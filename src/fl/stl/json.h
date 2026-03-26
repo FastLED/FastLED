@@ -448,7 +448,7 @@ private:
     template<typename T>
     typename fl::enable_if<fl::is_same<T, json_object>::value, T>::type
     get_default_value() const {
-        return json_object();  // Object defaults to empty object
+        return get_empty_json_obj();  // Object defaults to empty object
     }
     
     template<typename T>
@@ -473,19 +473,19 @@ public:
 
     // Iterator support for objects
     json_value::iterator begin() FL_NOEXCEPT {
-        if (!mValue) return json_value::iterator(json_object().begin());
+        if (!mValue) return json_value::iterator(get_empty_json_obj().begin());
         return mValue->begin(); 
     }
     json_value::iterator end() FL_NOEXCEPT {
-        if (!mValue) return json_value::iterator(json_object().end());
+        if (!mValue) return json_value::iterator(get_empty_json_obj().end());
         return mValue->end(); 
     }
     json_value::const_iterator begin() const FL_NOEXCEPT {
-        if (!mValue) return json_value::const_iterator::from_iterator(json_object().begin());
+        if (!mValue) return json_value::const_iterator::from_iterator(get_empty_json_obj().begin());
         return json_value::const_iterator::from_object_iterator(mValue->begin()); 
     }
     json_value::const_iterator end() const FL_NOEXCEPT {
-        if (!mValue) return json_value::const_iterator::from_iterator(json_object().end());
+        if (!mValue) return json_value::const_iterator::from_iterator(get_empty_json_obj().end());
         return json_value::const_iterator::from_object_iterator(mValue->end()); 
     }
     
@@ -590,7 +590,7 @@ public:
     
     json operator[](const fl::string &key) FL_NOEXCEPT {
         if (!mValue || !mValue->is_object()) {
-            mValue = fl::make_shared<json_value>(json_object{});
+            mValue = fl::make_shared<json_value>(get_empty_json_obj());
         }
         // Get reference to the json_value
         auto objPtr = mValue->data.ptr<json_object>();
@@ -692,7 +692,7 @@ public:
     }
 
     static json object() FL_NOEXCEPT {
-        return json(json_object{});
+        return json(get_empty_json_obj());
     }
     
     // Compatibility with existing API for array/object access
@@ -702,7 +702,7 @@ public:
     // Set methods for building objects
     void set(const fl::string& key, const json& value) FL_NOEXCEPT {
         if (!mValue || !mValue->is_object()) {
-            mValue = fl::make_shared<json_value>(json_object{});
+            mValue = fl::make_shared<json_value>(get_empty_json_obj());
         }
         // Directly assign the value to the object without going through json::operator[]
         auto objPtr = mValue->data.ptr<json_object>();

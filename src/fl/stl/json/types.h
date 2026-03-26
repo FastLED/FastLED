@@ -1119,8 +1119,8 @@ struct json_value {
             auto ptr = data.ptr<json_object>();
             return iterator(ptr->begin());
         }
-        // Use temporary empty object to avoid static initialization conflicts with Teensy
-        return iterator(json_object().begin());
+        // Use static empty object to avoid deleted default constructor on AVR
+        return iterator(get_empty_json_obj().begin());
     }
     
     iterator end() FL_NOEXCEPT {
@@ -1128,28 +1128,28 @@ struct json_value {
             auto ptr = data.ptr<json_object>();
             return iterator(ptr->end());
         }
-        // Use temporary empty object to avoid static initialization conflicts with Teensy
-        return iterator(json_object().end());
+        // Use static empty object to avoid deleted default constructor on AVR
+        return iterator(get_empty_json_obj().end());
     }
     
     const_iterator begin() const FL_NOEXCEPT {
         if (is_object()) {
             auto ptr = data.ptr<const json_object>();
-            if (!ptr) return const_iterator::from_iterator(json_object().begin());
+            if (!ptr) return const_iterator::from_iterator(get_empty_json_obj().begin());
             return const_iterator::from_iterator(ptr->begin());
         }
-        // Use temporary empty object to avoid static initialization conflicts with Teensy
-        return const_iterator::from_iterator(json_object().begin());
+        // Use static empty object to avoid deleted default constructor on AVR
+        return const_iterator::from_iterator(get_empty_json_obj().begin());
     }
     
     const_iterator end() const FL_NOEXCEPT {
         if (is_object()) {
             auto ptr = data.ptr<const json_object>();
-            if (!ptr) return const_iterator::from_iterator(json_object().end());
+            if (!ptr) return const_iterator::from_iterator(get_empty_json_obj().end());
             return const_iterator::from_iterator(ptr->end());
         }
-        // Use temporary empty object to avoid static initialization conflicts with Teensy
-        return const_iterator::from_iterator(json_object().end());
+        // Use static empty object to avoid deleted default constructor on AVR
+        return const_iterator::from_iterator(get_empty_json_obj().end());
     }
     
     // Iterator support for packed arrays
@@ -1375,7 +1375,7 @@ struct json_value {
     }
     
     json_value& operator[](const fl::string &key) FL_NOEXCEPT {
-        if (!is_object()) data = json_object{};
+        if (!is_object()) data = get_empty_json_obj();
         auto ptr = data.ptr<json_object>();
         if (!ptr) return get_null_json_value(); // Handle error case
         auto &obj = *ptr;
