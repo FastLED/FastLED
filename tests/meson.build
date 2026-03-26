@@ -151,9 +151,14 @@ endforeach
 all_test_dlls = []
 all_test_runners = []
 
-# Environment for test execution - ensure fastled.dll is discoverable on Windows
+# Environment for test execution - ensure fastled.dll and runtime DLLs are discoverable
 test_env = environment()
 test_env.prepend('PATH', fastled_lib_dir)
+# Add clang-tool-chain runtime dirs so ASan/MinGW DLLs are found even when
+# zccache caches the link and skips ctc-clang++'s post-link deployment.
+foreach _rtdll_dir : runtime_dll_paths
+  test_env.prepend('PATH', _rtdll_dir)
+endforeach
 
 # Find python once for test wrapper (avoid 245 find_program calls inside loop)
 python_exe = find_program('python')
@@ -294,6 +299,9 @@ foreach test_name : test_names
   # timeout to match the meson timeout (runner defaults to 20s otherwise).
   this_test_env = environment()
   this_test_env.prepend('PATH', fastled_lib_dir)
+  foreach _rtdll_dir : runtime_dll_paths
+    this_test_env.prepend('PATH', _rtdll_dir)
+  endforeach
   this_test_env.set('FASTLED_TEST_TIMEOUT', test_timeout.to_string())
 
   if use_wrapper

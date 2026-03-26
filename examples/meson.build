@@ -298,9 +298,14 @@ foreach example_name : example_paths.keys()
 
     # Register as test target: runner loads the DLL and executes it
     # Add to 'examples' suite for easy filtering
-    # Environment ensures fastled.dll is discoverable on Windows
+    # Environment ensures fastled.dll and runtime DLLs (ASan, MinGW) are discoverable
     example_test_env = environment()
     example_test_env.prepend('PATH', fastled_lib_dir)
+    # Add clang-tool-chain runtime dirs so ASan/MinGW DLLs are found even when
+    # zccache caches the link and skips ctc-clang++'s post-link deployment.
+    foreach _rtdll_dir : runtime_dll_paths
+      example_test_env.prepend('PATH', _rtdll_dir)
+    endforeach
     test('example-' + example_name, example_runner_exe,
         args: [example_dll.full_path()],
         suite: 'examples',
