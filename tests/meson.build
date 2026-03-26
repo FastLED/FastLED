@@ -263,7 +263,8 @@ foreach test_name : test_names
     'fl_hsv2rgb_accuracy',          # Color conversion accuracy test (many iterations)
     'rmt5_channel_engine',         # RMT5 channel engine test
     'rmt5_peripheral_mock',        # RMT5 peripheral mock test
-    'fl_audio_detectors',          # Audio detector tests (downbeat, vocal, etc.)
+    'fl_audio_detectors_beat',      # Beat + vibe detector tests (FFT-intensive)
+    'fl_audio_detectors_vocal',     # Vocal detector tests (real audio decoding + FFT)
     'fl_channels_adapters_spi_channel_adapter', # SPI channel adapter test
     'channel_driver_uart',          # UART channel engine test
     'uart_waveform_alignment',      # UART waveform timing test
