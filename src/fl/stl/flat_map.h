@@ -53,7 +53,7 @@ class flat_map {
 
   public:
     // Constructors
-    flat_map() FL_NOEXCEPT = default;
+    flat_map() = default;
 
     explicit flat_map(memory_resource* resource) FL_NOEXCEPT
         : mData(resource) {}
@@ -64,8 +64,8 @@ class flat_map {
     flat_map(const Less& less, memory_resource* resource) FL_NOEXCEPT
         : mData(resource), mLess(less) {}
 
-    flat_map(const flat_map& other) FL_NOEXCEPT = default;
-    flat_map& operator=(const flat_map& other) FL_NOEXCEPT = default;
+    flat_map(const flat_map& other) = default;
+    flat_map& operator=(const flat_map& other) = default;
 
     flat_map(flat_map&& other) FL_NOEXCEPT
         : mData(fl::move(other.mData)), mLess(fl::move(other.mLess)) {}
