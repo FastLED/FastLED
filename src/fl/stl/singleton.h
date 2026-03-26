@@ -139,11 +139,14 @@ template <typename T, int N = 0> class SingletonThreadLocal {
         static AlignedStorage storage;
         static ThreadLocal<T>* ptr = nullptr;
         if (!ptr) {
-#if FL_HAS_SANITIZER_LSAN
-            __lsan::ScopedDisabler disabler;
-#endif
             ptr = new (&storage.data) ThreadLocal<T>();
         }
+        // The ThreadLocal container is never destroyed (singleton pattern).
+        // Each thread's createStorage() allocation is intentionally permanent.
+        // Suppress LSAN false positives for per-thread storage allocations.
+#if FL_HAS_SANITIZER_LSAN
+        __lsan::ScopedDisabler disabler;
+#endif
         return ptr->access();
     }
 
