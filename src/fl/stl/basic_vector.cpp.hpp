@@ -454,7 +454,7 @@ void vector_basic::swap_impl(vector_basic& other) {
 
 // ======= COPY / MOVE HELPERS =======
 
-void vector_basic::copy_from(const vector_basic& other) {
+void vector_basic::copy_from(const vector_basic& other) FL_NOEXCEPT {
     clear_impl();
     if (other.mSize == 0) return;
 

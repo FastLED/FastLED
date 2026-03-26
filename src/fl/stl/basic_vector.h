@@ -87,7 +87,7 @@ class vector_basic {
 
     /// Heap-only vector (no inline buffer).
     vector_basic(fl::size elementSize, memory_resource* resource,
-                 const vector_element_ops* ops)
+                 const vector_element_ops* ops) FL_NOEXCEPT
         : mElementSize(elementSize)
         , mResource(resource)
         , mOps(ops)
@@ -119,7 +119,7 @@ class vector_basic {
     // ======= HELPERS FOR DERIVED CLASSES =======
 
     /// Copy all elements from another vector_basic.
-    void copy_from(const vector_basic& other);
+    void copy_from(const vector_basic& other) FL_NOEXCEPT;
 
     /// Move-steal contents from another vector_basic.
     void move_from(vector_basic& other) FL_NOEXCEPT;
