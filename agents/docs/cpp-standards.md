@@ -5,6 +5,32 @@
 - **If you want to use a stdlib header like <type_traits>, look check for equivalent in `fl/type_traits.h`
 - **Vector type usage**: Use `fl::vector<T>` for dynamic arrays. The implementation is in `src/fl/stl/vector.h`.
 
+## `FL_NOEXCEPT` Convention
+
+`FL_NOEXCEPT` (defined in `src/fl/stl/noexcept.h`) expands to `noexcept` in C++ builds. It must be used pervasively on constructors and assignment operators:
+
+- **Always mark the following with `FL_NOEXCEPT`:**
+  - Default constructors
+  - Copy constructors
+  - Move constructors
+  - Copy assignment operators
+  - Move assignment operators
+  - Destructors
+- **Propagate `FL_NOEXCEPT` bottom-up.** When a `= default` special member is declared `FL_NOEXCEPT`, every function it implicitly calls must also be `FL_NOEXCEPT`. If a member type (e.g. `fl::vector`) lacks `FL_NOEXCEPT` on its constructor, the compiler will silently **delete** the defaulted function. Fix this by adding `FL_NOEXCEPT` to the underlying type, not by removing it from the consumer.
+- **Example — correct chain:**
+  ```cpp
+  // In vector.h — source type is noexcept
+  vector() FL_NOEXCEPT;
+  vector(const vector&) FL_NOEXCEPT;
+  vector& operator=(const vector&) FL_NOEXCEPT;
+
+  // In flat_map.h — consumer can safely = default with FL_NOEXCEPT
+  flat_map() FL_NOEXCEPT = default;
+  flat_map(const flat_map&) FL_NOEXCEPT = default;
+  flat_map& operator=(const flat_map&) FL_NOEXCEPT = default;
+  ```
+- **Why:** On embedded platforms (AVR, ESP32) exceptions are disabled (`-fno-exceptions`), so `noexcept` is always safe. Using it consistently reduces `.eh_frame` bloat on platforms where exception tables would otherwise be generated.
+
 ## `fl::net` Namespace Convention
 
 Files in `src/fl/net/` follow a two-level namespace pattern:
