@@ -93,12 +93,20 @@ endif
 # Mode-specific optimization flags
 if build_mode == 'debug'
   # Debug mode: No optimization, full debug symbols, sanitizers
+  # NOTE: Sanitizers are disabled on Windows because the shared ASan runtime DLL
+  # (clang_rt.asan_dynamic-x86_64.dll) is not deployed to the build directory,
+  # causing STATUS_DLL_NOT_FOUND (0xc0000135) for all executables at runtime.
+  debug_sanitizer_args = []
+  if build_machine.system() != 'windows'
+    debug_sanitizer_args = [
+      '-fsanitize=address',       # Address sanitizer (detect memory errors)
+      '-fsanitize=undefined',     # Undefined behavior sanitizer
+    ]
+  endif
   base_optimization = base_common + stack_trace_flags + [
     '-O0',                      # No optimization (fastest compilation)
     '-g3',                      # Full debug symbols (variables, macros, everything)
-    '-fsanitize=address',       # Address sanitizer (detect memory errors)
-    '-fsanitize=undefined',     # Undefined behavior sanitizer
-  ]
+  ] + debug_sanitizer_args
 elif build_mode == 'quick'
   # Quick mode: Default mode for fast development iteration
   # No optimization, no debug symbols, no sanitizers
@@ -216,9 +224,10 @@ if build_mode == 'release'
   core_link_args += ['-flto=thin']
 endif
 
-# Sanitizer link flags (used in debug mode)
+# Sanitizer link flags (used in debug mode, Unix only)
+# NOTE: Sanitizers are disabled on Windows - see base_optimization comment above.
 sanitizer_link_args = []
-if build_mode == 'debug'
+if build_mode == 'debug' and not is_windows
   sanitizer_link_args = [
     '-fsanitize=address',
     '-fsanitize=undefined',
@@ -357,12 +366,18 @@ runner_cpp_args = [
   '-Wno-pragma-pack',
 ]
 if build_mode == 'debug'
+  # NOTE: Sanitizers are disabled on Windows - see base_optimization comment above.
+  runner_debug_sanitizer_args = []
+  if not is_windows
+    runner_debug_sanitizer_args = [
+      '-fsanitize=address',
+      '-fsanitize=undefined',
+    ]
+  endif
   runner_cpp_args += stack_trace_flags + [
     '-O0',
     '-g3',
-    '-fsanitize=address',
-    '-fsanitize=undefined',
-  ]
+  ] + runner_debug_sanitizer_args
 elif build_mode == 'quick'
   runner_cpp_args += stack_trace_flags + [
     '-O1',
