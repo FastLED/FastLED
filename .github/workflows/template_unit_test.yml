@@ -84,6 +84,10 @@ jobs:
           cache-dependency-glob: "**/pyproject.toml"
           version: "0.8.0" # 0.8.8 has problems with deployment on linux.
 
+      - name: Install libunwind-dev (Linux only)
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y libunwind-dev
+
       - name: Install
         working-directory: trusted
         run: ./install

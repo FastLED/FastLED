@@ -284,9 +284,10 @@ endif
 # ============================================================================
 # The runner loads DLLs and provides system libraries (pthread, dbghelp, etc.)
 # In debug mode: dynamic linking (required for sanitizers)
-# In quick mode: static linking with libunwind for stack traces
-# In release mode: static linking without stack trace support
+# In quick mode: dynamic linking on Unix, static on Windows
+# In release mode: static linking on Windows, dynamic on Unix
 #
+# NOTE: -lunwind is added conditionally below after checking availability.
 # NOTE: -Wl,--no-undefined is added in quick/release modes to catch missing
 # libraries early. It's NOT added in debug mode because sanitizers (ASan/UBSan)
 # have symbols resolved at runtime, not link time.
@@ -297,10 +298,8 @@ if build_mode == 'debug'
   runner_link_args = core_link_args + sanitizer_link_args + ['-pthread']
   if is_windows
     runner_link_args += ['-ldbghelp', '-lpsapi', '-lws2_32']
-  else
-    # Unix: Link libunwind for crash handler stack traces
-    runner_link_args += ['-lunwind']
   endif
+  # Note: -lunwind is added conditionally below after checking availability
 elif build_mode == 'quick'
   # Quick mode: static linking on Windows, dynamic on Unix
   # NOTE: Linux with glibc doesn't support static linking + dlopen() properly.
@@ -319,11 +318,10 @@ elif build_mode == 'quick'
     ]
   else
     # macOS and Linux: dynamic linking (glibc doesn't support static + dlopen)
-    # Link libunwind for crash handler stack traces
+    # Note: -lunwind is added conditionally below after checking availability
     runner_link_args = core_link_args + [
       '-Wl,--no-undefined',  # Catch missing libraries early
       '-pthread',
-      '-lunwind',
     ]
   endif
 else
@@ -341,11 +339,10 @@ else
     ]
   else
     # macOS and Linux: dynamic linking (glibc doesn't support static + dlopen)
-    # Link libunwind for crash handler stack traces
+    # Note: -lunwind is added conditionally below after checking availability
     runner_link_args = core_link_args + [
       '-Wl,--no-undefined',  # Catch missing libraries early
       '-pthread',
-      '-lunwind',
     ]
   endif
 endif
@@ -392,17 +389,37 @@ unit_test_link_args = dll_link_args
 # ============================================================================
 # libunwind for enhanced stack traces (Unix only)
 # ============================================================================
-# libunwind provides detailed stack unwinding for crash handlers on Unix systems
-# Always enabled on Unix - explicitly linked via -lunwind in runner_link_args
-message('libunwind enabled for Unix platforms - enhanced stack traces enabled')
-base_defines += ['-DUSE_LIBUNWIND']
+# libunwind provides detailed stack unwinding for crash handlers on Unix systems.
+# When available, it's explicitly linked via -lunwind in runner_link_args.
+# On systems where libunwind is not installed, we gracefully degrade to basic
+# crash handling (crash_handler_noop.h).
+#
+# libunwind is typically provided by:
+#   - System: libunwind-dev (Ubuntu/Debian), libunwind-devel (Fedora/RHEL)
+#   - clang-tool-chain: bundled LLVM distribution (adds -L to find libunwind.a)
+#
+has_libunwind = false
+if not is_windows
+  cpp_compiler = meson.get_compiler('cpp')
+  libunwind_dep = cpp_compiler.find_library('unwind', required: false)
+  if libunwind_dep.found()
+    message('libunwind found - enhanced stack traces enabled')
+    has_libunwind = true
+    base_defines += ['-DUSE_LIBUNWIND']
+    runner_link_args += ['-lunwind']
+  else
+    message('libunwind NOT found - stack traces in crash handler will be limited')
+    message('Install libunwind-dev (Ubuntu/Debian) or libunwind-devel (Fedora/RHEL) for enhanced stack traces')
+  endif
+endif
 
 # ============================================================================
 # SHARED CRASH HANDLER (used by both test runner and example runner)
 # ============================================================================
 # Build crash handler library once - provides crash handler setup that runs
 # BEFORE any DLL is loaded. Links to dbghelp/psapi on Windows.
-# On Unix, libunwind is explicitly linked via -lunwind in runner_link_args.
+# On Unix, libunwind is conditionally linked via -lunwind in runner_link_args
+# when libunwind is available (see has_libunwind check above).
 # Absolute include args for crash handler — use cpp_args instead of
 # include_directories to prevent Meson from propagating backslash
 # relative -I paths to consumer targets (tests, examples), which breaks
@@ -413,9 +430,16 @@ crash_handler_abs_include_args = [
   '-I' + meson.project_source_root() / 'src',
 ]
 
+crash_handler_cpp_args = ['-DENABLE_CRASH_HANDLER', '-DFASTLED_STUB_IMPL'] + crash_handler_abs_include_args
+# Note: -DUSE_LIBUNWIND is added here separately from base_defines because crash_handler_lib
+# uses its own cpp_args and does not inherit base_defines (which is used for test/example targets).
+if has_libunwind
+  crash_handler_cpp_args += ['-DUSE_LIBUNWIND']
+endif
+
 crash_handler_lib = static_library('crash_handler',
   files(meson.project_source_root() / 'tests' / 'shared' / 'crash_handler_main.cpp'),
-  cpp_args: ['-DENABLE_CRASH_HANDLER', '-DFASTLED_STUB_IMPL', '-DUSE_LIBUNWIND'] + crash_handler_abs_include_args,
+  cpp_args: crash_handler_cpp_args,
   install: false
 )
 

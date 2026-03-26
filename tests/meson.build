@@ -80,7 +80,7 @@ test_pch = custom_target('test_pch',
 #
 # NOTE: runner_link_args, runner_cpp_args, and crash_handler_lib are defined
 # in root meson.build and shared with examples/meson.build for consistency.
-# libunwind is injected via DLL at runtime by clang-tool-chain, no explicit linking needed.
+# libunwind is conditionally linked via -lunwind in runner_link_args when available.
 runner_exe = executable('runner',
   'shared/runner.cpp',
   include_directories: [src_dir, stub_dir],

@@ -149,7 +149,7 @@ endforeach
 #
 # NOTE: runner_link_args, runner_cpp_args, and crash_handler_lib are defined
 # in root meson.build and shared with tests/meson.build for consistency.
-# libunwind is injected via DLL at runtime by clang-tool-chain, no explicit linking needed.
+# libunwind is conditionally linked via -lunwind in runner_link_args when available.
 example_runner_exe = executable('example_runner',
   files('../tests/shared/example_runner.cpp'),
   include_directories: [src_dir, stub_dir, tests_dir],

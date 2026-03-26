@@ -34,6 +34,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 #   - libstdc++-12-dev: C++ standard library
 #   - libgcc-12-dev: GCC runtime library (libgcc_s)
 #   - libxml2: Required by clang-tool-chain's bundled ld.lld
+#   - libunwind-dev: Stack unwinding library for crash handler stack traces
 #   - valgrind: For callgrind profiling and analysis
 #   - binutils: Provides strip command for removing debug symbols
 #   - rsync: For content-based file syncing (prevents timestamp rebuild issues)
@@ -44,6 +45,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libstdc++-12-dev \
     libgcc-12-dev \
     libxml2 \
+    libunwind-dev \
     valgrind \
     binutils \
     rsync \
