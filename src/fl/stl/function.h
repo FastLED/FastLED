@@ -383,10 +383,10 @@ class function_list<void(Args...)> {
     bool mNeedsCompact = false;  // True when functions have been cleared during invocation
 
   public:
-    function_list() = default;
-    function_list(const function_list& other) = default;
+    function_list() FL_NOEXCEPT = default;
+    function_list(const function_list& other) FL_NOEXCEPT = default;
     function_list(function_list&& other) FL_NOEXCEPT = default;
-    function_list& operator=(const function_list& other) = default;
+    function_list& operator=(const function_list& other) FL_NOEXCEPT = default;
     function_list& operator=(function_list&& other) FL_NOEXCEPT = default;
     ~function_list() FL_NOEXCEPT = default;
 
