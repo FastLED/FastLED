@@ -42,20 +42,12 @@ class TestCheckCdcOnBootInFlags:
 class TestCheckCdcOnBootInFile:
     def test_file_with_cdc_enabled(self, tmp_path: Path) -> None:
         ini = tmp_path / "platformio.ini"
-        ini.write_text(
-            "[env:esp32c6]\n"
-            "build_flags =\n"
-            "  -D ARDUINO_USB_CDC_ON_BOOT=1\n"
-        )
+        ini.write_text("[env:esp32c6]\nbuild_flags =\n  -D ARDUINO_USB_CDC_ON_BOOT=1\n")
         assert check_cdc_on_boot_in_file(ini) is True
 
     def test_file_with_cdc_disabled(self, tmp_path: Path) -> None:
         ini = tmp_path / "platformio.ini"
-        ini.write_text(
-            "[env:esp32dev]\n"
-            "build_flags =\n"
-            "  -DARDUINO_USB_CDC_ON_BOOT=0\n"
-        )
+        ini.write_text("[env:esp32dev]\nbuild_flags =\n  -DARDUINO_USB_CDC_ON_BOOT=0\n")
         assert check_cdc_on_boot_in_file(ini) is False
 
     def test_file_without_cdc(self, tmp_path: Path) -> None:
@@ -86,9 +78,7 @@ class TestWarnIfCdcOnBoot:
     def test_returns_true_and_prints_when_detected_in_flags(
         self, capsys: pytest.CaptureFixture[str]
     ) -> None:
-        result = warn_if_cdc_on_boot(
-            build_flags=["-DARDUINO_USB_CDC_ON_BOOT=1"]
-        )
+        result = warn_if_cdc_on_boot(build_flags=["-DARDUINO_USB_CDC_ON_BOOT=1"])
         assert result is True
         captured = capsys.readouterr()
         assert "CDC ON BOOT" in captured.out

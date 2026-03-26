@@ -13,6 +13,7 @@ if not plugged into a USB host.
 import re
 from pathlib import Path
 
+
 # Pattern to match ARDUINO_USB_CDC_ON_BOOT=1 in build flags or INI files.
 # Matches: -DARDUINO_USB_CDC_ON_BOOT=1, -D ARDUINO_USB_CDC_ON_BOOT=1, etc.
 _CDC_ON_BOOT_ENABLED_RE = re.compile(r"ARDUINO_USB_CDC_ON_BOOT\s*=\s*1\b")
@@ -39,7 +40,7 @@ def check_cdc_on_boot_in_file(ini_path: Path) -> bool:
         True if ARDUINO_USB_CDC_ON_BOOT=1 is found in the file.
     """
     try:
-        content = ini_path.read_text(encoding="utf-8", errors="ignore")
+        content = ini_path.read_text(encoding="utf-8", errors="replace")
     except OSError:
         return False
     return bool(_CDC_ON_BOOT_ENABLED_RE.search(content))
