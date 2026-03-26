@@ -986,10 +986,10 @@ class FL_ALIGN SortedHeapVector {
     SortedHeapVector(LessThan less = LessThan()) FL_NOEXCEPT : mLess(less) {}
 
     // Copy constructor
-    SortedHeapVector(const SortedHeapVector& other) FL_NOEXCEPT = default;
+    SortedHeapVector(const SortedHeapVector& other) = default;
 
     // Copy assignment
-    SortedHeapVector& operator=(const SortedHeapVector& other) FL_NOEXCEPT = default;
+    SortedHeapVector& operator=(const SortedHeapVector& other) = default;
 
     // Move constructor
     SortedHeapVector(SortedHeapVector&& other) FL_NOEXCEPT

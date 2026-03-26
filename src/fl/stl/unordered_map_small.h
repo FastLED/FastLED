@@ -181,7 +181,7 @@ class unordered_map_small {
 
   public:
     // Constructors
-    unordered_map_small() FL_NOEXCEPT = default;
+    unordered_map_small() = default;
 
     explicit unordered_map_small(memory_resource* resource) FL_NOEXCEPT
         : mData(resource), mResource(resource) {}
