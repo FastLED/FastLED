@@ -483,14 +483,19 @@ fastled_lib_dir = meson.current_build_dir()
 # directories and add them to the test PATH so DLLs are always discoverable.
 runtime_dll_paths = []
 if is_windows
-  _rtdll_script = meson.project_source_root() / 'ci' / 'meson' / 'get_runtime_dll_paths.py'
-  _rtdll_result = run_command('python', _rtdll_script, check: false)
-  if _rtdll_result.returncode() == 0
-    foreach _line : _rtdll_result.stdout().strip().split('\n')
-      if _line != ''
-        runtime_dll_paths += [_line]
-      endif
-    endforeach
+  _rtdll_python = find_program('python3', 'python', required: false)
+  if _rtdll_python.found()
+    _rtdll_script = meson.project_source_root() / 'ci' / 'meson' / 'get_runtime_dll_paths.py'
+    _rtdll_result = run_command(_rtdll_python, _rtdll_script, check: false)
+    if _rtdll_result.returncode() == 0
+      foreach _line : _rtdll_result.stdout().strip().split('\n')
+        if _line != ''
+          runtime_dll_paths += [_line]
+        endif
+      endforeach
+    else
+      warning('get_runtime_dll_paths.py failed (rc=' + _rtdll_result.returncode().to_string() + '): ' + _rtdll_result.stderr().strip())
+    endif
   endif
   if runtime_dll_paths.length() > 0
     message('clang-tool-chain runtime DLL paths: ' + ', '.join(runtime_dll_paths))

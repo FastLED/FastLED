@@ -23,9 +23,9 @@ def main() -> None:
     except ImportError:
         # clang-tool-chain not installed — nothing to output
         pass
-    except Exception:
-        # Non-fatal: don't break meson configure
-        pass
+    except Exception as e:
+        # Non-fatal: don't break meson configure, but log for debugging
+        print(f"Warning: get_runtime_dll_paths failed: {e}", file=sys.stderr)
 
 
 if __name__ == "__main__":
