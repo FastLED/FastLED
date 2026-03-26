@@ -1,3 +1,4 @@
+// @filter: (memory is high)
 // AudioUrl - Demonstrates loading audio from a URL in the WASM UI.
 //
 // When running in the FastLED web compiler, the browser will automatically

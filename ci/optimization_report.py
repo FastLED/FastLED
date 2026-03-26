@@ -39,6 +39,13 @@ def main() -> int:
     board_dir = board_dirs[which]
     # build_info_json = board_dir / "build_info.json"
     optimization_report = board_dir / "optimization_report.txt"
+    if not optimization_report.exists():
+        print(
+            f"No optimization report found for board '{board_dir.name}'.\n"
+            f"Expected: {optimization_report}\n"
+            "The build may not have completed successfully."
+        )
+        return 0
     text = optimization_report.read_text(encoding="utf-8", errors="replace")
     print(text)
     return 0
