@@ -660,6 +660,10 @@ def run_meson_build_and_test(
                         + _streaming_env.get("LD_LIBRARY_PATH", "")
                     )
 
+                # Set runner watchdog timeout to match meson slow test timeout (60s)
+                if "FASTLED_TEST_TIMEOUT" not in _streaming_env:
+                    _streaming_env["FASTLED_TEST_TIMEOUT"] = "60"
+
                 def test_callback(test_path: Path) -> bool:
                     """Run a single test executable and return success status"""
                     try:
