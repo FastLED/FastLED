@@ -1985,6 +1985,11 @@ async def run(args: Args | None = None) -> int:  # pyright: ignore[reportGeneral
             if not run_upload(build_dir, final_environment, upload_port, args.verbose):
                 return 1
 
+        # Warn if CDC ON BOOT is enabled (device may seem to hang without USB)
+        from ci.util.cdc_on_boot_warning import warn_if_cdc_on_boot
+
+        warn_if_cdc_on_boot(ini_path=build_dir / "platformio.ini")
+
         # Wait for serial port to become available after upload
         # Device reboots after firmware upload, so we need to wait for USB re-enumeration
         if upload_port:

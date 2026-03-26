@@ -615,6 +615,15 @@ def main() -> int:
                         )
                         return 1
 
+    # Check for CDC ON BOOT warning after all boards compiled
+    from ci.util.cdc_on_boot_warning import warn_if_cdc_on_boot
+
+    for board in boards:
+        # Combine board build_flags with user-supplied defines for full coverage
+        all_flags = list(board.build_flags or []) + [f"-D{d}" for d in defines]
+        if warn_if_cdc_on_boot(build_flags=all_flags):
+            break  # Only warn once across all boards
+
     # Report results
     elapsed_time = time.time() - start_time
     time_str = format_elapsed_time(elapsed_time)

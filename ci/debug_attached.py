@@ -1398,6 +1398,11 @@ def main() -> int:
             if not run_upload(build_dir, args.environment, upload_port, args.verbose):
                 return 1
 
+        # Warn if CDC ON BOOT is enabled (device may seem to hang without USB)
+        from ci.util.cdc_on_boot_warning import warn_if_cdc_on_boot
+
+        warn_if_cdc_on_boot(ini_path=build_dir / "platformio.ini")
+
         # Phase 4: Monitor serial output
         monitor_result = run_monitor(
             build_dir,
