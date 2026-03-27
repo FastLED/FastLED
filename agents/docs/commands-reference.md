@@ -36,27 +36,23 @@ bash test --docker --examples
 - Reproducing CI failures that only occur in the Linux environment
 - Testing cross-platform compatibility issues
 
-## fbuild (Default for ESP32-S3 and ESP32-C6)
+## fbuild (Optional, Not Default)
 
-The project uses `fbuild` as the **default build system** for ESP32-S3 and ESP32-C6 (RISC-V) boards. fbuild provides:
+The project supports `fbuild` as an **optional build system** for ESP boards, but all boards now use **PlatformIO by default**. fbuild provides:
 - **Daemon-based compilation** — Background process handles builds, survives agent interrupts
 - **Cached toolchains/frameworks** — Downloads and caches ESP32 toolchain, Arduino framework
 - **Direct esptool integration** — Fast uploads without PlatformIO overhead
 
 **Default behavior:**
-- **ESP32-S3 / ESP32-C6**: fbuild is used automatically (no flag needed)
-- **Other ESP32 variants**: PlatformIO is used by default
+- **All ESP32 variants**: PlatformIO is used by default
 
 **Usage via debug_attached.py:**
 ```bash
-# ESP32-S3: fbuild is the default (no --use-fbuild needed)
+# All boards use PlatformIO by default
 uv run ci/debug_attached.py esp32s3 --example Blink
 
-# Force PlatformIO on esp32s3/esp32c6
-uv run ci/debug_attached.py esp32s3 --example Blink --no-fbuild
-
-# Explicitly use fbuild on other ESP32 variants
-uv run ci/debug_attached.py esp32dev --use-fbuild --example Blink
+# Explicitly use fbuild (opt-in only)
+uv run ci/debug_attached.py esp32s3 --use-fbuild --example Blink
 ```
 
 **Build caching:** fbuild stores builds in `.fbuild/build/<env>/` and caches toolchains in `.fbuild/cache/`.

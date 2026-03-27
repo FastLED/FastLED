@@ -392,7 +392,7 @@ def main() -> int:
             )
         else:
             # Normal Docker auto-detection for non-CI environments
-            # Skip Docker entirely for fbuild boards (esp32s3, esp32c3, esp32c6)
+            # Skip Docker entirely for fbuild boards (none currently)
             from ci.compiler.fbuild_boards import FBUILD_BOARDS
 
             board_name = config.boards[0].board_name

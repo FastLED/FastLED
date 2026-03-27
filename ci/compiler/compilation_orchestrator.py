@@ -115,7 +115,7 @@ def compile_board_examples(
             else CacheType.NO_CACHE
         )
 
-        # Use fbuild for supported boards (esp32s3, esp32c3, esp32c6)
+        # Use fbuild for supported boards (none currently; all use PlatformIO)
         use_fbuild = board.board_name.lower() in FBUILD_BOARDS
 
         # Create PioCompiler instance

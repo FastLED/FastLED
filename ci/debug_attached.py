@@ -1152,7 +1152,8 @@ def _should_use_fbuild(
 ) -> bool:
     """Determine if fbuild should be used for compilation and upload.
 
-    fbuild is the default for esp32s3 and esp32c6 (RISC-V) environments.
+    fbuild is no longer the default for any board (all use PlatformIO by default).
+    Use --use-fbuild to explicitly opt in.
 
     Args:
         environment: PlatformIO environment name (e.g., "esp32s3", "esp32c6")
@@ -1364,7 +1365,7 @@ def main() -> int:
             args.environment, args.use_fbuild, args.no_fbuild
         )
         if use_fbuild:
-            print("📦 Using fbuild (default for esp32s3/esp32c6)")
+            print("📦 Using fbuild (explicitly requested via --use-fbuild)")
         else:
             print("📦 Using PlatformIO")
 
