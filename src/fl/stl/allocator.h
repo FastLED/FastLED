@@ -247,7 +247,7 @@ public:
         template <typename U>
         void destroy(U* p) FL_NOEXCEPT {
             if (p == nullptr) return;
-            p->~U() FL_NOEXCEPT;
+            p->~U();
         }
 };
 
@@ -494,7 +494,7 @@ private:
 
         slab->memory = static_cast<u8*>(Malloc(SLAB_MEMORY_SIZE));
         if (!slab->memory) {
-            slab->~Slab() FL_NOEXCEPT;
+            slab->~Slab();
             Free(slab);
             return nullptr;
         }
@@ -680,7 +680,7 @@ public:
     void cleanup() FL_NOEXCEPT {
         while (mSlabs) {
             Slab* next = mSlabs->next;
-            mSlabs->~Slab() FL_NOEXCEPT;
+            mSlabs->~Slab();
             Free(mSlabs);
             mSlabs = next;
         }
@@ -971,7 +971,7 @@ public:
     void clear() FL_NOEXCEPT {
         // Destroy inlined objects
         for (fl::size i = 0; i < mInlinedUsed; ++i) {
-            get_inlined_ptr()[i].~T() FL_NOEXCEPT;
+            get_inlined_ptr()[i].~T();
         }
         mInlinedUsed = 0;
         mFreeBits.reset();

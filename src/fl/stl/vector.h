@@ -253,11 +253,11 @@ class FL_ALIGN FixedVector {
     // Erase the element at the given iterator position
     iterator erase(iterator pos) FL_NOEXCEPT {
         if (pos != end()) {
-            pos->~T() FL_NOEXCEPT;
+            pos->~T();
             // shift all elements to the left
             for (iterator p = pos; p != end() - 1; ++p) {
                 new (p) T(fl::move(*(p + 1))); // Use move constructor
-                (p + 1)->~T() FL_NOEXCEPT;
+                (p + 1)->~T();
             }
             --current_size;
         }
@@ -419,14 +419,14 @@ class FL_ALIGN FixedVector {
                 T* src = memory() + i;
                 T* dst = other.memory() + i;
                 new (dst) T(fl::move(*src));
-                src->~T() FL_NOEXCEPT;
+                src->~T();
             }
         } else if (other.current_size > current_size) {
             for (fl::size i = min_sz; i < max_sz; ++i) {
                 T* src = other.memory() + i;
                 T* dst = memory() + i;
                 new (dst) T(fl::move(*src));
-                src->~T() FL_NOEXCEPT;
+                src->~T();
             }
         }
         fl::size temp_size = current_size;

@@ -191,8 +191,20 @@ def classify_line(line: str, class_names: set[str]) -> MatchResult | None:
     # ── Destructor ──────────────────────────────────────────────────────
     m = _DTOR.search(code)
     if m:
-        paren = code.index("(", m.start())
-        return ("destructor", paren)
+        tilde_pos = m.start()
+        # Exclude manual destructor calls: obj->~T() or obj.~T()
+        prefix_text = code[:tilde_pos].rstrip()
+        if prefix_text.endswith("->") or prefix_text.endswith("."):
+            pass  # not a declaration
+        else:
+            paren = code.index("(", m.start())
+            # Exclude bitwise NOT expressions: ~Type(value) — destructors
+            # have empty parens
+            close = _find_close_paren(code, paren)
+            if close >= 0:
+                inside = code[paren + 1 : close].strip()
+                if inside == "" or inside == "void":
+                    return ("destructor", paren)
 
     # ── Assignment operator ─────────────────────────────────────────────
     m = _OP_ASSIGN.search(code)

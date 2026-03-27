@@ -419,6 +419,34 @@ class TestEdgeCases:
         assert len(viols) == 1
         assert "Foo" in viols[0][1]
 
+    def test_manual_destructor_call_not_flagged(self):
+        """obj->~T() is a destructor CALL, not a declaration."""
+        code = "class T {\n    void destroy() { get_object()->~T(); }\n};"
+        viols = _check(code)
+        assert len(viols) == 0
+
+    def test_manual_destructor_call_dot_not_flagged(self):
+        """obj.~T() is a destructor CALL, not a declaration."""
+        code = "class T {\n    void destroy() { obj.~T(); }\n};"
+        viols = _check(code)
+        assert len(viols) == 0
+
+    def test_bitwise_not_not_flagged(self):
+        """~block_type(0) is bitwise NOT, not a destructor."""
+        code = (
+            "class block_type {\n"
+            "    void set_all() { x = static_cast<block_type>(~block_type(0)); }\n"
+            "};"
+        )
+        viols = _check(code)
+        assert len(viols) == 0
+
+    def test_bitwise_not_cast_not_flagged(self):
+        """~Type(value) with non-empty parens is not a destructor."""
+        code = "class Foo {\n    int x = ~Foo(42);\n};"
+        viols = _check(code)
+        assert len(viols) == 0
+
 
 # ── classify_line unit tests ───────────────────────────────────────────────
 

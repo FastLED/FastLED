@@ -137,7 +137,7 @@ struct FL_ALIGNAS(control_block_alignment<T>::value) InlinedControlBlock : publi
 
     void destroy_object() FL_NOEXCEPT override {
         if (object_constructed) {
-            get_object()->~T() FL_NOEXCEPT;  // Manual destructor call
+            get_object()->~T();  // Manual destructor call
             object_constructed = false;
         }
     }

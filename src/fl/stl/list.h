@@ -61,7 +61,7 @@ private:
 
     void destroy_node(Node* node) {
         if (node && node != mHead) {
-            node->~Node() FL_NOEXCEPT;
+            node->~Node();
             mResource->deallocate(node, sizeof(Node));
         }
     }

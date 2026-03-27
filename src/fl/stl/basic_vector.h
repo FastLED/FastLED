@@ -317,7 +317,7 @@ const vector_element_ops* vector_element_ops_for() {
     static const vector_element_ops ops = {
         detail::get_copy_construct_fn<T>(),       // copy_construct
         detail::get_move_construct_fn<T>(),       // move_construct
-        [](void* ptr) { static_cast<T*>(ptr)->~T() FL_NOEXCEPT; }, // destroy
+        [](void* ptr) { static_cast<T*>(ptr)->~T(); }, // destroy
         detail::get_default_construct_fn<T>(),    // default_construct
         detail::get_swap_fn<T>(),                 // swap_elements
         detail::get_uninitialized_move_n_fn<T>(), // uninitialized_move_n
@@ -325,7 +325,7 @@ const vector_element_ops* vector_element_ops_for() {
         [](void* first, fl::size count) {
             T* p = static_cast<T*>(first);
             for (fl::size i = 0; i < count; ++i) {
-                p[i].~T() FL_NOEXCEPT;
+                p[i].~T();
             }
         }
     };
