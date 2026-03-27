@@ -70,7 +70,7 @@ class PSRamMemoryResource : public memory_resource {
 
 } // anonymous namespace
 
-memory_resource* default_memory_resource() {
+memory_resource* default_memory_resource() FL_NOEXCEPT {
     static DefaultMemoryResource instance;
     return &instance;
 }

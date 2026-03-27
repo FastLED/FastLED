@@ -87,7 +87,7 @@ class vector_basic {
 
     /// Heap-only vector (no inline buffer).
     vector_basic(fl::size elementSize, memory_resource* resource,
-                 const vector_element_ops* ops)
+                 const vector_element_ops* ops) FL_NOEXCEPT
         : mElementSize(elementSize)
         , mResource(resource)
         , mOps(ops)
@@ -119,7 +119,7 @@ class vector_basic {
     // ======= HELPERS FOR DERIVED CLASSES =======
 
     /// Copy all elements from another vector_basic.
-    void copy_from(const vector_basic& other);
+    void copy_from(const vector_basic& other) FL_NOEXCEPT;
 
     /// Move-steal contents from another vector_basic.
     void move_from(vector_basic& other) FL_NOEXCEPT;
@@ -308,7 +308,7 @@ get_uninitialized_move_n_fn() {
 /// Generate a static ops table for type T.
 /// Returns nullptr for trivially copyable types (fast path).
 template <typename T>
-const vector_element_ops* vector_element_ops_for() {
+const vector_element_ops* vector_element_ops_for() FL_NOEXCEPT {
     // Trivially copyable types use the fast path (mOps == nullptr)
     if (fl::is_trivially_copyable<T>::value) {
         return nullptr;

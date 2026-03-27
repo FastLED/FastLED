@@ -55,7 +55,7 @@ class memory_resource {
 };
 
 /// Get the default memory resource (wraps fl::Malloc / fl::Free / fl::realloc).
-memory_resource* default_memory_resource();
+memory_resource* default_memory_resource() FL_NOEXCEPT;
 
 /// Get the PSRAM memory resource (wraps PSRamAllocate / PSRamDeallocate).
 memory_resource* psram_memory_resource();

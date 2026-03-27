@@ -488,7 +488,7 @@ class FL_ALIGN vector : public vector_basic {
     // ======= CONSTRUCTORS =======
 
     // Default constructor
-    vector()
+    vector() FL_NOEXCEPT
         : vector_basic(sizeof(T), default_memory_resource(),
                         vector_element_ops_for<T>()) {}
 
@@ -510,7 +510,7 @@ class FL_ALIGN vector : public vector_basic {
     }
 
     // Copy constructor
-    vector(const vector &other)
+    vector(const vector &other) FL_NOEXCEPT
         : vector_basic(sizeof(T), other.mResource,
                         vector_element_ops_for<T>()) {
         copy_from(other);
