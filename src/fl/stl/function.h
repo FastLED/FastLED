@@ -383,11 +383,27 @@ class function_list<void(Args...)> {
     bool mNeedsCompact = false;  // True when functions have been cleared during invocation
 
   public:
-    function_list() FL_NOEXCEPT = default;
-    function_list(const function_list& other) FL_NOEXCEPT = default;
-    function_list(function_list&& other) FL_NOEXCEPT = default;
-    function_list& operator=(const function_list& other) FL_NOEXCEPT = default;
-    function_list& operator=(function_list&& other) FL_NOEXCEPT = default;
+    function_list() FL_NOEXCEPT : mFunctions(), mIdCounter(0), mNeedsCompact(false) {}
+    function_list(const function_list& other) FL_NOEXCEPT
+        : mFunctions(other.mFunctions), mIdCounter(other.mIdCounter), mNeedsCompact(other.mNeedsCompact) {}
+    function_list(function_list&& other) FL_NOEXCEPT
+        : mFunctions(fl::move(other.mFunctions)), mIdCounter(other.mIdCounter), mNeedsCompact(other.mNeedsCompact) {}
+    function_list& operator=(const function_list& other) FL_NOEXCEPT {
+        if (this != &other) {
+            mFunctions = other.mFunctions;
+            mIdCounter = other.mIdCounter;
+            mNeedsCompact = other.mNeedsCompact;
+        }
+        return *this;
+    }
+    function_list& operator=(function_list&& other) FL_NOEXCEPT {
+        if (this != &other) {
+            mFunctions = fl::move(other.mFunctions);
+            mIdCounter = other.mIdCounter;
+            mNeedsCompact = other.mNeedsCompact;
+        }
+        return *this;
+    }
     ~function_list() = default;
 
     int add(function<void(Args...)> fn, int priority = 0) FL_NOEXCEPT {
