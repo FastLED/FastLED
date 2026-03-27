@@ -19,7 +19,7 @@ struct tuple<Head, Tail...> {
     Head head;
     tuple<Tail...> tail;
 
-    tuple() FL_NOEXCEPT = default;
+    tuple() = default;
 
     tuple(const Head& h, const Tail&... t) FL_NOEXCEPT
       : head(h), tail(t...) {}
