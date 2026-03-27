@@ -2,6 +2,7 @@
 #include "fl/audio/audio_manager.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/noexcept.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(float-equal)
@@ -22,7 +23,7 @@ UIButton::UIButton(const char *name) : mImpl(name), mListener(this) {
     mListener.addToEngineEventsOnce();
 }
 
-UIButton::~UIButton() {}
+UIButton::~UIButton() FL_NOEXCEPT {}
 
 // UICheckbox constructor
 UICheckbox::UICheckbox(const char *name, bool value)
@@ -30,7 +31,7 @@ UICheckbox::UICheckbox(const char *name, bool value)
     mListener.addToEngineEventsOnce();
 }
 
-UICheckbox::~UICheckbox() {}
+UICheckbox::~UICheckbox() FL_NOEXCEPT {}
 
 // UINumberField constructor
 UINumberField::UINumberField(const char *name, double value, double min, double max)
@@ -38,7 +39,7 @@ UINumberField::UINumberField(const char *name, double value, double min, double 
     mListener.addToEngineEventsOnce();
 }
 
-UINumberField::~UINumberField() {}
+UINumberField::~UINumberField() FL_NOEXCEPT {}
 
 // UITitle constructors
 #if FASTLED_USE_JSON_UI
@@ -47,21 +48,21 @@ UITitle::UITitle(const char *name) : mImpl(fl::string(name), fl::string(name)) {
 UITitle::UITitle(const char *name) : mImpl(name) {}
 #endif
 
-UITitle::~UITitle() {}
+UITitle::~UITitle() FL_NOEXCEPT {}
 
 // UIDescription constructor
 UIDescription::UIDescription(const char *name) : mImpl(name) {}
-UIDescription::~UIDescription() {}
+UIDescription::~UIDescription() FL_NOEXCEPT {}
 
 // UIHelp constructor
 UIHelp::UIHelp(const char *markdownContent) : mImpl(markdownContent) {}
-UIHelp::~UIHelp() {}
+UIHelp::~UIHelp() FL_NOEXCEPT {}
 
 // UIAudio constructors
 UIAudio::UIAudio(const fl::string& name) : mImpl(name) {}
 UIAudio::UIAudio(const fl::string& name, const fl::url& url) : mImpl(name, url) {}
 UIAudio::UIAudio(const fl::string& name, const fl::audio::Config& config) : mImpl(name, config), mConfig(config) {}
-UIAudio::~UIAudio() {}
+UIAudio::~UIAudio() FL_NOEXCEPT {}
 
 fl::shared_ptr<audio::Processor> UIAudio::processor() {
     if (!mProcessor) {
@@ -81,11 +82,11 @@ UIDropdown::UIDropdown(const char *name, fl::initializer_list<fl::string> option
     mListener.addToEngineEventsOnce();
 }
 
-UIDropdown::~UIDropdown() {}
+UIDropdown::~UIDropdown() FL_NOEXCEPT {}
 
 // UIGroup constructors
 UIGroup::UIGroup(const fl::string& groupName) : mImpl(groupName.c_str()) {}
-UIGroup::~UIGroup() {}
+UIGroup::~UIGroup() FL_NOEXCEPT {}
 
 void UISlider::setValue(float value) {
     float oldValue = mImpl.value();

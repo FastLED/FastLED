@@ -20,6 +20,7 @@
 
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/string.h"  // IWYU pragma: keep
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -52,7 +53,7 @@ public:
         bool supportsSpi;        ///< Supports SPI protocols (APA102, SK9822, etc.)
 
         /// @brief Default constructor (no capabilities)
-        constexpr Capabilities() : supportsClockless(false), supportsSpi(false) {}
+        constexpr Capabilities() FL_NOEXCEPT : supportsClockless(false), supportsSpi(false) {}
 
         /// @brief Constructor with explicit capabilities
         constexpr Capabilities(bool clockless, bool spi)
@@ -131,16 +132,16 @@ public:
     bool waitForReadyOrDraining(u32 timeoutMs = 1000);
 
     /// @brief Virtual destructor
-    virtual ~IChannelDriver() = default;
+    virtual ~IChannelDriver() FL_NOEXCEPT = default;
 
 protected:
-    IChannelDriver() = default;
+    IChannelDriver() FL_NOEXCEPT = default;
 
     // Non-copyable, non-movable
-    IChannelDriver(const IChannelDriver&) = delete;
-    IChannelDriver& operator=(const IChannelDriver&) = delete;
-    IChannelDriver(IChannelDriver&&) = delete;
-    IChannelDriver& operator=(IChannelDriver&&) = delete;
+    IChannelDriver(const IChannelDriver&) FL_NOEXCEPT = delete;
+    IChannelDriver& operator=(const IChannelDriver&) FL_NOEXCEPT = delete;
+    IChannelDriver(IChannelDriver&&) FL_NOEXCEPT = delete;
+    IChannelDriver& operator=(IChannelDriver&&) FL_NOEXCEPT = delete;
 
     template<typename Condition>
     bool waitForCondition(Condition condition, u32 timeoutMs = 1000);

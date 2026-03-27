@@ -7,6 +7,7 @@
 #include "fl/stl/type_traits.h"
 #include "fl/stl/int.h"
 #include "fl/stl/memory_resource.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -27,7 +28,7 @@ class unordered_set {
         using pointer = const Key*;
         using iterator_category = fl::forward_iterator_tag;
         
-        iterator() = default;
+        iterator() FL_NOEXCEPT = default;
         explicit iterator(map_iterator it) : mIt(it) {}
         
         reference operator*() const { return mIt->first; }
@@ -53,7 +54,7 @@ class unordered_set {
         using pointer = const Key*;
         using iterator_category = fl::forward_iterator_tag;
         
-        const_iterator() = default;
+        const_iterator() FL_NOEXCEPT = default;
         explicit const_iterator(map_const_iterator it) : mIt(it) {}
         const_iterator(const iterator& other) : mIt(static_cast<map_const_iterator>(other.mIt)) {}
         
@@ -67,13 +68,13 @@ class unordered_set {
         bool operator!=(const const_iterator& other) const { return mIt != other.mIt; }
     };
 
-    unordered_set() = default;
+    unordered_set() FL_NOEXCEPT = default;
     explicit unordered_set(memory_resource* resource) : data(resource) {}
-    unordered_set(const unordered_set& other) = default;
-    unordered_set(unordered_set&& other) = default;
-    unordered_set& operator=(const unordered_set& other) = default;
-    unordered_set& operator=(unordered_set&& other) = default;
-    ~unordered_set() = default;
+    unordered_set(const unordered_set& other) FL_NOEXCEPT = default;
+    unordered_set(unordered_set&& other) FL_NOEXCEPT = default;
+    unordered_set& operator=(const unordered_set& other) FL_NOEXCEPT = default;
+    unordered_set& operator=(unordered_set&& other) FL_NOEXCEPT = default;
+    ~unordered_set() FL_NOEXCEPT = default;
 
     // Iterator methods
     iterator begin() { return iterator(data.begin()); }

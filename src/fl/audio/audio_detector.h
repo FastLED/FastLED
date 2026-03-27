@@ -1,4 +1,5 @@
 #pragma once
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -7,7 +8,7 @@ class Context;
 
 class Detector {
 public:
-    virtual ~Detector() = default;
+    virtual ~Detector() FL_NOEXCEPT = default;
 
     virtual void update(shared_ptr<Context> context) = 0;
     virtual void fireCallbacks() {}

@@ -521,7 +521,7 @@ void vector_basic::move_assign(vector_basic& other) FL_NOEXCEPT {
 
 // ======= DESTRUCTOR =======
 
-vector_basic::~vector_basic() {
+vector_basic::~vector_basic() FL_NOEXCEPT {
     clear_impl();
     if (!isInline() && mArray) {
         mResource->deallocate(mArray, mCapacity * mElementSize);

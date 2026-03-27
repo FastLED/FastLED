@@ -11,6 +11,7 @@ Based on works and code by Shawn Silverman.
 #include "fl/stl/stdint.h"
 
 #include "fl/stl/vector.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -30,7 +31,7 @@ class WaveSimulation1D_Real {
     //  2^(dampening).
     WaveSimulation1D_Real(u32 length, float speed = 0.16f,
                           int dampening = 6);
-    ~WaveSimulation1D_Real() = default;
+    ~WaveSimulation1D_Real() FL_NOEXCEPT = default;
 
     // Set simulation speed (courant parameter) using a float.
     void setSpeed(float something);
@@ -110,7 +111,7 @@ class WaveSimulation2D_Real {
     // 2^dampening.
     WaveSimulation2D_Real(u32 W, u32 H, float speed = 0.16f,
                           float dampening = 6.0f);
-    ~WaveSimulation2D_Real() = default;
+    ~WaveSimulation2D_Real() FL_NOEXCEPT = default;
 
     // Set the simulation speed (courantSq) using a float value.
     void setSpeed(float something);

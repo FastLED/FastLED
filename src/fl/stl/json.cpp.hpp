@@ -21,6 +21,7 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/string_interner.h"
 #include "fl/stl/string_view.h"
+#include "fl/stl/noexcept.h"
 
 // fl::numeric_limits<i16>::min(), fl::numeric_limits<i16>::max(), and fl::numeric_limits<u8>::max() should come from the platform's
 // <stdint.h> or <cstdint> headers (via fl/stl/stdint.h).
@@ -117,7 +118,7 @@ enum class ParseState : u8 { KEEP_GOING = 0, ERROR = 1 };
 class JsonVisitor {
 public:
     virtual ParseState on_token(JsonToken token, const fl::span<const char>& value) = 0;
-    virtual ~JsonVisitor() = default;
+    virtual ~JsonVisitor() FL_NOEXCEPT = default;
 };
 
 // Character-by-character tokenizer
@@ -508,7 +509,7 @@ private:
     int mDepth;
 
 public:
-    JsonValidator() : mExpectKey(false), mExpectValue(false), mExpectColon(false), mDepth(0) {}
+    JsonValidator() FL_NOEXCEPT : mExpectKey(false), mExpectValue(false), mExpectColon(false), mDepth(0) {}
 
     ParseState on_token(JsonToken token, const fl::span<const char>& value) override {
         (void)value;  // Suppress unused parameter warning
@@ -886,7 +887,7 @@ private:
     }
 
 public:
-    JsonBuilder() : mRoot(), mDepth(0) {}
+    JsonBuilder() FL_NOEXCEPT : mRoot(), mDepth(0) {}
 
     ParseState on_token(JsonToken token, const fl::span<const char>& value) override {
         // Recursion depth check

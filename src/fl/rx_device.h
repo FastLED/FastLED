@@ -7,6 +7,7 @@
 #include "fl/stl/optional.h"
 #include "fl/stl/result.h"
 #include "fl/stl/cstddef.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -33,7 +34,7 @@ struct EdgeTime {
     u32 high : 1;   ///< High/low level (1 bit: 1=high, 0=low)
 
     /// Default constructor (low, 0ns)
-    constexpr EdgeTime() : ns(0), high(0) {}
+    constexpr EdgeTime() FL_NOEXCEPT : ns(0), high(0) {}
 
     /// Construct from high/low state and duration
     constexpr EdgeTime(bool high_level, u32 ns_duration)
@@ -226,7 +227,7 @@ struct RxConfig {
     bool io_loop_back = false;              ///< Enable internal RMT loopback (RMT only, default: false)
 
     /// Default constructor with common WS2812B defaults
-    constexpr RxConfig() = default;
+    constexpr RxConfig() FL_NOEXCEPT = default;
 };
 
 /**
@@ -398,8 +399,8 @@ public:
 protected:
     // Allow shared_ptr to access protected destructor
     friend class fl::shared_ptr<RxDevice>;
-    RxDevice() = default;
-    virtual ~RxDevice() = default;
+    RxDevice() FL_NOEXCEPT = default;
+    virtual ~RxDevice() FL_NOEXCEPT = default;
 
 private:
     /**

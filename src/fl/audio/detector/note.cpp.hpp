@@ -1,6 +1,7 @@
 #include "fl/audio/detector/note.h"
 #include "fl/audio/audio_context.h"
 #include "fl/math/math.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -42,7 +43,7 @@ Note::Note(shared_ptr<Pitch> pitchDetector)
     , mVelocitySensitivity(1.0f)
 {}
 
-Note::~Note() = default;
+Note::~Note() FL_NOEXCEPT = default;
 
 void Note::update(shared_ptr<Context> context) {
     // Update pitch detector if we own it

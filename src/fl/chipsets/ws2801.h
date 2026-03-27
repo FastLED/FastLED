@@ -8,6 +8,7 @@
 #include "platforms/shared/spi_pixel_writer.h"  // ok platform headers
 // IWYU pragma: end_keep
 #include "platforms/spi_output_template.h"
+#include "fl/stl/noexcept.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -27,7 +28,7 @@ class WS2801Controller : public CPixelLEDController<RGB_ORDER> {
 	CMinWait<1000>  mWaitDelay;
 
 public:
-	WS2801Controller() {}
+	WS2801Controller() FL_NOEXCEPT {}
 
 	/// Initialize the controller
 	virtual void init() {

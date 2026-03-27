@@ -37,7 +37,7 @@ posix_filebuf::posix_filebuf(const char* path, const char* mode)
     }
 }
 
-posix_filebuf::~posix_filebuf() {
+posix_filebuf::~posix_filebuf() FL_NOEXCEPT {
     close();
 }
 

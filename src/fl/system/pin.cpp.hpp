@@ -34,6 +34,7 @@
 #include "fl/system/log.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/singleton.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -90,7 +91,7 @@ struct PwmPinState {
     u16 tick_counter;       // Current tick (0 to period_ticks-1)
     bool pin_state;         // Current GPIO state (ISR only)
 
-    PwmPinState() : pin(-1), frequency_hz(0), backend(PwmBackend::None),
+    PwmPinState() FL_NOEXCEPT : pin(-1), frequency_hz(0), backend(PwmBackend::None),
         duty_cycle(0), period_ticks(0), high_ticks(0),
         tick_counter(0), pin_state(false) {}
 };
@@ -101,7 +102,7 @@ struct PwmStateData {
     fl::isr::handle isr_handle;
     bool isr_active;
 
-    PwmStateData() : isr_active(false) {}
+    PwmStateData() FL_NOEXCEPT : isr_active(false) {}
 };
 
 // Access singleton state

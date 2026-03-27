@@ -3,6 +3,7 @@
 
 #include "fl/stl/fstream.h"
 #include "fl/stl/memory.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -20,7 +21,7 @@ ifstream::ifstream(filebuf_ptr handle)
     updateState();
 }
 
-ifstream::~ifstream() {
+ifstream::~ifstream() FL_NOEXCEPT {
     close();
 }
 
@@ -120,7 +121,7 @@ ofstream::ofstream(filebuf_ptr handle)
     updateState();
 }
 
-ofstream::~ofstream() {
+ofstream::~ofstream() FL_NOEXCEPT {
     close();
 }
 
@@ -229,7 +230,7 @@ fstream::fstream(filebuf_ptr handle)
     updateState();
 }
 
-fstream::~fstream() {
+fstream::~fstream() FL_NOEXCEPT {
     close();
 }
 

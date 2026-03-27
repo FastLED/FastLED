@@ -3,6 +3,7 @@
 #include "fl/fx/video.h"
 #include "fl/audio/audio_processor.h"
 #include "fl/task/scheduler.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -12,7 +13,7 @@ FxEngine::FxEngine(u16 numLeds, bool interpolate)
     mEffects.reserve(FASTLED_FX_ENGINE_MAX_FX);
 }
 
-FxEngine::~FxEngine() {}
+FxEngine::~FxEngine() FL_NOEXCEPT {}
 
 void FxEngine::pushAudioFrame(const AudioFrame &frame) {
     mAudioBack.push_back(frame);

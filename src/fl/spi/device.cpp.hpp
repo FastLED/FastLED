@@ -24,7 +24,7 @@ Device::Device(const Config& config)
            << " data_pins.size()=" << config.data_pins.size());
 }
 
-Device::~Device() {
+Device::~Device() FL_NOEXCEPT {
     FL_LOG_SPI("SPI Device: Destructor called");
     if (pImpl && pImpl->initialized) {
         FL_LOG_SPI("SPI Device: Calling end() from destructor");
@@ -399,7 +399,7 @@ Transaction& Transaction::operator=(Transaction&& other) FL_NOEXCEPT {
     return *this;
 }
 
-Transaction::~Transaction() {
+Transaction::~Transaction() FL_NOEXCEPT {
     if (pImpl) {
         // Auto-wait for completion if not already done
         if (!pImpl->completed) {

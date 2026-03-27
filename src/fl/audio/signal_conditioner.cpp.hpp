@@ -3,6 +3,7 @@
 #include "fl/stl/new.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/math/math.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -15,7 +16,7 @@ SignalConditioner::SignalConditioner(const SignalConditionerConfig& config) {
     configure(config);
 }
 
-SignalConditioner::~SignalConditioner() = default;
+SignalConditioner::~SignalConditioner() FL_NOEXCEPT = default;
 
 void SignalConditioner::configure(const SignalConditionerConfig& config) {
     mConfig = config;

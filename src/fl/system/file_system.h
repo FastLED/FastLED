@@ -11,6 +11,7 @@
 #include "fl/fx/video.h"               // IWYU pragma: export
 #include "fl/codec/jpeg.h"             // IWYU pragma: export
 #include "fl/stl/compiler_control.h"   // IWYU pragma: export
+#include "fl/stl/noexcept.h"
 
 // Forward declaration — concrete Mp3Decoder lives in fl/codec/mp3.h
 namespace fl {
@@ -49,7 +50,7 @@ class json;
 
 class FileSystem {
   public:
-    FileSystem();
+    FileSystem() FL_NOEXCEPT;
     bool beginSd(int cs_pin); // Signal to begin using the filesystem resource.
     bool begin(FsImplPtr platform_filesystem); // Signal to begin using the
                                                // filesystem resource.
@@ -85,11 +86,11 @@ class FileSystem {
 class FsImpl {
   public:
     struct Visitor {
-        virtual ~Visitor() {}
+        virtual ~Visitor() FL_NOEXCEPT {}
         virtual void accept(const char *path) = 0;
     };
-    FsImpl() = default;
-    virtual ~FsImpl() {} // Use default pins for spi.
+    FsImpl() FL_NOEXCEPT = default;
+    virtual ~FsImpl() FL_NOEXCEPT {} // Use default pins for spi.
     virtual bool begin() = 0;
     //  End use of card
     virtual void end() = 0;

@@ -10,6 +10,7 @@
 #include "fl/remote/rpc/type_conversion_result.h"
 #include "fl/remote/rpc/typed_rpc_binding.h"
 #include "fl/remote/rpc/type_schema.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace detail {
@@ -32,7 +33,7 @@ struct TypeTag {
 
 class ErasedInvoker {
 public:
-    virtual ~ErasedInvoker() = default;
+    virtual ~ErasedInvoker() FL_NOEXCEPT = default;
     virtual fl::tuple<TypeConversionResult, json> invoke(const json& args) = 0;
 };
 
@@ -42,7 +43,7 @@ public:
 
 class ErasedSchemaGenerator {
 public:
-    virtual ~ErasedSchemaGenerator() = default;
+    virtual ~ErasedSchemaGenerator() FL_NOEXCEPT = default;
     virtual void setParamNames(const fl::vector<fl::string>& names) = 0;
 
     // Flat tuple format: [["name", "type"], ...] optimized for low-memory devices

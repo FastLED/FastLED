@@ -108,6 +108,7 @@ auto t = fl::task::coroutine({
 #include "fl/task/promise.h"  // IWYU pragma: keep
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/cstddef.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace task {
@@ -139,13 +140,13 @@ class Handle {
 public:
 
     // Default constructor
-    Handle() = default;
+    Handle() FL_NOEXCEPT = default;
 
     // Copy and Move semantics (now possible with shared_ptr)
-    Handle(const Handle&) = default;
-    Handle& operator=(const Handle&) = default;
-    Handle(Handle&&) = default;
-    Handle& operator=(Handle&&) = default;
+    Handle(const Handle&) FL_NOEXCEPT = default;
+    Handle& operator=(const Handle&) FL_NOEXCEPT = default;
+    Handle(Handle&&) FL_NOEXCEPT = default;
+    Handle& operator=(Handle&&) FL_NOEXCEPT = default;
 
     // Constructor from impl - public because ITaskImpl is only forward-declared
     // in the header, making this effectively private to external consumers

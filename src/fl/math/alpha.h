@@ -4,6 +4,7 @@
 /// @brief Unsigned alpha types with UNORM semantics (GPU industry standard).
 
 #include "fl/stl/type_traits.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -41,7 +42,7 @@ using enable_if_integer_t =
 struct alpha8 {
     unsigned char value;
 
-    constexpr alpha8() : value(0) {}
+    constexpr alpha8() FL_NOEXCEPT : value(0) {}
 
     // Accept any non-bool integer type (signed or unsigned, any width).
     template <typename IntT, alpha_detail::enable_if_integer_t<IntT> = 0>
@@ -86,7 +87,7 @@ struct alpha8 {
 struct alpha16 {
     unsigned short value;
 
-    constexpr alpha16() : value(0) {}
+    constexpr alpha16() FL_NOEXCEPT : value(0) {}
 
     // Accept any non-bool integer type (signed or unsigned, any width).
     template <typename IntT, alpha_detail::enable_if_integer_t<IntT> = 0>

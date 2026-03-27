@@ -6,6 +6,7 @@
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -23,15 +24,15 @@ class Sample {
   public:
     using VectorPCM = fl::vector<fl::i16>;
     using const_iterator = VectorPCM::const_iterator;
-    Sample() {}
-    Sample(const Sample &other) : mImpl(other.mImpl) {}
+    Sample() FL_NOEXCEPT {}
+    Sample(const Sample &other) FL_NOEXCEPT : mImpl(other.mImpl) {}
     Sample(SampleImplPtr impl) : mImpl(impl) {}
-    ~Sample();
+    ~Sample() FL_NOEXCEPT;
 
     // Constructor that takes raw audio data and handles pooling internally
     Sample(fl::span<const fl::i16> span, fl::u32 timestamp = 0);
 
-    Sample &operator=(const Sample &other);
+    Sample &operator=(const Sample &other) FL_NOEXCEPT;
     bool isValid() const { return mImpl != nullptr; }
 
     fl::size size() const;
@@ -112,7 +113,7 @@ class SoundLevelMeter {
 class SampleImpl {
   public:
     using VectorPCM = fl::vector<fl::i16>;
-    ~SampleImpl() {}
+    ~SampleImpl() FL_NOEXCEPT {}
     // template <typename It> void assign(It begin, It end) {
     //     assign(begin, end, 0);  // Default timestamp to 0
     // }

@@ -3,6 +3,7 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/span.h"
 #include "fl/fx/fx1d.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -55,7 +56,7 @@ class Particles1d : public Fx1d {
     /// @param fade_rate Fade amount per frame for trails (0-255, default: 2)
     Particles1d(u16 num_leds, u8 max_particles = 10, u8 fade_rate = 2);
 
-    ~Particles1d();
+    ~Particles1d() FL_NOEXCEPT;
 
     /// @brief Update and render all particles with overdraw technique
     /// @param context Draw context containing current time and LED buffer
@@ -106,7 +107,7 @@ class Particles1d : public Fx1d {
         u32 lifetime;       ///< Lifespan in milliseconds
         bool active;        ///< Active flag (false = available for reuse)
 
-        Particle();
+        Particle() FL_NOEXCEPT;
 
         /// @return Power level from 1.0 (birth) to 0.0 (death)
         float getPower(u32 now) const;

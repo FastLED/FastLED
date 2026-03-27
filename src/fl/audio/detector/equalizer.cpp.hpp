@@ -3,6 +3,7 @@
 #include "fl/audio/mic_response_data.h"
 #include "fl/audio/fft/fft.h"
 #include "fl/math/math.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -52,7 +53,7 @@ EqualizerDetector::EqualizerDetector()
     recomputePinkNoiseGains();
 }
 
-EqualizerDetector::~EqualizerDetector() = default;
+EqualizerDetector::~EqualizerDetector() FL_NOEXCEPT = default;
 
 void EqualizerDetector::configure(const EqualizerConfig& config) {
     mConfig = config;

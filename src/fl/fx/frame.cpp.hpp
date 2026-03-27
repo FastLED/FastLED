@@ -8,6 +8,7 @@
 #include "fl/fx/frame.h"
 
 #include "fl/stl/cstring.h"
+#include "fl/stl/noexcept.h"
 namespace fl {
 
 Frame::Frame(int pixels_count) : mPixelsCount(pixels_count), mRgb(), mIsFromCodec(false) {
@@ -41,7 +42,7 @@ Frame::Frame(const Frame& other)
     }
 }
 
-Frame::~Frame() {
+Frame::~Frame() FL_NOEXCEPT {
     // Vector will handle memory cleanup automatically
 }
 

@@ -5,6 +5,7 @@
 // Include Helix MP3 decoder internal API (in fl::third_party namespace)
 // IWYU pragma: begin_keep
 #include "third_party/libhelix_mp3/pub/mp3dec.h"
+#include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep
 
 namespace fl {
@@ -19,7 +20,7 @@ Mp3HelixDecoder::Mp3HelixDecoder()
     fl::memset(&mFrameInfo, 0, sizeof(mFrameInfo));
 }
 
-Mp3HelixDecoder::~Mp3HelixDecoder() {
+Mp3HelixDecoder::~Mp3HelixDecoder() FL_NOEXCEPT {
     reset();
 }
 
@@ -123,8 +124,8 @@ fl::vector<audio::Sample> Mp3HelixDecoder::decodeToAudioSamples(const fl::u8* da
 // Mp3StreamDecoderImpl - internal implementation of streaming MP3 decoder
 class Mp3StreamDecoderImpl {
   public:
-    Mp3StreamDecoderImpl();
-    ~Mp3StreamDecoderImpl();
+    Mp3StreamDecoderImpl() FL_NOEXCEPT;
+    ~Mp3StreamDecoderImpl() FL_NOEXCEPT;
 
     bool begin(fl::filebuf_ptr stream);
     void end();
@@ -161,7 +162,7 @@ Mp3StreamDecoderImpl::Mp3StreamDecoderImpl()
     mBuffer.reserve(BUFFER_SIZE);
 }
 
-Mp3StreamDecoderImpl::~Mp3StreamDecoderImpl() {
+Mp3StreamDecoderImpl::~Mp3StreamDecoderImpl() FL_NOEXCEPT {
     end();
 }
 
@@ -361,7 +362,7 @@ bool Mp3StreamDecoderImpl::decodeNextFrame(audio::Sample* out_sample) {
 // Mp3Decoder implementation
 Mp3Decoder::Mp3Decoder() : mImpl(fl::make_unique<third_party::Mp3StreamDecoderImpl>()) {}
 
-Mp3Decoder::~Mp3Decoder() = default;
+Mp3Decoder::~Mp3Decoder() FL_NOEXCEPT = default;
 
 bool Mp3Decoder::begin(fl::filebuf_ptr stream) {
     return mImpl->begin(stream);

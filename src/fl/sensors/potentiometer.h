@@ -3,6 +3,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/function.h"
 #include "fl/stl/shared_ptr.h"  // For FASTLED_SHARED_PTR macros
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -11,10 +12,10 @@ namespace fl {
 class PotentiometerLowLevel {
   public:
     PotentiometerLowLevel(int pin);
-    ~PotentiometerLowLevel();
-    PotentiometerLowLevel(const PotentiometerLowLevel &other) = default;
-    PotentiometerLowLevel &operator=(const PotentiometerLowLevel &other) = delete;
-    PotentiometerLowLevel(PotentiometerLowLevel &&other) = delete;
+    ~PotentiometerLowLevel() FL_NOEXCEPT;
+    PotentiometerLowLevel(const PotentiometerLowLevel &other) FL_NOEXCEPT = default;
+    PotentiometerLowLevel &operator=(const PotentiometerLowLevel &other) FL_NOEXCEPT = delete;
+    PotentiometerLowLevel(PotentiometerLowLevel &&other) FL_NOEXCEPT = delete;
 
     // Read raw ADC value (0-1023 for 10-bit, 0-4095 for 12-bit ADC)
     u16 read();
@@ -137,7 +138,7 @@ class Potentiometer {
   protected:
     struct Listener : public EngineEvents::Listener {
         Listener(Potentiometer *owner);
-        ~Listener();
+        ~Listener() FL_NOEXCEPT;
         void addToEngineEventsOnce();
 
         // Update on end frame (before next frame is drawn, matching Button behavior)

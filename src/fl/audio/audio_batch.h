@@ -4,6 +4,7 @@
 #include "fl/stl/span.h"
 #include "fl/stl/stdint.h"
 #include "fl/audio/audio_frame.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -64,13 +65,13 @@ struct PercussionState {
 // ---------------------------------------------------------------------------
 class AudioBatch {
   public:
-    AudioBatch() = default;
+    AudioBatch() FL_NOEXCEPT = default;
     explicit AudioBatch(fl::span<const AudioFrame> frames,
                         audio::Processor *proc = nullptr)
         : mFrames(frames), mProc(proc) {}
 
-    AudioBatch(const AudioBatch &) = delete;
-    AudioBatch &operator=(const AudioBatch &) = delete;
+    AudioBatch(const AudioBatch &) FL_NOEXCEPT = delete;
+    AudioBatch &operator=(const AudioBatch &) FL_NOEXCEPT = delete;
 
     // --- Cheap: peak aggregates over AudioFrames (compute-once) ---
     float bass() const { ensurePeaks(); return mPeaks.bass; }

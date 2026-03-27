@@ -21,6 +21,7 @@
 #include "fl/audio/detector/drop.h"
 #include "fl/audio/detector/equalizer.h"
 #include "fl/audio/detector/vibe.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -33,7 +34,7 @@ void Processor::registerDetector(shared_ptr<Detector> detector) {
     mActiveDetectors.push_back(detector);
 }
 
-Processor::~Processor() = default;
+Processor::~Processor() FL_NOEXCEPT = default;
 
 void Processor::update(const Sample& sample) {
     // Signal conditioning pipeline: raw sample → conditioned sample

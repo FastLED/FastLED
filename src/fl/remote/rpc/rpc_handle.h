@@ -2,6 +2,7 @@
 
 #include "fl/stl/function.h"
 #include "fl/stl/type_traits.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -27,7 +28,7 @@ public:
     using function_type = fl::function<R(Args...)>;
 
     // Default constructor - creates invalid handle
-    RpcHandle() : mValid(false) {}
+    RpcHandle() FL_NOEXCEPT : mValid(false) {}
 
     // Constructor from function (internal use by RpcFactory)
     explicit RpcHandle(function_type fn) : mFn(fn), mValid(true) {}

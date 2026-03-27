@@ -253,11 +253,11 @@ class FL_ALIGN FixedVector {
     // Erase the element at the given iterator position
     iterator erase(iterator pos) FL_NOEXCEPT {
         if (pos != end()) {
-            pos->~T();
+            pos->~T() FL_NOEXCEPT;
             // shift all elements to the left
             for (iterator p = pos; p != end() - 1; ++p) {
                 new (p) T(fl::move(*(p + 1))); // Use move constructor
-                (p + 1)->~T();
+                (p + 1)->~T() FL_NOEXCEPT;
             }
             --current_size;
         }
@@ -419,14 +419,14 @@ class FL_ALIGN FixedVector {
                 T* src = memory() + i;
                 T* dst = other.memory() + i;
                 new (dst) T(fl::move(*src));
-                src->~T();
+                src->~T() FL_NOEXCEPT;
             }
         } else if (other.current_size > current_size) {
             for (fl::size i = min_sz; i < max_sz; ++i) {
                 T* src = other.memory() + i;
                 T* dst = memory() + i;
                 new (dst) T(fl::move(*src));
-                src->~T();
+                src->~T() FL_NOEXCEPT;
             }
         }
         fl::size temp_size = current_size;
@@ -567,7 +567,7 @@ class FL_ALIGN vector : public vector_basic {
 
     // ======= ASSIGNMENT =======
 
-    vector &operator=(const vector &other) {
+    vector &operator=(const vector &other) FL_NOEXCEPT {
         if (this != &other) {
             copy_from(other);
         }
@@ -892,7 +892,7 @@ class FL_ALIGN VectorN : public vector<T> {
         }
     }
 
-    VectorN& operator=(const VectorN& other) {
+    VectorN& operator=(const VectorN& other) FL_NOEXCEPT {
         if (this != &other) {
             this->copy_from(other);
         }
@@ -914,7 +914,7 @@ class FL_ALIGN VectorN : public vector<T> {
 template <typename T>
 class vector_psram : public vector<T> {
   public:
-    vector_psram()
+    vector_psram() FL_NOEXCEPT
         : vector<T>(psram_memory_resource()) {}
 
     vector_psram(fl::size count, const T& value = T())
@@ -938,7 +938,7 @@ class vector_psram : public vector<T> {
         }
     }
 
-    vector_psram(const vector_psram& other)
+    vector_psram(const vector_psram& other) FL_NOEXCEPT
         : vector<T>(psram_memory_resource()) {
         this->copy_from(other);
     }
@@ -948,7 +948,7 @@ class vector_psram : public vector<T> {
         this->move_from(other);
     }
 
-    vector_psram& operator=(const vector_psram& other) {
+    vector_psram& operator=(const vector_psram& other) FL_NOEXCEPT {
         if (this != &other) {
             this->copy_from(other);
         }

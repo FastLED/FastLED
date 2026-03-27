@@ -10,6 +10,7 @@
 #pragma once
 
 #include "fl/stl/stdint.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -38,7 +39,7 @@ namespace fl {
 class Timeout {
 public:
     /// @brief Default constructor - creates an already-expired timeout
-    Timeout() : mStartTime(0), mDuration(0) {}
+    Timeout() FL_NOEXCEPT : mStartTime(0), mDuration(0) {}
 
     /// @brief Construct a timeout with specified start time and duration
     /// @param start_time Start timestamp (in any consistent units)

@@ -80,7 +80,7 @@ class vector_basic {
     void swap_impl(vector_basic& other);
 
     // ======= DESTRUCTOR =======
-    ~vector_basic();
+    ~vector_basic() FL_NOEXCEPT;
 
   protected:
     // ======= CONSTRUCTION (only callable by vector<T>) =======
@@ -111,10 +111,10 @@ class vector_basic {
     }
 
     // Deleted copy/move — vector<T> handles these
-    vector_basic(const vector_basic&) = delete;
-    vector_basic(vector_basic&&) = delete;
-    vector_basic& operator=(const vector_basic&) = delete;
-    vector_basic& operator=(vector_basic&&) = delete;
+    vector_basic(const vector_basic&) FL_NOEXCEPT = delete;
+    vector_basic(vector_basic&&) FL_NOEXCEPT = delete;
+    vector_basic& operator=(const vector_basic&) FL_NOEXCEPT = delete;
+    vector_basic& operator=(vector_basic&&) FL_NOEXCEPT = delete;
 
     // ======= HELPERS FOR DERIVED CLASSES =======
 
@@ -317,7 +317,7 @@ const vector_element_ops* vector_element_ops_for() {
     static const vector_element_ops ops = {
         detail::get_copy_construct_fn<T>(),       // copy_construct
         detail::get_move_construct_fn<T>(),       // move_construct
-        [](void* ptr) { static_cast<T*>(ptr)->~T(); }, // destroy
+        [](void* ptr) { static_cast<T*>(ptr)->~T() FL_NOEXCEPT; }, // destroy
         detail::get_default_construct_fn<T>(),    // default_construct
         detail::get_swap_fn<T>(),                 // swap_elements
         detail::get_uninitialized_move_n_fn<T>(), // uninitialized_move_n
@@ -325,7 +325,7 @@ const vector_element_ops* vector_element_ops_for() {
         [](void* first, fl::size count) {
             T* p = static_cast<T*>(first);
             for (fl::size i = 0; i < count; ++i) {
-                p[i].~T();
+                p[i].~T() FL_NOEXCEPT;
             }
         }
     };

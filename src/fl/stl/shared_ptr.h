@@ -36,7 +36,7 @@ struct ControlBlockBase {
         : shared_count(track ? 1 : NO_TRACKING_VALUE), weak_count(1) {}
     // Destructor defined out-of-line in shared_ptr.cpp.hpp to anchor vtable
     // to a single translation unit, preventing ODR violations when using shared libraries.
-    virtual ~ControlBlockBase();
+    virtual ~ControlBlockBase() FL_NOEXCEPT;
     virtual void destroy_object() = 0;
     virtual void destroy_control_block() = 0;
     
@@ -137,7 +137,7 @@ struct FL_ALIGNAS(control_block_alignment<T>::value) InlinedControlBlock : publi
 
     void destroy_object() FL_NOEXCEPT override {
         if (object_constructed) {
-            get_object()->~T();  // Manual destructor call
+            get_object()->~T() FL_NOEXCEPT;  // Manual destructor call
             object_constructed = false;
         }
     }

@@ -4,6 +4,7 @@
 #include "fl/audio/detector/percussion.h"
 #include "fl/audio/audio_context.h"
 #include "fl/math/math.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -36,7 +37,7 @@ Percussion::Percussion()
     , mLastTomTime(0)
 {}
 
-Percussion::~Percussion() = default;
+Percussion::~Percussion() FL_NOEXCEPT = default;
 
 void Percussion::update(shared_ptr<Context> context) {
     mRetainedFFT = context->getFFT16(fft::Mode::CQ_NAIVE);

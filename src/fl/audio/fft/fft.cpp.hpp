@@ -172,7 +172,7 @@ FloatVectorPool& Bins::pool() {
 Bins::Bins(fl::size n)
     : mBands(n) {}
 
-Bins::~Bins() {
+Bins::~Bins() FL_NOEXCEPT {
     auto& p = pool();
     p.releaseIfNotEmpty(fl::move(mBinsRaw));
     p.releaseIfNotEmpty(fl::move(mBinsLinear));

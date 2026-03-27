@@ -15,7 +15,7 @@ class StringHolder {
     StringHolder(const char *str, size length);
     StringHolder(const StringHolder &other) FL_NOEXCEPT = delete;
     StringHolder &operator=(const StringHolder &other) FL_NOEXCEPT = delete;
-    ~StringHolder();
+    ~StringHolder() FL_NOEXCEPT;
 
     void grow(size newLength);
     bool hasCapacity(size newLength) const FL_NOEXCEPT { return newLength + 1 <= mCapacity; }

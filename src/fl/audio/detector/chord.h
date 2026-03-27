@@ -4,6 +4,7 @@
 #include "fl/stl/function.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/flat_map.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -33,7 +34,7 @@ struct Chord {
     float confidence;       // Detection confidence (0.0-1.0)
     u32 timestamp;     // When detected
 
-    Chord() : rootNote(-1), type(ChordType::UNKNOWN), confidence(0.0f), timestamp(0) {}
+    Chord() FL_NOEXCEPT : rootNote(-1), type(ChordType::UNKNOWN), confidence(0.0f), timestamp(0) {}
     Chord(int root, ChordType t, float conf, u32 ts)
         : rootNote(root), type(t), confidence(conf), timestamp(ts) {}
 
@@ -46,8 +47,8 @@ struct Chord {
 
 class ChordDetector : public Detector {
 public:
-    ChordDetector();
-    ~ChordDetector() override;
+    ChordDetector() FL_NOEXCEPT;
+    ~ChordDetector() FL_NOEXCEPT override;
 
     void update(shared_ptr<Context> context) override;
     void fireCallbacks() override;

@@ -1,6 +1,7 @@
 #include "fl/audio/detector/dynamics_analyzer.h"
 #include "fl/audio/audio_context.h"
 #include "fl/math/math.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -27,7 +28,7 @@ DynamicsAnalyzer::DynamicsAnalyzer()
     mRMSHistory.reserve(mHistorySize);
 }
 
-DynamicsAnalyzer::~DynamicsAnalyzer() = default;
+DynamicsAnalyzer::~DynamicsAnalyzer() FL_NOEXCEPT = default;
 
 void DynamicsAnalyzer::update(shared_ptr<Context> context) {
     mCurrentRMS = context->getRMS();

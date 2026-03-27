@@ -8,6 +8,7 @@
 
 // Include cstdio for I/O functions
 #include "fl/stl/cstdio.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -29,7 +30,7 @@ private:
     bool readToken(string& token);
     
 public:
-    istream_real() = default;
+    istream_real() FL_NOEXCEPT = default;
     
     // Check if stream is in good state
     bool good() const { return !mFailed; }
@@ -83,7 +84,7 @@ private:
 #endif
     
 public:
-    istream() = default;
+    istream() FL_NOEXCEPT = default;
     
     // Check if stream is in good state
     bool good() const { 

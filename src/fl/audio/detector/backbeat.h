@@ -5,6 +5,7 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/deque.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -57,9 +58,9 @@ public:
     /**
      * @brief Construct with standalone Beat
      */
-    Backbeat();
+    Backbeat() FL_NOEXCEPT;
 
-    ~Backbeat() override;
+    ~Backbeat() FL_NOEXCEPT override;
 
     void update(shared_ptr<Context> context) override;
     void fireCallbacks() override;

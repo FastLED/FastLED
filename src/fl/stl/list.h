@@ -6,6 +6,7 @@
 #include "fl/stl/iterator.h"
 #include "fl/stl/memory_resource.h"
 #include "fl/stl/new.h"  // IWYU pragma: keep
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -60,7 +61,7 @@ private:
 
     void destroy_node(Node* node) {
         if (node && node != mHead) {
-            node->~Node();
+            node->~Node() FL_NOEXCEPT;
             mResource->deallocate(node, sizeof(Node));
         }
     }
@@ -192,7 +193,7 @@ public:
     typedef fl::reverse_iterator<const_iterator> const_reverse_iterator;
 
     // Constructors
-    list() {
+    list() FL_NOEXCEPT {
         init_sentinel();
     }
 
@@ -207,14 +208,14 @@ public:
         }
     }
 
-    list(const list& other) {
+    list(const list& other) FL_NOEXCEPT {
         init_sentinel();
         for (const auto& value : other) {
             push_back(value);
         }
     }
 
-    list(list&& other) {
+    list(list&& other) FL_NOEXCEPT {
         init_sentinel();
         swap(other);
     }
@@ -227,13 +228,13 @@ public:
     }
 
     // Destructor
-    ~list() {
+    ~list() FL_NOEXCEPT {
         clear();
         destroy_sentinel();
     }
 
     // Assignment operators
-    list& operator=(const list& other) {
+    list& operator=(const list& other) FL_NOEXCEPT {
         if (this != &other) {
             clear();
             for (const auto& value : other) {
@@ -243,7 +244,7 @@ public:
         return *this;
     }
 
-    list& operator=(list&& other) {
+    list& operator=(list&& other) FL_NOEXCEPT {
         if (this != &other) {
             clear();
             swap(other);

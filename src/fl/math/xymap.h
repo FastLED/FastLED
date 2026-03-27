@@ -5,6 +5,7 @@
 #include "fl/math/lut.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 struct CRGB;  // Forward declaration
@@ -73,8 +74,8 @@ class XYMap {
     XYMap(u16 width, u16 height, bool is_serpentine = true,
           u16 offset = 0);
 
-    XYMap(const XYMap &other) = default;
-    XYMap &operator=(const XYMap &other) = default;
+    XYMap(const XYMap &other) FL_NOEXCEPT = default;
+    XYMap &operator=(const XYMap &other) FL_NOEXCEPT = default;
 
     fl::ScreenMap toScreenMap() const;
 

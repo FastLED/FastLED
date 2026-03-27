@@ -12,6 +12,7 @@
 #include "fl/math/math.h"
 #include "fl/stl/function.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -19,8 +20,8 @@ namespace detector {
 
 class Vocal : public Detector {
 public:
-    Vocal();
-    ~Vocal() override;
+    Vocal() FL_NOEXCEPT;
+    ~Vocal() FL_NOEXCEPT override;
 
     // Detector interface
     void update(shared_ptr<Context> context) override;

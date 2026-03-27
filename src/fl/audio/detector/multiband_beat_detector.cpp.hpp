@@ -1,5 +1,6 @@
 #include "fl/audio/detector/multiband_beat_detector.h"
 #include "fl/math/math.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -11,7 +12,7 @@ MultiBandBeat::MultiBandBeat(const MultiBandBeatDetectorConfig& config) {
     configure(config);
 }
 
-MultiBandBeat::~MultiBandBeat() = default;
+MultiBandBeat::~MultiBandBeat() FL_NOEXCEPT = default;
 
 void MultiBandBeat::configure(const MultiBandBeatDetectorConfig& config) {
     mConfig = config;

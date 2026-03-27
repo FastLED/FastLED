@@ -6,6 +6,7 @@
 #include "crgb.h"
 #include "eorder.h"
 #include "platforms/spi_output_template.h"
+#include "fl/stl/noexcept.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -34,7 +35,7 @@ class P9813Controller : public CPixelLEDController<RGB_ORDER> {
 	}
 
 public:
-	P9813Controller() {}
+	P9813Controller() FL_NOEXCEPT {}
 
 	virtual void init() {
 		mSPI.init();

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/stl/vector.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -8,8 +9,8 @@ namespace detector {
 
 class Transient {
 public:
-    Transient();
-    ~Transient();
+    Transient() FL_NOEXCEPT;
+    ~Transient() FL_NOEXCEPT;
 
     void update(shared_ptr<Context> context);
     void reset();

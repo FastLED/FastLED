@@ -13,6 +13,7 @@
 #include "fl/gfx/colorutils.h"  // IWYU pragma: keep
 #include "fl/gfx/crgb.h"  // for CRGB  // IWYU pragma: keep
 #include "fl/stl/vector.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -85,8 +86,8 @@ struct ReactiveConfig {
 
 class Reactive {
 public:
-    Reactive();
-    ~Reactive();
+    Reactive() FL_NOEXCEPT;
+    ~Reactive() FL_NOEXCEPT;
     
     // Setup
     void begin(const ReactiveConfig& config = ReactiveConfig{});
@@ -281,8 +282,8 @@ private:
 // Spectral flux-based onset detection for enhanced beat detection
 class SpectralFluxDetector {
 public:
-    SpectralFluxDetector();
-    ~SpectralFluxDetector();
+    SpectralFluxDetector() FL_NOEXCEPT;
+    ~SpectralFluxDetector() FL_NOEXCEPT;
     
     void reset();
     bool detectOnset(const float* currentBins, const float* previousBins);
@@ -303,8 +304,8 @@ private:
 
 // Multi-band beat detection for different frequency ranges
 struct BeatDetectors {
-    BeatDetectors();
-    ~BeatDetectors();
+    BeatDetectors() FL_NOEXCEPT;
+    ~BeatDetectors() FL_NOEXCEPT;
     
     void reset();
     void detectBeats(const float* frequencyBins, Data& audioData);
@@ -331,8 +332,8 @@ private:
 // Perceptual audio weighting for psychoacoustic processing
 class PerceptualWeighting {
 public:
-    PerceptualWeighting();
-    ~PerceptualWeighting();
+    PerceptualWeighting() FL_NOEXCEPT;
+    ~PerceptualWeighting() FL_NOEXCEPT;
     
     void applyAWeighting(Data& data) const;
     void applyLoudnessCompensation(Data& data, float referenceLevel) const;

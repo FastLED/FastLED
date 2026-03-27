@@ -3,6 +3,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -12,7 +13,7 @@ namespace fl {
 
 class TypeConversionResult {
 public:
-    TypeConversionResult() : mHasError(false) {}
+    TypeConversionResult() FL_NOEXCEPT : mHasError(false) {}
 
     static TypeConversionResult success() {
         return TypeConversionResult();

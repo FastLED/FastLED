@@ -37,7 +37,7 @@ template <typename T1, typename T2> struct pair {
     pair(pair<U1, U2> &&other) FL_NOEXCEPT : first(fl::move(other.first)), second(fl::move(other.second)) {}
     
     // Rule of 5: copy constructor, copy assignment, move constructor, move assignment, destructor
-    pair(const pair &other) = default;
+    pair(const pair &other) FL_NOEXCEPT = default;
     pair &operator=(const pair &other) = default;
     pair(pair &&other) FL_NOEXCEPT : first(fl::move(other.first)), second(fl::move(other.second)) {}
     pair &operator=(pair &&other) FL_NOEXCEPT = default;

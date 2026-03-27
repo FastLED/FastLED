@@ -1,6 +1,7 @@
 #include "fl/audio/detector/energy_analyzer.h"
 #include "fl/audio/audio_context.h"
 #include "fl/math/math.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -17,7 +18,7 @@ EnergyAnalyzer::EnergyAnalyzer()
 {
 }
 
-EnergyAnalyzer::~EnergyAnalyzer() = default;
+EnergyAnalyzer::~EnergyAnalyzer() FL_NOEXCEPT = default;
 
 void EnergyAnalyzer::update(shared_ptr<Context> context) {
     // Get RMS directly from Sample (no fft::FFT needed)

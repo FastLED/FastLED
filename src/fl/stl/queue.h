@@ -2,6 +2,7 @@
 
 #include "fl/stl/deque.h"
 #include "fl/stl/move.h"
+#include "fl/stl/noexcept.h"
 namespace fl {
 
 /// @brief A first-in, first-out (FIFO) queue container adapter
@@ -26,7 +27,7 @@ private:
 
 public:
     /// @brief Default constructor - creates an empty queue
-    queue() = default;
+    queue() FL_NOEXCEPT = default;
 
     /// @brief Construct queue with a copy of the given container
     /// @param container Container to copy
@@ -38,24 +39,24 @@ public:
 
     /// @brief Copy constructor
     /// @param other Queue to copy
-    queue(const queue& other) = default;
+    queue(const queue& other) FL_NOEXCEPT = default;
 
     /// @brief Move constructor
     /// @param other Queue to move
-    queue(queue&& other) = default;
+    queue(queue&& other) FL_NOEXCEPT = default;
 
     /// @brief Copy assignment operator
     /// @param other Queue to copy
     /// @return Reference to this queue
-    queue& operator=(const queue& other) = default;
+    queue& operator=(const queue& other) FL_NOEXCEPT = default;
 
     /// @brief Move assignment operator
     /// @param other Queue to move
     /// @return Reference to this queue
-    queue& operator=(queue&& other) = default;
+    queue& operator=(queue&& other) FL_NOEXCEPT = default;
 
     /// @brief Destructor
-    ~queue() = default;
+    ~queue() FL_NOEXCEPT = default;
 
     /// @brief Access the first element (front of queue)
     /// @return Reference to the front element

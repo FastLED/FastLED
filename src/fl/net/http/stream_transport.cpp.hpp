@@ -5,6 +5,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/stdio.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace net {
@@ -54,7 +55,7 @@ HttpStreamTransport::HttpStreamTransport(const fl::string& host, u16 port, u32 h
     , mWasConnected(false) {
 }
 
-HttpStreamTransport::~HttpStreamTransport() {
+HttpStreamTransport::~HttpStreamTransport() FL_NOEXCEPT {
     // Note: Cannot call pure virtual disconnect() here
     // Subclasses must clean up in their own destructors
 }

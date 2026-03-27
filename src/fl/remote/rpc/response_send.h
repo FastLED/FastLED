@@ -5,6 +5,7 @@
 #if FASTLED_ENABLE_JSON
 
 #include "fl/stl/function.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -55,10 +56,10 @@ public:
         : mRequestId(requestId), mResponseSink(fl::move(sink)), mIsFinal(false) {}
 
     // Non-copyable but movable
-    ResponseSend(const ResponseSend&) = delete;
-    ResponseSend& operator=(const ResponseSend&) = delete;
-    ResponseSend(ResponseSend&&) = default;
-    ResponseSend& operator=(ResponseSend&&) = default;
+    ResponseSend(const ResponseSend&) FL_NOEXCEPT = delete;
+    ResponseSend& operator=(const ResponseSend&) FL_NOEXCEPT = delete;
+    ResponseSend(ResponseSend&&) FL_NOEXCEPT = default;
+    ResponseSend& operator=(ResponseSend&&) FL_NOEXCEPT = default;
 
     /**
      * @brief Send a single response (for ASYNC mode)

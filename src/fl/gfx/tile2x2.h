@@ -7,6 +7,7 @@
 #include "fl/stl/span.h"
 #include "fl/math/xymap.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -19,11 +20,11 @@ class Tile2x2_u8 {
     static void Rasterize(const span<const Tile2x2_u8> &tiles,
                           XYRasterU8Sparse *output);
 
-    Tile2x2_u8() = default;
+    Tile2x2_u8() FL_NOEXCEPT = default;
     Tile2x2_u8(const vec2<u16> &origin) : mOrigin(origin) {}
-    Tile2x2_u8(const Tile2x2_u8 &) = default;
-    Tile2x2_u8 &operator=(const Tile2x2_u8 &) = default;
-    Tile2x2_u8(Tile2x2_u8 &&) = default;
+    Tile2x2_u8(const Tile2x2_u8 &) FL_NOEXCEPT = default;
+    Tile2x2_u8 &operator=(const Tile2x2_u8 &) FL_NOEXCEPT = default;
+    Tile2x2_u8(Tile2x2_u8 &&) FL_NOEXCEPT = default;
 
     void scale(u8 scale);
 
@@ -102,7 +103,7 @@ class Tile2x2_u8_wrap {
     using Entry = fl::pair<vec2<u16>, u8>;  // absolute position, alpha
     using Data = Entry[2][2];
 
-    Tile2x2_u8_wrap();
+    Tile2x2_u8_wrap() FL_NOEXCEPT;
     Tile2x2_u8_wrap(const Tile2x2_u8 &from, u16 width);
     Tile2x2_u8_wrap(const Tile2x2_u8 &from, u16 width, u16 height);
 

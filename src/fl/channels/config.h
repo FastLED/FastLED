@@ -14,6 +14,7 @@
 #include "fl/stl/optional.h"
 #include "color.h"  // IWYU pragma: keep
 #include "dither_mode.h"  // IWYU pragma: keep
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -30,19 +31,19 @@ struct ClocklessChipset {
         : pin(pin), timing(timing) {}
 
     /// @brief Default constructor
-    ClocklessChipset() : pin(-1), timing(0, 0, 0, 0) {}
+    ClocklessChipset() FL_NOEXCEPT : pin(-1), timing(0, 0, 0, 0) {}
 
     /// @brief Copy constructor
-    ClocklessChipset(const ClocklessChipset&) = default;
+    ClocklessChipset(const ClocklessChipset&) FL_NOEXCEPT = default;
 
     /// @brief Move constructor
-    ClocklessChipset(ClocklessChipset&&) = default;
+    ClocklessChipset(ClocklessChipset&&) FL_NOEXCEPT = default;
 
     /// @brief Copy assignment
-    ClocklessChipset& operator=(const ClocklessChipset&) = default;
+    ClocklessChipset& operator=(const ClocklessChipset&) FL_NOEXCEPT = default;
 
     /// @brief Move assignment
-    ClocklessChipset& operator=(ClocklessChipset&&) = default;
+    ClocklessChipset& operator=(ClocklessChipset&&) FL_NOEXCEPT = default;
 
     /// @brief Equality operator
     bool operator==(const ClocklessChipset& other) const {
@@ -74,19 +75,19 @@ struct SpiChipsetConfig {
 
     /// @brief Default constructor (requires explicit protocol specification)
     /// @note Protocol defaults to APA102 as a reasonable fallback
-    SpiChipsetConfig() : dataPin(-1), clockPin(-1), timing{fl::SpiChipset::APA102, 6000000} {}
+    SpiChipsetConfig() FL_NOEXCEPT : dataPin(-1), clockPin(-1), timing{fl::SpiChipset::APA102, 6000000} {}
 
     /// @brief Copy constructor
-    SpiChipsetConfig(const SpiChipsetConfig&) = default;
+    SpiChipsetConfig(const SpiChipsetConfig&) FL_NOEXCEPT = default;
 
     /// @brief Move constructor
-    SpiChipsetConfig(SpiChipsetConfig&&) = default;
+    SpiChipsetConfig(SpiChipsetConfig&&) FL_NOEXCEPT = default;
 
     /// @brief Copy assignment
-    SpiChipsetConfig& operator=(const SpiChipsetConfig&) = default;
+    SpiChipsetConfig& operator=(const SpiChipsetConfig&) FL_NOEXCEPT = default;
 
     /// @brief Move assignment
-    SpiChipsetConfig& operator=(SpiChipsetConfig&&) = default;
+    SpiChipsetConfig& operator=(SpiChipsetConfig&&) FL_NOEXCEPT = default;
 
     /// @brief Equality operator
     bool operator==(const SpiChipsetConfig& other) const {
@@ -178,14 +179,14 @@ struct ChannelConfig {
                   EOrder rgbOrder = RGB, const ChannelOptions& options = ChannelOptions());
 
     // Copy constructor (needed because of variant)
-    ChannelConfig(const ChannelConfig& other);
+    ChannelConfig(const ChannelConfig& other) FL_NOEXCEPT;
 
     // Move constructor (needed because of variant)
-    ChannelConfig(ChannelConfig&& other);
+    ChannelConfig(ChannelConfig&& other) FL_NOEXCEPT;
 
     // Note: Assignment operators deleted because const members cannot be reassigned
-    ChannelConfig& operator=(const ChannelConfig&) = delete;
-    ChannelConfig& operator=(ChannelConfig&&) = delete;
+    ChannelConfig& operator=(const ChannelConfig&) FL_NOEXCEPT = delete;
+    ChannelConfig& operator=(ChannelConfig&&) FL_NOEXCEPT = delete;
 
     // ========== Accessors ==========
 
@@ -258,9 +259,9 @@ FASTLED_SHARED_PTR_STRUCT(ChannelConfig);
 /// config.add(channel2);
 /// ```
 struct MultiChannelConfig {
-    MultiChannelConfig() = default;
-    MultiChannelConfig(const MultiChannelConfig&) = default;
-    MultiChannelConfig(MultiChannelConfig&&) = default;
+    MultiChannelConfig() FL_NOEXCEPT = default;
+    MultiChannelConfig(const MultiChannelConfig&) FL_NOEXCEPT = default;
+    MultiChannelConfig(MultiChannelConfig&&) FL_NOEXCEPT = default;
 
     MultiChannelConfig(fl::span<ChannelConfigPtr> channels) : mChannels(channels.begin(), channels.end()) {}
     MultiChannelConfig(fl::initializer_list<ChannelConfigPtr> channels) : mChannels(channels.begin(), channels.end()) {}
@@ -273,9 +274,9 @@ struct MultiChannelConfig {
     /// @param channels Initializer list of ChannelConfig objects to copy
     MultiChannelConfig(fl::initializer_list<ChannelConfig> channels);
 
-    MultiChannelConfig& operator=(const MultiChannelConfig&) = default;
-    MultiChannelConfig& operator=(MultiChannelConfig&&) = default;
-    ~MultiChannelConfig() = default;
+    MultiChannelConfig& operator=(const MultiChannelConfig&) FL_NOEXCEPT = default;
+    MultiChannelConfig& operator=(MultiChannelConfig&&) FL_NOEXCEPT = default;
+    ~MultiChannelConfig() FL_NOEXCEPT = default;
 
     /// Add a channel configuration to the multi-channel config
     /// @param channel shared pointer to the channel configuration to add

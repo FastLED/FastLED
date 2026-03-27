@@ -729,7 +729,7 @@ struct json_value {
 
     template<typename T>
     typename fl::enable_if<!fl::is_same<typename fl::remove_cv<typename fl::remove_reference<T>::type>::type, json_value>::value, json_value&>::type
-    operator=(T&& value) {
+    operator=(T&& value) FL_NOEXCEPT {
         data = fl::forward<T>(value);
         return *this;
     }

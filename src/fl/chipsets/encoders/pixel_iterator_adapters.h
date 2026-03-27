@@ -16,6 +16,7 @@
 #include "fl/stl/array.h"
 #include "fl/stl/pair.h"
 #include "fl/stl/iterator.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -48,7 +49,7 @@ public:
     }
 
     /// @brief Sentinel constructor (end iterator)
-    ScaledPixelIteratorRGB()
+    ScaledPixelIteratorRGB() FL_NOEXCEPT
         : mPixels(nullptr), mCurrent(), mHasValue(false) {}
 
     /// @brief Dereference operator
@@ -132,7 +133,7 @@ public:
     }
 
     /// @brief Sentinel constructor (end iterator)
-    ScaledPixelIteratorRGBW()
+    ScaledPixelIteratorRGBW() FL_NOEXCEPT
         : mPixels(nullptr), mCurrent(), mHasValue(false) {}
 
     /// @brief Dereference operator
@@ -205,7 +206,7 @@ public:
     }
 
     /// @brief Sentinel constructor (end iterator)
-    ScaledPixelIteratorBrightness()
+    ScaledPixelIteratorBrightness() FL_NOEXCEPT
         : mPixels(nullptr), mCurrent(0), mHasValue(false) {}
 
     /// @brief Dereference operator
@@ -275,7 +276,7 @@ public:
     }
 
     /// @brief Sentinel constructor (end iterator)
-    ScaledPixelIteratorRGB16()
+    ScaledPixelIteratorRGB16() FL_NOEXCEPT
         : mPixels(nullptr), mCurrent(), mHasValue(false) {}
 
     /// @brief Dereference operator

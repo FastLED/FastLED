@@ -9,6 +9,7 @@
 #include "fl/fx/time.h"
 #include "fl/fx/video.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl { namespace audio { class Processor; } }
 
@@ -41,7 +42,7 @@ class FxEngine {
     /**
      * @brief Destructor for FxEngine.
      */
-    ~FxEngine();
+    ~FxEngine() FL_NOEXCEPT;
 
     /**
      * @brief Adds a new effect to the engine.

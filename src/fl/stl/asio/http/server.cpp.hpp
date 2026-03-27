@@ -31,6 +31,7 @@
     #define SOCKET_ERROR_IN_PROGRESS WSAEINPROGRESS
 #else
     #include "platforms/posix/socket_posix.h"  // ok platform headers (includes all system socket headers)  // IWYU pragma: keep
+#include "fl/stl/noexcept.h"
     #define SOCKET_ERROR_WOULD_BLOCK EWOULDBLOCK
     #define SOCKET_ERROR_IN_PROGRESS EINPROGRESS
 #endif
@@ -255,7 +256,7 @@ Server::Server() {
     EngineEvents::addListener(this);
 }
 
-Server::~Server() {
+Server::~Server() FL_NOEXCEPT {
     // Unregister from engine events
     EngineEvents::removeListener(this);
     stop();
@@ -825,7 +826,7 @@ Server::Server() {
     EngineEvents::addListener(this);
 }
 
-Server::~Server() {
+Server::~Server() FL_NOEXCEPT {
     EngineEvents::removeListener(this);
     stop();
 }
@@ -964,7 +965,7 @@ Response Response::internal_error(const string&) { return Response(); }
 string Response::to_string() const { return ""; }
 
 Server::Server() {}
-Server::~Server() = default;
+Server::~Server() FL_NOEXCEPT = default;
 void Server::onExit() {}
 bool Server::start(int) { return false; }
 void Server::stop() {}

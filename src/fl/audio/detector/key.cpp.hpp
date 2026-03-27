@@ -6,6 +6,7 @@
 #include "fl/math/math.h"
 #include "fl/system/log.h"
 #include "fl/stl/stdio.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -92,7 +93,7 @@ KeyDetector::KeyDetector()
     initializeProfileStats();
 }
 
-KeyDetector::~KeyDetector() = default;
+KeyDetector::~KeyDetector() FL_NOEXCEPT = default;
 
 void KeyDetector::initializeProfileStats() {
     // Pre-compute statistics for MAJOR_PROFILE

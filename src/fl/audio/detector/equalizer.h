@@ -6,6 +6,7 @@
 #include "fl/stl/function.h"
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -83,8 +84,8 @@ class EqualizerDetector : public Detector {
 public:
     static constexpr int kNumBins = 16;
 
-    EqualizerDetector();
-    ~EqualizerDetector() override;
+    EqualizerDetector() FL_NOEXCEPT;
+    ~EqualizerDetector() FL_NOEXCEPT override;
 
     /// Reconfigure equalizer tuning parameters at runtime.
     void configure(const EqualizerConfig& config);

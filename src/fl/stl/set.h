@@ -36,7 +36,7 @@ template <typename Key, size N> class VectorSetFixed {
     typedef typename VectorType::const_iterator const_iterator;
 
     // Constructor
-    constexpr VectorSetFixed() = default;
+    constexpr VectorSetFixed() FL_NOEXCEPT = default;
 
     iterator begin() { return data.begin(); }
     iterator end() { return data.end(); }
@@ -209,7 +209,7 @@ template <typename Key> class VectorSet {
     typedef typename VectorType::reverse_iterator reverse_iterator;
 
     // Constructor
-    constexpr VectorSet() = default;
+    constexpr VectorSet() FL_NOEXCEPT = default;
 
     // Copy constructor
     VectorSet(const VectorSet &other) : data(other.data) {}
@@ -219,7 +219,7 @@ template <typename Key> class VectorSet {
         : data(fl::move(other.data)) {}
 
     // Copy assignment operator
-    VectorSet &operator=(const VectorSet &other) {
+    VectorSet &operator=(const VectorSet &other) FL_NOEXCEPT {
         if (this != &other) {
             data = other.data;
         }
@@ -388,12 +388,12 @@ template <typename Key, typename Allocator = fl::allocator_slab<Key>> class set 
     using allocator_type = Allocator;
 
     // Constructors
-    set() = default;
+    set() FL_NOEXCEPT = default;
     explicit set(const Allocator& alloc) : mTree(fl::less<Key>(), alloc) {}
-    set(const set& other) = default;
-    set(set&& other) = default;
-    set& operator=(const set& other) = default;
-    set& operator=(set&& other) = default;
+    set(const set& other) FL_NOEXCEPT = default;
+    set(set&& other) FL_NOEXCEPT = default;
+    set& operator=(const set& other) FL_NOEXCEPT = default;
+    set& operator=(set&& other) FL_NOEXCEPT = default;
 
     // Initializer list constructor
     set(fl::initializer_list<Key> init) {
@@ -403,7 +403,7 @@ template <typename Key, typename Allocator = fl::allocator_slab<Key>> class set 
     }
 
     // Initializer list assignment
-    set& operator=(fl::initializer_list<Key> init) {
+    set& operator=(fl::initializer_list<Key> init) FL_NOEXCEPT {
         clear();
         for (const auto& elem : init) {
             insert(elem);

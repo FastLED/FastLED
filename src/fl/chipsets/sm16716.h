@@ -8,6 +8,7 @@
 #include "platforms/shared/spi_pixel_writer.h"  // ok platform headers
 // IWYU pragma: end_keep
 #include "platforms/spi_output_template.h"
+#include "fl/stl/noexcept.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -43,7 +44,7 @@ class SM16716Controller : public CPixelLEDController<RGB_ORDER> {
 	}
 
 public:
-	SM16716Controller() {}
+	SM16716Controller() FL_NOEXCEPT {}
 
 	virtual void init() {
 		mSPI.init();

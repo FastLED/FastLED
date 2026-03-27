@@ -14,6 +14,7 @@
 #include "fl/system/log.h"
 #include "fl/stl/singleton.h"
 #include "fl/stl/stdio.h"
+#include "fl/stl/noexcept.h"
 
 // Configuration: Maximum stack depth (can be overridden at compile time)
 #ifndef FL_STACK_TRACE_MAX_DEPTH
@@ -27,7 +28,7 @@ struct TraceEntry {
     const char* function;
     int line;
 
-    TraceEntry() : function(nullptr), line(0) {}
+    TraceEntry() FL_NOEXCEPT : function(nullptr), line(0) {}
     TraceEntry(const char* f, int l) : function(f), line(l) {}
 };
 
@@ -159,7 +160,7 @@ ScopedTrace::ScopedTrace(const char* function, int line) {
     push(function, line);
 }
 
-ScopedTrace::~ScopedTrace() {
+ScopedTrace::~ScopedTrace() FL_NOEXCEPT {
     pop();
 }
 

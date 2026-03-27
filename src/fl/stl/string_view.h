@@ -57,7 +57,7 @@ class string_view {
         : mData(str.c_str()), mSize(str.size()) {}
 
     // Copy constructor
-    string_view(const string_view& other) = default;
+    string_view(const string_view& other) FL_NOEXCEPT = default;
 
     // Assignment operator
     string_view& operator=(const string_view& other) = default;

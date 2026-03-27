@@ -10,6 +10,7 @@
 #include "fl/audio/detector/vibe.h"
 #include "fl/audio/audio_context.h"
 #include "fl/math/math.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -23,7 +24,7 @@ void Vibe::resetPrivateFFTCount() { sVibeFFTCount = 0; }
 Vibe::Vibe()
 {}
 
-Vibe::~Vibe() = default;
+Vibe::~Vibe() FL_NOEXCEPT = default;
 
 void Vibe::update(shared_ptr<Context> context) {
     if (!context) {

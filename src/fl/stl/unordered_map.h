@@ -25,6 +25,7 @@ and removals.
 #include "fl/stl/vector.h"
 #include "fl/stl/initializer_list.h"  // IWYU pragma: keep
 #include "fl/stl/memory_resource.h"
+#include "fl/stl/noexcept.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_SHORTEN_64_TO_32
@@ -56,7 +57,7 @@ template <typename Key, typename T, typename Hash = Hash<Key>,
           int INLINED_COUNT = FASTLED_HASHMAP_INLINED_COUNT>
 class FL_ALIGN unordered_map {
   public:
-    unordered_map() : unordered_map(FASTLED_HASHMAP_INLINED_COUNT, 0.7f) {}
+    unordered_map() FL_NOEXCEPT : unordered_map(FASTLED_HASHMAP_INLINED_COUNT, 0.7f) {}
     unordered_map(fl::size initial_capacity) : unordered_map(initial_capacity, 0.7f) {}
 
     explicit unordered_map(memory_resource* resource)
@@ -75,7 +76,7 @@ class FL_ALIGN unordered_map {
     }
 
     // Copy constructor
-    unordered_map(const unordered_map& other)
+    unordered_map(const unordered_map& other) FL_NOEXCEPT
         : _buckets(other._buckets.size()), _size(0), _tombstones(0),
           mLoadFactor(other.mLoadFactor), _occupied(other._buckets.size()),
           _deleted(other._buckets.size()), _hash(other._hash), _equal(other._equal) {
@@ -88,7 +89,7 @@ class FL_ALIGN unordered_map {
     }
 
     // Move constructor
-    unordered_map(unordered_map&& other)
+    unordered_map(unordered_map&& other) FL_NOEXCEPT
         : _buckets(fl::move(other._buckets)), _size(other._size),
           _tombstones(other._tombstones), mLoadFactor(other.mLoadFactor),
           _occupied(fl::move(other._occupied)), _deleted(fl::move(other._deleted)),
@@ -120,7 +121,7 @@ class FL_ALIGN unordered_map {
     }
 
     // Copy assignment operator
-    unordered_map& operator=(const unordered_map& other) {
+    unordered_map& operator=(const unordered_map& other) FL_NOEXCEPT {
         if (this != &other) {
             // Clear current content
             clear();
@@ -152,7 +153,7 @@ class FL_ALIGN unordered_map {
     }
 
     // Move assignment operator
-    unordered_map& operator=(unordered_map&& other) {
+    unordered_map& operator=(unordered_map&& other) FL_NOEXCEPT {
         if (this != &other) {
             _buckets = fl::move(other._buckets);
             _size = other._size;
@@ -171,7 +172,7 @@ class FL_ALIGN unordered_map {
     }
 
     // Initializer list assignment operator
-    unordered_map& operator=(fl::initializer_list<pair<Key, T>> init) {
+    unordered_map& operator=(fl::initializer_list<pair<Key, T>> init) FL_NOEXCEPT {
         clear();
         insert(init);
         return *this;
@@ -191,7 +192,7 @@ class FL_ALIGN unordered_map {
         using reference = value_type &;
         using iterator_category = fl::forward_iterator_tag;
 
-        iterator() : _map(nullptr), _idx(0) {}
+        iterator() FL_NOEXCEPT : _map(nullptr), _idx(0) {}
         iterator(unordered_map *m, fl::size idx) : _map(m), _idx(idx) {
             advance_to_occupied();
         }
@@ -246,7 +247,7 @@ class FL_ALIGN unordered_map {
         using reference = const value_type &;
         using iterator_category = fl::forward_iterator_tag;
 
-        const_iterator() : _map(nullptr), _idx(0) {}
+        const_iterator() FL_NOEXCEPT : _map(nullptr), _idx(0) {}
         const_iterator(const unordered_map *m, fl::size idx) : _map(m), _idx(idx) {
             advance_to_occupied();
         }

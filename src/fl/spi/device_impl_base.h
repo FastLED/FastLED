@@ -7,6 +7,7 @@
 #include "fl/stl/shared_ptr.h"
 // IWYU pragma: begin_keep
 #include "platforms/shared/spi_hw_base.h"  // ok platform headers
+#include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep  // ok platform headers
 
 namespace fl {
@@ -21,7 +22,7 @@ struct DeviceImplBase {
     bool owns_backend;                  ///< Whether this device owns the backend (for cleanup)
 
     /// @brief Constructor
-    DeviceImplBase()
+    DeviceImplBase() FL_NOEXCEPT
         : backend()
         , initialized(false)
         , owns_backend(false) {}

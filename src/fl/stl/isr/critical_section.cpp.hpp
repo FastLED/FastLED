@@ -3,6 +3,7 @@
 
 #include "fl/stl/isr/critical_section.h"
 #include "platforms/isr.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -20,7 +21,7 @@ critical_section::critical_section() {
     fl::interrupt_disable();
 }
 
-critical_section::~critical_section() {
+critical_section::~critical_section() FL_NOEXCEPT {
     fl::interrupt_enable();
 }
 

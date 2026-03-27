@@ -62,7 +62,7 @@ struct hsv8 {
 
     /// Default constructor
     /// @warning Default values are UNITIALIZED!
-    constexpr hsv8(): h(0), s(0), v(0) { }
+    constexpr hsv8() FL_NOEXCEPT : h(0), s(0), v(0) { }
 
     /// Allow construction from hue, saturation, and value
     /// @param ih input hue
@@ -77,7 +77,7 @@ struct hsv8 {
     constexpr hsv8(const hsv8& rhs) FL_NOEXCEPT : h(rhs.h), s(rhs.s), v(rhs.v) { }
 
     /// Allow copy construction
-    hsv8& operator= (const hsv8& rhs) = default;
+    hsv8& operator= (const hsv8& rhs) FL_NOEXCEPT = default;
 
     /// Assign new HSV values
     /// @param ih input hue

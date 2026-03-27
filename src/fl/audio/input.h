@@ -7,6 +7,7 @@
 #include "fl/audio/mic_profiles.h"
 #include "fl/stl/compiler_control.h"
 #include "platforms/audio.h"
+#include "fl/stl/noexcept.h"
 
 #ifndef FASTLED_HAS_AUDIO_INPUT
 #error "platforms/audio.h must define FASTLED_HAS_AUDIO_INPUT"
@@ -199,7 +200,7 @@ public:
     //   set internally via an interrupt / queue and then they can just be popped off the queue.
     static fl::shared_ptr<IInput> create(const Config& config, fl::string* error_message = nullptr);
 
-    virtual ~IInput() = default;
+    virtual ~IInput() FL_NOEXCEPT = default;
     // Starts the audio source.
     virtual void start() = 0;
     // Stops the audio source, call this before light sleep.

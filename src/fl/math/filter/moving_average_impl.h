@@ -2,6 +2,7 @@
 
 #include "fl/stl/circular_buffer.h"
 #include "fl/stl/type_traits.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace detail {
@@ -9,7 +10,7 @@ namespace detail {
 template <typename T, fl::size N = 0>
 class MovingAverageImpl {
   public:
-    MovingAverageImpl() : mSum(T(0)) {}
+    MovingAverageImpl() FL_NOEXCEPT : mSum(T(0)) {}
     explicit MovingAverageImpl(fl::size capacity) : mBuf(capacity), mSum(T(0)) {}
 
     T update(T input) {

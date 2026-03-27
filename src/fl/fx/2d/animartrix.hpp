@@ -22,6 +22,7 @@
 #include "pixel_controller.h"
 
 #include "fl/fx/2d/animartrix_detail.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -189,7 +190,7 @@ class Animartrix : public Fx2d {
         // cross-DLL static initialization order issues on Windows.
     }
 
-    Animartrix(const Animartrix &) = delete;
+    Animartrix(const Animartrix &) FL_NOEXCEPT = delete;
 
     void draw(DrawContext ctx) override {
         if (!mXyMap.isLUT()) {

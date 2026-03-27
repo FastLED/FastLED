@@ -20,6 +20,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/math/ease.h"
 #include "fl/chipsets/encoders/pixel_iterator_adapters.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -38,7 +39,7 @@ struct UCS7604CurrentControl {
     u8 w;  ///< White channel current (0x0-0xF)
 
     /// Default constructor - maximum brightness
-    UCS7604CurrentControl() : r(0xF), g(0xF), b(0xF), w(0xF) {}
+    UCS7604CurrentControl() FL_NOEXCEPT : r(0xF), g(0xF), b(0xF), w(0xF) {}
 
     /// Construct from single brightness value (all channels)
     explicit UCS7604CurrentControl(u8 brightness)

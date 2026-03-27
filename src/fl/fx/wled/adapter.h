@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/fx/wled/ifastled.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -41,7 +42,7 @@ public:
     /**
      * @brief Destructor
      */
-    ~FastLEDAdapter() override = default;
+    ~FastLEDAdapter() FL_NOEXCEPT override = default;
 
     // IFastLED interface implementation
 

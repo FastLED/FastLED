@@ -7,6 +7,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/detail/memory_file_handle.h"
 #include "fl/fx/fx1d.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -44,14 +45,14 @@ class Video : public Fx1d { // Fx1d because video can be irregular.
     // just leave this as the default. For streaming byte streams you may want
     // to increase this number to allow momentary re-wind. If you'd like to use
     // a Video as a buffer for an fx effect then please see VideoFxWrapper.
-    Video();
+    Video() FL_NOEXCEPT;
     Video(size_t pixelsPerFrame, float fps = 30.0f,
           size_t frameHistoryCount =
               DefaultFrameHistoryCount()); // Please use FileSytem to construct
                                            // a Video.
-    ~Video();
-    Video(const Video &);
-    Video &operator=(const Video &);
+    ~Video() FL_NOEXCEPT;
+    Video(const Video &) FL_NOEXCEPT;
+    Video &operator=(const Video &) FL_NOEXCEPT;
 
     // Fx Api
     void draw(DrawContext context) override;
@@ -92,7 +93,7 @@ class Video : public Fx1d { // Fx1d because video can be irregular.
 class VideoFxWrapper : public Fx1d {
   public:
     VideoFxWrapper(FxPtr fx);
-    ~VideoFxWrapper() override;
+    ~VideoFxWrapper() FL_NOEXCEPT override;
     void draw(DrawContext context) override;
     string fxName() const override;
     void setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime);

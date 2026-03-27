@@ -1,4 +1,5 @@
 #pragma once
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -11,13 +12,13 @@ struct Drop {
     u32 timestamp = 0;        // When the drop occurred
 
     // Default constructor
-    Drop() = default;
+    Drop() FL_NOEXCEPT = default;
 };
 
 class DropDetector {
 public:
-    DropDetector();
-    ~DropDetector();
+    DropDetector() FL_NOEXCEPT;
+    ~DropDetector() FL_NOEXCEPT;
 
     void update(shared_ptr<Context> context);
     void reset();

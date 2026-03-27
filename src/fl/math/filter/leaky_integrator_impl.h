@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/stl/type_traits.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace detail {
@@ -8,7 +9,7 @@ namespace detail {
 template <typename T, int K = 2>
 class LeakyIntegratorImpl {
   public:
-    LeakyIntegratorImpl() : mY(T(0)) {}
+    LeakyIntegratorImpl() FL_NOEXCEPT : mY(T(0)) {}
     explicit LeakyIntegratorImpl(T initial) : mY(initial) {}
 
     T update(T input) {

@@ -10,6 +10,7 @@
 #include "fl/video/frame_interpolator.h"
 #include "fl/video/pixel_stream.h"
 #include "fl/video/video_impl.h"
+#include "fl/stl/noexcept.h"
 
 #define DBG FASTLED_DBG
 
@@ -30,9 +31,9 @@ void Video::pause(fl::u32 now) { mImpl->pause(now); }
 
 void Video::resume(fl::u32 now) { mImpl->resume(now); }
 
-Video::~Video() = default;
+Video::~Video() FL_NOEXCEPT = default;
 Video::Video(const Video &) = default;
-Video &Video::operator=(const Video &) = default;
+Video &Video::operator=(const Video &) FL_NOEXCEPT = default;
 
 bool Video::begin(filebuf_ptr handle) {
     if (!mImpl) {
@@ -145,7 +146,7 @@ VideoFxWrapper::VideoFxWrapper(fl::shared_ptr<Fx> fx) : Fx1d(fx->getNumLeds()), 
     mVideo->begin(mByteStream);
 }
 
-VideoFxWrapper::~VideoFxWrapper() = default;
+VideoFxWrapper::~VideoFxWrapper() FL_NOEXCEPT = default;
 
 string VideoFxWrapper::fxName() const {
     string out = "video_fx_wrapper: ";

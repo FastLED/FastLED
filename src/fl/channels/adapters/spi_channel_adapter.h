@@ -77,7 +77,7 @@ public:
     );
 
     /// @brief Destructor
-    ~SpiChannelEngineAdapter() override;
+    ~SpiChannelEngineAdapter() FL_NOEXCEPT override;
 
     // IChannelDriver interface implementation
 
@@ -185,10 +185,10 @@ private:
     fl::vector<ChannelDataPtr> mTransmittingChannels;  ///< Channels currently transmitting
 
     // Non-copyable, non-movable
-    SpiChannelEngineAdapter(const SpiChannelEngineAdapter&) = delete;
-    SpiChannelEngineAdapter& operator=(const SpiChannelEngineAdapter&) = delete;
-    SpiChannelEngineAdapter(SpiChannelEngineAdapter&&) = delete;
-    SpiChannelEngineAdapter& operator=(SpiChannelEngineAdapter&&) = delete;
+    SpiChannelEngineAdapter(const SpiChannelEngineAdapter&) FL_NOEXCEPT = delete;
+    SpiChannelEngineAdapter& operator=(const SpiChannelEngineAdapter&) FL_NOEXCEPT = delete;
+    SpiChannelEngineAdapter(SpiChannelEngineAdapter&&) FL_NOEXCEPT = delete;
+    SpiChannelEngineAdapter& operator=(SpiChannelEngineAdapter&&) FL_NOEXCEPT = delete;
 };
 
 } // namespace fl

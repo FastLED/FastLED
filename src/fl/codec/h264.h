@@ -2,6 +2,7 @@
 
 #include "fl/codec/common.h"
 #include "fl/codec/mp4_parser.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -14,7 +15,7 @@ struct H264Info {
     fl::u8 numRefFrames = 0;
     bool isValid = false;
 
-    H264Info() = default;
+    H264Info() FL_NOEXCEPT = default;
     H264Info(fl::u16 w, fl::u16 h, fl::u8 prof, fl::u8 lvl)
         : width(w), height(h), profile(prof), level(lvl), isValid(true) {}
 };

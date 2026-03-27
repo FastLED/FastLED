@@ -7,6 +7,7 @@
 #include "fl/math/fixed_point/isqrt.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/math/fixed_point/traits.h"
+#include "fl/stl/noexcept.h"
 
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
@@ -21,7 +22,7 @@ class u12x4 {
 
     // ---- Construction ------------------------------------------------------
 
-    constexpr u12x4() = default;
+    constexpr u12x4() FL_NOEXCEPT = default;
 
     explicit constexpr u12x4(float f)
         : mValue(static_cast<u16>(f * (SCALE))) {}

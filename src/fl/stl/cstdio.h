@@ -70,7 +70,7 @@ public:
     }
 
     /// Destructor - restores previous log level
-    ~ScopedLogDisable() {
+    ~ScopedLogDisable() FL_NOEXCEPT {
         setLogLevel(mPreviousLevel);
     }
 

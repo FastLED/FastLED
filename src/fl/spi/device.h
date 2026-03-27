@@ -14,6 +14,7 @@
 #include "fl/spi/transaction.h"
 // IWYU pragma: begin_keep
 #include "platforms/shared/spi_types.h"  // ok platform headers
+#include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep  // ok platform headers - DMABuffer, SPIError, TransmitMode
 
 namespace fl {
@@ -52,7 +53,7 @@ public:
 
     /// @brief Destructor - releases hardware resources
     /// @note Waits for pending operations to complete
-    ~Device();
+    ~Device() FL_NOEXCEPT;
 
     // ========== Initialization ==========
 
@@ -133,8 +134,8 @@ private:
     fl::unique_ptr<Impl> pImpl;
 
     // Non-copyable, non-movable (owns hardware resources)
-    Device(const Device&) = delete;
-    Device& operator=(const Device&) = delete;
+    Device(const Device&) FL_NOEXCEPT = delete;
+    Device& operator=(const Device&) FL_NOEXCEPT = delete;
 };
 
 } // namespace spi

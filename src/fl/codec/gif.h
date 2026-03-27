@@ -3,6 +3,7 @@
 #include "fl/codec/common.h"  // IWYU pragma: keep
 #include "fl/stl/vector.h"  // IWYU pragma: keep
 #include "fl/stl/shared_ptr.h"  // IWYU pragma: keep
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -16,7 +17,7 @@ struct GifInfo {
     bool isAnimated = false;     // True if GIF has multiple frames
     bool isValid = false;        // True if metadata was successfully parsed
 
-    GifInfo() = default;
+    GifInfo() FL_NOEXCEPT = default;
 
     // Constructor for easy initialization
     GifInfo(fl::u16 w, fl::u16 h, fl::u32 frames, fl::u32 loops = 0)
@@ -32,7 +33,7 @@ struct GifConfig {
     PixelFormat format = PixelFormat::RGB888;
     fl::u8 bufferFrames = 3;  // For smooth animation
 
-    GifConfig() = default;
+    GifConfig() FL_NOEXCEPT = default;
     GifConfig(FrameMode m, PixelFormat fmt = PixelFormat::RGB888)
         : mode(m), format(fmt) {}
 };

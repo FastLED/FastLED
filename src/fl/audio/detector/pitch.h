@@ -4,6 +4,7 @@
 #include "fl/math/filter/filter.h"
 #include "fl/stl/function.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -31,8 +32,8 @@ namespace detector {
  */
 class Pitch : public Detector {
 public:
-    Pitch();
-    ~Pitch() override;
+    Pitch() FL_NOEXCEPT;
+    ~Pitch() FL_NOEXCEPT override;
 
     void update(shared_ptr<Context> context) override;
     void fireCallbacks() override;

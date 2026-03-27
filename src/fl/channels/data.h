@@ -140,8 +140,8 @@ private:
     );
 
     // Non-copyable (move-only via shared_ptr)
-    ChannelData(const ChannelData&) = delete;
-    ChannelData& operator=(const ChannelData&) = delete;
+    ChannelData(const ChannelData&) FL_NOEXCEPT = delete;
+    ChannelData& operator=(const ChannelData&) FL_NOEXCEPT = delete;
 
     ChipsetVariant mChipset;                ///< Chipset configuration (clockless or SPI)
     PaddingGenerator mPaddingGenerator;     ///< Optional padding generator for block-size alignment

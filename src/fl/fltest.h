@@ -33,6 +33,7 @@
 #if defined(__cpp_exceptions) || defined(__EXCEPTIONS)
 // IWYU pragma: begin_keep
 #include <exception>
+#include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep  // For std::exception in CHECK_THROWS_WITH
 #endif
 
@@ -101,7 +102,7 @@ struct TestStats {
 // Reporter interface for outputting results
 class IReporter {
 public:
-    virtual ~IReporter() = default;
+    virtual ~IReporter() FL_NOEXCEPT = default;
 
     virtual void testRunStart() = 0;
     virtual void testRunEnd(const TestStats& stats) = 0;
@@ -244,7 +245,7 @@ public:
     fl::u32 getElapsedMs() const;
 
 private:
-    TestContext();
+    TestContext() FL_NOEXCEPT;
 
     fl::vector<TestCaseInfo> mTestCases;
     fl::vector<SubcaseSignature> mSubcaseStack;       // Current path being followed
@@ -286,7 +287,7 @@ private:
 class Subcase {
 public:
     Subcase(const char* name, const char* file, int line);
-    ~Subcase();
+    ~Subcase() FL_NOEXCEPT;
 
     explicit operator bool() const { return mEntered; }
 
@@ -1024,7 +1025,7 @@ namespace detail {
             mPreviousName = currentSuiteName();
             currentSuiteName() = name;
         }
-        ~SuiteScope() {
+        ~SuiteScope() FL_NOEXCEPT {
             currentSuiteName() = mPreviousName;
         }
     };

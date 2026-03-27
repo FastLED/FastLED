@@ -9,6 +9,7 @@
 #include "platforms/shared/spi_types.h"  // ok platform headers
 #include "platforms/shared/spi_hw_base.h"  // ok platform headers
 #include "fl/system/log.h"
+#include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep
 
 namespace fl {
@@ -47,7 +48,7 @@ struct Device::Impl {
         , owns_backend(false) {}
 
     /// @brief Destructor
-    ~Impl() {
+    ~Impl() FL_NOEXCEPT {
         FL_LOG_SPI("Device::Impl: Destructor called");
         // Members will be destroyed in reverse order of declaration:
         // 1. owns_backend (bool) - trivial

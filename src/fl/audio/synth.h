@@ -44,6 +44,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/span.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -71,7 +72,7 @@ struct SynthParams {
     float zeroWait = 0.0f;    ///< Wait time at zero [0..1]
 
     /// Default constructor - sawtooth wave
-    SynthParams() = default;
+    SynthParams() FL_NOEXCEPT = default;
 
     /// Full parameter constructor
     SynthParams(i32 reflect, float peakTime, float halfHeight, float zeroWait)
@@ -94,7 +95,7 @@ public:
     /// @return Shared pointer to the engine
     static ISynthEnginePtr create(i32 width = 32, i32 oversample = 16);
 
-    virtual ~ISynthEngine() = default;
+    virtual ~ISynthEngine() FL_NOEXCEPT = default;
 
     /// Check if engine was initialized successfully
     virtual bool isValid() const = 0;
@@ -127,7 +128,7 @@ public:
     /// @return Shared pointer to the oscillator
     static ISynthOscillatorPtr create(ISynthEnginePtr engine, SynthShape shape = SynthShape::Sawtooth);
 
-    virtual ~ISynthOscillator() = default;
+    virtual ~ISynthOscillator() FL_NOEXCEPT = default;
 
     /// Generate audio samples
     /// @param output Buffer to fill with samples

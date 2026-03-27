@@ -1,6 +1,7 @@
 #include "fl/audio/detector/backbeat.h"
 #include "fl/audio/audio_context.h"
 #include "fl/math/math.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -51,7 +52,7 @@ Backbeat::Backbeat()
     mOwnsBeatDetector = true;
 }
 
-Backbeat::~Backbeat() = default;
+Backbeat::~Backbeat() FL_NOEXCEPT = default;
 
 void Backbeat::update(shared_ptr<Context> context) {
     // Update Beat if we own it

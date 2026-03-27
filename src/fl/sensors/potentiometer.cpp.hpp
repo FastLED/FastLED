@@ -5,6 +5,7 @@
 #include "fl/sensors/potentiometer.h"
 #include "fl/system/pin.h"
 #include "fl/math/math.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -16,7 +17,7 @@ PotentiometerLowLevel::PotentiometerLowLevel(int pin)
     : mPin(pin) {
 }
 
-PotentiometerLowLevel::~PotentiometerLowLevel() {}
+PotentiometerLowLevel::~PotentiometerLowLevel() FL_NOEXCEPT {}
 
 u16 PotentiometerLowLevel::read() {
     return fl::analogRead(mPin);
@@ -161,7 +162,7 @@ Potentiometer::Listener::Listener(Potentiometer *owner) : mOwner(owner) {
     addToEngineEventsOnce();
 }
 
-Potentiometer::Listener::~Listener() {
+Potentiometer::Listener::~Listener() FL_NOEXCEPT {
     if (added) {
         EngineEvents::removeListener(this);
     }

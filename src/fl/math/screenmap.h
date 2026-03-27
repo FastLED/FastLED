@@ -4,6 +4,7 @@
 #include "fl/stl/flat_map.h"  // Required: fl_map is a template alias, cannot be forward declared
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
 /* Screenmap maps strip indexes to x,y coordinates. This is used for FastLED Web
  * to map the 1D strip to a 2D screen. Note that the strip can have arbitrary
  * size. this was first motivated by the effort to port theChromancer project to
@@ -45,8 +46,8 @@ class ScreenMap {
                                   float completion = .9f);
 
     // Constructors and destructor - implemented in .cpp for proper smart_ptr handling
-    ScreenMap();
-    ~ScreenMap();
+    ScreenMap() FL_NOEXCEPT;
+    ~ScreenMap() FL_NOEXCEPT;
 
     // is_reverse is false by default for linear layout
     ScreenMap(u32 length, float mDiameter = -1.0f);
@@ -60,8 +61,8 @@ class ScreenMap {
     // Constructor with functor to fill in values
     ScreenMap(int count, float diameter, fl::function<void(int, vec2f& pt_out)> func);
 
-    ScreenMap(const ScreenMap &other);
-    ScreenMap(ScreenMap&& other);
+    ScreenMap(const ScreenMap &other) FL_NOEXCEPT;
+    ScreenMap(ScreenMap&& other) FL_NOEXCEPT;
 
     const vec2f &operator[](u32 x) const;
 
@@ -78,8 +79,8 @@ class ScreenMap {
     void setDiameter(float diameter);
 
     // define the assignment operator
-    ScreenMap &operator=(const ScreenMap &other);
-    ScreenMap &operator=(ScreenMap &&other);
+    ScreenMap &operator=(const ScreenMap &other) FL_NOEXCEPT;
+    ScreenMap &operator=(ScreenMap &&other) FL_NOEXCEPT;
 
     vec2f mapToIndex(u32 x) const;
 

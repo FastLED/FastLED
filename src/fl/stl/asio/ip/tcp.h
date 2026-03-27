@@ -9,6 +9,7 @@
 #include "fl/stl/span.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/string.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace asio {
@@ -21,7 +22,7 @@ struct endpoint {
     fl::string host; // hostname or IP address
     u16 port;
 
-    endpoint() : port(0) {}
+    endpoint() FL_NOEXCEPT : port(0) {}
     endpoint(const fl::string &h, u16 p) : host(h), port(p) {}
     endpoint(const char *h, u16 p) : host(h), port(p) {}
 
@@ -40,16 +41,16 @@ struct endpoint {
 /// Movable, not copyable.
 class socket {
   public:
-    socket();
-    ~socket();
+    socket() FL_NOEXCEPT;
+    ~socket() FL_NOEXCEPT;
 
     // Movable
-    socket(socket &&other);
-    socket &operator=(socket &&other);
+    socket(socket &&other) FL_NOEXCEPT;
+    socket &operator=(socket &&other) FL_NOEXCEPT;
 
     // Not copyable
-    socket(const socket &) = delete;
-    socket &operator=(const socket &) = delete;
+    socket(const socket &) FL_NOEXCEPT = delete;
+    socket &operator=(const socket &) FL_NOEXCEPT = delete;
 
     /// True if the socket has a valid file descriptor.
     bool is_open() const;
@@ -104,12 +105,12 @@ class socket {
 /// Binds, listens, and accepts incoming connections.
 class acceptor {
   public:
-    acceptor();
-    ~acceptor();
+    acceptor() FL_NOEXCEPT;
+    ~acceptor() FL_NOEXCEPT;
 
     // Not copyable or movable (owns listening socket)
-    acceptor(const acceptor &) = delete;
-    acceptor &operator=(const acceptor &) = delete;
+    acceptor(const acceptor &) FL_NOEXCEPT = delete;
+    acceptor &operator=(const acceptor &) FL_NOEXCEPT = delete;
 
     /// Bind and prepare to listen on port.
     error_code open(u16 port);

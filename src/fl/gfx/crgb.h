@@ -105,7 +105,7 @@ struct CRGB {
 
     #if defined(FL_IS_AVR)
     // Saves a surprising amount of memory on AVR devices.
-    CRGB() = default;
+    CRGB() FL_NOEXCEPT = default;
     #else
     /// Default constructor
     FASTLED_FORCE_INLINE CRGB() {
@@ -163,11 +163,11 @@ struct CRGB {
     CRGB(const HSV16& rhs);
 
     /// Allow assignment from one RGB struct to another
-    FASTLED_FORCE_INLINE CRGB& operator= (const CRGB& rhs) = default;
+    FASTLED_FORCE_INLINE CRGB& operator= (const CRGB& rhs) FL_NOEXCEPT = default;
 
     /// Allow assignment from 32-bit (really 24-bit) 0xRRGGBB color code
     /// @param colorcode a packed 24 bit color code
-    FASTLED_FORCE_INLINE CRGB& operator= (const u32 colorcode)
+    FASTLED_FORCE_INLINE CRGB& operator= (const u32 colorcode) FL_NOEXCEPT
     {
         r = (colorcode >> 16) & 0xFF;
         g = (colorcode >>  8) & 0xFF;
@@ -202,7 +202,7 @@ struct CRGB {
     CRGB& setHue (u8 hue);
 
     /// Allow assignment from HSV color
-    CRGB& operator= (const hsv8& rhs);
+    CRGB& operator= (const hsv8& rhs) FL_NOEXCEPT;
 
     /// Allow assignment from 32-bit (really 24-bit) 0xRRGGBB color code
     /// @param colorcode a packed 24 bit color code

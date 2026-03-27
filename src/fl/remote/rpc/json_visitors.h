@@ -4,6 +4,7 @@
 #include "fl/stl/stdint.h"  // IWYU pragma: keep
 #include "fl/stl/string.h"  // IWYU pragma: keep
 #include "fl/stl/cstdlib.h"  // IWYU pragma: keep
+#include "fl/stl/noexcept.h"
 
 #if FASTLED_ENABLE_JSON
 
@@ -18,7 +19,7 @@ struct JsonToIntegerVisitor {
     T mValue;
     TypeConversionResult mResult;
 
-    JsonToIntegerVisitor() : mValue(T()) {}
+    JsonToIntegerVisitor() FL_NOEXCEPT : mValue(T()) {}
 
     template<typename U>
     void accept(const U& value) {
@@ -99,7 +100,7 @@ struct JsonToBoolVisitor {
     bool mValue;
     TypeConversionResult mResult;
 
-    JsonToBoolVisitor() : mValue(false) {}
+    JsonToBoolVisitor() FL_NOEXCEPT : mValue(false) {}
 
     template<typename U>
     void accept(const U& value) {
@@ -173,7 +174,7 @@ struct JsonToFloatVisitor {
     T mValue;
     TypeConversionResult mResult;
 
-    JsonToFloatVisitor() : mValue(T()) {}
+    JsonToFloatVisitor() FL_NOEXCEPT : mValue(T()) {}
 
     template<typename U>
     void accept(const U& value) {
@@ -248,7 +249,7 @@ struct JsonToStringVisitor {
     fl::string mValue;
     TypeConversionResult mResult;
 
-    JsonToStringVisitor() {}
+    JsonToStringVisitor() FL_NOEXCEPT {}
 
     template<typename U>
     void accept(const U& value) {

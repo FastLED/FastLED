@@ -43,6 +43,7 @@
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -299,7 +300,7 @@ public:
     enum class Type { None, Int, UInt, Long, ULong, LongLong, ULongLong,
                       Double, Char, CString, String, Pointer };
 
-    FormatArg() : mType(Type::None) {}
+    FormatArg() FL_NOEXCEPT : mType(Type::None) {}
     FormatArg(int v) : mType(Type::Int) { mData.i = v; }
     FormatArg(unsigned int v) : mType(Type::UInt) { mData.u = v; }
     FormatArg(long v) : mType(Type::Long) { mData.l = v; }

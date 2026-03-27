@@ -8,6 +8,7 @@
 #include "fl/math/fixed_point/isqrt.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/math/fixed_point/traits.h"
+#include "fl/stl/noexcept.h"
 
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
@@ -22,7 +23,7 @@ class s8x8 {
 
     // ---- Construction ------------------------------------------------------
 
-    constexpr s8x8() = default;
+    constexpr s8x8() FL_NOEXCEPT = default;
 
     explicit constexpr s8x8(float f)
         : mValue(static_cast<i16>(f * (static_cast<i16>(1) << FRAC_BITS))) {}

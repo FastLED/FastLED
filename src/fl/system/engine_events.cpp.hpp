@@ -1,18 +1,19 @@
 #include "fl/system/engine_events.h"
 #include "fl/stl/int.h"
 #include "fl/stl/cstdio.h"  // for printf debug
+#include "fl/stl/noexcept.h"
 
 
 namespace fl {
 
 // Explicitly define constructor and destructor
 EngineEvents::EngineEvents() = default;
-EngineEvents::~EngineEvents() = default;
+EngineEvents::~EngineEvents() FL_NOEXCEPT = default;
 
 
 EngineEvents::Listener::Listener() {}
 
-EngineEvents::Listener::~Listener() {
+EngineEvents::Listener::~Listener() FL_NOEXCEPT {
 #if FASTLED_HAS_ENGINE_EVENTS
     EngineEvents *ptr = EngineEvents::getInstance();
     const bool has_listener = ptr && ptr->_hasListener(this);

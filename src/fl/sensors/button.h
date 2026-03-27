@@ -7,6 +7,7 @@
 #include "fl/system/engine_events.h"
 #include "fl/sensors/digital_pin.h"
 #include "fl/ui.h"  // For IButtonInput
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -31,10 +32,10 @@ enum class ButtonStrategy {
 class ButtonLowLevel {
   public:
     ButtonLowLevel(int pin, ButtonStrategy strategy = ButtonStrategy::kHighLowFloating);
-    ~ButtonLowLevel();
-    ButtonLowLevel(const ButtonLowLevel &other) = default;
-    ButtonLowLevel &operator=(const ButtonLowLevel &other) = delete;
-    ButtonLowLevel(ButtonLowLevel &&other) = delete;
+    ~ButtonLowLevel() FL_NOEXCEPT;
+    ButtonLowLevel(const ButtonLowLevel &other) FL_NOEXCEPT = default;
+    ButtonLowLevel &operator=(const ButtonLowLevel &other) FL_NOEXCEPT = delete;
+    ButtonLowLevel(ButtonLowLevel &&other) FL_NOEXCEPT = delete;
     bool isPressed();
 
     bool highLowFloating();
@@ -74,7 +75,7 @@ class Button : public IButtonInput {
   protected:
     struct Listener : public EngineEvents::Listener {
         Listener(Button *owner);
-        ~Listener();
+        ~Listener() FL_NOEXCEPT;
         void addToEngineEventsOnce();
 
         // We do an experiment here, what about listening to the end frame event

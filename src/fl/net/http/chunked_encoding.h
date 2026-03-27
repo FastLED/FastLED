@@ -3,6 +3,7 @@
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace net {
@@ -19,7 +20,7 @@ struct ChunkedReadResult {
     Status mStatus;
     fl::span<const u8> mData;  // Subspan of caller's buffer containing the bytes read
 
-    ChunkedReadResult() : mStatus(CHUNKED_NO_DATA) {}
+    ChunkedReadResult() FL_NOEXCEPT : mStatus(CHUNKED_NO_DATA) {}
     ChunkedReadResult(Status s, fl::span<const u8> d) : mStatus(s), mData(d) {}
 
     bool hasData() const { return mStatus == CHUNKED_DATA; }
@@ -30,7 +31,7 @@ struct ChunkedReadResult {
 // Format: <chunk-size-hex>\r\n<chunk-data>\r\n ... 0\r\n\r\n
 class ChunkedReader {
 public:
-    ChunkedReader();
+    ChunkedReader() FL_NOEXCEPT;
 
     // Feed raw bytes received from a socket into the parser (incremental/streaming)
     void feed(fl::span<const u8> data);
@@ -80,7 +81,7 @@ private:
 // ChunkedWriter: Format HTTP/1.1 chunked transfer encoding
 class ChunkedWriter {
 public:
-    ChunkedWriter();
+    ChunkedWriter() FL_NOEXCEPT;
 
     // Write chunk into caller-provided buffer.
     // Output format: <size-hex>\r\n<data>\r\n

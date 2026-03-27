@@ -12,6 +12,7 @@
 #include "fl/stl/iterator.h"
 #include "fl/stl/pair.h"
 #include "fl/stl/type_traits.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -366,7 +367,7 @@ public:
         }
 
     public:
-        iterator() : mNode(nullptr), mTree(nullptr) {}
+        iterator() FL_NOEXCEPT : mNode(nullptr), mTree(nullptr) {}
         iterator(RBNode* n, const RedBlackTree* t) : mNode(n), mTree(t) {}
 
         value_type& operator*() const { 
@@ -452,7 +453,7 @@ public:
         using value_type = T;
         using iterator_category = fl::bidirectional_iterator_tag;
 
-        const_iterator() : mNode(nullptr), mTree(nullptr) {}
+        const_iterator() FL_NOEXCEPT : mNode(nullptr), mTree(nullptr) {}
         const_iterator(const RBNode* n, const RedBlackTree* t) : mNode(n), mTree(t) {}
         const_iterator(const iterator& it) : mNode(it.mNode), mTree(it.mTree) {}
 
@@ -559,7 +560,7 @@ public:
         using value_type = T;
         using iterator_category = fl::bidirectional_iterator_tag;
 
-        reverse_iterator() : mNode(nullptr), mTree(nullptr) {}
+        reverse_iterator() FL_NOEXCEPT : mNode(nullptr), mTree(nullptr) {}
         reverse_iterator(RBNode* n, const RedBlackTree* t) : mNode(n), mTree(t) {}
 
         value_type& operator*() const {
@@ -648,7 +649,7 @@ public:
         using value_type = T;
         using iterator_category = fl::bidirectional_iterator_tag;
 
-        const_reverse_iterator() : mNode(nullptr), mTree(nullptr) {}
+        const_reverse_iterator() FL_NOEXCEPT : mNode(nullptr), mTree(nullptr) {}
         const_reverse_iterator(const RBNode* n, const RedBlackTree* t) : mNode(n), mTree(t) {}
         const_reverse_iterator(const reverse_iterator& it) : mNode(it.mNode), mTree(it.mTree) {}
 
@@ -705,14 +706,14 @@ public:
     RedBlackTree(const Compare& comp = Compare(), const Allocator& alloc = Allocator())
         : mRoot(nullptr), mSize(0), mComp(comp), mAlloc(alloc) {}
 
-    RedBlackTree(const RedBlackTree& other)
+    RedBlackTree(const RedBlackTree& other) FL_NOEXCEPT
         : mRoot(nullptr), mSize(other.mSize), mComp(other.mComp), mAlloc(other.mAlloc) {
         if (other.mRoot) {
             mRoot = copyTree(other.mRoot);
         }
     }
 
-    RedBlackTree& operator=(const RedBlackTree& other) {
+    RedBlackTree& operator=(const RedBlackTree& other) FL_NOEXCEPT {
         if (this != &other) {
             clear();
             mSize = other.mSize;
@@ -726,14 +727,14 @@ public:
     }
 
     // Move constructor
-    RedBlackTree(RedBlackTree&& other)
+    RedBlackTree(RedBlackTree&& other) FL_NOEXCEPT
         : mRoot(other.mRoot), mSize(other.mSize), mComp(fl::move(other.mComp)), mAlloc(fl::move(other.mAlloc)) {
         other.mRoot = nullptr;
         other.mSize = 0;
     }
 
     // Move assignment operator
-    RedBlackTree& operator=(RedBlackTree&& other) {
+    RedBlackTree& operator=(RedBlackTree&& other) FL_NOEXCEPT {
         if (this != &other) {
             clear();
             mRoot = other.mRoot;
@@ -746,7 +747,7 @@ public:
         return *this;
     }
 
-    ~RedBlackTree() {
+    ~RedBlackTree() FL_NOEXCEPT {
         clear();
     }
 
@@ -1047,18 +1048,18 @@ public:
     MapRedBlackTree(const Compare& comp = Compare(), const Allocator& alloc = Allocator())
         : mTree(PairCompare(comp), alloc) {}
 
-    MapRedBlackTree(const MapRedBlackTree& other) = default;
-    MapRedBlackTree& operator=(const MapRedBlackTree& other) = default;
+    MapRedBlackTree(const MapRedBlackTree& other) FL_NOEXCEPT = default;
+    MapRedBlackTree& operator=(const MapRedBlackTree& other) FL_NOEXCEPT = default;
 
     // Move constructor
-    MapRedBlackTree(MapRedBlackTree&& other) = default;
+    MapRedBlackTree(MapRedBlackTree&& other) FL_NOEXCEPT = default;
 
     // Move assignment operator
-    MapRedBlackTree& operator=(MapRedBlackTree&& other) = default;
+    MapRedBlackTree& operator=(MapRedBlackTree&& other) FL_NOEXCEPT = default;
 
     // Initializer list assignment operator
     // Replaces the contents of the map with the contents of the initializer list
-    MapRedBlackTree& operator=(fl::initializer_list<value_type> ilist) {
+    MapRedBlackTree& operator=(fl::initializer_list<value_type> ilist) FL_NOEXCEPT {
         clear();
         for (const auto& value : ilist) {
             mTree.insert(value);
@@ -1093,7 +1094,7 @@ public:
         }
     }
 
-    ~MapRedBlackTree() = default;
+    ~MapRedBlackTree() FL_NOEXCEPT = default;
 
     // Iterators
     iterator begin() { return mTree.begin(); }
@@ -1463,11 +1464,11 @@ public:
     SetRedBlackTree(const Compare& comp = Compare(), const Allocator& alloc = Allocator()) 
         : mTree(comp, alloc) {}
 
-    SetRedBlackTree(const SetRedBlackTree& other) = default;
-    SetRedBlackTree(SetRedBlackTree&& other) = default;
-    SetRedBlackTree& operator=(const SetRedBlackTree& other) = default;
-    SetRedBlackTree& operator=(SetRedBlackTree&& other) = default;
-    ~SetRedBlackTree() = default;
+    SetRedBlackTree(const SetRedBlackTree& other) FL_NOEXCEPT = default;
+    SetRedBlackTree(SetRedBlackTree&& other) FL_NOEXCEPT = default;
+    SetRedBlackTree& operator=(const SetRedBlackTree& other) FL_NOEXCEPT = default;
+    SetRedBlackTree& operator=(SetRedBlackTree&& other) FL_NOEXCEPT = default;
+    ~SetRedBlackTree() FL_NOEXCEPT = default;
 
     // Iterators
     const_iterator begin() const { return mTree.begin(); }

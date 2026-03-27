@@ -157,6 +157,7 @@
 #include "fl/math/filter/hampel_filter_impl.h"
 #include "fl/math/filter/savitzky_golay_filter_impl.h"
 #include "fl/math/filter/bilateral_filter_impl.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -261,7 +262,7 @@ class DCBlocker {
 template <typename T = float, int K = 2>
 class LeakyIntegrator {
   public:
-    LeakyIntegrator() = default;
+    LeakyIntegrator() FL_NOEXCEPT = default;
     explicit LeakyIntegrator(T initial) : mImpl(initial) {}
     FASTLED_FORCE_INLINE T update(T input) { return mImpl.update(input); }
     FASTLED_FORCE_INLINE T value() const { return mImpl.value(); }
@@ -420,7 +421,7 @@ class OneEuroFilter {
 template <typename T = float, fl::size N = 8>
 class MovingAverage {
   public:
-    MovingAverage() = default;
+    MovingAverage() FL_NOEXCEPT = default;
     explicit MovingAverage(fl::size capacity) : mImpl(capacity) {}
     FASTLED_FORCE_INLINE T update(T input) { return mImpl.update(input); }
     FASTLED_FORCE_INLINE T value() const { return mImpl.value(); }
@@ -455,7 +456,7 @@ class MovingAverage {
 template <typename T = float, fl::size N = 5>
 class MedianFilter {
   public:
-    MedianFilter() = default;
+    MedianFilter() FL_NOEXCEPT = default;
     explicit MedianFilter(fl::size capacity) : mImpl(capacity) {}
     FASTLED_FORCE_INLINE T update(T input) { return mImpl.update(input); }
     FASTLED_FORCE_INLINE T update(fl::span<const T> values) { return mImpl.update(values); }
@@ -488,7 +489,7 @@ class MedianFilter {
 template <typename T = float, fl::size N = 8>
 class WeightedMovingAverage {
   public:
-    WeightedMovingAverage() = default;
+    WeightedMovingAverage() FL_NOEXCEPT = default;
     explicit WeightedMovingAverage(fl::size capacity) : mImpl(capacity) {}
     FASTLED_FORCE_INLINE T update(T input) { return mImpl.update(input); }
     FASTLED_FORCE_INLINE T update(fl::span<const T> values) { return mImpl.update(values); }
@@ -523,7 +524,7 @@ class WeightedMovingAverage {
 template <typename T = float, fl::size N = 7>
 class TriangularFilter {
   public:
-    TriangularFilter() = default;
+    TriangularFilter() FL_NOEXCEPT = default;
     explicit TriangularFilter(fl::size capacity) : mImpl(capacity) {}
     FASTLED_FORCE_INLINE T update(T input) { return mImpl.update(input); }
     FASTLED_FORCE_INLINE T update(fl::span<const T> values) { return mImpl.update(values); }
@@ -557,7 +558,7 @@ class TriangularFilter {
 template <typename T = float, fl::size N = 5>
 class GaussianFilter {
   public:
-    GaussianFilter() = default;
+    GaussianFilter() FL_NOEXCEPT = default;
     explicit GaussianFilter(fl::size capacity) : mImpl(capacity) {}
     FASTLED_FORCE_INLINE T update(T input) { return mImpl.update(input); }
     FASTLED_FORCE_INLINE T update(fl::span<const T> values) { return mImpl.update(values); }
@@ -656,7 +657,7 @@ class HampelFilter {
 template <typename T = float, fl::size N = 5>
 class SavitzkyGolayFilter {
   public:
-    SavitzkyGolayFilter() = default;
+    SavitzkyGolayFilter() FL_NOEXCEPT = default;
     explicit SavitzkyGolayFilter(fl::size capacity) : mImpl(capacity) {}
     FASTLED_FORCE_INLINE T update(T input) { return mImpl.update(input); }
     FASTLED_FORCE_INLINE T update(fl::span<const T> values) { return mImpl.update(values); }

@@ -7,6 +7,7 @@
 #include "fl/stl/function.h"
 #include "fl/stl/optional.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -38,7 +39,7 @@ public:
      * Creates Server with no-op callbacks. Use setRequestSource/setResponseSink
      * to configure I/O, or call setRequestHandler() manually.
      */
-    Server();
+    Server() FL_NOEXCEPT;
 
     /**
      * @brief Construct with I/O callbacks
@@ -47,13 +48,13 @@ public:
      */
     Server(RequestSource source, ResponseSink sink);
 
-    virtual ~Server() = default;
+    virtual ~Server() FL_NOEXCEPT = default;
 
     // Non-copyable but movable
-    Server(const Server&) = delete;
-    Server& operator=(const Server&) = delete;
-    Server(Server&&) = default;
-    Server& operator=(Server&&) = default;
+    Server(const Server&) FL_NOEXCEPT = delete;
+    Server& operator=(const Server&) FL_NOEXCEPT = delete;
+    Server(Server&&) FL_NOEXCEPT = default;
+    Server& operator=(Server&&) FL_NOEXCEPT = default;
 
     /**
      * @brief Set request handler

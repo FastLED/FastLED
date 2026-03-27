@@ -65,7 +65,7 @@ struct allocator_traits {
 // Interface class for malloc/free test hooks
 class MallocFreeHook {
 public:
-    virtual ~MallocFreeHook() = default;
+    virtual ~MallocFreeHook() FL_NOEXCEPT = default;
     virtual void onMalloc(void* ptr, fl::size size) = 0;
     virtual void onFree(void* ptr) = 0;
 };
@@ -247,7 +247,7 @@ public:
         template <typename U>
         void destroy(U* p) FL_NOEXCEPT {
             if (p == nullptr) return;
-            p->~U();
+            p->~U() FL_NOEXCEPT;
         }
 };
 
@@ -494,7 +494,7 @@ private:
 
         slab->memory = static_cast<u8*>(Malloc(SLAB_MEMORY_SIZE));
         if (!slab->memory) {
-            slab->~Slab();
+            slab->~Slab() FL_NOEXCEPT;
             Free(slab);
             return nullptr;
         }
@@ -680,7 +680,7 @@ public:
     void cleanup() FL_NOEXCEPT {
         while (mSlabs) {
             Slab* next = mSlabs->next;
-            mSlabs->~Slab();
+            mSlabs->~Slab() FL_NOEXCEPT;
             Free(mSlabs);
             mSlabs = next;
         }
@@ -971,7 +971,7 @@ public:
     void clear() FL_NOEXCEPT {
         // Destroy inlined objects
         for (fl::size i = 0; i < mInlinedUsed; ++i) {
-            get_inlined_ptr()[i].~T();
+            get_inlined_ptr()[i].~T() FL_NOEXCEPT;
         }
         mInlinedUsed = 0;
         mFreeBits.reset();

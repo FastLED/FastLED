@@ -17,6 +17,7 @@
 #include "platforms/shared/spi_bitbang/spi_block_8.h" // ok platform headers
 #include "platforms/shared/spi_bitbang/spi_block_16.h" // ok platform headers
 #include "platforms/shared/spi_bitbang/spi_block_32.h" // ok platform headers
+#include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep
 
 namespace fl {
@@ -51,7 +52,7 @@ struct ParallelDevice::Impl {
         , backend_width(0) {
     }
 
-    ~Impl() {
+    ~Impl() FL_NOEXCEPT {
         if (initialized && backend) {
             releaseBackend();
         }
@@ -145,7 +146,7 @@ ParallelDevice::ParallelDevice(const Config& config)
     FL_DBG("ParallelDevice: Created with " << num_pins << " GPIO pins");
 }
 
-ParallelDevice::~ParallelDevice() {
+ParallelDevice::~ParallelDevice() FL_NOEXCEPT {
     if (pImpl && pImpl->initialized) {
         end();
     }

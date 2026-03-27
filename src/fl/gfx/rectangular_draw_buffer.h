@@ -26,11 +26,11 @@
 namespace fl {
 
 struct DrawItem {
-    DrawItem() = default;
+    DrawItem() FL_NOEXCEPT = default;
     DrawItem(u8 pin, u16 numLeds, bool is_rgbw);
     
     // Rule of 5 for POD data
-    DrawItem(const DrawItem &other) = default;
+    DrawItem(const DrawItem &other) FL_NOEXCEPT = default;
     DrawItem &operator=(const DrawItem &other) = default;
     DrawItem(DrawItem &&other) FL_NOEXCEPT = default;
     DrawItem &operator=(DrawItem &&other) FL_NOEXCEPT = default;
@@ -47,14 +47,14 @@ struct DrawItem {
 class RectangularDrawBuffer {
   public:
 
-    RectangularDrawBuffer()
+    RectangularDrawBuffer() FL_NOEXCEPT
         : mAllLedsBufferUint8Size(0)
         , mDrawListChangedThisFrame(false)
         , mQueueState(IDLE)
     {
         mPinToLedSegment.reserve(50);
     }
-    ~RectangularDrawBuffer() = default;
+    ~RectangularDrawBuffer() FL_NOEXCEPT = default;
 
     fl::span<u8> getLedsBufferBytesForPin(u8 pin,
                                                bool clear_first = true);

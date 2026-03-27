@@ -4,6 +4,7 @@
 
 #include "fl/math/math.h"
 #include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -33,7 +34,7 @@ inline float time_alphaf(u32 now, u32 start, u32 end) {
 
 class TimeAlpha {
   public:
-    virtual ~TimeAlpha() = default;
+    virtual ~TimeAlpha() FL_NOEXCEPT = default;
     virtual void trigger(u32 now) = 0;
     virtual u8 update8(u32 now) = 0;
     virtual u16 update16(u32 now) {

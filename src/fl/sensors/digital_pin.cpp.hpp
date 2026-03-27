@@ -8,13 +8,14 @@
 
 // Include fl/pin.h for pin API (includes platform implementations)
 #include "fl/system/pin.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
 class DigitalPinImpl {
   public:
     DigitalPinImpl(int pin) : mPin(pin) {}
-    ~DigitalPinImpl() = default;
+    ~DigitalPinImpl() FL_NOEXCEPT = default;
 
     void setPinMode(DigitalPin::Mode mode) {
         fl::PinMode pinMode;
@@ -53,10 +54,10 @@ class DigitalPinImpl {
 DigitalPin::DigitalPin(int pin) {
     mImpl = fl::make_shared<DigitalPinImpl>(pin);
 }
-DigitalPin::~DigitalPin() = default;
+DigitalPin::~DigitalPin() FL_NOEXCEPT = default;
 DigitalPin::DigitalPin(const DigitalPin &other) = default;
 
-DigitalPin& DigitalPin::operator=(const DigitalPin &other) = default;
+DigitalPin& DigitalPin::operator=(const DigitalPin &other) FL_NOEXCEPT = default;
 
 void DigitalPin::setPinMode(Mode mode) {
     mImpl->setPinMode(mode);

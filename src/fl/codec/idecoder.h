@@ -8,6 +8,7 @@
 #include "fl/stl/function.h"
 #include "fl/audio/audio.h"
 #include "fl/fx/frame.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -33,7 +34,7 @@ using AudioFrameCallback = fl::function<void(const audio::Sample&)>;
 // - Future codec implementations
 class IDecoder {
 public:
-    virtual ~IDecoder() = default;
+    virtual ~IDecoder() FL_NOEXCEPT = default;
 
     // Lifecycle methods
     virtual bool begin(fl::filebuf_ptr stream) = 0;

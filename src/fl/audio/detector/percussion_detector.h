@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/stl/function.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -8,8 +9,8 @@ namespace detector {
 
 class Percussion {
 public:
-    Percussion();
-    ~Percussion();
+    Percussion() FL_NOEXCEPT;
+    ~Percussion() FL_NOEXCEPT;
 
     void update(shared_ptr<Context> context);
     void reset();

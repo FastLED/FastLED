@@ -20,6 +20,7 @@ threshold. The first version is much faster and should be used in most cases.
 #include "fl/math/geometry.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -33,11 +34,11 @@ template <typename NumberT = float> class LineSimplifier {
     using Point = fl::vec2<NumberT>;
     using VectorPoint = fl::vector<Point>;
 
-    LineSimplifier() : mMinDistance(FL_EPSILON_F) {}
-    LineSimplifier(const LineSimplifier &other) = default;
-    LineSimplifier &operator=(const LineSimplifier &other) = default;
-    LineSimplifier(LineSimplifier &&other) = default;
-    LineSimplifier &operator=(LineSimplifier &&other) = default;
+    LineSimplifier() FL_NOEXCEPT : mMinDistance(FL_EPSILON_F) {}
+    LineSimplifier(const LineSimplifier &other) FL_NOEXCEPT = default;
+    LineSimplifier &operator=(const LineSimplifier &other) FL_NOEXCEPT = default;
+    LineSimplifier(LineSimplifier &&other) FL_NOEXCEPT = default;
+    LineSimplifier &operator=(LineSimplifier &&other) FL_NOEXCEPT = default;
 
     explicit LineSimplifier(NumberT e) : mMinDistance(e) {}
     void setMinimumDistance(NumberT eps) { mMinDistance = eps; }
@@ -234,7 +235,7 @@ template <typename NumberT = float> class LineSimplifier {
 
 template <typename NumberT = float> class LineSimplifierExact {
   public:
-    LineSimplifierExact() = default;
+    LineSimplifierExact() FL_NOEXCEPT = default;
     using Point = vec2<NumberT>;
 
     LineSimplifierExact(int count) : mCount(count) {}

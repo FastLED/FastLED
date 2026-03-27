@@ -17,6 +17,7 @@
 #include "fl/gfx/tile2x2.h"  // IWYU pragma: keep
 #include "fl/math/transform.h"
 #include "fl/gfx/xypath_impls.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -92,7 +93,7 @@ class XYPath {
     XYPath(XYPathGeneratorPtr path,
            TransformFloat transform = TransformFloat());
 
-    virtual ~XYPath();
+    virtual ~XYPath() FL_NOEXCEPT;
     vec2f at(float alpha);
     Tile2x2_u8 at_subpixel(float alpha);
 

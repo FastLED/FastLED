@@ -89,6 +89,7 @@
 
 #include "fl/stl/function.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/noexcept.h"
 
 // Note: OTA implementation uses Arduino/ESP-IDF standard types
 // No FastLED type headers needed here to avoid conflicts
@@ -123,10 +124,10 @@ enum class Service : u8 {
 class OTA {
 public:
     /// @brief Default constructor (lazy initialization)
-    OTA();
+    OTA() FL_NOEXCEPT;
 
     /// @brief Destructor - cleans up resources
-    ~OTA();
+    ~OTA() FL_NOEXCEPT;
 
     // ========== Network Setup Methods ==========
 

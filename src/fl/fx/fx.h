@@ -8,6 +8,7 @@
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/stl/string.h"  // IWYU pragma: keep
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -48,7 +49,7 @@ class Fx {
     u16 getNumLeds() const { return mNumLeds; }
 
   protected:
-    virtual ~Fx() {} // Protected destructor
+    virtual ~Fx() FL_NOEXCEPT {} // Protected destructor
     u16 mNumLeds;
 };
 

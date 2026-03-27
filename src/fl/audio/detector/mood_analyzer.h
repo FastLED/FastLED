@@ -6,6 +6,7 @@
 #include "fl/audio/audio_detector.h"
 #include "fl/stl/function.h"
 #include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -28,7 +29,7 @@ struct Mood {
         NEUTRAL             // Near center, no strong mood
     };
 
-    Mood() : valence(0.0f), arousal(0.0f), confidence(0.0f), timestamp(0), duration(0) {}
+    Mood() FL_NOEXCEPT : valence(0.0f), arousal(0.0f), confidence(0.0f), timestamp(0), duration(0) {}
 
     bool isValid() const { return confidence > 0.0f; }
 
@@ -62,8 +63,8 @@ struct Mood {
 
 class MoodAnalyzer : public Detector {
 public:
-    MoodAnalyzer();
-    ~MoodAnalyzer() override;
+    MoodAnalyzer() FL_NOEXCEPT;
+    ~MoodAnalyzer() FL_NOEXCEPT override;
 
     // Detector interface
     void update(shared_ptr<Context> context) override;

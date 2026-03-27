@@ -5,6 +5,7 @@
 #include "fl/stl/algorithm.h"
 #include "fl/stl/cstring.h"
 #include "fl/system/log.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -84,6 +85,6 @@ void ChannelData::writeWithPadding(fl::span<u8> dst) {
     }
 }
 
-ChannelData::~ChannelData() = default;
+ChannelData::~ChannelData() FL_NOEXCEPT = default;
 
 }  // namespace fl

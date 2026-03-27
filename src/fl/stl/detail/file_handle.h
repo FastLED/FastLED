@@ -26,7 +26,7 @@ enum class seek_dir {
 // Platform implementations subclass this; consumers should prefer fl::ifstream.
 class filebuf {
 public:
-    virtual ~filebuf() = default;
+    virtual ~filebuf() FL_NOEXCEPT = default;
 
     // Core file operations (pure virtual)
     virtual bool is_open() const = 0;
@@ -92,14 +92,14 @@ private:
     void clearErrorState();
 
 public:
-    posix_filebuf() : mFile(nullptr), mLastError(0) {}
+    posix_filebuf() FL_NOEXCEPT : mFile(nullptr), mLastError(0) {}
 
     explicit posix_filebuf(const char* path, const char* mode);
 
-    ~posix_filebuf() override;
+    ~posix_filebuf() FL_NOEXCEPT override;
 
     // Non-copyable
-    posix_filebuf(const posix_filebuf&) = delete;
+    posix_filebuf(const posix_filebuf&) FL_NOEXCEPT = delete;
     posix_filebuf& operator=(const posix_filebuf&) = delete;
 
     // Moveable

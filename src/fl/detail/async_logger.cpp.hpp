@@ -8,6 +8,7 @@
 #include "fl/system/log.h"  // For FL_ERROR macro
 #include "fl/task/task.h"  // For fl::task
 #include "fl/task/scheduler.h"  // For fl::task::Scheduler
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -33,7 +34,7 @@ namespace detail {
         fl::size mMessagesPerTick;         // Max messages to flush per timer tick
         bool mEnabled;                     // Whether background flushing is enabled
 
-        BackgroundFlushState()
+        BackgroundFlushState() FL_NOEXCEPT
             : mNeedsFlush(false)
             , mTimerHandle()  // Default constructor
             , mMessagesPerTick(5)

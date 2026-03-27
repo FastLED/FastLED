@@ -2,6 +2,7 @@
 #include "fl/audio/audio_context.h"
 #include "fl/math/math.h"
 #include "fl/stl/algorithm.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -22,7 +23,7 @@ Beat::Beat()
     mPreviousMagnitudes.resize(16, 0.0f);
 }
 
-Beat::~Beat() = default;
+Beat::~Beat() FL_NOEXCEPT = default;
 
 void Beat::update(shared_ptr<Context> context) {
     // Use 30 Hz min frequency so bass bins actually cover sub-bass (20-60 Hz).

@@ -2,6 +2,7 @@
 
 #include "fl/stl/int.h"
 #include "fl/stl/span.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -72,9 +73,9 @@ struct MultiBandBeatDetectorConfig {
 /// @endcode
 class MultiBandBeat {
 public:
-    MultiBandBeat();
+    MultiBandBeat() FL_NOEXCEPT;
     explicit MultiBandBeat(const MultiBandBeatDetectorConfig& config);
-    ~MultiBandBeat();
+    ~MultiBandBeat() FL_NOEXCEPT;
 
     /// Configure the multi-band beat detector
     void configure(const MultiBandBeatDetectorConfig& config);

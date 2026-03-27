@@ -51,6 +51,7 @@
 #include "fl/stl/cstddef.h"     // for size_t
 #include "fl/stl/stdint.h"      // for u8
 #include "fl/stl/vector.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace task {
@@ -86,7 +87,7 @@ int& await_depth_tls();
 /// @brief Generic task runner interface
 class Runner {
 public:
-    virtual ~Runner() = default;
+    virtual ~Runner() FL_NOEXCEPT = default;
 
     /// Update this runner (called during task pumping)
     virtual void update() = 0;

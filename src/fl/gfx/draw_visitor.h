@@ -16,7 +16,7 @@ struct XYDrawComposited {
     XYDrawComposited(const CRGB &color, const XYMap &xymap, fl::span<CRGB> out);
 
     // Copy constructor (assignment deleted due to const members)
-    XYDrawComposited(const XYDrawComposited &other) = default;
+    XYDrawComposited(const XYDrawComposited &other) FL_NOEXCEPT = default;
     XYDrawComposited &operator=(const XYDrawComposited &other) = delete;
 
     // Move constructor (assignment deleted due to const members)
@@ -34,7 +34,7 @@ struct XYDrawGradient {
     XYDrawGradient(const Gradient &gradient, const XYMap &xymap, fl::span<CRGB> out);
 
     // Copy constructor (assignment deleted due to const members)
-    XYDrawGradient(const XYDrawGradient &other) = default;
+    XYDrawGradient(const XYDrawGradient &other) FL_NOEXCEPT = default;
     XYDrawGradient &operator=(const XYDrawGradient &other) = delete;
 
     // Move constructor (assignment deleted due to const members)

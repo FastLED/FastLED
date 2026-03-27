@@ -3,6 +3,7 @@
 #include "fl/stl/int.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/span.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -52,9 +53,9 @@ struct SignalConditionerConfig {
 /// @endcode
 class SignalConditioner {
 public:
-    SignalConditioner();
+    SignalConditioner() FL_NOEXCEPT;
     explicit SignalConditioner(const SignalConditionerConfig& config);
-    ~SignalConditioner();
+    ~SignalConditioner() FL_NOEXCEPT;
 
     /// Configure the signal conditioner
     void configure(const SignalConditionerConfig& config);

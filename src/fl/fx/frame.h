@@ -11,6 +11,7 @@
 #include "fl/stl/allocator.h"
 #include "fl/gfx/draw_mode.h"
 #include "fl/codec/pixel.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -32,12 +33,12 @@ class Frame {
     Frame(fl::u8* pixels, fl::u16 width, fl::u16 height, PixelFormat format, fl::u32 timestamp = 0);
 
     // Copy constructor
-    Frame(const Frame& other);
+    Frame(const Frame& other) FL_NOEXCEPT;
 
     // Delete copy assignment operator (can't assign due to const member)
-    Frame& operator=(const Frame& other) = delete;
+    Frame& operator=(const Frame& other) FL_NOEXCEPT = delete;
 
-    ~Frame();
+    ~Frame() FL_NOEXCEPT;
     fl::span<CRGB> rgb() { return fl::span<CRGB>(mRgb.data(), mPixelsCount); }
     fl::span<const CRGB> rgb() const { return fl::span<const CRGB>(mRgb.data(), mPixelsCount); }
     size_t size() const { return mPixelsCount; }

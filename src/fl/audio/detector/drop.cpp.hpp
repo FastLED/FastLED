@@ -4,6 +4,7 @@
 #include "fl/audio/audio_context.h"
 #include "fl/math/math.h"
 #include "fl/system/log.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -24,7 +25,7 @@ DropDetector::DropDetector()
     mLastDrop.timestamp = 0;  // Initialize to allow immediate first drop
 }
 
-DropDetector::~DropDetector() = default;
+DropDetector::~DropDetector() FL_NOEXCEPT = default;
 
 void DropDetector::update(shared_ptr<Context> context) {
     if (!context) {

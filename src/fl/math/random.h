@@ -2,6 +2,7 @@
 
 #include "fl/stl/int.h"
 #include "fl/math/random8.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace math {
@@ -26,7 +27,7 @@ public:
     typedef u32 result_type;
 
     /// Default constructor - uses current global random seed
-    random() : mSeed(random16_get_seed()) {}
+    random() FL_NOEXCEPT : mSeed(random16_get_seed()) {}
 
     /// Constructor with explicit seed
     explicit random(u16 seed) : mSeed(seed) {}

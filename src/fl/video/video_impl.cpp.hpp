@@ -10,6 +10,7 @@
 #include "fl/video/frame_interpolator.h"
 #include "fl/video/pixel_stream.h"
 #include "crgb.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace video {
@@ -51,7 +52,7 @@ bool VideoImpl::needsFrame(fl::u32 now) const {
     return out;
 }
 
-VideoImpl::~VideoImpl() { end(); }
+VideoImpl::~VideoImpl() FL_NOEXCEPT { end(); }
 
 void VideoImpl::begin(filebuf_ptr h) {
     end();

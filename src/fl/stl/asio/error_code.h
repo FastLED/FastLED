@@ -3,6 +3,7 @@
 #include "fl/task/promise.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/string.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace asio {
@@ -31,7 +32,7 @@ struct error_code {
     errc code;
     fl::string message; // optional human-readable detail
 
-    error_code() : code(errc::success) {}
+    error_code() FL_NOEXCEPT : code(errc::success) {}
     error_code(errc c) : code(c) {}
     error_code(errc c, const fl::string &msg) : code(c), message(msg) {}
     error_code(errc c, const char *msg) : code(c), message(msg) {}

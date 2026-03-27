@@ -47,7 +47,7 @@ public:
     static ChannelPtr create(const ChannelConfig& config);
 
     /// @brief Destructor
-    virtual ~Channel();
+    virtual ~Channel() FL_NOEXCEPT;
 
     /// @brief Get the channel ID
     /// @return Channel ID (always increments, starts at 0)
@@ -203,10 +203,10 @@ private:
             EOrder rgbOrder, const ChannelOptions& options);
 
     // Non-copyable, non-movable
-    Channel(const Channel&) = delete;
-    Channel& operator=(const Channel&) = delete;
-    Channel(Channel&&) = delete;
-    Channel& operator=(Channel&&) = delete;
+    Channel(const Channel&) FL_NOEXCEPT = delete;
+    Channel& operator=(const Channel&) FL_NOEXCEPT = delete;
+    Channel(Channel&&) FL_NOEXCEPT = delete;
+    Channel& operator=(Channel&&) FL_NOEXCEPT = delete;
 
     static i32 nextId();
     static fl::string makeName(i32 id, const fl::optional<fl::string>& configName = fl::optional<fl::string>());

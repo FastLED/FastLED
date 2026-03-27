@@ -7,6 +7,7 @@
 #include "fl/stl/algorithm.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/cctype.h"
+#include "fl/stl/noexcept.h"
 namespace fl {
 namespace {
 
@@ -66,7 +67,7 @@ HttpRequestParser::HttpRequestParser()
 {
 }
 
-HttpRequestParser::~HttpRequestParser() = default;
+HttpRequestParser::~HttpRequestParser() FL_NOEXCEPT = default;
 
 void HttpRequestParser::feed(fl::span<const u8> data) {
     mBuffer.insert(mBuffer.end(), data.begin(), data.end());
@@ -294,7 +295,7 @@ HttpResponseParser::HttpResponseParser()
 {
 }
 
-HttpResponseParser::~HttpResponseParser() = default;
+HttpResponseParser::~HttpResponseParser() FL_NOEXCEPT = default;
 
 void HttpResponseParser::feed(fl::span<const u8> data) {
     mBuffer.insert(mBuffer.end(), data.begin(), data.end());

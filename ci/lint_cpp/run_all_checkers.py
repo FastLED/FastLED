@@ -54,6 +54,7 @@ from ci.lint_cpp.no_using_namespace_fl_in_headers import UsingNamespaceFlChecker
 from ci.lint_cpp.numeric_limit_macros_checker import NumericLimitMacroChecker
 from ci.lint_cpp.pch_file_checker import check as check_pch_files
 from ci.lint_cpp.platform_includes_checker import PlatformIncludesChecker
+from ci.lint_cpp.noexcept_special_members_checker import NoexceptSpecialMembersChecker
 from ci.lint_cpp.platform_pragma_checker import PlatformPragmaChecker
 from ci.lint_cpp.pragma_once_checker import PragmaOnceChecker
 from ci.lint_cpp.raw_noexcept_checker import RawNoexceptChecker
@@ -260,6 +261,7 @@ def create_checkers(
         # namespace for backward compatibility. Using inline namespace math
         # causes cascading ambiguity with fl::detail, fl::simd, etc.
         EnumClassChecker(),  # Checks for plain enum — use enum class for type safety
+        NoexceptSpecialMembersChecker(),  # Checks special member functions have FL_NOEXCEPT
     ]
 
     # lib8tion/ directory checkers with STRICT enforcement

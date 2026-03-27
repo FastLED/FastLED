@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/stl/vector.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -9,8 +10,8 @@ namespace detector {
 class Pitch {
 public:
     // Constructors and destructor
-    Pitch();
-    ~Pitch();
+    Pitch() FL_NOEXCEPT;
+    ~Pitch() FL_NOEXCEPT;
 
     // Update method
     void update(shared_ptr<Context> context);

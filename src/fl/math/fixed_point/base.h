@@ -12,6 +12,7 @@
 #include "fl/math/sin32.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/type_traits.h"
+#include "fl/stl/noexcept.h"
 
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
@@ -42,7 +43,7 @@ class fixed_point_base {
 
     // ---- Construction ------------------------------------------------------
 
-    constexpr fixed_point_base() = default;
+    constexpr fixed_point_base() FL_NOEXCEPT = default;
 
     explicit constexpr fixed_point_base(float f)
         : mValue(static_cast<raw_type>(f * (static_cast<raw_type>(1) << FRAC_BITS))) {}

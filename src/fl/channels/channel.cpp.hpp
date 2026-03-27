@@ -23,6 +23,7 @@
 #include "fl/system/engine_events.h"
 #include "fl/math/xymap.h"
 #include "fl/stl/singleton.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -217,7 +218,7 @@ Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds
     mChannelData = ChannelData::create(mChipset);
 }
 
-Channel::~Channel() {
+Channel::~Channel() FL_NOEXCEPT {
     auto& events = ChannelEvents::instance();
     events.onChannelBeginDestroy(*this);
 }
@@ -428,7 +429,7 @@ void Channel::init() {
 namespace {
 class StubChannelEngine : public IChannelDriver {
 public:
-    virtual ~StubChannelEngine() = default;
+    virtual ~StubChannelEngine() FL_NOEXCEPT = default;
 
     virtual bool canHandle(const ChannelDataPtr& data) const override {
         (void)data;

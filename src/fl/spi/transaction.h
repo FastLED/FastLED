@@ -72,14 +72,14 @@ private:
     friend class Device;
 
     // Private constructor for Device to create transactions
-    Transaction();
+    Transaction() FL_NOEXCEPT;
 
     struct Impl;
     fl::unique_ptr<Impl> pImpl;
 
     // Non-copyable
-    Transaction(const Transaction&) = delete;
-    Transaction& operator=(const Transaction&) = delete;
+    Transaction(const Transaction&) FL_NOEXCEPT = delete;
+    Transaction& operator=(const Transaction&) FL_NOEXCEPT = delete;
 };
 
 } // namespace spi

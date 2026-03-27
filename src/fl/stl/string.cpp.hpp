@@ -17,6 +17,7 @@
 #if FL_STRING_NEEDS_ARDUINO_CONVERSION
 // IWYU pragma: begin_keep
 #include "fl/system/arduino.h"
+#include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep  // ok header
 #endif
 
@@ -139,7 +140,7 @@ string::string(const ::String &str) {
     copy(str.c_str(), strlen(str.c_str()));
 }
 
-string &string::operator=(const ::String &str) {
+string &string::operator=(const ::String &str) FL_NOEXCEPT {
     copy(str.c_str(), strlen(str.c_str()));
     return *this;
 }

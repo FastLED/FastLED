@@ -13,6 +13,7 @@
 #include "fl/spi/write_result.h"
 // IWYU pragma: begin_keep
 #include "platforms/shared/spi_types.h"  // ok platform headers
+#include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep  // ok platform headers
 
 namespace fl {
@@ -56,7 +57,7 @@ public:
         u32 clock_speed_hz;        ///< Clock speed in Hz (0xffffffff = as fast as possible)
         u8 mode;                   ///< SPI mode (CPOL/CPHA)
 
-        Config() : clock_pin(0xFF), clock_speed_hz(0xffffffff), mode(0) {}
+        Config() FL_NOEXCEPT : clock_pin(0xFF), clock_speed_hz(0xffffffff), mode(0) {}
     };
 
     /// @brief Construct multi-lane device
@@ -64,13 +65,13 @@ public:
     explicit MultiLaneDevice(const Config& config);
 
     /// @brief Destructor - releases hardware resources
-    ~MultiLaneDevice();
+    ~MultiLaneDevice() FL_NOEXCEPT;
 
     // Disable copy/move
-    MultiLaneDevice(const MultiLaneDevice&) = delete;
-    MultiLaneDevice& operator=(const MultiLaneDevice&) = delete;
-    MultiLaneDevice(MultiLaneDevice&&) = delete;
-    MultiLaneDevice& operator=(MultiLaneDevice&&) = delete;
+    MultiLaneDevice(const MultiLaneDevice&) FL_NOEXCEPT = delete;
+    MultiLaneDevice& operator=(const MultiLaneDevice&) FL_NOEXCEPT = delete;
+    MultiLaneDevice(MultiLaneDevice&&) FL_NOEXCEPT = delete;
+    MultiLaneDevice& operator=(MultiLaneDevice&&) FL_NOEXCEPT = delete;
 
     // ========== Initialization ==========
 

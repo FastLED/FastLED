@@ -303,7 +303,7 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     string(const std::string& str) : StrN<FASTLED_STR_INLINED_SIZE>() {  // okay std namespace
         copy(str.c_str(), str.size());
     }
-    string& operator=(const std::string& str) {  // okay std namespace
+    string& operator=(const std::string& str) FL_NOEXCEPT {  // okay std namespace
         copy(str.c_str(), str.size());
         return *this;
     }
@@ -315,7 +315,7 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
 
 #if FL_STRING_NEEDS_ARDUINO_CONVERSION
     string(const ::String& str);
-    string& operator=(const ::String& str);
+    string& operator=(const ::String& str) FL_NOEXCEPT;
     string& append(const ::String& str);
 #endif
 

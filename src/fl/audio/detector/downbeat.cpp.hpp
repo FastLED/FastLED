@@ -2,6 +2,7 @@
 #include "fl/audio/audio_context.h"
 #include "fl/math/math.h"
 #include "fl/stl/array.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -32,7 +33,7 @@ Downbeat::Downbeat()
     mOwnsBeatDetector = true;
 }
 
-Downbeat::~Downbeat() = default;
+Downbeat::~Downbeat() FL_NOEXCEPT = default;
 
 void Downbeat::update(shared_ptr<Context> context) {
     // Update Beat if we own it

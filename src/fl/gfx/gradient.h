@@ -16,11 +16,11 @@ class GradientInlined;
 class Gradient {
   public:
     using GradientFunction = fl::function<CRGB(u8 index)>;
-    Gradient() = default;
+    Gradient() FL_NOEXCEPT = default;
     Gradient(const GradientInlined &other);
 
     template <typename T> Gradient(T *palette);
-    Gradient(const Gradient &other);
+    Gradient(const Gradient &other) FL_NOEXCEPT;
     Gradient &operator=(const Gradient &other);
 
     Gradient(Gradient &&other) FL_NOEXCEPT;
@@ -46,12 +46,12 @@ class GradientInlined {
     using GradientFunction = fl::function<CRGB(u8 index)>;
     using GradientVariant =
         variant<CRGBPalette16, CRGBPalette32, CRGBPalette256, GradientFunction>;
-    GradientInlined() = default;
+    GradientInlined() FL_NOEXCEPT = default;
 
     template <typename T> GradientInlined(const T &palette) { set(palette); }
 
-    GradientInlined(const GradientInlined &other) = default;
-    GradientInlined &operator=(const GradientInlined &other) = default;
+    GradientInlined(const GradientInlined &other) FL_NOEXCEPT = default;
+    GradientInlined &operator=(const GradientInlined &other) FL_NOEXCEPT = default;
 
     void set(const CRGBPalette16 &palette) { mVariant = palette; }
     void set(const CRGBPalette32 &palette) { mVariant = palette; }

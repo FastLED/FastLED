@@ -2,6 +2,7 @@
 
 #include "fl/stl/flat_map.h"
 #include "fl/stl/mutex.h"
+#include "fl/stl/noexcept.h"
 namespace fl {
 
 /**
@@ -30,7 +31,7 @@ public:
     /**
      * Default constructor - creates a new ID tracker instance
      */
-    IdTracker() = default;
+    IdTracker() FL_NOEXCEPT = default;
 
     /**
      * Get existing ID for pointer, or create a new one if not found.
@@ -76,10 +77,10 @@ public:
 
     // Non-copyable and non-movable for thread safety
     // (Each instance should have its own independent state)
-    IdTracker(const IdTracker&) = delete;
-    IdTracker& operator=(const IdTracker&) = delete;
-    IdTracker(IdTracker&&) = delete;
-    IdTracker& operator=(IdTracker&&) = delete;
+    IdTracker(const IdTracker&) FL_NOEXCEPT = delete;
+    IdTracker& operator=(const IdTracker&) FL_NOEXCEPT = delete;
+    IdTracker(IdTracker&&) FL_NOEXCEPT = delete;
+    IdTracker& operator=(IdTracker&&) FL_NOEXCEPT = delete;
 
 private:
 

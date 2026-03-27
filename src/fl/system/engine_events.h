@@ -7,6 +7,7 @@
 #include "fl/stl/string.h"  // IWYU pragma: keep
 #include "fl/stl/int.h"
 #include "fl/system/sketch_macros.h"
+#include "fl/stl/noexcept.h"
 
 #ifndef FASTLED_HAS_ENGINE_EVENTS
 #define FASTLED_HAS_ENGINE_EVENTS SKETCH_HAS_LOTS_OF_MEMORY
@@ -24,8 +25,8 @@ class EngineEvents {
         // Note that the subclass must call EngineEvents::addListener(this) to
         // start listening. In the subclass destructor, the subclass should call
         // EngineEvents::removeListener(this).
-        Listener();
-        virtual ~Listener();
+        Listener() FL_NOEXCEPT;
+        virtual ~Listener() FL_NOEXCEPT;
         virtual void onBeginFrame() {}
         virtual void onEndShowLeds() {}
         virtual void onEndFrame() {}
@@ -119,8 +120,8 @@ class EngineEvents {
     }
 
     // Needed by fl::vector<T>
-    EngineEvents();
-    ~EngineEvents();
+    EngineEvents() FL_NOEXCEPT;
+    ~EngineEvents() FL_NOEXCEPT;
 
   private:
     // Safe to add a listeners during a callback.
@@ -137,7 +138,7 @@ class EngineEvents {
     bool _hasListener(Listener *listener);
 #if FASTLED_HAS_ENGINE_EVENTS
     struct Pair {
-        Pair() = default;
+        Pair() FL_NOEXCEPT = default;
         Listener *listener = nullptr;
         int priority = 0;
         Pair(Listener *listener, int priority)

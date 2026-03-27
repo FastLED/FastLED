@@ -11,6 +11,7 @@
 #include "fl/stl/detail/memory_file_handle.h"
 #include "fl/codec/pixel.h"
 #include "fl/stl/chrono.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -65,7 +66,7 @@ public:
         mDriver = fl::third_party::createTJpgInstanceDecoder();
     }
 
-    ~Impl() = default;
+    ~Impl() FL_NOEXCEPT = default;
 
     bool begin(fl::filebuf_ptr stream) {
         if (!mDriver) {
@@ -214,7 +215,7 @@ public:
 JpegDecoder::JpegDecoder(const JpegConfig& config)
     : mImpl(fl::make_unique<Impl>(config)) {}
 
-JpegDecoder::~JpegDecoder() = default;
+JpegDecoder::~JpegDecoder() FL_NOEXCEPT = default;
 
 bool JpegDecoder::begin(fl::filebuf_ptr stream) {
     return mImpl->begin(stream);

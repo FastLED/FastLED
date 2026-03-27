@@ -6,6 +6,7 @@
 #include "fl/stl/detail/string_holder.h"
 #include "fl/stl/cstring.h"  // For memcpy
 #include "fl/stl/malloc.h"   // For fl::malloc, fl::free, fl::realloc
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -35,7 +36,7 @@ StringHolder::StringHolder(const char *str, size length)
     mData[mLength] = '\0';
 }
 
-StringHolder::~StringHolder() {
+StringHolder::~StringHolder() FL_NOEXCEPT {
     fl::free(mData); // Release the memory
 }
 

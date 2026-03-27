@@ -13,6 +13,7 @@
 #include "fl/stl/bit_cast.h"
 #include "fl/channels/options.h"
 #include "fl/stl/span.h"
+#include "fl/stl/noexcept.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -81,7 +82,7 @@ public:
     void setEnabled(bool enabled) { mEnabled = enabled; }
     bool getEnabled() { return mEnabled; }
 
-    CLEDController();
+    CLEDController() FL_NOEXCEPT;
     // If we added virtual to the AVR boards then we are going to add 600 bytes of memory to the binary
     // flash size. This is because the virtual destructor pulls in malloc and free, which are the largest
     // Testing shows that this virtual destructor adds a 600 bytes to the binary on
@@ -89,7 +90,7 @@ public:
     // Attiny85:
     //   With CLEDController destructor virtual: 11018 bytes to binary.
     //   Without CLEDController destructor virtual: 10666 bytes to binary.
-    VIRTUAL_IF_NOT_AVR ~CLEDController();
+    VIRTUAL_IF_NOT_AVR ~CLEDController() FL_NOEXCEPT;
 
     Rgbw getRgbw() const { return mSettings.mRgbw; }
 

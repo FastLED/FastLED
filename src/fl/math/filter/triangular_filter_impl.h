@@ -4,6 +4,7 @@
 #include "fl/system/log.h"
 #include "fl/math/math.h"
 #include "fl/stl/span.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace detail {
@@ -13,7 +14,7 @@ class TriangularFilterImpl {
     static_assert(N == 0 || (N % 2 == 1),
                   "TriangularFilter: N must be odd for a symmetric tent shape");
   public:
-    TriangularFilterImpl() : mLastValue(T(0)) {}
+    TriangularFilterImpl() FL_NOEXCEPT : mLastValue(T(0)) {}
     explicit TriangularFilterImpl(fl::size capacity)
         : mBuf(capacity), mLastValue(T(0)) {
         if (capacity % 2 == 0) {

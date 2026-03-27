@@ -17,10 +17,11 @@
 #include "fl/stl/compiler_control.h"  // IWYU pragma: keep
 #include "platforms/ui_defs.h"
 #include "fl/stl/int.h"  // IWYU pragma: keep
+#include "fl/stl/noexcept.h"
 
 #define FL_NO_COPY(CLASS)                                                      \
     CLASS(const CLASS &) = delete;                                             \
-    CLASS &operator=(const CLASS &) = delete;
+    CLASS &operator=(const CLASS &) FL_NOEXCEPT = delete;
 
 namespace fl {
 
@@ -28,7 +29,7 @@ namespace fl {
 // Concrete Button class implements this in fl/sensors/button.h.
 class IButtonInput {
   public:
-    virtual ~IButtonInput() = default;
+    virtual ~IButtonInput() FL_NOEXCEPT = default;
     virtual bool isPressed() = 0;
     virtual bool clicked() = 0;
 };
@@ -39,8 +40,8 @@ class Button;
 // Base class for UI elements that provides string-based group functionality
 class UIElement {
   public:
-    UIElement();
-    VIRTUAL_IF_NOT_AVR ~UIElement() {}
+    UIElement() FL_NOEXCEPT;
+    VIRTUAL_IF_NOT_AVR ~UIElement() FL_NOEXCEPT {}
     virtual void setGroup(const fl::string& groupName) { mGroupName = groupName; }
 
     fl::string getGroup() const { return mGroupName; }
@@ -80,11 +81,11 @@ class UISlider : public UIElement {
 
     int as_int() const { return static_cast<int>(mImpl.value()); }
 
-    UISlider &operator=(float value) {
+    UISlider &operator=(float value) FL_NOEXCEPT {
         mImpl.setValue(value);
         return *this;
     }
-    UISlider &operator=(int value) {
+    UISlider &operator=(int value) FL_NOEXCEPT {
         mImpl.setValue(static_cast<float>(value));
         return *this;
     }
@@ -111,7 +112,7 @@ class UISlider : public UIElement {
         Listener(UISlider *owner) : mOwner(owner) {
             
         }
-        ~Listener() {
+        ~Listener() FL_NOEXCEPT {
             if (added) {
                 EngineEvents::removeListener(this);
             }
@@ -143,7 +144,7 @@ class UIButton : public UIElement {
   public:
     FL_NO_COPY(UIButton)
     UIButton(const char *name);
-    ~UIButton();
+    ~UIButton() FL_NOEXCEPT;
     bool isPressed() const {
         if (mImpl.isPressed()) {
             return true;
@@ -214,7 +215,7 @@ class UIButton : public UIElement {
     struct Listener : public EngineEvents::Listener {
         Listener(UIButton *owner) : mOwner(owner) {
         }
-        ~Listener() {
+        ~Listener() FL_NOEXCEPT {
             if (added) {
                 EngineEvents::removeListener(this);
             }
@@ -247,11 +248,11 @@ class UICheckbox : public UIElement {
   public:
     FL_NO_COPY(UICheckbox);
     UICheckbox(const char *name, bool value = false);
-    ~UICheckbox();
+    ~UICheckbox() FL_NOEXCEPT;
 
     operator bool() const { return value(); }
     explicit operator int() const { return static_cast<int>(value()); }
-    UICheckbox &operator=(bool value) {
+    UICheckbox &operator=(bool value) FL_NOEXCEPT {
         mImpl = value;
         return *this;
     }
@@ -278,7 +279,7 @@ class UICheckbox : public UIElement {
         Listener(UICheckbox *owner) : mOwner(owner) {
             // Don't register in constructor - prevents callbacks before owner is fully initialized
         }
-        ~Listener() {
+        ~Listener() FL_NOEXCEPT {
             if (added) {
                 EngineEvents::removeListener(this);
             }
@@ -309,16 +310,16 @@ class UINumberField : public UIElement {
     FL_NO_COPY(UINumberField);
     UINumberField(const char *name, double value, double min = 0,
                   double max = 100);
-    ~UINumberField();
+    ~UINumberField() FL_NOEXCEPT;
     double value() const { return mImpl.value(); }
     void setValue(double value) { mImpl.setValue(value); }
     operator double() const { return mImpl.value(); }
     operator int() const { return static_cast<int>(mImpl.value()); }
-    UINumberField &operator=(double value) {
+    UINumberField &operator=(double value) FL_NOEXCEPT {
         setValue(value);
         return *this;
     }
-    UINumberField &operator=(int value) {
+    UINumberField &operator=(int value) FL_NOEXCEPT {
         setValue(static_cast<double>(value));
         return *this;
     }
@@ -345,7 +346,7 @@ class UINumberField : public UIElement {
         Listener(UINumberField *owner) : mOwner(owner) {
             // Don't register in constructor - prevents callbacks before owner is fully initialized
         }
-        ~Listener() {
+        ~Listener() FL_NOEXCEPT {
             if (added) {
                 EngineEvents::removeListener(this);
             }
@@ -374,7 +375,7 @@ class UITitle : public UIElement {
   public:
     FL_NO_COPY(UITitle);
     UITitle(const char *name);
-    ~UITitle();
+    ~UITitle() FL_NOEXCEPT;
     
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
@@ -391,7 +392,7 @@ class UIDescription : public UIElement {
   public:
     FL_NO_COPY(UIDescription);
     UIDescription(const char *name);
-    ~UIDescription();
+    ~UIDescription() FL_NOEXCEPT;
     
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
@@ -408,7 +409,7 @@ class UIHelp : public UIElement {
   public:
     FL_NO_COPY(UIHelp);
     UIHelp(const char *markdownContent);
-    ~UIHelp();
+    ~UIHelp() FL_NOEXCEPT;
     
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
@@ -430,7 +431,7 @@ class UIAudio : public UIElement {
     UIAudio(const fl::string& name);
     UIAudio(const fl::string& name, const fl::url& url);
     UIAudio(const fl::string& name, const fl::audio::Config& config);
-    ~UIAudio();
+    ~UIAudio() FL_NOEXCEPT;
     audio::Sample next() { return mImpl.next(); }
     bool hasNext() { return mImpl.hasNext(); }
 
@@ -469,7 +470,7 @@ class UIDropdown : public UIElement {
     // Constructor with initializer_list
     UIDropdown(const char *name, fl::initializer_list<fl::string> options);
 
-    ~UIDropdown();
+    ~UIDropdown() FL_NOEXCEPT;
     
     fl::string value() const { return mImpl.value(); }
     int as_int() const { return mImpl.value_int(); }
@@ -485,7 +486,7 @@ class UIDropdown : public UIElement {
     operator fl::string() const { return value(); }
     operator int() const { return as_int(); }
     
-    UIDropdown &operator=(int index) {
+    UIDropdown &operator=(int index) FL_NOEXCEPT {
         setSelectedIndex(index);
         return *this;
     }
@@ -521,7 +522,7 @@ class UIDropdown : public UIElement {
         Listener(UIDropdown *owner) : mOwner(owner) {
             // Don't register in constructor - prevents callbacks before owner is fully initialized
         }
-        ~Listener() {
+        ~Listener() FL_NOEXCEPT {
             if (added) {
                 EngineEvents::removeListener(this);
             }
@@ -563,7 +564,7 @@ class UIGroup {
         add(elements...);
     }
 
-    ~UIGroup();
+    ~UIGroup() FL_NOEXCEPT;
     
     // Get the group name
     fl::string name() const { return mImpl.name(); }

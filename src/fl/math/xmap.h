@@ -3,6 +3,7 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/math/lut.h"
 #include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -36,10 +37,10 @@ class XMap {
     // is_reverse is false by default for linear layout
     XMap(u16 length, bool is_reverse = false, u16 offset = 0);
 
-    XMap(const XMap &other);
+    XMap(const XMap &other) FL_NOEXCEPT;
 
     // define the assignment operator
-    XMap &operator=(const XMap &other);
+    XMap &operator=(const XMap &other) FL_NOEXCEPT;
 
     void convertToLookUpTable();
 

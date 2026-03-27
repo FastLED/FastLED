@@ -13,6 +13,7 @@
 
 // Now include FastLED headers
 #include "fl/stl/asio/http/native_server.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -24,7 +25,7 @@ NativeHttpServer::NativeHttpServer(u16 port, const ConnectionConfig& config)
 {
 }
 
-NativeHttpServer::~NativeHttpServer() {
+NativeHttpServer::~NativeHttpServer() FL_NOEXCEPT {
     stop();
 }
 

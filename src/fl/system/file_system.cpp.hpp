@@ -27,6 +27,7 @@
 #include "fl/math/screenmap.h"
 #include "fl/math/math.h" // for min
 #include "fl/stl/cstring.h"
+#include "fl/stl/noexcept.h"
 
 // Codec-dependent methods (openMp3, loadJpeg, openMpeg1Video, Mpeg1FileHandle)
 // moved to fl/codec/file_system_codecs.cpp.hpp to break fl.system+ -> fl.codec+ chain.
@@ -35,8 +36,8 @@ namespace fl {
 
 class NullFileHandle : public filebuf {
   public:
-    NullFileHandle() = default;
-    ~NullFileHandle() override {}
+    NullFileHandle() FL_NOEXCEPT = default;
+    ~NullFileHandle() FL_NOEXCEPT override {}
 
     bool is_open() const override { return false; }
     fl::size_t size() const override { return 0; }
@@ -68,11 +69,11 @@ class NullFileHandle : public filebuf {
 
 class NullFileSystem : public FsImpl {
   public:
-    NullFileSystem() {
+    NullFileSystem() FL_NOEXCEPT {
         FASTLED_WARN("NullFileSystem instantiated as a placeholder, please "
                      "implement a file system for your platform.");
     }
-    ~NullFileSystem() override {}
+    ~NullFileSystem() FL_NOEXCEPT override {}
 
     bool begin() override { return true; }
     void end() override {}

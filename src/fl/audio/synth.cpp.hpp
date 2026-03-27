@@ -8,6 +8,7 @@
 #include "fl/stl/malloc.h"
 // IWYU pragma: begin_keep
 #include "third_party/stb/hexwave/stb_hexwave.h"
+#include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep
 
 namespace fl {
@@ -25,11 +26,11 @@ namespace hw = third_party::hexwave;
 class SynthEngineImpl : public ISynthEngine {
 public:
     SynthEngineImpl(i32 width, i32 oversample);
-    ~SynthEngineImpl() override;
+    ~SynthEngineImpl() FL_NOEXCEPT override;
 
     // Non-copyable
-    SynthEngineImpl(const SynthEngineImpl&) = delete;
-    SynthEngineImpl& operator=(const SynthEngineImpl&) = delete;
+    SynthEngineImpl(const SynthEngineImpl&) FL_NOEXCEPT = delete;
+    SynthEngineImpl& operator=(const SynthEngineImpl&) FL_NOEXCEPT = delete;
 
     // ISynthEngine interface
     bool isValid() const override;
@@ -52,11 +53,11 @@ private:
 class SynthOscillatorImpl : public ISynthOscillator {
 public:
     SynthOscillatorImpl(fl::shared_ptr<SynthEngineImpl> engine, const SynthParams& params);
-    ~SynthOscillatorImpl() override;
+    ~SynthOscillatorImpl() FL_NOEXCEPT override;
 
     // Non-copyable
-    SynthOscillatorImpl(const SynthOscillatorImpl&) = delete;
-    SynthOscillatorImpl& operator=(const SynthOscillatorImpl&) = delete;
+    SynthOscillatorImpl(const SynthOscillatorImpl&) FL_NOEXCEPT = delete;
+    SynthOscillatorImpl& operator=(const SynthOscillatorImpl&) FL_NOEXCEPT = delete;
 
     // ISynthOscillator interface
     void generateSamples(float* output, i32 numSamples, float freq) override;
@@ -114,7 +115,7 @@ SynthEngineImpl::SynthEngineImpl(i32 width, i32 oversample)
     mEngine = hw::hexwave_engine_create(mWidth, mOversample, nullptr);
 }
 
-SynthEngineImpl::~SynthEngineImpl() {
+SynthEngineImpl::~SynthEngineImpl() FL_NOEXCEPT {
     if (mEngine) {
         hw::hexwave_engine_destroy(mEngine);
         mEngine = nullptr;
@@ -163,7 +164,7 @@ SynthOscillatorImpl::SynthOscillatorImpl(fl::shared_ptr<SynthEngineImpl> engine,
     );
 }
 
-SynthOscillatorImpl::~SynthOscillatorImpl() {
+SynthOscillatorImpl::~SynthOscillatorImpl() FL_NOEXCEPT {
     if (mHexWave) {
         fl::free(mHexWave);
         mHexWave = nullptr;

@@ -10,6 +10,7 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/span.h"
 #include "fl/remote/rpc/base64.h"
+#include "fl/stl/noexcept.h"
 
 #if FASTLED_ENABLE_JSON
 
@@ -20,7 +21,7 @@ namespace fl {
 struct ConstCharPtrWrapper {
     fl::string value;
 
-    ConstCharPtrWrapper() = default;
+    ConstCharPtrWrapper() FL_NOEXCEPT = default;
     ConstCharPtrWrapper(const fl::string& s) : value(s) {}
     ConstCharPtrWrapper(fl::string&& s) : value(fl::move(s)) {}
 
@@ -34,7 +35,7 @@ template <typename T>
 struct ConstSpanWrapper {
     fl::vector<T> value;
 
-    ConstSpanWrapper() = default;
+    ConstSpanWrapper() FL_NOEXCEPT = default;
     ConstSpanWrapper(fl::vector<T>&& v) : value(fl::move(v)) {}
     ConstSpanWrapper(const fl::vector<T>& v) : value(v) {}
 

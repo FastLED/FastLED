@@ -27,6 +27,7 @@
 #include "fl/system/engine_events.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -51,10 +52,10 @@ public:
     static ChannelManager& instance();
 
     /// @brief Constructor
-    ChannelManager();
+    ChannelManager() FL_NOEXCEPT;
 
     /// @brief Destructor - cleanup shared drivers (automatic via shared_ptr)
-    ~ChannelManager() override;
+    ~ChannelManager() FL_NOEXCEPT override;
 
     /// @brief Add a driver with priority (higher priority = preferred)
     /// @param priority Driver priority (higher values = higher priority)
@@ -209,10 +210,10 @@ private:
     fl::string mExclusiveDriver;
 
     // Non-copyable, non-movable
-    ChannelManager(const ChannelManager&) = delete;
-    ChannelManager& operator=(const ChannelManager&) = delete;
-    ChannelManager(ChannelManager&&) = delete;
-    ChannelManager& operator=(ChannelManager&&) = delete;
+    ChannelManager(const ChannelManager&) FL_NOEXCEPT = delete;
+    ChannelManager& operator=(const ChannelManager&) FL_NOEXCEPT = delete;
+    ChannelManager(ChannelManager&&) FL_NOEXCEPT = delete;
+    ChannelManager& operator=(ChannelManager&&) FL_NOEXCEPT = delete;
 };
 
 /// @brief Get the global ChannelManager singleton instance

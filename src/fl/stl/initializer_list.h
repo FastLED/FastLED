@@ -12,6 +12,7 @@
 #if !defined(FL_IS_AVR)
 // IWYU pragma: begin_keep
 #include <initializer_list>  // IWYU pragma: keep
+#include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep
 #endif
 
@@ -39,7 +40,7 @@ namespace std {
         using const_iterator = const T*;
 
         // Default constructor
-        constexpr initializer_list() : mBegin(nullptr), mSize(0) {}
+        constexpr initializer_list() FL_NOEXCEPT : mBegin(nullptr), mSize(0) {}
 
         // Size and capacity
         constexpr unsigned int size() const { return mSize; }

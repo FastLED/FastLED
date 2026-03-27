@@ -2,6 +2,7 @@
 #include "fl/video/pixel_stream.h"
 #include "fl/system/log.h"
 #include "fl/stl/limits.h"
+#include "fl/stl/noexcept.h"
 
 #define DBG FASTLED_DBG
 
@@ -11,7 +12,7 @@ namespace video {
 PixelStream::PixelStream(int bytes_per_frame)
     : mbytesPerFrame(bytes_per_frame), mType(kFile) {}
 
-PixelStream::~PixelStream() { close(); }
+PixelStream::~PixelStream() FL_NOEXCEPT { close(); }
 
 bool PixelStream::begin(filebuf_ptr h) {
     close();

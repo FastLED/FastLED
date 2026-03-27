@@ -4,6 +4,7 @@
 #include "fl/system/log.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/span.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace detail {
@@ -13,7 +14,7 @@ class MedianFilterImpl {
     static_assert(N == 0 || (N % 2 == 1),
                   "MedianFilter: N must be odd for an unambiguous median");
   public:
-    MedianFilterImpl() : mSortedCount(0), mLastMedian(T(0)) {}
+    MedianFilterImpl() FL_NOEXCEPT : mSortedCount(0), mLastMedian(T(0)) {}
     explicit MedianFilterImpl(fl::size capacity)
         : mRing(capacity), mSorted(capacity),
           mSortedCount(0), mLastMedian(T(0)) {

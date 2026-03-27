@@ -7,6 +7,7 @@
 #include "fl/stl/int.h"
 #include "fl/stl/singleton.h"
 #include "fl/task/task.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -17,8 +18,8 @@ namespace fl {
 /// Registers itself automatically in ActiveLoggerRegistry on first access
 class AsyncLogger {
 public:
-    AsyncLogger();
-    ~AsyncLogger() = default;  // No cleanup needed (embedded storage)
+    AsyncLogger() FL_NOEXCEPT;
+    ~AsyncLogger() FL_NOEXCEPT = default;  // No cleanup needed (embedded storage)
 
     void push(const fl::string& msg);
     void push(const char* msg);
@@ -228,8 +229,8 @@ namespace detail {
     private:
         friend class fl::SingletonShared<AsyncLoggerServiceTask>;
 
-        AsyncLoggerServiceTask();
-        ~AsyncLoggerServiceTask() = default;
+        AsyncLoggerServiceTask() FL_NOEXCEPT;
+        ~AsyncLoggerServiceTask() FL_NOEXCEPT = default;
 
         u32 mIntervalMs;
         fl::size mMessagesPerTick;

@@ -2,6 +2,7 @@
 
 #include "fl/stl/span.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -22,7 +23,7 @@ namespace fl {
  */
 class IFastLED {
 public:
-    virtual ~IFastLED() = default;
+    virtual ~IFastLED() FL_NOEXCEPT = default;
 
     // LED array access
 

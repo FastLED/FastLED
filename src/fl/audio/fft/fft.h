@@ -46,9 +46,9 @@ class Bins {
 
   public:
     Bins(fl::size n);
-    ~Bins();
+    ~Bins() FL_NOEXCEPT;
 
-    Bins(const Bins &) = default;
+    Bins(const Bins &) FL_NOEXCEPT = default;
     Bins &operator=(const Bins &) = default;
     Bins(Bins &&) FL_NOEXCEPT = default;
     Bins &operator=(Bins &&) FL_NOEXCEPT = default;
@@ -157,13 +157,13 @@ struct Args {
 
 class FFT {
   public:
-    FFT() = default;
-    ~FFT() = default;
+    FFT() FL_NOEXCEPT = default;
+    ~FFT() FL_NOEXCEPT = default;
 
-    FFT(FFT &&) = default;
-    FFT &operator=(FFT &&) = default;
-    FFT(const FFT &) = default;
-    FFT &operator=(const FFT &) = default;
+    FFT(FFT &&) FL_NOEXCEPT = default;
+    FFT &operator=(FFT &&) FL_NOEXCEPT = default;
+    FFT(const FFT &) FL_NOEXCEPT = default;
+    FFT &operator=(const FFT &) FL_NOEXCEPT = default;
 
     void run(const span<const i16> &sample, Bins *out,
              const Args &args = Args());

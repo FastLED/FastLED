@@ -3,6 +3,7 @@
 #include "fl/codec/common.h"  // IWYU pragma: keep
 // IWYU pragma: begin_keep
 #include "third_party/mpeg1_decoder/software_decoder.h"
+#include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep
 
 namespace fl {
@@ -17,7 +18,7 @@ struct Mpeg1Info {
     bool hasAudio = false;       // True if MPEG1 contains audio track
     bool isValid = false;        // True if metadata was successfully parsed
 
-    Mpeg1Info() = default;
+    Mpeg1Info() FL_NOEXCEPT = default;
 
     // Constructor for easy initialization
     Mpeg1Info(fl::u16 w, fl::u16 h, fl::u16 fps)

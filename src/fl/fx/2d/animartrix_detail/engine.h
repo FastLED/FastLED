@@ -12,6 +12,7 @@
 #include "fl/stl/optional.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -51,7 +52,7 @@ struct Engine {
     fl::optional<fl::u32> currentTime;
 
     Engine(Context *ctx) : mCtx(ctx) {}
-    ~Engine();
+    ~Engine() FL_NOEXCEPT;
 
     void setTime(fl::u32 t) { currentTime = t; }
     fl::u32 getTime() { return currentTime.has_value() ? currentTime.value() : fl::millis(); }
@@ -124,9 +125,9 @@ struct Engine {
     }
 };
 
-inline Engine::~Engine() = default;
+inline Engine::~Engine() FL_NOEXCEPT = default;
 
-inline Context::~Context() = default;
+inline Context::~Context() FL_NOEXCEPT = default;
 
 // Initialize context with grid dimensions
 inline void init(Context &ctx, int w, int h) {

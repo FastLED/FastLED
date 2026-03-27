@@ -2,6 +2,7 @@
 #include "fl/audio/audio_context.h"
 #include "fl/audio/fft/fft.h"
 #include "fl/math/math.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -39,7 +40,7 @@ FrequencyBands::FrequencyBands()
     , mTrebleMax(20000.0f)
 {}
 
-FrequencyBands::~FrequencyBands() = default;
+FrequencyBands::~FrequencyBands() FL_NOEXCEPT = default;
 
 void FrequencyBands::update(shared_ptr<Context> context) {
     // Use sample rate from context if available

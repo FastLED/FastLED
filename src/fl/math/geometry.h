@@ -20,7 +20,7 @@ template <typename T> struct vec3 {
     T x = 0;
     T y = 0;
     T z = 0;
-    constexpr vec3() = default;
+    constexpr vec3() FL_NOEXCEPT = default;
     constexpr vec3(T x, T y, T z) : x(x), y(y), z(z) {}
 
     template <typename U>
@@ -90,7 +90,7 @@ template <typename T> struct vec3 {
         return *this;
     }
 
-    vec3 &operator=(const vec3 &p) {
+    vec3 &operator=(const vec3 &p) FL_NOEXCEPT {
         x = p.x;
         y = p.y;
         z = p.z;
@@ -189,7 +189,7 @@ template <typename T> struct vec2 {
     using value_type = T;
     value_type x = 0;
     value_type y = 0;
-    constexpr vec2() = default;
+    constexpr vec2() FL_NOEXCEPT = default;
     constexpr vec2(T x, T y) : x(x), y(y) {}
 
     template <typename U> explicit constexpr vec2(U xy) : x(xy), y(xy) {}
@@ -257,7 +257,7 @@ template <typename T> struct vec2 {
         return *this;
     }
 
-    vec2 &operator=(const vec2 &p) {
+    vec2 &operator=(const vec2 &p) FL_NOEXCEPT {
         x = p.x;
         y = p.y;
         return *this;
@@ -363,7 +363,7 @@ using pair_xy_float = vec2<float>; // Legacy name for vec2f
 template <typename T> struct pair_xy : public vec2<T> {
     using value_type = T;
     using vec2<T>::vec2;
-    pair_xy() = default;
+    pair_xy() FL_NOEXCEPT = default;
     pair_xy(const vec2<T> &p) : vec2<T>(p) {}
 };
 
@@ -371,14 +371,14 @@ template <typename T> struct line_xy {
     vec2<T> start;
     vec2<T> end;
 
-    line_xy() = default;
+    line_xy() FL_NOEXCEPT = default;
     line_xy(const vec2<T> &start, const vec2<T> &end)
         : start(start), end(end) {}
 
     line_xy(T start_x, T start_y, T end_x, T end_y)
         : start(start_x, start_y), end(end_x, end_y) {}
     
-    line_xy(const line_xy &other) = default;
+    line_xy(const line_xy &other) FL_NOEXCEPT = default;
     line_xy &operator=(const line_xy &other) = default;
     line_xy(line_xy &&other) noexcept = default;
     line_xy &operator=(line_xy &&other) noexcept = default;
@@ -437,13 +437,13 @@ template <typename T> struct rect {
     vec2<T> mMin;
     vec2<T> mMax;
 
-    rect() = default;
+    rect() FL_NOEXCEPT = default;
     rect(const vec2<T> &min, const vec2<T> &max) : mMin(min), mMax(max) {}
 
     rect(T min_x, T min_y, T max_x, T max_y)
         : mMin(min_x, min_y), mMax(max_x, max_y) {}
     
-    rect(const rect &other) = default;
+    rect(const rect &other) FL_NOEXCEPT = default;
     rect &operator=(const rect &other) = default;
     rect(rect &&other) noexcept = default;
     rect &operator=(rect &&other) noexcept = default;

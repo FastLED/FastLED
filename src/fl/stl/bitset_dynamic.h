@@ -94,7 +94,7 @@ class bitset_dynamic {
             // Set all bits to 1
             if (_blocks && _block_count > 0) {
                 for (fl::u32 i = 0; i < _block_count; ++i) {
-                    _blocks[i] = static_cast<block_type>(~block_type(0));
+                    _blocks[i] = static_cast<block_type>(~block_type(0) FL_NOEXCEPT );
                 }
                 // Clear any bits beyond the actual size
                 if (_size % bits_per_block != 0) {
@@ -284,7 +284,7 @@ class bitset_dynamic {
         if (!_blocks) return false;
 
         for (fl::u32 i = 0; i < _block_count - 1; ++i) {
-            if (_blocks[i] != static_cast<block_type>(~block_type(0)))
+            if (_blocks[i] != static_cast<block_type>(~block_type(0) FL_NOEXCEPT ))
                 return false;
         }
 
@@ -336,7 +336,7 @@ class bitset_dynamic {
             if (block_idx == _block_count - 1 && _size % bits_per_block != 0) {
                 const fl::u32 valid_bits = _size % bits_per_block;
                 block_type mask = (valid_bits == bits_per_block)
-                    ? static_cast<block_type>(~block_type(0))
+                    ? static_cast<block_type>(~block_type(0) FL_NOEXCEPT )
                     : static_cast<block_type>(((block_type(1) << valid_bits) - 1));
                 current_block &= mask;
             }

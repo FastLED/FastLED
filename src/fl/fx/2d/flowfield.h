@@ -15,6 +15,7 @@
 #include "fl/stl/align.h"
 #include "fl/stl/vector.h"
 #include "fl/math/fixed_point/s16x16.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -166,7 +167,7 @@ struct FlowFieldFPState {
     int width = 0;
     int height = 0;
 
-    FlowFieldFPState() {}
+    FlowFieldFPState() FL_NOEXCEPT {}
 
     void init(int w, int h) {
         width = w;
@@ -226,7 +227,7 @@ class FlowField : public Fx2d {
   public:
     using Params = FlowFieldParams;
 
-    ~FlowField() override = default;
+    ~FlowField() FL_NOEXCEPT override = default;
 
     /// Handles timing, then delegates to drawImpl().
     /// Caps dt to prevent huge jumps when effect was inactive.

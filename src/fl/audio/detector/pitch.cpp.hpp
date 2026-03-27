@@ -1,6 +1,7 @@
 #include "fl/audio/detector/pitch.h"
 #include "fl/audio/audio_context.h"
 #include "fl/math/math.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -26,7 +27,7 @@ Pitch::Pitch()
     mAutocorrelation.reserve(static_cast<size>(mMaxPeriod + 1));
 }
 
-Pitch::~Pitch() = default;
+Pitch::~Pitch() FL_NOEXCEPT = default;
 
 void Pitch::update(shared_ptr<Context> context) {
     // Get PCM data from context

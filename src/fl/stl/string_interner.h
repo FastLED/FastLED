@@ -15,6 +15,7 @@
 #include "fl/stl/int.h"
 #include "fl/stl/unordered_map.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -29,8 +30,8 @@ template <typename T, fl::size Extent> class span;  // IWYU pragma: keep
 // Thread-safety: NOT thread-safe. Synchronize externally if needed.
 class StringInterner {
   public:
-    StringInterner();
-    ~StringInterner();
+    StringInterner() FL_NOEXCEPT;
+    ~StringInterner() FL_NOEXCEPT;
 
     // Intern a string_view (primary API) - returns a fl::string with heap allocation.
     // If the string already exists, returns the existing fl::string (cheap shared_ptr copy).

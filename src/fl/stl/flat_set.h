@@ -46,7 +46,7 @@ class flat_set {
 
   public:
     // Constructors
-    flat_set() = default;
+    flat_set() FL_NOEXCEPT = default;
 
     explicit flat_set(memory_resource* resource)
         : mData(resource) {}
@@ -57,7 +57,7 @@ class flat_set {
     flat_set(const Less& less, memory_resource* resource)
         : mData(resource), mLess(less) {}
 
-    flat_set(const flat_set& other) = default;
+    flat_set(const flat_set& other) FL_NOEXCEPT = default;
     flat_set& operator=(const flat_set& other) = default;
 
     flat_set(flat_set&& other) FL_NOEXCEPT

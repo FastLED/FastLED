@@ -60,8 +60,8 @@ class TransformFloatImpl {
         TransformFloatImplPtr tx = fl::make_shared<TransformFloatImpl>();
         return tx;
     }
-    TransformFloatImpl() = default;
-    virtual ~TransformFloatImpl() = default; // Add virtual destructor for proper cleanup
+    TransformFloatImpl() FL_NOEXCEPT = default;
+    virtual ~TransformFloatImpl() FL_NOEXCEPT = default; // Add virtual destructor for proper cleanup
     float scale_x = 1.0f;
     float scale_y = 1.0f;
     float offset_x = 0.0f;
@@ -75,8 +75,8 @@ class TransformFloatImpl {
 
 // Future usage.
 struct Matrix3x3f {
-    Matrix3x3f() = default;
-    Matrix3x3f(const Matrix3x3f &) = default;
+    Matrix3x3f() FL_NOEXCEPT = default;
+    Matrix3x3f(const Matrix3x3f &) FL_NOEXCEPT = default;
     Matrix3x3f &operator=(const Matrix3x3f &) = default;
     Matrix3x3f(Matrix3x3f &&) FL_NOEXCEPT = default;
     Matrix3x3f &operator=(Matrix3x3f &&) FL_NOEXCEPT = default;
@@ -102,7 +102,7 @@ struct Matrix3x3f {
 // TransformFloat is a wrapper around the smart ptr. This version allows for
 // easy use and fast / well behaved copy.
 struct TransformFloat {
-    TransformFloat() = default;
+    TransformFloat() FL_NOEXCEPT = default;
     float scale_x() const { return mImpl->scale_x; }
     float scale_y() const { return mImpl->scale_y; }
     float offset_x() const { return mImpl->offset_x; }

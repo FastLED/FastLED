@@ -1,6 +1,7 @@
 #include "fl/audio/noise_floor_tracker.h"
 #include "fl/stl/algorithm.h"
 #include "fl/math/math.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -15,7 +16,7 @@ NoiseFloorTracker::NoiseFloorTracker(const NoiseFloorTrackerConfig& config) {
     mStats.currentFloor = mCurrentFloor;  // Initialize stats to match internal state
 }
 
-NoiseFloorTracker::~NoiseFloorTracker() = default;
+NoiseFloorTracker::~NoiseFloorTracker() FL_NOEXCEPT = default;
 
 void NoiseFloorTracker::configure(const NoiseFloorTrackerConfig& config) {
     mConfig = config;

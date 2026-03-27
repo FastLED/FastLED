@@ -125,7 +125,7 @@ template <fl::u32 N> class bitset_fixed {
         // Mask out unused high bits in the last block
         if (N % bits_per_block != 0) {
             const fl::u32 extra = bits_per_block - (N % bits_per_block);
-            _blocks[block_count - 1] &= (~block_type(0) >> extra);
+            _blocks[block_count - 1] &= (~block_type(0) FL_NOEXCEPT >> extra);
         }
         return *this;
     }
@@ -161,7 +161,7 @@ template <fl::u32 N> class bitset_fixed {
                 const fl::u32 valid_bits = N % bits_per_block;
                 // Create a mask with only the valid bits set to 1
                 block_type mask = (valid_bits == bits_per_block)
-                                      ? static_cast<block_type>(~block_type(0))
+                                      ? static_cast<block_type>(~block_type(0) FL_NOEXCEPT )
                                       : ((block_type(1) << valid_bits) - 1);
                 last_block &= mask;
             }
@@ -180,7 +180,7 @@ template <fl::u32 N> class bitset_fixed {
 
         // Check all complete blocks
         for (fl::u32 i = 0; i < block_count - 1; ++i) {
-            if (_blocks[i] != ~block_type(0)) {
+            if (_blocks[i] != ~block_type(0) FL_NOEXCEPT ) {
                 return false;
             }
         }
@@ -192,7 +192,7 @@ template <fl::u32 N> class bitset_fixed {
                 // Create a mask for the valid bits in the last block
                 mask = (block_type(1) << (N % bits_per_block)) - 1;
             } else {
-                mask = static_cast<block_type>(~block_type(0));
+                mask = static_cast<block_type>(~block_type(0) FL_NOEXCEPT );
             }
 
             if ((_blocks[block_count - 1] & mask) != mask) {
@@ -249,7 +249,7 @@ template <fl::u32 N> class bitset_fixed {
             if (block_idx == block_count - 1 && N % bits_per_block != 0) {
                 const fl::u32 valid_bits = N % bits_per_block;
                 block_type mask = (valid_bits == bits_per_block) 
-                    ? static_cast<block_type>(~block_type(0)) 
+                    ? static_cast<block_type>(~block_type(0) FL_NOEXCEPT ) 
                     : ((block_type(1) << valid_bits) - 1);
                 current_block &= mask;
             }

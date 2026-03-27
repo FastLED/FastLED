@@ -2,6 +2,7 @@
 #include "fl/audio/audio_context.h"
 #include "fl/math/math.h"
 #include "fl/stl/algorithm.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -21,7 +22,7 @@ Transient::Transient()
     mPreviousHighFreq.resize(16, 0.0f);
 }
 
-Transient::~Transient() = default;
+Transient::~Transient() FL_NOEXCEPT = default;
 
 void Transient::update(shared_ptr<Context> context) {
     mRetainedFFT = context->getFFT16();

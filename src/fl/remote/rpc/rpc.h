@@ -89,6 +89,7 @@
 #include "fl/stl/unordered_map.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/initializer_list.h"  // IWYU pragma: keep
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -209,14 +210,14 @@ public:
               description(fl::move(desc)), tags(fl::move(t)) {}
     };
 
-    Rpc() = default;
-    ~Rpc() = default;
+    Rpc() FL_NOEXCEPT = default;
+    ~Rpc() FL_NOEXCEPT = default;
 
     // Non-copyable but movable
-    Rpc(const Rpc&) = delete;
-    Rpc& operator=(const Rpc&) = delete;
-    Rpc(Rpc&&) = default;
-    Rpc& operator=(Rpc&&) = default;
+    Rpc(const Rpc&) FL_NOEXCEPT = delete;
+    Rpc& operator=(const Rpc&) FL_NOEXCEPT = delete;
+    Rpc(Rpc&&) FL_NOEXCEPT = default;
+    Rpc& operator=(Rpc&&) FL_NOEXCEPT = default;
 
     // =========================================================================
     // Response Sink for Async ACKs

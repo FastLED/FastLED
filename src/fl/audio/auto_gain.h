@@ -3,6 +3,7 @@
 #include "fl/math/filter/filter.h"
 #include "fl/stl/int.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -83,9 +84,9 @@ struct AutoGainConfig {
 /// @endcode
 class AutoGain {
 public:
-    AutoGain();
+    AutoGain() FL_NOEXCEPT;
     explicit AutoGain(const AutoGainConfig& config);
-    ~AutoGain();
+    ~AutoGain() FL_NOEXCEPT;
 
     /// Configure the auto gain controller
     void configure(const AutoGainConfig& config);

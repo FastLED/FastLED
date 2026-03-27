@@ -6,6 +6,7 @@
 #include "fl/stl/iterator.h"
 #include "fl/stl/memory_resource.h"
 #include "fl/stl/new.h"  // IWYU pragma: keep
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -39,7 +40,7 @@ private:
         for (fl::size i = 0; i < mSize; ++i) {
             fl::size old_idx = (mFront + i) % mCapacity;
             new (&new_data[i]) T(fl::move(mData[old_idx]));
-            mData[old_idx].~T();
+            mData[old_idx].~T() FL_NOEXCEPT;
         }
 
         if (mData) {
@@ -264,7 +265,7 @@ public:
     typedef fl::reverse_iterator<const_iterator> const_reverse_iterator;
 
     // Constructors
-    deque() : mData(nullptr), mCapacity(0), mSize(0), mFront(0) {}
+    deque() FL_NOEXCEPT : mData(nullptr), mCapacity(0), mSize(0), mFront(0) {}
 
     explicit deque(memory_resource* resource) : mData(nullptr), mCapacity(0), mSize(0), mFront(0), mResource(resource) {}
 
@@ -272,11 +273,11 @@ public:
         resize(count, value);
     }
 
-    deque(const deque& other) : deque() {
+    deque(const deque& other) FL_NOEXCEPT : deque() {
         *this = other;
     }
 
-    deque(deque&& other) : deque() {
+    deque(deque&& other) FL_NOEXCEPT : deque() {
         *this = fl::move(other);
     }
 
@@ -287,7 +288,7 @@ public:
     }
 
     // Destructor
-    ~deque() {
+    ~deque() FL_NOEXCEPT {
         clear();
         if (mData) {
             mResource->deallocate(mData, mCapacity * sizeof(T));
@@ -295,7 +296,7 @@ public:
     }
 
     // Assignment operators
-    deque& operator=(const deque& other) {
+    deque& operator=(const deque& other) FL_NOEXCEPT {
         if (this != &other) {
             clear();
             for (fl::size i = 0; i < other.size(); ++i) {
@@ -305,7 +306,7 @@ public:
         return *this;
     }
 
-    deque& operator=(deque&& other) {
+    deque& operator=(deque&& other) FL_NOEXCEPT {
         if (this != &other) {
             clear();
             if (mData) {
@@ -463,7 +464,7 @@ public:
                 for (fl::size i = 0; i < mSize; ++i) {
                     fl::size old_idx = (mFront + i) % mCapacity;
                     new (&new_data[i]) T(fl::move(mData[old_idx]));
-                    mData[old_idx].~T();
+                    mData[old_idx].~T() FL_NOEXCEPT;
                 }
 
                 if (mData) {
@@ -519,14 +520,14 @@ public:
     void pop_back() {
         if (mSize > 0) {
             fl::size back_index = get_index(mSize - 1);
-            mData[back_index].~T();
+            mData[back_index].~T() FL_NOEXCEPT;
             --mSize;
         }
     }
 
     void pop_front() {
         if (mSize > 0) {
-            mData[mFront].~T();
+            mData[mFront].~T() FL_NOEXCEPT;
             mFront = (mFront + 1) % mCapacity;
             --mSize;
         }
@@ -584,7 +585,7 @@ public:
             fl::size from_idx = get_index(i - 1);
             fl::size to_idx = get_index(i);
             new (&mData[to_idx]) T(fl::move(mData[from_idx]));
-            mData[from_idx].~T();
+            mData[from_idx].~T() FL_NOEXCEPT;
         }
 
         // Insert new element
@@ -604,7 +605,7 @@ public:
             fl::size from_idx = get_index(i - 1);
             fl::size to_idx = get_index(i);
             new (&mData[to_idx]) T(fl::move(mData[from_idx]));
-            mData[from_idx].~T();
+            mData[from_idx].~T() FL_NOEXCEPT;
         }
 
         // Insert new element
@@ -624,7 +625,7 @@ public:
             fl::size from_idx = get_index(i - count);
             fl::size to_idx = get_index(i);
             new (&mData[to_idx]) T(fl::move(mData[from_idx]));
-            mData[from_idx].~T();
+            mData[from_idx].~T() FL_NOEXCEPT;
         }
 
         // Insert new elements
@@ -645,14 +646,14 @@ public:
 
         // Destroy element at pos
         fl::size erase_idx = get_index(index);
-        mData[erase_idx].~T();
+        mData[erase_idx].~T() FL_NOEXCEPT;
 
         // Shift elements from pos+1 to end one position to the left
         for (fl::size i = index; i < mSize - 1; ++i) {
             fl::size from_idx = get_index(i + 1);
             fl::size to_idx = get_index(i);
             new (&mData[to_idx]) T(fl::move(mData[from_idx]));
-            mData[from_idx].~T();
+            mData[from_idx].~T() FL_NOEXCEPT;
         }
 
         --mSize;
@@ -668,7 +669,7 @@ public:
         // Destroy elements in range
         for (fl::size i = 0; i < count; ++i) {
             fl::size destroy_idx = get_index(start_idx + i);
-            mData[destroy_idx].~T();
+            mData[destroy_idx].~T() FL_NOEXCEPT;
         }
 
         // Shift remaining elements left
@@ -676,7 +677,7 @@ public:
             fl::size from_idx = get_index(i + count);
             fl::size to_idx = get_index(i);
             new (&mData[to_idx]) T(fl::move(mData[from_idx]));
-            mData[from_idx].~T();
+            mData[from_idx].~T() FL_NOEXCEPT;
         }
 
         mSize -= count;
@@ -694,7 +695,7 @@ public:
             fl::size from_idx = get_index(i - 1);
             fl::size to_idx = get_index(i);
             new (&mData[to_idx]) T(fl::move(mData[from_idx]));
-            mData[from_idx].~T();
+            mData[from_idx].~T() FL_NOEXCEPT;
         }
 
         // Construct new element in place

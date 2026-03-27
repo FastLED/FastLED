@@ -6,6 +6,7 @@
 #include "fl/stl/int.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/type_traits.h"
+#include "fl/stl/noexcept.h"
 
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
@@ -33,7 +34,7 @@ class s0x32 {
 
     // ---- Construction ------------------------------------------------------
 
-    constexpr s0x32() = default;
+    constexpr s0x32() FL_NOEXCEPT = default;
 
     // Construct from float (clamps to [-1.0, 1.0] range)
     // Q31 format: max value is 0x7FFFFFFF (just under 1.0), min is 0x80000000 (-1.0)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -68,9 +69,9 @@ struct NoiseFloorTrackerConfig {
 /// @endcode
 class NoiseFloorTracker {
 public:
-    NoiseFloorTracker();
+    NoiseFloorTracker() FL_NOEXCEPT;
     explicit NoiseFloorTracker(const NoiseFloorTrackerConfig& config);
-    ~NoiseFloorTracker();
+    ~NoiseFloorTracker() FL_NOEXCEPT;
 
     /// Configure the noise floor tracker
     void configure(const NoiseFloorTrackerConfig& config);

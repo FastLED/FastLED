@@ -6,6 +6,7 @@
 #include "fl/audio/fft/fft.h"
 #include "fl/math/math.h"
 #include "fl/stl/algorithm.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -20,7 +21,7 @@ Vocal::Vocal()
     , mFormantRatio(0.0f)
 {}
 
-Vocal::~Vocal() = default;
+Vocal::~Vocal() FL_NOEXCEPT = default;
 
 void Vocal::update(shared_ptr<Context> context) {
     mSampleRate = context->getSampleRate();

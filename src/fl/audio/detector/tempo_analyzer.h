@@ -5,6 +5,7 @@
 #include "fl/stl/function.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/deque.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -12,8 +13,8 @@ namespace detector {
 
 class TempoAnalyzer : public Detector {
 public:
-    TempoAnalyzer();
-    ~TempoAnalyzer() override;
+    TempoAnalyzer() FL_NOEXCEPT;
+    ~TempoAnalyzer() FL_NOEXCEPT override;
 
     void update(shared_ptr<Context> context) override;
     void fireCallbacks() override;

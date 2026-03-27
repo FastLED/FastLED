@@ -3,6 +3,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/function.h"
 #include "fl/stl/priority_queue.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -20,14 +21,14 @@ namespace fl {
 template<typename Task = fl::function<void()>>
 class RpcScheduler {
 public:
-    RpcScheduler() = default;
-    ~RpcScheduler() = default;
+    RpcScheduler() FL_NOEXCEPT = default;
+    ~RpcScheduler() FL_NOEXCEPT = default;
 
     // Non-copyable but movable
-    RpcScheduler(const RpcScheduler&) = delete;
-    RpcScheduler& operator=(const RpcScheduler&) = delete;
-    RpcScheduler(RpcScheduler&&) = default;
-    RpcScheduler& operator=(RpcScheduler&&) = default;
+    RpcScheduler(const RpcScheduler&) FL_NOEXCEPT = delete;
+    RpcScheduler& operator=(const RpcScheduler&) FL_NOEXCEPT = delete;
+    RpcScheduler(RpcScheduler&&) FL_NOEXCEPT = default;
+    RpcScheduler& operator=(RpcScheduler&&) FL_NOEXCEPT = default;
 
     /**
      * @brief Schedule a task for execution at specified timestamp

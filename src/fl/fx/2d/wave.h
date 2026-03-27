@@ -13,6 +13,7 @@
 #include "fl/math/wave/wave_simulation.h"
 #include "fl/math/xymap.h"
 #include "fl/fx/fx2d.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -27,7 +28,7 @@ FASTLED_SHARED_PTR(WaveCrgbGradientMap);
 /// into CRGB color values for LED display.
 class WaveCrgbMap {
   public:
-    virtual ~WaveCrgbMap() = default;
+    virtual ~WaveCrgbMap() FL_NOEXCEPT = default;
 
     /// @brief Convert wave simulation values to LED colors
     /// @param xymap Coordinate mapping from 2D grid to 1D LED array
@@ -77,7 +78,7 @@ class WaveCrgbGradientMap : public WaveCrgbMap {
     WaveCrgbGradientMap(const CRGBPalette16 &palette) : mGradient(palette) {}
 
     /// @brief Default constructor with no initial gradient
-    WaveCrgbGradientMap() = default;
+    WaveCrgbGradientMap() FL_NOEXCEPT = default;
 
     /// @brief Map wave values to gradient-colored LEDs
     /// @param xymap Coordinate mapping from 2D grid to 1D LED array
@@ -99,7 +100,7 @@ class WaveCrgbGradientMap : public WaveCrgbMap {
 /// Defines all the settings that control wave behavior including
 /// simulation quality, physics parameters, and color mapping.
 struct WaveFxArgs {
-    WaveFxArgs() = default;
+    WaveFxArgs() FL_NOEXCEPT = default;
 
     /// @brief Construct with all parameters
     /// @param factor Supersampling quality (higher = smoother but slower)
@@ -112,8 +113,8 @@ struct WaveFxArgs {
                float speed, float dampening, WaveCrgbMapPtr crgbMap)
         : factor(factor), half_duplex(half_duplex), auto_updates(auto_updates),
           speed(speed), dampening(dampening), crgbMap(crgbMap) {}
-    WaveFxArgs(const WaveFxArgs &) = default;
-    WaveFxArgs &operator=(const WaveFxArgs &) = default;
+    WaveFxArgs(const WaveFxArgs &) FL_NOEXCEPT = default;
+    WaveFxArgs &operator=(const WaveFxArgs &) FL_NOEXCEPT = default;
 
     /// Supersampling quality (SUPER_SAMPLE_2X recommended for balance)
     SuperSample factor = SuperSample::SUPER_SAMPLE_2X;

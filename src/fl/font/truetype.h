@@ -32,6 +32,7 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/span.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -65,7 +66,7 @@ struct GlyphBitmap {
     i32 xOffset;                  // X offset from origin to top-left of bitmap
     i32 yOffset;                  // Y offset from origin to top-left of bitmap (typically negative)
 
-    GlyphBitmap() : width(0), height(0), xOffset(0), yOffset(0) {}
+    GlyphBitmap() FL_NOEXCEPT : width(0), height(0), xOffset(0), yOffset(0) {}
 
     // Returns true if this bitmap has valid data
     bool valid() const { return !data.empty() && width > 0 && height > 0; }
@@ -94,7 +95,7 @@ public:
     // fontIndex: 0-based index of the font in the collection
     static fl::shared_ptr<Font> load(fl::span<const u8> fontData, i32 fontIndex);
 
-    virtual ~Font() = default;
+    virtual ~Font() FL_NOEXCEPT = default;
 
     // Get the number of fonts in this file (1 for .ttf, possibly more for .ttc)
     virtual i32 getNumFonts() const = 0;
@@ -122,7 +123,7 @@ public:
                                     i32 oversampleX, i32 oversampleY) const = 0;
 
 protected:
-    Font() = default;
+    Font() FL_NOEXCEPT = default;
 };
 
 using FontPtr = fl::shared_ptr<Font>;
@@ -133,7 +134,7 @@ public:
     // Create a renderer for the given font at the specified pixel height
     FontRenderer(FontPtr font, float pixelHeight);
 
-    ~FontRenderer();
+    ~FontRenderer() FL_NOEXCEPT;
 
     // Check if renderer is valid
     bool valid() const { return mFont != nullptr; }

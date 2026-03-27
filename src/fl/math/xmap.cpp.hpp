@@ -1,6 +1,7 @@
 
 
 #include "fl/math/xmap.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -80,7 +81,7 @@ XMap::Type XMap::getType() const { return type; }
 XMap::XMap(u16 length, Type type)
     : length(length), type(type), mOffset(0) {}
 
-XMap &XMap::operator=(const XMap &other) {
+XMap &XMap::operator=(const XMap &other) FL_NOEXCEPT {
     if (this != &other) {
         type = other.type;
         length = other.length;

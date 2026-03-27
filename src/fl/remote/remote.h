@@ -16,6 +16,7 @@
 #include "fl/remote/rpc/server.h"
 #include "fl/remote/types.h"
 #include "fl/scheduler.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -73,10 +74,10 @@ public:
     Remote(RequestSource source, ResponseSink sink);
 
     // Non-copyable, non-movable (lambda captures 'this')
-    Remote(const Remote&) = delete;
-    Remote(Remote&&) = delete;
-    Remote& operator=(const Remote&) = delete;
-    Remote& operator=(Remote&&) = delete;
+    Remote(const Remote&) FL_NOEXCEPT = delete;
+    Remote(Remote&&) FL_NOEXCEPT = delete;
+    Remote& operator=(const Remote&) FL_NOEXCEPT = delete;
+    Remote& operator=(Remote&&) FL_NOEXCEPT = delete;
 
     // =========================================================================
     // Method Registration

@@ -9,6 +9,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/optional.h"
 #include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
 
 // Forward declarations for detail modules
 namespace fl {
@@ -30,7 +31,7 @@ struct SingleTestConfig {
     int pin_tx;                   ///< TX pin (base pin for multi-lane)
     int pin_rx;                   ///< RX pin
 
-    SingleTestConfig()
+    SingleTestConfig() FL_NOEXCEPT
         : pattern("MSB_LSB_A")
         , iterations(1)
         , pin_tx(1)
@@ -54,7 +55,7 @@ struct SingleTestResult {
     optional<string> failure_pattern;     ///< Pattern that failed if !passed
     optional<string> failure_details;     ///< Failure details
 
-    SingleTestResult()
+    SingleTestResult() FL_NOEXCEPT
         : success(false)
         , passed(false)
         , total_tests(0)
@@ -76,7 +77,7 @@ struct DriverTestResult {
         , passed_tests(0)
         , skipped(false) {}
 
-    DriverTestResult()
+    DriverTestResult() FL_NOEXCEPT
         : total_tests(0)
         , passed_tests(0)
         , skipped(false) {}

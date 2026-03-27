@@ -3,6 +3,7 @@
 #include "fl/stl/int.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/deque.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -68,9 +69,9 @@ struct MusicalBeatDetectorConfig {
 /// @endcode
 class MusicalBeat {
 public:
-    MusicalBeat();
+    MusicalBeat() FL_NOEXCEPT;
     explicit MusicalBeat(const MusicalBeatDetectorConfig& config);
-    ~MusicalBeat();
+    ~MusicalBeat() FL_NOEXCEPT;
 
     /// Configure the beat detector
     void configure(const MusicalBeatDetectorConfig& config);

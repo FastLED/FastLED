@@ -20,16 +20,16 @@ public:
     explicit scope_exit(EFP &&f)
         : mExitFunction(fl::forward<EFP>(f)), mActive(true) {}
 
-    scope_exit(scope_exit &&rhs)
+    scope_exit(scope_exit &&rhs) FL_NOEXCEPT
         : mExitFunction(fl::move(rhs.mExitFunction)), mActive(rhs.mActive) {
         rhs.release();
     }
 
-    scope_exit(const scope_exit &) = delete;
-    scope_exit &operator=(const scope_exit &) = delete;
-    scope_exit &operator=(scope_exit &&) = delete;
+    scope_exit(const scope_exit &) FL_NOEXCEPT = delete;
+    scope_exit &operator=(const scope_exit &) FL_NOEXCEPT = delete;
+    scope_exit &operator=(scope_exit &&) FL_NOEXCEPT = delete;
 
-    ~scope_exit() {
+    ~scope_exit() FL_NOEXCEPT {
         if (mActive) {
             mExitFunction();
         }

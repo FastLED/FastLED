@@ -9,6 +9,7 @@
 #include "fl/gfx/colorutils.h"
 #include "fl/math/fixed_point/s16x16.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -17,7 +18,7 @@ FASTLED_SHARED_PTR(PerlinParticlePunch);
 class PerlinParticlePunch : public Fx1d {
   public:
     PerlinParticlePunch(u16 num_leds);
-    ~PerlinParticlePunch();
+    ~PerlinParticlePunch() FL_NOEXCEPT;
 
     void draw(DrawContext context) override;
     fl::string fxName() const override;

@@ -5,6 +5,7 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/stl/function.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -19,7 +20,7 @@ struct Drop {
     float energyIncrease;   // Energy increase from previous state
     u32 timestamp;     // When drop occurred
 
-    Drop()
+    Drop() FL_NOEXCEPT
         : impact(0.0f)
         , bassEnergy(0.0f)
         , energyIncrease(0.0f)
@@ -49,8 +50,8 @@ struct Drop {
 //
 class DropDetector : public Detector {
 public:
-    DropDetector();
-    ~DropDetector() override;
+    DropDetector() FL_NOEXCEPT;
+    ~DropDetector() FL_NOEXCEPT override;
 
     // Detector interface
     void update(shared_ptr<Context> context) override;

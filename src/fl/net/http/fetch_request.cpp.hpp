@@ -56,6 +56,7 @@
     #include <unistd.h>
     #include <fcntl.h>
     #include <errno.h>
+#include "fl/stl/noexcept.h"
     // IWYU pragma: end_keep
     #define SOCKET_ERROR_WOULD_BLOCK EWOULDBLOCK
     #define GET_SOCKET_ERROR() errno
@@ -90,7 +91,7 @@ FetchRequest::FetchRequest(const fl::string& url, const FetchOptions& opts, fl::
     mPath = p.empty() ? fl::string("/") : fl::string(p.data(), p.size());
 }
 
-FetchRequest::~FetchRequest() {
+FetchRequest::~FetchRequest() FL_NOEXCEPT {
     close_socket();
 }
 

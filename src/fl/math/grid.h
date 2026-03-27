@@ -5,6 +5,7 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/int.h"
 #include "fl/stl/span.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -12,7 +13,7 @@ template <typename T> class allocator_psram;
 
 template <typename T> class Grid {
   public:
-    Grid() = default;
+    Grid() FL_NOEXCEPT = default;
 
     Grid(u32 width, u32 height) { reset(width, height); }
 

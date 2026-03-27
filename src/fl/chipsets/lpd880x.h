@@ -9,6 +9,7 @@
 #include "platforms/shared/spi_pixel_writer.h"  // ok platform headers
 // IWYU pragma: end_keep
 #include "platforms/spi_output_template.h"
+#include "fl/stl/noexcept.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -42,7 +43,7 @@ class LPD8806Controller : public CPixelLEDController<RGB_ORDER> {
 	SPI mSPI;
 
 public:
-	LPD8806Controller()  {}
+	LPD8806Controller() FL_NOEXCEPT  {}
 	virtual void init() {
 		mSPI.init();
 	}
@@ -107,7 +108,7 @@ class LPD6803Controller : public CPixelLEDController<RGB_ORDER> {
 	void endBoundary(int nLeds) { int nDWords = (nLeds/32); do { mSPI.writeByte(0xFF); mSPI.writeByte(0x00); mSPI.writeByte(0x00); mSPI.writeByte(0x00); } while(nDWords--); }
 
 public:
-	LPD6803Controller() {}
+	LPD6803Controller() FL_NOEXCEPT {}
 
 	virtual void init() {
 		mSPI.init();

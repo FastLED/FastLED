@@ -4,6 +4,7 @@
 #include "fl/math/filter/filter.h"
 #include "fl/stl/int.h"
 #include "fl/stl/function.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -18,8 +19,8 @@ enum class PercussionType : u8 {
 
 class Percussion : public Detector {
 public:
-    Percussion();
-    ~Percussion() override;
+    Percussion() FL_NOEXCEPT;
+    ~Percussion() FL_NOEXCEPT override;
 
     void update(shared_ptr<Context> context) override;
     void fireCallbacks() override;

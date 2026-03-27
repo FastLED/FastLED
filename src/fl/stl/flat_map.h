@@ -64,7 +64,7 @@ class flat_map {
     flat_map(const Less& less, memory_resource* resource) FL_NOEXCEPT
         : mData(resource), mLess(less) {}
 
-    flat_map(const flat_map& other) = default;
+    flat_map(const flat_map& other) FL_NOEXCEPT = default;
     flat_map& operator=(const flat_map& other) = default;
 
     flat_map(flat_map&& other) FL_NOEXCEPT

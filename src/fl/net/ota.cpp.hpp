@@ -3,6 +3,7 @@
 
 #include "fl/net/ota.h"
 #include "platforms/ota.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace net {
@@ -15,7 +16,7 @@ OTA::OTA() : mImpl(nullptr) {
     // Lazy initialization - mImpl will be created on first method call
 }
 
-OTA::~OTA() {
+OTA::~OTA() FL_NOEXCEPT {
     // shared_ptr handles cleanup automatically
 }
 

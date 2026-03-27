@@ -4,6 +4,7 @@
 #include "fl/system/log.h"
 #include "fl/math/filter/div_by_count.h"
 #include "fl/stl/span.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace detail {
@@ -13,7 +14,7 @@ class SavitzkyGolayFilterImpl {
     static_assert(N == 0 || (N % 2 == 1),
                   "SavitzkyGolayFilter: N must be odd for symmetric polynomial fit");
   public:
-    SavitzkyGolayFilterImpl() : mLastValue(T(0)) {}
+    SavitzkyGolayFilterImpl() FL_NOEXCEPT : mLastValue(T(0)) {}
     explicit SavitzkyGolayFilterImpl(fl::size capacity)
         : mBuf(capacity), mLastValue(T(0)) {
         if (capacity % 2 == 0) {

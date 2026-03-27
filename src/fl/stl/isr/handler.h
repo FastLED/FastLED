@@ -7,6 +7,7 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/cstddef.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace isr {
@@ -22,7 +23,7 @@ struct config {
     u8 priority;                  // Priority level (platform-dependent range)
     u32 flags;                    // Platform-specific flags (see constants.h)
 
-    config()
+    config() FL_NOEXCEPT
         : handler(nullptr)
         , user_data(nullptr)
         , frequency_hz(0)
@@ -38,7 +39,7 @@ struct handle {
     void* user_data;              // User data (for validation)
     u8 platform_id;               // Platform identifier (for runtime checks)
 
-    handle()
+    handle() FL_NOEXCEPT
         : platform_handle(nullptr)
         , handler(nullptr)
         , user_data(nullptr)

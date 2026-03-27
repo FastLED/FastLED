@@ -12,6 +12,7 @@ LUT - Look up table implementation for various types.
 
 #include "fl/stl/int.h"
 #include "fl/math/geometry.h"
+#include "fl/stl/noexcept.h"
 namespace fl {
 
 // LUT holds a look up table to map data from one
@@ -40,7 +41,7 @@ template <typename T> class LUT {
     }
     // In this version the data is passed in but not managed by this object.
     LUT(u32 length, T *data) : length(length) { this->data = data; }
-    ~LUT() {
+    ~LUT() FL_NOEXCEPT {
         PSRamAllocator<T>::Free(mDataHandle.release());
         data = mDataHandle.get();
     }

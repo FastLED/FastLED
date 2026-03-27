@@ -3,6 +3,7 @@
 #include "fl/stl/new.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/math/math.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -15,7 +16,7 @@ AutoGain::AutoGain(const AutoGainConfig& config) {
     configure(config);
 }
 
-AutoGain::~AutoGain() = default;
+AutoGain::~AutoGain() FL_NOEXCEPT = default;
 
 void AutoGain::configure(const AutoGainConfig& config) {
     mConfig = config;

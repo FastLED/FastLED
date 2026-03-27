@@ -2,6 +2,7 @@
 #include "fl/audio/audio_context.h"
 #include "fl/math/math.h"
 #include "fl/stl/algorithm.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -23,7 +24,7 @@ TempoAnalyzer::TempoAnalyzer()
     mHypotheses.reserve(MAX_HYPOTHESES);
 }
 
-TempoAnalyzer::~TempoAnalyzer() = default;
+TempoAnalyzer::~TempoAnalyzer() FL_NOEXCEPT = default;
 
 void TempoAnalyzer::update(shared_ptr<Context> context) {
     mRetainedFFT = context->getFFT16();

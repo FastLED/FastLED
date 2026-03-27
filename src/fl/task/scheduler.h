@@ -7,6 +7,7 @@
 #include "fl/stl/singleton.h"
 #include "fl/stl/atomic.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace task {
@@ -27,7 +28,7 @@ public:
 
 private:
     friend class fl::Singleton<Scheduler>;
-    Scheduler() : mTasks(), mNextTaskId(1) {}
+    Scheduler() FL_NOEXCEPT : mTasks(), mNextTaskId(1) {}
 
     void warn_no_then(int task_id, const fl::string& trace_label);
     void warn_no_catch(int task_id, const fl::string& trace_label, const Error& error);

@@ -108,7 +108,7 @@ void Gradient::set(const CRGBPalette16 *palette) { mVariant = palette; }
 
 void Gradient::set(const GradientFunction &func) { mVariant = func; }
 
-Gradient &Gradient::operator=(const Gradient &other) {
+Gradient &Gradient::operator=(const Gradient &other) FL_NOEXCEPT {
     if (this != &other) {
         mVariant = other.mVariant;
     }

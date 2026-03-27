@@ -39,7 +39,7 @@ namespace task {
 struct Error {
     fl::string message;
 
-    Error() = default;
+    Error() FL_NOEXCEPT = default;
     Error(const fl::string& msg) : message(msg) {}
     Error(const char* msg) : message(msg) {}
     Error(fl::string&& msg) : message(fl::move(msg)) {}
@@ -90,7 +90,7 @@ public:
     }
 
     /// Default constructor - creates invalid Promise
-    Promise() : mImpl(nullptr) {}
+    Promise() FL_NOEXCEPT : mImpl(nullptr) {}
 
     /// Copy constructor (promises are now copyable via shared implementation)
     Promise(const Promise& other) = default;
@@ -244,7 +244,7 @@ enum class PromiseState_t {
 template<typename T>
 class PromiseImpl {
 public:
-    PromiseImpl() : mState(static_cast<int>(PromiseState_t::PENDING)), mCallbacksProcessed(false) {}
+    PromiseImpl() FL_NOEXCEPT : mState(static_cast<int>(PromiseState_t::PENDING)), mCallbacksProcessed(false) {}
 
     /// Set success callback
     void set_then_callback(fl::function<void(const T&)> callback) {

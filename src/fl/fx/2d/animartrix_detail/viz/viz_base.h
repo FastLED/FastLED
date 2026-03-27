@@ -1,4 +1,5 @@
 #pragma once
+#include "fl/stl/noexcept.h"
 
 // IAnimartrix2Viz: abstract base class for all Animartrix2 visualizers.
 //
@@ -15,7 +16,7 @@ namespace fl {
 
 class IAnimartrix2Viz {
 public:
-    virtual ~IAnimartrix2Viz() = default;
+    virtual ~IAnimartrix2Viz() FL_NOEXCEPT = default;
     virtual void draw(Context &ctx) = 0;
 };
 

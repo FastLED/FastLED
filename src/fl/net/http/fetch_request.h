@@ -5,6 +5,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/url.h"
 #include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
 
 // Forward declaration for hostent (platform-specific type)
 struct hostent;
@@ -38,7 +39,7 @@ public:
     FetchRequest(const fl::string& url, const FetchOptions& opts, fl::task::Promise<Response> promise);
 
     /// @brief Destructor - closes socket if still open
-    ~FetchRequest();
+    ~FetchRequest() FL_NOEXCEPT;
 
     /// @brief Pump the state machine (called by fl::task every update interval)
     ///

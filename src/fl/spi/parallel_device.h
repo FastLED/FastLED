@@ -11,6 +11,7 @@
 #include "fl/spi/transaction.h"
 // IWYU pragma: begin_keep
 #include "platforms/shared/spi_types.h"  // ok platform headers
+#include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep  // ok platform headers
 
 // Forward declarations for backends
@@ -70,7 +71,7 @@ public:
         SpiParallelMode mode;           ///< Execution mode (ISR vs bit-bang)
         u32 timer_hz;              ///< Timer frequency for ISR mode
 
-        Config();  // Implemented in .cpp to avoid circular dependency
+        Config() FL_NOEXCEPT;  // Implemented in .cpp to avoid circular dependency
     };
 
     /// @brief Construct parallel device
@@ -78,13 +79,13 @@ public:
     explicit ParallelDevice(const Config& config);
 
     /// @brief Destructor - releases hardware resources
-    ~ParallelDevice();
+    ~ParallelDevice() FL_NOEXCEPT;
 
     // Disable copy/move
-    ParallelDevice(const ParallelDevice&) = delete;
-    ParallelDevice& operator=(const ParallelDevice&) = delete;
-    ParallelDevice(ParallelDevice&&) = delete;
-    ParallelDevice& operator=(ParallelDevice&&) = delete;
+    ParallelDevice(const ParallelDevice&) FL_NOEXCEPT = delete;
+    ParallelDevice& operator=(const ParallelDevice&) FL_NOEXCEPT = delete;
+    ParallelDevice(ParallelDevice&&) FL_NOEXCEPT = delete;
+    ParallelDevice& operator=(ParallelDevice&&) FL_NOEXCEPT = delete;
 
     // ========== Initialization ==========
 

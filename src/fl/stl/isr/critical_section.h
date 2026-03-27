@@ -2,6 +2,7 @@
 /// @brief RAII critical section helper and interrupt control declarations
 
 #pragma once
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -24,10 +25,10 @@ namespace isr {
 ///   }  // Interrupts automatically re-enabled here
 class critical_section {
 public:
-    critical_section();
-    ~critical_section();
-    critical_section(const critical_section&) = delete;
-    critical_section& operator=(const critical_section&) = delete;
+    critical_section() FL_NOEXCEPT;
+    ~critical_section() FL_NOEXCEPT;
+    critical_section(const critical_section&) FL_NOEXCEPT = delete;
+    critical_section& operator=(const critical_section&) FL_NOEXCEPT = delete;
 };
 
 // Backward-compatible type alias

@@ -8,6 +8,7 @@
 #include "fl/stl/chrono.h"
 #include "fl/stl/cstdio.h"
 #include "fl/stl/thread.h"
+#include "fl/stl/noexcept.h"
 namespace fl {
 namespace net {
 namespace http {
@@ -23,7 +24,7 @@ HttpStreamClient::HttpStreamClient(const fl::string& host, u16 port, u32 heartbe
     mNativeClient = fl::make_unique<NativeHttpClient>(mHost, mPort, config);
 }
 
-HttpStreamClient::~HttpStreamClient() {
+HttpStreamClient::~HttpStreamClient() FL_NOEXCEPT {
     disconnect();
 }
 

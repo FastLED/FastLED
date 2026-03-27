@@ -1,4 +1,5 @@
 #pragma once
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -12,9 +13,9 @@ public:
     static constexpr u8 A4_MIDI_NOTE = 69;
 
     // Constructors
-    Note();
+    Note() FL_NOEXCEPT;
     explicit Note(shared_ptr<Pitch> pitchDetector);
-    ~Note();
+    ~Note() FL_NOEXCEPT;
 
     // Update and reset
     void update(shared_ptr<Context> context);

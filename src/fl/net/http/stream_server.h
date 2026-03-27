@@ -9,6 +9,7 @@
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/flat_map.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace net {
@@ -26,7 +27,7 @@ public:
     HttpStreamServer(u16 port = 8080, u32 heartbeatIntervalMs = 30000);
 
     /// Virtual destructor
-    ~HttpStreamServer() override;
+    ~HttpStreamServer() FL_NOEXCEPT override;
 
     // Connection Management (override from HttpStreamTransport)
 
@@ -91,7 +92,7 @@ private:
         fl::string headerBuffer;     // Accumulates partial HTTP header reads
 
         // Default constructor (required for map operations)
-        ClientState()
+        ClientState() FL_NOEXCEPT
             : clientId(0)
             , httpHeaderReceived(false)
             , httpHeaderSent(false)

@@ -12,6 +12,7 @@ Modern platforms are so fast that the extra performance is not needed, but accur
 #include "fl/stl/span.h"
 #include "fl/stl/shared_ptr.h"  // IWYU pragma: keep
 #include "fl/math/fixed_point.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -287,7 +288,7 @@ inline void ease8(EaseType type, u8* src, u8* dst, u8 count) {
 class Gamma8 {
 public:
     static fl::shared_ptr<const Gamma8> getOrCreate(float gamma);
-    virtual ~Gamma8() = default;
+    virtual ~Gamma8() FL_NOEXCEPT = default;
 
     virtual void convert(fl::span<const u8> input, fl::span<u16> output) const = 0;
     virtual void convert(fl::span<const fl::ufixed_point<8, 8>> input, fl::span<u16> output) const = 0;

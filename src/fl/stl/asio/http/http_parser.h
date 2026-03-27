@@ -7,6 +7,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/flat_map.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/noexcept.h"
 
 // Forward declaration — breaks fl.stl+ -> fl.net+ link chain
 namespace fl { namespace net { namespace http { class ChunkedReader; } } }
@@ -39,8 +40,8 @@ using HttpResponsePtrConst = fl::shared_ptr<const HttpResponse>;
 // HttpRequestParser: Parse HTTP/1.1 requests
 class HttpRequestParser {
 public:
-    HttpRequestParser();
-    ~HttpRequestParser();
+    HttpRequestParser() FL_NOEXCEPT;
+    ~HttpRequestParser() FL_NOEXCEPT;
 
     // Feed raw bytes received from a socket into the parser (incremental/streaming)
     void feed(fl::span<const u8> data);
@@ -102,8 +103,8 @@ private:
 // HttpResponseParser: Parse HTTP/1.1 responses
 class HttpResponseParser {
 public:
-    HttpResponseParser();
-    ~HttpResponseParser();
+    HttpResponseParser() FL_NOEXCEPT;
+    ~HttpResponseParser() FL_NOEXCEPT;
 
     // Feed raw bytes received from a socket into the parser (incremental/streaming)
     void feed(fl::span<const u8> data);

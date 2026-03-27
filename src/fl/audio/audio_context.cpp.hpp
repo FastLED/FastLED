@@ -1,4 +1,5 @@
 #include "fl/audio/audio_context.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -29,7 +30,7 @@ Context::Context(const Sample& sample)
     mFFTCache.reserve(MAX_FFT_CACHE_ENTRIES);
 }
 
-Context::~Context() = default;
+Context::~Context() FL_NOEXCEPT = default;
 
 shared_ptr<const fft::Bins> Context::getFFT(int bands, float fmin, float fmax, fft::Mode mode, fft::Window window) {
     fft::Args args(mSample.size(), bands, fmin, fmax, mSampleRate, mode, window);

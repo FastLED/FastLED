@@ -8,6 +8,7 @@
 #include "fl/stl/span.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -36,10 +37,10 @@ struct Context {
     // Internal engine (reuses original implementation for bit-identical output)
     fl::unique_ptr<Engine> mEngine;
 
-    Context() = default;
-    ~Context();
-    Context(const Context &) = delete;
-    Context &operator=(const Context &) = delete;
+    Context() FL_NOEXCEPT = default;
+    ~Context() FL_NOEXCEPT;
+    Context(const Context &) FL_NOEXCEPT = delete;
+    Context &operator=(const Context &) FL_NOEXCEPT = delete;
 };
 
 }  // namespace fl

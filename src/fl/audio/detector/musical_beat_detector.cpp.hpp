@@ -2,6 +2,7 @@
 #include "fl/stl/int.h"
 #include "fl/math/math.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -13,7 +14,7 @@ MusicalBeat::MusicalBeat(const MusicalBeatDetectorConfig& config) {
     configure(config);
 }
 
-MusicalBeat::~MusicalBeat() = default;
+MusicalBeat::~MusicalBeat() FL_NOEXCEPT = default;
 
 void MusicalBeat::configure(const MusicalBeatDetectorConfig& config) {
     mConfig = config;

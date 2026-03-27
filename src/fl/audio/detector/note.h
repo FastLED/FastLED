@@ -3,6 +3,7 @@
 #include "fl/audio/audio_detector.h"
 #include "fl/stl/function.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -30,9 +31,9 @@ namespace detector {
  */
 class Note : public Detector {
 public:
-    Note();
+    Note() FL_NOEXCEPT;
     explicit Note(shared_ptr<Pitch> pitchDetector);
-    ~Note() override;
+    ~Note() FL_NOEXCEPT override;
 
     void update(shared_ptr<Context> context) override;
     void fireCallbacks() override;

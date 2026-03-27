@@ -38,6 +38,7 @@
 #include "fl/stl/map.h"
 #include "fl/system/engine_events.h"
 #include "platforms/esp/is_esp.h"  // ok platform headers - for FL_IS_ESP32  // IWYU pragma: keep
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace asio {
@@ -46,7 +47,7 @@ namespace http {
 /// HTTP request object (immutable, passed by const reference)
 class Request {
 public:
-    Request() = default;
+    Request() FL_NOEXCEPT = default;
 
     /// Get HTTP method (e.g., "GET", "POST", "PUT", "DELETE")
     const string& method() const { return mMethod; }
@@ -93,7 +94,7 @@ private:
 /// HTTP response builder (fluent interface)
 class Response {
 public:
-    Response();
+    Response() FL_NOEXCEPT;
 
     /// Set HTTP status code
     /// @param code Status code (e.g., 200, 404, 500)
@@ -166,14 +167,14 @@ using RouteHandler = function<Response(const Request&)>;
 class Server : public EngineEvents::Listener {
 public:
     /// Constructor
-    Server();
+    Server() FL_NOEXCEPT;
 
     /// Destructor (stops server if running)
-    ~Server();
+    ~Server() FL_NOEXCEPT;
 
     // Non-copyable
-    Server(const Server&) = delete;
-    Server& operator=(const Server&) = delete;
+    Server(const Server&) FL_NOEXCEPT = delete;
+    Server& operator=(const Server&) FL_NOEXCEPT = delete;
 
     /// Start server on specified port
     /// @param port Port to listen on (default: 8080)

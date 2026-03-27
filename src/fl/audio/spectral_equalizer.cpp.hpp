@@ -5,6 +5,7 @@
 #include "fl/math/math.h"
 #include "fl/math/math.h"
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -21,7 +22,7 @@ SpectralEqualizer::SpectralEqualizer(const SpectralEqualizerConfig& config) {
     configure(config);
 }
 
-SpectralEqualizer::~SpectralEqualizer() = default;
+SpectralEqualizer::~SpectralEqualizer() FL_NOEXCEPT = default;
 
 void SpectralEqualizer::configure(const SpectralEqualizerConfig& config) {
     mConfig = config;

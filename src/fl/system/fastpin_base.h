@@ -8,6 +8,7 @@
 
 #include "platforms/is_platform.h"
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/noexcept.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -43,7 +44,7 @@ struct ValidPinBase {
 class Selectable {
 public:
 	#ifndef FL_IS_AVR
-	virtual ~Selectable() {}
+	virtual ~Selectable() FL_NOEXCEPT {}
 	#endif
 	virtual void select() = 0;      ///< Select this object
 	virtual void release() = 0;     ///< Release this object

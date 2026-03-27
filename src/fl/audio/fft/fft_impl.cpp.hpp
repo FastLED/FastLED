@@ -23,6 +23,7 @@
 
 #include "fl/stl/cstring.h"
 #include "fl/stl/singleton.h"
+#include "fl/stl/noexcept.h"
 
 #ifndef FL_AUDIO_SAMPLE_RATE
 #define FL_AUDIO_SAMPLE_RATE 44100
@@ -90,7 +91,7 @@ class Context {
         }
     }
 
-    ~Context() {
+    ~Context() FL_NOEXCEPT {
         if (mFftrCfg) {
             kiss_fftr_free(mFftrCfg);
         }
@@ -1132,7 +1133,7 @@ Impl::Impl(const Args &args) {
                                           args.mode, args.window);
 }
 
-Impl::~Impl() { mContext.reset(); }
+Impl::~Impl() FL_NOEXCEPT { mContext.reset(); }
 
 fl::string Impl::info() const {
     if (mContext) {

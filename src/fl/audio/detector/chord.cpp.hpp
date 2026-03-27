@@ -3,6 +3,7 @@
 #include "fl/audio/fft/fft.h"
 #include "fl/math/math.h"
 #include "fl/system/log.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -47,7 +48,7 @@ ChordDetector::ChordDetector()
     initializeTemplateMap();
 }
 
-ChordDetector::~ChordDetector() = default;
+ChordDetector::~ChordDetector() FL_NOEXCEPT = default;
 
 void ChordDetector::initializeTemplateMap() {
     // Pre-compute lookup map from ChordType to ChordTemplate*

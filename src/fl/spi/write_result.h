@@ -4,6 +4,7 @@
 /// @brief Result type for SPI write operations
 
 #include "fl/stl/string.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -13,7 +14,7 @@ struct WriteResult {
     bool ok;                ///< True if write succeeded, false if error
     fl::string error;       ///< Error message (empty if ok == true)
 
-    WriteResult() : ok(true) {}
+    WriteResult() FL_NOEXCEPT : ok(true) {}
     explicit WriteResult(const char* err) : ok(false), error(err) {}
     explicit WriteResult(const fl::string& err) : ok(false), error(err) {}
 

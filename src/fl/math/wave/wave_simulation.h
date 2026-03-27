@@ -19,6 +19,7 @@ Based on works and code by Shawn Silverman.
 #include "fl/stl/unique_ptr.h"  // For unique_ptr
 #include "fl/math/supersample.h"
 #include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -55,7 +56,7 @@ class WaveSimulation1D {
     // Only applies to getu8().
     void setEasingMode(U8EasingFunction mode) { mU8Mode = mode; }
 
-    ~WaveSimulation1D() = default;
+    ~WaveSimulation1D() FL_NOEXCEPT = default;
 
     // Delegate methods to the internal simulation.
     void setSpeed(float speed);
@@ -127,7 +128,7 @@ class WaveSimulation2D {
     void init(u32 width, u32 height, SuperSample factor, float speed,
               int dampening);
 
-    ~WaveSimulation2D() = default;
+    ~WaveSimulation2D() FL_NOEXCEPT = default;
 
     // Delegated simulation methods.
     void setSpeed(float speed);

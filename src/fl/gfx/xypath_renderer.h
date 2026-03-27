@@ -12,6 +12,7 @@
 #include "fl/stl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/gfx/tile2x2.h"  // IWYU pragma: keep
 #include "fl/math/transform.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -21,7 +22,7 @@ class XYPathRenderer {
   public:
     XYPathRenderer(XYPathGeneratorPtr path,
                    TransformFloat transform = TransformFloat());
-    virtual ~XYPathRenderer() = default; // Add virtual destructor for proper cleanup
+    virtual ~XYPathRenderer() FL_NOEXCEPT = default; // Add virtual destructor for proper cleanup
     vec2f at(float alpha);
 
     Tile2x2_u8 at_subpixel(float alpha);

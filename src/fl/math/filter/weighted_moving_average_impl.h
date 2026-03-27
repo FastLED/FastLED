@@ -2,6 +2,7 @@
 
 #include "fl/stl/circular_buffer.h"
 #include "fl/stl/span.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace detail {
@@ -9,7 +10,7 @@ namespace detail {
 template <typename T, fl::size N = 0>
 class WeightedMovingAverageImpl {
   public:
-    WeightedMovingAverageImpl() : mLastValue(T(0)) {}
+    WeightedMovingAverageImpl() FL_NOEXCEPT : mLastValue(T(0)) {}
     explicit WeightedMovingAverageImpl(fl::size capacity)
         : mBuf(capacity), mLastValue(T(0)) {}
 

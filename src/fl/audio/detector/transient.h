@@ -5,6 +5,7 @@
 #include "fl/stl/function.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/deque.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -19,8 +20,8 @@ namespace detector {
  */
 class Transient : public Detector {
 public:
-    Transient();
-    ~Transient() override;
+    Transient() FL_NOEXCEPT;
+    ~Transient() FL_NOEXCEPT override;
 
     void update(shared_ptr<Context> context) override;
     void fireCallbacks() override;

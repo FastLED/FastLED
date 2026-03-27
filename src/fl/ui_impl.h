@@ -5,6 +5,7 @@
 #include "fl/stl/url.h"
 #include "fl/stl/compiler_control.h"
 #include "platforms/ui_defs.h"
+#include "fl/stl/noexcept.h"
 
 #ifndef FASTLED_HAS_UI_SLIDER
 #define FASTLED_HAS_UI_SLIDER 0
@@ -59,7 +60,7 @@ class UISliderImpl {
             mValue = max;
         }
     }
-    ~UISliderImpl() {}
+    ~UISliderImpl() FL_NOEXCEPT {}
     float value() const { return mValue; }
     float getMax() const { return mMax; }
     float getMin() const { return mMin; }
@@ -75,11 +76,11 @@ class UISliderImpl {
     // Stub method for group setting (does nothing on non-WASM platforms)
     void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
 
-    UISliderImpl &operator=(float value) {
+    UISliderImpl &operator=(float value) FL_NOEXCEPT {
         setValue(value);
         return *this;
     }
-    UISliderImpl &operator=(int value) {
+    UISliderImpl &operator=(int value) FL_NOEXCEPT {
         setValue(static_cast<float>(value));
         return *this;
     }
@@ -99,7 +100,7 @@ class UISliderImpl {
 class UIButtonImpl {
   public:
     UIButtonImpl(const char *name) { FASTLED_UNUSED(name); }
-    ~UIButtonImpl() {}
+    ~UIButtonImpl() FL_NOEXCEPT {}
     bool isPressed() const { return false; }
     bool clicked() const { return false; }
     int clickedCount() const { return 0; }
@@ -123,14 +124,14 @@ class UICheckboxImpl {
     UICheckboxImpl(const char *name, bool value = false) : mValue(value) {
         FASTLED_UNUSED(name);
     }
-    ~UICheckboxImpl() {}
+    ~UICheckboxImpl() FL_NOEXCEPT {}
     operator bool() const { return mValue; }
     explicit operator int() const { return mValue ? 1 : 0; }
-    UICheckboxImpl &operator=(bool value) {
+    UICheckboxImpl &operator=(bool value) FL_NOEXCEPT {
         setValue(value);
         return *this;
     }
-    UICheckboxImpl &operator=(int value) {
+    UICheckboxImpl &operator=(int value) FL_NOEXCEPT {
         setValue(value != 0);
         return *this;
     }
@@ -155,16 +156,16 @@ class UINumberFieldImpl {
         : mValue(value), mMin(fl::min(min, max)), mMax(fl::max(min, max)) {
         FASTLED_UNUSED(name);
     }
-    ~UINumberFieldImpl() {}
+    ~UINumberFieldImpl() FL_NOEXCEPT {}
     double value() const { return mValue; }
     void setValue(double value) { mValue = fl::max(mMin, fl::min(mMax, value)); }
     operator double() const { return mValue; }
     operator int() const { return static_cast<int>(mValue); }
-    UINumberFieldImpl &operator=(double value) {
+    UINumberFieldImpl &operator=(double value) FL_NOEXCEPT {
         setValue(value);
         return *this;
     }
-    UINumberFieldImpl &operator=(int value) {
+    UINumberFieldImpl &operator=(int value) FL_NOEXCEPT {
         setValue(static_cast<double>(value));
         return *this;
     }
@@ -185,7 +186,7 @@ class UINumberFieldImpl {
 class UITitleImpl {
   public:
     UITitleImpl(const char *name) { FASTLED_UNUSED(name); }
-    ~UITitleImpl() {}
+    ~UITitleImpl() FL_NOEXCEPT {}
     
     // Stub method for group setting (does nothing on non-WASM platforms)
     void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
@@ -198,7 +199,7 @@ class UITitleImpl {
 class UIDescriptionImpl {
   public:
     UIDescriptionImpl(const char *name) { FASTLED_UNUSED(name); }
-    ~UIDescriptionImpl() {}
+    ~UIDescriptionImpl() FL_NOEXCEPT {}
     
     // Stub method for group setting (does nothing on non-WASM platforms)
     void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
@@ -210,7 +211,7 @@ class UIDescriptionImpl {
 class UIHelpImpl {
   public:
     UIHelpImpl(const char *markdownContent) : mContent(markdownContent) { FASTLED_UNUSED(markdownContent); }
-    ~UIHelpImpl() {}
+    ~UIHelpImpl() FL_NOEXCEPT {}
     
     // Stub method for group setting (does nothing on non-WASM platforms)
     void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
@@ -236,7 +237,7 @@ class UIAudioImpl {
         FASTLED_UNUSED(name);
         FASTLED_UNUSED(config);
     }
-    ~UIAudioImpl() {}
+    ~UIAudioImpl() FL_NOEXCEPT {}
 
     audio::Sample next() {
         FASTLED_WARN("Audio sample not implemented");
@@ -312,7 +313,7 @@ class UIDropdownImpl {
         }
     }
 
-    ~UIDropdownImpl() {}
+    ~UIDropdownImpl() FL_NOEXCEPT {}
     
     fl::string value() const { 
         if (mSelectedIndex < mOptions.size()) {
@@ -369,7 +370,7 @@ class UIGroupImpl {
     UIGroupImpl(const char *name) : mGroupName(name) { 
         FASTLED_UNUSED(name); 
     }
-    ~UIGroupImpl() {}
+    ~UIGroupImpl() FL_NOEXCEPT {}
     fl::string name() const { return mGroupName; }
 
   private:

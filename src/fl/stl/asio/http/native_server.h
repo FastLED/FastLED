@@ -11,6 +11,7 @@
 #include "fl/stl/span.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -21,20 +22,20 @@ struct ServerClientConnection {
     u32 clientId;  // Unique identifier for this client
 
     // Default constructor (required for fl::vector operations)
-    ServerClientConnection()
+    ServerClientConnection() FL_NOEXCEPT
         : connection(ConnectionConfig())
         , clientId(0)
     {
     }
 
-    ServerClientConnection(ServerClientConnection&& other)
+    ServerClientConnection(ServerClientConnection&& other) FL_NOEXCEPT
         : socket(fl::move(other.socket))
         , connection(other.connection)
         , clientId(other.clientId)
     {
     }
 
-    ServerClientConnection& operator=(ServerClientConnection&& other) {
+    ServerClientConnection& operator=(ServerClientConnection&& other) FL_NOEXCEPT {
         if (this != &other) {
             socket = fl::move(other.socket);
             connection = other.connection;
@@ -44,8 +45,8 @@ struct ServerClientConnection {
     }
 
     // Not copyable (socket is not copyable)
-    ServerClientConnection(const ServerClientConnection&) = delete;
-    ServerClientConnection& operator=(const ServerClientConnection&) = delete;
+    ServerClientConnection(const ServerClientConnection&) FL_NOEXCEPT = delete;
+    ServerClientConnection& operator=(const ServerClientConnection&) FL_NOEXCEPT = delete;
 };
 
 // Native HTTP server using POSIX sockets
@@ -54,11 +55,11 @@ class NativeHttpServer {
 public:
     // Constructor
     NativeHttpServer(u16 port, const ConnectionConfig& config = ConnectionConfig());
-    ~NativeHttpServer();
+    ~NativeHttpServer() FL_NOEXCEPT;
 
     // Disable copy (socket ownership)
-    NativeHttpServer(const NativeHttpServer&) = delete;
-    NativeHttpServer& operator=(const NativeHttpServer&) = delete;
+    NativeHttpServer(const NativeHttpServer&) FL_NOEXCEPT = delete;
+    NativeHttpServer& operator=(const NativeHttpServer&) FL_NOEXCEPT = delete;
 
     // Server lifecycle
     bool start();             // Start listening for connections

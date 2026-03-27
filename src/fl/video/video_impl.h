@@ -3,6 +3,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/span.h"
+#include "fl/stl/noexcept.h"
 
 // Forward declarations - actual includes moved to cpp
 namespace fl {
@@ -34,7 +35,7 @@ class VideoImpl {
     // audio triggers.
     VideoImpl(size_t pixelsPerFrame, float fpsVideo,
               size_t frameHistoryCount = 0);
-    ~VideoImpl();
+    ~VideoImpl() FL_NOEXCEPT;
     // Api
     void begin(fl::filebuf_ptr h);
     void setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime);

@@ -34,7 +34,7 @@ template <typename T> using ThreadLocal = ThreadLocalFake<T>;
 template <typename T> class ThreadLocalReal {
   public:
     // Default: each thread's object is default-constructed
-    ThreadLocalReal() : mDefaultValue(), mHasDefault(false) {
+    ThreadLocalReal() FL_NOEXCEPT : mDefaultValue(), mHasDefault(false) {
         initializeKey();
     }
 
@@ -45,7 +45,7 @@ template <typename T> class ThreadLocalReal {
     }
 
     // Destructor - cleanup pthread key
-    ~ThreadLocalReal() {
+    ~ThreadLocalReal() FL_NOEXCEPT {
         if (mKeyInitialized) {
             // Manually clean up storage for the current thread.
             // pthread_key_delete does NOT call the cleanup function - it only
@@ -60,12 +60,12 @@ template <typename T> class ThreadLocalReal {
     }
 
     // Copy constructor
-    ThreadLocalReal(const ThreadLocalReal& other) : mDefaultValue(other.mDefaultValue), mHasDefault(other.mHasDefault) {
+    ThreadLocalReal(const ThreadLocalReal& other) FL_NOEXCEPT : mDefaultValue(other.mDefaultValue), mHasDefault(other.mHasDefault) {
         initializeKey();
     }
 
     // Assignment operator
-    ThreadLocalReal& operator=(const ThreadLocalReal& other) {
+    ThreadLocalReal& operator=(const ThreadLocalReal& other) FL_NOEXCEPT {
         if (this != &other) {
             mDefaultValue = other.mDefaultValue;
             mHasDefault = other.mHasDefault;
@@ -108,7 +108,7 @@ template <typename T> class ThreadLocalReal {
     operator T &() { return access(); }
     operator const T &() const { return access(); }
 
-    ThreadLocalReal &operator=(const T &v) {
+    ThreadLocalReal &operator=(const T &v) FL_NOEXCEPT {
         set(v);
         return *this;
     }

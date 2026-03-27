@@ -1,6 +1,7 @@
 #include "fl/fx/1d/perlin_particle_punch.h"
 #include "fl/math/math.h"
 #include "noise.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -66,7 +67,7 @@ PerlinParticlePunch::PerlinParticlePunch(u16 num_leds) : Fx1d(num_leds) {
     mAmbientPalette = defaultPalette;
 }
 
-PerlinParticlePunch::~PerlinParticlePunch() = default;
+PerlinParticlePunch::~PerlinParticlePunch() FL_NOEXCEPT = default;
 
 fl::string PerlinParticlePunch::fxName() const {
     return "PerlinParticlePunch";

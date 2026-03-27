@@ -1,14 +1,15 @@
 #pragma once
 
 #include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
 // Logic to control the progression of a transition over time.
 class Transition {
   public:
-    Transition() : mStart(0), mDuration(0), mNotStarted(true) {}
-    ~Transition() {}
+    Transition() FL_NOEXCEPT : mStart(0), mDuration(0), mNotStarted(true) {}
+    ~Transition() FL_NOEXCEPT {}
 
     u8 getProgress(fl::u32 now) {
         if (mNotStarted) {

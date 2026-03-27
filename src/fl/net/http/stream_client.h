@@ -6,6 +6,7 @@
 #include "fl/stl/asio/http/native_client.h"  // IWYU pragma: keep
 #include "fl/stl/string.h"
 #include "fl/stl/unique_ptr.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace net {
@@ -24,7 +25,7 @@ public:
     HttpStreamClient(const fl::string& host, u16 port = 8080, u32 heartbeatIntervalMs = 30000);
 
     /// Virtual destructor
-    ~HttpStreamClient() override;
+    ~HttpStreamClient() FL_NOEXCEPT override;
 
     // Connection Management (override from HttpStreamTransport)
 

@@ -20,13 +20,14 @@
 #include "fl/math/math.h"
 #include "fl/stl/vector.h"
 #include "fl/system/log.h"
+#include "fl/stl/noexcept.h"
 
 
 namespace fl {
 
 // Default constructor and destructor - must be in .cpp for proper smart_ptr handling
 ScreenMap::ScreenMap() = default;
-ScreenMap::~ScreenMap() = default;
+ScreenMap::~ScreenMap() FL_NOEXCEPT = default;
 
 // Helper function to extract a vector of floats from a JSON array
 fl::vector<float> jsonArrayToFloatVector(const fl::json& jsonArray) {
@@ -445,7 +446,7 @@ vec2f &ScreenMap::operator[](u32 x) {
     return data[x];
 }
 
-ScreenMap &ScreenMap::operator=(const ScreenMap &other) {
+ScreenMap &ScreenMap::operator=(const ScreenMap &other) FL_NOEXCEPT {
     if (this != &other) {
         mDiameter = other.mDiameter;
         length = other.length;
@@ -455,7 +456,7 @@ ScreenMap &ScreenMap::operator=(const ScreenMap &other) {
     return *this;
 }
 
-ScreenMap &ScreenMap::operator=(ScreenMap &&other) {
+ScreenMap &ScreenMap::operator=(ScreenMap &&other) FL_NOEXCEPT {
     if (this != &other) {
         mDiameter = other.mDiameter;
         length = other.length;

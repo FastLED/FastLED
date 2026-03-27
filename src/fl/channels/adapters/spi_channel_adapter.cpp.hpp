@@ -8,6 +8,7 @@
 #include "fl/channels/config.h"  // For SpiChipsetConfig
 // IWYU pragma: begin_keep
 #include "platforms/shared/spi_hw_1.h"  // For SpiHw1::Config // ok platform headers
+#include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep
 
 namespace fl {
@@ -66,7 +67,7 @@ SpiChannelEngineAdapter::SpiChannelEngineAdapter(const char* name)
     // Controllers added via create() factory method
 }
 
-SpiChannelEngineAdapter::~SpiChannelEngineAdapter() {
+SpiChannelEngineAdapter::~SpiChannelEngineAdapter() FL_NOEXCEPT {
     FL_DBG("SpiChannelEngineAdapter: Destructor for '" << mName << "'");
 
     // Clear any enqueued channels that were never transmitted

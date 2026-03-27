@@ -3,6 +3,7 @@
 #include "fl/stl/int.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/span.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -69,9 +70,9 @@ struct FrequencyBinMapperConfig {
 /// @endcode
 class FrequencyBinMapper {
 public:
-    FrequencyBinMapper();
+    FrequencyBinMapper() FL_NOEXCEPT;
     explicit FrequencyBinMapper(const FrequencyBinMapperConfig& config);
-    ~FrequencyBinMapper();
+    ~FrequencyBinMapper() FL_NOEXCEPT;
 
     /// Configure the frequency bin mapper
     /// This calculates bin boundaries and FFT-to-frequency bin mappings

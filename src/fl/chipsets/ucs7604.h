@@ -12,6 +12,7 @@
 #include "fl/stl/vector.h"
 #include "fl/math/ease.h"
 #include "fl/stl/iterator.h"
+#include "fl/stl/noexcept.h"
 
 /// @file fl/chipsets/ucs7604.h
 /// @brief UCS7604 LED chipset controller implementation for FastLED
@@ -106,7 +107,7 @@ private:
     fl::vector_psram<u8> mByteBuffer;
 
 public:
-    UCS7604ControllerT() {}
+    UCS7604ControllerT() FL_NOEXCEPT {}
 
     virtual void init() override {
         mDelegate.init();

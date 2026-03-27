@@ -4,6 +4,7 @@
 #include "fl/audio/detector/mood_analyzer.h"
 #include "fl/audio/audio_context.h"
 #include "fl/math/math.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -24,7 +25,7 @@ MoodAnalyzer::MoodAnalyzer()
     mArousalHistory.reserve(mAveragingFrames);
 }
 
-MoodAnalyzer::~MoodAnalyzer() = default;
+MoodAnalyzer::~MoodAnalyzer() FL_NOEXCEPT = default;
 
 void MoodAnalyzer::update(shared_ptr<Context> context) {
     mRetainedFFT = context->getFFT(32);  // Higher resolution for mood analysis

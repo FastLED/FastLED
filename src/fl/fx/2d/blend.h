@@ -9,6 +9,7 @@ are blended by the the max luminance of the components.
 #include "fl/stl/stdint.h"
 
 #include "fl/fx/fx2d.h"
+#include "fl/stl/noexcept.h"
 
 // Forward declarations to reduce header overhead
 namespace fl {
@@ -49,7 +50,7 @@ class Blend2d : public Fx2d {
         Fx2dPtr fx;
         u8 blur_amount = 0;
         u8 blur_passes = 1;
-        Entry() = default;
+        Entry() FL_NOEXCEPT = default;
         Entry(Fx2dPtr fx, u8 blur_amount, u8 blur_passes)
             : fx(fx), blur_amount(blur_amount), blur_passes(blur_passes) {}
     };

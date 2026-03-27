@@ -8,6 +8,7 @@
 #include "fl/font/ttf_covenant5x5.h"  // Embedded default font declarations
 // IWYU pragma: begin_keep
 #include "third_party/stb/truetype/stb_truetype.h"
+#include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep  // declarations only
 
 namespace fl {
@@ -24,7 +25,7 @@ public:
         ) != 0;
     }
 
-    ~FontImpl() override = default;
+    ~FontImpl() FL_NOEXCEPT override = default;
 
     bool isValid() const { return mValid; }
 
@@ -194,7 +195,7 @@ FontRenderer::FontRenderer(FontPtr font, float pixelHeight)
     , mScale(font ? font->getScaleForPixelHeight(pixelHeight) : 0.0f) {
 }
 
-FontRenderer::~FontRenderer() = default;
+FontRenderer::~FontRenderer() FL_NOEXCEPT = default;
 
 FontRenderer::ScaledMetrics FontRenderer::getScaledMetrics() const {
     ScaledMetrics result = {};

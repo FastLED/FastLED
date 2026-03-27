@@ -2,6 +2,7 @@
 
 #include "fl/system/log.h"
 #include "fl/system/log.h"
+#include "fl/stl/noexcept.h"
 
 #define DBG FASTLED_DBG
 
@@ -11,7 +12,7 @@ TimeWarp::TimeWarp(fl::u32 realTimeNow, float initialTimeScale)
     : mLastRealTime(realTimeNow), mStartTime(realTimeNow),
       mTimeScale(initialTimeScale) {}
 
-TimeWarp::~TimeWarp() {}
+TimeWarp::~TimeWarp() FL_NOEXCEPT {}
 
 void TimeWarp::setSpeed(float timeScale) { mTimeScale = timeScale; }
 

@@ -3,6 +3,7 @@
 #include "fl/stl/int.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/span.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -74,9 +75,9 @@ struct SpectralEqualizerConfig {
 /// @endcode
 class SpectralEqualizer {
 public:
-    SpectralEqualizer();
+    SpectralEqualizer() FL_NOEXCEPT;
     explicit SpectralEqualizer(const SpectralEqualizerConfig& config);
-    ~SpectralEqualizer();
+    ~SpectralEqualizer() FL_NOEXCEPT;
 
     /// Configure the spectral equalizer
     /// This calculates per-band gain multipliers based on the selected curve

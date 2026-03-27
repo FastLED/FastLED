@@ -4,6 +4,7 @@
 /// @brief High-performance ISR-safe async logging queue (SPSC ring buffer) - declarations only
 
 #include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -32,10 +33,10 @@ public:
         fl::u16 mLength;    ///< Length of message in bytes
         fl::u16 mPadding;   ///< Reserved for alignment (unused)
 
-        Descriptor();
+        Descriptor() FL_NOEXCEPT;
     };
 
-    AsyncLogQueue();
+    AsyncLogQueue() FL_NOEXCEPT;
 
     /// @brief Push a message from fl::string (ISR-safe)
     bool push(const fl::string& msg);

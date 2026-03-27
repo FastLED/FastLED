@@ -13,6 +13,7 @@
 #include "fl/trace.h"
 #include "fl/task/executor.h"
 #include "platforms/init_channel_driver.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -35,7 +36,7 @@ ChannelManager::ChannelManager() {
     EngineEvents::addListener(this);
 }
 
-ChannelManager::~ChannelManager() {
+ChannelManager::~ChannelManager() FL_NOEXCEPT {
     FL_DBG("ChannelManager: Destructor called");
 
     // Remove self from EngineEvents listener list

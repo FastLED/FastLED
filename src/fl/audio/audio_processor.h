@@ -14,6 +14,7 @@
 #include "fl/stl/function.h"  // IWYU pragma: keep
 #include "fl/stl/vector.h"
 #include "fl/task/task.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -55,8 +56,8 @@ class Vibe;
 
 class Processor {
 public:
-    Processor();
-    ~Processor();
+    Processor() FL_NOEXCEPT;
+    ~Processor() FL_NOEXCEPT;
 
     // ----- Main Update -----
     void update(const Sample& sample);

@@ -29,6 +29,7 @@
 #else
     #include "platforms/posix/socket_posix.h"  // ok platform headers  // IWYU pragma: keep
     #include <fcntl.h>  // ok platform headers (for O_NONBLOCK flag)  // IWYU pragma: keep
+#include "fl/stl/noexcept.h"
 #endif
 #endif
 
@@ -424,10 +425,10 @@ fl::task::Promise<Response> execute_fetch_request(const fl::string& url, const F
 
 class FetchEngineListener : public EngineEvents::Listener {
 public:
-    FetchEngineListener() {
+    FetchEngineListener() FL_NOEXCEPT {
         EngineEvents::addListener(this);
     };
-    ~FetchEngineListener() override {
+    ~FetchEngineListener() FL_NOEXCEPT override {
         // Listener base class automatically removes itself
         EngineEvents::removeListener(this);
     }

@@ -7,6 +7,7 @@
 
 #include "eorder.h"
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -49,7 +50,7 @@ struct Rgbw {
 };
 
 struct RgbwInvalid : public Rgbw {
-    RgbwInvalid() {
+    RgbwInvalid() FL_NOEXCEPT {
         white_color_temp = kRGBWDefaultColorTemp;
         rgbw_mode = RGBW_MODE::kRGBWInvalid;
     }
@@ -60,7 +61,7 @@ struct RgbwInvalid : public Rgbw {
 };
 
 struct RgbwDefault : public Rgbw {
-    RgbwDefault() {
+    RgbwDefault() FL_NOEXCEPT {
         white_color_temp = kRGBWDefaultColorTemp;
         rgbw_mode = RGBW_MODE::kRGBWExactColors;
     }
@@ -71,7 +72,7 @@ struct RgbwDefault : public Rgbw {
 };
 
 struct RgbwWhiteIsOff : public Rgbw {
-    RgbwWhiteIsOff() {
+    RgbwWhiteIsOff() FL_NOEXCEPT {
         white_color_temp = kRGBWDefaultColorTemp;
         rgbw_mode = RGBW_MODE::kRGBWNullWhitePixel;
     }

@@ -3,6 +3,7 @@
 #include "fl/audio/audio_detector.h"
 #include "fl/stl/function.h"
 #include "fl/stl/vector.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -12,8 +13,8 @@ namespace detector {
 // diminuendos, and overall dynamic evolution.
 class DynamicsAnalyzer : public Detector {
 public:
-    DynamicsAnalyzer();
-    ~DynamicsAnalyzer() override;
+    DynamicsAnalyzer() FL_NOEXCEPT;
+    ~DynamicsAnalyzer() FL_NOEXCEPT override;
 
     // Detector interface
     void update(shared_ptr<Context> context) override;

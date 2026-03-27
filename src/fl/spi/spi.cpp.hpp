@@ -9,7 +9,7 @@ namespace fl {
 
 // Out-of-line destructor: ensures unique_ptr<MultiLaneDevice> destruction
 // happens here (in fl.spi+), not in every TU that includes spi.h.
-Spi::~Spi() = default;
+Spi::~Spi() FL_NOEXCEPT = default;
 
 // ============================================================================
 // Spi Constructors

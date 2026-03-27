@@ -10,6 +10,7 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/asio/http/connection.h"
 #include "fl/net/http/chunked_encoding.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace net {
@@ -21,7 +22,7 @@ class HttpStreamTransport;  // IWYU pragma: keep
 /// Provides onData() for intermediate updates, plus then()/catch_() for final result
 class StreamHandle {
 public:
-    StreamHandle() = default;
+    StreamHandle() FL_NOEXCEPT = default;
 
     /// Register callback for intermediate stream data
     StreamHandle& onData(fl::function<void(const fl::json&)> cb);
@@ -62,7 +63,7 @@ public:
     HttpStreamTransport(const fl::string& host, u16 port, u32 heartbeatIntervalMs = 30000);
 
     /// Virtual destructor
-    virtual ~HttpStreamTransport();
+    virtual ~HttpStreamTransport() FL_NOEXCEPT;
 
     // Connection Management
 

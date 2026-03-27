@@ -3,6 +3,7 @@
 #include "fl/audio/audio_processor.h"
 #include "fl/audio/input.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -21,12 +22,12 @@ class AudioManager {
 
     shared_ptr<Processor> &processor();
 
-    AudioManager() = default;
-    ~AudioManager() = default;
+    AudioManager() FL_NOEXCEPT = default;
+    ~AudioManager() FL_NOEXCEPT = default;
 
   private:
-    AudioManager(const AudioManager &) = delete;
-    AudioManager &operator=(const AudioManager &) = delete;
+    AudioManager(const AudioManager &) FL_NOEXCEPT = delete;
+    AudioManager &operator=(const AudioManager &) FL_NOEXCEPT = delete;
 };
 
 } // namespace audio

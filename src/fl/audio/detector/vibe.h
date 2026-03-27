@@ -31,6 +31,7 @@
 #include "fl/audio/fft/fft.h"
 #include "fl/stl/function.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -62,8 +63,8 @@ struct VibeLevels {
 
 class Vibe : public Detector {
 public:
-    Vibe();
-    ~Vibe() override;
+    Vibe() FL_NOEXCEPT;
+    ~Vibe() FL_NOEXCEPT override;
 
     // Detector interface
     void update(shared_ptr<Context> context) override;

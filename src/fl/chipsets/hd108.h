@@ -7,6 +7,7 @@
 #include "fastspi.h"
 #include "cpixel_ledcontroller.h"
 #include "fl/math/ease.h"
+#include "fl/stl/noexcept.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -42,7 +43,7 @@ class HD108Controller : public CPixelLEDController<RGB_ORDER> {
 	SPI mSPI;
 
 public:
-	HD108Controller() {}
+	HD108Controller() FL_NOEXCEPT {}
 
 	void init() override { mSPI.init(); }
 

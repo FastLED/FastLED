@@ -3,6 +3,7 @@
 #include "fl/stl/span.h"
 #include "fl/stl/string.h"
 #include "fl/stl/unique_ptr.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -30,7 +31,7 @@ class Impl {
     };
     // Default values for the Impl.
     Impl(const Args &args);
-    ~Impl();
+    ~Impl() FL_NOEXCEPT;
 
     fl::size sampleSize() const;
     // Note that the sample sizes MUST match the samples size passed into the
@@ -41,10 +42,10 @@ class Impl {
     fl::string info() const;
 
     // Disable copy and move constructors and assignment operators
-    Impl(const Impl &) = delete;
-    Impl &operator=(const Impl &) = delete;
-    Impl(Impl &&) = delete;
-    Impl &operator=(Impl &&) = delete;
+    Impl(const Impl &) FL_NOEXCEPT = delete;
+    Impl &operator=(const Impl &) FL_NOEXCEPT = delete;
+    Impl(Impl &&) FL_NOEXCEPT = delete;
+    Impl &operator=(Impl &&) FL_NOEXCEPT = delete;
 
   private:
     fl::unique_ptr<Context> mContext;

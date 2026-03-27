@@ -12,6 +12,7 @@ recently used items when it reaches capacity.
 #include "fl/stl/limits.h"
 #include "fl/stl/int.h"
 #include "fl/stl/memory_resource.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -25,7 +26,7 @@ class HashMapLru {
         T value;
         u32 last_access_time;
 
-        ValueWithTimestamp() : last_access_time(0) {}
+        ValueWithTimestamp() FL_NOEXCEPT : last_access_time(0) {}
         ValueWithTimestamp(const T &v, u32 time)
             : value(v), last_access_time(time) {}
     };

@@ -7,6 +7,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/system/log.h"
 #include "fl/stl/cstdio.h"
+#include "fl/stl/noexcept.h"
 namespace fl {
 namespace net {
 namespace http {
@@ -23,7 +24,7 @@ HttpStreamServer::HttpStreamServer(u16 port, u32 heartbeatIntervalMs)
     mRecvBuffer.reserve(16384);
 }
 
-HttpStreamServer::~HttpStreamServer() {
+HttpStreamServer::~HttpStreamServer() FL_NOEXCEPT {
     disconnect();
 }
 

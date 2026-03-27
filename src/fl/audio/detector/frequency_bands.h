@@ -5,6 +5,7 @@
 #include "fl/math/filter/filter.h"
 #include "fl/stl/function.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -12,8 +13,8 @@ namespace detector {
 
 class FrequencyBands : public Detector {
 public:
-    FrequencyBands();
-    ~FrequencyBands() override;
+    FrequencyBands() FL_NOEXCEPT;
+    ~FrequencyBands() FL_NOEXCEPT override;
 
     void update(shared_ptr<Context> context) override;
     void fireCallbacks() override;

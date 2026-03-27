@@ -15,6 +15,7 @@
 // Include stb_vorbis raw API (FL_STB_* macros translated to STB_* internally)
 // IWYU pragma: begin_keep
 #include "third_party/stb/stb_vorbis.h"
+#include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep
 
 namespace fl {
@@ -29,7 +30,7 @@ namespace vb = third_party::vorbis;
 // StbVorbisDecoder implementation
 StbVorbisDecoder::StbVorbisDecoder() : mVorbis(nullptr) {}
 
-StbVorbisDecoder::~StbVorbisDecoder() {
+StbVorbisDecoder::~StbVorbisDecoder() FL_NOEXCEPT {
     close();
 }
 
@@ -104,8 +105,8 @@ fl::u32 StbVorbisDecoder::getTotalSamples() const {
 // VorbisDecoderImpl - internal implementation
 class VorbisDecoderImpl {
 public:
-    VorbisDecoderImpl();
-    ~VorbisDecoderImpl();
+    VorbisDecoderImpl() FL_NOEXCEPT;
+    ~VorbisDecoderImpl() FL_NOEXCEPT;
 
     bool begin(fl::filebuf_ptr stream);
     void end();
@@ -131,7 +132,7 @@ VorbisDecoderImpl::VorbisDecoderImpl() : mPosition(0), mEndOfStream(false) {
     mPcmBuffer.resize(FRAME_SIZE * 2);  // Stereo
 }
 
-VorbisDecoderImpl::~VorbisDecoderImpl() {
+VorbisDecoderImpl::~VorbisDecoderImpl() FL_NOEXCEPT {
     end();
 }
 
@@ -242,7 +243,7 @@ void VorbisDecoderImpl::reset() {
 
 // VorbisDecoder public implementation
 VorbisDecoder::VorbisDecoder() : mImpl(fl::make_unique<VorbisDecoderImpl>()) {}
-VorbisDecoder::~VorbisDecoder() = default;
+VorbisDecoder::~VorbisDecoder() FL_NOEXCEPT = default;
 
 bool VorbisDecoder::begin(fl::filebuf_ptr stream) { return mImpl->begin(stream); }
 void VorbisDecoder::end() { mImpl->end(); }

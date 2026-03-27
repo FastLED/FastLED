@@ -3,6 +3,7 @@
 #include "fl/audio/audio_detector.h"
 #include "fl/math/filter/filter.h"
 #include "fl/stl/function.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -10,8 +11,8 @@ namespace detector {
 
 class EnergyAnalyzer : public Detector {
 public:
-    EnergyAnalyzer();
-    ~EnergyAnalyzer() override;
+    EnergyAnalyzer() FL_NOEXCEPT;
+    ~EnergyAnalyzer() FL_NOEXCEPT override;
 
     void update(shared_ptr<Context> context) override;
     void fireCallbacks() override;

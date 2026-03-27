@@ -5,6 +5,7 @@
 #include "fl/math/math.h"
 #include "fl/math/math.h"
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -17,7 +18,7 @@ FrequencyBinMapper::FrequencyBinMapper(const FrequencyBinMapperConfig& config) {
     configure(config);
 }
 
-FrequencyBinMapper::~FrequencyBinMapper() = default;
+FrequencyBinMapper::~FrequencyBinMapper() FL_NOEXCEPT = default;
 
 void FrequencyBinMapper::configure(const FrequencyBinMapperConfig& config) {
     mConfig = config;

@@ -42,6 +42,7 @@ void helper() {
 #include "fl/stl/string.h"  // IWYU pragma: keep
 #include "fl/stl/vector.h"
 #include "fl/stl/compiler_control.h"  // For FL_FUNCTION  // IWYU pragma: keep
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -63,13 +64,13 @@ public:
     explicit ScopedTrace(const char* function, int line);
 
     /// @brief Destructor - automatically pops from stack
-    ~ScopedTrace();
+    ~ScopedTrace() FL_NOEXCEPT;
 
     // Non-copyable, non-movable
-    ScopedTrace(const ScopedTrace&) = delete;
-    ScopedTrace& operator=(const ScopedTrace&) = delete;
-    ScopedTrace(ScopedTrace&&) = delete;
-    ScopedTrace& operator=(ScopedTrace&&) = delete;
+    ScopedTrace(const ScopedTrace&) FL_NOEXCEPT = delete;
+    ScopedTrace& operator=(const ScopedTrace&) FL_NOEXCEPT = delete;
+    ScopedTrace(ScopedTrace&&) FL_NOEXCEPT = delete;
+    ScopedTrace& operator=(ScopedTrace&&) FL_NOEXCEPT = delete;
 
     /// @brief Push a function name onto the call stack
     /// @param function Function name (must be string literal or have static lifetime)

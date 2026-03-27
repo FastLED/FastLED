@@ -7,6 +7,7 @@
 #include "fl/stl/assert.h"
 #include "fl/sensors/button.h"
 #include "fl/sensors/digital_pin.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -15,7 +16,7 @@ ButtonLowLevel::ButtonLowLevel(int pin, ButtonStrategy strategy)
     setStrategy(strategy);
 }
 
-ButtonLowLevel::~ButtonLowLevel() {}
+ButtonLowLevel::~ButtonLowLevel() FL_NOEXCEPT {}
 
 bool ButtonLowLevel::highLowFloating() {
     // High-low floating detection: Set pin to high, check if high,
@@ -70,7 +71,7 @@ Button::Listener::Listener(Button *owner) : mOwner(owner) {
     addToEngineEventsOnce();
 }
 
-Button::Listener::~Listener() {
+Button::Listener::~Listener() FL_NOEXCEPT {
     if (added) {
         EngineEvents::removeListener(this);
     }

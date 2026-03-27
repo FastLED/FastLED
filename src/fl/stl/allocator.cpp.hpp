@@ -13,6 +13,7 @@
 #include "esp_system.h"
 // IWYU pragma: begin_keep
 #include "platforms/esp/esp_version.h"  // ok platform headers
+#include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep // ok platform headers
 #endif
 
@@ -68,10 +69,10 @@ int& tls_reintrancy_count() {
 
 struct MemoryGuard {
     int& reintrancy_count;
-    MemoryGuard(): reintrancy_count(tls_reintrancy_count()) {
+    MemoryGuard() FL_NOEXCEPT : reintrancy_count(tls_reintrancy_count()) {
         reintrancy_count++;
     }
-    ~MemoryGuard() {
+    ~MemoryGuard() FL_NOEXCEPT {
         reintrancy_count--;
     }
     bool enabled() const {

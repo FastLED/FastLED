@@ -10,6 +10,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/span.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -21,11 +22,11 @@ public:
     NativeHttpClient(const asio::ip::tcp::endpoint& ep, const ConnectionConfig& config = ConnectionConfig());
     // Legacy constructor (backward compatible)
     NativeHttpClient(const string& host, u16 port, const ConnectionConfig& config = ConnectionConfig());
-    ~NativeHttpClient();
+    ~NativeHttpClient() FL_NOEXCEPT;
 
     // Disable copy (socket ownership)
-    NativeHttpClient(const NativeHttpClient&) = delete;
-    NativeHttpClient& operator=(const NativeHttpClient&) = delete;
+    NativeHttpClient(const NativeHttpClient&) FL_NOEXCEPT = delete;
+    NativeHttpClient& operator=(const NativeHttpClient&) FL_NOEXCEPT = delete;
 
     // Connection management
     bool connect();           // Initiate connection

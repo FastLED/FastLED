@@ -16,6 +16,7 @@
 
 #include "fl/fx/wled/segment.h"
 #include "fl/fx/wled/json_helpers.h"  // IWYU pragma: keep
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -255,7 +256,7 @@ public:
      * Example:
      *   fl::WLED wled;
      */
-    WLED();
+    WLED() FL_NOEXCEPT;
 
     /**
      * @brief Construct WLED with custom I/O callbacks

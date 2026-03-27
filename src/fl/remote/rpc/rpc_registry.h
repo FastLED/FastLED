@@ -12,6 +12,7 @@
 #include "fl/stl/unordered_map.h"  // IWYU pragma: keep
 #include "fl/remote/rpc/rpc_invokers.h"  // IWYU pragma: keep
 #include "fl/remote/rpc/rpc_mode.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -25,7 +26,7 @@ namespace detail {
 // =============================================================================
 
 struct CallableHolderBase {
-    virtual ~CallableHolderBase() = default;
+    virtual ~CallableHolderBase() FL_NOEXCEPT = default;
 };
 
 // =============================================================================

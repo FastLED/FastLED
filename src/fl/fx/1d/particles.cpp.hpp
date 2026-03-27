@@ -1,6 +1,7 @@
 #include "fl/fx/1d/particles.h"
 #include "fl/fastled.h"
 #include "fl/gfx/blur.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -13,7 +14,7 @@ Particles1d::Particles1d(u16 num_leds, u8 max_particles, u8 fade_rate)
       mParticles(max_particles) {
 }
 
-Particles1d::~Particles1d() = default;
+Particles1d::~Particles1d() FL_NOEXCEPT = default;
 
 void Particles1d::draw(DrawContext context) {
     if (context.leds.empty() || mNumLeds == 0) return;

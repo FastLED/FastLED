@@ -4,6 +4,7 @@
 #include "fl/fltest.h"
 #include "fl/system/log.h"
 #include "fl/stl/stdio.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace test {
@@ -448,7 +449,7 @@ Subcase::Subcase(const char* name, const char* file, int line)
     mEntered = TestContext::instance().enterSubcase(mSignature);
 }
 
-Subcase::~Subcase() {
+Subcase::~Subcase() FL_NOEXCEPT {
     if (mEntered) {
         TestContext::instance().exitSubcase(mSignature);
     }

@@ -7,6 +7,7 @@
 #include "fl/stl/span.h"
 #include "fl/stl/int.h"
 #include "fl/stl/unique_ptr.h"  // For unique_ptr
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -24,7 +25,7 @@ Reactive::Reactive()
     }
 }
 
-Reactive::~Reactive() = default;
+Reactive::~Reactive() FL_NOEXCEPT = default;
 
 void Reactive::begin(const ReactiveConfig& config) {
     setConfig(config);
@@ -686,7 +687,7 @@ SpectralFluxDetector::SpectralFluxDetector()
 #endif
 }
 
-SpectralFluxDetector::~SpectralFluxDetector() = default;
+SpectralFluxDetector::~SpectralFluxDetector() FL_NOEXCEPT = default;
 
 void SpectralFluxDetector::reset() {
     for (fl::size i = 0; i < mPreviousMagnitudes.size(); ++i) {
@@ -765,7 +766,7 @@ BeatDetectors::BeatDetectors()
 {
 }
 
-BeatDetectors::~BeatDetectors() = default;
+BeatDetectors::~BeatDetectors() FL_NOEXCEPT = default;
 
 void BeatDetectors::reset() {
 #if SKETCH_HAS_LOTS_OF_MEMORY
@@ -834,7 +835,7 @@ PerceptualWeighting::PerceptualWeighting()
 #endif
 }
 
-PerceptualWeighting::~PerceptualWeighting() = default;
+PerceptualWeighting::~PerceptualWeighting() FL_NOEXCEPT = default;
 
 void PerceptualWeighting::applyAWeighting(Data& data) const {
     // Apply A-weighting coefficients to frequency bins

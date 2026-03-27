@@ -21,6 +21,7 @@
 
 #include "fl/stl/atomic.h"
 #include "fl/stl/singleton.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -73,7 +74,7 @@ XYPath::XYPath(XYPathGeneratorPtr path, TransformFloat transform)
     mPathRenderer = fl::make_shared<XYPathRenderer>(path, transform);
 }
 
-XYPath::~XYPath() {}
+XYPath::~XYPath() FL_NOEXCEPT {}
 
 void XYPathRenderer::rasterize(
     float from, float to, int steps, XYRaster &raster,

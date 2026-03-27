@@ -4,6 +4,7 @@
 #include "fl/stl/move.h"    // for fl::move
 #include "fl/stl/vector.h"  // for fl::vector_inlined
 #include "fl/stl/memory_resource.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -12,7 +13,7 @@ namespace fl {
 template <typename T>
 class circular_buffer_core {
   public:
-    circular_buffer_core() : mData(nullptr), mCapacity(0), mHead(0), mTail(0), mFull(false) {}
+    circular_buffer_core() FL_NOEXCEPT : mData(nullptr), mCapacity(0), mHead(0), mTail(0), mFull(false) {}
 
     circular_buffer_core(T* data, fl::size capacity)
         : mData(data), mCapacity(capacity), mHead(0), mTail(0), mFull(false) {}
@@ -164,7 +165,7 @@ template <typename T, fl::size N = 0>
 class circular_buffer {
   public:
     // Default constructor — pre-sizes to N (useful when N > 0).
-    circular_buffer() {
+    circular_buffer() FL_NOEXCEPT {
         mStorage.resize(N);
         mCore.assign(mStorage.data(), N);
     }
@@ -189,7 +190,7 @@ class circular_buffer {
         mCore.assign(mStorage.data(), capacity);
     }
 
-    circular_buffer(const circular_buffer& other)
+    circular_buffer(const circular_buffer& other) FL_NOEXCEPT
         : mStorage(other.mStorage),
           mCore(mStorage.data(), mStorage.size()) {
         mCore.setHead(other.mCore.head());
@@ -197,7 +198,7 @@ class circular_buffer {
         mCore.setFull(other.mCore.isFull());
     }
 
-    circular_buffer(circular_buffer&& other)
+    circular_buffer(circular_buffer&& other) FL_NOEXCEPT
         : mStorage(fl::move(other.mStorage)),
           mCore(mStorage.data(), mStorage.size()) {
         mCore.setHead(other.mCore.head());
@@ -206,7 +207,7 @@ class circular_buffer {
         other.mCore.assign(nullptr, 0);
     }
 
-    circular_buffer& operator=(const circular_buffer& other) {
+    circular_buffer& operator=(const circular_buffer& other) FL_NOEXCEPT {
         if (this != &other) {
             mStorage = other.mStorage;
             mCore.assign(mStorage.data(), mStorage.size());
@@ -217,7 +218,7 @@ class circular_buffer {
         return *this;
     }
 
-    circular_buffer& operator=(circular_buffer&& other) {
+    circular_buffer& operator=(circular_buffer&& other) FL_NOEXCEPT {
         if (this != &other) {
             mStorage = fl::move(other.mStorage);
             mCore.assign(mStorage.data(), mStorage.size());

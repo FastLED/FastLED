@@ -15,7 +15,7 @@ namespace fl {
 /// (default heap, PSRAM, DMA, slab, etc.)
 class memory_resource {
   public:
-    virtual ~memory_resource() = default;
+    virtual ~memory_resource() FL_NOEXCEPT = default;
 
     void* allocate(fl::size bytes) {
         if (bytes == 0) return nullptr;

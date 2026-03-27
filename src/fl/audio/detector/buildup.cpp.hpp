@@ -5,6 +5,7 @@
 #include "fl/math/math.h"
 #include "fl/system/log.h"
 #include "fl/system/log.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -34,7 +35,7 @@ BuildupDetector::BuildupDetector()
     }
 }
 
-BuildupDetector::~BuildupDetector() = default;
+BuildupDetector::~BuildupDetector() FL_NOEXCEPT = default;
 
 void BuildupDetector::update(shared_ptr<Context> context) {
     if (!context) {

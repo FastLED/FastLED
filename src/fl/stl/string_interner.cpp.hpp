@@ -8,6 +8,7 @@
 #include "fl/stl/string_view.h"
 #include "fl/stl/span.h"
 #include "fl/stl/mutex.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -21,7 +22,7 @@ static fl::mutex& global_interner_mutex() {
 
 StringInterner::StringInterner() {}
 
-StringInterner::~StringInterner() {
+StringInterner::~StringInterner() FL_NOEXCEPT {
     clear();
 }
 

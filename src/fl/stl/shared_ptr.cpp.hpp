@@ -16,12 +16,13 @@
 /// operations stay within the same binary that created the control block.
 
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace detail {
 
 // Out-of-line destructor definition to anchor the vtable to this translation unit.
-ControlBlockBase::~ControlBlockBase() = default;
+ControlBlockBase::~ControlBlockBase() FL_NOEXCEPT = default;
 
 // Reference count increment - must be out-of-line to prevent cross-binary vtable issues.
 void ControlBlockBase::add_shared_ref() {

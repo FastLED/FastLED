@@ -6,6 +6,7 @@
 #include "fl/stl/type_traits.h"  // IWYU pragma: keep
 #include "fl/stl/detail/rbtree.h"
 #include "fl/stl/allocator.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 
@@ -40,7 +41,7 @@ private:
         Key value;
         fl::size unique_id;
 
-        ValueWithId() = default;
+        ValueWithId() FL_NOEXCEPT = default;
         ValueWithId(const Key& v, fl::size id) : value(v), unique_id(id) {}
         ValueWithId(Key&& v, fl::size id) : value(fl::move(v)), unique_id(id) {}
 
@@ -78,7 +79,7 @@ private:
         typename TreeType::const_iterator mTreeIt;
 
     public:
-        ConstIteratorWrapper() = default;
+        ConstIteratorWrapper() FL_NOEXCEPT = default;
         explicit ConstIteratorWrapper(typename TreeType::const_iterator it) : mTreeIt(it) {}
 
         const value_type& operator*() const {
@@ -120,7 +121,7 @@ private:
         typename TreeType::const_reverse_iterator mTreeRIt;
 
     public:
-        ConstReverseIteratorWrapper() = default;
+        ConstReverseIteratorWrapper() FL_NOEXCEPT = default;
         explicit ConstReverseIteratorWrapper(typename TreeType::const_reverse_iterator it) : mTreeRIt(it) {}
 
         const value_type& operator*() const {
@@ -166,11 +167,11 @@ public:
     MultiSetTree(const Compare& comp = Compare(), const Allocator& alloc = Allocator())
         : mTree(KeyCompareWithId(comp), alloc) {}
 
-    MultiSetTree(const MultiSetTree& other) = default;
-    MultiSetTree& operator=(const MultiSetTree& other) = default;
+    MultiSetTree(const MultiSetTree& other) FL_NOEXCEPT = default;
+    MultiSetTree& operator=(const MultiSetTree& other) FL_NOEXCEPT = default;
 
-    MultiSetTree(MultiSetTree&& other) = default;
-    MultiSetTree& operator=(MultiSetTree&& other) = default;
+    MultiSetTree(MultiSetTree&& other) FL_NOEXCEPT = default;
+    MultiSetTree& operator=(MultiSetTree&& other) FL_NOEXCEPT = default;
 
     // Initializer list constructor
     MultiSetTree(fl::initializer_list<value_type> init,
@@ -182,7 +183,7 @@ public:
         }
     }
 
-    ~MultiSetTree() = default;
+    ~MultiSetTree() FL_NOEXCEPT = default;
 
     // Iterators
     iterator begin() { return iterator(mTree.begin()); }

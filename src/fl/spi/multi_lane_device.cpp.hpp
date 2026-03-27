@@ -9,6 +9,7 @@
 #include "platforms/shared/spi_hw_4.h" // ok platform headers
 #include "platforms/shared/spi_hw_8.h" // ok platform headers
 #include "platforms/shared/spi_transposer.h" // ok platform headers
+#include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep
 
 namespace fl {
@@ -35,7 +36,7 @@ struct MultiLaneDevice::Impl : public DeviceImplBase {
         }
     }
 
-    ~Impl() {
+    ~Impl() FL_NOEXCEPT {
         if (initialized && backend) {
             releaseBackend();
         }
@@ -68,7 +69,7 @@ MultiLaneDevice::MultiLaneDevice(const Config& config)
     FL_DBG("MultiLaneDevice: Created with " << num_lanes << " lane(s)");
 }
 
-MultiLaneDevice::~MultiLaneDevice() {
+MultiLaneDevice::~MultiLaneDevice() FL_NOEXCEPT {
     if (pImpl && pImpl->initialized) {
         end();
     }

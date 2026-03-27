@@ -6,6 +6,7 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/span.h"
 #include "fl/stl/flat_map.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace audio {
@@ -19,7 +20,7 @@ struct BandEnergy {
 class Context {
 public:
     explicit Context(const Sample& sample);
-    ~Context();
+    ~Context() FL_NOEXCEPT;
 
     // ----- Basic Sample Access -----
     const Sample& getSample() const { return mSample; }
