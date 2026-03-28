@@ -5,9 +5,9 @@
 Detects special member functions (destructors, default/copy/move constructors,
 copy/move assignment operators) that are missing FL_NOEXCEPT in src/fl/.
 
-Special member functions MUST always use FL_NOEXCEPT so that on ESP32 the
-compiler can elide unwind tables (saving ~26 KB), while on AVR/Teensy the
-macro safely expands to nothing.
+FL_NOEXCEPT is currently a noop on all platforms for cross-platform
+compatibility. Enforcing its use on special member functions ensures that
+when noexcept is re-enabled, all the right places are already annotated.
 
 Scope: src/fl/** (all .h / .hpp / .cpp / .cpp.hpp files)
 

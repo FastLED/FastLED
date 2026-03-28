@@ -3,10 +3,10 @@
 """Checker to detect raw 'noexcept' keyword in src/ files.
 
 FastLED wraps the noexcept specifier behind the FL_NOEXCEPT macro
-(defined in src/fl/stl/noexcept.h).  On ESP32 it expands to 'noexcept',
-reducing .eh_frame bloat; on all other platforms it expands to nothing,
-keeping the specifier out of AVR/Teensy/etc. builds where exceptions are
-never enabled and the bare keyword adds noise.
+(defined in src/fl/stl/noexcept.h).  FL_NOEXCEPT is currently a noop
+on all platforms due to compatibility issues across AVR, WASM, etc.
+Using the macro rather than the bare keyword ensures that enabling
+noexcept in the future only requires a change in one place.
 
 Using raw 'noexcept' directly bypasses this portability layer.
 
@@ -127,8 +127,8 @@ class RawNoexceptChecker(FileContentChecker):
                 (
                     line_number,
                     f"Raw 'noexcept' keyword — use FL_NOEXCEPT macro instead "
-                    f"(defined in fl/stl/noexcept.h, expands to noexcept on ESP32 "
-                    f"and nothing elsewhere): {stripped}",
+                    f"(defined in fl/stl/noexcept.h, currently a noop everywhere "
+                    f"for cross-platform compatibility): {stripped}",
                 )
             )
 
