@@ -29,6 +29,27 @@ FL_EXTERN_C_END
 #define SOC_PARLIO_SUPPORTED 0
 #endif
 
+#ifndef SOC_WIFI_SUPPORTED
+#define SOC_WIFI_SUPPORTED 0
+#endif
+
+// FL_HAS_NETWORK: True when the chip has WiFi hardware and IDF 4.0+ is available.
+//
+// Used to gate:
+//   - lwip_hook_ip6_input() stub (required when CONFIG_LWIP_HOOK_IP6_INPUT=CUSTOM)
+//   - Other networking-dependent code that would cause linker failures on
+//     non-WiFi chips (ESP32-H2, ESP32-P4) or older IDF toolchains.
+//
+// SOC_WIFI_SUPPORTED is 0 on ESP32-H2 and ESP32-P4 (no WiFi silicon).
+// All other ESP32 variants have WiFi and SOC_WIFI_SUPPORTED=1.
+#if !defined(FL_HAS_NETWORK)
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 0, 0) && SOC_WIFI_SUPPORTED
+#define FL_HAS_NETWORK 1
+#else
+#define FL_HAS_NETWORK 0
+#endif
+#endif
+
 #if !defined(FASTLED_ESP32_HAS_CLOCKLESS_SPI)
 #if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 0, 0) || defined(FL_IS_ESP8266)
 #define FASTLED_ESP32_HAS_CLOCKLESS_SPI 0

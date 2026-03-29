@@ -1,7 +1,7 @@
 // IWYU pragma: private
 
 /// @file platforms/esp/32/lwip_hooks.cpp.hpp
-/// @brief Provides required LwIP hooks for ESP32
+/// @brief Provides required LwIP hooks for ESP32 with WiFi support
 ///
 /// Some versions of framework-arduinoespressif32-libs compile the LwIP
 /// library with CONFIG_LWIP_HOOK_IP6_INPUT=CUSTOM, which requires the
@@ -15,9 +15,18 @@
 ///
 /// The hook is called for every incoming IPv6 packet.
 /// Returning 0 lets normal LwIP IPv6 processing continue.
+///
+/// Gated by FL_HAS_NETWORK (from feature_flags/enabled.h), which is 1 only
+/// on ESP32 variants that have WiFi silicon (SOC_WIFI_SUPPORTED=1) with
+/// ESP-IDF 4.0+. Non-WiFi chips (ESP32-H2, ESP32-P4) and pre-4.0 IDF
+/// toolchains are excluded automatically.
 
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
+
+#include "platforms/esp/32/feature_flags/enabled.h"
+
+#if FL_HAS_NETWORK
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,5 +56,7 @@ int lwip_hook_ip6_input(void *p, void *inp) {
 #ifdef __cplusplus
 }
 #endif
+
+#endif  // FL_HAS_NETWORK
 
 #endif  // FL_IS_ESP32
