@@ -24,6 +24,7 @@
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
 
+#include "fl/stl/compiler_control.h"
 #include "platforms/esp/32/feature_flags/enabled.h"
 
 #if FL_HAS_NETWORK
@@ -47,7 +48,10 @@ extern "C" {
 /// which require complex include-path ordering under the unity-build system.
 /// The function signature is ABI-compatible: both parameters are pointers
 /// (same size as void*) and the return value is a single byte integer.
-int lwip_hook_ip6_input(void *p, void *inp) {
+///
+/// FL_LINK_WEAK allows user code or a real network stack component to
+/// override this default pass-through implementation.
+FL_LINK_WEAK int lwip_hook_ip6_input(void *p, void *inp) {
     (void)p;
     (void)inp;
     return 0;
