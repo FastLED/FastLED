@@ -201,10 +201,7 @@ class DockerAVR8jsRunner:
     def ensure_image_available(self) -> bool:
         """Check if Docker image exists, build if needed"""
         try:
-            check_cmd = ["docker", "images", "-q", self.docker_image]
-            result = RunningProcess.run(check_cmd, cwd=None, check=False, timeout=10)
-
-            if not result.stdout.strip():
+            if not self.check_image_exists(self.docker_image):
                 print(f"Docker image {self.docker_image} not found")
                 print("Building image...")
                 return self.build_image()
