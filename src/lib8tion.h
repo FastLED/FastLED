@@ -713,7 +713,7 @@ LIB8STATIC fl::u8 cubicwave8(fl::u8 in)
 /// @param in input value
 /// @param pulsewidth width of the output pulse
 /// @returns square wave output
-LIB8STATIC fl::u8 squarewave8( fl::u8 in, u8 pulsewidth=128)
+LIB8STATIC fl::u8 squarewave8( fl::u8 in, fl::u8 pulsewidth=128)
 {
     if( in < pulsewidth || (pulsewidth == 255)) {
         return 255;
@@ -808,7 +808,7 @@ fl::u32 get_millisecond_timer();
 /// @warning The BPM parameter **MUST** be provided in Q8.8 format! E.g.
 /// for 120 BPM it would be 120*256 = 30720. If you just want to specify
 /// "120", use beat16() or beat8().
-LIB8STATIC fl::u16 beat88( accum88 beats_per_minute_88, u32 timebase = 0)
+LIB8STATIC fl::u16 beat88( accum88 beats_per_minute_88, fl::u32 timebase = 0)
 {
     // BPM is 'beats per minute', or 'beats per 60000ms'.
     // To avoid using the (slower) division operator, we
@@ -824,7 +824,7 @@ LIB8STATIC fl::u16 beat88( accum88 beats_per_minute_88, u32 timebase = 0)
 /// Generates a 16-bit "sawtooth" wave at a given BPM
 /// @param beats_per_minute the frequency of the wave, in decimal
 /// @param timebase the time offset of the wave from the millis() timer
-LIB8STATIC fl::u16 beat16( accum88 beats_per_minute, u32 timebase = 0)
+LIB8STATIC fl::u16 beat16( accum88 beats_per_minute, fl::u32 timebase = 0)
 {
     // Convert simple 8-bit BPM's to full Q8.8 accum88's if needed
     if( beats_per_minute < 256) beats_per_minute <<= 8;
@@ -834,7 +834,7 @@ LIB8STATIC fl::u16 beat16( accum88 beats_per_minute, u32 timebase = 0)
 /// Generates an 8-bit "sawtooth" wave at a given BPM
 /// @param beats_per_minute the frequency of the wave, in decimal
 /// @param timebase the time offset of the wave from the millis() timer
-LIB8STATIC fl::u8 beat8( accum88 beats_per_minute, u32 timebase = 0)
+LIB8STATIC fl::u8 beat8( accum88 beats_per_minute, fl::u32 timebase = 0)
 {
     return beat16( beats_per_minute, timebase) >> 8;
 }
@@ -894,7 +894,7 @@ LIB8STATIC fl::u16 beatsin16( accum88 beats_per_minute, fl::u16 lowest = 0, fl::
 /// @param highest the highest output value of the sine wave
 /// @param timebase the time offset of the wave from the millis() timer
 /// @param phase_offset phase offset of the wave from the current position
-LIB8STATIC fl::u8 beatsin8( accum88 beats_per_minute, fl::u8 lowest = 0, u8 highest = 255,
+LIB8STATIC fl::u8 beatsin8( accum88 beats_per_minute, fl::u8 lowest = 0, fl::u8 highest = 255,
                             fl::u32 timebase = 0, fl::u8 phase_offset = 0)
 {
     fl::u8 beat = beat8( beats_per_minute, timebase);
@@ -963,7 +963,7 @@ LIB8STATIC fl::u8 hours8()
 /// just six shifts (vs 40), and no loop overhead.
 /// Used to convert millis to "binary seconds" aka bseconds:
 /// one bsecond == 1024 millis.
-LIB8STATIC fl::u16 div1024_32_16( u32 in32)
+LIB8STATIC fl::u16 div1024_32_16( fl::u32 in32)
 {
     fl::u16 out16;
 #if defined(FL_IS_AVR)
