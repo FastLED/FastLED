@@ -304,6 +304,7 @@ FL_TEST_CASE("fl::move with user-defined types") {
 }
 
 FL_TEST_CASE("fl::move is noexcept") {
+#ifdef FL_HAS_NOEXCEPT
     FL_SUBCASE("move is noexcept for basic types") {
         // fl::move itself should be noexcept
         int x = 10;
@@ -322,6 +323,7 @@ FL_TEST_CASE("fl::move is noexcept") {
         static_assert(noexcept(fl::move(obj)), "fl::move should be noexcept");
         FL_CHECK(true);  // Dummy runtime check
     }
+#endif  // FL_HAS_NOEXCEPT
 }
 
 FL_TEST_CASE("fl::move with references") {
