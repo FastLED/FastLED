@@ -6,6 +6,7 @@
 // Derived classes inherit via protected inheritance and re-expose methods
 // via using declarations for explicit API control.
 
+#include "fl/stl/undef.h"  // Undefine abs/min/max macros from Arduino.h
 #include "fl/stl/compiler_control.h"
 #include "fl/math/fixed_point/traits.h"
 #include "fl/math/fixed_point/isqrt.h"

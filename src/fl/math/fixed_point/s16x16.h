@@ -3,6 +3,7 @@
 // Signed 16.16 fixed-point arithmetic and trigonometry.
 // All operations are integer-only in the hot path.
 
+#include "fl/stl/undef.h"  // Undefine abs/min/max macros from Arduino.h
 #include "fl/stl/stdint.h"
 #include "fl/math/sin32.h"
 #include "fl/math/fixed_point/isqrt.h"

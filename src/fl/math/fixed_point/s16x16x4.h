@@ -3,6 +3,7 @@
 /// @file s16x16x4.h
 /// SIMD 4-wide s16x16 fixed-point vector type
 
+#include "fl/stl/undef.h"  // Undefine abs/min/max macros from Arduino.h
 #include "fl/math/simd.h"
 #include "fl/math/fixed_point/s16x16.h"
 #include "fl/math/sin32.h"

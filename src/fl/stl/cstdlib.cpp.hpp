@@ -19,7 +19,9 @@ namespace fl {
 // ============================================================================
 
 void *aligned_alloc(fl::size_t alignment, fl::size_t size) {
-#if defined(FL_IS_AVR) || defined(FL_IS_ESP8266)
+#if defined(FL_IS_AVR) || defined(FL_IS_ESP8266) || defined(FL_IS_ARM)
+    // ARM bare-metal libc_nano's aligned_alloc calls posix_memalign which
+    // is unavailable; fall back to plain malloc (sufficient for most ARM MCUs).
     (void)alignment;
     return ::malloc(size);
 #elif defined(FL_IS_WIN)
@@ -31,7 +33,7 @@ void *aligned_alloc(fl::size_t alignment, fl::size_t size) {
 }
 
 void aligned_free(void *ptr) {
-#if defined(FL_IS_AVR) || defined(FL_IS_ESP8266)
+#if defined(FL_IS_AVR) || defined(FL_IS_ESP8266) || defined(FL_IS_ARM)
     ::free(ptr);
 #elif defined(FL_IS_WIN)
     ::_aligned_free(ptr);

@@ -33,6 +33,7 @@
 //
 // numeric_limits specializations in fl/stl/limits.h
 
+#include "fl/stl/undef.h"  // Undefine abs/min/max macros from Arduino.h before fixed-point headers
 #include "fl/math/fixed_point/s0x32.h"
 #include "fl/math/fixed_point/s4x12.h"
 #include "fl/math/fixed_point/s8x8.h"
