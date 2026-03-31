@@ -45,17 +45,17 @@ I2SContext make_context(const audio::ConfigI2S &config) {
         return 0;
     };
 
-    auto convert_comm_format = [](I2SCommFormat value) -> int {
+    auto convert_comm_format = [](audio::I2SCommFormat value) -> int {
         switch (value) {
-        case Philips:
+        case audio::I2SCommFormat::Philips:
             return I2S_COMM_FORMAT_STAND_I2S;
-        case MSB:
+        case audio::I2SCommFormat::MSB:
             return I2S_COMM_FORMAT_STAND_MSB;
-        case PCMShort:
+        case audio::I2SCommFormat::PCMShort:
             return I2S_COMM_FORMAT_STAND_PCM_SHORT;
-        case PCMLong:
+        case audio::I2SCommFormat::PCMLong:
             return I2S_COMM_FORMAT_STAND_PCM_LONG;
-        case Max:
+        case audio::I2SCommFormat::Max:
             return I2S_COMM_FORMAT_STAND_MAX;
         }
         FL_ASSERT(false, "Invalid comm format");
