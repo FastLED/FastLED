@@ -322,7 +322,9 @@ inline int setPwmFrequencyNative(int pin, u32 frequency_hz) {
     timer_cfg.timer_num = alloc.timer;
     timer_cfg.duty_resolution = static_cast<ledc_timer_bit_t>(resolution);
     timer_cfg.freq_hz = frequency_hz;
+#if ESP_IDF_VERSION_4_OR_HIGHER
     timer_cfg.clk_cfg = LEDC_AUTO_CLK;
+#endif
 
     esp_err_t err = ledc_timer_config(&timer_cfg);
     if (err != ESP_OK) {
