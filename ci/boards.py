@@ -499,7 +499,14 @@ class Board:
         # Force DIO flash mode ONLY for QEMU builds
         # QEMU doesn't support QIO flash mode which requires setting the QIE bit
         # Hardware builds should use QIO for better performance (30-50% faster)
-        is_qemu_build = self.defines and "QEMU_BUILD=1" in self.defines
+        # Check both static board defines and additional_defines passed at build time
+        # - FASTLED_ESP32_IS_QEMU: passed via --defines by Docker QEMU workflows
+        # - QEMU_BUILD=1: set in static board defines (e.g. ESP32DEV_QEMU)
+        qemu_markers = {"QEMU_BUILD=1", "FASTLED_ESP32_IS_QEMU"}
+        is_qemu_build = bool(
+            (self.defines and qemu_markers & set(self.defines))
+            or (additional_defines and qemu_markers & set(additional_defines))
+        )
         if is_qemu_build and (
             self.board_name.startswith("esp32")
             or (self.real_board_name and self.real_board_name.startswith("esp32"))
