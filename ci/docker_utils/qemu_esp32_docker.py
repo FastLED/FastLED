@@ -75,7 +75,7 @@ else
         -nographic \\
         -machine {qemu_machine} \\
         -drive file="/tmp/flash.bin",if=mtd,format=raw \\
-        -global driver=timer.esp32.timg,property=wdt_disable,value=true \\
+        -global driver=timer.{qemu_machine}.timg,property=wdt_disable,value=true \\
         -monitor none \\
         -serial mon:stdio
 fi
