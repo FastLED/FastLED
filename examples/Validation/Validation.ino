@@ -1,4 +1,4 @@
-// @filter: (platform is esp32) or (platform is native) or (platform is teensy)
+// @filter: (platform is esp32) or (platform is native) or ((platform is teensy) and (memory is high))
 
 // examples/Validation/Validation.ino
 //
