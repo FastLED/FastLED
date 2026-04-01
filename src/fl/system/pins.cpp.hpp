@@ -137,7 +137,13 @@ int portValueToId(T* ptr) {
 
 int pinToPort(int pin) {
     if (pin < 0) return -1;
+#ifdef digitalPinToPort
     return portValueToId(digitalPinToPort(pin));
+#else
+    // Platform does not define digitalPinToPort (e.g. Apollo3 mbed framework).
+    // Fall back to simple pin-grouping heuristic.
+    return pin / 32;
+#endif
 }
 
 #endif // FASTLED_ALL_PINS_VALID
