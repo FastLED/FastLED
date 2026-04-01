@@ -262,6 +262,7 @@ foreach test_name : test_names
   slow_tests = [
     'fastled_core',                 # Main integration test
     'fl_fx_2d',                    # 2D animation effects (heavy computation)
+    'fl_gfx_blur',                  # Gaussian blur benchmark (256x256 debug mode)
     'fl_spi',                      # SPI communication test
     'fl_xypath',                   # XY path computation test
     'fx_wled',                     # WLED effects test

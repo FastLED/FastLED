@@ -537,7 +537,7 @@ static void apply_pass_alpha(const RGB_T *pad, RGB_T *out, int count,
 // Uses hardware byte averaging which computes (x+y+1)>>1.
 // Two nested avg ops approximate (a + 2b + c) >> 2 with at most +1 rounding
 // per channel — imperceptible for blur and ~3x fewer SIMD instructions.
-static void simd_conv_121(const u8 * FL_RESTRICT_PARAM a,
+static FL_OPTIMIZE_FUNCTION void simd_conv_121(const u8 * FL_RESTRICT_PARAM a,
                            const u8 * FL_RESTRICT_PARAM b,
                            const u8 * FL_RESTRICT_PARAM c,
                            u8 * FL_RESTRICT_PARAM out, int nbytes) {
@@ -565,7 +565,7 @@ static void simd_conv_121(const u8 * FL_RESTRICT_PARAM a,
 // Used by R=2, R=3, R=4 kernels for both low and high halves of the 16-byte register.
 
 // Kernel: [1, 4, 6, 4, 1] >> 4
-static void simd_conv_14641(const u8 *p0, const u8 *p1, const u8 *p2,
+static FL_OPTIMIZE_FUNCTION void simd_conv_14641(const u8 *p0, const u8 *p1, const u8 *p2,
                             const u8 *p3, const u8 *p4,
                             u8 *out, int nbytes) {
     namespace fsimd = fl::simd; // ok bare using
@@ -606,7 +606,7 @@ static void simd_conv_14641(const u8 *p0, const u8 *p1, const u8 *p2,
 }
 
 // Kernel: [1, 6, 15, 20, 15, 6, 1] >> 6
-static void simd_conv_r3(const u8 *p0, const u8 *p1, const u8 *p2,
+static FL_OPTIMIZE_FUNCTION void simd_conv_r3(const u8 *p0, const u8 *p1, const u8 *p2,
                           const u8 *p3, const u8 *p4, const u8 *p5,
                           const u8 *p6, u8 *out, int nbytes) {
     namespace fsimd = fl::simd; // ok bare using
@@ -656,7 +656,7 @@ static void simd_conv_r3(const u8 *p0, const u8 *p1, const u8 *p2,
 }
 
 // Kernel: [1, 8, 28, 56, 70, 56, 28, 8, 1] >> 8
-static void simd_conv_r4(const u8 *p0, const u8 *p1, const u8 *p2, const u8 *p3,
+static FL_OPTIMIZE_FUNCTION void simd_conv_r4(const u8 *p0, const u8 *p1, const u8 *p2, const u8 *p3,
                           const u8 *p4, const u8 *p5, const u8 *p6, const u8 *p7,
                           const u8 *p8, u8 *out, int nbytes) {
     namespace fsimd = fl::simd; // ok bare using
@@ -1024,6 +1024,7 @@ void hpass_row(RGB_T *pad, RGB_T *out, int w, AlphaT alpha) {
 
 // ── Helper: vertical pass over entire image ─────────────────────────────
 template <int R, typename RGB_T, typename acc_t, bool ApplyAlpha, typename AlphaT>
+FL_OPTIMIZE_FUNCTION
 static void vpass_full(RGB_T *pixels, int w, int h, RGB_T *scratch, AlphaT alpha) {
 #if defined(FL_IS_AVR)
     // AVR: column-by-column with per-channel noinline + O3.

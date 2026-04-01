@@ -313,10 +313,13 @@ static void run_benchmark_blur_only(const char *label, int iters) {
 
 FL_TEST_CASE("blur benchmark") {
     // Use fewer iterations in debug/quick builds (-O0) to avoid watchdog timeout.
+    // On macOS (Clang), FL_OPTIMIZE_FUNCTION does not force per-function O3 as
+    // it does on GCC, so debug builds are significantly slower. Use a small
+    // iteration count to keep the benchmark within the watchdog limit.
 #ifdef NDEBUG
     const int ITERS = 5000;
 #else
-    const int ITERS = 200;
+    const int ITERS = 50;
 #endif
 
     fl::println("\n── Gaussian Blur Benchmark (fill + blur) ──\n");
