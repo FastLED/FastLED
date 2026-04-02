@@ -231,9 +231,15 @@
 // Only import names that are actually defined in namespace fl (via platforms/ headers).
 // Functions defined with LIB8STATIC outside namespace fl (e.g., random8.h) are already global.
 //
-// On AVR, Arduino's USBAPI.h defines u8/u16/u32 at global scope with potentially
-// different underlying types (e.g. unsigned short vs unsigned int for u16).
-// Skip those to avoid redeclaration conflicts.
+// On AVR, we skip the 'using fl::u8/u16/u32' declarations for two reasons:
+//   1. On AVR boards with USB (Uno, Mega, etc.), Arduino's USBAPI.h already
+//      defines u8/u16/u32 at global scope. Re-importing via 'using fl::u8'
+//      would conflict because fl::u16 is 'unsigned int' but USBAPI.h defines
+//      u16 as 'unsigned short' — same width but different type.
+//   2. On AVR boards WITHOUT USB hardware (ATtiny1604, etc.), USBAPI.h is
+//      NOT included, so there are no global u8/u16/u32 type aliases at all.
+//      In both cases, ALL lib8tion.h function signatures must use 'fl::u8',
+//      'fl::u16', and 'fl::u32' explicitly — never bare type names.
 #if !defined(FL_IS_AVR)
 using fl::u8;
 // On AVR+Arduino, USBAPI.h (included via Arduino.h) already provides a global
