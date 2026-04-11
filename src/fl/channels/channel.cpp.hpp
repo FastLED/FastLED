@@ -153,10 +153,8 @@ Channel::Channel(const ChipsetVariant& chipset, EOrder rgbOrder, RegistrationMod
     , mAffinity()
     , mId(nextId())
     , mName(makeName(mId)) {
-    fl::pinMode(getPin(), fl::PinMode::InputPulldown);
-    if (const SpiChipsetConfig* spi = chipset.ptr<SpiChipsetConfig>()) {
-        fl::pinMode(spi->clockPin, fl::PinMode::InputPulldown);
-    }
+    // NOTE: Do NOT call fl::pinMode() here — see comment in the
+    // Channel(ChipsetVariant, span, EOrder, ChannelOptions) constructor.
     mChannelData = ChannelData::create(mChipset);
 }
 
@@ -169,15 +167,11 @@ Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
     , mAffinity(options.mAffinity)  // Get affinity from ChannelOptions
     , mId(nextId())
     , mName(makeName(mId)) {
-    // Initialize GPIO with pulldown to ensure stable LOW state
-    // This prevents RX from capturing noise/glitches on uninitialized pins
-    // Must happen before any driver initialization
-    fl::pinMode(getPin(), fl::PinMode::InputPulldown);
-
-    // For SPI chipsets, also initialize the clock pin
-    if (const SpiChipsetConfig* spi = chipset.ptr<SpiChipsetConfig>()) {
-        fl::pinMode(spi->clockPin, fl::PinMode::InputPulldown);
-    }
+    // NOTE: Do NOT call fl::pinMode() here. The pin may already be
+    // configured for SPI output by a persistent driver (ChannelEngineSpi).
+    // Calling pinMode(InputPulldown) would disconnect the SPI MOSI from the
+    // GPIO matrix, causing subsequent transmissions to produce no output.
+    // The driver will configure the pin when it first uses it.
 
     // Set the LED data array
     setLeds(leds);
@@ -202,8 +196,8 @@ Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds
     , mAffinity(options.mAffinity)  // Get affinity from ChannelOptions
     , mId(nextId())
     , mName(makeName(mId)) {
-    // Initialize GPIO with pulldown to ensure stable LOW state
-    fl::pinMode(pin, fl::PinMode::InputPulldown);
+    // NOTE: Do NOT call fl::pinMode() here — see comment in the
+    // Channel(ChipsetVariant, span, EOrder, ChannelOptions) constructor.
 
     // Set the LED data array
     setLeds(leds);

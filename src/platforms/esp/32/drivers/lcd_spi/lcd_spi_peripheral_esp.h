@@ -83,6 +83,7 @@ class LcdSpiPeripheralEsp : public ILcdSpiPeripheral {
     void *mCallback;
     void *mUserCtx;
     volatile bool mBusy;
+    size_t mLastTransmitSize;
 };
 
 } // namespace detail

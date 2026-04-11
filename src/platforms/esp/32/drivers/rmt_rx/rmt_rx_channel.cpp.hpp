@@ -1243,6 +1243,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
     void clear() FL_NOEXCEPT {
         mReceiveDone = false;
         mSymbolsReceived = 0;
+        mAccumulationOffset = 0;
         // mSkipCounter is set in begin(), not here
         FL_LOG_RX("RX state cleared");
     }

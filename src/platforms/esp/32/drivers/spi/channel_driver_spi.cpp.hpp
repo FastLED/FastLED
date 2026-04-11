@@ -690,7 +690,25 @@ ChannelEngineSpi::acquireChannel(gpio_num_t pin, const ChipsetTimingConfig &timi
             channel.ledBytesRemaining = 0;
 
             if (channel.spi_host != SPI_HOST_MAX) {
-                // SPI hardware still allocated - reuse directly (same pin + timing)
+                // SPI hardware still allocated - reuse directly (same pin + timing).
+                // Reallocate LED source buffer if the new data is larger
+                // than the existing buffer. Without this, larger strips
+                // fall back to ISR-unsafe direct PSRAM access.
+                if (channel.ledSourceBufferSize < dataSize) {
+                    if (channel.ledSourceBuffer) {
+                        heap_caps_free(channel.ledSourceBuffer);
+                    }
+                    channel.ledSourceBuffer = (u8 *)heap_caps_malloc(
+                        dataSize,
+                        MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+                    channel.ledSourceBufferSize =
+                        channel.ledSourceBuffer ? dataSize : 0;
+                    if (!channel.ledSourceBuffer) {
+                        FL_WARN("ChannelEngineSpi: Failed to reallocate "
+                                "LED source buffer ("
+                                << dataSize << " bytes)");
+                    }
+                }
                 FL_DBG_EVERY(100, "ChannelEngineSpi: Reusing SPI for pin " << pin);
                 return &channel;
             }

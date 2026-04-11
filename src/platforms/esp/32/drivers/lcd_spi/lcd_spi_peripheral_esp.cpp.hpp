@@ -27,6 +27,14 @@
 #include "esp_timer.h"
 #include "platforms/esp/esp_version.h"
 
+// Cache sync for PSRAM DMA buffers (IDF 5.0+)
+#if FL_HAS_INCLUDE("esp_cache.h")
+#include "esp_cache.h"
+#define FL_HAS_ESP_CACHE_MSYNC 1
+#else
+#define FL_HAS_ESP_CACHE_MSYNC 0
+#endif
+
 #ifndef LCD_SPI_PSRAM_ALIGNMENT
 #define LCD_SPI_PSRAM_ALIGNMENT 64
 #endif
@@ -83,7 +91,7 @@ LcdSpiPeripheralEsp &LcdSpiPeripheralEsp::instance() FL_NOEXCEPT {
 LcdSpiPeripheralEsp::LcdSpiPeripheralEsp() FL_NOEXCEPT
     : mInitialized(false), mConfig(), mI80Bus(nullptr), mPanelIo(nullptr),
       mCompleteSem(nullptr), mCallback(nullptr), mUserCtx(nullptr),
-      mBusy(false) {}
+      mBusy(false), mLastTransmitSize(0) {}
 
 LcdSpiPeripheralEsp::~LcdSpiPeripheralEsp() { deinitialize(); }
 
@@ -165,34 +173,19 @@ bool LcdSpiPeripheralEsp::initialize(const LcdSpiConfig &config) FL_NOEXCEPT {
         return false;
     }
 
-    esp_lcd_panel_io_i80_config_t io_config = {};
-    io_config.cs_gpio_num = -1;
-    io_config.pclk_hz = config.clock_hz;
-    io_config.trans_queue_depth = 1;
-    io_config.dc_levels = {
-        .dc_idle_level = 0,
-        .dc_cmd_level = 0,
-        .dc_dummy_level = 0,
-        .dc_data_level = 1,
-    };
-    io_config.lcd_cmd_bits = 0;
-    io_config.lcd_param_bits = 0;
-    io_config.user_ctx = this;
-    io_config.on_color_trans_done = lcd_spi_flush_ready;
+    // Panel IO is created lazily in transmit() so it can be recreated
+    // when the transaction size changes. This avoids stale GDMA
+    // descriptor state between different-sized transfers.
 
-    err = esp_lcd_new_panel_io_i80(mI80Bus, &io_config, &mPanelIo);
-    if (err != ESP_OK) {
-        FL_WARN("LcdSpiPeripheralEsp: Failed to create panel IO: " << err);
-        esp_lcd_del_i80_bus(mI80Bus);
-        mI80Bus = nullptr;
-        return false;
-    }
-
-    // Create completion semaphore
+    // Create completion semaphore and prime it so the first transmit()
+    // can take it without blocking. Subsequent transmits wait for the
+    // ISR to give the semaphore after DMA completion.
     if (mCompleteSem == nullptr) {
         mCompleteSem = xSemaphoreCreateBinary();
+        xSemaphoreGive(mCompleteSem);
     }
 
+    mLastTransmitSize = 0;
     mInitialized = true;
     FL_DBG("LcdSpiPeripheralEsp: Initialized with " << config.num_lanes
            << " lanes, " << config.clock_hz << " Hz clock");
@@ -216,6 +209,7 @@ void LcdSpiPeripheralEsp::deinitialize() FL_NOEXCEPT {
     mCallback = nullptr;
     mUserCtx = nullptr;
     mBusy = false;
+    mLastTransmitSize = 0;
 }
 
 bool LcdSpiPeripheralEsp::isInitialized() const FL_NOEXCEPT {
@@ -258,26 +252,84 @@ void LcdSpiPeripheralEsp::freeBuffer(u16 *buffer) FL_NOEXCEPT {
 
 bool LcdSpiPeripheralEsp::transmit(const u16 *buffer,
                                    size_t size_bytes) FL_NOEXCEPT {
-    if (!mInitialized || mPanelIo == nullptr) {
+    if (!mInitialized || mI80Bus == nullptr) {
         return false;
     }
 
-    // Drain stale semaphore from a previous transmit whose completion
-    // was detected via isBusy() rather than waitTransmitDone().
-    // Without this, esp_lcd_panel_io_tx_color may silently fail to
-    // start DMA on the second call because the I80 transaction queue
-    // (depth=1) still holds the completed-but-unconsumed transaction.
+    // Block until previous DMA is truly complete. The semaphore is
+    // primed during initialize() so the first call returns immediately.
+    // This is stronger than the old non-blocking drain — it guarantees
+    // the I80 bus has fully processed the previous transaction before
+    // we submit a new one.
     if (mCompleteSem) {
-        xSemaphoreTake(mCompleteSem, 0);
+        if (xSemaphoreTake(mCompleteSem, pdMS_TO_TICKS(2000)) != pdTRUE) {
+            FL_WARN("LcdSpiPeripheralEsp: Timed out waiting for previous "
+                    "transmit to complete");
+            mBusy = false;
+            return false;
+        }
     }
 
+    // Recreate panel IO when transaction size changes. The ESP-IDF I80
+    // bus driver builds a GDMA descriptor chain sized for each
+    // transaction. Reusing the same panel_io handle with a different
+    // size can leave stale DMA descriptor state that causes the second
+    // transmit to produce no output (ESP_OK but no DMA activity).
+    // Recreating panel_io is cheap (descriptor alloc + config) and does
+    // not touch the I80 bus GPIO routing.
+    if (size_bytes != mLastTransmitSize && mPanelIo != nullptr) {
+        esp_lcd_panel_io_del(mPanelIo);
+        mPanelIo = nullptr;
+    }
+
+    if (mPanelIo == nullptr) {
+        esp_lcd_panel_io_i80_config_t io_config = {};
+        io_config.cs_gpio_num = -1;
+        io_config.pclk_hz = mConfig.clock_hz;
+        io_config.trans_queue_depth = 1;
+        io_config.dc_levels = {
+            .dc_idle_level = 0,
+            .dc_cmd_level = 0,
+            .dc_dummy_level = 0,
+            .dc_data_level = 1,
+        };
+        io_config.lcd_cmd_bits = 0;
+        io_config.lcd_param_bits = 0;
+        io_config.user_ctx = this;
+        io_config.on_color_trans_done = lcd_spi_flush_ready;
+
+        esp_err_t err =
+            esp_lcd_new_panel_io_i80(mI80Bus, &io_config, &mPanelIo);
+        if (err != ESP_OK) {
+            FL_WARN("LcdSpiPeripheralEsp: Failed to recreate panel IO: "
+                    << err);
+            return false;
+        }
+    }
+
+    // Flush CPU cache to PSRAM so DMA sees the latest buffer contents.
+    // esp_lcd_panel_io_tx_color() should handle this internally in
+    // IDF 5.2+, but explicit sync guards against edge cases where the
+    // same buffer pointer is reused with different data.
+#if FL_HAS_ESP_CACHE_MSYNC
+    {
+        // Round up to cache-line boundary (64 bytes). Safe because the
+        // buffer allocation is always 64-byte aligned and oversized.
+        size_t sync_size = ((size_bytes + 63) & ~(size_t)63);
+        esp_cache_msync((void *)buffer, sync_size,
+                        ESP_CACHE_MSYNC_FLAG_DIR_C2M);
+    }
+#endif
+
     mBusy = true;
+    mLastTransmitSize = size_bytes;
 
     esp_err_t err =
         esp_lcd_panel_io_tx_color(mPanelIo, 0x2C, buffer, size_bytes);
 
     if (err != ESP_OK) {
         mBusy = false;
+        FL_WARN("LcdSpiPeripheralEsp: tx_color failed: " << err);
         return false;
     }
 
