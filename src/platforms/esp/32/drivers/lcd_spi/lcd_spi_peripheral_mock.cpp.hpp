@@ -211,14 +211,25 @@ void LcdSpiPeripheralMockImpl::simulateTransmitComplete() FL_NOEXCEPT {
     if (mPendingTransmits == 0) {
         return;
     }
-    mPendingTransmits--;
-    if (mPendingTransmits == 0) {
-        mBusy = false;
-    }
-    if (mCallback != nullptr) {
-        using CallbackType = bool (*)(void *, const void *, void *);
-        auto cb = reinterpret_cast<CallbackType>(mCallback); // ok reinterpret cast
-        cb(nullptr, nullptr, mUserCtx);
+
+    // Drain the entire ISR callback chain. When a callback calls transmit()
+    // (to submit the next DMA chunk), mPendingTransmits increments again.
+    // The loop continues until no more chunks are queued.
+    // This simulates instant DMA completion for all chunks in the stream.
+    //
+    // For single-shot transmissions (no callback registered), the loop
+    // fires once and exits — behavior is identical to the old code.
+    while (mPendingTransmits > 0) {
+        mPendingTransmits--;
+        if (mPendingTransmits == 0) {
+            mBusy = false;
+        }
+        if (mCallback != nullptr) {
+            using CallbackType = bool (*)(void *, const void *, void *);
+            auto cb =
+                reinterpret_cast<CallbackType>(mCallback); // ok reinterpret cast
+            cb(nullptr, nullptr, mUserCtx);
+        }
     }
 }
 

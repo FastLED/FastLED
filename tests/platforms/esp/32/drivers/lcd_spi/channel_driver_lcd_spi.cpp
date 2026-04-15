@@ -663,6 +663,369 @@ FL_TEST_CASE("ChannelDriverLcdSpi - lane count change triggers reinit") {
     }
 }
 
+//=============================================================================
+// ISR-Driven Chunked Streaming Tests (Issue #2258)
+//=============================================================================
+
+FL_TEST_CASE("ChannelDriverLcdSpi - single chunk with ISR callback") {
+    // Small data that fits in one chunk — ISR fires once, marks complete
+    resetMockState();
+    auto peripheral = createMockPeripheral();
+    ChannelDriverLcdSpi driver(peripheral);
+    auto &mock = LcdSpiPeripheralMock::instance();
+
+    // 4 bytes = 32 u16 words. With default chunk size (2048 bytes), fits
+    // in one chunk.
+    SpiEncoder encoder = SpiEncoder::apa102();
+    SpiChipsetConfig cfg{5, 18, encoder};
+    fl::vector_psram<u8> d;
+    d.resize(4);
+    d[0] = 0xFF; d[1] = 0x00; d[2] = 0xAA; d[3] = 0x55;
+    driver.enqueue(ChannelData::create(cfg, fl::move(d)));
+    driver.show();
+
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::DRAINING);
+    FL_CHECK(mock.getTransmitCount() == 1);
+
+    mock.simulateTransmitComplete();
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
+
+    // Verify: exactly 1 transmit (no ISR-initiated follow-up)
+    FL_CHECK(mock.getTransmitCount() == 1);
+}
+
+FL_TEST_CASE("ChannelDriverLcdSpi - multi-chunk streaming") {
+    // Force small chunk size to create multiple chunks
+    resetMockState();
+    auto peripheral = createMockPeripheral();
+    ChannelDriverLcdSpi driver(peripheral);
+    auto &mock = LcdSpiPeripheralMock::instance();
+
+    // 16 source bytes, 4 bytes per chunk = 4 chunks
+    driver.setChunkInputBytesForTest(4);
+
+    SpiEncoder encoder = SpiEncoder::apa102();
+    SpiChipsetConfig cfg{5, 18, encoder};
+    fl::vector_psram<u8> d;
+    d.resize(16);
+    for (size_t i = 0; i < 16; i++) {
+        d[i] = static_cast<u8>(i);
+    }
+    driver.enqueue(ChannelData::create(cfg, fl::move(d)));
+    driver.show();
+
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::DRAINING);
+    // First chunk submitted by beginTransmission
+    FL_CHECK(mock.getTransmitCount() == 1);
+
+    // simulateTransmitComplete drains the entire ISR callback chain
+    mock.simulateTransmitComplete();
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
+
+    // 4 chunks total: 1 initial + 3 from ISR callbacks
+    FL_CHECK(mock.getTransmitCount() == 4);
+}
+
+FL_TEST_CASE("ChannelDriverLcdSpi - chunk transpose fidelity") {
+    // Verify chunked transpose produces identical output to full-buffer
+    resetMockState();
+    auto peripheral = createMockPeripheral();
+    ChannelDriverLcdSpi driver(peripheral);
+    auto &mock = LcdSpiPeripheralMock::instance();
+
+    // Force 4 bytes per chunk
+    driver.setChunkInputBytesForTest(4);
+
+    SpiEncoder encoder = SpiEncoder::apa102();
+    SpiChipsetConfig cfg{5, 18, encoder};
+    fl::vector_psram<u8> d;
+    d.resize(12);
+    d[0] = 0x00; d[1] = 0xFF; d[2] = 0xAA; d[3] = 0x55;
+    d[4] = 0x0F; d[5] = 0xF0; d[6] = 0x33; d[7] = 0xCC;
+    d[8] = 0x01; d[9] = 0x80; d[10] = 0x7E; d[11] = 0xBD;
+
+    driver.enqueue(ChannelData::create(cfg, fl::move(d)));
+    driver.show();
+    mock.simulateTransmitComplete();
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
+
+    // 3 chunks of 4 bytes each
+    FL_CHECK(mock.getTransmitCount() == 3);
+
+    // Concatenate all chunk outputs
+    const auto &history = mock.getTransmitHistory();
+    fl::vector<u16> combined;
+    for (const auto &record : history) {
+        for (const auto &word : record.buffer_copy) {
+            combined.push_back(word);
+        }
+    }
+
+    // Compare against single-shot reference
+    FL_REQUIRE(combined.size() == 12 * 8); // 96 words
+
+    // Byte 0 = 0x00 → 8 words of 0x0000
+    for (size_t i = 0; i < 8; i++) {
+        FL_CHECK(combined[i] == 0x0000);
+    }
+    // Byte 1 = 0xFF → 8 words of 0x0001 (lane 0 set)
+    for (size_t i = 8; i < 16; i++) {
+        FL_CHECK(combined[i] == 0x0001);
+    }
+    // Byte 2 = 0xAA (10101010) → alternating
+    FL_CHECK(combined[16] == 0x0001); FL_CHECK(combined[17] == 0x0000);
+    FL_CHECK(combined[18] == 0x0001); FL_CHECK(combined[19] == 0x0000);
+    FL_CHECK(combined[20] == 0x0001); FL_CHECK(combined[21] == 0x0000);
+    FL_CHECK(combined[22] == 0x0001); FL_CHECK(combined[23] == 0x0000);
+    // Byte 3 = 0x55 (01010101) → alternating (opposite)
+    FL_CHECK(combined[24] == 0x0000); FL_CHECK(combined[25] == 0x0001);
+    FL_CHECK(combined[26] == 0x0000); FL_CHECK(combined[27] == 0x0001);
+    FL_CHECK(combined[28] == 0x0000); FL_CHECK(combined[29] == 0x0001);
+    FL_CHECK(combined[30] == 0x0000); FL_CHECK(combined[31] == 0x0001);
+}
+
+FL_TEST_CASE("ChannelDriverLcdSpi - multi-chunk two lanes") {
+    // Multi-lane with small chunk size to exercise lane transposition
+    resetMockState();
+    auto peripheral = createMockPeripheral();
+    ChannelDriverLcdSpi driver(peripheral);
+    auto &mock = LcdSpiPeripheralMock::instance();
+
+    driver.setChunkInputBytesForTest(2);
+
+    SpiEncoder encoder = SpiEncoder::apa102();
+    SpiChipsetConfig cfg0{5, 18, encoder};
+    SpiChipsetConfig cfg1{6, 18, encoder};
+
+    fl::vector_psram<u8> d0, d1;
+    d0.resize(4); d1.resize(4);
+    d0[0] = 0xFF; d0[1] = 0xFF; d0[2] = 0xFF; d0[3] = 0xFF;
+    d1[0] = 0x00; d1[1] = 0x00; d1[2] = 0xFF; d1[3] = 0xFF;
+
+    driver.enqueue(ChannelData::create(cfg0, fl::move(d0)));
+    driver.enqueue(ChannelData::create(cfg1, fl::move(d1)));
+    driver.show();
+    mock.simulateTransmitComplete();
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
+
+    // 4 bytes / 2 per chunk = 2 chunks
+    FL_CHECK(mock.getTransmitCount() == 2);
+
+    // Concatenate
+    const auto &history = mock.getTransmitHistory();
+    fl::vector<u16> combined;
+    for (const auto &rec : history) {
+        for (const auto &w : rec.buffer_copy) {
+            combined.push_back(w);
+        }
+    }
+    FL_REQUIRE(combined.size() == 32); // 4 bytes * 8
+
+    // Chunk 0 (bytes 0-1): lane0=0xFF,0xFF  lane1=0x00,0x00
+    // Only lane 0 active
+    for (size_t i = 0; i < 16; i++) {
+        FL_CHECK(combined[i] == 0x0001);
+    }
+    // Chunk 1 (bytes 2-3): lane0=0xFF,0xFF  lane1=0xFF,0xFF
+    // Both lanes active
+    for (size_t i = 16; i < 32; i++) {
+        FL_CHECK(combined[i] == 0x0003);
+    }
+}
+
+FL_TEST_CASE("ChannelDriverLcdSpi - ring wrap 3+ chunks") {
+    // 6 chunks to wrap the ring buffer (3 slots) twice
+    resetMockState();
+    auto peripheral = createMockPeripheral();
+    ChannelDriverLcdSpi driver(peripheral);
+    auto &mock = LcdSpiPeripheralMock::instance();
+
+    driver.setChunkInputBytesForTest(2);
+
+    SpiEncoder encoder = SpiEncoder::apa102();
+    SpiChipsetConfig cfg{5, 18, encoder};
+    fl::vector_psram<u8> d;
+    d.resize(12); // 12 / 2 = 6 chunks
+    for (size_t i = 0; i < 12; i++) {
+        d[i] = static_cast<u8>(0xFF); // all ones for easy verification
+    }
+    driver.enqueue(ChannelData::create(cfg, fl::move(d)));
+    driver.show();
+    mock.simulateTransmitComplete();
+
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
+    FL_CHECK(mock.getTransmitCount() == 6);
+
+    // All chunks should produce the same output (all 0xFF → all 0x0001)
+    const auto &history = mock.getTransmitHistory();
+    for (size_t c = 0; c < history.size(); c++) {
+        FL_REQUIRE(history[c].buffer_copy.size() == 16); // 2 bytes * 8
+        for (size_t i = 0; i < 16; i++) {
+            FL_CHECK(history[c].buffer_copy[i] == 0x0001);
+        }
+    }
+}
+
+FL_TEST_CASE("ChannelDriverLcdSpi - multi-cycle chunked reuse") {
+    // Multiple show() calls reuse ring buffers
+    resetMockState();
+    auto peripheral = createMockPeripheral();
+    ChannelDriverLcdSpi driver(peripheral);
+    auto &mock = LcdSpiPeripheralMock::instance();
+
+    driver.setChunkInputBytesForTest(4);
+
+    SpiEncoder encoder = SpiEncoder::apa102();
+
+    for (int cycle = 0; cycle < 3; cycle++) {
+        SpiChipsetConfig cfg{5, 18, encoder};
+        fl::vector_psram<u8> d;
+        d.resize(8); // 2 chunks per cycle
+        for (size_t i = 0; i < 8; i++) {
+            d[i] = static_cast<u8>(cycle * 16 + i);
+        }
+        driver.enqueue(ChannelData::create(cfg, fl::move(d)));
+        driver.show();
+        mock.simulateTransmitComplete();
+        FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
+    }
+
+    // 3 cycles × 2 chunks = 6 total transmits
+    FL_CHECK(mock.getTransmitCount() == 6);
+}
+
+FL_TEST_CASE("ChannelDriverLcdSpi - error mid-stream aborts cleanly") {
+    // Inject failure on the 2nd chunk — stream should abort
+    resetMockState();
+    auto peripheral = createMockPeripheral();
+    ChannelDriverLcdSpi driver(peripheral);
+    auto &mock = LcdSpiPeripheralMock::instance();
+
+    driver.setChunkInputBytesForTest(4);
+
+    SpiEncoder encoder = SpiEncoder::apa102();
+    SpiChipsetConfig cfg{5, 18, encoder};
+    fl::vector_psram<u8> d;
+    d.resize(12); // 3 chunks
+    for (size_t i = 0; i < 12; i++) d[i] = 0xFF;
+    driver.enqueue(ChannelData::create(cfg, fl::move(d)));
+    driver.show();
+
+    FL_CHECK(mock.getTransmitCount() == 1);
+
+    // Inject failure before completing first chunk
+    mock.setTransmitFailure(true);
+    mock.simulateTransmitComplete();
+
+    // ISR tried to submit chunk 2 but transmit failed → stream aborted
+    // The initial transmit succeeded, ISR callback's transmit failed
+    FL_CHECK(mock.getTransmitCount() == 1); // only the initial one succeeded
+
+    // Driver should transition to READY after stream abort
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
+}
+
+FL_TEST_CASE("ChannelDriverLcdSpi - asymmetric lanes with chunking") {
+    // Lane 0: 8 bytes, Lane 1: 4 bytes
+    // With chunk size 4, lane 1 runs out mid-stream
+    resetMockState();
+    auto peripheral = createMockPeripheral();
+    ChannelDriverLcdSpi driver(peripheral);
+    auto &mock = LcdSpiPeripheralMock::instance();
+
+    driver.setChunkInputBytesForTest(4);
+
+    SpiEncoder encoder = SpiEncoder::apa102();
+    SpiChipsetConfig cfg0{5, 18, encoder};
+    SpiChipsetConfig cfg1{6, 18, encoder};
+
+    fl::vector_psram<u8> d0, d1;
+    d0.resize(8); d1.resize(4);
+    for (size_t i = 0; i < 8; i++) d0[i] = 0xFF;
+    for (size_t i = 0; i < 4; i++) d1[i] = 0xFF;
+
+    driver.enqueue(ChannelData::create(cfg0, fl::move(d0)));
+    driver.enqueue(ChannelData::create(cfg1, fl::move(d1)));
+    driver.show();
+    mock.simulateTransmitComplete();
+
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
+    // max(8, 4) = 8 bytes, 8/4 = 2 chunks
+    FL_CHECK(mock.getTransmitCount() == 2);
+
+    const auto &history = mock.getTransmitHistory();
+
+    // Chunk 0 (bytes 0-3): both lanes 0xFF → 0x0003
+    FL_REQUIRE(history[0].buffer_copy.size() == 32);
+    for (size_t i = 0; i < 32; i++) {
+        FL_CHECK(history[0].buffer_copy[i] == 0x0003);
+    }
+
+    // Chunk 1 (bytes 4-7): lane0=0xFF, lane1=0x00 (past end) → 0x0001
+    FL_REQUIRE(history[1].buffer_copy.size() == 32);
+    for (size_t i = 0; i < 32; i++) {
+        FL_CHECK(history[1].buffer_copy[i] == 0x0001);
+    }
+}
+
+FL_TEST_CASE("ChannelDriverLcdSpi - single byte chunk") {
+    // Extreme case: 1 byte per chunk
+    resetMockState();
+    auto peripheral = createMockPeripheral();
+    ChannelDriverLcdSpi driver(peripheral);
+    auto &mock = LcdSpiPeripheralMock::instance();
+
+    driver.setChunkInputBytesForTest(1);
+
+    SpiEncoder encoder = SpiEncoder::apa102();
+    SpiChipsetConfig cfg{5, 18, encoder};
+    fl::vector_psram<u8> d;
+    d.resize(4);
+    d[0] = 0xFF; d[1] = 0x00; d[2] = 0xAA; d[3] = 0x55;
+    driver.enqueue(ChannelData::create(cfg, fl::move(d)));
+    driver.show();
+    mock.simulateTransmitComplete();
+
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
+    FL_CHECK(mock.getTransmitCount() == 4); // 4 chunks of 1 byte each
+
+    const auto &history = mock.getTransmitHistory();
+
+    // Chunk 0: 0xFF → all bits set → 8 words of 0x0001
+    FL_REQUIRE(history[0].buffer_copy.size() == 8);
+    for (size_t i = 0; i < 8; i++) {
+        FL_CHECK(history[0].buffer_copy[i] == 0x0001);
+    }
+    // Chunk 1: 0x00 → no bits set → 8 words of 0x0000
+    FL_REQUIRE(history[1].buffer_copy.size() == 8);
+    for (size_t i = 0; i < 8; i++) {
+        FL_CHECK(history[1].buffer_copy[i] == 0x0000);
+    }
+}
+
+FL_TEST_CASE("ChannelDriverLcdSpi - chunk size larger than data") {
+    // Chunk size > data size → single chunk, same as default behavior
+    resetMockState();
+    auto peripheral = createMockPeripheral();
+    ChannelDriverLcdSpi driver(peripheral);
+    auto &mock = LcdSpiPeripheralMock::instance();
+
+    driver.setChunkInputBytesForTest(1000);
+
+    SpiEncoder encoder = SpiEncoder::apa102();
+    SpiChipsetConfig cfg{5, 18, encoder};
+    fl::vector_psram<u8> d;
+    d.resize(8);
+    for (size_t i = 0; i < 8; i++) d[i] = 0xFF;
+    driver.enqueue(ChannelData::create(cfg, fl::move(d)));
+    driver.show();
+
+    FL_CHECK(mock.getTransmitCount() == 1);
+    mock.simulateTransmitComplete();
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
+    FL_CHECK(mock.getTransmitCount() == 1);
+}
+
 #endif // FASTLED_STUB_IMPL
 
 } // FL_TEST_FILE

@@ -89,6 +89,9 @@
 // IWYU pragma: begin_keep
 #include "lcd_spi/channel_driver_lcd_spi.h"
 // IWYU pragma: end_keep
+// IWYU pragma: begin_keep
+#include "lcd_spi/channel_driver_lcd_clockless.h"
+// IWYU pragma: end_keep
 #endif
 
 namespace fl {
@@ -121,6 +124,11 @@ constexpr int PRIORITY_I2S_SPI = 10; ///< Native I2S parallel SPI driver (ESP32d
 constexpr int PRIORITY_LCD_SPI = PRIORITY_FORCE; ///< FORCED highest by FASTLED_ESP32_FORCE_LCD_SPI
 #else
 constexpr int PRIORITY_LCD_SPI = 10; ///< Native LCD_CAM SPI driver (ESP32-S3, true SPI chipsets)
+#endif
+#if defined(FASTLED_ESP32_FORCE_LCD_CLOCKLESS)
+constexpr int PRIORITY_LCD_CLOCKLESS = PRIORITY_FORCE; ///< FORCED highest by FASTLED_ESP32_FORCE_LCD_CLOCKLESS
+#else
+constexpr int PRIORITY_LCD_CLOCKLESS = 1; ///< LCD_CAM clockless driver (ESP32-S3, replaces misnamed I2S)
 #endif
 
 /// @brief Add HW SPI drivers if supported by platform (UNIFIED VERSION)
@@ -280,6 +288,21 @@ static void addLcdSpiIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 #endif
 }
 
+/// @brief Add LCD_CAM clockless driver if supported (ESP32-S3, replaces misnamed I2S)
+static void addLcdClocklessIfPossible(ChannelManager& manager) FL_NOEXCEPT {
+#if FASTLED_ESP32_HAS_LCD_SPI
+    auto driver = createLcdClocklessEngine();
+    if (driver) {
+        manager.addDriver(PRIORITY_LCD_CLOCKLESS, driver);
+        FL_DBG("ESP32-S3: Added LCD_CLOCKLESS driver (priority " << PRIORITY_LCD_CLOCKLESS << ")");
+    } else {
+        FL_DBG("ESP32-S3: LCD_CLOCKLESS driver creation deferred");
+    }
+#else
+    (void)manager;
+#endif
+}
+
 /// @brief Add I2S LCD_CAM driver if supported by platform
 static void addI2sIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 #if FASTLED_ESP32_HAS_I2S_LCD_CAM
@@ -320,7 +343,8 @@ void initChannelDrivers() FL_NOEXCEPT {
     detail::addSpiIfPossible(manager);          // Priority 0 (clockless-over-SPI)
     detail::addUartIfPossible(manager);         // Priority -1 (clockless)
     detail::addRmtIfPossible(manager);          // Priority 2 (clockless)
-    detail::addI2sIfPossible(manager);          // Priority 1 (clockless)
+    detail::addLcdClocklessIfPossible(manager); // Priority 1 (clockless, ESP32-S3, replaces misnamed I2S)
+    detail::addI2sIfPossible(manager);          // Priority 1 (clockless, legacy I2S name)
 
     FL_DBG("ESP32: Channel drivers initialized");
 }
