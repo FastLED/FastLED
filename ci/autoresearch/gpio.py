@@ -59,11 +59,50 @@ async def run_gpio_pretest(
                 handle_keyboard_interrupt(ki)
                 raise
             except Exception as e:
-                print(f"\u274c Ping failed: {e}")
-                print(
-                    "   RPC communication is not working - device may not be responding"
-                )
-                return False
+                # Try DTR reset and retry — device may be booted but idle
+                print(f"\u26a0\ufe0f  Ping failed ({e}), attempting DTR reset...")
+                try:
+                    await client.close()
+                    import serial as pyserial
+
+                    s = pyserial.Serial(port, 115200, timeout=0.1)
+                    s.dtr = True
+                    import asyncio
+
+                    await asyncio.sleep(0.1)
+                    s.dtr = False
+                    await asyncio.sleep(3.0)
+                    s.close()
+
+                    client = RpcClient(
+                        port,
+                        timeout=timeout,
+                        serial_interface=serial_interface,
+                        verbose=True,
+                    )
+                    await client.connect(boot_wait=3.0, drain_boot=True)
+                    ping_response = await client.send("ping", retries=3)
+                    print(f"\u2705 Ping successful after DTR reset: {ping_response.data}")
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
+                    raise
+                except Exception as e2:
+                    print(f"\u274c Ping failed after DTR reset: {e2}")
+                    print()
+                    print(
+                        f"   {Fore.RED}DIAGNOSIS: RPC communication failure{Style.RESET_ALL}"
+                    )
+                    print(
+                        "   The device is not responding to JSON-RPC commands."
+                    )
+                    print("   This is NOT a jumper wire issue.")
+                    print()
+                    print("   Possible causes:")
+                    print("   1. Firmware not flashed or outdated")
+                    print("   2. Device crashed during boot")
+                    print("   3. Serial port conflict with another process")
+                    print("   4. Wrong baud rate or USB-CDC driver issue")
+                    return False
 
             print()
             print("=" * 60)
@@ -85,23 +124,39 @@ async def run_gpio_pretest(
                 print()
                 return True
             else:
+                rx_low = response.get("rxWhenTxLow", "?")
+                rx_high = response.get("rxWhenTxHigh", "?")
+                msg = response.get("message", "Unknown error")
                 print()
                 print(f"{Fore.RED}\u274c GPIO PRE-TEST FAILED{Style.RESET_ALL}")
                 print()
-                print(
-                    f"   {Fore.RED}Error: {response.get('message', 'Unknown error')}{Style.RESET_ALL}"
-                )
+                print(f"   {Fore.RED}Error: {msg}{Style.RESET_ALL}")
                 print()
-                print("   The TX and RX pins are NOT electrically connected.")
-                print()
-                print(f"   {Fore.YELLOW}ACTION REQUIRED:{Style.RESET_ALL}")
-                print(
-                    f"   Connect a jumper wire between GPIO {tx_pin} (TX) and GPIO {rx_pin} (RX)"
-                )
+                # Provide specific diagnosis based on pin readings
+                if rx_low == 1 and rx_high == 1:
+                    print(
+                        f"   {Fore.YELLOW}DIAGNOSIS: RX pin (GPIO {rx_pin}) is stuck HIGH (floating/pullup).{Style.RESET_ALL}"
+                    )
+                    print(
+                        f"   The jumper wire is likely not connected to GPIO {rx_pin}."
+                    )
+                    print(
+                        f"   Check that the wire connects TX (GPIO {tx_pin}) to RX (GPIO {rx_pin})."
+                    )
+                elif rx_low == 0 and rx_high == 0:
+                    print(
+                        f"   {Fore.YELLOW}DIAGNOSIS: RX pin (GPIO {rx_pin}) is stuck LOW.{Style.RESET_ALL}"
+                    )
+                    print(
+                        "   Possible short to ground or GPIO conflict with a peripheral."
+                    )
+                else:
+                    print("   The TX and RX pins are NOT electrically connected.")
                 print()
                 print("   Debug info:")
-                print(f"     RX when TX=LOW:  {response.get('rxWhenTxLow', '?')}")
-                print(f"     RX when TX=HIGH: {response.get('rxWhenTxHigh', '?')}")
+                print(f"     RX when TX=LOW:  {rx_low}")
+                print(f"     RX when TX=HIGH: {rx_high}")
+                print(f"     Tested: TX=GPIO {tx_pin}, RX=GPIO {rx_pin}")
                 print()
                 return False
         finally:
@@ -194,13 +249,47 @@ async def run_pin_discovery(
             handle_keyboard_interrupt(ki)
             raise
         except Exception as e:
-            print(f"\u274c Ping failed: {e}")
-            print("   RPC communication is not working - device may not be responding")
-            if client:
+            # Try DTR reset and retry — device may be booted but idle
+            print(f"\u26a0\ufe0f  Ping failed ({e}), attempting DTR reset...")
+            try:
                 await client.close()
-            return PinDiscoveryResult(
-                success=False, tx_pin=None, rx_pin=None, client=None
-            )
+                client = None
+                import serial as pyserial
+
+                s = pyserial.Serial(port, 115200, timeout=0.1)
+                s.dtr = True
+                import asyncio
+
+                await asyncio.sleep(0.1)
+                s.dtr = False
+                await asyncio.sleep(3.0)
+                s.close()
+
+                client = RpcClient(
+                    port,
+                    timeout=timeout,
+                    serial_interface=serial_interface,
+                    verbose=True,
+                )
+                await client.connect(boot_wait=3.0, drain_boot=True)
+                ping_response = await client.send("ping", timeout=30.0, retries=3)
+                print(f"\u2705 Ping successful after DTR reset: {ping_response.data}")
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
+                raise
+            except Exception as e2:
+                print(f"\u274c Ping failed after DTR reset: {e2}")
+                print()
+                print(
+                    "   DIAGNOSIS: RPC communication failure — device is not responding."
+                )
+                print("   This is NOT a jumper wire issue.")
+                print("   Check: firmware flashed? device crashed? port conflict?")
+                if client:
+                    await client.close()
+                return PinDiscoveryResult(
+                    success=False, tx_pin=None, rx_pin=None, client=None
+                )
 
         print()
         print("=" * 60)
