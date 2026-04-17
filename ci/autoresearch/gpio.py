@@ -63,16 +63,26 @@ async def run_gpio_pretest(
                 print(f"\u26a0\ufe0f  Ping failed ({e}), attempting DTR reset...")
                 try:
                     await client.close()
-                    import serial as pyserial
 
-                    s = pyserial.Serial(port, 115200, timeout=0.1)
-                    s.dtr = True
+                    # Use SerialInterface.reset_device() if available
+                    if serial_interface is not None:
+                        print("  Resetting device via SerialInterface.reset_device()...")
+                        await serial_interface.reset_device(board="esp32s3")
+                    else:
+                        # Fallback: direct pyserial DTR toggle
+                        import serial as pyserial
+
+                        s = pyserial.Serial(port, 115200, timeout=0.1)
+                        s.dtr = True
+                        import asyncio
+
+                        await asyncio.sleep(0.1)
+                        s.dtr = False
+                        s.close()
+
                     import asyncio
 
-                    await asyncio.sleep(0.1)
-                    s.dtr = False
                     await asyncio.sleep(3.0)
-                    s.close()
 
                     client = RpcClient(
                         port,
@@ -252,18 +262,29 @@ async def run_pin_discovery(
             # Try DTR reset and retry — device may be booted but idle
             print(f"\u26a0\ufe0f  Ping failed ({e}), attempting DTR reset...")
             try:
-                await client.close()
+                if client:
+                    await client.close()
                 client = None
-                import serial as pyserial
 
-                s = pyserial.Serial(port, 115200, timeout=0.1)
-                s.dtr = True
+                # Use SerialInterface.reset_device() if available
+                if serial_interface is not None:
+                    print("  Resetting device via SerialInterface.reset_device()...")
+                    await serial_interface.reset_device(board="esp32s3")
+                else:
+                    # Fallback: direct pyserial DTR toggle
+                    import serial as pyserial
+
+                    s = pyserial.Serial(port, 115200, timeout=0.1)
+                    s.dtr = True
+                    import asyncio
+
+                    await asyncio.sleep(0.1)
+                    s.dtr = False
+                    s.close()
+
                 import asyncio
 
-                await asyncio.sleep(0.1)
-                s.dtr = False
                 await asyncio.sleep(3.0)
-                s.close()
 
                 client = RpcClient(
                     port,

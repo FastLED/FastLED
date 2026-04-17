@@ -50,6 +50,18 @@ class SerialInterface(Protocol):
         if False:  # pragma: no cover
             yield ""
 
+    async def reset_device(self, board: str | None = None) -> bool:
+        """Reset the device via DTR/RTS toggling.
+
+        Args:
+            board: Board identifier for platform-specific reset sequence.
+                   If None, uses generic DTR toggle.
+
+        Returns:
+            True if reset succeeded, False otherwise.
+        """
+        ...
+
 
 class PySerialAdapter:
     """Adapter wrapping pyserial_monitor.SerialMonitor as SerialInterface."""
@@ -82,6 +94,21 @@ class PySerialAdapter:
     async def read_lines(self, timeout: float) -> AsyncIterator[str]:
         for line in self._monitor.read_lines(timeout=timeout):
             yield line
+
+    async def reset_device(self, board: str | None = None) -> bool:
+        """Reset device via direct pyserial DTR toggle."""
+        try:
+            import serial as pyserial
+
+            s = pyserial.Serial(self._monitor.port, 115200, timeout=0.1)
+            s.dtr = True
+            await asyncio.sleep(0.1)
+            s.dtr = False
+            await asyncio.sleep(0.5)
+            s.close()
+            return True
+        except Exception:
+            return False
 
 
 class FbuildSerialAdapter:
@@ -171,6 +198,29 @@ class FbuildSerialAdapter:
             if item is None:
                 break
             yield item
+
+
+    async def reset_device(self, board: str | None = None) -> bool:
+        """Reset device via fbuild daemon's reset endpoint."""
+        try:
+            result = await self._run_in_thread(self._monitor.reset_device, board)
+            return bool(result)
+        except AttributeError:
+            # Older fbuild version without reset_device — fall back to pyserial
+            try:
+                import serial as pyserial
+
+                s = pyserial.Serial(self._monitor.port, 115200, timeout=0.1)
+                s.dtr = True
+                await asyncio.sleep(0.1)
+                s.dtr = False
+                await asyncio.sleep(0.5)
+                s.close()
+                return True
+            except Exception:
+                return False
+        except Exception:
+            return False
 
 
 def create_serial_interface(
