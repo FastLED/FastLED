@@ -15,6 +15,31 @@ from collections.abc import AsyncIterator
 from concurrent.futures import ThreadPoolExecutor
 from typing import Protocol, runtime_checkable
 
+import serial as pyserial
+
+
+def _pyserial_dtr_reset(port: str) -> bool:
+    """Reset an ESP32 device using the esptool ClassicReset DTR/RTS sequence.
+
+    Sequence: DTR=false,RTS=true (hold EN low) → DTR=true,RTS=false (release)
+    → DTR=false (final state). This matches esptool's --before default-reset.
+    """
+    try:
+        s = pyserial.Serial(port, 115200, timeout=0.1)
+        try:
+            s.dtr = False
+            s.rts = True
+            time.sleep(0.1)
+            s.dtr = True
+            s.rts = False
+            time.sleep(0.05)
+            s.dtr = False
+        finally:
+            s.close()
+        return True
+    except (OSError, pyserial.SerialException):
+        return False
+
 
 @runtime_checkable
 class SerialInterface(Protocol):
@@ -50,12 +75,12 @@ class SerialInterface(Protocol):
         if False:  # pragma: no cover
             yield ""
 
-    async def reset_device(self, board: str | None = None) -> bool:
+    async def reset_device(self, board: str | None) -> bool:
         """Reset the device via DTR/RTS toggling.
 
         Args:
             board: Board identifier for platform-specific reset sequence.
-                   If None, uses generic DTR toggle.
+                   Pass None for generic DTR toggle.
 
         Returns:
             True if reset succeeded, False otherwise.
@@ -95,20 +120,9 @@ class PySerialAdapter:
         for line in self._monitor.read_lines(timeout=timeout):
             yield line
 
-    async def reset_device(self, board: str | None = None) -> bool:
-        """Reset device via direct pyserial DTR toggle."""
-        try:
-            import serial as pyserial
-
-            s = pyserial.Serial(self._monitor.port, 115200, timeout=0.1)
-            s.dtr = True
-            await asyncio.sleep(0.1)
-            s.dtr = False
-            await asyncio.sleep(0.5)
-            s.close()
-            return True
-        except Exception:
-            return False
+    async def reset_device(self, board: str | None) -> bool:
+        """Reset device via direct pyserial DTR/RTS toggle."""
+        return _pyserial_dtr_reset(self._monitor.port)
 
 
 class FbuildSerialAdapter:
@@ -199,26 +213,14 @@ class FbuildSerialAdapter:
                 break
             yield item
 
-
-    async def reset_device(self, board: str | None = None) -> bool:
+    async def reset_device(self, board: str | None) -> bool:
         """Reset device via fbuild daemon's reset endpoint."""
+        if not hasattr(self._monitor, "reset_device"):
+            # Older fbuild version — fall back to pyserial
+            return _pyserial_dtr_reset(self._monitor.port)
         try:
             result = await self._run_in_thread(self._monitor.reset_device, board)
             return bool(result)
-        except AttributeError:
-            # Older fbuild version without reset_device — fall back to pyserial
-            try:
-                import serial as pyserial
-
-                s = pyserial.Serial(self._monitor.port, 115200, timeout=0.1)
-                s.dtr = True
-                await asyncio.sleep(0.1)
-                s.dtr = False
-                await asyncio.sleep(0.5)
-                s.close()
-                return True
-            except Exception:
-                return False
         except Exception:
             return False
 
