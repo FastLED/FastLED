@@ -2,7 +2,7 @@
 /// @brief   Benchmark drawDisc on AVR (32x8 canvas, blend mode)
 /// @example PerfDisc.ino
 
-// @filter: (memory is low)
+// @filter: (board is not ATtiny1604)
 
 #include <Arduino.h>
 #include <FastLED.h>

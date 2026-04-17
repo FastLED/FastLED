@@ -2,7 +2,7 @@
 /// @brief   Demonstrates how to use multiple LED strips, each with their own data in one shared array
 /// @example MultipleStripsInOneArray.ino
 
-// @filter: (memory is low)
+// @filter: (board is not ATtiny1604)
 
 // MultipleStripsInOneArray - see https://github.com/FastLED/FastLED/wiki/Multiple-Controller-Examples for more info on
 // using multiple controllers.  In this example, we're going to set up four NEOPIXEL strips on three
