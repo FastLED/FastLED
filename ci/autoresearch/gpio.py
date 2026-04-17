@@ -46,14 +46,19 @@ async def run_gpio_pretest(
         client = RpcClient(
             port, timeout=timeout, serial_interface=serial_interface, verbose=True
         )
-        await client.connect(boot_wait=3.0, drain_boot=False)
+        # Wait longer than the nominal boot time: FbuildSerialAdapter's
+        # connect triggers a DTR reset, and ESP32-S3 AutoResearch setup
+        # takes ~5-7s before the RPC dispatcher is ready. A 3s boot_wait
+        # raced the first ping against setup() and caused intermittent
+        # timeouts.
+        await client.connect(boot_wait=8.0, drain_boot=True)
         try:
             print()
             print("=" * 60)
             print("PING TEST (verify basic RPC works)")
             print("=" * 60)
             try:
-                ping_response = await client.send("ping", retries=3)
+                ping_response = await client.send("ping", timeout=15.0, retries=3)
                 print(f"\u2705 Ping successful: {ping_response.data}")
             except KeyboardInterrupt as ki:
                 handle_keyboard_interrupt(ki)
@@ -239,7 +244,7 @@ async def run_pin_discovery(
         client = RpcClient(
             port, timeout=timeout, serial_interface=serial_interface, verbose=True
         )
-        await client.connect(boot_wait=3.0, drain_boot=True)
+        await client.connect(boot_wait=8.0, drain_boot=True)
 
         print()
         print("=" * 60)

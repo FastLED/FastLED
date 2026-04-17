@@ -370,13 +370,17 @@ bool ChannelDriverLcdClockless::beginTransmission(
             config.data_gpios[i] = channels[i]->getPin();
         }
 
-        // PCLK needs a GPIO but is not connected to LEDs for clockless.
-        // Use GPIO 21 as dummy (same convention as SPI dc_gpio).
+        // PCLK and DC pins are required by the LCD I80 bus API but the
+        // signals are not connected to LEDs for clockless output (data
+        // streams out on data_gpios). Use GPIO 0 for both (same convention
+        // as the legacy I2S LCD_CAM driver this replaces — proven safe on
+        // ESP32-S3 because the strapping pin tolerates being multiplexed
+        // to unused peripheral functions).
         if (config.clock_gpio < 0) {
-            config.clock_gpio = 21;
+            config.clock_gpio = 0;
         }
         if (config.dc_gpio < 0) {
-            config.dc_gpio = 22; // another unused GPIO
+            config.dc_gpio = 0;
         }
 
         if (!mPeripheral->initialize(config)) {

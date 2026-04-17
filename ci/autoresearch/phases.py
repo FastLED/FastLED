@@ -178,6 +178,12 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             "\u2139\ufe0f  --lcd flag requires ESP32-S3, auto-selecting 'esp32s3' environment"
         )
 
+    if args.lcd_spi and not final_environment:
+        final_environment = "esp32s3"
+        print(
+            "\u2139\ufe0f  --lcd-spi flag requires ESP32-S3, auto-selecting 'esp32s3' environment"
+        )
+
     if args.lcd_rgb and not final_environment:
         final_environment = "esp32p4"
         print(
@@ -190,7 +196,16 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     coroutine_test_mode = args.coroutine
 
     if args.all:
-        drivers = ["PARLIO", "RMT", "SPI", "UART", "I2S", "LCD_RGB", "OBJECTFLED"]
+        drivers = [
+            "PARLIO",
+            "RMT",
+            "SPI",
+            "UART",
+            "LCD_CLOCKLESS",
+            "LCD_SPI",
+            "LCD_RGB",
+            "OBJECTFLED",
+        ]
     else:
         if args.parlio:
             drivers.append("PARLIO")
@@ -201,7 +216,9 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         if args.uart:
             drivers.append("UART")
         if args.lcd:
-            drivers.append("I2S")
+            drivers.append("LCD_CLOCKLESS")
+        if args.lcd_spi:
+            drivers.append("LCD_SPI")
         if args.lcd_rgb:
             drivers.append("LCD_RGB")
         if args.object_fled:
