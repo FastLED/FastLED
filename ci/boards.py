@@ -236,13 +236,15 @@ class Board:
         """
         # Tiny-memory board list: <= 1KB SRAM. These cannot fit many standard
         # FastLED example sketches. Matches sketch_macros.h SKETCH_HAS_TINY_MEMORY.
+        # Case-insensitive match — PlatformIO board names vary in casing (e.g.
+        # "attiny85" vs "ATtiny1604").
         tiny_memory_boards = {
             "attiny85",  # 512B RAM
             "attiny88",  # 512B RAM
             "attiny4313",  # 256B RAM
             "attiny1604",  # 1KB RAM (ATtinyxy4)
         }
-        if self.board_name in tiny_memory_boards:
+        if self.board_name.lower() in tiny_memory_boards:
             return "tiny"
 
         # Low-memory board list (matches sketch_macros.h)
