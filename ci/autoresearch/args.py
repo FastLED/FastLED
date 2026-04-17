@@ -18,6 +18,7 @@ class Args:
     spi: bool
     uart: bool
     lcd: bool
+    lcd_spi: bool
     lcd_rgb: bool
     object_fled: bool
     all: bool
@@ -99,10 +100,11 @@ Examples:
   %(prog)s --all                       # Test all drivers
   %(prog)s --parlio --skip-lint        # Skip linting for faster iteration
   %(prog)s --rmt --timeout 120         # Custom timeout (default: 60s)
-  %(prog)s --lcd --lanes 2 --strip-sizes 100,300  # Test I2S with 2 lanes, strips of 100 and 300 LEDs
+  %(prog)s --lcd --lanes 2 --strip-sizes 100,300  # Test LCD_CLOCKLESS with 2 lanes, strips of 100 and 300 LEDs
+  %(prog)s --lcd-spi --strip-sizes 100,500   # Test LCD_SPI (APA102) on ESP32-S3
   %(prog)s --parlio --lanes 1-4        # Test PARLIO with 1-4 lanes
   %(prog)s --rmt --strip-sizes small   # Test RMT with 'small' preset (100/500 LEDs)
-  %(prog)s --lcd --lane-counts 100,200,300  # Test I2S with 3 lanes (100, 200, 300 LEDs per lane)
+  %(prog)s --lcd --lane-counts 100,200,300  # Test LCD_CLOCKLESS with 3 lanes (100, 200, 300 LEDs per lane)
   %(prog)s --parlio --color-pattern 0xff00aa  # Test PARLIO with custom color pattern (RGB hex)
   %(prog)s --help                      # Show this help message
 
@@ -111,13 +113,15 @@ Driver Selection (JSON-RPC):
   You can instantly switch between drivers without rebuilding firmware.
 
   MANDATORY: You MUST specify at least one driver flag:
-    --parlio      Test only PARLIO driver
-    --rmt         Test only RMT driver
-    --spi         Test only SPI driver
-    --uart        Test only UART driver
-    --lcd-rgb     Test only LCD RGB driver (ESP32-P4 only)
-    --object-fled Test only ObjectFLED DMA driver (Teensy 4.x)
-    --all         Test all drivers
+    --parlio       Test only PARLIO driver
+    --rmt          Test only RMT driver
+    --spi          Test only SPI driver
+    --uart         Test only UART driver
+    --lcd          Test only LCD_CLOCKLESS driver (ESP32-S3 only, replaces misnamed I2S)
+    --lcd-spi      Test only LCD_SPI driver (ESP32-S3 only, APA102/SK9822)
+    --lcd-rgb      Test only LCD RGB driver (ESP32-P4 only)
+    --object-fled  Test only ObjectFLED DMA driver (Teensy 4.x)
+    --all          Test all drivers
 
 Strip Size Configuration:
   Configure LED strip sizes for autoresearch testing via JSON-RPC:
@@ -199,7 +203,12 @@ See Also:
         driver_group.add_argument(
             "--lcd",
             action="store_true",
-            help="Test only I2S LCD_CAM driver (ESP32-S3 only)",
+            help="Test only LCD_CLOCKLESS driver (ESP32-S3, clockless via LCD_CAM I80; replaces misnamed I2S)",
+        )
+        driver_group.add_argument(
+            "--lcd-spi",
+            action="store_true",
+            help="Test only LCD_SPI driver (ESP32-S3, APA102/SK9822 via LCD_CAM I80)",
         )
         driver_group.add_argument(
             "--lcd-rgb",
@@ -214,7 +223,7 @@ See Also:
         driver_group.add_argument(
             "--all",
             action="store_true",
-            help="Test all drivers (equivalent to --parlio --rmt --spi --uart --lcd --lcd-rgb --object-fled)",
+            help="Test all drivers (equivalent to --parlio --rmt --spi --uart --lcd --lcd-spi --lcd-rgb --object-fled)",
         )
         driver_group.add_argument(
             "--simd",
@@ -480,6 +489,7 @@ See Also:
             spi=parsed.spi,
             uart=parsed.uart,
             lcd=parsed.lcd,
+            lcd_spi=parsed.lcd_spi,
             lcd_rgb=parsed.lcd_rgb,
             object_fled=parsed.object_fled,
             all=parsed.all,
