@@ -91,9 +91,9 @@ public:
   }
 };
 
-#ifndef FASTLED_UNUSABLE_PIN_MASK
-
 #define _FL_BIT(B) (1ULL << B)
+
+#ifndef FASTLED_UNUSABLE_PIN_MASK
 
 // CONFIG_IDF_TARGET_ESP32 was introduced in ESP-IDF v4.0
 // For v3.x (where the macro doesn't exist), assume original ESP32
