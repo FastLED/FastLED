@@ -2,6 +2,8 @@
 /// @brief   Demonstrates how to use an XY position helper function with a 2D matrix
 /// @example XYMatrix.ino
 
+// @filter: (board is not ATtiny1604)
+
 #include <FastLED.h>
 
 #define LED_PIN  3
