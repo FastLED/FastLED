@@ -74,7 +74,9 @@ async def run_gpio_pretest(
                     # to block until the device starts producing serial output
                     reset_ok = False
                     if serial_interface is not None:
-                        print("  Resetting device via SerialInterface.reset_device(wait_for_output=True)...")
+                        print(
+                            "  Resetting device via SerialInterface.reset_device(wait_for_output=True)..."
+                        )
                         reset_ok = await serial_interface.reset_device(board=None)
                     else:
                         from ci.util.serial_interface import _pyserial_dtr_reset
@@ -92,7 +94,9 @@ async def run_gpio_pretest(
                     )
                     await client.connect(boot_wait=boot_wait, drain_boot=True)
                     ping_response = await client.send("ping", retries=3)
-                    print(f"\u2705 Ping successful after DTR reset: {ping_response.data}")
+                    print(
+                        f"\u2705 Ping successful after DTR reset: {ping_response.data}"
+                    )
                 except KeyboardInterrupt as ki:
                     handle_keyboard_interrupt(ki)
                     raise
@@ -102,9 +106,7 @@ async def run_gpio_pretest(
                     print(
                         f"   {Fore.RED}DIAGNOSIS: RPC communication failure{Style.RESET_ALL}"
                     )
-                    print(
-                        "   The device is not responding to JSON-RPC commands."
-                    )
+                    print("   The device is not responding to JSON-RPC commands.")
                     print("   This is NOT a jumper wire issue.")
                     print()
                     print("   Possible causes:")
@@ -270,7 +272,9 @@ async def run_pin_discovery(
                 # Use SerialInterface.reset_device(wait_for_output=True)
                 reset_ok = False
                 if serial_interface is not None:
-                    print("  Resetting device via SerialInterface.reset_device(wait_for_output=True)...")
+                    print(
+                        "  Resetting device via SerialInterface.reset_device(wait_for_output=True)..."
+                    )
                     reset_ok = await serial_interface.reset_device(board=None)
                 else:
                     from ci.util.serial_interface import _pyserial_dtr_reset
