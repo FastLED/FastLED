@@ -22,6 +22,7 @@ from typing import Any
 
 from typeguard import typechecked
 
+
 VALID_OWNER_TYPES = {"organization", "user"}
 
 
@@ -120,9 +121,7 @@ def find_project(owner: str, owner_type: str, number: int) -> str:
         data = graphql(query, {"owner": owner, "number": number})
         project = data["data"]["organization"]["projectV2"]
         if not project:
-            raise SystemExit(
-                f"Project #{number} not found for organization '{owner}'"
-            )
+            raise SystemExit(f"Project #{number} not found for organization '{owner}'")
         return project["id"]
     else:
         query = """
@@ -187,9 +186,7 @@ def get_field_and_option(
         if field.get("name") == field_name:
             for option in field.get("options", []):
                 if option["name"] == option_name:
-                    return FieldOption(
-                        field_id=field["id"], option_id=option["id"]
-                    )
+                    return FieldOption(field_id=field["id"], option_id=option["id"])
             available: list[str] = []
             for opt in field.get("options", []):
                 available.append(opt["name"])
@@ -203,9 +200,7 @@ def get_field_and_option(
         name = f.get("name")
         if name:
             available_fields.append(name)
-    raise SystemExit(
-        f"Field '{field_name}' not found. Available: {available_fields}"
-    )
+    raise SystemExit(f"Field '{field_name}' not found. Available: {available_fields}")
 
 
 def get_date_field(project_id: str, field_name: str) -> str:
@@ -264,9 +259,7 @@ def update_single_select(
     )
 
 
-def update_date(
-    project_id: str, item_id: str, field_id: str, date_value: str
-) -> None:
+def update_date(project_id: str, item_id: str, field_id: str, date_value: str) -> None:
     """Update a date field on a project item."""
     query = """
     mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $dateValue: Date!) {
@@ -325,9 +318,7 @@ def main() -> None:
 
     status_name = determine_status(config)
     print(f"Setting status to: {status_name}")
-    resolved = get_field_and_option(
-        project_id, config.status_field, status_name
-    )
+    resolved = get_field_and_option(project_id, config.status_field, status_name)
     update_single_select(project_id, item_id, resolved.field_id, resolved.option_id)
     print("Status updated")
 

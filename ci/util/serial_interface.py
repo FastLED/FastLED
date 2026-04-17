@@ -17,6 +17,8 @@ from typing import Protocol, runtime_checkable
 
 import serial as pyserial
 
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
+
 
 def _pyserial_dtr_reset(port: str) -> bool:
     """Reset an ESP32 device using the esptool ClassicReset DTR/RTS sequence.
@@ -226,6 +228,9 @@ class FbuildSerialAdapter:
                 self._monitor.reset_device, board, True, 5.0
             )
             return bool(result)
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
         except Exception:
             return False
 
