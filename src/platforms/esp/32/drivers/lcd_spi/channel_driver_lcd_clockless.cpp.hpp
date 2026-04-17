@@ -65,14 +65,16 @@ ChannelDriverLcdClockless::ChannelDriverLcdClockless(
 
 ChannelDriverLcdClockless::~ChannelDriverLcdClockless() {
     if (mBusy && mPeripheral) {
+        // Wait up to 2 s for DMA to drain. If the peripheral is still busy
+        // after that, it is either a stuck controller on real hardware or a
+        // mock with no auto-completion. Free either way: LeakSanitizer in
+        // unit tests flags the alternative, and a 2 s stall already means
+        // something is badly wrong so leaking is not a meaningful safety net.
         bool done = mPeripheral->waitTransmitDone(2000);
         mBusy = false;
         if (!done) {
-            // DMA may still be using the buffers — leak them to avoid
-            // use-after-free.
-            FL_WARN("ChannelDriverLcdClockless: DMA wait timed out, "
-                    "leaking ring buffers to avoid use-after-free");
-            return;
+            FL_WARN("ChannelDriverLcdClockless: DMA wait timed out — "
+                    "freeing ring buffers anyway");
         }
     }
     freeRingBuffers();

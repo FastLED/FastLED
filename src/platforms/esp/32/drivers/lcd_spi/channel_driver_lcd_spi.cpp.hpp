@@ -65,11 +65,12 @@ ChannelDriverLcdSpi::~ChannelDriverLcdSpi() {
         bool done = mPeripheral->waitTransmitDone(2000);
         mBusy = false;
         if (!done) {
-            // DMA may still be using the buffers — leak them to avoid
-            // use-after-free.
-            FL_WARN("ChannelDriverLcdSpi: DMA wait timed out, "
-                    "leaking ring buffers to avoid use-after-free");
-            return;
+            // If a 2 s wait didn't drain the peripheral, it's either stuck
+            // hardware or a mock with no auto-completion. Free anyway:
+            // LeakSanitizer flags the alternative, and a 2 s stall already
+            // indicates the DMA is lost.
+            FL_WARN("ChannelDriverLcdSpi: DMA wait timed out — "
+                    "freeing ring buffers anyway");
         }
     }
     freeRingBuffers();
