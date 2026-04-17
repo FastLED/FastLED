@@ -289,8 +289,10 @@ inline int setPwmFrequencyNative(int pin, u32 frequency_hz) FL_NOEXCEPT {
 
     // Determine the best duty resolution for the requested frequency.
     // LEDC supports 1-20 bit resolution depending on the clock and frequency.
-#if ESP_IDF_VERSION_5_OR_HIGHER
-    // ESP-IDF v5+ provides a helper to find the best resolution
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 3, 0)
+    // ESP-IDF v5.3+ provides a helper to find the best resolution.
+    // Prior to 5.3 (including 5.0-5.2 shipped with arduino-esp32 3.0.x),
+    // the helper does not exist and we fall back to manual calculation below.
     // For ESP32 with LEDC_AUTO_CLK, typical source clock is 80MHz APB clock
     const u32 ledc_src_clk_hz = 80000000;  // 80MHz APB clock
     u32 resolution = ledc_find_suitable_duty_resolution(
@@ -299,7 +301,7 @@ inline int setPwmFrequencyNative(int pin, u32 frequency_hz) FL_NOEXCEPT {
         return -3;  // Could not find a suitable resolution
     }
 #else
-    // ESP-IDF v4.x: calculate manually.
+    // ESP-IDF v4.x / v5.0-5.2: calculate manually.
     // resolution = floor(log2(APB_CLK_FREQ / frequency))
     // APB_CLK_FREQ is typically 80 MHz.
     u32 ratio = APB_CLK_FREQ / frequency_hz;
@@ -308,7 +310,7 @@ inline int setPwmFrequencyNative(int pin, u32 frequency_hz) FL_NOEXCEPT {
         ratio >>= 1;
         resolution++;
     }
-    // Clamp resolution to valid range [1, 16] for v4.x
+    // Clamp resolution to valid range [1, 16]
     if (resolution < 1) {
         resolution = 1;
     }

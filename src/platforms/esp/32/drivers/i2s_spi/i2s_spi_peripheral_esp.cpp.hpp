@@ -401,8 +401,16 @@ bool I2sSpiPeripheralEsp::isInitialized() const FL_NOEXCEPT {
 
 u8 *I2sSpiPeripheralEsp::allocateBuffer(size_t size_bytes) FL_NOEXCEPT {
     size_t aligned_size = ((size_bytes + 3) / 4) * 4;
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 3, 0)
     void *buffer = heap_caps_aligned_calloc(4, aligned_size, 1,
                                             MALLOC_CAP_DMA | MALLOC_CAP_8BIT);
+#else
+    // ESP-IDF prior to 4.3 (including 3.3-LTS) lacks heap_caps_aligned_calloc.
+    // aligned_size is already a multiple of 4, and ESP32 heap allocations are
+    // naturally 4-byte aligned, so heap_caps_calloc gives us what we need.
+    void *buffer = heap_caps_calloc(1, aligned_size,
+                                    MALLOC_CAP_DMA | MALLOC_CAP_8BIT);
+#endif
     return static_cast<u8 *>(buffer);
 }
 
