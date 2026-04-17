@@ -120,8 +120,20 @@
 // These cannot fit many standard FastLED example sketches (data-heavy demos,
 // multi-strip arrays, etc.). Aligns with SKETCH_HAS_TINY_MEMORY in
 // fl/system/sketch_macros.h.
-// Includes: classic ATtiny13/25/45/85, ATtiny24/44/84, ATtiny48/88, ATtiny87/167,
-// ATtiny2313/4313, and modern ATtinyxy2/xy4 parts up to 1KB SRAM (e.g. ATtiny1604).
+//
+// Covers only explicit parts with <=1KB SRAM. The __AVR_ATtinyxy4__/xy6/xy7
+// wildcards are deliberately NOT used here because they span parts with up to
+// 3KB SRAM (e.g. ATtiny1624=2KB, ATtiny3224=3KB) which fit standard sketches.
+//
+// Part-by-part SRAM:
+//   Classic: ATtiny13/13A=64B, ATtiny24/25/45=128/128/256B, ATtiny44/84/85=256/512/512B,
+//            ATtiny48=256B, ATtiny87/88=512/512B, ATtiny167=512B,
+//            ATtiny2313/2313A=128B, ATtiny4313=256B
+//   Modern:  ATtinyxy2 family=128-256B (all <=256B SRAM),
+//            ATtinyxy4 0/1-series: 204=128B, 404/414=256/512B, 804=512B, 1604=1KB
+//            (intentionally excludes 2-series xy4: 424=512B, 824=1KB, 1624=2KB, 3224=3KB
+//            because 2KB+ variants fit sketches; if 424/824 were common we'd list them,
+//            but megaTinyCore/PlatformIO rarely targets them)
 // ============================================================================
 #if defined(__AVR_ATtiny13__) || defined(__AVR_ATtiny13A__) || \
     defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) || \
@@ -136,8 +148,7 @@
     defined(__AVR_ATtiny412__) || defined(__AVR_ATtiny414__) || \
     defined(__AVR_ATtiny416__) || defined(__AVR_ATtiny417__) || \
     defined(__AVR_ATtiny1604__) || \
-    defined(__AVR_ATtinyxy2__) || defined(__AVR_ATtinyxy4__) || \
-    defined(ARDUINO_attinyxy4)
+    defined(__AVR_ATtinyxy2__)
 #define FL_IS_AVR_ATTINY_TINY_MEMORY
 #endif
 

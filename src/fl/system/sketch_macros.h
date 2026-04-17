@@ -2,9 +2,12 @@
 
 // Four-tier memory classification:
 //   Tiny: SKETCH_HAS_TINY_MEMORY=1, SKETCH_HAS_LARGE_MEMORY=0, SKETCH_HAS_HUGE_MEMORY=0
-//         (ATtiny85/88/4313, ATtinyxy4 (e.g. ATtiny1604) — <=1KB SRAM)
+//         (classic ATtiny <=512B parts, ATtiny1604 1KB, select modern tinyAVR
+//          0/1-series parts with <=1KB SRAM — see FL_IS_AVR_ATTINY_TINY_MEMORY
+//          in is_avr.h for the full list; 2-series parts with 2KB+ are excluded)
 //   Low:  SKETCH_HAS_TINY_MEMORY=0, SKETCH_HAS_LARGE_MEMORY=0, SKETCH_HAS_HUGE_MEMORY=0
-//         (AVR Uno/Nano/Leonardo, ATtinyxy6, ESP8266, Teensy LC/3.0/3.1/3.2, STM32F1, Renesas UNO)
+//         (AVR Uno/Nano/Leonardo, ATtiny1616/1624/3216/3224 (2-3KB), ESP8266,
+//          Teensy LC/3.0/3.1/3.2, STM32F1, Renesas UNO)
 //   High: SKETCH_HAS_LARGE_MEMORY=1, SKETCH_HAS_HUGE_MEMORY=0
 //         (Apollo3, nRF52, SAMD21, generic ARM)
 //   Huge: SKETCH_HAS_LARGE_MEMORY=1, SKETCH_HAS_HUGE_MEMORY=1
