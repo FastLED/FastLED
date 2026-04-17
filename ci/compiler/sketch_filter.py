@@ -5,10 +5,11 @@ from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 This module provides parsing and evaluation of @filter blocks in .ino files.
 
-Memory tiers (ordered: low < large < huge):
-    - (memory is large) matches boards with 'large' or 'huge' memory
+Memory tiers (ordered: tiny < low < large < huge):
     - (memory is huge) matches only boards with 'huge' memory
-    - (memory is low)  matches all boards (everything is >= low)
+    - (memory is large) matches boards with 'large' or 'huge' memory
+    - (memory is low)  matches low/large/huge (excludes tiny sub-1KB-SRAM boards)
+    - (memory is tiny) matches all boards (everything is >= tiny)
 
 Supports multiple syntaxes:
 
@@ -301,10 +302,12 @@ def should_skip_sketch(
     return False, ""
 
 
-# Ordered memory tiers: low < large < huge.
+# Ordered memory tiers: tiny < low < large < huge.
+# (memory is huge)  matches only boards with "huge" memory.
 # (memory is large) matches boards with "large" or "huge" memory.
-# (memory is huge) matches only boards with "huge" memory.
-MEMORY_TIERS: dict[str, int] = {"low": 0, "large": 1, "huge": 2}
+# (memory is low)   matches low/large/huge (excludes tiny sub-1KB-SRAM boards).
+# (memory is tiny)  matches all boards.
+MEMORY_TIERS: dict[str, int] = {"tiny": 0, "low": 1, "large": 2, "huge": 3}
 
 
 def _memory_tier_matches(board_memory: str, filter_values: list[str]) -> bool:
@@ -319,7 +322,8 @@ def _memory_tier_matches(board_memory: str, filter_values: list[str]) -> bool:
     Returns:
         True if board memory tier >= any required tier
     """
-    board_tier = MEMORY_TIERS.get(board_memory.lower(), 1)
+    # Unknown board memory defaults to "large" tier (capable, non-tiny, non-low).
+    board_tier = MEMORY_TIERS.get(board_memory.lower(), MEMORY_TIERS["large"])
     for val in filter_values:
         required_tier = MEMORY_TIERS.get(val.lower().strip())
         if required_tier is not None:

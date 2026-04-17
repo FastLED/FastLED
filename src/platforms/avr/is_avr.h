@@ -116,6 +116,32 @@
 #endif
 
 // ============================================================================
+// FL_IS_AVR_ATTINY_TINY_MEMORY - ATtiny chips with <=1KB SRAM
+// These cannot fit many standard FastLED example sketches (data-heavy demos,
+// multi-strip arrays, etc.). Aligns with SKETCH_HAS_TINY_MEMORY in
+// fl/system/sketch_macros.h.
+// Includes: classic ATtiny13/25/45/85, ATtiny24/44/84, ATtiny48/88, ATtiny87/167,
+// ATtiny2313/4313, and modern ATtinyxy2/xy4 parts up to 1KB SRAM (e.g. ATtiny1604).
+// ============================================================================
+#if defined(__AVR_ATtiny13__) || defined(__AVR_ATtiny13A__) || \
+    defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) || \
+    defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || \
+    defined(__AVR_ATtiny48__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtiny88__) || \
+    defined(__AVR_ATtiny167__) || \
+    defined(__AVR_ATtiny2313__) || defined(__AVR_ATtiny2313A__) || defined(__AVR_ATtiny4313__) || \
+    defined(__AVR_ATtiny202__) || defined(__AVR_ATtiny204__) || \
+    defined(__AVR_ATtiny212__) || defined(__AVR_ATtiny214__) || \
+    defined(__AVR_ATtiny402__) || defined(__AVR_ATtiny404__) || \
+    defined(__AVR_ATtiny406__) || defined(__AVR_ATtiny407__) || \
+    defined(__AVR_ATtiny412__) || defined(__AVR_ATtiny414__) || \
+    defined(__AVR_ATtiny416__) || defined(__AVR_ATtiny417__) || \
+    defined(__AVR_ATtiny1604__) || \
+    defined(__AVR_ATtinyxy2__) || defined(__AVR_ATtinyxy4__) || \
+    defined(ARDUINO_attinyxy4)
+#define FL_IS_AVR_ATTINY_TINY_MEMORY
+#endif
+
+// ============================================================================
 // FL_IS_AVR_ATTINY_NO_UART - ATtiny chips without UART hardware (only USI)
 // ============================================================================
 #if defined(__AVR_ATtiny13__) || defined(__AVR_ATtiny13A__) || \

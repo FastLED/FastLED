@@ -2,6 +2,8 @@
 /// @brief   Benchmark drawDisc on AVR (32x8 canvas, blend mode)
 /// @example PerfDisc.ino
 
+// @filter: (memory is low)
+
 #include <Arduino.h>
 #include <FastLED.h>
 #include <fl/gfx/gfx.h>

@@ -684,6 +684,18 @@ class TestMemoryTierMatching:
         board.board_name = "uno"
         return board
 
+    @pytest.fixture
+    def tiny_board(self) -> Board:
+        """ATtiny board with tiny memory (<=1KB SRAM)."""
+        from unittest.mock import MagicMock
+
+        board = MagicMock()
+        board.platform_family = "avr"
+        board.memory_class = "tiny"
+        board.get_mcu_target = MagicMock(return_value="ATtiny1604")
+        board.board_name = "attiny1604"
+        return board
+
     def test_require_large_matches_huge(self, huge_board: Board) -> None:
         """(memory is large) should match huge boards (ordered comparison)."""
         filter_obj = SketchFilter(require={"memory": ["large"]})
@@ -720,14 +732,57 @@ class TestMemoryTierMatching:
         skip, _ = should_skip_sketch(low_board, filter_obj)
         assert skip
 
-    def test_require_low_matches_all(
+    def test_require_low_matches_low_large_huge(
         self, low_board: Board, large_board: Board, huge_board: Board
     ) -> None:
-        """(memory is low) should match all boards (every board is >= low)."""
+        """(memory is low) should match low/large/huge (every non-tiny board is >= low)."""
         filter_obj = SketchFilter(require={"memory": ["low"]})
         for board in [low_board, large_board, huge_board]:
             skip, _ = should_skip_sketch(board, filter_obj)
             assert not skip
+
+    def test_require_low_skips_tiny(self, tiny_board: Board) -> None:
+        """(memory is low) should skip tiny boards (tiny < low)."""
+        filter_obj = SketchFilter(require={"memory": ["low"]})
+        skip, _ = should_skip_sketch(tiny_board, filter_obj)
+        assert skip
+
+    def test_require_large_skips_tiny(self, tiny_board: Board) -> None:
+        """(memory is large) should skip tiny boards."""
+        filter_obj = SketchFilter(require={"memory": ["large"]})
+        skip, _ = should_skip_sketch(tiny_board, filter_obj)
+        assert skip
+
+    def test_require_tiny_matches_all(
+        self,
+        tiny_board: Board,
+        low_board: Board,
+        large_board: Board,
+        huge_board: Board,
+    ) -> None:
+        """(memory is tiny) should match every board (tiny is the weakest tier)."""
+        filter_obj = SketchFilter(require={"memory": ["tiny"]})
+        for board in [tiny_board, low_board, large_board, huge_board]:
+            skip, _ = should_skip_sketch(board, filter_obj)
+            assert not skip
+
+    def test_exclude_tiny_skips_tiny_only(
+        self,
+        tiny_board: Board,
+        low_board: Board,
+        large_board: Board,
+        huge_board: Board,
+    ) -> None:
+        """Exclude memory=tiny should skip only tiny boards (exact match)."""
+        filter_obj = SketchFilter(exclude={"memory": ["tiny"]})
+        skip_tiny, _ = should_skip_sketch(tiny_board, filter_obj)
+        skip_low, _ = should_skip_sketch(low_board, filter_obj)
+        skip_large, _ = should_skip_sketch(large_board, filter_obj)
+        skip_huge, _ = should_skip_sketch(huge_board, filter_obj)
+        assert skip_tiny
+        assert not skip_low
+        assert not skip_large
+        assert not skip_huge
 
     def test_exclude_low_skips_low_only(
         self, low_board: Board, large_board: Board, huge_board: Board

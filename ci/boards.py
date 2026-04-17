@@ -226,24 +226,32 @@ class Board:
 
     @property
     def memory_class(self) -> str:
-        """Return memory classification: 'low', 'large', or 'huge'.
+        """Return memory classification: 'tiny', 'low', 'large', or 'huge'.
 
-        Three-tier system matching sketch_macros.h:
+        Four-tier system matching sketch_macros.h:
+        - 'tiny':  SKETCH_HAS_TINY_MEMORY=1, SKETCH_HAS_LARGE_MEMORY=0 (<=1KB SRAM)
         - 'low':   SKETCH_HAS_LARGE_MEMORY=0, SKETCH_HAS_HUGE_MEMORY=0
         - 'large': SKETCH_HAS_LARGE_MEMORY=1, SKETCH_HAS_HUGE_MEMORY=0
         - 'huge':  SKETCH_HAS_LARGE_MEMORY=1, SKETCH_HAS_HUGE_MEMORY=1
         """
+        # Tiny-memory board list: <= 1KB SRAM. These cannot fit many standard
+        # FastLED example sketches. Matches sketch_macros.h SKETCH_HAS_TINY_MEMORY.
+        tiny_memory_boards = {
+            "attiny85",  # 512B RAM
+            "attiny88",  # 512B RAM
+            "attiny4313",  # 256B RAM
+            "attiny1604",  # 1KB RAM (ATtinyxy4)
+        }
+        if self.board_name in tiny_memory_boards:
+            return "tiny"
+
         # Low-memory board list (matches sketch_macros.h)
         low_memory_boards = {
             "uno",
             "nano",
             "nano_every",
             "leonardo",
-            "attiny85",
-            "attiny88",
-            "attiny1604",
-            "attiny4313",
-            "attiny1616",
+            "attiny1616",  # 2KB RAM (ATtinyxy6) — has room for standard sketches
             "teensylc",
             "teensy30",
             "teensy31",
