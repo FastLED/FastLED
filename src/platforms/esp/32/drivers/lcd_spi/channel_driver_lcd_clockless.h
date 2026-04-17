@@ -116,7 +116,6 @@ class ChannelDriverLcdClockless : public IChannelDriver {
 
         size_t mTotalBytes;
         size_t mChunkInputBytes;
-        size_t mDmaBytesPerChunk; // DMA output bytes for a full chunk
 
         void reset() FL_NOEXCEPT {
             mStreamComplete = false;
@@ -124,7 +123,6 @@ class ChannelDriverLcdClockless : public IChannelDriver {
             mRingWriteIdx = 0;
             mTotalBytes = 0;
             mChunkInputBytes = 0;
-            mDmaBytesPerChunk = 0;
         }
     };
 

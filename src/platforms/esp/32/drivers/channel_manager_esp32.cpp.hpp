@@ -128,7 +128,7 @@ constexpr int PRIORITY_LCD_SPI = 10; ///< Native LCD_CAM SPI driver (ESP32-S3, t
 #if defined(FASTLED_ESP32_FORCE_LCD_CLOCKLESS)
 constexpr int PRIORITY_LCD_CLOCKLESS = PRIORITY_FORCE; ///< FORCED highest by FASTLED_ESP32_FORCE_LCD_CLOCKLESS
 #else
-constexpr int PRIORITY_LCD_CLOCKLESS = 1; ///< LCD_CAM clockless driver (ESP32-S3, replaces misnamed I2S)
+constexpr int PRIORITY_LCD_CLOCKLESS = 2; ///< LCD_CAM clockless driver (ESP32-S3, outranks legacy I2S)
 #endif
 
 /// @brief Add HW SPI drivers if supported by platform (UNIFIED VERSION)

@@ -65,8 +65,15 @@ ChannelDriverLcdClockless::ChannelDriverLcdClockless(
 
 ChannelDriverLcdClockless::~ChannelDriverLcdClockless() {
     if (mBusy && mPeripheral) {
-        mPeripheral->waitTransmitDone(2000);
+        bool done = mPeripheral->waitTransmitDone(2000);
         mBusy = false;
+        if (!done) {
+            // DMA may still be using the buffers — leak them to avoid
+            // use-after-free.
+            FL_WARN("ChannelDriverLcdClockless: DMA wait timed out, "
+                    "leaking ring buffers to avoid use-after-free");
+            return;
+        }
     }
     freeRingBuffers();
 }
@@ -162,7 +169,10 @@ IChannelDriver::DriverState ChannelDriverLcdClockless::poll() FL_NOEXCEPT {
     bool streamDone = mIsrCtx.mStreamComplete;
     bool peripheralIdle = mPeripheral && !mPeripheral->isBusy();
 
-    if (streamDone || peripheralIdle) {
+    // Only declare complete when the ISR has signaled all chunks are done.
+    // peripheralIdle alone is insufficient: between the first DMA send and
+    // the ISR callback registration, the peripheral can briefly appear idle.
+    if (streamDone && peripheralIdle) {
         mBusy = false;
         mIsrCtx.mStreamComplete = false;
         for (auto &channel : mTransmittingChannels) {
@@ -275,6 +285,12 @@ bool ChannelDriverLcdClockless::beginTransmission(
         return false;
     }
 
+    if (channels.size() > 16) {
+        FL_WARN("ChannelDriverLcdClockless: too many channels ("
+                << channels.size() << "), max 16 supported");
+        return false;
+    }
+
     // Find max data size and extract timing from first channel
     size_t maxSize = 0;
     ChipsetTiming chipsetTiming = {};
@@ -330,8 +346,11 @@ bool ChannelDriverLcdClockless::beginTransmission(
 
     size_t slotCapacityBytes = chunkInputBytes * mOutputBytesPerInputByte;
 
-    // Peripheral init (only when lane count changes)
-    bool needPeripheralInit = !mInitialized || (numLanes != mNumLanes);
+    // Peripheral init when lane count, clock rate, or pin assignment changes
+    bool needPeripheralInit = !mInitialized || (numLanes != mNumLanes) ||
+                              (mClockHz != 0 && mClockHz != mPeripheral->getConfig().clock_hz) ||
+                              (firstPin >= 0 && mInitialized &&
+                               mPeripheral->getConfig().data_gpios[0] != firstPin);
 
     if (needPeripheralInit) {
         freeRingBuffers();
@@ -374,14 +393,16 @@ bool ChannelDriverLcdClockless::beginTransmission(
     }
 
     // Register ISR callback
-    mPeripheral->registerTransmitCallback(
-        reinterpret_cast<void *>(&isrChunkDone), this); // ok reinterpret cast
+    if (!mPeripheral->registerTransmitCallback(
+            reinterpret_cast<void *>(&isrChunkDone), this)) { // ok reinterpret cast
+        FL_WARN("ChannelDriverLcdClockless: registerTransmitCallback failed");
+        return false;
+    }
 
     // Initialize ISR context
     mIsrCtx.reset();
     mIsrCtx.mTotalBytes = maxSize;
     mIsrCtx.mChunkInputBytes = chunkInputBytes;
-    mIsrCtx.mDmaBytesPerChunk = slotCapacityBytes;
 
     for (const auto &channel : channels) {
         channel->setInUse(true);

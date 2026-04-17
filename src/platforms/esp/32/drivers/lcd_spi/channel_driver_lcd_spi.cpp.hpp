@@ -62,8 +62,15 @@ ChannelDriverLcdSpi::~ChannelDriverLcdSpi() {
     // Block until DMA completes — ring buffers are DMA sources,
     // so freeing them while DMA is active would be a use-after-free.
     if (mBusy && mPeripheral) {
-        mPeripheral->waitTransmitDone(2000);
+        bool done = mPeripheral->waitTransmitDone(2000);
         mBusy = false;
+        if (!done) {
+            // DMA may still be using the buffers — leak them to avoid
+            // use-after-free.
+            FL_WARN("ChannelDriverLcdSpi: DMA wait timed out, "
+                    "leaking ring buffers to avoid use-after-free");
+            return;
+        }
     }
     freeRingBuffers();
 }
@@ -345,8 +352,11 @@ bool ChannelDriverLcdSpi::beginTransmission(
     }
 
     // Register the ISR callback for chunked streaming
-    mPeripheral->registerTransmitCallback(
-        reinterpret_cast<void *>(&isrChunkDone), this); // ok reinterpret cast
+    if (!mPeripheral->registerTransmitCallback(
+            reinterpret_cast<void *>(&isrChunkDone), this)) { // ok reinterpret cast
+        FL_WARN("ChannelDriverLcdSpi: registerTransmitCallback failed");
+        return false;
+    }
 
     // Initialize ISR context for this frame
     mIsrCtx.reset();
