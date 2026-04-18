@@ -1,4 +1,5 @@
 {
+  "_cwd_resolution": "Each hook walks up from $PWD looking for pyproject.toml (the project-root marker). If found, cd there and exec the hook script. If not found (cwd outside project, or inside a nested build dir with its own .git), the hook skips with a warning instead of blocking every subsequent tool call. Do NOT use `git rev-parse --show-toplevel` here — it gets fooled by nested .git dirs that build tools create under .build/.",
   "hooks": {
     "PreToolUse": [
       {
@@ -6,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-superproject-working-tree 2>/dev/null || git rev-parse --show-toplevel 2>/dev/null || echo .)\" && uv run python ci/hooks/check_forbidden_commands.py"
+            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && exec uv run python ci/hooks/check_forbidden_commands.py || { echo 'FastLED hook skipped: project root (pyproject.toml) not found above $PWD' >&2; exit 0; }"
           }
         ]
       },
@@ -15,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-superproject-working-tree 2>/dev/null || git rev-parse --show-toplevel 2>/dev/null || echo .)\" && uv run python ci/hooks/check_test_file_pairing.py"
+            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && exec uv run python ci/hooks/check_test_file_pairing.py || { echo 'FastLED hook skipped: project root (pyproject.toml) not found above $PWD' >&2; exit 0; }"
           }
         ]
       },
@@ -24,12 +25,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-superproject-working-tree 2>/dev/null || git rev-parse --show-toplevel 2>/dev/null || echo .)\" && uv run python ci/hooks/tdd_guard.py",
+            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && exec uv run python ci/hooks/tdd_guard.py || { echo 'FastLED hook skipped: project root (pyproject.toml) not found above $PWD' >&2; exit 0; }",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-superproject-working-tree 2>/dev/null || git rev-parse --show-toplevel 2>/dev/null || echo .)\" && uv run python ci/hooks/protect_platform_headers.py",
+            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && exec uv run python ci/hooks/protect_platform_headers.py || { echo 'FastLED hook skipped: project root (pyproject.toml) not found above $PWD' >&2; exit 0; }",
             "timeout": 10
           }
         ]
@@ -41,17 +42,17 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-superproject-working-tree 2>/dev/null || git rev-parse --show-toplevel 2>/dev/null || echo .)\" && uv run python ci/hooks/lint-on-save.py",
+            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && exec uv run python ci/hooks/lint-on-save.py || { echo 'FastLED hook skipped: project root (pyproject.toml) not found above $PWD' >&2; exit 0; }",
             "timeout": 30
           },
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-superproject-working-tree 2>/dev/null || git rev-parse --show-toplevel 2>/dev/null || echo .)\" && uv run python ci/hooks/auto_test_suggest.py",
+            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && exec uv run python ci/hooks/auto_test_suggest.py || { echo 'FastLED hook skipped: project root (pyproject.toml) not found above $PWD' >&2; exit 0; }",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-superproject-working-tree 2>/dev/null || git rev-parse --show-toplevel 2>/dev/null || echo .)\" && uv run python ci/hooks/compile_example.py",
+            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && exec uv run python ci/hooks/compile_example.py || { echo 'FastLED hook skipped: project root (pyproject.toml) not found above $PWD' >&2; exit 0; }",
             "timeout": 300,
             "statusMessage": "Compiling example..."
           }
@@ -63,7 +64,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-superproject-working-tree 2>/dev/null || git rev-parse --show-toplevel 2>/dev/null || echo .)\" && uv run python ci/hooks/check-on-start.py",
+            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && exec uv run python ci/hooks/check-on-start.py || { echo 'FastLED hook skipped: project root (pyproject.toml) not found above $PWD' >&2; exit 0; }",
             "timeout": 10
           }
         ]
@@ -74,7 +75,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-superproject-working-tree 2>/dev/null || git rev-parse --show-toplevel 2>/dev/null || echo .)\" && uv run python ci/hooks/check-on-stop.py",
+            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && exec uv run python ci/hooks/check-on-stop.py || { echo 'FastLED hook skipped: project root (pyproject.toml) not found above $PWD' >&2; exit 0; }",
             "timeout": 600
           }
         ]
@@ -85,7 +86,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-superproject-working-tree 2>/dev/null || git rev-parse --show-toplevel 2>/dev/null || echo .)\" && uv run python ci/hooks/desktop_notify.py",
+            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && exec uv run python ci/hooks/desktop_notify.py || { echo 'FastLED hook skipped: project root (pyproject.toml) not found above $PWD' >&2; exit 0; }",
             "timeout": 10
           }
         ]
@@ -96,7 +97,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd \"$(git rev-parse --show-superproject-working-tree 2>/dev/null || git rev-parse --show-toplevel 2>/dev/null || echo .)\" && uv run python ci/hooks/git_context.py",
+            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && exec uv run python ci/hooks/git_context.py || { echo 'FastLED hook skipped: project root (pyproject.toml) not found above $PWD' >&2; exit 0; }",
             "timeout": 10
           }
         ]
