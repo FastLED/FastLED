@@ -846,7 +846,14 @@ bool ChannelEngineSpi::reinitSpiHardware(SpiChannelState *state, gpio_num_t pin,
         return false;
     }
 
-    const size_t staging_size = 4096;
+    // Staging buffer sized to fit an entire ~680-LED WS2812B wave8 payload in
+    // one SPI transaction (1 LED = 24 wave8 bytes). With 4096-byte staging,
+    // any strip longer than ~170 LEDs was transmitted as multiple chunks with
+    // a poll()-timing-dependent gap between them — long enough to latch the
+    // first 170 LEDs and leave the rest dark (the "black frame between
+    // displays" bug in #2254). 16384 bytes lets ESP-IDF's SPI DMA descriptor
+    // chain produce continuous output for a single transaction.
+    const size_t staging_size = 16384;
     const size_t spiBufferSize = dataSize * WAVE8_BYTES_PER_COLOR_BYTE;
     state->useDMA = (spiBufferSize > 64);
 
@@ -933,9 +940,15 @@ bool ChannelEngineSpi::createChannel(SpiChannelState *state, gpio_num_t pin,
         return false;
     }
 
-    // Staging buffer size determines max SPI transaction size (chunked transmission)
-    // We use 4KB staging buffers, so max_transfer_sz matches staging capacity
-    const size_t staging_size = 4096;
+    // Staging buffer size determines max SPI transaction size. 16 KB lets a
+    // single ESP-IDF spi_device_queue_trans() produce continuous wave8 output
+    // for up to ~680 WS2812B LEDs. With the earlier 4 KB size, any strip >
+    // ~170 LEDs was split across multiple poll()-driven transactions with
+    // inter-chunk gaps long enough for WS2812B to latch — the "black frame
+    // between displays" bug reported in #2254. 16 KB matches the per-channel
+    // internal-SRAM cost (2× double-buffered = 32 KB) — tight but acceptable
+    // on ESP32-S3 (~320 KB internal SRAM).
+    const size_t staging_size = 16384;
 
     // Determine if we should use DMA
     // Use DMA for larger buffers (>64 bytes)
