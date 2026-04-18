@@ -727,12 +727,13 @@ class RmtRxChannelImpl : public RmtRxChannel {
         rx_config.clk_src = RMT_CLK_SRC_DEFAULT;
         rx_config.resolution_hz = mResolutionHz;
         // mem_block_symbols: non-DMA = hardware RMT memory block (small, ~64);
-        // DMA = DRAM ping-pong buffer size (ESP-IDF fires the ISR per half).
-        // For streaming DMA mode we want a larger chunk size so each partial-rx
-        // callback delivers meaningful work but not so large that allocation
-        // fails. 1024 symbols = 4 KB internal RAM — fits comfortably and gives
-        // ~42 WS2812B LEDs per callback, so a 550-LED capture fires ~13 times.
-        rx_config.mem_block_symbols = mUseDma ? 1024 : 64;
+        // DMA = DRAM ping-pong buffer ESP-IDF allocates internally. The driver
+        // fires the partial-rx ISR every `mem_block_symbols` fill, so this is
+        // the per-callback chunk size, not an upper bound on capture length.
+        // Smaller value → more callbacks per transmission (finer streaming);
+        // larger value → less ISR overhead. Keep user buffer ≥ 2× this so
+        // ESP-IDF's partial-rx mode engages (equal size = single-shot).
+        rx_config.mem_block_symbols = mUseDma ? 256 : 64;
         // Interrupt priority level 3 (maximum supported by ESP-IDF RMT driver
         // API) Note: Both RISC-V and Xtensa platforms are limited to level 3 by
         // driver validation RISC-V hardware supports 1-7, but ESP-IDF
@@ -920,8 +921,15 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // Receive completed naturally (spurious symbols already filtered in
         // ISR)
         FL_LOG_RX("wait(): receive done, count=" << mSymbolsReceived);
-        FL_LOG_RX("RMT RX callback count: " << mCallbackCount
-                                          << " (en_partial_rx test)");
+        // Visible (non-FL_DBG) telemetry: lets us see whether en_partial_rx
+        // is actually firing multiple callbacks per transmission on long
+        // streams. mCallbackCount == 1 on a long-stream capture indicates
+        // ESP-IDF ended the receive after one fill (likely due to idle
+        // timeout from signal_range_max_ns). See issue #2254.
+        FL_WARN("[RMT RX] wait(): symbols=" << mSymbolsReceived
+                                          << " callbacks=" << mCallbackCount
+                                          << " use_dma="
+                                          << (mUseDma ? "true" : "false"));
         return RxWaitResult::SUCCESS;
     }
 
@@ -1232,7 +1240,12 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // ESP32-S3, which ESP-IDF rejects with "user buffer not in the internal
         // RAM". See issue #2254.
         constexpr size_t NONDMA_BUFFER_SIZE = 4096;
-        constexpr size_t DMA_BUFFER_SIZE = 1024; // matches mem_block_symbols
+        // DMA user buffer: pass 4× mem_block_symbols (=256) = 1024 symbols so
+        // ESP-IDF's partial-rx fires the ISR every 256-symbol fill, streaming
+        // multiple chunks into accumulation. If user buffer == mem_block_symbols
+        // the driver treats it as single-shot and we get only 1 callback per
+        // rmt_receive() — capping capture at ~4096 symbols (=170 LEDs).
+        constexpr size_t DMA_BUFFER_SIZE = 1024;
         const size_t hw_buffer_size = mUseDma ? DMA_BUFFER_SIZE : NONDMA_BUFFER_SIZE;
 
         if (mUseDma) {
