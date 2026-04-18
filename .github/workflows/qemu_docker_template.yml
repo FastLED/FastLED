@@ -1,10 +1,20 @@
-name: ESP32 QEMU Test Template (Docker)
+name: ESP32 QEMU Test Template (fbuild)
+
+# Reusable template: build + run an ESP32 sketch in QEMU via
+# `fbuild test-emu --emulator qemu`. Replaces the legacy Docker-based
+# pipeline (espressif/idf image, hand-rolled merged.bin assembly, bash
+# wait-loops). fbuild auto-downloads the Espressif QEMU binary and handles
+# timeout + halt-on-regex + artifact locating natively.
+#
+# ESP32-C3 support depends on FastLED/fbuild#85. Until that ships, C3 runs
+# will fail — esp32c3 is kept in the matrix so the green signal (once the
+# fbuild fix lands) re-enables it automatically.
 
 on:
   workflow_call:
     inputs:
       platform:
-        description: 'ESP32 platform to test (esp32dev, esp32c3, etc.)'
+        description: 'ESP32 platform to test (esp32dev, esp32c3, esp32s3, etc.)'
         required: true
         type: string
       platform_display:
@@ -12,7 +22,7 @@ on:
         required: true
         type: string
       sketch:
-        description: 'Arduino sketch/example to test (e.g., BlinkParallel, Blink, etc.)'
+        description: 'Arduino sketch/example to test (e.g., BlinkParallel, Blink)'
         required: true
         type: string
 
@@ -41,34 +51,20 @@ jobs:
 
       - name: Merge safe source files from PR
         run: |
-          # Copy ONLY safe source files from PR, never executable scripts
           if [ -d "pr-code/src" ]; then
             cp -r pr-code/src/* trusted/src/ 2>/dev/null || true
           fi
           if [ -d "pr-code/examples" ]; then
             cp -r pr-code/examples/* trusted/examples/ 2>/dev/null || true
           fi
-          if [ -f "pr-code/platformio.ini" ]; then
-            cp pr-code/platformio.ini trusted/
-          fi
-          if [ -f "pr-code/library.json" ]; then
-            cp pr-code/library.json trusted/
-          fi
-          if [ -f "pr-code/library.properties" ]; then
-            cp pr-code/library.properties trusted/
-          fi
-          if [ -f "pr-code/CMakeLists.txt" ]; then
-            cp pr-code/CMakeLists.txt trusted/
-          fi
+          for f in platformio.ini library.json library.properties CMakeLists.txt; do
+            [ -f "pr-code/$f" ] && cp "pr-code/$f" trusted/
+          done
         shell: bash
-
-      - name: Set working directory to trusted
-        run: echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE/trusted" >> $GITHUB_ENV
 
       - name: Pin python version
         working-directory: trusted
-        run: |
-          echo "3.11" >> .python-version
+        run: echo "3.11" > .python-version
 
       - name: Install uv
         uses: astral-sh/setup-uv@v6
@@ -77,328 +73,87 @@ jobs:
           cache-dependency-glob: "**/pyproject.toml"
           version: "0.8.0"
 
-      - name: "Set up Python"
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version-file: "trusted/.python-version"
 
-      - name: Install Dependencies
+      - name: Install project dependencies (includes fbuild)
         working-directory: trusted
-        run: |
-          # Install Python dependencies needed for compilation
-          uv sync
-          # Install esptool for flash image creation
-          uv pip install esptool
+        run: uv sync
 
-      - name: Create build directory for QEMU
+      - name: "fbuild test-emu — build + emulate ${{ inputs.sketch }} on ${{ inputs.platform_display }}"
+        id: test_emu
         working-directory: trusted
+        # Build + stage the sketch via ci-compile.py (produces
+        # .build/pio/<env>/ with platformio.ini + firmware + bootloader/
+        # partitions), then run fbuild test-emu against that staged project.
+        #
+        # Success semantics match the legacy Docker pipeline: reaching
+        # "setup starting" is enough. The RMT peripheral is not fully
+        # modeled in QEMU, so driver-backed sketches (BlinkParallel,
+        # DriverTest) stall inside showPixels() before hitting loop() —
+        # treating setup-then-stall as success is what the Docker
+        # pipeline did (via a 120s timeout treated as pass, plus a
+        # "setup starting" grep).
+        #
+        # --halt-on-success fires as soon as the setup message lands,
+        # which short-circuits the stall and keeps CI fast.
+        # --halt-on-error still catches real crashes (Guru Meditation /
+        # abort()) early rather than waiting out the full 120s timeout.
         run: |
-          mkdir -p qemu-build
-          echo "Created qemu-build directory for ${{ inputs.platform }} binaries"
-
-      - name: Build ${{ inputs.platform }} firmware with merged binary
-        working-directory: trusted
-        run: |
-          echo "=== Building ${{ inputs.sketch }} for ${{ inputs.platform }} with merged-bin ==="
-          echo "Build command:"
-          echo "  uv run ci/ci-compile.py ${{ inputs.platform }} --examples ${{ inputs.sketch }} --merged-bin -o qemu-build/merged.bin"
-
-          set -x
+          set -o pipefail
           uv run ci/ci-compile.py ${{ inputs.platform }} \
             --examples ${{ inputs.sketch }} \
             --merged-bin \
-            -o qemu-build/merged.bin \
             --defines FASTLED_ESP32_IS_QEMU \
             --verbose
-          set +x
-
-          echo "=== Build Complete ==="
-
-          # Copy ELF file for backtrace decoding
-          echo "=== Copying ELF file for debugging ==="
-          PIO_BUILD_DIR=".build/pio/${{ inputs.platform }}"
-          PIO_ARTIFACTS_DIR="$PIO_BUILD_DIR/.pio/build/${{ inputs.platform }}"
-
-          if [ -f "$PIO_ARTIFACTS_DIR/firmware.elf" ]; then
-            cp "$PIO_ARTIFACTS_DIR/firmware.elf" qemu-build/
-            echo "✅ Copied firmware.elf from artifacts directory"
-          elif [ -f "$PIO_BUILD_DIR/firmware.elf" ]; then
-            cp "$PIO_BUILD_DIR/firmware.elf" qemu-build/
-            echo "✅ Copied firmware.elf from build directory"
-          else
-            ELF_FILE=$(find "$PIO_BUILD_DIR" -name "firmware.elf" 2>/dev/null | head -1)
-            if [ -n "$ELF_FILE" ]; then
-              cp "$ELF_FILE" qemu-build/firmware.elf
-              echo "✅ Found and copied firmware.elf from $ELF_FILE"
-            else
-              echo "⚠️  firmware.elf not found - backtrace decoding will not be available"
-            fi
-          fi
-
-          # Copy build_info.json for addr2line tool path lookup
-          echo "=== Copying build_info.json for backtrace decoding ==="
-          if [ -f "$PIO_BUILD_DIR/build_info.json" ]; then
-            cp "$PIO_BUILD_DIR/build_info.json" qemu-build/
-            echo "✅ Copied build_info.json from build directory"
-          else
-            echo "⚠️  build_info.json not found - will use default addr2line search"
-          fi
-
-          echo "=== Final qemu-build contents ==="
-          ls -la qemu-build/
-
-      - name: Verify merged binary
-        working-directory: trusted
-        run: |
-          echo "=== Binary Validation ==="
-
-          if [ ! -f qemu-build/merged.bin ]; then
-            echo "❌ Merged binary not found!"
-            echo "Build directory contents:"
-            ls -laR .build/${{ inputs.platform }} || true
-            exit 1
-          fi
-
-          echo "✅ Merged binary exists"
-
-          # Check size
-          SIZE=$(stat -c%s qemu-build/merged.bin)
-          echo "Binary size: $SIZE bytes"
-
-          if [ $SIZE -lt 100000 ]; then
-            echo "❌ Binary too small: $SIZE bytes"
-            exit 1
-          fi
-
-          # Check ESP32 application magic byte at offset 0x10000 (application location)
-          MAGIC=$(xxd -s 0x10000 -p -l 1 qemu-build/merged.bin)
-          if [ "$MAGIC" = "e9" ]; then
-            echo "✅ Valid ESP32 application magic byte (0xE9) at offset 0x10000"
-          else
-            echo "❌ Invalid magic byte at 0x10000: 0x$MAGIC (expected 0xE9)"
-            exit 1
-          fi
-
-          # Show hex dump at application location
-          echo "=== Binary Header at 0x10000 (application location, first 32 bytes) ==="
-          xxd -s 0x10000 -l 32 qemu-build/merged.bin
-
-          # MD5 checksum
-          echo "=== Binary Checksum ==="
-          md5sum qemu-build/merged.bin
-
-          echo "=== Final qemu-build contents ==="
-          ls -la qemu-build/
-
-      - name: Map platform to chip name
-        id: chip_mapping
-        run: |
-          # Map PlatformIO platform names to QEMU chip names
-          # esp32dev -> esp32 (esp32dev is PlatformIO name, esp32 is chip name)
-          PLATFORM="${{ inputs.platform }}"
-          case "$PLATFORM" in
-            esp32dev|esp32wroom|esp32_i2s_ws2812)
-              CHIP="esp32"
-              ;;
-            esp32c3)
-              CHIP="esp32c3"
-              ;;
-            esp32s3)
-              CHIP="esp32s3"
-              ;;
-            esp32p4)
-              CHIP="esp32p4"
-              ;;
-            *)
-              echo "Unknown platform: $PLATFORM, defaulting to esp32"
-              CHIP="esp32"
-              ;;
-          esac
-          echo "chip=$CHIP" >> $GITHUB_OUTPUT
-          echo "Mapped platform '$PLATFORM' to chip '$CHIP'"
-        shell: bash
-
-      - name: Pull or build Docker image for QEMU
-        working-directory: trusted
-        run: |
-          echo "=== Ensuring Docker image is available ==="
-          echo "This step pulls the image if available, otherwise builds it"
-          echo ""
-
-          # Try to pull or build the Docker image
-          uv run python -c "
-          import sys
-          from ci.docker_utils.qemu_esp32_docker import DockerQEMURunner
-
-          print('Initializing Docker QEMU runner...')
-          runner = DockerQEMURunner()
-
-          print('Attempting to pull Docker image...')
-          try:
-              runner.pull_image()
-              print('')
-              print('✅ Docker image ready')
-              sys.exit(0)
-          except Exception as e:
-              print(f'⚠️  Pull failed: {e}')
-              print('')
-              print('🔨 Building Docker image as fallback...')
-              print('   This will take approximately 30 minutes')
-              print('')
-
-              # Build the image for the current platform
-              exit_code = runner.build_board_image(
-                  platform='${{ inputs.platform }}',
-                  progress=True
-              )
-
-              if exit_code == 0:
-                  print('✅ Docker image built successfully')
-                  sys.exit(0)
-              else:
-                  print('❌ Failed to build Docker image')
-                  sys.exit(1)
-          "
-
-          echo ""
-          echo "=== Docker image ready for QEMU ==="
-        shell: bash
-
-      - name: Run ${{ inputs.platform_display }} in QEMU using Docker
-        id: qemu
-        working-directory: trusted
-        run: |
-          echo "=== Running QEMU via Docker ==="
-          echo "Platform: ${{ inputs.platform }}"
-          echo "Chip: ${{ steps.chip_mapping.outputs.chip }}"
-          echo "Firmware: qemu-build/merged.bin"
-          echo ""
-
-          # Run QEMU using the local Docker runner
-          uv run python -c "
-          import sys
-          from pathlib import Path
-          from ci.docker_utils.qemu_esp32_docker import DockerQEMURunner
-
-          print('Initializing Docker QEMU runner...')
-          runner = DockerQEMURunner()
-
-          firmware_path = Path('qemu-build/merged.bin').absolute()
-          print(f'Firmware path: {firmware_path}')
-          print(f'Firmware exists: {firmware_path.exists()}')
-          print('')
-
-          print('Starting QEMU execution...')
-          exit_code = runner.run(
-              firmware_path=firmware_path,
-              timeout=120,
-              machine='${{ steps.chip_mapping.outputs.chip }}',
-              interrupt_regex=r'Test finished.*completed.*iterations|Starting loop iteration 2',
-              output_file='qemu_output.log',
-              skip_pull=True
-          )
-
-          print('')
-          print(f'QEMU execution completed with exit code: {exit_code}')
-          sys.exit(exit_code)
-          "
-
-          QEMU_EXIT_CODE=$?
-          echo "qemu_exit_code=$QEMU_EXIT_CODE" >> $GITHUB_OUTPUT
-
-          # Check if output file was created
-          if [ -f "qemu_output.log" ]; then
-            echo "✅ QEMU output file created ($(wc -l < qemu_output.log) lines)"
-          else
-            echo "❌ QEMU output file not found"
-            exit 1
-          fi
-
-          exit $QEMU_EXIT_CODE
+          uv run fbuild test-emu \
+            --emulator qemu \
+            --environment ${{ inputs.platform }} \
+            --timeout 120 \
+            --halt-on-success "setup starting" \
+            --halt-on-error "Guru Meditation|abort\\(\\)|Backtrace:" \
+            .build/pio/${{ inputs.platform }} 2>&1 | tee qemu_output.log
         shell: bash
 
       - name: Display QEMU output
         if: always()
         working-directory: trusted
         run: |
-          echo "=== QEMU Results ==="
-          echo "Exit code: ${{ steps.qemu.outputs.qemu_exit_code }}"
-
+          echo "=== ${{ inputs.platform_display }} QEMU Output (first 200 lines) ==="
           if [ -f qemu_output.log ]; then
-            echo "=== QEMU Output (first 100 lines) ==="
-            head -100 qemu_output.log
-
-            echo "=== Output Summary ==="
-            echo "Total lines: $(wc -l < qemu_output.log)"
-            echo "Boot messages: $(grep -c 'rst:' qemu_output.log || echo 0)"
-            echo "Setup messages: $(grep -c 'setup starting' qemu_output.log || echo 0)"
-            echo "Loop iterations: $(grep -c 'Starting loop iteration' qemu_output.log || echo 0)"
+            head -200 qemu_output.log
+            echo ""
+            echo "=== Stats ==="
+            echo "Lines:            $(wc -l < qemu_output.log)"
+            echo "Boot messages:    $(grep -c 'rst:' qemu_output.log || echo 0)"
+            echo "Setup messages:   $(grep -c 'setup starting' qemu_output.log || echo 0)"
+            echo "Loop iterations:  $(grep -c 'Starting loop iteration' qemu_output.log || echo 0)"
           else
-            echo "❌ No QEMU output file found"
+            echo "(no output log produced)"
           fi
-
-      - name: Validate ${{ inputs.sketch }} output
-        working-directory: trusted
-        run: |
-          echo "=== Validating ${{ inputs.sketch }} output ==="
-
-          if [ ! -f qemu_output.log ]; then
-            echo "❌ No QEMU output found"
-            exit 1
-          fi
-
-          # Check for crash patterns
-          if grep -q "guru meditation\|abort()" qemu_output.log; then
-            echo "❌ QEMU crashed!"
-            grep -A 10 "guru meditation\|abort()" qemu_output.log
-            exit 1
-          fi
-
-          # Check for expected output
-          if grep -q "${{ inputs.sketch }} setup starting" qemu_output.log; then
-            echo "✅ Setup message found"
-          else
-            echo "❌ Setup message not found"
-            exit 1
-          fi
-
-          echo "=== Validation complete ==="
 
       - name: Generate artifact name
         id: artifact_name
         if: always()
         run: |
           SKETCH_NAME="${{ inputs.sketch }}"
-          ARTIFACT_SKETCH="${SKETCH_NAME////-}"
-          echo "sketch=$ARTIFACT_SKETCH" >> $GITHUB_OUTPUT
+          echo "sketch=${SKETCH_NAME////-}" >> $GITHUB_OUTPUT
         shell: bash
 
-      - name: Upload QEMU logs on failure
+      - name: Upload QEMU log on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.platform }}-qemu-failure-${{ steps.artifact_name.outputs.sketch }}-${{ github.sha }}
-          path: |
-            trusted/qemu_output.log
-            trusted/qemu-build/
-          include-hidden-files: true
+          path: trusted/qemu_output.log
+          if-no-files-found: warn
 
-      - name: Upload QEMU logs on success
+      - name: Upload QEMU log on success
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.platform }}-qemu-success-${{ steps.artifact_name.outputs.sketch }}-${{ github.sha }}
           path: trusted/qemu_output.log
-
-      - name: Summary
-        if: always()
-        working-directory: trusted
-        run: |
-          echo "=== ${{ inputs.platform_display }} QEMU Test Summary ==="
-          echo "Platform: ${{ inputs.platform }} (Docker-based)"
-          echo "Sketch: ${{ inputs.sketch }}"
-          echo "Status: ${{ job.status }}"
-
-          if [ -f qemu_output.log ]; then
-            echo "QEMU output lines: $(wc -l < qemu_output.log)"
-          fi
+          if-no-files-found: warn
