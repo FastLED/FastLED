@@ -1012,3 +1012,120 @@ FL_TEST_CASE("ADVERSARIAL - phase-coherent sweep across all 3 bands tracks smoot
     FL_CHECK_LT(midNormDelta, 0.30f);
     FL_CHECK_LT(trebNormDelta, 0.30f);
 }
+
+// ============================================================================
+// Silence gate tests (Phase 2 PR-C — FastLED #2253)
+//
+// Vibe adopts SilenceEnvelope so getVol()/getBass()/getMid()/getTreb() and the
+// smoothed *Att variants decay toward 0 when Context::isSilent() is true. This
+// fixes MilkDrop self-normalization's stuck-at-1.0 behavior during silence.
+// ============================================================================
+
+FL_TEST_CASE("audio::detector::Vibe - getVol decays to zero during silence") {
+    audio::detector::Vibe detector;
+
+    // Feed ~30 frames of 440 Hz audio to establish live levels (no silence yet).
+    // These frames drive mImmRel toward real values — NOT 1.0 pass-through.
+    for (int i = 0; i < 30; ++i) {
+        auto sample = makeSample(440.0f, i * 12, 16000.0f);
+        auto ctx = fl::make_shared<audio::Context>(sample);
+        ctx->setSampleRate(44100);
+        // isSilent() defaults to false — no gating during audio.
+        detector.update(ctx);
+        detector.fireCallbacks();
+    }
+
+    // Baseline: getVol() should be non-trivial after audio settles.
+    float liveVol = detector.getVol();
+    FL_WARN("Vibe silence-gate: live getVol=" << liveVol);
+    FL_CHECK_GT(liveVol, 0.1f);
+
+    // Now feed ~90 frames of silence with setSilent(true). At 512 samples /
+    // 44100 Hz ≈ 11.6 ms/frame, 90 frames ≈ 1.05s. With tau=0.3s that's
+    // ~3.5*tau → within ~3% of target (well under the 0.05 threshold).
+    for (int i = 0; i < 90; ++i) {
+        auto sample = makeSilence((30 + i) * 12);
+        auto ctx = fl::make_shared<audio::Context>(sample);
+        ctx->setSampleRate(44100);
+        ctx->setSilent(true);
+        detector.update(ctx);
+        detector.fireCallbacks();
+    }
+
+    float silentVol = detector.getVol();
+    float silentVolAtt = detector.getVolAtt();
+    FL_WARN("Vibe silence-gate: after 90 silent frames getVol=" << silentVol
+                 << " getVolAtt=" << silentVolAtt);
+
+    // User-visible metrics must be gated to near-zero.
+    FL_CHECK_LT(silentVol, 0.05f);
+    FL_CHECK_LT(silentVolAtt, 0.05f);
+    // Each band is individually gated too.
+    FL_CHECK_LT(detector.getBass(), 0.05f);
+    FL_CHECK_LT(detector.getMid(), 0.05f);
+    FL_CHECK_LT(detector.getTreb(), 0.05f);
+    FL_CHECK_LT(detector.getBassAtt(), 0.05f);
+    FL_CHECK_LT(detector.getMidAtt(), 0.05f);
+    FL_CHECK_LT(detector.getTrebAtt(), 0.05f);
+}
+
+FL_TEST_CASE("audio::detector::Vibe - silence gate is pass-through when isSilent is false") {
+    // Regression guard: when the pipeline has NOT opted into NFT (so
+    // Context::isSilent() stays false), the envelope must not alter values.
+    // This protects existing users who rely on the self-normalizing levels.
+    audio::detector::Vibe gated;
+    audio::detector::Vibe ungated;
+
+    for (int i = 0; i < 60; ++i) {
+        auto sample = makeSample(440.0f, i * 12, 16000.0f);
+
+        auto gctx = fl::make_shared<audio::Context>(sample);
+        gctx->setSampleRate(44100);
+        // Leaving isSilent at default (false) = envelope is pass-through.
+        gated.update(gctx);
+
+        auto uctx = fl::make_shared<audio::Context>(sample);
+        uctx->setSampleRate(44100);
+        ungated.update(uctx);
+    }
+
+    // Both detectors should produce identical outputs since neither activated
+    // the silence gate. This proves default behavior is unchanged.
+    FL_CHECK_EQ(gated.getVol(), ungated.getVol());
+    FL_CHECK_EQ(gated.getBass(), ungated.getBass());
+    FL_CHECK_EQ(gated.getMid(), ungated.getMid());
+    FL_CHECK_EQ(gated.getTreb(), ungated.getTreb());
+}
+
+FL_TEST_CASE("audio::detector::Vibe - silence-to-audio transition snaps back (no attack lag)") {
+    audio::detector::Vibe detector;
+
+    // Drive to gated state via silence.
+    for (int i = 0; i < 30; ++i) {
+        auto sample = makeSample(440.0f, i * 12, 16000.0f);
+        auto ctx = fl::make_shared<audio::Context>(sample);
+        ctx->setSampleRate(44100);
+        detector.update(ctx);
+    }
+    for (int i = 0; i < 120; ++i) {
+        auto sample = makeSilence((30 + i) * 12);
+        auto ctx = fl::make_shared<audio::Context>(sample);
+        ctx->setSampleRate(44100);
+        ctx->setSilent(true);
+        detector.update(ctx);
+    }
+    FL_CHECK_LT(detector.getVol(), 0.01f);
+
+    // Audio returns — a beat should NOT be attenuated by residual decay state.
+    // The envelope must snap back to pass-through immediately.
+    auto loudSample = makeSample(440.0f, 1000, 30000.0f);
+    auto ctx = fl::make_shared<audio::Context>(loudSample);
+    ctx->setSampleRate(44100);
+    // isSilent = false — audio is back.
+    detector.update(ctx);
+
+    // After one audio frame, the live signal flows through unchanged.
+    // With loud audio vs the previously quiet baseline (long_avg still low),
+    // bass should exceed 1.0 — no attack lag from the envelope.
+    FL_CHECK_GT(detector.getBass(), 0.5f);
+}

@@ -29,6 +29,7 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/fft/fft.h"
+#include "fl/audio/silence_envelope.h"
 #include "fl/stl/function.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/noexcept.h"
@@ -153,6 +154,13 @@ private:
     bool mPrevBassSpike = false;
     bool mPrevMidSpike = false;
     bool mPrevTrebSpike = false;
+
+    // Silence gate envelopes — decay mImmRel[i] and mAvgRel[i] toward zero
+    // when Context::isSilent() is true. Fixes MilkDrop self-normalization's
+    // stuck-at-1.0 behavior when music stops. Pass-through during audio so
+    // beat dynamics are preserved exactly.
+    SilenceEnvelope mImmRelEnv[3];
+    SilenceEnvelope mAvgRelEnv[3];
 
     // FPS-independent rate adjustment
     static float adjustRateToFPS(float rateAtFps1, float fps1, float actualFps) FL_NOEXCEPT;

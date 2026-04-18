@@ -21,8 +21,24 @@ int Vibe::getPrivateFFTCount() { return sVibeFFTCount; }
 void Vibe::resetPrivateFFTCount() { sVibeFFTCount = 0; }
 
 
-Vibe::Vibe()
-{}
+Vibe::Vibe() {
+    // Tau chosen for LED visualizer feel: ~0.3s gives ~1 second of silence
+    // to fully gate, matching user expectation that beats decay quickly when
+    // music stops. The envelope targets 0.0 — full silence on the metric.
+    SilenceEnvelope::Config cfg;
+    cfg.decayTauSeconds = 0.3f;
+    cfg.targetValue = 0.0f;
+    for (int i = 0; i < 3; ++i) {
+        mImmRelEnv[i].configure(cfg);
+        mAvgRelEnv[i].configure(cfg);
+        // Seed cached "last audio" value at 1.0 to match the detector's
+        // initial public state (getBass()/getMid()/getTreb() return 1.0
+        // before any update()). Without this, the first silent update
+        // would immediately decay from 0 — no visible change, but semantic.
+        mImmRelEnv[i].reset(1.0f);
+        mAvgRelEnv[i].reset(1.0f);
+    }
+}
 
 Vibe::~Vibe() FL_NOEXCEPT = default;
 
@@ -92,6 +108,19 @@ void Vibe::update(shared_ptr<Context> context) {
         }
     }
 
+    // --- Step 4b: Silence gate ---
+    // MilkDrop's self-normalization drives mImmRel toward 1.0 when input is
+    // silent (noise / noise → 1.0), and the < 0.001f clamp above also pins
+    // to 1.0. Neither is what LED effects want when music stops. Route each
+    // band through its SilenceEnvelope: pass-through during audio, exponential
+    // decay toward 0 during silence. The Context::isSilent() flag is populated
+    // by Processor/Reactive from NoiseFloorTracker. Re-uses dt computed above.
+    const bool silent = context->isSilent();
+    for (int i = 0; i < 3; i++) {
+        mImmRel[i] = mImmRelEnv[i].update(silent, mImmRel[i], dt);
+        mAvgRel[i] = mAvgRelEnv[i].update(silent, mAvgRel[i], dt);
+    }
+
     // --- Step 5: Spike detection ---
     // When immediate exceeds smoothed, energy is rising — a beat is in progress.
     mPrevBassSpike = mBassSpike;
@@ -145,6 +174,10 @@ void Vibe::reset() {
         mLongAvg[i] = 0.0f;
         mImmRel[i] = 1.0f;
         mAvgRel[i] = 1.0f;
+        // Match the mImmRel/mAvgRel defaults of 1.0 so the silence gate
+        // picks up from the public state after reset().
+        mImmRelEnv[i].reset(1.0f);
+        mAvgRelEnv[i].reset(1.0f);
     }
     mBassSpike = false;
     mMidSpike = false;
