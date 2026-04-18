@@ -667,9 +667,15 @@ class PioCompiler(Compiler):
             green_color = "\033[32m"
             reset_color = "\033[0m"
             print(f"{green_color}SUCCESS: {example}{reset_color}")
-            # Mirror top-level fbuild artifacts to the legacy .pio/build path so
-            # downstream tooling (QEMU/avr8js workflows, crash decoders) keeps
-            # working without having to know about fbuild's layout.
+            # Generate build metadata FIRST, because `pio project metadata`
+            # prepares `.pio/build/<env>/` by wiping and re-creating it —
+            # which would clobber any mirrored firmware files. Only after
+            # that settles do we copy fbuild's artifacts over so the legacy
+            # PlatformIO path also has `firmware.elf` / `firmware.hex` for
+            # downstream tooling (QEMU / avr8js workflows, crash decoders).
+            generate_build_info_json_from_existing_build(
+                self.build_dir, self.board, example
+            )
             try:
                 _mirror_fbuild_artifacts_to_pio(self.build_dir, environment)
             except Exception as mirror_err:
@@ -678,9 +684,6 @@ class PioCompiler(Compiler):
                     f"Warning: failed to mirror fbuild artifacts to .pio/build/{environment}: "
                     f"{mirror_err}"
                 )
-            generate_build_info_json_from_existing_build(
-                self.build_dir, self.board, example
-            )
         else:
             red_color = "\033[31m"
             reset_color = "\033[0m"
