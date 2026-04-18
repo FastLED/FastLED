@@ -1,5 +1,9 @@
 name: esp32dev-idf3.3-lts
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 on:
   push:
     branches:
