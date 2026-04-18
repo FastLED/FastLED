@@ -17,23 +17,65 @@ import sys
 from pathlib import Path
 
 
-def fbuild_release_dir(build_root: Path, board_name: str) -> Path:
-    """Path to the fbuild release dir for ``board_name`` under ``build_root``.
+def _candidate_fbuild_release_dirs(build_root: Path, board_name: str) -> list[Path]:
+    """Candidate locations where fbuild may have written artifacts.
 
-    Matches ``PioCompiler._artifacts_dir`` in ``ci/compiler/pio.py``.
+    FastLED compiles fbuild with ``build_dir=<repo>/.build/pio/<board>/`` (see
+    ``ci/compiler/pio.py::_artifacts_dir``), so fbuild's output lives at
+    ``.build/pio/<board>/.fbuild/build/<env>/release/``. The standalone CLI
+    (``fbuild <repo> build --target compiledb``) instead emits
+    ``<repo>/.fbuild/build/<env>/release/`` — we treat both as valid so that a
+    direct ``--target compiledb`` invocation (no prior FastLED compile) also
+    works. An older ``.build/.fbuild/…`` layout is kept as a tail fallback.
+
+    Returned in preference order (first hit wins).
     """
-    return build_root / ".fbuild" / "build" / board_name / "release"
+    # Repo root is the parent of .build/ when build_root follows convention.
+    repo_root = build_root.parent if build_root.name == ".build" else build_root
+    return [
+        build_root / "pio" / board_name / ".fbuild" / "build" / board_name / "release",
+        repo_root / ".fbuild" / "build" / board_name / "release",
+        build_root / ".fbuild" / "build" / board_name / "release",
+    ]
+
+
+def fbuild_release_dir(build_root: Path, board_name: str) -> Path:
+    """Return the canonical fbuild release dir for ``board_name``.
+
+    Prefers the first of the candidate locations in
+    :func:`_candidate_fbuild_release_dirs` that already exists, and falls back
+    to the FastLED-orchestrated layout
+    (``.build/pio/<board>/.fbuild/build/<env>/release/``) when none do — so
+    callers can still materialize artifacts there via
+    :func:`ensure_compile_commands`.
+    """
+    candidates = _candidate_fbuild_release_dirs(build_root, board_name)
+    for cand in candidates:
+        if cand.exists():
+            return cand
+    return candidates[0]
 
 
 def was_compiled_with_fbuild(build_root: Path, board_name: str) -> bool:
-    """True iff fbuild produced artifacts for ``board_name``.
+    """True iff fbuild produced artifacts for ``board_name`` anywhere we look.
 
-    Detection probes the release dir (``.build/.fbuild/build/<env>/release/``)
-    which fbuild's ESP32 orchestrator populates during compile. This matches
-    the detection logic lifted from ``ci/ci-cppcheck.py`` and is the canonical
-    fbuild-vs-PIO backend signal for post-compile tooling.
+    Probes every candidate release dir from
+    :func:`_candidate_fbuild_release_dirs` — fbuild's ESP32 / AVR / Teensy
+    orchestrators populate this directory during compile, so its presence is
+    the canonical fbuild-vs-PIO backend signal for post-compile tooling.
     """
-    return fbuild_release_dir(build_root, board_name).exists()
+    return any(
+        cand.exists() for cand in _candidate_fbuild_release_dirs(build_root, board_name)
+    )
+
+
+def _find_existing_compile_db(build_root: Path, board_name: str) -> Path | None:
+    """Return an existing ``compile_commands.json`` for ``board_name``, or None."""
+    for cand in _candidate_fbuild_release_dirs(build_root, board_name):
+        cdb = cand / "compile_commands.json"
+        if cdb.exists():
+            return cdb
+    return None
 
 
 def ensure_compile_commands(
@@ -41,24 +83,24 @@ def ensure_compile_commands(
 ) -> Path | None:
     """Ensure ``compile_commands.json`` exists for ``board_name``; return its path.
 
-    If the DB is already present, returns it immediately. Otherwise shells out
-    to ``fbuild build -e <env> --target compiledb`` and returns the resulting
-    path. Returns ``None`` if fbuild isn't on PATH or the subprocess fails.
+    If the DB is already present at any known location (see
+    :func:`_candidate_fbuild_release_dirs`), returns it immediately. Otherwise
+    shells out to ``fbuild <project_root> build -e <env> --target compiledb``
+    and returns the resulting path. Returns ``None`` if fbuild isn't on PATH
+    or the subprocess fails.
 
     Args:
         project_root: FastLED repo root (the directory fbuild resolves
             ``fbuild.toml`` / ``pyproject.toml`` from).
-        build_root: The ``.build/`` directory — fbuild writes its artifacts
-            under ``<build_root>/.fbuild/build/<env>/``.
+        build_root: The ``.build/`` directory.
         board_name: Canonical board / fbuild environment name (e.g.
             ``esp32c2``, matching the ``-e`` flag on fbuild).
 
     Returns:
         Path to ``compile_commands.json`` on success, ``None`` otherwise.
     """
-    release = fbuild_release_dir(build_root, board_name)
-    cdb = release / "compile_commands.json"
-    if cdb.exists():
+    cdb = _find_existing_compile_db(build_root, board_name)
+    if cdb is not None:
         return cdb
 
     # Canonical FastLED fbuild invocation order (matches
@@ -96,4 +138,7 @@ def ensure_compile_commands(
         )
         return None
 
-    return cdb if cdb.exists() else None
+    # Re-scan candidate locations — ``fbuild --target compiledb`` writes to
+    # ``<repo>/.fbuild/build/<env>/release/`` regardless of which candidate
+    # the prior FastLED compile populated.
+    return _find_existing_compile_db(build_root, board_name)
