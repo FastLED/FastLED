@@ -12,32 +12,12 @@ fs = import('fs')
 # Find uv for running Zig compiler
 uv = find_program('uv')
 
-# Absolute include paths — must match between PCH and test DLL compilation so
-# that #pragma once recognises headers from both contexts as the same file.
-# Meson's include_directories() emits *relative* -I flags; the PCH custom_target
-# uses project_source_root() which produces *absolute* -I flags.  Mixing the two
-# makes clang (especially on Windows) treat the same header as two different
-# files, breaking #pragma once across PCH boundaries.
-#
-# Forward-slash normalization: on Windows, meson.project_source_root() returns
-# native backslash paths (C:\Users\...), but the '/' operator normalizes to
-# forward slashes (C:/Users/.../src).
-#
-# Critical: the -I flag for `src` must be spelled IDENTICALLY to the `src`
-# -I flags used by fastled_lib / crash_handler_lib in ci/meson/native/meson.build
-# and examples/meson.build.  Those all use `meson.project_source_root() / 'src'`
-# which produces `C:/.../fastled6/src`.  If we chain via an intermediate
-# `meson.project_source_root() / '.'` and then `/ 'src'`, the result is
-# `C:/.../fastled6/./src` — the `/./` in the middle is a different string,
-# and when the test DLL links against fastled_lib, BOTH spellings land on the
-# compile line.  Clang's #pragma once keys on the resolved path string, so the
-# two spellings of the same directory cause #pragma once to fail and
-# headers included via both paths get defined twice.  (Repro: vibe.h via
-# audio_processor.h and via tests/fl/audio/detector/vibe.hpp triggers
-# "redefinition of VibeLevels".)  Always use the clean `/ 'src'` spelling.
+# Absolute forward-slash -I args — see ci/meson/shared/meson.build for rationale
+# (issue #2328). All project-wide includes MUST be spelled identically everywhere
+# or clang's #pragma once dedup is silently defeated on Windows.
 test_abs_include_args = [
-  '-I' + meson.project_source_root() / '.',    # project root (tests/*, etc.)
-  '-I' + meson.project_source_root() / 'src',  # src library (matches fastled_lib -I)
+  path_norm_I_root,  # For test includes (normalized abs forward-slash).
+  path_norm_I_src,   # For library.
 ]
 
 # Build precompiled header from test_pch.h (contains FastLED.h + doctest + common headers)
@@ -67,7 +47,7 @@ test_pch = custom_target('test_pch',
     unit_test_compile_args,        # Same flags as all tests
     '-fPIC',                       # Required: tests build as shared_library which needs PIC
     test_abs_include_args,
-    '-I' + meson.project_source_root() / 'src/platforms/stub',  # For Arduino.h in FastLED.h
+    path_norm_I_stub,  # For Arduino.h in FastLED.h
     # STRICT PCH VALIDATION FLAGS (to catch invalidation issues):
     '-Werror=invalid-pch',                      # Treat invalid PCH as hard error
     '-verify-pch',                              # Load and verify PCH is not stale
@@ -98,10 +78,11 @@ test_pch = custom_target('test_pch',
 # NOTE: runner_link_args, runner_cpp_args, and crash_handler_lib are defined
 # in root meson.build and shared with examples/meson.build for consistency.
 # libunwind is conditionally linked via -lunwind in runner_link_args when available.
+# Absolute forward-slash -I args (issue #2328) — DO NOT use include_directories()
+# here. Meson emits -I..\..\src on Windows which breaks #pragma once.
 runner_exe = executable('runner',
   'shared/runner.cpp',
-  include_directories: [src_dir, stub_dir],
-  cpp_args: runner_cpp_args,
+  cpp_args: runner_cpp_args + [path_norm_I_src, path_norm_I_stub],
   link_args: runner_link_args,
   link_with: [crash_handler_lib],  # Shared crash handler from root meson.build
   install: false

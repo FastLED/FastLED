@@ -8,13 +8,14 @@ project('fastled', 'cpp',
   ]
 )
 
-# Source directory
-src_dir = include_directories('src')
-tests_dir = include_directories('tests')
-project_root_dir = include_directories('.')
-
-# Platform-specific stub include (provides Arduino.h and other stub headers)
-stub_dir = include_directories('src/platforms/stub')
+# NOTE (#2328): We intentionally do NOT declare project-wide include_directories()
+# objects here. On Windows, Meson's include_directories() propagates -I flags
+# with native backslashes + relative paths (e.g. -I..\..\src) which defeats
+# clang's #pragma once file-identity check and causes double-definition errors
+# when a header reaches a TU via two different spellings. Instead, every
+# meson.build that needs project-wide includes uses the canonical absolute
+# forward-slash -I args exported from ci/meson/shared/meson.build
+# (path_norm_I_root, path_norm_I_src, path_norm_I_tests, path_norm_I_stub).
 
 # Recursively discover all .cpp source files in src/ directory with caching
 # Note: Meson doesn't have native rglob, so we use Python's pathlib

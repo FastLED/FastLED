@@ -27,8 +27,13 @@
 
 #pragma once
 
-#ifndef FL_AUDIO_DETECTOR_VIBE_H
-#define FL_AUDIO_DETECTOR_VIBE_H
+// NOTE (#2328): The defensive `#ifndef FL_AUDIO_DETECTOR_VIBE_H` guard that
+// was added in #2325 has been removed. It existed because Meson was emitting
+// -I flags with mixed spellings (backslash vs forward-slash, relative vs
+// absolute) on Windows, which defeated clang's #pragma once file-identity
+// check. All `-I` flags are now absolute + forward-slash + spelled
+// identically (see ci/meson/shared/meson.build path_norm_*), so #pragma once
+// is sufficient on its own.
 
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/fft/fft.h"
@@ -172,5 +177,3 @@ private:
 } // namespace detector
 } // namespace audio
 } // namespace fl
-
-#endif // FL_AUDIO_DETECTOR_VIBE_H

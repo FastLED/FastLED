@@ -36,12 +36,14 @@ wasm_lib_compile_args = lib_result.stdout().strip().split('\n')
 # The weak/strong symbol separation is a native build concern only.
 wasm_all_sources = fastled_sources + platforms_shared_files
 
-# Absolute include paths — Meson's include_directories() emits *relative* -I
-# flags which causes clang (especially emscripten on Windows) to treat the same
-# header as distinct files for #pragma once purposes.
+# Absolute forward-slash include paths (issue #2328). Meson's
+# include_directories() emits *relative* -I flags with backslashes on Windows,
+# which causes clang/emscripten to treat the same header as distinct files
+# for #pragma once purposes. path_norm_* are exported from
+# ci/meson/shared/meson.build.
 wasm_abs_include_args = [
-  '-I' + meson.project_source_root() / 'src',
-  '-I' + meson.project_source_root() / 'src' / 'platforms' / 'wasm' / 'compiler',
+  path_norm_I_src,
+  '-I' + path_norm_root / 'src/platforms/wasm/compiler',
 ]
 
 fastled_wasm_lib = static_library('fastled',

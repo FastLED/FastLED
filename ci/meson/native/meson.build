@@ -433,9 +433,9 @@ endif
 # relative -I paths to consumer targets (tests, examples), which breaks
 # #pragma once across PCH boundaries on Windows.
 crash_handler_abs_include_args = [
-  '-I' + meson.project_source_root() / '.',
-  '-I' + meson.project_source_root() / 'tests',
-  '-I' + meson.project_source_root() / 'src',
+  path_norm_I_root,
+  path_norm_I_tests,
+  path_norm_I_src,
 ]
 
 crash_handler_cpp_args = ['-DENABLE_CRASH_HANDLER', '-DFASTLED_STUB_IMPL'] + crash_handler_abs_include_args
@@ -466,8 +466,8 @@ crash_handler_lib = static_library('crash_handler',
 # Meson from propagating backslash relative -I paths to consumer targets,
 # which breaks #pragma once across PCH boundaries on Windows.
 fastled_lib_abs_include_args = [
-  '-I' + meson.project_source_root() / 'src',
-  '-I' + meson.project_source_root() / 'src/platforms/stub',
+  path_norm_I_src,
+  path_norm_I_stub,
 ]
 
 fastled_lib = shared_library('fastled',
@@ -521,8 +521,8 @@ endif
 # Absolute include paths — must match between PCH and consumer compilation so
 # that #pragma once recognises headers from both contexts as the same file.
 fastled_pch_abs_include_args = [
-  '-I' + meson.project_source_root() / 'src',
-  '-I' + meson.project_source_root() / 'src/platforms/stub',
+  path_norm_I_src,
+  path_norm_I_stub,
 ]
 
 fastled_pch = custom_target('fastled_pch',

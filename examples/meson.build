@@ -25,10 +25,10 @@
 project_root = meson.project_source_root()
 fs = import('fs')
 
-# Include directories are provided by parent meson.build:
-#   src_dir  = include_directories('src')
-#   stub_dir = include_directories('src/platforms/stub')
-# No need to redefine them here
+# NOTE (#2328): Absolute forward-slash -I args (path_norm_I_*) come from
+# ci/meson/shared/meson.build. We do NOT use include_directories() for
+# project-wide includes because Meson propagates them as backslash + relative
+# -I flags on Windows, which defeats clang's #pragma once file-identity check.
 
 # ============================================================================
 # HOST-BASED EXAMPLE COMPILATION (Fast, using STUB platform)
@@ -150,10 +150,11 @@ endforeach
 # NOTE: runner_link_args, runner_cpp_args, and crash_handler_lib are defined
 # in root meson.build and shared with tests/meson.build for consistency.
 # libunwind is conditionally linked via -lunwind in runner_link_args when available.
+# Absolute forward-slash -I args (issue #2328) — DO NOT use include_directories()
+# here. Meson emits -I..\..\src on Windows which breaks #pragma once.
 example_runner_exe = executable('example_runner',
   files('../tests/shared/example_runner.cpp'),
-  include_directories: [src_dir, stub_dir, tests_dir],
-  cpp_args: runner_cpp_args,
+  cpp_args: runner_cpp_args + [path_norm_I_src, path_norm_I_stub, path_norm_I_tests],
   link_args: runner_link_args,
   link_with: [crash_handler_lib],  # Shared crash handler from root meson.build
   install: false
@@ -169,8 +170,8 @@ example_runner_exe = executable('example_runner',
 # Absolute include paths must match those used to compile fastled_pch so that
 # #pragma once recognises headers from both contexts as the same file.
 example_abs_include_args = [
-    '-I' + meson.project_source_root() / 'src',
-    '-I' + meson.project_source_root() / 'src/platforms/stub',
+    path_norm_I_src,
+    path_norm_I_stub,
 ]
 example_pch_usage_args = [
     '-include-pch', fastled_pch_dir / 'FastLED.h.pch',
@@ -197,17 +198,16 @@ foreach example_name : example_paths.keys()
     # Get include directories for this example
     example_include_dirs = example_includes.get(example_name, [])
 
-    # Build include_directories objects
-    # inc_dir is relative to project root (e.g., "examples/Blink")
-    # We need to make it relative to this meson.build (which is in examples/)
-    include_objs = []
+    # Build absolute forward-slash -I args for each per-example include dir
+    # (issue #2328). DO NOT use include_directories() — Meson emits these as
+    # backslash + relative paths on Windows, which defeats #pragma once dedup.
+    # inc_dir is project-relative (e.g. "examples/Blink" or "examples\\Blink");
+    # normalize to path_norm_root / <rest> via forward-slash '/' operator.
+    per_example_I_args = []
     foreach inc_dir : example_include_dirs
-        # Strip "examples/" prefix if present (Windows uses backslash)
-        inc_dir_fixed = inc_dir
-        if inc_dir.startswith('examples\\') or inc_dir.startswith('examples/')
-            inc_dir_fixed = inc_dir.substring(9)  # Length of "examples/"
-        endif
-        include_objs += include_directories(inc_dir_fixed)
+        # Canonicalize any backslashes the discovery script may have emitted
+        inc_dir_fwd = inc_dir.replace('\\', '/')
+        per_example_I_args += ['-I' + path_norm_root / inc_dir_fwd]
     endforeach
 
     # Construct proper path: <example_root>/<example_name>.ino
@@ -217,8 +217,11 @@ foreach example_name : example_paths.keys()
     # This eliminates custom_target overhead and Python script dependency
     wrapper_cpp = files(project_root / 'tests' / 'shared' / 'example_dll_wrapper_template.cpp')
 
-    # Add FastLED includes (src, stub platform, and tests for shared infrastructure) to the example includes
-    all_includes = [project_root_dir, src_dir, stub_dir, tests_dir] + include_objs
+    # Absolute forward-slash -I args for FastLED + tests + per-example includes
+    # (issue #2328). Used via cpp_args, NOT include_directories.
+    all_I_args = [
+      path_norm_I_root, path_norm_I_src, path_norm_I_stub, path_norm_I_tests,
+    ] + per_example_I_args
 
     # Get additional source files for this example (e.g., src/*.cpp)
     additional_sources = []
@@ -276,12 +279,13 @@ foreach example_name : example_paths.keys()
 
     # Build example as a shared library (DLL)
     # NOTE: System dependencies moved to example_runner.exe
+    # NOTE (#2328): includes passed via cpp_args (abs forward-slash), NOT
+    # include_directories, to avoid backslash + relative -I propagation.
     example_dll = shared_library(
         'example-' + example_name,
         all_sources + this_example_extra_sources,  # Wrapper + additional .cpp files + PCH dep
-        include_directories: all_includes,
         link_with: fastled_lib,
-        cpp_args: example_compile_args + debug_cpp_args + example_specific_cpp_args + this_example_pch_args + ['-DEXAMPLE_DLL_MODE'],
+        cpp_args: example_compile_args + all_I_args + debug_cpp_args + example_specific_cpp_args + this_example_pch_args + ['-DEXAMPLE_DLL_MODE'],
         link_args: dll_link_args,  # Minimal linking (defined in root meson.build)
         name_prefix: '',  # Remove 'lib' prefix on Windows (produce 'example-Blink.dll' not 'libexample-Blink.dll')
         build_by_default: false,  # Only build when explicitly requested
