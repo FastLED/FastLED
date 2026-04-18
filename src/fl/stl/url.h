@@ -245,4 +245,52 @@ class url {
 
 using Url = url;
 
+/// Parse the contents of a `.lnk` file into a `fl::url`.
+///
+/// Format: one URL per line. Leading/trailing whitespace on each line is
+/// ignored. Blank lines and lines whose first non-whitespace character is
+/// `#` are treated as comments and skipped. The first non-comment,
+/// non-blank line is returned as a `fl::url`.
+///
+/// Future-compat: additional lines (metadata like `sha256=...`,
+/// `fallback=...`) are ignored by this v1 parser so older binaries keep
+/// working when future `.lnk` files grow richer.
+inline url parse_lnk(fl::string_view content) FL_NOEXCEPT {
+    fl::size pos = 0;
+    while (pos < content.size()) {
+        fl::size eol = content.find('\n', pos);
+        fl::size lineEnd = (eol == fl::string_view::npos) ? content.size() : eol;
+        fl::string_view line = content.substr(pos, lineEnd - pos);
+        pos = (eol == fl::string_view::npos) ? content.size() : eol + 1;
+
+        // Strip a trailing '\r' from CRLF line endings.
+        if (!line.empty() && line[line.size() - 1] == '\r') {
+            line = line.substr(0, line.size() - 1);
+        }
+
+        // Trim leading whitespace.
+        fl::size s = 0;
+        while (s < line.size() &&
+               (line[s] == ' ' || line[s] == '\t')) {
+            ++s;
+        }
+        // Trim trailing whitespace.
+        fl::size e = line.size();
+        while (e > s &&
+               (line[e - 1] == ' ' || line[e - 1] == '\t')) {
+            --e;
+        }
+        line = line.substr(s, e - s);
+
+        if (line.empty()) {
+            continue;
+        }
+        if (line[0] == '#') {
+            continue;
+        }
+        return url(line);
+    }
+    return url();
+}
+
 } // namespace fl

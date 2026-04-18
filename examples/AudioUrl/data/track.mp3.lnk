@@ -1,0 +1,6 @@
+# .lnk asset link file — see FastLED issue #2284.
+# The first non-comment line is the URL this asset resolves to.
+# Lines starting with '#' and blank lines are ignored.
+# Additional lines (metadata like sha256=, fallback=) are reserved for
+# future use and are ignored by the v1 parser.
+https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3
