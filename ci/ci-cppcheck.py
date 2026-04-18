@@ -1,18 +1,21 @@
 import argparse
+import json
 import os
 import subprocess
 import sys
 from pathlib import Path
+
+from ci.util.fbuild_compiledb import ensure_compile_commands, was_compiled_with_fbuild
 
 
 MINIMUM_REPORT_SEVERTIY = "medium"
 MINIMUM_FAIL_SEVERTIY = "high"
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run cppcheck on the project")
     parser.add_argument("board", nargs="?", help="Board to check, optional")
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 def resolve_board_name(board_input: str) -> str:
@@ -99,17 +102,71 @@ def find_platformio_ini_in_tree(base_dir: Path) -> Path | None:
     return None
 
 
-def was_compiled_with_fbuild(build_root: Path, board_name: str) -> bool:
-    """Detect whether the active backend for this board was fbuild.
+def _load_src_files_from_compile_db(compile_db: Path, project_root: Path) -> list[str]:
+    """Return the list of source files in ``compile_db`` under ``<project_root>/src/``.
 
-    fbuild writes artifacts under ``.build/.fbuild/build/<env>/release/``
-    (see ``ci/compiler/pio.py::PioCompiler._artifacts_dir``). If that
-    directory exists for the target board, fbuild produced the compile,
-    and ``pio check`` will fail during CMake configure because partition
-    CSVs and other PIO-side metadata are never written to the PIO project
-    tree — see FastLED#2302 for the esp32c2 symptom.
+    Filters out third-party / framework TUs so we only analyze FastLED's own
+    code, matching the legacy ``pio check --src-filters=+<src/>`` scope.
     """
-    return (build_root / ".fbuild" / "build" / board_name / "release").exists()
+    src_root = (project_root / "src").resolve()
+    with compile_db.open("r", encoding="utf-8") as fh:
+        entries = json.load(fh)
+    files: list[str] = []
+    for entry in entries:
+        raw = entry.get("file")
+        if not raw:
+            continue
+        try:
+            resolved = Path(raw).resolve()
+        except OSError:
+            continue
+        try:
+            resolved.relative_to(src_root)
+        except ValueError:
+            continue
+        files.append(str(resolved))
+    return files
+
+
+def run_static_analysis_against_compile_db(compile_db: Path, project_root: Path) -> int:
+    """Run clang-tidy against a compile_commands.json via ``clang-tool-chain-tidy``.
+
+    Routes entirely through the ``clang-tool-chain`` wrapper (lazily validates
+    and fetches its bundled toolchain on first use), so there is no
+    ``apt-get install`` / system-package dependency. Replaces the legacy
+    ``pio check`` pathway, which fails during CMake configure on
+    fbuild-compiled boards because PIO-side metadata (partition CSVs etc.)
+    isn't populated — see FastLED#2302 / #2303.
+
+    Check selection is governed by the repo-root ``.clang-tidy`` file, which
+    already enables the cppcheck-equivalent families (``bugprone-*``,
+    ``clang-analyzer-*``, ``performance-*``, selected ``modernize-*`` /
+    ``readability-*``). No inline ``--checks`` override — the file is the
+    single source of truth.
+    """
+    files = _load_src_files_from_compile_db(compile_db, project_root)
+    if not files:
+        print(
+            f"No src/ translation units found in {compile_db} — nothing to "
+            f"analyze. (Compile DB may cover only framework code for this "
+            f"board.)"
+        )
+        return 0
+
+    print(
+        f"Running clang-tool-chain-tidy against {len(files)} src/ files using "
+        f"compile DB: {compile_db}"
+    )
+    cmd = [
+        "uv",
+        "run",
+        "clang-tool-chain-tidy",
+        "-p",
+        str(compile_db.parent),
+        *files,
+    ]
+    cp = subprocess.run(cmd)
+    return cp.returncode
 
 
 def main() -> int:
@@ -130,19 +187,25 @@ def main() -> int:
                 f"Resolved board '{args.board}' to canonical name '{canonical_board_name}'"
             )
 
-        # Short-circuit on fbuild-compiled boards: `pio check` requires a
-        # fully-populated PIO project tree (e.g. resolved partition CSVs)
-        # which fbuild does not produce. Until fbuild grows cppcheck /
-        # clang-tool-chain support (FastLED#2301, #2303), skip with a
-        # visible notice rather than fail CI. Tracked: FastLED#2302.
+        # fbuild-backed boards: route cppcheck through the compile DB fbuild
+        # emits. Avoids `pio check`'s CMake-configure failure mode (missing
+        # partition CSVs etc.) while giving us real cppcheck coverage, not a
+        # skip. See FastLED#2303.
         if was_compiled_with_fbuild(build, canonical_board_name):
-            print(
-                f"SKIP: cppcheck not supported on fbuild-compiled boards "
-                f"('{canonical_board_name}' was built with fbuild). "
-                f"Tracking: FastLED#2301 (cppcheck/fbuild), #2302 (c2 regression), "
-                f"#2303 (clang-tool-chain-bin integration)."
+            compile_db = ensure_compile_commands(
+                project_root, build, canonical_board_name
             )
-            return 0
+            if compile_db is None:
+                print(
+                    f"ERROR: could not obtain fbuild compile_commands.json for "
+                    f"'{canonical_board_name}'. fbuild >= 2.1 should emit this "
+                    f"via `fbuild build -e {canonical_board_name} --target "
+                    f"compiledb`; verify the fbuild version and the env name. "
+                    f"Tracking: FastLED#2303.",
+                    file=sys.stderr,
+                )
+                return 1
+            return run_static_analysis_against_compile_db(compile_db, project_root)
 
         # Search for the specified board using the canonical name
         project_dir = find_platformio_project_dir(build, canonical_board_name)
