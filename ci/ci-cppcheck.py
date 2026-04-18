@@ -99,6 +99,19 @@ def find_platformio_ini_in_tree(base_dir: Path) -> Path | None:
     return None
 
 
+def was_compiled_with_fbuild(build_root: Path, board_name: str) -> bool:
+    """Detect whether the active backend for this board was fbuild.
+
+    fbuild writes artifacts under ``.build/.fbuild/build/<env>/release/``
+    (see ``ci/compiler/pio.py::PioCompiler._artifacts_dir``). If that
+    directory exists for the target board, fbuild produced the compile,
+    and ``pio check`` will fail during CMake configure because partition
+    CSVs and other PIO-side metadata are never written to the PIO project
+    tree — see FastLED#2302 for the esp32c2 symptom.
+    """
+    return (build_root / ".fbuild" / "build" / board_name / "release").exists()
+
+
 def main() -> int:
     args = parse_args()
     here = Path(__file__).parent
@@ -116,6 +129,20 @@ def main() -> int:
             print(
                 f"Resolved board '{args.board}' to canonical name '{canonical_board_name}'"
             )
+
+        # Short-circuit on fbuild-compiled boards: `pio check` requires a
+        # fully-populated PIO project tree (e.g. resolved partition CSVs)
+        # which fbuild does not produce. Until fbuild grows cppcheck /
+        # clang-tool-chain support (FastLED#2301, #2303), skip with a
+        # visible notice rather than fail CI. Tracked: FastLED#2302.
+        if was_compiled_with_fbuild(build, canonical_board_name):
+            print(
+                f"SKIP: cppcheck not supported on fbuild-compiled boards "
+                f"('{canonical_board_name}' was built with fbuild). "
+                f"Tracking: FastLED#2301 (cppcheck/fbuild), #2302 (c2 regression), "
+                f"#2303 (clang-tool-chain-bin integration)."
+            )
+            return 0
 
         # Search for the specified board using the canonical name
         project_dir = find_platformio_project_dir(build, canonical_board_name)
