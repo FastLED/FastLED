@@ -58,6 +58,16 @@ public:
     void setSampleRate(int sampleRate) FL_NOEXCEPT { mSampleRate = sampleRate; }
     int getSampleRate() const FL_NOEXCEPT { return mSampleRate; }
 
+    // ----- Silence Flag -----
+    // Populated per-frame by the pipeline owner (Processor / Reactive) from
+    // NoiseFloorTracker::isAboveFloor(). Detectors read this to gate their
+    // outputs during silence. Default false — detectors that check this flag
+    // simply won't gate if the pipeline hasn't enabled noise-floor tracking.
+    // Reset to false on each setSample(); callers must re-populate after their
+    // NoiseFloorTracker.update() call.
+    void setSilent(bool silent) FL_NOEXCEPT { mIsSilent = silent; }
+    bool isSilent() const FL_NOEXCEPT { return mIsSilent; }
+
     // ----- Update & Reset -----
     void setSample(const Sample& sample) FL_NOEXCEPT;
     void clearCache() FL_NOEXCEPT;
@@ -82,6 +92,7 @@ private:
     vector<fft::Bins> mFFTHistory;
     int mFFTHistoryDepth = 0;
     int mFFTHistoryIndex = 0;
+    bool mIsSilent = false;
 };
 
 /// Compute the time delta (in seconds) for an audio buffer.

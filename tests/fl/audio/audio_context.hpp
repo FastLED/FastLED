@@ -161,3 +161,25 @@ FL_TEST_CASE("audio::Context - new sample produces fresh audio::fft::FFT data") 
     }
     FL_CHECK_GT(secondMaxBin, 100.0f);
 }
+
+FL_TEST_CASE("audio::Context - silence flag") {
+    audio::Sample sample = makeSineAudioSample(440.0f, 1000);
+    audio::Context ctx(sample);
+
+    // Default: no silence claim until pipeline populates the flag.
+    FL_CHECK_FALSE(ctx.isSilent());
+
+    // Pipeline owner (Processor/Reactive) sets it after NFT update.
+    ctx.setSilent(true);
+    FL_CHECK(ctx.isSilent());
+
+    // Next frame — setSample() must reset the flag so a stale claim can't
+    // survive a frame where NFT is disabled or the pipeline forgot to populate.
+    audio::Sample sample2 = makeSineAudioSample(880.0f, 2000);
+    ctx.setSample(sample2);
+    FL_CHECK_FALSE(ctx.isSilent());
+
+    // And re-populating works after setSample.
+    ctx.setSilent(true);
+    FL_CHECK(ctx.isSilent());
+}

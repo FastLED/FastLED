@@ -175,6 +175,12 @@ void Reactive::processSample(const Sample& sample) {
     // Set conditioned sample on shared Context (clears per-frame FFT cache)
     mContext->setSample(processedSample);
 
+    // Populate silence flag after setSample() resets it — detectors run via
+    // updateFromContext() below and will read context->isSilent().
+    if (mConfig.enableNoiseFloorTracking) {
+        mContext->setSilent(!mNoiseFloorTracker.isAboveFloor(processedSample.rms()));
+    }
+
     // Process the conditioned Sample - timing is gated by sample availability
     processFFT(processedSample);
 

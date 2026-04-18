@@ -60,6 +60,13 @@ void Processor::update(const Sample& sample) {
 
     mContext->setSample(conditioned);
 
+    // Stage 4: Silence flag — detectors use this to gate outputs when audio stops.
+    // Only populated when NFT is enabled; otherwise silence is unknowable and
+    // stays at its default (false) after setSample() above.
+    if (mNoiseFloorTrackingEnabled && conditioned.isValid()) {
+        mContext->setSilent(!mNoiseFloorTracker.isAboveFloor(conditioned.rms()));
+    }
+
     // Phase 1: Compute state for all active detector
     for (auto& d : mActiveDetectors) {
         d->update(mContext);

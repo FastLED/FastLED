@@ -157,6 +157,8 @@ void Context::setSample(const Sample& sample) {
     mSample = sample;
     // Clear per-frame fft::FFT cache (new sample = new data)
     mFFTCache.clear();
+    // Reset silence flag — pipeline must re-populate after NFT update this frame.
+    mIsSilent = false;
 }
 
 void Context::clearCache() {
