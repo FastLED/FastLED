@@ -10,6 +10,7 @@ components/
 .profile-results/
 build/
 !src/fl/build/
+!src/platforms/wasm/compiler/vendor/three/build/
 out/
 emscripten/
 *.o

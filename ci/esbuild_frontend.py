@@ -121,7 +121,7 @@ def _run_esbuild(args: list[str]) -> None:
     result = subprocess.run(
         [
             str(esbuild),
-            "--alias:three=./vendor/three/three.module.js",
+            "--alias:three=./vendor/three/build/three.module.js",
             *args,
         ],
         cwd=str(FRONTEND_DIR),
