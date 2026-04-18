@@ -16,6 +16,7 @@
 // IWYU pragma: begin_keep
 #include "platforms/coroutine_runtime.h"
 #include "platforms/coroutine.h"
+#include "platforms/esp/32/feature_flags/enabled.h"
 #include "fl/stl/string.h"
 #include "fl/stl/functional.h"
 #include "fl/stl/atomic.h"
@@ -119,7 +120,8 @@ public:
     static TaskCoroutinePtr create(fl::string name,
                                     TaskFunction function,
                                     size_t stack_size = 4096,
-                                    u8 priority = 5) FL_NOEXCEPT;
+                                    u8 priority = 5,
+                                    int core_id = -1) FL_NOEXCEPT;
 
     ~TaskCoroutineESP32() override;
 
@@ -174,9 +176,19 @@ TaskCoroutinePtr TaskCoroutineESP32::create(
         fl::string name,
         TaskFunction function,
         size_t stack_size,
-        u8 priority) FL_NOEXCEPT {
+        u8 priority,
+        int core_id) FL_NOEXCEPT {
     if (stack_size < kMinStackSize) {
         stack_size = kMinStackSize;
+    }
+
+    // Resolve requested core_id against platform capabilities. An out-of-range
+    // or negative value is silently downgraded to tskNO_AFFINITY — the caller's
+    // task still runs, just without affinity. This matches the existing
+    // behaviour where every caller was implicitly tskNO_AFFINITY.
+    BaseType_t affinity = tskNO_AFFINITY;
+    if (core_id >= 0 && core_id < FL_CPU_CORES) {
+        affinity = static_cast<BaseType_t>(core_id);
     }
 
     TaskCoroutinePtr task(new TaskCoroutineESP32()) FL_NOEXCEPT;  // ok bare allocation
@@ -207,7 +219,7 @@ TaskCoroutinePtr TaskCoroutineESP32::create(
         tskIDLE_PRIORITY + priority,
         impl->mStackBuf.get(),
         impl->mTaskTcb.get(),
-        tskNO_AFFINITY);
+        affinity);
 #else
     // IDF 3.x: xTaskCreateStaticPinnedToCore may not be available
     // (configSUPPORT_STATIC_ALLOCATION not guaranteed). Use dynamic
@@ -219,7 +231,7 @@ TaskCoroutinePtr TaskCoroutineESP32::create(
         impl,                       // param = this
         tskIDLE_PRIORITY + priority,
         &impl->mTask,
-        tskNO_AFFINITY);
+        affinity);
     if (rc != pdPASS) {
         impl->mTask = nullptr;
     }
@@ -260,9 +272,9 @@ TaskCoroutinePtr createTaskCoroutine(fl::string name,
                                       ICoroutineTask::TaskFunction function,
                                       size_t stack_size,
                                       u8 priority,
-                                      int /*core_id*/) FL_NOEXCEPT {
+                                      int core_id) FL_NOEXCEPT {
     return TaskCoroutineESP32::create(fl::move(name), fl::move(function),
-                                      stack_size, priority);
+                                      stack_size, priority, core_id);
 }
 
 //=============================================================================

@@ -25,6 +25,35 @@ FL_EXTERN_C_END
 #define SOC_RMT_SUPPORTED 0
 #endif
 
+// SOC_CPU_CORES_NUM is defined in soc/soc_caps.h on IDF 4.0+. For IDF 3.x
+// (where soc_caps.h does not exist) fall back to explicit variant checks.
+// Original ESP32 / ESP32-S3 / ESP32-P4 are dual-core; everything else is
+// single-core from an SMP-FreeRTOS perspective.
+#ifndef SOC_CPU_CORES_NUM
+#if defined(FL_IS_ESP_32DEV) || defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32P4)
+#define SOC_CPU_CORES_NUM 2
+#else
+#define SOC_CPU_CORES_NUM 1
+#endif
+#endif
+
+// FL_CPU_CORES: Number of CPU cores available for RTOS task pinning.
+// FL_HAS_MULTICORE_AFFINITY: 1 when the platform supports xTaskCreatePinnedToCore
+// with a core argument other than tskNO_AFFINITY (i.e. has >=2 cores).
+//
+// Used by platforms/esp/32/coroutine_esp32.impl.hpp to validate
+// CoroutineConfig::core_id. Out-of-range requests fall back to tskNO_AFFINITY.
+#ifndef FL_CPU_CORES
+#define FL_CPU_CORES SOC_CPU_CORES_NUM
+#endif
+#ifndef FL_HAS_MULTICORE_AFFINITY
+#if FL_CPU_CORES > 1
+#define FL_HAS_MULTICORE_AFFINITY 1
+#else
+#define FL_HAS_MULTICORE_AFFINITY 0
+#endif
+#endif
+
 #ifndef SOC_PARLIO_SUPPORTED
 #define SOC_PARLIO_SUPPORTED 0
 #endif
