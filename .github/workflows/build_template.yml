@@ -122,9 +122,11 @@ jobs:
       - name: Extract board name from inputs.args
         id: fbuild_board
         shell: bash
+        env:
+          BUILD_ARGS: ${{ inputs.args }}
         run: |
-          board="$(echo '${{ inputs.args }}' | awk '{print $1}')"
-          echo "name=${board:-unknown}" >> "$GITHUB_OUTPUT"
+          board="$(awk '{print $1}' <<< "$BUILD_ARGS")"
+          printf 'name=%s\n' "${board:-unknown}" >> "$GITHUB_OUTPUT"
 
       - name: Set up fbuild (install + cache)
         uses: FastLED/fbuild/.github/actions/setup@main
