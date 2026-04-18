@@ -20,6 +20,8 @@ import subprocess
 import sys
 from typing import Any, cast
 
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
+
 
 MERGE_RE = re.compile(r"\bgh\s+pr\s+merge\b")
 
@@ -27,6 +29,9 @@ MERGE_RE = re.compile(r"\bgh\s+pr\s+merge\b")
 def main() -> int:
     try:
         payload = cast(dict[str, Any], json.load(sys.stdin))
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
     except Exception:
         return 0
 
@@ -46,6 +51,9 @@ def main() -> int:
             text=True,
             timeout=30,
         )
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
     except (subprocess.TimeoutExpired, FileNotFoundError):
         return 0
 
