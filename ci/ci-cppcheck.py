@@ -107,6 +107,15 @@ def _load_src_files_from_compile_db(compile_db: Path, project_root: Path) -> lis
 
     Filters out third-party / framework TUs so we only analyze FastLED's own
     code, matching the legacy ``pio check --src-filters=+<src/>`` scope.
+
+    Per the `JSON Compilation Database spec
+    <https://clang.llvm.org/docs/JSONCompilationDatabase.html>`_, the
+    ``file`` field may be absolute OR relative to the entry's ``directory``
+    field (which itself is absolute). Resolve relatives against
+    ``directory`` (falling back to ``compile_db.parent`` when ``directory``
+    is missing) rather than against the Python CWD — otherwise fbuild
+    emitting a single relative path would silently drop its TU from the
+    analysis set.
     """
     src_root = (project_root / "src").resolve()
     with compile_db.open("r", encoding="utf-8") as fh:
@@ -116,8 +125,12 @@ def _load_src_files_from_compile_db(compile_db: Path, project_root: Path) -> lis
         raw = entry.get("file")
         if not raw:
             continue
+        raw_path = Path(raw)
+        if not raw_path.is_absolute():
+            directory = entry.get("directory") or compile_db.parent
+            raw_path = Path(directory) / raw_path
         try:
-            resolved = Path(raw).resolve()
+            resolved = raw_path.resolve()
         except OSError:
             continue
         try:
