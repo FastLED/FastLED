@@ -1,0 +1,31 @@
+name: add-to-project
+
+# Auto-adds every new issue / PR to the FastLED Tracker project (#1).
+#
+# This is a minimal fallback sync — the repo also has `project_automation.yml`
+# which handles auto-add PLUS Status field transitions, but that one is gated
+# on a GitHub App being configured (PROJECT_APP_ID / PROJECT_APP_PRIVATE_KEY).
+# Until the App is wired up, this file covers the auto-add behavior using a
+# PAT stored in `secrets.ADD_TO_PROJECT_PAT`.
+#
+# The PAT needs `project` and `repo` scopes. Rotate via:
+#   gh secret set ADD_TO_PROJECT_PAT --repo FastLED/FastLED --body "<new-pat>"
+
+on:
+  issues:
+    types: [opened]
+  pull_request_target:
+    types: [opened]
+
+permissions:
+  contents: read
+
+jobs:
+  add:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.sender.type != 'Bot' || true }}
+    steps:
+      - uses: actions/add-to-project@v1.0.2
+        with:
+          project-url: https://github.com/orgs/FastLED/projects/1
+          github-token: ${{ secrets.ADD_TO_PROJECT_PAT }}
