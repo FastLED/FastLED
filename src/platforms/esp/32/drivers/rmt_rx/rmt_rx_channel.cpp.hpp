@@ -730,10 +730,11 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // DMA = DRAM ping-pong buffer ESP-IDF allocates internally. The driver
         // fires the partial-rx ISR every `mem_block_symbols` fill, so this is
         // the per-callback chunk size, not an upper bound on capture length.
-        // Smaller value → more callbacks per transmission (finer streaming);
-        // larger value → less ISR overhead. Keep user buffer ≥ 2× this so
-        // ESP-IDF's partial-rx mode engages (equal size = single-shot).
-        rx_config.mem_block_symbols = mUseDma ? 256 : 64;
+        // ESP-IDF's internal capacity check rejects rmt_receive() when the
+        // user buffer exceeds 4 × mem_block_symbols (observed empirically).
+        // Use 1024 so we can pass a 4096-symbol user buffer — enough to
+        // capture ~680 WS2812B LEDs per rmt_receive() via 4 ping-pong wraps.
+        rx_config.mem_block_symbols = mUseDma ? 1024 : 64;
         // Interrupt priority level 3 (maximum supported by ESP-IDF RMT driver
         // API) Note: Both RISC-V and Xtensa platforms are limited to level 3 by
         // driver validation RISC-V hardware supports 1-7, but ESP-IDF
@@ -861,6 +862,19 @@ class RmtRxChannelImpl : public RmtRxChannel {
             rmt_disable(mChannel);
             rmt_del_channel(mChannel);
             mChannel = nullptr;
+            // Release the DMA slot we acquired earlier — otherwise the slot
+            // leaks and subsequent begin() retries report "Shared DMA slot
+            // unavailable" until the RxDevice is destroyed.
+            if (mDmaAllocated) {
+                auto &memMgr = RmtMemoryManager::instance();
+                memMgr.freeDMA(mMemoryChannelId, false);
+                mDmaAllocated = false;
+            }
+            if (mMemoryRegistered) {
+                auto &memMgr = RmtMemoryManager::instance();
+                memMgr.free(mMemoryChannelId, false);
+                mMemoryRegistered = false;
+            }
             return false;
         }
 
@@ -1240,13 +1254,13 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // ESP32-S3, which ESP-IDF rejects with "user buffer not in the internal
         // RAM". See issue #2254.
         constexpr size_t NONDMA_BUFFER_SIZE = 4096;
-        // DMA user buffer: ESP-IDF's partial-rx streams multiple ping-pong
-        // halves through this buffer until the receiver goes idle. Observed
-        // that 1024-symbol buffer capped at 4× reloads = 4096 total symbols,
-        // so bump to 16384 symbols (64 KB DMA|INTERNAL) to cover ~680 WS2812B
-        // LEDs per single rmt_receive(). Ratio user_buf / mem_block_symbols =
-        // 64 gives ESP-IDF plenty of descriptor headroom for streaming.
-        constexpr size_t DMA_BUFFER_SIZE = 16384;
+        // DMA user buffer: ESP-IDF rejects rmt_receive() with "buffer size
+        // exceeds DMA capacity" when user_buf > 4 × mem_block_symbols. With
+        // mem_block_symbols = 1024, max accepted buffer is 4096 symbols.
+        // Combined with the observed 4× wrap behavior of partial-rx, each
+        // rmt_receive() captures up to 4 × 4096 = 16384 symbols = ~680
+        // WS2812B LEDs. That covers the 550-LED target with margin.
+        constexpr size_t DMA_BUFFER_SIZE = 4096;
         const size_t hw_buffer_size = mUseDma ? DMA_BUFFER_SIZE : NONDMA_BUFFER_SIZE;
 
         if (mUseDma) {
