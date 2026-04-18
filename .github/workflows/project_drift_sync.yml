@@ -1,0 +1,56 @@
+name: project-drift-sync
+
+# Nightly safety net behind the event-driven add-to-project workflows.
+# Every day at 03:00 UTC, reconciles the FastLED Tracker project against
+# the live state of the feeder repos and adds any open issue/PR that's
+# missing. Also exposed via workflow_dispatch with an option to include
+# closed/merged items (useful for a one-off full backfill).
+#
+# Safe by design: addProjectV2ItemById is idempotent — re-adds cost nothing.
+# Uses the same GitHub App auth as project_automation.yml.
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      include_closed:
+        description: "Also sync closed/merged items (backfill mode; leaves ~1500 historical items in the project)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    if: >-
+      vars.PROJECT_APP_ID != '' &&
+      vars.PROJECT_OWNER != '' &&
+      vars.PROJECT_NUMBER != ''
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Generate App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.PROJECT_APP_ID }}
+          private-key: ${{ secrets.PROJECT_APP_PRIVATE_KEY }}
+          owner: ${{ vars.PROJECT_OWNER }}
+
+      - name: Drift sync
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          PROJECT_OWNER: ${{ vars.PROJECT_OWNER }}
+          PROJECT_NUMBER: ${{ vars.PROJECT_NUMBER }}
+          FEEDER_REPOS: "FastLED,fbuild,fastled-playground,PlatformIO-Starter,fastled-fastled.github.io,WiLi"
+          INCLUDE_CLOSED: ${{ inputs.include_closed || 'false' }}
+        run: python ci/github_project_drift_sync.py
