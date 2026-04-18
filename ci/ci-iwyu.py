@@ -532,8 +532,13 @@ def run_iwyu_against_compile_db(
         f"using compile DB: {compile_db}"
     )
     try:
-        result = subprocess.run(cmd)
+        result = subprocess.run(cmd, check=True)
         return result.returncode
+    except KeyboardInterrupt as ki:
+        from ci.util.global_interrupt_handler import handle_keyboard_interrupt
+
+        handle_keyboard_interrupt(ki)
+        raise
     except subprocess.CalledProcessError as e:
         print(f"clang-tool-chain-iwyu-tool failed with return code {e.returncode}")
         return e.returncode
@@ -811,8 +816,10 @@ def main() -> int:
 
         handle_keyboard_interrupt(ki)
         raise
-    except Exception:
-        canonical_board_name = args.board
+    except Exception as e:
+        raise RuntimeError(
+            f"Failed to resolve board '{args.board}' via ci.boards.create_board: {e}"
+        ) from e
     if canonical_board_name != args.board:
         print(
             f"Resolved board '{args.board}' to canonical name '{canonical_board_name}'"
