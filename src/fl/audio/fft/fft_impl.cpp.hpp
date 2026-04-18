@@ -251,7 +251,7 @@ class Context {
         s.rawBinsI.resize(bands);
 
         applyWindow(buffer.data(), mWindowBuf.data(), s.windowed.data(), N);
-        fl_fft_real_forward(mFftrCfg, s.windowed.data(), s.fftOut.data());
+        fl_fft_real_forward(mFftrCfg, mInputSamples, s.windowed.data(), s.fftOut.data());
 
         // Deinterleave AoS → SoA and batch-compute magnitudes
         deinterleave(s.fftOut.data(), s.re.data(), s.im.data(), numRawBins);
@@ -303,7 +303,7 @@ class Context {
         s.im.resize(numRawBins);
         s.mag.resize(numRawBins);
 
-        fl_fft_real_forward(mFftrCfg, buffer.data(), s.fftOut.data());
+        fl_fft_real_forward(mFftrCfg, mInputSamples, buffer.data(), s.fftOut.data());
 
         // Deinterleave AoS → SoA and batch-compute magnitudes
         deinterleave(s.fftOut.data(), s.re.data(), s.im.data(), numRawBins);
@@ -672,7 +672,7 @@ class Context {
         }
 
         // FFT at full sample rate (for linear bins + top octave CQ)
-        fl_fft_real_forward(mFftrCfg, mWorkBuf.data(), mFftOut.data());
+        fl_fft_real_forward(mFftrCfg, mInputSamples, mWorkBuf.data(), mFftOut.data());
 
         // Deinterleave AoS → SoA and batch-compute magnitudes
         FftScratch &s = scratch();
@@ -708,7 +708,7 @@ class Context {
                 // Zero-pad remainder so FFT sees clean input
                 for (int i = workLen; i < N; i++)
                     mWorkBuf[i] = 0;
-                fl_fft_real_forward(mFftrCfg, mWorkBuf.data(), mFftOut.data());
+                fl_fft_real_forward(mFftrCfg, mInputSamples, mWorkBuf.data(), mFftOut.data());
             }
 
             // Zero the CQ accumulator and apply kernels
@@ -881,7 +881,7 @@ class Context {
         // Phase 1: Windowed 512pt FFT → LOG_REBIN for upper bins
         applyWindow(buffer.data(), mWindowBuf.data(), s.windowed.data(), N);
 
-        fl_fft_real_forward(mFftrCfg, s.windowed.data(), mFftOut.data());
+        fl_fft_real_forward(mFftrCfg, mInputSamples, s.windowed.data(), mFftOut.data());
 
         deinterleave(mFftOut.data(), s.re.data(), s.im.data(), numRawBins);
         batchMag(s.re.data(), s.im.data(), s.mag.data(), numRawBins);
@@ -918,7 +918,8 @@ class Context {
             for (int i = mHybridMidN; i < midFftN; ++i) {
                 s.windowed[i] = 0;
             }
-            fl_fft_real_forward(mHybridMidFft, s.windowed.data(),
+            fl_fft_real_forward(mHybridMidFft, mHybridMidN * 2,
+                                s.windowed.data(),
                                 mHybridMidFftOut.data());
             deinterleave(mHybridMidFftOut.data(), s.re.data(), s.im.data(), midRawBins);
             batchMag(s.re.data(), s.im.data(), s.mag.data(), midRawBins);
@@ -939,7 +940,8 @@ class Context {
             s.windowed.resize(mHybridSmallN);
             applyWindow(mWorkBuf.data(), mHybridBassWindow.data(),
                            s.windowed.data(), mHybridSmallN);
-            fl_fft_real_forward(mHybridSmallFft, s.windowed.data(),
+            fl_fft_real_forward(mHybridSmallFft, mHybridSmallN,
+                                s.windowed.data(),
                                 mHybridSmallFftOut.data());
             deinterleave(mHybridSmallFftOut.data(), s.re.data(), s.im.data(), bassRawBins);
             batchMag(s.re.data(), s.im.data(), s.mag.data(), bassRawBins);
