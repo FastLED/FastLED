@@ -63,14 +63,17 @@ def _mirror_fbuild_artifacts_to_pio(build_dir: Path, environment: str) -> None:
     ``.pio/build/<env>/`` path because that was the PlatformIO convention.
 
     To keep those consumers working without plumbing fbuild-awareness into
-    every call site, copy ``firmware.elf``, ``firmware.bin``, ``firmware.hex``,
-    and ``firmware.map`` (when present) into ``.pio/build/<env>/`` after a
-    successful fbuild compile. This is a cheap no-op if the source files are
-    missing.
+    every call site, copy the artifacts fbuild produces — ``firmware.elf``,
+    ``firmware.bin``, ``firmware.hex``, ``firmware.map``, plus the ESP32
+    boot/partition artifacts ``bootloader.bin``, ``partitions.bin``, and
+    ``boot_app0.bin`` when present — into ``.pio/build/<env>/`` after a
+    successful fbuild compile. Missing source files are skipped silently.
 
-    Note: fbuild does NOT produce ``bootloader.bin`` / ``partitions.bin``.
-    Callers that need those (ESP32 merged-bin / QEMU) must run the PlatformIO
-    build explicitly — this function only covers the single-firmware case.
+    fbuild's ESP32 orchestrator (fbuild >= 2.1.7) emits
+    ``bootloader.bin`` / ``partitions.bin`` / ``boot_app0.bin`` alongside
+    ``firmware.bin`` in the release dir — copying them lets
+    ``build_with_merged_bin()`` run the ``esptool merge_bin`` step directly
+    on fbuild output, no PlatformIO build required.
     """
     pio_artifacts_dir = build_dir / ".pio" / "build" / environment
     pio_artifacts_dir.mkdir(parents=True, exist_ok=True)
@@ -85,6 +88,12 @@ def _mirror_fbuild_artifacts_to_pio(build_dir: Path, environment: str) -> None:
         (fbuild_release_dir / "firmware.bin", "firmware.bin"),
         (fbuild_release_dir / "firmware.hex", "firmware.hex"),
         (fbuild_release_dir / "firmware.map", "firmware.map"),
+        # ESP32 merged-bin inputs — produced by fbuild's Esp32Orchestrator
+        # (orchestrator.rs step 14: "Prepare boot artifacts for deployment /
+        # emulation"). Non-ESP32 builds simply won't have these files.
+        (fbuild_release_dir / "bootloader.bin", "bootloader.bin"),
+        (fbuild_release_dir / "partitions.bin", "partitions.bin"),
+        (fbuild_release_dir / "boot_app0.bin", "boot_app0.bin"),
         (fbuild_env_dir / "build_info.json", "build_info.json"),
     ]
 
@@ -1181,25 +1190,24 @@ class PioCompiler(Compiler):
 
         # 2. Build normally first.
         #
-        # Merged-bin builds need ``bootloader.bin`` and ``partitions.bin`` in
-        # ``.pio/build/<env>/`` — these are produced by PlatformIO's ESP-IDF
-        # post-build steps and are NOT emitted by fbuild (which only produces
-        # ``firmware.elf`` / ``firmware.bin``). Force the PlatformIO path for
-        # this build even on boards that normally use fbuild, so QEMU and
-        # other flash-image consumers get a complete artifact set.
-        original_use_fbuild = self.use_fbuild
-        if self.use_fbuild:
-            print(
-                "build_with_merged_bin: forcing PlatformIO build path "
-                "(fbuild does not produce bootloader.bin/partitions.bin)"
-            )
-            self.use_fbuild = False
-            self.initialized = False
-        try:
-            cancelled = threading.Event()
-            result = self._internal_build_no_lock(example, cancelled)
-        finally:
-            self.use_fbuild = original_use_fbuild
+        # Both build paths produce the full artifact set needed for
+        # ``esptool merge_bin``:
+        #
+        # - PlatformIO: ESP-IDF post-build steps write
+        #   ``bootloader.bin`` / ``partitions.bin`` / ``boot_app0.bin``
+        #   directly into ``.pio/build/<env>/``.
+        # - fbuild (>= 2.1.7): the ESP32 orchestrator emits the same three
+        #   files plus ``firmware.bin`` into ``.fbuild/build/<env>/release/``;
+        #   ``_build_with_fbuild`` then calls
+        #   ``_mirror_fbuild_artifacts_to_pio`` to copy them into the
+        #   ``.pio/build/<env>/`` path this function reads from.
+        #
+        # Whichever build tool the caller asked for is respected here —
+        # previously this function force-disabled fbuild because the old
+        # fbuild version could not emit the boot/partition artifacts, but
+        # that workaround is no longer needed (FastLED/FastLED#2287).
+        cancelled = threading.Event()
+        result = self._internal_build_no_lock(example, cancelled)
         if not result.success:
             return result
 
