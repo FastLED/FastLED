@@ -552,7 +552,9 @@ class RmtRxChannelImpl : public RmtRxChannel {
           mSignalRangeMaxNs(
               4000000) // 40us - Allow gaps between PARLIO streaming chunks
           ,
-          mSkipCounter(0), mStartLow(true), mIoLoopBack(false), mInternalBuffer(),
+          mSkipCounter(0), mStartLow(true), mIoLoopBack(false), mUseDma(false),
+          mDmaAllocated(false), mDmaCapableBuffer(nullptr),
+          mDmaCapableBufferSize(0), mInternalBuffer(),
           mAccumulationBuffer(), mAccumulationOffset(0), mCallbackCount(0),
           mMemoryRegistered(false), mMemoryChannelId(0) {
         FL_LOG_RX("RmtRxChannel constructed with pin="
@@ -591,6 +593,20 @@ class RmtRxChannelImpl : public RmtRxChannel {
             mChannel = nullptr;
         }
 
+        // Release the shared DMA slot if this channel was holding it
+        if (mDmaAllocated) {
+            auto &memMgr = RmtMemoryManager::instance();
+            memMgr.freeDMA(mMemoryChannelId, false);
+            mDmaAllocated = false;
+        }
+
+        // Free the DRAM-backed DMA capture buffer
+        if (mDmaCapableBuffer) {
+            heap_caps_free(mDmaCapableBuffer);
+            mDmaCapableBuffer = nullptr;
+            mDmaCapableBufferSize = 0;
+        }
+
         // Unregister from RMT memory manager to release resources for TX channels
         if (mMemoryRegistered) {
             auto &memMgr = RmtMemoryManager::instance();
@@ -602,6 +618,36 @@ class RmtRxChannelImpl : public RmtRxChannel {
     }
 
     bool begin(const RxConfig &config) FL_NOEXCEPT override {
+        // If the DMA setting changed on an already-created channel, we have to
+        // tear it down — ESP-IDF bakes `flags.with_dma` into the channel at
+        // rmt_new_rx_channel() time, so toggling on a later begin() is a no-op
+        // unless we rebuild. Also release the shared DMA slot and any DRAM
+        // capture buffer so first-time init below allocates cleanly.
+        if (mChannel && config.use_dma != mUseDma) {
+            FL_WARN("[RMT RX] use_dma changed ("
+                    << (mUseDma ? "true" : "false") << " -> "
+                    << (config.use_dma ? "true" : "false")
+                    << ") - rebuilding channel");
+            rmt_disable(mChannel);
+            rmt_del_channel(mChannel);
+            mChannel = nullptr;
+            if (mDmaAllocated) {
+                auto &memMgr = RmtMemoryManager::instance();
+                memMgr.freeDMA(mMemoryChannelId, false);
+                mDmaAllocated = false;
+            }
+            if (mMemoryRegistered) {
+                auto &memMgr = RmtMemoryManager::instance();
+                memMgr.free(mMemoryChannelId, false);
+                mMemoryRegistered = false;
+            }
+            if (mDmaCapableBuffer) {
+                heap_caps_free(mDmaCapableBuffer);
+                mDmaCapableBuffer = nullptr;
+                mDmaCapableBufferSize = 0;
+            }
+        }
+
         // Validate and extract hardware parameters on first call
         if (!mChannel) {
             // First-time initialization - extract hardware parameters from
@@ -627,6 +673,7 @@ class RmtRxChannelImpl : public RmtRxChannel {
         mSkipCounter = config.skip_signals;
         mStartLow = config.start_low;
         mIoLoopBack = config.io_loop_back;
+        mUseDma = config.use_dma;
 
         FL_LOG_RX("RX begin: signal_range_min="
                << mSignalRangeMinNs
@@ -650,9 +697,16 @@ class RmtRxChannelImpl : public RmtRxChannel {
                 return false;
             }
 
-            // Handle skip phase using small discard buffer
-            if (!handleSkipPhase()) {
-                return false;
+            // In non-DMA mode, skip_signals must be drained via a synchronous
+            // pre-capture loop because the receiver only fires one callback per
+            // rmt_receive() in non-DMA mode. In DMA streaming mode the ISR
+            // filters skip chunks inline as they arrive, so no pre-capture
+            // drain is needed (and would deadlock waiting for a TX that hasn't
+            // started yet).
+            if (!mUseDma) {
+                if (!handleSkipPhase()) {
+                    return false;
+                }
             }
 
             // Allocate buffer and arm receiver for actual capture
@@ -672,7 +726,13 @@ class RmtRxChannelImpl : public RmtRxChannel {
         rx_config.gpio_num = mPin;
         rx_config.clk_src = RMT_CLK_SRC_DEFAULT;
         rx_config.resolution_hz = mResolutionHz;
-        rx_config.mem_block_symbols = 64; // Use 64 symbols per memory block
+        // mem_block_symbols: non-DMA = hardware RMT memory block (small, ~64);
+        // DMA = DRAM ping-pong buffer size (ESP-IDF fires the ISR per half).
+        // For streaming DMA mode we want a larger chunk size so each partial-rx
+        // callback delivers meaningful work but not so large that allocation
+        // fails. 1024 symbols = 4 KB internal RAM — fits comfortably and gives
+        // ~42 WS2812B LEDs per callback, so a 550-LED capture fires ~13 times.
+        rx_config.mem_block_symbols = mUseDma ? 1024 : 64;
         // Interrupt priority level 3 (maximum supported by ESP-IDF RMT driver
         // API) Note: Both RISC-V and Xtensa platforms are limited to level 3 by
         // driver validation RISC-V hardware supports 1-7, but ESP-IDF
@@ -682,8 +742,15 @@ class RmtRxChannelImpl : public RmtRxChannel {
 
         // Additional flags
         rx_config.flags.invert_in = false; // No signal inversion
-        rx_config.flags.with_dma =
-            false; // Start with non-DMA (universal compatibility)
+        // DMA streaming mode: extends capture past the ~4096-symbol mem-block
+        // cap by firing the ISR on every ping-pong fill. Must be baked in at
+        // rmt_new_rx_channel() time; toggling later requires rebuilding.
+        rx_config.flags.with_dma = mUseDma ? 1 : 0;
+        if (mUseDma) {
+            FL_WARN("[RMT RX] DMA streaming mode requested on GPIO "
+                    << static_cast<int>(mPin)
+                    << " (mem_block_symbols=" << rx_config.mem_block_symbols << ")");
+        }
         // Internal loopback configuration:
         // When io_loop_back=true, RX receives from TX output internally (same GPIO).
         // This is REQUIRED for RMT TX → RMT RX validation on ESP32-S3 because
@@ -703,13 +770,34 @@ class RmtRxChannelImpl : public RmtRxChannel {
             FL_WARN("RMT RX was not pre-registered in constructor - registering now");
             auto &memMgr = RmtMemoryManager::instance();
             mMemoryChannelId = static_cast<u8>(128 + (mPin & 0x7F));
-            auto alloc_result = memMgr.allocateRx(mMemoryChannelId, rx_config.mem_block_symbols, false);
+            // Pass use_dma=true when DMA mode is on so the memory manager
+            // bypasses the on-chip RX pool (DMA uses DRAM). Without this,
+            // larger mem_block_symbols values (e.g., 1024 for DMA) would
+            // exceed ESP32-S3's 192-word dedicated RX pool and fail.
+            auto alloc_result = memMgr.allocateRx(
+                mMemoryChannelId, rx_config.mem_block_symbols, mUseDma);
             if (!alloc_result.ok()) {
                 FL_WARN("RMT RX memory allocation failed for channel "
                         << static_cast<int>(mMemoryChannelId));
                 return false;
             }
             mMemoryRegistered = true;
+        }
+
+        // ESP32-S3 has a single shared DMA slot between RMT TX and RX. Acquire
+        // it here when DMA mode is requested. If the slot is already held by a
+        // TX channel, fall back to non-DMA mode automatically so capture still
+        // works (just with the shorter 4096-symbol cap).
+        if (mUseDma) {
+            auto &memMgr = RmtMemoryManager::instance();
+            if (!memMgr.allocateDMA(mMemoryChannelId, false)) {
+                FL_WARN("[RMT RX] Shared DMA slot unavailable — falling back to non-DMA mode");
+                mUseDma = false;
+                rx_config.flags.with_dma = 0;
+                rx_config.mem_block_symbols = 64;
+            } else {
+                mDmaAllocated = true;
+            }
         }
 
         // Create RX channel
@@ -753,13 +841,17 @@ class RmtRxChannelImpl : public RmtRxChannel {
             return false;
         }
 
-        // Handle skip phase using small discard buffer
-        if (!handleSkipPhase()) {
-            FL_WARN("Failed to handle skip phase in begin()");
-            rmt_disable(mChannel);
-            rmt_del_channel(mChannel);
-            mChannel = nullptr;
-            return false;
+        // Non-DMA mode: drain skip_signals synchronously via a pre-capture
+        // discard receive. DMA streaming mode does the skip filter inline in
+        // the ISR so no pre-capture drain is required (see rxDoneCallback).
+        if (!mUseDma) {
+            if (!handleSkipPhase()) {
+                FL_WARN("Failed to handle skip phase in begin()");
+                rmt_disable(mChannel);
+                rmt_del_channel(mChannel);
+                mChannel = nullptr;
+                return false;
+            }
         }
 
         // Allocate buffer and arm receiver for actual capture
@@ -1131,12 +1223,44 @@ class RmtRxChannelImpl : public RmtRxChannel {
      * partial RX callback
      */
     bool allocateAndArm() FL_NOEXCEPT {
-        constexpr size_t DMA_BUFFER_SIZE =
-            4096; // Larger buffer to reduce callback frequency
-        mInternalBuffer.clear();
-        mInternalBuffer.reserve(DMA_BUFFER_SIZE);
-        for (size_t i = 0; i < DMA_BUFFER_SIZE; i++) {
-            mInternalBuffer.push_back(0);
+        // Per-receive buffer that ESP-IDF writes into. In non-DMA mode this is
+        // sized for a single mem-block fill; in DMA mode ESP-IDF requires the
+        // user buffer to be ≤ mem_block_symbols (the DRAM ping-pong size),
+        // and the ISR streams from it into the accumulation buffer on every
+        // partial-rx callback. The DMA variant MUST live in MALLOC_CAP_DMA |
+        // MALLOC_CAP_INTERNAL memory — a plain fl::vector can land in PSRAM on
+        // ESP32-S3, which ESP-IDF rejects with "user buffer not in the internal
+        // RAM". See issue #2254.
+        constexpr size_t NONDMA_BUFFER_SIZE = 4096;
+        constexpr size_t DMA_BUFFER_SIZE = 1024; // matches mem_block_symbols
+        const size_t hw_buffer_size = mUseDma ? DMA_BUFFER_SIZE : NONDMA_BUFFER_SIZE;
+
+        if (mUseDma) {
+            if (mDmaCapableBuffer && mDmaCapableBufferSize < hw_buffer_size) {
+                heap_caps_free(mDmaCapableBuffer);
+                mDmaCapableBuffer = nullptr;
+                mDmaCapableBufferSize = 0;
+            }
+            if (!mDmaCapableBuffer) {
+                size_t bytes = hw_buffer_size * sizeof(RmtSymbol);
+                mDmaCapableBuffer = static_cast<RmtSymbol *>(
+                    heap_caps_malloc(bytes, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL));
+                if (!mDmaCapableBuffer) {
+                    FL_WARN("allocateAndArm(): heap_caps_malloc("
+                            << bytes << ", DMA|INTERNAL) failed");
+                    return false;
+                }
+                mDmaCapableBufferSize = hw_buffer_size;
+            }
+            for (size_t i = 0; i < hw_buffer_size; i++) {
+                mDmaCapableBuffer[i] = 0;
+            }
+        } else {
+            mInternalBuffer.clear();
+            mInternalBuffer.reserve(hw_buffer_size);
+            for (size_t i = 0; i < hw_buffer_size; i++) {
+                mInternalBuffer.push_back(0);
+            }
         }
 
         // Allocate accumulation buffer (full user-requested size)
@@ -1148,13 +1272,13 @@ class RmtRxChannelImpl : public RmtRxChannel {
         size_t free_heap = esp_get_free_heap_size();
         size_t max_alloc = free_heap / 4;  // Use at most 25% of free heap
         size_t target_bytes = target_size * sizeof(RmtSymbol);
-        if (target_bytes > max_alloc && max_alloc > DMA_BUFFER_SIZE * sizeof(RmtSymbol)) {
+        if (target_bytes > max_alloc && max_alloc > hw_buffer_size * sizeof(RmtSymbol)) {
             target_size = max_alloc / sizeof(RmtSymbol);
         }
         mAccumulationBuffer.reserve(target_size);
-        // Fall back to DMA buffer size if reserve fails
-        if (mAccumulationBuffer.capacity() < DMA_BUFFER_SIZE) {
-            mAccumulationBuffer.reserve(DMA_BUFFER_SIZE);
+        // Fall back to hw buffer size if reserve fails
+        if (mAccumulationBuffer.capacity() < hw_buffer_size) {
+            mAccumulationBuffer.reserve(hw_buffer_size);
         }
         size_t effective_size = mAccumulationBuffer.capacity();
         if (effective_size < mBufferSize) {
@@ -1166,12 +1290,17 @@ class RmtRxChannelImpl : public RmtRxChannel {
             mAccumulationBuffer.push_back(0);
         }
 
-        FL_LOG_RX("allocateAndArm(): DMA buffer="
-               << DMA_BUFFER_SIZE << " symbols, accumulation buffer="
+        FL_LOG_RX("allocateAndArm(): hw buffer="
+               << hw_buffer_size << " symbols (use_dma="
+               << (mUseDma ? "true" : "false") << "), accumulation buffer="
                << mBufferSize << " symbols");
 
-        // Start receive operation (pass DMA buffer, not accumulation buffer)
-        if (!startReceive(mInternalBuffer.data(), DMA_BUFFER_SIZE)) {
+        // Start receive operation (pass the hardware buffer, not accumulation).
+        // In DMA streaming mode the ISR will fire repeatedly, copying each fill
+        // into the accumulation buffer before the next DMA chunk overwrites.
+        RmtSymbol *hw_buffer = mUseDma ? mDmaCapableBuffer
+                                        : mInternalBuffer.data();
+        if (!startReceive(hw_buffer, hw_buffer_size)) {
             FL_WARN("allocateAndArm(): failed to start receive");
             return false;
         }
@@ -1350,19 +1479,54 @@ class RmtRxChannelImpl : public RmtRxChannel {
         self->mCallbackCount =
             self->mCallbackCount + 1; // Debug: Track callback invocations
         size_t received_count = data->num_symbols;
+        const rmt_symbol_word_t *src = data->received_symbols;
+        size_t src_offset = 0; // symbols consumed by in-stream skip
 
-        // Check if we're in skip phase
+        // In-stream skip (DMA / partial-rx mode).
+        // Old single-shot handleSkipPhase() used mReceiveDone to hand back
+        // control after each 64-symbol drain. In DMA streaming mode the
+        // receiver fires the ISR on every ping-pong fill, and we want to
+        // filter skip chunks inline without terminating the receive op.
+        //
+        //   - Chunk entirely inside skip window → drop whole chunk, continue.
+        //   - Chunk straddles the skip boundary → advance past the skipped
+        //     prefix and copy the remainder into the accumulation buffer.
+        //   - Chunk entirely past the skip window → normal accumulation.
+        //
+        // In non-DMA mode the handleSkipPhase() wrapper still owns the drain
+        // loop (it calls rmt_receive() in a loop, each fill sets is_last).
+        // Preserving the legacy "set mReceiveDone on skip" behavior there so
+        // the host-side while-loop wakes up to submit the next chunk.
         if (self->mSkipCounter > 0) {
-            // Discard received symbols and decrement skip counter
             if (self->mSkipCounter >= received_count) {
+                // Entire chunk discarded
                 self->mSkipCounter -= received_count;
-            } else {
-                self->mSkipCounter = 0;
+                if (!self->mUseDma) {
+                    // Legacy non-DMA path: hand control back to handleSkipPhase
+                    self->mSymbolsReceived = 0;
+                    self->mReceiveDone = true;
+                    return false;
+                }
+                // DMA streaming: do not terminate; wait for next fill
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 3, 0)
+                if (data->flags.is_last) {
+                    self->mReceiveDone = true;
+                }
+#endif
+                return false;
             }
-
-            self->mSymbolsReceived = 0;
-            self->mReceiveDone = true; // Signal completion for skip phase
-            return false;
+            // Partial skip: skip window ends inside this chunk
+            src_offset = self->mSkipCounter;
+            received_count -= self->mSkipCounter;
+            self->mSkipCounter = 0;
+            if (!self->mUseDma) {
+                // Legacy non-DMA path terminates skip phase here; caller will
+                // re-arm for real capture.
+                self->mSymbolsReceived = 0;
+                self->mReceiveDone = true;
+                return false;
+            }
+            // DMA streaming: fall through and accumulate the non-skipped tail
         }
 
         // Capture phase - manually copy from DMA buffer to accumulation buffer
@@ -1384,11 +1548,11 @@ class RmtRxChannelImpl : public RmtRxChannel {
             // after use" linker errors
             RmtSymbol *dest =
                 self->mAccumulationBuffer.data() + self->mAccumulationOffset;
-            const rmt_symbol_word_t *src = data->received_symbols;
+            const rmt_symbol_word_t *src_effective = src + src_offset;
 
             // Copy word-by-word (32-bit aligned, efficient)
             for (size_t i = 0; i < symbols_to_copy; i++) {
-                dest[i] = reinterpret_cast<const RmtSymbol &>(src[i]); // ok reinterpret cast - ISR IRAM context
+                dest[i] = reinterpret_cast<const RmtSymbol &>(src_effective[i]); // ok reinterpret cast - ISR IRAM context
             }
 
             // Update accumulation offset
@@ -1432,6 +1596,10 @@ class RmtRxChannelImpl : public RmtRxChannel {
     bool mStartLow;   ///< Pin idle state: true=LOW (WS2812B), false=HIGH
                       ///< (inverted)
     bool mIoLoopBack; ///< Enable internal RMT loopback (TX→RX on same GPIO)
+    bool mUseDma;     ///< DMA streaming mode (ESP-IDF 5.3+ en_partial_rx)
+    bool mDmaAllocated; ///< True if we hold the shared DMA slot
+    RmtSymbol *mDmaCapableBuffer; ///< DRAM-resident ping-pong buffer for DMA
+    size_t mDmaCapableBufferSize; ///< Capacity in symbols
     fl::vector<RmtSymbol>
         mInternalBuffer; ///< DMA buffer for hardware RX (small, ≤4096 symbols)
     fl::vector<RmtSymbol>

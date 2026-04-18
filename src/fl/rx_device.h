@@ -226,6 +226,16 @@ struct RxConfig {
     // is actively receiving on a different GPIO.
     bool io_loop_back = false;              ///< Enable internal RMT loopback (RMT only, default: false)
 
+    // DMA streaming mode (ESP32 RMT only). Non-DMA RMT RX caps a single receive
+    // at one mem-block fill (~4096 symbols, ≈170 WS2812B LEDs). DMA mode + ESP-IDF
+    // 5.3+ en_partial_rx fires the ISR multiple times per transmission — each fill
+    // copies into a DRAM accumulation buffer, extending capture to the full
+    // buffer_size. DMA bypasses on-chip RMT memory (uses DRAM), so it does NOT
+    // consume the shared RX pool and is safe to enable alongside other RMT
+    // channels. ESP32-S3 has one shared DMA slot; acquisition is coordinated via
+    // RmtMemoryManager::allocateDMA(). See issue #2254.
+    bool use_dma = false;                   ///< Use DMA streaming for RX (RMT only, default: false)
+
     /// Default constructor with common WS2812B defaults
     constexpr RxConfig() FL_NOEXCEPT = default;
 };

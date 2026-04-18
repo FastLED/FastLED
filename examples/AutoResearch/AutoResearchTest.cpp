@@ -338,10 +338,17 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
     // For other drivers (PARLIO, SPI, UART, I2S), disable io_loop_back (use external GPIO wire)
     bool is_rmt_driver = (fl::strcmp(driver_name, "RMT") == 0);
     rx_config.io_loop_back = is_rmt_driver;
+    // DMA streaming RX: extends capture past the non-DMA ~4096-symbol cap
+    // (~170 WS2812B LEDs) by firing the ISR on every partial-rx fill. Enable
+    // for non-RMT drivers where the TX path does not use RMT (SPI, PARLIO,
+    // I2S, UART, LCD_*) so there's no contention for the shared DMA slot.
+    // RMT loopback stays non-DMA because the TX also wants the DMA slot.
+    // See issue #2254.
+    rx_config.use_dma = !is_rmt_driver;
     if (is_rmt_driver) {
         FL_WARN("[CAPTURE] RMT TX -> RMT RX: Internal loopback enabled (io_loop_back=true)");
     } else {
-        FL_WARN("[CAPTURE] " << driver_name << " TX -> RMT RX: External GPIO wire (io_loop_back=false)");
+        FL_WARN("[CAPTURE] " << driver_name << " TX -> RMT RX: External GPIO wire (io_loop_back=false, use_dma=true)");
     }
 
     // Driver-aware capture strategy:
