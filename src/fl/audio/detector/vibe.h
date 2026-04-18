@@ -27,6 +27,9 @@
 
 #pragma once
 
+#ifndef FL_AUDIO_DETECTOR_VIBE_H
+#define FL_AUDIO_DETECTOR_VIBE_H
+
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/fft/fft.h"
 #include "fl/audio/silence_envelope.h"
@@ -169,3 +172,5 @@ private:
 } // namespace detector
 } // namespace audio
 } // namespace fl
+
+#endif // FL_AUDIO_DETECTOR_VIBE_H
