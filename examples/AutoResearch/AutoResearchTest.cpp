@@ -338,13 +338,14 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
     // For other drivers (PARLIO, SPI, UART, I2S), disable io_loop_back (use external GPIO wire)
     bool is_rmt_driver = (fl::strcmp(driver_name, "RMT") == 0);
     rx_config.io_loop_back = is_rmt_driver;
-    // DMA streaming RX: extends capture past the non-DMA ~4096-symbol cap
-    // (~170 WS2812B LEDs) by firing the ISR on every partial-rx fill. Enable
-    // for non-RMT drivers where the TX path does not use RMT (SPI, PARLIO,
-    // I2S, UART, LCD_*) so there's no contention for the shared DMA slot.
-    // RMT loopback stays non-DMA because the TX also wants the DMA slot.
+    // RX DMA streaming infrastructure is in place via RxConfig::use_dma, but
+    // ESP32-S3's RMT DMA descriptor cap limits rmt_receive() to ~4096 symbols
+    // total per call — same as non-DMA mode. Extending past this needs
+    // task-side re-submission which isn't wired up yet, so DMA auto-enable
+    // here would not actually extend capture length. Keep the toggle OFF to
+    // avoid the DMA-slot acquisition cost without a corresponding benefit.
     // See issue #2254.
-    rx_config.use_dma = !is_rmt_driver;
+    rx_config.use_dma = false;
     if (is_rmt_driver) {
         FL_WARN("[CAPTURE] RMT TX -> RMT RX: Internal loopback enabled (io_loop_back=true)");
     } else {
