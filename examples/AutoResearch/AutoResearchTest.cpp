@@ -837,11 +837,13 @@ void runMultiTest(const char* test_name,
                                          bytes_expected;
                 (void)bytes_to_check;
 
+                size_t verified_leds = 0;
                 for (size_t i = 0; i < num_leds; i++) {
                     size_t byte_offset = rx_buffer_offset + i * 3; // Apply offset for PARLIO front padding
                     if (byte_offset + 2 >= bytes_captured) { // Check against total captured bytes
                         break;
                     }
+                    verified_leds = i + 1;
 
                     uint8_t expected_r = leds[i].r;
                     uint8_t expected_g = leds[i].g;
@@ -888,6 +890,22 @@ void runMultiTest(const char* test_name,
                             ));
                         }
                     }
+                }
+
+                // Truncated capture: RX returned fewer bytes than expected. Count
+                // the unchecked LEDs as mismatches rather than silently passing.
+                // A short capture means we did NOT verify those LEDs, so the run
+                // MUST fail. The old silent break hid real bugs on strips longer
+                // than the RMT DMA buffer (~170 LEDs for WS2812B). See issue #2254.
+                if (verified_leds < num_leds) {
+                    size_t unchecked = num_leds - verified_leds;
+                    mismatches += static_cast<int>(unchecked);
+                    result.mismatchedBytes += static_cast<int>(unchecked * 3);
+                    FL_WARN("[TRUNCATED CAPTURE] Only verified " << verified_leds
+                            << "/" << num_leds << " LEDs (" << bytes_captured
+                            << " bytes captured, needed " << (num_leds * 3)
+                            << "). Marking " << unchecked
+                            << " unchecked LEDs as mismatches.");
                 }
             }
 
