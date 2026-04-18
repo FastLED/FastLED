@@ -726,15 +726,17 @@ class RmtRxChannelImpl : public RmtRxChannel {
         rx_config.gpio_num = mPin;
         rx_config.clk_src = RMT_CLK_SRC_DEFAULT;
         rx_config.resolution_hz = mResolutionHz;
-        // mem_block_symbols: non-DMA = hardware RMT memory block (small, ~64);
-        // DMA = DRAM ping-pong buffer ESP-IDF allocates internally.
-        // EMPIRICAL FINDING (ESP32-S3, ESP-IDF 5.5): the absolute cap on the
-        // rmt_receive() user buffer is 1024 symbols = 4 KB regardless of
-        // mem_block_symbols. Exceeding this returns ESP_ERR_INVALID_SIZE
-        // ("buffer size exceeds DMA capacity"). Observed total capture per
-        // rmt_receive() is 4× the user buffer via ping-pong wrap (~4096
-        // symbols = 170 WS2812B LEDs). See issue #2254.
-        rx_config.mem_block_symbols = mUseDma ? 256 : 64;
+        // mem_block_symbols:
+        //   Non-DMA: hardware RMT memory block, small (~64 symbols hard cap).
+        //   DMA:     sizes ESP-IDF's DMA descriptor chain. Per rmt_rx.c:210-211:
+        //     num_dma_nodes = max(2, mem_block_symbols * 4 / 4095 + 1)
+        //   and the per-rmt_receive() user-buffer cap is num_dma_nodes * 4092
+        //   bytes (=1023 symbols/node). So to pass a 14000-symbol user buffer
+        //   (= 56 KB) we need ≥14 DMA nodes, which means mem_block_symbols ≥
+        //   14336. Set 14336 to cover ~595 WS2812B LEDs in a single rmt_receive.
+        //   Memory cost: 14336 × 4 = 56 KB internal-RAM DMA buffer — ESP32-S3
+        //   has ~320 KB so ~18%. See issue #2254.
+        rx_config.mem_block_symbols = mUseDma ? 14336 : 64;
         // Interrupt priority level 3 (maximum supported by ESP-IDF RMT driver
         // API) Note: Both RISC-V and Xtensa platforms are limited to level 3 by
         // driver validation RISC-V hardware supports 1-7, but ESP-IDF
@@ -1254,14 +1256,14 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // ESP32-S3, which ESP-IDF rejects with "user buffer not in the internal
         // RAM". See issue #2254.
         constexpr size_t NONDMA_BUFFER_SIZE = 4096;
-        // DMA user buffer: capped at 1024 symbols by ESP-IDF on ESP32-S3
-        // (absolute DMA descriptor limit). ESP-IDF fires partial-rx ISR every
-        // mem_block_symbols=256 fill (ping-pong halves); total capture per
-        // rmt_receive() is 4× the user buffer via internal wrap = 4096 symbols
-        // max, same absolute cap as non-DMA mode. Extending past this requires
-        // task-side re-submission which is not yet wired up — the DMA path is
-        // present as groundwork for that future change. See issue #2254.
-        constexpr size_t DMA_BUFFER_SIZE = 1024;
+        // DMA user buffer sized to fit within num_dma_nodes × 4092 bytes. With
+        // mem_block_symbols=14336 we get 14 DMA nodes = 57288 bytes = 14322
+        // symbols capacity. Pass 14000 symbols (= 56000 bytes) with margin.
+        // Covers 583 WS2812B LEDs in a single rmt_receive() — no need for
+        // ISR re-submission on typical long strips. Partial-rx ISR still fires
+        // every ~1023-symbol DMA node fill, streaming into the accumulation
+        // buffer via rxDoneCallback.
+        constexpr size_t DMA_BUFFER_SIZE = 14000;
         const size_t hw_buffer_size = mUseDma ? DMA_BUFFER_SIZE : NONDMA_BUFFER_SIZE;
 
         if (mUseDma) {
