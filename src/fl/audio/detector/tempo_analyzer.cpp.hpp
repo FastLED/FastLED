@@ -22,6 +22,14 @@ TempoAnalyzer::TempoAnalyzer()
 {
     mPreviousMagnitudes.resize(8, 0.0f);  // Track first 8 bins for spectral flux
     mHypotheses.reserve(MAX_HYPOTHESES);
+
+    // BPM confidence fades over ~2s of silence — musical tempo has natural
+    // persistence; snapping faster feels wrong. Raw BPM is NOT gated so that
+    // when audio returns, beat sync resumes from the same tempo estimate.
+    SilenceEnvelope::Config cfg;
+    cfg.decayTauSeconds = 2.0f;
+    cfg.targetValue = 0.0f;
+    mConfidenceEnvelope.configure(cfg);
 }
 
 TempoAnalyzer::~TempoAnalyzer() FL_NOEXCEPT = default;
@@ -65,6 +73,19 @@ void TempoAnalyzer::update(shared_ptr<Context> context) {
     // Update stability analysis
     updateStability();
 
+    // Silence gate: fade confidence toward 0 during silence. The BPM estimate
+    // itself survives unchanged so beat sync is seamless on audio re-entry.
+    // dt derived from timestamp deltas (ms→s). First frame: dt=0 → pass-through.
+    float dt = 0.0f;
+    if (mHasPrevTimestamp && timestamp >= mPrevTimestamp) {
+        dt = static_cast<float>(timestamp - mPrevTimestamp) * 0.001f;
+    }
+    mPrevTimestamp = timestamp;
+    mHasPrevTimestamp = true;
+
+    const bool isSilent = context->isSilent();
+    mConfidence = mConfidenceEnvelope.update(isSilent, mConfidence, dt);
+
     // Track state changes for fireCallbacks()
     float bpmDiff = fl::abs(mCurrentBPM - mPreviousBPM);
     mBpmChanged = (bpmDiff > 5.0f);
@@ -104,6 +125,9 @@ void TempoAnalyzer::reset() {
     mFluxAvg.reset();
     mBPMMedian.reset();
     mBPMHistory.clear();
+    mConfidenceEnvelope.reset(0.0f);
+    mPrevTimestamp = 0;
+    mHasPrevTimestamp = false;
 }
 
 float TempoAnalyzer::calculateSpectralFlux(const fft::Bins& fft) {

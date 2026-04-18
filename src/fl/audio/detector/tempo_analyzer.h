@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/audio/audio_detector.h"
+#include "fl/audio/silence_envelope.h"
 #include "fl/math/filter/filter.h"
 #include "fl/stl/function.h"
 #include "fl/stl/vector.h"
@@ -90,6 +91,18 @@ private:
     static constexpr u32 MAX_BEAT_INTERVAL_MS = 2000; // Min 30 BPM
 
     shared_ptr<const fft::Bins> mRetainedFFT;
+
+    // Silence gate for confidence. Decays confidence (not BPM) toward 0 with
+    // tau ~2s during silence; the BPM estimate itself is preserved so that
+    // when audio returns, beat sync resumes from the same tempo. Musical tempo
+    // has natural persistence — snapping too fast feels wrong to users.
+    SilenceEnvelope mConfidenceEnvelope;
+
+    // Timestamp of the previous update() call, used to compute dt for the
+    // envelope. Zero means "no previous frame" and the envelope skips decay
+    // for that one-off call.
+    u32 mPrevTimestamp = 0;
+    bool mHasPrevTimestamp = false;
 
     // Internal methods
     float calculateSpectralFlux(const fft::Bins& fft);

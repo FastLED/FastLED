@@ -269,6 +269,123 @@ FL_TEST_CASE("audio::detector::TempoAnalyzer - onTempoChange callback fires on B
     FL_CHECK_LT(lastChangedBPM, 200.0f);
 }
 
+FL_TEST_CASE("audio::detector::TempoAnalyzer - confidence fades in silence, BPM preserved") {
+    // Part 4/4 of FastLED#2253 silence-gate rollout.
+    //
+    // 1. Drive TempoAnalyzer with ~5s of synthetic onsets at 120 BPM.
+    // 2. Confirm confidence rises above a threshold.
+    // 3. Switch to silence with context->setSilent(true) for ~3s.
+    // 4. Assert confidence < 0.05, but BPM estimate is preserved.
+    audio::detector::TempoAnalyzer analyzer;
+    analyzer.setMinBPM(60.0f);
+    analyzer.setMaxBPM(180.0f);
+    analyzer.setStabilityThreshold(5.0f);
+    const int framesPerBeat = 22;
+    const int totalBeats = 15;
+    const u32 frameIntervalMs = 23;  // ~43 fps → 22 frames * 23ms ≈ 506ms/beat ≈ 118.6 BPM
+
+    fl::vector<fl::i16> silenceData(512, 0);
+    audio::Sample silence(silenceData, 0);
+    auto ctx = fl::make_shared<audio::Context>(silence);
+    ctx->setSampleRate(44100);
+    ctx->getFFT(16);
+    ctx->setFFTHistoryDepth(4);
+
+    u32 timestamp = 0;
+    // Phase 1: 15 beats of synthetic onsets at ~120 BPM, NOT silent.
+    for (int beat = 0; beat < totalBeats; ++beat) {
+        for (int frame = 0; frame < framesPerBeat; ++frame) {
+            timestamp += frameIntervalMs;
+            if (frame == 0) {
+                fl::vector<fl::i16> bassData;
+                bassData.reserve(512);
+                for (int s = 0; s < 512; ++s) {
+                    float phase = 2.0f * FL_M_PI * 200.0f * s / 44100.0f;
+                    bassData.push_back(static_cast<fl::i16>(20000.0f * fl::sinf(phase)));
+                }
+                ctx->setSample(audio::Sample(bassData, timestamp));
+            } else {
+                ctx->setSample(audio::Sample(silenceData, timestamp));
+            }
+            ctx->setSilent(false);  // audio present — envelope is pass-through
+            ctx->getFFT(16);
+            analyzer.update(ctx);
+        }
+    }
+
+    const float liveConfidence = analyzer.getConfidence();
+    const float liveBPM = analyzer.getBPM();
+
+    // Confidence should have risen above the integration threshold from the
+    // design doc (>= 0.3). If the fixture's onsets are weak we still require
+    // at least a meaningful non-zero value so the decay test is well-posed.
+    FL_CHECK_GT(liveConfidence, 0.3f);
+    // BPM is in the ballpark of the 120 BPM click track.
+    FL_CHECK_GT(liveBPM, 90.0f);
+    FL_CHECK_LT(liveBPM, 150.0f);
+
+    // Phase 2: ~3 seconds of silence with context->setSilent(true).
+    // At 43 fps (23ms per frame), 3s ≈ 130 frames. With tau=2s the envelope
+    // crosses 95% of the decay in 3*tau = 6s, but at 3s we expect ≈ exp(-1.5) = 0.22
+    // of the starting value, which for a start around 0.5 lands near 0.11.
+    // Run longer (5s) to be well past 95% → comfortably below the 0.05 target.
+    const int silenceFrames = 220;  // ~5s
+    for (int i = 0; i < silenceFrames; ++i) {
+        timestamp += frameIntervalMs;
+        ctx->setSample(audio::Sample(silenceData, timestamp));
+        ctx->setSilent(true);  // silence declared — envelope decays
+        ctx->getFFT(16);
+        analyzer.update(ctx);
+    }
+
+    // Confidence should have decayed well below the integration threshold.
+    FL_CHECK_LT(analyzer.getConfidence(), 0.05f);
+    // BPM estimate is preserved — decaying confidence, not raw BPM, so beat
+    // sync can resume from the same tempo when audio returns.
+    FL_CHECK_EQ(analyzer.getBPM(), liveBPM);
+}
+
+FL_TEST_CASE("audio::detector::TempoAnalyzer - confidence pass-through when not silent") {
+    // Envelope must be a no-op when context->isSilent() is false, even if
+    // the underlying confidence briefly dips (e.g. between onsets).
+    audio::detector::TempoAnalyzer analyzer;
+    analyzer.setMinBPM(60.0f);
+    analyzer.setMaxBPM(180.0f);
+
+    fl::vector<fl::i16> silenceData(512, 0);
+    audio::Sample silence(silenceData, 0);
+    auto ctx = fl::make_shared<audio::Context>(silence);
+    ctx->setSampleRate(44100);
+    ctx->getFFT(16);
+    ctx->setFFTHistoryDepth(4);
+
+    u32 timestamp = 0;
+    // Drive with onsets, keeping isSilent=false throughout.
+    for (int beat = 0; beat < 15; ++beat) {
+        for (int frame = 0; frame < 22; ++frame) {
+            timestamp += 23;
+            if (frame == 0) {
+                fl::vector<fl::i16> bassData;
+                bassData.reserve(512);
+                for (int s = 0; s < 512; ++s) {
+                    float phase = 2.0f * FL_M_PI * 200.0f * s / 44100.0f;
+                    bassData.push_back(static_cast<fl::i16>(20000.0f * fl::sinf(phase)));
+                }
+                ctx->setSample(audio::Sample(bassData, timestamp));
+            } else {
+                ctx->setSample(audio::Sample(silenceData, timestamp));
+            }
+            ctx->setSilent(false);
+            ctx->getFFT(16);
+            analyzer.update(ctx);
+        }
+    }
+
+    // With isSilent=false, envelope is pass-through → confidence matches what
+    // the core algorithm produced (non-zero after consistent onsets).
+    FL_CHECK_GT(analyzer.getConfidence(), 0.0f);
+}
+
 FL_TEST_CASE("audio::detector::TempoAnalyzer - isStable becomes true with consistent tempo") {
     audio::detector::TempoAnalyzer analyzer;
     analyzer.setMinBPM(60.0f);
