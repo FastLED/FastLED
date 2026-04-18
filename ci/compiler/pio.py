@@ -53,6 +53,52 @@ from ci.compiler.source_manager import (
 from ci.util.output_formatter import create_sketch_path_formatter
 
 
+def _mirror_fbuild_artifacts_to_pio(build_dir: Path, environment: str) -> None:
+    """Mirror fbuild top-level artifacts to the legacy PlatformIO build directory.
+
+    fbuild writes its artifacts to ``.fbuild/build/<env>/release/`` (and
+    ``.fbuild/build/<env>/`` for some metadata files). A number of downstream
+    consumers — GitHub Actions workflow scripts (QEMU / AVR8JS), the crash
+    decoder, and ``build_with_merged_bin`` — still look under the legacy
+    ``.pio/build/<env>/`` path because that was the PlatformIO convention.
+
+    To keep those consumers working without plumbing fbuild-awareness into
+    every call site, copy ``firmware.elf``, ``firmware.bin``, ``firmware.hex``,
+    and ``firmware.map`` (when present) into ``.pio/build/<env>/`` after a
+    successful fbuild compile. This is a cheap no-op if the source files are
+    missing.
+
+    Note: fbuild does NOT produce ``bootloader.bin`` / ``partitions.bin``.
+    Callers that need those (ESP32 merged-bin / QEMU) must run the PlatformIO
+    build explicitly — this function only covers the single-firmware case.
+    """
+    pio_artifacts_dir = build_dir / ".pio" / "build" / environment
+    pio_artifacts_dir.mkdir(parents=True, exist_ok=True)
+
+    fbuild_release_dir = build_dir / ".fbuild" / "build" / environment / "release"
+    fbuild_env_dir = build_dir / ".fbuild" / "build" / environment
+
+    # firmware.* files land in the release/ subdir; metadata files like
+    # build_info.json live one level up in the environment dir.
+    candidates: list[tuple[Path, str]] = [
+        (fbuild_release_dir / "firmware.elf", "firmware.elf"),
+        (fbuild_release_dir / "firmware.bin", "firmware.bin"),
+        (fbuild_release_dir / "firmware.hex", "firmware.hex"),
+        (fbuild_release_dir / "firmware.map", "firmware.map"),
+        (fbuild_env_dir / "build_info.json", "build_info.json"),
+    ]
+
+    copied: list[str] = []
+    for src, name in candidates:
+        if src.exists():
+            dst = pio_artifacts_dir / name
+            shutil.copy2(src, dst)
+            copied.append(name)
+
+    if copied:
+        print(f"Mirrored fbuild artifacts to {pio_artifacts_dir}: {', '.join(copied)}")
+
+
 def _init_platformio_build(
     board: Board,
     verbose: bool,
@@ -621,6 +667,17 @@ class PioCompiler(Compiler):
             green_color = "\033[32m"
             reset_color = "\033[0m"
             print(f"{green_color}SUCCESS: {example}{reset_color}")
+            # Mirror top-level fbuild artifacts to the legacy .pio/build path so
+            # downstream tooling (QEMU/avr8js workflows, crash decoders) keeps
+            # working without having to know about fbuild's layout.
+            try:
+                _mirror_fbuild_artifacts_to_pio(self.build_dir, environment)
+            except Exception as mirror_err:
+                # Non-fatal: legacy tooling may not work but the build succeeded.
+                print(
+                    f"Warning: failed to mirror fbuild artifacts to .pio/build/{environment}: "
+                    f"{mirror_err}"
+                )
             generate_build_info_json_from_existing_build(
                 self.build_dir, self.board, example
             )
@@ -1122,9 +1179,27 @@ class PioCompiler(Compiler):
                 example=example,
             )
 
-        # 2. Build normally first
-        cancelled = threading.Event()
-        result = self._internal_build_no_lock(example, cancelled)
+        # 2. Build normally first.
+        #
+        # Merged-bin builds need ``bootloader.bin`` and ``partitions.bin`` in
+        # ``.pio/build/<env>/`` — these are produced by PlatformIO's ESP-IDF
+        # post-build steps and are NOT emitted by fbuild (which only produces
+        # ``firmware.elf`` / ``firmware.bin``). Force the PlatformIO path for
+        # this build even on boards that normally use fbuild, so QEMU and
+        # other flash-image consumers get a complete artifact set.
+        original_use_fbuild = self.use_fbuild
+        if self.use_fbuild:
+            print(
+                "build_with_merged_bin: forcing PlatformIO build path "
+                "(fbuild does not produce bootloader.bin/partitions.bin)"
+            )
+            self.use_fbuild = False
+            self.initialized = False
+        try:
+            cancelled = threading.Event()
+            result = self._internal_build_no_lock(example, cancelled)
+        finally:
+            self.use_fbuild = original_use_fbuild
         if not result.success:
             return result
 
@@ -1146,9 +1221,59 @@ class PioCompiler(Compiler):
                 missing_files.append(str(bin_file))
 
         if missing_files:
+            # The build appeared to succeed but the expected artifacts aren't
+            # where we look for them. This is almost always a path mismatch
+            # (e.g. fbuild wrote artifacts to .fbuild/build/<env>/release/
+            # instead of .pio/build/<env>/) or a PlatformIO configuration that
+            # silently skipped the ESP-IDF post-build step. Surface as much
+            # context as possible so operators can debug without re-running.
+            diagnostics: list[str] = []
+            diagnostics.append(
+                f"Required binary files not found after build: {', '.join(missing_files)}"
+            )
+            diagnostics.append("")
+            diagnostics.append("Build succeeded but expected artifacts are missing.")
+            diagnostics.append(
+                "This typically means the compile actually failed earlier, "
+                "the build system emitted artifacts at a non-standard location, "
+                "or an ESP-IDF post-build step was skipped."
+            )
+            # Dump directory listing of both the legacy PIO path and the
+            # fbuild path so the real artifact location is visible.
+            for label, directory in [
+                ("PlatformIO artifacts dir", artifacts_dir),
+                (
+                    "fbuild artifacts dir",
+                    self.build_dir / ".fbuild" / "build" / env_name,
+                ),
+                (
+                    "fbuild release dir",
+                    self.build_dir / ".fbuild" / "build" / env_name / "release",
+                ),
+            ]:
+                diagnostics.append("")
+                diagnostics.append(f"=== {label}: {directory} ===")
+                if directory.exists():
+                    try:
+                        entries = sorted(p.name for p in directory.iterdir())
+                    except OSError as e:
+                        diagnostics.append(f"  (failed to list: {e})")
+                    else:
+                        if entries:
+                            diagnostics.extend(f"  {name}" for name in entries)
+                        else:
+                            diagnostics.append("  (empty)")
+                else:
+                    diagnostics.append("  (does not exist)")
+            diagnostics.append("")
+            diagnostics.append("--- Last 4KB of compile output ---")
+            build_output = result.output or ""
+            tail = build_output[-4096:] if build_output else "(no output captured)"
+            diagnostics.append(tail)
+            diagnostics.append("--- End compile output ---")
             return SketchResult(
                 success=False,
-                output=f"Required binary files not found after build: {', '.join(missing_files)}",
+                output="\n".join(diagnostics),
                 build_dir=self.build_dir,
                 example=example,
             )
