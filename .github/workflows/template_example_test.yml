@@ -21,6 +21,11 @@ defaults:
 jobs:
   build:
     runs-on: ${{ inputs.os }}
+    # Fail fast instead of waiting for the 6h default runner timeout.
+    # Successful runs complete in ~8-20 minutes; anything past 45m is hung.
+    # Observed Windows runners hanging in the Install step for 3+ hours
+    # before losing communication with the server (runs/24593311481).
+    timeout-minutes: 45
     steps:
       - name: Checkout trusted base branch code
         uses: actions/checkout@v4
