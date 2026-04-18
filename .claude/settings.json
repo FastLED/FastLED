@@ -21,6 +21,16 @@
         ]
       },
       {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && exec uv run python ci/hooks/check_pr_merge_reviews.py || { echo 'FastLED hook skipped: project root (pyproject.toml) not found above $PWD' >&2; exit 0; }",
+            "timeout": 45
+          }
+        ]
+      },
+      {
         "matcher": "Edit|Write",
         "hooks": [
           {

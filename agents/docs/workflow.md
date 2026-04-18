@@ -38,6 +38,10 @@ Guidelines for how agents should approach work in the FastLED project.
 - Zero context switching required from the user
 - Go fix failing CI tests without being told how
 
+## CodeRabbit Review Loop
+
+When CodeRabbit posts review comments on a PR, run `/address-reviews` before any `gh pr merge`. The skill fetches open comments, classifies each, applies fixes for valid findings, and replies to threads. The pre-merge hook blocks merge while unresolved CodeRabbit threads remain. Security-critical findings are routed to a human — never auto-fixed. Max 3 iterations per PR; if CodeRabbit keeps asking after three rounds, stop and flag a human reviewer.
+
 ## Task Management
 
 1. **Plan First**: Write plan to `agents/tasks/todo.md` with checkable items
