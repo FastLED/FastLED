@@ -53,61 +53,6 @@ from ci.compiler.source_manager import (
 from ci.util.output_formatter import create_sketch_path_formatter
 
 
-def _mirror_fbuild_artifacts_to_pio(build_dir: Path, environment: str) -> None:
-    """Mirror fbuild top-level artifacts to the legacy PlatformIO build directory.
-
-    fbuild writes its artifacts to ``.fbuild/build/<env>/release/`` (and
-    ``.fbuild/build/<env>/`` for some metadata files). A number of downstream
-    consumers — GitHub Actions workflow scripts (QEMU / AVR8JS), the crash
-    decoder, and ``build_with_merged_bin`` — still look under the legacy
-    ``.pio/build/<env>/`` path because that was the PlatformIO convention.
-
-    To keep those consumers working without plumbing fbuild-awareness into
-    every call site, copy the artifacts fbuild produces — ``firmware.elf``,
-    ``firmware.bin``, ``firmware.hex``, ``firmware.map``, plus the ESP32
-    boot/partition artifacts ``bootloader.bin``, ``partitions.bin``, and
-    ``boot_app0.bin`` when present — into ``.pio/build/<env>/`` after a
-    successful fbuild compile. Missing source files are skipped silently.
-
-    fbuild's ESP32 orchestrator (fbuild >= 2.1.7) emits
-    ``bootloader.bin`` / ``partitions.bin`` / ``boot_app0.bin`` alongside
-    ``firmware.bin`` in the release dir — copying them lets
-    ``build_with_merged_bin()`` run the ``esptool merge_bin`` step directly
-    on fbuild output, no PlatformIO build required.
-    """
-    pio_artifacts_dir = build_dir / ".pio" / "build" / environment
-    pio_artifacts_dir.mkdir(parents=True, exist_ok=True)
-
-    fbuild_release_dir = build_dir / ".fbuild" / "build" / environment / "release"
-    fbuild_env_dir = build_dir / ".fbuild" / "build" / environment
-
-    # firmware.* files land in the release/ subdir; metadata files like
-    # build_info.json live one level up in the environment dir.
-    candidates: list[tuple[Path, str]] = [
-        (fbuild_release_dir / "firmware.elf", "firmware.elf"),
-        (fbuild_release_dir / "firmware.bin", "firmware.bin"),
-        (fbuild_release_dir / "firmware.hex", "firmware.hex"),
-        (fbuild_release_dir / "firmware.map", "firmware.map"),
-        # ESP32 merged-bin inputs — produced by fbuild's Esp32Orchestrator
-        # (orchestrator.rs step 14: "Prepare boot artifacts for deployment /
-        # emulation"). Non-ESP32 builds simply won't have these files.
-        (fbuild_release_dir / "bootloader.bin", "bootloader.bin"),
-        (fbuild_release_dir / "partitions.bin", "partitions.bin"),
-        (fbuild_release_dir / "boot_app0.bin", "boot_app0.bin"),
-        (fbuild_env_dir / "build_info.json", "build_info.json"),
-    ]
-
-    copied: list[str] = []
-    for src, name in candidates:
-        if src.exists():
-            dst = pio_artifacts_dir / name
-            shutil.copy2(src, dst)
-            copied.append(name)
-
-    if copied:
-        print(f"Mirrored fbuild artifacts to {pio_artifacts_dir}: {', '.join(copied)}")
-
-
 def _init_platformio_build(
     board: Board,
     verbose: bool,
@@ -676,23 +621,9 @@ class PioCompiler(Compiler):
             green_color = "\033[32m"
             reset_color = "\033[0m"
             print(f"{green_color}SUCCESS: {example}{reset_color}")
-            # Generate build metadata FIRST, because `pio project metadata`
-            # prepares `.pio/build/<env>/` by wiping and re-creating it —
-            # which would clobber any mirrored firmware files. Only after
-            # that settles do we copy fbuild's artifacts over so the legacy
-            # PlatformIO path also has `firmware.elf` / `firmware.hex` for
-            # downstream tooling (QEMU / avr8js workflows, crash decoders).
             generate_build_info_json_from_existing_build(
                 self.build_dir, self.board, example
             )
-            try:
-                _mirror_fbuild_artifacts_to_pio(self.build_dir, environment)
-            except Exception as mirror_err:
-                # Non-fatal: legacy tooling may not work but the build succeeded.
-                print(
-                    f"Warning: failed to mirror fbuild artifacts to .pio/build/{environment}: "
-                    f"{mirror_err}"
-                )
         else:
             red_color = "\033[31m"
             reset_color = "\033[0m"
@@ -1156,6 +1087,15 @@ class PioCompiler(Compiler):
             plat in str(self.board.platform).lower() for plat in supported_platforms
         )
 
+    def _artifacts_dir(self, env_name: str) -> Path:
+        # fbuild emits artifacts (firmware.*, bootloader.bin, partitions.bin,
+        # boot_app0.bin) into .fbuild/build/<env>/release/. PlatformIO's
+        # ESP-IDF post-build steps put the same set into .pio/build/<env>/.
+        # Whichever backend ran the compile is where the artifacts live.
+        if self.use_fbuild:
+            return self.build_dir / ".fbuild" / "build" / env_name / "release"
+        return self.build_dir / ".pio" / "build" / env_name
+
     def get_merged_bin_path(self, example: str) -> Optional[Path]:
         """Get path to merged binary if it exists.
 
@@ -1165,8 +1105,7 @@ class PioCompiler(Compiler):
         Returns:
             Path to merged.bin if it exists, None otherwise
         """
-        env_name = self.board.board_name
-        merged_bin = self.build_dir / ".pio" / "build" / env_name / "merged.bin"
+        merged_bin = self._artifacts_dir(self.board.board_name) / "merged.bin"
         return merged_bin if merged_bin.exists() else None
 
     def build_with_merged_bin(
@@ -1193,22 +1132,14 @@ class PioCompiler(Compiler):
 
         # 2. Build normally first.
         #
-        # Both build paths produce the full artifact set needed for
-        # ``esptool merge_bin``:
+        # Both backends produce the artifact set ``esptool merge_bin`` needs
+        # (``firmware.bin`` + ``bootloader.bin`` + ``partitions.bin``), just
+        # in different directories. ``_artifacts_dir`` returns whichever path
+        # the active backend wrote to, so the merge step below reads from
+        # the right place without copying anything around.
         #
-        # - PlatformIO: ESP-IDF post-build steps write
-        #   ``bootloader.bin`` / ``partitions.bin`` / ``boot_app0.bin``
-        #   directly into ``.pio/build/<env>/``.
-        # - fbuild (>= 2.1.7): the ESP32 orchestrator emits the same three
-        #   files plus ``firmware.bin`` into ``.fbuild/build/<env>/release/``;
-        #   ``_build_with_fbuild`` then calls
-        #   ``_mirror_fbuild_artifacts_to_pio`` to copy them into the
-        #   ``.pio/build/<env>/`` path this function reads from.
-        #
-        # Whichever build tool the caller asked for is respected here —
-        # previously this function force-disabled fbuild because the old
-        # fbuild version could not emit the boot/partition artifacts, but
-        # that workaround is no longer needed (FastLED/FastLED#2287).
+        # fbuild >= 2.1.7 is required for ESP32 merged-bin support — earlier
+        # versions did not emit the boot/partition artifacts (FastLED#2287).
         cancelled = threading.Event()
         result = self._internal_build_no_lock(example, cancelled)
         if not result.success:
@@ -1217,7 +1148,7 @@ class PioCompiler(Compiler):
         # 3. Use esptool to merge binaries
         # PlatformIO doesn't have a merge_bin target - we must use esptool directly
         env_name = self.board.board_name
-        artifacts_dir = self.build_dir / ".pio" / "build" / env_name
+        artifacts_dir = self._artifacts_dir(env_name)
 
         # Find required binary components
         bootloader_bin = artifacts_dir / "bootloader.bin"
@@ -1233,29 +1164,30 @@ class PioCompiler(Compiler):
 
         if missing_files:
             # The build appeared to succeed but the expected artifacts aren't
-            # where we look for them. This is almost always a path mismatch
-            # (e.g. fbuild wrote artifacts to .fbuild/build/<env>/release/
-            # instead of .pio/build/<env>/) or a PlatformIO configuration that
-            # silently skipped the ESP-IDF post-build step. Surface as much
-            # context as possible so operators can debug without re-running.
+            # where we look for them. Most often this means the compile
+            # actually failed earlier, or fbuild's ESP32 orchestrator skipped
+            # its boot-artifact step (e.g. on an older fbuild). Dump both the
+            # active backend's dir and the inactive one so the real artifact
+            # location is visible regardless of which backend ran.
+            backend = "fbuild" if self.use_fbuild else "PlatformIO"
             diagnostics: list[str] = []
             diagnostics.append(
                 f"Required binary files not found after build: {', '.join(missing_files)}"
             )
             diagnostics.append("")
-            diagnostics.append("Build succeeded but expected artifacts are missing.")
+            diagnostics.append(
+                f"Build succeeded ({backend}) but expected artifacts are missing."
+            )
             diagnostics.append(
                 "This typically means the compile actually failed earlier, "
                 "the build system emitted artifacts at a non-standard location, "
                 "or an ESP-IDF post-build step was skipped."
             )
-            # Dump directory listing of both the legacy PIO path and the
-            # fbuild path so the real artifact location is visible.
             for label, directory in [
-                ("PlatformIO artifacts dir", artifacts_dir),
+                (f"Active backend ({backend}) artifacts dir", artifacts_dir),
                 (
-                    "fbuild artifacts dir",
-                    self.build_dir / ".fbuild" / "build" / env_name,
+                    "PlatformIO artifacts dir",
+                    self.build_dir / ".pio" / "build" / env_name,
                 ),
                 (
                     "fbuild release dir",
