@@ -1240,12 +1240,13 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // ESP32-S3, which ESP-IDF rejects with "user buffer not in the internal
         // RAM". See issue #2254.
         constexpr size_t NONDMA_BUFFER_SIZE = 4096;
-        // DMA user buffer: pass 4× mem_block_symbols (=256) = 1024 symbols so
-        // ESP-IDF's partial-rx fires the ISR every 256-symbol fill, streaming
-        // multiple chunks into accumulation. If user buffer == mem_block_symbols
-        // the driver treats it as single-shot and we get only 1 callback per
-        // rmt_receive() — capping capture at ~4096 symbols (=170 LEDs).
-        constexpr size_t DMA_BUFFER_SIZE = 1024;
+        // DMA user buffer: ESP-IDF's partial-rx streams multiple ping-pong
+        // halves through this buffer until the receiver goes idle. Observed
+        // that 1024-symbol buffer capped at 4× reloads = 4096 total symbols,
+        // so bump to 16384 symbols (64 KB DMA|INTERNAL) to cover ~680 WS2812B
+        // LEDs per single rmt_receive(). Ratio user_buf / mem_block_symbols =
+        // 64 gives ESP-IDF plenty of descriptor headroom for streaming.
+        constexpr size_t DMA_BUFFER_SIZE = 16384;
         const size_t hw_buffer_size = mUseDma ? DMA_BUFFER_SIZE : NONDMA_BUFFER_SIZE;
 
         if (mUseDma) {
