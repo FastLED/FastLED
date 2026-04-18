@@ -62,6 +62,11 @@ class LcdSpiPeripheralEsp : public ILcdSpiPeripheral {
     u64 getMicroseconds() FL_NOEXCEPT override;
     void delay(u32 ms) FL_NOEXCEPT override;
 
+    /// @brief Currently-recorded owning driver (issue #2270).
+    /// Exposed for diagnostics and tests — production callers should set
+    /// `LcdSpiConfig::owner` and let initialize() manage the transition.
+    LcdSpiOwnerDriver getOwner() const FL_NOEXCEPT { return mOwner; }
+
   private:
     template <typename T, int N>
     friend class ::fl::Singleton;
@@ -75,6 +80,11 @@ class LcdSpiPeripheralEsp : public ILcdSpiPeripheral {
     LcdSpiPeripheralEsp(const LcdSpiPeripheralEsp &) = delete;
     LcdSpiPeripheralEsp &operator=(const LcdSpiPeripheralEsp &) = delete;
 
+    /// @brief Tear down every piece of peripheral state held by this
+    /// singleton. Called from deinitialize() and from initialize() when
+    /// the owning driver changes (issue #2270).
+    void teardownLocked() FL_NOEXCEPT;
+
     bool mInitialized;
     LcdSpiConfig mConfig;
     esp_lcd_i80_bus_handle_t mI80Bus;
@@ -84,6 +94,7 @@ class LcdSpiPeripheralEsp : public ILcdSpiPeripheral {
     void *mUserCtx;
     volatile bool mBusy;
     size_t mLastTransmitSize;
+    LcdSpiOwnerDriver mOwner; ///< Tracks which driver owns the singleton (#2270).
 };
 
 } // namespace detail

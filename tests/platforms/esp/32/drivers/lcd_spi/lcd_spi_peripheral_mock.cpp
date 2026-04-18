@@ -196,6 +196,102 @@ FL_TEST_CASE("LcdSpiPeripheralMock - deinitialize") {
     FL_CHECK_FALSE(mock.isInitialized());
 }
 
+
+//=============================================================================
+// Issue #2270 — owner-aware teardown on cross-driver switch
+//=============================================================================
+
+FL_TEST_CASE("LcdSpiPeripheralMock - same owner reuse does not deinit") {
+    // Regression test for #2270: when the same driver re-initializes with
+    // the same config, the peripheral should NOT force a tear-down.
+    resetMockState();
+    auto &mock = LcdSpiPeripheralMock::instance();
+
+    LcdSpiConfig config(1, 18, 6000000, 1024);
+    config.owner = LcdSpiOwnerDriver::LCD_SPI;
+    FL_REQUIRE(mock.initialize(config));
+    size_t deinitsBefore = mock.getDeinitCount();
+
+    // Same owner, re-initialize -> fast path (no extra deinit).
+    FL_REQUIRE(mock.initialize(config));
+    FL_CHECK(mock.getDeinitCount() == deinitsBefore);
+}
+
+FL_TEST_CASE("LcdSpiPeripheralMock - cross-driver switch forces deinit") {
+    // Regression test for #2270: switching from LCD_SPI to LCD_CLOCKLESS
+    // MUST force a tear-down even if the hardware shape happens to match.
+    // Otherwise the previous driver's ISR callback and ring buffers leak
+    // into the new driver's session and the second switch silently fails.
+    resetMockState();
+    auto &mock = LcdSpiPeripheralMock::instance();
+
+    LcdSpiConfig spiConfig(1, 18, 6000000, 1024);
+    spiConfig.owner = LcdSpiOwnerDriver::LCD_SPI;
+    FL_REQUIRE(mock.initialize(spiConfig));
+    size_t deinitsBefore = mock.getDeinitCount();
+
+    // Switch to the clockless driver with identical lanes/clock/size.
+    // This is the bug's fingerprint: same shape, different owner.
+    LcdSpiConfig clocklessConfig(1, 18, 6000000, 1024);
+    clocklessConfig.owner = LcdSpiOwnerDriver::LCD_CLOCKLESS;
+    FL_REQUIRE(mock.initialize(clocklessConfig));
+
+    FL_CHECK(mock.getDeinitCount() == deinitsBefore + 1);
+    FL_CHECK(mock.getConfig().owner == LcdSpiOwnerDriver::LCD_CLOCKLESS);
+}
+
+FL_TEST_CASE(
+    "LcdSpiPeripheralMock - repeated cross-driver alternation never fails") {
+    // Regression test for #2270: the issue's failure table shows that
+    // switches 3 and 4 in an SPI -> CLOCKLESS -> SPI -> CLOCKLESS
+    // sequence start failing. After the fix every switch must deinit
+    // the previous owner and initialize successfully.
+    resetMockState();
+    auto &mock = LcdSpiPeripheralMock::instance();
+
+    LcdSpiConfig spiConfig(1, 18, 6000000, 1024);
+    spiConfig.owner = LcdSpiOwnerDriver::LCD_SPI;
+
+    LcdSpiConfig clocklessConfig(1, 18, 6000000, 1024);
+    clocklessConfig.owner = LcdSpiOwnerDriver::LCD_CLOCKLESS;
+
+    // Simulate the exact failing sequence from the issue table:
+    // 1. LCD_SPI       2. LCD_CLOCKLESS
+    // 3. LCD_SPI       4. LCD_CLOCKLESS
+    size_t baseDeinits = mock.getDeinitCount();
+
+    FL_REQUIRE(mock.initialize(spiConfig));       // #1 - cold init
+    FL_REQUIRE(mock.initialize(clocklessConfig)); // #2 - switch
+    FL_REQUIRE(mock.initialize(spiConfig));       // #3 - switch back
+    FL_REQUIRE(mock.initialize(clocklessConfig)); // #4 - switch again
+
+    // Each cross-driver switch must trigger one deinit (#2, #3, #4 = 3).
+    FL_CHECK(mock.getDeinitCount() == baseDeinits + 3);
+
+    // Final state: clockless owns the peripheral.
+    FL_CHECK(mock.isInitialized());
+    FL_CHECK(mock.getConfig().owner == LcdSpiOwnerDriver::LCD_CLOCKLESS);
+}
+
+FL_TEST_CASE(
+    "LcdSpiPeripheralMock - legacy caller without owner field still works") {
+    // Backward compatibility: existing callers that don't set `owner`
+    // leave it as NONE. The singleton should treat NONE as "don't force
+    // tear-down on owner mismatch" so legacy tests / wrappers still
+    // hit the fast path when the shape is compatible.
+    resetMockState();
+    auto &mock = LcdSpiPeripheralMock::instance();
+
+    LcdSpiConfig config(1, 18, 6000000, 1024);
+    // owner intentionally left as LcdSpiOwnerDriver::NONE (default).
+    FL_REQUIRE(mock.initialize(config));
+    size_t deinitsBefore = mock.getDeinitCount();
+
+    // Re-initialize with identical NONE-owner config -> no deinit.
+    FL_REQUIRE(mock.initialize(config));
+    FL_CHECK(mock.getDeinitCount() == deinitsBefore);
+}
+
 #endif // FASTLED_STUB_IMPL
 
 } // FL_TEST_FILE

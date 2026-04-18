@@ -367,6 +367,9 @@ bool ChannelDriverLcdClockless::beginTransmission(
         config.max_transfer_bytes = slotCapacityBytes;
         config.use_psram = true;
         config.clock_hz = mClockHz;
+        // Issue #2270: tag the shared LCD_CAM singleton with this driver
+        // so it can detect a cross-driver switch and force full teardown.
+        config.owner = detail::LcdSpiOwnerDriver::LCD_CLOCKLESS;
 
         for (size_t i = 0; i < channels.size() && i < 16; i++) {
             config.data_gpios[i] = channels[i]->getPin();

@@ -100,6 +100,14 @@ bool LcdSpiPeripheralMockImpl::initialize(
                 << config.num_lanes);
         return false;
     }
+    // Issue #2270: mirror the real peripheral's owner-aware teardown so
+    // host tests can exercise the cross-driver switch path.
+    const bool sameOwner =
+        (config.owner == mConfig.owner) ||
+        (config.owner == LcdSpiOwnerDriver::NONE);
+    if (mInitialized && !sameOwner) {
+        deinitialize();
+    }
     mConfig = config;
     mInitialized = true;
     mEnabled = true;

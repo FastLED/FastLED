@@ -91,7 +91,8 @@ LcdSpiPeripheralEsp &LcdSpiPeripheralEsp::instance() FL_NOEXCEPT {
 LcdSpiPeripheralEsp::LcdSpiPeripheralEsp() FL_NOEXCEPT
     : mInitialized(false), mConfig(), mI80Bus(nullptr), mPanelIo(nullptr),
       mCompleteSem(nullptr), mCallback(nullptr), mUserCtx(nullptr),
-      mBusy(false), mLastTransmitSize(0) {}
+      mBusy(false), mLastTransmitSize(0),
+      mOwner(LcdSpiOwnerDriver::NONE) {}
 
 LcdSpiPeripheralEsp::~LcdSpiPeripheralEsp() { deinitialize(); }
 
@@ -100,13 +101,37 @@ LcdSpiPeripheralEsp::~LcdSpiPeripheralEsp() { deinitialize(); }
 //=============================================================================
 
 bool LcdSpiPeripheralEsp::initialize(const LcdSpiConfig &config) FL_NOEXCEPT {
+    // Issue #2270: when the owning driver changes between calls (e.g. the
+    // clocked-SPI driver handed the peripheral over to the clockless
+    // driver, or vice-versa) we MUST fully tear down even if the lane
+    // count / clock / transfer size happen to match. Otherwise the
+    // previous driver's ISR callback, ring buffers, and semaphore state
+    // leak into the new driver's session and the second cross-driver
+    // switch silently produces no DMA output.
+    const bool sameOwner =
+        (config.owner == mOwner) ||
+        (config.owner == LcdSpiOwnerDriver::NONE);
+
     if (mInitialized) {
-        if (mConfig.num_lanes == config.num_lanes &&
+        const bool sameShape =
+            mConfig.num_lanes == config.num_lanes &&
             mConfig.clock_hz == config.clock_hz &&
-            mConfig.max_transfer_bytes >= config.max_transfer_bytes) {
+            mConfig.max_transfer_bytes >= config.max_transfer_bytes;
+
+        if (sameShape && sameOwner) {
+            // Fast path - same driver, compatible config. Record the
+            // (possibly NONE) owner from the caller in case it now
+            // reports a concrete identity that was unset before.
+            if (config.owner != LcdSpiOwnerDriver::NONE) {
+                mOwner = config.owner;
+            }
             return true;
         }
-        deinitialize();
+
+        // Slow path - either the shape changed or the owning driver
+        // changed. Both cases require a full tear-down so we don't
+        // carry stale callback / semaphore / panel_io state forward.
+        teardownLocked();
     }
 
     if (config.num_lanes < 1 || config.num_lanes > 16) {
@@ -187,12 +212,23 @@ bool LcdSpiPeripheralEsp::initialize(const LcdSpiConfig &config) FL_NOEXCEPT {
 
     mLastTransmitSize = 0;
     mInitialized = true;
+    mOwner = config.owner;
     FL_DBG("LcdSpiPeripheralEsp: Initialized with " << config.num_lanes
-           << " lanes, " << config.clock_hz << " Hz clock");
+           << " lanes, " << config.clock_hz << " Hz clock, owner="
+           << static_cast<int>(config.owner));
     return true;
 }
 
-void LcdSpiPeripheralEsp::deinitialize() FL_NOEXCEPT {
+void LcdSpiPeripheralEsp::teardownLocked() FL_NOEXCEPT {
+    // Clear the ISR callback BEFORE deleting the panel_io so a late
+    // DMA-done interrupt from the previous owner can't dispatch into a
+    // stale context. The ESP-IDF LCD driver invokes our callback via
+    // the on_color_trans_done hook set when we create the panel_io, so
+    // nulling our user-level callback pointers here stops the trampoline
+    // in lcd_spi_flush_ready() from fanning out to the previous driver.
+    mCallback = nullptr;
+    mUserCtx = nullptr;
+
     if (mPanelIo != nullptr) {
         esp_lcd_panel_io_del(mPanelIo);
         mPanelIo = nullptr;
@@ -202,14 +238,22 @@ void LcdSpiPeripheralEsp::deinitialize() FL_NOEXCEPT {
         mI80Bus = nullptr;
     }
     if (mCompleteSem != nullptr) {
+        // Drain any stale "given" state from the previous owner, then
+        // delete the semaphore. Subsequent initialize() calls recreate
+        // and re-prime it so the new owner starts from a known-good
+        // state (given, ready to be taken by the first transmit()).
+        xSemaphoreTake(mCompleteSem, 0);
         vSemaphoreDelete(mCompleteSem);
         mCompleteSem = nullptr;
     }
     mInitialized = false;
-    mCallback = nullptr;
-    mUserCtx = nullptr;
     mBusy = false;
     mLastTransmitSize = 0;
+    mOwner = LcdSpiOwnerDriver::NONE;
+}
+
+void LcdSpiPeripheralEsp::deinitialize() FL_NOEXCEPT {
+    teardownLocked();
 }
 
 bool LcdSpiPeripheralEsp::isInitialized() const FL_NOEXCEPT {

@@ -321,6 +321,9 @@ bool ChannelDriverLcdSpi::beginTransmission(
         // max_transfer_bytes = chunk DMA size (all chunks are uniform)
         config.max_transfer_bytes = slotCapacityBytes;
         config.use_psram = true;
+        // Issue #2270: tag the shared LCD_CAM singleton with this driver
+        // so it can detect a cross-driver switch and force full teardown.
+        config.owner = detail::LcdSpiOwnerDriver::LCD_SPI;
 
         for (size_t i = 0; i < channels.size() && i < 16; i++) {
             const auto &chipset = channels[i]->getChipset();

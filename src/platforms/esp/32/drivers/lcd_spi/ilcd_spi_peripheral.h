@@ -17,6 +17,22 @@
 namespace fl {
 namespace detail {
 
+/// @brief Identifies which channel driver currently owns the shared
+///        LCD_CAM I80 peripheral singleton.
+///
+/// The ESP32-S3 LCD_CAM peripheral is a shared hardware resource that
+/// can be driven by either the clocked-SPI driver (APA102/SK9822) or the
+/// clockless driver (WS2812/SK6812) but not both simultaneously. When the
+/// active driver changes, the peripheral MUST be fully torn down — even
+/// if the lane count / clock / transfer size happen to match — because
+/// the ISR callback, ring-buffer ownership, and completion semaphore all
+/// belong to the previous driver. See issue #2270.
+enum class LcdSpiOwnerDriver : u8 {
+    NONE = 0,         ///< No driver has initialized the peripheral yet.
+    LCD_SPI = 1,      ///< Clocked-SPI driver (channel_driver_lcd_spi).
+    LCD_CLOCKLESS = 2 ///< Clockless driver (channel_driver_lcd_clockless).
+};
+
 /// @brief Configuration for LCD_CAM SPI peripheral
 struct LcdSpiConfig {
     fl::vector_fixed<int, 16> data_gpios; ///< Data lane GPIOs (D0-D15)
@@ -26,6 +42,7 @@ struct LcdSpiConfig {
     u32 clock_hz;                          ///< SPI clock frequency in Hz
     size_t max_transfer_bytes;             ///< Maximum bytes per transfer
     bool use_psram;                        ///< Allocate buffers in PSRAM
+    LcdSpiOwnerDriver owner;               ///< Which driver is initializing (issue #2270)
 
     LcdSpiConfig() FL_NOEXCEPT
         : data_gpios(),
@@ -34,7 +51,8 @@ struct LcdSpiConfig {
           num_lanes(0),
           clock_hz(0),
           max_transfer_bytes(0),
-          use_psram(true) {
+          use_psram(true),
+          owner(LcdSpiOwnerDriver::NONE) {
         data_gpios.resize(16);
         for (size_t i = 0; i < 16; i++) {
             data_gpios[i] = -1;
@@ -49,7 +67,8 @@ struct LcdSpiConfig {
           num_lanes(lanes),
           clock_hz(clk_hz),
           max_transfer_bytes(max_bytes),
-          use_psram(true) {
+          use_psram(true),
+          owner(LcdSpiOwnerDriver::NONE) {
         data_gpios.resize(16);
         for (size_t i = 0; i < 16; i++) {
             data_gpios[i] = -1;
