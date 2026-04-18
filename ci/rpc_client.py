@@ -160,12 +160,29 @@ class RpcClient:
         """Check if serial connection is open."""
         return self._serial is not None and self._connected
 
-    async def connect(self, boot_wait: float = 3.0, drain_boot: bool = True) -> None:
+    async def connect(
+        self,
+        boot_wait: float = 3.0,
+        drain_boot: bool = True,
+        boot_signals: "list[str] | tuple[str, ...] | None" = None,
+    ) -> None:
         """Open serial connection (async).
 
         Args:
-            boot_wait: Time to wait for device boot (seconds)
-            drain_boot: Whether to drain boot output after connecting
+            boot_wait: Maximum time to wait for device boot (seconds). When
+                ``boot_signals`` is non-empty, this is the *deadline* for the
+                spin-poll — the helper returns as soon as any signal appears,
+                otherwise it falls back to waiting the full duration (matching
+                the legacy fixed-sleep behavior so slow devices still work).
+            drain_boot: Whether to drain boot output after connecting. Lines
+                consumed while spinning for ``boot_signals`` count toward the
+                drain, so this second pass only catches leftovers.
+            boot_signals: Substrings to look for in serial output during the
+                boot wait. When a match is found, ``connect()`` returns
+                immediately instead of sleeping the full ``boot_wait``. Pass
+                an empty list to opt out of spin-polling (legacy sleep path).
+                Defaults to ``BOOT_SIGNALS_ANY`` which covers both ROM-loader
+                and Arduino ``setup()`` banners.
         """
         if self._connected:
             return
@@ -191,22 +208,69 @@ class RpcClient:
         if self.verbose:
             print(f"✅ [RPC] Serial connection established")
 
+        # Resolve default boot signals lazily so tests that don't touch
+        # serial I/O don't import the util module.
+        effective_signals: tuple[str, ...] | list[str]
+        if boot_signals is None:
+            from ci.util.boot_wait import BOOT_SIGNALS_ANY
+
+            effective_signals = BOOT_SIGNALS_ANY
+        else:
+            effective_signals = boot_signals
+
+        poll_drained_lines: list[str] = []
+
         if boot_wait > 0:
             if self.verbose:
-                print(f"⏳ [RPC] Waiting {boot_wait}s for device boot...")
-            # Use async sleep to allow other tasks to run
-            # Poll in small increments for interrupt checking
-            start = time.time()
-            while time.time() - start < boot_wait:
-                self._check_interrupt()
-                await asyncio.sleep(0.05)  # Async sleep, check interrupt every 50ms
+                print(f"⏳ [RPC] Waiting up to {boot_wait}s for device boot...")
+            from ci.util.boot_wait import wait_for_signal
+
+            def _mirror(line: str) -> None:
+                if self.verbose:
+                    print(f"  [boot-poll] {line[:120]}")
+
+            # Spin-poll for a boot signal. If none of the expected signals
+            # arrive within ``boot_wait`` the call still returns (timeout IS
+            # the fallback — see issue #2265), preserving the original
+            # "waited N seconds then moved on" behavior.
+            assert self._serial is not None
+            try:
+                matched, poll_drained_lines = await wait_for_signal(
+                    self._serial,
+                    effective_signals,
+                    timeout=boot_wait,
+                    on_line=_mirror if self.verbose else None,
+                )
+            except KeyboardInterrupt:
+                notify_main_thread()
+                raise
+
+            self._check_interrupt()
+
+            if self.verbose:
+                if matched is not None:
+                    print(
+                        f"✅ [RPC] Boot signal {matched!r} detected after "
+                        f"draining {len(poll_drained_lines)} line(s); "
+                        f"skipping fixed sleep."
+                    )
+                else:
+                    print(
+                        f"⏳ [RPC] No boot signal in {boot_wait}s "
+                        f"(drained {len(poll_drained_lines)} line(s)); "
+                        f"falling back to timeout behavior."
+                    )
 
         if drain_boot:
             if self.verbose:
                 print(f"📥 [RPC] Draining boot output...")
             lines_drained = await self.drain_boot_output(verbose=self.verbose)
             if self.verbose:
-                print(f"📥 [RPC] Drained {lines_drained} boot lines")
+                total = lines_drained + len(poll_drained_lines)
+                print(
+                    f"📥 [RPC] Drained {lines_drained} boot lines "
+                    f"(plus {len(poll_drained_lines)} during spin-poll = {total})"
+                )
 
     async def close(self) -> None:
         """Close serial connection (async)."""
