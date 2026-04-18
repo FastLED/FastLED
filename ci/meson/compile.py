@@ -3,6 +3,7 @@
 import os
 import re
 import sys
+import time
 from collections import deque
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -16,11 +17,22 @@ from ci.meson.cache_utils import (
     save_ninja_skip_state,
 )
 from ci.meson.compiler import get_meson_executable
+from ci.meson.link_retry import (
+    is_link_permission_denied_error,
+    kill_stale_runner_processes,
+)
 from ci.meson.output import print_banner
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.output_formatter import TimestampFormatter
 from ci.util.tee import StreamTee
 from ci.util.timestamp_print import ts_print as _ts_print
+
+
+# Maximum number of retries when ld.lld fails with 'permission denied' on
+# runner.exe / example_runner.exe (Windows-only transient failure; see #2268).
+# Each retry waits ``0.5 * (attempt + 1)`` seconds and is preceded by a
+# best-effort kill of any stale runner process under the build directory.
+_LLD_PERM_DENIED_MAX_RETRIES = 3
 
 
 @dataclass
@@ -177,6 +189,15 @@ def compile_meson(
     # Generate log filename
     test_name_slug = target.replace("/", "_") if target else "all"
     error_log_path = compile_errors_dir / f"{test_name_slug}.log"
+
+    # Pre-link safeguard (#2268): on Windows, kill any stale runner.exe /
+    # example_runner.exe processes under this build_dir. Windows refuses to
+    # overwrite a running .exe, so a leftover process from a prior invocation
+    # will cause ld.lld to fail with "permission denied". This is a no-op on
+    # non-Windows platforms.
+    _killed = kill_stale_runner_processes(build_dir)
+    if _killed:
+        _ts_print(f"[MESON] 🧹 Killed {_killed} stale runner process(es) before link")
 
     # Create tee for error log capture (stdout + stderr merged)
     stderr_tee = StreamTee(error_log_path, echo=False)
@@ -497,6 +518,70 @@ def compile_meson(
                     f"[MESON] ⚠️  Repair failed with exception: {repair_error}",
                     file=sys.stderr,
                 )
+
+        # Windows ld.lld 'permission denied' retry (#2268).
+        # If the link failed because runner.exe / example_runner.exe was
+        # locked (stale runner process or antivirus handle), retry the ninja
+        # invocation a few times with a short backoff. This is a no-op on
+        # non-Windows platforms because ``is_link_permission_denied_error``
+        # returns False off-Windows.
+        if returncode != 0 and is_link_permission_denied_error(output):
+            for _attempt in range(_LLD_PERM_DENIED_MAX_RETRIES):
+                _ts_print(
+                    f"[MESON] ⚠️  ld.lld permission denied on runner binary "
+                    f"(attempt {_attempt + 1}/{_LLD_PERM_DENIED_MAX_RETRIES}) - "
+                    f"killing stale runner processes and retrying",
+                    file=sys.stderr,
+                )
+                _killed_retry = kill_stale_runner_processes(build_dir)
+                if _killed_retry:
+                    _ts_print(
+                        f"[MESON] 🧹 Killed {_killed_retry} stale runner process(es)",
+                        file=sys.stderr,
+                    )
+                # Backoff 0.5s, 1.0s, 1.5s — gives Windows/AV time to release
+                # any remaining handles on the .exe.
+                time.sleep(0.5 * (_attempt + 1))
+
+                # Re-invoke ninja for the same compile command. We reuse the
+                # original ``cmd`` (meson compile -C build_dir [target]) so
+                # ninja does an incremental relink of just the failed target.
+                try:
+                    retry_proc = RunningProcess(
+                        cmd,
+                        timeout=600,
+                        auto_run=True,
+                        check=False,
+                        output_formatter=TimestampFormatter(),
+                    )
+                    retry_proc.wait(echo=False)
+                    returncode = cast(int, retry_proc.returncode)
+                    retry_output = str(retry_proc.stdout)
+                    # Merge retry output into the captured output so downstream
+                    # diagnostics include the retry context.
+                    output = output + "\n" + retry_output
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
+                    raise
+                except Exception as retry_error:
+                    _ts_print(
+                        f"[MESON] ⚠️  Retry invocation failed: {retry_error}",
+                        file=sys.stderr,
+                    )
+                    break
+
+                if returncode == 0:
+                    _ts_print(
+                        f"[MESON] ✅ Link retry succeeded on attempt {_attempt + 1}",
+                        file=sys.stderr,
+                    )
+                    break
+
+                # Only keep retrying while the failure is still the same
+                # permission-denied pattern. A different failure means the
+                # retry loop is done (fall through to normal error handling).
+                if not is_link_permission_denied_error(retry_output):
+                    break
 
         if returncode != 0:
             # In quiet mode, don't print failure messages (fallback retries handle this)
