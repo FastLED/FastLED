@@ -1108,6 +1108,135 @@ class PioCompiler(Compiler):
         merged_bin = self._artifacts_dir(self.board.board_name) / "merged.bin"
         return merged_bin if merged_bin.exists() else None
 
+    def _apply_bootloader_cache(
+        self,
+        env_name: str,
+        artifacts_dir: Path,
+        bootloader_bin: Path,
+        partitions_bin: Path,
+    ) -> None:
+        """Consult the bootloader cache and materialise / populate as needed.
+
+        Call site: ``build_with_merged_bin`` — AFTER the per-example build
+        has succeeded, BEFORE the ``esptool merge_bin`` step.
+
+        Behaviour:
+
+        * If the active backend already emitted ``bootloader.bin`` AND
+          ``partitions.bin``:
+          - cache miss → populate it (future runs skip re-generating
+            deterministic artifacts);
+          - cache hit → no-op (we already have good files).
+
+        * If either artifact is missing from the active backend's dir:
+          - cache hit → materialise the cached files next to
+            ``firmware.bin`` so the merge step below finds a complete set;
+          - cache miss → no-op (we can't fix this from here; the
+            diagnostic block below will surface the missing files).
+
+        All errors are swallowed (logged) — the merge step's own
+        existence check is the authoritative guard.
+        """
+        try:
+            from ci.compiler.bootloader_cache import (
+                BootloaderCache,
+                build_cache_key_for_board,
+            )
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception as import_err:
+            print(f"bootloader cache: skipped (import failed: {import_err})")
+            return
+
+        try:
+            cache = BootloaderCache()
+            key = build_cache_key_for_board(
+                board_name=env_name,
+                # Platform URL pins the entire ESP-IDF toolchain version.
+                # ``str(...)`` because some platforms are raw version
+                # strings (e.g. ``espressif32@1.11.2``), not URLs.
+                platform_url_or_version=str(self.board.platform),
+                build_dir=self.build_dir,
+            )
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception as key_err:
+            print(f"bootloader cache: skipped (key build failed: {key_err})")
+            return
+
+        have_bootloader = bootloader_bin.exists()
+        have_partitions = partitions_bin.exists()
+
+        try:
+            hit = cache.lookup(key)
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception as lookup_err:
+            print(f"bootloader cache: lookup failed ({lookup_err}) — ignoring cache")
+            return
+
+        if have_bootloader and have_partitions:
+            # Backend produced fresh artifacts — populate the cache for
+            # future runs if we don't already have an entry.
+            if hit is None:
+                try:
+                    cache.populate(key, bootloader_bin, partitions_bin)
+                    print(
+                        f"bootloader cache: populated {key.digest()[:12]} "
+                        f"from backend artifacts"
+                    )
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
+                    raise
+                except Exception as pop_err:
+                    # Non-fatal: just lose the perf win this round.
+                    print(
+                        f"bootloader cache: populate failed "
+                        f"({pop_err}) — build still succeeds"
+                    )
+            else:
+                print(
+                    f"bootloader cache: reusing {key.digest()[:12]} "
+                    f"(backend also emitted fresh artifacts)"
+                )
+            return
+
+        # At least one artifact is missing from the backend's output
+        # dir — try to fill from cache.
+        if hit is None:
+            # Both missing and no cache to rescue from — leave as-is so
+            # the diagnostic branch below can show the user what's
+            # actually on disk.
+            print(
+                f"bootloader cache: miss for {key.digest()[:12]} and "
+                f"backend produced no {('bootloader.bin' if not have_bootloader else '')}"
+                f"{' + ' if not have_bootloader and not have_partitions else ''}"
+                f"{('partitions.bin' if not have_partitions else '')} "
+                f"— merge step will fail with a diagnostic"
+            )
+            return
+
+        try:
+            cache.materialise_into(hit, artifacts_dir)
+            print(
+                f"bootloader cache: HIT {key.digest()[:12]} — "
+                f"materialised bootloader.bin + partitions.bin into "
+                f"{artifacts_dir}"
+            )
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
+        except Exception as mat_err:
+            # Non-fatal: the merge step will surface the still-missing
+            # files via its own diagnostic.
+            print(
+                f"bootloader cache: materialise failed "
+                f"({mat_err}) — falling through to diagnostic"
+            )
+
     def build_with_merged_bin(
         self, example: str, output_path: Optional[Path] = None
     ) -> SketchResult:
@@ -1155,6 +1284,33 @@ class PioCompiler(Compiler):
         partitions_bin = artifacts_dir / "partitions.bin"
         boot_app0_bin = artifacts_dir / "boot_app0.bin"
         firmware_bin = artifacts_dir / "firmware.bin"
+
+        # 3a. Bootloader-cache integration (FastLED/FastLED#2287).
+        #
+        # ESP-IDF's bootloader + partition-table binaries are deterministic
+        # for a given (board, IDF version, partitions.csv, sdkconfig.defaults)
+        # tuple — no embedded timestamps / paths / git hashes. We use this
+        # to:
+        #
+        #   * Cache hit (and missing from active backend's output dir):
+        #       materialise the cached ``bootloader.bin`` + ``partitions.bin``
+        #       directly next to ``firmware.bin`` so the merge step
+        #       below finds a complete set without needing the backend
+        #       to have re-emitted them. This unblocks fbuild workflows
+        #       on fbuild versions that don't yet emit boot artifacts.
+        #
+        #   * Cache miss, but build did emit the artifacts: populate the
+        #       cache so future runs (CI + developer) can short-circuit.
+        #
+        # A failure inside the cache layer is non-fatal — the merge below
+        # will still succeed as long as the active backend itself
+        # produced the files.
+        self._apply_bootloader_cache(
+            env_name=env_name,
+            artifacts_dir=artifacts_dir,
+            bootloader_bin=bootloader_bin,
+            partitions_bin=partitions_bin,
+        )
 
         # Verify all required files exist
         missing_files: list[str] = []
