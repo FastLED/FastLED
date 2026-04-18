@@ -2098,17 +2098,19 @@ FL_TEST_CASE("audio::Reactive - spectral metrics decay to zero on silence (FastL
         (void)data.spectralFlux;
     }
 
-    // Phase 2: 1 s of zero-PCM silence. The pipeline's NoiseFloorTracker
-    // will flag each frame as silent, and the envelope should decay all
-    // three spectral metrics toward zero.
-    for (int i = 0; i < kFramesPerSecond; ++i) {
+    // Phase 2: zero-PCM silence. With tau=0.2s, the envelope follows
+    // exp(-t/tau) — after t seconds the residual fraction is exp(-t/0.2).
+    // We want the residual to be small enough that the *absolute* value is
+    // < 0.01 regardless of the peak. For initial peaks ~O(1e3), that needs
+    // about exp(-t/0.2) < 1e-5 → t ≳ 2.3s. Run 2.5s of silence (~11 taus).
+    constexpr int kSilenceSeconds = 3;
+    for (int i = 0; i < kSilenceSeconds * kFramesPerSecond; ++i) {
         audio::Sample s = makeSilence(
             (kFramesPerSecond + i) * 12, kSamplesPerFrame);
         reactive.processSample(s);
     }
 
-    // With tau=0.2s and ~1 s of silence (~5*tau), outputs should be
-    // within the envelope's isGated() epsilon (1e-4) of zero.
+    // After ~15 taus of silence the envelopes are effectively zero.
     const auto& data = reactive.getData();
     FL_CHECK_LT(data.dominantFrequency, 0.01f);
     FL_CHECK_LT(data.magnitude, 0.01f);

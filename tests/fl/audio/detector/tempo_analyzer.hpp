@@ -324,12 +324,13 @@ FL_TEST_CASE("audio::detector::TempoAnalyzer - confidence fades in silence, BPM 
     FL_CHECK_GT(liveBPM, 90.0f);
     FL_CHECK_LT(liveBPM, 150.0f);
 
-    // Phase 2: ~3 seconds of silence with context->setSilent(true).
-    // At 43 fps (23ms per frame), 3s ≈ 130 frames. With tau=2s the envelope
-    // crosses 95% of the decay in 3*tau = 6s, but at 3s we expect ≈ exp(-1.5) = 0.22
-    // of the starting value, which for a start around 0.5 lands near 0.11.
-    // Run longer (5s) to be well past 95% → comfortably below the 0.05 target.
-    const int silenceFrames = 220;  // ~5s
+    // Phase 2: ~8 seconds of silence with context->setSilent(true).
+    // tau=2s → after t seconds residual fraction is exp(-t/2). At t=8s,
+    // residual ≈ 0.018 — for liveConfidence up to ~2.5 this lands at
+    // ~0.045, comfortably below the 0.05 target even at the high end.
+    // Earlier durations (5s ≈ exp(-2.5) = 0.082) were too tight to the
+    // threshold and flaked when liveConfidence came in near its upper end.
+    const int silenceFrames = 350;  // ~8s at 43 fps
     for (int i = 0; i < silenceFrames; ++i) {
         timestamp += frameIntervalMs;
         ctx->setSample(audio::Sample(silenceData, timestamp));

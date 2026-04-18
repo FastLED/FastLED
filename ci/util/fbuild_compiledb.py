@@ -80,10 +80,13 @@ def ensure_compile_commands(
             check=True,
             cwd=str(project_root),
         )
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
         # Per project guideline: all try/except blocks must handle
         # KeyboardInterrupt before broader exceptions so Ctrl-C is never
         # swallowed.
+        from ci.util.global_interrupt_handler import handle_keyboard_interrupt
+
+        handle_keyboard_interrupt(ki)
         raise
     except (subprocess.CalledProcessError, FileNotFoundError) as exc:
         print(

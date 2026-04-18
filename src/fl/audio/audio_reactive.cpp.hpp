@@ -191,8 +191,16 @@ void Reactive::processSample(const Sample& sample) {
 
     // Populate silence flag after setSample() resets it — detectors run via
     // updateFromContext() below and will read context->isSilent().
+    //
+    // Uses an absolute RMS threshold (not the adaptive noise floor). The
+    // adaptive floor's first-sample init matches the current level, which
+    // causes isAboveFloor() to be stuck at false for any steady signal —
+    // wrongly flagging loud constant tones as silent. Absolute RMS is the
+    // right primitive for "no signal present": a steady loud tone has
+    // large RMS and is not silent regardless of noise-floor adaptation.
     if (mConfig.enableNoiseFloorTracking) {
-        mContext->setSilent(!mNoiseFloorTracker.isAboveFloor(processedSample.rms()));
+        constexpr float kSilenceRmsThreshold = 10.0f;
+        mContext->setSilent(processedSample.rms() < kSilenceRmsThreshold);
     }
 
     // Process the conditioned Sample - timing is gated by sample availability

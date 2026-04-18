@@ -63,8 +63,14 @@ void Processor::update(const Sample& sample) {
     // Stage 4: Silence flag — detectors use this to gate outputs when audio stops.
     // Only populated when NFT is enabled; otherwise silence is unknowable and
     // stays at its default (false) after setSample() above.
+    //
+    // Uses an absolute RMS threshold rather than NFT.isAboveFloor(): the
+    // adaptive floor's first-sample init matches the current level, so
+    // isAboveFloor() stays false for any steady signal. Absolute RMS is the
+    // right silence primitive — a loud constant tone has large RMS.
     if (mNoiseFloorTrackingEnabled && conditioned.isValid()) {
-        mContext->setSilent(!mNoiseFloorTracker.isAboveFloor(conditioned.rms()));
+        constexpr float kSilenceRmsThreshold = 10.0f;
+        mContext->setSilent(conditioned.rms() < kSilenceRmsThreshold);
     }
 
     // Phase 1: Compute state for all active detector
