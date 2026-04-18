@@ -115,13 +115,25 @@ void run(fl::u32 microseconds, ExecFlags flags) {
             Executor::instance().update_all();
         }
 
-        // SYSTEM: OS-level yield. Normally uses fl::yield() which maps to
-        // vTaskDelay(0) on ESP32 — only yields to same-or-higher priority.
-        // When WiFi is active, ESP32 needs vTaskDelay(1) (1 FreeRTOS tick)
-        // to give lower-priority WiFi/lwIP tasks CPU time.
+        // SYSTEM: OS-level yield.
+        //
+        // When the caller provided a non-zero microseconds budget we treat
+        // this as an explicit spin-wait on hardware (typical DMA / driver
+        // wait loops). In that case we MUST use a deep yield (≥ 1 FreeRTOS
+        // tick on ESP32) so that lower-priority network tasks — WiFi,
+        // Ethernet lwIP, etc. — actually get CPU time. Previously this
+        // path was gated on an active WiFi mode check, which missed
+        // Ethernet-only deployments and also the pre-connection window
+        // where `esp_wifi_get_mode` still returns WIFI_MODE_NULL. That
+        // regression manifested as the ESP32-S3 I2S-vs-websockets
+        // starvation reported in https://github.com/FastLED/FastLED/issues/2254
+        // (Issue 1).
+        //
+        // When microseconds == 0 the caller wants the cheapest possible
+        // yield (we are between other pumped subsystems and will loop
+        // again immediately), so we keep the lightweight fl::yield() path.
         if (do_system) {
-            if (microseconds > 0 &&
-                fl::platforms::ICoroutineRuntime::instance().needsDeepYield()) {
+            if (microseconds > 0) {
                 fl::platforms::ICoroutineRuntime::instance().pumpCoroutines(1000);
             } else {
                 fl::yield();

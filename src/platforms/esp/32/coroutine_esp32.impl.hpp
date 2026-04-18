@@ -64,11 +64,25 @@ public:
         const fl::u32 tick_period_us = 1000000u / configTICK_RATE_HZ;
         fl::u32 ticks = us / tick_period_us;
 
-        if (ticks > 0) {
-            vTaskDelay(ticks);
-        } else {
+        if (us == 0) {
+            // Caller explicitly asked for no delay — just yield among
+            // equal/higher priority tasks.
             taskYIELD();
+            return;
         }
+
+        // Caller asked for a non-zero wait. Round UP to at least 1 tick so
+        // that lower-priority tasks (e.g. lwIP/WiFi) actually get CPU time.
+        // Otherwise, on default ESP-IDF tick rates (100 Hz, tick_period_us
+        // = 10 000) a sub-tick request such as pumpCoroutines(1000) would
+        // truncate to ticks == 0 and degenerate into taskYIELD(), which
+        // does NOT yield to lower-priority tasks. That regression was the
+        // root cause of websocket starvation on ESP32-S3 I2S wait loops
+        // (see https://github.com/FastLED/FastLED/issues/2254, Issue 1).
+        if (ticks == 0) {
+            ticks = 1;
+        }
+        vTaskDelay(ticks);
     }
 
     bool needsDeepYield() const FL_NOEXCEPT override {
