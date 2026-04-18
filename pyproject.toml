@@ -48,7 +48,6 @@ dependencies = [
     "colorama>=0.4.6",
     "ty>=0.0.15",
     "bleak>=0.22.3",
-    "running-process>=3.0.7",
 ]
 
 [build-system]

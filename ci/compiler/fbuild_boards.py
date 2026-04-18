@@ -10,10 +10,12 @@
 #
 # NOT supported by fbuild (must stay on PlatformIO):
 #   - atmelmegaavr boards (ATtiny1604, ATtiny1616, nano_every) -- platform not recognized
-#   - Teensy 3.x/LC (teensy30..36, teensylc)
-#   - Specialized ESP32 variants (qemu, idf33, idf44, i2s)
+#   - Teensy 3.x/LC (teensy30..36, teensylc) -- no Cortex-M7
+#   - Specialized ESP32 variants (qemu, idf33, idf44, i2s) -- custom IDF/driver configs
 #   - uno_r4_wifi -- uses renesas-ra platform, no fbuild orchestrator
-#   - teensy40, teensy41
+#   - atmega8a -- MiniCore framework: core path + board name mapping broken
+#   - STM32, RP2040/RP2350, NRF52, Apollo3, SAM/SAMD, MGM240 -- no orchestrators
+#   - esp8266 -- no orchestrator
 FBUILD_BOARDS: frozenset[str] = frozenset(
     {
         # AVR (atmelavr)
@@ -34,5 +36,8 @@ FBUILD_BOARDS: frozenset[str] = frozenset(
         "esp32h2",
         "upesy_wroom",
         "seeed_xiao_esp32s3",
+        # Teensy (arm-none-eabi-gcc, Cortex-M7)
+        "teensy40",
+        "teensy41",
     }
 )

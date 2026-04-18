@@ -367,11 +367,16 @@ class RunningProcessGroup:
                 if not any_activity:
                     time.sleep(0.01)
 
+        except KeyboardInterrupt:
+            # Kill all active child processes on interrupt
+            for proc in active_processes:
+                proc.kill()
+            handle_keyboard_interrupt(KeyboardInterrupt())
+            raise
         finally:
             # Clean up monitoring
             if stuck_monitor:
-                for proc in self.processes:
-                    stuck_monitor.stop_monitoring(proc)
+                stuck_monitor.shutdown()
             self._status_monitoring_active = False
 
         # Check for processes that failed with non-zero exit codes
