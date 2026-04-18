@@ -13,6 +13,7 @@
 #include "fl/audio/frequency_bin_mapper.cpp.hpp"
 #include "fl/audio/noise_floor_tracker.cpp.hpp"
 #include "fl/audio/signal_conditioner.cpp.hpp"
+#include "fl/audio/silence_envelope.cpp.hpp"
 #include "fl/audio/spectral_equalizer.cpp.hpp"
 #include "fl/audio/synth.cpp.hpp"
 

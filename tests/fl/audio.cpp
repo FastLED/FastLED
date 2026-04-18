@@ -20,6 +20,7 @@ FL_TEST_CASE("Audio - Test registration works") {
 #include "tests/fl/audio/frequency_bin_mapper.hpp"
 #include "tests/fl/audio/noise_floor_tracker.hpp"
 #include "tests/fl/audio/signal_conditioner.hpp"
+#include "tests/fl/audio/silence_envelope.hpp"
 #include "tests/fl/audio/spectral_equalizer.hpp"
 #include "tests/fl/audio/synth.hpp"
 #include "tests/fl/audio/detector/equalizer.hpp"
