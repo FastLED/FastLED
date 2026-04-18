@@ -502,6 +502,17 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                     }
                     if args.legacy:
                         test_config["useLegacyApi"] = True
+                    # Multi-frame capture: back-to-back show()/capture cycles per pattern.
+                    # Defaults: SPI -> 2 (catches #2254/#2288 second-frame degradation),
+                    # others -> 1. User can override with --frames N.
+                    if args.frames is not None:
+                        frame_count = args.frames
+                    elif driver == "SPI":
+                        frame_count = 2
+                    else:
+                        frame_count = 1
+                    if frame_count > 1:
+                        test_config["frameCount"] = frame_count
                     rpc_command = {"method": "runSingleTest", "params": test_config}
                     rpc_commands_list.append(rpc_command)
 

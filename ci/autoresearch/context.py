@@ -164,10 +164,14 @@ def display_pattern_details(result: dict[str, Any]) -> None:
     lane_count = result.get("laneCount", 0)
     lane_sizes = result.get("laneSizes", [])
     total_leds = sum(lane_sizes) if lane_sizes else 0
+    frame_count = result.get("frameCount", 1)
 
     print()
     print("=" * 62)
-    print(f"{driver} — {lane_count} lane(s), {total_leds} LEDs")
+    header = f"{driver} — {lane_count} lane(s), {total_leds} LEDs"
+    if frame_count and frame_count > 1:
+        header += f", frames={frame_count}"
+    print(header)
     print("=" * 62)
 
     agg_total_bytes = 0
@@ -177,13 +181,15 @@ def display_pattern_details(result: dict[str, Any]) -> None:
     for pat in patterns:
         name = pat.get("name", "Unknown")
         passed = pat.get("passed", False)
+        run_number = pat.get("runNumber")
         status = (
             f"{Fore.GREEN}PASS{Style.RESET_ALL}"
             if passed
             else f"{Fore.RED}FAIL{Style.RESET_ALL}"
         )
 
-        print(f"\n  {name}  {status}")
+        frame_suffix = f" [frame {run_number}]" if run_number else ""
+        print(f"\n  {name}{frame_suffix}  {status}")
 
         if passed:
             num_leds = pat.get("totalLeds", 0)

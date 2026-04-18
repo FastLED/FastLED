@@ -142,10 +142,13 @@ void runMultiTest(const char* test_name,
 // @param total Output parameter - total tests run (incremented)
 // @param passed Output parameter - tests passed (incremented)
 // @param out_results Optional output for per-pattern results with LED error details
+// @param num_runs_per_pattern Consecutive captures per pattern (default 1). >=2 exposes
+//        second-frame degradation bugs like SPI driver zeroing DMA buffer after first show().
 void autoResearchChipsetTiming(fl::AutoResearchConfig& config,
                            int& total, int& passed,
                            uint32_t& out_show_duration_ms,
-                           fl::vector<fl::RunResult>* out_results = nullptr);
+                           fl::vector<fl::RunResult>* out_results = nullptr,
+                           int num_runs_per_pattern = 1);
 
 // AutoResearch using the legacy template addLeds API (supports multi-lane)
 // Uses LegacyClocklessProxy to map runtime pin to WS2812B<PIN> template instantiation
@@ -153,10 +156,12 @@ void autoResearchChipsetTiming(fl::AutoResearchConfig& config,
 // @param total Output parameter - total tests run (incremented)
 // @param passed Output parameter - tests passed (incremented)
 // @param out_results Optional output for per-pattern results with LED error details
+// @param num_runs_per_pattern Consecutive captures per pattern (default 1).
 void autoResearchChipsetTimingLegacy(fl::AutoResearchConfig& config,
                                  int& total, int& passed,
                                  uint32_t& out_show_duration_ms,
-                                 fl::vector<fl::RunResult>* out_results = nullptr);
+                                 fl::vector<fl::RunResult>* out_results = nullptr,
+                                 int num_runs_per_pattern = 1);
 
 // Set mixed RGB bit patterns to test MSB vs LSB handling
 // @param leds LED array to fill with pattern

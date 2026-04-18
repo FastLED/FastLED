@@ -980,7 +980,8 @@ void runMultiTest(const char* test_name,
 void autoResearchChipsetTiming(fl::AutoResearchConfig& config,
                            int& driver_total, int& driver_passed,
                            uint32_t& out_show_duration_ms,
-                           fl::vector<fl::RunResult>* out_results) {
+                           fl::vector<fl::RunResult>* out_results,
+                           int num_runs_per_pattern) {
     fl::sstream ss;
     ss << "\n========================================\n";
     ss << "Testing: " << config.timing_name << "\n";
@@ -1047,8 +1048,11 @@ void autoResearchChipsetTiming(fl::AutoResearchConfig& config,
 
     // Multi-run configuration - optimized for speed
     fl::MultiRunConfig multi_config;
-    multi_config.num_runs = 1;            // Single run per pattern (Python orchestrates retries)
-    multi_config.print_all_runs = false;  // Only print failed runs
+    // num_runs=1: Python orchestrates retries (default).
+    // num_runs>=2: Back-to-back captures of the same buffer to expose second-frame
+    // degradation (e.g., SPI driver zeroing its DMA buffer after the first show()).
+    multi_config.num_runs = (num_runs_per_pattern > 0) ? num_runs_per_pattern : 1;
+    multi_config.print_all_runs = (multi_config.num_runs > 1);
     multi_config.print_per_led_errors = false;  // Errors reported via JSON-RPC
     multi_config.max_errors_per_run = 10;  // Store first 10 errors for JSON response
 
@@ -1090,7 +1094,8 @@ void autoResearchChipsetTiming(fl::AutoResearchConfig& config,
 void autoResearchChipsetTimingLegacy(fl::AutoResearchConfig& config,
                                  int& driver_total, int& driver_passed,
                                  uint32_t& out_show_duration_ms,
-                                 fl::vector<fl::RunResult>* out_results) {
+                                 fl::vector<fl::RunResult>* out_results,
+                                 int num_runs_per_pattern) {
     fl::sstream ss;
     ss << "\n========================================\n";
     ss << "Testing (LEGACY API): " << config.timing_name << "\n";
@@ -1140,8 +1145,8 @@ void autoResearchChipsetTimingLegacy(fl::AutoResearchConfig& config,
     int passed = 0;
 
     fl::MultiRunConfig multi_config;
-    multi_config.num_runs = 1;
-    multi_config.print_all_runs = false;
+    multi_config.num_runs = (num_runs_per_pattern > 0) ? num_runs_per_pattern : 1;
+    multi_config.print_all_runs = (multi_config.num_runs > 1);
     multi_config.print_per_led_errors = false;
     multi_config.max_errors_per_run = 10;
 

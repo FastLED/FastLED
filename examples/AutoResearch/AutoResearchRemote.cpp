@@ -214,6 +214,22 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         }
     }
 
+    // 4b. Extract frameCount (optional, default: 1)
+    // Number of back-to-back captures of the SAME LED buffer within a single
+    // pattern. frameCount >= 2 exposes second-frame degradation bugs where a
+    // driver corrupts or zeroes its DMA buffer after the first show() — see
+    // issues #2254 and #2288 (ESP32-S3 SPI \"black frame between displays\").
+    int frame_count = 1;
+    if (config.contains("frameCount") && config["frameCount"].is_int()) {
+        frame_count = static_cast<int>(config["frameCount"].as_int().value());
+        if (frame_count < 1 || frame_count > 16) {
+            response.set("success", false);
+            response.set("error", "InvalidFrameCount");
+            response.set("message", "frameCount must be in [1, 16]");
+            return response;
+        }
+    }
+
     // 5. Extract pinTx (optional, default: use mState->pin_tx)
     int pin_tx = mState->pin_tx;
     if (config.contains("pinTx") && config["pinTx"].is_int()) {
@@ -373,7 +389,7 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
             // Legacy API path: WS2812B<PIN> template instantiation
             for (int iter = 0; iter < iterations; iter++) {
                 int iter_total = 0, iter_passed = 0;
-                autoResearchChipsetTimingLegacy(autoresearch_config, iter_total, iter_passed, show_duration_ms, &run_results);
+                autoResearchChipsetTimingLegacy(autoresearch_config, iter_total, iter_passed, show_duration_ms, &run_results, frame_count);
                 total_tests += iter_total;
                 passed_tests += iter_passed;
             }
@@ -381,7 +397,7 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
             // Channel API path: FastLED.add(channel_config)
             for (int iter = 0; iter < iterations; iter++) {
                 int iter_total = 0, iter_passed = 0;
-                autoResearchChipsetTiming(autoresearch_config, iter_total, iter_passed, show_duration_ms, &run_results);
+                autoResearchChipsetTiming(autoresearch_config, iter_total, iter_passed, show_duration_ms, &run_results, frame_count);
                 total_tests += iter_total;
                 passed_tests += iter_passed;
             }
@@ -409,6 +425,7 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     response.set("laneSizes", sizes_response);
     response.set("pattern", pattern.c_str());
     response.set("useLegacyApi", use_legacy_api);
+    response.set("frameCount", static_cast<int64_t>(frame_count));
 
     // Free run_results before building response to reclaim heap
     // Only serialize pattern details when tests FAIL (saves heap on passing tests)
@@ -418,6 +435,7 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
             const auto& rr = run_results[ri];
             if (rr.passed) continue;  // Skip passing patterns
             fl::json pat = fl::json::object();
+            pat.set("runNumber", static_cast<int64_t>(rr.run_number));
             pat.set("totalLeds", static_cast<int64_t>(rr.total_leds));
             pat.set("mismatchedLeds", static_cast<int64_t>(rr.mismatches));
             pat.set("mismatchedBytes", static_cast<int64_t>(rr.mismatchedBytes));

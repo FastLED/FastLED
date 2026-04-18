@@ -80,6 +80,7 @@ def _make_args(**overrides) -> Args:
         ble=False,
         parallel=False,
         decode=None,
+        frames=None,
     )
     defaults.update(overrides)
     return Args(**defaults)

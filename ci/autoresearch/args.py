@@ -86,6 +86,11 @@ class Args:
     # Decode autoresearch mode (host-only, no device needed)
     decode: str | None
 
+    # Multi-frame capture — number of back-to-back show()/capture cycles per pattern.
+    # None = driver-default (SPI → 2, others → 1). Explicit value overrides.
+    # See issues #2254 and #2288 (ESP32-S3 SPI second-frame degradation).
+    frames: int | None
+
     @staticmethod
     def parse_args() -> "Args":
         """Parse command-line arguments and return Args dataclass instance."""
@@ -479,6 +484,18 @@ See Also:
             help="Chipset timing to use for autoresearch (default: ws2812). ucs7604 uses UCS7604-800KHZ timing with 16-bit encoding.",
         )
 
+        # Multi-frame capture (second-frame degradation detection)
+        parser.add_argument(
+            "--frames",
+            type=int,
+            default=None,
+            metavar="N",
+            help="Consecutive back-to-back show()/capture cycles per pattern (1-16). "
+            "Exposes second-frame degradation bugs (e.g., SPI driver zeroing its "
+            "DMA buffer after first show). Default: 2 for --spi, 1 otherwise. "
+            "See issues #2254, #2288.",
+        )
+
         parsed = parser.parse_args()
 
         # Convert argparse.Namespace to Args dataclass
@@ -527,4 +544,5 @@ See Also:
             ble=parsed.ble,
             parallel=parsed.parallel,
             decode=parsed.decode,
+            frames=parsed.frames,
         )
