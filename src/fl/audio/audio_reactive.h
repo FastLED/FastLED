@@ -7,6 +7,7 @@
 #include "fl/audio/signal_conditioner.h"
 #include "fl/audio/noise_floor_tracker.h"
 #include "fl/audio/frequency_bin_mapper.h"
+#include "fl/audio/silence_envelope.h"
 #include "fl/audio/spectral_equalizer.h"
 #include "fl/stl/array.h"
 #include "fl/stl/span.h"
@@ -278,6 +279,16 @@ private:
 
     // Enhanced beat detection state
     fl::array<float, 16> mPreviousMagnitudes;
+
+    // Silence-gate envelopes for spectral metrics (FastLED#2253).
+    // During silence (Context::isSilent() true), these fast-decay the
+    // dominantFrequency / magnitude / spectralFlux outputs toward zero so
+    // the FFT noise floor does not lock onto arbitrary bins. During audio
+    // they are pass-through. Tau = 0.2 s — spectral metrics are brittle
+    // and should snap to zero quickly.
+    SilenceEnvelope mDominantFrequencyEnvelope;
+    SilenceEnvelope mMagnitudeEnvelope;
+    SilenceEnvelope mSpectralFluxEnvelope;
 
     // Internal Processor for detector-based polling getters
     fl::unique_ptr<Processor> mAudioProcessor;

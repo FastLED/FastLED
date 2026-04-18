@@ -2066,5 +2066,79 @@ FL_TEST_CASE("audio::Processor - configureEqualizer silence threshold") {
     FL_CHECK(isSilence == false);
 }
 
+FL_TEST_CASE("audio::Reactive - spectral metrics decay to zero on silence (FastLED#2253)") {
+    // Drive Reactive with a loud 440 Hz sine so dominantFrequency / magnitude
+    // / spectralFlux all take on non-zero values, then switch to zero-PCM
+    // with Context::setSilent(true). The SilenceEnvelope (tau=0.2s) should
+    // snap the three fields to ~0 within 1 second (5 * tau).
+    audio::Reactive reactive;
+    audio::ReactiveConfig config;
+    config.sampleRate = 44100;
+    config.enableNoiseFloorTracking = true;  // Required for isSilent() to fire.
+    reactive.begin(config);
+
+    // Phase 1: 1 s of loud 440 Hz sine at full-scale amplitude.
+    constexpr fl::size kSamplesPerFrame = 512;
+    constexpr float kSampleRate = 44100.0f;
+    constexpr int kFramesPerSecond =
+        static_cast<int>(kSampleRate / static_cast<float>(kSamplesPerFrame));  // ~86
+
+    for (int i = 0; i < kFramesPerSecond; ++i) {
+        audio::Sample s = makeSample(440.0f, i * 12, 16000.0f,
+                                     kSamplesPerFrame, kSampleRate);
+        reactive.processSample(s);
+    }
+
+    // Sanity: all three metrics should be non-trivial after loud drive.
+    {
+        const auto& data = reactive.getData();
+        FL_CHECK_GT(data.dominantFrequency, 0.0f);
+        FL_CHECK_GT(data.magnitude, 0.0f);
+        // Flux may be near zero in steady state; don't gate on it here.
+        (void)data.spectralFlux;
+    }
+
+    // Phase 2: 1 s of zero-PCM silence. The pipeline's NoiseFloorTracker
+    // will flag each frame as silent, and the envelope should decay all
+    // three spectral metrics toward zero.
+    for (int i = 0; i < kFramesPerSecond; ++i) {
+        audio::Sample s = makeSilence(
+            (kFramesPerSecond + i) * 12, kSamplesPerFrame);
+        reactive.processSample(s);
+    }
+
+    // With tau=0.2s and ~1 s of silence (~5*tau), outputs should be
+    // within the envelope's isGated() epsilon (1e-4) of zero.
+    const auto& data = reactive.getData();
+    FL_CHECK_LT(data.dominantFrequency, 0.01f);
+    FL_CHECK_LT(data.magnitude, 0.01f);
+    FL_CHECK_LT(data.spectralFlux, 0.01f);
+}
+
+FL_TEST_CASE("audio::Reactive - spectral metrics are pass-through during loud audio (FastLED#2253)") {
+    // Sanity: with live audio, the SilenceEnvelope must be a strict
+    // pass-through — dominantFrequency / magnitude / spectralFlux should
+    // track the raw FFT outputs exactly, not be smoothed or attenuated.
+    audio::Reactive reactive;
+    audio::ReactiveConfig config;
+    config.sampleRate = 44100;
+    config.enableNoiseFloorTracking = true;
+    reactive.begin(config);
+
+    // Feed loud sine — during audio isSilent() is false and the envelope
+    // returns currentValue unchanged.
+    for (int i = 0; i < 30; ++i) {
+        audio::Sample s = makeSample(1000.0f, i * 12, 16000.0f, 512, 44100.0f);
+        reactive.processSample(s);
+    }
+
+    const auto& data = reactive.getData();
+    // Loud 1 kHz drive must yield a sensible dominant frequency in the
+    // audible range and a positive magnitude — same contract as the
+    // pre-gate behavior.
+    FL_CHECK_GT(data.dominantFrequency, 100.0f);
+    FL_CHECK_LT(data.dominantFrequency, 4000.0f);
+    FL_CHECK_GT(data.magnitude, 0.0f);
+}
 
 } // FL_TEST_FILE

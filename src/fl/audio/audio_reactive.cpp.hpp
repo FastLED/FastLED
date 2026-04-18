@@ -24,6 +24,15 @@ Reactive::Reactive()
     for (fl::size i = 0; i < mPreviousMagnitudes.size(); ++i) {
         mPreviousMagnitudes[i] = 0.0f;
     }
+
+    // Configure spectral silence envelopes — tau=0.2s chosen because FFT noise
+    // floor is brittle; these metrics should snap to zero quickly in silence.
+    SilenceEnvelope::Config envCfg;
+    envCfg.decayTauSeconds = 0.2f;
+    envCfg.targetValue = 0.0f;
+    mDominantFrequencyEnvelope.configure(envCfg);
+    mMagnitudeEnvelope.configure(envCfg);
+    mSpectralFluxEnvelope.configure(envCfg);
 }
 
 Reactive::~Reactive() FL_NOEXCEPT = default;
@@ -131,6 +140,11 @@ void Reactive::begin(const ReactiveConfig& config) {
         mPreviousMagnitudes[i] = 0.0f;
     }
 
+    // Reset silence envelopes for spectral metrics.
+    mDominantFrequencyEnvelope.reset(0.0f);
+    mMagnitudeEnvelope.reset(0.0f);
+    mSpectralFluxEnvelope.reset(0.0f);
+
     // Update Context sample rate
     mContext->setSampleRate(config.sampleRate);
 
@@ -210,6 +224,26 @@ void Reactive::processSample(const Sample& sample) {
     applyAWeighting();
 
     updateSpectralFlux();
+
+    // Silence gate for spectral metrics (FastLED#2253).
+    // During audio the envelopes are pass-through; during silence they
+    // exponentially decay (tau=0.2s) the raw argmax / flux outputs toward
+    // zero so the FFT noise floor cannot lock onto arbitrary bins.
+    // dt is the exact audio duration of this PCM buffer (frame-rate
+    // independent). When enableNoiseFloorTracking is false, isSilent()
+    // is always false, making this a strict pass-through (no behavior
+    // change for users who haven't opted in).
+    {
+        const bool silent = mContext->isSilent();
+        const float dt = computeAudioDt(processedSample.pcm().size(),
+                                        mConfig.sampleRate);
+        mCurrentData.dominantFrequency = mDominantFrequencyEnvelope.update(
+            silent, mCurrentData.dominantFrequency, dt);
+        mCurrentData.magnitude = mMagnitudeEnvelope.update(
+            silent, mCurrentData.magnitude, dt);
+        mCurrentData.spectralFlux = mSpectralFluxEnvelope.update(
+            silent, mCurrentData.spectralFlux, dt);
+    }
 
     // Enhanced beat detection (includes original)
     detectBeat(currentTimeMs);
