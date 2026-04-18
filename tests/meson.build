@@ -18,15 +18,26 @@ uv = find_program('uv')
 # uses project_source_root() which produces *absolute* -I flags.  Mixing the two
 # makes clang (especially on Windows) treat the same header as two different
 # files, breaking #pragma once across PCH boundaries.
-# On Windows, meson.project_source_root() returns native backslash paths
-# (e.g. C:\Users\...) but the '/' operator normalizes to forward slashes
-# (e.g. C:/Users/.../src). Mixing separators in -I flags breaks #pragma once
-# across PCH boundaries because clang treats them as different files.
-# Force all -I paths through the '/' operator to normalize to forward slashes.
-_project_root_fwd = meson.project_source_root() / '.'
+#
+# Forward-slash normalization: on Windows, meson.project_source_root() returns
+# native backslash paths (C:\Users\...), but the '/' operator normalizes to
+# forward slashes (C:/Users/.../src).
+#
+# Critical: the -I flag for `src` must be spelled IDENTICALLY to the `src`
+# -I flags used by fastled_lib / crash_handler_lib in ci/meson/native/meson.build
+# and examples/meson.build.  Those all use `meson.project_source_root() / 'src'`
+# which produces `C:/.../fastled6/src`.  If we chain via an intermediate
+# `meson.project_source_root() / '.'` and then `/ 'src'`, the result is
+# `C:/.../fastled6/./src` — the `/./` in the middle is a different string,
+# and when the test DLL links against fastled_lib, BOTH spellings land on the
+# compile line.  Clang's #pragma once keys on the resolved path string, so the
+# two spellings of the same directory cause #pragma once to fail and
+# headers included via both paths get defined twice.  (Repro: vibe.h via
+# audio_processor.h and via tests/fl/audio/detector/vibe.hpp triggers
+# "redefinition of VibeLevels".)  Always use the clean `/ 'src'` spelling.
 test_abs_include_args = [
-  '-I' + _project_root_fwd,          # For test includes (normalized).
-  '-I' + _project_root_fwd / 'src',  # for library.
+  '-I' + meson.project_source_root() / '.',    # project root (tests/*, etc.)
+  '-I' + meson.project_source_root() / 'src',  # src library (matches fastled_lib -I)
 ]
 
 # Build precompiled header from test_pch.h (contains FastLED.h + doctest + common headers)
