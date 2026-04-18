@@ -13,6 +13,7 @@ See FastLED#2301 / #2302 / #2303 for background.
 from __future__ import annotations
 
 import subprocess
+import sys
 from pathlib import Path
 
 
@@ -60,24 +61,35 @@ def ensure_compile_commands(
     if cdb.exists():
         return cdb
 
+    # Canonical FastLED fbuild invocation order (matches
+    # ``ci/util/fbuild_runner.py:104-114``): project dir goes *before* the
+    # ``build`` subcommand. ``cwd`` is still set so fbuild's config
+    # discovery works identically whether the positional is honored or
+    # ignored by future fbuild versions.
     try:
         subprocess.run(
             [
                 "fbuild",
+                str(project_root),
                 "build",
                 "-e",
                 board_name,
                 "--target",
                 "compiledb",
-                str(project_root),
             ],
             check=True,
             cwd=str(project_root),
         )
+    except KeyboardInterrupt:
+        # Per project guideline: all try/except blocks must handle
+        # KeyboardInterrupt before broader exceptions so Ctrl-C is never
+        # swallowed.
+        raise
     except (subprocess.CalledProcessError, FileNotFoundError) as exc:
         print(
             f"ensure_compile_commands: failed to generate fbuild compile DB "
-            f"for '{board_name}': {exc}"
+            f"for '{board_name}': {exc}",
+            file=sys.stderr,
         )
         return None
 
