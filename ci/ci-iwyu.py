@@ -497,8 +497,13 @@ def run_iwyu_against_compile_db(
     mapping_args: list[str] = []
     for name in ("fastled.imp", "stdlib.imp"):
         p = project_root / "ci" / "iwyu" / name
-        if p.exists():
-            mapping_args.extend(["-Xiwyu", f"--mapping_file={p}"])
+        if not p.exists():
+            print(
+                f"ERROR: required IWYU mapping file not found: {p}",
+                file=sys.stderr,
+            )
+            return 1
+        mapping_args.extend(["-Xiwyu", f"--mapping_file={p}"])
 
     if args.mapping_file:
         for mapping in args.mapping_file:
@@ -540,6 +545,13 @@ def run_iwyu_against_compile_db(
 
         handle_keyboard_interrupt(ki)
         raise
+    except FileNotFoundError as e:
+        print(
+            "ERROR: fbuild IWYU mode requires `uv run clang-tool-chain-iwyu-tool`, "
+            f"but the command could not be started: {e}",
+            file=sys.stderr,
+        )
+        return 1
     except subprocess.CalledProcessError as e:
         print(f"clang-tool-chain-iwyu-tool failed with return code {e.returncode}")
         return e.returncode
@@ -849,7 +861,7 @@ def main() -> int:
             # (tracked upstream); fail loudly rather than silently no-op.
             print(
                 "NOTE: --fix is not yet supported for fbuild-backed boards; "
-                "violations were reported but not auto-fixed.",
+                "IWYU was run in report-only mode — no changes were auto-fixed.",
                 file=sys.stderr,
             )
         return result_code
