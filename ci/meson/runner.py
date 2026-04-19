@@ -389,7 +389,21 @@ def _start_zccache_session(build_dir: Path) -> None:
     Sets ZCCACHE_SESSION_ID in os.environ so all subsequent compiler
     invocations through zccache use this session and get logged.
     The session auto-cleans up via PID monitoring when the process exits.
+
+    Also sets ZCCACHE_LINK_DEPLOY_CMD so zccache invokes
+    `clang-tool-chain-libdeploy` after each cache-miss link. This
+    materializes runtime DLLs next to the linked binary (on Windows
+    these otherwise don't get deployed because the native ctc-clang++
+    trampoline skips Python post-link hooks) and lets zccache's
+    side-effect scanner bundle them into the cached artifact set —
+    fixing flaky error-126 DLL load failures under parallel test
+    execution. See https://github.com/FastLED/FastLED/issues/2329.
     """
+    # Set the deploy hook regardless of zccache binary availability —
+    # zccache reads it from client env if set, and it's a no-op otherwise.
+    if "ZCCACHE_LINK_DEPLOY_CMD" not in os.environ:
+        os.environ["ZCCACHE_LINK_DEPLOY_CMD"] = "clang-tool-chain-libdeploy"
+
     zccache_bin = _find_zccache_binary()
     if not zccache_bin:
         return
