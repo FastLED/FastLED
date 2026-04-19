@@ -18,7 +18,8 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
 from ci.iwyu_cache import IWYUCache, compute_source_tree_hash
-from ci.util.fbuild_compiledb import ensure_compile_commands, was_compiled_with_fbuild
+from ci.util.fbuild_adapter import get_compile_commands
+from ci.util.fbuild_compiledb import was_compiled_with_fbuild
 
 
 # ---------------------------------------------------------------------------
@@ -830,7 +831,7 @@ def main() -> int:
     # project-tree assumption entirely — no platformio.ini required. See
     # FastLED#2303.
     if was_compiled_with_fbuild(build, canonical_board_name):
-        compile_db = ensure_compile_commands(_PROJECT_ROOT, build, canonical_board_name)
+        compile_db = get_compile_commands(canonical_board_name, build_root=build)
         if compile_db is None:
             print(
                 f"ERROR: could not obtain fbuild compile_commands.json for "
@@ -842,7 +843,7 @@ def main() -> int:
             )
             return 1
         result_code = run_iwyu_against_compile_db(compile_db, _PROJECT_ROOT, args)
-        if args.fix and result_code == 0:
+        if args.fix:
             # IWYU-tool mode emits fixits to stdout only — `fix_includes` is a
             # separate pass. For fbuild boards `--fix` is not wired up yet
             # (tracked upstream); fail loudly rather than silently no-op.
@@ -865,8 +866,13 @@ def main() -> int:
         print(f"Board {args.board} not found in {build}")
         print("Available boards:")
         for d in build.iterdir():
-            if d.is_dir():
+            if d.is_dir() and d.name != "pio":
                 print(f"  {d.name}")
+        pio_root = build / "pio"
+        if pio_root.exists():
+            for d in pio_root.iterdir():
+                if d.is_dir():
+                    print(f"  {d.name}")
         return 1
 
     project_dir = find_platformio_project_dir(board_dir)
