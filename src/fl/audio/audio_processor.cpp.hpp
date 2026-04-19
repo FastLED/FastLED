@@ -23,6 +23,18 @@
 #include "fl/audio/detector/vibe.h"
 #include "fl/stl/noexcept.h"
 
+#if defined(FL_IS_ESP32)
+// Deep platform include is intentional — we need FL_HAS_MULTICORE_AFFINITY
+// and FL_CPU_CORES for the setCoreAffinity gate and range check; both are
+// ESP32-only and defined only by this header. Non-ESP32 TUs skip the gate.
+// IWYU pragma: begin_keep
+#include "platforms/esp/32/feature_flags/enabled.h"  // ok platform headers
+// IWYU pragma: end_keep
+#endif
+
+#include "fl/task/worker.h"
+#include "fl/stl/unique_ptr.h"
+
 namespace fl {
 namespace audio {
 
@@ -977,14 +989,21 @@ shared_ptr<detector::Vibe> Processor::getVibeDetector() {
     return mVibeDetector;
 }
 
-shared_ptr<Processor> Processor::createWithAutoInput(
-        shared_ptr<IInput> input) {
-    auto processor = make_shared<Processor>();
-    processor->mAudioInput = input;
-    // weak_ptr so the lambda doesn't prevent Processor destruction
-    weak_ptr<Processor> weak = processor;
-    weak_ptr<IInput> weakInput = input;
-    processor->mAutoTask = fl::task::every_ms(1).then([weak, weakInput]() {
+void Processor::buildAutoPumpTask() FL_NOEXCEPT {
+    // Cancel any previous task first (setCoreAffinity reinvokes this).
+    if (mAutoTask.is_valid()) {
+        mAutoTask.cancel();
+    }
+
+    weak_ptr<Processor> weak = mSelfWeak;
+    weak_ptr<IInput> weakInput = mAudioInput;
+
+    // Pump closure — runs on whichever thread/core currently owns the work.
+    // See mWorker below: when setCoreAffinity pinned us, the every_ms(1)
+    // callback hops this functor onto a pinned FreeRTOS task via
+    // mWorker->run(); the main scheduler thread blocks for completion but
+    // the CPU cost itself lands on the other core.
+    auto pump_fn = [weak, weakInput]() {
         auto proc = weak.lock();
         auto inp = weakInput.lock();
         if (!proc || !inp) {
@@ -995,7 +1014,64 @@ shared_ptr<Processor> Processor::createWithAutoInput(
         for (const auto& sample : samples) {
             proc->update(sample);
         }
+    };
+
+    mAutoTask = fl::task::every_ms(1).then([weak, pump_fn]() {
+        auto proc = weak.lock();
+        if (!proc) {
+            return;
+        }
+        if (proc->mWorker) {
+            // Offload onto the pinned worker core. Blocks the scheduler
+            // thread until the worker finishes the tick's samples — but
+            // while blocked, the scheduler's host core is free for OS work.
+            proc->mWorker->run(pump_fn);
+        } else {
+            pump_fn();
+        }
     });
+}
+
+bool Processor::setCoreAffinity(int core) FL_NOEXCEPT {
+    // Accept -1 to disable any previously-assigned worker.
+    if (core == -1) {
+        mWorker.reset();
+        mCoreAffinity = -1;
+        return true;
+    }
+
+#if defined(FL_IS_ESP32) && defined(FL_HAS_MULTICORE_AFFINITY) && FL_HAS_MULTICORE_AFFINITY
+    if (core < 0 || core >= FL_CPU_CORES) {
+        return false;
+    }
+    // Build a new pinned worker. Reset any prior one first so we don't
+    // leave a FreeRTOS task orphaned on the previous core.
+    mWorker.reset();
+    mWorker = make_unique<fl::task::Worker>(core, "fl_audio_worker");
+    mCoreAffinity = core;
+    return true;
+#else
+    // Single-core / non-ESP32: accept 0 as a no-op success so portable user
+    // code can call setCoreAffinity(0) without platform gates, but skip
+    // constructing a worker (it would just add semaphore cost with no
+    // cross-core benefit).
+    if (core == 0) {
+        mWorker.reset();
+        mCoreAffinity = 0;
+        return true;
+    }
+    return false;
+#endif
+}
+
+shared_ptr<Processor> Processor::createWithAutoInput(
+        shared_ptr<IInput> input) {
+    auto processor = make_shared<Processor>();
+    processor->mAudioInput = input;
+    // Store a weak self-reference so setCoreAffinity can rebuild the pump
+    // later without needing a shared_ptr handed back in from the caller.
+    processor->mSelfWeak = processor;
+    processor->buildAutoPumpTask();
     return processor;
 }
 

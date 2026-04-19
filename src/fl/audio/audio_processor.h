@@ -11,12 +11,19 @@
 #include "fl/audio/signal_conditioner.h"
 #include "fl/audio/noise_floor_tracker.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/weak_ptr.h"
+#include "fl/stl/unique_ptr.h"
 #include "fl/stl/function.h"  // IWYU pragma: keep
 #include "fl/stl/vector.h"
 #include "fl/task/task.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {
+
+namespace task {
+class Worker;  // IWYU pragma: keep — forward-decl for unique_ptr<Worker> member
+}
+
 namespace audio {
 
 class AudioManager;
@@ -323,6 +330,45 @@ public:
     const SignalConditioner::Stats& getSignalConditionerStats() const FL_NOEXCEPT { return mSignalConditioner.getStats(); }
     const NoiseFloorTracker::Stats& getNoiseFloorStats() const FL_NOEXCEPT { return mNoiseFloorTracker.getStats(); }
 
+    // ----- Core Affinity (ESP32 dual-core only) -----
+    /// Offload the per-tick audio pump onto a specific CPU core via an
+    /// `fl::task::Worker`. Portable: works on ESP32 dual-core (actual core
+    /// pinning), ESP32 single-core variants (silent 0-only pass-through),
+    /// and non-ESP32 platforms (0 accepted as no-op so the same user code
+    /// compiles everywhere).
+    ///
+    /// Mechanism: the default scheduler still runs an `every_ms(1)` tick on
+    /// the main loop thread. When a worker is configured, the tick's pump
+    /// closure is handed to the worker via `Worker::run(fn)`. On dual-core
+    /// ESP32 the worker executes it on a FreeRTOS task pinned to the
+    /// requested core; the scheduler thread blocks on a semaphore until the
+    /// worker signals done. During that block, the scheduler's host core
+    /// is free for OS/WiFi work, and the audio cost lands on the other
+    /// physical core — restoring LED FPS when `FastLED.show()` shares the
+    /// scheduler core. On single-core platforms the "worker" is a no-op
+    /// passthrough so audio still runs, just without cross-core benefit.
+    ///
+    /// **Threading caveat**: when cross-core offload is active, user
+    /// callbacks registered via `onBass()`, `onBeat()`, `onVibeLevels()`,
+    /// etc. fire from inside the worker's task on the pinned core — not
+    /// the main loop thread. Do **not** call `FastLED.show()` or modify
+    /// LED arrays from inside those callbacks; FastLED's render path is
+    /// not thread-safe across cores.
+    ///
+    /// @param core CPU core ID (typically 0 when Arduino `loop()` runs on
+    ///             core 1). Pass -1 to disable offload and restore the
+    ///             plain scheduler-thread pump.
+    /// @return true if the preference was applied (including the no-op
+    ///         single-core case for core==0). false on invalid core_id
+    ///         or unsupported platform+core combination.
+    ///
+    /// @see fl::task::Worker
+    /// @see https://github.com/FastLED/FastLED/issues/2308
+    bool setCoreAffinity(int core) FL_NOEXCEPT;
+
+    /// @return The currently-configured core affinity, or -1 if none.
+    int getCoreAffinity() const FL_NOEXCEPT { return mCoreAffinity; }
+
     // ----- State Access -----
     shared_ptr<Context> getContext() const FL_NOEXCEPT { return mContext; }
     const Sample& getSample() const FL_NOEXCEPT;
@@ -389,6 +435,22 @@ private:
     // Auto-pump support (used by CFastLED::add(Config))
     fl::task::Handle mAutoTask;
     fl::shared_ptr<IInput> mAudioInput;
+    fl::weak_ptr<Processor> mSelfWeak;  ///< Stored by createWithAutoInput so
+                                        ///< buildAutoPumpTask can capture a
+                                        ///< weak reference inside the pump
+                                        ///< closure without external plumbing.
+    int mCoreAffinity = -1;             ///< -1 = no worker; >=0 = offloaded
+                                        ///< to mWorker.
+    fl::unique_ptr<fl::task::Worker> mWorker;  ///< One-shot worker used by
+                                               ///< setCoreAffinity to hop the
+                                               ///< pump functor onto a pinned
+                                               ///< FreeRTOS task. nullptr on
+                                               ///< platforms without useful
+                                               ///< cross-core affinity.
+
+    /// (Re)build mAutoTask now that createWithAutoInput or setCoreAffinity
+    /// has updated the worker configuration. Idempotent.
+    void buildAutoPumpTask() FL_NOEXCEPT;
 
     static fl::shared_ptr<Processor> createWithAutoInput(
         fl::shared_ptr<IInput> input) FL_NOEXCEPT;

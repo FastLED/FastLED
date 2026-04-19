@@ -5,5 +5,6 @@
 #include "fl/task/executor.cpp.hpp"
 #include "fl/task/scheduler.cpp.hpp"
 #include "fl/task/task.cpp.hpp"
+#include "fl/task/worker.cpp.hpp"
 
 // begin sub directory includes

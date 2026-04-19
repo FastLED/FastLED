@@ -26,6 +26,10 @@
 #include "fl/stl/json.h"
 #include "fl/task/task.h"
 #include "fl/task/executor.h"
+#include "fl/task/worker.h"
+#include "fl/audio/fft/fft.h"
+#include "fl/audio/fft/fft_backend.h"
+#include "fl/math/math.h"
 #include "fl/stl/atomic.h"
 #include "fl/task/promise.h"
 #include "fl/math/simd.h"
@@ -2350,6 +2354,181 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         return r;
     });
 
+    // Test: CoroutineConfig::core_id actually pins the FreeRTOS task.
+    // Validates the plumbing shipped in issue #2308 phase 1 (#2337) and used
+    // by Processor::setCoreAffinity() in phase 2. ESP32-only because
+    // uxTaskGetCoreID() and multi-core affinity are FreeRTOS-SMP features.
+    mRemote->bind("testCoroutineCoreAffinity", [](const fl::json& args) -> fl::json {
+        (void)args;
+        fl::json r = fl::json::object();
+
+#if defined(FL_IS_ESP32) && defined(FL_HAS_MULTICORE_AFFINITY) && FL_HAS_MULTICORE_AFFINITY
+        // Drive one test per valid core; report the observed core for each.
+        fl::json per_core = fl::json::array();
+        bool all_passed = true;
+        for (int requested = 0; requested < FL_CPU_CORES; ++requested) {
+            fl::atomic<int> observed(-1);
+            fl::atomic<bool> task_ran(false);
+            fl::task::CoroutineConfig cfg;
+            cfg.func = [&observed, &task_ran]() {
+                observed.store(static_cast<int>(xPortGetCoreID()));
+                task_ran.store(true);
+            };
+            cfg.name = "affinity_probe";
+            cfg.core_id = requested;
+            auto t = fl::task::coroutine(cfg);
+
+            uint32_t start = millis();
+            while (!task_ran.load() && (millis() - start) < 2000) {
+                delay(10);
+            }
+
+            fl::json entry = fl::json::object();
+            entry.set("requested", static_cast<int64_t>(requested));
+            entry.set("observed", static_cast<int64_t>(observed.load()));
+            bool ok = task_ran.load() && (observed.load() == requested);
+            entry.set("ok", ok);
+            per_core.push_back(entry);
+            if (!ok) {
+                all_passed = false;
+            }
+        }
+        r.set("success", all_passed);
+        r.set("cores", per_core);
+        r.set("cpuCores", static_cast<int64_t>(FL_CPU_CORES));
+#else
+        // Single-core platform (ESP32-S2/C2/C3/C5/C6/H2) or non-ESP32.
+        // Report skip as a pass so the suite doesn't red on these variants.
+        r.set("success", true);
+        r.set("skipped", true);
+        r.set("reason", "FL_HAS_MULTICORE_AFFINITY is 0 on this platform");
+#endif
+        return r;
+    });
+
+    // Test: FFT backend timing — hardware (ESP-DSP) vs software (kiss_fftr).
+    // Runs the currently-compiled backend against a known single-tone sine
+    // signal, reports µs-per-call and peak bin magnitudes so autoresearch
+    // can compare two runs (one with -DFL_FFT_USE_ESP_DSP=1, one without).
+    // The comparison lives in the post-processor, not here — this handler
+    // only measures ONE backend per build.
+    mRemote->bind("testFftBackendTiming", [](const fl::json& args) -> fl::json {
+        (void)args;
+        fl::json r = fl::json::object();
+
+        constexpr int N = 512;
+        constexpr int SAMPLE_RATE = 44100;
+        constexpr int TONE_HZ = 1000;
+        constexpr int ITERATIONS = 100;
+
+        // Generate a single-tone sine signal at TONE_HZ, 50 % full-scale.
+        fl::vector<fl::i16> samples(N);
+        for (int i = 0; i < N; ++i) {
+            float phase = 2.0f * 3.14159265358979323846f *
+                          static_cast<float>(TONE_HZ) *
+                          static_cast<float>(i) /
+                          static_cast<float>(SAMPLE_RATE);
+            samples[i] = static_cast<fl::i16>(16000.0f * sinf(phase));
+        }
+
+        fl::audio::fft::FFT fft;
+        fl::audio::fft::Args fft_args;
+        fft_args.samples = N;
+        fft_args.bands = 16;
+        fft_args.sample_rate = SAMPLE_RATE;
+
+        fl::audio::fft::Bins bins(fft_args.bands);
+
+        // Warm-up: prime the FFT kernel cache so the first measured call
+        // doesn't pay for ImplCache allocation.
+        fft.run(fl::span<const fl::i16>(samples.data(), N), &bins, fft_args);
+
+        uint32_t t_start = micros();
+        for (int iter = 0; iter < ITERATIONS; ++iter) {
+            fft.run(fl::span<const fl::i16>(samples.data(), N), &bins, fft_args);
+        }
+        uint32_t t_end = micros();
+
+        float total_us = static_cast<float>(t_end - t_start);
+        float us_per_call = total_us / static_cast<float>(ITERATIONS);
+
+        // Find the peak CQ bin and its neighbours for a sanity signal.
+        fl::span<const float> raw_bins = bins.raw();
+        int peak_bin = 0;
+        float peak_mag = 0.0f;
+        for (int b = 0; b < static_cast<int>(raw_bins.size()); ++b) {
+            if (raw_bins[b] > peak_mag) {
+                peak_mag = raw_bins[b];
+                peak_bin = b;
+            }
+        }
+
+        r.set("success", us_per_call > 0.0f);
+        r.set("usPerCall", static_cast<double>(us_per_call));
+        r.set("iterations", static_cast<int64_t>(ITERATIONS));
+        r.set("samples", static_cast<int64_t>(N));
+        r.set("bands", static_cast<int64_t>(fft_args.bands));
+        r.set("sampleRate", static_cast<int64_t>(SAMPLE_RATE));
+        r.set("toneHz", static_cast<int64_t>(TONE_HZ));
+        r.set("peakBin", static_cast<int64_t>(peak_bin));
+        r.set("peakMagnitude", static_cast<double>(peak_mag));
+#if FL_FFT_ESP_DSP_ACTIVE
+        r.set("backend", "esp-dsp");
+#else
+        r.set("backend", "kiss_fftr");
+#endif
+        return r;
+    });
+
+    // Test: fl::task::Worker end-to-end.
+    // Validates that Worker::run(fn) executes fn on the requested core (on
+    // dual-core ESP32) or synchronously (everywhere else). Report observed
+    // core per core_id so the autoresearch post-processor can confirm
+    // phase 2 of #2308 actually offloads across cores.
+    mRemote->bind("testWorkerAffinity", [](const fl::json& args) -> fl::json {
+        (void)args;
+        fl::json r = fl::json::object();
+
+#if defined(FL_IS_ESP32) && defined(FL_HAS_MULTICORE_AFFINITY) && FL_HAS_MULTICORE_AFFINITY
+        fl::json per_core = fl::json::array();
+        bool all_passed = true;
+        for (int requested = 0; requested < FL_CPU_CORES; ++requested) {
+            fl::task::Worker worker(requested, "ar_probe");
+            fl::atomic<int> observed(-1);
+            fl::atomic<bool> ran(false);
+            worker.run([&observed, &ran]() {
+                observed.store(static_cast<int>(xPortGetCoreID()));
+                ran.store(true);
+            });
+
+            fl::json entry = fl::json::object();
+            entry.set("requested", static_cast<int64_t>(requested));
+            entry.set("observed", static_cast<int64_t>(observed.load()));
+            entry.set("isPinned", worker.isPinned());
+            bool ok = ran.load() && (observed.load() == requested);
+            entry.set("ok", ok);
+            per_core.push_back(entry);
+            if (!ok) {
+                all_passed = false;
+            }
+        }
+        r.set("success", all_passed);
+        r.set("cores", per_core);
+        r.set("cpuCores", static_cast<int64_t>(FL_CPU_CORES));
+#else
+        // Single-core / non-ESP32: Worker::run is synchronous. Verify that
+        // the fallback actually executes the functor.
+        fl::task::Worker worker(0);
+        fl::atomic<bool> ran(false);
+        worker.run([&ran]() { ran.store(true); });
+        r.set("success", ran.load());
+        r.set("skipped", true);
+        r.set("reason", "FL_HAS_MULTICORE_AFFINITY is 0 — verified synchronous fallback");
+        r.set("isPinned", worker.isPinned());
+#endif
+        return r;
+    });
+
     // Run all coroutine tests sequentially
     mRemote->bind("testCoroutineAll", [this](const fl::json& args) -> fl::json {
         (void)args;
@@ -2363,9 +2542,11 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
             "testCoroutineAwaitError",
             "testCoroutinePromiseCallbacks",
             "testCoroutinePromiseCatchCallback",
-            "testCoroutineChainedAwait"
+            "testCoroutineChainedAwait",
+            "testCoroutineCoreAffinity",
+            "testWorkerAffinity"
         };
-        const int num_tests = 8;
+        const int num_tests = 10;
 
         int passed = 0;
         int failed = 0;
