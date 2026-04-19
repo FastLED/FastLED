@@ -18,6 +18,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
 from ci.iwyu_cache import IWYUCache, compute_source_tree_hash
+from ci.util.fbuild_compiledb import ensure_compile_commands, was_compiled_with_fbuild
 
 
 # ---------------------------------------------------------------------------
@@ -317,7 +318,7 @@ def scan_fl_headers(
 # ---------------------------------------------------------------------------
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Run include-what-you-use on the project"
     )
@@ -358,7 +359,7 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Bypass per-file result cache (force full re-scan)",
     )
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
 # ---------------------------------------------------------------------------
@@ -429,6 +430,99 @@ def find_platformio_project_dir(board_dir: Path) -> Path | None:
         print(f"Found platformio.ini directly in {board_dir}")
         return board_dir
     return None
+
+
+def _load_src_files_from_compile_db(compile_db: Path, project_root: Path) -> list[str]:
+    """Return TU file paths under ``<project_root>/src/`` from ``compile_db``.
+
+    Mirrors the filtering convention in ``ci/ci-cppcheck.py`` so IWYU and
+    cppcheck stay in lockstep on what counts as FastLED-owned source.
+    Per the JSON Compilation Database spec, the ``file`` field may be
+    absolute or relative to the entry's ``directory``; resolve relatives
+    against ``directory`` (falling back to the DB's parent) rather than
+    the Python CWD.
+    """
+    src_root = (project_root / "src").resolve()
+    with compile_db.open("r", encoding="utf-8") as fh:
+        entries = json.load(fh)
+    files: list[str] = []
+    for entry in entries:
+        raw = entry.get("file")
+        if not raw:
+            continue
+        raw_path = Path(raw)
+        if not raw_path.is_absolute():
+            directory = entry.get("directory") or compile_db.parent
+            raw_path = Path(directory) / raw_path
+        try:
+            resolved = raw_path.resolve()
+        except OSError:
+            continue
+        try:
+            resolved.relative_to(src_root)
+        except ValueError:
+            continue
+        files.append(str(resolved))
+    return files
+
+
+def run_iwyu_on_fbuild_compile_db(
+    compile_db: Path, project_root: Path, args: argparse.Namespace
+) -> int:
+    """Run IWYU against fbuild's ``compile_commands.json`` via clang-tool-chain.
+
+    Uses ``clang-tool-chain-iwyu-tool -p <db-dir>`` (the standard clang
+    tooling compile-DB driver) instead of ``pio check``. Everything stays
+    inside the ``clang-tool-chain`` wrapper, which lazily validates and
+    fetches its bundled toolchain on first use — no system IWYU install
+    is needed. Mapping files (``ci/iwyu/fastled.imp`` / ``stdlib.imp``)
+    are passed through unchanged so diagnostics match the PIO pathway.
+
+    Returns ``1`` if ``iwyu-tool`` returns non-zero, otherwise ``0``.
+    Note: ``iwyu-tool`` also exits non-zero when IWYU itself reports
+    violations — callers get the same pass/fail semantics as the PIO
+    path in that respect.
+    """
+    db_dir = compile_db.parent
+    src_files = _load_src_files_from_compile_db(compile_db, project_root)
+    if not src_files:
+        print(
+            f"No src/ translation units found in {compile_db} — nothing to "
+            f"analyze. (Compile DB may cover only framework code for this "
+            f"board.)"
+        )
+        return 0
+
+    mapping_args: list[str] = []
+    for name in ("fastled.imp", "stdlib.imp"):
+        p = project_root / "ci" / "iwyu" / name
+        if p.exists():
+            mapping_args.extend(["-Xiwyu", f"--mapping_file={p}"])
+    if args.mapping_file:
+        for mapping in args.mapping_file:
+            mapping_args.extend(["-Xiwyu", f"--mapping_file={mapping}"])
+
+    print(
+        f"Running clang-tool-chain-iwyu-tool against {len(src_files)} src/ "
+        f"files using compile DB: {compile_db}"
+    )
+
+    cmd = [
+        "uv",
+        "run",
+        "clang-tool-chain-iwyu-tool",
+        "-p",
+        str(db_dir),
+        *src_files,
+        "--",
+        f"--max_line_length={args.max_line_length}",
+        "--quoted_includes_first",
+        "--no_comments",
+        "--verbose=3" if args.verbose else "--verbose=1",
+        *mapping_args,
+    ]
+    cp = subprocess.run(cmd)
+    return cp.returncode
 
 
 def run_iwyu_on_platformio_project(project_dir: Path, args: argparse.Namespace) -> int:
@@ -670,12 +764,35 @@ def main() -> int:
                 print("✅ All src/fl/ headers pass IWYU")
         return 0
 
-    # --- Board mode: PlatformIO ---
+    # --- Board mode ---
     build = _PROJECT_ROOT / ".build"
     if not build.exists():
         print(f"Build directory {build} not found")
         print("Run a compilation first: ./compile [board] --examples [example]")
         return 1
+
+    # fbuild-backed boards: route IWYU through the compile DB fbuild emits,
+    # via ``clang-tool-chain-iwyu-tool -p``. Avoids the PIO project-tree
+    # dependency that fails on fbuild-only boards (esp32c2 today, more on
+    # deck). See FastLED#2303.
+    if was_compiled_with_fbuild(build, args.board):
+        compile_db = ensure_compile_commands(_PROJECT_ROOT, build, args.board)
+        if compile_db is None:
+            print(
+                f"ERROR: could not obtain fbuild compile_commands.json for "
+                f"'{args.board}'. fbuild >= 2.1 should emit this via "
+                f"`fbuild {_PROJECT_ROOT} build -e {args.board} --target "
+                f"compiledb`; verify the fbuild version and the env name. "
+                f"Tracking: FastLED#2303.",
+                file=sys.stderr,
+            )
+            return 1
+        result_code = run_iwyu_on_fbuild_compile_db(compile_db, _PROJECT_ROOT, args)
+        if args.fix and result_code == 0:
+            fix_result = apply_iwyu_fixes(_PROJECT_ROOT / "src")
+            if fix_result != 0:
+                result_code = fix_result
+        return result_code
 
     board_dir = build / args.board
     if not board_dir.exists():
