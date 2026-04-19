@@ -6,7 +6,6 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "fbuild>=2.1.12",
-    "fbuild>=2.1.12",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
