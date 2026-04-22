@@ -1065,6 +1065,7 @@ ATTINY85 = Board(
 
 DIGISPARK_TINY = Board(
     board_name="digispark-tiny",
+    board_build_mcu="attiny85",
     # PlatformIO only publishes Digistump core 1.7.2 and avr-gcc 5.4/7.3
     # packages, so the Arduino IDE 1.6.7 + avr-g++ 4.8.1 issue environment
     # cannot be pinned through platform_packages here.

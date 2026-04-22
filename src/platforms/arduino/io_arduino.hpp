@@ -45,10 +45,10 @@ int read() FL_NOEXCEPT {
 // This handles USB CDC multi-packet transfers correctly via Stream::timedRead()
 // which uses yield() (immediate context switch) instead of delay(1) (1ms sleep).
 int readLineNative(char delimiter, char* out, int outLen) FL_NOEXCEPT {
-#if defined(FL_IS_AVR_ATTINY)
     if (outLen <= 0) {
         return 0;
     }
+#if defined(FL_IS_AVR_ATTINY)
     // TinyDebugSerial lacks readStringUntil(), so keep Stream's blocking
     // line-read behavior without allocating Arduino String.
     const unsigned long timeoutMs = 1000UL;
