@@ -11,6 +11,7 @@
 #include "fl/stl/cstring.h"
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 
 namespace fl {
 

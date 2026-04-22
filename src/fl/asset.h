@@ -22,11 +22,12 @@
 /// is future work and intentionally omitted.
 ///
 /// **Compile-time validation:** `FL_ASSET("data/../foo.mp3")` and any path
-/// containing `..` segments is rejected via `static_assert`. The normalized
+/// containing `..` segments is rejected via `FL_STATIC_ASSERT`. The normalized
 /// path is stored verbatim; runtime resolution never walks parent directories.
 
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 #include "fl/stl/string.h"
 #include "fl/stl/string_view.h"
 #include "fl/stl/url.h"
@@ -79,7 +80,7 @@ constexpr bool path_has_parent_segment(const char* p) FL_NOEXCEPT {
 ///
 /// Value type: cheap to copy (a single pointer + size). Created via the
 /// `FL_ASSET()` macro or `fl::asset(const char*)` below. The `FL_ASSET()`
-/// macro performs a `static_assert` that the path contains no `..` segments.
+/// macro performs an `FL_STATIC_ASSERT` that the path contains no `..` segments.
 class asset_ref {
   public:
     /// Construct from a pointer to a null-terminated string with known length.
@@ -118,7 +119,7 @@ class asset_ref {
 /// Construct an asset handle from a relative sketch path at runtime.
 ///
 /// For **compile-time rejection** of `..` paths, use the `FL_ASSET()` macro
-/// instead — it wraps this function with a `static_assert`.
+/// instead — it wraps this function with `FL_STATIC_ASSERT`.
 ///
 /// This overload accepts any `const char*` (including runtime-computed
 /// pointers) and, for safety, returns an empty handle if the path contains
@@ -130,7 +131,7 @@ constexpr asset_ref asset(const char* path) FL_NOEXCEPT {
                : asset_ref(path, asset_detail::clen(path));
 }
 
-/// Preferred entry point: rejects `..` at compile time via `static_assert`.
+/// Preferred entry point: rejects `..` at compile time via `FL_STATIC_ASSERT`.
 ///
 /// Use: `fl::UIAudio audio("Audio", FL_ASSET("data/track.mp3"));`
 #define FL_ASSET(LITERAL_PATH)                                                 \

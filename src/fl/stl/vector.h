@@ -18,6 +18,7 @@
 #include "fl/stl/align.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/basic_vector.h"
+#include "fl/stl/static_assert.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "fl/stl/static_assert.h"
-
 // FL_NOEXCEPT: intentionally a noop on all platforms.
 // noexcept was causing too many platform compatibility issues (AVR, WASM, etc.)
 // so it is disabled everywhere until a robust cross-platform solution is found.

@@ -8,6 +8,7 @@
 #include "pixeltypes.h"
 #include "fl/gfx/five_bit_hd_gamma.h"
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/static_assert.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/unique_ptr.h"
 #include "pixel_iterator.h"

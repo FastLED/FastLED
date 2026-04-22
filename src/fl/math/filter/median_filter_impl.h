@@ -5,6 +5,7 @@
 #include "fl/stl/algorithm.h"
 #include "fl/stl/span.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 
 namespace fl {
 namespace detail {

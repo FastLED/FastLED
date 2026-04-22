@@ -38,6 +38,41 @@ HAS_INCLUDE_PATTERN = re.compile(r"\b__has_include\s*\(")
 STATIC_ASSERT_PATTERN = re.compile(r"\bstatic_assert\s*\(")
 
 
+def _strip_string_literals(code: str) -> str:
+    """Replace C/C++ string and character literal contents with spaces."""
+    result: list[str] = []
+    quote: str | None = None
+    escaped = False
+
+    for char in code:
+        if quote is None:
+            if char in ('"', "'"):
+                quote = char
+                result.append(char)
+            else:
+                result.append(char)
+            continue
+
+        if escaped:
+            escaped = False
+            result.append(" ")
+            continue
+
+        if char == "\\":
+            escaped = True
+            result.append(" ")
+            continue
+
+        if char == quote:
+            quote = None
+            result.append(char)
+            continue
+
+        result.append(" ")
+
+    return "".join(result)
+
+
 class BannedMacrosChecker(FileContentChecker):
     """Checker for banned preprocessor macros - should use FL_* wrappers instead."""
 
@@ -100,15 +135,20 @@ class BannedMacrosChecker(FileContentChecker):
             if "#define" in code_part and "FL_HAS_INCLUDE" in code_part:
                 continue
 
+            code_no_strings = _strip_string_literals(code_part)
+
             # Fast first pass: skip regex if no banned keyword is present
-            if "__has_include" not in code_part and "static_assert" not in code_part:
+            if (
+                "__has_include" not in code_no_strings
+                and "static_assert" not in code_no_strings
+            ):
                 continue
 
             # Check for __has_include(...) usage
-            if HAS_INCLUDE_PATTERN.search(code_part):
+            if HAS_INCLUDE_PATTERN.search(code_no_strings):
                 # Skip if it's in a #ifndef __has_include guard (definition pattern)
                 # This allows: #ifndef __has_include / #define FL_HAS_INCLUDE(x) 0 / #else ...
-                if "#ifndef" in code_part or "#ifdef" in code_part:
+                if "#ifndef" in code_no_strings or "#ifdef" in code_no_strings:
                     continue
 
                 violations.append(
@@ -121,7 +161,7 @@ class BannedMacrosChecker(FileContentChecker):
                     )
                 )
 
-            if STATIC_ASSERT_PATTERN.search(code_part):
+            if STATIC_ASSERT_PATTERN.search(code_no_strings):
                 violations.append(
                     (
                         line_number,

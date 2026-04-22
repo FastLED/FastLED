@@ -5,6 +5,7 @@
 #include "fl/stl/stdint.h"        // for fl::size_t  // IWYU pragma: keep
 #include "fl/stl/cstddef.h"       // for fl::nullptr_t
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 
 namespace fl {
 

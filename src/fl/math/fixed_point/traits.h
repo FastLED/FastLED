@@ -6,6 +6,7 @@
 #include "fl/stl/stdint.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 
 namespace fl {
 

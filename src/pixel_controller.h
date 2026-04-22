@@ -17,6 +17,7 @@
 #include "rgbw.h"
 #include "fl/gfx/five_bit_hd_gamma.h"
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/static_assert.h"
 #include "fl/math/scale8.h"
 #include "fl/math/math8.h"
 #include "eorder.h"

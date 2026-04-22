@@ -7,6 +7,7 @@
 /// used primarily for duration period types in fl::chrono.
 
 #include "fl/stl/int.h"
+#include "fl/stl/static_assert.h"
 
 namespace fl {
 

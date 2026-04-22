@@ -3,6 +3,7 @@
 #include "fl/stl/variant.h"
 #include "fl/stl/bitset_dynamic.h"
 #include "fl/stl/int.h"
+#include "fl/stl/static_assert.h"
 
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/move.h"

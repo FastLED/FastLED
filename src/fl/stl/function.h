@@ -10,6 +10,7 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/algorithm.h"  // for fl::sort
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 
 #ifndef FASTLED_INLINE_LAMBDA_SIZE
 #define FASTLED_INLINE_LAMBDA_SIZE 64

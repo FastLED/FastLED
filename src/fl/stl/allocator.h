@@ -10,6 +10,7 @@
 #include "fl/stl/malloc.h"
 #include "fl/stl/align.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 
 #ifndef FASTLED_DEFAULT_SLAB_SIZE
 #define FASTLED_DEFAULT_SLAB_SIZE 8

@@ -87,8 +87,8 @@ class ClocklessController_LCD_I80_Proxy
                   "GPIO19 and GPIO20 are reserved for USB-JTAG and CANNOT be used");
     FL_STATIC_ASSERT(!(DATA_PIN >= 26 && DATA_PIN <= 32),
                   "GPIO26-32 are reserved for Flash/PSRAM and CANNOT be used");
-    FL_STATIC_ASSERT(!(DATA_PIN == 0 || DATA_PIN == 3 || DATA_PIN == 45 || DATA_PIN == 46) || true,
-                  "WARNING: Strapping pins - use with caution");
+    // GPIO0, GPIO3, GPIO45, and GPIO46 are strapping pins. They are risky but
+    // not invalid, so this disabled driver keeps the note non-blocking.
     #if defined(CONFIG_SPIRAM_MODE_OCT) || defined(CONFIG_ESPTOOLPY_FLASHMODE_OPI)
     FL_STATIC_ASSERT(!(DATA_PIN >= 33 && DATA_PIN <= 37),
                   "GPIO33-37 reserved for Octal Flash/PSRAM");

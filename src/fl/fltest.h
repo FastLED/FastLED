@@ -27,6 +27,7 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/strstream.h"
 #include "fl/stl/cstring.h"
+#include "fl/stl/static_assert.h"
 
 // Conditionally include <exception> for platforms with exception support
 // This must be at the top of the file (before any namespace declarations)

@@ -14,6 +14,7 @@
 // IWYU pragma: begin_keep
 #include "fl/stl/function.h"
 // IWYU pragma: end_keep  // ~5ms - only needed for function<> constructor implementation
+#include "fl/stl/static_assert.h"
 
 // Other implementation dependencies
 #include "fl/math/math.h"

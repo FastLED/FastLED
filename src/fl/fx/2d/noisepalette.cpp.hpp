@@ -1,4 +1,5 @@
 #include "fl/stl/stdint.h"
+#include "fl/stl/static_assert.h"
 
 #ifndef FASTLED_INTERNAL
 #define FASTLED_INTERNAL

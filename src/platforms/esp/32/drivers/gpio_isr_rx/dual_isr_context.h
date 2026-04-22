@@ -28,7 +28,9 @@
  */
 
 #include "fl/stl/stdint.h"  // IWYU pragma: keep
+#ifdef __cplusplus
 #include "fl/stl/static_assert.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {

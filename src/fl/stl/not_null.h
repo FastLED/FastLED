@@ -48,6 +48,7 @@
 #include "fl/stl/type_traits.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 
 // Forward declarations to break circular dependency with assert.h
 // not_null needs assertions, but assert.h might need not_null in the future

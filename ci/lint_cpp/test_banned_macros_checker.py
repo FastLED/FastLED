@@ -50,6 +50,16 @@ class TestBannedMacrosChecker(unittest.TestCase):
     def test_multiline_comments_are_ignored(self) -> None:
         self.assertEqual(len(_violations('/*\nstatic_assert(true, "ok");\n*/')), 0)
 
+    def test_string_literals_are_ignored(self) -> None:
+        self.assertEqual(
+            len(_violations('FL_WARN("use FL_STATIC_ASSERT not static_assert(true)");')),
+            0,
+        )
+        self.assertEqual(
+            len(_violations("FL_WARN('__has_include(<vector>) is banned');")),
+            0,
+        )
+
     def test_definition_file_is_skipped(self) -> None:
         self.assertFalse(BannedMacrosChecker().should_process_file(_CPP_COMPAT_PATH))
         self.assertFalse(BannedMacrosChecker().should_process_file(_STATIC_ASSERT_PATH))

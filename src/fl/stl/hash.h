@@ -6,6 +6,7 @@
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/string.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 
 namespace fl {
 

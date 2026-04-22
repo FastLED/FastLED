@@ -77,7 +77,7 @@ private:
     // Static timing assertions for protocol sanity
     FL_STATIC_ASSERT(T1 > 0, "T1 (high time for bit 0) must be positive");
     FL_STATIC_ASSERT(T2 > 0, "T2 (additional high time for bit 1) must be positive");
-    FL_STATIC_ASSERT(T3 > 0, "T3 (addtional time for low tail duration) must be positive");
+    FL_STATIC_ASSERT(T3 > 0, "T3 (additional time for low tail duration) must be positive");
 
     // Minimum wait time between frames
     CMinWait<WAIT_TIME> mWait;

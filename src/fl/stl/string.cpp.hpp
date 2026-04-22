@@ -11,6 +11,7 @@
 #include "fl/gfx/crgb.h"                 // for CRGB
 #include "fl/gfx/tile2x2.h"
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/static_assert.h"
 #include "fl/math/xymap.h"
 // UI dependency moved to separate compilation unit to break dependency chain
 

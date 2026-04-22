@@ -12,6 +12,7 @@
 #include "fl/stl/stdint.h"  // For u64, uint8_t
 #include "fl/stl/cstddef.h" // For fl::size_t
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 
 namespace fl {
 

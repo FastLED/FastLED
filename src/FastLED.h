@@ -149,6 +149,7 @@
 
 
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/static_assert.h"
 #include "cpp_compat.h"
 
 #include "fastled_config.h"
@@ -1004,8 +1005,8 @@ public:
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE > ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		// Instantiate the controller using ClockedChipsetHelper
 		typedef ClockedChipsetHelper<CHIPSET, DATA_PIN, CLOCK_PIN> CHIP;
-		typedef typename CHIP::template CONTROLLER_CLASS_WITH_ORDER_AND_FREQ<RGB_ORDER, SPI_DATA_RATE>::ControllerType ControllerTypeWithFreq;
 		FL_STATIC_ASSERT(CHIP::IS_VALID, "Unsupported chipset");
+		typedef typename CHIP::template CONTROLLER_CLASS_WITH_ORDER_AND_FREQ<RGB_ORDER, SPI_DATA_RATE>::ControllerType ControllerTypeWithFreq;
 		static ControllerTypeWithFreq c;
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
@@ -1013,8 +1014,8 @@ public:
 	/// Add an SPI based CLEDController instance to the world (legacy path).
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN > static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		typedef ClockedChipsetHelper<CHIPSET, DATA_PIN, CLOCK_PIN> CHIP;
-		typedef typename CHIP::ControllerType ControllerType;
 		FL_STATIC_ASSERT(CHIP::IS_VALID, "Unsupported chipset");
+		typedef typename CHIP::ControllerType ControllerType;
 		static ControllerType c;
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}

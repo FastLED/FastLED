@@ -2,6 +2,7 @@
 #include "fl/stl/type_traits.h"
 #include "fl/stl/int.h"
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/static_assert.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(unused-function)

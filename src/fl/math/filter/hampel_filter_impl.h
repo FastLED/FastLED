@@ -5,6 +5,7 @@
 #include "fl/stl/algorithm.h"
 #include "fl/stl/span.h"
 #include "fl/math/filter/div_by_count.h"
+#include "fl/stl/static_assert.h"
 
 namespace fl {
 namespace detail {
