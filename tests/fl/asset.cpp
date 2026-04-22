@@ -6,6 +6,7 @@
 #include "fl/stl/string_view.h"
 #include "fl/stl/url.h"
 #include "test.h"
+#include "fl/stl/static_assert.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -16,29 +17,29 @@ using namespace fl;
 // innocent-looking paths that merely contain dot characters.
 // -----------------------------------------------------------------------------
 
-static_assert(!fl::asset_detail::path_has_parent_segment("data/track.mp3"),
+FL_STATIC_ASSERT(!fl::asset_detail::path_has_parent_segment("data/track.mp3"),
               "plain relative path should not be flagged");
-static_assert(!fl::asset_detail::path_has_parent_segment("track.mp3"),
+FL_STATIC_ASSERT(!fl::asset_detail::path_has_parent_segment("track.mp3"),
               "bare file should not be flagged");
-static_assert(!fl::asset_detail::path_has_parent_segment("folder.with.dots/a.mp3"),
+FL_STATIC_ASSERT(!fl::asset_detail::path_has_parent_segment("folder.with.dots/a.mp3"),
               "dots inside segments must not trigger false positive");
-static_assert(!fl::asset_detail::path_has_parent_segment("."),
+FL_STATIC_ASSERT(!fl::asset_detail::path_has_parent_segment("."),
               "single dot is not a parent segment");
-static_assert(!fl::asset_detail::path_has_parent_segment(""),
+FL_STATIC_ASSERT(!fl::asset_detail::path_has_parent_segment(""),
               "empty path is not a parent segment");
 
-static_assert(fl::asset_detail::path_has_parent_segment(".."),
+FL_STATIC_ASSERT(fl::asset_detail::path_has_parent_segment(".."),
               "bare .. must be rejected");
-static_assert(fl::asset_detail::path_has_parent_segment("../foo"),
+FL_STATIC_ASSERT(fl::asset_detail::path_has_parent_segment("../foo"),
               "leading .. must be rejected");
-static_assert(fl::asset_detail::path_has_parent_segment("foo/.."),
+FL_STATIC_ASSERT(fl::asset_detail::path_has_parent_segment("foo/.."),
               "trailing .. must be rejected");
-static_assert(fl::asset_detail::path_has_parent_segment("data/../foo.mp3"),
+FL_STATIC_ASSERT(fl::asset_detail::path_has_parent_segment("data/../foo.mp3"),
               "embedded .. must be rejected");
-static_assert(fl::asset_detail::path_has_parent_segment("a/b/../c"),
+FL_STATIC_ASSERT(fl::asset_detail::path_has_parent_segment("a/b/../c"),
               "deep embedded .. must be rejected");
 // Windows-style separators are treated the same.
-static_assert(fl::asset_detail::path_has_parent_segment("data\\..\\foo.mp3"),
+FL_STATIC_ASSERT(fl::asset_detail::path_has_parent_segment("data\\..\\foo.mp3"),
               "backslash-style .. must also be rejected");
 
 // FL_ASSET() macro returns a valid handle at compile time when the path is OK.

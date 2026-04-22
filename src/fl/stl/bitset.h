@@ -41,7 +41,7 @@ inline fl::u8 countr_zero(IntType value) FL_NOEXCEPT {
 /// A simple fixed-size Bitset implementation similar to std::Bitset.
 template <fl::u32 N> class bitset_fixed {
   private:
-    static_assert(sizeof(fl::u16) == 2, "u16 should be 2 bytes");
+    FL_STATIC_ASSERT(sizeof(fl::u16) == 2, "u16 should be 2 bytes");
     static constexpr fl::u32 bits_per_block = 8 * sizeof(fl::u16);
     static constexpr fl::u32 block_count =
         (N + bits_per_block - 1) / bits_per_block;

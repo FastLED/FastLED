@@ -3,6 +3,7 @@
 
 #include "test.h"
 #include "fl/stl/not_null.h"
+#include "fl/stl/static_assert.h"
 
 using namespace fl;
 
@@ -349,27 +350,27 @@ FL_TEST_CASE("not_null - compile-time type constraints") {
 // Test that verifies the type traits are working correctly
 FL_TEST_CASE("not_null - type traits verification") {
     // Verify is_comparable_to_nullptr works
-    static_assert(fl::detail::is_comparable_to_nullptr<int*>::value,
+    FL_STATIC_ASSERT(fl::detail::is_comparable_to_nullptr<int*>::value,
                   "int* should be comparable to nullptr");
-    static_assert(fl::detail::is_comparable_to_nullptr<const int*>::value,
+    FL_STATIC_ASSERT(fl::detail::is_comparable_to_nullptr<const int*>::value,
                   "const int* should be comparable to nullptr");
-    static_assert(fl::detail::is_comparable_to_nullptr<fl::CRGB*>::value,
+    FL_STATIC_ASSERT(fl::detail::is_comparable_to_nullptr<fl::CRGB*>::value,
                   "CRGB* should be comparable to nullptr");
 
     // Verify is_reference works
-    static_assert(!fl::detail::is_reference<int>::value,
+    FL_STATIC_ASSERT(!fl::detail::is_reference<int>::value,
                   "int should not be a reference");
-    static_assert(!fl::detail::is_reference<int*>::value,
+    FL_STATIC_ASSERT(!fl::detail::is_reference<int*>::value,
                   "int* should not be a reference");
-    static_assert(fl::detail::is_reference<int&>::value,
+    FL_STATIC_ASSERT(fl::detail::is_reference<int&>::value,
                   "int& should be a reference");
-    static_assert(fl::detail::is_reference<int&&>::value,
+    FL_STATIC_ASSERT(fl::detail::is_reference<int&&>::value,
                   "int&& should be a reference");
 
     // Verify is_dereferenceable works
-    static_assert(fl::detail::is_dereferenceable<int*>::value,
+    FL_STATIC_ASSERT(fl::detail::is_dereferenceable<int*>::value,
                   "int* should be dereferenceable");
-    static_assert(fl::detail::is_dereferenceable<fl::CRGB*>::value,
+    FL_STATIC_ASSERT(fl::detail::is_dereferenceable<fl::CRGB*>::value,
                   "CRGB* should be dereferenceable");
 
     // This test passes if all static_assert succeed at compile time

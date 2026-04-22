@@ -135,7 +135,7 @@ constexpr asset_ref asset(const char* path) FL_NOEXCEPT {
 /// Use: `fl::UIAudio audio("Audio", FL_ASSET("data/track.mp3"));`
 #define FL_ASSET(LITERAL_PATH)                                                 \
     ([]() -> ::fl::asset_ref {                                                 \
-        static_assert(                                                         \
+        FL_STATIC_ASSERT(                                                         \
             !::fl::asset_detail::path_has_parent_segment(LITERAL_PATH),        \
             "fl::asset path must not contain '..' segments");                  \
         return ::fl::asset_ref(                                                \

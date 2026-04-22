@@ -16,12 +16,12 @@ class string;
 template <fl::size DescriptorCount = 128, fl::size ArenaSize = 4096>
 class AsyncLogQueue {
     // Compile-time assertions for power-of-2 sizes (enables cheap modulo with &)
-    static_assert((DescriptorCount & (DescriptorCount - 1)) == 0,
+    FL_STATIC_ASSERT((DescriptorCount & (DescriptorCount - 1)) == 0,
                   "DescriptorCount must be power of 2");
-    static_assert((ArenaSize & (ArenaSize - 1)) == 0,
+    FL_STATIC_ASSERT((ArenaSize & (ArenaSize - 1)) == 0,
                   "ArenaSize must be power of 2");
-    static_assert(DescriptorCount >= 4, "DescriptorCount must be >= 4");
-    static_assert(ArenaSize >= 32, "ArenaSize must be >= 32");
+    FL_STATIC_ASSERT(DescriptorCount >= 4, "DescriptorCount must be >= 4");
+    FL_STATIC_ASSERT(ArenaSize >= 32, "ArenaSize must be >= 32");
 
 public:
     /// Maximum message length (bounded for ISR safety)

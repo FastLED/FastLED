@@ -13,6 +13,7 @@
 
 #include "eorder.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 namespace fl {
 
 #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
@@ -36,17 +37,17 @@ class ClocklessController : public CPixelLEDController<_RGB_ORDER> {
     static constexpr int _T2 = (TIMING::T2 * (CLOCKLESS_FREQUENCY / 1000000UL) + 500) / 1000;
     static constexpr int _T3 = (TIMING::T3 * (CLOCKLESS_FREQUENCY / 1000000UL) + 500) / 1000;
 
-    static_assert(FASTLED_NRF52_MAXIMUM_PIXELS_PER_STRING > 0, "Maximum string length must be positive value (FASTLED_NRF52_MAXIMUM_PIXELS_PER_STRING)");
-    static_assert(_T1         >             0 , "negative values are not allowed");
-    static_assert(_T2         >             0 , "negative values are not allowed");
-    static_assert(_T3         >             0 , "negative values are not allowed");
-    static_assert(_T1         <  (0x8000u-2u), "_T1 must fit in 15 bits");
-    static_assert(_T2         <  (0x8000u-2u), "_T2 must fit in 15 bits");
-    static_assert(_T3         <  (0x8000u-2u), "_T3 must fit in 15 bits");
-    static_assert(_T1         <  (0x8000u-2u), "_T0H must fit in 15 bits");
-    static_assert(_T1+_T2     <  (0x8000u-2u), "_T1H must fit in 15 bits");
-    static_assert(_T1+_T2+_T3 <  (0x8000u-2u), "_TOP must fit in 15 bits");
-    static_assert(_T1+_T2+_T3 <= PWM_COUNTERTOP_COUNTERTOP_Msk, "_TOP too large for peripheral");
+    FL_STATIC_ASSERT(FASTLED_NRF52_MAXIMUM_PIXELS_PER_STRING > 0, "Maximum string length must be positive value (FASTLED_NRF52_MAXIMUM_PIXELS_PER_STRING)");
+    FL_STATIC_ASSERT(_T1         >             0 , "negative values are not allowed");
+    FL_STATIC_ASSERT(_T2         >             0 , "negative values are not allowed");
+    FL_STATIC_ASSERT(_T3         >             0 , "negative values are not allowed");
+    FL_STATIC_ASSERT(_T1         <  (0x8000u-2u), "_T1 must fit in 15 bits");
+    FL_STATIC_ASSERT(_T2         <  (0x8000u-2u), "_T2 must fit in 15 bits");
+    FL_STATIC_ASSERT(_T3         <  (0x8000u-2u), "_T3 must fit in 15 bits");
+    FL_STATIC_ASSERT(_T1         <  (0x8000u-2u), "_T0H must fit in 15 bits");
+    FL_STATIC_ASSERT(_T1+_T2     <  (0x8000u-2u), "_T1H must fit in 15 bits");
+    FL_STATIC_ASSERT(_T1+_T2+_T3 <  (0x8000u-2u), "_TOP must fit in 15 bits");
+    FL_STATIC_ASSERT(_T1+_T2+_T3 <= PWM_COUNTERTOP_COUNTERTOP_Msk, "_TOP too large for peripheral");
 
 private:
     static const bool     _INITIALIZE_PIN_HIGH = (_FLIP ? 1 : 0);

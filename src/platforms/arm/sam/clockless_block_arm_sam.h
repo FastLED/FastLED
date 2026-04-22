@@ -8,6 +8,7 @@
 #include "bitswap.h"
 #include "platforms/arm/sam/is_sam.h"
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/static_assert.h"
 #include "fl/stl/noexcept.h"
 
 FL_DISABLE_WARNING_PUSH
@@ -57,7 +58,7 @@ class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LAN
 public:
 	virtual int size() { return CLEDController::size() * LANES; }
 	virtual void init() FL_NOEXCEPT {
-        static_assert(LANES <= 8, "Maximum of 8 lanes for Due parallel controllers!");
+        FL_STATIC_ASSERT(LANES <= 8, "Maximum of 8 lanes for Due parallel controllers!");
         if(FIRST_PIN == PORTA_FIRST_PIN) {
             switch(LANES) {
                 case 8: FastPin<31>::setOutput();

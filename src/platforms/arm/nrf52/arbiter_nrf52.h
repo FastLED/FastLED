@@ -10,6 +10,7 @@
 
 #include "platforms/arm/nrf52/led_sysdefs_arm_nrf52.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 
 typedef void (*FASTLED_NRF52_PWM_INTERRUPT_HANDLER)();
 
@@ -36,12 +37,12 @@ typedef enum _FASTLED_NRF52_ENABLED_PWM_INSTANCE { // ok plain enum
     FASTLED_NRF52_PWM_INSTANCE_COUNT
 } FASTLED_NRF52_ENABLED_PWM_INSTANCES;
 
-static_assert(FASTLED_NRF52_PWM_INSTANCE_COUNT > 0, "Instance count must be greater than zero -- define FASTLED_NRF52_ENABLE_PWM_INSTNACE[n] (replace `[n]` with digit)");
+FL_STATIC_ASSERT(FASTLED_NRF52_PWM_INSTANCE_COUNT > 0, "Instance count must be greater than zero -- define FASTLED_NRF52_ENABLE_PWM_INSTNACE[n] (replace `[n]` with digit)");
 
 template <fl::u32 _PWM_ID>
 class PWM_Arbiter {
 private:
-    static_assert(_PWM_ID < 32, "PWM_ID over 31 breaks current arbitration bitmask");
+    FL_STATIC_ASSERT(_PWM_ID < 32, "PWM_ID over 31 breaks current arbitration bitmask");
     //const  uint32_t _ACQUIRE_MASK =             (1u << _PWM_ID) ;
     //const  uint32_t _CLEAR_MASK   = ~((uint32_t)(1u << _PWM_ID));
     static fl::u32                              s_PwmInUse;

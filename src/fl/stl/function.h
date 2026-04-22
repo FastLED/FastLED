@@ -85,9 +85,9 @@ private:
         
         template <typename Function>
         InlinedLambda(Function f) FL_NOEXCEPT {
-            static_assert(sizeof(Function) <= kInlineLambdaSize, 
+            FL_STATIC_ASSERT(sizeof(Function) <= kInlineLambdaSize,
                          "Lambda/functor too large for inline storage");
-            static_assert(alignof(Function) <= alignof(max_align_t), 
+            FL_STATIC_ASSERT(alignof(Function) <= alignof(max_align_t),
                          "Lambda/functor requires stricter alignment than storage provides");
             
             // Initialize the entire storage to zero to avoid copying uninitialized memory
@@ -175,7 +175,7 @@ private:
         template <typename C>
         NonConstMemberCallable(C* o, R (C::*mf)(Args...)) FL_NOEXCEPT : obj(o) {
             // Store the member function pointer as raw bytes
-            static_assert(sizeof(mf) <= sizeof(member_func_storage), 
+            FL_STATIC_ASSERT(sizeof(mf) <= sizeof(member_func_storage),
                          "Member function pointer too large");
             fl::memcpy(member_func_storage.bytes, &mf, sizeof(mf));
             // Set the invoker to a function that knows how to cast back and call
@@ -211,7 +211,7 @@ private:
         template <typename C>
         ConstMemberCallable(const C* o, R (C::*mf)(Args...) const) FL_NOEXCEPT : obj(o) {
             // Store the member function pointer as raw bytes
-            static_assert(sizeof(mf) <= sizeof(member_func_storage), 
+            FL_STATIC_ASSERT(sizeof(mf) <= sizeof(member_func_storage),
                          "Member function pointer too large");
             fl::memcpy(member_func_storage.bytes, &mf, sizeof(mf));
             // Set the invoker to a function that knows how to cast back and call
@@ -354,7 +354,7 @@ private:
 // Only specializations for function signatures (e.g., function_list<void(Args...)>) are valid
 template <typename T>
 class function_list {
-    static_assert(fl::is_same<T, void>::value && !fl::is_same<T, void>::value,
+    FL_STATIC_ASSERT(fl::is_same<T, void>::value && !fl::is_same<T, void>::value,
                   "function_list requires a void returning function signature.");
 };
 
@@ -509,7 +509,7 @@ class function_list<void(Args...)> {
 // Triggers a compile-time error when attempting to use non-void return types
 template <typename R, typename... Args>
 class function_list<R(Args...)> {
-    static_assert(fl::is_same<R, void>::value,
+    FL_STATIC_ASSERT(fl::is_same<R, void>::value,
                   "function_list only supports void return type. "
                   "Use function_list<void(Args...)> instead of function_list<ReturnType(Args...)>.");
 };

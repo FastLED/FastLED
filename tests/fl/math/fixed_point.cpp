@@ -105,6 +105,7 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/math/fixed_point.h"
 #include "fl/math/math.h"
+#include "fl/stl/static_assert.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -809,21 +810,21 @@ void test_to_float_impl(float epsilon, float epsilon_large) {
 // This is a compile-time check: if raw() is not constexpr, static_assert fails.
 FL_TEST_CASE("constexpr raw() - all fixed-point types") {
     // Signed types
-    static_assert(constexpr_raw_check<s0x32>(0.5f), "s0x32::raw() must be constexpr");
-    static_assert(constexpr_raw_check<s4x12>(1.0f), "s4x12::raw() must be constexpr");
-    static_assert(constexpr_raw_check<s8x8>(1.0f), "s8x8::raw() must be constexpr");
-    static_assert(constexpr_raw_check<s8x24>(1.0f), "s8x24::raw() must be constexpr");
-    static_assert(constexpr_raw_check<s12x4>(1.0f), "s12x4::raw() must be constexpr");
-    static_assert(constexpr_raw_check<s16x16>(1.0f), "s16x16::raw() must be constexpr");
-    static_assert(constexpr_raw_check<s24x8>(1.0f), "s24x8::raw() must be constexpr");
+    FL_STATIC_ASSERT(constexpr_raw_check<s0x32>(0.5f), "s0x32::raw() must be constexpr");
+    FL_STATIC_ASSERT(constexpr_raw_check<s4x12>(1.0f), "s4x12::raw() must be constexpr");
+    FL_STATIC_ASSERT(constexpr_raw_check<s8x8>(1.0f), "s8x8::raw() must be constexpr");
+    FL_STATIC_ASSERT(constexpr_raw_check<s8x24>(1.0f), "s8x24::raw() must be constexpr");
+    FL_STATIC_ASSERT(constexpr_raw_check<s12x4>(1.0f), "s12x4::raw() must be constexpr");
+    FL_STATIC_ASSERT(constexpr_raw_check<s16x16>(1.0f), "s16x16::raw() must be constexpr");
+    FL_STATIC_ASSERT(constexpr_raw_check<s24x8>(1.0f), "s24x8::raw() must be constexpr");
     // Unsigned types
-    static_assert(constexpr_raw_check<u0x32>(0.5f), "u0x32::raw() must be constexpr");
-    static_assert(constexpr_raw_check<u4x12>(1.0f), "u4x12::raw() must be constexpr");
-    static_assert(constexpr_raw_check<u8x8>(1.0f), "u8x8::raw() must be constexpr");
-    static_assert(constexpr_raw_check<u8x24>(1.0f), "u8x24::raw() must be constexpr");
-    static_assert(constexpr_raw_check<u12x4>(1.0f), "u12x4::raw() must be constexpr");
-    static_assert(constexpr_raw_check<u16x16>(1.0f), "u16x16::raw() must be constexpr");
-    static_assert(constexpr_raw_check<u24x8>(1.0f), "u24x8::raw() must be constexpr");
+    FL_STATIC_ASSERT(constexpr_raw_check<u0x32>(0.5f), "u0x32::raw() must be constexpr");
+    FL_STATIC_ASSERT(constexpr_raw_check<u4x12>(1.0f), "u4x12::raw() must be constexpr");
+    FL_STATIC_ASSERT(constexpr_raw_check<u8x8>(1.0f), "u8x8::raw() must be constexpr");
+    FL_STATIC_ASSERT(constexpr_raw_check<u8x24>(1.0f), "u8x24::raw() must be constexpr");
+    FL_STATIC_ASSERT(constexpr_raw_check<u12x4>(1.0f), "u12x4::raw() must be constexpr");
+    FL_STATIC_ASSERT(constexpr_raw_check<u16x16>(1.0f), "u16x16::raw() must be constexpr");
+    FL_STATIC_ASSERT(constexpr_raw_check<u24x8>(1.0f), "u24x8::raw() must be constexpr");
 }
 
 // ============================================================================
@@ -966,164 +967,164 @@ constexpr bool constexpr_rsqrt_check(float a) {
 
 FL_TEST_CASE("constexpr from_raw - all types") {
     // Signed
-    static_assert(constexpr_from_raw_check<s4x12>(), "s4x12::from_raw must be constexpr");
-    static_assert(constexpr_from_raw_check<s8x8>(), "s8x8::from_raw must be constexpr");
-    static_assert(constexpr_from_raw_check<s8x24>(), "s8x24::from_raw must be constexpr");
-    static_assert(constexpr_from_raw_check<s12x4>(), "s12x4::from_raw must be constexpr");
-    static_assert(constexpr_from_raw_check<s16x16>(), "s16x16::from_raw must be constexpr");
-    static_assert(constexpr_from_raw_check<s24x8>(), "s24x8::from_raw must be constexpr");
+    FL_STATIC_ASSERT(constexpr_from_raw_check<s4x12>(), "s4x12::from_raw must be constexpr");
+    FL_STATIC_ASSERT(constexpr_from_raw_check<s8x8>(), "s8x8::from_raw must be constexpr");
+    FL_STATIC_ASSERT(constexpr_from_raw_check<s8x24>(), "s8x24::from_raw must be constexpr");
+    FL_STATIC_ASSERT(constexpr_from_raw_check<s12x4>(), "s12x4::from_raw must be constexpr");
+    FL_STATIC_ASSERT(constexpr_from_raw_check<s16x16>(), "s16x16::from_raw must be constexpr");
+    FL_STATIC_ASSERT(constexpr_from_raw_check<s24x8>(), "s24x8::from_raw must be constexpr");
     // Unsigned
-    static_assert(constexpr_from_raw_check<u4x12>(), "u4x12::from_raw must be constexpr");
-    static_assert(constexpr_from_raw_check<u8x8>(), "u8x8::from_raw must be constexpr");
-    static_assert(constexpr_from_raw_check<u8x24>(), "u8x24::from_raw must be constexpr");
-    static_assert(constexpr_from_raw_check<u12x4>(), "u12x4::from_raw must be constexpr");
-    static_assert(constexpr_from_raw_check<u16x16>(), "u16x16::from_raw must be constexpr");
-    static_assert(constexpr_from_raw_check<u24x8>(), "u24x8::from_raw must be constexpr");
+    FL_STATIC_ASSERT(constexpr_from_raw_check<u4x12>(), "u4x12::from_raw must be constexpr");
+    FL_STATIC_ASSERT(constexpr_from_raw_check<u8x8>(), "u8x8::from_raw must be constexpr");
+    FL_STATIC_ASSERT(constexpr_from_raw_check<u8x24>(), "u8x24::from_raw must be constexpr");
+    FL_STATIC_ASSERT(constexpr_from_raw_check<u12x4>(), "u12x4::from_raw must be constexpr");
+    FL_STATIC_ASSERT(constexpr_from_raw_check<u16x16>(), "u16x16::from_raw must be constexpr");
+    FL_STATIC_ASSERT(constexpr_from_raw_check<u24x8>(), "u24x8::from_raw must be constexpr");
 }
 
 FL_TEST_CASE("constexpr arithmetic operators") {
     // Addition
-    static_assert(constexpr_add_check<s8x8>(1.5f, 0.5f), "s8x8 + must be constexpr");
-    static_assert(constexpr_add_check<s16x16>(1.5f, 0.5f), "s16x16 + must be constexpr");
-    static_assert(constexpr_add_check<u8x8>(1.5f, 0.5f), "u8x8 + must be constexpr");
-    static_assert(constexpr_add_check<u16x16>(1.5f, 0.5f), "u16x16 + must be constexpr");
+    FL_STATIC_ASSERT(constexpr_add_check<s8x8>(1.5f, 0.5f), "s8x8 + must be constexpr");
+    FL_STATIC_ASSERT(constexpr_add_check<s16x16>(1.5f, 0.5f), "s16x16 + must be constexpr");
+    FL_STATIC_ASSERT(constexpr_add_check<u8x8>(1.5f, 0.5f), "u8x8 + must be constexpr");
+    FL_STATIC_ASSERT(constexpr_add_check<u16x16>(1.5f, 0.5f), "u16x16 + must be constexpr");
     // Subtraction
-    static_assert(constexpr_sub_check<s8x8>(1.5f, 0.5f), "s8x8 - must be constexpr");
-    static_assert(constexpr_sub_check<s16x16>(1.5f, 0.5f), "s16x16 - must be constexpr");
+    FL_STATIC_ASSERT(constexpr_sub_check<s8x8>(1.5f, 0.5f), "s8x8 - must be constexpr");
+    FL_STATIC_ASSERT(constexpr_sub_check<s16x16>(1.5f, 0.5f), "s16x16 - must be constexpr");
     // Unary minus
-    static_assert(constexpr_neg_check<s8x8>(1.5f), "s8x8 unary- must be constexpr");
-    static_assert(constexpr_neg_check<s16x16>(1.5f), "s16x16 unary- must be constexpr");
+    FL_STATIC_ASSERT(constexpr_neg_check<s8x8>(1.5f), "s8x8 unary- must be constexpr");
+    FL_STATIC_ASSERT(constexpr_neg_check<s16x16>(1.5f), "s16x16 unary- must be constexpr");
     // Multiply
-    static_assert(constexpr_mul_check<s8x8>(2.0f, 0.5f), "s8x8 * must be constexpr");
-    static_assert(constexpr_mul_check<s16x16>(2.0f, 0.5f), "s16x16 * must be constexpr");
-    static_assert(constexpr_mul_check<u8x8>(2.0f, 0.5f), "u8x8 * must be constexpr");
+    FL_STATIC_ASSERT(constexpr_mul_check<s8x8>(2.0f, 0.5f), "s8x8 * must be constexpr");
+    FL_STATIC_ASSERT(constexpr_mul_check<s16x16>(2.0f, 0.5f), "s16x16 * must be constexpr");
+    FL_STATIC_ASSERT(constexpr_mul_check<u8x8>(2.0f, 0.5f), "u8x8 * must be constexpr");
     // Divide
-    static_assert(constexpr_div_check<s8x8>(2.0f, 0.5f), "s8x8 / must be constexpr");
-    static_assert(constexpr_div_check<s16x16>(2.0f, 0.5f), "s16x16 / must be constexpr");
+    FL_STATIC_ASSERT(constexpr_div_check<s8x8>(2.0f, 0.5f), "s8x8 / must be constexpr");
+    FL_STATIC_ASSERT(constexpr_div_check<s16x16>(2.0f, 0.5f), "s16x16 / must be constexpr");
     // Right shift
-    static_assert(constexpr_rshift_check<s16x16>(4.0f), "s16x16 >> must be constexpr");
+    FL_STATIC_ASSERT(constexpr_rshift_check<s16x16>(4.0f), "s16x16 >> must be constexpr");
 }
 
 FL_TEST_CASE("constexpr comparisons") {
-    static_assert(constexpr_lt_check<s16x16>(1.0f, 2.0f), "s16x16 < must be constexpr");
-    static_assert(constexpr_eq_check<s16x16>(1.0f), "s16x16 == must be constexpr");
-    static_assert(constexpr_lt_check<s8x8>(1.0f, 2.0f), "s8x8 < must be constexpr");
-    static_assert(constexpr_eq_check<u16x16>(1.0f), "u16x16 == must be constexpr");
+    FL_STATIC_ASSERT(constexpr_lt_check<s16x16>(1.0f, 2.0f), "s16x16 < must be constexpr");
+    FL_STATIC_ASSERT(constexpr_eq_check<s16x16>(1.0f), "s16x16 == must be constexpr");
+    FL_STATIC_ASSERT(constexpr_lt_check<s8x8>(1.0f, 2.0f), "s8x8 < must be constexpr");
+    FL_STATIC_ASSERT(constexpr_eq_check<u16x16>(1.0f), "u16x16 == must be constexpr");
 }
 
 FL_TEST_CASE("constexpr conversions") {
-    static_assert(constexpr_to_int_check<s16x16>(2.0f) == 2, "s16x16 to_int must be constexpr");
-    static_assert(constexpr_to_int_check<s8x8>(3.0f) == 3, "s8x8 to_int must be constexpr");
+    FL_STATIC_ASSERT(constexpr_to_int_check<s16x16>(2.0f) == 2, "s16x16 to_int must be constexpr");
+    FL_STATIC_ASSERT(constexpr_to_int_check<s8x8>(3.0f) == 3, "s8x8 to_int must be constexpr");
     // to_float constexpr check (just verify it compiles)
-    static_assert(constexpr_to_float_check<s16x16>(1.0f) > 0.0f, "s16x16 to_float must be constexpr");
+    FL_STATIC_ASSERT(constexpr_to_float_check<s16x16>(1.0f) > 0.0f, "s16x16 to_float must be constexpr");
 }
 
 FL_TEST_CASE("constexpr math functions") {
     // mod
-    static_assert(constexpr_mod_check<s16x16>(1.5f, 1.0f), "s16x16 mod must be constexpr");
-    static_assert(constexpr_mod_check<s8x8>(1.5f, 1.0f), "s8x8 mod must be constexpr");
+    FL_STATIC_ASSERT(constexpr_mod_check<s16x16>(1.5f, 1.0f), "s16x16 mod must be constexpr");
+    FL_STATIC_ASSERT(constexpr_mod_check<s8x8>(1.5f, 1.0f), "s8x8 mod must be constexpr");
     // floor
-    static_assert(constexpr_floor_check<s16x16>(1.7f), "s16x16 floor must be constexpr");
-    static_assert(constexpr_floor_check<s8x8>(1.7f), "s8x8 floor must be constexpr");
+    FL_STATIC_ASSERT(constexpr_floor_check<s16x16>(1.7f), "s16x16 floor must be constexpr");
+    FL_STATIC_ASSERT(constexpr_floor_check<s8x8>(1.7f), "s8x8 floor must be constexpr");
     // ceil
-    static_assert(constexpr_ceil_check<s16x16>(1.3f), "s16x16 ceil must be constexpr");
-    static_assert(constexpr_ceil_check<s8x8>(1.3f), "s8x8 ceil must be constexpr");
+    FL_STATIC_ASSERT(constexpr_ceil_check<s16x16>(1.3f), "s16x16 ceil must be constexpr");
+    FL_STATIC_ASSERT(constexpr_ceil_check<s8x8>(1.3f), "s8x8 ceil must be constexpr");
     // fract
-    static_assert(constexpr_fract_check<s16x16>(1.7f), "s16x16 fract must be constexpr");
+    FL_STATIC_ASSERT(constexpr_fract_check<s16x16>(1.7f), "s16x16 fract must be constexpr");
     // abs
-    static_assert(constexpr_abs_check<s16x16>(-1.5f), "s16x16 abs must be constexpr");
-    static_assert(constexpr_abs_check<s8x8>(-1.5f), "s8x8 abs must be constexpr");
+    FL_STATIC_ASSERT(constexpr_abs_check<s16x16>(-1.5f), "s16x16 abs must be constexpr");
+    FL_STATIC_ASSERT(constexpr_abs_check<s8x8>(-1.5f), "s8x8 abs must be constexpr");
     // sign
-    static_assert(constexpr_sign_check<s16x16>(1.0f) == 1, "s16x16 sign(+) must be 1");
-    static_assert(constexpr_sign_check<s16x16>(-1.0f) == -1, "s16x16 sign(-) must be -1");
+    FL_STATIC_ASSERT(constexpr_sign_check<s16x16>(1.0f) == 1, "s16x16 sign(+) must be 1");
+    FL_STATIC_ASSERT(constexpr_sign_check<s16x16>(-1.0f) == -1, "s16x16 sign(-) must be -1");
     // lerp
-    static_assert(constexpr_lerp_check<s16x16>(0.0f, 2.0f, 0.5f), "s16x16 lerp must be constexpr");
+    FL_STATIC_ASSERT(constexpr_lerp_check<s16x16>(0.0f, 2.0f, 0.5f), "s16x16 lerp must be constexpr");
     // clamp
-    static_assert(constexpr_clamp_check<s16x16>(3.0f, 0.0f, 2.0f), "s16x16 clamp must be constexpr");
+    FL_STATIC_ASSERT(constexpr_clamp_check<s16x16>(3.0f, 0.0f, 2.0f), "s16x16 clamp must be constexpr");
     // step
-    static_assert(constexpr_step_check<s16x16>(0.5f, 1.0f), "s16x16 step must be constexpr");
+    FL_STATIC_ASSERT(constexpr_step_check<s16x16>(0.5f, 1.0f), "s16x16 step must be constexpr");
     // sqrt - all signed types
-    static_assert(constexpr_sqrt_check<s4x12>(1.0f), "s4x12 sqrt must be constexpr");
-    static_assert(constexpr_sqrt_check<s8x8>(1.0f), "s8x8 sqrt must be constexpr");
-    static_assert(constexpr_sqrt_check<s8x24>(1.0f), "s8x24 sqrt must be constexpr");
-    static_assert(constexpr_sqrt_check<s12x4>(1.0f), "s12x4 sqrt must be constexpr");
-    static_assert(constexpr_sqrt_check<s16x16>(1.0f), "s16x16 sqrt must be constexpr");
-    static_assert(constexpr_sqrt_check<s24x8>(1.0f), "s24x8 sqrt must be constexpr");
+    FL_STATIC_ASSERT(constexpr_sqrt_check<s4x12>(1.0f), "s4x12 sqrt must be constexpr");
+    FL_STATIC_ASSERT(constexpr_sqrt_check<s8x8>(1.0f), "s8x8 sqrt must be constexpr");
+    FL_STATIC_ASSERT(constexpr_sqrt_check<s8x24>(1.0f), "s8x24 sqrt must be constexpr");
+    FL_STATIC_ASSERT(constexpr_sqrt_check<s12x4>(1.0f), "s12x4 sqrt must be constexpr");
+    FL_STATIC_ASSERT(constexpr_sqrt_check<s16x16>(1.0f), "s16x16 sqrt must be constexpr");
+    FL_STATIC_ASSERT(constexpr_sqrt_check<s24x8>(1.0f), "s24x8 sqrt must be constexpr");
     // sqrt - all unsigned types
-    static_assert(constexpr_sqrt_check<u4x12>(1.0f), "u4x12 sqrt must be constexpr");
-    static_assert(constexpr_sqrt_check<u8x8>(1.0f), "u8x8 sqrt must be constexpr");
-    static_assert(constexpr_sqrt_check<u8x24>(1.0f), "u8x24 sqrt must be constexpr");
-    static_assert(constexpr_sqrt_check<u12x4>(1.0f), "u12x4 sqrt must be constexpr");
-    static_assert(constexpr_sqrt_check<u16x16>(1.0f), "u16x16 sqrt must be constexpr");
-    static_assert(constexpr_sqrt_check<u24x8>(1.0f), "u24x8 sqrt must be constexpr");
+    FL_STATIC_ASSERT(constexpr_sqrt_check<u4x12>(1.0f), "u4x12 sqrt must be constexpr");
+    FL_STATIC_ASSERT(constexpr_sqrt_check<u8x8>(1.0f), "u8x8 sqrt must be constexpr");
+    FL_STATIC_ASSERT(constexpr_sqrt_check<u8x24>(1.0f), "u8x24 sqrt must be constexpr");
+    FL_STATIC_ASSERT(constexpr_sqrt_check<u12x4>(1.0f), "u12x4 sqrt must be constexpr");
+    FL_STATIC_ASSERT(constexpr_sqrt_check<u16x16>(1.0f), "u16x16 sqrt must be constexpr");
+    FL_STATIC_ASSERT(constexpr_sqrt_check<u24x8>(1.0f), "u24x8 sqrt must be constexpr");
     // rsqrt - all signed types
-    static_assert(constexpr_rsqrt_check<s4x12>(1.0f), "s4x12 rsqrt must be constexpr");
-    static_assert(constexpr_rsqrt_check<s8x8>(1.0f), "s8x8 rsqrt must be constexpr");
-    static_assert(constexpr_rsqrt_check<s8x24>(1.0f), "s8x24 rsqrt must be constexpr");
-    static_assert(constexpr_rsqrt_check<s12x4>(1.0f), "s12x4 rsqrt must be constexpr");
-    static_assert(constexpr_rsqrt_check<s16x16>(1.0f), "s16x16 rsqrt must be constexpr");
-    static_assert(constexpr_rsqrt_check<s24x8>(1.0f), "s24x8 rsqrt must be constexpr");
+    FL_STATIC_ASSERT(constexpr_rsqrt_check<s4x12>(1.0f), "s4x12 rsqrt must be constexpr");
+    FL_STATIC_ASSERT(constexpr_rsqrt_check<s8x8>(1.0f), "s8x8 rsqrt must be constexpr");
+    FL_STATIC_ASSERT(constexpr_rsqrt_check<s8x24>(1.0f), "s8x24 rsqrt must be constexpr");
+    FL_STATIC_ASSERT(constexpr_rsqrt_check<s12x4>(1.0f), "s12x4 rsqrt must be constexpr");
+    FL_STATIC_ASSERT(constexpr_rsqrt_check<s16x16>(1.0f), "s16x16 rsqrt must be constexpr");
+    FL_STATIC_ASSERT(constexpr_rsqrt_check<s24x8>(1.0f), "s24x8 rsqrt must be constexpr");
     // rsqrt - all unsigned types
-    static_assert(constexpr_rsqrt_check<u4x12>(1.0f), "u4x12 rsqrt must be constexpr");
-    static_assert(constexpr_rsqrt_check<u8x8>(1.0f), "u8x8 rsqrt must be constexpr");
-    static_assert(constexpr_rsqrt_check<u8x24>(1.0f), "u8x24 rsqrt must be constexpr");
-    static_assert(constexpr_rsqrt_check<u12x4>(1.0f), "u12x4 rsqrt must be constexpr");
-    static_assert(constexpr_rsqrt_check<u16x16>(1.0f), "u16x16 rsqrt must be constexpr");
-    static_assert(constexpr_rsqrt_check<u24x8>(1.0f), "u24x8 rsqrt must be constexpr");
+    FL_STATIC_ASSERT(constexpr_rsqrt_check<u4x12>(1.0f), "u4x12 rsqrt must be constexpr");
+    FL_STATIC_ASSERT(constexpr_rsqrt_check<u8x8>(1.0f), "u8x8 rsqrt must be constexpr");
+    FL_STATIC_ASSERT(constexpr_rsqrt_check<u8x24>(1.0f), "u8x24 rsqrt must be constexpr");
+    FL_STATIC_ASSERT(constexpr_rsqrt_check<u12x4>(1.0f), "u12x4 rsqrt must be constexpr");
+    FL_STATIC_ASSERT(constexpr_rsqrt_check<u16x16>(1.0f), "u16x16 rsqrt must be constexpr");
+    FL_STATIC_ASSERT(constexpr_rsqrt_check<u24x8>(1.0f), "u24x8 rsqrt must be constexpr");
 }
 
 // Verify constexpr works for concrete value computation
 FL_TEST_CASE("constexpr value verification") {
     // s16x16: 1.5 + 0.5 = 2.0
-    static_assert((s16x16(1.5f) + s16x16(0.5f)).raw() == s16x16(2.0f).raw(),
+    FL_STATIC_ASSERT((s16x16(1.5f) + s16x16(0.5f)).raw() == s16x16(2.0f).raw(),
                   "1.5 + 0.5 must equal 2.0");
 
     // s16x16: 3.0 * 2.0 = 6.0
-    static_assert((s16x16(3.0f) * s16x16(2.0f)).raw() == s16x16(6.0f).raw(),
+    FL_STATIC_ASSERT((s16x16(3.0f) * s16x16(2.0f)).raw() == s16x16(6.0f).raw(),
                   "3.0 * 2.0 must equal 6.0");
 
     // s16x16: floor(1.7) = 1.0
-    static_assert(s16x16::floor(s16x16(1.7f)).raw() == s16x16(1.0f).raw(),
+    FL_STATIC_ASSERT(s16x16::floor(s16x16(1.7f)).raw() == s16x16(1.0f).raw(),
                   "floor(1.7) must equal 1.0");
 
     // s8x8: -2.0 negation
-    static_assert((-s8x8(2.0f)).raw() == s8x8(-2.0f).raw(),
+    FL_STATIC_ASSERT((-s8x8(2.0f)).raw() == s8x8(-2.0f).raw(),
                   "-(2.0) must equal -2.0");
 
     // s16x16: clamp(3.0, 0.0, 2.0) = 2.0
-    static_assert(s16x16::clamp(s16x16(3.0f), s16x16(0.0f), s16x16(2.0f)).raw() == s16x16(2.0f).raw(),
+    FL_STATIC_ASSERT(s16x16::clamp(s16x16(3.0f), s16x16(0.0f), s16x16(2.0f)).raw() == s16x16(2.0f).raw(),
                   "clamp(3.0, 0.0, 2.0) must equal 2.0");
 
     // s16x16: abs(-1.5) = 1.5
-    static_assert(s16x16::abs(s16x16(-1.5f)).raw() == s16x16(1.5f).raw(),
+    FL_STATIC_ASSERT(s16x16::abs(s16x16(-1.5f)).raw() == s16x16(1.5f).raw(),
                   "abs(-1.5) must equal 1.5");
 
     // s16x16: sqrt(4.0) = 2.0
-    static_assert(s16x16::sqrt(s16x16(4.0f)).raw() == s16x16(2.0f).raw(),
+    FL_STATIC_ASSERT(s16x16::sqrt(s16x16(4.0f)).raw() == s16x16(2.0f).raw(),
                   "sqrt(4.0) must equal 2.0");
 
     // s16x16: sqrt(1.0) = 1.0
-    static_assert(s16x16::sqrt(s16x16(1.0f)).raw() == s16x16(1.0f).raw(),
+    FL_STATIC_ASSERT(s16x16::sqrt(s16x16(1.0f)).raw() == s16x16(1.0f).raw(),
                   "sqrt(1.0) must equal 1.0");
 
     // s16x16: sqrt(0.0) = 0.0
-    static_assert(s16x16::sqrt(s16x16(0.0f)).raw() == 0,
+    FL_STATIC_ASSERT(s16x16::sqrt(s16x16(0.0f)).raw() == 0,
                   "sqrt(0.0) must equal 0.0");
 
     // u16x16: sqrt(4.0) = 2.0
-    static_assert(u16x16::sqrt(u16x16(4.0f)).raw() == u16x16(2.0f).raw(),
+    FL_STATIC_ASSERT(u16x16::sqrt(u16x16(4.0f)).raw() == u16x16(2.0f).raw(),
                   "u16x16 sqrt(4.0) must equal 2.0");
 
     // s16x16: rsqrt(1.0) = 1.0
-    static_assert(s16x16::rsqrt(s16x16(1.0f)).raw() == s16x16(1.0f).raw(),
+    FL_STATIC_ASSERT(s16x16::rsqrt(s16x16(1.0f)).raw() == s16x16(1.0f).raw(),
                   "rsqrt(1.0) must equal 1.0");
 
     // s16x16: rsqrt(0.0) = 0.0 (zero guard)
-    static_assert(s16x16::rsqrt(s16x16(0.0f)).raw() == 0,
+    FL_STATIC_ASSERT(s16x16::rsqrt(s16x16(0.0f)).raw() == 0,
                   "rsqrt(0.0) must equal 0.0");
 
     // u16x16: rsqrt(1.0) = 1.0
-    static_assert(u16x16::rsqrt(u16x16(1.0f)).raw() == u16x16(1.0f).raw(),
+    FL_STATIC_ASSERT(u16x16::rsqrt(u16x16(1.0f)).raw() == u16x16(1.0f).raw(),
                   "u16x16 rsqrt(1.0) must equal 1.0");
 }
 

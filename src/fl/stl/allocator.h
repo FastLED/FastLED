@@ -270,7 +270,7 @@ class allocator_realloc {
 private:
     // SAFETY CHECK: Compile-time verification that T is trivially copyable
     // This prevents undefined behavior from using realloc() with non-trivially-copyable types
-    static_assert(fl::is_trivially_copyable<T>::value,
+    FL_STATIC_ASSERT(fl::is_trivially_copyable<T>::value,
         "allocator_realloc<T> requires T to be trivially copyable. "
         "NOTE: This allocator is now redundant - fl::allocator<T> automatically "
         "optimizes trivially copyable types. Just use fl::vector<T> instead.");

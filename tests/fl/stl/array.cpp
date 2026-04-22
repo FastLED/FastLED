@@ -6,6 +6,7 @@
 #include "fl/stl/move.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/int.h"
+#include "fl/stl/static_assert.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -386,18 +387,18 @@ FL_TEST_CASE("fl::array - Edge cases") {
 FL_TEST_CASE("fl::array - Type traits") {
     FL_SUBCASE("value_type") {
         using ArrayType = array<int, 5>;
-        static_assert(fl::is_same<ArrayType::value_type, int>::value, "value_type should be int");
+        FL_STATIC_ASSERT(fl::is_same<ArrayType::value_type, int>::value, "value_type should be int");
     }
 
     FL_SUBCASE("size_type") {
         using ArrayType = array<int, 5>;
-        static_assert(fl::is_same<ArrayType::size_type, fl::size>::value, "size_type should be fl::size");
+        FL_STATIC_ASSERT(fl::is_same<ArrayType::size_type, fl::size>::value, "size_type should be fl::size");
     }
 
     FL_SUBCASE("iterator types") {
         using ArrayType = array<int, 5>;
-        static_assert(fl::is_same<ArrayType::iterator, int*>::value, "iterator should be int*");
-        static_assert(fl::is_same<ArrayType::const_iterator, const int*>::value, "const_iterator should be const int*");
+        FL_STATIC_ASSERT(fl::is_same<ArrayType::iterator, int*>::value, "iterator should be int*");
+        FL_STATIC_ASSERT(fl::is_same<ArrayType::const_iterator, const int*>::value, "const_iterator should be const int*");
     }
 }
 

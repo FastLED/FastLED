@@ -7,11 +7,14 @@ across all platforms and compilers.
 
 Banned macros/features checked:
 - __has_include(...) (C++17/compiler extension) -> FL_HAS_INCLUDE(...)
+- static_assert(...) -> FL_STATIC_ASSERT(...)
 
 Rationale:
 - __has_include() is not universally supported across all compilers/platforms
 - FL_HAS_INCLUDE provides a fallback implementation (returns 0) for compilers
   without __has_include support
+- FL_STATIC_ASSERT provides a C++98-compatible fallback for legacy embedded
+  toolchains and preserves native static_assert on modern compilers
 - Ensures code compiles consistently across all target platforms
 """
 
@@ -24,11 +27,15 @@ from ci.util.paths import PROJECT_ROOT
 # Mapping of banned macros to their FL_* macro equivalents
 MACRO_MAPPINGS = {
     "__has_include": "FL_HAS_INCLUDE",
+    "static_assert": "FL_STATIC_ASSERT",
 }
 
 # Pattern to match __has_include(...) usage
 # Matches: __has_include(<header>) or __has_include("header")
 HAS_INCLUDE_PATTERN = re.compile(r"\b__has_include\s*\(")
+
+# Pattern to match raw static_assert(...) usage
+STATIC_ASSERT_PATTERN = re.compile(r"\bstatic_assert\s*\(")
 
 
 class BannedMacrosChecker(FileContentChecker):
@@ -43,9 +50,9 @@ class BannedMacrosChecker(FileContentChecker):
         if not file_path.endswith((".cpp", ".h", ".hpp", ".ino", ".cpp.hpp")):
             return False
 
-        # Skip files that define FL_HAS_INCLUDE
+        # Skip files that define the portable wrappers themselves
         if file_path.endswith("has_include.h") or file_path.endswith(
-            "compiler_control.h"
+            ("compiler_control.h", "cpp_compat.h", "static_assert.h")
         ):
             return False
 
@@ -93,8 +100,8 @@ class BannedMacrosChecker(FileContentChecker):
             if "#define" in code_part and "FL_HAS_INCLUDE" in code_part:
                 continue
 
-            # Fast first pass: skip regex if keyword not present
-            if "__has_include" not in code_part:
+            # Fast first pass: skip regex if no banned keyword is present
+            if "__has_include" not in code_part and "static_assert" not in code_part:
                 continue
 
             # Check for __has_include(...) usage
@@ -111,6 +118,16 @@ class BannedMacrosChecker(FileContentChecker):
                         f"      Rationale: __has_include is not universally supported. "
                         f"FL_HAS_INCLUDE provides a portable wrapper with fallback for older compilers.\n"
                         f"      Include 'fl/stl/has_include.h' and replace __has_include(...) with FL_HAS_INCLUDE(...)",
+                    )
+                )
+
+            if STATIC_ASSERT_PATTERN.search(code_part):
+                violations.append(
+                    (
+                        line_number,
+                        f"Use FL_STATIC_ASSERT instead of raw static_assert: {stripped}\n"
+                        f"      Rationale: FL_STATIC_ASSERT keeps compile-time assertions portable on old embedded toolchains.\n"
+                        f"      Include 'fl/stl/static_assert.h' when needed and replace static_assert(...) with FL_STATIC_ASSERT(...)",
                     )
                 )
 

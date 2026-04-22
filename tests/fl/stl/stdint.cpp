@@ -2,6 +2,7 @@
 #include "fl/stl/stdint.h"
 #include "test.h"
 #include "stdint.h" // ok include - testing FL types against standard
+#include "fl/stl/static_assert.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -334,17 +335,17 @@ FL_TEST_CASE("stdint constexpr compatibility") {
 
     FL_SUBCASE("static assertions") {
         // These should compile successfully
-        static_assert(sizeof(uint8_t) == 1, "uint8_t should be 1 byte");
-        static_assert(sizeof(uint16_t) == 2, "uint16_t should be 2 bytes");
-        static_assert(sizeof(uint32_t) == 4, "uint32_t should be 4 bytes");
-        static_assert(sizeof(uint64_t) == 8, "uint64_t should be 8 bytes");
+        FL_STATIC_ASSERT(sizeof(uint8_t) == 1, "uint8_t should be 1 byte");
+        FL_STATIC_ASSERT(sizeof(uint16_t) == 2, "uint16_t should be 2 bytes");
+        FL_STATIC_ASSERT(sizeof(uint32_t) == 4, "uint32_t should be 4 bytes");
+        FL_STATIC_ASSERT(sizeof(uint64_t) == 8, "uint64_t should be 8 bytes");
 
-        static_assert(INT8_MAX == 127, "INT8_MAX should be 127");
-        static_assert(UINT8_MAX == 255, "UINT8_MAX should be 255");
-        static_assert(INT16_MAX == 32767, "INT16_MAX should be 32767");
-        static_assert(UINT16_MAX == 65535, "UINT16_MAX should be 65535");
-        static_assert(INT32_MAX == 2147483647, "INT32_MAX should be 2147483647");
-        static_assert(UINT32_MAX == 4294967295U, "UINT32_MAX should be 4294967295U");
+        FL_STATIC_ASSERT(INT8_MAX == 127, "INT8_MAX should be 127");
+        FL_STATIC_ASSERT(UINT8_MAX == 255, "UINT8_MAX should be 255");
+        FL_STATIC_ASSERT(INT16_MAX == 32767, "INT16_MAX should be 32767");
+        FL_STATIC_ASSERT(UINT16_MAX == 65535, "UINT16_MAX should be 65535");
+        FL_STATIC_ASSERT(INT32_MAX == 2147483647, "INT32_MAX should be 2147483647");
+        FL_STATIC_ASSERT(UINT32_MAX == 4294967295U, "UINT32_MAX should be 4294967295U");
     }
 }
 

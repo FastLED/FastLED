@@ -1,6 +1,7 @@
 #include "fl/stl/range_access.h"
 #include "fl/stl/array.h"
 #include "test.h"
+#include "fl/stl/static_assert.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -108,7 +109,7 @@ FL_TEST_CASE("fl::begin and fl::end constexpr") {
         constexpr const int* b = fl::begin(arr);
         constexpr const int* e = fl::end(arr);
 
-        static_assert(e - b == 3, "size should be 3");
+        FL_STATIC_ASSERT(e - b == 3, "size should be 3");
         FL_CHECK_EQ(e - b, 3);
     }
 

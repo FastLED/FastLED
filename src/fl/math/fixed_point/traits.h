@@ -140,7 +140,7 @@ struct fixed_point_traits {
     // Compile-time overflow safety checks
     // Verify intermediate_type can hold worst-case products for operator*
     // raw_max * raw_max needs 2*TOTAL_BITS bits
-    static_assert(sizeof(intermediate_type) * 8 >= TOTAL_BITS * 2,
+    FL_STATIC_ASSERT(sizeof(intermediate_type) * 8 >= TOTAL_BITS * 2,
                   "intermediate_type too narrow for operator* overflow safety");
 
     // Verify poly_intermediate_type can hold polynomial products
@@ -150,7 +150,7 @@ struct fixed_point_traits {
     // Max product: ~1.5 * 2^IFRAC * 2^IFRAC = ~1.5 * 2^(2*IFRAC)
     // For i32: needs 2*IFRAC + 1 <= 31, so IFRAC <= 15 (but we use i64 for multiply, safe)
     // For i64: needs 2*IFRAC + 1 <= 63, so IFRAC <= 31 (all our types fit)
-    static_assert((IFRAC <= 16 && sizeof(poly_intermediate_type) * 8 >= 32) ||
+    FL_STATIC_ASSERT((IFRAC <= 16 && sizeof(poly_intermediate_type) * 8 >= 32) ||
                   (IFRAC > 16 && sizeof(poly_intermediate_type) * 8 >= 64),
                   "poly_intermediate_type insufficient for polynomial evaluation");
 };

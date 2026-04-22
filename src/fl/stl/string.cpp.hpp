@@ -84,9 +84,9 @@ void string::swap(string &other) {
 }
 
 void string::compileTimeAssertions() {
-    static_assert(FASTLED_STR_INLINED_SIZE > 0,
+    FL_STATIC_ASSERT(FASTLED_STR_INLINED_SIZE > 0,
                   "FASTLED_STR_INLINED_SIZE must be greater than 0");
-    static_assert(FASTLED_STR_INLINED_SIZE == kStrInlineSize,
+    FL_STATIC_ASSERT(FASTLED_STR_INLINED_SIZE == kStrInlineSize,
                   "If you want to change the FASTLED_STR_INLINED_SIZE, then it "
                   "must be through a build define and not an include define.");
 }

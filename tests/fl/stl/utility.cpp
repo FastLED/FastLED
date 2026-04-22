@@ -1,6 +1,7 @@
 #include "fl/stl/utility.h"
 #include "fl/stl/limits.h"
 #include "test.h"
+#include "fl/stl/static_assert.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -61,9 +62,9 @@ FL_TEST_CASE("fl::less<T>") {
     FL_SUBCASE("constexpr evaluation") {
         // Test that less can be used in constexpr contexts
         constexpr less<int> cmp;
-        static_assert(cmp(1, 2), "1 < 2 should be true");
-        static_assert(!cmp(2, 1), "2 < 1 should be false");
-        static_assert(!cmp(5, 5), "5 < 5 should be false");
+        FL_STATIC_ASSERT(cmp(1, 2), "1 < 2 should be true");
+        FL_STATIC_ASSERT(!cmp(2, 1), "2 < 1 should be false");
+        FL_STATIC_ASSERT(!cmp(5, 5), "5 < 5 should be false");
     }
 }
 
@@ -121,9 +122,9 @@ FL_TEST_CASE("fl::less<void> - transparent comparator") {
 
     FL_SUBCASE("constexpr with void") {
         constexpr less<void> cmp_void;
-        static_assert(cmp_void(1, 2), "1 < 2 should be true");
-        static_assert(!cmp_void(2, 1), "2 < 1 should be false");
-        static_assert(cmp_void(1.0f, 2.0), "1.0f < 2.0 should be true");
+        FL_STATIC_ASSERT(cmp_void(1, 2), "1 < 2 should be true");
+        FL_STATIC_ASSERT(!cmp_void(2, 1), "2 < 1 should be false");
+        FL_STATIC_ASSERT(cmp_void(1.0f, 2.0), "1.0f < 2.0 should be true");
     }
 }
 
@@ -147,7 +148,7 @@ FL_TEST_CASE("fl::DefaultLess - backward compatibility") {
 
     FL_SUBCASE("constexpr compatibility") {
         constexpr DefaultLess<int> cmp;
-        static_assert(cmp(1, 2), "DefaultLess should work in constexpr context");
+        FL_STATIC_ASSERT(cmp(1, 2), "DefaultLess should work in constexpr context");
     }
 }
 

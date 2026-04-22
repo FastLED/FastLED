@@ -43,6 +43,7 @@
 #include "platforms/esp/32/core/fastpin_esp32.h"
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 
 namespace fl {
 
@@ -57,7 +58,7 @@ private:
     fl::shared_ptr<IChannelDriver> mDriver;
 
     // -- Verify that the pin is valid
-    static_assert(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
+    FL_STATIC_ASSERT(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
 
 public:
     ClocklessIdf4() FL_NOEXCEPT

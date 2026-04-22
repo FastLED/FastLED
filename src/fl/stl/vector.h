@@ -111,7 +111,7 @@ class FL_ALIGN FixedVector {
     }
 
     template <fl::size M> FixedVector(T (&values)[M]) FL_NOEXCEPT : current_size(0) {
-        static_assert(M <= N, "Too many elements for FixedVector");
+        FL_STATIC_ASSERT(M <= N, "Too many elements for FixedVector");
         assign_array(values, M);
     }
 

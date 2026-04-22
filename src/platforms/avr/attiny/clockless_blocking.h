@@ -13,6 +13,7 @@
 #include <avr/interrupt.h> // for cli/sei definitions
 // IWYU pragma: end_keep
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/static_assert.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/system/fastpin.h"
 #include "platforms/avr/is_avr.h"
@@ -167,7 +168,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	static constexpr u32 T2 = (TIMING::T2 * (F_CPU / 1000000UL) + 500) / 1000;
 	static constexpr u32 T3 = (TIMING::T3 * (F_CPU / 1000000UL) + 500) / 1000;
 
-	static_assert(T1 >= 2 && T2 >= 2 && T3 >= 3, "Not enough cycles - use a higher clock speed");
+	FL_STATIC_ASSERT(T1 >= 2 && T2 >= 2 && T3 >= 3, "Not enough cycles - use a higher clock speed");
 
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;

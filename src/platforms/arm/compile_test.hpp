@@ -4,6 +4,7 @@
 
 #define FASTLED_INTERNAL  
 #include "FastLED.h"
+#include "fl/stl/static_assert.h"
 
 namespace fl {
 static void arm_compile_tests() {
@@ -119,7 +120,7 @@ static void arm_compile_tests() {
 #if defined(STM32F1) || defined(__STM32F1__) || defined(STM32F1xx)
     // Static assert to ensure we're aware of memory constraints
     // STM32F103C8 has only 64KB flash and 20KB RAM
-    static_assert(sizeof(void*) == 4, "STM32F1 should be 32-bit platform");
+    FL_STATIC_ASSERT(sizeof(void*) == 4, "STM32F1 should be 32-bit platform");
     
     // Compile-time check for sketch memory usage awareness
     #if SKETCH_HAS_LARGE_MEMORY != 0

@@ -10,6 +10,7 @@
 #include "crgb.h"
 #include "fastspi_types.h"
 #include "fl/stl/bit_cast.h"
+#include "fl/stl/static_assert.h"
 #include "fl/stl/cstring.h"  // For fl::memset
 #include "fl/system/log.h"  // For FL_WARN macro
 
@@ -52,8 +53,8 @@ class ESP32SPIOutput {
 
 public:
     // Verify that the pins are valid
-    static_assert(FastPin<DATA_PIN>::validpin(), "Invalid data pin specified");
-    static_assert(FastPin<CLOCK_PIN>::validpin(), "Invalid clock pin specified");
+    FL_STATIC_ASSERT(FastPin<DATA_PIN>::validpin(), "Invalid data pin specified");
+    FL_STATIC_ASSERT(FastPin<CLOCK_PIN>::validpin(), "Invalid clock pin specified");
 
     ESP32SPIOutput()
         : mSPIHandle(nullptr)

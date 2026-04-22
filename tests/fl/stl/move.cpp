@@ -28,6 +28,7 @@
 #include "fl/stl/unordered_map_lru.h"
 #include "fl/stl/bitset_dynamic.h"
 #include "fl/stl/bitset.h"
+#include "fl/stl/static_assert.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -83,69 +84,69 @@ struct MoveTestTypeMove {
 
 FL_TEST_CASE("fl::remove_reference trait") {
     FL_SUBCASE("Non-reference types remain unchanged") {
-        static_assert(fl::is_same<typename remove_reference<int>::type, int>::value,
+        FL_STATIC_ASSERT(fl::is_same<typename remove_reference<int>::type, int>::value,
                      "remove_reference should not change int");
-        static_assert(fl::is_same<typename remove_reference<float>::type, float>::value,
+        FL_STATIC_ASSERT(fl::is_same<typename remove_reference<float>::type, float>::value,
                      "remove_reference should not change float");
-        static_assert(fl::is_same<typename remove_reference<double>::type, double>::value,
+        FL_STATIC_ASSERT(fl::is_same<typename remove_reference<double>::type, double>::value,
                      "remove_reference should not change double");
-        static_assert(fl::is_same<typename remove_reference<char>::type, char>::value,
+        FL_STATIC_ASSERT(fl::is_same<typename remove_reference<char>::type, char>::value,
                      "remove_reference should not change char");
         FL_CHECK(true);  // Dummy runtime check
     }
 
     FL_SUBCASE("Pointer types remain unchanged") {
-        static_assert(fl::is_same<typename remove_reference<int*>::type, int*>::value,
+        FL_STATIC_ASSERT(fl::is_same<typename remove_reference<int*>::type, int*>::value,
                      "remove_reference should not change int*");
-        static_assert(fl::is_same<typename remove_reference<const int*>::type, const int*>::value,
+        FL_STATIC_ASSERT(fl::is_same<typename remove_reference<const int*>::type, const int*>::value,
                      "remove_reference should not change const int*");
-        static_assert(fl::is_same<typename remove_reference<void*>::type, void*>::value,
+        FL_STATIC_ASSERT(fl::is_same<typename remove_reference<void*>::type, void*>::value,
                      "remove_reference should not change void*");
         FL_CHECK(true);  // Dummy runtime check
     }
 
     FL_SUBCASE("Lvalue references are removed") {
-        static_assert(fl::is_same<typename remove_reference<int&>::type, int>::value,
+        FL_STATIC_ASSERT(fl::is_same<typename remove_reference<int&>::type, int>::value,
                      "remove_reference should remove lvalue reference from int&");
-        static_assert(fl::is_same<typename remove_reference<float&>::type, float>::value,
+        FL_STATIC_ASSERT(fl::is_same<typename remove_reference<float&>::type, float>::value,
                      "remove_reference should remove lvalue reference from float&");
-        static_assert(fl::is_same<typename remove_reference<const double&>::type, const double>::value,
+        FL_STATIC_ASSERT(fl::is_same<typename remove_reference<const double&>::type, const double>::value,
                      "remove_reference should remove lvalue reference from const double&");
         FL_CHECK(true);  // Dummy runtime check
     }
 
     FL_SUBCASE("Rvalue references are removed") {
-        static_assert(fl::is_same<typename remove_reference<int&&>::type, int>::value,
+        FL_STATIC_ASSERT(fl::is_same<typename remove_reference<int&&>::type, int>::value,
                      "remove_reference should remove rvalue reference from int&&");
-        static_assert(fl::is_same<typename remove_reference<float&&>::type, float>::value,
+        FL_STATIC_ASSERT(fl::is_same<typename remove_reference<float&&>::type, float>::value,
                      "remove_reference should remove rvalue reference from float&&");
-        static_assert(fl::is_same<typename remove_reference<const double&&>::type, const double>::value,
+        FL_STATIC_ASSERT(fl::is_same<typename remove_reference<const double&&>::type, const double>::value,
                      "remove_reference should remove rvalue reference from const double&&");
         FL_CHECK(true);  // Dummy runtime check
     }
 
     FL_SUBCASE("Const qualification is preserved") {
-        static_assert(fl::is_same<typename remove_reference<const int>::type, const int>::value,
+        FL_STATIC_ASSERT(fl::is_same<typename remove_reference<const int>::type, const int>::value,
                      "remove_reference should preserve const on non-reference");
-        static_assert(fl::is_same<typename remove_reference<const int&>::type, const int>::value,
+        FL_STATIC_ASSERT(fl::is_same<typename remove_reference<const int&>::type, const int>::value,
                      "remove_reference should preserve const when removing reference");
-        static_assert(fl::is_same<typename remove_reference<const int&&>::type, const int>::value,
+        FL_STATIC_ASSERT(fl::is_same<typename remove_reference<const int&&>::type, const int>::value,
                      "remove_reference should preserve const when removing rvalue reference");
         FL_CHECK(true);  // Dummy runtime check
     }
 
     FL_SUBCASE("Volatile qualification is preserved") {
-        static_assert(fl::is_same<typename remove_reference<volatile int>::type, volatile int>::value,
+        FL_STATIC_ASSERT(fl::is_same<typename remove_reference<volatile int>::type, volatile int>::value,
                      "remove_reference should preserve volatile on non-reference");
-        static_assert(fl::is_same<typename remove_reference<volatile int&>::type, volatile int>::value,
+        FL_STATIC_ASSERT(fl::is_same<typename remove_reference<volatile int&>::type, volatile int>::value,
                      "remove_reference should preserve volatile when removing reference");
         FL_CHECK(true);  // Dummy runtime check
     }
 
     FL_SUBCASE("CV qualifications are preserved") {
-        static_assert(fl::is_same<typename remove_reference<const volatile int>::type, const volatile int>::value,
+        FL_STATIC_ASSERT(fl::is_same<typename remove_reference<const volatile int>::type, const volatile int>::value,
                      "remove_reference should preserve const volatile");
-        static_assert(fl::is_same<typename remove_reference<const volatile int&>::type, const volatile int>::value,
+        FL_STATIC_ASSERT(fl::is_same<typename remove_reference<const volatile int&>::type, const volatile int>::value,
                      "remove_reference should preserve const volatile when removing reference");
         FL_CHECK(true);  // Dummy runtime check
     }
@@ -153,19 +154,19 @@ FL_TEST_CASE("fl::remove_reference trait") {
 
 FL_TEST_CASE("fl::remove_reference_t alias") {
     FL_SUBCASE("Alias works correctly for basic types") {
-        static_assert(fl::is_same<remove_reference_t<int>, int>::value,
+        FL_STATIC_ASSERT(fl::is_same<remove_reference_t<int>, int>::value,
                      "remove_reference_t should work like remove_reference::type");
-        static_assert(fl::is_same<remove_reference_t<int&>, int>::value,
+        FL_STATIC_ASSERT(fl::is_same<remove_reference_t<int&>, int>::value,
                      "remove_reference_t should remove lvalue reference");
-        static_assert(fl::is_same<remove_reference_t<int&&>, int>::value,
+        FL_STATIC_ASSERT(fl::is_same<remove_reference_t<int&&>, int>::value,
                      "remove_reference_t should remove rvalue reference");
         FL_CHECK(true);  // Dummy runtime check
     }
 
     FL_SUBCASE("Alias preserves qualifiers") {
-        static_assert(fl::is_same<remove_reference_t<const int&>, const int>::value,
+        FL_STATIC_ASSERT(fl::is_same<remove_reference_t<const int&>, const int>::value,
                      "remove_reference_t should preserve const");
-        static_assert(fl::is_same<remove_reference_t<volatile int&>, volatile int>::value,
+        FL_STATIC_ASSERT(fl::is_same<remove_reference_t<volatile int&>, volatile int>::value,
                      "remove_reference_t should preserve volatile");
         FL_CHECK(true);  // Dummy runtime check
     }
@@ -308,19 +309,19 @@ FL_TEST_CASE("fl::move is noexcept") {
     FL_SUBCASE("move is noexcept for basic types") {
         // fl::move itself should be noexcept
         int x = 10;
-        static_assert(noexcept(fl::move(x)), "fl::move should be noexcept");
+        FL_STATIC_ASSERT(noexcept(fl::move(x)), "fl::move should be noexcept");
         FL_CHECK(true);  // Dummy runtime check
     }
 
     FL_SUBCASE("move is noexcept for pointer types") {
         int* ptr = nullptr;
-        static_assert(noexcept(fl::move(ptr)), "fl::move should be noexcept");
+        FL_STATIC_ASSERT(noexcept(fl::move(ptr)), "fl::move should be noexcept");
         FL_CHECK(true);  // Dummy runtime check
     }
 
     FL_SUBCASE("move is noexcept for user types") {
         MoveTestTypeMove obj(10);
-        static_assert(noexcept(fl::move(obj)), "fl::move should be noexcept");
+        FL_STATIC_ASSERT(noexcept(fl::move(obj)), "fl::move should be noexcept");
         FL_CHECK(true);  // Dummy runtime check
     }
 #endif  // FL_HAS_NOEXCEPT
@@ -426,14 +427,14 @@ FL_TEST_CASE("fl::move type deduction") {
     FL_SUBCASE("Return type is rvalue reference") {
         int x = 10;
         // The return type should be int&&
-        static_assert(fl::is_same<decltype(fl::move(x)), int&&>::value,
+        FL_STATIC_ASSERT(fl::is_same<decltype(fl::move(x)), int&&>::value,
                      "fl::move should return rvalue reference");
         FL_CHECK(true);  // Dummy runtime check
     }
 
     FL_SUBCASE("Return type preserves base type") {
         float f = 3.14f;
-        static_assert(fl::is_same<decltype(fl::move(f)), float&&>::value,
+        FL_STATIC_ASSERT(fl::is_same<decltype(fl::move(f)), float&&>::value,
                      "fl::move should return float&&");
         FL_CHECK(true);  // Dummy runtime check
     }
@@ -442,14 +443,14 @@ FL_TEST_CASE("fl::move type deduction") {
         int x = 10;
         int& ref = x;
         // Input is int&, output should be int&&
-        static_assert(fl::is_same<decltype(fl::move(ref)), int&&>::value,
+        FL_STATIC_ASSERT(fl::is_same<decltype(fl::move(ref)), int&&>::value,
                      "fl::move should convert int& to int&&");
         FL_CHECK(true);  // Dummy runtime check
     }
 
     FL_SUBCASE("Return type for const types") {
         const int x = 10;
-        static_assert(fl::is_same<decltype(fl::move(x)), const int&&>::value,
+        FL_STATIC_ASSERT(fl::is_same<decltype(fl::move(x)), const int&&>::value,
                      "fl::move should return const int&&");
         FL_CHECK(true);  // Dummy runtime check
     }
@@ -505,18 +506,18 @@ FL_TEST_CASE("fl::move comparison with std semantics") {
 FL_TEST_CASE("fl::remove_reference with complex types") {
     FL_SUBCASE("remove_reference with function pointers") {
         typedef void (*FuncPtr)(int);
-        static_assert(fl::is_same<typename remove_reference<FuncPtr>::type, FuncPtr>::value,
+        FL_STATIC_ASSERT(fl::is_same<typename remove_reference<FuncPtr>::type, FuncPtr>::value,
                      "remove_reference should not change function pointer");
-        static_assert(fl::is_same<typename remove_reference<FuncPtr&>::type, FuncPtr>::value,
+        FL_STATIC_ASSERT(fl::is_same<typename remove_reference<FuncPtr&>::type, FuncPtr>::value,
                      "remove_reference should remove reference from function pointer");
         FL_CHECK(true);  // Dummy runtime check
     }
 
     FL_SUBCASE("remove_reference with array types") {
         typedef int ArrayType[10];
-        static_assert(fl::is_same<typename remove_reference<ArrayType>::type, ArrayType>::value,
+        FL_STATIC_ASSERT(fl::is_same<typename remove_reference<ArrayType>::type, ArrayType>::value,
                      "remove_reference should not change array type");
-        static_assert(fl::is_same<typename remove_reference<ArrayType&>::type, ArrayType>::value,
+        FL_STATIC_ASSERT(fl::is_same<typename remove_reference<ArrayType&>::type, ArrayType>::value,
                      "remove_reference should remove reference from array type");
         FL_CHECK(true);  // Dummy runtime check
     }

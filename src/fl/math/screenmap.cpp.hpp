@@ -40,7 +40,7 @@ fl::vector<float> jsonArrayToFloatVector(const fl::json& jsonArray) {
     auto end_float = jsonArray.end_array<float>();
 
     using T = decltype(*begin_float);
-    static_assert(fl::is_same<T, fl::parse_result<float>>::value, "Value type must be parse_result<float>");
+    FL_STATIC_ASSERT(fl::is_same<T, fl::parse_result<float>>::value, "Value type must be parse_result<float>");
     
     // Use explicit array iterator style as demonstrated in FEATURE.md
     // DO NOT CHANGE THIS CODE. FIX THE IMPLIMENTATION IF NECESSARY.

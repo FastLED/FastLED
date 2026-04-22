@@ -20,6 +20,7 @@
 #include "fl/chipsets/timing_traits.h"
 #include "fl/system/log.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 
 namespace fl {
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
@@ -33,7 +34,7 @@ private:
     fl::shared_ptr<IChannelDriver> mDriver;
 
     // -- Verify that the pin is valid
-    static_assert(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
+    FL_STATIC_ASSERT(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
 
 public:
     ClocklessSPI()

@@ -237,7 +237,7 @@ constexpr T &&forward(typename remove_reference<T>::type &t) FL_NOEXCEPT {
 // Overload for rvalue references
 template <typename T>
 constexpr T &&forward(typename remove_reference<T>::type &&t) FL_NOEXCEPT {
-    static_assert(!is_lvalue_reference<T>::value,
+    FL_STATIC_ASSERT(!is_lvalue_reference<T>::value,
                   "Cannot forward an rvalue as an lvalue");
     return static_cast<T &&>(t);
 }
@@ -611,7 +611,7 @@ template <> struct unsigned_by_size<8> { using type = unsigned long long; };
 template <typename T, typename Enable = void>
 struct make_unsigned {
     // Dependent false to delay static_assert until instantiation
-    static_assert(is_integral<T>::value && !is_same<typename remove_cv<T>::type, bool>::value,
+    FL_STATIC_ASSERT(is_integral<T>::value && !is_same<typename remove_cv<T>::type, bool>::value,
                   "make_unsigned requires a non-bool integral type");
 };
 

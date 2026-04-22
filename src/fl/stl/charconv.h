@@ -57,7 +57,7 @@ fl::string hex(u64 value, HexIntWidth width, bool is_negative, bool uppercase, b
 /// @brief Compile-time integer width determination (default - triggers error)
 template<size_t Size>
 constexpr HexIntWidth get_hex_int_width() FL_NOEXCEPT {
-    static_assert(Size == 0, "Unsupported type size for hex conversion");
+    FL_STATIC_ASSERT(Size == 0, "Unsupported type size for hex conversion");
     return HexIntWidth::Width8; // Unreachable, but needed for compilation
 }
 

@@ -24,6 +24,7 @@
 
 #include "fl/math/lib8static.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/static_assert.h"
 #include "fl/system/sketch_macros.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/compiler_control.h"
@@ -71,7 +72,7 @@ struct int_scale_impl {
     static INT_TO apply(INT_FROM) FL_NOEXCEPT {
         // This will only be instantiated if no specialization matches
         // Use dependent expression to delay assertion until instantiation
-        static_assert(fl::is_same<INT_FROM, void>::value, "int_scale: unsupported type conversion pair");
+        FL_STATIC_ASSERT(fl::is_same<INT_FROM, void>::value, "int_scale: unsupported type conversion pair");
         return INT_TO(0);  // Never reached, but satisfies return type
     }
 };

@@ -2,6 +2,7 @@
 #include "test.h"
 #include "fl/stl/move.h"
 #include "fl/stl/type_traits.h"
+#include "fl/stl/static_assert.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -228,13 +229,13 @@ FL_TEST_CASE("fl::pair move assignment") {
 
 FL_TEST_CASE("fl::pair member typedefs") {
     FL_SUBCASE("first_type typedef") {
-        static_assert(fl::is_same<pair<int, double>::first_type, int>::value, "first_type should be int");
-        static_assert(fl::is_same<pair<float, char>::first_type, float>::value, "first_type should be float");
+        FL_STATIC_ASSERT(fl::is_same<pair<int, double>::first_type, int>::value, "first_type should be int");
+        FL_STATIC_ASSERT(fl::is_same<pair<float, char>::first_type, float>::value, "first_type should be float");
     }
 
     FL_SUBCASE("second_type typedef") {
-        static_assert(fl::is_same<pair<int, double>::second_type, double>::value, "second_type should be double");
-        static_assert(fl::is_same<pair<float, char>::second_type, char>::value, "second_type should be char");
+        FL_STATIC_ASSERT(fl::is_same<pair<int, double>::second_type, double>::value, "second_type should be double");
+        FL_STATIC_ASSERT(fl::is_same<pair<float, char>::second_type, char>::value, "second_type should be char");
     }
 }
 
@@ -411,7 +412,7 @@ FL_TEST_CASE("fl::pair greater-than-or-equal operator") {
 FL_TEST_CASE("fl::make_pair function") {
     FL_SUBCASE("make_pair with primitives") {
         auto p = make_pair(42, 3.14);
-        static_assert(fl::is_same<decltype(p), pair<int, double>>::value, "make_pair should deduce types");
+        FL_STATIC_ASSERT(fl::is_same<decltype(p), pair<int, double>>::value, "make_pair should deduce types");
         FL_CHECK_EQ(p.first, 42);
         FL_CHECK_EQ(p.second, 3.14);
     }
@@ -434,7 +435,7 @@ FL_TEST_CASE("fl::make_pair function") {
         int arr[3] = {1, 2, 3};
         auto p = make_pair(arr, 42);
         // Array should decay to pointer
-        static_assert(fl::is_same<decltype(p.first), int*>::value, "Array should decay to pointer");
+        FL_STATIC_ASSERT(fl::is_same<decltype(p.first), int*>::value, "Array should decay to pointer");
         FL_CHECK_EQ(p.second, 42);
     }
 }
@@ -461,28 +462,28 @@ FL_TEST_CASE("fl::make_pair function") {
 
 FL_TEST_CASE("fl::pair_element type trait") {
     FL_SUBCASE("pair_element<0>") {
-        static_assert(fl::is_same<pair_element<0, int, double>::type, int>::value, "pair_element<0> should be int");
+        FL_STATIC_ASSERT(fl::is_same<pair_element<0, int, double>::type, int>::value, "pair_element<0> should be int");
     }
 
     FL_SUBCASE("pair_element<1>") {
-        static_assert(fl::is_same<pair_element<1, int, double>::type, double>::value, "pair_element<1> should be double");
+        FL_STATIC_ASSERT(fl::is_same<pair_element<1, int, double>::type, double>::value, "pair_element<1> should be double");
     }
 }
 
 FL_TEST_CASE("fl::tuple_size for pair") {
     FL_SUBCASE("tuple_size value") {
-        static_assert(tuple_size<pair<int, double>>::value == 2, "tuple_size should be 2");
-        static_assert(tuple_size<pair<float, char>>::value == 2, "tuple_size should be 2");
+        FL_STATIC_ASSERT(tuple_size<pair<int, double>>::value == 2, "tuple_size should be 2");
+        FL_STATIC_ASSERT(tuple_size<pair<float, char>>::value == 2, "tuple_size should be 2");
     }
 }
 
 FL_TEST_CASE("fl::tuple_element for pair") {
     FL_SUBCASE("tuple_element<0>") {
-        static_assert(fl::is_same<tuple_element<0, pair<int, double>>::type, int>::value, "tuple_element<0> should be int");
+        FL_STATIC_ASSERT(fl::is_same<tuple_element<0, pair<int, double>>::type, int>::value, "tuple_element<0> should be int");
     }
 
     FL_SUBCASE("tuple_element<1>") {
-        static_assert(fl::is_same<tuple_element<1, pair<int, double>>::type, double>::value, "tuple_element<1> should be double");
+        FL_STATIC_ASSERT(fl::is_same<tuple_element<1, pair<int, double>>::type, double>::value, "tuple_element<1> should be double");
     }
 }
 
@@ -587,7 +588,7 @@ FL_TEST_CASE("fl::Pair backwards compatibility") {
         Pair<int, double> p(42, 3.14);
         FL_CHECK_EQ(p.first, 42);
         FL_CHECK_EQ(p.second, 3.14);
-        static_assert(fl::is_same<Pair<int, double>, pair<int, double>>::value, "Pair should be alias for pair");
+        FL_STATIC_ASSERT(fl::is_same<Pair<int, double>, pair<int, double>>::value, "Pair should be alias for pair");
     }
 }
 

@@ -28,6 +28,7 @@
  */
 
 #include "fl/stl/stdint.h"  // IWYU pragma: keep
+#include "fl/stl/static_assert.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,8 +56,8 @@ typedef struct __attribute__((packed, aligned(4))) {
 
 // Static assertions for structure layout (C11/C++11 compatible)
 #ifdef __cplusplus
-static_assert(sizeof(EdgeEntry) == 8, "EdgeEntry must be exactly 8 bytes");
-static_assert(alignof(EdgeEntry) == 4, "EdgeEntry must be 4-byte aligned");
+FL_STATIC_ASSERT(sizeof(EdgeEntry) == 8, "EdgeEntry must be exactly 8 bytes");
+FL_STATIC_ASSERT(alignof(EdgeEntry) == 4, "EdgeEntry must be 4-byte aligned");
 #else
 _Static_assert(sizeof(EdgeEntry) == 8, "EdgeEntry must be exactly 8 bytes");
 _Static_assert(_Alignof(EdgeEntry) == 4, "EdgeEntry must be 4-byte aligned");
@@ -265,8 +266,8 @@ typedef struct __attribute__((aligned(64))) {
 // Note: Structure is now >64 bytes due to buffer_size_mask optimization field
 // First 64 bytes (hot path + medium-hot) should still fit in first cache line
 #ifdef __cplusplus
-static_assert(sizeof(DualIsrContext) <= 128, "DualIsrContext must fit in 2 cache lines or less");
-static_assert(alignof(DualIsrContext) == 64, "DualIsrContext must be 64-byte aligned");
+FL_STATIC_ASSERT(sizeof(DualIsrContext) <= 128, "DualIsrContext must fit in 2 cache lines or less");
+FL_STATIC_ASSERT(alignof(DualIsrContext) == 64, "DualIsrContext must be 64-byte aligned");
 #else
 _Static_assert(sizeof(DualIsrContext) <= 128, "DualIsrContext must fit in 2 cache lines or less");
 _Static_assert(_Alignof(DualIsrContext) == 64, "DualIsrContext must be 64-byte aligned");

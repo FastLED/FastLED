@@ -214,7 +214,7 @@ class RGBWEmulatedController
     static const fl::u32 MASK = CONTROLLER::MASK_VALUE;
 
     // The delegated controller must do no reordering.
-    static_assert(RGB == CONTROLLER::RGB_ORDER_VALUE, "The delegated controller MUST NOT do reordering");
+    FL_STATIC_ASSERT(RGB == CONTROLLER::RGB_ORDER_VALUE, "The delegated controller MUST NOT do reordering");
 
     /// @brief Constructor with optional RGBW configuration
     /// @param rgbw Configuration for RGBW color conversion (defaults to kRGBWExactColors mode)

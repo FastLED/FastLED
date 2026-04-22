@@ -2,6 +2,7 @@
 #include "fl/stl/bit_cast.h"
 #include "test.h"
 #include "fl/stl/int.h"
+#include "fl/stl/static_assert.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -217,35 +218,35 @@ FL_TEST_CASE("fl::ptr_to_int and fl::int_to_ptr") {
 FL_TEST_CASE("fl::is_bitcast_compatible trait") {
     FL_SUBCASE("Integral types are compatible") {
         // Use static_assert to check at compile time
-        static_assert(is_bitcast_compatible<u8>::value, "u8 should be bitcast compatible");
-        static_assert(is_bitcast_compatible<u16>::value, "u16 should be bitcast compatible");
-        static_assert(is_bitcast_compatible<u32>::value, "u32 should be bitcast compatible");
-        static_assert(is_bitcast_compatible<u64>::value, "u64 should be bitcast compatible");
-        static_assert(is_bitcast_compatible<i8>::value, "i8 should be bitcast compatible");
-        static_assert(is_bitcast_compatible<i16>::value, "i16 should be bitcast compatible");
-        static_assert(is_bitcast_compatible<i32>::value, "i32 should be bitcast compatible");
-        static_assert(is_bitcast_compatible<i64>::value, "i64 should be bitcast compatible");
+        FL_STATIC_ASSERT(is_bitcast_compatible<u8>::value, "u8 should be bitcast compatible");
+        FL_STATIC_ASSERT(is_bitcast_compatible<u16>::value, "u16 should be bitcast compatible");
+        FL_STATIC_ASSERT(is_bitcast_compatible<u32>::value, "u32 should be bitcast compatible");
+        FL_STATIC_ASSERT(is_bitcast_compatible<u64>::value, "u64 should be bitcast compatible");
+        FL_STATIC_ASSERT(is_bitcast_compatible<i8>::value, "i8 should be bitcast compatible");
+        FL_STATIC_ASSERT(is_bitcast_compatible<i16>::value, "i16 should be bitcast compatible");
+        FL_STATIC_ASSERT(is_bitcast_compatible<i32>::value, "i32 should be bitcast compatible");
+        FL_STATIC_ASSERT(is_bitcast_compatible<i64>::value, "i64 should be bitcast compatible");
         FL_CHECK(true);  // Dummy runtime check
     }
 
     FL_SUBCASE("Floating point types are compatible") {
-        static_assert(is_bitcast_compatible<float>::value, "float should be bitcast compatible");
-        static_assert(is_bitcast_compatible<double>::value, "double should be bitcast compatible");
+        FL_STATIC_ASSERT(is_bitcast_compatible<float>::value, "float should be bitcast compatible");
+        FL_STATIC_ASSERT(is_bitcast_compatible<double>::value, "double should be bitcast compatible");
         FL_CHECK(true);  // Dummy runtime check
     }
 
     FL_SUBCASE("Pointer types are compatible") {
-        static_assert(is_bitcast_compatible<int*>::value, "int* should be bitcast compatible");
-        static_assert(is_bitcast_compatible<float*>::value, "float* should be bitcast compatible");
-        static_assert(is_bitcast_compatible<void*>::value, "void* should be bitcast compatible");
-        static_assert(is_bitcast_compatible<const int*>::value, "const int* should be bitcast compatible");
+        FL_STATIC_ASSERT(is_bitcast_compatible<int*>::value, "int* should be bitcast compatible");
+        FL_STATIC_ASSERT(is_bitcast_compatible<float*>::value, "float* should be bitcast compatible");
+        FL_STATIC_ASSERT(is_bitcast_compatible<void*>::value, "void* should be bitcast compatible");
+        FL_STATIC_ASSERT(is_bitcast_compatible<const int*>::value, "const int* should be bitcast compatible");
         FL_CHECK(true);  // Dummy runtime check
     }
 
     FL_SUBCASE("Const types preserve compatibility") {
-        static_assert(is_bitcast_compatible<const int>::value, "const int should be bitcast compatible");
-        static_assert(is_bitcast_compatible<const float>::value, "const float should be bitcast compatible");
-        static_assert(is_bitcast_compatible<const u32>::value, "const u32 should be bitcast compatible");
+        FL_STATIC_ASSERT(is_bitcast_compatible<const int>::value, "const int should be bitcast compatible");
+        FL_STATIC_ASSERT(is_bitcast_compatible<const float>::value, "const float should be bitcast compatible");
+        FL_STATIC_ASSERT(is_bitcast_compatible<const u32>::value, "const u32 should be bitcast compatible");
         FL_CHECK(true);  // Dummy runtime check
     }
 }

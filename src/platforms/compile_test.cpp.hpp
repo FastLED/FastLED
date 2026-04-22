@@ -2,6 +2,7 @@
 #define FASTLED_INTERNAL  
 #include "fl/fastled.h"
 #include "fl/stl/int.h"
+#include "fl/stl/static_assert.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/type_traits.h"
 
@@ -90,29 +91,29 @@ FL_MAYBE_UNUSED static void test_strstream_integer_operators() FL_NOEXCEPT {
 // any compile-time errors if the platform is not configured correctly.
 FL_MAYBE_UNUSED static void compile_tests() FL_NOEXCEPT {
 
-    static_assert(fl::is_same<u32, u32>::value, "u32 must be the same type as u32");
-    static_assert(fl::is_same<u16, u16>::value, "u16 must be the same type as u16");
-    static_assert(fl::is_same<u8, u8>::value, "u8 must be the same type as u8");
-    static_assert(fl::is_same<i32, i32>::value, "i32 must be the same type as i32");
-    static_assert(fl::is_same<i16, i16>::value, "i16 must be the same type as i16");
-    static_assert(fl::is_same<i8, i8>::value, "i8 must be the same type as i8");
-    static_assert(fl::is_same<size, size_t>::value, "size must be the same type as size_t");
-    static_assert(fl::is_same<uptr, uintptr_t>::value, "uptr must be the same type as uintptr_t");
+    FL_STATIC_ASSERT(fl::is_same<u32, u32>::value, "u32 must be the same type as u32");
+    FL_STATIC_ASSERT(fl::is_same<u16, u16>::value, "u16 must be the same type as u16");
+    FL_STATIC_ASSERT(fl::is_same<u8, u8>::value, "u8 must be the same type as u8");
+    FL_STATIC_ASSERT(fl::is_same<i32, i32>::value, "i32 must be the same type as i32");
+    FL_STATIC_ASSERT(fl::is_same<i16, i16>::value, "i16 must be the same type as i16");
+    FL_STATIC_ASSERT(fl::is_same<i8, i8>::value, "i8 must be the same type as i8");
+    FL_STATIC_ASSERT(fl::is_same<size, size_t>::value, "size must be the same type as size_t");
+    FL_STATIC_ASSERT(fl::is_same<uptr, uintptr_t>::value, "uptr must be the same type as uintptr_t");
 
     // Test sstream integer operator overloads
     test_strstream_integer_operators();
 
     // Size assertions for FastLED integer types
-    static_assert(sizeof(i8) == 1, "i8 must be exactly 1 byte");
-    static_assert(sizeof(u8) == 1, "u8 must be exactly 1 byte");
-    static_assert(sizeof(i16) == 2, "i16 must be exactly 2 bytes");
-    static_assert(sizeof(u16) == 2, "u16 must be exactly 2 bytes");
-    static_assert(sizeof(i32) == 4, "i32 must be exactly 4 bytes");
-    static_assert(sizeof(u32) == 4, "u32 must be exactly 4 bytes");
-    static_assert(sizeof(i64) == 8, "i64 must be exactly 8 bytes");
-    static_assert(sizeof(u64) == 8, "u64 must be exactly 8 bytes");
-    static_assert(sizeof(uptr) == sizeof(uintptr_t), "uptr must be exactly the same size as uintptr_t");
-    static_assert(sizeof(size) == sizeof(size_t), "size must be exactly the same size as size_t");
+    FL_STATIC_ASSERT(sizeof(i8) == 1, "i8 must be exactly 1 byte");
+    FL_STATIC_ASSERT(sizeof(u8) == 1, "u8 must be exactly 1 byte");
+    FL_STATIC_ASSERT(sizeof(i16) == 2, "i16 must be exactly 2 bytes");
+    FL_STATIC_ASSERT(sizeof(u16) == 2, "u16 must be exactly 2 bytes");
+    FL_STATIC_ASSERT(sizeof(i32) == 4, "i32 must be exactly 4 bytes");
+    FL_STATIC_ASSERT(sizeof(u32) == 4, "u32 must be exactly 4 bytes");
+    FL_STATIC_ASSERT(sizeof(i64) == 8, "i64 must be exactly 8 bytes");
+    FL_STATIC_ASSERT(sizeof(u64) == 8, "u64 must be exactly 8 bytes");
+    FL_STATIC_ASSERT(sizeof(uptr) == sizeof(uintptr_t), "uptr must be exactly the same size as uintptr_t");
+    FL_STATIC_ASSERT(sizeof(size) == sizeof(size_t), "size must be exactly the same size as size_t");
 
 #if defined(__AVR__)
     avr_compile_tests();
@@ -128,7 +129,7 @@ FL_MAYBE_UNUSED static void compile_tests() FL_NOEXCEPT {
     stub_compile_tests();
 #else
     // No platform-specific tests available for this platform
-    static_assert(false, "Unknown platform - no compile tests available");
+    FL_STATIC_ASSERT(false, "Unknown platform - no compile tests available");
 #endif
 }
 }

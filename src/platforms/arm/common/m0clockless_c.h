@@ -27,6 +27,7 @@
  ******************************************************************************/
 
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/static_assert.h"
 #include "fl/stl/stdint.h"
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/noexcept.h"
@@ -335,9 +336,9 @@ int showLedData(volatile fl::u32* port, fl::u32 bitmask,
                 M0ClocklessData* pData) FL_NOEXCEPT {
 
     // Compile-time validation of GPIO offsets
-    static_assert((HI_OFFSET & 3) == 0 && (LO_OFFSET & 3) == 0,
+    FL_STATIC_ASSERT((HI_OFFSET & 3) == 0 && (LO_OFFSET & 3) == 0,
                   "HI_OFFSET and LO_OFFSET must be 4-byte aligned");
-    static_assert(HI_OFFSET != LO_OFFSET,
+    FL_STATIC_ASSERT(HI_OFFSET != LO_OFFSET,
                   "HI_OFFSET and LO_OFFSET must be different");
 
     // Convert timing values from nanoseconds to CPU cycles at compile-time

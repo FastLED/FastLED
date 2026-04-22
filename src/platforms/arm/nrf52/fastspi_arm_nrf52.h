@@ -4,6 +4,7 @@
 #define __FASTSPI_ARM_NRF52_H
 
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/static_assert.h"
 #include "fl/system/fastpin_base.h"
 #include "fastspi_types.h"
 #include "fl/gfx/eorder.h"
@@ -125,8 +126,8 @@ namespace fl {
         NRF52HardwareSPIOutput() {}
 
         // Low frequency GPIO is for signals with a frequency up to 10 kHz.  Lowest speed SPIM is 125kbps.
-        static_assert(!FastPin<_DATA_PIN>::LowSpeedOnlyRecommended(),  "Invalid (low-speed only) pin specified");
-        static_assert(!FastPin<_CLOCK_PIN>::LowSpeedOnlyRecommended(), "Invalid (low-speed only) pin specified");
+        FL_STATIC_ASSERT(!FastPin<_DATA_PIN>::LowSpeedOnlyRecommended(),  "Invalid (low-speed only) pin specified");
+        FL_STATIC_ASSERT(!FastPin<_CLOCK_PIN>::LowSpeedOnlyRecommended(), "Invalid (low-speed only) pin specified");
 
         /// initialize the SPI subssytem
         void init() FL_NOEXCEPT {

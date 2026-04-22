@@ -16,6 +16,7 @@
 
 #include "fl/system/log.h"
 #include "fl/stl/iterator.h"
+#include "fl/stl/static_assert.h"
 
 // RX device logging: Disabled by default to reduce noise
 // Enable with: #define FASTLED_RX_LOG_ENABLED 1
@@ -62,9 +63,9 @@ FL_EXTERN_C_END
 namespace fl {
 
 // Ensure RmtSymbol (uint32_t) and rmt_symbol_word_t have the same size
-static_assert(sizeof(RmtSymbol) == sizeof(rmt_symbol_word_t),
+FL_STATIC_ASSERT(sizeof(RmtSymbol) == sizeof(rmt_symbol_word_t),
               "RmtSymbol must be the same size as rmt_symbol_word_t (32 bits)");
-static_assert(fl::is_trivially_copyable<rmt_symbol_word_t>::value,
+FL_STATIC_ASSERT(fl::is_trivially_copyable<rmt_symbol_word_t>::value,
               "rmt_symbol_word_t must be trivially copyable for safe casting");
 
 // ============================================================================

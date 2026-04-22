@@ -4,6 +4,7 @@
 #include "test.h"
 #include "platforms/shared/clockless_timing.h"
 #include "crgb.h"
+#include "fl/stl/static_assert.h"
 
 using namespace fl;
 
@@ -345,21 +346,21 @@ FL_TEST_CASE("ClocklessTiming - constexpr evaluation") {
         350, 700, 600, 3
     );
 
-    static_assert(result.valid, "Calculation should succeed at compile time");
-    static_assert(result.n_bit == 3, "Should use 3 words per bit");
-    static_assert(result.pclk_hz > 0, "PCLK should be positive");
+    FL_STATIC_ASSERT(result.valid, "Calculation should succeed at compile time");
+    FL_STATIC_ASSERT(result.n_bit == 3, "Should use 3 words per bit");
+    FL_STATIC_ASSERT(result.pclk_hz > 0, "PCLK should be positive");
 
     // Verify constexpr buffer size calculation
     constexpr size_t buffer_size = fl::ClocklessTiming::calculate_buffer_size(
         1000, 24, 3, 300, 500
     );
-    static_assert(buffer_size > 0, "Buffer size should be positive");
+    FL_STATIC_ASSERT(buffer_size > 0, "Buffer size should be positive");
 
     // Verify constexpr frame time calculation
     constexpr uint32_t frame_time = fl::ClocklessTiming::calculate_frame_time_us(
         1000, 24, 3, 500, 300
     );
-    static_assert(frame_time > 0, "Frame time should be positive");
+    FL_STATIC_ASSERT(frame_time > 0, "Frame time should be positive");
 }
 #endif // __cplusplus >= 201402L
 

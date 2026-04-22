@@ -13,6 +13,7 @@
 // Standard library includes must be OUTSIDE namespaces
 #include <thread>  // ok include
 #include "fl/stl/chrono.h"
+#include "fl/stl/static_assert.h"
 #include "platforms/win/is_win.h"
 
 #ifdef FL_IS_WIN
@@ -129,7 +130,7 @@ namespace this_thread {
         // For time_point support, we would need fl::chrono::time_point and fl::chrono::clock
         // For now, this is a placeholder - implement when needed
         (void)wake_time;  // Suppress unused parameter warning
-        static_assert(sizeof(Rep) == 0, "sleep_until not yet implemented for fl::chrono::time_point");
+        FL_STATIC_ASSERT(sizeof(Rep) == 0, "sleep_until not yet implemented for fl::chrono::time_point");
     }
 } // namespace this_thread
 

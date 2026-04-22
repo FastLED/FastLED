@@ -151,10 +151,10 @@ private:
     T mPtr;  // Underlying pointer (mCamelCase naming per FastLED standards)
 
     // Static assertions to enforce template constraints
-    static_assert(detail::is_comparable_to_nullptr<T>::value,
+    FL_STATIC_ASSERT(detail::is_comparable_to_nullptr<T>::value,
                   "not_null<T>: T must be comparable to nullptr");
 
-    static_assert(!detail::is_reference<T>::value,
+    FL_STATIC_ASSERT(!detail::is_reference<T>::value,
                   "not_null<T>: T must not be a reference type");
 
 public:

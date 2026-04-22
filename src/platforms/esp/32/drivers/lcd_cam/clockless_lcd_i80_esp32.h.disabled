@@ -31,6 +31,7 @@
 #endif
 
 #include "sdkconfig.h"
+#include "fl/stl/static_assert.h"
 
 #include "crgb.h"
 #include "cpixel_ledcontroller.h"
@@ -82,14 +83,14 @@ class ClocklessController_LCD_I80_Proxy
     typedef CPixelLEDController<RGB_ORDER> Base;
 
     // Compile-time GPIO validation (same as before)
-    static_assert(!(DATA_PIN == 19 || DATA_PIN == 20),
+    FL_STATIC_ASSERT(!(DATA_PIN == 19 || DATA_PIN == 20),
                   "GPIO19 and GPIO20 are reserved for USB-JTAG and CANNOT be used");
-    static_assert(!(DATA_PIN >= 26 && DATA_PIN <= 32),
+    FL_STATIC_ASSERT(!(DATA_PIN >= 26 && DATA_PIN <= 32),
                   "GPIO26-32 are reserved for Flash/PSRAM and CANNOT be used");
-    static_assert(!(DATA_PIN == 0 || DATA_PIN == 3 || DATA_PIN == 45 || DATA_PIN == 46) || true,
+    FL_STATIC_ASSERT(!(DATA_PIN == 0 || DATA_PIN == 3 || DATA_PIN == 45 || DATA_PIN == 46) || true,
                   "WARNING: Strapping pins - use with caution");
     #if defined(CONFIG_SPIRAM_MODE_OCT) || defined(CONFIG_ESPTOOLPY_FLASHMODE_OPI)
-    static_assert(!(DATA_PIN >= 33 && DATA_PIN <= 37),
+    FL_STATIC_ASSERT(!(DATA_PIN >= 33 && DATA_PIN <= 37),
                   "GPIO33-37 reserved for Octal Flash/PSRAM");
     #endif
 

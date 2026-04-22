@@ -4,6 +4,7 @@
 #define __INC_CLOCKLESS_BLOCK_ESP8266_H
 
 #include "fl/stl/stdint.h"
+#include "fl/stl/static_assert.h"
 #include "platforms/esp/32/core/clock_cycles.h"
 #include "esp_intr_alloc.h"
 #include "eorder.h"
@@ -67,7 +68,7 @@ class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LAN
     };
 
 	// Verify that the pin is valid
-	static_assert(FastPin<FIRST_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
+	FL_STATIC_ASSERT(FastPin<FIRST_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
 
 	data_t mPinMask;
     data_ptr_t mPort;

@@ -11,6 +11,7 @@
 #include "platforms/esp/is_esp.h"
 
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/static_assert.h"
 #include "fl/system/log.h"
 #include "fl/stl/noexcept.h"
 
@@ -34,7 +35,7 @@ namespace detail {
 #endif
 
 // Minimum cap validation (supports at least 1 LED × 16 lanes)
-static_assert(FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES >= 12UL * 1024UL,
+FL_STATIC_ASSERT(FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES >= 12UL * 1024UL,
               "FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES too small (minimum 12 KB)");
 
 // PSRAM ring buffer memory cap (used when PSRAM is available at runtime)

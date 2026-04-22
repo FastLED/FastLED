@@ -6,6 +6,7 @@
 #include "platforms/esp/is_esp.h"
 
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/static_assert.h"
 // Assembly Shims for High-Priority Interrupts on ESP32-C3/C6 (RISC-V)
 //
 // This file provides interrupt service routine (ISR) shims for high-priority
@@ -473,7 +474,7 @@ void FL_IRAM fastled_riscv_rmt_experimental_handler(void *arg) FL_NOEXCEPT;
 #if 0  // DISABLED - Broken assembly implementation
 #define FASTLED_ESP_RISCV_ASM_INTERRUPT_TRAMPOLINE(new_function_name, function_pointer) \
     /* THIS MACRO IS DISABLED DUE TO CRITICAL TECHNICAL ERRORS */ \
-    static_assert(false, "FASTLED_ESP_RISCV_ASM_INTERRUPT_TRAMPOLINE is disabled due to critical errors. Use FASTLED_ESP_RISCV_INTERRUPT_TRAMPOLINE instead.");
+    FL_STATIC_ASSERT(false, "FASTLED_ESP_RISCV_ASM_INTERRUPT_TRAMPOLINE is disabled due to critical errors. Use FASTLED_ESP_RISCV_INTERRUPT_TRAMPOLINE instead.");
 #endif  // DISABLED
 
 /*

@@ -9,6 +9,7 @@
 #include <avr/interrupt.h> // for cli/se definitions
 // IWYU pragma: end_keep
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/static_assert.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/chipsets/timing_traits.h"
 #include "fastled_delay.h"
@@ -155,7 +156,7 @@ static u8 gTimeErrorAccum256ths;
 
 template <u8 DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 10>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
-	static_assert(T1 >= 2 && T2 >= 2 && T3 >= 3, "Not enough cycles - use a higher clock speed");
+	FL_STATIC_ASSERT(T1 >= 2 && T2 >= 2 && T3 >= 3, "Not enough cycles - use a higher clock speed");
 
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;

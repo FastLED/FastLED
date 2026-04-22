@@ -2,6 +2,7 @@
 #include "test.h"
 #include "fl/stl/int.h"
 #include "fl/stl/move.h"
+#include "fl/stl/static_assert.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -53,32 +54,32 @@ FL_TEST_CASE("fl::integral_constant") {
 
 FL_TEST_CASE("fl::identity") {
     FL_SUBCASE("preserves type") {
-        static_assert(is_same<identity<int>::type, int>::value, "identity should preserve int");
-        static_assert(is_same<identity<float>::type, float>::value, "identity should preserve float");
-        static_assert(is_same<identity<Base>::type, Base>::value, "identity should preserve class");
+        FL_STATIC_ASSERT(is_same<identity<int>::type, int>::value, "identity should preserve int");
+        FL_STATIC_ASSERT(is_same<identity<float>::type, float>::value, "identity should preserve float");
+        FL_STATIC_ASSERT(is_same<identity<Base>::type, Base>::value, "identity should preserve class");
     }
 }
 
 FL_TEST_CASE("fl::add_rvalue_reference") {
     FL_SUBCASE("non-reference types") {
-        static_assert(is_same<add_rvalue_reference<int>::type, int&&>::value, "should add rvalue ref to int");
-        static_assert(is_same<add_rvalue_reference<float>::type, float&&>::value, "should add rvalue ref to float");
+        FL_STATIC_ASSERT(is_same<add_rvalue_reference<int>::type, int&&>::value, "should add rvalue ref to int");
+        FL_STATIC_ASSERT(is_same<add_rvalue_reference<float>::type, float&&>::value, "should add rvalue ref to float");
     }
 
     FL_SUBCASE("lvalue reference types") {
-        static_assert(is_same<add_rvalue_reference<int&>::type, int&>::value, "should preserve lvalue ref");
-        static_assert(is_same<add_rvalue_reference<float&>::type, float&>::value, "should preserve lvalue ref");
+        FL_STATIC_ASSERT(is_same<add_rvalue_reference<int&>::type, int&>::value, "should preserve lvalue ref");
+        FL_STATIC_ASSERT(is_same<add_rvalue_reference<float&>::type, float&>::value, "should preserve lvalue ref");
     }
 }
 
 FL_TEST_CASE("fl::enable_if") {
     FL_SUBCASE("true condition") {
-        static_assert(is_same<enable_if<true, int>::type, int>::value, "enable_if true should provide type");
-        static_assert(is_same<enable_if_t<true, int>, int>::value, "enable_if_t true should provide type");
+        FL_STATIC_ASSERT(is_same<enable_if<true, int>::type, int>::value, "enable_if true should provide type");
+        FL_STATIC_ASSERT(is_same<enable_if_t<true, int>, int>::value, "enable_if_t true should provide type");
     }
 
     FL_SUBCASE("default type") {
-        static_assert(is_same<enable_if<true>::type, void>::value, "enable_if default should be void");
+        FL_STATIC_ASSERT(is_same<enable_if<true>::type, void>::value, "enable_if default should be void");
     }
 }
 
@@ -123,16 +124,16 @@ FL_TEST_CASE("fl::is_same") {
 
 FL_TEST_CASE("fl::conditional") {
     FL_SUBCASE("true condition") {
-        static_assert(is_same<conditional<true, int, float>::type, int>::value,
+        FL_STATIC_ASSERT(is_same<conditional<true, int, float>::type, int>::value,
                       "conditional true should choose first type");
-        static_assert(is_same<conditional_t<true, int, float>, int>::value,
+        FL_STATIC_ASSERT(is_same<conditional_t<true, int, float>, int>::value,
                       "conditional_t true should choose first type");
     }
 
     FL_SUBCASE("false condition") {
-        static_assert(is_same<conditional<false, int, float>::type, float>::value,
+        FL_STATIC_ASSERT(is_same<conditional<false, int, float>::type, float>::value,
                       "conditional false should choose second type");
-        static_assert(is_same<conditional_t<false, int, float>, float>::value,
+        FL_STATIC_ASSERT(is_same<conditional_t<false, int, float>, float>::value,
                       "conditional_t false should choose second type");
     }
 }
@@ -153,18 +154,18 @@ FL_TEST_CASE("fl::is_array") {
 
 FL_TEST_CASE("fl::remove_extent") {
     FL_SUBCASE("array types") {
-        static_assert(is_same<remove_extent<int[]>::type, int>::value,
+        FL_STATIC_ASSERT(is_same<remove_extent<int[]>::type, int>::value,
                       "should remove extent from unbounded array");
-        static_assert(is_same<remove_extent<int[10]>::type, int>::value,
+        FL_STATIC_ASSERT(is_same<remove_extent<int[10]>::type, int>::value,
                       "should remove extent from bounded array");
-        static_assert(is_same<remove_extent<float[5]>::type, float>::value,
+        FL_STATIC_ASSERT(is_same<remove_extent<float[5]>::type, float>::value,
                       "should remove extent from array");
     }
 
     FL_SUBCASE("non-array types") {
-        static_assert(is_same<remove_extent<int>::type, int>::value,
+        FL_STATIC_ASSERT(is_same<remove_extent<int>::type, int>::value,
                       "should not affect non-array");
-        static_assert(is_same<remove_extent<int*>::type, int*>::value,
+        FL_STATIC_ASSERT(is_same<remove_extent<int*>::type, int*>::value,
                       "should not affect pointer");
     }
 }
@@ -187,32 +188,32 @@ FL_TEST_CASE("fl::is_function") {
 
 FL_TEST_CASE("fl::add_pointer") {
     FL_SUBCASE("non-reference types") {
-        static_assert(is_same<add_pointer<int>::type, int*>::value,
+        FL_STATIC_ASSERT(is_same<add_pointer<int>::type, int*>::value,
                       "should add pointer to int");
-        static_assert(is_same<add_pointer_t<float>, float*>::value,
+        FL_STATIC_ASSERT(is_same<add_pointer_t<float>, float*>::value,
                       "should add pointer to float");
     }
 
     FL_SUBCASE("reference types") {
-        static_assert(is_same<add_pointer<int&>::type, int*>::value,
+        FL_STATIC_ASSERT(is_same<add_pointer<int&>::type, int*>::value,
                       "should convert lvalue ref to pointer");
-        static_assert(is_same<add_pointer<int&&>::type, int*>::value,
+        FL_STATIC_ASSERT(is_same<add_pointer<int&&>::type, int*>::value,
                       "should convert rvalue ref to pointer");
     }
 }
 
 FL_TEST_CASE("fl::remove_const") {
     FL_SUBCASE("const types") {
-        static_assert(is_same<remove_const<const int>::type, int>::value,
+        FL_STATIC_ASSERT(is_same<remove_const<const int>::type, int>::value,
                       "should remove const from int");
-        static_assert(is_same<remove_const<const float>::type, float>::value,
+        FL_STATIC_ASSERT(is_same<remove_const<const float>::type, float>::value,
                       "should remove const from float");
     }
 
     FL_SUBCASE("non-const types") {
-        static_assert(is_same<remove_const<int>::type, int>::value,
+        FL_STATIC_ASSERT(is_same<remove_const<int>::type, int>::value,
                       "should not affect non-const");
-        static_assert(is_same<remove_const<volatile int>::type, volatile int>::value,
+        FL_STATIC_ASSERT(is_same<remove_const<volatile int>::type, volatile int>::value,
                       "should not affect volatile");
     }
 }
@@ -273,50 +274,50 @@ FL_TEST_CASE("fl::forward") {
 
 FL_TEST_CASE("fl::remove_cv") {
     FL_SUBCASE("const") {
-        static_assert(is_same<remove_cv<const int>::type, int>::value,
+        FL_STATIC_ASSERT(is_same<remove_cv<const int>::type, int>::value,
                       "should remove const");
-        static_assert(is_same<remove_cv_t<const int>, int>::value,
+        FL_STATIC_ASSERT(is_same<remove_cv_t<const int>, int>::value,
                       "remove_cv_t should remove const");
     }
 
     FL_SUBCASE("volatile") {
-        static_assert(is_same<remove_cv<volatile int>::type, int>::value,
+        FL_STATIC_ASSERT(is_same<remove_cv<volatile int>::type, int>::value,
                       "should remove volatile");
     }
 
     FL_SUBCASE("const volatile") {
-        static_assert(is_same<remove_cv<const volatile int>::type, int>::value,
+        FL_STATIC_ASSERT(is_same<remove_cv<const volatile int>::type, int>::value,
                       "should remove const volatile");
     }
 
     FL_SUBCASE("neither") {
-        static_assert(is_same<remove_cv<int>::type, int>::value,
+        FL_STATIC_ASSERT(is_same<remove_cv<int>::type, int>::value,
                       "should not affect non-cv type");
     }
 }
 
 FL_TEST_CASE("fl::decay") {
     FL_SUBCASE("array decay") {
-        static_assert(is_same<decay<int[10]>::type, int*>::value,
+        FL_STATIC_ASSERT(is_same<decay<int[10]>::type, int*>::value,
                       "array should decay to pointer");
-        static_assert(is_same<decay_t<int[]>, int*>::value,
+        FL_STATIC_ASSERT(is_same<decay_t<int[]>, int*>::value,
                       "unbounded array should decay to pointer");
     }
 
     FL_SUBCASE("function decay") {
-        static_assert(is_same<decay<int()>::type, int(*)()>::value,
+        FL_STATIC_ASSERT(is_same<decay<int()>::type, int(*)()>::value,
                       "function should decay to function pointer");
     }
 
     FL_SUBCASE("reference and cv decay") {
-        static_assert(is_same<decay<const int&>::type, int>::value,
+        FL_STATIC_ASSERT(is_same<decay<const int&>::type, int>::value,
                       "should remove ref and const");
-        static_assert(is_same<decay<volatile int&&>::type, int>::value,
+        FL_STATIC_ASSERT(is_same<decay<volatile int&&>::type, int>::value,
                       "should remove ref and volatile");
     }
 
     FL_SUBCASE("no decay") {
-        static_assert(is_same<decay<int>::type, int>::value,
+        FL_STATIC_ASSERT(is_same<decay<int>::type, int>::value,
                       "should not affect plain int");
     }
 }
@@ -465,32 +466,32 @@ FL_TEST_CASE("fl::type_rank") {
 
 FL_TEST_CASE("fl::common_type") {
     FL_SUBCASE("same type") {
-        static_assert(is_same<common_type<int, int>::type, int>::value,
+        FL_STATIC_ASSERT(is_same<common_type<int, int>::type, int>::value,
                       "common type of same types should be that type");
-        static_assert(is_same<common_type_t<float, float>, float>::value,
+        FL_STATIC_ASSERT(is_same<common_type_t<float, float>, float>::value,
                       "common_type_t of same types should be that type");
     }
 
     FL_SUBCASE("integer promotion") {
-        static_assert(is_same<common_type<int, long>::type, long>::value,
+        FL_STATIC_ASSERT(is_same<common_type<int, long>::type, long>::value,
                       "larger integer type should win");
-        static_assert(is_same<common_type<short, int>::type, int>::value,
+        FL_STATIC_ASSERT(is_same<common_type<short, int>::type, int>::value,
                       "int should win over short");
     }
 
     FL_SUBCASE("floating point promotion") {
-        static_assert(is_same<common_type<int, float>::type, float>::value,
+        FL_STATIC_ASSERT(is_same<common_type<int, float>::type, float>::value,
                       "float should win over int");
-        static_assert(is_same<common_type<float, double>::type, double>::value,
+        FL_STATIC_ASSERT(is_same<common_type<float, double>::type, double>::value,
                       "double should win over float");
-        static_assert(is_same<common_type<double, long double>::type, long double>::value,
+        FL_STATIC_ASSERT(is_same<common_type<double, long double>::type, long double>::value,
                       "long double should win");
     }
 
     FL_SUBCASE("symmetric") {
-        static_assert(is_same<common_type<int, float>::type, common_type<float, int>::type>::value,
+        FL_STATIC_ASSERT(is_same<common_type<int, float>::type, common_type<float, int>::type>::value,
                       "common_type should be symmetric");
-        static_assert(is_same<common_type<int, long>::type, common_type<long, int>::type>::value,
+        FL_STATIC_ASSERT(is_same<common_type<int, long>::type, common_type<long, int>::type>::value,
                       "common_type should be symmetric for integers");
     }
 }
@@ -623,7 +624,7 @@ namespace compile_time_tests {
     void test_declval() {
         // declval should be usable in unevaluated contexts
         using result = decltype(declval<T>());
-        static_assert(is_same<result, typename add_rvalue_reference<T>::type>::value,
+        FL_STATIC_ASSERT(is_same<result, typename add_rvalue_reference<T>::type>::value,
                       "declval should return rvalue reference");
     }
 

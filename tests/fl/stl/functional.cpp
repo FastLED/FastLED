@@ -6,6 +6,7 @@
 #include "fl/stl/move.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/unique_ptr.h"
+#include "fl/stl/static_assert.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -202,18 +203,18 @@ FL_TEST_CASE("fl::invoke helper traits") {
     // Test is_member_data_pointer
     FL_SUBCASE("is_member_data_pointer trait") {
         using namespace detail;
-        static_assert(!is_member_data_pointer<int>::value, "int is not a member data pointer");
-        static_assert(is_member_data_pointer<int Calculator::*>::value, "int Calculator::* is a member data pointer");
-        static_assert(!is_member_data_pointer<int (Calculator::*)(int)>::value, "member function pointer is not a member data pointer");
+        FL_STATIC_ASSERT(!is_member_data_pointer<int>::value, "int is not a member data pointer");
+        FL_STATIC_ASSERT(is_member_data_pointer<int Calculator::*>::value, "int Calculator::* is a member data pointer");
+        FL_STATIC_ASSERT(!is_member_data_pointer<int (Calculator::*)(int)>::value, "member function pointer is not a member data pointer");
     }
 
     // Test is_pointer_like
     FL_SUBCASE("is_pointer_like trait") {
         using namespace detail;
-        static_assert(!is_pointer_like<int>::value, "int is not pointer-like");
-        static_assert(!is_pointer_like<Calculator>::value, "Calculator is not pointer-like");
-        static_assert(is_pointer_like<int*>::value, "int* is pointer-like");
-        static_assert(is_pointer_like<Calculator*>::value, "Calculator* is pointer-like");
+        FL_STATIC_ASSERT(!is_pointer_like<int>::value, "int is not pointer-like");
+        FL_STATIC_ASSERT(!is_pointer_like<Calculator>::value, "Calculator is not pointer-like");
+        FL_STATIC_ASSERT(is_pointer_like<int*>::value, "int* is pointer-like");
+        FL_STATIC_ASSERT(is_pointer_like<Calculator*>::value, "Calculator* is pointer-like");
     }
 }
 

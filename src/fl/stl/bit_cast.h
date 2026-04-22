@@ -45,9 +45,9 @@ struct is_bitcast_compatible<T*> {
 // Compilers recognize this pattern and optimize it to a single register move.
 template <typename To, typename From>
 To bit_cast(const From& from) FL_NOEXCEPT {
-    static_assert(sizeof(To) == sizeof(From), "bit_cast: types must have the same size");
-    static_assert(is_bitcast_compatible<To>::value, "bit_cast: destination type must be bitcast compatible");
-    static_assert(is_bitcast_compatible<From>::value, "bit_cast: source type must be bitcast compatible");
+    FL_STATIC_ASSERT(sizeof(To) == sizeof(From), "bit_cast: types must have the same size");
+    FL_STATIC_ASSERT(is_bitcast_compatible<To>::value, "bit_cast: destination type must be bitcast compatible");
+    FL_STATIC_ASSERT(is_bitcast_compatible<From>::value, "bit_cast: source type must be bitcast compatible");
 
     To to;
     fl::memcpy(&to, &from, sizeof(To));

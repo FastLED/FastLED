@@ -1,6 +1,7 @@
 // g++ --std=c++11 test.cpp
 
 #include "fl/math/math.h"
+#include "fl/stl/static_assert.h"
 
 
 #include "fl/gfx/corkscrew.h"
@@ -149,15 +150,15 @@ FL_TEST_CASE("Constexpr corkscrew dimension calculation") {
     constexpr uint16_t festival_width = fl::calculateCorkscrewWidth(19.0f, 288);
     constexpr uint16_t festival_height = fl::calculateCorkscrewHeight(19.0f, 288);
     
-    static_assert(festival_width == 16, "FestivalStick width should be 16");
-    static_assert(festival_height == 18, "FestivalStick height should be 18");
+    FL_STATIC_ASSERT(festival_width == 16, "FestivalStick width should be 16");
+    FL_STATIC_ASSERT(festival_height == 18, "FestivalStick height should be 18");
     
     // Default case: 19 turns, 144 LEDs
     constexpr uint16_t default_width = fl::calculateCorkscrewWidth(19.0f, 144);
     constexpr uint16_t default_height = fl::calculateCorkscrewHeight(19.0f, 144);
     
-    static_assert(default_width == 8, "Default width should be 8");
-    static_assert(default_height == 18, "Default height should be 18");
+    FL_STATIC_ASSERT(default_width == 8, "Default width should be 8");
+    FL_STATIC_ASSERT(default_height == 18, "Default height should be 18");
     
     // Verify runtime and compile-time versions match
     fl::Corkscrew runtime_corkscrew(19.0f, 288);
@@ -169,8 +170,8 @@ FL_TEST_CASE("Constexpr corkscrew dimension calculation") {
     constexpr uint16_t simple_width = fl::calculateCorkscrewWidth(10.0f, 100);
     constexpr uint16_t simple_height = fl::calculateCorkscrewHeight(10.0f, 100);
     
-    static_assert(simple_width == 10, "Simple width should be 10");
-    static_assert(simple_height == 10, "Simple height should be 10");
+    FL_STATIC_ASSERT(simple_width == 10, "Simple width should be 10");
+    FL_STATIC_ASSERT(simple_height == 10, "Simple height should be 10");
 }
 
 FL_TEST_CASE("TestCorkscrewBufferFunctionality") {

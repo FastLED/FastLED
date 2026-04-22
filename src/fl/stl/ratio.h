@@ -18,7 +18,7 @@ namespace fl {
 /// Used for duration period types (e.g., milliseconds = 1/1000 second).
 template<fl::i64 Num, fl::i64 Denom = 1>
 struct ratio {
-    static_assert(Denom != 0, "ratio denominator cannot be zero");
+    FL_STATIC_ASSERT(Denom != 0, "ratio denominator cannot be zero");
 
     static constexpr fl::i64 num = Num;
     static constexpr fl::i64 den = Denom;

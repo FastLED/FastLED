@@ -1,6 +1,7 @@
 #include "test.h"
 #include "fl/stl/limits.h"
 #include "test.h"
+#include "fl/stl/static_assert.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -47,9 +48,9 @@ FL_TEST_CASE("fl::numeric_limits<bool>") {
     }
 
     FL_SUBCASE("constexpr evaluation") {
-        static_assert(numeric_limits<bool>::min() == false, "min() must be constexpr");
-        static_assert(numeric_limits<bool>::max() == true, "max() must be constexpr");
-        static_assert(numeric_limits<bool>::is_specialized, "is_specialized must be constexpr");
+        FL_STATIC_ASSERT(numeric_limits<bool>::min() == false, "min() must be constexpr");
+        FL_STATIC_ASSERT(numeric_limits<bool>::max() == true, "max() must be constexpr");
+        FL_STATIC_ASSERT(numeric_limits<bool>::is_specialized, "is_specialized must be constexpr");
     }
 }
 
@@ -113,8 +114,8 @@ FL_TEST_CASE("fl::numeric_limits<signed char>") {
     }
 
     FL_SUBCASE("constexpr evaluation") {
-        static_assert(numeric_limits<signed char>::min() == -128, "min() must be constexpr");
-        static_assert(numeric_limits<signed char>::max() == 127, "max() must be constexpr");
+        FL_STATIC_ASSERT(numeric_limits<signed char>::min() == -128, "min() must be constexpr");
+        FL_STATIC_ASSERT(numeric_limits<signed char>::max() == 127, "max() must be constexpr");
     }
 }
 
@@ -139,8 +140,8 @@ FL_TEST_CASE("fl::numeric_limits<unsigned char>") {
     }
 
     FL_SUBCASE("constexpr evaluation") {
-        static_assert(numeric_limits<unsigned char>::min() == 0, "min() must be constexpr");
-        static_assert(numeric_limits<unsigned char>::max() == 255, "max() must be constexpr");
+        FL_STATIC_ASSERT(numeric_limits<unsigned char>::min() == 0, "min() must be constexpr");
+        FL_STATIC_ASSERT(numeric_limits<unsigned char>::max() == 255, "max() must be constexpr");
     }
 }
 
@@ -165,8 +166,8 @@ FL_TEST_CASE("fl::numeric_limits<short>") {
     }
 
     FL_SUBCASE("constexpr evaluation") {
-        static_assert(numeric_limits<short>::min() == -32768, "min() must be constexpr");
-        static_assert(numeric_limits<short>::max() == 32767, "max() must be constexpr");
+        FL_STATIC_ASSERT(numeric_limits<short>::min() == -32768, "min() must be constexpr");
+        FL_STATIC_ASSERT(numeric_limits<short>::max() == 32767, "max() must be constexpr");
     }
 }
 
@@ -191,8 +192,8 @@ FL_TEST_CASE("fl::numeric_limits<unsigned short>") {
     }
 
     FL_SUBCASE("constexpr evaluation") {
-        static_assert(numeric_limits<unsigned short>::min() == 0, "min() must be constexpr");
-        static_assert(numeric_limits<unsigned short>::max() == 65535, "max() must be constexpr");
+        FL_STATIC_ASSERT(numeric_limits<unsigned short>::min() == 0, "min() must be constexpr");
+        FL_STATIC_ASSERT(numeric_limits<unsigned short>::max() == 65535, "max() must be constexpr");
     }
 }
 
@@ -338,8 +339,8 @@ FL_TEST_CASE("fl::numeric_limits<long long>") {
     }
 
     FL_SUBCASE("constexpr evaluation") {
-        static_assert(numeric_limits<long long>::digits == 63, "digits must be constexpr");
-        static_assert(numeric_limits<long long>::max() == 9223372036854775807LL, "max() must be constexpr");
+        FL_STATIC_ASSERT(numeric_limits<long long>::digits == 63, "digits must be constexpr");
+        FL_STATIC_ASSERT(numeric_limits<long long>::max() == 9223372036854775807LL, "max() must be constexpr");
     }
 }
 
@@ -364,8 +365,8 @@ FL_TEST_CASE("fl::numeric_limits<unsigned long long>") {
     }
 
     FL_SUBCASE("constexpr evaluation") {
-        static_assert(numeric_limits<unsigned long long>::digits == 64, "digits must be constexpr");
-        static_assert(numeric_limits<unsigned long long>::max() == 18446744073709551615ull, "max() must be constexpr");
+        FL_STATIC_ASSERT(numeric_limits<unsigned long long>::digits == 64, "digits must be constexpr");
+        FL_STATIC_ASSERT(numeric_limits<unsigned long long>::max() == 18446744073709551615ull, "max() must be constexpr");
     }
 }
 
@@ -449,9 +450,9 @@ FL_TEST_CASE("fl::numeric_limits<float>") {
         constexpr float max_val = numeric_limits<float>::max();
         constexpr float eps = numeric_limits<float>::epsilon();
 
-        static_assert(min_val > 0.0f, "min() must be constexpr");
-        static_assert(max_val > 0.0f, "max() must be constexpr");
-        static_assert(eps > 0.0f, "epsilon() must be constexpr");
+        FL_STATIC_ASSERT(min_val > 0.0f, "min() must be constexpr");
+        FL_STATIC_ASSERT(max_val > 0.0f, "max() must be constexpr");
+        FL_STATIC_ASSERT(eps > 0.0f, "epsilon() must be constexpr");
     }
 }
 
@@ -536,9 +537,9 @@ FL_TEST_CASE("fl::numeric_limits<double>") {
         constexpr double max_val = numeric_limits<double>::max();
         constexpr double eps = numeric_limits<double>::epsilon();
 
-        static_assert(min_val > 0.0, "min() must be constexpr");
-        static_assert(max_val > 0.0, "max() must be constexpr");
-        static_assert(eps > 0.0, "epsilon() must be constexpr");
+        FL_STATIC_ASSERT(min_val > 0.0, "min() must be constexpr");
+        FL_STATIC_ASSERT(max_val > 0.0, "max() must be constexpr");
+        FL_STATIC_ASSERT(eps > 0.0, "epsilon() must be constexpr");
     }
 }
 

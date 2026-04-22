@@ -1005,7 +1005,7 @@ public:
 		// Instantiate the controller using ClockedChipsetHelper
 		typedef ClockedChipsetHelper<CHIPSET, DATA_PIN, CLOCK_PIN> CHIP;
 		typedef typename CHIP::template CONTROLLER_CLASS_WITH_ORDER_AND_FREQ<RGB_ORDER, SPI_DATA_RATE>::ControllerType ControllerTypeWithFreq;
-		static_assert(CHIP::IS_VALID, "Unsupported chipset");
+		FL_STATIC_ASSERT(CHIP::IS_VALID, "Unsupported chipset");
 		static ControllerTypeWithFreq c;
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
@@ -1014,7 +1014,7 @@ public:
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN > static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		typedef ClockedChipsetHelper<CHIPSET, DATA_PIN, CLOCK_PIN> CHIP;
 		typedef typename CHIP::ControllerType ControllerType;
-		static_assert(CHIP::IS_VALID, "Unsupported chipset");
+		FL_STATIC_ASSERT(CHIP::IS_VALID, "Unsupported chipset");
 		static ControllerType c;
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
@@ -1023,7 +1023,7 @@ public:
 	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER>
 	::CLEDController& addLeds(CRGB* data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		typedef ClockedChipsetHelper<CHIPSET, DATA_PIN, CLOCK_PIN> CHIP;
-		static_assert(CHIP::IS_VALID, "Unsupported chipset");
+		FL_STATIC_ASSERT(CHIP::IS_VALID, "Unsupported chipset");
 		typedef typename CHIP::template CONTROLLER_CLASS_WITH_ORDER<RGB_ORDER>::ControllerType ControllerTypeWithOrder;
 		static ControllerTypeWithOrder c;
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);

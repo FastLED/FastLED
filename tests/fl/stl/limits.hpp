@@ -1,5 +1,6 @@
 #include "test.h"
 #include "fl/stl/limits.h"
+#include "fl/stl/static_assert.h"
 
 using namespace fl;
 
@@ -10,7 +11,7 @@ FL_TEST_CASE("fl::numeric_limits<int>") {
         FL_CHECK_EQ(min_val, -2147483647 - 1);
 
         // Compile-time check
-        static_assert(numeric_limits<int>::min() < 0, "int min should be negative");
+        FL_STATIC_ASSERT(numeric_limits<int>::min() < 0, "int min should be negative");
     }
 
     FL_SUBCASE("max returns maximum int value") {
@@ -19,11 +20,11 @@ FL_TEST_CASE("fl::numeric_limits<int>") {
         FL_CHECK_EQ(max_val, 2147483647);
 
         // Compile-time check
-        static_assert(numeric_limits<int>::max() > 0, "int max should be positive");
+        FL_STATIC_ASSERT(numeric_limits<int>::max() > 0, "int max should be positive");
     }
 
     FL_SUBCASE("min is less than max") {
-        static_assert(numeric_limits<int>::min() < numeric_limits<int>::max(),
+        FL_STATIC_ASSERT(numeric_limits<int>::min() < numeric_limits<int>::max(),
                       "min should be less than max");
     }
 }
@@ -33,7 +34,7 @@ FL_TEST_CASE("fl::numeric_limits<unsigned int>") {
         constexpr unsigned int min_val = numeric_limits<unsigned int>::min();
         FL_CHECK_EQ(min_val, 0u);
 
-        static_assert(numeric_limits<unsigned int>::min() == 0,
+        FL_STATIC_ASSERT(numeric_limits<unsigned int>::min() == 0,
                       "unsigned int min should be 0");
     }
 
@@ -42,7 +43,7 @@ FL_TEST_CASE("fl::numeric_limits<unsigned int>") {
         // Should be 2^32 - 1 for 32-bit unsigned int
         FL_CHECK_EQ(max_val, 4294967295u);
 
-        static_assert(numeric_limits<unsigned int>::max() > 0,
+        FL_STATIC_ASSERT(numeric_limits<unsigned int>::max() > 0,
                       "unsigned int max should be positive");
     }
 }
@@ -52,14 +53,14 @@ FL_TEST_CASE("fl::numeric_limits<long>") {
         constexpr long min_val = numeric_limits<long>::min();
         FL_CHECK(min_val < 0);
 
-        static_assert(numeric_limits<long>::min() < 0, "long min should be negative");
+        FL_STATIC_ASSERT(numeric_limits<long>::min() < 0, "long min should be negative");
     }
 
     FL_SUBCASE("max returns maximum long value") {
         constexpr long max_val = numeric_limits<long>::max();
         FL_CHECK(max_val > 0);
 
-        static_assert(numeric_limits<long>::max() > 0, "long max should be positive");
+        FL_STATIC_ASSERT(numeric_limits<long>::max() > 0, "long max should be positive");
     }
 
     FL_SUBCASE("consistent with sizeof") {
@@ -81,7 +82,7 @@ FL_TEST_CASE("fl::numeric_limits<unsigned long>") {
         constexpr unsigned long min_val = numeric_limits<unsigned long>::min();
         FL_CHECK_EQ(min_val, 0ul);
 
-        static_assert(numeric_limits<unsigned long>::min() == 0,
+        FL_STATIC_ASSERT(numeric_limits<unsigned long>::min() == 0,
                       "unsigned long min should be 0");
     }
 
@@ -89,7 +90,7 @@ FL_TEST_CASE("fl::numeric_limits<unsigned long>") {
         constexpr unsigned long max_val = numeric_limits<unsigned long>::max();
         FL_CHECK(max_val > 0);
 
-        static_assert(numeric_limits<unsigned long>::max() > 0,
+        FL_STATIC_ASSERT(numeric_limits<unsigned long>::max() > 0,
                       "unsigned long max should be positive");
     }
 
@@ -109,7 +110,7 @@ FL_TEST_CASE("fl::numeric_limits<long long>") {
         // Should be -2^63
         FL_CHECK_EQ(min_val, -9223372036854775807LL - 1);
 
-        static_assert(numeric_limits<long long>::min() < 0,
+        FL_STATIC_ASSERT(numeric_limits<long long>::min() < 0,
                       "long long min should be negative");
     }
 
@@ -118,7 +119,7 @@ FL_TEST_CASE("fl::numeric_limits<long long>") {
         // Should be 2^63 - 1
         FL_CHECK_EQ(max_val, 9223372036854775807LL);
 
-        static_assert(numeric_limits<long long>::max() > 0,
+        FL_STATIC_ASSERT(numeric_limits<long long>::max() > 0,
                       "long long max should be positive");
     }
 }
@@ -128,7 +129,7 @@ FL_TEST_CASE("fl::numeric_limits<unsigned long long>") {
         constexpr unsigned long long min_val = numeric_limits<unsigned long long>::min();
         FL_CHECK_EQ(min_val, 0ull);
 
-        static_assert(numeric_limits<unsigned long long>::min() == 0,
+        FL_STATIC_ASSERT(numeric_limits<unsigned long long>::min() == 0,
                       "unsigned long long min should be 0");
     }
 
@@ -137,7 +138,7 @@ FL_TEST_CASE("fl::numeric_limits<unsigned long long>") {
         // Should be 2^64 - 1
         FL_CHECK_EQ(max_val, 18446744073709551615ull);
 
-        static_assert(numeric_limits<unsigned long long>::max() > 0,
+        FL_STATIC_ASSERT(numeric_limits<unsigned long long>::max() > 0,
                       "unsigned long long max should be positive");
     }
 }
@@ -151,7 +152,7 @@ FL_TEST_CASE("fl::numeric_limits<float>") {
         // Should match __FLT_MIN__
         FL_CHECK_EQ(min_val, __FLT_MIN__);
 
-        static_assert(numeric_limits<float>::min() > 0,
+        FL_STATIC_ASSERT(numeric_limits<float>::min() > 0,
                       "float min should be positive (smallest normalized value)");
     }
 
@@ -162,7 +163,7 @@ FL_TEST_CASE("fl::numeric_limits<float>") {
         // Should match __FLT_MAX__
         FL_CHECK_EQ(max_val, __FLT_MAX__);
 
-        static_assert(numeric_limits<float>::max() > 0,
+        FL_STATIC_ASSERT(numeric_limits<float>::max() > 0,
                       "float max should be positive");
     }
 }
@@ -176,7 +177,7 @@ FL_TEST_CASE("fl::numeric_limits<double>") {
         // Should match __DBL_MIN__
         FL_CHECK_EQ(min_val, __DBL_MIN__);
 
-        static_assert(numeric_limits<double>::min() > 0,
+        FL_STATIC_ASSERT(numeric_limits<double>::min() > 0,
                       "double min should be positive (smallest normalized value)");
     }
 
@@ -187,15 +188,15 @@ FL_TEST_CASE("fl::numeric_limits<double>") {
         // Should match __DBL_MAX__
         FL_CHECK_EQ(max_val, __DBL_MAX__);
 
-        static_assert(numeric_limits<double>::max() > 0,
+        FL_STATIC_ASSERT(numeric_limits<double>::max() > 0,
                       "double max should be positive");
     }
 
     FL_SUBCASE("double range is larger than float range") {
         // Double should have larger range than float
-        static_assert(numeric_limits<double>::max() > numeric_limits<float>::max(),
+        FL_STATIC_ASSERT(numeric_limits<double>::max() > numeric_limits<float>::max(),
                       "double max should be larger than float max");
-        static_assert(numeric_limits<double>::min() < numeric_limits<float>::min(),
+        FL_STATIC_ASSERT(numeric_limits<double>::min() < numeric_limits<float>::min(),
                       "double min should be smaller than float min");
     }
 }
@@ -228,7 +229,7 @@ FL_TEST_CASE("fl::numeric_limits compile-time evaluation") {
 FL_TEST_CASE("fl::numeric_limits integral relationships") {
     FL_SUBCASE("unsigned max is about twice signed max") {
         // For same-sized types, unsigned max ≈ 2 * signed max + 1
-        static_assert(numeric_limits<unsigned int>::max() ==
+        FL_STATIC_ASSERT(numeric_limits<unsigned int>::max() ==
                       static_cast<unsigned int>(numeric_limits<int>::max()) * 2u + 1u,
                       "unsigned max should be 2*signed_max + 1");
     }

@@ -5,6 +5,7 @@
 #include "platforms/esp/is_esp.h"
 
 #include "fl/stl/stdint.h"
+#include "fl/stl/static_assert.h"
 
 #include "fl/stl/compiler_control.h"
 #include "platforms/esp/esp_version.h"
@@ -37,7 +38,7 @@ public:
   #endif
 
   inline static void setOutput() FL_NOEXCEPT {
-      static_assert(validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
+      FL_STATIC_ASSERT(validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
       pinMode(PIN, PinMode::Output);
   }
   inline static void setInput() { pinMode(PIN, PinMode::Input); }

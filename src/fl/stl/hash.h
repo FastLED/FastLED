@@ -105,7 +105,7 @@ static inline u32 fast_hash64(u64 x) FL_NOEXCEPT {
 //-----------------------------------------------------------------------------
 // https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp
 template <typename T> struct Hash {
-    static_assert(fl::is_pod<T>::value,
+    FL_STATIC_ASSERT(fl::is_pod<T>::value,
                   "fl::Hash<T> only supports POD types (integrals, floats, "
                   "etc.), you need to define your own hash.");
     u32 operator()(const T &key) const FL_NOEXCEPT {
@@ -114,7 +114,7 @@ template <typename T> struct Hash {
 };
 
 template <typename T> struct FastHash {
-    static_assert(fl::is_pod<T>::value,
+    FL_STATIC_ASSERT(fl::is_pod<T>::value,
                   "fl::FastHash<T> only supports POD types (integrals, floats, "
                   "etc.), you need to define your own hash.");
     u32 operator()(const T &key) const FL_NOEXCEPT {

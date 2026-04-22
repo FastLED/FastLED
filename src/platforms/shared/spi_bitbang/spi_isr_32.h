@@ -4,6 +4,7 @@
 // IWYU pragma: private
 
 #include "fl/stl/stdint.h"
+#include "fl/stl/static_assert.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/bit_cast.h"
 #include "platforms/shared/spi_bitbang/spi_isr_engine.h"
@@ -34,11 +35,11 @@ struct GPIOEvent {
 
 // Verify memory layout matches between C and C++ structures
 // Use FL_OFFSETOF macro (defined in fl/cstddef.h) instead of <stddef.h>
-static_assert(sizeof(GPIOEvent) == sizeof(FastLED_GPIO_Event),
+FL_STATIC_ASSERT(sizeof(GPIOEvent) == sizeof(FastLED_GPIO_Event),
               "C++ GPIOEvent must match C FastLED_GPIO_Event layout");
-static_assert(FL_OFFSETOF(GPIOEvent, event_type) == FL_OFFSETOF(FastLED_GPIO_Event, event_type),
+FL_STATIC_ASSERT(FL_OFFSETOF(GPIOEvent, event_type) == FL_OFFSETOF(FastLED_GPIO_Event, event_type),
               "event_type offset must match");
-static_assert(FL_OFFSETOF(GPIOEvent, payload) == FL_OFFSETOF(FastLED_GPIO_Event, payload),
+FL_STATIC_ASSERT(FL_OFFSETOF(GPIOEvent, payload) == FL_OFFSETOF(FastLED_GPIO_Event, payload),
               "payload offset must match");
 #endif
 

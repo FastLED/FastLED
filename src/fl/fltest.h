@@ -1903,7 +1903,7 @@ struct TypeIterator<TypeList<T, Rest...>, TestFunc> {
                 FLTEST_CAT(id, _REG_)::baseName(), __FILE__, __LINE__, 0);      \
         }                                                                        \
     } FLTEST_UNIQUE(FLTEST_TMPL_INVOKE_INST_);                                  \
-    static_assert(true, "")
+    FL_STATIC_ASSERT(true, "")
 
 // FL_TEST_CASE_TEMPLATE_APPLY - Same as INVOKE but takes a TypeList instead of types
 // Usage: FL_TEST_CASE_TEMPLATE_APPLY(my_test_id, MyTypeList);  // Note: semicolon required
@@ -1915,7 +1915,7 @@ struct TypeIterator<TypeList<T, Rest...>, TestFunc> {
                 FLTEST_CAT(id, _REG_)::baseName(), __FILE__, __LINE__, 0);      \
         }                                                                        \
     } FLTEST_UNIQUE(FLTEST_TMPL_APPLY_INST_);                                   \
-    static_assert(true, "")
+    FL_STATIC_ASSERT(true, "")
 
 // =============================================================================
 // Standalone main implementation macro

@@ -20,6 +20,7 @@
 #include "fl/system/delay.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/static_assert.h"
 #include "fl/chipsets/timing_traits.h"
 #include "fl/system/log.h"
 #include "controller.h"
@@ -74,9 +75,9 @@ private:
     // static_assert(fl::FastPin<DATA_PIN>::validpin(), "Invalid pin for clockless controller");
 
     // Static timing assertions for protocol sanity
-    static_assert(T1 > 0, "T1 (high time for bit 0) must be positive");
-    static_assert(T2 > 0, "T2 (additional high time for bit 1) must be positive");
-    static_assert(T3 > 0, "T3 (addtional time for low tail duration) must be positive");
+    FL_STATIC_ASSERT(T1 > 0, "T1 (high time for bit 0) must be positive");
+    FL_STATIC_ASSERT(T2 > 0, "T2 (additional high time for bit 1) must be positive");
+    FL_STATIC_ASSERT(T3 > 0, "T3 (addtional time for low tail duration) must be positive");
 
     // Minimum wait time between frames
     CMinWait<WAIT_TIME> mWait;

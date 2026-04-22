@@ -3,6 +3,7 @@
 #include "test.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/int.h"
+#include "fl/stl/static_assert.h"
 
 using namespace fl;
 
@@ -19,7 +20,7 @@ FL_TEST_CASE("fl::cycle_t type definition") {
 #if defined(__AVR__)
     FL_SUBCASE("cycle_t is int on AVR platforms") {
         // On AVR, cycle_t should be int (typically 16-bit)
-        static_assert(fl::is_same<cycle_t, int>::value,
+        FL_STATIC_ASSERT(fl::is_same<cycle_t, int>::value,
                      "cycle_t should be int on AVR");
 
         // Verify it's the expected size for AVR
@@ -28,7 +29,7 @@ FL_TEST_CASE("fl::cycle_t type definition") {
 #else
     FL_SUBCASE("cycle_t is fl::i64 on non-AVR platforms") {
         // On non-AVR platforms, cycle_t should be fl::i64
-        static_assert(fl::is_same<cycle_t, fl::i64>::value,
+        FL_STATIC_ASSERT(fl::is_same<cycle_t, fl::i64>::value,
                      "cycle_t should be fl::i64 on non-AVR");
 
         // Verify it's 64-bit

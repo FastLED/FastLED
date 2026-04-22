@@ -8,6 +8,7 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/move.h"
 #include "fl/stl/type_traits.h"
+#include "fl/stl/static_assert.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -456,8 +457,8 @@ FL_TEST_CASE("fl::fl_random - Type traits") {
 
     FL_SUBCASE("Constexpr minimum and maximum") {
         // These should be usable in constant expressions
-        static_assert(fl_random::minimum() == 0, "minimum should be 0");
-        static_assert(fl_random::maximum() == 4294967295U, "maximum should be u32 max");
+        FL_STATIC_ASSERT(fl_random::minimum() == 0, "minimum should be 0");
+        FL_STATIC_ASSERT(fl_random::maximum() == 4294967295U, "maximum should be u32 max");
     }
 }
 

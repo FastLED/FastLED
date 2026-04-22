@@ -1,4 +1,5 @@
 #include "test.h"
+#include "fl/stl/static_assert.h"
 
 #include "fl/math/alpha.h"
 
@@ -253,89 +254,89 @@ template <typename Alpha, typename Raw, int MaxVal>
 static void test_alpha_constexpr() {
     // Default construction
     constexpr Alpha def;
-    static_assert(def.raw() == 0, "default ctor");
+    FL_STATIC_ASSERT(def.raw() == 0, "default ctor");
 
     // Integer construction — every width and signedness
     constexpr Alpha from_raw_type(static_cast<Raw>(MaxVal));
-    static_assert(from_raw_type.raw() == MaxVal, "raw type ctor");
+    FL_STATIC_ASSERT(from_raw_type.raw() == MaxVal, "raw type ctor");
 
     constexpr Alpha from_char(static_cast<signed char>(42));
-    static_assert(from_char.raw() == 42, "signed char ctor");
+    FL_STATIC_ASSERT(from_char.raw() == 42, "signed char ctor");
 
     constexpr Alpha from_uchar(static_cast<unsigned char>(42));
-    static_assert(from_uchar.raw() == 42, "unsigned char ctor");
+    FL_STATIC_ASSERT(from_uchar.raw() == 42, "unsigned char ctor");
 
     constexpr Alpha from_short(static_cast<short>(42));
-    static_assert(from_short.raw() == 42, "short ctor");
+    FL_STATIC_ASSERT(from_short.raw() == 42, "short ctor");
 
     constexpr Alpha from_ushort(static_cast<unsigned short>(42));
-    static_assert(from_ushort.raw() == 42, "unsigned short ctor");
+    FL_STATIC_ASSERT(from_ushort.raw() == 42, "unsigned short ctor");
 
     constexpr Alpha from_int(42);
-    static_assert(from_int.raw() == 42, "int ctor");
+    FL_STATIC_ASSERT(from_int.raw() == 42, "int ctor");
 
     constexpr Alpha from_uint(42u);
-    static_assert(from_uint.raw() == 42, "unsigned int ctor");
+    FL_STATIC_ASSERT(from_uint.raw() == 42, "unsigned int ctor");
 
     constexpr Alpha from_long(42L);
-    static_assert(from_long.raw() == 42, "long ctor");
+    FL_STATIC_ASSERT(from_long.raw() == 42, "long ctor");
 
     constexpr Alpha from_ulong(42UL);
-    static_assert(from_ulong.raw() == 42, "unsigned long ctor");
+    FL_STATIC_ASSERT(from_ulong.raw() == 42, "unsigned long ctor");
 
     constexpr Alpha from_ll(42LL);
-    static_assert(from_ll.raw() == 42, "long long ctor");
+    FL_STATIC_ASSERT(from_ll.raw() == 42, "long long ctor");
 
     constexpr Alpha from_ull(42ULL);
-    static_assert(from_ull.raw() == 42, "unsigned long long ctor");
+    FL_STATIC_ASSERT(from_ull.raw() == 42, "unsigned long long ctor");
 
     // Float / double construction (explicit)
     constexpr Alpha from_f0(0.0f);
-    static_assert(from_f0.raw() == 0, "float ctor 0.0");
+    FL_STATIC_ASSERT(from_f0.raw() == 0, "float ctor 0.0");
 
     constexpr Alpha from_f1(1.0f);
-    static_assert(from_f1.raw() == MaxVal, "float ctor 1.0");
+    FL_STATIC_ASSERT(from_f1.raw() == MaxVal, "float ctor 1.0");
 
     constexpr Alpha from_d0(0.0);
-    static_assert(from_d0.raw() == 0, "double ctor 0.0");
+    FL_STATIC_ASSERT(from_d0.raw() == 0, "double ctor 0.0");
 
     constexpr Alpha from_d1(1.0);
-    static_assert(from_d1.raw() == MaxVal, "double ctor 1.0");
+    FL_STATIC_ASSERT(from_d1.raw() == MaxVal, "double ctor 1.0");
 
     // Float clamp boundaries
     constexpr Alpha clamp_above(2.0f);
-    static_assert(clamp_above.raw() == MaxVal, "float clamp above");
+    FL_STATIC_ASSERT(clamp_above.raw() == MaxVal, "float clamp above");
 
     constexpr Alpha clamp_below(-1.0f);
-    static_assert(clamp_below.raw() == 0, "float clamp below");
+    FL_STATIC_ASSERT(clamp_below.raw() == 0, "float clamp below");
 
     // Implicit conversion to Raw
     constexpr Raw r = from_raw_type;
-    static_assert(r == static_cast<Raw>(MaxVal), "implicit conversion");
+    FL_STATIC_ASSERT(r == static_cast<Raw>(MaxVal), "implicit conversion");
 
     // raw() accessor
-    static_assert(from_int.raw() == 42, "raw()");
+    FL_STATIC_ASSERT(from_int.raw() == 42, "raw()");
 
     // to_float() — verify constexpr (boundaries are exact in IEEE 754)
     constexpr float f_zero = Alpha(static_cast<Raw>(0)).to_float();
-    static_assert(f_zero == 0.0f, "to_float 0");
+    FL_STATIC_ASSERT(f_zero == 0.0f, "to_float 0");
 
     constexpr float f_one = Alpha(static_cast<Raw>(MaxVal)).to_float();
-    static_assert(f_one == 1.0f, "to_float max");
+    FL_STATIC_ASSERT(f_one == 1.0f, "to_float max");
 
     // from_float() static method
     constexpr Alpha ff0 = Alpha::from_float(0.0f);
-    static_assert(ff0.raw() == 0, "from_float 0");
+    FL_STATIC_ASSERT(ff0.raw() == 0, "from_float 0");
 
     constexpr Alpha ff1 = Alpha::from_float(1.0f);
-    static_assert(ff1.raw() == MaxVal, "from_float 1");
+    FL_STATIC_ASSERT(ff1.raw() == MaxVal, "from_float 1");
 
     constexpr Alpha ff_clamp = Alpha::from_float(5.0f);
-    static_assert(ff_clamp.raw() == MaxVal, "from_float clamp");
+    FL_STATIC_ASSERT(ff_clamp.raw() == MaxVal, "from_float clamp");
 
     // Copy construction
     constexpr Alpha copy = from_raw_type;
-    static_assert(copy.raw() == MaxVal, "copy ctor");
+    FL_STATIC_ASSERT(copy.raw() == MaxVal, "copy ctor");
 
     // All checks passed at compile time; runtime just confirms we got here.
     FL_CHECK(true);

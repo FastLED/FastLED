@@ -1,6 +1,7 @@
 #include "fl/stl/cstddef.h"
 #include "fl/stl/cstddef.h"
 #include "test.h"
+#include "fl/stl/static_assert.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -239,7 +240,7 @@ FL_TEST_CASE("FL_OFFSETOF macro") {
         // This test verifies that FL_OFFSETOF can be used in contexts
         // requiring compile-time constants
         constexpr fl::size_t offset = FL_OFFSETOF(SimpleStruct, b);
-        static_assert(offset == FL_OFFSETOF(SimpleStruct, b), "FL_OFFSETOF should be constexpr");
+        FL_STATIC_ASSERT(offset == FL_OFFSETOF(SimpleStruct, b), "FL_OFFSETOF should be constexpr");
 
         // Use the constexpr value
         FL_CHECK(offset >= 0);

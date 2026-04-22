@@ -7,6 +7,7 @@
 #include "fl/stl/move.h"
 #include "fl/stl/type_traits.h"
 #include "fl/stl/int.h"
+#include "fl/stl/static_assert.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -37,23 +38,23 @@ FL_TEST_CASE("fl::allocator_traits") {
 
     FL_SUBCASE("allocator_realloc has both capabilities") {
         // allocator_realloc should support both reallocate() and allocate_at_least()
-        static_assert(allocator_traits<allocator_realloc<int>>::has_reallocate_v,
+        FL_STATIC_ASSERT(allocator_traits<allocator_realloc<int>>::has_reallocate_v,
                      "allocator_realloc should support reallocate()");
-        static_assert(allocator_traits<allocator_realloc<int>>::has_allocate_at_least_v,
+        FL_STATIC_ASSERT(allocator_traits<allocator_realloc<int>>::has_allocate_at_least_v,
                      "allocator_realloc should support allocate_at_least()");
         FL_CHECK(true);  // Compile-time checks passed
     }
 
     FL_SUBCASE("base allocator<T> has allocate_at_least") {
         // Standard allocator should have allocate_at_least() (with default implementation)
-        static_assert(allocator_traits<allocator<int>>::has_allocate_at_least_v,
+        FL_STATIC_ASSERT(allocator_traits<allocator<int>>::has_allocate_at_least_v,
                      "allocator<T> should support allocate_at_least()");
         FL_CHECK(true);
     }
 
     FL_SUBCASE("base allocator<T> has default reallocate") {
         // Standard allocator has reallocate() that returns nullptr (no-op)
-        static_assert(allocator_traits<allocator<int>>::has_reallocate_v,
+        FL_STATIC_ASSERT(allocator_traits<allocator<int>>::has_reallocate_v,
                      "allocator<T> should have reallocate() method");
         FL_CHECK(true);
     }

@@ -112,6 +112,7 @@
 #include "fl/chipsets/led_timing.h"
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/allocator.h"
+#include "fl/stl/static_assert.h"
 #include "fl/stl/noexcept.h"
 #include "fastled_delay.h"
 namespace fl {
@@ -168,7 +169,7 @@ class ClocklessI2S : public CPixelLEDController<RGB_ORDER> {
     static constexpr u32 T3 = TIMING::T3;
 
     // -- Verify that the pin is valid
-    static_assert(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
+    FL_STATIC_ASSERT(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
 
     // -- Save the pixel controller
     PixelController<RGB_ORDER> *mPixels;

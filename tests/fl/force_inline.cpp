@@ -1,6 +1,7 @@
 
 #include "fl/stl/compiler_control.h"
 #include "test.h"
+#include "fl/stl/static_assert.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -79,7 +80,7 @@ FL_TEST_CASE("FASTLED_FORCE_INLINE macro") {
 
         // Compile-time evaluation test
         constexpr int result = square_force_inline(7);
-        static_assert(result == 49, "constexpr function should work at compile time");
+        FL_STATIC_ASSERT(result == 49, "constexpr function should work at compile time");
     }
 
     FL_SUBCASE("macro is defined") {

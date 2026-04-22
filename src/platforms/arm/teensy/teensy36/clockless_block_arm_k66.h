@@ -30,6 +30,7 @@
 #include <kinetis.h>
 // IWYU pragma: end_keep
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/static_assert.h"
 #include "fl/stl/noexcept.h"
 
 FL_DISABLE_WARNING_PUSH
@@ -240,7 +241,7 @@ class SixteenWayInlineBlockClocklessController : public CPixelLEDController<RGB_
 
 public:
 	virtual void init() FL_NOEXCEPT {
-		static_assert(LANES <= 16, "Maximum of 16 lanes for Teensy parallel controllers!");
+		FL_STATIC_ASSERT(LANES <= 16, "Maximum of 16 lanes for Teensy parallel controllers!");
 		// FastPin<30>::setOutput();
 		// FastPin<29>::setOutput();
 		// FastPin<27>::setOutput();

@@ -11,7 +11,7 @@ namespace detail {
 
 template <typename T, fl::size N = 0>
 class MedianFilterImpl {
-    static_assert(N == 0 || (N % 2 == 1),
+    FL_STATIC_ASSERT(N == 0 || (N % 2 == 1),
                   "MedianFilter: N must be odd for an unambiguous median");
   public:
     MedianFilterImpl() FL_NOEXCEPT : mSortedCount(0), mLastMedian(T(0)) {}

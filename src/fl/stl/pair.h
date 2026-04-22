@@ -112,7 +112,7 @@ struct pair_element<1, T1, T2> {
 // get function overloads for tuple-like access by index
 template <fl::size I, typename T1, typename T2>
 typename pair_element<I, T1, T2>::type& get(pair<T1, T2> &p) FL_NOEXCEPT {
-    static_assert(I < 2, "Index out of bounds for pair");
+    FL_STATIC_ASSERT(I < 2, "Index out of bounds for pair");
     if (I == 0) {
         return p.first;
     } else {
@@ -122,7 +122,7 @@ typename pair_element<I, T1, T2>::type& get(pair<T1, T2> &p) FL_NOEXCEPT {
 
 template <fl::size I, typename T1, typename T2>
 const typename pair_element<I, T1, T2>::type& get(const pair<T1, T2> &p) FL_NOEXCEPT {
-    static_assert(I < 2, "Index out of bounds for pair");
+    FL_STATIC_ASSERT(I < 2, "Index out of bounds for pair");
     if (I == 0) {
         return p.first;
     } else {
@@ -132,7 +132,7 @@ const typename pair_element<I, T1, T2>::type& get(const pair<T1, T2> &p) FL_NOEX
 
 template <fl::size I, typename T1, typename T2>
 typename pair_element<I, T1, T2>::type&& get(pair<T1, T2> &&p) FL_NOEXCEPT {
-    static_assert(I < 2, "Index out of bounds for pair");
+    FL_STATIC_ASSERT(I < 2, "Index out of bounds for pair");
     if (I == 0) {
         return fl::move(p.first);
     } else {
@@ -143,9 +143,9 @@ typename pair_element<I, T1, T2>::type&& get(pair<T1, T2> &&p) FL_NOEXCEPT {
 // get by type overloads (when T1 and T2 are different types)
 template <typename T, typename T1, typename T2>
 T& get(pair<T1, T2> &p) FL_NOEXCEPT {
-    static_assert(fl::is_same<T, T1>::value || fl::is_same<T, T2>::value, 
+    FL_STATIC_ASSERT(fl::is_same<T, T1>::value || fl::is_same<T, T2>::value,
                   "Type T must be one of the pair's element types");
-    static_assert(!(fl::is_same<T, T1>::value && fl::is_same<T, T2>::value), 
+    FL_STATIC_ASSERT(!(fl::is_same<T, T1>::value && fl::is_same<T, T2>::value),
                   "Type T must be unique in the pair");
     if (fl::is_same<T, T1>::value) {
         return p.first;
@@ -156,9 +156,9 @@ T& get(pair<T1, T2> &p) FL_NOEXCEPT {
 
 template <typename T, typename T1, typename T2>
 const T& get(const pair<T1, T2> &p) FL_NOEXCEPT {
-    static_assert(fl::is_same<T, T1>::value || fl::is_same<T, T2>::value, 
+    FL_STATIC_ASSERT(fl::is_same<T, T1>::value || fl::is_same<T, T2>::value,
                   "Type T must be one of the pair's element types");
-    static_assert(!(fl::is_same<T, T1>::value && fl::is_same<T, T2>::value), 
+    FL_STATIC_ASSERT(!(fl::is_same<T, T1>::value && fl::is_same<T, T2>::value),
                   "Type T must be unique in the pair");
     if (fl::is_same<T, T1>::value) {
         return p.first;
@@ -169,9 +169,9 @@ const T& get(const pair<T1, T2> &p) FL_NOEXCEPT {
 
 template <typename T, typename T1, typename T2>
 T&& get(pair<T1, T2> &&p) FL_NOEXCEPT {
-    static_assert(fl::is_same<T, T1>::value || fl::is_same<T, T2>::value, 
+    FL_STATIC_ASSERT(fl::is_same<T, T1>::value || fl::is_same<T, T2>::value,
                   "Type T must be one of the pair's element types");
-    static_assert(!(fl::is_same<T, T1>::value && fl::is_same<T, T2>::value), 
+    FL_STATIC_ASSERT(!(fl::is_same<T, T1>::value && fl::is_same<T, T2>::value),
                   "Type T must be unique in the pair");
     if (fl::is_same<T, T1>::value) {
         return fl::move(p.first);

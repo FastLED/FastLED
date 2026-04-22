@@ -4,6 +4,7 @@
 #include "fl/system/delay.h"
 #include "fl/task/executor.h"
 #include "test.h"
+#include "fl/stl/static_assert.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -11,11 +12,11 @@ namespace delay_lookup_regression {
 char delay(fl::u32);
 using fl::delay;
 
-static_assert(fl::is_same<decltype(delay(fl::u32{1})), char>::value,
+FL_STATIC_ASSERT(fl::is_same<decltype(delay(fl::u32{1})), char>::value,
               "Bare delay(u32) should prefer the non-template Arduino-style overload");
-static_assert(fl::is_same<decltype(delay(static_cast<unsigned long>(1))), char>::value,
+FL_STATIC_ASSERT(fl::is_same<decltype(delay(static_cast<unsigned long>(1))), char>::value,
               "Bare delay(unsigned long) should prefer the non-template Arduino-style overload");
-static_assert(fl::is_same<decltype(delay(fl::u32{1}, false)), void>::value,
+FL_STATIC_ASSERT(fl::is_same<decltype(delay(fl::u32{1}, false)), void>::value,
               "Two-argument delay(ms, run_async) should resolve to fl::delay");
 }  // namespace delay_lookup_regression
 

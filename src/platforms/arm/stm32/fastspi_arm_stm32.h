@@ -17,6 +17,7 @@
 #include "fastspi_types.h"
 #include "platforms/arm/stm32/is_stm32.h"
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/static_assert.h"
 #include "fl/stl/noexcept.h"
 
 FL_DISABLE_WARNING_PUSH
@@ -60,8 +61,8 @@ private:
 
 public:
     // Verify that the pins are valid
-    static_assert(FastPin<DATA_PIN>::validpin(), "Invalid data pin specified");
-    static_assert(FastPin<CLOCK_PIN>::validpin(), "Invalid clock pin specified");
+    FL_STATIC_ASSERT(FastPin<DATA_PIN>::validpin(), "Invalid data pin specified");
+    FL_STATIC_ASSERT(FastPin<CLOCK_PIN>::validpin(), "Invalid clock pin specified");
 
     STM32SPIOutput()
         : mPSelect(nullptr)

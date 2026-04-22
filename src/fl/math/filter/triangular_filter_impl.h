@@ -11,7 +11,7 @@ namespace detail {
 
 template <typename T, fl::size N = 0>
 class TriangularFilterImpl {
-    static_assert(N == 0 || (N % 2 == 1),
+    FL_STATIC_ASSERT(N == 0 || (N % 2 == 1),
                   "TriangularFilter: N must be odd for a symmetric tent shape");
   public:
     TriangularFilterImpl() FL_NOEXCEPT : mLastValue(T(0)) {}

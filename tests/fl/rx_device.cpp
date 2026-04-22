@@ -10,6 +10,7 @@
 #include "fl/stl/move.h"
 #include "fl/stl/shared_ptr.h"
 #include "platforms/is_platform.h"
+#include "fl/stl/static_assert.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
@@ -215,12 +216,12 @@ FL_TEST_CASE("EdgeTime - WS2812B pattern") {
 FL_TEST_CASE("EdgeTime - constexpr") {
     // Ensure constexpr constructors work at compile time
     constexpr EdgeTime e1;
-    static_assert(e1.high == 0, "Default constructor should create low edge");
-    static_assert(e1.ns == 0, "Default constructor should create 0ns duration");
+    FL_STATIC_ASSERT(e1.high == 0, "Default constructor should create low edge");
+    FL_STATIC_ASSERT(e1.ns == 0, "Default constructor should create 0ns duration");
 
     constexpr EdgeTime e2(true, 1000);
-    static_assert(e2.high == 1, "Constructor should set high flag");
-    static_assert(e2.ns == 1000, "Constructor should set ns value");
+    FL_STATIC_ASSERT(e2.high == 1, "Constructor should set high flag");
+    FL_STATIC_ASSERT(e2.ns == 1000, "Constructor should set ns value");
 
     // Runtime checks to ensure constexpr works correctly
     uint32_t high1 = e1.high;

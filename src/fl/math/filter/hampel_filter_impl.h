@@ -11,7 +11,7 @@ namespace detail {
 
 template <typename T, fl::size N = 0>
 class HampelFilterImpl {
-    static_assert(N == 0 || (N % 2 == 1),
+    FL_STATIC_ASSERT(N == 0 || (N % 2 == 1),
                   "HampelFilter: N must be odd for an unambiguous median");
   public:
     explicit HampelFilterImpl(T threshold = T(3.0f))
