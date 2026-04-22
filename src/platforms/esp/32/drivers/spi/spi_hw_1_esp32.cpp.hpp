@@ -97,6 +97,8 @@ bool SPISingleESP32::begin(const SpiHw1::Config& config) FL_NOEXCEPT {
         return true;  // Already initialized
     }
 
+    mBusInitializedByUs = false;
+
     // Validate bus_num against mBusId if driver has pre-assigned ID
     if (mBusId != -1 && config.bus_num != static_cast<u8>(mBusId)) {
         return false;  // Mismatch: driver is for bus X but config requests bus Y
@@ -137,6 +139,7 @@ bool SPISingleESP32::begin(const SpiHw1::Config& config) FL_NOEXCEPT {
             // Genuine initialization failure — bail out
             return false;
         }
+        mBusInitializedByUs = false;
         // ESP_ERR_INVALID_STATE means the bus is already initialized
         // by another driver. This is the canonical ESP-IDF pattern for
         // sharing an SPI bus: skip bus init and proceed to
@@ -158,6 +161,7 @@ bool SPISingleESP32::begin(const SpiHw1::Config& config) FL_NOEXCEPT {
     if (ret != ESP_OK) {
         if (mBusInitializedByUs) {
             spi_bus_free(mHost);
+            mBusInitializedByUs = false;
         }
         return false;
     }
@@ -291,6 +295,7 @@ void SPISingleESP32::cleanup() FL_NOEXCEPT {
 
         if (mBusInitializedByUs) {
             spi_bus_free(mHost);
+            mBusInitializedByUs = false;
         }
         mInitialized = false;
     }
