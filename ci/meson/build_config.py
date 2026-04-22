@@ -317,7 +317,7 @@ def _is_forward_slash_absolute(path: str) -> bool:
     return path.startswith("/") or re.match(r"^[A-Za-z]:/", path) is not None
 
 
-def _normalize_meson_private_include_paths(build_dir: Path) -> bool:
+def normalize_meson_private_include_paths(build_dir: Path) -> bool:
     """Normalize Meson's private ``-I*.p`` scratch includes for zccache strict mode."""
 
     changed_any = False
@@ -340,23 +340,33 @@ def _normalize_meson_private_include_paths(build_dir: Path) -> bool:
     if build_ninja.exists():
         try:
             content = build_ninja.read_text(encoding="utf-8")
-        except OSError:
-            pass
+        except OSError as e:
+            raise RuntimeError(
+                f"Could not read {build_ninja} while normalizing Meson strict paths"
+            ) from e
         else:
             normalized = _normalize_text(content)
             if normalized != content:
                 try:
                     build_ninja.write_text(normalized, encoding="utf-8")
                     changed_any = True
-                except OSError:
-                    pass
+                except OSError as e:
+                    raise RuntimeError(
+                        f"Could not write {build_ninja} after normalizing Meson strict paths"
+                    ) from e
 
     compile_commands = build_dir / "compile_commands.json"
     if compile_commands.exists():
         try:
             data = json.loads(compile_commands.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            data = None
+        except OSError as e:
+            raise RuntimeError(
+                f"Could not read {compile_commands} while normalizing Meson strict paths"
+            ) from e
+        except json.JSONDecodeError as e:
+            raise RuntimeError(
+                f"Could not parse {compile_commands} while normalizing Meson strict paths"
+            ) from e
         if isinstance(data, list):
             changed_json = False
             for entry in data:
@@ -377,8 +387,10 @@ def _normalize_meson_private_include_paths(build_dir: Path) -> bool:
                         encoding="utf-8",
                     )
                     changed_any = True
-                except OSError:
-                    pass
+                except OSError as e:
+                    raise RuntimeError(
+                        f"Could not write {compile_commands} after normalizing Meson strict paths"
+                    ) from e
 
     return changed_any
 
@@ -1887,7 +1899,7 @@ endian = 'little'
         # Combined function reads build.ninja once and populates _ar_opt_status_cache,
         # so a subsequent is_ar_content_preserving_active() call in runner.py is free.
         inject_ar_optimization_patches(build_dir, source_dir)
-        if _normalize_meson_private_include_paths(build_dir):
+        if normalize_meson_private_include_paths(build_dir):
             _ts_print("[MESON] Normalized private include paths for zccache strict mode")
 
         return True
@@ -1986,7 +1998,7 @@ endian = 'little'
         # so a subsequent is_ar_content_preserving_active() call in runner.py is free.
         # Must be called after meson setup so build.ninja exists.
         inject_ar_optimization_patches(build_dir, source_dir)
-        if _normalize_meson_private_include_paths(build_dir):
+        if normalize_meson_private_include_paths(build_dir):
             _ts_print("[MESON] Normalized private include paths for zccache strict mode")
 
         return True

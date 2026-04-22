@@ -70,9 +70,9 @@ def get_meson_executable() -> str:
 
 
 def _normalize_meson_private_paths(build_dir: Path) -> None:
-    from ci.meson.build_config import _normalize_meson_private_include_paths
+    from ci.meson.build_config import normalize_meson_private_include_paths
 
-    if _normalize_meson_private_include_paths(build_dir):
+    if normalize_meson_private_include_paths(build_dir):
         print("[WASM] Normalized private include paths for strict path mode")
 
 

@@ -46,13 +46,28 @@ _SEPARATE_PATH_FLAGS = {
     "-imacros",
     "/I",
 }
-_ATTACHED_PATH_PREFIXES = ("-I", "-F", "/I")
+_ATTACHED_PATH_PREFIXES = (
+    "-include-pch",
+    "-iframework",
+    "-idirafter",
+    "-isystem",
+    "-include",
+    "-iquote",
+    "-imacros",
+    "-imsvc",
+    "-I",
+    "-F",
+    "/I",
+)
 
 
 def _tokens_from_entry(entry: dict[str, object]) -> list[str]:
     raw_args = entry.get("arguments")
     if isinstance(raw_args, list):
-        return [str(arg) for arg in raw_args]
+        tokens: list[str] = []
+        for arg in raw_args:
+            tokens.append(str(arg))
+        return tokens
 
     raw = entry.get("command", "")
     assert isinstance(raw, str)
@@ -71,14 +86,11 @@ def _extract_strict_path_flags(entry: dict[str, object]) -> list[tuple[str, str]
             i += 2
             continue
 
-        attached = next(
-            (
-                prefix
-                for prefix in _ATTACHED_PATH_PREFIXES
-                if token.startswith(prefix) and len(token) > len(prefix)
-            ),
-            None,
-        )
+        attached = None
+        for prefix in _ATTACHED_PATH_PREFIXES:
+            if token.startswith(prefix) and len(token) > len(prefix):
+                attached = prefix
+                break
         if attached is not None:
             out.append((attached, token[len(attached) :]))
         i += 1
@@ -99,7 +111,10 @@ def _path_violation(path: str) -> str | None:
     if not _is_absolute_forward_slash(path):
         return "non-absolute path"
 
-    parts = [part for part in re.split(r"/+", path) if part]
+    parts: list[str] = []
+    for part in re.split(r"/+", path):
+        if part:
+            parts.append(part)
     if "." in parts or ".." in parts:
         return "dot path component"
     return None
@@ -107,6 +122,40 @@ def _path_violation(path: str) -> str | None:
 
 class TestMesonIncludePaths(unittest.TestCase):
     """Every path-bearing compile flag must satisfy zccache strict mode."""
+
+    def test_extract_strict_path_flags_includes_attached_forms(self) -> None:
+        entry = {
+            "arguments": [
+                "clang++",
+                "-IC:/bad/include",
+                "/IC:/bad/msvc",
+                "-isystemC:/bad/system",
+                "-iquoteC:/bad/quote",
+                "-include-pchC:/bad/header.pch",
+                "-imacrosC:/bad/macros.h",
+                "-idirafterC:/bad/after",
+                "-iframeworkC:/bad/framework",
+                "-imsvcC:/bad/imsvc",
+                "-include",
+                "C:/bad/forced.h",
+            ]
+        }
+
+        self.assertEqual(
+            _extract_strict_path_flags(entry),
+            [
+                ("-I", "C:/bad/include"),
+                ("/I", "C:/bad/msvc"),
+                ("-isystem", "C:/bad/system"),
+                ("-iquote", "C:/bad/quote"),
+                ("-include-pch", "C:/bad/header.pch"),
+                ("-imacros", "C:/bad/macros.h"),
+                ("-idirafter", "C:/bad/after"),
+                ("-iframework", "C:/bad/framework"),
+                ("-imsvc", "C:/bad/imsvc"),
+                ("-include", "C:/bad/forced.h"),
+            ],
+        )
 
     def _check_build_dir(self, build_dir: Path) -> None:
         cc_json = build_dir / "compile_commands.json"
