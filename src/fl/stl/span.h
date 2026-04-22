@@ -465,7 +465,7 @@ template <typename T, fl::size Extent> class span {
     // Compile-time sized first N elements
     template<fl::size N>
     span<T, N> first() const FL_NOEXCEPT {
-        return span<T, N>(mData);
+        return span<T, N>(mData, N);
     }
 
     // Runtime-sized first count elements
@@ -476,7 +476,7 @@ template <typename T, fl::size Extent> class span {
     // Compile-time sized last N elements
     template<fl::size N>
     span<T, N> last() const FL_NOEXCEPT {
-        return span<T, N>(mData + Extent - N);
+        return span<T, N>(mData + Extent - N, N);
     }
 
     // Runtime-sized last count elements
@@ -488,9 +488,9 @@ template <typename T, fl::size Extent> class span {
     template<fl::size Offset, fl::size Count = dynamic_extent>
     span<T, Count> subspan() const FL_NOEXCEPT {
         if (Count == dynamic_extent) {
-            return span<T, Extent - Offset>(mData + Offset);
+            return span<T, Extent - Offset>(mData + Offset, Extent - Offset);
         }
-        return span<T, Count>(mData + Offset);
+        return span<T, Count>(mData + Offset, Count);
     }
 
     // Runtime subspan
