@@ -474,9 +474,6 @@ protected:
 #define DADVANCE 3
 #define DUSE (0xFF - (DADVANCE-1))
 
-// Silence compiler warnings about switch/case that is explicitly intended to fall through.
-#define FL_FALLTHROUGH __attribute__ ((fallthrough));
-
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
 	static void /*__attribute__((optimize("O0")))*/  /*__attribute__ ((always_inline))*/  showRGBInternal(PixelController<RGB_ORDER> & pixels)  {

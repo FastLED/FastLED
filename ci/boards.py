@@ -243,6 +243,7 @@ class Board:
             "attiny88",  # 512B RAM
             "attiny4313",  # 256B RAM
             "attiny1604",  # 1KB RAM (ATtinyxy4)
+            "digispark-tiny",  # 512B RAM
         }
         if self.board_name.lower() in tiny_memory_boards:
             return "tiny"
@@ -1060,6 +1061,19 @@ ATTINY85 = Board(
     board_name="attiny85",
     platform="atmelavr",
     framework="arduino",
+)
+
+DIGISPARK_TINY = Board(
+    board_name="digispark-tiny",
+    # PlatformIO only publishes Digistump core 1.7.2 and avr-gcc 5.4/7.3
+    # packages, so the Arduino IDE 1.6.7 + avr-g++ 4.8.1 issue environment
+    # cannot be pinned through platform_packages here.
+    platform="atmelavr",
+    platform_packages=(
+        "\n\tframework-arduino-avr-digistump@1.7.2\n\ttoolchain-atmelavr@1.70300.191015"
+    ),
+    framework="arduino",
+    build_flags=["-std=gnu++11"],
 )
 
 # Seeed XIAO ESP32S3 board – same platform, needs FASTLED_RMT5 macro removal

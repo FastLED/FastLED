@@ -14,7 +14,6 @@
 // IWYU pragma: end_keep
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/static_assert.h"
-#include "fl/stl/compiler_control.h"
 #include "fl/system/fastpin.h"
 #include "platforms/avr/is_avr.h"
 #include "fl/chipsets/led_timing.h"
@@ -485,9 +484,6 @@ protected:
 
 #define DADVANCE 3
 #define DUSE (0xFF - (DADVANCE-1))
-
-// Silence compiler warnings about switch/case that is explicitly intended to fall through.
-#define FL_FALLTHROUGH __attribute__ ((fallthrough));
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.

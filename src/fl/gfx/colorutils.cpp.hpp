@@ -387,7 +387,7 @@ CRGB ColorFromPaletteExtended(const CRGBPalette32 &pal, fl::u16 index,
 CRGB16 ColorFromPaletteHD(const CRGBPalette32 &pal, fl::u16 index,
                           fl::u8x8 brightness, TBlendType blendType) {
     return ColorFromPaletteHDImpl<5>(
-        RuntimeRGBPaletteReader<32>{fl::span<const CRGB, 32>(pal.entries)},
+        RuntimeRGBPaletteReader<32>{fl::span<const CRGB, 32>(&pal.entries[0])},
         index, brightness, blendType);
 }
 
@@ -532,7 +532,7 @@ CRGB ColorFromPaletteExtended(const CRGBPalette16 &pal, fl::u16 index,
 CRGB16 ColorFromPaletteHD(const CRGBPalette16 &pal, fl::u16 index,
                           fl::u8x8 brightness, TBlendType blendType) {
     return ColorFromPaletteHDImpl<4>(
-        RuntimeRGBPaletteReader<16>{fl::span<const CRGB, 16>(pal.entries)},
+        RuntimeRGBPaletteReader<16>{fl::span<const CRGB, 16>(&pal.entries[0])},
         index, brightness, blendType);
 }
 
@@ -587,8 +587,8 @@ CRGB ColorFromPaletteExtended(const TProgmemRGBPalette16 &pal, fl::u16 index,
 CRGB16 ColorFromPaletteHD(const TProgmemRGBPalette16 &pal, fl::u16 index,
                           fl::u8x8 brightness, TBlendType blendType) {
     return ColorFromPaletteHDImpl<4>(
-        ProgmemRGBPaletteReader<16>{fl::span<const fl::u32, 16>(pal)}, index,
-        brightness, blendType);
+        ProgmemRGBPaletteReader<16>{fl::span<const fl::u32, 16>(&pal[0])},
+        index, brightness, blendType);
 }
 
 CRGB ColorFromPaletteExtended(const TProgmemRGBPalette32 &pal, fl::u16 index,
@@ -642,8 +642,8 @@ CRGB ColorFromPaletteExtended(const TProgmemRGBPalette32 &pal, fl::u16 index,
 CRGB16 ColorFromPaletteHD(const TProgmemRGBPalette32 &pal, fl::u16 index,
                           fl::u8x8 brightness, TBlendType blendType) {
     return ColorFromPaletteHDImpl<5>(
-        ProgmemRGBPaletteReader<32>{fl::span<const fl::u32, 32>(pal)}, index,
-        brightness, blendType);
+        ProgmemRGBPaletteReader<32>{fl::span<const fl::u32, 32>(&pal[0])},
+        index, brightness, blendType);
 }
 
 CRGB ColorFromPalette(const TProgmemRGBPalette16 &pal, fl::u8 index,
@@ -983,7 +983,7 @@ CRGB ColorFromPaletteExtended(const CRGBPalette256 &pal, fl::u16 index,
 CRGB16 ColorFromPaletteHD(const CRGBPalette256 &pal, fl::u16 index,
                           fl::u8x8 brightness, TBlendType blendType) {
     return ColorFromPaletteHDImpl<8>(
-        RuntimeRGBPaletteReader<256>{fl::span<const CRGB, 256>(pal.entries)},
+        RuntimeRGBPaletteReader<256>{fl::span<const CRGB, 256>(&pal.entries[0])},
         index, brightness, blendType);
 }
 

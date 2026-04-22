@@ -6,6 +6,7 @@
 // IWYU pragma: begin_keep
 #include "fl/system/arduino.h"
 #include "fl/stl/noexcept.h"
+#include "platforms/avr/is_avr.h"
 // IWYU pragma: end_keep
 
 namespace fl {
@@ -44,12 +45,46 @@ int read() FL_NOEXCEPT {
 // This handles USB CDC multi-packet transfers correctly via Stream::timedRead()
 // which uses yield() (immediate context switch) instead of delay(1) (1ms sleep).
 int readLineNative(char delimiter, char* out, int outLen) FL_NOEXCEPT {
+#if defined(FL_IS_AVR_ATTINY)
+    if (outLen <= 0) {
+        return 0;
+    }
+    // TinyDebugSerial lacks readStringUntil(), so keep Stream's blocking
+    // line-read behavior without allocating Arduino String.
+    const unsigned long timeoutMs = 1000UL;
+    unsigned long start = millis();
+    int len = 0;
+    while (true) {
+        if (!Serial.available()) {
+            if (millis() - start >= timeoutMs) {
+                break;
+            }
+            yield();
+            continue;
+        }
+        const int value = Serial.read();
+        if (value < 0) {
+            break;
+        }
+        const char c = static_cast<char>(value);
+        if (c == delimiter) {
+            break;
+        }
+        if (len < outLen - 1) {
+            out[len++] = c;
+        }
+        start = millis();
+    }
+    out[len] = '\0';
+    return len;
+#else
     String line = Serial.readStringUntil(delimiter);
     int len = line.length();
     if (len > outLen - 1) len = outLen - 1;
     memcpy(out, line.c_str(), len);
     out[len] = '\0';
     return len;
+#endif
 }
 
 // Utility functions

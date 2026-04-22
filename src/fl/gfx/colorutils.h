@@ -16,6 +16,7 @@
 #include "fl/math/xymap.h"  // IWYU pragma: keep
 #include "fl/math/memmove.h"
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/cstring.h"
 #include "fl/system/log.h"  // IWYU pragma: keep
 #include "platforms/is_platform.h"  // IWYU pragma: keep
 #include "fl/stl/noexcept.h"
@@ -483,19 +484,12 @@ class TColorPalette {
     operator TColor *() FL_NOEXCEPT { return &(entries[0]); }
 
     bool operator==(const TColorPalette &rhs) const FL_NOEXCEPT {
-        const fl::u8 *p = reinterpret_cast<const fl::u8 *>(&(this->entries[0]));
-        const fl::u8 *q = reinterpret_cast<const fl::u8 *>(&(rhs.entries[0]));
-        if (p == q) {
+        const TColor *lhs = &(this->entries[0]);
+        const TColor *rhs_entries = &(rhs.entries[0]);
+        if (lhs == rhs_entries) {
             return true;
         }
-        for (unsigned int i = 0; i < sizeof(entries); ++i) {
-            if (*p != *q) {
-                return false;
-            }
-            ++p;
-            ++q;
-        }
-        return true;
+        return fl::memcmp(lhs, rhs_entries, sizeof(entries)) == 0;
     }
 
     bool operator!=(const TColorPalette &rhs) const FL_NOEXCEPT {

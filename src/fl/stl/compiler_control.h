@@ -524,7 +524,7 @@ FL_DISABLE_WARNING_POP
 #if __cplusplus >= 201703L
   // C++17+: Use standard [[fallthrough]] attribute
   #define FL_FALLTHROUGH [[fallthrough]]
-#elif defined(FL_IS_GCC) || defined(FL_IS_CLANG)
+#elif defined(FL_IS_CLANG) || (defined(FL_IS_GCC) && FL_GCC_VERSION >= 700)
   // GCC 7+ / Clang 10+: Use fallthrough attribute
   #define FL_FALLTHROUGH __attribute__((fallthrough))
 #else
