@@ -310,7 +310,7 @@ def is_ar_content_preserving_active(build_dir: Path) -> bool:
 _ar_opt_status_cache: dict[str, bool] = {}
 
 
-_MESON_PRIVATE_INCLUDE_RE = re.compile(r'("-I)([^"]+\.p)(")')
+_MESON_PRIVATE_INCLUDE_RE = re.compile(r'("?)(-I)(\S+\.p)\1')
 
 
 def _is_forward_slash_absolute(path: str) -> bool:
@@ -323,7 +323,7 @@ def normalize_meson_private_include_paths(build_dir: Path) -> bool:
     changed_any = False
 
     def _replacement(match: re.Match[str]) -> str:
-        prefix, raw_path, suffix = match.groups()
+        quote, flag, raw_path = match.groups()
         normalized = raw_path.replace("\\", "/")
         if _is_forward_slash_absolute(normalized):
             absolute = normalized
@@ -331,7 +331,7 @@ def normalize_meson_private_include_paths(build_dir: Path) -> bool:
             absolute = (build_dir / normalized).resolve().as_posix()
         if absolute == raw_path:
             return match.group(0)
-        return f"{prefix}{absolute}{suffix}"
+        return f"{quote}{flag}{absolute}{quote}"
 
     def _normalize_text(content: str) -> str:
         return _MESON_PRIVATE_INCLUDE_RE.sub(_replacement, content)
@@ -374,12 +374,22 @@ def normalize_meson_private_include_paths(build_dir: Path) -> bool:
                     continue
                 entry_dict = cast(dict[str, object], entry)
                 command = entry_dict.get("command")
-                if not isinstance(command, str):
-                    continue
-                normalized = _normalize_text(command)
-                if normalized != command:
-                    entry_dict["command"] = normalized
-                    changed_json = True
+                if isinstance(command, str):
+                    normalized = _normalize_text(command)
+                    if normalized != command:
+                        entry_dict["command"] = normalized
+                        changed_json = True
+                arguments = entry_dict.get("arguments")
+                if isinstance(arguments, list):
+                    changed_args = False
+                    for i, arg in enumerate(arguments):
+                        if isinstance(arg, str):
+                            normalized = _normalize_text(arg)
+                            if normalized != arg:
+                                arguments[i] = normalized
+                                changed_args = True
+                    if changed_args:
+                        changed_json = True
             if changed_json:
                 try:
                     compile_commands.write_text(
