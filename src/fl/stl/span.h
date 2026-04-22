@@ -407,10 +407,10 @@ template <typename T, fl::size Extent> class span {
         (void)size; // Suppress unused parameter warning
     }
 
-    // Constructor from pointer only (size is known at compile-time)
-    explicit span(T *data) FL_NOEXCEPT : mData(data) {}
-
     // Constructor from C-array with matching size
+    // Matches std::span: when the argument is an array of exactly Extent
+    // elements, size is known at compile time and no runtime length is
+    // required.  See std::span<T, N>::span(std::type_identity_t<T>(&)[N]).
     span(T (&array)[Extent]) FL_NOEXCEPT : mData(array) {}
 
     // Copy constructor

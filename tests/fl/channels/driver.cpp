@@ -44,6 +44,7 @@ public:
     int transmitCount = 0;
     int lastChannelCount = 0;
     int enqueueCount = 0;
+    int showCount = 0;
     fl::vector<ChannelDataPtr> mEnqueuedChannels;
     fl::vector<ChannelDataPtr> mTransmittingChannels;
 
@@ -60,6 +61,7 @@ public:
     }
 
     void show() override {
+        showCount++;
         if (!mEnqueuedChannels.empty()) {
             mTransmittingChannels = fl::move(mEnqueuedChannels);
             mEnqueuedChannels.clear();
@@ -130,17 +132,69 @@ FL_TEST_CASE("Channel transmission") {
     ChannelConfig config(1, timing, fl::span<CRGB>(leds, 5), RGB, options);
     auto channel = Channel::create(config);
 
-    // Trigger show - this encodes and enqueues
+    // Direct show should encode, enqueue, and flush via frame-end events.
     channel->showLeds(255);
-
-    // Engine's show() triggers transmission
-    mockEngine->show();
 
     FL_CHECK(mockEngine->transmitCount == 1);
     FL_CHECK(mockEngine->lastChannelCount == 1);
+    FL_CHECK(mockEngine->showCount >= 1);
 
     // Clean up: disable mock driver after test
     manager.setDriverEnabled("MOCK_TX", false);
+}
+
+FL_TEST_CASE("CLEDController direct showLeds flushes channel drivers") {
+    auto mockEngine = fl::make_shared<MockEngine>("MOCK_DIRECT_CTL");
+
+    ChannelManager& manager = ChannelManager::instance();
+    manager.addDriver(1000, mockEngine);
+
+    CRGB leds[5];
+    fill_solid(leds, 5, CRGB::Green);
+
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    ChannelOptions options;
+    options.mAffinity = "MOCK_DIRECT_CTL";
+    ChannelConfig config(2, timing, fl::span<CRGB>(leds, 5), RGB, options);
+    auto channel = Channel::create(config);
+
+    CLEDController* controller = channel->asController();
+    controller->showLeds(255);
+
+    FL_CHECK_EQ(mockEngine->enqueueCount, 1);
+    FL_CHECK_EQ(mockEngine->transmitCount, 1);
+    FL_CHECK_EQ(mockEngine->lastChannelCount, 1);
+    FL_CHECK(mockEngine->mEnqueuedChannels.empty());
+
+    manager.removeDriver(mockEngine);
+}
+
+FL_TEST_CASE("CLEDController clearLeds flushes cleared channel data") {
+    auto mockEngine = fl::make_shared<MockEngine>("MOCK_DIRECT_CLEAR");
+
+    ChannelManager& manager = ChannelManager::instance();
+    manager.addDriver(1000, mockEngine);
+
+    CRGB leds[5];
+    fill_solid(leds, 5, CRGB::White);
+
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    ChannelOptions options;
+    options.mAffinity = "MOCK_DIRECT_CLEAR";
+    ChannelConfig config(3, timing, fl::span<CRGB>(leds, 5), RGB, options);
+    auto channel = Channel::create(config);
+
+    CLEDController* controller = channel->asController();
+    controller->clearLeds();
+
+    FL_CHECK_EQ(mockEngine->enqueueCount, 1);
+    FL_CHECK_EQ(mockEngine->transmitCount, 1);
+    FL_CHECK_EQ(mockEngine->lastChannelCount, 1);
+    for (const CRGB& led : leds) {
+        FL_CHECK(led == CRGB::Black);
+    }
+
+    manager.removeDriver(mockEngine);
 }
 
 FL_TEST_CASE("FastLED.show() with channels") {
@@ -166,17 +220,7 @@ FL_TEST_CASE("FastLED.show() with channels") {
     FastLED.show();
     int enqueueAfter = mockEngine->enqueueCount;
 
-    // Debug: Check if enqueue was called
-    if (enqueueAfter == enqueueBefore) {
-        FL_WARN("enqueue() was NOT called by FastLED.show() - enqueue count: " << enqueueAfter);
-    } else {
-        FL_WARN("enqueue() WAS called " << (enqueueAfter - enqueueBefore) << " times");
-    }
-
-    // The issue: FastLED.show() calls enqueue() but not show() on the driver
-    // We need to explicitly call show() or FastLED.show() needs to call it
-    mockEngine->show();
-
+    FL_CHECK(enqueueAfter > enqueueBefore);
     FL_CHECK(mockEngine->transmitCount > before);
 
     // Clean up
