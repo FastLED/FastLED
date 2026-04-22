@@ -37,8 +37,10 @@ class TestMesonPrivateIncludeNormalization(unittest.TestCase):
 
             self.assertTrue(normalize_meson_private_include_paths(build_dir))
 
-            native_private = (build_dir / "ci/meson/native/fastled.so.p").as_posix()
-            test_private = (build_dir / "tests/test.dll.p").as_posix()
+            native_private = (
+                build_dir / "ci/meson/native/fastled.so.p"
+            ).resolve().as_posix()
+            test_private = (build_dir / "tests/test.dll.p").resolve().as_posix()
 
             normalized_ninja = build_ninja.read_text(encoding="utf-8")
             self.assertIn(f"-I{native_private}", normalized_ninja)
