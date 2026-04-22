@@ -13,6 +13,7 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     if: >-
+      vars.PROJECT_APP_CLIENT_ID != '' &&
       vars.PROJECT_NUMBER != '' &&
       vars.PROJECT_OWNER != ''
     steps:
@@ -26,9 +27,9 @@ jobs:
 
       - name: Generate GitHub App token
         id: app-token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v3
         with:
-          app-id: ${{ vars.PROJECT_APP_ID }}
+          client-id: ${{ vars.PROJECT_APP_CLIENT_ID }}
           private-key: ${{ secrets.PROJECT_APP_PRIVATE_KEY }}
           owner: ${{ vars.PROJECT_OWNER }}
 
