@@ -10,6 +10,7 @@
 #include "crgb.h"  // IWYU pragma: keep
 #include "fastled_progmem.h"
 #include "fl/gfx/blur.h"  // IWYU pragma: keep
+#include "fl/gfx/crgb16.h"
 #include "fl/gfx/colorutils_misc.h"
 #include "fl/gfx/fill.h"
 #include "fl/math/xymap.h"  // IWYU pragma: keep
@@ -1367,6 +1368,23 @@ CRGB ColorFromPalette(const CRGBPalette16 &pal, fl::u8 index,
 CRGB ColorFromPaletteExtended(const CRGBPalette16 &pal, fl::u16 index,
                               fl::u8 brightness, TBlendType blendType) FL_NOEXCEPT;
 
+/// @brief High-precision palette lookup with fl::u16 `index` and CRGB16 output.
+///
+/// Existing palettes still store 8-bit CRGB entries, but interpolation and
+/// brightness scaling are preserved in CRGB16 8.8 fixed-point channels.
+/// The u8x8 brightness overload treats u8x8(1) as identity.
+CRGB16 ColorFromPaletteHD(const CRGBPalette16 &pal, fl::u16 index,
+                          fl::u8x8 brightness = fl::u8x8(1),
+                          TBlendType blendType = LINEARBLEND) FL_NOEXCEPT;
+
+/// @copydoc ColorFromPaletteHD(const CRGBPalette16&, fl::u16, fl::u8x8, TBlendType)
+inline CRGB16 ColorFromPaletteHD(const CRGBPalette16 &pal, fl::u16 index,
+                                 fl::u8 brightness,
+                                 TBlendType blendType = LINEARBLEND) FL_NOEXCEPT {
+    const fl::u16 raw = brightness == 255 ? fl::u16(256) : brightness;
+    return ColorFromPaletteHD(pal, index, fl::u8x8::from_raw(raw), blendType);
+}
+
 /// @brief Same as ColorFromPalette, but higher precision. Will eventually
 ///        become the default.
 /// @author https://github.com/generalelectrix
@@ -1375,15 +1393,54 @@ CRGB ColorFromPaletteExtended(const CRGBPalette16 &pal, fl::u16 index,
 CRGB ColorFromPaletteExtended(const CRGBPalette32 &pal, fl::u16 index,
                               fl::u8 brightness, TBlendType blendType) FL_NOEXCEPT;
 
+/// @copydoc ColorFromPaletteHD(const CRGBPalette16&, fl::u16, fl::u8x8, TBlendType)
+CRGB16 ColorFromPaletteHD(const CRGBPalette32 &pal, fl::u16 index,
+                          fl::u8x8 brightness = fl::u8x8(1),
+                          TBlendType blendType = LINEARBLEND) FL_NOEXCEPT;
+
+/// @copydoc ColorFromPaletteHD(const CRGBPalette32&, fl::u16, fl::u8x8, TBlendType)
+inline CRGB16 ColorFromPaletteHD(const CRGBPalette32 &pal, fl::u16 index,
+                                 fl::u8 brightness,
+                                 TBlendType blendType = LINEARBLEND) FL_NOEXCEPT {
+    const fl::u16 raw = brightness == 255 ? fl::u16(256) : brightness;
+    return ColorFromPaletteHD(pal, index, fl::u8x8::from_raw(raw), blendType);
+}
+
 /// @copydoc ColorFromPaletteExtended(const CRGBPalette16&, fl::u16, fl::u8, TBlendType)
 CRGB ColorFromPaletteExtended(const TProgmemRGBPalette16 &pal, fl::u16 index,
                               fl::u8 brightness = 255,
                               TBlendType blendType = LINEARBLEND) FL_NOEXCEPT;
 
+/// @copydoc ColorFromPaletteHD(const CRGBPalette16&, fl::u16, fl::u8x8, TBlendType)
+CRGB16 ColorFromPaletteHD(const TProgmemRGBPalette16 &pal, fl::u16 index,
+                          fl::u8x8 brightness = fl::u8x8(1),
+                          TBlendType blendType = LINEARBLEND) FL_NOEXCEPT;
+
+/// @copydoc ColorFromPaletteHD(const TProgmemRGBPalette16&, fl::u16, fl::u8x8, TBlendType)
+inline CRGB16 ColorFromPaletteHD(const TProgmemRGBPalette16 &pal, fl::u16 index,
+                                 fl::u8 brightness,
+                                 TBlendType blendType = LINEARBLEND) FL_NOEXCEPT {
+    const fl::u16 raw = brightness == 255 ? fl::u16(256) : brightness;
+    return ColorFromPaletteHD(pal, index, fl::u8x8::from_raw(raw), blendType);
+}
+
 /// @copydoc ColorFromPaletteExtended(const CRGBPalette32&, fl::u16, fl::u8, TBlendType)
 CRGB ColorFromPaletteExtended(const TProgmemRGBPalette32 &pal, fl::u16 index,
                               fl::u8 brightness = 255,
                               TBlendType blendType = LINEARBLEND) FL_NOEXCEPT;
+
+/// @copydoc ColorFromPaletteHD(const CRGBPalette32&, fl::u16, fl::u8x8, TBlendType)
+CRGB16 ColorFromPaletteHD(const TProgmemRGBPalette32 &pal, fl::u16 index,
+                          fl::u8x8 brightness = fl::u8x8(1),
+                          TBlendType blendType = LINEARBLEND) FL_NOEXCEPT;
+
+/// @copydoc ColorFromPaletteHD(const TProgmemRGBPalette32&, fl::u16, fl::u8x8, TBlendType)
+inline CRGB16 ColorFromPaletteHD(const TProgmemRGBPalette32 &pal, fl::u16 index,
+                                 fl::u8 brightness,
+                                 TBlendType blendType = LINEARBLEND) FL_NOEXCEPT {
+    const fl::u16 raw = brightness == 255 ? fl::u16(256) : brightness;
+    return ColorFromPaletteHD(pal, index, fl::u8x8::from_raw(raw), blendType);
+}
 
 /// @copydoc ColorFromPalette(const CRGBPalette16&, fl::u8, fl::u8,
 /// TBlendType)
@@ -1400,6 +1457,19 @@ CRGB ColorFromPalette(const CRGBPalette256 &pal, fl::u8 index,
 CRGB ColorFromPaletteExtended(const CRGBPalette256 &pal, fl::u16 index,
                               fl::u8 brightness = 255,
                               TBlendType blendType = LINEARBLEND) FL_NOEXCEPT;
+
+/// @copydoc ColorFromPaletteHD(const CRGBPalette16&, fl::u16, fl::u8x8, TBlendType)
+CRGB16 ColorFromPaletteHD(const CRGBPalette256 &pal, fl::u16 index,
+                          fl::u8x8 brightness = fl::u8x8(1),
+                          TBlendType blendType = LINEARBLEND) FL_NOEXCEPT;
+
+/// @copydoc ColorFromPaletteHD(const CRGBPalette256&, fl::u16, fl::u8x8, TBlendType)
+inline CRGB16 ColorFromPaletteHD(const CRGBPalette256 &pal, fl::u16 index,
+                                 fl::u8 brightness,
+                                 TBlendType blendType = LINEARBLEND) FL_NOEXCEPT {
+    const fl::u16 raw = brightness == 255 ? fl::u16(256) : brightness;
+    return ColorFromPaletteHD(pal, index, fl::u8x8::from_raw(raw), blendType);
+}
 
 /// @copydoc ColorFromPalette(const CRGBPalette16&, fl::u8, fl::u8,
 /// TBlendType)

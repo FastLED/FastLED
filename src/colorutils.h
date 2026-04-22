@@ -38,6 +38,7 @@ using fl::TGradientDirectionCode;
 using fl::TBlendType;
 using fl::ColorFromPalette;
 using fl::ColorFromPaletteExtended;
+using fl::ColorFromPaletteHD;
 using fl::fill_palette;
 using fl::fill_gradient;
 using fl::fill_rainbow;

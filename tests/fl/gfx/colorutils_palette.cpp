@@ -24,6 +24,13 @@ static const TProgmemRGBPalette32 kProgmemRgb32 FL_PROGMEM = {
     0x48494A, 0x4B4C4D, 0x4E4F50, 0x515253, 0x545556, 0x575859, 0x5A5B5C, 0x5D5E5F,
 };
 
+static const TProgmemRGBPalette16 kProgmemRgb16 FL_PROGMEM = {
+    0x000000, 0xFFFFFF, 0x000000, 0x000000,
+    0x000000, 0x000000, 0x000000, 0x000000,
+    0x000000, 0x000000, 0x000000, 0x000000,
+    0x000000, 0x000000, 0x000000, 0x800000,
+};
+
 CHSV make_hsv(int i) {
     return CHSV(static_cast<fl::u8>(i), static_cast<fl::u8>(100 + i),
                 static_cast<fl::u8>(200 - i));
@@ -44,6 +51,12 @@ void check_rgb_eq(const CRGB &lhs, const CRGB &rhs) {
     FL_CHECK_EQ(lhs.red, rhs.red);
     FL_CHECK_EQ(lhs.green, rhs.green);
     FL_CHECK_EQ(lhs.blue, rhs.blue);
+}
+
+CRGB downconvert(const fl::CRGB16 &rgb) {
+    return CRGB(static_cast<fl::u8>(rgb.r.to_int()),
+                static_cast<fl::u8>(rgb.g.to_int()),
+                static_cast<fl::u8>(rgb.b.to_int()));
 }
 
 } // namespace
@@ -158,6 +171,85 @@ FL_TEST_CASE("palette single-color constructors remain copy-initializable") {
     for (int i = 0; i < 32; ++i) {
         check_rgb_eq(rgb_solid[i], rgb_color);
     }
+}
+
+FL_TEST_CASE("ColorFromPaletteHD preserves CRGB16 precision") {
+    CRGBPalette16 pal(CRGB::Black);
+    pal[0] = CRGB::Black;
+    pal[1] = CRGB::White;
+    pal[15] = CRGB(128, 0, 0);
+
+    FL_SUBCASE("CRGBPalette16 lookup keeps sub-8-bit interpolation") {
+        fl::CRGB16 color = ColorFromPaletteHD(pal, 1, fl::u8x8(1),
+                                              LINEARBLEND);
+
+        FL_CHECK_EQ(color.r.to_int(), 0u);
+        FL_CHECK_GT(color.r.raw(), 0u);
+        FL_CHECK_EQ(color.r.raw(), color.g.raw());
+        FL_CHECK_EQ(color.g.raw(), color.b.raw());
+    }
+
+    FL_SUBCASE("low brightness scaling keeps fractional channel data") {
+        fl::CRGB16 color = ColorFromPaletteHD(
+            pal, 0x1000, fl::u8x8::from_raw(1), NOBLEND);
+
+        FL_CHECK_EQ(color.r.to_int(), 0u);
+        FL_CHECK_GT(color.r.raw(), 0u);
+        FL_CHECK_EQ(color.r.raw(), color.g.raw());
+        FL_CHECK_EQ(color.g.raw(), color.b.raw());
+    }
+
+    FL_SUBCASE("LINEARBLEND wraps and LINEARBLEND_NOWRAP holds final entry") {
+        fl::CRGB16 wrap = ColorFromPaletteHD(pal, 0xF800, fl::u8x8(1),
+                                             LINEARBLEND);
+        fl::CRGB16 no_wrap = ColorFromPaletteHD(pal, 0xF800, fl::u8x8(1),
+                                                LINEARBLEND_NOWRAP);
+
+        FL_CHECK_LT(wrap.r.raw(), no_wrap.r.raw());
+        FL_CHECK_EQ(no_wrap.r.raw(), fl::u16(128) << 8);
+        FL_CHECK_EQ(no_wrap.g.raw(), 0u);
+        FL_CHECK_EQ(no_wrap.b.raw(), 0u);
+    }
+
+    FL_SUBCASE("downconversion matches existing extended lookup at anchors") {
+        const fl::u16 anchors[] = {0x0000, 0x1000, 0xF000};
+        for (fl::u16 index : anchors) {
+            CRGB legacy =
+                ColorFromPaletteExtended(pal, index, 255, LINEARBLEND);
+            CRGB hd = downconvert(
+                ColorFromPaletteHD(pal, index, fl::u8x8(1), LINEARBLEND));
+            check_rgb_eq(hd, legacy);
+        }
+    }
+}
+
+FL_TEST_CASE("ColorFromPaletteHD supports existing RGB palette families") {
+    CRGBPalette16 pal16(CRGB::Black);
+    pal16[0] = CRGB(0, 0, 0);
+    pal16[1] = CRGB(255, 0, 0);
+
+    CRGBPalette32 pal32(CRGB::Black);
+    pal32[0] = CRGB(0, 0, 0);
+    pal32[1] = CRGB(0, 255, 0);
+
+    CRGBPalette256 pal256(CRGB::Black);
+    pal256[0] = CRGB(0, 0, 0);
+    pal256[1] = CRGB(0, 0, 255);
+
+    FL_CHECK_GT(ColorFromPaletteHD(pal16, 1, fl::u8x8(1), LINEARBLEND).r.raw(),
+                0u);
+    FL_CHECK_GT(ColorFromPaletteHD(pal32, 1, fl::u8x8(1), LINEARBLEND).g.raw(),
+                0u);
+    FL_CHECK_GT(ColorFromPaletteHD(pal256, 1, fl::u8x8(1), LINEARBLEND).b.raw(),
+                0u);
+
+    FL_CHECK_GT(
+        ColorFromPaletteHD(kProgmemRgb16, 1, fl::u8x8(1), LINEARBLEND).r.raw(),
+        0u);
+    FL_CHECK_GT(
+        ColorFromPaletteHD(kProgmemRgb32, 0x0800, fl::u8x8(1), LINEARBLEND)
+            .r.raw(),
+        0u);
 }
 
 } // FL_TEST_FILE

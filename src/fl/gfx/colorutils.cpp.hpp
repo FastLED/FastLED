@@ -251,6 +251,91 @@ inline fl::u8 lsrX4(fl::u8 dividend) {
     return dividend;
 }
 
+namespace {
+
+template <fl::size Size> struct RuntimeRGBPaletteReader {
+    fl::span<const CRGB, Size> entries;
+
+    CRGB read(fl::u8 index) const { return entries[index]; }
+};
+
+template <fl::size Size> struct ProgmemRGBPaletteReader {
+    fl::span<const fl::u32, Size> entries;
+
+    CRGB read(fl::u8 index) const {
+        return CRGB(FL_PGM_READ_DWORD_NEAR(entries.data() + index));
+    }
+};
+
+inline fl::u16 promote_channel_to_hd(fl::u8 channel) {
+    return static_cast<fl::u16>(channel) << 8;
+}
+
+inline fl::u16 lerp_channel_to_hd(fl::u8 a, fl::u8 b, fl::u16 frac,
+                                  fl::u32 segment_size) {
+    const fl::u32 a_raw = static_cast<fl::u32>(a) << 8;
+    const fl::u32 b_raw = static_cast<fl::u32>(b) << 8;
+    return static_cast<fl::u16>(
+        (a_raw * (segment_size - frac) + b_raw * frac) / segment_size);
+}
+
+inline CRGB16 promote_rgb_to_hd(const CRGB &rgb) {
+    return CRGB16(u8x8::from_raw(promote_channel_to_hd(rgb.red)),
+                  u8x8::from_raw(promote_channel_to_hd(rgb.green)),
+                  u8x8::from_raw(promote_channel_to_hd(rgb.blue)));
+}
+
+inline fl::u16 scale_hd_channel(fl::u16 channel, fl::u8x8 scale) {
+    const fl::u32 scaled =
+        (static_cast<fl::u32>(channel) * scale.raw()) >> 8;
+    return scaled > 0xFFFFu ? fl::u16(0xFFFF) : static_cast<fl::u16>(scaled);
+}
+
+inline void scale_rgb_hd(CRGB16 &rgb, fl::u8x8 brightness) {
+    if (brightness.raw() == 256) {
+        return;
+    }
+    rgb.r = u8x8::from_raw(scale_hd_channel(rgb.r.raw(), brightness));
+    rgb.g = u8x8::from_raw(scale_hd_channel(rgb.g.raw(), brightness));
+    rgb.b = u8x8::from_raw(scale_hd_channel(rgb.b.raw(), brightness));
+}
+
+template <fl::u8 PaletteBits, typename Reader>
+CRGB16 ColorFromPaletteHDImpl(const Reader &reader, fl::u16 index,
+                              fl::u8x8 brightness,
+                              TBlendType blendType) {
+    const fl::u8 frac_bits = 16 - PaletteBits;
+    const fl::u8 palette_last = (fl::u8(1) << PaletteBits) - 1;
+    const fl::u32 segment_size = fl::u32(1) << frac_bits;
+    const fl::u8 entry_index = static_cast<fl::u8>(index >> frac_bits);
+    const fl::u16 frac =
+        static_cast<fl::u16>(index & (segment_size - fl::u32(1)));
+
+    const CRGB rgb1 = reader.read(entry_index);
+    CRGB16 out;
+    if (frac && blendType != NOBLEND) {
+        CRGB rgb2;
+        if (entry_index == palette_last) {
+            rgb2 = blendType == LINEARBLEND_NOWRAP ? rgb1 : reader.read(0);
+        } else {
+            rgb2 = reader.read(entry_index + 1);
+        }
+        out = CRGB16(u8x8::from_raw(lerp_channel_to_hd(
+                         rgb1.red, rgb2.red, frac, segment_size)),
+                     u8x8::from_raw(lerp_channel_to_hd(
+                         rgb1.green, rgb2.green, frac, segment_size)),
+                     u8x8::from_raw(lerp_channel_to_hd(
+                         rgb1.blue, rgb2.blue, frac, segment_size)));
+    } else {
+        out = promote_rgb_to_hd(rgb1);
+    }
+
+    scale_rgb_hd(out, brightness);
+    return out;
+}
+
+} // namespace
+
 CRGB ColorFromPaletteExtended(const CRGBPalette32 &pal, fl::u16 index,
                               fl::u8 brightness, TBlendType blendType) {
     // Extract the five most significant bits of the index as a palette index.
@@ -297,6 +382,13 @@ CRGB ColorFromPaletteExtended(const CRGBPalette32 &pal, fl::u16 index,
         nscale8x3(red1, green1, blue1, brightness);
     }
     return CRGB(red1, green1, blue1);
+}
+
+CRGB16 ColorFromPaletteHD(const CRGBPalette32 &pal, fl::u16 index,
+                          fl::u8x8 brightness, TBlendType blendType) {
+    return ColorFromPaletteHDImpl<5>(
+        RuntimeRGBPaletteReader<32>{fl::span<const CRGB, 32>(pal.entries)},
+        index, brightness, blendType);
 }
 
 CRGB ColorFromPalette(const CRGBPalette16 &pal, fl::u8 index,
@@ -437,6 +529,13 @@ CRGB ColorFromPaletteExtended(const CRGBPalette16 &pal, fl::u16 index,
     return CRGB(red1, green1, blue1);
 }
 
+CRGB16 ColorFromPaletteHD(const CRGBPalette16 &pal, fl::u16 index,
+                          fl::u8x8 brightness, TBlendType blendType) {
+    return ColorFromPaletteHDImpl<4>(
+        RuntimeRGBPaletteReader<16>{fl::span<const CRGB, 16>(pal.entries)},
+        index, brightness, blendType);
+}
+
 CRGB ColorFromPaletteExtended(const TProgmemRGBPalette16 &pal, fl::u16 index,
                               fl::u8 brightness, TBlendType blendType) {
     // Extract the four most significant bits of the index as a palette index.
@@ -485,6 +584,13 @@ CRGB ColorFromPaletteExtended(const TProgmemRGBPalette16 &pal, fl::u16 index,
     return CRGB(red1, green1, blue1);
 }
 
+CRGB16 ColorFromPaletteHD(const TProgmemRGBPalette16 &pal, fl::u16 index,
+                          fl::u8x8 brightness, TBlendType blendType) {
+    return ColorFromPaletteHDImpl<4>(
+        ProgmemRGBPaletteReader<16>{fl::span<const fl::u32, 16>(pal)}, index,
+        brightness, blendType);
+}
+
 CRGB ColorFromPaletteExtended(const TProgmemRGBPalette32 &pal, fl::u16 index,
                               fl::u8 brightness, TBlendType blendType) {
     // Extract the five most significant bits of the index as a palette index.
@@ -531,6 +637,13 @@ CRGB ColorFromPaletteExtended(const TProgmemRGBPalette32 &pal, fl::u16 index,
         nscale8x3(red1, green1, blue1, brightness);
     }
     return CRGB(red1, green1, blue1);
+}
+
+CRGB16 ColorFromPaletteHD(const TProgmemRGBPalette32 &pal, fl::u16 index,
+                          fl::u8x8 brightness, TBlendType blendType) {
+    return ColorFromPaletteHDImpl<5>(
+        ProgmemRGBPaletteReader<32>{fl::span<const fl::u32, 32>(pal)}, index,
+        brightness, blendType);
 }
 
 CRGB ColorFromPalette(const TProgmemRGBPalette16 &pal, fl::u8 index,
@@ -865,6 +978,13 @@ CRGB ColorFromPaletteExtended(const CRGBPalette256 &pal, fl::u16 index,
         nscale8x3(red1, green1, blue1, brightness);
     }
     return CRGB(red1, green1, blue1);
+}
+
+CRGB16 ColorFromPaletteHD(const CRGBPalette256 &pal, fl::u16 index,
+                          fl::u8x8 brightness, TBlendType blendType) {
+    return ColorFromPaletteHDImpl<8>(
+        RuntimeRGBPaletteReader<256>{fl::span<const CRGB, 256>(pal.entries)},
+        index, brightness, blendType);
 }
 
 CHSV ColorFromPalette(const CHSVPalette16 &pal, fl::u8 index,
