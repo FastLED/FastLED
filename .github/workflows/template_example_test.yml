@@ -63,6 +63,12 @@ jobs:
           if [ -f "pr-code/test.py" ]; then
             cp pr-code/test.py trusted/
           fi
+          if [ "${{ github.event.pull_request.head.repo.full_name }}" = "${{ github.repository }}" ]; then
+            # Same-repository CI helper PRs need to exercise their own Meson setup code.
+            if [ -f "pr-code/ci/meson/build_config.py" ]; then
+              cp pr-code/ci/meson/build_config.py trusted/ci/meson/build_config.py
+            fi
+          fi
           if [ -f "pr-code/test" ]; then
             # DO NOT copy executable test script - use trusted version
             echo "Skipping pr-code/test script - using trusted version"

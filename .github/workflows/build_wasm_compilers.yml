@@ -76,6 +76,12 @@ jobs:
         if [ -f "pr-code/CMakeLists.txt" ]; then
           cp pr-code/CMakeLists.txt trusted/
         fi
+        if [ "${{ github.event.pull_request.head.repo.full_name }}" = "${{ github.repository }}" ]; then
+          # Same-repository CI helper PRs need to exercise their own Meson setup code.
+          if [ -f "pr-code/ci/meson/build_config.py" ]; then
+            cp pr-code/ci/meson/build_config.py trusted/ci/meson/build_config.py
+          fi
+        fi
         # Change working directory to trusted for all subsequent steps
         cd trusted
       shell: bash
