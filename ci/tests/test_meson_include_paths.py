@@ -1,20 +1,12 @@
-"""Meson `-I` path normalization check (issue #2328).
+"""Meson strict path normalization check (issues #2328, #2376).
 
-On Windows, Meson's `include_directories()` propagates `-I` flags using native
-backslash + relative path spellings (e.g. `-I..\\..\\src\\platforms\\stub`).
-Clang keys `#pragma once` deduplication on the raw resolved path string — if
-the same directory reaches a translation unit via two different spellings
-(forward slash vs backslash, absolute vs relative, with/without `/./`), the
-header appears to be two different files and `#pragma once` is silently
-defeated, producing double-definition errors (see #2324, #2325).
-
-The fix is to make every `-I` flag we generate be absolute + forward-slash +
-spelled identically everywhere. This test inspects the generated
-`compile_commands.json` after `meson setup` and fails if any `-I` flag
-contains a backslash or is not absolute.
+On Windows, native backslash and relative path spellings can defeat clang's
+file identity checks and are rejected by zccache strict path mode. This test
+inspects generated Meson compile databases and fails if any path-bearing
+compiler flag would be rejected by ``ZCCACHE_STRICT_PATHS=absolute``.
 
 Run via:
-    bash test                              # all python tests, incl. this one
+    bash test
     uv run pytest ci/tests/test_meson_include_paths.py -v
 """
 
@@ -22,6 +14,7 @@ from __future__ import annotations
 
 import json
 import re
+import shlex
 import unittest
 from pathlib import Path
 
@@ -40,94 +33,80 @@ _MESON_BUILD_DIRS = [
     BUILD / "meson-wasm-quick",
 ]
 
-# Matches a single -I flag token. compile_commands.json "command" strings
-# emit tokens wrapped in double-quotes like `"-Ici/foo"` or `"-IC:/foo"` on
-# Windows, so we match between quotes as well as bare -Ifoo. The captured
-# path value never includes the surrounding quotes.
-_I_FLAG_RE = re.compile(r'"-I([^"]+)"|(?<!\S)-I(\S+)')
-
-# Whitelisted -I flags that come from Meson itself, not our meson.build files.
-# Meson unconditionally adds four kinds of -I for every target; we cannot
-# remove them without patching Meson. They are harmless because our canonical
-# absolute forward-slash -I flags are tried first during header resolution:
-#
-#   1. "-I<target-name>.p"         — private scratch dir for the target
-#                                     (holds .obj files, no headers)
-#   2. "-I<path-to-build-subdir>"  — e.g. "tests", "ci/meson/native"
-#                                     (build output subdir, usually empty)
-#   3. "-I<path-to-source-subdir>" — e.g. "..\..\tests", "..\..\examples"
-#                                     (source subdir containing the meson.build)
-#   4. "-I." / "-I<up-relative>"   — build root and project root
-#
-# These are always *relative* to the build dir and cannot be normalized by us.
-# The PCH is built with absolute forward-slash spellings, so consumer compiles
-# resolve the same absolute path first; pragma-once dedup works despite these.
-#
-# We whitelist them by shape: any relative path that either
-#   (a) ends in .p (Meson's "target private scratch"), or
-#   (b) is a known source/build subdirectory (examples, tests, tests/profile,
-#       ci/meson/*, or the plain build-dir markers "." / "..").
-_MESON_AUTO_SUBDIRS = {
-    ".",
-    "..",
-    "../..",
-    "examples",
-    "tests",
-    "tests/profile",
-    "ci/meson",
-    "ci/meson/native",
-    "ci/meson/shared",
-    "ci/meson/wasm",
+_SEPARATE_PATH_FLAGS = {
+    "-I",
+    "-F",
+    "-isystem",
+    "-iquote",
+    "-idirafter",
+    "-iframework",
+    "-imsvc",
+    "-include",
+    "-include-pch",
+    "-imacros",
+    "/I",
 }
-_MESON_P_SCRATCH_RE = re.compile(r"(?:^|/)[A-Za-z0-9._+-]+\.p$")
+_ATTACHED_PATH_PREFIXES = ("-I", "-F", "/I")
 
 
-def _extract_includes_from_entry(entry: dict[str, object]) -> list[str]:
-    """Extract -I <path> values from a compile_commands.json entry."""
-    raw = entry.get("command") or " ".join(entry.get("arguments", []))  # type: ignore[arg-type]
+def _tokens_from_entry(entry: dict[str, object]) -> list[str]:
+    raw_args = entry.get("arguments")
+    if isinstance(raw_args, list):
+        return [str(arg) for arg in raw_args]
+
+    raw = entry.get("command", "")
     assert isinstance(raw, str)
-    out: list[str] = []
-    for m in _I_FLAG_RE.finditer(raw):
-        out.append(m.group(1) or m.group(2))
+    return shlex.split(raw, posix=True)
+
+
+def _extract_strict_path_flags(entry: dict[str, object]) -> list[tuple[str, str]]:
+    """Extract path-bearing compiler flags checked by zccache strict mode."""
+    tokens = _tokens_from_entry(entry)
+    out: list[tuple[str, str]] = []
+    i = 0
+    while i < len(tokens):
+        token = tokens[i]
+        if token in _SEPARATE_PATH_FLAGS and i + 1 < len(tokens):
+            out.append((token, tokens[i + 1]))
+            i += 2
+            continue
+
+        attached = next(
+            (
+                prefix
+                for prefix in _ATTACHED_PATH_PREFIXES
+                if token.startswith(prefix) and len(token) > len(prefix)
+            ),
+            None,
+        )
+        if attached is not None:
+            out.append((attached, token[len(attached) :]))
+        i += 1
     return out
 
 
-def _is_meson_auto_include(include_path: str) -> bool:
-    """Return True if this -I path is Meson-injected (not user-controlled).
-
-    We normalize forward/back slashes before matching so the function behaves
-    the same regardless of how Meson spelled the path on a given platform.
-    """
-    norm = include_path.replace("\\", "/").rstrip("/")
-    # (a) Private per-target scratch dir (contains only .obj files)
-    if _MESON_P_SCRATCH_RE.search(norm):
-        return True
-    # (b) Known Meson source/build subdirs; also accept them with a
-    #     leading "../../" prefix (Meson relativises them to the build root).
-    if norm.startswith("../../"):
-        norm = norm[len("../../") :]
-    return norm in _MESON_AUTO_SUBDIRS
-
-
 def _is_absolute_forward_slash(path: str) -> bool:
-    """Return True if `path` is absolute (POSIX `/...` or Windows `X:/...`)
-    and contains no backslashes.
-    """
     if "\\" in path:
         return False
-    # Windows drive letter
     if re.match(r"^[A-Za-z]:/", path):
         return True
-    # POSIX absolute
-    if path.startswith("/"):
-        return True
-    return False
+    return path.startswith("/")
+
+
+def _path_violation(path: str) -> str | None:
+    if "\\" in path:
+        return "backslash in path"
+    if not _is_absolute_forward_slash(path):
+        return "non-absolute path"
+
+    parts = [part for part in re.split(r"/+", path) if part]
+    if "." in parts or ".." in parts:
+        return "dot path component"
+    return None
 
 
 class TestMesonIncludePaths(unittest.TestCase):
-    """Every -I flag in every compile_commands.json must be absolute +
-    forward-slash + spelled identically everywhere.
-    """
+    """Every path-bearing compile flag must satisfy zccache strict mode."""
 
     def _check_build_dir(self, build_dir: Path) -> None:
         cc_json = build_dir / "compile_commands.json"
@@ -137,8 +116,7 @@ class TestMesonIncludePaths(unittest.TestCase):
         with open(cc_json, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        offenders_backslash: dict[str, list[str]] = {}
-        offenders_relative: dict[str, list[str]] = {}
+        offenders: dict[tuple[str, str, str], list[str]] = {}
 
         for entry in data:
             source_file = entry.get("file", "<unknown>")
@@ -148,48 +126,31 @@ class TestMesonIncludePaths(unittest.TestCase):
             except ValueError:
                 source_rel = source_file
 
-            for inc in _extract_includes_from_entry(entry):
-                if _is_meson_auto_include(inc):
-                    continue
-                if "\\" in inc:
-                    offenders_backslash.setdefault(inc, []).append(source_rel)
-                elif not _is_absolute_forward_slash(inc):
-                    offenders_relative.setdefault(inc, []).append(source_rel)
+            assert isinstance(entry, dict)
+            for flag, path in _extract_strict_path_flags(entry):
+                violation = _path_violation(path)
+                if violation is not None:
+                    offenders.setdefault((flag, path, violation), []).append(source_rel)
 
-        if offenders_backslash or offenders_relative:
+        if offenders:
             lines = [
-                f"Non-normalized -I flags found in {cc_json}:",
+                f"Non-normalized compiler path flags found in {cc_json}:",
                 "",
-                "See https://github.com/FastLED/FastLED/issues/2328 — all -I flags",
-                "must be absolute + forward-slash. Backslashes or relative paths",
-                "defeat clang's #pragma once dedup on Windows.",
+                "See https://github.com/FastLED/FastLED/issues/2328 and #2376.",
+                "All path-bearing compiler flags must satisfy",
+                "ZCCACHE_STRICT_PATHS=absolute: absolute, forward-slash, and no",
+                "dot path components.",
                 "",
             ]
-            if offenders_backslash:
+            for (flag, path, violation), sources in sorted(offenders.items())[:20]:
                 lines.append(
-                    f"  Backslash in path ({len(offenders_backslash)} distinct):"
+                    f"    {flag} {path}  ({violation}; seen in {len(sources)} TUs, e.g. {sources[0]})"
                 )
-                for flag, sources in sorted(offenders_backslash.items())[:10]:
-                    lines.append(
-                        f"    {flag}  (seen in {len(sources)} TUs, e.g. {sources[0]})"
-                    )
-                if len(offenders_backslash) > 10:
-                    lines.append(f"    ... {len(offenders_backslash) - 10} more")
-                lines.append("")
-            if offenders_relative:
-                lines.append(
-                    f"  Non-absolute path ({len(offenders_relative)} distinct):"
-                )
-                for flag, sources in sorted(offenders_relative.items())[:10]:
-                    lines.append(
-                        f"    {flag}  (seen in {len(sources)} TUs, e.g. {sources[0]})"
-                    )
-                if len(offenders_relative) > 10:
-                    lines.append(f"    ... {len(offenders_relative) - 10} more")
+            if len(offenders) > 20:
+                lines.append(f"    ... {len(offenders) - 20} more")
             self.fail("\n".join(lines))
 
     def test_all_meson_build_dirs_have_normalized_includes(self) -> None:
-        """Check every known meson build dir. Skip any that don't exist yet."""
         checked_any = False
         for build_dir in _MESON_BUILD_DIRS:
             if not (build_dir / "compile_commands.json").exists():

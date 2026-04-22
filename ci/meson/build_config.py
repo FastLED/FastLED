@@ -310,6 +310,79 @@ def is_ar_content_preserving_active(build_dir: Path) -> bool:
 _ar_opt_status_cache: dict[str, bool] = {}
 
 
+_MESON_PRIVATE_INCLUDE_RE = re.compile(r'("-I)([^"]+\.p)(")')
+
+
+def _is_forward_slash_absolute(path: str) -> bool:
+    return path.startswith("/") or re.match(r"^[A-Za-z]:/", path) is not None
+
+
+def _normalize_meson_private_include_paths(build_dir: Path) -> bool:
+    """Normalize Meson's private ``-I*.p`` scratch includes for zccache strict mode."""
+
+    changed_any = False
+
+    def _replacement(match: re.Match[str]) -> str:
+        prefix, raw_path, suffix = match.groups()
+        normalized = raw_path.replace("\\", "/")
+        if _is_forward_slash_absolute(normalized):
+            absolute = normalized
+        else:
+            absolute = (build_dir / normalized).resolve().as_posix()
+        if absolute == raw_path:
+            return match.group(0)
+        return f"{prefix}{absolute}{suffix}"
+
+    def _normalize_text(content: str) -> str:
+        return _MESON_PRIVATE_INCLUDE_RE.sub(_replacement, content)
+
+    build_ninja = build_dir / "build.ninja"
+    if build_ninja.exists():
+        try:
+            content = build_ninja.read_text(encoding="utf-8")
+        except OSError:
+            pass
+        else:
+            normalized = _normalize_text(content)
+            if normalized != content:
+                try:
+                    build_ninja.write_text(normalized, encoding="utf-8")
+                    changed_any = True
+                except OSError:
+                    pass
+
+    compile_commands = build_dir / "compile_commands.json"
+    if compile_commands.exists():
+        try:
+            data = json.loads(compile_commands.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            data = None
+        if isinstance(data, list):
+            changed_json = False
+            for entry in data:
+                if not isinstance(entry, dict):
+                    continue
+                entry_dict = cast(dict[str, object], entry)
+                command = entry_dict.get("command")
+                if not isinstance(command, str):
+                    continue
+                normalized = _normalize_text(command)
+                if normalized != command:
+                    entry_dict["command"] = normalized
+                    changed_json = True
+            if changed_json:
+                try:
+                    compile_commands.write_text(
+                        json.dumps(data, indent=2) + "\n",
+                        encoding="utf-8",
+                    )
+                    changed_any = True
+                except OSError:
+                    pass
+
+    return changed_any
+
+
 def _write_configuration_markers(
     *,
     build_mode_marker: Path,
@@ -1718,6 +1791,9 @@ endian = 'little'
         _ts_print(f"[MESON] Warning: Could not write native file: {e}", file=sys.stderr)
 
     env = os.environ.copy()
+    if cache_binary:
+        env.setdefault("ZCCACHE_STRICT_PATHS", "absolute")
+
     # PERFORMANCE: Use raw compiler binaries for env vars when available.
     # The native file takes precedence over env vars for meson, but these
     # serve as fallback. Raw binaries avoid ~3.6s Python wrapper overhead.
@@ -1811,6 +1887,8 @@ endian = 'little'
         # Combined function reads build.ninja once and populates _ar_opt_status_cache,
         # so a subsequent is_ar_content_preserving_active() call in runner.py is free.
         inject_ar_optimization_patches(build_dir, source_dir)
+        if _normalize_meson_private_include_paths(build_dir):
+            _ts_print("[MESON] Normalized private include paths for zccache strict mode")
 
         return True
 
@@ -1908,6 +1986,8 @@ endian = 'little'
         # so a subsequent is_ar_content_preserving_active() call in runner.py is free.
         # Must be called after meson setup so build.ninja exists.
         inject_ar_optimization_patches(build_dir, source_dir)
+        if _normalize_meson_private_include_paths(build_dir):
+            _ts_print("[MESON] Normalized private include paths for zccache strict mode")
 
         return True
 

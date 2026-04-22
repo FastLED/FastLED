@@ -448,6 +448,7 @@ endif
 crash_handler_lib = static_library('crash_handler',
   files(meson.project_source_root() / 'tests' / 'shared' / 'crash_handler_main.cpp'),
   cpp_args: crash_handler_cpp_args,
+  implicit_include_directories: false,
   install: false
 )
 
@@ -475,6 +476,7 @@ fastled_lib = shared_library('fastled',
   cpp_args: base_compile_args + ['-DFASTLED_BUILDING_DLL'] + fastled_lib_abs_include_args,
   link_args: fastled_shared_link_args,
   name_prefix: '',  # Produce 'fastled.dll' not 'libfastled.dll'
+  implicit_include_directories: false,
   install: false
 )
 

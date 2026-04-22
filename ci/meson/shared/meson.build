@@ -35,10 +35,9 @@ shared_defines = ['-DFASTLED_USE_PROGMEM=0']
 # ============================================================================
 
 # meson.project_source_root() on Windows returns native backslashes
-# (e.g. C:\Users\...). The '/' operator normalizes to forward slashes
-# (e.g. C:/Users/...). Always compose -I paths via '/' so they are
-# absolute + forward-slash + spelled identically everywhere.
-path_norm_root = meson.project_source_root() / '.'
+# (e.g. C:\Users\...). Normalize it once and compose every derived path via
+# '/' so paths are absolute + forward-slash + spelled identically everywhere.
+path_norm_root = meson.project_source_root().replace('\\', '/')
 
 # Canonical absolute forward-slash -I args for the four project-wide
 # include roots. Use these everywhere instead of redeclaring.

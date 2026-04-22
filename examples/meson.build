@@ -157,6 +157,7 @@ example_runner_exe = executable('example_runner',
   cpp_args: runner_cpp_args + [path_norm_I_src, path_norm_I_stub, path_norm_I_tests],
   link_args: runner_link_args,
   link_with: [crash_handler_lib],  # Shared crash handler from root meson.build
+  implicit_include_directories: false,
   install: false
 )
 
@@ -289,6 +290,7 @@ foreach example_name : example_paths.keys()
         link_args: dll_link_args,  # Minimal linking (defined in root meson.build)
         name_prefix: '',  # Remove 'lib' prefix on Windows (produce 'example-Blink.dll' not 'libexample-Blink.dll')
         build_by_default: false,  # Only build when explicitly requested
+        implicit_include_directories: false,
         install: false
     )
 

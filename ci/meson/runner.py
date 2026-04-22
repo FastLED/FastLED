@@ -403,6 +403,7 @@ def _start_zccache_session(build_dir: Path) -> None:
     # zccache reads it from client env if set, and it's a no-op otherwise.
     if "ZCCACHE_LINK_DEPLOY_CMD" not in os.environ:
         os.environ["ZCCACHE_LINK_DEPLOY_CMD"] = "clang-tool-chain-libdeploy"
+    os.environ.setdefault("ZCCACHE_STRICT_PATHS", "absolute")
 
     zccache_bin = _find_zccache_binary()
     if not zccache_bin:

@@ -17,6 +17,7 @@ uv = find_program('uv')
 # or clang's #pragma once dedup is silently defeated on Windows.
 test_abs_include_args = [
   path_norm_I_root,  # For test includes (normalized abs forward-slash).
+  path_norm_I_tests, # For "test.h" includes from test subdirectories.
   path_norm_I_src,   # For library.
 ]
 
@@ -82,9 +83,10 @@ test_pch = custom_target('test_pch',
 # here. Meson emits -I..\..\src on Windows which breaks #pragma once.
 runner_exe = executable('runner',
   'shared/runner.cpp',
-  cpp_args: runner_cpp_args + [path_norm_I_src, path_norm_I_stub],
+  cpp_args: runner_cpp_args + [path_norm_I_src, path_norm_I_stub, path_norm_I_tests],
   link_args: runner_link_args,
   link_with: [crash_handler_lib],  # Shared crash handler from root meson.build
+  implicit_include_directories: false,
   install: false
 )
 
@@ -179,6 +181,7 @@ test_shared_objs_lib = static_library('test_shared_objs',
   ['doctest_main.cpp', 'shared/fl_unittest.cpp', 'misc' / 'coroutine_impl.cpp', test_pch],
   cpp_args: shared_test_cpp_args,
   pic: true,
+  implicit_include_directories: false,
   install: false
 )
 shared_test_objects = test_shared_objs_lib.extract_all_objects(recursive: false)
@@ -216,6 +219,7 @@ foreach test_name : test_names
     link_args: test_link_args,
     link_with: test_link_with,
     name_prefix: '',  # Remove 'lib' prefix on Windows (produce 'test.dll' not 'libtest.dll')
+    implicit_include_directories: false,
     install: false
   )
 

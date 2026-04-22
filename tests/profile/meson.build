@@ -52,6 +52,7 @@ if profile_test_files != ''
       link_args: profile_link_args,
       link_with: [fastled_lib, crash_handler_lib],
       install: false,
+      implicit_include_directories: false,
       build_by_default: false  # Only build when explicitly requested via 'bash profile <function>'
     )
   endforeach

@@ -69,6 +69,13 @@ def get_meson_executable() -> str:
     return "meson"
 
 
+def _normalize_meson_private_paths(build_dir: Path) -> None:
+    from ci.meson.build_config import _normalize_meson_private_include_paths
+
+    if _normalize_meson_private_include_paths(build_dir):
+        print("[WASM] Normalized private include paths for strict path mode")
+
+
 # ============================================================================
 # Library fingerprint — skip meson/ninja when source tree hasn't changed
 # ============================================================================
@@ -407,6 +414,7 @@ def _recover_stale_wasm_build(build_dir: Path) -> bool:
         ]
         result = subprocess.run(cmd, cwd=PROJECT_ROOT)
         if result.returncode == 0:
+            _normalize_meson_private_paths(build_dir)
             print("[WASM] Self-healing reconfiguration complete")
             return True
         else:
@@ -441,6 +449,7 @@ def ensure_meson_configured(build_dir: Path, mode: str, force: bool = False) -> 
             except OSError:
                 pass
         if stored_hash == current_hash:
+            _normalize_meson_private_paths(build_dir)
             return True  # No file list changes, skip reconfigure
 
         # Source file list changed — need reconfigure
@@ -466,6 +475,7 @@ def ensure_meson_configured(build_dir: Path, mode: str, force: bool = False) -> 
         if result.returncode != 0:
             print(f"[WASM] Meson reconfiguration failed (rc {result.returncode})")
             return False
+        _normalize_meson_private_paths(build_dir)
         try:
             file_list_marker.write_text(current_hash, encoding="utf-8")
         except OSError:
@@ -493,6 +503,7 @@ def ensure_meson_configured(build_dir: Path, mode: str, force: bool = False) -> 
     if result.returncode != 0:
         print(f"[WASM] Meson setup failed with return code {result.returncode}")
         return False
+    _normalize_meson_private_paths(build_dir)
 
     # Write file list hash marker for future staleness detection
     try:

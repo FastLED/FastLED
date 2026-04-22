@@ -50,6 +50,7 @@ fastled_wasm_lib = static_library('fastled',
   wasm_all_sources,
   cpp_args: wasm_abs_include_args + wasm_lib_compile_args,
   pic: false,
+  implicit_include_directories: false,
   install: false
 )
 
