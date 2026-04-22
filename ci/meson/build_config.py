@@ -310,7 +310,9 @@ def is_ar_content_preserving_active(build_dir: Path) -> bool:
 _ar_opt_status_cache: dict[str, bool] = {}
 
 
-_MESON_PRIVATE_INCLUDE_RE = re.compile(r'("-I)([^"]+\.p)(")')
+_MESON_PRIVATE_INCLUDE_RE = re.compile(
+    r'(?P<prefix>(?<!\S)"?-I)(?P<path>[^"\s]+\.p)(?P<suffix>"?)'
+)
 
 
 def _is_forward_slash_absolute(path: str) -> bool:
