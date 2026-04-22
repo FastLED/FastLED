@@ -6,10 +6,11 @@
 # Supported platforms (fbuild orchestrator must exist):
 #   - atmelavr  -> AvrOrchestrator  (avr-gcc with -mmcu=)
 #   - espressif32 (pioarduino) -> Esp32Orchestrator (metadata-driven toolchain)
-#   - teensy    -> TeensyOrchestrator (arm-none-eabi-gcc, Cortex-M7 only)
 #
 # NOT supported by fbuild (must stay on PlatformIO):
 #   - atmelmegaavr boards (ATtiny1604, ATtiny1616, nano_every) -- platform not recognized
+#   - Teensy 4.x (teensy40, teensy41) -- fbuild does not yet discover Teensyduino
+#     framework libraries such as SPI and OctoWS2811 (FastLED/FastLED#2365)
 #   - Teensy 3.x/LC (teensy30..36, teensylc) -- no Cortex-M7
 #   - Specialized ESP32 variants (qemu, idf33, idf44, i2s) -- custom IDF/driver configs
 #   - uno_r4_wifi -- uses renesas-ra platform, no fbuild orchestrator
@@ -36,8 +37,5 @@ FBUILD_BOARDS: frozenset[str] = frozenset(
         "esp32h2",
         "upesy_wroom",
         "seeed_xiao_esp32s3",
-        # Teensy (arm-none-eabi-gcc, Cortex-M7)
-        "teensy40",
-        "teensy41",
     }
 )
