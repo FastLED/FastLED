@@ -252,12 +252,7 @@ class u12x4 {
         u12x4 fr = x - fl_val;
         u32 n = fl_val.mValue >> FRAC_BITS;
         if (n >= INT_BITS - 1) return from_raw(0xFFFF);
-        u32 int_pow;
-        if (n >= 0) {
-            int_pow = static_cast<u32>(SCALE) << n;
-        } else {
-            int_pow = static_cast<u32>(SCALE) >> (-static_cast<int>(n));
-        }
+        u32 int_pow = static_cast<u32>(SCALE) << n;
         // 4-term minimax coefficients for 2^t - 1, t in [0,1).
         // Stored as u32 with 12 fractional bits.
         constexpr int IFRAC = 12;

@@ -194,10 +194,8 @@ template <> struct Hash<audio::fft::Args> {
         h ^= MurmurHash3_x86_32(&key.fmin, sizeof(key.fmin)) * 2246822519u;
         h ^= MurmurHash3_x86_32(&key.fmax, sizeof(key.fmax)) * 3266489917u;
         h ^= MurmurHash3_x86_32(&key.sample_rate, sizeof(key.sample_rate)) * 668265263u;
-        int mode_int = static_cast<int>(key.mode);
-        h ^= MurmurHash3_x86_32(&mode_int, sizeof(mode_int)) * 374761393u;
-        int window_int = static_cast<int>(key.window);
-        h ^= MurmurHash3_x86_32(&window_int, sizeof(window_int)) * 2246822519u;
+        h ^= static_cast<fl::u32>(key.mode) * 374761393u;
+        h ^= static_cast<fl::u32>(key.window) * 2246822519u;
         return h;
     }
 };

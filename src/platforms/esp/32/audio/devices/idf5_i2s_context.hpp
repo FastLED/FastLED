@@ -109,10 +109,14 @@ I2SContext make_context(const audio::ConfigI2S &config) FL_NOEXCEPT {
                 .bit_order_lsb = false,
             },
 #endif
-        .gpio_cfg = {.bclk = static_cast<gpio_num_t>(pin_clk),
+        .gpio_cfg = {.mclk = GPIO_NUM_NC,
+                     .bclk = static_cast<gpio_num_t>(pin_clk),
                      .ws = static_cast<gpio_num_t>(pin_ws),
                      .dout = GPIO_NUM_NC,
-                     .din = static_cast<gpio_num_t>(pin_sd)}};
+                     .din = static_cast<gpio_num_t>(pin_sd),
+                     .invert_flags = {.mclk_inv = false,
+                                      .bclk_inv = false,
+                                      .ws_inv = false}}};
 
     I2SContext out = {nullptr, std_cfg};
     return out;

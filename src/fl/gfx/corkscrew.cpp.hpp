@@ -418,8 +418,7 @@ void Corkscrew::readFromMulti(const fl::Grid<CRGB>& source_grid) const {
                 fl::u8 weight = entry.second; // weight is the second element of the pair
                 
                 // Bounds check for the source grid
-                if (pos.x >= 0 && pos.x < width && 
-                    pos.y >= 0 && pos.y < height) {
+                if (pos.x < width && pos.y < height) {
                     
                     // Sample from the source grid
                     CRGB sample_color = source_grid.at(pos.x, pos.y);

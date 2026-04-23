@@ -11,6 +11,7 @@
 // Note: This must be included before using Selectable as a base class
 #include "fl/system/fastpin_base.h"
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/type_traits.h"
 #include "fl/system/pin.h"  // For PinMode, PinValue enums and pinMode/digitalWrite/digitalRead functions
 #include "fl/stl/noexcept.h"
 
@@ -51,7 +52,7 @@ public:
 	#endif
 
 	typedef volatile RwReg * port_ptr_t;  ///< type for a pin read/write register, volatile
-	typedef RwReg port_t;  ///< type for a pin read/write register, non-volatile
+	typedef typename fl::remove_cv<RwReg>::type port_t;  ///< type for a pin read/write register, non-volatile
 
 	/// Set the pin mode as `OUTPUT`
 	inline void setOutput() { pinMode(mPin, PinMode::Output); }
@@ -112,7 +113,7 @@ public:
 	/// Gets the state of the port with this pin `HIGH`
 	FL_DISABLE_WARNING_PUSH
 	FL_DISABLE_WARNING_VOLATILE
-	volatile port_t hival() FL_NOEXCEPT __attribute__ ((always_inline)) {
+	port_t hival() FL_NOEXCEPT __attribute__ ((always_inline)) {
 		if (mPort) { return *mPort | mPinMask; }
 		else { return 1; }  // Return 1 (HIGH equivalent)
 	}
@@ -120,7 +121,7 @@ public:
 	/// Gets the state of the port with this pin `LOW`
 	FL_DISABLE_WARNING_PUSH
 	FL_DISABLE_WARNING_VOLATILE
-	volatile port_t loval() FL_NOEXCEPT __attribute__ ((always_inline)) {
+	port_t loval() FL_NOEXCEPT __attribute__ ((always_inline)) {
 		if (mPort) { return *mPort & ~mPinMask; }
 		else { return 0; }  // Return 0 (LOW equivalent)
 	}
@@ -130,7 +131,7 @@ public:
 	/// Get the pin mask
 	FL_DISABLE_WARNING_PUSH
 	FL_DISABLE_WARNING_VOLATILE
-	volatile port_t mask() __attribute__ ((always_inline)) { return mPinMask; }
+	port_t mask() __attribute__ ((always_inline)) { return mPinMask; }
 	FL_DISABLE_WARNING_POP
 	FL_DISABLE_WARNING_POP
 
