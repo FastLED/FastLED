@@ -20,22 +20,6 @@ on:
       - 'pyproject.toml'
       - 'test'
       - 'test.py'
-  pull_request:
-    branches:
-      - master
-    paths:
-      - 'src/**'
-      - 'examples/**'
-      - 'ci/**'
-      - '.github/workflows/example_test*.yml'
-      - '.github/workflows/template_example_test.yml'
-      - 'CMakeLists.txt'
-      - 'meson.build'
-      - 'examples/meson.build'
-      - 'pyproject.toml'
-      - 'test'
-      - 'test.py'
-
 jobs:
   test:
     uses: ./.github/workflows/template_example_test.yml

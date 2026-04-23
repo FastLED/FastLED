@@ -11,11 +11,6 @@ on:
       - 'src/**/*.h'
       - 'src/**/*.hpp'
       - '.github/workflows/header-perf.yml'
-  pull_request:
-    paths:
-      - 'src/**/*.h'
-      - 'src/**/*.hpp'
-
 jobs:
   header-perf:
     runs-on: ubuntu-latest

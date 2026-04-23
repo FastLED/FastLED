@@ -18,20 +18,6 @@ on:
         - 'platformio.ini'
         - 'library.json'
         - 'library.properties'
-    pull_request:
-      branches:
-        - master
-      paths:
-        - 'src/**'
-        - 'examples/wasm/**'
-        - 'examples/WasmScreenCoords/**'
-        - 'ci/**'
-        - '.github/workflows/build_wasm_compilers.yml'
-        - 'CMakeLists.txt'
-        - 'platformio.ini'
-        - 'library.json'
-        - 'library.properties'
-
 permissions:
   contents: read        # Required to checkout code
   actions: read         # Required for artifact operations  

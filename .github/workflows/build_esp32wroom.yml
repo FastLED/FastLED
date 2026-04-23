@@ -22,24 +22,6 @@ on:
       - 'platformio.ini'
       - 'library.json'
       - 'library.properties'
-  pull_request:
-    branches:
-      - master
-    paths:
-      - 'src/**'
-      - '!src/platforms/arm/**'
-      - '!src/platforms/wasm/**'
-      - '!src/platforms/avr/**'
-      - 'src/platforms/esp/**'
-      - 'examples/**'
-      - 'ci/**'
-      - '.github/workflows/build_esp32wroom.yml'
-      - '.github/workflows/build_template.yml'
-      - 'CMakeLists.txt'
-      - 'platformio.ini'
-      - 'library.json'
-      - 'library.properties'
-
 jobs:
   build:
     uses: ./.github/workflows/build_template.yml

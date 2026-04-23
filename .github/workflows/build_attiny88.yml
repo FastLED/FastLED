@@ -18,20 +18,6 @@ on:
       - 'platformio.ini'
       - 'library.json'
       - 'library.properties'
-  pull_request:
-    branches:
-      - master
-    paths:
-      - 'src/**'
-      - 'examples/**'
-      - 'ci/**'
-      - '.github/workflows/build_attiny88.yml'
-      - '.github/workflows/build_template.yml'
-      - 'CMakeLists.txt'
-      - 'platformio.ini'
-      - 'library.json'
-      - 'library.properties'
-
 jobs:
   build:
     uses: ./.github/workflows/build_template.yml
