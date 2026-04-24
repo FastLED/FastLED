@@ -79,7 +79,7 @@ $ fbuild build --help
       [possible values: compiledb]
 ```
 
-This is built into the Rust binary itself; no FastLED code currently invokes it. The `fbuild` Python package (`fbuild 2.1.11` at `C:\Users\niteris\dev\fastled9\.venv\Lib\site-packages\fbuild\__init__.py`) exposes only `Daemon`, `DaemonConnection`, `connect_daemon` — no direct compile-DB Python API. `DaemonConnection` exposes `build`, `deploy`, `monitor` only, so the compile DB must be triggered via the CLI `fbuild build --target compiledb -e <env>`.
+This is built into the Rust binary itself; no FastLED code currently invokes it. The Python package exposes only `Daemon`, `DaemonConnection`, `connect_daemon` — no direct compile-DB Python API. `DaemonConnection` exposes `build`, `deploy`, `monitor` only, so the compile DB must be triggered via the CLI `fbuild build --target compiledb -e <env>`.
 
 fbuild also has three built-in static-analysis subcommands that likely consume the same DB internally (though each is thin and takes no tool-specific args yet):
 

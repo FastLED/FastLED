@@ -28,7 +28,7 @@ SUCCESS_MARKER = "FBUILD-QEMU-TEST-OK"
 
 pytestmark = pytest.mark.skipif(
     shutil.which("fbuild") is None,
-    reason="fbuild CLI not on PATH — install with `uv pip install fbuild>=2.1.20`",
+    reason="fbuild CLI not on PATH — install with `uv pip install fbuild`",
 )
 
 
