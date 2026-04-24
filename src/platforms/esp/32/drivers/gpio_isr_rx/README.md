@@ -170,7 +170,7 @@ Key `RxConfig` parameters:
 ## Usage
 
 ```cpp
-#include "fl/rx_device.h"
+#include "fl/channels/rx.h"
 
 // Pin must be configured before use
 pinMode(1, INPUT);

@@ -13,7 +13,7 @@
 #pragma once
 
 #include "fl/stl/shared_ptr.h"  // IWYU pragma: keep
-#include "fl/rx_device.h"
+#include "fl/channels/rx.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {

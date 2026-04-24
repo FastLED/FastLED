@@ -9,7 +9,7 @@
 
 #if defined(FL_IS_TEENSY_4X)
 
-#include "fl/rx_device.h"
+#include "fl/channels/rx.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/noexcept.h"
 

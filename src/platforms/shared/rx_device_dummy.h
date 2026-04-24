@@ -5,7 +5,7 @@
 
 // IWYU pragma: private
 
-#include "fl/rx_device.h"
+#include "fl/channels/rx.h"
 #include "fl/system/log.h"
 #include "fl/system/log.h"
 #include "fl/stl/assert.h"

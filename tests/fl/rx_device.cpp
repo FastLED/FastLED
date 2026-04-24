@@ -3,7 +3,7 @@
 
 #include "FastLED.h"
 #include "fl/channels/rx/channel.h"
-#include "fl/rx_device.h"
+#include "fl/channels/rx.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/new.h"
 #include "fl/stl/stdint.h"

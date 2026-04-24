@@ -1,8 +1,8 @@
-/// @file rx_device.cpp
+/// @file device.cpp.hpp
 /// @brief Implementation of RxDevice factory
 
 #include "platforms/is_platform.h"
-#include "fl/rx_device.h"
+#include "fl/channels/rx.h"
 // IWYU pragma: begin_keep
 #include "platforms/shared/rx_device_dummy.h"  // ok platform headers
 // IWYU pragma: end_keep // ok platform headers

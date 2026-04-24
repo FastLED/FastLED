@@ -14,7 +14,7 @@
 #include "fl/stl/array.h"
 #include "fl/stl/iterator.h"
 #include "fl/stl/result.h"
-#include "fl/rx_device.h"
+#include "fl/channels/rx.h"
 #include "fl/stl/noexcept.h"
 
 // RMT symbol is a 32-bit value (union with duration0/level0/duration1/level1 bitfields)

@@ -14,7 +14,7 @@
 #include "fl/channels/driver.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/system/delay.h"
-#include "fl/rx_device.h"
+#include "fl/channels/rx.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/move.h"
 #include "fl/stl/new.h"

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/channels/rx/config.h"
-#include "fl/rx_device.h"
+#include "fl/channels/rx.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/shared_ptr.h"

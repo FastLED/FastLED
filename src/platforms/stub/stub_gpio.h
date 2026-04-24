@@ -22,7 +22,7 @@
 #include "fl/stl/span.h"
 #include "fl/stl/function.h"
 #include "fl/chipsets/chipset_timing_config.h"
-#include "fl/rx_device.h"  // for fl::EdgeTime
+#include "fl/channels/rx.h"  // for fl::EdgeTime
 #include "fl/stl/noexcept.h"
 
 namespace fl {

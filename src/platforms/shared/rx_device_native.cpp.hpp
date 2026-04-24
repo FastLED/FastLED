@@ -9,7 +9,7 @@
 #ifdef FL_IS_STUB
 
 #include "platforms/stub/stub_gpio.h"
-#include "fl/rx_device.h"
+#include "fl/channels/rx.h"
 #include "fl/system/log.h"
 #include "fl/system/log.h"
 #include "fl/system/log.h"

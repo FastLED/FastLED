@@ -14,7 +14,7 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/span.h"
 #include "fl/stl/result.h"
-#include "fl/rx_device.h"
+#include "fl/channels/rx.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {

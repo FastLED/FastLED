@@ -1,5 +1,5 @@
-/// @file rx_device.h
-/// @brief Common interface for RX devices (cross-platform)
+/// @file rx.h
+/// @brief Common RX interfaces and shared types
 
 #pragma once
 
@@ -8,6 +8,8 @@
 #include "fl/stl/result.h"
 #include "fl/stl/cstddef.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/span.h"
 
 namespace fl {
 
