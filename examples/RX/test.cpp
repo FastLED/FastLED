@@ -44,9 +44,9 @@ void executeToggles(fl::RxChannel& rx,
     digitalWrite(pin_tx, config.start_low ? LOW : HIGH);
     fl::delayMicroseconds(100);  // Allow pin to settle
 
-    // Initialize RX device
+    // Initialize RX channel
     if (!rx.begin(config)) {
-        FL_ERROR("Failed to initialize RX device");
+        FL_ERROR("Failed to initialize RX channel");
         return;
     }
 
@@ -149,7 +149,7 @@ bool validateEdgeTiming(fl::span<const fl::EdgeTime> edges,
     } else if (edge_count >= 5) {
         FL_WARN("[TEST] ✓ PASS: Captured " << edge_count << " edges with proper alternation");
         FL_WARN("[TEST] ✓ PASS: All timing values match expected pattern within tolerance");
-        FL_WARN("[TEST] ✓ RX device working correctly!");
+        FL_WARN("[TEST] ✓ RX channel working correctly!");
         return true;
     } else {
         FL_WARN("WARNING: Only captured " << edge_count << " edges (expected >=5)");
@@ -157,17 +157,17 @@ bool validateEdgeTiming(fl::span<const fl::EdgeTime> edges,
     }
 }
 
-bool testRxDevice(fl::shared_ptr<fl::RxChannel> rx, int pin_tx) {
-    FL_WARN("Testing RX device with low-frequency pattern...");
+bool testRxChannelSanity(fl::shared_ptr<fl::RxChannel> rx, int pin_tx) {
+    FL_WARN("Testing RX channel with low-frequency pattern...");
 
     if (!rx) {
-        FL_ERROR("Failed to test RX device - null device provided");
+        FL_ERROR("Failed to test RX channel - null channel provided");
         return false;
     }
 
     int pin_rx = rx->getPin();
 
-    // Configure RX device for low-frequency test
+    // Configure RX channel for low-frequency test
     fl::RxChannelConfig config(pin_rx);
     config.signal_range_min_ns = 100;       // 100ns glitch filter
     config.signal_range_max_ns = 30000000;  // 30ms idle timeout (ESP-IDF RMT limit: 32767000ns)
@@ -180,7 +180,7 @@ bool testRxDevice(fl::shared_ptr<fl::RxChannel> rx, int pin_tx) {
     delay(10);  // Allow pin to settle
 
     if (!rx->begin(config)) {
-        FL_ERROR("Failed to initialize RX device");
+        FL_ERROR("Failed to initialize RX channel");
         return false;
     }
 
@@ -200,9 +200,9 @@ bool testRxDevice(fl::shared_ptr<fl::RxChannel> rx, int pin_tx) {
     auto wait_result = rx->wait(100);
 
     if (wait_result == fl::RxWaitResult::TIMEOUT) {
-        FL_ERROR("RX device test FAILED - timeout waiting for data");
+        FL_ERROR("RX channel test FAILED - timeout waiting for data");
         FL_ERROR("  No edges captured within 100ms");
-        FL_ERROR("  This suggests the RX device cannot read from GPIO " << pin_rx);
+        FL_ERROR("  This suggests the RX channel cannot read from GPIO " << pin_rx);
         return false;
     }
 
@@ -211,7 +211,7 @@ bool testRxDevice(fl::shared_ptr<fl::RxChannel> rx, int pin_tx) {
     size_t edge_count = rx->getRawEdgeTimes(edge_buffer);
 
     if (edge_count < 3) {
-        FL_ERROR("RX device test FAILED - insufficient edges captured");
+        FL_ERROR("RX channel test FAILED - insufficient edges captured");
         FL_ERROR("  Expected at least 3 edges, got " << edge_count);
         FL_ERROR("  Pin loopback may not be working correctly");
         return false;
@@ -228,12 +228,12 @@ bool testRxDevice(fl::shared_ptr<fl::RxChannel> rx, int pin_tx) {
     }
 
     if (timing_ok) {
-        FL_WARN("✓ RX device test PASSED");
+        FL_WARN("✓ RX channel test PASSED");
         FL_WARN("  Captured " << edge_count << " edges");
         FL_WARN("  Timing appears correct (~10ms per edge)");
         return true;
     } else {
-        FL_WARN("✓ RX device test PASSED (with timing warnings)");
+        FL_WARN("✓ RX channel test PASSED (with timing warnings)");
         FL_WARN("  Captured " << edge_count << " edges");
         FL_WARN("  Timing may be affected by system load");
         return true;  // Still pass - we got edges

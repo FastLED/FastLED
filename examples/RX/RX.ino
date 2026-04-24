@@ -22,7 +22,7 @@
 ///   - ESP32 (all variants: classic, S3, C3, C6, etc.)
 ///
 /// run with (in fastled repo)
-//    bash debug RX --expect "TX Pin: GPIO 0" --expect "RX Pin: GPIO 1" --expect "RX Device: RMT" --fail-on ERROR
+//    bash debug RX --expect "TX Pin: GPIO 0" --expect "RX Pin: GPIO 1" --expect "RX Backend: RMT" --fail-on ERROR
 
 #include <FastLED.h>
 #include "fl/stl/singleton.h"
@@ -63,7 +63,7 @@ const fl::array<PinToggle, 6> TEST_PATTERN = {{
 // Global State
 // ============================================================================
 
-fl::shared_ptr<fl::RxChannel>& rxDeviceSingleton() {
+fl::shared_ptr<fl::RxChannel>& rxChannelSingleton() {
     return fl::Singleton<fl::shared_ptr<fl::RxChannel>>::instance();
 }
 
@@ -83,7 +83,7 @@ void setup() {
     FL_WARN("Platform: ESP32");
     FL_WARN("TX Pin: GPIO " << PIN_TX);
     FL_WARN("RX Pin: GPIO " << PIN_RX);
-    FL_WARN("RX Device: " << (RX_BACKEND == fl::RxBackend::RMT ? "RMT" : "ISR"));
+    FL_WARN("RX Backend: " << (RX_BACKEND == fl::RxBackend::RMT ? "RMT" : "ISR"));
     FL_WARN("LOOP BACK MODE: " << loop_back_mode);
 
     // Sanity check: Verify jumper wire connection when TX and RX are different pins
@@ -122,7 +122,7 @@ void setup() {
     }
 
     // Test RX channel functionality
-    if (!testRxDevice(rx_test, PIN_TX)) {
+    if (!testRxChannelSanity(rx_test, PIN_TX)) {
         halt.error("RX channel sanity check failed - RX not working");
         return;
     }
@@ -132,8 +132,8 @@ void setup() {
     // Use 1MHz resolution to allow longer timeouts (40MHz = ~819us max, 1MHz = ~32ms max)
     FL_WARN("Creating main RX channel...");
     fl::RxChannelConfig main_channel_config(PIN_RX, RX_BACKEND);
-    rxDeviceSingleton() = FastLED.addRx(main_channel_config);
-    if (!rxDeviceSingleton()) {
+    rxChannelSingleton() = FastLED.addRx(main_channel_config);
+    if (!rxChannelSingleton()) {
         halt.error("Failed to create main RX channel");
         return;
     }
@@ -160,13 +160,13 @@ void loop() {
 
     // Execute toggles and capture data
     FL_WARN("[TEST] Initializing RX channel and executing toggles...");
-    auto& rx_device = rxDeviceSingleton();
-    rx_device->setConfig(config);
-    executeToggles(*rx_device, TEST_PATTERN, PIN_TX, WAIT_TIMEOUT_MS);
+    auto& rx_channel = rxChannelSingleton();
+    rx_channel->setConfig(config);
+    executeToggles(*rx_channel, TEST_PATTERN, PIN_TX, WAIT_TIMEOUT_MS);
 
     // Wait for capture completion
     FL_WARN("[TEST] Waiting for capture (timeout: " << WAIT_TIMEOUT_MS << "ms)...");
-    auto wait_result = rx_device->wait(WAIT_TIMEOUT_MS);
+    auto wait_result = rx_channel->wait(WAIT_TIMEOUT_MS);
 
     if (wait_result == fl::RxWaitResult::TIMEOUT) {
         FL_ERROR("Timeout waiting for data");
@@ -177,7 +177,7 @@ void loop() {
 
         // Get edge timings
         fl::array<fl::EdgeTime, EDGE_BUFFER_SIZE> edge_buffer;
-        size_t edge_count = rx_device->getRawEdgeTimes(edge_buffer);
+        size_t edge_count = rx_channel->getRawEdgeTimes(edge_buffer);
 
         // Validate edge timing against expected pattern
         const uint32_t TOLERANCE_PERCENT = 15;  // ±15% tolerance for timing jitter

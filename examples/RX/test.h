@@ -4,7 +4,7 @@
 #include "fl/channels/rx/channel.h"
 
 /**
- * @brief Pin toggle instruction for RX device testing
+ * @brief Pin toggle instruction for RX channel testing
  */
 struct PinToggle {
     bool is_high;       // Pin state (HIGH or LOW)
@@ -24,17 +24,17 @@ struct PinToggle {
 bool verifyJumperWire(int pin_tx, int pin_rx);
 
 /**
- * @brief Test RX device functionality with low-frequency pattern
+ * @brief Test RX channel functionality with low-frequency pattern
  *
- * Validates the given RX device can capture edge transitions by generating
+ * Validates the given RX channel can capture edge transitions by generating
  * a simple test pattern (HIGH/LOW toggles) and verifying the captured
  * timing data matches expectations.
  *
- * @param rx Shared pointer to the RX device to test
+ * @param rx Shared pointer to the RX channel to test
  * @param pin_tx TX pin number to toggle
- * @return true if RX device captures expected edges, false otherwise
+ * @return true if RX channel captures expected edges, false otherwise
  */
-bool testRxDevice(fl::shared_ptr<fl::RxChannel> rx, int pin_tx);
+bool testRxChannelSanity(fl::shared_ptr<fl::RxChannel> rx, int pin_tx);
 
 /**
  * @brief Execute pin toggles and initialize RX channel for capture
