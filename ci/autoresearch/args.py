@@ -93,7 +93,7 @@ class Args:
     frames: int | None
 
     @staticmethod
-    def parse_args() -> "Args":
+    def parse_args(argv: list[str] | None = None) -> "Args":
         """Parse command-line arguments and return Args dataclass instance."""
         parser = argparse.ArgumentParser(
             description="FastLED AutoResearch Test Runner with JSON-RPC support",
@@ -497,7 +497,7 @@ See Also:
             "See issues #2254, #2288.",
         )
 
-        parsed = parser.parse_args()
+        parsed = parser.parse_args(argv)
 
         if parsed.use_fbuild or parsed.no_fbuild:
             flag = "--no-fbuild" if parsed.no_fbuild else "--use-fbuild"

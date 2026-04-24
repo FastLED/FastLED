@@ -28,8 +28,8 @@ def test_compile_board_examples_always_uses_fbuild(
     class FakePioCompiler:
         def __init__(self, *args: Any, **kwargs: Any) -> None:
             use_fbuild = kwargs.get("use_fbuild", missing)
-            if use_fbuild is missing and len(args) >= 6:
-                use_fbuild = args[5]
+            if use_fbuild is missing and len(args) >= 7:
+                use_fbuild = args[6]
             assert use_fbuild is not missing, "PioCompiler use_fbuild argument missing"
             captured["use_fbuild"] = bool(use_fbuild)
 
@@ -70,11 +70,10 @@ def test_autoresearch_always_selects_fbuild() -> None:
 
 
 def test_autoresearch_parse_args_warns_for_deprecated_fbuild_flags(
-    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
     """Args.parse_args should warn when deprecated fbuild flags are used."""
-    monkeypatch.setattr("sys.argv", ["autoresearch", "--no-fbuild"])
-    parsed = Args.parse_args()
+    parsed = Args.parse_args(["--no-fbuild"])
     captured = capsys.readouterr()
 
     assert parsed.no_fbuild is True
