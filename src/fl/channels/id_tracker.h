@@ -7,19 +7,19 @@ namespace fl {
 
 /**
  * Thread-safe ID tracker that maps void* pointers to unique integer IDs.
- * 
+ *
  * Features:
  * - Auto-incrementing ID counter for new entries
  * - Thread-safe operations with mutex protection
  * - Instantiable class - create as many trackers as needed
  * - Support for removal of tracked pointers
- * 
+ *
  * Usage:
  *   IdTracker tracker;  // Create instance
  *   int id = tracker.getOrCreateId(ptr);
  *   bool found = tracker.getId(ptr, &id);
  *   tracker.removeId(ptr);
- * 
+ *
  * For singleton behavior, wrap in your own singleton:
  *   static IdTracker& getGlobalTracker() {
  *       static IdTracker instance;
@@ -36,7 +36,7 @@ public:
     /**
      * Get existing ID for pointer, or create a new one if not found.
      * Thread-safe.
-     * 
+     *
      * @param ptr Pointer to track
      * @return Unique integer ID for this pointer
      */
@@ -45,7 +45,7 @@ public:
     /**
      * Get existing ID for pointer without creating a new one.
      * Thread-safe.
-     * 
+     *
      * @param ptr Pointer to look up
      * @param outId Pointer to store the ID if found
      * @return true if ID was found, false if pointer not tracked
@@ -55,7 +55,7 @@ public:
     /**
      * Remove tracking for a pointer.
      * Thread-safe.
-     * 
+     *
      * @param ptr Pointer to stop tracking
      * @return true if pointer was being tracked and removed, false if not found
      */
@@ -64,7 +64,7 @@ public:
     /**
      * Get the current number of tracked pointers.
      * Thread-safe.
-     * 
+     *
      * @return Number of currently tracked pointers
      */
     size_t size() FL_NOEXCEPT;
@@ -86,10 +86,10 @@ private:
 
     // Thread synchronization
     mutable fl::mutex mMutex;
-    
+
     // ID mapping and counter
     fl::flat_map<void*, int> mPointerToId;
     int mNextId = 0;  // Start IDs at 0 to match StripIdMap behavior
 };
 
-} // namespace fl 
+} // namespace fl

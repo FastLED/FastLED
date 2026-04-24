@@ -116,7 +116,7 @@ Containers, views, algorithms, compile‑time utilities, memory/ownership, porta
 - SIMD and optimization primitives: `stl/simd.h`
 - Types and traits: `types.h`, `type_traits.h`, `initializer_list.h`, `utility.h`, `move.h`, `template_magic.h`, `stdint.h`, `cstddef.h`
 - Memory/ownership: `unique_ptr.h`, `shared_ptr.h`, `weak_ptr.h`, `scoped_ptr.h`, `scoped_array.h`, `referent.h`, `allocator.h`, `memory.h`, `memfill.h`, `inplacenew.h`
-- Portability and compiler control: `compiler_control.h`, `force_inline.h`, `virtual_if_not_avr.h`, `has_define.h`, `register.h`, `warn.h`, `trace.h`, `dbg.h`, `log.h`, `assert.h`, `unused.h`, `export.h`, `dll.h`, `deprecated.h`, `avr_disallowed.h`, `bit_cast.h`, `id_tracker.h`, `singleton.h`
+- Portability and compiler control: `compiler_control.h`, `force_inline.h`, `virtual_if_not_avr.h`, `has_define.h`, `register.h`, `warn.h`, `trace.h`, `dbg.h`, `log.h`, `assert.h`, `unused.h`, `export.h`, `dll.h`, `deprecated.h`, `avr_disallowed.h`, `bit_cast.h`, `singleton.h`
 
 Per‑header quick descriptions:
 
@@ -176,7 +176,6 @@ Per‑header quick descriptions:
 - `deprecated.h`: Cross‑compiler deprecation annotations.
 - `avr_disallowed.h`: Guardrails to prevent unsupported usage on AVR.
 - `bit_cast.h`: Safe bit reinterpretation where supported, with fallbacks.
-- `id_tracker.h`: ID generation/tracking utility for object registries.
 - `singleton.h`: Simple singleton helper for cases requiring global access.
 
 ### 2) Graphics, geometry, and rendering

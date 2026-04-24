@@ -32,7 +32,7 @@
 // IWYU pragma: end_keep
 
 #include "platforms/shared/active_strip_data/active_strip_data.h"
-#include "fl/id_tracker.h"
+#include "fl/channels/id_tracker.h"
 
 /// WASM-SPECIFIC: Early initialization using GCC constructor attribute.
 /// EMSCRIPTEN_KEEPALIVE prevents the function and its call to Instance()

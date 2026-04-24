@@ -24,7 +24,6 @@ Usage:
 from __future__ import annotations
 
 import io
-import os
 import shutil
 import sys
 import time
@@ -59,7 +58,7 @@ def get_fbuild_executable() -> str | None:
     for candidate in candidates:
         if candidate.exists():
             return str(candidate)
-    return os.fspath(shutil.which("fbuild")) if shutil.which("fbuild") else None
+    return shutil.which("fbuild")
 
 
 def ensure_fbuild_daemon() -> None:

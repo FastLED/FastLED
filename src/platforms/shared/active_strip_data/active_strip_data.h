@@ -7,7 +7,7 @@
 #include "fl/math/screenmap.h"
 #include "fl/stl/singleton.h"
 #include "fl/stl/span.h"
-#include "fl/id_tracker.h"
+#include "fl/channels/id_tracker.h"
 #include "fl/stl/noexcept.h"
 namespace fl {
 class CLEDController;

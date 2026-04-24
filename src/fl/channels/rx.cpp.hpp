@@ -1,4 +1,4 @@
-/// @file device.cpp.hpp
+/// @file rx.cpp.hpp
 /// @brief Implementation of RxDevice factory
 
 #include "platforms/is_platform.h"
