@@ -5,9 +5,10 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # fbuild 2.2.1+ includes Teensy framework library resolution and the
-    # Teensy-compatible GCC 11 toolchain fix needed for teensy40/teensy41.
-    "fbuild>=2.2.1",
+    # Pin to the first published fbuild release that includes both Teensy
+    # framework library resolution and the Teensy-compatible GCC 11 toolchain
+    # fix needed for teensy40/teensy41.
+    "fbuild==2.2.1",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",

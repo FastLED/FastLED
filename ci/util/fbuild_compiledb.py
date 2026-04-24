@@ -16,6 +16,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from ci.util.fbuild_runner import get_fbuild_executable
+
 
 def _candidate_fbuild_release_dirs(
     project_root: Path, build_root: Path, board_name: str
@@ -119,10 +121,17 @@ def ensure_compile_commands(
     # ``build`` subcommand. ``cwd`` is still set so fbuild's config
     # discovery works identically whether the positional is honored or
     # ignored by future fbuild versions.
+    fbuild_exe = get_fbuild_executable()
+    if fbuild_exe is None:
+        print(
+            f"ensure_compile_commands: fbuild executable not found for '{board_name}'",
+            file=sys.stderr,
+        )
+        return None
     try:
         subprocess.run(
             [
-                "fbuild",
+                fbuild_exe,
                 str(project_root),
                 "build",
                 "-e",

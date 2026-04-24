@@ -24,6 +24,8 @@ Usage:
 from __future__ import annotations
 
 import io
+import os
+import shutil
 import sys
 import time
 from dataclasses import dataclass
@@ -40,6 +42,24 @@ class FbuildCommandResult:
     success: bool
     output: str
     returncode: int | None = None
+
+
+def get_fbuild_executable() -> str | None:
+    """Resolve the ``fbuild`` executable for the active Python environment.
+
+    Prefer the sibling script next to the current interpreter so ``uv run``
+    reliably uses the version locked in this repo's virtualenv instead of an
+    older global ``fbuild`` earlier on ``PATH``.
+    """
+    script_dir = Path(sys.executable).resolve().parent
+    candidates = [
+        script_dir / "fbuild",
+        script_dir / "fbuild.exe",
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return str(candidate)
+    return os.fspath(shutil.which("fbuild")) if shutil.which("fbuild") else None
 
 
 def ensure_fbuild_daemon() -> None:
@@ -82,7 +102,6 @@ def run_fbuild_compile(
     Returns:
         Result containing success flag, return code, and captured output
     """
-    import shutil
     import subprocess
 
     from running_process import RunningProcess
@@ -95,7 +114,7 @@ def run_fbuild_compile(
     print("COMPILING (fbuild)", file=out)
     print("=" * 60, file=out)
 
-    fbuild_exe = shutil.which("fbuild")
+    fbuild_exe = get_fbuild_executable()
     if fbuild_exe is None:
         message = "BUILD FAIL fbuild not found on PATH"
         print(message, file=out)
