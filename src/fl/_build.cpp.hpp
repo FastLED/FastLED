@@ -34,4 +34,5 @@
 #include "fl/stl/_build.cpp.hpp"
 #include "fl/system/_build.cpp.hpp"
 #include "fl/task/_build.cpp.hpp"
+#include "fl/ui/_build.cpp.hpp"
 #include "fl/video/_build.cpp.hpp"

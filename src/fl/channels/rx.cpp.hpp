@@ -1,5 +1,6 @@
 /// @file rx.cpp.hpp
 /// @brief Implementation of RxDevice factory
+// ok no header (RxDevice class is declared in fl/channels/rx.h)
 
 #include "platforms/is_platform.h"
 #include "fl/channels/rx.h"

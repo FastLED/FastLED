@@ -1,4 +1,4 @@
-/// @file rx_device.cpp
+/// @file rx.cpp
 /// @brief Unit tests for RxDevice interface, factory, and EdgeTime packed structure
 
 #include "FastLED.h"

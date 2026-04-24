@@ -425,4 +425,14 @@ private:
     static fl::shared_ptr<RxDevice> createDummy() FL_NOEXCEPT;
 };
 
+// Explicit specialization declarations — definitions live in
+// fl/channels/rx.cpp.hpp. Declaring them here prevents implicit
+// instantiation of the primary template at call sites (e.g.,
+// channel.cpp.hpp), which would otherwise collide with the explicit
+// specializations when both live in the same translation unit.
+template <> fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::PLATFORM_DEFAULT>(int pin) FL_NOEXCEPT;
+template <> fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::RMT>(int pin) FL_NOEXCEPT;
+template <> fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>(int pin) FL_NOEXCEPT;
+template <> fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::FLEXPWM>(int pin) FL_NOEXCEPT;
+
 } // namespace fl
