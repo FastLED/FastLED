@@ -3,7 +3,7 @@
 // RX channel testing implementation
 
 #include "fl/channels/detail/validation/rx_test.h"
-#include "fl/rx_device.h"
+#include "fl/channels/rx/channel.h"
 #include "fl/system/pin.h"
 #include "fl/system/log.h"
 #include "fl/system/delay.h"
@@ -13,7 +13,7 @@ namespace fl {
 namespace validation {
 
 bool testRxChannel(
-    fl::shared_ptr<fl::RxDevice> rx_channel,
+    fl::shared_ptr<fl::RxChannel> rx_channel,
     int pin_tx,
     int pin_rx,
     u32 hz,
@@ -31,8 +31,8 @@ bool testRxChannel(
     const u32 signal_range_max_ns = 2000000; // 2ms idle threshold
 
     // Initialize RX channel with signal range for fast GPIO toggles
-    fl::RxConfig rx_config;
-    rx_config.buffer_size = buffer_size;
+    fl::RxChannelConfig rx_config(pin_rx);
+    rx_config.edge_capacity = buffer_size;
     rx_config.hz = hz;
     rx_config.signal_range_min_ns = 100;    // min=100ns
     rx_config.signal_range_max_ns = signal_range_max_ns;

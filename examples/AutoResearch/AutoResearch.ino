@@ -213,7 +213,7 @@
 // Serial port timeout (milliseconds) - wait for serial monitor to attach
 #define SERIAL_TIMEOUT_MS 120000  // 120 seconds
 
-const fl::RxDeviceType RX_TYPE = fl::RxDeviceType::PLATFORM_DEFAULT;
+const fl::RxBackend RX_BACKEND = fl::RxBackend::PLATFORM_DEFAULT;
 
 // ============================================================================
 // Platform-Specific Pin Defaults
@@ -240,10 +240,11 @@ constexpr int RX_BUFFER_SIZE = 100 * 32 + 100;  // Memory-constrained: 100 LEDs 
 constexpr int RX_BUFFER_SIZE = 3000 * 32 + 100;  // LEDs × 32:1 expansion + headroom
 #endif
 
-// Factory function for creating RxDevice instances
+// Factory function for creating RxChannel instances
 // This allows AutoResearchRemoteControl to recreate the RX channel when the pin changes
-fl::shared_ptr<fl::RxDevice> createRxDevice(int pin) {
-    return fl::RxDevice::create<RX_TYPE>(pin);
+fl::shared_ptr<fl::RxChannel> createRxDevice(int pin) {
+    fl::RxChannelConfig config(pin, RX_BACKEND);
+    return FastLED.addRx(config);
 }
 
 // Global autoresearch state (shared between main loop and RPC handlers)
@@ -317,7 +318,7 @@ void setup() {
     ss << "\n[HARDWARE]\n";
     ss << "  TX Pin: " << PIN_TX << "\n";  // --expect "TX Pin: 0"
     ss << "  RX Pin: " << PIN_RX << "\n";  // --expect "RX Pin: 1"
-    ss << "  RX Device: " << fl::toString(RX_TYPE) << "\n";
+    ss << "  RX Device: " << fl::toString(RX_BACKEND) << "\n";
     ss << "  Loopback Mode: " << loop_back_mode << "\n";
     ss << "  Color Order: RGB\n";
     ss << "  RX Buffer Size: " << RX_BUFFER_SIZE << " bytes";
@@ -341,7 +342,7 @@ void setup() {
        << " (" << (40000000 / 1000000) << "MHz, " << RX_BUFFER_SIZE << " symbols)";
     FL_PRINT(ss.str());
 
-    g_autoresearch_state->rx_channel = fl::RxDevice::create<RX_TYPE>(PIN_RX);
+    g_autoresearch_state->rx_channel = createRxDevice(PIN_RX);
 
     if (!g_autoresearch_state->rx_channel) {
         ss.clear();

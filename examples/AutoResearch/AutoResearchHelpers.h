@@ -6,7 +6,6 @@
 #include <FastLED.h>
 #include "Common.h"
 #include "AutoResearchTest.h"
-#include "fl/rx_device.h"
 
 /// @brief Test RX channel with manual GPIO toggle
 /// @param rx_channel RX channel to test
@@ -16,7 +15,7 @@
 /// @param buffer_size Size of RX buffer in symbols
 /// @return true if test passes, false otherwise
 bool testRxChannel(
-    fl::shared_ptr<fl::RxDevice> rx_channel,
+    fl::shared_ptr<fl::RxChannel> rx_channel,
     int pin_tx,
     int pin_rx,
     uint32_t hz,
@@ -46,7 +45,7 @@ void testDriver(
     size_t num_leds,
     CRGB* leds,
     EOrder color_order,
-    fl::shared_ptr<fl::RxDevice> rx_channel,
+    fl::shared_ptr<fl::RxChannel> rx_channel,
     fl::span<uint8_t> rx_buffer,
     int base_strip_size,
     fl::RxDeviceType rx_type,

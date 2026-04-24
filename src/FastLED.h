@@ -162,6 +162,7 @@
 #include "fl/channels/channel_events.h"
 #include "fl/channels/manager.h"
 #include "fl/channels/config.h"  // for ChannelConfig, MultiChannelConfig
+#include "fl/channels/rx/channel.h"
 
 #include "fl/audio/input.h"
 #include "fl/audio/audio_processor.h"
@@ -763,6 +764,16 @@ public:
 	/// auto channels = FastLED.add(multiConfig);
 	/// @endcode
 	static fl::vector<fl::ChannelPtr> add(const fl::MultiChannelConfig& multiConfig);
+
+	/// @brief Add an RX channel with runtime configuration
+	///
+	/// Creates a first-class RX channel handle backed by the existing platform RX
+	/// device layer. The returned object exposes RX-specific lifecycle methods such
+	/// as begin(), wait(), decode(), and getRawEdgeTimes().
+	///
+	/// @param config RX channel configuration (pin, backend, capture settings)
+	/// @returns Shared pointer to RxChannel
+	static fl::RxChannelPtr addRx(const fl::RxChannelConfig& config);
 
 	/// @brief Add an audio input and return an auto-pumped Processor
 	///

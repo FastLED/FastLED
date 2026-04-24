@@ -10,7 +10,7 @@
 namespace fl {
 
 // Forward declarations
-class RxDevice;
+class RxChannel;
 
 namespace validation {
 
@@ -24,7 +24,7 @@ namespace validation {
 /// @note Generates 10 fast toggles (100μs pulses = 5kHz square wave)
 /// @note Uses fl::pin API for platform-independent pin control
 bool testRxChannel(
-    fl::shared_ptr<fl::RxDevice> rx_channel,
+    fl::shared_ptr<fl::RxChannel> rx_channel,
     int pin_tx,
     int pin_rx,
     u32 hz,

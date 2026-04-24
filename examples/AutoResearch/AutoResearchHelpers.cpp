@@ -8,7 +8,7 @@
 #include "fl/channels/detail/validation/result_formatter.h"
 
 bool testRxChannel(
-    fl::shared_ptr<fl::RxDevice> rx_channel,
+    fl::shared_ptr<fl::RxChannel> rx_channel,
     int pin_tx,
     int pin_rx,
     uint32_t hz,
@@ -30,7 +30,7 @@ void testDriver(
     size_t num_leds,
     CRGB* leds,
     EOrder color_order,
-    fl::shared_ptr<fl::RxDevice> rx_channel,
+    fl::shared_ptr<fl::RxChannel> rx_channel,
     fl::span<uint8_t> rx_buffer,
     int base_strip_size,
     fl::RxDeviceType rx_type,

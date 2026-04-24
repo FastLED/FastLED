@@ -349,7 +349,7 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     }
 
     // Create temporary RX channel if pinRx differs from default
-    fl::shared_ptr<fl::RxDevice> rx_channel_to_use = mState->rx_channel;
+    fl::shared_ptr<fl::RxChannel> rx_channel_to_use = mState->rx_channel;
 
     if (pin_rx != mState->pin_rx && mState->rx_factory) {
         rx_channel_to_use = mState->rx_factory(pin_rx);

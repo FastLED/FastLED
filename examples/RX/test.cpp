@@ -2,7 +2,6 @@
 
 #include <Arduino.h>
 #include "FastLED.h"
-#include "fl/rx_device.h"
 #include "test.h"
 
 bool verifyJumperWire(int pin_tx, int pin_rx) {
@@ -34,11 +33,11 @@ bool verifyJumperWire(int pin_tx, int pin_rx) {
     return true;
 }
 
-void executeToggles(fl::RxDevice& rx,
-                    const fl::RxConfig& config,
+void executeToggles(fl::RxChannel& rx,
                     fl::span<const PinToggle> toggles,
                     int pin_tx,
                     uint32_t wait_ms) {
+    const fl::RxChannelConfig& config = rx.config();
 
     // Set pin to initial state before begin()
     pinMode(pin_tx, OUTPUT);
@@ -158,7 +157,7 @@ bool validateEdgeTiming(fl::span<const fl::EdgeTime> edges,
     }
 }
 
-bool testRxDevice(fl::shared_ptr<fl::RxDevice> rx, int pin_tx) {
+bool testRxDevice(fl::shared_ptr<fl::RxChannel> rx, int pin_tx) {
     FL_WARN("Testing RX device with low-frequency pattern...");
 
     if (!rx) {
@@ -169,7 +168,7 @@ bool testRxDevice(fl::shared_ptr<fl::RxDevice> rx, int pin_tx) {
     int pin_rx = rx->getPin();
 
     // Configure RX device for low-frequency test
-    fl::RxConfig config;
+    fl::RxChannelConfig config(pin_rx);
     config.signal_range_min_ns = 100;       // 100ns glitch filter
     config.signal_range_max_ns = 30000000;  // 30ms idle timeout (ESP-IDF RMT limit: 32767000ns)
     config.start_low = true;                 // Pin starts LOW

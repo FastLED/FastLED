@@ -25,7 +25,7 @@
 /// @param rx_channel RX device to read edge data from
 /// @param timing Chipset timing configuration for pattern analysis
 /// @param range Edge range to print (offset, count)
-void dumpRawEdgeTiming(fl::shared_ptr<fl::RxDevice> rx_channel,
+void dumpRawEdgeTiming(fl::shared_ptr<fl::RxChannel> rx_channel,
                        const fl::ChipsetTimingConfig& timing,
                        fl::EdgeRange range) {
     if (!rx_channel) {
@@ -171,7 +171,7 @@ static fl::vector<uint8_t> buildExpectedUCS7604(fl::span<CRGB> leds, const fl::C
 // RMT RX captures edges on the data pin. Each edge duration / bit_period_ns
 // gives the number of consecutive same-value bits.
 // Returns number of LED RGB bytes written to rx_buffer, or 0 on error.
-static size_t decodeSpiEdges(fl::shared_ptr<fl::RxDevice> rx_channel,
+static size_t decodeSpiEdges(fl::shared_ptr<fl::RxChannel> rx_channel,
                              fl::span<uint8_t> rx_buffer,
                              uint32_t clock_hz) {
     if (!rx_channel || clock_hz == 0) {
@@ -314,7 +314,7 @@ static size_t decodeSpiEdges(fl::shared_ptr<fl::RxDevice> rx_channel,
 // - timing: Chipset timing configuration for RX decoder
 // - driver_name: Name of the TX driver being tested (e.g., "RMT", "PARLIO") - enables io_loop_back only for RMT
 // Returns number of bytes captured, or 0 on error
-size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buffer, const fl::ChipsetTimingConfig& timing, const char* driver_name) {
+size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel, fl::span<uint8_t> rx_buffer, const fl::ChipsetTimingConfig& timing, const char* driver_name) {
     if (!rx_channel) {
         FL_ERROR("RX channel is null");
         return 0;
@@ -324,13 +324,13 @@ size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buf
     fl::memset(rx_buffer.data(), 0, rx_buffer.size());
 
     // Prepare RX config (but don't arm yet to avoid locking TX resources)
-    fl::RxConfig rx_config;  // Use default WS2812B-compatible settings
+    fl::RxChannelConfig rx_config(rx_channel->getPin());
     rx_config.hz = 40000000; // 40MHz for high-precision LED timing capture
 
     // Buffer size: 1 LED byte = 8 bits = 8 RMT symbols
     // UART with TX inversion produces standard WS2812 waveform, same symbol count
     bool is_uart_driver = (fl::strcmp(driver_name, "UART") == 0);
-    rx_config.buffer_size = rx_buffer.size() * 8;
+    rx_config.edge_capacity = rx_buffer.size() * 8;
 
     // Internal loopback configuration: Enable ONLY for RMT TX -> RMT RX scenarios
     // When driver_name == "RMT", enable io_loop_back to route RMT TX output to RMT RX internally

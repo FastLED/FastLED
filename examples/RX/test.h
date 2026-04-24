@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/system/log.h"
-#include "fl/rx_device.h"
+#include "fl/channels/rx/channel.h"
 
 /**
  * @brief Pin toggle instruction for RX device testing
@@ -34,22 +34,20 @@ bool verifyJumperWire(int pin_tx, int pin_rx);
  * @param pin_tx TX pin number to toggle
  * @return true if RX device captures expected edges, false otherwise
  */
-bool testRxDevice(fl::shared_ptr<fl::RxDevice> rx, int pin_tx);
+bool testRxDevice(fl::shared_ptr<fl::RxChannel> rx, int pin_tx);
 
 /**
- * @brief Execute pin toggles and initialize RX device for capture
+ * @brief Execute pin toggles and initialize RX channel for capture
  *
- * Configures the RX device with the given config, sets the TX pin to the
+ * Reads the current config from the RX channel, sets the TX pin to the
  * initial state, begins capture, and executes the sequence of pin toggles.
  *
- * @param rx RX device to initialize and use for capture
- * @param config Configuration for the RX device
+ * @param rx RX channel to initialize and use for capture
  * @param toggles Sequence of pin state changes to execute
  * @param pin_tx TX pin number to toggle
  * @param wait_ms Unused parameter (kept for API compatibility)
  */
-void executeToggles(fl::RxDevice& rx,
-                    const fl::RxConfig& config,
+void executeToggles(fl::RxChannel& rx,
                     fl::span<const PinToggle> toggles,
                     int pin_tx,
                     uint32_t wait_ms);

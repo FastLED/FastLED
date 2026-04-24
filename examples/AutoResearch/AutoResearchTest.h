@@ -5,7 +5,6 @@
 
 #include <FastLED.h>
 #include "fl/channels/validation.h"
-#include "fl/rx_device.h"
 
 namespace fl {
 
@@ -16,7 +15,7 @@ struct AutoResearchConfig {
     const char* timing_name;                     ///< Timing name for logging (e.g., "WS2812B-V5")
     fl::span<fl::ChannelConfig> tx_configs;      ///< TX channel configurations to test (mutable for LED manipulation)
     const char* driver_name;                     ///< Driver name for logging (e.g., "RMT", "SPI", "PARLIO")
-    fl::shared_ptr<fl::RxDevice> rx_channel;     ///< RX channel for loopback capture (created in .ino, passed in)
+    fl::shared_ptr<fl::RxChannel> rx_channel;    ///< RX channel for loopback capture (created in .ino, passed in)
     fl::span<uint8_t> rx_buffer;                 ///< Buffer to store received bytes
     int base_strip_size;                         ///< Base strip size (10 or 300 LEDs)
     fl::RxDeviceType rx_type;                    ///< RX device type (RMT or ISR)
@@ -25,7 +24,7 @@ struct AutoResearchConfig {
                      const char* tn,
                      fl::span<fl::ChannelConfig> tc,
                      const char* dn,
-                     fl::shared_ptr<fl::RxDevice> rc,
+                     fl::shared_ptr<fl::RxChannel> rc,
                      fl::span<uint8_t> rb,
                      int bss,
                      fl::RxDeviceType rt)
@@ -110,7 +109,7 @@ struct MultiRunConfig {
 // - timing: Chipset timing configuration for RX decoder
 // - driver_name: Name of the TX driver being tested (e.g., "RMT", "PARLIO") - enables io_loop_back only for RMT
 // Returns number of bytes captured, or 0 on error
-size_t capture(fl::shared_ptr<fl::RxDevice> rx_channel, fl::span<uint8_t> rx_buffer, const fl::ChipsetTimingConfig& timing, const char* driver_name);
+size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel, fl::span<uint8_t> rx_buffer, const fl::ChipsetTimingConfig& timing, const char* driver_name);
 
 // Generic driver-agnostic autoresearch test runner (single run)
 // Tests all channels using the specified configuration

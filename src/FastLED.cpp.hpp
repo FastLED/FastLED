@@ -640,6 +640,10 @@ fl::vector<fl::ChannelPtr> CFastLED::add(const fl::MultiChannelConfig& multiConf
     return channels;
 }
 
+fl::RxChannelPtr CFastLED::addRx(const fl::RxChannelConfig& config) {
+    return fl::RxChannel::create(config);
+}
+
 // ============================================================================
 
 #ifdef NEED_CXX_BITS

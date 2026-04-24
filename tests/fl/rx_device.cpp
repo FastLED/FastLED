@@ -1,6 +1,8 @@
 /// @file rx_device.cpp
 /// @brief Unit tests for RxDevice interface, factory, and EdgeTime packed structure
 
+#include "FastLED.h"
+#include "fl/channels/rx/channel.h"
 #include "fl/rx_device.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/new.h"
@@ -104,6 +106,46 @@ FL_TEST_CASE("RxDevice - non-stub non-esp32 returns singleton dummy") {
     FL_CHECK(fl::strcmp(dummy1->name(), "dummy") == 0);
     FL_CHECK(fl::strcmp(dummy2->name(), "dummy") == 0);
 #endif
+}
+
+FL_TEST_CASE("RxChannel - create stores config and name") {
+    RxChannelConfig config(6, RxBackend::RMT);
+    config.name = "loopback";
+    config.signal_range_max_ns = 1234;
+
+    auto channel = RxChannel::create(config);
+    FL_REQUIRE(channel != nullptr);
+    FL_CHECK(fl::strcmp(channel->name().c_str(), "loopback") == 0);
+    FL_CHECK(channel->config().pin == 6);
+    FL_CHECK(channel->config().signal_range_max_ns == 1234);
+
+#ifdef FL_IS_STUB
+    FL_CHECK(channel->getPin() == 6);
+    FL_CHECK(fl::strcmp(channel->getEngineName().c_str(), "native") == 0);
+#else
+    FL_CHECK(!channel->getEngineName().empty());
+#endif
+}
+
+FL_TEST_CASE("RxChannel - setConfig updates staged values") {
+    auto channel = RxChannel::create(RxChannelConfig(6, RxBackend::RMT));
+    FL_REQUIRE(channel != nullptr);
+
+    RxChannelConfig updated(7, RxBackend::ISR);
+    updated.name = "updated";
+    updated.edge_capacity = 99;
+    channel->setConfig(updated);
+
+    FL_CHECK(channel->config().pin == 7);
+    FL_CHECK(channel->config().edge_capacity == 99);
+    FL_CHECK(fl::strcmp(channel->name().c_str(), "updated") == 0);
+}
+
+FL_TEST_CASE("CFastLED - addRx creates RxChannel") {
+    RxChannelConfig config(8, RxBackend::PLATFORM_DEFAULT);
+    auto channel = FastLED.addRx(config);
+    FL_REQUIRE(channel != nullptr);
+    FL_CHECK(channel->config().pin == 8);
 }
 
 // ============================================================

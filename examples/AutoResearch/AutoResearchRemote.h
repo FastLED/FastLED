@@ -22,19 +22,19 @@
 namespace fl {
 class json;
 class Remote;
-class RxDevice;
+class RxChannel;
 namespace net { namespace ble { struct TransportState; } }
 }
 
-/// @brief Factory function type for creating RxDevice instances
-/// @param pin The GPIO pin to create the RxDevice on
-/// @return A shared_ptr to the created RxDevice, or nullptr on failure
-using RxDeviceFactory = fl::shared_ptr<fl::RxDevice>(*)(int pin);
+/// @brief Factory function type for creating RxChannel instances
+/// @param pin The GPIO pin to create the RxChannel on
+/// @return A shared_ptr to the created RxChannel, or nullptr on failure
+using RxDeviceFactory = fl::shared_ptr<fl::RxChannel>(*)(int pin);
 
 /// @brief AutoResearch runtime state (shared between main loop and RPC handlers)
 struct AutoResearchState {
     fl::vector<fl::DriverInfo> drivers_available;
-    fl::shared_ptr<fl::RxDevice> rx_channel;
+    fl::shared_ptr<fl::RxChannel> rx_channel;
     fl::span<uint8_t> rx_buffer;
     int pin_tx;
     int pin_rx;
