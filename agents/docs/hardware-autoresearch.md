@@ -53,7 +53,7 @@ bash autoresearch --all --skip-lint --timeout 180
 - `--help` - See all options
 
 ### Build Backend
-`bash autoresearch` uses fbuild for all board compiles. Do not use board-specific PlatformIO fallback paths for compatibility issues; file board build compatibility problems at https://github.com/fastled/fbuild.
+`bash autoresearch` uses fbuild for all board compiles. Do not use board-specific PlatformIO fallback paths for compatibility issues; file board build compatibility problems at https://github.com/FastLED/fbuild/issues.
 
 ### Strip Size Configuration
 Configure LED strip sizes for autoresearch testing via JSON-RPC:

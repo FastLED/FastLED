@@ -10,7 +10,7 @@
 
 ### Board Build Backend: fbuild
 
-All board compiles use `fbuild`. Do not add board allowlists or PlatformIO fallback paths when a board does not compile; file board build compatibility problems at https://github.com/fastled/fbuild and fix them in fbuild.
+All board compiles use `fbuild`. Do not add board allowlists or PlatformIO fallback paths when a board does not compile; file board build compatibility problems at https://github.com/FastLED/fbuild/issues and fix them in fbuild.
 
 ### Use These Commands
 

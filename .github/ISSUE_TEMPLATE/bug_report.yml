@@ -6,7 +6,7 @@ body:
     id: board
     attributes:
       label: Board / MCU
-      description: Which board or microcontroller are you using? Board build compatibility problems should be filed at https://github.com/fastled/fbuild/issues.
+      description: Which board or microcontroller are you using? Board build compatibility problems should be filed at https://github.com/FastLED/fbuild/issues.
       options:
         - ESP32
         - ESP32-S2

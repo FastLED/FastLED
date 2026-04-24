@@ -131,7 +131,7 @@ bash test --docker --examples
 ## fbuild (Default for Board Builds)
 The project uses `fbuild` as the build system for all board compiles. New board targets must take the fbuild path by default; do not add board allowlists or PlatformIO fallbacks for board compatibility issues. Fix those in fbuild instead.
 
-File board build compatibility problems at https://github.com/fastled/fbuild.
+File board build compatibility problems at https://github.com/FastLED/fbuild/issues.
 
 fbuild provides:
 - **Daemon-based compilation** - Background process handles builds, survives agent interrupts

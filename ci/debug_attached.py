@@ -1143,26 +1143,15 @@ Examples:
         help="Deprecated compatibility flag; ignored because fbuild is always used",
     )
 
-    return parser.parse_args()
-
-
-def _should_use_fbuild(
-    environment: str | None, use_fbuild_flag: bool, no_fbuild_flag: bool
-) -> bool:
-    """Determine if fbuild should be used for compilation and upload.
-
-    All board builds use fbuild. The fbuild selection flags are kept only for
-    command compatibility and do not change this behavior.
-
-    Args:
-        environment: PlatformIO environment name (e.g., "esp32s3", "esp32c6")
-        use_fbuild_flag: True if --use-fbuild was explicitly specified
-        no_fbuild_flag: True if --no-fbuild was explicitly specified
-
-    Returns:
-        True if fbuild should be used, False otherwise
-    """
-    return True
+    args = parser.parse_args()
+    if args.use_fbuild or args.no_fbuild:
+        flag = "--no-fbuild" if args.no_fbuild else "--use-fbuild"
+        print(
+            f"warning: {flag} is deprecated and has no effect; "
+            "fbuild is always used for board builds.",
+            file=sys.stderr,
+        )
+    return args
 
 
 def main() -> int:
@@ -1353,25 +1342,11 @@ def main() -> int:
         # No lock needed: each project has isolated build directory.
         # Multiple agents can compile different projects simultaneously.
 
-        # Determine if fbuild should be used (always true for board builds)
-        use_fbuild = _should_use_fbuild(
-            args.environment, args.use_fbuild, args.no_fbuild
-        )
-        if use_fbuild:
-            print("📦 Using fbuild")
-        else:
-            print("📦 Using PlatformIO")
+        print("📦 Using fbuild")
+        from ci.util.fbuild_runner import run_fbuild_compile
 
-        if use_fbuild:
-            from ci.util.fbuild_runner import run_fbuild_compile
-
-            if not run_fbuild_compile(
-                build_dir, args.environment, args.verbose
-            ).success:
-                return 1
-        else:
-            if not run_compile(build_dir, args.environment, args.verbose):
-                return 1
+        if not run_fbuild_compile(build_dir, args.environment, args.verbose).success:
+            return 1
 
         # ============================================================
         # PHASES 3-4: Upload + Monitor
@@ -1383,16 +1358,12 @@ def main() -> int:
             kill_port_users(upload_port)
 
         # Phase 3: Upload firmware (with incremental rebuild if needed)
-        if use_fbuild:
-            from ci.util.fbuild_runner import run_fbuild_upload
+        from ci.util.fbuild_runner import run_fbuild_upload
 
-            if not run_fbuild_upload(
-                build_dir, args.environment, upload_port, args.verbose
-            ):
-                return 1
-        else:
-            if not run_upload(build_dir, args.environment, upload_port, args.verbose):
-                return 1
+        if not run_fbuild_upload(
+            build_dir, args.environment, upload_port, args.verbose
+        ):
+            return 1
 
         # Phase 4: Monitor serial output
         monitor_result = run_monitor(

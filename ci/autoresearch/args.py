@@ -1,6 +1,7 @@
 """Argument parsing for the autoresearch test runner."""
 
 import argparse
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -497,6 +498,14 @@ See Also:
         )
 
         parsed = parser.parse_args()
+
+        if parsed.use_fbuild or parsed.no_fbuild:
+            flag = "--no-fbuild" if parsed.no_fbuild else "--use-fbuild"
+            print(
+                f"warning: {flag} is deprecated and has no effect; "
+                "fbuild is always used for board builds.",
+                file=sys.stderr,
+            )
 
         # Convert argparse.Namespace to Args dataclass
         return Args(

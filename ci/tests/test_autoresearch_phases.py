@@ -177,9 +177,16 @@ class TestParseArgsAndBuildCommands:
         args = _make_args(all=True, parlio=False, project_dir=fake_project_dir)
         result = _parse_args_and_build_commands(args)
         assert isinstance(result, RunContext)
-        assert len(result.drivers) == 8
-        assert "PARLIO" in result.drivers
-        assert "RMT" in result.drivers
+        assert set(result.drivers) == {
+            "PARLIO",
+            "RMT",
+            "SPI",
+            "UART",
+            "LCD_CLOCKLESS",
+            "LCD_SPI",
+            "LCD_RGB",
+            "OBJECTFLED",
+        }
 
     def test_multiple_drivers(self, fake_project_dir: Path) -> None:
         args = _make_args(parlio=True, rmt=True, spi=True, project_dir=fake_project_dir)

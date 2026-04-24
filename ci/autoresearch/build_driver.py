@@ -13,7 +13,7 @@ class BuildDriver(Protocol):
 
     Two implementations:
       - FbuildDriver (default for all board builds)
-      - PlatformIODriver (legacy implementation)
+      - PlatformIODriver (deprecated legacy implementation)
     """
 
     @property
@@ -84,7 +84,11 @@ class FbuildDriver:
 
 
 class PlatformIODriver:
-    """Build driver using PlatformIO (separate compile + upload steps)."""
+    """Deprecated PlatformIO build driver kept for legacy callers.
+
+    New board-build paths should use FbuildDriver. This compatibility shim is
+    retained only for code that still imports PlatformIODriver directly.
+    """
 
     @property
     def name(self) -> str:
@@ -138,13 +142,18 @@ class PlatformIODriver:
 
 
 def select_build_driver(
-    environment: str | None,
-    use_fbuild_flag: bool,
-    no_fbuild_flag: bool,
+    _environment: str | None,
+    _use_fbuild_flag: bool,
+    _no_fbuild_flag: bool,
 ) -> BuildDriver:
     """Select the appropriate build driver.
 
     All board builds use fbuild. The fbuild selection flags are kept only for
     command compatibility and do not change this behavior.
+
+    Args:
+        _environment: Deprecated compatibility parameter; ignored.
+        _use_fbuild_flag: Deprecated compatibility parameter; ignored.
+        _no_fbuild_flag: Deprecated compatibility parameter; ignored.
     """
     return FbuildDriver()

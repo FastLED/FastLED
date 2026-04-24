@@ -356,7 +356,7 @@ def main() -> int:
         and len(config.boards) == 1
     ):
         # Check if we're on GitHub Actions - if so, force local compilation
-        from ci.compiler.formatting_utils import green_text, yellow_text
+        from ci.compiler.formatting_utils import yellow_text
         from ci.util.github_env import is_github_actions
 
         if is_github_actions():
@@ -387,39 +387,6 @@ def main() -> int:
                 skip_filters=config.skip_filters,
                 no_parallel=config.no_parallel,
             )
-        else:
-            # Normal Docker auto-detection for non-CI environments.
-            # Board compiles are fbuild-backed by default, so do not auto-route
-            # them to PlatformIO Docker images.
-            use_docker = False
-            if use_docker:
-                print(
-                    green_text(
-                        "🐳 Docker detected and will be used for faster compilation"
-                    )
-                )
-                print("   Use --local to force native compilation instead")
-                # Update workflow to Docker
-                from ci.compiler.argument_parser import CompilationConfig
-
-                config = CompilationConfig(
-                    boards=config.boards,
-                    examples=config.examples,
-                    workflow=WorkflowType.DOCKER,
-                    defines=config.defines,
-                    extra_packages=config.extra_packages,
-                    verbose=config.verbose,
-                    output_path=config.output_path,
-                    merged_bin=config.merged_bin,
-                    log_failures=config.log_failures,
-                    max_failures=config.max_failures,
-                    docker_build=config.docker_build,
-                    force_local=config.force_local,
-                    wasm_run=config.wasm_run,
-                    global_cache_dir=config.global_cache_dir,
-                    skip_filters=config.skip_filters,
-                    no_parallel=config.no_parallel,
-                )
 
     # Handle Docker compilation mode
     # Skip if already running inside Docker (FASTLED_DOCKER env var is set)

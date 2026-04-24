@@ -1,7 +1,7 @@
 blank_issues_enabled: false
 contact_links:
   - name: fbuild Board Build Compatibility
-    url: https://github.com/fastled/fbuild/issues
+    url: https://github.com/FastLED/fbuild/issues
     about: File board compile/build compatibility problems with fbuild.
   - name: FastLED Documentation
     url: https://fastled.io/docs
