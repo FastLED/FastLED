@@ -1,4 +1,4 @@
-"""Build driver abstraction for autoresearch — fbuild (default) and PlatformIO."""
+"""Build driver abstraction for autoresearch — fbuild default with legacy PlatformIO."""
 
 from __future__ import annotations
 
@@ -12,8 +12,8 @@ class BuildDriver(Protocol):
     """Abstract build system driver for compile + deploy.
 
     Two implementations:
-      - FbuildDriver (default for supported boards)
-      - PlatformIODriver (fallback / A-B testing)
+      - FbuildDriver (default for all board builds)
+      - PlatformIODriver (legacy implementation)
     """
 
     @property
@@ -144,20 +144,7 @@ def select_build_driver(
 ) -> BuildDriver:
     """Select the appropriate build driver.
 
-    Priority:
-      1. --no-fbuild flag  -> PlatformIODriver
-      2. --use-fbuild flag -> FbuildDriver
-      3. Board in FBUILD_BOARDS -> FbuildDriver
-      4. Default -> PlatformIODriver
+    All board builds use fbuild. The fbuild selection flags are kept only for
+    command compatibility and do not change this behavior.
     """
-    if no_fbuild_flag:
-        return PlatformIODriver()
-    if use_fbuild_flag:
-        return FbuildDriver()
-    if environment:
-        from ci.compiler.fbuild_boards import FBUILD_BOARDS
-
-        env_lower = environment.lower()
-        if any(board in env_lower for board in FBUILD_BOARDS):
-            return FbuildDriver()
-    return PlatformIODriver()
+    return FbuildDriver()

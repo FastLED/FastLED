@@ -8,6 +8,10 @@
 
 **WASM is the default compilation target for verifying examples.** Only compile for specific hardware platforms (esp32dev, uno, esp32s3, etc.) when the user explicitly requests it.
 
+### Board Build Backend: fbuild
+
+All board compiles use `fbuild`. Do not add board allowlists or PlatformIO fallback paths when a board does not compile; file board build compatibility problems at https://github.com/fastled/fbuild and fix them in fbuild.
+
 ### Use These Commands
 
 ```bash

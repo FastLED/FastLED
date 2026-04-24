@@ -16,7 +16,6 @@ from typeguard import typechecked
 from ci.boards import Board
 from ci.compiler.board_example_utils import get_filtered_examples
 from ci.compiler.compiler import SketchResult
-from ci.compiler.fbuild_boards import FBUILD_BOARDS
 from ci.compiler.pio import FastLEDPaths, PioCompiler
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
@@ -105,9 +104,6 @@ def compile_board_examples(
     print(f"{'=' * 60}")
 
     try:
-        # Use fbuild for supported boards (none currently; all use PlatformIO)
-        use_fbuild = board.board_name.lower() in FBUILD_BOARDS
-
         # Create PioCompiler instance
         compiler = PioCompiler(
             board=board,
@@ -115,7 +111,7 @@ def compile_board_examples(
             global_cache_dir=resolved_cache_dir,
             additional_defines=defines,
             additional_libs=extra_packages,
-            use_fbuild=use_fbuild,
+            use_fbuild=True,
         )
 
         # Build all examples - use merged-bin method if requested

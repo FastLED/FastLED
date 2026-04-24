@@ -2,8 +2,8 @@
 """PySerial-based SerialMonitor - Direct serial I/O without fbuild daemon.
 
 This module provides a SerialMonitor class with an API compatible with
-fbuild's SerialMonitor, but using pyserial directly. This is used when
---no-fbuild is specified to avoid daemon dependencies.
+fbuild's SerialMonitor, but using pyserial directly. This is retained for
+legacy direct-serial workflows.
 
 Example Usage:
     >>> from ci.util.pyserial_monitor import SerialMonitor
@@ -36,8 +36,7 @@ class SerialMonitor:
     """Context manager for direct pyserial-based serial monitoring.
 
     This class provides an API compatible with fbuild's SerialMonitor,
-    but uses pyserial directly without daemon dependencies. Use this
-    when --no-fbuild is specified.
+    but uses pyserial directly without daemon dependencies.
 
     Example:
         >>> with SerialMonitor(port='COM13', baud_rate=115200) as mon:

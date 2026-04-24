@@ -21,15 +21,14 @@ Phase 1: Linting (C++ linting only - catches ISR errors)
     - Can be skipped with --skip-lint flag for faster iteration
 
 Phase 2: Compile (NO LOCK - parallelizable)
-    - Builds the PlatformIO project for the target environment
-    - Uses `pio run -e <environment>` (normal compilation)
+    - Builds the staged project for the target environment with fbuild
     - No lock needed: Each project has isolated build directory
     - Packages already installed, so no downloads triggered
     - Multiple agents can compile different projects simultaneously
 
 Phase 3: Upload
-    - Uploads firmware to the attached device using `pio run -t upload`
-    - PlatformIO's incremental build system only rebuilds if source files changed
+    - Uploads firmware to the attached device using fbuild
+    - fbuild only rebuilds when source files or build inputs changed
     - Blocks if daemon indicates resource is busy
 
 Phase 4: Monitor
@@ -47,8 +46,8 @@ Concurrency Control:
 Usage:
     ⚠️ AI agents should use 'bash autoresearch' for device testing (see CLAUDE.md)
 
-    uv run ci/debug_attached.py                          # Auto-detect env & sketch (default: 60s timeout, waits until timeout)
-    uv run ci/debug_attached.py RX                       # Compile RX sketch (examples/RX), auto-detect env
+    uv run ci/debug_attached.py                          # Use default_envs & default sketch (default: 60s timeout, waits until timeout)
+    uv run ci/debug_attached.py RX                       # Compile RX sketch (examples/RX), use default_envs
     uv run ci/debug_attached.py RX --env esp32dev        # Compile RX sketch for specific environment
     uv run ci/debug_attached.py examples/RX/RX.ino       # Full path to sketch
     uv run ci/debug_attached.py --verbose                # Verbose mode
@@ -422,7 +421,7 @@ def run_monitor(
                                (default: ["ClearCommError", "PermissionError"])
         stop_keyword: Regex pattern that triggers early successful exit if all expect patterns found
         json_rpc_commands: List of JSON-RPC commands to send to device at startup (before trigger)
-        use_pyserial: If True, use pyserial directly instead of fbuild SerialMonitor (for --no-fbuild)
+        use_pyserial: If True, use pyserial directly instead of fbuild SerialMonitor
 
     Returns:
         Tuple of (success, output_lines, json_rpc_handler)
@@ -996,12 +995,12 @@ def run_monitor(
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
-        description="Upload and monitor attached PlatformIO device",
+        description="Upload and monitor an attached device with fbuild",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s                          # Auto-detect env & sketch (default: 60s timeout, waits until timeout)
-  %(prog)s RX                       # Compile RX sketch (examples/RX), auto-detect environment
+  %(prog)s                          # Use default_envs & sketch (default: 60s timeout, waits until timeout)
+  %(prog)s RX                       # Compile RX sketch (examples/RX), use default_envs
   %(prog)s RX --env esp32dev        # Compile RX sketch for specific environment
   %(prog)s examples/RX              # Same as above (explicit path)
   %(prog)s examples/deep/nested/Sketch  # Deep nested sketch
@@ -1035,7 +1034,7 @@ Examples:
         "--env",
         "-e",
         dest="environment",
-        help="PlatformIO environment to build (optional, auto-detect if not provided)",
+        help="PlatformIO environment to build (uses default_envs if not provided)",
     )
     parser.add_argument(
         "--verbose",
@@ -1136,12 +1135,12 @@ Examples:
     parser.add_argument(
         "--use-fbuild",
         action="store_true",
-        help="Use fbuild for compile and upload instead of PlatformIO (default for esp32s3/esp32c6)",
+        help="Deprecated compatibility flag; fbuild is always used for board builds",
     )
     parser.add_argument(
         "--no-fbuild",
         action="store_true",
-        help="Force PlatformIO even for esp32s3/esp32c6 (disables fbuild default)",
+        help="Deprecated compatibility flag; ignored because fbuild is always used",
     )
 
     return parser.parse_args()
@@ -1152,8 +1151,8 @@ def _should_use_fbuild(
 ) -> bool:
     """Determine if fbuild should be used for compilation and upload.
 
-    fbuild is no longer the default for any board (all use PlatformIO by default).
-    Use --use-fbuild to explicitly opt in.
+    All board builds use fbuild. The fbuild selection flags are kept only for
+    command compatibility and do not change this behavior.
 
     Args:
         environment: PlatformIO environment name (e.g., "esp32s3", "esp32c6")
@@ -1163,23 +1162,7 @@ def _should_use_fbuild(
     Returns:
         True if fbuild should be used, False otherwise
     """
-    # Explicit --no-fbuild takes priority
-    if no_fbuild_flag:
-        return False
-
-    # Explicit --use-fbuild
-    if use_fbuild_flag:
-        return True
-
-    # Default: use fbuild for boards in FBUILD_BOARDS
-    if environment:
-        from ci.compiler.fbuild_boards import FBUILD_BOARDS
-
-        env_lower = environment.lower()
-        if any(board in env_lower for board in FBUILD_BOARDS):
-            return True
-
-    return False
+    return True
 
 
 def main() -> int:
@@ -1193,6 +1176,16 @@ def main() -> int:
         print(f"❌ Error: platformio.ini not found in {build_dir}")
         print("   Make sure you're running this from a PlatformIO project directory")
         return 1
+
+    if args.environment is None:
+        from ci.util.pio_package_daemon import get_default_environment
+
+        default_environment = get_default_environment(str(build_dir))
+        if default_environment is None:
+            print("Error: fbuild requires an environment.")
+            print("   Set default_envs in platformio.ini or pass --env <environment>.")
+            return 1
+        args.environment = default_environment
 
     # Handle sketch argument and set PLATFORMIO_SRC_DIR environment variable
     if args.sketch:
@@ -1360,12 +1353,12 @@ def main() -> int:
         # No lock needed: each project has isolated build directory.
         # Multiple agents can compile different projects simultaneously.
 
-        # Determine if fbuild should be used (default for esp32s3/esp32c6)
+        # Determine if fbuild should be used (always true for board builds)
         use_fbuild = _should_use_fbuild(
             args.environment, args.use_fbuild, args.no_fbuild
         )
         if use_fbuild:
-            print("📦 Using fbuild (explicitly requested via --use-fbuild)")
+            print("📦 Using fbuild")
         else:
             print("📦 Using PlatformIO")
 

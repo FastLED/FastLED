@@ -116,9 +116,9 @@ jobs:
           python-version-file: "trusted/.python-version"
 
       # Extract board name (first positional in inputs.args) so per-board
-      # caches don't collide. Boards using PlatformIO get an empty cache —
-      # harmless; boards in FBUILD_BOARDS (see trusted/ci/compiler/fbuild_boards.py)
-      # get a warm toolchain + compile cache from previous runs.
+      # fbuild caches don't collide.
+      # All board builds use fbuild, so each board gets a warm toolchain
+      # and compile cache from previous runs.
       - name: Extract board name from inputs.args
         id: fbuild_board
         shell: bash
@@ -131,7 +131,7 @@ jobs:
       - name: Set up fbuild (install + cache)
         uses: FastLED/fbuild/.github/actions/setup@main
         with:
-          cache-key-extra: ${{ steps.fbuild_board.outputs.name }}-${{ hashFiles('trusted/platformio.ini', 'trusted/library.json', 'trusted/ci/compiler/fbuild_boards.py') }}
+          cache-key-extra: ${{ steps.fbuild_board.outputs.name }}-${{ hashFiles('trusted/platformio.ini', 'trusted/library.json', 'trusted/pyproject.toml', 'trusted/uv.lock') }}
 
       - name: Install Platform
         if: inputs.platform != ''

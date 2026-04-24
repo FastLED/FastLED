@@ -403,12 +403,12 @@ See Also:
         parser.add_argument(
             "--use-fbuild",
             action="store_true",
-            help="Use fbuild for compile and upload instead of PlatformIO (default for esp32s3 and esp32c6)",
+            help="Deprecated compatibility flag; fbuild is always used for board builds",
         )
         parser.add_argument(
             "--no-fbuild",
             action="store_true",
-            help="Force PlatformIO even for esp32s3 (disables fbuild default)",
+            help="Deprecated compatibility flag; ignored because fbuild is always used",
         )
         parser.add_argument(
             "--clean",

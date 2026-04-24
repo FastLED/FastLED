@@ -44,6 +44,7 @@ def _make_args(**overrides) -> Args:
         spi=False,
         uart=False,
         lcd=False,
+        lcd_spi=False,
         lcd_rgb=False,
         object_fled=False,
         all=False,
@@ -176,7 +177,7 @@ class TestParseArgsAndBuildCommands:
         args = _make_args(all=True, parlio=False, project_dir=fake_project_dir)
         result = _parse_args_and_build_commands(args)
         assert isinstance(result, RunContext)
-        assert len(result.drivers) == 7
+        assert len(result.drivers) == 8
         assert "PARLIO" in result.drivers
         assert "RMT" in result.drivers
 
@@ -296,7 +297,7 @@ class TestParseArgsAndBuildCommands:
         result = _parse_args_and_build_commands(args)
         assert isinstance(result, RunContext)
         assert result.final_environment == "esp32s3"
-        assert "I2S" in result.drivers
+        assert "LCD_CLOCKLESS" in result.drivers
 
     def test_timeout_parsing(self, fake_project_dir: Path) -> None:
         args = _make_args(timeout="2m", project_dir=fake_project_dir)

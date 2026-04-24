@@ -36,22 +36,26 @@ bash test --docker --examples
 - Reproducing CI failures that only occur in the Linux environment
 - Testing cross-platform compatibility issues
 
-## fbuild (Optional, Not Default)
+## fbuild (Default for Board Builds)
 
-The project supports `fbuild` as an **optional build system** for ESP boards, but all boards now use **PlatformIO by default**. fbuild provides:
+The project uses `fbuild` as the build system for all board compiles. New board targets must take the fbuild path by default; do not add board allowlists or PlatformIO fallbacks for board compatibility issues. Fix those in fbuild instead.
+
+File board build compatibility problems at https://github.com/fastled/fbuild.
+
+fbuild provides:
 - **Daemon-based compilation** — Background process handles builds, survives agent interrupts
 - **Cached toolchains/frameworks** — Downloads and caches ESP32 toolchain, Arduino framework
 - **Direct esptool integration** — Fast uploads without PlatformIO overhead
 
 **Default behavior:**
-- **All ESP32 variants**: PlatformIO is used by default
+- **All boards**: fbuild is used by default
 
 **Usage via debug_attached.py:**
 ```bash
-# All boards use PlatformIO by default
+# All board builds use fbuild
 uv run ci/debug_attached.py esp32s3 --example Blink
 
-# Explicitly use fbuild (opt-in only)
+# Compatibility flag only; fbuild is still used
 uv run ci/debug_attached.py esp32s3 --use-fbuild --example Blink
 ```
 

@@ -57,8 +57,8 @@ Options:
   --verbose, -v       Enable verbose output
 
 Build System:
-  --use-fbuild        Use fbuild for compile/upload (default for esp32s3/esp32c6)
-  --no-fbuild         Force PlatformIO even for esp32s3/esp32c6 (disables fbuild)
+  --use-fbuild        Deprecated compatibility flag; fbuild is always used
+  --no-fbuild         Deprecated compatibility flag; ignored because fbuild is always used
 
 Lane Configuration:
   --lanes N or MIN-MAX      Set lane count or range (e.g., '2' or '1-4')
@@ -89,7 +89,7 @@ Examples:
   bash autoresearch --parlio --lanes 1-4        # Test PARLIO with 1-4 lanes
   bash autoresearch --i2s --lane-counts 100,200,300  # Test I2S with 3 lanes (100, 200, 300 LEDs)
   bash autoresearch --rmt --color-pattern ff00aa     # Test RMT with custom color (pink)
-  bash autoresearch --parlio --no-fbuild             # Force PlatformIO (skip fbuild)
+  bash autoresearch --parlio                         # Uses fbuild for compile/upload
   bash autoresearch --parlio --lcd-rgb --parallel --lanes 1  # Test PARLIO + LCD_RGB in parallel
   bash autoresearch --net                             # ESP32 self-contained HTTP loopback test
   bash autoresearch --net-server                     # ESP32 WiFi AP + HTTP server autoresearch

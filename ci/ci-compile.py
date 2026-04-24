@@ -357,7 +357,6 @@ def main() -> int:
     ):
         # Check if we're on GitHub Actions - if so, force local compilation
         from ci.compiler.formatting_utils import green_text, yellow_text
-        from ci.util.docker_helper import should_use_docker_for_board
         from ci.util.github_env import is_github_actions
 
         if is_github_actions():
@@ -389,17 +388,10 @@ def main() -> int:
                 no_parallel=config.no_parallel,
             )
         else:
-            # Normal Docker auto-detection for non-CI environments
-            # Skip Docker entirely for fbuild boards (none currently)
-            from ci.compiler.fbuild_boards import FBUILD_BOARDS
-
-            board_name = config.boards[0].board_name
-            if board_name.lower() in FBUILD_BOARDS:
-                use_docker = False
-            else:
-                use_docker, reason = should_use_docker_for_board(
-                    board_name, verbose=False
-                )
+            # Normal Docker auto-detection for non-CI environments.
+            # Board compiles are fbuild-backed by default, so do not auto-route
+            # them to PlatformIO Docker images.
+            use_docker = False
             if use_docker:
                 print(
                     green_text(
