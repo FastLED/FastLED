@@ -102,7 +102,11 @@ def find_on_block(lines: list[str]) -> OnBlock | None:
 
     events: dict[str, EventBlock] = {}
     for position, (name, start) in enumerate(event_starts):
-        end = event_starts[position + 1][1] if position + 1 < len(event_starts) else on_end
+        end = (
+            event_starts[position + 1][1]
+            if position + 1 < len(event_starts)
+            else on_end
+        )
         events[name] = EventBlock(name=name, start=start, end=end, indent=child_indent)
 
     return OnBlock(start=on_start, end=on_end, child_indent=child_indent, events=events)

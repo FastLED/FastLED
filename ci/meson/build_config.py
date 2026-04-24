@@ -1902,7 +1902,9 @@ endian = 'little'
         # so a subsequent is_ar_content_preserving_active() call in runner.py is free.
         inject_ar_optimization_patches(build_dir, source_dir)
         if normalize_meson_private_include_paths(build_dir):
-            _ts_print("[MESON] Normalized private include paths for zccache strict mode")
+            _ts_print(
+                "[MESON] Normalized private include paths for zccache strict mode"
+            )
 
         return True
 
@@ -2001,7 +2003,9 @@ endian = 'little'
         # Must be called after meson setup so build.ninja exists.
         inject_ar_optimization_patches(build_dir, source_dir)
         if normalize_meson_private_include_paths(build_dir):
-            _ts_print("[MESON] Normalized private include paths for zccache strict mode")
+            _ts_print(
+                "[MESON] Normalized private include paths for zccache strict mode"
+            )
 
         return True
 

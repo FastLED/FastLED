@@ -52,7 +52,9 @@ class TestBannedMacrosChecker(unittest.TestCase):
 
     def test_string_literals_are_ignored(self) -> None:
         self.assertEqual(
-            len(_violations('FL_WARN("use FL_STATIC_ASSERT not static_assert(true)");')),
+            len(
+                _violations('FL_WARN("use FL_STATIC_ASSERT not static_assert(true)");')
+            ),
             0,
         )
         self.assertEqual(

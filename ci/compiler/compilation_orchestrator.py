@@ -19,6 +19,7 @@ from ci.compiler.compiler import SketchResult
 from ci.compiler.pio import FastLEDPaths, PioCompiler
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
+
 BOARD_BUILDS_USE_FBUILD = True
 
 

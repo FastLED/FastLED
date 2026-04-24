@@ -1,7 +1,6 @@
-from typing import Any
-
 from concurrent.futures import Future
 from pathlib import Path
+from typing import Any
 
 import pytest
 
