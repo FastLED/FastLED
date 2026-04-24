@@ -19,6 +19,13 @@ class WorkflowType(Enum):
     WASM = "wasm"
 
 
+class BuildBackend(Enum):
+    """Compilation backend selection (fbuild vs PlatformIO's `pio run`)."""
+
+    FBUILD = "fbuild"
+    PLATFORMIO = "platformio"
+
+
 @dataclass(frozen=True)
 class CompilationConfig:
     """Immutable compilation configuration with validation."""
@@ -54,6 +61,9 @@ class CompilationConfig:
 
     # Info options
     build_info: Optional[Path] = None  # Output file path for build info JSON
+
+    # Build backend selection (default fbuild; --backend=platformio forces `pio run`)
+    backend: BuildBackend = BuildBackend.FBUILD
 
     def validate(self) -> list[str]:
         """Validate configuration and return list of error messages."""
@@ -269,6 +279,32 @@ class CompilationArgumentParser:
             help="Override global PlatformIO cache directory path (for testing)",
         )
 
+        # Build backend selection. Default is fbuild (fast, incremental).
+        # --backend=platformio / --platformio / --pio forces `pio run` (slower,
+        # but exercises the PlatformIO-native build for size/compat comparison).
+        parser.add_argument(
+            "--backend",
+            choices=[b.value for b in BuildBackend],
+            default=BuildBackend.FBUILD.value,
+            help="Select build backend: 'fbuild' (default, fast) or 'platformio' "
+            "(runs `pio run` for a PlatformIO-native build). Use 'platformio' "
+            "to compare against fbuild output or reproduce PlatformIO-only "
+            "size/link behavior.",
+        )
+        parser.add_argument(
+            "--platformio",
+            "--pio",
+            dest="platformio_backend",
+            action="store_true",
+            help="Shortcut for --backend=platformio (force PlatformIO `pio run`).",
+        )
+        parser.add_argument(
+            "--fbuild",
+            dest="fbuild_backend",
+            action="store_true",
+            help="Shortcut for --backend=fbuild (default).",
+        )
+
         return parser
 
     def _build_config(self, args: argparse.Namespace) -> CompilationConfig:
@@ -290,6 +326,19 @@ class CompilationArgumentParser:
             else []
         )
 
+        # Resolve build backend. Precedence (last wins among explicit flags):
+        #   --fbuild  -> fbuild
+        #   --platformio / --pio -> platformio
+        #   --backend=<value>  -> <value> (explicit takes precedence over shortcuts
+        #       only if also passed; argparse has no easy "was flag passed" signal
+        #       for choices with a default, so we honor the shortcut if set, else
+        #       the --backend value).
+        backend = BuildBackend(args.backend)
+        if getattr(args, "platformio_backend", False):
+            backend = BuildBackend.PLATFORMIO
+        if getattr(args, "fbuild_backend", False):
+            backend = BuildBackend.FBUILD
+
         return CompilationConfig(
             boards=boards,
             examples=examples,
@@ -310,6 +359,7 @@ class CompilationArgumentParser:
             build_info=Path(args.build_info)
             if hasattr(args, "build_info") and args.build_info
             else None,
+            backend=backend,
         )
 
     def _resolve_boards(self, board_spec: Optional[str]) -> list[Board]:

@@ -20,6 +20,8 @@ from ci.compiler.pio import FastLEDPaths, PioCompiler
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
+# Default when the caller does not pass `use_fbuild=` explicitly. The
+# ci-compile.py CLI now exposes a `--backend` flag that overrides this.
 BOARD_BUILDS_USE_FBUILD = True
 
 
@@ -47,8 +49,16 @@ def compile_board_examples(
     extra_packages: Optional[list[str]] = None,
     max_failures: Optional[int] = None,
     skip_filters: bool = False,
+    use_fbuild: Optional[bool] = None,
 ) -> BoardCompilationResult:
-    """Compile examples for a single board using PioCompiler."""
+    """Compile examples for a single board using PioCompiler.
+
+    Args:
+        use_fbuild: If None, uses BOARD_BUILDS_USE_FBUILD (default True).
+            If True, uses fbuild. If False, uses PlatformIO's `pio run`.
+    """
+    if use_fbuild is None:
+        use_fbuild = BOARD_BUILDS_USE_FBUILD
 
     # Resolve global cache directory immediately for display
     resolved_cache_dir = None
@@ -104,6 +114,8 @@ def compile_board_examples(
             ok=True, sketch_results=[], skipped_examples=skipped_examples
         )
 
+    backend_label = "fbuild" if use_fbuild else "platformio (pio run)"
+    print(f"BUILD BACKEND: {backend_label}")
     print(f"{'=' * 60}")
 
     try:
@@ -114,7 +126,7 @@ def compile_board_examples(
             global_cache_dir=resolved_cache_dir,
             additional_defines=defines,
             additional_libs=extra_packages,
-            use_fbuild=BOARD_BUILDS_USE_FBUILD,
+            use_fbuild=use_fbuild,
         )
 
         # Build all examples - use merged-bin method if requested

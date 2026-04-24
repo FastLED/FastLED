@@ -343,6 +343,7 @@ def main() -> int:
             global_cache_dir=config.global_cache_dir,
             skip_filters=config.skip_filters,
             no_parallel=config.no_parallel,
+            backend=config.backend,
         )
 
     # Auto-detect Docker availability if neither --docker nor --local is specified
@@ -386,6 +387,7 @@ def main() -> int:
                 global_cache_dir=config.global_cache_dir,
                 skip_filters=config.skip_filters,
                 no_parallel=config.no_parallel,
+                backend=config.backend,
             )
 
     # Handle Docker compilation mode
@@ -487,6 +489,8 @@ def main() -> int:
         if config.merged_bin and config.output_path:
             merged_bin_output = config.output_path
 
+        from ci.compiler.argument_parser import BuildBackend
+
         result = compile_board_examples(
             board=board,
             examples=examples,
@@ -498,6 +502,7 @@ def main() -> int:
             extra_packages=config.extra_packages if config.extra_packages else None,
             max_failures=config.max_failures,
             skip_filters=config.skip_filters,
+            use_fbuild=(config.backend == BuildBackend.FBUILD),
         )
 
         if not result.ok:
