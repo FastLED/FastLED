@@ -2,7 +2,7 @@
 /// @file asset.cpp
 /// @brief Tests for fl::asset_ref, fl::asset(), and fl::resolve_asset().
 
-#include "fl/asset.h"
+#include "fl/asset/asset.h"
 #include "fl/stl/string_view.h"
 #include "fl/stl/url.h"
 #include "test.h"

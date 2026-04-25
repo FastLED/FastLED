@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/asset.h"
+#include "fl/asset/asset.h"
 #include "fl/audio/audio.h"
 #include "fl/audio/audio_input.h"  // For audio::Config  // IWYU pragma: keep
 #include "fl/stl/optional.h"

@@ -6,12 +6,12 @@
 // which includes is_teensy.h before this header.
 
 // begin current directory includes
-#include "fl/asset.cpp.hpp"
 #include "fl/fastled_internal.cpp.hpp"
 #include "fl/fltest.cpp.hpp"
 #include "fl/static_constexpr_defs.cpp.hpp"
 
 // begin sub directory includes
+#include "fl/asset/_build.cpp.hpp"
 #include "fl/audio/_build.cpp.hpp"
 #include "fl/channels/_build.cpp.hpp"
 #include "fl/chipsets/_build.cpp.hpp"

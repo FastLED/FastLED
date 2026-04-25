@@ -160,7 +160,7 @@ constexpr asset_ref asset(const char* path) FL_NOEXCEPT {
 /// These are parsed by `fl::parse_lnk_with_metadata()` for forward-compat and
 /// reserved for future integrity/retry features.
 ///
-/// Declared here; defined in `fl/asset.cpp.hpp`.
+/// Declared here; defined in `fl/asset/asset.cpp.hpp`.
 fl::url resolve_asset(const asset_ref& a) FL_NOEXCEPT;
 
 /// Register an asset path → URL mapping at runtime.
