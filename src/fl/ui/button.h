@@ -19,7 +19,7 @@ namespace fl {
 
 class UIButtonImpl {
   public:
-    UIButtonImpl(const char *name) { FASTLED_UNUSED(name); }
+    UIButtonImpl(const char *name) : mName(name ? name : "") {}
     ~UIButtonImpl() FL_NOEXCEPT {}
     bool isPressed() const { return false; }
     bool clicked() const { return false; }
@@ -103,8 +103,16 @@ class UIButton : public UIElement {
         return id;
     }
 
-    void removeCallback(int id) FL_NOEXCEPT { mCallbacks.remove(id); }
-    void clearCallbacks() FL_NOEXCEPT { mCallbacks.clear(); }
+    void removeCallback(int id) FL_NOEXCEPT {
+        mCallbacks.remove(id);
+        mPressCallbacks.remove(id);
+        mReleaseCallbacks.remove(id);
+    }
+    void clearCallbacks() FL_NOEXCEPT {
+        mCallbacks.clear();
+        mPressCallbacks.clear();
+        mReleaseCallbacks.clear();
+    }
 
   protected:
     UIButtonImpl mImpl;

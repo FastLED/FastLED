@@ -21,7 +21,9 @@ class UINumberFieldImpl {
   public:
     UINumberFieldImpl(const char *name, double value, double min = 0,
                       double max = 100)
-        : mValue(value), mMin(fl::min(min, max)), mMax(fl::max(min, max)) {
+        : mMin(fl::min(min, max)),
+          mMax(fl::max(min, max)),
+          mValue(fl::max(mMin, fl::min(mMax, value))) {
         FASTLED_UNUSED(name);
     }
     ~UINumberFieldImpl() FL_NOEXCEPT {}
@@ -42,9 +44,9 @@ class UINumberFieldImpl {
     void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
 
   private:
-    double mValue;
     double mMin;
     double mMax;
+    double mValue;
 };
 
 #endif

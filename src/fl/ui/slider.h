@@ -22,15 +22,11 @@ class UISliderImpl {
     // If step is -1, it will be calculated as (max - min) / 100
     UISliderImpl(const char *name, float value = 128.0f, float min = 1,
                  float max = 255, float step = -1.f)
-        : mValue(value), mMin(fl::min(min, max)), mMax(fl::max(min, max)) {
+        : mMin(fl::min(min, max)),
+          mMax(fl::max(min, max)),
+          mValue(fl::max(mMin, fl::min(mMax, value))) {
         FASTLED_UNUSED(name);
         FASTLED_UNUSED(step);
-        if (value < min) {
-            mValue = min;
-        }
-        if (value > max) {
-            mValue = max;
-        }
     }
     ~UISliderImpl() FL_NOEXCEPT {}
     float value() const { return mValue; }
@@ -58,9 +54,9 @@ class UISliderImpl {
     }
 
   private:
-    float mValue;
     float mMin;
     float mMax;
+    float mValue;
 };
 
 #endif

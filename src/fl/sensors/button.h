@@ -64,11 +64,11 @@ class Button : public IButtonInput {
         mButton.setStrategy(strategy);
     }
 
-    bool isPressed() override {
+    bool isPressed() const FL_NOEXCEPT override {
         return mButton.isPressed();
     }
 
-    bool clicked() override {
+    bool clicked() const FL_NOEXCEPT override {
         return mClickedThisFrame;
     }
 
@@ -92,7 +92,11 @@ class Button : public IButtonInput {
     };
 
   private:
-    ButtonLowLevel mButton;
+    // mButton is mutable because querying button state requires toggling pin
+    // mode/level on platforms using kHighLowFloating strategy. The const-ness
+    // refers to the logical observable state of the Button object, not the
+    // underlying hardware probe.
+    mutable ButtonLowLevel mButton;
     Listener mListener;
     bool mPressedLastFrame = false;  // Don't read this variale, it's used internally.
     bool mClickedThisFrame = false;  // This is true if clicked this frame.

@@ -31,8 +31,8 @@ namespace fl {
 class IButtonInput {
   public:
     virtual ~IButtonInput() FL_NOEXCEPT = default;
-    virtual bool isPressed() FL_NOEXCEPT = 0;
-    virtual bool clicked() FL_NOEXCEPT = 0;
+    virtual bool isPressed() const FL_NOEXCEPT = 0;
+    virtual bool clicked() const FL_NOEXCEPT = 0;
 };
 
 // Forward declaration only - concrete type lives in fl/sensors/button.h
