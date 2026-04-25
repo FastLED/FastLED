@@ -11,4 +11,5 @@
 #include "fl/ui/help.cpp.hpp"
 #include "fl/ui/number_field.cpp.hpp"
 #include "fl/ui/slider.cpp.hpp"
+#include "fl/ui/string.cpp.hpp"
 #include "fl/ui/title.cpp.hpp"

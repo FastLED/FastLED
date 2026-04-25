@@ -207,7 +207,7 @@ template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, 
 using ClocklessBlockController = ClocklessBlockingGeneric<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
 #endif
 
-// Note: ClocklessController alias selection is now handled by fl/clockless_controller_impl.h
+// Note: ClocklessController alias selection is now handled by fl/chipsets/clockless_controller_impl.h
 // which checks both FL_CLOCKLESS_CONTROLLER_DEFINED and FASTLED_CLOCKLESS_STUB_DEFINED flags
 
 }  // namespace fl

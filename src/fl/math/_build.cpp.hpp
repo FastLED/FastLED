@@ -9,6 +9,7 @@
 #include "fl/math/random.cpp.hpp"
 #include "fl/math/screenmap.cpp.hpp"
 #include "fl/math/sin32.cpp.hpp"
+#include "fl/math/time_alpha.cpp.hpp"
 #include "fl/math/transform.cpp.hpp"
 #include "fl/math/transposition.cpp.hpp"
 #include "fl/math/xmap.cpp.hpp"

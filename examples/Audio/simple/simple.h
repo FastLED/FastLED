@@ -31,7 +31,7 @@ all the UI elements you see below.
 #include "fl/math/math.h"
 #include "fl/math/math.h"
 #include "fl/gfx/raster.h"
-#include "fl/time_alpha.h"
+#include "fl/math/time_alpha.h"
 #include "fl/ui.h"
 #include "fl/gfx/xypath.h"
 #include "fl/stl/compiler_control.h"
