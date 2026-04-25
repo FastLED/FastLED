@@ -9,4 +9,5 @@
 #include "fl/system/pin.cpp.hpp"
 #include "fl/system/pins.cpp.hpp"
 #include "fl/system/serial.cpp.hpp"
+#include "fl/system/trace.cpp.hpp"
 #include "fl/system/yield.cpp.hpp"

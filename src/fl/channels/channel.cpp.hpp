@@ -13,7 +13,7 @@
 #include "fl/channels/options.h"
 #include "fl/gfx/pixel_iterator_any.h"
 #include "pixel_controller.h"
-#include "fl/trace.h"
+#include "fl/system/trace.h"
 
 #include "fl/system/pin.h"
 #include "fl/chipsets/encoders/ucs7604.h"

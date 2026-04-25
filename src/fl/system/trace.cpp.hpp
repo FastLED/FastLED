@@ -6,7 +6,7 @@
  * that uses a fixed-size buffer to store function names during execution.
  */
 
-#include "fl/trace.h"
+#include "fl/system/trace.h"
 
 #include "fl/stl/vector.h"
 #include "fl/stl/string.h"

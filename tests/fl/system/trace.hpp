@@ -1,7 +1,7 @@
 /// @file trace.cpp
 /// @brief Test for internal call stack tracking system
 
-#include "fl/trace.h"
+#include "fl/system/trace.h"
 #include "test.h"
 #include "fl/system/log.h"
 #include "fl/stl/strstream.h"

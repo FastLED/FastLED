@@ -41,7 +41,7 @@
 #include "fl/stl/sstream.h"
 #include "fl/stl/chrono.h"
 #include "fl/stl/unique_ptr.h"
-#include "fl/trace.h"
+#include "fl/system/trace.h"
 #include "platforms/memory_barrier.h" // For FL_MEMORY_BARRIER
 #include "fl/stl/noexcept.h"
 
