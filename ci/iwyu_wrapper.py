@@ -44,6 +44,30 @@ def find_iwyu_binary() -> str | None:
     return None
 
 
+def _resolve_fast_native_cxx(compiler_path: str) -> str:
+    """Swap a slow Python-wrapped C++ driver for the cached native launcher.
+
+    The `clang-tool-chain-cpp` Python entry point pays ~828ms of interpreter
+    startup before clang even runs (per the meson native-file optimization,
+    repo memory 2026-03-07). The repo's build system pre-compiles a native
+    launcher at `.cached/clang-native/ctc-clang++.exe` that avoids this
+    overhead (~100ms vs ~1068ms for the same `-E -v` stdlib probe).
+
+    If the cached native launcher exists and the requested driver is the
+    slow Python wrapper, return the cached path. Otherwise, return the
+    original path unchanged.
+    """
+    name = Path(compiler_path).name.lower()
+    if "clang-tool-chain-cpp" not in name and "clang-tool-chain-c-msvc" not in name:
+        return compiler_path
+    repo_root = Path(__file__).resolve().parent.parent
+    suffix = ".exe" if sys.platform == "win32" else ""
+    cached = repo_root / ".cached" / "clang-native" / f"ctc-clang++{suffix}"
+    if cached.is_file():
+        return str(cached)
+    return compiler_path
+
+
 def get_compiler_include_paths(compiler_path: str) -> list[str]:
     """
     Extract C++ stdlib include paths from the compiler.
@@ -51,11 +75,12 @@ def get_compiler_include_paths(compiler_path: str) -> list[str]:
     This queries the compiler for its default include search paths
     and returns them as a list of -I flags for IWYU.
     """
+    fast_compiler = _resolve_fast_native_cxx(compiler_path)
     try:
         # Query compiler for its include paths
         # Using -E (preprocess only), -x c++ (C++ mode), -v (verbose), - (stdin)
         result = subprocess.run(
-            [compiler_path, "-E", "-x", "c++", "-v", "-"],
+            [fast_compiler, "-E", "-x", "c++", "-v", "-"],
             input="",
             capture_output=True,
             text=True,
