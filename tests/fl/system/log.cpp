@@ -443,7 +443,7 @@ FL_TEST_CASE("warning macro edge cases") {
 }
 
 // Grouped tests
-#include "tests/fl/trace.hpp"
+#include "tests/fl/system/trace.hpp"
 
 FL_TEST_FILE(FL_FILEPATH) {
 

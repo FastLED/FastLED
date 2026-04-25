@@ -8,7 +8,7 @@
 #include "fl/channels/channel.h"
 #include "fl/channels/channel_events.h"
 #include "fl/channels/manager.h"
-#include "fl/trace.h"
+#include "fl/system/trace.h"
 #include "fl/channels/driver.h"  // for IChannelDriver
 #include "fl/system/delay.h"  // for delayMicroseconds
 #include "fl/system/sketch_macros.h"
