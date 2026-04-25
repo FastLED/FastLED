@@ -3,7 +3,7 @@
 /// @brief Test for Timeout class rollover-safe arithmetic
 
 #include "test.h"
-#include "fl/timeout.h"
+#include "fl/system/timeout.h"
 
 using namespace fl;
 
