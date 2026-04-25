@@ -233,7 +233,7 @@ def manifest_to_cpp_header(scan: AssetScanResult) -> str:
     lines.append("// Registers the sketch's v1 asset manifest (issue #2284).")
     lines.append("#pragma once")
     lines.append("")
-    lines.append('#include "fl/asset.h"')
+    lines.append('#include "fl/asset/asset.h"')
     lines.append('#include "fl/stl/url.h"')
     lines.append("")
     lines.append("namespace {")

@@ -61,6 +61,7 @@ LIBRARY_JSON_FILE = "library.json"
 EXPECTED_BUILD_FILES = {
     "fl/build/src.cpp",
     "fl/build/fl.cpp",
+    "fl/build/fl.asset+.cpp",
     "fl/build/fl.audio+.cpp",
     "fl/build/fl.channels+.cpp",
     "fl/build/fl.chipsets+.cpp",

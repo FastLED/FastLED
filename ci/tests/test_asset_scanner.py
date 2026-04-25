@@ -142,7 +142,7 @@ class TestManifestSerializers(unittest.TestCase):
             manifest={"data/track.mp3": AssetEntry(url="https://example.com/a.mp3")}
         )
         header = manifest_to_cpp_header(scan)
-        self.assertIn('#include "fl/asset.h"', header)
+        self.assertIn('#include "fl/asset/asset.h"', header)
         self.assertIn("::fl::register_asset", header)
         self.assertIn('"data/track.mp3"', header)
         self.assertIn('"https://example.com/a.mp3"', header)

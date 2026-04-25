@@ -11,7 +11,7 @@
 //   fastled
 
 #include <FastLED.h>
-#include "fl/asset.h"
+#include "fl/asset/asset.h"
 #include "fl/ui.h"
 #include "fl/stl/url.h"
 
