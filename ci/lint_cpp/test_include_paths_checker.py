@@ -98,7 +98,8 @@ def _all_test_filenames() -> frozenset[str]:
         _all_test_filenames_cache = frozenset(
             p.name
             for p in (PROJECT_ROOT / "tests").rglob("*")
-            if p.is_file() and p.suffix in (".h", ".hpp", ".cpp.hpp")
+            if p.is_file()
+            and (p.suffix in (".h", ".hpp") or p.name.endswith(".cpp.hpp"))
         )
     return _all_test_filenames_cache
 
