@@ -4,7 +4,7 @@
 
 #include "fl/sensors/digital_pin.h"
 #include "fl/ui.h"
-#include "fl/time_alpha.h"
+#include "fl/math/time_alpha.h"
 
 namespace fl {
 
