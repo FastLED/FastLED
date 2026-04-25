@@ -9,6 +9,7 @@
 #include "fl/stl/url.h"
 #include "fl/stl/compiler_control.h"  // IWYU pragma: keep
 #include "fl/stl/noexcept.h"
+#include "fl/system/log.h"
 #include "fl/ui/element.h"
 #include "platforms/ui_defs.h"
 
