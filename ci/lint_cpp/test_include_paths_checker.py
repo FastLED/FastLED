@@ -38,36 +38,70 @@ TESTS_DIR = str(PROJECT_ROOT / "tests").replace("\\", "/")
 # Pattern to extract include path from #include "..." statements
 _INCLUDE_PATTERN = re.compile(r'^\s*#\s*include\s+"([^"]+)"')
 
-# Top-level headers in tests/ that are unambiguous (no directory prefix needed).
-# These live directly in tests/ and have no counterpart in src/.
-_ALLOWED_BARE_TEST_HEADERS: frozenset[str] = frozenset(
-    p.name
-    for p in (PROJECT_ROOT / "tests").iterdir()
-    if p.is_file() and p.suffix in (".h", ".hpp")
-)
+# Filesystem scans below are deferred to first-use. Walking tests/ recursively
+# costs ~314ms at module import, which is paid by every single-file lint —
+# even when the file being linted is not under tests/ and this checker is a
+# no-op for it. Lazy init keeps the import cheap.
+_allowed_bare_test_headers_cache: frozenset[str] | None = None
+_allowed_bare_src_headers_cache: frozenset[str] | None = None
+_allowed_bare_includes_cache: frozenset[str] | None = None
+_all_test_filenames_cache: frozenset[str] | None = None
 
-# Top-level headers in src/ that are unambiguous (legacy compatibility).
-# These live directly in src/ (e.g., FastLED.h, crgb.h) and have no
-# counterpart in tests/.
-_ALLOWED_BARE_SRC_HEADERS: frozenset[str] = frozenset(
-    p.name
-    for p in (PROJECT_ROOT / "src").iterdir()
-    if p.is_file() and p.suffix in (".h", ".hpp")
-)
 
-# Union of all allowed bare (no-directory) includes.
-_ALLOWED_BARE_INCLUDES: frozenset[str] = (
-    _ALLOWED_BARE_TEST_HEADERS | _ALLOWED_BARE_SRC_HEADERS
-)
+def _allowed_bare_test_headers() -> frozenset[str]:
+    """Top-level headers in tests/ that are unambiguous (no dir prefix needed)."""
+    global _allowed_bare_test_headers_cache
+    if _allowed_bare_test_headers_cache is None:
+        _allowed_bare_test_headers_cache = frozenset(
+            p.name
+            for p in (PROJECT_ROOT / "tests").iterdir()
+            if p.is_file() and p.suffix in (".h", ".hpp")
+        )
+    return _allowed_bare_test_headers_cache
 
-# All filenames that exist somewhere inside tests/ (recursively).
-# A bare include is only flagged if the filename is found here — otherwise
-# it's probably a system or SDK header (e.g., <stdint.h>, <initializer_list>).
-_ALL_TEST_FILENAMES: frozenset[str] = frozenset(
-    p.name
-    for p in (PROJECT_ROOT / "tests").rglob("*")
-    if p.is_file() and p.suffix in (".h", ".hpp", ".cpp.hpp")
-)
+
+def _allowed_bare_src_headers() -> frozenset[str]:
+    """Top-level headers in src/ that are unambiguous (legacy compatibility).
+
+    These live directly in src/ (e.g., FastLED.h, crgb.h) and have no
+    counterpart in tests/.
+    """
+    global _allowed_bare_src_headers_cache
+    if _allowed_bare_src_headers_cache is None:
+        _allowed_bare_src_headers_cache = frozenset(
+            p.name
+            for p in (PROJECT_ROOT / "src").iterdir()
+            if p.is_file() and p.suffix in (".h", ".hpp")
+        )
+    return _allowed_bare_src_headers_cache
+
+
+def _allowed_bare_includes() -> frozenset[str]:
+    """Union of allowed bare (no-directory) includes."""
+    global _allowed_bare_includes_cache
+    if _allowed_bare_includes_cache is None:
+        _allowed_bare_includes_cache = (
+            _allowed_bare_test_headers() | _allowed_bare_src_headers()
+        )
+    return _allowed_bare_includes_cache
+
+
+def _all_test_filenames() -> frozenset[str]:
+    """All filenames that exist somewhere inside tests/ (recursively).
+
+    A bare include is only flagged if the filename is found here — otherwise
+    it's probably a system or SDK header (e.g., <stdint.h>, <initializer_list>).
+    Recursive scan is the dominant cost (~314ms); cached after first use.
+    """
+    global _all_test_filenames_cache
+    if _all_test_filenames_cache is None:
+        _all_test_filenames_cache = frozenset(
+            p.name
+            for p in (PROJECT_ROOT / "tests").rglob("*")
+            if p.is_file() and p.suffix in (".h", ".hpp", ".cpp.hpp")
+        )
+    return _all_test_filenames_cache
+
 
 # Valid directory prefixes for qualified includes (src-relative or test-relative).
 _VALID_PREFIXES = (
@@ -162,13 +196,13 @@ class TestIncludePathsChecker(FileContentChecker):
             # 3) Bare filename — allowed only for known top-level headers
             #    or system/SDK headers that don't exist in tests/.
             if _is_bare_filename(include_path):
-                if include_path in _ALLOWED_BARE_INCLUDES:
+                if include_path in _allowed_bare_includes():
                     continue
                 # Only flag if this filename actually exists somewhere in tests/
                 # (i.e., it's a test-local header).  System/SDK headers like
                 # stdint.h, initializer_list, esp_err.h are NOT in tests/ and
                 # are silently allowed.
-                if include_path not in _ALL_TEST_FILENAMES:
+                if include_path not in _all_test_filenames():
                     continue
                 violations.append(
                     (
