@@ -13,6 +13,7 @@ Guidelines for how agents should approach work in the FastLED project.
 - Offload research, exploration, and parallel analysis to subagents
 - For complex problems, throw more compute at it via subagents
 - One task per subagent for focused execution
+- **Orchestrated sub-agents must NOT each run `bash test`** — running the full test suite N times across N steps is pure waste. Per-step sub-agents run `bash lint` only; the orchestrator runs `bash test --cpp` ONCE at the end (the `Stop` hook does this for free when files changed). The orchestrator MUST explicitly suspend the test mandate in the dispatch prompt. Full rule: `agents/tests.md` → "Orchestrated Sub-Agent Carve-Out".
 
 ## 3. Self-Improvement Loop
 - After ANY correction from the user: update `agents/tasks/lessons.md` with the pattern

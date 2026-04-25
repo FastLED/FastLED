@@ -46,6 +46,23 @@
 
 **FAILURE TO FOLLOW THESE REQUIREMENTS WILL RESULT IN BROKEN CODE SUBMISSIONS.**
 
+### 🔁 Orchestrated Sub-Agent Carve-Out
+
+**The `bash test` mandate above does NOT apply when a sub-agent is dispatched as one step of a larger multi-step orchestration.**
+
+When the orchestrator (the parent agent) delegates a single step of a 3+ step plan to a sub-agent — e.g., "move file X, sweep includes, commit" as part of a 9-step refactor — that sub-agent MUST:
+
+- **Run `bash lint` only.** It is fast and catches missing-include errors.
+- **Skip `bash test --cpp` / `bash test`.** Per-step test runs across N sub-agents = N redundant compiles of the same codebase. The test pass should run ONCE.
+- **Trust the orchestrator** to run `bash test --cpp` once at the end before pushing. The `Stop` hook (`ci/hooks/check-on-stop.py`) also runs it automatically when files changed during the session, so the orchestrator gets it for free.
+
+**How a sub-agent knows it is orchestrated:** the dispatcher's prompt explicitly says so (e.g., "you are step N of an M-step plan; do not run `bash test`"). If the prompt does not say this, fall back to the standard mandate above and run `bash test`.
+
+**Orchestrator responsibilities:**
+- State explicitly in each sub-agent prompt that the test mandate is suspended for this step.
+- Run `bash test --cpp` once after the final step's commit, before pushing the branch / opening the PR.
+- If the final test pass fails, identify which step's commit broke it (via `git bisect` or `git log`) and dispatch a fix.
+
 ---
 
 ## Test Assertion Macros
