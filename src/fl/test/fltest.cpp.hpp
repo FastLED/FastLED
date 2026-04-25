@@ -1,7 +1,7 @@
-/// @file fl/fltest.cpp
+/// @file fl/test/fltest.cpp
 /// @brief Implementation of the portable test framework
 
-#include "fl/fltest.h"
+#include "fl/test/fltest.h"
 #include "fl/system/log.h"
 #include "fl/stl/stdio.h"
 #include "fl/stl/noexcept.h"

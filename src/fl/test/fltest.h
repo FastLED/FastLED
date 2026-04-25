@@ -1,6 +1,6 @@
 #pragma once
 
-/// @file fl/fltest.h
+/// @file fl/test/fltest.h
 /// @brief Portable test framework for FastLED
 ///
 /// This is a lightweight test framework that can run on both host computers
@@ -13,7 +13,7 @@
 /// - Support for embedded devices (serial output)
 ///
 /// Usage:
-///   #include "fl/fltest.h"
+///   #include "fl/test/fltest.h"
 ///
 ///   FL_TEST_CASE("MyTest") {
 ///       FL_CHECK(1 + 1 == 2);
@@ -1927,7 +1927,7 @@ struct TypeIterator<TypeList<T, Rest...>, TestFunc> {
 // Usage:
 //   // In your main test file:
 //   #define FLTEST_IMPLEMENT_MAIN
-//   #include "fl/fltest.h"
+//   #include "fl/test/fltest.h"
 //
 //   FL_TEST_CASE("my test") { FL_CHECK(1 == 1); }
 //
@@ -1945,7 +1945,7 @@ int main(int argc, char** argv) {
 // =============================================================================
 // For Arduino-style embedded environments, use this in your setup() function:
 //
-//   #include "fl/fltest.h"
+//   #include "fl/test/fltest.h"
 //
 //   void setup() {
 //       Serial.begin(115200);

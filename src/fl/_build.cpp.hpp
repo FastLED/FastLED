@@ -7,7 +7,6 @@
 
 // begin current directory includes
 #include "fl/fastled_internal.cpp.hpp"
-#include "fl/fltest.cpp.hpp"
 #include "fl/static_constexpr_defs.cpp.hpp"
 
 // begin sub directory includes
@@ -30,5 +29,6 @@
 #include "fl/stl/_build.cpp.hpp"
 #include "fl/system/_build.cpp.hpp"
 #include "fl/task/_build.cpp.hpp"
+#include "fl/test/_build.cpp.hpp"
 #include "fl/ui/_build.cpp.hpp"
 #include "fl/video/_build.cpp.hpp"
