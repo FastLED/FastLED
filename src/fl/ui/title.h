@@ -16,11 +16,11 @@ namespace fl {
 
 class UITitleImpl {
   public:
-    UITitleImpl(const char *name) { FASTLED_UNUSED(name); }
+    UITitleImpl(const char *name) FL_NOEXCEPT { FASTLED_UNUSED(name); }
     ~UITitleImpl() FL_NOEXCEPT {}
 
     // Stub method for group setting (does nothing on non-WASM platforms)
-    void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
+    void setGroup(const fl::string& groupName) FL_NOEXCEPT { FASTLED_UNUSED(groupName); }
 };
 
 #endif

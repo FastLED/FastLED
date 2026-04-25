@@ -8,9 +8,9 @@
 
 namespace fl {
 
-void UIButton::addRealButton(fl::shared_ptr<Button> button) {
-    // Button inherits IButtonInput; shared_ptr implicit upcast captures the
-    // concrete deleter so fl.cpp never needs Button's destructor.
+void UIButton::addRealButton(fl::shared_ptr<IButtonInput> button) {
+    // Stored directly; no concrete-type dependency. Caller may pass any
+    // IButtonInput implementation (Button, mock, etc.).
     mButtonInput = button;
 }
 

@@ -18,23 +18,18 @@ UIDropdown::~UIDropdown() FL_NOEXCEPT {}
 void UIDropdown::Listener::onBeginFrame() FL_NOEXCEPT {
     UIDropdown &owner = *mOwner;
 
-    // Check the next button if one is attached (via IButtonInput interface)
-    bool shouldAdvance = false;
-    if (owner.mNextButton) {
-        if (owner.mNextButton->clicked()) {
-            shouldAdvance = true;
-        }
-    }
-
-    if (shouldAdvance) {
-        owner.nextOption();
-    }
-
+    // Seed baseline before any first-frame advance so a nextOption() triggered
+    // on the very first frame still produces a change callback.
     if (!owner.mLastFrameValueValid) {
         owner.mLastFrameValue = owner.as_int();
         owner.mLastFrameValueValid = true;
-        return;
     }
+
+    // Check the next button if one is attached (via IButtonInput interface)
+    if (owner.mNextButton && owner.mNextButton->clicked()) {
+        owner.nextOption();
+    }
+
     int value = owner.as_int();
     if (value != owner.mLastFrameValue) {
         owner.mCallbacks.invoke(owner);

@@ -14,11 +14,13 @@ UISlider::UISlider(const char *name, float value, float min, float max, float st
 
 void UISlider::setValue(float value) FL_NOEXCEPT {
     float oldValue = mImpl.value();
-    if (value != oldValue) {
-        mImpl.setValue(value);
-        // Update the last frame value to keep state consistent.
-        // Read back from mImpl in case setValue clamped to [min, max].
-        mLastFrameValue = mImpl.value();
+    mImpl.setValue(value);
+    // Read back post-clamp value; only fire callbacks if the observable value
+    // actually changed (avoids spurious notifications when caller passes an
+    // out-of-range value that clamps back to the current value).
+    float newValue = mImpl.value();
+    if (newValue != oldValue) {
+        mLastFrameValue = newValue;
         mLastFrameValueValid = true;
         // Invoke callbacks to notify listeners (including JavaScript components)
         mCallbacks.invoke(*this);

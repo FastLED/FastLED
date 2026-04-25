@@ -64,7 +64,7 @@ class UIButton : public UIElement {
     operator bool() const FL_NOEXCEPT { return clicked(); }
     bool value() const FL_NOEXCEPT { return clicked(); }
 
-    void addRealButton(fl::shared_ptr<Button> button) FL_NOEXCEPT;
+    void addRealButton(fl::shared_ptr<IButtonInput> button) FL_NOEXCEPT;
 
     void click() FL_NOEXCEPT { mImpl.click(); }
 
@@ -103,11 +103,13 @@ class UIButton : public UIElement {
         return id;
     }
 
-    void removeCallback(int id) FL_NOEXCEPT {
-        mCallbacks.remove(id);
-        mPressCallbacks.remove(id);
-        mReleaseCallbacks.remove(id);
-    }
+    // Per-list removers. Each callback list maintains its own ID counter,
+    // so an id returned by onChanged()/onPressed()/onReleased() is only
+    // meaningful to its originating list — use the matching remover here.
+    void removeChangedCallback(int id) FL_NOEXCEPT { mCallbacks.remove(id); }
+    void removePressedCallback(int id) FL_NOEXCEPT { mPressCallbacks.remove(id); }
+    void removeReleasedCallback(int id) FL_NOEXCEPT { mReleaseCallbacks.remove(id); }
+
     void clearCallbacks() FL_NOEXCEPT {
         mCallbacks.clear();
         mPressCallbacks.clear();
