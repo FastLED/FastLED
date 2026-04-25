@@ -6,7 +6,7 @@
 #include "fl/math/xmap.h"
 #include "fl/math/screenmap.h"
 #include "fl/stl/span.h"
-#include "fl/fltest.h"
+#include "fl/test/fltest.h"
 #include "fl/channels/driver.h"
 #include "fl/channels/data.h"
 #include "fl/channels/manager.h"

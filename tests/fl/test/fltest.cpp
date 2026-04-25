@@ -4,14 +4,14 @@
 /// This test verifies that the fltest framework itself works correctly.
 /// It uses the FL_* macros to test basic functionality.
 
-// Suppress macro redefinition warnings from fl/fltest.h
+// Suppress macro redefinition warnings from fl/test/fltest.h
 #include "fl/stl/compiler_control.h"
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(macro-redefined)
-#include "fl/fltest.h"
+#include "fl/test/fltest.h"
 FL_DISABLE_WARNING_POP
 
-// Include test.h to override fl/fltest.h macros with fl_unittest versions
+// Include test.h to override fl/test/fltest.h macros with fl_unittest versions
 // This ensures tests register with fl_unittest's runner, not fltest's TestContext
 #include "test.h"
 

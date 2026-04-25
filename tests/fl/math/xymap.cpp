@@ -3,7 +3,7 @@
 
 #include "fl/math/xymap.h"
 #include "fl/math/screenmap.h"
-#include "fl/fltest.h"
+#include "fl/test/fltest.h"
 
 using namespace fl;
 
