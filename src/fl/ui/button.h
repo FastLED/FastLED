@@ -106,7 +106,11 @@ class UIButton : public UIElement {
     // Per-list removers. Each callback list maintains its own ID counter,
     // so an id returned by onChanged()/onPressed()/onReleased() is only
     // meaningful to its originating list — use the matching remover here.
+    // Note: onClicked() also registers into the changed-callbacks list, so
+    // ids returned by onClicked() are removed via removeClickedCallback
+    // (an alias for removeChangedCallback).
     void removeChangedCallback(int id) FL_NOEXCEPT { mCallbacks.remove(id); }
+    void removeClickedCallback(int id) FL_NOEXCEPT { mCallbacks.remove(id); }
     void removePressedCallback(int id) FL_NOEXCEPT { mPressCallbacks.remove(id); }
     void removeReleasedCallback(int id) FL_NOEXCEPT { mReleaseCallbacks.remove(id); }
 
