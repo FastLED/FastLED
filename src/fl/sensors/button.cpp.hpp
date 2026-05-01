@@ -59,10 +59,14 @@ Button::Button(int pin, ButtonStrategy strategy)
 void Button::Listener::onEndFrame() {
     const bool pressed_curr_frame = mOwner->mButton.isPressed();
     const bool pressed_last_frame = mOwner->mPressedLastFrame;
-    const bool changed_this_frame = pressed_curr_frame != pressed_last_frame;
+    // Rising edge of isPressed() == one click event for this frame.
+    // mClickedThisFrame must reflect only the current frame's transition;
+    // callers (UIDropdown::Listener, UIButton::clickedCount edge counter)
+    // rely on clicked() being transient, not latched.
+    const bool clicked_this_frame = pressed_curr_frame && !pressed_last_frame;
     mOwner->mPressedLastFrame = pressed_curr_frame;
-    if (changed_this_frame && pressed_curr_frame) {
-        mOwner->mClickedThisFrame = true;
+    mOwner->mClickedThisFrame = clicked_this_frame;
+    if (clicked_this_frame) {
         mOwner->mOnClickCallbacks.invoke();
     }
 }
