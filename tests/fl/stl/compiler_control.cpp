@@ -62,6 +62,24 @@ static int o0_sum(int a, int b) {
 }
 FL_OPTIMIZATION_LEVEL_O0_END
 
+// Test helper: per-function FL_NO_UNWIND attribute
+FL_NO_UNWIND
+static int no_unwind_sum(int a, int b) {
+    return a + b;
+}
+
+// Test helper: TU-block FL_NO_UNWIND_BEGIN/_END
+FL_NO_UNWIND_BEGIN
+static int no_unwind_block_sum(int a, int b) {
+    return a + b;
+}
+static int no_unwind_block_loop() {
+    int sum = 0;
+    for (int i = 0; i < 5; i++) sum += i;
+    return sum;
+}
+FL_NO_UNWIND_END
+
 // Test helper: Weak linkage function
 FL_LINK_WEAK int weak_function() {
     return 42;
@@ -792,6 +810,39 @@ FL_TEST_CASE("fl::deprecated_template_function") {
 
     FL_CHECK_EQ(newTemplateFunction(5), 15);
     FL_CHECK_EQ(newTemplateFunction(3.0), 9.0);
+}
+
+FL_TEST_CASE("FL_NO_UNWIND family") {
+    FL_SUBCASE("FL_NO_UNWIND_ACTIVE is defined to 0 or 1") {
+        // Must be a usable preprocessor value (some build configs check it).
+        FL_CHECK(FL_NO_UNWIND_ACTIVE == 0 || FL_NO_UNWIND_ACTIVE == 1);
+    }
+
+    FL_SUBCASE("per-function FL_NO_UNWIND attribute compiles and runs") {
+        FL_CHECK_EQ(no_unwind_sum(7, 8), 15);
+    }
+
+    FL_SUBCASE("TU-level FL_NO_UNWIND_BEGIN/_END compiles and runs") {
+        FL_CHECK_EQ(no_unwind_block_sum(10, 20), 30);
+        FL_CHECK_EQ(no_unwind_block_loop(), 0 + 1 + 2 + 3 + 4);
+    }
+
+    FL_SUBCASE("FL_NO_UNWIND macros are always defined (even when no-op)") {
+        // All three must expand to something — should compile in any context.
+        FL_NO_UNWIND_BEGIN
+        int x = 42;
+        FL_NO_UNWIND_END
+        FL_CHECK_EQ(x, 42);
+    }
+
+    FL_SUBCASE("nested FL_NO_UNWIND_BEGIN/_END blocks") {
+        FL_NO_UNWIND_BEGIN
+        FL_NO_UNWIND_BEGIN
+        int x = 1;
+        FL_NO_UNWIND_END
+        FL_NO_UNWIND_END
+        FL_CHECK_EQ(x, 1);
+    }
 }
 
 } // FL_TEST_FILE
