@@ -7,6 +7,7 @@
 #include "fl/fastled.h"
 
 #include "fl/gfx/rgbw.h"
+#include "fl/stl/singleton.h"
 
 
 namespace fl {
@@ -113,22 +114,38 @@ void rgb_2_rgbw_white_boosted(u16 w_color_temperature, u8 r,
     *out_w = w;
 }
 
-rgb_2_rgbw_function g_user_function = rgb_2_rgbw_exact;
+// User-installable RGB→RGBW function pointer, held behind a lazily-constructed
+// Singleton<T>. Replaces the previous static-init form
+// (`rgb_2_rgbw_function g_user_function = rgb_2_rgbw_exact`), which forced
+// `rgb_2_rgbw_exact` to be ODR-used at static init even when no caller ever
+// reached the kRGBWUserFunction code path.
+//
+// The Singleton's instance is constructed on first call to set_… or
+// rgb_2_rgbw_user_function below — never at static init. The default value of
+// `fn` is `nullptr`; rgb_2_rgbw_user_function uses `rgb_2_rgbw_exact` as the
+// fallback algorithm when nothing has been installed.
+//
+// See issue #2424 for the broader binary-bloat investigation.
+namespace {
+struct Rgb2RgbwUserState {
+    rgb_2_rgbw_function fn = nullptr;
+};
+} // namespace
 
 void set_rgb_2_rgbw_function(rgb_2_rgbw_function func) {
-    if (func == nullptr) {
-        g_user_function = rgb_2_rgbw_exact;
-        return;
-    }
-    g_user_function = func;
+    fl::Singleton<Rgb2RgbwUserState>::instance().fn = func;
 }
 
 void rgb_2_rgbw_user_function(u16 w_color_temperature, u8 r,
                               u8 g, u8 b, u8 r_scale,
                               u8 g_scale, u8 b_scale, u8 *out_r,
                               u8 *out_g, u8 *out_b, u8 *out_w) {
-    g_user_function(w_color_temperature, r, g, b, r_scale, g_scale, b_scale,
-                    out_r, out_g, out_b, out_w);
+    rgb_2_rgbw_function fn = fl::Singleton<Rgb2RgbwUserState>::instance().fn;
+    if (fn == nullptr) {
+        fn = rgb_2_rgbw_exact;
+    }
+    fn(w_color_temperature, r, g, b, r_scale, g_scale, b_scale,
+       out_r, out_g, out_b, out_w);
 }
 
 void rgbw_partial_reorder(EOrderW w_placement, u8 b0, u8 b1,
