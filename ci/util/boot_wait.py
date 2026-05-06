@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import TYPE_CHECKING, Iterable
+from typing import TYPE_CHECKING, Callable, Iterable
 
 
 if TYPE_CHECKING:
@@ -56,7 +56,7 @@ async def wait_for_signal(
     patterns: Iterable[str],
     timeout: float,
     spin_interval: float = 0.05,
-    on_line: "callable[[str], None] | None" = None,  # type: ignore[valid-type]
+    on_line: "Callable[[str], None] | None" = None,
 ) -> tuple[str | None, list[str]]:
     """Spin-poll ``iface`` for any of ``patterns`` until ``timeout`` elapses.
 

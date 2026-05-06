@@ -452,6 +452,9 @@ class TwoLayerFingerprintCache:
         Returns:
             True if processing is needed, False if cache is valid.
         """
+        # zccache-fp 1.3.10 fails to canonicalize a relative "." root
+        # ("scan error in : cannot canonicalize root"); always pass absolute.
+        abs_root = str(Path(root).resolve())
         args = [
             "--cache-file",
             str(self.cache_file),
@@ -459,7 +462,7 @@ class TwoLayerFingerprintCache:
             "two-layer",
             "check",
             "--root",
-            root,
+            abs_root,
         ]
         if ext:
             for e in ext:
@@ -589,6 +592,7 @@ class HashFingerprintCache:
         Returns:
             True if processing is needed, False if cache is valid.
         """
+        abs_root = str(Path(root).resolve())
         args = [
             "--cache-file",
             str(self.cache_file),
@@ -596,7 +600,7 @@ class HashFingerprintCache:
             "hash",
             "check",
             "--root",
-            root,
+            abs_root,
         ]
         if ext:
             for e in ext:

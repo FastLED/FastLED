@@ -430,9 +430,12 @@ class AutoResearchAgent:
         Returns:
             List of enabled driver names
         """
-        response: list[Any] = self.send_rpc("drivers")  # type: ignore[assignment]
-        # response is a list of driver dicts with 'name' and 'enabled' keys
-        return [str(d["name"]) for d in response if d.get("enabled")]
+        # send_rpc returns json.loads() output; "drivers" RPC returns a JSON array.
+        raw: object = self.send_rpc("drivers")
+        assert isinstance(raw, list), (
+            f"drivers RPC expected list, got {type(raw).__name__}"
+        )
+        return [str(d["name"]) for d in raw if d.get("enabled")]
 
     def ping(self) -> dict[str, Any]:
         """Health check.

@@ -809,7 +809,7 @@ def run_meson_build_and_test(
                             except Exception:
                                 pass
 
-                test_callback.kill_all = _kill_active_procs  # type: ignore[attr-defined]
+                setattr(test_callback, "kill_all", _kill_active_procs)
 
                 # Determine compile timeout based on build mode
                 # Debug builds with ASAN are significantly slower, especially on Windows CI
