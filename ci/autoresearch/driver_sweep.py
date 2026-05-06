@@ -258,7 +258,7 @@ async def run_sweep(
             try:
                 response = await client.send(
                     "runSingleTest",
-                    args=test_config,  # type: ignore[arg-type]
+                    args=[test_config],
                     timeout=timeout,
                 )
 

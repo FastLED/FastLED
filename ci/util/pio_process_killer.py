@@ -17,7 +17,7 @@ import os
 import signal
 import subprocess
 import threading
-from typing import Any
+from typing import Any, cast
 
 import psutil
 
@@ -108,8 +108,10 @@ class PioProcessRegistry:
                 if signum == signal.SIGTERM
                 else self._original_sigint
             )
-            if callable(original):
-                original(signum, frame)  # type: ignore[call-top-callable]
+            # signal.getsignal() returns Handlers | int | Callable | None;
+            # the callable() check + isinstance excludes the int/Handlers cases.
+            if callable(original) and not isinstance(original, int):
+                original(signum, frame)
             elif original == signal.SIG_DFL:
                 # Re-raise to trigger default behavior
                 signal.signal(signum, signal.SIG_DFL)
@@ -369,7 +371,9 @@ class TrackedPopen:
         Returns:
             Tuple of (stdout, stderr)
         """
-        return self._proc.communicate(input=input, timeout=timeout)  # type: ignore[arg-type]
+        # _proc is Popen[Any]; Popen.communicate resolves AnyStr to a union ty
+        # cannot match against bytes-or-str input. Runtime accepts both.
+        return self._proc.communicate(input=cast(Any, input), timeout=timeout)
 
     def poll(self) -> int | None:
         """Check if process has terminated.

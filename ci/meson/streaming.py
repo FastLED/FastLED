@@ -578,7 +578,7 @@ def stream_compile_and_run_tests(
     # inject it into the subprocess environment (os.environ is stale after
     # _streaming_env was copied).
     if test_file_filter:
-        test_callback._test_file_filter = test_file_filter  # type: ignore[attr-defined]
+        setattr(test_callback, "_test_file_filter", test_file_filter)
 
     # Prepare concurrent test execution infrastructure.
     # Tests are submitted to the executor as they finish linking (during

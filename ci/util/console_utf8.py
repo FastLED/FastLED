@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import io
 import os
 import sys
 
@@ -17,14 +18,12 @@ def configure_utf8_console() -> None:
         return
 
     try:
-        if hasattr(sys.stdout, "reconfigure") and callable(
-            getattr(sys.stdout, "reconfigure", None)
-        ):
-            sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[attr-defined]
-        if hasattr(sys.stderr, "reconfigure") and callable(
-            getattr(sys.stderr, "reconfigure", None)
-        ):
-            sys.stderr.reconfigure(encoding="utf-8", errors="replace")  # type: ignore[attr-defined]
+        # TextIOWrapper.reconfigure exists on stock 3.7+; redirected streams
+        # (StringIO, ipykernel wrappers, etc.) won't be TextIOWrapper instances.
+        if isinstance(sys.stdout, io.TextIOWrapper):
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        if isinstance(sys.stderr, io.TextIOWrapper):
+            sys.stderr.reconfigure(encoding="utf-8", errors="replace")
     except (AttributeError, OSError):
         # Older Python versions or redirected streams may not support reconfigure
         pass
