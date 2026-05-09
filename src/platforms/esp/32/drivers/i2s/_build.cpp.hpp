@@ -12,3 +12,6 @@
 #include "platforms/esp/32/drivers/i2s/i2s_lcd_cam_peripheral_mock.cpp.hpp"
 
 #include "platforms/esp/32/drivers/i2s/wave8_encoder_i2s.cpp.hpp"
+
+// BusTraits<Bus::I2S> specialization.
+#include "platforms/esp/32/drivers/i2s/bus_traits.h"

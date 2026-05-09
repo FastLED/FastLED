@@ -1,0 +1,34 @@
+#pragma once
+
+// IWYU pragma: private
+
+/// @file bus_traits.h
+/// @brief BusTraits<Bus::BIT_BANG> specialization for the portable bit-bang driver.
+///
+/// `BitBangChannelDriver` is the universal fallback — any platform with GPIO
+/// can drive both clockless and SPI LED strips by bit-banging. Supports up to
+/// 8 parallel pins via `DigitalMultiWrite8`.
+
+#include "fl/stl/compiler_control.h"
+#include "fl/channels/bus.h"
+#include "fl/channels/bus_traits.h"
+#include "fl/channels/config.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/type_traits.h"
+#include "platforms/shared/bitbang/bitbang_channel_driver.h"
+
+namespace fl {
+
+template<> struct BusTraits<Bus::BIT_BANG> {
+    using Driver = BitBangChannelDriver;
+
+    static Driver& instance() FL_NOEXCEPT {
+        static fl::shared_ptr<Driver> gHolder = fl::make_shared<Driver>();
+        return *gHolder;
+    }
+};
+
+template<> struct BusSupports<Bus::BIT_BANG, ClocklessChipset> : fl::true_type {};
+template<> struct BusSupports<Bus::BIT_BANG, SpiChipsetConfig>  : fl::true_type {};
+
+}  // namespace fl
