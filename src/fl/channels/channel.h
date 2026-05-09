@@ -15,6 +15,7 @@
 #include "fl/stl/noexcept.h"
 
 #include "cpixel_ledcontroller.h"
+#include "fl/channels/ichannel.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/weak_ptr.h"
 #include "fl/stl/stdint.h"
@@ -36,8 +37,12 @@ FASTLED_SHARED_PTR(ChannelData);
 ///        but with timing and pin information.
 ///
 /// Provides access to LED channel functionality for driving LED strips.
-/// RGB_ORDER is set to RGB - reordering is handled internally by the Channel
-class Channel: public CPixelLEDController<RGB> {
+/// RGB_ORDER is set to RGB - reordering is handled internally by the Channel.
+///
+/// Inherits `IChannel` so `ChannelEvents` callbacks (and other consumers that
+/// only need to identify a channel) can take a non-template reference even
+/// after `Channel<Bus, Chipset>` becomes templated in Phase 3b. See #2428.
+class Channel: public CPixelLEDController<RGB>, public IChannel {
 public:
     /// @brief Create a new channel with optional affinity binding
     /// @param config Channel configuration (includes optional affinity for driver selection)
@@ -51,11 +56,11 @@ public:
 
     /// @brief Get the channel ID
     /// @return Channel ID (always increments, starts at 0)
-    i32 id() const { return mId; }
+    i32 id() const override { return mId; }
 
     /// @brief Get the channel name
     /// @return Channel name (user-specified or auto-generated "Channel_<id>")
-    const fl::string& name() const { return mName; }
+    const fl::string& name() const override { return mName; }
 
     /// @brief Get the pin number for this channel (data pin)
     /// @return Pin number

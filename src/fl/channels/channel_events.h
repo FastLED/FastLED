@@ -1,10 +1,11 @@
 #pragma once
 
 #include "fl/stl/function.h"
+#include "fl/stl/string.h"  // IWYU pragma: keep
 
 namespace fl {
 
-class Channel;
+class IChannel;
 class IChannelDriver;  // IWYU pragma: keep
 class ChannelData;
 struct ChannelConfig;
@@ -17,12 +18,12 @@ struct ChannelConfig;
 /// Usage:
 /// @code
 /// // Add a listener
-/// int id = FastLED.channelEvents().onChannelCreated.add([](const Channel& ch) {
+/// int id = FastLED.channelEvents().onChannelCreated.add([](const IChannel& ch) {
 ///     FL_DBG("Channel created: " << ch.name());
 /// });
 ///
 /// // Add with priority (higher priority executes first)
-/// int id2 = FastLED.channelEvents().onChannelCreated.add([](const Channel& ch) {
+/// int id2 = FastLED.channelEvents().onChannelCreated.add([](const IChannel& ch) {
 ///     FL_DBG("High priority listener");
 /// }, 100);
 ///
@@ -34,40 +35,44 @@ struct ChannelConfig;
 /// - Past tense (Created, Added, Configured, Removed, Enqueued): fired after the action
 /// - "Begin" prefix (BeginDestroy, BeginShow): fired before the action
 /// - "End" prefix (EndShow): fired after a bracketed action
+///
+/// Callbacks receive `const IChannel&` so the same listener works regardless
+/// of which `Channel<Bus, Chipset>` instantiation produced the event. See
+/// `fl/channels/ichannel.h` and issue #2428.
 struct ChannelEvents {
     static ChannelEvents& instance();
 
     // -- Lifecycle events --
 
     /// Fired after a Channel is constructed via Channel::create()
-    fl::function_list<void(const Channel&)> onChannelCreated;
+    fl::function_list<void(const IChannel&)> onChannelCreated;
 
     /// Fired at the start of ~Channel(), before members are torn down
-    fl::function_list<void(const Channel&)> onChannelBeginDestroy;
+    fl::function_list<void(const IChannel&)> onChannelBeginDestroy;
 
     // -- FastLED list events --
 
     /// Fired after a Channel is added to FastLED's controller list
-    fl::function_list<void(const Channel&)> onChannelAdded;
+    fl::function_list<void(const IChannel&)> onChannelAdded;
 
     /// Fired after a Channel is removed from FastLED's controller list
-    fl::function_list<void(const Channel&)> onChannelRemoved;
+    fl::function_list<void(const IChannel&)> onChannelRemoved;
 
     // -- Configuration events --
 
     /// Fired after applyConfig() reconfigures a Channel
-    fl::function_list<void(const Channel&, const ChannelConfig&)> onChannelConfigured;
+    fl::function_list<void(const IChannel&, const ChannelConfig&)> onChannelConfigured;
 
     // -- Rendering events --
 
     /// Fired after pixel data is encoded into byte stream (before enqueuing)
     /// Second parameter is the encoded channel data
     /// @note This event fires after writeWS2812/writeAPA102/etc. encoding completes
-    fl::function_list<void(const Channel&, const ChannelData&)> onChannelDataEncoded;
+    fl::function_list<void(const IChannel&, const ChannelData&)> onChannelDataEncoded;
 
     /// Fired after channel data is enqueued to a driver
     /// Second parameter is the driver name (empty string for unnamed drivers)
-    fl::function_list<void(const Channel&, const fl::string& driverName)> onChannelEnqueued;
+    fl::function_list<void(const IChannel&, const fl::string& driverName)> onChannelEnqueued;
 };
 
 }  // namespace fl

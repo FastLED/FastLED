@@ -175,13 +175,13 @@ void setup() {
     auto& events = FastLED.channelEvents();
 
     // Called when channel is created
-    events.onChannelCreated.add([](const fl::Channel& ch) {
+    events.onChannelCreated.add([](const fl::IChannel& ch) {
         Serial.printf("Channel created: %s\n", ch.name().c_str());
     });
 
     // Called when channel data is enqueued to driver
-    events.onChannelEnqueued.add([](const fl::Channel& ch, const fl::string& driver) {
-        Serial.printf("%s → %s\n", ch.name().c_str(), driver.c_str());
+    events.onChannelEnqueued.add([](const fl::IChannel& ch, const fl::string& driver) {
+        Serial.printf("%s -> %s\n", ch.name().c_str(), driver.c_str());
     });
 
     // Create channel (triggers onChannelCreated)
