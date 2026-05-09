@@ -31,6 +31,16 @@ LOCK_TIMEOUT_S: float = 120.0
 # Allows brief lock contention (e.g., concurrent build finishing) to resolve.
 _LOCK_GRACE_S: float = 2.0
 
+# Maximum time a lock may be held by an alive process before we treat it as
+# stale and steal it. The watchdog in test.py force-exits at ~600s (extended
+# to 1200s in CI, up to 2700s for sequential debug builds with sanitizers),
+# so use a value above the highest expected legitimate hold time. If a
+# process has held the lock past this, it's wedged — steal the lock so
+# subsequent runs aren't blocked indefinitely.
+#
+# Override via FASTLED_LOCK_MAX_HOLD_S env var for testing or unusual builds.
+_DEFAULT_MAX_HOLD_S: float = 3600.0  # 60 minutes
+
 
 def _is_process_alive_psutil(pid: int) -> bool:
     """Check if a process is alive using psutil (more reliable than kernel32 on Windows)."""
@@ -123,8 +133,26 @@ class BuildLock:
 
     _stale_lock_warned: bool = False
 
+    @staticmethod
+    def _max_hold_seconds() -> float:
+        """Resolve the max-hold threshold from env or default."""
+        env = os.environ.get("FASTLED_LOCK_MAX_HOLD_S")
+        if env:
+            try:
+                return float(env)
+            except ValueError:
+                pass
+        return _DEFAULT_MAX_HOLD_S
+
     def _check_stale_lock(self) -> bool:
-        """Check if lock is stale (dead process) and remove if stale.
+        """Check if lock is stale and remove if so.
+
+        A lock is treated as stale if either:
+          1. ALL holders have dead PIDs (process crashed), OR
+          2. ANY holder has held the lock past _max_hold_seconds() — even
+             alive-but-wedged processes get stolen so subsequent runs aren't
+             blocked indefinitely. The wedged process gets a deadman force-exit
+             from test.py's watchdog separately.
 
         Uses psutil for process liveness checks (more reliable than kernel32 on Windows).
 
@@ -140,17 +168,33 @@ class BuildLock:
             all_dead = all(
                 not _is_process_alive_psutil(h["owner_pid"]) for h in holders
             )
-            if not all_dead:
+
+            # Check for alive-but-wedged: any holder past max-hold threshold.
+            now = time.time()
+            max_hold = self._max_hold_seconds()
+            wedged_holders = [h for h in holders if (now - h["acquired_at"]) > max_hold]
+
+            if not all_dead and not wedged_holders:
                 return False
 
             if not BuildLock._stale_lock_warned:
                 BuildLock._stale_lock_warned = True
-                dead_pids = [h["owner_pid"] for h in holders]
-                print(
-                    f"Detected stale lock '{self._lock_name}' (dead PIDs: {dead_pids}). Removing..."
-                )
+                if all_dead:
+                    dead_pids = [h["owner_pid"] for h in holders]
+                    print(
+                        f"Detected stale lock '{self._lock_name}' (dead PIDs: {dead_pids}). Removing..."
+                    )
+                else:
+                    parts = [
+                        f"PID {h['owner_pid']} ({(now - h['acquired_at']):.0f}s)"
+                        for h in wedged_holders
+                    ]
+                    print(
+                        f"Detected wedged lock '{self._lock_name}' "
+                        f"(holder(s) past {max_hold:.0f}s max-hold: {', '.join(parts)}). Stealing..."
+                    )
 
-            # Force-break since we already verified all holders are dead
+            # Force-break: either all holders are dead, or one is wedged past max-hold.
             if self._db.force_break(self._lock_name):
                 print(f"Removed stale lock: {self._lock_name}")
                 BuildLock._stale_lock_warned = False
@@ -315,17 +359,36 @@ def libfastled_build_lock(
     if not lock.acquire(timeout=timeout):
         # Include holder info with psutil process details in error message
         holder_info = ""
+        kill_hint = ""
         try:
             holders = lock._db.get_lock_info(lock._lock_name)
             if holders:
                 parts: list[str] = []
+                hint_pids: list[int] = []
                 for h in holders:
                     held_secs = _time.time() - h["acquired_at"]
                     proc_info = _get_process_info(h["owner_pid"])
                     parts.append(
                         f"PID {h['owner_pid']} (held {held_secs:.0f}s, {proc_info})"
                     )
+                    hint_pids.append(h["owner_pid"])
                 holder_info = f". Held by: {', '.join(parts)}"
+                if hint_pids:
+                    pid_csv = ",".join(str(p) for p in hint_pids)
+                    if platform.system() == "Windows":
+                        kill_hint = (
+                            f"\nTip: if the holder appears stuck, run: "
+                            f"taskkill /F /PID {hint_pids[0]}"
+                        )
+                    else:
+                        kill_hint = (
+                            f"\nTip: if the holder appears stuck, run: "
+                            f"kill -9 {pid_csv}"
+                        )
+                    kill_hint += (
+                        "\n     Or clear all stale locks: "
+                        "uv run python -m ci.util.lock_admin --clean-stale"
+                    )
         except KeyboardInterrupt as ki:
             handle_keyboard_interrupt(ki)
             raise
@@ -333,7 +396,8 @@ def libfastled_build_lock(
             pass
         actual_elapsed = _time.time() - lock_start
         raise TimeoutError(
-            f"Failed to acquire libfastled build lock after {actual_elapsed:.0f}s (timeout={timeout:.0f}s){holder_info}"
+            f"Failed to acquire libfastled build lock after {actual_elapsed:.0f}s "
+            f"(timeout={timeout:.0f}s){holder_info}{kill_hint}"
         )
     lock_duration = _time.time() - lock_start
 
