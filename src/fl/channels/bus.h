@@ -61,9 +61,7 @@ template<typename Chipset> struct DefaultBus;
 // ---------------------------------------------------------------------------
 //
 // Each specialization sets `value` to the Bus identifier whose driver TU should
-// be linked when the user does not name a bus explicitly. Phase 1 wires up host
-// (stub) only; subsequent phases will add ESP32 / Teensy / etc. as their
-// per-driver `BusTraits` specializations land.
+// be linked when the user does not name a bus explicitly.
 
 #if defined(FL_IS_STUB) || defined(FL_IS_WASM)
 
@@ -74,6 +72,44 @@ template<> struct DefaultBus<ClocklessChipset> {
 template<> struct DefaultBus<SpiChipsetConfig> {
     static constexpr Bus value = Bus::STUB;
 };
+
+#elif defined(FL_IS_ESP32)
+
+// ESP32-P4 / C6 / H2 / C5 -- PARLIO is the highest-priority clockless driver.
+// ESP32-dev / S2 / S3 -- RMT is the recommended clockless default.
+// Mirrors the priority order used by channel_manager_esp32.cpp.hpp.
+#if defined(FL_IS_ESP_32P4) || defined(FL_IS_ESP_32C6) || \
+    defined(FL_IS_ESP_32H2) || defined(FL_IS_ESP_32C5)
+template<> struct DefaultBus<ClocklessChipset> {
+    static constexpr Bus value = Bus::PARLIO;
+};
+#else
+template<> struct DefaultBus<ClocklessChipset> {
+    static constexpr Bus value = Bus::RMT;
+};
+#endif
+
+// True SPI chipsets (APA102, SK9822, HD108): pick the platform-native parallel
+// SPI driver. ESP32-S3 uses LCD_SPI; original ESP32 uses I2S_SPI; other variants
+// are intentionally undefined so users get a clear "specify Bus::X explicitly"
+// error rather than a silent wrong default.
+#if defined(FL_IS_ESP_32S3)
+template<> struct DefaultBus<SpiChipsetConfig> {
+    static constexpr Bus value = Bus::LCD_SPI;
+};
+#elif defined(FL_IS_ESP_32DEV)
+template<> struct DefaultBus<SpiChipsetConfig> {
+    static constexpr Bus value = Bus::I2S_SPI;
+};
+#endif
+
+#elif defined(FL_IS_TEENSY_4X)
+
+template<> struct DefaultBus<ClocklessChipset> {
+    static constexpr Bus value = Bus::OBJECT_FLED;
+};
+// SpiChipsetConfig default for Teensy 4.x is intentionally unspecified -- users
+// pick explicitly between Bus::BIT_BANG and any future hardware-SPI bus.
 
 #endif
 
