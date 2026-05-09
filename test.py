@@ -31,6 +31,26 @@ _START_TIME = time.time()
 os.chdir(Path(__file__).parent)
 
 
+# When stdout is piped (e.g., `bash test --cpp 2>&1 | tail -15`), Python
+# defaults to block buffering — small writes may not surface until program
+# exit, making background test runs appear to "hang silently" even when
+# they're producing output. Force line buffering so `\n`-terminated output
+# flushes immediately to whatever pipe is reading us.
+#
+# This must run before any imports that touch stdout (e.g., test runners,
+# rich console) so the buffering policy is set on first write.
+if not sys.stdout.isatty():
+    try:
+        sys.stdout.reconfigure(line_buffering=True)  # type: ignore[union-attr]
+    except (AttributeError, ValueError):
+        pass
+if not sys.stderr.isatty():
+    try:
+        sys.stderr.reconfigure(line_buffering=True)  # type: ignore[union-attr]
+    except (AttributeError, ValueError):
+        pass
+
+
 # Ultra-early exit fires BEFORE heavy ci.util.* imports (~318ms savings on cached runs).
 # All ultra-early-exit logic is in ci.early_exit_cache (imported above).
 # typeguard (177ms), psutil (28ms), asyncio (50ms), unittest.mock (65ms) are skipped
@@ -151,15 +171,60 @@ if os.environ.get("GITHUB_ACTIONS"):
     )
 
 
+# Deadman timer fires this many seconds after the primary watchdog if the
+# process is still alive — bypasses any blocked diagnostics in the primary
+# watchdog and unconditionally calls os._exit().
+_DEADMAN_GRACE_S = 60
+
+
+def _release_held_build_locks() -> None:
+    """Best-effort: release any libfastled_build locks held by this PID.
+
+    Called from the watchdog before force-exit so subsequent runs don't
+    block on a stale lock from this hung process.
+    """
+    try:
+        from ci.util.lock_database import get_lock_database  # noqa: PLC0415
+
+        db = get_lock_database()
+        my_pid = os.getpid()
+        for lock in db.list_all_locks():
+            if lock["owner_pid"] == my_pid:
+                try:
+                    db.release(lock["lock_name"], my_pid)
+                except Exception:
+                    pass
+    except Exception:
+        pass
+
+
 def make_watch_dog_thread(
     seconds: int,
 ) -> threading.Thread:  # 60 seconds default timeout
+    def deadman_timer() -> None:
+        # Unconditional second-tier kill: if the primary watchdog gets stuck
+        # in dump_thread_stacks() / psutil queries / blocked I/O, this fires
+        # _DEADMAN_GRACE_S later and exits without running any diagnostics.
+        time.sleep(seconds + _DEADMAN_GRACE_S)
+        if _CANCEL_WATCHDOG.is_set():
+            return
+        try:
+            _release_held_build_locks()
+        except Exception:
+            pass
+        os._exit(3)  # Exit code 3 = deadman fired (primary watchdog also stuck)
+
     def watchdog_timer() -> None:
         time.sleep(seconds)
         if _CANCEL_WATCHDOG.is_set():
             return
 
         warnings.warn(f"Watchdog timer expired after {seconds} seconds.")
+
+        # Release any build locks first, before potentially-blocking diagnostics.
+        # If diagnostics hang, the deadman timer will still force-exit, but the
+        # lock will already be released so subsequent runs aren't blocked.
+        _release_held_build_locks()
 
         dump_thread_stacks()
         ts_print(f"Watchdog timer expired after {seconds} seconds - forcing exit")
@@ -186,6 +251,13 @@ def make_watch_dog_thread(
 
     thr = threading.Thread(target=watchdog_timer, daemon=True, name="WatchdogTimer")
     thr.start()
+
+    # Second-tier deadman: fires at seconds + _DEADMAN_GRACE_S regardless of
+    # whether the primary watchdog blocks.
+    deadman = threading.Thread(
+        target=deadman_timer, daemon=True, name="WatchdogDeadman"
+    )
+    deadman.start()
     return thr
 
 
