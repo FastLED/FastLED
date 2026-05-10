@@ -12,6 +12,7 @@
 #include "eorder.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/chipsets/timing_traits.h"
+#include "fl/channels/bus.h"
 #include "fl/channels/data.h"
 #include "fl/channels/driver.h"
 #include "fl/channels/manager.h"
@@ -20,6 +21,7 @@
 #include "fl/system/log.h"
 #include "fl/stl/vector.h"
 #include "platforms/shared/active_strip_tracker/active_strip_tracker.h"
+#include "platforms/stub/bus_traits.h"
 #include "platforms/stub/stub_gpio.h"
 #include "fl/stl/noexcept.h"
 
@@ -49,6 +51,16 @@ public:
         // Create channel data with pin and timing configuration
         ChipsetTimingConfig timing = makeTimingConfig<TIMING>();
         mChannelData = ChannelData::create(DATA_PIN, timing);
+#if FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY
+        // Phase 5b of #2428 (opt-in mode): pre-bind to the stub driver
+        // singleton so showPixels() bypasses ChannelManager entirely.
+        // Naming BusTraits<Bus::STUB>::instancePtr() here is the ODR-use
+        // that lets the linker keep ONLY the stub driver TU.
+        // Default mode (macro 0) leaves mDriver unbound so the existing
+        // selectDriverForChannel() path runs each frame -- preserves
+        // backward compat for tests that register custom mock drivers.
+        mDriver = BusTraits<Bus::STUB>::instancePtr();
+#endif
     }
 
     virtual void init() FL_NOEXCEPT override { }

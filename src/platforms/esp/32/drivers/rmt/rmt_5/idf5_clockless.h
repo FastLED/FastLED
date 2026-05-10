@@ -10,11 +10,13 @@
 #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
 #include "eorder.h"
+#include "fl/channels/bus.h"
 #include "fl/channels/channel.h"
 #include "fl/channels/config.h"
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/static_assert.h"
+#include "platforms/esp/32/drivers/rmt/rmt_5/bus_traits.h"
 
 namespace fl {
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
@@ -31,6 +33,19 @@ public:
     ClocklessIdf5() FL_NOEXCEPT
         : Channel(makeChipset(), RGB_ORDER, RegistrationMode::DeferRegister)
     {
+#if FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY
+        // Phase 5b of #2428 (opt-in mode): pre-bind to the RMT5 driver
+        // singleton so showPixels() bypasses ChannelManager entirely.
+        // Naming BusTraits<Bus::RMT>::instancePtr() here is the ODR-use
+        // that lets the linker keep ONLY the RMT5 driver TU when the user
+        // opts into FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY=1 -- the
+        // binary-size fix from #2420.
+        // Default mode (macro 0) leaves mDriver unbound so the existing
+        // selectDriverForChannel() path runs each frame -- preserves
+        // backward compat for users registering custom drivers via
+        // ChannelManager.
+        setDriver(BusTraits<Bus::RMT>::instancePtr());
+#endif
         // Auto-register in the controller draw list (template API expects this)
         addToList();
     }

@@ -15,6 +15,24 @@
 #include "fl/stl/stdint.h"
 #include "platforms/is_platform.h"
 
+// FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY: opt-in macro that, when set to 1,
+// disables the legacy `initChannelDrivers()` auto-registration AND switches
+// per-platform legacy clockless controllers (stub `ClocklessController`,
+// ESP32 `ClocklessIdf5`, etc.) to pre-bind directly to their default
+// `BusTraits<Bus::X>::instancePtr()` -- bypassing `ChannelManager` entirely.
+//
+// This is the toggle that lets `--gc-sections` drop unreferenced driver TUs
+// (the binary-size fix from #2420). Default 0 for backward compatibility;
+// users opting in must call `fl::enableDrivers<fl::Bus::X...>()` explicitly
+// for any non-default driver they need at runtime.
+//
+// Defined here (early-included by every channels TU) so all consumers see the
+// same value -- the macro is checked from per-platform legacy clockless
+// headers as well as channel_manager_esp32.cpp.hpp.
+#ifndef FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY
+#define FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY 0
+#endif
+
 namespace fl {
 
 // Forward declarations. The chipset family types live in fl/channels/config.h,

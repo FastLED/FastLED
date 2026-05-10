@@ -313,8 +313,18 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
         FL_WARN("Channel '" << mName << "': Engine became READY after waiting");
     }
 
-    auto driver = ChannelManager::instance().selectDriverForChannel(mChannelData, mAffinity);
-    mDriver = driver;
+    // Phase 5b of #2428: if the driver was pre-bound via setDriver() (legacy
+    // addLeds<>-style controllers naming BusTraits<Bus::X>::instancePtr() in
+    // their constructor), bypass ChannelManager entirely. Channels created via
+    // the manager-based API (Channel::create(cfg) without affinity) keep their
+    // existing per-frame re-selection so users can swap drivers at runtime.
+    fl::shared_ptr<IChannelDriver> driver;
+    if (mDriverPreBound) {
+        driver = mDriver.lock();
+    } else {
+        driver = ChannelManager::instance().selectDriverForChannel(mChannelData, mAffinity);
+        mDriver = driver;
+    }
     if (!driver) {
         FL_ERROR("Channel '" << mName << "': No compatible driver found - cannot transmit");
         return;

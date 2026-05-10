@@ -193,6 +193,23 @@ protected:
     /// @note Does not set LED data or channel options - caller must do that
     Channel(const ChipsetVariant& chipset, EOrder rgbOrder, RegistrationMode mode);
 
+    /// @brief Pre-bind a driver, bypassing `ChannelManager::selectDriverForChannel()`
+    ///        on every subsequent `showPixels()` call.
+    ///
+    /// Used by legacy `addLeds<>`-style controllers (e.g. `ClocklessIdf5`) to
+    /// route directly to a `BusTraits<DefaultBus>::instancePtr()` singleton at
+    /// construction time. Combined with `FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY=1`,
+    /// this is what lets `--gc-sections` drop unreferenced driver TUs (Phase 5b
+    /// of #2428 — the binary-size fix for #2420).
+    ///
+    /// @note Stored as `weak_ptr` to avoid holding the driver alive past the
+    ///       caller's intent. The caller (typically the static singleton in a
+    ///       BusTraits) owns the strong reference.
+    void setDriver(fl::shared_ptr<IChannelDriver> driver) FL_NOEXCEPT {
+        mDriver = driver;
+        mDriverPreBound = true;
+    }
+
 private:
     /// @brief Private constructor (use create() factory method)
     /// @param chipset Chipset configuration (clockless or SPI)
@@ -219,6 +236,11 @@ private:
     ChipsetVariant mChipset;         // Chipset configuration (clockless or SPI)
     EOrder mRgbOrder;
     fl::weak_ptr<IChannelDriver> mDriver;  // Weak reference to driver (prevents dangling pointers)
+    bool mDriverPreBound = false;    // True if setDriver() was called (legacy addLeds<> path).
+                                     // When true, showPixels() uses mDriver directly and skips
+                                     // ChannelManager::selectDriverForChannel(). When false (the
+                                     // default), every showPixels() re-evaluates the manager's
+                                     // priority list so users can swap drivers at runtime.
     fl::string mAffinity;            // Engine affinity name (empty = no affinity, dynamic selection)
     const i32 mId;
     fl::string mName;               // User-specified or auto-generated name
