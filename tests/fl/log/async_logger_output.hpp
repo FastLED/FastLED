@@ -15,7 +15,7 @@
 #include "fl/system/log.h"
 #include "fl/stl/sstream.h"
 #include "test.h"
-#include "fl/detail/async_logger.h"
+#include "fl/log/async_logger.h"
 #include "fl/stl/string.h"
 #include "fl/stl/strstream.h"
 #include "fl/stl/int.h"

@@ -2,7 +2,7 @@
 #include "test.h"
 #include "FastLED.h"
 #include "power_mgt.h"
-#include "fl/cled_controller.h"
+#include "fl/channels/cled_controller.h"
 
 using namespace fl;
 

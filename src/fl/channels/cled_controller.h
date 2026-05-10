@@ -1,6 +1,6 @@
 #pragma once
 
-/// @file cled_controller.h
+/// @file fl/channels/cled_controller.h
 /// base definitions used by led controllers for writing out led data
 
 #include "color.h"

@@ -297,7 +297,7 @@ uv run ci/ci-iwyu.py esp32dev  # Requires PlatformIO compilation
 #endif
 
 // When IWYU suggests removing a needed header:
-#include "fl/detail/async_logger.h"  // IWYU pragma: keep - Required by FL_LOG_* macros
+#include "fl/log/async_logger.h"  // IWYU pragma: keep - Required by FL_LOG_* macros
 ```
 
 ### ✅ DO: Mark Platform Files as Private
@@ -337,14 +337,14 @@ error: unable to find header file <driver/gpio.h>
 
 **Symptom:**
 ```
-warning: #include "fl/detail/async_logger.h" is not used
+warning: #include "fl/log/async_logger.h" is not used
 ```
 
 **Cause:** Header used by macro, IWYU can't detect usage
 
 **Fix:**
 ```cpp
-#include "fl/detail/async_logger.h"  // IWYU pragma: keep - Required by FL_LOG_* macros
+#include "fl/log/async_logger.h"  // IWYU pragma: keep - Required by FL_LOG_* macros
 ```
 
 ### False Positive on Conditional Include

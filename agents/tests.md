@@ -295,7 +295,7 @@ Some test directories use a **consolidation pattern** where multiple `.cpp` file
 - Current consolidated directories (see `EXCLUDED_TEST_DIRS` in `tests/test_config.py`):
   - `tests/fl/fx/2d/` → parent: `tests/fl/fx/2d.cpp`
   - `tests/fl/chipsets/encoders/`
-  - `tests/fl/detail/`
+  - `tests/fl/log/`
   - `tests/fl/audio/detectors/`
   - `tests/fl/channels/detail/validation/`
   - `tests/fl/remote/rpc/`

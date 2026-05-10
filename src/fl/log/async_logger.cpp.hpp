@@ -1,7 +1,7 @@
-/// @file detail/async_logger.cpp
+/// @file fl/log/async_logger.cpp
 /// @brief Async logger implementation using SPSC queue backend
 
-#include "fl/detail/async_logger.h"
+#include "fl/log/async_logger.h"
 #include "fl/stl/cstdio.h"
 #include "fl/stl/isr/handler.h"
 #include "fl/math/math.h"

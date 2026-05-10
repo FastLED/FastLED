@@ -53,7 +53,7 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/weak_ptr.h"
 #include "fl/stl/new.h"
-#include "fl/cled_controller.h"
+#include "fl/channels/cled_controller.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
 
