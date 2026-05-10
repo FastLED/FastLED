@@ -5,7 +5,7 @@
 #if defined(FL_IS_TEENSY_4X) // Teensy 4.0/4.1 only.
 
 #define FASTLED_INTERNAL
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 
 #include "platforms/arm/teensy/teensy4_common/clockless_objectfled.h"
 // IWYU pragma: begin_keep

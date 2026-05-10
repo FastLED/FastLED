@@ -5,7 +5,7 @@
 #include "fl/fx/2d/luminova.h"
 
 // Includes needed for implementation
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 #include "fl/gfx/blur.h"
 #include "fl/math/math.h"
 #include "fl/math/math.h"

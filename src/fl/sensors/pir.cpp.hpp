@@ -2,7 +2,7 @@
 #define FASTLED_INTERNAL
 #endif
     
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 
 #include "fl/system/fastpin.h"
 #include "fl/stl/strstream.h"

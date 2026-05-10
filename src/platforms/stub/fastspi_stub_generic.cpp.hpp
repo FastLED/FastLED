@@ -3,7 +3,7 @@
 #ifdef FASTLED_STUB_IMPL
 
 #define FASTLED_INTERNAL
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 
 #include "platforms/stub/fastspi_stub_generic.h"
 #include "fl/stl/noexcept.h"

@@ -1,5 +1,5 @@
 #include "fl/fx/1d/particles.h"
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 #include "fl/gfx/blur.h"
 #include "fl/stl/noexcept.h"
 

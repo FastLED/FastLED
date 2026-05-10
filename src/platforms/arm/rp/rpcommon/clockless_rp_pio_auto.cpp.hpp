@@ -6,7 +6,7 @@
 #if defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
 
 #define FASTLED_INTERNAL
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 
 #include "platforms/arm/rp/rpcommon/clockless_rp_pio_auto.h"
 #include "platforms/arm/rp/rpcommon/parallel_transpose.h"

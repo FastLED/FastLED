@@ -2,7 +2,7 @@
 #define FASTLED_INTERNAL
 #endif
 
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 
 #include "fl/math/ease.h"
 #include "lib8tion.h" // This is the problematic header that's hard to include

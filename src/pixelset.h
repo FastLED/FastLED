@@ -8,7 +8,7 @@
 #include "fl/gfx/fill.h"
 #include "fl/gfx/blur.h"
 
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 #include "fl/stl/span.h"
 
 #define FUNCTION_FILL_RAINBOW(a,b,c,d) fl::fill_rainbow(a,b,c,d)

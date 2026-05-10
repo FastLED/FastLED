@@ -1,6 +1,6 @@
 #ifdef ESP32
 
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 
 FL_EXTERN_C_BEGIN
 #include "soc/rmt_struct.h"

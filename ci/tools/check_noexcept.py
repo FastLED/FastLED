@@ -24,7 +24,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
 # Translation units for different scopes
 _TU_PLATFORMS = "ci/tools/_noexcept_check_platforms_tu.cpp"
-_TU_FL = "src/fl/build/fl.cpp"
+_TU_FL = "src/fl/build/fl.system+.cpp"
 
 # Scope → (translation_unit, file_matching_regex)
 _SCOPES: dict[str, list[tuple[str, str]]] = {

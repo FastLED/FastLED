@@ -1,5 +1,5 @@
 #define FASTLED_INTERNAL
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 
 /// @file wiring.cpp
 /// Re-implementation of Arduino core functions

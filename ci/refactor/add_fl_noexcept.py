@@ -33,14 +33,14 @@ _NOEXCEPT_INCLUDE = '#include "fl/stl/noexcept.h"'
 # Scope → (translation_unit, file_matching_regex)
 _SCOPES: dict[str, list[tuple[str, str]]] = {
     "fl": [
-        ("src/fl/build/fl.cpp", ".*src.fl.*"),
+        ("src/fl/build/fl.system+.cpp", ".*src.fl.*"),
     ],
     "platforms": [
         ("ci/tools/_noexcept_check_platforms_tu.cpp", ".*src.platforms.*"),
     ],
     "all": [
         ("ci/tools/_noexcept_check_platforms_tu.cpp", ".*src.platforms.*"),
-        ("src/fl/build/fl.cpp", ".*src.fl.*"),
+        ("src/fl/build/fl.system+.cpp", ".*src.fl.*"),
     ],
 }
 

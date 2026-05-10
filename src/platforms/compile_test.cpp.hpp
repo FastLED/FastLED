@@ -1,6 +1,6 @@
 
 #define FASTLED_INTERNAL  
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 #include "fl/stl/int.h"
 #include "fl/stl/static_assert.h"
 #include "fl/stl/stdint.h"

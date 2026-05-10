@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # pyright: reportUnknownMemberType=false
-"""Checker for internal headers using FastLED.h instead of fl/fastled.h."""
+"""Checker for internal headers using FastLED.h instead of fl/system/fastled.h."""
 
 import os
 import re
@@ -21,7 +21,7 @@ _EXEMPT_FILENAMES = {"FastLED.h", "fastspi.h"}
 
 
 class FastLEDHeaderUsageChecker(FileContentChecker):
-    """Checker for internal headers that should use fl/fastled.h instead of FastLED.h."""
+    """Checker for internal headers that should use fl/system/fastled.h instead of FastLED.h."""
 
     def __init__(self):
         self.violations: dict[str, list[tuple[int, str]]] = {}
@@ -66,7 +66,7 @@ class FastLEDHeaderUsageChecker(FileContentChecker):
                 violations.append(
                     (
                         line_number,
-                        f"Use 'fl/fastled.h' instead of 'FastLED.h': {line.strip()}",
+                        f"Use 'fl/system/fastled.h' instead of 'FastLED.h': {line.strip()}",
                     )
                 )
 

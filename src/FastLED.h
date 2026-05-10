@@ -156,7 +156,7 @@
 #include "led_sysdefs.h"
 
 // Include the internal FastLED header (provides core types without cycles)
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 
 #include "fl/channels/channel.h"
 #include "fl/channels/channel_events.h"
@@ -1705,4 +1705,4 @@ using fl_string = fl::string;
 
 // Backdoor to get the size of the CLedController object. The one place
 // that includes this just uses extern to declare the function.
-// Declaration moved to src/fl/fastled.h
+// Declaration moved to src/fl/system/fastled.h

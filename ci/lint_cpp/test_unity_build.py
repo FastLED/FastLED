@@ -60,7 +60,6 @@ CPP_HPP_INCLUDE_PATTERN = re.compile(r'^\s*#include\s+"[^"]+\.cpp\.hpp"', re.MUL
 LIBRARY_JSON_FILE = "library.json"
 EXPECTED_BUILD_FILES = {
     "fl/build/src.cpp",
-    "fl/build/fl.cpp",
     "fl/build/fl.asset+.cpp",
     "fl/build/fl.audio+.cpp",
     "fl/build/fl.channels+.cpp",
@@ -179,6 +178,17 @@ def _get_independently_compiled_dirs(src_dir: Path) -> set[str]:
     for build_file in build_dir.glob("*.cpp"):
         dir_path, _ = _parse_build_filename(build_file.name)
         dirs.add(dir_path)
+        # Also register every ancestor directory: if "fl/audio" is
+        # independently compiled, then its parent "fl" is implicitly
+        # covered (its subdirs do not need to be re-included from a
+        # higher-level _build.cpp.hpp). This avoids spurious "Missing
+        # subdirectory include" violations when a parent directory has
+        # no flat build file but all its children are independently
+        # compiled via fl.X+.cpp recursive builds.
+        parent = dir_path
+        while "/" in parent:
+            parent = parent.rsplit("/", 1)[0]
+            dirs.add(parent)
     return dirs
 
 

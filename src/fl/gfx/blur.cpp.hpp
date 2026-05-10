@@ -3,7 +3,7 @@
 #include "fl/stl/stdint.h"
 
 #define FASTLED_INTERNAL
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 
 #include "crgb.h"
 #include "fl/gfx/blur.h"

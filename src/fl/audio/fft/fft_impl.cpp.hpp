@@ -2,7 +2,7 @@
 #define FASTLED_INTERNAL
 #endif
 
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 
 // IWYU pragma: begin_keep
 #include "third_party/cq_kernel/cq_kernel.h"

@@ -4,7 +4,7 @@
 #include "fl/stl/stdint.h"
 
 #define FASTLED_INTERNAL
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 
 #include "fl/gfx/rgbw.h"
 #include "fl/stl/singleton.h"

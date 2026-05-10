@@ -1,6 +1,6 @@
 // ok no header
 #define FASTLED_INTERNAL
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 #include "cled_controller.h"
 #include "fl/stl/noexcept.h"
 

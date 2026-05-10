@@ -58,7 +58,7 @@ def run_clang_query(scope: str) -> list[tuple[str, int]]:
     if "platforms" in scope:
         tu = "ci/tools/_noexcept_check_platforms_tu.cpp"
     else:
-        tu = "src/fl/build/fl.cpp"
+        tu = "src/fl/build/fl.system+.cpp"
 
     # Build the file matching regex from scope
     scope_regex = scope.replace("/", ".")

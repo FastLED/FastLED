@@ -48,9 +48,9 @@
 
 // NOW include the internal FastLED header, which defines core types without cycles
 // At this point, SPIOutput is already defined for the current platform
-// Note: We use fl/fastled.h instead of FastLED.h to avoid cyclic dependencies,
+// Note: We use fl/system/fastled.h instead of FastLED.h to avoid cyclic dependencies,
 // since this file is included by FastLED.h
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 
 // ============================================================================
 // DATA RATE MACROS (platform-specific clock calculations)

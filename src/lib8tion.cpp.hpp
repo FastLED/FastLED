@@ -9,7 +9,7 @@
 #define FASTLED_INTERNAL
 
 
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 
 
 

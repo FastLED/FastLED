@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 
 /// @addtogroup Chipsets
 /// @{
