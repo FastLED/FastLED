@@ -47,7 +47,7 @@
     // IWYU pragma: end_keep
 #endif
 
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/stddef.h"
 #include "fl/stl/string.h"
 #include "fl/stl/noexcept.h"

@@ -23,7 +23,7 @@
 /// - Warnings on lock failures (already locked)
 
 #include "fl/stl/assert.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 // IWYU pragma: begin_keep
 #include <mutex>  // ok include - needed for std::unique_lock compatibility
 #include "fl/stl/noexcept.h"

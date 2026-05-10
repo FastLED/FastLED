@@ -248,7 +248,7 @@ const char *fastled_file_offset(const char *file) FL_NOEXCEPT;
 // AsyncLogger, LogCategory enum, and accessor functions are now in fl/log/async_logger.h
 // This provides template-based lazy instantiation with linker-friendly auto-registration
 
-/// @file fl/log.h
+/// @file fl/log/log.h
 /// @brief Centralized logging categories for FastLED hardware interfaces and subsystems
 ///
 /// This file provides category-specific logging macros for different FastLED subsystems.
@@ -261,7 +261,7 @@ const char *fastled_file_offset(const char *file) FL_NOEXCEPT;
 ///
 /// Example:
 ///   #define FL_LOG_SPI_ENABLED
-///   #include "fl/system/log.h"
+///   #include "fl/log/log.h"
 ///
 ///   FL_LOG_SPI("Initializing SPI bus " << bus_id);
 

@@ -2,7 +2,7 @@
 
 #include "platforms/wasm/js_fetch.h"
 #include "fl/net/http/fetch.h"  // Include for fl::net::http::Response definition
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/string.h"
 #include "fl/stl/function.h"
 #include "fl/stl/flat_map.h"

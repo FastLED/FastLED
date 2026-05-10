@@ -7,7 +7,7 @@
 
 #include "AutoResearchOta.h"
 #include "fl/stl/json.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 
 // Global OTA state
 static AutoResearchOtaState s_ota_state;

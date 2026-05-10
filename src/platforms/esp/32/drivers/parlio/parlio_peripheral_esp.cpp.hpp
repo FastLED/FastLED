@@ -14,10 +14,10 @@
 #if FASTLED_ESP32_HAS_PARLIO
 
 #include "platforms/esp/32/drivers/parlio/parlio_peripheral_esp.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/task/executor.h"
-#include "fl/system/log.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/sstream.h"
 #include "fl/stl/charconv.h"  // For fl::to_hex
 

@@ -12,7 +12,7 @@
 #ifdef FL_IS_TEENSY_4X
 
 #include "platforms/arm/teensy/init_teensy4.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 
 // ObjectFLED registry is accessed via singleton pattern
 // We include the header to access the getInstance() function

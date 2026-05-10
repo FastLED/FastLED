@@ -5,7 +5,7 @@
 #include "platforms/ota.h"
 #include "platforms/esp/is_esp.h"
 #include "platforms/esp/esp_version.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/noexcept.h"
 
 // Skip null stub when the real ESP32 OTA implementation will be compiled.

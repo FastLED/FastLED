@@ -9,7 +9,7 @@
      (defined(FL_IS_LINUX) || defined(FL_IS_APPLE) || defined(FL_IS_WIN)))
 
 #include "platforms/esp/32/drivers/lcd_spi/lcd_spi_peripheral_mock.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/singleton.h"
 #include "fl/stl/noexcept.h"

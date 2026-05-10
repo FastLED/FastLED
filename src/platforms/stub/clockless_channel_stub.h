@@ -18,7 +18,7 @@
 #include "fl/channels/manager.h"
 #include "fl/stl/weak_ptr.h"
 #include "pixel_iterator.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/vector.h"
 #include "platforms/shared/active_strip_tracker/active_strip_tracker.h"
 #include "platforms/stub/bus_traits.h"

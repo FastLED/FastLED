@@ -48,13 +48,13 @@
 #include "fl/stl/vector.h"  // ok include
 // IWYU pragma: end_keep
 
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/system/file_system.h"
 #include "fl/stl/json.h"
 #include "fl/math/math.h"
 #include "fl/stl/memory.h"
 #include "fl/stl/string.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/mutex.h"
 #include "platforms/wasm/js.h"
 

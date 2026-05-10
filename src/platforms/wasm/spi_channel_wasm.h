@@ -14,7 +14,7 @@
 #include "fl/channels/driver.h"
 #include "fl/channels/manager.h"
 #include "pixel_iterator.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {

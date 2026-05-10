@@ -17,7 +17,7 @@
     (!defined(ARDUINO) && (defined(__linux__) || defined(__APPLE__) || defined(_WIN32)))
 
 #include "platforms/esp/32/drivers/lcd_cam/channel_driver_lcd_rgb.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/noexcept.h"
 

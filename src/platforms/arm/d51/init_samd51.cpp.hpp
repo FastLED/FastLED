@@ -12,7 +12,7 @@
 #ifdef FL_IS_SAMD51
 
 #include "platforms/arm/d51/init_samd51.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 
 // Include SPI hardware controller headers
 #include "platforms/shared/spi_hw_2.h"

@@ -2,8 +2,8 @@
 /// @brief Adapter implementation for HW SPI controllers
 
 #include "fl/channels/adapters/spi_channel_adapter.h"
-#include "fl/system/log.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/cstring.h"  // For memcpy
 #include "fl/channels/config.h"  // For SpiChipsetConfig
 // IWYU pragma: begin_keep

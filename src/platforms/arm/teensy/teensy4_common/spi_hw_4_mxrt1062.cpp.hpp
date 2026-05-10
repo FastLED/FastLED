@@ -28,8 +28,8 @@
 #if defined(FL_IS_TEENSY_4X)
 
 #include "platforms/shared/spi_hw_4.h"
-#include "fl/system/log.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/limits.h"
 // IWYU pragma: begin_keep
 #include <SPI.h>

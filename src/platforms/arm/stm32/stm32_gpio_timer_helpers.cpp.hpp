@@ -42,8 +42,8 @@
 #endif  // FL_HAS_INCLUDE("stm32_def.h")
 
 #include "platforms/arm/stm32/stm32_capabilities.h"
-#include "fl/system/log.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/cstring.h"
 
 namespace fl {

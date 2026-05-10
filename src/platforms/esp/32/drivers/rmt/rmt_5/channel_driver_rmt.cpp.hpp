@@ -7,7 +7,7 @@
 /// transmission):
 ///   #define FL_LOG_RMT_ENABLED
 ///
-/// RMT logging uses FL_LOG_RMT which is compile-time controlled via fl/log.h.
+/// RMT logging uses FL_LOG_RMT which is compile-time controlled via fl/log/log.h.
 /// When disabled (default), FL_LOG_RMT produces no code overhead (zero-cost
 /// abstraction).
 
@@ -27,13 +27,13 @@
 
 #include "platforms/esp/32/drivers/rmt/rmt_5/channel_driver_rmt.h"
 #include "fl/chipsets/led_timing.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/system/delay.h"
 #include "fl/task/executor.h"
-#include "fl/system/log.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
+#include "fl/log/log.h"
 #include "fl/system/pin.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/assert.h"

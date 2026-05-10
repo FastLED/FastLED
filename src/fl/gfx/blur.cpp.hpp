@@ -9,7 +9,7 @@
 #include "fl/gfx/blur.h"
 #include "fl/gfx/colorutils_misc.h"
 #include "fl/stl/compiler_control.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/math/xymap.h"
 #include "fl/math/scale8.h"
 #include "fl/stl/int.h"

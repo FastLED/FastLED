@@ -17,7 +17,7 @@
 #include "fl/math/memmove.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/cstring.h"
-#include "fl/system/log.h"  // IWYU pragma: keep
+#include "fl/log/log.h"  // IWYU pragma: keep
 #include "platforms/is_platform.h"  // IWYU pragma: keep
 #include "fl/stl/noexcept.h"
 

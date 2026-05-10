@@ -13,7 +13,7 @@
 #include "fl/stl/new.h"
 #include "test.h"
 #include "fl/math/geometry.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/gfx/crgb.h"
 #include "fl/stl/span.h"
 #include "fl/stl/strstream.h"

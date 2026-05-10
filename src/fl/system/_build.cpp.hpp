@@ -6,7 +6,6 @@
 #include "fl/system/fastled_internal.cpp.hpp"
 #include "fl/system/file_system.cpp.hpp"
 #include "fl/system/heap.cpp.hpp"
-#include "fl/system/log.cpp.hpp"
 #include "fl/system/pin.cpp.hpp"
 #include "fl/system/pins.cpp.hpp"
 #include "fl/system/serial.cpp.hpp"

@@ -20,7 +20,7 @@
 #include "fl/stl/singleton.h"
 #include "fl/stl/string.h"
 #include "fl/stl/unique_ptr.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep
 

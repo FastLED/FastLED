@@ -26,8 +26,8 @@ FL_EXTERN_C_BEGIN
 FL_EXTERN_C_END
 
 #include "fl/stl/assert.h"
-#include "fl/system/log.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
+#include "fl/log/log.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/noexcept.h"
 

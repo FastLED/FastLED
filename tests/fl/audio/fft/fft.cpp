@@ -9,7 +9,7 @@
 #include "fl/audio/fft/fft.h"
 #include "fl/audio/fft/fft_impl.h"
 #include "fl/stl/int.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/math/math.h"
 #include "fl/stl/move.h"
 #include "fl/stl/span.h"

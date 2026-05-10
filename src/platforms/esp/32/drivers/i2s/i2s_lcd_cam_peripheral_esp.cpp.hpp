@@ -14,7 +14,7 @@
 #include "platforms/esp/32/drivers/i2s/i2s_lcd_cam_peripheral_esp.h"
 #include "fl/stl/singleton.h"
 #include "fl/stl/noexcept.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 
 // IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"

@@ -9,7 +9,7 @@
 #ifdef FL_IS_RP2040
 
 #include "platforms/arm/rp/semaphore_rp.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 
 // Include Pico SDK headers ONLY in .cpp file
 FL_EXTERN_C_BEGIN

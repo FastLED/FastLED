@@ -5,7 +5,7 @@
 #include "fl/stl/cstdio.h"
 #include "fl/stl/isr/handler.h"
 #include "fl/math/math.h"
-#include "fl/system/log.h"  // For FL_ERROR macro
+#include "fl/log/log.h"  // For FL_ERROR macro
 #include "fl/task/task.h"  // For fl::task
 #include "fl/task/scheduler.h"  // For fl::task::Scheduler
 #include "fl/stl/noexcept.h"

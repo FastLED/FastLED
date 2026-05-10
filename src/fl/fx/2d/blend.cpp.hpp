@@ -11,7 +11,7 @@ are blended by the the max luminance of the components.
 #include "fl/fx/fx.h"
 #include "fl/stl/stdint.h"
 #include "fl/math/xymap.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 
 namespace fl {
 

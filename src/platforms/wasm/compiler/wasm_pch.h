@@ -65,8 +65,8 @@
 #include "fl/stl/vector.h"      // fl::vector
 #include "fl/stl/string.h"          // fl::string
 #include "fl/math/math.h"  // fl::min, fl::max, etc.
-#include "fl/system/log.h"          // FL_DBG macro for debug output
-#include "fl/system/log.h"         // FL_WARN macro for warnings
+#include "fl/log/log.h"          // FL_DBG macro for debug output
+#include "fl/log/log.h"         // FL_WARN macro for warnings
 
 // ============================================================================
 // FX HEADERS

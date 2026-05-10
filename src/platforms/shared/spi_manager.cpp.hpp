@@ -5,10 +5,10 @@
 
 #include "fastled_config.h"  // For FASTLED_FORCE_SOFTWARE_SPI
 #include "fl/stl/vector.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/strstream.h"  // Required for FL_WARN_FMT
-#include "fl/system/log.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
+#include "fl/log/log.h"
 
 #include "fl/stl/limits.h"
 #include "fl/system/fastpin.h"

@@ -5,7 +5,7 @@
 #include "fl/channels/detail/validation/result_formatter.h"
 #include "fl/channels/validation.h"
 #include "fl/stl/sstream.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 
 namespace fl {
 namespace validation {

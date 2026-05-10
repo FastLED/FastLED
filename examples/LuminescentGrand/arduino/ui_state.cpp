@@ -2,7 +2,7 @@
 
 #include "./ui_state.h"
 #include "shared/Painter.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/compiler_control.h"
 
 #include <Arduino.h>

@@ -17,9 +17,9 @@
 #include "platforms/memory_barrier.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/system/delay.h"
-#include "fl/system/log.h"
-#include "fl/system/log.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
+#include "fl/log/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/bit_cast.h"
 
 // Include ESP-IDF headers ONLY in .cpp file

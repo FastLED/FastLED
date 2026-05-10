@@ -26,7 +26,7 @@
 #include "FastLED.h"
 
 #include "fl/system/sketch_macros.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/stdio.h"
 
 #include <FastLED.h>

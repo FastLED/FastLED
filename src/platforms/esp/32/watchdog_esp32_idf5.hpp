@@ -16,7 +16,7 @@
 
 #if defined(FL_IS_ESP32)
 
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "esp_task_wdt.h"
 #include "esp_system.h"
 // IWYU pragma: begin_keep

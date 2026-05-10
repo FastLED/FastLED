@@ -21,7 +21,7 @@
 #ifdef FL_I2S_SPI_COMPILE
 
 #include "platforms/esp/32/drivers/i2s_spi/channel_driver_i2s_spi.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/task/executor.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/noexcept.h"

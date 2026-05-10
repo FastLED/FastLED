@@ -3,7 +3,7 @@
 
 // IWYU pragma: private
 
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 // IWYU pragma: begin_keep
 #include <emscripten.h>
 // IWYU pragma: end_keep

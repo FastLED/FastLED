@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/channels/rx/channel.h"
 
 /**

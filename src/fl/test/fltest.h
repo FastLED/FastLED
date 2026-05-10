@@ -840,7 +840,7 @@ bool isTestSkipped() FL_NOEXCEPT;
     } while (0)
 
 // FL_INFO - alias for FL_MESSAGE (doctest compatibility)
-// Only define if not already defined (e.g., by fl/log.h)
+// Only define if not already defined (e.g., by fl/log/log.h)
 #ifndef FL_INFO
 #define FL_INFO(msg) FL_MESSAGE(msg)
 #endif
@@ -871,7 +871,7 @@ bool isTestSkipped() FL_NOEXCEPT;
     } while (0)
 
 // FL_WARN - warning assertion (logs but doesn't affect pass/fail)
-// Note: Only define if not already defined by fl/log.h (which provides streaming support)
+// Note: Only define if not already defined by fl/log/log.h (which provides streaming support)
 #ifndef FL_WARN
 #define FL_WARN(expr)                                                           \
     do {                                                                         \

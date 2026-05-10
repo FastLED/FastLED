@@ -15,7 +15,7 @@
 #if SKETCH_HAS_LARGE_MEMORY
 #include "fl/task/executor.h"  // for task::run (WiFi yield in show() spin loop)
 #endif
-#include "fl/system/log.h"  // for FL_WARN
+#include "fl/log/log.h"  // for FL_WARN
 #include "fl/stl/assert.h"  // for FL_ASSERT
 #include "fl/audio/audio_manager.h"  // for AudioManager
 #include "hsv2rgb.h"  // for CRGB

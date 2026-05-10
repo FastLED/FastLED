@@ -1,7 +1,7 @@
 #include "fl/channels/spi/parallel_device.h"
 #include "fl/channels/spi/device_impl_base.h"
-#include "fl/system/log.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
+#include "fl/log/log.h"
 
 // Include parallel SPI backends
 // IWYU pragma: begin_keep

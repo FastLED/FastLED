@@ -11,7 +11,7 @@
 #include "fl/stl/cctype.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/malloc.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 
 // ESP32 HTTP server header (must be before namespace declarations)
 // Requires IDF 4.0+ for HTTPD_500_INTERNAL_SERVER_ERROR, httpd_resp_send_err, etc.

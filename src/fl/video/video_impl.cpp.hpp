@@ -5,7 +5,7 @@
 #include "fl/fx/time.h"
 #include "fl/stl/assert.h"
 #include "fl/math/math.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/system/file_system.h"
 #include "fl/video/frame_interpolator.h"
 #include "fl/video/pixel_stream.h"

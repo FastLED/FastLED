@@ -31,7 +31,7 @@ Workflow:
 #include "fl/math/math.h"
 #include "fl/math/screenmap.h"
 #include "fl/stl/sstream.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "noise.h"
 #include "fl/stl/array.h"
 #include "fl/fx/2d/wave.h"

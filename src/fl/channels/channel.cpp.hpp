@@ -9,7 +9,7 @@
 #include "fl/channels/driver.h"
 #include "fl/channels/manager.h"
 #include "fl/stl/atomic.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/channels/options.h"
 #include "fl/gfx/pixel_iterator_any.h"
 #include "pixel_controller.h"

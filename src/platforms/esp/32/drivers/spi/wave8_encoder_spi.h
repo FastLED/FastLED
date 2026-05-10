@@ -27,7 +27,7 @@
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/span.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "platforms/esp/is_esp.h"
 #include "fl/stl/noexcept.h"
 

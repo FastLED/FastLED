@@ -18,7 +18,7 @@
 #else
 
 #include "FastLED.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 
 
 // Hardware configuration

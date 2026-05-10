@@ -2,7 +2,7 @@
 #include "noise.h"
 #include "fl/stl/stdint.h"
 #include "test.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/strstream.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
