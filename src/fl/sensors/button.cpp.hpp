@@ -2,7 +2,7 @@
 
 #include "fl/stl/stdint.h"
 
-#include "fl/ui.h"
+#include "fl/ui/ui.h"
 
 #include "fl/stl/assert.h"
 #include "fl/sensors/button.h"

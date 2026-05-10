@@ -31,7 +31,7 @@
 #include "arduino/ui_state.h"
 #include "shared/dprint.h"
 #include "fl/system/log.h"
-#include "fl/ui.h"
+#include "fl/ui/ui.h"
 #include "fl/stl/compiler_control.h"
 
 // Spoof the midi library so it thinks it's running on an arduino.

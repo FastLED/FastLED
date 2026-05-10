@@ -17,7 +17,7 @@
 #include "fl/fx/2d/noisepalette.h"
 #include "fl/fx/2d/animartrix.hpp"
 #include "fl/fx/fx_engine.h"
-#include "fl/ui.h"
+#include "fl/ui/ui.h"
 
 #define LED_PIN 2
 #define BRIGHTNESS 96

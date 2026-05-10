@@ -23,7 +23,7 @@ This will compile and preview the sketch in the browser, and enable
 all the UI elements you see below.
 */
 
-#include "fl/ui.h"
+#include "fl/ui/ui.h"
 #include "fl/fx/2d/wave.h"
 #include <Arduino.h>
 #include <FastLED.h>

@@ -14,7 +14,7 @@ void loop() {}
 #else
 
 #include "fl/audio/audio_processor.h"
-#include "fl/ui.h"
+#include "fl/ui/ui.h"
 
 // LED Configuration
 #define NUM_LEDS 60

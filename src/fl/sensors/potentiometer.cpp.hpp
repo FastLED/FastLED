@@ -1,6 +1,6 @@
 #include "fl/stl/stdint.h"
 #include "platforms/is_platform.h"
-#include "fl/ui.h"
+#include "fl/ui/ui.h"
 #include "fl/stl/assert.h"
 #include "fl/sensors/potentiometer.h"
 #include "fl/system/pin.h"

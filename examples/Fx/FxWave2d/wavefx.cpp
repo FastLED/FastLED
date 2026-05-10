@@ -25,7 +25,7 @@ which are blended together to create complex visual effects.
 
 #include "fl/math/math.h"  // Math helper functions and macros
 #include "fl/math/time_alpha.h"   // Time-based alpha/transition effects
-#include "fl/ui.h"           // UI components for the FastLED web compiler
+#include "fl/ui/ui.h"           // UI components for the FastLED web compiler
 #include "fl/fx/2d/blend.h"  // 2D blending effects between layers
 #include "fl/fx/2d/wave.h"   // 2D wave simulation
 

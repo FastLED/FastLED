@@ -929,7 +929,7 @@ FastLED includes a JSON‑driven UI layer that can expose controls (sliders, but
 
 - **Key headers and switches**
   - `platforms/ui_defs.h`: controls `FASTLED_USE_JSON_UI` (defaults to 1 on WASM, 0 elsewhere).
-  - `fl/ui.h`: C++ UI element classes (UISlider, UIButton, UICheckbox, UINumberField, UIDropdown, UITitle, UIDescription, UIHelp, UIAudio, UIGroup).
+  - `fl/ui/ui.h`: C++ UI element classes (UISlider, UIButton, UICheckbox, UINumberField, UIDropdown, UITitle, UIDescription, UIHelp, UIAudio, UIGroup).
   - `platforms/shared/ui/json/ui_manager.h`: platform‑agnostic JSON UI manager that integrates with `EngineEvents`.
   - `platforms/shared/ui/json/readme.md`: implementation guide and JSON protocol.
 
@@ -952,7 +952,7 @@ FastLED includes a JSON‑driven UI layer that can expose controls (sliders, but
 
   ```cpp
   #include <FastLED.h>
-  #include "fl/ui.h"
+  #include "fl/ui/ui.h"
 
   UISlider brightness("Brightness", 128, 0, 255);
   UICheckbox enabled("Enabled", true);

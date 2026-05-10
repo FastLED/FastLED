@@ -21,7 +21,7 @@
 // fluid-like patterns from color emitters.
 
 #include <FastLED.h>
-#include "fl/ui.h"
+#include "fl/ui/ui.h"
 #include "fl/fx/2d/flowfield.h"
 
 // -- Matrix config --

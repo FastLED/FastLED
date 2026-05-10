@@ -22,7 +22,7 @@
 #include "noisegen.h"
 #include "fl/math/screenmap.h"
 #include "fl/stl/span.h"
-#include "fl/ui.h"
+#include "fl/ui/ui.h"
 #include "fl/sensors/pir.h"
 #include "fl/stl/sstream.h"
 #include "fl/stl/assert.h"

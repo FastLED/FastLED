@@ -1,10 +1,10 @@
 #pragma once
 
-/// @file fl/ui.h
+/// @file fl/ui/ui.h
 /// @brief Aggregator header for the fl/ui/ family of per-element UI types.
 ///
 /// Each UI type lives in its own header under fl/ui/. This file re-exports
-/// them so existing consumers that include "fl/ui.h" continue to work.
+/// them so consumers can include the entire UI surface with one include.
 
 #include "fl/ui/audio.h"
 #include "fl/ui/button.h"

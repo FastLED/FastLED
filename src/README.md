@@ -173,7 +173,7 @@ void render_frame() {
 
 ```cpp
 #include <FastLED.h>
-#include "fl/ui.h"
+#include "fl/ui/ui.h"
 
 UISlider brightness("Brightness", 128, 0, 255);
 UICheckbox enabled("Enabled", true);

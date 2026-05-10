@@ -3,7 +3,7 @@
 #include "fl/stl/stdint.h"
 
 #include "fl/sensors/digital_pin.h"
-#include "fl/ui.h"
+#include "fl/ui/ui.h"
 #include "fl/math/time_alpha.h"
 
 namespace fl {
