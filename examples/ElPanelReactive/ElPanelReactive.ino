@@ -18,7 +18,7 @@
 #include "el_panel.h"
 #include "fl/math/filter/filter.h"
 #include "fl/math/math.h"
-#include "fl/ui.h"
+#include "fl/ui/ui.h"
 
 // ---------------------------------------------------------------------------
 // UI

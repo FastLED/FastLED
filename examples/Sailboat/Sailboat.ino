@@ -15,7 +15,7 @@
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/fx/1d/perlin_particle_punch.h"
 #include "fl/fx/fx_engine.h"
-#include "fl/ui.h"
+#include "fl/ui/ui.h"
 
 
 // ---------------------------------------------------------------------------

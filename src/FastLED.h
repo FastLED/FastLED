@@ -166,7 +166,7 @@
 
 #include "fl/audio/input.h"
 #include "fl/audio/audio_processor.h"
-#include "fl/ui.h"  // for UIAudio (needed for CFastLED::add(UIAudio&) overload)
+#include "fl/ui/ui.h"  // for UIAudio (needed for CFastLED::add(UIAudio&) overload)
 
 // ============================================================================
 // C STRING FUNCTION USING DECLARATIONS
@@ -1627,7 +1627,7 @@ extern CFastLED FastLED;
 
 #include "fl/channels/spi.h"  // SPI device and multi-lane SPI support (1-16 lanes)
 
-#include "fl/ui.h"  // Provides UIButton, UISlider, UICheckbox, UINumberField and UITitle, UIDescription, UIHelp, UIGroup.
+#include "fl/ui/ui.h"  // Provides UIButton, UISlider, UICheckbox, UINumberField and UITitle, UIDescription, UIHelp, UIGroup.
 using fl::UITitle;
 using fl::UIDescription;
 using fl::UIHelp;

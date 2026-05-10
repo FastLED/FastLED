@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
-#include "fl/ui.h"
+#include "fl/ui/ui.h"
 #include "fl/system/log.h"
 #include "fl/system/delay.h"
 

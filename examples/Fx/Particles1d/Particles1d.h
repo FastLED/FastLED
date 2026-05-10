@@ -14,7 +14,7 @@
 
 #include "fl/fx/1d/particles.h"
 #include "fl/math/screenmap.h"
-#include "fl/ui.h"
+#include "fl/ui/ui.h"
 
 
 #define NUM_LEDS 210

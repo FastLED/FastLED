@@ -6,7 +6,7 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/system/engine_events.h"
 #include "fl/sensors/digital_pin.h"
-#include "fl/ui.h"  // For IButtonInput
+#include "fl/ui/ui.h"  // For IButtonInput
 #include "fl/stl/noexcept.h"
 
 namespace fl {

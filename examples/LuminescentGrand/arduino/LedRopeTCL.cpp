@@ -7,7 +7,7 @@
 #include <Arduino.h>
 #include "FastLED.h"
 #include "fl/system/log.h"
-#include "fl/ui.h"
+#include "fl/ui/ui.h"
 #include "fl/math/math.h"
 
 #include "../shared/color.h"

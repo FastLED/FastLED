@@ -11,7 +11,7 @@ void setup() {}
 void loop() {}
 #else
 
-#include "fl/ui.h"
+#include "fl/ui/ui.h"
 
 #define NUM_LEDS 180
 #define LEDS_PER_SEGMENT 60

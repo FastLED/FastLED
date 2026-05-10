@@ -4,7 +4,7 @@
 #include "FastLED.h"
 #include "fl/audio/audio_processor.h"
 #include "fl/fx/fx_engine.h"
-#include "fl/ui.h"
+#include "fl/ui/ui.h"
 
 struct AudioReactive {
     fl::shared_ptr<fl::audio::Processor> processor;

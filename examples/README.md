@@ -85,7 +85,7 @@ Tips:
 ### WASM (browser demos + JSON UI)
 
 - `examples/wasm/` and related WASM-focused examples run in the browser
-- The JSON UI system enables sliders, buttons, and other controls (see `src/platforms/wasm` and `src/fl/ui.h`)
+- The JSON UI system enables sliders, buttons, and other controls (see `src/platforms/wasm` and `src/fl/ui/ui.h`)
 - Typical flow: build to WebAssembly, serve the app, and interact via the browser UI
 
 ---
@@ -273,7 +273,7 @@ FastLED now supports flexible `@filter` directives in `.ino` sketch files for co
 
 - Many examples are deliberately small; for more reusable building blocks, see `src/fl/` and `src/fx/`
 - Prefer `fl::` containers, views (`fl::span`), and graphics helpers for portability and quality
-- For UI/remote control on capable targets, use the JSON UI elements (see `src/fl/ui.h`) and WASM bridge (`src/platforms/wasm`)
+- For UI/remote control on capable targets, use the JSON UI elements (see `src/fl/ui/ui.h`) and WASM bridge (`src/platforms/wasm`)
 
 ---
 

@@ -54,7 +54,7 @@ Performence notes @64x64:
 #include "fl/fx/fx_engine.h"
 
 #include "fl/fx/2d/animartrix.hpp"
-#include "fl/ui.h"
+#include "fl/ui/ui.h"
 #include "fl/audio/audio_processor.h"
 #include "fl/audio/detector/vibe.h"
 

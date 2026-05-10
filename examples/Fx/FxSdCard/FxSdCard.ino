@@ -18,7 +18,7 @@
 #include "fl/fx/fx_engine.h"
 #include "fl/fx/video.h"
 #include "fl/system/file_system.h"
-#include "fl/ui.h"
+#include "fl/ui/ui.h"
 #include "fl/math/screenmap.h"
 #include "fl/system/file_system.h"
 

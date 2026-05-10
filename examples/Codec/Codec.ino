@@ -6,7 +6,7 @@
 
 #include <FastLED.h>
 #include "fl/system/sketch_macros.h"
-#include "fl/ui.h"
+#include "fl/ui/ui.h"
 #include "fl/stl/string.h"
 
 #include "fl/math/xymap.h"

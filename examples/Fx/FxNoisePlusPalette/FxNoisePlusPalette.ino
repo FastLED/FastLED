@@ -12,7 +12,7 @@
 
 #include <FastLED.h>
 #include "fl/fx/2d/noisepalette.h"
-#include "fl/ui.h"
+#include "fl/ui/ui.h"
 
 #define LED_PIN 3
 #define BRIGHTNESS 96

@@ -3,7 +3,7 @@
 /// @brief UIButton/UIDropdown <-> Button integration via IButtonInput interface.
 /// Compiled in fl.sensors+ to keep concrete Button out of fl.cpp link chain.
 
-#include "fl/ui.h"
+#include "fl/ui/ui.h"
 #include "fl/sensors/button.h"
 
 namespace fl {
