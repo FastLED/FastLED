@@ -964,6 +964,146 @@
 #endif // defined(ARDUINO_GENERIC)
 
 
+// SuperMini nRF52840 (and nice!nano-pin-compatible ProMicro nRF52840)
+// Variant: https://github.com/pdcook/nRFMicro-Arduino-Core/blob/main/variants/SuperMini_nRF52840/variant.h
+// Reported in https://github.com/FastLED/FastLED/issues/2422
+#if defined(TARGET_SUPERMINI_NRF52840)
+    #if defined(__FASTPIN_ARM_NRF52_VARIANT_FOUND)
+        #error "Cannot define more than one board at a time"
+    #else
+        #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
+    #endif
+
+    // Pin mappings from variant.h (community-reported, see issue #2422)
+
+    // Left side header (top to bottom)
+    _FL_DEFPIN( 0,  6, 0); // D0  is P0.06 (TX)
+    _FL_DEFPIN( 1,  8, 0); // D1  is P0.08 (RX)
+    _FL_DEFPIN( 2, 17, 0); // D2  is P0.17 (SCK)
+    _FL_DEFPIN( 3, 20, 0); // D3  is P0.20 (MISO)
+    _FL_DEFPIN( 4, 22, 0); // D4  is P0.22 (MOSI)
+    _FL_DEFPIN( 5, 24, 0); // D5  is P0.24 (CS)
+    _FL_DEFPIN( 6, 32, 1); // D6  is P1.00 (SDA)
+    _FL_DEFPIN( 7, 11, 0); // D7  is P0.11 (SCL)
+    _FL_DEFPIN( 8, 36, 1); // D8  is P1.04
+    _FL_DEFPIN( 9, 38, 1); // D9  is P1.06
+
+    // Right side header (bottom to top)
+    _FL_DEF_INVALID_PIN(10,  9, 0); // D10 is P0.09 (NFC1)
+    _FL_DEF_INVALID_PIN(11, 10, 0); // D11 is P0.10 (NFC2)
+    _FL_DEFPIN(12, 43, 1); // D12 is P1.11
+    _FL_DEFPIN(13, 45, 1); // D13 is P1.13 (SDA1)
+    _FL_DEFPIN(14, 47, 1); // D14 is P1.15 (SCL1)
+    _FL_DEFPIN(15,  2, 0); // D15 is P0.02 (A0)
+    _FL_DEFPIN(16, 29, 0); // D16 is P0.29 (A1)
+    _FL_DEFPIN(17, 31, 0); // D17 is P0.31 (A2)
+
+    // Center pins
+    _FL_DEFPIN(18, 33, 1); // D18 is P1.01 (SCK1)
+    _FL_DEFPIN(19, 34, 1); // D19 is P1.02 (MISO1)
+    _FL_DEFPIN(20, 39, 1); // D20 is P1.07 (MOSI1)
+
+    // Onboard control pins (not safe for FastLED output)
+    _FL_DEF_INVALID_PIN(21, 13, 0); // D21 is P0.13 (EXT_VCC -- 3V3 enable)
+    _FL_DEF_INVALID_PIN(22, 15, 0); // D22 is P0.15 (USR LED)
+#endif // defined(TARGET_SUPERMINI_NRF52840)
+
+
+// nice!nano v2 (and pin-compatible ProMicro nRF52840 boards using this BSP)
+// Variant: https://github.com/pdcook/nRFMicro-Arduino-Core/blob/main/variants/nice_nano/variant.h
+// Reported in https://github.com/FastLED/FastLED/issues/2422
+#if defined(TARGET_NICE_NANO_V2)
+    #if defined(__FASTPIN_ARM_NRF52_VARIANT_FOUND)
+        #error "Cannot define more than one board at a time"
+    #else
+        #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
+    #endif
+
+    // Pin mappings match the SuperMini_nRF52840 variant (community-reported, see issue #2422)
+
+    // Left side header (top to bottom)
+    _FL_DEFPIN( 0,  6, 0); // D0  is P0.06 (TX)
+    _FL_DEFPIN( 1,  8, 0); // D1  is P0.08 (RX)
+    _FL_DEFPIN( 2, 17, 0); // D2  is P0.17 (SCK)
+    _FL_DEFPIN( 3, 20, 0); // D3  is P0.20 (MISO)
+    _FL_DEFPIN( 4, 22, 0); // D4  is P0.22 (MOSI)
+    _FL_DEFPIN( 5, 24, 0); // D5  is P0.24 (CS)
+    _FL_DEFPIN( 6, 32, 1); // D6  is P1.00 (SDA)
+    _FL_DEFPIN( 7, 11, 0); // D7  is P0.11 (SCL)
+    _FL_DEFPIN( 8, 36, 1); // D8  is P1.04
+    _FL_DEFPIN( 9, 38, 1); // D9  is P1.06
+
+    // Right side header (bottom to top)
+    _FL_DEF_INVALID_PIN(10,  9, 0); // D10 is P0.09 (NFC1)
+    _FL_DEF_INVALID_PIN(11, 10, 0); // D11 is P0.10 (NFC2)
+    _FL_DEFPIN(12, 43, 1); // D12 is P1.11
+    _FL_DEFPIN(13, 45, 1); // D13 is P1.13 (SDA1)
+    _FL_DEFPIN(14, 47, 1); // D14 is P1.15 (SCL1)
+    _FL_DEFPIN(15,  2, 0); // D15 is P0.02 (A0)
+    _FL_DEFPIN(16, 29, 0); // D16 is P0.29 (A1)
+    _FL_DEFPIN(17, 31, 0); // D17 is P0.31 (A2)
+
+    // Center pins
+    _FL_DEFPIN(18, 33, 1); // D18 is P1.01 (SCK1)
+    _FL_DEFPIN(19, 34, 1); // D19 is P1.02 (MISO1)
+    _FL_DEFPIN(20, 39, 1); // D20 is P1.07 (MOSI1)
+
+    // Onboard control pins (not safe for FastLED output)
+    _FL_DEF_INVALID_PIN(21, 13, 0); // D21 is P0.13 (EXT_VCC -- 3V3 enable)
+    _FL_DEF_INVALID_PIN(22, 15, 0); // D22 is P0.15 (USR LED)
+#endif // defined(TARGET_NICE_NANO_V2)
+
+
+// nRFMicro (Joric's open-hardware ProMicro-pin-compatible nRF52840)
+// Variant: https://github.com/pdcook/nRFMicro-Arduino-Core/blob/main/variants/nRFMicro/variant.h
+// Reported in https://github.com/FastLED/FastLED/issues/2422
+#if defined(TARGET_NRFMICRO)
+    #if defined(__FASTPIN_ARM_NRF52_VARIANT_FOUND)
+        #error "Cannot define more than one board at a time"
+    #else
+        #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
+    #endif
+
+    // Pin mappings from variant.h (community-reported, see issue #2422)
+
+    // Left side header (top to bottom)
+    _FL_DEFPIN( 0,  6, 0); // D0  is P0.06 (TX)
+    _FL_DEFPIN( 1,  8, 0); // D1  is P0.08 (RX)
+    _FL_DEFPIN( 2, 15, 0); // D2  is P0.15 (SCK)
+    _FL_DEFPIN( 3, 17, 0); // D3  is P0.17 (MISO)
+    _FL_DEFPIN( 4, 20, 0); // D4  is P0.20 (MOSI)
+    _FL_DEFPIN( 5, 13, 0); // D5  is P0.13 (SDA)
+    _FL_DEFPIN( 6, 24, 0); // D6  is P0.24 (SCL)
+    _FL_DEF_INVALID_PIN( 7,  9, 0); // D7  is P0.09 (NFC1)
+    _FL_DEF_INVALID_PIN( 8, 10, 0); // D8  is P0.10 (NFC2)
+    _FL_DEFPIN( 9, 38, 1); // D9  is P1.06 (CS)
+
+    // Right side header (bottom to top)
+    _FL_DEFPIN(10, 43, 1); // D10 is P1.11
+    _FL_DEFPIN(11, 28, 0); // D11 is P0.28 (A0)
+    _FL_DEFPIN(12,  3, 0); // D12 is P0.03 (A1)
+    _FL_DEFPIN(13, 45, 1); // D13 is P1.13
+    _FL_DEFPIN(14,  2, 0); // D14 is P0.02 (A2)
+    _FL_DEFPIN(15, 29, 0); // D15 is P0.29 (A3)
+    _FL_DEFPIN(16, 31, 0); // D16 is P0.31 (A4)
+    _FL_DEFPIN(17, 30, 0); // D17 is P0.30 (A5)
+
+    // Center pins (free / through-hole)
+    _FL_DEFPIN(18, 36, 1); // D18 is P1.04 (SCK1)
+    _FL_DEFPIN(19, 34, 1); // D19 is P1.02 (MISO1)
+    _FL_DEFPIN(20, 32, 1); // D20 is P1.00 (MOSI1)
+    _FL_DEFPIN(21, 22, 0); // D21 is P0.22
+    _FL_DEFPIN(22,  7, 0); // D22 is P0.07 (SDA1)
+    _FL_DEFPIN(23, 12, 0); // D23 is P0.12 (SCL1)
+    _FL_DEFPIN(24, 26, 0); // D24 is P0.26
+
+    // Onboard control pins (not safe for FastLED output)
+    _FL_DEF_INVALID_PIN(25,  4, 0); // D25 is P0.04 (VBAT sense)
+    _FL_DEF_INVALID_PIN(26, 41, 1); // D26 is P1.09 (EXT_VCC -- 3V3 enable)
+    _FL_DEF_INVALID_PIN(27, 42, 1); // D27 is P1.10 (USR LED)
+#endif // defined(TARGET_NRFMICRO)
+
+
 // Adafruit Bluefruit nRF52840 Feather Express
 // From https://www.adafruit.com/package_adafruit_index.json
 #if defined(NRF52840_XXAA) && !defined(__FASTPIN_ARM_NRF52_VARIANT_FOUND)

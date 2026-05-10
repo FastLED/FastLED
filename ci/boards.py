@@ -883,6 +883,56 @@ NRF52840 = Board(
     board_build_core="nRF5",  # Ensure correct core directory
 )
 
+# SuperMini nRF52840 -- community board (issue #2422)
+# Variant header: https://github.com/pdcook/nRFMicro-Arduino-Core/blob/main/variants/SuperMini_nRF52840/variant.h
+# No first-party PlatformIO board package exists for this variant; we reuse
+# the nrf52840 Adafruit BSP and rely on the TARGET_SUPERMINI_NRF52840 define
+# to select the correct fastpin variant block in FastLED.
+SUPERMINI_NRF52840 = Board(
+    board_name="supermini_nrf52840",
+    real_board_name="nrf52840_dk_adafruit",
+    platform="nordicnrf52",
+    framework="arduino",
+    platform_packages="framework-arduinoadafruitnrf52@^1.10601.0",
+    defines=[
+        "TARGET_SUPERMINI_NRF52840",
+        "FASTLED_USE_COMPILE_TESTS=0",
+    ],
+    board_build_core="nRF5",
+)
+
+# nice!nano v2 / ProMicro nRF52840 -- community board (issue #2422)
+# Variant header: https://github.com/pdcook/nRFMicro-Arduino-Core/blob/main/variants/nice_nano/variant.h
+# Pin-compatible with the SparkFun ProMicro footprint.  Reuses the nrf52840
+# Adafruit BSP; TARGET_NICE_NANO_V2 selects the correct variant block.
+NICE_NANO_NRF52840 = Board(
+    board_name="nice_nano_nrf52840",
+    real_board_name="nrf52840_dk_adafruit",
+    platform="nordicnrf52",
+    framework="arduino",
+    platform_packages="framework-arduinoadafruitnrf52@^1.10601.0",
+    defines=[
+        "TARGET_NICE_NANO_V2",
+        "FASTLED_USE_COMPILE_TESTS=0",
+    ],
+    board_build_core="nRF5",
+)
+
+# nRFMicro -- community board (issue #2422)
+# Variant header: https://github.com/pdcook/nRFMicro-Arduino-Core/blob/main/variants/nRFMicro/variant.h
+NRFMICRO_NRF52840 = Board(
+    board_name="nrfmicro_nrf52840",
+    real_board_name="nrf52840_dk_adafruit",
+    platform="nordicnrf52",
+    framework="arduino",
+    platform_packages="framework-arduinoadafruitnrf52@^1.10601.0",
+    defines=[
+        "TARGET_NRFMICRO",
+        "FASTLED_USE_COMPILE_TESTS=0",
+    ],
+    board_build_core="nRF5",
+)
+
 RPI_PICO = Board(
     board_name="rp2040",
     real_board_name="rpipico",
