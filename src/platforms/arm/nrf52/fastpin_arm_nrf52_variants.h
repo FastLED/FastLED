@@ -61,6 +61,46 @@
     {}
 
 
+// ---- Opt-in re-enable macros for pins normally treated as invalid ---------
+//
+// FASTLED_NRF52_ALLOW_NFC_PINS:
+//   When defined by the user, P0.09 / P0.10 (NFC1 / NFC2) become valid
+//   FastLED output pins on every nRF52840 variant in this file.  The pins
+//   are gated behind a build-time switch because the Adafruit nRF52 core
+//   defaults to NFC mode for them; you ALSO need either
+//     - CONFIG_NFCT_PINS_AS_GPIOS=1 in the BSP / build flags, OR
+//     - NFC_PINS_AS_GPIO() called at boot (Adafruit core helper)
+//   for the pins to actually drive a strip.  Defining this macro alone is
+//   necessary but not sufficient.
+//
+// FASTLED_NRF52_ALLOW_USR_LED:
+//   When defined by the user, the on-board user-LED pins on each variant
+//   become valid FastLED output pins.  Defining this risks a clash with
+//   any Arduino sketch (or BSP background task) that calls
+//   digitalWrite(LED_BUILTIN, ...); make sure your sketch is not also
+//   driving the LED pin from the Arduino API.
+//
+// EXT_VCC enable pins and VBAT-sense pins remain invalid unconditionally
+// (toggling EXT_VCC mid-show() browns out the regulator; VBAT is an analog
+// input on most BSPs).
+
+#if defined(FASTLED_NRF52_ALLOW_NFC_PINS)
+    #define _FL_DEFPIN_NFC(ARDUINO_PIN, BOARD_PIN, BOARD_PORT) \
+        _FL_DEFPIN(ARDUINO_PIN, BOARD_PIN, BOARD_PORT)
+#else
+    #define _FL_DEFPIN_NFC(ARDUINO_PIN, BOARD_PIN, BOARD_PORT) \
+        _FL_DEF_INVALID_PIN(ARDUINO_PIN, BOARD_PIN, BOARD_PORT)
+#endif
+
+#if defined(FASTLED_NRF52_ALLOW_USR_LED)
+    #define _FL_DEFPIN_USR_LED(ARDUINO_PIN, BOARD_PIN, BOARD_PORT) \
+        _FL_DEFPIN(ARDUINO_PIN, BOARD_PIN, BOARD_PORT)
+#else
+    #define _FL_DEFPIN_USR_LED(ARDUINO_PIN, BOARD_PIN, BOARD_PORT) \
+        _FL_DEF_INVALID_PIN(ARDUINO_PIN, BOARD_PIN, BOARD_PORT)
+#endif
+
+
 
 // Adafruit Bluefruit nRF52832 Feather
 // From https://www.adafruit.com/package_adafruit_index.json
@@ -811,15 +851,15 @@
     _FL_DEFPIN( 9, 46, 1); // D9  is P1.46
     _FL_DEFPIN(10, 47, 1); // D10 is P1.47
 
-    _FL_DEF_INVALID_PIN(11, 26, 0); // D11 is P0.26 (LED RED)
-    _FL_DEF_INVALID_PIN(12, 6, 0); // D12 is P0.06 (LED BLUE)
-    _FL_DEF_INVALID_PIN(13, 30, 0); // D13 is P0.30 (LED GREEN)
+    _FL_DEFPIN_USR_LED(11, 26, 0); // D11 is P0.26 (LED RED)
+    _FL_DEFPIN_USR_LED(12, 6, 0); // D12 is P0.06 (LED BLUE)
+    _FL_DEFPIN_USR_LED(13, 30, 0); // D13 is P0.30 (LED GREEN)
     _FL_DEF_INVALID_PIN(14, 14, 0); // D14 is P0.14 (READ_BAT)
 
     _FL_DEF_INVALID_PIN(22, 13, 0); // D22 is P0.13 (HICHG)
     _FL_DEF_INVALID_PIN(23, 17, 0); // D23 is P0.17 (~CHG)
 
-        
+
     _FL_DEF_INVALID_PIN(24, 21, 0);  // D24 is P0.21 (QSPI_SCK)
     _FL_DEF_INVALID_PIN(25, 25, 0);  // D25 is P0.25 (QSPI_CSN)
     _FL_DEF_INVALID_PIN(26, 20, 0);  // D26 is P0.20 (QSPI_SIO_0 DI)
@@ -828,8 +868,8 @@
     _FL_DEF_INVALID_PIN(29, 23, 0);  // D29 is P0.23 (QSPI_SIO_3 HOLD)
 
     // NFC
-    _FL_DEF_INVALID_PIN(30, 9, 0);  // D30 is P0.09 (NFC1)
-    _FL_DEF_INVALID_PIN(31, 10, 0);  // D31 is P0.10 (NFC2)
+    _FL_DEFPIN_NFC(30, 9, 0);  // D30 is P0.09 (NFC1)
+    _FL_DEFPIN_NFC(31, 10, 0);  // D31 is P0.10 (NFC2)
 
     // VBAT
     _FL_DEF_INVALID_PIN(32, 31, 0);  // D32 is P0.31 (VBAT)
@@ -859,15 +899,15 @@
     _FL_DEFPIN( 9, 46, 1); // D9  is P1.46
     _FL_DEFPIN(10, 47, 1); // D10 is P1.47
 
-    _FL_DEF_INVALID_PIN(11, 26, 0); // D11 is P0.26 (LED RED)
-    _FL_DEF_INVALID_PIN(12, 6, 0); // D12 is P0.06 (LED BLUE)
-    _FL_DEF_INVALID_PIN(13, 30, 0); // D13 is P0.30 (LED GREEN)
+    _FL_DEFPIN_USR_LED(11, 26, 0); // D11 is P0.26 (LED RED)
+    _FL_DEFPIN_USR_LED(12, 6, 0); // D12 is P0.06 (LED BLUE)
+    _FL_DEFPIN_USR_LED(13, 30, 0); // D13 is P0.30 (LED GREEN)
     _FL_DEF_INVALID_PIN(14, 14, 0); // D14 is P0.14 (READ_BAT)
 
     _FL_DEF_INVALID_PIN(22, 13, 0); // D22 is P0.13 (HICHG)
     _FL_DEF_INVALID_PIN(23, 17, 0); // D23 is P0.17 (~CHG)
 
-        
+
     _FL_DEF_INVALID_PIN(24, 21, 0);  // D24 is P0.21 (QSPI_SCK)
     _FL_DEF_INVALID_PIN(25, 25, 0);  // D25 is P0.25 (QSPI_CSN)
     _FL_DEF_INVALID_PIN(26, 20, 0);  // D26 is P0.20 (QSPI_SIO_0 DI)
@@ -876,8 +916,8 @@
     _FL_DEF_INVALID_PIN(29, 23, 0);  // D29 is P0.23 (QSPI_SIO_3 HOLD)
 
     // NFC
-    _FL_DEF_INVALID_PIN(30, 9, 0);  // D30 is P0.09 (NFC1)
-    _FL_DEF_INVALID_PIN(31, 10, 0);  // D31 is P0.10 (NFC2)
+    _FL_DEFPIN_NFC(30, 9, 0);  // D30 is P0.09 (NFC1)
+    _FL_DEFPIN_NFC(31, 10, 0);  // D31 is P0.10 (NFC2)
 
     // VBAT
     _FL_DEF_INVALID_PIN(32, 31, 0);  // D32 is P0.31 (VBAT)
@@ -989,8 +1029,8 @@
     _FL_DEFPIN( 9, 38, 1); // D9  is P1.06
 
     // Right side header (bottom to top)
-    _FL_DEF_INVALID_PIN(10,  9, 0); // D10 is P0.09 (NFC1)
-    _FL_DEF_INVALID_PIN(11, 10, 0); // D11 is P0.10 (NFC2)
+    _FL_DEFPIN_NFC(10,  9, 0); // D10 is P0.09 (NFC1)
+    _FL_DEFPIN_NFC(11, 10, 0); // D11 is P0.10 (NFC2)
     _FL_DEFPIN(12, 43, 1); // D12 is P1.11
     _FL_DEFPIN(13, 45, 1); // D13 is P1.13 (SDA1)
     _FL_DEFPIN(14, 47, 1); // D14 is P1.15 (SCL1)
@@ -1005,7 +1045,7 @@
 
     // Onboard control pins (not safe for FastLED output)
     _FL_DEF_INVALID_PIN(21, 13, 0); // D21 is P0.13 (EXT_VCC -- 3V3 enable)
-    _FL_DEF_INVALID_PIN(22, 15, 0); // D22 is P0.15 (USR LED)
+    _FL_DEFPIN_USR_LED(22, 15, 0); // D22 is P0.15 (USR LED)
 #endif // defined(TARGET_SUPERMINI_NRF52840)
 
 
@@ -1034,8 +1074,8 @@
     _FL_DEFPIN( 9, 38, 1); // D9  is P1.06
 
     // Right side header (bottom to top)
-    _FL_DEF_INVALID_PIN(10,  9, 0); // D10 is P0.09 (NFC1)
-    _FL_DEF_INVALID_PIN(11, 10, 0); // D11 is P0.10 (NFC2)
+    _FL_DEFPIN_NFC(10,  9, 0); // D10 is P0.09 (NFC1)
+    _FL_DEFPIN_NFC(11, 10, 0); // D11 is P0.10 (NFC2)
     _FL_DEFPIN(12, 43, 1); // D12 is P1.11
     _FL_DEFPIN(13, 45, 1); // D13 is P1.13 (SDA1)
     _FL_DEFPIN(14, 47, 1); // D14 is P1.15 (SCL1)
@@ -1050,7 +1090,7 @@
 
     // Onboard control pins (not safe for FastLED output)
     _FL_DEF_INVALID_PIN(21, 13, 0); // D21 is P0.13 (EXT_VCC -- 3V3 enable)
-    _FL_DEF_INVALID_PIN(22, 15, 0); // D22 is P0.15 (USR LED)
+    _FL_DEFPIN_USR_LED(22, 15, 0); // D22 is P0.15 (USR LED)
 #endif // defined(TARGET_NICE_NANO_V2)
 
 
@@ -1074,8 +1114,8 @@
     _FL_DEFPIN( 4, 20, 0); // D4  is P0.20 (MOSI)
     _FL_DEFPIN( 5, 13, 0); // D5  is P0.13 (SDA)
     _FL_DEFPIN( 6, 24, 0); // D6  is P0.24 (SCL)
-    _FL_DEF_INVALID_PIN( 7,  9, 0); // D7  is P0.09 (NFC1)
-    _FL_DEF_INVALID_PIN( 8, 10, 0); // D8  is P0.10 (NFC2)
+    _FL_DEFPIN_NFC( 7,  9, 0); // D7  is P0.09 (NFC1)
+    _FL_DEFPIN_NFC( 8, 10, 0); // D8  is P0.10 (NFC2)
     _FL_DEFPIN( 9, 38, 1); // D9  is P1.06 (CS)
 
     // Right side header (bottom to top)
@@ -1100,7 +1140,7 @@
     // Onboard control pins (not safe for FastLED output)
     _FL_DEF_INVALID_PIN(25,  4, 0); // D25 is P0.04 (VBAT sense)
     _FL_DEF_INVALID_PIN(26, 41, 1); // D26 is P1.09 (EXT_VCC -- 3V3 enable)
-    _FL_DEF_INVALID_PIN(27, 42, 1); // D27 is P1.10 (USR LED)
+    _FL_DEFPIN_USR_LED(27, 42, 1); // D27 is P1.10 (USR LED)
 #endif // defined(TARGET_NRFMICRO)
 
 
