@@ -829,6 +829,37 @@ public:
 	/// @endcode
 	static fl::shared_ptr<fl::audio::Processor> add(fl::UIAudio& uiAudio);
 
+	/// @brief Enroll every channel driver available on this platform with `ChannelManager`.
+	///
+	/// Convenience forwarder to `fl::enableAllDrivers()` (defined in
+	/// `fl/channels/all_drivers.h`). Use this to restore 3.10.3-style runtime
+	/// driver flexibility — every driver is registered, any affinity string
+	/// resolves at runtime.
+	///
+	/// **Linker note (issue #2428).** This member's body lives in
+	/// `fl/channels/all_drivers.h`. Including that header is what makes the
+	/// per-platform `BusTraits<Bus::X>::instance()` singletons visible at the
+	/// call site so the linker keeps their translation units. If a sketch
+	/// never calls `FastLED.enableAllDrivers()`, `--gc-sections` drops the
+	/// inline body and every driver TU it references — the binary-bloat fix
+	/// from #2420 / #2421 is preserved.
+	///
+	/// Example:
+	/// @code
+	/// #include "FastLED.h"
+	/// #include "fl/channels/all_drivers.h"
+	///
+	/// void setup() {
+	///     FastLED.enableAllDrivers();   // every platform driver registered
+	///     fl::ChannelOptions opts; opts.mAffinity = "RMT";
+	///     FastLED.add(fl::ChannelConfig(...));
+	/// }
+	/// @endcode
+	///
+	/// @note Calling without including `fl/channels/all_drivers.h` produces a
+	///       linker error — the include is the explicit opt-in.
+	static void enableAllDrivers();
+
 	/// @brief Remove a channel from the LED controller list
 	///
 	/// Removes the channel from the active controller list so it will no longer
