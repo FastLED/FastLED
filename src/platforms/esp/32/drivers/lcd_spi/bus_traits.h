@@ -20,9 +20,11 @@
 #if defined(FL_IS_ESP32) && FASTLED_ESP32_HAS_LCD_SPI
 
 #include "fl/channels/bus.h"
+#include "fl/channels/bus_priorities.h"
 #include "fl/channels/bus_traits.h"
 #include "fl/channels/config.h"
 #include "fl/channels/driver.h"
+#include "fl/channels/manager.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/type_traits.h"
 #include "platforms/esp/32/drivers/lcd_spi/channel_driver_lcd_clockless.h"
@@ -36,9 +38,15 @@ namespace fl {
 template<> struct BusTraits<Bus::LCD_SPI> {
     using Driver = IChannelDriver;
 
-    static Driver& instance() FL_NOEXCEPT {
+    static fl::shared_ptr<Driver> instancePtr() FL_NOEXCEPT {
         static fl::shared_ptr<Driver> gHolder = createLcdSpiEngine();
-        return *gHolder;
+        return gHolder;
+    }
+
+    static Driver& instance() FL_NOEXCEPT { return *instancePtr(); }
+
+    static void registerWithManager() FL_NOEXCEPT {
+        ChannelManager::instance().addDriver(default_bus_priority(Bus::LCD_SPI), instancePtr());
     }
 };
 
@@ -47,9 +55,15 @@ template<> struct BusSupports<Bus::LCD_SPI, SpiChipsetConfig> : fl::true_type {}
 template<> struct BusTraits<Bus::LCD_CLOCKLESS> {
     using Driver = IChannelDriver;
 
-    static Driver& instance() FL_NOEXCEPT {
+    static fl::shared_ptr<Driver> instancePtr() FL_NOEXCEPT {
         static fl::shared_ptr<Driver> gHolder = createLcdClocklessEngine();
-        return *gHolder;
+        return gHolder;
+    }
+
+    static Driver& instance() FL_NOEXCEPT { return *instancePtr(); }
+
+    static void registerWithManager() FL_NOEXCEPT {
+        ChannelManager::instance().addDriver(default_bus_priority(Bus::LCD_CLOCKLESS), instancePtr());
     }
 };
 

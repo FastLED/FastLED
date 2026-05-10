@@ -11,6 +11,7 @@
 #include "fl/channels/bus_traits.h"
 #include "fl/channels/config.h"  // ClocklessChipset, SpiChipsetConfig
 #include "fl/channels/driver.h"  // IChannelDriver
+#include "fl/channels/manager.h"
 #include "fl/stl/stdint.h"
 #include "fl/stl/string.h"
 #include "platforms/is_platform.h"
@@ -62,6 +63,29 @@ FL_TEST_CASE("BusTraits<Bus::STUB>::Driver implements IChannelDriver contract") 
     // Cast back to concrete type to exercise the alias.
     Driver* concrete = static_cast<Driver*>(iface);
     FL_CHECK(concrete != nullptr);
+}
+
+FL_TEST_CASE("BusTraits<Bus::STUB>::instancePtr returns a non-null shared_ptr") {
+    auto p = fl::BusTraits<fl::Bus::STUB>::instancePtr();
+    FL_REQUIRE(p != nullptr);
+    // instance() and *instancePtr() must reference the same object.
+    FL_CHECK(p.get() == &fl::BusTraits<fl::Bus::STUB>::instance());
+}
+
+FL_TEST_CASE("enableDrivers<Bus::STUB>() registers the stub driver with ChannelManager") {
+    // Snapshot driver count before; explicit enableDrivers should add (or
+    // replace, if the legacy auto-init already registered) by name.
+    auto& mgr = fl::ChannelManager::instance();
+    auto before = mgr.getDriverCount();
+    fl::enableDrivers<fl::Bus::STUB>();
+    auto after = mgr.getDriverCount();
+    // After enableDrivers the manager must contain the stub driver. Count
+    // either grows by one (fresh registration) or stays equal (replace by name).
+    FL_CHECK(after >= before);
+    auto stubDriver = mgr.getDriverByName(fl::string::from_literal("STUB"));
+    FL_REQUIRE(stubDriver != nullptr);
+    // Identity check: the registered driver must be the BusTraits singleton.
+    FL_CHECK(stubDriver.get() == &fl::BusTraits<fl::Bus::STUB>::instance());
 }
 
 }  // FL_TEST_FILE

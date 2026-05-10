@@ -11,8 +11,10 @@
 
 #include "fl/stl/compiler_control.h"
 #include "fl/channels/bus.h"
+#include "fl/channels/bus_priorities.h"
 #include "fl/channels/bus_traits.h"
 #include "fl/channels/config.h"
+#include "fl/channels/manager.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/type_traits.h"
 #include "platforms/shared/bitbang/bitbang_channel_driver.h"
@@ -22,9 +24,15 @@ namespace fl {
 template<> struct BusTraits<Bus::BIT_BANG> {
     using Driver = BitBangChannelDriver;
 
-    static Driver& instance() FL_NOEXCEPT {
+    static fl::shared_ptr<Driver> instancePtr() FL_NOEXCEPT {
         static fl::shared_ptr<Driver> gHolder = fl::make_shared<Driver>();
-        return *gHolder;
+        return gHolder;
+    }
+
+    static Driver& instance() FL_NOEXCEPT { return *instancePtr(); }
+
+    static void registerWithManager() FL_NOEXCEPT {
+        ChannelManager::instance().addDriver(default_bus_priority(Bus::BIT_BANG), instancePtr());
     }
 };
 

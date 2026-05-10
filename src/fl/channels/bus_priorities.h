@@ -1,0 +1,47 @@
+#pragma once
+
+/// @file bus_priorities.h
+/// @brief Per-Bus priority constants for ChannelManager registration.
+///
+/// `ChannelManager` selects drivers in priority order (higher = preferred).
+/// Each `BusTraits<B>::registerWithManager()` reads its priority from this
+/// table to keep the values centralized rather than scattered across
+/// per-driver headers and the legacy `initChannelDrivers()` body.
+///
+/// The values mirror the priorities historically defined in
+/// `src/platforms/esp/32/drivers/channel_manager_esp32.cpp.hpp` so behavior
+/// is unchanged for legacy auto-registered builds.
+
+#include "fl/channels/bus.h"
+#include "fl/stl/stdint.h"
+
+namespace fl {
+
+/// @brief Default priority assigned to a `Bus` when registered with the manager.
+///
+/// Higher = preferred. The function is `constexpr` so callers can use it in
+/// constant expressions if needed. Buses without a registered priority fall
+/// back to 0.
+constexpr int default_bus_priority(Bus b) FL_NOEXCEPT {
+    // FORCE-style overrides (FASTLED_ESP32_FORCE_*) are intentionally not
+    // applied here -- the legacy initChannelDrivers() retains its own
+    // priority-bumping logic for backward compatibility. This table is the
+    // baseline used by the new enableDrivers<>() opt-in API.
+    return
+        b == Bus::I2S_SPI       ? 10 :
+        b == Bus::LCD_SPI       ? 10 :
+        b == Bus::PARLIO        ? 4  :
+        b == Bus::LCD_RGB       ? 3  :
+        b == Bus::RMT           ? 2  :
+        b == Bus::LCD_CLOCKLESS ? 2  :
+        b == Bus::I2S           ? 1  :
+        b == Bus::FLEX_IO       ? 1  :
+        b == Bus::OBJECT_FLED   ? 1  :
+        b == Bus::SPI           ? 0  :
+        b == Bus::BIT_BANG      ? 0  :
+        b == Bus::STUB          ? 0  :
+        b == Bus::UART          ? -1 :
+        0;
+}
+
+}  // namespace fl

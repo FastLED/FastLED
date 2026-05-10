@@ -20,9 +20,11 @@
 #if defined(FL_IS_ESP32) && FASTLED_ESP32_HAS_I2S_LCD_CAM
 
 #include "fl/channels/bus.h"
+#include "fl/channels/bus_priorities.h"
 #include "fl/channels/bus_traits.h"
 #include "fl/channels/config.h"
 #include "fl/channels/driver.h"
+#include "fl/channels/manager.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/type_traits.h"
 #include "platforms/esp/32/drivers/i2s/channel_driver_i2s.h"
@@ -34,9 +36,15 @@ namespace fl {
 template<> struct BusTraits<Bus::I2S> {
     using Driver = IChannelDriver;  // factory returns abstract base
 
-    static Driver& instance() FL_NOEXCEPT {
+    static fl::shared_ptr<Driver> instancePtr() FL_NOEXCEPT {
         static fl::shared_ptr<Driver> gHolder = createI2sEngine();
-        return *gHolder;
+        return gHolder;
+    }
+
+    static Driver& instance() FL_NOEXCEPT { return *instancePtr(); }
+
+    static void registerWithManager() FL_NOEXCEPT {
+        ChannelManager::instance().addDriver(default_bus_priority(Bus::I2S), instancePtr());
     }
 };
 
