@@ -15,8 +15,10 @@
 #if defined(FL_IS_ESP32) && FASTLED_ESP32_HAS_RMT && (FASTLED_ESP32_RMT5_ONLY_PLATFORM || FASTLED_RMT5)
 
 #include "fl/channels/bus.h"
+#include "fl/channels/bus_priorities.h"
 #include "fl/channels/bus_traits.h"
 #include "fl/channels/config.h"
+#include "fl/channels/manager.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/type_traits.h"
 #include "platforms/esp/32/drivers/rmt/rmt_5/channel_driver_rmt.h"
@@ -27,9 +29,15 @@ template<> struct BusTraits<Bus::RMT> {
     using Driver = ChannelEngineRMT;
 
     /// @brief Lazy singleton — naming this is what links the RMT5 TU.
-    static Driver& instance() FL_NOEXCEPT {
+    static fl::shared_ptr<Driver> instancePtr() FL_NOEXCEPT {
         static fl::shared_ptr<Driver> gHolder = ChannelEngineRMT::create();
-        return *gHolder;
+        return gHolder;
+    }
+
+    static Driver& instance() FL_NOEXCEPT { return *instancePtr(); }
+
+    static void registerWithManager() FL_NOEXCEPT {
+        ChannelManager::instance().addDriver(default_bus_priority(Bus::RMT), instancePtr());
     }
 };
 

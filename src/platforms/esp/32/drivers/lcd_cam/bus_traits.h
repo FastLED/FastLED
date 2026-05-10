@@ -15,9 +15,11 @@
 #if defined(FL_IS_ESP32) && FASTLED_ESP32_HAS_LCD_RGB
 
 #include "fl/channels/bus.h"
+#include "fl/channels/bus_priorities.h"
 #include "fl/channels/bus_traits.h"
 #include "fl/channels/config.h"
 #include "fl/channels/driver.h"
+#include "fl/channels/manager.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/type_traits.h"
 #include "platforms/esp/32/drivers/lcd_cam/channel_driver_lcd_rgb.h"
@@ -29,9 +31,15 @@ namespace fl {
 template<> struct BusTraits<Bus::LCD_RGB> {
     using Driver = IChannelDriver;
 
-    static Driver& instance() FL_NOEXCEPT {
+    static fl::shared_ptr<Driver> instancePtr() FL_NOEXCEPT {
         static fl::shared_ptr<Driver> gHolder = createLcdRgbEngine();
-        return *gHolder;
+        return gHolder;
+    }
+
+    static Driver& instance() FL_NOEXCEPT { return *instancePtr(); }
+
+    static void registerWithManager() FL_NOEXCEPT {
+        ChannelManager::instance().addDriver(default_bus_priority(Bus::LCD_RGB), instancePtr());
     }
 };
 

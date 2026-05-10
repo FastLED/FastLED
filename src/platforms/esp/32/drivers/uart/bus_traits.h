@@ -15,8 +15,10 @@
 #if defined(FL_IS_ESP32) && FASTLED_ESP32_HAS_UART
 
 #include "fl/channels/bus.h"
+#include "fl/channels/bus_priorities.h"
 #include "fl/channels/bus_traits.h"
 #include "fl/channels/config.h"
+#include "fl/channels/manager.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/type_traits.h"
 #include "platforms/esp/32/drivers/uart/channel_driver_uart.h"
@@ -24,21 +26,29 @@
 
 namespace fl {
 
+namespace detail {
+/// @brief UART singleton: peripheral + driver lifetimes paired.
+struct UartBusHolder {
+    fl::shared_ptr<UartPeripheralEsp> peripheral;
+    fl::shared_ptr<ChannelEngineUART> driver;
+    UartBusHolder() FL_NOEXCEPT
+        : peripheral(fl::make_shared<UartPeripheralEsp>()),
+          driver(fl::make_shared<ChannelEngineUART>(peripheral)) {}
+};
+}  // namespace detail
+
 template<> struct BusTraits<Bus::UART> {
     using Driver = ChannelEngineUART;
 
-    /// @brief Constructs the UART peripheral and driver lazily on first call.
-    /// Holding both shared_ptrs in a single struct keeps their lifetimes paired.
-    static Driver& instance() FL_NOEXCEPT {
-        struct Holder {
-            fl::shared_ptr<UartPeripheralEsp> peripheral;
-            fl::shared_ptr<Driver> driver;
-            Holder() FL_NOEXCEPT
-                : peripheral(fl::make_shared<UartPeripheralEsp>()),
-                  driver(fl::make_shared<Driver>(peripheral)) {}
-        };
-        static Holder gHolder;
-        return *gHolder.driver;
+    static fl::shared_ptr<Driver> instancePtr() FL_NOEXCEPT {
+        static detail::UartBusHolder gHolder;
+        return gHolder.driver;
+    }
+
+    static Driver& instance() FL_NOEXCEPT { return *instancePtr(); }
+
+    static void registerWithManager() FL_NOEXCEPT {
+        ChannelManager::instance().addDriver(default_bus_priority(Bus::UART), instancePtr());
     }
 };
 

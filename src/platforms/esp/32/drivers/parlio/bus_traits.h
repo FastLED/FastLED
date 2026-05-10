@@ -15,8 +15,10 @@
 #if defined(FL_IS_ESP32) && FASTLED_ESP32_HAS_PARLIO
 
 #include "fl/channels/bus.h"
+#include "fl/channels/bus_priorities.h"
 #include "fl/channels/bus_traits.h"
 #include "fl/channels/config.h"
+#include "fl/channels/manager.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/type_traits.h"
 #include "platforms/esp/32/drivers/parlio/channel_driver_parlio.h"
@@ -26,9 +28,19 @@ namespace fl {
 template<> struct BusTraits<Bus::PARLIO> {
     using Driver = ChannelDriverPARLIO;
 
-    static Driver& instance() FL_NOEXCEPT {
+    /// @brief Lazily-constructed shared pointer to the singleton driver.
+    /// Naming this anywhere in the program is what links the driver TU.
+    static fl::shared_ptr<Driver> instancePtr() FL_NOEXCEPT {
         static fl::shared_ptr<Driver> gHolder = fl::make_shared<Driver>();
-        return *gHolder;
+        return gHolder;
+    }
+
+    static Driver& instance() FL_NOEXCEPT { return *instancePtr(); }
+
+    /// @brief Register this driver with `ChannelManager` for runtime selection.
+    /// Used by `FastLED.enableDrivers<Bus::PARLIO, ...>()` opt-in API.
+    static void registerWithManager() FL_NOEXCEPT {
+        ChannelManager::instance().addDriver(default_bus_priority(Bus::PARLIO), instancePtr());
     }
 };
 

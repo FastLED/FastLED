@@ -16,6 +16,7 @@
 /// instantiation references it, the driver TU is dead-stripped. See #2428.
 
 #include "fl/channels/bus.h"
+#include "fl/stl/noexcept.h"
 #include "fl/stl/type_traits.h"
 
 namespace fl {
@@ -43,5 +44,43 @@ template<fl::Bus B> struct BusTraits;
 /// at compile time rather than at runtime.
 template<fl::Bus B, typename Chipset>
 struct BusSupports : fl::false_type {};
+
+namespace detail {
+
+/// @brief Helper used by `enableDrivers<Bus...>()` to expand the parameter pack.
+/// Each call ODR-uses `BusTraits<B>::registerWithManager()`, which lazily
+/// constructs the driver singleton AND registers it with `ChannelManager`.
+template<Bus B>
+inline int bus_register_one() FL_NOEXCEPT {
+    BusTraits<B>::registerWithManager();
+    return 0;
+}
+
+}  // namespace detail
+
+/// @brief Register the named drivers with `ChannelManager` for runtime selection.
+///
+/// Each named bus's `BusTraits<B>::registerWithManager()` is invoked, which:
+///  1. Lazily constructs the driver singleton (links its translation unit).
+///  2. Calls `ChannelManager::addDriver(priority, instance)` so the runtime
+///     manager can route channels to it.
+///
+/// **Pre-condition:** the per-driver `bus_traits.h` for each `B` named here
+/// must be reachable from the calling translation unit. Including the
+/// per-platform driver headers brings the relevant specializations in.
+/// Naming a `Bus` whose `BusTraits<B>` specialization is not visible
+/// produces a clear "implicit instantiation of undefined template" diagnostic.
+///
+/// @code
+///   #include "platforms/esp/32/drivers/rmt/rmt_5/bus_traits.h"
+///   #include "platforms/esp/32/drivers/parlio/bus_traits.h"
+///   fl::enableDrivers<fl::Bus::RMT, fl::Bus::PARLIO>();
+/// @endcode
+template<Bus... Buses>
+inline void enableDrivers() FL_NOEXCEPT {
+    // C++11-compatible pack expansion via array initializer trick.
+    using expand = int[];
+    (void)expand{0, detail::bus_register_one<Buses>()...};
+}
 
 }  // namespace fl
