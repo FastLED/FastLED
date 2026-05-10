@@ -1213,7 +1213,7 @@ FL_TEST_CASE("UCS7604 channel preamble in encoded data") {
     fl::vector_psram<u8> capturedData;
     auto& events = ChannelEvents::instance();
     int listenerId = events.onChannelDataEncoded.add(
-        [&](const Channel& ch, const ChannelData& chData) {
+        [&](const IChannel& ch, const ChannelData& chData) {
             if (&ch == channel.get()) {
                 eventFired = true;
                 const auto& data = chData.getData();
@@ -1281,7 +1281,7 @@ FL_TEST_CASE("WS2812 channel produces no UCS7604 preamble") {
     fl::vector_psram<u8> capturedData;
     auto& events = ChannelEvents::instance();
     int listenerId = events.onChannelDataEncoded.add(
-        [&](const Channel& ch, const ChannelData& chData) {
+        [&](const IChannel& ch, const ChannelData& chData) {
             if (&ch == channel.get()) {
                 const auto& data = chData.getData();
                 capturedData.assign(data.begin(), data.end());

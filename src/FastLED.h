@@ -636,7 +636,7 @@ public:
 	/// @return Reference to the ChannelEvents singleton
 	/// @note Use to register callbacks for channel lifecycle events
 	/// @code
-	/// int id = FastLED.channelEvents().onChannelCreated.add([](const fl::Channel& ch) { ... });
+	/// int id = FastLED.channelEvents().onChannelCreated.add([](const fl::IChannel& ch) { ... });
 	/// @endcode
 	static fl::ChannelEvents& channelEvents();
 
