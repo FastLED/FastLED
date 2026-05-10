@@ -54,7 +54,22 @@
 #endif
 
 /// PROGMEM keyword for storage
+///
+/// Teensy 4.x (`__IMXRT1062__`) workaround: Teensy core defines `PROGMEM` as
+/// `__attribute__((section(".progmem")))`, which causes GCC to emit "section
+/// type conflict" errors when a single translation unit contains FL_PROGMEM
+/// variables of different types (e.g. `CRGB`, `float`, `i32`) — see the
+/// fl.fx+ unity build that aggregates `colorpalettes.h`, `sin32.h`, and
+/// `mic_response_data.h`. Teensy 4 has a unified linear address space and
+/// places `const` data in `.rodata` (flash) automatically via the linker
+/// script, so the section attribute is unnecessary on this platform.
+/// Emitting empty `FL_PROGMEM` keeps user code that uses Arduino's `PROGMEM`
+/// directly unaffected.
+#if defined(__IMXRT1062__)
+#define FL_PROGMEM
+#else
 #define FL_PROGMEM                PROGMEM
+#endif
 
 
 /// @name PROGMEM Read Functions
