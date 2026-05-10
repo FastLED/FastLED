@@ -37,33 +37,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout trusted base branch code
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.repository.default_branch || 'master' }}
-          path: trusted
-
-      - name: Checkout PR code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          path: pr-code
-
-      - name: Merge safe source files from PR
-        run: |
-          if [ -d "pr-code/src" ]; then
-            cp -r pr-code/src/* trusted/src/ 2>/dev/null || true
-          fi
-          if [ -d "pr-code/examples" ]; then
-            cp -r pr-code/examples/* trusted/examples/ 2>/dev/null || true
-          fi
-          for f in platformio.ini library.json library.properties CMakeLists.txt; do
-            [ -f "pr-code/$f" ] && cp "pr-code/$f" trusted/
-          done
-        shell: bash
+          persist-credentials: false
 
       - name: Pin python version
-        working-directory: trusted
         run: echo "3.11" > .python-version
 
       - name: Install uv
@@ -76,15 +55,13 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version-file: "trusted/.python-version"
+          python-version-file: ".python-version"
 
       - name: Install project dependencies (includes fbuild)
-        working-directory: trusted
         run: uv sync
 
       - name: "fbuild test-emu — build + emulate ${{ inputs.sketch }} on ${{ inputs.platform_display }}"
         id: test_emu
-        working-directory: trusted
         # Build + stage the sketch via ci-compile.py (produces
         # .build/pio/<env>/ with platformio.ini + firmware + bootloader/
         # partitions), then run fbuild test-emu against that staged project.
@@ -119,7 +96,6 @@ jobs:
 
       - name: Display QEMU output
         if: always()
-        working-directory: trusted
         run: |
           echo "=== ${{ inputs.platform_display }} QEMU Output (first 200 lines) ==="
           if [ -f qemu_output.log ]; then
@@ -147,7 +123,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.platform }}-qemu-failure-${{ steps.artifact_name.outputs.sketch }}-${{ github.sha }}
-          path: trusted/qemu_output.log
+          path: qemu_output.log
           if-no-files-found: warn
 
       - name: Upload QEMU log on success
@@ -155,5 +131,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.platform }}-qemu-success-${{ steps.artifact_name.outputs.sketch }}-${{ github.sha }}
-          path: trusted/qemu_output.log
+          path: qemu_output.log
           if-no-files-found: warn

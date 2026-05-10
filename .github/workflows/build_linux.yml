@@ -27,51 +27,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout trusted base branch code
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.repository.default_branch || 'master' }}
-          path: trusted
-
-      - name: Checkout PR code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          path: pr-code
-
-      - name: Merge safe source files from PR
-        run: |
-          # Copy ONLY safe source files from PR, never executable scripts
-          if [ -d "pr-code/src" ]; then
-            cp -r pr-code/src/* trusted/src/ 2>/dev/null || true
-          fi
-          if [ -d "pr-code/examples" ]; then
-            cp -r pr-code/examples/* trusted/examples/ 2>/dev/null || true
-          fi
-          if [ -f "pr-code/platformio.ini" ]; then
-            cp pr-code/platformio.ini trusted/
-          fi
-          if [ -f "pr-code/library.json" ]; then
-            cp pr-code/library.json trusted/
-          fi
-          if [ -f "pr-code/library.properties" ]; then
-            cp pr-code/library.properties trusted/
-          fi
-          if [ -f "pr-code/CMakeLists.txt" ]; then
-            cp pr-code/CMakeLists.txt trusted/
-          fi
-          if [ "${{ github.event.pull_request.head.repo.full_name }}" = "${{ github.repository }}" ]; then
-            # Same-repository CI helper PRs need to exercise their own Meson setup code.
-            if [ -f "pr-code/ci/meson/build_config.py" ]; then
-              cp pr-code/ci/meson/build_config.py trusted/ci/meson/build_config.py
-            fi
-          fi
-          # Change working directory to trusted for all subsequent steps
-          cd trusted
-        shell: bash
-
-      - name: Set working directory to trusted
-        run: echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE/trusted" >> $GITHUB_ENV
+          persist-credentials: false
 
       - name: Install Python
         uses: actions/setup-python@v5
@@ -92,13 +51,11 @@ jobs:
           ld.lld --version
 
       - name: Run Native Build
-        working-directory: trusted
         run: |
           # Run C++ unit tests (uses Meson for native compilation)
           uv run test.py --cpp
 
       - name: Test Multi-Word Fuzzy Matching
-        working-directory: trusted
         run: |
           # Test that multiple positional arguments work for fuzzy matching
           # This should find and run the "string_view" test
