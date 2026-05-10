@@ -54,7 +54,7 @@
 
 #include <FastLED.h>
 #include "fl/math/simd.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 
 // Test framework headers
 #include "test_result.h"

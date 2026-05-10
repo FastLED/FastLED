@@ -42,8 +42,8 @@
 #endif
 #endif  // FL_HAS_INCLUDE("stm32_def.h")
 
-#include "fl/system/log.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
+#include "fl/log/log.h"
 #include "platforms/arm/stm32/stm32_gpio_timer_helpers.h"  // GPIO and Timer helper functions
 #include "fl/stl/noexcept.h"
 

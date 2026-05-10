@@ -10,7 +10,7 @@
 #include "platforms/esp/32/condition_variable_esp32.h"
 #include "platforms/esp/32/mutex_esp32.h"
 // IWYU pragma: end_keep
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 
 // Include FreeRTOS headers ONLY in .cpp file
 FL_EXTERN_C_BEGIN

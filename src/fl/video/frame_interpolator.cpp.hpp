@@ -3,7 +3,7 @@
 #include "fl/math/math.h"
 #include "fl/video/pixel_stream.h"
 
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 
 #include "fl/math/math.h"
 #include "fl/math/math.h"

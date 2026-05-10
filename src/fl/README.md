@@ -607,7 +607,7 @@ build_flags =
 **Logging in your code:**
 
 ```cpp
-#include "fl/log.h"
+#include "fl/log/log.h"
 
 void myCustomDriver::initialize(uint32_t freq_hz) {
     FL_LOG_I2S("I2S initialized");

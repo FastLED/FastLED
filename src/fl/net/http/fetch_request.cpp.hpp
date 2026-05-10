@@ -2,7 +2,7 @@
 
 #include "fl/net/http/fetch_request.h"
 #include "fl/task/executor.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/int.h"
 
 #ifdef FASTLED_HAS_NETWORKING

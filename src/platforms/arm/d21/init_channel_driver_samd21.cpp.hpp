@@ -18,8 +18,8 @@
 
 #include "fl/channels/manager.h"
 #include "fl/channels/adapters/spi_channel_adapter.h"
-#include "fl/system/log.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/shared_ptr.h"
 #include "platforms/shared/spi_hw_2.h"
 #include "platforms/arm/d21/init_channel_driver.h"

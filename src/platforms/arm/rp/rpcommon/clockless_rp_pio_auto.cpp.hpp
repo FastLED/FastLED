@@ -13,14 +13,14 @@
 #include "fl/gfx/rectangular_draw_buffer.h"
 #include "fl/stl/singleton.h"
 #include "fl/stl/vector.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/math/math.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/assert.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/flat_map.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 
 // Hardware headers for RP2040/RP2350
 // IWYU pragma: begin_keep

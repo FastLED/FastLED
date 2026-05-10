@@ -7,7 +7,7 @@ from ci.lint_cpp.noexcept_checker import NoexceptFunctionChecker
 from ci.util.check_files import FileContent
 
 
-_FL_HEADER = "src/fl/system/log.h"
+_FL_HEADER = "src/fl/log/log.h"
 _PLATFORM_HEADER = "src/platforms/arm/d21/semaphore_samd.h"
 _DRIVER_HEADER = "src/platforms/esp/32/drivers/rmt/some_driver.h"
 _PLATFORM_SHARED = "src/platforms/shared/rx_device_native.h"

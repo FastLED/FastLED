@@ -71,7 +71,7 @@
 /// Uses mock responses for testing the API without network connectivity
 
 #include "fl/net/http/fetch.h"     // FastLED HTTP fetch API
-#include "fl/system/log.h"      // FastLED logging system  
+#include "fl/log/log.h"      // FastLED logging system  
 #include "fl/task/executor.h"     // FastLED async utilities (await_top_level, etc.)
 #include <FastLED.h>      // FastLED core library
 

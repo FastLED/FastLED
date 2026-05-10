@@ -18,7 +18,7 @@
 #include "fl/channels/driver.h"
 #include "fl/channels/manager.h"
 #include "fl/chipsets/timing_traits.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/static_assert.h"
 

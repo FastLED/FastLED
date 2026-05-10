@@ -22,7 +22,7 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/static_assert.h"
 #include "fl/chipsets/timing_traits.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "controller.h"
 #include "pixel_iterator.h"
 #include "crgb.h"

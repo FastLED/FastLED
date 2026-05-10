@@ -3,7 +3,7 @@
 #include "fl/stl/assert.h"
 #include "fl/math/math.h"
 #include "fl/gfx/splat.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/gfx/tile2x2.h"
 #include "fl/math/math.h"
 #include "fl/stl/compiler_control.h"

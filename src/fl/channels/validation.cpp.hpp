@@ -6,7 +6,7 @@
 #include "fl/system/fastled.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/sstream.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 
 namespace fl {
 

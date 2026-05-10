@@ -34,12 +34,12 @@
 #include "platforms/memory_barrier.h"
 #include "platforms/esp/32/drivers/spi/wave8_encoder_spi.h"
 #include "fl/chipsets/led_timing.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/system/delay.h"
 #include "fl/system/pin.h"
 #include "fl/math/math.h"
 #include "fl/task/executor.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/chrono.h"
 #include "platforms/esp/32/drivers/spi/spi_hw_base.h" // SPI host definitions (SPI2_HOST, SPI3_HOST)
 #include "platforms/esp/is_esp.h" // Platform detection (FL_IS_ESP_32C6, etc.)

@@ -29,7 +29,7 @@
  *
  * @code
  * #include "fl/stl/json.h"
- * #include "fl/system/log.h" // For FL_WARN
+ * #include "fl/log/log.h" // For FL_WARN
  *
  * const char* jsonStr = R"({
  *   "config": {
@@ -67,7 +67,7 @@
  * #include "fl/stl/json.h"
  * #include "fl/stl/string.h"
  * #include "fl/stl/vector.h"
- * #include "fl/system/log.h"
+ * #include "fl/log/log.h"
  *
  * // Create a root JSON object
  * fl::json newJson = fl::json::object();

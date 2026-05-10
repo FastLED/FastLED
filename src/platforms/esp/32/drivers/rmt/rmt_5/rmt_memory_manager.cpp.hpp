@@ -8,7 +8,7 @@
 #include "platforms/is_platform.h"
 #if defined(FL_IS_ESP32) && FASTLED_RMT5
 
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/noexcept.h"
 #include "platforms/esp/32/drivers/rmt/rmt_5/common.h"
 

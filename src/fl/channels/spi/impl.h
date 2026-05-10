@@ -8,7 +8,7 @@
 #include "platforms/shared/spi_manager.h"  // ok platform headers
 #include "platforms/shared/spi_types.h"  // ok platform headers
 #include "platforms/shared/spi_hw_base.h"  // ok platform headers
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep
 

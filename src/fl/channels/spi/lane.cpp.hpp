@@ -1,6 +1,6 @@
 #include "fl/channels/spi/lane.h"
-#include "fl/system/log.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
+#include "fl/log/log.h"
 
 namespace fl {
 namespace spi {

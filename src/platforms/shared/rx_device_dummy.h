@@ -6,8 +6,8 @@
 // IWYU pragma: private
 
 #include "fl/channels/rx.h"
-#include "fl/system/log.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/assert.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/noexcept.h"

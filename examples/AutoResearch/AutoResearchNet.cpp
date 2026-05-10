@@ -7,7 +7,7 @@
 
 #include "AutoResearchNet.h"
 #include "fl/stl/json.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 
 // Global net state
 static AutoResearchNetState s_net_state;

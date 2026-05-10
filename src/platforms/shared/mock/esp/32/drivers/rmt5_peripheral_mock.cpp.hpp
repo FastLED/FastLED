@@ -9,8 +9,8 @@
 #if defined(FASTLED_STUB_IMPL) || (!defined(ARDUINO) && (defined(FL_IS_LINUX) || defined(FL_IS_APPLE) || defined(FL_IS_WIN)))
 
 #include "platforms/shared/mock/esp/32/drivers/rmt5_peripheral_mock.h"
-#include "fl/system/log.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/cstring.h"

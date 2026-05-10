@@ -1,8 +1,7 @@
-// ok cpp include
-/// @file log.cpp
-/// @brief Tests for logging, debug, and warning macros (fl/log.h)
+/// @file log.hpp
+/// @brief Tests for logging, debug, and warning macros (fl/log/log.h)
 
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/system/sketch_macros.h"
 #include "test.h"
 #include "fl/stl/cstring.h"
@@ -442,9 +441,3 @@ FL_TEST_CASE("warning macro edge cases") {
     }
 }
 
-// Grouped tests
-#include "tests/fl/system/trace.hpp"
-
-FL_TEST_FILE(FL_FILEPATH) {
-
-} // FL_TEST_FILE

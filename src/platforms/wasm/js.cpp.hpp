@@ -27,7 +27,7 @@
 
 #include "platforms/wasm/active_strip_data.h"
 #include "platforms/wasm/engine_listener.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/map.h"
 #include "fl/math/screenmap.h"
 #include "fl/stl/string.h"

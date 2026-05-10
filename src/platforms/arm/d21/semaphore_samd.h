@@ -24,7 +24,7 @@
 
 #include "fl/stl/assert.h"
 #include "fl/stl/cstddef.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/noexcept.h"
 
 // Forward declare std::chrono types to avoid including <chrono> in header

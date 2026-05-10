@@ -18,7 +18,7 @@
 #include "fl/stl/json.h"
 #include "fl/math/math.h"
 #include "fl/math/math.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "noisegen.h"
 #include "fl/math/screenmap.h"
 #include "fl/stl/span.h"

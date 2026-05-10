@@ -24,7 +24,7 @@
 #ifdef FL_LCD_SPI_COMPILE
 
 #include "platforms/esp/32/drivers/lcd_spi/channel_driver_lcd_spi.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/task/executor.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/noexcept.h"

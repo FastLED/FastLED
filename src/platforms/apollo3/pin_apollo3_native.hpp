@@ -29,8 +29,8 @@ FL_EXTERN_C_BEGIN
 // IWYU pragma: end_keep
 FL_EXTERN_C_END
 
-#include "fl/system/log.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
+#include "fl/log/log.h"
 #include "fl/system/pin.h"
 #include "fl/stl/noexcept.h"
 

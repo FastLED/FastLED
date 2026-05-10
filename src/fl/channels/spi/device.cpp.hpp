@@ -1,7 +1,7 @@
 #include "fl/channels/spi.h"
 #include "fl/channels/spi/impl.h"
-#include "fl/system/log.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/chrono.h"
 // IWYU pragma: begin_keep
 #include "platforms/shared/spi_manager.h" // ok platform headers

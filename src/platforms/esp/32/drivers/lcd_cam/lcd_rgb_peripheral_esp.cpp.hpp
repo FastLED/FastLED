@@ -14,7 +14,7 @@
 #include "platforms/esp/32/drivers/lcd_cam/lcd_rgb_peripheral_esp.h"
 #include "fl/stl/singleton.h"
 #include "fl/task/executor.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 
 // IWYU pragma: begin_keep
 #include "freertos/FreeRTOS.h"

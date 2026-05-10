@@ -8,7 +8,7 @@
 #include "sdkconfig.h"
 #include "platforms/esp/esp_version.h"
 #include "platforms/esp/32/feature_flags/enabled.h"
-#include "fl/system/log.h"  // For FL_WARN_ONCE in IDF6 stub
+#include "fl/log/log.h"  // For FL_WARN_ONCE in IDF6 stub
 
 // I2S parallel mode driver is disabled when FASTLED_ESP32_HAS_I2S=0 or on
 // ESP-IDF 6.0+ (PERIPH_I2S1_MODULE removed, needs LL API port).

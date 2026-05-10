@@ -1,8 +1,8 @@
 // ok no header
 #include "fl/channels/spi.h"
 #include "fl/channels/spi/multi_lane_device.h"
-#include "fl/system/log.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {

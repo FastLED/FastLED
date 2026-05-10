@@ -9,7 +9,7 @@
 #include "fl/codec/jpeg.h"
 #include "fl/codec/mp3.h"
 #include "fl/codec/mpeg1.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/math/math.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/cstring.h"

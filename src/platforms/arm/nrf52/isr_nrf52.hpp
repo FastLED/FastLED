@@ -35,7 +35,7 @@
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/assert.h"
 #include "fl/stl/unique_ptr.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 
 // Include NRF52 SDK headers
 FL_EXTERN_C_BEGIN

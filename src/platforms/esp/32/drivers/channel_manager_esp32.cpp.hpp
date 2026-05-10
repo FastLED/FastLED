@@ -31,7 +31,7 @@
 #include "fl/channels/bus.h"
 #include "fl/channels/bus_traits.h"
 #include "fl/channels/manager.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "platforms/esp/32/feature_flags/enabled.h"
 #include "fl/stl/shared_ptr.h"
 #include "platforms/shared/spi_hw_1.h"

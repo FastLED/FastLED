@@ -12,7 +12,7 @@ most portion being the bottom.
 
 #include "fl/stl/assert.h"
 #include "fl/math/screenmap.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "noise.h"
 #include <FastLED.h>
 // #include "fl::vec3.h"

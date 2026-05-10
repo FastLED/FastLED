@@ -17,7 +17,7 @@
 #include "fl/math/transform.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/vector.h"
-#include "fl/system/log.h"  // IWYU pragma: keep
+#include "fl/log/log.h"  // IWYU pragma: keep
 #include "fl/stl/noexcept.h"
 
 namespace fl {

@@ -12,7 +12,7 @@
 #include "test.h"
 #include "fl/chipsets/encoders/pixel_iterator.h"
 #include "fl/gfx/eorder.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/gfx/crgb.h"
 #include "fl/gfx/rgbw.h"
 #include "fl/stl/span.h"

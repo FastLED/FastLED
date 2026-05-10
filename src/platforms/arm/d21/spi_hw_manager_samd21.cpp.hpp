@@ -20,7 +20,7 @@
 #if defined(FL_IS_SAMD21)
 
 #include "platforms/shared/spi_hw_2.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 
 namespace fl {
 namespace detail {

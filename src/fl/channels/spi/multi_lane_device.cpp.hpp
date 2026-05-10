@@ -1,7 +1,7 @@
 #include "fl/channels/spi/multi_lane_device.h"
 #include "fl/channels/spi/device_impl_base.h"
-#include "fl/system/log.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/string.h"
 // IWYU pragma: begin_keep
 #include "platforms/shared/spi_hw_1.h" // ok platform headers

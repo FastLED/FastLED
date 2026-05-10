@@ -19,7 +19,7 @@
 #include "fl/channels/options.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/gfx/eorder.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/gfx/crgb.h"
 #include "fl/stl/span.h"
 #include "fl/stl/allocator.h"

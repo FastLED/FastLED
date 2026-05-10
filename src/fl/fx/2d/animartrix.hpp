@@ -11,7 +11,7 @@
 // See LICENSE file in the root of this repository.
 
 #include "crgb.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/memory.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/math/xymap.h"

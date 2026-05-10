@@ -8,7 +8,7 @@
 
 #include "platforms/stub/spi_4_stub.h"
 #include "platforms/shared/spi_manager.h"  // For DMABuffer, TransmitMode, SPIError
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/noexcept.h"
 
 #if defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)

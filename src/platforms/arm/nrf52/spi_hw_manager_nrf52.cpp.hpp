@@ -26,7 +26,7 @@
 #include "platforms/shared/spi_hw_4.h"
 #include "platforms/arm/nrf52/spi_hw_2_nrf52.h"
 #include "platforms/arm/nrf52/spi_hw_4_nrf52.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 
 namespace fl {
 namespace detail {

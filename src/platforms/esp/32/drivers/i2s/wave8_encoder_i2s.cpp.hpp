@@ -8,8 +8,8 @@
 #include "fl/channels/detail/wave8.hpp"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/noexcept.h"
-#include "fl/system/log.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
+#include "fl/log/log.h"
 
 namespace fl {
 

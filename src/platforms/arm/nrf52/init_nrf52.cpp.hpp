@@ -12,7 +12,7 @@
 #ifdef FL_IS_NRF52
 
 #include "platforms/arm/nrf52/init_nrf52.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 
 // Include SPI hardware controller headers
 #include "platforms/shared/spi_hw_2.h"

@@ -18,11 +18,11 @@
 #include "test.h"
 #include "fl/audio/fft/fft.h"
 #include "fl/stl/int.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/math/math.h"
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 
 namespace {
 

@@ -100,7 +100,7 @@
 #define FL_FFT_ESP_DSP_AVAILABLE 1
 #include "esp_dsp.h"
 #include "fl/stl/vector.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/math/math.h"  // cosf / sinf wrappers
 #else
 #define FL_FFT_ESP_DSP_AVAILABLE 0

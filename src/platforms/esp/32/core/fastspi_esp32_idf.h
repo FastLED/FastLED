@@ -12,7 +12,7 @@
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/static_assert.h"
 #include "fl/stl/cstring.h"  // For fl::memset
-#include "fl/system/log.h"  // For FL_WARN macro
+#include "fl/log/log.h"  // For FL_WARN macro
 
 FL_EXTERN_C_BEGIN
 // IWYU pragma: begin_keep

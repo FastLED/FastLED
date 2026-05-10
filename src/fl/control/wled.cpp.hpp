@@ -1,7 +1,7 @@
 // ok no header
 #include "fl/fx/wled.h"
-#include "fl/system/log.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
+#include "fl/log/log.h"
 namespace fl {
 
 // WLED Constructor and Stub Implementations

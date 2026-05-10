@@ -19,9 +19,9 @@
 
 #include "platforms/wasm/active_strip_data.h"
 #include "platforms/wasm/engine_listener.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/task/executor.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 // IWYU pragma: begin_keep
 #include "fl/stl/cstdio.h"  // ok include
 // IWYU pragma: end_keep

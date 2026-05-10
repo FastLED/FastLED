@@ -18,8 +18,8 @@
 #elif !FASTLED_RMT5  // Only compile for RMT4 (IDF 4.x)
 
 #include "platforms/esp/32/drivers/rmt/rmt_4/channel_driver_rmt4.h"
-#include "fl/system/log.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {

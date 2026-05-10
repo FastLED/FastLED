@@ -12,7 +12,7 @@
 #ifdef FL_IS_STM32
 
 #include "platforms/arm/stm32/init_stm32.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 
 // Include SPI hardware controller headers
 #include "platforms/shared/spi_hw_1.h"

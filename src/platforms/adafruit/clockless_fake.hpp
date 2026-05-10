@@ -9,7 +9,7 @@
 
 #include "platforms/adafruit/driver.h"
 #include "fl/stl/compiler_control.h"
-#include "fl/system/log.h"
+#include "fl/log/log.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {
