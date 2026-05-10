@@ -192,8 +192,14 @@ def _release_held_build_locks() -> None:
             if lock["owner_pid"] == my_pid:
                 try:
                     db.release(lock["lock_name"], my_pid)
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
+                    raise
                 except Exception:
                     pass
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
     except Exception:
         pass
 
@@ -210,6 +216,9 @@ def make_watch_dog_thread(
             return
         try:
             _release_held_build_locks()
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
         except Exception:
             pass
         os._exit(3)  # Exit code 3 = deadman fired (primary watchdog also stuck)
