@@ -181,7 +181,10 @@ def _release_held_build_locks() -> None:
     """Best-effort: release any libfastled_build locks held by this PID.
 
     Called from the watchdog before force-exit so subsequent runs don't
-    block on a stale lock from this hung process.
+    block on a stale lock from this hung process. Intentionally suppresses
+    KeyboardInterrupt: the watchdog's caller (deadman_timer / watchdog_timer)
+    is about to call os._exit(), so cleanup must run to completion regardless
+    of signal state. Re-raising would short-circuit the force-exit.
     """
     try:
         from ci.util.lock_database import get_lock_database  # noqa: PLC0415
@@ -194,12 +197,10 @@ def _release_held_build_locks() -> None:
                     db.release(lock["lock_name"], my_pid)
                 except KeyboardInterrupt as ki:
                     handle_keyboard_interrupt(ki)
-                    raise
                 except Exception:
                     pass
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
-        raise
     except Exception:
         pass
 
@@ -217,8 +218,9 @@ def make_watch_dog_thread(
         try:
             _release_held_build_locks()
         except KeyboardInterrupt as ki:
+            # Suppress: the unconditional os._exit() below is the entire point
+            # of the deadman timer. Re-raising would defeat it.
             handle_keyboard_interrupt(ki)
-            raise
         except Exception:
             pass
         os._exit(3)  # Exit code 3 = deadman fired (primary watchdog also stuck)

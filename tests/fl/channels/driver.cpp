@@ -456,7 +456,7 @@ FL_TEST_CASE("Channel Events: onChannelDataEncoded fires after encoding") {
     bool eventFired = false;
     size_t encodedDataSize = 0;
     auto& events = ChannelEvents::instance();
-    int listenerId = events.onChannelDataEncoded.add([&](const Channel& ch, const ChannelData& chData) {
+    int listenerId = events.onChannelDataEncoded.add([&](const IChannel& ch, const ChannelData& chData) {
         eventFired = true;
         encodedDataSize = chData.getData().size();
         FL_CHECK(&ch == channel.get());  // Verify channel reference is correct
@@ -507,7 +507,7 @@ FL_TEST_CASE("Channel: Guard against double-encoding within single FastLED.show(
     // Track how many times encoding happens
     int encodeCount = 0;
     auto& events = ChannelEvents::instance();
-    int listenerId = events.onChannelDataEncoded.add([&](const Channel&, const ChannelData&) {
+    int listenerId = events.onChannelDataEncoded.add([&](const IChannel&, const ChannelData&) {
         encodeCount++;
     });
 
