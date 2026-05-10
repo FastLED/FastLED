@@ -13,7 +13,7 @@
 #ifndef __INC_PLATFORMS_SHARED_SPI_BITBANG_GENERIC_SOFTWARE_SPI_H
 #define __INC_PLATFORMS_SHARED_SPI_BITBANG_GENERIC_SOFTWARE_SPI_H
 
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 #include "platforms/is_platform.h"
 
 #include "fastled_delay.h"

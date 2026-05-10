@@ -4,7 +4,7 @@ cpp_lint.py - FastLED C++ Linter
 
 Performs multiple checks on C++ source files:
 1. Checks for relative includes (those containing "..") which can cause build issues
-2. Ensures internal headers use 'fl/fastled.h' instead of 'FastLED.h'
+2. Ensures internal headers use 'fl/system/fastled.h' instead of 'FastLED.h'
 """
 
 import argparse
@@ -56,7 +56,7 @@ def check_relative_includes(file_path: Path) -> List[Tuple[int, str]]:
 
 def check_fastled_header_usage(file_path: Path) -> List[Tuple[int, str]]:
     """
-    Check header files for #include "FastLED.h" - internal headers should use fl/fastled.h
+    Check header files for #include "FastLED.h" - internal headers should use fl/system/fastled.h
 
     Returns:
         List of (line_number, line_content) tuples for offending includes
@@ -80,7 +80,7 @@ def check_fastled_header_usage(file_path: Path) -> List[Tuple[int, str]]:
         return violations
 
     # Regex to match #include "FastLED.h" or #include <FastLED.h>
-    # This should match the root header, not fl/fastled.h
+    # This should match the root header, not fl/system/fastled.h
     include_pattern = re.compile(r'^\s*#\s*include\s+[<"]FastLED\.h[>"]')
 
     # Allow exemptions via "// ok include" comment on the same line
@@ -201,7 +201,7 @@ Examples:
                 print(f"\n{file_path}:")
             for line_num, line in header_violations:
                 print(f"  {line_num}: {line}")
-                print(f"      ^ Error: Internal header should use 'fl/fastled.h' instead of 'FastLED.h'")
+                print(f"      ^ Error: Internal header should use 'fl/system/fastled.h' instead of 'FastLED.h'")
                 print(f"      ^ Add '// ok include' comment to exempt this line if necessary")
 
     # Summary
@@ -210,7 +210,7 @@ Examples:
         print(f"Found {total_violations} violation(s) in {files_with_violations} file(s)")
         print("\nRelative includes (paths with '..') should be avoided.")
         print("Use absolute includes from project root or proper include paths instead.")
-        print("\nInternal headers should use 'fl/fastled.h' instead of 'FastLED.h'.")
+        print("\nInternal headers should use 'fl/system/fastled.h' instead of 'FastLED.h'.")
         print("The 'FastLED.h' header is for end-user sketches only.")
         return 1
     else:

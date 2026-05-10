@@ -3,7 +3,7 @@
 
 /// Disables pragma messages and warnings
 #define FASTLED_INTERNAL
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 #include "fastled_delay.h"
 
 // This file primarily serves to:

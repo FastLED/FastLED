@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 
 #include "pixeltypes.h"
 

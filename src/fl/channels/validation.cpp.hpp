@@ -3,7 +3,7 @@
 // Validation test logic implementation - stateless single-test execution
 
 #include "fl/channels/validation.h"
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/sstream.h"
 #include "fl/system/log.h"

@@ -1,7 +1,7 @@
 #include "fl/gfx/five_bit_hd_gamma.h"
 #include "fl/stl/align.h"
 #include "fl/math/ease.h"
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 

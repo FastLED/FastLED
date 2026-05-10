@@ -11,7 +11,7 @@
 
 /// Disables pragma messages and warnings
 #define FASTLED_INTERNAL
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 
 
 #include "fl/stl/compiler_control.h"

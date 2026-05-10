@@ -209,13 +209,13 @@ COMPILER_ARGS = [
 # Run query against a translation unit:
 query = 'match functionDecl(unless(isNoThrow()), unless(isImplicit()))'
 result = subprocess.run(
-    [CLANG_QUERY, "src/fl/build/fl.cpp", "--"] + COMPILER_ARGS,
+    [CLANG_QUERY, "src/fl/build/fl.system+.cpp", "--"] + COMPILER_ARGS,
     input=f"set output diag\n{query}", capture_output=True, text=True
 )
 ```
 
 **Translation units by scope:**
-- `src/fl/build/fl.cpp` — core fl/ code
+- `src/fl/build/fl.system+.cpp` — core fl/ code
 - `ci/tools/_noexcept_check_tu.cpp` — ESP32 driver mock code
 
 **Limitation**: clang-query only sees code visible to the TU — `#ifdef ESP32` code is invisible under stub mode.

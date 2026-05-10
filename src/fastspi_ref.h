@@ -8,7 +8,7 @@
 #define __INC_FASTSPI_ARM_SAM_H
 
 #if FASTLED_DOXYGEN // guard against the arduino ide idiotically including every header file
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 #include "fl/stl/int.h"
 #include "fl/stl/compiler_control.h"
 

@@ -1,6 +1,6 @@
 #pragma once
 
-/// @file fl/fastled.h
+/// @file fl/system/fastled.h
 /// @brief Internal FastLED header for implementation files
 ///
 /// This is the minimal internal header used by FastLED implementation files (.cpp and .h).
@@ -10,9 +10,9 @@
 /// **User sketches should use `#include <FastLED.h>` instead.**
 ///
 /// **Internal Implementation Files:**
-/// - src/*.cpp files should use: `#include "fl/fastled.h"`
-/// - src/fl/*.cpp files should use: `#include "fl/fastled.h"` (after FASTLED_INTERNAL define)
-/// - Headers that need to avoid cycles should use: `#include "fl/fastled.h"`
+/// - src/*.cpp files should use: `#include "fl/system/fastled.h"`
+/// - src/fl/*.cpp files should use: `#include "fl/system/fastled.h"` (after FASTLED_INTERNAL define)
+/// - Headers that need to avoid cycles should use: `#include "fl/system/fastled.h"`
 
 
 // ============================================================================

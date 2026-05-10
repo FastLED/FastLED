@@ -5,7 +5,7 @@
 
 ```cpp
 // IWYU pragma: begin_keep
-#include <fl/fastled.h>
+#include <fl/system/fastled.h>
 #include <fl/task/task.h>
 // IWYU pragma: end_keep
 

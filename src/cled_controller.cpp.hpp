@@ -2,7 +2,7 @@
 /// base definitions used by led controllers for writing out led data
 
 #define FASTLED_INTERNAL
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 
 #include "cled_controller.h"
 

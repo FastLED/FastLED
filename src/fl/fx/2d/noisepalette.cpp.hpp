@@ -5,7 +5,7 @@
 #define FASTLED_INTERNAL
 #endif
 
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 #include "fl/stl/memory.h"
 #include "fl/math/xymap.h"
 #include "fl/fx/fx2d.h"

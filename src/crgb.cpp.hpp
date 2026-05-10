@@ -3,7 +3,7 @@
 
 #define FASTLED_INTERNAL
 #include "crgb.h"
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 #include "fl/math/xymap.h"
 
 #include "fl/gfx/upscale.h"

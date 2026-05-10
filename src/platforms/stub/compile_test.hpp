@@ -2,7 +2,7 @@
 
 // IWYU pragma: private
 
-#include "fl/fastled.h"
+#include "fl/system/fastled.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {
