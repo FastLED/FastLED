@@ -88,4 +88,25 @@ FL_TEST_CASE("enableDrivers<Bus::STUB>() registers the stub driver with ChannelM
     FL_CHECK(stubDriver.get() == &fl::BusTraits<fl::Bus::STUB>::instance());
 }
 
+FL_TEST_CASE("Legacy initChannelDrivers() and enableDrivers<Bus::STUB>() share singleton (Phase 5a)") {
+    // Phase 5a guarantee: the legacy auto-init path and the new opt-in
+    // enableDrivers<Bus::X>() API register the same singleton instance.
+    // Before Phase 5a, the legacy `initChannelDrivers()` constructed a fresh
+    // ClocklessChannelEngineStub via `fl::make_shared_no_tracking(stubEngine)`,
+    // distinct from the BusTraits singleton.
+    auto& mgr = fl::ChannelManager::instance();
+    // The legacy auto-init runs lazily on first ChannelManager::instance() call;
+    // accessing instance() above guaranteed it ran. Verify the registered driver
+    // identity matches the BusTraits singleton.
+    auto registered = mgr.getDriverByName(fl::string::from_literal("STUB"));
+    FL_REQUIRE(registered != nullptr);
+    FL_CHECK(registered.get() == &fl::BusTraits<fl::Bus::STUB>::instance());
+    // Calling enableDrivers explicitly must not change the registered driver
+    // identity -- the manager replaces by name with the same singleton.
+    fl::enableDrivers<fl::Bus::STUB>();
+    auto registered2 = mgr.getDriverByName(fl::string::from_literal("STUB"));
+    FL_REQUIRE(registered2 != nullptr);
+    FL_CHECK(registered2.get() == &fl::BusTraits<fl::Bus::STUB>::instance());
+}
+
 }  // FL_TEST_FILE

@@ -28,6 +28,8 @@
 #include "platforms/is_platform.h"
 #ifdef FL_IS_ESP32
 
+#include "fl/channels/bus.h"
+#include "fl/channels/bus_traits.h"
 #include "fl/channels/manager.h"
 #include "fl/system/log.h"
 #include "platforms/esp/32/feature_flags/enabled.h"
@@ -36,61 +38,68 @@
 #include "fl/channels/adapters/spi_channel_adapter.h"
 #include "fl/stl/noexcept.h"
 
+// FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY: when defined to 1, the legacy
+// `initChannelDrivers()` body becomes a no-op. Users opting in must call
+// `fl::enableDrivers<fl::Bus::X...>()` explicitly to register the drivers
+// they actually need -- this is the pathway that lets the linker drop unused
+// driver TUs (#2420 binary-bloat fix). Default is 0 for backward compatibility;
+// Phase 5b of #2428 will flip the default.
+#ifndef FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY
+#define FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY 0
+#endif
+
 // Platform detection for I2S/LCD_SPI drivers
 #include "platforms/esp/is_esp.h"
 
-// Include concrete driver implementations
+// Include per-driver bus_traits.h (each is internally guarded by its
+// FASTLED_ESP32_HAS_* macro and degrades to an empty header when the
+// corresponding driver is not enabled on this platform). The bus_traits
+// headers transitively include the concrete driver headers we need.
 #if FASTLED_ESP32_HAS_PARLIO
 // IWYU pragma: begin_keep
-#include "parlio/channel_driver_parlio.h"
+#include "parlio/bus_traits.h"
 // IWYU pragma: end_keep
 #endif
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
 // IWYU pragma: begin_keep
-#include "spi/channel_driver_spi.h"
+#include "spi/bus_traits.h"
 // IWYU pragma: end_keep
 #endif
 #if FASTLED_ESP32_HAS_UART
 // IWYU pragma: begin_keep
-#include "uart/channel_driver_uart.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
-#include "uart/uart_peripheral_esp.h"
+#include "uart/bus_traits.h"
 // IWYU pragma: end_keep
 #endif
 #if FASTLED_ESP32_HAS_RMT
 // Include the appropriate RMT driver (RMT4 or RMT5) based on platform
 #if FASTLED_ESP32_RMT5_ONLY_PLATFORM || FASTLED_RMT5
 // IWYU pragma: begin_keep
-#include "rmt/rmt_5/channel_driver_rmt.h"
+#include "rmt/rmt_5/bus_traits.h"
 // IWYU pragma: end_keep
 #else
 // IWYU pragma: begin_keep
-#include "rmt/rmt_4/channel_driver_rmt4.h"
+#include "rmt/rmt_4/bus_traits.h"
 // IWYU pragma: end_keep
 #endif
 #endif  // FASTLED_ESP32_HAS_RMT
 #if FASTLED_ESP32_HAS_LCD_RGB
 // IWYU pragma: begin_keep
-#include "lcd_cam/channel_driver_lcd_rgb.h"
+#include "lcd_cam/bus_traits.h"
 // IWYU pragma: end_keep
 #endif
 #if FASTLED_ESP32_HAS_I2S_LCD_CAM
 // IWYU pragma: begin_keep
-#include "i2s/channel_driver_i2s.h"
+#include "i2s/bus_traits.h"
 // IWYU pragma: end_keep
 #endif
 #if FASTLED_ESP32_HAS_I2S
 // IWYU pragma: begin_keep
-#include "i2s_spi/channel_driver_i2s_spi.h"
+#include "i2s_spi/bus_traits.h"
 // IWYU pragma: end_keep
 #endif
 #if FASTLED_ESP32_HAS_LCD_SPI
 // IWYU pragma: begin_keep
-#include "lcd_spi/channel_driver_lcd_spi.h"
-// IWYU pragma: end_keep
-// IWYU pragma: begin_keep
-#include "lcd_spi/channel_driver_lcd_clockless.h"
+#include "lcd_spi/bus_traits.h"
 // IWYU pragma: end_keep
 #endif
 
@@ -187,12 +196,17 @@ static void addSpiHardwareIfPossible(ChannelManager& manager) FL_NOEXCEPT {
     }
 }
 
+// Each addXxxIfPossible delegates to BusTraits<Bus::X>::instancePtr() so the
+// legacy auto-init path and the new fl::enableDrivers<>() opt-in API share the
+// SAME singleton driver instance. Without this unification, calling
+// enableDrivers<Bus::PARLIO>() after the legacy auto-init created a *second*
+// PARLIO driver instance, which then tried to claim the PARLIO peripheral
+// twice. Phase 4 documented this caveat; Phase 5a (this commit) fixes it.
+
 /// @brief Add PARLIO driver if supported by platform
 static void addParlioIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 #if FASTLED_ESP32_HAS_PARLIO
-    // ESP32-C6: Fixed by explicitly setting clk_in_gpio_num = -1 (Iteration 2)
-    // This tells the driver to use internal clock source instead of external GPIO 0
-    manager.addDriver(PRIORITY_PARLIO, fl::make_shared<ChannelDriverPARLIO>());
+    manager.addDriver(PRIORITY_PARLIO, BusTraits<Bus::PARLIO>::instancePtr());
     FL_DBG("ESP32: Added PARLIO driver (priority " << PRIORITY_PARLIO << ")");
 #else
     (void)manager;  // Suppress unused parameter warning
@@ -202,7 +216,7 @@ static void addParlioIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 /// @brief Add LCD RGB driver if supported by platform
 static void addLcdRgbIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 #if FASTLED_ESP32_HAS_LCD_RGB
-    auto driver = createLcdRgbEngine();
+    auto driver = BusTraits<Bus::LCD_RGB>::instancePtr();
     if (driver) {
         manager.addDriver(PRIORITY_LCD_RGB, driver);
         FL_DBG("ESP32: Added LCD_RGB driver (priority " << PRIORITY_LCD_RGB << ")");
@@ -217,7 +231,7 @@ static void addLcdRgbIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 /// @brief Add SPI driver if supported by platform
 static void addSpiIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
-    manager.addDriver(PRIORITY_SPI, fl::make_shared<ChannelEngineSpi>());
+    manager.addDriver(PRIORITY_SPI, BusTraits<Bus::SPI>::instancePtr());
     FL_DBG("ESP32: Added SPI driver (priority " << PRIORITY_SPI << ")");
 #else
     (void)manager;  // Suppress unused parameter warning
@@ -227,12 +241,11 @@ static void addSpiIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 /// @brief Add UART driver if supported by platform
 static void addUartIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 #if FASTLED_ESP32_HAS_UART
-    // UART driver uses wave8 encoding adapted for UART framing
-    // Available on all ESP32 variants (C3, S3, C6, H2, P4) with ESP-IDF 4.0+
-    // Uses automatic start/stop bit insertion for efficient waveform generation
-    auto peripheral = fl::make_shared<UartPeripheralEsp>();
-    auto driver = fl::make_shared<ChannelEngineUART>(peripheral);
-    manager.addDriver(PRIORITY_UART, driver);
+    // UART driver uses wave8 encoding adapted for UART framing.
+    // Available on all ESP32 variants (C3, S3, C6, H2, P4) with ESP-IDF 4.0+.
+    // BusTraits<Bus::UART>::instancePtr() also constructs the UartPeripheralEsp
+    // dependency inside its UartBusHolder.
+    manager.addDriver(PRIORITY_UART, BusTraits<Bus::UART>::instancePtr());
     FL_DBG("ESP32: Added UART driver (priority " << PRIORITY_UART << ")");
 #else
     (void)manager;  // Suppress unused parameter warning
@@ -242,12 +255,13 @@ static void addUartIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 /// @brief Add RMT driver if supported by platform
 static void addRmtIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 #if FASTLED_ESP32_HAS_RMT
-    // Create RMT driver using the appropriate driver (RMT4 or RMT5)
+    // BusTraits<Bus::RMT> resolves to ChannelEngineRMT (RMT5) or
+    // ChannelEngineRMT4 depending on the build path; the right header is
+    // pulled in transitively via the bus_traits.h include above.
+    auto driver = BusTraits<Bus::RMT>::instancePtr();
     #if FASTLED_ESP32_RMT5_ONLY_PLATFORM || FASTLED_RMT5
-    auto driver = fl::ChannelEngineRMT::create();
     const char* version = "RMT5";
     #else
-    auto driver = fl::ChannelEngineRMT4::create();
     const char* version = "RMT4";
     #endif
 
@@ -261,7 +275,7 @@ static void addRmtIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 /// @brief Add I2S_SPI driver if supported by platform (ESP32dev true SPI)
 static void addI2sSpiIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 #if FASTLED_ESP32_HAS_I2S
-    auto driver = createI2sSpiEngine();
+    auto driver = BusTraits<Bus::I2S_SPI>::instancePtr();
     if (driver) {
         manager.addDriver(PRIORITY_I2S_SPI, driver);
         FL_DBG("ESP32: Added I2S_SPI driver (priority " << PRIORITY_I2S_SPI << ")");
@@ -276,7 +290,7 @@ static void addI2sSpiIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 /// @brief Add LCD_SPI driver if supported by platform (ESP32-S3 true SPI)
 static void addLcdSpiIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 #if FASTLED_ESP32_HAS_LCD_SPI
-    auto driver = createLcdSpiEngine();
+    auto driver = BusTraits<Bus::LCD_SPI>::instancePtr();
     if (driver) {
         manager.addDriver(PRIORITY_LCD_SPI, driver);
         FL_DBG("ESP32-S3: Added LCD_SPI driver (priority " << PRIORITY_LCD_SPI << ")");
@@ -291,7 +305,7 @@ static void addLcdSpiIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 /// @brief Add LCD_CAM clockless driver if supported (ESP32-S3, replaces misnamed I2S)
 static void addLcdClocklessIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 #if FASTLED_ESP32_HAS_LCD_SPI
-    auto driver = createLcdClocklessEngine();
+    auto driver = BusTraits<Bus::LCD_CLOCKLESS>::instancePtr();
     if (driver) {
         manager.addDriver(PRIORITY_LCD_CLOCKLESS, driver);
         FL_DBG("ESP32-S3: Added LCD_CLOCKLESS driver (priority " << PRIORITY_LCD_CLOCKLESS << ")");
@@ -306,9 +320,9 @@ static void addLcdClocklessIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 /// @brief Add I2S LCD_CAM driver if supported by platform
 static void addI2sIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 #if FASTLED_ESP32_HAS_I2S_LCD_CAM
-    // I2S LCD_CAM driver uses LCD_CAM peripheral via I80 bus (ESP32-S3 only)
-    // Experimental driver - uses transpose encoding for parallel LED output
-    auto driver = createI2sEngine();
+    // I2S LCD_CAM driver uses LCD_CAM peripheral via I80 bus (ESP32-S3 only).
+    // Experimental driver - uses transpose encoding for parallel LED output.
+    auto driver = BusTraits<Bus::I2S>::instancePtr();
     if (driver) {
         manager.addDriver(PRIORITY_I2S, driver);
         FL_DBG("ESP32-S3: Added I2S LCD_CAM driver (priority " << PRIORITY_I2S << ")");
@@ -328,7 +342,18 @@ namespace platforms {
 ///
 /// Called lazily on first access to ChannelManager::instance().
 /// Registers platform-specific drivers (PARLIO, SPI, UART, RMT) with the bus manager.
+///
+/// Defining `FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY=1` disables this auto-init.
+/// Users opting in must call `fl::enableDrivers<fl::Bus::X...>()` explicitly to
+/// register only the drivers they need -- this is the pathway that lets the
+/// linker drop unused driver TUs (#2420 binary-bloat fix). Phase 5b of #2428
+/// will flip the default; this commit (Phase 5a) just adds the opt-in.
 void initChannelDrivers() FL_NOEXCEPT {
+#if FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY
+    // Opt-in mode: skip auto-registration entirely. Users must call
+    // fl::enableDrivers<fl::Bus::X, ...>() to register the drivers they need.
+    FL_DBG("ESP32: Legacy driver auto-init disabled (FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY=1)");
+#else
     FL_DBG("ESP32: Lazy initialization of channel drivers");
 
     auto& manager = channelManager();
@@ -347,6 +372,7 @@ void initChannelDrivers() FL_NOEXCEPT {
     detail::addI2sIfPossible(manager);          // Priority 1 (clockless, legacy I2S name)
 
     FL_DBG("ESP32: Channel drivers initialized");
+#endif  // !FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY
 }
 
 } // namespace platforms
