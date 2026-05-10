@@ -28,7 +28,7 @@ EXCLUDED_TEST_FILES = {
     # Unity-build aggregators (include multiple .hpp sub-tests)
     "audio.cpp",  # Aggregates tests/fl/audio/*.hpp
     "codec.cpp",  # Aggregates tests/fl/codec/*.hpp
-    "detail.cpp",  # Aggregates tests/fl/detail/*.hpp
+    "log.cpp",  # Aggregates tests/fl/log/*.hpp
     "detectors.cpp",  # Aggregates tests/fl/audio/detector/*.hpp
     "encoders.cpp",  # Aggregates tests/fl/chipsets/encoders/*.hpp
     "2d.cpp",  # Aggregates tests/fl/fx/2d/*.hpp

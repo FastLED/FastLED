@@ -2,7 +2,7 @@
 /// @brief Logging infrastructure - background flush service and helper functions
 
 #include "fl/system/log.h"
-#include "fl/detail/async_logger.h"
+#include "fl/log/async_logger.h"
 
 namespace fl {
 
@@ -33,7 +33,7 @@ const char *fastled_file_offset(const char *file) {
     return file; // If no slashes found at all, return original path
 }
 
-// NOTE: AsyncLogger implementation moved to fl/detail/async_logger.cpp
+// NOTE: AsyncLogger implementation moved to fl/log/async_logger.cpp
 // Background flush infrastructure and async_log_service also moved there
 
 } // namespace fl

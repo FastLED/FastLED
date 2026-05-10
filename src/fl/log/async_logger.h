@@ -1,9 +1,9 @@
 #pragma once
 
-/// @file detail/async_logger.h
+/// @file fl/log/async_logger.h
 /// @brief ISR-safe async logger using SPSC queue backend (zero heap allocation)
 
-#include "fl/detail/async_log_queue.h"
+#include "fl/log/async_log_queue.h"
 #include "fl/stl/int.h"
 #include "fl/stl/singleton.h"
 #include "fl/task/task.h"

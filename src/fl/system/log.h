@@ -33,7 +33,7 @@
 
 // Conditional include for async logger functions (only when logging features are enabled)
 #if defined(FASTLED_LOG_SPI_ENABLED) || defined(FASTLED_LOG_RMT_ENABLED) || defined(FASTLED_LOG_PARLIO_ENABLED) || defined(FASTLED_LOG_AUDIO_ENABLED) || defined(FASTLED_LOG_INTERRUPT_ENABLED)
-    #include "fl/detail/async_logger.h"  // IWYU pragma: keep - Required by FL_LOG_*_ASYNC_* macros
+    #include "fl/log/async_logger.h"  // IWYU pragma: keep - Required by FL_LOG_*_ASYNC_* macros
 #include "fl/stl/noexcept.h"
 #endif
 
@@ -243,9 +243,9 @@ const char *fastled_file_offset(const char *file) FL_NOEXCEPT;
 #endif
 
 // =============================================================================
-// AsyncLogger Class (in fl/detail/async_logger.h)
+// AsyncLogger Class (in fl/log/async_logger.h)
 // =============================================================================
-// AsyncLogger, LogCategory enum, and accessor functions are now in fl/detail/async_logger.h
+// AsyncLogger, LogCategory enum, and accessor functions are now in fl/log/async_logger.h
 // This provides template-based lazy instantiation with linker-friendly auto-registration
 
 /// @file fl/log.h

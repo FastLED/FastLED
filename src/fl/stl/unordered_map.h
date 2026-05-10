@@ -11,7 +11,7 @@ and removals.
 
 #include "fl/stl/align.h"
 #include "fl/stl/compiler_control.h"
-#include "fl/detail/private.h"  // IWYU pragma: keep
+#include "fl/stl/private.h"  // IWYU pragma: keep
 #include "fl/stl/hash.h"
 #include "fl/stl/int.h"
 #include "fl/math/math.h"

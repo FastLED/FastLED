@@ -76,7 +76,7 @@ EXCLUDED_TEST_DIRS: set[Path] = {
     TESTS_DIR / "fastled_js",
     # Consolidated test directories (individual files included via parent .cpp)
     TESTS_DIR / "fl" / "chipsets" / "encoders",
-    TESTS_DIR / "fl" / "detail",
+    TESTS_DIR / "fl" / "log",
     # NOTE: tests/fl/audio/detector/ is NOT excluded — it contains standalone .cpp test files
     # The old entry "detectors" (with 's') was a typo for a non-existent directory
     TESTS_DIR / "fl" / "channels" / "detail" / "validation",

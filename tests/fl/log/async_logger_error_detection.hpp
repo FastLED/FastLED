@@ -14,7 +14,7 @@
 // This test verifies error detection when logging is disabled
 
 #include "test.h"
-#include "fl/detail/async_logger.h"
+#include "fl/log/async_logger.h"
 #include "fl/stl/int.h"
 
 using namespace fl;

@@ -47,7 +47,7 @@ EXCLUDED_TEST_FILES = {
     "test_helpers.hpp",  # Shared test helper utilities (not 1:1 with source)
     # Unity-build aggregators (only include test .hpp files, not source headers)
     "codec.cpp",  # Aggregates tests/fl/codec/*.hpp
-    "detail.cpp",  # Aggregates tests/fl/detail/*.hpp
+    "log.cpp",  # Aggregates tests/fl/log/*.hpp
     "detectors.cpp",  # Aggregates tests/fl/audio/detector/*.hpp
     "encoders.cpp",  # Aggregates tests/fl/chipsets/encoders/*.hpp
     "2d.cpp",  # Aggregates tests/fl/fx/2d/*.hpp
