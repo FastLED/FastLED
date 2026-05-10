@@ -36,36 +36,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout trusted base branch code
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.repository.default_branch || 'master' }}
-          path: trusted
-
-      - name: Checkout PR code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          path: pr-code
-
-      - name: Merge safe source files from PR
-        # Same security model as the legacy Docker template: only source +
-        # manifest files from the PR are merged into the trusted checkout.
-        # Never copy scripts or CI config.
-        run: |
-          if [ -d "pr-code/src" ]; then
-            cp -r pr-code/src/* trusted/src/ 2>/dev/null || true
-          fi
-          if [ -d "pr-code/examples" ]; then
-            cp -r pr-code/examples/* trusted/examples/ 2>/dev/null || true
-          fi
-          for f in platformio.ini library.json library.properties CMakeLists.txt; do
-            [ -f "pr-code/$f" ] && cp "pr-code/$f" trusted/
-          done
-        shell: bash
+          persist-credentials: false
 
       - name: Pin python version
-        working-directory: trusted
         run: echo "3.11" > .python-version
 
       - name: Install uv
@@ -78,10 +54,9 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version-file: "trusted/.python-version"
+          python-version-file: ".python-version"
 
       - name: Install project dependencies (includes fbuild)
-        working-directory: trusted
         run: uv sync
 
       - name: Set up Node.js
@@ -104,7 +79,6 @@ jobs:
 
       - name: "fbuild test-emu — build + emulate ${{ inputs.sketch }} on ${{ inputs.platform_display }}"
         id: test_emu
-        working-directory: trusted
         # Two-step pattern: ci-compile.py stages the sketch into
         # .build/pio/<env>/ (writes platformio.ini + fbuild firmware.hex).
         # Then fbuild test-emu loads firmware into AVR8JS and streams
@@ -132,7 +106,6 @@ jobs:
 
       - name: Display emulator output
         if: always()
-        working-directory: trusted
         run: |
           echo "=== ${{ inputs.platform_display }} AVR8JS Output (first 200 lines) ==="
           if [ -f avr8js_output.log ]; then
@@ -158,7 +131,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.platform }}-avr8js-failure-${{ steps.artifact_name.outputs.sketch }}-${{ github.sha }}
-          path: trusted/avr8js_output.log
+          path: avr8js_output.log
           if-no-files-found: warn
 
       - name: Upload output log on success
@@ -166,5 +139,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.platform }}-avr8js-success-${{ steps.artifact_name.outputs.sketch }}-${{ github.sha }}
-          path: trusted/avr8js_output.log
+          path: avr8js_output.log
           if-no-files-found: warn

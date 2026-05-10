@@ -26,80 +26,12 @@ jobs:
   build:
     runs-on: ${{ inputs.runs-on }}
     steps:
-      - name: Checkout trusted base branch code
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.repository.default_branch || 'master' }}
-          path: trusted
           persist-credentials: false
-
-      - name: Checkout PR code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          path: pr-code
-          persist-credentials: false
-
-      - name: Configure Git/LFS auth for ALL github.com traffic
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-              # Clean up any previous rewrites/headers so we don’t double-auth
-              git config --global --unset-all http.https://github.com/.extraheader || true
-              git config --global --unset-all url."https://".insteadof || true
-
-              # Proper Basic auth header for GitHub (LFS respects this)
-              printf "x-access-token:%s" "$GITHUB_TOKEN" | base64 -w0 > /tmp/gh.b64
-              git config --global http.https://github.com/.extraheader "AUTHORIZATION: Basic $(cat /tmp/gh.b64)"
-              rm -f /tmp/gh.b64
-
-              # Ensure LFS is active on the runner (fresh VMs sometimes need this)
-              git lfs install --force
-
-              # (Optional) More robust over CI networks
-              git config --global lfs.concurrenttransfers 8
-
-      - name: Merge safe source files from PR
-        run: |
-          # Copy ONLY safe source files from PR, never executable scripts
-          if [ -d "pr-code/src" ]; then
-            cp -r pr-code/src/* trusted/src/ 2>/dev/null || true
-          fi
-          if [ -d "pr-code/examples" ]; then
-            cp -r pr-code/examples/* trusted/examples/ 2>/dev/null || true
-          fi
-          if [ -f "pr-code/platformio.ini" ]; then
-            cp pr-code/platformio.ini trusted/
-          fi
-          if [ -f "pr-code/library.json" ]; then
-            cp pr-code/library.json trusted/
-          fi
-          if [ -f "pr-code/library.properties" ]; then
-            cp pr-code/library.properties trusted/
-          fi
-          if [ -f "pr-code/CMakeLists.txt" ]; then
-            cp pr-code/CMakeLists.txt trusted/
-          fi
-          # Change working directory to trusted for all subsequent steps
-          cd trusted
-        shell: bash
-
-      - name: Set working directory to trusted
-        run: echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE/trusted" >> $GITHUB_ENV
-
-
-
-      # disabled for now.
-      #- name: Cache .build directory
-      #  uses: actions/cache@v3
-      #  with:
-      #    path: ./.build
-      #    key: ${{ runner.os }}-build-${{ hashFiles('./ci/**') }}
-      #    restore-keys: |
-      #      ${{ runner.os }}-build-
 
       - name: Pin python version
-        working-directory: trusted
         run: |
           echo "3.11" >> .python-version
 
@@ -113,7 +45,7 @@ jobs:
       - name: "Set up Python"
         uses: actions/setup-python@v5
         with:
-          python-version-file: "trusted/.python-version"
+          python-version-file: ".python-version"
 
       # Extract board name (first positional in inputs.args) so per-board
       # fbuild caches don't collide.
@@ -131,31 +63,26 @@ jobs:
       - name: Set up fbuild (install + cache)
         uses: FastLED/fbuild/.github/actions/setup@main
         with:
-          cache-key-extra: ${{ steps.fbuild_board.outputs.name }}-${{ hashFiles('trusted/platformio.ini', 'trusted/library.json', 'trusted/pyproject.toml', 'trusted/uv.lock') }}
+          cache-key-extra: ${{ steps.fbuild_board.outputs.name }}-${{ hashFiles('platformio.ini', 'library.json', 'pyproject.toml', 'uv.lock') }}
 
       - name: Install Platform
         if: inputs.platform != ''
-        working-directory: trusted
         run: |
           uv run pio pkg -g install ${{ inputs.platform }}
 
       - name: PlatformIO Versions
-        working-directory: trusted
         run: |
           uv run platformio --version
 
       - name: Build FastLED examples with "./compile --no-interactive  ${{ inputs.args }}"
         id: build_examples
-        working-directory: trusted
         run: |
           set -o pipefail
           ./compile --no-interactive --no-parallel --log-failures failures --max-failures 3  ${{ inputs.args }} | tee build.log
         shell: bash
 
-
       - name: Build summary and failure logs
         if: failure()
-        working-directory: trusted
         run: |
           SUMMARY_FILE="build-summary.txt"
           {
@@ -193,7 +120,6 @@ jobs:
       - name: Find platformio.ini file and print it out
         if: always()
         continue-on-error: true
-        working-directory: trusted
         run: |
           platformio_ini=$(find ./.build -type f -name platformio.ini | head -n 1)
           if [ -f "$platformio_ini" ]; then
@@ -207,7 +133,6 @@ jobs:
 
       - name: Print out build_info files
         if: always()
-        working-directory: trusted
         run: |
           echo "============================================"
           echo "Current directory: $(pwd)"
@@ -239,7 +164,6 @@ jobs:
           fi
 
       - name: CPP Check
-        working-directory: trusted
         run: |
           # take the input.args and parse out the first element, which will be the board name
           # do this to input.args
@@ -249,14 +173,12 @@ jobs:
 
       - name: Check Compiled size of last compiled example
         continue-on-error: true
-        working-directory: trusted
         run: |
           uv run ci/ci-check-compiled-size.py ${{ inputs.args }} --no-build
 
       - name: Inspect Binary
         if: always()
         continue-on-error: true
-        working-directory: trusted
         run: |
           echo "============================================"
           echo "Binary Artifacts"
@@ -292,17 +214,8 @@ jobs:
           echo ""
           echo "============================================"
 
-      # Inspect Elf step removed - superseded by Symbol Analysis step
-      # - name: Inspect Elf
-      #   if: always()
-      #   continue-on-error: true
-      #   working-directory: trusted
-      #   run: |
-      #     uv run ci/inspect_elf.py --first
-
       - name: Build Blink.ino for library info
         continue-on-error: true
-        working-directory: trusted
         run: |
           # Strip --examples and positional examples from args, then add --examples Blink
           ARGS="${{ inputs.args }}"
@@ -338,7 +251,6 @@ jobs:
       - name: Symbol Analysis
         if: always()
         continue-on-error: true
-        working-directory: trusted
         run: |
           # Parse the board name from args (first element)
           python -c "print('${{ inputs.args }}'.split()[0])" > board.txt
@@ -348,7 +260,6 @@ jobs:
       - name: Optimization Report
         if: always()
         continue-on-error: true
-        working-directory: trusted
         run: |
           uv run ci/optimization_report.py --first
 
@@ -364,21 +275,21 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
-          path: trusted/.build/
+          path: .build/
           include-hidden-files: true
 
       - name: Upload build log
         uses: actions/upload-artifact@v4
         with:
           name: build-log-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
-          path: trusted/build.log
+          path: build.log
 
       - name: Upload build summary
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: build-summary-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
-          path: trusted/build-summary.txt
+          path: build-summary.txt
           if-no-files-found: ignore
 
       - name: Check build status
