@@ -19,10 +19,10 @@ The system consists of two layers:
 
 Users create `Channel` objects using the Channel API (recommended) or the template-based `FastLED.addLeds<>()` API (backwards compatible). The driver layer is managed automatically based on platform capabilities and priorities.
 
-Two complementary dispatch modes are available (introduced by issue #2428):
+Two complementary dispatch modes are available (introduced by issue #2428, refined by #2459):
 
-- **Compile-time `fl::Bus` binding** - `FastLED.add<fl::Bus::RMT>(cfg)` / `Channel::create<fl::Bus::RMT>(cfg)` pin the driver at compile time. Naming `Bus::X` at the call site is what links the driver's translation unit, so `--gc-sections` drops every driver the sketch doesn't reference. Bus/chipset mismatches become `static_assert` errors rather than runtime warnings.
-- **Runtime selection** - `FastLED.add(cfg)` (with optional `mAffinity`) or `FastLED.add(fl::Bus::RMT, cfg)` dispatch through `ChannelManager` at runtime. Drivers must first be registered: either by leaving the legacy registry on (the default - see `FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY` below) or by calling `fl::enableDrivers<fl::Bus::X...>()` / `FastLED.enableAllDrivers()`.
+- **Compile-time `fl::Bus` binding** - `fl::TypedChannel<fl::Bus::RMT, fl::ClocklessChipset>::create(cfg)` (and the planned `addLeds<..., fl::Bus::RMT>` trailing template parameter — see #2460) pin the driver at compile time. Naming `Bus::X` at the call site is what links the driver's translation unit, so `--gc-sections` drops every driver the sketch doesn't reference. Bus/chipset mismatches become `static_assert` errors rather than runtime warnings.
+- **Runtime selection** - `FastLED.add(cfg)` is **non-template**. Pick the driver by setting `cfg.options.mBus = fl::Bus::RMT` (typed `enum class`). The non-template path auto-enrolls every driver on the platform via `fl::enableAllDrivers()` and emits a one-time `FL_WARN_ONCE` explaining the binary-size trade-off (suppress with `-DFASTLED_SUPPRESS_RUNTIME_DRIVER_WARNING`). For minimum binary size, use the compile-time path instead. Custom/mock drivers (whose names aren't in the `fl::Bus` enum) bind via priority dispatch — register the mock with `manager.addDriver()` and either let it win by priority, or use `manager.setExclusiveDriver(name)` to force-select.
 
 ---
 
@@ -118,7 +118,7 @@ The `fl::Bus` enum (in `fl/channels/bus.h`) is the single identifier that flows 
 | `STUB` | `"STUB"` |
 | `AUTO` | sentinel - resolves to `DefaultBus<Chipset>::value` for the platform |
 
-`busName(Bus)` returns the canonical string literal. `isKnownBusName(name)` tells you whether a string matches any of the above (used internally by the affinity-miss diagnostic).
+`busName(Bus)` returns the canonical string literal. This is what `ChannelManager::findDriverByName` matches against each driver's `getName()`.
 
 Note the spelling: driver names match the enumerator exactly, including underscores. Earlier releases used `"BITBANG"`, `"FLEXIO"`, `"OBJECTFLED"` - those are now `"BIT_BANG"`, `"FLEX_IO"`, `"OBJECT_FLED"`.
 
@@ -135,52 +135,65 @@ CRGB leds[60];
 
 void setup() {
     auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
-    fl::ChannelConfig cfg(fl::ClocklessChipset(16, timing),
-        fl::span<CRGB>(leds, 60), RGB);
+    fl::ChannelConfigOf<fl::ClocklessChipset> cfg{
+        fl::ClocklessChipset(16, timing),
+        fl::span<CRGB>(leds, 60), RGB};
 
-    // Compile-time bus pinning: typos like fl::Bus::RTM are compile errors,
-    // and the only driver TU linked is RMT.
-    auto channel = FastLED.add<fl::Bus::RMT>(cfg);
+    // Compile-time bus pinning via TypedChannel — the single template entry
+    // point. Typos like fl::Bus::RTM are compile errors, and the only driver
+    // TU linked is RMT.
+    auto channel = fl::TypedChannel<fl::Bus::RMT, fl::ClocklessChipset>::create(cfg);
+    FastLED.add(channel);
 }
 ```
 
-**Strongly-typed `ChannelConfigOf<Chipset>` (Phase 3b, #2428):** the templated `FastLED.add<Bus, Chipset>(cfg)` overload accepts a `ChannelConfigOf<ClocklessChipset>` or `ChannelConfigOf<SpiChipsetConfig>` and `static_asserts` via `BusSupports<B, Chipset>::value` that the chosen bus actually handles the chipset family:
+**Strongly-typed `ChannelConfigOf<Chipset>` (Phase 3b, #2428):** the `TypedChannel<Bus, Chipset>::create(cfg)` template accepts a `ChannelConfigOf<ClocklessChipset>` or `ChannelConfigOf<SpiChipsetConfig>` and `static_asserts` via `BusSupports<B, Chipset>::value` that the chosen bus actually handles the chipset family:
 
 ```cpp
 fl::ChannelConfigOf<fl::ClocklessChipset> cfg{
     fl::ClocklessChipset(4, fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>()),
     fl::span<CRGB>(leds, 60), GRB};
 
-FastLED.add(cfg);                       // Bus::AUTO -> DefaultBus<ClocklessChipset>
-FastLED.add<fl::Bus::RMT>(cfg);         // OK -- RMT supports clockless
-FastLED.add<fl::Bus::LCD_SPI>(cfg);     // compile error: SPI bus, clockless chipset
+// AUTO resolves to DefaultBus<ClocklessChipset> per platform.
+fl::TypedChannel<fl::Bus::AUTO, fl::ClocklessChipset>::create(cfg);
+// Explicit bus selection.
+fl::TypedChannel<fl::Bus::RMT, fl::ClocklessChipset>::create(cfg);      // OK
+fl::TypedChannel<fl::Bus::LCD_SPI, fl::ClocklessChipset>::create(cfg);  // compile error
 ```
 
-The `TypedChannel<Bus, Chipset>` template (in `fl/channels/channel_typed.h`) is the underlying primitive: it `static_asserts` the bus/chipset contract and returns a `ChannelPtr` to the regular non-template runtime `Channel` so callbacks, the draw list, and `ChannelManager` see one channel type.
+`TypedChannel<Bus, Chipset>` lives in `fl/channels/channel_typed.h`. It returns a `ChannelPtr` to the regular non-template runtime `Channel` so callbacks, the draw list, and `ChannelManager` see one channel type.
 
-### Runtime Bus Selection (`FastLED.add(fl::Bus, cfg)`)
+> **Planned**: `FastLED.addLeds<CHIPSET, PIN, ORDER, fl::Bus::X>(leds, n)` — a trailing default template parameter on the legacy `addLeds<>` shape. See #2460. Not in tree yet.
 
-`FastLED.add(fl::Bus::RMT, cfg)` dispatches by the runtime value of the `Bus` argument. Unlike the templated form, it does **not** link a driver TU by itself - the user is responsible for getting the driver registered with `ChannelManager` ahead of time (e.g. by calling `FastLED.enableAllDrivers()` or `fl::enableDrivers<fl::Bus::RMT>()`). Use this when the bus choice is data-driven (config file, UI, etc.) and you've already opted into runtime flexibility:
+### Runtime Bus Selection (non-template `FastLED.add(cfg)`)
+
+`FastLED.add(cfg)` is non-template (#2459). Pick the driver via `cfg.options.mBus`:
+
+- **`cfg.options.mBus = fl::Bus::RMT`** — pin to a specific driver. The dispatch looks up `busName(mBus)` in `ChannelManager`.
+- **`cfg.options.mBus = fl::Bus::AUTO`** (the default) — `ChannelManager` picks the highest-priority driver that `canHandle` the chipset.
+
+For **custom / third-party / mock drivers** whose names aren't in the `fl::Bus` enum, register the driver with `manager.addDriver(priority, driver)` and either (a) clear competing drivers first so priority dispatch picks it, or (b) call `manager.setExclusiveDriver(name)` for process-wide binding. There is no string-affinity field on `ChannelOptions` post-#2459.
+
+The non-template path **auto-enrolls every driver** on the platform (`fl::enableAllDrivers()` runs inside) so any `mBus` value can be dispatched at runtime. A one-time `FL_WARN_ONCE` explains the binary-size trade-off; suppress it with `-DFASTLED_SUPPRESS_RUNTIME_DRIVER_WARNING`. For minimum binary size, use the compile-time `TypedChannel<...>::create()` path above.
 
 ```cpp
 #include "FastLED.h"
-#include "fl/channels/all_drivers.h"   // makes BusTraits<Bus::*> singletons visible
 
 CRGB leds[60];
 
 fl::Bus userPreferredBus();            // declared elsewhere -- reads config / UI
 
 void setup() {
-    FastLED.enableAllDrivers();        // register every platform driver
-
     auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
     fl::ChannelConfig cfg(fl::ClocklessChipset(16, timing),
         fl::span<CRGB>(leds, 60), RGB);
 
-    fl::Bus chosen = userPreferredBus();    // e.g. read from config
-    FastLED.add(chosen, cfg);               // affinity = busName(chosen)
+    cfg.options.mBus = userPreferredBus();   // data-driven choice
+    FastLED.add(cfg);                         // auto-enables all drivers, dispatches by mBus
 }
 ```
+
+If `cfg.options.mBus` names a driver that — for whatever reason — isn't in the manager's registry, `Channel::showPixels` emits a one-shot `FL_ERROR` listing the resolution options (`fl::enableDrivers<fl::Bus::X>()` or `FastLED.enableAllDrivers()`) and falls back to AUTO/priority dispatch (#2455).
 
 Passing `fl::Bus::AUTO` clears the affinity and lets `ChannelManager` pick by priority - identical to the no-affinity `FastLED.add(cfg)` overload.
 
@@ -473,14 +486,14 @@ CRGB ws2816_strip[NUM_LEDS];
 void setup() {
     // WS2812 strips bound to RMT driver
     fl::ChannelOptions ws2812_opts;
-    ws2812_opts.mAffinity = "RMT";
+    ws2812_opts.mBus = fl::Bus::RMT;       // typed, preferred (#2459)
     auto timing_ws2812 = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
     FastLED.add(fl::ChannelConfig(16, timing_ws2812,
         fl::span<CRGB>(ws2812_strip, NUM_LEDS), RGB, ws2812_opts));
 
     // WS2816 strips bound to SPI driver (transmits in parallel with RMT)
     fl::ChannelOptions ws2816_opts;
-    ws2816_opts.mAffinity = "SPI";
+    ws2816_opts.mBus = fl::Bus::SPI;
     auto timing_ws2816 = fl::makeTimingConfig<fl::TIMING_WS2816>();
     FastLED.add(fl::ChannelConfig(18, timing_ws2816,
         fl::span<CRGB>(ws2816_strip, NUM_LEDS), RGB, ws2816_opts));
@@ -501,11 +514,11 @@ void loop() {
 - Testing specific driver implementations
 - Debugging hardware-specific behavior
 
-**Driver-name spelling.** Affinity strings must match the driver's `getName()` exactly. The canonical name for `fl::Bus::X` is `busName(X)` (see the table above). Prefer the templated `FastLED.add<fl::Bus::X>(cfg)` or runtime `FastLED.add(fl::Bus::X, cfg)` overloads - they derive the affinity string via `busName(B)` so the typo-prone literal never appears at the call site.
+**`mBus` is typed.** `cfg.options.mBus` is an `enum class` (#2459), so typos like `fl::Bus::RTM` are compile errors. The canonical driver name is derived via `busName(B)` — string literals never appear at the call site.
 
-**Affinity-miss diagnostic (one-shot, from #2456):** when a non-empty `mAffinity` resolves to a driver that isn't registered with `ChannelManager`, the first `Channel::showPixels()` call emits a single `FL_ERROR` and falls back to AUTO/priority dispatch. Subsequent shows on the same channel suppress the warning via `mAffinityWarned`. The diagnostic uses `ChannelManager::findDriverByName()` (silent lookup) to distinguish two cases:
+**Bus-miss diagnostic (one-shot, from #2456 / #2459):** when `cfg.options.mBus != fl::Bus::AUTO` resolves to a driver that isn't registered with `ChannelManager`, the first `Channel::showPixels()` call emits a single `FL_ERROR` and falls back to AUTO/priority dispatch. Subsequent shows on the same channel suppress the warning via `mBusWarned`. The diagnostic uses `ChannelManager::findDriverByName()` (silent lookup) to distinguish two cases:
 
-- Driver name matches a known `Bus` value but isn't registered - message points the user at `fl::enableDrivers<fl::Bus::X>()`.
+- Driver isn't registered at all - message points the user at `fl::enableDrivers<fl::Bus::X>()` or `FastLED.enableAllDrivers()`.
 - Driver is registered but `canHandle()` rejected the chipset (bus/chipset mismatch) - message suggests picking a different `Bus`.
 
 Use `ChannelManager::findDriverByName(name)` directly when you want to probe the registry without triggering the log; `getDriverByName(name)` is the noisy variant.
@@ -847,7 +860,7 @@ void setupCustomEngine() {
    - On hit: that driver is returned (no priority iteration).
    - On miss: `Channel::showPixels()` emits a one-shot `FL_ERROR` (see "Affinity-miss diagnostic" above) and falls through to priority dispatch.
 2. Otherwise (or on affinity miss): manager iterates drivers by priority (high to low) and returns the first that `canHandle()`s the channel data.
-3. User can override with `ChannelOptions.mAffinity` (or the templated `FastLED.add<fl::Bus::X>(cfg)` / runtime `FastLED.add(fl::Bus::X, cfg)` overloads, which set affinity for you) or with `FastLED.setExclusiveDriver()`.
+3. User can override via `ChannelOptions.mBus` (#2459), `fl::TypedChannel<Bus, Chipset>::create()` (compile-time, ODR-links the driver), or `FastLED.setExclusiveDriver()` (process-wide).
 
 **Priority modification:**
 - Engines are sorted by priority on registration (via `addDriver()`)
@@ -965,7 +978,7 @@ See `tests/fl/channels/driver.cpp` for more test examples.
 - `fl/channels/ichannel.h` - `IChannel` ABC (callback-facing identification base)
 - `fl/channels/config.h` - `ChannelConfig`, `ChannelConfigOf<Chipset>`, `ClocklessChipset`, `SpiChipsetConfig`
 - `fl/channels/options.h` - `ChannelOptions` (correction, temperature, dither, affinity, gamma)
-- `fl/channels/bus.h` - `fl::Bus` enum, `busName()`, `isKnownBusName()`, `DefaultBus<Chipset>`, `FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY`
+- `fl/channels/bus.h` - `fl::Bus` enum, `busName()`, `DefaultBus<Chipset>`, `FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY`
 - `fl/channels/bus_traits.h` - `BusTraits<B>`, `BusSupports<B, Chipset>`, `enableDrivers<Bus...>()`
 - `fl/channels/all_drivers.h` - `fl::enableAllDrivers()` / `FastLED.enableAllDrivers()` aggregator
 - `fl/channels/manager.h` - `ChannelManager` (`addDriver`, `getDriverByName`, `findDriverByName`, `selectDriverForChannel`, `clearAllDrivers`, ...)

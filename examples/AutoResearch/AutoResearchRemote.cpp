@@ -646,9 +646,27 @@ fl::json AutoResearchRemoteControl::runParallelTestImpl(const fl::json& args) {
         for (fl::size li = 0; li < de.lane_sizes.size(); li++) {
             auto leds = fl::make_unique<fl::vector<CRGB>>(de.lane_sizes[li]);
 
-            // Set up channel with driver affinity
+            // Set up channel with typed driver selection (#2459).
+            // The pre-#2459 string `mAffinity` field is gone — translate the
+            // discovered driver name back to a `fl::Bus` enum value.
             fl::ChannelOptions opts;
-            opts.mAffinity = de.name;
+            {
+                const fl::string& n = de.name;
+                if      (n == "RMT")           opts.mBus = fl::Bus::RMT;
+                else if (n == "PARLIO")        opts.mBus = fl::Bus::PARLIO;
+                else if (n == "SPI")           opts.mBus = fl::Bus::SPI;
+                else if (n == "I2S")           opts.mBus = fl::Bus::I2S;
+                else if (n == "I2S_SPI")       opts.mBus = fl::Bus::I2S_SPI;
+                else if (n == "LCD_RGB")       opts.mBus = fl::Bus::LCD_RGB;
+                else if (n == "LCD_SPI")       opts.mBus = fl::Bus::LCD_SPI;
+                else if (n == "LCD_CLOCKLESS") opts.mBus = fl::Bus::LCD_CLOCKLESS;
+                else if (n == "UART")          opts.mBus = fl::Bus::UART;
+                else if (n == "FLEX_IO")       opts.mBus = fl::Bus::FLEX_IO;
+                else if (n == "OBJECT_FLED")   opts.mBus = fl::Bus::OBJECT_FLED;
+                else if (n == "BIT_BANG")      opts.mBus = fl::Bus::BIT_BANG;
+                else if (n == "STUB")          opts.mBus = fl::Bus::STUB;
+                // else: leave Bus::AUTO; priority dispatch will pick.
+            }
 
             fl::ChannelConfig channel_config(
                 de.pin_tx + (int)li,  // Consecutive pins per lane

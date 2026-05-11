@@ -150,7 +150,7 @@ Channel::Channel(const ChipsetVariant& chipset, EOrder rgbOrder, RegistrationMod
     , mChipset(chipset)
     , mRgbOrder(rgbOrder)
     , mDriver()
-    , mAffinity()
+    , mBus(Bus::AUTO)
     , mId(nextId())
     , mName(makeName(mId)) {
     // NOTE: Do NOT call fl::pinMode() here — see comment in the
@@ -164,7 +164,7 @@ Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
     , mChipset(chipset)
     , mRgbOrder(rgbOrder)
     , mDriver()  // Empty weak_ptr - late binding on first showPixels()
-    , mAffinity(options.mAffinity)  // Get affinity from ChannelOptions
+    , mBus(options.mBus)  // Bus selection (#2459)
     , mId(nextId())
     , mName(makeName(mId)) {
     // NOTE: Do NOT call fl::pinMode() here. The pin may already be
@@ -193,7 +193,7 @@ Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds
     , mChipset(ClocklessChipset(pin, timing))  // Convert to variant
     , mRgbOrder(rgbOrder)
     , mDriver()  // Empty weak_ptr - late binding on first showPixels()
-    , mAffinity(options.mAffinity)  // Get affinity from ChannelOptions
+    , mBus(options.mBus)  // Bus selection (#2459)
     , mId(nextId())
     , mName(makeName(mId)) {
     // NOTE: Do NOT call fl::pinMode() here — see comment in the
@@ -318,46 +318,45 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     // their constructor), bypass ChannelManager entirely. Channels created via
     // the manager-based API (Channel::create(cfg) without affinity) keep their
     // existing per-frame re-selection so users can swap drivers at runtime.
+    // Resolve dispatch via the typed `mBus` field (#2459). `Bus::AUTO`
+    // means "no pinning — let the manager pick by priority"; any other
+    // value pins this channel to `busName(mBus)`.
+    fl::string busKey;
+    if (mBus != Bus::AUTO) {
+        busKey = fl::string::from_literal(busName(mBus));
+    }
     fl::shared_ptr<IChannelDriver> driver;
     if (mDriverPreBound) {
         driver = mDriver.lock();
     } else {
-        driver = ChannelManager::instance().selectDriverForChannel(mChannelData, mAffinity);
+        driver = ChannelManager::instance().selectDriverForChannel(mChannelData, busKey);
         mDriver = driver;
     }
-    // #2455: one-shot diagnostic when a runtime-selected affinity misses.
-    // The manager already returned the AUTO/priority-dispatch fallback (or
-    // null) — we just log the actionable hint once so the user knows WHY
-    // their explicit Bus selection didn't take. The guard suppresses the
-    // log on every subsequent show() of this channel, even though the
-    // affinity → priority-fallback chain re-runs each frame.
-    //
-    // We probe the registry directly via the silent `findDriverByName` to
-    // distinguish "driver wasn't instantiated" from "driver exists but
-    // canHandle() rejected this chipset" — the messages differ because the
-    // resolution paths differ (enableDrivers vs use a different Bus).
-    if (!mDriverPreBound && !mAffinity.empty() && !mAffinityWarned &&
-        (!driver || driver->getName() != mAffinity)) {
-        auto affinityDriver = ChannelManager::instance().findDriverByName(mAffinity);
-        if (!affinityDriver) {
-            // Not registered with the manager at all.
-            if (isKnownBusName(mAffinity)) {
-                FL_ERROR("Channel '" << mName << "': Driver '" << mAffinity
-                    << "' wasn't instantiated — call fl::enableDrivers<fl::Bus::"
-                    << mAffinity
-                    << ">() (or fl::enableAllDrivers()) before adding the channel. "
-                    << "Defaulting to AUTO/priority dispatch.");
-            } else {
-                FL_ERROR("Channel '" << mName << "': Affinity '" << mAffinity
-                    << "' has no registered driver. Defaulting to AUTO/priority dispatch.");
-            }
+    // #2455 / #2459: one-shot diagnostic when a typed-Bus miss happens.
+    // Probe via `findDriverByName` (silent) to distinguish "driver wasn't
+    // instantiated" from "driver exists but canHandle() rejected this
+    // chipset" — resolution paths differ. The mBusWarned guard suppresses
+    // duplicate logs on subsequent shows of the same channel.
+    if (!mDriverPreBound && mBus != Bus::AUTO && !mBusWarned &&
+        (!driver || driver->getName() != busKey)) {
+        auto busDriver = ChannelManager::instance().findDriverByName(busKey);
+        if (!busDriver) {
+            // Typed Bus miss — emit the actionable hint with the two
+            // currently-shipping remediations. The third option
+            // (`addLeds<..., fl::Bus::X>(...)`) is planned in #2460.
+            FL_ERROR("Channel '" << mName << "': Driver '" << busKey
+                << "' wasn't instantiated. Resolve with: "
+                << "(1) fl::enableDrivers<fl::Bus::" << busKey << ">() "
+                << "(links only this driver), or "
+                << "(2) FastLED.enableAllDrivers() (links every driver). "
+                << "Defaulting to AUTO/priority dispatch.");
         } else {
             // Registered, but canHandle() said no — bus/chipset mismatch.
-            FL_ERROR("Channel '" << mName << "': Driver '" << mAffinity
+            FL_ERROR("Channel '" << mName << "': Driver '" << busKey
                 << "' is registered but cannot handle this channel's chipset "
                 << "(bus/chipset mismatch). Defaulting to AUTO/priority dispatch.");
         }
-        mAffinityWarned = true;
+        mBusWarned = true;
     }
     if (!driver) {
         FL_ERROR("Channel '" << mName << "': No compatible driver found - cannot transmit");

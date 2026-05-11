@@ -15,7 +15,6 @@
 #include "fl/stl/noexcept.h"
 #include "fl/stl/static_assert.h"
 #include "fl/stl/stdint.h"
-#include "fl/stl/string.h"
 #include "platforms/is_platform.h"
 
 // FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY: opt-in macro that, when set to 1,
@@ -138,17 +137,14 @@ template<> struct DefaultBus<ClocklessChipset> {
 ///
 /// Each `Bus::X` corresponds to exactly one concrete `IChannelDriver`. That
 /// driver's `getName()` returns a stable string that `ChannelManager` uses as
-/// the affinity key (`ChannelOptions::mAffinity` / `getDriverByName`). When
-/// the new templated `Channel::create<Bus B>(cfg)` / `FastLED.add<Bus B>(cfg)`
-/// overloads are used (closes #2167), the affinity is derived from `B` via
-/// this helper so the typo-prone string literal never appears at the call
-/// site.
+/// the lookup key (`findDriverByName` / `getDriverByName`). Channels read
+/// `ChannelOptions::mBus` (#2459) and the dispatch layer derives the lookup
+/// string via `busName(mBus)` — typo-prone string literals never appear at the
+/// call site.
 ///
 /// Returns `"AUTO"` for `Bus::AUTO` — diagnostic/log paths get a stable
-/// human-readable label. The templated `Channel::create<B>(cfg)` /
-/// `FastLED.add<B>(cfg)` overloads `static_assert` against `B == Bus::AUTO`,
-/// so this name never reaches `ChannelOptions::mAffinity` and never enters
-/// the `ChannelManager` dispatch path.
+/// human-readable label. `mBus == Bus::AUTO` means "no Bus pin; let the
+/// manager pick by priority", so this name never reaches the manager's lookup.
 ///
 /// Spelling is normalized to match the C++ enumerator name exactly (including
 /// underscores in `FLEX_IO`, `OBJECT_FLED`, `BIT_BANG`). Driver `getName()`
@@ -182,23 +178,5 @@ inline const char* busName(Bus b) FL_NOEXCEPT {
 // wire the case in — its failure is the prompt to revisit `busName()`.
 FL_STATIC_ASSERT(static_cast<fl::u8>(Bus::STUB) == 13,
                  "Bus changed: add the new value to busName() in this file");  // ok plain enum
-
-/// @brief Predicate: does `name` match the `getName()` of any known FastLED
-///        channel driver? Used by Channel's runtime-affinity miss diagnostic
-///        (#2455) to decide whether to emit the actionable
-///        `fl::enableDrivers<fl::Bus::X>()` hint or a generic message.
-///
-/// Empty / unknown / third-party names return `false`. `"AUTO"` returns
-/// `false` because it is the sentinel for "no affinity"; the dispatch path
-/// should never see it as a non-empty mAffinity in practice.
-inline bool isKnownBusName(const fl::string& name) FL_NOEXCEPT {
-    return name == "RMT"           || name == "PARLIO"      ||
-           name == "SPI"           || name == "I2S"          ||
-           name == "I2S_SPI"       || name == "LCD_RGB"      ||
-           name == "LCD_SPI"       || name == "LCD_CLOCKLESS"||
-           name == "UART"          || name == "FLEX_IO"      ||
-           name == "OBJECT_FLED"   || name == "BIT_BANG"     ||
-           name == "STUB";
-}
 
 }  // namespace fl

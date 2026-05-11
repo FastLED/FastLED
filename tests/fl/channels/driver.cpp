@@ -102,9 +102,7 @@ FL_TEST_CASE("Channel basic operations") {
     CRGB leds[10];
     auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
     ChannelOptions options;
-    options.mAffinity = "MOCK_1";  // Match driver name
 
-    // Use affinity to bind to mock driver
     ChannelConfig config(1, timing, fl::span<CRGB>(leds, 10), RGB, options);
     auto channel = Channel::create(config);
 
@@ -128,7 +126,6 @@ FL_TEST_CASE("Channel transmission") {
 
     auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
     ChannelOptions options;
-    options.mAffinity = "MOCK_TX";
     ChannelConfig config(1, timing, fl::span<CRGB>(leds, 5), RGB, options);
     auto channel = Channel::create(config);
 
@@ -154,7 +151,6 @@ FL_TEST_CASE("CLEDController direct showLeds flushes channel drivers") {
 
     auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
     ChannelOptions options;
-    options.mAffinity = "MOCK_DIRECT_CTL";
     ChannelConfig config(2, timing, fl::span<CRGB>(leds, 5), RGB, options);
     auto channel = Channel::create(config);
 
@@ -180,7 +176,6 @@ FL_TEST_CASE("CLEDController clearLeds flushes cleared channel data") {
 
     auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
     ChannelOptions options;
-    options.mAffinity = "MOCK_DIRECT_CLEAR";
     ChannelConfig config(3, timing, fl::span<CRGB>(leds, 5), RGB, options);
     auto channel = Channel::create(config);
 
@@ -209,7 +204,6 @@ FL_TEST_CASE("FastLED.show() with channels") {
 
     auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
     ChannelOptions options;
-    options.mAffinity = "MOCK_FASTLED";
     ChannelConfig config(1, timing, fl::span<CRGB>(leds, 5), RGB, options);
     auto channel = Channel::create(config);
 
@@ -248,7 +242,6 @@ FL_TEST_CASE("Channel Engine: 8 channels → exactly 8 enqueues (no accumulation
         fl::fill_solid(leds[i], NUM_LEDS, CRGB::Red);
 
         ChannelOptions opts;
-        opts.mAffinity = "ENQUEUE_TEST_1";
         ChannelConfig config(
             static_cast<int>(i + 1),  // Pin 1-8
             timing,
@@ -302,7 +295,6 @@ FL_TEST_CASE("Channel Engine: Multiple show() calls don't accumulate channels") 
         fl::fill_solid(leds[i], NUM_LEDS, CRGB::Blue);
 
         ChannelOptions opts;
-        opts.mAffinity = "ENQUEUE_TEST_2";
         ChannelConfig config(
             static_cast<int>(i + 10),  // Pin 10-13
             timing,
@@ -359,7 +351,6 @@ FL_TEST_CASE("Channel Engine: Adding/removing channels updates enqueue count cor
 
     auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
     ChannelOptions opts;
-    opts.mAffinity = "ENQUEUE_TEST_3";
 
     // Start with 2 channels
     ChannelConfig config1(20, timing, fl::span<CRGB>(leds1, NUM_LEDS), GRB, opts);
@@ -411,7 +402,6 @@ FL_TEST_CASE("Channel Engine: ChannelData isInUse flag managed correctly") {
 
     auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
     ChannelOptions opts;
-    opts.mAffinity = "ENQUEUE_TEST_4";
     ChannelConfig config(30, timing, fl::span<CRGB>(leds, NUM_LEDS), RGB, opts);
     auto channel = Channel::create(config);
 
@@ -447,7 +437,6 @@ FL_TEST_CASE("Channel Events: onChannelDataEncoded fires after encoding") {
 
     auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
     ChannelOptions opts;
-    opts.mAffinity = "EVENT_ENCODED_TEST";
 
     ChannelConfig config(5, timing, fl::span<CRGB>(leds, NUM_LEDS), GRB, opts);
     auto channel = Channel::create(config);
@@ -498,7 +487,6 @@ FL_TEST_CASE("Channel: Guard against double-encoding within single FastLED.show(
 
     auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
     ChannelOptions opts;
-    opts.mAffinity = "DOUBLE_ENCODE_TEST";
 
     ChannelConfig config(5, timing, fl::span<CRGB>(leds, NUM_LEDS), GRB, opts);
     auto channel = Channel::create(config);

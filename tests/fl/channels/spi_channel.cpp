@@ -271,7 +271,6 @@ FL_TEST_CASE("SPI chipset - mock driver integration") {
     SpiChipsetConfig spiConfig{5, 6, encoder};  // DATA_PIN=5, CLOCK_PIN=6
 
     ChannelOptions options;
-    options.mAffinity = "MOCK_SPI";
     ChannelConfig config(spiConfig, fl::span<CRGB>(leds, NUM_LEDS), RGB, options);
 
     auto channel = Channel::create(config);
@@ -324,7 +323,6 @@ FL_TEST_CASE("SPI chipset - APA102HD mock driver integration") {
     SpiChipsetConfig spiConfig{5, 6, encoder};
 
     ChannelOptions options;
-    options.mAffinity = "MOCK_SPI_HD";
     ChannelConfig config(spiConfig, fl::span<CRGB>(leds, NUM_LEDS), RGB, options);
 
     // Verify it's configured as APA102HD
