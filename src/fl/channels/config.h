@@ -246,6 +246,76 @@ struct ChannelConfig {
 
 FASTLED_SHARED_PTR_STRUCT(ChannelConfig);
 
+/// @brief Strongly-typed channel configuration with compile-time chipset family.
+///
+/// `ChannelConfigOf<Chipset>` is the Phase 3b (issue #2428) templated form of
+/// `ChannelConfig`. It carries the same payload as a `ChannelConfig` but encodes
+/// the chipset family (`ClocklessChipset` or `SpiChipsetConfig`) as a template
+/// parameter so that `FastLED.add<Bus, Chipset>(cfg)` can:
+///
+///  - Deduce `Chipset` from the configuration without a runtime variant probe.
+///  - `static_assert` that the named `Bus` supports `Chipset` at compile time
+///    via `BusSupports<B, Chipset>`.
+///  - Reject nonsense combinations (e.g. clockless config routed to an
+///    SPI-only bus) at compile time rather than at runtime.
+///
+/// Implicit conversions to/from the non-template `ChannelConfig` preserve
+/// backward compatibility -- existing `Channel::create(cfg)` callers and the
+/// non-template `FastLED.add(cfg)` overloads continue to work unchanged.
+///
+/// @tparam Chipset One of `fl::ClocklessChipset` or `fl::SpiChipsetConfig`.
+template<typename Chipset>
+struct ChannelConfigOf {
+    /// @brief Construct from a typed chipset, LEDs span, and optional metadata.
+    ChannelConfigOf(const Chipset& chipset, fl::span<CRGB> leds,
+                    EOrder rgbOrder = RGB,
+                    const ChannelOptions& options = ChannelOptions()) FL_NOEXCEPT
+        : chipset(chipset), mLeds(leds), rgb_order(rgbOrder), options(options) {}
+
+    /// @brief Named-channel constructor.
+    ChannelConfigOf(const fl::string& name, const Chipset& chipset,
+                    fl::span<CRGB> leds, EOrder rgbOrder = RGB,
+                    const ChannelOptions& options = ChannelOptions()) FL_NOEXCEPT
+        : chipset(chipset), mLeds(leds), rgb_order(rgbOrder), options(options), mName(name) {}
+
+    /// @brief Implicit conversion to the type-erased `ChannelConfig` so the
+    ///        existing non-template `Channel::create()` factory accepts a
+    ///        templated config without any per-call-site change.
+    operator ChannelConfig() const FL_NOEXCEPT {
+        ChannelConfig cfg(chipset, mLeds, rgb_order, options);
+        cfg.mScreenMap = mScreenMap;
+        if (mName.has_value()) {
+            cfg.mName = mName;
+        }
+        return cfg;
+    }
+
+    /// @brief Convenience: build the erased form by value (handy in templates
+    ///        where the implicit conversion is suppressed by overload rules).
+    ChannelConfig toErased() const FL_NOEXCEPT { return static_cast<ChannelConfig>(*this); }
+
+    // ---- Data members (mirror ChannelConfig, but with typed `chipset`) ----
+
+    /// Typed chipset configuration. No variant -- the `Chipset` template
+    /// parameter is the source of truth.
+    Chipset chipset;
+
+    /// LED data span.
+    fl::span<CRGB> mLeds;
+
+    /// RGB channel ordering.
+    EOrder rgb_order = RGB;
+
+    /// Optional channel settings (correction, temperature, dither, rgbw, affinity).
+    ChannelOptions options;
+
+    /// Screen mapping (for JS canvas visualization).
+    fl::ScreenMap mScreenMap;
+
+    /// Optional user-specified name. If unset, `Channel` auto-generates one.
+    fl::optional<fl::string> mName;
+};
+
 /// @brief Multi-channel LED configuration
 ///
 /// Stores shared pointers to ChannelConfig objects for managing multiple channels.

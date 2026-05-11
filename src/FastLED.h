@@ -162,6 +162,9 @@
 #include "fl/channels/channel_events.h"
 #include "fl/channels/manager.h"
 #include "fl/channels/config.h"  // for ChannelConfig, MultiChannelConfig
+#include "fl/channels/bus.h"          // for fl::Bus, fl::DefaultBus (Phase 3b, #2428)
+#include "fl/channels/bus_traits.h"   // for fl::BusTraits, fl::BusSupports (Phase 3b, #2428)
+#include "fl/channels/channel_typed.h"  // for fl::TypedChannel<B, Chipset> (Phase 3b, #2428)
 #include "fl/channels/rx/channel.h"
 
 #include "fl/audio/input.h"
@@ -764,6 +767,50 @@ public:
 	/// auto channels = FastLED.add(multiConfig);
 	/// @endcode
 	static fl::vector<fl::ChannelPtr> add(const fl::MultiChannelConfig& multiConfig);
+
+	/// @brief Templated Channel add -- compile-time bus/chipset enforcement (issue #2428 Phase 3b).
+	///
+	/// Selects the driver `Bus` at compile time. When `B == fl::Bus::AUTO` (the
+	/// default), the bus is resolved per-platform via `fl::DefaultBus<Chipset>::value`.
+	/// A `static_assert` rejects nonsense combinations (e.g. clockless config
+	/// routed to an SPI-only bus) at instantiation time so they never reach
+	/// runtime as warnings.
+	///
+	/// @tparam B       The driver bus identifier. Default `fl::Bus::AUTO`
+	///                 resolves to the platform default for `Chipset`.
+	/// @tparam Chipset Chipset family (deduced from the config).
+	/// @param  cfg     Strongly-typed channel configuration.
+	/// @return Shared pointer to the created `Channel` (already added to the
+	///         draw list), suitable for lifetime management.
+	///
+	/// Example:
+	/// @code
+	/// fl::ChannelConfigOf<fl::ClocklessChipset> cfg{
+	///     fl::ClocklessChipset(4, fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>()),
+	///     fl::span<CRGB>(leds, 60), GRB};
+	///
+	/// FastLED.add(cfg);                          // platform default clockless bus
+	/// FastLED.add<fl::Bus::RMT>(cfg);            // OK -- RMT supports clockless
+	/// FastLED.add<fl::Bus::SPI>(cfg);            // compile error: SPI bus, clockless chipset
+	/// @endcode
+	template<fl::Bus B = fl::Bus::AUTO, typename Chipset>
+	static fl::ChannelPtr add(const fl::ChannelConfigOf<Chipset>& cfg) FL_NOEXCEPT {
+		constexpr fl::Bus actual = (B == fl::Bus::AUTO)
+			? fl::DefaultBus<Chipset>::value
+			: B;
+		// Diagnostic message (suppressed on pre-C++17 by FL_STATIC_ASSERT)
+		// describes the contract: route ClocklessChipset to a clockless bus
+		// (RMT/PARLIO/I2S/...) and SpiChipsetConfig to an SPI bus.
+		FL_STATIC_ASSERT(
+			fl::BusSupports<actual, Chipset>::value,
+			"FastLED.add: Bus does not support this Chipset family");
+		// Naming `BusTraits<actual>::instance` here is the ODR-use that links
+		// the driver translation unit even with `--gc-sections` enabled
+		// (issue #2428 Phase 5 binary-size fix).
+		(void)&fl::BusTraits<actual>::instance;
+		fl::ChannelConfig erased = cfg.toErased();
+		return CFastLED::add(erased);
+	}
 
 	/// @brief Add an RX channel with runtime configuration
 	///
