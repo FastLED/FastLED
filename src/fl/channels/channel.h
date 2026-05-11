@@ -15,8 +15,13 @@
 #include "fl/stl/noexcept.h"
 
 #include "cpixel_ledcontroller.h"
+#include "fl/channels/bus.h"
+#include "fl/channels/bus_traits.h"
 #include "fl/channels/ichannel.h"
+#include "fl/channels/options.h"
 #include "fl/stl/shared_ptr.h"
+#include "fl/stl/static_assert.h"
+#include "fl/stl/string.h"
 #include "fl/stl/weak_ptr.h"
 #include "fl/stl/stdint.h"
 #include "fl/channels/config.h"
@@ -50,6 +55,58 @@ public:
     /// @note Channels always use ChannelManager by default
     /// @note If config.affinity is set, binds to the named driver from ChannelManager
     static ChannelPtr create(const ChannelConfig& config);
+
+    /// @brief Create a channel pinned at compile time to a specific `Bus`.
+    ///
+    /// Closes #2167 — `Channel::create<EngineType>(config)` is now a real
+    /// template. Use this overload to:
+    ///   - State the target bus at compile time so typos (`Bus::RTM` →
+    ///     compile error, "RMT" → "RTM" would silently runtime-warn).
+    ///   - Reject bus/chipset mismatches via `static_assert` rather than at
+    ///     runtime via `ChannelManager` warnings.
+    ///   - ODR-use `BusTraits<B>::instancePtr()` from the call site so the
+    ///     driver's translation unit is kept by `--gc-sections` (#2428's
+    ///     binary-bloat fix). Sketches that only ever name one `Bus::X` only
+    ///     link that one driver.
+    ///
+    /// **Precondition.** The user must `#include` the per-driver
+    /// `bus_traits.h` that specializes `BusTraits<B>` for the chosen bus.
+    /// Otherwise the call fails to compile with `implicit instantiation of
+    /// undefined template 'BusTraits<Bus::X>'` — the explicit-opt-in
+    /// behaviour that lets unused drivers be linker-stripped.
+    ///
+    /// @code
+    ///   #include "platforms/esp/32/drivers/rmt/rmt_5/bus_traits.h"
+    ///   auto ch = fl::Channel::create<fl::Bus::RMT>(cfg);
+    /// @endcode
+    ///
+    /// @tparam B target bus (not `Bus::AUTO` — use the non-template form
+    ///           if you want platform-default selection)
+    /// @param  config channel configuration; the `mAffinity` field is
+    ///                overwritten with `busName(B)` to pin dispatch
+    /// @return shared pointer to the channel, or nullptr if the platform
+    ///         build did not register a driver for `B`
+    template<Bus B>
+    static ChannelPtr create(ChannelConfig config) {
+        FL_STATIC_ASSERT(B != Bus::AUTO,
+            "Channel::create<Bus::AUTO>() is not allowed — use the non-template "
+            "create(cfg) form for platform-default dispatch.");
+        FL_STATIC_ASSERT(
+            BusSupports<B, ClocklessChipset>::value ||
+            BusSupports<B, SpiChipsetConfig>::value,
+            "Bus B has no BusSupports specialization for any chipset family. "
+            "Did you forget to include the per-driver bus_traits.h? "
+            "(See src/platforms/.../bus_traits.h)");
+        // ODR-use the driver singleton so its translation unit is kept by
+        // --gc-sections (the linker keep-alive that delivers #2428's
+        // binary-bloat fix on a per-bus basis).
+        (void) BusTraits<B>::instancePtr();
+        // `busName(B)` returns a string literal (static storage duration), so
+        // `from_literal` is sound and avoids the heap allocation a `const
+        // char*` constructor would do.
+        config.options.mAffinity = fl::string::from_literal(busName(B));
+        return create(config);
+    }
 
     /// @brief Destructor
     virtual ~Channel() FL_NOEXCEPT;

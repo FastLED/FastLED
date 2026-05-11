@@ -710,6 +710,46 @@ public:
 	/// @endcode
 	static fl::ChannelPtr add(const fl::ChannelConfig& config);
 
+	/// @brief Add an LED channel pinned at compile time to a specific `fl::Bus`.
+	///
+	/// Templated counterpart to `FastLED.add(cfg)` — the bus is chosen at
+	/// compile time so typos become compile errors (`fl::Bus::RTM` → no such
+	/// enumerator) and bus/chipset mismatches become `static_assert`
+	/// failures rather than runtime warnings.
+	///
+	/// This is the issue #2428 / #2167 API:
+	///
+	/// @code
+	///   #include "platforms/esp/32/drivers/rmt/rmt_5/bus_traits.h"
+	///   auto channel = FastLED.add<fl::Bus::RMT>(cfg);
+	/// @endcode
+	///
+	/// **Linker behaviour.** This overload ODR-uses
+	/// `fl::BusTraits<B>::instancePtr()` so the linker keeps the driver's
+	/// translation unit. Sketches that only ever name one `Bus::X` only link
+	/// that one driver — the binary-bloat fix from #2420 / #2421 applies
+	/// per-bus.
+	///
+	/// **Precondition.** The user must `#include` the per-driver
+	/// `bus_traits.h` that specializes `BusTraits<B>` for the chosen bus, or
+	/// the call fails to compile with `implicit instantiation of undefined
+	/// template`. That diagnostic IS the opt-in.
+	///
+	/// @tparam B target bus — must not be `Bus::AUTO`. For
+	///           platform-default dispatch, use the non-template overload.
+	/// @param  config channel configuration; the affinity is overwritten
+	///                with `busName(B)` to pin dispatch
+	/// @return shared pointer to the channel, or nullptr if no driver for
+	///         `B` is registered at runtime
+	template<fl::Bus B>
+	static fl::ChannelPtr add(const fl::ChannelConfig& config) {
+		auto channel = fl::Channel::create<B>(config);
+		if (channel) {
+			add(channel);
+		}
+		return channel;
+	}
+
 	/// @brief Add multiple LED channels from a config array
 	///
 	/// Creates and registers multiple Channel-based LED controllers from an array of configurations.

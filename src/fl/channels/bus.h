@@ -12,6 +12,8 @@
 /// Drivers link only when their `Bus` value is named somewhere in the
 /// translation unit graph. See issue #2428.
 
+#include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 #include "fl/stl/stdint.h"
 #include "platforms/is_platform.h"
 
@@ -130,5 +132,55 @@ template<> struct DefaultBus<ClocklessChipset> {
 // pick explicitly between Bus::BIT_BANG and any future hardware-SPI bus.
 
 #endif
+
+/// @brief Canonical driver-name string for a `Bus` value.
+///
+/// Each `Bus::X` corresponds to exactly one concrete `IChannelDriver`. That
+/// driver's `getName()` returns a stable string that `ChannelManager` uses as
+/// the affinity key (`ChannelOptions::mAffinity` / `getDriverByName`). When
+/// the new templated `Channel::create<Bus B>(cfg)` / `FastLED.add<Bus B>(cfg)`
+/// overloads are used (closes #2167), the affinity is derived from `B` via
+/// this helper so the typo-prone string literal never appears at the call
+/// site.
+///
+/// Returns `"AUTO"` for `Bus::AUTO` — diagnostic/log paths get a stable
+/// human-readable label. The templated `Channel::create<B>(cfg)` /
+/// `FastLED.add<B>(cfg)` overloads `static_assert` against `B == Bus::AUTO`,
+/// so this name never reaches `ChannelOptions::mAffinity` and never enters
+/// the `ChannelManager` dispatch path.
+///
+/// Note: the spelling matches the driver's `getName()` exactly, including
+/// where the enum's snake_case differs from the driver's name
+/// (`Bus::FLEX_IO` → `"FLEXIO"`, `Bus::OBJECT_FLED` → `"OBJECTFLED"`,
+/// `Bus::BIT_BANG` → `"BITBANG"`). Mismatches would silently break
+/// affinity-based dispatch, so this table is the single source of truth.
+///
+/// **Lifetime.** Every returned pointer is to a string literal, so it has
+/// static storage duration — safe to feed to `fl::string::from_literal()`.
+inline const char* busName(Bus b) FL_NOEXCEPT {
+    switch (b) {
+        case Bus::AUTO:          return "AUTO";
+        case Bus::RMT:           return "RMT";
+        case Bus::PARLIO:        return "PARLIO";
+        case Bus::SPI:           return "SPI";
+        case Bus::I2S:           return "I2S";
+        case Bus::I2S_SPI:       return "I2S_SPI";
+        case Bus::LCD_RGB:       return "LCD_RGB";
+        case Bus::LCD_SPI:       return "LCD_SPI";
+        case Bus::LCD_CLOCKLESS: return "LCD_CLOCKLESS";
+        case Bus::UART:          return "UART";
+        case Bus::FLEX_IO:       return "FLEXIO";
+        case Bus::OBJECT_FLED:   return "OBJECTFLED";
+        case Bus::BIT_BANG:      return "BITBANG";
+        case Bus::STUB:          return "STUB";
+    }
+    return "";  // unreachable — silences -Wreturn-type on toolchains that miss the exhaustive switch
+}
+
+// Drift-prevention: if a new `Bus` enumerator is added, the switch above must
+// gain a case. Update this assertion to the new last enumerator after you
+// wire the case in — its failure is the prompt to revisit `busName()`.
+FL_STATIC_ASSERT(static_cast<fl::u8>(Bus::STUB) == 13,
+                 "Bus changed: add the new value to busName() in this file");  // ok plain enum
 
 }  // namespace fl

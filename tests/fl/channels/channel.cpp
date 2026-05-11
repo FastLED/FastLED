@@ -1,20 +1,27 @@
 /// @file tests/fl/channels/channels.cpp
-/// @brief Test suite for Channel API with addressing and color order
+/// @brief Test suite for Channel API with addressing, color order, and
+///        Bus-templated create<B>()/FastLED.add<B>() overloads (#2428/#2167)
 
+#include "FastLED.h"
+#include "fl/channels/all_drivers.h"
+#include "fl/channels/bus.h"
+#include "fl/channels/bus_traits.h"
 #include "fl/channels/channel.h"
+#include "fl/channels/data.h"
+#include "fl/channels/driver.h"
+#include "fl/channels/manager.h"
+#include "fl/chipsets/chipset_timing_config.h"
+#include "fl/gfx/fill.h"
+#include "fl/math/screenmap.h"
 #include "fl/math/xymap.h"
 #include "fl/math/xmap.h"
-#include "fl/math/screenmap.h"
-#include "fl/stl/span.h"
-#include "fl/test/fltest.h"
-#include "fl/channels/driver.h"
-#include "fl/channels/data.h"
-#include "fl/channels/manager.h"
-#include "fl/stl/vector.h"
-#include "fl/stl/shared_ptr.h"
-#include "fl/gfx/fill.h"
-#include "fl/chipsets/chipset_timing_config.h"
 #include "fl/stl/scope_exit.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/span.h"
+#include "fl/stl/string.h"
+#include "fl/stl/vector.h"
+#include "fl/test/fltest.h"
+#include "platforms/stub/bus_traits.h"
 
 using namespace fl;
 
@@ -336,4 +343,113 @@ FL_TEST_CASE("XMap reverse addressing with APA102 encodes pixels in reverse orde
             FL_CHECK_EQ(encodedBytes[ledStart + 15], 0xFF);  // Red
         }
     }
+}
+
+// ============ Bus-template API tests (#2428 / #2167) ============
+// Verify Channel::create<Bus::STUB>(cfg) and FastLED.add<Bus::STUB>(cfg)
+// on the host build (FL_IS_STUB).  Tests run against the real STUB driver —
+// no mocks needed.
+
+namespace {
+
+/// Reset ChannelManager to a known-empty state and return its reference.
+/// Required before each bus-template test so prior registrations don't leak.
+ChannelManager& freshBusTestManager() {
+    auto& mgr = ChannelManager::instance();
+    mgr.clearAllDrivers();
+    return mgr;
+}
+
+/// Minimal WS2812 ChannelConfig on pin 4 with 8 LEDs.
+ChannelConfig makeBusTestConfig(fl::span<CRGB> leds) {
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    return ChannelConfig(4, timing, leds, RGB);
+}
+
+}  // namespace
+
+FL_TEST_CASE("Channel::create<Bus::STUB> returns non-null on host") {
+    auto& mgr = freshBusTestManager();
+    FL_REQUIRE(mgr.getDriverCount() == 0);
+
+    fl::enableAllDrivers();
+    FL_REQUIRE(mgr.getDriverCount() > 0);
+
+    CRGB leds[8] = {};
+    ChannelConfig cfg = makeBusTestConfig(fl::span<CRGB>(leds, 8));
+
+    auto channel = Channel::create<Bus::STUB>(cfg);
+    FL_REQUIRE(channel != nullptr);
+
+    // The registered STUB driver must be the BusTraits<Bus::STUB> singleton.
+    auto stubDriver = mgr.getDriverByName(fl::string::from_literal("STUB"));
+    FL_REQUIRE(stubDriver != nullptr);
+    FL_CHECK_EQ(stubDriver.get(), &BusTraits<Bus::STUB>::instance());
+
+    channel->removeFromDrawList();
+}
+
+FL_TEST_CASE("Channel::create<Bus::STUB> overwrites mAffinity and binds STUB driver") {
+    auto& mgr = freshBusTestManager();
+    FL_REQUIRE(mgr.getDriverCount() == 0);
+
+    fl::enableAllDrivers();
+
+    CRGB leds[8] = {};
+    ChannelConfig cfg = makeBusTestConfig(fl::span<CRGB>(leds, 8));
+    // Deliberately wrong affinity — template overload must overwrite it.
+    cfg.options.mAffinity = fl::string::from_literal("WRONG");
+
+    auto channel = Channel::create<Bus::STUB>(cfg);
+    FL_REQUIRE(channel != nullptr);
+
+    // Trigger a show so the channel selects and caches its driver.
+    channel->showLeds(0);
+
+    // After show the bound engine name must be "STUB", not "WRONG".
+    FL_CHECK_EQ(channel->getEngineName(), fl::string::from_literal("STUB"));
+
+    channel->removeFromDrawList();
+}
+
+FL_TEST_CASE("FastLED.add<Bus::STUB> returns non-null and adds channel to draw list") {
+    auto& mgr = freshBusTestManager();
+    FL_REQUIRE(mgr.getDriverCount() == 0);
+
+    fl::enableAllDrivers();
+
+    CRGB leds[8] = {};
+    ChannelConfig cfg = makeBusTestConfig(fl::span<CRGB>(leds, 8));
+
+    auto channel = FastLED.add<Bus::STUB>(cfg);
+    FL_REQUIRE(channel != nullptr);
+
+    // FastLED.add() must append the channel to the CLEDController draw list.
+    FL_CHECK_TRUE(channel->isInDrawList());
+
+    channel->removeFromDrawList();
+}
+
+FL_TEST_CASE("FastLED.add<Bus::STUB> driver singleton matches BusTraits<Bus::STUB>") {
+    auto& mgr = freshBusTestManager();
+    FL_REQUIRE(mgr.getDriverCount() == 0);
+
+    fl::enableAllDrivers();
+
+    CRGB leds[8] = {};
+    ChannelConfig cfg = makeBusTestConfig(fl::span<CRGB>(leds, 8));
+
+    auto channel = FastLED.add<Bus::STUB>(cfg);
+    FL_REQUIRE(channel != nullptr);
+
+    // Trigger show so the channel binds its driver.
+    channel->showLeds(0);
+
+    FL_CHECK_EQ(channel->getEngineName(), fl::string::from_literal("STUB"));
+
+    auto stubPtr = mgr.getDriverByName(fl::string::from_literal("STUB"));
+    FL_REQUIRE(stubPtr != nullptr);
+    FL_CHECK_EQ(stubPtr.get(), &BusTraits<Bus::STUB>::instance());
+
+    channel->removeFromDrawList();
 }
