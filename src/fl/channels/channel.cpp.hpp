@@ -325,6 +325,40 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
         driver = ChannelManager::instance().selectDriverForChannel(mChannelData, mAffinity);
         mDriver = driver;
     }
+    // #2455: one-shot diagnostic when a runtime-selected affinity misses.
+    // The manager already returned the AUTO/priority-dispatch fallback (or
+    // null) — we just log the actionable hint once so the user knows WHY
+    // their explicit Bus selection didn't take. The guard suppresses the
+    // log on every subsequent show() of this channel, even though the
+    // affinity → priority-fallback chain re-runs each frame.
+    //
+    // We probe the registry directly via the silent `findDriverByName` to
+    // distinguish "driver wasn't instantiated" from "driver exists but
+    // canHandle() rejected this chipset" — the messages differ because the
+    // resolution paths differ (enableDrivers vs use a different Bus).
+    if (!mDriverPreBound && !mAffinity.empty() && !mAffinityWarned &&
+        (!driver || driver->getName() != mAffinity)) {
+        auto affinityDriver = ChannelManager::instance().findDriverByName(mAffinity);
+        if (!affinityDriver) {
+            // Not registered with the manager at all.
+            if (isKnownBusName(mAffinity)) {
+                FL_ERROR("Channel '" << mName << "': Driver '" << mAffinity
+                    << "' wasn't instantiated — call fl::enableDrivers<fl::Bus::"
+                    << mAffinity
+                    << ">() (or fl::enableAllDrivers()) before adding the channel. "
+                    << "Defaulting to AUTO/priority dispatch.");
+            } else {
+                FL_ERROR("Channel '" << mName << "': Affinity '" << mAffinity
+                    << "' has no registered driver. Defaulting to AUTO/priority dispatch.");
+            }
+        } else {
+            // Registered, but canHandle() said no — bus/chipset mismatch.
+            FL_ERROR("Channel '" << mName << "': Driver '" << mAffinity
+                << "' is registered but cannot handle this channel's chipset "
+                << "(bus/chipset mismatch). Defaulting to AUTO/priority dispatch.");
+        }
+        mAffinityWarned = true;
+    }
     if (!driver) {
         FL_ERROR("Channel '" << mName << "': No compatible driver found - cannot transmit");
         return;

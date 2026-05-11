@@ -15,6 +15,7 @@
 #include "fl/stl/noexcept.h"
 #include "fl/stl/static_assert.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/string.h"
 #include "platforms/is_platform.h"
 
 // FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY: opt-in macro that, when set to 1,
@@ -149,11 +150,10 @@ template<> struct DefaultBus<ClocklessChipset> {
 /// so this name never reaches `ChannelOptions::mAffinity` and never enters
 /// the `ChannelManager` dispatch path.
 ///
-/// Note: the spelling matches the driver's `getName()` exactly, including
-/// where the enum's snake_case differs from the driver's name
-/// (`Bus::FLEX_IO` → `"FLEXIO"`, `Bus::OBJECT_FLED` → `"OBJECTFLED"`,
-/// `Bus::BIT_BANG` → `"BITBANG"`). Mismatches would silently break
-/// affinity-based dispatch, so this table is the single source of truth.
+/// Spelling is normalized to match the C++ enumerator name exactly (including
+/// underscores in `FLEX_IO`, `OBJECT_FLED`, `BIT_BANG`). Driver `getName()`
+/// implementations return the same string, so callers never need a reverse
+/// mapping or special-case handling.
 ///
 /// **Lifetime.** Every returned pointer is to a string literal, so it has
 /// static storage duration — safe to feed to `fl::string::from_literal()`.
@@ -169,9 +169,9 @@ inline const char* busName(Bus b) FL_NOEXCEPT {
         case Bus::LCD_SPI:       return "LCD_SPI";
         case Bus::LCD_CLOCKLESS: return "LCD_CLOCKLESS";
         case Bus::UART:          return "UART";
-        case Bus::FLEX_IO:       return "FLEXIO";
-        case Bus::OBJECT_FLED:   return "OBJECTFLED";
-        case Bus::BIT_BANG:      return "BITBANG";
+        case Bus::FLEX_IO:       return "FLEX_IO";
+        case Bus::OBJECT_FLED:   return "OBJECT_FLED";
+        case Bus::BIT_BANG:      return "BIT_BANG";
         case Bus::STUB:          return "STUB";
     }
     return "";  // unreachable — silences -Wreturn-type on toolchains that miss the exhaustive switch
@@ -182,5 +182,23 @@ inline const char* busName(Bus b) FL_NOEXCEPT {
 // wire the case in — its failure is the prompt to revisit `busName()`.
 FL_STATIC_ASSERT(static_cast<fl::u8>(Bus::STUB) == 13,
                  "Bus changed: add the new value to busName() in this file");  // ok plain enum
+
+/// @brief Predicate: does `name` match the `getName()` of any known FastLED
+///        channel driver? Used by Channel's runtime-affinity miss diagnostic
+///        (#2455) to decide whether to emit the actionable
+///        `fl::enableDrivers<fl::Bus::X>()` hint or a generic message.
+///
+/// Empty / unknown / third-party names return `false`. `"AUTO"` returns
+/// `false` because it is the sentinel for "no affinity"; the dispatch path
+/// should never see it as a non-empty mAffinity in practice.
+inline bool isKnownBusName(const fl::string& name) FL_NOEXCEPT {
+    return name == "RMT"           || name == "PARLIO"      ||
+           name == "SPI"           || name == "I2S"          ||
+           name == "I2S_SPI"       || name == "LCD_RGB"      ||
+           name == "LCD_SPI"       || name == "LCD_CLOCKLESS"||
+           name == "UART"          || name == "FLEX_IO"      ||
+           name == "OBJECT_FLED"   || name == "BIT_BANG"     ||
+           name == "STUB";
+}
 
 }  // namespace fl

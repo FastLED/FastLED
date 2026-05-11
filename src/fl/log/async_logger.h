@@ -150,7 +150,7 @@ namespace detail {
     };
 
     struct FlexIOLoggerInfo {
-        static const char* categoryName() { return "FLEXIO"; }
+        static const char* categoryName() { return "FLEX_IO"; }
         static const char* defineName() { return "FASTLED_LOG_FLEXIO_ENABLED"; }
         static bool isEnabled() {
             #ifdef FASTLED_LOG_FLEXIO_ENABLED
@@ -162,7 +162,7 @@ namespace detail {
     };
 
     struct ObjectFLEDLoggerInfo {
-        static const char* categoryName() { return "OBJECTFLED"; }
+        static const char* categoryName() { return "OBJECT_FLED"; }
         static const char* defineName() { return "FASTLED_LOG_OBJECTFLED_ENABLED"; }
         static bool isEnabled() {
             #ifdef FASTLED_LOG_OBJECTFLED_ENABLED

@@ -167,11 +167,11 @@ FL_TEST_CASE("FlexIO engine - empty enqueue does nothing") {
 // Test Suite: Engine Properties
 //=============================================================================
 
-FL_TEST_CASE("FlexIO engine - name is FLEXIO") {
+FL_TEST_CASE("FlexIO engine - name is FLEX_IO") {
     auto mock = fl::make_shared<FlexIOPeripheralMock>();
     ChannelEngineFlexIO engine(mock);
 
-    FL_CHECK(engine.getName() == "FLEXIO");
+    FL_CHECK(engine.getName() == "FLEX_IO");
 }
 
 FL_TEST_CASE("FlexIO engine - capabilities are clockless only") {

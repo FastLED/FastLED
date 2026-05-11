@@ -45,9 +45,9 @@ FL_TEST_CASE("poll always READY") {
     FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
 }
 
-FL_TEST_CASE("getName returns BITBANG") {
+FL_TEST_CASE("getName returns BIT_BANG") {
     BitBangChannelDriver driver;
-    FL_CHECK(driver.getName() == fl::string::from_literal("BITBANG"));
+    FL_CHECK(driver.getName() == fl::string::from_literal("BIT_BANG"));
 }
 
 FL_TEST_CASE("capabilities: clockless and SPI") {

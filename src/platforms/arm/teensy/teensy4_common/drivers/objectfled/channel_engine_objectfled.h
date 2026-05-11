@@ -64,9 +64,9 @@ public:
     DriverState poll() FL_NOEXCEPT override;
 
     /// @brief Get engine name
-    /// @return "OBJECTFLED"
+    /// @return "OBJECT_FLED" — matches the `fl::Bus::OBJECT_FLED` enumerator spelling.
     fl::string getName() const FL_NOEXCEPT override {
-        return fl::string::from_literal("OBJECTFLED");
+        return fl::string::from_literal("OBJECT_FLED");
     }
 
     /// @brief Get capabilities (clockless only)

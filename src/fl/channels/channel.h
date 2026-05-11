@@ -299,6 +299,11 @@ private:
                                      // default), every showPixels() re-evaluates the manager's
                                      // priority list so users can swap drivers at runtime.
     fl::string mAffinity;            // Engine affinity name (empty = no affinity, dynamic selection)
+    bool mAffinityWarned = false;    // One-shot guard for the #2455 FL_ERROR. Flipped on the
+                                     // first showPixels() that observes an affinity miss (the
+                                     // named driver wasn't registered with ChannelManager).
+                                     // Subsequent shows on the same channel skip the warn even
+                                     // though the priority-dispatch fallback re-runs every frame.
     const i32 mId;
     fl::string mName;               // User-specified or auto-generated name
     ChannelOptions mSettings;           // Per-channel settings (gamma, rgbw, etc.)
