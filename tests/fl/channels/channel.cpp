@@ -87,7 +87,6 @@ FL_TEST_CASE("Serpentine 2x2 with APA102 encodes pixels in expected byte order")
     SpiEncoder encoder = SpiEncoder::apa102();
     SpiChipsetConfig spiConfig{5, 6, encoder};
     ChannelOptions options;
-    options.mAffinity = "BYTE_CAPTURE_TEST";
 
     ChannelConfig config(spiConfig, fl::span<CRGB>(workspace, NUM_LEDS), RGB, options);
     auto channel = Channel::create(config);
@@ -184,7 +183,6 @@ FL_TEST_CASE("Serpentine 2x2 with WS2812 GRB encodes pixels in expected byte ord
 
     auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
     ChannelOptions options;
-    options.mAffinity = "WS2812_BYTE_CAPTURE";
 
     ChannelConfig config(1, timing, fl::span<CRGB>(workspace, NUM_LEDS), GRB, options);
     auto channel = Channel::create(config);
@@ -273,7 +271,6 @@ FL_TEST_CASE("XMap reverse addressing with APA102 encodes pixels in reverse orde
     SpiEncoder encoder = SpiEncoder::apa102();
     SpiChipsetConfig spiConfig{5, 6, encoder};
     ChannelOptions options;
-    options.mAffinity = "XMAP_CAPTURE_TEST";
 
     ChannelConfig config(spiConfig, fl::span<CRGB>(workspace, NUM_LEDS), RGB, options);
     auto channel = Channel::create(config);
@@ -368,7 +365,13 @@ ChannelConfig makeBusTestConfig(fl::span<CRGB> leds) {
 
 }  // namespace
 
-FL_TEST_CASE("Channel::create<Bus::STUB> returns non-null on host") {
+// ============ Typed mBus runtime dispatch (#2459) ============
+// `ChannelOptions::mBus` is the typed primary path for runtime driver
+// selection. The non-template `FastLED.add(cfg)` reads it and dispatches
+// to `busName(mBus)`. `Bus::AUTO` (the default) falls through to the
+// string-affinity escape hatch / priority dispatch.
+
+FL_TEST_CASE("cfg.options.mBus = Bus::STUB binds the STUB driver on host") {
     auto& mgr = freshBusTestManager();
     FL_REQUIRE(mgr.getDriverCount() == 0);
 
@@ -377,11 +380,15 @@ FL_TEST_CASE("Channel::create<Bus::STUB> returns non-null on host") {
 
     CRGB leds[8] = {};
     ChannelConfig cfg = makeBusTestConfig(fl::span<CRGB>(leds, 8));
+    cfg.options.mBus = Bus::STUB;
 
-    auto channel = Channel::create<Bus::STUB>(cfg);
+    auto channel = Channel::create(cfg);
     FL_REQUIRE(channel != nullptr);
+    channel->addToDrawList();
+    channel->showLeds(0);
 
-    // The registered STUB driver must be the BusTraits<Bus::STUB> singleton.
+    FL_CHECK_EQ(channel->getEngineName(), fl::string::from_literal("STUB"));
+
     auto stubDriver = mgr.getDriverByName(fl::string::from_literal("STUB"));
     FL_REQUIRE(stubDriver != nullptr);
     FL_CHECK_EQ(stubDriver.get(), &BusTraits<Bus::STUB>::instance());
@@ -389,7 +396,7 @@ FL_TEST_CASE("Channel::create<Bus::STUB> returns non-null on host") {
     channel->removeFromDrawList();
 }
 
-FL_TEST_CASE("Channel::create<Bus::STUB> overwrites mAffinity and binds STUB driver") {
+FL_TEST_CASE("mBus = Bus::AUTO falls back to priority dispatch") {
     auto& mgr = freshBusTestManager();
     FL_REQUIRE(mgr.getDriverCount() == 0);
 
@@ -397,130 +404,14 @@ FL_TEST_CASE("Channel::create<Bus::STUB> overwrites mAffinity and binds STUB dri
 
     CRGB leds[8] = {};
     ChannelConfig cfg = makeBusTestConfig(fl::span<CRGB>(leds, 8));
-    // Deliberately wrong affinity — template overload must overwrite it.
-    cfg.options.mAffinity = fl::string::from_literal("WRONG");
+    // Leave mBus at default (AUTO).
 
-    auto channel = Channel::create<Bus::STUB>(cfg);
+    auto channel = Channel::create(cfg);
     FL_REQUIRE(channel != nullptr);
-
-    // Trigger a show so the channel selects and caches its driver.
+    channel->addToDrawList();
     channel->showLeds(0);
 
-    // After show the bound engine name must be "STUB", not "WRONG".
-    FL_CHECK_EQ(channel->getEngineName(), fl::string::from_literal("STUB"));
-
-    channel->removeFromDrawList();
-}
-
-FL_TEST_CASE("FastLED.add<Bus::STUB> returns non-null and adds channel to draw list") {
-    auto& mgr = freshBusTestManager();
-    FL_REQUIRE(mgr.getDriverCount() == 0);
-
-    fl::enableAllDrivers();
-
-    CRGB leds[8] = {};
-    ChannelConfig cfg = makeBusTestConfig(fl::span<CRGB>(leds, 8));
-
-    auto channel = FastLED.add<Bus::STUB>(cfg);
-    FL_REQUIRE(channel != nullptr);
-
-    // FastLED.add() must append the channel to the CLEDController draw list.
-    FL_CHECK_TRUE(channel->isInDrawList());
-
-    channel->removeFromDrawList();
-}
-
-FL_TEST_CASE("FastLED.add<Bus::STUB> driver singleton matches BusTraits<Bus::STUB>") {
-    auto& mgr = freshBusTestManager();
-    FL_REQUIRE(mgr.getDriverCount() == 0);
-
-    fl::enableAllDrivers();
-
-    CRGB leds[8] = {};
-    ChannelConfig cfg = makeBusTestConfig(fl::span<CRGB>(leds, 8));
-
-    auto channel = FastLED.add<Bus::STUB>(cfg);
-    FL_REQUIRE(channel != nullptr);
-
-    // Trigger show so the channel binds its driver.
-    channel->showLeds(0);
-
-    FL_CHECK_EQ(channel->getEngineName(), fl::string::from_literal("STUB"));
-
-    auto stubPtr = mgr.getDriverByName(fl::string::from_literal("STUB"));
-    FL_REQUIRE(stubPtr != nullptr);
-    FL_CHECK_EQ(stubPtr.get(), &BusTraits<Bus::STUB>::instance());
-
-    channel->removeFromDrawList();
-}
-
-// ============ Runtime Bus-dispatch overload (#2453) ============
-// FastLED.add(fl::Bus, cfg) — non-templated, runtime-only counterpart to
-// FastLED.add<fl::Bus B>(cfg). Bus passed by value, affinity derived via
-// fl::busName(), no ODR-use of BusTraits<B>::instancePtr(). Lets sketches
-// that called enableAllDrivers() pick the driver by enum at runtime without
-// also paying the per-bus linker keep-alive that the templated form does.
-
-FL_TEST_CASE("FastLED.add(Bus, cfg) dispatches to runtime-selected bus") {
-    auto& mgr = freshBusTestManager();
-    FL_REQUIRE(mgr.getDriverCount() == 0);
-
-    fl::enableAllDrivers();
-
-    CRGB leds[8] = {};
-    ChannelConfig cfg = makeBusTestConfig(fl::span<CRGB>(leds, 8));
-
-    // Variable Bus value — what the runtime overload exists for.
-    Bus b = Bus::STUB;
-    auto channel = FastLED.add(b, cfg);
-    FL_REQUIRE(channel != nullptr);
-    FL_CHECK_TRUE(channel->isInDrawList());
-
-    // Trigger show so the channel binds its driver.
-    channel->showLeds(0);
-    FL_CHECK_EQ(channel->getEngineName(), fl::string::from_literal("STUB"));
-
-    channel->removeFromDrawList();
-}
-
-FL_TEST_CASE("FastLED.add(Bus, cfg) overwrites prior mAffinity") {
-    auto& mgr = freshBusTestManager();
-    FL_REQUIRE(mgr.getDriverCount() == 0);
-
-    fl::enableAllDrivers();
-
-    CRGB leds[8] = {};
-    ChannelConfig cfg = makeBusTestConfig(fl::span<CRGB>(leds, 8));
-    // Deliberately wrong prior affinity — runtime overload must overwrite.
-    cfg.options.mAffinity = fl::string::from_literal("WRONG");
-
-    auto channel = FastLED.add(Bus::STUB, cfg);
-    FL_REQUIRE(channel != nullptr);
-    channel->showLeds(0);
-    FL_CHECK_EQ(channel->getEngineName(), fl::string::from_literal("STUB"));
-
-    channel->removeFromDrawList();
-}
-
-FL_TEST_CASE("FastLED.add(Bus::AUTO, cfg) clears affinity and falls back to priority") {
-    auto& mgr = freshBusTestManager();
-    FL_REQUIRE(mgr.getDriverCount() == 0);
-
-    fl::enableAllDrivers();
-
-    CRGB leds[8] = {};
-    ChannelConfig cfg = makeBusTestConfig(fl::span<CRGB>(leds, 8));
-    // Seed a non-empty affinity so we can prove AUTO clears it.
-    cfg.options.mAffinity = fl::string::from_literal("STUB");
-
-    auto channel = FastLED.add(Bus::AUTO, cfg);
-    FL_REQUIRE(channel != nullptr);
-    FL_CHECK_TRUE(channel->isInDrawList());
-    // On host the only registered drivers from enableAllDrivers() are STUB
-    // and BITBANG. Priority dispatch should land on one of them; we only
-    // assert that dispatch succeeds (driver gets bound) rather than naming
-    // which one wins the priority tie.
-    channel->showLeds(0);
+    // Priority dispatch picks a host driver — either STUB or BIT_BANG.
     auto bound = channel->getEngineName();
     FL_CHECK(bound == fl::string::from_literal("STUB") ||
              bound == fl::string::from_literal("BIT_BANG"));
@@ -529,18 +420,18 @@ FL_TEST_CASE("FastLED.add(Bus::AUTO, cfg) clears affinity and falls back to prio
 }
 
 // ============ Affinity-miss diagnostic (#2455) ============
-// When an affinity is set but the named driver isn't registered with
+// When an mBus target is set but the named driver isn't registered with
 // ChannelManager, Channel::showPixels emits exactly one FL_ERROR with the
 // fl::enableDrivers<fl::Bus::X>() / fl::enableAllDrivers() hint, then falls
 // back to priority dispatch. The mAffinityWarned flag suppresses duplicates
 // on subsequent shows of the same channel.
 
-FL_TEST_CASE("Affinity miss to unregistered known Bus falls back and still renders") {
+FL_TEST_CASE("mBus miss to unregistered known Bus falls back and still renders") {
     auto& mgr = freshBusTestManager();
     FL_REQUIRE(mgr.getDriverCount() == 0);
 
     // Register ONLY the host fallbacks (STUB + BIT_BANG via enableAllDrivers).
-    // We do not register Bus::RMT, so an affinity = "RMT" must miss.
+    // We do not register Bus::RMT, so an mBus = Bus::RMT request must miss.
     fl::enableAllDrivers();
     // Use the silent `findDriverByName` here — `getDriverByName` would emit
     // its own FL_ERROR on miss and pollute any log inspection of the actual
@@ -549,8 +440,8 @@ FL_TEST_CASE("Affinity miss to unregistered known Bus falls back and still rende
 
     CRGB leds[8] = {};
     ChannelConfig cfg = makeBusTestConfig(fl::span<CRGB>(leds, 8));
-    // Forge a runtime affinity for a Bus whose driver is NOT registered.
-    cfg.options.mAffinity = fl::string::from_literal("RMT");
+    // Target a typed Bus whose driver is NOT registered on this host.
+    cfg.options.mBus = fl::Bus::RMT;
 
     auto channel = Channel::create(cfg);
     FL_REQUIRE(channel != nullptr);
@@ -574,31 +465,6 @@ FL_TEST_CASE("Affinity miss to unregistered known Bus falls back and still rende
     // Driver binding is unchanged.
     channel->showLeds(0);
     FL_CHECK(channel->getEngineName() == bound);
-
-    channel->removeFromDrawList();
-}
-
-FL_TEST_CASE("Affinity miss to unknown third-party name still falls back") {
-    auto& mgr = freshBusTestManager();
-    FL_REQUIRE(mgr.getDriverCount() == 0);
-
-    fl::enableAllDrivers();
-
-    CRGB leds[8] = {};
-    ChannelConfig cfg = makeBusTestConfig(fl::span<CRGB>(leds, 8));
-    // Use a name that is NOT one of the canonical Bus names. The diagnostic
-    // should fire but use the generic "no registered driver" message branch
-    // (no fl::Bus::WAT hint).
-    cfg.options.mAffinity = fl::string::from_literal("WAT");
-
-    auto channel = Channel::create(cfg);
-    FL_REQUIRE(channel != nullptr);
-    channel->addToDrawList();
-
-    channel->showLeds(0);
-    auto bound = channel->getEngineName();
-    FL_CHECK(bound == fl::string::from_literal("STUB") ||
-             bound == fl::string::from_literal("BIT_BANG"));
 
     channel->removeFromDrawList();
 }

@@ -710,87 +710,6 @@ public:
 	/// @endcode
 	static fl::ChannelPtr add(const fl::ChannelConfig& config);
 
-	/// @brief Add an LED channel pinned at compile time to a specific `fl::Bus`.
-	///
-	/// Templated counterpart to `FastLED.add(cfg)` — the bus is chosen at
-	/// compile time so typos become compile errors (`fl::Bus::RTM` → no such
-	/// enumerator) and bus/chipset mismatches become `static_assert`
-	/// failures rather than runtime warnings.
-	///
-	/// This is the issue #2428 / #2167 API:
-	///
-	/// @code
-	///   #include "platforms/esp/32/drivers/rmt/rmt_5/bus_traits.h"
-	///   auto channel = FastLED.add<fl::Bus::RMT>(cfg);
-	/// @endcode
-	///
-	/// **Linker behaviour.** This overload ODR-uses
-	/// `fl::BusTraits<B>::instancePtr()` so the linker keeps the driver's
-	/// translation unit. Sketches that only ever name one `Bus::X` only link
-	/// that one driver — the binary-bloat fix from #2420 / #2421 applies
-	/// per-bus.
-	///
-	/// **Precondition.** The user must `#include` the per-driver
-	/// `bus_traits.h` that specializes `BusTraits<B>` for the chosen bus, or
-	/// the call fails to compile with `implicit instantiation of undefined
-	/// template`. That diagnostic IS the opt-in.
-	///
-	/// @tparam B target bus — must not be `Bus::AUTO`. For
-	///           platform-default dispatch, use the non-template overload.
-	/// @param  config channel configuration; the affinity is overwritten
-	///                with `busName(B)` to pin dispatch
-	/// @return shared pointer to the channel, or nullptr if no driver for
-	///         `B` is registered at runtime
-	template<fl::Bus B>
-	static fl::ChannelPtr add(const fl::ChannelConfig& config) {
-		auto channel = fl::Channel::create<B>(config);
-		if (channel) {
-			add(channel);
-		}
-		return channel;
-	}
-
-	/// @brief Add an LED channel and dispatch by a **runtime** `fl::Bus` value.
-	///
-	/// Sister API to the templated `FastLED.add<Bus B>(cfg)` (PR #2451). The
-	/// trade-off:
-	///
-	/// | API | Bus is chosen | Driver TU is linked when |
-	/// |---|---|---|
-	/// | `FastLED.add<Bus::RMT>(cfg)` (templated) | at compile time | the call site names `Bus::RMT` |
-	/// | `FastLED.add(Bus::RMT, cfg)` (this one)  | at runtime      | something *else* in the build named `Bus::RMT` (e.g. `enableAllDrivers()`) |
-	///
-	/// Use this overload when the user has already enrolled drivers with
-	/// `ChannelManager` (typically via `fl::enableAllDrivers()` or an explicit
-	/// `fl::enableDrivers<...>()`) and just wants to pick which one handles a
-	/// given channel — **without** the per-call-site linker keep-alive that the
-	/// templated form does. The bus name is derived via `fl::busName(b)` so the
-	/// stringly-typed `"RMT"` literal never appears in user code. See issue
-	/// #2453 for the design context.
-	///
-	/// @param b      target bus; if `fl::Bus::AUTO`, the affinity is cleared so
-	///               `ChannelManager` picks by priority (same as not setting an
-	///               affinity at all).
-	/// @param config channel configuration; the `mAffinity` field is overwritten.
-	/// @return shared pointer to the channel, or nullptr if dispatch failed
-	///         (e.g. the named driver was not registered with `ChannelManager`).
-	///
-	/// @code
-	///   #include "fl/channels/all_drivers.h"
-	///   void setup() {
-	///       FastLED.enableAllDrivers();
-	///       FastLED.add(fl::Bus::RMT, cfg);   // runtime dispatch, no extra linker work
-	///   }
-	/// @endcode
-	static fl::ChannelPtr add(fl::Bus b, fl::ChannelConfig config) FL_NOEXCEPT {
-		if (b == fl::Bus::AUTO) {
-			config.options.mAffinity.clear();
-		} else {
-			config.options.mAffinity = fl::string::from_literal(fl::busName(b));
-		}
-		return add(config);
-	}
-
 	/// @brief Add multiple LED channels from a config array
 	///
 	/// Creates and registers multiple Channel-based LED controllers from an array of configurations.
@@ -848,50 +767,6 @@ public:
 	/// auto channels = FastLED.add(multiConfig);
 	/// @endcode
 	static fl::vector<fl::ChannelPtr> add(const fl::MultiChannelConfig& multiConfig);
-
-	/// @brief Templated Channel add -- compile-time bus/chipset enforcement (issue #2428 Phase 3b).
-	///
-	/// Selects the driver `Bus` at compile time. When `B == fl::Bus::AUTO` (the
-	/// default), the bus is resolved per-platform via `fl::DefaultBus<Chipset>::value`.
-	/// A `static_assert` rejects nonsense combinations (e.g. clockless config
-	/// routed to an SPI-only bus) at instantiation time so they never reach
-	/// runtime as warnings.
-	///
-	/// @tparam B       The driver bus identifier. Default `fl::Bus::AUTO`
-	///                 resolves to the platform default for `Chipset`.
-	/// @tparam Chipset Chipset family (deduced from the config).
-	/// @param  cfg     Strongly-typed channel configuration.
-	/// @return Shared pointer to the created `Channel` (already added to the
-	///         draw list), suitable for lifetime management.
-	///
-	/// Example:
-	/// @code
-	/// fl::ChannelConfigOf<fl::ClocklessChipset> cfg{
-	///     fl::ClocklessChipset(4, fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>()),
-	///     fl::span<CRGB>(leds, 60), GRB};
-	///
-	/// FastLED.add(cfg);                          // platform default clockless bus
-	/// FastLED.add<fl::Bus::RMT>(cfg);            // OK -- RMT supports clockless
-	/// FastLED.add<fl::Bus::SPI>(cfg);            // compile error: SPI bus, clockless chipset
-	/// @endcode
-	template<fl::Bus B = fl::Bus::AUTO, typename Chipset>
-	static fl::ChannelPtr add(const fl::ChannelConfigOf<Chipset>& cfg) FL_NOEXCEPT {
-		constexpr fl::Bus actual = (B == fl::Bus::AUTO)
-			? fl::DefaultBus<Chipset>::value
-			: B;
-		// Diagnostic message (suppressed on pre-C++17 by FL_STATIC_ASSERT)
-		// describes the contract: route ClocklessChipset to a clockless bus
-		// (RMT/PARLIO/I2S/...) and SpiChipsetConfig to an SPI bus.
-		FL_STATIC_ASSERT(
-			fl::BusSupports<actual, Chipset>::value,
-			"FastLED.add: Bus does not support this Chipset family");
-		// Naming `BusTraits<actual>::instance` here is the ODR-use that links
-		// the driver translation unit even with `--gc-sections` enabled
-		// (issue #2428 Phase 5 binary-size fix).
-		(void)&fl::BusTraits<actual>::instance;
-		fl::ChannelConfig erased = cfg.toErased();
-		return CFastLED::add(erased);
-	}
 
 	/// @brief Add an RX channel with runtime configuration
 	///
@@ -979,8 +854,8 @@ public:
 	///
 	/// void setup() {
 	///     FastLED.enableAllDrivers();   // every platform driver registered
-	///     fl::ChannelOptions opts; opts.mAffinity = "RMT";
-	///     FastLED.add(fl::ChannelConfig(...));
+	///     fl::ChannelOptions opts; opts.mBus = fl::Bus::RMT;   // #2459
+	///     FastLED.add(fl::ChannelConfig(..., opts));
 	/// }
 	/// @endcode
 	///

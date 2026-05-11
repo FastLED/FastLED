@@ -203,7 +203,6 @@ FL_TEST_CASE("Channel API: Mock driver workflow (GitHub issue #2167)") {
 
     auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
     fl::ChannelOptions options;
-    options.mAffinity = "MOCK";  // Bind to mock driver
 
     fl::ChannelConfig config(5, timing, fl::span<CRGB>(leds, 10), GRB, options);
 
@@ -257,7 +256,6 @@ FL_TEST_CASE("Channel API: Double add protection") {
 
     auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
     fl::ChannelOptions options;
-    options.mAffinity = "MOCK_DOUBLE";
 
     fl::ChannelConfig config(10, timing, fl::span<CRGB>(leds, 5), GRB, options);
     auto channel = fl::Channel::create(config);
@@ -310,7 +308,6 @@ FL_TEST_CASE("Channel API: Add and remove symmetry") {
 
     auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
     fl::ChannelOptions options;
-    options.mAffinity = "MOCK_REMOVE";
 
     fl::ChannelConfig config(12, timing, fl::span<CRGB>(leds, 8), GRB, options);
     auto channel = fl::Channel::create(config);
@@ -363,7 +360,6 @@ FL_TEST_CASE("Channel API: Internal ChannelPtr storage prevents dangling") {
 
     auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
     fl::ChannelOptions options;
-    options.mAffinity = "MOCK_STORAGE";
 
     fl::ChannelConfig config(7, timing, fl::span<CRGB>(leds, 4), GRB, options);
     auto channel = fl::Channel::create(config);
@@ -529,7 +525,6 @@ public:
 static ChannelPtr makeChannel(CRGB* leds, int n) {
     auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
     ChannelOptions opts;
-    opts.mAffinity = "STUB_ADD_REMOVE";
     ChannelConfig config(1, timing, fl::span<CRGB>(leds, n), RGB, opts);
     return Channel::create(config);
 }
@@ -1100,7 +1095,6 @@ FL_TEST_CASE("Channel Events: onChannelAdded fires on FastLED.add()") {
     static CRGB leds[10];
     auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
     ChannelOptions opts;
-    opts.mAffinity = "EVENT_TEST";
     ChannelConfig config(5, timing, fl::span<CRGB>(leds, 10), GRB, opts);
     auto channel = Channel::create(config);
 
@@ -1135,7 +1129,6 @@ FL_TEST_CASE("Channel Events: onChannelRemoved fires on FastLED.remove()") {
     static CRGB leds[10];
     auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
     ChannelOptions opts;
-    opts.mAffinity = "EVENT_TEST";
     ChannelConfig config(5, timing, fl::span<CRGB>(leds, 10), GRB, opts);
     auto channel = Channel::create(config);
     FastLED.add(channel);
@@ -1202,7 +1195,6 @@ FL_TEST_CASE("Channel Events: onChannelEnqueued fires when data is enqueued to d
     fl::fill_solid(leds, 10, CRGB::Green);
     auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
     ChannelOptions opts;
-    opts.mAffinity = "EVENT_ENQUEUE_TEST";
     ChannelConfig config(5, timing, fl::span<CRGB>(leds, 10), GRB, opts);
     auto channel = Channel::create(config);
     FastLED.add(channel);
@@ -1296,7 +1288,6 @@ FL_TEST_CASE("Channel Events: Complete lifecycle event sequence") {
         fl::fill_solid(leds1, 10, CRGB::Red);
         auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
         ChannelOptions opts;
-        opts.mAffinity = "EVENT_LIFECYCLE_TEST";
         ChannelConfig config1(5, timing, fl::span<CRGB>(leds1, 10), GRB, opts);
         auto channel = Channel::create(config1);
         FL_CHECK(tracker.mCreatedCount == 1);
@@ -1654,8 +1645,13 @@ FL_TEST_CASE("Arduino macro undefs: Comprehensive round-trip test") {
     }
 }
 
-FL_TEST_CASE("Channel API: Affinity binds to low priority driver, empty affinity binds to high priority") {
-    // Create two mock drivers with different priorities
+FL_TEST_CASE("Channel API: Empty affinity binds to high priority driver") {
+    // Create two mock drivers with different priorities. The pre-#2459 version
+    // of this test also covered "mAffinity = LOW_PRIORITY pins to the lower-
+    // priority driver", but with `mAffinity` removed the only way to override
+    // priority dispatch is `setExclusiveDriver`, which leaves persistent state
+    // that pollutes downstream tests. The priority-dispatch half of the
+    // original test is preserved here verbatim.
     auto lowPriorityEngine = fl::make_shared<ChannelEngineMock>("LOW_PRIORITY");
     auto highPriorityEngine = fl::make_shared<ChannelEngineMock>("HIGH_PRIORITY");
     lowPriorityEngine->reset();
@@ -1672,44 +1668,14 @@ FL_TEST_CASE("Channel API: Affinity binds to low priority driver, empty affinity
     FL_REQUIRE(lowEngine != nullptr);
     FL_REQUIRE(highEngine != nullptr);
 
-    // Test 1: Channel WITH affinity="LOW_PRIORITY" should bind to low priority driver
-    {
-        static CRGB leds1[10];
-        fl::fill_solid(leds1, 10, CRGB::Red);
-
-        auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
-        fl::ChannelOptions opts;
-        opts.mAffinity = "LOW_PRIORITY";  // Explicit affinity to low priority
-
-        fl::ChannelConfig config(5, timing, fl::span<CRGB>(leds1, 10), GRB, opts);
-        auto channel1 = fl::Channel::create(config);
-        FL_REQUIRE(channel1 != nullptr);
-
-        // Add to FastLED and trigger show
-        FastLED.add(channel1);
-
-        // Reset counters before show
-        lowPriorityEngine->reset();
-        highPriorityEngine->reset();
-
-        FastLED.show();
-
-        // Verify: LOW priority driver should receive data (affinity binding)
-        FL_CHECK(lowPriorityEngine->mEnqueueCount == 1);
-        FL_CHECK(highPriorityEngine->mEnqueueCount == 0);  // Should NOT receive data
-
-        // Cleanup
-        FastLED.remove(channel1);
-    }
-
-    // Test 2: Channel WITHOUT affinity should bind to high priority driver
+    // Channel WITHOUT affinity should bind to high priority driver
     {
         static CRGB leds2[10];
         fl::fill_solid(leds2, 10, CRGB::Green);
 
         auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
         fl::ChannelOptions opts;
-        // No affinity set (empty string)
+        // No affinity set
 
         fl::ChannelConfig config(6, timing, fl::span<CRGB>(leds2, 10), GRB, opts);
         auto channel2 = fl::Channel::create(config);
@@ -1835,7 +1801,6 @@ FL_TEST_CASE("Channel API: removeFromDrawList() clears driver weak_ptr") {
 
     auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
     fl::ChannelOptions opts;
-    opts.mAffinity = "CLEAR_TEST";  // Set affinity to bind to driver
 
     fl::ChannelConfig config(5, timing, fl::span<CRGB>(leds, 10), GRB, opts);
     auto channel = fl::Channel::create(config);
@@ -1879,7 +1844,6 @@ FL_TEST_CASE("Channel API: Late binding - driver name empty after construction")
 
         auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
         fl::ChannelOptions opts;
-        opts.mAffinity = "LATE_BIND_AFFINITY";
 
         fl::ChannelConfig config(5, timing, fl::span<CRGB>(leds1, 10), GRB, opts);
         auto channel = fl::Channel::create(config);

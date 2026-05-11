@@ -101,7 +101,7 @@ FL_TEST_CASE("Phase 3b: TypedChannel<Bus::AUTO, ClocklessChipset>::create resolv
     FL_CHECK(channel->isClockless());
 }
 
-FL_TEST_CASE("Phase 3b: FastLED.add<Bus::STUB>(clockless_cfg) compiles and binds channel") {
+FL_TEST_CASE("#2459: TypedChannel<Bus::STUB, ClocklessChipset>::create binds the STUB driver") {
     CRGB workspace[3];
     auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
     fl::ChannelConfigOf<fl::ClocklessChipset> cfg{
@@ -109,25 +109,27 @@ FL_TEST_CASE("Phase 3b: FastLED.add<Bus::STUB>(clockless_cfg) compiles and binds
         fl::span<CRGB>(workspace, 3),
         RGB};
 
-    auto channel = FastLED.add<fl::Bus::STUB>(cfg);
+    // Compile-time path: TypedChannel is the single template entry point.
+    auto channel = fl::TypedChannel<fl::Bus::STUB, fl::ClocklessChipset>::create(cfg);
     FL_REQUIRE(channel != nullptr);
     FL_CHECK(channel->isClockless());
     FL_CHECK(channel->getPin() == 8);
 
-    // Cleanup
     channel->removeFromDrawList();
 }
 
-FL_TEST_CASE("Phase 3b: FastLED.add(cfg) defaults to Bus::AUTO on the host (STUB)") {
+FL_TEST_CASE("#2459: runtime FastLED.add(cfg) with cfg.options.mBus = Bus::STUB") {
     CRGB workspace[5];
     auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
-    fl::ChannelConfigOf<fl::ClocklessChipset> cfg{
+    fl::ChannelConfigOf<fl::ClocklessChipset> typed_cfg{
         fl::ClocklessChipset(2, timing),
         fl::span<CRGB>(workspace, 5),
         RGB};
 
-    // No explicit Bus -- AUTO resolves to DefaultBus<ClocklessChipset> == Bus::STUB.
-    auto channel = FastLED.add(cfg);
+    // Runtime path: erase, set mBus, dispatch via non-template FastLED.add.
+    fl::ChannelConfig erased = typed_cfg.toErased();
+    erased.options.mBus = fl::Bus::STUB;
+    auto channel = FastLED.add(erased);
     FL_REQUIRE(channel != nullptr);
     FL_CHECK(channel->isClockless());
     FL_CHECK(channel->getPin() == 2);
