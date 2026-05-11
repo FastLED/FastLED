@@ -7,11 +7,14 @@
 ///
 /// Provides cooperative coroutines in WASM through one of two back-ends,
 /// selected at compile time:
-///   * JSPI (default) — via CoroutinePlatformWasm. Requires -sJSPI; only
-///     supported in Chromium-based engines.
-///   * pthreads + SharedArrayBuffer — via CoroutinePlatformPthread, when
-///     FASTLED_WASM_PTHREADS=1 is defined. Works in every cross-origin
-///     isolated webview (WebKit/Safari, Firefox, WebView2, WebKitGTK).
+///   * pthreads + SharedArrayBuffer (DEFAULT since #2452 phase 6) — via
+///     CoroutinePlatformPthread, when FASTLED_WASM_PTHREADS=1 is defined.
+///     Works in every cross-origin isolated webview (WebKit/Safari, Firefox,
+///     WebView2, WebKitGTK).
+///   * JSPI (opt-out) — via CoroutinePlatformWasm. Requires -sJSPI; only
+///     supported in Chromium-based engines. Enabled when the build is
+///     invoked with FASTLED_WASM_JSPI=1 in the environment, which causes
+///     ci/wasm_flags.py to suppress the -DFASTLED_WASM_PTHREADS define.
 ///
 /// The generic CoroutineRunner handles scheduling; this file just wires
 /// the appropriate platform implementation and runtime together. See

@@ -96,6 +96,10 @@ _LINK_ENV_VARS = (
     "EMSDK_NODE",
     "LLVM_ROOT",
     "BINARYEN_ROOT",
+    # Coroutine back-end selector — when this changes the library has to
+    # be re-linked too (and re-compiled, see _compute_src_fingerprint).
+    "FASTLED_WASM_JSPI",
+    "FASTLED_WASM_PTHREADS",
 )
 
 
@@ -147,6 +151,14 @@ def _compute_src_fingerprint() -> str:
             h.update(f"{config_file}:{config_file.stat().st_mtime:.6f}".encode())
         except OSError:
             h.update(f"{config_file}:MISSING".encode())
+
+    # Env vars that mutate library compile flags (see ci/wasm_flags.py and
+    # _apply_pthread_substitution). Switching between pthread / JSPI back-ends
+    # must invalidate the cached libfastled.a — otherwise the library still
+    # carries the previous back-end's -DFASTLED_WASM_PTHREADS state. See
+    # issue #2452.
+    for key in ("FASTLED_WASM_JSPI", "FASTLED_WASM_PTHREADS"):
+        h.update(f"env:{key}={os.environ.get(key, '')}".encode())
 
     _cached_fingerprint = h.hexdigest()
     _cached_fingerprint_time = now

@@ -309,17 +309,19 @@ flags = [
     # Linker Performance Optimization
     "-fuse-ld=wasm-ld",                      # Explicitly use wasm-ld (default, but explicit for clarity)
 
-    # Coroutine back-end (default: JSPI). When FASTLED_WASM_PTHREADS=1 is set
-    # in the environment, ci/wasm_flags.py replaces these JSPI flags with the
-    # ones in [linking.pthread] below (and adds -DFASTLED_WASM_PTHREADS=1 to
-    # all compile units). See issue #2452.
+    # Coroutine back-end. The DEFAULT is now the pthread + SharedArrayBuffer
+    # back-end (see [linking.pthread] below). ci/wasm_flags.py removes the
+    # -sJSPI* flags from this block at link time and substitutes the pthread
+    # block, plus adds -pthread + -DFASTLED_WASM_PTHREADS=1 to every compile
+    # unit. The legacy JSPI back-end is kept as an opt-out and is enabled by
+    # setting FASTLED_WASM_JSPI=1 in the environment. See issue #2452.
     #
     # JSPI (JavaScript Promise Integration) — enables cooperative coroutines
     # via engine-level stack management. Unlike asyncify, JSPI requires NO code
     # transformation and NO function whitelist — zero WASM size overhead.
     # The engine creates/suspends/resumes stacks natively via WebAssembly.promising.
     # Supported in Chrome 123+, Firefox 139+. NOT supported in WebKit (Safari,
-    # WKWebView, WebKitGTK) — that's the motivation for the pthread fallback.
+    # WKWebView, WebKitGTK) — that's the motivation for the pthread default.
     #
     # JSPI_EXPORTS: WASM exports that can transitively call a suspending import
     # (EM_ASYNC_JS). Any export that reaches contextSwitch → _jspi_context_switch
@@ -330,15 +332,20 @@ flags = [
 
 [linking.pthread]
 # ================================================================================================
-# PTHREAD-BACK-END LINKING FLAGS  (alternate to JSPI; opt-in)
+# PTHREAD-BACK-END LINKING FLAGS  (default since #2452 phase 6)
 # ================================================================================================
-# When FASTLED_WASM_PTHREADS=1 is exported in the environment, the loader in
-# ci/wasm_flags.py removes the -sJSPI / -sJSPI_EXPORTS flags from
-# [linking.base] above and appends the flags listed here instead. It also
-# threads -pthread + -DFASTLED_WASM_PTHREADS=1 into every compile unit so
+# These flags are applied by ci/wasm_flags.py automatically when the pthread
+# back-end is selected (which is now the default). The loader strips the
+# -sJSPI / -sJSPI_EXPORTS flags from [linking.base] above and appends the
+# flags listed here instead. It also threads -pthread +
+# -DFASTLED_WASM_PTHREADS=1 into every compile unit so
 # fl::thread / fl::mutex / fl::condition_variable resolve to real backing
 # primitives (SharedArrayBuffer + Atomics.wait under the hood) and the
-# pthread variant of ICoroutinePlatform gets registered. See issue #2452.
+# pthread variant of ICoroutinePlatform gets registered.
+#
+# To opt OUT of pthread and use the legacy JSPI back-end instead, set the
+# environment variable FASTLED_WASM_JSPI=1 before running `bash compile wasm`.
+# See issue #2452.
 
 flags = [
     "-pthread",                              # Enable Emscripten pthreads (SAB + Web Workers)

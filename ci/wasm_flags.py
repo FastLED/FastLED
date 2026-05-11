@@ -30,19 +30,31 @@ BUILD_FLAGS_TOML = (
 )
 
 
-# JSPI flags removed when FASTLED_WASM_PTHREADS=1 is set. We match on prefix so
-# the exact JSPI_EXPORTS list can evolve without breaking the substitution.
+# JSPI flags removed whenever the pthread back-end is in use (i.e. the default
+# now — JSPI is opt-in via FASTLED_WASM_JSPI=1). We match on prefix so the exact
+# JSPI_EXPORTS list can evolve without breaking the substitution.
 _JSPI_FLAG_PREFIXES = ("-sJSPI",)
 
 
-def _pthreads_enabled() -> bool:
-    """Return True when the pthread coroutine back-end is requested.
+def _jspi_explicitly_requested() -> bool:
+    """Return True when the legacy JSPI back-end is explicitly opted into.
 
-    Selection: env var ``FASTLED_WASM_PTHREADS`` set to 1/true/yes/on.
-    See issue #2452.
+    Selection: env var ``FASTLED_WASM_JSPI`` set to 1/true/yes/on. The pthread
+    back-end is the default since it works in every cross-origin-isolated
+    webview (WebKit/Safari, WebKitGTK, WebView2, Firefox, Chromium). JSPI is
+    only kept around as an opt-out for legacy or debugging use. See issue #2452.
     """
-    val = os.environ.get("FASTLED_WASM_PTHREADS", "").strip().lower()
+    val = os.environ.get("FASTLED_WASM_JSPI", "").strip().lower()
     return val in ("1", "true", "yes", "on")
+
+
+def _pthreads_enabled() -> bool:
+    """Return True when the pthread coroutine back-end is in use (the default).
+
+    The pthread back-end is now the default. Pass ``FASTLED_WASM_JSPI=1`` in
+    the environment to switch back to the legacy JSPI back-end. See #2452.
+    """
+    return not _jspi_explicitly_requested()
 
 
 def _load_toml() -> dict[str, Any]:

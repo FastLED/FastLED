@@ -18,7 +18,9 @@
 ///     blocks the caller — only one thread runs user code at a time, so
 ///     existing sketch code stays single-owner.
 ///
-/// Selected at compile time via FASTLED_WASM_PTHREADS=1.
+/// Selected at compile time via FASTLED_WASM_PTHREADS=1 — which is the
+/// default behavior since #2452 phase 6 (ci/wasm_flags.py injects the define
+/// unless the environment requests JSPI via FASTLED_WASM_JSPI=1).
 ///
 /// See issue #2452 for the rationale and migration plan.
 
