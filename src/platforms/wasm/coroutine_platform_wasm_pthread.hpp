@@ -38,15 +38,26 @@
 #include "fl/stl/mutex.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/thread.h"
+#include "fl/stl/unique_ptr.h"
+
+// Forward-declare pthread_exit (stable POSIX C ABI). Avoids pulling
+// <pthread.h> into a header — that include is banned project-wide in favor
+// of fl/stl/thread.h. We only need this one symbol to terminate the worker
+// thread cleanly during destroyContext() teardown; see contextSwitch().
+extern "C" __attribute__((noreturn)) void pthread_exit(void* retval);
 
 namespace fl {
 namespace platforms {
 
 /// Per-context state for the pthread-based coroutine platform.
-/// Holds the OS thread, its parking primitive (mutex + cv), and the
-/// baton/exit flags used by contextSwitch().
+///
+/// Lifetime: the platform owns this struct directly. The worker thread holds
+/// only a raw `self` pointer, but contextSwitch() observes `exit_requested`
+/// after every wake and calls `pthread_exit()` so the worker is fully torn
+/// down (with no further access to *this) before destroyContext() proceeds
+/// with `join()`. See destroyContext() comments for the teardown protocol.
 struct PthreadCoroCtx {
-    fl::thread* thread = nullptr;          ///< nullptr for the runner context
+    fl::unique_ptr<fl::thread> thread;     ///< null for the runner context (no OS thread)
     fl::mutex mutex;                        ///< Guards `signaled` / `exit_requested`
     fl::condition_variable cv;              ///< Park spot for this thread
     bool signaled = false;                  ///< Set true to wake this context
@@ -55,14 +66,21 @@ struct PthreadCoroCtx {
 };
 
 /// Thread body. Each non-runner context owns one of these.
-/// Park until first signal, then run the entry trampoline; the trampoline
-/// is responsible for ending with a contextSwitch back to the runner.
+/// Park until first signal, then run the entry trampoline. The trampoline
+/// itself never returns (CoroutineContext::entry_trampoline busy-loops if
+/// it falls through), so the *only* way this function returns is via the
+/// initial-wait exit branch below. Mid-coroutine teardown is handled by
+/// contextSwitch() calling pthread_exit() — the thread terminates without
+/// returning here.
 inline void pthread_coro_thread_main(PthreadCoroCtx* self) FL_NOEXCEPT {
     {
         fl::unique_lock<fl::mutex> lk(self->mutex);
         self->cv.wait(lk, [self] { return self->signaled; });
         self->signaled = false;
         if (self->exit_requested) {
+            // Initial-wait exit — destroyContext() called before the
+            // coroutine ever ran. Drop the lock and exit cleanly so
+            // destroyContext()'s join() can return.
             return;
         }
     }
@@ -70,11 +88,10 @@ inline void pthread_coro_thread_main(PthreadCoroCtx* self) FL_NOEXCEPT {
     if (self->entry_fn) {
         self->entry_fn();
     }
-
-    // The trampoline always finishes with contextSwitch(self, runner), which
-    // re-parks this thread on `self->cv`. Reaching this point only happens
-    // if exit_requested was set while parked there — in which case
-    // contextSwitch() returned and we fall off the thread normally.
+    // Unreachable: entry_fn (CoroutineContext::entry_trampoline) busy-loops
+    // on its own after the final contextSwitch back to the runner.
+    // Mid-coroutine teardown exits the thread via pthread_exit() inside
+    // contextSwitch(), so control never returns here from entry_fn().
 }
 
 class CoroutinePlatformPthread : public ICoroutinePlatform {
@@ -82,7 +99,7 @@ public:
     void* createContext(void (*entry_fn)(), size_t /*stack_size*/) FL_NOEXCEPT override {
         auto* ctx = new PthreadCoroCtx();  // ok bare allocation - platform context lifetime
         ctx->entry_fn = entry_fn;
-        ctx->thread = new fl::thread(pthread_coro_thread_main, ctx);  // ok bare allocation
+        ctx->thread.reset(new fl::thread(pthread_coro_thread_main, ctx));  // ok bare allocation
         return ctx;
     }
 
@@ -98,7 +115,18 @@ public:
         if (!ctx) return;
 
         if (ctx->thread) {
-            // Wake the thread out of its current park and ask it to exit.
+            // Teardown protocol — guarantees the worker has fully stopped
+            // touching *ctx before we free it (closes the UAF window flagged
+            // in PR #2457 review).
+            //
+            //   1. Set `exit_requested` and `signaled` under the lock.
+            //   2. notify_all() — wakes the worker out of either its initial
+            //      cv.wait() or any contextSwitch() cv.wait().
+            //   3. The worker rechecks `exit_requested` after every cv.wait()
+            //      and either falls off pthread_coro_thread_main (initial
+            //      wait) or calls pthread_exit() (contextSwitch).
+            //   4. join() blocks until that exit completes — only then is it
+            //      safe to delete the thread object and *ctx.
             {
                 fl::lock_guard<fl::mutex> lk(ctx->mutex);
                 ctx->exit_requested = true;
@@ -106,15 +134,10 @@ public:
             }
             ctx->cv.notify_all();
 
-            // The thread may be parked deep inside contextSwitch (after the
-            // coroutine completed) or inside its initial wait. We don't join
-            // because the thread might still be holding user-stack state
-            // that's safest to let the OS clean up at module exit.
             if (ctx->thread->joinable()) {
-                ctx->thread->detach();
+                ctx->thread->join();
             }
-            delete ctx->thread;  // ok bare allocation - platform context lifetime
-            ctx->thread = nullptr;
+            ctx->thread.reset();
         }
         delete ctx;  // ok bare allocation - platform context lifetime
     }
@@ -131,11 +154,23 @@ public:
         }
         to->cv.notify_one();
 
-        // Park until someone hands the baton back to us.
+        // Park until someone hands the baton back to us — or until
+        // destroyContext() asks us to exit (`exit_requested`).
+        bool exit_now = false;
         {
             fl::unique_lock<fl::mutex> lk(from->mutex);
             from->cv.wait(lk, [from] { return from->signaled; });
             from->signaled = false;
+            exit_now = from->exit_requested;
+        }
+        if (exit_now) {
+            // Mid-coroutine teardown. The trampoline's caller frame would
+            // otherwise busy-loop (entry_trampoline's `while (true) {}`),
+            // pinning the worker forever and blocking destroyContext()'s
+            // join(). Terminate the thread cleanly here — no further access
+            // to *from after this point, so destroyContext() may free *from
+            // as soon as join() returns.
+            pthread_exit(nullptr);
         }
     }
 

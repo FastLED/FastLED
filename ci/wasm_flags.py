@@ -81,11 +81,40 @@ def _apply_pthread_substitution(
     defines.append("-DFASTLED_WASM_PTHREADS=1")
     compiler_flags.append("-pthread")
 
-    link_flags[:] = [
-        f for f in link_flags if not any(f.startswith(p) for p in _JSPI_FLAG_PREFIXES)
-    ]
+    # Strip JSPI link flags via an explicit loop (project Python style — no list
+    # comprehensions for non-trivial filters; keeps the predicate debuggable).
+    filtered_link_flags: list[str] = []
+    for flag in link_flags:
+        is_jspi = False
+        for prefix in _JSPI_FLAG_PREFIXES:
+            if flag.startswith(prefix):
+                is_jspi = True
+                break
+        if not is_jspi:
+            filtered_link_flags.append(flag)
+    link_flags[:] = filtered_link_flags
+
+    # Substitute the [linking.pthread] block. Fail fast (not silent fallback)
+    # if the section is missing — silent default to [] would just trade a
+    # config error for a much later, much harder-to-diagnose link failure.
     config = _load_toml()
-    pthread_link = list(config.get("linking", {}).get("pthread", {}).get("flags", []))
+    linking_cfg = config.get("linking")
+    pthread_cfg = linking_cfg.get("pthread") if isinstance(linking_cfg, dict) else None
+    if not isinstance(pthread_cfg, dict) or "flags" not in pthread_cfg:
+        raise KeyError(
+            "Missing [linking.pthread].flags in build_flags.toml while the "
+            "pthread WASM coroutine back-end is selected (set "
+            "FASTLED_WASM_JSPI=1 to opt out). See issue #2452."
+        )
+    raw_flags = pthread_cfg["flags"]
+    if not isinstance(raw_flags, list):
+        raise TypeError(
+            "[linking.pthread].flags must be a list of strings; "
+            f"got {type(raw_flags).__name__}"
+        )
+    pthread_link: list[str] = []
+    for item in raw_flags:  # type: ignore[reportUnknownVariableType]
+        pthread_link.append(str(item))
     link_flags.extend(pthread_link)
 
 
