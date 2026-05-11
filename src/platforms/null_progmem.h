@@ -11,8 +11,20 @@
 #endif
 
 #if !defined(FL_PROGMEM)
+// Teensy 4.x (`__IMXRT1062__`) workaround: Teensy core defines `PROGMEM` as
+// `__attribute__((section(".progmem")))`, which causes GCC to emit "section
+// type conflict" errors when a single translation unit contains FL_PROGMEM
+// variables of different types (e.g. `CRGB`, `i32`, `float`) — see the
+// fl.fx+ unity build that aggregates `colorpalettes.h`, `sin32.h`, and
+// `mic_response_data.h`. Teensy 4 has a unified linear address space and
+// places `const` data in `.rodata` (flash) automatically via the linker
+// script, so the section attribute is unnecessary on this platform.
+// Mirrors the same special case in `fastled_progmem.h` so it applies
+// regardless of which inclusion path defines FL_PROGMEM first.
+#if defined(__IMXRT1062__)
+#define FL_PROGMEM
 // Ensure PROGMEM is available before using it
-#if defined(PROGMEM)
+#elif defined(PROGMEM)
 #define FL_PROGMEM PROGMEM
 #if defined(FL_IS_AVR)
 // IWYU pragma: begin_keep
