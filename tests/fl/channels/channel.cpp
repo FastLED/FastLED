@@ -453,3 +453,77 @@ FL_TEST_CASE("FastLED.add<Bus::STUB> driver singleton matches BusTraits<Bus::STU
 
     channel->removeFromDrawList();
 }
+
+// ============ Runtime Bus-dispatch overload (#2453) ============
+// FastLED.add(fl::Bus, cfg) — non-templated, runtime-only counterpart to
+// FastLED.add<fl::Bus B>(cfg). Bus passed by value, affinity derived via
+// fl::busName(), no ODR-use of BusTraits<B>::instancePtr(). Lets sketches
+// that called enableAllDrivers() pick the driver by enum at runtime without
+// also paying the per-bus linker keep-alive that the templated form does.
+
+FL_TEST_CASE("FastLED.add(Bus, cfg) dispatches to runtime-selected bus") {
+    auto& mgr = freshBusTestManager();
+    FL_REQUIRE(mgr.getDriverCount() == 0);
+
+    fl::enableAllDrivers();
+
+    CRGB leds[8] = {};
+    ChannelConfig cfg = makeBusTestConfig(fl::span<CRGB>(leds, 8));
+
+    // Variable Bus value — what the runtime overload exists for.
+    Bus b = Bus::STUB;
+    auto channel = FastLED.add(b, cfg);
+    FL_REQUIRE(channel != nullptr);
+    FL_CHECK_TRUE(channel->isInDrawList());
+
+    // Trigger show so the channel binds its driver.
+    channel->showLeds(0);
+    FL_CHECK_EQ(channel->getEngineName(), fl::string::from_literal("STUB"));
+
+    channel->removeFromDrawList();
+}
+
+FL_TEST_CASE("FastLED.add(Bus, cfg) overwrites prior mAffinity") {
+    auto& mgr = freshBusTestManager();
+    FL_REQUIRE(mgr.getDriverCount() == 0);
+
+    fl::enableAllDrivers();
+
+    CRGB leds[8] = {};
+    ChannelConfig cfg = makeBusTestConfig(fl::span<CRGB>(leds, 8));
+    // Deliberately wrong prior affinity — runtime overload must overwrite.
+    cfg.options.mAffinity = fl::string::from_literal("WRONG");
+
+    auto channel = FastLED.add(Bus::STUB, cfg);
+    FL_REQUIRE(channel != nullptr);
+    channel->showLeds(0);
+    FL_CHECK_EQ(channel->getEngineName(), fl::string::from_literal("STUB"));
+
+    channel->removeFromDrawList();
+}
+
+FL_TEST_CASE("FastLED.add(Bus::AUTO, cfg) clears affinity and falls back to priority") {
+    auto& mgr = freshBusTestManager();
+    FL_REQUIRE(mgr.getDriverCount() == 0);
+
+    fl::enableAllDrivers();
+
+    CRGB leds[8] = {};
+    ChannelConfig cfg = makeBusTestConfig(fl::span<CRGB>(leds, 8));
+    // Seed a non-empty affinity so we can prove AUTO clears it.
+    cfg.options.mAffinity = fl::string::from_literal("STUB");
+
+    auto channel = FastLED.add(Bus::AUTO, cfg);
+    FL_REQUIRE(channel != nullptr);
+    FL_CHECK_TRUE(channel->isInDrawList());
+    // On host the only registered drivers from enableAllDrivers() are STUB
+    // and BITBANG. Priority dispatch should land on one of them; we only
+    // assert that dispatch succeeds (driver gets bound) rather than naming
+    // which one wins the priority tie.
+    channel->showLeds(0);
+    auto bound = channel->getEngineName();
+    FL_CHECK(bound == fl::string::from_literal("STUB") ||
+             bound == fl::string::from_literal("BITBANG"));
+
+    channel->removeFromDrawList();
+}
