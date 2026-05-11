@@ -37,10 +37,12 @@
 #include "crgb.h"
 #include "eorder.h"
 #include "pixel_iterator.h"
+#include "fl/channels/bus.h"
 #include "fl/channels/data.h"
 #include "fl/channels/driver.h"
 #include "fl/channels/manager.h"
 #include "platforms/esp/32/core/fastpin_esp32.h"
+#include "platforms/esp/32/drivers/rmt/rmt_4/bus_traits.h"
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/static_assert.h"
@@ -106,7 +108,17 @@ protected:
     }
 
     static fl::shared_ptr<IChannelDriver> getRmtEngine() FL_NOEXCEPT {
+#if FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY
+        // Phase 5c of #2428 (opt-in mode): bypass `ChannelManager` and bind
+        // directly to the `BusTraits<Bus::RMT>` singleton. Naming
+        // `BusTraits<Bus::RMT>::instancePtr()` here is the ODR-use that
+        // lets the linker keep ONLY the RMT4 driver TU when the user opts
+        // into `FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY=1` -- the
+        // binary-size fix from #2420.
+        return BusTraits<Bus::RMT>::instancePtr();
+#else
         return ChannelManager::instance().getDriverByName("RMT");
+#endif
     }
 
 };

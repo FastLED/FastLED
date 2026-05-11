@@ -3,6 +3,18 @@
 /// @file _build.hpp
 /// @brief Unity build header for platforms\esp\32\drivers/ directory
 /// Includes all implementation files in alphabetical order
+///
+/// Phase 5c of #2428 (binary-size fix for #2420):
+///
+/// Each LED-output driver subdirectory's `_build.cpp.hpp` self-gates against
+/// `FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY`. When the macro is enabled (opt-in
+/// mode), every non-platform-default driver TU becomes empty -- so only the
+/// platform's default driver remains in the build. The auxiliary subdirs
+/// (`ble`, `gpio_isr_rx`, `rmt_rx`) are not channel drivers and stay
+/// unconditional.
+///
+/// Unconditional aggregator structure (one include per subdir, alphabetical)
+/// is preserved to satisfy the unity-build linter.
 
 #include "fl/stl/compiler_control.h"
 FL_NO_UNWIND_BEGIN
