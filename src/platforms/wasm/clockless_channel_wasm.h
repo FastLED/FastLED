@@ -11,6 +11,7 @@
 #include "eorder.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/chipsets/timing_traits.h"
+#include "fl/channels/bus.h"
 #include "fl/channels/data.h"
 #include "fl/channels/driver.h"
 #include "fl/channels/manager.h"
@@ -18,6 +19,7 @@
 #include "pixel_iterator.h"
 #include "fl/log/log.h"
 #include "platforms/shared/active_strip_tracker/active_strip_tracker.h"
+#include "platforms/stub/bus_traits.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {
@@ -94,7 +96,14 @@ protected:
     }
 
     static fl::shared_ptr<IChannelDriver> getWasmEngine() FL_NOEXCEPT {
+#if FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY
+        // Phase 5c of #2428 (opt-in mode): bypass `ChannelManager` and bind
+        // directly to the `BusTraits<Bus::STUB>` singleton -- the stub
+        // driver is the platform default for both stub and WASM builds.
+        return BusTraits<Bus::STUB>::instancePtr();
+#else
         return ChannelManager::instance().getDriverByName("STUB");
+#endif
     }
 };
 
