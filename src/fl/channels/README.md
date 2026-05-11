@@ -15,9 +15,14 @@ The Channels API provides a modern, hardware-accelerated interface for driving m
 The system consists of two layers:
 
 1. **Channel** - High-level LED strip controller with explicit configuration API
-2. **ChannelEngine** - Low-level hardware driver (RMT, PARLIO, SPI, I2S, UART)
+2. **ChannelEngine** - Low-level hardware driver (RMT, PARLIO, SPI, I2S, UART, FLEX_IO, OBJECT_FLED, BIT_BANG, ...)
 
 Users create `Channel` objects using the Channel API (recommended) or the template-based `FastLED.addLeds<>()` API (backwards compatible). The driver layer is managed automatically based on platform capabilities and priorities.
+
+Two complementary dispatch modes are available (introduced by issue #2428):
+
+- **Compile-time `fl::Bus` binding** - `FastLED.add<fl::Bus::RMT>(cfg)` / `Channel::create<fl::Bus::RMT>(cfg)` pin the driver at compile time. Naming `Bus::X` at the call site is what links the driver's translation unit, so `--gc-sections` drops every driver the sketch doesn't reference. Bus/chipset mismatches become `static_assert` errors rather than runtime warnings.
+- **Runtime selection** - `FastLED.add(cfg)` (with optional `mAffinity`) or `FastLED.add(fl::Bus::RMT, cfg)` dispatch through `ChannelManager` at runtime. Drivers must first be registered: either by leaving the legacy registry on (the default - see `FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY` below) or by calling `fl::enableDrivers<fl::Bus::X...>()` / `FastLED.enableAllDrivers()`.
 
 ---
 
@@ -92,6 +97,131 @@ void loop() {
 
 This API is simpler for basic use cases but offers less flexibility than the Channel API.
 
+### Compile-Time Bus Selection (`fl::Bus`)
+
+The `fl::Bus` enum (in `fl/channels/bus.h`) is the single identifier that flows through both the templated APIs and the runtime registry overrides. Each value names exactly one concrete driver:
+
+| `fl::Bus::X` | Driver string (`busName(X)` / `IChannelDriver::getName()`) |
+|---|---|
+| `RMT` | `"RMT"` |
+| `PARLIO` | `"PARLIO"` |
+| `SPI` | `"SPI"` |
+| `I2S` | `"I2S"` |
+| `I2S_SPI` | `"I2S_SPI"` |
+| `LCD_RGB` | `"LCD_RGB"` |
+| `LCD_SPI` | `"LCD_SPI"` |
+| `LCD_CLOCKLESS` | `"LCD_CLOCKLESS"` |
+| `UART` | `"UART"` |
+| `FLEX_IO` | `"FLEX_IO"` |
+| `OBJECT_FLED` | `"OBJECT_FLED"` |
+| `BIT_BANG` | `"BIT_BANG"` |
+| `STUB` | `"STUB"` |
+| `AUTO` | sentinel - resolves to `DefaultBus<Chipset>::value` for the platform |
+
+`busName(Bus)` returns the canonical string literal. `isKnownBusName(name)` tells you whether a string matches any of the above (used internally by the affinity-miss diagnostic).
+
+Note the spelling: driver names match the enumerator exactly, including underscores. Earlier releases used `"BITBANG"`, `"FLEXIO"`, `"OBJECTFLED"` - those are now `"BIT_BANG"`, `"FLEX_IO"`, `"OBJECT_FLED"`.
+
+```cpp
+#include "FastLED.h"
+#include "fl/channels/bus.h"
+#include "fl/channels/config.h"
+// Including the per-driver bus_traits.h is the explicit opt-in that links
+// the driver translation unit. Without it the templated call fails with
+// "implicit instantiation of undefined template BusTraits<Bus::RMT>".
+#include "platforms/esp/32/drivers/rmt/rmt_5/bus_traits.h"
+
+CRGB leds[60];
+
+void setup() {
+    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    fl::ChannelConfig cfg(fl::ClocklessChipset(16, timing),
+        fl::span<CRGB>(leds, 60), RGB);
+
+    // Compile-time bus pinning: typos like fl::Bus::RTM are compile errors,
+    // and the only driver TU linked is RMT.
+    auto channel = FastLED.add<fl::Bus::RMT>(cfg);
+}
+```
+
+**Strongly-typed `ChannelConfigOf<Chipset>` (Phase 3b, #2428):** the templated `FastLED.add<Bus, Chipset>(cfg)` overload accepts a `ChannelConfigOf<ClocklessChipset>` or `ChannelConfigOf<SpiChipsetConfig>` and `static_asserts` via `BusSupports<B, Chipset>::value` that the chosen bus actually handles the chipset family:
+
+```cpp
+fl::ChannelConfigOf<fl::ClocklessChipset> cfg{
+    fl::ClocklessChipset(4, fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>()),
+    fl::span<CRGB>(leds, 60), GRB};
+
+FastLED.add(cfg);                       // Bus::AUTO -> DefaultBus<ClocklessChipset>
+FastLED.add<fl::Bus::RMT>(cfg);         // OK -- RMT supports clockless
+FastLED.add<fl::Bus::LCD_SPI>(cfg);     // compile error: SPI bus, clockless chipset
+```
+
+The `TypedChannel<Bus, Chipset>` template (in `fl/channels/channel_typed.h`) is the underlying primitive: it `static_asserts` the bus/chipset contract and returns a `ChannelPtr` to the regular non-template runtime `Channel` so callbacks, the draw list, and `ChannelManager` see one channel type.
+
+### Runtime Bus Selection (`FastLED.add(fl::Bus, cfg)`)
+
+`FastLED.add(fl::Bus::RMT, cfg)` dispatches by the runtime value of the `Bus` argument. Unlike the templated form, it does **not** link a driver TU by itself - the user is responsible for getting the driver registered with `ChannelManager` ahead of time (e.g. by calling `FastLED.enableAllDrivers()` or `fl::enableDrivers<fl::Bus::RMT>()`). Use this when the bus choice is data-driven (config file, UI, etc.) and you've already opted into runtime flexibility:
+
+```cpp
+#include "FastLED.h"
+#include "fl/channels/all_drivers.h"   // makes BusTraits<Bus::*> singletons visible
+
+CRGB leds[60];
+
+fl::Bus userPreferredBus();            // declared elsewhere -- reads config / UI
+
+void setup() {
+    FastLED.enableAllDrivers();        // register every platform driver
+
+    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    fl::ChannelConfig cfg(fl::ClocklessChipset(16, timing),
+        fl::span<CRGB>(leds, 60), RGB);
+
+    fl::Bus chosen = userPreferredBus();    // e.g. read from config
+    FastLED.add(chosen, cfg);               // affinity = busName(chosen)
+}
+```
+
+Passing `fl::Bus::AUTO` clears the affinity and lets `ChannelManager` pick by priority - identical to the no-affinity `FastLED.add(cfg)` overload.
+
+### Opt-In Driver Registration (`enableDrivers<>` / `enableAllDrivers`)
+
+In default builds with `FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY=0`, every platform driver still self-registers with `ChannelManager` at startup (3.10.3-compatible behaviour). Setting `FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY=1` disables that auto-registration so unreferenced driver TUs can be linker-stripped, at the cost of an explicit opt-in for every driver the sketch wants at runtime:
+
+```cpp
+// Selective opt-in: only RMT and PARLIO end up linked AND registered.
+#include "platforms/esp/32/drivers/rmt/rmt_5/bus_traits.h"
+#include "platforms/esp/32/drivers/parlio/bus_traits.h"
+
+void setup() {
+    fl::enableDrivers<fl::Bus::RMT, fl::Bus::PARLIO>();
+    // ...
+}
+```
+
+Or, to restore 3.10.3-style "every driver available at runtime":
+
+```cpp
+#include "FastLED.h"
+#include "fl/channels/all_drivers.h"   // pulls in every BusTraits<> on the platform
+
+void setup() {
+    FastLED.enableAllDrivers();        // forwards to fl::enableAllDrivers()
+    // any affinity string now resolves at runtime
+}
+```
+
+Including `fl/channels/all_drivers.h` is the explicit opt-in that makes the per-driver `BusTraits<Bus::X>` specializations visible at the call site - without that include, `FastLED.enableAllDrivers()` fails to link and `--gc-sections` is free to drop driver TUs the sketch doesn't reference.
+
+### `FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY`
+
+Defined in `fl/channels/bus.h` (so every channels TU sees the same value). Default `0` - the legacy `initChannelDrivers()` path auto-registers every driver with `ChannelManager` at static-init time, and legacy `ClocklessController` subclasses bind through the manager on every `showPixels()`. Set to `1` to:
+
+- Skip the legacy auto-registration (drivers register only when explicitly named via `enableDrivers<>` / `enableAllDrivers()`).
+- Pre-bind per-platform legacy clockless controllers directly to their `BusTraits<DefaultBus>::instancePtr()` singleton, bypassing `ChannelManager` entirely (Phase 5b of #2428).
+
+This is the toggle that lets `--gc-sections` drop unreferenced driver TUs (the binary-size fix for #2420). Build-time opt-in only - flip it via `-DFASTLED_DISABLE_LEGACY_DRIVER_REGISTRY=1` in your platform config.
+
 ---
 
 ## Hardware Engine Selection
@@ -115,10 +245,20 @@ Engines are tried in priority order until one accepts the channel:
 For testing or performance tuning, you can control driver selection:
 
 ```cpp
+#include "FastLED.h"
+#include "fl/channels/manager.h"   // for fl::ChannelManager::instance().setDriverPriority
+
+CRGB leds[60];
+
 void setup() {
     auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
-    fl::ChannelConfig config(16, timing, leds, RGB);
+    fl::ChannelConfig config(16, timing, fl::span<CRGB>(leds, 60), RGB);
     FastLED.add(config);
+
+    // The three methods below are independent alternatives -- pick one
+    // strategy per program. They are shown together for reference only;
+    // calling them all in sequence (as written here) makes the later
+    // calls override the earlier ones.
 
     // Method 1: Force a specific driver exclusively (disables all others)
     FastLED.setExclusiveDriver("RMT");
@@ -128,9 +268,11 @@ void setup() {
     FastLED.setDriverEnabled("SPI", false);     // Disable
 
     // Method 3: Adjust driver priority (higher = preferred)
-    // Engines are sorted by priority - changing priority triggers re-sort
-    FastLED.setDriverPriority("RMT", 9000);     // Increase priority
-    FastLED.setDriverPriority("PARLIO", 8000);  // Set below RMT
+    // Engines are sorted by priority - changing priority triggers re-sort.
+    // Note: priority editing lives on the ChannelManager directly -- FastLED
+    // does NOT expose a setDriverPriority() forwarder.
+    fl::ChannelManager::instance().setDriverPriority("RMT", 9000);     // Increase priority
+    fl::ChannelManager::instance().setDriverPriority("PARLIO", 8000);  // Set below RMT
 
     // Query available drivers (sorted by priority, high to low)
     for (size_t i = 0; i < FastLED.getDriverCount(); i++) {
@@ -143,9 +285,9 @@ void setup() {
 ```
 
 **Control methods:**
-- `setExclusiveDriver(name)` - Disable all drivers except the named one
-- `setDriverEnabled(name, enabled)` - Enable/disable specific driver
-- `setDriverPriority(name, priority)` - Change priority (triggers automatic re-sort)
+- `FastLED.setExclusiveDriver(name)` - Disable all drivers except the named one
+- `FastLED.setDriverEnabled(name, enabled)` - Enable/disable specific driver
+- `fl::ChannelManager::instance().setDriverPriority(name, priority)` - Change priority (triggers automatic re-sort). No `FastLED.*` forwarder is provided for this.
 
 **When to override:**
 - Testing different drivers for performance comparison
@@ -358,6 +500,15 @@ void loop() {
 - Parallel transmission of different chipset timings (see "Mixing Chipset Timings" below)
 - Testing specific driver implementations
 - Debugging hardware-specific behavior
+
+**Driver-name spelling.** Affinity strings must match the driver's `getName()` exactly. The canonical name for `fl::Bus::X` is `busName(X)` (see the table above). Prefer the templated `FastLED.add<fl::Bus::X>(cfg)` or runtime `FastLED.add(fl::Bus::X, cfg)` overloads - they derive the affinity string via `busName(B)` so the typo-prone literal never appears at the call site.
+
+**Affinity-miss diagnostic (one-shot, from #2456):** when a non-empty `mAffinity` resolves to a driver that isn't registered with `ChannelManager`, the first `Channel::showPixels()` call emits a single `FL_ERROR` and falls back to AUTO/priority dispatch. Subsequent shows on the same channel suppress the warning via `mAffinityWarned`. The diagnostic uses `ChannelManager::findDriverByName()` (silent lookup) to distinguish two cases:
+
+- Driver name matches a known `Bus` value but isn't registered - message points the user at `fl::enableDrivers<fl::Bus::X>()`.
+- Driver is registered but `canHandle()` rejected the chipset (bus/chipset mismatch) - message suggests picking a different `Bus`.
+
+Use `ChannelManager::findDriverByName(name)` directly when you want to probe the registry without triggering the log; `getDriverByName(name)` is the noisy variant.
 
 ---
 
@@ -677,12 +828,12 @@ void setupCustomEngine() {
 
     // Register with priority (higher = preferred)
     // Built-in ESP32 drivers use priorities 4 (PARLIO), 2 (RMT), 1 (I2S), 0 (SPI), -1 (UART)
-    // Custom drivers can use any integer priority value
-    fl::ChannelManager::instance().addDriver(
-        10,                // Priority (higher than built-in drivers)
-        driver,            // Shared pointer to driver
-        "MY_ENGINE"        // Unique name for affinity binding
-    );
+    // Custom drivers can use any integer priority value.
+    //
+    // The driver name is obtained via driver->getName() - addDriver() is a
+    // 2-arg call. If getName() returns an empty string, addDriver() emits an
+    // FL_WARN and rejects the driver.
+    fl::ChannelManager::instance().addDriver(10, driver);
 }
 ```
 
@@ -691,11 +842,12 @@ void setupCustomEngine() {
 - Use negative priorities (<0) for low-priority fallback implementations
 - Priority values are just integers - no predefined ranges required
 
-**Engine selection:**
-1. Bus manager maintains drivers sorted by priority (high to low)
-2. Iterates drivers in priority order, calls `canHandle()` on each
-3. First driver returning `true` wins
-4. User can override with `ChannelOptions.mAffinity` or `FastLED.setExclusiveDriver()`
+**Engine selection (`ChannelManager::selectDriverForChannel`):**
+1. If `affinity` is non-empty, manager does a silent `findDriverByName(affinity)` lookup first.
+   - On hit: that driver is returned (no priority iteration).
+   - On miss: `Channel::showPixels()` emits a one-shot `FL_ERROR` (see "Affinity-miss diagnostic" above) and falls through to priority dispatch.
+2. Otherwise (or on affinity miss): manager iterates drivers by priority (high to low) and returns the first that `canHandle()`s the channel data.
+3. User can override with `ChannelOptions.mAffinity` (or the templated `FastLED.add<fl::Bus::X>(cfg)` / runtime `FastLED.add(fl::Bus::X, cfg)` overloads, which set affinity for you) or with `FastLED.setExclusiveDriver()`.
 
 **Priority modification:**
 - Engines are sorted by priority on registration (via `addDriver()`)
@@ -710,7 +862,7 @@ void setupCustomEngine() {
 ```cpp
 void show() override {
     // Wait for previous frame to finish.
-    while (poll() != EngineState::READY) {
+    while (poll() != DriverState::READY) {
         // poll() drives the state machine and clears in-use flags.
     }
 
@@ -808,9 +960,15 @@ See `tests/fl/channels/driver.cpp` for more test examples.
 ## Reference
 
 **Headers:**
-- `fl/channels/channel.h` - Channel class and factory methods
-- `fl/channels/config.h` - ChannelConfig, ClocklessChipset, SpiChipsetConfig
-- `fl/channels/options.h` - ChannelOptions (correction, temperature, dither, affinity, gamma)
+- `fl/channels/channel.h` - `Channel` class, non-template `create(cfg)` and templated `create<Bus B>(cfg)` factories
+- `fl/channels/channel_typed.h` - `TypedChannel<Bus, Chipset>` (Phase 3b compile-time bus/chipset enforcement)
+- `fl/channels/ichannel.h` - `IChannel` ABC (callback-facing identification base)
+- `fl/channels/config.h` - `ChannelConfig`, `ChannelConfigOf<Chipset>`, `ClocklessChipset`, `SpiChipsetConfig`
+- `fl/channels/options.h` - `ChannelOptions` (correction, temperature, dither, affinity, gamma)
+- `fl/channels/bus.h` - `fl::Bus` enum, `busName()`, `isKnownBusName()`, `DefaultBus<Chipset>`, `FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY`
+- `fl/channels/bus_traits.h` - `BusTraits<B>`, `BusSupports<B, Chipset>`, `enableDrivers<Bus...>()`
+- `fl/channels/all_drivers.h` - `fl::enableAllDrivers()` / `FastLED.enableAllDrivers()` aggregator
+- `fl/channels/manager.h` - `ChannelManager` (`addDriver`, `getDriverByName`, `findDriverByName`, `selectDriverForChannel`, `clearAllDrivers`, ...)
 - `fl/channels/channel_events.h` - Lifecycle event callbacks
 - `fl/channels/driver.h` - Engine interface and state machine
 
