@@ -1,5 +1,39 @@
 // IWYU pragma: private
 
+/// @file js_fetch.cpp.hpp
+/// @brief WASM HTTP fetch shim — async dispatch + thread-safe callback table.
+///
+/// Threading model under both back-ends:
+///
+/// * **JSPI back-end** (`-sJSPI`): everything runs on the single WASM main
+///   thread. `js_fetch_async` is invoked from C++ user code; the JS-side
+///   `fetch().then(...)` resolves on the same thread; the success/error
+///   callback re-enters WASM via `Module._js_fetch_*_callback`. No
+///   cross-thread synchronization is actually needed — the mutex below
+///   is a single-threaded no-op.
+///
+/// * **Pthread back-end** (`-pthread`, `FASTLED_WASM_PTHREADS=1`):
+///   1. Multiple sketch coroutines (each on its own pthread) can call
+///      `WasmFetchRequest::response()` concurrently. `mNextRequestId` and
+///      `mPendingCallbacks` are protected by `mCallbacksMutex` — uncontended
+///      access uses Atomics fast paths; contention is rare (callback
+///      handoffs are O(microseconds)).
+///   2. `js_fetch_async` is an `addToLibrary` import. With `-pthread`,
+///      Emscripten auto-proxies non-thread-safe JS-library calls to the
+///      browser main thread for execution, so the actual `fetch()` runs
+///      where Web APIs require it.
+///   3. The success/error callbacks are exported WASM functions invoked
+///      from JS. They lock the same callback-map mutex briefly. After
+///      committing Promise state via the user callback, they invoke
+///      `ICoroutineRuntime::instance().wakeWaiters()` to unpark any
+///      pthread blocked in `fl::platforms::await()` (see issue #2452
+///      Phase 2 in `coroutine_runtime_wasm.impl.hpp`).
+///
+/// Audit conclusion (Phase 3 of #2452): the existing async + callback-map
+/// design is already thread-safe under pthreads. The promise-wake latency
+/// concern raised in Phase 1's follow-ups is resolved by Phase 2's
+/// `wakeWaiters()` hook installed below.
+
 #include "platforms/wasm/js_fetch.h"
 #include "fl/net/http/fetch.h"  // Include for fl::net::http::Response definition
 #include "fl/log/log.h"
