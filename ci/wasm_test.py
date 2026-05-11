@@ -79,7 +79,13 @@ def _run_http_server(port: int, directory: str) -> None:
     os.chdir(directory)
 
     class _MimeHandler(http.server.SimpleHTTPRequestHandler):
-        """Handler with correct MIME types for ES module scripts."""
+        """Handler with correct MIME types for ES module scripts.
+
+        Sends Cross-Origin-Opener-Policy and Cross-Origin-Embedder-Policy
+        headers so the page is cross-origin isolated. Required for the
+        pthread WASM back-end (SharedArrayBuffer + Atomics.wait); benign
+        for the JSPI back-end. See issue #2452.
+        """
 
         extensions_map = {
             **http.server.SimpleHTTPRequestHandler.extensions_map,
@@ -89,6 +95,11 @@ def _run_http_server(port: int, directory: str) -> None:
             ".json": "application/json",
             ".css": "text/css",
         }
+
+        def end_headers(self) -> None:
+            self.send_header("Cross-Origin-Opener-Policy", "same-origin")
+            self.send_header("Cross-Origin-Embedder-Policy", "require-corp")
+            super().end_headers()
 
         def log_message(self, format, *args):  # noqa: A002
             """Suppress noisy request logs during tests."""

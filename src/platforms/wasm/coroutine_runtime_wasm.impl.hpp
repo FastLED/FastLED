@@ -5,16 +5,28 @@
 /// @file coroutine_runtime_wasm.impl.hpp
 /// @brief WASM coroutine runtime — pumps cooperative coroutine runner
 ///
-/// Uses JSPI-based context switching (via CoroutinePlatformWasm) to provide
-/// cooperative coroutines in WASM. The generic CoroutineRunner handles
-/// scheduling; this file just wires the platform and runtime together.
+/// Provides cooperative coroutines in WASM through one of two back-ends,
+/// selected at compile time:
+///   * JSPI (default) — via CoroutinePlatformWasm. Requires -sJSPI; only
+///     supported in Chromium-based engines.
+///   * pthreads + SharedArrayBuffer — via CoroutinePlatformPthread, when
+///     FASTLED_WASM_PTHREADS=1 is defined. Works in every cross-origin
+///     isolated webview (WebKit/Safari, Firefox, WebView2, WebKitGTK).
+///
+/// The generic CoroutineRunner handles scheduling; this file just wires
+/// the appropriate platform implementation and runtime together. See
+/// issue #2452.
 
 #include "platforms/wasm/is_wasm.h"
 
 #ifdef FL_IS_WASM
 
 // IWYU pragma: begin_keep
+#ifdef FASTLED_WASM_PTHREADS
+#include "platforms/wasm/coroutine_platform_wasm_pthread.hpp"
+#else
 #include "platforms/wasm/coroutine_platform_wasm.hpp"
+#endif
 #include "platforms/coroutine_runtime.h"
 #include "platforms/coroutine.h"
 #include "fl/stl/singleton.h"
@@ -51,8 +63,13 @@ public:
 namespace {
 struct WasmPlatformRegistrar {
     WasmPlatformRegistrar() FL_NOEXCEPT {
+#ifdef FASTLED_WASM_PTHREADS
+        ICoroutinePlatform::setInstance(
+            &fl::Singleton<CoroutinePlatformPthread>::instance());
+#else
         ICoroutinePlatform::setInstance(
             &fl::Singleton<CoroutinePlatformWasm>::instance());
+#endif
     }
 };
 static WasmPlatformRegistrar sWasmPlatformRegistrar;

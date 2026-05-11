@@ -5,7 +5,9 @@
 
 #include "platforms/wasm/is_wasm.h"
 
-#ifdef FL_IS_WASM
+// JSPI glue is compiled out when the pthread back-end is selected.
+// See platforms/wasm/coroutine_platform_wasm_pthread.hpp.
+#if defined(FL_IS_WASM) && !defined(FASTLED_WASM_PTHREADS)
 
 // Register a context in the JS scheduler state.
 EM_JS(void, _jspi_register, (int id), {
@@ -65,4 +67,4 @@ EM_ASYNC_JS(void, _jspi_context_switch, (int from_id, int to_id), {
 });
 // NOLINTEND
 
-#endif  // FL_IS_WASM
+#endif  // FL_IS_WASM && !FASTLED_WASM_PTHREADS
