@@ -55,6 +55,19 @@ public:
         pumpCoroutines(us);
     }
 
+    /// Wake every thread parked in suspendMainthread() early.
+    ///
+    /// Used by async callbacks (e.g. JS fetch resolution, JS-side resolvers
+    /// invoked from the browser main thread) to bring a pthread out of
+    /// `Atomics.wait` immediately when a Promise becomes resolvable instead
+    /// of waiting for the poll timeout in fl::platforms::await().
+    ///
+    /// Default is a no-op — only the WASM pthread back-end currently parks
+    /// on a futex. Non-WASM platforms either don't have async callbacks at
+    /// all (Arduino, ESP32 with FreeRTOS) or already round-trip through the
+    /// scheduler that owns the polling loop.
+    virtual void wakeWaiters() FL_NOEXCEPT {}
+
     /// Check if shutdown has been requested
     /// Background threads should poll this and exit early when true.
     bool isShutdownRequested() FL_NOEXCEPT { return mShutdownRequested.load(); }

@@ -9,6 +9,7 @@
 #include "fl/stl/mutex.h"
 #include "fl/stl/singleton.h"
 #include "fl/stl/optional.h"
+#include "platforms/coroutine_runtime.h"
 
 #include "platforms/wasm/is_wasm.h"
 #ifdef FL_IS_WASM
@@ -80,11 +81,14 @@ extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_success_callback(u32 request_id, c
         fl::net::http::Response response(200, "OK");
         response.set_body(fl::string(content));
         response.set_header("content-type", "text/html"); // Default content type
-        
+
         (*callback_opt)(response);
     } else {
         FL_WARN("Warning: No pending callback found for fetch success request " << request_id);
     }
+    // Wake any pthread parked inside fl::platforms::await(); cheap no-op on
+    // JSPI (default suspendMainthread() doesn't park on a futex).
+    fl::platforms::ICoroutineRuntime::instance().wakeWaiters();
 }
 
 // C++ error callback function that JavaScript can call when fetch fails
@@ -98,11 +102,13 @@ extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_error_callback(u32 request_id, con
         fl::string error_content = "Fetch Error: ";
         error_content += error_message;
         response.set_body(error_content);
-        
+
         (*callback_opt)(response);
     } else {
         FL_WARN("Warning: No pending callback found for fetch error request " << request_id);
     }
+    // See note in js_fetch_success_callback above.
+    fl::platforms::ICoroutineRuntime::instance().wakeWaiters();
 }
 
 void WasmFetchRequest::response(const FetchResponseCallback& callback) {
