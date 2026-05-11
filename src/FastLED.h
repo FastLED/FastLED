@@ -750,6 +750,47 @@ public:
 		return channel;
 	}
 
+	/// @brief Add an LED channel and dispatch by a **runtime** `fl::Bus` value.
+	///
+	/// Sister API to the templated `FastLED.add<Bus B>(cfg)` (PR #2451). The
+	/// trade-off:
+	///
+	/// | API | Bus is chosen | Driver TU is linked when |
+	/// |---|---|---|
+	/// | `FastLED.add<Bus::RMT>(cfg)` (templated) | at compile time | the call site names `Bus::RMT` |
+	/// | `FastLED.add(Bus::RMT, cfg)` (this one)  | at runtime      | something *else* in the build named `Bus::RMT` (e.g. `enableAllDrivers()`) |
+	///
+	/// Use this overload when the user has already enrolled drivers with
+	/// `ChannelManager` (typically via `fl::enableAllDrivers()` or an explicit
+	/// `fl::enableDrivers<...>()`) and just wants to pick which one handles a
+	/// given channel — **without** the per-call-site linker keep-alive that the
+	/// templated form does. The bus name is derived via `fl::busName(b)` so the
+	/// stringly-typed `"RMT"` literal never appears in user code. See issue
+	/// #2453 for the design context.
+	///
+	/// @param b      target bus; if `fl::Bus::AUTO`, the affinity is cleared so
+	///               `ChannelManager` picks by priority (same as not setting an
+	///               affinity at all).
+	/// @param config channel configuration; the `mAffinity` field is overwritten.
+	/// @return shared pointer to the channel, or nullptr if dispatch failed
+	///         (e.g. the named driver was not registered with `ChannelManager`).
+	///
+	/// @code
+	///   #include "fl/channels/all_drivers.h"
+	///   void setup() {
+	///       FastLED.enableAllDrivers();
+	///       FastLED.add(fl::Bus::RMT, cfg);   // runtime dispatch, no extra linker work
+	///   }
+	/// @endcode
+	static fl::ChannelPtr add(fl::Bus b, fl::ChannelConfig config) FL_NOEXCEPT {
+		if (b == fl::Bus::AUTO) {
+			config.options.mAffinity.clear();
+		} else {
+			config.options.mAffinity = fl::string::from_literal(fl::busName(b));
+		}
+		return add(config);
+	}
+
 	/// @brief Add multiple LED channels from a config array
 	///
 	/// Creates and registers multiple Channel-based LED controllers from an array of configurations.
