@@ -195,7 +195,7 @@ void setup() {
 
 If `cfg.options.mBus` names a driver that — for whatever reason — isn't in the manager's registry, `Channel::showPixels` emits a one-shot `FL_ERROR` listing the resolution options (`fl::enableDrivers<fl::Bus::X>()` or `FastLED.enableAllDrivers()`) and falls back to AUTO/priority dispatch (#2455).
 
-Passing `fl::Bus::AUTO` clears the affinity and lets `ChannelManager` pick by priority - identical to the no-affinity `FastLED.add(cfg)` overload.
+Passing `fl::Bus::AUTO` (the default) skips the pinning step and lets `ChannelManager` pick by priority — identical to constructing the config without touching `cfg.options.mBus`.
 
 ### Opt-In Driver Registration (`enableDrivers<>` / `enableAllDrivers`)
 
@@ -856,11 +856,11 @@ void setupCustomEngine() {
 - Priority values are just integers - no predefined ranges required
 
 **Engine selection (`ChannelManager::selectDriverForChannel`):**
-1. If `affinity` is non-empty, manager does a silent `findDriverByName(affinity)` lookup first.
+1. `Channel::showPixels()` derives a bus key from `cfg.options.mBus` (`busName(mBus)`) and passes it as the `affinity` string argument to `selectDriverForChannel`. When `mBus != Bus::AUTO`, the manager does a silent `findDriverByName(busKey)` lookup first.
    - On hit: that driver is returned (no priority iteration).
-   - On miss: `Channel::showPixels()` emits a one-shot `FL_ERROR` (see "Affinity-miss diagnostic" above) and falls through to priority dispatch.
-2. Otherwise (or on affinity miss): manager iterates drivers by priority (high to low) and returns the first that `canHandle()`s the channel data.
-3. User can override via `ChannelOptions.mBus` (#2459), `fl::TypedChannel<Bus, Chipset>::create()` (compile-time, ODR-links the driver), or `FastLED.setExclusiveDriver()` (process-wide).
+   - On miss: `Channel::showPixels()` emits a one-shot `FL_ERROR` (see "Bus-miss diagnostic" above) and falls through to priority dispatch.
+2. Otherwise (`mBus == Bus::AUTO` or bus-miss fallback): manager iterates drivers by priority (high to low) and returns the first that `canHandle()`s the channel data.
+3. User can override via `ChannelOptions::mBus` (#2459, runtime), `fl::TypedChannel<Bus, Chipset>::create()` (compile-time, ODR-links only the named driver), or `FastLED.setExclusiveDriver()` (process-wide).
 
 **Priority modification:**
 - Engines are sorted by priority on registration (via `addDriver()`)
@@ -973,11 +973,11 @@ See `tests/fl/channels/driver.cpp` for more test examples.
 ## Reference
 
 **Headers:**
-- `fl/channels/channel.h` - `Channel` class, non-template `create(cfg)` and templated `create<Bus B>(cfg)` factories
+- `fl/channels/channel.h` - `Channel` class, non-template `create(cfg)` factory (the only `Channel::create` form post-#2459; compile-time bus pinning lives on `TypedChannel`)
 - `fl/channels/channel_typed.h` - `TypedChannel<Bus, Chipset>` (Phase 3b compile-time bus/chipset enforcement)
 - `fl/channels/ichannel.h` - `IChannel` ABC (callback-facing identification base)
 - `fl/channels/config.h` - `ChannelConfig`, `ChannelConfigOf<Chipset>`, `ClocklessChipset`, `SpiChipsetConfig`
-- `fl/channels/options.h` - `ChannelOptions` (correction, temperature, dither, affinity, gamma)
+- `fl/channels/options.h` - `ChannelOptions` (correction, temperature, dither, rgbw, `mBus` driver selection, gamma)
 - `fl/channels/bus.h` - `fl::Bus` enum, `busName()`, `DefaultBus<Chipset>`, `FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY`
 - `fl/channels/bus_traits.h` - `BusTraits<B>`, `BusSupports<B, Chipset>`, `enableDrivers<Bus...>()`
 - `fl/channels/all_drivers.h` - `fl::enableAllDrivers()` / `FastLED.enableAllDrivers()` aggregator
