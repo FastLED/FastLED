@@ -63,9 +63,9 @@ public:
     DriverState poll() FL_NOEXCEPT override;
 
     /// @brief Get engine name
-    /// @return "FLEXIO"
+    /// @return "FLEX_IO" — matches the `fl::Bus::FLEX_IO` enumerator spelling.
     fl::string getName() const FL_NOEXCEPT override {
-        return fl::string::from_literal("FLEXIO");
+        return fl::string::from_literal("FLEX_IO");
     }
 
     /// @brief Get capabilities (clockless only)

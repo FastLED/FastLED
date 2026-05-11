@@ -523,7 +523,82 @@ FL_TEST_CASE("FastLED.add(Bus::AUTO, cfg) clears affinity and falls back to prio
     channel->showLeds(0);
     auto bound = channel->getEngineName();
     FL_CHECK(bound == fl::string::from_literal("STUB") ||
-             bound == fl::string::from_literal("BITBANG"));
+             bound == fl::string::from_literal("BIT_BANG"));
+
+    channel->removeFromDrawList();
+}
+
+// ============ Affinity-miss diagnostic (#2455) ============
+// When an affinity is set but the named driver isn't registered with
+// ChannelManager, Channel::showPixels emits exactly one FL_ERROR with the
+// fl::enableDrivers<fl::Bus::X>() / fl::enableAllDrivers() hint, then falls
+// back to priority dispatch. The mAffinityWarned flag suppresses duplicates
+// on subsequent shows of the same channel.
+
+FL_TEST_CASE("Affinity miss to unregistered known Bus falls back and still renders") {
+    auto& mgr = freshBusTestManager();
+    FL_REQUIRE(mgr.getDriverCount() == 0);
+
+    // Register ONLY the host fallbacks (STUB + BIT_BANG via enableAllDrivers).
+    // We do not register Bus::RMT, so an affinity = "RMT" must miss.
+    fl::enableAllDrivers();
+    // Use the silent `findDriverByName` here — `getDriverByName` would emit
+    // its own FL_ERROR on miss and pollute any log inspection of the actual
+    // showLeds() diagnostic below.
+    FL_CHECK(mgr.findDriverByName(fl::string::from_literal("RMT")) == nullptr);
+
+    CRGB leds[8] = {};
+    ChannelConfig cfg = makeBusTestConfig(fl::span<CRGB>(leds, 8));
+    // Forge a runtime affinity for a Bus whose driver is NOT registered.
+    cfg.options.mAffinity = fl::string::from_literal("RMT");
+
+    auto channel = Channel::create(cfg);
+    FL_REQUIRE(channel != nullptr);
+    channel->addToDrawList();
+
+    // First show: the diagnostic fires AND priority dispatch picks a host
+    // driver (STUB or BIT_BANG). Channel still renders.
+    //
+    // NOTE: we don't assert "exactly one FL_ERROR was emitted" — the project
+    // log macros don't have a capture/intercept hook today, so a count
+    // assertion isn't possible. The behavioural proxy is: dispatch falls
+    // back to a host driver and the bound driver is stable across shows
+    // (no churn / no respec). That, plus the mAffinityWarned guard's
+    // unconditional latch, is what makes the FL_ERROR one-shot in practice.
+    channel->showLeds(0);
+    auto bound = channel->getEngineName();
+    FL_CHECK(bound == fl::string::from_literal("STUB") ||
+             bound == fl::string::from_literal("BIT_BANG"));
+
+    // Second show: mAffinityWarned suppresses the duplicate diagnostic.
+    // Driver binding is unchanged.
+    channel->showLeds(0);
+    FL_CHECK(channel->getEngineName() == bound);
+
+    channel->removeFromDrawList();
+}
+
+FL_TEST_CASE("Affinity miss to unknown third-party name still falls back") {
+    auto& mgr = freshBusTestManager();
+    FL_REQUIRE(mgr.getDriverCount() == 0);
+
+    fl::enableAllDrivers();
+
+    CRGB leds[8] = {};
+    ChannelConfig cfg = makeBusTestConfig(fl::span<CRGB>(leds, 8));
+    // Use a name that is NOT one of the canonical Bus names. The diagnostic
+    // should fire but use the generic "no registered driver" message branch
+    // (no fl::Bus::WAT hint).
+    cfg.options.mAffinity = fl::string::from_literal("WAT");
+
+    auto channel = Channel::create(cfg);
+    FL_REQUIRE(channel != nullptr);
+    channel->addToDrawList();
+
+    channel->showLeds(0);
+    auto bound = channel->getEngineName();
+    FL_CHECK(bound == fl::string::from_literal("STUB") ||
+             bound == fl::string::from_literal("BIT_BANG"));
 
     channel->removeFromDrawList();
 }

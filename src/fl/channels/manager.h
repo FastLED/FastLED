@@ -132,7 +132,16 @@ public:
     /// @param name Engine name to look up (case-sensitive, e.g., "RMT", "SPI", "PARLIO")
     /// @return Shared pointer to driver if found and enabled, nullptr otherwise
     /// @note Used by Channel affinity system to bind channels to specific drivers
+    /// @note Logs `FL_ERROR` on miss — call `findDriverByName()` for silent lookup.
     fl::shared_ptr<IChannelDriver> getDriverByName(const fl::string& name) const FL_NOEXCEPT;
+
+    /// @brief Silent counterpart to `getDriverByName()`.
+    ///
+    /// Same lookup, no logging on miss. Lets callers that handle the "missing
+    /// driver" case themselves (e.g. `Channel::showPixels()`'s one-shot
+    /// affinity-miss diagnostic from #2455) probe the registry without
+    /// triggering the per-frame `FL_ERROR` stream that `getDriverByName()` emits.
+    fl::shared_ptr<IChannelDriver> findDriverByName(const fl::string& name) const FL_NOEXCEPT;
 
     /// @brief Select best driver for channel data (used by Channel::showPixels)
     /// @param data Channel data to route (chipset configuration)

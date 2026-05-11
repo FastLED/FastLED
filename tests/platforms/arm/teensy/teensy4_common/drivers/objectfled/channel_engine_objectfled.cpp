@@ -272,10 +272,10 @@ FL_TEST_CASE("ObjectFLED engine - handles createInstance failure") {
 // Engine Properties
 //=============================================================================
 
-FL_TEST_CASE("ObjectFLED engine - name is OBJECTFLED") {
+FL_TEST_CASE("ObjectFLED engine - name is OBJECT_FLED") {
     auto mock = fl::make_shared<ObjectFLEDPeripheralMock>();
     ChannelEngineObjectFLED engine(mock);
-    FL_CHECK(engine.getName() == "OBJECTFLED");
+    FL_CHECK(engine.getName() == "OBJECT_FLED");
 }
 
 FL_TEST_CASE("ObjectFLED engine - capabilities are clockless only") {

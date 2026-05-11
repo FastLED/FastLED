@@ -40,7 +40,8 @@ IChannelDriver::DriverState BitBangChannelDriver::poll() FL_NOEXCEPT {
 }
 
 fl::string BitBangChannelDriver::getName() const FL_NOEXCEPT {
-    return fl::string::from_literal("BITBANG");
+    // Matches the `fl::Bus::BIT_BANG` enumerator spelling.
+    return fl::string::from_literal("BIT_BANG");
 }
 
 IChannelDriver::Capabilities BitBangChannelDriver::getCapabilities() const FL_NOEXCEPT {

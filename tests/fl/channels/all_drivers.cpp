@@ -48,8 +48,8 @@ FL_TEST_CASE("enableAllDrivers() registers Bus::STUB and Bus::BIT_BANG on host")
 
     // Bus::BIT_BANG is always-on (no platform guard) and must register on
     // every build, including the host test runner. The driver's getName()
-    // returns "BITBANG" (no underscore) — the manager keys on that string.
-    auto bitbang = mgr.getDriverByName(fl::string::from_literal("BITBANG"));
+    // returns "BIT_BANG" — same spelling as the C++ enumerator.
+    auto bitbang = mgr.getDriverByName(fl::string::from_literal("BIT_BANG"));
     FL_REQUIRE(bitbang != nullptr);
     FL_CHECK(bitbang.get() == &fl::BusTraits<fl::Bus::BIT_BANG>::instance());
 
@@ -69,7 +69,7 @@ FL_TEST_CASE("FastLED.enableAllDrivers() forwards to fl::enableAllDrivers()") {
     // precondition above guarantees no prior registration leaked in.
     FastLED.enableAllDrivers();
 
-    auto bitbang = mgr.getDriverByName(fl::string::from_literal("BITBANG"));
+    auto bitbang = mgr.getDriverByName(fl::string::from_literal("BIT_BANG"));
     FL_REQUIRE(bitbang != nullptr);
     FL_CHECK(bitbang.get() == &fl::BusTraits<fl::Bus::BIT_BANG>::instance());
 
@@ -94,7 +94,7 @@ FL_TEST_CASE("enableAllDrivers() is idempotent") {
     FL_CHECK(count_after_first == count_after_second);
 
     // The driver identities must not change either — same singletons.
-    auto bitbang = mgr.getDriverByName(fl::string::from_literal("BITBANG"));
+    auto bitbang = mgr.getDriverByName(fl::string::from_literal("BIT_BANG"));
     FL_REQUIRE(bitbang != nullptr);
     FL_CHECK(bitbang.get() == &fl::BusTraits<fl::Bus::BIT_BANG>::instance());
 }
