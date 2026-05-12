@@ -17,7 +17,9 @@
 
 #include "platforms/wasm/is_wasm.h"
 
-#ifdef FL_IS_WASM
+// JSPI platform is compiled out when the pthread back-end is selected.
+// See platforms/wasm/coroutine_platform_wasm_pthread.hpp.
+#if defined(FL_IS_WASM) && !defined(FASTLED_WASM_PTHREADS)
 
 // IWYU pragma: begin_keep
 #include <emscripten.h>
@@ -124,4 +126,4 @@ public:
 }  // namespace platforms
 }  // namespace fl
 
-#endif  // FL_IS_WASM
+#endif  // FL_IS_WASM && !FASTLED_WASM_PTHREADS
