@@ -970,37 +970,39 @@ public:
 	/// Stubbed out platforms have unique challenges in faking out the SPI based controllers.
 	/// Therefore for these platforms we will always delegate to the WS2812 clockless controller.
 	/// This is fine because the clockless controllers on the stubbed out platforms are fake anyways.
-	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE > ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE, fl::Bus B = fl::Bus::AUTO> ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		// Instantiate the controller using ClockedChipsetHelper
 		// Always USE WS2812 clockless controller since it's the common path.
-		return addLeds<WS2812, DATA_PIN, RGB_ORDER>(data, nLedsOrOffset, nLedsIfOffset);
+		return addLeds<WS2812, DATA_PIN, RGB_ORDER, B>(data, nLedsOrOffset, nLedsIfOffset);
 	}
 
 	/// Add an SPI based CLEDController instance to the world.
-	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN > static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::Bus B = fl::Bus::AUTO> static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		// Always USE WS2812 clockless controller since it's the common path.
-		return addLeds<WS2812, DATA_PIN>(data, nLedsOrOffset, nLedsIfOffset);
+		return addLeds<WS2812, DATA_PIN, B>(data, nLedsOrOffset, nLedsIfOffset);
 	}
 
 
 	// The addLeds function using ChipsetHelper
-	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER>
+	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::Bus B = fl::Bus::AUTO>
 	::CLEDController& addLeds(CRGB* data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		// Always USE WS2812 clockless controller since it's the common path.
-		return addLeds<WS2812, DATA_PIN, RGB_ORDER>(data, nLedsOrOffset, nLedsIfOffset);
+		return addLeds<WS2812, DATA_PIN, RGB_ORDER, B>(data, nLedsOrOffset, nLedsIfOffset);
 	}
 
 	#elif FASTLED_SPI_USES_CHANNEL_API
 
 	/// Add an SPI based CLEDController via Channel API.
-	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE>
+	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE, fl::Bus B = fl::Bus::AUTO>
 	::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		fl::busKeepAlive<B>();
 		int nOffset = (nLedsIfOffset > 0) ? nLedsOrOffset : 0;
 		int nLeds = (nLedsIfOffset > 0) ? nLedsIfOffset : nLedsOrOffset;
 		fl::SpiEncoder encoder = fl::SpiEncoder::spiEncoderForChipset(
 			static_cast<fl::SpiChipset>(CHIPSET), SPI_DATA_RATE);
 		fl::SpiChipsetConfig spiCfg(DATA_PIN, CLOCK_PIN, encoder);
 		fl::ChannelConfig config(spiCfg, fl::span<CRGB>(data + nOffset, nLeds), RGB_ORDER);
+		config.options.mBus = B;
 		static fl::ChannelPtr sChannel;
 		if (!sChannel) {
 			sChannel = add(config);
@@ -1009,8 +1011,9 @@ public:
 	}
 
 	/// Add an SPI based CLEDController via Channel API (default RGB order and speed).
-	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN>
+	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::Bus B = fl::Bus::AUTO>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		fl::busKeepAlive<B>();
 		int nOffset = (nLedsIfOffset > 0) ? nLedsOrOffset : 0;
 		int nLeds = (nLedsIfOffset > 0) ? nLedsIfOffset : nLedsOrOffset;
 		fl::SpiEncoder encoder = fl::SpiEncoder::spiEncoderForChipset(
@@ -1021,6 +1024,7 @@ public:
 			(static_cast<fl::SpiChipset>(CHIPSET) == fl::SpiChipset::HD108)
 				? GRB : RGB;
 		fl::ChannelConfig config(spiCfg, fl::span<CRGB>(data + nOffset, nLeds), order);
+		config.options.mBus = B;
 		static fl::ChannelPtr sChannel;
 		if (!sChannel) {
 			sChannel = add(config);
@@ -1029,14 +1033,16 @@ public:
 	}
 
 	/// Add an SPI based CLEDController via Channel API (default speed).
-	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER>
+	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::Bus B = fl::Bus::AUTO>
 	::CLEDController& addLeds(CRGB* data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		fl::busKeepAlive<B>();
 		int nOffset = (nLedsIfOffset > 0) ? nLedsOrOffset : 0;
 		int nLeds = (nLedsIfOffset > 0) ? nLedsIfOffset : nLedsOrOffset;
 		fl::SpiEncoder encoder = fl::SpiEncoder::spiEncoderForChipset(
 			static_cast<fl::SpiChipset>(CHIPSET));
 		fl::SpiChipsetConfig spiCfg(DATA_PIN, CLOCK_PIN, encoder);
 		fl::ChannelConfig config(spiCfg, fl::span<CRGB>(data + nOffset, nLeds), RGB_ORDER);
+		config.options.mBus = B;
 		static fl::ChannelPtr sChannel;
 		if (!sChannel) {
 			sChannel = add(config);
@@ -1047,7 +1053,8 @@ public:
 	#else
 
 	/// Add an SPI based CLEDController instance to the world (legacy path).
-	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE > ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE, fl::Bus B = fl::Bus::AUTO> ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		fl::busKeepAlive<B>();
 		// Instantiate the controller using ClockedChipsetHelper
 		typedef ClockedChipsetHelper<CHIPSET, DATA_PIN, CLOCK_PIN> CHIP;
 		FL_STATIC_ASSERT(CHIP::IS_VALID, "Unsupported chipset");
@@ -1057,7 +1064,8 @@ public:
 	}
 
 	/// Add an SPI based CLEDController instance to the world (legacy path).
-	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN > static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::Bus B = fl::Bus::AUTO> static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		fl::busKeepAlive<B>();
 		typedef ClockedChipsetHelper<CHIPSET, DATA_PIN, CLOCK_PIN> CHIP;
 		FL_STATIC_ASSERT(CHIP::IS_VALID, "Unsupported chipset");
 		typedef typename CHIP::ControllerType ControllerType;
@@ -1066,8 +1074,9 @@ public:
 	}
 
 	/// Add an SPI based CLEDController instance to the world (legacy path).
-	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER>
+	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::Bus B = fl::Bus::AUTO>
 	::CLEDController& addLeds(CRGB* data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		fl::busKeepAlive<B>();
 		typedef ClockedChipsetHelper<CHIPSET, DATA_PIN, CLOCK_PIN> CHIP;
 		FL_STATIC_ASSERT(CHIP::IS_VALID, "Unsupported chipset");
 		typedef typename CHIP::template CONTROLLER_CLASS_WITH_ORDER<RGB_ORDER>::ControllerType ControllerTypeWithOrder;
@@ -1078,16 +1087,16 @@ public:
 
 
 #ifdef SPI_DATA
-	template<ESPIChipsets CHIPSET> static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
-		return addLeds<CHIPSET, SPI_DATA, SPI_CLOCK, RGB>(data, nLedsOrOffset, nLedsIfOffset);
+	template<ESPIChipsets CHIPSET, fl::Bus B = fl::Bus::AUTO> static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		return addLeds<CHIPSET, SPI_DATA, SPI_CLOCK, RGB, B>(data, nLedsOrOffset, nLedsIfOffset);
 	}
 
-	template<ESPIChipsets CHIPSET, fl::EOrder RGB_ORDER> static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
-		return addLeds<CHIPSET, SPI_DATA, SPI_CLOCK, RGB_ORDER>(data, nLedsOrOffset, nLedsIfOffset);
+	template<ESPIChipsets CHIPSET, fl::EOrder RGB_ORDER, fl::Bus B = fl::Bus::AUTO> static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		return addLeds<CHIPSET, SPI_DATA, SPI_CLOCK, RGB_ORDER, B>(data, nLedsOrOffset, nLedsIfOffset);
 	}
 
-	template<ESPIChipsets CHIPSET, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE> static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
-		return addLeds<CHIPSET, SPI_DATA, SPI_CLOCK, RGB_ORDER, SPI_DATA_RATE>(data, nLedsOrOffset, nLedsIfOffset);
+	template<ESPIChipsets CHIPSET, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE, fl::Bus B = fl::Bus::AUTO> static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		return addLeds<CHIPSET, SPI_DATA, SPI_CLOCK, RGB_ORDER, SPI_DATA_RATE, B>(data, nLedsOrOffset, nLedsIfOffset);
 	}
 
 #endif
@@ -1124,44 +1133,49 @@ public:
 	/// @{
 
 	/// Add a clockless based CLEDController instance to the world.
-	template<template<fl::u8, fl::EOrder> class CHIPSET, fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
+	template<template<fl::u8, fl::EOrder> class CHIPSET, fl::u8 DATA_PIN, fl::EOrder RGB_ORDER, fl::Bus B = fl::Bus::AUTO>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		fl::busKeepAlive<B>();
 		static CHIPSET<DATA_PIN, RGB_ORDER> c;
 		return addLedsImpl(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
 	/// Add a clockless based CLEDController instance to the world.
-	template<template<fl::u8, fl::EOrder> class CHIPSET, fl::u8 DATA_PIN>
+	template<template<fl::u8, fl::EOrder> class CHIPSET, fl::u8 DATA_PIN, fl::Bus B = fl::Bus::AUTO>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		fl::busKeepAlive<B>();
 		static CHIPSET<DATA_PIN, RGB> c;
 		return addLedsImpl(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
 	/// Add a clockless based CLEDController instance to the world.
-	template<template<fl::u8> class CHIPSET, fl::u8 DATA_PIN>
+	template<template<fl::u8> class CHIPSET, fl::u8 DATA_PIN, fl::Bus B = fl::Bus::AUTO>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		fl::busKeepAlive<B>();
 		static CHIPSET<DATA_PIN> c;
 		return addLedsImpl(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
-	template<template<fl::u8> class CHIPSET, fl::u8 DATA_PIN>
+	template<template<fl::u8> class CHIPSET, fl::u8 DATA_PIN, fl::Bus B = fl::Bus::AUTO>
 	static ::CLEDController &addLeds(fl::Leds& leds, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		CRGB* rgb = leds;
-		return addLeds<CHIPSET, DATA_PIN>(rgb, nLedsOrOffset, nLedsIfOffset);
+		return addLeds<CHIPSET, DATA_PIN, B>(rgb, nLedsOrOffset, nLedsIfOffset);
 	}
 
 #if defined(__FASTLED_HAS_FIBCC) && (__FASTLED_HAS_FIBCC == 1)
-	template<fl::u8 NUM_LANES, template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER> class CHIPSET, fl::u8 DATA_PIN, fl::EOrder RGB_ORDER=RGB>
+	template<fl::u8 NUM_LANES, template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER> class CHIPSET, fl::u8 DATA_PIN, fl::EOrder RGB_ORDER=RGB, fl::Bus B = fl::Bus::AUTO>
 	static ::CLEDController &addLeds(CRGB *data, int nLeds) {
+		fl::busKeepAlive<B>();
 		static fl::__FIBCC<CHIPSET, DATA_PIN, NUM_LANES, RGB_ORDER> c;
 		return addLeds(&c, data, nLeds);
 	}
 #endif
 
 	#ifdef FASTSPI_USE_DMX_SIMPLE
-	template<EClocklessChipsets CHIPSET, fl::u8 DATA_PIN, fl::EOrder RGB_ORDER=RGB>
+	template<EClocklessChipsets CHIPSET, fl::u8 DATA_PIN, fl::EOrder RGB_ORDER=RGB, fl::Bus B = fl::Bus::AUTO>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0)
 	{
+		fl::busKeepAlive<B>();
 		switch(CHIPSET) {
 			case DMX: { static DMXController<DATA_PIN> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 		}
@@ -1192,15 +1206,17 @@ public:
 	/// @{
 
 	/// Add a 3rd party library based CLEDController instance to the world.
-	template<template<fl::EOrder RGB_ORDER> class CHIPSET, fl::EOrder RGB_ORDER>
+	template<template<fl::EOrder RGB_ORDER> class CHIPSET, fl::EOrder RGB_ORDER, fl::Bus B = fl::Bus::AUTO>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		fl::busKeepAlive<B>();
 		static CHIPSET<RGB_ORDER> c;
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
 	/// Add a 3rd party library based CLEDController instance to the world.
-	template<template<fl::EOrder RGB_ORDER> class CHIPSET>
+	template<template<fl::EOrder RGB_ORDER> class CHIPSET, fl::Bus B = fl::Bus::AUTO>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		fl::busKeepAlive<B>();
 		static CHIPSET<RGB> c;
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
@@ -1209,9 +1225,10 @@ public:
 	/// Add a OCTOWS2811 based CLEDController instance to the world.
 	/// @see https://www.pjrc.com/teensy/td_libs_OctoWS2811.html
 	/// @see https://github.com/PaulStoffregen/OctoWS2811
-	template<OWS2811 CHIPSET, fl::EOrder RGB_ORDER>
+	template<OWS2811 CHIPSET, fl::EOrder RGB_ORDER, fl::Bus B = fl::Bus::AUTO>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0)
 	{
+		fl::busKeepAlive<B>();
 		switch(CHIPSET) {
 			case OCTOWS2811: { static fl::COctoWS2811Controller<RGB_ORDER,WS2811_800kHz> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 			case OCTOWS2811_400: { static fl::COctoWS2811Controller<RGB_ORDER,WS2811_400kHz> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
@@ -1224,10 +1241,10 @@ public:
 	/// Add a OCTOWS2811 library based CLEDController instance to the world.
 	/// @see https://www.pjrc.com/teensy/td_libs_OctoWS2811.html
 	/// @see https://github.com/PaulStoffregen/OctoWS2811
-	template<OWS2811 CHIPSET>
+	template<OWS2811 CHIPSET, fl::Bus B = fl::Bus::AUTO>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0)
 	{
-		return addLeds<CHIPSET,GRB>(data,nLedsOrOffset,nLedsIfOffset);
+		return addLeds<CHIPSET,GRB,B>(data,nLedsOrOffset,nLedsIfOffset);
 	}
 
 #endif
@@ -1236,9 +1253,10 @@ public:
 	/// Add a WS2812Serial library based CLEDController instance to the world.
 	/// @see https://www.pjrc.com/non-blocking-ws2812-led-library/
 	/// @see https://github.com/PaulStoffregen/WS2812Serial
-	template<SWS2812 CHIPSET, int DATA_PIN, fl::EOrder RGB_ORDER>
+	template<SWS2812 CHIPSET, int DATA_PIN, fl::EOrder RGB_ORDER, fl::Bus B = fl::Bus::AUTO>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0)
 	{
+		fl::busKeepAlive<B>();
 		static CWS2812SerialController<DATA_PIN,RGB_ORDER> controller;
 		return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset);
 	}
@@ -1247,9 +1265,10 @@ public:
 #ifdef SmartMatrix_h
 	/// Add a SmartMatrix library based CLEDController instance to the world.
 	/// @see https://github.com/pixelmatix/SmartMatrix
-	template<ESM CHIPSET>
+	template<ESM CHIPSET, fl::Bus B = fl::Bus::AUTO>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0)
 	{
+		fl::busKeepAlive<B>();
 		switch(CHIPSET) {
 			case SMART_MATRIX: { static CSmartMatrixController controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 		}
@@ -1282,8 +1301,9 @@ public:
 	/// @{
 
 	/// Add a block based parallel output CLEDController instance to the world.
-	template<EBlockChipsets CHIPSET, int NUM_LANES, fl::EOrder RGB_ORDER>
+	template<EBlockChipsets CHIPSET, int NUM_LANES, fl::EOrder RGB_ORDER, fl::Bus B = fl::Bus::AUTO>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		fl::busKeepAlive<B>();
 		switch(CHIPSET) {
 		#ifdef PORTA_FIRST_PIN
 				case WS2811_PORTA: return addLeds(new fl::InlineBlockClocklessController<NUM_LANES, PORTA_FIRST_PIN, fl::TIMING_WS2811_800KHZ_LEGACY, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);  // ok bare allocation
@@ -1324,9 +1344,9 @@ public:
 	}
 
 	/// Add a block based parallel output CLEDController instance to the world.
-	template<EBlockChipsets CHIPSET, int NUM_LANES>
+	template<EBlockChipsets CHIPSET, int NUM_LANES, fl::Bus B = fl::Bus::AUTO>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
-		return addLeds<CHIPSET,NUM_LANES,GRB>(data,nLedsOrOffset,nLedsIfOffset);
+		return addLeds<CHIPSET,NUM_LANES,GRB,B>(data,nLedsOrOffset,nLedsIfOffset);
 	}
 	/// @} Adding parallel output controllers
 #endif

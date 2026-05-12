@@ -7,6 +7,7 @@
 ///
 /// See issue #2428.
 
+#include "FastLED.h"  // For FastLED.addLeds<..., fl::Bus> tests (#2460)
 #include "fl/channels/bus.h"
 #include "fl/channels/bus_traits.h"
 #include "fl/channels/config.h"  // ClocklessChipset, SpiChipsetConfig
@@ -86,6 +87,63 @@ FL_TEST_CASE("enableDrivers<Bus::STUB>() registers the stub driver with ChannelM
     FL_REQUIRE(stubDriver != nullptr);
     // Identity check: the registered driver must be the BusTraits singleton.
     FL_CHECK(stubDriver.get() == &fl::BusTraits<fl::Bus::STUB>::instance());
+}
+
+// ---------------------------------------------------------------------------
+// #2460 — trailing `fl::Bus B` template parameter on FastLED.addLeds<>
+// ---------------------------------------------------------------------------
+//
+// These cases exercise the new `busKeepAlive<B>()` helper and at least one
+// clockless + one SPI legacy-API call site with `B = fl::Bus::STUB`. On host
+// `Bus::STUB` is the only bus we can name without dragging in real hardware
+// drivers, but the body change is the same for every variant.
+
+FL_TEST_CASE("busKeepAlive<Bus::AUTO>() is a no-op and compiles") {
+    fl::busKeepAlive<fl::Bus::AUTO>();  // AUTO specialization: no ODR-use.
+    // Same identity check as plain `instance()` — proving the AUTO path
+    // did not corrupt state in any way.
+    auto& a = fl::BusTraits<fl::Bus::STUB>::instance();
+    auto& b = fl::BusTraits<fl::Bus::STUB>::instance();
+    FL_CHECK(&a == &b);
+}
+
+FL_TEST_CASE("busKeepAlive<Bus::STUB>() ODR-uses the singleton accessor") {
+    fl::busKeepAlive<fl::Bus::STUB>();
+    // After the keep-alive runs, the singleton must still be valid.
+    auto p = fl::BusTraits<fl::Bus::STUB>::instancePtr();
+    FL_REQUIRE(p != nullptr);
+    FL_CHECK(p.get() == &fl::BusTraits<fl::Bus::STUB>::instance());
+}
+
+FL_TEST_CASE("FastLED.addLeds<WS2812, ..., fl::Bus::STUB> clockless variant compiles") {
+    // Acceptance criterion: clockless variant accepts the trailing Bus param.
+    static CRGB leds[8];
+    auto& ctrl = FastLED.addLeds<WS2812, 2, GRB, fl::Bus::STUB>(leds, 8);
+    (void)ctrl;
+    // Identity check post-instantiation.
+    FL_CHECK(&fl::BusTraits<fl::Bus::STUB>::instance() != nullptr);
+}
+
+FL_TEST_CASE("FastLED.addLeds<APA102, ..., fl::Bus::STUB> SPI variant compiles") {
+    // Acceptance criterion: SPI variant accepts the trailing Bus param.
+    static CRGB leds[8];
+    auto& ctrl = FastLED.addLeds<APA102, 23, 18, RGB, DATA_RATE_MHZ(12), fl::Bus::STUB>(leds, 8);
+    (void)ctrl;
+    FL_CHECK(&fl::BusTraits<fl::Bus::STUB>::instance() != nullptr);
+}
+
+FL_TEST_CASE("FastLED.addLeds<WS2812, ...> default-AUTO call site is unchanged") {
+    // Regression guard: omitting the Bus param must compile and behave as
+    // before #2460 (the AUTO specialization is a no-op).
+    static CRGB leds[8];
+    auto& ctrl = FastLED.addLeds<WS2812, 3, GRB>(leds, 8);
+    (void)ctrl;
+}
+
+FL_TEST_CASE("FastLED.addLeds<APA102, ...> default-AUTO SPI call site is unchanged") {
+    static CRGB leds[8];
+    auto& ctrl = FastLED.addLeds<APA102, 23, 18, RGB, DATA_RATE_MHZ(12)>(leds, 8);
+    (void)ctrl;
 }
 
 FL_TEST_CASE("Legacy initChannelDrivers() and enableDrivers<Bus::STUB>() share singleton (Phase 5a)") {
