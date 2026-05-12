@@ -46,8 +46,11 @@ void testDriver(
 
     FL_WARN("[CONFIG] Driver: " << driver_name << " (physical jumper required)\n");
 
-    // Create TX configuration for autoresearch tests
-    fl::ChannelConfig tx_config(pin_data, timing_config.timing, fl::span<CRGB>(leds, num_leds), color_order);
+    // Create TX configuration for autoresearch tests.
+    // Build the ClocklessChipset explicitly so the encoder selector (carried
+    // alongside timing in NamedTimingConfig, #2467) is preserved end-to-end.
+    fl::ClocklessChipset chipset(pin_data, timing_config.timing, timing_config.encoder);
+    fl::ChannelConfig tx_config(chipset, fl::span<CRGB>(leds, num_leds), color_order);
 
     FL_WARN("[INFO] Testing " << timing_config.name << " timing\n");
 
@@ -60,7 +63,8 @@ void testDriver(
         rx_channel,
         rx_buffer,
         base_strip_size,
-        rx_type
+        rx_type,
+        timing_config.encoder
     );
 
     // FIRST RUN: Discard results (timing warm-up)

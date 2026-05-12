@@ -1181,18 +1181,26 @@ FL_TEST_CASE("UCS7604 per-controller gamma override via setGamma") {
 }
 
 FL_TEST_CASE("UCS7604 channel encoder tag propagation") {
-    // Verify makeTimingConfig propagates the ENCODER field
-    auto ws_config = makeTimingConfig<TIMING_WS2812_800KHZ>();
-    FL_CHECK(ws_config.encoder == ClocklessEncoder::CLOCKLESS_ENCODER_WS2812);
+    // Verify encoder_for<>() / makeClockless<>() propagate the ENCODER field
+    // (encoder now lives on ClocklessChipset as a peer of timing, not inside
+    // ChipsetTimingConfig — see issue #2467).
+    FL_CHECK(encoder_for<TIMING_WS2812_800KHZ>() == ClocklessEncoder::CLOCKLESS_ENCODER_WS2812);
+    FL_CHECK(encoder_for<TIMING_UCS7604_800KHZ>() == ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT);
+    FL_CHECK(encoder_for<TIMING_UCS7604_1600KHZ>() == ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT_1600);
+    FL_CHECK(encoder_for<TIMING_UCS7604_8BIT_800KHZ>() == ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_8BIT);
 
-    auto ucs_16bit_config = makeTimingConfig<TIMING_UCS7604_800KHZ>();
-    FL_CHECK(ucs_16bit_config.encoder == ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT);
+    // And the high-level helper rolls timing + encoder into one expression.
+    auto ws_chipset = makeClockless<TIMING_WS2812_800KHZ>(2);
+    FL_CHECK(ws_chipset.encoder == ClocklessEncoder::CLOCKLESS_ENCODER_WS2812);
 
-    auto ucs_1600_config = makeTimingConfig<TIMING_UCS7604_1600KHZ>();
-    FL_CHECK(ucs_1600_config.encoder == ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT_1600);
+    auto ucs_16bit_chipset = makeClockless<TIMING_UCS7604_800KHZ>(2);
+    FL_CHECK(ucs_16bit_chipset.encoder == ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT);
 
-    auto ucs_8bit_config = makeTimingConfig<TIMING_UCS7604_8BIT_800KHZ>();
-    FL_CHECK(ucs_8bit_config.encoder == ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_8BIT);
+    auto ucs_1600_chipset = makeClockless<TIMING_UCS7604_1600KHZ>(2);
+    FL_CHECK(ucs_1600_chipset.encoder == ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT_1600);
+
+    auto ucs_8bit_chipset = makeClockless<TIMING_UCS7604_8BIT_800KHZ>(2);
+    FL_CHECK(ucs_8bit_chipset.encoder == ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_8BIT);
 }
 
 FL_TEST_CASE("UCS7604 channel preamble in encoded data") {
@@ -1203,9 +1211,11 @@ FL_TEST_CASE("UCS7604 channel preamble in encoded data") {
     leds[1] = CRGB::Green;
     leds[2] = CRGB::Blue;
 
-    auto timing = makeTimingConfig<TIMING_UCS7604_800KHZ>();
+    // makeClockless<>() rolls timing + encoder into one expression so the
+    // UCS7604 encoder rides correctly into the channel (the bare 2-arg
+    // ClocklessChipset(pin, timing) form would default the encoder to WS2812).
     ChannelOptions opts;
-    ChannelConfig config(ClocklessChipset(2, timing), fl::span<CRGB>(leds, NUM_LEDS), RGB, opts);
+    ChannelConfig config(makeClockless<TIMING_UCS7604_800KHZ>(2), fl::span<CRGB>(leds, NUM_LEDS), RGB, opts);
     ChannelPtr channel = Channel::create(config);
 
     // Use onChannelDataEncoded event to capture the encoded data

@@ -115,23 +115,23 @@ void dumpRawEdgeTiming(fl::shared_ptr<fl::RxChannel> rx_channel,
     FL_WARN("");
 }
 
-/// @brief Check if a timing config uses UCS7604 encoder
-static bool isUCS7604(const fl::ChipsetTimingConfig& timing) {
-    return timing.encoder == fl::ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_8BIT ||
-           timing.encoder == fl::ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT ||
-           timing.encoder == fl::ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT_1600;
+/// @brief Check if an encoder selector identifies a UCS7604 variant
+static bool isUCS7604(fl::ClocklessEncoder encoder) {
+    return encoder == fl::ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_8BIT ||
+           encoder == fl::ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT ||
+           encoder == fl::ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT_1600;
 }
 
 /// @brief Build expected UCS7604 encoded bytes from LED data
 /// @param leds LED data span
-/// @param timing Timing config (contains encoder enum)
+/// @param encoder Encoder selector identifying the UCS7604 variant
 /// @return Vector of expected encoded bytes (preamble + padding + pixel data)
-static fl::vector<uint8_t> buildExpectedUCS7604(fl::span<CRGB> leds, const fl::ChipsetTimingConfig& timing) {
+static fl::vector<uint8_t> buildExpectedUCS7604(fl::span<CRGB> leds, fl::ClocklessEncoder encoder) {
     fl::vector<uint8_t> expected;
 
     // Map encoder to UCS7604Mode
     fl::UCS7604Mode mode;
-    switch (timing.encoder) {
+    switch (encoder) {
         case fl::ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_8BIT:
             mode = fl::UCS7604Mode::UCS7604_MODE_8BIT_800KHZ;
             break;
@@ -651,10 +651,10 @@ void runTest(const char* test_name,
 
         int mismatches = 0;
 
-        if (isUCS7604(config.timing)) {
+        if (isUCS7604(config.encoder)) {
             // UCS7604: Compare full encoded frame (preamble + padding + pixel data) byte-for-byte
             fl::vector<uint8_t> expected_encoded = buildExpectedUCS7604(
-                config.tx_configs[config_idx].mLeds, config.timing);
+                config.tx_configs[config_idx].mLeds, config.encoder);
             size_t expected_len = expected_encoded.size();
 
             FL_WARN("UCS7604 encoded comparison: expected " << expected_len << " bytes, captured " << bytes_captured);
@@ -797,10 +797,10 @@ void runMultiTest(const char* test_name,
                 FL_WARN("  [" << i << "] = 0x" << fl::hex << static_cast<int>(config.rx_buffer[i]) << fl::dec);
             }
 
-            if (isUCS7604(config.timing)) {
+            if (isUCS7604(config.encoder)) {
                 // UCS7604: Compare full encoded frame byte-for-byte
                 fl::vector<uint8_t> expected_encoded = buildExpectedUCS7604(
-                    config.tx_configs[config_idx].mLeds, config.timing);
+                    config.tx_configs[config_idx].mLeds, config.encoder);
                 size_t expected_len = expected_encoded.size();
                 result.totalBytes = static_cast<int>(expected_len);
 

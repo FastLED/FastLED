@@ -375,14 +375,14 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     if (mChipset.is<ClocklessChipset>()) {
         // Clockless chipsets: dispatch based on encoder type
         const ClocklessChipset* clockless = mChipset.ptr<ClocklessChipset>();
-        switch (clockless->timing.encoder) {
+        switch (clockless->encoder) {
             case ClocklessEncoder::CLOCKLESS_ENCODER_WS2812:
                 pixelIterator.writeWS2812(&data);
                 break;
             case ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_8BIT:
             case ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT:
             case ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT_1600:
-                writeUCS7604(&data, pixelIterator, clockless->timing.encoder,
+                writeUCS7604(&data, pixelIterator, clockless->encoder,
                              mSettings, mRgbOrder);
                 break;
         }

@@ -26,12 +26,18 @@ struct DriverFailureInfo {
 };
 
 /// @brief Chipset timing configuration with name for testing
+///
+/// Carries timing + the byte-level encoder selector together because callers
+/// build runtime-named chipset variants (e.g., "UCS7604-800KHZ") and need
+/// both fields to construct a faithful `ClocklessChipset` downstream.
 struct NamedTimingConfig {
     fl::ChipsetTimingConfig timing;
+    fl::ClocklessEncoder encoder;
     const char* name;
 
-    NamedTimingConfig(const fl::ChipsetTimingConfig& timing_, const char* name_)
-        : timing(timing_), name(name_) {}
+    NamedTimingConfig(const fl::ChipsetTimingConfig& timing_, const char* name_,
+                      fl::ClocklessEncoder enc = fl::ClocklessEncoder::CLOCKLESS_ENCODER_WS2812)
+        : timing(timing_), encoder(enc), name(name_) {}
 };
 
 // Legacy test matrix structures removed - validation now uses one-test-per-RPC architecture
