@@ -137,14 +137,16 @@ FastLED 3.10.4 (Next Release)
       * Optimize for specific scenarios (RMT for flexibility, SPI for speed, PARLIO for maximum throughput)
     * **API Methods** (accessed via global `FastLED` object, **full functionality ESP32-only**, safe no-op stubs on other platforms):
       * `FastLED.setDriverEnabled(name, enabled)` - Enable/disable specific driver by name
-      * `FastLED.setExclusiveDriver(name)` - Enable only one driver, disable all others (forward-compatible)
+      * `FastLED.setExclusiveDriver(fl::Bus)` - Enable only one driver, disable all others (typed, typo-safe; forward-compatible)
+      * For mocks / custom drivers (names not in `fl::Bus`), use `fl::ChannelManager::instance().setExclusiveDriverByName(name)`
       * `FastLED.isDriverEnabled(name)` - Query if a driver is currently enabled
       * `FastLED.getDriverCount()` - Get total number of registered drivers
       * `FastLED.getDriverInfo()` - Get full state of all drivers (name, priority, enabled state)
     * **Complete Example**:
       ```cpp
-      // Force RMT driver only (disables SPI, PARLIO, and any future drivers)
-      FastLED.setExclusiveDriver("RMT");
+      // Force RMT driver only (disables SPI, PARLIO, and any future drivers).
+      // Typed: fl::Bus::RTM would be a compile error.
+      FastLED.setExclusiveDriver(fl::Bus::RMT);
 
       // Or selectively enable/disable
       FastLED.setDriverEnabled("SPI", false);    // Disable SPI
@@ -167,7 +169,7 @@ FastLED 3.10.4 (Next Release)
     * **Forward-compatible**: `setExclusiveDriver()` automatically disables future drivers, ensuring predictable behavior
     * **Automatic fallback**: If highest-priority driver fails, manager automatically tries next priority
     * **ESP32 integration**: Drivers auto-register with names during platform initialization
-    * **Example Sketch**: See `examples/AutoResearch/AutoResearch.ino` for usage with `FastLED.setExclusiveDriver("RMT")`
+    * **Example Sketch**: See `examples/AutoResearch/AutoResearch.ino` for usage with `FastLED.setExclusiveDriver(fl::Bus::RMT)`
     * Unit tested with comprehensive test suite (18 test cases covering priority, fallback, runtime control)
   * **ESP32 SPI Chipsets No Longer Hardcoded to Specific Pins**: Use any GPIO pins for SPI-based LEDs (all ESP32 variants)
     * Previously forced to use VSPI/HSPI pins - now fully flexible via GPIO matrix

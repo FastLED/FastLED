@@ -557,9 +557,9 @@ void CFastLED::setDriverEnabled(const char* name, bool enabled) {
 	manager.setDriverEnabled(name, enabled);
 }
 
-bool CFastLED::setExclusiveDriver(const char* name) {
+bool CFastLED::setExclusiveDriver(fl::Bus bus) {
 	fl::ChannelManager& manager = fl::channelManager();
-	return manager.setExclusiveDriver(name);
+	return manager.setExclusiveDriver(bus);
 }
 
 bool CFastLED::isDriverEnabled(const char* name) const {

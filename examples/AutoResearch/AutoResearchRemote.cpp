@@ -285,8 +285,8 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
 
     uint32_t start_ms = millis();
 
-    // Set driver as exclusive
-    if (!FastLED.setExclusiveDriver(driver_name.c_str())) {
+    // Set driver as exclusive (by-name path: driver_name comes from RPC)
+    if (!autoResearchSetExclusiveDriverByName(driver_name.c_str())) {
         response.set("success", false);
         response.set("error", "DriverSetupFailed");
         fl::sstream msg;
@@ -1688,9 +1688,9 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
             }
         }
 
-        // Set exclusive driver if requested
+        // Set exclusive driver if requested (by-name path: requested_driver from RPC)
         if (!requested_driver.empty()) {
-            if (!FastLED.setExclusiveDriver(requested_driver.c_str())) {
+            if (!autoResearchSetExclusiveDriverByName(requested_driver.c_str())) {
                 response.set("success", false);
                 response.set("error", "DriverSetupFailed");
                 fl::sstream msg;

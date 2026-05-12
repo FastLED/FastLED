@@ -6,6 +6,7 @@
 #pragma once
 
 #include "AutoResearchRemote.h"
+#include "AutoResearchHelpers.h"  // autoResearchSetExclusiveDriverByName
 #include "fl/task/task.h"
 #include "fl/task/executor.h"
 
@@ -88,7 +89,7 @@ inline void maybeRegisterStubAutorun(
             const auto& drv = state->drivers_available[di];
             FL_PRINT("\n[STUB CLIENT] Driver: " << drv.name.c_str());
 
-            if (!FastLED.setExclusiveDriver(drv.name.c_str())) {
+            if (!autoResearchSetExclusiveDriverByName(drv.name.c_str())) {
                 FL_ERROR("[STUB CLIENT] Failed to activate driver: " << drv.name.c_str());
                 grand_total++;  // count as a failure
                 continue;

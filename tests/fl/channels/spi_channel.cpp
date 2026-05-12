@@ -256,7 +256,7 @@ FL_TEST_CASE("SPI chipset - mock driver integration") {
     manager.addDriver(1000, mockEngine);
 
     // Set mock driver as exclusive (disables all other drivers)
-    bool exclusive = manager.setExclusiveDriver("MOCK_SPI");
+    bool exclusive = manager.setExclusiveDriverByName("MOCK_SPI");
     FL_REQUIRE(exclusive);
 
     // Create LED array and set pixel data
@@ -308,7 +308,7 @@ FL_TEST_CASE("SPI chipset - APA102HD mock driver integration") {
     manager.addDriver(1000, mockEngine);
 
     // Set mock driver as exclusive (disables all other drivers)
-    bool exclusive = manager.setExclusiveDriver("MOCK_SPI_HD");
+    bool exclusive = manager.setExclusiveDriverByName("MOCK_SPI_HD");
     FL_REQUIRE(exclusive);
 
     // Create LED array and set pixel data
@@ -422,7 +422,7 @@ FL_TEST_CASE("ChannelManager - predicate filtering (clockless rejected)") {
     manager.addDriver(1000, mockSpiEngine);
 
     // Set mock driver as exclusive (disables all other drivers)
-    bool exclusive = manager.setExclusiveDriver("MOCK_SPI_TEST1");
+    bool exclusive = manager.setExclusiveDriverByName("MOCK_SPI_TEST1");
     FL_REQUIRE(exclusive);
 
     // Create clockless ChannelData
@@ -452,7 +452,7 @@ FL_TEST_CASE("ChannelManager - predicate filtering (SPI accepted)") {
     manager.addDriver(1000, mockSpiEngine);
 
     // Set mock driver as exclusive (disables all other drivers)
-    bool exclusive = manager.setExclusiveDriver("MOCK_SPI_TEST2");
+    bool exclusive = manager.setExclusiveDriverByName("MOCK_SPI_TEST2");
     FL_REQUIRE(exclusive);
 
     // Create SPI ChannelData
@@ -585,7 +585,7 @@ FL_TEST_CASE("APA102 channel routes through ChannelManager") {
     auto mock = fl::make_shared<SpiCaptureMock>("APA102_ROUTE_TEST");
     ChannelManager& manager = ChannelManager::instance();
     manager.addDriver(1000, mock);
-    bool exclusive = manager.setExclusiveDriver("APA102_ROUTE_TEST");
+    bool exclusive = manager.setExclusiveDriverByName("APA102_ROUTE_TEST");
     FL_REQUIRE(exclusive);
 
     const int NUM_LEDS = 5;
@@ -644,7 +644,7 @@ FL_TEST_CASE("SK9822 channel routes through ChannelManager") {
     auto mock = fl::make_shared<SpiCaptureMock>("SK9822_ROUTE_TEST");
     ChannelManager& manager = ChannelManager::instance();
     manager.addDriver(1000, mock);
-    bool exclusive = manager.setExclusiveDriver("SK9822_ROUTE_TEST");
+    bool exclusive = manager.setExclusiveDriverByName("SK9822_ROUTE_TEST");
     FL_REQUIRE(exclusive);
 
     const int NUM_LEDS = 3;
@@ -682,7 +682,7 @@ FL_TEST_CASE("WS2801 channel routes through ChannelManager") {
     auto mock = fl::make_shared<SpiCaptureMock>("WS2801_ROUTE_TEST");
     ChannelManager& manager = ChannelManager::instance();
     manager.addDriver(1000, mock);
-    bool exclusive = manager.setExclusiveDriver("WS2801_ROUTE_TEST");
+    bool exclusive = manager.setExclusiveDriverByName("WS2801_ROUTE_TEST");
     FL_REQUIRE(exclusive);
 
     const int NUM_LEDS = 4;
@@ -713,7 +713,7 @@ FL_TEST_CASE("Multiple SPI channels share ChannelManager") {
     auto mock = fl::make_shared<SpiCaptureMock>("MULTI_SPI_TEST");
     ChannelManager& manager = ChannelManager::instance();
     manager.addDriver(1000, mock);
-    bool exclusive = manager.setExclusiveDriver("MULTI_SPI_TEST");
+    bool exclusive = manager.setExclusiveDriverByName("MULTI_SPI_TEST");
     FL_REQUIRE(exclusive);
 
     const int NUM_LEDS = 3;
@@ -771,7 +771,7 @@ FL_TEST_CASE("SPI channel rejected by clockless-only driver") {
     // Register clockless at higher priority, SPI at lower
     manager.addDriver(2000, clocklessMock);
     manager.addDriver(1000, spiMock);
-    manager.setExclusiveDriver("CLOCKLESS_ONLY"); // disable all
+    manager.setExclusiveDriverByName("CLOCKLESS_ONLY"); // disable all
     manager.setDriverEnabled("CLOCKLESS_ONLY", true);
     manager.setDriverEnabled("SPI_FALLBACK_TEST", true);
 
@@ -915,7 +915,7 @@ FL_TEST_CASE("P9813 channel routes with flag byte encoding") {
     auto mock = fl::make_shared<SpiCaptureMock>("P9813_ROUTE_TEST");
     ChannelManager& manager = ChannelManager::instance();
     manager.addDriver(1000, mock);
-    bool exclusive = manager.setExclusiveDriver("P9813_ROUTE_TEST");
+    bool exclusive = manager.setExclusiveDriverByName("P9813_ROUTE_TEST");
     FL_REQUIRE(exclusive);
 
     const int NUM_LEDS = 2;
@@ -966,7 +966,7 @@ FL_TEST_CASE("LPD8806 channel routes with MSB-set encoding") {
     auto mock = fl::make_shared<SpiCaptureMock>("LPD8806_ROUTE_TEST");
     ChannelManager& manager = ChannelManager::instance();
     manager.addDriver(1000, mock);
-    bool exclusive = manager.setExclusiveDriver("LPD8806_ROUTE_TEST");
+    bool exclusive = manager.setExclusiveDriverByName("LPD8806_ROUTE_TEST");
     FL_REQUIRE(exclusive);
 
     const int NUM_LEDS = 3;
@@ -1010,7 +1010,7 @@ FL_TEST_CASE("LPD6803 channel routes with 16-bit 5-5-5 encoding") {
     auto mock = fl::make_shared<SpiCaptureMock>("LPD6803_ROUTE_TEST");
     ChannelManager& manager = ChannelManager::instance();
     manager.addDriver(1000, mock);
-    bool exclusive = manager.setExclusiveDriver("LPD6803_ROUTE_TEST");
+    bool exclusive = manager.setExclusiveDriverByName("LPD6803_ROUTE_TEST");
     FL_REQUIRE(exclusive);
 
     const int NUM_LEDS = 2;
@@ -1053,7 +1053,7 @@ FL_TEST_CASE("SM16716 channel routes with RGB encoding") {
     auto mock = fl::make_shared<SpiCaptureMock>("SM16716_ROUTE_TEST");
     ChannelManager& manager = ChannelManager::instance();
     manager.addDriver(1000, mock);
-    bool exclusive = manager.setExclusiveDriver("SM16716_ROUTE_TEST");
+    bool exclusive = manager.setExclusiveDriverByName("SM16716_ROUTE_TEST");
     FL_REQUIRE(exclusive);
 
     const int NUM_LEDS = 2;
@@ -1092,7 +1092,7 @@ FL_TEST_CASE("DOTSTAR channel produces APA102-compatible encoding") {
     auto mock = fl::make_shared<SpiCaptureMock>("DOTSTAR_ENCODE_TEST");
     ChannelManager& manager = ChannelManager::instance();
     manager.addDriver(1000, mock);
-    bool exclusive = manager.setExclusiveDriver("DOTSTAR_ENCODE_TEST");
+    bool exclusive = manager.setExclusiveDriverByName("DOTSTAR_ENCODE_TEST");
     FL_REQUIRE(exclusive);
 
     const int NUM_LEDS = 3;

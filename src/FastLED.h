@@ -1372,11 +1372,15 @@ public:
 	void setDriverEnabled(const char* name, bool enabled);
 
 	/// Enable only one driver exclusively (disables all others)
-	/// @param name Driver name to enable exclusively (case-sensitive, e.g., "RMT", "SPI", "PARLIO")
-	/// @return true if driver was found and set as exclusive, false if name not found
+	/// @param bus Bus enum identifying the driver (typed, typo-safe)
+	/// @return true if driver was found and set as exclusive, false otherwise
 	/// @note Atomically disables all drivers, then enables the specified one
 	/// @note Use for testing specific drivers or debugging
-	bool setExclusiveDriver(const char* name);
+	/// @note For drivers whose names aren't in the `fl::Bus` enum (mocks,
+	///       custom third-party drivers, RPC-resolved names), use
+	///       `fl::ChannelManager::instance().setExclusiveDriverByName(name)`
+	///       directly.
+	bool setExclusiveDriver(fl::Bus bus);
 
 	/// Check if a driver is enabled by name
 	/// @param name Driver name to query (case-sensitive)

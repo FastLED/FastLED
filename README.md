@@ -244,8 +244,9 @@ void loop() {
 > **Platform Support**: API is available on all platforms for code compatibility. Full functionality (multi-driver switching) is **ESP32-only**. Non-ESP32 platforms have safe no-op implementations.
 
 ```cpp
-// Force RMT driver exclusively (disables SPI, PARLIO, and future drivers)
-FastLED.setExclusiveDriver("RMT");
+// Force RMT driver exclusively (disables SPI, PARLIO, and future drivers).
+// Typed fl::Bus form — fl::Bus::RTM would be a compile error.
+FastLED.setExclusiveDriver(fl::Bus::RMT);
 
 // Or selectively enable/disable
 FastLED.setDriverEnabled("SPI", false);    // Disable SPI
@@ -863,8 +864,9 @@ All methods are accessed via the global `FastLED` object (ESP32 only):
 FastLED.setDriverEnabled("RMT", true);      // Enable RMT driver
 FastLED.setDriverEnabled("SPI", false);     // Disable SPI driver
 
-// Enable only one driver (disables all others, including future drivers)
-FastLED.setExclusiveDriver("RMT");          // Use only RMT
+// Enable only one driver (disables all others, including future drivers).
+// Typed: fl::Bus::RTM would be a compile error.
+FastLED.setExclusiveDriver(fl::Bus::RMT);   // Use only RMT
 
 // Query driver state
 bool rmtEnabled = FastLED.isDriverEnabled("RMT");
@@ -887,7 +889,7 @@ for (const auto& driver : drivers) {
 ```cpp
 void setup() {
     // Test with only RMT to isolate driver issues
-    FastLED.setExclusiveDriver("RMT");
+    FastLED.setExclusiveDriver(fl::Bus::RMT);
     FastLED.addLeds<WS2812, PIN, GRB>(leds, NUM_LEDS);
 }
 ```
@@ -906,10 +908,10 @@ void setup() {
 void loop() {
     if (WiFi.status() == WL_CONNECTED) {
         // Use RMT when Wi-Fi is active (more interrupt-tolerant)
-        FastLED.setExclusiveDriver("RMT");
+        FastLED.setExclusiveDriver(fl::Bus::RMT);
     } else {
         // Use faster SPI when Wi-Fi is off
-        FastLED.setExclusiveDriver("SPI");
+        FastLED.setExclusiveDriver(fl::Bus::SPI);
     }
 
     // Your LED code...

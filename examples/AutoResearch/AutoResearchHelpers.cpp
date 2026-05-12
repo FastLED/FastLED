@@ -1,6 +1,8 @@
 // AutoResearchHelpers.cpp - Helper function implementations
 
 #include "AutoResearchHelpers.h"
+#include "fl/channels/manager.h"
+#include "fl/channels/all_drivers.h"    // FastLED.enableAllDrivers() out-of-line definition
 #include "fl/stl/sstream.h"
 #include "fl/system/pin.h"  // Platform-independent pin API
 #include "fl/channels/detail/validation/rx_test.h"
@@ -23,6 +25,14 @@ void autoResearchExpectedEngines() {
     fl::validation::printEngineValidation();
 }
 
+bool autoResearchSetExclusiveDriverByName(const char* name) {
+    // AutoResearch resolves driver names at runtime (RPC/JSON), so it needs every
+    // driver enrolled with ChannelManager before the lookup runs — otherwise a
+    // driver that wasn't auto-registered would silently miss.
+    FastLED.enableAllDrivers();
+    return fl::ChannelManager::instance().setExclusiveDriverByName(name);
+}
+
 void testDriver(
     const char* driver_name,
     const fl::NamedTimingConfig& timing_config,
@@ -36,8 +46,10 @@ void testDriver(
     fl::RxDeviceType rx_type,
     fl::DriverTestResult& result) {
 
-    // Set this driver as exclusive for testing
-    if (!FastLED.setExclusiveDriver(driver_name)) {
+    // Set this driver as exclusive for testing. AutoResearch resolves driver
+    // names at runtime, so we use the by-name helper (auto-enables all
+    // drivers first to ensure the lookup succeeds).
+    if (!autoResearchSetExclusiveDriverByName(driver_name)) {
         FL_ERROR("Failed to set " << driver_name << " as exclusive driver");
         result.skipped = true;
         return;

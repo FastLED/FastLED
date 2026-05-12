@@ -184,7 +184,7 @@ The Bus parameter triggers linker keep-alive in every variant. For the SPI varia
 - **`cfg.options.mBus = fl::Bus::RMT`** — pin to a specific driver. The dispatch looks up `busName(mBus)` in `ChannelManager`.
 - **`cfg.options.mBus = fl::Bus::AUTO`** (the default) — `ChannelManager` picks the highest-priority driver that `canHandle` the chipset.
 
-For **custom / third-party / mock drivers** whose names aren't in the `fl::Bus` enum, register the driver with `manager.addDriver(priority, driver)` and either (a) clear competing drivers first so priority dispatch picks it, or (b) call `manager.setExclusiveDriver(name)` for process-wide binding.
+For **custom / third-party / mock drivers** whose names aren't in the `fl::Bus` enum, register the driver with `manager.addDriver(priority, driver)` and either (a) clear competing drivers first so priority dispatch picks it, or (b) call `manager.setExclusiveDriverByName(name)` for process-wide binding (the by-name escape hatch — `manager.setExclusiveDriver(fl::Bus)` is the typed form for built-in drivers).
 
 The non-template path **auto-enrolls every driver** on the platform (`fl::enableAllDrivers()` runs inside) so any `mBus` value can be dispatched at runtime. A one-time `FL_WARN_ONCE` explains the binary-size trade-off; suppress it with `-DFASTLED_SUPPRESS_RUNTIME_DRIVER_WARNING`. For minimum binary size, use the compile-time `TypedChannel<...>::create()` path above.
 
@@ -306,8 +306,12 @@ void setup() {
     // calling them all in sequence (as written here) makes the later
     // calls override the earlier ones.
 
-    // Method 1: Force a specific driver exclusively (disables all others)
-    FastLED.setExclusiveDriver("RMT");
+    // Method 1: Force a specific driver exclusively (disables all others).
+    // Use the typed fl::Bus form — typos like fl::Bus::RTM are compile errors.
+    FastLED.setExclusiveDriver(fl::Bus::RMT);
+    // For custom/mock drivers (names not in the fl::Bus enum), use the by-name
+    // escape hatch on the manager directly:
+    //   fl::ChannelManager::instance().setExclusiveDriverByName("MOCK_NAME");
 
     // Method 2: Enable/disable specific drivers
     FastLED.setDriverEnabled("PARLIO", true);   // Enable
@@ -331,7 +335,8 @@ void setup() {
 ```
 
 **Control methods:**
-- `FastLED.setExclusiveDriver(name)` - Disable all drivers except the named one
+- `FastLED.setExclusiveDriver(fl::Bus)` - Disable all drivers except the named one (typed, typo-safe — preferred)
+- `fl::ChannelManager::instance().setExclusiveDriverByName(name)` - Same, by string name (for mocks / custom drivers not in `fl::Bus`)
 - `FastLED.setDriverEnabled(name, enabled)` - Enable/disable specific driver
 - `fl::ChannelManager::instance().setDriverPriority(name, priority)` - Change priority (triggers automatic re-sort). No `FastLED.*` forwarder is provided for this.
 

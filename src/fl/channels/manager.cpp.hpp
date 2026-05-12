@@ -170,10 +170,14 @@ void ChannelManager::setDriverEnabled(const char* name, bool enabled) {
     }
 }
 
-bool ChannelManager::setExclusiveDriver(const char* name) {
+bool ChannelManager::setExclusiveDriver(Bus bus) {
+    return setExclusiveDriverByName(busName(bus));
+}
+
+bool ChannelManager::setExclusiveDriverByName(const char* name) {
     // Handle null or empty name
     if (!name || !name[0]) {
-        FL_ERROR("ChannelManager::setExclusiveDriver() - Null or empty driver name provided");
+        FL_ERROR("ChannelManager::setExclusiveDriverByName() - Null or empty driver name provided");
         mExclusiveDriver.clear();
         // Disable all drivers
         for (auto& entry : mDrivers) {
@@ -194,7 +198,7 @@ bool ChannelManager::setExclusiveDriver(const char* name) {
     }
 
     if (!found) {
-        FL_ERROR("ChannelManager::setExclusiveDriver() - Driver '" << name << "' not found in registry");
+        FL_ERROR("ChannelManager::setExclusiveDriverByName() - Driver '" << name << "' not found in registry");
     }
 
     return found;
