@@ -17,13 +17,18 @@ The system consists of two layers:
 1. **Channel** - High-level LED strip controller with explicit configuration API
 2. **ChannelEngine** - Low-level hardware driver (RMT, PARLIO, SPI, I2S, UART, FLEX_IO, OBJECT_FLED, BIT_BANG, ...)
 
-Users create `Channel` objects using the Channel API (`FastLED.add(cfg)` / `Channel::create(cfg)`) or the template-based `FastLED.addLeds<>()` API. Both route through the same `ChannelManager` and driver layer; pick by call-site shape, not by maturity. The driver layer is managed automatically based on platform capabilities and priorities.
+Users create `Channel` objects through one of two entry points — pick the one that matches what your sketch needs:
+
+- **Easy API** (`FastLED.addLeds<Chipset, PIN, ...>(...)`) — the familiar template form. Recommended for most sketches: short, fixed at compile time, hides the configuration boilerplate. Most FastLED examples use this.
+- **Channel API** (`FastLED.add(cfg)` / `Channel::create(cfg)`) — runtime-configurable. Pick this when you need to build channels from data (JSON, UI, network), reconfigure LEDs after `setup()`, name channels for diagnostics, or mix multiple chipset timings across distinct drivers in parallel.
+
+Both route through the same `ChannelManager` and driver layer; the Easy API is simply a one-line wrapper that constructs a `ChannelConfig` for you. The driver layer is managed automatically based on platform capabilities and priorities.
 
 Two complementary dispatch modes are available (introduced by issue #2428, refined by #2459 / #2460):
 
 - **Compile-time `fl::Bus` binding** — two equivalent entry points pin the driver at compile time:
-  - `fl::TypedChannel<fl::Bus::RMT, fl::ClocklessChipset>::create(cfg)` — strongly-typed factory with `static_assert` for bus/chipset compatibility.
-  - `FastLED.addLeds<WS2812, 4, GRB, fl::Bus::RMT>(leds, NUM)` — every `addLeds<>` variant takes an optional trailing `fl::Bus B = fl::Bus::AUTO` template parameter (#2460).
+  - `FastLED.addLeds<WS2812, 4, GRB, fl::Bus::RMT>(leds, NUM)` — every Easy-API `addLeds<>` variant takes an optional trailing `fl::Bus B = fl::Bus::AUTO` template parameter (#2460). This is the simplest way to pin a driver.
+  - `fl::TypedChannel<fl::Bus::RMT, fl::ClocklessChipset>::create(cfg)` — Channel-API factory with `static_assert` for bus/chipset compatibility, for sketches that already need a `ChannelConfig`.
 
   In either case, naming `Bus::X` at the call site is what links the driver's translation unit, so `--gc-sections` drops every driver the sketch doesn't reference. Bus/chipset mismatches become `static_assert` errors rather than runtime warnings.
 - **Runtime selection** — `FastLED.add(cfg)` is **non-template**. Pick the driver by setting `cfg.options.mBus = fl::Bus::RMT` (typed `enum class`). The non-template path auto-enrolls every driver on the platform via `fl::enableAllDrivers()` and emits a one-time `FL_WARN_ONCE` explaining the binary-size trade-off (suppress with `-DFASTLED_SUPPRESS_RUNTIME_DRIVER_WARNING`). For minimum binary size, use the compile-time path instead. Custom/mock drivers (whose names aren't in the `fl::Bus` enum) bind via priority dispatch — register the mock with `manager.addDriver()` and either let it win by priority, or use `manager.setExclusiveDriver(name)` to force-select.
@@ -32,9 +37,39 @@ Two complementary dispatch modes are available (introduced by issue #2428, refin
 
 ## Basic Usage
 
-### Channel API (Recommended)
+### Easy API — `FastLED.addLeds<>()` (Recommended)
 
-The Channel API provides a clean, explicit interface for creating and configuring LED strips:
+The template-based `FastLED.addLeds<>()` form is the simplest way to drive LEDs and what most FastLED sketches use. One line per strip, no configuration boilerplate, fixed at compile time. **This is not a legacy API** — it's the recommended entry point for any sketch that doesn't need to reconfigure channels at runtime.
+
+```cpp
+#include "FastLED.h"
+
+CRGB leds1[60];
+CRGB leds2[60];
+
+void setup() {
+    // Each addLeds<> internally constructs a ChannelConfig and registers it.
+    FastLED.addLeds<WS2812, 16>(leds1, 60);
+    FastLED.addLeds<WS2812, 17>(leds2, 60);
+}
+
+void loop() {
+    fill_solid(leds1, 60, CRGB::Red);
+    FastLED.show();
+}
+```
+
+**Use the Easy API when:**
+- The pin, chipset, and LED count are fixed at compile time (true for most sketches).
+- You don't need to swap chipsets or LED buffers after `setup()`.
+- You don't need named channels for diagnostics.
+- You want the shortest possible call-site shape.
+
+Every `addLeds<>` variant also accepts an optional trailing `fl::Bus B = fl::Bus::AUTO` template parameter (#2460) — see "Compile-Time Bus Selection" below for how to pin the driver from the call site for minimum binary size.
+
+### Channel API — `FastLED.add(cfg)` (Runtime-Configurable)
+
+The Channel API is the more powerful but more verbose path. It's the right pick when the Easy API's compile-time constraints don't fit — for sketches that read configuration from a UI, JSON, MQTT, or want to swap LED buffers at runtime.
 
 ```cpp
 #include "FastLED.h"
@@ -49,12 +84,13 @@ CRGB leds1[NUM_LEDS];
 CRGB leds2[NUM_LEDS];
 
 void setup() {
-    // Create channel configurations with names
-    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
-
-    fl::ChannelConfig config1("left_strip", fl::ClocklessChipset(PIN1, timing),
+    // `fl::makeClockless<TIMING>(pin)` builds a `ClocklessChipset` carrying both
+    // the bit-period timing (T1/T2/T3/RESET) AND the byte-level encoder selector
+    // (#2467). For WS2812-compatible chipsets the encoder is the default; for
+    // chipsets like UCS7604 it picks the right encoder automatically.
+    fl::ChannelConfig config1("left_strip", fl::makeClockless<fl::TIMING_WS2812_800KHZ>(PIN1),
         fl::span<CRGB>(leds1, NUM_LEDS), RGB);
-    fl::ChannelConfig config2("right_strip", fl::ClocklessChipset(PIN2, timing),
+    fl::ChannelConfig config2("right_strip", fl::makeClockless<fl::TIMING_WS2812_800KHZ>(PIN2),
         fl::span<CRGB>(leds2, NUM_LEDS), RGB);
 
     // Register channels with FastLED
@@ -71,35 +107,42 @@ void loop() {
 }
 ```
 
-**Benefits:**
-- Explicit configuration - no hidden template magic
-- Runtime flexibility - chipset and settings can be changed dynamically
-- Named channels for debugging and logging
-- Direct access to channel objects for advanced control
+**Use the Channel API when:**
+- The config is data-driven (read from JSON, UI, network).
+- You need to call `applyConfig()` to swap LED buffers, RGB order, or color settings after `setup()`.
+- You want named channels for logging and diagnostics.
+- You're mixing chipset timings across multiple drivers in parallel (per-channel `mBus` pinning).
 
-### Template `addLeds<>` API
+#### Chipset Timing and Encoders (`makeClockless<>` / `makeTimingConfig<>`)
 
-The familiar template-based `FastLED.addLeds<>()` form is a one-line convenience over the Channel API. It's the right pick for short sketches that don't need to reconfigure at runtime.
+A clockless chipset description has **two** concerns that travel together:
+
+| Concern | Type | What it controls |
+|---|---|---|
+| Bit-period timing | `fl::ChipsetTimingConfig` | T1/T2/T3/RESET nanosecond bit shape |
+| Byte-level encoder | `fl::ClocklessEncoder` | Which encoding pipeline runs (WS2812 raw bytes vs UCS7604 preambled frames) |
+
+Most chipsets (`TIMING_WS2812_800KHZ`, `TIMING_SK6812`, `TIMING_WS2813`, ...) use the default WS2812 encoder. UCS7604 timing structs (`TIMING_UCS7604_800KHZ`, `TIMING_UCS7604_1600KHZ`, `TIMING_UCS7604_8BIT_800KHZ`) declare a non-default `ENCODER` member that must reach the channel for the protocol to work.
+
+**Prefer the one-liner** — `fl::makeClockless<TIMING>(pin)` builds a `ClocklessChipset` that carries both fields automatically:
 
 ```cpp
-#include "FastLED.h"
-
-CRGB leds1[60];
-CRGB leds2[60];
-
-void setup() {
-    // Each addLeds<> internally constructs a ChannelConfig.
-    FastLED.addLeds<WS2812, 16>(leds1, 60);
-    FastLED.addLeds<WS2812, 17>(leds2, 60);
-}
-
-void loop() {
-    fill_solid(leds1, 60, CRGB::Red);
-    FastLED.show();
-}
+fl::ChannelConfig cfg(fl::makeClockless<fl::TIMING_UCS7604_800KHZ>(2), leds, RGB);
+// `cfg`'s clockless chipset has the UCS7604 timing AND the UCS7604 encoder.
 ```
 
-Every `addLeds<>` variant also accepts an optional trailing `fl::Bus B = fl::Bus::AUTO` template parameter — see "Compile-Time Bus Selection" below for how to pin the driver from the call site.
+The older two-step pattern still compiles, but it defaults the encoder to WS2812 and silently corrupts any non-WS2812 chipset:
+
+```cpp
+auto timing = fl::makeTimingConfig<fl::TIMING_UCS7604_800KHZ>();      // timing only
+fl::ChannelConfig cfg(fl::ClocklessChipset(2, timing), leds, RGB);     // encoder defaults to WS2812 — BUG for UCS7604
+```
+
+`fl::makeTimingConfig<>()` and the 2-arg `ClocklessChipset(pin, timing)` are still fine for WS2812-compatible chipsets where the default encoder is correct. For UCS7604 (or any future chipset with a non-default `ENCODER`), always use `makeClockless<>()`.
+
+To inspect the encoder selector for a `TIMING` trait outside the channel-building flow, call `fl::encoder_for<TIMING>()` from `fl/chipsets/clockless_encoder.h`.
+
+**Note for Easy API users:** `FastLED.addLeds<UCS7604_800KHZ, PIN>(...)` already wires the right encoder automatically — `makeClockless<>()` is only relevant when you're building a `ChannelConfig` by hand through the Channel API.
 
 ### Compile-Time Bus Selection (`fl::Bus`)
 
@@ -136,9 +179,8 @@ The `fl::Bus` enum (in `fl/channels/bus.h`) is the single identifier that flows 
 CRGB leds[60];
 
 void setup() {
-    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
     fl::ChannelConfigOf<fl::ClocklessChipset> cfg{
-        fl::ClocklessChipset(16, timing),
+        fl::makeClockless<fl::TIMING_WS2812_800KHZ>(16),
         fl::span<CRGB>(leds, 60), RGB};
 
     // Compile-time bus pinning via TypedChannel — the single template entry
@@ -153,7 +195,7 @@ void setup() {
 
 ```cpp
 fl::ChannelConfigOf<fl::ClocklessChipset> cfg{
-    fl::ClocklessChipset(4, fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>()),
+    fl::makeClockless<fl::TIMING_WS2812_800KHZ>(4),
     fl::span<CRGB>(leds, 60), GRB};
 
 // AUTO resolves to DefaultBus<ClocklessChipset> per platform.
@@ -196,8 +238,7 @@ CRGB leds[60];
 fl::Bus userPreferredBus();            // declared elsewhere -- reads config / UI
 
 void setup() {
-    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
-    fl::ChannelConfig cfg(fl::ClocklessChipset(16, timing),
+    fl::ChannelConfig cfg(fl::makeClockless<fl::TIMING_WS2812_800KHZ>(16),
         fl::span<CRGB>(leds, 60), RGB);
 
     cfg.options.mBus = userPreferredBus();   // data-driven choice
@@ -297,8 +338,8 @@ For testing or performance tuning, you can control driver selection:
 CRGB leds[60];
 
 void setup() {
-    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
-    fl::ChannelConfig config(16, timing, fl::span<CRGB>(leds, 60), RGB);
+    fl::ChannelConfig config(fl::makeClockless<fl::TIMING_WS2812_800KHZ>(16),
+        fl::span<CRGB>(leds, 60), RGB);
     FastLED.add(config);
 
     // The three methods below are independent alternatives -- pick one
@@ -373,8 +414,7 @@ void setup() {
     });
 
     // Create channel (triggers onChannelCreated)
-    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
-    fl::ChannelConfig config("my_strip", fl::ClocklessChipset(5, timing),
+    fl::ChannelConfig config("my_strip", fl::makeClockless<fl::TIMING_WS2812_800KHZ>(5),
         fl::span<CRGB>(leds, 60), RGB);
     FastLED.add(config);
 }
@@ -473,21 +513,20 @@ Change LED settings at runtime without recreating channels using `applyConfig()`
 fl::ChannelPtr channel;
 
 void setup() {
-    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
-    fl::ChannelConfig config(16, timing, leds, GRB);
+    fl::ChannelConfig config(fl::makeClockless<fl::TIMING_WS2812_800KHZ>(16), leds, GRB);
     channel = fl::Channel::create(config);
     FastLED.add(channel);
 }
 
 // Called from UI/network handler
 void updateSettings(CRGB* newLeds, int count, EOrder order) {
-    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
     fl::ChannelOptions opts;
     opts.mCorrection = TypicalSMD5050;
     opts.mTemperature = Tungsten100W;
     opts.mDitherMode = DISABLE_DITHER;
 
-    fl::ChannelConfig newConfig(16, timing, fl::span<CRGB>(newLeds, count), order, opts);
+    fl::ChannelConfig newConfig(fl::makeClockless<fl::TIMING_WS2812_800KHZ>(16),
+        fl::span<CRGB>(newLeds, count), order, opts);
     channel->applyConfig(newConfig);
 }
 ```
@@ -522,15 +561,13 @@ void setup() {
     // WS2812 strips bound to RMT driver
     fl::ChannelOptions ws2812_opts;
     ws2812_opts.mBus = fl::Bus::RMT;       // typed, preferred (#2459)
-    auto timing_ws2812 = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
-    FastLED.add(fl::ChannelConfig(16, timing_ws2812,
+    FastLED.add(fl::ChannelConfig(fl::makeClockless<fl::TIMING_WS2812_800KHZ>(16),
         fl::span<CRGB>(ws2812_strip, NUM_LEDS), RGB, ws2812_opts));
 
     // WS2816 strips bound to SPI driver (transmits in parallel with RMT)
     fl::ChannelOptions ws2816_opts;
     ws2816_opts.mBus = fl::Bus::SPI;
-    auto timing_ws2816 = fl::makeTimingConfig<fl::TIMING_WS2816>();
-    FastLED.add(fl::ChannelConfig(18, timing_ws2816,
+    FastLED.add(fl::ChannelConfig(fl::makeClockless<fl::TIMING_WS2816>(18),
         fl::span<CRGB>(ws2816_strip, NUM_LEDS), RGB, ws2816_opts));
 }
 
@@ -562,23 +599,22 @@ Use `ChannelManager::findDriverByName(name)` directly when you want to probe the
 
 ## Which API to Use
 
-Both APIs are first-class and route through the same `ChannelManager` / driver layer. Pick by call-site shape, not by maturity.
+Both entry points route through the same `ChannelManager` / driver layer — the difference is what's visible at the call site and whether you can reconfigure after `setup()`.
 
-**Channel API (`FastLED.add(cfg)` / `Channel::create(cfg)`):**
-- Explicit `ChannelConfig` — chipset, span, RGB order, and `ChannelOptions` are all visible at the call site.
-- Mutable at runtime via `Channel::applyConfig()` — good fit for web UIs, MQTT, or any sketch that reconfigures LEDs after `setup()`.
-- Returns a `ChannelPtr` you can hold and re-apply.
-
-**Template `addLeds<>` API (`FastLED.addLeds<Chipset, PIN, ...>(...)`):**
-- One-line convenience for short sketches.
-- Internally constructs a `ChannelConfig`; no behavioral difference from the Channel API.
+**Start with the Easy API (`FastLED.addLeds<Chipset, PIN, ...>(...)`):**
+- One line per strip. Hides the `ChannelConfig` boilerplate behind a template.
+- Fixed at compile time — pin, chipset, and (optionally) bus are template parameters.
+- Internally constructs a `ChannelConfig`; no behavioral difference at the driver layer.
 - Optional trailing `fl::Bus B` template parameter pins the driver and triggers linker keep-alive.
+- This is the right pick for the vast majority of sketches.
 
-**Prefer the Channel API when:**
-- You need runtime reconfiguration (`applyConfig`).
-- You want named channels for logging / diagnostics.
-- The config is data-driven (read from JSON, UI, network).
-- You're mixing chipset timings across multiple drivers in parallel (per-channel `mBus`).
+**Reach for the Channel API (`FastLED.add(cfg)` / `Channel::create(cfg)`) only when you need:**
+- Runtime reconfiguration via `Channel::applyConfig()` (swap LED buffer, RGB order, color settings).
+- Named channels for logging / diagnostics.
+- Data-driven config (read from JSON, UI, network).
+- Mixed chipset timings across multiple drivers in parallel (per-channel `mBus`).
+
+The Channel API is **strictly more powerful and strictly more verbose**. It is not a replacement for the Easy API; it's an escape hatch for sketches whose configuration can't be expressed at compile time.
 
 ---
 
@@ -626,8 +662,8 @@ For advanced CPU/DMA parallelism (e.g., computing next frame while DMA transmits
 CRGB leds[300];
 
 void setup() {
-    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
-    fl::ChannelConfig config(16, timing, fl::span<CRGB>(leds, 300), RGB);
+    fl::ChannelConfig config(fl::makeClockless<fl::TIMING_WS2812_800KHZ>(16),
+        fl::span<CRGB>(leds, 300), RGB);
     FastLED.add(config);
 }
 
