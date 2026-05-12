@@ -96,14 +96,11 @@ protected:
     }
 
     static fl::shared_ptr<IChannelDriver> getWasmEngine() FL_NOEXCEPT {
-#if FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY
-        // Phase 5c of #2428 (opt-in mode): bypass `ChannelManager` and bind
-        // directly to the `BusTraits<Bus::STUB>` singleton -- the stub
-        // driver is the platform default for both stub and WASM builds.
+        // Phase 5c of #2428: bypass `ChannelManager` and bind directly to
+        // the `BusTraits<Bus::STUB>` singleton -- the stub driver is the
+        // platform default for both stub and WASM builds. Naming the
+        // singleton here ODR-links the stub driver TU.
         return BusTraits<Bus::STUB>::instancePtr();
-#else
-        return ChannelManager::instance().getDriverByName("STUB");
-#endif
     }
 };
 

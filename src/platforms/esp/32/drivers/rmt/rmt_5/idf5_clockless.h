@@ -33,19 +33,13 @@ public:
     ClocklessIdf5() FL_NOEXCEPT
         : Channel(makeChipset(), RGB_ORDER, RegistrationMode::DeferRegister)
     {
-#if FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY
-        // Phase 5b of #2428 (opt-in mode): pre-bind to the RMT5 driver
-        // singleton so showPixels() bypasses ChannelManager entirely.
-        // Naming BusTraits<Bus::RMT>::instancePtr() here is the ODR-use
-        // that lets the linker keep ONLY the RMT5 driver TU when the user
-        // opts into FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY=1 -- the
-        // binary-size fix from #2420.
-        // Default mode (macro 0) leaves mDriver unbound so the existing
-        // selectDriverForChannel() path runs each frame -- preserves
-        // backward compat for users registering custom drivers via
-        // ChannelManager.
+        // Phase 5b of #2428: pre-bind to the RMT5 driver singleton so
+        // showPixels() bypasses ChannelManager entirely. Naming
+        // BusTraits<Bus::RMT>::instancePtr() here is the ODR-use that lets
+        // the linker keep ONLY the RMT5 driver TU -- post-#2428 drivers
+        // do not auto-register, so this pre-bind is what links the RMT
+        // singleton on platforms where RMT is the default.
         setDriver(BusTraits<Bus::RMT>::instancePtr());
-#endif
         // Auto-register in the controller draw list (template API expects this)
         addToList();
     }

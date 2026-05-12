@@ -411,12 +411,19 @@ FL_TEST_CASE("Channel API: Internal ChannelPtr storage prevents dangling") {
     manager.setDriverEnabled("MOCK_STORAGE", false);
 }
 
-FL_TEST_CASE("Legacy API: 4 parallel strips using FastLED.addLeds<>()") {
-    // This test validates that the legacy FastLED.addLeds<>() API works with channel drivers:
-    // - Use template-based FastLED.addLeds<WS2812, PIN>() (no explicit channel creation)
-    // - Set different colors on each strip
-    // - Call FastLED.show()
-    // - Verify driver received all 4 strips with correct data
+FL_TEST_CASE("Channel API: 4 parallel strips via FastLED.add() routes through mock driver") {
+    // Post-#2428 architecture: legacy `FastLED.addLeds<>()` pre-binds to the
+    // platform-default driver (Phase 5b) and bypasses `ChannelManager`, so the
+    // way to route runtime traffic through a custom mock driver is the
+    // explicit Channel API: `FastLED.add(cfg)`. Each `Channel` registered via
+    // that path consults the manager on every show() and picks the highest-
+    // priority driver that `canHandle` the channel data.
+    //
+    // This test validates that workflow with 4 parallel strips:
+    // - Register a mock driver with the manager at high priority
+    // - Create 4 channels via `FastLED.add(ChannelConfig)`
+    // - Call `FastLED.show()`
+    // - Verify the mock received all 4 strips
 
     auto mockEngine = fl::make_shared<ChannelEngineMock>("MOCK_LEGACY");
     mockEngine->reset();
@@ -430,7 +437,6 @@ FL_TEST_CASE("Legacy API: 4 parallel strips using FastLED.addLeds<>()") {
     FL_REQUIRE(registeredEngine != nullptr);
     FL_CHECK(registeredEngine.get() == mockEngine.get());
 
-    // Create 4 LED strips using legacy template API (no affinity, no explicit channel)
     #define NUM_LEDS 60
     #define PIN1 16
     #define PIN2 17
@@ -442,41 +448,34 @@ FL_TEST_CASE("Legacy API: 4 parallel strips using FastLED.addLeds<>()") {
     static CRGB strip3[NUM_LEDS];
     static CRGB strip4[NUM_LEDS];
 
-    // Use legacy API - should automatically use highest priority driver (our mock)
-    FastLED.addLeds<WS2812, PIN1>(strip1, NUM_LEDS);
-    FastLED.addLeds<WS2812, PIN2>(strip2, NUM_LEDS);
-    FastLED.addLeds<WS2812, PIN3>(strip3, NUM_LEDS);
-    FastLED.addLeds<WS2812, PIN4>(strip4, NUM_LEDS);
+    // Channel API: 4 channels routed through the manager.
+    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    auto ch1 = FastLED.add(fl::ChannelConfig(PIN1, timing, fl::span<CRGB>(strip1, NUM_LEDS), RGB));
+    auto ch2 = FastLED.add(fl::ChannelConfig(PIN2, timing, fl::span<CRGB>(strip2, NUM_LEDS), RGB));
+    auto ch3 = FastLED.add(fl::ChannelConfig(PIN3, timing, fl::span<CRGB>(strip3, NUM_LEDS), RGB));
+    auto ch4 = FastLED.add(fl::ChannelConfig(PIN4, timing, fl::span<CRGB>(strip4, NUM_LEDS), RGB));
 
-    // Set different colors on each strip (from README example)
     fl::fill_solid(strip1, NUM_LEDS, CRGB::Red);
     fl::fill_solid(strip2, NUM_LEDS, CRGB::Green);
     fl::fill_solid(strip3, NUM_LEDS, CRGB::Blue);
     fl::fill_solid(strip4, NUM_LEDS, CRGB::Yellow);
 
-    // Reset mock counters before show
     mockEngine->reset();
-
-    // Call FastLED.show() - should enqueue all 4 strips
     FastLED.show();
 
-    // Verify driver received all 4 strips
     FL_CHECK(mockEngine->mEnqueueCount == 4);
     FL_CHECK(mockEngine->mShowCount == 1);
     FL_CHECK(mockEngine->mEnqueuedChannels.size() == 0);  // Cleared by show()
 
-    // Verify the channels have the correct data (spot check first LED of each strip)
     FL_CHECK(strip1[0] == CRGB::Red);
     FL_CHECK(strip2[0] == CRGB::Green);
     FL_CHECK(strip3[0] == CRGB::Blue);
     FL_CHECK(strip4[0] == CRGB::Yellow);
 
-    // Verify all LEDs in strip1 are red
     for (int i = 0; i < NUM_LEDS; i++) {
         FL_CHECK(strip1[i] == CRGB::Red);
     }
 
-    // Test second frame with different pattern (rainbow effect from README)
     mockEngine->reset();
     static uint8_t hue = 0;
     for(int i = 0; i < NUM_LEDS; i++) {
@@ -485,15 +484,15 @@ FL_TEST_CASE("Legacy API: 4 parallel strips using FastLED.addLeds<>()") {
         strip3[i] = CHSV(hue + (i * 4) + 128, 255, 255);
         strip4[i] = CHSV(hue + (i * 4) + 192, 255, 255);
     }
-
     FastLED.show();
 
-    // Verify driver received all 4 strips again
     FL_CHECK(mockEngine->mEnqueueCount == 4);
     FL_CHECK(mockEngine->mShowCount == 1);
 
-    // Cleanup - clear all controllers (legacy API doesn't return handles)
-    FastLED.clear(true);  // Clear and deallocate
+    FastLED.remove(ch1);
+    FastLED.remove(ch2);
+    FastLED.remove(ch3);
+    FastLED.remove(ch4);
     manager.removeDriver(mockEngine);
 
     #undef NUM_LEDS

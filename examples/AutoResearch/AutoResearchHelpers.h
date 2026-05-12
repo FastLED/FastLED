@@ -25,15 +25,20 @@ bool testRxChannel(
 /// Prints ERROR if any expected engines are missing
 void autoResearchExpectedEngines();
 
-/// @brief AutoResearch-style helper: enable all drivers, then set an exclusive driver by name
+/// @brief AutoResearch-style helper: set an exclusive driver by name
 /// @param name Driver name (case-sensitive — must match an `IChannelDriver::getName()` value)
 /// @return true if the driver was found and set as exclusive
 ///
 /// AutoResearch resolves driver names at runtime from RPC/JSON payloads, so it
 /// can't use the typed `FastLED.setExclusiveDriver(fl::Bus)` form. This wrapper
-/// makes sure every driver is registered before the lookup runs — without it,
-/// a driver that hasn't been enrolled yet would silently miss the lookup and
-/// fall back to AUTO/priority dispatch.
+/// forwards to `ChannelManager::instance().setExclusiveDriverByName(name)`.
+///
+/// **Precondition:** The caller must already have enrolled every available
+/// driver via `FastLED.enableAllDrivers()` (typically once in `setup()`).
+/// This helper deliberately does NOT call `enableAllDrivers()` itself —
+/// calling it per-iteration in a discovery loop re-adds every driver each
+/// time, triggering ChannelManager's "Replacing existing driver" path and
+/// resetting state mid-test (#2469).
 ///
 /// For built-in driver code that knows its driver at compile time, use
 /// `FastLED.setExclusiveDriver(fl::Bus::X)` instead (typo-safe).

@@ -2,7 +2,6 @@
 
 #include "AutoResearchHelpers.h"
 #include "fl/channels/manager.h"
-#include "fl/channels/all_drivers.h"    // FastLED.enableAllDrivers() out-of-line definition
 #include "fl/stl/sstream.h"
 #include "fl/system/pin.h"  // Platform-independent pin API
 #include "fl/channels/detail/validation/rx_test.h"
@@ -26,10 +25,12 @@ void autoResearchExpectedEngines() {
 }
 
 bool autoResearchSetExclusiveDriverByName(const char* name) {
-    // AutoResearch resolves driver names at runtime (RPC/JSON), so it needs every
-    // driver enrolled with ChannelManager before the lookup runs — otherwise a
-    // driver that wasn't auto-registered would silently miss.
-    FastLED.enableAllDrivers();
+    // AutoResearch resolves driver names at runtime (RPC/JSON). The caller
+    // (AutoResearch.ino setup()) must already have enrolled every available
+    // driver via FastLED.enableAllDrivers(). We deliberately do NOT call
+    // enableAllDrivers() here — doing it per-iteration would re-add every
+    // driver each call, triggering ChannelManager's "Replacing existing driver"
+    // path and resetting state mid-test (#2469).
     return fl::ChannelManager::instance().setExclusiveDriverByName(name);
 }
 

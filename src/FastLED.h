@@ -1371,11 +1371,38 @@ public:
 	/// @note On platforms without registered drivers, this is a safe no-op
 	void setDriverEnabled(const char* name, bool enabled);
 
-	/// Enable only one driver exclusively (disables all others)
+	/// Register a single driver at a priority above the platform default
+	/// (compile-time TU-linking variant).
+	///
+	/// Post-#2428 the default build does NOT auto-register every driver —
+	/// only the platform-default driver TU links (via the legacy clockless
+	/// controller's Phase 5b pre-bind). This template provides the opt-in
+	/// path to add another driver and have it win priority dispatch.
+	///
+	/// Naming `BusTraits<B>::instancePtr()` in the body is the ODR-use that
+	/// links the driver TU; the registration with the manager happens at
+	/// `kExclusivePriority` (a value above any platform default).
+	///
+	/// **Must be called before `addLeds<>` / `FastLED.add()`** so newly-
+	/// constructed channels see the override during driver resolution.
+	/// Legacy clockless controllers that already pre-bound to the platform
+	/// default via Phase 5b will continue to use that pre-bind.
+	///
+	/// @tparam B  Bus identifier. The caller must have the per-driver
+	///            `bus_traits.h` visible at the call site (which provides
+	///            the `BusTraits<B>` specialization).
+	template<fl::Bus B>
+	void setExclusiveDriver() FL_NOEXCEPT {
+		fl::channelManager().setExclusiveDriver<B>();
+	}
+
+	/// Enable only one driver exclusively, runtime form (disables all others)
 	/// @param bus Bus enum identifying the driver (typed, typo-safe)
 	/// @return true if driver was found and set as exclusive, false otherwise
-	/// @note Atomically disables all drivers, then enables the specified one
 	/// @note Use for testing specific drivers or debugging
+	/// @note Does NOT ODR-use `BusTraits<bus>::instancePtr()` — for compile-time
+	///       TU-linking of a non-default driver, use the
+	///       `setExclusiveDriver<fl::Bus B>()` template overload above.
 	/// @note For drivers whose names aren't in the `fl::Bus` enum (mocks,
 	///       custom third-party drivers, RPC-resolved names), use
 	///       `fl::ChannelManager::instance().setExclusiveDriverByName(name)`

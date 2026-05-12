@@ -2,20 +2,17 @@
 
 /// @file _build.hpp
 /// @brief Unity build header for platforms\esp\32\drivers\spi/ directory
-/// Includes all implementation files in alphabetical order
 ///
-/// Phase 5c of #2428: the clockless-over-SPI driver is never a platform
-/// default. When the user opts in to `FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY=1`,
-/// this TU becomes empty and the SPI clockless driver is dropped from the
-/// binary.
+/// `Bus::SPI` is the *clockless-over-SPI* driver (WS2812 etc. over the SPI
+/// peripheral, using wave8 encoding). It is never a platform default
+/// (true-SPI chipsets like APA102 / SK9822 / HD108 go through `Bus::I2S_SPI`
+/// on ESP32dev or `Bus::LCD_SPI` on ESP32-S3 instead).
 ///
-/// NOTE: This is `Bus::SPI`, the *clockless* SPI driver (WS2812 etc. over the
-/// SPI peripheral). True-SPI chipsets (APA102, SK9822, HD108) go through
-/// `Bus::I2S_SPI` on ESP32dev or `Bus::LCD_SPI` on ESP32-S3.
-
-#include "fl/channels/bus.h"  // brings in FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY
-
-#if !FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY
+/// Post-#2428 the driver impl is always compiled here so that
+/// `fl::enableDrivers<fl::Bus::SPI>()` / `FastLED.enableAllDrivers()` /
+/// `FastLED.setExclusiveDriver<fl::Bus::SPI>()` have the symbols they need
+/// to link. Default builds don't ODR-use any symbol from this driver, so
+/// `--gc-sections` strips the whole TU.
 
 #include "platforms/esp/32/drivers/spi/channel_driver_spi.cpp.hpp"
 #include "platforms/esp/32/drivers/spi/spi_esp32_init.cpp.hpp"
@@ -25,5 +22,3 @@
 
 // BusTraits<Bus::SPI> specialization.
 #include "platforms/esp/32/drivers/spi/bus_traits.h"
-
-#endif  // !FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY

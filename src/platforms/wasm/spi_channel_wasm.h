@@ -79,15 +79,11 @@ protected:
     }
 
     static fl::shared_ptr<IChannelDriver> getWasmSpiEngine() FL_NOEXCEPT {
-#if FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY
-        // Phase 5c of #2428 (opt-in mode): bypass `ChannelManager` and bind
-        // directly to the `BusTraits<Bus::STUB>` singleton. WASM uses the
-        // stub driver for both clockless and SPI chipsets (no real
-        // hardware in the browser).
+        // Phase 5c of #2428: bypass `ChannelManager` and bind directly to
+        // the `BusTraits<Bus::STUB>` singleton. WASM uses the stub driver
+        // for both clockless and SPI chipsets (no real hardware in the
+        // browser). Naming the singleton here ODR-links the stub driver TU.
         return BusTraits<Bus::STUB>::instancePtr();
-#else
-        return ChannelManager::instance().getDriverByName("SPI");
-#endif
     }
 };
 

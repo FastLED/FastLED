@@ -209,44 +209,48 @@ If `cfg.options.mBus` names a driver that — for whatever reason — isn't in t
 
 Passing `fl::Bus::AUTO` (the default) skips the pinning step and lets `ChannelManager` pick by priority — identical to constructing the config without touching `cfg.options.mBus`.
 
-### Opt-In Driver Registration (`enableDrivers<>` / `enableAllDrivers`)
+### Opt-In Driver Registration (`enableDrivers<>` / `enableAllDrivers` / `setExclusiveDriver<>`)
 
-By default every platform driver self-registers with `ChannelManager` at startup, so any `cfg.options.mBus` value can be dispatched without further setup. The opt-in API below is for sketches that want tighter binary-size control (paired with `FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY=1`, described below).
+**Default behaviour: no driver auto-registration.** Only the platform-default driver TU (named by the legacy clockless controller's Phase 5b pre-bind via `BusTraits<DefaultBus<Chipset>>::instancePtr()`) is linked into the binary; every other driver is `--gc-sections`-eligible until something names its `BusTraits<Bus::X>::instancePtr()`. This is the binary-size fix for #2420 / #2421 — the old `FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY` macro has been removed; the default IS the opt-in path.
 
-Selective opt-in — only the named drivers are linked AND registered:
+To register additional drivers at runtime, sketches pick one of three opt-in calls:
 
 ```cpp
+// 1. Selective opt-in: only RMT and PARLIO end up linked AND registered.
 #include "platforms/esp/32/drivers/rmt/rmt_5/bus_traits.h"
 #include "platforms/esp/32/drivers/parlio/bus_traits.h"
 
 void setup() {
     fl::enableDrivers<fl::Bus::RMT, fl::Bus::PARLIO>();
-    // ...
 }
 ```
 
-Or enroll every driver the platform supports:
-
 ```cpp
+// 2. Universal opt-in: 3.10.3-style "every driver available at runtime".
 #include "FastLED.h"
 #include "fl/channels/all_drivers.h"   // pulls in every BusTraits<> on the platform
 
 void setup() {
     FastLED.enableAllDrivers();        // forwards to fl::enableAllDrivers()
-    // any Bus value now resolves at runtime
+    // any cfg.options.mBus value now resolves at runtime via the manager
 }
 ```
 
-Including `fl/channels/all_drivers.h` is the explicit opt-in that makes the per-driver `BusTraits<Bus::X>` specializations visible at the call site — without that include, `FastLED.enableAllDrivers()` fails to link and `--gc-sections` is free to drop driver TUs the sketch doesn't reference.
+```cpp
+// 3. Single-driver override: link the named driver AND set it at priority
+//    above the platform default so it wins ChannelManager dispatch. Must be
+//    called BEFORE addLeds<> / FastLED.add() so the override is visible
+//    when channels resolve their drivers.
+#include "FastLED.h"
+#include "platforms/esp/32/drivers/lcd_spi/bus_traits.h"
 
-### `FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY`
+void setup() {
+    FastLED.setExclusiveDriver<fl::Bus::LCD_SPI>();
+    FastLED.addLeds<APA102, 23, 18, RGB>(leds, 60);
+}
+```
 
-Defined in `fl/channels/bus.h` so every channels TU sees the same value. Default `0` — auto-registration is on: every available driver enrolls with `ChannelManager` at static-init time. Set to `1` to:
-
-- Disable auto-registration. Drivers register only when explicitly named via `enableDrivers<>()` / `enableAllDrivers()`.
-- Pre-bind per-platform clockless controllers directly to their `BusTraits<DefaultBus>::instancePtr()` singleton, bypassing `ChannelManager` entirely (#2428 Phase 5b).
-
-This is the toggle that lets `--gc-sections` drop unreferenced driver TUs (the binary-size fix from #2420). Build-time opt-in only — flip it via `-DFASTLED_DISABLE_LEGACY_DRIVER_REGISTRY=1` in your platform config.
+Including the matching per-driver `bus_traits.h` is the explicit opt-in that makes the `BusTraits<Bus::X>` specialization visible at the call site — without that include the call fails to link and `--gc-sections` stays free to drop the driver TU.
 
 ---
 
@@ -306,16 +310,28 @@ void setup() {
     // calling them all in sequence (as written here) makes the later
     // calls override the earlier ones.
 
-    // Method 1: Force a specific driver exclusively (disables all others).
-    // Use the typed fl::Bus form — typos like fl::Bus::RTM are compile errors.
+    // Method 1a: Link + register a specific driver at priority above the
+    //            platform default (compile-time template form — production
+    //            opt-in path). Must be called BEFORE the addLeds<>/FastLED.add()
+    //            calls that should pick it up.
+    //   #include "platforms/esp/32/drivers/rmt/rmt_5/bus_traits.h"  (at file top)
+    FastLED.setExclusiveDriver<fl::Bus::RMT>();
+
+    // Method 1b: Same as 1a, but runtime-typed (no TU-link side effect).
+    //            Use when the driver is already registered (mocks, custom,
+    //            or after FastLED.enableAllDrivers()). Typed, typo-safe —
+    //            fl::Bus::RTM is a compile error.
     FastLED.setExclusiveDriver(fl::Bus::RMT);
-    // For custom/mock drivers (names not in the fl::Bus enum), use the by-name
-    // escape hatch on the manager directly:
+
+    // Method 1c: For custom/mock drivers (names not in the fl::Bus enum),
+    //            use the by-name escape hatch on the manager directly:
     //   fl::ChannelManager::instance().setExclusiveDriverByName("MOCK_NAME");
 
-    // Method 2: Enable/disable specific drivers
-    FastLED.setDriverEnabled("PARLIO", true);   // Enable
-    FastLED.setDriverEnabled("SPI", false);     // Disable
+    // Method 2: Enable/disable specific already-registered drivers (string
+    //           form -- works for drivers that have already been registered
+    //           via enableDrivers<> / enableAllDrivers() / a mock test).
+    FastLED.setDriverEnabled("PARLIO", true);
+    FastLED.setDriverEnabled("SPI", false);
 
     // Method 3: Adjust driver priority (higher = preferred)
     // Engines are sorted by priority - changing priority triggers re-sort.
@@ -335,9 +351,10 @@ void setup() {
 ```
 
 **Control methods:**
-- `FastLED.setExclusiveDriver(fl::Bus)` - Disable all drivers except the named one (typed, typo-safe — preferred)
-- `fl::ChannelManager::instance().setExclusiveDriverByName(name)` - Same, by string name (for mocks / custom drivers not in `fl::Bus`)
-- `FastLED.setDriverEnabled(name, enabled)` - Enable/disable specific driver
+- `FastLED.setExclusiveDriver<fl::Bus::X>()` - Link the named driver TU and register it at priority above the platform default (production opt-in path; compile-time TU-link). Must be called before `addLeds<>` / `FastLED.add()`.
+- `FastLED.setExclusiveDriver(fl::Bus)` - Runtime-typed: disable all drivers except the named one. Typed, typo-safe (`fl::Bus::RTM` is a compile error). Does NOT link a driver TU — use the template form above for that.
+- `fl::ChannelManager::instance().setExclusiveDriverByName(name)` - By-name escape hatch for mocks / custom drivers not in `fl::Bus`. Does NOT link a driver TU.
+- `FastLED.setDriverEnabled(name, enabled)` - Enable/disable a specific already-registered driver.
 - `fl::ChannelManager::instance().setDriverPriority(name, priority)` - Change priority (triggers automatic re-sort). No `FastLED.*` forwarder is provided for this.
 
 **When to override:**
@@ -905,7 +922,7 @@ void setupCustomEngine() {
    - On hit: that driver is returned (no priority iteration).
    - On miss: `Channel::showPixels()` emits a one-shot `FL_ERROR` (see "Bus-miss diagnostic" above) and falls through to priority dispatch.
 2. Otherwise (`mBus == Bus::AUTO` or bus-miss fallback): the manager iterates drivers by priority (high to low) and returns the first that `canHandle()`s the channel data.
-3. Callers can override via `cfg.options.mBus` (per-channel, runtime), `fl::TypedChannel<Bus, Chipset>::create()` or `FastLED.addLeds<..., fl::Bus::X>` (compile-time, links only the named driver), or `FastLED.setExclusiveDriver()` (process-wide).
+3. Callers can override via `cfg.options.mBus` (per-channel, runtime), `fl::TypedChannel<Bus, Chipset>::create()` or `FastLED.addLeds<..., fl::Bus::X>` (compile-time, links only the named driver), or `FastLED.setExclusiveDriver<fl::Bus::X>()` (process-wide, compile-time TU-link; must be called before `addLeds<>`).
 
 **Priority modification:**
 - Engines are sorted by priority on registration (via `addDriver()`)
@@ -1023,11 +1040,11 @@ See `tests/fl/channels/driver.cpp` for more test examples.
 - `fl/channels/ichannel.h` — `IChannel` ABC (callback-facing identification base).
 - `fl/channels/config.h` — `ChannelConfig`, `ChannelConfigOf<Chipset>`, `ClocklessChipset`, `SpiChipsetConfig`.
 - `fl/channels/options.h` — `ChannelOptions` (correction, temperature, dither, rgbw, `mBus` driver selection, gamma).
-- `fl/channels/bus.h` — `fl::Bus` enum, `busName()`, `DefaultBus<Chipset>`, `FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY`.
+- `fl/channels/bus.h` — `fl::Bus` enum, `busName()`, `DefaultBus<Chipset>`.
 - `fl/channels/bus_traits.h` — `BusTraits<B>`, `BusSupports<B, Chipset>`, `enableDrivers<Bus...>()`, `busKeepAlive<B>()`.
 - `fl/channels/bus_priorities.h` — `default_bus_priority(Bus)` table consumed by `enableDrivers<>()`.
 - `fl/channels/all_drivers.h` — `fl::enableAllDrivers()` / `FastLED.enableAllDrivers()` aggregator.
-- `fl/channels/manager.h` — `ChannelManager` (`addDriver`, `getDriverByName`, `findDriverByName`, `selectDriverForChannel`, `setDriverPriority`, `setDriverEnabled`, `setExclusiveDriver`, `clearAllDrivers`, ...).
+- `fl/channels/manager.h` — `ChannelManager` (`addDriver`, `getDriverByName`, `findDriverByName`, `selectDriverForChannel`, `setDriverPriority`, `setDriverEnabled`, `setExclusiveDriver`, `setExclusiveDriverByName`, `clearAllDrivers`, ...).
 - `fl/channels/channel_events.h` — Lifecycle event callbacks.
 - `fl/channels/driver.h` — `IChannelDriver` interface and `DriverState` machine.
 
