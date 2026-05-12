@@ -20,6 +20,7 @@
 
 #include "fl/stl/stdint.h"
 #include "fl/stl/noexcept.h"
+#include "fl/chipsets/clockless_encoder.h"  // ClocklessEncoder enum (used by UCS7604 timings)
 
 // ============================================================================
 // Overclock Factor Configuration
@@ -72,21 +73,9 @@
 
 namespace fl {
 
-// ============================================================================
-// Clockless Encoder Selection
-// ============================================================================
-
-/// @brief Identifies which encoder to use for clockless chipsets in the Channel API
-///
-/// Most clockless chipsets use plain WS2812-style encoding (raw pixel bytes).
-/// Some chipsets (e.g., UCS7604) require special preambles and encoding.
-/// This enum allows the Channel API to dispatch to the correct encoder.
-enum class ClocklessEncoder : u8 {
-    CLOCKLESS_ENCODER_WS2812 = 0,           ///< Default, no preamble (WS2812 and compatible)
-    CLOCKLESS_ENCODER_UCS7604_8BIT,         ///< UCS7604 8-bit 800KHz
-    CLOCKLESS_ENCODER_UCS7604_16BIT,        ///< UCS7604 16-bit 800KHz
-    CLOCKLESS_ENCODER_UCS7604_16BIT_1600    ///< UCS7604 16-bit 1600KHz
-};
+// The `ClocklessEncoder` enum used by certain timings (e.g., UCS7604) is
+// declared in `fl/chipsets/clockless_encoder.h` (included above). This file
+// stays focused on bit-period timing only.
 
 // ============================================================================
 // Centralized Nanosecond Timing Definitions

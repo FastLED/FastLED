@@ -300,15 +300,19 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     // Channel API: Uses timing_name from RPC (default: WS2812B-V5)
     // RX decode timing MUST match actual TX timing for correct capture
     fl::ChipsetTimingConfig resolved_timing;
+    fl::ClocklessEncoder resolved_encoder = fl::ClocklessEncoder::CLOCKLESS_ENCODER_WS2812;
     if (use_legacy_api) {
         resolved_timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+        resolved_encoder = fl::encoder_for<fl::TIMING_WS2812_800KHZ>();
         timing_name = "WS2812-800KHZ";
     } else if (timing_name == "UCS7604-800KHZ") {
         resolved_timing = fl::makeTimingConfig<fl::TIMING_UCS7604_800KHZ>();
+        resolved_encoder = fl::encoder_for<fl::TIMING_UCS7604_800KHZ>();
     } else {
         resolved_timing = fl::makeTimingConfig<fl::TIMING_WS2812B_V5>();
+        resolved_encoder = fl::encoder_for<fl::TIMING_WS2812B_V5>();
     }
-    fl::NamedTimingConfig timing_config(resolved_timing, timing_name.c_str());
+    fl::NamedTimingConfig timing_config(resolved_timing, timing_name.c_str(), resolved_encoder);
 
     // Dynamically allocate LED arrays for each lane
     fl::vector<fl::unique_ptr<fl::vector<CRGB>>> led_arrays;
@@ -370,7 +374,8 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         rx_channel_to_use,
         mState->rx_buffer,
         lane_sizes[0],  // base_strip_size (used for logging)
-        fl::RxDeviceType::RMT  // Default RX device type
+        fl::RxDeviceType::RMT,  // Default RX device type
+        timing_config.encoder
     );
 
     // Run test with debug output suppressed
@@ -526,12 +531,15 @@ fl::json AutoResearchRemoteControl::runParallelTestImpl(const fl::json& args) {
 
     // Get timing configuration
     fl::ChipsetTimingConfig resolved_timing;
+    fl::ClocklessEncoder resolved_encoder = fl::ClocklessEncoder::CLOCKLESS_ENCODER_WS2812;
     if (timing_name == "UCS7604-800KHZ") {
         resolved_timing = fl::makeTimingConfig<fl::TIMING_UCS7604_800KHZ>();
+        resolved_encoder = fl::encoder_for<fl::TIMING_UCS7604_800KHZ>();
     } else {
         resolved_timing = fl::makeTimingConfig<fl::TIMING_WS2812B_V5>();
+        resolved_encoder = fl::encoder_for<fl::TIMING_WS2812B_V5>();
     }
-    fl::NamedTimingConfig timing_config(resolved_timing, timing_name.c_str());
+    fl::NamedTimingConfig timing_config(resolved_timing, timing_name.c_str(), resolved_encoder);
 
     // 3. Parse each driver entry and validate
     struct DriverEntry {
@@ -755,7 +763,8 @@ fl::json AutoResearchRemoteControl::runParallelTestImpl(const fl::json& args) {
                 mState->rx_channel,
                 mState->rx_buffer,
                 primary_driver.lane_sizes[0],
-                fl::RxDeviceType::RMT
+                fl::RxDeviceType::RMT,
+                timing_config.encoder
             );
 
             int total_tests = 0;

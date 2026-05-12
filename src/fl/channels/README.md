@@ -412,8 +412,11 @@ The UCS7604 chipset supports 16-bit color depth, which benefits from gamma corre
 CRGB leds[NUM_LEDS];
 
 void setup() {
-    auto timing = fl::makeTimingConfig<fl::TIMING_UCS7604_800KHZ>();
-    fl::ChannelConfig config(fl::ClocklessChipset(2, timing), leds, RGB);
+    // makeClockless<>() carries both bit-period timing AND the UCS7604 encoder
+    // selector through to the channel. Use this one-liner for any non-WS2812
+    // clockless chipset — the 2-arg ClocklessChipset(pin, timing) form would
+    // default the encoder to WS2812.
+    fl::ChannelConfig config(fl::makeClockless<fl::TIMING_UCS7604_800KHZ>(2), leds, RGB);
 
     auto channel = FastLED.add(config);
     channel->setGamma(3.2f);  // Override gamma (default is 2.8)
@@ -449,14 +452,13 @@ CRGB warm_leds[60];
 CRGB cool_leds[60];
 
 void setup() {
-    auto timing = fl::makeTimingConfig<fl::TIMING_UCS7604_800KHZ>();
-
+    // makeClockless<>() carries the UCS7604 encoder selector with the timing.
     auto warm = FastLED.add(fl::ChannelConfig(
-        fl::ClocklessChipset(2, timing), warm_leds, RGB));
+        fl::makeClockless<fl::TIMING_UCS7604_800KHZ>(2), warm_leds, RGB));
     warm->setGamma(2.2f);  // Gentle curve for warm ambiance
 
     auto cool = FastLED.add(fl::ChannelConfig(
-        fl::ClocklessChipset(4, timing), cool_leds, RGB));
+        fl::makeClockless<fl::TIMING_UCS7604_800KHZ>(4), cool_leds, RGB));
     cool->setGamma(3.2f);  // Steep curve for high contrast
 }
 ```

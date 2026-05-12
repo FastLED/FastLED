@@ -12,6 +12,7 @@ namespace fl {
 /// Contains all input parameters needed for autoresearch (excludes output parameters)
 struct AutoResearchConfig {
     const fl::ChipsetTimingConfig& timing;       ///< Chipset timing configuration to test
+    fl::ClocklessEncoder encoder;                ///< Encoder selector (peer of timing; see issue #2467)
     const char* timing_name;                     ///< Timing name for logging (e.g., "WS2812B-V5")
     fl::span<fl::ChannelConfig> tx_configs;      ///< TX channel configurations to test (mutable for LED manipulation)
     const char* driver_name;                     ///< Driver name for logging (e.g., "RMT", "SPI", "PARLIO")
@@ -27,8 +28,10 @@ struct AutoResearchConfig {
                      fl::shared_ptr<fl::RxChannel> rc,
                      fl::span<uint8_t> rb,
                      int bss,
-                     fl::RxDeviceType rt)
+                     fl::RxDeviceType rt,
+                     fl::ClocklessEncoder enc = fl::ClocklessEncoder::CLOCKLESS_ENCODER_WS2812)
         : timing(t)
+        , encoder(enc)
         , timing_name(tn)
         , tx_configs(tc)
         , driver_name(dn)
