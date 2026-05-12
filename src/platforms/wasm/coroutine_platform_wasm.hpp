@@ -39,6 +39,48 @@
 // <pthread.h> into a header — that include is banned project-wide in favor
 // of fl/stl/thread.h. We only need this one symbol to terminate the worker
 // thread cleanly during destroyContext() teardown; see contextSwitch().
+//
+// ============================================================================
+// Coroutine teardown contract — IMPORTANT for callers writing coroutines
+// ============================================================================
+//
+// FastLED is built with `-fno-exceptions` (and so is the WASM target — see
+// `[all].compiler_flags` in build_flags.toml). On Emscripten, `pthread_exit`
+// under that configuration calls `_emscripten_thread_exit` followed by
+// `emscripten_unwind_to_js_event_loop` — it does NOT walk the C++ stack and
+// does NOT run destructors for objects living on it. With `-pthread`
+// `-sPROXY_TO_PTHREAD` the same is true; `pthread_exit` is thread-local but
+// still skips C++ unwinding.
+//
+// Implications for destroyContext():
+//
+//   * **Library frames are safe.** `pthread_coro_thread_main` and the
+//     `contextSwitch` path explicitly drop their `fl::unique_lock` /
+//     `fl::lock_guard` before reaching `pthread_exit(nullptr)`, so no
+//     `fl::mutex` is leaked through the teardown path. The pthread itself
+//     is `join()`-ed afterwards, so the OS thread is fully reclaimed.
+//
+//   * **User coroutine stack frames are NOT safe.** Any RAII-managed
+//     resource live on the user coroutine's stack at the moment
+//     destroyContext() asks the worker to exit — fl::unique_ptr slots,
+//     heap allocations held by smart pointers, file handles, lock guards
+//     in user code, etc. — will be abandoned without their destructors
+//     running. That is a real leak: the underlying allocations / handles
+//     are NOT released.
+//
+// Caller guidance:
+//
+//   1. Prefer cooperative shutdown. Have the coroutine body poll a "should
+//      stop" condition (e.g. `CoroutineContext::should_stop()` or an
+//      application-owned flag) and return through its normal exit path
+//      *before* destroyContext() is invoked. That path runs full RAII.
+//   2. If a hard teardown is unavoidable, keep ownership of long-lived
+//      resources on the OWNER (the object that calls destroyContext()) and
+//      hand only borrowed references / value copies into the coroutine.
+//      Then destruction order is controlled by the owner, not the worker
+//      stack.
+//   3. Do not rely on stack-based locks / counters inside the coroutine to
+//      release on exit — they won't.
 extern "C" __attribute__((noreturn)) void pthread_exit(void* retval);
 
 namespace fl {
@@ -121,6 +163,13 @@ public:
             //      wait) or calls pthread_exit() (contextSwitch).
             //   4. join() blocks until that exit completes — only then is it
             //      safe to delete the thread object and *ctx.
+            //
+            // NB: under `-fno-exceptions`, `pthread_exit` skips C++ stack
+            // unwinding. Library frames release their locks before exit (see
+            // contextSwitch / pthread_coro_thread_main), but RAII objects
+            // living on the *user* coroutine's stack are abandoned without
+            // destructors. See the "Coroutine teardown contract" block at
+            // the top of this file for the caller-facing implications.
             {
                 fl::lock_guard<fl::mutex> lk(ctx->mutex);
                 ctx->exit_requested = true;
