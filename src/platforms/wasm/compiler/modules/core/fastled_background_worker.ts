@@ -921,7 +921,7 @@ function handleScreenMapUpdate(payload) {
 function handleAudioSamples(payload) {
   // Buffer audio samples instead of pushing to WASM immediately.
   // Samples are flushed to WASM at the start of each frame in executeFrameLoop()
-  // to avoid JSPI interference when calling Module.ccall between frames.
+  // so Module.ccall happens in the same execution context as externLoop().
   workerState.audioSampleQueue.push(payload);
 
   if (!workerState.audioSampleBufferedOnce) {
@@ -1026,7 +1026,7 @@ async function executeFrameLoop(currentTime) {
 
     // Flush buffered audio samples to WASM BEFORE running C++ loop.
     // This ensures Module.ccall('pushAudioSamples') happens in the same
-    // execution context as externLoop(), avoiding JSPI interference.
+    // execution context as externLoop().
     flushAudioSamplesToWasm();
 
     // Call FastLED loop function synchronously (Asyncify removed - worker thread allows blocking)

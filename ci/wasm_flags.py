@@ -17,7 +17,6 @@ CLI (for meson run_command()):
 """
 
 import argparse
-import os
 import sys
 import tomllib
 from pathlib import Path
@@ -30,92 +29,12 @@ BUILD_FLAGS_TOML = (
 )
 
 
-# JSPI flags removed whenever the pthread back-end is in use (i.e. the default
-# now — JSPI is opt-in via FASTLED_WASM_JSPI=1). We match on prefix so the exact
-# JSPI_EXPORTS list can evolve without breaking the substitution.
-_JSPI_FLAG_PREFIXES = ("-sJSPI",)
-
-
-def _jspi_explicitly_requested() -> bool:
-    """Return True when the legacy JSPI back-end is explicitly opted into.
-
-    Selection: env var ``FASTLED_WASM_JSPI`` set to 1/true/yes/on. The pthread
-    back-end is the default since it works in every cross-origin-isolated
-    webview (WebKit/Safari, WebKitGTK, WebView2, Firefox, Chromium). JSPI is
-    only kept around as an opt-out for legacy or debugging use. See issue #2452.
-    """
-    val = os.environ.get("FASTLED_WASM_JSPI", "").strip().lower()
-    return val in ("1", "true", "yes", "on")
-
-
-def _pthreads_enabled() -> bool:
-    """Return True when the pthread coroutine back-end is in use (the default).
-
-    The pthread back-end is now the default. Pass ``FASTLED_WASM_JSPI=1`` in
-    the environment to switch back to the legacy JSPI back-end. See #2452.
-    """
-    return not _jspi_explicitly_requested()
-
-
 def _load_toml() -> dict[str, Any]:
     """Load and return the parsed build_flags.toml."""
     if not BUILD_FLAGS_TOML.exists():
         raise FileNotFoundError(f"Build flags TOML not found: {BUILD_FLAGS_TOML}")
     with open(BUILD_FLAGS_TOML, "rb") as f:
         return tomllib.load(f)
-
-
-def _apply_pthread_substitution(
-    defines: list[str], compiler_flags: list[str], link_flags: list[str]
-) -> None:
-    """Mutate flag lists in place to swap JSPI -> pthread when enabled.
-
-    - Compile: append ``-pthread`` and ``-DFASTLED_WASM_PTHREADS=1``.
-    - Link: strip ``-sJSPI*`` entries and append the ``[linking.pthread]``
-      block from build_flags.toml (``-pthread``, ``-sPROXY_TO_PTHREAD``,
-      ``-sPTHREAD_POOL_SIZE=4``).
-    """
-    if not _pthreads_enabled():
-        return
-
-    defines.append("-DFASTLED_WASM_PTHREADS=1")
-    compiler_flags.append("-pthread")
-
-    # Strip JSPI link flags via an explicit loop (project Python style — no list
-    # comprehensions for non-trivial filters; keeps the predicate debuggable).
-    filtered_link_flags: list[str] = []
-    for flag in link_flags:
-        is_jspi = False
-        for prefix in _JSPI_FLAG_PREFIXES:
-            if flag.startswith(prefix):
-                is_jspi = True
-                break
-        if not is_jspi:
-            filtered_link_flags.append(flag)
-    link_flags[:] = filtered_link_flags
-
-    # Substitute the [linking.pthread] block. Fail fast (not silent fallback)
-    # if the section is missing — silent default to [] would just trade a
-    # config error for a much later, much harder-to-diagnose link failure.
-    config = _load_toml()
-    linking_cfg = config.get("linking")
-    pthread_cfg = linking_cfg.get("pthread") if isinstance(linking_cfg, dict) else None
-    if not isinstance(pthread_cfg, dict) or "flags" not in pthread_cfg:
-        raise KeyError(
-            "Missing [linking.pthread].flags in build_flags.toml while the "
-            "pthread WASM coroutine back-end is selected (set "
-            "FASTLED_WASM_JSPI=1 to opt out). See issue #2452."
-        )
-    raw_flags = pthread_cfg["flags"]
-    if not isinstance(raw_flags, list):
-        raise TypeError(
-            "[linking.pthread].flags must be a list of strings; "
-            f"got {type(raw_flags).__name__}"
-        )
-    pthread_link: list[str] = []
-    for item in raw_flags:  # type: ignore[reportUnknownVariableType]
-        pthread_link.append(str(item))
-    link_flags.extend(pthread_link)
 
 
 def get_lib_compile_flags_dict(mode: str = "quick") -> dict[str, list[str]]:
@@ -145,11 +64,6 @@ def get_lib_compile_flags_dict(mode: str = "quick") -> dict[str, list[str]]:
     else:
         compiler_flags.extend(config.get("library", {}).get("compiler_flags", []))
         compiler_flags.extend(build_mode_config.get("flags", []))
-
-    # Library is compiled without link flags, but pthread substitution still
-    # needs to add -pthread + -DFASTLED_WASM_PTHREADS=1 to the compile units.
-    _unused_link: list[str] = []
-    _apply_pthread_substitution(defines, compiler_flags, _unused_link)
 
     return {"defines": defines, "compiler_flags": compiler_flags}
 
@@ -184,8 +98,6 @@ def get_sketch_compile_flags_dict(mode: str = "quick") -> dict[str, list[str]]:
     link_flags = list(config.get("linking", {}).get("base", {}).get("flags", []))
     link_flags.extend(config.get("linking", {}).get("sketch", {}).get("flags", []))
     link_flags.extend(build_mode_config.get("link_flags", []))
-
-    _apply_pthread_substitution(defines, compiler_flags, link_flags)
 
     return {
         "defines": defines,
