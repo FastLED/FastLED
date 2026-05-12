@@ -6,7 +6,6 @@
 
 #include "platforms/wasm/active_strip_data.cpp.hpp"
 #include "platforms/wasm/audio_input_wasm.cpp.hpp"
-#include "platforms/wasm/coroutine_platform_wasm.js.cpp.hpp"
 #include "platforms/wasm/engine_listener.cpp.hpp"
 #include "platforms/wasm/entry_point.cpp.hpp"
 #include "platforms/wasm/fs_wasm.cpp.hpp"

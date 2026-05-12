@@ -3,16 +3,8 @@
 /// @file js_fetch.cpp.hpp
 /// @brief WASM HTTP fetch shim — async dispatch + thread-safe callback table.
 ///
-/// Threading model under both back-ends:
+/// Threading model (pthread back-end, `-pthread` + `-sPROXY_TO_PTHREAD`):
 ///
-/// * **JSPI back-end** (`-sJSPI`): everything runs on the single WASM main
-///   thread. `js_fetch_async` is invoked from C++ user code; the JS-side
-///   `fetch().then(...)` resolves on the same thread; the success/error
-///   callback re-enters WASM via `Module._js_fetch_*_callback`. No
-///   cross-thread synchronization is actually needed — the mutex below
-///   is a single-threaded no-op.
-///
-/// * **Pthread back-end** (`-pthread`, `FASTLED_WASM_PTHREADS=1`):
 ///   1. Multiple sketch coroutines (each on its own pthread) can call
 ///      `WasmFetchRequest::response()` concurrently. `mNextRequestId` and
 ///      `mPendingCallbacks` are protected by `mCallbacksMutex` — uncontended
@@ -26,13 +18,9 @@
 ///      from JS. They lock the same callback-map mutex briefly. After
 ///      committing Promise state via the user callback, they invoke
 ///      `ICoroutineRuntime::instance().wakeWaiters()` to unpark any
-///      pthread blocked in `fl::platforms::await()` (see issue #2452
-///      Phase 2 in `coroutine_runtime_wasm.impl.hpp`).
+///      pthread blocked in `fl::platforms::await()`.
 ///
-/// Audit conclusion (Phase 3 of #2452): the existing async + callback-map
-/// design is already thread-safe under pthreads. The promise-wake latency
-/// concern raised in Phase 1's follow-ups is resolved by Phase 2's
-/// `wakeWaiters()` hook installed below.
+/// See issue #2452 for the JSPI -> pthread migration history.
 
 #include "platforms/wasm/js_fetch.h"
 #include "fl/net/http/fetch.h"  // Include for fl::net::http::Response definition
@@ -120,8 +108,7 @@ extern "C" EMSCRIPTEN_KEEPALIVE void js_fetch_success_callback(u32 request_id, c
     } else {
         FL_WARN("Warning: No pending callback found for fetch success request " << request_id);
     }
-    // Wake any pthread parked inside fl::platforms::await(); cheap no-op on
-    // JSPI (default suspendMainthread() doesn't park on a futex).
+    // Wake any pthread parked inside fl::platforms::await().
     fl::platforms::ICoroutineRuntime::instance().wakeWaiters();
 }
 

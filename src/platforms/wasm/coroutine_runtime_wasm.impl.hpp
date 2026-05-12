@@ -5,33 +5,22 @@
 /// @file coroutine_runtime_wasm.impl.hpp
 /// @brief WASM coroutine runtime — pumps cooperative coroutine runner
 ///
-/// Provides cooperative coroutines in WASM through one of two back-ends,
-/// selected at compile time:
-///   * pthreads + SharedArrayBuffer (DEFAULT since #2452 phase 6) — via
-///     CoroutinePlatformPthread, when FASTLED_WASM_PTHREADS=1 is defined.
-///     Works in every cross-origin isolated webview (WebKit/Safari, Firefox,
-///     WebView2, WebKitGTK).
-///   * JSPI (opt-out) — via CoroutinePlatformWasm. Requires -sJSPI; only
-///     supported in Chromium-based engines. Enabled when the build is
-///     invoked with FASTLED_WASM_JSPI=1 in the environment, which causes
-///     ci/wasm_flags.py to suppress the -DFASTLED_WASM_PTHREADS define.
+/// Provides cooperative coroutines in WASM via pthreads + SharedArrayBuffer
+/// (CoroutinePlatformPthread). Works in every cross-origin isolated webview
+/// (WebKit/Safari, Firefox, WebView2, WebKitGTK).
 ///
 /// The generic CoroutineRunner handles scheduling; this file just wires
-/// the appropriate platform implementation and runtime together. See
-/// issue #2452.
+/// the platform implementation and runtime together. See issue #2452 for
+/// the JSPI -> pthread migration history.
 
 #include "platforms/wasm/is_wasm.h"
 
 #ifdef FL_IS_WASM
 
 // IWYU pragma: begin_keep
-#ifdef FASTLED_WASM_PTHREADS
-#include "platforms/wasm/coroutine_platform_wasm_pthread.hpp"
+#include "platforms/wasm/coroutine_platform_wasm.hpp"
 #include <emscripten/atomic.h>
 #include "fl/stl/atomic.h"
-#else
-#include "platforms/wasm/coroutine_platform_wasm.hpp"
-#endif
 #include "platforms/coroutine_runtime.h"
 #include "platforms/coroutine.h"
 #include "fl/stl/singleton.h"
@@ -60,14 +49,10 @@ public:
         }
     }
 
-#ifdef FASTLED_WASM_PTHREADS
-    /// pthread back-end: park on a real futex instead of busy-yielding.
+    /// Park on a real futex instead of busy-yielding.
     ///
     /// fl::platforms::await() polls a Promise with this method between
-    /// re-checks. On JSPI the yield is cheap (engine reschedules the
-    /// suspended frame), but on the pthread back-end the calling pthread
-    /// would otherwise spin via condition_variable hops. Use the WASM
-    /// `Atomics.wait` primitive directly so the worker pthread parks until
+    /// re-checks. The calling pthread parks via WASM `Atomics.wait` until
     /// either (a) the timeout elapses or (b) wakeWaiters() notifies on the
     /// shared counter from a JS callback.
     ///
@@ -115,7 +100,6 @@ private:
     /// The exact value carries no information — `Atomics.wait` parks while
     /// the loaded value equals the snapshot, so any change at all is a wake.
     fl::atomic<fl::u32> mWakeupCounter{0};
-#endif  // FASTLED_WASM_PTHREADS
 };
 
 //=============================================================================
@@ -125,13 +109,8 @@ private:
 namespace {
 struct WasmPlatformRegistrar {
     WasmPlatformRegistrar() FL_NOEXCEPT {
-#ifdef FASTLED_WASM_PTHREADS
         ICoroutinePlatform::setInstance(
             &fl::Singleton<CoroutinePlatformPthread>::instance());
-#else
-        ICoroutinePlatform::setInstance(
-            &fl::Singleton<CoroutinePlatformWasm>::instance());
-#endif
     }
 };
 static WasmPlatformRegistrar sWasmPlatformRegistrar;

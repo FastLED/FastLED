@@ -82,9 +82,9 @@ def _run_http_server(port: int, directory: str) -> None:
         """Handler with correct MIME types for ES module scripts.
 
         Sends Cross-Origin-Opener-Policy and Cross-Origin-Embedder-Policy
-        headers so the page is cross-origin isolated. Required for the
-        pthread WASM back-end (SharedArrayBuffer + Atomics.wait); benign
-        for the JSPI back-end. See issue #2452.
+        headers so the page is cross-origin isolated — required for the
+        WASM pthread back-end (SharedArrayBuffer + Atomics.wait).
+        See issue #2452.
         """
 
         extensions_map = {
