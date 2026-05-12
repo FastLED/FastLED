@@ -25,7 +25,7 @@ namespace fl {
 /// **Custom / third-party / mock drivers** whose names aren't in the
 /// `fl::Bus` enum should be bound either by priority (clear competing
 /// drivers via `clearAllDrivers()` and let the mock win priority dispatch)
-/// or via `ChannelManager::setExclusiveDriver(name)` for process-wide
+/// or via `ChannelManager::setExclusiveDriverByName(name)` for process-wide
 /// binding. There is no string-typed affinity field on `ChannelOptions`.
 struct ChannelOptions {
     CRGB mCorrection = UncorrectedColor;

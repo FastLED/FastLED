@@ -24,6 +24,7 @@
 
 #include "fl/channels/driver.h"
 #include "fl/channels/data.h"
+#include "fl/channels/bus.h"
 #include "fl/system/engine_events.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/shared_ptr.h"
@@ -93,15 +94,26 @@ public:
     void setDriverEnabled(const char* name, bool enabled) FL_NOEXCEPT;
 
     /// @brief Enable only one driver exclusively (disables all others)
-    /// @param name Driver name to enable exclusively (case-sensitive, e.g., "RMT", "SPI", "PARLIO")
+    /// @param bus Bus enum identifying the driver to enable (typed, typo-safe)
+    /// @return true if driver was found and set as exclusive, false otherwise
+    /// @note Typed overload — prefer this over the string-based variant for
+    ///       built-in drivers. Delegates to `setExclusiveDriverByName(busName(bus))`.
+    bool setExclusiveDriver(Bus bus) FL_NOEXCEPT;
+
+    /// @brief Enable only one driver exclusively (disables all others) — by-name escape hatch
+    /// @param name Driver name to enable exclusively (case-sensitive, e.g., "MOCK_SPI")
     /// @return true if driver was found and set as exclusive, false if name not found
+    /// @note Use this only for drivers whose names are NOT in the `fl::Bus` enum
+    ///       (mock drivers, custom third-party drivers, RPC-resolved names). For
+    ///       built-in drivers, prefer the typed `setExclusiveDriver(fl::Bus)`
+    ///       overload — it catches typos at compile time.
     /// @note Atomically disables all drivers, then enables the specified one
     /// @note Changes take effect immediately on next enqueue()
     /// @note If name is not found, all drivers remain disabled (defensive behavior)
     /// @note Use nullptr or empty string to disable all drivers (returns false)
     /// @warning This will disable ALL other registered drivers, including future additions
     /// @warning This ensures forward compatibility - new drivers are automatically excluded
-    bool setExclusiveDriver(const char* name) FL_NOEXCEPT;
+    bool setExclusiveDriverByName(const char* name) FL_NOEXCEPT;
 
     /// @brief Change the priority of a registered driver
     /// @param name Driver name (case-sensitive, e.g., "RMT", "SPI", "PARLIO")

@@ -16,6 +16,7 @@
 
 #include <Arduino.h>
 #include <FastLED.h>
+#include "fl/channels/manager.h"        // ChannelManager::setExclusiveDriverByName (by-name escape hatch)
 #include "fl/stl/sstream.h"
 #include "PlatformConfig.h"
 
@@ -261,8 +262,13 @@ private:
         ss << LINE_SEP;
         Serial.print(ss.str().c_str());
 
-        // Attempt to set this driver as exclusive
-        if (!FastLED.setExclusiveDriver(driverName)) {
+        // Attempt to set this driver as exclusive. `driverName` is a runtime
+        // string (the test iterates over discovered drivers by name), so we use
+        // the by-name escape hatch on ChannelManager rather than the typed
+        // FastLED.setExclusiveDriver(fl::Bus) overload. Make sure every driver
+        // is enrolled first so the lookup can succeed.
+        FastLED.enableAllDrivers();
+        if (!fl::ChannelManager::instance().setExclusiveDriverByName(driverName)) {
             Serial.print("  [SKIP] Could not set ");
             Serial.print(driverName);
             Serial.println(" as exclusive driver (not available)");
