@@ -47,11 +47,14 @@ FASTLED_SHARED_PTR(ChannelData);
 /// after `Channel<Bus, Chipset>` becomes templated in Phase 3b. See #2428.
 class Channel: public CPixelLEDController<RGB>, public IChannel {
 public:
-    /// @brief Create a new channel with optional affinity binding
-    /// @param config Channel configuration (includes optional affinity for driver selection)
+    /// @brief Create a new channel with optional `mBus` driver pinning.
+    /// @param config Channel configuration. If `config.options.mBus` is not
+    ///        `Bus::AUTO`, the channel pins itself to the driver named by
+    ///        `busName(mBus)` via `ChannelManager::findDriverByName()`. On a
+    ///        miss, `showPixels()` falls back to AUTO/priority dispatch and
+    ///        emits a one-shot `FL_ERROR` (see channel.cpp.hpp).
     /// @return Shared pointer to channel (auto-cleanup when out of scope)
-    /// @note Channels always use ChannelManager by default
-    /// @note If config.affinity is set, binds to the named driver from ChannelManager
+    /// @note Channels always use ChannelManager by default.
     static ChannelPtr create(const ChannelConfig& config);
 
     /// @brief Destructor
