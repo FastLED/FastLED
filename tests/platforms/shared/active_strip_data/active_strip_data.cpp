@@ -8,18 +8,18 @@
 
 #include "test.h"
 #include "FastLED.h"
+#include "platforms/stub/bus_traits.h"  // for BusTraits<Bus::STUB>
 #include "platforms/shared/active_strip_data/active_strip_data.h"
 #include "platforms/shared/active_strip_tracker/active_strip_tracker.h"
 
 using namespace fl;
 
-FL_TEST_CASE("Stub driver is registered") {
-    // Verify the stub driver is properly registered in ChannelManager
-    auto& manager = fl::ChannelManager::instance();
-    FL_CHECK_GT(manager.getDriverCount(), 0);
-
-    auto stubEngine = manager.getDriverByName("STUB");
-    FL_REQUIRE(stubEngine != nullptr);
+FL_TEST_CASE("Stub driver singleton is reachable") {
+    // Post-#2428 the stub driver is not auto-registered with the manager;
+    // legacy clockless controllers pre-bind to BusTraits<Bus::STUB>::instancePtr()
+    // directly. Verify the singleton is reachable (i.e. the driver TU linked).
+    auto stub = fl::BusTraits<fl::Bus::STUB>::instancePtr();
+    FL_REQUIRE(stub != nullptr);
 }
 
 FL_TEST_CASE("ClocklessController - Basic LED capture with single strip") {

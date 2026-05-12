@@ -83,17 +83,12 @@ protected:
     }
 
     static fl::shared_ptr<IChannelDriver> getClocklessSpiEngine() FL_NOEXCEPT {
-#if FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY
-        // Phase 5c of #2428 (opt-in mode): bypass `ChannelManager` and bind
-        // directly to the `BusTraits<Bus::SPI>` singleton. Naming
+        // Phase 5c of #2428: bypass `ChannelManager` and bind directly to
+        // the `BusTraits<Bus::SPI>` singleton. Naming
         // `BusTraits<Bus::SPI>::instancePtr()` here is the ODR-use that
-        // lets the linker keep ONLY the SPI clockless driver TU when the
-        // user opts into `FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY=1` -- the
-        // binary-size fix from #2420.
+        // lets the linker keep ONLY the SPI clockless driver TU -- post-#2428
+        // the ChannelManager-driven registry path is gone.
         return BusTraits<Bus::SPI>::instancePtr();
-#else
-        return ChannelManager::instance().getDriverByName("SPI");
-#endif
     }
 };
 }  // namespace fl

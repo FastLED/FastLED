@@ -182,6 +182,7 @@
 // ============================================================================
 
 #include <FastLED.h>
+#include "fl/channels/all_drivers.h"  // for FastLED.enableAllDrivers() post-#2428
 #include "fl/stl/undef.h"  // Undefine Arduino macros (DEFAULT, INPUT, OUTPUT)
 #include "fl/stl/sstream.h"
 #include "Common.h"
@@ -395,6 +396,11 @@ void setup() {
     // GPIO baseline test moved to loop() - wait for RPC start signal before testing
     // This allows JSON-RPC commands (testGpioConnection, findConnectedPins) to run first
     FL_WARN("[GPIO BASELINE TEST] Deferred to loop() - waiting for RPC start signal");
+
+    // Post-#2428 the channel driver registry no longer auto-populates. This
+    // example needs every available driver enrolled with ChannelManager so the
+    // discovery + autoresearch loop below can enumerate them.
+    FastLED.enableAllDrivers();
 
     // List all available drivers and store globally
     g_autoresearch_state->drivers_available = FastLED.getDriverInfos();

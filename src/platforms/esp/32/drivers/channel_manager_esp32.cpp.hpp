@@ -38,16 +38,6 @@
 #include "fl/channels/adapters/spi_channel_adapter.h"
 #include "fl/stl/noexcept.h"
 
-// FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY: when defined to 1, the legacy
-// `initChannelDrivers()` body becomes a no-op. Users opting in must call
-// `fl::enableDrivers<fl::Bus::X...>()` explicitly to register the drivers
-// they actually need -- this is the pathway that lets the linker drop unused
-// driver TUs (#2420 binary-bloat fix). Default is 0 for backward compatibility;
-// Phase 5b of #2428 will flip the default.
-#ifndef FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY
-#define FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY 0
-#endif
-
 // Platform detection for I2S/LCD_SPI drivers
 #include "platforms/esp/is_esp.h"
 
@@ -338,41 +328,16 @@ static void addI2sIfPossible(ChannelManager& manager) FL_NOEXCEPT {
 
 namespace platforms {
 
-/// @brief Initialize channel drivers for ESP32
+/// @brief Initialize channel drivers for ESP32 (no-op, post-#2428).
 ///
-/// Called lazily on first access to ChannelManager::instance().
-/// Registers platform-specific drivers (PARLIO, SPI, UART, RMT) with the bus manager.
-///
-/// Defining `FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY=1` disables this auto-init.
-/// Users opting in must call `fl::enableDrivers<fl::Bus::X...>()` explicitly to
-/// register only the drivers they need -- this is the pathway that lets the
-/// linker drop unused driver TUs (#2420 binary-bloat fix). Phase 5b of #2428
-/// will flip the default; this commit (Phase 5a) just adds the opt-in.
+/// Drivers do NOT auto-register with `ChannelManager`. Only the
+/// platform-default driver TU (named by the legacy clockless controller's
+/// Phase 5b pre-bind via `BusTraits<DefaultBus<Chipset>>::instancePtr()`)
+/// links into the binary. Users who need additional drivers at runtime call
+/// `fl::enableDrivers<fl::Bus::X, ...>()` or `FastLED.enableAllDrivers()`.
 void initChannelDrivers() FL_NOEXCEPT {
-#if FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY
-    // Opt-in mode: skip auto-registration entirely. Users must call
-    // fl::enableDrivers<fl::Bus::X, ...>() to register the drivers they need.
-    FL_DBG("ESP32: Legacy driver auto-init disabled (FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY=1)");
-#else
-    FL_DBG("ESP32: Lazy initialization of channel drivers");
-
-    auto& manager = channelManager();
-
-    // Add drivers in priority order (each function handles platform-specific ifdefs)
-    // CRITICAL: Native SPI drivers (priority 10) registered first, then HW SPI fallback
-    detail::addI2sSpiIfPossible(manager);       // Priority 10 (native I2S parallel SPI, ESP32dev)
-    detail::addLcdSpiIfPossible(manager);       // Priority 10 (native LCD_CAM SPI, ESP32-S3)
-    detail::addSpiHardwareIfPossible(manager);  // Priority 5-9 (unified, true SPI fallback)
-    detail::addParlioIfPossible(manager);       // Priority 4 (clockless)
-    detail::addLcdRgbIfPossible(manager);       // Priority 3 (clockless)
-    detail::addSpiIfPossible(manager);          // Priority 0 (clockless-over-SPI)
-    detail::addUartIfPossible(manager);         // Priority -1 (clockless)
-    detail::addRmtIfPossible(manager);          // Priority 2 (clockless)
-    detail::addLcdClocklessIfPossible(manager); // Priority 1 (clockless, ESP32-S3, replaces misnamed I2S)
-    detail::addI2sIfPossible(manager);          // Priority 1 (clockless, legacy I2S name)
-
-    FL_DBG("ESP32: Channel drivers initialized");
-#endif  // !FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY
+    // Intentionally empty. See `fl::enableDrivers<>()` / `enableAllDrivers()`
+    // for the opt-in registration path.
 }
 
 } // namespace platforms

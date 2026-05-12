@@ -17,23 +17,17 @@
 #include "fl/stl/stdint.h"
 #include "platforms/is_platform.h"
 
-// FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY: opt-in macro that, when set to 1,
-// disables the legacy `initChannelDrivers()` auto-registration AND switches
-// per-platform legacy clockless controllers (stub `ClocklessController`,
-// ESP32 `ClocklessIdf5`, etc.) to pre-bind directly to their default
-// `BusTraits<Bus::X>::instancePtr()` -- bypassing `ChannelManager` entirely.
+// Post-#2428 architecture: drivers do NOT auto-register with `ChannelManager`.
+// Only the platform-default driver TU (named by the legacy clockless controller's
+// Phase 5b pre-bind via `BusTraits<DefaultBus<Chipset>>::instancePtr()`) links
+// into the binary. Users who need additional drivers at runtime call:
+//   - `fl::enableDrivers<fl::Bus::X, ...>()` for selective opt-in,
+//   - `FastLED.enableAllDrivers()` for 3.10.3-style universal enrollment,
+//   - `FastLED.setExclusiveDriver<fl::Bus::X>()` to register a non-default driver
+//     at high priority (must be called before `addLeds<>` to override the pre-bind).
 //
-// This is the toggle that lets `--gc-sections` drop unreferenced driver TUs
-// (the binary-size fix from #2420). Default 0 for backward compatibility;
-// users opting in must call `fl::enableDrivers<fl::Bus::X...>()` explicitly
-// for any non-default driver they need at runtime.
-//
-// Defined here (early-included by every channels TU) so all consumers see the
-// same value -- the macro is checked from per-platform legacy clockless
-// headers as well as channel_manager_esp32.cpp.hpp.
-#ifndef FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY
-#define FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY 0
-#endif
+// The historical `FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY` opt-in macro has been
+// removed; the previously opt-in behaviour is now the only behaviour.
 
 namespace fl {
 

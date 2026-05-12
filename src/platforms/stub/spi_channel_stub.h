@@ -84,14 +84,11 @@ protected:
     }
 
     static fl::shared_ptr<IChannelDriver> getStubSpiEngine() FL_NOEXCEPT {
-#if FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY
-        // Phase 5c of #2428 (opt-in mode): bypass `ChannelManager` and bind
-        // directly to the `BusTraits<Bus::STUB>` singleton -- stub builds
-        // route every clockless/SPI chipset through the same no-op driver.
+        // Phase 5c of #2428: bypass `ChannelManager` and bind directly to
+        // the `BusTraits<Bus::STUB>` singleton. Stub builds route every
+        // clockless/SPI chipset through the same no-op driver. Naming the
+        // singleton here ODR-links the stub driver TU.
         return BusTraits<Bus::STUB>::instancePtr();
-#else
-        return ChannelManager::instance().getDriverByName("SPI");
-#endif
     }
 };
 

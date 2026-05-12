@@ -46,6 +46,7 @@ FL_DISABLE_WARNING_POP
 
 #include "platforms/stub/coroutine_stub.h"  // for cleanup_coroutine_threads(), CoroutineRunner
 #include "platforms/esp/32/drivers/parlio/parlio_peripheral_mock.h"
+#include "fl/channels/all_drivers.h"     // for fl::enableAllDrivers() (post-#2428)
 #include "fl/stl/cstdlib.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/system/engine_events.h"
@@ -81,6 +82,13 @@ int fl_run_tests(int argc, const char** argv) {
     std::cout << "Pre-initializing CoroutineRunner singleton" << std::endl;
     fl::detail::CoroutineRunner::instance();
     std::cout << "CoroutineRunner singleton pre-initialized successfully" << std::endl;
+
+    // Post-#2428: the channel driver registry no longer auto-populates.
+    // Enable every platform-available driver so legacy `FastLED.addLeds<>()`
+    // AND Channel API `FastLED.add(cfg)` paths both have a driver to dispatch
+    // to on host. Tests that need stricter isolation can call
+    // `manager.clearAllDrivers()` followed by their own `enableDrivers<>()`.
+    fl::enableAllDrivers();
 
     // Run fl_unittest test framework
     fl::test::RunOptions opts = fl::test::parse_args(argc, (const char**)argv);

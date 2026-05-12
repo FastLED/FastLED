@@ -51,16 +51,13 @@ public:
         // Create channel data with pin and timing configuration
         ChipsetTimingConfig timing = makeTimingConfig<TIMING>();
         mChannelData = ChannelData::create(DATA_PIN, timing);
-#if FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY
-        // Phase 5b of #2428 (opt-in mode): pre-bind to the stub driver
-        // singleton so showPixels() bypasses ChannelManager entirely.
-        // Naming BusTraits<Bus::STUB>::instancePtr() here is the ODR-use
-        // that lets the linker keep ONLY the stub driver TU.
-        // Default mode (macro 0) leaves mDriver unbound so the existing
-        // selectDriverForChannel() path runs each frame -- preserves
-        // backward compat for tests that register custom mock drivers.
+        // Phase 5b of #2428: pre-bind to the stub driver singleton so
+        // showPixels() bypasses ChannelManager entirely. Naming
+        // BusTraits<Bus::STUB>::instancePtr() here is the ODR-use that
+        // lets the linker keep ONLY the stub driver TU -- post-#2428
+        // drivers do not auto-register, so this pre-bind is what links
+        // the stub singleton.
         mDriver = BusTraits<Bus::STUB>::instancePtr();
-#endif
     }
 
     virtual void init() FL_NOEXCEPT override { }
@@ -68,19 +65,15 @@ public:
 protected:
     virtual void showPixels(PixelController<RGB_ORDER>& pixels) FL_NOEXCEPT override
     {
-        // Get driver (lock weak_ptr to shared_ptr)
+        // Phase 5b of #2428: use the pre-bound driver directly. Legacy
+        // `addLeds<>`-style controllers name `BusTraits<Bus::STUB>::instancePtr()`
+        // in their constructor so this is the platform-default stub driver.
+        // For runtime overrides, sketches use `FastLED.add(cfg)` (Channel API)
+        // with `cfg.options.mBus` -- the manager-driven Channel path stays.
         fl::shared_ptr<IChannelDriver> driver = mDriver.lock();
-
-        // If driver is null/expired, select one from ChannelManager
         if (!driver) {
-            driver = ChannelManager::instance().selectDriverForChannel(mChannelData, fl::string());  // Empty affinity
-            if (driver) {
-                // Cache the selected driver as weak_ptr
-                mDriver = driver;
-            } else {
-                FL_ERROR("ClocklessController(stub): No compatible driver found - cannot transmit");
-                return;
-            }
+            FL_ERROR("ClocklessController(stub): No compatible driver found - cannot transmit");
+            return;
         }
 
         // Wait for previous transmission to complete and release buffer

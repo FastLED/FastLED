@@ -204,9 +204,9 @@ protected:
     ///
     /// Used by legacy `addLeds<>`-style controllers (e.g. `ClocklessIdf5`) to
     /// route directly to a `BusTraits<DefaultBus>::instancePtr()` singleton at
-    /// construction time. Combined with `FASTLED_DISABLE_LEGACY_DRIVER_REGISTRY=1`,
-    /// this is what lets `--gc-sections` drop unreferenced driver TUs (Phase 5b
-    /// of #2428 — the binary-size fix for #2420).
+    /// construction time. Post-#2428 this is the mechanism that lets
+    /// `--gc-sections` drop unreferenced driver TUs from default builds
+    /// (Phase 5b — the binary-size fix for #2420 / #2421).
     ///
     /// @note Stored as `weak_ptr` to avoid holding the driver alive past the
     ///       caller's intent. The caller (typically the static singleton in a
