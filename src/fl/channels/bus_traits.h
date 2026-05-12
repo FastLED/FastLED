@@ -83,4 +83,39 @@ inline void enableDrivers() FL_NOEXCEPT {
     (void)expand{0, detail::bus_register_one<Buses>()...};
 }
 
+/// @brief Compile-time linker keep-alive hook for a single `fl::Bus`.
+///
+/// Used by the legacy `FastLED.addLeds<..., fl::Bus B>(...)` template path
+/// (see #2460). When `B != Bus::AUTO`, naming `BusTraits<B>::instance` here
+/// is what makes `--gc-sections` retain the named driver's translation unit
+/// even though the legacy controller body never invokes the singleton
+/// directly. The `Bus::AUTO` specialization is a no-op so calls without an
+/// explicit Bus param remain byte-for-byte identical to pre-#2460 code.
+namespace detail {
+
+template<fl::Bus B>
+struct BusKeepAliveImpl {
+    static inline void odr_use() FL_NOEXCEPT {
+        // ODR-use the singleton accessor's address — sufficient to keep
+        // the driver TU alive. We do NOT call `instance()` here because
+        // some platforms construct the driver eagerly inside the Meyers
+        // singleton and we want `Bus::X`-tagged `addLeds<>` to behave as
+        // a pure compile-time annotation (no runtime side effect beyond
+        // the linker keep-alive itself).
+        (void)&BusTraits<B>::instance;
+    }
+};
+
+template<>
+struct BusKeepAliveImpl<fl::Bus::AUTO> {
+    static inline void odr_use() FL_NOEXCEPT {}  // AUTO: no pinning, no ODR-use.
+};
+
+}  // namespace detail
+
+template<fl::Bus B>
+inline void busKeepAlive() FL_NOEXCEPT {
+    detail::BusKeepAliveImpl<B>::odr_use();
+}
+
 }  // namespace fl

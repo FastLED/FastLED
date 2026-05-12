@@ -341,14 +341,15 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
         (!driver || driver->getName() != busKey)) {
         auto busDriver = ChannelManager::instance().findDriverByName(busKey);
         if (!busDriver) {
-            // Typed Bus miss — emit the actionable hint with the two
-            // currently-shipping remediations. The third option
-            // (`addLeds<..., fl::Bus::X>(...)`) is planned in #2460.
+            // Typed Bus miss — emit the actionable hint with the three
+            // currently-shipping remediations (option 3 added in #2460).
             FL_ERROR("Channel '" << mName << "': Driver '" << busKey
                 << "' wasn't instantiated. Resolve with: "
                 << "(1) fl::enableDrivers<fl::Bus::" << busKey << ">() "
-                << "(links only this driver), or "
-                << "(2) FastLED.enableAllDrivers() (links every driver). "
+                << "(links only this driver), "
+                << "(2) FastLED.enableAllDrivers() (links every driver), or "
+                << "(3) FastLED.addLeds<..., fl::Bus::" << busKey << ">(...) "
+                << "(legacy API; pins Bus + triggers linker keep-alive). "
                 << "Defaulting to AUTO/priority dispatch.");
         } else {
             // Registered, but canHandle() said no — bus/chipset mismatch.

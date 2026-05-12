@@ -163,7 +163,17 @@ fl::TypedChannel<fl::Bus::LCD_SPI, fl::ClocklessChipset>::create(cfg);  // compi
 
 `TypedChannel<Bus, Chipset>` lives in `fl/channels/channel_typed.h`. It returns a `ChannelPtr` to the regular non-template runtime `Channel` so callbacks, the draw list, and `ChannelManager` see one channel type.
 
-> **Planned**: `FastLED.addLeds<CHIPSET, PIN, ORDER, fl::Bus::X>(leds, n)` — a trailing default template parameter on the legacy `addLeds<>` shape. See #2460. Not in tree yet.
+**Legacy `addLeds<>` Bus pinning (#2460):** every `FastLED.addLeds<>` variant accepts an optional trailing `fl::Bus B = fl::Bus::AUTO` template parameter. `B = AUTO` (the default) leaves call sites byte-for-byte unchanged; `B != AUTO` ODR-uses `fl::BusTraits<B>::instance` so `--gc-sections` retains the named driver TU.
+
+```cpp
+// Clockless: pin to RMT at compile time.
+FastLED.addLeds<WS2812, 4, GRB, fl::Bus::RMT>(leds, 60);
+
+// SPI: pin to SPI at compile time.
+FastLED.addLeds<APA102, 23, 18, RGB, DATA_RATE_MHZ(12), fl::Bus::SPI>(leds, 60);
+```
+
+The Bus param triggers linker keep-alive in every variant. For the SPI variants on the `FASTLED_SPI_USES_CHANNEL_API` branch, the parameter also populates `cfg.options.mBus = B` so the channel routes through the named driver at runtime. Legacy non-Channel-API controllers keep their platform-default routing and rely on the linker keep-alive alone — for full runtime routing through a specific Bus, prefer `FastLED.add(cfg)` with `cfg.options.mBus = B`.
 
 ### Runtime Bus Selection (non-template `FastLED.add(cfg)`)
 
@@ -193,7 +203,7 @@ void setup() {
 }
 ```
 
-If `cfg.options.mBus` names a driver that — for whatever reason — isn't in the manager's registry, `Channel::showPixels` emits a one-shot `FL_ERROR` listing the resolution options (`fl::enableDrivers<fl::Bus::X>()` or `FastLED.enableAllDrivers()`) and falls back to AUTO/priority dispatch (#2455).
+If `cfg.options.mBus` names a driver that — for whatever reason — isn't in the manager's registry, `Channel::showPixels` emits a one-shot `FL_ERROR` listing the resolution options (`fl::enableDrivers<fl::Bus::X>()`, `FastLED.enableAllDrivers()`, or the legacy `FastLED.addLeds<..., fl::Bus::X>(...)` shape) and falls back to AUTO/priority dispatch (#2455, #2460).
 
 Passing `fl::Bus::AUTO` (the default) skips the pinning step and lets `ChannelManager` pick by priority — identical to constructing the config without touching `cfg.options.mBus`.
 
