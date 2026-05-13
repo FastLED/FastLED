@@ -9,6 +9,7 @@ Provides a clean interface for building FastLED projects with PlatformIO.
 """
 
 import gc
+import hashlib
 import platform
 import shutil
 import subprocess
@@ -58,6 +59,7 @@ def _init_platformio_build(
     verbose: bool,
     example: str,
     paths: FastLEDPaths,
+    build_dir: Optional[Path] = None,
     additional_defines: Optional[list[str]] = None,
     additional_include_dirs: Optional[list[str]] = None,
     additional_libs: Optional[list[str]] = None,
@@ -70,7 +72,7 @@ def _init_platformio_build(
     uses the same project structure.
     """
     project_root = resolve_project_root()
-    build_dir = project_root / ".build" / "pio" / board.board_name
+    build_dir = build_dir or (project_root / ".build" / "pio" / board.board_name)
 
     if not use_fbuild:
         # Check for and fix corrupted packages before building
@@ -377,7 +379,7 @@ class PioCompiler(Compiler):
 
         # fbuild path: run on main thread for reliable Ctrl+C handling
         if self.use_fbuild:
-            return self._build_fbuild_sync(examples)
+            return self._build_fbuild(examples)
 
         # Acquire the global package lock for the first build (package installation)
 
@@ -415,6 +417,179 @@ class PioCompiler(Compiler):
             for future in futures:
                 future.cancel()
             raise
+
+        return futures
+
+    def _build_fbuild(self, examples: list[str]) -> list[Future[SketchResult]]:
+        """Build examples using fbuild, preferring ``ci`` when available."""
+        from ci.util.fbuild_runner import (
+            fbuild_supports_ci,
+            fbuild_supports_compile_many,
+        )
+
+        if fbuild_supports_ci():
+            return self._build_fbuild_ci(examples)
+        if fbuild_supports_compile_many():
+            print(
+                "fbuild ci is unavailable in the installed fbuild; "
+                "falling back to fbuild compile-many."
+            )
+            return self._build_fbuild_compile_many(examples)
+
+        print(
+            "fbuild ci and compile-many are unavailable in the installed fbuild; "
+            "falling back to the legacy serial loop."
+        )
+        return self._build_fbuild_sync(examples)
+
+    def _compile_many_project_dir(self, example: str, index: int) -> Path:
+        """Return the staged project directory for one compile-many sketch."""
+        if index == 0:
+            return self.build_dir
+
+        example_path = Path(example)
+        if example_path.is_absolute():
+            digest = hashlib.sha1(str(example_path).encode("utf-8")).hexdigest()[:12]
+            safe_name = "".join(
+                ch if ch.isalnum() or ch in "._-" else "_" for ch in example_path.name
+            ) or f"example_{index}"
+            return self.build_dir / "compile_many" / f"{safe_name}_{digest}"
+        return self.build_dir / "compile_many" / example_path
+
+    def _stage_fbuild_compile_many_projects(
+        self, examples: list[str]
+    ) -> list[tuple[str, Path]]:
+        """Stage one PlatformIO-compatible project directory per example."""
+        staged_projects: list[tuple[str, Path]] = []
+        for index, example in enumerate(examples):
+            project_dir = self._compile_many_project_dir(example, index)
+            init_result = _init_platformio_build(
+                self.board,
+                self.verbose,
+                example,
+                self.paths,
+                build_dir=project_dir,
+                additional_defines=self.additional_defines,
+                additional_include_dirs=self.additional_include_dirs,
+                additional_libs=self.additional_libs,
+                use_fbuild=True,
+            )
+            if not init_result.success:
+                raise RuntimeError(init_result.output)
+            staged_projects.append((example, project_dir))
+        return staged_projects
+
+    def _build_fbuild_compile_many(
+        self, examples: list[str]
+    ) -> list[Future[SketchResult]]:
+        """Build examples with one ``fbuild compile-many`` invocation."""
+        from ci.util.fbuild_runner import run_fbuild_compile_many
+
+        return self._build_fbuild_batch(
+            examples=examples,
+            command_label="compile-many",
+            run_batch=run_fbuild_compile_many,
+        )
+
+    def _build_fbuild_ci(self, examples: list[str]) -> list[Future[SketchResult]]:
+        """Build examples with one ``fbuild ci`` invocation."""
+        from ci.util.fbuild_runner import run_fbuild_ci
+
+        return self._build_fbuild_batch(
+            examples=examples,
+            command_label="ci",
+            run_batch=run_fbuild_ci,
+        )
+
+    def _build_fbuild_batch(
+        self,
+        examples: list[str],
+        command_label: str,
+        run_batch: Any,
+    ) -> list[Future[SketchResult]]:
+        """Build examples with one batched ``fbuild`` invocation."""
+
+        futures: list[Future[SketchResult]] = []
+
+        try:
+            staged_projects = self._stage_fbuild_compile_many_projects(examples)
+        except Exception as e:
+            for example in examples:
+                future: Future[SketchResult] = Future()
+                future.set_result(
+                    SketchResult(
+                        success=False,
+                        output=f"Failed to stage fbuild {command_label} project: {e}",
+                        build_dir=self.build_dir,
+                        example=example,
+                    )
+                )
+                futures.append(future)
+            print(f"Releasing platform lock: {self.platform_lock.lock_file_path}\n")
+            self.platform_lock.release()
+            return futures
+
+        try:
+            compile_many_result = run_batch(
+                board=self.board.board_name,
+                sketch_project_dirs=[project_dir for _, project_dir in staged_projects],
+                verbose=self.verbose,
+                timeout=1800,
+                quiet=False,
+                log_file=None,
+            )
+            reported = {
+                sketch_result.sketch_dir.resolve(): sketch_result
+                for sketch_result in compile_many_result.sketch_results
+            }
+
+            for example, project_dir in staged_projects:
+                sketch_result = reported.get(project_dir.resolve())
+                if sketch_result is None:
+                    output = (
+                        f"fbuild {command_label} did not report a result for "
+                        f"{project_dir}\n\n{compile_many_result.output}"
+                    )
+                    success = False
+                else:
+                    output = sketch_result.message
+                    if sketch_result.log_path is not None and sketch_result.log_path.exists():
+                        output = sketch_result.log_path.read_text(
+                            encoding="utf-8", errors="ignore"
+                        )
+                    success = sketch_result.success
+
+                if success:
+                    green_color = "\033[32m"
+                    reset_color = "\033[0m"
+                    print(f"{green_color}SUCCESS: {example}{reset_color}")
+                    if generate_build_info_json_from_existing_build(
+                        project_dir, self.board, example
+                    ):
+                        build_info_path = project_dir / f"build_info_{example}.json"
+                        if project_dir != self.build_dir and build_info_path.exists():
+                            shutil.copy2(
+                                build_info_path,
+                                self.build_dir / build_info_path.name,
+                            )
+                else:
+                    red_color = "\033[31m"
+                    reset_color = "\033[0m"
+                    print(f"{red_color}FAILED: {example}{reset_color}")
+
+                future: Future[SketchResult] = Future()
+                future.set_result(
+                    SketchResult(
+                        success=success,
+                        output=output or f"fbuild {command_label}",
+                        build_dir=project_dir,
+                        example=example,
+                    )
+                )
+                futures.append(future)
+        finally:
+            print(f"Releasing platform lock: {self.platform_lock.lock_file_path}\n")
+            self.platform_lock.release()
 
         return futures
 

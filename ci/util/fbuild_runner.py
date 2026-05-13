@@ -24,14 +24,20 @@ Usage:
 from __future__ import annotations
 
 import io
+import os
+import re
 import shutil
 import sys
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from functools import lru_cache
 from pathlib import Path
 from typing import IO, Any, cast
 
 from fbuild import Daemon, connect_daemon
+from typeguard import typechecked
+
+from ci.util.cpu_count import cpu_count
 
 
 @dataclass
@@ -41,6 +47,36 @@ class FbuildCommandResult:
     success: bool
     output: str
     returncode: int | None = None
+
+
+@typechecked
+@dataclass
+class FbuildCompileManySketchResult:
+    """Result for one sketch reported by ``fbuild compile-many``."""
+
+    sketch_dir: Path
+    success: bool
+    stage: str
+    build_time_secs: float
+    log_path: Path | None
+    message: str
+
+
+@typechecked
+@dataclass
+class FbuildCompileManyResult(FbuildCommandResult):
+    """Result for an ``fbuild compile-many`` invocation."""
+
+    sketch_results: list[FbuildCompileManySketchResult] = field(default_factory=list)
+
+
+_COMPILE_MANY_RESULT_RE = re.compile(
+    r"^\s+\[(?P<stage>stage1|stage2)\]\s+"
+    r"(?P<status>OK|FAIL)\s+"
+    r"\((?P<secs>[0-9.]+)s\)\s+"
+    r"(?P<sketch>.*?)\s{2}log="
+    r"(?P<log>.*?)\s{2}(?P<message>.*)$"
+)
 
 
 def get_fbuild_executable() -> str | None:
@@ -73,6 +109,94 @@ def _get_output(quiet: bool, log_file: IO[str] | None) -> IO[str]:
     if quiet:
         return io.StringIO()  # discard
     return sys.stdout
+
+
+def _get_env_job_count(name: str) -> int | None:
+    """Read a positive integer job override from the environment."""
+    raw_value = os.environ.get(name)
+    if raw_value is None:
+        return None
+    try:
+        value = int(raw_value)
+    except ValueError:
+        print(f"Warning: ignoring invalid {name}={raw_value!r}; expected integer")
+        return None
+    if value < 1:
+        print(f"Warning: ignoring invalid {name}={raw_value!r}; expected >= 1")
+        return None
+    return value
+
+
+def default_fbuild_framework_jobs() -> int:
+    """Default stage-1 parallelism for batched ``fbuild`` sketch builds."""
+    return _get_env_job_count("FASTLED_FRAMEWORK_JOBS") or 1
+
+
+def default_fbuild_sketch_jobs() -> int:
+    """Default stage-2 parallelism for batched ``fbuild`` sketch builds."""
+    env_override = _get_env_job_count("FASTLED_SKETCH_JOBS")
+    if env_override is not None:
+        return env_override
+    cpus = cpu_count()
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        return min(cpus, 2)
+    return cpus
+
+
+def _fbuild_supports_subcommand(subcommand: str) -> bool:
+    """Return whether the active fbuild executable exposes ``subcommand``."""
+    import subprocess
+
+    fbuild_exe = get_fbuild_executable()
+    if fbuild_exe is None:
+        return False
+    try:
+        proc = subprocess.run(
+            [fbuild_exe, "help", subcommand],
+            capture_output=True,
+            text=True,
+            timeout=15,
+            check=False,
+        )
+    except KeyboardInterrupt:
+        raise
+    except (FileNotFoundError, subprocess.SubprocessError, OSError):
+        return False
+    return proc.returncode == 0
+
+
+@lru_cache(maxsize=1)
+def fbuild_supports_ci() -> bool:
+    """Return whether the active fbuild executable exposes ``ci``."""
+    return _fbuild_supports_subcommand("ci")
+
+
+@lru_cache(maxsize=1)
+def fbuild_supports_compile_many() -> bool:
+    """Return whether the active fbuild executable exposes ``compile-many``."""
+    return _fbuild_supports_subcommand("compile-many")
+
+
+def _parse_compile_many_results(output: str) -> list[FbuildCompileManySketchResult]:
+    """Extract per-sketch results from ``fbuild compile-many`` output."""
+    results: list[FbuildCompileManySketchResult] = []
+    for line in output.splitlines():
+        match = _COMPILE_MANY_RESULT_RE.match(line)
+        if match is None:
+            continue
+        log_path_raw = match.group("log")
+        log_path = None if log_path_raw == "-" else Path(log_path_raw)
+        results.append(
+            FbuildCompileManySketchResult(
+                sketch_dir=Path(match.group("sketch")),
+                success=match.group("status") == "OK",
+                stage=match.group("stage"),
+                build_time_secs=float(match.group("secs")),
+                log_path=log_path,
+                message=match.group("message"),
+            )
+        )
+    return results
 
 
 def run_fbuild_compile(
@@ -178,6 +302,155 @@ def run_fbuild_compile(
         success=success,
         output=output,
         returncode=returncode,
+    )
+
+
+def _run_fbuild_batch_command(
+    command_name: str,
+    board: str,
+    sketch_project_dirs: list[Path],
+    verbose: bool,
+    timeout: float,
+    quiet: bool,
+    log_file: IO[str] | None,
+) -> FbuildCompileManyResult:
+    """Compile many sketches with one batched ``fbuild`` invocation."""
+    import subprocess
+
+    from running_process import RunningProcess
+
+    if not sketch_project_dirs:
+        raise ValueError("sketch_project_dirs must not be empty")
+
+    out = _get_output(quiet, log_file)
+    print("=" * 60, file=out)
+    print(f"COMPILING MANY (fbuild {command_name})", file=out)
+    print("=" * 60, file=out)
+
+    fbuild_exe = get_fbuild_executable()
+    if fbuild_exe is None:
+        message = "BUILD FAIL fbuild not found on PATH"
+        print(message, file=out)
+        return FbuildCompileManyResult(success=False, output=message)
+
+    framework_jobs = default_fbuild_framework_jobs()
+    sketch_jobs = default_fbuild_sketch_jobs()
+    cmd: list[str] = [
+        fbuild_exe,
+        command_name,
+        "--board",
+        board,
+        "--framework-jobs",
+        str(framework_jobs),
+        "--sketch-jobs",
+        str(sketch_jobs),
+    ]
+    if verbose:
+        cmd.append("-v")
+    cmd.extend(str(path) for path in sketch_project_dirs)
+
+    print(f"Running: {subprocess.list2cmdline(cmd)}", file=out)
+    print(file=out)
+
+    t0 = time.monotonic()
+    try:
+        process = RunningProcess(
+            cmd,
+            timeout=int(timeout),
+            auto_run=False,
+            capture=True,
+        )
+        process.start()
+        returncode = cast(
+            int, process.wait(echo=bool(not quiet or log_file is not None))
+        )
+        output = str(process.stdout)
+        sketch_results = _parse_compile_many_results(output)
+        success = returncode == 0
+        expected_results = len(sketch_project_dirs)
+        if success and len(sketch_results) != expected_results:
+            message = (
+                f"BUILD FAIL {command_name} returned 0 but parsed "
+                f"{len(sketch_results)}/{expected_results} per-sketch results "
+                "from stdout (output format drift?)"
+            )
+            print(message, file=out)
+            return FbuildCompileManyResult(
+                success=False,
+                output=output,
+                returncode=returncode,
+            )
+    except KeyboardInterrupt as ki:
+        from ci.util.global_interrupt_handler import handle_keyboard_interrupt
+
+        print(f"\nKeyboardInterrupt: Stopping {command_name}")
+        handle_keyboard_interrupt(ki)
+        raise
+    except subprocess.TimeoutExpired:
+        elapsed = time.monotonic() - t0
+        message = f"BUILD FAIL timeout after {elapsed:.1f}s"
+        print(message, file=out)
+        return FbuildCompileManyResult(success=False, output=message)
+    except Exception as e:
+        message = f"BUILD FAIL {e}"
+        print(message, file=out)
+        return FbuildCompileManyResult(success=False, output=message)
+
+    elapsed = time.monotonic() - t0
+    if quiet:
+        status = "ok" if success else "FAIL"
+        print(f"BUILD {status} {elapsed:.1f}s")
+    else:
+        if success:
+            print(f"\nCompilation succeeded (fbuild {command_name}) [{elapsed:.1f}s]\n")
+        else:
+            print(f"\nCompilation failed (fbuild {command_name}) [{elapsed:.1f}s]\n")
+
+    return FbuildCompileManyResult(
+        success=success,
+        output=output,
+        returncode=returncode,
+        sketch_results=sketch_results,
+    )
+
+
+def run_fbuild_ci(
+    board: str,
+    sketch_project_dirs: list[Path],
+    verbose: bool,
+    timeout: float,
+    quiet: bool,
+    log_file: IO[str] | None,
+) -> FbuildCompileManyResult:
+    """Compile many sketches with one ``fbuild ci`` invocation."""
+    return _run_fbuild_batch_command(
+        "ci",
+        board,
+        sketch_project_dirs,
+        verbose,
+        timeout,
+        quiet,
+        log_file,
+    )
+
+
+def run_fbuild_compile_many(
+    board: str,
+    sketch_project_dirs: list[Path],
+    verbose: bool,
+    timeout: float,
+    quiet: bool,
+    log_file: IO[str] | None,
+) -> FbuildCompileManyResult:
+    """Compile many sketches with one ``fbuild compile-many`` invocation."""
+    return _run_fbuild_batch_command(
+        "compile-many",
+        board,
+        sketch_project_dirs,
+        verbose,
+        timeout,
+        quiet,
+        log_file,
     )
 
 
