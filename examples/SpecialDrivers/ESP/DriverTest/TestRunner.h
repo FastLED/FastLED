@@ -16,6 +16,7 @@
 
 #include <Arduino.h>
 #include <FastLED.h>
+#include "fl/channels/all_drivers.h"    // FastLED.enableAllDrivers() body (linker opt-in, see #2428)
 #include "fl/channels/manager.h"        // ChannelManager::setExclusiveDriverByName (by-name escape hatch)
 #include "fl/stl/sstream.h"
 #include "PlatformConfig.h"
