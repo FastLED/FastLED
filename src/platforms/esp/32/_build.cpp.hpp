@@ -4,9 +4,6 @@
 /// @brief Unity build header for platforms\esp\32/ directory
 /// Includes all implementation files in alphabetical order
 
-#include "fl/stl/compiler_control.h"
-FL_NO_UNWIND_BEGIN
-
 // Root directory implementations (alphabetical order)
 
 // begin current directory includes
@@ -26,5 +23,3 @@ FL_NO_UNWIND_BEGIN
 #include "platforms/esp/32/drivers/_build.cpp.hpp"
 #include "platforms/esp/32/interrupts/_build.cpp.hpp"
 #include "platforms/esp/32/ota/_build.cpp.hpp"
-
-FL_NO_UNWIND_END
