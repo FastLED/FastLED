@@ -1050,3 +1050,27 @@ See `tests/fl/channels/driver.cpp` for more test examples.
 
 **Examples:**
 - `examples/BlinkParallel.ino` - Parallel LED strip example
+
+## Reducing Binary Size
+
+The compiler emits DWARF `.eh_frame` / FDE unwind tables by default on most
+toolchains. On ESP32-S3 release builds this can add ~180 KB even when
+`-fno-exceptions` is set. To strip it, add the codegen flags to your
+`platformio.ini`:
+
+```ini
+build_flags =
+    -fno-asynchronous-unwind-tables
+    -fno-unwind-tables
+```
+
+> **Note:** Earlier releases shipped `FL_NO_UNWIND` / `FL_NO_UNWIND_BEGIN` /
+> `FL_NO_UNWIND_END` / `FASTLED_FORCE_NO_UNWIND_TABLES` /
+> `FASTLED_FORCE_UNWIND_TABLES` macros that attempted to do this via
+> `#pragma GCC optimize("no-unwind-tables")`. A byte-level audit on
+> GCC 14.2.0 / xtensa-esp-elf (issue #2473) proved the pragma is a no-op:
+> wrapped TUs still shipped the full `.eh_frame`. The macros have been
+> removed (issue #2474). Use the `build_flags` form above instead — it
+> actually shrinks the binary and also covers `libstdc++.a` and user TUs,
+> which the macros could not reach. fbuild#243 will eventually apply
+> these flags automatically per-architecture.
