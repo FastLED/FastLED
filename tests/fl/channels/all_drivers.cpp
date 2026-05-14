@@ -22,6 +22,11 @@
 #include "fl/channels/bus_traits.h"
 #include "fl/channels/manager.h"
 #include "fl/stl/string.h"
+#include "platforms/is_platform.h"
+#include "platforms/shared/bitbang/bus_traits.h"  // BusTraits<Bus::BIT_BANG>
+#if defined(FL_IS_STUB) || defined(FL_IS_WASM)
+#include "platforms/stub/bus_traits.h"            // BusTraits<Bus::STUB>
+#endif
 #include "test.h"
 
 FL_TEST_FILE(FL_FILEPATH) {

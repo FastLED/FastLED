@@ -834,23 +834,21 @@ public:
 
 	/// @brief Enroll every channel driver available on this platform with `ChannelManager`.
 	///
-	/// Convenience forwarder to `fl::enableAllDrivers()` (defined in
-	/// `fl/channels/all_drivers.h`). Use this to restore 3.10.3-style runtime
-	/// driver flexibility — every driver is registered, any affinity string
-	/// resolves at runtime.
+	/// Convenience forwarder to `fl::enableAllDrivers()` (defined out-of-line
+	/// in `src/fl/channels/all_drivers.cpp.hpp`, linked into libfastled). Use
+	/// this to restore 3.10.3-style runtime driver flexibility — every driver
+	/// is registered, any affinity string resolves at runtime.
 	///
-	/// **Linker note (issue #2428).** This member's body lives in
-	/// `fl/channels/all_drivers.h`. Including that header is what makes the
-	/// per-platform `BusTraits<Bus::X>::instance()` singletons visible at the
-	/// call site so the linker keeps their translation units. If a sketch
-	/// never calls `FastLED.enableAllDrivers()`, `--gc-sections` drops the
-	/// inline body and every driver TU it references — the binary-bloat fix
-	/// from #2420 / #2421 is preserved.
+	/// **Tree-shaking (issue #2428).** The body lives in a single TU. If a
+	/// sketch never calls `FastLED.enableAllDrivers()`, `-Wl,--gc-sections`
+	/// drops that TU and transitively every `BusTraits<Bus::X>` /
+	/// `registerWithManager()` / driver factory it references — the
+	/// binary-size fix from #2420 / #2421 is preserved structurally, no
+	/// "magic include" required at the call site.
 	///
 	/// Example:
 	/// @code
 	/// #include "FastLED.h"
-	/// #include "fl/channels/all_drivers.h"
 	///
 	/// void setup() {
 	///     FastLED.enableAllDrivers();   // every platform driver registered
@@ -858,9 +856,6 @@ public:
 	///     FastLED.add(fl::ChannelConfig(..., opts));
 	/// }
 	/// @endcode
-	///
-	/// @note Calling without including `fl/channels/all_drivers.h` produces a
-	///       linker error — the include is the explicit opt-in.
 	static void enableAllDrivers();
 
 	/// @brief Remove a channel from the LED controller list

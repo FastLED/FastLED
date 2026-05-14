@@ -228,13 +228,17 @@ void setup() {
 ```cpp
 // 2. Universal opt-in: 3.10.3-style "every driver available at runtime".
 #include "FastLED.h"
-#include "fl/channels/all_drivers.h"   // pulls in every BusTraits<> on the platform
 
 void setup() {
     FastLED.enableAllDrivers();        // forwards to fl::enableAllDrivers()
     // any cfg.options.mBus value now resolves at runtime via the manager
 }
 ```
+
+> `FastLED.enableAllDrivers()` is defined in `libfastled` (no extra include
+> needed). `-Wl,--gc-sections` drops the call graph — every driver TU it
+> references — when no sketch calls it, so the opt-in remains zero-cost
+> for sketches that don't need it.
 
 ```cpp
 // 3. Single-driver override: link the named driver AND set it at priority
@@ -1043,7 +1047,7 @@ See `tests/fl/channels/driver.cpp` for more test examples.
 - `fl/channels/bus.h` — `fl::Bus` enum, `busName()`, `DefaultBus<Chipset>`.
 - `fl/channels/bus_traits.h` — `BusTraits<B>`, `BusSupports<B, Chipset>`, `enableDrivers<Bus...>()`, `busKeepAlive<B>()`.
 - `fl/channels/bus_priorities.h` — `default_bus_priority(Bus)` table consumed by `enableDrivers<>()`.
-- `fl/channels/all_drivers.h` — `fl::enableAllDrivers()` / `FastLED.enableAllDrivers()` aggregator.
+- `fl/channels/all_drivers.h` — declaration header for `fl::enableAllDrivers()` / `FastLED.enableAllDrivers()`. The body lives in `all_drivers.cpp.hpp`, linked into libfastled; `--gc-sections` handles the tree-shaking.
 - `fl/channels/manager.h` — `ChannelManager` (`addDriver`, `getDriverByName`, `findDriverByName`, `selectDriverForChannel`, `setDriverPriority`, `setDriverEnabled`, `setExclusiveDriver`, `setExclusiveDriverByName`, `clearAllDrivers`, ...).
 - `fl/channels/channel_events.h` — Lifecycle event callbacks.
 - `fl/channels/driver.h` — `IChannelDriver` interface and `DriverState` machine.
