@@ -116,6 +116,16 @@ def _compute_dir_hash(directory: Path) -> str:
     return digest.hexdigest()
 
 
+def _has_required_static_dist_assets(dist_dir: Path) -> bool:
+    return all(
+        path.is_file()
+        for path in (
+            dist_dir / "index.css",
+            dist_dir / "modules" / "utils" / "json_inspector.css",
+        )
+    )
+
+
 def _run_esbuild(args: list[str]) -> None:
     esbuild = install_esbuild()
     result = subprocess.run(
@@ -136,7 +146,10 @@ def build_dist() -> Path:
     source_mtime = _get_source_mtime(FRONTEND_DIR)
     if dist_dir.exists() and marker.exists():
         try:
-            if float(marker.read_text(encoding="utf-8").strip()) >= source_mtime:
+            if (
+                float(marker.read_text(encoding="utf-8").strip()) >= source_mtime
+                and _has_required_static_dist_assets(dist_dir)
+            ):
                 return dist_dir
         except ValueError:
             pass
@@ -177,6 +190,10 @@ def build_dist() -> Path:
     )
     (dist_dir / "index.html").write_text(index_html, encoding="utf-8")
     _copy_file(FRONTEND_DIR / "index.css", dist_dir / "index.css")
+    _copy_file(
+        FRONTEND_DIR / "modules" / "utils" / "json_inspector.css",
+        dist_dir / "modules" / "utils" / "json_inspector.css",
+    )
     _copy_file(
         FRONTEND_DIR / "modules" / "audio" / "audio_worklet_processor.js",
         dist_dir / "audio_worklet_processor.js",
