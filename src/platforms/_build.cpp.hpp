@@ -6,6 +6,7 @@
 // Root directory implementations (alphabetical order)
 
 // begin current directory includes
+#include "platforms/channel_drivers.impl.cpp.hpp" // ok include cpp.hpp
 #include "platforms/compile_test.cpp.hpp"
 #include "platforms/coroutine.impl.cpp.hpp" // ok include cpp.hpp
 #include "platforms/debug_setup.cpp.hpp"

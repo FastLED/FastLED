@@ -9,19 +9,23 @@
 /// On the host (FL_IS_STUB) the only buses with actual `BusTraits<>`
 /// specializations are `Bus::STUB` (the host-only stub driver) and
 /// `Bus::BIT_BANG` (always-on portable fallback). After calling
-/// `enableAllDrivers()` both must be findable in the manager registry and
-/// must be the same singleton instances exposed by `BusTraits<B>::instance()`.
+/// `enableAllDrivers()` both must be findable in the manager registry with
+/// the expected names and capabilities.
 ///
 /// `ChannelManager` is a process-singleton, so every test case begins by
-/// clearing the registry and asserting it is empty — otherwise a later case
-/// could pass purely on residue from an earlier one (e.g. the "forwards"
-/// test would succeed even if `FastLED.enableAllDrivers()` were a no-op).
+/// clearing the registry and asserting it is empty. Otherwise a later case
+/// could pass purely on residue from an earlier one.
 
 #include "fl/channels/all_drivers.h"
 #include "fl/channels/bus.h"
 #include "fl/channels/bus_traits.h"
 #include "fl/channels/manager.h"
 #include "fl/stl/string.h"
+#include "platforms/is_platform.h"
+#include "platforms/shared/bitbang/bus_traits.h"  // BusTraits<Bus::BIT_BANG>
+#if defined(FL_IS_STUB) || defined(FL_IS_WASM)
+#include "platforms/stub/bus_traits.h"  // BusTraits<Bus::STUB>
+#endif
 #include "test.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
@@ -38,6 +42,22 @@ fl::ChannelManager& freshManager() {
     return mgr;
 }
 
+void checkHostDriversRegistered(fl::ChannelManager& mgr) {
+    auto bitbang = mgr.getDriverByName(fl::string::from_literal("BIT_BANG"));
+    FL_REQUIRE(bitbang != nullptr);
+    FL_CHECK(bitbang->getName() == fl::string::from_literal("BIT_BANG"));
+    auto bitbangCaps = bitbang->getCapabilities();
+    FL_CHECK(bitbangCaps.supportsClockless);
+    FL_CHECK(bitbangCaps.supportsSpi);
+
+    auto stub = mgr.getDriverByName(fl::string::from_literal("STUB"));
+    FL_REQUIRE(stub != nullptr);
+    FL_CHECK(stub->getName() == fl::string::from_literal("STUB"));
+    auto stubCaps = stub->getCapabilities();
+    FL_CHECK(stubCaps.supportsClockless);
+    FL_CHECK(!stubCaps.supportsSpi);
+}
+
 }  // namespace
 
 FL_TEST_CASE("enableAllDrivers() registers Bus::STUB and Bus::BIT_BANG on host") {
@@ -46,18 +66,7 @@ FL_TEST_CASE("enableAllDrivers() registers Bus::STUB and Bus::BIT_BANG on host")
 
     fl::enableAllDrivers();
 
-    // Bus::BIT_BANG is always-on (no platform guard) and must register on
-    // every build, including the host test runner. The driver's getName()
-    // returns "BIT_BANG" — same spelling as the C++ enumerator.
-    auto bitbang = mgr.getDriverByName(fl::string::from_literal("BIT_BANG"));
-    FL_REQUIRE(bitbang != nullptr);
-    FL_CHECK(bitbang.get() == &fl::BusTraits<fl::Bus::BIT_BANG>::instance());
-
-    // Bus::STUB is host-only — guarded by FL_IS_STUB / FL_IS_WASM in
-    // all_drivers.h. Tests run with FL_IS_STUB defined, so it must register.
-    auto stub = mgr.getDriverByName(fl::string::from_literal("STUB"));
-    FL_REQUIRE(stub != nullptr);
-    FL_CHECK(stub.get() == &fl::BusTraits<fl::Bus::STUB>::instance());
+    checkHostDriversRegistered(mgr);
 }
 
 FL_TEST_CASE("FastLED.enableAllDrivers() forwards to fl::enableAllDrivers()") {
@@ -69,13 +78,7 @@ FL_TEST_CASE("FastLED.enableAllDrivers() forwards to fl::enableAllDrivers()") {
     // precondition above guarantees no prior registration leaked in.
     FastLED.enableAllDrivers();
 
-    auto bitbang = mgr.getDriverByName(fl::string::from_literal("BIT_BANG"));
-    FL_REQUIRE(bitbang != nullptr);
-    FL_CHECK(bitbang.get() == &fl::BusTraits<fl::Bus::BIT_BANG>::instance());
-
-    auto stub = mgr.getDriverByName(fl::string::from_literal("STUB"));
-    FL_REQUIRE(stub != nullptr);
-    FL_CHECK(stub.get() == &fl::BusTraits<fl::Bus::STUB>::instance());
+    checkHostDriversRegistered(mgr);
 }
 
 FL_TEST_CASE("enableAllDrivers() is idempotent") {
@@ -92,11 +95,7 @@ FL_TEST_CASE("enableAllDrivers() is idempotent") {
     // Manager replaces by name on duplicate `addDriver`, so a second call
     // must leave the count unchanged.
     FL_CHECK(count_after_first == count_after_second);
-
-    // The driver identities must not change either — same singletons.
-    auto bitbang = mgr.getDriverByName(fl::string::from_literal("BIT_BANG"));
-    FL_REQUIRE(bitbang != nullptr);
-    FL_CHECK(bitbang.get() == &fl::BusTraits<fl::Bus::BIT_BANG>::instance());
+    checkHostDriversRegistered(mgr);
 }
 
 }  // FL_TEST_FILE

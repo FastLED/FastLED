@@ -552,6 +552,10 @@ void delay_at_max_brightness_for_power(fl::u16 ms)
 // Channel Bus Manager Controls
 // ============================================================================
 
+void CFastLED::enableAllDrivers() {
+	fl::enableAllDrivers();
+}
+
 void CFastLED::setDriverEnabled(const char* name, bool enabled) {
 	fl::ChannelManager& manager = fl::channelManager();
 	manager.setDriverEnabled(name, enabled);
