@@ -545,6 +545,12 @@ def ensure_meson_configured(build_dir: Path, mode: str, force: bool = False) -> 
             except OSError:
                 pass
         if stored_hash == current_hash:
+            # Re-render the generated cross-file so a freshly built or
+            # repaired native launcher is picked up on the NEXT meson
+            # invocation. We don't trigger a reconfigure here — the render
+            # is cheap (writes a small ini), and the next `meson setup`
+            # will see the updated paths automatically.
+            _render_wasm_cross_file(build_dir)
             _normalize_meson_private_paths(build_dir)
             return True  # No file list changes, skip reconfigure
 

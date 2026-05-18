@@ -146,10 +146,9 @@ def build_dist() -> Path:
     source_mtime = _get_source_mtime(FRONTEND_DIR)
     if dist_dir.exists() and marker.exists():
         try:
-            if (
-                float(marker.read_text(encoding="utf-8").strip()) >= source_mtime
-                and _has_required_static_dist_assets(dist_dir)
-            ):
+            if float(
+                marker.read_text(encoding="utf-8").strip()
+            ) >= source_mtime and _has_required_static_dist_assets(dist_dir):
                 return dist_dir
         except ValueError:
             pass

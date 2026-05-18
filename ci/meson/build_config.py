@@ -141,8 +141,10 @@ def _ensure_emcc_native_launcher(
             return str(ctc_emcc), str(ctc_empp)
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
-    except Exception:
-        pass
+    except Exception as e:
+        _ts_print(
+            f"[WASM] Native emcc launcher build failed; falling back to Python wrapper: {e}"
+        )
     return None, None
 
 
@@ -174,7 +176,10 @@ def resolve_wasm_native_entries(project_root: Path) -> WasmNativeEntries:
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
         return fallback  # unreachable, satisfies type checker
-    except Exception:
+    except Exception as e:
+        _ts_print(
+            f"[WASM] Native emcc launcher resolution failed; falling back to Python wrapper: {e}"
+        )
         return fallback
 
     if ctc_emcc is None or ctc_empp is None:
