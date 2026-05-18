@@ -450,9 +450,13 @@ class PioCompiler(Compiler):
         example_path = Path(example)
         if example_path.is_absolute():
             digest = hashlib.sha1(str(example_path).encode("utf-8")).hexdigest()[:12]
-            safe_name = "".join(
-                ch if ch.isalnum() or ch in "._-" else "_" for ch in example_path.name
-            ) or f"example_{index}"
+            safe_name = (
+                "".join(
+                    ch if ch.isalnum() or ch in "._-" else "_"
+                    for ch in example_path.name
+                )
+                or f"example_{index}"
+            )
             return self.build_dir / "compile_many" / f"{safe_name}_{digest}"
         return self.build_dir / "compile_many" / example_path
 
@@ -553,7 +557,10 @@ class PioCompiler(Compiler):
                     success = False
                 else:
                     output = sketch_result.message
-                    if sketch_result.log_path is not None and sketch_result.log_path.exists():
+                    if (
+                        sketch_result.log_path is not None
+                        and sketch_result.log_path.exists()
+                    ):
                         output = sketch_result.log_path.read_text(
                             encoding="utf-8", errors="ignore"
                         )

@@ -49,6 +49,28 @@ class FastNativeEntries:
     ar: Optional[str]
 
 
+@dataclass(slots=True)
+class WasmNativeEntries:
+    """Native (or fallback wrapper) tool entries for the WASM cross-file.
+
+    Each field holds the absolute path to a compiled launcher binary
+    when available, otherwise the corresponding clang-tool-chain Python
+    entry-point name (so the build still works, just slower).
+    """
+
+    c: str
+    cpp: str
+    ar: str
+    # True if c/cpp resolved to the compiled native launcher binary.
+    # Used purely for logging/telemetry.
+    used_native_launcher: bool
+
+
+def _native_launcher_output_dir(project_root: Path) -> Path:
+    """Directory where compiled native launchers live."""
+    return project_root / ".cached" / "clang-native"
+
+
 def _ensure_native_launcher(project_root: Path) -> tuple[Optional[str], Optional[str]]:
     """
     Ensure ctc-clang/ctc-clang++ native launchers are compiled.
@@ -61,7 +83,7 @@ def _ensure_native_launcher(project_root: Path) -> tuple[Optional[str], Optional
     Returns:
         Tuple of (ctc_clang_path, ctc_clangpp_path), or (None, None) on failure.
     """
-    output_dir = project_root / ".cached" / "clang-native"
+    output_dir = _native_launcher_output_dir(project_root)
     exe_suffix = ".exe" if sys.platform == "win32" else ""
     ctc_clang = output_dir / f"ctc-clang{exe_suffix}"
     ctc_clangpp = output_dir / f"ctc-clang++{exe_suffix}"
@@ -81,6 +103,94 @@ def _ensure_native_launcher(project_root: Path) -> tuple[Optional[str], Optional
     except Exception:
         pass
     return None, None
+
+
+def _ensure_emcc_native_launcher(
+    project_root: Path,
+) -> tuple[Optional[str], Optional[str]]:
+    """
+    Ensure ctc-emcc/ctc-em++ native launchers are compiled.
+
+    The emcc launcher is a compiled C++ binary that replaces the Python
+    ``clang-tool-chain-emcc`` wrapper with near-zero startup overhead.
+    It implements a 3-tier strategy: user-template -> flag-hash auto-cache
+    -> Python fallback, so even uncached link/preprocess steps still work
+    correctly via the Python emcc.py underneath.
+
+    Shares the same output directory as the clang launcher because
+    ``compile_native()`` from clang-tool-chain builds all registered tools
+    in one call (clang launcher + emcc launcher + wasm-ld launcher).
+
+    Returns:
+        Tuple of (ctc_emcc_path, ctc_empp_path), or (None, None) on failure.
+    """
+    output_dir = _native_launcher_output_dir(project_root)
+    exe_suffix = ".exe" if sys.platform == "win32" else ""
+    ctc_emcc = output_dir / f"ctc-emcc{exe_suffix}"
+    ctc_empp = output_dir / f"ctc-em++{exe_suffix}"
+
+    if ctc_emcc.exists() and ctc_empp.exists():
+        return str(ctc_emcc), str(ctc_empp)
+
+    try:
+        from clang_tool_chain.commands.compile_native import compile_native
+
+        output_dir.mkdir(parents=True, exist_ok=True)
+        rc = compile_native(str(output_dir))
+        if rc == 0 and ctc_emcc.exists() and ctc_empp.exists():
+            return str(ctc_emcc), str(ctc_empp)
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+    except Exception as e:
+        _ts_print(
+            f"[WASM] Native emcc launcher build failed; falling back to Python wrapper: {e}"
+        )
+    return None, None
+
+
+def resolve_wasm_native_entries(project_root: Path) -> WasmNativeEntries:
+    """
+    Resolve compiler/archiver entries for the Meson WASM cross-file.
+
+    Mirrors :func:`_resolve_fast_native_entries` but for the emscripten
+    toolchain. Returns absolute paths to the compiled ``ctc-emcc`` /
+    ``ctc-em++`` native launchers when they can be built, otherwise the
+    historical Python wrapper names ``clang-tool-chain-emcc``.
+
+    The archiver always uses the Python ``clang-tool-chain-emar`` wrapper
+    because no native ``ctc-emar`` launcher exists yet.
+
+    This function NEVER raises and ALWAYS returns a usable WasmNativeEntries:
+    a launcher build failure falls back to the Python wrappers and is
+    functionally identical to the pre-optimization behavior.
+    """
+    fallback = WasmNativeEntries(
+        c="clang-tool-chain-emcc",
+        cpp="clang-tool-chain-emcc",
+        ar="clang-tool-chain-emar",
+        used_native_launcher=False,
+    )
+
+    try:
+        ctc_emcc, ctc_empp = _ensure_emcc_native_launcher(project_root)
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        return fallback  # unreachable, satisfies type checker
+    except Exception as e:
+        _ts_print(
+            f"[WASM] Native emcc launcher resolution failed; falling back to Python wrapper: {e}"
+        )
+        return fallback
+
+    if ctc_emcc is None or ctc_empp is None:
+        return fallback
+
+    return WasmNativeEntries(
+        c=ctc_emcc,
+        cpp=ctc_empp,
+        ar="clang-tool-chain-emar",
+        used_native_launcher=True,
+    )
 
 
 def _find_zccache_binary() -> Optional[str]:
