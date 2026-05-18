@@ -23,7 +23,7 @@ dependencies = [
     "clang-tool-chain>=1.2.9",
     "zccache>=1.4.0",
     "ninja",
-    "meson>=1.10.0",
+    "meson>=1.11.0",
     "download",
     "playwright",
     "httpx",
