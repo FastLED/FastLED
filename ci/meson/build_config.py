@@ -414,6 +414,12 @@ def cleanup_stale_meson_lockfile(build_dir: Path) -> bool:
         True if a stale lockfile was found and successfully removed, False
         otherwise (including when no lockfile exists or removal failed).
     """
+    # Stale lockfile cleanup is intended for the Windows DirectoryLock bug.
+    # On POSIX, meson uses fcntl/flock (advisory) — removing an in-use lockfile
+    # could let a concurrent meson setup bypass the intended lock.
+    if os.name != "nt":
+        return False
+
     lockfile = build_dir / "meson-private" / "meson.lock"
     if not lockfile.exists():
         return False
@@ -421,6 +427,9 @@ def cleanup_stale_meson_lockfile(build_dir: Path) -> bool:
         lockfile.unlink()
         _ts_print(f"[MESON] Removed stale lockfile: {lockfile}")
         return True
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
     except OSError as e:
         # Be tolerant of file-in-use errors on Windows — if removal fails, log
         # and continue. The caller will hit the original OSError from meson,
