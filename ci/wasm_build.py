@@ -471,6 +471,13 @@ def _render_wasm_cross_file(build_dir: Path) -> Path:
 
     if entries.used_native_launcher:
         print(f"[WASM] Using native ctc-emcc launcher: {entries.c}")
+        if entries.ar.endswith(("ctc-emar", "ctc-emar.exe")):
+            print(f"[WASM] Using native ctc-emar launcher: {entries.ar}")
+        else:
+            print(
+                "[WASM] ctc-emar native launcher unavailable; "
+                f"using Python wrapper for ar: {entries.ar}"
+            )
     else:
         print(
             "[WASM] Native ctc-emcc launcher unavailable; "
