@@ -158,7 +158,10 @@ def _fbuild_supports_subcommand(subcommand: str) -> bool:
             timeout=15,
             check=False,
         )
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
+        from ci.util.global_interrupt_handler import handle_keyboard_interrupt
+
+        handle_keyboard_interrupt(ki)
         raise
     except (FileNotFoundError, subprocess.SubprocessError, OSError):
         return False
