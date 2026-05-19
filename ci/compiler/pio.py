@@ -348,9 +348,10 @@ class PioCompiler(Compiler):
             self.verbose,
             example,
             self.paths,
-            self.additional_defines,
-            self.additional_include_dirs,
-            self.additional_libs,
+            build_dir=self.build_dir,
+            additional_defines=self.additional_defines,
+            additional_include_dirs=self.additional_include_dirs,
+            additional_libs=self.additional_libs,
             use_fbuild=self.use_fbuild,
         )
         if result.success:
@@ -517,6 +518,9 @@ class PioCompiler(Compiler):
 
         try:
             staged_projects = self._stage_fbuild_compile_many_projects(examples)
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
+            raise
         except Exception as e:
             for example in examples:
                 future: Future[SketchResult] = Future()

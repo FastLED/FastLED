@@ -457,36 +457,76 @@ def _escape_meson_string(value: str) -> str:
     return value.replace("\\", "\\\\").replace("'", "\\'")
 
 
+_emscripten_patch_applied = False
+
+
+def _ensure_emscripten_wasm_ld_patch() -> None:
+    """Apply the EMCC_WASM_LD patch to the emscripten install.
+
+    Idempotent — does nothing if the patch is already in place. Required
+    so that ``shared.py`` honors the ``EMCC_WASM_LD`` env var we set below,
+    routing emcc's internal wasm-ld invocation through our ctc-wasm-ld
+    native launcher. Added in clang-tool-chain 1.5.1 (closes #22).
+    """
+    global _emscripten_patch_applied
+    if _emscripten_patch_applied:
+        return
+    try:
+        import platform as _platform_mod
+
+        from clang_tool_chain.installers.emscripten import ensure_emscripten_available
+
+        system = _platform_mod.system().lower()
+        platform_name = (
+            "win"
+            if system == "windows"
+            else ("darwin" if system == "darwin" else "linux")
+        )
+        machine = _platform_mod.machine().lower()
+        arch = "x86_64" if machine in ("x86_64", "amd64") else "arm64"
+        ensure_emscripten_available(platform_name, arch)
+        _emscripten_patch_applied = True
+    except Exception as e:
+        # Patch is best-effort. Without it, EMCC_WASM_LD is ignored and emcc
+        # falls back to the bundled wasm-ld — the build still works, just
+        # without the ctc-wasm-ld speedup on link.
+        print(f"[WASM] EMCC_WASM_LD patch attempt failed (non-fatal): {e}")
+
+
 def _render_wasm_cross_file(build_dir: Path) -> Path:
     """Generate the WASM Meson cross-file with resolved compiler paths.
 
-    Returns the absolute path of the generated file. On any resolution
-    failure, the generated file is functionally identical to the static
-    template (Python wrappers, ``clang-tool-chain-emcc``), so the WASM
-    build never regresses below baseline behavior.
+    clang-tool-chain >=1.5.1 is pinned and guarantees all seven native
+    launchers; if resolution fails the function raises (no Python-wrapper
+    fallback).
+
+    Side effects: applies the EMCC_WASM_LD patch to the emscripten install
+    (idempotent, once per process) and sets ``EMCC_WASM_LD`` in os.environ
+    pointing at the resolved ctc-wasm-ld so emcc's internal linker
+    invocation goes through it.
     """
     from ci.meson.build_config import resolve_wasm_native_entries
 
+    _ensure_emscripten_wasm_ld_patch()
     entries = resolve_wasm_native_entries(PROJECT_ROOT)
+    os.environ["EMCC_WASM_LD"] = entries.wasm_ld
 
-    if entries.used_native_launcher:
-        print(f"[WASM] Using native ctc-emcc launcher: {entries.c}")
-        if entries.ar.endswith(("ctc-emar", "ctc-emar.exe")):
-            print(f"[WASM] Using native ctc-emar launcher: {entries.ar}")
-        else:
-            print(
-                "[WASM] ctc-emar native launcher unavailable; "
-                f"using Python wrapper for ar: {entries.ar}"
-            )
-    else:
-        print(
-            "[WASM] Native ctc-emcc launcher unavailable; "
-            "falling back to clang-tool-chain Python wrapper"
-        )
+    print(f"[WASM] Using native ctc-emcc launcher: {entries.c}")
+    for label, path in (
+        ("emar", entries.ar),
+        ("emstrip", entries.strip),
+        ("emranlib", entries.ranlib),
+        ("emnm", entries.nm),
+        ("wasm-ld", entries.wasm_ld),
+    ):
+        print(f"[WASM] Using native ctc-{label} launcher: {path}")
 
     c_val = _escape_meson_string(entries.c)
     cpp_val = _escape_meson_string(entries.cpp)
     ar_val = _escape_meson_string(entries.ar)
+    strip_val = _escape_meson_string(entries.strip)
+    ranlib_val = _escape_meson_string(entries.ranlib)
+    nm_val = _escape_meson_string(entries.nm)
 
     content = (
         "# ============================================================================\n"
@@ -497,17 +537,21 @@ def _render_wasm_cross_file(build_dir: Path) -> Path:
         "# and the generator instead.\n"
         "#\n"
         "# The [binaries] section is dynamically resolved so we can point\n"
-        "# meson at the compiled ctc-emcc native launcher (near-zero startup)\n"
-        "# when it is available, with automatic fallback to the Python\n"
-        "# clang-tool-chain-emcc wrapper otherwise.\n"
+        "# meson at compiled ctc-* native launchers (near-zero startup) when\n"
+        "# available, with automatic fallback to the clang-tool-chain Python\n"
+        "# wrappers otherwise.\n"
         "# ============================================================================\n"
         "\n"
         "[binaries]\n"
         f"c = '{c_val}'\n"
         f"cpp = '{cpp_val}'\n"
         f"ar = '{ar_val}'\n"
-        "strip = 'true'\n"
-        "# Note: wasm-ld is invoked by emcc during linking, not directly by meson\n"
+        f"strip = '{strip_val}'\n"
+        f"ranlib = '{ranlib_val}'\n"
+        f"nm = '{nm_val}'\n"
+        "# wasm-ld is invoked by emcc internally; integration is via the\n"
+        "# EMCC_WASM_LD env var set in ensure_meson_configured() and honored\n"
+        "# by the shared.py patch applied by ensure_emscripten_available().\n"
         "\n"
         "[host_machine]\n"
         "system = 'emscripten'\n"
