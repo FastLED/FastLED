@@ -478,6 +478,13 @@ def _render_wasm_cross_file(build_dir: Path) -> Path:
                 "[WASM] ctc-emar native launcher unavailable; "
                 f"using Python wrapper for ar: {entries.ar}"
             )
+        for label, path in (
+            ("strip", entries.strip),
+            ("ranlib", entries.ranlib),
+            ("nm", entries.nm),
+        ):
+            if path is not None:
+                print(f"[WASM] Using native ctc-em{label} launcher: {path}")
     else:
         print(
             "[WASM] Native ctc-emcc launcher unavailable; "
@@ -487,6 +494,23 @@ def _render_wasm_cross_file(build_dir: Path) -> Path:
     c_val = _escape_meson_string(entries.c)
     cpp_val = _escape_meson_string(entries.cpp)
     ar_val = _escape_meson_string(entries.ar)
+    # strip/ranlib/nm are emitted only when the native launcher resolved —
+    # clang-tool-chain ships no Python wrapper fallback for these three
+    # (see zackees/clang-tool-chain#23). When omitted, meson falls back to
+    # its defaults (system tool for strip, ar-built index for ranlib).
+    strip_line = (
+        f"strip = '{_escape_meson_string(entries.strip)}'\n"
+        if entries.strip is not None
+        else "strip = 'true'\n"
+    )
+    ranlib_line = (
+        f"ranlib = '{_escape_meson_string(entries.ranlib)}'\n"
+        if entries.ranlib is not None
+        else ""
+    )
+    nm_line = (
+        f"nm = '{_escape_meson_string(entries.nm)}'\n" if entries.nm is not None else ""
+    )
 
     content = (
         "# ============================================================================\n"
@@ -506,8 +530,12 @@ def _render_wasm_cross_file(build_dir: Path) -> Path:
         f"c = '{c_val}'\n"
         f"cpp = '{cpp_val}'\n"
         f"ar = '{ar_val}'\n"
-        "strip = 'true'\n"
-        "# Note: wasm-ld is invoked by emcc during linking, not directly by meson\n"
+        f"{strip_line}"
+        f"{ranlib_line}"
+        f"{nm_line}"
+        "# Note: wasm-ld is invoked by emcc during linking, not directly by meson.\n"
+        "# Wiring ctc-wasm-ld requires an emcc-side override that does not exist\n"
+        "# today (see zackees/clang-tool-chain#22).\n"
         "\n"
         "[host_machine]\n"
         "system = 'emscripten'\n"
