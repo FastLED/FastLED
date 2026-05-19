@@ -496,15 +496,14 @@ def _ensure_emscripten_wasm_ld_patch() -> None:
 def _render_wasm_cross_file(build_dir: Path) -> Path:
     """Generate the WASM Meson cross-file with resolved compiler paths.
 
-    Returns the absolute path of the generated file. On any resolution
-    failure, the generated file is functionally identical to the static
-    template (Python wrappers, ``clang-tool-chain-emcc``), so the WASM
-    build never regresses below baseline behavior.
+    clang-tool-chain >=1.5.1 is pinned and guarantees all seven native
+    launchers; if resolution fails the function raises (no Python-wrapper
+    fallback).
 
     Side effects: applies the EMCC_WASM_LD patch to the emscripten install
     (idempotent, once per process) and sets ``EMCC_WASM_LD`` in os.environ
-    pointing at the resolved wasm-ld so emcc's internal linker invocation
-    goes through ctc-wasm-ld.
+    pointing at the resolved ctc-wasm-ld so emcc's internal linker
+    invocation goes through it.
     """
     from ci.meson.build_config import resolve_wasm_native_entries
 
@@ -512,36 +511,15 @@ def _render_wasm_cross_file(build_dir: Path) -> Path:
     entries = resolve_wasm_native_entries(PROJECT_ROOT)
     os.environ["EMCC_WASM_LD"] = entries.wasm_ld
 
-    if entries.used_native_launcher:
-        print(f"[WASM] Using native ctc-emcc launcher: {entries.c}")
-        for label, path in (
-            ("emar", entries.ar),
-            ("emstrip", entries.strip),
-            ("emranlib", entries.ranlib),
-            ("emnm", entries.nm),
-        ):
-            if path.endswith((f"ctc-{label}", f"ctc-{label}.exe")):
-                print(f"[WASM] Using native ctc-{label} launcher: {path}")
-            else:
-                print(
-                    f"[WASM] ctc-{label} native launcher unavailable; "
-                    f"using Python wrapper: {path}"
-                )
-        # EMCC_WASM_LD must be set in os.environ before meson invokes emcc.
-        # That is handled in ensure_meson_configured() — this log is just
-        # so the resolution status is visible alongside the others.
-        if entries.wasm_ld.endswith(("ctc-wasm-ld", "ctc-wasm-ld.exe")):
-            print(f"[WASM] Using native ctc-wasm-ld for emcc linker: {entries.wasm_ld}")
-        else:
-            print(
-                f"[WASM] ctc-wasm-ld native launcher unavailable; using Python "
-                f"wrapper for emcc linker: {entries.wasm_ld}"
-            )
-    else:
-        print(
-            "[WASM] Native ctc-emcc launcher unavailable; "
-            "falling back to clang-tool-chain Python wrappers"
-        )
+    print(f"[WASM] Using native ctc-emcc launcher: {entries.c}")
+    for label, path in (
+        ("emar", entries.ar),
+        ("emstrip", entries.strip),
+        ("emranlib", entries.ranlib),
+        ("emnm", entries.nm),
+        ("wasm-ld", entries.wasm_ld),
+    ):
+        print(f"[WASM] Using native ctc-{label} launcher: {path}")
 
     c_val = _escape_meson_string(entries.c)
     cpp_val = _escape_meson_string(entries.cpp)

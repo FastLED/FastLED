@@ -55,28 +55,29 @@ class FastNativeEntries:
 class EmccNativeLaunchers:
     """Compiled emscripten-tool launcher paths produced by ``compile_native()``.
 
-    Each field is an absolute path to the compiled binary, or ``None`` when
-    the corresponding launcher is missing after the build attempt.
+    Every field is a guaranteed-present absolute path. ``compile_native()``
+    in clang-tool-chain 1.5.1+ produces all seven launchers in one call;
+    if any is missing afterward the resolver raises rather than silently
+    falling back. clang-tool-chain >=1.5.1 is pinned in pyproject.toml.
     """
 
-    emcc: Optional[str]
-    empp: Optional[str]
-    emar: Optional[str]
-    emstrip: Optional[str]
-    emranlib: Optional[str]
-    emnm: Optional[str]
-    wasm_ld: Optional[str]
+    emcc: str
+    empp: str
+    emar: str
+    emstrip: str
+    emranlib: str
+    emnm: str
+    wasm_ld: str
 
 
 @typechecked
 @dataclass(slots=True)
 class WasmNativeEntries:
-    """Tool entries for the WASM cross-file.
+    """Native tool entries for the WASM cross-file.
 
-    All fields always hold a usable value — compiled launcher path when
-    available, otherwise the corresponding clang-tool-chain Python entry-point
-    name (added in 1.5.1; see #23). The build never regresses below
-    Python-wrapper baseline behavior.
+    All fields are absolute paths to compiled ctc-* native launchers.
+    No Python-wrapper fallbacks — clang-tool-chain >=1.5.1 is a hard
+    requirement and ``compile_native()`` is invoked eagerly.
 
     ``wasm_ld`` is not consumed by meson directly. emcc invokes wasm-ld
     internally; the integration is via the ``EMCC_WASM_LD`` env var picked
@@ -91,9 +92,6 @@ class WasmNativeEntries:
     ranlib: str
     nm: str
     wasm_ld: str
-    # True if c/cpp resolved to the compiled native launcher binary.
-    # Used purely for logging/telemetry.
-    used_native_launcher: bool
 
 
 def _native_launcher_output_dir(project_root: Path) -> Path:
@@ -137,143 +135,72 @@ def _ensure_native_launcher(project_root: Path) -> tuple[Optional[str], Optional
 
 def _ensure_emcc_native_launcher(project_root: Path) -> EmccNativeLaunchers:
     """
-    Ensure ctc-emcc/ctc-em++/ctc-emar native launchers are compiled.
+    Build and return all seven WASM-related ctc-* native launcher paths.
 
-    Native C++ launchers that replace the Python ``clang-tool-chain-emcc`` /
-    ``clang-tool-chain-emar`` wrappers with near-zero startup overhead.
-    The emcc launcher implements a 3-tier strategy: user-template ->
-    flag-hash auto-cache -> Python fallback, so even uncached link/preprocess
-    steps still work correctly via the Python emcc.py underneath. The emar
-    launcher (added in clang-tool-chain 1.3.1) covers the archiver path.
+    ``compile_native()`` from clang-tool-chain 1.5.1+ produces every binary
+    in a single invocation (clang + emcc + wasm-ld + emtool family with all
+    its hardlinked aliases). If any binary is missing afterward, raises
+    RuntimeError — no Python-wrapper fallback. clang-tool-chain >=1.5.1 is
+    pinned in pyproject.toml so this is a hard requirement.
 
-    Shares the same output directory as the clang launcher because
-    ``compile_native()`` from clang-tool-chain builds all registered tools
-    in one call (clang + emcc + wasm-ld + emtool).
+    Raises:
+        RuntimeError: if ``compile_native()`` fails or any launcher binary
+            is missing after a successful build.
     """
     output_dir = _native_launcher_output_dir(project_root)
     exe_suffix = ".exe" if sys.platform == "win32" else ""
-    ctc_emcc = output_dir / f"ctc-emcc{exe_suffix}"
-    ctc_empp = output_dir / f"ctc-em++{exe_suffix}"
-    ctc_emar = output_dir / f"ctc-emar{exe_suffix}"
-    ctc_emstrip = output_dir / f"ctc-emstrip{exe_suffix}"
-    ctc_emranlib = output_dir / f"ctc-emranlib{exe_suffix}"
-    ctc_emnm = output_dir / f"ctc-emnm{exe_suffix}"
-    ctc_wasm_ld = output_dir / f"ctc-wasm-ld{exe_suffix}"
+    binaries = {
+        "emcc": output_dir / f"ctc-emcc{exe_suffix}",
+        "empp": output_dir / f"ctc-em++{exe_suffix}",
+        "emar": output_dir / f"ctc-emar{exe_suffix}",
+        "emstrip": output_dir / f"ctc-emstrip{exe_suffix}",
+        "emranlib": output_dir / f"ctc-emranlib{exe_suffix}",
+        "emnm": output_dir / f"ctc-emnm{exe_suffix}",
+        "wasm_ld": output_dir / f"ctc-wasm-ld{exe_suffix}",
+    }
 
-    def _present() -> EmccNativeLaunchers:
-        return EmccNativeLaunchers(
-            emcc=str(ctc_emcc) if ctc_emcc.exists() else None,
-            empp=str(ctc_empp) if ctc_empp.exists() else None,
-            emar=str(ctc_emar) if ctc_emar.exists() else None,
-            emstrip=str(ctc_emstrip) if ctc_emstrip.exists() else None,
-            emranlib=str(ctc_emranlib) if ctc_emranlib.exists() else None,
-            emnm=str(ctc_emnm) if ctc_emnm.exists() else None,
-            wasm_ld=str(ctc_wasm_ld) if ctc_wasm_ld.exists() else None,
-        )
-
-    if all(
-        p.exists()
-        for p in (
-            ctc_emcc,
-            ctc_empp,
-            ctc_emar,
-            ctc_emstrip,
-            ctc_emranlib,
-            ctc_emnm,
-            ctc_wasm_ld,
-        )
-    ):
-        return _present()
-
-    try:
+    if not all(p.exists() for p in binaries.values()):
         from clang_tool_chain.commands.compile_native import compile_native
 
         output_dir.mkdir(parents=True, exist_ok=True)
         rc = compile_native(str(output_dir))
-        if rc == 0:
-            return _present()
-    except KeyboardInterrupt as ki:
-        handle_keyboard_interrupt(ki)
-    except Exception as e:
-        _ts_print(
-            f"[WASM] Native launcher build failed; falling back to Python wrapper: {e}"
-        )
-    return EmccNativeLaunchers(
-        emcc=None,
-        empp=None,
-        emar=None,
-        emstrip=None,
-        emranlib=None,
-        emnm=None,
-        wasm_ld=None,
-    )
+        if rc != 0:
+            raise RuntimeError(
+                f"clang-tool-chain compile_native() failed with rc={rc} "
+                f"in {output_dir}; cannot resolve WASM native launchers"
+            )
+        missing = [name for name, p in binaries.items() if not p.exists()]
+        if missing:
+            raise RuntimeError(
+                f"clang-tool-chain compile_native() succeeded but expected "
+                f"binaries are missing in {output_dir}: {missing}. "
+                f"Ensure clang-tool-chain >=1.5.1 is installed."
+            )
+
+    return EmccNativeLaunchers(**{name: str(p) for name, p in binaries.items()})
 
 
 def resolve_wasm_native_entries(project_root: Path) -> WasmNativeEntries:
     """
     Resolve compiler/archiver entries for the Meson WASM cross-file.
 
-    Mirrors :func:`_resolve_fast_native_entries` but for the emscripten
-    toolchain. Returns absolute paths to the compiled ``ctc-emcc`` /
-    ``ctc-em++`` / ``ctc-emar`` native launchers when they can be built,
-    otherwise the historical Python wrapper names
-    (``clang-tool-chain-emcc`` / ``clang-tool-chain-emar``).
+    Returns absolute paths to the seven compiled ctc-* native launchers.
+    No Python-wrapper fallback — if ``compile_native()`` fails or any
+    binary is missing, raises (clang-tool-chain >=1.5.1 is pinned and
+    guarantees all seven launchers).
 
-    Native and Python paths can mix: e.g., if emcc/em++ resolve but emar
-    is missing for some reason, the function returns native paths for the
-    compilers and the Python wrapper for the archiver. ``used_native_launcher``
-    is True only when the emcc compiler launcher resolved.
-
-    This function NEVER raises and ALWAYS returns a usable WasmNativeEntries:
-    a launcher build failure falls back to the Python wrappers and is
-    functionally identical to the pre-optimization behavior.
+    Raises:
+        RuntimeError: if ``compile_native()`` fails or any binary is missing.
     """
-    fallback = WasmNativeEntries(
-        c="clang-tool-chain-emcc",
-        cpp="clang-tool-chain-emcc",
-        ar="clang-tool-chain-emar",
-        strip="clang-tool-chain-emstrip",
-        ranlib="clang-tool-chain-emranlib",
-        nm="clang-tool-chain-emnm",
-        wasm_ld="clang-tool-chain-wasm-ld",
-        used_native_launcher=False,
-    )
-
-    try:
-        launchers = _ensure_emcc_native_launcher(project_root)
-    except KeyboardInterrupt as ki:
-        handle_keyboard_interrupt(ki)
-        return fallback  # unreachable, satisfies type checker
-    except Exception as e:
-        _ts_print(
-            f"[WASM] Native emcc launcher resolution failed; falling back to Python wrapper: {e}"
-        )
-        return fallback
-
-    if launchers.emcc is None or launchers.empp is None:
-        return fallback
-
+    launchers = _ensure_emcc_native_launcher(project_root)
     return WasmNativeEntries(
         c=launchers.emcc,
         cpp=launchers.empp,
-        ar=launchers.emar if launchers.emar is not None else "clang-tool-chain-emar",
-        strip=(
-            launchers.emstrip
-            if launchers.emstrip is not None
-            else "clang-tool-chain-emstrip"
-        ),
-        ranlib=(
-            launchers.emranlib
-            if launchers.emranlib is not None
-            else "clang-tool-chain-emranlib"
-        ),
-        nm=launchers.emnm if launchers.emnm is not None else "clang-tool-chain-emnm",
-        wasm_ld=(
-            launchers.wasm_ld
-            if launchers.wasm_ld is not None
-            else "clang-tool-chain-wasm-ld"
-        ),
-        used_native_launcher=True,
+        ar=launchers.emar,
+        strip=launchers.emstrip,
+        ranlib=launchers.emranlib,
+        nm=launchers.emnm,
+        wasm_ld=launchers.wasm_ld,
     )
 
 
