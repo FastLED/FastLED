@@ -159,7 +159,16 @@ def _ensure_emcc_native_launcher(project_root: Path) -> EmccNativeLaunchers:
         "wasm_ld": output_dir / f"ctc-wasm-ld{exe_suffix}",
     }
 
-    if not all(p.exists() for p in binaries.values()):
+    # Warm-path presence check: one os.scandir() enumerates the whole dir
+    # in ~10-20 ms; 7 individual Path.exists() calls cost ~30 ms each on
+    # Windows NTFS (~240 ms total). Set-membership lookups are O(1).
+    try:
+        present_names: set[str] = {entry.name for entry in os.scandir(output_dir)}
+    except OSError:
+        present_names = set()
+    all_present = all(p.name in present_names for p in binaries.values())
+
+    if not all_present:
         from clang_tool_chain.commands.compile_native import compile_native
 
         output_dir.mkdir(parents=True, exist_ok=True)

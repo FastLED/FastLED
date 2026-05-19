@@ -306,15 +306,51 @@ def _link_environment_fingerprint_matches(build_dir: Path, mode: str) -> bool:
     return stored == _compute_link_environment_fingerprint(mode)
 
 
+# In-process memo for _compute_src_file_list_hash. Cache is keyed on the
+# src/ directory's mtime + top-level entry count — captures most file-list
+# changes (additions/removals at the top level rebump the mtime). For
+# deeper-tree changes that don't bump src/'s own mtime, the cache may be
+# stale but the next interpreter invocation rebuilds it. Cross-process
+# callers (one Python subprocess per build) pay the walk once and skip
+# subsequent calls within the same process. Reset for tests via
+# _src_file_list_hash_reset_for_tests().
+_src_file_list_hash_cache: dict[str, tuple[float, int, str]] = {}
+
+
+def _src_file_list_hash_reset_for_tests() -> None:
+    _src_file_list_hash_cache.clear()
+
+
 def _compute_src_file_list_hash() -> str:
     """Hash of sorted source file paths only (not content/mtimes).
 
     Detects file additions, removals, and renames — changes that require
     meson reconfiguration to update the build graph.  Content-only changes
     are handled by Ninja's dependency tracking and don't need this.
+
+    Memoized per-process by (src_dir mtime, top-level count). The full
+    recursive walk costs ~40 ms on a typical FastLED tree; the cache check
+    is sub-millisecond.
     """
-    h = hashlib.md5(usedforsecurity=False)
     src_dir = str(PROJECT_ROOT / "src")
+    src_path = PROJECT_ROOT / "src"
+    try:
+        st = src_path.stat()
+        top_count = sum(1 for _ in src_path.iterdir())
+    except OSError:
+        st = None  # type: ignore[assignment]
+        top_count = -1
+
+    cached = _src_file_list_hash_cache.get(src_dir)
+    if (
+        cached is not None
+        and st is not None
+        and cached[0] == st.st_mtime
+        and cached[1] == top_count
+    ):
+        return cached[2]
+
+    h = hashlib.md5(usedforsecurity=False)
     _EXTS = (".cpp", ".h", ".hpp", ".c")
 
     def _scan(path: str) -> list[str]:
@@ -335,7 +371,11 @@ def _compute_src_file_list_hash() -> str:
 
     for p in sorted(_scan(src_dir)):
         h.update(p.encode())
-    return h.hexdigest()
+    digest = h.hexdigest()
+
+    if st is not None:
+        _src_file_list_hash_cache[src_dir] = (st.st_mtime, top_count, digest)
+    return digest
 
 
 def _library_is_fresh(build_dir: Path) -> bool:
@@ -517,18 +557,20 @@ def _ensure_emscripten_wasm_ld_patch() -> None:
 def _render_wasm_cross_file(build_dir: Path) -> Path:
     """Generate the WASM Meson cross-file with resolved compiler paths.
 
-    clang-tool-chain >=1.5.1 is pinned and guarantees all seven native
+    clang-tool-chain >=1.5.5 is pinned and guarantees all seven native
     launchers; if resolution fails the function raises (no Python-wrapper
     fallback).
 
-    Side effects: applies the EMCC_WASM_LD patch to the emscripten install
-    (idempotent, once per process) and sets ``EMCC_WASM_LD`` in os.environ
-    pointing at the resolved ctc-wasm-ld so emcc's internal linker
-    invocation goes through it.
+    Side effects: sets ``EMCC_WASM_LD`` in os.environ pointing at the
+    resolved ctc-wasm-ld so emcc's internal linker invocation goes through
+    it WHEN emcc.py is imported (cold-link path). The actual patch
+    verification moved to ``run_emcc()`` in 1.5.5 — that's the only place
+    emcc.py is read in-process, and gating the patch check there avoids
+    paying ~1 ms on every warm build invocation just to confirm a
+    1.5.5-marker-file flag.
     """
     from ci.meson.build_config import resolve_wasm_native_entries
 
-    _ensure_emscripten_wasm_ld_patch()
     entries = resolve_wasm_native_entries(PROJECT_ROOT)
     os.environ["EMCC_WASM_LD"] = entries.wasm_ld
 
