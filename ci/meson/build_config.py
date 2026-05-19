@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Optional, cast
 
 from running_process import RunningProcess
+from typeguard import typechecked
 
 from ci.meson.cache_utils import get_max_dir_mtime
 from ci.meson.compiler import (
@@ -49,18 +50,13 @@ class FastNativeEntries:
     ar: Optional[str]
 
 
+@typechecked
 @dataclass(slots=True)
 class EmccNativeLaunchers:
     """Compiled emscripten-tool launcher paths produced by ``compile_native()``.
 
     Each field is an absolute path to the compiled binary, or ``None`` when
     the corresponding launcher is missing after the build attempt.
-
-    ``emcc`` / ``empp`` / ``emar`` have Python wrapper fallbacks in
-    clang-tool-chain (``clang-tool-chain-emcc`` / ``-empp`` / ``-emar``).
-    ``emstrip`` / ``emranlib`` / ``emnm`` do NOT — they only exist as compiled
-    launchers, so a None value means meson should omit the corresponding
-    cross-file field and use its default behavior.
     """
 
     emcc: Optional[str]
@@ -69,25 +65,32 @@ class EmccNativeLaunchers:
     emstrip: Optional[str]
     emranlib: Optional[str]
     emnm: Optional[str]
+    wasm_ld: Optional[str]
 
 
+@typechecked
 @dataclass(slots=True)
 class WasmNativeEntries:
-    """Native (or fallback wrapper) tool entries for the WASM cross-file.
+    """Tool entries for the WASM cross-file.
 
-    ``c`` / ``cpp`` / ``ar`` always hold a usable value (compiled launcher
-    path or Python wrapper name). ``strip`` / ``ranlib`` / ``nm`` hold
-    a compiled launcher path when available or ``None`` when meson should
-    omit the cross-file field entirely (clang-tool-chain ships no Python
-    wrapper for these three; only the native launchers from 1.3.1+).
+    All fields always hold a usable value — compiled launcher path when
+    available, otherwise the corresponding clang-tool-chain Python entry-point
+    name (added in 1.5.1; see #23). The build never regresses below
+    Python-wrapper baseline behavior.
+
+    ``wasm_ld`` is not consumed by meson directly. emcc invokes wasm-ld
+    internally; the integration is via the ``EMCC_WASM_LD`` env var picked
+    up by the shared.py patch that ``ensure_emscripten_available`` applies.
+    Carried here so the build orchestration can set the env var.
     """
 
     c: str
     cpp: str
     ar: str
-    strip: Optional[str]
-    ranlib: Optional[str]
-    nm: Optional[str]
+    strip: str
+    ranlib: str
+    nm: str
+    wasm_ld: str
     # True if c/cpp resolved to the compiled native launcher binary.
     # Used purely for logging/telemetry.
     used_native_launcher: bool
@@ -155,6 +158,7 @@ def _ensure_emcc_native_launcher(project_root: Path) -> EmccNativeLaunchers:
     ctc_emstrip = output_dir / f"ctc-emstrip{exe_suffix}"
     ctc_emranlib = output_dir / f"ctc-emranlib{exe_suffix}"
     ctc_emnm = output_dir / f"ctc-emnm{exe_suffix}"
+    ctc_wasm_ld = output_dir / f"ctc-wasm-ld{exe_suffix}"
 
     def _present() -> EmccNativeLaunchers:
         return EmccNativeLaunchers(
@@ -164,11 +168,20 @@ def _ensure_emcc_native_launcher(project_root: Path) -> EmccNativeLaunchers:
             emstrip=str(ctc_emstrip) if ctc_emstrip.exists() else None,
             emranlib=str(ctc_emranlib) if ctc_emranlib.exists() else None,
             emnm=str(ctc_emnm) if ctc_emnm.exists() else None,
+            wasm_ld=str(ctc_wasm_ld) if ctc_wasm_ld.exists() else None,
         )
 
     if all(
         p.exists()
-        for p in (ctc_emcc, ctc_empp, ctc_emar, ctc_emstrip, ctc_emranlib, ctc_emnm)
+        for p in (
+            ctc_emcc,
+            ctc_empp,
+            ctc_emar,
+            ctc_emstrip,
+            ctc_emranlib,
+            ctc_emnm,
+            ctc_wasm_ld,
+        )
     ):
         return _present()
 
@@ -186,7 +199,13 @@ def _ensure_emcc_native_launcher(project_root: Path) -> EmccNativeLaunchers:
             f"[WASM] Native launcher build failed; falling back to Python wrapper: {e}"
         )
     return EmccNativeLaunchers(
-        emcc=None, empp=None, emar=None, emstrip=None, emranlib=None, emnm=None
+        emcc=None,
+        empp=None,
+        emar=None,
+        emstrip=None,
+        emranlib=None,
+        emnm=None,
+        wasm_ld=None,
     )
 
 
@@ -213,9 +232,10 @@ def resolve_wasm_native_entries(project_root: Path) -> WasmNativeEntries:
         c="clang-tool-chain-emcc",
         cpp="clang-tool-chain-emcc",
         ar="clang-tool-chain-emar",
-        strip=None,
-        ranlib=None,
-        nm=None,
+        strip="clang-tool-chain-emstrip",
+        ranlib="clang-tool-chain-emranlib",
+        nm="clang-tool-chain-emnm",
+        wasm_ld="clang-tool-chain-wasm-ld",
         used_native_launcher=False,
     )
 
@@ -237,9 +257,22 @@ def resolve_wasm_native_entries(project_root: Path) -> WasmNativeEntries:
         c=launchers.emcc,
         cpp=launchers.empp,
         ar=launchers.emar if launchers.emar is not None else "clang-tool-chain-emar",
-        strip=launchers.emstrip,
-        ranlib=launchers.emranlib,
-        nm=launchers.emnm,
+        strip=(
+            launchers.emstrip
+            if launchers.emstrip is not None
+            else "clang-tool-chain-emstrip"
+        ),
+        ranlib=(
+            launchers.emranlib
+            if launchers.emranlib is not None
+            else "clang-tool-chain-emranlib"
+        ),
+        nm=launchers.emnm if launchers.emnm is not None else "clang-tool-chain-emnm",
+        wasm_ld=(
+            launchers.wasm_ld
+            if launchers.wasm_ld is not None
+            else "clang-tool-chain-wasm-ld"
+        ),
         used_native_launcher=True,
     )
 
