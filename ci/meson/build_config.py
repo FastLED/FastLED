@@ -107,45 +107,55 @@ def _ensure_native_launcher(project_root: Path) -> tuple[Optional[str], Optional
 
 def _ensure_emcc_native_launcher(
     project_root: Path,
-) -> tuple[Optional[str], Optional[str]]:
+) -> tuple[Optional[str], Optional[str], Optional[str]]:
     """
-    Ensure ctc-emcc/ctc-em++ native launchers are compiled.
+    Ensure ctc-emcc/ctc-em++/ctc-emar native launchers are compiled.
 
-    The emcc launcher is a compiled C++ binary that replaces the Python
-    ``clang-tool-chain-emcc`` wrapper with near-zero startup overhead.
-    It implements a 3-tier strategy: user-template -> flag-hash auto-cache
-    -> Python fallback, so even uncached link/preprocess steps still work
-    correctly via the Python emcc.py underneath.
+    Native C++ launchers that replace the Python ``clang-tool-chain-emcc`` /
+    ``clang-tool-chain-emar`` wrappers with near-zero startup overhead.
+    The emcc launcher implements a 3-tier strategy: user-template ->
+    flag-hash auto-cache -> Python fallback, so even uncached link/preprocess
+    steps still work correctly via the Python emcc.py underneath. The emar
+    launcher (added in clang-tool-chain 1.3.1) covers the archiver path.
 
     Shares the same output directory as the clang launcher because
     ``compile_native()`` from clang-tool-chain builds all registered tools
-    in one call (clang launcher + emcc launcher + wasm-ld launcher).
+    in one call (clang + emcc + wasm-ld + emtool).
 
     Returns:
-        Tuple of (ctc_emcc_path, ctc_empp_path), or (None, None) on failure.
+        Tuple of (ctc_emcc_path, ctc_empp_path, ctc_emar_path). Any element
+        is None if that binary is missing after compilation.
     """
     output_dir = _native_launcher_output_dir(project_root)
     exe_suffix = ".exe" if sys.platform == "win32" else ""
     ctc_emcc = output_dir / f"ctc-emcc{exe_suffix}"
     ctc_empp = output_dir / f"ctc-em++{exe_suffix}"
+    ctc_emar = output_dir / f"ctc-emar{exe_suffix}"
 
-    if ctc_emcc.exists() and ctc_empp.exists():
-        return str(ctc_emcc), str(ctc_empp)
+    def _present() -> tuple[Optional[str], Optional[str], Optional[str]]:
+        return (
+            str(ctc_emcc) if ctc_emcc.exists() else None,
+            str(ctc_empp) if ctc_empp.exists() else None,
+            str(ctc_emar) if ctc_emar.exists() else None,
+        )
+
+    if ctc_emcc.exists() and ctc_empp.exists() and ctc_emar.exists():
+        return _present()
 
     try:
         from clang_tool_chain.commands.compile_native import compile_native
 
         output_dir.mkdir(parents=True, exist_ok=True)
         rc = compile_native(str(output_dir))
-        if rc == 0 and ctc_emcc.exists() and ctc_empp.exists():
-            return str(ctc_emcc), str(ctc_empp)
+        if rc == 0:
+            return _present()
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
     except Exception as e:
         _ts_print(
-            f"[WASM] Native emcc launcher build failed; falling back to Python wrapper: {e}"
+            f"[WASM] Native launcher build failed; falling back to Python wrapper: {e}"
         )
-    return None, None
+    return None, None, None
 
 
 def resolve_wasm_native_entries(project_root: Path) -> WasmNativeEntries:
@@ -154,11 +164,14 @@ def resolve_wasm_native_entries(project_root: Path) -> WasmNativeEntries:
 
     Mirrors :func:`_resolve_fast_native_entries` but for the emscripten
     toolchain. Returns absolute paths to the compiled ``ctc-emcc`` /
-    ``ctc-em++`` native launchers when they can be built, otherwise the
-    historical Python wrapper names ``clang-tool-chain-emcc``.
+    ``ctc-em++`` / ``ctc-emar`` native launchers when they can be built,
+    otherwise the historical Python wrapper names
+    (``clang-tool-chain-emcc`` / ``clang-tool-chain-emar``).
 
-    The archiver always uses the Python ``clang-tool-chain-emar`` wrapper
-    because no native ``ctc-emar`` launcher exists yet.
+    Native and Python paths can mix: e.g., if emcc/em++ resolve but emar
+    is missing for some reason, the function returns native paths for the
+    compilers and the Python wrapper for the archiver. ``used_native_launcher``
+    is True only when the emcc compiler launcher resolved.
 
     This function NEVER raises and ALWAYS returns a usable WasmNativeEntries:
     a launcher build failure falls back to the Python wrappers and is
@@ -172,7 +185,7 @@ def resolve_wasm_native_entries(project_root: Path) -> WasmNativeEntries:
     )
 
     try:
-        ctc_emcc, ctc_empp = _ensure_emcc_native_launcher(project_root)
+        ctc_emcc, ctc_empp, ctc_emar = _ensure_emcc_native_launcher(project_root)
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
         return fallback  # unreachable, satisfies type checker
@@ -188,7 +201,7 @@ def resolve_wasm_native_entries(project_root: Path) -> WasmNativeEntries:
     return WasmNativeEntries(
         c=ctc_emcc,
         cpp=ctc_empp,
-        ar="clang-tool-chain-emar",
+        ar=ctc_emar if ctc_emar is not None else "clang-tool-chain-emar",
         used_native_launcher=True,
     )
 
