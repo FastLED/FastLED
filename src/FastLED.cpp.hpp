@@ -231,13 +231,22 @@ static void* gControllersData[MAX_CLED_CONTROLLERS];
 
 FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 	FL_SCOPED_TRACE;
+#ifdef FL_PARLIO_PROFILE
+	const fl::u32 _pt0 = fl::micros();
+#endif
 	onBeginFrame();
+#ifdef FL_PARLIO_PROFILE
+	const fl::u32 _pt1 = fl::micros();
+#endif
 	while(mNMinMicros && ((fl::micros()-lastshow) < mNMinMicros)) {
 #if SKETCH_HAS_LARGE_MEMORY
 		fl::task::run(250, fl::task::ExecFlags::SYSTEM);
 #endif
 	}
 	lastshow = fl::micros();
+#ifdef FL_PARLIO_PROFILE
+	const fl::u32 _pt2 = fl::micros();
+#endif
 
 	// If we have a function for computing power, use it!
 	if(mPPowerFunc) {
@@ -277,9 +286,17 @@ FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 		length++;
 		pCur = pCur->next();
 	}
+#ifdef FL_PARLIO_PROFILE
+	const fl::u32 _pt3 = fl::micros();
+#endif
 	countFPS();
 	onEndFrame();
 	onEndShowLeds();
+#ifdef FL_PARLIO_PROFILE
+	const fl::u32 _pt4 = fl::micros();
+	// Compact integer-only timing: b=onBeginFrame g=gate s=showLeds-loop e=onEndFrame tot=total (microseconds)
+	FL_WARN("PT b=" << (int)(_pt1-_pt0) << " g=" << (int)(_pt2-_pt1) << " s=" << (int)(_pt3-_pt2) << " e=" << (int)(_pt4-_pt3) << " tot=" << (int)(_pt4-_pt0));
+#endif
 }
 
 void CFastLED::onEndFrame() {

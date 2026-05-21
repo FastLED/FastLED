@@ -338,6 +338,10 @@ fl::shared_ptr<IChannelDriver> ChannelManager::selectDriverForChannel(const Chan
 template<typename Condition>
 bool ChannelManager::waitForCondition(Condition condition, u32 timeoutMs) {
     const u32 startTime = timeoutMs > 0 ? millis() : 0;
+#ifdef FL_PARLIO_PROFILE
+    const u32 _pt_wfc_start = micros();
+    int _pt_wfc_iters = 0;
+#endif
 
     while (!condition()) {
         // Check timeout if specified
@@ -349,8 +353,16 @@ bool ChannelManager::waitForCondition(Condition condition, u32 timeoutMs) {
         // OS yield only — keeps WiFi/lwIP alive without pumping
         // tasks or coroutines during frame transitions (re-entrancy risk).
         task::run(250, task::ExecFlags::SYSTEM);
+#ifdef FL_PARLIO_PROFILE
+        _pt_wfc_iters++;
+#endif
     }
 
+#ifdef FL_PARLIO_PROFILE
+    if (_pt_wfc_iters > 0) {
+        FL_WARN("PT_WFC iters=" << _pt_wfc_iters << " us=" << (int)(micros() - _pt_wfc_start));
+    }
+#endif
     return true;  // Condition met
 }
 
