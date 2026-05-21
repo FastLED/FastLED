@@ -790,11 +790,14 @@ def create_wrapper(example_name: str, sketch_cache_dir: Path) -> Path:
         f"// Auto-generated wrapper for {example_name}.ino",
         "// C++20 header unit import — ~2x faster than PCH for sketch compilation.",
         '// The .ino\'s #include "FastLED.h" is a harmless no-op after this import.',
+        "// Emscripten-only: empty TU under any other toolchain.",
+        "#ifdef __EMSCRIPTEN__",
         'import "wasm_pch.h";',
         f'#include "{ino_file.as_posix()}"',
     ]
     for cpp in extra_cpps:
         lines.append(f'#include "{cpp.as_posix()}"')
+    lines.append("#endif  // __EMSCRIPTEN__")
     wrapper_content = "\n".join(lines) + "\n"
 
     # Only write if content changed (preserve timestamp for incremental builds)
