@@ -3,12 +3,17 @@
 //   - platform: esp32p4
 // @end-filter
 
-// ParlioBench.ino — Issue #2493 reproducer for ESP32-P4 PARLIO 16.7ms block.
-// Writes show() timing to a global volatile buffer that survives across the
-// chip's reset, so we can read it back via esptool's `dump_mem` against
-// internal RAM. Also prints to Serial for hosts where USB-Serial-JTAG works.
+// ParlioBench.ino — Issue #2493 reproducer.
+// Writes show() timing to flash so we can read it back via esptool — bypasses
+// the unreliable USB-Serial-JTAG path on some Windows hosts.
+//
+// After running for ~5s:
+//   esptool --port COMxx --chip esp32p4 read-flash 0x3F0000 1024 dump.bin
+// Decode: magic 0xDEADBEEF at offset 0, then 16-byte records of
+//   {uint32 magic, uint32 frame, uint32 total_us, uint32 wfc_iters}
 
 #include <FastLED.h>
+#include <esp_partition.h>
 
 #ifndef NUM_STRIPS
 #define NUM_STRIPS 1
@@ -19,26 +24,43 @@
 
 CRGB leds[NUM_STRIPS][NUM_LEDS];
 
-// 1 KB of timing scratch in DRAM at a known label so esptool can find it
-// by reading the symbol table. Each record = 4 × uint32: magic, frame, total_us, max_iter_us.
+// Fixed flash log address — well into unused space, before NVS partitions
+static const uint32_t LOG_FLASH_OFFSET = 0x3F0000;
+static const size_t LOG_RECORD_SIZE = 16;
+static const size_t LOG_MAX_RECORDS = 60;
+
 struct PtRecord {
-    uint32_t magic;
+    uint32_t magic;       // 0xDEADBEEF
     uint32_t frame;
     uint32_t total_us;
     uint32_t reserved;
 };
-__attribute__((section(".data"))) volatile PtRecord g_pt_log[64] = {};
-__attribute__((section(".data"))) volatile uint32_t g_pt_index = 0;
-__attribute__((section(".data"))) volatile uint32_t g_pt_marker = 0xCAFEF00D;
+
+static uint8_t g_log_buffer[LOG_RECORD_SIZE * LOG_MAX_RECORDS];
+static uint32_t g_frame = 0;
+static bool g_flushed = false;
 
 template <int PIN, int IDX>
 void addLane() {
     FastLED.addLeds<WS2812B, PIN, GRB>(leds[IDX], NUM_LEDS);
 }
 
+void flushToFlash() {
+    if (g_flushed) return;
+    g_flushed = true;
+    // Find a data partition we can write to. Use the larger "spiffs" partition
+    // or any data partition with enough space.
+    const esp_partition_t* part = esp_partition_find_first(
+        ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, NULL);
+    if (!part) return;
+    esp_partition_erase_range(part, 0, 4096);
+    esp_partition_write(part, 0, g_log_buffer, sizeof(g_log_buffer));
+    Serial.println("[ParlioBench] flushed to flash");
+}
+
 void setup() {
     Serial.begin(115200);
-    delay(1500);
+    delay(1000);
     Serial.println("[ParlioBench] start");
 
     addLane<0, 0>();
@@ -56,37 +78,45 @@ void setup() {
 #endif
 
     FastLED.setBrightness(8);
+    FastLED.setMaxRefreshRate(60);  // Force 60Hz gate to test if that's user's bug
     for (int s = 0; s < NUM_STRIPS; ++s) {
         for (int i = 0; i < NUM_LEDS; ++i) {
             leds[s][i] = CRGB(1, 0, 0);
         }
     }
-
-    // Stamp marker so esptool can locate the buffer in a RAM dump
-    g_pt_marker = 0xCAFEF00D;
-    g_pt_index = 0;
     Serial.println("[ParlioBench] setup done");
 }
 
 void loop() {
-    static uint32_t frame = 0;
     uint32_t t0 = micros();
     FastLED.show();
     uint32_t t1 = micros();
     uint32_t dur = t1 - t0;
 
-    // Record into ring buffer (DRAM, persists between resets if power preserved)
-    uint32_t idx = g_pt_index % 64;
-    g_pt_log[idx].magic = 0xDEADBEEF;
-    g_pt_log[idx].frame = frame;
-    g_pt_log[idx].total_us = dur;
-    g_pt_log[idx].reserved = 0;
-    g_pt_index = (g_pt_index + 1);
+    if (g_frame < LOG_MAX_RECORDS) {
+        PtRecord* rec = (PtRecord*)(g_log_buffer + (g_frame * LOG_RECORD_SIZE));
+        rec->magic = 0xDEADBEEF;
+        rec->frame = g_frame;
+        rec->total_us = dur;
+        rec->reserved = 0;
+    }
 
     Serial.print("EXT show ");
     Serial.print((int)dur);
     Serial.print(" us frame ");
-    Serial.println(frame++);
+    Serial.println(g_frame);
     Serial.flush();
-    delay(200);
+
+    g_frame++;
+
+    if (g_frame == LOG_MAX_RECORDS) {
+        flushToFlash();
+        Serial.println("[ParlioBench] HALTED — read with esptool");
+    }
+    if (g_frame >= LOG_MAX_RECORDS) {
+        // Pulse activity so we know we're alive
+        delay(1000);
+        return;
+    }
+    // NO DELAY — back-to-back show() to force waitForReady() to spin on prior DMA
 }
