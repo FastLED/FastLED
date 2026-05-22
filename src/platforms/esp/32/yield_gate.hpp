@@ -7,11 +7,13 @@
 /// FreeRTOS tasks can run. The cheap choice — `taskYIELD()` — only re-runs the
 /// scheduler against equal-or-higher-priority Ready tasks; lower-priority
 /// network tasks (lwIP / WiFi / BT) never get CPU. The traditional fix is
-/// `vTaskDelay(1)`, which Blocks the caller for exactly one FreeRTOS tick
+/// `vTaskDelay(1)`, which Blocks the caller for at least one FreeRTOS tick
 /// and lets the scheduler run anything Ready, including lower-priority tasks.
 ///
-/// `vTaskDelay(1)` costs one full tick (~1 ms on the default 1 kHz tick
-/// rate). On a 60 FPS render budget that's ~6 % of frame time. Paying that
+/// `vTaskDelay(1)` blocks for between 0 and 1 full tick (depending on phase
+/// relative to the next tick interrupt) plus the requested 1 tick — so 1 to 2
+/// ticks of actual wall-clock delay on a system with a 1 kHz tick rate. On a
+/// 60 FPS render budget that's ~6–12 % of frame time per yield. Paying that
 /// when the binary has no network stack linked at all — or when WiFi/BT are
 /// linked but inactive — is wasted overhead.
 ///
@@ -24,10 +26,13 @@
 ///     dead code.
 ///   - Runtime gate: when symbols are linked, the active-mode check is
 ///     cached at 1 Hz inside `CoroutineRuntimeEsp32::needsDeepYield()`, so
-///     per-call cost is a singleton lookup plus one compare.
-///   - Yield magnitude: when the gate fires we use `vTaskDelay(1)` — exactly
-///     one tick by the FreeRTOS contract, regardless of the configured tick
-///     rate. Sub-tick delays are not meaningful in FreeRTOS terms.
+///     hot-path cost is a singleton lookup plus a compare (first call after
+///     boot pays a network-stack probe).
+///   - Yield magnitude: when the gate fires we use `vTaskDelay(1)` — the
+///     minimum delay that releases the caller from the Ready set under
+///     FreeRTOS. Sub-tick requests degenerate to `taskYIELD()` and do not
+///     let lower-priority tasks run; that's the failure mode this helper
+///     exists to avoid.
 ///
 /// Refs: https://github.com/FastLED/FastLED/issues/2493 (latency analysis),
 /// https://github.com/FastLED/FastLED/issues/2254 (the original WiFi
@@ -54,15 +59,15 @@ namespace platforms {
 
 /// @brief Yield to the FreeRTOS scheduler with network-stack awareness.
 ///
-/// When a network stack (WiFi / BT) is active, blocks for exactly one
+/// When a network stack (WiFi / BT) is active, blocks for at least one
 /// FreeRTOS tick so lower-priority network tasks can drain. Otherwise just
 /// `taskYIELD()`, which is sub-microsecond.
 inline void esp_smart_yield() FL_NOEXCEPT {
-    if (fl::ICoroutineRuntime::instance().needsDeepYield()) {
-        // Exactly one tick — the smallest interval that releases the caller
-        // from the Ready set and lets the scheduler dispatch lower-priority
-        // tasks. Sub-tick requests round to taskYIELD() under FreeRTOS, which
-        // is what this branch is trying to avoid.
+    if (fl::platforms::ICoroutineRuntime::instance().needsDeepYield()) {
+        // Minimum tick-granularity delay that releases the caller from the
+        // Ready set, allowing the scheduler to dispatch lower-priority tasks
+        // (lwIP / WiFi / BT). Sub-tick requests degenerate to taskYIELD()
+        // under FreeRTOS, which is exactly what this branch avoids.
         vTaskDelay(1);
     } else {
         taskYIELD();

@@ -125,7 +125,10 @@ private:
 #endif
 #if SOC_BT_SUPPORTED
         if (esp_bt_controller_get_status != nullptr) {
-            if (esp_bt_controller_get_status() != ESP_BT_CONTROLLER_STATUS_IDLE) {
+            // Match NetworkDetector::isBluetoothActive() — controller is active
+            // only when ENABLED (not merely INITED), so we don't pay the deep
+            // yield for a bt-stack-init'd-but-radio-off configuration.
+            if (esp_bt_controller_get_status() == ESP_BT_CONTROLLER_STATUS_ENABLED) {
                 return true;
             }
         }
