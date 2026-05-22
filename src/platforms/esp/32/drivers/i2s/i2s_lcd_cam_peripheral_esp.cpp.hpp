@@ -12,6 +12,7 @@
 #if defined(FL_IS_ESP_32S3) && FL_HAS_INCLUDE("esp_lcd_panel_io.h")
 
 #include "platforms/esp/32/drivers/i2s/i2s_lcd_cam_peripheral_esp.h"
+#include "platforms/esp/32/yield_gate.hpp"
 #include "fl/stl/singleton.h"
 #include "fl/stl/noexcept.h"
 #include "fl/log/log.h"
@@ -280,7 +281,9 @@ bool I2sLcdCamPeripheralEsp::waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT {
         return false;
     }
 
-    // Simple polling wait (callback will clear mBusy)
+    // Simple polling wait (callback will clear mBusy). Yield via the
+    // network-aware smart gate: vTaskDelay(1) only when WiFi/BT is active,
+    // taskYIELD() otherwise. See platforms/esp/32/yield_gate.hpp.
     u32 start = (u32)(esp_timer_get_time() / 1000);
     while (mBusy) {
         if (timeout_ms > 0) {
@@ -289,7 +292,7 @@ bool I2sLcdCamPeripheralEsp::waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT {
                 return false;  // Timeout
             }
         }
-        vTaskDelay(1);  // Yield
+        fl::platforms::esp_smart_yield();
     }
     return true;
 }

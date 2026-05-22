@@ -48,6 +48,17 @@ FL_EXTERN_C_BEGIN
 // Weak symbol: resolves to nullptr when WiFi component is not linked
 FL_LINK_WEAK esp_err_t esp_wifi_get_mode(wifi_mode_t *mode);
 #endif
+#ifndef SOC_BT_SUPPORTED
+#define SOC_BT_SUPPORTED 0
+#endif
+#if SOC_BT_SUPPORTED
+#include "esp_bt.h"
+// Weak symbol: resolves to nullptr when BT controller component is not linked.
+// Returning anything other than ESP_BT_CONTROLLER_STATUS_IDLE indicates the
+// controller is initialized/enabled and may have ready BT tasks competing
+// for CPU.
+FL_LINK_WEAK esp_bt_controller_status_t esp_bt_controller_get_status(void);
+#endif
 FL_EXTERN_C_END
 
 namespace fl {
@@ -87,26 +98,36 @@ public:
     }
 
     bool needsDeepYield() const FL_NOEXCEPT override {
-        // Cache WiFi detection — recheck at most once per second.
+        // Cache network-stack detection — recheck at most once per second.
+        // A "deep yield" (vTaskDelay(1) = exactly one FreeRTOS tick) is only
+        // needed when a network stack (WiFi or BT) is active and may have
+        // ready-to-run lower-priority tasks. When neither is active or linked,
+        // a plain taskYIELD() is sufficient and avoids the per-tick cost.
         static TickType_t s_lastCheck = 0;
         static bool s_cached = false;
         TickType_t now = xTaskGetTickCount();
         if ((now - s_lastCheck) >= pdMS_TO_TICKS(1000)) {
             s_lastCheck = now;
-            s_cached = isWiFiActive();
+            s_cached = isNetworkActive();
         }
         return s_cached;
     }
 
 private:
-    static bool isWiFiActive() FL_NOEXCEPT {
+    static bool isNetworkActive() FL_NOEXCEPT {
 #if SOC_WIFI_SUPPORTED
-        if (esp_wifi_get_mode == nullptr) {
-            return false; // WiFi component not linked
+        if (esp_wifi_get_mode != nullptr) {
+            wifi_mode_t mode;
+            if (esp_wifi_get_mode(&mode) == ESP_OK && mode != WIFI_MODE_NULL) {
+                return true;
+            }
         }
-        wifi_mode_t mode;
-        if (esp_wifi_get_mode(&mode) == ESP_OK && mode != WIFI_MODE_NULL) {
-            return true;
+#endif
+#if SOC_BT_SUPPORTED
+        if (esp_bt_controller_get_status != nullptr) {
+            if (esp_bt_controller_get_status() != ESP_BT_CONTROLLER_STATUS_IDLE) {
+                return true;
+            }
         }
 #endif
         return false;
