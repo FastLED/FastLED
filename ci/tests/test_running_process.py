@@ -6,7 +6,6 @@ This test executes a trivial Python command via `uv run python -c` and verifies:
 """
 
 import subprocess
-import sys
 import time
 import unittest
 from pathlib import Path
@@ -114,17 +113,12 @@ class _UpperFormatter:
 @pytest.mark.serial
 class TestRunningProcessAdditional(unittest.TestCase):
     def test_timeout_and_kill(self: "TestRunningProcessAdditional") -> None:
-        """Process exceeding timeout should be killed and raise TimeoutError.
-
-        Uses ``sys.executable`` directly (not ``uv run python``) because the
-        timeout path kills the immediate child only — and on Windows, ``uv``'s
-        grandchild python.exe survives uv's death with the stdout pipe still
-        open, which blocks ``RunningProcess``'s reader-thread shutdown during
-        garbage collection. Bypassing the uv shim avoids the orphan-grandchild.
-        """
+        """Process exceeding timeout should be killed and raise TimeoutError."""
 
         command: list[str] = [
-            sys.executable,
+            "uv",
+            "run",
+            "python",
             "-c",
             "import time; time.sleep(999)",
         ]
@@ -145,7 +139,17 @@ class TestRunningProcessAdditional(unittest.TestCase):
 
         # After timeout, process should be finished
         self.assertTrue(rp.finished)
-        self.assertIsNotNone(rp.returncode)
+
+        # EndOfStream should be delivered shortly after
+        end_seen: bool = False
+        deadline: float = time.time() + 2.0
+        while time.time() < deadline:
+            nxt: Any = rp.get_next_line_non_blocking()
+            if isinstance(nxt, EndOfStream):
+                end_seen = True
+                break
+            time.sleep(0.01)
+        self.assertTrue(end_seen)
 
     def test_output_formatter(self: "TestRunningProcessAdditional") -> None:
         """Output formatter hooks are invoked and transform is applied; blanks ignored."""
