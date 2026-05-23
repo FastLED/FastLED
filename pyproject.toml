@@ -7,10 +7,13 @@ requires-python = ">=3.11"
 dependencies = [
     # Pin to an fbuild release that includes both Teensy framework library
     # resolution and the Teensy-compatible GCC 11 toolchain fix needed for
-    # teensy40/teensy41. 2.2.4 adds CMSIS-DSP (arm_cortexM7lfsp_math) to
-    # the teensy41 link args so Audio-library FFT examples link cleanly
-    # (FastLED/fbuild#257).
-    "fbuild==2.2.4",
+    # teensy40/teensy41. 2.2.4 added CMSIS-DSP (arm_cortexM7lfsp_math) to
+    # the teensy41 link args (FastLED/fbuild#257), but regressed source
+    # discovery so the bundled FastLED in cores/teensy4/.../libraries was
+    # compiled alongside the local lib, causing multiple-definition link
+    # errors on every example (FastLED/fbuild#263). 2.2.5 fixes that
+    # regression while keeping the CMSIS-DSP fix.
+    "fbuild==2.2.5",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
