@@ -17,6 +17,8 @@ on:
       - 'platformio.ini'
       - 'library.json'
       - 'library.properties'
+      - 'pyproject.toml'
+      - 'uv.lock'
   # pull_request_target: DISABLED - Security vulnerability through PlatformIO pre-script execution
   # Running on pull_request_target allows execution of malicious Python code
   # Workflow still runs on push to master for validation

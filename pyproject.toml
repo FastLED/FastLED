@@ -7,8 +7,10 @@ requires-python = ">=3.11"
 dependencies = [
     # Pin to an fbuild release that includes both Teensy framework library
     # resolution and the Teensy-compatible GCC 11 toolchain fix needed for
-    # teensy40/teensy41.
-    "fbuild==2.2.3",
+    # teensy40/teensy41. 2.2.4 adds CMSIS-DSP (arm_cortexM7lfsp_math) to
+    # the teensy41 link args so Audio-library FFT examples link cleanly
+    # (FastLED/fbuild#257).
+    "fbuild==2.2.4",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
@@ -21,7 +23,7 @@ dependencies = [
     "fpvgcc",
     "uv",
     "clang-tool-chain>=1.5.2",
-    "zccache>=1.4.0",
+    "zccache>=1.9.0",
     "ninja",
     "meson>=1.11.0",
     "download",

@@ -18,6 +18,8 @@ on:
       - 'platformio.ini'
       - 'library.json'
       - 'library.properties'
+      - 'pyproject.toml'
+      - 'uv.lock'
 jobs:
   build:
     uses: ./.github/workflows/build_template.yml

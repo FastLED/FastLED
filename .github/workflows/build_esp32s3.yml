@@ -22,6 +22,8 @@ on:
       - 'platformio.ini'
       - 'library.json'
       - 'library.properties'
+      - 'pyproject.toml'
+      - 'uv.lock'
   pull_request:
     branches:
       - master
@@ -39,6 +41,8 @@ on:
       - 'platformio.ini'
       - 'library.json'
       - 'library.properties'
+      - 'pyproject.toml'
+      - 'uv.lock'
 
 jobs:
   build:
