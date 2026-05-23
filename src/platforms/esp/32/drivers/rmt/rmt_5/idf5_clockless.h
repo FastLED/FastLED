@@ -33,12 +33,19 @@ public:
     ClocklessIdf5() FL_NOEXCEPT
         : Channel(makeChipset(), RGB_ORDER, RegistrationMode::DeferRegister)
     {
+        // Register the RMT5 driver with ChannelManager so onEndFrame() will
+        // iterate mDrivers and call driver->show() to actually transmit. The
+        // pre-bind via setDriver() below only short-circuits per-frame driver
+        // *selection* in showPixels() -- it does NOT trigger transmission.
+        // Post-#2469 drivers no longer auto-register at static-init time, so
+        // legacy addLeds<>-style controllers must do this explicitly here or
+        // the encoded pixel data sits enqueued and never reaches the hardware.
+        // ChannelManager::addDriver() is idempotent for true duplicates, so
+        // this is safe to call from every ClocklessIdf5 instantiation.
+        BusTraits<Bus::RMT>::registerWithManager();
         // Phase 5b of #2428: pre-bind to the RMT5 driver singleton so
-        // showPixels() bypasses ChannelManager entirely. Naming
-        // BusTraits<Bus::RMT>::instancePtr() here is the ODR-use that lets
-        // the linker keep ONLY the RMT5 driver TU -- post-#2428 drivers
-        // do not auto-register, so this pre-bind is what links the RMT
-        // singleton on platforms where RMT is the default.
+        // showPixels() bypasses ChannelManager::selectDriverForChannel()
+        // on every frame -- avoids the per-frame priority lookup overhead.
         setDriver(BusTraits<Bus::RMT>::instancePtr());
         // Auto-register in the controller draw list (template API expects this)
         addToList();

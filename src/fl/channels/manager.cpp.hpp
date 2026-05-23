@@ -64,6 +64,17 @@ void ChannelManager::addDriver(int priority, fl::shared_ptr<IChannelDriver> driv
     bool replacing = false;
     for (const auto& entry : mDrivers) {
         if (entry.name == engineName) {
+            // True-duplicate fast path: same shared_ptr at same priority is
+            // a no-op (legacy clockless controllers may pre-bind the same
+            // driver singleton from many template instantiations). Skip the
+            // replace flow entirely so we don't waitForReady() or emit a
+            // spurious "Replacing" warning.
+            if (entry.driver == driver && entry.priority == priority) {
+                FL_DBG("ChannelManager::addDriver() - '" << engineName.c_str()
+                       << "' already registered at priority " << priority
+                       << " (idempotent no-op)");
+                return;
+            }
             replacing = true;
             FL_WARN("ChannelManager::addDriver() - Replacing existing driver '" << engineName.c_str() << "'");
             break;
