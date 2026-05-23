@@ -13,6 +13,7 @@
 #include "fl/gfx/eorder.h"
 #include "fl/channels/options.h"
 #include "fl/stl/optional.h"
+#include "fl/stl/string.h"  // fl::string must be complete for Optional<fl::string> below  // IWYU pragma: keep
 #include "color.h"  // IWYU pragma: keep
 #include "dither_mode.h"  // IWYU pragma: keep
 #include "fl/stl/noexcept.h"
