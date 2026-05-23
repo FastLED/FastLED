@@ -144,16 +144,19 @@ class PlatformIODriver:
 def select_build_driver(
     _environment: str | None,
     _use_fbuild_flag: bool,
-    _no_fbuild_flag: bool,
+    no_fbuild_flag: bool,
 ) -> BuildDriver:
     """Select the appropriate build driver.
 
-    All board builds use fbuild. The fbuild selection flags are kept only for
-    command compatibility and do not change this behavior.
+    Default is fbuild. `--no-fbuild` selects the legacy PlatformIODriver as a
+    fallback when the fbuild zccache daemon is broken (used by AI agents who
+    need a working build path without depending on fbuild's daemon).
 
     Args:
-        _environment: Deprecated compatibility parameter; ignored.
+        _environment: Reserved for future per-board overrides; currently unused.
         _use_fbuild_flag: Deprecated compatibility parameter; ignored.
-        _no_fbuild_flag: Deprecated compatibility parameter; ignored.
+        no_fbuild_flag: When True, select PlatformIODriver instead of fbuild.
     """
+    if no_fbuild_flag:
+        return PlatformIODriver()
     return FbuildDriver()
