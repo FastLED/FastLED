@@ -70,10 +70,29 @@ def get_meson_executable() -> str:
 
 
 def _normalize_meson_private_paths(build_dir: Path) -> None:
-    from ci.meson.build_config import normalize_meson_private_include_paths
+    from ci.meson.build_config import (
+        find_strict_path_violations,
+        normalize_meson_private_include_paths,
+    )
 
     if normalize_meson_private_include_paths(build_dir):
         print("[WASM] Normalized private include paths for strict path mode")
+
+    violations = find_strict_path_violations(build_dir)
+    if violations:
+        sample = violations[:10]
+        extra = len(violations) - len(sample)
+        lines = [
+            "[WASM] ZCCACHE_STRICT_PATHS=absolute would reject"
+            f" {len(violations)} compile flag(s) in"
+            " compile_commands.json (issue #2378):",
+        ]
+        lines.extend(f"  {flag}" for flag in sample)
+        if extra > 0:
+            lines.append(f"  ... {extra} more")
+        message = "\n".join(lines)
+        print(message)
+        raise RuntimeError(message)
 
 
 def _cleanup_stale_meson_lockfile(build_dir: Path) -> None:
