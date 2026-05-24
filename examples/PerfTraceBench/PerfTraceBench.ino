@@ -195,8 +195,13 @@ static void flushToFlash() {
 // ---------------------------------------------------------------------------
 void setup() {
     Serial.begin(115200);
-    delay(2000);
+    // Long delay so USB-Serial-JTAG CDC has time to enumerate AND for the
+    // host's `pio device monitor`/Python `serial.Serial` to (re)open the
+    // port. Without this, the first ~1-2s of Serial output is lost on
+    // ESP32-P4-EV's USB-Serial-JTAG bridge. See PR #2494 / #2507.
+    delay(5000);
     Serial.println("[PerfTraceBench] start");
+    Serial.flush();
 
     addAllLanes();
     FastLED.setBrightness(8);
