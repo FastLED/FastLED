@@ -25,6 +25,7 @@
 #include "fl/log/log.h"
 #include "fl/log/log.h"
 #include "fl/stl/algorithm.h"
+#include "fl/system/perf_trace.h"
 #include "fl/system/trace.h"
 #include "fl/stl/assert.h"
 #include "fl/stl/noexcept.h"
@@ -215,6 +216,7 @@ void ChannelDriverPARLIOImpl::show() FL_NOEXCEPT {
 }
 
 IChannelDriver::DriverState ChannelDriverPARLIOImpl::poll() FL_NOEXCEPT {
+    FL_PERF_SCOPE("ParlioImpl::poll");
     // If not initialized, we're ready (no hardware to poll)
     if (!mInitialized) {
         return DriverState::READY;
@@ -279,6 +281,7 @@ IChannelDriver::DriverState ChannelDriverPARLIOImpl::poll() FL_NOEXCEPT {
 
 void ChannelDriverPARLIOImpl::beginTransmission(
     fl::span<const ChannelDataPtr> channelData) FL_NOEXCEPT {
+    FL_PERF_SCOPE("ParlioImpl::beginTransmission");
 
     // Validate channel data first (before initialization)
     if (channelData.size() == 0) {
@@ -464,6 +467,7 @@ void ChannelDriverPARLIO::show() FL_NOEXCEPT {
 }
 
 IChannelDriver::DriverState ChannelDriverPARLIO::poll() FL_NOEXCEPT {
+    FL_PERF_SCOPE("ChannelDriverPARLIO::poll");
     switch (mPhase) {
         case TransmitPhase::IDLE:
             return DriverState::READY;
@@ -539,6 +543,7 @@ IChannelDriver::DriverState ChannelDriverPARLIO::poll() FL_NOEXCEPT {
 
 void ChannelDriverPARLIO::beginClocklessTransmission(
     fl::span<const ChannelDataPtr> channelData) FL_NOEXCEPT {
+    FL_PERF_SCOPE("ChannelDriverPARLIO::beginClocklessTransmission");
     if (channelData.size() == 0) {
         return;
     }

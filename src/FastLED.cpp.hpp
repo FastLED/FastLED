@@ -9,6 +9,7 @@
 #include "fl/channels/channel.h"
 #include "fl/channels/channel_events.h"
 #include "fl/channels/manager.h"
+#include "fl/system/perf_trace.h"
 #include "fl/system/trace.h"
 #include "fl/channels/driver.h"  // for IChannelDriver
 #include "fl/system/delay.h"  // for delayMicroseconds
@@ -231,11 +232,18 @@ static void* gControllersData[MAX_CLED_CONTROLLERS];
 
 FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 	FL_SCOPED_TRACE;
-	onBeginFrame();
-	while(mNMinMicros && ((fl::micros()-lastshow) < mNMinMicros)) {
+	FL_PERF_SCOPE("CFastLED::show");
+	{
+		FL_PERF_SCOPE("onBeginFrame");
+		onBeginFrame();
+	}
+	{
+		FL_PERF_SCOPE("min_micros_gate");
+		while(mNMinMicros && ((fl::micros()-lastshow) < mNMinMicros)) {
 #if SKETCH_HAS_LARGE_MEMORY
-		fl::task::run(250, fl::task::ExecFlags::SYSTEM);
+			fl::task::run(250, fl::task::ExecFlags::SYSTEM);
 #endif
+		}
 	}
 	lastshow = fl::micros();
 
@@ -259,23 +267,29 @@ FL_KEEP_ALIVE void CFastLED::show(fl::u8 scale) {
 		pCur = pCur->next();
 	}
 
-	pCur = CLEDController::head();
-	for (length = 0; length < MAX_CLED_CONTROLLERS && pCur; length++) {
-		if (pCur->getEnabled()) {
-			pCur->showLedsInternal(scale);
-		}
-		pCur = pCur->next();
+	{
+		FL_PERF_SCOPE("showLedsInternal");
+		pCur = CLEDController::head();
+		for (length = 0; length < MAX_CLED_CONTROLLERS && pCur; length++) {
+			if (pCur->getEnabled()) {
+				pCur->showLedsInternal(scale);
+			}
+			pCur = pCur->next();
 
+		}
 	}
 
-	length = 0;  // Reset length to 0 and iterate again.
-	pCur = CLEDController::head();
-	while(pCur && length < MAX_CLED_CONTROLLERS) {
-		if (pCur->getEnabled()) {
-			pCur->endShowLeds(gControllersData[length]);
+	{
+		FL_PERF_SCOPE("endShowLeds");
+		length = 0;  // Reset length to 0 and iterate again.
+		pCur = CLEDController::head();
+		while(pCur && length < MAX_CLED_CONTROLLERS) {
+			if (pCur->getEnabled()) {
+				pCur->endShowLeds(gControllersData[length]);
+			}
+			length++;
+			pCur = pCur->next();
 		}
-		length++;
-		pCur = pCur->next();
 	}
 	countFPS();
 	onEndFrame();

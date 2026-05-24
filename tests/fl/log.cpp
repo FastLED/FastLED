@@ -6,3 +6,4 @@
 #include "tests/fl/log/async_logger_output.hpp"
 #include "tests/fl/log/log.hpp"
 #include "tests/fl/system/trace.hpp"
+#include "tests/fl/system/perf_trace.hpp"

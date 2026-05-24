@@ -17,6 +17,7 @@
 #include "AutoResearchOta.h"
 #include "fl/remote/transport/serial.h"
 #include "fl/system/heap.h"
+#include "fl/system/perf_trace.h"
 #include "Common.h"
 #include "AutoResearchTest.h"
 #include "AutoResearchHelpers.h"
@@ -1066,6 +1067,54 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         response.set("success", true);
         response.set("message", "RPC works from task context");
         response.set("serial_safe", false);
+        return response;
+    });
+
+    // Register "setPerfTraceEnabled" — runtime toggle for fl::PerfTrace capture.
+    // Even when FASTLED_PERF_TRACE is compiled in, scope capture is gated on
+    // this flag so autoresearch can flip tracing on/off without reflashing.
+    mRemote->bind("setPerfTraceEnabled", [](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+        if (!args.is_array() || args.size() != 1 || !args[0].is_bool()) {
+            response.set("success", false);
+            response.set("error", "InvalidArgs");
+            response.set("message", "Expected [enabled: bool]");
+            return response;
+        }
+        bool enabled = args[0].as_bool().value();
+        fl::PerfTrace::set_enabled(enabled);
+        if (!enabled) {
+            fl::PerfTrace::clear();
+        }
+        response.set("success", true);
+        response.set("perf_trace_enabled", enabled);
+        return response;
+    });
+
+    // Register "getPerfTraceLog" — return all completed events accumulated on
+    // this thread since the last clear, then clear the log. Each entry is a
+    // compact tuple: [depth, dur_us, start_us, name, file, line].
+    mRemote->bind("getPerfTraceLog", [](const fl::json& args) -> fl::json {
+        (void)args;
+        fl::json response = fl::json::object();
+        fl::json events = fl::json::array();
+        const fl::size n = fl::PerfTrace::event_count();
+        const fl::PerfEvent* ev = fl::PerfTrace::events();
+        for (fl::size i = 0; i < n; ++i) {
+            fl::json e = fl::json::array();
+            e.push_back(static_cast<int64_t>(ev[i].depth));
+            e.push_back(static_cast<int64_t>(ev[i].end_us - ev[i].start_us));
+            e.push_back(static_cast<int64_t>(ev[i].start_us));
+            e.push_back(ev[i].name ? ev[i].name : "");
+            e.push_back(ev[i].file ? ev[i].file : "");
+            e.push_back(static_cast<int64_t>(ev[i].line));
+            events.push_back(e);
+        }
+        response.set("success", true);
+        response.set("count", static_cast<int64_t>(n));
+        response.set("dropped", fl::PerfTrace::dropped());
+        response.set("events", events);
+        fl::PerfTrace::clear();
         return response;
     });
 

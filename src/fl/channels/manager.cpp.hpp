@@ -10,6 +10,7 @@
 #include "fl/stl/chrono.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/move.h"
+#include "fl/system/perf_trace.h"
 #include "fl/system/trace.h"
 #include "fl/task/executor.h"
 #include "platforms/init_channel_driver.h"
@@ -349,6 +350,7 @@ fl::shared_ptr<IChannelDriver> ChannelManager::selectDriverForChannel(const Chan
 
 template<typename Condition>
 bool ChannelManager::waitForCondition(Condition condition, u32 timeoutMs) {
+    FL_PERF_SCOPE("ChannelManager::waitForCondition");
     const u32 startTime = timeoutMs > 0 ? millis() : 0;
 
     while (!condition()) {

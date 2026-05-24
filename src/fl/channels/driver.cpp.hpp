@@ -2,6 +2,7 @@
 #include "fl/channels/driver.h"
 #include "fl/log/log.h"
 #include "fl/stl/chrono.h"
+#include "fl/system/perf_trace.h"
 #include "fl/task/executor.h"
 #include "platforms/is_platform.h"
 
@@ -9,6 +10,7 @@ namespace fl {
 
 template<typename Condition>
 bool IChannelDriver::waitForCondition(Condition condition, u32 timeoutMs) {
+    FL_PERF_SCOPE("IChannelDriver::waitForCondition");
     const u32 startTime = timeoutMs > 0 ? millis() : 0;
 
     while (!condition()) {
