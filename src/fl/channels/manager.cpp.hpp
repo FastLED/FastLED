@@ -13,6 +13,7 @@
 #include "fl/system/trace.h"
 #include "fl/task/executor.h"
 #include "platforms/init_channel_driver.h"
+#include "platforms/is_platform.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {
@@ -357,9 +358,17 @@ bool ChannelManager::waitForCondition(Condition condition, u32 timeoutMs) {
             return false;  // Timeout occurred
         }
 
+#if defined(FL_IS_ESP_32P4)
+        // ESP32-P4 has no network stack (no WiFi, no Bluetooth, no lwIP),
+        // so the deep-yield rationale from #2254 doesn't apply. taskYIELD()
+        // avoids the 1-tick (≥1 ms at CONFIG_FREERTOS_HZ=1000) floor that
+        // adds ~8 ms per frame in PARLIO multi-strip workloads (#2493).
+        task::run(0, task::ExecFlags::SYSTEM);
+#else
         // OS yield only — keeps WiFi/lwIP alive without pumping
         // tasks or coroutines during frame transitions (re-entrancy risk).
         task::run(250, task::ExecFlags::SYSTEM);
+#endif
     }
 
     return true;  // Condition met
