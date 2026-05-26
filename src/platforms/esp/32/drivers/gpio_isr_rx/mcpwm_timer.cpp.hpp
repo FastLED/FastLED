@@ -52,7 +52,13 @@ using fl::u32;
 #include "esp_log.h"
 #include "soc/mcpwm_struct.h"
 #include "hal/mcpwm_ll.h"
+#include "platforms/esp/esp_version.h"
+#if ESP_IDF_VERSION_6_OR_HIGHER
+// ESP-IDF 6 relocated mcpwm_periph.h from soc/ to hal/.
+#include "hal/mcpwm_periph.h"
+#else
 #include "soc/mcpwm_periph.h"
+#endif
 // IWYU pragma: end_keep
 
 // Note: Functions are declared extern "C" in header - no namespace wrapping here
