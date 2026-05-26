@@ -133,8 +133,9 @@ bool I2sLcdCamPeripheralEsp::initialize(const I2sLcdCamConfig& config) FL_NOEXCE
     // Create I80 bus configuration
     esp_lcd_i80_bus_config_t bus_config = {};
     bus_config.clk_src = LCD_CLK_SRC_PLL160M;
-    bus_config.dc_gpio_num = 0;  // Not used for LED driving
-    bus_config.wr_gpio_num = 0;  // Not used for LED driving
+    // ESP-IDF 6 made gpio_num_t strictly typed; explicit cast needed.
+    bus_config.dc_gpio_num = static_cast<gpio_num_t>(0);  // Not used for LED driving
+    bus_config.wr_gpio_num = static_cast<gpio_num_t>(0);  // Not used for LED driving
     bus_config.bus_width = 16;
     bus_config.max_transfer_bytes = config.max_transfer_bytes;
 
@@ -152,9 +153,9 @@ bool I2sLcdCamPeripheralEsp::initialize(const I2sLcdCamConfig& config) FL_NOEXCE
     // Data GPIO pins
     for (int i = 0; i < 16; i++) {
         if (i < config.num_lanes) {
-            bus_config.data_gpio_nums[i] = config.data_gpios[i];
+            bus_config.data_gpio_nums[i] = static_cast<gpio_num_t>(config.data_gpios[i]);
         } else {
-            bus_config.data_gpio_nums[i] = 0;  // Unused pins set to 0
+            bus_config.data_gpio_nums[i] = static_cast<gpio_num_t>(0);  // Unused pins set to 0
         }
     }
 
@@ -167,7 +168,7 @@ bool I2sLcdCamPeripheralEsp::initialize(const I2sLcdCamConfig& config) FL_NOEXCE
 
     // Create panel IO configuration
     esp_lcd_panel_io_i80_config_t io_config = {};
-    io_config.cs_gpio_num = -1;  // No CS pin
+    io_config.cs_gpio_num = GPIO_NUM_NC;  // No CS pin
     io_config.pclk_hz = config.pclk_hz > 0 ? config.pclk_hz : FASTLED_ESP32S3_I2S_CLOCK_HZ;
     io_config.trans_queue_depth = 1;
     io_config.dc_levels = {
