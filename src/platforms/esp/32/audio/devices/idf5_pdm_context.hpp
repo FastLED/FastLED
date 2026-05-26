@@ -32,8 +32,7 @@ PDMContext pdm_audio_init(const audio::ConfigPdm &config) FL_NOEXCEPT {
     int pin_din = config.mPinDin;
     u16 sample_rate = config.mSampleRate;
 
-    // Create I2S channel configuration with DMA buffer settings.
-    // ESP-IDF 6 removed the i2s_port_t enum; i2s_chan_config_t::id is now int.
+    // Create I2S channel configuration with DMA buffer settings
 #if ESP_IDF_VERSION_6_OR_HIGHER
     i2s_chan_config_t chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(
         config.mI2sNum, I2S_ROLE_MASTER);

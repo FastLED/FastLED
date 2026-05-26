@@ -160,14 +160,13 @@ bool Rmt5PeripheralESPImpl::createTxChannel(const Rmt5ChannelConfig& config,
     esp_config.flags.invert_out = config.invert_out ? 1U : 0U;
     esp_config.flags.with_dma = config.with_dma ? 1U : 0U;
 #if !ESP_IDF_VERSION_6_OR_HIGHER
-    // ESP-IDF 6 removed rmt_tx_channel_config_t::flags::io_od_mode and
-    // ::io_loop_back. Both were already 0 here; on IDF 6 the defaults match,
-    // so we just skip the assignments.
-    //
+    // GPIO configuration flags:
     // io_od_mode=0: Push-pull output (not open-drain)
     esp_config.flags.io_od_mode = 0;
-    // io_loop_back=0: external loop via jumper, not internal loopback (which
-    // could reconfigure GPIO in ways that break subsequent TX).
+
+    // io_loop_back: Internal loopback mode (routes TX output back to RX input internally)
+    // Setting to 0 because we use physical jumper cable, not internal loopback.
+    // With io_loop_back=1, ESP-IDF may reconfigure GPIO in ways that break subsequent TX.
     esp_config.flags.io_loop_back = 0;
 #endif
     esp_config.intr_priority = config.intr_priority;

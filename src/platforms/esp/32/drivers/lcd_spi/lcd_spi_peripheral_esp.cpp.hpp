@@ -160,7 +160,6 @@ bool LcdSpiPeripheralEsp::initialize(const LcdSpiConfig &config) FL_NOEXCEPT {
     // dummy (matching i2s_lcd_cam_peripheral_esp.cpp.hpp convention).
     // NOTE: GPIO 0 is a strapping pin — if your board uses GPIO 0 for
     // boot-mode selection, set dc_gpio in LcdSpiConfig to an unused pin.
-    // ESP-IDF 6 made gpio_num_t strictly typed; explicit casts needed.
     if (config.dc_gpio >= 0) {
         bus_config.dc_gpio_num = static_cast<gpio_num_t>(config.dc_gpio);
     } else {

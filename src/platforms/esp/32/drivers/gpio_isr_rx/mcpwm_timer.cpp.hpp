@@ -54,7 +54,6 @@ using fl::u32;
 #include "hal/mcpwm_ll.h"
 #include "platforms/esp/esp_version.h"
 #if ESP_IDF_VERSION_6_OR_HIGHER
-// ESP-IDF 6 relocated mcpwm_periph.h from soc/ to hal/.
 #include "hal/mcpwm_periph.h"
 #else
 #include "soc/mcpwm_periph.h"
@@ -239,11 +238,7 @@ int mcpwm_timer_init(DualIsrContext* ctx, int gpio_pin) FL_NOEXCEPT {
         ESP_LOGI(MCPWM_TIMER_TAG, "Timer resolution verified: %lu Hz (12.5 ns per tick)", actual_resolution);
     }
 
-    // Step 2: Create capture channel and connect to GPIO.
-    // ESP-IDF 6 trimmed mcpwm_capture_channel_config_t::flags down to
-    // {pos_edge, neg_edge, invert_cap_signal}; pull_up/pull_down/io_loop_back
-    // were removed (use gpio_set_pull_mode() etc. if needed). All three were
-    // already 0 here, so just drop them on IDF 6.
+    // Step 2: Create capture channel and connect to GPIO
     mcpwm_capture_channel_config_t channel_config = {
         .gpio_num = gpio_pin,
         .prescale = 1,  // No prescaling - capture at full timer resolution

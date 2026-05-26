@@ -762,15 +762,11 @@ class RmtRxChannelImpl : public RmtRxChannel {
         // ESP32-S3 has a hardware limitation where TX GPIO output stops when RX
         // is actively receiving on a different GPIO. With loopback enabled,
         // TX output is routed both to the GPIO AND internally to RX.
-        //
-        // ESP-IDF 6 removed the explicit io_loop_back flag because loopback is
-        // now implicit: configuring the same GPIO as both TX output and RX input
-        // routes the signal internally automatically.
 #if !ESP_IDF_VERSION_6_OR_HIGHER
         rx_config.flags.io_loop_back = mIoLoopBack ? 1 : 0;
 #endif
         if (mIoLoopBack) {
-            FL_WARN("[RMT RX] Internal loopback enabled on GPIO " << static_cast<int>(mPin));
+            FL_WARN("[RMT RX] Internal loopback enabled (io_loop_back=1) on GPIO " << static_cast<int>(mPin));
         }
 
         // Note: RX channel is already registered with RmtMemoryManager in constructor

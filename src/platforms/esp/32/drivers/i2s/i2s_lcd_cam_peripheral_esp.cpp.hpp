@@ -133,7 +133,6 @@ bool I2sLcdCamPeripheralEsp::initialize(const I2sLcdCamConfig& config) FL_NOEXCE
     // Create I80 bus configuration
     esp_lcd_i80_bus_config_t bus_config = {};
     bus_config.clk_src = LCD_CLK_SRC_PLL160M;
-    // ESP-IDF 6 made gpio_num_t strictly typed; explicit cast needed.
     bus_config.dc_gpio_num = static_cast<gpio_num_t>(0);  // Not used for LED driving
     bus_config.wr_gpio_num = static_cast<gpio_num_t>(0);  // Not used for LED driving
     bus_config.bus_width = 16;

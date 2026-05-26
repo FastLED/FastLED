@@ -126,8 +126,7 @@ I2SContext make_context(const audio::ConfigI2S &config) FL_NOEXCEPT {
 I2SContext i2s_audio_init(const audio::ConfigI2S &config) FL_NOEXCEPT {
     I2SContext ctx = make_context(config);
 
-    // Create I2S channel configuration with DMA buffer settings.
-    // ESP-IDF 6 removed the i2s_port_t enum; i2s_chan_config_t::id is now int.
+    // Create I2S channel configuration with DMA buffer settings
 #if ESP_IDF_VERSION_6_OR_HIGHER
     i2s_chan_config_t chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(
         config.mI2sNum, I2S_ROLE_MASTER);
