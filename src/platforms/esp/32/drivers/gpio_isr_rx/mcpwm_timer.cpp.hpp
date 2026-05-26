@@ -239,17 +239,25 @@ int mcpwm_timer_init(DualIsrContext* ctx, int gpio_pin) FL_NOEXCEPT {
         ESP_LOGI(MCPWM_TIMER_TAG, "Timer resolution verified: %lu Hz (12.5 ns per tick)", actual_resolution);
     }
 
-    // Step 2: Create capture channel and connect to GPIO
+    // Step 2: Create capture channel and connect to GPIO.
+    // ESP-IDF 6 trimmed mcpwm_capture_channel_config_t::flags down to
+    // {pos_edge, neg_edge, invert_cap_signal}; pull_up/pull_down/io_loop_back
+    // were removed (use gpio_set_pull_mode() etc. if needed). All three were
+    // already 0 here, so just drop them on IDF 6.
     mcpwm_capture_channel_config_t channel_config = {
         .gpio_num = gpio_pin,
         .prescale = 1,  // No prescaling - capture at full timer resolution
         .flags = {
             .pos_edge = 1,  // Capture on positive edges
             .neg_edge = 1,  // Capture on negative edges
+#if !ESP_IDF_VERSION_6_OR_HIGHER
             .pull_up = 0,   // No internal pull-up
             .pull_down = 0, // No internal pull-down
+#endif
             .invert_cap_signal = 0,  // No inversion
+#if !ESP_IDF_VERSION_6_OR_HIGHER
             .io_loop_back = 0,       // No loopback
+#endif
         }
     };
 
