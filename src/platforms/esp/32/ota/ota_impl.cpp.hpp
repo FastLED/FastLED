@@ -14,7 +14,11 @@
 // OTA support detection flag
 // OTA requires IDF 4.0+ for HTTP server and OTA APIs
 // ESP32-H2 and ESP32-P4 lack WiFi hardware
-#if ESP_IDF_VERSION_4_OR_HIGHER && !defined(FL_IS_ESP_32H2) && !defined(FL_IS_ESP_32P4)
+// ESP-IDF 6 deprecated mbedtls's direct SHA256/MD5 APIs (moved to
+// mbedtls/private/) in favor of PSA crypto; until this implementation is
+// ported to psa_hash_*, OTA is disabled on IDF 6+.
+#if ESP_IDF_VERSION_4_OR_HIGHER && !ESP_IDF_VERSION_6_OR_HIGHER \
+    && !defined(FL_IS_ESP_32H2) && !defined(FL_IS_ESP_32P4)
 #define FL_ESP_OTA_SUPPORTED
 #endif
 
