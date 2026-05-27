@@ -6,10 +6,7 @@ dependencies:
     rules:
       - if: "target == esp32p4"
 
-# The IDF Component Manager strips any directory called `build/` via its
-# hardcoded DEFAULT_EXCLUDE (`**/build/**/*`). The unity-build entry .cpp
-# files live in `src/fl/build/`, so without re-including them the fetched
-# component has zero compilable sources and registers as CONFIG_ONLY.
+# Re-include src/fl/build/ which DEFAULT_EXCLUDE's **/build/**/* otherwise strips.
 files:
   include:
     - "src/fl/build/**/*"
