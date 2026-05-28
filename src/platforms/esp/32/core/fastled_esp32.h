@@ -23,6 +23,10 @@
 #include "platforms/esp/32/drivers/rmt/clockless_rmt_esp32.h"
 #endif
 
+#if FASTLED_ESP32_HAS_PARLIO
+#include "platforms/esp/32/drivers/parlio/clockless_parlio_esp32.h"
+#endif
+
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
 #include "platforms/esp/32/drivers/spi/idf5_clockless_spi_esp32.h"
 #endif
