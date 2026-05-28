@@ -1057,6 +1057,9 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         response.set("message", "pong");
         response.set("timestamp", static_cast<int64_t>(now));
         response.set("uptimeMs", static_cast<int64_t>(now));
+        fl::HeapInfo heap = fl::getFreeHeap();
+        response.set("free_sram", static_cast<int64_t>(heap.free_sram));
+        response.set("free_psram", static_cast<int64_t>(heap.free_psram));
         return response;
     });
 
@@ -1795,6 +1798,131 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         }
         response.set("message", msg.str().c_str());
 
+        return response;
+    });
+
+    // Register "measureParlio" - allocate an N-lane PARLIO setup, measure the
+    // internal-SRAM delta around the DMA ring allocation, and time show().
+    // Validates the PARLIO DMA buffer-sizing fix (#2519): per-lane sizing keeps
+    // the ring small (~37KB for 12x256) instead of the pre-fix ~590KB, which
+    // would not even fit in this board's free internal SRAM.
+    mRemote->bind("measureParlio", [this](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+        int lanes = 12, leds = 256, iterations = 20;
+        fl::json cfg;
+        if (args.is_object()) {
+            cfg = args;
+        } else if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
+            cfg = args[0];
+        }
+        if (!cfg.is_null()) {
+            if (cfg.contains("lanes") && cfg["lanes"].is_int()) {
+                lanes = static_cast<int>(cfg["lanes"].as_int().value());
+            }
+            if (cfg.contains("leds") && cfg["leds"].is_int()) {
+                leds = static_cast<int>(cfg["leds"].as_int().value());
+            }
+            if (cfg.contains("iterations") && cfg["iterations"].is_int()) {
+                iterations = static_cast<int>(cfg["iterations"].as_int().value());
+            }
+        }
+        if (lanes < 1 || lanes > 16 || leds < 1 || leds > 2048 || iterations < 1) {
+            response.set("success", false);
+            response.set("error", "InvalidArgs");
+            response.set("message", "lanes 1-16, leds 1-2048, iterations>=1");
+            return response;
+        }
+        if (!autoResearchSetExclusiveDriverByName("PARLIO")) {
+            response.set("success", false);
+            response.set("error", "DriverSetupFailed");
+            response.set("message", "Failed to set PARLIO exclusive");
+            return response;
+        }
+
+        fl::HeapInfo h_idle = fl::getFreeHeap();
+
+        fl::vector<fl::unique_ptr<fl::vector<CRGB>>> led_arrays;
+        fl::vector<fl::ChannelPtr> channels;
+        for (int li = 0; li < lanes; li++) {
+            auto buf = fl::make_unique<fl::vector<CRGB>>(leds);
+            for (int i = 0; i < leds; i++) {
+                (*buf)[i] = CRGB(0x10, 0x20, 0x40);
+            }
+            fl::ChannelOptions opts;
+            opts.mBus = fl::Bus::PARLIO;
+            fl::ChannelConfig channel_config(
+                mState->pin_tx + li,
+                fl::makeTimingConfig<fl::TIMING_WS2812B_V5>(),
+                fl::span<CRGB>(buf->data(), buf->size()),
+                RGB,
+                opts
+            );
+            auto ch = FastLED.add(channel_config);
+            if (!ch) {
+                FastLED.clear(ClearFlags::CHANNELS);
+                response.set("success", false);
+                response.set("error", "ChannelCreationFailed");
+                fl::sstream m;
+                m << "lane " << li << " add failed (free_sram=" << h_idle.free_sram << ")";
+                response.set("message", m.str().c_str());
+                return response;
+            }
+            channels.push_back(ch);
+            led_arrays.push_back(fl::move(buf));
+        }
+
+        // Warmup show allocates the DMA ring buffer.
+        FastLED.show();
+        FastLED.wait(5000);
+        fl::HeapInfo h_alloc = fl::getFreeHeap();
+
+        uint32_t show_min = 0xFFFFFFFFu;
+        uint32_t show_max = 0;
+        uint32_t show_sum = 0;
+        uint32_t total_sum = 0;
+        for (int it = 0; it < iterations; it++) {
+            uint32_t t0 = micros();
+            FastLED.show();
+            uint32_t t1 = micros();
+            FastLED.wait(5000);
+            uint32_t t2 = micros();
+            uint32_t s = t1 - t0;
+            uint32_t tt = t2 - t0;
+            if (s < show_min) {
+                show_min = s;
+            }
+            if (s > show_max) {
+                show_max = s;
+            }
+            show_sum += s;
+            total_sum += tt;
+        }
+
+        FastLED.clear(ClearFlags::CHANNELS);
+        fl::HeapInfo h_free = fl::getFreeHeap();
+
+        int64_t alloc_bytes =
+            static_cast<int64_t>(h_idle.free_sram) - static_cast<int64_t>(h_alloc.free_sram);
+        int64_t alloc_psram_bytes =
+            static_cast<int64_t>(h_idle.free_psram) - static_cast<int64_t>(h_alloc.free_psram);
+
+        response.set("success", true);
+        response.set("lanes", static_cast<int64_t>(lanes));
+        response.set("leds_per_lane", static_cast<int64_t>(leds));
+        response.set("iterations", static_cast<int64_t>(iterations));
+        response.set("free_sram_idle", static_cast<int64_t>(h_idle.free_sram));
+        response.set("free_sram_allocated", static_cast<int64_t>(h_alloc.free_sram));
+        response.set("free_sram_after_free", static_cast<int64_t>(h_free.free_sram));
+        response.set("alloc_sram_bytes", alloc_bytes);
+        response.set("free_psram_idle", static_cast<int64_t>(h_idle.free_psram));
+        response.set("free_psram_allocated", static_cast<int64_t>(h_alloc.free_psram));
+        response.set("alloc_psram_bytes", alloc_psram_bytes);
+        response.set("show_min_us", static_cast<int64_t>(show_min));
+        response.set("show_avg_us",
+                     static_cast<int64_t>(show_sum / static_cast<uint32_t>(iterations)));
+        response.set("show_max_us", static_cast<int64_t>(show_max));
+        response.set("total_avg_us",
+                     static_cast<int64_t>(total_sum / static_cast<uint32_t>(iterations)));
         return response;
     });
 
