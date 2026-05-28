@@ -876,7 +876,7 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     final_environment = ctx.final_environment
 
     # Validate RPC commands against device schema
-    constrained_platforms = ["esp32c6", "esp32c2", "teensy41", "teensy40"]
+    constrained_platforms = ["esp32c6", "esp32c2", "esp32p4", "teensy41", "teensy40"]
     skip_schema = (
         args.skip_schema or args.quiet or final_environment in constrained_platforms
     )

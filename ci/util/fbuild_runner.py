@@ -559,25 +559,70 @@ def run_fbuild_deploy(
     Returns:
         True if deploy (and optional monitoring) succeeded, False otherwise
     """
+    import subprocess
+
     out = _get_output(quiet, log_file)
     print("=" * 60, file=out)
     print("DEPLOYING (fbuild)", file=out)
     print("=" * 60, file=out)
 
-    ensure_fbuild_daemon()
+    if environment is None:
+        raise ValueError("environment must be specified for fbuild deploy")
+
+    fbuild_exe = get_fbuild_executable()
+    if fbuild_exe is None:
+        print("BUILD+FLASH FAIL fbuild not found on PATH")
+        return False
+
+    cmd: list[str] = [
+        fbuild_exe,
+        str(build_dir),
+        "deploy",
+        "-e",
+        environment,
+    ]
+    if upload_port:
+        cmd.extend(["-p", upload_port])
+    if verbose:
+        cmd.append("-v")
+    if clean:
+        cmd.append("-c")
+    if monitor_after:
+        cmd.append("--monitor")
+
+    env = os.environ.copy()
+    force_restart_daemon = False
+    if environment.lower() == "esp32p4":
+        for name in ("FBUILD_USE_ESPFLASH_VERIFY", "FBUILD_USE_ESPFLASH_WRITE"):
+            if not env.get(name):
+                env[name] = "0"
+                force_restart_daemon = True
+    if force_restart_daemon:
+        subprocess.run(
+            [fbuild_exe, "daemon", "stop"],
+            capture_output=True,
+            text=True,
+            env=env,
+            check=False,
+        )
 
     t0 = time.monotonic()
     try:
-        if environment is None:
-            raise ValueError("environment must be specified for fbuild deploy")
-
-        with connect_daemon(str(build_dir), environment) as conn:
-            success: bool = conn.deploy(
-                port=upload_port,
-                clean=clean,
-                monitor_after=monitor_after,
-                timeout=timeout,
-            )
+        print(f"Running: {subprocess.list2cmdline(cmd)}", file=out)
+        print(file=out)
+        proc = subprocess.run(
+            cmd,
+            timeout=int(timeout),
+            env=env,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            check=False,
+        )
+        if proc.stdout:
+            print(proc.stdout, file=out, end="")
+        returncode = proc.returncode
+        success = returncode == 0
 
         elapsed = time.monotonic() - t0
         if quiet:
@@ -597,6 +642,10 @@ def run_fbuild_deploy(
         print("\nKeyboardInterrupt: Stopping deploy")
         handle_keyboard_interrupt(ki)
         raise
+    except subprocess.TimeoutExpired:
+        elapsed = time.monotonic() - t0
+        print(f"BUILD+FLASH FAIL timeout after {elapsed:.1f}s")
+        return False
     except Exception as e:
         elapsed = time.monotonic() - t0
         print(f"BUILD+FLASH FAIL {e}")
