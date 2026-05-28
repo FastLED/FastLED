@@ -335,6 +335,20 @@ private:
     // Maximum LEDs per channel used to size ring buffers
     // Used to detect when ring buffers need reallocation (new test has more LEDs)
     size_t mMaxLedsPerChannel;
+
+    // Frame-level ping-pong slot (0/1) for the single-full-frame fast path.
+    // beginTransmission() encodes frame N into mActiveSlot while frame N-1 is
+    // still draining from the other slot, then flips. Distinct slots guarantee
+    // we never encode into an in-flight DMA buffer. Only used when the whole
+    // frame fits in one ring buffer; the multi-chunk streaming path ignores it.
+    size_t mActiveSlot;
+
+    // True iff the previously-submitted frame used the single-full-frame fast
+    // path (exactly one buffer, occupying the OTHER ping-pong slot). Only then
+    // is it safe to encode frame N before draining frame N-1, because the sole
+    // in-flight buffer is guaranteed to be the slot we are NOT writing to. The
+    // streaming path clears this so the next frame drains-first (unchanged).
+    bool mOverlapArmed;
 };
 
 } // namespace detail

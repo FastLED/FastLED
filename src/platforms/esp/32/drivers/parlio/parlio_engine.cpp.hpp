@@ -301,7 +301,9 @@ ParlioEngine::ParlioEngine() FL_NOEXCEPT
       mLaneStride(0),
       mErrorOccurred(false),
       mTxUnitEnabled(false),
-      mMaxLedsPerChannel(0) {
+      mMaxLedsPerChannel(0),
+      mActiveSlot(0),
+      mOverlapArmed(false) {
     FL_LOG_PARLIO("PARLIO_INIT: Constructor entered");
 }
 
@@ -1738,7 +1740,14 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
     // The ESP-IDF PARLIO driver's internal DMA queue may still have the last buffer
     // queued even after our ISR context shows mStreamComplete=true. Without this,
     // consecutive transmissions with the same config fail silently (0 bytes output).
-    if (mTxUnitEnabled) {
+    //
+    // PING-PONG OVERLAP (Approach A): when the previous frame used the single-
+    // full-frame fast path (mOverlapArmed), its sole in-flight buffer occupies the
+    // OTHER ping-pong slot, so we DEFER this drain until after encoding frame N
+    // into mActiveSlot. That overlaps encode(N) with wire(N-1). When not armed
+    // (first frame, or previous frame used the streaming path) we drain here
+    // first, exactly as before.
+    if (mTxUnitEnabled && !mOverlapArmed) {
         mPeripheral->waitAllDone(100);  // 100ms timeout - should be near-instant
     }
 
@@ -1793,9 +1802,14 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
     mErrorOccurred = false;
     mIsrContext->mTransmitting = false; // Will be set to true after first buffer submitted
 
-    // Initialize ring buffer indices and count
-    mIsrContext->mRingReadIdx = 0;
-    mIsrContext->mRingWriteIdx = 0;
+    // Initialize ring buffer indices and count.
+    // Ping-pong: encoding (and the first submit) begin at mActiveSlot rather than
+    // a hardcoded slot 0. For the single-full-frame path this selects the slot NOT
+    // currently in flight. For the streaming path mActiveSlot is always 0 (it is
+    // never advanced unless a single-frame completes), so this is a no-op there and
+    // the buffer layout/shape is byte-identical to before.
+    mIsrContext->mRingReadIdx = mActiveSlot;
+    mIsrContext->mRingWriteIdx = mActiveSlot;
     mIsrContext->mRingCount = 0;
     mIsrContext->mRingError = false;
     mIsrContext->mHardwareIdle = false;
@@ -1814,10 +1828,23 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
     mIsrContext->mDebugLastTxDoneTime = 0;
     mIsrContext->mDebugLastWorkerIsrTime = 0;
 
-    // Pre-populate ring buffers (fill all buffers if possible)
+    // Pre-populate ring buffers (fill all buffers if possible).
     FL_LOG_PARLIO("PARLIO_TX: Pre-populating ring buffers - mScratchBuffer=" << (void*)mScratchBuffer << " stride=" << mLaneStride);
-    while (hasRingSpace() && populateNextDMABuffer()) {
-        // Buffer populated into ring
+    //
+    // PING-PONG SAFETY: the FIRST buffer is encoded into mActiveSlot, which is the
+    // slot a prior single-frame transmission is NOT using, so it is always safe to
+    // encode it before draining. If more bytes remain after this first buffer we are
+    // on the STREAMING path, where subsequent buffers wrap through every slot and
+    // could collide with the still-in-flight buffer. In that case honor the deferred
+    // drain NOW -- before populating any further buffer -- which restores the exact
+    // original drain-first ordering for streaming.
+    bool more_data = (hasRingSpace() && populateNextDMABuffer());
+    if (more_data && mTxUnitEnabled && mOverlapArmed) {
+        mPeripheral->waitAllDone(100);  // 100ms timeout - should be near-instant
+        mOverlapArmed = false;  // Drained early; the pre-submit deferred drain is now a no-op
+    }
+    while (more_data && hasRingSpace()) {
+        more_data = populateNextDMABuffer();  // Buffer populated into ring
     }
 
     // Get actual number of buffers populated
@@ -1836,6 +1863,18 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
         FL_LOG_PARLIO("PARLIO: No buffers populated - cannot start transmission");
         mErrorOccurred = true;
         return false;
+    }
+
+    // DEFERRED DRAIN (ping-pong overlap): if we skipped the top-of-function drain
+    // because the previous frame used the single-full-frame fast path (mOverlapArmed),
+    // frame N has now been fully ENCODED into mActiveSlot while frame N-1 was still on
+    // the wire in the OTHER slot -- that is the encode(N)/wire(N-1) overlap. Drain it
+    // here, BEFORE the disable/enable cycle below: parlio_tx_unit_disable() aborts any
+    // in-flight DMA, so frame N-1 must be fully on the wire first. (Streaming frames
+    // already drained inside the populate loop and cleared mOverlapArmed, so this is a
+    // no-op for them -- identical to the original drain-first ordering.)
+    if (mTxUnitEnabled && mOverlapArmed) {
+        mPeripheral->waitAllDone(100);  // 100ms timeout - should be near-instant
     }
 
     // CRITICAL: Always disable and re-enable the PARLIO peripheral between transmissions.
@@ -1857,11 +1896,24 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
     mTxUnitEnabled = true;
     FL_LOG_PARLIO("PARLIO_TX: Peripheral enabled successfully");
 
+    // The first buffer to submit lives in mActiveSlot (the ping-pong slot we
+    // encoded into). Capture it now; everything below is expressed relative to it
+    // so the streaming path (mActiveSlot==0) is byte-identical to the old code.
+    size_t first_slot = mActiveSlot;
+    size_t next_read_idx = (first_slot + 1) % ParlioRingBuffer3::RING_BUFFER_COUNT;
+
+    // Detect the single-full-frame fast path: the whole frame fit in ONE buffer
+    // (populateNextDMABuffer consumed all source bytes in one call). Only this
+    // path participates in frame-level ping-pong overlap; the multi-chunk
+    // streaming path falls back to the original drain-first behavior.
+    bool is_single_frame = (buffers_populated == 1 &&
+                            mIsrContext->mNextByteOffset >= mIsrContext->mTotalBytes);
+
     // Queue first buffer to start transmission
     FL_LOG_PARLIO("PARLIO: Starting ISR-based streaming | first_buffer_size="
-           << mRingBuffer->sizes[0] << " | buffers_ready=" << buffers_populated);
+           << mRingBuffer->sizes[first_slot] << " | buffers_ready=" << buffers_populated);
 
-    size_t first_buffer_size = mRingBuffer->sizes[0];
+    size_t first_buffer_size = mRingBuffer->sizes[first_slot];
     FL_LOG_PARLIO("PARLIO_TX: Starting transmission - first_buffer=" << first_buffer_size << " bytes, buffers_ready=" << buffers_populated);
 
     // CRITICAL FIX: Mark transmission started BEFORE submitting buffer
@@ -1870,20 +1922,35 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
 
     // CRITICAL FIX (Iteration 2): Advance read index BEFORE submitting first buffer
     // This prevents race condition where txDone fires before index is advanced
-    // Root cause: If txDone fires with read_idx=0, it calculates wrong completed_buffer_idx
-    mIsrContext->mRingReadIdx = 1;
+    // Root cause: If txDone fires before read_idx is advanced past first_slot, it
+    // calculates the wrong completed_buffer_idx.
+    mIsrContext->mRingReadIdx = next_read_idx;
     mIsrContext->mRingCount = buffers_populated - 1;
     FL_MEMORY_BARRIER;
 
-    if (!mPeripheral->transmit(mRingBuffer->ptrs[0], first_buffer_size * 8, 0x0000)) {
+    if (!mPeripheral->transmit(mRingBuffer->ptrs[first_slot], first_buffer_size * 8, 0x0000)) {
         FL_LOG_PARLIO("PARLIO: Failed to queue first buffer");
         mIsrContext->mTransmitting = false;  // Rollback flag on error
-        mIsrContext->mRingReadIdx = 0;  // Rollback index on error
+        mIsrContext->mRingReadIdx = first_slot;  // Rollback index on error
         mIsrContext->mRingCount = buffers_populated;  // Rollback count on error
+        mOverlapArmed = false;  // Force the next frame to drain-first after an error
         mErrorOccurred = true;
         return false;
     }
     FL_LOG_PARLIO("PARLIO_TX: First buffer submitted successfully - transmission started");
+
+    // Ping-pong bookkeeping (post-submit, frame N is now in flight in first_slot):
+    //  - single-frame fast path: flip mActiveSlot to the other slot so frame N+1
+    //    encodes there while frame N drains, and arm the deferred-drain overlap.
+    //  - streaming path: pin mActiveSlot back to 0 and disarm, so the next frame
+    //    drains-first and starts at slot 0 exactly like the original logic.
+    if (is_single_frame) {
+        mActiveSlot ^= 1;       // 0 <-> 1
+        mOverlapArmed = true;
+    } else {
+        mActiveSlot = 0;
+        mOverlapArmed = false;
+    }
 
     //=========================================================================
     // Worker function now called directly from txDoneCallback (one-shot pattern)

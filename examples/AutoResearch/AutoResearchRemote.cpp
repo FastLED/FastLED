@@ -1898,6 +1898,21 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
             total_sum += tt;
         }
 
+        // PIPELINED timing (no per-frame wait) — this is where the ping-pong
+        // overlap shows. Back-to-back show() lets show(N) encode while frame N-1's
+        // DMA drains in the background, so the steady-state per-frame period
+        // collapses toward max(encode, wire) instead of encode + wire. One wait()
+        // at the end accounts for the final in-flight frame. Compare against
+        // total_avg_us (the serialized show()+wait() period): pipelined < serialized
+        // by ~the wire-drain time confirms the overlap is active.
+        uint32_t pipe_t0 = micros();
+        for (int it = 0; it < iterations; it++) {
+            FastLED.show();
+        }
+        FastLED.wait(5000);
+        uint32_t pipelined_per_frame_us =
+            (micros() - pipe_t0) / static_cast<uint32_t>(iterations);
+
         FastLED.clear(ClearFlags::CHANNELS);
         fl::HeapInfo h_free = fl::getFreeHeap();
 
@@ -1923,6 +1938,7 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         response.set("show_max_us", static_cast<int64_t>(show_max));
         response.set("total_avg_us",
                      static_cast<int64_t>(total_sum / static_cast<uint32_t>(iterations)));
+        response.set("pipelined_per_frame_us", static_cast<int64_t>(pipelined_per_frame_us));
         return response;
     });
 
