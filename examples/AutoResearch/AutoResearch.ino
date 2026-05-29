@@ -195,6 +195,7 @@
 #include "AutoResearchPlatform.h"
 #include "AutoResearchSimd.h"
 #include "AutoResearchWave8Expand.h"  // boot-time #2526 micro-bench
+#include "AutoResearchParlioEncode.h" // full parlio encode bench (post-byte-LUT)
 
 // ============================================================================
 // Teensy Hardware Watchdog (crash recovery) - DISABLED
@@ -339,6 +340,16 @@ void setup() {
     {
         auto _w8r = autoresearch::wave8_bench::measureWave8Expand();
         autoresearch::wave8_bench::printWave8ExpandResultRom(_w8r);
+    }
+#endif
+
+    // Full PARLIO encode bench (post-byte-LUT, #2526). RPC-driven via
+    // parlioEncodeBenchmark; boot-time bridge gated by FL_BENCH_PARLIO_AT_BOOT
+    // until #2541 testSimd RPC routing is fixed.
+#ifdef FL_BENCH_PARLIO_AT_BOOT
+    {
+        auto _per = autoresearch::parlio_bench::measureParlioEncode();
+        autoresearch::parlio_bench::printParlioEncodeResultRom(_per);
     }
 #endif
     if (simd_failures > 0) {
