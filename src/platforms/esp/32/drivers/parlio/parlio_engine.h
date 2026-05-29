@@ -295,6 +295,9 @@ private:
 
     // Wave8 lookup table (used for clockless encoding)
     fl::Wave8BitExpansionLut mWave8Lut;
+    // Byte-indexed expansion LUT (#2526): 2 KB, 1 lookup per byte → ~1.7x
+    // faster expansion on ESP32-P4 vs the nibble path; built from mWave8Lut.
+    fl::Wave8ByteExpansionLut mWave8ByteLut;
 
     // Wave3 lookup table and state (used when chipset timing is wave3-eligible)
     fl::Wave3BitExpansionLut mWave3Lut;

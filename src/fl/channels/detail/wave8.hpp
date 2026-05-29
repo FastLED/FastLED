@@ -60,6 +60,20 @@ void wave8_convert_byte_to_wave8byte(u8 byte_value,
                   1); // 4 bytes = 1 x uint32_t
 }
 
+/// @brief Byte-indexed expansion (#2526): one indexed 8-byte copy.
+///
+/// Single lookup (no >>4/mask, no second index) into the 256×8 byte LUT;
+/// bit-identical to wave8_convert_byte_to_wave8byte(). ~half the index/issue
+/// work for the same memory traffic — the win on the in-order RV32 core.
+FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
+void wave8_expand_byte(u8 byte_value,
+                       const Wave8ByteExpansionLut &lut,
+                       Wave8Byte *output) {
+    isr::memcpy_32(fl::bit_cast_ptr<u32>(output),
+                  fl::bit_cast_ptr<const u32>(&lut.lut[byte_value]),
+                  2); // 8 bytes = 2 x uint32_t
+}
+
 // ============================================================================
 // 2-Lane Transposition Helper Macro
 // ============================================================================

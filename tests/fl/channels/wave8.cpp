@@ -78,6 +78,28 @@ FL_TEST_CASE("convertToWave8Bit") {
     }
 }
 
+FL_TEST_CASE("buildWave8ByteExpansionLUT matches nibble path for all 256 bytes") {
+    // #2526: the byte-indexed LUT expansion must be bit-identical to the
+    // nibble-LUT expansion for every possible input byte.
+    ChipsetTiming timing;
+    timing.T1 = 250;
+    timing.T2 = 500;
+    timing.T3 = 250;
+
+    Wave8BitExpansionLut nibble = buildWave8ExpansionLUT(timing);
+    Wave8ByteExpansionLut byteLut = buildWave8ByteExpansionLUT(nibble);
+
+    for (int b = 0; b < 256; ++b) {
+        Wave8Byte ref;   // nibble path (current production)
+        Wave8Byte got;   // byte path (#2526)
+        detail::wave8_convert_byte_to_wave8byte(static_cast<u8>(b), nibble, &ref);
+        detail::wave8_expand_byte(static_cast<u8>(b), byteLut, &got);
+        for (int s = 0; s < 8; ++s) {
+            FL_REQUIRE(got.symbols[s].data == ref.symbols[s].data);
+        }
+    }
+}
+
 FL_TEST_CASE("wave8Transpose_4_all_ones_and_zeros") {
     // Build LUT where bit0 = all LOW, bit1 = all HIGH
     ChipsetTiming timing;
