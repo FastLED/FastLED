@@ -30,6 +30,7 @@
 #include "fl/task/promise.h"
 #include "fl/math/simd.h"
 #include "AutoResearchSimd.h"
+#include "AutoResearchWave8Expand.h"  // #2526 wave8ExpandBenchmark RPC
 #include "fl/system/heap.h"
 #include "fl/chipsets/spi.h"
 #include "fl/channels/config.h"
@@ -1567,9 +1568,17 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         testSimdBenchmark_fn.set("description", "Benchmark multiply speed: float vs s16x16 vs s16x16x4 SIMD");
         functions.push_back(testSimdBenchmark_fn);
 
+        fl::json wave8ExpandBenchmark_fn = fl::json::object();
+        wave8ExpandBenchmark_fn.set("name", "wave8ExpandBenchmark");
+        wave8ExpandBenchmark_fn.set("phase", "Phase 4: Utility");
+        wave8ExpandBenchmark_fn.set("args", "[{iterations}] (optional, default 30000, max 200000)");
+        wave8ExpandBenchmark_fn.set("returns", "{success, iterations, expand_nibble_us, expand_byte_us, expand_batched_us, transpose16_nibble_us, transpose16_byte_us, sink}");
+        wave8ExpandBenchmark_fn.set("description", "Bench PARLIO Wave8 expansion (#2526): nibble vs byte vs batched LUT, plus full per-byte-position cost (expansion + 16-lane transpose)");
+        functions.push_back(wave8ExpandBenchmark_fn);
+
         fl::json response = fl::json::object();
         response.set("success", true);
-        response.set("totalFunctions", static_cast<int64_t>(22));
+        response.set("totalFunctions", static_cast<int64_t>(23));
         response.set("functions", functions);
         return response;
     });
@@ -1662,6 +1671,37 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         div.set("u16x16_us", result.div_u16x16_us);
         response.set("div", div);
 
+        return response;
+    });
+
+    // Register "wave8ExpandBenchmark" - PARLIO Wave8 expansion bench (#2526).
+    // Compares nibble-LUT vs byte-LUT vs batched byte-LUT, and times the full
+    // per-byte-position cost (expansion + 16-lane transpose) for both LUTs.
+    // Args: {iterations} (optional, default 30000, max 200000)
+    mRemote->bind("wave8ExpandBenchmark", [](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+
+        int iters = 30000;
+        fl::json config;
+        if (args.is_object()) {
+            config = args;
+        } else if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
+            config = args[0];
+        }
+        if (!config.is_null() && config.contains("iterations") && config["iterations"].is_int()) {
+            iters = static_cast<int>(config["iterations"].as_int().value());
+        }
+
+        auto r = autoresearch::wave8_bench::measureWave8Expand(iters);
+
+        response.set("success", true);
+        response.set("iterations", static_cast<int64_t>(r.iters));
+        response.set("expand_nibble_us", static_cast<int64_t>(r.expand_nibble_us));
+        response.set("expand_byte_us", static_cast<int64_t>(r.expand_byte_us));
+        response.set("expand_batched_us", static_cast<int64_t>(r.expand_batched_us));
+        response.set("transpose16_nibble_us", static_cast<int64_t>(r.transpose16_nibble_us));
+        response.set("transpose16_byte_us", static_cast<int64_t>(r.transpose16_byte_us));
+        response.set("sink", static_cast<int64_t>(r.sink));
         return response;
     });
 

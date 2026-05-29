@@ -1,12 +1,17 @@
 /// @file AutoResearchWave8Expand.h
-/// @brief Boot-time micro-benchmark for the Wave8 expansion (#2526).
+/// @brief Wave8 expansion micro-benchmark for #2526.
 ///
-/// Compares the current nibble-LUT expansion against the byte-indexed (256x8)
-/// LUT proposed in #2526, plus a batched-byte variant (S3). Output goes through
-/// esp_rom_printf so it reaches the USB-Serial-JTAG console (= COM25) at boot
-/// — the testSimd RPC path is currently blocked by a UART0-vs-USB-JTAG routing
-/// issue on P4 (CDC On Boot = 0; see #2536/#2538). Capturing boot serial on
-/// COM25 sidesteps that.
+/// Compares the nibble-LUT expansion path against the byte-indexed (256x8)
+/// LUT and a batched-byte variant (S3), AND times the full per-byte-position
+/// production cost (expansion + 16-lane transpose) for both LUTs.
+///
+/// **Invocation:** intended to be called via the `wave8ExpandBenchmark` RPC
+/// (registered in AutoResearchRemote.cpp). Not computed at boot by default.
+/// Build with `-DFL_BENCH_WAVE8_AT_BOOT=1` to also fire once at setup() —
+/// that's a bridge until the testSimd RPC routing on P4 is fixed (#2541), at
+/// which point the bench is purely RPC-driven. Boot-time output uses
+/// `esp_rom_printf` because `FL_PRINT` doesn't currently reach COM25 on P4
+/// (see #2540/#2541).
 
 #pragma once
 
@@ -17,22 +22,43 @@
 #include "fl/stl/int.h"
 
 #if defined(ARDUINO_ARCH_ESP32) || defined(ESP_PLATFORM)
-#include <Arduino.h>     // micros()
-#include <esp_rom_sys.h> // esp_rom_printf -> USB-Serial-JTAG console
-#define FL_BENCH_PRINTF esp_rom_printf
-#define FL_BENCH_ENABLED 1
-#else
-#define FL_BENCH_ENABLED 0
+#include <Arduino.h> // micros()
+#endif
+#if defined(ARDUINO_ARCH_ESP32) || defined(ESP_PLATFORM)
+#include <esp_rom_sys.h> // esp_rom_printf -> USB-Serial-JTAG console (#2540)
 #endif
 
 namespace autoresearch {
 namespace wave8_bench {
 
-#if FL_BENCH_ENABLED
+struct Wave8ExpandResult {
+    fl::u32 iters;
+    // Expansion in isolation (the #2526 strategies side-by-side).
+    fl::u32 expand_nibble_us;     // current production
+    fl::u32 expand_byte_us;       // S1: byte-indexed 256x8 LUT
+    fl::u32 expand_batched_us;    // S3: byte LUT, load-all-then-store-all
+    // Full per-byte-position cost (expansion + 16-lane transpose). This is
+    // what the parlio engine actually pays per byte-position * 768/frame.
+    fl::u32 transpose16_nibble_us;
+    fl::u32 transpose16_byte_us;
+    fl::u32 sink;
+};
 
-inline void runWave8ExpandBenchmark() {
-    // Representative WS2812B-ish timing (ratios that yield non-degenerate
-    // expansion patterns; the absolute values don't matter for this micro-bench).
+#if defined(ARDUINO_ARCH_ESP32) || defined(ESP_PLATFORM)
+
+/// Pure compute: builds both LUTs, runs all five timed paths, returns numbers.
+/// No printing — the caller (RPC handler or boot-time bridge) decides.
+inline Wave8ExpandResult measureWave8Expand(int iters_in = 30000) {
+    Wave8ExpandResult result{};
+    if (iters_in < 1) {
+        iters_in = 1;
+    }
+    if (iters_in > 200000) {
+        iters_in = 200000;
+    }
+    result.iters = static_cast<fl::u32>(iters_in);
+
+    // Representative WS2812B-ish timing; absolutes don't matter for the bench.
     fl::ChipsetTiming timing;
     timing.T1 = 400;
     timing.T2 = 450;
@@ -41,97 +67,143 @@ inline void runWave8ExpandBenchmark() {
     fl::Wave8BitExpansionLut nibLut = fl::buildWave8ExpansionLUT(timing);
     fl::Wave8ByteExpansionLut byteLut = fl::buildWave8ByteExpansionLUT(nibLut);
 
-    // 16 lane inputs, mixed values; output buffer matches the production
-    // wave8Transpose_16() stack layout (16 Wave8Byte = 128 bytes).
     fl::u8 lanes[16];
     for (int i = 0; i < 16; ++i) {
         lanes[i] = static_cast<fl::u8>(i * 17 + 3);
     }
     fl::Wave8Byte out[16];
-
     volatile fl::u32 sink = 0;
-
-    // One iter == one "byte-position" of encode = 16 lane expansions.
-    // Production encodes 768 byte-positions per frame (256 LEDs * 3 channels).
-    // Pick ITERS large enough that micros() jitter is <1% (~hundreds of ms total).
-    const int ITERS = 30000; // 30000 * 16 = 480,000 expansions per measurement
 
     // Warm caches / icache.
     for (int i = 0; i < 16; ++i) {
         fl::detail::wave8_convert_byte_to_wave8byte(lanes[i], nibLut, &out[i]);
         fl::detail::wave8_expand_byte(lanes[i], byteLut, &out[i]);
     }
+    fl::u8 transposed[16 * sizeof(fl::Wave8Byte)];
+    fl::wave8Transpose_16(reinterpret_cast<const fl::u8(&)[16]>(lanes), nibLut,
+                          reinterpret_cast<fl::u8(&)[16 * sizeof(fl::Wave8Byte)]>(transposed));
+    fl::wave8Transpose_16(reinterpret_cast<const fl::u8(&)[16]>(lanes), byteLut,
+                          reinterpret_cast<fl::u8(&)[16 * sizeof(fl::Wave8Byte)]>(transposed));
 
-    // --- Nibble path (current production) ---
-    fl::u32 t0 = micros();
-    for (int it = 0; it < ITERS; ++it) {
-        lanes[0] = static_cast<fl::u8>(it);
-        lanes[8] = static_cast<fl::u8>(~it);
-        for (int i = 0; i < 16; ++i) {
-            fl::detail::wave8_convert_byte_to_wave8byte(lanes[i], nibLut, &out[i]);
+    const int iters = iters_in;
+
+    // --- Expansion only: nibble (current production path) ---
+    {
+        fl::u32 t0 = micros();
+        for (int it = 0; it < iters; ++it) {
+            lanes[0] = static_cast<fl::u8>(it);
+            lanes[8] = static_cast<fl::u8>(~it);
+            for (int i = 0; i < 16; ++i) {
+                fl::detail::wave8_convert_byte_to_wave8byte(lanes[i], nibLut, &out[i]);
+            }
+            sink ^= out[0].symbols[0].data ^ out[15].symbols[7].data;
         }
-        sink ^= out[0].symbols[0].data ^ out[15].symbols[7].data;
+        result.expand_nibble_us = micros() - t0;
     }
-    fl::u32 nibble_us = micros() - t0;
 
-    // --- Byte-LUT path (S1: byte-indexed 256x8) ---
-    t0 = micros();
-    for (int it = 0; it < ITERS; ++it) {
-        lanes[0] = static_cast<fl::u8>(it);
-        lanes[8] = static_cast<fl::u8>(~it);
-        for (int i = 0; i < 16; ++i) {
-            fl::detail::wave8_expand_byte(lanes[i], byteLut, &out[i]);
+    // --- Expansion only: byte-LUT (S1) ---
+    {
+        fl::u32 t0 = micros();
+        for (int it = 0; it < iters; ++it) {
+            lanes[0] = static_cast<fl::u8>(it);
+            lanes[8] = static_cast<fl::u8>(~it);
+            for (int i = 0; i < 16; ++i) {
+                fl::detail::wave8_expand_byte(lanes[i], byteLut, &out[i]);
+            }
+            sink ^= out[0].symbols[0].data ^ out[15].symbols[7].data;
         }
-        sink ^= out[0].symbols[0].data ^ out[15].symbols[7].data;
+        result.expand_byte_us = micros() - t0;
     }
-    fl::u32 byte_us = micros() - t0;
 
-    // --- Batched byte path (S3: load-all-then-store-all, ILP) ---
-    t0 = micros();
-    for (int it = 0; it < ITERS; ++it) {
-        lanes[0] = static_cast<fl::u8>(it);
-        lanes[8] = static_cast<fl::u8>(~it);
-        fl::u32 lo[16];
-        fl::u32 hi[16];
-        for (int i = 0; i < 16; ++i) {
-            const fl::u32 *src = fl::bit_cast_ptr<const fl::u32>(&byteLut.lut[lanes[i]]);
-            lo[i] = src[0];
-            hi[i] = src[1];
+    // --- Expansion only: batched byte-LUT (S3: load-all-then-store-all) ---
+    {
+        fl::u32 t0 = micros();
+        for (int it = 0; it < iters; ++it) {
+            lanes[0] = static_cast<fl::u8>(it);
+            lanes[8] = static_cast<fl::u8>(~it);
+            fl::u32 lo[16];
+            fl::u32 hi[16];
+            for (int i = 0; i < 16; ++i) {
+                const fl::u32 *src = fl::bit_cast_ptr<const fl::u32>(&byteLut.lut[lanes[i]]);
+                lo[i] = src[0];
+                hi[i] = src[1];
+            }
+            for (int i = 0; i < 16; ++i) {
+                fl::u32 *dst = fl::bit_cast_ptr<fl::u32>(&out[i]);
+                dst[0] = lo[i];
+                dst[1] = hi[i];
+            }
+            sink ^= out[0].symbols[0].data ^ out[15].symbols[7].data;
         }
-        for (int i = 0; i < 16; ++i) {
-            fl::u32 *dst = fl::bit_cast_ptr<fl::u32>(&out[i]);
-            dst[0] = lo[i];
-            dst[1] = hi[i];
-        }
-        sink ^= out[0].symbols[0].data ^ out[15].symbols[7].data;
+        result.expand_batched_us = micros() - t0;
     }
-    fl::u32 batched_us = micros() - t0;
 
-    // Frame-equivalent micros: per-frame is 768 byte-positions vs our ITERS.
-    fl::u32 nibble_frame_us = static_cast<fl::u32>(static_cast<fl::u64>(nibble_us) * 768 / ITERS);
-    fl::u32 byte_frame_us = static_cast<fl::u32>(static_cast<fl::u64>(byte_us) * 768 / ITERS);
-    fl::u32 batched_frame_us = static_cast<fl::u32>(static_cast<fl::u64>(batched_us) * 768 / ITERS);
+    // --- Full per-byte-position (expansion + 16-lane transpose), nibble path ---
+    {
+        fl::u32 t0 = micros();
+        for (int it = 0; it < iters; ++it) {
+            lanes[0] = static_cast<fl::u8>(it);
+            lanes[8] = static_cast<fl::u8>(~it);
+            fl::wave8Transpose_16(reinterpret_cast<const fl::u8(&)[16]>(lanes), nibLut,
+                                  reinterpret_cast<fl::u8(&)[16 * sizeof(fl::Wave8Byte)]>(transposed));
+            sink ^= transposed[0] ^ transposed[127];
+        }
+        result.transpose16_nibble_us = micros() - t0;
+    }
 
-    // Speedups as percentage * 100 (integer math, avoid floats in esp_rom_printf).
-    fl::u32 spd_byte_x100 = (byte_us > 0)
-        ? static_cast<fl::u32>(static_cast<fl::u64>(nibble_us) * 100 / byte_us) : 0;
-    fl::u32 spd_batched_x100 = (batched_us > 0)
-        ? static_cast<fl::u32>(static_cast<fl::u64>(nibble_us) * 100 / batched_us) : 0;
+    // --- Full per-byte-position (expansion + 16-lane transpose), byte-LUT path ---
+    {
+        fl::u32 t0 = micros();
+        for (int it = 0; it < iters; ++it) {
+            lanes[0] = static_cast<fl::u8>(it);
+            lanes[8] = static_cast<fl::u8>(~it);
+            fl::wave8Transpose_16(reinterpret_cast<const fl::u8(&)[16]>(lanes), byteLut,
+                                  reinterpret_cast<fl::u8(&)[16 * sizeof(fl::Wave8Byte)]>(transposed));
+            sink ^= transposed[0] ^ transposed[127];
+        }
+        result.transpose16_byte_us = micros() - t0;
+    }
 
-    FL_BENCH_PRINTF("\nBENCH_EXPAND_START (issue #2526)\n");
-    FL_BENCH_PRINTF("BENCH_EXPAND iters=%d  nibble_us=%u byte_us=%u batched_us=%u  sink=%u\n",
-                    ITERS, nibble_us, byte_us, batched_us,
-                    static_cast<fl::u32>(sink));
-    FL_BENCH_PRINTF("BENCH_EXPAND frame_equiv_us  nibble=%u byte=%u batched=%u\n",
-                    nibble_frame_us, byte_frame_us, batched_frame_us);
-    FL_BENCH_PRINTF("BENCH_EXPAND speedup_x100  byte_vs_nibble=%u batched_vs_nibble=%u\n",
-                    spd_byte_x100, spd_batched_x100);
-    FL_BENCH_PRINTF("BENCH_EXPAND_END\n\n");
+    result.sink = static_cast<fl::u32>(sink);
+    return result;
 }
 
-#else  // !FL_BENCH_ENABLED
+/// Optional helper that prints the result via esp_rom_printf (reaches COM25
+/// on P4 today). Used only by the gated boot-time bridge; the RPC handler
+/// JSON-serializes the struct directly. Will be retired in favor of FL_PRINT
+/// once the routing in #2541 is fixed (see #2540).
+inline void printWave8ExpandResultRom(const Wave8ExpandResult &r) {
+    const fl::u64 iters64 = (r.iters > 0) ? r.iters : 1;
 
-inline void runWave8ExpandBenchmark() { /* no-op on non-ESP32 */ }
+    fl::u32 spd_byte = (r.expand_byte_us > 0)
+        ? static_cast<fl::u32>(static_cast<fl::u64>(r.expand_nibble_us) * 100 / r.expand_byte_us) : 0;
+    fl::u32 spd_batched = (r.expand_batched_us > 0)
+        ? static_cast<fl::u32>(static_cast<fl::u64>(r.expand_nibble_us) * 100 / r.expand_batched_us) : 0;
+    fl::u32 spd_t16 = (r.transpose16_byte_us > 0)
+        ? static_cast<fl::u32>(static_cast<fl::u64>(r.transpose16_nibble_us) * 100 / r.transpose16_byte_us) : 0;
+
+    fl::u32 expand_nib_frame = static_cast<fl::u32>(static_cast<fl::u64>(r.expand_nibble_us) * 768 / iters64);
+    fl::u32 expand_byte_frame = static_cast<fl::u32>(static_cast<fl::u64>(r.expand_byte_us) * 768 / iters64);
+    fl::u32 t16_nib_frame = static_cast<fl::u32>(static_cast<fl::u64>(r.transpose16_nibble_us) * 768 / iters64);
+    fl::u32 t16_byte_frame = static_cast<fl::u32>(static_cast<fl::u64>(r.transpose16_byte_us) * 768 / iters64);
+
+    esp_rom_printf("\nBENCH_EXPAND_START (issue #2526)\n");
+    esp_rom_printf("BENCH_EXPAND iters=%u sink=%u\n", r.iters, r.sink);
+    esp_rom_printf("BENCH_EXPAND expand_only_us  nibble=%u byte=%u batched=%u\n",
+                   r.expand_nibble_us, r.expand_byte_us, r.expand_batched_us);
+    esp_rom_printf("BENCH_EXPAND transpose16_us  nibble=%u byte=%u\n",
+                   r.transpose16_nibble_us, r.transpose16_byte_us);
+    esp_rom_printf("BENCH_EXPAND frame_equiv_us  expand_nibble=%u expand_byte=%u t16_nibble=%u t16_byte=%u\n",
+                   expand_nib_frame, expand_byte_frame, t16_nib_frame, t16_byte_frame);
+    esp_rom_printf("BENCH_EXPAND speedup_x100  expand=%u batched=%u transpose16=%u\n",
+                   spd_byte, spd_batched, spd_t16);
+    esp_rom_printf("BENCH_EXPAND_END\n\n");
+}
+
+#else // non-ESP32
+
+inline Wave8ExpandResult measureWave8Expand(int /*iters*/ = 30000) { return {}; }
+inline void printWave8ExpandResultRom(const Wave8ExpandResult & /*r*/) {}
 
 #endif
 
