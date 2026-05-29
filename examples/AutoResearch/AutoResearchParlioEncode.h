@@ -69,6 +69,12 @@ struct ParlioEncodeResult {
     fl::u32 var_l4_us;
     fl::u32 l4_lut_bytes;      // for sanity-check: 524288 expected
 
+    // #2548 L4 NIBBLE prototype — same shape as L4 but nibble-indexed (16
+    // entries/lane instead of 256), split by hi/lo nibble halves. 32 KB total —
+    // fits trivially in P4's 128 KB L2 cache, unlike byte-L4.
+    fl::u32 var_l4n_us;
+    fl::u32 l4n_lut_bytes;     // 32768 expected
+
     fl::u32 sink;
 };
 
@@ -210,6 +216,118 @@ void wave8Transpose_16_l4(const fl::u8 lanes[16],
         out_u[2] = acc2;
         out_u[3] = acc3;
     }
+}
+
+// --- #2548 L4 NIBBLE (32 KB, fits in L2 cache) ---
+// Splits the byte dimension by nibble — the natural wave8 expansion is already
+// nibble-based (hi nibble of input → symbols 0..3, lo nibble → symbols 4..7).
+//
+// Layout (32 KB total = 2 × 16 × 16 × 64):
+//   first  16 KB: lut_hi[lane][nibble][i] — 64 bytes covering symbols 0..3
+//   second 16 KB: lut_lo[lane][nibble][i] — 64 bytes covering symbols 4..7
+//
+// Per byte_position the working set is 16 × 16 × 64 × 2 = 32 KB — fits L2
+// trivially (vs the 512 KB byte-L4 which thrashed L2 → 7.7× regression).
+constexpr fl::size FL_L4N_LUT_BYTES = 2u * 16u * 16u * 64u; // 32768
+using Wave8L4NibbleSpan = fl::span<fl::u8, FL_L4N_LUT_BYTES>;
+using Wave8L4NibbleConstSpan = fl::span<const fl::u8, FL_L4N_LUT_BYTES>;
+
+inline void buildWave8L4NibbleLut(const fl::Wave8ByteExpansionLut &byte_lut,
+                                  Wave8L4NibbleSpan dst) {
+    fl::u8 *base = dst.data();
+    constexpr fl::size HI_BYTES = 16u * 16u * 64u; // 16 KB hi half
+    fl::u8 *hi = base;
+    fl::u8 *lo = base + HI_BYTES;
+
+    // Hi-nibble entries: fake byte = nibble << 4 (hi nibble = nibble, lo = 0).
+    // wave8 expansion of this byte produces symbols 0..3 (from kNibbleLut[hi])
+    // and symbols 4..7 = 0 — so only symbols 0..3 contribute.
+    for (int lane = 0; lane < 16; ++lane) {
+        for (int n = 0; n < 16; ++n) {
+            const fl::u8 fake_byte = static_cast<fl::u8>(n << 4);
+            for (int s = 0; s < 4; ++s) {
+                fl::u8 dummy[16] = {0};
+                dummy[lane] = byte_lut.lut[fake_byte].symbols[s].data;
+                fl::u8 contrib[16];
+                fl::detail::spread_transpose16_symbol(dummy, contrib);
+                fl::u8 *entry =
+                    hi + (static_cast<fl::size>(lane) * 16 + n) * 64 + s * 16;
+                for (int i = 0; i < 16; ++i) entry[i] = contrib[i];
+            }
+        }
+    }
+
+    // Lo-nibble entries: fake byte = nibble (hi = 0, lo nibble = nibble).
+    // Only symbols 4..7 contribute.
+    for (int lane = 0; lane < 16; ++lane) {
+        for (int n = 0; n < 16; ++n) {
+            const fl::u8 fake_byte = static_cast<fl::u8>(n);
+            for (int s = 4; s < 8; ++s) {
+                fl::u8 dummy[16] = {0};
+                dummy[lane] = byte_lut.lut[fake_byte].symbols[s].data;
+                fl::u8 contrib[16];
+                fl::detail::spread_transpose16_symbol(dummy, contrib);
+                fl::u8 *entry =
+                    lo + (static_cast<fl::size>(lane) * 16 + n) * 64 + (s - 4) * 16;
+                for (int i = 0; i < 16; ++i) entry[i] = contrib[i];
+            }
+        }
+    }
+}
+
+FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
+void wave8Transpose_16_l4_nibble(const fl::u8 lanes[16],
+                                 Wave8L4NibbleConstSpan lut,
+                                 fl::u8 *output /*128 bytes*/) {
+    const fl::u8 *base = lut.data();
+    const fl::u8 *hi_base = base;
+    const fl::u8 *lo_base = base + 16 * 16 * 64;
+
+    // OR straight into the output (zeroed first). Output is split: bytes 0..63
+    // = symbols 0..3 (hi nibble), bytes 64..127 = symbols 4..7 (lo nibble).
+    fl::u32 *out_hi = fl::bit_cast_ptr<fl::u32>(output);
+    fl::u32 *out_lo = fl::bit_cast_ptr<fl::u32>(output + 64);
+    for (int i = 0; i < 16; ++i) {
+        out_hi[i] = 0;
+        out_lo[i] = 0;
+    }
+    for (int lane = 0; lane < 16; ++lane) {
+        const fl::u8 b = lanes[lane];
+        const fl::u32 *uhi = fl::bit_cast_ptr<const fl::u32>(
+            hi_base + (static_cast<fl::size>(lane) * 16 + (b >> 4)) * 64);
+        const fl::u32 *ulo = fl::bit_cast_ptr<const fl::u32>(
+            lo_base + (static_cast<fl::size>(lane) * 16 + (b & 0xF)) * 64);
+        for (int i = 0; i < 16; ++i) {
+            out_hi[i] |= uhi[i];
+            out_lo[i] |= ulo[i];
+        }
+    }
+}
+
+inline fl::u32 fl_parlio_measure_l4n(const fl::u8 *scratch,
+                                     fl::u8 *output,
+                                     Wave8L4NibbleConstSpan l4n_lut,
+                                     int iters_byte_positions,
+                                     volatile fl::u32 *sink) {
+    constexpr fl::size LANES = 16;
+    constexpr fl::size BYTES_PER_LANE = 768;
+    const fl::size lane_stride = BYTES_PER_LANE;
+
+    fl::u32 t0 = micros();
+    for (int it = 0; it < iters_byte_positions; ++it) {
+        const fl::size byte_offset =
+            static_cast<fl::size>(it) % BYTES_PER_LANE;
+        const fl::size output_idx =
+            byte_offset * LANES * sizeof(fl::Wave8Byte);
+        fl::u8 lanes[16];
+        for (fl::size lane = 0; lane < 16; lane++) {
+            lanes[lane] = scratch[lane * lane_stride + byte_offset];
+        }
+        wave8Transpose_16_l4_nibble(lanes, l4n_lut, output + output_idx);
+        *sink ^= static_cast<fl::u32>(
+            output[output_idx] ^ output[output_idx + 127]);
+    }
+    return micros() - t0;
 }
 
 // --- #2548 L1+L2+L3 inner: process 4 byte-positions per call. Strided gather
@@ -437,6 +555,26 @@ inline ParlioEncodeResult measureParlioEncode(int iters_in = 12000) {
         heap_caps_free(l4_buf);
     }
 
+    // #2548 L4-NIBBLE: 32-KB LUT (fits L2). Could be SRAM, but use PSRAM here
+    // to keep the bench's SRAM footprint stable + show that L2 hides PSRAM
+    // when working set ≤ 128 KB.
+    fl::u8 *l4n_buf = fl_parlio_alloc(FL_L4N_LUT_BYTES, /*psram=*/true);
+    if (l4n_buf != nullptr) {
+        Wave8L4NibbleSpan l4n_lut(l4n_buf, FL_L4N_LUT_BYTES);
+        result.l4n_lut_bytes = static_cast<fl::u32>(FL_L4N_LUT_BYTES);
+        fl::memset(l4n_buf, 0, FL_L4N_LUT_BYTES);
+        buildWave8L4NibbleLut(byte_lut, l4n_lut);
+        Wave8L4NibbleConstSpan l4n_lut_const(l4n_buf, FL_L4N_LUT_BYTES);
+        {
+            fl::u8 dummy_lanes[16] = {0};
+            fl::u8 dummy_out[128];
+            (void)wave8Transpose_16_l4_nibble(dummy_lanes, l4n_lut_const, dummy_out);
+        }
+        result.var_l4n_us = fl_parlio_measure_l4n(
+            scratch_sram, output_sram, l4n_lut_const, iters_in, &sink);
+        heap_caps_free(l4n_buf);
+    }
+
     result.sink = static_cast<fl::u32>(sink);
 
     heap_caps_free(scratch_sram);
@@ -518,6 +656,20 @@ inline void printParlioEncodeResultRom(const ParlioEncodeResult &r) {
     } else {
         esp_rom_printf("BENCH_PARLIO L4_lazy_psram  alloc FAILED (lut_bytes=%u)\n",
                        static_cast<fl::u32>(FL_L4_LUT_BYTES));
+    }
+
+    // L4-NIBBLE (32 KB, fits L2)
+    if (r.var_l4n_us > 0) {
+        const fl::u32 l4n_frame_us =
+            static_cast<fl::u32>(static_cast<fl::u64>(r.var_l4n_us) * 768 / iters64);
+        const fl::u32 spd_l4n_x100 =
+            static_cast<fl::u32>(static_cast<fl::u64>(r.perpos_ss_us) * 100 / r.var_l4n_us);
+        esp_rom_printf("BENCH_PARLIO L4_nibble      lut_bytes=%u total_us=%u frame_us=%u speedup_x100=%u (baseline=100)  ws2812b_tx=%u\n",
+                       r.l4n_lut_bytes, r.var_l4n_us, l4n_frame_us, spd_l4n_x100,
+                       WS2812B_FRAME_US);
+    } else {
+        esp_rom_printf("BENCH_PARLIO L4_nibble      alloc FAILED (lut_bytes=%u)\n",
+                       static_cast<fl::u32>(FL_L4N_LUT_BYTES));
     }
 
     esp_rom_printf("BENCH_PARLIO_END\n\n");
