@@ -18,6 +18,11 @@
           {
             "type": "command",
             "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && ! grep -q '^<<<<<<< ' pyproject.toml && exec uv run python ci/hooks/check_test_file_pairing.py || { echo 'FastLED hook skipped: pyproject.toml missing or has unresolved merge conflict markers' >&2; exit 0; }"
+          },
+          {
+            "type": "command",
+            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && ! grep -q '^<<<<<<< ' pyproject.toml && exec uv run python ci/hooks/protect_example_ino.py || { echo 'FastLED hook skipped: pyproject.toml missing or has unresolved merge conflict markers' >&2; exit 0; }",
+            "timeout": 10
           }
         ]
       },
