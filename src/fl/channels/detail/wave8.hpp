@@ -7,6 +7,7 @@
 #pragma once
 
 #include "fl/channels/wave8.h"
+#include "fl/channels/detail/bit_spread_lut.hpp"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/isr/memcpy.h"
 #include "fl/stl/bit_cast.h"
@@ -184,36 +185,17 @@ void wave8_transpose_4(const Wave8Byte lane_waves[4],
 /// @param lane_waves Array of 8 Wave8Byte structures
 /// @param output Output buffer (64 bytes)
 ///
-/// Fully-unrolled naive bit-by-bit transpose. Benchmarked (#2524) as the
-/// fastest variant on the ESP32-P4 (RV32): 3336 vs 4680 us/frame for a u32
-/// Hacker's-Delight 8x8 — the compiler turns these independent shift/or ops
-/// into tight code, beating the latency-bound delta-swap chain on an in-order
-/// core. Each symbol is an 8-lane x 8-pulse bit matrix.
+/// Spread-LUT transpose (#2533): ~1.90× faster than the unrolled naive on the
+/// ESP32-P4 (RV32) — 3356→1764 us/frame, bit-exact. See bit_spread_lut.hpp.
 FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
 void wave8_transpose_8(const Wave8Byte lane_waves[8],
                        u8 output[8 * sizeof(Wave8Byte)]) {
     for (int symbol_idx = 0; symbol_idx < 8; symbol_idx++) {
-        const u8 l0 = lane_waves[0].symbols[symbol_idx].data;
-        const u8 l1 = lane_waves[1].symbols[symbol_idx].data;
-        const u8 l2 = lane_waves[2].symbols[symbol_idx].data;
-        const u8 l3 = lane_waves[3].symbols[symbol_idx].data;
-        const u8 l4 = lane_waves[4].symbols[symbol_idx].data;
-        const u8 l5 = lane_waves[5].symbols[symbol_idx].data;
-        const u8 l6 = lane_waves[6].symbols[symbol_idx].data;
-        const u8 l7 = lane_waves[7].symbols[symbol_idx].data;
-        u8* out = &output[symbol_idx * 8];
-#define FL_W8_PULSE(b) static_cast<u8>(((l7 >> (b)) & 1) << 7 | ((l6 >> (b)) & 1) << 6 | \
-    ((l5 >> (b)) & 1) << 5 | ((l4 >> (b)) & 1) << 4 | ((l3 >> (b)) & 1) << 3 | \
-    ((l2 >> (b)) & 1) << 2 | ((l1 >> (b)) & 1) << 1 | ((l0 >> (b)) & 1))
-        out[0] = FL_W8_PULSE(7);
-        out[1] = FL_W8_PULSE(6);
-        out[2] = FL_W8_PULSE(5);
-        out[3] = FL_W8_PULSE(4);
-        out[4] = FL_W8_PULSE(3);
-        out[5] = FL_W8_PULSE(2);
-        out[6] = FL_W8_PULSE(1);
-        out[7] = FL_W8_PULSE(0);
-#undef FL_W8_PULSE
+        u8 l[8];
+        for (int lane = 0; lane < 8; lane++) {
+            l[lane] = lane_waves[lane].symbols[symbol_idx].data;
+        }
+        spread_transpose8_symbol(l, output + symbol_idx * 8);
     }
 }
 
@@ -225,49 +207,21 @@ void wave8_transpose_8(const Wave8Byte lane_waves[8],
 /// @param lane_waves Array of 16 Wave8Byte structures
 /// @param output Output buffer (128 bytes)
 ///
-/// Fully-unrolled naive bit-by-bit transpose. Benchmarked (#2524) as the
-/// fastest variant on the ESP32-P4 (RV32): 6595 vs 10524 us/frame for a
-/// two-pass (two 8x8 via u32) decomposition, and faster than a u64 SWAR. The
-/// compiler schedules these independent shift/or ops better than a
-/// latency-bound delta-swap chain on an in-order core. Each 16-lane sample is
-/// 2 output bytes: low = lanes 0-7, high = lanes 8-15.
+/// Spread-LUT transpose (#2533): ~1.98× faster than the unrolled naive on the
+/// ESP32-P4 (RV32) — 6649→3353 us/frame, bit-exact. Two-pass (two 8x8 via u32),
+/// u64 SWAR, and Hacker's-Delight all lost to this on the in-order core; the
+/// winning shape is independent table-lookup + shift + OR-reduce (native u32,
+/// no dependency chain). See bit_spread_lut.hpp. Each 16-lane sample is 2 output
+/// bytes: low = lanes 0-7, high = lanes 8-15.
 FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
 void wave8_transpose_16(const Wave8Byte lane_waves[16],
                         u8 output[16 * sizeof(Wave8Byte)]) {
     for (int symbol_idx = 0; symbol_idx < 8; symbol_idx++) {
-        const u8 l0 = lane_waves[0].symbols[symbol_idx].data;
-        const u8 l1 = lane_waves[1].symbols[symbol_idx].data;
-        const u8 l2 = lane_waves[2].symbols[symbol_idx].data;
-        const u8 l3 = lane_waves[3].symbols[symbol_idx].data;
-        const u8 l4 = lane_waves[4].symbols[symbol_idx].data;
-        const u8 l5 = lane_waves[5].symbols[symbol_idx].data;
-        const u8 l6 = lane_waves[6].symbols[symbol_idx].data;
-        const u8 l7 = lane_waves[7].symbols[symbol_idx].data;
-        const u8 l8 = lane_waves[8].symbols[symbol_idx].data;
-        const u8 l9 = lane_waves[9].symbols[symbol_idx].data;
-        const u8 l10 = lane_waves[10].symbols[symbol_idx].data;
-        const u8 l11 = lane_waves[11].symbols[symbol_idx].data;
-        const u8 l12 = lane_waves[12].symbols[symbol_idx].data;
-        const u8 l13 = lane_waves[13].symbols[symbol_idx].data;
-        const u8 l14 = lane_waves[14].symbols[symbol_idx].data;
-        const u8 l15 = lane_waves[15].symbols[symbol_idx].data;
-        u8* out = &output[symbol_idx * 16];
-#define FL_W8_LO(b) static_cast<u8>(((l7 >> (b)) & 1) << 7 | ((l6 >> (b)) & 1) << 6 | \
-    ((l5 >> (b)) & 1) << 5 | ((l4 >> (b)) & 1) << 4 | ((l3 >> (b)) & 1) << 3 | \
-    ((l2 >> (b)) & 1) << 2 | ((l1 >> (b)) & 1) << 1 | ((l0 >> (b)) & 1))
-#define FL_W8_HI(b) static_cast<u8>(((l15 >> (b)) & 1) << 7 | ((l14 >> (b)) & 1) << 6 | \
-    ((l13 >> (b)) & 1) << 5 | ((l12 >> (b)) & 1) << 4 | ((l11 >> (b)) & 1) << 3 | \
-    ((l10 >> (b)) & 1) << 2 | ((l9 >> (b)) & 1) << 1 | ((l8 >> (b)) & 1))
-        out[0] = FL_W8_LO(7);  out[1] = FL_W8_HI(7);
-        out[2] = FL_W8_LO(6);  out[3] = FL_W8_HI(6);
-        out[4] = FL_W8_LO(5);  out[5] = FL_W8_HI(5);
-        out[6] = FL_W8_LO(4);  out[7] = FL_W8_HI(4);
-        out[8] = FL_W8_LO(3);  out[9] = FL_W8_HI(3);
-        out[10] = FL_W8_LO(2); out[11] = FL_W8_HI(2);
-        out[12] = FL_W8_LO(1); out[13] = FL_W8_HI(1);
-        out[14] = FL_W8_LO(0); out[15] = FL_W8_HI(0);
-#undef FL_W8_LO
-#undef FL_W8_HI
+        u8 l[16];
+        for (int lane = 0; lane < 16; lane++) {
+            l[lane] = lane_waves[lane].symbols[symbol_idx].data;
+        }
+        spread_transpose16_symbol(l, output + symbol_idx * 16);
     }
 }
 
