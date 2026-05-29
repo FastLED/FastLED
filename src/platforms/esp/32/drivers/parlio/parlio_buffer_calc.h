@@ -194,8 +194,8 @@ struct ParlioBufferCalculator {
     ///
     /// Algorithm:
     /// 1. Calculate LEDs per buffer: maxLedsPerChannel / numRingBuffers
-    /// 2. Convert to input bytes: LEDs × 3 bytes/LED × mDataWidth (multi-lane)
-    /// 3. Apply wave8 expansion (8:1 ratio): input_bytes × outputBytesPerInputByte()
+    /// 2. Convert to per-lane input bytes: LEDs × 3 bytes/LED
+    /// 3. Apply PARLIO expansion: input_bytes × outputBytesPerInputByte()
     /// 4. Add reset padding bytes (only to last buffer in stream)
     /// 5. Add safety margin for boundary checks
     /// 6. Result is DMA buffer capacity per ring buffer
@@ -216,7 +216,10 @@ struct ParlioBufferCalculator {
         // (hardware limitation). This gap corrupts WS2812 signal timing and
         // causes bit-shift errors in all LEDs after the transition point.
         // By fitting all data in one buffer, we avoid transitions entirely.
-        size_t totalInputBytes = maxLedsPerChannel * 3 * mDataWidth;
+        // The engine streams byte positions across all lanes. Its input byte
+        // count is therefore bytes per lane, while outputBytesPerInputByte()
+        // already accounts for mDataWidth during waveform transposition.
+        size_t totalInputBytes = maxLedsPerChannel * 3;
         size_t fullFrameDmaSize = dmaBufferSize(totalInputBytes, reset_us);
 
         if (fullFrameDmaSize + safetyMargin <= perBufferCap) {
@@ -227,7 +230,7 @@ struct ParlioBufferCalculator {
         // Full frame doesn't fit - fall back to streaming with multiple ring buffers.
         // This path has the ~20µs DMA gap between buffers (unavoidable hardware limitation).
         size_t ledsPerBuffer = (maxLedsPerChannel + numRingBuffers - 1) / numRingBuffers;
-        size_t inputBytesPerBuffer = ledsPerBuffer * 3 * mDataWidth;
+        size_t inputBytesPerBuffer = ledsPerBuffer * 3;
         size_t dmaBufferCapacity = dmaBufferSize(inputBytesPerBuffer, reset_us);
 
         if (dmaBufferCapacity > perBufferCap) {

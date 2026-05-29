@@ -200,8 +200,9 @@ calculateBufferByteCount(const BufferPopulationParams& params) FL_NOEXCEPT {
     size_t bytes_per_buffer = (params.totalBytes + effective_ring_count - 1)
                               / effective_ring_count;
 
-    // LED boundary alignment constant: 3 bytes (RGB) × lane count
-    size_t bytes_per_led_all_lanes = 3 * params.dataWidth;
+    // LED boundary alignment constant. totalBytes is bytes per lane, so one
+    // LED boundary is 3 RGB bytes; output expansion accounts for dataWidth.
+    size_t bytes_per_led_all_lanes = 3;
 
     // Calculate maximum input bytes that fit in one buffer
     // (reuse calc object from above to avoid duplication)
@@ -715,9 +716,6 @@ ParlioEngine::workerIsrCallback(void *user_data) FL_NOEXCEPT {
         return;  // No data to process
     }
 
-    // Zero output buffer (ISR-safe memset)
-    fl::isr::memset_zero(outputBuffer, self->mRingBufferCapacity);
-
     // Generate waveform data
     size_t outputBytesWritten = 0;
     if (!self->populateDmaBuffer(outputBuffer, self->mRingBufferCapacity,
@@ -819,8 +817,9 @@ ParlioEngine::populateDmaBuffer(u8* outputBuffer,
             return false;
         }
 
-        // Buffer is already pre-zeroed by caller (fl::isr::memset_zero)
-        // Just advance the index to skip over the front padding region
+        if (front_padding_total > 0) {
+            fl::isr::memset_zero(outputBuffer + outputIdx, front_padding_total);
+        }
         outputIdx += front_padding_total;
     }
 
@@ -1022,7 +1021,7 @@ ParlioEngine::populateDmaBuffer(u8* outputBuffer,
             return false;
         }
 
-        // Buffer is already pre-zeroed by caller, just advance index
+        fl::isr::memset_zero(outputBuffer + outputIdx, back_padding_total);
         outputIdx += back_padding_total;
     }
 
@@ -1045,7 +1044,7 @@ ParlioEngine::populateDmaBuffer(u8* outputBuffer,
         }
 
         // Append all-zero bytes (LOW signal for reset duration)
-        // Buffer is already pre-zeroed by caller, so we just advance the index
+        fl::isr::memset_zero(outputBuffer + outputIdx, reset_padding_bytes);
         outputIdx += reset_padding_bytes;
     }
 
@@ -1200,10 +1199,6 @@ ParlioEngine::populateNextDMABuffer() FL_NOEXCEPT {
     if (mIsrContext->mNextByteOffset + byte_count > mIsrContext->mTotalBytes) {
         byte_count = mIsrContext->mTotalBytes - mIsrContext->mNextByteOffset;
     }
-
-    // Zero output buffer to prevent garbage data from previous use
-    // Use ISR-safe memset since this function may be called from workerIsr()
-    fl::isr::memset_zero(outputBuffer, mRingBufferCapacity);
 
     // Generate waveform data using helper function
     size_t outputBytesWritten = 0;

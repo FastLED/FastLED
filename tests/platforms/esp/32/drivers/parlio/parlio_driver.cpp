@@ -2090,9 +2090,9 @@ FL_TEST_CASE("ParlioBufferCalculator - calculateRingBufferCapacity") {
     FL_SUBCASE("10 LEDs, 4 lanes, 3 ring buffers, no reset") {
         ParlioBufferCalculator calc{4};
         size_t capacity = calc.calculateRingBufferCapacity(10, 0, 3);
-        // Full frame fits in one buffer: dmaBufferSize(120, 0) + 128
-        // = (32 + 120*32 + 0) + 128 = 3872 + 128 = 4000
-        FL_CHECK(capacity == 4000);
+        // Full frame fits in one buffer: dmaBufferSize(30, 0) + 128
+        // = (32 + 30*32 + 0) + 128 = 992 + 128 = 1120
+        FL_CHECK(capacity == 1120);
     }
 
     FL_SUBCASE("single LED, single lane, 3 ring buffers") {
@@ -2107,6 +2107,16 @@ FL_TEST_CASE("ParlioBufferCalculator - calculateRingBufferCapacity") {
         // Full frame fits in one buffer: dmaBufferSize(9000, 280) + 128
         // = (8 + 9000*8 + 280) + 128 = 72288 + 128 = 72416
         FL_CHECK(capacity == 72416);
+    }
+
+    FL_SUBCASE("256 LEDs, 16-lane Wave3, 280us reset") {
+        ParlioBufferCalculator calc(16, true, 2400000);
+        size_t capacity = calc.calculateRingBufferCapacity(256, 280, 3,
+                                                           FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM);
+        // Full frame fits in one buffer using per-lane input bytes:
+        // dmaBufferSize(768, 280) + 128
+        // = (48 + 768*48 + 84) + 128 = 36996 + 128 = 37124
+        FL_CHECK(capacity == 37124);
     }
 }
 
