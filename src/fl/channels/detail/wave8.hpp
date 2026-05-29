@@ -183,62 +183,37 @@ void wave8_transpose_4(const Wave8Byte lane_waves[4],
 /// @brief Transpose 8 lanes of Wave8Byte data into interleaved format
 /// @param lane_waves Array of 8 Wave8Byte structures
 /// @param output Output buffer (64 bytes)
+///
+/// Fully-unrolled naive bit-by-bit transpose. Benchmarked (#2524) as the
+/// fastest variant on the ESP32-P4 (RV32): 3336 vs 4680 us/frame for a u32
+/// Hacker's-Delight 8x8 — the compiler turns these independent shift/or ops
+/// into tight code, beating the latency-bound delta-swap chain on an in-order
+/// core. Each symbol is an 8-lane x 8-pulse bit matrix.
 FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
 void wave8_transpose_8(const Wave8Byte lane_waves[8],
                        u8 output[8 * sizeof(Wave8Byte)]) {
-    // Each symbol (Wave8Bit) has 8 pulses
-    // With 8 lanes, we produce 8 bytes per symbol (1 pulse per byte × 8 lanes)
-    // Output format: [L7_P7, L6_P7, ..., L0_P7, L7_P6, L6_P6, ..., L0_P6, ...]
-    //
-    // This implementation uses the Hacker's Delight 8x8 bit matrix transpose algorithm
-    // for optimal performance. For 8 lanes, this is the perfect fit since the output is
-    // exactly 8 bits wide (one bit per lane).
-
-    // Process each of the 8 symbols (Wave8Bit structures)
     for (int symbol_idx = 0; symbol_idx < 8; symbol_idx++) {
-        // Load 8 lane bytes for this symbol into a temporary array
-        u8 lane_bytes[8];
-        for (int lane = 0; lane < 8; lane++) {
-            lane_bytes[lane] = lane_waves[lane].symbols[symbol_idx].data;
-        }
-
-        // Apply Hacker's Delight 8x8 transpose algorithm inline
-        // This transposes the 8x8 bit matrix in ~6 XOR-shift operations
-        u32 x, y, t;
-
-        // Load the array and pack it into x and y (little-endian)
-        // Use ISR-safe memcpy32 for aligned 32-bit loads
-        isr::memcpy_32(&y, fl::bit_cast_ptr<const u32>(lane_bytes), 1);      // lanes 0-3
-        isr::memcpy_32(&x, fl::bit_cast_ptr<const u32>(lane_bytes + 4), 1);  // lanes 4-7
-
-        // Pre-transform x
-        t = (x ^ (x >> 7)) & 0x00AA00AA;  x = x ^ t ^ (t << 7);
-        t = (x ^ (x >> 14)) & 0x0000CCCC;  x = x ^ t ^ (t << 14);
-
-        // Pre-transform y
-        t = (y ^ (y >> 7)) & 0x00AA00AA;  y = y ^ t ^ (t << 7);
-        t = (y ^ (y >> 14)) & 0x0000CCCC;  y = y ^ t ^ (t << 14);
-
-        // Final transform
-        t = (x & 0xF0F0F0F0) | ((y >> 4) & 0x0F0F0F0F);
-        y = ((x << 4) & 0xF0F0F0F0) | (y & 0x0F0F0F0F);
-        x = t;
-
-        // Store result directly to output (little-endian)
-        // Use ISR-safe memcpy32 for aligned 32-bit stores
-        isr::memcpy_32(fl::bit_cast_ptr<u32>(output + symbol_idx * 8), &y, 1);
-        isr::memcpy_32(fl::bit_cast_ptr<u32>(output + symbol_idx * 8 + 4), &x, 1);
-
-        // Reverse byte order within symbol block: Hacker's Delight transpose
-        // puts column N at output[N], but bit 7 (MSB) is the first clock pulse
-        // and bit 0 (LSB) is the last. PARLIO sends output[0] first, so without
-        // reversal the waveform is time-reversed (last pulse sent first).
-        u8* blk = output + symbol_idx * 8;
-        u8 tmp;
-        tmp = blk[0]; blk[0] = blk[7]; blk[7] = tmp;
-        tmp = blk[1]; blk[1] = blk[6]; blk[6] = tmp;
-        tmp = blk[2]; blk[2] = blk[5]; blk[5] = tmp;
-        tmp = blk[3]; blk[3] = blk[4]; blk[4] = tmp;
+        const u8 l0 = lane_waves[0].symbols[symbol_idx].data;
+        const u8 l1 = lane_waves[1].symbols[symbol_idx].data;
+        const u8 l2 = lane_waves[2].symbols[symbol_idx].data;
+        const u8 l3 = lane_waves[3].symbols[symbol_idx].data;
+        const u8 l4 = lane_waves[4].symbols[symbol_idx].data;
+        const u8 l5 = lane_waves[5].symbols[symbol_idx].data;
+        const u8 l6 = lane_waves[6].symbols[symbol_idx].data;
+        const u8 l7 = lane_waves[7].symbols[symbol_idx].data;
+        u8* out = &output[symbol_idx * 8];
+#define FL_W8_PULSE(b) static_cast<u8>(((l7 >> (b)) & 1) << 7 | ((l6 >> (b)) & 1) << 6 | \
+    ((l5 >> (b)) & 1) << 5 | ((l4 >> (b)) & 1) << 4 | ((l3 >> (b)) & 1) << 3 | \
+    ((l2 >> (b)) & 1) << 2 | ((l1 >> (b)) & 1) << 1 | ((l0 >> (b)) & 1))
+        out[0] = FL_W8_PULSE(7);
+        out[1] = FL_W8_PULSE(6);
+        out[2] = FL_W8_PULSE(5);
+        out[3] = FL_W8_PULSE(4);
+        out[4] = FL_W8_PULSE(3);
+        out[5] = FL_W8_PULSE(2);
+        out[6] = FL_W8_PULSE(1);
+        out[7] = FL_W8_PULSE(0);
+#undef FL_W8_PULSE
     }
 }
 
@@ -249,82 +224,50 @@ void wave8_transpose_8(const Wave8Byte lane_waves[8],
 /// @brief Transpose 16 lanes of Wave8Byte data into interleaved format
 /// @param lane_waves Array of 16 Wave8Byte structures
 /// @param output Output buffer (128 bytes)
-/// @note Fully unrolled implementation for 8x performance improvement
+///
+/// Fully-unrolled naive bit-by-bit transpose. Benchmarked (#2524) as the
+/// fastest variant on the ESP32-P4 (RV32): 6595 vs 10524 us/frame for a
+/// two-pass (two 8x8 via u32) decomposition, and faster than a u64 SWAR. The
+/// compiler schedules these independent shift/or ops better than a
+/// latency-bound delta-swap chain on an in-order core. Each 16-lane sample is
+/// 2 output bytes: low = lanes 0-7, high = lanes 8-15.
 FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
 void wave8_transpose_16(const Wave8Byte lane_waves[16],
                         u8 output[16 * sizeof(Wave8Byte)]) {
-    // Fully unrolled version: Eliminates all loop overhead
-    // Process each of 8 symbols with explicit pulse extraction
-    // Achieves ~8x speedup over generic baseline (1,300 vs 10,000 cycles)
-
     for (int symbol_idx = 0; symbol_idx < 8; symbol_idx++) {
-        // Load all 16 lane bytes for this symbol
-        const u8 l0  = lane_waves[0].symbols[symbol_idx].data;
-        const u8 l1  = lane_waves[1].symbols[symbol_idx].data;
-        const u8 l2  = lane_waves[2].symbols[symbol_idx].data;
-        const u8 l3  = lane_waves[3].symbols[symbol_idx].data;
-        const u8 l4  = lane_waves[4].symbols[symbol_idx].data;
-        const u8 l5  = lane_waves[5].symbols[symbol_idx].data;
-        const u8 l6  = lane_waves[6].symbols[symbol_idx].data;
-        const u8 l7  = lane_waves[7].symbols[symbol_idx].data;
-        const u8 l8  = lane_waves[8].symbols[symbol_idx].data;
-        const u8 l9  = lane_waves[9].symbols[symbol_idx].data;
+        const u8 l0 = lane_waves[0].symbols[symbol_idx].data;
+        const u8 l1 = lane_waves[1].symbols[symbol_idx].data;
+        const u8 l2 = lane_waves[2].symbols[symbol_idx].data;
+        const u8 l3 = lane_waves[3].symbols[symbol_idx].data;
+        const u8 l4 = lane_waves[4].symbols[symbol_idx].data;
+        const u8 l5 = lane_waves[5].symbols[symbol_idx].data;
+        const u8 l6 = lane_waves[6].symbols[symbol_idx].data;
+        const u8 l7 = lane_waves[7].symbols[symbol_idx].data;
+        const u8 l8 = lane_waves[8].symbols[symbol_idx].data;
+        const u8 l9 = lane_waves[9].symbols[symbol_idx].data;
         const u8 l10 = lane_waves[10].symbols[symbol_idx].data;
         const u8 l11 = lane_waves[11].symbols[symbol_idx].data;
         const u8 l12 = lane_waves[12].symbols[symbol_idx].data;
         const u8 l13 = lane_waves[13].symbols[symbol_idx].data;
         const u8 l14 = lane_waves[14].symbols[symbol_idx].data;
         const u8 l15 = lane_waves[15].symbols[symbol_idx].data;
-
         u8* out = &output[symbol_idx * 16];
-
-        // Pulse 7 (bit 7): out[0] = lanes 0-7 (low byte), out[1] = lanes 8-15 (high byte)
-        out[0] = ((l7  >> 7) & 1) << 7 | ((l6  >> 7) & 1) << 6 | ((l5  >> 7) & 1) << 5 | ((l4  >> 7) & 1) << 4 |
-                 ((l3  >> 7) & 1) << 3 | ((l2  >> 7) & 1) << 2 | ((l1  >> 7) & 1) << 1 | ((l0  >> 7) & 1);
-        out[1] = ((l15 >> 7) & 1) << 7 | ((l14 >> 7) & 1) << 6 | ((l13 >> 7) & 1) << 5 | ((l12 >> 7) & 1) << 4 |
-                 ((l11 >> 7) & 1) << 3 | ((l10 >> 7) & 1) << 2 | ((l9  >> 7) & 1) << 1 | ((l8  >> 7) & 1);
-
-        // Pulse 6 (bit 6): out[2] = lanes 0-7 (low byte), out[3] = lanes 8-15 (high byte)
-        out[2] = ((l7  >> 6) & 1) << 7 | ((l6  >> 6) & 1) << 6 | ((l5  >> 6) & 1) << 5 | ((l4  >> 6) & 1) << 4 |
-                 ((l3  >> 6) & 1) << 3 | ((l2  >> 6) & 1) << 2 | ((l1  >> 6) & 1) << 1 | ((l0  >> 6) & 1);
-        out[3] = ((l15 >> 6) & 1) << 7 | ((l14 >> 6) & 1) << 6 | ((l13 >> 6) & 1) << 5 | ((l12 >> 6) & 1) << 4 |
-                 ((l11 >> 6) & 1) << 3 | ((l10 >> 6) & 1) << 2 | ((l9  >> 6) & 1) << 1 | ((l8  >> 6) & 1);
-
-        // Pulse 5 (bit 5): out[4] = lanes 0-7 (low byte), out[5] = lanes 8-15 (high byte)
-        out[4] = ((l7  >> 5) & 1) << 7 | ((l6  >> 5) & 1) << 6 | ((l5  >> 5) & 1) << 5 | ((l4  >> 5) & 1) << 4 |
-                 ((l3  >> 5) & 1) << 3 | ((l2  >> 5) & 1) << 2 | ((l1  >> 5) & 1) << 1 | ((l0  >> 5) & 1);
-        out[5] = ((l15 >> 5) & 1) << 7 | ((l14 >> 5) & 1) << 6 | ((l13 >> 5) & 1) << 5 | ((l12 >> 5) & 1) << 4 |
-                 ((l11 >> 5) & 1) << 3 | ((l10 >> 5) & 1) << 2 | ((l9  >> 5) & 1) << 1 | ((l8  >> 5) & 1);
-
-        // Pulse 4 (bit 4): out[6] = lanes 0-7 (low byte), out[7] = lanes 8-15 (high byte)
-        out[6] = ((l7  >> 4) & 1) << 7 | ((l6  >> 4) & 1) << 6 | ((l5  >> 4) & 1) << 5 | ((l4  >> 4) & 1) << 4 |
-                 ((l3  >> 4) & 1) << 3 | ((l2  >> 4) & 1) << 2 | ((l1  >> 4) & 1) << 1 | ((l0  >> 4) & 1);
-        out[7] = ((l15 >> 4) & 1) << 7 | ((l14 >> 4) & 1) << 6 | ((l13 >> 4) & 1) << 5 | ((l12 >> 4) & 1) << 4 |
-                 ((l11 >> 4) & 1) << 3 | ((l10 >> 4) & 1) << 2 | ((l9  >> 4) & 1) << 1 | ((l8  >> 4) & 1);
-
-        // Pulse 3 (bit 3): out[8] = lanes 0-7 (low byte), out[9] = lanes 8-15 (high byte)
-        out[8] = ((l7  >> 3) & 1) << 7 | ((l6  >> 3) & 1) << 6 | ((l5  >> 3) & 1) << 5 | ((l4  >> 3) & 1) << 4 |
-                 ((l3  >> 3) & 1) << 3 | ((l2  >> 3) & 1) << 2 | ((l1  >> 3) & 1) << 1 | ((l0  >> 3) & 1);
-        out[9] = ((l15 >> 3) & 1) << 7 | ((l14 >> 3) & 1) << 6 | ((l13 >> 3) & 1) << 5 | ((l12 >> 3) & 1) << 4 |
-                 ((l11 >> 3) & 1) << 3 | ((l10 >> 3) & 1) << 2 | ((l9  >> 3) & 1) << 1 | ((l8  >> 3) & 1);
-
-        // Pulse 2 (bit 2): out[10] = lanes 0-7 (low byte), out[11] = lanes 8-15 (high byte)
-        out[10] = ((l7  >> 2) & 1) << 7 | ((l6  >> 2) & 1) << 6 | ((l5  >> 2) & 1) << 5 | ((l4  >> 2) & 1) << 4 |
-                  ((l3  >> 2) & 1) << 3 | ((l2  >> 2) & 1) << 2 | ((l1  >> 2) & 1) << 1 | ((l0  >> 2) & 1);
-        out[11] = ((l15 >> 2) & 1) << 7 | ((l14 >> 2) & 1) << 6 | ((l13 >> 2) & 1) << 5 | ((l12 >> 2) & 1) << 4 |
-                  ((l11 >> 2) & 1) << 3 | ((l10 >> 2) & 1) << 2 | ((l9  >> 2) & 1) << 1 | ((l8  >> 2) & 1);
-
-        // Pulse 1 (bit 1): out[12] = lanes 0-7 (low byte), out[13] = lanes 8-15 (high byte)
-        out[12] = ((l7  >> 1) & 1) << 7 | ((l6  >> 1) & 1) << 6 | ((l5  >> 1) & 1) << 5 | ((l4  >> 1) & 1) << 4 |
-                  ((l3  >> 1) & 1) << 3 | ((l2  >> 1) & 1) << 2 | ((l1  >> 1) & 1) << 1 | ((l0  >> 1) & 1);
-        out[13] = ((l15 >> 1) & 1) << 7 | ((l14 >> 1) & 1) << 6 | ((l13 >> 1) & 1) << 5 | ((l12 >> 1) & 1) << 4 |
-                  ((l11 >> 1) & 1) << 3 | ((l10 >> 1) & 1) << 2 | ((l9  >> 1) & 1) << 1 | ((l8  >> 1) & 1);
-
-        // Pulse 0 (bit 0): out[14] = lanes 0-7 (low byte), out[15] = lanes 8-15 (high byte)
-        out[14] = ((l7  >> 0) & 1) << 7 | ((l6  >> 0) & 1) << 6 | ((l5  >> 0) & 1) << 5 | ((l4  >> 0) & 1) << 4 |
-                  ((l3  >> 0) & 1) << 3 | ((l2  >> 0) & 1) << 2 | ((l1  >> 0) & 1) << 1 | ((l0  >> 0) & 1);
-        out[15] = ((l15 >> 0) & 1) << 7 | ((l14 >> 0) & 1) << 6 | ((l13 >> 0) & 1) << 5 | ((l12 >> 0) & 1) << 4 |
-                  ((l11 >> 0) & 1) << 3 | ((l10 >> 0) & 1) << 2 | ((l9  >> 0) & 1) << 1 | ((l8  >> 0) & 1);
+#define FL_W8_LO(b) static_cast<u8>(((l7 >> (b)) & 1) << 7 | ((l6 >> (b)) & 1) << 6 | \
+    ((l5 >> (b)) & 1) << 5 | ((l4 >> (b)) & 1) << 4 | ((l3 >> (b)) & 1) << 3 | \
+    ((l2 >> (b)) & 1) << 2 | ((l1 >> (b)) & 1) << 1 | ((l0 >> (b)) & 1))
+#define FL_W8_HI(b) static_cast<u8>(((l15 >> (b)) & 1) << 7 | ((l14 >> (b)) & 1) << 6 | \
+    ((l13 >> (b)) & 1) << 5 | ((l12 >> (b)) & 1) << 4 | ((l11 >> (b)) & 1) << 3 | \
+    ((l10 >> (b)) & 1) << 2 | ((l9 >> (b)) & 1) << 1 | ((l8 >> (b)) & 1))
+        out[0] = FL_W8_LO(7);  out[1] = FL_W8_HI(7);
+        out[2] = FL_W8_LO(6);  out[3] = FL_W8_HI(6);
+        out[4] = FL_W8_LO(5);  out[5] = FL_W8_HI(5);
+        out[6] = FL_W8_LO(4);  out[7] = FL_W8_HI(4);
+        out[8] = FL_W8_LO(3);  out[9] = FL_W8_HI(3);
+        out[10] = FL_W8_LO(2); out[11] = FL_W8_HI(2);
+        out[12] = FL_W8_LO(1); out[13] = FL_W8_HI(1);
+        out[14] = FL_W8_LO(0); out[15] = FL_W8_HI(0);
+#undef FL_W8_LO
+#undef FL_W8_HI
     }
 }
 

@@ -139,42 +139,34 @@ void wave3_transpose_4(const Wave3Byte lane_waves[4],
 /// @brief Transpose 8 lanes of Wave3Byte data into interleaved format
 /// @param lane_waves Array of 8 Wave3Byte structures
 /// @param output Output buffer (24 bytes = 8 * 3)
+///
+/// Fully-unrolled naive bit-by-bit transpose — benchmarked (#2524) as the
+/// fastest variant on the ESP32-P4 (RV32), beating a u32 Hacker's-Delight 8x8.
 FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
 void wave3_transpose_8(const Wave3Byte lane_waves[8],
                        u8 output[8 * sizeof(Wave3Byte)]) {
-    // For 8 lanes, each symbol produces 8 bytes (1 byte per pulse, 8 pulses per symbol)
-    // Use Hacker's Delight 8x8 transpose like wave8
     for (int symbol_idx = 0; symbol_idx < 3; symbol_idx++) {
-        u8 lane_bytes[8];
-        for (int lane = 0; lane < 8; lane++) {
-            lane_bytes[lane] = lane_waves[lane].data[symbol_idx];
-        }
-
-        u32 x, y, t;
-        isr::memcpy_32(&y, reinterpret_cast<const u32*>(lane_bytes), 1);       // ok reinterpret cast - lanes 0-3
-        isr::memcpy_32(&x, reinterpret_cast<const u32*>(lane_bytes + 4), 1);   // ok reinterpret cast - lanes 4-7
-
-        t = (x ^ (x >> 7)) & 0x00AA00AA;  x = x ^ t ^ (t << 7);
-        t = (x ^ (x >> 14)) & 0x0000CCCC;  x = x ^ t ^ (t << 14);
-        t = (y ^ (y >> 7)) & 0x00AA00AA;  y = y ^ t ^ (t << 7);
-        t = (y ^ (y >> 14)) & 0x0000CCCC;  y = y ^ t ^ (t << 14);
-        t = (x & 0xF0F0F0F0) | ((y >> 4) & 0x0F0F0F0F);
-        y = ((x << 4) & 0xF0F0F0F0) | (y & 0x0F0F0F0F);
-        x = t;
-
-        isr::memcpy_32(reinterpret_cast<u32*>(output + symbol_idx * 8), &y, 1);     // ok reinterpret cast - output byte array to u32
-        isr::memcpy_32(reinterpret_cast<u32*>(output + symbol_idx * 8 + 4), &x, 1); // ok reinterpret cast - output byte array to u32
-
-        // Reverse byte order within symbol block: Hacker's Delight transpose
-        // puts column N at output[N], but bit 7 (MSB) is the first clock pulse
-        // and bit 0 (LSB) is the last. PARLIO sends output[0] first, so without
-        // reversal the waveform is time-reversed (last pulse sent first).
-        u8* blk = output + symbol_idx * 8;
-        u8 tmp;
-        tmp = blk[0]; blk[0] = blk[7]; blk[7] = tmp;
-        tmp = blk[1]; blk[1] = blk[6]; blk[6] = tmp;
-        tmp = blk[2]; blk[2] = blk[5]; blk[5] = tmp;
-        tmp = blk[3]; blk[3] = blk[4]; blk[4] = tmp;
+        const u8 l0 = lane_waves[0].data[symbol_idx];
+        const u8 l1 = lane_waves[1].data[symbol_idx];
+        const u8 l2 = lane_waves[2].data[symbol_idx];
+        const u8 l3 = lane_waves[3].data[symbol_idx];
+        const u8 l4 = lane_waves[4].data[symbol_idx];
+        const u8 l5 = lane_waves[5].data[symbol_idx];
+        const u8 l6 = lane_waves[6].data[symbol_idx];
+        const u8 l7 = lane_waves[7].data[symbol_idx];
+        u8* out = &output[symbol_idx * 8];
+#define FL_W3_PULSE(b) static_cast<u8>(((l7 >> (b)) & 1) << 7 | ((l6 >> (b)) & 1) << 6 | \
+    ((l5 >> (b)) & 1) << 5 | ((l4 >> (b)) & 1) << 4 | ((l3 >> (b)) & 1) << 3 | \
+    ((l2 >> (b)) & 1) << 2 | ((l1 >> (b)) & 1) << 1 | ((l0 >> (b)) & 1))
+        out[0] = FL_W3_PULSE(7);
+        out[1] = FL_W3_PULSE(6);
+        out[2] = FL_W3_PULSE(5);
+        out[3] = FL_W3_PULSE(4);
+        out[4] = FL_W3_PULSE(3);
+        out[5] = FL_W3_PULSE(2);
+        out[6] = FL_W3_PULSE(1);
+        out[7] = FL_W3_PULSE(0);
+#undef FL_W3_PULSE
     }
 }
 
@@ -185,69 +177,47 @@ void wave3_transpose_8(const Wave3Byte lane_waves[8],
 /// @brief Transpose 16 lanes of Wave3Byte data into interleaved format
 /// @param lane_waves Array of 16 Wave3Byte structures
 /// @param output Output buffer (48 bytes = 16 * 3)
+///
+/// Fully-unrolled naive bit-by-bit transpose — benchmarked (#2524) as the
+/// fastest on the ESP32-P4 (RV32), beating two-pass/SWAR. Each 16-lane sample
+/// is 2 output bytes: low = lanes 0-7, high = lanes 8-15.
 FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
 void wave3_transpose_16(const Wave3Byte lane_waves[16],
                         u8 output[16 * sizeof(Wave3Byte)]) {
     for (int symbol_idx = 0; symbol_idx < 3; symbol_idx++) {
-        const u8 l0  = lane_waves[0].data[symbol_idx];
-        const u8 l1  = lane_waves[1].data[symbol_idx];
-        const u8 l2  = lane_waves[2].data[symbol_idx];
-        const u8 l3  = lane_waves[3].data[symbol_idx];
-        const u8 l4  = lane_waves[4].data[symbol_idx];
-        const u8 l5  = lane_waves[5].data[symbol_idx];
-        const u8 l6  = lane_waves[6].data[symbol_idx];
-        const u8 l7  = lane_waves[7].data[symbol_idx];
-        const u8 l8  = lane_waves[8].data[symbol_idx];
-        const u8 l9  = lane_waves[9].data[symbol_idx];
+        const u8 l0 = lane_waves[0].data[symbol_idx];
+        const u8 l1 = lane_waves[1].data[symbol_idx];
+        const u8 l2 = lane_waves[2].data[symbol_idx];
+        const u8 l3 = lane_waves[3].data[symbol_idx];
+        const u8 l4 = lane_waves[4].data[symbol_idx];
+        const u8 l5 = lane_waves[5].data[symbol_idx];
+        const u8 l6 = lane_waves[6].data[symbol_idx];
+        const u8 l7 = lane_waves[7].data[symbol_idx];
+        const u8 l8 = lane_waves[8].data[symbol_idx];
+        const u8 l9 = lane_waves[9].data[symbol_idx];
         const u8 l10 = lane_waves[10].data[symbol_idx];
         const u8 l11 = lane_waves[11].data[symbol_idx];
         const u8 l12 = lane_waves[12].data[symbol_idx];
         const u8 l13 = lane_waves[13].data[symbol_idx];
         const u8 l14 = lane_waves[14].data[symbol_idx];
         const u8 l15 = lane_waves[15].data[symbol_idx];
-
         u8* out = &output[symbol_idx * 16];
-
-        // 8 pulses per symbol, 2 bytes per pulse (low byte = lanes 0-7, high byte = lanes 8-15)
-        out[0] = ((l7  >> 7) & 1) << 7 | ((l6  >> 7) & 1) << 6 | ((l5  >> 7) & 1) << 5 | ((l4  >> 7) & 1) << 4 |
-                 ((l3  >> 7) & 1) << 3 | ((l2  >> 7) & 1) << 2 | ((l1  >> 7) & 1) << 1 | ((l0  >> 7) & 1);
-        out[1] = ((l15 >> 7) & 1) << 7 | ((l14 >> 7) & 1) << 6 | ((l13 >> 7) & 1) << 5 | ((l12 >> 7) & 1) << 4 |
-                 ((l11 >> 7) & 1) << 3 | ((l10 >> 7) & 1) << 2 | ((l9  >> 7) & 1) << 1 | ((l8  >> 7) & 1);
-
-        out[2] = ((l7  >> 6) & 1) << 7 | ((l6  >> 6) & 1) << 6 | ((l5  >> 6) & 1) << 5 | ((l4  >> 6) & 1) << 4 |
-                 ((l3  >> 6) & 1) << 3 | ((l2  >> 6) & 1) << 2 | ((l1  >> 6) & 1) << 1 | ((l0  >> 6) & 1);
-        out[3] = ((l15 >> 6) & 1) << 7 | ((l14 >> 6) & 1) << 6 | ((l13 >> 6) & 1) << 5 | ((l12 >> 6) & 1) << 4 |
-                 ((l11 >> 6) & 1) << 3 | ((l10 >> 6) & 1) << 2 | ((l9  >> 6) & 1) << 1 | ((l8  >> 6) & 1);
-
-        out[4] = ((l7  >> 5) & 1) << 7 | ((l6  >> 5) & 1) << 6 | ((l5  >> 5) & 1) << 5 | ((l4  >> 5) & 1) << 4 |
-                 ((l3  >> 5) & 1) << 3 | ((l2  >> 5) & 1) << 2 | ((l1  >> 5) & 1) << 1 | ((l0  >> 5) & 1);
-        out[5] = ((l15 >> 5) & 1) << 7 | ((l14 >> 5) & 1) << 6 | ((l13 >> 5) & 1) << 5 | ((l12 >> 5) & 1) << 4 |
-                 ((l11 >> 5) & 1) << 3 | ((l10 >> 5) & 1) << 2 | ((l9  >> 5) & 1) << 1 | ((l8  >> 5) & 1);
-
-        out[6] = ((l7  >> 4) & 1) << 7 | ((l6  >> 4) & 1) << 6 | ((l5  >> 4) & 1) << 5 | ((l4  >> 4) & 1) << 4 |
-                 ((l3  >> 4) & 1) << 3 | ((l2  >> 4) & 1) << 2 | ((l1  >> 4) & 1) << 1 | ((l0  >> 4) & 1);
-        out[7] = ((l15 >> 4) & 1) << 7 | ((l14 >> 4) & 1) << 6 | ((l13 >> 4) & 1) << 5 | ((l12 >> 4) & 1) << 4 |
-                 ((l11 >> 4) & 1) << 3 | ((l10 >> 4) & 1) << 2 | ((l9  >> 4) & 1) << 1 | ((l8  >> 4) & 1);
-
-        out[8] = ((l7  >> 3) & 1) << 7 | ((l6  >> 3) & 1) << 6 | ((l5  >> 3) & 1) << 5 | ((l4  >> 3) & 1) << 4 |
-                 ((l3  >> 3) & 1) << 3 | ((l2  >> 3) & 1) << 2 | ((l1  >> 3) & 1) << 1 | ((l0  >> 3) & 1);
-        out[9] = ((l15 >> 3) & 1) << 7 | ((l14 >> 3) & 1) << 6 | ((l13 >> 3) & 1) << 5 | ((l12 >> 3) & 1) << 4 |
-                 ((l11 >> 3) & 1) << 3 | ((l10 >> 3) & 1) << 2 | ((l9  >> 3) & 1) << 1 | ((l8  >> 3) & 1);
-
-        out[10] = ((l7  >> 2) & 1) << 7 | ((l6  >> 2) & 1) << 6 | ((l5  >> 2) & 1) << 5 | ((l4  >> 2) & 1) << 4 |
-                  ((l3  >> 2) & 1) << 3 | ((l2  >> 2) & 1) << 2 | ((l1  >> 2) & 1) << 1 | ((l0  >> 2) & 1);
-        out[11] = ((l15 >> 2) & 1) << 7 | ((l14 >> 2) & 1) << 6 | ((l13 >> 2) & 1) << 5 | ((l12 >> 2) & 1) << 4 |
-                  ((l11 >> 2) & 1) << 3 | ((l10 >> 2) & 1) << 2 | ((l9  >> 2) & 1) << 1 | ((l8  >> 2) & 1);
-
-        out[12] = ((l7  >> 1) & 1) << 7 | ((l6  >> 1) & 1) << 6 | ((l5  >> 1) & 1) << 5 | ((l4  >> 1) & 1) << 4 |
-                  ((l3  >> 1) & 1) << 3 | ((l2  >> 1) & 1) << 2 | ((l1  >> 1) & 1) << 1 | ((l0  >> 1) & 1);
-        out[13] = ((l15 >> 1) & 1) << 7 | ((l14 >> 1) & 1) << 6 | ((l13 >> 1) & 1) << 5 | ((l12 >> 1) & 1) << 4 |
-                  ((l11 >> 1) & 1) << 3 | ((l10 >> 1) & 1) << 2 | ((l9  >> 1) & 1) << 1 | ((l8  >> 1) & 1);
-
-        out[14] = ((l7  >> 0) & 1) << 7 | ((l6  >> 0) & 1) << 6 | ((l5  >> 0) & 1) << 5 | ((l4  >> 0) & 1) << 4 |
-                  ((l3  >> 0) & 1) << 3 | ((l2  >> 0) & 1) << 2 | ((l1  >> 0) & 1) << 1 | ((l0  >> 0) & 1);
-        out[15] = ((l15 >> 0) & 1) << 7 | ((l14 >> 0) & 1) << 6 | ((l13 >> 0) & 1) << 5 | ((l12 >> 0) & 1) << 4 |
-                  ((l11 >> 0) & 1) << 3 | ((l10 >> 0) & 1) << 2 | ((l9  >> 0) & 1) << 1 | ((l8  >> 0) & 1);
+#define FL_W3_LO(b) static_cast<u8>(((l7 >> (b)) & 1) << 7 | ((l6 >> (b)) & 1) << 6 | \
+    ((l5 >> (b)) & 1) << 5 | ((l4 >> (b)) & 1) << 4 | ((l3 >> (b)) & 1) << 3 | \
+    ((l2 >> (b)) & 1) << 2 | ((l1 >> (b)) & 1) << 1 | ((l0 >> (b)) & 1))
+#define FL_W3_HI(b) static_cast<u8>(((l15 >> (b)) & 1) << 7 | ((l14 >> (b)) & 1) << 6 | \
+    ((l13 >> (b)) & 1) << 5 | ((l12 >> (b)) & 1) << 4 | ((l11 >> (b)) & 1) << 3 | \
+    ((l10 >> (b)) & 1) << 2 | ((l9 >> (b)) & 1) << 1 | ((l8 >> (b)) & 1))
+        out[0] = FL_W3_LO(7);  out[1] = FL_W3_HI(7);
+        out[2] = FL_W3_LO(6);  out[3] = FL_W3_HI(6);
+        out[4] = FL_W3_LO(5);  out[5] = FL_W3_HI(5);
+        out[6] = FL_W3_LO(4);  out[7] = FL_W3_HI(4);
+        out[8] = FL_W3_LO(3);  out[9] = FL_W3_HI(3);
+        out[10] = FL_W3_LO(2); out[11] = FL_W3_HI(2);
+        out[12] = FL_W3_LO(1); out[13] = FL_W3_HI(1);
+        out[14] = FL_W3_LO(0); out[15] = FL_W3_HI(0);
+#undef FL_W3_LO
+#undef FL_W3_HI
     }
 }
 
