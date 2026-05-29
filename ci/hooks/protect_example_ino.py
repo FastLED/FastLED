@@ -27,7 +27,9 @@ import os
 import sys
 
 
-OVERRIDE_TOKEN = "FL_AGENT_ALLOW_NEW_EXAMPLE"
+# Doubles as an environment variable AND an in-content directive token
+# (the Write tool has no command string to prepend the env var to).
+OVERRIDE_ENV_VAR = "FL_AGENT_ALLOW_NEW_EXAMPLE"
 
 
 def main() -> int:
@@ -46,12 +48,12 @@ def main() -> int:
         return 0
 
     # Environment override (human escape hatch, consistent with other hooks).
-    if os.environ.get(OVERRIDE_TOKEN) in ("1", "true", "True", "TRUE"):
+    if os.environ.get(OVERRIDE_ENV_VAR) in ("1", "true", "True", "TRUE"):
         return 0
 
     # In-content directive override: agent prepends the FL_* directive.
     content = tool_input.get("content", "") or ""
-    if OVERRIDE_TOKEN in content:
+    if OVERRIDE_ENV_VAR in content:
         return 0
 
     # Normalize to forward slashes.
@@ -94,9 +96,9 @@ def main() -> int:
         "  That is the canonical target for testing new functionality.",
         "",
         "If you genuinely need a brand-new example, force creation with the FL_* directive:",
-        f"  1. Prepend a comment containing {OVERRIDE_TOKEN} to the file content, e.g.:",
-        f"         // {OVERRIDE_TOKEN}",
-        f"  2. Or launch Claude with the env var: {OVERRIDE_TOKEN}=1",
+        f"  1. Prepend a comment containing {OVERRIDE_ENV_VAR} to the file content, e.g.:",
+        f"         // {OVERRIDE_ENV_VAR}",
+        f"  2. Or launch Claude with the env var: {OVERRIDE_ENV_VAR}=1",
     ]
     print("\n".join(error_lines), file=sys.stderr)
     return 2
