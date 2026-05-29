@@ -46,6 +46,17 @@ struct FL_ALIGNAS(8) Wave8BitExpansionLut {
     Wave8Bit lut[16][4]; // nibble -> 4 Wave8Bit (4 bytes per nibble)
 };
 
+/// @brief Byte-indexed expansion LUT (#2526): 256 entries × 8 bytes = 2 KB.
+///
+/// Maps a full input byte directly to its 8 Wave8Bit pulse symbols, so the hot
+/// expansion is a single indexed 8-byte copy instead of two nibble lookups +
+/// two 4-byte copies. Same total memory traffic, ~half the index/issue work —
+/// the win on the in-order RV32 core (which is issue-bound here, not bandwidth-
+/// bound). Keep this in internal SRAM (not PSRAM) so the lookup stays fast.
+struct FL_ALIGNAS(8) Wave8ByteExpansionLut {
+    Wave8Byte lut[256]; // byte -> 8 Wave8Bit (8 bytes per byte)
+};
+
 /// @brief Build a Wave8BitExpansionLut from chipset timing data
 ///
 /// Converts three-phase LED timing (T1, T2, T3) into a nibble lookup table
@@ -58,6 +69,13 @@ struct FL_ALIGNAS(8) Wave8BitExpansionLut {
 /// @param timing ChipsetTiming struct containing T1, T2, T3 in nanoseconds
 /// @return Populated Wave8BitExpansionLut lookup table (64 bytes)
 Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing);
+
+/// @brief Build a byte-indexed expansion LUT (#2526) from the nibble LUT.
+///
+/// Entry b is the concatenation of the high-nibble expansion (symbols[0..3])
+/// and the low-nibble expansion (symbols[4..7]) — bit-identical to what
+/// wave8_convert_byte_to_wave8byte() produces. Not for ISR use.
+Wave8ByteExpansionLut buildWave8ByteExpansionLUT(const Wave8BitExpansionLut &nibble);
 
 // Forward declaration for inline function (implementation in detail/wave8.hpp)
 void wave8(u8 lane,
@@ -83,6 +101,27 @@ void wave8Transpose_8(
 void wave8Transpose_16(
     const u8 (&FL_RESTRICT_PARAM lanes)[16],
     const Wave8BitExpansionLut &lut,
+    u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]);
+
+// Byte-LUT overloads (#2526): same semantics, faster expansion path.
+void wave8Transpose_2(
+    const u8 (&FL_RESTRICT_PARAM lanes)[2],
+    const Wave8ByteExpansionLut &lut,
+    u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]);
+
+void wave8Transpose_4(
+    const u8 (&FL_RESTRICT_PARAM lanes)[4],
+    const Wave8ByteExpansionLut &lut,
+    u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]);
+
+void wave8Transpose_8(
+    const u8 (&FL_RESTRICT_PARAM lanes)[8],
+    const Wave8ByteExpansionLut &lut,
+    u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]);
+
+void wave8Transpose_16(
+    const u8 (&FL_RESTRICT_PARAM lanes)[16],
+    const Wave8ByteExpansionLut &lut,
     u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]);
 
 // Untranspose functions (for testing - reverse the transpose operation)

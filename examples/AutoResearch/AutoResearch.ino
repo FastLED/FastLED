@@ -194,6 +194,7 @@
 #include "AutoResearchAsync.h"
 #include "AutoResearchPlatform.h"
 #include "AutoResearchSimd.h"
+#include "AutoResearchWave8Expand.h"  // boot-time #2526 micro-bench
 
 // ============================================================================
 // Teensy Hardware Watchdog (crash recovery) - DISABLED
@@ -329,6 +330,9 @@ void setup() {
     // SIMD AutoResearch
     // ========================================================================
     int simd_failures = autoresearch::simd_check::runSimdTests();
+
+    // #2526 expansion micro-bench: prints via esp_rom_printf -> USB-JTAG console.
+    autoresearch::wave8_bench::runWave8ExpandBenchmark();
     if (simd_failures > 0) {
         FL_ERROR("SIMD autoresearch failed - " << simd_failures << " test(s) failed");
     }

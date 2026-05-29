@@ -86,6 +86,53 @@ void wave8Transpose_16(const u8 (&FL_RESTRICT_PARAM lanes)[16],
 }
 
 // ============================================================================
+// Byte-LUT overloads (#2526): cheaper expansion, same DMA output.
+// ============================================================================
+
+FL_OPTIMIZE_FUNCTION FL_IRAM
+void wave8Transpose_2(const u8 (&FL_RESTRICT_PARAM lanes)[2],
+                      const Wave8ByteExpansionLut &lut,
+                      u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) {
+    Wave8Byte laneWaveformSymbols[2];
+    detail::wave8_expand_byte(lanes[0], lut, &laneWaveformSymbols[0]);
+    detail::wave8_expand_byte(lanes[1], lut, &laneWaveformSymbols[1]);
+    detail::wave8_transpose_2(laneWaveformSymbols, output);
+}
+
+FL_OPTIMIZE_FUNCTION FL_IRAM
+void wave8Transpose_4(const u8 (&FL_RESTRICT_PARAM lanes)[4],
+                      const Wave8ByteExpansionLut &lut,
+                      u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]) {
+    Wave8Byte laneWaveformSymbols[4];
+    for (int lane = 0; lane < 4; lane++) {
+        detail::wave8_expand_byte(lanes[lane], lut, &laneWaveformSymbols[lane]);
+    }
+    detail::wave8_transpose_4(laneWaveformSymbols, output);
+}
+
+FL_OPTIMIZE_FUNCTION FL_IRAM
+void wave8Transpose_8(const u8 (&FL_RESTRICT_PARAM lanes)[8],
+                      const Wave8ByteExpansionLut &lut,
+                      u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]) {
+    Wave8Byte laneWaveformSymbols[8];
+    for (int lane = 0; lane < 8; lane++) {
+        detail::wave8_expand_byte(lanes[lane], lut, &laneWaveformSymbols[lane]);
+    }
+    detail::wave8_transpose_8(laneWaveformSymbols, output);
+}
+
+FL_OPTIMIZE_FUNCTION FL_IRAM
+void wave8Transpose_16(const u8 (&FL_RESTRICT_PARAM lanes)[16],
+                       const Wave8ByteExpansionLut &lut,
+                       u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]) {
+    Wave8Byte laneWaveformSymbols[16];
+    for (int lane = 0; lane < 16; lane++) {
+        detail::wave8_expand_byte(lanes[lane], lut, &laneWaveformSymbols[lane]);
+    }
+    detail::wave8_transpose_16(laneWaveformSymbols, output);
+}
+
+// ============================================================================
 // LUT Builder from Timing Data
 // Note: This is not designed to be called from ISR handlers.
 // ============================================================================
@@ -148,6 +195,22 @@ Wave8BitExpansionLut buildWave8ExpansionLUT(const ChipsetTiming &timing) {
     }
 
     return lut;
+}
+
+// Byte-indexed expansion LUT (#2526). Entry b = high-nibble expansion in
+// symbols[0..3] + low-nibble expansion in symbols[4..7], matching
+// wave8_convert_byte_to_wave8byte() exactly (so the byte path is bit-identical).
+Wave8ByteExpansionLut buildWave8ByteExpansionLUT(const Wave8BitExpansionLut &nibble) {
+    Wave8ByteExpansionLut out;
+    for (int b = 0; b < 256; ++b) {
+        const Wave8Bit *hi = nibble.lut[(b >> 4) & 0xF];
+        const Wave8Bit *lo = nibble.lut[b & 0xF];
+        for (int i = 0; i < 4; ++i) {
+            out.lut[b].symbols[i] = hi[i];
+            out.lut[b].symbols[i + 4] = lo[i];
+        }
+    }
+    return out;
 }
 
 // ============================================================================

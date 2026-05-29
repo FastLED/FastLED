@@ -922,7 +922,7 @@ ParlioEngine::populateDmaBuffer(u8* outputBuffer,
                     : 0;
 
                 Wave8Byte wave8_output;
-                fl::detail::wave8_convert_byte_to_wave8byte(byte_value, mWave8Lut, &wave8_output);
+                fl::detail::wave8_expand_byte(byte_value, mWave8ByteLut, &wave8_output);
 
                 // MSB bit packing: Wave8Bit stores pulses MSB-first, PARLIO MSB packing required
                 // (Hardware validation confirms MSB packing is correct for Wave8 format)
@@ -945,7 +945,7 @@ ParlioEngine::populateDmaBuffer(u8* outputBuffer,
                     : 0;
 
                 u8 transposed[2 * sizeof(Wave8Byte)];
-                fl::wave8Transpose_2(reinterpret_cast<const u8(&)[2]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
+                fl::wave8Transpose_2(reinterpret_cast<const u8(&)[2]>(lanes), mWave8ByteLut, // ok reinterpret cast - array reference type conversion
                                     reinterpret_cast<u8(&)[2 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
 
                 fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
@@ -959,7 +959,7 @@ ParlioEngine::populateDmaBuffer(u8* outputBuffer,
                 }
 
                 u8 transposed[4 * sizeof(Wave8Byte)];
-                fl::wave8Transpose_4(reinterpret_cast<const u8(&)[4]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
+                fl::wave8Transpose_4(reinterpret_cast<const u8(&)[4]>(lanes), mWave8ByteLut, // ok reinterpret cast - array reference type conversion
                                     reinterpret_cast<u8(&)[4 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
 
                 fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
@@ -973,7 +973,7 @@ ParlioEngine::populateDmaBuffer(u8* outputBuffer,
                 }
 
                 u8 transposed[8 * sizeof(Wave8Byte)];
-                fl::wave8Transpose_8(reinterpret_cast<const u8(&)[8]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
+                fl::wave8Transpose_8(reinterpret_cast<const u8(&)[8]>(lanes), mWave8ByteLut, // ok reinterpret cast - array reference type conversion
                                     reinterpret_cast<u8(&)[8 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
 
                 fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
@@ -987,7 +987,7 @@ ParlioEngine::populateDmaBuffer(u8* outputBuffer,
                 }
 
                 u8 transposed[16 * sizeof(Wave8Byte)];
-                fl::wave8Transpose_16(reinterpret_cast<const u8(&)[16]>(lanes), mWave8Lut, // ok reinterpret cast - array reference type conversion
+                fl::wave8Transpose_16(reinterpret_cast<const u8(&)[16]>(lanes), mWave8ByteLut, // ok reinterpret cast - array reference type conversion
                                      reinterpret_cast<u8(&)[16 * sizeof(Wave8Byte)]>(transposed)); // ok reinterpret cast - array reference type conversion
 
                 fl::memcpy(outputBuffer + outputIdx, transposed, blockSize);
@@ -1421,6 +1421,8 @@ bool ParlioEngine::initialize(size_t dataWidth,
     }
     // Always build wave8 LUT (needed as fallback and for SPI mode)
     mWave8Lut = buildWave8ExpansionLUT(chipsetTiming);
+    // #2526: also build the byte-indexed LUT used by the hot encode path.
+    mWave8ByteLut = buildWave8ByteExpansionLUT(mWave8Lut);
     mEncodingMode = EncodingMode::CLOCKLESS;
 
     // Configure peripheral (constructor handles -1 filling for unused pins)
