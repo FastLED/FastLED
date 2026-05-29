@@ -120,6 +120,10 @@ def _repo_slug() -> str:
 
 
 def fetch_comments(pr: int) -> list[Comment]:
+    # Returns ALL review comments on the PR (both CodeRabbit and human),
+    # because _is_resolved needs to see human replies to detect that a
+    # CodeRabbit thread has been addressed. Top-level filtering to
+    # CodeRabbit-authored threads happens in plan().
     repo = _repo_slug()
     out = _run_gh(["api", f"repos/{repo}/pulls/{pr}/comments", "--paginate"])
     raw = cast(list[dict[str, Any]], json.loads(out))
@@ -127,8 +131,6 @@ def fetch_comments(pr: int) -> list[Comment]:
     for c in raw:
         user = cast(dict[str, Any], c.get("user") or {})
         author = cast(str, user.get("login", ""))
-        if author not in CODERABBIT_LOGINS:
-            continue
         comments.append(
             Comment(
                 id=int(c["id"]),
@@ -159,7 +161,9 @@ def _is_resolved(comment: Comment, all_comments: list[Comment]) -> bool:
 
 def plan(pr: int) -> dict[str, Any]:
     comments = fetch_comments(pr)
-    top_level = [c for c in comments if c.in_reply_to is None]
+    top_level = [
+        c for c in comments if c.in_reply_to is None and c.author in CODERABBIT_LOGINS
+    ]
     buckets: dict[str, list[dict[str, Any]]] = {
         "valid-fix": [],
         "style": [],
