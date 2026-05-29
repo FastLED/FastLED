@@ -148,15 +148,15 @@ def fetch_comments(pr: int) -> list[Comment]:
 
 
 def _is_resolved(comment: Comment, all_comments: list[Comment]) -> bool:
-    # Resolution heuristic: a non-CodeRabbit author replied in-thread since
-    # the last CodeRabbit message. Proper GraphQL "resolved" state is also
-    # honored via the review-thread API but needs a heavier call — start
-    # with the reply heuristic and evolve if false positives show up.
-    replies = [c for c in all_comments if c.in_reply_to == comment.id]
-    if not replies:
-        return False
-    latest = max(replies, key=lambda c: c.id)
-    return latest.author not in CODERABBIT_LOGINS
+    # Resolution heuristic: any non-CodeRabbit author has replied in-thread.
+    # CodeRabbit acknowledgement replies that arrive after a human reply
+    # (e.g. "thanks for the update") must not un-resolve the thread, so we
+    # cannot use "latest reply is human" — CodeRabbit consistently gets the
+    # last word a few seconds later.
+    for c in all_comments:
+        if c.in_reply_to == comment.id and c.author not in CODERABBIT_LOGINS:
+            return True
+    return False
 
 
 def plan(pr: int) -> dict[str, Any]:
