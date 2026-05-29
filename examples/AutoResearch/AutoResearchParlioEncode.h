@@ -56,6 +56,12 @@ struct ParlioEncodeResult {
     fl::u32 perpos_ps_us;      // scratch PSRAM, output SRAM
     fl::u32 perpos_pp_us;      // scratch PSRAM, output PSRAM
 
+    // #2548 algorithmic variants (all SRAM scratch + SRAM output; PSRAM proven
+    // equivalent above, so we hold those constant and isolate the algorithm).
+    fl::u32 var_l2_us;         // L2: direct write to output, skip 128-B memcpy
+    fl::u32 var_l1l2_us;       // L1+L2: fused expand+transpose + direct write
+    fl::u32 var_l1l2l3_us;     // L1+L2+L3: fused + direct write + 4-byte-position tiling
+
     fl::u32 sink;
 };
 
@@ -85,6 +91,86 @@ fl::u32 fl_parlio_inner_one_byte_position(const fl::u8 *scratch,
     return static_cast<fl::u32>(output[output_idx] ^ output[output_idx + 127]);
 }
 
+// --- #2548 L1: fused expand+transpose. Cache the 16 byte_lut row pointers,
+// then symbol-major loop reads `e[lane]->symbols[s]` directly — no 128-B
+// intermediate `laneWaveformSymbols` buffer.
+FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
+void wave8Transpose_16_fused(const fl::u8 lanes[16],
+                             const fl::Wave8ByteExpansionLut &lut,
+                             fl::u8 *output /*128 bytes*/) {
+    const fl::Wave8Byte *e[16];
+    for (int lane = 0; lane < 16; ++lane) {
+        e[lane] = &lut.lut[lanes[lane]];
+    }
+    for (int s = 0; s < 8; ++s) {
+        fl::u8 l[16];
+        for (int lane = 0; lane < 16; ++lane) {
+            l[lane] = e[lane]->symbols[s].data;
+        }
+        fl::detail::spread_transpose16_symbol(l, output + s * 16);
+    }
+}
+
+// --- #2548 L2 inner: same call shape as baseline, but pass the DMA output
+// straight in (skip the 128-B stack `transposed[]` + memcpy).
+FASTLED_FORCE_INLINE FL_IRAM
+fl::u32 fl_parlio_inner_l2(const fl::u8 *scratch,
+                           fl::size_t lane_stride,
+                           fl::size_t byte_offset,
+                           const fl::Wave8ByteExpansionLut &byte_lut,
+                           fl::u8 *output,
+                           fl::size_t output_idx) {
+    fl::u8 lanes[16];
+    for (fl::size_t lane = 0; lane < 16; lane++) {
+        lanes[lane] = scratch[lane * lane_stride + byte_offset];
+    }
+    fl::wave8Transpose_16(
+        reinterpret_cast<const fl::u8(&)[16]>(lanes), byte_lut,
+        *reinterpret_cast<fl::u8(*)[16 * sizeof(fl::Wave8Byte)]>(output + output_idx));
+    return static_cast<fl::u32>(output[output_idx] ^ output[output_idx + 127]);
+}
+
+// --- #2548 L1+L2 inner: fused transpose into the DMA output directly.
+FASTLED_FORCE_INLINE FL_IRAM
+fl::u32 fl_parlio_inner_l1l2(const fl::u8 *scratch,
+                             fl::size_t lane_stride,
+                             fl::size_t byte_offset,
+                             const fl::Wave8ByteExpansionLut &byte_lut,
+                             fl::u8 *output,
+                             fl::size_t output_idx) {
+    fl::u8 lanes[16];
+    for (fl::size_t lane = 0; lane < 16; lane++) {
+        lanes[lane] = scratch[lane * lane_stride + byte_offset];
+    }
+    wave8Transpose_16_fused(lanes, byte_lut, output + output_idx);
+    return static_cast<fl::u32>(output[output_idx] ^ output[output_idx + 127]);
+}
+
+// --- #2548 L1+L2+L3 inner: process 4 byte-positions per call. Strided gather
+// pulls 4 consecutive bytes per lane, then 4 fused transposes back-to-back.
+FASTLED_FORCE_INLINE FL_IRAM
+fl::u32 fl_parlio_inner_l1l2l3_4tile(const fl::u8 *scratch,
+                                     fl::size_t lane_stride,
+                                     fl::size_t byte_offset_base,
+                                     const fl::Wave8ByteExpansionLut &byte_lut,
+                                     fl::u8 *output,
+                                     fl::size_t output_idx_base) {
+    fl::u8 lanes0[16], lanes1[16], lanes2[16], lanes3[16];
+    for (fl::size_t lane = 0; lane < 16; lane++) {
+        const fl::u8 *p = &scratch[lane * lane_stride + byte_offset_base];
+        lanes0[lane] = p[0];
+        lanes1[lane] = p[1];
+        lanes2[lane] = p[2];
+        lanes3[lane] = p[3];
+    }
+    wave8Transpose_16_fused(lanes0, byte_lut, output + output_idx_base + 0);
+    wave8Transpose_16_fused(lanes1, byte_lut, output + output_idx_base + 128);
+    wave8Transpose_16_fused(lanes2, byte_lut, output + output_idx_base + 256);
+    wave8Transpose_16_fused(lanes3, byte_lut, output + output_idx_base + 384);
+    return static_cast<fl::u32>(
+        output[output_idx_base + 0] ^ output[output_idx_base + 511]);
+}
+
 // Time one configuration: scratch + output buffers (caller pre-allocates).
 inline fl::u32 fl_parlio_measure(const fl::u8 *scratch, fl::size_t scratch_size,
                                  fl::u8 *output, fl::size_t output_size,
@@ -105,6 +191,55 @@ inline fl::u32 fl_parlio_measure(const fl::u8 *scratch, fl::size_t scratch_size,
             byte_offset * LANES * sizeof(fl::Wave8Byte);
         *sink ^= fl_parlio_inner_one_byte_position(
             scratch, lane_stride, byte_offset, byte_lut, output, output_idx);
+    }
+    return micros() - t0;
+}
+
+// Variant measure for L2 and L1+L2 (same per-iter structure as baseline).
+template <fl::u32 (*Inner)(const fl::u8 *, fl::size_t, fl::size_t,
+                            const fl::Wave8ByteExpansionLut &, fl::u8 *,
+                            fl::size_t)>
+inline fl::u32 fl_parlio_measure_variant(const fl::u8 *scratch,
+                                         fl::u8 *output,
+                                         const fl::Wave8ByteExpansionLut &byte_lut,
+                                         int iters_byte_positions,
+                                         volatile fl::u32 *sink) {
+    constexpr fl::size_t LANES = 16;
+    constexpr fl::size_t BYTES_PER_LANE = 768;
+    const fl::size_t lane_stride = BYTES_PER_LANE;
+
+    fl::u32 t0 = micros();
+    for (int it = 0; it < iters_byte_positions; ++it) {
+        const fl::size_t byte_offset =
+            static_cast<fl::size_t>(it) % BYTES_PER_LANE;
+        const fl::size_t output_idx =
+            byte_offset * LANES * sizeof(fl::Wave8Byte);
+        *sink ^=
+            Inner(scratch, lane_stride, byte_offset, byte_lut, output, output_idx);
+    }
+    return micros() - t0;
+}
+
+// L1+L2+L3 measure: each iter does 4 byte-positions. iters_byte_positions is
+// the total byte-positions to cover, so the outer loop runs iters/4 times.
+inline fl::u32 fl_parlio_measure_l1l2l3(const fl::u8 *scratch,
+                                        fl::u8 *output,
+                                        const fl::Wave8ByteExpansionLut &byte_lut,
+                                        int iters_byte_positions,
+                                        volatile fl::u32 *sink) {
+    constexpr fl::size_t LANES = 16;
+    constexpr fl::size_t BYTES_PER_LANE = 768;
+    const fl::size_t lane_stride = BYTES_PER_LANE;
+    const int outer_iters = iters_byte_positions / 4;
+
+    fl::u32 t0 = micros();
+    for (int it = 0; it < outer_iters; ++it) {
+        const fl::size_t byte_offset_base =
+            (static_cast<fl::size_t>(it) * 4) % BYTES_PER_LANE;
+        const fl::size_t output_idx_base =
+            byte_offset_base * LANES * sizeof(fl::Wave8Byte);
+        *sink ^= fl_parlio_inner_l1l2l3_4tile(
+            scratch, lane_stride, byte_offset_base, byte_lut, output, output_idx_base);
     }
     return micros() - t0;
 }
@@ -181,6 +316,14 @@ inline ParlioEncodeResult measureParlioEncode(int iters_in = 12000) {
         scratch_psram, SCRATCH_BYTES, output_psram, OUTPUT_BYTES,
         byte_lut, iters_in, &sink);
 
+    // #2548 algorithmic variants — all SRAM/SRAM so the algorithm is isolated.
+    result.var_l2_us = fl_parlio_measure_variant<fl_parlio_inner_l2>(
+        scratch_sram, output_sram, byte_lut, iters_in, &sink);
+    result.var_l1l2_us = fl_parlio_measure_variant<fl_parlio_inner_l1l2>(
+        scratch_sram, output_sram, byte_lut, iters_in, &sink);
+    result.var_l1l2l3_us = fl_parlio_measure_l1l2l3(
+        scratch_sram, output_sram, byte_lut, iters_in, &sink);
+
     result.sink = static_cast<fl::u32>(sink);
 
     heap_caps_free(scratch_sram);
@@ -233,6 +376,23 @@ inline void printParlioEncodeResultRom(const ParlioEncodeResult &r) {
                    ss_frame_us, sp_frame_us, ps_frame_us, pp_frame_us, WS2812B_FRAME_US);
     esp_rom_printf("BENCH_PARLIO ratio_x100  sp_vs_ss=%u ps_vs_ss=%u pp_vs_ss=%u\n",
                    ratio_sp_ss_x100, ratio_ps_ss_x100, ratio_pp_ss_x100);
+
+    // #2548 algorithmic variants
+    const fl::u32 l2_frame_us = static_cast<fl::u32>(static_cast<fl::u64>(r.var_l2_us) * 768 / iters64);
+    const fl::u32 l1l2_frame_us = static_cast<fl::u32>(static_cast<fl::u64>(r.var_l1l2_us) * 768 / iters64);
+    const fl::u32 l1l2l3_frame_us = static_cast<fl::u32>(static_cast<fl::u64>(r.var_l1l2l3_us) * 768 / iters64);
+    fl::u32 spd_l2_x100 = (r.var_l2_us > 0)
+        ? static_cast<fl::u32>(static_cast<fl::u64>(r.perpos_ss_us) * 100 / r.var_l2_us) : 0;
+    fl::u32 spd_l1l2_x100 = (r.var_l1l2_us > 0)
+        ? static_cast<fl::u32>(static_cast<fl::u64>(r.perpos_ss_us) * 100 / r.var_l1l2_us) : 0;
+    fl::u32 spd_l1l2l3_x100 = (r.var_l1l2l3_us > 0)
+        ? static_cast<fl::u32>(static_cast<fl::u64>(r.perpos_ss_us) * 100 / r.var_l1l2l3_us) : 0;
+    esp_rom_printf("BENCH_PARLIO variants_us  baseline=%u L2=%u L1+L2=%u L1+L2+L3=%u\n",
+                   r.perpos_ss_us, r.var_l2_us, r.var_l1l2_us, r.var_l1l2l3_us);
+    esp_rom_printf("BENCH_PARLIO variants_frame_us  baseline=%u L2=%u L1+L2=%u L1+L2+L3=%u  ws2812b_tx=%u\n",
+                   ss_frame_us, l2_frame_us, l1l2_frame_us, l1l2l3_frame_us, WS2812B_FRAME_US);
+    esp_rom_printf("BENCH_PARLIO variants_speedup_x100  L2=%u L1+L2=%u L1+L2+L3=%u (baseline=100)\n",
+                   spd_l2_x100, spd_l1l2_x100, spd_l1l2l3_x100);
     esp_rom_printf("BENCH_PARLIO_END\n\n");
 }
 

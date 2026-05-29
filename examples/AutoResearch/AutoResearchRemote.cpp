@@ -1581,8 +1581,8 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         parlioEncodeBenchmark_fn.set("name", "parlioEncodeBenchmark");
         parlioEncodeBenchmark_fn.set("phase", "Phase 4: Utility");
         parlioEncodeBenchmark_fn.set("args", "[{iterations}] (optional, default 12000, max 200000)");
-        parlioEncodeBenchmark_fn.set("returns", "{success, iters, lanes, leds_per_lane, perpos_ss_us, perpos_sp_us, perpos_ps_us, perpos_pp_us, sink}");
-        parlioEncodeBenchmark_fn.set("description", "Bench full PARLIO encode hot loop (16-lane gather + wave8Transpose_16 + memcpy) with 4 SRAM/PSRAM placements; answers PSRAM hypothesis + ISR-streaming feasibility");
+        parlioEncodeBenchmark_fn.set("returns", "{success, iters, lanes, leds_per_lane, perpos_{ss,sp,ps,pp}_us, var_{l2,l1l2,l1l2l3}_us, sink}");
+        parlioEncodeBenchmark_fn.set("description", "Bench PARLIO encode hot loop: 4 SRAM/PSRAM placements (PSRAM hypothesis) + #2548 algorithmic variants (L2 direct-write, L1+L2 fused expand+transpose, L1+L2+L3 4-byte-position tiling)");
         functions.push_back(parlioEncodeBenchmark_fn);
 
         fl::json response = fl::json::object();
@@ -1742,6 +1742,9 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         response.set("perpos_sp_us", static_cast<int64_t>(r.perpos_sp_us));
         response.set("perpos_ps_us", static_cast<int64_t>(r.perpos_ps_us));
         response.set("perpos_pp_us", static_cast<int64_t>(r.perpos_pp_us));
+        response.set("var_l2_us", static_cast<int64_t>(r.var_l2_us));
+        response.set("var_l1l2_us", static_cast<int64_t>(r.var_l1l2_us));
+        response.set("var_l1l2l3_us", static_cast<int64_t>(r.var_l1l2l3_us));
         response.set("sink", static_cast<int64_t>(r.sink));
         return response;
     });
