@@ -3,6 +3,7 @@
 // IWYU pragma: private
 
 #include "platforms/esp/is_esp.h"  // IWYU pragma: keep
+#include "platforms/is_platform.h"  // IWYU pragma: keep  (FL_IS_CLANG)
 
 /// @file simd_riscv.hpp
 /// ESP32 RISC-V-specific SIMD implementations
@@ -27,6 +28,17 @@
 // The header <riscv_vector.h> may exist in the toolchain but will fail to compile
 // without the vector extension enabled, so we do not include it.
 #define FASTLED_ESP32_RISCV_HAS_RVV 0
+
+// ESP32-P4 PIE (xesppie) 128-bit SIMD coprocessor detection (issue #2536).
+// __riscv_xesppie is predefined by GCC when -march=...xesppie is active; the PIE
+// inline asm is GCC-only, so clang and the host build fall back to scalar.
+// Only the revision-stable LCD ops (load/store + bitwise) are routed through PIE
+// here; saturation/rounding/float ops stay scalar (see #2535 for the analysis).
+#if defined(__riscv_xesppie) && !defined(FL_IS_CLANG)
+#  define FL_RISCV_HAS_PIE 1
+#else
+#  define FL_RISCV_HAS_PIE 0
+#endif
 
 //==============================================================================
 // Platform Implementation Namespace
@@ -57,6 +69,87 @@ struct FL_ALIGNAS(16) simd_u32x4 {
 struct FL_ALIGNAS(16) simd_f32x4 {
     float data[4];
 };
+
+//==============================================================================
+// ESP32-P4 PIE (xesppie) 128-bit primitives (issue #2536)
+//==============================================================================
+#if FL_RISCV_HAS_PIE
+// `esp.vld.128.ip` / `esp.vst.128.ip` require their base address register to be
+// in the RVC compressed set (x8-x15), so each pointer is pinned to a0/a1/a2 via
+// a local register variable; a plain "r" constraint lets GCC pick an illegal
+// register (a6/a7/t0/...) and the assembler rejects it. All buffers must be
+// 16-byte aligned — the simd_* structs are FL_ALIGNAS(16) and the aligned
+// load/store contract guarantees it.
+
+FASTLED_FORCE_INLINE FL_IRAM void pie_and_128(const void* a, const void* b, void* out) FL_NOEXCEPT {
+    register const void* pa asm("a0") = a;
+    register const void* pb asm("a1") = b;
+    register void* pr asm("a2") = out;
+    asm volatile(
+        "esp.vld.128.ip q0, %[pa], 0\n"
+        "esp.vld.128.ip q1, %[pb], 0\n"
+        "esp.andq q2, q0, q1\n"
+        "esp.vst.128.ip q2, %[pr], 0\n"
+        : [pa] "+r"(pa), [pb] "+r"(pb), [pr] "+r"(pr)
+        :
+        : "memory");
+}
+
+FASTLED_FORCE_INLINE FL_IRAM void pie_or_128(const void* a, const void* b, void* out) FL_NOEXCEPT {
+    register const void* pa asm("a0") = a;
+    register const void* pb asm("a1") = b;
+    register void* pr asm("a2") = out;
+    asm volatile(
+        "esp.vld.128.ip q0, %[pa], 0\n"
+        "esp.vld.128.ip q1, %[pb], 0\n"
+        "esp.orq q2, q0, q1\n"
+        "esp.vst.128.ip q2, %[pr], 0\n"
+        : [pa] "+r"(pa), [pb] "+r"(pb), [pr] "+r"(pr)
+        :
+        : "memory");
+}
+
+FASTLED_FORCE_INLINE FL_IRAM void pie_xor_128(const void* a, const void* b, void* out) FL_NOEXCEPT {
+    register const void* pa asm("a0") = a;
+    register const void* pb asm("a1") = b;
+    register void* pr asm("a2") = out;
+    asm volatile(
+        "esp.vld.128.ip q0, %[pa], 0\n"
+        "esp.vld.128.ip q1, %[pb], 0\n"
+        "esp.xorq q2, q0, q1\n"
+        "esp.vst.128.ip q2, %[pr], 0\n"
+        : [pa] "+r"(pa), [pb] "+r"(pb), [pr] "+r"(pr)
+        :
+        : "memory");
+}
+
+FASTLED_FORCE_INLINE FL_IRAM void pie_andnot_128(const void* a, const void* b, void* out) FL_NOEXCEPT {
+    // (~a) & b
+    register const void* pa asm("a0") = a;
+    register const void* pb asm("a1") = b;
+    register void* pr asm("a2") = out;
+    asm volatile(
+        "esp.vld.128.ip q0, %[pa], 0\n"
+        "esp.vld.128.ip q1, %[pb], 0\n"
+        "esp.notq q0, q0\n"
+        "esp.andq q2, q0, q1\n"
+        "esp.vst.128.ip q2, %[pr], 0\n"
+        : [pa] "+r"(pa), [pb] "+r"(pb), [pr] "+r"(pr)
+        :
+        : "memory");
+}
+
+FASTLED_FORCE_INLINE FL_IRAM void pie_copy_128(const void* src, void* dst) FL_NOEXCEPT {
+    register const void* ps asm("a0") = src;
+    register void* pd asm("a1") = dst;
+    asm volatile(
+        "esp.vld.128.ip q0, %[ps], 0\n"
+        "esp.vst.128.ip q0, %[pd], 0\n"
+        : [ps] "+r"(ps), [pd] "+r"(pd)
+        :
+        : "memory");
+}
+#endif  // FL_RISCV_HAS_PIE
 
 //==============================================================================
 // Atomic Load/Store Operations
@@ -160,33 +253,49 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 blend_u8_16(simd_u8x16 a, simd_u8x16 b, 
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 and_u8_16(simd_u8x16 a, simd_u8x16 b) FL_NOEXCEPT {
     simd_u8x16 result;
+#if FL_RISCV_HAS_PIE
+    pie_and_128(a.data, b.data, result.data);
+#else
     for (int i = 0; i < 16; ++i) {
         result.data[i] = a.data[i] & b.data[i];
     }
+#endif
     return result;
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 or_u8_16(simd_u8x16 a, simd_u8x16 b) FL_NOEXCEPT {
     simd_u8x16 result;
+#if FL_RISCV_HAS_PIE
+    pie_or_128(a.data, b.data, result.data);
+#else
     for (int i = 0; i < 16; ++i) {
         result.data[i] = a.data[i] | b.data[i];
     }
+#endif
     return result;
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 xor_u8_16(simd_u8x16 a, simd_u8x16 b) FL_NOEXCEPT {
     simd_u8x16 result;
+#if FL_RISCV_HAS_PIE
+    pie_xor_128(a.data, b.data, result.data);
+#else
     for (int i = 0; i < 16; ++i) {
         result.data[i] = a.data[i] ^ b.data[i];
     }
+#endif
     return result;
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u8x16 andnot_u8_16(simd_u8x16 a, simd_u8x16 b) FL_NOEXCEPT {
     simd_u8x16 result;
+#if FL_RISCV_HAS_PIE
+    pie_andnot_128(a.data, b.data, result.data);
+#else
     for (int i = 0; i < 16; ++i) {
         result.data[i] = (~a.data[i]) & b.data[i];
     }
+#endif
     return result;
 }
 
@@ -318,11 +427,15 @@ FASTLED_FORCE_INLINE FL_IRAM simd_f32x4 max_f32_4(simd_f32x4 a, simd_f32x4 b) FL
 //==============================================================================
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 xor_u32_4(simd_u32x4 a, simd_u32x4 b) FL_NOEXCEPT {
-    // RVV-ready: This loop can be replaced with vxor.vv
     simd_u32x4 result;
+#if FL_RISCV_HAS_PIE
+    pie_xor_128(a.data, b.data, result.data);
+#else
+    // RVV-ready: This loop can be replaced with vxor.vv
     for (int i = 0; i < 4; ++i) {
         result.data[i] = a.data[i] ^ b.data[i];
     }
+#endif
     return result;
 }
 
@@ -383,28 +496,40 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 srl_u32_4(simd_u32x4 vec, int shift) FL_
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 and_u32_4(simd_u32x4 a, simd_u32x4 b) FL_NOEXCEPT {
-    // RVV-ready: This loop can be replaced with vand.vv
     simd_u32x4 result;
+#if FL_RISCV_HAS_PIE
+    pie_and_128(a.data, b.data, result.data);
+#else
+    // RVV-ready: This loop can be replaced with vand.vv
     for (int i = 0; i < 4; ++i) {
         result.data[i] = a.data[i] & b.data[i];
     }
+#endif
     return result;
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 load_u32_4_aligned(const u32* ptr) FL_NOEXCEPT {
     const u32* p = FL_ASSUME_ALIGNED(ptr, 16);
     simd_u32x4 result;
+#if FL_RISCV_HAS_PIE
+    pie_copy_128(p, result.data);
+#else
     for (int i = 0; i < 4; ++i) {
         result.data[i] = p[i];
     }
+#endif
     return result;
 }
 
 FASTLED_FORCE_INLINE FL_IRAM void store_u32_4_aligned(u32* ptr, simd_u32x4 vec) FL_NOEXCEPT {
     u32* p = FL_ASSUME_ALIGNED(ptr, 16);
+#if FL_RISCV_HAS_PIE
+    pie_copy_128(vec.data, p);
+#else
     for (int i = 0; i < 4; ++i) {
         p[i] = vec.data[i];
     }
+#endif
 }
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 set_u32_4(u32 a, u32 b, u32 c, u32 d) FL_NOEXCEPT {
@@ -418,9 +543,13 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 set_u32_4(u32 a, u32 b, u32 c, u32 d) FL
 
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 or_u32_4(simd_u32x4 a, simd_u32x4 b) FL_NOEXCEPT {
     simd_u32x4 result;
+#if FL_RISCV_HAS_PIE
+    pie_or_128(a.data, b.data, result.data);
+#else
     for (int i = 0; i < 4; ++i) {
         result.data[i] = a.data[i] | b.data[i];
     }
+#endif
     return result;
 }
 

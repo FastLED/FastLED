@@ -94,6 +94,7 @@ See `agents/docs/workflow.md` for full workflow orchestration and task managemen
 - **Self-improvement**: Update `agents/tasks/lessons.md` after corrections
 - **Verify before done** — prove it works with tests, logs, demonstrations
 - **Test simplicity**: Keep tests simple, avoid mocks. See `agents/tests.md`
+- **On-device / hardware tests go through `examples/AutoResearch/AutoResearch.ino`** — prefer reusing or augmenting its existing test harness (e.g. `AutoResearchSimd.h`, run via `bash autoresearch <board> --simd`/`--parlio`/etc.) rather than creating a new `.ino` in `examples/`. New example sketches bloat the CI compile matrix; AutoResearch already has the RPC/serial plumbing.
 - **TDD for features/bugs**: Use `/tdd` (guided cycle) or `/tdd-implement` (full feature). Write tests FIRST.
 - **Orchestrated sub-agents skip `bash test`** — when a sub-agent is one step of a multi-step plan, the orchestrator runs `bash test --cpp` once at the end (the `Stop` hook covers this for free). Per-step sub-agents run `bash lint` only. See `agents/tests.md` → "Orchestrated Sub-Agent Carve-Out". The orchestrator must say so explicitly in the dispatch prompt.
 
