@@ -35,8 +35,14 @@ OVERRIDE_ENV_VAR = "FL_AGENT_ALLOW_NEW_EXAMPLE"
 def main() -> int:
     try:
         input_data = json.load(sys.stdin)
-    except json.JSONDecodeError:
-        return 0
+    except KeyboardInterrupt:
+        raise
+    except json.JSONDecodeError as exc:
+        print(
+            f"protect_example_ino: invalid hook payload: {exc}",
+            file=sys.stderr,
+        )
+        return 2
 
     tool_name = input_data.get("tool_name", "")
     if tool_name != "Write":
@@ -51,9 +57,20 @@ def main() -> int:
     if os.environ.get(OVERRIDE_ENV_VAR) in ("1", "true", "True", "TRUE"):
         return 0
 
-    # In-content directive override: agent prepends the FL_* directive.
+    # In-content directive override: agent prepends the FL_* directive as a
+    # leading comment. Restrict to the first non-empty line (and require it to
+    # be a comment) so the token cannot accidentally bypass the hook by merely
+    # appearing somewhere in the file body.
     content = tool_input.get("content", "") or ""
-    if OVERRIDE_ENV_VAR in content:
+    first_non_empty_line = ""
+    for line in content.splitlines():
+        if line.strip():
+            first_non_empty_line = line.strip()
+            break
+    if (
+        first_non_empty_line.startswith("//")
+        and OVERRIDE_ENV_VAR in first_non_empty_line
+    ):
         return 0
 
     # Normalize to forward slashes.
