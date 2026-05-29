@@ -31,6 +31,7 @@
 #include "fl/math/simd.h"
 #include "AutoResearchSimd.h"
 #include "AutoResearchWave8Expand.h"  // #2526 wave8ExpandBenchmark RPC
+#include "AutoResearchParlioEncode.h" // parlioEncodeBenchmark RPC (#2526 follow-up)
 #include "fl/system/heap.h"
 #include "fl/chipsets/spi.h"
 #include "fl/channels/config.h"
@@ -1576,9 +1577,17 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         wave8ExpandBenchmark_fn.set("description", "Bench PARLIO Wave8 expansion (#2526): nibble vs byte vs batched LUT, plus full per-byte-position cost (expansion + 16-lane transpose)");
         functions.push_back(wave8ExpandBenchmark_fn);
 
+        fl::json parlioEncodeBenchmark_fn = fl::json::object();
+        parlioEncodeBenchmark_fn.set("name", "parlioEncodeBenchmark");
+        parlioEncodeBenchmark_fn.set("phase", "Phase 4: Utility");
+        parlioEncodeBenchmark_fn.set("args", "[{iterations}] (optional, default 12000, max 200000)");
+        parlioEncodeBenchmark_fn.set("returns", "{success, iters, lanes, leds_per_lane, perpos_ss_us, perpos_sp_us, perpos_ps_us, perpos_pp_us, sink}");
+        parlioEncodeBenchmark_fn.set("description", "Bench full PARLIO encode hot loop (16-lane gather + wave8Transpose_16 + memcpy) with 4 SRAM/PSRAM placements; answers PSRAM hypothesis + ISR-streaming feasibility");
+        functions.push_back(parlioEncodeBenchmark_fn);
+
         fl::json response = fl::json::object();
         response.set("success", true);
-        response.set("totalFunctions", static_cast<int64_t>(23));
+        response.set("totalFunctions", static_cast<int64_t>(24));
         response.set("functions", functions);
         return response;
     });
@@ -1701,6 +1710,38 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         response.set("expand_batched_us", static_cast<int64_t>(r.expand_batched_us));
         response.set("transpose16_nibble_us", static_cast<int64_t>(r.transpose16_nibble_us));
         response.set("transpose16_byte_us", static_cast<int64_t>(r.transpose16_byte_us));
+        response.set("sink", static_cast<int64_t>(r.sink));
+        return response;
+    });
+
+    // Register "parlioEncodeBenchmark" - full PARLIO encode hot-loop bench with
+    // {scratch, output} in SRAM/PSRAM (4 combinations). Answers the PSRAM
+    // hypothesis + ISR-streaming feasibility on the byte-LUT path (#2526
+    // follow-up).
+    mRemote->bind("parlioEncodeBenchmark", [](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+
+        int iters = 12000;
+        fl::json config;
+        if (args.is_object()) {
+            config = args;
+        } else if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
+            config = args[0];
+        }
+        if (!config.is_null() && config.contains("iterations") && config["iterations"].is_int()) {
+            iters = static_cast<int>(config["iterations"].as_int().value());
+        }
+
+        auto r = autoresearch::parlio_bench::measureParlioEncode(iters);
+
+        response.set("success", r.iters > 0);
+        response.set("iters", static_cast<int64_t>(r.iters));
+        response.set("lanes", static_cast<int64_t>(r.lanes));
+        response.set("leds_per_lane", static_cast<int64_t>(r.leds_per_lane));
+        response.set("perpos_ss_us", static_cast<int64_t>(r.perpos_ss_us));
+        response.set("perpos_sp_us", static_cast<int64_t>(r.perpos_sp_us));
+        response.set("perpos_ps_us", static_cast<int64_t>(r.perpos_ps_us));
+        response.set("perpos_pp_us", static_cast<int64_t>(r.perpos_pp_us));
         response.set("sink", static_cast<int64_t>(r.sink));
         return response;
     });
