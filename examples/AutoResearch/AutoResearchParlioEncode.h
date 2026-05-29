@@ -29,6 +29,7 @@
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/int.h"
+#include "fl/stl/span.h"
 
 #include "fl/stl/cstring.h"  // fl::memcpy / fl::memset
 
@@ -61,6 +62,12 @@ struct ParlioEncodeResult {
     fl::u32 var_l2_us;         // L2: direct write to output, skip 128-B memcpy
     fl::u32 var_l1l2_us;       // L1+L2: fused expand+transpose + direct write
     fl::u32 var_l1l2l3_us;     // L1+L2+L3: fused + direct write + 4-byte-position tiling
+
+    // #2548 L4 prototype — lazy / PSRAM-allocated combined byte+lane+symbol LUT
+    // (512 KB). Built once at engine init from byte_lut; lives in PSRAM (zero
+    // SRAM footprint outside the engine pointer). 0 = build failed or not run.
+    fl::u32 var_l4_us;
+    fl::u32 l4_lut_bytes;      // for sanity-check: 524288 expected
 
     fl::u32 sink;
 };
@@ -146,6 +153,65 @@ fl::u32 fl_parlio_inner_l1l2(const fl::u8 *scratch,
     return static_cast<fl::u32>(output[output_idx] ^ output[output_idx + 127]);
 }
 
+// --- #2548 L4 (lazy/PSRAM combined byte+lane+symbol LUT) ---
+// Layout: lut[symbol_idx][lane_position][input_byte][output_byte_offset].
+// Each (s, l, b) 16-byte slot pre-encodes the byte's full contribution to
+// symbol s's 16-byte output area when expanded+transposed at lane position l.
+// Total: 8 × 16 × 256 × 16 = 524288 bytes = 512 KB — lives in PSRAM, not SRAM.
+// Per byte_position kernel = 8 symbols × 16 lanes × 4-u32 OR-reduce = the
+// algorithmic ceiling for single-core / single-Wave8 (#2548 deferred entry,
+// brought back via lazy allocation).
+constexpr fl::size FL_L4_LUT_BYTES = 8u * 16u * 256u * 16u;
+using Wave8L4LutSpan = fl::span<fl::u8, FL_L4_LUT_BYTES>;
+using Wave8L4LutConstSpan = fl::span<const fl::u8, FL_L4_LUT_BYTES>;
+
+// Build the L4 LUT by calling the existing spread-LUT transpose on dummy lanes
+// (one lane non-zero at a time) — correct by construction. The dst span is a
+// fixed-extent compile-time-sized view of FL_L4_LUT_BYTES bytes, so callers
+// must back it with an allocation of exactly that size.
+inline void buildWave8L4Lut(const fl::Wave8ByteExpansionLut &byte_lut,
+                            Wave8L4LutSpan dst) {
+    fl::u8 *base = dst.data();
+    // base[s * 16*256*16 + lane * 256*16 + byte * 16 + i]
+    for (int s = 0; s < 8; ++s) {
+        for (int lane = 0; lane < 16; ++lane) {
+            for (int b = 0; b < 256; ++b) {
+                fl::u8 dummy[16] = {0};
+                dummy[lane] = byte_lut.lut[b].symbols[s].data;
+                fl::u8 contrib[16];
+                fl::detail::spread_transpose16_symbol(dummy, contrib);
+                fl::u8 *entry = base + ((static_cast<fl::size>(s) * 16 + lane) * 256 + b) * 16;
+                for (int i = 0; i < 16; ++i) entry[i] = contrib[i];
+            }
+        }
+    }
+}
+
+FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
+void wave8Transpose_16_l4(const fl::u8 lanes[16],
+                          Wave8L4LutConstSpan l4_lut,
+                          fl::u8 *output /*128 bytes*/) {
+    const fl::u8 *base = l4_lut.data();
+    for (int s = 0; s < 8; ++s) {
+        fl::u32 acc0 = 0, acc1 = 0, acc2 = 0, acc3 = 0;
+        const fl::u8 *sym_base = base + static_cast<fl::size>(s) * 16 * 256 * 16;
+        for (int lane = 0; lane < 16; ++lane) {
+            const fl::u8 *entry =
+                sym_base + (static_cast<fl::size>(lane) * 256 + lanes[lane]) * 16;
+            const fl::u32 *u = fl::bit_cast_ptr<const fl::u32>(entry);
+            acc0 |= u[0];
+            acc1 |= u[1];
+            acc2 |= u[2];
+            acc3 |= u[3];
+        }
+        fl::u32 *out_u = fl::bit_cast_ptr<fl::u32>(output + s * 16);
+        out_u[0] = acc0;
+        out_u[1] = acc1;
+        out_u[2] = acc2;
+        out_u[3] = acc3;
+    }
+}
+
 // --- #2548 L1+L2+L3 inner: process 4 byte-positions per call. Strided gather
 // pulls 4 consecutive bytes per lane, then 4 fused transposes back-to-back.
 FASTLED_FORCE_INLINE FL_IRAM
@@ -216,6 +282,34 @@ inline fl::u32 fl_parlio_measure_variant(const fl::u8 *scratch,
             byte_offset * LANES * sizeof(fl::Wave8Byte);
         *sink ^=
             Inner(scratch, lane_stride, byte_offset, byte_lut, output, output_idx);
+    }
+    return micros() - t0;
+}
+
+// L4 measure: SRAM scratch + SRAM output; LUT in PSRAM (already proven to be
+// transparent to encode time, #2547).
+inline fl::u32 fl_parlio_measure_l4(const fl::u8 *scratch,
+                                    fl::u8 *output,
+                                    Wave8L4LutConstSpan l4_lut,
+                                    int iters_byte_positions,
+                                    volatile fl::u32 *sink) {
+    constexpr fl::size LANES = 16;
+    constexpr fl::size BYTES_PER_LANE = 768;
+    const fl::size lane_stride = BYTES_PER_LANE;
+
+    fl::u32 t0 = micros();
+    for (int it = 0; it < iters_byte_positions; ++it) {
+        const fl::size byte_offset =
+            static_cast<fl::size>(it) % BYTES_PER_LANE;
+        const fl::size output_idx =
+            byte_offset * LANES * sizeof(fl::Wave8Byte);
+        fl::u8 lanes[16];
+        for (fl::size lane = 0; lane < 16; lane++) {
+            lanes[lane] = scratch[lane * lane_stride + byte_offset];
+        }
+        wave8Transpose_16_l4(lanes, l4_lut, output + output_idx);
+        *sink ^= static_cast<fl::u32>(
+            output[output_idx] ^ output[output_idx + 127]);
     }
     return micros() - t0;
 }
@@ -324,6 +418,25 @@ inline ParlioEncodeResult measureParlioEncode(int iters_in = 12000) {
     result.var_l1l2l3_us = fl_parlio_measure_l1l2l3(
         scratch_sram, output_sram, byte_lut, iters_in, &sink);
 
+    // #2548 L4: lazy alloc the 512-KB LUT from PSRAM, build, time, free.
+    fl::u8 *l4_buf = fl_parlio_alloc(FL_L4_LUT_BYTES, /*psram=*/true);
+    if (l4_buf != nullptr) {
+        Wave8L4LutSpan l4_lut(l4_buf, FL_L4_LUT_BYTES);
+        result.l4_lut_bytes = static_cast<fl::u32>(FL_L4_LUT_BYTES);
+        fl::memset(l4_buf, 0, FL_L4_LUT_BYTES);
+        buildWave8L4Lut(byte_lut, l4_lut);
+        Wave8L4LutConstSpan l4_lut_const(l4_buf, FL_L4_LUT_BYTES);
+        // Warm L2 with the LUT before timing (one full sweep through symbols).
+        {
+            fl::u8 dummy_lanes[16] = {0};
+            fl::u8 dummy_out[128];
+            (void)wave8Transpose_16_l4(dummy_lanes, l4_lut_const, dummy_out);
+        }
+        result.var_l4_us = fl_parlio_measure_l4(
+            scratch_sram, output_sram, l4_lut_const, iters_in, &sink);
+        heap_caps_free(l4_buf);
+    }
+
     result.sink = static_cast<fl::u32>(sink);
 
     heap_caps_free(scratch_sram);
@@ -393,6 +506,20 @@ inline void printParlioEncodeResultRom(const ParlioEncodeResult &r) {
                    ss_frame_us, l2_frame_us, l1l2_frame_us, l1l2l3_frame_us, WS2812B_FRAME_US);
     esp_rom_printf("BENCH_PARLIO variants_speedup_x100  L2=%u L1+L2=%u L1+L2+L3=%u (baseline=100)\n",
                    spd_l2_x100, spd_l1l2_x100, spd_l1l2l3_x100);
+
+    // L4 (lazy PSRAM LUT) — separate line because it's a big-LUT class of variant.
+    if (r.var_l4_us > 0) {
+        const fl::u32 l4_frame_us =
+            static_cast<fl::u32>(static_cast<fl::u64>(r.var_l4_us) * 768 / iters64);
+        const fl::u32 spd_l4_x100 =
+            static_cast<fl::u32>(static_cast<fl::u64>(r.perpos_ss_us) * 100 / r.var_l4_us);
+        esp_rom_printf("BENCH_PARLIO L4_lazy_psram  lut_bytes=%u total_us=%u frame_us=%u speedup_x100=%u (baseline=100)\n",
+                       r.l4_lut_bytes, r.var_l4_us, l4_frame_us, spd_l4_x100);
+    } else {
+        esp_rom_printf("BENCH_PARLIO L4_lazy_psram  alloc FAILED (lut_bytes=%u)\n",
+                       static_cast<fl::u32>(FL_L4_LUT_BYTES));
+    }
+
     esp_rom_printf("BENCH_PARLIO_END\n\n");
 }
 

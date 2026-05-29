@@ -1745,6 +1745,8 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         response.set("var_l2_us", static_cast<int64_t>(r.var_l2_us));
         response.set("var_l1l2_us", static_cast<int64_t>(r.var_l1l2_us));
         response.set("var_l1l2l3_us", static_cast<int64_t>(r.var_l1l2l3_us));
+        response.set("var_l4_us", static_cast<int64_t>(r.var_l4_us));
+        response.set("l4_lut_bytes", static_cast<int64_t>(r.l4_lut_bytes));
         response.set("sink", static_cast<int64_t>(r.sink));
         return response;
     });
