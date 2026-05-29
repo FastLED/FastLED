@@ -194,6 +194,7 @@
 #include "AutoResearchAsync.h"
 #include "AutoResearchPlatform.h"
 #include "AutoResearchSimd.h"
+#include "AutoResearchWave8Expand.h"  // boot-time #2526 micro-bench
 
 // ============================================================================
 // Teensy Hardware Watchdog (crash recovery) - DISABLED
@@ -329,6 +330,17 @@ void setup() {
     // SIMD AutoResearch
     // ========================================================================
     int simd_failures = autoresearch::simd_check::runSimdTests();
+
+    // #2526 expansion micro-bench is RPC-driven (wave8ExpandBenchmark, registered
+    // in AutoResearchRemote.cpp). NOT computed at boot by default — flip
+    // -DFL_BENCH_WAVE8_AT_BOOT=1 to run once at startup as a bridge until the
+    // testSimd RPC routing on P4 is fixed (#2541).
+#ifdef FL_BENCH_WAVE8_AT_BOOT
+    {
+        auto _w8r = autoresearch::wave8_bench::measureWave8Expand();
+        autoresearch::wave8_bench::printWave8ExpandResultRom(_w8r);
+    }
+#endif
     if (simd_failures > 0) {
         FL_ERROR("SIMD autoresearch failed - " << simd_failures << " test(s) failed");
     }

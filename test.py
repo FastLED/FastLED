@@ -40,15 +40,22 @@ os.chdir(Path(__file__).parent)
 # This must run before any imports that touch stdout (e.g., test runners,
 # rich console) so the buffering policy is set on first write.
 if not sys.stdout.isatty():
-    try:
-        sys.stdout.reconfigure(line_buffering=True)  # type: ignore[union-attr]
-    except (AttributeError, ValueError):
-        pass
+    # `reconfigure` is on io.TextIOWrapper but not the abstract TextIO type
+    # that sys.stdout is typed as. getattr+callable keeps this type-safe across
+    # mypy/pyright/ty without needing per-checker `# ignore` comments.
+    _reconfigure_stdout = getattr(sys.stdout, "reconfigure", None)
+    if callable(_reconfigure_stdout):
+        try:
+            _reconfigure_stdout(line_buffering=True)
+        except ValueError:
+            pass
 if not sys.stderr.isatty():
-    try:
-        sys.stderr.reconfigure(line_buffering=True)  # type: ignore[union-attr]
-    except (AttributeError, ValueError):
-        pass
+    _reconfigure_stderr = getattr(sys.stderr, "reconfigure", None)
+    if callable(_reconfigure_stderr):
+        try:
+            _reconfigure_stderr(line_buffering=True)
+        except ValueError:
+            pass
 
 
 # Ultra-early exit fires BEFORE heavy ci.util.* imports (~318ms savings on cached runs).
