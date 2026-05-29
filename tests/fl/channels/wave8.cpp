@@ -4,6 +4,7 @@
 /// Tests the wave transpose functionality used for multi-lane LED protocols.
 
 #include "fl/channels/wave8.h"
+#include "fl/channels/detail/wave8.hpp"
 #include "fl/stl/cstring.h"
 #include "test.h"
 #include "fl/chipsets/led_timing.h"
@@ -857,6 +858,63 @@ FL_TEST_CASE("wave8Untranspose_16_distinct_patterns") {
         for (int symbol = 0; symbol < 8; symbol++) {
             uint8_t expected = (symbol == (7 - set_bit)) ? 0xFF : 0x00;
             FL_REQUIRE(untransposed[lane * 8 + symbol] == expected);
+        }
+    }
+}
+
+// #2524: the optimized two-pass (8x8) transposes must be bit-identical to a
+// ground-truth naive transpose across random inputs (the known-answer tests
+// above only cover specific patterns).
+FL_TEST_CASE("wave8 transpose_8/_16 == naive (random)") {
+    auto naive8 = [](const Wave8Byte in[8], u8 out[8 * sizeof(Wave8Byte)]) {
+        for (int s = 0; s < 8; s++) {
+            for (int k = 0; k < 8; k++) {
+                int b = 7 - k;
+                int byte = 0;
+                for (int l = 0; l < 8; l++) {
+                    byte |= ((in[l].symbols[s].data >> b) & 1) << l;
+                }
+                out[s * 8 + k] = static_cast<u8>(byte);
+            }
+        }
+    };
+    auto naive16 = [](const Wave8Byte in[16], u8 out[16 * sizeof(Wave8Byte)]) {
+        for (int s = 0; s < 8; s++) {
+            for (int b = 0; b < 8; b++) {
+                int lo = 0;
+                int hi = 0;
+                for (int l = 0; l < 8; l++) {
+                    lo |= ((in[l].symbols[s].data >> b) & 1) << l;
+                    hi |= ((in[l + 8].symbols[s].data >> b) & 1) << l;
+                }
+                out[s * 16 + (7 - b) * 2] = static_cast<u8>(lo);
+                out[s * 16 + (7 - b) * 2 + 1] = static_cast<u8>(hi);
+            }
+        }
+    };
+
+    u32 seed = 0xABCDEF01u;
+    for (int round = 0; round < 400; round++) {
+        Wave8Byte w8[16];
+        for (int l = 0; l < 16; l++) {
+            for (int s = 0; s < 8; s++) {
+                seed = seed * 1664525u + 1013904223u;
+                w8[l].symbols[s].data = static_cast<u8>(seed >> 24);
+            }
+        }
+        u8 got[16 * sizeof(Wave8Byte)];
+        u8 exp[16 * sizeof(Wave8Byte)];
+
+        fl::detail::wave8_transpose_8(w8, got);
+        naive8(w8, exp);
+        for (int i = 0; i < 8 * static_cast<int>(sizeof(Wave8Byte)); i++) {
+            FL_REQUIRE(got[i] == exp[i]);
+        }
+
+        fl::detail::wave8_transpose_16(w8, got);
+        naive16(w8, exp);
+        for (int i = 0; i < 16 * static_cast<int>(sizeof(Wave8Byte)); i++) {
+            FL_REQUIRE(got[i] == exp[i]);
         }
     }
 }
