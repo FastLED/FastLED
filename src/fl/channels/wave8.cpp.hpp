@@ -155,6 +155,37 @@ void wave8Transpose_16x2_pipe2(const u8 (&FL_RESTRICT_PARAM lanes_a)[16],
                                        output_a, output_b);
 }
 
+FL_OPTIMIZE_FUNCTION FL_IRAM
+void wave8Transpose_16x4_pipe4(const u8 (&FL_RESTRICT_PARAM lanes_a)[16],
+                               const u8 (&FL_RESTRICT_PARAM lanes_b)[16],
+                               const u8 (&FL_RESTRICT_PARAM lanes_c)[16],
+                               const u8 (&FL_RESTRICT_PARAM lanes_d)[16],
+                               const Wave8ByteExpansionLut &lut,
+                               u8 (&FL_RESTRICT_PARAM output_a)[16 * sizeof(Wave8Byte)],
+                               u8 (&FL_RESTRICT_PARAM output_b)[16 * sizeof(Wave8Byte)],
+                               u8 (&FL_RESTRICT_PARAM output_c)[16 * sizeof(Wave8Byte)],
+                               u8 (&FL_RESTRICT_PARAM output_d)[16 * sizeof(Wave8Byte)]) {
+    Wave8Byte laneWaveformsA[16];
+    Wave8Byte laneWaveformsB[16];
+    Wave8Byte laneWaveformsC[16];
+    Wave8Byte laneWaveformsD[16];
+    for (int lane = 0; lane < 16; lane++) {
+        detail::wave8_expand_byte(lanes_a[lane], lut, &laneWaveformsA[lane]);
+    }
+    for (int lane = 0; lane < 16; lane++) {
+        detail::wave8_expand_byte(lanes_b[lane], lut, &laneWaveformsB[lane]);
+    }
+    for (int lane = 0; lane < 16; lane++) {
+        detail::wave8_expand_byte(lanes_c[lane], lut, &laneWaveformsC[lane]);
+    }
+    for (int lane = 0; lane < 16; lane++) {
+        detail::wave8_expand_byte(lanes_d[lane], lut, &laneWaveformsD[lane]);
+    }
+    detail::wave8_transpose_16x4_pipe4(laneWaveformsA, laneWaveformsB,
+                                       laneWaveformsC, laneWaveformsD,
+                                       output_a, output_b, output_c, output_d);
+}
+
 // ============================================================================
 // LUT Builder from Timing Data
 // Note: This is not designed to be called from ISR handlers.
