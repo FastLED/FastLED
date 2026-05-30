@@ -76,7 +76,7 @@ def _is_suppressed(source_lines: list[str], lineno: int, code: str) -> bool:
         return False
     codes = m.group(1)
     if codes is None:
-        return True  # bare ``# noqa`` suppresses everything
+        return True  # bare ``noqa`` (no codes) suppresses everything
     return code in {c.strip() for c in codes.split(",")}
 
 

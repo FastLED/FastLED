@@ -75,7 +75,8 @@ select = [
     "UP007",  # Use PEP 604 union syntax (X | Y instead of Union[X, Y], T | None instead of Optional[T])
 ]
 # Register custom checker codes so ruff accepts # noqa: DCT001 etc.
-external = ["DCT001", "DCT002"]
+# KBI001/002/003 are emitted by ci/lint_python/keyboard_interrupt_checker.py.
+external = ["DCT001", "DCT002", "KBI001", "KBI002", "KBI003"]
 
 [tool.ruff.lint.isort]
 # Configure import sorting to match isort's black profile
