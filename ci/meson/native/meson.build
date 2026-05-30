@@ -189,6 +189,7 @@ example_compile_args = base_compile_args
 
 # Detect platform for the few remaining differences
 is_windows = build_machine.system() == 'windows'
+is_macos = build_machine.system() == 'darwin'
 
 # ============================================================================
 # Detect if clang-tool-chain Python wrapper is being used
@@ -261,9 +262,13 @@ else
   dll_link_args += ['-rdynamic']
   # In debug mode with sanitizers, shared libraries need to allow undefined symbols
   # that will be provided by the sanitizer runtime when the runner loads them.
-  # LLD by default allows undefined symbols in shared libraries, but we add the
-  # flag explicitly on Unix for compatibility with other linkers.
-  if build_mode == 'debug'
+  # LLD-ELF (Linux) defaults to allowing undefined symbols in shared libraries but
+  # we set the flag explicitly for compatibility with GNU-ld. macOS's ld64.lld
+  # uses Mach-O semantics and does NOT understand `--allow-shlib-undefined`
+  # (it errors out — see FastLED #2612). On Mach-O the equivalent semantic is
+  # `-undefined dynamic_lookup`, which is not needed because Mach-O resolves
+  # undefined symbols at runtime by default.
+  if build_mode == 'debug' and not is_macos
     dll_link_args += ['-Wl,--allow-shlib-undefined']
   endif
 endif
@@ -282,7 +287,9 @@ if is_windows
     '-lws2_32',
   ]
 else
-  if build_mode == 'debug'
+  # macOS ld64.lld rejects `--allow-shlib-undefined` (it's an ELF-only flag).
+  # See FastLED #2612 and the comment above on `dll_link_args`.
+  if build_mode == 'debug' and not is_macos
     fastled_shared_link_args += ['-Wl,--allow-shlib-undefined']
   endif
 endif
@@ -327,10 +334,13 @@ elif build_mode == 'quick'
   else
     # macOS and Linux: dynamic linking (glibc doesn't support static + dlopen)
     # Note: -lunwind is added conditionally below after checking availability
-    runner_link_args = core_link_args + deploy_link_args + [
-      '-Wl,--no-undefined',  # Catch missing libraries early
-      '-pthread',
-    ]
+    # macOS ld64.lld rejects `--no-undefined` (ELF-only); Mach-O defaults to
+    # erroring on undefined symbols anyway, so the flag is redundant there.
+    # See FastLED #2612.
+    runner_link_args = core_link_args + deploy_link_args + ['-pthread']
+    if not is_macos
+      runner_link_args += ['-Wl,--no-undefined']  # Catch missing libraries early
+    endif
   endif
 else
   # Release mode: static linking on Windows, dynamic on Unix
@@ -348,10 +358,11 @@ else
   else
     # macOS and Linux: dynamic linking (glibc doesn't support static + dlopen)
     # Note: -lunwind is added conditionally below after checking availability
-    runner_link_args = core_link_args + deploy_link_args + [
-      '-Wl,--no-undefined',  # Catch missing libraries early
-      '-pthread',
-    ]
+    # macOS ld64.lld rejects `--no-undefined` (ELF-only); see comment above.
+    runner_link_args = core_link_args + deploy_link_args + ['-pthread']
+    if not is_macos
+      runner_link_args += ['-Wl,--no-undefined']  # Catch missing libraries early
+    endif
   endif
 endif
 
