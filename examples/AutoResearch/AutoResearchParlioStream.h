@@ -46,8 +46,12 @@ struct ValidateResult {
     int lanes;                 // PARLIO lane count tested
     int leds_per_lane;         // LEDs per lane
     int iterations;            // number of show() iterations run
-    uint32_t per_iter_us[kMaxIterations];  // per-iteration show()+wait() time
-    uint32_t steady_avg_us;    // average of iters 1..N-1 (skips iter 0 setup)
+    uint32_t per_iter_us[kMaxIterations];  // per-iteration show()+wait() total time
+    uint32_t per_iter_show_us[kMaxIterations];  // per-iter show() return time (pre-encode + submit)
+    uint32_t per_iter_wait_us[kMaxIterations];  // per-iter wait() time (TX completion)
+    uint32_t steady_avg_us;        // average total of iters 1..N-1 (skips iter 0 setup)
+    uint32_t steady_avg_show_us;   // average show() time of iters 1..N-1
+    uint32_t steady_avg_wait_us;   // average wait() time of iters 1..N-1
     int failed_iter;           // index of first iter that exceeded timeout, or -1
     uint32_t timeout_ms;       // effective timeout passed in
 };
@@ -118,18 +122,30 @@ inline ValidateResult validateParlioStreaming(int base_tx_pin,
 
     bool ok = true;
     uint32_t steady_total = 0;
+    uint32_t steady_show_total = 0;
+    uint32_t steady_wait_total = 0;
     for (int iter = 0; iter < iterations; ++iter) {
         const uint32_t t0 = micros();
         FastLED.show();
+        const uint32_t t_show = micros();
         FastLED.wait(timeout_ms);
-        const uint32_t dt = micros() - t0;
+        const uint32_t t1 = micros();
+        const uint32_t show_us = t_show - t0;
+        const uint32_t wait_us = t1 - t_show;
+        const uint32_t dt = t1 - t0;
         r.per_iter_us[iter] = dt;
+        r.per_iter_show_us[iter] = show_us;
+        r.per_iter_wait_us[iter] = wait_us;
         if (dt > timeout_ms * 1000u) {
             r.failed_iter = iter;
             ok = false;
             break;
         }
-        if (iter > 0) steady_total += dt;
+        if (iter > 0) {
+            steady_total += dt;
+            steady_show_total += show_us;
+            steady_wait_total += wait_us;
+        }
     }
 
     FastLED.clear(ClearFlags::CHANNELS);
@@ -137,8 +153,12 @@ inline ValidateResult validateParlioStreaming(int base_tx_pin,
     r.completed = ok;
     if (ok && iterations > 1) {
         r.steady_avg_us = steady_total / (iterations - 1);
+        r.steady_avg_show_us = steady_show_total / (iterations - 1);
+        r.steady_avg_wait_us = steady_wait_total / (iterations - 1);
     } else if (ok) {
         r.steady_avg_us = r.per_iter_us[0];
+        r.steady_avg_show_us = r.per_iter_show_us[0];
+        r.steady_avg_wait_us = r.per_iter_wait_us[0];
     }
 #else
     (void)base_tx_pin;
