@@ -192,9 +192,9 @@ inline ParlioEncodeResult measureParlioEncode(int iters_in = 12000) {
 
 inline void printParlioEncodeResultRom(const ParlioEncodeResult &r) {
     if (r.iters == 0) {
-        esp_rom_printf("\nBENCH_PARLIO_START (issue #2526 follow-up)\n");
-        esp_rom_printf("BENCH_PARLIO ERROR: heap allocation failed\n");
-        esp_rom_printf("BENCH_PARLIO_END\n\n");
+        esp_rom_printf("\nBENCH_PARLIO_START (issue #2526 follow-up)\n");  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
+        esp_rom_printf("BENCH_PARLIO ERROR: heap allocation failed\n");  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
+        esp_rom_printf("BENCH_PARLIO_END\n\n");  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
         return;
     }
 
@@ -222,18 +222,18 @@ inline void printParlioEncodeResultRom(const ParlioEncodeResult &r) {
     // WS2812B 800kHz, 16 lanes in parallel, 256 LEDs * 24 bits * 1.25 us/bit.
     constexpr fl::u32 WS2812B_FRAME_US = 7680;
 
-    esp_rom_printf("\nBENCH_PARLIO_START (16 lanes x 256 LEDs, byte-LUT, #2526 follow-up)\n");
-    esp_rom_printf("BENCH_PARLIO iters=%u lanes=%u leds=%u sink=%u\n",
+    esp_rom_printf("\nBENCH_PARLIO_START (16 lanes x 256 LEDs, byte-LUT, #2526 follow-up)\n");  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
+    esp_rom_printf("BENCH_PARLIO iters=%u lanes=%u leds=%u sink=%u\n",  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
                    r.iters, r.lanes, r.leds_per_lane, r.sink);
-    esp_rom_printf("BENCH_PARLIO perpos_us  ss=%u sp=%u ps=%u pp=%u\n",
+    esp_rom_printf("BENCH_PARLIO perpos_us  ss=%u sp=%u ps=%u pp=%u\n",  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
                    r.perpos_ss_us, r.perpos_sp_us, r.perpos_ps_us, r.perpos_pp_us);
-    esp_rom_printf("BENCH_PARLIO perpos_ns_each  ss=%u sp=%u ps=%u pp=%u\n",
+    esp_rom_printf("BENCH_PARLIO perpos_ns_each  ss=%u sp=%u ps=%u pp=%u\n",  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
                    ss_ns_per, sp_ns_per, ps_ns_per, pp_ns_per);
-    esp_rom_printf("BENCH_PARLIO frame_equiv_us  ss=%u sp=%u ps=%u pp=%u  ws2812b_tx=%u\n",
+    esp_rom_printf("BENCH_PARLIO frame_equiv_us  ss=%u sp=%u ps=%u pp=%u  ws2812b_tx=%u\n",  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
                    ss_frame_us, sp_frame_us, ps_frame_us, pp_frame_us, WS2812B_FRAME_US);
-    esp_rom_printf("BENCH_PARLIO ratio_x100  sp_vs_ss=%u ps_vs_ss=%u pp_vs_ss=%u\n",
+    esp_rom_printf("BENCH_PARLIO ratio_x100  sp_vs_ss=%u ps_vs_ss=%u pp_vs_ss=%u\n",  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
                    ratio_sp_ss_x100, ratio_ps_ss_x100, ratio_pp_ss_x100);
-    esp_rom_printf("BENCH_PARLIO_END\n\n");
+    esp_rom_printf("BENCH_PARLIO_END\n\n");  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
 }
 
 #else // !FL_PARLIO_BENCH_ENABLED

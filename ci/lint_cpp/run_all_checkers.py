@@ -38,6 +38,7 @@ from ci.lint_cpp.cpp_hpp_includes_checker import CppHppIncludesChecker
 from ci.lint_cpp.cpp_include_checker import CppIncludeChecker
 from ci.lint_cpp.ctype_global_checker import CtypeGlobalChecker
 from ci.lint_cpp.enum_class_checker import EnumClassChecker
+from ci.lint_cpp.esp_rom_printf_checker import EspRomPrintfChecker
 from ci.lint_cpp.fastled_header_usage_checker import FastLEDHeaderUsageChecker
 from ci.lint_cpp.fl_is_defined_checker import FlIsDefinedChecker
 from ci.lint_cpp.headers_exist_checker import HeadersExistChecker
@@ -181,6 +182,7 @@ def create_checkers(
         AsmJsLocationChecker(),  # Checks EM_JS / EM_ASYNC_JS / EM_ASM live only in *.js.cpp.hpp
         BannedMacrosChecker(),  # Checks for banned preprocessor macros like __has_include
         BuiltinMemcpyChecker(),  # Checks for raw __builtin_memcpy — use FL_BUILTIN_MEMCPY
+        EspRomPrintfChecker(),  # Checks for raw esp_rom_printf — use FastLED logging
         FlIsDefinedChecker(),
         BannedNamespaceChecker(),  # Checks for banned namespace patterns like fl::fl
         SingletonInHeadersChecker(),  # Checks for Singleton<T> in headers (must use SingletonShared<T>)

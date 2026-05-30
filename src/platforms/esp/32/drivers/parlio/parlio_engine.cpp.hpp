@@ -107,12 +107,17 @@ namespace detail {
 #endif // defined(FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH)
 
 // #2548: when set, beginTransmission() submits all pre-encoded ring buffers
-// to the IDF TX queue immediately. The IDF holds up to
-// FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH pending transmits and chains them via
-// hardware DMA descriptors — eliminating the ISR-latency gap between buffers
-// that previously serialized encode→TX within a frame.
+// to the IDF TX queue immediately FOR FRAMES THAT FIT IN THE RING. The IDF
+// holds up to FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH pending transmits and chains
+// them via hardware DMA descriptors — eliminating the ISR-latency gap between
+// buffers that would otherwise serialize encode→TX within a frame.
 //
-// MEASURED IMPACT (16-lane × 256-LED WS2812B on P4 v1.3):
+// For frames LARGER than the ring (extra-long LED strips), the engine falls
+// back to the chunked-streaming path: txDoneCallback + workerIsrCallback
+// submit + populate buffers one at a time as TX drains, with new chunks
+// encoded on the fly. Both paths coexist; the decision is per-frame.
+//
+// MEASURED IMPACT (16-lane × 256-LED WS2812B on P4 v1.3, fits-in-ring path):
 //   off: total=16 995us  show=9 439us  wait=7 556us  (encode→TX serial)
 //   on : total=12 220us  show=10 605us wait=1 615us  (encode/TX overlap, ~30% faster)
 //
@@ -1933,21 +1938,38 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
     // background while show() submits buffer 1+ (and any FastLED bookkeeping
     // runs concurrently with TX too).
     //
+    // CRITICAL: only eager-queue when the entire frame is already encoded
+    // (i.e. the frame fit in the engine's 3-buffer ring). For frames larger
+    // than the ring, encoding must continue in the background via the
+    // txDoneCallback → workerIsrCallback streaming path — those need
+    // `mRingCount` to track "buffers waiting to be submitted to IDF", which
+    // gets corrupted if we drain it eagerly. The "ring empty but more data
+    // pending" branch in txDoneCallback would also incorrectly set
+    // `mHardwareIdle = true` while the IDF queue is still draining.
+    //
     // Configurable via FL_PARLIO_EAGER_QUEUE (default ON). See header comment
     // for measured impact and disable instructions.
 #if FL_PARLIO_EAGER_QUEUE
-    while (mIsrContext->mRingCount > 0) {
-        size_t idx = mIsrContext->mRingReadIdx;
-        size_t sz = mRingBuffer->sizes[idx];
-        if (!mPeripheral->transmit(mRingBuffer->ptrs[idx], sz * 8, 0x0000)) {
-            // Best-effort: stop on first failure. txDoneCallback will resubmit
-            // remaining buffers from the engine ring as TX progresses.
-            break;
+    const bool frame_fits_in_ring =
+        (mIsrContext->mNextByteOffset >= mIsrContext->mTotalBytes);
+    if (frame_fits_in_ring) {
+        while (mIsrContext->mRingCount > 0) {
+            size_t idx = mIsrContext->mRingReadIdx;
+            size_t sz = mRingBuffer->sizes[idx];
+            if (!mPeripheral->transmit(mRingBuffer->ptrs[idx], sz * 8, 0x0000)) {
+                // Best-effort: stop on first failure. txDoneCallback will resubmit
+                // remaining buffers from the engine ring as TX progresses.
+                break;
+            }
+            mIsrContext->mRingReadIdx = (mIsrContext->mRingReadIdx + 1) % ParlioRingBuffer3::RING_BUFFER_COUNT;
+            mIsrContext->mRingCount = mIsrContext->mRingCount - 1;
+            FL_MEMORY_BARRIER;
         }
-        mIsrContext->mRingReadIdx = (mIsrContext->mRingReadIdx + 1) % ParlioRingBuffer3::RING_BUFFER_COUNT;
-        mIsrContext->mRingCount = mIsrContext->mRingCount - 1;
-        FL_MEMORY_BARRIER;
     }
+    // else: frame > ring capacity → leave remaining buffers in the engine
+    // ring; the existing chunked-streaming path (txDoneCallback +
+    // workerIsrCallback) will submit them one at a time as TX drains, while
+    // also encoding new chunks on the fly.
 #endif
 
     //=========================================================================
