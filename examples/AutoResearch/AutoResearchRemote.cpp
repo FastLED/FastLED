@@ -1585,9 +1585,17 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         parlioEncodeBenchmark_fn.set("description", "Bench PARLIO encode hot loop: 4 SRAM/PSRAM placements (PSRAM hypothesis) + #2548 algorithmic variants (L2 direct-write, L1+L2 fused expand+transpose, L1+L2+L3 4-byte-position tiling)");
         functions.push_back(parlioEncodeBenchmark_fn);
 
+        fl::json parlioStageBreakdown_fn = fl::json::object();
+        parlioStageBreakdown_fn.set("name", "parlioStageBreakdown");
+        parlioStageBreakdown_fn.set("phase", "Phase 4: Utility");
+        parlioStageBreakdown_fn.set("args", "[{iterations}] (optional, default 8000, max 200000)");
+        parlioStageBreakdown_fn.set("returns", "{success, iters, gather_cyc, expand_cyc, transpose_cyc, store_cyc, sink}");
+        parlioStageBreakdown_fn.set("description", "Per-stage cycle-counter breakdown of the PARLIO encode hot loop (#2548 Phase 0): gather / expand / spread-transpose / store");
+        functions.push_back(parlioStageBreakdown_fn);
+
         fl::json response = fl::json::object();
         response.set("success", true);
-        response.set("totalFunctions", static_cast<int64_t>(24));
+        response.set("totalFunctions", static_cast<int64_t>(25));
         response.set("functions", functions);
         return response;
     });
@@ -1748,6 +1756,34 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         response.set("var_l4_us", static_cast<int64_t>(r.var_l4_us));
         response.set("l4_lut_bytes", static_cast<int64_t>(r.l4_lut_bytes));
         response.set("sink", static_cast<int64_t>(r.sink));
+        return response;
+    });
+
+    // Register "parlioStageBreakdown" - #2548 Phase 0 per-stage cycle-counter
+    // bench. Returns cycles spent in gather / expand / spread-transpose / store.
+    mRemote->bind("parlioStageBreakdown", [](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+
+        int iters = 8000;
+        fl::json config;
+        if (args.is_object()) {
+            config = args;
+        } else if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
+            config = args[0];
+        }
+        if (!config.is_null() && config.contains("iterations") && config["iterations"].is_int()) {
+            iters = static_cast<int>(config["iterations"].as_int().value());
+        }
+
+        auto sb = autoresearch::parlio_bench::measureParlioStageBreakdown(iters);
+
+        response.set("success", sb.iters > 0);
+        response.set("iters", static_cast<int64_t>(sb.iters));
+        response.set("gather_cyc", static_cast<int64_t>(sb.gather_cyc));
+        response.set("expand_cyc", static_cast<int64_t>(sb.expand_cyc));
+        response.set("transpose_cyc", static_cast<int64_t>(sb.transpose_cyc));
+        response.set("store_cyc", static_cast<int64_t>(sb.store_cyc));
+        response.set("sink", static_cast<int64_t>(sb.sink));
         return response;
     });
 

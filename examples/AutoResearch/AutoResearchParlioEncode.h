@@ -37,6 +37,9 @@
 #include <Arduino.h>     // micros()
 #include <esp_heap_caps.h>
 #include <esp_rom_sys.h> // esp_rom_printf -> USB-Serial-JTAG console
+// Per-stage cycle-counter instrumentation (#2548 Phase 0). Routes to
+// esp_cpu_get_cycle_count() on IDF v5+ — single inline call, ~few cycle overhead.
+#include "platforms/esp/32/core/clock_cycles.h"  // ok platform headers — needed for __clock_cycles() (P4 RV32 cycle counter, #2548)
 #define FL_PARLIO_BENCH_ENABLED 1
 #else
 #define FL_PARLIO_BENCH_ENABLED 0
@@ -75,6 +78,21 @@ struct ParlioEncodeResult {
     fl::u32 var_l4n_us;
     fl::u32 l4n_lut_bytes;     // 32768 expected
 
+    fl::u32 sink;
+};
+
+// #2548 Phase 0: per-stage cycle-counter breakdown. Drives which of L7 / fused-v2
+// / L5 to prioritize. Times each stage of the production hot loop separately:
+//   gather:    16 strided u8 reads from scratch -> lanes[16]
+//   expand:    16 x wave8_expand_byte (byte_lut -> Wave8Byte intermediate)
+//   transpose: 8 x spread_transpose16_symbol (the spread-LUT)
+//   store:     128-B memcpy to DMA output buffer
+struct ParlioStageBreakdown {
+    fl::u32 iters;
+    fl::u64 gather_cyc;
+    fl::u64 expand_cyc;
+    fl::u64 transpose_cyc;
+    fl::u64 store_cyc;
     fl::u32 sink;
 };
 
@@ -463,7 +481,168 @@ inline fl::u8 *fl_parlio_alloc(fl::size_t size, bool psram) {
               : (MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT)));
 }
 
+// --- #2548 Phase 0: per-stage cycle-counter instrumentation ---
+//
+// Mirrors the production hot path but inserts `__clock_cycles()` reads between
+// each stage, with `asm volatile("" ::: "memory")` barriers that prevent the
+// compiler from hoisting/reordering across the timer boundary. Stage totals are
+// accumulated across all iterations (single counter avoids per-iter overhead
+// drift). The barriers cost ~0 instructions but keep the stages clearly
+// separated in the resulting timing.
+inline void fl_parlio_measure_stages(const fl::u8 *scratch,
+                                     fl::u8 *output,
+                                     const fl::Wave8ByteExpansionLut &byte_lut,
+                                     int iters_byte_positions,
+                                     ParlioStageBreakdown *sb,
+                                     volatile fl::u32 *sink) {
+    constexpr fl::size LANES = 16;
+    constexpr fl::size BYTES_PER_LANE = 768;
+    const fl::size lane_stride = BYTES_PER_LANE;
+
+    fl::u64 gather_total = 0;
+    fl::u64 expand_total = 0;
+    fl::u64 transpose_total = 0;
+    fl::u64 store_total = 0;
+
+    for (int it = 0; it < iters_byte_positions; ++it) {
+        const fl::size byte_offset =
+            static_cast<fl::size>(it) % BYTES_PER_LANE;
+        const fl::size output_idx =
+            byte_offset * LANES * sizeof(fl::Wave8Byte);
+
+        fl::u8 lanes[16];
+        fl::Wave8Byte expanded[16];
+        fl::u8 transposed[16 * sizeof(fl::Wave8Byte)];
+
+        // STAGE 1: gather (16 strided u8 reads)
+        const fl::u32 t0 = __clock_cycles();
+        for (fl::size lane = 0; lane < 16; lane++) {
+            lanes[lane] = scratch[lane * lane_stride + byte_offset];
+        }
+        asm volatile("" : "+m"(lanes) : : "memory");
+        const fl::u32 t1 = __clock_cycles();
+
+        // STAGE 2: expand (16 x wave8_expand_byte, byte-LUT path)
+        for (int lane = 0; lane < 16; ++lane) {
+            fl::detail::wave8_expand_byte(lanes[lane], byte_lut, &expanded[lane]);
+        }
+        asm volatile("" : "+m"(expanded) : : "memory");
+        const fl::u32 t2 = __clock_cycles();
+
+        // STAGE 3: spread-transpose (8 x spread_transpose16_symbol)
+        fl::detail::wave8_transpose_16(expanded, transposed);
+        asm volatile("" : "+m"(transposed) : : "memory");
+        const fl::u32 t3 = __clock_cycles();
+
+        // STAGE 4: store 128 B to output buffer
+        fl::memcpy(output + output_idx, transposed, sizeof(transposed));
+        asm volatile("" : "+m"(*(output + output_idx)) : : "memory");
+        const fl::u32 t4 = __clock_cycles();
+
+        gather_total    += static_cast<fl::u64>(t1 - t0);
+        expand_total    += static_cast<fl::u64>(t2 - t1);
+        transpose_total += static_cast<fl::u64>(t3 - t2);
+        store_total     += static_cast<fl::u64>(t4 - t3);
+
+        *sink ^= output[output_idx] ^ output[output_idx + 127];
+    }
+
+    sb->iters = static_cast<fl::u32>(iters_byte_positions);
+    sb->gather_cyc = gather_total;
+    sb->expand_cyc = expand_total;
+    sb->transpose_cyc = transpose_total;
+    sb->store_cyc = store_total;
+    sb->sink = static_cast<fl::u32>(*sink);
+}
+
 } // anonymous namespace
+
+// Run only the per-stage breakdown (smaller iter count by default to keep boot
+// time reasonable when both this and measureParlioEncode fire at startup).
+inline ParlioStageBreakdown
+measureParlioStageBreakdown(int iters_in = 8000) {
+    ParlioStageBreakdown result{};
+    if (iters_in < 1) iters_in = 1;
+    if (iters_in > 200000) iters_in = 200000;
+
+    constexpr fl::size LANES = 16;
+    constexpr fl::size BYTES_PER_LANE = 768;
+    constexpr fl::size SCRATCH_BYTES = LANES * BYTES_PER_LANE;
+    constexpr fl::size OUTPUT_BYTES = BYTES_PER_LANE * LANES * sizeof(fl::Wave8Byte);
+
+    fl::ChipsetTiming timing;
+    timing.T1 = 400;
+    timing.T2 = 450;
+    timing.T3 = 400;
+    fl::Wave8BitExpansionLut nib_lut = fl::buildWave8ExpansionLUT(timing);
+    fl::Wave8ByteExpansionLut byte_lut = fl::buildWave8ByteExpansionLUT(nib_lut);
+
+    fl::u8 *scratch = fl_parlio_alloc(SCRATCH_BYTES, /*psram=*/false);
+    fl::u8 *output = fl_parlio_alloc(OUTPUT_BYTES, /*psram=*/false);
+    if (!scratch || !output) {
+        heap_caps_free(scratch);
+        heap_caps_free(output);
+        return result;
+    }
+
+    for (fl::size i = 0; i < SCRATCH_BYTES; ++i) {
+        scratch[i] = static_cast<fl::u8>((i * 31 + 7) & 0xFF);
+    }
+    fl::memset(output, 0, OUTPUT_BYTES);
+
+    volatile fl::u32 sink = 0;
+
+    // Warm caches / icache before timing.
+    {
+        ParlioStageBreakdown warm{};
+        fl_parlio_measure_stages(scratch, output, byte_lut, 64, &warm, &sink);
+    }
+
+    fl_parlio_measure_stages(scratch, output, byte_lut, iters_in, &result, &sink);
+
+    heap_caps_free(scratch);
+    heap_caps_free(output);
+    return result;
+}
+
+inline void
+printParlioStageBreakdownRom(const ParlioStageBreakdown &sb) {
+    if (sb.iters == 0) {
+        esp_rom_printf("\nBENCH_PARLIO_STAGES ERROR: alloc failed\n\n");
+        return;
+    }
+    constexpr fl::u32 FL_P4_MHZ = 360u;
+    const fl::u64 iters64 = sb.iters;
+    const fl::u64 total = sb.gather_cyc + sb.expand_cyc + sb.transpose_cyc + sb.store_cyc;
+
+    const fl::u32 g_per = static_cast<fl::u32>(sb.gather_cyc    / iters64);
+    const fl::u32 e_per = static_cast<fl::u32>(sb.expand_cyc    / iters64);
+    const fl::u32 t_per = static_cast<fl::u32>(sb.transpose_cyc / iters64);
+    const fl::u32 s_per = static_cast<fl::u32>(sb.store_cyc     / iters64);
+    const fl::u32 sum_per = g_per + e_per + t_per + s_per;
+
+    const fl::u32 g_ns = (g_per * 1000u) / FL_P4_MHZ;
+    const fl::u32 e_ns = (e_per * 1000u) / FL_P4_MHZ;
+    const fl::u32 t_ns = (t_per * 1000u) / FL_P4_MHZ;
+    const fl::u32 s_ns = (s_per * 1000u) / FL_P4_MHZ;
+    const fl::u32 sum_ns = g_ns + e_ns + t_ns + s_ns;
+
+    const fl::u32 g_pct = total > 0 ? static_cast<fl::u32>(sb.gather_cyc    * 10000u / total) : 0;
+    const fl::u32 e_pct = total > 0 ? static_cast<fl::u32>(sb.expand_cyc    * 10000u / total) : 0;
+    const fl::u32 t_pct = total > 0 ? static_cast<fl::u32>(sb.transpose_cyc * 10000u / total) : 0;
+    const fl::u32 s_pct = total > 0 ? static_cast<fl::u32>(sb.store_cyc     * 10000u / total) : 0;
+
+    esp_rom_printf("\nBENCH_PARLIO_STAGES_START (issue #2548 Phase 0)\n");
+    esp_rom_printf("BENCH_PARLIO_STAGES iters=%u cpu_mhz=%u sink=%u\n",
+                   sb.iters, FL_P4_MHZ, sb.sink);
+    esp_rom_printf("BENCH_PARLIO_STAGES cyc/iter  gather=%u expand=%u transpose=%u store=%u total=%u\n",
+                   g_per, e_per, t_per, s_per, sum_per);
+    esp_rom_printf("BENCH_PARLIO_STAGES ns/iter   gather=%u expand=%u transpose=%u store=%u total=%u\n",
+                   g_ns, e_ns, t_ns, s_ns, sum_ns);
+    esp_rom_printf("BENCH_PARLIO_STAGES pct_x100  gather=%u expand=%u transpose=%u store=%u (total=10000)\n",
+                   g_pct, e_pct, t_pct, s_pct);
+    esp_rom_printf("BENCH_PARLIO_STAGES_END\n\n");
+}
 
 inline ParlioEncodeResult measureParlioEncode(int iters_in = 12000) {
     ParlioEncodeResult result{};
@@ -679,6 +858,8 @@ inline void printParlioEncodeResultRom(const ParlioEncodeResult &r) {
 
 inline ParlioEncodeResult measureParlioEncode(int /*iters*/ = 12000) { return {}; }
 inline void printParlioEncodeResultRom(const ParlioEncodeResult & /*r*/) {}
+inline ParlioStageBreakdown measureParlioStageBreakdown(int /*iters*/ = 8000) { return {}; }
+inline void printParlioStageBreakdownRom(const ParlioStageBreakdown & /*sb*/) {}
 
 #endif
 

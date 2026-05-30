@@ -350,6 +350,9 @@ void setup() {
     {
         auto _per = autoresearch::parlio_bench::measureParlioEncode();
         autoresearch::parlio_bench::printParlioEncodeResultRom(_per);
+        // Phase 0 per-stage breakdown — drives prioritization of L7 / fused-v2 / L5.
+        auto _sb = autoresearch::parlio_bench::measureParlioStageBreakdown();
+        autoresearch::parlio_bench::printParlioStageBreakdownRom(_sb);
     }
 #endif
     if (simd_failures > 0) {
