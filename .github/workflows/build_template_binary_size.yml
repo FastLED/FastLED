@@ -40,8 +40,16 @@ jobs:
       - name: Install UV
         run: pip install uv
 
+      # NOTE: Force --backend=platformio for size checks. Since commit
+      # f215b56b8 ("ci: make fbuild the default for board builds"), the
+      # default builder is fbuild. fbuild does not yet emit the per-build
+      # build_info.json metadata that ci/compiled_size.py + inspect_*.py +
+      # symbol_analysis_runner.py all depend on (see FastLED/fbuild#297).
+      # Until fbuild gains an equivalent emitter, the size pipeline must
+      # build via `pio` so `pio project metadata --json-output` produces
+      # build_info_<example>.json.
       - name: Check Compiled Program Size for ${{ inputs.board }}
-        run: uv run ci/ci-check-compiled-size.py ${{ inputs.board }} --max-size ${{ inputs.max_size }} --example Blink ${{ inputs.extra_args }}
+        run: uv run ci/ci-check-compiled-size.py ${{ inputs.board }} --max-size ${{ inputs.max_size }} --example Blink --backend=platformio ${{ inputs.extra_args }}
 
       - name: Inspect Binary
         if: always()
@@ -62,7 +70,7 @@ jobs:
           uv run ci/symbol_analysis_runner.py --board ${{ inputs.board }} --example Blink --skip-on-failure
 
       - name: Check Compiled Program Size for ${{ inputs.board }} (Apa102)
-        run: uv run ci/ci-check-compiled-size.py ${{ inputs.board }} --max-size ${{ inputs.max_size_apa102 }} --example Apa102 ${{ inputs.extra_args }}
+        run: uv run ci/ci-check-compiled-size.py ${{ inputs.board }} --max-size ${{ inputs.max_size_apa102 }} --example Apa102 --backend=platformio ${{ inputs.extra_args }}
 
       - name: Inspect Binary
         if: always()
@@ -84,7 +92,7 @@ jobs:
 
       - name: Check Compiled Program Size for ${{ inputs.board }} (Apa102 with HD Color Mixing)
         if: inputs.board == 'attiny85'
-        run: uv run ci/ci-check-compiled-size.py ${{ inputs.board }} --example Apa102 ${{ inputs.extra_args }} --defines FASTLED_HD_COLOR_MIXING=1
+        run: uv run ci/ci-check-compiled-size.py ${{ inputs.board }} --example Apa102 --backend=platformio ${{ inputs.extra_args }} --defines FASTLED_HD_COLOR_MIXING=1
 
       - name: Inspect Binary (HD Color Mixing)
         if: inputs.board == 'attiny85'
