@@ -138,6 +138,24 @@ void wave8Transpose_16x2_pipe2(
     u8 (&FL_RESTRICT_PARAM output_a)[16 * sizeof(Wave8Byte)],
     u8 (&FL_RESTRICT_PARAM output_b)[16 * sizeof(Wave8Byte)]);
 
+/// @brief Pipe4: transpose 16-lane × 4-byte-positions (#2548).
+///        Bit-identical to four sequential `wave8Transpose_16` calls. Peak of
+///        the cross-position ILP curve on RV32 P4 — pipe2 = +26%, pipe3 = +36%,
+///        **pipe4 = +41%** vs baseline (9 651 → 6 822 µs/frame). pipe6 / pipe8
+///        regress to 94% (32-GPR budget exceeded → compiler spills).
+///        Measured **11% UNDER the 7 680 µs WS2812B TX target** — comfortable
+///        margin for ISR-chunked streaming.
+void wave8Transpose_16x4_pipe4(
+    const u8 (&FL_RESTRICT_PARAM lanes_a)[16],
+    const u8 (&FL_RESTRICT_PARAM lanes_b)[16],
+    const u8 (&FL_RESTRICT_PARAM lanes_c)[16],
+    const u8 (&FL_RESTRICT_PARAM lanes_d)[16],
+    const Wave8ByteExpansionLut &lut,
+    u8 (&FL_RESTRICT_PARAM output_a)[16 * sizeof(Wave8Byte)],
+    u8 (&FL_RESTRICT_PARAM output_b)[16 * sizeof(Wave8Byte)],
+    u8 (&FL_RESTRICT_PARAM output_c)[16 * sizeof(Wave8Byte)],
+    u8 (&FL_RESTRICT_PARAM output_d)[16 * sizeof(Wave8Byte)]);
+
 // Untranspose functions (for testing - reverse the transpose operation)
 void wave8Untranspose_2(
     const u8 (&FL_RESTRICT_PARAM transposed)[2 * sizeof(Wave8Byte)],

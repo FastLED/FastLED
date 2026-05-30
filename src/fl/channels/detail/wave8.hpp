@@ -262,6 +262,40 @@ void wave8_transpose_16x2_pipe2(const Wave8Byte lane_waves_a[16],
     }
 }
 
+/// @brief Pipe4: transpose 16-lane × 4-byte-positions in one fused call.
+///        Bit-identical to four sequential `wave8_transpose_16` calls. Extends
+///        the pipe2 idea to 4 positions — empirically the peak of the curve on
+///        the in-order RV32 P4 core (#2548). pipe2 saved 26% over baseline,
+///        pipe3 36%, **pipe4 41%**, pipe6 regressed to 94% (register spill).
+///        Stays within the 32-GPR budget: 4 × 4 = 16 OR-tree accumulators +
+///        ~8 misc GPRs = ~24 live; pipe6 would push this past 32.
+FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
+void wave8_transpose_16x4_pipe4(const Wave8Byte lane_waves_a[16],
+                                const Wave8Byte lane_waves_b[16],
+                                const Wave8Byte lane_waves_c[16],
+                                const Wave8Byte lane_waves_d[16],
+                                u8 output_a[16 * sizeof(Wave8Byte)],
+                                u8 output_b[16 * sizeof(Wave8Byte)],
+                                u8 output_c[16 * sizeof(Wave8Byte)],
+                                u8 output_d[16 * sizeof(Wave8Byte)]) {
+    for (int symbol_idx = 0; symbol_idx < 8; symbol_idx++) {
+        u8 la[16];
+        u8 lb[16];
+        u8 lc[16];
+        u8 ld[16];
+        for (int lane = 0; lane < 16; lane++) {
+            la[lane] = lane_waves_a[lane].symbols[symbol_idx].data;
+            lb[lane] = lane_waves_b[lane].symbols[symbol_idx].data;
+            lc[lane] = lane_waves_c[lane].symbols[symbol_idx].data;
+            ld[lane] = lane_waves_d[lane].symbols[symbol_idx].data;
+        }
+        spread_transpose16_symbol(la, output_a + symbol_idx * 16);
+        spread_transpose16_symbol(lb, output_b + symbol_idx * 16);
+        spread_transpose16_symbol(lc, output_c + symbol_idx * 16);
+        spread_transpose16_symbol(ld, output_d + symbol_idx * 16);
+    }
+}
+
 } // namespace detail
 
 // ============================================================================

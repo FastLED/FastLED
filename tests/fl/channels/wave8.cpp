@@ -978,4 +978,56 @@ FL_TEST_CASE("wave8Transpose_16x2_pipe2 == two sequential wave8Transpose_16 (ran
     }
 }
 
+FL_TEST_CASE("wave8Transpose_16x4_pipe4 == four sequential wave8Transpose_16 (random)") {
+    // #2548: the 4-position fused pipe4 path must be bit-identical to running
+    // wave8Transpose_16 four times on the same inputs. Confirms that scaling
+    // the cross-position interleaving from 2 to 4 still preserves semantics.
+    ChipsetTiming timing;
+    timing.T1 = 400;
+    timing.T2 = 450;
+    timing.T3 = 400;
+    Wave8BitExpansionLut nib_lut = buildWave8ExpansionLUT(timing);
+    Wave8ByteExpansionLut byte_lut = buildWave8ByteExpansionLUT(nib_lut);
+
+    u32 seed = 0x9ABCDEF0u;
+    for (int round = 0; round < 500; round++) {
+        u8 lanes_a[16];
+        u8 lanes_b[16];
+        u8 lanes_c[16];
+        u8 lanes_d[16];
+        for (int l = 0; l < 16; l++) {
+            seed = seed * 1664525u + 1013904223u;
+            lanes_a[l] = static_cast<u8>(seed >> 24);
+            seed = seed * 1664525u + 1013904223u;
+            lanes_b[l] = static_cast<u8>(seed >> 24);
+            seed = seed * 1664525u + 1013904223u;
+            lanes_c[l] = static_cast<u8>(seed >> 24);
+            seed = seed * 1664525u + 1013904223u;
+            lanes_d[l] = static_cast<u8>(seed >> 24);
+        }
+        u8 ref_a[16 * sizeof(Wave8Byte)];
+        u8 ref_b[16 * sizeof(Wave8Byte)];
+        u8 ref_c[16 * sizeof(Wave8Byte)];
+        u8 ref_d[16 * sizeof(Wave8Byte)];
+        u8 got_a[16 * sizeof(Wave8Byte)];
+        u8 got_b[16 * sizeof(Wave8Byte)];
+        u8 got_c[16 * sizeof(Wave8Byte)];
+        u8 got_d[16 * sizeof(Wave8Byte)];
+
+        wave8Transpose_16(lanes_a, byte_lut, ref_a);
+        wave8Transpose_16(lanes_b, byte_lut, ref_b);
+        wave8Transpose_16(lanes_c, byte_lut, ref_c);
+        wave8Transpose_16(lanes_d, byte_lut, ref_d);
+        wave8Transpose_16x4_pipe4(lanes_a, lanes_b, lanes_c, lanes_d, byte_lut,
+                                  got_a, got_b, got_c, got_d);
+
+        for (int i = 0; i < 16 * static_cast<int>(sizeof(Wave8Byte)); i++) {
+            FL_REQUIRE(got_a[i] == ref_a[i]);
+            FL_REQUIRE(got_b[i] == ref_b[i]);
+            FL_REQUIRE(got_c[i] == ref_c[i]);
+            FL_REQUIRE(got_d[i] == ref_d[i]);
+        }
+    }
+}
+
 } // FL_TEST_FILE
