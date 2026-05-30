@@ -964,16 +964,41 @@ ParlioEngine::populateDmaBuffer(u8* outputBuffer,
                                     *reinterpret_cast<u8(*)[8 * sizeof(Wave8Byte)]>(outputBuffer + outputIdx)); // ok reinterpret cast - direct write to DMA buffer (#2548 L2)
                 outputIdx += blockSize;
             } else if (mDataWidth == 16) {
-                u8 lanes[16];
+                u8 lanes_a[16];
                 for (size_t lane = 0; lane < 16; lane++) {
-                    lanes[lane] = (lane < mActualChannels)
+                    lanes_a[lane] = (lane < mActualChannels)
                         ? mScratchBuffer[lane * mLaneStride + startByte + byteOffset]
                         : 0;
                 }
 
-                fl::wave8Transpose_16(reinterpret_cast<const u8(&)[16]>(lanes), mWave8ByteLut, // ok reinterpret cast - array reference type conversion
-                                     *reinterpret_cast<u8(*)[16 * sizeof(Wave8Byte)]>(outputBuffer + outputIdx)); // ok reinterpret cast - direct write to DMA buffer (#2548 L2)
-                outputIdx += blockSize;
+                // #2548 pipe2: when a second byte position fits, run the
+                // 2-position fused transpose. Bit-identical to two sequential
+                // wave8Transpose_16 calls, but interleaves the two independent
+                // OR-trees so the in-order RV32 P4 fills load-use stalls from
+                // position A with ALU ops from position B. Measured 9655 →
+                // 7625 µs/frame (+26%) on P4 v1.3 16-lane × 256-LED.
+                if (byteOffset + 1 < byteCount
+                    && outputIdx + 2 * blockSize <= outputBufferCapacity) {
+                    u8 lanes_b[16];
+                    for (size_t lane = 0; lane < 16; lane++) {
+                        lanes_b[lane] = (lane < mActualChannels)
+                            ? mScratchBuffer[lane * mLaneStride + startByte + byteOffset + 1]
+                            : 0;
+                    }
+                    fl::wave8Transpose_16x2_pipe2(
+                        reinterpret_cast<const u8(&)[16]>(lanes_a), // ok reinterpret cast - array reference type conversion
+                        reinterpret_cast<const u8(&)[16]>(lanes_b), // ok reinterpret cast - array reference type conversion
+                        mWave8ByteLut,
+                        *reinterpret_cast<u8(*)[16 * sizeof(Wave8Byte)]>(outputBuffer + outputIdx),                  // ok reinterpret cast - direct write to DMA buffer (#2548)
+                        *reinterpret_cast<u8(*)[16 * sizeof(Wave8Byte)]>(outputBuffer + outputIdx + blockSize));     // ok reinterpret cast - direct write to DMA buffer (#2548)
+                    outputIdx += 2 * blockSize;
+                    byteOffset += 1;  // outer loop also does ++byteOffset → net +2
+                } else {
+                    fl::wave8Transpose_16(
+                        reinterpret_cast<const u8(&)[16]>(lanes_a), mWave8ByteLut, // ok reinterpret cast - array reference type conversion
+                        *reinterpret_cast<u8(*)[16 * sizeof(Wave8Byte)]>(outputBuffer + outputIdx)); // ok reinterpret cast - direct write to DMA buffer (#2548 L2)
+                    outputIdx += blockSize;
+                }
             } else {
                 // Invalid data width - should never happen (validated in initialize())
                 outputBytesWritten = outputIdx;
