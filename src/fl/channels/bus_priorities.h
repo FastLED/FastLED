@@ -15,6 +15,19 @@
 #include "fl/channels/bus.h"
 #include "fl/stl/stdint.h"
 
+// Platform CMSIS/Arduino headers may define SPI / UART / I2S as register
+// pointer macros (e.g. Sam3X8E: `#define UART ((Uart*)0x400E0800U)`).
+// Those macros expand inside qualified names like `Bus::SPI` below and
+// produce a syntax error. bus.h itself uses push_macro/pop_macro around
+// its enum definition; once bus.h pops the macros are restored. So we
+// must apply the same guard locally here. See fl/channels/bus.h.
+#pragma push_macro("UART")
+#pragma push_macro("SPI")
+#pragma push_macro("I2S")
+#undef UART
+#undef SPI
+#undef I2S
+
 namespace fl {
 
 /// @brief Default priority assigned to a `Bus` when registered with the manager.
@@ -45,3 +58,7 @@ constexpr int default_bus_priority(Bus b) FL_NOEXCEPT {
 }
 
 }  // namespace fl
+
+#pragma pop_macro("I2S")
+#pragma pop_macro("SPI")
+#pragma pop_macro("UART")

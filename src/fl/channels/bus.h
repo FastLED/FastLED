@@ -17,6 +17,22 @@
 #include "fl/stl/stdint.h"
 #include "platforms/is_platform.h"
 
+// Platform CMSIS/Arduino headers (pulled in transitively above) define
+// peripheral pointer macros that collide with our `Bus` enumerator names.
+// Sam3X8E in particular does:
+//     #define UART ((Uart *)0x400E0800U)
+//     #define SPI  ((Spi  *)0x40008000U)
+// Without these undefs, the preprocessor expands those names inside
+// `enum class Bus { ..., SPI, UART, ... }`, producing a syntax error
+// (see FastLED sam3x8e_due CI failure). Push the originals so any
+// downstream TU that needs the register macros keeps working.
+#pragma push_macro("UART")
+#pragma push_macro("SPI")
+#pragma push_macro("I2S")
+#undef UART
+#undef SPI
+#undef I2S
+
 // Post-#2428 architecture: drivers do NOT auto-register with `ChannelManager`.
 // Only the platform-default driver TU (named by the legacy clockless controller's
 // Phase 5b pre-bind via `BusTraits<DefaultBus<Chipset>>::instancePtr()`) links
@@ -174,3 +190,9 @@ FL_STATIC_ASSERT(static_cast<fl::u8>(Bus::STUB) == 13,
                  "Bus changed: add the new value to busName() in this file");  // ok plain enum
 
 }  // namespace fl
+
+// Restore the original platform macros for any downstream code that needs
+// the CMSIS / Arduino register pointers.
+#pragma pop_macro("I2S")
+#pragma pop_macro("SPI")
+#pragma pop_macro("UART")
