@@ -43,6 +43,15 @@ Guidelines for how agents should approach work in the FastLED project.
 
 When CodeRabbit posts review comments on a PR, run `/address-reviews` before any `gh pr merge`. The skill fetches open comments, classifies each, applies fixes for valid findings, and replies to threads. The pre-merge hook blocks merge while unresolved CodeRabbit threads remain. Security-critical findings are routed to a human — never auto-fixed. Max 3 iterations per PR; if CodeRabbit keeps asking after three rounds, stop and flag a human reviewer.
 
+## CI Wait Loops
+
+When polling CI on a PR (e.g. inside `/clud-pr-merge` or before `gh pr merge`):
+
+- **FastLED's slowest platform builds take 20–30 minutes** on GitHub Actions runners — one observed: 26m7s on `build / build`. A `until <no pending>; do sleep 30; done` poll therefore sits silent for that long. Tell the user upfront ("this can take up to 30 minutes") so they don't read the silence as a hung shell.
+- **The Claude Code harness blocks leading `sleep N; <cmd>` chains.** Use `until <condition>; do sleep N; done` (sleep inside the loop body), or pass `run_in_background: true` to the Bash tool. For waits longer than ~5 minutes, prefer `ScheduleWakeup` so the conversation isn't held open.
+- **`gh pr checks` returns exit code 1 when any check failed**, even with `--json`. A polled background task that ends with exit 1 may still have produced complete output — read the output file before concluding the poll itself failed.
+- **The `sync` check fails on every PR.** It belongs to the `project-automation` workflow on `pull_request_target` events; the failure is a 404 on "Generate GitHub App token" (the GitHub App isn't installed on the `FastLED` user/org). It does not run on `push` to master, so it won't appear in master's check-runs. Treat it as a known pre-existing infrastructure failure, never a regression.
+
 ## Task Management
 
 1. **Plan First**: Write plan to `agents/tasks/todo.md` with checkable items
