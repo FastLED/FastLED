@@ -978,6 +978,97 @@ FL_TEST_CASE("wave8Transpose_16x2_pipe2 == two sequential wave8Transpose_16 (ran
     }
 }
 
+FL_TEST_CASE("wave8Transpose_16_bf1 == wave8Transpose_16 (random)") {
+    // #2548 BF1: chipset-aware direct encode. Must produce bit-identical
+    // output to the byte_lut path across 1000 random inputs.
+    ChipsetTiming timing;
+    timing.T1 = 400;
+    timing.T2 = 450;
+    timing.T3 = 400;
+    Wave8BitExpansionLut nib_lut = buildWave8ExpansionLUT(timing);
+    Wave8ByteExpansionLut byte_lut = buildWave8ByteExpansionLUT(nib_lut);
+
+    u32 seed = 0x1357BD9Fu;
+    for (int round = 0; round < 1000; round++) {
+        u8 lanes[16];
+        for (int l = 0; l < 16; l++) {
+            seed = seed * 1664525u + 1013904223u;
+            lanes[l] = static_cast<u8>(seed >> 24);
+        }
+        u8 ref[16 * sizeof(Wave8Byte)];
+        u8 got[16 * sizeof(Wave8Byte)];
+        wave8Transpose_16(lanes, byte_lut, ref);
+        wave8Transpose_16_bf1(lanes, byte_lut, got);
+        for (int i = 0; i < 16 * static_cast<int>(sizeof(Wave8Byte)); i++) {
+            FL_REQUIRE(got[i] == ref[i]);
+        }
+    }
+}
+
+FL_TEST_CASE("wave8Transpose_16_bf1 == wave8Transpose_16 (multiple timings)") {
+    // BF1 must hold for ANY Wave8 chipset/timing, not just one.
+    const struct { u32 T1, T2, T3; } timings[] = {
+        {250, 500, 250},    // 1/4, 3/4 pulse split
+        {400, 450, 400},    // WS2812B Wave8
+        {350, 350, 550},    // WS2812 variant
+        {100, 800, 350},    // extreme bit-0 short
+        {600, 100, 550},    // extreme bit-0 long
+    };
+    for (const auto &t : timings) {
+        ChipsetTiming timing;
+        timing.T1 = t.T1; timing.T2 = t.T2; timing.T3 = t.T3;
+        Wave8BitExpansionLut nib = buildWave8ExpansionLUT(timing);
+        Wave8ByteExpansionLut byte_lut = buildWave8ByteExpansionLUT(nib);
+
+        u32 seed = (t.T1 * 31u) ^ (t.T2 * 17u) ^ t.T3;
+        for (int round = 0; round < 200; ++round) {
+            u8 lanes[16];
+            for (int l = 0; l < 16; l++) {
+                seed = seed * 1664525u + 1013904223u;
+                lanes[l] = static_cast<u8>(seed >> 24);
+            }
+            u8 ref[16 * sizeof(Wave8Byte)];
+            u8 got[16 * sizeof(Wave8Byte)];
+            wave8Transpose_16(lanes, byte_lut, ref);
+            wave8Transpose_16_bf1(lanes, byte_lut, got);
+            for (int i = 0; i < 16 * static_cast<int>(sizeof(Wave8Byte)); i++) {
+                FL_REQUIRE(got[i] == ref[i]);
+            }
+        }
+    }
+}
+
+FL_TEST_CASE("wave8Transpose_16x4_bf1_pipe4 == 4× wave8Transpose_16 (random)") {
+    ChipsetTiming timing;
+    timing.T1 = 400; timing.T2 = 450; timing.T3 = 400;
+    Wave8BitExpansionLut nib = buildWave8ExpansionLUT(timing);
+    Wave8ByteExpansionLut byte_lut = buildWave8ByteExpansionLUT(nib);
+
+    u32 seed = 0xCAFEBABEu;
+    for (int round = 0; round < 500; ++round) {
+        u8 la[16], lb[16], lc[16], ld[16];
+        for (int l = 0; l < 16; l++) {
+            seed = seed * 1664525u + 1013904223u; la[l] = static_cast<u8>(seed >> 24);
+            seed = seed * 1664525u + 1013904223u; lb[l] = static_cast<u8>(seed >> 24);
+            seed = seed * 1664525u + 1013904223u; lc[l] = static_cast<u8>(seed >> 24);
+            seed = seed * 1664525u + 1013904223u; ld[l] = static_cast<u8>(seed >> 24);
+        }
+        u8 ra[128], rb[128], rc[128], rd[128];
+        u8 ga[128], gb[128], gc[128], gd[128];
+        wave8Transpose_16(la, byte_lut, ra);
+        wave8Transpose_16(lb, byte_lut, rb);
+        wave8Transpose_16(lc, byte_lut, rc);
+        wave8Transpose_16(ld, byte_lut, rd);
+        wave8Transpose_16x4_bf1_pipe4(la, lb, lc, ld, byte_lut, ga, gb, gc, gd);
+        for (int i = 0; i < 128; i++) {
+            FL_REQUIRE(ga[i] == ra[i]);
+            FL_REQUIRE(gb[i] == rb[i]);
+            FL_REQUIRE(gc[i] == rc[i]);
+            FL_REQUIRE(gd[i] == rd[i]);
+        }
+    }
+}
+
 FL_TEST_CASE("wave8Transpose_16x4_pipe4 == four sequential wave8Transpose_16 (random)") {
     // #2548: the 4-position fused pipe4 path must be bit-identical to running
     // wave8Transpose_16 four times on the same inputs. Confirms that scaling

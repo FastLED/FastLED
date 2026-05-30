@@ -296,6 +296,93 @@ void wave8_transpose_16x4_pipe4(const Wave8Byte lane_waves_a[16],
     }
 }
 
+/// @brief BF1: chipset-aware direct encode for Wave8 16-lane (#2548 deep-dive).
+///
+/// Bypasses the byte_lut entirely by exploiting the algebraic identity:
+///   output_bit(s, p, lane) = M0_p XOR (input_bit_(7-s)_of_lane AND D_p)
+/// where W0/W1 are the bit-0 / bit-1 waveform patterns (chipset constants),
+/// M0_p = (W0 >> (7-p)) & 1, D_p = M0_p XOR M1_p. The bit-transpose of input
+/// lane bytes (giving the per-symbol column bytes) is computed ONCE by
+/// spread_transpose16_symbol — replacing the prior 8 calls (one per symbol)
+/// plus the 16 byte_lut expansions.
+///
+/// Bit-identical to wave8_transpose_16(expand(lanes_input), output). Works for
+/// ANY Wave8 chipset/timing — W0/W1 are derived from the byte_lut at runtime.
+///
+/// Measured 6 822 → 1 757 µs/frame (3.88× faster than pipe4, 5.49× vs baseline)
+/// when fused with pipe4 (#2548 final).
+FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
+void wave8_transpose_16_bf1(const u8 lanes[16],
+                            u8 W0, u8 W1,
+                            u8 output[16 * sizeof(Wave8Byte)]) {
+    u8 d_mask[8];
+    u8 m0_mask[8];
+    const u8 D_byte = W0 ^ W1;
+    for (int p = 0; p < 8; ++p) {
+        const int shift = 7 - p;
+        d_mask[p] = ((D_byte >> shift) & 1) ? 0xFFu : 0x00u;
+        m0_mask[p] = ((W0 >> shift) & 1) ? 0xFFu : 0x00u;
+    }
+    // Bit-transpose: spread_transpose16_symbol on input bytes gives
+    // cols[2s+h] = byte where bit L = bit(7-s) of lanes[L+8h].
+    u8 cols[16];
+    spread_transpose16_symbol(lanes, cols);
+    for (int s = 0; s < 8; ++s) {
+        const u8 col_lo = cols[2 * s + 0];
+        const u8 col_hi = cols[2 * s + 1];
+        for (int p = 0; p < 8; ++p) {
+            output[s * 16 + p * 2 + 0] = m0_mask[p] ^ (col_lo & d_mask[p]);
+            output[s * 16 + p * 2 + 1] = m0_mask[p] ^ (col_hi & d_mask[p]);
+        }
+    }
+}
+
+/// @brief BF1 + pipe4: 4-position software-pipelined BF1 (#2548 deep-dive).
+///        Combines BF1's algorithmic reduction (1 transpose per byte-position
+///        instead of 8) with pipe4's cross-position ILP. Empirical peak of all
+///        prototypes: **1 757 µs/frame** vs 9 651 baseline (5.49×).
+FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
+void wave8_transpose_16x4_bf1_pipe4(const u8 lanes_a[16],
+                                    const u8 lanes_b[16],
+                                    const u8 lanes_c[16],
+                                    const u8 lanes_d[16],
+                                    u8 W0, u8 W1,
+                                    u8 output_a[16 * sizeof(Wave8Byte)],
+                                    u8 output_b[16 * sizeof(Wave8Byte)],
+                                    u8 output_c[16 * sizeof(Wave8Byte)],
+                                    u8 output_d[16 * sizeof(Wave8Byte)]) {
+    u8 d_mask[8];
+    u8 m0_mask[8];
+    const u8 D_byte = W0 ^ W1;
+    for (int p = 0; p < 8; ++p) {
+        const int shift = 7 - p;
+        d_mask[p] = ((D_byte >> shift) & 1) ? 0xFFu : 0x00u;
+        m0_mask[p] = ((W0 >> shift) & 1) ? 0xFFu : 0x00u;
+    }
+    u8 cols_a[16], cols_b[16], cols_c[16], cols_d[16];
+    spread_transpose16_symbol(lanes_a, cols_a);
+    spread_transpose16_symbol(lanes_b, cols_b);
+    spread_transpose16_symbol(lanes_c, cols_c);
+    spread_transpose16_symbol(lanes_d, cols_d);
+    for (int s = 0; s < 8; ++s) {
+        const u8 al = cols_a[2*s + 0], ah = cols_a[2*s + 1];
+        const u8 bl = cols_b[2*s + 0], bh = cols_b[2*s + 1];
+        const u8 cl = cols_c[2*s + 0], ch = cols_c[2*s + 1];
+        const u8 dl = cols_d[2*s + 0], dh = cols_d[2*s + 1];
+        for (int p = 0; p < 8; ++p) {
+            const u8 dm = d_mask[p], mm = m0_mask[p];
+            output_a[s*16 + p*2 + 0] = mm ^ (al & dm);
+            output_a[s*16 + p*2 + 1] = mm ^ (ah & dm);
+            output_b[s*16 + p*2 + 0] = mm ^ (bl & dm);
+            output_b[s*16 + p*2 + 1] = mm ^ (bh & dm);
+            output_c[s*16 + p*2 + 0] = mm ^ (cl & dm);
+            output_c[s*16 + p*2 + 1] = mm ^ (ch & dm);
+            output_d[s*16 + p*2 + 0] = mm ^ (dl & dm);
+            output_d[s*16 + p*2 + 1] = mm ^ (dh & dm);
+        }
+    }
+}
+
 } // namespace detail
 
 // ============================================================================

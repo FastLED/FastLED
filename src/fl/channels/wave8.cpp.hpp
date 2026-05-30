@@ -156,6 +156,35 @@ void wave8Transpose_16x2_pipe2(const u8 (&FL_RESTRICT_PARAM lanes_a)[16],
 }
 
 FL_OPTIMIZE_FUNCTION FL_IRAM
+void wave8Transpose_16_bf1(const u8 (&FL_RESTRICT_PARAM lanes)[16],
+                           const Wave8ByteExpansionLut &lut,
+                           u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]) {
+    // Extract W0/W1 chipset constants from the lut.
+    // byte_lut[0x00].symbols[0] = waveform for input bit 7 == 0 = W0
+    // byte_lut[0xFF].symbols[0] = waveform for input bit 7 == 1 = W1
+    const u8 W0 = lut.lut[0x00].symbols[0].data;
+    const u8 W1 = lut.lut[0xFF].symbols[0].data;
+    detail::wave8_transpose_16_bf1(lanes, W0, W1, output);
+}
+
+FL_OPTIMIZE_FUNCTION FL_IRAM
+void wave8Transpose_16x4_bf1_pipe4(const u8 (&FL_RESTRICT_PARAM lanes_a)[16],
+                                   const u8 (&FL_RESTRICT_PARAM lanes_b)[16],
+                                   const u8 (&FL_RESTRICT_PARAM lanes_c)[16],
+                                   const u8 (&FL_RESTRICT_PARAM lanes_d)[16],
+                                   const Wave8ByteExpansionLut &lut,
+                                   u8 (&FL_RESTRICT_PARAM output_a)[16 * sizeof(Wave8Byte)],
+                                   u8 (&FL_RESTRICT_PARAM output_b)[16 * sizeof(Wave8Byte)],
+                                   u8 (&FL_RESTRICT_PARAM output_c)[16 * sizeof(Wave8Byte)],
+                                   u8 (&FL_RESTRICT_PARAM output_d)[16 * sizeof(Wave8Byte)]) {
+    const u8 W0 = lut.lut[0x00].symbols[0].data;
+    const u8 W1 = lut.lut[0xFF].symbols[0].data;
+    detail::wave8_transpose_16x4_bf1_pipe4(lanes_a, lanes_b, lanes_c, lanes_d,
+                                            W0, W1,
+                                            output_a, output_b, output_c, output_d);
+}
+
+FL_OPTIMIZE_FUNCTION FL_IRAM
 void wave8Transpose_16x4_pipe4(const u8 (&FL_RESTRICT_PARAM lanes_a)[16],
                                const u8 (&FL_RESTRICT_PARAM lanes_b)[16],
                                const u8 (&FL_RESTRICT_PARAM lanes_c)[16],
