@@ -23,6 +23,7 @@ import argparse
 import hashlib
 import json
 import sys
+from itertools import chain
 from pathlib import Path
 from typing import Dict, List, Set
 
@@ -43,12 +44,13 @@ def compute_test_files_hash(tests_dir: Path) -> str:
     Returns:
         SHA256 hash of all test file metadata
     """
-    # Find all *.cpp files recursively, same logic as discover_tests.py
+    # Find all *.cpp / *.ino files recursively, same logic as discover_tests.py
+    from discover_tests import TEST_SOURCE_GLOBS
     from test_config import EXCLUDED_TEST_DIRS, EXCLUDED_TEST_FILES
 
-    test_files: List[Path] = []
+    test_files: list[Path] = []
 
-    for f in sorted(tests_dir.rglob("*.cpp")):
+    for f in sorted(chain.from_iterable(tests_dir.rglob(g) for g in TEST_SOURCE_GLOBS)):
         resolved = f.resolve()
 
         # Skip excluded files
@@ -62,10 +64,7 @@ def compute_test_files_hash(tests_dir: Path) -> str:
         # Skip hidden directories and .dir directories
         rel = f.relative_to(tests_dir)
         parent_parts = rel.parts[:-1]
-        if any(
-            part.startswith(".") or part.endswith(".dir")
-            for part in parent_parts
-        ):
+        if any(part.startswith(".") or part.endswith(".dir") for part in parent_parts):
             continue
         test_files.append(f)
 
@@ -81,7 +80,7 @@ def compute_test_files_hash(tests_dir: Path) -> str:
             hash_input.append(f"{rel_path}:{stat.st_mtime:.6f}:{stat.st_size}")
 
     # Compute SHA256 hash
-    hash_str = '\n'.join(hash_input)
+    hash_str = "\n".join(hash_input)
     return hashlib.sha256(hash_str.encode()).hexdigest()
 
 
@@ -101,11 +100,11 @@ def load_cache(build_dir: Path) -> dict | None:
         return None
 
     try:
-        with open(cache_file, 'r', encoding='utf-8') as f:
+        with open(cache_file, "r", encoding="utf-8") as f:
             cache = json.load(f)
 
         # Validate cache structure
-        required_keys = ['hash', 'timestamp', 'metadata']
+        required_keys = ["hash", "timestamp", "metadata"]
         if not all(key in cache for key in required_keys):
             return None
 
@@ -128,17 +127,13 @@ def save_cache(build_dir: Path, tests_hash: str, metadata: str) -> None:
     cache_file = build_dir / CACHE_FILENAME
     build_dir.mkdir(parents=True, exist_ok=True)
 
-    cache = {
-        'hash': tests_hash,
-        'timestamp': time.time(),
-        'metadata': metadata
-    }
+    cache = {"hash": tests_hash, "timestamp": time.time(), "metadata": metadata}
 
-    with open(cache_file, 'w', encoding='utf-8') as f:
+    with open(cache_file, "w", encoding="utf-8") as f:
         json.dump(cache, f, indent=2)
 
 
-def parse_metadata(metadata: str) -> Set[str]:
+def parse_metadata(metadata: str) -> set[str]:
     """
     Parse test metadata into a set of test names.
 
@@ -149,15 +144,15 @@ def parse_metadata(metadata: str) -> Set[str]:
         Set of test names
     """
     test_names = set()
-    for line in metadata.strip().split('\n'):
-        if line and line.startswith('TEST:'):
-            parts = line.split(':')
+    for line in metadata.strip().split("\n"):
+        if line and line.startswith("TEST:"):
+            parts = line.split(":")
             if len(parts) >= 2:
                 test_names.add(parts[1])
     return test_names
 
 
-def detect_changes(tests_dir: Path, build_dir: Path) -> Dict[str, List[str] | bool]:
+def detect_changes(tests_dir: Path, build_dir: Path) -> dict[str, list[str] | bool]:
     """
     Detect what changed since last cache.
 
@@ -177,19 +172,19 @@ def detect_changes(tests_dir: Path, build_dir: Path) -> Dict[str, List[str] | bo
             "unchanged": False,
             "new_tests": [],
             "deleted_tests": [],
-            "modified_tests": []
+            "modified_tests": [],
         }
 
     # Compute current hash
     current_hash = compute_test_files_hash(tests_dir)
 
     # If hashes match, nothing changed
-    if cache['hash'] == current_hash:
+    if cache["hash"] == current_hash:
         return {
             "unchanged": True,
             "new_tests": [],
             "deleted_tests": [],
-            "modified_tests": []
+            "modified_tests": [],
         }
 
     # Hash mismatch - need to run organize_tests.py to get actual differences
@@ -198,34 +193,51 @@ def detect_changes(tests_dir: Path, build_dir: Path) -> Dict[str, List[str] | bo
         "unchanged": False,
         "new_tests": [],
         "deleted_tests": [],
-        "modified_tests": []
+        "modified_tests": [],
     }
 
 
 def main() -> None:
     """Main entry point for test metadata cache operations."""
     parser = argparse.ArgumentParser(
-        description='Manage test metadata cache for Meson build system'
+        description="Manage test metadata cache for Meson build system"
     )
 
     # Mutually exclusive operation modes
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('--check', action='store_true',
-                       help='Check if cache is valid (exit 0 if valid, 1 if invalid)')
-    group.add_argument('--update', action='store_true',
-                       help='Update cache with new metadata')
-    group.add_argument('--invalidate', action='store_true',
-                       help='Force invalidate cache')
-    group.add_argument('--detect-changes', action='store_true',
-                       help='Detect changes since last cache (JSON output)')
+    group.add_argument(
+        "--check",
+        action="store_true",
+        help="Check if cache is valid (exit 0 if valid, 1 if invalid)",
+    )
+    group.add_argument(
+        "--update", action="store_true", help="Update cache with new metadata"
+    )
+    group.add_argument(
+        "--invalidate", action="store_true", help="Force invalidate cache"
+    )
+    group.add_argument(
+        "--detect-changes",
+        action="store_true",
+        help="Detect changes since last cache (JSON output)",
+    )
 
     # Positional arguments
-    parser.add_argument('tests_dir', nargs='?', type=Path,
-                        help='Tests directory (required for --check, --update, --detect-changes)')
-    parser.add_argument('build_dir', nargs='?', type=Path,
-                        help='Build directory (required for all operations)')
-    parser.add_argument('metadata', nargs='?', type=str,
-                        help='Test metadata (required for --update)')
+    parser.add_argument(
+        "tests_dir",
+        nargs="?",
+        type=Path,
+        help="Tests directory (required for --check, --update, --detect-changes)",
+    )
+    parser.add_argument(
+        "build_dir",
+        nargs="?",
+        type=Path,
+        help="Build directory (required for all operations)",
+    )
+    parser.add_argument(
+        "metadata", nargs="?", type=str, help="Test metadata (required for --update)"
+    )
 
     args = parser.parse_args()
 
@@ -255,9 +267,9 @@ def main() -> None:
         current_hash = compute_test_files_hash(args.tests_dir)
 
         # Check if hash matches
-        if cache['hash'] == current_hash:
+        if cache["hash"] == current_hash:
             # Cache hit - output cached metadata and exit success
-            print(cache['metadata'])
+            print(cache["metadata"])
             sys.exit(0)
         else:
             # Cache invalid - exit with failure, no output
@@ -265,7 +277,10 @@ def main() -> None:
 
     elif args.update:
         if not args.tests_dir or not args.build_dir or not args.metadata:
-            print("Error: --update requires <tests_dir> <build_dir> <metadata>", file=sys.stderr)
+            print(
+                "Error: --update requires <tests_dir> <build_dir> <metadata>",
+                file=sys.stderr,
+            )
             sys.exit(1)
 
         # Compute hash and save cache
@@ -275,7 +290,10 @@ def main() -> None:
 
     elif args.detect_changes:
         if not args.tests_dir or not args.build_dir:
-            print("Error: --detect-changes requires <tests_dir> <build_dir>", file=sys.stderr)
+            print(
+                "Error: --detect-changes requires <tests_dir> <build_dir>",
+                file=sys.stderr,
+            )
             sys.exit(1)
 
         # Detect changes and output JSON
