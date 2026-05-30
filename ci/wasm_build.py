@@ -505,6 +505,8 @@ def _ensure_emscripten_wasm_ld_patch() -> None:
         arch = "x86_64" if machine in ("x86_64", "amd64") else "arm64"
         ensure_emscripten_available(platform_name, arch)
         _emscripten_patch_applied = True
+    except KeyboardInterrupt:
+        raise
     except Exception as e:
         # Patch is best-effort. Without it, EMCC_WASM_LD is ignored and emcc
         # falls back to the bundled wasm-ld — the build still works, just
