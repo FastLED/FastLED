@@ -161,14 +161,14 @@ bool LcdSpiPeripheralEsp::initialize(const LcdSpiConfig &config) FL_NOEXCEPT {
     // NOTE: GPIO 0 is a strapping pin — if your board uses GPIO 0 for
     // boot-mode selection, set dc_gpio in LcdSpiConfig to an unused pin.
     if (config.dc_gpio >= 0) {
-        bus_config.dc_gpio_num = config.dc_gpio;
+        bus_config.dc_gpio_num = static_cast<gpio_num_t>(config.dc_gpio);
     } else {
-        bus_config.dc_gpio_num = 0;
+        bus_config.dc_gpio_num = static_cast<gpio_num_t>(0);
         FL_WARN("LcdSpiPeripheralEsp: dc_gpio not set, defaulting to "
                 "GPIO 0 (strapping pin). Set LcdSpiConfig::dc_gpio to "
                 "an unused pin to avoid boot issues.");
     }
-    bus_config.wr_gpio_num = config.clock_gpio; // PCLK as SPI clock
+    bus_config.wr_gpio_num = static_cast<gpio_num_t>(config.clock_gpio); // PCLK as SPI clock
     bus_config.bus_width = 16;
     bus_config.max_transfer_bytes = config.max_transfer_bytes;
 
@@ -184,11 +184,11 @@ bool LcdSpiPeripheralEsp::initialize(const LcdSpiConfig &config) FL_NOEXCEPT {
 
     for (int i = 0; i < 16; i++) {
         if (i < config.num_lanes) {
-            bus_config.data_gpio_nums[i] = config.data_gpios[i];
+            bus_config.data_gpio_nums[i] = static_cast<gpio_num_t>(config.data_gpios[i]);
         } else {
             // I80 bus requires valid GPIOs for all bus_width pins.
             // Use GPIO 0 for unused lanes (matches I2S LCD_CAM convention).
-            bus_config.data_gpio_nums[i] = 0;
+            bus_config.data_gpio_nums[i] = static_cast<gpio_num_t>(0);
         }
     }
 
@@ -328,7 +328,7 @@ bool LcdSpiPeripheralEsp::transmit(const u16 *buffer,
 
     if (mPanelIo == nullptr) {
         esp_lcd_panel_io_i80_config_t io_config = {};
-        io_config.cs_gpio_num = -1;
+        io_config.cs_gpio_num = GPIO_NUM_NC;
         io_config.pclk_hz = mConfig.clock_hz;
         io_config.trans_queue_depth = 1;
         io_config.dc_levels = {

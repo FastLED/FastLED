@@ -52,7 +52,12 @@ using fl::u32;
 #include "esp_log.h"
 #include "soc/mcpwm_struct.h"
 #include "hal/mcpwm_ll.h"
+#include "platforms/esp/esp_version.h"
+#if ESP_IDF_VERSION_6_OR_HIGHER
+#include "hal/mcpwm_periph.h"
+#else
 #include "soc/mcpwm_periph.h"
+#endif
 // IWYU pragma: end_keep
 
 // Note: Functions are declared extern "C" in header - no namespace wrapping here
@@ -240,10 +245,14 @@ int mcpwm_timer_init(DualIsrContext* ctx, int gpio_pin) FL_NOEXCEPT {
         .flags = {
             .pos_edge = 1,  // Capture on positive edges
             .neg_edge = 1,  // Capture on negative edges
+#if !ESP_IDF_VERSION_6_OR_HIGHER
             .pull_up = 0,   // No internal pull-up
             .pull_down = 0, // No internal pull-down
+#endif
             .invert_cap_signal = 0,  // No inversion
+#if !ESP_IDF_VERSION_6_OR_HIGHER
             .io_loop_back = 0,       // No loopback
+#endif
         }
     };
 

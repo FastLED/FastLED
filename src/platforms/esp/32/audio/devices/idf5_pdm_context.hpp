@@ -14,6 +14,7 @@
 #include "fl/stl/int.h"
 #include "fl/stl/noexcept.h"
 #include "fl/log/log.h"
+#include "platforms/esp/esp_version.h"
 
 namespace fl {
 namespace esp_pdm {
@@ -32,8 +33,13 @@ PDMContext pdm_audio_init(const audio::ConfigPdm &config) FL_NOEXCEPT {
     u16 sample_rate = config.mSampleRate;
 
     // Create I2S channel configuration with DMA buffer settings
+#if ESP_IDF_VERSION_6_OR_HIGHER
+    i2s_chan_config_t chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(
+        config.mI2sNum, I2S_ROLE_MASTER);
+#else
     i2s_chan_config_t chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(
         static_cast<i2s_port_t>(config.mI2sNum), I2S_ROLE_MASTER);
+#endif
     chan_cfg.dma_desc_num = AUDIO_DMA_BUFFER_COUNT;
     chan_cfg.dma_frame_num = I2S_AUDIO_BUFFER_LEN;
 
