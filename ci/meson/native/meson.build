@@ -191,6 +191,16 @@ example_compile_args = base_compile_args
 is_windows = build_machine.system() == 'windows'
 is_macos = build_machine.system() == 'darwin'
 
+# macOS uses ld64.lld which does not accept GNU-style --no-undefined.
+# On macOS the linker errors on undefined symbols by default, so we just
+# omit the flag there. Windows and Linux LLD accept it as expected.
+# See FastLED #2612 and PR #2567.
+if is_macos
+  no_undefined_link_args = []
+else
+  no_undefined_link_args = ['-Wl,--no-undefined']
+endif
+
 # ============================================================================
 # Detect if clang-tool-chain Python wrapper is being used
 # ============================================================================
@@ -303,10 +313,11 @@ endif
 # In release mode: static linking on Windows, dynamic on Unix
 #
 # NOTE: -lunwind is added conditionally below after checking availability.
-# NOTE: -Wl,--no-undefined is added in quick/release modes to catch missing
-# libraries early. It's NOT added in debug mode because sanitizers (ASan/UBSan)
-# have symbols resolved at runtime, not link time.
-# See: https://github.com/google/sanitizers/issues/380
+# NOTE: -Wl,--no-undefined (via no_undefined_link_args) is added in
+# quick/release modes to catch missing libraries early. It's NOT added in:
+#   - debug mode: sanitizers (ASan/UBSan) resolve symbols at runtime
+#     (https://github.com/google/sanitizers/issues/380)
+#   - macOS: ld64.lld doesn't accept the flag; error-on-undefined is default
 if build_mode == 'debug'
   # Debug mode: dynamic linking required for sanitizers
   # No --no-undefined: sanitizers resolve symbols at runtime
@@ -323,8 +334,7 @@ elif build_mode == 'quick'
   # that cause SIGSEGV crashes. Use dynamic linking on Linux like macOS.
   if is_windows
     # Windows: static linking works well with LoadLibrary
-    runner_link_args = core_link_args + deploy_link_args + [
-      '-Wl,--no-undefined',  # Catch missing libraries early
+    runner_link_args = core_link_args + deploy_link_args + no_undefined_link_args + [
       '-static',
       '-static-libgcc',
       '-static-libstdc++',
@@ -334,21 +344,19 @@ elif build_mode == 'quick'
   else
     # macOS and Linux: dynamic linking (glibc doesn't support static + dlopen)
     # Note: -lunwind is added conditionally below after checking availability
-    # macOS ld64.lld rejects `--no-undefined` (ELF-only); Mach-O defaults to
-    # erroring on undefined symbols anyway, so the flag is redundant there.
-    # See FastLED #2612.
-    runner_link_args = core_link_args + deploy_link_args + ['-pthread']
-    if not is_macos
-      runner_link_args += ['-Wl,--no-undefined']  # Catch missing libraries early
-    endif
+    # no_undefined_link_args is empty on macOS (ld64.lld rejects the GNU flag;
+    # Mach-O defaults to erroring on undefined symbols anyway).
+    # See FastLED #2612 and PR #2567.
+    runner_link_args = core_link_args + deploy_link_args + no_undefined_link_args + [
+      '-pthread',
+    ]
   endif
 else
   # Release mode: static linking on Windows, dynamic on Unix
   # NOTE: Linux with glibc doesn't support static linking + dlopen() properly.
   if is_windows
     # Windows: static linking works well with LoadLibrary
-    runner_link_args = core_link_args + deploy_link_args + [
-      '-Wl,--no-undefined',  # Catch missing libraries early
+    runner_link_args = core_link_args + deploy_link_args + no_undefined_link_args + [
       '-static',
       '-static-libgcc',
       '-static-libstdc++',
@@ -358,11 +366,11 @@ else
   else
     # macOS and Linux: dynamic linking (glibc doesn't support static + dlopen)
     # Note: -lunwind is added conditionally below after checking availability
-    # macOS ld64.lld rejects `--no-undefined` (ELF-only); see comment above.
-    runner_link_args = core_link_args + deploy_link_args + ['-pthread']
-    if not is_macos
-      runner_link_args += ['-Wl,--no-undefined']  # Catch missing libraries early
-    endif
+    # no_undefined_link_args is empty on macOS (ld64.lld rejects the GNU flag);
+    # see comment above.
+    runner_link_args = core_link_args + deploy_link_args + no_undefined_link_args + [
+      '-pthread',
+    ]
   endif
 endif
 
