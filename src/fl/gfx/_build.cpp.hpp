@@ -18,6 +18,7 @@
 #include "fl/gfx/raster_sparse.cpp.hpp"
 #include "fl/gfx/rectangular_draw_buffer.cpp.hpp"
 #include "fl/gfx/rgbw.cpp.hpp"
+#include "fl/gfx/rgbw_colorimetric.cpp.hpp"
 #include "fl/gfx/sample.cpp.hpp"
 #include "fl/gfx/splat.cpp.hpp"
 #include "fl/gfx/tile2x2.cpp.hpp"

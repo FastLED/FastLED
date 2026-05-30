@@ -21,4 +21,7 @@ constexpr RGBW_MODE kRGBWNullWhitePixel = RGBW_MODE::kRGBWNullWhitePixel;
 constexpr RGBW_MODE kRGBWExactColors = RGBW_MODE::kRGBWExactColors;
 constexpr RGBW_MODE kRGBWBoostedWhite = RGBW_MODE::kRGBWBoostedWhite;
 constexpr RGBW_MODE kRGBWMaxBrightness = RGBW_MODE::kRGBWMaxBrightness;
+constexpr RGBW_MODE kRGBWColorimetric = RGBW_MODE::kRGBWColorimetric;
+constexpr RGBW_MODE kRGBWColorimetricBoosted = RGBW_MODE::kRGBWColorimetricBoosted;
+// kRGBWUserFunction MUST stay last — see comment on the enum in fl/gfx/rgbw.h.
 constexpr RGBW_MODE kRGBWUserFunction = RGBW_MODE::kRGBWUserFunction;
