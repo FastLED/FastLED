@@ -185,7 +185,15 @@ FL_TEST_CASE("rgbww colorimetric profile get/set API") {
     custom.warm_path.lum_w = 0.5f;  // arbitrary distinguishing value
     set_rgbww_colorimetric_profile(&custom);
     const colorimetric_detail::RgbcctProfile* after = get_rgbww_colorimetric_profile();
-    FL_CHECK(after == &custom);
+    // By-value contract (#2580 A4 / CodeRabbit on #2560): set_* copies the
+    // profile into singleton-owned storage; get_* returns a pointer to that
+    // owned copy, never the caller's address. Asserting pointer identity
+    // with &custom would re-introduce the dangling-pointer bug — verify the
+    // value flowed through and that the pointer is distinct from both the
+    // caller's stack address and the default profile.
+    FL_CHECK(after != nullptr);
+    FL_CHECK(after != &custom);
+    FL_CHECK(after != &kRgbwwDefaultProfile);
     FL_CHECK_CLOSE(after->warm_path.lum_w, 0.5f, 1e-6f);
 
     set_rgbww_colorimetric_profile(nullptr);
