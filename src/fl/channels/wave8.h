@@ -156,6 +156,35 @@ void wave8Transpose_16x4_pipe4(
     u8 (&FL_RESTRICT_PARAM output_c)[16 * sizeof(Wave8Byte)],
     u8 (&FL_RESTRICT_PARAM output_d)[16 * sizeof(Wave8Byte)]);
 
+/// @brief BF1: chipset-aware direct encode for 16-lane Wave8 (#2548 deep-dive).
+///        Bypasses the byte_lut. Uses the algebraic identity
+///        `output_bit(s, p, lane) = M0_p XOR (input_bit_(7-s) AND D_p)` where
+///        W0/W1 are the bit-0/bit-1 waveform patterns extracted from the lut.
+///        Bit-identical to wave8Transpose_16 for ANY Wave8 chipset. The
+///        bit-transpose of input bytes is computed ONCE (not 8× per symbol).
+///        Measured **9 651 → 4 465 µs/frame (2.16×)** vs baseline on P4 v1.3.
+void wave8Transpose_16_bf1(
+    const u8 (&FL_RESTRICT_PARAM lanes)[16],
+    const Wave8ByteExpansionLut &lut,
+    u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]);
+
+/// @brief BF1 + pipe4: 4-position-pipelined direct encode (#2548 deep-dive).
+///        Combines BF1's algorithmic reduction with pipe4 cross-position ILP.
+///        Empirical peak of all prototypes:
+///        **9 651 → 1 757 µs/frame = 5.49× speedup** on P4 v1.3 16-lane × 256
+///        LEDs. **4.4× faster than the 7 680 µs WS2812B 16-lane TX target** —
+///        encode now has massive headroom for ISR-driven chunked streaming.
+void wave8Transpose_16x4_bf1_pipe4(
+    const u8 (&FL_RESTRICT_PARAM lanes_a)[16],
+    const u8 (&FL_RESTRICT_PARAM lanes_b)[16],
+    const u8 (&FL_RESTRICT_PARAM lanes_c)[16],
+    const u8 (&FL_RESTRICT_PARAM lanes_d)[16],
+    const Wave8ByteExpansionLut &lut,
+    u8 (&FL_RESTRICT_PARAM output_a)[16 * sizeof(Wave8Byte)],
+    u8 (&FL_RESTRICT_PARAM output_b)[16 * sizeof(Wave8Byte)],
+    u8 (&FL_RESTRICT_PARAM output_c)[16 * sizeof(Wave8Byte)],
+    u8 (&FL_RESTRICT_PARAM output_d)[16 * sizeof(Wave8Byte)]);
+
 // Untranspose functions (for testing - reverse the transpose operation)
 void wave8Untranspose_2(
     const u8 (&FL_RESTRICT_PARAM transposed)[2 * sizeof(Wave8Byte)],

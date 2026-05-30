@@ -971,14 +971,14 @@ ParlioEngine::populateDmaBuffer(u8* outputBuffer,
                         : 0;
                 }
 
-                // #2548 cross-position ILP dispatch (best variant wins by
-                // remaining-byte count):
-                //   ≥4 remaining → pipe4 (+41% over baseline, peak of curve)
-                //   ≥2 remaining → pipe2 (+26%, ships in #2555)
-                //   else         → single (+3.5% over pre-L2, ships in #2553)
-                // Bit-identical to running wave8Transpose_16 byte-by-byte;
-                // the win is the in-order RV32 P4 filling its load-use stall
-                // cycles with independent ALU ops from the parallel positions.
+                // #2548 BF1 dispatch (chipset-aware direct encode, deep-dive):
+                //   ≥4 remaining → wave8Transpose_16x4_bf1_pipe4 (5.49× vs baseline)
+                //   ≥1 remaining → wave8Transpose_16_bf1 (2.16× vs baseline)
+                // Both bypass the byte_lut expand stage entirely — they call
+                // spread_transpose16_symbol ONCE per byte-position on the input
+                // bytes directly (vs current 8 calls + 16 byte-LUT loads). The
+                // bf1_pipe4 fusion also gives cross-position ILP for free.
+                // Bit-identical to wave8Transpose_16 for any Wave8 chipset.
                 if (byteOffset + 3 < byteCount
                     && outputIdx + 4 * blockSize <= outputBufferCapacity) {
                     u8 lanes_b[16];
@@ -991,7 +991,7 @@ ParlioEngine::populateDmaBuffer(u8* outputBuffer,
                         lanes_c[lane] = active ? base[byteOffset + 2] : 0;
                         lanes_d[lane] = active ? base[byteOffset + 3] : 0;
                     }
-                    fl::wave8Transpose_16x4_pipe4(
+                    fl::wave8Transpose_16x4_bf1_pipe4(
                         reinterpret_cast<const u8(&)[16]>(lanes_a), // ok reinterpret cast - array reference type conversion
                         reinterpret_cast<const u8(&)[16]>(lanes_b), // ok reinterpret cast - array reference type conversion
                         reinterpret_cast<const u8(&)[16]>(lanes_c), // ok reinterpret cast - array reference type conversion
@@ -1003,26 +1003,10 @@ ParlioEngine::populateDmaBuffer(u8* outputBuffer,
                         *reinterpret_cast<u8(*)[16 * sizeof(Wave8Byte)]>(outputBuffer + outputIdx + 3 * blockSize));     // ok reinterpret cast - direct write to DMA buffer (#2548)
                     outputIdx += 4 * blockSize;
                     byteOffset += 3;  // outer loop also does ++byteOffset → net +4
-                } else if (byteOffset + 1 < byteCount
-                           && outputIdx + 2 * blockSize <= outputBufferCapacity) {
-                    u8 lanes_b[16];
-                    for (size_t lane = 0; lane < 16; lane++) {
-                        lanes_b[lane] = (lane < mActualChannels)
-                            ? mScratchBuffer[lane * mLaneStride + startByte + byteOffset + 1]
-                            : 0;
-                    }
-                    fl::wave8Transpose_16x2_pipe2(
-                        reinterpret_cast<const u8(&)[16]>(lanes_a), // ok reinterpret cast - array reference type conversion
-                        reinterpret_cast<const u8(&)[16]>(lanes_b), // ok reinterpret cast - array reference type conversion
-                        mWave8ByteLut,
-                        *reinterpret_cast<u8(*)[16 * sizeof(Wave8Byte)]>(outputBuffer + outputIdx),                  // ok reinterpret cast - direct write to DMA buffer (#2548)
-                        *reinterpret_cast<u8(*)[16 * sizeof(Wave8Byte)]>(outputBuffer + outputIdx + blockSize));     // ok reinterpret cast - direct write to DMA buffer (#2548)
-                    outputIdx += 2 * blockSize;
-                    byteOffset += 1;  // outer loop also does ++byteOffset → net +2
                 } else {
-                    fl::wave8Transpose_16(
+                    fl::wave8Transpose_16_bf1(
                         reinterpret_cast<const u8(&)[16]>(lanes_a), mWave8ByteLut, // ok reinterpret cast - array reference type conversion
-                        *reinterpret_cast<u8(*)[16 * sizeof(Wave8Byte)]>(outputBuffer + outputIdx)); // ok reinterpret cast - direct write to DMA buffer (#2548 L2)
+                        *reinterpret_cast<u8(*)[16 * sizeof(Wave8Byte)]>(outputBuffer + outputIdx)); // ok reinterpret cast - direct write to DMA buffer (#2548 BF1)
                     outputIdx += blockSize;
                 }
             } else {
