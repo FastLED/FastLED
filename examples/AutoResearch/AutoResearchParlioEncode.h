@@ -85,6 +85,12 @@ struct ParlioEncodeResult {
     fl::u32 var_l7_us;
     fl::u32 l7_lut_bytes;      // 512 expected
 
+    // #2548 Phase 3 — Register-cached fused v2: caches 16 × u32 PAIRS of
+    // expansion bytes (16 GPRs live at a time across two outer loop halves)
+    // instead of the L1 variant's 16 × Wave8Byte* pointers. Fixes L1's
+    // register-pressure regression. Attacks the 37% expand stage.
+    fl::u32 var_fused_v2_us;
+
     fl::u32 sink;
 };
 
@@ -582,6 +588,67 @@ fl::u32 fl_parlio_inner_l7(const fl::u8 *scratch,
     return static_cast<fl::u32>(output[output_idx] ^ output[output_idx + 127]);
 }
 
+// --- #2548 Phase 3: Register-cached fused v2 ---
+//
+// Two-pass register-cached fusion that fixes L1's 16-pointer-array spill
+// regression. Cache the per-lane Wave8Byte expansion as TWO u32 PAIRS (one
+// holding symbols 0..3, one holding symbols 4..7). The symbol loop is split
+// in half so only 16 u32 are live at any one time — fits in RV32's 32 GPRs
+// without spilling. Eliminates the 128-B `laneWaveformSymbols` intermediate
+// stack array entirely.
+//
+// Uses the production spread_transpose16_symbol (NOT the L7 preshifted one
+// — that was a loss).
+FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
+void wave8Transpose_16_fused_v2(const fl::u8 lanes[16],
+                                const fl::Wave8ByteExpansionLut &lut,
+                                fl::u8 *output) {
+    // Phase A: cache expansion bytes as 32 u32 (split into two halves so only
+    // 16 are live across each symbol sub-loop).
+    fl::u32 e_lo[16];
+    fl::u32 e_hi[16];
+    for (int lane = 0; lane < 16; ++lane) {
+        const fl::u32 *p = fl::bit_cast_ptr<const fl::u32>(&lut.lut[lanes[lane]]);
+        e_lo[lane] = p[0];
+        e_hi[lane] = p[1];
+    }
+
+    // Phase B1: symbols 0..3 from e_lo. Only e_lo is needed → 16 u32 live.
+    for (int s = 0; s < 4; ++s) {
+        const int shift = s * 8;
+        fl::u8 l[16];
+        for (int lane = 0; lane < 16; ++lane) {
+            l[lane] = static_cast<fl::u8>(e_lo[lane] >> shift);
+        }
+        fl::detail::spread_transpose16_symbol(l, output + s * 16);
+    }
+
+    // Phase B2: symbols 4..7 from e_hi. Only e_hi is needed → 16 u32 live.
+    for (int s = 4; s < 8; ++s) {
+        const int shift = (s - 4) * 8;
+        fl::u8 l[16];
+        for (int lane = 0; lane < 16; ++lane) {
+            l[lane] = static_cast<fl::u8>(e_hi[lane] >> shift);
+        }
+        fl::detail::spread_transpose16_symbol(l, output + s * 16);
+    }
+}
+
+FASTLED_FORCE_INLINE FL_IRAM
+fl::u32 fl_parlio_inner_fused_v2(const fl::u8 *scratch,
+                                 fl::size_t lane_stride,
+                                 fl::size_t byte_offset,
+                                 const fl::Wave8ByteExpansionLut &byte_lut,
+                                 fl::u8 *output,
+                                 fl::size_t output_idx) {
+    fl::u8 lanes[16];
+    for (fl::size_t lane = 0; lane < 16; lane++) {
+        lanes[lane] = scratch[lane * lane_stride + byte_offset];
+    }
+    wave8Transpose_16_fused_v2(lanes, byte_lut, output + output_idx);
+    return static_cast<fl::u32>(output[output_idx] ^ output[output_idx + 127]);
+}
+
 inline fl::u8 *fl_parlio_alloc(fl::size_t size, bool psram) {
     return reinterpret_cast<fl::u8 *>(heap_caps_malloc(
         size,
@@ -835,6 +902,15 @@ inline ParlioEncodeResult measureParlioEncode(int iters_in = 12000) {
     result.var_l7_us = fl_parlio_measure_variant<fl_parlio_inner_l7>(
         scratch_sram, output_sram, byte_lut, iters_in, &sink);
 
+    // #2548 Phase 3 — Register-cached fused v2 (fixes L1's spill regression).
+    for (int i = 0; i < 64; ++i) {
+        sink ^= fl_parlio_inner_fused_v2(scratch_sram, BYTES_PER_LANE,
+                                         i % BYTES_PER_LANE, byte_lut, output_sram,
+                                         (i % BYTES_PER_LANE) * LANES * sizeof(fl::Wave8Byte));
+    }
+    result.var_fused_v2_us = fl_parlio_measure_variant<fl_parlio_inner_fused_v2>(
+        scratch_sram, output_sram, byte_lut, iters_in, &sink);
+
     // #2548 L4: lazy alloc the 512-KB LUT from PSRAM, build, time, free.
     fl::u8 *l4_buf = fl_parlio_alloc(FL_L4_LUT_BYTES, /*psram=*/true);
     if (l4_buf != nullptr) {
@@ -965,6 +1041,17 @@ inline void printParlioEncodeResultRom(const ParlioEncodeResult &r) {
             static_cast<fl::u32>(static_cast<fl::u64>(r.perpos_ss_us) * 100 / r.var_l7_us);
         esp_rom_printf("BENCH_PARLIO L7_preshift_l1 lut_bytes=%u total_us=%u frame_us=%u speedup_x100=%u (baseline=100)  ws2812b_tx=%u\n",
                        r.l7_lut_bytes, r.var_l7_us, l7_frame_us, spd_l7_x100,
+                       WS2812B_FRAME_US);
+    }
+
+    // Fused v2 (register-cached, 32 u32 pairs) — Phase 3 of #2548.
+    if (r.var_fused_v2_us > 0) {
+        const fl::u32 fv2_frame_us =
+            static_cast<fl::u32>(static_cast<fl::u64>(r.var_fused_v2_us) * 768 / iters64);
+        const fl::u32 spd_fv2_x100 =
+            static_cast<fl::u32>(static_cast<fl::u64>(r.perpos_ss_us) * 100 / r.var_fused_v2_us);
+        esp_rom_printf("BENCH_PARLIO fused_v2_reg   total_us=%u frame_us=%u speedup_x100=%u (baseline=100)  ws2812b_tx=%u\n",
+                       r.var_fused_v2_us, fv2_frame_us, spd_fv2_x100,
                        WS2812B_FRAME_US);
     }
 
