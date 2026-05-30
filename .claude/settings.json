@@ -1,6 +1,10 @@
 {
-  "_cwd_resolution": "Each hook walks up from $PWD looking for pyproject.toml (the project-root marker). If found, cd there and exec the hook script. If not found (cwd outside project, or inside a nested build dir with its own .git), the hook skips with a warning instead of blocking every subsequent tool call. Do NOT use `git rev-parse --show-toplevel` here — it gets fooled by nested .git dirs that build tools create under .build/.",
-  "_conflict_marker_guard": "Before execing `uv run python <hook>.py`, each command greps pyproject.toml for merge-conflict markers (`<<<<<<< `). If present, the hook skips instead of letting uv fail with a TOML parse error and cascade-block every tool. Without this guard, a mid-rebase state (git rebase leaving conflict markers in pyproject.toml) makes every Claude tool unrunnable until someone manually fixes the file — a catch-22 since the fix itself requires tools. Learned from an actual lockout on 2026-04-19 during PR #2346 rebase.",
+  "_cwd_resolution": "Each hook walks up from $PWD looking for a directory that contains pyproject.toml AND its OWN specific hook script. The SPECIFIC script name is the unique marker because sibling FastLED clones / fbuild worktrees under scratch/ also have pyproject.toml + ci/hooks/, but their ci/hooks/ contains different scripts (tool_guard.py, lint.py, etc.). If no qualifying root is found, the hook skips with a warning instead of blocking. ESCAPE HATCH: set FL_HOOK_SOFT=1 in the environment to demote ALL hook FAILURES to warnings (errors still printed to stderr, exit code forced to 0). Set FL_HOOK_SKIP=1 to skip the hook entirely (no script execution at all). Do NOT use `git rev-parse --show-toplevel` here — it gets fooled by nested .git dirs that build tools create under .build/.",
+  "_conflict_marker_guard": "Before running `uv run python <hook>.py`, each command greps pyproject.toml for merge-conflict markers (`<<<<<<< `). If present, the hook skips instead of letting uv fail with a TOML parse error and cascade-block every tool. Without this guard, a mid-rebase state (git rebase leaving conflict markers in pyproject.toml) makes every Claude tool unrunnable until someone manually fixes the file — a catch-22 since the fix itself requires tools. Learned from an actual lockout on 2026-04-19 during PR #2346 rebase.",
+  "_escape_hatches": {
+    "FL_HOOK_SKIP": "Set to 1 to make every hook short-circuit to exit 0 without running its script. Use when hooks are misbehaving and you need to unblock tool use immediately.",
+    "FL_HOOK_SOFT": "Set to 1 to make every hook print errors to stderr but still exit 0 if the script fails. Use when you want hook diagnostics but can't tolerate them blocking tools."
+  },
   "hooks": {
     "PreToolUse": [
       {
@@ -8,7 +12,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && ! grep -q '^<<<<<<< ' pyproject.toml && exec uv run python ci/hooks/check_forbidden_commands.py || { echo 'FastLED hook skipped: pyproject.toml missing or has unresolved merge conflict markers' >&2; exit 0; }"
+            "command": "[ \"$FL_HOOK_SKIP\" = \"1\" ] && exit 0; S=ci/hooks/check_forbidden_commands.py; d=$PWD; while [ \"$d\" != / ] && { [ ! -f \"$d/pyproject.toml\" ] || [ ! -f \"$d/$S\" ]; }; do d=$(dirname \"$d\"); done; if [ -f \"$d/pyproject.toml\" ] && [ -f \"$d/$S\" ] && ! grep -q '^<<<<<<< ' \"$d/pyproject.toml\"; then cd \"$d\" && uv run python \"$S\"; ST=$?; if [ \"$ST\" != 0 ] && [ \"$FL_HOOK_SOFT\" = \"1\" ]; then echo \"FL_HOOK_SOFT: $S exited $ST (forced to 0)\" >&2; exit 0; fi; exit $ST; else echo \"FastLED hook skipped: project root with $S not found above $PWD, or pyproject.toml has merge conflict markers\" >&2; exit 0; fi"
           }
         ]
       },
@@ -17,11 +21,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && ! grep -q '^<<<<<<< ' pyproject.toml && exec uv run python ci/hooks/check_test_file_pairing.py || { echo 'FastLED hook skipped: pyproject.toml missing or has unresolved merge conflict markers' >&2; exit 0; }"
+            "command": "[ \"$FL_HOOK_SKIP\" = \"1\" ] && exit 0; S=ci/hooks/check_test_file_pairing.py; d=$PWD; while [ \"$d\" != / ] && { [ ! -f \"$d/pyproject.toml\" ] || [ ! -f \"$d/$S\" ]; }; do d=$(dirname \"$d\"); done; if [ -f \"$d/pyproject.toml\" ] && [ -f \"$d/$S\" ] && ! grep -q '^<<<<<<< ' \"$d/pyproject.toml\"; then cd \"$d\" && uv run python \"$S\"; ST=$?; if [ \"$ST\" != 0 ] && [ \"$FL_HOOK_SOFT\" = \"1\" ]; then echo \"FL_HOOK_SOFT: $S exited $ST (forced to 0)\" >&2; exit 0; fi; exit $ST; else echo \"FastLED hook skipped: project root with $S not found above $PWD, or pyproject.toml has merge conflict markers\" >&2; exit 0; fi"
           },
           {
             "type": "command",
-            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && ! grep -q '^<<<<<<< ' pyproject.toml && exec uv run python ci/hooks/protect_example_ino.py || { echo 'FastLED hook skipped: pyproject.toml missing or has unresolved merge conflict markers' >&2; exit 0; }",
+            "command": "[ \"$FL_HOOK_SKIP\" = \"1\" ] && exit 0; S=ci/hooks/protect_example_ino.py; d=$PWD; while [ \"$d\" != / ] && { [ ! -f \"$d/pyproject.toml\" ] || [ ! -f \"$d/$S\" ]; }; do d=$(dirname \"$d\"); done; if [ -f \"$d/pyproject.toml\" ] && [ -f \"$d/$S\" ] && ! grep -q '^<<<<<<< ' \"$d/pyproject.toml\"; then cd \"$d\" && uv run python \"$S\"; ST=$?; if [ \"$ST\" != 0 ] && [ \"$FL_HOOK_SOFT\" = \"1\" ]; then echo \"FL_HOOK_SOFT: $S exited $ST (forced to 0)\" >&2; exit 0; fi; exit $ST; else echo \"FastLED hook skipped: project root with $S not found above $PWD, or pyproject.toml has merge conflict markers\" >&2; exit 0; fi",
             "timeout": 10
           }
         ]
@@ -31,7 +35,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && ! grep -q '^<<<<<<< ' pyproject.toml && exec uv run python ci/hooks/check_pr_merge_reviews.py || { echo 'FastLED hook skipped: pyproject.toml missing or has unresolved merge conflict markers' >&2; exit 0; }",
+            "command": "[ \"$FL_HOOK_SKIP\" = \"1\" ] && exit 0; S=ci/hooks/check_pr_merge_reviews.py; d=$PWD; while [ \"$d\" != / ] && { [ ! -f \"$d/pyproject.toml\" ] || [ ! -f \"$d/$S\" ]; }; do d=$(dirname \"$d\"); done; if [ -f \"$d/pyproject.toml\" ] && [ -f \"$d/$S\" ] && ! grep -q '^<<<<<<< ' \"$d/pyproject.toml\"; then cd \"$d\" && uv run python \"$S\"; ST=$?; if [ \"$ST\" != 0 ] && [ \"$FL_HOOK_SOFT\" = \"1\" ]; then echo \"FL_HOOK_SOFT: $S exited $ST (forced to 0)\" >&2; exit 0; fi; exit $ST; else echo \"FastLED hook skipped: project root with $S not found above $PWD, or pyproject.toml has merge conflict markers\" >&2; exit 0; fi",
             "timeout": 45
           }
         ]
@@ -41,12 +45,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && ! grep -q '^<<<<<<< ' pyproject.toml && exec uv run python ci/hooks/tdd_guard.py || { echo 'FastLED hook skipped: pyproject.toml missing or has unresolved merge conflict markers' >&2; exit 0; }",
+            "command": "[ \"$FL_HOOK_SKIP\" = \"1\" ] && exit 0; S=ci/hooks/tdd_guard.py; d=$PWD; while [ \"$d\" != / ] && { [ ! -f \"$d/pyproject.toml\" ] || [ ! -f \"$d/$S\" ]; }; do d=$(dirname \"$d\"); done; if [ -f \"$d/pyproject.toml\" ] && [ -f \"$d/$S\" ] && ! grep -q '^<<<<<<< ' \"$d/pyproject.toml\"; then cd \"$d\" && uv run python \"$S\"; ST=$?; if [ \"$ST\" != 0 ] && [ \"$FL_HOOK_SOFT\" = \"1\" ]; then echo \"FL_HOOK_SOFT: $S exited $ST (forced to 0)\" >&2; exit 0; fi; exit $ST; else echo \"FastLED hook skipped: project root with $S not found above $PWD, or pyproject.toml has merge conflict markers\" >&2; exit 0; fi",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && ! grep -q '^<<<<<<< ' pyproject.toml && exec uv run python ci/hooks/protect_platform_headers.py || { echo 'FastLED hook skipped: pyproject.toml missing or has unresolved merge conflict markers' >&2; exit 0; }",
+            "command": "[ \"$FL_HOOK_SKIP\" = \"1\" ] && exit 0; S=ci/hooks/protect_platform_headers.py; d=$PWD; while [ \"$d\" != / ] && { [ ! -f \"$d/pyproject.toml\" ] || [ ! -f \"$d/$S\" ]; }; do d=$(dirname \"$d\"); done; if [ -f \"$d/pyproject.toml\" ] && [ -f \"$d/$S\" ] && ! grep -q '^<<<<<<< ' \"$d/pyproject.toml\"; then cd \"$d\" && uv run python \"$S\"; ST=$?; if [ \"$ST\" != 0 ] && [ \"$FL_HOOK_SOFT\" = \"1\" ]; then echo \"FL_HOOK_SOFT: $S exited $ST (forced to 0)\" >&2; exit 0; fi; exit $ST; else echo \"FastLED hook skipped: project root with $S not found above $PWD, or pyproject.toml has merge conflict markers\" >&2; exit 0; fi",
             "timeout": 10
           }
         ]
@@ -58,17 +62,17 @@
         "hooks": [
           {
             "type": "command",
-            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && ! grep -q '^<<<<<<< ' pyproject.toml && exec uv run python ci/hooks/lint-on-save.py || { echo 'FastLED hook skipped: pyproject.toml missing or has unresolved merge conflict markers' >&2; exit 0; }",
+            "command": "[ \"$FL_HOOK_SKIP\" = \"1\" ] && exit 0; S=ci/hooks/lint-on-save.py; d=$PWD; while [ \"$d\" != / ] && { [ ! -f \"$d/pyproject.toml\" ] || [ ! -f \"$d/$S\" ]; }; do d=$(dirname \"$d\"); done; if [ -f \"$d/pyproject.toml\" ] && [ -f \"$d/$S\" ] && ! grep -q '^<<<<<<< ' \"$d/pyproject.toml\"; then cd \"$d\" && uv run python \"$S\"; ST=$?; if [ \"$ST\" != 0 ] && [ \"$FL_HOOK_SOFT\" = \"1\" ]; then echo \"FL_HOOK_SOFT: $S exited $ST (forced to 0)\" >&2; exit 0; fi; exit $ST; else echo \"FastLED hook skipped: project root with $S not found above $PWD, or pyproject.toml has merge conflict markers\" >&2; exit 0; fi",
             "timeout": 30
           },
           {
             "type": "command",
-            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && ! grep -q '^<<<<<<< ' pyproject.toml && exec uv run python ci/hooks/auto_test_suggest.py || { echo 'FastLED hook skipped: pyproject.toml missing or has unresolved merge conflict markers' >&2; exit 0; }",
+            "command": "[ \"$FL_HOOK_SKIP\" = \"1\" ] && exit 0; S=ci/hooks/auto_test_suggest.py; d=$PWD; while [ \"$d\" != / ] && { [ ! -f \"$d/pyproject.toml\" ] || [ ! -f \"$d/$S\" ]; }; do d=$(dirname \"$d\"); done; if [ -f \"$d/pyproject.toml\" ] && [ -f \"$d/$S\" ] && ! grep -q '^<<<<<<< ' \"$d/pyproject.toml\"; then cd \"$d\" && uv run python \"$S\"; ST=$?; if [ \"$ST\" != 0 ] && [ \"$FL_HOOK_SOFT\" = \"1\" ]; then echo \"FL_HOOK_SOFT: $S exited $ST (forced to 0)\" >&2; exit 0; fi; exit $ST; else echo \"FastLED hook skipped: project root with $S not found above $PWD, or pyproject.toml has merge conflict markers\" >&2; exit 0; fi",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && ! grep -q '^<<<<<<< ' pyproject.toml && exec uv run python ci/hooks/compile_example.py || { echo 'FastLED hook skipped: pyproject.toml missing or has unresolved merge conflict markers' >&2; exit 0; }",
+            "command": "[ \"$FL_HOOK_SKIP\" = \"1\" ] && exit 0; S=ci/hooks/compile_example.py; d=$PWD; while [ \"$d\" != / ] && { [ ! -f \"$d/pyproject.toml\" ] || [ ! -f \"$d/$S\" ]; }; do d=$(dirname \"$d\"); done; if [ -f \"$d/pyproject.toml\" ] && [ -f \"$d/$S\" ] && ! grep -q '^<<<<<<< ' \"$d/pyproject.toml\"; then cd \"$d\" && uv run python \"$S\"; ST=$?; if [ \"$ST\" != 0 ] && [ \"$FL_HOOK_SOFT\" = \"1\" ]; then echo \"FL_HOOK_SOFT: $S exited $ST (forced to 0)\" >&2; exit 0; fi; exit $ST; else echo \"FastLED hook skipped: project root with $S not found above $PWD, or pyproject.toml has merge conflict markers\" >&2; exit 0; fi",
             "timeout": 300,
             "statusMessage": "Compiling example..."
           }
@@ -80,7 +84,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && ! grep -q '^<<<<<<< ' pyproject.toml && exec uv run python ci/hooks/check-on-start.py || { echo 'FastLED hook skipped: pyproject.toml missing or has unresolved merge conflict markers' >&2; exit 0; }",
+            "command": "[ \"$FL_HOOK_SKIP\" = \"1\" ] && exit 0; S=ci/hooks/check-on-start.py; d=$PWD; while [ \"$d\" != / ] && { [ ! -f \"$d/pyproject.toml\" ] || [ ! -f \"$d/$S\" ]; }; do d=$(dirname \"$d\"); done; if [ -f \"$d/pyproject.toml\" ] && [ -f \"$d/$S\" ] && ! grep -q '^<<<<<<< ' \"$d/pyproject.toml\"; then cd \"$d\" && uv run python \"$S\"; ST=$?; if [ \"$ST\" != 0 ] && [ \"$FL_HOOK_SOFT\" = \"1\" ]; then echo \"FL_HOOK_SOFT: $S exited $ST (forced to 0)\" >&2; exit 0; fi; exit $ST; else echo \"FastLED hook skipped: project root with $S not found above $PWD, or pyproject.toml has merge conflict markers\" >&2; exit 0; fi",
             "timeout": 10
           }
         ]
@@ -91,7 +95,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && ! grep -q '^<<<<<<< ' pyproject.toml && exec uv run python ci/hooks/check-on-stop.py || { echo 'FastLED hook skipped: pyproject.toml missing or has unresolved merge conflict markers' >&2; exit 0; }",
+            "command": "[ \"$FL_HOOK_SKIP\" = \"1\" ] && exit 0; S=ci/hooks/check-on-stop.py; d=$PWD; while [ \"$d\" != / ] && { [ ! -f \"$d/pyproject.toml\" ] || [ ! -f \"$d/$S\" ]; }; do d=$(dirname \"$d\"); done; if [ -f \"$d/pyproject.toml\" ] && [ -f \"$d/$S\" ] && ! grep -q '^<<<<<<< ' \"$d/pyproject.toml\"; then cd \"$d\" && uv run python \"$S\"; ST=$?; if [ \"$ST\" != 0 ] && [ \"$FL_HOOK_SOFT\" = \"1\" ]; then echo \"FL_HOOK_SOFT: $S exited $ST (forced to 0)\" >&2; exit 0; fi; exit $ST; else echo \"FastLED hook skipped: project root with $S not found above $PWD, or pyproject.toml has merge conflict markers\" >&2; exit 0; fi",
             "timeout": 600
           }
         ]
@@ -102,7 +106,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && ! grep -q '^<<<<<<< ' pyproject.toml && exec uv run python ci/hooks/desktop_notify.py || { echo 'FastLED hook skipped: pyproject.toml missing or has unresolved merge conflict markers' >&2; exit 0; }",
+            "command": "[ \"$FL_HOOK_SKIP\" = \"1\" ] && exit 0; S=ci/hooks/desktop_notify.py; d=$PWD; while [ \"$d\" != / ] && { [ ! -f \"$d/pyproject.toml\" ] || [ ! -f \"$d/$S\" ]; }; do d=$(dirname \"$d\"); done; if [ -f \"$d/pyproject.toml\" ] && [ -f \"$d/$S\" ] && ! grep -q '^<<<<<<< ' \"$d/pyproject.toml\"; then cd \"$d\" && uv run python \"$S\"; ST=$?; if [ \"$ST\" != 0 ] && [ \"$FL_HOOK_SOFT\" = \"1\" ]; then echo \"FL_HOOK_SOFT: $S exited $ST (forced to 0)\" >&2; exit 0; fi; exit $ST; else echo \"FastLED hook skipped: project root with $S not found above $PWD, or pyproject.toml has merge conflict markers\" >&2; exit 0; fi",
             "timeout": 10
           }
         ]
@@ -113,7 +117,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "d=$PWD; while [ \"$d\" != / ] && [ ! -f \"$d/pyproject.toml\" ]; do d=$(dirname \"$d\"); done; [ -f \"$d/pyproject.toml\" ] && cd \"$d\" && ! grep -q '^<<<<<<< ' pyproject.toml && exec uv run python ci/hooks/git_context.py || { echo 'FastLED hook skipped: pyproject.toml missing or has unresolved merge conflict markers' >&2; exit 0; }",
+            "command": "[ \"$FL_HOOK_SKIP\" = \"1\" ] && exit 0; S=ci/hooks/git_context.py; d=$PWD; while [ \"$d\" != / ] && { [ ! -f \"$d/pyproject.toml\" ] || [ ! -f \"$d/$S\" ]; }; do d=$(dirname \"$d\"); done; if [ -f \"$d/pyproject.toml\" ] && [ -f \"$d/$S\" ] && ! grep -q '^<<<<<<< ' \"$d/pyproject.toml\"; then cd \"$d\" && uv run python \"$S\"; ST=$?; if [ \"$ST\" != 0 ] && [ \"$FL_HOOK_SOFT\" = \"1\" ]; then echo \"FL_HOOK_SOFT: $S exited $ST (forced to 0)\" >&2; exit 0; fi; exit $ST; else echo \"FastLED hook skipped: project root with $S not found above $PWD, or pyproject.toml has merge conflict markers\" >&2; exit 0; fi",
             "timeout": 10
           }
         ]
