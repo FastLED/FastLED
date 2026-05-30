@@ -73,7 +73,17 @@ static void arm_compile_tests() {
 #endif
 
 // Specific ARM variant checks
-#if defined(ARDUINO_ARCH_STM32) || defined(STM32F1)
+//
+// The interrupts-off rule applies to the lower-end STM32 families
+// (F1 @72 MHz, F4 @ ~84-180 MHz on STM32duino) where any ISR mid-write
+// disrupts WS28xx clockless timing. STM32H7 / Giga R1 runs at 480 MHz
+// on the Arduino Mbed core, has cycles to spare during clockless writes,
+// and deliberately sets `FASTLED_ALLOW_INTERRUPTS = 1` in its
+// `led_sysdef_arm_giga.h`. Exclude those targets from the gate so they
+// don't trip on a sane platform choice. See FastLED #2614.
+#if (defined(ARDUINO_ARCH_STM32) || defined(STM32F1)) \
+    && !defined(STM32H7xx) \
+    && !defined(FL_IS_STM32_MBED)
     #if FASTLED_ALLOW_INTERRUPTS != 0
     #error "STM32 platforms should have FASTLED_ALLOW_INTERRUPTS set to 0"
     #endif
