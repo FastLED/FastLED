@@ -239,6 +239,29 @@ void wave8_transpose_16(const Wave8Byte lane_waves[16],
     }
 }
 
+/// @brief Pipe2: transpose 16-lane × 2-byte-positions in one fused call.
+///        Result is bit-identical to two sequential `wave8_transpose_16` calls;
+///        the win comes from interleaving the two independent OR-trees inside
+///        the symbol loop so the in-order RV32 P4 can fill load-use stall
+///        cycles from position A with ALU ops from position B (and vice versa).
+///        Measured +26% / frame vs sequential calls on P4 v1.3 (#2548).
+FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
+void wave8_transpose_16x2_pipe2(const Wave8Byte lane_waves_a[16],
+                                const Wave8Byte lane_waves_b[16],
+                                u8 output_a[16 * sizeof(Wave8Byte)],
+                                u8 output_b[16 * sizeof(Wave8Byte)]) {
+    for (int symbol_idx = 0; symbol_idx < 8; symbol_idx++) {
+        u8 la[16];
+        u8 lb[16];
+        for (int lane = 0; lane < 16; lane++) {
+            la[lane] = lane_waves_a[lane].symbols[symbol_idx].data;
+            lb[lane] = lane_waves_b[lane].symbols[symbol_idx].data;
+        }
+        spread_transpose16_symbol(la, output_a + symbol_idx * 16);
+        spread_transpose16_symbol(lb, output_b + symbol_idx * 16);
+    }
+}
+
 } // namespace detail
 
 // ============================================================================

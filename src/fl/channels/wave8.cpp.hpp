@@ -132,6 +132,29 @@ void wave8Transpose_16(const u8 (&FL_RESTRICT_PARAM lanes)[16],
     detail::wave8_transpose_16(laneWaveformSymbols, output);
 }
 
+FL_OPTIMIZE_FUNCTION FL_IRAM
+void wave8Transpose_16x2_pipe2(const u8 (&FL_RESTRICT_PARAM lanes_a)[16],
+                               const u8 (&FL_RESTRICT_PARAM lanes_b)[16],
+                               const Wave8ByteExpansionLut &lut,
+                               u8 (&FL_RESTRICT_PARAM output_a)[16 * sizeof(Wave8Byte)],
+                               u8 (&FL_RESTRICT_PARAM output_b)[16 * sizeof(Wave8Byte)]) {
+    // Expand both positions independently — compiler can interleave the two
+    // loops freely because they share no data.
+    Wave8Byte laneWaveformsA[16];
+    Wave8Byte laneWaveformsB[16];
+    for (int lane = 0; lane < 16; lane++) {
+        detail::wave8_expand_byte(lanes_a[lane], lut, &laneWaveformsA[lane]);
+    }
+    for (int lane = 0; lane < 16; lane++) {
+        detail::wave8_expand_byte(lanes_b[lane], lut, &laneWaveformsB[lane]);
+    }
+    // Symbol-major loop with both transposes inlined back-to-back: the two
+    // OR-trees share no dependencies, so the compiler can interleave them and
+    // fill the in-order pipeline bubbles. See #2548.
+    detail::wave8_transpose_16x2_pipe2(laneWaveformsA, laneWaveformsB,
+                                       output_a, output_b);
+}
+
 // ============================================================================
 // LUT Builder from Timing Data
 // Note: This is not designed to be called from ISR handlers.

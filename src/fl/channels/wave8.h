@@ -124,6 +124,20 @@ void wave8Transpose_16(
     const Wave8ByteExpansionLut &lut,
     u8 (&FL_RESTRICT_PARAM output)[16 * sizeof(Wave8Byte)]);
 
+/// @brief Pipe2: transpose 16-lane × 2-byte-positions (#2548).
+///        Bit-identical to two sequential `wave8Transpose_16` calls. Internally
+///        interleaves the two independent OR-trees inside the symbol loop so
+///        the in-order RV32 P4 can fill load-use stalls from position A with
+///        ALU ops from position B. Measured 9655 → 7625 µs/frame (+26%) on
+///        P4 v1.3 (16-lane × 256-LED, byte-LUT path) — first variant to beat
+///        the 7680 µs WS2812B 16-lane TX target.
+void wave8Transpose_16x2_pipe2(
+    const u8 (&FL_RESTRICT_PARAM lanes_a)[16],
+    const u8 (&FL_RESTRICT_PARAM lanes_b)[16],
+    const Wave8ByteExpansionLut &lut,
+    u8 (&FL_RESTRICT_PARAM output_a)[16 * sizeof(Wave8Byte)],
+    u8 (&FL_RESTRICT_PARAM output_b)[16 * sizeof(Wave8Byte)]);
+
 // Untranspose functions (for testing - reverse the transpose operation)
 void wave8Untranspose_2(
     const u8 (&FL_RESTRICT_PARAM transposed)[2 * sizeof(Wave8Byte)],
