@@ -22,9 +22,7 @@
 #include "fl/stl/int.h"
 
 #if defined(ARDUINO_ARCH_ESP32) || defined(ESP_PLATFORM)
-#include <Arduino.h> // micros()
-#endif
-#if defined(ARDUINO_ARCH_ESP32) || defined(ESP_PLATFORM)
+#include <Arduino.h>     // micros()
 #include <esp_rom_sys.h> // esp_rom_printf -> USB-Serial-JTAG console (#2540)
 #endif
 
