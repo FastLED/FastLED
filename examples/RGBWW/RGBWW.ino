@@ -1,6 +1,14 @@
 // FL_AGENT_ALLOW_NEW_EXAMPLE — first example sketch for the 5-channel
 // RGB + warm-W + cool-W path landed in PR #2560 (issue #2558).
 //
+// @filter: (memory is large)
+//
+// Pulls in the full Channels API plus the colorimetric RGB→RGBWW solvers;
+// total code size is ~54 KB on AVR (overflows attiny85's 8 KB and uno's
+// 32 KB flash). Restrict CI compile matrix to boards with >= "large"
+// memory tier (Apollo3 / nRF52 / SAMD21+ / SAMD51 / STM32F4+ /
+// teensy 3.5+ / teensy 4.x / ESP32 / native / web / rp2040).
+//
 // Add the following to platformio.ini for full colorimetric output:
 //     build_flags =
 //         -DFASTLED_RGBW_COLORIMETRIC=1     ; provides the underlying math
