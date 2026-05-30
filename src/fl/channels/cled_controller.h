@@ -75,8 +75,39 @@ public:
     CLEDController& setRgbw(const Rgbw& arg = RgbwDefault::value()) FL_NOEXCEPT {
         // Note that at this time (Sept 13th, 2024) this is only implemented in the ESP32 driver
         // directly. For an emulated version please see RGBWEmulatedController in chipsets.h
-        mSettings.mRgbw = arg;
+        //
+        // (#2558) mSettings.mWhiteCfg is now a fl::variant<Empty, Rgbw, Rgbww>;
+        // assigning Rgbw selects the 4-channel alternative. The legacy
+        // "setRgbw(RgbwInvalid::value()) → disable" semantics are preserved
+        // by translating an inactive Rgbw into Empty so observers see the
+        // same "no white channel" state they did before the variant migration.
+        if (!arg.active()) {
+            mSettings.mWhiteCfg.reset();
+        } else {
+            mSettings.mWhiteCfg = arg;
+        }
         return *this;  // builder pattern.
+    }
+
+    /// @brief Configure this channel for 5-channel RGBWW (RGB + warm-W + cool-W)
+    /// output. See issue #2558. Driver-side support arrives in later phases of
+    /// the RGBWW work; today this just sets the configuration alternative.
+    /// Symmetric with setRgbw: passing RgbwwInvalid::value() clears the channel
+    /// to plain RGB rather than storing an inactive Rgbww.
+    CLEDController& setRgbww(const Rgbww& arg = RgbwwDefault::value()) FL_NOEXCEPT {
+        if (!arg.active()) {
+            mSettings.mWhiteCfg.reset();
+        } else {
+            mSettings.mWhiteCfg = arg;
+        }
+        return *this;
+    }
+
+    /// @brief Reset this channel to plain 3-channel RGB (clears any RGBW/RGBWW
+    /// configuration). Equivalent to assigning an empty mWhiteCfg.
+    CLEDController& clearWhiteChannel() FL_NOEXCEPT {
+        mSettings.mWhiteCfg.reset();
+        return *this;
     }
 
     void setEnabled(bool enabled) FL_NOEXCEPT { mEnabled = enabled; }
@@ -92,7 +123,14 @@ public:
     //   Without CLEDController destructor virtual: 10666 bytes to binary.
     VIRTUAL_IF_NOT_AVR ~CLEDController() FL_NOEXCEPT;
 
-    Rgbw getRgbw() const FL_NOEXCEPT { return mSettings.mRgbw; }
+    /// @return The Rgbw configuration if this channel is in 4-channel mode,
+    /// otherwise RgbwInvalid::value(). Backward-compatible with the pre-#2558
+    /// API: callers that don't know about Rgbww see the same shape as before.
+    Rgbw getRgbw() const FL_NOEXCEPT { return mSettings.rgbw(); }
+
+    /// @return The Rgbww configuration if this channel is in 5-channel mode,
+    /// otherwise RgbwwInvalid::value().
+    Rgbww getRgbww() const FL_NOEXCEPT { return mSettings.rgbww(); }
 
     /// Initialize the LED controller
     virtual void init() FL_NOEXCEPT = 0;

@@ -29,6 +29,21 @@ namespace fl {
 
 namespace {
 
+/// @brief Apply the white-channel selection from ChannelOptions to a
+/// CLEDController. The variant alternative chooses RGB-only / RGBW / RGBWW
+/// without forcing every call site to duplicate the dispatch.
+inline void applyWhiteCfg(CLEDController& ctrl,
+                          const ChannelOptions& options) FL_NOEXCEPT {
+    if (auto* p = options.mWhiteCfg.ptr<Rgbww>()) {
+        ctrl.setRgbww(*p);
+    } else if (auto* p = options.mWhiteCfg.ptr<Rgbw>()) {
+        ctrl.setRgbw(*p);
+    } else {
+        // Empty alternative (or default-constructed) → plain RGB.
+        ctrl.clearWhiteChannel();
+    }
+}
+
 /// @brief Encapsulates pixel iterator construction with optional XYMap reordering
 class ReorderingPixelIteratorAny {
   private:
@@ -52,8 +67,9 @@ class ReorderingPixelIteratorAny {
         const XYMap* addressing,
         EOrder rgbOrder,
         Rgbw rgbw,
+        Rgbww rgbww,
         const fl::string& channelName)
-        : mPixelIterator(pixels, rgbOrder, rgbw) {
+        : mPixelIterator(pixels, rgbOrder, rgbw, rgbww) {
 
         // Apply addressing transformation if configured
         if (addressing) {
@@ -89,7 +105,7 @@ class ReorderingPixelIteratorAny {
             mAddressedController.emplace(
                 buffer.data(), buffer.size(),
                 pixels.mColorAdjustment, DISABLE_DITHER);
-            mPixelIterator = PixelIteratorAny(mAddressedController.value(), rgbOrder, rgbw);
+            mPixelIterator = PixelIteratorAny(mAddressedController.value(), rgbOrder, rgbw, rgbww);
         }
     }
 
@@ -180,7 +196,7 @@ Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
     setCorrection(options.mCorrection);
     setTemperature(options.mTemperature);
     setDither(options.mDitherMode);
-    setRgbw(options.mRgbw);
+    applyWhiteCfg(*this, options);
 
     // Create ChannelData during construction with chipset variant
     mChannelData = ChannelData::create(mChipset);
@@ -206,7 +222,7 @@ Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds
     setCorrection(options.mCorrection);
     setTemperature(options.mTemperature);
     setDither(options.mDitherMode);
-    setRgbw(options.mRgbw);
+    applyWhiteCfg(*this, options);
 
     // Create ChannelData during construction
     mChannelData = ChannelData::create(mChipset);
@@ -226,7 +242,7 @@ void Channel::applyConfig(const ChannelConfig& config) {
     setCorrection(config.options.mCorrection);
     setTemperature(config.options.mTemperature);
     setDither(config.options.mDitherMode);
-    setRgbw(config.options.mRgbw);
+    applyWhiteCfg(*this, config.options);
     auto& events = ChannelEvents::instance();
     events.onChannelConfigured(*this, config);
 }
@@ -285,6 +301,20 @@ void writeUCS7604(fl::vector_psram<u8>* data, PixelIterator& pixelIterator,
 
     bool is_rgbw = pixelIterator.get_rgbw().active();
     size_t num_leds = pixelIterator.size();
+
+    // (#2558) UCS7604 is a 4-channel chipset (always RGBW). If the user
+    // configured this channel for 5-channel RGBWW (warm-W + cool-W), the
+    // chipset can't carry the second W byte. Warn loudly — silently dropping
+    // the white channels would be very hard to diagnose. The pixel iterator
+    // continues to emit RGB-only bytes (is_rgbw=false) so the strip still
+    // lights up, just without the W diode.
+    if (pixelIterator.get_rgbww().active() && !is_rgbw) {
+        FL_WARN_ONCE("UCS7604 cannot carry 5-channel RGBWW — this chipset "
+                     "always emits 4-channel RGBW. The warm/cool white "
+                     "channels in your Rgbww config will be dropped. "
+                     "Set ChannelOptions.mWhiteCfg = Rgbw{...} instead to "
+                     "silence this warning.");
+    }
 
     // Encode into the data buffer
     encodeUCS7604(pixelIterator, num_leds, fl::back_inserter(*data),
@@ -365,7 +395,12 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     }
 
     // Build pixel iterator with optional addressing transformation
-    ReorderingPixelIteratorAny iterator(pixels, mScreenMap.getXYMap(), mRgbOrder, mSettings.mRgbw, mName);
+    // (#2558) Pass both Rgbw and Rgbww from the channel options; the iterator
+    // carries both, and the encoder dispatch below picks the right path based
+    // on which variant alternative ChannelOptions::mWhiteCfg holds.
+    ReorderingPixelIteratorAny iterator(pixels, mScreenMap.getXYMap(), mRgbOrder,
+                                        mSettings.rgbw(), mSettings.rgbww(),
+                                        mName);
     PixelIterator& pixelIterator = iterator.get();
 
     // Encode pixels based on chipset type

@@ -118,10 +118,37 @@ struct PowerModelRGBWW {
           white_mW(w), warm_white_mW(ww), dark_mW(d),
           exponent(e) {}
 
-    /// Convert to RGB model (extracts RGB components, preserves exponent)
-    /// @note Used internally until RGBWW power calculations are implemented
+    /// Convert to RGB model (folds W/WW power back into RGB so the brightness
+    /// limiter doesn't under-budget).
+    ///
+    /// Issue #2558 update: the white-channel mW values are no longer dropped.
+    /// They're distributed evenly across the three RGB channels, which:
+    ///   - matches the brightness limiter's assumption that each RGB byte has
+    ///     a fixed mW cost at full drive (the limiter caps total predicted
+    ///     mW against a budget),
+    ///   - over-estimates rather than under-estimates when only white
+    ///     channels are on (safer for power-limited supplies),
+    ///   - accepts that a fully RGBWW-aware brightness limiter (per-channel
+    ///     accounting using all 5 mW values directly) is the right long-term
+    ///     fix — see Phase G in issue #2558.
     constexpr PowerModelRGB toRGB() const {
-        return PowerModelRGB(red_mW, green_mW, blue_mW, dark_mW, exponent);
+        // Distribute white-channel mW evenly across R/G/B. Clamp to 255 (u8
+        // max) on overflow — a wrapping static_cast<u8> here would make the
+        // brightness limiter *less* conservative on the highest-draw configs
+        // (where it most needs to be conservative). The worst-case
+        // under-budget per channel from the floor division is 2 mW.
+        return PowerModelRGB(
+            static_cast<fl::u8>(
+                (red_mW + (white_mW + warm_white_mW) / 3) > 255
+                    ? 255 : (red_mW + (white_mW + warm_white_mW) / 3)),
+            static_cast<fl::u8>(
+                (green_mW + (white_mW + warm_white_mW) / 3) > 255
+                    ? 255 : (green_mW + (white_mW + warm_white_mW) / 3)),
+            static_cast<fl::u8>(
+                (blue_mW + (white_mW + warm_white_mW) / 3) > 255
+                    ? 255 : (blue_mW + (white_mW + warm_white_mW) / 3)),
+            dark_mW,
+            exponent);
     }
 };
 

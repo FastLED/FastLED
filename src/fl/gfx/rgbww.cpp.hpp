@@ -1,0 +1,320 @@
+/// @file rgbww.cpp.hpp
+/// Dispatch + implementations for the 5-channel RGB->RGBWW path
+/// (issue #2558, Phase 3 of #2545).
+///
+/// The colorimetric modes call `solve_rgbcct()` from
+/// fl/gfx/rgbw_colorimetric.h whenever FASTLED_RGBW_COLORIMETRIC is defined
+/// (that's the one flag that gates the underlying color math library — see
+/// PR #2552). Without it, the dispatch emits FL_WARN_ONCE and outputs five
+/// zero bytes. Suppress the warn-once with
+/// `-DFASTLED_SUPPRESS_RGBWW_FALLBACK_WARNING=1`.
+///
+/// There is intentionally no separate FASTLED_RGBWW gate: --gc-sections
+/// already drops every RGBWW symbol for sketches that never configure a
+/// channel with `mWhiteCfg = Rgbww{...}`, so a second compile flag would
+/// only add an extra define for users to remember without any flash savings.
+
+#include "fl/stl/stdint.h"
+
+#define FASTLED_INTERNAL
+#include "fl/system/fastled.h"
+
+#include "fl/gfx/rgbww.h"
+// rgbw_colorimetric.h carries the RgbcctProfile type definition that
+// kRgbwwDefaultProfile needs, plus the inline math primitives Phase D uses.
+// The non-inline solve_rgbcct symbol itself only exists when
+// FASTLED_RGBW_COLORIMETRIC is defined at library build time — see the gated
+// dispatch bodies further down.
+#include "fl/gfx/rgbw_colorimetric.h"
+#include "fl/log/log.h"
+#include "fl/stl/singleton.h"
+
+
+namespace fl {
+
+namespace {
+inline void zero_out(u8 *r, u8 *g, u8 *b, u8 *ww, u8 *wc) FL_NOEXCEPT {
+    *r = 0; *g = 0; *b = 0; *ww = 0; *wc = 0;
+}
+} // namespace
+
+// ===== Default profile + active-profile state ==============================
+//
+// kRgbwwDefaultProfile: two DiodeProfile entries derived from SK6812-RGBWW-
+// style datasheets. R/G/B chromaticities and luminances mirror
+// kRgbwDefaultProfile (the colorimetric 4-channel default); W vertex is
+// hardcoded to the Planckian xy at 2700K (warm) and 6500K (cool) so static
+// initialization stays trivial (no CCT conversion at init time).
+//   2700K Planckian xy ≈ (0.4600, 0.4107)  (matches cct_to_xy(2700) ± 0.002)
+//   6500K Planckian xy ≈ (0.3135, 0.3237)  (matches cct_to_xy(6500) ± 0.002)
+const colorimetric_detail::RgbcctProfile kRgbwwDefaultProfile = {
+    /* warm_path */ {
+        /* xy_r        */ { 0.700606f, 0.299300f },
+        /* xy_g        */ { 0.097940f, 0.831593f },
+        /* xy_b        */ { 0.129086f, 0.049450f },
+        /* xy_w (2700) */ { 0.460000f, 0.410700f },
+        /* lum_r       */ 0.10f,
+        /* lum_g       */ 0.37f,
+        /* lum_b       */ 0.08f,
+        /* lum_w       */ 1.00f,
+        /* nominal_cct */ 2700,
+    },
+    /* cool_path */ {
+        /* xy_r        */ { 0.700606f, 0.299300f },
+        /* xy_g        */ { 0.097940f, 0.831593f },
+        /* xy_b        */ { 0.129086f, 0.049450f },
+        /* xy_w (6500) */ { 0.313500f, 0.323700f },
+        /* lum_r       */ 0.10f,
+        /* lum_g       */ 0.37f,
+        /* lum_b       */ 0.08f,
+        /* lum_w       */ 1.00f,
+        /* nominal_cct */ 6500,
+    },
+};
+
+namespace {
+struct RgbwwColorimetricState {
+    const colorimetric_detail::RgbcctProfile* profile = nullptr;
+};
+} // namespace
+
+void set_rgbww_colorimetric_profile(const colorimetric_detail::RgbcctProfile* profile) FL_NOEXCEPT {
+    fl::Singleton<RgbwwColorimetricState>::instance().profile = profile;
+}
+
+const colorimetric_detail::RgbcctProfile* get_rgbww_colorimetric_profile() FL_NOEXCEPT {
+    const colorimetric_detail::RgbcctProfile* p =
+        fl::Singleton<RgbwwColorimetricState>::instance().profile;
+    return p != nullptr ? p : &kRgbwwDefaultProfile;
+}
+
+// User-installable RGB->RGBWW function pointer, held behind a lazy
+// Singleton<T> (same pattern as the rgb_2_rgbw user function — see #2424 for
+// the binary-bloat rationale). Default is nullptr; the user function path
+// emits zero output when nothing is installed.
+namespace {
+struct Rgb2RgbwwUserState {
+    rgb_2_rgbww_function fn = nullptr;
+};
+} // namespace
+
+void set_rgb_2_rgbww_function(rgb_2_rgbww_function func) FL_NOEXCEPT {
+    fl::Singleton<Rgb2RgbwwUserState>::instance().fn = func;
+}
+
+void rgbww_partial_reorder(EOrderWW ww_placement,
+                           u8 b0, u8 b1, u8 b2,
+                           u8 ww, u8 wc,
+                           u8 *out_b0, u8 *out_b1, u8 *out_b2,
+                           u8 *out_b3, u8 *out_b4) FL_NOEXCEPT {
+    // Five output slots: out[0..4].
+    u8 out[5];
+    const u8 enc = static_cast<u8>(ww_placement);
+    const u8 ww_idx = (enc >> 4) & 0x07;
+    const u8 wc_idx = enc & 0x07;
+    out[ww_idx] = ww;
+    out[wc_idx] = wc;
+    // Fill the three remaining slots with b0, b1, b2 in ascending index order.
+    u8 b_idx = 0;
+    const u8 rgb_bytes[3] = { b0, b1, b2 };
+    for (u8 k = 0; k < 5; ++k) {
+        if (k != ww_idx && k != wc_idx) {
+            out[k] = rgb_bytes[b_idx++];
+        }
+    }
+    *out_b0 = out[0];
+    *out_b1 = out[1];
+    *out_b2 = out[2];
+    *out_b3 = out[3];
+    *out_b4 = out[4];
+}
+
+void rgb_2_rgbww_user_function(const Rgbww& cfg,
+                               u8 r, u8 g, u8 b,
+                               u8 r_scale, u8 g_scale, u8 b_scale,
+                               u8 *out_r, u8 *out_g, u8 *out_b,
+                               u8 *out_ww, u8 *out_wc) FL_NOEXCEPT {
+    rgb_2_rgbww_function fn = fl::Singleton<Rgb2RgbwwUserState>::instance().fn;
+    if (fn == nullptr) {
+        // No user function installed — produce safe zero output.
+        zero_out(out_r, out_g, out_b, out_ww, out_wc);
+        return;
+    }
+    fn(cfg, r, g, b, r_scale, g_scale, b_scale,
+       out_r, out_g, out_b, out_ww, out_wc);
+}
+
+
+#if FASTLED_RGBW_COLORIMETRIC
+
+namespace {
+// Compute the warm/cool blend factor from the input chromaticity. Simple
+// x-based heuristic: warmer inputs (higher x, closer to warm white) → lower
+// eta (more warm-W); cooler inputs → higher eta. Mathematically not optimal
+// — a chromaticity-aware solver could place eta to minimize dE — but cheap,
+// monotonic, and good enough for the common ambilight / neutral-pastel case.
+inline float compute_eta_from_input(const colorimetric_detail::RgbcctProfile& profile,
+                                    float s_r, float s_g, float s_b) FL_NOEXCEPT {
+    // Reuse the warm path's RGB primaries to compute the input chromaticity.
+    float P_R[3], P_G[3], P_B[3];
+    colorimetric_detail::xyY_to_XYZ(profile.warm_path.xy_r[0], profile.warm_path.xy_r[1],
+                                    profile.warm_path.lum_r, P_R);
+    colorimetric_detail::xyY_to_XYZ(profile.warm_path.xy_g[0], profile.warm_path.xy_g[1],
+                                    profile.warm_path.lum_g, P_G);
+    colorimetric_detail::xyY_to_XYZ(profile.warm_path.xy_b[0], profile.warm_path.xy_b[1],
+                                    profile.warm_path.lum_b, P_B);
+    const float X = P_R[0]*s_r + P_G[0]*s_g + P_B[0]*s_b;
+    const float Y = P_R[1]*s_r + P_G[1]*s_g + P_B[1]*s_b;
+    const float Z = P_R[2]*s_r + P_G[2]*s_g + P_B[2]*s_b;
+    const float sum = X + Y + Z;
+    if (sum < 1e-9f) return 0.5f;
+    const float input_x = X / sum;
+    const float warm_x = profile.warm_path.xy_w[0];
+    const float cool_x = profile.cool_path.xy_w[0];
+    if (cool_x == warm_x) return 0.5f;
+    const float eta = (input_x - warm_x) / (cool_x - warm_x);
+    if (eta < 0.0f) return 0.0f;
+    if (eta > 1.0f) return 1.0f;
+    return eta;
+}
+// Resolve the per-call RgbcctProfile, honoring cfg.warm_cct / cool_cct.
+//
+// (#2558) CodeRabbit caught that the previous implementation ignored the
+// per-strip CCT fields whenever cfg.profile == nullptr — every Rgbww config
+// produced the same warm=2700/cool=6500 default. Now we shift the W vertex
+// of a per-call profile to whatever CCTs the user requested. When the
+// requested CCTs match the default profile's nominal_cct values exactly, we
+// short-circuit to the global default to avoid the per-pixel xy recompute.
+inline const colorimetric_detail::RgbcctProfile&
+resolve_active_rgbcct_profile(const Rgbww& cfg,
+                              colorimetric_detail::RgbcctProfile& scratch) FL_NOEXCEPT {
+    if (cfg.profile != nullptr) {
+        return *cfg.profile;
+    }
+    const colorimetric_detail::RgbcctProfile* base = get_rgbww_colorimetric_profile();
+    if (static_cast<int>(cfg.warm_cct) == base->warm_path.nominal_cct
+        && static_cast<int>(cfg.cool_cct) == base->cool_path.nominal_cct) {
+        return *base;
+    }
+    // Build a temp profile with W vertices at the requested CCTs.
+    scratch = *base;
+    if (static_cast<int>(cfg.warm_cct) != base->warm_path.nominal_cct) {
+        float xy[2];
+        colorimetric_detail::cct_to_xy(cfg.warm_cct, xy);
+        scratch.warm_path.xy_w[0] = xy[0];
+        scratch.warm_path.xy_w[1] = xy[1];
+        scratch.warm_path.nominal_cct = cfg.warm_cct;
+    }
+    if (static_cast<int>(cfg.cool_cct) != base->cool_path.nominal_cct) {
+        float xy[2];
+        colorimetric_detail::cct_to_xy(cfg.cool_cct, xy);
+        scratch.cool_path.xy_w[0] = xy[0];
+        scratch.cool_path.xy_w[1] = xy[1];
+        scratch.cool_path.nominal_cct = cfg.cool_cct;
+    }
+    return scratch;
+}
+
+} // namespace
+
+void rgb_2_rgbww_colorimetric(const Rgbww& cfg,
+                              u8 r, u8 g, u8 b,
+                              u8 r_scale, u8 g_scale, u8 b_scale,
+                              u8 *out_r, u8 *out_g, u8 *out_b,
+                              u8 *out_ww, u8 *out_wc) FL_NOEXCEPT {
+    r = scale8(r, r_scale);
+    g = scale8(g, g_scale);
+    b = scale8(b, b_scale);
+    if ((r | g | b) == 0) { zero_out(out_r, out_g, out_b, out_ww, out_wc); return; }
+
+    colorimetric_detail::RgbcctProfile scratch;
+    const colorimetric_detail::RgbcctProfile& profile =
+        resolve_active_rgbcct_profile(cfg, scratch);
+
+    const float s_r = r * (1.0f / 255.0f);
+    const float s_g = g * (1.0f / 255.0f);
+    const float s_b = b * (1.0f / 255.0f);
+    const float eta = compute_eta_from_input(profile, s_r, s_g, s_b);
+
+    float rgbww[5];
+    colorimetric_detail::solve_rgbcct(profile, s_r, s_g, s_b, eta, rgbww);
+
+    *out_r  = colorimetric_detail::quantize_u8(rgbww[0]);
+    *out_g  = colorimetric_detail::quantize_u8(rgbww[1]);
+    *out_b  = colorimetric_detail::quantize_u8(rgbww[2]);
+    *out_ww = colorimetric_detail::quantize_u8(rgbww[3]);
+    *out_wc = colorimetric_detail::quantize_u8(rgbww[4]);
+}
+
+void rgb_2_rgbww_colorimetric_boosted(const Rgbww& cfg,
+                                      u8 r, u8 g, u8 b,
+                                      u8 r_scale, u8 g_scale, u8 b_scale,
+                                      u8 *out_r, u8 *out_g, u8 *out_b,
+                                      u8 *out_ww, u8 *out_wc) FL_NOEXCEPT {
+    // Phase D MVP: the boosted variant uses the same RGBCCT line-blend as the
+    // strict path but skews eta toward 0.5 (equal warm+cool) so the combined
+    // W contribution is larger when the input chromaticity sits near neutral.
+    // A future revision can use a wx_lp-style maximization here.
+    r = scale8(r, r_scale);
+    g = scale8(g, g_scale);
+    b = scale8(b, b_scale);
+    if ((r | g | b) == 0) { zero_out(out_r, out_g, out_b, out_ww, out_wc); return; }
+
+    colorimetric_detail::RgbcctProfile scratch;
+    const colorimetric_detail::RgbcctProfile& profile =
+        resolve_active_rgbcct_profile(cfg, scratch);
+
+    const float s_r = r * (1.0f / 255.0f);
+    const float s_g = g * (1.0f / 255.0f);
+    const float s_b = b * (1.0f / 255.0f);
+    const float eta_chroma = compute_eta_from_input(profile, s_r, s_g, s_b);
+    // Push eta halfway toward 0.5 (equal blend) for more total W participation.
+    const float eta = 0.5f * eta_chroma + 0.5f * 0.5f;
+
+    float rgbww[5];
+    colorimetric_detail::solve_rgbcct(profile, s_r, s_g, s_b, eta, rgbww);
+
+    *out_r  = colorimetric_detail::quantize_u8(rgbww[0]);
+    *out_g  = colorimetric_detail::quantize_u8(rgbww[1]);
+    *out_b  = colorimetric_detail::quantize_u8(rgbww[2]);
+    *out_ww = colorimetric_detail::quantize_u8(rgbww[3]);
+    *out_wc = colorimetric_detail::quantize_u8(rgbww[4]);
+}
+
+#else  // FASTLED_RGBW_COLORIMETRIC
+
+// Stub path when the colorimetric math library is not compiled in. Emits
+// FL_WARN_ONCE (suppressible) and five zero bytes. Does not pull in the
+// solver, profile cache, or float math machinery — same gc-section behavior
+// as the rest of the colorimetric Phase 1 dispatch in PR #2552.
+void rgb_2_rgbww_colorimetric(const Rgbww& cfg,
+                              u8 r, u8 g, u8 b,
+                              u8 r_scale, u8 g_scale, u8 b_scale,
+                              u8 *out_r, u8 *out_g, u8 *out_b,
+                              u8 *out_ww, u8 *out_wc) FL_NOEXCEPT {
+    (void)cfg; (void)r; (void)g; (void)b;
+    (void)r_scale; (void)g_scale; (void)b_scale;
+#ifndef FASTLED_SUPPRESS_RGBWW_FALLBACK_WARNING
+    FL_WARN_ONCE("RGBWW: kRGBWWColorimetric requires FASTLED_RGBW_COLORIMETRIC=1 "
+                 "(the math library that provides solve_rgbcct). Outputting zeros.");
+#endif
+    zero_out(out_r, out_g, out_b, out_ww, out_wc);
+}
+
+void rgb_2_rgbww_colorimetric_boosted(const Rgbww& cfg,
+                                      u8 r, u8 g, u8 b,
+                                      u8 r_scale, u8 g_scale, u8 b_scale,
+                                      u8 *out_r, u8 *out_g, u8 *out_b,
+                                      u8 *out_ww, u8 *out_wc) FL_NOEXCEPT {
+    (void)cfg; (void)r; (void)g; (void)b;
+    (void)r_scale; (void)g_scale; (void)b_scale;
+#ifndef FASTLED_SUPPRESS_RGBWW_FALLBACK_WARNING
+    FL_WARN_ONCE("RGBWW: kRGBWWColorimetricBoosted requires FASTLED_RGBW_COLORIMETRIC=1. "
+                 "Outputting zeros.");
+#endif
+    zero_out(out_r, out_g, out_b, out_ww, out_wc);
+}
+
+#endif  // FASTLED_RGBW_COLORIMETRIC
+
+} // namespace fl

@@ -70,14 +70,17 @@ FL_TEST_CASE("PowerModelRGBW - toRGB conversion") {
     FL_CHECK(rgb.dark_mW == 5);
 }
 
-FL_TEST_CASE("PowerModelRGBWW - toRGB conversion") {
+FL_TEST_CASE("PowerModelRGBWW - toRGB conversion folds in W/WW power (#2558 Phase F)") {
     PowerModelRGBWW rgbww(85, 65, 85, 95, 95, 5);
     PowerModelRGB rgb = rgbww.toRGB();
 
-    // Only RGB + dark should be extracted
-    FL_CHECK(rgb.red_mW == 85);
-    FL_CHECK(rgb.green_mW == 65);
-    FL_CHECK(rgb.blue_mW == 85);
+    // (#2558) toRGB() now distributes the white-channel mW evenly across the
+    // three RGB channels so the brightness limiter doesn't under-budget when
+    // RGBWW strips are in use. Bonus per RGB channel = (white_mW + warm_white_mW) / 3.
+    const fl::u8 share = (95 + 95) / 3;  // 63
+    FL_CHECK(rgb.red_mW == 85 + share);
+    FL_CHECK(rgb.green_mW == 65 + share);
+    FL_CHECK(rgb.blue_mW == 85 + share);
     FL_CHECK(rgb.dark_mW == 5);
 }
 
@@ -104,15 +107,17 @@ FL_TEST_CASE("set_power_model - RGBW extracts RGB") {
     FL_CHECK(retrieved.dark_mW == 5);
 }
 
-FL_TEST_CASE("set_power_model - RGBWW extracts RGB") {
+FL_TEST_CASE("set_power_model - RGBWW folds in W/WW power (#2558 Phase F)") {
     PowerModelRGBWW rgbww(85, 65, 85, 95, 95, 5);
     set_power_model(rgbww);
 
-    // Should extract only RGB components
+    // (#2558) Mirror the new PowerModelRGBWW::toRGB() contract: white-channel
+    // power is distributed evenly across RGB rather than dropped.
+    const fl::u8 share = (95 + 95) / 3;
     PowerModelRGB retrieved = get_power_model();
-    FL_CHECK(retrieved.red_mW == 85);
-    FL_CHECK(retrieved.green_mW == 65);
-    FL_CHECK(retrieved.blue_mW == 85);
+    FL_CHECK(retrieved.red_mW == 85 + share);
+    FL_CHECK(retrieved.green_mW == 65 + share);
+    FL_CHECK(retrieved.blue_mW == 85 + share);
     FL_CHECK(retrieved.dark_mW == 5);
 }
 

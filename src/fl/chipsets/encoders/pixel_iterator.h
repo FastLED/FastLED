@@ -8,6 +8,7 @@
 #include "fl/stl/iterator.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/gfx/rgbw.h"
+#include "fl/gfx/rgbww.h"
 #include "crgb.h"
 #include "fl/math/intmap.h"
 #include "fl/chipsets/encoders/ws2801.h"
@@ -44,6 +45,16 @@ struct PixelControllerVtable {
   static void loadAndScaleRGBW(void* pixel_controller, Rgbw rgbw, u8* b0_out, u8* b1_out, u8* b2_out, u8* b3_out) FL_NOEXCEPT {
     PixelControllerT* pc = static_cast<PixelControllerT*>(pixel_controller);
     pc->loadAndScaleRGBW(rgbw, b0_out, b1_out, b2_out, b3_out);
+  }
+
+  // 5-channel RGBWW path (issue #2558, Phase C of #2545). Same vtable
+  // pattern as loadAndScaleRGBW but produces 5 output bytes (RGB + warm-W
+  // + cool-W) per pixel in EOrder + EOrderWW wire order.
+  static void loadAndScaleRGBWW(void* pixel_controller, Rgbww rgbww,
+                                u8* b0_out, u8* b1_out, u8* b2_out,
+                                u8* b3_out, u8* b4_out) FL_NOEXCEPT {
+    PixelControllerT* pc = static_cast<PixelControllerT*>(pixel_controller);
+    pc->loadAndScaleRGBWW(rgbww, b0_out, b1_out, b2_out, b3_out, b4_out);
   }
 
   static void loadAndScaleRGB(void* pixel_controller, u8* r_out, u8* g_out, u8* b_out) FL_NOEXCEPT {
@@ -88,6 +99,7 @@ struct PixelControllerVtable {
 };
 
 typedef void (*loadAndScaleRGBWFunction)(void* pixel_controller, Rgbw rgbw, u8* b0_out, u8* b1_out, u8* b2_out, u8* b3_out);
+typedef void (*loadAndScaleRGBWWFunction)(void* pixel_controller, Rgbww rgbww, u8* b0_out, u8* b1_out, u8* b2_out, u8* b3_out, u8* b4_out);
 typedef void (*loadAndScaleRGBFunction)(void* pixel_controller, u8* r_out, u8* g_out, u8* b_out);
 // NOTE: loadAndScale_APA102_HDFunction removed - use fl::loadAndScale_APA102_HD<RGB_ORDER>() from apa102.h encoder
 // NOTE: loadAndScale_WS2816_HDFunction removed - use fl::loadAndScale_WS2816_HD<RGB_ORDER>() from ws2816.h encoder
@@ -109,8 +121,9 @@ typedef void (*getHdScaleFunction)(void* pixel_controller, u8* c0, u8* c1, u8* c
 class PixelIterator {
   public:
     template<typename PixelControllerT>
-    PixelIterator(PixelControllerT* pc, Rgbw rgbw) FL_NOEXCEPT
-         : mPixelController(pc), mRgbw(rgbw) {
+    PixelIterator(PixelControllerT* pc, Rgbw rgbw,
+                  Rgbww rgbww = RgbwwInvalid::value()) FL_NOEXCEPT
+         : mPixelController(pc), mRgbw(rgbw), mRgbww(rgbww) {
       // Manually build up a vtable.
       // Wait... what? Stupid nerds trying to show off how smart they are...
       // Why not just use a virtual function?!
@@ -137,6 +150,7 @@ class PixelIterator {
       // polymorphism by leveraging the C++ template system to ensure type safety.
       typedef PixelControllerVtable<PixelControllerT> Vtable;
       mLoadAndScaleRGBW = &Vtable::loadAndScaleRGBW;
+      mLoadAndScaleRGBWW = &Vtable::loadAndScaleRGBWW;
       mLoadAndScaleRGB = &Vtable::loadAndScaleRGB;
       // NOTE: mLoadAndScale_APA102_HD removed - use fl::loadAndScale_APA102_HD<RGB_ORDER>() from apa102.h encoder
       // NOTE: mLoadAndScale_WS2816_HD removed - use fl::loadAndScale_WS2816_HD<RGB_ORDER>() from ws2816.h encoder
@@ -154,6 +168,10 @@ class PixelIterator {
     void loadAndScaleRGBW(u8 *b0_out, u8 *b1_out, u8 *b2_out, u8 *w_out) FL_NOEXCEPT {
       mLoadAndScaleRGBW(mPixelController, mRgbw, b0_out, b1_out, b2_out, w_out);
     }
+    void loadAndScaleRGBWW(u8 *b0_out, u8 *b1_out, u8 *b2_out,
+                           u8 *b3_out, u8 *b4_out) FL_NOEXCEPT {
+      mLoadAndScaleRGBWW(mPixelController, mRgbww, b0_out, b1_out, b2_out, b3_out, b4_out);
+    }
     void loadAndScaleRGB(u8 *r_out, u8 *g_out, u8 *b_out) FL_NOEXCEPT {
       mLoadAndScaleRGB(mPixelController, r_out, g_out, b_out);
     }
@@ -165,6 +183,9 @@ class PixelIterator {
 
     void set_rgbw(Rgbw rgbw) FL_NOEXCEPT { mRgbw = rgbw; }
     Rgbw get_rgbw() const FL_NOEXCEPT { return mRgbw; }
+
+    void set_rgbww(Rgbww rgbww) FL_NOEXCEPT { mRgbww = rgbww; }
+    Rgbww get_rgbww() const FL_NOEXCEPT { return mRgbww; }
 
     #if FASTLED_HD_COLOR_MIXING
     void loadRGBScaleAndBrightness(u8* c0, u8* c1, u8* c2, u8* brightness) FL_NOEXCEPT {
@@ -180,7 +201,12 @@ class PixelIterator {
     template <typename CONTAINER_UIN8_T>
     void writeWS2812(CONTAINER_UIN8_T* out) FL_NOEXCEPT {
         auto back_ins = fl::back_inserter(*out);
-        if (mRgbw.active()) {
+        // (#2558) Dispatch order: RGBWW > RGBW > RGB. The variant migration
+        // makes these mutually exclusive — at most one alternative is active.
+        if (mRgbww.active()) {
+            auto range = makeScaledPixelRangeRGBWW(this);
+            encodeWS2812_RGBWW(range.first, range.second, back_ins);
+        } else if (mRgbw.active()) {
             auto range = makeScaledPixelRangeRGBW(this);
             encodeWS2812_RGBW(range.first, range.second, back_ins);
         } else {
@@ -343,7 +369,9 @@ class PixelIterator {
     // vtable emulation
     void* mPixelController = nullptr;
     Rgbw mRgbw;
+    Rgbww mRgbww;
     loadAndScaleRGBWFunction mLoadAndScaleRGBW = nullptr;
+    loadAndScaleRGBWWFunction mLoadAndScaleRGBWW = nullptr;
     loadAndScaleRGBFunction mLoadAndScaleRGB = nullptr;
     // NOTE: mLoadAndScale_APA102_HD removed - use fl::loadAndScale_APA102_HD<RGB_ORDER>() from apa102.h encoder
     // NOTE: mLoadAndScale_WS2816_HD removed - use fl::loadAndScale_WS2816_HD<RGB_ORDER>() from ws2816.h encoder
@@ -396,6 +424,25 @@ inline void ScaledPixelIteratorRGBW::advance() FL_NOEXCEPT {
         u8 b0, b1, b2, b3;
         mPixels->loadAndScaleRGBW(&b0, &b1, &b2, &b3);
         mCurrent = array<u8, 4>{{b0, b1, b2, b3}};  // Wire order bytes
+        mPixels->stepDithering();
+        mPixels->advanceData();
+        mHasValue = true;
+    } else {
+        mHasValue = false;
+    }
+}
+
+// ScaledPixelIteratorRGBWW implementation (issue #2558)
+inline void ScaledPixelIteratorRGBWW::advance() FL_NOEXCEPT {
+    if (!mPixels) {
+        mHasValue = false;
+        return;
+    }
+
+    if (mPixels->has(1)) {
+        u8 b0, b1, b2, b3, b4;
+        mPixels->loadAndScaleRGBWW(&b0, &b1, &b2, &b3, &b4);
+        mCurrent = array<u8, 5>{{b0, b1, b2, b3, b4}};  // Wire-order 5 bytes
         mPixels->stepDithering();
         mPixels->advanceData();
         mHasValue = true;

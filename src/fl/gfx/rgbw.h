@@ -61,10 +61,12 @@ const DiodeProfile* get_rgbw_colorimetric_profile() FL_NOEXCEPT;
 
 // Enable the 2D + 1D factored LUT path (issue #2545 Phase 2). When enabled,
 // the colorimetric modes use a bilinear-interpolated LUT instead of solving
-// per pixel. Requires FASTLED_RGBW_COLORIMETRIC_LUT to be defined; no-op
-// otherwise. `grid_n` controls the LUT edge length (8 KB at N=32, ~2 KB at
-// N=16, ~32 KB at N=64). LUT is rebuilt whenever the active profile or CCT
-// changes. Returns false on allocation failure.
+// per pixel. Available whenever FASTLED_RGBW_COLORIMETRIC=1 — no separate
+// FASTLED_RGBW_COLORIMETRIC_LUT flag exists; gc-sections drops the LUT path
+// for sketches that never call this. `grid_n` controls the LUT edge length
+// (8 KB at N=32, ~2 KB at N=16, ~32 KB at N=64). LUT is rebuilt whenever
+// the active profile or CCT changes. Returns false on allocation failure
+// (or always false when FASTLED_RGBW_COLORIMETRIC is undefined).
 bool enable_rgbw_colorimetric_lut(int grid_n) FL_NOEXCEPT;
 
 // Free the LUT and revert colorimetric calls to the closed-form solver.
