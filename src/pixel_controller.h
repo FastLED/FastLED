@@ -15,7 +15,9 @@
 #include "platforms/is_platform.h"
 
 #include "rgbw.h"
+#include "fl/gfx/rgbww.h"
 #include "fl/gfx/five_bit_hd_gamma.h"
+#include "fl/log/log.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/static_assert.h"
 #include "fl/math/scale8.h"
@@ -623,6 +625,54 @@ struct PixelController {
             rgb.raw[b2_index],
             w,  // The white component is not ordered in this call.
             b0_out, b1_out, b2_out, b3_out);  // RGBW data now in total native led order.
+#endif
+    }
+
+    /// @brief Load + scale a single pixel to 5-channel RGBWW (issue #2558).
+    /// Mirrors loadAndScaleRGBW: applies the per-channel premix scale, dispatches
+    /// to rgb_2_rgbww for the colorimetric solve, then routes the five output
+    /// bytes through rgbww_partial_reorder for the wire-order placement.
+    FASTLED_FORCE_INLINE void loadAndScaleRGBWW(fl::Rgbww rgbww,
+                                                fl::u8 *b0_out, fl::u8 *b1_out,
+                                                fl::u8 *b2_out, fl::u8 *b3_out,
+                                                fl::u8 *b4_out) {
+#ifdef FL_IS_AVR
+        // AVR: float colorimetric math is too expensive on the 8-bit core;
+        // the strip will get RGB-only output with both white channels black.
+        // Surface this with a FL_WARN_ONCE so the silent dropout is visible
+        // when debugging — a user configuring RGBWW on an AVR target almost
+        // certainly didn't expect their warm/cool W channels to be inert.
+        FL_WARN_ONCE("RGBWW colorimetric is not supported on AVR — the warm "
+                     "and cool white channels will be black. Use an ESP32 / "
+                     "Teensy / RP2040 target for full RGBWW support.");
+        fl::u8 r_pre = loadAndScale0();
+        fl::u8 g_pre = loadAndScale1();
+        fl::u8 b_pre = loadAndScale2();
+        fl::rgbww_partial_reorder(
+            rgbww.w_placement,
+            r_pre, g_pre, b_pre,
+            0, 0,
+            b0_out, b1_out, b2_out, b3_out, b4_out);
+#else
+        const fl::u8 b0_index = RGB_BYTE0(RGB_ORDER);
+        const fl::u8 b1_index = RGB_BYTE1(RGB_ORDER);
+        const fl::u8 b2_index = RGB_BYTE2(RGB_ORDER);
+        CRGB rgb(mData[0], mData[1], mData[2]);
+        fl::u8 ww = 0;
+        fl::u8 wc = 0;
+        fl::rgb_2_rgbww(rgbww,
+                        rgb.r, rgb.g, rgb.b,
+                        mColorAdjustment.premixed.r,
+                        mColorAdjustment.premixed.g,
+                        mColorAdjustment.premixed.b,
+                        &rgb.r, &rgb.g, &rgb.b, &ww, &wc);
+        fl::rgbww_partial_reorder(
+            rgbww.w_placement,
+            rgb.raw[b0_index],
+            rgb.raw[b1_index],
+            rgb.raw[b2_index],
+            ww, wc,
+            b0_out, b1_out, b2_out, b3_out, b4_out);
 #endif
     }
 };

@@ -186,6 +186,54 @@ private:
     bool mHasValue;              ///< true if current pixel is valid
 };
 
+/// @brief Input iterator adapter yielding 5-byte RGBWW pixels (issue #2558).
+///
+/// Mirrors ScaledPixelIteratorRGBW but produces 5 bytes per pixel
+/// (R, G, B, warm-W, cool-W in EOrder + EOrderWW wire order).
+class ScaledPixelIteratorRGBWW {
+public:
+    using iterator_category = input_iterator_tag;
+    using value_type = array<u8, 5>;
+    using difference_type = ptrdiff_t;
+    using pointer = const array<u8, 5>*;
+    using reference = const array<u8, 5>&;
+
+    explicit ScaledPixelIteratorRGBWW(PixelIterator* pixels) FL_NOEXCEPT
+        : mPixels(pixels), mCurrent(), mHasValue(false) {
+        advance();
+    }
+
+    ScaledPixelIteratorRGBWW() FL_NOEXCEPT
+        : mPixels(nullptr), mCurrent(), mHasValue(false) {}
+
+    const array<u8, 5>& operator*() const FL_NOEXCEPT { return mCurrent; }
+    const array<u8, 5>* operator->() const FL_NOEXCEPT { return &mCurrent; }
+
+    ScaledPixelIteratorRGBWW& operator++() FL_NOEXCEPT { advance(); return *this; }
+    ScaledPixelIteratorRGBWW operator++(int) FL_NOEXCEPT {
+        ScaledPixelIteratorRGBWW tmp = *this;
+        advance();
+        return tmp;
+    }
+
+    bool operator==(const ScaledPixelIteratorRGBWW& other) const FL_NOEXCEPT {
+        if (!mHasValue && !other.mHasValue) return true;
+        if (mHasValue != other.mHasValue) return false;
+        return mPixels == other.mPixels;
+    }
+
+    bool operator!=(const ScaledPixelIteratorRGBWW& other) const FL_NOEXCEPT {
+        return !(*this == other);
+    }
+
+private:
+    void advance() FL_NOEXCEPT;
+
+    PixelIterator* mPixels;
+    array<u8, 5> mCurrent;
+    bool mHasValue;
+};
+
 /// @brief Input iterator adapter for PixelIterator yielding brightness values
 ///
 /// Extracts per-LED brightness values from PixelIterator for HD encoders.
@@ -359,6 +407,15 @@ makeScaledPixelRangeRGBW(PixelIterator* pixels) FL_NOEXCEPT {
     return make_pair(
         detail::ScaledPixelIteratorRGBW(pixels),
         detail::ScaledPixelIteratorRGBW()  // End sentinel
+    );
+}
+
+/// @brief Create RGBWW input iterator range from PixelIterator (issue #2558)
+inline pair<detail::ScaledPixelIteratorRGBWW, detail::ScaledPixelIteratorRGBWW>
+makeScaledPixelRangeRGBWW(PixelIterator* pixels) FL_NOEXCEPT {
+    return make_pair(
+        detail::ScaledPixelIteratorRGBWW(pixels),
+        detail::ScaledPixelIteratorRGBWW()  // End sentinel
     );
 }
 

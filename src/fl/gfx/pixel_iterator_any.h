@@ -9,6 +9,7 @@
 #include "fl/stl/optional.h"
 #include "fl/stl/vector.h"
 #include "rgbw.h"
+#include "fl/gfx/rgbww.h"
 
 namespace fl {
 
@@ -27,14 +28,24 @@ class PixelIteratorAny {
     /// @param controller Source PixelController (always RGB order)
     /// @param newOrder Desired color order (RGB, RBG, GRB, GBR, BRG, BGR)
     /// @param rgbw RGBW conversion settings
-    PixelIteratorAny(PixelController<RGB> &controller, EOrder newOrder, Rgbw rgbw): mRgbw(rgbw) {
+    PixelIteratorAny(PixelController<RGB> &controller, EOrder newOrder, Rgbw rgbw,
+                     Rgbww rgbww = RgbwwInvalid::value())
+        : mRgbw(rgbw), mRgbww(rgbww) {
         init(controller, newOrder);
     }
 
     template<typename PIXEL_CONTROLLER>
-    PixelIteratorAny(PIXEL_CONTROLLER &controller, EOrder newOrder, Rgbw rgbw): mRgbw(rgbw) {
-        PixelController<RGB> rgbController(controller);  // Normslize to RGB order.
-        init(controller, newOrder);  // now this switch statement just has to resolve the other half.
+    PixelIteratorAny(PIXEL_CONTROLLER &controller, EOrder newOrder, Rgbw rgbw,
+                     Rgbww rgbww = RgbwwInvalid::value())
+        : mRgbw(rgbw), mRgbww(rgbww) {
+        // (#2558) Bugfix surfaced by CodeRabbit on PR #2560: the previous
+        // implementation constructed rgbController for normalization but then
+        // called init(controller, ...) — passing the un-normalized original
+        // controller. init() takes a PixelController<RGB>&, so a non-RGB
+        // PIXEL_CONTROLLER would have failed to compile if this branch was
+        // ever instantiated; the bug stayed latent until now.
+        PixelController<RGB> rgbController(controller);  // Normalize to RGB order.
+        init(rgbController, newOrder);
     }
 
     /// @brief Get the type-erased PixelIterator
@@ -77,32 +88,34 @@ class PixelIteratorAny {
         // Step 2: Use visitor pattern to construct PixelIterator with correct pointer type
         // Note: fl::Optional::emplace takes a constructed object, not constructor args
         struct PixelIteratorInitVisitor {
-            PixelIteratorInitVisitor(Rgbw rgbw) : rgbw(rgbw) {}
+            PixelIteratorInitVisitor(Rgbw rgbw, Rgbww rgbww)
+                : rgbw(rgbw), rgbww(rgbww) {}
             fl::Optional<PixelIterator>* pixelIteratorPtr;
             Rgbw rgbw;
+            Rgbww rgbww;
 
             // Need concrete overloads for each type in the variant
             void accept(PixelController<RGB>& controller) {
-                pixelIteratorPtr->emplace(PixelIterator(&controller, rgbw));
+                pixelIteratorPtr->emplace(PixelIterator(&controller, rgbw, rgbww));
             }
             void accept(PixelController<RBG>& controller) {
-                pixelIteratorPtr->emplace(PixelIterator(&controller, rgbw));
+                pixelIteratorPtr->emplace(PixelIterator(&controller, rgbw, rgbww));
             }
             void accept(PixelController<GRB>& controller) {
-                pixelIteratorPtr->emplace(PixelIterator(&controller, rgbw));
+                pixelIteratorPtr->emplace(PixelIterator(&controller, rgbw, rgbww));
             }
             void accept(PixelController<GBR>& controller) {
-                pixelIteratorPtr->emplace(PixelIterator(&controller, rgbw));
+                pixelIteratorPtr->emplace(PixelIterator(&controller, rgbw, rgbww));
             }
             void accept(PixelController<BRG>& controller) {
-                pixelIteratorPtr->emplace(PixelIterator(&controller, rgbw));
+                pixelIteratorPtr->emplace(PixelIterator(&controller, rgbw, rgbww));
             }
             void accept(PixelController<BGR>& controller) {
-                pixelIteratorPtr->emplace(PixelIterator(&controller, rgbw));
+                pixelIteratorPtr->emplace(PixelIterator(&controller, rgbw, rgbww));
             }
         };
 
-        PixelIteratorInitVisitor visitor(mRgbw);
+        PixelIteratorInitVisitor visitor(mRgbw, mRgbww);
         visitor.pixelIteratorPtr = &mPixelIterator;
         mAnyController.visit(visitor);
     }
@@ -117,6 +130,7 @@ class PixelIteratorAny {
     fl::Optional<PixelIterator> mPixelIterator;
 
     Rgbw mRgbw;
+    Rgbww mRgbww;
 
     // XYMap for pixel addressing (optional) - contains embedded width/height
     fl::shared_ptr<const XYMap> mXyMap;

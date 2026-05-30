@@ -19,6 +19,7 @@
 #include "fl/stl/array.h"
 #include "fl/chipsets/encoders/encoder_constants.h"
 #include "fl/gfx/rgbw.h"
+#include "fl/gfx/rgbww.h"
 #include "fl/stl/noexcept.h"
 
 namespace fl {
@@ -74,6 +75,23 @@ void encodeWS2812(InputIterator first, InputIterator last, OutputIterator out, c
         encodeWS2812_RGBW(first, last, out);
     } else {
         encodeWS2812_RGB(first, last, out);
+    }
+}
+
+/// @brief Encode 5-byte pixel data in WS2812 format (issue #2558, RGBWW).
+/// @tparam InputIterator Iterator yielding fl::array<u8, 5> (5 bytes in wire order:
+///         R, G, B, warm-W, cool-W after EOrder + EOrderWW placement)
+/// @tparam OutputIterator Output iterator accepting uint8_t
+template <typename InputIterator, typename OutputIterator>
+void encodeWS2812_RGBWW(InputIterator first, InputIterator last, OutputIterator out) FL_NOEXCEPT {
+    while (first != last) {
+        const fl::array<u8, BYTES_PER_PIXEL_RGBWW>& pixel = *first;
+        *out++ = pixel[0];
+        *out++ = pixel[1];
+        *out++ = pixel[2];
+        *out++ = pixel[3];
+        *out++ = pixel[4];
+        ++first;
     }
 }
 

@@ -873,7 +873,9 @@ FL_TEST_CASE("Channel::applyConfig updates reconfigurable fields") {
     fl::ChannelOptions opts;
     opts.mCorrection = TypicalSMD5050;
     opts.mDitherMode = BINARY_DITHER;
-    opts.mRgbw = fl::RgbwInvalid::value();
+    // (#2558) mWhiteCfg default-constructs to fl::Empty (plain RGB), same
+    // semantics as the legacy `mRgbw = RgbwInvalid::value()` sentinel.
+    opts.mWhiteCfg.reset();
 
     fl::ChannelConfig config1(5, timing, fl::span<CRGB>(leds1, 8), GRB, opts);
     auto channel = fl::Channel::create(config1);
@@ -896,7 +898,7 @@ FL_TEST_CASE("Channel::applyConfig updates reconfigurable fields") {
     opts2.mCorrection = Typical8mmPixel;
     opts2.mTemperature = CRGB(200, 180, 160);
     opts2.mDitherMode = DISABLE_DITHER;
-    opts2.mRgbw = fl::Rgbw(fl::kRGBWDefaultColorTemp, fl::RGBW_MODE::kRGBWExactColors);
+    opts2.mWhiteCfg = fl::Rgbw(fl::kRGBWDefaultColorTemp, fl::RGBW_MODE::kRGBWExactColors);
 
     fl::ChannelConfig config2(99, timing, fl::span<CRGB>(leds2, 16), BGR, opts2);
 

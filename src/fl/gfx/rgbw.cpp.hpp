@@ -230,11 +230,13 @@ inline const colorimetric_detail::ProfileCache& get_cache(int cct) FL_NOEXCEPT {
 }
 
 // ===== LUT state (issue #2545 Phase 2) ==================================
-#if FASTLED_RGBW_COLORIMETRIC_LUT
-// The LUT itself is owned by the singleton via fl::unique_ptr — null when
-// disabled, non-null and fully built when enabled. The lookup code path
-// reads through .table->cells.get() and is guaranteed safe whenever
-// `enabled` is true.
+// Always-compiled when the outer FASTLED_RGBW_COLORIMETRIC gate is on. The
+// inner FASTLED_RGBW_COLORIMETRIC_LUT gate that used to wrap this block was
+// redundant — once you've opted into colorimetric math, the LUT state +
+// rebuild_lut_if_stale + build_lut reference are gc-section-droppable for
+// sketches that never call enable_rgbw_colorimetric_lut() (the `enabled`
+// flag stays false, the fl::unique_ptr<LutTable> stays empty, and only the
+// LutStateHolder singleton instance itself is retained — ~32 bytes).
 struct LutStateHolder {
     fl::unique_ptr<colorimetric_detail::LutTable> table;
     const DiodeProfile* built_for = nullptr;
@@ -256,7 +258,6 @@ inline void rebuild_lut_if_stale(LutStateHolder& s, int cct) FL_NOEXCEPT {
     s.built_for = active;
     s.built_cct = override_cct;
 }
-#endif  // FASTLED_RGBW_COLORIMETRIC_LUT
 } // namespace
 
 void rgb_2_rgbw_colorimetric(u16 w_color_temperature, u8 r,
@@ -276,7 +277,8 @@ void rgb_2_rgbw_colorimetric(u16 w_color_temperature, u8 r,
     const colorimetric_detail::ProfileCache& cache = get_cache(w_color_temperature);
     float rgbw[4];
 
-#if FASTLED_RGBW_COLORIMETRIC_LUT
+    // LUT fast path — gc-sections drops the branch + singleton + lookup_lut
+    // for sketches that never call enable_rgbw_colorimetric_lut().
     LutStateHolder& lut_state = fl::Singleton<LutStateHolder>::instance();
     if (lut_state.enabled) {
         rebuild_lut_if_stale(lut_state, w_color_temperature);
@@ -297,7 +299,6 @@ void rgb_2_rgbw_colorimetric(u16 w_color_temperature, u8 r,
         *out_w = colorimetric_detail::quantize_u8(rgbw[3]);
         return;
     }
-#endif
 
     const bool ok =
         colorimetric_detail::solve_strict_subgamut(cache, s_r, s_g, s_b, rgbw);
@@ -336,7 +337,6 @@ void rgb_2_rgbw_colorimetric_boosted(u16 w_color_temperature, u8 r,
 }
 
 bool enable_rgbw_colorimetric_lut(int grid_n) FL_NOEXCEPT {
-#if FASTLED_RGBW_COLORIMETRIC_LUT
     if (grid_n < 4) grid_n = 4;
     if (grid_n > 256) grid_n = 256;
     LutStateHolder& s = fl::Singleton<LutStateHolder>::instance();
@@ -346,29 +346,19 @@ bool enable_rgbw_colorimetric_lut(int grid_n) FL_NOEXCEPT {
     s.built_for = nullptr;
     s.built_cct = -1;
     return true;
-#else
-    (void)grid_n;
-    return false;
-#endif
 }
 
 void disable_rgbw_colorimetric_lut() FL_NOEXCEPT {
-#if FASTLED_RGBW_COLORIMETRIC_LUT
     LutStateHolder& s = fl::Singleton<LutStateHolder>::instance();
     s.enabled = false;
     s.table.reset();  // unique_ptr destructor frees the cells storage
     s.requested_grid_n = 0;
     s.built_for = nullptr;
     s.built_cct = 0;
-#endif
 }
 
 bool rgbw_colorimetric_lut_enabled() FL_NOEXCEPT {
-#if FASTLED_RGBW_COLORIMETRIC_LUT
     return fl::Singleton<LutStateHolder>::instance().enabled;
-#else
-    return false;
-#endif
 }
 
 #else  // FASTLED_RGBW_COLORIMETRIC
