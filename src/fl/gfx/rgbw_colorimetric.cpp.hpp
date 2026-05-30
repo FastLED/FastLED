@@ -7,6 +7,7 @@
 
 #if FASTLED_RGBW_COLORIMETRIC
 
+#include "fl/log/log.h"
 #include "fl/math/math.h"
 #include "fl/stl/unique_ptr.h"
 
@@ -19,11 +20,12 @@ void build_profile_cache(const DiodeProfile* p, int cct_override,
     xyY_to_XYZ(p->xy_r[0], p->xy_r[1], p->lum_r, cache->P_R);
     xyY_to_XYZ(p->xy_g[0], p->xy_g[1], p->lum_g, cache->P_G);
     xyY_to_XYZ(p->xy_b[0], p->xy_b[1], p->lum_b, cache->P_B);
-    float xy_w[2] = { p->xy_w[0], p->xy_w[1] };
+    cache->xy_w[0] = p->xy_w[0];
+    cache->xy_w[1] = p->xy_w[1];
     if (cct_override >= 1500 && cct_override <= 15000) {
-        cct_to_xy(cct_override, xy_w);
+        cct_to_xy(cct_override, cache->xy_w);
     }
-    xyY_to_XYZ(xy_w[0], xy_w[1], p->lum_w, cache->P_W);
+    xyY_to_XYZ(cache->xy_w[0], cache->xy_w[1], p->lum_w, cache->P_W);
 
     auto pack = [](const float* a, const float* b, const float* c,
                    float out[3][3]) FL_NOEXCEPT {
@@ -38,10 +40,23 @@ void build_profile_cache(const DiodeProfile* p, int cct_override,
     pack(cache->P_R, cache->P_B, cache->P_W, P_RBW);
     pack(cache->P_B, cache->P_G, cache->P_W, P_BGW);
 
-    invert3x3(P_RGB, cache->P_RGB_inv);
-    invert3x3(P_RGW, cache->P_RGW_inv);
-    invert3x3(P_RBW, cache->P_RBW_inv);
-    invert3x3(P_BGW, cache->P_BGW_inv);
+    // Inverting a singular matrix leaves the destination with whatever
+    // invert3x3 wrote — solvers reading it would silently produce garbage.
+    // Warn once if any inversion fails so the user knows their profile has
+    // degenerate primaries (colinear chromaticities, near-zero luminance, etc).
+    const bool ok_rgb = invert3x3(P_RGB, cache->P_RGB_inv);
+    const bool ok_rgw = invert3x3(P_RGW, cache->P_RGW_inv);
+    const bool ok_rbw = invert3x3(P_RBW, cache->P_RBW_inv);
+    const bool ok_bgw = invert3x3(P_BGW, cache->P_BGW_inv);
+    // Inverting a singular matrix leaves the destination with whatever
+    // invert3x3 wrote — solvers reading it would silently produce garbage.
+    // Warn once so the user knows their profile has degenerate primaries
+    // (colinear chromaticities, near-zero luminance, etc).
+    if (!(ok_rgb && ok_rgw && ok_rbw && ok_bgw)) {
+        FL_WARN_ONCE("RGBW colorimetric: profile has degenerate primaries — "
+                     "one or more sub-gamut matrix inversions failed. Output "
+                     "colors will be incorrect. Check DiodeProfile xy/lum values.");
+    }
 
     matvec3(cache->P_RGB_inv, cache->P_W, cache->d_W);
 }
@@ -68,12 +83,15 @@ bool solve_strict_subgamut(const ProfileCache& cache, float s_r,
         const float (*Pinv)[3];
         int idx_a, idx_b, idx_c;
     };
+    // Route barycentric containment against the *effective* W chromaticity
+    // (cache.xy_w) so CCT-shifted whites land in the same simplex the matrix
+    // solve uses. Using profile->xy_w here would mis-route shifted targets.
     const SubGamut sgs[3] = {
-        { cache.profile->xy_r, cache.profile->xy_g, cache.profile->xy_w,
+        { cache.profile->xy_r, cache.profile->xy_g, cache.xy_w,
           cache.P_RGW_inv, 0, 1, 3 },
-        { cache.profile->xy_r, cache.profile->xy_b, cache.profile->xy_w,
+        { cache.profile->xy_r, cache.profile->xy_b, cache.xy_w,
           cache.P_RBW_inv, 0, 2, 3 },
-        { cache.profile->xy_b, cache.profile->xy_g, cache.profile->xy_w,
+        { cache.profile->xy_b, cache.profile->xy_g, cache.xy_w,
           cache.P_BGW_inv, 2, 1, 3 },
     };
 
@@ -119,12 +137,13 @@ bool solve_strict_subgamut_xy(const ProfileCache& cache,
         const float (*Pinv)[3];
         int idx_a, idx_b, idx_c;
     };
+    // See note in solve_strict_subgamut: use cache.xy_w, not profile->xy_w.
     const SubGamut sgs[3] = {
-        { cache.profile->xy_r, cache.profile->xy_g, cache.profile->xy_w,
+        { cache.profile->xy_r, cache.profile->xy_g, cache.xy_w,
           cache.P_RGW_inv, 0, 1, 3 },
-        { cache.profile->xy_r, cache.profile->xy_b, cache.profile->xy_w,
+        { cache.profile->xy_r, cache.profile->xy_b, cache.xy_w,
           cache.P_RBW_inv, 0, 2, 3 },
-        { cache.profile->xy_b, cache.profile->xy_g, cache.profile->xy_w,
+        { cache.profile->xy_b, cache.profile->xy_g, cache.xy_w,
           cache.P_BGW_inv, 2, 1, 3 },
     };
 
@@ -183,8 +202,15 @@ void solve_wx_lp(const ProfileCache& cache, float s_r, float s_g,
 
 LutTable build_lut(const ProfileCache& cache, int grid_n) FL_NOEXCEPT {
     LutTable lut;
+    // Guard against degenerate grids: N < 2 would divide-by-zero in the
+    // 1/(N-1) step below, and negative N would overflow the allocation size.
+    // Return an empty LutTable so callers can detect failure via .N == 0.
+    if (grid_n < 2) {
+        return lut;
+    }
+    const fl::size_t n = static_cast<fl::size_t>(grid_n);
     lut.N = grid_n;
-    lut.cells = fl::make_unique<i16[]>(static_cast<fl::size_t>(grid_n * grid_n * 4));
+    lut.cells = fl::make_unique<i16[]>(n * n * 4u);
 
     const float* R = cache.profile->xy_r;
     const float* G = cache.profile->xy_g;
@@ -224,9 +250,19 @@ LutTable build_lut(const ProfileCache& cache, int grid_n) FL_NOEXCEPT {
 
 void lookup_lut(const LutTable& lut, const float xy_t[2], float Y_t,
                 float out_rgbw[4]) FL_NOEXCEPT {
+    // Defend against degenerate LUTs (empty table, unbuilt cells, zero span).
+    // build_lut() returns an empty LutTable on bad input — without these
+    // guards the divide-by-zero and OOB reads would corrupt random memory.
+    out_rgbw[0] = out_rgbw[1] = out_rgbw[2] = out_rgbw[3] = 0.0f;
+    if (lut.N < 2 || lut.cells.get() == nullptr) {
+        return;
+    }
     const int N = lut.N;
     const float dx = lut.xy_max[0] - lut.xy_min[0];
     const float dy = lut.xy_max[1] - lut.xy_min[1];
+    if (dx <= 0.0f || dy <= 0.0f) {
+        return;
+    }
     float x_norm = (xy_t[0] - lut.xy_min[0]) / dx * (N - 1);
     float y_norm = (xy_t[1] - lut.xy_min[1]) / dy * (N - 1);
     x_norm = fl::clamp(x_norm, 0.0f, static_cast<float>(N - 1) - 1e-4f);
