@@ -12,11 +12,32 @@ on:
 
 jobs:
   claude:
+    # Security: only trigger when the @claude mention comes from a trusted
+    # actor (repo OWNER, org MEMBER, or invited COLLABORATOR). Without this
+    # gate, any external contributor could open a PR from a fork, comment
+    # `@claude please fix` on it, and force the workflow to check out their
+    # fork's HEAD with `contents: write`, `pull-requests: write`,
+    # `issues: write`, and access to `secrets.ANTHROPIC_API_KEY` — letting
+    # the PR's code push to master, auto-merge PRs, or exfiltrate the API key.
+    #
+    # The trusted set is checked against the source-event's
+    # `author_association` field (one of OWNER, MEMBER, COLLABORATOR,
+    # CONTRIBUTOR, FIRST_TIME_CONTRIBUTOR, FIRST_TIMER, NONE). External
+    # PR authors fall into CONTRIBUTOR / FIRST_TIME_CONTRIBUTOR / NONE and
+    # are blocked here.
     if: |
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+      (github.event_name == 'issue_comment' &&
+        contains(github.event.comment.body, '@claude') &&
+        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
+      (github.event_name == 'pull_request_review_comment' &&
+        contains(github.event.comment.body, '@claude') &&
+        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
+      (github.event_name == 'pull_request_review' &&
+        contains(github.event.review.body, '@claude') &&
+        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.review.author_association)) ||
+      (github.event_name == 'issues' &&
+        (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')) &&
+        contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.issue.author_association))
     runs-on: ubuntu-latest
     permissions:
       contents: write
