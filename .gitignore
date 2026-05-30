@@ -116,3 +116,6 @@ src/platforms/wasm/compiler/node_modules/
 
 # AutoResearch transient logs
 .autoresearch_last.log
+
+# Compile failure logs (./compile --log-failures failures)
+failures/
