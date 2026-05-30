@@ -5,6 +5,12 @@ dependencies:
     version: "^1.2.0"
     rules:
       - if: "target == esp32p4"
+  # Used by the ESP32 OTA path (mdns.h), which only compiles on IDF < 6 with
+  # WiFi (FL_ESP_OTA_SUPPORTED excludes ESP32-H2 and ESP32-P4).
+  espressif/mdns:
+    version: "^1.2.0"
+    rules:
+      - if: "idf_version < 6.0.0 && target not in [esp32h2, esp32p4]"
 
 # Re-include src/fl/build/ which DEFAULT_EXCLUDE's **/build/**/* otherwise strips.
 files:
