@@ -334,10 +334,13 @@ elif build_mode == 'quick'
   else
     # macOS and Linux: dynamic linking (glibc doesn't support static + dlopen)
     # Note: -lunwind is added conditionally below after checking availability
-    runner_link_args = core_link_args + deploy_link_args + [
-      '-Wl,--no-undefined',  # Catch missing libraries early
-      '-pthread',
-    ]
+    # macOS ld64.lld rejects `--no-undefined` (ELF-only); Mach-O defaults to
+    # erroring on undefined symbols anyway, so the flag is redundant there.
+    # See FastLED #2612.
+    runner_link_args = core_link_args + deploy_link_args + ['-pthread']
+    if not is_macos
+      runner_link_args += ['-Wl,--no-undefined']  # Catch missing libraries early
+    endif
   endif
 else
   # Release mode: static linking on Windows, dynamic on Unix
@@ -355,10 +358,11 @@ else
   else
     # macOS and Linux: dynamic linking (glibc doesn't support static + dlopen)
     # Note: -lunwind is added conditionally below after checking availability
-    runner_link_args = core_link_args + deploy_link_args + [
-      '-Wl,--no-undefined',  # Catch missing libraries early
-      '-pthread',
-    ]
+    # macOS ld64.lld rejects `--no-undefined` (ELF-only); see comment above.
+    runner_link_args = core_link_args + deploy_link_args + ['-pthread']
+    if not is_macos
+      runner_link_args += ['-Wl,--no-undefined']  # Catch missing libraries early
+    endif
   endif
 endif
 
