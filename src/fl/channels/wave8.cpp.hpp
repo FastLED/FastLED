@@ -168,6 +168,33 @@ void wave8Transpose_16_bf1(const u8 (&FL_RESTRICT_PARAM lanes)[16],
 }
 
 FL_OPTIMIZE_FUNCTION FL_IRAM
+void wave8Transpose_8_bf1(const u8 (&FL_RESTRICT_PARAM lanes)[8],
+                          const Wave8ByteExpansionLut &lut,
+                          u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]) {
+    const u8 W0 = lut.lut[0x00].symbols[0].data;
+    const u8 W1 = lut.lut[0xFF].symbols[0].data;
+    detail::wave8_transpose_8_bf1(lanes, W0, W1, output);
+}
+
+FL_OPTIMIZE_FUNCTION FL_IRAM
+void wave8Transpose_4_bf1(const u8 (&FL_RESTRICT_PARAM lanes)[4],
+                          const Wave8ByteExpansionLut &lut,
+                          u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]) {
+    const u8 W0 = lut.lut[0x00].symbols[0].data;
+    const u8 W1 = lut.lut[0xFF].symbols[0].data;
+    detail::wave8_transpose_4_bf1(lanes, W0, W1, output);
+}
+
+FL_OPTIMIZE_FUNCTION FL_IRAM
+void wave8Transpose_2_bf1(const u8 (&FL_RESTRICT_PARAM lanes)[2],
+                          const Wave8ByteExpansionLut &lut,
+                          u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]) {
+    const u8 W0 = lut.lut[0x00].symbols[0].data;
+    const u8 W1 = lut.lut[0xFF].symbols[0].data;
+    detail::wave8_transpose_2_bf1(lanes, W0, W1, output);
+}
+
+FL_OPTIMIZE_FUNCTION FL_IRAM
 void wave8Transpose_16x4_bf1_pipe4(const u8 (&FL_RESTRICT_PARAM lanes_a)[16],
                                    const u8 (&FL_RESTRICT_PARAM lanes_b)[16],
                                    const u8 (&FL_RESTRICT_PARAM lanes_c)[16],
