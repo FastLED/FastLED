@@ -51,7 +51,14 @@ using fl::u32;
 #include "driver/gpio.h"
 #include "esp_log.h"
 #include "soc/mcpwm_struct.h"
-#include "hal/mcpwm_ll.h"
+// NOTE: `hal/mcpwm_ll.h` was previously included here but isn't actually
+// used — this file references `MCPWM0`/`mcpwm_dev_t`/`cap_chn` which come
+// from `soc/mcpwm_struct.h` above. Including `hal/mcpwm_ll.h` triggers
+// a hard C++ error in some IDF 5.x toolchains (`mcpwm_ll.h:1598` does
+// `mcpwm_timer_cfg0_reg_t cfg0 = mcpwm->timer[i].timer_cfg0;` which
+// binds `const T&` to `volatile T&`, discarding qualifiers under
+// `-std=c++17` and later). Dropping the unused include unblocks the
+// `esp_extra_libs` (kitchensink) build on pioarduino IDF 51.03.04.
 #include "platforms/esp/esp_version.h"
 #if ESP_IDF_VERSION_6_OR_HIGHER
 #include "hal/mcpwm_periph.h"

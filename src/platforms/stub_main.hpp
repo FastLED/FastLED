@@ -45,7 +45,15 @@ public:
             exit_called = true;
             // Clear delay override before DLL unload to avoid dangling
             // lambda pointers in fastled.dll's global g_delay_override.
+            //
+            // `clearDelayFunction` lives in `platforms/stub/time_stub.h`
+            // which is only included above when stub-time is in use
+            // (`!defined(ARDUINO) || defined(FASTLED_USE_STUB_ARDUINO)`).
+            // On a real Arduino build there is no delay override to
+            // clear, so guard the call to match.
+#if !defined(ARDUINO) || defined(FASTLED_USE_STUB_ARDUINO)
             clearDelayFunction();
+#endif
             fl::EngineEvents::onExit();
         }
     }
