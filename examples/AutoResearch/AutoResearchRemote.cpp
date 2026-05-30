@@ -1776,13 +1776,21 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         response.set("ledsPerLane", static_cast<int64_t>(r.leds_per_lane));
         response.set("iterations", static_cast<int64_t>(r.iterations));
         response.set("steadyAvgUs", static_cast<int64_t>(r.steady_avg_us));
+        response.set("steadyAvgShowUs", static_cast<int64_t>(r.steady_avg_show_us));
+        response.set("steadyAvgWaitUs", static_cast<int64_t>(r.steady_avg_wait_us));
         response.set("failedIter", static_cast<int64_t>(r.failed_iter));
         response.set("timeoutMs", static_cast<int64_t>(r.timeout_ms));
         fl::json per_iter = fl::json::array();
+        fl::json per_iter_show = fl::json::array();
+        fl::json per_iter_wait = fl::json::array();
         for (int i = 0; i < r.iterations; ++i) {
             per_iter.push_back(static_cast<int64_t>(r.per_iter_us[i]));
+            per_iter_show.push_back(static_cast<int64_t>(r.per_iter_show_us[i]));
+            per_iter_wait.push_back(static_cast<int64_t>(r.per_iter_wait_us[i]));
         }
         response.set("perIterUs", per_iter);
+        response.set("perIterShowUs", per_iter_show);
+        response.set("perIterWaitUs", per_iter_wait);
         return response;
     });
 

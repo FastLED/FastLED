@@ -26,6 +26,7 @@
 #include "platforms/esp/32/drivers/parlio/parlio_debug.h"
 #include "platforms/esp/32/drivers/parlio/parlio_ring_buffer.h"
 #include "fl/system/delay.h"
+
 #include "fl/log/log.h"
 #include "fl/log/log.h"
 #include "fl/log/log.h"
@@ -104,6 +105,17 @@ namespace detail {
 #ifndef FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH
 #define FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH 3
 #endif // defined(FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH)
+
+// #2548 EXPERIMENTAL: when set, beginTransmission() submits all pre-encoded
+// ring buffers to the IDF TX queue immediately (relying on hardware DMA-
+// descriptor chaining to avoid the ISR-latency gap between buffers). Cuts
+// frame time from 17ms to 12ms on 16-lane × 256-LED WS2812B (encode/TX
+// overlap), but requires per-chipset RX-loopback validation to confirm
+// the IDF chains buffers without a >5µs gap (which would corrupt WS2812
+// signal timing). Default OFF — see comment in beginTransmission().
+#ifndef FL_PARLIO_EAGER_QUEUE
+#define FL_PARLIO_EAGER_QUEUE 0
+#endif
 
 // Worker function is now called directly from txDoneCallback (no timer needed)
 // This eliminates the 50µs periodic timer overhead
@@ -1861,6 +1873,7 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
     // The ESP32 PARLIO hardware requires a disable/enable cycle to reset its DMA state
     // machine. Without this, consecutive transmissions with the same config silently fail
     // (DMA doesn't start, TX produces no output, RX captures 0 bytes).
+    // Measured cost: ~25-30 µs (negligible).
     if (mTxUnitEnabled) {
         FL_LOG_PARLIO("PARLIO_TX: Disabling peripheral for re-enable cycle");
         mPeripheral->disable();
@@ -1903,6 +1916,36 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
         return false;
     }
     FL_LOG_PARLIO("PARLIO_TX: First buffer submitted successfully - transmission started");
+
+    // #2548 EXPERIMENTAL: Eager-queue additional pre-encoded buffers to the IDF
+    // TX queue, so the hardware can chain them via DMA descriptors instead of
+    // waiting for an ISR-latency gap between txDone and next-submit.
+    //
+    // MEASURED IMPACT (16-lane × 256-LED WS2812B on P4 v1.3):
+    //   default off: total=16 995us  show=9 439us  wait=7 556us  (encode→TX serial)
+    //   eager on   : total=12 220us  show=10 605us wait=1 615us  (encode/TX overlap)
+    //
+    // WARNING: gated OFF by default because the IDF queue chaining behaviour
+    // for parlio_tx_unit is not guaranteed to be gap-free on all IDF versions.
+    // A gap > ~5µs between queued buffers would corrupt WS2812 timing (reset
+    // latch fires mid-frame). Validated correct TIMING on the bench but not
+    // OUTPUT correctness — needs RX-loopback validation per chipset.
+    //
+    // Enable with `-DFL_PARLIO_EAGER_QUEUE=1` once validated on your hardware.
+#if FL_PARLIO_EAGER_QUEUE
+    while (mIsrContext->mRingCount > 0) {
+        size_t idx = mIsrContext->mRingReadIdx;
+        size_t sz = mRingBuffer->sizes[idx];
+        if (!mPeripheral->transmit(mRingBuffer->ptrs[idx], sz * 8, 0x0000)) {
+            // Best-effort: stop on first failure. txDoneCallback will resubmit
+            // remaining buffers from the engine ring as TX progresses.
+            break;
+        }
+        mIsrContext->mRingReadIdx = (mIsrContext->mRingReadIdx + 1) % ParlioRingBuffer3::RING_BUFFER_COUNT;
+        mIsrContext->mRingCount = mIsrContext->mRingCount - 1;
+        FL_MEMORY_BARRIER;
+    }
+#endif
 
     //=========================================================================
     // Worker function now called directly from txDoneCallback (one-shot pattern)
