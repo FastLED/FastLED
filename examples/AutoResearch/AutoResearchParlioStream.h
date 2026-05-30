@@ -1,5 +1,5 @@
 /// @file AutoResearchParlioStream.h
-/// @brief Boot-time PARLIO streaming functional test (#2548 deep-dive follow-up).
+/// @brief PARLIO ISR-streaming functional validation (#2548 deep-dive follow-up).
 ///
 /// Validates the engine's ISR-chunked streaming path on real hardware:
 ///   - Initializes PARLIO with **16 lanes** (forces the engine's 16-lane Wave8
@@ -8,138 +8,143 @@
 ///   - Fills with a known pattern.
 ///   - Calls FastLED.show() — which goes through ParlioEngine's 3-buffer ring
 ///     + txDoneCallback ISR streaming + BF1 encode.
-///   - Measures wall-clock time for show()+wait() to complete.
+///   - Measures wall-clock time for show()+wait() to complete across N back-
+///     to-back frames.
 ///
-/// **Functional pass criterion**: show()+wait() completes < 100 ms. The
-/// expected time is ~2 ms (BF1+pipe4 encode is 1.75 ms/frame, TX is 7.68 ms,
-/// but the engine streams them concurrently so the bottleneck is the slower
-/// of the two — TX). 100 ms gives ~10× margin and catches hangs / stalls.
+/// **Pass criterion**: every show()+wait() completes within `timeoutMs`.
+/// Catches hangs / stalls in the streaming engine.
 ///
-/// Does NOT validate transmitted byte correctness — that needs RX loopback
-/// with a jumper wire (handled by the existing autoresearch --parlio CLI).
-/// Bit-exactness of BF1 is independently covered by the host test in
-/// tests/fl/channels/wave8.cpp added in #2559.
+/// Does NOT validate transmitted byte correctness — that's covered by the host
+/// bit-exactness test in tests/fl/channels/wave8.cpp added in #2559, and by
+/// the RX-loopback path in the existing autoresearch CLI when run with a
+/// jumper wire.
 ///
-/// Reports `BENCH_PARLIO_STREAM_VALIDATE PASS/FAIL` via `esp_rom_printf` to
-/// the USB-Serial-JTAG console (COM25 on the P4 dev board), so it works
-/// without the broken testSimd RPC routing (#2541).
-///
-/// Gated by `-DFL_PARLIO_STREAM_VALIDATE_AT_BOOT=1`. Runs once in setup().
+/// Invoked via the `parlioStreamValidate` JSON-RPC handler registered in
+/// AutoResearchRemote.cpp.
 
 #pragma once
 
 #include "FastLED.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/chipsets/led_timing.h"
+#include "fl/stl/int.h"
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
 
 #if defined(ARDUINO_ARCH_ESP32) || defined(ESP_PLATFORM)
-#include <Arduino.h>      // micros()
-#include <esp_rom_sys.h>  // esp_rom_printf
+#include <Arduino.h>  // micros()
 #endif
 
 namespace autoresearch {
 namespace parlio_stream {
 
-/// Run at boot AFTER the RX channel is created (RX is unused — kept in the
-/// signature for symmetry with future loopback variants).
+constexpr int kMaxIterations = 16;  // result struct iter timing array fixed size
+
+struct ValidateResult {
+    bool channels_ok;          // true if all PARLIO channels created cleanly
+    bool completed;            // true if every iteration completed within timeout
+    int lanes;                 // PARLIO lane count tested
+    int leds_per_lane;         // LEDs per lane
+    int iterations;            // number of show() iterations run
+    uint32_t per_iter_us[kMaxIterations];  // per-iteration show()+wait() time
+    uint32_t steady_avg_us;    // average of iters 1..N-1 (skips iter 0 setup)
+    int failed_iter;           // index of first iter that exceeded timeout, or -1
+    uint32_t timeout_ms;       // effective timeout passed in
+};
+
+/// @brief Run the PARLIO streaming functional test.
 ///
-/// @param base_tx_pin  First PARLIO TX pin; lanes occupy [base_tx_pin .. base_tx_pin+15]
-inline void validateAtBoot(int base_tx_pin) {
+/// @param base_tx_pin  First PARLIO TX pin; lanes occupy [base_tx_pin .. base_tx_pin+num_lanes-1]
+/// @param num_lanes    Number of PARLIO lanes (1-16). Use 16 to exercise BF1+pipe4.
+/// @param num_leds     LEDs per lane.
+/// @param iterations   Number of back-to-back show()+wait() cycles (capped at kMaxIterations).
+/// @param timeout_ms   Per-iteration timeout. Test fails if any iter exceeds this.
+inline ValidateResult validateParlioStreaming(int base_tx_pin,
+                                              int num_lanes,
+                                              int num_leds,
+                                              int iterations,
+                                              uint32_t timeout_ms) {
+    ValidateResult r{};
+    r.channels_ok = false;
+    r.completed = false;
+    r.lanes = num_lanes;
+    r.leds_per_lane = num_leds;
+    r.iterations = iterations;
+    r.timeout_ms = timeout_ms;
+    r.failed_iter = -1;
+
+    if (iterations < 1) iterations = 1;
+    if (iterations > kMaxIterations) iterations = kMaxIterations;
+    r.iterations = iterations;
+    if (num_lanes < 1 || num_lanes > 16) return r;
+    if (num_leds < 1) return r;
+
 #if defined(ARDUINO_ARCH_ESP32) || defined(ESP_PLATFORM)
-    esp_rom_printf("\nBENCH_PARLIO_STREAM_VALIDATE_START\n");
-
-    constexpr int kNumLanes = 16;
-    constexpr int kNumLEDs = 256;   // matches the canonical bench workload
-    constexpr uint32_t kTimeoutMs = 200;
-
-    // 16 separate CRGB arrays, one per lane — forces the engine's 16-lane
-    // Wave8 dispatch which uses wave8Transpose_16x4_bf1_pipe4.
-    static CRGB leds[kNumLanes][kNumLEDs];
-    for (int lane = 0; lane < kNumLanes; ++lane) {
-        for (int i = 0; i < kNumLEDs; ++i) {
-            // Pattern A: mixed bit positions per byte.
-            leds[lane][i] = CRGB(0xF0, 0x0F, 0xAA);
+    // Reuse a single static heap-resident LED buffer sized for the canonical
+    // worst case (16 lanes × 256 LEDs). Test callers must stay within these
+    // bounds. Static to avoid repeated allocation across RPC calls.
+    constexpr int kMaxLanes = 16;
+    constexpr int kMaxLEDs = 256;
+    if (num_leds > kMaxLEDs) return r;
+    static CRGB leds[kMaxLanes][kMaxLEDs];
+    for (int lane = 0; lane < num_lanes; ++lane) {
+        for (int i = 0; i < num_leds; ++i) {
+            leds[lane][i] = CRGB(0xF0, 0x0F, 0xAA);  // Pattern A (mixed bits)
         }
     }
 
     fl::ChipsetTimingConfig timing =
         fl::makeTimingConfig<fl::TIMING_WS2812B_V5>();
 
-    // Build 16 PARLIO channels on consecutive pins.
     fl::ChannelOptions parlio_opts;
     parlio_opts.mBus = fl::Bus::PARLIO;
 
     fl::vector<fl::shared_ptr<fl::Channel>> channels;
-    bool add_ok = true;
-    for (int lane = 0; lane < kNumLanes; ++lane) {
+    for (int lane = 0; lane < num_lanes; ++lane) {
         fl::ChannelConfig cfg(
             base_tx_pin + lane,
             timing,
-            fl::span<CRGB>(leds[lane], kNumLEDs),
+            fl::span<CRGB>(leds[lane], num_leds),
             RGB,
             parlio_opts);
         auto ch = FastLED.add(cfg);
         if (!ch) {
-            esp_rom_printf("BENCH_PARLIO_STREAM_VALIDATE FAIL  "
-                           "add_channel_failed_at_lane=%d\n", lane);
-            add_ok = false;
-            break;
+            FastLED.clear(ClearFlags::CHANNELS);
+            return r;
         }
         channels.push_back(ch);
     }
+    r.channels_ok = true;
 
-    if (!add_ok) {
-        FastLED.clear(ClearFlags::CHANNELS);
-        esp_rom_printf("BENCH_PARLIO_STREAM_VALIDATE_END\n\n");
-        return;
-    }
-
-    // Run several iterations to make sure streaming repeats cleanly across
-    // back-to-back frames (catches single-frame-only bugs). First iter has
-    // setup overhead; the steady-state cost is the average of iters 2..N.
-    constexpr int kIterations = 5;
-    uint32_t per_iter_us[8] = {0};
     bool ok = true;
-    for (int iter = 0; iter < kIterations; ++iter) {
+    uint32_t steady_total = 0;
+    for (int iter = 0; iter < iterations; ++iter) {
         const uint32_t t0 = micros();
         FastLED.show();
-        FastLED.wait(kTimeoutMs);
+        FastLED.wait(timeout_ms);
         const uint32_t dt = micros() - t0;
-        per_iter_us[iter] = dt;
-        if (dt > kTimeoutMs * 1000u) {
-            esp_rom_printf("BENCH_PARLIO_STREAM_VALIDATE FAIL  "
-                           "iter=%d show_wait_us=%u (timeout=%ums)\n",
-                           iter, static_cast<unsigned>(dt),
-                           static_cast<unsigned>(kTimeoutMs));
+        r.per_iter_us[iter] = dt;
+        if (dt > timeout_ms * 1000u) {
+            r.failed_iter = iter;
             ok = false;
             break;
         }
+        if (iter > 0) steady_total += dt;
     }
 
     FastLED.clear(ClearFlags::CHANNELS);
 
-    if (ok) {
-        // Steady-state average across iters 1..N-1 (skip iter 0 setup overhead).
-        uint32_t steady_total = 0;
-        for (int i = 1; i < kIterations; ++i) steady_total += per_iter_us[i];
-        const uint32_t steady_avg = steady_total / (kIterations - 1);
-        esp_rom_printf("BENCH_PARLIO_STREAM_VALIDATE PASS  lanes=%d leds=%d "
-                       "iters=%d iter0=%u iter1=%u iter2=%u iter3=%u iter4=%u "
-                       "steady_avg_us=%u (WS2812B 16-lane TX=7680us)\n",
-                       kNumLanes, kNumLEDs, kIterations,
-                       static_cast<unsigned>(per_iter_us[0]),
-                       static_cast<unsigned>(per_iter_us[1]),
-                       static_cast<unsigned>(per_iter_us[2]),
-                       static_cast<unsigned>(per_iter_us[3]),
-                       static_cast<unsigned>(per_iter_us[4]),
-                       static_cast<unsigned>(steady_avg));
+    r.completed = ok;
+    if (ok && iterations > 1) {
+        r.steady_avg_us = steady_total / (iterations - 1);
+    } else if (ok) {
+        r.steady_avg_us = r.per_iter_us[0];
     }
-    esp_rom_printf("BENCH_PARLIO_STREAM_VALIDATE_END\n\n");
 #else
     (void)base_tx_pin;
+    (void)timeout_ms;
 #endif
+    return r;
 }
 
 }  // namespace parlio_stream

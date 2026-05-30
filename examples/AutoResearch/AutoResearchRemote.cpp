@@ -32,6 +32,7 @@
 #include "AutoResearchSimd.h"
 #include "AutoResearchWave8Expand.h"  // #2526 wave8ExpandBenchmark RPC
 #include "AutoResearchParlioEncode.h" // parlioEncodeBenchmark RPC (#2526 follow-up)
+#include "AutoResearchParlioStream.h" // parlioStreamValidate RPC (#2548 follow-up)
 #include "fl/system/heap.h"
 #include "fl/chipsets/spi.h"
 #include "fl/channels/config.h"
@@ -1585,9 +1586,17 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         parlioEncodeBenchmark_fn.set("description", "Bench full PARLIO encode hot loop (16-lane gather + wave8Transpose_16 + memcpy) with 4 SRAM/PSRAM placements; answers PSRAM hypothesis + ISR-streaming feasibility");
         functions.push_back(parlioEncodeBenchmark_fn);
 
+        fl::json parlioStreamValidate_fn = fl::json::object();
+        parlioStreamValidate_fn.set("name", "parlioStreamValidate");
+        parlioStreamValidate_fn.set("phase", "Phase 4: Utility");
+        parlioStreamValidate_fn.set("args", "[{numLanes, numLeds, iterations, timeoutMs}] (all optional; defaults 16/256/5/200)");
+        parlioStreamValidate_fn.set("returns", "{success, completed, lanes, leds_per_lane, iterations, perIterUs:[...], steadyAvgUs, failedIter}");
+        parlioStreamValidate_fn.set("description", "Functional test of the PARLIO ISR-chunked streaming engine (#2548). Drives N back-to-back FastLED.show() calls through the production engine (which uses BF1+pipe4 on 16-lane Wave8 since #2559) and verifies all complete within timeout. Catches hangs/stalls.");
+        functions.push_back(parlioStreamValidate_fn);
+
         fl::json response = fl::json::object();
         response.set("success", true);
-        response.set("totalFunctions", static_cast<int64_t>(24));
+        response.set("totalFunctions", static_cast<int64_t>(25));
         response.set("functions", functions);
         return response;
     });
@@ -1711,6 +1720,69 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         response.set("transpose16_nibble_us", static_cast<int64_t>(r.transpose16_nibble_us));
         response.set("transpose16_byte_us", static_cast<int64_t>(r.transpose16_byte_us));
         response.set("sink", static_cast<int64_t>(r.sink));
+        return response;
+    });
+
+    // Register "parlioStreamValidate" - functional test of the production
+    // PARLIO ISR-chunked streaming engine (#2548). Exercises the 16-lane Wave8
+    // path which dispatches to wave8Transpose_16x4_bf1_pipe4 (BF1, #2559).
+    // Drives N back-to-back FastLED.show() cycles and verifies each completes
+    // within timeout. Returns per-iter timing so the host can diagnose stalls.
+    mRemote->bind("parlioStreamValidate", [this](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+
+        int num_lanes = 16;
+        int num_leds = 256;
+        int iterations = 5;
+        int timeout_ms = 200;
+
+        fl::json config;
+        if (args.is_object()) {
+            config = args;
+        } else if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
+            config = args[0];
+        }
+        if (!config.is_null()) {
+            if (config.contains("numLanes") && config["numLanes"].is_int())
+                num_lanes = static_cast<int>(config["numLanes"].as_int().value());
+            if (config.contains("numLeds") && config["numLeds"].is_int())
+                num_leds = static_cast<int>(config["numLeds"].as_int().value());
+            if (config.contains("iterations") && config["iterations"].is_int())
+                iterations = static_cast<int>(config["iterations"].as_int().value());
+            if (config.contains("timeoutMs") && config["timeoutMs"].is_int())
+                timeout_ms = static_cast<int>(config["timeoutMs"].as_int().value());
+        }
+
+        // Clamp inputs to safe ranges.
+        if (num_lanes < 1) num_lanes = 1;
+        if (num_lanes > 16) num_lanes = 16;
+        if (num_leds < 1) num_leds = 1;
+        if (num_leds > 256) num_leds = 256;
+        if (iterations < 1) iterations = 1;
+        if (iterations > autoresearch::parlio_stream::kMaxIterations) {
+            iterations = autoresearch::parlio_stream::kMaxIterations;
+        }
+        if (timeout_ms < 1) timeout_ms = 1;
+        if (timeout_ms > 5000) timeout_ms = 5000;
+
+        auto r = autoresearch::parlio_stream::validateParlioStreaming(
+            mState->pin_tx, num_lanes, num_leds, iterations,
+            static_cast<uint32_t>(timeout_ms));
+
+        response.set("success", true);
+        response.set("channelsOk", r.channels_ok);
+        response.set("completed", r.completed);
+        response.set("lanes", static_cast<int64_t>(r.lanes));
+        response.set("ledsPerLane", static_cast<int64_t>(r.leds_per_lane));
+        response.set("iterations", static_cast<int64_t>(r.iterations));
+        response.set("steadyAvgUs", static_cast<int64_t>(r.steady_avg_us));
+        response.set("failedIter", static_cast<int64_t>(r.failed_iter));
+        response.set("timeoutMs", static_cast<int64_t>(r.timeout_ms));
+        fl::json per_iter = fl::json::array();
+        for (int i = 0; i < r.iterations; ++i) {
+            per_iter.push_back(static_cast<int64_t>(r.per_iter_us[i]));
+        }
+        response.set("perIterUs", per_iter);
         return response;
     });
 
