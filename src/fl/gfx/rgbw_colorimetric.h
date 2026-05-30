@@ -112,8 +112,13 @@ inline u8 quantize_u8(float v) FL_NOEXCEPT {
 
 // Precomputed per-profile data: emitter XYZ columns + the four matrix inverses
 // the solvers need. Built once when the active (profile, cct) pair changes.
+// xy_w is the *effective* W chromaticity — equal to profile->xy_w when no CCT
+// override is active, otherwise the cct_to_xy() shift. The strict solvers
+// must route barycentric containment against this value (not the profile's
+// raw xy_w) or they will choose the wrong sub-gamut for CCT-shifted whites.
 struct ProfileCache {
     const DiodeProfile* profile;
+    float xy_w[2];                           // effective W chromaticity (incl. CCT shift)
     float P_R[3], P_G[3], P_B[3], P_W[3];   // emitter XYZ at full drive
     float P_RGB_inv[3][3];                   // [R G B]^-1, used by wx_lp_legacy
     float P_RGW_inv[3][3];                   // [R G W]^-1
