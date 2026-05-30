@@ -46,7 +46,14 @@
  * - Critical for achieving <20 cycle target
  */
 
-#ifdef __riscv  // Only compile for RISC-V platforms (ESP32-C6)
+// The fast ISR uses RV32A lr.w/sc.w atomics for the circular-buffer
+// index update. Only compile on RISC-V cores that ship the A extension
+// (ESP32-C6 / H2 / C5 / P4 — RV32IMAC+). ESP32-C3 and C2 are RV32IMC
+// and would fail the assembler with `extension 'zalrsc' required`.
+// The companion C++ glue in gpio_isr_rx_mcpwm.cpp.hpp already gates on
+// SOC_MCPWM_SUPPORTED, which excludes C3/C2 — this aligns the assembly
+// with that gate.
+#if defined(__riscv) && defined(__riscv_atomic)
 
 // ============================================================================
 // Section Placement
@@ -181,4 +188,4 @@ gpio_fast_edge_isr:
 
 .size gpio_fast_edge_isr, .-gpio_fast_edge_isr
 
-#endif // __riscv
+#endif // __riscv && __riscv_atomic
