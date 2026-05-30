@@ -192,6 +192,11 @@ Channel::Channel(const ChipsetVariant& chipset, fl::span<CRGB> leds,
     // Set the LED data array
     setLeds(leds);
 
+    // Sync mSettings from ChannelOptions so the mWhiteCfg variant (and any
+    // other future fields) survives to showPixels(). The setter calls below
+    // are then idempotent overlays on top of the same data.
+    mSettings = options;
+
     // Set color correction/temperature/dither/rgbw from ChannelOptions
     setCorrection(options.mCorrection);
     setTemperature(options.mTemperature);
@@ -218,6 +223,10 @@ Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds
     // Set the LED data array
     setLeds(leds);
 
+    // Sync mSettings from ChannelOptions so the mWhiteCfg variant survives
+    // to showPixels(). See sibling ChipsetVariant constructor for rationale.
+    mSettings = options;
+
     // Set color correction/temperature/dither/rgbw from ChannelOptions
     setCorrection(options.mCorrection);
     setTemperature(options.mTemperature);
@@ -239,6 +248,9 @@ void Channel::applyConfig(const ChannelConfig& config) {
         mName = config.mName.value();
     }
     setLeds(config.mLeds);
+    // Sync mSettings from incoming options so the mWhiteCfg variant survives
+    // to showPixels(). Setters below are idempotent overlays on the same data.
+    mSettings = config.options;
     setCorrection(config.options.mCorrection);
     setTemperature(config.options.mTemperature);
     setDither(config.options.mDitherMode);
