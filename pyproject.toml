@@ -5,10 +5,10 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to an fbuild release that includes the Teensy framework library
-    # fixes from 2.2.5 and the ESP32-P4 path/source discovery fixes needed by
-    # AutoResearch and PARLIO validation (FastLED/fbuild#273).
-    "fbuild==2.2.7",
+    # Pin to an fbuild release with the Teensy 4.x SPI shadowing-filter fix
+    # (FastLED/fbuild#284, closes FastLED/FastLED#2365) on top of the prior
+    # Teensy framework-library and ESP32-P4 path/source discovery fixes.
+    "fbuild==2.2.9",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
