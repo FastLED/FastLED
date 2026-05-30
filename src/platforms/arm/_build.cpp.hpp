@@ -9,6 +9,7 @@
 #include "platforms/arm/d51/_build.cpp.hpp"
 #include "platforms/arm/mgm240/_build.cpp.hpp"
 #include "platforms/arm/nrf52/_build.cpp.hpp"
+#include "platforms/arm/renesas/_build.cpp.hpp"
 #include "platforms/arm/rp/_build.cpp.hpp"
 #include "platforms/arm/sam/_build.cpp.hpp"
 #include "platforms/arm/stm32/_build.cpp.hpp"
