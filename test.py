@@ -47,7 +47,9 @@ if not sys.stdout.isatty():
     if callable(_reconfigure_stdout):
         try:
             _reconfigure_stdout(line_buffering=True)
-        except KeyboardInterrupt:
+        except KeyboardInterrupt:  # noqa: KBI002
+            # Pre-imports startup path — handle_keyboard_interrupt() isn't
+            # available yet (it's imported below at line 80). Bare re-raise.
             raise
         except ValueError:
             pass
@@ -56,7 +58,8 @@ if not sys.stderr.isatty():
     if callable(_reconfigure_stderr):
         try:
             _reconfigure_stderr(line_buffering=True)
-        except KeyboardInterrupt:
+        except KeyboardInterrupt:  # noqa: KBI002
+            # See note above on the stdout block — helper not yet imported.
             raise
         except ValueError:
             pass
