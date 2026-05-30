@@ -196,6 +196,7 @@
 #include "AutoResearchSimd.h"
 #include "AutoResearchWave8Expand.h"  // boot-time #2526 micro-bench
 #include "AutoResearchParlioEncode.h" // full parlio encode bench (post-byte-LUT)
+#include "AutoResearchParlioStream.h" // #2548 boot-time PARLIO streaming validation
 
 // ============================================================================
 // Teensy Hardware Watchdog (crash recovery) - DISABLED
@@ -381,6 +382,17 @@ void setup() {
     ss << "[RX CREATE] ✓ RX channel created successfully (will be initialized with config in begin())\n";
     ss << "[RX SETUP] ✓ RX channel ready for LED autoresearch";
     FL_PRINT(ss.str());
+
+    // ========================================================================
+    // PARLIO streaming validation (#2548 follow-up)
+    // ========================================================================
+    // Exercises the production engine path: 3-buffer ring + txDoneCallback ISR
+    // streaming + BF1 (#2559). Reports PASS/FAIL via esp_rom_printf so it
+    // works on COM25 USB-Serial-JTAG without the broken testSimd RPC routing.
+#ifdef FL_PARLIO_STREAM_VALIDATE_AT_BOOT
+    autoresearch::parlio_stream::validateAtBoot(
+        g_autoresearch_state->pin_tx);
+#endif
 
     // ========================================================================
     // Remote RPC Function Registration (EARLY - before GPIO baseline test)
