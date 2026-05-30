@@ -110,6 +110,21 @@ struct ParlioEncodeResult {
     fl::u32 var_pipe6_us;
     fl::u32 var_pipe8_us;
 
+    // BF1: chipset-aware direct encode (#2548 deep-dive). Skips byte_lut
+    // entirely. Uses the algebraic identity:
+    //   output_bit(s, p, lane) = M0_p XOR (input_bit_(7-s)_of_lane AND D_p)
+    // where M0_p = (W0 >> (7-p)) & 1, D_p = M0_p XOR M1_p, and W0/W1 are
+    // the bit0/bit1 waveform constants. For typical WS2812B Wave8 timing
+    // (T1=400/T2=450/T3=400), D=0x18 → only 2 of 8 pulses are input-dependent,
+    // 6 pulses produce constant 0xFF/0x00 bytes regardless of input data.
+    // Bit-transpose of input bytes reuses existing spread_transpose16_symbol
+    // (single call per byte-position, replacing the current 8 calls + 16
+    // byte_lut expansions). Theoretical: ~88 + ~128 ops ≈ 216 vs current
+    // pipe4 ~1325 cyc/byte-position → potential 6× reduction.
+    fl::u32 var_bf1_runtime_us;     // W0/W1 as runtime params
+    fl::u32 var_bf1_ws2812b_us;     // W0=0xE0, W1=0xF8 baked at compile time
+    fl::u32 var_bf1_pipe4_us;       // BF1 fused with 4-position pipelining
+
     fl::u32 sink;
 };
 
@@ -888,6 +903,228 @@ fl::u32 fl_parlio_inner_pipe4(const fl::u8 *scratch,
         output[output_idx_d] ^ output[output_idx_d + 127]);
 }
 
+// =============================================================================
+// BF1 — chipset-aware direct encode (#2548 deep-dive)
+// =============================================================================
+//
+// Algebraic identity exploited:
+//   For input byte B and lane L, the output bit at (symbol s, pulse p) is:
+//     bit = (W_{input_bit_(7-s)_of_B} >> (7-p)) & 1
+//         = M0_p XOR (input_bit_(7-s)_of_B AND D_p)
+//   where:
+//     M0_p = (W0 >> (7-p)) & 1     // bit-0-waveform's p-th pulse
+//     M1_p = (W1 >> (7-p)) & 1     // bit-1-waveform's p-th pulse
+//     D_p  = M0_p XOR M1_p         // 1 if pulse is input-dependent
+//
+// Output byte at (s, p, half-h) packs bits L=0..7 from lanes (L+8h):
+//   output_byte = M0_p_mask XOR (col[s][h] AND D_p_mask)
+//   where col[s][h] = byte where bit L = bit (7-s) of lanes[L+8h] input byte
+//   and M0_p_mask, D_p_mask are 0xFF/0x00 replications.
+//
+// The bit-transpose of input bytes giving col[s][h] is exactly what
+// fl::detail::spread_transpose16_symbol(input_lanes, cols) computes — when
+// applied to input bytes (not symbol bytes), each output byte cols[2s+h] is
+// the column for input bit (7-s) of lanes_(8h..8h+7). One call per
+// byte-position instead of 8 (one per symbol).
+//
+// For WS2812B Wave8 with T1=400/T2=450/T3=400:
+//   W0 = 0xE0 (bits 7,6,5 set — 3 HIGH pulses for bit-0)
+//   W1 = 0xF8 (bits 7,6,5,4,3 set — 5 HIGH pulses for bit-1)
+//   D  = 0x18 (input-dependent at p=3,4)
+//   M0 = 0xE0 (constant-1 at p=0,1,2; constant-0 at p=3,4,5,6,7)
+// → 6 of 8 pulses produce constant bytes regardless of input data.
+
+FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
+void wave8Transpose_16_bf1_runtime(const fl::u8 lanes[16],
+                                   fl::u8 W0, fl::u8 W1,
+                                   fl::u8 *output) {
+    // Precompute per-pulse masks (8 bytes total, fits in registers).
+    fl::u8 d_mask[8];
+    fl::u8 m0_mask[8];
+    const fl::u8 D_byte = W0 ^ W1;
+    for (int p = 0; p < 8; ++p) {
+        const int shift = 7 - p;
+        d_mask[p] = ((D_byte >> shift) & 1) ? 0xFFu : 0x00u;
+        m0_mask[p] = ((W0 >> shift) & 1) ? 0xFFu : 0x00u;
+    }
+
+    // Bit-transpose the input lane bytes — reuses spread_transpose16_symbol
+    // with lane bytes as direct input. Output: cols[2s+h] = byte where bit L
+    // = bit (7-s) of lanes[L+8h].
+    fl::u8 cols[16];
+    fl::detail::spread_transpose16_symbol(lanes, cols);
+
+    // Emit 128 output bytes. Each (s, p, h) tuple does a 1-byte AND/XOR/store.
+    for (int s = 0; s < 8; ++s) {
+        const fl::u8 col_lo = cols[2 * s + 0];
+        const fl::u8 col_hi = cols[2 * s + 1];
+        for (int p = 0; p < 8; ++p) {
+            output[s * 16 + p * 2 + 0] = m0_mask[p] ^ (col_lo & d_mask[p]);
+            output[s * 16 + p * 2 + 1] = m0_mask[p] ^ (col_hi & d_mask[p]);
+        }
+    }
+}
+
+FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
+void wave8Transpose_16_bf1_ws2812b(const fl::u8 lanes[16], fl::u8 *output) {
+    // Specialized for WS2812B Wave8 (T1=400/T2=450/T3=400):
+    //   W0=0xE0, W1=0xF8 → D=0x18, M0=0xE0
+    //   D-bit pattern (MSB=pulse 0): p=3 and p=4 are input-dependent
+    //   M0-bit pattern: pulses 0,1,2 are constant-0xFF; pulses 3,4,5,6,7 use M0=0
+    fl::u8 cols[16];
+    fl::detail::spread_transpose16_symbol(lanes, cols);
+
+    for (int s = 0; s < 8; ++s) {
+        const fl::u8 col_lo = cols[2 * s + 0];
+        const fl::u8 col_hi = cols[2 * s + 1];
+        const int base = s * 16;
+        // p=0: constant 0xFF (M0=1, D=0)
+        output[base +  0] = 0xFFu;
+        output[base +  1] = 0xFFu;
+        // p=1: constant 0xFF
+        output[base +  2] = 0xFFu;
+        output[base +  3] = 0xFFu;
+        // p=2: constant 0xFF
+        output[base +  4] = 0xFFu;
+        output[base +  5] = 0xFFu;
+        // p=3: input-dependent (D=1, M0=0): output = col
+        output[base +  6] = col_lo;
+        output[base +  7] = col_hi;
+        // p=4: input-dependent (D=1, M0=0): output = col
+        output[base +  8] = col_lo;
+        output[base +  9] = col_hi;
+        // p=5: constant 0x00
+        output[base + 10] = 0x00u;
+        output[base + 11] = 0x00u;
+        // p=6: constant 0x00
+        output[base + 12] = 0x00u;
+        output[base + 13] = 0x00u;
+        // p=7: constant 0x00
+        output[base + 14] = 0x00u;
+        output[base + 15] = 0x00u;
+    }
+}
+
+FASTLED_FORCE_INLINE FL_IRAM
+fl::u32 fl_parlio_inner_bf1_runtime(const fl::u8 *scratch,
+                                    fl::size_t lane_stride,
+                                    fl::size_t byte_offset,
+                                    const fl::Wave8ByteExpansionLut &byte_lut,
+                                    fl::u8 *output,
+                                    fl::size_t output_idx) {
+    fl::u8 lanes[16];
+    for (fl::size_t lane = 0; lane < 16; lane++) {
+        lanes[lane] = scratch[lane * lane_stride + byte_offset];
+    }
+    // Extract W0, W1 from byte_lut. byte_lut.lut[0x00].symbols[0].data is the
+    // pure bit-0 waveform; byte_lut.lut[0xFF].symbols[0].data is the bit-1.
+    const fl::u8 W0 = byte_lut.lut[0x00].symbols[0].data;
+    const fl::u8 W1 = byte_lut.lut[0xFF].symbols[0].data;
+    wave8Transpose_16_bf1_runtime(lanes, W0, W1, output + output_idx);
+    return static_cast<fl::u32>(output[output_idx] ^ output[output_idx + 127]);
+}
+
+FASTLED_FORCE_INLINE FL_IRAM
+fl::u32 fl_parlio_inner_bf1_ws2812b(const fl::u8 *scratch,
+                                    fl::size_t lane_stride,
+                                    fl::size_t byte_offset,
+                                    const fl::Wave8ByteExpansionLut &byte_lut,
+                                    fl::u8 *output,
+                                    fl::size_t output_idx) {
+    (void)byte_lut;  // constants baked at compile time
+    fl::u8 lanes[16];
+    for (fl::size_t lane = 0; lane < 16; lane++) {
+        lanes[lane] = scratch[lane * lane_stride + byte_offset];
+    }
+    wave8Transpose_16_bf1_ws2812b(lanes, output + output_idx);
+    return static_cast<fl::u32>(output[output_idx] ^ output[output_idx + 127]);
+}
+
+// BF1+pipe4: 4 byte-positions, each does single-position BF1, interleaved by
+// the compiler when force-inlined. The col[] arrays are 16 bytes per position
+// = 64 bytes total stack. Per-symbol working set is just col_lo/col_hi pairs
+// × 4 = 8 bytes (within budget). Output emission is mostly constant stores
+// which won't compete for the same FU.
+FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
+void wave8Transpose_16x4_bf1_pipe4(const fl::u8 lanes_a[16],
+                                   const fl::u8 lanes_b[16],
+                                   const fl::u8 lanes_c[16],
+                                   const fl::u8 lanes_d[16],
+                                   fl::u8 *output_a,
+                                   fl::u8 *output_b,
+                                   fl::u8 *output_c,
+                                   fl::u8 *output_d) {
+    fl::u8 cols_a[16], cols_b[16], cols_c[16], cols_d[16];
+    fl::detail::spread_transpose16_symbol(lanes_a, cols_a);
+    fl::detail::spread_transpose16_symbol(lanes_b, cols_b);
+    fl::detail::spread_transpose16_symbol(lanes_c, cols_c);
+    fl::detail::spread_transpose16_symbol(lanes_d, cols_d);
+
+    for (int s = 0; s < 8; ++s) {
+        const int base = s * 16;
+        const fl::u8 al = cols_a[2*s + 0], ah = cols_a[2*s + 1];
+        const fl::u8 bl = cols_b[2*s + 0], bh = cols_b[2*s + 1];
+        const fl::u8 cl = cols_c[2*s + 0], ch = cols_c[2*s + 1];
+        const fl::u8 dl = cols_d[2*s + 0], dh = cols_d[2*s + 1];
+        // p=0..2: constant 0xFF
+        for (int p = 0; p < 3; ++p) {
+            output_a[base + p*2 + 0] = 0xFFu; output_a[base + p*2 + 1] = 0xFFu;
+            output_b[base + p*2 + 0] = 0xFFu; output_b[base + p*2 + 1] = 0xFFu;
+            output_c[base + p*2 + 0] = 0xFFu; output_c[base + p*2 + 1] = 0xFFu;
+            output_d[base + p*2 + 0] = 0xFFu; output_d[base + p*2 + 1] = 0xFFu;
+        }
+        // p=3,4: input-dependent
+        output_a[base +  6] = al; output_a[base +  7] = ah;
+        output_a[base +  8] = al; output_a[base +  9] = ah;
+        output_b[base +  6] = bl; output_b[base +  7] = bh;
+        output_b[base +  8] = bl; output_b[base +  9] = bh;
+        output_c[base +  6] = cl; output_c[base +  7] = ch;
+        output_c[base +  8] = cl; output_c[base +  9] = ch;
+        output_d[base +  6] = dl; output_d[base +  7] = dh;
+        output_d[base +  8] = dl; output_d[base +  9] = dh;
+        // p=5..7: constant 0x00
+        for (int p = 5; p < 8; ++p) {
+            output_a[base + p*2 + 0] = 0x00u; output_a[base + p*2 + 1] = 0x00u;
+            output_b[base + p*2 + 0] = 0x00u; output_b[base + p*2 + 1] = 0x00u;
+            output_c[base + p*2 + 0] = 0x00u; output_c[base + p*2 + 1] = 0x00u;
+            output_d[base + p*2 + 0] = 0x00u; output_d[base + p*2 + 1] = 0x00u;
+        }
+    }
+}
+
+FASTLED_FORCE_INLINE FL_IRAM
+fl::u32 fl_parlio_inner_bf1_pipe4(const fl::u8 *scratch,
+                                  fl::size_t lane_stride,
+                                  fl::size_t byte_offset_a,
+                                  fl::size_t byte_offset_b,
+                                  fl::size_t byte_offset_c,
+                                  fl::size_t byte_offset_d,
+                                  const fl::Wave8ByteExpansionLut &byte_lut,
+                                  fl::u8 *output,
+                                  fl::size_t output_idx_a,
+                                  fl::size_t output_idx_b,
+                                  fl::size_t output_idx_c,
+                                  fl::size_t output_idx_d) {
+    (void)byte_lut;
+    fl::u8 lanes_a[16], lanes_b[16], lanes_c[16], lanes_d[16];
+    for (fl::size_t lane = 0; lane < 16; lane++) {
+        lanes_a[lane] = scratch[lane * lane_stride + byte_offset_a];
+        lanes_b[lane] = scratch[lane * lane_stride + byte_offset_b];
+        lanes_c[lane] = scratch[lane * lane_stride + byte_offset_c];
+        lanes_d[lane] = scratch[lane * lane_stride + byte_offset_d];
+    }
+    wave8Transpose_16x4_bf1_pipe4(lanes_a, lanes_b, lanes_c, lanes_d,
+                                  output + output_idx_a,
+                                  output + output_idx_b,
+                                  output + output_idx_c,
+                                  output + output_idx_d);
+    return static_cast<fl::u32>(
+        output[output_idx_a] ^ output[output_idx_a + 127] ^
+        output[output_idx_b] ^ output[output_idx_b + 127] ^
+        output[output_idx_c] ^ output[output_idx_c + 127] ^
+        output[output_idx_d] ^ output[output_idx_d + 127]);
+}
+
 // --- Templated pipeN kernel for N ≥ 5 (pipe6, pipe8) ---
 // Same dataflow as the explicit pipe2/3/4 kernels — compiler unrolls all the
 // `for (p = 0; p < N; ++p)` loops at -O3, so codegen is equivalent to the
@@ -1026,6 +1263,34 @@ inline fl::u32 fl_parlio_measure_pipe4(const fl::u8 *scratch,
         *sink ^= fl_parlio_inner_pipe4(
             scratch, lane_stride, off_a, off_b, off_c, off_d, byte_lut,
             output, out_a, out_b, out_c, out_d);
+    }
+    return micros() - t0;
+}
+
+// BF1 pipe4 measure (4 byte-positions per outer iter).
+inline fl::u32 fl_parlio_measure_bf1_pipe4(const fl::u8 *scratch,
+                                            fl::u8 *output,
+                                            const fl::Wave8ByteExpansionLut &byte_lut,
+                                            int iters_byte_positions,
+                                            volatile fl::u32 *sink) {
+    constexpr fl::size_t LANES = 16;
+    constexpr fl::size_t BYTES_PER_LANE = 768;
+    const fl::size_t lane_stride = BYTES_PER_LANE;
+    const int outer_iters = iters_byte_positions / 4;
+
+    fl::u32 t0 = micros();
+    for (int it = 0; it < outer_iters; ++it) {
+        const fl::size_t base = (static_cast<fl::size_t>(it) * 4) % BYTES_PER_LANE;
+        const fl::size_t off_a = base;
+        const fl::size_t off_b = (base + 1) % BYTES_PER_LANE;
+        const fl::size_t off_c = (base + 2) % BYTES_PER_LANE;
+        const fl::size_t off_d = (base + 3) % BYTES_PER_LANE;
+        *sink ^= fl_parlio_inner_bf1_pipe4(
+            scratch, lane_stride, off_a, off_b, off_c, off_d, byte_lut, output,
+            off_a * LANES * sizeof(fl::Wave8Byte),
+            off_b * LANES * sizeof(fl::Wave8Byte),
+            off_c * LANES * sizeof(fl::Wave8Byte),
+            off_d * LANES * sizeof(fl::Wave8Byte));
     }
     return micros() - t0;
 }
@@ -1372,6 +1637,39 @@ inline ParlioEncodeResult measureParlioEncode(int iters_in = 12000) {
     result.var_pipe8_us = fl_parlio_measure_pipeN<8>(
         scratch_sram, output_sram, byte_lut, iters_in, &sink);
 
+    // BF1 (chipset-aware direct encode).
+    for (int i = 0; i < 64; ++i) {
+        sink ^= fl_parlio_inner_bf1_runtime(scratch_sram, BYTES_PER_LANE,
+                                             i % BYTES_PER_LANE, byte_lut, output_sram,
+                                             (i % BYTES_PER_LANE) * LANES * sizeof(fl::Wave8Byte));
+    }
+    result.var_bf1_runtime_us = fl_parlio_measure_variant<fl_parlio_inner_bf1_runtime>(
+        scratch_sram, output_sram, byte_lut, iters_in, &sink);
+
+    for (int i = 0; i < 64; ++i) {
+        sink ^= fl_parlio_inner_bf1_ws2812b(scratch_sram, BYTES_PER_LANE,
+                                             i % BYTES_PER_LANE, byte_lut, output_sram,
+                                             (i % BYTES_PER_LANE) * LANES * sizeof(fl::Wave8Byte));
+    }
+    result.var_bf1_ws2812b_us = fl_parlio_measure_variant<fl_parlio_inner_bf1_ws2812b>(
+        scratch_sram, output_sram, byte_lut, iters_in, &sink);
+
+    for (int i = 0; i < 64; i += 4) {
+        sink ^= fl_parlio_inner_bf1_pipe4(
+            scratch_sram, BYTES_PER_LANE,
+            i % BYTES_PER_LANE,
+            (i + 1) % BYTES_PER_LANE,
+            (i + 2) % BYTES_PER_LANE,
+            (i + 3) % BYTES_PER_LANE,
+            byte_lut, output_sram,
+            (i % BYTES_PER_LANE) * LANES * sizeof(fl::Wave8Byte),
+            ((i + 1) % BYTES_PER_LANE) * LANES * sizeof(fl::Wave8Byte),
+            ((i + 2) % BYTES_PER_LANE) * LANES * sizeof(fl::Wave8Byte),
+            ((i + 3) % BYTES_PER_LANE) * LANES * sizeof(fl::Wave8Byte));
+    }
+    result.var_bf1_pipe4_us = fl_parlio_measure_bf1_pipe4(
+        scratch_sram, output_sram, byte_lut, iters_in, &sink);
+
     // #2548 L4: lazy alloc the 512-KB LUT from PSRAM, build, time, free.
     fl::u8 *l4_buf = fl_parlio_alloc(FL_L4_LUT_BYTES, /*psram=*/true);
     if (l4_buf != nullptr) {
@@ -1569,6 +1867,30 @@ inline void printParlioEncodeResultRom(const ParlioEncodeResult &r) {
         esp_rom_printf("BENCH_PARLIO pipe8_8pos     total_us=%u frame_us=%u speedup_x100=%u (baseline=100)  ws2812b_tx=%u\n",
                        r.var_pipe8_us, p8_frame_us, spd_p8_x100,
                        WS2812B_FRAME_US);
+    }
+
+    // BF1 runtime (W0/W1 from byte_lut).
+    if (r.var_bf1_runtime_us > 0) {
+        const fl::u32 fr = static_cast<fl::u32>(static_cast<fl::u64>(r.var_bf1_runtime_us) * 768 / iters64);
+        const fl::u32 sp = static_cast<fl::u32>(static_cast<fl::u64>(r.perpos_ss_us) * 100 / r.var_bf1_runtime_us);
+        esp_rom_printf("BENCH_PARLIO bf1_runtime    total_us=%u frame_us=%u speedup_x100=%u (baseline=100)  ws2812b_tx=%u\n",
+                       r.var_bf1_runtime_us, fr, sp, WS2812B_FRAME_US);
+    }
+
+    // BF1 specialized for WS2812B Wave8.
+    if (r.var_bf1_ws2812b_us > 0) {
+        const fl::u32 fr = static_cast<fl::u32>(static_cast<fl::u64>(r.var_bf1_ws2812b_us) * 768 / iters64);
+        const fl::u32 sp = static_cast<fl::u32>(static_cast<fl::u64>(r.perpos_ss_us) * 100 / r.var_bf1_ws2812b_us);
+        esp_rom_printf("BENCH_PARLIO bf1_ws2812b    total_us=%u frame_us=%u speedup_x100=%u (baseline=100)  ws2812b_tx=%u\n",
+                       r.var_bf1_ws2812b_us, fr, sp, WS2812B_FRAME_US);
+    }
+
+    // BF1 + pipe4.
+    if (r.var_bf1_pipe4_us > 0) {
+        const fl::u32 fr = static_cast<fl::u32>(static_cast<fl::u64>(r.var_bf1_pipe4_us) * 768 / iters64);
+        const fl::u32 sp = static_cast<fl::u32>(static_cast<fl::u64>(r.perpos_ss_us) * 100 / r.var_bf1_pipe4_us);
+        esp_rom_printf("BENCH_PARLIO bf1_pipe4_4pos total_us=%u frame_us=%u speedup_x100=%u (baseline=100)  ws2812b_tx=%u\n",
+                       r.var_bf1_pipe4_us, fr, sp, WS2812B_FRAME_US);
     }
 
     // L4-NIBBLE (32 KB, fits L2)
