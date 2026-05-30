@@ -35,7 +35,10 @@ OVERRIDE_ENV_VAR = "FL_AGENT_ALLOW_NEW_EXAMPLE"
 def main() -> int:
     try:
         input_data = json.load(sys.stdin)
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
+        from ci.util.global_interrupt_handler import handle_keyboard_interrupt
+
+        handle_keyboard_interrupt(ki)
         raise
     except json.JSONDecodeError as exc:
         print(
