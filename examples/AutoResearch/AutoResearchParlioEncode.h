@@ -27,6 +27,7 @@
 #include "fl/channels/detail/wave8.hpp"
 #include "fl/channels/wave8.h"
 #include "fl/chipsets/led_timing.h"
+#include "fl/log/log.h"  // FL_WARN
 #include "fl/stl/bit_cast.h"
 #include "fl/stl/int.h"
 
@@ -94,8 +95,15 @@ inline fl::u32 fl_parlio_measure(const fl::u8 *scratch, fl::size_t scratch_size,
     constexpr fl::size_t LANES = 16;
     constexpr fl::size_t BYTES_PER_LANE = 768; // 256 LEDs × 3
     const fl::size_t lane_stride = BYTES_PER_LANE;
-    (void)scratch_size;
-    (void)output_size;
+
+    const fl::size_t required_scratch = LANES * BYTES_PER_LANE;
+    const fl::size_t required_output = BYTES_PER_LANE * LANES * sizeof(fl::Wave8Byte);
+    if (scratch_size < required_scratch || output_size < required_output) {
+        FL_WARN("fl_parlio_measure: undersized buffer "
+                "(scratch=" << scratch_size << " need=" << required_scratch
+                << ", output=" << output_size << " need=" << required_output << ")");
+        return 0u;
+    }
 
     fl::u32 t0 = micros();
     for (int it = 0; it < iters_byte_positions; ++it) {
