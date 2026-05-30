@@ -5,10 +5,17 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to an fbuild release with the Teensy 4.x SPI shadowing-filter fix
-    # (FastLED/fbuild#284, closes FastLED/FastLED#2365) on top of the prior
-    # Teensy framework-library and ESP32-P4 path/source discovery fixes.
-    "fbuild==2.2.9",
+    # Pin to fbuild 2.2.11 — content of 2.2.10 republished with the full
+    # wheel set (win_amd64 + manylinux_x86_64 were missing from 2.2.10's
+    # PyPI upload). Bundles SAMD51 `cores/arduino` fallback + include-path
+    # injection (FastLED/fbuild#319/#320), nRF52 nRF52DK->pca10056 variant
+    # alias (FastLED/fbuild#321/#322), board JSON tinyuf2 partition rename
+    # + cmsis_dsp_lib validator whitelist (FastLED/fbuild#318), and
+    # daemon.rs subprocess-spawn lint annotations (FastLED/fbuild#317).
+    # Together these unblock Build SAMD51J, Build nRF52840 DK, and reduce
+    # Validate Boards drift from 39 boards to 14 (configuration-choice
+    # remainder pending maintainer review).
+    "fbuild==2.2.11",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
