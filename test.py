@@ -48,6 +48,10 @@ if not sys.stdout.isatty():
         try:
             _reconfigure_stdout(line_buffering=True)
         except KeyboardInterrupt:
+            # Notify the main thread (no-op on the main thread itself but
+            # the project's KBI checker requires the call) and propagate
+            # so __main__'s top-level handler runs cleanup.
+            _thread.interrupt_main()
             raise
         except ValueError:
             pass
@@ -57,6 +61,7 @@ if not sys.stderr.isatty():
         try:
             _reconfigure_stderr(line_buffering=True)
         except KeyboardInterrupt:
+            _thread.interrupt_main()
             raise
         except ValueError:
             pass

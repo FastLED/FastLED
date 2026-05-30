@@ -83,4 +83,9 @@ EXCLUDED_TEST_DIRS: set[Path] = {
     TESTS_DIR / "fl" / "remote" / "rpc",
     TESTS_DIR / "fl" / "codec",
     TESTS_DIR / "fl" / "fx" / "2d",
+    # Standalone PIO project fixture (driven by ci/tests/test_fbuild_qemu.py),
+    # NOT a host unit test. Its src/main.cpp includes <Arduino.h> + provides
+    # setup()/loop() — those conflict with the doctest runner. Excluded
+    # categorically — proper PR for this is #2600.
+    TESTS_DIR / "fbuild_qemu_smoke",
 }
