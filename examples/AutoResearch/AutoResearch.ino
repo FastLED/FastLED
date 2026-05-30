@@ -339,8 +339,8 @@ void setup() {
     // testSimd RPC routing on P4 is fixed (#2541).
 #ifdef FL_BENCH_WAVE8_AT_BOOT
     {
-        auto _w8r = autoresearch::wave8_bench::measureWave8Expand();
-        autoresearch::wave8_bench::printWave8ExpandResultRom(_w8r);
+        auto w8r = autoresearch::wave8_bench::measureWave8Expand();
+        autoresearch::wave8_bench::printWave8ExpandResultRom(w8r);
     }
 #endif
 
