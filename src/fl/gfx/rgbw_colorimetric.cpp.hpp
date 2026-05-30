@@ -48,14 +48,20 @@ void build_profile_cache(const DiodeProfile* p, int cct_override,
     const bool ok_rgw = invert3x3(P_RGW, cache->P_RGW_inv);
     const bool ok_rbw = invert3x3(P_RBW, cache->P_RBW_inv);
     const bool ok_bgw = invert3x3(P_BGW, cache->P_BGW_inv);
-    // Inverting a singular matrix leaves the destination with whatever
-    // invert3x3 wrote — solvers reading it would silently produce garbage.
-    // Warn once so the user knows their profile has degenerate primaries
-    // (colinear chromaticities, near-zero luminance, etc).
     if (!(ok_rgb && ok_rgw && ok_rbw && ok_bgw)) {
         FL_WARN_ONCE("RGBW colorimetric: profile has degenerate primaries — "
                      "one or more sub-gamut matrix inversions failed. Output "
                      "colors will be incorrect. Check DiodeProfile xy/lum values.");
+        // Zero-init any failed inverse so downstream matvec3() output is
+        // deterministic (zero) rather than UB-valued garbage.
+        auto zero3x3 = [](float m[3][3]) FL_NOEXCEPT {
+            for (int i = 0; i < 3; ++i)
+                for (int j = 0; j < 3; ++j) m[i][j] = 0.0f;
+        };
+        if (!ok_rgb) zero3x3(cache->P_RGB_inv);
+        if (!ok_rgw) zero3x3(cache->P_RGW_inv);
+        if (!ok_rbw) zero3x3(cache->P_RBW_inv);
+        if (!ok_bgw) zero3x3(cache->P_BGW_inv);
     }
 
     matvec3(cache->P_RGB_inv, cache->P_W, cache->d_W);
