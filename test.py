@@ -47,6 +47,8 @@ if not sys.stdout.isatty():
     if callable(_reconfigure_stdout):
         try:
             _reconfigure_stdout(line_buffering=True)
+        except KeyboardInterrupt:
+            raise
         except ValueError:
             pass
 if not sys.stderr.isatty():
@@ -54,6 +56,8 @@ if not sys.stderr.isatty():
     if callable(_reconfigure_stderr):
         try:
             _reconfigure_stderr(line_buffering=True)
+        except KeyboardInterrupt:
+            raise
         except ValueError:
             pass
 
