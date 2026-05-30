@@ -230,11 +230,11 @@ private:
         if (mUsbSerialJtag.isBuffered()) {
             // Our USB-Serial JTAG driver installed successfully
             mUseUsbSerialJtag = true;
-            esp_rom_printf("EspIO: Using ESP-IDF USB-Serial JTAG driver\n");
+            esp_rom_printf("EspIO: Using ESP-IDF USB-Serial JTAG driver\n");  // ok esp_rom_printf - USB-Serial-JTAG vs ROM-UART selection log (pre-logging)
         } else {
             // USB-Serial JTAG driver failed to install - fall back to UART0
             mUseUsbSerialJtag = false;
-            esp_rom_printf("EspIO: USB-Serial JTAG installation failed - falling back to UART0\n");
+            esp_rom_printf("EspIO: USB-Serial JTAG installation failed - falling back to UART0\n");  // ok esp_rom_printf - USB-Serial-JTAG vs ROM-UART selection log (pre-logging)
         }
 #endif
     }

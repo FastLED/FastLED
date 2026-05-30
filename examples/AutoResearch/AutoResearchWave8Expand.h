@@ -187,17 +187,17 @@ inline void printWave8ExpandResultRom(const Wave8ExpandResult &r) {
     fl::u32 t16_nib_frame = static_cast<fl::u32>(static_cast<fl::u64>(r.transpose16_nibble_us) * 768 / iters64);
     fl::u32 t16_byte_frame = static_cast<fl::u32>(static_cast<fl::u64>(r.transpose16_byte_us) * 768 / iters64);
 
-    esp_rom_printf("\nBENCH_EXPAND_START (issue #2526)\n");
-    esp_rom_printf("BENCH_EXPAND iters=%u sink=%u\n", r.iters, r.sink);
-    esp_rom_printf("BENCH_EXPAND expand_only_us  nibble=%u byte=%u batched=%u\n",
+    esp_rom_printf("\nBENCH_EXPAND_START (issue #2526)\n");  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
+    esp_rom_printf("BENCH_EXPAND iters=%u sink=%u\n", r.iters, r.sink);  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
+    esp_rom_printf("BENCH_EXPAND expand_only_us  nibble=%u byte=%u batched=%u\n",  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
                    r.expand_nibble_us, r.expand_byte_us, r.expand_batched_us);
-    esp_rom_printf("BENCH_EXPAND transpose16_us  nibble=%u byte=%u\n",
+    esp_rom_printf("BENCH_EXPAND transpose16_us  nibble=%u byte=%u\n",  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
                    r.transpose16_nibble_us, r.transpose16_byte_us);
-    esp_rom_printf("BENCH_EXPAND frame_equiv_us  expand_nibble=%u expand_byte=%u t16_nibble=%u t16_byte=%u\n",
+    esp_rom_printf("BENCH_EXPAND frame_equiv_us  expand_nibble=%u expand_byte=%u t16_nibble=%u t16_byte=%u\n",  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
                    expand_nib_frame, expand_byte_frame, t16_nib_frame, t16_byte_frame);
-    esp_rom_printf("BENCH_EXPAND speedup_x100  expand=%u batched=%u transpose16=%u\n",
+    esp_rom_printf("BENCH_EXPAND speedup_x100  expand=%u batched=%u transpose16=%u\n",  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
                    spd_byte, spd_batched, spd_t16);
-    esp_rom_printf("BENCH_EXPAND_END\n\n");
+    esp_rom_printf("BENCH_EXPAND_END\n\n");  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
 }
 
 #else // non-ESP32
