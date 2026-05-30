@@ -4,8 +4,14 @@
 
 #ifndef FASTLED_FORCE_SOFTWARE_SPI
 
-// Check if STM32 HAL is available
-#if defined(HAL_SPI_MODULE_ENABLED)
+// Check if STM32 HAL is available AND the user has explicitly opted into
+// hardware SPI. Pulling in Arduino's `<SPI.h>` unconditionally on HAL
+// detection breaks STM32H7 / Giga R1 builds where the Arduino mbed-os
+// core does NOT auto-resolve `<SPI.h>` from PlatformIO's lib finder
+// (`fastspi_arm_stm32.h:11: fatal error: SPI.h: No such file or directory`).
+// Users who want STM32 hardware SPI define `FASTLED_ALL_PINS_HARDWARE_SPI`
+// and add `SPI` to their `lib_deps` — same pattern as ESP8266 (#2570).
+#if defined(HAL_SPI_MODULE_ENABLED) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
     #define FASTLED_STM32_USE_HAL 1
     // IWYU pragma: begin_keep
     #include <SPI.h>
