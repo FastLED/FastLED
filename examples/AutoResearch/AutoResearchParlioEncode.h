@@ -91,6 +91,16 @@ struct ParlioEncodeResult {
     // register-pressure regression. Attacks the 37% expand stage.
     fl::u32 var_fused_v2_us;
 
+    // Post-L2 follow-up — pipe2: process TWO consecutive byte positions per
+    // outer-loop iteration with software pipelining. Two independent OR-trees
+    // live in the same symbol-major inner loop so the compiler can interleave
+    // ALU ops from position N with load completions from position N+1 (and
+    // vice versa). P4 is single-issue in-order, but the Phase 0 measurement
+    // showed transpose taking ~5.6 cyc/op vs the 1-cyc/op theoretical max →
+    // ~80 % of cycles are bubbles (load-use stalls + dependency chains).
+    // Filling those bubbles with independent work is the one un-attacked angle.
+    fl::u32 var_pipe2_us;
+
     fl::u32 sink;
 };
 
@@ -649,6 +659,102 @@ fl::u32 fl_parlio_inner_fused_v2(const fl::u8 *scratch,
     return static_cast<fl::u32>(output[output_idx] ^ output[output_idx + 127]);
 }
 
+// --- Post-L2 pipe2: process 2 byte positions in lockstep ---
+//
+// Strategy: gather + expand both positions into stack Wave8Byte arrays first,
+// then run a SINGLE symbol-major loop that transposes both positions back-to-
+// back per symbol. Because spread_transpose16_symbol is FORCE_INLINE, the
+// compiler sees both OR-trees in the same basic block and can interleave the
+// independent table loads / shifts / ORs from position A with the same ops
+// from position B. On in-order RV32 with 1-cyc shifts + 2-3 cyc load-use
+// latency, this should hide A's load-use stalls under B's ALU work.
+//
+// Register-pressure budget: 2 × 128 B Wave8Byte arrays live on the stack
+// (256 B), but at any given symbol the per-symbol working set is just
+// la[16] + lb[16] = 32 bytes (8 GPRs worth) + the four 32-bit accumulators
+// per call × 2 calls = 8 GPRs. Stays well inside the 32-GPR budget.
+FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
+void wave8Transpose_16x2_pipe2(const fl::u8 lanes_a[16],
+                               const fl::u8 lanes_b[16],
+                               const fl::Wave8ByteExpansionLut &lut,
+                               fl::u8 *output_a,
+                               fl::u8 *output_b) {
+    fl::Wave8Byte e_a[16];
+    fl::Wave8Byte e_b[16];
+    // Phase A1: expand position A.
+    for (int lane = 0; lane < 16; ++lane) {
+        e_a[lane] = lut.lut[lanes_a[lane]];
+    }
+    // Phase A2: expand position B. Two independent expansion streams — compiler
+    // is free to interleave A1 and A2 reads if it helps issue scheduling.
+    for (int lane = 0; lane < 16; ++lane) {
+        e_b[lane] = lut.lut[lanes_b[lane]];
+    }
+    // Phase B: symbol-major. The two transpose calls per symbol share no data
+    // dependencies, so the compiler should interleave their OR-trees once they
+    // are inlined.
+    for (int s = 0; s < 8; ++s) {
+        fl::u8 la[16];
+        fl::u8 lb[16];
+        for (int lane = 0; lane < 16; ++lane) {
+            la[lane] = e_a[lane].symbols[s].data;
+            lb[lane] = e_b[lane].symbols[s].data;
+        }
+        fl::detail::spread_transpose16_symbol(la, output_a + s * 16);
+        fl::detail::spread_transpose16_symbol(lb, output_b + s * 16);
+    }
+}
+
+FASTLED_FORCE_INLINE FL_IRAM
+fl::u32 fl_parlio_inner_pipe2(const fl::u8 *scratch,
+                              fl::size_t lane_stride,
+                              fl::size_t byte_offset_a,
+                              fl::size_t byte_offset_b,
+                              const fl::Wave8ByteExpansionLut &byte_lut,
+                              fl::u8 *output,
+                              fl::size_t output_idx_a,
+                              fl::size_t output_idx_b) {
+    fl::u8 lanes_a[16];
+    fl::u8 lanes_b[16];
+    for (fl::size_t lane = 0; lane < 16; lane++) {
+        lanes_a[lane] = scratch[lane * lane_stride + byte_offset_a];
+        lanes_b[lane] = scratch[lane * lane_stride + byte_offset_b];
+    }
+    wave8Transpose_16x2_pipe2(lanes_a, lanes_b, byte_lut,
+                              output + output_idx_a, output + output_idx_b);
+    return static_cast<fl::u32>(
+        output[output_idx_a] ^ output[output_idx_a + 127] ^
+        output[output_idx_b] ^ output[output_idx_b + 127]);
+}
+
+// Pipe2 measure: each iter does 2 byte-positions. iters_byte_positions is
+// the total byte-positions to cover, so the outer loop runs iters/2 times.
+inline fl::u32 fl_parlio_measure_pipe2(const fl::u8 *scratch,
+                                        fl::u8 *output,
+                                        const fl::Wave8ByteExpansionLut &byte_lut,
+                                        int iters_byte_positions,
+                                        volatile fl::u32 *sink) {
+    constexpr fl::size_t LANES = 16;
+    constexpr fl::size_t BYTES_PER_LANE = 768;
+    const fl::size_t lane_stride = BYTES_PER_LANE;
+    const int outer_iters = iters_byte_positions / 2;
+
+    fl::u32 t0 = micros();
+    for (int it = 0; it < outer_iters; ++it) {
+        const fl::size_t base = (static_cast<fl::size_t>(it) * 2) % BYTES_PER_LANE;
+        const fl::size_t byte_offset_a = base;
+        const fl::size_t byte_offset_b = (base + 1) % BYTES_PER_LANE;
+        const fl::size_t output_idx_a =
+            byte_offset_a * LANES * sizeof(fl::Wave8Byte);
+        const fl::size_t output_idx_b =
+            byte_offset_b * LANES * sizeof(fl::Wave8Byte);
+        *sink ^= fl_parlio_inner_pipe2(
+            scratch, lane_stride, byte_offset_a, byte_offset_b, byte_lut,
+            output, output_idx_a, output_idx_b);
+    }
+    return micros() - t0;
+}
+
 inline fl::u8 *fl_parlio_alloc(fl::size_t size, bool psram) {
     return reinterpret_cast<fl::u8 *>(heap_caps_malloc(
         size,
@@ -911,6 +1017,17 @@ inline ParlioEncodeResult measureParlioEncode(int iters_in = 12000) {
     result.var_fused_v2_us = fl_parlio_measure_variant<fl_parlio_inner_fused_v2>(
         scratch_sram, output_sram, byte_lut, iters_in, &sink);
 
+    // Post-L2 pipe2 (2-position software pipelining).
+    for (int i = 0; i < 64; i += 2) {
+        sink ^= fl_parlio_inner_pipe2(
+            scratch_sram, BYTES_PER_LANE, i % BYTES_PER_LANE,
+            (i + 1) % BYTES_PER_LANE, byte_lut, output_sram,
+            (i % BYTES_PER_LANE) * LANES * sizeof(fl::Wave8Byte),
+            ((i + 1) % BYTES_PER_LANE) * LANES * sizeof(fl::Wave8Byte));
+    }
+    result.var_pipe2_us = fl_parlio_measure_pipe2(
+        scratch_sram, output_sram, byte_lut, iters_in, &sink);
+
     // #2548 L4: lazy alloc the 512-KB LUT from PSRAM, build, time, free.
     fl::u8 *l4_buf = fl_parlio_alloc(FL_L4_LUT_BYTES, /*psram=*/true);
     if (l4_buf != nullptr) {
@@ -1052,6 +1169,17 @@ inline void printParlioEncodeResultRom(const ParlioEncodeResult &r) {
             static_cast<fl::u32>(static_cast<fl::u64>(r.perpos_ss_us) * 100 / r.var_fused_v2_us);
         esp_rom_printf("BENCH_PARLIO fused_v2_reg   total_us=%u frame_us=%u speedup_x100=%u (baseline=100)  ws2812b_tx=%u\n",
                        r.var_fused_v2_us, fv2_frame_us, spd_fv2_x100,
+                       WS2812B_FRAME_US);
+    }
+
+    // Pipe2 (2-position software pipelining) — post-L2 ILP exploration.
+    if (r.var_pipe2_us > 0) {
+        const fl::u32 p2_frame_us =
+            static_cast<fl::u32>(static_cast<fl::u64>(r.var_pipe2_us) * 768 / iters64);
+        const fl::u32 spd_p2_x100 =
+            static_cast<fl::u32>(static_cast<fl::u64>(r.perpos_ss_us) * 100 / r.var_pipe2_us);
+        esp_rom_printf("BENCH_PARLIO pipe2_2pos     total_us=%u frame_us=%u speedup_x100=%u (baseline=100)  ws2812b_tx=%u\n",
+                       r.var_pipe2_us, p2_frame_us, spd_p2_x100,
                        WS2812B_FRAME_US);
     }
 
