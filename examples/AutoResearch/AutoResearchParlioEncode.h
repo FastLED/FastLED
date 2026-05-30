@@ -78,6 +78,13 @@ struct ParlioEncodeResult {
     fl::u32 var_l4n_us;
     fl::u32 l4n_lut_bytes;     // 32768 expected
 
+    // #2548 L7 prototype — pre-shifted spread LUT, 512 B, L1-resident.
+    // kSpreadPreShifted[lane_pos][nibble] = kSpreadNibble[nibble] << lane_pos.
+    // Eliminates 256 runtime shifts per byte-position from the OR-tree's
+    // critical path without growing memory traffic.
+    fl::u32 var_l7_us;
+    fl::u32 l7_lut_bytes;      // 512 expected
+
     fl::u32 sink;
 };
 
@@ -474,6 +481,107 @@ inline fl::u32 fl_parlio_measure_l1l2l3(const fl::u8 *scratch,
     return micros() - t0;
 }
 
+// --- #2548 L7: pre-shifted spread LUT, 512 B, L1-resident ---
+//
+// kSpreadPreShifted[lane_pos][nibble] = kSpreadNibble[nibble] << lane_pos.
+// Indexed by (lane_pos ∈ 0..7, nibble ∈ 0..15). Replaces the runtime shifts in
+// spread_transpose16_symbol's OR-tree without growing memory traffic — same
+// 32 loads per call, just from a pre-shifted table.
+//
+// Mirror values of kSpreadNibble for reference:
+//   {0x00000000, 0x01000000, 0x00010000, 0x01010000,
+//    0x00000100, 0x01000100, 0x00010100, 0x01010100,
+//    0x00000001, 0x01000001, 0x00010001, 0x01010001,
+//    0x00000101, 0x01000101, 0x00010101, 0x01010101};
+// 512 B total, well under P4 L1d (32 KB) — no eviction during the inner loop.
+
+FL_ALIGNAS(16) fl::u32 g_kSpreadPreShifted[8][16];
+
+inline void buildSpreadPreShifted() {
+    static const fl::u32 kBase[16] = {
+        0x00000000u, 0x01000000u, 0x00010000u, 0x01010000u,
+        0x00000100u, 0x01000100u, 0x00010100u, 0x01010100u,
+        0x00000001u, 0x01000001u, 0x00010001u, 0x01010001u,
+        0x00000101u, 0x01000101u, 0x00010101u, 0x01010101u,
+    };
+    for (int lane = 0; lane < 8; ++lane) {
+        for (int n = 0; n < 16; ++n) {
+            g_kSpreadPreShifted[lane][n] = kBase[n] << lane;
+        }
+    }
+}
+
+// L7-style spread_transpose16_symbol: same shape as the production one but
+// the inner expressions are 8 loads + 7 ORs each (no shifts on the critical
+// path). The store-narrowing block at the bottom is byte-identical.
+FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
+void spread_transpose16_symbol_preshifted(const fl::u8 l[16], fl::u8 out[16]) {
+    const fl::u32 aLo =
+        g_kSpreadPreShifted[0][l[0] >> 4] | g_kSpreadPreShifted[1][l[1] >> 4] |
+        g_kSpreadPreShifted[2][l[2] >> 4] | g_kSpreadPreShifted[3][l[3] >> 4] |
+        g_kSpreadPreShifted[4][l[4] >> 4] | g_kSpreadPreShifted[5][l[5] >> 4] |
+        g_kSpreadPreShifted[6][l[6] >> 4] | g_kSpreadPreShifted[7][l[7] >> 4];
+    const fl::u32 bLo =
+        g_kSpreadPreShifted[0][l[0] & 0xF] | g_kSpreadPreShifted[1][l[1] & 0xF] |
+        g_kSpreadPreShifted[2][l[2] & 0xF] | g_kSpreadPreShifted[3][l[3] & 0xF] |
+        g_kSpreadPreShifted[4][l[4] & 0xF] | g_kSpreadPreShifted[5][l[5] & 0xF] |
+        g_kSpreadPreShifted[6][l[6] & 0xF] | g_kSpreadPreShifted[7][l[7] & 0xF];
+    const fl::u32 aHi =
+        g_kSpreadPreShifted[0][l[ 8] >> 4] | g_kSpreadPreShifted[1][l[ 9] >> 4] |
+        g_kSpreadPreShifted[2][l[10] >> 4] | g_kSpreadPreShifted[3][l[11] >> 4] |
+        g_kSpreadPreShifted[4][l[12] >> 4] | g_kSpreadPreShifted[5][l[13] >> 4] |
+        g_kSpreadPreShifted[6][l[14] >> 4] | g_kSpreadPreShifted[7][l[15] >> 4];
+    const fl::u32 bHi =
+        g_kSpreadPreShifted[0][l[ 8] & 0xF] | g_kSpreadPreShifted[1][l[ 9] & 0xF] |
+        g_kSpreadPreShifted[2][l[10] & 0xF] | g_kSpreadPreShifted[3][l[11] & 0xF] |
+        g_kSpreadPreShifted[4][l[12] & 0xF] | g_kSpreadPreShifted[5][l[13] & 0xF] |
+        g_kSpreadPreShifted[6][l[14] & 0xF] | g_kSpreadPreShifted[7][l[15] & 0xF];
+
+    // Identical store-narrowing to the production spread_transpose16_symbol.
+    out[ 0] = static_cast<fl::u8>(aLo);        out[ 1] = static_cast<fl::u8>(aHi);
+    out[ 2] = static_cast<fl::u8>(aLo >>  8);  out[ 3] = static_cast<fl::u8>(aHi >>  8);
+    out[ 4] = static_cast<fl::u8>(aLo >> 16);  out[ 5] = static_cast<fl::u8>(aHi >> 16);
+    out[ 6] = static_cast<fl::u8>(aLo >> 24);  out[ 7] = static_cast<fl::u8>(aHi >> 24);
+    out[ 8] = static_cast<fl::u8>(bLo);        out[ 9] = static_cast<fl::u8>(bHi);
+    out[10] = static_cast<fl::u8>(bLo >>  8);  out[11] = static_cast<fl::u8>(bHi >>  8);
+    out[12] = static_cast<fl::u8>(bLo >> 16);  out[13] = static_cast<fl::u8>(bHi >> 16);
+    out[14] = static_cast<fl::u8>(bLo >> 24);  out[15] = static_cast<fl::u8>(bHi >> 24);
+}
+
+// L7 transpose: same shape as wave8Transpose_16 byte-LUT path but the inner
+// spread_transpose calls use the pre-shifted table.
+FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
+void wave8Transpose_16_l7(const fl::u8 lanes[16],
+                          const fl::Wave8ByteExpansionLut &lut,
+                          fl::u8 *output) {
+    fl::Wave8Byte laneWaveformSymbols[16];
+    for (int lane = 0; lane < 16; ++lane) {
+        fl::detail::wave8_expand_byte(lanes[lane], lut, &laneWaveformSymbols[lane]);
+    }
+    for (int s = 0; s < 8; ++s) {
+        fl::u8 l[16];
+        for (int lane = 0; lane < 16; ++lane) {
+            l[lane] = laneWaveformSymbols[lane].symbols[s].data;
+        }
+        spread_transpose16_symbol_preshifted(l, output + s * 16);
+    }
+}
+
+FASTLED_FORCE_INLINE FL_IRAM
+fl::u32 fl_parlio_inner_l7(const fl::u8 *scratch,
+                           fl::size_t lane_stride,
+                           fl::size_t byte_offset,
+                           const fl::Wave8ByteExpansionLut &byte_lut,
+                           fl::u8 *output,
+                           fl::size_t output_idx) {
+    fl::u8 lanes[16];
+    for (fl::size_t lane = 0; lane < 16; lane++) {
+        lanes[lane] = scratch[lane * lane_stride + byte_offset];
+    }
+    wave8Transpose_16_l7(lanes, byte_lut, output + output_idx);
+    return static_cast<fl::u32>(output[output_idx] ^ output[output_idx + 127]);
+}
+
 inline fl::u8 *fl_parlio_alloc(fl::size_t size, bool psram) {
     return reinterpret_cast<fl::u8 *>(heap_caps_malloc(
         size,
@@ -715,6 +823,18 @@ inline ParlioEncodeResult measureParlioEncode(int iters_in = 12000) {
     result.var_l1l2l3_us = fl_parlio_measure_l1l2l3(
         scratch_sram, output_sram, byte_lut, iters_in, &sink);
 
+    // #2548 Phase 2 — L7 pre-shifted spread LUT (512 B, L1-resident).
+    buildSpreadPreShifted();
+    result.l7_lut_bytes = static_cast<fl::u32>(sizeof(g_kSpreadPreShifted));
+    // Warm icache on the new kernel.
+    for (int i = 0; i < 64; ++i) {
+        sink ^= fl_parlio_inner_l7(scratch_sram, BYTES_PER_LANE, i % BYTES_PER_LANE,
+                                   byte_lut, output_sram,
+                                   (i % BYTES_PER_LANE) * LANES * sizeof(fl::Wave8Byte));
+    }
+    result.var_l7_us = fl_parlio_measure_variant<fl_parlio_inner_l7>(
+        scratch_sram, output_sram, byte_lut, iters_in, &sink);
+
     // #2548 L4: lazy alloc the 512-KB LUT from PSRAM, build, time, free.
     fl::u8 *l4_buf = fl_parlio_alloc(FL_L4_LUT_BYTES, /*psram=*/true);
     if (l4_buf != nullptr) {
@@ -835,6 +955,17 @@ inline void printParlioEncodeResultRom(const ParlioEncodeResult &r) {
     } else {
         esp_rom_printf("BENCH_PARLIO L4_lazy_psram  alloc FAILED (lut_bytes=%u)\n",
                        static_cast<fl::u32>(FL_L4_LUT_BYTES));
+    }
+
+    // L7 (512 B pre-shifted spread LUT, L1-resident) — Phase 2 of #2548.
+    if (r.var_l7_us > 0) {
+        const fl::u32 l7_frame_us =
+            static_cast<fl::u32>(static_cast<fl::u64>(r.var_l7_us) * 768 / iters64);
+        const fl::u32 spd_l7_x100 =
+            static_cast<fl::u32>(static_cast<fl::u64>(r.perpos_ss_us) * 100 / r.var_l7_us);
+        esp_rom_printf("BENCH_PARLIO L7_preshift_l1 lut_bytes=%u total_us=%u frame_us=%u speedup_x100=%u (baseline=100)  ws2812b_tx=%u\n",
+                       r.l7_lut_bytes, r.var_l7_us, l7_frame_us, spd_l7_x100,
+                       WS2812B_FRAME_US);
     }
 
     // L4-NIBBLE (32 KB, fits L2)
