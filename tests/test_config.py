@@ -83,4 +83,11 @@ EXCLUDED_TEST_DIRS: set[Path] = {
     TESTS_DIR / "fl" / "remote" / "rpc",
     TESTS_DIR / "fl" / "codec",
     TESTS_DIR / "fl" / "fx" / "2d",
+    # Standalone PIO project fixture (driven by ci/tests/test_fbuild_qemu.py),
+    # NOT a host unit test. Its src/main.cpp includes <Arduino.h> which the
+    # native test compiler can't resolve. Renamed from main.ino to main.cpp
+    # to satisfy arduino-lint LD003 (see FastLED #2593); that rename made
+    # meson's test discovery pick it up, breaking linux_native. Excluding
+    # keeps both side-effects happy.
+    TESTS_DIR / "fbuild_qemu_smoke",
 }
