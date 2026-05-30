@@ -106,15 +106,21 @@ namespace detail {
 #define FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH 3
 #endif // defined(FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH)
 
-// #2548 EXPERIMENTAL: when set, beginTransmission() submits all pre-encoded
-// ring buffers to the IDF TX queue immediately (relying on hardware DMA-
-// descriptor chaining to avoid the ISR-latency gap between buffers). Cuts
-// frame time from 17ms to 12ms on 16-lane × 256-LED WS2812B (encode/TX
-// overlap), but requires per-chipset RX-loopback validation to confirm
-// the IDF chains buffers without a >5µs gap (which would corrupt WS2812
-// signal timing). Default OFF — see comment in beginTransmission().
+// #2548: when set, beginTransmission() submits all pre-encoded ring buffers
+// to the IDF TX queue immediately. The IDF holds up to
+// FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH pending transmits and chains them via
+// hardware DMA descriptors — eliminating the ISR-latency gap between buffers
+// that previously serialized encode→TX within a frame.
+//
+// MEASURED IMPACT (16-lane × 256-LED WS2812B on P4 v1.3):
+//   off: total=16 995us  show=9 439us  wait=7 556us  (encode→TX serial)
+//   on : total=12 220us  show=10 605us wait=1 615us  (encode/TX overlap, ~30% faster)
+//
+// Default ON. If a specific chipset/IDF combination shows WS2812 glitches
+// from the inter-buffer chaining, set `-DFL_PARLIO_EAGER_QUEUE=0` to revert
+// to the conservative one-submit-per-txDone pattern.
 #ifndef FL_PARLIO_EAGER_QUEUE
-#define FL_PARLIO_EAGER_QUEUE 0
+#define FL_PARLIO_EAGER_QUEUE 1
 #endif
 
 // Worker function is now called directly from txDoneCallback (no timer needed)
@@ -1917,21 +1923,15 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
     }
     FL_LOG_PARLIO("PARLIO_TX: First buffer submitted successfully - transmission started");
 
-    // #2548 EXPERIMENTAL: Eager-queue additional pre-encoded buffers to the IDF
-    // TX queue, so the hardware can chain them via DMA descriptors instead of
-    // waiting for an ISR-latency gap between txDone and next-submit.
+    // #2548: Eager-queue additional pre-encoded buffers to the IDF TX queue,
+    // so the hardware chains them via DMA descriptors instead of waiting for
+    // an ISR-latency gap between txDone and next-submit. This is what makes
+    // encode/TX interleaving actually work — the TX of buffer 0 runs in the
+    // background while show() submits buffer 1+ (and any FastLED bookkeeping
+    // runs concurrently with TX too).
     //
-    // MEASURED IMPACT (16-lane × 256-LED WS2812B on P4 v1.3):
-    //   default off: total=16 995us  show=9 439us  wait=7 556us  (encode→TX serial)
-    //   eager on   : total=12 220us  show=10 605us wait=1 615us  (encode/TX overlap)
-    //
-    // WARNING: gated OFF by default because the IDF queue chaining behaviour
-    // for parlio_tx_unit is not guaranteed to be gap-free on all IDF versions.
-    // A gap > ~5µs between queued buffers would corrupt WS2812 timing (reset
-    // latch fires mid-frame). Validated correct TIMING on the bench but not
-    // OUTPUT correctness — needs RX-loopback validation per chipset.
-    //
-    // Enable with `-DFL_PARLIO_EAGER_QUEUE=1` once validated on your hardware.
+    // Configurable via FL_PARLIO_EAGER_QUEUE (default ON). See header comment
+    // for measured impact and disable instructions.
 #if FL_PARLIO_EAGER_QUEUE
     while (mIsrContext->mRingCount > 0) {
         size_t idx = mIsrContext->mRingReadIdx;
