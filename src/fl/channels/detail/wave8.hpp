@@ -408,8 +408,11 @@ void wave8_transpose_4_bf1(const u8 lanes[4],
 
 /// @brief BF1 for 2-lane Wave8. Output: 8 symbols × 2 bytes = 16 bytes. Each
 ///        byte packs 4 pulses × 2 lanes bit-interleaved (lane 1 in even bit
-///        positions, lane 0 in odd). High byte holds MSB pulses (0..3), low
-///        byte holds LSB pulses (4..7).
+///        positions, lane 0 in odd). High byte (`output[s*2 + 0]`) holds
+///        bf1-pulse indices 0..3 with q=0 → pulse 3 and q=3 → pulse 0; low
+///        byte holds bf1-pulse indices 4..7 with q=0 → pulse 7 and q=3 →
+///        pulse 4. Layout matches `wave8_transpose_2`'s LUT-based packing
+///        (see FL_WAVE8_SPREAD_TO_16 / kTranspose4_16_LUT).
 FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
 void wave8_transpose_2_bf1(const u8 lanes[2],
                            u8 W0, u8 W1,
@@ -429,8 +432,14 @@ void wave8_transpose_2_bf1(const u8 lanes[2],
         u8 byte_hi = 0;
         u8 byte_lo = 0;
         for (int q = 0; q < 4; ++q) {
-            const int p_hi = q;
-            const int p_lo = q + 4;
+            // Reference `wave8_transpose_2` lands chipset-byte bit (4+q) at
+            // high-byte bit position (2*q) for lane 1 (even) / (2*q+1) for
+            // lane 0 (odd). Chipset-byte bit (4+q) corresponds to bf1
+            // pulse index (3 - q) because bf1 numbers pulse p ↔ chipset bit
+            // (7 - p). Similarly the low byte uses chipset bits 0..3, which
+            // map to bf1 pulses 7..4.
+            const int p_hi = 3 - q;
+            const int p_lo = 7 - q;
             const u8 m0_p_hi = static_cast<u8>(m0_mask[p_hi] & 1u);
             const u8 d_p_hi  = static_cast<u8>(d_mask[p_hi] & 1u);
             const u8 m0_p_lo = static_cast<u8>(m0_mask[p_lo] & 1u);
