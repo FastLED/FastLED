@@ -164,6 +164,30 @@ def compile_meson(
     # correctly, leaving the PCH stale even though headers changed.
     _invalidate_stale_pchs(build_dir)
 
+    # Re-normalize strict-path include flags before every compile (#2378).
+    # Meson setup already normalizes once, but ninja can regenerate
+    # build.ninja silently when meson.build files change — that regeneration
+    # re-introduces the relative + backslash `-Ici/meson/native\fastled.dll.p`
+    # form that zccache's --strict-paths=absolute rejects. Running the
+    # normalizer here costs ~5-20 ms and is idempotent when nothing changed.
+    from ci.meson.build_config import normalize_meson_private_include_paths
+
+    try:
+        normalize_meson_private_include_paths(build_dir)
+    except KeyboardInterrupt as ki:
+        # Ctrl-C during normalization — propagate cleanly so the watchdog
+        # and signal-handler chain runs to completion (KBI001).
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception as e:
+        # Non-fatal: if the normalizer fails for any reason, fall through
+        # to the compile — the worst case is the original zccache strict-
+        # paths error surfaces, which is still better than silently breaking
+        # the build at the normalize step.
+        _ts_print(
+            f"[MESON] ⚠️  Pre-compile normalize_meson_private_include_paths failed: {e}"
+        )
+
     if target:
         cmd.append(target)
         if not quiet:
