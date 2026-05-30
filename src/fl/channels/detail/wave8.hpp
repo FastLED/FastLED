@@ -337,6 +337,116 @@ void wave8_transpose_16_bf1(const u8 lanes[16],
     }
 }
 
+/// @brief BF1 for 8-lane Wave8 — same algebraic identity as 16-lane BF1.
+///        Output: 8 symbols × 8 pulses × 1 byte = 64 bytes. Each pulse byte
+///        carries 8 lanes' bits at the corresponding pulse position. Uses
+///        spread_transpose8_symbol to compute the bit transpose in one call.
+FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
+void wave8_transpose_8_bf1(const u8 lanes[8],
+                           u8 W0, u8 W1,
+                           u8 output[8 * sizeof(Wave8Byte)]) {
+    u8 d_mask[8];
+    u8 m0_mask[8];
+    const u8 D_byte = W0 ^ W1;
+    for (int p = 0; p < 8; ++p) {
+        const int shift = 7 - p;
+        d_mask[p] = ((D_byte >> shift) & 1) ? 0xFFu : 0x00u;
+        m0_mask[p] = ((W0 >> shift) & 1) ? 0xFFu : 0x00u;
+    }
+    u8 cols[8];
+    spread_transpose8_symbol(lanes, cols);
+    for (int s = 0; s < 8; ++s) {
+        const u8 col = cols[s];
+        for (int p = 0; p < 8; ++p) {
+            output[s * 8 + p] = m0_mask[p] ^ (col & d_mask[p]);
+        }
+    }
+}
+
+/// @brief BF1 for 4-lane Wave8. Output: 8 symbols × 4 bytes = 32 bytes. Each
+///        byte packs 2 pulses × 4 lanes — high nibble = earlier pulse, low
+///        nibble = later pulse; within each nibble, lanes 0..3 in bits 0..3.
+FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
+void wave8_transpose_4_bf1(const u8 lanes[4],
+                           u8 W0, u8 W1,
+                           u8 output[4 * sizeof(Wave8Byte)]) {
+    u8 d_mask[8];
+    u8 m0_mask[8];
+    const u8 D_byte = W0 ^ W1;
+    for (int p = 0; p < 8; ++p) {
+        const int shift = 7 - p;
+        d_mask[p] = ((D_byte >> shift) & 1) ? 0xFFu : 0x00u;
+        m0_mask[p] = ((W0 >> shift) & 1) ? 0xFFu : 0x00u;
+    }
+    // Bit transpose: cols[s] (low nibble) = bit(7-s) of lanes 0..3.
+    // spreadA(lanes[L]) puts the 4 high-nibble bits of lanes[L] into bit 0 of
+    // 4 separate bytes; OR'd across lanes with shifts gives 4 bytes (cols[0..3]).
+    const u32 aLo = spreadA(lanes[0]) | (spreadA(lanes[1]) << 1)
+                  | (spreadA(lanes[2]) << 2) | (spreadA(lanes[3]) << 3);
+    const u32 bLo = spreadB(lanes[0]) | (spreadB(lanes[1]) << 1)
+                  | (spreadB(lanes[2]) << 2) | (spreadB(lanes[3]) << 3);
+    u8 cols[8];
+    cols[0] = static_cast<u8>(aLo);
+    cols[1] = static_cast<u8>(aLo >> 8);
+    cols[2] = static_cast<u8>(aLo >> 16);
+    cols[3] = static_cast<u8>(aLo >> 24);
+    cols[4] = static_cast<u8>(bLo);
+    cols[5] = static_cast<u8>(bLo >> 8);
+    cols[6] = static_cast<u8>(bLo >> 16);
+    cols[7] = static_cast<u8>(bLo >> 24);
+    for (int s = 0; s < 8; ++s) {
+        const u8 col = cols[s];  // bits 0..3 = lanes 0..3
+        for (int k = 0; k < 4; ++k) {
+            const int p_hi = 2 * k;
+            const int p_lo = 2 * k + 1;
+            const u8 hi = static_cast<u8>((m0_mask[p_hi] & 0xF0u) ^ ((col << 4) & d_mask[p_hi]));
+            const u8 lo = static_cast<u8>((m0_mask[p_lo] & 0x0Fu) ^ (col & d_mask[p_lo]));
+            output[s * 4 + k] = static_cast<u8>(hi | lo);
+        }
+    }
+}
+
+/// @brief BF1 for 2-lane Wave8. Output: 8 symbols × 2 bytes = 16 bytes. Each
+///        byte packs 4 pulses × 2 lanes bit-interleaved (lane 1 in even bit
+///        positions, lane 0 in odd). High byte holds MSB pulses (0..3), low
+///        byte holds LSB pulses (4..7).
+FASTLED_FORCE_INLINE FL_IRAM FL_OPTIMIZE_FUNCTION
+void wave8_transpose_2_bf1(const u8 lanes[2],
+                           u8 W0, u8 W1,
+                           u8 output[2 * sizeof(Wave8Byte)]) {
+    u8 d_mask[8];
+    u8 m0_mask[8];
+    const u8 D_byte = W0 ^ W1;
+    for (int p = 0; p < 8; ++p) {
+        const int shift = 7 - p;
+        d_mask[p] = ((D_byte >> shift) & 1) ? 0xFFu : 0x00u;
+        m0_mask[p] = ((W0 >> shift) & 1) ? 0xFFu : 0x00u;
+    }
+    for (int s = 0; s < 8; ++s) {
+        const int bit_idx = 7 - s;
+        const u8 b0 = static_cast<u8>((lanes[0] >> bit_idx) & 1u);
+        const u8 b1 = static_cast<u8>((lanes[1] >> bit_idx) & 1u);
+        u8 byte_hi = 0;
+        u8 byte_lo = 0;
+        for (int q = 0; q < 4; ++q) {
+            const int p_hi = q;
+            const int p_lo = q + 4;
+            const u8 m0_p_hi = static_cast<u8>(m0_mask[p_hi] & 1u);
+            const u8 d_p_hi  = static_cast<u8>(d_mask[p_hi] & 1u);
+            const u8 m0_p_lo = static_cast<u8>(m0_mask[p_lo] & 1u);
+            const u8 d_p_lo  = static_cast<u8>(d_mask[p_lo] & 1u);
+            const u8 v0_hi = static_cast<u8>(m0_p_hi ^ (b0 & d_p_hi));
+            const u8 v1_hi = static_cast<u8>(m0_p_hi ^ (b1 & d_p_hi));
+            const u8 v0_lo = static_cast<u8>(m0_p_lo ^ (b0 & d_p_lo));
+            const u8 v1_lo = static_cast<u8>(m0_p_lo ^ (b1 & d_p_lo));
+            byte_hi |= static_cast<u8>((v1_hi << (2 * q)) | (v0_hi << (2 * q + 1)));
+            byte_lo |= static_cast<u8>((v1_lo << (2 * q)) | (v0_lo << (2 * q + 1)));
+        }
+        output[s * 2 + 0] = byte_hi;
+        output[s * 2 + 1] = byte_lo;
+    }
+}
+
 /// @brief BF1 + pipe4: 4-position software-pipelined BF1 (#2548 deep-dive).
 ///        Combines BF1's algorithmic reduction (1 transpose per byte-position
 ///        instead of 8) with pipe4's cross-position ILP. Empirical peak of all

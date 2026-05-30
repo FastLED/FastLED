@@ -956,8 +956,9 @@ ParlioEngine::populateDmaBuffer(u8* outputBuffer,
                 // #2548 L2: write transpose result directly into DMA buffer
                 // (capacity pre-validated by the `outputIdx + blockSize > outputBufferCapacity`
                 //  check at the top of this loop). Skips the 128-B stack round-trip.
-                fl::wave8Transpose_2(reinterpret_cast<const u8(&)[2]>(lanes), mWave8ByteLut, // ok reinterpret cast - array reference type conversion
-                                    *reinterpret_cast<u8(*)[2 * sizeof(Wave8Byte)]>(outputBuffer + outputIdx)); // ok reinterpret cast - direct write to DMA buffer (#2548 L2)
+                // #2548 BF1: chipset-aware direct encode (skips byte_lut).
+                fl::wave8Transpose_2_bf1(reinterpret_cast<const u8(&)[2]>(lanes), mWave8ByteLut, // ok reinterpret cast - array reference type conversion
+                                    *reinterpret_cast<u8(*)[2 * sizeof(Wave8Byte)]>(outputBuffer + outputIdx)); // ok reinterpret cast - direct write to DMA buffer (#2548 BF1)
                 outputIdx += blockSize;
             } else if (mDataWidth == 4) {
                 u8 lanes[4];
@@ -967,8 +968,9 @@ ParlioEngine::populateDmaBuffer(u8* outputBuffer,
                         : 0;
                 }
 
-                fl::wave8Transpose_4(reinterpret_cast<const u8(&)[4]>(lanes), mWave8ByteLut, // ok reinterpret cast - array reference type conversion
-                                    *reinterpret_cast<u8(*)[4 * sizeof(Wave8Byte)]>(outputBuffer + outputIdx)); // ok reinterpret cast - direct write to DMA buffer (#2548 L2)
+                // #2548 BF1: chipset-aware direct encode (skips byte_lut).
+                fl::wave8Transpose_4_bf1(reinterpret_cast<const u8(&)[4]>(lanes), mWave8ByteLut, // ok reinterpret cast - array reference type conversion
+                                    *reinterpret_cast<u8(*)[4 * sizeof(Wave8Byte)]>(outputBuffer + outputIdx)); // ok reinterpret cast - direct write to DMA buffer (#2548 BF1)
                 outputIdx += blockSize;
             } else if (mDataWidth == 8) {
                 u8 lanes[8];
@@ -978,8 +980,9 @@ ParlioEngine::populateDmaBuffer(u8* outputBuffer,
                         : 0;
                 }
 
-                fl::wave8Transpose_8(reinterpret_cast<const u8(&)[8]>(lanes), mWave8ByteLut, // ok reinterpret cast - array reference type conversion
-                                    *reinterpret_cast<u8(*)[8 * sizeof(Wave8Byte)]>(outputBuffer + outputIdx)); // ok reinterpret cast - direct write to DMA buffer (#2548 L2)
+                // #2548 BF1: chipset-aware direct encode (skips byte_lut).
+                fl::wave8Transpose_8_bf1(reinterpret_cast<const u8(&)[8]>(lanes), mWave8ByteLut, // ok reinterpret cast - array reference type conversion
+                                    *reinterpret_cast<u8(*)[8 * sizeof(Wave8Byte)]>(outputBuffer + outputIdx)); // ok reinterpret cast - direct write to DMA buffer (#2548 BF1)
                 outputIdx += blockSize;
             } else if (mDataWidth == 16) {
                 u8 lanes_a[16];

@@ -1038,6 +1038,110 @@ FL_TEST_CASE("wave8Transpose_16_bf1 == wave8Transpose_16 (multiple timings)") {
     }
 }
 
+FL_TEST_CASE("wave8Transpose_8_bf1 == wave8Transpose_8 (random)") {
+    ChipsetTiming timing;
+    timing.T1 = 400; timing.T2 = 450; timing.T3 = 400;
+    Wave8BitExpansionLut nib = buildWave8ExpansionLUT(timing);
+    Wave8ByteExpansionLut byte_lut = buildWave8ByteExpansionLUT(nib);
+
+    u32 seed = 0xFACE0008u;
+    for (int round = 0; round < 1000; ++round) {
+        u8 lanes[8];
+        for (int l = 0; l < 8; ++l) {
+            seed = seed * 1664525u + 1013904223u;
+            lanes[l] = static_cast<u8>(seed >> 24);
+        }
+        u8 ref[8 * sizeof(Wave8Byte)];
+        u8 got[8 * sizeof(Wave8Byte)];
+        wave8Transpose_8(lanes, byte_lut, ref);
+        wave8Transpose_8_bf1(lanes, byte_lut, got);
+        for (int i = 0; i < 8 * static_cast<int>(sizeof(Wave8Byte)); ++i) {
+            FL_REQUIRE(got[i] == ref[i]);
+        }
+    }
+}
+
+FL_TEST_CASE("wave8Transpose_4_bf1 == wave8Transpose_4 (random)") {
+    ChipsetTiming timing;
+    timing.T1 = 400; timing.T2 = 450; timing.T3 = 400;
+    Wave8BitExpansionLut nib = buildWave8ExpansionLUT(timing);
+    Wave8ByteExpansionLut byte_lut = buildWave8ByteExpansionLUT(nib);
+
+    u32 seed = 0xFACE0004u;
+    for (int round = 0; round < 1000; ++round) {
+        u8 lanes[4];
+        for (int l = 0; l < 4; ++l) {
+            seed = seed * 1664525u + 1013904223u;
+            lanes[l] = static_cast<u8>(seed >> 24);
+        }
+        u8 ref[4 * sizeof(Wave8Byte)];
+        u8 got[4 * sizeof(Wave8Byte)];
+        wave8Transpose_4(lanes, byte_lut, ref);
+        wave8Transpose_4_bf1(lanes, byte_lut, got);
+        for (int i = 0; i < 4 * static_cast<int>(sizeof(Wave8Byte)); ++i) {
+            FL_REQUIRE(got[i] == ref[i]);
+        }
+    }
+}
+
+FL_TEST_CASE("wave8Transpose_2_bf1 == wave8Transpose_2 (random)") {
+    ChipsetTiming timing;
+    timing.T1 = 400; timing.T2 = 450; timing.T3 = 400;
+    Wave8BitExpansionLut nib = buildWave8ExpansionLUT(timing);
+    Wave8ByteExpansionLut byte_lut = buildWave8ByteExpansionLUT(nib);
+
+    u32 seed = 0xFACE0002u;
+    for (int round = 0; round < 1000; ++round) {
+        u8 lanes[2];
+        for (int l = 0; l < 2; ++l) {
+            seed = seed * 1664525u + 1013904223u;
+            lanes[l] = static_cast<u8>(seed >> 24);
+        }
+        u8 ref[2 * sizeof(Wave8Byte)];
+        u8 got[2 * sizeof(Wave8Byte)];
+        wave8Transpose_2(lanes, byte_lut, ref);
+        wave8Transpose_2_bf1(lanes, byte_lut, got);
+        for (int i = 0; i < 2 * static_cast<int>(sizeof(Wave8Byte)); ++i) {
+            FL_REQUIRE(got[i] == ref[i]);
+        }
+    }
+}
+
+FL_TEST_CASE("wave8Transpose_8/4/2_bf1 == wave8Transpose_X (multiple timings)") {
+    // BF1 must hold for any Wave8 chipset/timing across lane counts.
+    const struct { u32 T1, T2, T3; } timings[] = {
+        {250, 500, 250}, {400, 450, 400}, {350, 350, 550},
+        {100, 800, 350}, {600, 100, 550},
+    };
+    for (const auto &t : timings) {
+        ChipsetTiming timing;
+        timing.T1 = t.T1; timing.T2 = t.T2; timing.T3 = t.T3;
+        Wave8BitExpansionLut nib = buildWave8ExpansionLUT(timing);
+        Wave8ByteExpansionLut byte_lut = buildWave8ByteExpansionLUT(nib);
+
+        u32 seed = (t.T1 * 31u) ^ (t.T2 * 17u) ^ t.T3;
+        for (int round = 0; round < 200; ++round) {
+            u8 l8[8], l4[4], l2[2];
+            for (int l = 0; l < 8; ++l) {
+                seed = seed * 1664525u + 1013904223u;
+                l8[l] = static_cast<u8>(seed >> 24);
+                if (l < 4) l4[l] = l8[l];
+                if (l < 2) l2[l] = l8[l];
+            }
+            u8 r8[64], g8[64], r4[32], g4[32], r2[16], g2[16];
+            wave8Transpose_8(l8, byte_lut, r8);
+            wave8Transpose_8_bf1(l8, byte_lut, g8);
+            wave8Transpose_4(l4, byte_lut, r4);
+            wave8Transpose_4_bf1(l4, byte_lut, g4);
+            wave8Transpose_2(l2, byte_lut, r2);
+            wave8Transpose_2_bf1(l2, byte_lut, g2);
+            for (int i = 0; i < 64; ++i) FL_REQUIRE(g8[i] == r8[i]);
+            for (int i = 0; i < 32; ++i) FL_REQUIRE(g4[i] == r4[i]);
+            for (int i = 0; i < 16; ++i) FL_REQUIRE(g2[i] == r2[i]);
+        }
+    }
+}
+
 FL_TEST_CASE("wave8Transpose_16x4_bf1_pipe4 == 4× wave8Transpose_16 (random)") {
     ChipsetTiming timing;
     timing.T1 = 400; timing.T2 = 450; timing.T3 = 400;

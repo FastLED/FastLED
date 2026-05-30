@@ -156,6 +156,24 @@ void wave8Transpose_16x4_pipe4(
     u8 (&FL_RESTRICT_PARAM output_c)[16 * sizeof(Wave8Byte)],
     u8 (&FL_RESTRICT_PARAM output_d)[16 * sizeof(Wave8Byte)]);
 
+/// @brief BF1 for 2-lane Wave8 (#2548 deep-dive followup).
+void wave8Transpose_2_bf1(
+    const u8 (&FL_RESTRICT_PARAM lanes)[2],
+    const Wave8ByteExpansionLut &lut,
+    u8 (&FL_RESTRICT_PARAM output)[2 * sizeof(Wave8Byte)]);
+
+/// @brief BF1 for 4-lane Wave8 (#2548 deep-dive followup).
+void wave8Transpose_4_bf1(
+    const u8 (&FL_RESTRICT_PARAM lanes)[4],
+    const Wave8ByteExpansionLut &lut,
+    u8 (&FL_RESTRICT_PARAM output)[4 * sizeof(Wave8Byte)]);
+
+/// @brief BF1 for 8-lane Wave8 (#2548 deep-dive followup).
+void wave8Transpose_8_bf1(
+    const u8 (&FL_RESTRICT_PARAM lanes)[8],
+    const Wave8ByteExpansionLut &lut,
+    u8 (&FL_RESTRICT_PARAM output)[8 * sizeof(Wave8Byte)]);
+
 /// @brief BF1: chipset-aware direct encode for 16-lane Wave8 (#2548 deep-dive).
 ///        Bypasses the byte_lut. Uses the algebraic identity
 ///        `output_bit(s, p, lane) = M0_p XOR (input_bit_(7-s) AND D_p)` where
