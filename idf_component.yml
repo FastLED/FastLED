@@ -5,3 +5,8 @@ dependencies:
     version: "^1.2.0"
     rules:
       - if: "target == esp32p4"
+
+# Re-include src/fl/build/ which DEFAULT_EXCLUDE's **/build/**/* otherwise strips.
+files:
+  include:
+    - "src/fl/build/**/*"
