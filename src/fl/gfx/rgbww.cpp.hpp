@@ -73,19 +73,30 @@ const colorimetric_detail::RgbcctProfile kRgbwwDefaultProfile = {
 };
 
 namespace {
+// Owns a copy of the active profile (see #2580 finding A4, originally
+// CodeRabbit on #2560). The earlier implementation stashed the caller's raw
+// pointer, which became a dangling reference the moment the caller's
+// RgbcctProfile (often a stack local in setup()) went out of scope. We now
+// copy by value; has_profile == false reverts to kRgbwwDefaultProfile.
 struct RgbwwColorimetricState {
-    const colorimetric_detail::RgbcctProfile* profile = nullptr;
+    bool has_profile = false;
+    colorimetric_detail::RgbcctProfile profile{};
 };
 } // namespace
 
 void set_rgbww_colorimetric_profile(const colorimetric_detail::RgbcctProfile* profile) FL_NOEXCEPT {
-    fl::Singleton<RgbwwColorimetricState>::instance().profile = profile;
+    RgbwwColorimetricState& state = fl::Singleton<RgbwwColorimetricState>::instance();
+    if (profile == nullptr) {
+        state.has_profile = false;
+        return;
+    }
+    state.profile = *profile;
+    state.has_profile = true;
 }
 
 const colorimetric_detail::RgbcctProfile* get_rgbww_colorimetric_profile() FL_NOEXCEPT {
-    const colorimetric_detail::RgbcctProfile* p =
-        fl::Singleton<RgbwwColorimetricState>::instance().profile;
-    return p != nullptr ? p : &kRgbwwDefaultProfile;
+    const RgbwwColorimetricState& state = fl::Singleton<RgbwwColorimetricState>::instance();
+    return state.has_profile ? &state.profile : &kRgbwwDefaultProfile;
 }
 
 // User-installable RGB->RGBWW function pointer, held behind a lazy
