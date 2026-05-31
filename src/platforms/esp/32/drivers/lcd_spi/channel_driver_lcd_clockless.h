@@ -71,10 +71,14 @@ class ChannelDriverLcdClockless : public IChannelDriver {
 
     static constexpr size_t kRingBufferCount = 3;
 
-    /// Default: ~30 LEDs per chunk for clockless (3 bytes/LED).
-    /// wave3: 90 bytes * 48 = 4.3KB per DMA slot → 13KB total ring.
-    /// wave8: 90 bytes * 128 = 11.5KB per DMA slot → 34.5KB total ring.
-    static constexpr size_t kDefaultChunkInputBytes = 90;
+    /// Default: 1024 bytes per chunk for clockless (3 bytes/LED ≈ 341 LEDs).
+    ///
+    /// The chunked-streaming ISR re-arm path currently emits garbled data
+    /// past the first chunk (#2647 follow-up). Until that is fixed, pick a
+    /// chunk size big enough that a typical RGB frame fits in one chunk so
+    /// the ISR re-arm path is never taken. Worst-case memory for
+    /// 16-lane wave8: 1024 × 128 × 3 buffers = 384 KB in PSRAM.
+    static constexpr size_t kDefaultChunkInputBytes = 1024;
 
     /// Override chunk input bytes for testing (0 = use default).
     void setChunkInputBytesForTest(size_t bytes) FL_NOEXCEPT {
@@ -91,7 +95,11 @@ class ChannelDriverLcdClockless : public IChannelDriver {
     /// @param startByte First source byte index
     /// @param byteCount Number of source bytes to encode
     /// @return Number of DMA bytes written
-    size_t encodeChunk(fl::span<const ChannelDataPtr> channels,
+    ///
+    /// ⚠️ HOT PATH — called from ISR context. MUST live in IRAM so it can
+    /// execute while flash cache is suspended (NVS writes, SPI flash erase,
+    /// etc.). Without FL_IRAM the ISR stalls and the interrupt watchdog trips.
+    size_t FL_IRAM encodeChunk(fl::span<const ChannelDataPtr> channels,
                        u16 *output, size_t startByte,
                        size_t byteCount) FL_NOEXCEPT;
 
@@ -102,7 +110,13 @@ class ChannelDriverLcdClockless : public IChannelDriver {
     // ISR callback
     //=========================================================================
 
-    static bool isrChunkDone(void *panel_io, const void *edata,
+    /// @brief ISR callback invoked by LCD I80 peripheral on chunk transmit done
+    /// ⚠️ ISR CONTEXT — MUST be in IRAM. Without FL_IRAM the callback's code
+    /// lives in flash; when flash cache is suspended (NVS commit, SPI flash
+    /// erase, etc.) the ISR cannot execute, interrupts stay disabled past the
+    /// 300 ms interrupt watchdog window, and the device panics with "Interrupt
+    /// wdt timeout on CPU1" in ISR context.
+    static bool FL_IRAM isrChunkDone(void *panel_io, const void *edata,
                              void *user_ctx) FL_NOEXCEPT;
 
     //=========================================================================

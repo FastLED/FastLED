@@ -14,8 +14,8 @@
 #if defined(FL_IS_ESP_32S3) && FL_HAS_INCLUDE("esp_lcd_panel_io.h")
 
 #include "platforms/esp/32/drivers/lcd_spi/ilcd_spi_peripheral.h"
+#include "fl/stl/compiler_control.h"  // FL_IRAM, FL_EXTERN_C_BEGIN
 #include "fl/stl/noexcept.h"
-#include "fl/stl/compiler_control.h"
 #include "esp_lcd_panel_io.h"
 
 FL_EXTERN_C_BEGIN
@@ -51,7 +51,10 @@ class LcdSpiPeripheralEsp : public ILcdSpiPeripheral {
     u16 *allocateBuffer(size_t size_bytes) FL_NOEXCEPT override;
     void freeBuffer(u16 *buffer) FL_NOEXCEPT override;
 
-    bool transmit(const u16 *buffer, size_t size_bytes) FL_NOEXCEPT override;
+    // FL_IRAM: ChannelDriverLcdClockless::isrChunkDone re-arms the next
+    // chunk from ISR context, so transmit() must be IRAM-resident to survive
+    // a flash-cache stall (NVS commit, SPI flash erase, etc.).
+    bool FL_IRAM transmit(const u16 *buffer, size_t size_bytes) FL_NOEXCEPT override;
     bool waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT override;
     bool isBusy() const FL_NOEXCEPT override;
 

@@ -191,7 +191,10 @@ IChannelDriver::DriverState ChannelDriverLcdClockless::poll() FL_NOEXCEPT {
 // Encoding — wave3 or wave8 transpose into u16 DMA words
 //=============================================================================
 
-size_t ChannelDriverLcdClockless::encodeChunk(
+// FL_IRAM matches the declaration in channel_driver_lcd_clockless.h — this
+// function is invoked from isrChunkDone() and MUST live in IRAM so it can
+// execute while flash cache is suspended (NVS, SPI flash ops).
+size_t FL_IRAM ChannelDriverLcdClockless::encodeChunk(
     fl::span<const ChannelDataPtr> channels, u16 *output,
     size_t startByte, size_t byteCount) FL_NOEXCEPT {
     size_t outputIdx = 0; // bytes written
@@ -238,7 +241,13 @@ size_t ChannelDriverLcdClockless::encodeChunk(
 // ISR Callback
 //=============================================================================
 
-bool ChannelDriverLcdClockless::isrChunkDone(void *panel_io,
+// FL_IRAM matches the declaration in channel_driver_lcd_clockless.h — this
+// callback runs in ISR context and MUST live in IRAM so it can execute while
+// flash cache is suspended. Without it, a concurrent flash operation (NVS
+// commit, esp_flash_erase_region, etc.) keeps the ISR stalled past the 300 ms
+// interrupt watchdog window and the device panics with "Interrupt wdt timeout
+// on CPU1" in ISR context.
+bool FL_IRAM ChannelDriverLcdClockless::isrChunkDone(void *panel_io,
                                               const void *edata,
                                               void *user_ctx) FL_NOEXCEPT {
     (void)panel_io;
@@ -338,11 +347,41 @@ bool ChannelDriverLcdClockless::beginTransmission(
         mOutputBytesPerInputByte = 16 * sizeof(Wave8Byte); // 128
     }
 
-    // Chunk sizing
-    size_t chunkInputBytes =
+    // Chunk sizing.
+    //
+    // The LCD I80 peripheral wrapper (LcdSpiPeripheralEsp::transmit) tears
+    // down and recreates the ESP-IDF panel_io handle whenever the
+    // transaction size changes — its GDMA descriptor chain is sized per
+    // transaction. The teardown calls esp_lcd_panel_io_del, which lives in
+    // flash; performing it from isrChunkDone (ISR context) deadlocks the
+    // chip with "Interrupt wdt timeout on CPU1" if any concurrent flash
+    // op has suspended the cache. To keep every ISR-driven transmit at the
+    // same size, we round the requested chunk size up so chunkInputBytes
+    // evenly divides maxSize — the resulting (slightly larger) chunks all
+    // carry the same DMA byte count.
+    size_t requestedChunkInputBytes =
         mChunkInputBytesOverride > 0 ? mChunkInputBytesOverride
                                      : kDefaultChunkInputBytes;
-    if (chunkInputBytes > maxSize) {
+    if (requestedChunkInputBytes > maxSize) {
+        requestedChunkInputBytes = maxSize;
+    }
+
+    // Pick numChunks so chunkInputBytes = maxSize / numChunks is exact (the
+    // remainder must be 0). Walk numChunks upward from
+    // ceil(maxSize / requested) until we hit a divisor; in the worst case we
+    // fall back to numChunks = maxSize (single-byte chunks). For typical LED
+    // counts (powers of two × 3 bytes per RGB pixel) the loop terminates in
+    // a couple of iterations.
+    size_t numChunks =
+        (maxSize + requestedChunkInputBytes - 1) / requestedChunkInputBytes;
+    if (numChunks == 0) {
+        numChunks = 1;
+    }
+    while (numChunks < maxSize && (maxSize % numChunks) != 0) {
+        ++numChunks;
+    }
+    size_t chunkInputBytes = maxSize / numChunks;
+    if (chunkInputBytes == 0) {
         chunkInputBytes = maxSize;
     }
 
@@ -465,7 +504,11 @@ fl::shared_ptr<IChannelDriver> createLcdClocklessEngine() FL_NOEXCEPT {
         void freeBuffer(u16 *b) FL_NOEXCEPT override {
             detail::LcdSpiPeripheralEsp::instance().freeBuffer(b);
         }
-        bool transmit(const u16 *b, size_t s) FL_NOEXCEPT override {
+        // FL_IRAM: forwarded into LcdSpiPeripheralEsp::transmit() from
+        // isrChunkDone (ISR context). The thunk must live in IRAM too —
+        // marking only the target is not enough because the vtable dispatch
+        // jumps here first.
+        bool FL_IRAM transmit(const u16 *b, size_t s) FL_NOEXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().transmit(b, s);
         }
         bool waitTransmitDone(u32 t) FL_NOEXCEPT override {

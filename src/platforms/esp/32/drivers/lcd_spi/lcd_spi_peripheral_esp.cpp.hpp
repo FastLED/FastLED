@@ -301,7 +301,7 @@ void LcdSpiPeripheralEsp::freeBuffer(u16 *buffer) FL_NOEXCEPT {
 // Transmission
 //=============================================================================
 
-bool LcdSpiPeripheralEsp::transmit(const u16 *buffer,
+bool FL_IRAM LcdSpiPeripheralEsp::transmit(const u16 *buffer,
                                    size_t size_bytes) FL_NOEXCEPT {
     if (!mInitialized || mI80Bus == nullptr) {
         return false;
@@ -309,15 +309,34 @@ bool LcdSpiPeripheralEsp::transmit(const u16 *buffer,
 
     // Block until previous DMA is truly complete. The semaphore is
     // primed during initialize() so the first call returns immediately.
-    // This is stronger than the old non-blocking drain — it guarantees
-    // the I80 bus has fully processed the previous transaction before
-    // we submit a new one.
+    //
+    // ISR safety: when ChannelDriverLcdClockless::isrChunkDone re-arms the
+    // next chunk from the on_color_trans_done callback, transmit() runs in
+    // interrupt context. lcd_spi_flush_ready() already did xSemaphoreGiveFromISR
+    // *before* invoking our user callback, so the take is guaranteed to be
+    // non-blocking — but we MUST use the FromISR variant because the regular
+    // xSemaphoreTake() asserts (configASSERT) when called from ISR.
     if (mCompleteSem) {
-        if (xSemaphoreTake(mCompleteSem, pdMS_TO_TICKS(2000)) != pdTRUE) {
-            FL_WARN("LcdSpiPeripheralEsp: Timed out waiting for previous "
-                    "transmit to complete");
-            mBusy = false;
-            return false;
+        if (xPortInIsrContext()) {
+            BaseType_t hpw = pdFALSE;
+            if (xSemaphoreTakeFromISR(mCompleteSem, &hpw) != pdTRUE) {
+                // Semaphore should always be available here because
+                // lcd_spi_flush_ready already gave it before invoking our
+                // callback. If not, abort the re-arm — the next CPU-side
+                // transmit() will pick up where we left off.
+                mBusy = false;
+                return false;
+            }
+            if (hpw) {
+                portYIELD_FROM_ISR();
+            }
+        } else {
+            if (xSemaphoreTake(mCompleteSem, pdMS_TO_TICKS(2000)) != pdTRUE) {
+                FL_WARN("LcdSpiPeripheralEsp: Timed out waiting for previous "
+                        "transmit to complete");
+                mBusy = false;
+                return false;
+            }
         }
     }
 
@@ -337,7 +356,13 @@ bool LcdSpiPeripheralEsp::transmit(const u16 *buffer,
         esp_lcd_panel_io_i80_config_t io_config = {};
         io_config.cs_gpio_num = GPIO_NUM_NC;
         io_config.pclk_hz = mConfig.clock_hz;
-        io_config.trans_queue_depth = 1;
+        // trans_queue_depth=2: ChannelDriverLcdClockless::isrChunkDone calls
+        // back into tx_color() from on_color_trans_done. With depth=1 the
+        // currently-running transaction has not been retired from the I80
+        // queue yet, so the re-arm blocks waiting for a queue slot — from
+        // ISR context — and trips the interrupt watchdog. Depth=2 leaves
+        // a free slot for the ISR-driven re-arm.
+        io_config.trans_queue_depth = 2;
         io_config.dc_levels = {
             .dc_idle_level = 0,
             .dc_cmd_level = 0,
