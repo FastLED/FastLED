@@ -189,6 +189,47 @@ def fbuild_supports_compile_many() -> bool:
     return _fbuild_supports_subcommand("compile-many")
 
 
+# Parses size lines emitted into per-sketch fbuild logs. Matches both unit
+# variants the AVR/ESP orchestrators emit:
+#   "Flash: 2.75KB / 31.50KB (8.7%)"
+#   "RAM:   223 bytes / 2.00KB (10.9%)"
+# Returns the leading number+unit (e.g. "2.75KB", "223 bytes") so the caller
+# can render it back without unit conversion.
+_FLASH_SIZE_RE = re.compile(r"^\s*Flash:\s+([0-9.]+(?:\s*KB|\s*MB|\s*bytes))\s*/")
+_RAM_SIZE_RE = re.compile(r"^\s*RAM:\s+([0-9.]+(?:\s*KB|\s*MB|\s*bytes))\s*/")
+
+
+def _parse_size_info_from_log(log_path: Path | None) -> tuple[str | None, str | None]:
+    """Pull the (flash, ram) size strings out of an fbuild per-sketch log.
+
+    Returns (None, None) when the log is missing or doesn't contain the
+    Flash/RAM lines (e.g. a stage-1 fingerprint cache hit prints a shorter
+    log without size info). Callers should gracefully omit size in that case.
+    """
+    if log_path is None or not log_path.exists():
+        return (None, None)
+    try:
+        content = log_path.read_text(encoding="utf-8", errors="ignore")
+    except OSError:
+        return (None, None)
+    flash: str | None = None
+    ram: str | None = None
+    for line in content.splitlines():
+        if flash is None:
+            m = _FLASH_SIZE_RE.match(line)
+            if m:
+                flash = m.group(1).strip()
+                continue
+        if ram is None:
+            m = _RAM_SIZE_RE.match(line)
+            if m:
+                ram = m.group(1).strip()
+                continue
+        if flash is not None and ram is not None:
+            break
+    return (flash, ram)
+
+
 def _parse_compile_many_results(output: str) -> list[FbuildCompileManySketchResult]:
     """Extract per-sketch results from ``fbuild compile-many`` output."""
     results: list[FbuildCompileManySketchResult] = []
