@@ -1,13 +1,16 @@
-name: AVR8JS Test Template (fbuild)
+name: AVR8JS Test Template (Docker)
 
-# Reusable template: build + run an Arduino sketch in the AVR8JS JavaScript
-# emulator via `fbuild test-emu --emulator avr8js`.
+# Reusable template: build an Arduino sketch with ci-compile.py, then run
+# the resulting firmware in the niteris/fastled-avr8js Docker image via
+# ci.docker_utils.avr8js_docker.DockerAVR8jsRunner.
 #
-# Migration note: this template used to orchestrate a Docker container
-# (niteris/fastled-avr8js) with hand-rolled timeout + regex-matching bash.
-# fbuild 2.1.16+ ships `test-emu` with native --timeout / --halt-on-success /
-# --halt-on-error / --expect, which replaces the whole pipeline. See
-# FastLED/fbuild#86 for the avr8js auto-install robustness fix this relies on.
+# Bypasses `fbuild test-emu --emulator avr8js` because of FastLED#2645:
+# fbuild 2.2.10+ hangs the daemon's /api/test-emu handler for the avr8js
+# path, and every fbuild call (including `daemon status` / `show daemon`)
+# also hangs once the daemon is wedged. The Docker runner is the same
+# pre-migration path that was working before (ci/runners/avr8js_runner.py
+# for local `bash test --run uno`); restoring it here unbreaks CI while
+# the upstream fbuild regression is being chased.
 
 on:
   workflow_call:
@@ -56,79 +59,89 @@ jobs:
         with:
           python-version-file: ".python-version"
 
-      - name: Install project dependencies (includes fbuild)
+      - name: Install project dependencies
         run: uv sync
 
-      - name: Set up Node.js
-        # fbuild's avr8js runner needs Node to run its bundled headless.mjs.
-        # Node auto-installs the avr8js npm package into ~/.fbuild/cache/.
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Belt-and-suspenders avr8js install
-        # Pre-populate the fbuild cache so even if the auto-install path has
-        # a regression (see FastLED/fbuild#86), the runner still finds avr8js.
-        run: |
-          mkdir -p ~/.fbuild/cache/avr8js-node
-          cd ~/.fbuild/cache/avr8js-node
-          npm init -y >/dev/null 2>&1 || true
-          npm install avr8js@0.21.0 --no-fund --no-audit
-          echo "avr8js cache populated:"
-          ls -la node_modules/avr8js | head -5
-
-      - name: "fbuild test-emu — build + emulate ${{ inputs.sketch }} on ${{ inputs.platform_display }}"
-        id: test_emu
-        # Two-step pattern: ci-compile.py stages the sketch into
-        # .build/pio/<env>/ (writes platformio.ini + fbuild firmware.hex).
-        # Then fbuild test-emu loads firmware into AVR8JS and streams
-        # serial output with timestamps.
-        #
-        # --halt-on-success "Test loop" ends the run as soon as loop() is
-        # reached; without it the emulator would run to the 30s timeout.
-        # --halt-on-error catches panics and avr-libc aborts early.
-        # --expect asserts setup() actually ran before we declared success.
-        # Output is tee'd into avr8js_output.log for artifact upload.
-        #
-        # Daemon restart + step timeout — FastLED#2645. After ci-compile.py
-        # invokes `fbuild build`, the daemon is left in whatever state the
-        # build ended in; on the avr8js path that state has been making
-        # `/api/test-emu` requests hang for 30 minutes before a
-        # connection-idle error. Restarting brings up a fresh daemon for
-        # the avr8js request, and the step-level timeout caps the bleed
-        # while the upstream fbuild bug is being chased.
+      - name: "Build ${{ inputs.sketch }} for ${{ inputs.platform_display }}"
+        # Stage the sketch into .build/pio/<env>/ via ci-compile.py.
+        # fbuild handles the actual compile and writes firmware.elf /
+        # firmware.hex under .fbuild/build/<env>/release/.
         timeout-minutes: 8
         run: |
           set -o pipefail
           uv run ci/ci-compile.py ${{ inputs.platform }} \
             --examples ${{ inputs.sketch }} \
             --verbose
-          echo "::group::fbuild daemon restart (FastLED#2645)"
-          uv run fbuild daemon restart || true
-          uv run fbuild daemon status || true
-          echo "::endgroup::"
-          uv run fbuild test-emu \
-            --emulator avr8js \
-            --environment ${{ inputs.platform }} \
-            --timeout 30 \
-            --halt-on-success "Test loop" \
-            --halt-on-error "PANIC|ABORT|assert" \
-            --expect "Test setup starting" \
-            .build/pio/${{ inputs.platform }} 2>&1 | tee avr8js_output.log
         shell: bash
 
-      - name: Dump fbuild daemon diagnostics on failure
-        # If test-emu hangs/fails, capture the daemon's view of the world
-        # so the next debugging cycle has real evidence (FastLED#2645).
-        if: failure() && steps.test_emu.conclusion == 'failure'
+      - name: "Run firmware in AVR8JS Docker (${{ inputs.platform_display }})"
+        id: avr8js
+        # Use the legacy Docker runner directly. The image pulls itself
+        # on first use (ensure_image_available). 8 min cap covers image
+        # pull + ~30s emulation timeout with comfortable headroom.
+        timeout-minutes: 8
         run: |
-          {
-            echo "=== fbuild daemon status ==="
-            uv run fbuild daemon status || true
-            echo
-            echo "=== fbuild daemon log tail ==="
-            uv run fbuild show daemon --lines 200 || true
-          } | tee -a avr8js_output.log
+          set -o pipefail
+          uv run python -c "
+          import sys
+          from pathlib import Path
+          from ci.docker_utils.avr8js_docker import DockerAVR8jsRunner
+
+          mcu_config = {
+              'uno': ('atmega328p', 16_000_000),
+              'leonardo': ('atmega32u4', 16_000_000),
+              'nano_every': ('atmega4809', 16_000_000),
+          }
+          platform = '${{ inputs.platform }}'
+          if platform not in mcu_config:
+              print(f'Unsupported avr8js platform: {platform}')
+              sys.exit(1)
+          mcu, freq = mcu_config[platform]
+
+          build_dir = Path('.build/pio/${{ inputs.platform }}')
+          elf_candidates = list(build_dir.rglob('firmware.elf'))
+          if not elf_candidates:
+              print(f'firmware.elf not found under {build_dir}')
+              sys.exit(1)
+          elf_path = elf_candidates[0].resolve()
+          print(f'Using firmware: {elf_path}')
+
+          runner = DockerAVR8jsRunner()
+          if not runner.ensure_image_available():
+              print('Failed to prepare AVR8JS Docker image')
+              sys.exit(1)
+
+          exit_code = runner.run(
+              elf_path=elf_path,
+              mcu=mcu,
+              frequency=freq,
+              timeout=30,
+              output_file='avr8js_output.log',
+          )
+          sys.exit(exit_code)
+          " 2>&1 | tee -a avr8js_output.log
+        shell: bash
+
+      - name: "Validate AVR8JS output for ${{ inputs.sketch }}"
+        # The Docker runner only reports the emulator's exit code; the
+        # Test sketch expects specific serial markers. Mirror the legacy
+        # template's grep gate so we don't pass on an emulator that
+        # silently produced no output.
+        if: steps.avr8js.outcome == 'success' && inputs.sketch == 'Test'
+        run: |
+          if [ ! -f avr8js_output.log ]; then
+            echo "::error::avr8js_output.log missing"
+            exit 1
+          fi
+          if ! grep -q "Test setup starting" avr8js_output.log; then
+            echo "::error::missing 'Test setup starting' marker"
+            exit 1
+          fi
+          if ! grep -q "Test loop" avr8js_output.log; then
+            echo "::error::missing 'Test loop' marker"
+            exit 1
+          fi
+          echo "Test markers present."
         shell: bash
 
       - name: Display emulator output
