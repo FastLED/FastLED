@@ -18,9 +18,8 @@
 ///      pattern (×1.00 SRAM vs PSRAM); this rechecks on the byte-LUT version.
 ///
 /// Output: `BENCH_PARLIO_*` lines via `esp_rom_printf` -> USB-Serial-JTAG (COM25)
-/// so capture works without the broken testSimd RPC routing (#2541). Gated by
-/// `-DFL_BENCH_PARLIO_AT_BOOT=1` per #2542 — RPC-invokable from
-/// `parlioEncodeBenchmark` in AutoResearchRemote.cpp.
+/// so capture works without depending on the testSimd RPC routing (#2541).
+/// **Invocation:** RPC-only via `parlioEncodeBenchmark` in AutoResearchRemote.cpp.
 
 #pragma once
 

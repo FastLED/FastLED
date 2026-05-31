@@ -328,42 +328,11 @@ void setup() {
     ss << "  RX Buffer Size: " << RX_BUFFER_SIZE << " bytes";
     FL_PRINT(ss.str());
 
-    // ========================================================================
-    // SIMD AutoResearch
-    // ========================================================================
-    // SIMD validation suite is RPC-driven (testSimd, registered in
-    // AutoResearchRemote.cpp). NOT computed at boot by default — flip
-    // -DFL_RUN_SIMD_TESTS_AT_BOOT=1 to run once at startup as a bridge until
-    // the testSimd RPC routing on P4 is fixed (#2541).
-#ifdef FL_RUN_SIMD_TESTS_AT_BOOT
-    {
-        int simd_failures = autoresearch::simd_check::runSimdTests();
-        if (simd_failures > 0) {
-            FL_ERROR("SIMD autoresearch failed - " << simd_failures << " test(s) failed");
-        }
-    }
-#endif
-
-    // #2526 expansion micro-bench is RPC-driven (wave8ExpandBenchmark, registered
-    // in AutoResearchRemote.cpp). NOT computed at boot by default — flip
-    // -DFL_BENCH_WAVE8_AT_BOOT=1 to run once at startup as a bridge until the
-    // testSimd RPC routing on P4 is fixed (#2541).
-#ifdef FL_BENCH_WAVE8_AT_BOOT
-    {
-        auto w8r = autoresearch::wave8_bench::measureWave8Expand();
-        autoresearch::wave8_bench::printWave8ExpandResultRom(w8r);
-    }
-#endif
-
-    // Full PARLIO encode bench (post-byte-LUT, #2526). RPC-driven via
-    // parlioEncodeBenchmark; boot-time bridge gated by FL_BENCH_PARLIO_AT_BOOT
-    // until #2541 testSimd RPC routing is fixed.
-#ifdef FL_BENCH_PARLIO_AT_BOOT
-    {
-        auto _per = autoresearch::parlio_bench::measureParlioEncode();
-        autoresearch::parlio_bench::printParlioEncodeResultRom(_per);
-    }
-#endif
+    // SIMD validation suite, Wave8 expansion micro-bench, and full PARLIO
+    // encode bench are RPC-driven — invoke via the `testSimd`,
+    // `wave8ExpandBenchmark`, and `parlioEncodeBenchmark` handlers in
+    // AutoResearchRemote.cpp. Do not add boot-time invocation blocks here;
+    // if RPC routing is broken on a platform, fix the routing (see #2541).
 
     // ========================================================================
     // RX Channel Setup

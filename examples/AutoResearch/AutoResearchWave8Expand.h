@@ -5,13 +5,9 @@
 /// LUT and a batched-byte variant (S3), AND times the full per-byte-position
 /// production cost (expansion + 16-lane transpose) for both LUTs.
 ///
-/// **Invocation:** intended to be called via the `wave8ExpandBenchmark` RPC
-/// (registered in AutoResearchRemote.cpp). Not computed at boot by default.
-/// Build with `-DFL_BENCH_WAVE8_AT_BOOT=1` to also fire once at setup() —
-/// that's a bridge until the testSimd RPC routing on P4 is fixed (#2541), at
-/// which point the bench is purely RPC-driven. Boot-time output uses
-/// `esp_rom_printf` because `FL_PRINT` doesn't currently reach COM25 on P4
-/// (see #2540/#2541).
+/// **Invocation:** RPC-only. Call via the `wave8ExpandBenchmark` handler
+/// registered in AutoResearchRemote.cpp. Output uses `esp_rom_printf` because
+/// `FL_PRINT` doesn't currently reach COM25 on P4 (see #2540/#2541).
 
 #pragma once
 
