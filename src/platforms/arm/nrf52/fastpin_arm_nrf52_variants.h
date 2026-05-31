@@ -15,9 +15,10 @@
 // to the OR-chain when introducing new community-board variants. See #2422
 // for the original report and #2626 for the redefinition bug.
 #undef __FASTLED_NRF52_USER_TARGET_OVERRIDE
-#if defined(TARGET_SUPERMINI_NRF52840) || \
-    defined(TARGET_NICE_NANO_V2)      || \
-    defined(TARGET_NRFMICRO)
+#if defined(TARGET_SUPERMINI_NRF52840)    || \
+    defined(TARGET_NICE_NANO_V2)          || \
+    defined(TARGET_NRFMICRO)              || \
+    defined(TARGET_XIAOBLE_NRF52840_SENSE)
     #define __FASTLED_NRF52_USER_TARGET_OVERRIDE
 #endif
 
