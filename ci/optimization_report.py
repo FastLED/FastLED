@@ -1,4 +1,5 @@
 import argparse
+import os
 import sys
 from pathlib import Path
 
@@ -12,7 +13,23 @@ from pathlib import Path
 # succeeded but Optimization Report cancelled at 37s with the runner dying
 # soon after. Cap to the LAST 1 MiB (most-recently emitted optimizer info,
 # which is the most actionable for size-driven debugging).
-MAX_REPORT_BYTES = 1 * 1024 * 1024
+#
+# Override via FL_OPT_REPORT_MAX_BYTES env var (set to 0 to disable the cap)
+# or the --max-bytes flag. Long-term, this script should print only a summary
+# and let the workflow upload optimization_report.txt as a build artifact for
+# devs to download — tracked as a follow-up.
+DEFAULT_MAX_REPORT_BYTES = 1 * 1024 * 1024
+
+
+def _env_default_max_bytes() -> int:
+    raw = os.environ.get("FL_OPT_REPORT_MAX_BYTES")
+    if raw is None:
+        return DEFAULT_MAX_REPORT_BYTES
+    try:
+        value = int(raw)
+    except ValueError:
+        return DEFAULT_MAX_REPORT_BYTES
+    return max(value, 0)
 
 
 def parse_args() -> argparse.Namespace:
@@ -24,8 +41,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--max-bytes",
         type=int,
-        default=MAX_REPORT_BYTES,
-        help=f"Cap report tail printed to stdout (default {MAX_REPORT_BYTES} bytes).",
+        default=_env_default_max_bytes(),
+        help=(
+            f"Cap report tail printed to stdout (default "
+            f"{DEFAULT_MAX_REPORT_BYTES} bytes; override via FL_OPT_REPORT_MAX_BYTES "
+            f"env var; set to 0 to disable the cap entirely)."
+        ),
     )
     return parser.parse_args()
 
