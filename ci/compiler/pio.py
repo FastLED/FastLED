@@ -422,25 +422,43 @@ class PioCompiler(Compiler):
         return futures
 
     def _build_fbuild(self, examples: list[str]) -> list[Future[SketchResult]]:
-        """Build examples using fbuild, preferring ``ci`` when available."""
+        """Build examples using fbuild, preferring ``ci`` when available.
+
+        compile-many / ``fbuild ci`` are gated behind ``FASTLED_USE_FBUILD_CI``
+        because today they re-build the framework from scratch in every
+        stage-2 sketch dir (FastLED/fbuild#335). On uno that's a ~7 min run
+        vs. ~3.5 min serial; on teensy41/esp32s3 (larger framework) it
+        blows past the 30 min batch timeout. Default off until fbuild#335
+        ships a shared framework cache; set ``FASTLED_USE_FBUILD_CI=1`` to
+        opt in (e.g. for local timing experiments).
+        """
+        import os
+
         from ci.util.fbuild_runner import (
             fbuild_supports_ci,
             fbuild_supports_compile_many,
         )
 
-        if fbuild_supports_ci():
-            return self._build_fbuild_ci(examples)
-        if fbuild_supports_compile_many():
-            print(
-                "fbuild ci is unavailable in the installed fbuild; "
-                "falling back to fbuild compile-many."
-            )
-            return self._build_fbuild_compile_many(examples)
-
-        print(
-            "fbuild ci and compile-many are unavailable in the installed fbuild; "
-            "falling back to the legacy serial loop."
+        opt_in = os.environ.get("FASTLED_USE_FBUILD_CI", "").lower() in (
+            "1",
+            "true",
+            "yes",
+            "on",
         )
+        if opt_in:
+            if fbuild_supports_ci():
+                return self._build_fbuild_ci(examples)
+            if fbuild_supports_compile_many():
+                print(
+                    "fbuild ci is unavailable in the installed fbuild; "
+                    "falling back to fbuild compile-many."
+                )
+                return self._build_fbuild_compile_many(examples)
+            print(
+                "FASTLED_USE_FBUILD_CI=1 was set but fbuild ci/compile-many "
+                "are unavailable in the installed fbuild; falling back to "
+                "the legacy serial loop."
+            )
         return self._build_fbuild_sync(examples)
 
     def _compile_many_project_dir(self, example: str, index: int) -> Path:

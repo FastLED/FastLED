@@ -168,6 +168,10 @@ def test_pio_compiler_build_prefers_ci_results(
     other_log = other_project / "compile_many.log"
     other_log.write_text("demo ok", encoding="utf-8")
 
+    # compile-many is gated behind FASTLED_USE_FBUILD_CI in
+    # PioCompiler._build_fbuild (see the FastLED/fbuild#335 note there).
+    # Opt in for this test so the ci-results path actually runs.
+    monkeypatch.setenv("FASTLED_USE_FBUILD_CI", "1")
     monkeypatch.setattr(fbuild_runner, "fbuild_supports_ci", lambda: True)
     monkeypatch.setattr(fbuild_runner, "fbuild_supports_compile_many", lambda: True)
     monkeypatch.setattr(
