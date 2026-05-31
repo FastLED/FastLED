@@ -797,7 +797,30 @@ ESP32_C6_DEVKITC_1 = Board(
     platform=ESP32_IDF_5_5_1_PIOARDUINO,
     board_build_flash_size="4MB",  # ESP32-C6FH4 actual flash size confirmed by esptool
     board_partitions="huge_app.csv",
-    build_flags=["-funwind-tables"],  # Better stack traces for RISC-V crash decoding
+    build_flags=[
+        "-funwind-tables",  # Better stack traces for RISC-V crash decoding
+        # Route Arduino Serial to USB-Serial/JTAG (HWCDC). Without these the
+        # sketch's Serial.print/RPC traffic goes to UART0, which is not wired
+        # on the embedded-flash FH4 SKU — host sees a silent device.
+        "-DARDUINO_USB_MODE=1",
+        "-DARDUINO_USB_CDC_ON_BOOT=1",
+        # PARLIO ISR placement + cache safety (needed for the chunked-streaming
+        # encode path the autoresearch tests exercise).
+        "-DCONFIG_PARLIO_TX_ISR_HANDLER_IN_IRAM=1",
+        "-DCONFIG_PARLIO_TX_ISR_CACHE_SAFE=1",
+        "-DPIN_DATA=21",
+        "-DPARLIO_FORCE_LSB_MODE=0",
+        # Quiet the debug log spam that saturates USB-CDC when running 16-lane
+        # parlioStreamValidate (ChannelManager::addDriver idempotent-no-op +
+        # per-driver INFO messages flood HWCDC TX faster than the host can
+        # drain it and corrupt the RPC reply stream).
+        "-UCORE_DEBUG_LEVEL",
+        "-DCORE_DEBUG_LEVEL=2",
+        "-ULOG_LOCAL_LEVEL",
+        "-DLOG_LOCAL_LEVEL=ESP_LOG_WARN",
+        "-UFASTLED_DEBUG",
+        "-DFASTLED_DEBUG=0",
+    ],
 )
 
 ESP32_S3_DEVKITC_1 = Board(
