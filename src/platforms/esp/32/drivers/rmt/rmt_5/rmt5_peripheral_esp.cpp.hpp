@@ -42,15 +42,11 @@ FL_EXTERN_C_BEGIN
 // IWYU pragma: end_keep
 FL_EXTERN_C_END
 
-// ESP-IDF 5.2+ compatibility: ESP_CACHE_MSYNC_FLAG_DIR_C2M
-// In ESP-IDF < 5.2, esp_cache_msync() defaults to C2M (cache-to-memory) direction
-// In ESP-IDF 5.2+, the direction flag was added to be explicit
-#include "platforms/esp/esp_version.h"
-#if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 2, 0)
-    #ifndef ESP_CACHE_MSYNC_FLAG_DIR_C2M
-        #define ESP_CACHE_MSYNC_FLAG_DIR_C2M 0  // Default behavior in < 5.2
-    #endif
-#endif
+// ESP-IDF 5.2+ compatibility: ESP_CACHE_MSYNC_FLAG_DIR_C2M.
+// Centralized so every driver gets the same shim regardless of unity-build
+// include order. See FastLED #2619 for the lcd_spi / rmt5 ordering bug that
+// motivated extracting this.
+#include "platforms/esp/esp_cache_compat.h"
 
 // FL_MEMORY_BARRIER for ISR synchronization
 #include "fl/stl/compiler_control.h"
