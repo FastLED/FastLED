@@ -251,6 +251,7 @@ jobs:
       - name: Symbol Analysis
         if: always()
         continue-on-error: true
+        timeout-minutes: 5
         run: |
           # Parse the board name from args (first element)
           python -c "print('${{ inputs.args }}'.split()[0])" > board.txt
@@ -260,6 +261,7 @@ jobs:
       - name: Optimization Report
         if: always()
         continue-on-error: true
+        timeout-minutes: 5
         run: |
           uv run ci/optimization_report.py --first
 
