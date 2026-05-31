@@ -811,15 +811,19 @@ ESP32_C6_DEVKITC_1 = Board(
         "-DPIN_DATA=21",
         "-DPARLIO_FORCE_LSB_MODE=0",
         # Quiet the debug log spam that saturates USB-CDC when running 16-lane
-        # parlioStreamValidate (ChannelManager::addDriver idempotent-no-op +
-        # per-driver INFO messages flood HWCDC TX faster than the host can
-        # drain it and corrupt the RPC reply stream).
+        # parlioStreamValidate (ChannelManager::addDriver idempotent-no-op
+        # FL_DBG fires once per (lane × pre-registered driver) = 80 lines and
+        # floods HWCDC faster than the host can drain — see issue #2663).
+        # FL_DBG is gated on SKETCH_HAS_LARGE_MEMORY (true on ESP32) so the
+        # IDF log-level flags alone are not enough; FASTLED_DISABLE_DBG=1 is
+        # what actually compiles FL_DBG out.
         "-UCORE_DEBUG_LEVEL",
         "-DCORE_DEBUG_LEVEL=2",
         "-ULOG_LOCAL_LEVEL",
         "-DLOG_LOCAL_LEVEL=ESP_LOG_WARN",
         "-UFASTLED_DEBUG",
         "-DFASTLED_DEBUG=0",
+        "-DFASTLED_DISABLE_DBG=1",
     ],
 )
 
