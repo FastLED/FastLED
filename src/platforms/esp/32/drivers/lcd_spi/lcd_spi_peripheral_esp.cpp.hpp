@@ -349,7 +349,13 @@ bool FL_IRAM LcdSpiPeripheralEsp::transmit(const u16 *buffer,
         esp_lcd_panel_io_i80_config_t io_config = {};
         io_config.cs_gpio_num = GPIO_NUM_NC;
         io_config.pclk_hz = mConfig.clock_hz;
-        io_config.trans_queue_depth = 1;
+        // trans_queue_depth=2: ChannelDriverLcdClockless::isrChunkDone calls
+        // back into tx_color() from on_color_trans_done. With depth=1 the
+        // currently-running transaction has not been retired from the I80
+        // queue yet, so the re-arm blocks waiting for a queue slot — from
+        // ISR context — and trips the interrupt watchdog. Depth=2 leaves
+        // a free slot for the ISR-driven re-arm.
+        io_config.trans_queue_depth = 2;
         io_config.dc_levels = {
             .dc_idle_level = 0,
             .dc_cmd_level = 0,
