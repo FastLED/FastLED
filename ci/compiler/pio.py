@@ -539,6 +539,11 @@ class PioCompiler(Compiler):
             self.platform_lock.release()
             return futures
 
+        import time
+
+        from ci.util.fbuild_runner import _parse_size_info_from_log
+
+        batch_start = time.monotonic()
         try:
             compile_many_result = run_batch(
                 board=self.board.board_name,
@@ -553,6 +558,9 @@ class PioCompiler(Compiler):
                 for sketch_result in compile_many_result.sketch_results
             }
 
+            success_count = 0
+            fail_count = 0
+            per_sketch_secs: list[float] = []
             for example, project_dir in staged_projects:
                 sketch_result = reported.get(project_dir.resolve())
                 if sketch_result is None:
@@ -561,6 +569,10 @@ class PioCompiler(Compiler):
                         f"{project_dir}\n\n{compile_many_result.output}"
                     )
                     success = False
+                    stage = "?"
+                    build_secs = 0.0
+                    flash_str: str | None = None
+                    ram_str: str | None = None
                 else:
                     output = sketch_result.message
                     if (
@@ -571,11 +583,37 @@ class PioCompiler(Compiler):
                             encoding="utf-8", errors="ignore"
                         )
                     success = sketch_result.success
+                    stage = sketch_result.stage
+                    build_secs = sketch_result.build_time_secs
+                    flash_str, ram_str = _parse_size_info_from_log(
+                        sketch_result.log_path
+                    )
 
+                # Normalized per-sketch summary line. The serial path emits
+                # `build succeeded in Xs (flash: N bytes, ram: M bytes)` from
+                # fbuild + `Compilation succeeded (fbuild) [Xs]` from FastLED.
+                # Compile-many never sees those per-sketch lines (fbuild only
+                # prints one aggregate table), so reconstruct an equivalent
+                # line per sketch from the parsed result + per-sketch log.
+                # Sizes come from the same fbuild `Flash:`/`RAM:` lines the
+                # serial path renders, just kept in fbuild's display units
+                # (e.g. "2.75KB") rather than re-converted to bytes — the
+                # signal is "did flash/ram change?", not the literal value.
+                size_part = ""
+                if flash_str is not None and ram_str is not None:
+                    size_part = f" (flash: {flash_str}, ram: {ram_str})"
+                elif flash_str is not None:
+                    size_part = f" (flash: {flash_str})"
+                stage_tag = f"[{stage}]" if stage != "?" else "[?]"
                 if success:
+                    success_count += 1
                     green_color = "\033[32m"
                     reset_color = "\033[0m"
-                    print(f"{green_color}SUCCESS: {example}{reset_color}")
+                    print(
+                        f"{green_color}SUCCESS: {example}  "
+                        f"build succeeded in {build_secs:.1f}s{size_part} {stage_tag}"
+                        f"{reset_color}"
+                    )
                     if generate_build_info_json_from_existing_build(
                         project_dir, self.board, example
                     ):
@@ -586,9 +624,16 @@ class PioCompiler(Compiler):
                                 self.build_dir / build_info_path.name,
                             )
                 else:
+                    fail_count += 1
                     red_color = "\033[31m"
                     reset_color = "\033[0m"
-                    print(f"{red_color}FAILED: {example}{reset_color}")
+                    print(
+                        f"{red_color}FAILED:  {example}  "
+                        f"build failed in {build_secs:.1f}s {stage_tag}"
+                        f"{reset_color}"
+                    )
+
+                per_sketch_secs.append(build_secs)
 
                 future: Future[SketchResult] = Future()
                 future.set_result(
@@ -600,6 +645,27 @@ class PioCompiler(Compiler):
                     )
                 )
                 futures.append(future)
+
+            # Total wall-clock and parallelism factor. The fbuild_runner step
+            # already prints `Compilation succeeded (fbuild ci) [Xs]` with
+            # the same wall time, but it lands BEFORE the per-sketch lines
+            # (fbuild prints its summary as soon as the subprocess exits).
+            # Re-emit a final-line total here so the bottom-of-log reader
+            # sees the wall clock right after the per-sketch summary, with
+            # an explicit parallelism factor so it's obvious when stage 2
+            # actually fanned out vs. ran serially.
+            batch_wall = time.monotonic() - batch_start
+            sum_per_sketch = sum(per_sketch_secs)
+            sketches_n = max(1, len(staged_projects))
+            speedup = sum_per_sketch / batch_wall if batch_wall > 0 else 1.0
+            print(
+                f"\nfbuild {command_label} total wall-clock: {batch_wall:.1f}s "
+                f"across {sketches_n} sketches "
+                f"(sum-of-per-sketch={sum_per_sketch:.1f}s, "
+                f"parallelism={speedup:.2f}x, "
+                f"avg-wall={batch_wall / sketches_n:.2f}s/sketch, "
+                f"ok={success_count}, fail={fail_count})\n"
+            )
         finally:
             print(f"Releasing platform lock: {self.platform_lock.lock_file_path}\n")
             self.platform_lock.release()
