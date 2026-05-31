@@ -346,13 +346,20 @@
 
 // Adafruit Bluefruit on nRF52840DK PCA10056
 // From https://www.adafruit.com/package_adafruit_index.json
-#if defined (ARDUINO_NRF52840_PCA10056)
+// Community boards (SuperMini / nice!nano v2 / nRFMicro) reuse the
+// nrf52840_dk_adafruit BSP, which auto-defines ARDUINO_NRF52840_PCA10056.
+// When one of those TARGET_* overrides is in scope, defer to its dedicated
+// block below instead of using the PCA10056 pin map (see issue #2422).
+#if defined (ARDUINO_NRF52840_PCA10056) && \
+    !defined(TARGET_SUPERMINI_NRF52840) && \
+    !defined(TARGET_NICE_NANO_V2) && \
+    !defined(TARGET_NRFMICRO)
     #if defined(__FASTPIN_ARM_NRF52_VARIANT_FOUND)
         #error "Cannot define more than one board at a time"
     #else
         #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
     #endif
-    
+
     #if defined(USE_ARDUINO_PIN_NUMBERING)
         #error "Define of `USE_ARDUINO_PIN_NUMBERING` has known errors in pin mapping -- select different mapping"
     #elif defined(FASTLED_NRF52_USE_ARDUINO_UNO_R3_HEADER_PIN_NUMBERING)
