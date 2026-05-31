@@ -195,16 +195,16 @@ For full documentation, see `uv run ci/debug_attached.py --help`
 from ci.rpc_client import RpcClient
 
 with RpcClient("/dev/ttyUSB0") as client:
-    # Pre-flight check
+    # Pre-flight check (testGpioConnection expects [txPin, rxPin])
     result = client.send("testGpioConnection", args=[1, 2])
     if not result["connected"]:
         exit(1)  # Fail-fast: hardware not connected
 
-    # Configure and run test in single call (NEW consolidated format)
-    result = client.send("runTest", args={
-        "drivers": ["PARLIO", "RMT"],
-        "laneRange": {"min": 1, "max": 4},
-        "stripSizes": [100, 300]
+    # Run a single-driver test (ASYNC — final response arrives via sendAsyncResponse)
+    result = client.send("runSingleTest", args={
+        "driver": "PARLIO",
+        "laneSizes": [100],
+        "pattern": "MSB_LSB_A",
     })
     exit(0 if result["success"] else 1)
 ```
@@ -215,124 +215,108 @@ The autoresearch system uses bidirectional JSON-RPC over serial for hardware-in-
 - Add new test functionality by extending the JSON-RPC API
 - Configure variable lane sizes and test patterns programmatically
 
-### Python Agent (`ci/autoresearch_agent.py`)
+### Discovering the live RPC surface
+Two device-side discovery rails are always available — prefer these over any hand-written method list, since the firmware is the source of truth:
+
+- `rpc.discover` (built-in) — returns the full OpenRPC schema for every bound method.
+- `help` (no args) — returns a flat manifest array of `{name, phase, args, returns, description}`.
+
 ```python
-from autoresearch_agent import AutoResearchAgent, TestConfig
+from ci.rpc_client import RpcClient
 
-# Connect to device
-with AutoResearchAgent("COM18") as agent:
-    # Health check
-    agent.ping()  # Returns: {timestamp, uptimeMs, frameCounter}
-
-    # Get available drivers
-    drivers = agent.get_drivers()  # Returns: ["PARLIO", "RMT", "SPI", "UART"]
-
-    # Configure test: 100 LEDs, 1 lane, PARLIO driver
-    config = TestConfig(
-        driver="PARLIO",
-        lane_sizes=[100],  # Per-lane LED counts
-        pattern="MSB_LSB_A",
-        iterations=1
-    )
-    agent.configure(config)
-
-    # Run test and get results
-    result = agent.run_test()
-    print(f"Passed: {result.passed_tests}/{result.total_tests}")
-
-    # Reset between tests
-    agent.reset()
+with RpcClient("/dev/ttyUSB0") as client:
+    for fn in client.send("help"):
+        print(f"{fn['phase']:>22}  {fn['name']:<28}  {fn['args']}")
 ```
 
-### JSON-RPC Commands
-Sent over serial with `REMOTE:` response prefix:
+### JSON-RPC Commands (current `bind()` registrations)
+
+Source of truth: `examples/AutoResearch/AutoResearchRemote.cpp` `mRemote->bind("...")` calls. Re-derive this table from `help` / `rpc.discover` rather than memorizing it.
+
+**Phase 1 — Status & basic control**
+
+| Command | Args | Returns |
+|---------|------|---------|
+| `status` | `[]` | `{ready, pinTx, pinRx}` |
+| `ping` | `[]` | `{success, message:"pong", timestamp, uptimeMs}` |
+| `drivers` | `[]` | `[{name, priority, enabled}, ...]` |
+| `debugTest` | any | `{success, received: <args>}` (echoes args; used to validate RPC plumbing) |
+| `setDebug` | `[bool]` | `{success}` (toggle verbose logging) |
+| `help` | `[]` | `[{name, phase, args, returns, description}, ...]` |
+
+**Phase 2 — Pin configuration & GPIO probe**
+
+| Command | Args | Returns |
+|---------|------|---------|
+| `getPins` | `[]` | `{success, txPin, rxPin, defaults:{txPin,rxPin}, platform}` |
+| `setTxPin` | `[pin]` | `{success, txPin}` |
+| `setRxPin` | `[pin]` | `{success, rxPin}` |
+| `setPins` | `[txPin, rxPin]` | `{success, txPin, rxPin}` |
+| `testGpioConnection` | `[txPin, rxPin]` | `{success, connected, rxWhenTxLow, rxWhenTxHigh, message}` |
+| `findConnectedPins` | `[]` or `[{startPin, endPin, autoApply}]` (all optional) | `{success, found, txPin, rxPin, autoApplied, testedPairs}` (or `{error, message}` on invalid range) |
+
+**Phase 3 — Tests (ASYNC; final response via `sendAsyncResponse`)**
+
+| Command | Args | Returns |
+|---------|------|---------|
+| `runSingleTest` | `{driver, laneSizes, pattern?, timing?, iterations?}` | `{success, passed, totalTests, passedTests, duration_ms, driver, laneCount, laneSizes, pattern, firstFailure?}` |
+| `runParallelTest` | `{drivers:[{driver, laneSizes}, ...], pattern?, iterations?, timing?}` | `{success, passed, duration_ms, show_duration_us, drivers:[...], rx_validation_attempted, rx_validation_passed}` |
+
+**Phase 4 — Utility & benchmarks**
 
 | Command | Args | Description |
 |---------|------|-------------|
-| `ping` | - | Health check, returns timestamp and uptime |
-| `drivers` | - | List available LED drivers with enabled status |
-| `getState` | - | Query current device state and configuration |
-| `runTest` | `{drivers, laneRange?, stripSizes?}` | **NEW**: Configure and execute test in single call with named arguments (recommended) |
-| `setDrivers` | `[driver_names...]` | Legacy: Set which drivers to test (use `runTest` with config instead) |
-| `setLaneRange` | `min, max` | Legacy: Set lane count range (use `runTest` with config instead) |
-| `setStripSizes` | `[sizes...]` | Legacy: Set strip sizes array (use `runTest` with config instead) |
-| `configure` | `{driver, laneSizes, pattern, iterations, shortStripSize?, longStripSize?, testSmallStrips?, testLargeStrips?}` | Set up test parameters (extended with strip size config) |
-| `setLaneSizes` | `[sizes...]` | Set per-lane LED counts directly |
-| `setLedCount` | `count` | Set uniform LED count for all lanes |
-| `setPattern` | `name` | Set test pattern (MSB_LSB_A, SOLID_RGB, etc.) |
-| `setShortStripSize` | `size` | Set short strip LED count |
-| `setLongStripSize` | `size` | Set long strip LED count |
-| `setStripSizeValues` | `short, long` | Set both strip sizes at once |
-| `runParallelTest` | `{drivers: [{driver, laneSizes}, ...], pattern?, timing?}` | Test multiple drivers simultaneously (parallel peripheral coexistence) |
-| `reset` | - | Reset device state |
+| `testSimd` | `[]` | Run comprehensive SIMD validation suite |
+| `testSimdBenchmark` | `[{iterations}?]` | Benchmark float vs s16x16 vs s16x16x4 multiply |
+| `wave8ExpandBenchmark` | `[]` | Wave8 expansion ns/byte micro-bench (#2526) |
+| `parlioEncodeBenchmark` | `[]` | Full PARLIO encode_us bench (#2539) |
+| `parlioStreamValidate` | `[...]` | PARLIO stream validation against reference |
+| `testAsync` | `[]` | Async framework smoke test |
+| `testNoSerial` | `[]` | Minimal RPC plumbing check (no Serial writes) |
 
-### Consolidated `runTest` with Named Arguments (recommended)
+**Phase 5 — Networking / OTA / BLE / decode**
+
+`startNetServer`, `startNetClient`, `runNetClientTest`, `runNetLoopback`, `stopNet`, `startOta`, `stopOta`, `startBle`, `stopBle`, `bleStatus`, `decodeFile(data:bytes, ext:string)`.
+
+**Phase 6 — Coroutine framework tests**
+
+`testCoroutineBasic`, `testCoroutineStop`, `testCoroutineConcurrent`, `testCoroutineAwait`, `testCoroutineAwaitError`, `testCoroutinePromiseCallbacks`, `testCoroutinePromiseCatchCallback`, `testCoroutineChainedAwait`, `testCoroutineAll`.
+
+**Not bound (historical):** `runTest`, `setDrivers`, `setLaneRange`, `setStripSizes`, `configure`, `setLaneSizes`, `setLedCount`, `setPattern`, `setShortStripSize`, `setLongStripSize`, `setStripSizeValues`, `getState`, `reset`. These names appear in the firmware-side `help` manifest as historical hints but currently return `-32601 Method not found`. Use `runSingleTest` / `runParallelTest` with the inline config shape above.
+
+### `runSingleTest` example (streaming JSONL)
 ```json
 // Device emits ready event after setup:
 RESULT: {"type":"ready","ready":true,"setupTimeMs":2340,"testCases":48,"drivers":3}
 
-// NEW: Single call with config (replaces setDrivers + setLaneRange + setStripSizes + runTest)
 // Send:
-{"function":"runTest","args":{"drivers":["PARLIO","RMT"],"laneRange":{"min":2,"max":4},"stripSizes":[100,300]}}
+{"function":"runSingleTest","args":{"driver":"PARLIO","laneSizes":[100,100],"pattern":"MSB_LSB_A"}}
 
 // Receive (streaming JSONL):
 REMOTE: {"success":true,"streamMode":true}
-RESULT: {"type":"test_start","testCases":16}
-RESULT: {"type":"test_complete","passed":true,"totalTests":64,"passedTests":64,"durationMs":8230}
-```
-
-### Legacy Multi-Call Format (still supported)
-```json
-// Send (4 separate calls):
-{"function":"setDrivers","args":["PARLIO"]}
-{"function":"setLaneRange","args":[2,4]}
-{"function":"setStripSizes","args":[[100,300]]}
-{"function":"runTest","args":[]}
-
-// Receive:
-REMOTE: {"success":true,"streamMode":true}
-RESULT: {"type":"test_start","driver":"PARLIO","totalLeds":100}
+RESULT: {"type":"test_start","driver":"PARLIO","totalLeds":200}
 RESULT: {"type":"test_complete","passed":true,"totalTests":4,"passedTests":4,"durationMs":2830}
 ```
 
 ### Variable Lane Configurations
 ```python
-# Uniform: all lanes same size
-config = TestConfig.uniform("RMT", led_count=100, lane_count=4, pattern="MSB_LSB_A")
+# Uniform: all lanes same size — pass identical entries
+client.send("runSingleTest", args={"driver": "RMT", "laneSizes": [100]*4, "pattern": "MSB_LSB_A"})
 
 # Asymmetric: different sizes per lane
-config = TestConfig(driver="PARLIO", lane_sizes=[300, 200, 100, 50], pattern="SOLID_RGB")
-```
-
-### Strip Size Configuration
-```python
-# Option 1: Individual RPC commands
-agent.set_strip_size_values(short=100, long=500)  # Set both sizes at once
-agent.set_strip_sizes_enabled(small=True, large=True)  # Enable both strip sizes
-
-# Option 2: Via TestConfig
-config = TestConfig(
-    driver="PARLIO",
-    lane_sizes=[100, 100],
-    pattern="MSB_LSB_A",
-    short_strip_size=300,      # Override default short strip size
-    long_strip_size=1000,      # Override default long strip size
-    test_small_strips=True,    # Enable small strip testing
-    test_large_strips=True,    # Enable large strip testing (requires sufficient memory)
-)
-agent.configure(config)
+client.send("runSingleTest", args={"driver": "PARLIO", "laneSizes": [300, 200, 100, 50], "pattern": "SOLID_RGB"})
 ```
 
 ### Extending the Protocol
 The JSON-RPC architecture allows agents to easily add new test functionality:
-1. Add new RPC handler in `examples/AutoResearch/AutoResearchRemote.cpp`
-2. Add corresponding Python method in `ci/autoresearch_agent.py`
-3. No firmware recompilation needed for client-side extensions
+1. Add a `mRemote->bind("yourMethod", ...)` registration in `examples/AutoResearch/AutoResearchRemote.cpp`.
+2. Add a matching entry to the `help` handler (same file) so the manifest stays self-describing.
+3. Client code can then call it via `rpc_client.send("yourMethod", ...)` — no Python wrapper required.
 
 **Files**:
-- `ci/autoresearch_agent.py` - Python AutoResearchAgent class
-- `ci/autoresearch_loop.py` - Test orchestration with CLI
-- `examples/AutoResearch/AutoResearchRemote.cpp` - Firmware RPC handlers
+- `examples/AutoResearch/AutoResearchRemote.cpp` — firmware RPC handlers (source of truth)
+- `ci/rpc_client.py` — minimal `send(method, args)` client used in examples above
+- `ci/autoresearch_agent.py` / `ci/autoresearch_loop.py` — higher-level wrapper. NOTE: parts of this wrapper still call legacy RPC names (`configure`, `runTest`, `getState`, `reset`) that are no longer bound — prefer `rpc_client` until the wrapper is reconciled.
 
 ## Package Installation Daemon Management
 `bash daemon <command>` - Manage the singleton daemon that handles PlatformIO package installations:
