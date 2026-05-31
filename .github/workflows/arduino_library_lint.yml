@@ -1,6 +1,7 @@
 # https://github.com/arduino/arduino-lint-action?tab=readme-ov-file
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - master

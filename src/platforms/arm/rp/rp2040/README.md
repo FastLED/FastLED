@@ -71,7 +71,7 @@ See `src/platforms/arm/rp/rpcommon/PARALLEL_AUTO.md` for complete documentation.
 
 ### Examples
 
-- `examples/SpecialDrivers/RP/Parallel_IO.ino` - Automatic parallel grouping demo
+- `examples/SpecialDrivers/RP/Parallel_IO/Parallel_IO.ino` - Automatic parallel grouping demo
 
 ---
 
