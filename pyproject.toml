@@ -5,17 +5,19 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.2.11 — content of 2.2.10 republished with the full
-    # wheel set (win_amd64 + manylinux_x86_64 were missing from 2.2.10's
-    # PyPI upload). Bundles SAMD51 `cores/arduino` fallback + include-path
-    # injection (FastLED/fbuild#319/#320), nRF52 nRF52DK->pca10056 variant
-    # alias (FastLED/fbuild#321/#322), board JSON tinyuf2 partition rename
-    # + cmsis_dsp_lib validator whitelist (FastLED/fbuild#318), and
-    # daemon.rs subprocess-spawn lint annotations (FastLED/fbuild#317).
-    # Together these unblock Build SAMD51J, Build nRF52840 DK, and reduce
-    # Validate Boards drift from 39 boards to 14 (configuration-choice
-    # remainder pending maintainer review).
-    "fbuild==2.2.11",
+    # Pin to fbuild 2.2.12 — adds the nRF52 variant include-path alias
+    # (FastLED/fbuild#325/#326), MCU-aware linker-script alias for the
+    # PIO-named nrf52_xxaa.ld with globbed highest-version SoftDevice
+    # script (FastLED/fbuild#327/#328 — also fingerprints the resolved
+    # linker basename into Nrf52FingerprintMetadata so fast-path keys
+    # invalidate when the alias moves between actual files), and a
+    # release-auto CI fix bypassing soldr's corrupted cargo-zigbuild
+    # bin cache (FastLED/fbuild#331/#332). Together these unblock
+    # Build nRF52840 DK and Build nRF52 XIAO BLE Sense workflows by
+    # making fbuild find `variants/pca10056/` and
+    # `variants/Seeed_XIAO_nRF52840_Sense/` for board JSONs that track
+    # PIO/sandeepmistry upstream naming.
+    "fbuild==2.2.12",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
