@@ -32,7 +32,7 @@ def _env_default_max_bytes() -> int:
     return max(value, 0)
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Inspect the GCC -fopt-info-all optimization report for a board."
     )
@@ -48,11 +48,11 @@ def parse_args() -> argparse.Namespace:
             f"env var; set to 0 to disable the cap entirely)."
         ),
     )
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
-def main() -> int:
-    args = parse_args()
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
     if args.cwd:
         root_build_dir = args.cwd / ".build"
     else:
