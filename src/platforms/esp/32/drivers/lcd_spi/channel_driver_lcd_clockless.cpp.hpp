@@ -347,11 +347,41 @@ bool ChannelDriverLcdClockless::beginTransmission(
         mOutputBytesPerInputByte = 16 * sizeof(Wave8Byte); // 128
     }
 
-    // Chunk sizing
-    size_t chunkInputBytes =
+    // Chunk sizing.
+    //
+    // The LCD I80 peripheral wrapper (LcdSpiPeripheralEsp::transmit) tears
+    // down and recreates the ESP-IDF panel_io handle whenever the
+    // transaction size changes — its GDMA descriptor chain is sized per
+    // transaction. The teardown calls esp_lcd_panel_io_del, which lives in
+    // flash; performing it from isrChunkDone (ISR context) deadlocks the
+    // chip with "Interrupt wdt timeout on CPU1" if any concurrent flash
+    // op has suspended the cache. To keep every ISR-driven transmit at the
+    // same size, we round the requested chunk size up so chunkInputBytes
+    // evenly divides maxSize — the resulting (slightly larger) chunks all
+    // carry the same DMA byte count.
+    size_t requestedChunkInputBytes =
         mChunkInputBytesOverride > 0 ? mChunkInputBytesOverride
                                      : kDefaultChunkInputBytes;
-    if (chunkInputBytes > maxSize) {
+    if (requestedChunkInputBytes > maxSize) {
+        requestedChunkInputBytes = maxSize;
+    }
+
+    // Pick numChunks so chunkInputBytes = maxSize / numChunks is exact (the
+    // remainder must be 0). Walk numChunks upward from
+    // ceil(maxSize / requested) until we hit a divisor; in the worst case we
+    // fall back to numChunks = maxSize (single-byte chunks). For typical LED
+    // counts (powers of two × 3 bytes per RGB pixel) the loop terminates in
+    // a couple of iterations.
+    size_t numChunks =
+        (maxSize + requestedChunkInputBytes - 1) / requestedChunkInputBytes;
+    if (numChunks == 0) {
+        numChunks = 1;
+    }
+    while (numChunks < maxSize && (maxSize % numChunks) != 0) {
+        ++numChunks;
+    }
+    size_t chunkInputBytes = maxSize / numChunks;
+    if (chunkInputBytes == 0) {
         chunkInputBytes = maxSize;
     }
 
