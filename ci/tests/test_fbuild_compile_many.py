@@ -240,3 +240,47 @@ def test_pio_compiler_build_prefers_ci_results(
     assert results[1].output == "demo ok"
     assert releases == ["x"]
     assert (compiler.build_dir / "build_info_Demo.json").exists()
+
+
+def test_fbuild_supports_subcommand_uses_sub_help_form(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Probe must use ``<fbuild> SUB --help`` not ``<fbuild> help SUB``.
+
+    The latter parses ``help`` as the subcommand and ``SUB`` as a positional
+    arg, which fails clap arg validation (exit 2) on any subcommand with a
+    required arg like ``--board``. Until this was fixed, compile-many
+    detection always returned False and CI silently fell back to the
+    legacy serial loop. Regression guard for that bug.
+    """
+    import subprocess
+
+    monkeypatch.setattr(fbuild_runner, "get_fbuild_executable", lambda: "fbuild.exe")
+    fbuild_runner.fbuild_supports_ci.cache_clear()
+    fbuild_runner.fbuild_supports_compile_many.cache_clear()
+
+    captured: list[list[str]] = []
+
+    class FakeProc:
+        returncode = 0
+
+    def fake_run(
+        cmd: list[str], **_kwargs: object
+    ) -> FakeProc:  # pyright: ignore[reportUnusedFunction]
+        captured.append(cmd)
+        return FakeProc()
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    assert fbuild_runner.fbuild_supports_ci() is True
+    assert fbuild_runner.fbuild_supports_compile_many() is True
+
+    assert captured == [
+        ["fbuild.exe", "ci", "--help"],
+        ["fbuild.exe", "compile-many", "--help"],
+    ], (
+        "expected `fbuild SUB --help` (clap intercepts, rc=0); "
+        f"got: {captured}. The legacy `fbuild help SUB` form parses 'help' "
+        "as the subcommand and exits 2 on missing required args, which "
+        "silently disables compile-many."
+    )

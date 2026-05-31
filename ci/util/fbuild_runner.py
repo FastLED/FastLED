@@ -144,7 +144,16 @@ def default_fbuild_sketch_jobs() -> int:
 
 
 def _fbuild_supports_subcommand(subcommand: str) -> bool:
-    """Return whether the active fbuild executable exposes ``subcommand``."""
+    """Return whether the active fbuild executable exposes ``subcommand``.
+
+    Probes with ``<fbuild> <subcommand> --help`` rather than ``<fbuild> help
+    <subcommand>``: the latter parses ``help`` as the subcommand name and
+    ``<subcommand>`` as a positional arg, which fails clap arg validation
+    (exit 2) on any subcommand with required args like ``--board``. With
+    ``--help`` clap intercepts and prints help with exit 0 regardless of
+    other required args. The old probe silently disabled compile-many on
+    every CI run and forced the legacy serial fallback path.
+    """
     import subprocess
 
     fbuild_exe = get_fbuild_executable()
@@ -152,7 +161,7 @@ def _fbuild_supports_subcommand(subcommand: str) -> bool:
         return False
     try:
         proc = subprocess.run(
-            [fbuild_exe, "help", subcommand],
+            [fbuild_exe, subcommand, "--help"],
             capture_output=True,
             text=True,
             timeout=15,
