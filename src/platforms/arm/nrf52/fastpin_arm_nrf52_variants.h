@@ -827,7 +827,12 @@
 #endif // defined(ARDUINO_STCT_NRF52_minidev)
 
 
-#if defined(ARDUINO_Seeed_XIAO_nRF52840_Sense)
+// Seeed XIAO BLE Sense — the BSP variant.h normally defines
+// ARDUINO_Seeed_XIAO_nRF52840_Sense.  For CI builds that reuse the
+// Adafruit nrf52840_dk_adafruit BSP variant (see #2634), the TARGET
+// define carries the same pin mapping without requiring the Seeed variant
+// folder to be present in the framework package.
+#if defined(ARDUINO_Seeed_XIAO_nRF52840_Sense) || defined(TARGET_XIAOBLE_NRF52840_SENSE)
     #if defined(__FASTPIN_ARM_NRF52_VARIANT_FOUND)
         #error "Cannot define more than one board at a time"
     #else
