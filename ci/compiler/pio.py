@@ -111,30 +111,32 @@ def _init_platformio_build(
     if additional_include_dirs:
         merged_include_dirs.extend(additional_include_dirs)
 
-    # Optimization report generation is available but OFF by default
-    # To enable optimization reports, add these flags to your board configuration:
-    # - "-fopt-info-all=optimization_report.txt" for detailed optimization info
-    # - "-Wl,-Map,firmware.map" for memory map analysis
+    # Optimization report (`-fopt-info-all`) is OPT-IN per board because the
+    # report file accumulates across every example in the matrix and can
+    # exceed 100 MB on no-LTO platforms — that overwhelmed the GHA log
+    # buffer and shut down the nrf52840 runners (see PR #2658 for the
+    # downstream cap and PR opening this gate). Set
+    # `generate_optimization_report=True` on the Board to opt in.
     #
-    # Note: The infrastructure is in place to support optimization reports when needed
-
-    # Always generate optimization artifacts into the board build directory
-    # Use absolute paths to ensure GCC/LD write into a known location even when the
-    # working directory changes inside PlatformIO builds.
+    # The linker map (`-Wl,-Map,firmware.map`) stays unconditional; it's a
+    # small per-example file and is consumed by size-analysis tooling.
     try:
-        opt_report_path = (build_dir / "optimization_report.txt").resolve()
-        # GCC writes reports relative to the current working directory; provide absolute path
-
-        # ESP32-C2 and AVR platforms cannot work with -fopt-info-all, suppress it for these platforms
-        if board.board_name != "esp32c2" and board.platform != "atmelavr":
-            board_with_sketch_include.build_flags.append(
-                f"-fopt-info-all={opt_report_path.as_posix()}"
-            )
-
         # Generate linker map in the board build directory using absolute path
         # (relative paths are unreliable — the linker CWD varies across PIO versions)
         map_path = (build_dir / "firmware.map").resolve()
         board_with_sketch_include.build_flags.append(f"-Wl,-Map,{map_path.as_posix()}")
+
+        # ESP32-C2 and AVR platforms cannot work with -fopt-info-all even when
+        # opted in — preserve the original suppression list.
+        if (
+            getattr(board, "generate_optimization_report", False)
+            and board.board_name != "esp32c2"
+            and board.platform != "atmelavr"
+        ):
+            opt_report_path = (build_dir / "optimization_report.txt").resolve()
+            board_with_sketch_include.build_flags.append(
+                f"-fopt-info-all={opt_report_path.as_posix()}"
+            )
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
         raise

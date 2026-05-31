@@ -79,6 +79,13 @@ class Board:
     extra_scripts: list[str] | None = (
         None  # Custom build scripts to run (e.g., ['pre:script.py'] for pre-build hooks)
     )
+    # Opt-in for GCC -fopt-info-all -> optimization_report.txt. Default OFF
+    # because the file accumulates across every example in the matrix and can
+    # exceed 100 MB on no-LTO boards with a large sketch set (nrf52840 with
+    # the Adafruit BSP would overrun the GHA log buffer and shut the runner
+    # down — see PR #2658). Set True when the board's workflow genuinely
+    # needs the optimization-info dump for size/perf debugging.
+    generate_optimization_report: bool = False
 
     def __post_init__(self) -> None:
         # Check if framework is set, warn and auto-set to arduino if missing (except for native/stub platforms)
