@@ -835,6 +835,14 @@ ESP32_P4 = Board(
     real_board_name="esp32-p4-evboard",
     platform=ESP32_IDF_5_5_1_PIOARDUINO,
     board_partitions="huge_app.csv",
+    # Route Serial → USB-Serial-JTAG (HWCDCSerial) instead of UART0 (pins 37/38).
+    # Without these the AutoResearch firmware listens on UART0 while the host
+    # tool talks to the USB-Serial-JTAG COM port — every RPC write times out.
+    # See #2541.
+    defines=[
+        "ARDUINO_USB_MODE=1",
+        "ARDUINO_USB_CDC_ON_BOOT=1",
+    ],
 )
 
 ADA_FEATHER_NRF52840_SENSE = Board(
