@@ -850,18 +850,39 @@ ADA_FEATHER_NRF52840_SENSE = Board(
     platform="nordicnrf52",
 )
 
+# Seeed XIAO BLE Sense (nRF52840) -- community board (issue #2634)
+# Variant header: https://github.com/adafruit/Adafruit_nRF52_Arduino (no xiao variant)
+# The maxgerhardt nordicnrf52 platform formerly used here points build.variant at a
+# `xiaoblesense_adafruit` directory that does NOT ship in the Adafruit nRF52 BSP
+# at 1.10601.0, so the Adafruit core's `#include "variant.h"` fails. Mirror the
+# SuperMini / nice!nano / nRFMicro pattern from #2422: reuse the Adafruit BSP's
+# `nrf52840_dk_adafruit` board JSON for a valid variant, then let the
+# TARGET_XIAOBLE_NRF52840_SENSE define select the correct fastpin variant block.
 XIAOBLESENSE_ADAFRUIT_NRF52 = Board(
     board_name="xiaoblesense_adafruit",
-    platform="https://github.com/maxgerhardt/platform-nordicnrf52",
-    platform_needs_install=True,  # Install platform package to get the boards
+    real_board_name="nrf52840_dk_adafruit",
+    platform="nordicnrf52",
+    framework="arduino",
+    platform_packages="framework-arduinoadafruitnrf52@^1.10601.0",
+    defines=[
+        "TARGET_XIAOBLE_NRF52840_SENSE",
+        "FASTLED_USE_COMPILE_TESTS=0",
+    ],
+    board_build_core="nRF5",
 )
 
 # Alias: handle common misspelling without the trailing 't'
 XIAOBLESENSE_ADAFRUI_ALIAS = Board(
     board_name="xiaoblesense_adafrui",  # missing 't'
-    real_board_name="xiaoblesense_adafruit",  # map to the correct board name
-    platform="https://github.com/maxgerhardt/platform-nordicnrf52",
-    platform_needs_install=True,
+    real_board_name="nrf52840_dk_adafruit",
+    platform="nordicnrf52",
+    framework="arduino",
+    platform_packages="framework-arduinoadafruitnrf52@^1.10601.0",
+    defines=[
+        "TARGET_XIAOBLE_NRF52840_SENSE",
+        "FASTLED_USE_COMPILE_TESTS=0",
+    ],
+    board_build_core="nRF5",
 )
 
 XIAOBLESENSE_NRF52 = Board(
