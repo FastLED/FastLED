@@ -89,11 +89,24 @@ jobs:
         # --halt-on-error catches panics and avr-libc aborts early.
         # --expect asserts setup() actually ran before we declared success.
         # Output is tee'd into avr8js_output.log for artifact upload.
+        #
+        # Daemon restart + step timeout — FastLED#2645. After ci-compile.py
+        # invokes `fbuild build`, the daemon is left in whatever state the
+        # build ended in; on the avr8js path that state has been making
+        # `/api/test-emu` requests hang for 30 minutes before a
+        # connection-idle error. Restarting brings up a fresh daemon for
+        # the avr8js request, and the step-level timeout caps the bleed
+        # while the upstream fbuild bug is being chased.
+        timeout-minutes: 8
         run: |
           set -o pipefail
           uv run ci/ci-compile.py ${{ inputs.platform }} \
             --examples ${{ inputs.sketch }} \
             --verbose
+          echo "::group::fbuild daemon restart (FastLED#2645)"
+          uv run fbuild daemon restart || true
+          uv run fbuild daemon status || true
+          echo "::endgroup::"
           uv run fbuild test-emu \
             --emulator avr8js \
             --environment ${{ inputs.platform }} \
@@ -102,6 +115,20 @@ jobs:
             --halt-on-error "PANIC|ABORT|assert" \
             --expect "Test setup starting" \
             .build/pio/${{ inputs.platform }} 2>&1 | tee avr8js_output.log
+        shell: bash
+
+      - name: Dump fbuild daemon diagnostics on failure
+        # If test-emu hangs/fails, capture the daemon's view of the world
+        # so the next debugging cycle has real evidence (FastLED#2645).
+        if: failure() && steps.test_emu.conclusion == 'failure'
+        run: |
+          {
+            echo "=== fbuild daemon status ==="
+            uv run fbuild daemon status || true
+            echo
+            echo "=== fbuild daemon log tail ==="
+            uv run fbuild show daemon --lines 200 || true
+          } | tee -a avr8js_output.log
         shell: bash
 
       - name: Display emulator output
