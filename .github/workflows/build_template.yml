@@ -64,6 +64,11 @@ jobs:
         uses: FastLED/fbuild/.github/actions/setup@main
         with:
           cache-key-extra: ${{ steps.fbuild_board.outputs.name }}-${{ hashFiles('platformio.ini', 'library.json', 'pyproject.toml', 'uv.lock') }}
+          # Binary install cache is intentionally board-independent — every
+          # job in this repo's board matrix shares the same fbuild binary,
+          # so key the install cache solely on the fbuild pin in pyproject.
+          # The action ignores this input on older revisions (no-op).
+          install-cache-key-extra: ${{ hashFiles('pyproject.toml') }}
 
       - name: Install Platform
         if: inputs.platform != ''
