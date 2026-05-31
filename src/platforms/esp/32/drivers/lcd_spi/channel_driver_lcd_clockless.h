@@ -71,10 +71,14 @@ class ChannelDriverLcdClockless : public IChannelDriver {
 
     static constexpr size_t kRingBufferCount = 3;
 
-    /// Default: ~30 LEDs per chunk for clockless (3 bytes/LED).
-    /// wave3: 90 bytes * 48 = 4.3KB per DMA slot → 13KB total ring.
-    /// wave8: 90 bytes * 128 = 11.5KB per DMA slot → 34.5KB total ring.
-    static constexpr size_t kDefaultChunkInputBytes = 90;
+    /// Default: 1024 bytes per chunk for clockless (3 bytes/LED ≈ 341 LEDs).
+    ///
+    /// The chunked-streaming ISR re-arm path currently emits garbled data
+    /// past the first chunk (#2647 follow-up). Until that is fixed, pick a
+    /// chunk size big enough that a typical RGB frame fits in one chunk so
+    /// the ISR re-arm path is never taken. Worst-case memory for
+    /// 16-lane wave8: 1024 × 128 × 3 buffers = 384 KB in PSRAM.
+    static constexpr size_t kDefaultChunkInputBytes = 1024;
 
     /// Override chunk input bytes for testing (0 = use default).
     void setChunkInputBytesForTest(size_t bytes) FL_NOEXCEPT {
