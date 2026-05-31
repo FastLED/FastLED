@@ -6,7 +6,9 @@
  *
  * This file redirects the GpioIsrRx::create() factory method to the
  * dual-ISR MCPWM implementation on platforms with MCPWM hardware.
- * Returns nullptr on platforms without MCPWM (e.g., ESP32-C3/C2).
+ * Returns nullptr (which the caller wraps as DummyRxDevice) on platforms
+ * without MCPWM (e.g., ESP32-C3/C2) OR without RMT5 (e.g., ESP32-C2,
+ * which lacks the RMT peripheral entirely).
  */
 
 #include "platforms/is_platform.h"
@@ -22,11 +24,19 @@
 #include "platforms/esp/32/feature_flags/enabled.h"
 // IWYU pragma: end_keep
 
+// soc_caps.h is only available under the ESP-IDF tree; only pull it in when
+// we'll actually consult SOC_MCPWM_SUPPORTED (i.e. when FASTLED_RMT5 is on).
 #if FASTLED_RMT5
-
-// Check if this SoC has MCPWM hardware
 #include "soc/soc_caps.h"  // IWYU pragma: keep
-#if defined(SOC_MCPWM_SUPPORTED) && SOC_MCPWM_SUPPORTED
+#endif
+
+// The caller in `src/fl/channels/rx.cpp.hpp` is gated only on `FL_IS_ESP32`
+// and references `GpioIsrRx::create()` unconditionally. We must therefore
+// provide a definition for every ESP32 board — even ones without RMT5 or
+// MCPWM (e.g. ESP32-C2 has neither). The MCPWM-backed path only fires
+// when both gates are positive; everything else falls into the stub.
+// See FastLED #2630.
+#if FASTLED_RMT5 && defined(SOC_MCPWM_SUPPORTED) && SOC_MCPWM_SUPPORTED
 
 // IWYU pragma: begin_keep
 #include "platforms/esp/32/drivers/gpio_isr_rx/gpio_isr_rx_mcpwm.h"
@@ -41,11 +51,13 @@ fl::shared_ptr<GpioIsrRx> GpioIsrRx::create(int pin) FL_NOEXCEPT {
 
 } // namespace fl
 
-#else // !SOC_MCPWM_SUPPORTED
+#else // !FASTLED_RMT5 OR !SOC_MCPWM_SUPPORTED
 
 namespace fl {
 
-// No MCPWM hardware on this SoC - ISR RX not supported
+// No MCPWM hardware (or no RMT5 support) on this SoC — ISR RX not
+// available. Returning null lets the caller substitute DummyRxDevice
+// at runtime rather than failing to link.
 fl::shared_ptr<GpioIsrRx> GpioIsrRx::create(int pin) FL_NOEXCEPT {
     (void)pin;
     return fl::shared_ptr<GpioIsrRx>();
@@ -53,6 +65,5 @@ fl::shared_ptr<GpioIsrRx> GpioIsrRx::create(int pin) FL_NOEXCEPT {
 
 } // namespace fl
 
-#endif // SOC_MCPWM_SUPPORTED
-#endif // FASTLED_RMT5
+#endif // FASTLED_RMT5 && SOC_MCPWM_SUPPORTED
 #endif // FL_IS_ESP32
