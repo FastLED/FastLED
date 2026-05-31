@@ -253,7 +253,7 @@ Source of truth: `examples/AutoResearch/AutoResearchRemote.cpp` `mRemote->bind("
 | `setRxPin` | `[pin]` | `{success, rxPin}` |
 | `setPins` | `[txPin, rxPin]` | `{success, txPin, rxPin}` |
 | `testGpioConnection` | `[txPin, rxPin]` | `{success, connected, rxWhenTxLow, rxWhenTxHigh, message}` |
-| `findConnectedPins` | `[]` | `{success, candidates:[{txPin,rxPin}, ...]}` |
+| `findConnectedPins` | `[]` or `[{startPin, endPin, autoApply}]` (all optional) | `{success, found, txPin, rxPin, autoApplied, testedPairs}` (or `{error, message}` on invalid range) |
 
 **Phase 3 — Tests (ASYNC; final response via `sendAsyncResponse`)**
 
