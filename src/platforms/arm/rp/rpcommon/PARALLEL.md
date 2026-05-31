@@ -571,7 +571,7 @@ Byte 31: [0][0][0][0][S3_W0_b0][S2_W0_b0][S1_W0_b0][S0_W0_b0]  // LSB of W0
 
 ## Examples
 
-See `examples/SpecialDrivers/RP/Parallel_IO.ino` for a complete working example.
+See `examples/SpecialDrivers/RP/Parallel_IO/Parallel_IO.ino` for a complete working example.
 
 ## License
 
