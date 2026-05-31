@@ -42,6 +42,15 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Install QEMU runtime libraries (libSDL2)
+        # The Espressif QEMU binary that fbuild auto-downloads is dynamically
+        # linked against libSDL2-2.0.so.0. ubuntu-latest runners don't ship it,
+        # so QEMU dies with exit 127 (dynamic-linker failure) before any
+        # `-display`/`-nographic` flag can take effect. See FastLED #2639.
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-recommends libsdl2-2.0-0
+
       - name: Pin python version
         run: echo "3.11" > .python-version
 
