@@ -868,6 +868,11 @@ XIAOBLESENSE_ADAFRUIT_NRF52 = Board(
         "TARGET_XIAOBLE_NRF52840_SENSE",
         "FASTLED_USE_COMPILE_TESTS=0",
     ],
+    # CI-unblock for #2641: arm-gnu 15.2.rel1 + Adafruit nRF52 BSP + LTO
+    # produces thousands of "offset out of range" assembler errors in the
+    # LTO-temp output. Disable LTO until the toolchain interaction is fixed.
+    build_unflags=["-flto"],
+    build_flags=["-fno-lto"],
     board_build_core="nRF5",
 )
 
@@ -882,6 +887,9 @@ XIAOBLESENSE_ADAFRUI_ALIAS = Board(
         "TARGET_XIAOBLE_NRF52840_SENSE",
         "FASTLED_USE_COMPILE_TESTS=0",
     ],
+    # See #2641 — LTO disabled to dodge arm-gnu 15.2.rel1 offset-overflow bug.
+    build_unflags=["-flto"],
+    build_flags=["-fno-lto"],
     board_build_core="nRF5",
 )
 
