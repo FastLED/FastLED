@@ -848,6 +848,9 @@ ESP32_P4 = Board(
 ADA_FEATHER_NRF52840_SENSE = Board(
     board_name="adafruit_feather_nrf52840_sense",
     platform="nordicnrf52",
+    # See #2653 — arm-gnu 15.2.rel1 + Adafruit BSP LTO offset overflow.
+    build_unflags=["-flto"],
+    build_flags=["-fno-lto"],
 )
 
 # Seeed XIAO BLE Sense (nRF52840) -- community board (issue #2634)
@@ -934,6 +937,9 @@ NRF52840 = Board(
     defines=[
         "FASTLED_USE_COMPILE_TESTS=0",
     ],
+    # See #2653 — arm-gnu 15.2.rel1 + Adafruit BSP LTO offset overflow.
+    build_unflags=["-flto"],
+    build_flags=["-fno-lto"],
     board_build_core="nRF5",  # Ensure correct core directory
 )
 
@@ -952,6 +958,9 @@ SUPERMINI_NRF52840 = Board(
         "TARGET_SUPERMINI_NRF52840",
         "FASTLED_USE_COMPILE_TESTS=0",
     ],
+    # See #2653 — arm-gnu 15.2.rel1 + Adafruit BSP LTO offset overflow.
+    build_unflags=["-flto"],
+    build_flags=["-fno-lto"],
     board_build_core="nRF5",
 )
 
