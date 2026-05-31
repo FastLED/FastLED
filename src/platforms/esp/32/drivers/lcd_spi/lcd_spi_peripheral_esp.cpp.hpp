@@ -35,6 +35,13 @@
 #define FL_HAS_ESP_CACHE_MSYNC 0
 #endif
 
+// Backfills `ESP_CACHE_MSYNC_FLAG_DIR_C2M = 0` on IDF < 5.2 (the flag was
+// added in 5.2; older esp_cache_msync() defaulted to that direction). See
+// FastLED #2619: previously rmt_5/rmt5_peripheral_esp.cpp.hpp owned this
+// shim and lcd_spi relied on unity-build include order putting rmt_5
+// first, which broke esp_extra_libs.
+#include "platforms/esp/esp_cache_compat.h"
+
 #ifndef LCD_SPI_PSRAM_ALIGNMENT
 #define LCD_SPI_PSRAM_ALIGNMENT 64
 #endif
