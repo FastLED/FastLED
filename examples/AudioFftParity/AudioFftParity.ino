@@ -1,3 +1,10 @@
+// @filter: (board is esp32dev) or (board is esp32s3) or (board is esp32c3) or (board is esp32c6) or (board is esp32p4) or (board is esp32wroom)
+//
+// Restrict to ESP32 boards that ship esp_dsp.h in their PlatformIO toolchain
+// bundle. esp32c2 / esp32s2 / esp32h2 / esp32c5 don't include esp_dsp, so the
+// `#define FL_FFT_USE_ESP_DSP 1` below causes a "esp_dsp.h: No such file"
+// fatal error there. See FastLED #2623.
+
 /// @file AudioFftParity.ino
 /// @brief Sanity test for the ESP-DSP real-FFT backend in fl::audio::fft.
 ///
