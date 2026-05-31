@@ -331,7 +331,18 @@ void setup() {
     // ========================================================================
     // SIMD AutoResearch
     // ========================================================================
-    int simd_failures = autoresearch::simd_check::runSimdTests();
+    // SIMD validation suite is RPC-driven (testSimd, registered in
+    // AutoResearchRemote.cpp). NOT computed at boot by default — flip
+    // -DFL_RUN_SIMD_TESTS_AT_BOOT=1 to run once at startup as a bridge until
+    // the testSimd RPC routing on P4 is fixed (#2541).
+#ifdef FL_RUN_SIMD_TESTS_AT_BOOT
+    {
+        int simd_failures = autoresearch::simd_check::runSimdTests();
+        if (simd_failures > 0) {
+            FL_ERROR("SIMD autoresearch failed - " << simd_failures << " test(s) failed");
+        }
+    }
+#endif
 
     // #2526 expansion micro-bench is RPC-driven (wave8ExpandBenchmark, registered
     // in AutoResearchRemote.cpp). NOT computed at boot by default — flip
@@ -353,9 +364,6 @@ void setup() {
         autoresearch::parlio_bench::printParlioEncodeResultRom(_per);
     }
 #endif
-    if (simd_failures > 0) {
-        FL_ERROR("SIMD autoresearch failed - " << simd_failures << " test(s) failed");
-    }
 
     // ========================================================================
     // RX Channel Setup
