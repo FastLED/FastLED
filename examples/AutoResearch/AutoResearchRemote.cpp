@@ -159,10 +159,10 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     }
 
     fl::json lane_sizes_json = config["laneSizes"];
-    if (lane_sizes_json.size() == 0 || lane_sizes_json.size() > 8) {
+    if (lane_sizes_json.size() == 0 || lane_sizes_json.size() > 16) {
         response.set("success", false);
         response.set("error", "InvalidLaneCount");
-        response.set("message", "laneSizes must have 1-8 elements");
+        response.set("message", "laneSizes must have 1-16 elements");
         return response;
     }
 

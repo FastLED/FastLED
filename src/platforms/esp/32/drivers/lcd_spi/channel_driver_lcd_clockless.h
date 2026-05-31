@@ -91,7 +91,11 @@ class ChannelDriverLcdClockless : public IChannelDriver {
     /// @param startByte First source byte index
     /// @param byteCount Number of source bytes to encode
     /// @return Number of DMA bytes written
-    size_t encodeChunk(fl::span<const ChannelDataPtr> channels,
+    ///
+    /// ⚠️ HOT PATH — called from ISR context. MUST live in IRAM so it can
+    /// execute while flash cache is suspended (NVS writes, SPI flash erase,
+    /// etc.). Without FL_IRAM the ISR stalls and the interrupt watchdog trips.
+    size_t FL_IRAM encodeChunk(fl::span<const ChannelDataPtr> channels,
                        u16 *output, size_t startByte,
                        size_t byteCount) FL_NOEXCEPT;
 
@@ -102,7 +106,13 @@ class ChannelDriverLcdClockless : public IChannelDriver {
     // ISR callback
     //=========================================================================
 
-    static bool isrChunkDone(void *panel_io, const void *edata,
+    /// @brief ISR callback invoked by LCD I80 peripheral on chunk transmit done
+    /// ⚠️ ISR CONTEXT — MUST be in IRAM. Without FL_IRAM the callback's code
+    /// lives in flash; when flash cache is suspended (NVS commit, SPI flash
+    /// erase, etc.) the ISR cannot execute, interrupts stay disabled past the
+    /// 300 ms interrupt watchdog window, and the device panics with "Interrupt
+    /// wdt timeout on CPU1" in ISR context.
+    static bool FL_IRAM isrChunkDone(void *panel_io, const void *edata,
                              void *user_ctx) FL_NOEXCEPT;
 
     //=========================================================================

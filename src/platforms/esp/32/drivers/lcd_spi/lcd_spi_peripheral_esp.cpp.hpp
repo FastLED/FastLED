@@ -294,7 +294,7 @@ void LcdSpiPeripheralEsp::freeBuffer(u16 *buffer) FL_NOEXCEPT {
 // Transmission
 //=============================================================================
 
-bool LcdSpiPeripheralEsp::transmit(const u16 *buffer,
+bool FL_IRAM LcdSpiPeripheralEsp::transmit(const u16 *buffer,
                                    size_t size_bytes) FL_NOEXCEPT {
     if (!mInitialized || mI80Bus == nullptr) {
         return false;
@@ -302,15 +302,34 @@ bool LcdSpiPeripheralEsp::transmit(const u16 *buffer,
 
     // Block until previous DMA is truly complete. The semaphore is
     // primed during initialize() so the first call returns immediately.
-    // This is stronger than the old non-blocking drain — it guarantees
-    // the I80 bus has fully processed the previous transaction before
-    // we submit a new one.
+    //
+    // ISR safety: when ChannelDriverLcdClockless::isrChunkDone re-arms the
+    // next chunk from the on_color_trans_done callback, transmit() runs in
+    // interrupt context. lcd_spi_flush_ready() already did xSemaphoreGiveFromISR
+    // *before* invoking our user callback, so the take is guaranteed to be
+    // non-blocking — but we MUST use the FromISR variant because the regular
+    // xSemaphoreTake() asserts (configASSERT) when called from ISR.
     if (mCompleteSem) {
-        if (xSemaphoreTake(mCompleteSem, pdMS_TO_TICKS(2000)) != pdTRUE) {
-            FL_WARN("LcdSpiPeripheralEsp: Timed out waiting for previous "
-                    "transmit to complete");
-            mBusy = false;
-            return false;
+        if (xPortInIsrContext()) {
+            BaseType_t hpw = pdFALSE;
+            if (xSemaphoreTakeFromISR(mCompleteSem, &hpw) != pdTRUE) {
+                // Semaphore should always be available here because
+                // lcd_spi_flush_ready already gave it before invoking our
+                // callback. If not, abort the re-arm — the next CPU-side
+                // transmit() will pick up where we left off.
+                mBusy = false;
+                return false;
+            }
+            if (hpw) {
+                portYIELD_FROM_ISR();
+            }
+        } else {
+            if (xSemaphoreTake(mCompleteSem, pdMS_TO_TICKS(2000)) != pdTRUE) {
+                FL_WARN("LcdSpiPeripheralEsp: Timed out waiting for previous "
+                        "transmit to complete");
+                mBusy = false;
+                return false;
+            }
         }
     }
 

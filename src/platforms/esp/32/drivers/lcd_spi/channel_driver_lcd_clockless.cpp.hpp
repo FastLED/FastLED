@@ -191,7 +191,10 @@ IChannelDriver::DriverState ChannelDriverLcdClockless::poll() FL_NOEXCEPT {
 // Encoding — wave3 or wave8 transpose into u16 DMA words
 //=============================================================================
 
-size_t ChannelDriverLcdClockless::encodeChunk(
+// FL_IRAM matches the declaration in channel_driver_lcd_clockless.h — this
+// function is invoked from isrChunkDone() and MUST live in IRAM so it can
+// execute while flash cache is suspended (NVS, SPI flash ops).
+size_t FL_IRAM ChannelDriverLcdClockless::encodeChunk(
     fl::span<const ChannelDataPtr> channels, u16 *output,
     size_t startByte, size_t byteCount) FL_NOEXCEPT {
     size_t outputIdx = 0; // bytes written
@@ -238,7 +241,13 @@ size_t ChannelDriverLcdClockless::encodeChunk(
 // ISR Callback
 //=============================================================================
 
-bool ChannelDriverLcdClockless::isrChunkDone(void *panel_io,
+// FL_IRAM matches the declaration in channel_driver_lcd_clockless.h — this
+// callback runs in ISR context and MUST live in IRAM so it can execute while
+// flash cache is suspended. Without it, a concurrent flash operation (NVS
+// commit, esp_flash_erase_region, etc.) keeps the ISR stalled past the 300 ms
+// interrupt watchdog window and the device panics with "Interrupt wdt timeout
+// on CPU1" in ISR context.
+bool FL_IRAM ChannelDriverLcdClockless::isrChunkDone(void *panel_io,
                                               const void *edata,
                                               void *user_ctx) FL_NOEXCEPT {
     (void)panel_io;
@@ -465,7 +474,11 @@ fl::shared_ptr<IChannelDriver> createLcdClocklessEngine() FL_NOEXCEPT {
         void freeBuffer(u16 *b) FL_NOEXCEPT override {
             detail::LcdSpiPeripheralEsp::instance().freeBuffer(b);
         }
-        bool transmit(const u16 *b, size_t s) FL_NOEXCEPT override {
+        // FL_IRAM: forwarded into LcdSpiPeripheralEsp::transmit() from
+        // isrChunkDone (ISR context). The thunk must live in IRAM too —
+        // marking only the target is not enough because the vtable dispatch
+        // jumps here first.
+        bool FL_IRAM transmit(const u16 *b, size_t s) FL_NOEXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().transmit(b, s);
         }
         bool waitTransmitDone(u32 t) FL_NOEXCEPT override {
