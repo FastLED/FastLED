@@ -285,6 +285,18 @@ def run_emcc(args: list[str], cwd: Optional[str] = None) -> int:
     Returns:
         Process return code (0 = success).
     """
+    # Verify the EMCC_WASM_LD patch is applied to the bundled emscripten
+    # install. This was previously in _render_wasm_cross_file (called on every
+    # warm build) — moved here in 2026-05 so the cost is paid only when emcc.py
+    # is actually about to be imported in-process. On clang-tool-chain >=1.5.5
+    # with a settled install, this is a ~1 ms marker-file stat; on older or
+    # freshly-extracted installs it does the full check.
+    #
+    # Lazy import to avoid the wasm_build <-> wasm_tools circular dep.
+    from ci.wasm_build import _ensure_emscripten_wasm_ld_patch
+
+    _ensure_emscripten_wasm_ld_patch()
+
     mod = _load_emcc_module()
     if mod is not None:
         # In-process invocation — save/restore global state
