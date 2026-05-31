@@ -895,9 +895,26 @@ XIAOBLESENSE_ADAFRUI_ALIAS = Board(
 
 XIAOBLESENSE_NRF52 = Board(
     board_name="xiaoblesense",
-    real_board_name="xiaoble_adafruit",
-    platform="https://github.com/maxgerhardt/platform-nordicnrf52",
-    platform_needs_install=True,
+    # Mirror the XIAOBLESENSE_ADAFRUIT_NRF52 fix from #2634 / #2636 — the
+    # maxgerhardt platform's `xiaoble_adafruit` board JSON points build.variant
+    # at a variant directory that doesn't exist in Adafruit BSP 1.10601.0, so
+    # the Adafruit core's `#include "variant.h"` fails. Reuse the stock
+    # `nrf52840_dk_adafruit` variant (which IS shipped) and let
+    # TARGET_XIAOBLE_NRF52840_SENSE route through the existing Seeed XIAO BLE
+    # Sense fastpin variant block. See FastLED #2643.
+    real_board_name="nrf52840_dk_adafruit",
+    platform="nordicnrf52",
+    framework="arduino",
+    platform_packages="framework-arduinoadafruitnrf52@^1.10601.0",
+    defines=[
+        "TARGET_XIAOBLE_NRF52840_SENSE",
+        "FASTLED_USE_COMPILE_TESTS=0",
+    ],
+    # Same arm-gnu 15.2.rel1 LTO offset-overflow workaround as the sister
+    # boards (see #2641).
+    build_unflags=["-flto"],
+    build_flags=["-fno-lto"],
+    board_build_core="nRF5",
 )
 
 # Correct nRF52840 DK board definition
