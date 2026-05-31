@@ -7,6 +7,20 @@
 // use this to determine if found variant or not (avoid multiple boards at once)
 #undef __FASTPIN_ARM_NRF52_VARIANT_FOUND
 
+// Sentinel: set when the user (or ci/boards.py) has opted in to a community
+// board via TARGET_*. These boards reuse a stock Adafruit BSP (typically
+// nrf52840_dk_adafruit), which injects its own ARDUINO_NRF52840_* macro. The
+// sentinel lets the BSP-default pin-map blocks below defer to the explicit
+// TARGET_* block so the user's override always wins. Add new TARGET_* macros
+// to the OR-chain when introducing new community-board variants. See #2422
+// for the original report and #2626 for the redefinition bug.
+#undef __FASTLED_NRF52_USER_TARGET_OVERRIDE
+#if defined(TARGET_SUPERMINI_NRF52840) || \
+    defined(TARGET_NICE_NANO_V2)      || \
+    defined(TARGET_NRFMICRO)
+    #define __FASTLED_NRF52_USER_TARGET_OVERRIDE
+#endif
+
 
 //
 // BOARD_PIN can be either the pin portion of a port.pin, or the combined NRF_GPIO_PIN_MAP() number.
@@ -346,14 +360,13 @@
 
 // Adafruit Bluefruit on nRF52840DK PCA10056
 // From https://www.adafruit.com/package_adafruit_index.json
-// Community boards (SuperMini / nice!nano v2 / nRFMicro) reuse the
-// nrf52840_dk_adafruit BSP, which auto-defines ARDUINO_NRF52840_PCA10056.
-// When one of those TARGET_* overrides is in scope, defer to its dedicated
-// block below instead of using the PCA10056 pin map (see issue #2422).
-#if defined (ARDUINO_NRF52840_PCA10056) && \
-    !defined(TARGET_SUPERMINI_NRF52840) && \
-    !defined(TARGET_NICE_NANO_V2) && \
-    !defined(TARGET_NRFMICRO)
+// Community boards reuse the nrf52840_dk_adafruit BSP, which auto-defines
+// ARDUINO_NRF52840_PCA10056. When the user opted into one of those community
+// variants via a TARGET_* macro, defer to its dedicated block below instead
+// of running the PCA10056 pin map. Why guard in the header instead of issuing
+// -UARDUINO_NRF52840_PCA10056 from ci/boards.py: a header-side guard also
+// works for non-PIO builds where the user sets TARGET_* by hand.
+#if defined (ARDUINO_NRF52840_PCA10056) && !defined(__FASTLED_NRF52_USER_TARGET_OVERRIDE)
     #if defined(__FASTPIN_ARM_NRF52_VARIANT_FOUND)
         #error "Cannot define more than one board at a time"
     #else
