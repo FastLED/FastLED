@@ -559,17 +559,29 @@ class PioCompiler(Compiler):
             self.platform_lock.release()
             return futures
 
+        import os
         import time
 
         from ci.util.fbuild_runner import _parse_size_info_from_log
 
+        # 30 min was the historical per-sketch timeout the serial path
+        # used; for the batched compile-many path the same number has to
+        # cover stage-1 framework build + stage-2 fanout of *every*
+        # sketch. On 2-core GitHub Actions runners with esp32s3 /
+        # teensy41 the framework alone outlasted 30 min in PR #2672 even
+        # with framework_jobs bumped to 2. Default to 60 min and let CI
+        # workflows tune via FASTLED_FBUILD_BATCH_TIMEOUT_SECS if a
+        # specific board needs more / less.
+        batch_timeout = float(
+            os.environ.get("FASTLED_FBUILD_BATCH_TIMEOUT_SECS", "3600")
+        )
         batch_start = time.monotonic()
         try:
             compile_many_result = run_batch(
                 board=self.board.board_name,
                 sketch_project_dirs=[project_dir for _, project_dir in staged_projects],
                 verbose=self.verbose,
-                timeout=1800,
+                timeout=batch_timeout,
                 quiet=False,
                 log_file=None,
             )

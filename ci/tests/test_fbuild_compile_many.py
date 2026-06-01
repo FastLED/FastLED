@@ -195,7 +195,11 @@ def test_pio_compiler_build_prefers_ci_results(
         assert board == "uno"
         assert sketch_project_dirs == [root_project, other_project]
         assert verbose is False
-        assert timeout == 1800
+        # _build_fbuild_batch now defaults the batch timeout to 3600s,
+        # overridable via FASTLED_FBUILD_BATCH_TIMEOUT_SECS. The previous
+        # 1800s default was raised because esp32s3/teensy41 stage-1
+        # framework builds outran it on 2-core CI runners (PR #2672).
+        assert timeout == 3600
         assert quiet is False
         assert log_file is None
         return fbuild_runner.FbuildCompileManyResult(
