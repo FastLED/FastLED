@@ -21,13 +21,17 @@ import hashlib
 import json
 import sys
 from dataclasses import dataclass
+from os import stat_result
 from pathlib import Path
+
+from typeguard import typechecked
 
 
 CACHE_FILENAME = "src_metadata.cache"
 CACHE_VERSION = 2
 
 
+@typechecked
 @dataclass(frozen=True)
 class CacheEntry:
     """Validated source metadata cache contents."""
@@ -38,7 +42,7 @@ class CacheEntry:
     metadata: str
 
 
-def compute_src_files_hash(src_dir: Path, pattern: str = "*.cpp") -> str:
+def compute_src_files_hash(src_dir: Path, pattern: str) -> str:
     """
     Compute a hash of all source file metadata (path + mtime + size).
 
@@ -59,8 +63,6 @@ def compute_src_files_hash(src_dir: Path, pattern: str = "*.cpp") -> str:
     hash_input: list[str] = []
     for f in source_files:
         if f.is_file():
-            from os import stat_result
-
             stat: stat_result = f.stat()
             rel_path: str = f.relative_to(src_dir).as_posix()
             # Include path, mtime, and size in hash
@@ -134,7 +136,7 @@ def save_cache(build_dir: Path, src_hash: str, metadata: str) -> None:
         json.dump(cache, f, indent=2)
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     """Main entry point for source metadata cache operations."""
     parser = argparse.ArgumentParser(
         description="Manage source metadata cache for Meson build system"
@@ -177,7 +179,7 @@ def main() -> None:
         help="File pattern to match (default: *.cpp)",
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     # Validate arguments based on operation
     if args.invalidate:
