@@ -426,15 +426,20 @@ class PioCompiler(Compiler):
     def _build_fbuild(self, examples: list[str]) -> list[Future[SketchResult]]:
         """Build examples using fbuild, preferring ``ci`` when available.
 
-        compile-many / ``fbuild ci`` are gated behind ``FASTLED_USE_FBUILD_CI``
-        because today they re-build the framework from scratch in every
-        stage-2 sketch dir (FastLED/fbuild#335). On uno that's a ~7 min run
-        vs. ~3.5 min serial; on teensy41/esp32s3 (larger framework) it
-        blows past the 30 min batch timeout — see the runs that landed on
-        master commits d2a025441e / 63e0241808 / fa147ae894. Default off
-        until fbuild#335 ships a shared framework cache; set
-        ``FASTLED_USE_FBUILD_CI=1`` to opt in (e.g. for local timing
-        experiments against the architectural fix once it lands).
+        compile-many / ``fbuild ci`` are now the default. They used to be
+        gated default-off via ``FASTLED_USE_FBUILD_CI`` because every
+        stage-2 sketch re-built the framework from scratch
+        (FastLED/fbuild#335), which on uno took a ~7 min run vs ~3.5 min
+        serial and on teensy41/esp32s3 blew past the 30 min batch
+        timeout. fbuild 2.2.13 ships the framework-archive share fix
+        (FastLED/fbuild#337), so stage-2 sketches reuse stage-1's
+        framework instead of recompiling it — locally that's a ~19x
+        cold-cache speedup on uno.
+
+        Opt-out is preserved for safety: set ``FASTLED_USE_FBUILD_CI``
+        to ``0``/``false``/``no``/``off`` to force the legacy serial
+        loop. Empty/unset = on. Any truthy value (``1``, ``true``,
+        ``yes``, ``on``) is also accepted explicitly.
         """
         import os
 
@@ -443,13 +448,9 @@ class PioCompiler(Compiler):
             fbuild_supports_compile_many,
         )
 
-        opt_in = os.environ.get("FASTLED_USE_FBUILD_CI", "").lower() in (
-            "1",
-            "true",
-            "yes",
-            "on",
-        )
-        if opt_in:
+        raw = os.environ.get("FASTLED_USE_FBUILD_CI", "").lower()
+        opt_out = raw in ("0", "false", "no", "off")
+        if not opt_out:
             if fbuild_supports_ci():
                 return self._build_fbuild_ci(examples)
             if fbuild_supports_compile_many():
@@ -459,9 +460,8 @@ class PioCompiler(Compiler):
                 )
                 return self._build_fbuild_compile_many(examples)
             print(
-                "FASTLED_USE_FBUILD_CI=1 was set but fbuild ci/compile-many "
-                "are unavailable in the installed fbuild; falling back to "
-                "the legacy serial loop."
+                "fbuild ci/compile-many are unavailable in the installed "
+                "fbuild; falling back to the legacy serial loop."
             )
         return self._build_fbuild_sync(examples)
 

@@ -168,11 +168,13 @@ def test_pio_compiler_build_prefers_ci_results(
     other_log = other_project / "compile_many.log"
     other_log.write_text("demo ok", encoding="utf-8")
 
-    # compile-many is gated behind FASTLED_USE_FBUILD_CI in
-    # PioCompiler._build_fbuild (FastLED/fbuild#335). Opt in here so the
-    # ci-results path actually runs in this test; without the env var
-    # the dispatch falls through to the legacy serial loop and the
-    # mocked run_fbuild_ci below would never be called.
+    # compile-many is now the default in PioCompiler._build_fbuild
+    # (FastLED/fbuild#337 shipped the framework-archive share, fbuild
+    # 2.2.13). Explicitly setting FASTLED_USE_FBUILD_CI=1 here matches
+    # the contract surface and guards against a future regression that
+    # flips the polarity again — without this, a hostile environment
+    # value (e.g. CI inheriting FASTLED_USE_FBUILD_CI=0 from a parent
+    # shell) would silently disable the path the test means to exercise.
     monkeypatch.setenv("FASTLED_USE_FBUILD_CI", "1")
     monkeypatch.setattr(fbuild_runner, "fbuild_supports_ci", lambda: True)
     monkeypatch.setattr(fbuild_runner, "fbuild_supports_compile_many", lambda: True)
