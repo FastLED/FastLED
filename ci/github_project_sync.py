@@ -20,13 +20,10 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
 
-from typeguard import typechecked
-
 
 VALID_OWNER_TYPES = {"organization", "user"}
 
 
-@typechecked
 @dataclass
 class FieldOption:
     """Resolved field and option IDs for a single-select project field."""
@@ -35,7 +32,6 @@ class FieldOption:
     option_id: str
 
 
-@typechecked
 @dataclass
 class Config:
     """Configuration parsed from environment variables."""
