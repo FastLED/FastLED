@@ -15,6 +15,13 @@ namespace platforms {
 // Serial initialization
 void begin(u32 baudRate) FL_NOEXCEPT {
     Serial.begin(baudRate);
+#if defined(ARDUINO_USB_CDC_ON_BOOT) && ARDUINO_USB_CDC_ON_BOOT
+    // ESP32 HWCDC/USBCDC: make writes drop instead of block when no host is reading.
+    // Default is 100ms (HWCDC) / 250ms (USBCDC). Setting to 0 collapses worst-case
+    // stall from ~2s to ~0 when host absent. See FastLED issue #2668 and
+    // arduino-esp32 PR #7583. Safe to call on any Serial that exposes the method.
+    Serial.setTxTimeoutMs(0);
+#endif
 }
 
 // Print functions
@@ -89,6 +96,12 @@ int readLineNative(char delimiter, char* out, int outLen) FL_NOEXCEPT {
 
 // Utility functions
 bool flush(u32 timeoutMs) FL_NOEXCEPT {
+    (void)timeoutMs;
+    // Skip flush when host is absent. On HWCDC, Serial.flush() can spin
+    // indefinitely without a host (arduino-esp32 issue #7554). Returning
+    // true is correct semantics: there is no drained-to-host invariant
+    // we can establish without a host. See FastLED issue #2668.
+    if (!Serial) return true;
     Serial.flush();
     return true;
 }

@@ -804,7 +804,11 @@ ESP32_C6_DEVKITC_1 = Board(
     platform=ESP32_IDF_5_5_1_PIOARDUINO,
     board_build_flash_size="4MB",  # ESP32-C6FH4 actual flash size confirmed by esptool
     board_partitions="huge_app.csv",
-    build_flags=["-funwind-tables"],  # Better stack traces for RISC-V crash decoding
+    build_flags=[
+        "-funwind-tables",  # Better stack traces for RISC-V crash decoding
+        "-DARDUINO_USB_MODE=1",  # Select HWCDC (USB-Serial/JTAG) over OTG
+        "-DARDUINO_USB_CDC_ON_BOOT=1",  # Route Serial to HWCDC. Safe with setTxTimeoutMs(0); see #2668
+    ],
 )
 
 ESP32_S3_DEVKITC_1 = Board(
