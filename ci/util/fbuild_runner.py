@@ -128,8 +128,21 @@ def _get_env_job_count(name: str) -> int | None:
 
 
 def default_fbuild_framework_jobs() -> int:
-    """Default stage-1 parallelism for batched ``fbuild`` sketch builds."""
-    return _get_env_job_count("FASTLED_FRAMEWORK_JOBS") or 1
+    """Default stage-1 parallelism for batched ``fbuild`` sketch builds.
+
+    Caps at 2 because framework compilation is memory-heavy (matches the
+    fbuild orchestrator's own ``default_framework_jobs`` policy in
+    ``crates/fbuild-build/src/compile_many.rs``). The previous hardcoded
+    1 made stage 1 single-threaded, which for esp32s3 / teensy41 on the
+    2-core GitHub Actions runners turned out to be the long pole — stage
+    1 ran past the 1800s batch timeout before stage 2 (with the
+    framework-share seed from FastLED/fbuild#337) ever got a chance to
+    fan out and amortize. Verified on FastLED PR #2672 esp32s3 CI run.
+    """
+    env_override = _get_env_job_count("FASTLED_FRAMEWORK_JOBS")
+    if env_override is not None:
+        return env_override
+    return min(cpu_count(), 2)
 
 
 def default_fbuild_sketch_jobs() -> int:
