@@ -29,9 +29,10 @@
 /// 2. Roger Clark STM32 (STM32F103C): __STM32F1__
 /// 3. Older STM32duino/Arduino_STM32: STM32F1, STM32F4
 /// 4. Particle (Photon): STM32F10X_MD, STM32F2XX
+/// 5. ArduinoCore-zephyr UNO Q: ARDUINO_UNO_Q / CONFIG_BOARD_ARDUINO_UNO_Q
 ///
 /// Core differentiation is handled by core_detection.h which defines:
-/// - FL_IS_STM32_STMDUINO, FL_IS_STM32_LIBMAPLE, FL_IS_STM32_PARTICLE, or FL_IS_STM32_UNKNOWN
+/// - FL_IS_STM32_STMDUINO, FL_IS_STM32_LIBMAPLE, FL_IS_STM32_PARTICLE, FL_IS_STM32_ZEPHYR, or FL_IS_STM32_UNKNOWN
 
 // ============================================================================
 // FL_IS_STM32 - General STM32 platform detection
@@ -56,7 +57,8 @@
     /* STM32G4 Family (170 MHz, Motor Control) */ \
     defined(STM32G4) || defined(STM32G4xx) || \
     /* STM32U5 Family (160 MHz, Ultra Low Power) */ \
-    defined(STM32U5) || defined(STM32U5xx)
+    defined(STM32U5) || defined(STM32U5xx) || defined(STM32U585xx) || defined(STM32U585XX) || \
+    defined(ARDUINO_UNO_Q) || defined(CONFIG_BOARD_ARDUINO_UNO_Q) || defined(CONFIG_SOC_STM32U585XX)
 #define FL_IS_STM32
 
 // Only include core_detection.h when on STM32 platform
@@ -108,7 +110,8 @@
 #endif
 
 // FL_IS_STM32_U5 - STM32U5 Family (160 MHz, 256-2496 KB RAM, 512-4096 KB Flash, Ultra-low-power)
-#if defined(STM32U5) || defined(STM32U5xx)
+#if defined(STM32U5) || defined(STM32U5xx) || defined(STM32U585xx) || defined(STM32U585XX) || \
+    defined(ARDUINO_UNO_Q) || defined(CONFIG_BOARD_ARDUINO_UNO_Q) || defined(CONFIG_SOC_STM32U585XX)
 #define FL_IS_STM32_U5
 #endif
 

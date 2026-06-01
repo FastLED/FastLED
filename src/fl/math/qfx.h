@@ -27,7 +27,7 @@ public:
     i32 operator*(i32 v) FL_NOEXCEPT { return (v*i) + ((v*f)>>F); }
     /// @copydoc operator*(uint32_t)
     i16 operator*(i16 v) FL_NOEXCEPT { return (v*i) + ((v*f)>>F); }
-#if defined(FL_IS_ARM) | defined(FASTLED_RISCV) | defined(FASTLED_APOLLO3)
+#if (defined(FL_IS_ARM) || defined(FASTLED_RISCV) || defined(FASTLED_APOLLO3)) && !defined(ARDUINO_ARCH_ZEPHYR)
     /// @copydoc operator*(uint32_t)
     int operator*(int v) { return (v*i) + ((v*f)>>F); }
 #endif
@@ -37,7 +37,7 @@ template<class T, int F, int I> static u32 operator*(u32 v, qfx<T,F,I> & q) FL_N
 template<class T, int F, int I> static u16 operator*(u16 v, qfx<T,F,I> & q) FL_NOEXCEPT { return q * v; }
 template<class T, int F, int I> static i32 operator*(i32 v, qfx<T,F,I> & q) FL_NOEXCEPT { return q * v; }
 template<class T, int F, int I> static i16 operator*(i16 v, qfx<T,F,I> & q) FL_NOEXCEPT { return q * v; }
-#if defined(FL_IS_ARM) | defined(FASTLED_RISCV) | defined(FASTLED_APOLLO3)
+#if (defined(FL_IS_ARM) || defined(FASTLED_RISCV) || defined(FASTLED_APOLLO3)) && !defined(ARDUINO_ARCH_ZEPHYR)
 template<class T, int F, int I> static int operator*(int v, qfx<T,F,I> & q) { return q * v; }
 #endif
 

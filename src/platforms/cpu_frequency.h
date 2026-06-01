@@ -25,6 +25,11 @@
 #elif defined(STM32F1) || defined(__STM32F1__) || defined(STM32F10X_MD)
   // STM32F1: 72 MHz
   #define GET_CPU_FREQUENCY() 72000000UL
+#elif defined(STM32U5) || defined(STM32U5xx) || defined(STM32U585xx) || \
+      defined(STM32U585XX) || defined(ARDUINO_UNO_Q) || \
+      defined(CONFIG_BOARD_ARDUINO_UNO_Q) || defined(CONFIG_SOC_STM32U585XX)
+  // STM32U5: UNO Q / U585 compile targets run the STM32duino proxy at 160 MHz.
+  #define GET_CPU_FREQUENCY() 160000000UL
 #elif defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
   // Other ARM Cortex-M3/M4: check F_CPU or use conservative 72 MHz default
   #if defined(F_CPU) && (F_CPU > 0)

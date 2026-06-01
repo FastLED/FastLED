@@ -30,7 +30,11 @@ class Pin : public Selectable {
 	/// Initialize the class by retrieving the register
 	/// pointers and bitmask.
 	void _init() FL_NOEXCEPT {
-		#if defined(digitalPinToBitMask) && defined(portOutputRegister) && defined(portInputRegister)
+		#if defined(ARDUINO_ARCH_ZEPHYR) && (defined(ARDUINO_UNO_Q) || defined(CONFIG_BOARD_ARDUINO_UNO_Q) || defined(CONFIG_SOC_STM32U585XX))
+		mPinMask = 1;
+		mPort = nullptr;
+		mInPort = nullptr;
+		#elif defined(digitalPinToBitMask) && defined(portOutputRegister) && defined(portInputRegister)
 		// Use PINMAP functions if available
 		mPinMask = digitalPinToBitMask(mPin);
 		mPort = (volatile RwReg*)portOutputRegister(digitalPinToPort(mPin));

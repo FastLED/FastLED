@@ -1226,6 +1226,18 @@ NUCLEO_F439ZI = Board(
     platform="ststm32",
 )
 
+# Arduino UNO Q board support.
+# PlatformIO does not yet ship an ArduinoCore-zephyr UNO Q platform, so CI uses
+# the STM32duino STM32U585ZITxQ toolchain as a compile target while preserving
+# the UNO Q board macro that selects FastLED's board pin map.
+ARDUINO_UNO_Q = Board(
+    board_name="arduino_uno_q",
+    real_board_name="arduino_uno_q",
+    platform="ststm32",
+    framework="arduino",
+    defines=["ARDUINO_UNO_Q"],
+)
+
 # Silicon Labs MGM240S boards (Arduino Nano Matter, SparkFun Thing Plus Matter)
 # Uses Silicon Labs EFM32 platform with Arduino framework support
 # Based on EFR32MG24 SoC with ARM Cortex-M33 @ 78MHz
