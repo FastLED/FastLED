@@ -16,6 +16,6 @@
   #if defined(CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC)
     #define F_CPU CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC
   #else
-    #define F_CPU 160000000UL
+    #error "CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC must be defined for STM32 Zephyr targets"
   #endif
 #endif

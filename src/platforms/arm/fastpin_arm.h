@@ -28,7 +28,7 @@
 #elif defined(__SAM3X8E__)
     // Arduino Due (SAM3X8E)
     #include "platforms/arm/sam/fastpin_arm_sam.h"
-#elif defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F1xx) || defined(STM32F2XX) || defined(STM32F4) || defined(STM32U5) || defined(STM32U5xx) || defined(STM32U585xx) || defined(STM32U585XX) || defined(ARDUINO_UNO_Q) || defined(CONFIG_BOARD_ARDUINO_UNO_Q)
+#elif defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F1xx) || defined(STM32F2XX) || defined(STM32F4) || defined(STM32U5) || defined(STM32U5xx) || defined(STM32U585xx) || defined(STM32U585XX) || defined(ARDUINO_UNO_Q) || defined(CONFIG_BOARD_ARDUINO_UNO_Q) || defined(CONFIG_SOC_STM32U585XX)
     // STM32 microcontrollers
     #include "platforms/arm/stm32/fastpin_arm_stm32.h"
 #elif defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || defined(__SAMD21E18A__)

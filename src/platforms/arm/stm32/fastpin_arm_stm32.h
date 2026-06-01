@@ -14,7 +14,7 @@
 // The legacy definitions use incorrect Arduino pin numbers instead of STM32 pin names
 // STM32F1: Blue Pill, Maple Mini, etc.
 // STM32F4: Black Pill, Nucleo, Discovery, etc.
-#if defined(ARDUINO_BLUEPILL_F103C8) || defined(ARDUINO_MAPLE_MINI) || defined(ARDUINO_GENERIC_STM32F103T) || defined(STM32F103TBU6) || defined(STM32F103TB) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F103C8) || defined(ARDUINO_GENERIC_STM32F103C8) || defined(ARDUINO_GENERIC_F103C8TX) || defined(STM32F4) || defined(STM32F4xx) || defined(STM32U5) || defined(STM32U5xx) || defined(STM32U585xx) || defined(STM32U585XX) || defined(ARDUINO_UNO_Q) || defined(CONFIG_BOARD_ARDUINO_UNO_Q) || defined(CONFIG_SOC_STM32U585XX)
+#if defined(ARDUINO_BLUEPILL_F103C8) || defined(ARDUINO_MAPLE_MINI) || defined(ARDUINO_GENERIC_STM32F103T) || defined(STM32F103TBU6) || defined(STM32F103TB) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F103C8) || defined(ARDUINO_GENERIC_STM32F103C8) || defined(ARDUINO_GENERIC_F103C8TX) || defined(STM32F4) || defined(STM32F4xx) || defined(ARDUINO_UNO_Q) || defined(CONFIG_BOARD_ARDUINO_UNO_Q)
 #if !defined(ARDUINO_HY_TINYSTM103TB)
 #define USE_NEW_STM32_PIN_DEFINITIONS
 #endif

@@ -24,4 +24,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: arduino_uno_q --examples Blink
+      args: arduino_uno_q --examples Blink,Apa102
