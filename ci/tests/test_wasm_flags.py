@@ -27,7 +27,8 @@ def test_lib_fast_debug_flags_map_fastled_src_to_dwarf_prefix() -> None:
 def test_lib_quick_flags_do_not_emit_dwarf_prefix_maps() -> None:
     flags = wasm_flags.get_lib_compile_flags_dict("quick")["compiler_flags"]
 
-    assert not any(flag.startswith("-ffile-prefix-map=") for flag in flags)
+    for flag in flags:
+        assert not flag.startswith("-ffile-prefix-map="), flag
 
 
 def test_rglob_outputs_forward_slashes(tmp_path: Path) -> None:

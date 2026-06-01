@@ -63,10 +63,10 @@ def _path_prefix_variants(path: Path) -> list[str]:
 
 def _file_prefix_map_flags(from_path: Path, to_prefix: str) -> list[str]:
     normalized_prefix = to_prefix.replace("\\", "/").strip("/")
-    return [
-        f"-ffile-prefix-map={path_prefix}={normalized_prefix}"
-        for path_prefix in _path_prefix_variants(from_path)
-    ]
+    flags: list[str] = []
+    for path_prefix in _path_prefix_variants(from_path):
+        flags.append(f"-ffile-prefix-map={path_prefix}={normalized_prefix}")
+    return flags
 
 
 def _lib_dwarf_prefix_map_flags(config: dict[str, Any], mode: str) -> list[str]:
