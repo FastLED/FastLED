@@ -39,6 +39,7 @@ from ci.lint_cpp.cpp_include_checker import CppIncludeChecker
 from ci.lint_cpp.ctype_global_checker import CtypeGlobalChecker
 from ci.lint_cpp.enum_class_checker import EnumClassChecker
 from ci.lint_cpp.esp_rom_printf_checker import EspRomPrintfChecker
+from ci.lint_cpp.example_serial_checker import ExampleSerialChecker
 from ci.lint_cpp.fastled_header_usage_checker import FastLEDHeaderUsageChecker
 from ci.lint_cpp.fl_is_defined_checker import FlIsDefinedChecker
 from ci.lint_cpp.headers_exist_checker import HeadersExistChecker
@@ -243,6 +244,7 @@ def create_checkers(
     # Examples-only checkers
     checkers_by_scope["examples"] = [
         SerialPrintfChecker(),
+        ExampleSerialChecker(),
         UsingNamespaceFlInExamplesChecker(),
     ]
 

@@ -264,7 +264,7 @@ fl::shared_ptr<AutoResearchState> g_autoresearch_state;  // Shared state pointer
 // Note: Some boards (ESP32S2) don't support setTxBufferSize() on USBCDC interface
 void init_serial_buffers() {
 #if defined(FL_IS_ESP32) && !defined(FL_IS_ESP_32S2)
-    Serial.setTxBufferSize(4096);  // 4KB buffer (default is 256 bytes)
+    Serial.setTxBufferSize(4096);  // 4KB buffer (default is 256 bytes)  // ok serial - platform-specific TX buffer sizing, no fl:: equivalent
 #endif
 }
 
@@ -289,15 +289,17 @@ void setup() {
     // Initialize serial buffers with platform-specific configuration
     // Must be called BEFORE Serial.begin()
     init_serial_buffers();
-    Serial.begin(115200);
+    fl::serial_begin(115200);
 #if defined(ARDUINO_USB_CDC_ON_BOOT) && ARDUINO_USB_CDC_ON_BOOT
     // Make HWCDC writes drop instead of block when no host is reading.
     // Without this, Serial.print() on ESP32-C3/C6/H2 can stall up to ~2s
     // per call once the TX ring fills with no host draining it.
     // See FastLED issue #2668 and arduino-esp32 PR #7583.
-    Serial.setTxTimeoutMs(0);
+    // Redundant with fl::serial_begin() which already sets this on HWCDC,
+    // kept as defense-in-depth for sketches that bypass fl::serial_begin.
+    Serial.setTxTimeoutMs(0);  // ok serial - platform-specific TX timeout, no fl:: equivalent
 #endif
-    while (!Serial && millis() < SERIAL_TIMEOUT_MS);  // Wait for serial monitor (early exits when connected)
+    while (!fl::serial_ready() && millis() < SERIAL_TIMEOUT_MS);  // Wait for serial monitor (early exits when connected)
 
     FL_WARN("[SETUP] AutoResearch sketch starting - serial output active");
 
