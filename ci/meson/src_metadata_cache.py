@@ -24,6 +24,7 @@ from pathlib import Path
 
 
 CACHE_FILENAME = "src_metadata.cache"
+CACHE_VERSION = 2
 
 
 def compute_src_files_hash(src_dir: Path, pattern: str = "*.cpp") -> str:
@@ -79,8 +80,10 @@ def load_cache(build_dir: Path) -> dict[str, str | float] | None:
             cache = json.load(f)
 
         # Validate cache structure
-        required_keys = ["hash", "timestamp", "metadata"]
+        required_keys = ["version", "hash", "timestamp", "metadata"]
         if not all(key in cache for key in required_keys):
+            return None
+        if cache["version"] != CACHE_VERSION:
             return None
 
         return cache
@@ -102,7 +105,12 @@ def save_cache(build_dir: Path, src_hash: str, metadata: str) -> None:
     cache_file = build_dir / CACHE_FILENAME
     build_dir.mkdir(parents=True, exist_ok=True)
 
-    cache = {"hash": src_hash, "timestamp": time.time(), "metadata": metadata}
+    cache = {
+        "version": CACHE_VERSION,
+        "hash": src_hash,
+        "timestamp": time.time(),
+        "metadata": metadata,
+    }
 
     with open(cache_file, "w", encoding="utf-8") as f:
         json.dump(cache, f, indent=2)

@@ -391,12 +391,12 @@ dwarf_prefix = "dwarfsource"                    # Prefix for generic dwarf-resol
 # Debug file naming
 dwarf_filename = "fastled.wasm.dwarf"           # Name of separate DWARF debug info file
 
-# File prefix mapping for source path resolution in debug info
-# This controls how absolute paths in the compilation environment are mapped to
-# relative paths in the debug information for consistent debugging experience
-# Format: -ffile-prefix-map=FROM=TO
-file_prefix_map_from = "/"                      # Map from root path
-file_prefix_map_to = "sketchsource/"            # Map to sketch source prefix
+# File prefix mapping for source path resolution in debug info.
+# ci/wasm_flags.py synthesizes known-root maps for FastLED library compiles:
+#   <repo>/src -> fastled_prefix
+# Build drivers that know the user sketch and Emscripten roots should map:
+#   <sketch> -> sketch_prefix
+#   <emsdk>  -> dwarf_prefix/emsdk
 
 [strict_mode]
 # ================================================================================================

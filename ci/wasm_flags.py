@@ -20,13 +20,14 @@ import argparse
 import sys
 import tomllib
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 
 PROJECT_ROOT = Path(__file__).parent.parent
 BUILD_FLAGS_TOML = (
     PROJECT_ROOT / "src" / "platforms" / "wasm" / "compiler" / "build_flags.toml"
 )
+DEBUG_PATH_MAP_MODES = {"debug", "fast_debug"}
 
 
 def _load_toml() -> dict[str, Any]:
@@ -35,6 +36,46 @@ def _load_toml() -> dict[str, Any]:
         raise FileNotFoundError(f"Build flags TOML not found: {BUILD_FLAGS_TOML}")
     with open(BUILD_FLAGS_TOML, "rb") as f:
         return tomllib.load(f)
+
+
+def _dwarf_config(config: dict[str, Any]) -> dict[str, Any]:
+    dwarf = config.get("dwarf", {})
+    if isinstance(dwarf, dict):
+        return cast(dict[str, Any], dwarf)
+    return {}
+
+
+def _dwarf_prefix(dwarf: dict[str, Any], key: str, default: str) -> str:
+    value = dwarf.get(key, default)
+    if not isinstance(value, str) or not value.strip():
+        value = default
+    return value.replace("\\", "/").strip("/")
+
+
+def _path_prefix_variants(path: Path) -> list[str]:
+    resolved = path.resolve()
+    variants = [resolved.as_posix()]
+    native = str(resolved)
+    if native != variants[0]:
+        variants.append(native)
+    return variants
+
+
+def _file_prefix_map_flags(from_path: Path, to_prefix: str) -> list[str]:
+    normalized_prefix = to_prefix.replace("\\", "/").strip("/")
+    return [
+        f"-ffile-prefix-map={path_prefix}={normalized_prefix}"
+        for path_prefix in _path_prefix_variants(from_path)
+    ]
+
+
+def _lib_dwarf_prefix_map_flags(config: dict[str, Any], mode: str) -> list[str]:
+    if mode not in DEBUG_PATH_MAP_MODES:
+        return []
+
+    dwarf = _dwarf_config(config)
+    fastled_prefix = _dwarf_prefix(dwarf, "fastled_prefix", "fastledsource")
+    return _file_prefix_map_flags(PROJECT_ROOT / "src", fastled_prefix)
 
 
 def get_lib_compile_flags_dict(mode: str = "quick") -> dict[str, list[str]]:
@@ -64,6 +105,8 @@ def get_lib_compile_flags_dict(mode: str = "quick") -> dict[str, list[str]]:
     else:
         compiler_flags.extend(config.get("library", {}).get("compiler_flags", []))
         compiler_flags.extend(build_mode_config.get("flags", []))
+
+    compiler_flags.extend(_lib_dwarf_prefix_map_flags(config, mode))
 
     return {"defines": defines, "compiler_flags": compiler_flags}
 
