@@ -30,9 +30,15 @@ Opt-out:
 """
 
 import re
+import sys
 from pathlib import Path
 
-from ci.util.check_files import FileContent, FileContentChecker
+from ci.util.check_files import (
+    FileContent,
+    FileContentChecker,
+    MultiCheckerFileProcessor,
+    run_checker_standalone,
+)
 from ci.util.paths import PROJECT_ROOT
 
 
@@ -91,7 +97,7 @@ def _enforced_for(file_path: str) -> bool:
 class ExampleSerialChecker(FileContentChecker):
     """Forbid raw Serial.* method calls in enforced example sketches."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.violations: dict[str, list[tuple[int, str]]] = {}
 
     def should_process_file(self, file_path: str) -> bool:
@@ -169,13 +175,6 @@ class ExampleSerialChecker(FileContentChecker):
 
 def main() -> None:
     """Run example-Serial checker standalone."""
-    import sys
-
-    from ci.util.check_files import (
-        MultiCheckerFileProcessor,
-        run_checker_standalone,
-    )
-
     if len(sys.argv) > 1:
         file_path = Path(sys.argv[1]).resolve()
         if not file_path.exists():
