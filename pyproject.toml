@@ -5,7 +5,8 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.2.13 — adds the compile-many stage-2 framework-archive
+    # Pin to fbuild 2.2.14 — adds Arduino UNO Q / STM32U5 board defaults while
+    # preserving the compile-many stage-2 framework-archive
     # share (FastLED/fbuild#337) which prevents every stage-2 sketch from
     # re-building the framework from scratch (the regression that originally
     # forced the FASTLED_USE_FBUILD_CI=1 gate to default-off in #2662). Also
@@ -15,7 +16,7 @@ dependencies = [
     # acquire instrumentation (#350) — together these address the silent
     # esp32c6 hang reported in fbuild#346 and unblock flipping
     # FASTLED_USE_FBUILD_CI=1 default-on in a follow-up.
-    "fbuild==2.2.13",
+    "fbuild==2.2.14",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
