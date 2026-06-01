@@ -198,6 +198,11 @@ NATIVE_TO_MODERN_DEFINES: dict[str, str] = {
     "STM32G4xx": "FL_IS_STM32_G4",
     "STM32U5": "FL_IS_STM32_U5",
     "STM32U5xx": "FL_IS_STM32_U5",
+    "STM32U585xx": "FL_IS_STM32_U5",
+    "STM32U585XX": "FL_IS_STM32_U5",
+    "ARDUINO_UNO_Q": "FL_IS_STM32_U5",
+    "CONFIG_BOARD_ARDUINO_UNO_Q": "FL_IS_STM32_U5",
+    "CONFIG_SOC_STM32U585XX": "FL_IS_STM32_U5",
     # ── NRF platforms ────────────────────────────────────────────────
     "NRF51": "FL_IS_NRF52",
     "NRF52_SERIES": "FL_IS_NRF52",

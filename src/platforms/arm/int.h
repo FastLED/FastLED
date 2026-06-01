@@ -3,6 +3,18 @@
 // IWYU pragma: private
 
 namespace fl {
+#if defined(ARDUINO_ARCH_ZEPHYR)
+    typedef __INT16_TYPE__ i16;
+    typedef __UINT16_TYPE__ u16;
+    typedef __INT32_TYPE__ i32;
+    typedef __UINT32_TYPE__ u32;
+    typedef __INT64_TYPE__ i64;
+    typedef __UINT64_TYPE__ u64;
+    typedef __SIZE_TYPE__ size;
+    typedef __UINTPTR_TYPE__ uptr;
+    typedef __INTPTR_TYPE__ iptr;
+    typedef __PTRDIFF_TYPE__ ptrdiff;
+#else
     // ARM platforms (32-bit): short is 16-bit, long is 32-bit
     // uint32_t resolves to 'unsigned long' on most ARM toolchains
     //
@@ -28,4 +40,5 @@ namespace fl {
     typedef unsigned int uptr;    // uintptr_t equivalent
     typedef int iptr;             // intptr_t equivalent
     typedef int ptrdiff;          // ptrdiff_t equivalent
+#endif
 } 

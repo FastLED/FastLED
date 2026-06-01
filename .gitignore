@@ -54,6 +54,7 @@ ci/-
 dist
 
 ignore/
+extern-repos/
 .env
 
 # Node.js dependencies

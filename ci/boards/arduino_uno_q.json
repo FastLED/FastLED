@@ -1,0 +1,43 @@
+{
+  "build": {
+    "arduino": {
+      "variant_h": "variant_NUCLEO_U575ZI_Q.h"
+    },
+    "board": "UNO_Q",
+    "core": "stm32",
+    "cpu": "cortex-m33",
+    "extra_flags": "-DSTM32U5 -DSTM32U5xx -DSTM32U585xx",
+    "f_cpu": "160000000L",
+    "framework_extra_flags": {
+      "arduino": "-DARDUINO_NUCLEO_U575ZI_Q -DCUSTOM_PERIPHERAL_PINS"
+    },
+    "mcu": "stm32u585zit6q",
+    "product_line": "STM32U585xx",
+    "variant": "STM32U5xx/U575Z(G-I)TxQ_U585ZITxQ",
+    "variant_h": "variant_NUCLEO_U575ZI_Q.h"
+  },
+  "debug": {
+    "default_tools": [
+      "stlink"
+    ],
+    "jlink_device": "STM32U585ZI",
+    "openocd_target": "stm32u5x"
+  },
+  "frameworks": [
+    "arduino"
+  ],
+  "name": "Arduino UNO Q (STM32U585 compile target)",
+  "upload": {
+    "maximum_ram_size": 523624,
+    "maximum_size": 1966080,
+    "protocol": "stlink",
+    "protocols": [
+      "stlink",
+      "jlink",
+      "cmsis-dap",
+      "blackmagic"
+    ]
+  },
+  "url": "https://docs.arduino.cc/hardware/uno-q/",
+  "vendor": "Arduino"
+}

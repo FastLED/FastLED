@@ -12,8 +12,10 @@
 ///
 /// Defines one of:
 /// - FL_IS_STM32_STMDUINO: Official STMicroelectronics Arduino core (modern)
+/// - FL_IS_STM32_MBED: Arduino Mbed OS framework for STM32
 /// - FL_IS_STM32_LIBMAPLE: Roger Clark Arduino_STM32 core (legacy, deprecated)
 /// - FL_IS_STM32_PARTICLE: Particle firmware (Photon/Electron)
+/// - FL_IS_STM32_ZEPHYR: ArduinoCore-zephyr STM32 boards (UNO Q)
 /// - FL_IS_STM32_UNKNOWN: Unknown/unsupported core
 ///
 /// Detection logic based on research from:
@@ -25,17 +27,53 @@
 // Core Detection - Mutually Exclusive
 // ============================================================================
 
+#if defined(ARDUINO_ARCH_STM32)
+  #define _FL_STM32_HAS_STMDUINO 1
+#else
+  #define _FL_STM32_HAS_STMDUINO 0
+#endif
+
+#if defined(ARDUINO_ARCH_ZEPHYR) && (defined(ARDUINO_UNO_Q) || defined(CONFIG_BOARD_ARDUINO_UNO_Q) || defined(CONFIG_SOC_STM32U585XX))
+  #define _FL_STM32_HAS_ZEPHYR 1
+#else
+  #define _FL_STM32_HAS_ZEPHYR 0
+#endif
+
+#if defined(ARDUINO_ARCH_MBED)
+  #define _FL_STM32_HAS_MBED 1
+#else
+  #define _FL_STM32_HAS_MBED 0
+#endif
+
+#if defined(__STM32F1__) || defined(__STM32F4__) || defined(STM32_MCU_SERIES)
+  #define _FL_STM32_HAS_LIBMAPLE 1
+#else
+  #define _FL_STM32_HAS_LIBMAPLE 0
+#endif
+
+#if defined(PLATFORM_ID) || defined(SPARK)
+  #define _FL_STM32_HAS_PARTICLE 1
+#else
+  #define _FL_STM32_HAS_PARTICLE 0
+#endif
+
 // Count how many cores are detected (for validation)
-#define _FL_STM32_CORE_COUNT ( \
-    (defined(ARDUINO_ARCH_STM32) ? 1 : 0) + \
-    ((defined(__STM32F1__) || defined(__STM32F4__) || defined(STM32_MCU_SERIES)) ? 1 : 0) + \
-    ((defined(PLATFORM_ID) || defined(SPARK)) ? 1 : 0) \
-)
+#define _FL_STM32_CORE_COUNT (_FL_STM32_HAS_STMDUINO + _FL_STM32_HAS_ZEPHYR + _FL_STM32_HAS_MBED + _FL_STM32_HAS_LIBMAPLE + _FL_STM32_HAS_PARTICLE)
+
+// ArduinoCore-zephyr STM32 boards
+// UNO Q uses an STM32U585 MCU behind the ArduinoCore-zephyr API.
+// Detection: platform.txt emits ARDUINO_ARCH_ZEPHYR and ARDUINO_UNO_Q.
+#if defined(ARDUINO_ARCH_ZEPHYR) && (defined(ARDUINO_UNO_Q) || defined(CONFIG_BOARD_ARDUINO_UNO_Q) || defined(CONFIG_SOC_STM32U585XX))
+  #define FL_IS_STM32_ZEPHYR
+
+// Arduino Mbed OS framework for STM32 boards, e.g. GIGA R1.
+#elif defined(ARDUINO_ARCH_MBED)
+  #define FL_IS_STM32_MBED
 
 // STM32duino (Official STMicroelectronics Core)
 // Detection: ARDUINO_ARCH_STM32 is the primary identifier
 // Source: https://github.com/stm32duino/Arduino_Core_STM32/issues/946
-#if defined(ARDUINO_ARCH_STM32)
+#elif defined(ARDUINO_ARCH_STM32)
   #define FL_IS_STM32_STMDUINO
 
   // F_CPU Behavior: Defined as SystemCoreClock (runtime variable, not compile-time constant)
@@ -89,7 +127,7 @@
   #define FL_IS_STM32_UNKNOWN
 
   #warning "Unknown STM32 Arduino core detected - FastLED compatibility not guaranteed"
-  #warning "Supported cores: STM32duino (ARDUINO_ARCH_STM32), Arduino_STM32 (__STM32F1__/__STM32F4__), Particle (PLATFORM_ID/SPARK)"
+  #warning "Supported cores: STM32duino (ARDUINO_ARCH_STM32), Arduino Mbed (ARDUINO_ARCH_MBED), ArduinoCore-zephyr UNO Q (ARDUINO_ARCH_ZEPHYR + ARDUINO_UNO_Q), Arduino_STM32 (__STM32F1__/__STM32F4__), Particle (PLATFORM_ID/SPARK)"
 #endif
 
 // ============================================================================
@@ -104,6 +142,11 @@
 
 // Clean up temporary macro
 #undef _FL_STM32_CORE_COUNT
+#undef _FL_STM32_HAS_STMDUINO
+#undef _FL_STM32_HAS_ZEPHYR
+#undef _FL_STM32_HAS_MBED
+#undef _FL_STM32_HAS_LIBMAPLE
+#undef _FL_STM32_HAS_PARTICLE
 
 // ============================================================================
 // Core Feature Detection - F_CPU Behavior

@@ -107,6 +107,16 @@
   #include "families/stm32f4.h"  // nolint
 
 // ========================================
+// STM32U5 Family (HAS_BRR = true)
+// ========================================
+
+  // IWYU pragma: end_keep
+#elif defined(ARDUINO_UNO_Q) || defined(CONFIG_BOARD_ARDUINO_UNO_Q)
+  #define FASTLED_STM32_BOARD_FILE "platforms/arm/stm32/pins/boards/u5/uno_q.h"
+  // IWYU pragma: begin_keep
+  #include "families/stm32u5.h"  // nolint
+
+// ========================================
 // Unknown Board - Error with Guidance
 // ========================================
 
