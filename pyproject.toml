@@ -5,19 +5,17 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.2.12 — adds the nRF52 variant include-path alias
-    # (FastLED/fbuild#325/#326), MCU-aware linker-script alias for the
-    # PIO-named nrf52_xxaa.ld with globbed highest-version SoftDevice
-    # script (FastLED/fbuild#327/#328 — also fingerprints the resolved
-    # linker basename into Nrf52FingerprintMetadata so fast-path keys
-    # invalidate when the alias moves between actual files), and a
-    # release-auto CI fix bypassing soldr's corrupted cargo-zigbuild
-    # bin cache (FastLED/fbuild#331/#332). Together these unblock
-    # Build nRF52840 DK and Build nRF52 XIAO BLE Sense workflows by
-    # making fbuild find `variants/pca10056/` and
-    # `variants/Seeed_XIAO_nRF52840_Sense/` for board JSONs that track
-    # PIO/sandeepmistry upstream naming.
-    "fbuild==2.2.12",
+    # Pin to fbuild 2.2.13 — adds the compile-many stage-2 framework-archive
+    # share (FastLED/fbuild#337) which prevents every stage-2 sketch from
+    # re-building the framework from scratch (the regression that originally
+    # forced the FASTLED_USE_FBUILD_CI=1 gate to default-off in #2662). Also
+    # picks up the stage-2 jobs split (#336), the real-toolchain stage-2 perf
+    # regression test (#342), the daemon-side fmt-tracing-to-stderr fix
+    # (#348), the bounded zccache start-up timeout (#349), and project-lock
+    # acquire instrumentation (#350) — together these address the silent
+    # esp32c6 hang reported in fbuild#346 and unblock flipping
+    # FASTLED_USE_FBUILD_CI=1 default-on in a follow-up.
+    "fbuild==2.2.13",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
