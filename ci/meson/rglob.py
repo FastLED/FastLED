@@ -53,7 +53,7 @@ def main() -> None:
             continue
 
         if exclude_path is None or exclude_path not in path_str:
-            print(str(p))
+            print(path_str)
 
 
 if __name__ == "__main__":

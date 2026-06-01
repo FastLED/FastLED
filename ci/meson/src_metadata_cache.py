@@ -20,13 +20,29 @@ import argparse
 import hashlib
 import json
 import sys
+from dataclasses import dataclass
+from os import stat_result
 from pathlib import Path
+
+from typeguard import typechecked
 
 
 CACHE_FILENAME = "src_metadata.cache"
+CACHE_VERSION = 2
 
 
-def compute_src_files_hash(src_dir: Path, pattern: str = "*.cpp") -> str:
+@typechecked
+@dataclass(frozen=True)
+class CacheEntry:
+    """Validated source metadata cache contents."""
+
+    version: int
+    hash: str
+    timestamp: float
+    metadata: str
+
+
+def compute_src_files_hash(src_dir: Path, pattern: str) -> str:
     """
     Compute a hash of all source file metadata (path + mtime + size).
 
@@ -47,8 +63,6 @@ def compute_src_files_hash(src_dir: Path, pattern: str = "*.cpp") -> str:
     hash_input: list[str] = []
     for f in source_files:
         if f.is_file():
-            from os import stat_result
-
             stat: stat_result = f.stat()
             rel_path: str = f.relative_to(src_dir).as_posix()
             # Include path, mtime, and size in hash
@@ -59,7 +73,7 @@ def compute_src_files_hash(src_dir: Path, pattern: str = "*.cpp") -> str:
     return hashlib.sha256(hash_str.encode()).hexdigest()
 
 
-def load_cache(build_dir: Path) -> dict[str, str | float] | None:
+def load_cache(build_dir: Path) -> CacheEntry | None:
     """
     Load cached source metadata from build directory.
 
@@ -67,7 +81,7 @@ def load_cache(build_dir: Path) -> dict[str, str | float] | None:
         build_dir: Meson build directory (e.g., .build/meson-quick/)
 
     Returns:
-        Cache dictionary with keys: hash, timestamp, metadata
+        Cache entry with version, hash, timestamp, and metadata
         None if cache doesn't exist or is invalid
     """
     cache_file = build_dir / CACHE_FILENAME
@@ -79,11 +93,20 @@ def load_cache(build_dir: Path) -> dict[str, str | float] | None:
             cache = json.load(f)
 
         # Validate cache structure
-        required_keys = ["hash", "timestamp", "metadata"]
+        required_keys = ["version", "hash", "timestamp", "metadata"]
         if not all(key in cache for key in required_keys):
             return None
+        if cache["version"] != CACHE_VERSION:
+            return None
 
-        return cache
+        return CacheEntry(
+            version=int(cache["version"]),
+            hash=str(cache["hash"]),
+            timestamp=float(cache["timestamp"]),
+            metadata=str(cache["metadata"]),
+        )
+    except KeyboardInterrupt:
+        raise
     except (json.JSONDecodeError, OSError):
         return None
 
@@ -102,13 +125,18 @@ def save_cache(build_dir: Path, src_hash: str, metadata: str) -> None:
     cache_file = build_dir / CACHE_FILENAME
     build_dir.mkdir(parents=True, exist_ok=True)
 
-    cache = {"hash": src_hash, "timestamp": time.time(), "metadata": metadata}
+    cache = {
+        "version": CACHE_VERSION,
+        "hash": src_hash,
+        "timestamp": time.time(),
+        "metadata": metadata,
+    }
 
     with open(cache_file, "w", encoding="utf-8") as f:
         json.dump(cache, f, indent=2)
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     """Main entry point for source metadata cache operations."""
     parser = argparse.ArgumentParser(
         description="Manage source metadata cache for Meson build system"
@@ -151,7 +179,7 @@ def main() -> None:
         help="File pattern to match (default: *.cpp)",
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     # Validate arguments based on operation
     if args.invalidate:
@@ -170,20 +198,18 @@ def main() -> None:
             sys.exit(1)
 
         # Load cached metadata
-        cache: dict[str, str | float] | None = load_cache(args.build_dir)
+        cache = load_cache(args.build_dir)
         if cache is None:
             # Cache miss - exit with failure, no output
             sys.exit(1)
-        assert cache is not None
 
         # Compute current hash
         current_hash = compute_src_files_hash(args.src_dir, args.pattern)
 
         # Check if hash matches
-        if cache["hash"] == current_hash:
+        if cache.hash == current_hash:
             # Cache hit - output cached metadata and exit success
-            metadata_str: str = str(cache["metadata"])
-            print(metadata_str)
+            print(cache.metadata)
             sys.exit(0)
         else:
             # Cache invalid - exit with failure, no output
