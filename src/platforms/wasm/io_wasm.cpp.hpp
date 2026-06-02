@@ -58,15 +58,14 @@ bool flush(u32 timeoutMs) {
     return true;
 }
 
-/// Write raw bytes to console
+/// Write raw bytes to stdout. Emits the buffer verbatim — including 0x00
+/// and 0xFF — so `write_bytes` round-trips binary data per the contract
+/// in FastLED/FastLED#2668. The previous `printf("%02X ", b)` hex-encoded
+/// every byte, which is a contract violation: callers who write binary
+/// frames or single-byte protocol stubs got expanded text instead.
 size_t write_bytes(const u8* buffer, size_t size) {
     if (!buffer || size == 0) return 0;
-
-    // Write bytes as binary data to console (hex output)
-    for (size_t i = 0; i < size; i++) {
-        ::printf("%02X ", buffer[i]);
-    }
-    return size;
+    return ::fwrite(buffer, 1, size, stdout);
 }
 
 /// Check if serial is ready (always true on WASM)
