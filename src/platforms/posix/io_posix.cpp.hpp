@@ -62,16 +62,15 @@ int read() {
 // Utility functions
 //
 // Honors `timeoutMs` per the FastLED/FastLED#2668 contract: `flush(0)` must
-// return immediately without spinning, and a positive `timeoutMs` must bound
-// the call. `fsync(2)` on stderr is effectively instantaneous (line-buffered
-// to TTY / fully buffered to pipe — either drains synchronously inside the
-// syscall), so the only observable timeout case is `flush(0)`, which now
-// short-circuits without entering the kernel.
-bool flush(u32 timeoutMs) {
-    if (timeoutMs == 0) {
-        return true;  // contract: flush(0) returns immediately
-    }
-    fsync(2);
+// return immediately, and a positive `timeoutMs` must bound the call. The
+// prior implementation called `fsync(2)` for non-zero timeouts, but `fsync`
+// on stderr can in principle block past the requested timeout when the
+// descriptor is backed by a pipe, socket, or slow disk (see the #2668
+// review of the original PR). `::write(2, ...)` already advances stderr's
+// kernel-side state synchronously for the line-buffered TTY and
+// fully-buffered pipe cases FastLED actually targets, so the safe path is
+// to perform no extra work here.
+bool flush(u32 /*timeoutMs*/) {
     return true;
 }
 

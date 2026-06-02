@@ -206,6 +206,14 @@ fl::optional<fl::string> readLine(char delimiter, char skipChar, fl::optional<u3
 }
 
 bool flush(u32 timeoutMs) {
+    // The FastLED/FastLED#2668 contract says `flush(0)` "returns immediately"
+    // regardless of sink state. Enforce that at this layer BEFORE consulting
+    // the injected handler so a misbehaving test double cannot turn flush(0)
+    // into a blocking call. Platform impls also short-circuit on timeoutMs==0
+    // (defense in depth), but the public contract lives here.
+    if (timeoutMs == 0) {
+        return true;
+    }
 #ifdef FASTLED_TESTING
     if (get_flush_handler()) {
         return get_flush_handler()(timeoutMs);
