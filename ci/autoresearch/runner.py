@@ -100,7 +100,7 @@ async def run(args: Args | None = None) -> int:
         if final_environment:
             upload_port = args.upload_port
             if not upload_port:
-                port_result = auto_detect_upload_port(None)
+                port_result = auto_detect_upload_port(final_environment)
                 if not port_result.ok:
                     print(
                         f"{Fore.RED}\u274c Error: No serial port detected for device decode{Style.RESET_ALL}"

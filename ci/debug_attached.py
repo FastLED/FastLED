@@ -1255,7 +1255,7 @@ def main() -> int:
     # Auto-detect upload port if not specified
     upload_port = args.upload_port
     if not upload_port:
-        result = auto_detect_upload_port(None)
+        result = auto_detect_upload_port(args.environment)
         if not result.ok:
             # Port detection failed - display detailed error and exit
             print(f"{Fore.RED}{'=' * 60}")

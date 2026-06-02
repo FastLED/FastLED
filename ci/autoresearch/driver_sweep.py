@@ -519,7 +519,7 @@ def main() -> int:
     port: str = args.port or ""
     if not port:
         print("Auto-detecting serial port...")
-        result = auto_detect_upload_port(None)
+        result = auto_detect_upload_port("esp32c6")
         if not result.ok:
             print("ERROR: No USB serial port found. Plug in the device or use --port.")
             return 1
