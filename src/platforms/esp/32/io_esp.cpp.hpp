@@ -15,6 +15,12 @@
 #ifndef FL_ESP_USE_IDF_SERIAL
     #if !FL_HAS_INCLUDE(<Arduino.h>)
         #define FL_ESP_USE_IDF_SERIAL 1  // Arduino not available - use ESP-IDF
+    #elif (defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C3) || \
+           defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || \
+           defined(FL_IS_ESP_32P4)) && defined(ARDUINO_USB_MODE) && \
+           ARDUINO_USB_MODE && \
+           (!defined(ARDUINO_USB_CDC_ON_BOOT) || !ARDUINO_USB_CDC_ON_BOOT)
+        #define FL_ESP_USE_IDF_SERIAL 1  // Arduino Serial is UART0; use USB-Serial-JTAG
     #else
         #define FL_ESP_USE_IDF_SERIAL 0  // Arduino available - use Arduino Serial by default
     #endif

@@ -31,6 +31,10 @@
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
 
+#if defined(ESP32) && FASTLED_ESP32_HAS_PARLIO
+#include "platforms/esp/32/drivers/parlio/parlio_engine.h"
+#endif
+
 #if defined(ARDUINO_ARCH_ESP32) || defined(ESP_PLATFORM)
 #include <Arduino.h>  // micros()
 #endif
@@ -39,6 +43,7 @@ namespace autoresearch {
 namespace parlio_stream {
 
 constexpr int kMaxIterations = 16;  // result struct iter timing array fixed size
+constexpr int kMaxLanes = 16;
 
 inline bool isFastLedOutputPinValid(int pin) {
     if (pin < 0 || pin >= 64) {
@@ -54,8 +59,11 @@ inline bool isFastLedOutputPinValid(int pin) {
 struct ValidateResult {
     bool channels_ok;          // true if all PARLIO channels created cleanly
     bool completed;            // true if every iteration completed within timeout
+    int base_tx_pin;           // first PARLIO TX pin used
+    bool explicit_tx_pins;     // true when caller supplied a non-contiguous pin map
     int lanes;                 // PARLIO lane count tested
     int leds_per_lane;         // LEDs per lane
+    int tx_pins[kMaxLanes];    // effective pin per lane
     int iterations;            // number of show() iterations run
     uint32_t per_iter_us[kMaxIterations];  // per-iteration show()+wait() total time
     uint32_t per_iter_show_us[kMaxIterations];  // per-iter show() return time (pre-encode + submit)
@@ -63,8 +71,16 @@ struct ValidateResult {
     uint32_t steady_avg_us;        // average total of iters 1..N-1 (skips iter 0 setup)
     uint32_t steady_avg_show_us;   // average show() time of iters 1..N-1
     uint32_t steady_avg_wait_us;   // average wait() time of iters 1..N-1
+    uint32_t tx_done_count;        // PARLIO txDone ISR calls from final metrics
+    uint32_t worker_isr_count;     // PARLIO worker ISR calls from final metrics
+    uint32_t underrun_count;       // ring-empty-with-bytes-pending events
+    uint32_t ring_count;           // final PARLIO ring occupancy
+    uint32_t bytes_total;          // final engine total source bytes
+    uint32_t bytes_transmitted;    // final engine transmitted source bytes
     int failed_iter;           // index of first iter that exceeded timeout, or -1
     uint32_t timeout_ms;       // effective timeout passed in
+    bool ring_error;           // true if PARLIO flagged ring accounting/buffer error
+    bool hardware_idle;        // true if hardware went idle before stream completed
 };
 
 /// @brief Run the PARLIO streaming functional test.
@@ -74,31 +90,45 @@ struct ValidateResult {
 /// @param num_leds     LEDs per lane.
 /// @param iterations   Number of back-to-back show()+wait() cycles (capped at kMaxIterations).
 /// @param timeout_ms   Per-iteration timeout. Test fails if any iter exceeds this.
+/// @param tx_pins      Optional explicit per-lane pins. If null, uses contiguous base_tx_pin+lane.
 inline ValidateResult validateParlioStreaming(int base_tx_pin,
                                               int num_lanes,
                                               int num_leds,
                                               int iterations,
-                                              uint32_t timeout_ms) {
+                                              uint32_t timeout_ms,
+                                              const int* tx_pins = nullptr) {
     ValidateResult r{};
     r.channels_ok = false;
     r.completed = false;
+    r.explicit_tx_pins = tx_pins != nullptr;
+    r.base_tx_pin = base_tx_pin;
     r.lanes = num_lanes;
     r.leds_per_lane = num_leds;
     r.iterations = iterations;
     r.timeout_ms = timeout_ms;
     r.failed_iter = -1;
+    for (int lane = 0; lane < kMaxLanes; ++lane) {
+        r.tx_pins[lane] = -1;
+    }
 
     if (iterations < 1) iterations = 1;
     if (iterations > kMaxIterations) iterations = kMaxIterations;
     r.iterations = iterations;
+    if (!tx_pins && base_tx_pin < 0) return r;
     if (num_lanes < 1 || num_lanes > 16) return r;
     if (num_leds < 1) return r;
+    if (tx_pins) {
+        base_tx_pin = tx_pins[0];
+        r.base_tx_pin = base_tx_pin;
+        for (int lane = 0; lane < num_lanes; ++lane) {
+            if (tx_pins[lane] < 0) return r;
+        }
+    }
 
 #if defined(ARDUINO_ARCH_ESP32) || defined(ESP_PLATFORM)
     // Reuse a single static heap-resident LED buffer sized for the canonical
     // worst case (16 lanes × 256 LEDs). Test callers must stay within these
     // bounds. Static to avoid repeated allocation across RPC calls.
-    constexpr int kMaxLanes = 16;
     constexpr int kMaxLEDs = 256;
     if (num_leds > kMaxLEDs) return r;
     static CRGB leds[kMaxLanes][kMaxLEDs];
@@ -114,9 +144,12 @@ inline ValidateResult validateParlioStreaming(int base_tx_pin,
     fl::ChannelOptions parlio_opts;
     parlio_opts.mBus = fl::Bus::PARLIO;
 
+    FastLED.clear(ClearFlags::CHANNELS);
+
     fl::vector<fl::shared_ptr<fl::Channel>> channels;
     for (int lane = 0; lane < num_lanes; ++lane) {
-        const int tx_pin = base_tx_pin + lane;
+        const int tx_pin = tx_pins ? tx_pins[lane] : (base_tx_pin + lane);
+        r.tx_pins[lane] = tx_pin;
         if (!isFastLedOutputPinValid(tx_pin)) {
             FastLED.clear(ClearFlags::CHANNELS);
             return r;
@@ -165,6 +198,20 @@ inline ValidateResult validateParlioStreaming(int base_tx_pin,
     }
 
     FastLED.clear(ClearFlags::CHANNELS);
+
+#if defined(ESP32) && FASTLED_ESP32_HAS_PARLIO
+    {
+        auto metrics = fl::detail::ParlioEngine::getInstance().getDebugMetrics();
+        r.tx_done_count = metrics.mTxDoneCount;
+        r.worker_isr_count = metrics.mWorkerIsrCount;
+        r.underrun_count = metrics.mUnderrunCount;
+        r.ring_count = metrics.mRingCount;
+        r.bytes_total = metrics.mBytesTotal;
+        r.bytes_transmitted = metrics.mBytesTransmitted;
+        r.ring_error = metrics.mRingError;
+        r.hardware_idle = metrics.mHardwareIdle;
+    }
+#endif
 
     r.completed = ok;
     if (ok && iterations > 1) {

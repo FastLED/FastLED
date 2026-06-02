@@ -183,6 +183,9 @@
 
 #include <FastLED.h>
 #include "fl/channels/all_drivers.h"  // for FastLED.enableAllDrivers() post-#2428
+#if defined(FL_IS_ESP32)
+#include "platforms/esp/32/watchdog_esp32.h"
+#endif
 #include "fl/stl/undef.h"  // Undefine Arduino macros (DEFAULT, INPUT, OUTPUT)
 #include "fl/stl/sstream.h"
 #include "Common.h"
@@ -215,7 +218,12 @@
 // ============================================================================
 
 // Serial port timeout (milliseconds) - wait for serial monitor to attach
-#define SERIAL_TIMEOUT_MS 120000  // 120 seconds
+static constexpr uint32_t SERIAL_TIMEOUT_MS = 120000;  // 120 seconds
+#if defined(FL_IS_ESP_32S3) || defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32H2) || defined(CONFIG_IDF_TARGET_ESP32P4)
+static constexpr uint32_t AUTORESEARCH_SERIAL_WAIT_MS = 2000;
+#else
+static constexpr uint32_t AUTORESEARCH_SERIAL_WAIT_MS = SERIAL_TIMEOUT_MS;
+#endif
 
 const fl::RxBackend RX_BACKEND = fl::RxBackend::PLATFORM_DEFAULT;
 
@@ -299,9 +307,13 @@ void setup() {
     // kept as defense-in-depth for sketches that bypass fl::serial_begin.
     Serial.setTxTimeoutMs(0);  // ok serial - platform-specific TX timeout, no fl:: equivalent
 #endif
-    while (!fl::serial_ready() && millis() < SERIAL_TIMEOUT_MS);  // Wait for serial monitor (early exits when connected)
+    uint32_t serial_wait_start = millis();
+    while (!fl::serial_ready() && (millis() - serial_wait_start) < AUTORESEARCH_SERIAL_WAIT_MS);  // Wait for serial monitor (early exits when connected)
 
     FL_WARN("[SETUP] AutoResearch sketch starting - serial output active");
+#if defined(FL_IS_ESP32)
+    fl::watchdog_setup(15000);
+#endif
 
     // Initialize RX buffer dynamically (uses PSRAM if available, falls back to heap)
     g_rx_buffer_storage.resize(RX_BUFFER_SIZE);

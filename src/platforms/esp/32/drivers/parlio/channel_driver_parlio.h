@@ -652,7 +652,13 @@ struct ParlioDebugMetrics {
     u32 mChunksCompleted; ///< Number of chunks that completed transmission
     u32 mBytesTotal;      ///< Total bytes expected to transmit
     u32 mBytesTransmitted; ///< Total bytes actually transmitted
+    u32 mTxDoneCount;      ///< Number of PARLIO TX-done callbacks observed
+    u32 mWorkerIsrCount;   ///< Number of worker ISR refills observed
+    u32 mUnderrunCount;    ///< Number of ring underruns observed
+    u32 mRingCount;        ///< Current number of queued ring buffers
     u32 mErrorCode;        ///< ESP-IDF error code (0 = success)
+    bool mRingError;       ///< True if ring accounting detected an error
+    bool mHardwareIdle;    ///< True if hardware is idle while streaming is pending
     bool mTransmissionActive;   ///< True if transmission is in progress
 };
 
