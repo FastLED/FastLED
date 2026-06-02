@@ -4,7 +4,9 @@
 #include "test.h"
 #include "fl/gfx/gfx.h"
 #include "fl/stl/chrono.h"
-#include "fl/stl/cstdio.h"
+// Note: fl/stl/cstdio.h intentionally NOT included — workaround for
+// zackees/zccache#619 (Windows PCH path-spelling drift). PCH provides
+// cstdio.h transitively.
 #include "fl/math/fixed_point/s16x16.h"
 
 // Performance benchmark for 2D graphics primitives.

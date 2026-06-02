@@ -6,7 +6,8 @@
 #include "fl/stl/string.h"
 #include "fl/stl/stdint.h"
 #include "fl/log/log.h"
-#include "fl/stl/cstdio.h"
+// Note: fl/stl/cstdio.h intentionally NOT included — workaround for
+// zackees/zccache#619 (Windows PCH path-spelling drift). Dead include.
 #include "fl/stl/noexcept.h"
 namespace fl {
 namespace net {

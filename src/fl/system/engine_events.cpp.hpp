@@ -1,6 +1,8 @@
 #include "fl/system/engine_events.h"
 #include "fl/stl/int.h"
-#include "fl/stl/cstdio.h"  // for printf debug
+// Note: fl/stl/cstdio.h intentionally NOT included — workaround for
+// zackees/zccache#619 (Windows PCH path-spelling drift). The comment
+// above said "for printf debug" but no printf-debug call survived.
 #include "fl/stl/noexcept.h"
 
 

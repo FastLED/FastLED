@@ -1,7 +1,10 @@
 #include "test.h"
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/int.h"
-#include "fl/stl/cstdio.h"
+// Note: fl/stl/cstdio.h intentionally NOT included directly — workaround
+// for zackees/zccache#619 (Windows PCH path-spelling drift). ostream.h
+// below pulls cstdio.h in transitively via the same path the PCH uses,
+// so all fl::print/println/flush/write_bytes symbols stay in scope.
 #include "fl/stl/cstring.h"
 #include "fl/stl/function.h"
 #include "fl/stl/ostream.h"

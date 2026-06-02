@@ -26,7 +26,11 @@
 #define TIMEOUT_WATCHDOG_H
 
 #include "crash_handler.h"  // IWYU pragma: keep
-#include "fl/stl/cstdio.h"  // IWYU pragma: keep
+// Note: fl/stl/cstdio.h intentionally NOT included — workaround for
+// zackees/zccache#619 (Windows PCH path-spelling drift defeats #pragma
+// once across the PCH boundary). cstdio.h reaches every test TU via the
+// PCH (test_pch.h -> ostream.h -> cstdio.h); this header doesn't use
+// any cstdio.h symbol directly.
 #include "fl/stl/cstdlib.h"  // IWYU pragma: keep
 #include "fl/stl/cstring.h"  // IWYU pragma: keep
 #include "fl/stl/atomic.h"

@@ -8,7 +8,11 @@
 #include "fl/gfx/crgb16.h"
 #include "fl/math/xymap.h"
 #include "fl/stl/chrono.h"
-#include "fl/stl/cstdio.h"
+// Note: fl/stl/cstdio.h intentionally NOT included — workaround for
+// zackees/zccache#619 (Windows PCH path-spelling drift defeats #pragma
+// once across the PCH boundary). The PCH provides cstdio.h transitively
+// via ostream.h, so the symbols this test uses (fl::print etc.) stay in
+// scope.
 #include "fl/stl/stdio.h"
 
 using namespace fl;
