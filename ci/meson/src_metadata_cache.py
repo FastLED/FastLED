@@ -105,8 +105,11 @@ def load_cache(build_dir: Path) -> CacheEntry | None:
             timestamp=float(cache["timestamp"]),
             metadata=str(cache["metadata"]),
         )
-    except KeyboardInterrupt:
-        raise
+    except KeyboardInterrupt as ki:
+        import _thread
+
+        _thread.interrupt_main()
+        raise ki
     except (json.JSONDecodeError, OSError):
         return None
 
@@ -202,6 +205,7 @@ def main(argv: list[str] | None = None) -> None:
         if cache is None:
             # Cache miss - exit with failure, no output
             sys.exit(1)
+        assert cache is not None  # ty: narrow CacheEntry | None -> CacheEntry past the sys.exit guard
 
         # Compute current hash
         current_hash = compute_src_files_hash(args.src_dir, args.pattern)

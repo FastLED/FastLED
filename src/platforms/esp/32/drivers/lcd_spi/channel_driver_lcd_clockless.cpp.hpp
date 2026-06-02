@@ -280,6 +280,7 @@ bool FL_IRAM ChannelDriverLcdClockless::isrChunkDone(void *panel_io,
     if (!self->mPeripheral->transmit(buf, dmaBytes)) {
         ctx.mStreamComplete = true;
         self->mBusy = false;
+        esp_rom_printf("ChannelDriverLcdClockless: ISR transmit failed\n");  // ok esp_rom_printf - IRAM ISR context, FL_WARN unsafe here
     }
 
     return false;

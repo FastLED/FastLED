@@ -375,7 +375,7 @@ void UsbSerialJtagEsp32::fillRxCache() FL_NOEXCEPT {
 
         int len = usb_serial_jtag_read_bytes(
             &mRxCache[write_idx],
-            static_cast<uint32_t>(contiguous),
+            static_cast<u32>(contiguous),
             0);
         if (len <= 0) {
             return;
