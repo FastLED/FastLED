@@ -36,12 +36,25 @@ shared_defines = ['-DFASTLED_USE_PROGMEM=0']
 
 # meson.project_source_root() on Windows returns native backslashes
 # (e.g. C:\Users\...). Normalize it once and compose every derived path via
-# '/' so paths are absolute + forward-slash + spelled identically everywhere.
+# literal '/' string concatenation so paths are absolute + forward-slash +
+# spelled identically everywhere.
+#
+# Why NOT meson's `/` path-join operator: on Windows it emits the native
+# separator (backslash) regardless of how its operands are spelled. So
+# `path_norm_root / 'src'` ends up as `C:/Users/.../fastled3\src` — a
+# single backslash injected mid-path. clang/zccache pass that `-I` flag
+# through verbatim, then when `#include "fl/stl/cstdio.h"` resolves
+# against it the resulting include path becomes `C:/.../fastled3\src/fl/
+# stl/cstdio.h` with mixed separators. The PCH canonicalizes one slash
+# spelling; the test TU sees another; `#pragma once` fails to dedupe and
+# the user sees `error: redefinition of 'LogLevel'`. Reproduced and root-
+# caused on 2026-06-02 against `bash test --cpp` after merging #2683 and
+# #2684. Literal `+ '/' +` concatenation keeps everything forward-slash.
 path_norm_root = meson.project_source_root().replace('\\', '/')
 
 # Canonical absolute forward-slash -I args for the four project-wide
 # include roots. Use these everywhere instead of redeclaring.
 path_norm_I_root   = '-I' + path_norm_root
-path_norm_I_src    = '-I' + path_norm_root / 'src'
-path_norm_I_tests  = '-I' + path_norm_root / 'tests'
-path_norm_I_stub   = '-I' + path_norm_root / 'src/platforms/stub'
+path_norm_I_src    = '-I' + path_norm_root + '/src'
+path_norm_I_tests  = '-I' + path_norm_root + '/tests'
+path_norm_I_stub   = '-I' + path_norm_root + '/src/platforms/stub'

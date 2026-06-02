@@ -18,7 +18,14 @@
 #include "fl/stl/span.h"
 #include "fl/stl/allocator.h"
 #include "fl/stl/string.h"
-#include "fl/stl/cstdio.h"
+// Note: `fl/stl/cstdio.h` intentionally NOT included directly.
+// Workaround for zackees/zccache#619 — on Windows, the same physical
+// cstdio.h header gets two different canonical path spellings (one via
+// the PCH, one via the consumer TU's direct include) and `#pragma once`
+// fails to dedupe across the PCH boundary, surfacing as
+// "error: redefinition of 'LogLevel'" etc. The PCH reaches cstdio.h
+// transitively via ostream.h, so the symbols stay in scope; this file
+// doesn't reference any cstdio.h symbol directly anyway.
 
 FL_TEST_FILE(FL_FILEPATH) {
 

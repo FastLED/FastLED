@@ -6,9 +6,16 @@
 #include "fl/system/sketch_macros.h"
 #include "fl/stl/int.h"
 
-// Include cstdio for I/O functions
-#include "fl/stl/cstdio.h"
+// Note: fl/stl/cstdio.h intentionally NOT included directly — workaround
+// for zackees/zccache#619 (Windows PCH path-spelling drift defeats
+// `#pragma once` across the PCH boundary). istream.h only needs one
+// cstdio.h symbol — `fl::available()` — so forward-declare it here
+// and let consumers that need the full cstdio API include it themselves.
 #include "fl/stl/noexcept.h"
+
+namespace fl {
+    int available() FL_NOEXCEPT;
+}
 
 namespace fl {
 

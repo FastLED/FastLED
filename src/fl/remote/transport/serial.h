@@ -9,7 +9,12 @@
 #include "fl/stl/int.h"
 #include "fl/stl/cctype.h"
 #include "fl/stl/chrono.h"
-#include "fl/stl/cstdio.h"
+// Note: fl/stl/cstdio.h intentionally NOT included directly — workaround
+// for zackees/zccache#619 (Windows PCH path-spelling drift). Reachable
+// transitively via fl/stl/strstream.h -> fl/stl/ostream.h -> cstdio.h
+// further below in this file, which is the same canonicalized path the
+// PCH uses. Symbols this header consumes (fl::println, fl::available,
+// fl::read, fl::readLine) stay in scope through that chain.
 #include "fl/stl/cstring.h"
 #include "fl/stl/function.h"
 #include "fl/stl/optional.h"

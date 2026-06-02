@@ -1,5 +1,8 @@
 #include "test.h"
-#include "fl/stl/cstdio.h"
+// Note: fl/stl/cstdio.h intentionally NOT included — workaround for
+// zackees/zccache#619 (Windows PCH path-spelling drift defeats #pragma
+// once across the PCH boundary). The PCH provides cstdio.h transitively;
+// this TU doesn't use any cstdio.h symbol directly.
 #include "fl/stl/vector.h"
 #include "fl/stl/memory.h"
 
