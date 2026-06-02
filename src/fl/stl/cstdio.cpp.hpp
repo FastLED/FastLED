@@ -62,6 +62,16 @@ static read_handler_t& get_read_handler() {
     static read_handler_t handler;
     return handler;
 }
+
+static flush_handler_t& get_flush_handler() {
+    static flush_handler_t handler;
+    return handler;
+}
+
+static write_bytes_handler_t& get_write_bytes_handler() {
+    static write_bytes_handler_t handler;
+    return handler;
+}
 #endif
 
 void print(const char* str) {
@@ -196,11 +206,21 @@ fl::optional<fl::string> readLine(char delimiter, char skipChar, fl::optional<u3
 }
 
 bool flush(u32 timeoutMs) {
+#ifdef FASTLED_TESTING
+    if (get_flush_handler()) {
+        return get_flush_handler()(timeoutMs);
+    }
+#endif
     return platforms::flush(timeoutMs);
 }
 
 size_t write_bytes(const u8* buffer, size_t size) {
     if (!buffer || size == 0) return 0;
+#ifdef FASTLED_TESTING
+    if (get_write_bytes_handler()) {
+        return get_write_bytes_handler()(buffer, size);
+    }
+#endif
     return platforms::write_bytes(buffer, size);
 }
 
@@ -237,12 +257,22 @@ void inject_read_handler(const read_handler_t& handler) {
     get_read_handler() = handler;
 }
 
+void inject_flush_handler(const flush_handler_t& handler) {
+    get_flush_handler() = handler;
+}
+
+void inject_write_bytes_handler(const write_bytes_handler_t& handler) {
+    get_write_bytes_handler() = handler;
+}
+
 // Clear all injected handlers (restores default behavior)
 void clear_io_handlers() {
     get_print_handler() = print_handler_t{};
     get_println_handler() = println_handler_t{};
     get_available_handler() = available_handler_t{};
     get_read_handler() = read_handler_t{};
+    get_flush_handler() = flush_handler_t{};
+    get_write_bytes_handler() = write_bytes_handler_t{};
 }
 
 // Clear individual handlers
@@ -262,6 +292,14 @@ void clear_read_handler() {
     get_read_handler() = read_handler_t{};
 }
 
+void clear_flush_handler() {
+    get_flush_handler() = flush_handler_t{};
+}
+
+void clear_write_bytes_handler() {
+    get_write_bytes_handler() = write_bytes_handler_t{};
+}
+
 // Force early initialization of function-level statics to avoid
 // static initialization order issues on macOS. The fl::function
 // objects may allocate memory during construction, and if the first
@@ -273,6 +311,8 @@ namespace cstdio_init {
         (void)get_println_handler();
         (void)get_available_handler();
         (void)get_read_handler();
+        (void)get_flush_handler();
+        (void)get_write_bytes_handler();
     }
 }
 

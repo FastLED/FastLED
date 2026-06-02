@@ -177,12 +177,16 @@ using print_handler_t = fl::function<void(const char*)>;
 using println_handler_t = fl::function<void(const char*)>;
 using available_handler_t = fl::function<int()>;
 using read_handler_t = fl::function<int()>;
+using flush_handler_t = fl::function<bool(u32)>;
+using write_bytes_handler_t = fl::function<size_t(const u8*, size_t)>;
 
 // Inject function handlers for testing
 void inject_print_handler(const print_handler_t& handler) FL_NOEXCEPT;
 void inject_println_handler(const println_handler_t& handler) FL_NOEXCEPT;
 void inject_available_handler(const available_handler_t& handler) FL_NOEXCEPT;
 void inject_read_handler(const read_handler_t& handler) FL_NOEXCEPT;
+void inject_flush_handler(const flush_handler_t& handler) FL_NOEXCEPT;
+void inject_write_bytes_handler(const write_bytes_handler_t& handler) FL_NOEXCEPT;
 
 // Clear all injected handlers (restores default behavior)
 void clear_io_handlers() FL_NOEXCEPT;
@@ -192,6 +196,8 @@ void clear_print_handler() FL_NOEXCEPT;
 void clear_println_handler() FL_NOEXCEPT;
 void clear_available_handler() FL_NOEXCEPT;
 void clear_read_handler() FL_NOEXCEPT;
+void clear_flush_handler() FL_NOEXCEPT;
+void clear_write_bytes_handler() FL_NOEXCEPT;
 
 #endif // FASTLED_TESTING
 

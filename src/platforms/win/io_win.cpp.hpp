@@ -62,9 +62,17 @@ int read() FL_NOEXCEPT {
 }
 
 // Utility functions
+//
+// Honors `timeoutMs` per the FastLED/FastLED#2668 contract: `flush(0)` must
+// return immediately. `_write(2, ...)` to stderr is unbuffered on Windows,
+// so any positive `timeoutMs` is also satisfied trivially (no draining
+// work to perform). The explicit `timeoutMs == 0` branch documents the
+// contract and prevents future drift if a buffered sink is ever added.
 bool flush(u32 timeoutMs) FL_NOEXCEPT {
-    (void)timeoutMs;
-    // _write to stderr is unbuffered on Windows - no-op
+    if (timeoutMs == 0) {
+        return true;
+    }
+    // _write to stderr is unbuffered on Windows - nothing to drain.
     return true;
 }
 

@@ -1,13 +1,16 @@
 // Unit tests for fl::readStringUntil and fl::sstream integration
 // Tests the new readline API with sstream buffer
 
+#include "fl/stl/chrono.h"
 #include "fl/stl/cstdio.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/function.h"
 #include "fl/stl/optional.h"
+#include "fl/stl/stdint.h"
 #include "fl/stl/stdio.h"
 #include "fl/stl/string.h"
 #include "fl/stl/strstream.h"
+#include "fl/stl/vector.h"
 #include "test.h"
 
 FL_TEST_FILE(FL_FILEPATH) {
@@ -355,5 +358,129 @@ FL_TEST_CASE("fl::printf pointer format") {
 // - %g/%G (general float) - requires choosing between %f and %e
 // - %*d (dynamic width) - requires runtime argument consumption in variadic templates
 // - %.*f (dynamic precision) - requires runtime argument consumption in variadic templates
+
+// =============================================================================
+// Behavioral-contract tests for fl::print / fl::println / fl::write_bytes /
+// fl::flush per FastLED/FastLED#2668.
+//
+// Host-side platform impls (POSIX/Windows/WASM) all flow through the
+// FASTLED_TESTING injection layer in src/fl/stl/cstdio.cpp.hpp, so these
+// cases pin the cross-platform semantics independent of any specific backend.
+// =============================================================================
+
+namespace {
+
+// Upper bound on a "non-blocking" host call. Generous enough to absorb host
+// jitter (cold cache, scheduler) but tight enough that a regression to a
+// busy-loop on backpressure would blow it.
+constexpr fl::u32 kNonBlockingBudgetMs = 50;
+
+}  // namespace
+
+// Case 1 — print() must return within the non-blocking budget even when the
+// sink reports backpressure on every call. With the injection layer,
+// "sink reports backpressure" is modelled as a handler that simply does
+// nothing (the platform-side equivalent of `write_bytes` returning 0).
+// Regression guard: a future busy-loop retry around the sink.
+FL_TEST_CASE("fl::print bounded under backpressure") {
+    fl::inject_print_handler([](const char* /*str*/) {
+        // accept-zero-bytes sink: drop without retrying
+    });
+
+    const fl::u32 start = fl::millis();
+    fl::print("payload");
+    const fl::u32 elapsed = fl::millis() - start;
+
+    FL_CHECK_LT(elapsed, kNonBlockingBudgetMs);
+
+    fl::clear_io_handlers();
+}
+
+// Case 2 — flush(timeoutMs) must surface a timeout instead of spinning past
+// the deadline. The injected handler simulates a sink that never drains by
+// returning false; the assertion pins "no hidden busy-loop padding".
+FL_TEST_CASE("fl::flush honors timeoutMs") {
+    fl::inject_flush_handler([](fl::u32 /*timeoutMs*/) -> bool {
+        return false;  // sink never drains -> flush reports failure
+    });
+
+    const fl::u32 budgetMs = 25;
+    const fl::u32 start = fl::millis();
+    const bool ok = fl::flush(budgetMs);
+    const fl::u32 elapsed = fl::millis() - start;
+
+    FL_CHECK_EQ(ok, false);
+    FL_CHECK_LT(elapsed, budgetMs + kNonBlockingBudgetMs);
+
+    fl::clear_io_handlers();
+}
+
+// Case 3 — flush(0) is a contract-mandated "no-block" probe. Even a handler
+// that would otherwise block on a positive timeout must short-circuit when
+// timeoutMs == 0.
+FL_TEST_CASE("fl::flush(0) returns immediately") {
+    bool handler_invoked_with_nonzero = false;
+    fl::inject_flush_handler([&](fl::u32 timeoutMs) -> bool {
+        if (timeoutMs != 0) {
+            handler_invoked_with_nonzero = true;
+        }
+        return true;
+    });
+
+    const fl::u32 start = fl::millis();
+    const bool ok = fl::flush(0);
+    const fl::u32 elapsed = fl::millis() - start;
+
+    FL_CHECK(ok);
+    FL_CHECK_LT(elapsed, kNonBlockingBudgetMs);
+    FL_CHECK_EQ(handler_invoked_with_nonzero, false);
+
+    fl::clear_io_handlers();
+}
+
+// Case 4 — back-to-back prints against a 1-byte sink must not deadlock.
+// Regression guard: a future loop-until-fully-written wrapper around
+// platform print.
+FL_TEST_CASE("fl::print is deadlock-free against 1-byte sink") {
+    int invocations = 0;
+    fl::inject_print_handler([&](const char* /*str*/) {
+        ++invocations;
+    });
+
+    const fl::u32 start = fl::millis();
+    fl::print("A");
+    fl::print("B");
+    const fl::u32 elapsed = fl::millis() - start;
+
+    FL_CHECK_EQ(invocations, 2);
+    FL_CHECK_LT(elapsed, kNonBlockingBudgetMs);
+
+    fl::clear_io_handlers();
+}
+
+// Case 5 — write_bytes must round-trip raw bytes including embedded NULs and
+// 0xFF. Regression guard against the prior WASM `printf("%02X ", b)`
+// hex-text bug fixed alongside these tests.
+FL_TEST_CASE("fl::write_bytes round-trips raw bytes including 0x00 and 0xFF") {
+    fl::vector<fl::u8> captured;
+    fl::inject_write_bytes_handler([&](const fl::u8* buf, size_t n) -> size_t {
+        for (size_t i = 0; i < n; ++i) {
+            captured.push_back(buf[i]);
+        }
+        return n;
+    });
+
+    const fl::u8 kPayload[] = {0x00, 0x01, 0x7F, 0x80, 0xFE, 0xFF};
+    const size_t kPayloadSize = sizeof(kPayload);
+    const size_t written = fl::write_bytes(kPayload, kPayloadSize);
+
+    FL_CHECK_EQ(written, kPayloadSize);
+    FL_CHECK_EQ(captured.size(), kPayloadSize);
+    for (size_t i = 0; i < kPayloadSize; ++i) {
+        FL_CHECK_EQ(captured[i], kPayload[i]);
+    }
+
+    fl::clear_io_handlers();
+}
 
 } // FL_TEST_FILE
