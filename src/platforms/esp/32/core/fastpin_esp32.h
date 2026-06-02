@@ -131,8 +131,10 @@ public:
 
 #elif defined(FL_IS_ESP_32C6)
 
-// GPIO 20-22, 24-26 used by default for SPI flash.
-#define FASTLED_UNUSABLE_PIN_MASK (0ULL |  _FL_BIT(24) | _FL_BIT(25) | _FL_BIT(26) | _FL_BIT(28) | _FL_BIT(29) | _FL_BIT(30))
+// GPIO 12/13 are native USB D-/D+ on ESP32-C6 USB-Serial/JTAG boards; using
+// them as FastLED outputs can sever the active serial/upload connection.
+// GPIO 24-26 and 28-30 are reserved/unusable on ESP32-C6 packages.
+#define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(12) | _FL_BIT(13) | _FL_BIT(24) | _FL_BIT(25) | _FL_BIT(26) | _FL_BIT(28) | _FL_BIT(29) | _FL_BIT(30))
 
 #elif defined(FL_IS_ESP_32P4)
 // 55 GPIO pins. ESPIDF defines all pins as valid.
@@ -173,6 +175,11 @@ public:
 #define _FL_VALID_PIN_MASK (u64(SOC_GPIO_VALID_OUTPUT_GPIO_MASK) & ~FASTLED_UNUSABLE_PIN_MASK)
 
 #define _FL_PIN_VALID(PIN) ((_FL_VALID_PIN_MASK & (1ULL << PIN)) != 0)
+
+#if defined(FL_IS_ESP_32C6)
+FL_STATIC_ASSERT(!_FL_PIN_VALID(12), "ESP32-C6 GPIO12 is USB D- and must be invalid for FastLED output");
+FL_STATIC_ASSERT(!_FL_PIN_VALID(13), "ESP32-C6 GPIO13 is USB D+ and must be invalid for FastLED output");
+#endif
 
 #define _FL_DEFPIN(PIN) template <> class FastPin<PIN> : public _ESPPIN<PIN, ((u32)1 << (PIN % 32)), _FL_PIN_VALID(PIN)> {};
 
