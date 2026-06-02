@@ -50,7 +50,9 @@ UsbSerialJtagEsp32::UsbSerialJtagEsp32(const UsbSerialJtagConfig& config)
     , mBuffered(false)
     , mInstalledDriver(false)
     , mHasPeek(false)
-    , mPeekByte(0) {
+    , mPeekByte(0)
+    , mRxCacheRead(0)
+    , mRxCacheCount(0) {
 
     // Initialize driver
     initDriver();
@@ -71,12 +73,19 @@ UsbSerialJtagEsp32::UsbSerialJtagEsp32(UsbSerialJtagEsp32&& other) FL_NOEXCEPT
     , mBuffered(other.mBuffered)
     , mInstalledDriver(other.mInstalledDriver)
     , mHasPeek(other.mHasPeek)
-    , mPeekByte(other.mPeekByte) {
+    , mPeekByte(other.mPeekByte)
+    , mRxCacheRead(other.mRxCacheRead)
+    , mRxCacheCount(other.mRxCacheCount) {
+    for (size_t i = 0; i < kRxCacheSize; ++i) {
+        mRxCache[i] = other.mRxCache[i];
+    }
     // Mark other as invalid (prevent double-uninstall)
     other.mBuffered = false;
     other.mInstalledDriver = false;
     other.mHasPeek = false;
     other.mPeekByte = 0;
+    other.mRxCacheRead = 0;
+    other.mRxCacheCount = 0;
 }
 
 UsbSerialJtagEsp32& UsbSerialJtagEsp32::operator=(UsbSerialJtagEsp32&& other) FL_NOEXCEPT {
@@ -94,12 +103,19 @@ UsbSerialJtagEsp32& UsbSerialJtagEsp32::operator=(UsbSerialJtagEsp32&& other) FL
         mInstalledDriver = other.mInstalledDriver;
         mHasPeek = other.mHasPeek;
         mPeekByte = other.mPeekByte;
+        mRxCacheRead = other.mRxCacheRead;
+        mRxCacheCount = other.mRxCacheCount;
+        for (size_t i = 0; i < kRxCacheSize; ++i) {
+            mRxCache[i] = other.mRxCache[i];
+        }
 
         // Mark other as invalid
         other.mBuffered = false;
         other.mInstalledDriver = false;
         other.mHasPeek = false;
         other.mPeekByte = 0;
+        other.mRxCacheRead = 0;
+        other.mRxCacheCount = 0;
     }
     return *this;
 }
@@ -305,19 +321,8 @@ int UsbSerialJtagEsp32::available() FL_NOEXCEPT {
         return 0;  // Driver not installed, no data available
     }
 
-    if (mHasPeek) {
-        return 1;
-    }
-
-    u8 c = 0;
-    int len = usb_serial_jtag_read_bytes(&c, 1, 0);  // timeout=0 (non-blocking)
-    if (len == 1) {
-        mPeekByte = c;
-        mHasPeek = true;
-        return 1;
-    }
-
-    return 0;
+    fillRxCache();
+    return static_cast<int>(mRxCacheCount + (mHasPeek ? 1 : 0));
 #else
     return 0;
 #endif
@@ -334,6 +339,13 @@ int UsbSerialJtagEsp32::read() FL_NOEXCEPT {
         return static_cast<int>(mPeekByte);
     }
 
+    if (mRxCacheCount > 0) {
+        u8 c = mRxCache[mRxCacheRead];
+        mRxCacheRead = (mRxCacheRead + 1) % kRxCacheSize;
+        mRxCacheCount--;
+        return static_cast<int>(c);
+    }
+
     u8 c = 0;
     int len = usb_serial_jtag_read_bytes(&c, 1, 0);  // timeout=0 (non-blocking)
 
@@ -344,6 +356,36 @@ int UsbSerialJtagEsp32::read() FL_NOEXCEPT {
     }
 #else
     return -1;
+#endif
+}
+
+void UsbSerialJtagEsp32::fillRxCache() FL_NOEXCEPT {
+#ifdef FL_HAS_USB_SERIAL_JTAG
+    if (!mBuffered) {
+        return;
+    }
+
+    while (mRxCacheCount < kRxCacheSize) {
+        size_t write_idx = (mRxCacheRead + mRxCacheCount) % kRxCacheSize;
+        size_t contiguous = kRxCacheSize - write_idx;
+        size_t free_count = kRxCacheSize - mRxCacheCount;
+        if (contiguous > free_count) {
+            contiguous = free_count;
+        }
+
+        int len = usb_serial_jtag_read_bytes(
+            &mRxCache[write_idx],
+            static_cast<uint32_t>(contiguous),
+            0);
+        if (len <= 0) {
+            return;
+        }
+
+        mRxCacheCount += static_cast<size_t>(len);
+        if (static_cast<size_t>(len) < contiguous) {
+            return;
+        }
+    }
 #endif
 }
 

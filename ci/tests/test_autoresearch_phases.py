@@ -13,6 +13,7 @@ from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from serial.tools.list_ports_common import ListPortInfo
 
 from ci.autoresearch.args import Args
 from ci.autoresearch.build_driver import BuildDriver
@@ -24,6 +25,7 @@ from ci.autoresearch.phases import (
     _run_schema_and_pin_setup,
     _run_tests_or_special_mode,
 )
+from ci.util.port_utils import ChipDetectionResult, auto_detect_upload_port
 
 
 # Module path for patching symbols imported into phases.py
@@ -409,6 +411,64 @@ class TestResolvePortAndEnvironment:
             mock_time.sleep = MagicMock()
             rc = asyncio.run(_resolve_port_and_environment(ctx))
         assert rc == 1
+
+
+class TestAutoDetectUploadPort:
+    """Test USB port detection edge cases used by autoresearch."""
+
+    def test_expected_environment_probe_failure_falls_back_to_descriptor(self) -> None:
+        port = ListPortInfo("COM9")
+        port.description = "USB JTAG/serial debug unit"
+        port.hwid = "USB VID:PID=303A:1001"
+
+        with (
+            patch(
+                "ci.util.port_utils.serial.tools.list_ports.comports",
+                return_value=[port],
+            ),
+            patch(
+                "ci.util.port_utils.detect_attached_chip",
+                return_value=ChipDetectionResult(
+                    ok=False,
+                    chip_type=None,
+                    environment=None,
+                    error_message="probe timed out",
+                ),
+            ) as detect_chip,
+        ):
+            result = auto_detect_upload_port("esp32c6")
+
+        assert result.ok is True
+        assert result.selected_port == "COM9"
+        detect_chip.assert_called_once_with("COM9", timeout=3.0)
+
+    def test_expected_environment_positive_mismatch_fails(self) -> None:
+        port = ListPortInfo("COM9")
+        port.description = "USB JTAG/serial debug unit"
+        port.hwid = "USB VID:PID=303A:1001"
+
+        with (
+            patch(
+                "ci.util.port_utils.serial.tools.list_ports.comports",
+                return_value=[port],
+            ),
+            patch(
+                "ci.util.port_utils.detect_attached_chip",
+                return_value=ChipDetectionResult(
+                    ok=True,
+                    chip_type="ESP32-S3",
+                    environment="esp32s3",
+                    error_message=None,
+                ),
+            ),
+        ):
+            result = auto_detect_upload_port("esp32c6")
+
+        assert result.ok is False
+        assert result.selected_port is None
+        assert "No USB serial port matched expected environment" in (
+            result.error_message or ""
+        )
 
 
 # ============================================================

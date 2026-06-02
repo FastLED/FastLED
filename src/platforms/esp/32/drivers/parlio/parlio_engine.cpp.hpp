@@ -254,13 +254,12 @@ calculateBufferByteCount(const BufferPopulationParams& params) FL_NOEXCEPT {
     // Calculate maximum input bytes that fit in one buffer
     // (reuse calc object from above to avoid duplication)
     size_t reset_padding = calc.resetPaddingBytes(params.resetUs);
-    size_t available_capacity = params.ringBufferCapacity - reset_padding;
-    size_t max_input_bytes_per_buffer = available_capacity / expansionFactor;
-
-    // Reduce max by one LED boundary to prevent exact-capacity overflow
-    if (max_input_bytes_per_buffer >= bytes_per_led_all_lanes) {
-        max_input_bytes_per_buffer -= bytes_per_led_all_lanes;
+    size_t fixed_overhead = calc.boundaryPaddingBytes() + reset_padding;
+    if (fixed_overhead >= params.ringBufferCapacity) {
+        return 0;
     }
+    size_t available_capacity = params.ringBufferCapacity - fixed_overhead;
+    size_t max_input_bytes_per_buffer = available_capacity / expansionFactor;
 
     // CRITICAL: If ALL data fits in one buffer, use single buffer to avoid DMA gap.
     // The PARLIO peripheral has a ~20µs gap between DMA buffer transitions
@@ -573,6 +572,11 @@ ParlioEngine::txDoneCallback(void* tx_unit,
     // caused 35-byte overflow when reset padding was present (9035 vs 9000 bytes).
     // Solution: Use pre-tracked input_sizes[] that excludes reset padding.
     size_t input_bytes = self->mRingBuffer->input_sizes[completed_buffer_idx];
+    if (ctx->mBytesTransmitted + input_bytes > ctx->mTotalBytes) {
+        input_bytes = (ctx->mBytesTransmitted < ctx->mTotalBytes)
+                          ? (ctx->mTotalBytes - ctx->mBytesTransmitted)
+                          : 0;
+    }
     ctx->mBytesTransmitted += input_bytes;
     ctx->mCurrentByte += input_bytes;
     ctx->mChunksCompleted++;
@@ -592,6 +596,9 @@ ParlioEngine::txDoneCallback(void* tx_unit,
             // All data transmitted - mark transmission complete
             ctx->mStreamComplete = true;
             ctx->mTransmitting = false;
+            ctx->mTransmissionActive = false;
+            ctx->mHardwareIdle = false;
+            ctx->mEndTimeUs = ctx->mDebugLastTxDoneTime;
 
             // SAFETY CHECK: Detect byte overflow (tolerate small overflows from LED rounding)
             // Flag overflow for debugging, but don't prevent completion
@@ -610,7 +617,6 @@ ParlioEngine::txDoneCallback(void* tx_unit,
         // Ring empty but more data pending - call worker function directly
         ctx->mHardwareIdle = true; // Signal that hardware needs restart
         ctx->mUnderrunCount = ctx->mUnderrunCount + 1;
-        ctx->mTransmitting = false; // Hardware is idle, not transmitting
 
         // ONE-SHOT PATTERN: Call worker function directly to populate next buffer
         // This eliminates the 50µs periodic timer overhead

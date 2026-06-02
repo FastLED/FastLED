@@ -165,9 +165,14 @@ private:
     bool mInstalledDriver;        // true if WE installed the driver (vs inherited from Arduino)
     bool mHasPeek;                // true if available() cached one byte
     u8 mPeekByte;                 // cached byte from the non-blocking availability probe
+    static constexpr size_t kRxCacheSize = 64;
+    u8 mRxCache[kRxCacheSize];    // bytes prefetched by available()
+    size_t mRxCacheRead;          // read index into mRxCache
+    size_t mRxCacheCount;         // number of valid cached bytes
 
     // Helper: Initialize USB-Serial JTAG driver (called by constructor)
     bool initDriver() FL_NOEXCEPT;
+    void fillRxCache() FL_NOEXCEPT;
 };
 
 } // namespace fl

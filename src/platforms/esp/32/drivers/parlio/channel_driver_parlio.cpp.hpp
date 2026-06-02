@@ -638,4 +638,26 @@ void ChannelDriverPARLIO::beginSingleSpiChannel(const ChannelDataPtr& channelDat
     }
 }
 
+ParlioDebugMetrics getParlioDebugMetrics() FL_NOEXCEPT {
+    const detail::ParlioDebugMetrics engine_metrics =
+        detail::ParlioEngine::getInstance().getDebugMetrics();
+    ParlioDebugMetrics metrics = {};
+    metrics.mStartTimeUs = engine_metrics.mStartTimeUs;
+    metrics.mEndTimeUs = engine_metrics.mEndTimeUs;
+    metrics.mIsrCount = engine_metrics.mIsrCount;
+    metrics.mChunksQueued = engine_metrics.mChunksQueued;
+    metrics.mChunksCompleted = engine_metrics.mChunksCompleted;
+    metrics.mBytesTotal = engine_metrics.mBytesTotal;
+    metrics.mBytesTransmitted = engine_metrics.mBytesTransmitted;
+    metrics.mTxDoneCount = engine_metrics.mTxDoneCount;
+    metrics.mWorkerIsrCount = engine_metrics.mWorkerIsrCount;
+    metrics.mUnderrunCount = engine_metrics.mUnderrunCount;
+    metrics.mRingCount = engine_metrics.mRingCount;
+    metrics.mErrorCode = engine_metrics.mErrorCode;
+    metrics.mRingError = engine_metrics.mRingError;
+    metrics.mHardwareIdle = engine_metrics.mHardwareIdle;
+    metrics.mTransmissionActive = engine_metrics.mTransmissionActive;
+    return metrics;
+}
+
 } // namespace fl

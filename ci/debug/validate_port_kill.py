@@ -79,7 +79,7 @@ def main():
     detected: ComportResult | None = None
     if args.auto or not args.port:
         print("Auto-detecting upload port...")
-        detected = auto_detect_upload_port()
+        detected = auto_detect_upload_port(None)
         if detected and detected.ok:
             print(f"✅ Auto-detected: {detected}")
             print()

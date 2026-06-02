@@ -1730,6 +1730,13 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
     // within timeout. Returns per-iter timing so the host can diagnose stalls.
     mRemote->bind("parlioStreamValidate", [this](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
+        auto invalidArgs = [](const char* message) -> fl::json {
+            fl::json error = fl::json::object();
+            error.set("success", false);
+            error.set("error", "InvalidArgs");
+            error.set("message", message);
+            return error;
+        };
 
         int num_lanes = 16;
         int num_leds = 256;
@@ -1738,6 +1745,7 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         int base_tx_pin = mState->pin_tx;
         int tx_pins[autoresearch::parlio_stream::kMaxLanes];
         bool has_tx_pins = false;
+        bool num_lanes_provided = false;
         for (int i = 0; i < autoresearch::parlio_stream::kMaxLanes; ++i) {
             tx_pins[i] = -1;
         }
@@ -1751,32 +1759,48 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         if (!config.is_null()) {
             if (config.contains("baseTxPin") && config["baseTxPin"].is_int())
                 base_tx_pin = static_cast<int>(config["baseTxPin"].as_int().value());
-            if (config.contains("numLanes") && config["numLanes"].is_int())
+            if (config.contains("numLanes")) {
+                if (!config["numLanes"].is_int()) {
+                    return invalidArgs("numLanes must be an integer");
+                }
                 num_lanes = static_cast<int>(config["numLanes"].as_int().value());
+                num_lanes_provided = true;
+            }
             if (config.contains("numLeds") && config["numLeds"].is_int())
                 num_leds = static_cast<int>(config["numLeds"].as_int().value());
             if (config.contains("iterations") && config["iterations"].is_int())
                 iterations = static_cast<int>(config["iterations"].as_int().value());
             if (config.contains("timeoutMs") && config["timeoutMs"].is_int())
                 timeout_ms = static_cast<int>(config["timeoutMs"].as_int().value());
-            if (config.contains("txPins") && config["txPins"].is_array()) {
-                int parsed_lanes = 0;
+            if (config.contains("txPins")) {
+                if (!config["txPins"].is_array()) {
+                    return invalidArgs("txPins must be an integer array");
+                }
+                if (!num_lanes_provided) {
+                    return invalidArgs("txPins requires numLanes");
+                }
+                if (num_lanes < 1 ||
+                    num_lanes > autoresearch::parlio_stream::kMaxLanes) {
+                    return invalidArgs("numLanes out of range for txPins");
+                }
+
                 const fl::json pins = config["txPins"];
-                for (size_t i = 0;
-                     i < pins.size() && i < autoresearch::parlio_stream::kMaxLanes;
-                     ++i) {
+                if (pins.size() != static_cast<size_t>(num_lanes)) {
+                    return invalidArgs("txPins length must match numLanes");
+                }
+
+                for (int i = 0; i < num_lanes; ++i) {
                     if (!pins[i].is_int()) {
-                        continue;
+                        return invalidArgs("txPins entries must be integers");
                     }
-                    tx_pins[parsed_lanes++] = static_cast<int>(pins[i].as_int().value());
-                }
-                if (parsed_lanes > 0) {
-                    has_tx_pins = true;
-                    if (!(config.contains("numLanes") && config["numLanes"].is_int())) {
-                        num_lanes = parsed_lanes;
+                    int64_t pin_value = pins[i].as_int().value();
+                    if (pin_value < 0 || pin_value >= 64) {
+                        return invalidArgs("txPins entries must be in range 0..63");
                     }
-                    base_tx_pin = tx_pins[0];
+                    tx_pins[i] = static_cast<int>(pin_value);
                 }
+                has_tx_pins = true;
+                base_tx_pin = tx_pins[0];
             }
         }
 

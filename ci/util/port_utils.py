@@ -66,7 +66,7 @@ class ComportResult:
     all_ports: list[ListPortInfo] = field(default_factory=lambda: [])
 
 
-def auto_detect_upload_port(expected_environment: str | None = None) -> ComportResult:
+def auto_detect_upload_port(expected_environment: str | None) -> ComportResult:
     """Auto-detect the upload port from available serial ports.
 
     Only considers USB devices - filters out Bluetooth and other non-USB ports.
@@ -133,9 +133,11 @@ def auto_detect_upload_port(expected_environment: str | None = None) -> ComportR
     esp_environments = {env.lower() for env in CHIP_TO_ENVIRONMENT.values()}
     if expected_env in esp_environments:
         probe_notes: list[str] = []
+        saw_positive_detection = False
         for port in usb_ports:
             chip_result = detect_attached_chip(port.device, timeout=3.0)
             if chip_result.ok:
+                saw_positive_detection = True
                 detected_env = chip_result.environment or "unknown"
                 probe_notes.append(
                     f"{port.device}: {chip_result.chip_type} ({detected_env})"
@@ -152,17 +154,19 @@ def auto_detect_upload_port(expected_environment: str | None = None) -> ComportR
                     f"{port.device}: detection failed ({chip_result.error_message})"
                 )
 
-        expected_chip = environment_to_chip(expected_env) or expected_environment
-        return ComportResult(
-            ok=False,
-            selected_port=None,
-            error_message=(
-                f"No USB serial port matched expected environment "
-                f"'{expected_environment}' ({expected_chip}). Probed: "
-                + "; ".join(probe_notes)
-            ),
-            all_ports=all_ports,
-        )
+        if saw_positive_detection:
+            expected_chip = environment_to_chip(expected_env) or expected_environment
+            return ComportResult(
+                ok=False,
+                selected_port=None,
+                error_message=(
+                    f"No USB serial port matched expected environment "
+                    f"'{expected_environment}' ({expected_chip}). Probed: "
+                    + "; ".join(probe_notes)
+                ),
+                all_ports=all_ports,
+            )
+        # Probe was inconclusive; fall through to the USB descriptor heuristic.
 
     # Select best USB port (prefer ESP32/Arduino chips if available)
     selected_port = None
