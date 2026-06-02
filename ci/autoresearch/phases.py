@@ -603,9 +603,10 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
 
     upload_port = args.upload_port
     if not upload_port:
+        expected_environment = None if is_teensy else ctx.final_environment
         max_wait_s = 60
         poll_interval_s = 1.0
-        result = auto_detect_upload_port()
+        result = auto_detect_upload_port(expected_environment=expected_environment)
         if not result.ok:
             if is_teensy:
                 print(f"\n{Fore.YELLOW}{'=' * 60}")
@@ -619,7 +620,9 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
             last_msg_at = 0.0
             while time.monotonic() < deadline:
                 time.sleep(poll_interval_s)
-                result = auto_detect_upload_port()
+                result = auto_detect_upload_port(
+                    expected_environment=expected_environment
+                )
                 if result.ok:
                     elapsed = max_wait_s - (deadline - time.monotonic())
                     print(
@@ -637,7 +640,9 @@ async def _resolve_port_and_environment(ctx: RunContext) -> int | None:
                         serial_deadline = time.monotonic() + 15
                         while time.monotonic() < serial_deadline:
                             time.sleep(1.0)
-                            result = auto_detect_upload_port()
+                            result = auto_detect_upload_port(
+                                expected_environment=expected_environment
+                            )
                             if result.ok:
                                 print(
                                     f"\u2705 Teensy serial port detected: {result.selected_port}"

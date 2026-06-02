@@ -66,7 +66,7 @@ class ComportResult:
     all_ports: list[ListPortInfo] = field(default_factory=lambda: [])
 
 
-def auto_detect_upload_port() -> ComportResult:
+def auto_detect_upload_port(expected_environment: str | None = None) -> ComportResult:
     """Auto-detect the upload port from available serial ports.
 
     Only considers USB devices - filters out Bluetooth and other non-USB ports.
@@ -126,6 +126,41 @@ def auto_detect_upload_port() -> ComportResult:
             ok=False,
             selected_port=None,
             error_message=f"No USB serial ports found (only {types_str} ports detected)",
+            all_ports=all_ports,
+        )
+
+    expected_env = expected_environment.lower() if expected_environment else None
+    esp_environments = {env.lower() for env in CHIP_TO_ENVIRONMENT.values()}
+    if expected_env in esp_environments:
+        probe_notes: list[str] = []
+        for port in usb_ports:
+            chip_result = detect_attached_chip(port.device, timeout=3.0)
+            if chip_result.ok:
+                detected_env = chip_result.environment or "unknown"
+                probe_notes.append(
+                    f"{port.device}: {chip_result.chip_type} ({detected_env})"
+                )
+                if detected_env.lower() == expected_env:
+                    return ComportResult(
+                        ok=True,
+                        selected_port=port.device,
+                        error_message=None,
+                        all_ports=all_ports,
+                    )
+            else:
+                probe_notes.append(
+                    f"{port.device}: detection failed ({chip_result.error_message})"
+                )
+
+        expected_chip = environment_to_chip(expected_env) or expected_environment
+        return ComportResult(
+            ok=False,
+            selected_port=None,
+            error_message=(
+                f"No USB serial port matched expected environment "
+                f"'{expected_environment}' ({expected_chip}). Probed: "
+                + "; ".join(probe_notes)
+            ),
             all_ports=all_ports,
         )
 
@@ -478,4 +513,13 @@ def chip_to_environment(chip_type: str) -> str | None:
         if chip_upper.startswith(known_chip.upper()):
             return env
 
+    return None
+
+
+def environment_to_chip(environment: str) -> str | None:
+    """Map a PlatformIO environment name to its base ESP chip type."""
+    env_lower = environment.lower()
+    for chip_type, env in CHIP_TO_ENVIRONMENT.items():
+        if env.lower() == env_lower:
+            return chip_type
     return None

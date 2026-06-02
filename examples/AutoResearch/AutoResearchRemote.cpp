@@ -1582,15 +1582,15 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         parlioEncodeBenchmark_fn.set("name", "parlioEncodeBenchmark");
         parlioEncodeBenchmark_fn.set("phase", "Phase 4: Utility");
         parlioEncodeBenchmark_fn.set("args", "[{iterations}] (optional, default 12000, max 200000)");
-        parlioEncodeBenchmark_fn.set("returns", "{success, iters, lanes, leds_per_lane, perpos_ss_us, perpos_sp_us, perpos_ps_us, perpos_pp_us, sink}");
-        parlioEncodeBenchmark_fn.set("description", "Bench full PARLIO encode hot loop (16-lane gather + wave8Transpose_16 + memcpy) with 4 SRAM/PSRAM placements; answers PSRAM hypothesis + ISR-streaming feasibility");
+        parlioEncodeBenchmark_fn.set("returns", "{success, iters, lanes, leds_per_lane, scratchPsramOk, outputPsramOk, perpos_ss_us, perpos_sp_us, perpos_ps_us, perpos_pp_us, frame_ss_us, frame_sp_us, frame_ps_us, frame_pp_us, sink}");
+        parlioEncodeBenchmark_fn.set("description", "Bench full PARLIO encode hot loop (16-lane gather + BF1 pipe4 direct encode) with SRAM and optional PSRAM placements; answers PSRAM hypothesis + ISR-streaming feasibility");
         functions.push_back(parlioEncodeBenchmark_fn);
 
         fl::json parlioStreamValidate_fn = fl::json::object();
         parlioStreamValidate_fn.set("name", "parlioStreamValidate");
         parlioStreamValidate_fn.set("phase", "Phase 4: Utility");
-        parlioStreamValidate_fn.set("args", "[{numLanes, numLeds, iterations, timeoutMs}] (all optional; defaults 16/256/5/200)");
-        parlioStreamValidate_fn.set("returns", "{success, completed, lanes, leds_per_lane, iterations, perIterUs:[...], steadyAvgUs, failedIter}");
+        parlioStreamValidate_fn.set("args", "[{baseTxPin, txPins, numLanes, numLeds, iterations, timeoutMs}] (all optional; txPins overrides contiguous baseTxPin)");
+        parlioStreamValidate_fn.set("returns", "{success, completed, baseTxPin, txPins, lanes, leds_per_lane, iterations, perIterUs:[...], steadyAvgUs, failedIter, underrunCount, txDoneCount, workerIsrCount, ringError, hardwareIdle}");
         parlioStreamValidate_fn.set("description", "Functional test of the PARLIO ISR-chunked streaming engine (#2548). Drives N back-to-back FastLED.show() calls through the production engine (which uses BF1+pipe4 on 16-lane Wave8 since #2559) and verifies all complete within timeout. Catches hangs/stalls.");
         functions.push_back(parlioStreamValidate_fn);
 
@@ -1735,6 +1735,12 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         int num_leds = 256;
         int iterations = 5;
         int timeout_ms = 200;
+        int base_tx_pin = mState->pin_tx;
+        int tx_pins[autoresearch::parlio_stream::kMaxLanes];
+        bool has_tx_pins = false;
+        for (int i = 0; i < autoresearch::parlio_stream::kMaxLanes; ++i) {
+            tx_pins[i] = -1;
+        }
 
         fl::json config;
         if (args.is_object()) {
@@ -1743,6 +1749,8 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
             config = args[0];
         }
         if (!config.is_null()) {
+            if (config.contains("baseTxPin") && config["baseTxPin"].is_int())
+                base_tx_pin = static_cast<int>(config["baseTxPin"].as_int().value());
             if (config.contains("numLanes") && config["numLanes"].is_int())
                 num_lanes = static_cast<int>(config["numLanes"].as_int().value());
             if (config.contains("numLeds") && config["numLeds"].is_int())
@@ -1751,9 +1759,29 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
                 iterations = static_cast<int>(config["iterations"].as_int().value());
             if (config.contains("timeoutMs") && config["timeoutMs"].is_int())
                 timeout_ms = static_cast<int>(config["timeoutMs"].as_int().value());
+            if (config.contains("txPins") && config["txPins"].is_array()) {
+                int parsed_lanes = 0;
+                const fl::json pins = config["txPins"];
+                for (size_t i = 0;
+                     i < pins.size() && i < autoresearch::parlio_stream::kMaxLanes;
+                     ++i) {
+                    if (!pins[i].is_int()) {
+                        continue;
+                    }
+                    tx_pins[parsed_lanes++] = static_cast<int>(pins[i].as_int().value());
+                }
+                if (parsed_lanes > 0) {
+                    has_tx_pins = true;
+                    if (!(config.contains("numLanes") && config["numLanes"].is_int())) {
+                        num_lanes = parsed_lanes;
+                    }
+                    base_tx_pin = tx_pins[0];
+                }
+            }
         }
 
         // Clamp inputs to safe ranges.
+        if (base_tx_pin < 0) base_tx_pin = 0;
         if (num_lanes < 1) num_lanes = 1;
         if (num_lanes > 16) num_lanes = 16;
         if (num_leds < 1) num_leds = 1;
@@ -1766,12 +1794,25 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         if (timeout_ms > 5000) timeout_ms = 5000;
 
         auto r = autoresearch::parlio_stream::validateParlioStreaming(
-            mState->pin_tx, num_lanes, num_leds, iterations,
-            static_cast<uint32_t>(timeout_ms));
+            base_tx_pin, num_lanes, num_leds, iterations,
+            static_cast<uint32_t>(timeout_ms),
+            has_tx_pins ? tx_pins : nullptr);
 
         response.set("success", true);
         response.set("channelsOk", r.channels_ok);
         response.set("completed", r.completed);
+        response.set("baseTxPin", static_cast<int64_t>(r.base_tx_pin));
+        int last_tx_pin = r.base_tx_pin + r.lanes - 1;
+        if (r.explicit_tx_pins) {
+            for (int i = r.lanes - 1; i >= 0; --i) {
+                if (r.tx_pins[i] >= 0) {
+                    last_tx_pin = r.tx_pins[i];
+                    break;
+                }
+            }
+        }
+        response.set("lastTxPin", static_cast<int64_t>(last_tx_pin));
+        response.set("explicitTxPins", r.explicit_tx_pins);
         response.set("lanes", static_cast<int64_t>(r.lanes));
         response.set("ledsPerLane", static_cast<int64_t>(r.leds_per_lane));
         response.set("iterations", static_cast<int64_t>(r.iterations));
@@ -1780,6 +1821,19 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         response.set("steadyAvgWaitUs", static_cast<int64_t>(r.steady_avg_wait_us));
         response.set("failedIter", static_cast<int64_t>(r.failed_iter));
         response.set("timeoutMs", static_cast<int64_t>(r.timeout_ms));
+        response.set("txDoneCount", static_cast<int64_t>(r.tx_done_count));
+        response.set("workerIsrCount", static_cast<int64_t>(r.worker_isr_count));
+        response.set("underrunCount", static_cast<int64_t>(r.underrun_count));
+        response.set("ringCount", static_cast<int64_t>(r.ring_count));
+        response.set("bytesTotal", static_cast<int64_t>(r.bytes_total));
+        response.set("bytesTransmitted", static_cast<int64_t>(r.bytes_transmitted));
+        response.set("ringError", r.ring_error);
+        response.set("hardwareIdle", r.hardware_idle);
+        fl::json response_tx_pins = fl::json::array();
+        for (int i = 0; i < r.lanes; ++i) {
+            response_tx_pins.push_back(static_cast<int64_t>(r.tx_pins[i]));
+        }
+        response.set("txPins", response_tx_pins);
         fl::json per_iter = fl::json::array();
         fl::json per_iter_show = fl::json::array();
         fl::json per_iter_wait = fl::json::array();
@@ -1818,10 +1872,23 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         response.set("iters", static_cast<int64_t>(r.iters));
         response.set("lanes", static_cast<int64_t>(r.lanes));
         response.set("leds_per_lane", static_cast<int64_t>(r.leds_per_lane));
+        response.set("scratchPsramOk", r.scratch_psram_ok);
+        response.set("outputPsramOk", r.output_psram_ok);
         response.set("perpos_ss_us", static_cast<int64_t>(r.perpos_ss_us));
         response.set("perpos_sp_us", static_cast<int64_t>(r.perpos_sp_us));
         response.set("perpos_ps_us", static_cast<int64_t>(r.perpos_ps_us));
         response.set("perpos_pp_us", static_cast<int64_t>(r.perpos_pp_us));
+        if (r.iters > 0) {
+            constexpr fl::u32 kFrameBytePositions = 256 * 3;
+            response.set("frame_ss_us", static_cast<int64_t>(
+                static_cast<fl::u64>(r.perpos_ss_us) * kFrameBytePositions / r.iters));
+            response.set("frame_sp_us", static_cast<int64_t>(
+                static_cast<fl::u64>(r.perpos_sp_us) * kFrameBytePositions / r.iters));
+            response.set("frame_ps_us", static_cast<int64_t>(
+                static_cast<fl::u64>(r.perpos_ps_us) * kFrameBytePositions / r.iters));
+            response.set("frame_pp_us", static_cast<int64_t>(
+                static_cast<fl::u64>(r.perpos_pp_us) * kFrameBytePositions / r.iters));
+        }
         response.set("sink", static_cast<int64_t>(r.sink));
         return response;
     });

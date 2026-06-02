@@ -23,7 +23,13 @@ struct ParlioDebugMetrics {
     u32 mChunksCompleted;
     u32 mBytesTotal;
     u32 mBytesTransmitted;
+    u32 mTxDoneCount;
+    u32 mWorkerIsrCount;
+    u32 mUnderrunCount;
+    u32 mRingCount;
     u32 mErrorCode;
+    bool mRingError;
+    bool mHardwareIdle;
     bool mTransmissionActive;
 };
 

@@ -163,6 +163,8 @@ private:
     UsbSerialJtagConfig mConfig;  // Configuration parameters
     bool mBuffered;               // true if driver installed, false if using ROM fallback
     bool mInstalledDriver;        // true if WE installed the driver (vs inherited from Arduino)
+    bool mHasPeek;                // true if available() cached one byte
+    u8 mPeekByte;                 // cached byte from the non-blocking availability probe
 
     // Helper: Initialize USB-Serial JTAG driver (called by constructor)
     bool initDriver() FL_NOEXCEPT;

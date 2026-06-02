@@ -332,8 +332,6 @@ bool FL_IRAM LcdSpiPeripheralEsp::transmit(const u16 *buffer,
             }
         } else {
             if (xSemaphoreTake(mCompleteSem, pdMS_TO_TICKS(2000)) != pdTRUE) {
-                FL_WARN("LcdSpiPeripheralEsp: Timed out waiting for previous "
-                        "transmit to complete");
                 mBusy = false;
                 return false;
             }
@@ -377,8 +375,6 @@ bool FL_IRAM LcdSpiPeripheralEsp::transmit(const u16 *buffer,
         esp_err_t err =
             esp_lcd_new_panel_io_i80(mI80Bus, &io_config, &mPanelIo);
         if (err != ESP_OK) {
-            FL_WARN("LcdSpiPeripheralEsp: Failed to recreate panel IO: "
-                    << err);
             return false;
         }
     }
@@ -405,7 +401,6 @@ bool FL_IRAM LcdSpiPeripheralEsp::transmit(const u16 *buffer,
 
     if (err != ESP_OK) {
         mBusy = false;
-        FL_WARN("LcdSpiPeripheralEsp: tx_color failed: " << err);
         return false;
     }
 

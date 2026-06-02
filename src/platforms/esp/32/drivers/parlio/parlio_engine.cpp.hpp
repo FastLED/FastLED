@@ -39,6 +39,7 @@
 #include "platforms/esp/32/drivers/parlio/parlio_peripheral_mock.h"
 #else
 #include "platforms/esp/32/drivers/parlio/parlio_peripheral_esp.h"
+#include "esp_heap_caps.h"
 #endif
 
 // All ESP-IDF dependencies have been abstracted through IParlioPeripheral interface
@@ -62,6 +63,29 @@ fl::detail::IParlioPeripheral* getParlioPeripheral() FL_NOEXCEPT {
         return &fl::detail::ParlioPeripheralESP::instance();
         FL_LOG_PARLIO("PARLIO_INIT: Using ESP peripheral (real hardware)");
     #endif
+}
+
+bool parlioDmaPsramAvailable() FL_NOEXCEPT {
+#ifdef FASTLED_STUB_IMPL
+    return false;
+#else
+    constexpr uint32_t caps = MALLOC_CAP_SPIRAM | MALLOC_CAP_DMA | MALLOC_CAP_8BIT;
+    return heap_caps_get_largest_free_block(caps) > 0;
+#endif
+}
+
+bool parlioCanAllocateInternalDmaRing(size_t bytes_per_buffer, size_t buffer_count) FL_NOEXCEPT {
+#ifdef FASTLED_STUB_IMPL
+    (void)bytes_per_buffer;
+    (void)buffer_count;
+    return true;
+#else
+    const size_t aligned_size = ((bytes_per_buffer + 63) / 64) * 64;
+    const size_t required_total = aligned_size * buffer_count;
+    constexpr uint32_t caps = MALLOC_CAP_DMA | MALLOC_CAP_8BIT;
+    return heap_caps_get_largest_free_block(caps) >= aligned_size &&
+           heap_caps_get_free_size(caps) >= required_total;
+#endif
 }
 
 } // anonymous namespace
@@ -585,6 +609,7 @@ ParlioEngine::txDoneCallback(void* tx_unit,
 
         // Ring empty but more data pending - call worker function directly
         ctx->mHardwareIdle = true; // Signal that hardware needs restart
+        ctx->mUnderrunCount = ctx->mUnderrunCount + 1;
         ctx->mTransmitting = false; // Hardware is idle, not transmitting
 
         // ONE-SHOT PATTERN: Call worker function directly to populate next buffer
@@ -1131,6 +1156,15 @@ bool ParlioEngine::allocateRingBuffers() FL_NOEXCEPT {
 
     u8* buffers[3] = {nullptr, nullptr, nullptr};
 
+    if (!parlioDmaPsramAvailable() &&
+        !parlioCanAllocateInternalDmaRing(mRingBufferCapacity,
+                                          ParlioRingBuffer3::RING_BUFFER_COUNT)) {
+        FL_LOG_PARLIO("PARLIO: Insufficient DMA heap for "
+                      << ParlioRingBuffer3::RING_BUFFER_COUNT
+                      << " ring buffers of " << mRingBufferCapacity << " bytes");
+        return false;
+    }
+
     // Allocate all 3 buffers via peripheral interface (handles DMA requirements)
     for (size_t i = 0; i < 3; i++) {
         buffers[i] = mPeripheral->allocateDmaBuffer(mRingBufferCapacity);
@@ -1324,9 +1358,11 @@ bool ParlioEngine::initialize(size_t dataWidth,
 
             // Recalculate ring buffer capacity for larger LED count
             ParlioBufferCalculator calc(mDataWidth, mUseWave3, mClockFreqHz); // ok no noexcept
+            const bool psram_cap_available = parlioDmaPsramAvailable();
             size_t raw_capacity = calc.calculateRingBufferCapacity(
                 maxLedsPerChannel, mResetUs, ParlioRingBuffer3::RING_BUFFER_COUNT,
-                FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM);
+                psram_cap_available ? FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM
+                                     : FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES);
             size_t new_capacity = ((raw_capacity + 63) / 64) * 64;
 
             if (new_capacity > mRingBufferCapacity) {
@@ -1334,12 +1370,14 @@ bool ParlioEngine::initialize(size_t dataWidth,
                 // Release old ring buffers before allocating new ones
                 mRingBuffer.reset();
                 if (!allocateRingBuffers()) {
-                    // PSRAM-sized allocation failed, retry with SRAM cap
-                    raw_capacity = calc.calculateRingBufferCapacity(
-                        maxLedsPerChannel, mResetUs, ParlioRingBuffer3::RING_BUFFER_COUNT,
-                        FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES);
-                    mRingBufferCapacity = ((raw_capacity + 63) / 64) * 64;
-                    if (!allocateRingBuffers()) {
+                    if (psram_cap_available) {
+                        // PSRAM-sized allocation failed, retry with SRAM cap
+                        raw_capacity = calc.calculateRingBufferCapacity(
+                            maxLedsPerChannel, mResetUs, ParlioRingBuffer3::RING_BUFFER_COUNT,
+                            FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES);
+                        mRingBufferCapacity = ((raw_capacity + 63) / 64) * 64;
+                    }
+                    if (!psram_cap_available || !allocateRingBuffers()) {
                         FL_LOG_PARLIO("PARLIO_INIT: FAILED to reallocate ring buffers");
                         mInitialized = false;
                         return false;
@@ -1368,7 +1406,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
             #else
             ParlioBitPackOrder::FL_PARLIO_MSB,
             #endif
-            true
+            parlioDmaPsramAvailable()
         );
         if (!mPeripheral->initialize(config)) {
             FL_LOG_PARLIO("PARLIO_INIT: FAILED to reinitialize TX unit");
@@ -1469,7 +1507,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
     mEncodingMode = EncodingMode::CLOCKLESS;
 
     // Configure peripheral (constructor handles -1 filling for unused pins)
-    // prefer_psram defaults true: allocator tries PSRAM+DMA first, falls back to internal SRAM
+    const bool psram_cap_available = parlioDmaPsramAvailable();
     // DIAGNOSTIC: Allow compile-time override to LSB mode for waveform inspection
     #ifndef PARLIO_FORCE_LSB_MODE
         #define PARLIO_FORCE_LSB_MODE 0  // Default: use MSB (correct mode)
@@ -1485,7 +1523,7 @@ bool ParlioEngine::initialize(size_t dataWidth,
         #else
         ParlioBitPackOrder::FL_PARLIO_MSB,  // MSB packing required - Wave8 data is MSB-ordered
         #endif
-        true  // prefer_psram: try PSRAM first, fall back to internal SRAM
+        psram_cap_available  // prefer_psram only when DMA-capable PSRAM exists
     );
     FL_LOG_PARLIO("PARLIO_INIT: Config - clock=" << mClockFreqHz << " queue_depth=" << FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH);
 
@@ -1517,12 +1555,13 @@ bool ParlioEngine::initialize(size_t dataWidth,
     }
     FL_LOG_PARLIO("PARLIO_INIT: ISR callback registered successfully");
 
-    // Calculate ring buffer capacity
-    // Try PSRAM cap first (larger buffers for 5+ channels), fall back to SRAM cap
+    // Calculate ring buffer capacity. Use the PSRAM cap only when a DMA-capable
+    // PSRAM heap exists; C6 has no PSRAM and should go straight to the SRAM cap.
     ParlioBufferCalculator calc(mDataWidth, mUseWave3, mClockFreqHz);
     size_t raw_capacity = calc.calculateRingBufferCapacity(
         maxLedsPerChannel, mResetUs, ParlioRingBuffer3::RING_BUFFER_COUNT,
-        FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM);
+        psram_cap_available ? FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM
+                             : FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES);
 
     // NEEDS REVIEW!!! are we potentially accessing memory outside of the cache??
     // Please invesatigate
@@ -1535,17 +1574,18 @@ bool ParlioEngine::initialize(size_t dataWidth,
         FL_LOG_PARLIO("PARLIO: Rounded buffer capacity from " << raw_capacity << " to " << mRingBufferCapacity << " bytes (64-byte alignment)");
     }
 
-    // Allocate ring buffers - try PSRAM-sized first, fall back to SRAM-sized
+    // Allocate ring buffers - try PSRAM-sized first only when PSRAM exists.
     FL_LOG_PARLIO("PARLIO_INIT: Allocating ring buffers (capacity=" << mRingBufferCapacity << ")");
     if (!allocateRingBuffers()) {
-        // PSRAM-sized allocation failed, retry with internal SRAM cap
-        FL_LOG_PARLIO("PARLIO_INIT: PSRAM-sized allocation failed, retrying with SRAM cap");
-        raw_capacity = calc.calculateRingBufferCapacity(
-            maxLedsPerChannel, mResetUs, ParlioRingBuffer3::RING_BUFFER_COUNT,
-            FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES);
-        mRingBufferCapacity = ((raw_capacity + 63) / 64) * 64;
+        if (psram_cap_available) {
+            FL_LOG_PARLIO("PARLIO_INIT: PSRAM-sized allocation failed, retrying with SRAM cap");
+            raw_capacity = calc.calculateRingBufferCapacity(
+                maxLedsPerChannel, mResetUs, ParlioRingBuffer3::RING_BUFFER_COUNT,
+                FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES);
+            mRingBufferCapacity = ((raw_capacity + 63) / 64) * 64;
+        }
 
-        if (!allocateRingBuffers()) {
+        if (!psram_cap_available || !allocateRingBuffers()) {
             FL_LOG_PARLIO("PARLIO_INIT: FAILED to allocate ring buffers");
             mPeripheral->deinitialize(); // Clean up TX unit so re-init can succeed
             mPeripheral = nullptr;
@@ -1639,7 +1679,7 @@ bool ParlioEngine::initializeSpi(const fl::vector<int>& pins,
         FL_ESP_PARLIO_HARDWARE_QUEUE_DEPTH,
         65534,
         ParlioBitPackOrder::FL_PARLIO_MSB,
-        true  // prefer_psram
+        parlioDmaPsramAvailable()
     );
 
     if (!mPeripheral->initialize(config)) {
@@ -1660,19 +1700,22 @@ bool ParlioEngine::initializeSpi(const fl::vector<int>& pins,
     // Calculate ring buffer capacity (SPI expansion: 4:1)
     // Each input byte produces 4 DMA bytes
     ParlioBufferCalculator calc{mDataWidth};
+    const bool psram_cap_available = parlioDmaPsramAvailable();
     size_t raw_capacity = calc.calculateRingBufferCapacity(
         maxLedsEquivalent, 0, ParlioRingBuffer3::RING_BUFFER_COUNT,
-        FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM);
+        psram_cap_available ? FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES_PSRAM
+                             : FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES);
     mRingBufferCapacity = ((raw_capacity + 63) / 64) * 64;
 
     if (!allocateRingBuffers()) {
-        // Try SRAM-sized
-        raw_capacity = calc.calculateRingBufferCapacity(
-            maxLedsEquivalent, 0, ParlioRingBuffer3::RING_BUFFER_COUNT,
-            FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES);
-        mRingBufferCapacity = ((raw_capacity + 63) / 64) * 64;
+        if (psram_cap_available) {
+            raw_capacity = calc.calculateRingBufferCapacity(
+                maxLedsEquivalent, 0, ParlioRingBuffer3::RING_BUFFER_COUNT,
+                FASTLED_PARLIO_MAX_RING_BUFFER_TOTAL_BYTES);
+            mRingBufferCapacity = ((raw_capacity + 63) / 64) * 64;
+        }
 
-        if (!allocateRingBuffers()) {
+        if (!psram_cap_available || !allocateRingBuffers()) {
             FL_WARN("PARLIO_SPI: Failed to allocate ring buffers");
             mPeripheral->deinitialize();
             mPeripheral = nullptr;
@@ -1844,6 +1887,7 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
     mIsrContext->mRingCount = 0;
     mIsrContext->mRingError = false;
     mIsrContext->mHardwareIdle = false;
+    mIsrContext->mUnderrunCount = 0;
     mIsrContext->mNextByteOffset = 0;
 
     // Initialize counters
@@ -2134,7 +2178,13 @@ ParlioDebugMetrics ParlioEngine::getDebugMetrics() const FL_NOEXCEPT {
     metrics.mChunksCompleted = mIsrContext->mChunksCompleted;
     metrics.mBytesTotal = mIsrContext->mTotalBytes;
     metrics.mBytesTransmitted = mIsrContext->mBytesTransmitted;
+    metrics.mTxDoneCount = mIsrContext->mDebugTxDoneCount;
+    metrics.mWorkerIsrCount = mIsrContext->mDebugWorkerIsrCount;
+    metrics.mUnderrunCount = mIsrContext->mUnderrunCount;
+    metrics.mRingCount = mIsrContext->mRingCount;
     metrics.mErrorCode = mErrorOccurred ? 1 : 0;
+    metrics.mRingError = mIsrContext->mRingError;
+    metrics.mHardwareIdle = mIsrContext->mHardwareIdle;
     metrics.mTransmissionActive = mIsrContext->mTransmissionActive;
 
     return metrics;

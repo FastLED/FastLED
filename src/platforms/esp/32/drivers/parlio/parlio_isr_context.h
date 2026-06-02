@@ -69,6 +69,7 @@ struct FL_ALIGNAS(64) ParlioIsrContext {
     volatile size_t mRingCount;      // 0-3 (distinguishes full vs empty)
     volatile bool mRingError;
     volatile bool mHardwareIdle;
+    volatile u32 mUnderrunCount;     // Ring emptied while source bytes remained
     volatile size_t mNextByteOffset; // Next byte offset in source data (Worker function updates)
 
     // === Non-Volatile Fields (read after barrier only) ===
@@ -89,7 +90,7 @@ struct FL_ALIGNAS(64) ParlioIsrContext {
     ParlioIsrContext() FL_NOEXCEPT
         : mStreamComplete(false), mTransmitting(false), mCurrentByte(0),
           mRingReadIdx(0), mRingWriteIdx(0), mRingCount(0), mRingError(false),
-          mHardwareIdle(false), mNextByteOffset(0),
+          mHardwareIdle(false), mUnderrunCount(0), mNextByteOffset(0),
           mTotalBytes(0), mNumLanes(0), mIsrCount(0),
           mBytesTransmitted(0), mChunksCompleted(0),
           mTransmissionActive(false), mEndTimeUs(0),

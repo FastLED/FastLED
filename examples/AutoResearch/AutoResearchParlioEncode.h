@@ -20,6 +20,9 @@
 /// Output: `BENCH_PARLIO_*` lines via `esp_rom_printf` -> USB-Serial-JTAG (COM25)
 /// so capture works without depending on the testSimd RPC routing (#2541).
 /// **Invocation:** RPC-only via `parlioEncodeBenchmark` in AutoResearchRemote.cpp.
+///
+/// Current implementation times the production BF1 pipe4 encode path and skips
+/// PSRAM-only placements when PSRAM is not present.
 
 #pragma once
 
@@ -49,13 +52,15 @@ struct ParlioEncodeResult {
     fl::u32 lanes;             // 16
     fl::u32 leds_per_lane;     // 256 (matches the standard P4 test config)
 
-    // Per-byte-position hot loop = 16-lane gather + wave8Transpose_16 + memcpy.
+    // Per-byte-position hot loop = 16-lane gather + BF1 pipe4 direct encode.
     // 4 placements of {scratch, output}: SRAM/SRAM, SRAM/PSRAM, PSRAM/SRAM, PSRAM/PSRAM.
     fl::u32 perpos_ss_us;      // scratch SRAM, output SRAM
     fl::u32 perpos_sp_us;      // scratch SRAM, output PSRAM
     fl::u32 perpos_ps_us;      // scratch PSRAM, output SRAM
     fl::u32 perpos_pp_us;      // scratch PSRAM, output PSRAM
 
+    bool scratch_psram_ok;
+    bool output_psram_ok;
     fl::u32 sink;
 };
 
@@ -67,22 +72,54 @@ namespace {
 // Wave8 path (parlio_engine.cpp.hpp ≈line 981-994). lane_stride matches the
 // production layout: lane k reads from scratch[k * lane_stride + byte_offset].
 FASTLED_FORCE_INLINE FL_IRAM
-fl::u32 fl_parlio_inner_one_byte_position(const fl::u8 *scratch,
-                                          fl::size_t lane_stride,
-                                          fl::size_t byte_offset,
-                                          const fl::Wave8ByteExpansionLut &byte_lut,
-                                          fl::u8 *output,
-                                          fl::size_t output_idx) {
+fl::u32 fl_parlio_inner_one_byte_position_bf1(const fl::u8 *scratch,
+                                              fl::size_t lane_stride,
+                                              fl::size_t byte_offset,
+                                              const fl::Wave8ByteExpansionLut &byte_lut,
+                                              fl::u8 *output,
+                                              fl::size_t output_idx) {
     fl::u8 lanes[16];
     for (fl::size_t lane = 0; lane < 16; lane++) {
         lanes[lane] = scratch[lane * lane_stride + byte_offset];
     }
-    fl::u8 transposed[16 * sizeof(fl::Wave8Byte)];
-    fl::wave8Transpose_16(reinterpret_cast<const fl::u8(&)[16]>(lanes), byte_lut,
-                          reinterpret_cast<fl::u8(&)[16 * sizeof(fl::Wave8Byte)]>(transposed));
-    fl::memcpy(output + output_idx, transposed, sizeof(transposed));
-    // Sink to defeat DCE: cheap reduction on a few output bytes.
+    fl::wave8Transpose_16_bf1(
+        reinterpret_cast<const fl::u8(&)[16]>(lanes), byte_lut,
+        *reinterpret_cast<fl::u8(*)[16 * sizeof(fl::Wave8Byte)]>(output + output_idx));
     return static_cast<fl::u32>(output[output_idx] ^ output[output_idx + 127]);
+}
+
+FASTLED_FORCE_INLINE FL_IRAM
+fl::u32 fl_parlio_inner_four_byte_positions_bf1_pipe4(const fl::u8 *scratch,
+                                                      fl::size_t lane_stride,
+                                                      fl::size_t byte_offset,
+                                                      const fl::Wave8ByteExpansionLut &byte_lut,
+                                                      fl::u8 *output) {
+    fl::u8 lanes_a[16];
+    fl::u8 lanes_b[16];
+    fl::u8 lanes_c[16];
+    fl::u8 lanes_d[16];
+    for (fl::size_t lane = 0; lane < 16; lane++) {
+        const fl::u8 *base = scratch + lane * lane_stride + byte_offset;
+        lanes_a[lane] = base[0];
+        lanes_b[lane] = base[1];
+        lanes_c[lane] = base[2];
+        lanes_d[lane] = base[3];
+    }
+
+    constexpr fl::size_t BLOCK_SIZE = 16 * sizeof(fl::Wave8Byte);
+    fl::u8 *out_a = output + byte_offset * BLOCK_SIZE;
+    fl::wave8Transpose_16x4_bf1_pipe4(
+        reinterpret_cast<const fl::u8(&)[16]>(lanes_a),
+        reinterpret_cast<const fl::u8(&)[16]>(lanes_b),
+        reinterpret_cast<const fl::u8(&)[16]>(lanes_c),
+        reinterpret_cast<const fl::u8(&)[16]>(lanes_d),
+        byte_lut,
+        *reinterpret_cast<fl::u8(*)[BLOCK_SIZE]>(out_a),
+        *reinterpret_cast<fl::u8(*)[BLOCK_SIZE]>(out_a + BLOCK_SIZE),
+        *reinterpret_cast<fl::u8(*)[BLOCK_SIZE]>(out_a + 2 * BLOCK_SIZE),
+        *reinterpret_cast<fl::u8(*)[BLOCK_SIZE]>(out_a + 3 * BLOCK_SIZE));
+
+    return static_cast<fl::u32>(out_a[0] ^ out_a[BLOCK_SIZE * 4 - 1]);
 }
 
 // Time one configuration: scratch + output buffers (caller pre-allocates).
@@ -104,14 +141,22 @@ inline fl::u32 fl_parlio_measure(const fl::u8 *scratch, fl::size_t scratch_size,
         return 0u;
     }
 
+    constexpr fl::size_t BLOCK_SIZE = LANES * sizeof(fl::Wave8Byte);
     fl::u32 t0 = micros();
-    for (int it = 0; it < iters_byte_positions; ++it) {
+    int it = 0;
+    while (it < iters_byte_positions) {
         const fl::size_t byte_offset =
             static_cast<fl::size_t>(it) % BYTES_PER_LANE;
-        const fl::size_t output_idx =
-            byte_offset * LANES * sizeof(fl::Wave8Byte);
-        *sink ^= fl_parlio_inner_one_byte_position(
-            scratch, lane_stride, byte_offset, byte_lut, output, output_idx);
+        if (byte_offset + 3 < BYTES_PER_LANE && it + 3 < iters_byte_positions) {
+            *sink ^= fl_parlio_inner_four_byte_positions_bf1_pipe4(
+                scratch, lane_stride, byte_offset, byte_lut, output);
+            it += 4;
+        } else {
+            const fl::size_t output_idx = byte_offset * BLOCK_SIZE;
+            *sink ^= fl_parlio_inner_one_byte_position_bf1(
+                scratch, lane_stride, byte_offset, byte_lut, output, output_idx);
+            it += 1;
+        }
     }
     return micros() - t0;
 }
@@ -146,27 +191,39 @@ inline ParlioEncodeResult measureParlioEncode(int iters_in = 12000) {
     fl::Wave8ByteExpansionLut byte_lut = fl::buildWave8ByteExpansionLUT(nib_lut);
 
     fl::u8 *scratch_sram = fl_parlio_alloc(SCRATCH_BYTES, /*psram=*/false);
-    fl::u8 *scratch_psram = fl_parlio_alloc(SCRATCH_BYTES, /*psram=*/true);
     fl::u8 *output_sram = fl_parlio_alloc(OUTPUT_BYTES, /*psram=*/false);
-    fl::u8 *output_psram = fl_parlio_alloc(OUTPUT_BYTES, /*psram=*/true);
 
-    if (!scratch_sram || !scratch_psram || !output_sram || !output_psram) {
-        // Partial alloc failed; bail with zeros so the caller knows.
+    if (!scratch_sram || !output_sram) {
         heap_caps_free(scratch_sram);
-        heap_caps_free(scratch_psram);
         heap_caps_free(output_sram);
-        heap_caps_free(output_psram);
+        result.iters = 0;
         return result;
     }
 
-    // Fill both scratches with representative LED data.
+    fl::u8 *scratch_psram = fl_parlio_alloc(SCRATCH_BYTES, /*psram=*/true);
+    fl::u8 *output_psram = fl_parlio_alloc(OUTPUT_BYTES, /*psram=*/true);
+    result.scratch_psram_ok = scratch_psram != nullptr;
+    result.output_psram_ok = output_psram != nullptr;
+
+    if (!scratch_psram) {
+        scratch_psram = scratch_sram;
+    }
+    if (!output_psram) {
+        output_psram = output_sram;
+    }
+
+    // Fill scratch buffers with representative LED data.
     for (fl::size_t i = 0; i < SCRATCH_BYTES; ++i) {
         const fl::u8 v = static_cast<fl::u8>((i * 31 + 7) & 0xFF);
         scratch_sram[i] = v;
-        scratch_psram[i] = v;
+        if (result.scratch_psram_ok) {
+            scratch_psram[i] = v;
+        }
     }
     fl::memset(output_sram, 0, OUTPUT_BYTES);
-    fl::memset(output_psram, 0, OUTPUT_BYTES);
+    if (result.output_psram_ok) {
+        fl::memset(output_psram, 0, OUTPUT_BYTES);
+    }
 
     volatile fl::u32 sink = 0;
 
@@ -174,26 +231,35 @@ inline ParlioEncodeResult measureParlioEncode(int iters_in = 12000) {
     fl_parlio_measure(scratch_sram, SCRATCH_BYTES, output_sram, OUTPUT_BYTES,
                       byte_lut, 64, &sink);
 
-    // Four placements. Each runs the same iters so totals are comparable.
     result.perpos_ss_us = fl_parlio_measure(
         scratch_sram, SCRATCH_BYTES, output_sram, OUTPUT_BYTES,
         byte_lut, iters_in, &sink);
-    result.perpos_sp_us = fl_parlio_measure(
-        scratch_sram, SCRATCH_BYTES, output_psram, OUTPUT_BYTES,
-        byte_lut, iters_in, &sink);
-    result.perpos_ps_us = fl_parlio_measure(
-        scratch_psram, SCRATCH_BYTES, output_sram, OUTPUT_BYTES,
-        byte_lut, iters_in, &sink);
-    result.perpos_pp_us = fl_parlio_measure(
-        scratch_psram, SCRATCH_BYTES, output_psram, OUTPUT_BYTES,
-        byte_lut, iters_in, &sink);
+    if (result.output_psram_ok) {
+        result.perpos_sp_us = fl_parlio_measure(
+            scratch_sram, SCRATCH_BYTES, output_psram, OUTPUT_BYTES,
+            byte_lut, iters_in, &sink);
+    }
+    if (result.scratch_psram_ok) {
+        result.perpos_ps_us = fl_parlio_measure(
+            scratch_psram, SCRATCH_BYTES, output_sram, OUTPUT_BYTES,
+            byte_lut, iters_in, &sink);
+    }
+    if (result.scratch_psram_ok && result.output_psram_ok) {
+        result.perpos_pp_us = fl_parlio_measure(
+            scratch_psram, SCRATCH_BYTES, output_psram, OUTPUT_BYTES,
+            byte_lut, iters_in, &sink);
+    }
 
     result.sink = static_cast<fl::u32>(sink);
 
     heap_caps_free(scratch_sram);
-    heap_caps_free(scratch_psram);
+    if (result.scratch_psram_ok) {
+        heap_caps_free(scratch_psram);
+    }
     heap_caps_free(output_sram);
-    heap_caps_free(output_psram);
+    if (result.output_psram_ok) {
+        heap_caps_free(output_psram);
+    }
     return result;
 }
 
@@ -232,6 +298,9 @@ inline void printParlioEncodeResultRom(const ParlioEncodeResult &r) {
     esp_rom_printf("\nBENCH_PARLIO_START (16 lanes x 256 LEDs, byte-LUT, #2526 follow-up)\n");  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
     esp_rom_printf("BENCH_PARLIO iters=%u lanes=%u leds=%u sink=%u\n",  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
                    r.iters, r.lanes, r.leds_per_lane, r.sink);
+    esp_rom_printf("BENCH_PARLIO psram scratch=%u output=%u\n",  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
+                   r.scratch_psram_ok ? 1u : 0u,
+                   r.output_psram_ok ? 1u : 0u);
     esp_rom_printf("BENCH_PARLIO perpos_us  ss=%u sp=%u ps=%u pp=%u\n",  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
                    r.perpos_ss_us, r.perpos_sp_us, r.perpos_ps_us, r.perpos_pp_us);
     esp_rom_printf("BENCH_PARLIO perpos_ns_each  ss=%u sp=%u ps=%u pp=%u\n",  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)

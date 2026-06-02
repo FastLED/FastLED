@@ -48,7 +48,9 @@ namespace fl {
 UsbSerialJtagEsp32::UsbSerialJtagEsp32(const UsbSerialJtagConfig& config)
     : mConfig(config)
     , mBuffered(false)
-    , mInstalledDriver(false) {
+    , mInstalledDriver(false)
+    , mHasPeek(false)
+    , mPeekByte(0) {
 
     // Initialize driver
     initDriver();
@@ -67,10 +69,14 @@ UsbSerialJtagEsp32::~UsbSerialJtagEsp32() {
 UsbSerialJtagEsp32::UsbSerialJtagEsp32(UsbSerialJtagEsp32&& other) FL_NOEXCEPT
     : mConfig(other.mConfig)
     , mBuffered(other.mBuffered)
-    , mInstalledDriver(other.mInstalledDriver) {
+    , mInstalledDriver(other.mInstalledDriver)
+    , mHasPeek(other.mHasPeek)
+    , mPeekByte(other.mPeekByte) {
     // Mark other as invalid (prevent double-uninstall)
     other.mBuffered = false;
     other.mInstalledDriver = false;
+    other.mHasPeek = false;
+    other.mPeekByte = 0;
 }
 
 UsbSerialJtagEsp32& UsbSerialJtagEsp32::operator=(UsbSerialJtagEsp32&& other) FL_NOEXCEPT {
@@ -86,10 +92,14 @@ UsbSerialJtagEsp32& UsbSerialJtagEsp32::operator=(UsbSerialJtagEsp32&& other) FL
         mConfig = other.mConfig;
         mBuffered = other.mBuffered;
         mInstalledDriver = other.mInstalledDriver;
+        mHasPeek = other.mHasPeek;
+        mPeekByte = other.mPeekByte;
 
         // Mark other as invalid
         other.mBuffered = false;
         other.mInstalledDriver = false;
+        other.mHasPeek = false;
+        other.mPeekByte = 0;
     }
     return *this;
 }
@@ -295,10 +305,18 @@ int UsbSerialJtagEsp32::available() FL_NOEXCEPT {
         return 0;  // Driver not installed, no data available
     }
 
-    // USB-Serial JTAG doesn't have a direct "get buffered data length" API
-    // We can try a non-blocking read with len=0 to check, but that's not standard
-    // For now, return 0 (not implemented)
-    // TODO: Check if there's a better way to query RX buffer status
+    if (mHasPeek) {
+        return 1;
+    }
+
+    u8 c = 0;
+    int len = usb_serial_jtag_read_bytes(&c, 1, 0);  // timeout=0 (non-blocking)
+    if (len == 1) {
+        mPeekByte = c;
+        mHasPeek = true;
+        return 1;
+    }
+
     return 0;
 #else
     return 0;
@@ -309,6 +327,11 @@ int UsbSerialJtagEsp32::read() FL_NOEXCEPT {
 #ifdef FL_HAS_USB_SERIAL_JTAG
     if (!mBuffered) {
         return -1;  // Driver not installed, cannot read
+    }
+
+    if (mHasPeek) {
+        mHasPeek = false;
+        return static_cast<int>(mPeekByte);
     }
 
     u8 c = 0;

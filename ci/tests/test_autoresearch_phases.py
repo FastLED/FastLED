@@ -334,7 +334,9 @@ class TestResolvePortAndEnvironment:
         ctx.args = _make_args(upload_port=None)
         mock_result = MagicMock(ok=True, selected_port="COM5")
         with (
-            patch(f"{_PATCH_MOD}.auto_detect_upload_port", return_value=mock_result),
+            patch(
+                f"{_PATCH_MOD}.auto_detect_upload_port", return_value=mock_result
+            ) as auto_detect,
             patch(
                 f"{_PATCH_MOD}.select_build_driver", return_value=_make_mock_driver()
             ),
@@ -346,6 +348,29 @@ class TestResolvePortAndEnvironment:
             rc = asyncio.run(_resolve_port_and_environment(ctx))
         assert rc is None
         assert ctx.upload_port == "COM5"
+        assert ctx.final_environment == "esp32s3"
+        auto_detect.assert_called_once_with(expected_environment="esp32s3")
+
+    def test_auto_detect_port_uses_requested_environment(self) -> None:
+        ctx = _make_ctx(upload_port=None, final_environment="esp32c6")
+        ctx.args = _make_args(upload_port=None, environment="esp32c6")
+        mock_result = MagicMock(ok=True, selected_port="COM9")
+        with (
+            patch(
+                f"{_PATCH_MOD}.auto_detect_upload_port", return_value=mock_result
+            ) as auto_detect,
+            patch(
+                f"{_PATCH_MOD}.select_build_driver", return_value=_make_mock_driver()
+            ),
+            patch(
+                "ci.util.pio_package_daemon.get_default_environment",
+                return_value=None,
+            ),
+        ):
+            rc = asyncio.run(_resolve_port_and_environment(ctx))
+        assert rc is None
+        assert ctx.upload_port == "COM9"
+        auto_detect.assert_called_once_with(expected_environment="esp32c6")
 
     def test_cli_upload_port(self) -> None:
         ctx = _make_ctx(upload_port=None)
