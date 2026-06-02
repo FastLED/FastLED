@@ -32,7 +32,7 @@
 #include "fl/stl/vector.h"
 
 #if defined(ESP32) && FASTLED_ESP32_HAS_PARLIO
-#include "platforms/esp/32/drivers/parlio/parlio_engine.h"
+#include "platforms/esp/32/drivers/parlio/parlio_engine.h"  // ok platform headers - AutoResearch is the canonical ESP32 PARLIO live-driver scratch sketch and needs the deep driver header for streaming diagnostics
 #endif
 
 #if defined(ARDUINO_ARCH_ESP32) || defined(ESP_PLATFORM)

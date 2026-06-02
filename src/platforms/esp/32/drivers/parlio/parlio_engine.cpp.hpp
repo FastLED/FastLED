@@ -16,6 +16,7 @@
 #if (defined(FL_IS_ESP32) && FASTLED_ESP32_HAS_PARLIO) || defined(FASTLED_STUB_IMPL)
 
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/int.h"  // For fl::u32
 #include "platforms/memory_barrier.h"  // For FL_MEMORY_BARRIER
 
 #include "platforms/esp/32/drivers/parlio/parlio_engine.h"
@@ -69,7 +70,7 @@ bool parlioDmaPsramAvailable() FL_NOEXCEPT {
 #ifdef FASTLED_STUB_IMPL
     return false;
 #else
-    constexpr uint32_t caps = MALLOC_CAP_SPIRAM | MALLOC_CAP_DMA | MALLOC_CAP_8BIT;
+    constexpr fl::u32 caps = MALLOC_CAP_SPIRAM | MALLOC_CAP_DMA | MALLOC_CAP_8BIT;
     return heap_caps_get_largest_free_block(caps) > 0;
 #endif
 }
@@ -82,7 +83,7 @@ bool parlioCanAllocateInternalDmaRing(size_t bytes_per_buffer, size_t buffer_cou
 #else
     const size_t aligned_size = ((bytes_per_buffer + 63) / 64) * 64;
     const size_t required_total = aligned_size * buffer_count;
-    constexpr uint32_t caps = MALLOC_CAP_DMA | MALLOC_CAP_8BIT;
+    constexpr fl::u32 caps = MALLOC_CAP_DMA | MALLOC_CAP_8BIT;
     return heap_caps_get_largest_free_block(caps) >= aligned_size &&
            heap_caps_get_free_size(caps) >= required_total;
 #endif
