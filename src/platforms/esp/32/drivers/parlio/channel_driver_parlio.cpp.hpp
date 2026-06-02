@@ -25,6 +25,7 @@
 #include "fl/log/log.h"
 #include "fl/log/log.h"
 #include "fl/stl/algorithm.h"
+#include "fl/system/fastpin.h"
 #include "fl/system/trace.h"
 #include "fl/stl/assert.h"
 #include "fl/stl/noexcept.h"
@@ -35,6 +36,21 @@
 #endif // defined(FL_ESP_PARLIO_MAX_LEDS_PER_CHANNEL)
 
 namespace fl {
+
+namespace {
+
+inline bool isValidParlioOutputPin(int pin) FL_NOEXCEPT {
+    if (pin < 0 || pin >= 64) {
+        return false;
+    }
+#if defined(_FL_VALID_PIN_MASK)
+    return (_FL_VALID_PIN_MASK & (1ULL << pin)) != 0;
+#else
+    return true;
+#endif
+}
+
+} // namespace
 
 //=============================================================================
 // Constructors / Destructors - Implementation Class
@@ -306,6 +322,12 @@ void ChannelDriverPARLIOImpl::beginTransmission(
     fl::vector<int> pins;
     for (size_t i = 0; i < channel_count; i++) {
         int pin = channelData[i]->getPin();
+        if (!isValidParlioOutputPin(pin)) {
+            FL_WARN("PARLIO: Invalid output GPIO "
+                    << pin
+                    << " for this ESP32 target; refusing to configure PARLIO");
+            return;
+        }
         pins.push_back(pin);
     }
 

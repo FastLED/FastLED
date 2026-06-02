@@ -40,6 +40,17 @@ namespace parlio_stream {
 
 constexpr int kMaxIterations = 16;  // result struct iter timing array fixed size
 
+inline bool isFastLedOutputPinValid(int pin) {
+    if (pin < 0 || pin >= 64) {
+        return false;
+    }
+#if defined(_FL_VALID_PIN_MASK)
+    return (_FL_VALID_PIN_MASK & (1ULL << pin)) != 0;
+#else
+    return true;
+#endif
+}
+
 struct ValidateResult {
     bool channels_ok;          // true if all PARLIO channels created cleanly
     bool completed;            // true if every iteration completed within timeout
@@ -105,8 +116,13 @@ inline ValidateResult validateParlioStreaming(int base_tx_pin,
 
     fl::vector<fl::shared_ptr<fl::Channel>> channels;
     for (int lane = 0; lane < num_lanes; ++lane) {
+        const int tx_pin = base_tx_pin + lane;
+        if (!isFastLedOutputPinValid(tx_pin)) {
+            FastLED.clear(ClearFlags::CHANNELS);
+            return r;
+        }
         fl::ChannelConfig cfg(
-            base_tx_pin + lane,
+            tx_pin,
             timing,
             fl::span<CRGB>(leds[lane], num_leds),
             RGB,
