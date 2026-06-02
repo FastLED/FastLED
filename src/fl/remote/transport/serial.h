@@ -9,12 +9,16 @@
 #include "fl/stl/int.h"
 #include "fl/stl/cctype.h"
 #include "fl/stl/chrono.h"
-// Note: fl/stl/cstdio.h intentionally NOT included directly — workaround
-// for zackees/zccache#619 (Windows PCH path-spelling drift). Reachable
-// transitively via fl/stl/strstream.h -> fl/stl/ostream.h -> cstdio.h
-// further below in this file, which is the same canonicalized path the
-// PCH uses. Symbols this header consumes (fl::println, fl::available,
-// fl::read, fl::readLine) stay in scope through that chain.
+// fl/stl/cstdio.h is REQUIRED here: this header calls fl::available,
+// fl::read, fl::readLine, and fl::println, all declared in cstdio.h. PR
+// #2685 tried to drop this include and rely on a strstream.h -> ostream.h
+// -> cstdio.h transitive chain to work around zackees/zccache#619
+// (Windows PCH path-spelling drift), but strstream.h does NOT include
+// ostream.h, so the chain is broken on every non-PCH build (teensy,
+// every Arduino ARM/AVR target, etc.) — see issue #2647-style follow-up.
+// The Windows PCH dedup issue is fixed by the meson.build path
+// normalization that landed in the same PR.
+#include "fl/stl/cstdio.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/function.h"
 #include "fl/stl/optional.h"
