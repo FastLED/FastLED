@@ -154,7 +154,7 @@ Lane Configuration:
     --lanes 2          Test with exactly 2 lanes
     --lanes 1-4        Test with 1 to 4 lanes (tests all combinations)
     --lane-counts 100,200,300  3 lanes with 100, 200, 300 LEDs per lane
-    Default: 1-8 lanes (firmware default)
+    Default: 1 lane; valid range: 1-16 lanes
 
 Color Pattern Configuration:
   Configure custom color pattern for autoresearch testing:
@@ -449,7 +449,7 @@ See Also:
             "--lanes",
             type=str,
             metavar="N or MIN-MAX",
-            help="Lane count: single number (e.g., '2') or range (e.g., '1-4'). Default: 1-8",
+            help="Lane count: single number (e.g., '2') or range (e.g., '1-4'). Valid range: 1-16",
         )
         lane_group.add_argument(
             "--lane-counts",

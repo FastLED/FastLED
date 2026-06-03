@@ -56,14 +56,17 @@ FL_TEST_CASE("Invalid lane count - 0 lanes") {
     FL_CHECK(result.error_message.has_value());
 }
 
-FL_TEST_CASE("Invalid lane count - more than 8 lanes") {
+FL_TEST_CASE("Invalid lane count - more than 16 lanes") {
     SingleTestConfig config = makeBasicConfig();
-    config.lane_sizes = {100, 100, 100, 100, 100, 100, 100, 100, 100}; // 9 lanes
+    config.lane_sizes = {
+        100, 100, 100, 100, 100, 100, 100, 100, 100,
+        100, 100, 100, 100, 100, 100, 100, 100}; // 17 lanes
 
     SingleTestResult result = runSingleValidationTest(config);
 
     FL_CHECK_FALSE(result.success);
     FL_CHECK(result.error_message.has_value());
+    FL_CHECK(result.error_message.value() == "Lane count cannot exceed 16");
 }
 
 FL_TEST_CASE("Multiple iterations") {
@@ -150,14 +153,16 @@ FL_TEST_CASE("Invalid pattern - empty") {
     FL_CHECK(result.error_message.has_value());
 }
 
-FL_TEST_CASE("Large lane count - 8 lanes (maximum allowed)") {
+FL_TEST_CASE("Large lane count - 16 lanes (maximum allowed)") {
     SingleTestConfig config = makeBasicConfig();
-    config.lane_sizes = {100, 100, 100, 100, 100, 100, 100, 100}; // 8 lanes
+    config.lane_sizes = {
+        100, 100, 100, 100, 100, 100, 100, 100,
+        100, 100, 100, 100, 100, 100, 100, 100}; // 16 lanes
 
     SingleTestResult result = runSingleValidationTest(config);
 
     FL_CHECK(result.success);
-    FL_CHECK(result.lane_count == 8);
+    FL_CHECK(result.lane_count == 16);
 }
 
 } // FL_TEST_FILE

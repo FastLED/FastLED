@@ -53,6 +53,8 @@ if TYPE_CHECKING:
 # Helpers
 # ============================================================
 
+MAX_AUTORESEARCH_LANES = 16
+
 
 def _is_native_platform(environment: str | None) -> bool:
     """Check if the target is the native/stub (host) platform."""
@@ -338,6 +340,18 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             "\u2139\ufe0f  Legacy API mode: using WS2812B<PIN> template path (single-lane, pin 0-8)"
         )
 
+    if min_lanes is not None and max_lanes is not None:
+        if min_lanes < 1 or max_lanes < 1 or min_lanes > max_lanes:
+            print(
+                f"\u274c Error: Invalid lane range {min_lanes}-{max_lanes} (expected 1-{MAX_AUTORESEARCH_LANES})"
+            )
+            return 1
+        if max_lanes > MAX_AUTORESEARCH_LANES:
+            print(
+                f"\u274c Error: Lane count must be 1-{MAX_AUTORESEARCH_LANES}, got max {max_lanes}"
+            )
+            return 1
+
     # Parse --lane-counts argument
     per_lane_counts: list[int] | None = None
     if args.lane_counts:
@@ -349,9 +363,9 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             if any(c <= 0 for c in per_lane_counts):
                 print("\u274c Error: All lane counts must be positive integers")
                 return 1
-            if len(per_lane_counts) < 1 or len(per_lane_counts) > 8:
+            if len(per_lane_counts) < 1 or len(per_lane_counts) > MAX_AUTORESEARCH_LANES:
                 print(
-                    f"\u274c Error: Lane count must be 1-8, got {len(per_lane_counts)} lanes"
+                    f"\u274c Error: Lane count must be 1-{MAX_AUTORESEARCH_LANES}, got {len(per_lane_counts)} lanes"
                 )
                 return 1
         except ValueError:

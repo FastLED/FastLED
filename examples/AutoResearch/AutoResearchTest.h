@@ -48,8 +48,8 @@ struct TestContext {
     const char* timing_name;      ///< Timing name (e.g., "WS2812B-V5")
     const char* rx_type_name;     ///< RX device type name (e.g., "RMT", "ISR")
     const char* pattern_name;     ///< Pattern name (e.g., "Pattern A (R=0xF0...)")
-    int lane_count;               ///< Total number of lanes (1-8)
-    int lane_index;               ///< Current lane index (0-7)
+    int lane_count;               ///< Total number of lanes (1-16)
+    int lane_index;               ///< Current lane index (0-15)
     int base_strip_size;          ///< Base strip size (10 or 300 LEDs)
     int num_leds;                 ///< Number of LEDs in this lane
     int pin_number;               ///< TX pin number for this lane

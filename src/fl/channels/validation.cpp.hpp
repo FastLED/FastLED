@@ -28,16 +28,16 @@ SingleTestResult runSingleValidationTest(const SingleTestConfig& config) {
         return result;
     }
 
-    // Validate lane count (1-8 lanes)
+    // Validate lane count (1-16 lanes)
     if (config.lane_sizes.empty()) {
         result.success = false;
         result.error_message = "Lane count must be at least 1";
         return result;
     }
 
-    if (config.lane_sizes.size() > 8) {
+    if (config.lane_sizes.size() > 16) {
         result.success = false;
-        result.error_message = "Lane count cannot exceed 8";
+        result.error_message = "Lane count cannot exceed 16";
         return result;
     }
 

@@ -85,6 +85,16 @@ ChannelDataPtr createClocklessChannelData(int pin, size_t numLeds) {
     return ChannelData::create(pin, timing, fl::move(data));
 }
 
+ChannelDataPtr createClocklessChannelDataBytes(int pin, size_t numBytes) {
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    fl::vector_psram<u8> data;
+    data.resize(numBytes);
+    for (size_t i = 0; i < numBytes; i++) {
+        data[i] = static_cast<u8>(i % 256);
+    }
+    return ChannelData::create(pin, timing, fl::move(data));
+}
+
 } // anonymous namespace
 
 //=============================================================================
@@ -195,6 +205,31 @@ FL_TEST_CASE("ChannelDriverLcdClockless - multi-chunk") {
     mock.simulateTransmitComplete();
     FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
     FL_CHECK(mock.getTransmitCount() == 3);
+}
+
+FL_TEST_CASE("ChannelDriverLcdClockless - awkward chunk size rounds up") {
+    resetMockState();
+    auto peripheral = createMockPeripheral();
+    ChannelDriverLcdClockless driver(peripheral);
+    auto &mock = LcdSpiPeripheralMock::instance();
+
+    driver.setChunkInputBytesForTest(1024);
+
+    auto data = createClocklessChannelDataBytes(5, 1025);
+    driver.enqueue(data);
+    driver.show();
+
+    FL_CHECK(mock.getTransmitCount() == 1);
+
+    mock.simulateTransmitComplete();
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
+    FL_CHECK(mock.getTransmitCount() == 2);
+
+    const auto &history = mock.getTransmitHistory();
+    FL_REQUIRE(history.size() == 2);
+    const size_t dmaBytesPerInputByte = 16 * sizeof(Wave3Byte);
+    FL_CHECK(history[0].size_bytes == 513 * dmaBytesPerInputByte);
+    FL_CHECK(history[1].size_bytes == 512 * dmaBytesPerInputByte);
 }
 
 //=============================================================================
