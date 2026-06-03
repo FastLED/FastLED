@@ -5,7 +5,14 @@
 /// Demonstrates beat detection using the Processor facade.
 /// Visualizes beats and tempo on an LED strip - flashes on beat detection.
 
+// @filter: (memory is large)
+
 #include <FastLED.h>
+
+#if defined(FL_IS_TEENSY)
+// Keep fbuild's library scanner aware of PJRC Audio sources for Teensy.
+#include <Audio.h>
+#endif
 
 #if !SKETCH_HAS_LARGE_MEMORY
 // Platform does not have enough memory

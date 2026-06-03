@@ -645,6 +645,84 @@ class TestPintestFilter:
         assert "atmega8" in reason.lower() or "board" in reason.lower()
 
 
+class TestAudioInputFilter:
+    """Test AudioInput example filter behavior."""
+
+    def test_audio_input_skips_small_teensy_boards(self) -> None:
+        """AudioInput requires Teensy boards with enough RAM for PJRC Audio."""
+        audio_input_path = (
+            Path(__file__).parent.parent.parent
+            / "examples"
+            / "AudioInput"
+            / "AudioInput.ino"
+        )
+        sketch_filter = parse_filter_from_sketch(audio_input_path)
+
+        assert sketch_filter is not None, "AudioInput should have a @filter directive"
+
+        cases = [
+            (
+                Board(board_name="teensy30", platform="teensy", framework="arduino"),
+                True,
+            ),
+            (
+                Board(board_name="teensylc", platform="teensy", framework="arduino"),
+                True,
+            ),
+            (
+                Board(board_name="teensy41", platform="teensy", framework="arduino"),
+                False,
+            ),
+            (
+                Board(board_name="esp32dev", platform="esp32", framework="arduino"),
+                False,
+            ),
+        ]
+
+        for board, should_skip_expected in cases:
+            should_skip, reason = should_skip_sketch(board, sketch_filter)
+            assert should_skip is should_skip_expected, (
+                f"unexpected AudioInput filter result for {board.board_name}: {reason}"
+            )
+
+
+class TestBeatDetectionFilter:
+    """Test BeatDetection example filter behavior."""
+
+    def test_beat_detection_skips_small_teensy_boards(self) -> None:
+        """BeatDetection uses UIAudio and should skip low-memory Teensy boards."""
+        beat_detection_path = (
+            Path(__file__).parent.parent.parent
+            / "examples"
+            / "BeatDetection"
+            / "BeatDetection.ino"
+        )
+        sketch_filter = parse_filter_from_sketch(beat_detection_path)
+
+        assert sketch_filter is not None, "BeatDetection should have a @filter directive"
+
+        cases = [
+            (
+                Board(board_name="teensy30", platform="teensy", framework="arduino"),
+                True,
+            ),
+            (
+                Board(board_name="teensylc", platform="teensy", framework="arduino"),
+                True,
+            ),
+            (
+                Board(board_name="teensy41", platform="teensy", framework="arduino"),
+                False,
+            ),
+        ]
+
+        for board, should_skip_expected in cases:
+            should_skip, reason = should_skip_sketch(board, sketch_filter)
+            assert should_skip is should_skip_expected, (
+                f"unexpected BeatDetection filter result for {board.board_name}: {reason}"
+            )
+
+
 class TestMemoryTierMatching:
     """Test three-tier memory classification: low < large < huge."""
 

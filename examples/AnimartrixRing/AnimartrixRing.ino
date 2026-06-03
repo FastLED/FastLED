@@ -11,6 +11,11 @@
 // build system
 #include "FastLED.h"
 
+#if defined(FL_IS_TEENSY)
+// Keep fbuild's library scanner aware of PJRC Audio sources for Teensy.
+#include <Audio.h>
+#endif
+
 #include "fl/math/math.h"
 #include "fl/math/screenmap.h"
 #include "fl/ui/ui.h"
