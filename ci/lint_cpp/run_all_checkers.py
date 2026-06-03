@@ -61,6 +61,7 @@ from ci.lint_cpp.pch_file_checker import check as check_pch_files
 from ci.lint_cpp.platform_includes_checker import PlatformIncludesChecker
 from ci.lint_cpp.platform_pragma_checker import PlatformPragmaChecker
 from ci.lint_cpp.pragma_once_checker import PragmaOnceChecker
+from ci.lint_cpp.public_settings_pattern_checker import PublicSettingsPatternChecker
 from ci.lint_cpp.raw_noexcept_checker import RawNoexceptChecker
 from ci.lint_cpp.raw_pragma_checker import RawPragmaChecker
 from ci.lint_cpp.reinterpret_cast_checker import ReinterpretCastChecker
@@ -275,6 +276,7 @@ def create_checkers(
         # causes cascading ambiguity with fl::detail, fl::simd, etc.
         EnumClassChecker(),  # Checks for plain enum — use enum class for type safety
         NoexceptSpecialMembersChecker(),  # Checks special member functions have FL_NOEXCEPT
+        PublicSettingsPatternChecker(),  # Checks fl::set_*/enable_*/disable_*/use_* free functions have CFastLED wrappers
     ]
 
     # lib8tion/ directory checkers with STRICT enforcement
