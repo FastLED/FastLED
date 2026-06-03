@@ -148,8 +148,6 @@ def parse_rust_json_output(stdout: str | None) -> list[dict[str, Any]]:
             continue
         try:
             value, _end = decoder.raw_decode(text[index:])
-        except KeyboardInterrupt:
-            raise
         except json.JSONDecodeError:
             continue
         if isinstance(value, list):
