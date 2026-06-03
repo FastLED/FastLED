@@ -17,8 +17,10 @@ dependencies = [
     # esp32c6 hang reported in fbuild#346 and unblock flipping
     # FASTLED_USE_FBUILD_CI=1 default-on in a follow-up. Also preserves
     # quoted Adafruit nRF52 BSP defines in response files, unblocking
-    # nRF52840 builds under fbuild.
-    "fbuild==2.2.15",
+    # nRF52840 builds under fbuild. Also completes ESP32-C2 framework
+    # skeleton installs and patches the missing touch_sensor_legacy_types.h
+    # no-touch compatibility header (FastLED/fbuild#378).
+    "fbuild==2.2.16",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
