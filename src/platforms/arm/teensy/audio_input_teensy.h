@@ -9,17 +9,16 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/span.h"
 #include "fl/stl/shared_ptr.h"
-#include "platforms/arm/teensy/is_teensy.h"
+#include "platforms/arm/teensy/audio_input_teensy_config.h"
 
 // Detect Teensy Audio Library availability
-#if defined(FL_IS_TEENSY) && FL_HAS_INCLUDE(<Audio.h>)
-#define TEENSY_AUDIO_LIBRARY_AVAILABLE 1
+#if TEENSY_AUDIO_LIBRARY_AVAILABLE
 // IWYU pragma: begin_keep
-#include <Audio.h>  // ok include
+#define FASTLED_TEENSY_AUDIO_LIBRARY_HEADER <Audio.h>
+#include FASTLED_TEENSY_AUDIO_LIBRARY_HEADER
+#undef FASTLED_TEENSY_AUDIO_LIBRARY_HEADER
 #include "fl/stl/noexcept.h"
 // IWYU pragma: end_keep
-#else
-#define TEENSY_AUDIO_LIBRARY_AVAILABLE 0
 #endif
 
 namespace fl {

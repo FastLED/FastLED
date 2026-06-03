@@ -15,23 +15,16 @@
 
 // First check for Teensy (before Arduino, since Teensy is Arduino-compatible)
 // IWYU pragma: begin_keep
-#include "platforms/arm/teensy/is_teensy.h" // ok platform headers
+#include "platforms/arm/teensy/audio_input_teensy_config.h" // ok platform headers
 // IWYU pragma: end_keep
-#ifndef FASTLED_USES_TEENSY_AUDIO_INPUT
-  #if defined(FL_IS_TEENSY)
-    #define FASTLED_USES_TEENSY_AUDIO_INPUT 1
-  #else
-    #define FASTLED_USES_TEENSY_AUDIO_INPUT 0
-  #endif
-#endif
 
 #ifndef FASTLED_USES_ARDUINO_AUDIO_INPUT
   #if defined(FL_IS_ESP32) && !defined(FL_IS_ESP8266)
     #define FASTLED_USES_ARDUINO_AUDIO_INPUT 0
   #elif defined(FL_IS_WASM)
     #define FASTLED_USES_ARDUINO_AUDIO_INPUT 0
-  #elif FASTLED_USES_TEENSY_AUDIO_INPUT
-    // Teensy uses its own audio implementation, not generic Arduino
+  #elif defined(FL_IS_TEENSY)
+    // Teensy uses the PJRC Audio backend when enabled, never generic Arduino I2S.
     #define FASTLED_USES_ARDUINO_AUDIO_INPUT 0
   #elif FL_HAS_INCLUDE(<Arduino.h>)
     #define FASTLED_USES_ARDUINO_AUDIO_INPUT 1
@@ -64,7 +57,10 @@
 // Include platform-specific audio input implementation
 // IWYU pragma: begin_keep
 #if FASTLED_USES_TEENSY_AUDIO_INPUT
-#include "platforms/arm/teensy/audio_input_teensy.h" // ok platform headers
+#define FASTLED_TEENSY_AUDIO_INPUT_HEADER                                    \
+    "platforms/arm/teensy/audio_input_teensy.h"
+#include FASTLED_TEENSY_AUDIO_INPUT_HEADER
+#undef FASTLED_TEENSY_AUDIO_INPUT_HEADER
 #elif FASTLED_USES_ARDUINO_AUDIO_INPUT
 #include "platforms/arduino/audio_input.hpp" // ok platform headers
 #elif FASTLED_USES_ESP32_AUDIO_INPUT

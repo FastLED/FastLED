@@ -2,11 +2,11 @@
 #pragma once
 
 #include "fl/stl/has_include.h"
-#include "platforms/arm/teensy/is_teensy.h"
+#include "platforms/arm/teensy/audio_input_teensy_config.h"
 
 // Check for Teensy with Audio Library first
 #if !defined(FASTLED_HAS_AUDIO_INPUT)
-  #if defined(FL_IS_TEENSY) && FL_HAS_INCLUDE(<Audio.h>)
+  #if FASTLED_USES_TEENSY_AUDIO_INPUT && TEENSY_AUDIO_LIBRARY_AVAILABLE
     #define FASTLED_HAS_AUDIO_INPUT 1
   #endif
 #endif

@@ -1,4 +1,4 @@
-// @filter: (platform is teensy) or (platform is esp32)
+// @filter: ((platform is teensy) and (memory is large)) or (platform is esp32)
 
 // I2S Audio Input Example
 // This example demonstrates using I2S audio input to control FastLED strips
