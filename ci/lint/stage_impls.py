@@ -190,7 +190,12 @@ def run_noexcept_check(run_tidy: bool) -> bool:
     return False
 
 
-def run_cpp_lint(no_fingerprint: bool, run_full: bool, run_iwyu: bool) -> bool:
+def run_cpp_lint(
+    no_fingerprint: bool,
+    run_full: bool,
+    run_iwyu: bool,
+    use_rust_cpp_lint: bool = False,
+) -> bool:
     """
     Run C++ linting stage.
 
@@ -256,10 +261,24 @@ def run_cpp_lint(no_fingerprint: bool, run_full: bool, run_iwyu: bool) -> bool:
             "Running unified C++ checker (all linters + unity build + cpp_lint in one pass)"
         )
 
-        result = subprocess.run(
-            ["uv", "run", "python", "ci/lint_cpp/run_all_checkers.py"],
-            capture_output=False,
+        cmd = ["uv", "run", "python", "ci/lint_cpp/run_all_checkers.py"]
+        if use_rust_cpp_lint:
+            cmd.append("--rust")
+
+        result = RunningProcess.run(
+            cmd,
+            cwd=None,
+            check=False,
+            timeout=300,
         )
+        if result.stdout:
+            print(result.stdout, end="" if result.stdout.endswith("\n") else "\n")
+        if result.stderr:
+            print(
+                result.stderr,
+                file=sys.stderr,
+                end="" if result.stderr.endswith("\n") else "\n",
+            )
 
         if result.returncode == 0:
             if not no_fingerprint:
@@ -672,7 +691,9 @@ def run_python_pipeline(no_fingerprint: bool, run_pyright_flag: bool) -> bool:
     return True
 
 
-def run_cpp_lint_single_file(file_path: str, strict: bool = False) -> bool:
+def run_cpp_lint_single_file(
+    file_path: str, strict: bool = False, use_rust_cpp_lint: bool = False
+) -> bool:
     """Run C++ linting on a single file (checkers + optional IWYU).
 
     Delegates to run_all_checkers.py which already supports single-file mode.
@@ -692,10 +713,19 @@ def run_cpp_lint_single_file(file_path: str, strict: bool = False) -> bool:
     print(f"🔧 C++ lint: {os.path.relpath(file_path)}")
 
     # STEP 1: Run standard C++ checkers FIRST
-    result = subprocess.run(
-        ["uv", "run", "python", "ci/lint_cpp/run_all_checkers.py", file_path],
-        capture_output=False,
-    )
+    cmd = ["uv", "run", "python", "ci/lint_cpp/run_all_checkers.py"]
+    if use_rust_cpp_lint:
+        cmd.append("--rust")
+    cmd.append(file_path)
+    result = RunningProcess.run(cmd, cwd=None, check=False, timeout=300)
+    if result.stdout:
+        print(result.stdout, end="" if result.stdout.endswith("\n") else "\n")
+    if result.stderr:
+        print(
+            result.stderr,
+            file=sys.stderr,
+            end="" if result.stderr.endswith("\n") else "\n",
+        )
 
     if result.returncode != 0:
         print(f"  ❌ failed")

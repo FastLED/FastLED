@@ -37,7 +37,9 @@ PYTHON_EXTENSIONS = {".py"}
 JS_EXTENSIONS = {".js", ".ts"}
 
 
-def run_single_file_mode(files: list[str], strict: bool = False) -> bool:
+def run_single_file_mode(
+    files: list[str], strict: bool = False, use_rust_cpp_lint: bool = False
+) -> bool:
     """Run linting on specific files, auto-detecting type by extension.
 
     Args:
@@ -48,7 +50,9 @@ def run_single_file_mode(files: list[str], strict: bool = False) -> bool:
     for file_path in files:
         ext = Path(file_path).suffix.lower()
         if ext in CPP_EXTENSIONS:
-            if not run_cpp_lint_single_file(file_path, strict=strict):
+            if not run_cpp_lint_single_file(
+                file_path, strict=strict, use_rust_cpp_lint=use_rust_cpp_lint
+            ):
                 success = False
         elif ext in PYTHON_EXTENSIONS:
             if not run_python_lint_single_file(file_path, strict=strict):
@@ -140,6 +144,9 @@ def print_ai_hints() -> None:
     )
     print("  - Use 'bash lint --js' for JavaScript linting only")
     print("  - Use 'bash lint --cpp' for C++ linting only")
+    print(
+        "  - Use 'bash lint --cpp --rust' to use Rust-backed C++ checkers where available"
+    )
     print("  - Use 'bash lint --full' to include IWYU (Include-What-You-Use) analysis")
     print("  - Use 'bash lint --iwyu' to run IWYU analysis only")
     print("  - Use 'bash lint --iwyu --fix' to auto-fix IWYU violations")
@@ -182,7 +189,12 @@ def create_stages(args: LintArgs) -> list[LintStage]:
 
         def run_cpp_and_iwyu() -> bool:
             """Run C++ linting and IWYU analysis together."""
-            if not run_cpp_lint(args.no_fingerprint, args.run_full, args.run_iwyu):
+            if not run_cpp_lint(
+                args.no_fingerprint,
+                args.run_full,
+                args.run_iwyu,
+                args.use_rust_cpp_lint,
+            ):
                 return False
             if not run_iwyu_pragma_check():
                 return False
@@ -243,7 +255,11 @@ def main() -> int:
         print(f"🔍 Single-file lint mode ({len(args.files)} file(s))")
         print("=" * 50)
         install_signal_handler()
-        success = run_single_file_mode(args.files, strict=args.run_pyright)
+        success = run_single_file_mode(
+            args.files,
+            strict=args.run_pyright,
+            use_rust_cpp_lint=args.use_rust_cpp_lint,
+        )
         return 0 if success else 1
 
     # Cleanup Visual Studio files and crash dumps

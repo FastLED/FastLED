@@ -64,6 +64,12 @@ from ci.lint_cpp.raw_noexcept_checker import RawNoexceptChecker
 from ci.lint_cpp.raw_pragma_checker import RawPragmaChecker
 from ci.lint_cpp.reinterpret_cast_checker import ReinterpretCastChecker
 from ci.lint_cpp.relative_include_checker import RelativeIncludeChecker
+from ci.lint_cpp.rust_bridge import (
+    merge_checker_results,
+    remove_rust_supported_checkers,
+    run_rust_ab_check,
+    run_rust_linter,
+)
 from ci.lint_cpp.serial_printf_checker import SerialPrintfChecker
 from ci.lint_cpp.simd_intrinsics_checker import SimdIntrinsicsChecker
 from ci.lint_cpp.singleton_in_headers_checker import SingletonInHeadersChecker
@@ -748,7 +754,14 @@ def main() -> int:
     parser.add_argument(
         "file", nargs="?", help="Optional: single file to check (faster)"
     )
+    parser.add_argument(
+        "--rust",
+        action="store_true",
+        help="Use the Rust linter for the checker subset it currently supports",
+    )
     args = parser.parse_args()
+    rust_ab = os.environ.get("FL_LINT_AB") == "1"
+    use_rust_fast_path = args.rust and not rust_ab
 
     if args.file:
         # Single file mode
@@ -767,9 +780,14 @@ def main() -> int:
 
         # Create all checker instances
         checkers_by_scope = create_checkers(all_headers=all_headers)
+        rust_results: dict[str, CheckerResults] = {}
+        if use_rust_fast_path:
+            rust_results = run_rust_linter([str(file_path)])
+            remove_rust_supported_checkers(checkers_by_scope)
 
         # Run all applicable checkers on the single file
         results = run_checkers_on_single_file(str(file_path), checkers_by_scope)
+        merge_checker_results(results, rust_results)
 
         # Run targeted unity build check for .cpp.hpp files and build files in src/fl/build/
         is_build_file = "/fl/build/" in str(file_path).replace("\\", "/")
@@ -793,6 +811,8 @@ def main() -> int:
                 results["TestAggregationChecker"] = agg_results
 
         # Format and print results
+        if rust_ab and not run_rust_ab_check(results, [str(file_path)]):
+            return 1
         exit_code = format_and_print_results(results)
 
         return exit_code
@@ -810,9 +830,14 @@ def main() -> int:
 
         # Create all checker instances
         checkers_by_scope = create_checkers(all_headers=all_headers)
+        rust_results: dict[str, CheckerResults] = {}
+        if use_rust_fast_path:
+            rust_results = run_rust_linter()
+            remove_rust_supported_checkers(checkers_by_scope)
 
         # Run all checkers in a single pass per scope
         results = run_checkers(files_by_dir, checkers_by_scope)
+        merge_checker_results(results, rust_results)
 
         # Run unity build structure check (formerly standalone subprocess)
         unity_violation_count, unity_violations = run_unity_build_check()
@@ -839,6 +864,8 @@ def main() -> int:
             results["PchFileChecker"] = pch_results
 
         # Format and print results
+        if rust_ab and not run_rust_ab_check(results):
+            return 1
         exit_code = format_and_print_results(results)
 
         return exit_code
