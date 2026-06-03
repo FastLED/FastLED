@@ -3091,11 +3091,7 @@ fn test_aggregation_check_single_file(file_path: &str) -> Vec<String> {
                         continue;
                     }
                     let rel_file = project_relative_path(&hpp_path).unwrap_or(hpp_path);
-                    violations.push(format!(
-                        "{}: orphaned {}",
-                        python_path_display(&aggregator_rel),
-                        python_path_display(&rel_file)
-                    ));
+                    violations.push(format!("{}: orphaned {}", aggregator_rel, rel_file));
                 }
             }
             for include in parse_aggregator_includes(&aggregator_path) {
@@ -3106,7 +3102,7 @@ fn test_aggregation_check_single_file(file_path: &str) -> Vec<String> {
                 {
                     violations.push(format!(
                         "{}: #include \"{include}\" should use .hpp",
-                        python_path_display(&aggregator_rel)
+                        aggregator_rel
                     ));
                 }
             }
@@ -3124,18 +3120,11 @@ fn test_aggregation_check_single_file(file_path: &str) -> Vec<String> {
             let (aggregator, included_files) =
                 collect_test_aggregation_included_files(&root_prefix, excluded_dir);
             let Some(aggregator_rel) = aggregator else {
-                violations.push(format!(
-                    "Missing aggregator: {}.cpp",
-                    python_path_display(excluded_dir)
-                ));
+                violations.push(format!("Missing aggregator: {}.cpp", excluded_dir));
                 return violations;
             };
             if !included_files.contains(&resolved) {
-                violations.push(format!(
-                    "{}: orphaned {}",
-                    python_path_display(&aggregator_rel),
-                    python_path_display(&project_rel)
-                ));
+                violations.push(format!("{}: orphaned {}", aggregator_rel, project_rel));
             }
             return violations;
         }

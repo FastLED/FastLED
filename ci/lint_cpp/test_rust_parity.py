@@ -13,6 +13,7 @@ from ci.lint_cpp import (
     cpp_hpp_header_pair_checker,
     cpp_hpp_includes_checker,
     fastled_header_usage_checker,
+    headers_exist_checker,
     include_paths_checker,
     is_header_include_checker,
     iwyu_pragma_block_checker,
@@ -21,6 +22,9 @@ from ci.lint_cpp import (
     no_namespace_fl_declaration,
     relative_include_checker,
     serial_printf_checker,
+    test_aggregation_checker,
+    test_include_paths_checker,
+    test_path_structure_checker,
     unit_test_checker,
     using_namespace_fl_in_examples_checker,
 )
@@ -47,6 +51,7 @@ from ci.lint_cpp.esp_rom_printf_checker import EspRomPrintfChecker
 from ci.lint_cpp.example_serial_checker import ExampleSerialChecker
 from ci.lint_cpp.fastled_header_usage_checker import FastLEDHeaderUsageChecker
 from ci.lint_cpp.fl_is_defined_checker import FlIsDefinedChecker
+from ci.lint_cpp.headers_exist_checker import HeadersExistChecker
 from ci.lint_cpp.impl_hpp_includes_checker import ImplHppIncludesChecker
 from ci.lint_cpp.include_after_namespace_checker import IncludeAfterNamespaceChecker
 from ci.lint_cpp.include_paths_checker import IncludePathsChecker
@@ -67,6 +72,7 @@ from ci.lint_cpp.raw_noexcept_checker import RawNoexceptChecker
 from ci.lint_cpp.raw_pragma_checker import RawPragmaChecker
 from ci.lint_cpp.reinterpret_cast_checker import ReinterpretCastChecker
 from ci.lint_cpp.relative_include_checker import RelativeIncludeChecker
+from ci.lint_cpp.run_all_checkers import _legacy_violation_item_to_line_content
 from ci.lint_cpp.rust_bridge import parse_rust_json_output
 from ci.lint_cpp.serial_printf_checker import SerialPrintfChecker
 from ci.lint_cpp.simd_intrinsics_checker import SimdIntrinsicsChecker
@@ -77,6 +83,15 @@ from ci.lint_cpp.static_in_headers_checker import StaticInHeaderChecker
 from ci.lint_cpp.std_namespace_checker import StdNamespaceChecker
 from ci.lint_cpp.stdint_type_checker import StdintTypeChecker
 from ci.lint_cpp.subdir_namespace_checker import SubdirNamespaceChecker
+from ci.lint_cpp.test_aggregation_checker import (
+    TestAggregationChecker as AggregationChecker,
+)
+from ci.lint_cpp.test_include_paths_checker import (
+    TestIncludePathsChecker as IncludePathStyleChecker,
+)
+from ci.lint_cpp.test_path_structure_checker import (
+    TestPathStructureChecker as MirrorPathChecker,
+)
 from ci.lint_cpp.thread_local_keyword_checker import ThreadLocalKeywordChecker
 from ci.lint_cpp.unit_test_checker import UnitTestChecker
 from ci.lint_cpp.using_namespace_fl_in_examples_checker import (
@@ -89,29 +104,6 @@ from ci.util.paths import PROJECT_ROOT
 
 def _normalize_path(path: Path | str) -> str:
     return str(path).replace("\\", "/")
-
-
-def _legacy_violation_item_to_line_content(item: Any) -> tuple[int, str]:
-    if isinstance(item, tuple) and len(item) >= 2:
-        line_num_raw, content_raw = item[0], item[1]
-        return int(line_num_raw), str(content_raw)
-
-    include_line = getattr(item, "include_line", None)
-    include_snippet = getattr(item, "include_snippet", None)
-    if include_line is None or include_snippet is None:
-        raise AssertionError(f"unsupported violation item: {item!r}")
-
-    message = str(include_snippet)
-    namespace_info = getattr(item, "namespace_info", None)
-    if namespace_info is not None:
-        namespace_line = getattr(namespace_info, "line_number", None)
-        namespace_snippet = getattr(namespace_info, "snippet", None)
-        if namespace_line is not None and namespace_snippet is not None:
-            message = (
-                f"{message} (namespace declared at line {int(namespace_line)}: "
-                f"{namespace_snippet})"
-            )
-    return int(include_line), message
 
 
 def _python_records(
@@ -131,15 +123,17 @@ def _python_records(
         )
         if file_violations is None:
             return []
-        return [
-            {
-                "checker": checker.__class__.__name__,
-                "path": _normalize_path(file_path),
-                "line": violation.line_number,
-                "message": violation.content,
-            }
-            for violation in file_violations.violations
-        ]
+        records: list[dict[str, Any]] = []
+        for violation in file_violations.violations:
+            records.append(
+                {
+                    "checker": checker.__class__.__name__,
+                    "path": _normalize_path(file_path),
+                    "line": violation.line_number,
+                    "message": violation.content,
+                }
+            )
+        return records
     violations = violations_by_path.get(
         file_path, violations_by_path.get(_normalize_path(file_path), [])
     )
@@ -154,13 +148,13 @@ def _python_records(
         ]
     records = []
     for item in violations:
-        line, message = _legacy_violation_item_to_line_content(item)
+        converted = _legacy_violation_item_to_line_content(item)
         records.append(
             {
                 "checker": checker.__class__.__name__,
                 "path": _normalize_path(file_path),
-                "line": line,
-                "message": message,
+                "line": converted.line_number,
+                "message": converted.message,
             }
         )
     return records
@@ -318,6 +312,12 @@ def _rust_records(
             FlIsDefinedChecker(),
             Path("src/fl/example.h"),
             "#if FL_IS_ESP32\n#endif\n",
+        ),
+        (
+            "headers_exist",
+            HeadersExistChecker(),
+            Path("tests/fl/missing.cpp"),
+            'TEST_CASE("missing") {}\n',
         ),
         (
             "include_paths",
@@ -524,6 +524,24 @@ def _rust_records(
             "namespace fl {\n}\n",
         ),
         (
+            "test_aggregation",
+            AggregationChecker(),
+            Path("tests/fl/codec/orphan.hpp"),
+            "int orphan;\n",
+        ),
+        (
+            "test_include_paths",
+            IncludePathStyleChecker(),
+            Path("tests/fl/example.cpp"),
+            '#include "../helper.hpp"\n',
+        ),
+        (
+            "test_path_structure",
+            MirrorPathChecker(),
+            Path("tests/fl/missing_path.cpp"),
+            'TEST_CASE("missing") {}\n',
+        ),
+        (
             "thread_local_keyword",
             ThreadLocalKeywordChecker(),
             Path("src/fl/example.h"),
@@ -591,6 +609,9 @@ def test_rust_checker_matches_python_oracle(
     monkeypatch.setattr(
         fastled_header_usage_checker, "SRC_DIR", _normalize_path(src_root)
     )
+    monkeypatch.setattr(headers_exist_checker, "PROJECT_ROOT", tmp_path)
+    monkeypatch.setattr(headers_exist_checker, "TESTS_ROOT", tests_root)
+    monkeypatch.setattr(headers_exist_checker, "SRC_ROOT", src_root)
     monkeypatch.setattr(include_paths_checker, "PROJECT_ROOT", tmp_path)
     monkeypatch.setattr(
         is_header_include_checker, "PLATFORMS_ROOT", src_root / "platforms"
@@ -604,6 +625,28 @@ def test_rust_checker_matches_python_oracle(
     monkeypatch.setattr(no_namespace_fl_declaration, "SRC_ROOT", src_root)
     monkeypatch.setattr(relative_include_checker, "SRC_DIR", _normalize_path(src_root))
     monkeypatch.setattr(serial_printf_checker, "EXAMPLES_ROOT", examples_root)
+    monkeypatch.setattr(test_aggregation_checker, "PROJECT_ROOT", tmp_path)
+    monkeypatch.setattr(test_aggregation_checker, "TESTS_DIR", tests_root)
+    monkeypatch.setattr(test_aggregation_checker, "_AGGREGATED_TEST_DIRS", None)
+    monkeypatch.setattr(test_include_paths_checker, "PROJECT_ROOT", tmp_path)
+    monkeypatch.setattr(
+        test_include_paths_checker,
+        "TESTS_DIR",
+        _normalize_path(tests_root),
+    )
+    monkeypatch.setattr(
+        test_include_paths_checker, "_allowed_bare_test_headers_cache", None
+    )
+    monkeypatch.setattr(
+        test_include_paths_checker, "_allowed_bare_src_headers_cache", None
+    )
+    monkeypatch.setattr(
+        test_include_paths_checker, "_allowed_bare_includes_cache", None
+    )
+    monkeypatch.setattr(test_include_paths_checker, "_all_test_filenames_cache", None)
+    monkeypatch.setattr(test_path_structure_checker, "PROJECT_ROOT", tmp_path)
+    monkeypatch.setattr(test_path_structure_checker, "TESTS_ROOT", tests_root)
+    monkeypatch.setattr(test_path_structure_checker, "SRC_ROOT", src_root)
     monkeypatch.setattr(unit_test_checker, "TESTS_ROOT", tests_root)
     monkeypatch.setattr(
         using_namespace_fl_in_examples_checker, "EXAMPLES_ROOT", examples_root
@@ -614,6 +657,13 @@ def test_rust_checker_matches_python_oracle(
     path = tmp_path / relative_path
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(code, encoding="utf-8")
+    if isinstance(checker, AggregationChecker):
+        aggregation_dir = tests_root / "fl" / "codec"
+        aggregation_dir.mkdir(parents=True, exist_ok=True)
+        (tests_root / "fl" / "codec.cpp").write_text("", encoding="utf-8")
+        monkeypatch.setattr(
+            test_aggregation_checker, "_AGGREGATED_TEST_DIRS", {aggregation_dir}
+        )
 
     assert _rust_records(checker_key, tmp_path, path) == _python_records(
         checker, path, code

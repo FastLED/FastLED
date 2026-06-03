@@ -9,6 +9,7 @@ instead of K times (where K is the number of checkers).
 
 import os
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -551,15 +552,25 @@ def run_test_aggregation_check() -> tuple[int, list[str]]:
     return (len(violations), violations)
 
 
-def _legacy_violation_item_to_line_content(item: Any) -> tuple[int, str] | None:
+@dataclass(frozen=True)
+class LegacyViolationLineContent:
+    line_number: int
+    message: str
+
+
+def _legacy_violation_item_to_line_content(item: Any) -> LegacyViolationLineContent:
     if isinstance(item, tuple) and len(item) >= 2:
         line_num_raw, content_raw = item[0], item[1]
-        return int(line_num_raw), str(content_raw)
+        return LegacyViolationLineContent(
+            line_number=int(line_num_raw), message=str(content_raw)
+        )
 
     include_line = getattr(item, "include_line", None)
     include_snippet = getattr(item, "include_snippet", None)
     if include_line is None or include_snippet is None:
-        return None
+        raise ValueError(
+            f"Unsupported violation item shape: {item!r} ({type(item).__name__})"
+        )
 
     message = str(include_snippet)
     namespace_info = getattr(item, "namespace_info", None)
@@ -571,7 +582,7 @@ def _legacy_violation_item_to_line_content(item: Any) -> tuple[int, str] | None:
                 f"{message} (namespace declared at line {int(namespace_line)}: "
                 f"{namespace_snippet})"
             )
-    return int(include_line), message
+    return LegacyViolationLineContent(line_number=int(include_line), message=message)
 
 
 def _convert_violations_to_results(violations: Any) -> CheckerResults:
@@ -592,9 +603,9 @@ def _convert_violations_to_results(violations: Any) -> CheckerResults:
         if isinstance(violation_list, list):
             for item in violation_list:  # type: ignore[reportUnknownVariableType]
                 converted = _legacy_violation_item_to_line_content(item)
-                if converted is not None:
-                    line_num, content = converted
-                    results.add_violation(file_path, line_num, content)
+                results.add_violation(
+                    file_path, converted.line_number, converted.message
+                )
         elif isinstance(violation_list, str):
             results.add_violation(file_path, 0, violation_list)
 
