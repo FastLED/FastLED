@@ -59,6 +59,25 @@ namespace fl {
         static u8  s_BufferIndex;
         static u8  s_Buffer[2][2]; // 2x two-byte buffers, allows one buffer currently being sent, and a second one being prepped to send.
 
+        static constexpr u32 spiClockHz() FL_NOEXCEPT {
+            constexpr u32 divider = (_SPI_CLOCK_DIVIDER == 0) ? 1 : _SPI_CLOCK_DIVIDER;
+            return F_CPU / divider;
+        }
+
+        static constexpr nrf_spim_frequency_t spimFrequency() FL_NOEXCEPT {
+            constexpr u32 hz = spiClockHz();
+
+            // nRF52 SPIM supports discrete frequencies. Select the fastest
+            // standard rate that does not exceed the requested FastLED rate.
+            return (hz >= 8000000UL)  ? NRF_SPIM_FREQ_8M :
+                   (hz >= 4000000UL)  ? NRF_SPIM_FREQ_4M :
+                   (hz >= 2000000UL)  ? NRF_SPIM_FREQ_2M :
+                   (hz >= 1000000UL)  ? NRF_SPIM_FREQ_1M :
+                   (hz >= 500000UL)   ? NRF_SPIM_FREQ_500K :
+                   (hz >= 250000UL)   ? NRF_SPIM_FREQ_250K :
+                                        NRF_SPIM_FREQ_125K;
+        }
+
         // This allows saving the configuration of the SPIM instance
         // upon select(), and restoring the configuration upon release().
         struct spim_config {
@@ -146,7 +165,7 @@ namespace fl {
                 );
             nrf_spim_frequency_set(
                 FASTLED_NRF52_SPIM,
-                NRF_SPIM_FREQ_4M // BUGBUG -- use _SPI_CLOCK_DIVIDER to determine frequency
+                spimFrequency()
                 );
             nrf_spim_pins_set(
                 FASTLED_NRF52_SPIM,

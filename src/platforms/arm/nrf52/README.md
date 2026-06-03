@@ -2,6 +2,38 @@
 
 Nordic nRF52 family support.
 
+The maintained backend targets the Adafruit nRF52 / Bluefruit Arduino BSP used
+by FastLED CI. That BSP provides the Nordic SDK headers, FreeRTOS integration,
+SoftDevice support, PWM EasyDMA, and SPIM HAL APIs this backend includes.
+Arduino mbed OS nRF52 boards such as Arduino Nano 33 BLE and Nano 33 BLE Sense
+are not supported by this backend today.
+
+## Clocked SPI LEDs
+
+Clocked chipsets such as APA102, SK9822, and DotStar use the nRF52 SPIM
+peripheral. `DATA_RATE_MHZ()` and `DATA_RATE_KHZ()` are honored by selecting
+the fastest standard nRF52 SPIM rate that does not exceed the requested rate:
+125 kHz, 250 kHz, 500 kHz, 1 MHz, 2 MHz, 4 MHz, or 8 MHz. The default
+`FASTLED_NRF52_SPIM` is `NRF_SPIM0`, so requests above 8 MHz are clamped to
+8 MHz. SPIM3 on nRF52840 can run faster, but this backend does not assume
+SPIM3 because most board pin maps and sketches use SPIM0 by default.
+
+## Clockless LEDs and BLE
+
+WS2812/SK6812-style chipsets use PWM EasyDMA sequence playback. The current
+clockless path uses one PWM arbiter instance by default and a static sequence
+buffer sized by `FASTLED_NRF52_MAXIMUM_PIXELS_PER_STRING` (default 144). BLE
+SoftDevice activity, RAM pressure, and multiple independent clockless strips
+can make large SK6812/WS2812 installations unreliable on nRF52. For BLE-heavy
+applications, prefer clocked LEDs such as APA102/SK9822/DotStar, reduce the
+number of clockless strips, or use a single shorter clockless output.
+
+WS2812/SK6812 LEDs also do not expose a separate update/latch signal. FastLED
+sends the pixel waveform and then leaves the data line idle for the reset time.
+If an application needs precisely scheduled visual updates independent of data
+transfer time, use a clocked LED chipset or schedule the start of `show()` so
+the protocol reset interval lands at the desired update time.
+
 ## Files (quick pass)
 - `fastled_arm_nrf52.h`: Aggregator; includes pin/SPI/clockless and sysdefs.
 - `fastpin_arm_nrf52.h`, `fastpin_arm_nrf52_variants.h`: Pin helpers/variants.
