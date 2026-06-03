@@ -832,7 +832,7 @@ def main() -> int:
         checkers_by_scope = create_checkers(all_headers=all_headers)
         rust_results: dict[str, CheckerResults] = {}
         if use_rust_fast_path:
-            rust_results = run_rust_linter()
+            rust_results = run_rust_linter(None)
             remove_rust_supported_checkers(checkers_by_scope)
 
         # Run all checkers in a single pass per scope
@@ -864,7 +864,7 @@ def main() -> int:
             results["PchFileChecker"] = pch_results
 
         # Format and print results
-        if rust_ab and not run_rust_ab_check(results):
+        if rust_ab and not run_rust_ab_check(results, None):
             return 1
         exit_code = format_and_print_results(results)
 

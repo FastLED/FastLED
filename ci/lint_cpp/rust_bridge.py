@@ -46,14 +46,14 @@ def remove_rust_supported_checkers(
 ) -> None:
     """Remove checker instances handled by the Rust fast path."""
     for scope, checkers in checkers_by_scope.items():
-        checkers_by_scope[scope] = [
-            checker
-            for checker in checkers
-            if checker.__class__.__name__ not in RUST_SUPPORTED_CHECKERS
-        ]
+        filtered: list[FileContentChecker] = []
+        for checker in checkers:
+            if checker.__class__.__name__ not in RUST_SUPPORTED_CHECKERS:
+                filtered.append(checker)
+        checkers_by_scope[scope] = filtered
 
 
-def run_rust_linter(files: list[str] | None = None) -> dict[str, CheckerResults]:
+def run_rust_linter(files: list[str] | None) -> dict[str, CheckerResults]:
     """Run the Rust linter and return results in the Python linter shape."""
     cmd = [
         "soldr",
@@ -110,6 +110,8 @@ def parse_rust_json_output(stdout: str | None) -> list[dict[str, Any]]:
             continue
         try:
             value, _end = decoder.raw_decode(text[index:])
+        except KeyboardInterrupt:
+            raise
         except json.JSONDecodeError:
             continue
         if isinstance(value, list):
@@ -120,7 +122,7 @@ def parse_rust_json_output(stdout: str | None) -> list[dict[str, Any]]:
 
 def run_rust_ab_check(
     python_results: dict[str, CheckerResults],
-    files: list[str] | None = None,
+    files: list[str] | None,
 ) -> bool:
     """Compare Rust-supported checker output against the Python oracle."""
     rust_results = run_rust_linter(files)

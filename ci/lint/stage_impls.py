@@ -194,7 +194,7 @@ def run_cpp_lint(
     no_fingerprint: bool,
     run_full: bool,
     run_iwyu: bool,
-    use_rust_cpp_lint: bool = False,
+    use_rust_cpp_lint: bool,
 ) -> bool:
     """
     Run C++ linting stage.
@@ -692,7 +692,7 @@ def run_python_pipeline(no_fingerprint: bool, run_pyright_flag: bool) -> bool:
 
 
 def run_cpp_lint_single_file(
-    file_path: str, strict: bool = False, use_rust_cpp_lint: bool = False
+    file_path: str, strict: bool, use_rust_cpp_lint: bool
 ) -> bool:
     """Run C++ linting on a single file (checkers + optional IWYU).
 

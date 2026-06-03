@@ -38,7 +38,7 @@ JS_EXTENSIONS = {".js", ".ts"}
 
 
 def run_single_file_mode(
-    files: list[str], strict: bool = False, use_rust_cpp_lint: bool = False
+    files: list[str], strict: bool, use_rust_cpp_lint: bool
 ) -> bool:
     """Run linting on specific files, auto-detecting type by extension.
 

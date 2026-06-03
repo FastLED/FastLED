@@ -5,7 +5,10 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from typeguard import typechecked
 
+
+@typechecked
 @dataclass
 class LintArgs:
     """Parsed command-line arguments for linting."""

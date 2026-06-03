@@ -185,14 +185,23 @@ impl MultiCheckerFileProcessor {
             .cloned()
             .collect();
 
-        let loaded_files: Vec<Result<(PathBuf, FileContent), DynError>> = pending_paths
+        let loaded_files: Vec<(PathBuf, Result<FileContent, DynError>)> = pending_paths
             .par_iter()
-            .map(|path| FileContent::read(path).map(|content| (path.clone(), content)))
+            .map(|path| (path.clone(), FileContent::read(path)))
             .collect();
 
-        for loaded in loaded_files {
-            let (path, content) = loaded?;
-            self.file_cache.insert(path, content);
+        for (path, loaded) in loaded_files {
+            match loaded {
+                Ok(content) => {
+                    self.file_cache.insert(path, content);
+                }
+                Err(error) => {
+                    eprintln!(
+                        "warning: skipped unreadable file {}: {error}",
+                        path.display()
+                    );
+                }
+            }
         }
 
         let files: Vec<FileContent> = unique_paths
@@ -881,8 +890,6 @@ fn header_exists_for_file(file_path: &str, include_path: &str) -> bool {
     let normalized_path = normalize_path(file_path);
     let project_root = if let Some(index) = normalized_path.find("/src/") {
         PathBuf::from(&normalized_path[..index])
-    } else if normalized_path.starts_with("src/") {
-        PathBuf::from(".")
     } else {
         PathBuf::from(".")
     };
