@@ -33,9 +33,11 @@ Driver Selection (optional - omit for GPIO-only mode):
   --rmt               Test RMT (Remote Control) driver
   --spi               Test SPI driver
   --uart              Test UART driver
-  --i2s               Test I2S LCD_CAM driver (ESP32-S3 only)
+  --lcd               Test LCD_CLOCKLESS driver (ESP32-S3 only)
+  --lcd-spi           Test LCD_SPI driver (ESP32-S3 only)
   --lcd-rgb           Test LCD RGB driver (ESP32-P4 only)
-  --all               Test all drivers (equivalent to --parlio --rmt --spi --uart --i2s --lcd-rgb)
+  --object-fled       Test ObjectFLED DMA driver (Teensy 4.x only)
+  --all               Test all drivers
   --simd              Test SIMD operations only (no LED drivers needed)
   --coroutine         Test coroutine/task creation, stop, await (no LED drivers needed)
   --parallel          Test multiple drivers simultaneously (requires 2+ drivers)
@@ -61,7 +63,7 @@ Build System:
   --no-fbuild         Deprecated compatibility flag; ignored because fbuild is always used
 
 Lane Configuration:
-  --lanes N or MIN-MAX      Set lane count or range (e.g., '2' or '1-4')
+  --lanes N or MIN-MAX      Set lane count or range, valid 1-16 (e.g., '2' or '1-4')
   --lane-counts LED1,LED2,... Set per-lane LED counts (e.g., '100,200,300')
 
 Color Configuration:
@@ -85,9 +87,9 @@ Examples:
   bash autoresearch --all                       # Test all drivers
   bash autoresearch --parlio --skip-lint        # Skip linting for faster iteration
   bash autoresearch --all --timeout 120         # Longer timeout
-  bash autoresearch --i2s --lanes 2             # Test I2S with exactly 2 lanes
+  bash autoresearch --lcd --lanes 2             # Test LCD_CLOCKLESS with exactly 2 lanes
   bash autoresearch --parlio --lanes 1-4        # Test PARLIO with 1-4 lanes
-  bash autoresearch --i2s --lane-counts 100,200,300  # Test I2S with 3 lanes (100, 200, 300 LEDs)
+  bash autoresearch --lcd --lane-counts 100,200,300  # Test LCD_CLOCKLESS with 3 lanes (100, 200, 300 LEDs)
   bash autoresearch --rmt --color-pattern ff00aa     # Test RMT with custom color (pink)
   bash autoresearch --parlio                         # Uses fbuild for compile/upload
   bash autoresearch --parlio --lcd-rgb --parallel --lanes 1  # Test PARLIO + LCD_RGB in parallel

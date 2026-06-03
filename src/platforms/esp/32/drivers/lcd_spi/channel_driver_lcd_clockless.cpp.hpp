@@ -368,21 +368,16 @@ bool ChannelDriverLcdClockless::beginTransmission(
         requestedChunkInputBytes = maxSize;
     }
 
-    // Pick numChunks so chunkInputBytes = maxSize / numChunks is exact (the
-    // remainder must be 0). Walk numChunks upward from
-    // ceil(maxSize / requested) until we hit a divisor; in the worst case we
-    // fall back to numChunks = maxSize (single-byte chunks). For typical LED
-    // counts (powers of two × 3 bytes per RGB pixel) the loop terminates in
-    // a couple of iterations.
+    // Keep the initial chunk count from the requested size, then round the
+    // chunk size up to cover maxSize. Do not walk numChunks upward looking for
+    // an exact divisor: awkward frame sizes just above the default chunk size
+    // would otherwise collapse into many much smaller ISR-driven chunks.
     size_t numChunks =
         (maxSize + requestedChunkInputBytes - 1) / requestedChunkInputBytes;
     if (numChunks == 0) {
         numChunks = 1;
     }
-    while (numChunks < maxSize && (maxSize % numChunks) != 0) {
-        ++numChunks;
-    }
-    size_t chunkInputBytes = maxSize / numChunks;
+    size_t chunkInputBytes = (maxSize + numChunks - 1) / numChunks;
     if (chunkInputBytes == 0) {
         chunkInputBytes = maxSize;
     }

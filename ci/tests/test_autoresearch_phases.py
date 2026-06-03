@@ -280,6 +280,31 @@ class TestParseArgsAndBuildCommands:
         assert len(result.json_rpc_commands) == 2
         assert result.json_rpc_commands[0]["method"] == "setLaneSizes"
 
+    def test_lane_counts_accepts_16_lanes(self, fake_project_dir: Path) -> None:
+        args = _make_args(
+            lane_counts=",".join(["100"] * 16),
+            project_dir=fake_project_dir,
+        )
+        result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.json_rpc_commands[0]["method"] == "setLaneSizes"
+        assert result.json_rpc_commands[0]["params"] == [[100] * 16]
+
+    def test_lane_counts_rejects_17_lanes(self, fake_project_dir: Path) -> None:
+        args = _make_args(
+            lane_counts=",".join(["100"] * 17),
+            project_dir=fake_project_dir,
+        )
+        result = _parse_args_and_build_commands(args)
+        assert isinstance(result, int)
+        assert result == 1
+
+    def test_lanes_rejects_above_16(self, fake_project_dir: Path) -> None:
+        args = _make_args(lanes="17", project_dir=fake_project_dir)
+        result = _parse_args_and_build_commands(args)
+        assert isinstance(result, int)
+        assert result == 1
+
     def test_color_pattern(self, fake_project_dir: Path) -> None:
         args = _make_args(color_pattern="ff00aa", project_dir=fake_project_dir)
         result = _parse_args_and_build_commands(args)

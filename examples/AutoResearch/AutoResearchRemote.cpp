@@ -1428,7 +1428,7 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         setLaneRange_fn.set("phase", "Phase 2: Configuration");
         setLaneRange_fn.set("args", "[minLanes, maxLanes]");
         setLaneRange_fn.set("returns", "{success, minLanes, maxLanes, testCases}");
-        setLaneRange_fn.set("description", "Configure lane range (1-8)");
+        setLaneRange_fn.set("description", "Configure lane range (1-16)");
         functions.push_back(setLaneRange_fn);
 
         fl::json setStripSizes_fn = fl::json::object();

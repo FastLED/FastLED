@@ -150,11 +150,11 @@
 //    // #define JUST_I2S     // Test only I2S LCD_CAM driver (ESP32-S3 only)
 //    - Default: Test all available drivers (RMT, SPI, PARLIO, UART, I2S)
 //
-// 2. LANE RANGE (1-8 lanes):
+// 2. LANE RANGE (1-16 lanes):
 //    - Uncomment to override lane range:
 //    // #define MIN_LANES 1  // Minimum number of lanes to test
-//    // #define MAX_LANES 8  // Maximum number of lanes to test
-//    - Default: MIN_LANES=1, MAX_LANES=8 (tests all lane counts)
+//    // #define MAX_LANES 16  // Maximum number of lanes to test
+//    - Default: MIN_LANES=1, MAX_LANES=16 (tests all lane counts)
 //    - Each lane has decreasing LED count: Lane 0=base, Lane 1=base-1, ..., Lane N=base-N
 //    - Multi-lane RX autoresearch: Only Lane 0 is validated (hardware limitation)
 //
@@ -165,7 +165,7 @@
 //    - Default: Test both small (10 LEDs) and large (300 LEDs) strips
 //
 // TEST MATRIX SIZE:
-// - Full matrix: 3 drivers × 8 lane counts × 2 strip sizes = 48 test cases
+// - Full matrix: 3 drivers × 16 lane counts × 2 strip sizes = 96 test cases
 // - Use defines above to narrow scope for faster debugging
 //
 // EXAMPLES:
