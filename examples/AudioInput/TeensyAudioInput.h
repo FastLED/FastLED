@@ -4,6 +4,9 @@
 
 #pragma once
 
+// Keep fbuild's library scanner aware of PJRC Audio sources for Teensy.
+#include <Audio.h>
+
 #include "fl/audio/audio_input.h"
 
 // ============================================================================

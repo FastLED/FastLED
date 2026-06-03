@@ -15,6 +15,11 @@
 // @filter: (mem is large)
 
 #include <FastLED.h>
+#if defined(FL_IS_TEENSY)
+// Keep fbuild's library scanner aware of PJRC Audio sources for Teensy.
+#include <Audio.h>
+#endif
+
 #include "el_panel.h"
 #include "fl/math/filter/filter.h"
 #include "fl/math/math.h"

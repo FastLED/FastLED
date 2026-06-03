@@ -11,6 +11,11 @@
 //   fastled
 
 #include <FastLED.h>
+#if defined(FL_IS_TEENSY)
+// Keep fbuild's library scanner aware of PJRC Audio sources for Teensy.
+#include <Audio.h>
+#endif
+
 #include "fl/asset/asset.h"
 #include "fl/ui/ui.h"
 #include "fl/stl/url.h"
