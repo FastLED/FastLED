@@ -487,6 +487,10 @@ where
 {
     let config = CliConfig::parse(args)?;
 
+    if config.show_help {
+        return Ok(0);
+    }
+
     if config.list_checkers {
         for checker in supported_checker_names() {
             println!("{checker}");
@@ -516,6 +520,7 @@ struct CliConfig {
     output_format: OutputFormat,
     project_root: PathBuf,
     selected_checkers: Option<HashSet<String>>,
+    show_help: bool,
     list_checkers: bool,
     paths: Vec<String>,
 }
@@ -568,7 +573,8 @@ impl CliConfig {
                         output_format,
                         project_root,
                         selected_checkers: None,
-                        list_checkers: true,
+                        show_help: true,
+                        list_checkers: false,
                         paths,
                     });
                 }
@@ -589,6 +595,7 @@ impl CliConfig {
             output_format,
             project_root,
             selected_checkers,
+            show_help: false,
             list_checkers,
             paths,
         })
@@ -636,14 +643,28 @@ fn collect_input_files(project_root: &Path, inputs: &[String]) -> Result<Vec<Pat
         }
     } else {
         for input in inputs {
+            let mut input_files = BTreeSet::new();
             if input.contains('*') || input.contains('?') || input.contains('[') {
+                let mut matched = false;
                 for entry in glob(input)? {
+                    matched = true;
                     let path = entry?;
-                    collect_path(&path, &mut files, false);
+                    collect_path(&path, &mut input_files, false);
+                }
+                if !matched || input_files.is_empty() {
+                    return Err(format!("input pattern matched no files: {input}").into());
                 }
             } else {
-                collect_path(&PathBuf::from(input), &mut files, true);
+                let path = PathBuf::from(input);
+                if !path.exists() {
+                    return Err(format!("input path not found: {input}").into());
+                }
+                collect_path(&path, &mut input_files, true);
+                if input_files.is_empty() {
+                    return Err(format!("input path produced no lintable files: {input}").into());
+                }
             }
+            files.extend(input_files);
         }
     }
 
@@ -3272,6 +3293,36 @@ mod tests {
             content: content.to_string(),
             lines: content.lines().map(str::to_string).collect(),
         }
+    }
+
+    #[test]
+    fn help_parse_exits_without_listing_checkers() {
+        let config = CliConfig::parse(vec!["--help".to_string()]).unwrap();
+        assert!(config.show_help);
+        assert!(!config.list_checkers);
+    }
+
+    #[test]
+    fn explicit_missing_input_is_an_error() {
+        let input =
+            std::env::temp_dir().join(format!("fastled_lint_missing_input_{}", std::process::id()));
+        let error = collect_input_files(Path::new("."), &[path_to_string(&input)])
+            .unwrap_err()
+            .to_string();
+        assert!(error.contains("input path not found"));
+    }
+
+    #[test]
+    fn unmatched_input_pattern_is_an_error() {
+        let temp_dir = normalize_path(&path_to_string(&std::env::temp_dir()));
+        let input = format!(
+            "{temp_dir}/fastled_lint_missing_pattern_{}/*.h",
+            std::process::id()
+        );
+        let error = collect_input_files(Path::new("."), &[input])
+            .unwrap_err()
+            .to_string();
+        assert!(error.contains("input pattern matched no files"));
     }
 
     #[test]
