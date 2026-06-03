@@ -543,7 +543,56 @@ inline void build_cache(const DiodeProfile* p, ProfileCache* cache) {
                             p->input_xy_w, cache->M_src);
 }
 
-// Verbatim copy of solve_strict_subgamut.
+// Mirror of project_to_hull (#2708) — verbatim copy of the static helper in
+// rgbw_colorimetric.cpp.hpp (which can't be linked from the default test
+// build). Used by `strict_subgamut` below to match production behavior.
+inline bool project_to_hull_mirror(const ProfileCache& cache,
+                                   float X_t[3], float xy_t[2]) {
+    const float sum = X_t[0] + X_t[1] + X_t[2];
+    if (sum < 1e-12f) return false;
+    xy_t[0] = X_t[0] / sum; xy_t[1] = X_t[1] / sum;
+    const DiodeProfile& p = *cache.profile;
+    float bary[3];
+    if (barycentric_xy(xy_t, p.xy_r, p.xy_g, p.xy_b, bary) &&
+        bary[0] >= -1e-9f && bary[1] >= -1e-9f && bary[2] >= -1e-9f) {
+        return false;
+    }
+    struct Tri { const float* a; const float* b; const float* c; };
+    const Tri tris[3] = {
+        { cache.P_R, cache.P_G, cache.P_W },
+        { cache.P_R, cache.P_B, cache.P_W },
+        { cache.P_B, cache.P_G, cache.P_W },
+    };
+    float best_xyz[3] = {0,0,0};
+    float best_residual = 1e30f;
+    for (int k = 0; k < 3; ++k) {
+        const float M[3][3] = {
+            { tris[k].a[0], tris[k].b[0], tris[k].c[0] },
+            { tris[k].a[1], tris[k].b[1], tris[k].c[1] },
+            { tris[k].a[2], tris[k].b[2], tris[k].c[2] },
+        };
+        float t[3], res;
+        nnls3(M, X_t, t, &res);
+        float mt = t[0]; if (t[1] > mt) mt = t[1]; if (t[2] > mt) mt = t[2];
+        if (mt > 1.0f) { float inv = 1.0f/mt; t[0]*=inv; t[1]*=inv; t[2]*=inv; }
+        float xyz[3];
+        xyz[0] = M[0][0]*t[0] + M[0][1]*t[1] + M[0][2]*t[2];
+        xyz[1] = M[1][0]*t[0] + M[1][1]*t[1] + M[1][2]*t[2];
+        xyz[2] = M[2][0]*t[0] + M[2][1]*t[1] + M[2][2]*t[2];
+        if (xyz[1] <= 1e-12f) continue;
+        if (res < best_residual) {
+            best_residual = res;
+            best_xyz[0] = xyz[0]; best_xyz[1] = xyz[1]; best_xyz[2] = xyz[2];
+        }
+    }
+    if (best_xyz[1] <= 1e-12f) return false;
+    const float s2 = best_xyz[0] + best_xyz[1] + best_xyz[2];
+    xy_t[0] = best_xyz[0] / s2; xy_t[1] = best_xyz[1] / s2;
+    xyY_to_XYZ(xy_t[0], xy_t[1], 1.0f, X_t);
+    return true;
+}
+
+// Verbatim copy of solve_strict_subgamut (post-#2708 — includes hull projection).
 inline bool strict_subgamut(const ProfileCache& cache, float s_r, float s_g, float s_b, float out[4]) {
     out[0] = out[1] = out[2] = out[3] = 0.0f;
     float X_t[3];
@@ -557,7 +606,8 @@ inline bool strict_subgamut(const ProfileCache& cache, float s_r, float s_g, flo
     }
     const float sum = X_t[0]+X_t[1]+X_t[2];
     if (sum < 1e-9f) return true;
-    const float xy_t[2] = { X_t[0]/sum, X_t[1]/sum };
+    float xy_t[2] = { X_t[0]/sum, X_t[1]/sum };
+    project_to_hull_mirror(cache, X_t, xy_t);
     struct SG { const float* a; const float* b; const float* c;
                 const float (*Pinv)[3]; int ia,ib,ic; };
     const SG sgs[3] = {
@@ -818,12 +868,12 @@ FL_TEST_CASE("FastLED strict subgamut agrees with reference port (in-hull)") {
 }
 
 
-FL_TEST_CASE("out-of-hull sRGB blue: FastLED zeroes while reference projects") {
-    // Documents #2708 as an executable contract: until FastLED gains the §3
-    // NNLS projection, the strict solver returns (0,0,0,0) for sRGB pure blue
-    // (xy ≈ 0.15, 0.06 — outside the LED hull). When #2708 is fixed this
-    // test will fail loudly, prompting the assertion to be flipped to agree
-    // with the reference.
+FL_TEST_CASE("out-of-hull sRGB blue: FastLED projects to match reference (#2708)") {
+    // Was the executable contract for #2708 — sRGB pure blue (xy ≈ 0.15, 0.06)
+    // lies outside the LED hull. Before #2708 landed, FastLED returned
+    // (0,0,0,0) here; the reference projected via NNLS. After #2708, FastLED
+    // also projects: assert outputs are non-trivial AND agree with reference
+    // within tolerance.
     using namespace gt_test;
     const DiodeProfile profile = reference_profile();
     ProfileCache fl_cache; fastled_mirror::build_cache(&profile, &fl_cache);
@@ -831,21 +881,30 @@ FL_TEST_CASE("out-of-hull sRGB blue: FastLED zeroes while reference projects") {
     float fl_out[4] = {0};
     const bool ok = fastled_mirror::strict_subgamut(
         fl_cache, 0.0f, 0.0f, 1.0f, fl_out);
-    FL_CHECK(!ok);
-    FL_CHECK(quantize_u8(fl_out[0]) == 0);
-    FL_CHECK(quantize_u8(fl_out[1]) == 0);
-    FL_CHECK(quantize_u8(fl_out[2]) == 0);
-    FL_CHECK(quantize_u8(fl_out[3]) == 0);
+    FL_CHECK(ok);
+    // Must produce a non-trivial result — at least one channel above 10 %.
+    float fl_max = fl_out[0];
+    if (fl_out[1] > fl_max) fl_max = fl_out[1];
+    if (fl_out[2] > fl_max) fl_max = fl_out[2];
+    if (fl_out[3] > fl_max) fl_max = fl_out[3];
+    FL_CHECK(fl_max > 0.1f);
+    const u8 fl_q[4] = {
+        quantize_u8(fl_out[0]), quantize_u8(fl_out[1]),
+        quantize_u8(fl_out[2]), quantize_u8(fl_out[3]),
+    };
 
     DiodeProfile p2 = profile;
     ProfileCache ref_cache;
     float ref_out[4] = {0};
     reference::strict_with_projection(p2, ref_cache, 0.0f, 0.0f, 1.0f, ref_out);
-    // Reference projects to the nearest in-hull point — output must be
-    // non-trivial (some channel above ~10% of full-scale).
-    float max_v = ref_out[0];
-    if (ref_out[1] > max_v) max_v = ref_out[1];
-    if (ref_out[2] > max_v) max_v = ref_out[2];
-    if (ref_out[3] > max_v) max_v = ref_out[3];
-    FL_CHECK(max_v > 0.1f);
+    const u8 ref_q[4] = {
+        quantize_u8(ref_out[0]), quantize_u8(ref_out[1]),
+        quantize_u8(ref_out[2]), quantize_u8(ref_out[3]),
+    };
+    // Both solvers share the same NNLS implementation now; outputs should
+    // agree exactly aside from rounding into the u8 bucket.
+    for (int k = 0; k < 4; ++k) {
+        const int d = abs_diff(fl_q[k], ref_q[k]);
+        FL_CHECK(d <= 1);
+    }
 }

@@ -142,6 +142,43 @@ inline bool build_source_matrix(const float xy_r[2], const float xy_g[2],
     return true;
 }
 
+// Non-negative least squares for the 3×3 sub-system M·t = b with t ≥ 0
+// (#2708, gist §3). Projected-gradient form matching the reference
+// `_nnls_solve` fallback used when scipy is unavailable: 500 iterations at
+// step 0.01. Cheap (~50 µs scalar on a typical MCU at -O2; only invoked for
+// out-of-hull source targets, never on the in-hull fast path) and free of
+// dynamic allocation, which makes it safe to inline behind the colorimetric
+// solvers' rare-branch.
+inline void nnls3(const float M[3][3], const float b[3],
+                  float t_out[3], float* residual_out) FL_NOEXCEPT {
+    float t[3] = {0.0f, 0.0f, 0.0f};
+    constexpr float kStep = 0.01f;
+    constexpr int kIters = 500;
+    for (int it = 0; it < kIters; ++it) {
+        float r[3];
+        r[0] = M[0][0]*t[0] + M[0][1]*t[1] + M[0][2]*t[2] - b[0];
+        r[1] = M[1][0]*t[0] + M[1][1]*t[1] + M[1][2]*t[2] - b[1];
+        r[2] = M[2][0]*t[0] + M[2][1]*t[1] + M[2][2]*t[2] - b[2];
+        // grad = Mᵀ · r
+        float g[3];
+        g[0] = M[0][0]*r[0] + M[1][0]*r[1] + M[2][0]*r[2];
+        g[1] = M[0][1]*r[0] + M[1][1]*r[1] + M[2][1]*r[2];
+        g[2] = M[0][2]*r[0] + M[1][2]*r[1] + M[2][2]*r[2];
+        for (int j = 0; j < 3; ++j) {
+            float v = t[j] - kStep * g[j];
+            t[j] = v > 0.0f ? v : 0.0f;
+        }
+    }
+    if (residual_out != nullptr) {
+        float r[3];
+        r[0] = M[0][0]*t[0] + M[0][1]*t[1] + M[0][2]*t[2] - b[0];
+        r[1] = M[1][0]*t[0] + M[1][1]*t[1] + M[1][2]*t[2] - b[1];
+        r[2] = M[2][0]*t[0] + M[2][1]*t[1] + M[2][2]*t[2] - b[2];
+        *residual_out = fl::sqrt(r[0]*r[0] + r[1]*r[1] + r[2]*r[2]);
+    }
+    t_out[0] = t[0]; t_out[1] = t[1]; t_out[2] = t[2];
+}
+
 // ===== Types =================================================================
 
 // Precomputed per-profile data: emitter XYZ columns + the four matrix inverses

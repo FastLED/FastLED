@@ -79,6 +79,79 @@ void build_profile_cache(const DiodeProfile* p, int cct_override,
     }
 }
 
+// Project an out-of-hull target XYZ onto the achievable LED gamut (#2708,
+// math-model gist §3). Returns true if a projection was applied, in which
+// case `X_t` and `xy_t` are updated to the projected point at unit Y. When
+// the target is already inside the full RGB triangle, returns false and
+// leaves `X_t` / `xy_t` untouched.
+//
+// Algorithm matches the reference's `_strict_project_target_xyz_to_led_hull`:
+// run NNLS in each of the three sub-gamuts (RGW / RBW / BGW), cap drive at
+// 1.0 per sub-gamut, then pick the sub-gamut with smallest residual. Use
+// the achieved chromaticity as the new target xy.
+static bool project_to_hull(const ProfileCache& cache,
+                            float X_t[3], float xy_t[2]) FL_NOEXCEPT {
+    const float sum = X_t[0] + X_t[1] + X_t[2];
+    if (sum < 1e-12f) return false;
+    xy_t[0] = X_t[0] / sum;
+    xy_t[1] = X_t[1] / sum;
+
+    const DiodeProfile& p = *cache.profile;
+    float bary[3];
+    // Test the full RGB triangle (not the sub-gamut triangles) — a target
+    // can be outside a single sub-gamut yet still inside the full hull.
+    if (barycentric_xy(xy_t, p.xy_r, p.xy_g, p.xy_b, bary)
+        && bary[0] >= -1e-9f && bary[1] >= -1e-9f && bary[2] >= -1e-9f) {
+        return false;
+    }
+
+    struct Tri { const float* a; const float* b; const float* c; };
+    const Tri tris[3] = {
+        { cache.P_R, cache.P_G, cache.P_W },
+        { cache.P_R, cache.P_B, cache.P_W },
+        { cache.P_B, cache.P_G, cache.P_W },
+    };
+    float best_xyz[3] = {0, 0, 0};
+    float best_residual = 1e30f;
+    for (int k = 0; k < 3; ++k) {
+        const Tri& tri = tris[k];
+        const float M[3][3] = {
+            { tri.a[0], tri.b[0], tri.c[0] },
+            { tri.a[1], tri.b[1], tri.c[1] },
+            { tri.a[2], tri.b[2], tri.c[2] },
+        };
+        float t[3], residual;
+        nnls3(M, X_t, t, &residual);
+        // Cap drive at full-scale per sub-gamut, matching the reference.
+        float mt = t[0];
+        if (t[1] > mt) mt = t[1];
+        if (t[2] > mt) mt = t[2];
+        if (mt > 1.0f) { const float inv = 1.0f / mt; t[0] *= inv; t[1] *= inv; t[2] *= inv; }
+        float xyz[3];
+        xyz[0] = M[0][0]*t[0] + M[0][1]*t[1] + M[0][2]*t[2];
+        xyz[1] = M[1][0]*t[0] + M[1][1]*t[1] + M[1][2]*t[2];
+        xyz[2] = M[2][0]*t[0] + M[2][1]*t[1] + M[2][2]*t[2];
+        if (xyz[1] <= 1e-12f) continue;
+        if (residual < best_residual) {
+            best_residual = residual;
+            best_xyz[0] = xyz[0]; best_xyz[1] = xyz[1]; best_xyz[2] = xyz[2];
+        }
+    }
+    if (best_xyz[1] <= 1e-12f) {
+        // All sub-gamut projections collapsed to zero — pathological
+        // profile or extreme target. Leave the original X_t alone; the
+        // strict solver will return false and the dispatch falls back.
+        return false;
+    }
+    const float s2 = best_xyz[0] + best_xyz[1] + best_xyz[2];
+    xy_t[0] = best_xyz[0] / s2;
+    xy_t[1] = best_xyz[1] / s2;
+    // Per reference, normalize Y to 1.0 for downstream routing. The full-chroma
+    // topology is re-solved from this projected XYZ in the caller.
+    xyY_to_XYZ(xy_t[0], xy_t[1], 1.0f, X_t);
+    return true;
+}
+
 bool solve_strict_subgamut(const ProfileCache& cache, float s_r,
                            float s_g, float s_b,
                            float out_rgbw[4]) FL_NOEXCEPT {
@@ -101,7 +174,14 @@ bool solve_strict_subgamut(const ProfileCache& cache, float s_r,
     if (sum_xyz < 1e-9f) {
         return true;
     }
-    const float xy_t[2] = { X_t[0] / sum_xyz, X_t[1] / sum_xyz };
+    float xy_t[2] = { X_t[0] / sum_xyz, X_t[1] / sum_xyz };
+
+    // Out-of-hull projection (#2708, gist §3): if the target xy lies outside
+    // the LED RGB triangle (typical for sRGB-blue and Rec.2020-green inputs),
+    // project onto the achievable LED hull via NNLS across all three
+    // sub-gamuts. Without this, named-gamut targets just outside the LED's
+    // primary triangle silently return (0,0,0,0).
+    project_to_hull(cache, X_t, xy_t);
 
     struct SubGamut {
         const float* xy_a;
@@ -157,6 +237,13 @@ bool solve_strict_subgamut_xy(const ProfileCache& cache,
     float X_t[3];
     xyY_to_XYZ(xy_t[0], xy_t[1], Y_t, X_t);
 
+    // Out-of-hull projection (#2708). xy_t arrives directly (this variant is
+    // called by the LUT builder), so we must project here before routing.
+    // `project_to_hull` updates `X_t` and `local_xy` in place when projection
+    // fires; the local copy is needed because the parameter is const.
+    float local_xy[2] = { xy_t[0], xy_t[1] };
+    project_to_hull(cache, X_t, local_xy);
+
     struct SubGamut {
         const float* xy_a;
         const float* xy_b;
@@ -178,7 +265,7 @@ bool solve_strict_subgamut_xy(const ProfileCache& cache,
     for (int k = 0; k < 3; ++k) {
         const SubGamut& sg = sgs[k];
         float bary[3];
-        if (!barycentric_xy(xy_t, sg.xy_a, sg.xy_b, sg.xy_c, bary)) continue;
+        if (!barycentric_xy(local_xy, sg.xy_a, sg.xy_b, sg.xy_c, bary)) continue;
         if (bary[0] < -kEps || bary[1] < -kEps || bary[2] < -kEps) continue;
         float t[3];
         matvec3(sg.Pinv, X_t, t);
@@ -218,6 +305,13 @@ void solve_wx_overdrive(const ProfileCache& cache, float s_r, float s_g,
         X_t[1] = cache.P_R[1] * s_r + cache.P_G[1] * s_g + cache.P_B[1] * s_b;
         X_t[2] = cache.P_R[2] * s_r + cache.P_G[2] * s_g + cache.P_B[2] * s_b;
     }
+    // Out-of-hull projection (#2708): out-of-hull targets produce a negative
+    // entry in `a` that the LP would otherwise zero, collapsing the result.
+    // Projecting to the achievable LED hull first keeps the overdrive
+    // formulation chromaticity-faithful even on sRGB / Rec.2020 boundary
+    // colors.
+    float xy_t[2];
+    project_to_hull(cache, X_t, xy_t);
     // a = P_RGB_inv · X_t — the 3-channel solution if W were unused. d is the
     // RGB-channel cost of one unit of W (cached at build_profile_cache time).
     float a[3];
