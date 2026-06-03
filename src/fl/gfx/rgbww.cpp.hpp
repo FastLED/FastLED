@@ -172,6 +172,26 @@ namespace {
 // eta (more warm-W); cooler inputs → higher eta. Mathematically not optimal
 // — a chromaticity-aware solver could place eta to minimize dE — but cheap,
 // monotonic, and good enough for the common ambilight / neutral-pastel case.
+// Per-process cache for the input chromaticity matrix used by
+// compute_eta_from_input. `build_source_matrix` runs a 3x3 invert, which is
+// far too expensive to repeat per pixel (CodeRabbit #2707). The keyed input
+// fields are profile-level data — the matrix is invariant until the active
+// profile's input_xy_* changes — so we cache it and invalidate only when one
+// of those eight floats differs from the cached snapshot.
+struct EtaSourceMatrixCache {
+    float xy_r[2] = {0.0f, 0.0f};
+    float xy_g[2] = {0.0f, 0.0f};
+    float xy_b[2] = {0.0f, 0.0f};
+    float xy_w[2] = {0.0f, 0.0f};
+    float M_src[3][3] = {{0}};
+    bool has_M_src = false;
+    bool initialized = false;
+};
+
+inline bool xy_equal(const float a[2], const float b[2]) FL_NOEXCEPT {
+    return a[0] == b[0] && a[1] == b[1];
+}
+
 inline float compute_eta_from_input(const colorimetric_detail::RgbcctProfile& profile,
                                     float s_r, float s_g, float s_b) FL_NOEXCEPT {
     // Compute the input chromaticity in the *source* color space (#2705) when
@@ -180,23 +200,37 @@ inline float compute_eta_from_input(const colorimetric_detail::RgbcctProfile& pr
     // gamut, so a neutral source white wouldn't blend symmetrically across
     // warm/cool when the source primaries (e.g. sRGB) differ from the LED
     // primaries — exactly the regression flagged on this PR.
-    //
-    // Source-space matrix derivation succeeds iff input_xy_w[1] > epsilon.
-    // Match the same fallback policy used by build_profile_cache.
-    float X = 0.0f, Y = 0.0f, Z = 0.0f;
+    EtaSourceMatrixCache& cache =
+        fl::Singleton<EtaSourceMatrixCache>::instance();
     const colorimetric_detail::DiodeProfile& wp = profile.warm_path;
-    if (wp.input_xy_w[1] > 1e-6f) {
-        float M_src[3][3];
-        if (colorimetric_detail::build_source_matrix(
-                wp.input_xy_r, wp.input_xy_g, wp.input_xy_b, wp.input_xy_w, M_src)) {
-            const float s[3] = { s_r, s_g, s_b };
-            float xyz[3];
-            colorimetric_detail::matvec3(M_src, s, xyz);
-            X = xyz[0]; Y = xyz[1]; Z = xyz[2];
-        }
+    const bool key_changed =
+        !cache.initialized ||
+        !xy_equal(cache.xy_r, wp.input_xy_r) ||
+        !xy_equal(cache.xy_g, wp.input_xy_g) ||
+        !xy_equal(cache.xy_b, wp.input_xy_b) ||
+        !xy_equal(cache.xy_w, wp.input_xy_w);
+    if (key_changed) {
+        cache.xy_r[0] = wp.input_xy_r[0]; cache.xy_r[1] = wp.input_xy_r[1];
+        cache.xy_g[0] = wp.input_xy_g[0]; cache.xy_g[1] = wp.input_xy_g[1];
+        cache.xy_b[0] = wp.input_xy_b[0]; cache.xy_b[1] = wp.input_xy_b[1];
+        cache.xy_w[0] = wp.input_xy_w[0]; cache.xy_w[1] = wp.input_xy_w[1];
+        cache.has_M_src = wp.input_xy_w[1] > 1e-6f &&
+                          colorimetric_detail::build_source_matrix(
+                              wp.input_xy_r, wp.input_xy_g,
+                              wp.input_xy_b, wp.input_xy_w, cache.M_src);
+        cache.initialized = true;
     }
-    if (X == 0.0f && Y == 0.0f && Z == 0.0f) {
+
+    float X = 0.0f, Y = 0.0f, Z = 0.0f;
+    if (cache.has_M_src) {
+        const float s[3] = { s_r, s_g, s_b };
+        float xyz[3];
+        colorimetric_detail::matvec3(cache.M_src, s, xyz);
+        X = xyz[0]; Y = xyz[1]; Z = xyz[2];
+    } else {
         // Legacy emitter-space fallback for profiles without populated source.
+        // Three xyY_to_XYZ calls per pixel — degraded but still cheap, and
+        // only reached when the user explicitly opts out of source space.
         float P_R[3], P_G[3], P_B[3];
         colorimetric_detail::xyY_to_XYZ(wp.xy_r[0], wp.xy_r[1], wp.lum_r, P_R);
         colorimetric_detail::xyY_to_XYZ(wp.xy_g[0], wp.xy_g[1], wp.lum_g, P_G);
