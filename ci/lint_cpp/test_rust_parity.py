@@ -10,9 +10,12 @@ import pytest
 from running_process import RunningProcess
 
 from ci.lint_cpp import (
+    cpp_hpp_header_pair_checker,
     cpp_hpp_includes_checker,
     fastled_header_usage_checker,
     include_paths_checker,
+    is_header_include_checker,
+    iwyu_pragma_block_checker,
     namespace_platforms_checker,
     no_namespace_fl_declaration,
     relative_include_checker,
@@ -32,6 +35,7 @@ from ci.lint_cpp.builtin_memcpy_checker import BuiltinMemcpyChecker
 from ci.lint_cpp.check_platform_includes import PlatformTrampolineChecker
 from ci.lint_cpp.check_platforms_fl_namespace import PlatformsFlNamespaceChecker
 from ci.lint_cpp.check_using_namespace import UsingNamespaceChecker
+from ci.lint_cpp.cpp_hpp_header_pair_checker import CppHppHeaderPairChecker
 from ci.lint_cpp.cpp_hpp_includes_checker import CppHppIncludesChecker
 from ci.lint_cpp.cpp_include_checker import CppIncludeChecker
 from ci.lint_cpp.ctype_global_checker import CtypeGlobalChecker
@@ -43,7 +47,10 @@ from ci.lint_cpp.fl_is_defined_checker import FlIsDefinedChecker
 from ci.lint_cpp.impl_hpp_includes_checker import ImplHppIncludesChecker
 from ci.lint_cpp.include_after_namespace_checker import IncludeAfterNamespaceChecker
 from ci.lint_cpp.include_paths_checker import IncludePathsChecker
+from ci.lint_cpp.is_header_include_checker import IsHeaderIncludeChecker
+from ci.lint_cpp.iwyu_pragma_block_checker import IwyuPragmaBlockChecker
 from ci.lint_cpp.logging_in_iram_checker import LoggingInIramChecker
+from ci.lint_cpp.member_style_checker import MemberStyleChecker
 from ci.lint_cpp.namespace_platforms_checker import NamespacePlatformsChecker
 from ci.lint_cpp.no_namespace_fl_declaration import NamespaceFlDeclarationChecker
 from ci.lint_cpp.no_using_namespace_fl_in_headers import UsingNamespaceFlChecker
@@ -71,7 +78,7 @@ from ci.lint_cpp.using_namespace_fl_in_examples_checker import (
     UsingNamespaceFlInExamplesChecker,
 )
 from ci.lint_cpp.weak_attribute_checker import WeakAttributeChecker
-from ci.util.check_files import FileContent, FileContentChecker
+from ci.util.check_files import CheckerResults, FileContent, FileContentChecker
 from ci.util.paths import PROJECT_ROOT
 
 
@@ -90,6 +97,21 @@ def _python_records(
         FileContent(path=file_path, content=code, lines=code.splitlines())
     )
     violations_by_path = getattr(checker, "violations", {})
+    if isinstance(violations_by_path, CheckerResults):
+        file_violations = violations_by_path.violations.get(
+            file_path, violations_by_path.violations.get(_normalize_path(file_path))
+        )
+        if file_violations is None:
+            return []
+        return [
+            {
+                "checker": checker.__class__.__name__,
+                "path": _normalize_path(file_path),
+                "line": violation.line_number,
+                "message": violation.content,
+            }
+            for violation in file_violations.violations
+        ]
     violations = violations_by_path.get(
         file_path, violations_by_path.get(_normalize_path(file_path), [])
     )
@@ -205,6 +227,12 @@ def _rust_records(
             '#include "fl/foo.cpp.hpp"\n',
         ),
         (
+            "cpp_hpp_header_pair",
+            CppHppHeaderPairChecker(),
+            Path("src/fl/example.cpp.hpp"),
+            "int value;\n",
+        ),
+        (
             "cpp_include",
             CppIncludeChecker(),
             Path("src/fl/example.h"),
@@ -277,6 +305,18 @@ def _rust_records(
             '#include "platforms/foo.impl.hpp"\n',
         ),
         (
+            "is_header_include",
+            IsHeaderIncludeChecker(),
+            Path("src/platforms/example.h"),
+            "#if FL_IS_ESP32\n#endif\n",
+        ),
+        (
+            "iwyu_pragma_block",
+            IwyuPragmaBlockChecker(),
+            Path("src/fl/example.h"),
+            "#include <driver/rmt.h>\n",
+        ),
+        (
             "bare_allocation",
             BareAllocationChecker(),
             Path("src/fl/example.h"),
@@ -299,6 +339,12 @@ def _rust_records(
             LoggingInIramChecker(),
             Path("src/fl/example.h"),
             '/*\ncomment\n*/\nFL_IRAM void isr() {\n    FL_WARN("x");\n}\n',
+        ),
+        (
+            "member_style",
+            MemberStyleChecker(),
+            Path("src/fl/example.h"),
+            "class Foo {\n    int state_;\n};\n",
         ),
         (
             "namespace_fl_declaration",
@@ -481,12 +527,18 @@ def test_rust_checker_matches_python_oracle(
     examples_root = tmp_path / "examples"
     src_root = tmp_path / "src"
     tests_root = tmp_path / "tests"
+    monkeypatch.setattr(cpp_hpp_header_pair_checker, "PROJECT_ROOT", tmp_path)
+    monkeypatch.setattr(cpp_hpp_header_pair_checker, "FL_ROOT", src_root / "fl")
     monkeypatch.setattr(cpp_hpp_includes_checker, "SRC_ROOT", src_root)
     monkeypatch.setattr(cpp_hpp_includes_checker, "TESTS_ROOT", tests_root)
     monkeypatch.setattr(
         fastled_header_usage_checker, "SRC_DIR", _normalize_path(src_root)
     )
     monkeypatch.setattr(include_paths_checker, "PROJECT_ROOT", tmp_path)
+    monkeypatch.setattr(
+        is_header_include_checker, "PLATFORMS_ROOT", src_root / "platforms"
+    )
+    monkeypatch.setattr(iwyu_pragma_block_checker, "PROJECT_ROOT", tmp_path)
     monkeypatch.setattr(namespace_platforms_checker, "SRC_ROOT", src_root)
     monkeypatch.setattr(no_namespace_fl_declaration, "SRC_ROOT", src_root)
     monkeypatch.setattr(relative_include_checker, "SRC_DIR", _normalize_path(src_root))

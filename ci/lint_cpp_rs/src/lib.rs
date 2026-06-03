@@ -2,7 +2,7 @@ use glob::glob;
 use rayon::prelude::*;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use std::collections::{BTreeSet, HashMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::error::Error;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -433,6 +433,27 @@ const UNIT_TEST_FAST_PREFIXES: &[&str] = &[
     "TYPE_TO_STRING",
 ];
 
+const FL_IS_PREFIX_TO_HEADER: &[(&str, &str)] = &[
+    ("FL_IS_RENESAS", "is_renesas.h"),
+    ("FL_IS_APOLLO3", "is_apollo3.h"),
+    ("FL_IS_STM32", "is_stm32.h"),
+    ("FL_IS_TEENSY", "is_teensy.h"),
+    ("FL_IS_NRF52", "is_nrf52.h"),
+    ("FL_IS_SILABS", "is_silabs.h"),
+    ("FL_IS_POSIX", "is_posix.h"),
+    ("FL_IS_WASM", "is_wasm.h"),
+    ("FL_IS_STUB", "is_stub.h"),
+    ("FL_IS_AVR", "is_avr.h"),
+    ("FL_IS_ESP", "is_esp.h"),
+    ("FL_IS_ARM", "is_arm.h"),
+    ("FL_IS_SAMD", "is_samd.h"),
+    ("FL_IS_SAM", "is_sam.h"),
+    ("FL_IS_WIN", "is_win.h"),
+    ("FL_IS_RP", "is_rp.h"),
+];
+
+const IWYU_INTERNAL_HEADER_PREFIXES: &[&str] = &["fl/", "fx/", "sensors/", "lib8tion/"];
+
 #[derive(Debug, Clone)]
 pub struct FileContent {
     pub path: String,
@@ -562,6 +583,7 @@ pub fn supported_checker_names() -> &'static [&'static str] {
         "banned_namespace",
         "builtin_memcpy",
         "cpp_hpp_includes",
+        "cpp_hpp_header_pair",
         "cpp_include",
         "ctype_global",
         "enum_class",
@@ -572,6 +594,9 @@ pub fn supported_checker_names() -> &'static [&'static str] {
         "include_paths",
         "impl_hpp_includes",
         "logging_in_iram",
+        "is_header_include",
+        "iwyu_pragma_block",
+        "member_style",
         "namespace_fl_declaration",
         "namespace_platforms",
         "numeric_limit_macros",
@@ -615,6 +640,7 @@ pub fn supported_python_checker_names() -> &'static [&'static str] {
         "BannedNamespaceChecker",
         "BuiltinMemcpyChecker",
         "CppHppIncludesChecker",
+        "CppHppHeaderPairChecker",
         "CppIncludeChecker",
         "CtypeGlobalChecker",
         "EnumClassChecker",
@@ -625,7 +651,10 @@ pub fn supported_python_checker_names() -> &'static [&'static str] {
         "IncludeAfterNamespaceChecker",
         "IncludePathsChecker",
         "ImplHppIncludesChecker",
+        "IsHeaderIncludeChecker",
+        "IwyuPragmaBlockChecker",
         "LoggingInIramChecker",
+        "MemberStyleChecker",
         "NamespaceFlDeclarationChecker",
         "NamespacePlatformsChecker",
         "NumericLimitMacroChecker",
@@ -670,6 +699,7 @@ pub fn create_checkers(
         ("banned_namespace", Box::new(BannedNamespaceChecker)),
         ("builtin_memcpy", Box::new(BuiltinMemcpyChecker)),
         ("cpp_hpp_includes", Box::new(CppHppIncludesChecker)),
+        ("cpp_hpp_header_pair", Box::new(CppHppHeaderPairChecker)),
         ("cpp_include", Box::new(CppIncludeChecker)),
         ("ctype_global", Box::new(CtypeGlobalChecker)),
         ("enum_class", Box::new(EnumClassChecker)),
@@ -683,7 +713,10 @@ pub fn create_checkers(
         ),
         ("include_paths", Box::new(IncludePathsChecker)),
         ("impl_hpp_includes", Box::new(ImplHppIncludesChecker)),
+        ("is_header_include", Box::new(IsHeaderIncludeChecker)),
+        ("iwyu_pragma_block", Box::new(IwyuPragmaBlockChecker)),
         ("logging_in_iram", Box::new(LoggingInIramChecker)),
+        ("member_style", Box::new(MemberStyleChecker)),
         (
             "namespace_fl_declaration",
             Box::new(NamespaceFlDeclarationChecker),
@@ -1207,6 +1240,31 @@ fn regex_cpp_hpp_include() -> &'static Regex {
     VALUE.get_or_init(|| Regex::new(r#"#\s*include\s+[<"]([^>"]+\.cpp\.hpp)[>"]"#).unwrap())
 }
 
+fn regex_include_any_path() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r#"^\s*#\s*include\s*[<"](.+?)[>"]"#).unwrap())
+}
+
+fn regex_iwyu_include() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r#"^\s*#include\s+[<"]([^>"]+)[>"](?:\s*//\s*(.*))?"#).unwrap())
+}
+
+fn regex_iwyu_begin() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"(?i)^\s*//\s*IWYU\s+pragma:\s*begin_keep").unwrap())
+}
+
+fn regex_iwyu_end() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"(?i)^\s*//\s*IWYU\s+pragma:\s*end_keep").unwrap())
+}
+
+fn regex_iwyu_keep_inline() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"(?i)IWYU\s+pragma:\s*keep").unwrap())
+}
+
 fn regex_impl_hpp_include() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| Regex::new(r#"#\s*include\s+[<"]([^>"]+\.impl\.hpp)[>"]"#).unwrap())
@@ -1291,6 +1349,11 @@ fn regex_preprocessor_if_elif() -> &'static Regex {
     VALUE.get_or_init(|| Regex::new(r"^\s*#\s*(?:if|elif)\b").unwrap())
 }
 
+fn regex_preprocessor_conditional() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"^\s*#\s*(?:if|ifdef|ifndef|elif)\b").unwrap())
+}
+
 fn regex_preprocessor_include() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| Regex::new(r"^#\s*include\b").unwrap())
@@ -1352,6 +1415,26 @@ fn regex_class_struct() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| {
         Regex::new(r"\b(?:class|struct)\s+(?:[A-Za-z_]\w*\s+)*[A-Za-z_]\w*").unwrap()
+    })
+}
+
+fn regex_member_trailing_underscore() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| {
+        Regex::new(
+            r"\b(?:const\s+)?(?:static\s+)?(?:volatile\s+)?(?:mutable\s+)?[\w:]+(?:<[^>]+>)?[\s*&]+\s*(\w{2,}_)\s*[;=,)]",
+        )
+        .unwrap()
+    })
+}
+
+fn regex_member_m_underscore() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| {
+        Regex::new(
+            r"\b(?:const\s+)?(?:static\s+)?(?:volatile\s+)?(?:mutable\s+)?[\w:]+(?:<[^>]+>)?[\s*&]+\s*(m_\w+)\s*[;=,)]",
+        )
+        .unwrap()
     })
 }
 
@@ -1825,6 +1908,129 @@ fn unit_test_fl_macro(macro_name: &str) -> Option<&'static str> {
     UNIT_TEST_BANNED_MACROS
         .iter()
         .find_map(|(bare, replacement)| (*bare == macro_name).then_some(*replacement))
+}
+
+fn project_relative_guess(path: &str) -> String {
+    let normalized = normalize_path(path);
+    for marker in ["/src/", "/tests/", "/examples/"] {
+        if let Some(index) = normalized.find(marker) {
+            return normalized[index + 1..].to_string();
+        }
+    }
+    for prefix in ["src/", "tests/", "examples/"] {
+        if normalized.starts_with(prefix) {
+            return normalized;
+        }
+    }
+    normalized
+}
+
+fn required_fl_is_header(fl_is_macro: &str) -> Option<&'static str> {
+    FL_IS_PREFIX_TO_HEADER
+        .iter()
+        .find_map(|(prefix, header)| fl_is_macro.starts_with(prefix).then_some(*header))
+}
+
+fn iwyu_is_top_level_platform_header(header_path: &str) -> bool {
+    let Some(remainder) = header_path.strip_prefix("platforms/") else {
+        return false;
+    };
+    !remainder.contains('/')
+}
+
+fn iwyu_classify_header(header_path: &str, include_line: &str) -> &'static str {
+    if include_line.contains('<') && include_line.contains('>') {
+        return "system";
+    }
+    if IWYU_INTERNAL_HEADER_PREFIXES
+        .iter()
+        .any(|prefix| header_path.starts_with(prefix))
+    {
+        return "internal";
+    }
+    if !header_path.contains('/') && ends_with_any(header_path, &[".h", ".hpp"]) {
+        return "internal";
+    }
+    if header_path.starts_with("platforms/") {
+        return "platform";
+    }
+    "system"
+}
+
+fn iwyu_format_violation(_header_path: &str, header_type: &str, include_line: &str) -> String {
+    let type_desc = if header_type == "platform" {
+        "Platform"
+    } else {
+        "System"
+    };
+    format!(
+        "{type_desc} header not wrapped in IWYU pragma block: {include_line}\n  Wrap in:\n    // IWYU pragma: begin_keep\n    {include_line}\n    // IWYU pragma: end_keep\n  Or add inline pragma:\n    {include_line}  // IWYU pragma: keep"
+    )
+}
+
+fn python_capitalize(part: &str) -> String {
+    let mut chars = part.chars();
+    let Some(first) = chars.next() else {
+        return String::new();
+    };
+    let mut result = first.to_uppercase().collect::<String>();
+    result.push_str(&chars.as_str().to_lowercase());
+    result
+}
+
+fn convert_google_to_m_prefix(var_name: &str) -> String {
+    let Some(base_name) = var_name.strip_suffix('_') else {
+        return var_name.to_string();
+    };
+    let mut base_chars = base_name.chars();
+    let Some(first) = base_chars.next() else {
+        return "m".to_string();
+    };
+    if base_chars.as_str().chars().any(char::is_uppercase) {
+        let first_upper = first.to_uppercase().collect::<String>();
+        return format!("m{first_upper}{}", base_chars.as_str());
+    }
+    let converted = base_name
+        .split('_')
+        .filter(|part| !part.is_empty())
+        .map(python_capitalize)
+        .collect::<String>();
+    format!("m{converted}")
+}
+
+fn convert_m_underscore_to_m_prefix(var_name: &str) -> String {
+    let Some(remainder) = var_name.strip_prefix("m_") else {
+        return var_name.to_string();
+    };
+    if remainder.is_empty() {
+        return var_name.to_string();
+    }
+    if remainder.contains('_') {
+        let converted = remainder
+            .split('_')
+            .filter(|part| !part.is_empty())
+            .map(python_capitalize)
+            .collect::<String>();
+        return format!("m{converted}");
+    }
+    let mut chars = remainder.chars();
+    let Some(first) = chars.next() else {
+        return "m".to_string();
+    };
+    let first_upper = first.to_uppercase().collect::<String>();
+    format!("m{first_upper}{}", chars.as_str())
+}
+
+fn is_inside_parens(code_part: &str, pos: usize) -> bool {
+    let mut depth = 0_i32;
+    for ch in code_part[..pos].chars() {
+        if ch == '(' {
+            depth += 1;
+        } else if ch == ')' {
+            depth -= 1;
+        }
+    }
+    depth > 0
 }
 
 fn platform_trampoline_suggestion(include_path: &str) -> &'static str {
@@ -2721,7 +2927,9 @@ impl FileContentChecker for AsmJsLocationChecker {
 
     fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
         let normalized = normalize_path(file_path);
-        if !is_under_project_subpath(&normalized, project_root, "src") {
+        if !is_under_project_subpath(&normalized, project_root, "src/fl")
+            && !is_under_project_subpath(&normalized, project_root, "src/platforms")
+        {
             return false;
         }
         if normalized.contains("/third_party/") {
@@ -2784,7 +2992,9 @@ impl FileContentChecker for ReinterpretCastChecker {
 
     fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
         let normalized = normalize_path(file_path);
-        if !is_under_project_subpath(&normalized, project_root, "src") {
+        if !is_under_project_subpath(&normalized, project_root, "src/fl")
+            && !is_under_project_subpath(&normalized, project_root, "src/platforms")
+        {
             return false;
         }
         if !ends_with_any(file_path, &[".cpp", ".h", ".hpp", ".ino"]) {
@@ -4206,6 +4416,332 @@ impl FileContentChecker for SimdIntrinsicsChecker {
                 if code_part.contains(pattern) {
                     violations.push((index + 1, format!("{stripped}  [{description}]")));
                     break;
+                }
+            }
+        }
+
+        violations
+    }
+}
+
+struct CppHppHeaderPairChecker;
+
+impl FileContentChecker for CppHppHeaderPairChecker {
+    fn name(&self) -> &'static str {
+        "CppHppHeaderPairChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        if !normalized.ends_with(".cpp.hpp") {
+            return false;
+        }
+        if !is_under_project_subpath(&normalized, project_root, "src/fl") {
+            return false;
+        }
+        let basename = normalized.rsplit('/').next().unwrap_or(&normalized);
+        !basename.starts_with("_build")
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        if file_content
+            .lines
+            .iter()
+            .take(5)
+            .any(|line| line.contains("// ok no header"))
+        {
+            return Vec::new();
+        }
+        let Some(header_path) = file_content.path.strip_suffix(".cpp.hpp") else {
+            return Vec::new();
+        };
+        let expected_header = format!("{header_path}.h");
+        if Path::new(&expected_header).exists() {
+            return Vec::new();
+        }
+        let mut expected_display = project_relative_guess(&expected_header);
+        if cfg!(windows) {
+            expected_display = expected_display.replace('/', "\\");
+        }
+        vec![(
+            1,
+            format!("No corresponding header found: expected {expected_display}"),
+        )]
+    }
+}
+
+struct IsHeaderIncludeChecker;
+
+impl FileContentChecker for IsHeaderIncludeChecker {
+    fn name(&self) -> &'static str {
+        "IsHeaderIncludeChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        if !is_under_project_subpath(&normalized, project_root, "src/platforms") {
+            return false;
+        }
+        if !ends_with_any(&normalized, &[".cpp", ".h", ".hpp"]) {
+            return false;
+        }
+        let file_name = normalized.rsplit('/').next().unwrap_or(&normalized);
+        if file_name.starts_with("is_") {
+            return false;
+        }
+        let file_name_lower = file_name.to_lowercase();
+        !file_name_lower.contains("compile_test") && !file_name_lower.contains("core_detection")
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let mut macros = BTreeSet::new();
+        let mut in_block_comment = false;
+
+        for line in &file_content.lines {
+            if line.contains("/*") {
+                in_block_comment = true;
+            }
+            if line.contains("*/") {
+                in_block_comment = false;
+                continue;
+            }
+            if in_block_comment {
+                continue;
+            }
+            let stripped = line.trim();
+            if stripped.starts_with("//") || !regex_preprocessor_conditional().is_match(stripped) {
+                continue;
+            }
+            let code_part = split_line_comment(line);
+            for token in regex_fl_is_token().find_iter(code_part) {
+                macros.insert(token.as_str().to_string());
+            }
+        }
+
+        if macros.is_empty() {
+            return Vec::new();
+        }
+
+        let mut included_names = HashSet::new();
+        for line in &file_content.lines {
+            if let Some(capture) = regex_include_any_path().captures(line) {
+                let include_path = &capture[1];
+                let include_name = include_path.rsplit('/').next().unwrap_or(include_path);
+                included_names.insert(include_name.to_string());
+            }
+        }
+        let has_is_platform = included_names.contains("is_platform.h");
+
+        let mut required: BTreeMap<&str, BTreeSet<String>> = BTreeMap::new();
+        for macro_name in macros {
+            if let Some(header) = required_fl_is_header(&macro_name) {
+                required.entry(header).or_default().insert(macro_name);
+            }
+        }
+
+        let mut violations = Vec::new();
+        for (header, macros) in required {
+            if included_names.contains(header) || has_is_platform {
+                continue;
+            }
+            let macros_str = macros.into_iter().collect::<Vec<_>>().join(", ");
+            violations.push((
+                0,
+                format!(
+                    "File uses {macros_str} but does not include '{header}' or 'is_platform.h'. Add: #include \"{header}\""
+                ),
+            ));
+        }
+        violations
+    }
+}
+
+struct IwyuPragmaBlockChecker;
+
+impl FileContentChecker for IwyuPragmaBlockChecker {
+    fn name(&self) -> &'static str {
+        "IwyuPragmaBlockChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        if !is_under_project_subpath(&normalized, project_root, "src/fl")
+            && !is_under_project_subpath(&normalized, project_root, "src/platforms")
+        {
+            return false;
+        }
+        if !ends_with_any(&normalized, &[".h", ".hpp", ".hh", ".hxx"]) {
+            return false;
+        }
+        !normalized.contains("/third_party/") && !normalized.contains("/platforms/stub/")
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let normalized_path = normalize_path(&file_content.path);
+        let is_fl_file = normalized_path.contains("/src/fl/");
+        let mut violations = Vec::new();
+        let mut in_pragma_block = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            if regex_iwyu_begin().is_match(line) {
+                in_pragma_block = true;
+                continue;
+            }
+            if regex_iwyu_end().is_match(line) {
+                in_pragma_block = false;
+                continue;
+            }
+
+            let Some(capture) = regex_iwyu_include().captures(line) else {
+                continue;
+            };
+            let header_path = &capture[1];
+            let comment = capture.get(2).map_or("", |value| value.as_str());
+            if in_pragma_block || regex_iwyu_keep_inline().is_match(comment) {
+                continue;
+            }
+
+            let header_type = iwyu_classify_header(header_path, line);
+            if header_type == "internal" {
+                continue;
+            }
+            if header_type == "platform" {
+                if iwyu_is_top_level_platform_header(header_path) || !is_fl_file {
+                    continue;
+                }
+                let message = iwyu_format_violation(header_path, header_type, line.trim());
+                violations.push((index + 1, message));
+            } else if header_type == "system" {
+                let message = iwyu_format_violation(header_path, header_type, line.trim());
+                violations.push((index + 1, message));
+            }
+        }
+
+        violations
+    }
+}
+
+struct MemberStyleChecker;
+
+impl FileContentChecker for MemberStyleChecker {
+    fn name(&self) -> &'static str {
+        "MemberStyleChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, _project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        if !ends_with_any(&normalized, &[".h", ".hpp", ".cpp"]) {
+            return false;
+        }
+        if is_excluded_file(&normalized) || normalized.contains("third_party") {
+            return false;
+        }
+        true
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment || stripped.starts_with("//") {
+                continue;
+            }
+
+            let mut code_part = split_line_comment(line).to_string();
+            if code_part.trim().is_empty() {
+                continue;
+            }
+
+            let has_trailing_underscore = code_part.contains("_;")
+                || code_part.contains("_=")
+                || code_part.contains("_,")
+                || code_part.contains("_)")
+                || code_part.contains("_ ");
+            let has_m_underscore = code_part.contains("m_");
+            if !has_trailing_underscore && !has_m_underscore {
+                continue;
+            }
+
+            if code_part.contains('"') {
+                code_part = regex_string_literal()
+                    .replace_all(&code_part, "\"\"")
+                    .to_string();
+            }
+
+            if has_trailing_underscore {
+                let code_for_positions = code_part.clone();
+                for capture in regex_member_trailing_underscore().captures_iter(&code_part) {
+                    let Some(var_match) = capture.get(1) else {
+                        continue;
+                    };
+                    let var_name = var_match.as_str();
+                    if is_inside_parens(&code_for_positions, var_match.start()) {
+                        continue;
+                    }
+                    if code_part.trim_start().starts_with('#') {
+                        continue;
+                    }
+                    if var_name.contains("__")
+                        || code_part.contains("COUNTER")
+                        || code_part.contains("LINE")
+                    {
+                        continue;
+                    }
+                    let base = var_name.trim_end_matches('_');
+                    if base
+                        .chars()
+                        .all(|ch| !ch.is_alphabetic() || ch.is_uppercase())
+                        && var_name.chars().count() > 2
+                    {
+                        continue;
+                    }
+                    let suggested_name = convert_google_to_m_prefix(var_name);
+                    violations.push((
+                        index + 1,
+                        format!(
+                            "{var_name} -> {suggested_name}: {}",
+                            stripped.chars().take(80).collect::<String>()
+                        ),
+                    ));
+                }
+            }
+
+            if has_m_underscore {
+                let code_for_positions = code_part.clone();
+                for capture in regex_member_m_underscore().captures_iter(&code_part) {
+                    let Some(var_match) = capture.get(1) else {
+                        continue;
+                    };
+                    let var_name = var_match.as_str();
+                    if is_inside_parens(&code_for_positions, var_match.start()) {
+                        continue;
+                    }
+                    if code_part.trim_start().starts_with('#') {
+                        continue;
+                    }
+                    if var_name.contains("__")
+                        || code_part.contains("COUNTER")
+                        || code_part.contains("LINE")
+                    {
+                        continue;
+                    }
+                    let suggested_name = convert_m_underscore_to_m_prefix(var_name);
+                    violations.push((
+                        index + 1,
+                        format!(
+                            "{var_name} -> {suggested_name}: {}",
+                            stripped.chars().take(80).collect::<String>()
+                        ),
+                    ));
                 }
             }
         }
