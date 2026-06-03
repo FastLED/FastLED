@@ -346,7 +346,14 @@ IChannelDriver::DriverState ChannelDriverLcdClockless::poll() FL_NOEXCEPT {
     // Only declare complete when the ISR has signaled all chunks are done.
     // peripheralIdle alone is insufficient: between the first DMA send and
     // the ISR callback registration, the peripheral can briefly appear idle.
-    if ((streamDone && peripheralIdle) || mIsrCtx.mStreamError) {
+    //
+    // Require peripheralIdle on the error path as well: queueTransmit() keeps
+    // up to two LCD transactions in flight, so a failed follow-up submission
+    // can leave an earlier chunk still completing asynchronously in
+    // LcdSpiPeripheralEsp. Clearing mIsrCtx and releasing the channels before
+    // that final ISR callback would let the stale callback poke into a torn-
+    // down or newly-started stream.
+    if ((streamDone || mIsrCtx.mStreamError) && peripheralIdle) {
         mBusy = false;
         mIsrCtx.mStreamComplete = false;
         mIsrCtx.mStreamError = false;
