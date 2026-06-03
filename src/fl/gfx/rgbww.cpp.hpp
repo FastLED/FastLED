@@ -174,17 +174,37 @@ namespace {
 // monotonic, and good enough for the common ambilight / neutral-pastel case.
 inline float compute_eta_from_input(const colorimetric_detail::RgbcctProfile& profile,
                                     float s_r, float s_g, float s_b) FL_NOEXCEPT {
-    // Reuse the warm path's RGB primaries to compute the input chromaticity.
-    float P_R[3], P_G[3], P_B[3];
-    colorimetric_detail::xyY_to_XYZ(profile.warm_path.xy_r[0], profile.warm_path.xy_r[1],
-                                    profile.warm_path.lum_r, P_R);
-    colorimetric_detail::xyY_to_XYZ(profile.warm_path.xy_g[0], profile.warm_path.xy_g[1],
-                                    profile.warm_path.lum_g, P_G);
-    colorimetric_detail::xyY_to_XYZ(profile.warm_path.xy_b[0], profile.warm_path.xy_b[1],
-                                    profile.warm_path.lum_b, P_B);
-    const float X = P_R[0]*s_r + P_G[0]*s_g + P_B[0]*s_b;
-    const float Y = P_R[1]*s_r + P_G[1]*s_g + P_B[1]*s_b;
-    const float Z = P_R[2]*s_r + P_G[2]*s_g + P_B[2]*s_b;
+    // Compute the input chromaticity in the *source* color space (#2705) when
+    // the warm path carries populated input_xy_* fields. Falling back to the
+    // emitter-space projection used previously would bias eta toward the LED
+    // gamut, so a neutral source white wouldn't blend symmetrically across
+    // warm/cool when the source primaries (e.g. sRGB) differ from the LED
+    // primaries — exactly the regression flagged on this PR.
+    //
+    // Source-space matrix derivation succeeds iff input_xy_w[1] > epsilon.
+    // Match the same fallback policy used by build_profile_cache.
+    float X = 0.0f, Y = 0.0f, Z = 0.0f;
+    const colorimetric_detail::DiodeProfile& wp = profile.warm_path;
+    if (wp.input_xy_w[1] > 1e-6f) {
+        float M_src[3][3];
+        if (colorimetric_detail::build_source_matrix(
+                wp.input_xy_r, wp.input_xy_g, wp.input_xy_b, wp.input_xy_w, M_src)) {
+            const float s[3] = { s_r, s_g, s_b };
+            float xyz[3];
+            colorimetric_detail::matvec3(M_src, s, xyz);
+            X = xyz[0]; Y = xyz[1]; Z = xyz[2];
+        }
+    }
+    if (X == 0.0f && Y == 0.0f && Z == 0.0f) {
+        // Legacy emitter-space fallback for profiles without populated source.
+        float P_R[3], P_G[3], P_B[3];
+        colorimetric_detail::xyY_to_XYZ(wp.xy_r[0], wp.xy_r[1], wp.lum_r, P_R);
+        colorimetric_detail::xyY_to_XYZ(wp.xy_g[0], wp.xy_g[1], wp.lum_g, P_G);
+        colorimetric_detail::xyY_to_XYZ(wp.xy_b[0], wp.xy_b[1], wp.lum_b, P_B);
+        X = P_R[0]*s_r + P_G[0]*s_g + P_B[0]*s_b;
+        Y = P_R[1]*s_r + P_G[1]*s_g + P_B[1]*s_b;
+        Z = P_R[2]*s_r + P_G[2]*s_g + P_B[2]*s_b;
+    }
     const float sum = X + Y + Z;
     if (sum < 1e-9f) return 0.5f;
     const float input_x = X / sum;

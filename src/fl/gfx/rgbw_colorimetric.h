@@ -188,6 +188,23 @@ enum class LutInterp : u8 {
     Hermite = 1,
 };
 
+// Cubic Hermite basis on [0, 1]. Output layout: { h00, h01, h10, h11 } where
+//   h00(t) = 2t³ - 3t² + 1   value at t=0
+//   h01(t) = -2t³ + 3t²      value at t=1
+//   h10(t) = t³ - 2t² + t    derivative at t=0
+//   h11(t) = t³ - t²         derivative at t=1
+// Lifted into a header inline so `lookup_lut` and the test suite consume
+// exactly the same evaluator (CodeRabbit #2707: tests that redefine basis
+// locally cannot catch regressions in the production code).
+inline void hermite_basis(float t, float out[4]) FL_NOEXCEPT {
+    const float t2 = t * t;
+    const float t3 = t2 * t;
+    out[0] = 2.0f * t3 - 3.0f * t2 + 1.0f;
+    out[1] = -2.0f * t3 + 3.0f * t2;
+    out[2] = t3 - 2.0f * t2 + t;
+    out[3] = t3 - t2;
+}
+
 // Owns its cell storage via fl::unique_ptr. Obtain via `build_lut(...)`,
 // which atomically allocates + populates. Lookup code can rely on
 // .cells.get() being non-null for the table's lifetime.

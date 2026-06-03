@@ -418,31 +418,65 @@ FL_TEST_CASE("overdrive interpolates between strict and full-W") {
 // math (basis functions, quantization, derivative scaling) rather than a
 // rebuilt library, so they run in the default test build.
 
-FL_TEST_CASE("Hermite basis evaluates to expected node values") {
-    // Hermite basis: at t=0 only h00 is 1 (value at left), at t=1 only h01
-    // is 1 (value at right). h10 and h11 carry the derivatives at left/right
-    // and are zero at the nodes — this is what lets the basis match both
-    // value and slope at each end of a cell.
-    auto h00 = [](float t) { return 2*t*t*t - 3*t*t + 1; };
-    auto h01 = [](float t) { return -2*t*t*t + 3*t*t; };
-    auto h10 = [](float t) { return t*t*t - 2*t*t + t; };
-    auto h11 = [](float t) { return t*t*t - t*t; };
+FL_TEST_CASE("hermite_basis matches expected node values") {
+    // CodeRabbit #2707: this test must call the *production* hermite_basis
+    // helper (defined inline in rgbw_colorimetric.h and consumed by
+    // lookup_lut), so a regression in the production basis also breaks
+    // this test.
+    //
+    // Layout: { h00, h01, h10, h11 } where
+    //   h00 = value at t=0,  h01 = value at t=1
+    //   h10 = derivative at t=0,  h11 = derivative at t=1.
+    float b0[4], b1[4], bm[4];
+    hermite_basis(0.0f, b0);
+    hermite_basis(1.0f, b1);
+    hermite_basis(0.5f, bm);
 
-    FL_CHECK_CLOSE(h00(0.0f), 1.0f, 1e-6f);
-    FL_CHECK_CLOSE(h00(1.0f), 0.0f, 1e-6f);
-    FL_CHECK_CLOSE(h01(0.0f), 0.0f, 1e-6f);
-    FL_CHECK_CLOSE(h01(1.0f), 1.0f, 1e-6f);
-    FL_CHECK_CLOSE(h10(0.0f), 0.0f, 1e-6f);
-    FL_CHECK_CLOSE(h10(1.0f), 0.0f, 1e-6f);
-    FL_CHECK_CLOSE(h11(0.0f), 0.0f, 1e-6f);
-    FL_CHECK_CLOSE(h11(1.0f), 0.0f, 1e-6f);
+    // At t=0: only h00 is non-zero (= 1).
+    FL_CHECK_CLOSE(b0[0], 1.0f, 1e-6f);
+    FL_CHECK_CLOSE(b0[1], 0.0f, 1e-6f);
+    FL_CHECK_CLOSE(b0[2], 0.0f, 1e-6f);
+    FL_CHECK_CLOSE(b0[3], 0.0f, 1e-6f);
 
-    // Value sum (h00 + h01) should equal 1 only at endpoints; midpoint is
-    // 0.5 by construction (cubic blend symmetric in t).
-    FL_CHECK_CLOSE(h00(0.5f) + h01(0.5f), 1.0f, 1e-6f);
-    // Derivative basis (h10 + h11) at midpoint: t³-2t²+t + t³-t² evaluated
-    // at 0.5 = (0.125-0.5+0.5) + (0.125-0.25) = 0.125 + -0.125 = 0.
-    FL_CHECK_CLOSE(h10(0.5f) + h11(0.5f), 0.0f, 1e-6f);
+    // At t=1: only h01 is non-zero (= 1).
+    FL_CHECK_CLOSE(b1[0], 0.0f, 1e-6f);
+    FL_CHECK_CLOSE(b1[1], 1.0f, 1e-6f);
+    FL_CHECK_CLOSE(b1[2], 0.0f, 1e-6f);
+    FL_CHECK_CLOSE(b1[3], 0.0f, 1e-6f);
+
+    // Value sum (h00 + h01) must equal 1 everywhere — partition-of-unity for
+    // the value-only subset of the basis, required for a constant function
+    // to interpolate as itself when all derivatives are zero.
+    FL_CHECK_CLOSE(bm[0] + bm[1], 1.0f, 1e-6f);
+    // Derivative basis (h10 + h11) at midpoint:
+    //   (0.125 − 0.5 + 0.5) + (0.125 − 0.25) = 0.125 − 0.125 = 0.
+    FL_CHECK_CLOSE(bm[2] + bm[3], 0.0f, 1e-6f);
+}
+
+
+FL_TEST_CASE("hermite_basis reproduces a linear function on a cell") {
+    // Verify the production basis can exactly represent f(t) = a + b·t when
+    // the values and derivatives at the endpoints are set consistently. This
+    // is the load-bearing property of bicubic Hermite: it matches BOTH value
+    // and slope at every corner — a regression that swaps the h10/h11 roles
+    // (or breaks the cubic blend) would fail this check at interior points.
+    const float a = 0.3f;
+    const float b = 0.7f;
+    const float f0 = a;       // f(0)
+    const float f1 = a + b;   // f(1)
+    const float df = b;       // f'(t) = b everywhere
+
+    auto eval = [&](float t) {
+        float h[4];
+        hermite_basis(t, h);
+        return h[0] * f0 + h[1] * f1 + h[2] * df + h[3] * df;
+    };
+
+    FL_CHECK_CLOSE(eval(0.0f), f0, 1e-5f);
+    FL_CHECK_CLOSE(eval(1.0f), f1, 1e-5f);
+    FL_CHECK_CLOSE(eval(0.25f), a + b * 0.25f, 1e-5f);
+    FL_CHECK_CLOSE(eval(0.5f),  a + b * 0.5f,  1e-5f);
+    FL_CHECK_CLOSE(eval(0.75f), a + b * 0.75f, 1e-5f);
 }
 
 

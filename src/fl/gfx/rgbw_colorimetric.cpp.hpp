@@ -377,23 +377,14 @@ void lookup_lut(const LutTable& lut, const float xy_t[2], float Y_t,
     const float inv_Q = 1.0f / static_cast<float>(kLutQ);
 
     if (lut.interp == LutInterp::Hermite) {
-        // Bicubic Hermite (no fxy term). Basis functions on [0, 1]:
-        //   h00(t) = 2t³ - 3t² + 1  (value at t=0, zero derivatives at both ends)
-        //   h01(t) = -2t³ + 3t²     (value at t=1)
-        //   h10(t) = t³ - 2t² + t   (derivative at t=0)
-        //   h11(t) = t³ - t²        (derivative at t=1)
-        const float fx2 = fx * fx;
-        const float fx3 = fx2 * fx;
-        const float h00x = 2.0f * fx3 - 3.0f * fx2 + 1.0f;
-        const float h01x = -2.0f * fx3 + 3.0f * fx2;
-        const float h10x = fx3 - 2.0f * fx2 + fx;
-        const float h11x = fx3 - fx2;
-        const float fy2 = fy * fy;
-        const float fy3 = fy2 * fy;
-        const float h00y = 2.0f * fy3 - 3.0f * fy2 + 1.0f;
-        const float h01y = -2.0f * fy3 + 3.0f * fy2;
-        const float h10y = fy3 - 2.0f * fy2 + fy;
-        const float h11y = fy3 - fy2;
+        // Bicubic Hermite with no fxy cross term. Basis is computed via the
+        // shared header helper `hermite_basis` so the test suite exercises the
+        // same evaluator (CodeRabbit #2707).
+        float bx[4], by[4];
+        hermite_basis(fx, bx);
+        hermite_basis(fy, by);
+        const float h00x = bx[0], h01x = bx[1], h10x = bx[2], h11x = bx[3];
+        const float h00y = by[0], h01y = by[1], h10y = by[2], h11y = by[3];
 
         for (int k = 0; k < 4; ++k) {
             const float v00 = c00[k] * inv_Q;
