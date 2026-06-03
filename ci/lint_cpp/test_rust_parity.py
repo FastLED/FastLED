@@ -17,6 +17,7 @@ from ci.lint_cpp import (
     no_namespace_fl_declaration,
     relative_include_checker,
     serial_printf_checker,
+    unit_test_checker,
     using_namespace_fl_in_examples_checker,
 )
 from ci.lint_cpp.arduino_macro_usage_checker import ArduinoMacroUsageChecker
@@ -26,12 +27,14 @@ from ci.lint_cpp.banned_define_checker import BannedDefineChecker
 from ci.lint_cpp.banned_macros_checker import BannedMacrosChecker
 from ci.lint_cpp.banned_namespace_checker import BannedNamespaceChecker
 from ci.lint_cpp.bare_allocation_checker import BareAllocationChecker
+from ci.lint_cpp.bare_using_checker import BareUsingChecker
 from ci.lint_cpp.builtin_memcpy_checker import BuiltinMemcpyChecker
 from ci.lint_cpp.check_platform_includes import PlatformTrampolineChecker
 from ci.lint_cpp.check_platforms_fl_namespace import PlatformsFlNamespaceChecker
 from ci.lint_cpp.check_using_namespace import UsingNamespaceChecker
 from ci.lint_cpp.cpp_hpp_includes_checker import CppHppIncludesChecker
 from ci.lint_cpp.cpp_include_checker import CppIncludeChecker
+from ci.lint_cpp.ctype_global_checker import CtypeGlobalChecker
 from ci.lint_cpp.enum_class_checker import EnumClassChecker
 from ci.lint_cpp.esp_rom_printf_checker import EspRomPrintfChecker
 from ci.lint_cpp.example_serial_checker import ExampleSerialChecker
@@ -60,7 +63,10 @@ from ci.lint_cpp.sleep_for_checker import SleepForChecker
 from ci.lint_cpp.span_from_pointer_checker import SpanFromPointerChecker
 from ci.lint_cpp.static_in_headers_checker import StaticInHeaderChecker
 from ci.lint_cpp.std_namespace_checker import StdNamespaceChecker
+from ci.lint_cpp.stdint_type_checker import StdintTypeChecker
+from ci.lint_cpp.subdir_namespace_checker import SubdirNamespaceChecker
 from ci.lint_cpp.thread_local_keyword_checker import ThreadLocalKeywordChecker
+from ci.lint_cpp.unit_test_checker import UnitTestChecker
 from ci.lint_cpp.using_namespace_fl_in_examples_checker import (
     UsingNamespaceFlInExamplesChecker,
 )
@@ -205,6 +211,12 @@ def _rust_records(
             '#include "foo.cpp"\n',
         ),
         (
+            "ctype_global",
+            CtypeGlobalChecker(),
+            Path("src/fl/example.h"),
+            "strlen(value);\n",
+        ),
+        (
             "enum_class",
             EnumClassChecker(),
             Path("src/fl/example.h"),
@@ -269,6 +281,12 @@ def _rust_records(
             BareAllocationChecker(),
             Path("src/fl/example.h"),
             "void* p = malloc(4);\nvoid* q = fl::malloc(4);\n",
+        ),
+        (
+            "bare_using",
+            BareUsingChecker(),
+            Path("src/fl/example.h"),
+            "using foo::bar;\n",
         ),
         (
             "logging_in_iram",
@@ -391,10 +409,28 @@ def _rust_records(
             "std::vector<int> values;\n",
         ),
         (
+            "stdint_type",
+            StdintTypeChecker(),
+            Path("src/fl/example.h"),
+            "uint32_t value;\n",
+        ),
+        (
+            "subdir_namespace",
+            SubdirNamespaceChecker("net"),
+            Path("src/fl/net/example.h"),
+            "namespace fl {\n}\n",
+        ),
+        (
             "thread_local_keyword",
             ThreadLocalKeywordChecker(),
             Path("src/fl/example.h"),
             "thread_local int value;\n",
+        ),
+        (
+            "unit_test",
+            UnitTestChecker(),
+            Path("tests/fl/example.cpp"),
+            '#include "doctest.h"\nTEST_CASE("x") {}\n',
         ),
         (
             "using_namespace_fl_in_examples",
@@ -455,9 +491,12 @@ def test_rust_checker_matches_python_oracle(
     monkeypatch.setattr(no_namespace_fl_declaration, "SRC_ROOT", src_root)
     monkeypatch.setattr(relative_include_checker, "SRC_DIR", _normalize_path(src_root))
     monkeypatch.setattr(serial_printf_checker, "EXAMPLES_ROOT", examples_root)
+    monkeypatch.setattr(unit_test_checker, "TESTS_ROOT", tests_root)
     monkeypatch.setattr(
         using_namespace_fl_in_examples_checker, "EXAMPLES_ROOT", examples_root
     )
+    if isinstance(checker, SubdirNamespaceChecker):
+        checker.subdir_root = _normalize_path(src_root / "fl" / checker.subdir)
 
     path = tmp_path / relative_path
     path.parent.mkdir(parents=True, exist_ok=True)

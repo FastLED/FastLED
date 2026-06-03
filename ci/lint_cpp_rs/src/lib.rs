@@ -296,6 +296,143 @@ const SIMD_PATTERNS: &[(&str, &str)] = &[
     ("ee.vst", "Xtensa PIE intrinsic — use fl::simd operations"),
 ];
 
+const CTYPE_FUNCTIONS: &[&str] = &[
+    "isspace", "isdigit", "isalpha", "isalnum", "isupper", "islower", "tolower", "toupper",
+];
+
+const CSTRING_FUNCTIONS: &[&str] = &[
+    "strlen", "strcmp", "strncmp", "strcpy", "strncpy", "strcat", "strncat", "strstr", "strchr",
+    "strrchr", "strspn", "strcspn", "strpbrk", "strtok", "strerror", "memcpy", "memcmp", "memmove",
+    "memset", "memchr",
+];
+
+const CTYPE_WHITELISTED_SUFFIXES: &[&str] = &[
+    "fl/stl/cctype.h",
+    "fl/stl/cstring.h",
+    "fl/stl/cstring.cpp.hpp",
+];
+
+const STDINT_TYPE_MAPPINGS: &[(&str, &str)] = &[
+    ("uint8_t", "u8"),
+    ("uint16_t", "u16"),
+    ("uint32_t", "u32"),
+    ("uint64_t", "u64"),
+    ("int8_t", "i8"),
+    ("int16_t", "i16"),
+    ("int32_t", "i32"),
+    ("int64_t", "i64"),
+    ("unsigned int", "u32"),
+    ("signed int", "i32"),
+];
+
+const STDINT_EXCLUDED_FILENAMES: &[&str] = &[
+    "stdint.h",
+    "int.h",
+    "run_unit_test.hpp",
+    "dual_isr_context.h",
+    "mcpwm_timer.h",
+];
+
+const UNIT_TEST_EXEMPT_FILES: &[&str] = &["test.h", "doctest.h", "doctest_main.cpp"];
+
+const UNIT_TEST_BANNED_MACROS: &[(&str, &str)] = &[
+    ("TEST_CASE_TEMPLATE", "FL_TEST_CASE_TEMPLATE"),
+    ("TEST_CASE_FIXTURE", "FL_TEST_CASE_FIXTURE"),
+    (
+        "REQUIRE_THROWS_WITH_MESSAGE",
+        "FL_REQUIRE_THROWS_WITH_MESSAGE",
+    ),
+    ("CHECK_FALSE_MESSAGE", "FL_CHECK_FALSE_MESSAGE"),
+    ("REQUIRE_FALSE_MESSAGE", "FL_REQUIRE_FALSE_MESSAGE"),
+    ("WARN_FALSE_MESSAGE", "FL_WARN_FALSE_MESSAGE"),
+    ("REQUIRE_THROWS_WITH", "FL_REQUIRE_THROWS_WITH"),
+    ("CHECK_FALSE", "FL_CHECK_FALSE"),
+    ("CHECK_MESSAGE", "FL_CHECK_MESSAGE"),
+    ("CHECK_THROWS_AS", "FL_CHECK_THROWS_AS"),
+    ("CHECK_THROWS_WITH", "FL_CHECK_THROWS_WITH"),
+    ("REQUIRE_FALSE", "FL_REQUIRE_FALSE"),
+    ("REQUIRE_MESSAGE", "FL_REQUIRE_MESSAGE"),
+    ("REQUIRE_THROWS_AS", "FL_REQUIRE_THROWS_AS"),
+    ("WARN_FALSE", "FL_DWARN_FALSE"),
+    ("WARN_MESSAGE", "FL_WARN_MESSAGE"),
+    ("WARN_THROWS_AS", "FL_WARN_THROWS_AS"),
+    ("WARN_THROWS_WITH", "FL_WARN_THROWS_WITH"),
+    ("TYPE_TO_STRING", "FL_TYPE_TO_STRING"),
+    ("CHECK_UNARY_FALSE", "FL_CHECK_UNARY_FALSE"),
+    ("REQUIRE_UNARY_FALSE", "FL_REQUIRE_UNARY_FALSE"),
+    ("WARN_UNARY_FALSE", "FL_WARN_UNARY_FALSE"),
+    ("TEST_CASE", "FL_TEST_CASE"),
+    ("TEST_SUITE", "FL_TEST_SUITE"),
+    ("CHECK_CLOSE", "FL_CHECK_CLOSE"),
+    ("CHECK_DOUBLE_EQ", "FL_CHECK_DOUBLE_EQ"),
+    ("CHECK_APPROX", "FL_CHECK_APPROX"),
+    ("CHECK_STREQ", "FL_CHECK_STREQ"),
+    ("CHECK_THROWS", "FL_CHECK_THROWS"),
+    ("CHECK_NOTHROW", "FL_CHECK_NOTHROW"),
+    ("CHECK_TRAIT", "FL_CHECK_TRAIT"),
+    ("REQUIRE_CLOSE", "FL_REQUIRE_CLOSE"),
+    ("REQUIRE_APPROX", "FL_REQUIRE_APPROX"),
+    ("REQUIRE_THROWS", "FL_REQUIRE_THROWS"),
+    ("REQUIRE_NOTHROW", "FL_REQUIRE_NOTHROW"),
+    ("WARN_UNARY", "FL_WARN_UNARY"),
+    ("WARN_THROWS", "FL_WARN_THROWS"),
+    ("WARN_NOTHROW", "FL_WARN_NOTHROW"),
+    ("AND_WHEN", "FL_AND_WHEN"),
+    ("AND_THEN", "FL_AND_THEN"),
+    ("SUBCASE", "FL_SUBCASE"),
+    ("MESSAGE", "FL_MESSAGE"),
+    ("CAPTURE", "FL_CAPTURE"),
+    ("FAIL_CHECK", "FL_FAIL_CHECK"),
+    ("CHECK_UNARY", "FL_CHECK_UNARY"),
+    ("CHECK_EQ", "FL_CHECK_EQ"),
+    ("CHECK_NE", "FL_CHECK_NE"),
+    ("CHECK_GT", "FL_CHECK_GT"),
+    ("CHECK_GE", "FL_CHECK_GE"),
+    ("CHECK_LT", "FL_CHECK_LT"),
+    ("CHECK_LE", "FL_CHECK_LE"),
+    ("REQUIRE_UNARY", "FL_REQUIRE_UNARY"),
+    ("REQUIRE_EQ", "FL_REQUIRE_EQ"),
+    ("REQUIRE_NE", "FL_REQUIRE_NE"),
+    ("REQUIRE_GT", "FL_REQUIRE_GT"),
+    ("REQUIRE_GE", "FL_REQUIRE_GE"),
+    ("REQUIRE_LT", "FL_REQUIRE_LT"),
+    ("REQUIRE_LE", "FL_REQUIRE_LE"),
+    ("WARN_FALSE", "FL_DWARN_FALSE"),
+    ("WARN_EQ", "FL_WARN_EQ"),
+    ("WARN_NE", "FL_WARN_NE"),
+    ("WARN_GT", "FL_WARN_GT"),
+    ("WARN_GE", "FL_WARN_GE"),
+    ("WARN_LT", "FL_WARN_LT"),
+    ("WARN_LE", "FL_WARN_LE"),
+    ("SCENARIO", "FL_SCENARIO"),
+    ("REQUIRE", "FL_REQUIRE"),
+    ("CHECK", "FL_CHECK"),
+    ("GIVEN", "FL_GIVEN"),
+    ("WHEN", "FL_WHEN"),
+    ("THEN", "FL_THEN"),
+    ("INFO", "FL_DINFO"),
+    ("FAIL", "FL_FAIL"),
+    ("WARN", "FL_DWARN"),
+];
+
+const UNIT_TEST_FAST_PREFIXES: &[&str] = &[
+    "CHECK",
+    "REQUIRE",
+    "WARN",
+    "TEST_",
+    "SUBCASE",
+    "FAIL",
+    "SCENARIO",
+    "GIVEN",
+    "WHEN",
+    "THEN",
+    "AND_",
+    "MESSAGE",
+    "INFO",
+    "CAPTURE",
+    "TYPE_TO_STRING",
+];
+
 #[derive(Debug, Clone)]
 pub struct FileContent {
     pub path: String,
@@ -419,12 +556,14 @@ pub fn supported_checker_names() -> &'static [&'static str] {
         "asm_js_location",
         "attribute",
         "bare_allocation",
+        "bare_using",
         "banned_define",
         "banned_macros",
         "banned_namespace",
         "builtin_memcpy",
         "cpp_hpp_includes",
         "cpp_include",
+        "ctype_global",
         "enum_class",
         "esp_rom_printf",
         "fastled_header_usage",
@@ -452,8 +591,11 @@ pub fn supported_checker_names() -> &'static [&'static str] {
         "static_in_headers",
         "std_namespace",
         "singleton_in_headers",
+        "stdint_type",
+        "subdir_namespace",
         "thread_local_keyword",
         "example_serial",
+        "unit_test",
         "using_namespace",
         "using_namespace_fl",
         "using_namespace_fl_in_examples",
@@ -467,12 +609,14 @@ pub fn supported_python_checker_names() -> &'static [&'static str] {
         "AsmJsLocationChecker",
         "AttributeChecker",
         "BareAllocationChecker",
+        "BareUsingChecker",
         "BannedDefineChecker",
         "BannedMacrosChecker",
         "BannedNamespaceChecker",
         "BuiltinMemcpyChecker",
         "CppHppIncludesChecker",
         "CppIncludeChecker",
+        "CtypeGlobalChecker",
         "EnumClassChecker",
         "EspRomPrintfChecker",
         "ExampleSerialChecker",
@@ -501,7 +645,10 @@ pub fn supported_python_checker_names() -> &'static [&'static str] {
         "SpanFromPointerChecker",
         "StaticInHeaderChecker",
         "StdNamespaceChecker",
+        "StdintTypeChecker",
+        "SubdirNamespaceChecker",
         "ThreadLocalKeywordChecker",
+        "UnitTestChecker",
         "UsingNamespaceChecker",
         "UsingNamespaceFlChecker",
         "UsingNamespaceFlInExamplesChecker",
@@ -517,12 +664,14 @@ pub fn create_checkers(
         ("asm_js_location", Box::new(AsmJsLocationChecker)),
         ("attribute", Box::new(AttributeChecker)),
         ("bare_allocation", Box::new(BareAllocationChecker)),
+        ("bare_using", Box::new(BareUsingChecker)),
         ("banned_define", Box::new(BannedDefineChecker)),
         ("banned_macros", Box::new(BannedMacrosChecker)),
         ("banned_namespace", Box::new(BannedNamespaceChecker)),
         ("builtin_memcpy", Box::new(BuiltinMemcpyChecker)),
         ("cpp_hpp_includes", Box::new(CppHppIncludesChecker)),
         ("cpp_include", Box::new(CppIncludeChecker)),
+        ("ctype_global", Box::new(CtypeGlobalChecker)),
         ("enum_class", Box::new(EnumClassChecker)),
         ("esp_rom_printf", Box::new(EspRomPrintfChecker)),
         ("example_serial", Box::new(ExampleSerialChecker)),
@@ -560,7 +709,21 @@ pub fn create_checkers(
         ("span_from_pointer", Box::new(SpanFromPointerChecker)),
         ("static_in_headers", Box::new(StaticInHeaderChecker)),
         ("std_namespace", Box::new(StdNamespaceChecker)),
+        ("stdint_type", Box::new(StdintTypeChecker)),
+        (
+            "subdir_namespace",
+            Box::new(SubdirNamespaceChecker { subdir: "net" }),
+        ),
+        (
+            "subdir_namespace",
+            Box::new(SubdirNamespaceChecker { subdir: "video" }),
+        ),
+        (
+            "subdir_namespace",
+            Box::new(SubdirNamespaceChecker { subdir: "task" }),
+        ),
         ("thread_local_keyword", Box::new(ThreadLocalKeywordChecker)),
+        ("unit_test", Box::new(UnitTestChecker)),
         ("using_namespace", Box::new(UsingNamespaceChecker)),
         ("using_namespace_fl", Box::new(UsingNamespaceFlChecker)),
         (
@@ -1138,6 +1301,43 @@ fn regex_namespace_declaration() -> &'static Regex {
     VALUE.get_or_init(|| Regex::new(r"^\s*(?:namespace\s+\w+|namespace\s*\{)").unwrap())
 }
 
+fn regex_bare_using_decl() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| {
+        Regex::new(r"^\s*using\s+(?:namespace\s+\w+(?:::\w+)*|\w+(?:::\w+)+)\s*;").unwrap()
+    })
+}
+
+fn regex_bare_using_suppress() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"(?i)//\s*ok(?:ay)?\s+bare\s+using").unwrap())
+}
+
+fn regex_named_namespace_open() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"^\s*namespace\s+\w+").unwrap())
+}
+
+fn regex_anon_namespace_open() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"^\s*namespace\s*\{").unwrap())
+}
+
+fn regex_extern_c_open() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r#"^\s*extern\s+"C""#).unwrap())
+}
+
+fn regex_local_scope_keyword() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"^\s*(?:class|struct|enum|union)\b").unwrap())
+}
+
+fn regex_preprocessor_line() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"^\s*#").unwrap())
+}
+
 fn regex_any_include() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| Regex::new(r#"^\s*#\s*include\s*[<"].*[>"]"#).unwrap())
@@ -1173,6 +1373,11 @@ fn regex_namespace_fl_declaration() -> &'static Regex {
 fn regex_namespace_platform_singular() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| Regex::new(r"\bnamespace\s+platform\s*\{").unwrap())
+}
+
+fn regex_subdir_namespace_decl() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\bnamespace\s+([\w:]+)\s*\{").unwrap())
 }
 
 fn regex_using_namespace() -> &'static Regex {
@@ -1276,6 +1481,11 @@ fn regex_iram_banned_macro() -> &'static Regex {
 fn regex_fl_log_macro() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| Regex::new(r"\bFL_LOG_\w+\s*\(").unwrap())
+}
+
+fn regex_unit_test_macro_call() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\b([A-Z_]+)\s*\(").unwrap())
 }
 
 fn regex_deep_platform_header() -> &'static Regex {
@@ -1499,6 +1709,122 @@ fn strip_comments_preserving_lines(lines: &[String]) -> String {
         })
         .collect::<Vec<_>>()
         .join("\n")
+}
+
+fn is_ascii_word_byte(byte: u8) -> bool {
+    byte.is_ascii_alphanumeric() || byte == b'_'
+}
+
+fn ctype_functions() -> impl Iterator<Item = &'static str> {
+    CTYPE_FUNCTIONS
+        .iter()
+        .chain(CSTRING_FUNCTIONS.iter())
+        .copied()
+}
+
+fn ctype_header(func: &str) -> &'static str {
+    if CTYPE_FUNCTIONS.contains(&func) {
+        "fl/stl/cctype.h"
+    } else {
+        "fl/stl/cstring.h"
+    }
+}
+
+fn find_ctype_calls(code_part: &str) -> Vec<(&'static str, bool)> {
+    let bytes = code_part.as_bytes();
+    let mut calls = Vec::new();
+
+    for func in ctype_functions() {
+        let mut search_start = 0;
+        while let Some(relative_pos) = code_part[search_start..].find(func) {
+            let pos = search_start + relative_pos;
+            let end = pos + func.len();
+            search_start = end;
+
+            if pos > 0 && is_ascii_word_byte(bytes[pos - 1]) {
+                continue;
+            }
+            if end < bytes.len() && is_ascii_word_byte(bytes[end]) {
+                continue;
+            }
+
+            let mut call_pos = end;
+            while call_pos < bytes.len() && bytes[call_pos].is_ascii_whitespace() {
+                call_pos += 1;
+            }
+            if call_pos >= bytes.len() || bytes[call_pos] != b'(' {
+                continue;
+            }
+
+            let prefix = &code_part[..pos];
+            if prefix.ends_with("fl::") {
+                continue;
+            }
+            let is_global_qualified = pos >= 2
+                && &bytes[pos - 2..pos] == b"::"
+                && (pos == 2 || !is_ascii_word_byte(bytes[pos - 3]));
+            calls.push((func, is_global_qualified));
+        }
+    }
+
+    calls
+}
+
+fn find_stdint_matches(code_part: &str) -> Vec<&'static str> {
+    let bytes = code_part.as_bytes();
+    let mut matches = Vec::new();
+
+    for (type_name, _) in STDINT_TYPE_MAPPINGS {
+        if *type_name == "unsigned int" || *type_name == "signed int" {
+            continue;
+        }
+        let mut search_start = 0;
+        while let Some(relative_pos) = code_part[search_start..].find(type_name) {
+            let pos = search_start + relative_pos;
+            let end = pos + type_name.len();
+            search_start = end;
+
+            if (pos == 0 || !is_ascii_word_byte(bytes[pos - 1]))
+                && (end >= bytes.len() || !is_ascii_word_byte(bytes[end]))
+            {
+                matches.push(*type_name);
+            }
+        }
+    }
+
+    for type_name in ["unsigned int", "signed int"] {
+        let mut search_start = 0;
+        while let Some(relative_pos) = code_part[search_start..].find(type_name) {
+            let pos = search_start + relative_pos;
+            let end = pos + type_name.len();
+            search_start = end;
+
+            let Some(next) = bytes.get(end).copied() else {
+                continue;
+            };
+            if !matches!(next, b' ' | b'*' | b'&' | b',' | b')' | b']') {
+                continue;
+            }
+            if (pos == 0 || !is_ascii_word_byte(bytes[pos - 1])) && !is_ascii_word_byte(next) {
+                matches.push(type_name);
+            }
+        }
+    }
+
+    matches
+}
+
+fn stdint_fl_type(type_name: &str) -> &'static str {
+    STDINT_TYPE_MAPPINGS
+        .iter()
+        .find_map(|(name, replacement)| (*name == type_name).then_some(*replacement))
+        .unwrap_or("u32")
+}
+
+fn unit_test_fl_macro(macro_name: &str) -> Option<&'static str> {
+    UNIT_TEST_BANNED_MACROS
+        .iter()
+        .find_map(|(bare, replacement)| (*bare == macro_name).then_some(*replacement))
 }
 
 fn platform_trampoline_suggestion(include_path: &str) -> &'static str {
@@ -3880,6 +4206,456 @@ impl FileContentChecker for SimdIntrinsicsChecker {
                 if code_part.contains(pattern) {
                     violations.push((index + 1, format!("{stripped}  [{description}]")));
                     break;
+                }
+            }
+        }
+
+        violations
+    }
+}
+
+struct BareUsingChecker;
+
+impl FileContentChecker for BareUsingChecker {
+    fn name(&self) -> &'static str {
+        "BareUsingChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        if !is_under_project_subpath(&normalized, project_root, "src/fl") {
+            return false;
+        }
+        if normalized.contains("/third_party/") {
+            return false;
+        }
+        let basename = normalized.rsplit('/').next().unwrap_or(&normalized);
+        if basename == "FastLED.h" {
+            return false;
+        }
+        ends_with_any(&normalized, &[".h", ".hpp", ".cpp.hpp"])
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let mut violations = Vec::new();
+        let mut scope_stack: Vec<&str> = Vec::new();
+        let mut in_block_comment = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            if in_block_comment {
+                if line.contains("*/") {
+                    in_block_comment = false;
+                }
+                continue;
+            }
+
+            let line_before_line_comment = split_line_comment(line);
+            if let Some(start_pos) = line_before_line_comment.find("/*") {
+                let rest = &line[start_pos + 2..];
+                if !rest.contains("*/") {
+                    in_block_comment = true;
+                }
+                continue;
+            }
+
+            if regex_preprocessor_line().is_match(line) {
+                continue;
+            }
+
+            let without_strings = strip_string_literals(line);
+            let clean = split_line_comment(&without_strings).to_string();
+            let mut open_braces = clean.matches('{').count();
+            let close_braces = clean.matches('}').count();
+            let mut scopes_to_push: Vec<&str> = Vec::new();
+
+            if open_braces > 0 {
+                if regex_anon_namespace_open().is_match(&clean) {
+                    scopes_to_push.push("local");
+                    open_braces -= 1;
+                } else if regex_named_namespace_open().is_match(&clean) {
+                    scopes_to_push.push("namespace");
+                    open_braces -= 1;
+                } else if regex_extern_c_open().is_match(&clean) {
+                    scopes_to_push.push("namespace");
+                    open_braces -= 1;
+                } else if regex_local_scope_keyword().is_match(&clean) {
+                    scopes_to_push.push("local");
+                    open_braces -= 1;
+                }
+                scopes_to_push.extend(std::iter::repeat("local").take(open_braces));
+            }
+
+            scope_stack.extend(scopes_to_push);
+            for _ in 0..close_braces {
+                if !scope_stack.is_empty() {
+                    scope_stack.pop();
+                }
+            }
+
+            if regex_bare_using_decl().is_match(&clean) {
+                if regex_bare_using_suppress().is_match(line) {
+                    continue;
+                }
+                if scope_stack.iter().all(|scope| *scope == "namespace") {
+                    violations.push((index + 1, line.trim().to_string()));
+                }
+            }
+        }
+
+        violations
+    }
+}
+
+struct CtypeGlobalChecker;
+
+impl FileContentChecker for CtypeGlobalChecker {
+    fn name(&self) -> &'static str {
+        "CtypeGlobalChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        if !is_under_project_subpath(&normalized, project_root, "src")
+            && !is_under_project_subpath(&normalized, project_root, "tests")
+        {
+            return false;
+        }
+        if !ends_with_any(&normalized, &[".cpp", ".h", ".hpp", ".ino", ".cpp.hpp"]) {
+            return false;
+        }
+        if is_excluded_file(&normalized)
+            || normalized.contains("third_party")
+            || normalized.contains("thirdparty")
+        {
+            return false;
+        }
+        !CTYPE_WHITELISTED_SUFFIXES
+            .iter()
+            .any(|suffix| normalized.ends_with(suffix))
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        if !ctype_functions().any(|func| file_content.content.contains(func)) {
+            return Vec::new();
+        }
+
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+        let mut fl_namespace_depth = 0_i32;
+        let mut brace_depth_at_fl_namespace: Vec<i32> = Vec::new();
+        let mut brace_depth = 0_i32;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment || stripped.starts_with("//") {
+                continue;
+            }
+
+            let code_part = split_line_comment(line);
+            if code_part.contains("namespace")
+                && regex_namespace_fl_declaration().is_match(code_part)
+            {
+                fl_namespace_depth += 1;
+                brace_depth_at_fl_namespace.push(brace_depth);
+            }
+            for ch in code_part.chars() {
+                if ch == '{' {
+                    brace_depth += 1;
+                } else if ch == '}' {
+                    brace_depth -= 1;
+                    if brace_depth_at_fl_namespace
+                        .last()
+                        .is_some_and(|depth| brace_depth == *depth)
+                    {
+                        fl_namespace_depth -= 1;
+                        brace_depth_at_fl_namespace.pop();
+                    }
+                }
+            }
+
+            if line.contains("// ok ctype") || line.contains("// okay ctype") {
+                continue;
+            }
+            if !ctype_functions().any(|func| code_part.contains(func)) {
+                continue;
+            }
+
+            let calls = find_ctype_calls(code_part);
+            if calls.is_empty() {
+                continue;
+            }
+
+            if fl_namespace_depth > 0 {
+                let global_funcs: BTreeSet<&str> = calls
+                    .iter()
+                    .filter_map(|(func, is_global)| (*is_global).then_some(*func))
+                    .collect();
+                for func in global_funcs {
+                    let header = ctype_header(func);
+                    violations.push((
+                        index + 1,
+                        format!(
+                            "Use fl::{func}() instead of ::{func}() — see {header}: {stripped}"
+                        ),
+                    ));
+                }
+                continue;
+            }
+
+            let funcs: BTreeSet<&str> = calls.iter().map(|(func, _)| *func).collect();
+            for func in funcs {
+                let header = ctype_header(func);
+                violations.push((
+                    index + 1,
+                    format!(
+                        "Use fl::{func}() instead of {func}() or ::{func}() — see {header}: {stripped}"
+                    ),
+                ));
+            }
+        }
+
+        violations
+    }
+}
+
+struct StdintTypeChecker;
+
+impl FileContentChecker for StdintTypeChecker {
+    fn name(&self) -> &'static str {
+        "StdintTypeChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        if !is_under_project_subpath(&normalized, project_root, "src") {
+            return false;
+        }
+        if !ends_with_any(&normalized, &[".cpp", ".h", ".hpp", ".cpp.hpp"]) {
+            return false;
+        }
+        let filename = normalized.rsplit('/').next().unwrap_or(&normalized);
+        if STDINT_EXCLUDED_FILENAMES.contains(&filename) {
+            return false;
+        }
+        if normalized.contains("/third_party/") || normalized.contains("/fl/stl/") {
+            return false;
+        }
+        if normalized.contains("/platforms/") {
+            if filename.starts_with("int_") && filename.ends_with(".h") {
+                return false;
+            }
+            if filename == "Arduino.h" || filename == "Arduino.cpp.hpp" {
+                return false;
+            }
+            if normalized.contains("/stub/") || normalized.contains("/test/") {
+                return false;
+            }
+        }
+        true
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        if !file_content.content.contains("int") {
+            return Vec::new();
+        }
+
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+        let mut in_extern_c_block = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            if !in_multiline_comment
+                && !line.contains("int")
+                && !line.contains("/*")
+                && !line.contains("*/")
+            {
+                continue;
+            }
+
+            let trimmed_start = line.trim_start_matches(|ch| ch == ' ' || ch == '\t');
+            let is_line_comment = trimmed_start.starts_with("//");
+            if is_line_comment && !in_multiline_comment {
+                continue;
+            }
+
+            if line.contains("extern \"C\"") {
+                if line.contains('{') {
+                    in_extern_c_block = true;
+                } else if line.contains(';') {
+                    continue;
+                }
+            }
+            if in_extern_c_block && line.contains('}') {
+                in_extern_c_block = false;
+                continue;
+            }
+            if in_extern_c_block {
+                continue;
+            }
+
+            if in_multiline_comment {
+                if line.contains("*/") {
+                    in_multiline_comment = false;
+                }
+                continue;
+            }
+
+            let code_for_comment_tracking = split_line_comment(line);
+            if let Some(open_pos) = code_for_comment_tracking.find("/*") {
+                let close_pos = code_for_comment_tracking[open_pos + 2..].find("*/");
+                if close_pos.is_none() {
+                    in_multiline_comment = true;
+                    continue;
+                }
+            }
+
+            if !line.contains("int") {
+                continue;
+            }
+
+            let mut code_part = split_line_comment(line).to_string();
+            while let Some(open_pos) = code_part.find("/*") {
+                let Some(close_relative) = code_part[open_pos + 2..].find("*/") else {
+                    code_part.truncate(open_pos);
+                    break;
+                };
+                let close_pos = open_pos + 2 + close_relative;
+                code_part.replace_range(open_pos..close_pos + 2, " ");
+            }
+
+            for match_type in find_stdint_matches(&code_part) {
+                let fl_type = stdint_fl_type(match_type);
+                violations.push((
+                    index + 1,
+                    format!(
+                        "Use '{fl_type}' from fl/stl/int.h instead of '{match_type}': {}",
+                        line.trim()
+                    ),
+                ));
+            }
+        }
+
+        violations
+    }
+}
+
+struct SubdirNamespaceChecker {
+    subdir: &'static str,
+}
+
+impl FileContentChecker for SubdirNamespaceChecker {
+    fn name(&self) -> &'static str {
+        "SubdirNamespaceChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let subpath = format!("src/fl/{}", self.subdir);
+        is_under_project_subpath(file_path, project_root, &subpath) && file_path.ends_with(".h")
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let expected = ["fl", self.subdir];
+        let mut found_parts: HashSet<String> = HashSet::new();
+        let mut has_any_namespace = false;
+
+        for line in &file_content.lines {
+            let stripped = line.trim();
+            if stripped.starts_with("//") || stripped.starts_with("/*") || stripped.starts_with('*')
+            {
+                continue;
+            }
+            let code = split_line_comment(stripped);
+            for capture in regex_subdir_namespace_decl().captures_iter(code) {
+                has_any_namespace = true;
+                for part in capture[1].split("::").filter(|part| !part.is_empty()) {
+                    found_parts.insert(part.to_string());
+                }
+            }
+        }
+
+        if !has_any_namespace {
+            return Vec::new();
+        }
+
+        let missing: Vec<&str> = expected
+            .iter()
+            .copied()
+            .filter(|part| !found_parts.contains(*part))
+            .collect();
+        if missing.is_empty() {
+            return Vec::new();
+        }
+
+        let expected_ns = expected.join("::");
+        vec![(
+            1,
+            format!(
+                "Header in fl/{}/ must use namespace {expected_ns}; missing namespace part(s): {}",
+                self.subdir,
+                missing.join(", ")
+            ),
+        )]
+    }
+}
+
+struct UnitTestChecker;
+
+impl FileContentChecker for UnitTestChecker {
+    fn name(&self) -> &'static str {
+        "UnitTestChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        if !is_under_project_subpath(&normalized, project_root, "tests") {
+            return false;
+        }
+        if !ends_with_any(&normalized, &[".cpp", ".h", ".hpp"]) {
+            return false;
+        }
+        let basename = normalized.rsplit('/').next().unwrap_or(&normalized);
+        !UNIT_TEST_EXEMPT_FILES.contains(&basename)
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let mut violations = Vec::new();
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+            if stripped.starts_with("//") {
+                continue;
+            }
+
+            if stripped.contains("#include \"doctest.h\"")
+                || stripped.contains("#include <doctest.h>")
+            {
+                violations.push((
+                    index + 1,
+                    "Use #include \"test.h\" instead of #include \"doctest.h\"".to_string(),
+                ));
+            }
+
+            if !UNIT_TEST_FAST_PREFIXES
+                .iter()
+                .any(|prefix| line.contains(prefix))
+            {
+                continue;
+            }
+
+            for capture in regex_unit_test_macro_call().captures_iter(line) {
+                let macro_name = &capture[1];
+                if let Some(fl_macro) = unit_test_fl_macro(macro_name) {
+                    violations.push((
+                        index + 1,
+                        format!("Use {fl_macro}() instead of bare {macro_name}()"),
+                    ));
                 }
             }
         }
