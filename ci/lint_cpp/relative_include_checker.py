@@ -21,6 +21,30 @@ _ALLOWED_RELATIVE_INCLUDE_FILES = {
 }
 
 
+def _strip_block_comments_from_line(
+    line: str, in_block_comment: bool
+) -> tuple[str, bool]:
+    visible = ""
+    rest = line
+
+    while True:
+        if in_block_comment:
+            end = rest.find("*/")
+            if end == -1:
+                return visible, True
+            rest = rest[end + 2 :]
+            in_block_comment = False
+            continue
+
+        start = rest.find("/*")
+        if start == -1:
+            return visible + rest, False
+
+        visible += rest[:start]
+        rest = rest[start + 2 :]
+        in_block_comment = True
+
+
 class RelativeIncludeChecker(FileContentChecker):
     """Checker for relative includes containing '..' in src/ files."""
 
@@ -45,9 +69,13 @@ class RelativeIncludeChecker(FileContentChecker):
             return []
 
         violations: list[tuple[int, str]] = []
+        in_block_comment = False
 
         for line_number, line in enumerate(file_content.lines, 1):
-            match = _RELATIVE_INCLUDE_PATTERN.match(line)
+            visible_line, in_block_comment = _strip_block_comments_from_line(
+                line, in_block_comment
+            )
+            match = _RELATIVE_INCLUDE_PATTERN.match(visible_line)
             if match:
                 # Allow suppression with '// ok relative include' comment
                 if "// ok relative include" not in line:

@@ -760,6 +760,30 @@ fn split_line_comment(line: &str) -> &str {
     line.split("//").next().unwrap_or(line)
 }
 
+fn strip_block_comments_from_line(line: &str, in_block_comment: &mut bool) -> String {
+    let mut visible = String::new();
+    let mut rest = line;
+
+    loop {
+        if *in_block_comment {
+            let Some(end) = rest.find("*/") else {
+                return visible;
+            };
+            rest = &rest[end + 2..];
+            *in_block_comment = false;
+            continue;
+        }
+
+        let Some(start) = rest.find("/*") else {
+            visible.push_str(rest);
+            return visible;
+        };
+        visible.push_str(&rest[..start]);
+        rest = &rest[start + 2..];
+        *in_block_comment = true;
+    }
+}
+
 fn strip_string_literals(code: &str) -> String {
     let mut result = String::with_capacity(code.len());
     let mut quote: Option<char> = None;
@@ -2534,8 +2558,12 @@ impl FileContentChecker for RelativeIncludeChecker {
         }
 
         let mut violations = Vec::new();
+        let mut in_block_comment = false;
         for (index, line) in file_content.lines.iter().enumerate() {
-            if regex_relative_include().is_match(line) && !line.contains("// ok relative include") {
+            let visible_line = strip_block_comments_from_line(line, &mut in_block_comment);
+            if regex_relative_include().is_match(&visible_line)
+                && !line.contains("// ok relative include")
+            {
                 violations.push((index + 1, format!("Relative include: {}", line.trim())));
             }
         }
@@ -2565,11 +2593,18 @@ impl FileContentChecker for FastLEDHeaderUsageChecker {
 
     fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
         let mut violations = Vec::new();
+        let mut in_block_comment = false;
+        let visible_lines: Vec<String> = file_content
+            .lines
+            .iter()
+            .map(|line| strip_block_comments_from_line(line, &mut in_block_comment))
+            .collect();
 
-        for (index, line) in file_content.lines.iter().enumerate() {
-            if !regex_fastled_h_include().is_match(line) {
+        for (index, visible_line) in visible_lines.iter().enumerate() {
+            if !regex_fastled_h_include().is_match(visible_line) {
                 continue;
             }
+            let line = &file_content.lines[index];
             let lower = line.to_ascii_lowercase();
             if lower.contains("// ok include") {
                 continue;
@@ -2577,7 +2612,7 @@ impl FileContentChecker for FastLEDHeaderUsageChecker {
 
             let lookback = (index).min(5);
             let has_internal_define = (1..=lookback)
-                .map(|offset| &file_content.lines[index - offset])
+                .map(|offset| &visible_lines[index - offset])
                 .any(|prev_line| regex_fastled_internal_define().is_match(prev_line));
             if !has_internal_define {
                 violations.push((

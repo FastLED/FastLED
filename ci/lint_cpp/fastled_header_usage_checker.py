@@ -20,6 +20,30 @@ _FASTLED_INTERNAL_DEFINE = re.compile(r"^\s*#\s*define\s+FASTLED_INTERNAL")
 _EXEMPT_FILENAMES = {"FastLED.h", "fastspi.h"}
 
 
+def _strip_block_comments_from_line(
+    line: str, in_block_comment: bool
+) -> tuple[str, bool]:
+    visible = ""
+    rest = line
+
+    while True:
+        if in_block_comment:
+            end = rest.find("*/")
+            if end == -1:
+                return visible, True
+            rest = rest[end + 2 :]
+            in_block_comment = False
+            continue
+
+        start = rest.find("/*")
+        if start == -1:
+            return visible + rest, False
+
+        visible += rest[:start]
+        rest = rest[start + 2 :]
+        in_block_comment = True
+
+
 class FastLEDHeaderUsageChecker(FileContentChecker):
     """Checker for internal headers that should use fl/system/fastled.h instead of FastLED.h."""
 
@@ -43,11 +67,21 @@ class FastLEDHeaderUsageChecker(FileContentChecker):
         """Check for FastLED.h usage in internal headers."""
         violations: list[tuple[int, str]] = []
         lines = file_content.lines
+        visible_lines: list[str] = []
+        in_block_comment = False
 
-        for line_number, line in enumerate(lines, 1):
-            match = _FASTLED_H_INCLUDE.match(line)
+        for line in lines:
+            visible_line, in_block_comment = _strip_block_comments_from_line(
+                line, in_block_comment
+            )
+            visible_lines.append(visible_line)
+
+        for line_number, visible_line in enumerate(visible_lines, 1):
+            match = _FASTLED_H_INCLUDE.match(visible_line)
             if not match:
                 continue
+
+            line = lines[line_number - 1]
 
             # Check for exemption comment on same line
             if _EXEMPTION_COMMENT.search(line):
@@ -57,7 +91,7 @@ class FastLEDHeaderUsageChecker(FileContentChecker):
             has_internal_define = False
             lookback = min(5, line_number - 1)
             for i in range(1, lookback + 1):
-                prev_line = lines[line_number - i - 1]
+                prev_line = visible_lines[line_number - i - 1]
                 if _FASTLED_INTERNAL_DEFINE.match(prev_line):
                     has_internal_define = True
                     break

@@ -201,6 +201,12 @@ def _rust_records(
             '#include "FastLED.h"\n',
         ),
         (
+            "fastled_header_usage",
+            FastLEDHeaderUsageChecker(),
+            Path("src/fl/example.h"),
+            '/*\n#include "FastLED.h"\n*/\n',
+        ),
+        (
             "fl_is_defined",
             FlIsDefinedChecker(),
             Path("src/fl/example.h"),
@@ -271,6 +277,12 @@ def _rust_records(
             RelativeIncludeChecker(),
             Path("src/fl/example.h"),
             '#include "../foo.h"\n',
+        ),
+        (
+            "relative_include",
+            RelativeIncludeChecker(),
+            Path("src/fl/example.h"),
+            '/*\n#include "../foo.h"\n*/\n',
         ),
         (
             "static_in_headers",
