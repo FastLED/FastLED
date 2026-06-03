@@ -425,15 +425,19 @@ pub fn supported_checker_names() -> &'static [&'static str] {
         "builtin_memcpy",
         "cpp_hpp_includes",
         "cpp_include",
+        "enum_class",
         "esp_rom_printf",
         "fastled_header_usage",
         "fl_is_defined",
         "include_after_namespace",
         "include_paths",
         "impl_hpp_includes",
+        "logging_in_iram",
         "namespace_fl_declaration",
+        "namespace_platforms",
         "numeric_limit_macros",
         "platform_includes",
+        "platforms_fl_namespace",
         "pragma_once",
         "platform_pragma",
         "platform_trampoline",
@@ -469,6 +473,7 @@ pub fn supported_python_checker_names() -> &'static [&'static str] {
         "BuiltinMemcpyChecker",
         "CppHppIncludesChecker",
         "CppIncludeChecker",
+        "EnumClassChecker",
         "EspRomPrintfChecker",
         "ExampleSerialChecker",
         "FastLEDHeaderUsageChecker",
@@ -476,9 +481,12 @@ pub fn supported_python_checker_names() -> &'static [&'static str] {
         "IncludeAfterNamespaceChecker",
         "IncludePathsChecker",
         "ImplHppIncludesChecker",
+        "LoggingInIramChecker",
         "NamespaceFlDeclarationChecker",
+        "NamespacePlatformsChecker",
         "NumericLimitMacroChecker",
         "PlatformIncludesChecker",
+        "PlatformsFlNamespaceChecker",
         "PragmaOnceChecker",
         "PlatformPragmaChecker",
         "PlatformTrampolineChecker",
@@ -515,6 +523,7 @@ pub fn create_checkers(
         ("builtin_memcpy", Box::new(BuiltinMemcpyChecker)),
         ("cpp_hpp_includes", Box::new(CppHppIncludesChecker)),
         ("cpp_include", Box::new(CppIncludeChecker)),
+        ("enum_class", Box::new(EnumClassChecker)),
         ("esp_rom_printf", Box::new(EspRomPrintfChecker)),
         ("example_serial", Box::new(ExampleSerialChecker)),
         ("fastled_header_usage", Box::new(FastLEDHeaderUsageChecker)),
@@ -525,12 +534,18 @@ pub fn create_checkers(
         ),
         ("include_paths", Box::new(IncludePathsChecker)),
         ("impl_hpp_includes", Box::new(ImplHppIncludesChecker)),
+        ("logging_in_iram", Box::new(LoggingInIramChecker)),
         (
             "namespace_fl_declaration",
             Box::new(NamespaceFlDeclarationChecker),
         ),
+        ("namespace_platforms", Box::new(NamespacePlatformsChecker)),
         ("numeric_limit_macros", Box::new(NumericLimitMacroChecker)),
         ("platform_includes", Box::new(PlatformIncludesChecker)),
+        (
+            "platforms_fl_namespace",
+            Box::new(PlatformsFlNamespaceChecker),
+        ),
         ("pragma_once", Box::new(PragmaOnceChecker)),
         ("platform_pragma", Box::new(PlatformPragmaChecker)),
         ("platform_trampoline", Box::new(PlatformTrampolineChecker)),
@@ -1128,6 +1143,18 @@ fn regex_any_include() -> &'static Regex {
     VALUE.get_or_init(|| Regex::new(r#"^\s*#\s*include\s*[<"].*[>"]"#).unwrap())
 }
 
+fn regex_named_enum() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\benum\s+([A-Za-z_]\w*)\s*[{:;]").unwrap())
+}
+
+fn regex_class_struct() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| {
+        Regex::new(r"\b(?:class|struct)\s+(?:[A-Za-z_]\w*\s+)*[A-Za-z_]\w*").unwrap()
+    })
+}
+
 fn regex_allow_include_after_namespace() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| Regex::new(r"//\s*allow-include-after-namespace").unwrap())
@@ -1141,6 +1168,11 @@ fn regex_nolint() -> &'static Regex {
 fn regex_namespace_fl_declaration() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| Regex::new(r"\bnamespace\s+fl\s*\{").unwrap())
+}
+
+fn regex_namespace_platform_singular() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\bnamespace\s+platform\s*\{").unwrap())
 }
 
 fn regex_using_namespace() -> &'static Regex {
@@ -1224,6 +1256,26 @@ fn regex_std_usage() -> &'static Regex {
 fn regex_serial_method() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| Regex::new(r"\bSerial\.(\w+)\s*\(").unwrap())
+}
+
+fn regex_iram_function() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| {
+        Regex::new(
+            r"FL_IRAM[\s\n]+(?:static\s+)?(?:inline\s+)?(?:virtual\s+)?(?:const\s+)?(?:(\w+(?:\s*<[^>]+>)?)\s+)?(?:__attribute__\s*\([^)]*\)\s+)?([\w:]+)\s*\([^)]*\)(?:\s*(?:const|override|final))?[^{]*\{",
+        )
+        .unwrap()
+    })
+}
+
+fn regex_iram_banned_macro() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\b(FL_WARN|FL_ERROR|FL_DBG|FL_ASSERT)\s*\(").unwrap())
+}
+
+fn regex_fl_log_macro() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\bFL_LOG_\w+\s*\(").unwrap())
 }
 
 fn regex_deep_platform_header() -> &'static Regex {
@@ -1435,6 +1487,18 @@ fn strip_inline_block_comments(line: &str) -> String {
     }
     result.push_str(rest);
     result
+}
+
+fn strip_comments_preserving_lines(lines: &[String]) -> String {
+    let mut in_block_comment = false;
+    lines
+        .iter()
+        .map(|line| {
+            let visible = strip_block_comments_from_line(line, &mut in_block_comment);
+            split_line_comment(&visible).to_string()
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 fn platform_trampoline_suggestion(include_path: &str) -> &'static str {
@@ -3817,6 +3881,257 @@ impl FileContentChecker for SimdIntrinsicsChecker {
                     violations.push((index + 1, format!("{stripped}  [{description}]")));
                     break;
                 }
+            }
+        }
+
+        violations
+    }
+}
+
+struct EnumClassChecker;
+
+impl FileContentChecker for EnumClassChecker {
+    fn name(&self) -> &'static str {
+        "EnumClassChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        if !ends_with_any(&normalized, &[".cpp", ".h", ".hpp", ".ino", ".cpp.hpp"]) {
+            return false;
+        }
+        if is_excluded_file(&normalized)
+            || normalized.contains("third_party")
+            || normalized.contains("thirdparty")
+            || normalized.contains("/examples/")
+        {
+            return false;
+        }
+        is_under_project_subpath(&normalized, project_root, "src/fl")
+            || is_under_project_subpath(&normalized, project_root, "src/platforms")
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+        let mut brace_depth = 0_i32;
+        let mut class_struct_enter_depths: Vec<i32> = Vec::new();
+        let mut pending_class_struct = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment || stripped.starts_with("//") {
+                continue;
+            }
+
+            let code_part = split_line_comment(line);
+            if regex_class_struct().is_match(code_part) {
+                let before_brace = code_part.split('{').next().unwrap_or(code_part);
+                if !before_brace.contains(';') {
+                    pending_class_struct = true;
+                }
+            }
+
+            for ch in code_part.chars() {
+                if ch == '{' {
+                    if pending_class_struct {
+                        class_struct_enter_depths.push(brace_depth);
+                        pending_class_struct = false;
+                    }
+                    brace_depth += 1;
+                } else if ch == '}' {
+                    brace_depth -= 1;
+                    if class_struct_enter_depths
+                        .last()
+                        .is_some_and(|depth| brace_depth == *depth)
+                    {
+                        class_struct_enter_depths.pop();
+                    }
+                }
+            }
+
+            if line.contains("// ok plain enum") || line.contains("// okay plain enum") {
+                continue;
+            }
+            if !code_part.contains("enum") || !class_struct_enter_depths.is_empty() {
+                continue;
+            }
+            if regex_named_enum().is_match(code_part) {
+                violations.push((
+                    index + 1,
+                    format!(
+                        "Plain enum detected - use 'enum class' for type safety. Plain enums leak names into enclosing scope and allow implicit integer conversions. Suppress with '// ok plain enum' for legacy enums: {stripped}"
+                    ),
+                ));
+            }
+        }
+
+        violations
+    }
+}
+
+struct PlatformsFlNamespaceChecker;
+
+impl FileContentChecker for PlatformsFlNamespaceChecker {
+    fn name(&self) -> &'static str {
+        "PlatformsFlNamespaceChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        if !is_under_project_subpath(&normalized, project_root, "src/platforms") {
+            return false;
+        }
+        if normalized.contains("/examples/") || normalized.contains("/tests/") {
+            return false;
+        }
+        if ends_with_any(&normalized, &["_build.hpp", "_build.cpp", "_build.cpp.hpp"]) {
+            return false;
+        }
+        ends_with_any(&normalized, &[".h", ".cpp", ".hpp"])
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        if file_content.content.contains("namespace fl")
+            || file_content.content.contains("// ok no namespace fl")
+        {
+            return Vec::new();
+        }
+        vec![(
+            0,
+            "Missing 'namespace fl {' or '// ok no namespace fl' comment".to_string(),
+        )]
+    }
+}
+
+struct NamespacePlatformsChecker;
+
+impl FileContentChecker for NamespacePlatformsChecker {
+    fn name(&self) -> &'static str {
+        "NamespacePlatformsChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        is_under_project_subpath(&normalized, project_root, "src/platforms")
+            && ends_with_any(&normalized, &[".cpp", ".h", ".hpp"])
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment || stripped.starts_with("//") {
+                continue;
+            }
+
+            let code_part = split_line_comment(line);
+            if regex_namespace_platform_singular().is_match(code_part) {
+                violations.push((index + 1, stripped.to_string()));
+            }
+        }
+
+        violations
+    }
+}
+
+struct LoggingInIramChecker;
+
+impl FileContentChecker for LoggingInIramChecker {
+    fn name(&self) -> &'static str {
+        "LoggingInIramChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, _project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        if is_excluded_file(&normalized) || !ends_with_any(&normalized, &[".cpp", ".h", ".hpp"]) {
+            return false;
+        }
+        normalized.contains("/platforms/") || normalized.contains("/fl/")
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let full_content = file_content.lines.join("\n");
+        if !full_content.contains("FL_IRAM") {
+            return Vec::new();
+        }
+
+        let cleaned_content = strip_comments_preserving_lines(&file_content.lines);
+        let mut violations = Vec::new();
+
+        for function_match in regex_iram_function().captures_iter(&cleaned_content) {
+            let Some(whole_match) = function_match.get(0) else {
+                continue;
+            };
+            let func_name = function_match.get(2).map_or("", |value| value.as_str());
+            let func_start = whole_match.end();
+            let mut brace_depth = 1_i32;
+            let mut func_body_end = func_start;
+            for (offset, ch) in cleaned_content[func_start..].char_indices() {
+                if ch == '{' {
+                    brace_depth += 1;
+                } else if ch == '}' {
+                    brace_depth -= 1;
+                    if brace_depth == 0 {
+                        func_body_end = func_start + offset;
+                        break;
+                    }
+                }
+            }
+            let func_body = &cleaned_content[func_start..func_body_end];
+
+            for macro_match in regex_iram_banned_macro().captures_iter(func_body) {
+                let macro_name = macro_match.get(1).unwrap().as_str();
+                let match_pos = func_start + macro_match.get(0).unwrap().start();
+                let line_number = cleaned_content[..match_pos].matches('\n').count() + 1;
+                let original_line = file_content
+                    .lines
+                    .get(line_number.saturating_sub(1))
+                    .map_or("", |line| line.trim());
+                violations.push((
+                    line_number,
+                    format!(
+                        "Found '{macro_name}' in FL_IRAM function '{func_name}'\n  Line: {}\n  Logging macros cannot be used in ISR functions marked with FL_IRAM.",
+                        original_line.chars().take(100).collect::<String>()
+                    ),
+                ));
+            }
+
+            for log_match in regex_fl_log_macro().find_iter(func_body) {
+                let macro_call = log_match.as_str();
+                let macro_name = macro_call.split('(').next().unwrap_or(macro_call).trim();
+                if macro_name.contains("ASYNC") {
+                    continue;
+                }
+                let match_pos = func_start + log_match.start();
+                let line_number = cleaned_content[..match_pos].matches('\n').count() + 1;
+                let original_line = file_content
+                    .lines
+                    .get(line_number.saturating_sub(1))
+                    .map_or("", |line| line.trim());
+                violations.push((
+                    line_number,
+                    format!(
+                        "Found '{macro_name}' in FL_IRAM function '{func_name}'\n  Line: {}\n  Logging macros cannot be used in ISR functions marked with FL_IRAM.",
+                        original_line.chars().take(100).collect::<String>()
+                    ),
+                ));
             }
         }
 

@@ -13,6 +13,7 @@ from ci.lint_cpp import (
     cpp_hpp_includes_checker,
     fastled_header_usage_checker,
     include_paths_checker,
+    namespace_platforms_checker,
     no_namespace_fl_declaration,
     relative_include_checker,
     serial_printf_checker,
@@ -27,9 +28,11 @@ from ci.lint_cpp.banned_namespace_checker import BannedNamespaceChecker
 from ci.lint_cpp.bare_allocation_checker import BareAllocationChecker
 from ci.lint_cpp.builtin_memcpy_checker import BuiltinMemcpyChecker
 from ci.lint_cpp.check_platform_includes import PlatformTrampolineChecker
+from ci.lint_cpp.check_platforms_fl_namespace import PlatformsFlNamespaceChecker
 from ci.lint_cpp.check_using_namespace import UsingNamespaceChecker
 from ci.lint_cpp.cpp_hpp_includes_checker import CppHppIncludesChecker
 from ci.lint_cpp.cpp_include_checker import CppIncludeChecker
+from ci.lint_cpp.enum_class_checker import EnumClassChecker
 from ci.lint_cpp.esp_rom_printf_checker import EspRomPrintfChecker
 from ci.lint_cpp.example_serial_checker import ExampleSerialChecker
 from ci.lint_cpp.fastled_header_usage_checker import FastLEDHeaderUsageChecker
@@ -37,6 +40,8 @@ from ci.lint_cpp.fl_is_defined_checker import FlIsDefinedChecker
 from ci.lint_cpp.impl_hpp_includes_checker import ImplHppIncludesChecker
 from ci.lint_cpp.include_after_namespace_checker import IncludeAfterNamespaceChecker
 from ci.lint_cpp.include_paths_checker import IncludePathsChecker
+from ci.lint_cpp.logging_in_iram_checker import LoggingInIramChecker
+from ci.lint_cpp.namespace_platforms_checker import NamespacePlatformsChecker
 from ci.lint_cpp.no_namespace_fl_declaration import NamespaceFlDeclarationChecker
 from ci.lint_cpp.no_using_namespace_fl_in_headers import UsingNamespaceFlChecker
 from ci.lint_cpp.numeric_limit_macros_checker import NumericLimitMacroChecker
@@ -82,6 +87,15 @@ def _python_records(
     violations = violations_by_path.get(
         file_path, violations_by_path.get(_normalize_path(file_path), [])
     )
+    if isinstance(violations, str):
+        return [
+            {
+                "checker": checker.__class__.__name__,
+                "path": _normalize_path(file_path),
+                "line": 0,
+                "message": violations,
+            }
+        ]
     return [
         {
             "checker": checker.__class__.__name__,
@@ -191,6 +205,12 @@ def _rust_records(
             '#include "foo.cpp"\n',
         ),
         (
+            "enum_class",
+            EnumClassChecker(),
+            Path("src/fl/example.h"),
+            "enum PlainEnum {\n    Value,\n};\n",
+        ),
+        (
             "esp_rom_printf",
             EspRomPrintfChecker(),
             Path("src/fl/example.h"),
@@ -251,10 +271,28 @@ def _rust_records(
             "void* p = malloc(4);\nvoid* q = fl::malloc(4);\n",
         ),
         (
+            "logging_in_iram",
+            LoggingInIramChecker(),
+            Path("src/fl/example.h"),
+            'FL_IRAM void isr() {\n    FL_WARN("x");\n}\n',
+        ),
+        (
+            "logging_in_iram",
+            LoggingInIramChecker(),
+            Path("src/fl/example.h"),
+            '/*\ncomment\n*/\nFL_IRAM void isr() {\n    FL_WARN("x");\n}\n',
+        ),
+        (
             "namespace_fl_declaration",
             NamespaceFlDeclarationChecker(),
             Path("src/example.h"),
             "namespace fl {\n}\n",
+        ),
+        (
+            "namespace_platforms",
+            NamespacePlatformsChecker(),
+            Path("src/platforms/example.h"),
+            "namespace platform {\n}\n",
         ),
         (
             "numeric_limit_macros",
@@ -267,6 +305,12 @@ def _rust_records(
             PlatformIncludesChecker(),
             Path("src/fl/example.h"),
             '#include "platforms/shared/int_windows.h"\n',
+        ),
+        (
+            "platforms_fl_namespace",
+            PlatformsFlNamespaceChecker(),
+            Path("src/platforms/example.h"),
+            "void value();\n",
         ),
         (
             "pragma_once",
@@ -407,6 +451,7 @@ def test_rust_checker_matches_python_oracle(
         fastled_header_usage_checker, "SRC_DIR", _normalize_path(src_root)
     )
     monkeypatch.setattr(include_paths_checker, "PROJECT_ROOT", tmp_path)
+    monkeypatch.setattr(namespace_platforms_checker, "SRC_ROOT", src_root)
     monkeypatch.setattr(no_namespace_fl_declaration, "SRC_ROOT", src_root)
     monkeypatch.setattr(relative_include_checker, "SRC_DIR", _normalize_path(src_root))
     monkeypatch.setattr(serial_printf_checker, "EXAMPLES_ROOT", examples_root)

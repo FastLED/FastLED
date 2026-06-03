@@ -38,8 +38,13 @@ def strip_comments(content: str) -> str:
     Returns:
         Content with comments removed, preserving line numbers
     """
-    # Remove multi-line comments (/* ... */)
-    content = re.sub(r"/\*.*?\*/", "", content, flags=re.DOTALL)
+    # Remove multi-line comments (/* ... */) while retaining line numbers.
+    content = re.sub(
+        r"/\*.*?\*/",
+        lambda match: "\n" * match.group(0).count("\n"),
+        content,
+        flags=re.DOTALL,
+    )
     # Remove single-line comments (// ...)
     content = re.sub(r"//.*$", "", content, flags=re.MULTILINE)
     return content
