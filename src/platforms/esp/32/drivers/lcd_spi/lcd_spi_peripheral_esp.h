@@ -55,6 +55,7 @@ class LcdSpiPeripheralEsp : public ILcdSpiPeripheral {
     // chunk from ISR context, so transmit() must be IRAM-resident to survive
     // a flash-cache stall (NVS commit, SPI flash erase, etc.).
     bool FL_IRAM transmit(const u16 *buffer, size_t size_bytes) FL_NOEXCEPT override;
+    bool FL_IRAM queueTransmit(const u16 *buffer, size_t size_bytes) FL_NOEXCEPT override;
     bool waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT override;
     bool isBusy() const FL_NOEXCEPT override;
 
@@ -87,6 +88,8 @@ class LcdSpiPeripheralEsp : public ILcdSpiPeripheral {
     /// singleton. Called from deinitialize() and from initialize() when
     /// the owning driver changes (issue #2270).
     void teardownLocked() FL_NOEXCEPT;
+    bool FL_IRAM transmitInternal(const u16 *buffer, size_t size_bytes,
+                                  bool wait_for_slot) FL_NOEXCEPT;
 
     bool mInitialized;
     LcdSpiConfig mConfig;
@@ -96,6 +99,7 @@ class LcdSpiPeripheralEsp : public ILcdSpiPeripheral {
     void *mCallback;
     void *mUserCtx;
     volatile bool mBusy;
+    volatile size_t mPendingTransmits;
     size_t mLastTransmitSize;
     LcdSpiOwnerDriver mOwner; ///< Tracks which driver owns the singleton (#2270).
 };

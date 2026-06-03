@@ -95,6 +95,17 @@ ChannelDataPtr createClocklessChannelDataBytes(int pin, size_t numBytes) {
     return ChannelData::create(pin, timing, fl::move(data));
 }
 
+fl::vector<u16> collectTransmitWords() {
+    const auto &history = LcdSpiPeripheralMock::instance().getTransmitHistory();
+    fl::vector<u16> combined;
+    for (const auto &record : history) {
+        for (const auto &word : record.buffer_copy) {
+            combined.push_back(word);
+        }
+    }
+    return combined;
+}
+
 } // anonymous namespace
 
 //=============================================================================
@@ -200,7 +211,7 @@ FL_TEST_CASE("ChannelDriverLcdClockless - multi-chunk") {
     driver.enqueue(data);
     driver.show();
 
-    FL_CHECK(mock.getTransmitCount() == 1);
+    FL_CHECK(mock.getTransmitCount() == 2);
 
     mock.simulateTransmitComplete();
     FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
@@ -219,7 +230,7 @@ FL_TEST_CASE("ChannelDriverLcdClockless - awkward chunk size rounds up") {
     driver.enqueue(data);
     driver.show();
 
-    FL_CHECK(mock.getTransmitCount() == 1);
+    FL_CHECK(mock.getTransmitCount() == 2);
 
     mock.simulateTransmitComplete();
     FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
@@ -229,7 +240,46 @@ FL_TEST_CASE("ChannelDriverLcdClockless - awkward chunk size rounds up") {
     FL_REQUIRE(history.size() == 2);
     const size_t dmaBytesPerInputByte = 16 * sizeof(Wave3Byte);
     FL_CHECK(history[0].size_bytes == 513 * dmaBytesPerInputByte);
-    FL_CHECK(history[1].size_bytes == 512 * dmaBytesPerInputByte);
+    FL_CHECK(history[1].size_bytes == 513 * dmaBytesPerInputByte);
+}
+
+FL_TEST_CASE("ChannelDriverLcdClockless - default multi-chunk 400 LED fidelity") {
+    fl::vector<u16> reference;
+    {
+        resetMockState();
+        auto peripheral = createMockPeripheral();
+        ChannelDriverLcdClockless driver(peripheral);
+        auto &mock = LcdSpiPeripheralMock::instance();
+
+        driver.setChunkInputBytesForTest(4096);
+        auto data = createClocklessChannelData(5, 400);
+        driver.enqueue(data);
+        driver.show();
+        FL_CHECK(mock.getTransmitCount() == 1);
+        mock.simulateTransmitComplete();
+        FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
+        reference = collectTransmitWords();
+    }
+
+    resetMockState();
+    auto peripheral = createMockPeripheral();
+    ChannelDriverLcdClockless driver(peripheral);
+    auto &mock = LcdSpiPeripheralMock::instance();
+
+    auto data = createClocklessChannelData(5, 400);
+    driver.enqueue(data);
+    driver.show();
+
+    FL_CHECK(mock.getTransmitCount() == 2);
+    mock.simulateTransmitComplete();
+    FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
+    FL_CHECK(mock.getTransmitCount() == 2);
+
+    fl::vector<u16> chunked = collectTransmitWords();
+    FL_REQUIRE(chunked.size() == reference.size());
+    for (size_t i = 0; i < reference.size(); i++) {
+        FL_CHECK(chunked[i] == reference[i]);
+    }
 }
 
 //=============================================================================
@@ -334,15 +384,15 @@ FL_TEST_CASE("ChannelDriverLcdClockless - error mid-stream") {
     driver.enqueue(data);
     driver.show();
 
-    FL_CHECK(mock.getTransmitCount() == 1);
+    FL_CHECK(mock.getTransmitCount() == 2);
 
     mock.setTransmitFailure(true);
     mock.simulateTransmitComplete();
+    FL_CHECK(mock.getTransmitCount() == 2);
 
     // ISR tried chunk 2 but transmit failed → abort
     FL_CHECK(driver.poll() == IChannelDriver::DriverState::READY);
 }
-
 //=============================================================================
 // Empty enqueue
 //=============================================================================

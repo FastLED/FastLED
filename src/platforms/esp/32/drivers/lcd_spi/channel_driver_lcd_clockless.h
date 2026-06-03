@@ -18,8 +18,8 @@
 ///
 /// ## ISR-Driven Chunked DMA
 ///
-/// Same architecture as ChannelDriverLcdSpi — 3-buffer ring, ISR callback
-/// transposes next chunk (~1-2 µs) and submits immediately.
+/// Uses a 3-buffer ring. The ISR records chunk completion and wakes a worker
+/// task; the worker encodes and submits follow-up chunks outside ISR context.
 /// See issue #2258 for design details.
 
 #pragma once
@@ -73,11 +73,8 @@ class ChannelDriverLcdClockless : public IChannelDriver {
 
     /// Default: 1024 bytes per chunk for clockless (3 bytes/LED ≈ 341 LEDs).
     ///
-    /// The chunked-streaming ISR re-arm path currently emits garbled data
-    /// past the first chunk (#2647 follow-up). Until that is fixed, pick a
-    /// chunk size big enough that a typical RGB frame fits in one chunk so
-    /// the ISR re-arm path is never taken. Worst-case memory for
-    /// 16-lane wave8: 1024 × 128 × 3 buffers = 384 KB in PSRAM.
+    /// Worst-case memory for 16-lane wave8 is
+    /// 1024 * 128 * 3 buffers = 384 KB in PSRAM.
     static constexpr size_t kDefaultChunkInputBytes = 1024;
 
     /// Override chunk input bytes for testing (0 = use default).
@@ -105,6 +102,13 @@ class ChannelDriverLcdClockless : public IChannelDriver {
 
     void freeRingBuffers() FL_NOEXCEPT;
     bool allocateRingBuffers(size_t slotCapacityBytes) FL_NOEXCEPT;
+    bool submitChunk(size_t chunkIndex, bool waitForSlot) FL_NOEXCEPT;
+    void processWorkerQueue() FL_NOEXCEPT;
+    bool ensureWorkerTask() FL_NOEXCEPT;
+    void stopWorkerTask() FL_NOEXCEPT;
+    bool notifyWorker() FL_NOEXCEPT;
+    bool notifyWorkerFromIsr() FL_NOEXCEPT;
+    static void workerTaskEntry(void *arg) FL_NOEXCEPT;
 
     //=========================================================================
     // ISR callback
@@ -125,18 +129,22 @@ class ChannelDriverLcdClockless : public IChannelDriver {
 
     struct IsrContext {
         volatile bool mStreamComplete;
-        volatile size_t mNextByteOffset;
-        volatile size_t mRingWriteIdx;
+        volatile bool mStreamError;
+        volatile size_t mSubmittedChunks;
+        volatile size_t mCompletedChunks;
 
         size_t mTotalBytes;
         size_t mChunkInputBytes;
+        size_t mTotalChunks;
 
         void reset() FL_NOEXCEPT {
             mStreamComplete = false;
-            mNextByteOffset = 0;
-            mRingWriteIdx = 0;
+            mStreamError = false;
+            mSubmittedChunks = 0;
+            mCompletedChunks = 0;
             mTotalBytes = 0;
             mChunkInputBytes = 0;
+            mTotalChunks = 0;
         }
     };
 
@@ -156,6 +164,9 @@ class ChannelDriverLcdClockless : public IChannelDriver {
     volatile bool mBusy;
     IsrContext mIsrCtx;
     size_t mChunkInputBytesOverride;
+    void *mWorkerTaskHandle;
+    volatile bool mWorkerStop;
+    volatile bool mWorkerRunning;
 
     // Encoding state (set during beginTransmission, stable during ISR)
     bool mUseWave3;

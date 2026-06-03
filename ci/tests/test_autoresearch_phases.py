@@ -9,6 +9,7 @@ Tests the refactored phase decomposition:
 """
 
 import asyncio
+import os
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -156,6 +157,14 @@ def fake_project_dir(tmp_path: Path) -> Path:
     """Create a minimal PlatformIO project structure."""
     (tmp_path / "platformio.ini").write_text("[env:esp32s3]\n")
     (tmp_path / "examples" / "AutoResearch").mkdir(parents=True)
+    return tmp_path
+
+
+@pytest.fixture
+def staged_project_dir(tmp_path: Path) -> Path:
+    """Create a minimal staged fbuild project structure."""
+    (tmp_path / "platformio.ini").write_text("[env:esp32s3]\n")
+    (tmp_path / "src" / "sketch").mkdir(parents=True)
     return tmp_path
 
 
@@ -325,6 +334,18 @@ class TestParseArgsAndBuildCommands:
         result = _parse_args_and_build_commands(args)
         assert isinstance(result, int)
         assert result == 1
+
+    def test_staged_project_dir_uses_src_sketch(
+        self, staged_project_dir: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.delenv("PLATFORMIO_SRC_DIR", raising=False)
+        args = _make_args(project_dir=staged_project_dir)
+        result = _parse_args_and_build_commands(args)
+        assert isinstance(result, RunContext)
+        assert result.build_dir == staged_project_dir
+        assert os.environ["PLATFORMIO_SRC_DIR"] == str(
+            staged_project_dir / "src" / "sketch"
+        )
 
     def test_lcd_forces_esp32s3(self, fake_project_dir: Path) -> None:
         args = _make_args(parlio=False, lcd=True, project_dir=fake_project_dir)

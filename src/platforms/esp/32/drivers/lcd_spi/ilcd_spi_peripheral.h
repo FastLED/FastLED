@@ -97,6 +97,10 @@ class ILcdSpiPeripheral {
     // Transmission
     virtual bool transmit(const u16 *buffer,
                           size_t size_bytes) FL_NOEXCEPT = 0;
+    virtual bool queueTransmit(const u16 *buffer,
+                               size_t size_bytes) FL_NOEXCEPT {
+        return transmit(buffer, size_bytes);
+    }
     virtual bool waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT = 0;
     virtual bool isBusy() const FL_NOEXCEPT = 0;
 

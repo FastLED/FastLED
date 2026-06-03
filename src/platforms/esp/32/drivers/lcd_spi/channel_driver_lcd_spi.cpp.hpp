@@ -425,6 +425,9 @@ fl::shared_ptr<IChannelDriver> createLcdSpiEngine() FL_NOEXCEPT {
         bool transmit(const u16 *b, size_t s) FL_NOEXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().transmit(b, s);
         }
+        bool queueTransmit(const u16 *b, size_t s) FL_NOEXCEPT override {
+            return detail::LcdSpiPeripheralEsp::instance().queueTransmit(b, s);
+        }
         bool waitTransmitDone(u32 t) FL_NOEXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().waitTransmitDone(t);
         }
