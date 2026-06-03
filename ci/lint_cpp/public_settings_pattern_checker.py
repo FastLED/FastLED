@@ -206,7 +206,7 @@ def _is_per_object_setter(decl_line: str) -> bool:
 
     # Split off the first parameter (stop at first comma that is not inside <>)
     depth = 0
-    first_param = []
+    first_param: list[str] = []
     for ch in params_raw:
         if ch == "<":
             depth += 1
