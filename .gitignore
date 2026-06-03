@@ -114,6 +114,7 @@ src/platforms/wasm/compiler/node_modules/
 .claude/settings.local.json
 .claude/worktrees/
 .claude/scheduled_tasks.lock
+ci/lint_cpp_rs/target/
 
 # AutoResearch transient logs
 .autoresearch_last.log

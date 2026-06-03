@@ -5,7 +5,10 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from typeguard import typechecked
 
+
+@typechecked
 @dataclass
 class LintArgs:
     """Parsed command-line arguments for linting."""
@@ -17,6 +20,7 @@ class LintArgs:
     run_iwyu: bool = False
     run_pyright: bool = False
     run_tidy: bool = False
+    use_rust_cpp_lint: bool = False
     iwyu_fix: bool = False
     files: list[str] = field(default_factory=lambda: list[str]())
 
@@ -54,6 +58,7 @@ Examples:
   bash lint --strict           # Also run pyright + IWYU on single files (strict mode)
   bash lint --js               # JavaScript linting only
   bash lint --cpp              # C++ linting only
+  bash lint --cpp --rust       # Use Rust-backed checker subset where available
   bash lint --full             # Include IWYU (Include-What-You-Use) on all files
   bash lint --iwyu             # Run IWYU only
   bash lint --tidy             # Run clang-tidy static analysis
@@ -105,6 +110,12 @@ Examples:
     )
 
     parser.add_argument(
+        "--rust",
+        action="store_true",
+        help="Use the Rust C++ checker subset where available",
+    )
+
+    parser.add_argument(
         "--fix",
         action="store_true",
         help="Auto-fix IWYU violations (implies --iwyu)",
@@ -138,6 +149,7 @@ Examples:
         run_iwyu=run_iwyu,
         run_pyright=args.strict,
         run_tidy=args.tidy,
+        use_rust_cpp_lint=args.rust,
         iwyu_fix=args.fix,
         files=files,
     )
