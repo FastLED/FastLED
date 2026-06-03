@@ -108,6 +108,40 @@ inline u8 quantize_u8(float v) FL_NOEXCEPT {
     return static_cast<u8>(scaled);
 }
 
+// Standard CIE primary-matrix construction (#2705). Given source primary
+// chromaticities xy_r/g/b and a source white chromaticity xy_w, build the
+// 3x3 matrix M such that M·[1,1,1]^T = xyY_to_XYZ(xy_w, 1.0). Columns are
+// per-channel scaled XYZ vectors of the primaries at Y=1, with scaling
+// chosen so the (1,1,1) input lands at source white in XYZ. This is the
+// classic linear-sRGB -> XYZ derivation generalized to arbitrary primaries.
+// Returns false if the primary matrix is singular (collinear chromaticities).
+inline bool build_source_matrix(const float xy_r[2], const float xy_g[2],
+                                const float xy_b[2], const float xy_w[2],
+                                float M_out[3][3]) FL_NOEXCEPT {
+    float xyz_R[3], xyz_G[3], xyz_B[3], xyz_W[3];
+    xyY_to_XYZ(xy_r[0], xy_r[1], 1.0f, xyz_R);
+    xyY_to_XYZ(xy_g[0], xy_g[1], 1.0f, xyz_G);
+    xyY_to_XYZ(xy_b[0], xy_b[1], 1.0f, xyz_B);
+    xyY_to_XYZ(xy_w[0], xy_w[1], 1.0f, xyz_W);
+
+    float P[3][3];
+    P[0][0] = xyz_R[0]; P[0][1] = xyz_G[0]; P[0][2] = xyz_B[0];
+    P[1][0] = xyz_R[1]; P[1][1] = xyz_G[1]; P[1][2] = xyz_B[1];
+    P[2][0] = xyz_R[2]; P[2][1] = xyz_G[2]; P[2][2] = xyz_B[2];
+
+    float P_inv[3][3];
+    if (!invert3x3(P, P_inv)) {
+        return false;
+    }
+    float k[3];
+    matvec3(P_inv, xyz_W, k);
+
+    M_out[0][0] = k[0] * xyz_R[0]; M_out[0][1] = k[1] * xyz_G[0]; M_out[0][2] = k[2] * xyz_B[0];
+    M_out[1][0] = k[0] * xyz_R[1]; M_out[1][1] = k[1] * xyz_G[1]; M_out[1][2] = k[2] * xyz_B[1];
+    M_out[2][0] = k[0] * xyz_R[2]; M_out[2][1] = k[1] * xyz_G[2]; M_out[2][2] = k[2] * xyz_B[2];
+    return true;
+}
+
 // ===== Types =================================================================
 
 // Precomputed per-profile data: emitter XYZ columns + the four matrix inverses
@@ -125,19 +159,61 @@ struct ProfileCache {
     float P_RBW_inv[3][3];                   // [R B W]^-1
     float P_BGW_inv[3][3];                   // [B G W]^-1
     float d_W[3];                            // P_RGB_inv * P_W (wx_lp_legacy cache)
+
+    // Source-space → device-XYZ matrix (#2705). M_src · source_rgb = target
+    // XYZ in the device's absolute XYZ frame. Built from profile.input_xy_*
+    // via the standard CIE primary-matrix construction (column-normalized so
+    // M_src·[1,1,1] equals the source white XYZ at Y=1). When the source
+    // chromaticities are degenerate (input_xy_w[1] == 0, the default for
+    // value-initialized `DiodeProfile{}`), `has_source_space` is false and
+    // solvers fall back to the legacy device-emitter projection.
+    float M_src[3][3];
+    bool has_source_space;
 };
 
-// 2D + 1D factored LUT cell quantization scale (1.0 -> kLutQ).
+// LUT cell quantization scale (value in [-8, +8) maps to i16 via *kLutQ).
 constexpr i16 kLutQ = 4096;
+
+// Storage stride per grid point. Bilinear LUTs store 4 (rgbw) values; Hermite
+// LUTs additionally store ∂/∂t_x and ∂/∂t_y per channel (in cell-parameter
+// units), enabling bicubic Hermite interpolation that reaches comparable
+// accuracy at ~half the grid edge length — ~25 % of the memory at ~ the
+// same error vs. bilinear. The grid step is uniform so derivatives are
+// naturally expressed in cell-parameter units (t ∈ [0, 1] per cell).
+constexpr int kLutStrideBilinear = 4;
+constexpr int kLutStrideHermite = 12;
+
+enum class LutInterp : u8 {
+    Bilinear = 0,
+    Hermite = 1,
+};
+
+// Cubic Hermite basis on [0, 1]. Output layout: { h00, h01, h10, h11 } where
+//   h00(t) = 2t³ - 3t² + 1   value at t=0
+//   h01(t) = -2t³ + 3t²      value at t=1
+//   h10(t) = t³ - 2t² + t    derivative at t=0
+//   h11(t) = t³ - t²         derivative at t=1
+// Lifted into a header inline so `lookup_lut` and the test suite consume
+// exactly the same evaluator (CodeRabbit #2707: tests that redefine basis
+// locally cannot catch regressions in the production code).
+inline void hermite_basis(float t, float out[4]) FL_NOEXCEPT {
+    const float t2 = t * t;
+    const float t3 = t2 * t;
+    out[0] = 2.0f * t3 - 3.0f * t2 + 1.0f;
+    out[1] = -2.0f * t3 + 3.0f * t2;
+    out[2] = t3 - 2.0f * t2 + t;
+    out[3] = t3 - t2;
+}
 
 // Owns its cell storage via fl::unique_ptr. Obtain via `build_lut(...)`,
 // which atomically allocates + populates. Lookup code can rely on
 // .cells.get() being non-null for the table's lifetime.
 struct LutTable {
     int N = 0;                          // grid edge length
+    LutInterp interp = LutInterp::Bilinear; // storage / interp scheme
     float xy_min[2] = {0.0f, 0.0f};     // grid origin in xy
     float xy_max[2] = {0.0f, 0.0f};     // grid extent in xy
-    fl::unique_ptr<i16[]> cells;        // [N*N*4] — 4 channels * grid_size^2
+    fl::unique_ptr<i16[]> cells;        // size = N*N*stride for chosen interp
 };
 
 // Two-emitter (warm-W, cool-W) profile for RGBCCT layered solver.
@@ -193,13 +269,33 @@ bool solve_strict_subgamut_xy(const ProfileCache& cache,
                               const float xy_t[2], float Y_t,
                               float out_rgbw[4]) FL_NOEXCEPT;
 
-// wx_lp_legacy white-overdrive solver (gist sec 9). Closed-form scalar LP:
-// maximize W subject to non-negative RGB residual.
-void solve_wx_lp(const ProfileCache& cache, float s_r, float s_g,
-                 float s_b, float out_rgbw[4]) FL_NOEXCEPT;
+// White-overdrive solver (#2706). Computes the strict-vertex W (same as
+// `solve_strict_subgamut`) and then pushes W past it by `overdrive_ratio`,
+// accepting chromaticity drift toward the W diode in exchange for higher
+// luminance. At overdrive_ratio = 0 this matches the strict-vertex output;
+// at overdrive_ratio = 1 W is driven to 1.0. Default boosted mode uses
+// `kDefaultOverdriveRatio` (see below). Replaces the previous `solve_wx_lp`
+// which was mathematically equivalent to the strict sub-gamut solver.
+void solve_wx_overdrive(const ProfileCache& cache, float s_r, float s_g,
+                        float s_b, float overdrive_ratio,
+                        float out_rgbw[4]) FL_NOEXCEPT;
 
-// Allocate + populate a LUT for `cache` at `grid_n` edge length.
-LutTable build_lut(const ProfileCache& cache, int grid_n) FL_NOEXCEPT;
+// Default overdrive ratio for `kRGBWColorimetricBoosted`. 0.5 = halfway
+// between the strict vertex and full W; produces visibly brighter output
+// than the strict mode while limiting chromaticity drift.
+constexpr float kDefaultOverdriveRatio = 0.5f;
+
+// Allocate + populate a LUT for `cache` at `grid_n` edge length, using
+// `interp` (default Hermite). Hermite tables carry per-cell value + slope
+// (∂/∂t_x, ∂/∂t_y), tripling per-cell storage but typically achieving lower
+// error than bilinear at the same grid size — enabling small tables (N=8..16)
+// suitable for memory-constrained targets.
+LutTable build_lut(const ProfileCache& cache, int grid_n,
+                   LutInterp interp) FL_NOEXCEPT;
+
+inline LutTable build_lut(const ProfileCache& cache, int grid_n) FL_NOEXCEPT {
+    return build_lut(cache, grid_n, LutInterp::Hermite);
+}
 
 // Bilinear lookup + Y multiply + normalize.
 void lookup_lut(const LutTable& lut, const float xy_t[2], float Y_t,

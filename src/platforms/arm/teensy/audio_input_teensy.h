@@ -10,6 +10,7 @@
 #include "fl/stl/span.h"
 #include "fl/stl/shared_ptr.h"
 #include "platforms/arm/teensy/audio_input_teensy_config.h"
+#include "platforms/arm/teensy/is_teensy.h"
 
 // Detect Teensy Audio Library availability
 #if TEENSY_AUDIO_LIBRARY_AVAILABLE

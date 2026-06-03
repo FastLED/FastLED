@@ -46,7 +46,12 @@ jobs:
 
       - name: Install libunwind-dev (Linux only)
         if: runner.os == 'Linux'
-        run: sudo apt-get install -y libunwind-dev
+        # Refresh apt indexes before install so stale mirror metadata
+        # (e.g. a transitional liblzma-dev version the mirror hasn't
+        # propagated yet, returning 404) doesn't fail the build.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libunwind-dev
 
       - name: Install
         run: ./install

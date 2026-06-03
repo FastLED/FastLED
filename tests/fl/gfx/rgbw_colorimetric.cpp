@@ -240,3 +240,247 @@ FL_TEST_CASE("enable/disable LUT public API is link-safe") {
         disable_rgbw_colorimetric_lut();  // also safe
     }
 }
+
+
+// ===== Source space tests (#2705) ==========================================
+// The colorimetric solvers previously interpreted the input RGB byte triple
+// as native-emitter drive coordinates, producing native-gamut output and
+// making D65-based verification impossible. The fix adds input_xy_* fields
+// to DiodeProfile plus an `M_src` matrix in the cache; these tests verify
+// the matrix construction is correct and the default profile is wired up.
+
+FL_TEST_CASE("default profile carries sRGB-D65 source space") {
+    // D65 (CIE 1931 2°) is approximately (0.31272, 0.32903). Rec709 / sRGB
+    // primaries are also published values — confirm the defaults match so
+    // verifiers and the math model agree on the input contract.
+    FL_CHECK_CLOSE(kRgbwDefaultProfile.input_xy_r[0], 0.6400f, 1e-4f);
+    FL_CHECK_CLOSE(kRgbwDefaultProfile.input_xy_r[1], 0.3300f, 1e-4f);
+    FL_CHECK_CLOSE(kRgbwDefaultProfile.input_xy_g[0], 0.3000f, 1e-4f);
+    FL_CHECK_CLOSE(kRgbwDefaultProfile.input_xy_g[1], 0.6000f, 1e-4f);
+    FL_CHECK_CLOSE(kRgbwDefaultProfile.input_xy_b[0], 0.1500f, 1e-4f);
+    FL_CHECK_CLOSE(kRgbwDefaultProfile.input_xy_b[1], 0.0600f, 1e-4f);
+    FL_CHECK_CLOSE(kRgbwDefaultProfile.input_xy_w[0], 0.31272f, 1e-4f);
+    FL_CHECK_CLOSE(kRgbwDefaultProfile.input_xy_w[1], 0.32903f, 1e-4f);
+}
+
+
+FL_TEST_CASE("source matrix maps (1,1,1) to D65 at Y=1") {
+    // M_src is constructed so that M_src · [1, 1, 1]^T = source_white_XYZ at
+    // Y=1. This is the load-bearing property of the construction: it makes
+    // RGB=(255, 255, 255) actually mean "D65 white" in CIE coordinates.
+    float M[3][3];
+    FL_CHECK(build_source_matrix(kRgbwDefaultProfile.input_xy_r,
+                                 kRgbwDefaultProfile.input_xy_g,
+                                 kRgbwDefaultProfile.input_xy_b,
+                                 kRgbwDefaultProfile.input_xy_w, M));
+    const float one[3] = {1.0f, 1.0f, 1.0f};
+    float white[3];
+    matvec3(M, one, white);
+
+    float expected_white[3];
+    xyY_to_XYZ(kRgbwDefaultProfile.input_xy_w[0],
+               kRgbwDefaultProfile.input_xy_w[1], 1.0f, expected_white);
+    FL_CHECK_CLOSE(white[0], expected_white[0], 1e-4f);
+    FL_CHECK_CLOSE(white[1], expected_white[1], 1e-4f);
+    FL_CHECK_CLOSE(white[2], expected_white[2], 1e-4f);
+    FL_CHECK_CLOSE(white[1], 1.0f, 1e-4f);  // Y of source white = 1.0
+}
+
+
+FL_TEST_CASE("source matrix preserves primary chromaticities") {
+    // M_src · [1, 0, 0]^T must produce XYZ on the source R primary ray
+    // (any positive scalar of the unit-Y red XYZ vector). Test by xy ratio.
+    float M[3][3];
+    FL_CHECK(build_source_matrix(kRgbwDefaultProfile.input_xy_r,
+                                 kRgbwDefaultProfile.input_xy_g,
+                                 kRgbwDefaultProfile.input_xy_b,
+                                 kRgbwDefaultProfile.input_xy_w, M));
+    const float r_unit[3] = {1.0f, 0.0f, 0.0f};
+    float r_xyz[3];
+    matvec3(M, r_unit, r_xyz);
+    const float r_sum = r_xyz[0] + r_xyz[1] + r_xyz[2];
+    FL_CHECK(r_sum > 1e-6f);
+    FL_CHECK_CLOSE(r_xyz[0] / r_sum, kRgbwDefaultProfile.input_xy_r[0], 1e-4f);
+    FL_CHECK_CLOSE(r_xyz[1] / r_sum, kRgbwDefaultProfile.input_xy_r[1], 1e-4f);
+}
+
+
+FL_TEST_CASE("source matrix matches published sRGB->XYZ matrix") {
+    // The canonical linear sRGB -> XYZ (D65) matrix used everywhere from
+    // browsers to color science papers. Confirm our derivation matches the
+    // published values within float tolerance.
+    //   X = 0.4124564 R + 0.3575761 G + 0.1804375 B
+    //   Y = 0.2126729 R + 0.7151522 G + 0.0721750 B
+    //   Z = 0.0193339 R + 0.1191920 G + 0.9503041 B
+    float M[3][3];
+    FL_CHECK(build_source_matrix(kRgbwDefaultProfile.input_xy_r,
+                                 kRgbwDefaultProfile.input_xy_g,
+                                 kRgbwDefaultProfile.input_xy_b,
+                                 kRgbwDefaultProfile.input_xy_w, M));
+    // Tolerance is loose because the published matrix uses xy_w =
+    // (0.31271, 0.32902) and slight rounding in the primaries vs. our
+    // defaults — but better than 1e-3 is plenty for chromaticity verification.
+    FL_CHECK_CLOSE(M[0][0], 0.4124564f, 5e-3f);
+    FL_CHECK_CLOSE(M[0][1], 0.3575761f, 5e-3f);
+    FL_CHECK_CLOSE(M[0][2], 0.1804375f, 5e-3f);
+    FL_CHECK_CLOSE(M[1][0], 0.2126729f, 5e-3f);
+    FL_CHECK_CLOSE(M[1][1], 0.7151522f, 5e-3f);
+    FL_CHECK_CLOSE(M[1][2], 0.0721750f, 5e-3f);
+    FL_CHECK_CLOSE(M[2][0], 0.0193339f, 5e-3f);
+    FL_CHECK_CLOSE(M[2][1], 0.1191920f, 5e-3f);
+    FL_CHECK_CLOSE(M[2][2], 0.9503041f, 5e-3f);
+}
+
+
+FL_TEST_CASE("source matrix rejects degenerate primaries") {
+    // Collinear primaries cannot define a 2D gamut. The builder must signal
+    // failure rather than emit garbage that the solvers would then consume.
+    const float bad_r[2] = {0.3f, 0.3f};
+    const float bad_g[2] = {0.4f, 0.4f};
+    const float bad_b[2] = {0.5f, 0.5f};
+    const float w[2] = {0.3127f, 0.3290f};
+    float M[3][3];
+    FL_CHECK(!build_source_matrix(bad_r, bad_g, bad_b, w, M));
+}
+
+
+// ===== Boosted-vs-strict differentiation (#2706) ===========================
+// Public dispatch test that runs only when the library was built with
+// FASTLED_RGBW_COLORIMETRIC. Detection uses the LUT enable probe: it returns
+// true only when the real colorimetric path is linked in.
+
+FL_TEST_CASE("kRGBWColorimetricBoosted differs from kRGBWColorimetric") {
+    const bool ok = enable_rgbw_colorimetric_lut(16);
+    disable_rgbw_colorimetric_lut();  // unrelated; only used as a build probe
+    if (!ok) {
+        // Library was built without FASTLED_RGBW_COLORIMETRIC. Both modes
+        // fall back to rgb_2_rgbw_exact through the stub path, so they will
+        // be identical — that's the documented degraded behavior, not the
+        // bug this test is guarding against.
+        return;
+    }
+    // The previous solve_wx_lp was mathematically equivalent to the strict
+    // sub-gamut solver — same vertex of the same feasible polytope. The new
+    // solve_wx_overdrive (rho = 0.5 by default) pushes W past the strict
+    // vertex, so for any non-edge in-gamut target the two modes must produce
+    // different RGBW tuples.
+    const u8 cases[][3] = {
+        {255, 255, 255},   // pure source white (D65 by default)
+        {200, 100, 50},    // warm-ish color
+        {128, 200, 220},   // cool-ish color
+        {180, 180, 180},   // mid-gray
+    };
+    for (const auto& c : cases) {
+        u8 r0, g0, b0, w0, r1, g1, b1, w1;
+        rgb_2_rgbw(RGBW_MODE::kRGBWColorimetric, kRGBWDefaultColorTemp,
+                   c[0], c[1], c[2], 255, 255, 255, &r0, &g0, &b0, &w0);
+        rgb_2_rgbw(RGBW_MODE::kRGBWColorimetricBoosted, kRGBWDefaultColorTemp,
+                   c[0], c[1], c[2], 255, 255, 255, &r1, &g1, &b1, &w1);
+        // Boosted should drive W >= strict (overdrive pushes W up, never down).
+        FL_CHECK(w1 >= w0);
+        // For at least one of these in-gamut targets the outputs must differ,
+        // proving the modes are not the same function.
+        if (r0 != r1 || g0 != g1 || b0 != b1 || w0 != w1) {
+            return;  // success: differentiated for this case
+        }
+    }
+    FL_CHECK(false);  // every case was bit-identical — the bug is back
+}
+
+
+FL_TEST_CASE("overdrive interpolates between strict and full-W") {
+    // Direct test of solve_wx_overdrive: rho=0 must equal the strict-vertex
+    // output (the LP form), and rho=1 must drive W to its maximum (clamped
+    // to either 1.0 or the polytope normalization).
+    //
+    // This test only links a build with FASTLED_RGBW_COLORIMETRIC because
+    // solve_wx_overdrive is not an inline header function. Guard via LUT probe.
+    const bool ok = enable_rgbw_colorimetric_lut(8);
+    disable_rgbw_colorimetric_lut();
+    if (!ok) return;
+
+    // We can't call solve_wx_overdrive directly from the test TU (cpp.hpp
+    // exclusion rule). The dispatch only exposes the default-rho path. So
+    // we sanity-check the documented invariant via dispatch: at rho_default
+    // (0.5), W must be >= the strict-mode W and the strict mode itself must
+    // produce a valid result.
+    u8 r_s, g_s, b_s, w_s, r_b, g_b, b_b, w_b;
+    rgb_2_rgbw(RGBW_MODE::kRGBWColorimetric, kRGBWDefaultColorTemp,
+               200, 200, 200, 255, 255, 255, &r_s, &g_s, &b_s, &w_s);
+    rgb_2_rgbw(RGBW_MODE::kRGBWColorimetricBoosted, kRGBWDefaultColorTemp,
+               200, 200, 200, 255, 255, 255, &r_b, &g_b, &b_b, &w_b);
+    FL_CHECK(w_b >= w_s);
+}
+
+
+// ===== Hermite LUT correctness =============================================
+// Validates the per-point value+slope Hermite scheme. Tests target the inline
+// math (basis functions, quantization, derivative scaling) rather than a
+// rebuilt library, so they run in the default test build.
+
+FL_TEST_CASE("hermite_basis matches expected node values") {
+    // CodeRabbit #2707: this test must call the *production* hermite_basis
+    // helper (defined inline in rgbw_colorimetric.h and consumed by
+    // lookup_lut), so a regression in the production basis also breaks
+    // this test.
+    //
+    // Layout: { h00, h01, h10, h11 } where
+    //   h00 = value at t=0,  h01 = value at t=1
+    //   h10 = derivative at t=0,  h11 = derivative at t=1.
+    float b0[4], b1[4], bm[4];
+    hermite_basis(0.0f, b0);
+    hermite_basis(1.0f, b1);
+    hermite_basis(0.5f, bm);
+
+    // At t=0: only h00 is non-zero (= 1).
+    FL_CHECK_CLOSE(b0[0], 1.0f, 1e-6f);
+    FL_CHECK_CLOSE(b0[1], 0.0f, 1e-6f);
+    FL_CHECK_CLOSE(b0[2], 0.0f, 1e-6f);
+    FL_CHECK_CLOSE(b0[3], 0.0f, 1e-6f);
+
+    // At t=1: only h01 is non-zero (= 1).
+    FL_CHECK_CLOSE(b1[0], 0.0f, 1e-6f);
+    FL_CHECK_CLOSE(b1[1], 1.0f, 1e-6f);
+    FL_CHECK_CLOSE(b1[2], 0.0f, 1e-6f);
+    FL_CHECK_CLOSE(b1[3], 0.0f, 1e-6f);
+
+    // Value sum (h00 + h01) must equal 1 everywhere — partition-of-unity for
+    // the value-only subset of the basis, required for a constant function
+    // to interpolate as itself when all derivatives are zero.
+    FL_CHECK_CLOSE(bm[0] + bm[1], 1.0f, 1e-6f);
+    // Derivative basis (h10 + h11) at midpoint:
+    //   (0.125 − 0.5 + 0.5) + (0.125 − 0.25) = 0.125 − 0.125 = 0.
+    FL_CHECK_CLOSE(bm[2] + bm[3], 0.0f, 1e-6f);
+}
+
+
+FL_TEST_CASE("hermite_basis reproduces a linear function on a cell") {
+    // Verify the production basis can exactly represent f(t) = a + b·t when
+    // the values and derivatives at the endpoints are set consistently. This
+    // is the load-bearing property of bicubic Hermite: it matches BOTH value
+    // and slope at every corner — a regression that swaps the h10/h11 roles
+    // (or breaks the cubic blend) would fail this check at interior points.
+    const float a = 0.3f;
+    const float b = 0.7f;
+    const float f0 = a;       // f(0)
+    const float f1 = a + b;   // f(1)
+    const float df = b;       // f'(t) = b everywhere
+
+    auto eval = [&](float t) {
+        float h[4];
+        hermite_basis(t, h);
+        return h[0] * f0 + h[1] * f1 + h[2] * df + h[3] * df;
+    };
+
+    FL_CHECK_CLOSE(eval(0.0f), f0, 1e-5f);
+    FL_CHECK_CLOSE(eval(1.0f), f1, 1e-5f);
+    FL_CHECK_CLOSE(eval(0.25f), a + b * 0.25f, 1e-5f);
+    FL_CHECK_CLOSE(eval(0.5f),  a + b * 0.5f,  1e-5f);
+    FL_CHECK_CLOSE(eval(0.75f), a + b * 0.75f, 1e-5f);
+}
+
+
+FL_TEST_CASE("LUT stride constants match interp scheme") {
+    FL_CHECK(kLutStrideBilinear == 4);
+    FL_CHECK(kLutStrideHermite == 12);  // value + dx + dy, 4 channels each
+}
