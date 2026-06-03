@@ -10,7 +10,10 @@ import pytest
 from running_process import RunningProcess
 
 from ci.lint_cpp import (
+    cpp_hpp_includes_checker,
+    fastled_header_usage_checker,
     include_paths_checker,
+    relative_include_checker,
     serial_printf_checker,
     using_namespace_fl_in_examples_checker,
 )
@@ -20,14 +23,21 @@ from ci.lint_cpp.banned_macros_checker import BannedMacrosChecker
 from ci.lint_cpp.banned_namespace_checker import BannedNamespaceChecker
 from ci.lint_cpp.bare_allocation_checker import BareAllocationChecker
 from ci.lint_cpp.builtin_memcpy_checker import BuiltinMemcpyChecker
+from ci.lint_cpp.cpp_hpp_includes_checker import CppHppIncludesChecker
 from ci.lint_cpp.cpp_include_checker import CppIncludeChecker
+from ci.lint_cpp.esp_rom_printf_checker import EspRomPrintfChecker
+from ci.lint_cpp.fastled_header_usage_checker import FastLEDHeaderUsageChecker
 from ci.lint_cpp.impl_hpp_includes_checker import ImplHppIncludesChecker
 from ci.lint_cpp.include_paths_checker import IncludePathsChecker
 from ci.lint_cpp.pragma_once_checker import PragmaOnceChecker
 from ci.lint_cpp.reinterpret_cast_checker import ReinterpretCastChecker
+from ci.lint_cpp.relative_include_checker import RelativeIncludeChecker
 from ci.lint_cpp.rust_bridge import parse_rust_json_output
 from ci.lint_cpp.serial_printf_checker import SerialPrintfChecker
+from ci.lint_cpp.sleep_for_checker import SleepForChecker
+from ci.lint_cpp.span_from_pointer_checker import SpanFromPointerChecker
 from ci.lint_cpp.static_in_headers_checker import StaticInHeaderChecker
+from ci.lint_cpp.thread_local_keyword_checker import ThreadLocalKeywordChecker
 from ci.lint_cpp.using_namespace_fl_in_examples_checker import (
     UsingNamespaceFlInExamplesChecker,
 )
@@ -139,10 +149,28 @@ def _rust_records(
             "__builtin_memcpy(dst, src, n);\n",
         ),
         (
+            "cpp_hpp_includes",
+            CppHppIncludesChecker(),
+            Path("src/fl/example.h"),
+            '#include "fl/foo.cpp.hpp"\n',
+        ),
+        (
             "cpp_include",
             CppIncludeChecker(),
             Path("src/fl/example.h"),
             '#include "foo.cpp"\n',
+        ),
+        (
+            "esp_rom_printf",
+            EspRomPrintfChecker(),
+            Path("src/fl/example.h"),
+            'esp_rom_printf("x");\n',
+        ),
+        (
+            "fastled_header_usage",
+            FastLEDHeaderUsageChecker(),
+            Path("src/fl/example.h"),
+            '#include "FastLED.h"\n',
         ),
         (
             "include_paths",
@@ -181,10 +209,34 @@ def _rust_records(
             "auto value = reinterpret_cast<int*>(ptr);\n",
         ),
         (
+            "relative_include",
+            RelativeIncludeChecker(),
+            Path("src/fl/example.h"),
+            '#include "../foo.h"\n',
+        ),
+        (
             "static_in_headers",
             StaticInHeaderChecker(),
             Path("src/fl/example.h"),
             "int getAll() {\n    static int instances = 0;\n    return instances;\n}\n",
+        ),
+        (
+            "sleep_for",
+            SleepForChecker(),
+            Path("src/fl/example.h"),
+            "std::this_thread::sleep_for(ms);\n",
+        ),
+        (
+            "span_from_pointer",
+            SpanFromPointerChecker(),
+            Path("src/fl/example.h"),
+            "auto s = span<int>(values.data(), values.size());\n",
+        ),
+        (
+            "thread_local_keyword",
+            ThreadLocalKeywordChecker(),
+            Path("src/fl/example.h"),
+            "thread_local int value;\n",
         ),
         (
             "using_namespace_fl_in_examples",
@@ -215,7 +267,15 @@ def test_rust_checker_matches_python_oracle(
     code: str,
 ) -> None:
     examples_root = tmp_path / "examples"
+    src_root = tmp_path / "src"
+    tests_root = tmp_path / "tests"
+    monkeypatch.setattr(cpp_hpp_includes_checker, "SRC_ROOT", src_root)
+    monkeypatch.setattr(cpp_hpp_includes_checker, "TESTS_ROOT", tests_root)
+    monkeypatch.setattr(
+        fastled_header_usage_checker, "SRC_DIR", _normalize_path(src_root)
+    )
     monkeypatch.setattr(include_paths_checker, "PROJECT_ROOT", tmp_path)
+    monkeypatch.setattr(relative_include_checker, "SRC_DIR", _normalize_path(src_root))
     monkeypatch.setattr(serial_printf_checker, "EXAMPLES_ROOT", examples_root)
     monkeypatch.setattr(
         using_namespace_fl_in_examples_checker, "EXAMPLES_ROOT", examples_root

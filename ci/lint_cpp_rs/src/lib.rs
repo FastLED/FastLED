@@ -48,6 +48,16 @@ const BARE_ALLOCATION_WHITELISTED_SUFFIXES: &[&str] = &[
     "fl/system/heap.cpp.hpp",
 ];
 
+const SLEEP_FOR_WHITELISTED_SUFFIXES: &[&str] = &[
+    "fl/stl/thread.h",
+    "platforms/stub/thread_stub_stl.h",
+    "platforms/stub/thread_stub_noop.h",
+    "platforms/stub/platform_time.cpp.hpp",
+    "fl/async.cpp.hpp",
+    "platforms/shared/spi_bitbang/host_timer.cpp.hpp",
+    "platforms/stub/coroutine_stub.impl.hpp",
+];
+
 const VALID_INCLUDE_PREFIXES: &[&str] = &["fl/", "platforms/", "fx/", "sensors/", "third_party/"];
 
 const EXTERNAL_SDK_PREFIXES: &[&str] = &[
@@ -230,13 +240,20 @@ pub fn supported_checker_names() -> &'static [&'static str] {
         "banned_macros",
         "banned_namespace",
         "builtin_memcpy",
+        "cpp_hpp_includes",
         "cpp_include",
+        "esp_rom_printf",
+        "fastled_header_usage",
         "include_paths",
         "impl_hpp_includes",
         "pragma_once",
         "reinterpret_cast",
+        "relative_include",
         "serial_printf",
+        "sleep_for",
+        "span_from_pointer",
         "static_in_headers",
+        "thread_local_keyword",
         "using_namespace_fl_in_examples",
         "weak_attribute",
     ]
@@ -250,13 +267,20 @@ pub fn supported_python_checker_names() -> &'static [&'static str] {
         "BannedMacrosChecker",
         "BannedNamespaceChecker",
         "BuiltinMemcpyChecker",
+        "CppHppIncludesChecker",
         "CppIncludeChecker",
+        "EspRomPrintfChecker",
+        "FastLEDHeaderUsageChecker",
         "IncludePathsChecker",
         "ImplHppIncludesChecker",
         "PragmaOnceChecker",
         "ReinterpretCastChecker",
+        "RelativeIncludeChecker",
         "SerialPrintfChecker",
+        "SleepForChecker",
+        "SpanFromPointerChecker",
         "StaticInHeaderChecker",
+        "ThreadLocalKeywordChecker",
         "UsingNamespaceFlInExamplesChecker",
         "WeakAttributeChecker",
     ]
@@ -272,13 +296,20 @@ pub fn create_checkers(
         ("banned_macros", Box::new(BannedMacrosChecker)),
         ("banned_namespace", Box::new(BannedNamespaceChecker)),
         ("builtin_memcpy", Box::new(BuiltinMemcpyChecker)),
+        ("cpp_hpp_includes", Box::new(CppHppIncludesChecker)),
         ("cpp_include", Box::new(CppIncludeChecker)),
+        ("esp_rom_printf", Box::new(EspRomPrintfChecker)),
+        ("fastled_header_usage", Box::new(FastLEDHeaderUsageChecker)),
         ("include_paths", Box::new(IncludePathsChecker)),
         ("impl_hpp_includes", Box::new(ImplHppIncludesChecker)),
         ("pragma_once", Box::new(PragmaOnceChecker)),
         ("reinterpret_cast", Box::new(ReinterpretCastChecker)),
+        ("relative_include", Box::new(RelativeIncludeChecker)),
         ("serial_printf", Box::new(SerialPrintfChecker)),
+        ("sleep_for", Box::new(SleepForChecker)),
+        ("span_from_pointer", Box::new(SpanFromPointerChecker)),
         ("static_in_headers", Box::new(StaticInHeaderChecker)),
+        ("thread_local_keyword", Box::new(ThreadLocalKeywordChecker)),
         (
             "using_namespace_fl_in_examples",
             Box::new(UsingNamespaceFlInExamplesChecker),
@@ -710,6 +741,11 @@ fn regex_cpp_include() -> &'static Regex {
     VALUE.get_or_init(|| Regex::new(r#"#include\s+[<"]([^>"]+\.cpp)[>"]"#).unwrap())
 }
 
+fn regex_cpp_hpp_include() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r#"#\s*include\s+[<"]([^>"]+\.cpp\.hpp)[>"]"#).unwrap())
+}
+
 fn regex_impl_hpp_include() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| Regex::new(r#"#\s*include\s+[<"]([^>"]+\.impl\.hpp)[>"]"#).unwrap())
@@ -718,6 +754,43 @@ fn regex_impl_hpp_include() -> &'static Regex {
 fn regex_asm_js_macro() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| Regex::new(r"\b(?:EM_JS|EM_ASYNC_JS|EM_ASM)\s*\(").unwrap())
+}
+
+fn regex_esp_rom_printf() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\besp_rom_printf\s*\(").unwrap())
+}
+
+fn regex_sleep_for() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\bsleep_for\s*\(").unwrap())
+}
+
+fn regex_thread_local() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\bthread_local\b").unwrap())
+}
+
+fn regex_span_data_size() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| {
+        Regex::new(r"span<[^>]+>\s*\([^)]*\.data\(\)[^)]*\.size\(\)[^)]*\)").unwrap()
+    })
+}
+
+fn regex_relative_include() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r#"^\s*#\s*include\s+[<"]([^>"]*\.\..*)[>"]"#).unwrap())
+}
+
+fn regex_fastled_h_include() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r#"^\s*#\s*include\s+[<"]FastLED\.h[>"]"#).unwrap())
+}
+
+fn regex_fastled_internal_define() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"^\s*#\s*define\s+FASTLED_INTERNAL").unwrap())
 }
 
 fn is_top_level_include(include_path: &str) -> bool {
@@ -1556,6 +1629,96 @@ impl FileContentChecker for CppIncludeChecker {
     }
 }
 
+struct CppHppIncludesChecker;
+
+impl FileContentChecker for CppHppIncludesChecker {
+    fn name(&self) -> &'static str {
+        "CppHppIncludesChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let is_src = is_under_project_subpath(file_path, project_root, "src");
+        let is_tests = is_under_project_subpath(file_path, project_root, "tests");
+
+        if !is_src && !is_tests {
+            return false;
+        }
+
+        if is_src && !ends_with_any(file_path, &[".cpp", ".h", ".hpp", ".cpp.hpp"]) {
+            return false;
+        }
+        if is_tests && !ends_with_any(file_path, &[".cpp", ".h", ".hpp"]) {
+            return false;
+        }
+
+        if is_src {
+            if file_path.ends_with("_build.hpp")
+                || file_path.ends_with("_build.cpp")
+                || file_path.ends_with("_build.cpp.hpp")
+            {
+                return false;
+            }
+            if is_under_project_subpath(file_path, project_root, "src/fl/build") {
+                return false;
+            }
+        }
+
+        true
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+        let normalized = normalize_path(&file_content.path);
+        let is_test = normalized.contains("/tests/") || normalized.starts_with("tests/");
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment || stripped.starts_with("//") {
+                continue;
+            }
+
+            let code_part = split_line_comment(line);
+            let Some(captures) = regex_cpp_hpp_include().captures(code_part) else {
+                continue;
+            };
+            let included_file = captures.get(1).map(|m| m.as_str()).unwrap_or("");
+            if is_test {
+                let h_header = included_file
+                    .strip_suffix(".cpp.hpp")
+                    .map(|prefix| format!("{prefix}.h"))
+                    .unwrap_or_else(|| included_file.to_string());
+                let h_header = h_header
+                    .strip_suffix(".impl.h")
+                    .map(|prefix| format!("{prefix}.h"))
+                    .unwrap_or(h_header);
+                violations.push((
+                    index + 1,
+                    format!(
+                        "{stripped} - Including *.cpp.hpp files in tests is banned (hard ban, no opt-out). Include the public header instead: #include \"{h_header}\""
+                    ),
+                ));
+            } else {
+                violations.push((
+                    index + 1,
+                    format!(
+                        "{stripped} - *.cpp.hpp files should ONLY be included by _build.* files (hard ban, no opt-out). Found include of '{included_file}' in non-build file. Move this include to the appropriate _build.hpp file."
+                    ),
+                ));
+            }
+        }
+
+        violations
+    }
+}
+
 struct ImplHppIncludesChecker;
 
 impl FileContentChecker for ImplHppIncludesChecker {
@@ -1777,6 +1940,323 @@ impl FileContentChecker for PragmaOnceChecker {
         }
 
         Vec::new()
+    }
+}
+
+struct EspRomPrintfChecker;
+
+impl FileContentChecker for EspRomPrintfChecker {
+    fn name(&self) -> &'static str {
+        "EspRomPrintfChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, _project_root: &Path) -> bool {
+        if !ends_with_any(file_path, &[".cpp", ".h", ".hpp", ".ino", ".cpp.hpp"]) {
+            return false;
+        }
+        !normalize_path(file_path).contains("/third_party/")
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment || stripped.starts_with("//") {
+                continue;
+            }
+
+            let (code_part, comment_part) = line
+                .split_once("//")
+                .map_or((line.as_str(), ""), |(code, comment)| (code, comment));
+            if !code_part.contains("esp_rom_printf") {
+                continue;
+            }
+            if !regex_esp_rom_printf().is_match(code_part) {
+                continue;
+            }
+            if comment_part
+                .to_ascii_lowercase()
+                .contains("ok esp_rom_printf")
+            {
+                continue;
+            }
+
+            violations.push((
+                index + 1,
+                format!(
+                    "Avoid `esp_rom_printf` — use FastLED logging (FL_LOG_INFO, FL_WARN, FL_PRINT) or fl::io instead: {stripped}\n      Rationale: esp_rom_printf bypasses FastLED's logging facilities, blocks on a slow peripheral, and proliferates platform-specific I/O into general code.\n      If this call is genuinely required (e.g. early bootstrap before logging is up), suppress with `// ok esp_rom_printf - <reason>` on the same line."
+                ),
+            ));
+        }
+
+        violations
+    }
+}
+
+struct SleepForChecker;
+
+impl FileContentChecker for SleepForChecker {
+    fn name(&self) -> &'static str {
+        "SleepForChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, _project_root: &Path) -> bool {
+        if !ends_with_any(file_path, &[".cpp", ".h", ".hpp", ".ino", ".cpp.hpp"]) {
+            return false;
+        }
+        if is_excluded_file(file_path) {
+            return false;
+        }
+        if file_path.contains("third_party") || file_path.contains("thirdparty") {
+            return false;
+        }
+        let normalized = normalize_path(file_path);
+        !SLEEP_FOR_WHITELISTED_SUFFIXES
+            .iter()
+            .any(|suffix| normalized.ends_with(suffix))
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment || stripped.starts_with("//") {
+                continue;
+            }
+            if line.contains("// ok sleep for") || line.contains("// okay sleep for") {
+                continue;
+            }
+
+            let code_part = split_line_comment(line);
+            if !code_part.contains("sleep_for") {
+                continue;
+            }
+            if regex_sleep_for().is_match(code_part) {
+                violations.push((
+                    index + 1,
+                    format!(
+                        "⚠️  CRITICAL: sleep_for() BLOCKS async/scheduler pumping! Async operations HANG, tasks FREEZE, UI becomes UNRESPONSIVE. USE fl::delay(ms) INSTEAD! Only suppress with '// ok sleep for' in core infrastructure: {stripped}"
+                    ),
+                ));
+            }
+        }
+
+        violations
+    }
+}
+
+struct ThreadLocalKeywordChecker;
+
+impl FileContentChecker for ThreadLocalKeywordChecker {
+    fn name(&self) -> &'static str {
+        "ThreadLocalKeywordChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, _project_root: &Path) -> bool {
+        ends_with_any(file_path, &[".cpp", ".h", ".hpp", ".ino"])
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        if !file_content.content.contains("thread_local") {
+            return Vec::new();
+        }
+
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment || stripped.starts_with("//") {
+                continue;
+            }
+
+            let code_part = split_line_comment(line);
+            let code_without_strings = strip_string_literals(code_part);
+            if regex_thread_local().is_match(&code_without_strings)
+                && !line.contains("// ok thread_local")
+            {
+                violations.push((
+                    index + 1,
+                    format!(
+                        "❌ Raw 'thread_local' keyword is banned — use fl::SingletonThreadLocal<T>::instance() instead (portable, never-destroyed, LSAN-safe): {stripped}"
+                    ),
+                ));
+            }
+        }
+
+        violations
+    }
+}
+
+struct SpanFromPointerChecker;
+
+impl FileContentChecker for SpanFromPointerChecker {
+    fn name(&self) -> &'static str {
+        "SpanFromPointerChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, _project_root: &Path) -> bool {
+        if !ends_with_any(file_path, &[".cpp", ".h", ".hpp", ".ino", ".cpp.hpp"]) {
+            return false;
+        }
+        !file_path.contains("third_party") && !file_path.contains("thirdparty")
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        if !file_content.content.contains("span<") && !file_content.content.contains("span <") {
+            return Vec::new();
+        }
+
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment || stripped.starts_with("//") {
+                continue;
+            }
+            if line.contains("// ok span from pointer") {
+                continue;
+            }
+
+            let code_part = split_line_comment(line);
+            if !code_part.contains(".data()") || !code_part.contains(".size()") {
+                continue;
+            }
+            if !code_part.contains("span<") && !code_part.contains("span <") {
+                continue;
+            }
+            if regex_span_data_size().is_match(code_part) {
+                violations.push((
+                    index + 1,
+                    format!(
+                        "{stripped}  →  Use span<T>(container) instead of span<T>(container.data(), container.size()). Suppress with '// ok span from pointer'"
+                    ),
+                ));
+            }
+        }
+
+        violations
+    }
+}
+
+struct RelativeIncludeChecker;
+
+impl FileContentChecker for RelativeIncludeChecker {
+    fn name(&self) -> &'static str {
+        "RelativeIncludeChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        is_under_project_subpath(file_path, project_root, "src")
+            && ends_with_any(file_path, &[".cpp", ".h", ".hpp", ".cc", ".cxx", ".ino"])
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        const ALLOWED_RELATIVE_INCLUDE_FILES: &[&str] = &[
+            "src/platforms/win/run_example.hpp",
+            "src/platforms/posix/run_example.hpp",
+            "src/platforms/apple/run_example.hpp",
+        ];
+
+        let normalized_path = normalize_path(&file_content.path);
+        if ALLOWED_RELATIVE_INCLUDE_FILES
+            .iter()
+            .any(|allowed_file| normalized_path.ends_with(allowed_file))
+        {
+            return Vec::new();
+        }
+
+        let mut violations = Vec::new();
+        for (index, line) in file_content.lines.iter().enumerate() {
+            if regex_relative_include().is_match(line) && !line.contains("// ok relative include") {
+                violations.push((index + 1, format!("Relative include: {}", line.trim())));
+            }
+        }
+
+        violations
+    }
+}
+
+struct FastLEDHeaderUsageChecker;
+
+impl FileContentChecker for FastLEDHeaderUsageChecker {
+    fn name(&self) -> &'static str {
+        "FastLEDHeaderUsageChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        if !is_under_project_subpath(file_path, project_root, "src") {
+            return false;
+        }
+        if !ends_with_any(file_path, &[".h", ".hpp"]) {
+            return false;
+        }
+        let normalized = normalize_path(file_path);
+        let basename = normalized.rsplit('/').next().unwrap_or(&normalized);
+        !matches!(basename, "FastLED.h" | "fastspi.h")
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let mut violations = Vec::new();
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            if !regex_fastled_h_include().is_match(line) {
+                continue;
+            }
+            let lower = line.to_ascii_lowercase();
+            if lower.contains("// ok include") {
+                continue;
+            }
+
+            let lookback = (index).min(5);
+            let has_internal_define = (1..=lookback)
+                .map(|offset| &file_content.lines[index - offset])
+                .any(|prev_line| regex_fastled_internal_define().is_match(prev_line));
+            if !has_internal_define {
+                violations.push((
+                    index + 1,
+                    format!(
+                        "Use 'fl/system/fastled.h' instead of 'FastLED.h': {}",
+                        line.trim()
+                    ),
+                ));
+            }
+        }
+
+        violations
     }
 }
 
