@@ -190,7 +190,7 @@ The names make roles explicit: `.impl.cpp.hpp` = "implementation router, include
 
 ## Singleton-Stored Configuration: Own by Value, Never by Borrowed Pointer
 
-**Core Principle**: Any public `fl::set_*` API that stores a configuration profile / settings object in process-wide (or static / namespace-scope) state MUST take the value `const T&` and **copy** it. Storing the raw pointer (`sActive = profile`) creates a deterministic use-after-scope bug when callers pass a stack temporary like `auto p = make_profile(); fl::set_x(&p); /* p goes out of scope */`.
+**Core Principle**: Any public `fl::set_*` API that stores a configuration profile / settings object in process-wide (or static / namespace-scope) state MUST **store by value** (copy / move) and never retain a caller-owned pointer. The parameter SHOULD be `const T&` (or `T&&`); a `const T*` parameter is permitted **only** as a signal for nullable-reset (`nullptr` means "revert to default") and only if the implementation copies the pointed-to value into a value-typed slot on non-null and clears that slot on null. Storing the raw pointer (`sActive = profile`) is always a deterministic use-after-scope bug when callers pass a stack temporary like `auto p = make_profile(); fl::set_x(&p); /* p goes out of scope */`.
 
 **Rules**:
 1. ❌ **NEVER store a borrowed pointer to a caller-owned value in a singleton.**
@@ -201,21 +201,29 @@ The names make roles explicit: `.impl.cpp.hpp` = "implementation router, include
          sActive = p;  // caller's lifetime, BOOM if they pass a stack temporary
      }
      ```
-   - ✅ Good (value semantics):
+   - ✅ Good (value semantics, preferred):
      ```cpp
      namespace { RgbcctProfile sActive = kRgbwwDefaultProfile; }
      void set_rgbww_colorimetric_profile(const RgbcctProfile& p) FL_NOEXCEPT {
          sActive = p;  // copy, lifetime owned by library
      }
      ```
+   - ✅ Good (nullable-reset exception — `const T*` allowed when null means "reset"):
+     ```cpp
+     namespace { RgbcctProfile sActive = kRgbwwDefaultProfile; }
+     void set_rgbww_colorimetric_profile(const RgbcctProfile* p) FL_NOEXCEPT {
+         sActive = (p != nullptr) ? *p : kRgbwwDefaultProfile;  // copy on non-null, reset on null
+     }
+     ```
 2. ✅ **Profile getters return `const T&` to the owned copy**, not a pointer that could be `nullptr`.
 3. ✅ **For polymorphic configuration** (rare), use `fl::shared_ptr<T>` or `fl::unique_ptr<T>` — never a raw `const T*`.
 
-**Rationale**: The colorimetric / power-model / driver-config setters are the only place this rule fires in the current codebase, but every one of them got a use-after-scope CodeRabbit finding (#2554, #2560, #2588, #2683, #2682) before the rule was written. The Public Settings Pattern (above) tells you *where* the setter lives (god instance); this rule tells you *how* it stores the value.
+**Rationale**: The colorimetric / power-model / driver-config setters are the only place this rule fires in the current codebase, but every one of them got a use-after-scope CodeRabbit finding (#2554, #2560, #2588, #2683, #2682) before the rule was written. The Public Settings Pattern (above) tells you *where* the setter lives (god instance); this rule tells you *how* it stores the value. The nullable-reset exception above accommodates the established `set_rgbww_colorimetric_profile(const T*)` shape — pointer parameter, value-typed storage — which is correct and idiomatic for "pass nullptr to revert."
 
 **Check Process**:
-1. For each `fl::set_*` setter that stores into a static / namespace-scope variable, verify the parameter is `const T&` (or `T&&`) and the assignment is a copy/move into a value-typed slot.
-2. If the parameter is `const T*` and the storage is `const T*`, flag as HIGH severity.
+1. For each `fl::set_*` setter that stores into a static / namespace-scope variable, verify the **storage** is value-typed (`T`, not `const T*`).
+2. If the parameter is `const T*` AND the storage is `const T*`, flag as HIGH severity (pointer storage = use-after-scope).
+3. If the parameter is `const T*` but the storage is `T` and the body copies on non-null + resets on null, that's the allowed nullable-reset shape — no violation.
 
 ## In-Place Profile Mutation Bumps a Version (Cache Invalidation Contract)
 
@@ -279,7 +287,9 @@ The names make roles explicit: `.impl.cpp.hpp` = "implementation router, include
    - ✅ Good (alternative — by-value pair): `void set_white_point(DiodeProfile* p, fl::vec2f white_xy);`
 3. ✅ **For RGBW / RGBWW multi-channel output**, prefer a `fl::span<u8, 4>` (or `5`) over five separate `u8*` parameters.
 
-**Rationale**: The base span rule prevents most of the pattern but CodeRabbit caught these two shapes in #2560, #2683, #2711. Just adding the two shapes to the canonical examples will close most remaining gaps.
+**Scoped exception — deferred legacy migrations**: A `(ptr, size)` callback typedef MAY be temporarily retained in a legacy layer when migrating it would force a synchronized rewrite of every caller and the migration is being deferred to a follow-up PR. The exception requires (a) a comment at the typedef site referencing the migration plan / tracking issue, (b) naming the legacy location (current example: `src/fl/stl/cstdio.h` retains raw pointer+length handler signatures intentionally), and (c) the exception is timeboxed — it must be revisited at the next layer-wide migration window. Permanent divergence is not permitted; the goal is "all-or-nothing per-layer sweep when the engineering budget allows."
+
+**Rationale**: The base span rule prevents most of the pattern but CodeRabbit caught these two shapes in #2560, #2683, #2711. Just adding the two shapes to the canonical examples will close most remaining gaps. The scoped exception accommodates the real-world case where touching every caller in one PR isn't tractable; without it the rule pushes engineers toward unprincipled mixed APIs.
 
 ## ISR-Shared State: `fl::atomic` or Critical Section, Never Bare `volatile`
 
