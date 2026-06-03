@@ -199,3 +199,31 @@ FL_TEST_CASE("rgbww colorimetric profile get/set API") {
     set_rgbww_colorimetric_profile(nullptr);
     FL_CHECK(get_rgbww_colorimetric_profile() == &kRgbwwDefaultProfile);
 }
+
+
+FL_TEST_CASE("kRgbwwDefaultProfile carries native-LED + D65 source space (#2710)") {
+    // Symmetric to the RGBW assertion in rgbw_colorimetric.cpp — locks the
+    // contract that the RGBWW default profile ships with native LED gamut on
+    // both warm and cool paths so warm/cool primaries can't silently drift
+    // out of sync with input_xy_* on future tuning.
+    const auto& warm = kRgbwwDefaultProfile.warm_path;
+    const auto& cool = kRgbwwDefaultProfile.cool_path;
+
+    FL_CHECK_CLOSE(warm.input_xy_r[0], warm.xy_r[0], 1e-6f);
+    FL_CHECK_CLOSE(warm.input_xy_r[1], warm.xy_r[1], 1e-6f);
+    FL_CHECK_CLOSE(warm.input_xy_g[0], warm.xy_g[0], 1e-6f);
+    FL_CHECK_CLOSE(warm.input_xy_g[1], warm.xy_g[1], 1e-6f);
+    FL_CHECK_CLOSE(warm.input_xy_b[0], warm.xy_b[0], 1e-6f);
+    FL_CHECK_CLOSE(warm.input_xy_b[1], warm.xy_b[1], 1e-6f);
+    FL_CHECK_CLOSE(warm.input_xy_w[0], 0.31272f, 1e-4f);
+    FL_CHECK_CLOSE(warm.input_xy_w[1], 0.32903f, 1e-4f);
+
+    FL_CHECK_CLOSE(cool.input_xy_r[0], cool.xy_r[0], 1e-6f);
+    FL_CHECK_CLOSE(cool.input_xy_r[1], cool.xy_r[1], 1e-6f);
+    FL_CHECK_CLOSE(cool.input_xy_g[0], cool.xy_g[0], 1e-6f);
+    FL_CHECK_CLOSE(cool.input_xy_g[1], cool.xy_g[1], 1e-6f);
+    FL_CHECK_CLOSE(cool.input_xy_b[0], cool.xy_b[0], 1e-6f);
+    FL_CHECK_CLOSE(cool.input_xy_b[1], cool.xy_b[1], 1e-6f);
+    FL_CHECK_CLOSE(cool.input_xy_w[0], 0.31272f, 1e-4f);
+    FL_CHECK_CLOSE(cool.input_xy_w[1], 0.32903f, 1e-4f);
+}

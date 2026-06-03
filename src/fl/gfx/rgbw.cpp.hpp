@@ -24,10 +24,16 @@ namespace fl {
 // midpoints (R 625nm, G 523nm, B 468nm) converted to CIE 1931 xy; W at
 // nominal 6000K (xy = 0.32208, 0.33805). Luminance ratios normalized so
 // W = 1.0; R/G/B set from datasheet typical mcd ratios for a 5050-class
-// part. Source space defaults to Rec709 / sRGB primaries with D65 white
-// (issue #2705) so the colorimetric solvers reproduce the math-model
-// gist's reference results out of the box. Users with a colorimeter
-// should override via set_rgbw_colorimetric_profile().
+// part.
+//
+// Source space defaults to **native LED gamut + D65 white** (#2710): the
+// input primaries equal the LED's measured primaries so a saturated input
+// like RGB=(255,0,0) reaches the full saturation of the LED red diode,
+// and RGB=(255,255,255) lands on D65. This is what most FastLED users
+// expect — full use of their hardware's chromatic range. Users who want
+// named-gamut input semantics (Rec709 / sRGB, Rec2020, DCI-P3 D65/D60)
+// should explicitly call `set_input_gamut()` after copying / constructing
+// their profile. See #2705 for the source-space transform itself.
 const DiodeProfile kRgbwDefaultProfile = {
     /* xy_r        */ { 0.700606f, 0.299300f },
     /* xy_g        */ { 0.097940f, 0.831593f },
@@ -38,10 +44,10 @@ const DiodeProfile kRgbwDefaultProfile = {
     /* lum_b       */ 0.08f,
     /* lum_w       */ 1.00f,
     /* nominal_cct */ 6000,
-    /* input_xy_r  */ { 0.6400f, 0.3300f },   // Rec709/sRGB R
-    /* input_xy_g  */ { 0.3000f, 0.6000f },   // Rec709/sRGB G
-    /* input_xy_b  */ { 0.1500f, 0.0600f },   // Rec709/sRGB B
-    /* input_xy_w  */ { 0.31272f, 0.32903f }, // D65
+    /* input_xy_r  */ { 0.700606f, 0.299300f },  // native LED R
+    /* input_xy_g  */ { 0.097940f, 0.831593f },  // native LED G
+    /* input_xy_b  */ { 0.129086f, 0.049450f },  // native LED B
+    /* input_xy_w  */ { 0.31272f, 0.32903f },    // D65 white
 };
 
 
@@ -200,6 +206,80 @@ const DiodeProfile* get_rgbw_colorimetric_profile() FL_NOEXCEPT {
     return p != nullptr ? p : &kRgbwDefaultProfile;
 }
 
+// Standard primary chromaticities for the named input gamuts (#2710). The
+// numbers come straight from each gamut's published spec:
+//   Rec.709 / sRGB    — ITU-R BT.709, IEC 61966-2-1
+//   Rec.2020          — ITU-R BT.2020
+//   DCI-P3 D65        — SMPTE EG 432-1 (consumer display variant)
+//   DCI-P3 D60 (ACES) — ACES AP1 white = (0.32168, 0.33767)
+// White-point chromaticities likewise: D65 = (0.31272, 0.32903),
+// ACES D60 = (0.32168, 0.33767).
+namespace {
+struct NamedGamut {
+    float xy_r[2];
+    float xy_g[2];
+    float xy_b[2];
+    float xy_w[2];
+};
+constexpr NamedGamut kRec709    = {{0.6400f, 0.3300f}, {0.3000f, 0.6000f},
+                                    {0.1500f, 0.0600f}, {0.31272f, 0.32903f}};
+constexpr NamedGamut kRec2020   = {{0.7080f, 0.2920f}, {0.1700f, 0.7970f},
+                                    {0.1310f, 0.0460f}, {0.31272f, 0.32903f}};
+constexpr NamedGamut kDciP3D65  = {{0.6800f, 0.3200f}, {0.2650f, 0.6900f},
+                                    {0.1500f, 0.0600f}, {0.31272f, 0.32903f}};
+constexpr NamedGamut kDciP3D60  = {{0.6800f, 0.3200f}, {0.2650f, 0.6900f},
+                                    {0.1500f, 0.0600f}, {0.32168f, 0.33767f}};
+} // namespace
+
+// Forward declaration: real implementation lives inside the colorimetric
+// branch below (and is a no-op when colorimetric math is compiled out).
+// Called from set_input_gamut to evict per-process caches keyed on a profile
+// whose input_xy_* fields were just mutated in place — without this hook the
+// pointer+CCT cache key stays equal and stale M_src/LUT data is reused
+// after a gamut switch on the currently active profile.
+namespace { void invalidate_colorimetric_caches_for(const DiodeProfile* profile) FL_NOEXCEPT; }
+
+void set_input_gamut(DiodeProfile* profile, InputGamut g,
+                     const float white_xy[2]) FL_NOEXCEPT {
+    if (profile == nullptr) return;
+    auto apply = [profile](const float r[2], const float gp[2],
+                           const float b[2], const float w[2]) {
+        profile->input_xy_r[0] = r[0];  profile->input_xy_r[1] = r[1];
+        profile->input_xy_g[0] = gp[0]; profile->input_xy_g[1] = gp[1];
+        profile->input_xy_b[0] = b[0];  profile->input_xy_b[1] = b[1];
+        profile->input_xy_w[0] = w[0];  profile->input_xy_w[1] = w[1];
+    };
+    switch (g) {
+    case InputGamut::Native: {
+        // For Native, the input gamut tracks this profile's LED primaries —
+        // copy them over rather than picking a fixed sRGB-like fallback.
+        const float d65[2] = {0.31272f, 0.32903f};
+        const float* w = (white_xy != nullptr) ? white_xy : d65;
+        apply(profile->xy_r, profile->xy_g, profile->xy_b, w);
+        invalidate_colorimetric_caches_for(profile);
+        return;
+    }
+    case InputGamut::Rec709:   apply(kRec709.xy_r,   kRec709.xy_g,   kRec709.xy_b,
+                                     white_xy != nullptr ? white_xy : kRec709.xy_w);
+                                invalidate_colorimetric_caches_for(profile);   return;
+    case InputGamut::Rec2020:  apply(kRec2020.xy_r,  kRec2020.xy_g,  kRec2020.xy_b,
+                                     white_xy != nullptr ? white_xy : kRec2020.xy_w);
+                                invalidate_colorimetric_caches_for(profile);  return;
+    case InputGamut::DciP3D65: apply(kDciP3D65.xy_r, kDciP3D65.xy_g, kDciP3D65.xy_b,
+                                     white_xy != nullptr ? white_xy : kDciP3D65.xy_w);
+                                invalidate_colorimetric_caches_for(profile); return;
+    case InputGamut::DciP3D60: apply(kDciP3D60.xy_r, kDciP3D60.xy_g, kDciP3D60.xy_b,
+                                     white_xy != nullptr ? white_xy : kDciP3D60.xy_w);
+                                invalidate_colorimetric_caches_for(profile); return;
+    }
+    // Default-fallthrough for forward-compat with future enum additions:
+    // leave the profile's input_xy_* untouched — also nothing to invalidate.
+}
+
+void set_input_gamut(DiodeProfile* profile, InputGamut g) FL_NOEXCEPT {
+    set_input_gamut(profile, g, nullptr);
+}
+
 #if FASTLED_RGBW_COLORIMETRIC
 
 namespace {
@@ -263,6 +343,24 @@ inline void rebuild_lut_if_stale(LutStateHolder& s, int cct) FL_NOEXCEPT {
         colorimetric_detail::build_lut(get_cache(cct), s.requested_grid_n));
     s.built_for = active;
     s.built_cct = override_cct;
+}
+
+// Drop both the ProfileCache and the LUT cache when `profile` matches the
+// current cache key. set_input_gamut() mutates input_xy_* in place without
+// touching the profile pointer or CCT, so the (pointer, cct) cache key
+// stays equal and would otherwise serve stale M_src / LUT data.
+void invalidate_colorimetric_caches_for(const DiodeProfile* profile) FL_NOEXCEPT {
+    ColorimetricCacheHolder& ch =
+        fl::Singleton<ColorimetricCacheHolder>::instance();
+    if (ch.cached_for == profile) {
+        ch.cached_for = nullptr;
+        ch.cached_cct = 0;
+    }
+    LutStateHolder& lh = fl::Singleton<LutStateHolder>::instance();
+    if (lh.built_for == profile) {
+        lh.built_for = nullptr;
+        lh.built_cct = 0;
+    }
 }
 } // namespace
 
@@ -378,6 +476,12 @@ bool rgbw_colorimetric_lut_enabled() FL_NOEXCEPT {
 }
 
 #else  // FASTLED_RGBW_COLORIMETRIC
+
+// No-op cache invalidation stub — the colorimetric cache machinery doesn't
+// exist when FASTLED_RGBW_COLORIMETRIC=0, so set_input_gamut has nothing to
+// evict. Keeping the forward-declared symbol available means the dispatch
+// path above doesn't need its own #if gate.
+namespace { void invalidate_colorimetric_caches_for(const DiodeProfile*) FL_NOEXCEPT {} }
 
 // Stub APIs for the LUT/CCT/RGBCCT path — no-ops when colorimetric is off.
 bool enable_rgbw_colorimetric_lut(int /*grid_n*/) FL_NOEXCEPT { return false; }

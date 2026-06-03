@@ -363,7 +363,10 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             if any(c <= 0 for c in per_lane_counts):
                 print("\u274c Error: All lane counts must be positive integers")
                 return 1
-            if len(per_lane_counts) < 1 or len(per_lane_counts) > MAX_AUTORESEARCH_LANES:
+            if (
+                len(per_lane_counts) < 1
+                or len(per_lane_counts) > MAX_AUTORESEARCH_LANES
+            ):
                 print(
                     f"\u274c Error: Lane count must be 1-{MAX_AUTORESEARCH_LANES}, got {len(per_lane_counts)} lanes"
                 )

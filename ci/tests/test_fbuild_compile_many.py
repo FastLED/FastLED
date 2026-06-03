@@ -270,9 +270,7 @@ def test_fbuild_supports_subcommand_uses_sub_help_form(
     class FakeProc:
         returncode = 0
 
-    def fake_run(
-        cmd: list[str], **_kwargs: object
-    ) -> FakeProc:  # pyright: ignore[reportUnusedFunction]
+    def fake_run(cmd: list[str], **_kwargs: object) -> FakeProc:  # pyright: ignore[reportUnusedFunction]
         captured.append(cmd)
         return FakeProc()
 

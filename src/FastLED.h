@@ -242,6 +242,7 @@ using fl::degrees;
 #include "fl/system/engine_events.h"
 
 #include "fl/gfx/leds.h"
+#include "fl/gfx/rgbw.h"  // DiodeProfile + InputGamut (wrapped on CFastLED below)
 
 // clockless.h removed - BulkClockless API has been superseded by Channel API
 
@@ -1475,6 +1476,32 @@ public:
 	inline float getPowerScalingExponent() const {
 		return get_power_scaling_exponent();
 	}
+
+	/// @name RGBW Input Gamut Configuration
+	/// God-instance wrappers around `fl::set_input_gamut` (#2710). See
+	/// `agents/docs/cpp-standards.md` → "Public Settings Pattern" for the
+	/// rule that global setters live here, not as bare `fl::` free functions.
+	/// @{
+
+	/// Reconfigure `profile`'s input gamut to one of the named source
+	/// chromaticity sets (Native / Rec709 / Rec2020 / DCI-P3 D65 / D60).
+	/// Mutates `profile` in place; no-op if `profile == nullptr`.
+	/// @code
+	/// FastLED.setInputGamut(&my_profile, fl::InputGamut::Rec709);
+	/// @endcode
+	inline void setInputGamut(fl::DiodeProfile* profile, fl::InputGamut g) FL_NOEXCEPT {
+		fl::set_input_gamut(profile, g);
+	}
+
+	/// Same as above with an explicit input white-point override. Pass
+	/// `nullptr` for `white_xy` to fall back to the gamut's standard
+	/// reference white (equivalent to the 2-argument overload).
+	inline void setInputGamut(fl::DiodeProfile* profile, fl::InputGamut g,
+	                          const float white_xy[2]) FL_NOEXCEPT {
+		fl::set_input_gamut(profile, g, white_xy);
+	}
+
+	/// @} RGBW Input Gamut Configuration
 
 	/// Set custom RGBW LED power consumption model
 	/// @param model RGBW power consumption model
