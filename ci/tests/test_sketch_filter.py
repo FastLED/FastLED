@@ -699,7 +699,9 @@ class TestBeatDetectionFilter:
         )
         sketch_filter = parse_filter_from_sketch(beat_detection_path)
 
-        assert sketch_filter is not None, "BeatDetection should have a @filter directive"
+        assert sketch_filter is not None, (
+            "BeatDetection should have a @filter directive"
+        )
 
         cases = [
             (
