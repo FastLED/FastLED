@@ -68,6 +68,22 @@ def test_autoresearch_always_selects_fbuild() -> None:
     assert isinstance(driver, FbuildDriver)
 
 
+def test_autoresearch_fbuild_install_packages_does_not_call_platformio(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """fbuild AutoResearch lets fbuild resolve packages during deploy."""
+
+    def fail_if_called(*_args: Any, **_kwargs: Any) -> bool:
+        raise AssertionError("PlatformIO package helper should not be called")
+
+    monkeypatch.setattr(
+        "ci.util.pio_package_client.ensure_packages_installed",
+        fail_if_called,
+    )
+
+    assert FbuildDriver().install_packages(Path("."), "esp32s3") is True
+
+
 def test_autoresearch_parse_args_warns_for_deprecated_fbuild_flags(
     capsys: pytest.CaptureFixture[str],
 ) -> None:

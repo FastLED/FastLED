@@ -61,7 +61,10 @@ bool IRAM_ATTR lcd_spi_flush_ready(
     void *user_ctx) { // ok no noexcept — matches friend decl
     LcdSpiPeripheralEsp *self =
         static_cast<LcdSpiPeripheralEsp *>(user_ctx);
-    self->mBusy = false;
+    if (self->mPendingTransmits > 0) {
+        self->mPendingTransmits = self->mPendingTransmits - 1;
+    }
+    self->mBusy = self->mPendingTransmits > 0;
 
     // Signal completion semaphore
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
@@ -98,7 +101,7 @@ LcdSpiPeripheralEsp &LcdSpiPeripheralEsp::instance() FL_NOEXCEPT {
 LcdSpiPeripheralEsp::LcdSpiPeripheralEsp() FL_NOEXCEPT
     : mInitialized(false), mConfig(), mI80Bus(nullptr), mPanelIo(nullptr),
       mCompleteSem(nullptr), mCallback(nullptr), mUserCtx(nullptr),
-      mBusy(false), mLastTransmitSize(0),
+      mBusy(false), mPendingTransmits(0), mLastTransmitSize(0),
       mOwner(LcdSpiOwnerDriver::NONE) {}
 
 LcdSpiPeripheralEsp::~LcdSpiPeripheralEsp() { deinitialize(); }
@@ -255,6 +258,7 @@ void LcdSpiPeripheralEsp::teardownLocked() FL_NOEXCEPT {
     }
     mInitialized = false;
     mBusy = false;
+    mPendingTransmits = 0;
     mLastTransmitSize = 0;
     mOwner = LcdSpiOwnerDriver::NONE;
 }
@@ -303,12 +307,24 @@ void LcdSpiPeripheralEsp::freeBuffer(u16 *buffer) FL_NOEXCEPT {
 
 bool FL_IRAM LcdSpiPeripheralEsp::transmit(const u16 *buffer,
                                    size_t size_bytes) FL_NOEXCEPT {
+    return transmitInternal(buffer, size_bytes, true);
+}
+
+bool FL_IRAM LcdSpiPeripheralEsp::queueTransmit(const u16 *buffer,
+                                                size_t size_bytes) FL_NOEXCEPT {
+    return transmitInternal(buffer, size_bytes, false);
+}
+
+bool FL_IRAM LcdSpiPeripheralEsp::transmitInternal(
+    const u16 *buffer, size_t size_bytes, bool wait_for_slot) FL_NOEXCEPT {
     if (!mInitialized || mI80Bus == nullptr) {
         return false;
     }
 
-    // Block until previous DMA is truly complete. The semaphore is
-    // primed during initialize() so the first call returns immediately.
+    // Block until a previous DMA slot is free when the caller requested
+    // serialized transmit() semantics. queueTransmit() deliberately skips this
+    // wait so LCD_CLOCKLESS can keep ESP-IDF's queue depth of 2 filled with an
+    // already-encoded next chunk.
     //
     // ISR safety: when ChannelDriverLcdClockless::isrChunkDone re-arms the
     // next chunk from the on_color_trans_done callback, transmit() runs in
@@ -316,7 +332,7 @@ bool FL_IRAM LcdSpiPeripheralEsp::transmit(const u16 *buffer,
     // *before* invoking our user callback, so the take is guaranteed to be
     // non-blocking — but we MUST use the FromISR variant because the regular
     // xSemaphoreTake() asserts (configASSERT) when called from ISR.
-    if (mCompleteSem) {
+    if (wait_for_slot && mCompleteSem) {
         if (xPortInIsrContext()) {
             BaseType_t hpw = pdFALSE;
             if (xSemaphoreTakeFromISR(mCompleteSem, &hpw) != pdTRUE) {
@@ -347,6 +363,9 @@ bool FL_IRAM LcdSpiPeripheralEsp::transmit(const u16 *buffer,
     // Recreating panel_io is cheap (descriptor alloc + config) and does
     // not touch the I80 bus GPIO routing.
     if (size_bytes != mLastTransmitSize && mPanelIo != nullptr) {
+        if (mPendingTransmits > 0) {
+            return false;
+        }
         esp_lcd_panel_io_del(mPanelIo);
         mPanelIo = nullptr;
     }
@@ -395,6 +414,7 @@ bool FL_IRAM LcdSpiPeripheralEsp::transmit(const u16 *buffer,
     }
 #endif
 
+    mPendingTransmits = mPendingTransmits + 1;
     mBusy = true;
     mLastTransmitSize = size_bytes;
 
@@ -402,7 +422,10 @@ bool FL_IRAM LcdSpiPeripheralEsp::transmit(const u16 *buffer,
         esp_lcd_panel_io_tx_color(mPanelIo, 0x2C, buffer, size_bytes);
 
     if (err != ESP_OK) {
-        mBusy = false;
+        if (mPendingTransmits > 0) {
+            mPendingTransmits = mPendingTransmits - 1;
+        }
+        mBusy = mPendingTransmits > 0;
         esp_rom_printf("LcdSpiPeripheralEsp: tx_color failed: %d\n", static_cast<int>(err));  // ok esp_rom_printf - FL_IRAM transmit() context, FL_WARN unsafe
         return false;
     }
@@ -415,17 +438,30 @@ bool LcdSpiPeripheralEsp::waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT {
         return false;
     }
 
-    TickType_t ticks = (timeout_ms == 0)
-                           ? portMAX_DELAY
-                           : pdMS_TO_TICKS(timeout_ms);
-    if (xSemaphoreTake(mCompleteSem, ticks) == pdTRUE) {
-        mBusy = false;
-        return true;
+    const TickType_t timeout_ticks =
+        (timeout_ms == 0) ? portMAX_DELAY : pdMS_TO_TICKS(timeout_ms);
+    TickType_t start = xTaskGetTickCount();
+
+    while (mPendingTransmits > 0) {
+        TickType_t ticks = timeout_ticks;
+        if (timeout_ticks != portMAX_DELAY) {
+            TickType_t elapsed = xTaskGetTickCount() - start;
+            if (elapsed >= timeout_ticks) {
+                return false;
+            }
+            ticks = timeout_ticks - elapsed;
+        }
+        if (xSemaphoreTake(mCompleteSem, ticks) != pdTRUE) {
+            return false;
+        }
     }
-    return false;
+    mBusy = false;
+    return true;
 }
 
-bool LcdSpiPeripheralEsp::isBusy() const FL_NOEXCEPT { return mBusy; }
+bool LcdSpiPeripheralEsp::isBusy() const FL_NOEXCEPT {
+    return mBusy || mPendingTransmits > 0;
+}
 
 //=============================================================================
 // Callback

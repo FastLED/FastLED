@@ -699,7 +699,9 @@ class TestBeatDetectionFilter:
         )
         sketch_filter = parse_filter_from_sketch(beat_detection_path)
 
-        assert sketch_filter is not None, "BeatDetection should have a @filter directive"
+        assert sketch_filter is not None, (
+            "BeatDetection should have a @filter directive"
+        )
 
         cases = [
             (
@@ -721,6 +723,51 @@ class TestBeatDetectionFilter:
             assert should_skip is should_skip_expected, (
                 f"unexpected BeatDetection filter result for {board.board_name}: {reason}"
             )
+
+
+class TestAutoResearchFilter:
+    """Test AutoResearch example board filtering."""
+
+    def test_autoresearch_filter_parsing(self) -> None:
+        from ci.compiler.board_example_utils import get_example_ino_path
+
+        sketch_filter = parse_filter_from_sketch(get_example_ino_path("AutoResearch"))
+
+        assert sketch_filter is not None, "AutoResearch should have a @filter directive"
+        assert sketch_filter.require == {
+            "board": ["esp32s3", "esp32c6", "esp32p4", "teensy41", "teensy40"]
+        }
+        assert sketch_filter.exclude == {"memory": ["low"]}
+
+    @pytest.mark.parametrize(
+        "board_name",
+        ["esp32s3", "esp32c6", "esp32p4", "teensy40", "teensy41"],
+    )
+    def test_autoresearch_supported_boards_compile(self, board_name: str) -> None:
+        from ci.boards import create_board
+        from ci.compiler.board_example_utils import should_skip_example_for_board
+
+        should_skip, reason = should_skip_example_for_board(
+            create_board(board_name), "AutoResearch"
+        )
+
+        assert not should_skip, (
+            f"{board_name} should pass AutoResearch filter: {reason}"
+        )
+
+    @pytest.mark.parametrize("board_name", ["esp32dev", "uno", "teensylc"])
+    def test_autoresearch_incompatible_boards_stay_filtered(
+        self, board_name: str
+    ) -> None:
+        from ci.boards import create_board
+        from ci.compiler.board_example_utils import should_skip_example_for_board
+
+        should_skip, reason = should_skip_example_for_board(
+            create_board(board_name), "AutoResearch"
+        )
+
+        assert should_skip, f"{board_name} should not pass AutoResearch filter"
+        assert reason
 
 
 class TestMemoryTierMatching:

@@ -1,4 +1,4 @@
-"""Build driver abstraction for autoresearch — fbuild default with legacy PlatformIO."""
+"""Build driver abstraction for autoresearch with fbuild-only board builds."""
 
 from __future__ import annotations
 
@@ -11,9 +11,8 @@ from typing import IO, Protocol, runtime_checkable
 class BuildDriver(Protocol):
     """Abstract build system driver for compile + deploy.
 
-    Two implementations:
-      - FbuildDriver (default for all board builds)
-      - PlatformIODriver (deprecated legacy implementation)
+    AutoResearch board builds use FbuildDriver. PlatformIODriver is retained
+    only for direct legacy imports, not for normal driver selection.
     """
 
     @property
@@ -53,9 +52,10 @@ class FbuildDriver:
         environment: str | None,
         timeout: float = 1800,
     ) -> bool:
-        from ci.util.pio_package_client import ensure_packages_installed
-
-        return ensure_packages_installed(build_dir, environment, timeout=int(timeout))
+        # fbuild owns package/toolchain resolution during build/deploy. Running
+        # the PlatformIO package helper here reintroduces the legacy backend and
+        # can hang before fbuild gets a chance to resolve its own inputs.
+        return True
 
     def deploy(
         self,
@@ -144,19 +144,16 @@ class PlatformIODriver:
 def select_build_driver(
     _environment: str | None,
     _use_fbuild_flag: bool,
-    no_fbuild_flag: bool,
+    _no_fbuild_flag: bool,
 ) -> BuildDriver:
     """Select the appropriate build driver.
 
-    Default is fbuild. `--no-fbuild` selects the legacy PlatformIODriver as a
-    fallback when the fbuild zccache daemon is broken (used by AI agents who
-    need a working build path without depending on fbuild's daemon).
+    fbuild is always selected for AutoResearch board builds. Deprecated
+    compatibility flags are accepted by the parser but ignored here.
 
     Args:
         _environment: Reserved for future per-board overrides; currently unused.
         _use_fbuild_flag: Deprecated compatibility parameter; ignored.
-        no_fbuild_flag: When True, select PlatformIODriver instead of fbuild.
+        _no_fbuild_flag: Deprecated compatibility parameter; ignored.
     """
-    if no_fbuild_flag:
-        return PlatformIODriver()
     return FbuildDriver()

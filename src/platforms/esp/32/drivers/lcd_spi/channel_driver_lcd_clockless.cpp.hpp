@@ -31,6 +31,12 @@
 #include "fl/task/executor.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/noexcept.h"
+#include "platforms/memory_barrier.h"
+
+#if defined(FL_IS_ESP32) && !defined(FASTLED_STUB_IMPL)
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#endif
 
 // Include ESP peripheral for factory function
 #if defined(FL_IS_ESP_32S3)
@@ -58,6 +64,7 @@ ChannelDriverLcdClockless::ChannelDriverLcdClockless(
       mEnqueuedChannels(), mTransmittingChannels(),
       mRingBuffers{nullptr, nullptr, nullptr}, mRingCapacity(0),
       mNumLanes(0), mBusy(false), mIsrCtx(), mChunkInputBytesOverride(0),
+      mWorkerTaskHandle(nullptr), mWorkerStop(false), mWorkerRunning(false),
       mUseWave3(true), mWave3Lut(), mWave8Lut(), mClockHz(0),
       mOutputBytesPerInputByte(0) {
     mIsrCtx.reset();
@@ -77,6 +84,7 @@ ChannelDriverLcdClockless::~ChannelDriverLcdClockless() {
                     "freeing ring buffers anyway");
         }
     }
+    stopWorkerTask();
     freeRingBuffers();
 }
 
@@ -112,6 +120,166 @@ bool ChannelDriverLcdClockless::allocateRingBuffers(
     }
     mRingCapacity = slotCapacityBytes;
     return true;
+}
+
+//=============================================================================
+// Worker Task
+//=============================================================================
+
+bool ChannelDriverLcdClockless::ensureWorkerTask() FL_NOEXCEPT {
+#if defined(FL_IS_ESP32) && !defined(FASTLED_STUB_IMPL)
+    if (mWorkerTaskHandle != nullptr) {
+        return true;
+    }
+
+    mWorkerStop = false;
+    mWorkerRunning = false;
+
+    TaskHandle_t handle = nullptr;
+    UBaseType_t priority =
+        (configMAX_PRIORITIES > 2) ? (configMAX_PRIORITIES - 2) : 1;
+    BaseType_t ok = xTaskCreate(workerTaskEntry, "fl_lcd_clk",
+                                4096, this, priority, &handle);
+    if (ok != pdPASS || handle == nullptr) {
+        mWorkerTaskHandle = nullptr;
+        return false;
+    }
+
+    mWorkerTaskHandle = static_cast<void *>(handle);
+    return true;
+#else
+    return true;
+#endif
+}
+
+void ChannelDriverLcdClockless::stopWorkerTask() FL_NOEXCEPT {
+#if defined(FL_IS_ESP32) && !defined(FASTLED_STUB_IMPL)
+    TaskHandle_t handle = static_cast<TaskHandle_t>(mWorkerTaskHandle);
+    if (handle == nullptr) {
+        return;
+    }
+
+    mWorkerStop = true;
+    xTaskNotifyGive(handle);
+
+    for (int i = 0; i < 100 && mWorkerTaskHandle != nullptr; i++) {
+        vTaskDelay(pdMS_TO_TICKS(1));
+    }
+
+    if (mWorkerTaskHandle != nullptr) {
+        vTaskDelete(static_cast<TaskHandle_t>(mWorkerTaskHandle));
+        mWorkerTaskHandle = nullptr;
+        mWorkerRunning = false;
+    }
+#else
+    mWorkerStop = true;
+    mWorkerTaskHandle = nullptr;
+    mWorkerRunning = false;
+#endif
+}
+
+void ChannelDriverLcdClockless::workerTaskEntry(void *arg) FL_NOEXCEPT {
+#if defined(FL_IS_ESP32) && !defined(FASTLED_STUB_IMPL)
+    auto *self = static_cast<ChannelDriverLcdClockless *>(arg);
+    if (self == nullptr) {
+        vTaskDelete(nullptr);
+        return;
+    }
+
+    self->mWorkerRunning = true;
+    for (;;) {
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+        if (self->mWorkerStop) {
+            break;
+        }
+        self->processWorkerQueue();
+    }
+
+    self->mWorkerRunning = false;
+    self->mWorkerTaskHandle = nullptr;
+    vTaskDelete(nullptr);
+#else
+    (void)arg;
+#endif
+}
+
+bool ChannelDriverLcdClockless::notifyWorker() FL_NOEXCEPT {
+#if defined(FL_IS_ESP32) && !defined(FASTLED_STUB_IMPL)
+    TaskHandle_t handle = static_cast<TaskHandle_t>(mWorkerTaskHandle);
+    if (handle == nullptr) {
+        return false;
+    }
+
+    xTaskNotifyGive(handle);
+    return true;
+#else
+    processWorkerQueue();
+    return true;
+#endif
+}
+
+bool ChannelDriverLcdClockless::notifyWorkerFromIsr() FL_NOEXCEPT {
+#if defined(FL_IS_ESP32) && !defined(FASTLED_STUB_IMPL)
+    TaskHandle_t handle = static_cast<TaskHandle_t>(mWorkerTaskHandle);
+    if (handle == nullptr) {
+        return false;
+    }
+
+    BaseType_t higherPriorityTaskWoken = pdFALSE;
+    vTaskNotifyGiveFromISR(handle, &higherPriorityTaskWoken);
+    return higherPriorityTaskWoken == pdTRUE;
+#else
+    processWorkerQueue();
+    return false;
+#endif
+}
+
+bool ChannelDriverLcdClockless::submitChunk(size_t chunkIndex,
+                                            bool waitForSlot) FL_NOEXCEPT {
+    size_t ringIdx = chunkIndex % kRingBufferCount;
+    size_t startByte = chunkIndex * mIsrCtx.mChunkInputBytes;
+    u16 *buf = mRingBuffers[ringIdx];
+    if (buf == nullptr) {
+        return false;
+    }
+
+    size_t dmaBytes = encodeChunk(mTransmittingChannels, buf, startByte,
+                                  mIsrCtx.mChunkInputBytes);
+
+    FL_MEMORY_BARRIER;
+
+    if (waitForSlot) {
+        return mPeripheral->transmit(buf, dmaBytes);
+    }
+    return mPeripheral->queueTransmit(buf, dmaBytes);
+}
+
+void ChannelDriverLcdClockless::processWorkerQueue() FL_NOEXCEPT {
+    IsrContext &ctx = mIsrCtx;
+
+    while (mBusy && !ctx.mStreamComplete && !ctx.mStreamError) {
+        size_t submitted = ctx.mSubmittedChunks;
+        size_t completed = ctx.mCompletedChunks;
+
+        if (submitted >= ctx.mTotalChunks) {
+            break;
+        }
+
+        if (submitted > completed &&
+            (submitted - completed) >= 2) {
+            break;
+        }
+
+        if (!submitChunk(submitted, false)) {
+            ctx.mStreamError = true;
+            ctx.mStreamComplete = true;
+            mBusy = false;
+            break;
+        }
+
+        ctx.mSubmittedChunks = submitted + 1;
+        FL_MEMORY_BARRIER;
+    }
 }
 
 //=============================================================================
@@ -168,15 +336,20 @@ IChannelDriver::DriverState ChannelDriverLcdClockless::poll() FL_NOEXCEPT {
         return DriverState::READY;
     }
 
+#if !defined(FL_IS_ESP32) || defined(FASTLED_STUB_IMPL)
+    processWorkerQueue();
+#endif
+
     bool streamDone = mIsrCtx.mStreamComplete;
     bool peripheralIdle = mPeripheral && !mPeripheral->isBusy();
 
     // Only declare complete when the ISR has signaled all chunks are done.
     // peripheralIdle alone is insufficient: between the first DMA send and
     // the ISR callback registration, the peripheral can briefly appear idle.
-    if (streamDone && peripheralIdle) {
+    if ((streamDone && peripheralIdle) || mIsrCtx.mStreamError) {
         mBusy = false;
         mIsrCtx.mStreamComplete = false;
+        mIsrCtx.mStreamError = false;
         for (auto &channel : mTransmittingChannels) {
             channel->setInUse(false);
         }
@@ -191,9 +364,9 @@ IChannelDriver::DriverState ChannelDriverLcdClockless::poll() FL_NOEXCEPT {
 // Encoding — wave3 or wave8 transpose into u16 DMA words
 //=============================================================================
 
-// FL_IRAM matches the declaration in channel_driver_lcd_clockless.h — this
-// function is invoked from isrChunkDone() and MUST live in IRAM so it can
-// execute while flash cache is suspended (NVS, SPI flash ops).
+// FL_IRAM matches the declaration in channel_driver_lcd_clockless.h. Keep the
+// encoder IRAM-safe because worker wake-up is triggered by the LCD ISR and this
+// code is part of the time-critical refill path.
 size_t FL_IRAM ChannelDriverLcdClockless::encodeChunk(
     fl::span<const ChannelDataPtr> channels, u16 *output,
     size_t startByte, size_t byteCount) FL_NOEXCEPT {
@@ -256,33 +429,16 @@ bool FL_IRAM ChannelDriverLcdClockless::isrChunkDone(void *panel_io,
     auto *self = static_cast<ChannelDriverLcdClockless *>(user_ctx);
     IsrContext &ctx = self->mIsrCtx;
 
-    if (ctx.mNextByteOffset >= ctx.mTotalBytes) {
+    ctx.mCompletedChunks = ctx.mCompletedChunks + 1;
+
+    if (ctx.mCompletedChunks >= ctx.mTotalChunks) {
         ctx.mStreamComplete = true;
         self->mBusy = false;
         return false;
     }
 
-    size_t writeIdx = ctx.mRingWriteIdx;
-    u16 *buf = self->mRingBuffers[writeIdx];
-
-    size_t bytesRemaining = ctx.mTotalBytes - ctx.mNextByteOffset;
-    size_t chunkBytes = ctx.mChunkInputBytes;
-    if (chunkBytes > bytesRemaining) {
-        chunkBytes = bytesRemaining;
-    }
-
-    size_t dmaBytes = self->encodeChunk(self->mTransmittingChannels, buf,
-                                        ctx.mNextByteOffset, chunkBytes);
-
-    ctx.mNextByteOffset += chunkBytes;
-    ctx.mRingWriteIdx = (writeIdx + 1) % kRingBufferCount;
-
-    if (!self->mPeripheral->transmit(buf, dmaBytes)) {
-        ctx.mStreamComplete = true;
-        self->mBusy = false;
-#ifndef FASTLED_STUB_IMPL
-        esp_rom_printf("ChannelDriverLcdClockless: ISR transmit failed\n");  // ok esp_rom_printf - IRAM ISR context, FL_WARN unsafe here
-#endif
+    if (ctx.mSubmittedChunks < ctx.mTotalChunks) {
+        return self->notifyWorkerFromIsr();
     }
 
     return false;
@@ -301,6 +457,11 @@ bool ChannelDriverLcdClockless::beginTransmission(
     if (channels.size() > 16) {
         FL_WARN("ChannelDriverLcdClockless: too many channels ("
                 << channels.size() << "), max 16 supported");
+        return false;
+    }
+
+    if (!ensureWorkerTask()) {
+        FL_WARN("ChannelDriverLcdClockless: worker task creation failed");
         return false;
     }
 
@@ -351,16 +512,10 @@ bool ChannelDriverLcdClockless::beginTransmission(
 
     // Chunk sizing.
     //
-    // The LCD I80 peripheral wrapper (LcdSpiPeripheralEsp::transmit) tears
-    // down and recreates the ESP-IDF panel_io handle whenever the
-    // transaction size changes — its GDMA descriptor chain is sized per
-    // transaction. The teardown calls esp_lcd_panel_io_del, which lives in
-    // flash; performing it from isrChunkDone (ISR context) deadlocks the
-    // chip with "Interrupt wdt timeout on CPU1" if any concurrent flash
-    // op has suspended the cache. To keep every ISR-driven transmit at the
-    // same size, we round the requested chunk size up so chunkInputBytes
-    // evenly divides maxSize — the resulting (slightly larger) chunks all
-    // carry the same DMA byte count.
+    // The LCD I80 peripheral wrapper tears down and recreates the ESP-IDF
+    // panel_io handle whenever the transaction size changes. Keep every chunk
+    // at the same DMA byte count so the worker never needs to recreate panel IO
+    // while a stream is active.
     size_t requestedChunkInputBytes =
         mChunkInputBytesOverride > 0 ? mChunkInputBytesOverride
                                      : kDefaultChunkInputBytes;
@@ -369,9 +524,9 @@ bool ChannelDriverLcdClockless::beginTransmission(
     }
 
     // Keep the initial chunk count from the requested size, then round the
-    // chunk size up to cover maxSize. Do not walk numChunks upward looking for
-    // an exact divisor: awkward frame sizes just above the default chunk size
-    // would otherwise collapse into many much smaller ISR-driven chunks.
+    // chunk size up to cover maxSize. Every submitted LCD transaction uses this
+    // rounded byte count; the last chunk zero-fills past the real source bytes
+    // so ESP-IDF panel IO never has to be recreated mid-stream.
     size_t numChunks =
         (maxSize + requestedChunkInputBytes - 1) / requestedChunkInputBytes;
     if (numChunks == 0) {
@@ -448,25 +603,15 @@ bool ChannelDriverLcdClockless::beginTransmission(
     mIsrCtx.reset();
     mIsrCtx.mTotalBytes = maxSize;
     mIsrCtx.mChunkInputBytes = chunkInputBytes;
+    mIsrCtx.mTotalChunks = numChunks;
 
     for (const auto &channel : channels) {
         channel->setInUse(true);
     }
 
-    // Encode first chunk
-    size_t firstChunkBytes = chunkInputBytes;
-    if (firstChunkBytes > maxSize) {
-        firstChunkBytes = maxSize;
-    }
-
-    size_t firstDmaBytes = encodeChunk(channels, mRingBuffers[0], 0,
-                                       firstChunkBytes);
-
-    mIsrCtx.mNextByteOffset = firstChunkBytes;
-    mIsrCtx.mRingWriteIdx = 1;
-
     mBusy = true;
-    if (!mPeripheral->transmit(mRingBuffers[0], firstDmaBytes)) {
+
+    if (!submitChunk(0, true)) {
         mBusy = false;
         for (const auto &channel : channels) {
             channel->setInUse(false);
@@ -474,6 +619,9 @@ bool ChannelDriverLcdClockless::beginTransmission(
         FL_WARN("ChannelDriverLcdClockless: Initial transmit failed");
         return false;
     }
+    mIsrCtx.mSubmittedChunks = 1;
+
+    notifyWorker();
 
     return true;
 }
@@ -501,12 +649,15 @@ fl::shared_ptr<IChannelDriver> createLcdClocklessEngine() FL_NOEXCEPT {
         void freeBuffer(u16 *b) FL_NOEXCEPT override {
             detail::LcdSpiPeripheralEsp::instance().freeBuffer(b);
         }
-        // FL_IRAM: forwarded into LcdSpiPeripheralEsp::transmit() from
-        // isrChunkDone (ISR context). The thunk must live in IRAM too —
-        // marking only the target is not enough because the vtable dispatch
-        // jumps here first.
+        // FL_IRAM: forwarded into LcdSpiPeripheralEsp::transmit(); keep the
+        // thunk IRAM-safe because the shared peripheral also services LCD_SPI
+        // ISR re-arm paths.
         bool FL_IRAM transmit(const u16 *b, size_t s) FL_NOEXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().transmit(b, s);
+        }
+        bool FL_IRAM queueTransmit(const u16 *b,
+                                   size_t s) FL_NOEXCEPT override {
+            return detail::LcdSpiPeripheralEsp::instance().queueTransmit(b, s);
         }
         bool waitTransmitDone(u32 t) FL_NOEXCEPT override {
             return detail::LcdSpiPeripheralEsp::instance().waitTransmitDone(t);

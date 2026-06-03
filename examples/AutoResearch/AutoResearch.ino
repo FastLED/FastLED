@@ -1,6 +1,6 @@
 // @filter
 // require:
-//   - platform: esp32s3,esp32c6,esp32p4,teensy41,teensy40
+//   - board: esp32s3,esp32c6,esp32p4,teensy41,teensy40
 // exclude:
 //   - memory: low
 // @end-filter

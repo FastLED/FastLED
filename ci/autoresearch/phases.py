@@ -572,8 +572,15 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
 
     sketch_path = build_dir / "examples" / "AutoResearch"
     if not sketch_path.exists():
-        print(f"\u274c Error: AutoResearch sketch not found at {sketch_path}")
-        return 1
+        staged_sketch_path = build_dir / "src" / "sketch"
+        if staged_sketch_path.exists():
+            sketch_path = staged_sketch_path
+        else:
+            print(
+                "\u274c Error: AutoResearch sketch not found at "
+                f"{sketch_path} or {staged_sketch_path}"
+            )
+            return 1
 
     os.environ["PLATFORMIO_SRC_DIR"] = str(sketch_path)
 
