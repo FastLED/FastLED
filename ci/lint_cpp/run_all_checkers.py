@@ -9,6 +9,7 @@ instead of K times (where K is the number of checkers).
 
 import os
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -551,6 +552,39 @@ def run_test_aggregation_check() -> tuple[int, list[str]]:
     return (len(violations), violations)
 
 
+@dataclass(frozen=True)
+class LegacyViolationLineContent:
+    line_number: int
+    message: str
+
+
+def _legacy_violation_item_to_line_content(item: Any) -> LegacyViolationLineContent:
+    if isinstance(item, tuple) and len(item) >= 2:
+        line_num_raw, content_raw = item[0], item[1]
+        return LegacyViolationLineContent(
+            line_number=int(line_num_raw), message=str(content_raw)
+        )
+
+    include_line = getattr(item, "include_line", None)
+    include_snippet = getattr(item, "include_snippet", None)
+    if include_line is None or include_snippet is None:
+        raise ValueError(
+            f"Unsupported violation item shape: {item!r} ({type(item).__name__})"
+        )
+
+    message = str(include_snippet)
+    namespace_info = getattr(item, "namespace_info", None)
+    if namespace_info is not None:
+        namespace_line = getattr(namespace_info, "line_number", None)
+        namespace_snippet = getattr(namespace_info, "snippet", None)
+        if namespace_line is not None and namespace_snippet is not None:
+            message = (
+                f"{message} (namespace declared at line {int(namespace_line)}: "
+                f"{namespace_snippet})"
+            )
+    return LegacyViolationLineContent(line_number=int(include_line), message=message)
+
+
 def _convert_violations_to_results(violations: Any) -> CheckerResults:
     """Convert checker violations (dict or CheckerResults) to CheckerResults format.
 
@@ -568,12 +602,10 @@ def _convert_violations_to_results(violations: Any) -> CheckerResults:
     for file_path, violation_list in violations.items():
         if isinstance(violation_list, list):
             for item in violation_list:  # type: ignore[reportUnknownVariableType]
-                if isinstance(item, tuple) and len(item) >= 2:  # type: ignore[reportUnknownArgumentType]
-                    # Type narrowing: item is a tuple with at least 2 elements
-                    line_num_raw, content_raw = item[0], item[1]  # type: ignore[reportUnknownVariableType]
-                    line_num = int(line_num_raw)  # type: ignore[reportUnknownArgumentType]
-                    content = str(content_raw)  # type: ignore[reportUnknownArgumentType]
-                    results.add_violation(file_path, line_num, content)
+                converted = _legacy_violation_item_to_line_content(item)
+                results.add_violation(
+                    file_path, converted.line_number, converted.message
+                )
         elif isinstance(violation_list, str):
             results.add_violation(file_path, 0, violation_list)
 
