@@ -1024,6 +1024,11 @@ fn regex_preprocessor_if_elif() -> &'static Regex {
     VALUE.get_or_init(|| Regex::new(r"^\s*#\s*(?:if|elif)\b").unwrap())
 }
 
+fn regex_preprocessor_include() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"^#\s*include\b").unwrap())
+}
+
 fn regex_fl_is_token() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| Regex::new(r"\bFL_IS_\w+\b").unwrap())
@@ -3053,7 +3058,7 @@ impl FileContentChecker for RawNoexceptChecker {
 
             let code = split_line_comment(stripped).trim();
             if code.is_empty()
-                || Regex::new(r"^#\s*include\b").unwrap().is_match(code)
+                || regex_preprocessor_include().is_match(code)
                 || regex_define_fl_noexcept().is_match(code)
                 || !regex_raw_noexcept().is_match(code)
             {
