@@ -541,6 +541,13 @@ inline void build_cache(const DiodeProfile* p, ProfileCache* cache) {
     cache->has_source_space = (p->input_xy_w[1] > 1e-6f) &&
         build_source_matrix(p->input_xy_r, p->input_xy_g, p->input_xy_b,
                             p->input_xy_w, cache->M_src);
+    // Production zeros M_src on failure for deterministic downstream matvec3
+    // (CodeRabbit on #2709) — mirror must too.
+    if (!cache->has_source_space) {
+        for (int i = 0; i < 3; ++i) {
+            for (int j = 0; j < 3; ++j) cache->M_src[i][j] = 0.0f;
+        }
+    }
 }
 
 // Mirror of project_to_hull (#2708) — verbatim copy of the static helper in
