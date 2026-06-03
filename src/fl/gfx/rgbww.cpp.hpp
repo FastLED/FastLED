@@ -58,6 +58,10 @@ const colorimetric_detail::RgbcctProfile kRgbwwDefaultProfile = {
         /* lum_b       */ 0.08f,
         /* lum_w       */ 1.00f,
         /* nominal_cct */ 2700,
+        /* input_xy_r  */ { 0.6400f, 0.3300f },
+        /* input_xy_g  */ { 0.3000f, 0.6000f },
+        /* input_xy_b  */ { 0.1500f, 0.0600f },
+        /* input_xy_w  */ { 0.31272f, 0.32903f },
     },
     /* cool_path */ {
         /* xy_r        */ { 0.700606f, 0.299300f },
@@ -69,6 +73,10 @@ const colorimetric_detail::RgbcctProfile kRgbwwDefaultProfile = {
         /* lum_b       */ 0.08f,
         /* lum_w       */ 1.00f,
         /* nominal_cct */ 6500,
+        /* input_xy_r  */ { 0.6400f, 0.3300f },
+        /* input_xy_g  */ { 0.3000f, 0.6000f },
+        /* input_xy_b  */ { 0.1500f, 0.0600f },
+        /* input_xy_w  */ { 0.31272f, 0.32903f },
     },
 };
 

@@ -34,6 +34,16 @@ enum class RGBW_MODE {
 // and uses datasheet-derived values for SK6812 RGBW3535 at 6000K. Users with a
 // colorimeter can build their own and install it via
 // `set_rgbw_colorimetric_profile`.
+//
+// Source-space fields (input_xy_*, issue #2705) define the color space the
+// input RGB triple is interpreted in. Defaults — set by `kRgbwDefaultProfile`
+// and the `make_diode_profile_*` helpers — are Rec709 / sRGB primaries with a
+// D65 white point. Solvers compute `X_t = M_src · source_rgb` where M_src is
+// the standard primary-matrix construction from these four chromaticities.
+// If input_xy_w[1] is left at 0.0f (the default for value-initialized profiles
+// `DiodeProfile{}`), solvers fall back to the legacy interpretation in which
+// the input RGB triple IS the device-emitter drive coordinates — preserved
+// for backward compatibility.
 struct DiodeProfile {
     float xy_r[2];      // R diode chromaticity (CIE 1931 xy)
     float xy_g[2];      // G diode chromaticity
@@ -44,6 +54,14 @@ struct DiodeProfile {
     float lum_b;
     float lum_w;        // typically 1.0 by convention
     int nominal_cct;    // CCT at which xy_w was measured (e.g. 6000)
+
+    // Source / input color space (#2705). Without these populated the
+    // colorimetric solvers cannot target a meaningful white point and the
+    // verifier cannot match expected D65 / Rec709 reference results.
+    float input_xy_r[2];  // source R primary chromaticity (default sRGB)
+    float input_xy_g[2];  // source G primary chromaticity
+    float input_xy_b[2];  // source B primary chromaticity
+    float input_xy_w[2];  // source white chromaticity (default D65)
 };
 
 // Default profile: SK6812 RGBW3535 @ ~6000K (datasheet wavelengths -> xy +

@@ -65,6 +65,18 @@ void build_profile_cache(const DiodeProfile* p, int cct_override,
     }
 
     matvec3(cache->P_RGB_inv, cache->P_W, cache->d_W);
+
+    // Source-space matrix (#2705). When input_xy_w is degenerate (the
+    // legacy value-initialized case `DiodeProfile{}`), leave M_src empty
+    // and signal the solvers to fall back to the device-emitter projection.
+    cache->has_source_space = (p->input_xy_w[1] > 1e-6f)
+                            && build_source_matrix(p->input_xy_r, p->input_xy_g,
+                                                   p->input_xy_b, p->input_xy_w,
+                                                   cache->M_src);
+    if (!cache->has_source_space) {
+        for (int i = 0; i < 3; ++i)
+            for (int j = 0; j < 3; ++j) cache->M_src[i][j] = 0.0f;
+    }
 }
 
 bool solve_strict_subgamut(const ProfileCache& cache, float s_r,
@@ -73,9 +85,18 @@ bool solve_strict_subgamut(const ProfileCache& cache, float s_r,
     out_rgbw[0] = out_rgbw[1] = out_rgbw[2] = out_rgbw[3] = 0.0f;
 
     float X_t[3];
-    X_t[0] = cache.P_R[0] * s_r + cache.P_G[0] * s_g + cache.P_B[0] * s_b;
-    X_t[1] = cache.P_R[1] * s_r + cache.P_G[1] * s_g + cache.P_B[1] * s_b;
-    X_t[2] = cache.P_R[2] * s_r + cache.P_G[2] * s_g + cache.P_B[2] * s_b;
+    if (cache.has_source_space) {
+        // X_t = M_src · source_rgb (#2705): interpret the input triple in the
+        // profile's source color space (defaults to Rec709/sRGB-D65). Without
+        // this step the solver targets the native-gamut sum chromaticity, not
+        // any standard white point.
+        const float s[3] = { s_r, s_g, s_b };
+        matvec3(cache.M_src, s, X_t);
+    } else {
+        X_t[0] = cache.P_R[0] * s_r + cache.P_G[0] * s_g + cache.P_B[0] * s_b;
+        X_t[1] = cache.P_R[1] * s_r + cache.P_G[1] * s_g + cache.P_B[1] * s_b;
+        X_t[2] = cache.P_R[2] * s_r + cache.P_G[2] * s_g + cache.P_B[2] * s_b;
+    }
     const float sum_xyz = X_t[0] + X_t[1] + X_t[2];
     if (sum_xyz < 1e-9f) {
         return true;
@@ -173,20 +194,49 @@ bool solve_strict_subgamut_xy(const ProfileCache& cache,
     return false;
 }
 
-void solve_wx_lp(const ProfileCache& cache, float s_r, float s_g,
-                 float s_b, float out_rgbw[4]) FL_NOEXCEPT {
-    const float a[3] = { s_r, s_g, s_b };
+void solve_wx_overdrive(const ProfileCache& cache, float s_r, float s_g,
+                        float s_b, float overdrive_ratio,
+                        float out_rgbw[4]) FL_NOEXCEPT {
+    // Replaces the original `solve_wx_lp` (issue #2706). The original was
+    // `max w s.t. (a - w*d) >= 0`, which produces the *same vertex of the
+    // feasible polytope* as the strict sub-gamut solver — bit-identical
+    // output for any in-gamut target. This formulation instead computes the
+    // strict-vertex w and then pushes W *past* it by `overdrive_ratio`,
+    // accepting chromaticity drift toward the W diode in exchange for higher
+    // luminance / a brighter output. At overdrive_ratio = 0 the function
+    // reduces to the strict vertex (degenerate with `solve_strict_subgamut`);
+    // at overdrive_ratio = 1 it drives w to 1.0 and clamps residuals.
+    //
+    // Target XYZ comes from the source space (#2705) when available, so the
+    // boosted mode targets the same standard white point as the strict mode.
+    float X_t[3];
+    if (cache.has_source_space) {
+        const float s[3] = { s_r, s_g, s_b };
+        matvec3(cache.M_src, s, X_t);
+    } else {
+        X_t[0] = cache.P_R[0] * s_r + cache.P_G[0] * s_g + cache.P_B[0] * s_b;
+        X_t[1] = cache.P_R[1] * s_r + cache.P_G[1] * s_g + cache.P_B[1] * s_b;
+        X_t[2] = cache.P_R[2] * s_r + cache.P_G[2] * s_g + cache.P_B[2] * s_b;
+    }
+    // a = P_RGB_inv · X_t — the 3-channel solution if W were unused. d is the
+    // RGB-channel cost of one unit of W (cached at build_profile_cache time).
+    float a[3];
+    matvec3(cache.P_RGB_inv, X_t, a);
     const float* d = cache.d_W;
 
-    float w = 1.0f;
+    float w_strict = 1.0f;
     for (int i = 0; i < 3; ++i) {
         if (d[i] > 1e-9f && a[i] >= 0.0f) {
             const float lim = a[i] / d[i];
-            if (lim < w) {
-                w = lim;
+            if (lim < w_strict) {
+                w_strict = lim;
             }
         }
     }
+    w_strict = fl::clamp(w_strict, 0.0f, 1.0f);
+
+    const float rho = fl::clamp(overdrive_ratio, 0.0f, 1.0f);
+    float w = w_strict + rho * (1.0f - w_strict);
     w = fl::clamp(w, 0.0f, 1.0f);
 
     float t[4];
@@ -206,7 +256,8 @@ void solve_wx_lp(const ProfileCache& cache, float s_r, float s_g,
     out_rgbw[3] = t[3];
 }
 
-LutTable build_lut(const ProfileCache& cache, int grid_n) FL_NOEXCEPT {
+LutTable build_lut(const ProfileCache& cache, int grid_n,
+                   LutInterp interp) FL_NOEXCEPT {
     LutTable lut;
     // Guard against degenerate grids: N < 2 would divide-by-zero in the
     // 1/(N-1) step below, and negative N would overflow the allocation size.
@@ -216,7 +267,10 @@ LutTable build_lut(const ProfileCache& cache, int grid_n) FL_NOEXCEPT {
     }
     const fl::size_t n = static_cast<fl::size_t>(grid_n);
     lut.N = grid_n;
-    lut.cells = fl::make_unique<i16[]>(n * n * 4u);
+    lut.interp = interp;
+    const fl::size_t stride =
+        (interp == LutInterp::Hermite) ? kLutStrideHermite : kLutStrideBilinear;
+    lut.cells = fl::make_unique<i16[]>(n * n * stride);
 
     const float* R = cache.profile->xy_r;
     const float* G = cache.profile->xy_g;
@@ -235,20 +289,54 @@ LutTable build_lut(const ProfileCache& cache, int grid_n) FL_NOEXCEPT {
     i16* cells = lut.cells.get();
     const int N = grid_n;
     const float inv_Nm1 = 1.0f / static_cast<float>(N - 1);
+    const float cell_dx = (lut.xy_max[0] - lut.xy_min[0]) * inv_Nm1;
+    const float cell_dy = (lut.xy_max[1] - lut.xy_min[1]) * inv_Nm1;
+
+    auto sample = [&](float x, float y, float out[4]) FL_NOEXCEPT {
+        const float xy[2] = {x, y};
+        solve_strict_subgamut_xy(cache, xy, 1.0f, out);
+    };
+
     for (int j = 0; j < N; ++j) {
-        const float y = lut.xy_min[1]
-                      + (lut.xy_max[1] - lut.xy_min[1]) * j * inv_Nm1;
+        const float y = lut.xy_min[1] + cell_dy * j;
         for (int i = 0; i < N; ++i) {
-            const float x = lut.xy_min[0]
-                          + (lut.xy_max[0] - lut.xy_min[0]) * i * inv_Nm1;
-            const float xy[2] = {x, y};
-            float rgbw[4];
-            solve_strict_subgamut_xy(cache, xy, 1.0f, rgbw);
-            i16* cell = &cells[(j * N + i) * 4];
-            cell[0] = quantize_lut_cell(rgbw[0]);
-            cell[1] = quantize_lut_cell(rgbw[1]);
-            cell[2] = quantize_lut_cell(rgbw[2]);
-            cell[3] = quantize_lut_cell(rgbw[3]);
+            const float x = lut.xy_min[0] + cell_dx * i;
+            float v[4];
+            sample(x, y, v);
+            i16* cell = &cells[(j * N + i) * stride];
+            cell[0] = quantize_lut_cell(v[0]);
+            cell[1] = quantize_lut_cell(v[1]);
+            cell[2] = quantize_lut_cell(v[2]);
+            cell[3] = quantize_lut_cell(v[3]);
+
+            if (interp != LutInterp::Hermite) continue;
+
+            // Numerical partials in cell-parameter (t) units. Sample
+            // half-a-cell ahead / behind in world coords, clamped to the LUT
+            // domain so edges fall back to one-sided differences. With
+            // eps_world = cell_dx / 2 and step_world = (clamped_+ - clamped_-),
+            // df/dt = (v_xp - v_xn) / step_world * cell_dx.
+            const float eps_x = cell_dx * 0.5f;
+            const float eps_y = cell_dy * 0.5f;
+            const float x_hi = fl::clamp(x + eps_x, lut.xy_min[0], lut.xy_max[0]);
+            const float x_lo = fl::clamp(x - eps_x, lut.xy_min[0], lut.xy_max[0]);
+            const float y_hi = fl::clamp(y + eps_y, lut.xy_min[1], lut.xy_max[1]);
+            const float y_lo = fl::clamp(y - eps_y, lut.xy_min[1], lut.xy_max[1]);
+
+            float v_xp[4] = {0}, v_xn[4] = {0}, v_yp[4] = {0}, v_yn[4] = {0};
+            sample(x_hi, y, v_xp);
+            sample(x_lo, y, v_xn);
+            sample(x, y_hi, v_yp);
+            sample(x, y_lo, v_yn);
+
+            const float step_x = x_hi - x_lo;
+            const float step_y = y_hi - y_lo;
+            const float scale_x = (step_x > 1e-9f) ? (cell_dx / step_x) : 0.0f;
+            const float scale_y = (step_y > 1e-9f) ? (cell_dy / step_y) : 0.0f;
+            for (int k = 0; k < 4; ++k) {
+                cell[4 + k] = quantize_lut_cell((v_xp[k] - v_xn[k]) * scale_x);
+                cell[8 + k] = quantize_lut_cell((v_yp[k] - v_yn[k]) * scale_y);
+            }
         }
     }
     return lut;
@@ -279,24 +367,74 @@ void lookup_lut(const LutTable& lut, const float xy_t[2], float Y_t,
     const float fy = y_norm - j;
 
     const i16* base = lut.cells.get();
-    const i16* c00 = &base[(j * N + i) * 4];
-    const i16* c10 = &base[(j * N + i + 1) * 4];
-    const i16* c01 = &base[((j + 1) * N + i) * 4];
-    const i16* c11 = &base[((j + 1) * N + i + 1) * 4];
+    const int stride =
+        (lut.interp == LutInterp::Hermite) ? kLutStrideHermite : kLutStrideBilinear;
+    const i16* c00 = &base[(j * N + i) * stride];
+    const i16* c10 = &base[(j * N + i + 1) * stride];
+    const i16* c01 = &base[((j + 1) * N + i) * stride];
+    const i16* c11 = &base[((j + 1) * N + i + 1) * stride];
 
-    const float w00 = (1 - fx) * (1 - fy);
-    const float w10 = fx * (1 - fy);
-    const float w01 = (1 - fx) * fy;
-    const float w11 = fx * fy;
     const float inv_Q = 1.0f / static_cast<float>(kLutQ);
 
-    for (int k = 0; k < 4; ++k) {
-        const float per_Y = (w00 * c00[k] + w10 * c10[k]
-                           + w01 * c01[k] + w11 * c11[k]) * inv_Q;
-        float t = per_Y * Y_t;
-        if (t < 0.0f) t = 0.0f;
-        out_rgbw[k] = t;
+    if (lut.interp == LutInterp::Hermite) {
+        // Bicubic Hermite (no fxy term). Basis functions on [0, 1]:
+        //   h00(t) = 2t³ - 3t² + 1  (value at t=0, zero derivatives at both ends)
+        //   h01(t) = -2t³ + 3t²     (value at t=1)
+        //   h10(t) = t³ - 2t² + t   (derivative at t=0)
+        //   h11(t) = t³ - t²        (derivative at t=1)
+        const float fx2 = fx * fx;
+        const float fx3 = fx2 * fx;
+        const float h00x = 2.0f * fx3 - 3.0f * fx2 + 1.0f;
+        const float h01x = -2.0f * fx3 + 3.0f * fx2;
+        const float h10x = fx3 - 2.0f * fx2 + fx;
+        const float h11x = fx3 - fx2;
+        const float fy2 = fy * fy;
+        const float fy3 = fy2 * fy;
+        const float h00y = 2.0f * fy3 - 3.0f * fy2 + 1.0f;
+        const float h01y = -2.0f * fy3 + 3.0f * fy2;
+        const float h10y = fy3 - 2.0f * fy2 + fy;
+        const float h11y = fy3 - fy2;
+
+        for (int k = 0; k < 4; ++k) {
+            const float v00 = c00[k] * inv_Q;
+            const float v10 = c10[k] * inv_Q;
+            const float v01 = c01[k] * inv_Q;
+            const float v11 = c11[k] * inv_Q;
+            const float dx00 = c00[4 + k] * inv_Q;
+            const float dx10 = c10[4 + k] * inv_Q;
+            const float dx01 = c01[4 + k] * inv_Q;
+            const float dx11 = c11[4 + k] * inv_Q;
+            const float dy00 = c00[8 + k] * inv_Q;
+            const float dy10 = c10[8 + k] * inv_Q;
+            const float dy01 = c01[8 + k] * inv_Q;
+            const float dy11 = c11[8 + k] * inv_Q;
+
+            const float per_Y =
+                  v00 * h00x * h00y + v10 * h01x * h00y
+                + v01 * h00x * h01y + v11 * h01x * h01y
+                + dx00 * h10x * h00y + dx10 * h11x * h00y
+                + dx01 * h10x * h01y + dx11 * h11x * h01y
+                + dy00 * h00x * h10y + dy10 * h01x * h10y
+                + dy01 * h00x * h11y + dy11 * h01x * h11y;
+
+            float t = per_Y * Y_t;
+            if (t < 0.0f) t = 0.0f;
+            out_rgbw[k] = t;
+        }
+    } else {
+        const float w00 = (1 - fx) * (1 - fy);
+        const float w10 = fx * (1 - fy);
+        const float w01 = (1 - fx) * fy;
+        const float w11 = fx * fy;
+        for (int k = 0; k < 4; ++k) {
+            const float per_Y = (w00 * c00[k] + w10 * c10[k]
+                               + w01 * c01[k] + w11 * c11[k]) * inv_Q;
+            float t = per_Y * Y_t;
+            if (t < 0.0f) t = 0.0f;
+            out_rgbw[k] = t;
+        }
     }
+
     const float m = fl::max(fl::max(out_rgbw[0], out_rgbw[1]),
                             fl::max(out_rgbw[2], out_rgbw[3]));
     if (m > 1.0f) {

@@ -24,8 +24,10 @@ namespace fl {
 // midpoints (R 625nm, G 523nm, B 468nm) converted to CIE 1931 xy; W at
 // nominal 6000K (xy = 0.32208, 0.33805). Luminance ratios normalized so
 // W = 1.0; R/G/B set from datasheet typical mcd ratios for a 5050-class
-// part. Users with a colorimeter should override via
-// set_rgbw_colorimetric_profile().
+// part. Source space defaults to Rec709 / sRGB primaries with D65 white
+// (issue #2705) so the colorimetric solvers reproduce the math-model
+// gist's reference results out of the box. Users with a colorimeter
+// should override via set_rgbw_colorimetric_profile().
 const DiodeProfile kRgbwDefaultProfile = {
     /* xy_r        */ { 0.700606f, 0.299300f },
     /* xy_g        */ { 0.097940f, 0.831593f },
@@ -36,6 +38,10 @@ const DiodeProfile kRgbwDefaultProfile = {
     /* lum_b       */ 0.08f,
     /* lum_w       */ 1.00f,
     /* nominal_cct */ 6000,
+    /* input_xy_r  */ { 0.6400f, 0.3300f },   // Rec709/sRGB R
+    /* input_xy_g  */ { 0.3000f, 0.6000f },   // Rec709/sRGB G
+    /* input_xy_b  */ { 0.1500f, 0.0600f },   // Rec709/sRGB B
+    /* input_xy_w  */ { 0.31272f, 0.32903f }, // D65
 };
 
 
@@ -283,9 +289,16 @@ void rgb_2_rgbw_colorimetric(u16 w_color_temperature, u8 r,
     if (lut_state.enabled) {
         rebuild_lut_if_stale(lut_state, w_color_temperature);
         float X_t[3];
-        X_t[0] = cache.P_R[0] * s_r + cache.P_G[0] * s_g + cache.P_B[0] * s_b;
-        X_t[1] = cache.P_R[1] * s_r + cache.P_G[1] * s_g + cache.P_B[1] * s_b;
-        X_t[2] = cache.P_R[2] * s_r + cache.P_G[2] * s_g + cache.P_B[2] * s_b;
+        if (cache.has_source_space) {
+            // #2705: use source-space matrix so the LUT lookup targets the
+            // same chromaticity as the closed-form solver.
+            const float s_vec[3] = { s_r, s_g, s_b };
+            colorimetric_detail::matvec3(cache.M_src, s_vec, X_t);
+        } else {
+            X_t[0] = cache.P_R[0] * s_r + cache.P_G[0] * s_g + cache.P_B[0] * s_b;
+            X_t[1] = cache.P_R[1] * s_r + cache.P_G[1] * s_g + cache.P_B[1] * s_b;
+            X_t[2] = cache.P_R[2] * s_r + cache.P_G[2] * s_g + cache.P_B[2] * s_b;
+        }
         const float sum = X_t[0] + X_t[1] + X_t[2];
         if (sum < 1e-9f) {
             *out_r = *out_g = *out_b = *out_w = 0;
@@ -328,8 +341,11 @@ void rgb_2_rgbw_colorimetric_boosted(u16 w_color_temperature, u8 r,
     const float s_g = g * (1.0f / 255.0f);
     const float s_b = b * (1.0f / 255.0f);
     float rgbw[4];
-    colorimetric_detail::solve_wx_lp(get_cache(w_color_temperature),
-                                     s_r, s_g, s_b, rgbw);
+    colorimetric_detail::solve_wx_overdrive(
+        get_cache(w_color_temperature),
+        s_r, s_g, s_b,
+        colorimetric_detail::kDefaultOverdriveRatio,
+        rgbw);
     *out_r = colorimetric_detail::quantize_u8(rgbw[0]);
     *out_g = colorimetric_detail::quantize_u8(rgbw[1]);
     *out_b = colorimetric_detail::quantize_u8(rgbw[2]);

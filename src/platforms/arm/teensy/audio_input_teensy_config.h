@@ -1,5 +1,7 @@
 #pragma once
 
+// ok no namespace fl — preprocessor-only config header (no symbols, no types)
+
 #include "fl/stl/has_include.h"
 #include "platforms/arm/teensy/is_teensy.h"
 
