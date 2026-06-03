@@ -187,3 +187,41 @@ The names make roles explicit: `.impl.cpp.hpp` = "implementation router, include
   - Wrong: `int count;`, `fl::string name;`, `bool isEnabled;`
   - The 'm' prefix clearly distinguishes member variables from local variables and parameters
 - **Follow existing code patterns** and naming conventions
+
+## Public Settings Pattern (Global Configuration via `CFastLED`)
+
+**Core Principle**: Any new global / library-wide configuration setter MUST be exposed as a public method on the `CFastLED` god instance in `src/FastLED.h`. The implementation may live as a free function in the `fl::` namespace for ADL / testability, but the documented user-facing entry point is `FastLED.setX(...)`, not `fl::set_x(...)`.
+
+**Rationale**: `CFastLED` is the discoverable surface — users see `FastLED.setBrightness()`, `FastLED.setMaxRefreshRate()`, `FastLED.setPowerModel()` in every sketch and expect every other knob to live there too. Free-function-only configuration ratchets the API surface into a second, undocumented place that users won't find and that drifts out of sync with the god instance.
+
+**Exemplar** (`src/FastLED.h:1455`):
+```cpp
+// Free function in fl:: namespace — does the work, testable in isolation
+namespace fl { void set_power_model(const PowerModelRGB& m) noexcept; }
+
+// Public entry point on CFastLED — thin delegator, this is what users call
+class CFastLED {
+    inline void setPowerModel(const PowerModelRGB& model) {
+        set_power_model(model);
+    }
+};
+```
+
+**Rules**:
+1. ❌ **NEVER ship a new `fl::set_*` / `fl::enable_*` / `fl::disable_*` / `fl::use_*` free function that mutates library-wide state without a matching `CFastLED::setX()` / `enableX()` wrapper.**
+   - ❌ Bad: `fl::set_input_gamut(&profile, fl::InputGamut::Rec709);` as the documented call site
+   - ✅ Good: `FastLED.setInputGamut(&profile, fl::InputGamut::Rec709);` (god instance), with a `fl::set_input_gamut(...)` free function backing it
+2. ✅ **The wrapper is a `inline` one-liner that delegates** — no logic, no validation, no error handling. The free function holds all behavior.
+3. ✅ **Per-object configuration (e.g. one strip's diode profile, one controller's correction) MAY live on the per-object API.** This rule targets *library-wide / process-wide / default-profile* state.
+4. ✅ **Documentation, examples, and PR descriptions reference the god-instance form.** The free function is an implementation detail.
+5. ⚠️ **Grandfathered offenders** (free-function-only, predate this rule): `fl::set_rgbw_colorimetric_profile`, `fl::set_input_gamut` (#2710). New code MUST wrap; existing offenders should be wrapped opportunistically.
+
+**Check Process**:
+1. For every new public function in `src/fl/**/*.h` whose name matches `^set_|^enable_|^disable_|^use_` and that mutates a static / global / namespace-scope variable, grep `src/FastLED.h` for a `CFastLED` method that delegates to it.
+2. If none exists: violation — add the wrapper in the same PR.
+3. Enforced by `ci/lint_cpp/` (rule TBD) with the grandfathered names allowlisted.
+
+**Where the rule does NOT apply**:
+- Helpers, constructors, factory functions — these are not setters of global state.
+- Functions in `fl::` that operate on caller-owned objects without touching global state (`fl::fill_solid(span, color)`).
+- Internal `fl::detail::` / anonymous-namespace functions — not public API.

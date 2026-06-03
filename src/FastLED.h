@@ -242,6 +242,7 @@ using fl::degrees;
 #include "fl/system/engine_events.h"
 
 #include "fl/gfx/leds.h"
+#include "fl/gfx/rgbw.h"  // DiodeProfile + set_rgbw_colorimetric_profile (wrapped on CFastLED below)
 
 // clockless.h removed - BulkClockless API has been superseded by Channel API
 
@@ -1539,6 +1540,32 @@ public:
 	fl::u32 getEstimatedPowerInMilliWatts(bool apply_limiter = true) const;
 
 	/// @} Power Model Configuration
+
+	/// @name RGBW Colorimetric Configuration
+	/// God-instance wrappers around `fl::set_rgbw_colorimetric_profile` /
+	/// `fl::get_rgbw_colorimetric_profile`. See
+	/// `agents/docs/cpp-standards.md` → "Public Settings Pattern" for the
+	/// rule that global setters live here, not as bare `fl::` free functions.
+	/// @{
+
+	/// Install a user-supplied RGBW diode chromaticity profile for the
+	/// colorimetric modes. The pointer is stored — caller must keep the
+	/// `DiodeProfile` alive for as long as a colorimetric mode is active.
+	/// No-op when `FASTLED_RGBW_COLORIMETRIC` is undefined.
+	/// @param profile pointer to a caller-owned `fl::DiodeProfile`, or `nullptr` to revert to `kRgbwDefaultProfile`.
+	/// @code
+	/// FastLED.setRgbwColorimetricProfile(&my_profile);
+	/// @endcode
+	inline void setRgbwColorimetricProfile(const fl::DiodeProfile* profile) FL_NOEXCEPT {
+		fl::set_rgbw_colorimetric_profile(profile);
+	}
+
+	/// Currently active RGBW colorimetric profile (defaults to `&fl::kRgbwDefaultProfile`).
+	inline const fl::DiodeProfile* getRgbwColorimetricProfile() const FL_NOEXCEPT {
+		return fl::get_rgbw_colorimetric_profile();
+	}
+
+	/// @} RGBW Colorimetric Configuration
 
 	/// Update all our controllers with the current led colors, using the passed in brightness
 	/// @param scale the brightness value to use in place of the stored value

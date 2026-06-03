@@ -230,6 +230,56 @@ void validateHardware() {
 - For new files: Fix immediately by asking user to rename
 - For existing files: Create GitHub issue or ask user if they want to rename now
 
+### src/** changes - PUBLIC SETTINGS PATTERN (god-instance enforcement)
+
+**Core Principle**: New global / library-wide configuration setters MUST be exposed on `CFastLED` (`FastLED.setX(...)`), not as bare `fl::set_*` free functions. The free function may exist for ADL/testability, but the documented entry point is the god instance.
+
+**Exemplar** (`src/FastLED.h:1455`):
+```cpp
+inline void setPowerModel(const PowerModelRGB& model) {
+    set_power_model(model);  // delegates to fl::set_power_model
+}
+```
+
+**Rules**:
+1. ❌ **NEVER add a new public `fl::set_*` / `fl::enable_*` / `fl::disable_*` / `fl::use_*` free function that mutates library-wide state without a matching `CFastLED::setX()` wrapper.**
+   - ❌ Bad (PR diff adds only):
+     ```cpp
+     // src/fl/gfx/rgbw.h
+     namespace fl { void set_input_gamut(DiodeProfile*, InputGamut) noexcept; }
+     ```
+   - ✅ Good (PR diff adds BOTH):
+     ```cpp
+     // src/fl/gfx/rgbw.h
+     namespace fl { void set_input_gamut(DiodeProfile*, InputGamut) noexcept; }
+     // src/FastLED.h, near setPowerModel
+     inline void setInputGamut(fl::DiodeProfile* p, fl::InputGamut g) FL_NOEXCEPT {
+         fl::set_input_gamut(p, g);
+     }
+     ```
+2. ✅ **The wrapper is a thin `inline` delegator** — no logic, validation, or error handling embedded.
+3. ✅ **Examples, README, and PR descriptions** should call `FastLED.setX(...)`, never `fl::set_x(...)`.
+
+**Grandfathered Exceptions** (predate the rule — do not flag for these names alone):
+- `fl::set_rgbw_colorimetric_profile`
+- `fl::set_input_gamut` (#2710)
+
+These should be wrapped opportunistically, but their bare existence does not block the PR they appear in.
+
+**Does NOT apply to**:
+- Helpers, constructors, factories (not "setters of global state")
+- Per-object / per-strip configuration on the object's own API
+- Functions that only mutate caller-owned objects (`fl::fill_solid(span, color)`)
+- `fl::detail::` / anonymous-namespace internals
+
+**Check Process**:
+1. Scan the diff for new public function declarations in `src/fl/**/*.h` whose name matches `^set_|^enable_|^disable_|^use_`.
+2. For each match, check whether the function mutates a namespace-scope / static / global variable (look at the implementation in the matching `.cpp.hpp`).
+3. If yes and the name isn't grandfathered: grep `src/FastLED.h` for a `CFastLED` method whose body mentions that free function. If none, **flag as HIGH severity** and either:
+   - Add the wrapper inline in the same diff (if the change is small), or
+   - Ask the user to add it before merge.
+4. Reference: `agents/docs/cpp-standards.md` → "Public Settings Pattern".
+
 ### src/** changes - SIGNED INTEGER OVERFLOW (UNDEFINED BEHAVIOR)
 
 **Core Principle**: Signed integer arithmetic that can overflow is undefined behavior in C++. Compilers exploit this for optimization, causing silent miscompilation. All potentially-overflowing arithmetic on signed types (`i8`, `i16`, `i32`) must be performed in the corresponding unsigned type, then cast back.
@@ -640,6 +690,7 @@ FL_TEST_CASE("my test") {
   - Unused variables after refactoring: N
   - Missing performance attributes: N
   - DMA/poll wait loops missing yield: N
+  - Public Settings Pattern violations (bare fl::set_* without CFastLED wrapper): N
   - Other: N
 - Violations fixed: N
 - User confirmations needed: N
