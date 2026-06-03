@@ -187,3 +187,211 @@ The names make roles explicit: `.impl.cpp.hpp` = "implementation router, include
   - Wrong: `int count;`, `fl::string name;`, `bool isEnabled;`
   - The 'm' prefix clearly distinguishes member variables from local variables and parameters
 - **Follow existing code patterns** and naming conventions
+
+## Singleton-Stored Configuration: Own by Value, Never by Borrowed Pointer
+
+**Core Principle**: Any public `fl::set_*` API that stores a configuration profile / settings object in process-wide (or static / namespace-scope) state MUST take the value `const T&` and **copy** it. Storing the raw pointer (`sActive = profile`) creates a deterministic use-after-scope bug when callers pass a stack temporary like `auto p = make_profile(); fl::set_x(&p); /* p goes out of scope */`.
+
+**Rules**:
+1. ❌ **NEVER store a borrowed pointer to a caller-owned value in a singleton.**
+   - ❌ Bad:
+     ```cpp
+     namespace { const RgbcctProfile* sActive = nullptr; }
+     void set_rgbww_colorimetric_profile(const RgbcctProfile* p) FL_NOEXCEPT {
+         sActive = p;  // caller's lifetime, BOOM if they pass a stack temporary
+     }
+     ```
+   - ✅ Good (value semantics):
+     ```cpp
+     namespace { RgbcctProfile sActive = kRgbwwDefaultProfile; }
+     void set_rgbww_colorimetric_profile(const RgbcctProfile& p) FL_NOEXCEPT {
+         sActive = p;  // copy, lifetime owned by library
+     }
+     ```
+2. ✅ **Profile getters return `const T&` to the owned copy**, not a pointer that could be `nullptr`.
+3. ✅ **For polymorphic configuration** (rare), use `fl::shared_ptr<T>` or `fl::unique_ptr<T>` — never a raw `const T*`.
+
+**Rationale**: The colorimetric / power-model / driver-config setters are the only place this rule fires in the current codebase, but every one of them got a use-after-scope CodeRabbit finding (#2554, #2560, #2588, #2683, #2682) before the rule was written. The Public Settings Pattern (above) tells you *where* the setter lives (god instance); this rule tells you *how* it stores the value.
+
+**Check Process**:
+1. For each `fl::set_*` setter that stores into a static / namespace-scope variable, verify the parameter is `const T&` (or `T&&`) and the assignment is a copy/move into a value-typed slot.
+2. If the parameter is `const T*` and the storage is `const T*`, flag as HIGH severity.
+
+## In-Place Profile Mutation Bumps a Version (Cache Invalidation Contract)
+
+**Core Principle**: If `set_X(T* obj, ...)` writes into the fields of a caller-owned `*obj`, and any subsystem caches values *derived from* `*obj` keyed only on `(obj_ptr, ...)`, then the setter MUST bump `obj->mCacheVersion` (or call `obj->invalidate()`) and the cache key MUST include that version. Otherwise the cache returns stale data the next time the same pointer is passed in.
+
+**Rules**:
+1. ❌ **NEVER mutate a profile field in place without bumping a version counter** when a cache exists keyed on the profile pointer.
+   - ❌ Bad:
+     ```cpp
+     void set_input_gamut(DiodeProfile* p, InputGamut g) FL_NOEXCEPT {
+         apply_gamut(p, g);  // rewrites p->input_xy_*
+         // …no version bump; ProfileCache keyed on (p, cct) still returns stale M_src
+     }
+     ```
+   - ✅ Good:
+     ```cpp
+     void set_input_gamut(DiodeProfile* p, InputGamut g) FL_NOEXCEPT {
+         apply_gamut(p, g);
+         ++p->mCacheVersion;  // forces any derived-value cache to rebuild
+     }
+     // and:
+     struct CacheKey { const DiodeProfile* p; u32 version; int cct; };
+     ```
+2. ✅ **Document the cache-invalidation contract** in the setter's doxygen: "Mutates `*p` in place; bumps `p->mCacheVersion` so derived caches rebuild on next access."
+3. ✅ **Prefer immutable profiles when possible.** A `DiodeProfile` that ships as `const` to all consumers and is replaced wholesale (`set_profile(const T&)`) eliminates this entire class of bug — see Singleton-Stored Configuration rule above.
+
+**Rationale**: Drove four CodeRabbit findings in the survey window (#2554, #2589, #2707, #2711) and is the root cause of the colorimetric "looks right in tests but stale in production" class. Tests typically construct one profile per test case so the cache never hits — the bug only shows up in real applications that mutate one shared profile across frames.
+
+**Check Process**:
+1. For each `fl::set_*(T* obj, ...)` where the body mutates `*obj`, search the codebase for a cache keyed on `obj` (typical names: `ProfileCache`, `kCache`, `sCachedDerived`).
+2. If a cache exists and the setter doesn't bump a version field, flag as HIGH severity.
+
+## Contract Change Fanout (API Surface Changes Touch All Layers in One PR)
+
+**Core Principle**: When a PR changes a numeric bound, enum range, struct shape, or semantic of a public API surface, it MUST update **every** consumer of that contract in the same PR: (a) the producer / setter, (b) the validator, (c) unit tests, (d) docs (`agents/docs/*`, AutoResearch JSON-RPC reference, RPC handlers), and (e) any matching debug-metrics / stats struct. Partial sweeps cause silent producer/consumer skew.
+
+**Rules**:
+1. ❌ **NEVER widen a bound without sweeping the validator and tests.**
+   - ❌ Bad: `examples/AutoResearch/AutoResearchRemote.cpp` bumps `laneSizes` max from 8 to 16, but `src/fl/channels/validation.cpp.hpp` still rejects > 8 — silent rejection at runtime.
+   - ✅ Good: Same PR updates the example, the validator, the test fixture asserting the new max, and the JSON-RPC schema doc.
+2. ❌ **NEVER add a struct field without updating the debug-metrics dump and the parser.**
+3. ❌ **NEVER change `available()` / `empty()` / `size()` semantics without updating the docstring AND every caller that compares against constants.**
+
+**Rationale**: This is a broadening of the existing "API Unit Change" rule (which was scoped to `_ms` / `_us` / `_bytes` suffixes). The recurring CodeRabbit pattern (#2621, #2648, #2669, #2682) is more general — any **contract** change, not just unit changes, needs the same fanout.
+
+**Check Process** (PR-level):
+1. If the diff modifies a public setter, enum, struct field, or named constant that defines a contract — grep for the contract name across `src/`, `examples/`, `tests/`, and `agents/docs/`.
+2. If any consumer doesn't appear in the diff, either update it in the same PR or document why it doesn't need updating (with a comment in the PR description).
+
+## `fl::span` for Callback Typedefs and Small Fixed-Size Arrays
+
+**Core Principle**: The general `fl::span` rule (above) covers function parameters but is repeatedly missed for two specific shapes: (a) `fl::function<...>` callback / handler typedefs, and (b) small fixed-size array parameters like `const float xy[2]`. These slip through because they don't look like the canonical `void f(const u8*, size_t)` pattern.
+
+**Rules**:
+1. ❌ **NEVER declare a callback typedef with a `(ptr, size)` shape.**
+   - ❌ Bad: `using write_bytes_handler_t = fl::function<size_t(const u8*, size_t)>;`
+   - ✅ Good: `using write_bytes_handler_t = fl::function<size_t(fl::span<const u8>)>;`
+2. ❌ **NEVER take small fixed-size arrays as raw pointers.**
+   - ❌ Bad: `void set_input_gamut(DiodeProfile* p, InputGamut g, const float white_xy[2]);`
+   - ✅ Good: `void set_input_gamut(DiodeProfile* p, InputGamut g, fl::span<const float, 2> white_xy);`
+   - ✅ Good (alternative — by-value pair): `void set_white_point(DiodeProfile* p, fl::vec2f white_xy);`
+3. ✅ **For RGBW / RGBWW multi-channel output**, prefer a `fl::span<u8, 4>` (or `5`) over five separate `u8*` parameters.
+
+**Rationale**: The base span rule prevents most of the pattern but CodeRabbit caught these two shapes in #2560, #2683, #2711. Just adding the two shapes to the canonical examples will close most remaining gaps.
+
+## ISR-Shared State: `fl::atomic` or Critical Section, Never Bare `volatile`
+
+**Core Principle**: Any field that is **written from an ISR callback context and read from task context** (or vice versa), or **written from two task contexts** without other locking, MUST be either an `fl::atomic<T>` with explicit `memory_order`, or guarded by `portENTER_CRITICAL_ISR/portEXIT_CRITICAL_ISR` (ISR side) and `portENTER_CRITICAL/portEXIT_CRITICAL` (task side). Plain `volatile` only prevents the compiler from caching the load — it does NOT provide atomicity, ordering, or visibility across cores.
+
+**Rules**:
+1. ❌ **NEVER use `int` / `bool` / `volatile int` for state shared with an ISR.**
+   - ❌ Bad:
+     ```cpp
+     volatile int mPendingTransmits = 0;
+     // ISR: --mPendingTransmits;          (not atomic on dual-core, no ordering)
+     // task: while (mPendingTransmits) {} (no acquire fence)
+     ```
+   - ✅ Good (atomic):
+     ```cpp
+     fl::atomic<int> mPendingTransmits{0};
+     // ISR: mPendingTransmits.fetch_sub(1, fl::memory_order_release);
+     // task: while (mPendingTransmits.load(fl::memory_order_acquire) > 0) {}
+     ```
+   - ✅ Good (critical section, when the state is more complex than a single word):
+     ```cpp
+     // ISR side:
+     portENTER_CRITICAL_ISR(&mLock);
+     mTransmitting = false;
+     mNextDescriptor = next;
+     portEXIT_CRITICAL_ISR(&mLock);
+     // task side:
+     portENTER_CRITICAL(&mLock);
+     bool tx = mTransmitting;
+     portEXIT_CRITICAL(&mLock);
+     ```
+2. ❌ **NEVER use `std::atomic<T>`** — FastLED targets AVR / older embedded toolchains that don't have `<atomic>`. Use `fl::atomic<T>` from `fl/stl/atomic.h`. (See the project-wide rule: prefer `fl::` over `std::` except for low-level metaprogramming traits.)
+3. ❌ **NEVER clear an ISR-shared flag in task context before all in-flight ISR work has drained.**
+   - This is the underrun-race pattern — clearing `mTransmitting = false` in `refill()` while a chunk-done ISR is still pending corrupts the next frame's state.
+
+**Rationale**: ESP32 / RP2040 / dual-core MCUs make this a hardware-correctness issue, not just a style preference. Caught only twice in the survey window (#2682, #2703), but both were high-severity races that would have shipped without manual review.
+
+**Check Process**:
+1. For each field declared in a class that has an `IRAM_ATTR` callback or `static void IRAM_ATTR on_*` ISR, verify it's either `fl::atomic<T>` or guarded by a `portMUX_TYPE` critical section.
+2. Plain `volatile` on these fields is a violation.
+
+## Unsigned Narrowing Cast Must Clamp
+
+**Core Principle**: When summing channel values, brightness contributions, or any per-element accumulator whose total may exceed the destination type's max, you MUST clamp **before** the narrowing cast. `static_cast<u8>(x)` silently wraps at 256, which is defined behavior in C++ but almost always the wrong behavior.
+
+**Rules**:
+1. ❌ **NEVER `static_cast<u8>` a value that can exceed 255.**
+   - ❌ Bad:
+     ```cpp
+     u32 total_mW = red_mW + (white_mW + warm_white_mW) / 3;
+     u8 byte = static_cast<u8>(total_mW);  // wraps if total > 255
+     ```
+   - ✅ Good:
+     ```cpp
+     u32 total_mW = red_mW + (white_mW + warm_white_mW) / 3;
+     u8 byte = static_cast<u8>(fl::min<u32>(255u, total_mW));
+     ```
+   - ✅ Good (saturating addition helper):
+     ```cpp
+     u8 byte = fl::qadd8(red_byte, white_byte);  // saturates at 255
+     ```
+2. ✅ **The same rule applies to `u16` narrowing** — `static_cast<u16>(x)` where `x` is `u32` and the source can exceed 65535 must clamp first.
+3. ✅ **Pure narrowing for known-in-range values is fine** — e.g. `u8 byte = static_cast<u8>(rgb.r);` when `rgb.r` is already a `u8` typed via a different value path. The rule fires when there's been arithmetic that can overflow the destination type.
+
+**Rationale**: Sibling to the existing "Signed Integer Overflow (UB)" rule. Unsigned wrap is *defined* but produces silently-wrong color / power / brightness values. The signed-UB rule (above) does NOT catch this — `u8 + u16 → wrap` is fine according to the standard but is the bug pattern flagged twice in #2560 (first review ignored, second review re-flagged).
+
+## Test Mirrors Must Call Production Symbols, Not Redeclare Them
+
+**Core Principle**: When `tests/fl/foo/test_bar.cpp` mirrors part of `src/fl/foo/bar.cpp.hpp` (e.g. to verify mathematical identities like Hermite-basis sum = 1), the test MUST call the production symbol directly. Re-declaring the algorithm as a local lambda or helper inside the test file means the test passes regardless of bugs introduced into the production implementation.
+
+**Rules**:
+1. ❌ **NEVER redefine a production algorithm inside a test file just to assert properties of it.**
+   - ❌ Bad:
+     ```cpp
+     // tests/fl/gfx/rgbw_colorimetric.cpp
+     FL_TEST_CASE("hermite basis sums to 1") {
+         auto h0 = [](float t) { return (1 - t)*(1 - t)*(1 + 2*t); };
+         auto h1 = [](float t) { return t*t*(3 - 2*t); };
+         // …asserts h0(t) + h1(t) == 1. Production hermite_basis is never called.
+     }
+     ```
+   - ✅ Good:
+     ```cpp
+     #include "fl/gfx/rgbw_colorimetric.h"
+     FL_TEST_CASE("hermite basis sums to 1") {
+         float out[2];
+         fl::gfx::hermite_basis(0.5f, out);
+         FL_CHECK_CLOSE(out[0] + out[1], 1.0f, 1e-6f);
+     }
+     ```
+2. ✅ **Mirror files are allowed only when test is verifying byte-for-byte text equivalence** of two sources (e.g. a port from Python reference). In that case the mirror must be obvious from the file name (e.g. `*_mirror_for_test.cpp.hpp`) and a static_assert / runtime check must compare the mirror's output against the production output on a sample input.
+3. ✅ **Header-only `inline` algorithms** can be tested by calling the production header directly — there's no link concern.
+
+**Rationale**: Caught in #2683, #2707, #2709. The bug pattern: a future regression in the production implementation (e.g. someone swaps the sign of a Hermite coefficient) passes all tests because the tests verify a local copy of the *correct* algorithm. The production code can silently drift.
+
+## ASCII-Only in Source Files (No Emoji, No Unicode Math Glyphs)
+
+**Core Principle**: Every C++ source file (`.h`, `.cpp`, `.hpp`, `.cpp.hpp`) and every Python source file in this repo MUST contain only 7-bit ASCII. No emoji in comments, no Unicode math symbols in identifiers or print statements, no curly-quote characters from copy/pasted documentation.
+
+**Rules**:
+1. ❌ **NEVER use emoji in C++ comments.**
+   - ❌ Bad: `// ⚠️ This runs in ISR context — keep it short`
+   - ✅ Good: `// WARNING: This runs in ISR context — keep it short`
+2. ❌ **NEVER use Unicode math glyphs in source code.**
+   - ❌ Bad (Python): `print("FastLED − Reference")`, `ρ = 0.5`, `Δ = abs(a - b)`
+   - ✅ Good (Python): `print("FastLED - Reference")`, `rho = 0.5`, `delta = abs(a - b)`
+3. ❌ **NEVER paste curly quotes / em-dashes from documentation tools.** Replace `"smart quotes"` with `"straight quotes"`, `—` with `-` or `--`.
+4. ✅ **Markdown documentation files (`*.md`) are exempt** — Unicode in human-reading docs is fine. This rule is for code only.
+
+**Rationale**: Source files are read by lots of tools (compilers, linters, AVR / RP2040 / Teensy toolchains with various Unicode story, terminal log dumps, grep, IDE search). Some toolchains choke; others render the glyphs as garbage in compile errors. Pure ASCII keeps the source legible in every context. Flagged in #2648 (C++ comments with emoji) and #2709 (Python with `×`, `−`, `ρ`, `∆`).
+
+**Check Process**:
+1. Run `grep -rPn '[^\x00-\x7F]' src/ tests/ ci/` (excluding `*.md`).
+2. Any hits are violations.
+3. Suppression: none — there is always an ASCII equivalent.
