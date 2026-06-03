@@ -8,6 +8,7 @@
 |------|------|
 | Writing/editing C++ code | `agents/docs/cpp-standards.md` |
 | Creating an API wrapper type | `agents/docs/cpp-standards.md` → "API Object Pattern" |
+| Adding a global setting / configuration knob | `agents/docs/cpp-standards.md` → "Public Settings Pattern" (new setters go on `CFastLED`, not as bare `fl::set_*` free functions) |
 | Writing/editing Python code | `agents/docs/python-standards.md` |
 | Editing meson.build files | `agents/docs/build-system.md` |
 | Running tests, Docker, WASM, QEMU | `agents/docs/testing-commands.md` |
@@ -83,6 +84,7 @@ See `agents/docs/build-system.md` for full command execution rules and forbidden
 
 ### Code Standards
 - **C++**: See `agents/docs/cpp-standards.md` (span convention, DMA patterns, naming, macros)
+- **C++ public settings**: New global setters MUST go on `CFastLED` (`FastLED.setX()`), not as bare `fl::set_*` free functions — see `agents/docs/cpp-standards.md` → "Public Settings Pattern"
 - **JavaScript**: Run `bash lint --js` after modifying JS files
 
 ### Code Review Rule
