@@ -454,6 +454,118 @@ const FL_IS_PREFIX_TO_HEADER: &[(&str, &str)] = &[
 
 const IWYU_INTERNAL_HEADER_PREFIXES: &[&str] = &["fl/", "fx/", "sensors/", "lib8tion/"];
 
+const TEST_PATH_EXCLUDED_FILES: &[&str] = &[
+    "doctest_main.cpp",
+    "audio.cpp",
+    "codec.cpp",
+    "log.cpp",
+    "detectors.cpp",
+    "encoders.cpp",
+    "2d.cpp",
+    "validation.cpp",
+    "draw_ring.hpp",
+    "draw_thick_line.hpp",
+    "draw_line.hpp",
+    "draw_disc.hpp",
+    "draw_disc_16.hpp",
+    "perf_primitives.hpp",
+    "gain.hpp",
+    "test_helpers.hpp",
+    "vocal_real_audio.hpp",
+    "map_range.hpp",
+    "assume_aligned.hpp",
+    "insert_result.hpp",
+    "active_strip_data_json.cpp",
+    "audio_url.cpp",
+    "bytestream.cpp",
+    "clamp.cpp",
+    "force_inline.cpp",
+    "hsv2rgb_accuracy.cpp",
+    "noise_range.cpp",
+    "noise_ring.cpp",
+    "power_estimation.cpp",
+    "slice.cpp",
+    "unused.cpp",
+    "channel_manager.cpp",
+    "spi_channel.cpp",
+    "wave8_spi.cpp",
+    "loopback.cpp",
+    "rpc.cpp",
+    "rpc_http_stream.cpp",
+    "adversarial.cpp",
+    "deficiencies.cpp",
+    "sound_level_meter.cpp",
+    "allocator_move.cpp",
+    "cstdint.cpp",
+    "function_list.cpp",
+    "strstream_integers.cpp",
+    "test_tcp_socket.cpp",
+    "test_tcp_acceptor.cpp",
+    "http_promise.cpp",
+    "http_transport.cpp",
+    "server_loopback.cpp",
+];
+
+const HEADERS_EXIST_EXCLUDED_FILES: &[&str] = &[
+    "doctest_main.cpp",
+    "sketch_runner.cpp",
+    "spi_batching_logic.cpp",
+    "serial_printf.cpp",
+    "test_runner.cpp",
+    "runner.cpp",
+    "crash_handler_main.cpp",
+    "example_runner.cpp",
+    "fltest_self_test.cpp",
+    "asan_leak.cpp",
+    "test_helpers.hpp",
+    "codec.cpp",
+    "log.cpp",
+    "detectors.cpp",
+    "encoders.cpp",
+    "2d.cpp",
+    "validation.cpp",
+    "rpc.cpp",
+];
+
+const TEST_CONFIG_EXCLUDED_DIRS: &[&str] = &[
+    "tests/shared",
+    "tests/testing",
+    "tests/data",
+    "tests/manual",
+    "tests/profile",
+    "tests/build",
+    "tests/builddir",
+    "tests/x64",
+    "tests/bin",
+    "tests/example_compile_direct",
+    "tests/fastled_js",
+    "tests/fl/chipsets/encoders",
+    "tests/fl/log",
+    "tests/fl/channels/detail/validation",
+    "tests/fl/remote/rpc",
+    "tests/fl/codec",
+    "tests/fl/fx/2d",
+    "tests/fbuild_qemu_smoke",
+];
+
+const TEST_AGGREGATED_DIRS: &[&str] = &[
+    "tests/fl/chipsets/encoders",
+    "tests/fl/log",
+    "tests/fl/channels/detail/validation",
+    "tests/fl/remote/rpc",
+    "tests/fl/codec",
+    "tests/fl/fx/2d",
+];
+
+const TEST_INCLUDE_VALID_PREFIXES: &[&str] = &[
+    "fl/",
+    "platforms/",
+    "fx/",
+    "sensors/",
+    "third_party/",
+    "tests/",
+];
+
 #[derive(Debug, Clone)]
 pub struct FileContent {
     pub path: String,
@@ -590,6 +702,7 @@ pub fn supported_checker_names() -> &'static [&'static str] {
         "esp_rom_printf",
         "fastled_header_usage",
         "fl_is_defined",
+        "headers_exist",
         "include_after_namespace",
         "include_paths",
         "impl_hpp_includes",
@@ -618,6 +731,9 @@ pub fn supported_checker_names() -> &'static [&'static str] {
         "singleton_in_headers",
         "stdint_type",
         "subdir_namespace",
+        "test_aggregation",
+        "test_include_paths",
+        "test_path_structure",
         "thread_local_keyword",
         "example_serial",
         "unit_test",
@@ -648,6 +764,7 @@ pub fn supported_python_checker_names() -> &'static [&'static str] {
         "ExampleSerialChecker",
         "FastLEDHeaderUsageChecker",
         "FlIsDefinedChecker",
+        "HeadersExistChecker",
         "IncludeAfterNamespaceChecker",
         "IncludePathsChecker",
         "ImplHppIncludesChecker",
@@ -676,6 +793,9 @@ pub fn supported_python_checker_names() -> &'static [&'static str] {
         "StdNamespaceChecker",
         "StdintTypeChecker",
         "SubdirNamespaceChecker",
+        "TestAggregationChecker",
+        "TestIncludePathsChecker",
+        "TestPathStructureChecker",
         "ThreadLocalKeywordChecker",
         "UnitTestChecker",
         "UsingNamespaceChecker",
@@ -707,6 +827,7 @@ pub fn create_checkers(
         ("example_serial", Box::new(ExampleSerialChecker)),
         ("fastled_header_usage", Box::new(FastLEDHeaderUsageChecker)),
         ("fl_is_defined", Box::new(FlIsDefinedChecker)),
+        ("headers_exist", Box::new(HeadersExistChecker)),
         (
             "include_after_namespace",
             Box::new(IncludeAfterNamespaceChecker),
@@ -755,6 +876,9 @@ pub fn create_checkers(
             "subdir_namespace",
             Box::new(SubdirNamespaceChecker { subdir: "task" }),
         ),
+        ("test_aggregation", Box::new(TestAggregationChecker)),
+        ("test_include_paths", Box::new(TestIncludePathsChecker)),
+        ("test_path_structure", Box::new(TestPathStructureChecker)),
         ("thread_local_keyword", Box::new(ThreadLocalKeywordChecker)),
         ("unit_test", Box::new(UnitTestChecker)),
         ("using_namespace", Box::new(UsingNamespaceChecker)),
@@ -1213,6 +1337,11 @@ fn regex_static_func() -> &'static Regex {
 fn regex_include_path() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| Regex::new(r#"#include\s+"([^"]+)""#).unwrap())
+}
+
+fn regex_quoted_include_line() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r#"^\s*#\s*include\s+"([^"]+)""#).unwrap())
 }
 
 fn regex_builtin_memcpy() -> &'static Regex {
@@ -1923,6 +2052,293 @@ fn project_relative_guess(path: &str) -> String {
         }
     }
     normalized
+}
+
+fn project_root_prefix_for_file(path: &str) -> String {
+    let normalized = normalize_path(path);
+    for marker in ["/tests/", "/src/", "/examples/"] {
+        if let Some(index) = normalized.find(marker) {
+            return normalized[..index].to_string();
+        }
+    }
+    String::new()
+}
+
+fn join_project_path(root_prefix: &str, rel_path: &str) -> PathBuf {
+    if root_prefix.is_empty() {
+        PathBuf::from(rel_path)
+    } else {
+        PathBuf::from(format!(
+            "{root_prefix}/{}",
+            rel_path.trim_start_matches('/')
+        ))
+    }
+}
+
+fn project_relative_path(path: &str) -> Option<String> {
+    let normalized = normalize_path(path);
+    for marker in ["/tests/", "/src/", "/examples/"] {
+        if let Some(index) = normalized.find(marker) {
+            return Some(normalized[index + 1..].to_string());
+        }
+    }
+    for prefix in ["tests/", "src/", "examples/"] {
+        if normalized.starts_with(prefix) {
+            return Some(normalized);
+        }
+    }
+    None
+}
+
+fn tests_relative_path(path: &str) -> Option<String> {
+    let normalized = normalize_path(path);
+    if let Some(index) = normalized.find("/tests/") {
+        return Some(normalized[index + "/tests/".len()..].to_string());
+    }
+    normalized
+        .strip_prefix("tests/")
+        .map(|value| value.to_string())
+}
+
+fn path_without_extension(path: &str) -> String {
+    for suffix in [".cpp.hpp", ".cpp", ".hpp", ".h"] {
+        if let Some(stripped) = path.strip_suffix(suffix) {
+            return stripped.to_string();
+        }
+    }
+    path.to_string()
+}
+
+fn python_path_display(rel_path: &str) -> String {
+    if cfg!(windows) {
+        rel_path.replace('/', "\\")
+    } else {
+        rel_path.to_string()
+    }
+}
+
+fn is_under_config_excluded_test_dir(path: &str) -> bool {
+    let Some(project_rel) = project_relative_path(path) else {
+        return false;
+    };
+    TEST_CONFIG_EXCLUDED_DIRS
+        .iter()
+        .any(|dir| project_rel == *dir || project_rel.strip_prefix(&format!("{dir}/")).is_some())
+}
+
+fn top_level_headers(root_prefix: &str, dir: &str) -> HashSet<String> {
+    let mut headers = HashSet::new();
+    let root = join_project_path(root_prefix, dir);
+    let Ok(entries) = fs::read_dir(root) else {
+        return headers;
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if !path.is_file() {
+            continue;
+        }
+        let name = path
+            .file_name()
+            .and_then(|value| value.to_str())
+            .unwrap_or("");
+        if name.ends_with(".h") || name.ends_with(".hpp") {
+            headers.insert(name.to_string());
+        }
+    }
+    headers
+}
+
+fn all_test_header_filenames(root_prefix: &str) -> HashSet<String> {
+    let root = join_project_path(root_prefix, "tests");
+    let mut filenames = HashSet::new();
+    if !root.exists() {
+        return filenames;
+    }
+    for entry in WalkDir::new(root).into_iter().filter_map(Result::ok) {
+        if !entry.file_type().is_file() {
+            continue;
+        }
+        let path = entry.path();
+        let path_str = normalize_path(&path_to_string(path));
+        if !ends_with_any(&path_str, &[".h", ".hpp", ".cpp.hpp"]) {
+            continue;
+        }
+        if let Some(name) = path.file_name().and_then(|value| value.to_str()) {
+            filenames.insert(name.to_string());
+        }
+    }
+    filenames
+}
+
+fn source_mirror_dir_has_headers(root_prefix: &str, test_dir_path: &str) -> bool {
+    let src_dir = join_project_path(root_prefix, &format!("src/{test_dir_path}"));
+    let Ok(entries) = fs::read_dir(src_dir) else {
+        return false;
+    };
+    entries.flatten().any(|entry| {
+        let path = entry.path();
+        path.is_file()
+            && path
+                .file_name()
+                .and_then(|value| value.to_str())
+                .is_some_and(|name| {
+                    name.ends_with(".h") || name.ends_with(".hpp") || name.ends_with(".cpp.hpp")
+                })
+    })
+}
+
+fn parse_aggregator_includes(path: &Path) -> BTreeSet<String> {
+    let mut includes = BTreeSet::new();
+    let Ok(content) = fs::read_to_string(path) else {
+        return includes;
+    };
+    for line in content.lines() {
+        if let Some(capture) = regex_quoted_include_line().captures(line) {
+            includes.insert(capture[1].to_string());
+        }
+    }
+    includes
+}
+
+fn test_aggregator_rel_for_dir(excluded_dir_rel: &str) -> String {
+    format!("{excluded_dir_rel}.cpp")
+}
+
+fn resolve_test_include(root_prefix: &str, aggregator_rel: &str, include_path: &str) -> String {
+    let aggregator_parent = aggregator_rel
+        .rsplit_once('/')
+        .map_or("", |(parent, _)| parent);
+    let from_aggregator = if aggregator_parent.is_empty() {
+        include_path.to_string()
+    } else {
+        format!("{aggregator_parent}/{include_path}")
+    };
+    let candidate = join_project_path(root_prefix, &from_aggregator);
+    if candidate.exists() {
+        return normalize_path(&path_to_string(&candidate));
+    }
+    normalize_path(&path_to_string(&join_project_path(
+        root_prefix,
+        include_path,
+    )))
+}
+
+fn collect_test_aggregation_included_files(
+    root_prefix: &str,
+    excluded_dir_rel: &str,
+) -> (Option<String>, BTreeSet<String>) {
+    let direct_aggregator_rel = test_aggregator_rel_for_dir(excluded_dir_rel);
+    let primary_aggregator = join_project_path(root_prefix, &direct_aggregator_rel)
+        .exists()
+        .then_some(direct_aggregator_rel.clone());
+    let mut included_files = BTreeSet::new();
+    let mut check_dir = excluded_dir_rel.to_string();
+
+    while check_dir.starts_with("tests/") && check_dir != "tests" {
+        let aggregator_rel = test_aggregator_rel_for_dir(&check_dir);
+        let aggregator = join_project_path(root_prefix, &aggregator_rel);
+        if aggregator.exists() {
+            for include in parse_aggregator_includes(&aggregator) {
+                let resolved = resolve_test_include(root_prefix, &aggregator_rel, &include);
+                if Path::new(&resolved).exists() {
+                    included_files.insert(resolved);
+                }
+            }
+        }
+        let Some((parent, _)) = check_dir.rsplit_once('/') else {
+            break;
+        };
+        check_dir = parent.to_string();
+    }
+
+    (primary_aggregator, included_files)
+}
+
+fn test_aggregation_check_single_file(file_path: &str) -> Vec<String> {
+    let normalized = normalize_path(file_path);
+    let root_prefix = project_root_prefix_for_file(&normalized);
+    let Some(project_rel) = project_relative_path(&normalized) else {
+        return Vec::new();
+    };
+    let resolved = normalize_path(&path_to_string(&join_project_path(
+        &root_prefix,
+        &project_rel,
+    )));
+    let mut violations = Vec::new();
+
+    for excluded_dir in TEST_AGGREGATED_DIRS {
+        let aggregator_rel = test_aggregator_rel_for_dir(excluded_dir);
+        let aggregator_path = join_project_path(&root_prefix, &aggregator_rel);
+        let aggregator_norm = normalize_path(&path_to_string(&aggregator_path));
+
+        if aggregator_path.exists() && aggregator_norm == resolved {
+            let (_, included_files) =
+                collect_test_aggregation_included_files(&root_prefix, excluded_dir);
+            let excluded_path = join_project_path(&root_prefix, excluded_dir);
+            if excluded_path.exists() {
+                for entry in WalkDir::new(&excluded_path)
+                    .into_iter()
+                    .filter_map(Result::ok)
+                {
+                    if !entry.file_type().is_file() {
+                        continue;
+                    }
+                    let hpp_path = normalize_path(&path_to_string(entry.path()));
+                    if !hpp_path.ends_with(".hpp") || included_files.contains(&hpp_path) {
+                        continue;
+                    }
+                    let rel_file = project_relative_path(&hpp_path).unwrap_or(hpp_path);
+                    violations.push(format!(
+                        "{}: orphaned {}",
+                        python_path_display(&aggregator_rel),
+                        python_path_display(&rel_file)
+                    ));
+                }
+            }
+            for include in parse_aggregator_includes(&aggregator_path) {
+                let inc_resolved = resolve_test_include(&root_prefix, &aggregator_rel, &include);
+                if project_relative_path(&inc_resolved)
+                    .is_some_and(|rel| rel.starts_with(&format!("{excluded_dir}/")))
+                    && include.ends_with(".cpp")
+                {
+                    violations.push(format!(
+                        "{}: #include \"{include}\" should use .hpp",
+                        python_path_display(&aggregator_rel)
+                    ));
+                }
+            }
+            return violations;
+        }
+
+        if project_rel == *excluded_dir
+            || project_rel
+                .strip_prefix(&format!("{excluded_dir}/"))
+                .is_some()
+        {
+            if !project_rel.ends_with(".hpp") {
+                continue;
+            }
+            let (aggregator, included_files) =
+                collect_test_aggregation_included_files(&root_prefix, excluded_dir);
+            let Some(aggregator_rel) = aggregator else {
+                violations.push(format!(
+                    "Missing aggregator: {}.cpp",
+                    python_path_display(excluded_dir)
+                ));
+                return violations;
+            };
+            if !included_files.contains(&resolved) {
+                violations.push(format!(
+                    "{}: orphaned {}",
+                    python_path_display(&aggregator_rel),
+                    python_path_display(&project_rel)
+                ));
+            }
+            return violations;
+        }
+    }
+
+    violations
 }
 
 fn required_fl_is_header(fl_is_macro: &str) -> Option<&'static str> {
@@ -5197,6 +5613,359 @@ impl FileContentChecker for UnitTestChecker {
         }
 
         violations
+    }
+}
+
+struct HeadersExistChecker;
+
+impl FileContentChecker for HeadersExistChecker {
+    fn name(&self) -> &'static str {
+        "HeadersExistChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        if !is_under_project_subpath(&normalized, project_root, "tests") {
+            return false;
+        }
+        if !ends_with_any(&normalized, &[".cpp", ".hpp"]) {
+            return false;
+        }
+        let name = normalized.rsplit('/').next().unwrap_or(&normalized);
+        if HEADERS_EXIST_EXCLUDED_FILES.contains(&name) {
+            return false;
+        }
+        let Some(rel) = tests_relative_path(&normalized) else {
+            return false;
+        };
+        let parts: Vec<&str> = rel.split('/').collect();
+        if parts
+            .iter()
+            .any(|part| matches!(*part, "core" | "shared" | "test_utils"))
+        {
+            return false;
+        }
+        !parts.iter().any(|part| {
+            *part == "build"
+                || part.starts_with(".build-")
+                || *part == "example_compile_direct"
+                || *part == "CMakeFiles"
+        })
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let normalized = normalize_path(&file_content.path);
+        let root_prefix = project_root_prefix_for_file(&normalized);
+        let Some(test_rel) = tests_relative_path(&normalized) else {
+            return Vec::new();
+        };
+        let first_part = test_rel.split('/').next().unwrap_or("");
+        if first_part == "misc" || first_part == "profile" {
+            return Vec::new();
+        }
+        if file_content
+            .lines
+            .iter()
+            .take(5)
+            .any(|line| line.to_lowercase().contains("// ok standalone"))
+        {
+            return Vec::new();
+        }
+
+        let includes: Vec<String> = file_content
+            .lines
+            .iter()
+            .filter_map(|line| regex_quoted_include_line().captures(line))
+            .filter_map(|capture| {
+                let header = capture[1].to_string();
+                (!header.contains("test.h")
+                    && !header.starts_with("testing/")
+                    && !header.starts_with("test_utils/"))
+                .then_some(header)
+            })
+            .collect();
+
+        let rel_no_ext = path_without_extension(&test_rel);
+        let base_name = normalized
+            .rsplit('/')
+            .next()
+            .and_then(|name| name.rsplit_once('.').map(|(stem, _)| stem))
+            .unwrap_or("");
+        let parent_rel = rel_no_ext.rsplit_once('/').map_or("", |(parent, _)| parent);
+        let primary_rel = if parent_rel.is_empty() {
+            format!("src/{base_name}.h")
+        } else {
+            format!("src/{parent_rel}/{base_name}.h")
+        };
+        let primary_exists = join_project_path(&root_prefix, &primary_rel).exists();
+        let fallback_candidates: Vec<String> = includes
+            .iter()
+            .map(|include| format!("src/{include}"))
+            .filter(|candidate| candidate != &primary_rel)
+            .collect();
+        let fallback_exists = fallback_candidates
+            .iter()
+            .any(|candidate| join_project_path(&root_prefix, candidate).exists());
+
+        if !primary_exists && !fallback_exists {
+            let test_full_rel = project_relative_path(&normalized).unwrap_or(test_rel.clone());
+            let mut parts = vec![
+                format!(
+                    "Test file {} has no corresponding header in src/",
+                    python_path_display(&test_full_rel)
+                ),
+                format!("  Expected: {}", python_path_display(&primary_rel)),
+            ];
+            if includes.is_empty() {
+                parts.push("  No project headers included!".to_string());
+            } else {
+                parts.push(format!(
+                    "  Includes: {}",
+                    includes
+                        .iter()
+                        .take(3)
+                        .cloned()
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                ));
+                if includes.len() > 3 {
+                    parts.push(format!("  ... and {} more", includes.len() - 3));
+                }
+            }
+            return vec![(0, parts.join("\n"))];
+        }
+
+        if !primary_exists && fallback_exists && !includes.is_empty() {
+            let test_dir_path = parent_rel;
+            let mut any_include_matches = false;
+            let mut first_mismatched_include_dir: Option<String> = None;
+            for include in &includes {
+                let include_dir = include.rsplit_once('/').map_or("", |(dir, _)| dir);
+                if !test_dir_path.is_empty()
+                    && !include_dir.is_empty()
+                    && test_dir_path == include_dir
+                {
+                    any_include_matches = true;
+                    break;
+                }
+                if first_mismatched_include_dir.is_none()
+                    && !test_dir_path.is_empty()
+                    && !include_dir.is_empty()
+                    && test_dir_path != include_dir
+                {
+                    first_mismatched_include_dir = Some(include_dir.to_string());
+                }
+            }
+            if !any_include_matches
+                && first_mismatched_include_dir.is_some()
+                && !source_mirror_dir_has_headers(&root_prefix, test_dir_path)
+            {
+                let include_dir = first_mismatched_include_dir.unwrap();
+                let test_full_rel = project_relative_path(&normalized).unwrap_or(test_rel);
+                return vec![(
+                    0,
+                    format!(
+                        "⚠️  Test file {} may be in wrong directory:\n  Test location: tests/{test_dir_path}/\n  Includes headers from: src/{include_dir}/\n  Expected location: tests/{include_dir}/",
+                        python_path_display(&test_full_rel)
+                    ),
+                )];
+            }
+        }
+
+        Vec::new()
+    }
+}
+
+struct TestIncludePathsChecker;
+
+impl FileContentChecker for TestIncludePathsChecker {
+    fn name(&self) -> &'static str {
+        "TestIncludePathsChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        is_under_project_subpath(&normalized, project_root, "tests")
+            && ends_with_any(&normalized, &[".cpp", ".h", ".hpp", ".cc", ".cxx"])
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let root_prefix = project_root_prefix_for_file(&file_content.path);
+        let mut allowed_bare = top_level_headers(&root_prefix, "tests");
+        allowed_bare.extend(top_level_headers(&root_prefix, "src"));
+        let all_test_filenames = all_test_header_filenames(&root_prefix);
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment || stripped.starts_with("//") {
+                continue;
+            }
+            if line.to_lowercase().contains("ok test include") {
+                continue;
+            }
+            let Some(capture) = regex_quoted_include_line().captures(stripped) else {
+                continue;
+            };
+            let include_path = &capture[1];
+            if include_path.starts_with("../") || include_path.starts_with("./") {
+                violations.push((
+                    index + 1,
+                    format!(
+                        "Relative include not allowed in tests: #include \"{include_path}\" — use a fully-qualified path (e.g., tests/fl/...). Add '// ok test include' to suppress."
+                    ),
+                ));
+                continue;
+            }
+            if TEST_INCLUDE_VALID_PREFIXES
+                .iter()
+                .any(|prefix| include_path.starts_with(prefix))
+            {
+                continue;
+            }
+            if !include_path.contains('/') && !include_path.contains('\\') {
+                if allowed_bare.contains(include_path) || !all_test_filenames.contains(include_path)
+                {
+                    continue;
+                }
+                violations.push((
+                    index + 1,
+                    format!(
+                        "Bare include not allowed in tests: #include \"{include_path}\" — use a fully-qualified path (e.g., fl/... or tests/...). Add '// ok test include' to suppress."
+                    ),
+                ));
+                continue;
+            }
+
+            let file_dir = Path::new(&file_content.path)
+                .parent()
+                .map(Path::to_path_buf)
+                .unwrap_or_default();
+            if file_dir.join(include_path).exists() {
+                violations.push((
+                    index + 1,
+                    format!(
+                        "Sub-path include not allowed in tests: #include \"{include_path}\" — use a fully-qualified path (e.g., tests/fl/...). Add '// ok test include' to suppress."
+                    ),
+                ));
+                continue;
+            }
+            let first_component = include_path.split('/').next().unwrap_or("");
+            if matches!(
+                first_component,
+                "fl" | "misc" | "platforms" | "shared" | "profile"
+            ) && !include_path.starts_with("tests/")
+            {
+                violations.push((
+                    index + 1,
+                    format!(
+                        "Include missing tests/ prefix: #include \"{include_path}\" — use #include \"tests/{include_path}\" instead. Add '// ok test include' to suppress."
+                    ),
+                ));
+            }
+        }
+
+        violations
+    }
+}
+
+struct TestPathStructureChecker;
+
+impl FileContentChecker for TestPathStructureChecker {
+    fn name(&self) -> &'static str {
+        "TestPathStructureChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        if !is_under_project_subpath(&normalized, project_root, "tests")
+            || !ends_with_any(&normalized, &[".cpp", ".hpp"])
+        {
+            return false;
+        }
+        let basename = normalized.rsplit('/').next().unwrap_or(&normalized);
+        if TEST_PATH_EXCLUDED_FILES.contains(&basename) {
+            return false;
+        }
+        let Some(rel) = tests_relative_path(&normalized) else {
+            return false;
+        };
+        let parts: Vec<&str> = rel.split('/').collect();
+        if parts
+            .first()
+            .is_some_and(|part| matches!(*part, "misc" | "profile" | "shared"))
+            || parts.contains(&"test_utils")
+        {
+            return false;
+        }
+        !is_under_config_excluded_test_dir(&normalized)
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let normalized = normalize_path(&file_content.path);
+        let root_prefix = project_root_prefix_for_file(&normalized);
+        let Some(rel_from_tests) = tests_relative_path(&normalized) else {
+            return Vec::new();
+        };
+        let test_name_no_ext = path_without_extension(&rel_from_tests);
+        let expected_h = format!("src/{test_name_no_ext}.h");
+        let expected_hpp = format!("src/{test_name_no_ext}.hpp");
+        let expected_cpp_hpp = format!("src/{test_name_no_ext}.cpp.hpp");
+        if join_project_path(&root_prefix, &expected_h).exists()
+            || join_project_path(&root_prefix, &expected_hpp).exists()
+            || join_project_path(&root_prefix, &expected_cpp_hpp).exists()
+        {
+            return Vec::new();
+        }
+        if file_content
+            .lines
+            .iter()
+            .take(5)
+            .any(|line| line.to_lowercase().contains("// ok standalone"))
+        {
+            return Vec::new();
+        }
+        let project_rel = project_relative_path(&normalized).unwrap_or_else(|| normalized.clone());
+        let test_name = normalized.rsplit('/').next().unwrap_or(&normalized);
+        vec![(
+            1,
+            format!(
+                "Test file has no corresponding source file at matching path. Test is at '{}' but no source file found at 'src/{}', 'src/{}', or 'src/{}'. \n\nREQUIRED ACTIONS (in order of preference):\n  1. RENAME the test to match the source file it's testing (best option)\n  2. MERGE this test into an existing test file that tests the same source — each test\n     file costs compile time, so consolidating into fewer files is strongly preferred\n  3. MOVE to 'tests/misc/{test_name}' if this truly doesn't test a specific source file\n\n⚠️  DO NOT add '// ok standalone' unless absolutely necessary. This amnesty is a last\nresort for rare infrastructure files that genuinely cannot be organized. AI agents\nshould NEVER add this comment — instead fix the path or consolidate tests.\n\nAvoid creating tests in 'tests/misc/' - prefer mirroring source directory structure.\nTest organization should mirror source organization for maintainability.\nNote: Source matcher checks .h, .hpp, and .cpp.hpp files.",
+                python_path_display(&project_rel),
+                python_path_display(&format!("{test_name_no_ext}.h")),
+                python_path_display(&format!("{test_name_no_ext}.hpp")),
+                python_path_display(&format!("{test_name_no_ext}.cpp.hpp")),
+            ),
+        )]
+    }
+}
+
+struct TestAggregationChecker;
+
+impl FileContentChecker for TestAggregationChecker {
+    fn name(&self) -> &'static str {
+        "TestAggregationChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        is_under_project_subpath(&normalized, project_root, "tests")
+            && ends_with_any(&normalized, &[".cpp", ".hpp"])
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        test_aggregation_check_single_file(&file_content.path)
+            .into_iter()
+            .map(|message| (0, message))
+            .collect()
     }
 }
 
