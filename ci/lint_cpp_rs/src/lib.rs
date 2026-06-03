@@ -124,6 +124,116 @@ const TYPO_INCLUDE_PREFIXES: &[(&str, &str)] = &[
     ("PLATFORMS/", "platforms/"),
 ];
 
+const ARDUINO_BANNED_MACROS: &[&str] = &["INPUT", "OUTPUT", "DEFAULT"];
+
+const ATTRIBUTE_MAPPINGS: &[(&str, &str)] = &[
+    ("maybe_unused", "FL_MAYBE_UNUSED"),
+    ("nodiscard", "FL_NODISCARD"),
+    ("fallthrough", "FL_FALLTHROUGH"),
+    ("deprecated", "FL_DEPRECATED"),
+    ("noreturn", "FL_NORETURN"),
+    ("likely", "FL_LIKELY"),
+    ("unlikely", "FL_UNLIKELY"),
+    ("no_unique_address", "FL_NO_UNIQUE_ADDRESS"),
+];
+
+const NUMERIC_LIMIT_MACROS: &[&str] = &[
+    "UINT8_MAX",
+    "UINT16_MAX",
+    "UINT32_MAX",
+    "UINT64_MAX",
+    "UINTMAX_MAX",
+    "UINTPTR_MAX",
+    "SIZE_MAX",
+    "INT8_MAX",
+    "INT16_MAX",
+    "INT32_MAX",
+    "INT64_MAX",
+    "INTMAX_MAX",
+    "INTPTR_MAX",
+    "INT8_MIN",
+    "INT16_MIN",
+    "INT32_MIN",
+    "INT64_MIN",
+    "INTMAX_MIN",
+    "INTPTR_MIN",
+    "UCHAR_MAX",
+    "USHRT_MAX",
+    "UINT_MAX",
+    "ULONG_MAX",
+    "ULLONG_MAX",
+    "CHAR_MAX",
+    "SHRT_MAX",
+    "INT_MAX",
+    "LONG_MAX",
+    "LLONG_MAX",
+    "CHAR_MIN",
+    "SHRT_MIN",
+    "INT_MIN",
+    "LONG_MIN",
+    "LLONG_MIN",
+];
+
+const NUMERIC_LIMIT_EXCLUDED_SUFFIXES: &[&str] =
+    &["tests/fl/stl/cstdint.cpp", "tests/fl/stl/stdint.cpp"];
+
+const STD_BRIDGE_FILE_WHITELIST: &[&str] = &[
+    "platforms/stub/mutex_stub_stl.h",
+    "platforms/stub/mutex_stub_noop.h",
+    "platforms/esp/32/mutex_esp32.h",
+    "platforms/arm/rp/mutex_rp.h",
+    "platforms/arm/stm32/mutex_stm32.h",
+    "platforms/arm/stm32/mutex_stm32_rtos.h",
+    "platforms/arm/d21/mutex_samd.h",
+    "platforms/arm/nrf52/mutex_nrf52.h",
+    "platforms/stub/condition_variable_stub.h",
+    "platforms/esp/32/condition_variable_esp32.h",
+    "platforms/esp/32/condition_variable_esp32.cpp.hpp",
+    "platforms/stub/thread_stub_stl.h",
+    "platforms/stub/thread_stub_noop.h",
+    "platforms/stub/semaphore_stub_stl.h",
+    "platforms/stub/semaphore_stub_noop.h",
+    "platforms/esp/32/semaphore_esp32.h",
+    "platforms/arm/d21/semaphore_samd.h",
+    "platforms/arm/d21/semaphore_samd.cpp.hpp",
+    "platforms/arm/rp/semaphore_rp.h",
+    "platforms/arm/rp/semaphore_rp.cpp.hpp",
+    "platforms/arm/stm32/semaphore_stm32.h",
+    "platforms/arm/stm32/semaphore_stm32.cpp.hpp",
+    "platforms/stub/platform_time.cpp.hpp",
+    "platforms/apple/run_example.hpp",
+    "platforms/apple/run_unit_test.hpp",
+    "platforms/posix/run_example.hpp",
+    "platforms/posix/run_unit_test.hpp",
+    "platforms/win/run_example.hpp",
+    "platforms/win/run_unit_test.hpp",
+];
+
+const ALLOWED_STD_SYMBOLS: &[&str] = &[
+    "std::atomic_thread_fence",
+    "std::memory_order_acquire",
+    "std::memory_order_release",
+    "std::memory_order_seq_cst",
+    "std::memory_order_relaxed",
+    "std::memory_order_acq_rel",
+    "std::memory_order_consume",
+];
+
+const FORBIDDEN_SERIAL_METHODS: &[&str] = &[
+    "print",
+    "println",
+    "printf",
+    "write",
+    "read",
+    "available",
+    "peek",
+    "readStringUntil",
+    "flush",
+    "begin",
+];
+
+const ALLOWED_SERIAL_METHODS: &[&str] = &["setTxBufferSize", "setTxTimeoutMs"];
+
 #[derive(Debug, Clone)]
 pub struct FileContent {
     pub path: String,
@@ -243,7 +353,9 @@ impl Default for MultiCheckerFileProcessor {
 
 pub fn supported_checker_names() -> &'static [&'static str] {
     &[
+        "arduino_macro_usage",
         "asm_js_location",
+        "attribute",
         "bare_allocation",
         "banned_define",
         "banned_macros",
@@ -253,16 +365,24 @@ pub fn supported_checker_names() -> &'static [&'static str] {
         "cpp_include",
         "esp_rom_printf",
         "fastled_header_usage",
+        "fl_is_defined",
         "include_paths",
         "impl_hpp_includes",
+        "numeric_limit_macros",
         "pragma_once",
+        "platform_pragma",
+        "raw_noexcept",
+        "raw_pragma",
         "reinterpret_cast",
         "relative_include",
         "serial_printf",
         "sleep_for",
         "span_from_pointer",
         "static_in_headers",
+        "std_namespace",
+        "singleton_in_headers",
         "thread_local_keyword",
+        "example_serial",
         "using_namespace_fl_in_examples",
         "weak_attribute",
     ]
@@ -270,7 +390,9 @@ pub fn supported_checker_names() -> &'static [&'static str] {
 
 pub fn supported_python_checker_names() -> &'static [&'static str] {
     &[
+        "ArduinoMacroUsageChecker",
         "AsmJsLocationChecker",
+        "AttributeChecker",
         "BareAllocationChecker",
         "BannedDefineChecker",
         "BannedMacrosChecker",
@@ -279,16 +401,24 @@ pub fn supported_python_checker_names() -> &'static [&'static str] {
         "CppHppIncludesChecker",
         "CppIncludeChecker",
         "EspRomPrintfChecker",
+        "ExampleSerialChecker",
         "FastLEDHeaderUsageChecker",
+        "FlIsDefinedChecker",
         "IncludePathsChecker",
         "ImplHppIncludesChecker",
+        "NumericLimitMacroChecker",
         "PragmaOnceChecker",
+        "PlatformPragmaChecker",
+        "RawNoexceptChecker",
+        "RawPragmaChecker",
         "ReinterpretCastChecker",
         "RelativeIncludeChecker",
         "SerialPrintfChecker",
         "SleepForChecker",
+        "SingletonInHeadersChecker",
         "SpanFromPointerChecker",
         "StaticInHeaderChecker",
+        "StdNamespaceChecker",
         "ThreadLocalKeywordChecker",
         "UsingNamespaceFlInExamplesChecker",
         "WeakAttributeChecker",
@@ -299,7 +429,9 @@ pub fn create_checkers(
     selected: Option<&HashSet<String>>,
 ) -> Result<Vec<Box<dyn FileContentChecker>>, DynError> {
     let mut checkers: Vec<(&'static str, Box<dyn FileContentChecker>)> = vec![
+        ("arduino_macro_usage", Box::new(ArduinoMacroUsageChecker)),
         ("asm_js_location", Box::new(AsmJsLocationChecker)),
+        ("attribute", Box::new(AttributeChecker)),
         ("bare_allocation", Box::new(BareAllocationChecker)),
         ("banned_define", Box::new(BannedDefineChecker)),
         ("banned_macros", Box::new(BannedMacrosChecker)),
@@ -308,16 +440,24 @@ pub fn create_checkers(
         ("cpp_hpp_includes", Box::new(CppHppIncludesChecker)),
         ("cpp_include", Box::new(CppIncludeChecker)),
         ("esp_rom_printf", Box::new(EspRomPrintfChecker)),
+        ("example_serial", Box::new(ExampleSerialChecker)),
         ("fastled_header_usage", Box::new(FastLEDHeaderUsageChecker)),
+        ("fl_is_defined", Box::new(FlIsDefinedChecker)),
         ("include_paths", Box::new(IncludePathsChecker)),
         ("impl_hpp_includes", Box::new(ImplHppIncludesChecker)),
+        ("numeric_limit_macros", Box::new(NumericLimitMacroChecker)),
         ("pragma_once", Box::new(PragmaOnceChecker)),
+        ("platform_pragma", Box::new(PlatformPragmaChecker)),
+        ("raw_noexcept", Box::new(RawNoexceptChecker)),
+        ("raw_pragma", Box::new(RawPragmaChecker)),
         ("reinterpret_cast", Box::new(ReinterpretCastChecker)),
         ("relative_include", Box::new(RelativeIncludeChecker)),
         ("serial_printf", Box::new(SerialPrintfChecker)),
         ("sleep_for", Box::new(SleepForChecker)),
+        ("singleton_in_headers", Box::new(SingletonInHeadersChecker)),
         ("span_from_pointer", Box::new(SpanFromPointerChecker)),
         ("static_in_headers", Box::new(StaticInHeaderChecker)),
+        ("std_namespace", Box::new(StdNamespaceChecker)),
         ("thread_local_keyword", Box::new(ThreadLocalKeywordChecker)),
         (
             "using_namespace_fl_in_examples",
@@ -802,6 +942,111 @@ fn regex_fastled_internal_define() -> &'static Regex {
     VALUE.get_or_init(|| Regex::new(r"^\s*#\s*define\s+FASTLED_INTERNAL").unwrap())
 }
 
+fn regex_arduino_macro() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\b(INPUT|OUTPUT|DEFAULT)\b").unwrap())
+}
+
+fn regex_arduino_scoped_enum() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"::\s*(?:INPUT|OUTPUT|DEFAULT)\b").unwrap())
+}
+
+fn regex_arduino_enum_member() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"^\s*(?:INPUT|OUTPUT|DEFAULT)\s*(?:=\s*\w+)?\s*[,}]").unwrap())
+}
+
+fn regex_arduino_preprocessor() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| {
+        Regex::new(r"^\s*#\s*(?:define|undef|ifdef|ifndef|if|elif|pragma|error|include)\b").unwrap()
+    })
+}
+
+fn regex_standard_attribute() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\[\[\s*([a-z_]+)\s*\]\]").unwrap())
+}
+
+fn regex_alignas() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\balignas\s*\(").unwrap())
+}
+
+fn regex_preprocessor_if_elif() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"^\s*#\s*(?:if|elif)\b").unwrap())
+}
+
+fn regex_fl_is_token() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\bFL_IS_\w+\b").unwrap())
+}
+
+fn regex_defined_fl_is() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"!?\s*defined\s*\(\s*FL_IS_\w+\s*\)").unwrap())
+}
+
+fn regex_singleton() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\bSingleton\s*<").unwrap())
+}
+
+fn regex_singleton_shared() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\bSingletonShared\b").unwrap())
+}
+
+fn regex_friend_class() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\bfriend\s+class\b").unwrap())
+}
+
+fn regex_numeric_limit_macro() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(&format!(r"\b({})\b", NUMERIC_LIMIT_MACROS.join("|"))).unwrap())
+}
+
+fn regex_platform_pragma() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| {
+        Regex::new(r"^\s*#\s*pragma\s+(?:GCC\s+diagnostic|clang\s+diagnostic|warning\s*\()")
+            .unwrap()
+    })
+}
+
+fn regex_raw_pragma() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\b_Pragma\s*\(").unwrap())
+}
+
+fn regex_raw_noexcept() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\bnoexcept\b").unwrap())
+}
+
+fn regex_define_fl_noexcept() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"#\s*define\s+FL_NOEXCEPT\b").unwrap())
+}
+
+fn regex_noexcept_suppression() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"(?i)//\s*(?:ok\s+noexcept|nolint)\b").unwrap())
+}
+
+fn regex_std_usage() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"std::\w+").unwrap())
+}
+
+fn regex_serial_method() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\bSerial\.(\w+)\s*\(").unwrap())
+}
+
 fn is_top_level_include(include_path: &str) -> bool {
     !include_path.contains('/') && !include_path.contains('\\')
 }
@@ -901,6 +1146,88 @@ fn typo_include_suggestion(include_path: &str) -> Option<&'static str> {
     TYPO_INCLUDE_PREFIXES
         .iter()
         .find_map(|(typo, correct)| include_path.starts_with(typo).then_some(*correct))
+}
+
+fn standard_attribute_replacement(attribute: &str) -> Option<&'static str> {
+    ATTRIBUTE_MAPPINGS
+        .iter()
+        .find_map(|(name, replacement)| (*name == attribute).then_some(*replacement))
+}
+
+fn numeric_limit_suggestion(macro_name: &str) -> &'static str {
+    match macro_name {
+        "UINT8_MAX" => "fl::numeric_limits<uint8_t>::max()",
+        "UINT16_MAX" => "fl::numeric_limits<uint16_t>::max()",
+        "UINT32_MAX" => "fl::numeric_limits<uint32_t>::max()",
+        "UINT64_MAX" => "fl::numeric_limits<uint64_t>::max()",
+        "INT8_MAX" => "fl::numeric_limits<int8_t>::max()",
+        "INT8_MIN" => "fl::numeric_limits<int8_t>::min()",
+        "INT16_MAX" => "fl::numeric_limits<int16_t>::max()",
+        "INT16_MIN" => "fl::numeric_limits<int16_t>::min()",
+        "INT32_MAX" => "fl::numeric_limits<int32_t>::max()",
+        "INT32_MIN" => "fl::numeric_limits<int32_t>::min()",
+        "INT64_MAX" => "fl::numeric_limits<int64_t>::max()",
+        "INT64_MIN" => "fl::numeric_limits<int64_t>::min()",
+        "SIZE_MAX" => "fl::numeric_limits<size_t>::max()",
+        "UINTMAX_MAX" => "fl::numeric_limits<uintmax_t>::max()",
+        "UINTPTR_MAX" => "fl::numeric_limits<uintptr_t>::max()",
+        "INTMAX_MAX" => "fl::numeric_limits<intmax_t>::max()",
+        "INTMAX_MIN" => "fl::numeric_limits<intmax_t>::min()",
+        "INTPTR_MAX" => "fl::numeric_limits<intptr_t>::max()",
+        "INTPTR_MIN" => "fl::numeric_limits<intptr_t>::min()",
+        "UCHAR_MAX" => "fl::numeric_limits<unsigned char>::max()",
+        "USHRT_MAX" => "fl::numeric_limits<unsigned short>::max()",
+        "UINT_MAX" => "fl::numeric_limits<unsigned int>::max()",
+        "ULONG_MAX" => "fl::numeric_limits<unsigned long>::max()",
+        "ULLONG_MAX" => "fl::numeric_limits<unsigned long long>::max()",
+        "CHAR_MAX" => "fl::numeric_limits<char>::max()",
+        "CHAR_MIN" => "fl::numeric_limits<char>::min()",
+        "SHRT_MAX" => "fl::numeric_limits<short>::max()",
+        "SHRT_MIN" => "fl::numeric_limits<short>::min()",
+        "INT_MAX" => "fl::numeric_limits<int>::max()",
+        "INT_MIN" => "fl::numeric_limits<int>::min()",
+        "LONG_MAX" => "fl::numeric_limits<long>::max()",
+        "LONG_MIN" => "fl::numeric_limits<long>::min()",
+        "LLONG_MAX" => "fl::numeric_limits<long long>::max()",
+        "LLONG_MIN" => "fl::numeric_limits<long long>::min()",
+        _ => "fl::numeric_limits<T>::max/min()",
+    }
+}
+
+fn is_std_bridge_file(file_path: &str) -> bool {
+    let normalized = normalize_path(file_path);
+    STD_BRIDGE_FILE_WHITELIST
+        .iter()
+        .any(|bridge_path| normalized.ends_with(bridge_path))
+}
+
+fn line_has_only_allowed_std_symbols(line: &str) -> bool {
+    let code_part = split_line_comment(line);
+    if !code_part.contains("std::") {
+        return true;
+    }
+
+    regex_std_usage().find_iter(code_part).all(|usage| {
+        ALLOWED_STD_SYMBOLS
+            .iter()
+            .any(|allowed| *allowed == usage.as_str())
+    })
+}
+
+fn serial_replacement(method: &str) -> &'static str {
+    match method {
+        "print" => "fl::print(...) or fl::cout << ...",
+        "println" => "fl::println(...) or fl::cout << ... << fl::endl",
+        "printf" => "fl::cout << ... (build typed values) or fl::println(formatted)",
+        "write" => "fl::write_bytes(buf, size)",
+        "read" => "fl::read()",
+        "available" => "fl::available()",
+        "peek" => "fl::peek()",
+        "readStringUntil" => "fl::readLine(delim) (returns fl::optional<fl::string>)",
+        "flush" => "fl::flush(timeoutMs)",
+        "begin" => "fl::serial_begin(baudRate)",
+        _ => "an fl:: variant",
+    }
 }
 
 struct SerialPrintfChecker;
@@ -2261,6 +2588,639 @@ impl FileContentChecker for FastLEDHeaderUsageChecker {
                     ),
                 ));
             }
+        }
+
+        violations
+    }
+}
+
+struct ArduinoMacroUsageChecker;
+
+impl FileContentChecker for ArduinoMacroUsageChecker {
+    fn name(&self) -> &'static str {
+        "ArduinoMacroUsageChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        if !ends_with_any(file_path, &[".cpp", ".h", ".hpp", ".ino", ".cpp.hpp"]) {
+            return false;
+        }
+        if !is_under_project_subpath(file_path, project_root, "src") {
+            return false;
+        }
+        if is_under_dir(file_path, "platforms") || is_under_dir(file_path, "third_party") {
+            return false;
+        }
+        true
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment || stripped.starts_with("//") {
+                continue;
+            }
+
+            let code_part = split_line_comment(line);
+            if regex_arduino_preprocessor().is_match(code_part)
+                || regex_arduino_scoped_enum().is_match(code_part)
+                || regex_arduino_enum_member().is_match(code_part)
+            {
+                continue;
+            }
+
+            for name in ARDUINO_BANNED_MACROS {
+                let Some(found) = regex_arduino_macro()
+                    .captures_iter(code_part)
+                    .find(|capture| capture.get(1).is_some_and(|m| m.as_str() == *name))
+                else {
+                    continue;
+                };
+                let macro_name = found.get(1).unwrap().as_str();
+                violations.push((
+                    index + 1,
+                    format!(
+                        "Banned Arduino macro '{macro_name}' used: {stripped}\n      These macros pollute the global namespace and conflict with Windows headers.\n      Use platform-specific APIs or define local constants instead."
+                    ),
+                ));
+            }
+        }
+
+        violations
+    }
+}
+
+struct AttributeChecker;
+
+impl FileContentChecker for AttributeChecker {
+    fn name(&self) -> &'static str {
+        "AttributeChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, _project_root: &Path) -> bool {
+        if !ends_with_any(file_path, &[".cpp", ".h", ".hpp", ".ino", ".cpp.hpp"]) {
+            return false;
+        }
+        let normalized = normalize_path(file_path);
+        if normalized.ends_with("compiler_control.h") {
+            return false;
+        }
+        if is_under_dir(&normalized, "third_party") {
+            return false;
+        }
+        !ends_with_any(&normalized, &["doctest.h", "catch.hpp", "gtest.h"])
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment || stripped.starts_with("//") {
+                continue;
+            }
+
+            let code_part = split_line_comment(line);
+            if code_part.contains("#define") && code_part.contains("FL_") {
+                continue;
+            }
+            if !code_part.contains("[[") && !code_part.contains("alignas") {
+                continue;
+            }
+
+            if code_part.contains("[[") {
+                for capture in regex_standard_attribute().captures_iter(code_part) {
+                    let Some(attribute) = capture.get(1).map(|m| m.as_str()) else {
+                        continue;
+                    };
+                    if let Some(fl_macro) = standard_attribute_replacement(attribute) {
+                        violations.push((
+                            index + 1,
+                            format!("Use {fl_macro} instead of [[{attribute}]]: {stripped}"),
+                        ));
+                    }
+                }
+            }
+
+            if code_part.contains("alignas")
+                && regex_alignas().is_match(code_part)
+                && !code_part.contains("FL_ALIGNAS")
+            {
+                violations.push((
+                    index + 1,
+                    format!("Use FL_ALIGNAS instead of alignas: {stripped}"),
+                ));
+            }
+        }
+
+        violations
+    }
+}
+
+struct FlIsDefinedChecker;
+
+impl FileContentChecker for FlIsDefinedChecker {
+    fn name(&self) -> &'static str {
+        "FlIsDefinedChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, _project_root: &Path) -> bool {
+        ends_with_any(file_path, &[".cpp", ".h", ".hpp", ".ino"])
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        if !file_content.content.contains("FL_IS_") {
+            return Vec::new();
+        }
+
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment {
+                continue;
+            }
+
+            let stripped = line.trim();
+            if stripped.starts_with("//") || !regex_preprocessor_if_elif().is_match(stripped) {
+                continue;
+            }
+
+            let code_part = split_line_comment(line);
+            if !regex_fl_is_token().is_match(code_part) {
+                continue;
+            }
+            let stripped_code = regex_defined_fl_is().replace_all(code_part, "");
+            for token in regex_fl_is_token().find_iter(&stripped_code) {
+                violations.push((
+                    index + 1,
+                    format!(
+                        "Bare '{}' in preprocessor conditional. FL_IS_* macros are defined/undefined (no value). Use '#ifdef {}' or '#if defined({})' instead.",
+                        token.as_str(),
+                        token.as_str(),
+                        token.as_str()
+                    ),
+                ));
+            }
+        }
+
+        violations
+    }
+}
+
+struct NumericLimitMacroChecker;
+
+impl FileContentChecker for NumericLimitMacroChecker {
+    fn name(&self) -> &'static str {
+        "NumericLimitMacroChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, _project_root: &Path) -> bool {
+        if !ends_with_any(file_path, &[".cpp", ".h", ".hpp", ".ino"]) {
+            return false;
+        }
+        if is_excluded_file(file_path) {
+            return false;
+        }
+        let normalized = normalize_path(file_path);
+        !NUMERIC_LIMIT_EXCLUDED_SUFFIXES
+            .iter()
+            .any(|suffix| normalized.ends_with(suffix))
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment || stripped.starts_with("//") {
+                continue;
+            }
+
+            if line.contains("// okay numeric limit macro") {
+                continue;
+            }
+            let code_part = split_line_comment(line);
+            if !code_part.contains("_MAX") && !code_part.contains("_MIN") {
+                continue;
+            }
+
+            let Some(capture) = regex_numeric_limit_macro().captures(code_part) else {
+                continue;
+            };
+            let macro_name = capture.get(1).unwrap().as_str();
+            let suggestion = numeric_limit_suggestion(macro_name);
+            violations.push((index + 1, format!("{stripped} (use {suggestion} instead)")));
+        }
+
+        violations
+    }
+}
+
+struct PlatformPragmaChecker;
+
+impl FileContentChecker for PlatformPragmaChecker {
+    fn name(&self) -> &'static str {
+        "PlatformPragmaChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, _project_root: &Path) -> bool {
+        if !ends_with_any(file_path, &[".cpp", ".h", ".hpp", ".ino", ".cpp.hpp"]) {
+            return false;
+        }
+        let normalized = normalize_path(file_path);
+        !is_under_dir(&normalized, "third_party")
+            && !is_under_dir(&normalized, "platforms")
+            && !normalized.ends_with("compiler_control.h")
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment || stripped.starts_with("//") {
+                continue;
+            }
+
+            if index >= 1 && file_content.lines[index - 1].contains("FL_ALLOW_PLATFORM_PRAGMA") {
+                continue;
+            }
+            if line.contains("FL_ALLOW_PLATFORM_PRAGMA") {
+                continue;
+            }
+            if regex_platform_pragma().is_match(line) {
+                violations.push((
+                    index + 1,
+                    format!(
+                        "Raw platform-specific pragma: {stripped}\n      Use FL_DISABLE_WARNING_PUSH / FL_DISABLE_WARNING(<name>) / FL_DISABLE_WARNING_POP from fl/stl/compiler_control.h.\n      If the FL macros cannot express this pragma, place FL_ALLOW_PLATFORM_PRAGMA on the preceding line as an escape hatch."
+                    ),
+                ));
+            }
+        }
+
+        violations
+    }
+}
+
+struct RawPragmaChecker;
+
+impl FileContentChecker for RawPragmaChecker {
+    fn name(&self) -> &'static str {
+        "RawPragmaChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, _project_root: &Path) -> bool {
+        if !ends_with_any(file_path, &[".cpp", ".h", ".hpp", ".ino", ".cpp.hpp"]) {
+            return false;
+        }
+        let normalized = normalize_path(file_path);
+        !normalized.ends_with("compiler_control.h") && !is_under_dir(&normalized, "third_party")
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment || stripped.starts_with("//") {
+                continue;
+            }
+
+            if regex_raw_pragma().is_match(line) {
+                violations.push((
+                    index + 1,
+                    format!(
+                        "Raw _Pragma() usage: {stripped}\n      Use FL_DISABLE_WARNING_PUSH / FL_DISABLE_WARNING_* / FL_DISABLE_WARNING_POP from fl/stl/compiler_control.h instead.\n      _Pragma() is not portable across all target compilers."
+                    ),
+                ));
+            }
+        }
+
+        violations
+    }
+}
+
+struct RawNoexceptChecker;
+
+impl FileContentChecker for RawNoexceptChecker {
+    fn name(&self) -> &'static str {
+        "RawNoexceptChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        if !is_under_project_subpath(file_path, project_root, "src") {
+            return false;
+        }
+        if !ends_with_any(file_path, &[".h", ".hpp", ".cpp", ".cpp.hpp"]) {
+            return false;
+        }
+        let normalized = normalize_path(file_path);
+        !normalized.ends_with("fl/stl/noexcept.h") && !is_under_dir(&normalized, "third_party")
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        if !file_content.content.contains("noexcept") {
+            return Vec::new();
+        }
+
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment || stripped.starts_with("//") {
+                continue;
+            }
+
+            let code = split_line_comment(stripped).trim();
+            if code.is_empty()
+                || Regex::new(r"^#\s*include\b").unwrap().is_match(code)
+                || regex_define_fl_noexcept().is_match(code)
+                || !regex_raw_noexcept().is_match(code)
+            {
+                continue;
+            }
+
+            let temp = code.replace("FL_NOEXCEPT", "");
+            let remaining: Vec<_> = regex_raw_noexcept().find_iter(&temp).collect();
+            let all_operator_form = remaining
+                .iter()
+                .all(|m| temp[m.end()..].trim_start().starts_with('('));
+            if !remaining.is_empty() && all_operator_form {
+                continue;
+            }
+            if regex_noexcept_suppression().is_match(line) {
+                continue;
+            }
+
+            violations.push((
+                index + 1,
+                format!(
+                    "Raw 'noexcept' keyword — use FL_NOEXCEPT macro instead (defined in fl/stl/noexcept.h, currently a noop everywhere for cross-platform compatibility): {stripped}"
+                ),
+            ));
+        }
+
+        violations
+    }
+}
+
+struct SingletonInHeadersChecker;
+
+impl FileContentChecker for SingletonInHeadersChecker {
+    fn name(&self) -> &'static str {
+        "SingletonInHeadersChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, _project_root: &Path) -> bool {
+        if !ends_with_any(file_path, &[".h", ".hpp"]) {
+            return false;
+        }
+        let normalized = normalize_path(file_path);
+        if normalized.ends_with("fl/stl/singleton.h") {
+            return false;
+        }
+        if normalized.ends_with(".hpp") {
+            return false;
+        }
+        !is_excluded_file(&normalized)
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let is_cpp_hpp = file_content.path.ends_with(".cpp.hpp");
+        let is_private_header = file_content
+            .lines
+            .iter()
+            .take(50)
+            .any(|line| line.contains("IWYU pragma: private"));
+        if is_cpp_hpp || is_private_header {
+            return Vec::new();
+        }
+
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment || stripped.starts_with("//") {
+                continue;
+            }
+
+            let code_part = split_line_comment(line);
+            if !code_part.contains("Singleton") {
+                continue;
+            }
+            if is_cpp_hpp {
+                if regex_singleton_shared().is_match(code_part) {
+                    violations.push((
+                        index + 1,
+                        format!("Use Singleton<T> instead of SingletonShared<T> in .cpp.hpp: {stripped}"),
+                    ));
+                }
+            } else if regex_singleton().is_match(code_part) {
+                if regex_friend_class().is_match(code_part) {
+                    continue;
+                }
+                violations.push((
+                    index + 1,
+                    format!(
+                        "Use SingletonShared<T> instead of Singleton<T> in headers: {stripped}"
+                    ),
+                ));
+            }
+        }
+
+        violations
+    }
+}
+
+struct StdNamespaceChecker;
+
+impl FileContentChecker for StdNamespaceChecker {
+    fn name(&self) -> &'static str {
+        "StdNamespaceChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        if !ends_with_any(file_path, &[".cpp", ".h", ".hpp", ".ino"]) {
+            return false;
+        }
+        if !is_under_project_subpath(file_path, project_root, "src")
+            && !is_under_project_subpath(file_path, project_root, "tests")
+        {
+            return false;
+        }
+        if is_excluded_file(file_path) {
+            return false;
+        }
+        let normalized = normalize_path(file_path);
+        if normalized.contains("third_party") || normalized.contains("thirdparty") {
+            return false;
+        }
+        !is_std_bridge_file(&normalized)
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment || stripped.starts_with("//") {
+                continue;
+            }
+
+            let code_part = split_line_comment(line);
+            if !code_part.contains("std::")
+                || line.contains("// okay std namespace")
+                || line_has_only_allowed_std_symbols(line)
+            {
+                continue;
+            }
+            violations.push((index + 1, stripped.to_string()));
+        }
+
+        violations
+    }
+}
+
+struct ExampleSerialChecker;
+
+impl FileContentChecker for ExampleSerialChecker {
+    fn name(&self) -> &'static str {
+        "ExampleSerialChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, _project_root: &Path) -> bool {
+        if !ends_with_any(file_path, &[".cpp", ".h", ".hpp", ".ino"]) {
+            return false;
+        }
+        normalize_path(file_path).contains("examples/AutoResearch/")
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment || stripped.starts_with("//") {
+                continue;
+            }
+
+            let (code_part, comment_part) = line
+                .split_once("//")
+                .map_or((line.as_str(), ""), |(code, comment)| (code, comment));
+            if !code_part.contains("Serial.") {
+                continue;
+            }
+            let Some(capture) = regex_serial_method().captures(code_part) else {
+                continue;
+            };
+            let method = capture.get(1).unwrap().as_str();
+            if ALLOWED_SERIAL_METHODS.contains(&method)
+                || !FORBIDDEN_SERIAL_METHODS.contains(&method)
+            {
+                continue;
+            }
+            if comment_part.to_ascii_lowercase().contains("ok serial") {
+                continue;
+            }
+
+            let replacement = serial_replacement(method);
+            violations.push((
+                index + 1,
+                format!(
+                    "Avoid `Serial.{method}(...)` in enforced examples — use `{replacement}` instead.\n      Rationale: fl:: wrappers carry the non-blocking HWCDC fixes from FastLED #2669 (setTxTimeoutMs=0, guarded flush, host-presence skip). Raw `Serial.{method}` bypasses them.\n      Line: {stripped}\n      If this call is genuinely required (platform-specific config with no fl:: equivalent), suppress with `// ok serial - <reason>` on the same line."
+                ),
+            ));
         }
 
         violations

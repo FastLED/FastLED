@@ -17,7 +17,9 @@ from ci.lint_cpp import (
     serial_printf_checker,
     using_namespace_fl_in_examples_checker,
 )
+from ci.lint_cpp.arduino_macro_usage_checker import ArduinoMacroUsageChecker
 from ci.lint_cpp.asm_js_location_checker import AsmJsLocationChecker
+from ci.lint_cpp.attribute_checker import AttributeChecker
 from ci.lint_cpp.banned_define_checker import BannedDefineChecker
 from ci.lint_cpp.banned_macros_checker import BannedMacrosChecker
 from ci.lint_cpp.banned_namespace_checker import BannedNamespaceChecker
@@ -26,17 +28,25 @@ from ci.lint_cpp.builtin_memcpy_checker import BuiltinMemcpyChecker
 from ci.lint_cpp.cpp_hpp_includes_checker import CppHppIncludesChecker
 from ci.lint_cpp.cpp_include_checker import CppIncludeChecker
 from ci.lint_cpp.esp_rom_printf_checker import EspRomPrintfChecker
+from ci.lint_cpp.example_serial_checker import ExampleSerialChecker
 from ci.lint_cpp.fastled_header_usage_checker import FastLEDHeaderUsageChecker
+from ci.lint_cpp.fl_is_defined_checker import FlIsDefinedChecker
 from ci.lint_cpp.impl_hpp_includes_checker import ImplHppIncludesChecker
 from ci.lint_cpp.include_paths_checker import IncludePathsChecker
+from ci.lint_cpp.numeric_limit_macros_checker import NumericLimitMacroChecker
+from ci.lint_cpp.platform_pragma_checker import PlatformPragmaChecker
 from ci.lint_cpp.pragma_once_checker import PragmaOnceChecker
+from ci.lint_cpp.raw_noexcept_checker import RawNoexceptChecker
+from ci.lint_cpp.raw_pragma_checker import RawPragmaChecker
 from ci.lint_cpp.reinterpret_cast_checker import ReinterpretCastChecker
 from ci.lint_cpp.relative_include_checker import RelativeIncludeChecker
 from ci.lint_cpp.rust_bridge import parse_rust_json_output
 from ci.lint_cpp.serial_printf_checker import SerialPrintfChecker
+from ci.lint_cpp.singleton_in_headers_checker import SingletonInHeadersChecker
 from ci.lint_cpp.sleep_for_checker import SleepForChecker
 from ci.lint_cpp.span_from_pointer_checker import SpanFromPointerChecker
 from ci.lint_cpp.static_in_headers_checker import StaticInHeaderChecker
+from ci.lint_cpp.std_namespace_checker import StdNamespaceChecker
 from ci.lint_cpp.thread_local_keyword_checker import ThreadLocalKeywordChecker
 from ci.lint_cpp.using_namespace_fl_in_examples_checker import (
     UsingNamespaceFlInExamplesChecker,
@@ -113,10 +123,22 @@ def _rust_records(
     ("checker_key", "checker", "relative_path", "code"),
     [
         (
+            "arduino_macro_usage",
+            ArduinoMacroUsageChecker(),
+            Path("src/fl/example.h"),
+            "int mode = INPUT;\n",
+        ),
+        (
             "asm_js_location",
             AsmJsLocationChecker(),
             Path("src/fl/example.h"),
             "EM_JS(void, demo, (), {});\n",
+        ),
+        (
+            "attribute",
+            AttributeChecker(),
+            Path("src/fl/example.h"),
+            "[[nodiscard]] int value();\n",
         ),
         (
             "banned_define",
@@ -167,10 +189,22 @@ def _rust_records(
             'esp_rom_printf("x");\n',
         ),
         (
+            "example_serial",
+            ExampleSerialChecker(),
+            Path("examples/AutoResearch/AutoResearch.ino"),
+            "void setup() {\n    Serial.begin(115200);\n}\n",
+        ),
+        (
             "fastled_header_usage",
             FastLEDHeaderUsageChecker(),
             Path("src/fl/example.h"),
             '#include "FastLED.h"\n',
+        ),
+        (
+            "fl_is_defined",
+            FlIsDefinedChecker(),
+            Path("src/fl/example.h"),
+            "#if FL_IS_ESP32\n#endif\n",
         ),
         (
             "include_paths",
@@ -197,10 +231,34 @@ def _rust_records(
             "void* p = malloc(4);\nvoid* q = fl::malloc(4);\n",
         ),
         (
+            "numeric_limit_macros",
+            NumericLimitMacroChecker(),
+            Path("src/fl/example.h"),
+            "auto value = UINT32_MAX;\n",
+        ),
+        (
             "pragma_once",
             PragmaOnceChecker(),
             Path("src/fl/example.h"),
             "int value;\n",
+        ),
+        (
+            "platform_pragma",
+            PlatformPragmaChecker(),
+            Path("src/fl/example.h"),
+            '#pragma GCC diagnostic ignored "-Wfoo"\n',
+        ),
+        (
+            "raw_noexcept",
+            RawNoexceptChecker(),
+            Path("src/fl/example.h"),
+            "void value() noexcept;\n",
+        ),
+        (
+            "raw_pragma",
+            RawPragmaChecker(),
+            Path("src/fl/example.h"),
+            '_Pragma("GCC diagnostic ignored \\"-Wfoo\\"")\n',
         ),
         (
             "reinterpret_cast",
@@ -227,10 +285,22 @@ def _rust_records(
             "std::this_thread::sleep_for(ms);\n",
         ),
         (
+            "singleton_in_headers",
+            SingletonInHeadersChecker(),
+            Path("src/fl/example.h"),
+            "auto& value = Singleton<Foo>::instance();\n",
+        ),
+        (
             "span_from_pointer",
             SpanFromPointerChecker(),
             Path("src/fl/example.h"),
             "auto s = span<int>(values.data(), values.size());\n",
+        ),
+        (
+            "std_namespace",
+            StdNamespaceChecker(),
+            Path("src/fl/example.h"),
+            "std::vector<int> values;\n",
         ),
         (
             "thread_local_keyword",
