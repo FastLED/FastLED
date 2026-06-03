@@ -13,6 +13,7 @@ from ci.lint_cpp import (
     cpp_hpp_includes_checker,
     fastled_header_usage_checker,
     include_paths_checker,
+    no_namespace_fl_declaration,
     relative_include_checker,
     serial_printf_checker,
     using_namespace_fl_in_examples_checker,
@@ -25,6 +26,8 @@ from ci.lint_cpp.banned_macros_checker import BannedMacrosChecker
 from ci.lint_cpp.banned_namespace_checker import BannedNamespaceChecker
 from ci.lint_cpp.bare_allocation_checker import BareAllocationChecker
 from ci.lint_cpp.builtin_memcpy_checker import BuiltinMemcpyChecker
+from ci.lint_cpp.check_platform_includes import PlatformTrampolineChecker
+from ci.lint_cpp.check_using_namespace import UsingNamespaceChecker
 from ci.lint_cpp.cpp_hpp_includes_checker import CppHppIncludesChecker
 from ci.lint_cpp.cpp_include_checker import CppIncludeChecker
 from ci.lint_cpp.esp_rom_printf_checker import EspRomPrintfChecker
@@ -32,8 +35,12 @@ from ci.lint_cpp.example_serial_checker import ExampleSerialChecker
 from ci.lint_cpp.fastled_header_usage_checker import FastLEDHeaderUsageChecker
 from ci.lint_cpp.fl_is_defined_checker import FlIsDefinedChecker
 from ci.lint_cpp.impl_hpp_includes_checker import ImplHppIncludesChecker
+from ci.lint_cpp.include_after_namespace_checker import IncludeAfterNamespaceChecker
 from ci.lint_cpp.include_paths_checker import IncludePathsChecker
+from ci.lint_cpp.no_namespace_fl_declaration import NamespaceFlDeclarationChecker
+from ci.lint_cpp.no_using_namespace_fl_in_headers import UsingNamespaceFlChecker
 from ci.lint_cpp.numeric_limit_macros_checker import NumericLimitMacroChecker
+from ci.lint_cpp.platform_includes_checker import PlatformIncludesChecker
 from ci.lint_cpp.platform_pragma_checker import PlatformPragmaChecker
 from ci.lint_cpp.pragma_once_checker import PragmaOnceChecker
 from ci.lint_cpp.raw_noexcept_checker import RawNoexceptChecker
@@ -42,6 +49,7 @@ from ci.lint_cpp.reinterpret_cast_checker import ReinterpretCastChecker
 from ci.lint_cpp.relative_include_checker import RelativeIncludeChecker
 from ci.lint_cpp.rust_bridge import parse_rust_json_output
 from ci.lint_cpp.serial_printf_checker import SerialPrintfChecker
+from ci.lint_cpp.simd_intrinsics_checker import SimdIntrinsicsChecker
 from ci.lint_cpp.singleton_in_headers_checker import SingletonInHeadersChecker
 from ci.lint_cpp.sleep_for_checker import SleepForChecker
 from ci.lint_cpp.span_from_pointer_checker import SpanFromPointerChecker
@@ -219,6 +227,12 @@ def _rust_records(
             '#include "../foo.h"\n',
         ),
         (
+            "include_after_namespace",
+            IncludeAfterNamespaceChecker(),
+            Path("src/fl/example.h"),
+            'namespace fl {\n#include "fl/late.h"\n}\n',
+        ),
+        (
             "include_paths",
             IncludePathsChecker(),
             Path("src/fl/example.h"),
@@ -237,10 +251,22 @@ def _rust_records(
             "void* p = malloc(4);\nvoid* q = fl::malloc(4);\n",
         ),
         (
+            "namespace_fl_declaration",
+            NamespaceFlDeclarationChecker(),
+            Path("src/example.h"),
+            "namespace fl {\n}\n",
+        ),
+        (
             "numeric_limit_macros",
             NumericLimitMacroChecker(),
             Path("src/fl/example.h"),
             "auto value = UINT32_MAX;\n",
+        ),
+        (
+            "platform_includes",
+            PlatformIncludesChecker(),
+            Path("src/fl/example.h"),
+            '#include "platforms/shared/int_windows.h"\n',
         ),
         (
             "pragma_once",
@@ -253,6 +279,12 @@ def _rust_records(
             PlatformPragmaChecker(),
             Path("src/fl/example.h"),
             '#pragma GCC diagnostic ignored "-Wfoo"\n',
+        ),
+        (
+            "platform_trampoline",
+            PlatformTrampolineChecker(),
+            Path("src/fl/example.h"),
+            '#include "platforms/shared/int_windows.h"\n',
         ),
         (
             "raw_noexcept",
@@ -333,10 +365,28 @@ def _rust_records(
             'void loop() {\n    Serial.printf("x=%d", x);\n}\n',
         ),
         (
+            "simd_intrinsics",
+            SimdIntrinsicsChecker(),
+            Path("src/fl/example.h"),
+            "__m128i value;\n",
+        ),
+        (
             "weak_attribute",
             WeakAttributeChecker(),
             Path("src/fl/example.h"),
             "__attribute__((weak)) void foo();\n",
+        ),
+        (
+            "using_namespace",
+            UsingNamespaceChecker(),
+            Path("src/fl/example.h"),
+            "using namespace std;\n",
+        ),
+        (
+            "using_namespace_fl",
+            UsingNamespaceFlChecker(),
+            Path("src/fl/example.h"),
+            "using namespace fl;\n",
         ),
     ],
 )
@@ -357,6 +407,7 @@ def test_rust_checker_matches_python_oracle(
         fastled_header_usage_checker, "SRC_DIR", _normalize_path(src_root)
     )
     monkeypatch.setattr(include_paths_checker, "PROJECT_ROOT", tmp_path)
+    monkeypatch.setattr(no_namespace_fl_declaration, "SRC_ROOT", src_root)
     monkeypatch.setattr(relative_include_checker, "SRC_DIR", _normalize_path(src_root))
     monkeypatch.setattr(serial_printf_checker, "EXAMPLES_ROOT", examples_root)
     monkeypatch.setattr(

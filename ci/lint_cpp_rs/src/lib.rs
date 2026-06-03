@@ -234,6 +234,68 @@ const FORBIDDEN_SERIAL_METHODS: &[&str] = &[
 
 const ALLOWED_SERIAL_METHODS: &[&str] = &["setTxBufferSize", "setTxTimeoutMs"];
 
+const INCLUDE_AFTER_NAMESPACE_SKIP_PATTERNS: &[&str] = &[
+    ".venv",
+    "node_modules",
+    "build",
+    ".build",
+    "third_party",
+    "ziglang",
+    "greenlet",
+    ".git",
+];
+
+const PLATFORM_INCLUDE_LOCATIONS: &[&str] = &[
+    "/src/fl/",
+    "/src/fx/",
+    "/src/lib8tion/",
+    "/src/sensors/",
+    "/tests/fl/",
+    "/tests/fx/",
+    "/examples/",
+];
+
+const DEEP_PLATFORM_REPLACEMENTS: &[(&str, &str)] = &[
+    ("platforms/shared/int_windows.h", "platforms/int.h"),
+    ("platforms/shared/int.h", "platforms/int.h"),
+    ("platforms/esp/", "platforms/init.h"),
+    ("platforms/arm/", "platforms/init.h"),
+    ("platforms/stub/", "platforms/init.h"),
+    ("platforms/avr/", "platforms/init.h"),
+    ("platforms/wasm/", "platforms/init.h"),
+];
+
+const SIMD_PATTERNS: &[(&str, &str)] = &[
+    (
+        "__m128i",
+        "x86 SSE type — use fl::simd::simd_u8x16 / simd_u16x8 / simd_u32x4",
+    ),
+    ("__m128", "x86 SSE type — use fl::simd types"),
+    ("__m256i", "x86 AVX type — use fl::simd types"),
+    ("__m256", "x86 AVX type — use fl::simd types"),
+    ("_mm_", "x86 SSE intrinsic — use fl::simd operations"),
+    ("_mm256_", "x86 AVX2 intrinsic — use fl::simd operations"),
+    ("_mm512_", "x86 AVX-512 intrinsic — use fl::simd operations"),
+    ("_MM_HINT", "x86 prefetch hint — use __builtin_prefetch"),
+    ("<emmintrin.h>", "SSE2 header — use fl/math/simd.h"),
+    ("<immintrin.h>", "AVX header — use fl/math/simd.h"),
+    ("<smmintrin.h>", "SSE4.1 header — use fl/math/simd.h"),
+    ("<xmmintrin.h>", "SSE header — use fl/math/simd.h"),
+    ("<tmmintrin.h>", "SSSE3 header — use fl/math/simd.h"),
+    ("<arm_neon.h>", "ARM NEON header — use fl/math/simd.h"),
+    ("vld1q_", "ARM NEON intrinsic — use fl::simd operations"),
+    ("vst1q_", "ARM NEON intrinsic — use fl::simd operations"),
+    ("vaddq_", "ARM NEON intrinsic — use fl::simd operations"),
+    ("vmulq_", "ARM NEON intrinsic — use fl::simd operations"),
+    ("vmovl_", "ARM NEON intrinsic — use fl::simd operations"),
+    ("vqmovn_", "ARM NEON intrinsic — use fl::simd operations"),
+    ("vcombine_", "ARM NEON intrinsic — use fl::simd operations"),
+    ("vdupq_", "ARM NEON intrinsic — use fl::simd operations"),
+    ("ee.vadds", "Xtensa PIE intrinsic — use fl::simd operations"),
+    ("ee.vld", "Xtensa PIE intrinsic — use fl::simd operations"),
+    ("ee.vst", "Xtensa PIE intrinsic — use fl::simd operations"),
+];
+
 #[derive(Debug, Clone)]
 pub struct FileContent {
     pub path: String,
@@ -366,16 +428,21 @@ pub fn supported_checker_names() -> &'static [&'static str] {
         "esp_rom_printf",
         "fastled_header_usage",
         "fl_is_defined",
+        "include_after_namespace",
         "include_paths",
         "impl_hpp_includes",
+        "namespace_fl_declaration",
         "numeric_limit_macros",
+        "platform_includes",
         "pragma_once",
         "platform_pragma",
+        "platform_trampoline",
         "raw_noexcept",
         "raw_pragma",
         "reinterpret_cast",
         "relative_include",
         "serial_printf",
+        "simd_intrinsics",
         "sleep_for",
         "span_from_pointer",
         "static_in_headers",
@@ -383,6 +450,8 @@ pub fn supported_checker_names() -> &'static [&'static str] {
         "singleton_in_headers",
         "thread_local_keyword",
         "example_serial",
+        "using_namespace",
+        "using_namespace_fl",
         "using_namespace_fl_in_examples",
         "weak_attribute",
     ]
@@ -404,22 +473,29 @@ pub fn supported_python_checker_names() -> &'static [&'static str] {
         "ExampleSerialChecker",
         "FastLEDHeaderUsageChecker",
         "FlIsDefinedChecker",
+        "IncludeAfterNamespaceChecker",
         "IncludePathsChecker",
         "ImplHppIncludesChecker",
+        "NamespaceFlDeclarationChecker",
         "NumericLimitMacroChecker",
+        "PlatformIncludesChecker",
         "PragmaOnceChecker",
         "PlatformPragmaChecker",
+        "PlatformTrampolineChecker",
         "RawNoexceptChecker",
         "RawPragmaChecker",
         "ReinterpretCastChecker",
         "RelativeIncludeChecker",
         "SerialPrintfChecker",
+        "SimdIntrinsicsChecker",
         "SleepForChecker",
         "SingletonInHeadersChecker",
         "SpanFromPointerChecker",
         "StaticInHeaderChecker",
         "StdNamespaceChecker",
         "ThreadLocalKeywordChecker",
+        "UsingNamespaceChecker",
+        "UsingNamespaceFlChecker",
         "UsingNamespaceFlInExamplesChecker",
         "WeakAttributeChecker",
     ]
@@ -443,22 +519,35 @@ pub fn create_checkers(
         ("example_serial", Box::new(ExampleSerialChecker)),
         ("fastled_header_usage", Box::new(FastLEDHeaderUsageChecker)),
         ("fl_is_defined", Box::new(FlIsDefinedChecker)),
+        (
+            "include_after_namespace",
+            Box::new(IncludeAfterNamespaceChecker),
+        ),
         ("include_paths", Box::new(IncludePathsChecker)),
         ("impl_hpp_includes", Box::new(ImplHppIncludesChecker)),
+        (
+            "namespace_fl_declaration",
+            Box::new(NamespaceFlDeclarationChecker),
+        ),
         ("numeric_limit_macros", Box::new(NumericLimitMacroChecker)),
+        ("platform_includes", Box::new(PlatformIncludesChecker)),
         ("pragma_once", Box::new(PragmaOnceChecker)),
         ("platform_pragma", Box::new(PlatformPragmaChecker)),
+        ("platform_trampoline", Box::new(PlatformTrampolineChecker)),
         ("raw_noexcept", Box::new(RawNoexceptChecker)),
         ("raw_pragma", Box::new(RawPragmaChecker)),
         ("reinterpret_cast", Box::new(ReinterpretCastChecker)),
         ("relative_include", Box::new(RelativeIncludeChecker)),
         ("serial_printf", Box::new(SerialPrintfChecker)),
+        ("simd_intrinsics", Box::new(SimdIntrinsicsChecker)),
         ("sleep_for", Box::new(SleepForChecker)),
         ("singleton_in_headers", Box::new(SingletonInHeadersChecker)),
         ("span_from_pointer", Box::new(SpanFromPointerChecker)),
         ("static_in_headers", Box::new(StaticInHeaderChecker)),
         ("std_namespace", Box::new(StdNamespaceChecker)),
         ("thread_local_keyword", Box::new(ThreadLocalKeywordChecker)),
+        ("using_namespace", Box::new(UsingNamespaceChecker)),
+        ("using_namespace_fl", Box::new(UsingNamespaceFlChecker)),
         (
             "using_namespace_fl_in_examples",
             Box::new(UsingNamespaceFlInExamplesChecker),
@@ -1029,6 +1118,46 @@ fn regex_preprocessor_include() -> &'static Regex {
     VALUE.get_or_init(|| Regex::new(r"^#\s*include\b").unwrap())
 }
 
+fn regex_namespace_declaration() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"^\s*(?:namespace\s+\w+|namespace\s*\{)").unwrap())
+}
+
+fn regex_any_include() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r#"^\s*#\s*include\s*[<"].*[>"]"#).unwrap())
+}
+
+fn regex_allow_include_after_namespace() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"//\s*allow-include-after-namespace").unwrap())
+}
+
+fn regex_nolint() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"//\s*nolint").unwrap())
+}
+
+fn regex_namespace_fl_declaration() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\bnamespace\s+fl\s*\{").unwrap())
+}
+
+fn regex_using_namespace() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\busing\s+namespace\s+\w+(?:::\w+)*\s*;").unwrap())
+}
+
+fn regex_define_using_namespace() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"#define\s+\w+.*using\s+namespace").unwrap())
+}
+
+fn regex_force_use_namespace() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"#if\s+.*FORCE_USE_NAMESPACE").unwrap())
+}
+
 fn regex_fl_is_token() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| Regex::new(r"\bFL_IS_\w+\b").unwrap())
@@ -1095,6 +1224,18 @@ fn regex_std_usage() -> &'static Regex {
 fn regex_serial_method() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| Regex::new(r"\bSerial\.(\w+)\s*\(").unwrap())
+}
+
+fn regex_deep_platform_header() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r#"(#include\s+"(platforms/[^/]+/[^"]+\.h[^"]*)")"#).unwrap())
+}
+
+fn regex_deep_platform_include() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| {
+        Regex::new(r#"^\s*#\s*include\s+[<"]platforms/([^/"]+)/([^"]+)[">]"#).unwrap()
+    })
 }
 
 fn is_top_level_include(include_path: &str) -> bool {
@@ -1278,6 +1419,29 @@ fn serial_replacement(method: &str) -> &'static str {
         "begin" => "fl::serial_begin(baudRate)",
         _ => "an fl:: variant",
     }
+}
+
+fn strip_inline_block_comments(line: &str) -> String {
+    let mut result = String::new();
+    let mut rest = line;
+    while let Some(start) = rest.find("/*") {
+        result.push_str(&rest[..start]);
+        let after_start = &rest[start + 2..];
+        let Some(end) = after_start.find("*/") else {
+            result.push_str(&rest[start..]);
+            return result;
+        };
+        rest = &after_start[end + 2..];
+    }
+    result.push_str(rest);
+    result
+}
+
+fn platform_trampoline_suggestion(include_path: &str) -> &'static str {
+    DEEP_PLATFORM_REPLACEMENTS
+        .iter()
+        .find_map(|(pattern, replacement)| include_path.contains(pattern).then_some(*replacement))
+        .unwrap_or("platforms/*.h (appropriate trampoline)")
 }
 
 struct SerialPrintfChecker;
@@ -3282,6 +3446,378 @@ impl FileContentChecker for ExampleSerialChecker {
                     "Avoid `Serial.{method}(...)` in enforced examples — use `{replacement}` instead.\n      Rationale: fl:: wrappers carry the non-blocking HWCDC fixes from FastLED #2669 (setTxTimeoutMs=0, guarded flush, host-presence skip). Raw `Serial.{method}` bypasses them.\n      Line: {stripped}\n      If this call is genuinely required (platform-specific config with no fl:: equivalent), suppress with `// ok serial - <reason>` on the same line."
                 ),
             ));
+        }
+
+        violations
+    }
+}
+
+struct IncludeAfterNamespaceChecker;
+
+impl FileContentChecker for IncludeAfterNamespaceChecker {
+    fn name(&self) -> &'static str {
+        "IncludeAfterNamespaceChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, _project_root: &Path) -> bool {
+        if INCLUDE_AFTER_NAMESPACE_SKIP_PATTERNS
+            .iter()
+            .any(|pattern| file_path.contains(pattern))
+        {
+            return false;
+        }
+        ends_with_any(file_path, &[".cpp", ".h", ".hpp", ".cc", ".ino"])
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        if file_content
+            .lines
+            .iter()
+            .any(|line| regex_allow_include_after_namespace().is_match(line))
+        {
+            return Vec::new();
+        }
+
+        let mut namespace_started = false;
+        let mut violations = Vec::new();
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            if regex_namespace_declaration().is_match(line) {
+                namespace_started = true;
+                continue;
+            }
+            if namespace_started && regex_any_include().is_match(line) {
+                if regex_nolint().is_match(line) {
+                    continue;
+                }
+                violations.push((index + 1, line.trim_end_matches('\n').to_string()));
+            }
+        }
+
+        violations
+    }
+}
+
+struct NamespaceFlDeclarationChecker;
+
+impl FileContentChecker for NamespaceFlDeclarationChecker {
+    fn name(&self) -> &'static str {
+        "NamespaceFlDeclarationChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let path = Path::new(file_path);
+        if path
+            .parent()
+            .and_then(Path::file_name)
+            .and_then(|name| name.to_str())
+            != Some("src")
+        {
+            return false;
+        }
+        let Ok(src_root) = project_root.join("src").canonicalize() else {
+            return false;
+        };
+        let Ok(parent) = path
+            .parent()
+            .unwrap_or_else(|| Path::new(""))
+            .canonicalize()
+        else {
+            return false;
+        };
+        if parent != src_root {
+            return false;
+        }
+        matches!(
+            path.extension().and_then(|value| value.to_str()),
+            Some("h" | "cpp")
+        )
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let mut violations = Vec::new();
+        for (index, line) in file_content.lines.iter().enumerate() {
+            if line.trim().starts_with("//") {
+                continue;
+            }
+            if regex_namespace_fl_declaration().is_match(line) {
+                violations.push((index + 1, line.trim().to_string()));
+            }
+        }
+        violations
+    }
+}
+
+struct UsingNamespaceFlChecker;
+
+impl FileContentChecker for UsingNamespaceFlChecker {
+    fn name(&self) -> &'static str {
+        "UsingNamespaceFlChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        if !is_under_project_subpath(&normalized, project_root, "src") {
+            return false;
+        }
+        if normalized.contains("/examples/") || normalized.contains("/tests/") {
+            return false;
+        }
+        if normalized.contains("FastLED.h") {
+            return false;
+        }
+        ends_with_any(&normalized, &[".h", ".hpp", ".cpp", ".cpp.hpp"])
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let mut violations = Vec::new();
+        for (index, line) in file_content.lines.iter().enumerate() {
+            if line.starts_with("//") {
+                continue;
+            }
+            if line.contains("using namespace fl;") {
+                violations.push((index + 1, line.trim().to_string()));
+            }
+        }
+        violations
+    }
+}
+
+struct UsingNamespaceChecker;
+
+impl FileContentChecker for UsingNamespaceChecker {
+    fn name(&self) -> &'static str {
+        "UsingNamespaceChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        if !is_under_project_subpath(&normalized, project_root, "src/fl") {
+            return false;
+        }
+        if normalized.contains("/examples/") || normalized.contains("/tests/") {
+            return false;
+        }
+        ends_with_any(&normalized, &[".h", ".hpp", ".hxx", ".hh"])
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let mut violations = Vec::new();
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let without_line_comment = split_line_comment(line);
+            let line_clean = strip_inline_block_comments(without_line_comment);
+            if !regex_using_namespace().is_match(&line_clean) {
+                continue;
+            }
+            if regex_define_using_namespace().is_match(&line_clean) {
+                continue;
+            }
+
+            let mut is_conditional = false;
+            for previous_index in index.saturating_sub(5)..index {
+                if regex_force_use_namespace().is_match(file_content.lines[previous_index].trim()) {
+                    is_conditional = true;
+                    break;
+                }
+            }
+            if !is_conditional {
+                violations.push((index + 1, line.trim().to_string()));
+            }
+        }
+        violations
+    }
+}
+
+struct PlatformIncludesChecker;
+
+impl FileContentChecker for PlatformIncludesChecker {
+    fn name(&self) -> &'static str {
+        "PlatformIncludesChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, _project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        if !ends_with_any(&normalized, &[".h", ".hpp"]) {
+            return false;
+        }
+        if is_excluded_file(&normalized) {
+            return false;
+        }
+        if normalized.contains("/platforms/") || normalized.contains("/tests/platforms/") {
+            return false;
+        }
+        PLATFORM_INCLUDE_LOCATIONS
+            .iter()
+            .any(|location| normalized.contains(location))
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment || stripped.starts_with("//") {
+                continue;
+            }
+
+            let (code_part, comment_part) = line
+                .split_once("//")
+                .map_or((line.as_str(), ""), |(code, comment)| (code, comment));
+            let comment = comment_part.to_ascii_lowercase();
+            let has_exception = comment.contains("ok platform headers")
+                || comment.contains("ok -- platform headers");
+            if has_exception {
+                continue;
+            }
+
+            let Some(capture) = regex_deep_platform_header().captures(code_part) else {
+                continue;
+            };
+            let include_statement = capture.get(1).unwrap().as_str().trim();
+            violations.push((
+                index + 1,
+                format!(
+                    "Forbidden deep platform header: {include_statement} - Code in fl/** must use top-level platform headers (platforms/*.h) or fl/ alternatives instead of deep platform-specific headers. Deep includes (platforms/{{platform}}/**/*.h) bypass the trampoline architecture. If this include is necessary, add '// ok platform headers' comment to suppress. See src/platforms/README.md for architecture details."
+                ),
+            ));
+        }
+
+        violations
+    }
+}
+
+struct PlatformTrampolineChecker;
+
+impl FileContentChecker for PlatformTrampolineChecker {
+    fn name(&self) -> &'static str {
+        "PlatformTrampolineChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        if !is_under_project_subpath(&normalized, project_root, "src") {
+            return false;
+        }
+        let Some(parts_after_src) = normalized.split("/src/").nth(1) else {
+            return false;
+        };
+        let parts: Vec<&str> = parts_after_src.split('/').collect();
+        if parts.first() == Some(&"platforms") {
+            return false;
+        }
+        if parts.first() == Some(&"fl") {
+            return true;
+        }
+        parts.len() == 1 && ends_with_any(&normalized, &[".cpp", ".h", ".hpp"])
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment || stripped.starts_with("//") {
+                continue;
+            }
+
+            let (code_part, comment_part) = line
+                .split_once("//")
+                .map_or((line.as_str(), ""), |(code, comment)| (code, comment));
+            let comment = comment_part.to_ascii_lowercase();
+            let has_exception = comment.contains("ok platform headers")
+                || comment.contains("ok -- platform headers");
+            if has_exception {
+                continue;
+            }
+
+            let Some(capture) = regex_deep_platform_include().captures(code_part) else {
+                continue;
+            };
+            let include_path = format!(
+                "platforms/{}/{}",
+                capture.get(1).unwrap().as_str(),
+                capture.get(2).unwrap().as_str()
+            );
+            let suggestion = platform_trampoline_suggestion(&include_path);
+            violations.push((
+                index + 1,
+                format!(
+                    "Forbidden deep platform header: #include \"{include_path}\" - Use \"{suggestion}\" instead (platform trampolines only). Deep includes bypass the trampoline architecture. If necessary, add \"// ok platform headers\" comment to suppress."
+                ),
+            ));
+        }
+
+        violations
+    }
+}
+
+struct SimdIntrinsicsChecker;
+
+impl FileContentChecker for SimdIntrinsicsChecker {
+    fn name(&self) -> &'static str {
+        "SimdIntrinsicsChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        if !is_under_project_subpath(&normalized, project_root, "src") {
+            return false;
+        }
+        if !ends_with_any(&normalized, &[".cpp", ".h", ".hpp", ".cpp.hpp"]) {
+            return false;
+        }
+        if is_excluded_file(&normalized)
+            || normalized.contains("third_party")
+            || normalized.contains("thirdparty")
+        {
+            return false;
+        }
+        !normalized.contains("/platforms/")
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment || stripped.starts_with("//") {
+                continue;
+            }
+            if line.contains("// ok platform simd") {
+                continue;
+            }
+
+            let code_part = split_line_comment(line);
+            for (pattern, description) in SIMD_PATTERNS {
+                if code_part.contains(pattern) {
+                    violations.push((index + 1, format!("{stripped}  [{description}]")));
+                    break;
+                }
+            }
         }
 
         violations
