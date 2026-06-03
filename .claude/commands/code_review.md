@@ -321,11 +321,7 @@ inline void setPowerModel(const PowerModelRGB& model) {
 2. ✅ **The wrapper is a thin `inline` delegator** — no logic, validation, or error handling embedded.
 3. ✅ **Examples, README, and PR descriptions** should call `FastLED.setX(...)`, never `fl::set_x(...)`.
 
-**Grandfathered Exceptions** (predate the rule — do not flag for these names alone):
-- `fl::set_rgbw_colorimetric_profile`
-- `fl::set_input_gamut` (#2710)
-
-These should be wrapped opportunistically, but their bare existence does not block the PR they appear in.
+**No Grandfathered Exceptions.** Every public global setter under `fl::` must ship with a `CFastLED` wrapper in the same PR. Bare functions added without one — including `fl::set_input_gamut` (#2710) — block the PR.
 
 **Does NOT apply to**:
 - Helpers, constructors, factories (not "setters of global state")
@@ -336,7 +332,7 @@ These should be wrapped opportunistically, but their bare existence does not blo
 **Check Process**:
 1. Scan the diff for new public function declarations in `src/fl/**/*.h` whose name matches `^set_|^enable_|^disable_|^use_`.
 2. For each match, check whether the function mutates a namespace-scope / static / global variable (look at the implementation in the matching `.cpp.hpp`).
-3. If yes and the name isn't grandfathered: grep `src/FastLED.h` for a `CFastLED` method whose body mentions that free function. If none, **flag as HIGH severity** and either:
+3. If yes: grep `src/FastLED.h` for a `CFastLED` method whose body mentions that free function. If none, **flag as HIGH severity** and either:
    - Add the wrapper inline in the same diff (if the change is small), or
    - Ask the user to add it before merge.
 4. Reference: `agents/docs/cpp-standards.md` → "Public Settings Pattern".

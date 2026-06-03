@@ -71,10 +71,10 @@ reviews:
         wrapper in the same PR; the user-facing documented call site should
         be `FastLED.setX(...)`, never `fl::set_x(...)`.
 
-        Grandfathered exceptions (do NOT flag for these names alone):
-          - fl::set_rgbw_colorimetric_profile
-          - fl::set_input_gamut (issue #2710)
-        These are tracked for backfill; new additions do not get grandfathered.
+        No grandfathered exceptions: every public global setter under
+        `fl::` must have a `CFastLED` wrapper. Functions added without one
+        — including bare `fl::set_input_gamut` (#2710) and any future
+        additions — must be wrapped in the same PR.
 
         Does NOT apply to: helpers, constructors, factories, functions that
         only mutate caller-owned objects (e.g. fl::fill_solid(span, color)),
