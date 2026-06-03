@@ -249,16 +249,24 @@ FL_TEST_CASE("enable/disable LUT public API is link-safe") {
 // to DiodeProfile plus an `M_src` matrix in the cache; these tests verify
 // the matrix construction is correct and the default profile is wired up.
 
-FL_TEST_CASE("default profile carries sRGB-D65 source space") {
-    // D65 (CIE 1931 2°) is approximately (0.31272, 0.32903). Rec709 / sRGB
-    // primaries are also published values — confirm the defaults match so
-    // verifiers and the math model agree on the input contract.
-    FL_CHECK_CLOSE(kRgbwDefaultProfile.input_xy_r[0], 0.6400f, 1e-4f);
-    FL_CHECK_CLOSE(kRgbwDefaultProfile.input_xy_r[1], 0.3300f, 1e-4f);
-    FL_CHECK_CLOSE(kRgbwDefaultProfile.input_xy_g[0], 0.3000f, 1e-4f);
-    FL_CHECK_CLOSE(kRgbwDefaultProfile.input_xy_g[1], 0.6000f, 1e-4f);
-    FL_CHECK_CLOSE(kRgbwDefaultProfile.input_xy_b[0], 0.1500f, 1e-4f);
-    FL_CHECK_CLOSE(kRgbwDefaultProfile.input_xy_b[1], 0.0600f, 1e-4f);
+FL_TEST_CASE("default profile carries native-LED + D65 source space (#2710)") {
+    // Default flipped from Rec709/sRGB (which silently truncated the LED
+    // gamut) to native LED primaries + D65 white. Users who want sRGB or
+    // other named-gamut input semantics must now call set_input_gamut()
+    // explicitly. See #2710 for the rationale.
+    FL_CHECK_CLOSE(kRgbwDefaultProfile.input_xy_r[0],
+                   kRgbwDefaultProfile.xy_r[0], 1e-6f);
+    FL_CHECK_CLOSE(kRgbwDefaultProfile.input_xy_r[1],
+                   kRgbwDefaultProfile.xy_r[1], 1e-6f);
+    FL_CHECK_CLOSE(kRgbwDefaultProfile.input_xy_g[0],
+                   kRgbwDefaultProfile.xy_g[0], 1e-6f);
+    FL_CHECK_CLOSE(kRgbwDefaultProfile.input_xy_g[1],
+                   kRgbwDefaultProfile.xy_g[1], 1e-6f);
+    FL_CHECK_CLOSE(kRgbwDefaultProfile.input_xy_b[0],
+                   kRgbwDefaultProfile.xy_b[0], 1e-6f);
+    FL_CHECK_CLOSE(kRgbwDefaultProfile.input_xy_b[1],
+                   kRgbwDefaultProfile.xy_b[1], 1e-6f);
+    // D65 reference white stays the default.
     FL_CHECK_CLOSE(kRgbwDefaultProfile.input_xy_w[0], 0.31272f, 1e-4f);
     FL_CHECK_CLOSE(kRgbwDefaultProfile.input_xy_w[1], 0.32903f, 1e-4f);
 }
@@ -305,18 +313,21 @@ FL_TEST_CASE("source matrix preserves primary chromaticities") {
 }
 
 
-FL_TEST_CASE("source matrix matches published sRGB->XYZ matrix") {
+FL_TEST_CASE("source matrix matches published sRGB->XYZ matrix (Rec709 opt-in)") {
     // The canonical linear sRGB -> XYZ (D65) matrix used everywhere from
-    // browsers to color science papers. Confirm our derivation matches the
-    // published values within float tolerance.
+    // browsers to color science papers. Default profile no longer ships
+    // with sRGB inputs (#2710 flipped the default to native LED gamut),
+    // so this test now opts into Rec709 via set_input_gamut() before
+    // building M_src and confirming our derivation matches the published
+    // values within float tolerance.
     //   X = 0.4124564 R + 0.3575761 G + 0.1804375 B
     //   Y = 0.2126729 R + 0.7151522 G + 0.0721750 B
     //   Z = 0.0193339 R + 0.1191920 G + 0.9503041 B
+    DiodeProfile p = kRgbwDefaultProfile;
+    set_input_gamut(&p, InputGamut::Rec709);
     float M[3][3];
-    FL_CHECK(build_source_matrix(kRgbwDefaultProfile.input_xy_r,
-                                 kRgbwDefaultProfile.input_xy_g,
-                                 kRgbwDefaultProfile.input_xy_b,
-                                 kRgbwDefaultProfile.input_xy_w, M));
+    FL_CHECK(build_source_matrix(p.input_xy_r, p.input_xy_g,
+                                 p.input_xy_b, p.input_xy_w, M));
     // Tolerance is loose because the published matrix uses xy_w =
     // (0.31271, 0.32902) and slight rounding in the primaries vs. our
     // defaults — but better than 1e-3 is plenty for chromaticity verification.
@@ -329,6 +340,67 @@ FL_TEST_CASE("source matrix matches published sRGB->XYZ matrix") {
     FL_CHECK_CLOSE(M[2][0], 0.0193339f, 5e-3f);
     FL_CHECK_CLOSE(M[2][1], 0.1191920f, 5e-3f);
     FL_CHECK_CLOSE(M[2][2], 0.9503041f, 5e-3f);
+}
+
+
+FL_TEST_CASE("set_input_gamut: Native copies LED primaries") {
+    DiodeProfile p = kRgbwDefaultProfile;
+    // First trash input_xy_* so we can prove Native restored them.
+    p.input_xy_r[0] = 0; p.input_xy_r[1] = 0;
+    p.input_xy_g[0] = 0; p.input_xy_g[1] = 0;
+    p.input_xy_b[0] = 0; p.input_xy_b[1] = 0;
+    p.input_xy_w[0] = 0; p.input_xy_w[1] = 0;
+    set_input_gamut(&p, InputGamut::Native);
+    FL_CHECK_CLOSE(p.input_xy_r[0], p.xy_r[0], 1e-6f);
+    FL_CHECK_CLOSE(p.input_xy_g[0], p.xy_g[0], 1e-6f);
+    FL_CHECK_CLOSE(p.input_xy_b[0], p.xy_b[0], 1e-6f);
+    // D65 by default.
+    FL_CHECK_CLOSE(p.input_xy_w[0], 0.31272f, 1e-4f);
+    FL_CHECK_CLOSE(p.input_xy_w[1], 0.32903f, 1e-4f);
+}
+
+
+FL_TEST_CASE("set_input_gamut: named gamuts populate canonical primaries") {
+    DiodeProfile p = kRgbwDefaultProfile;
+    set_input_gamut(&p, InputGamut::Rec709);
+    FL_CHECK_CLOSE(p.input_xy_r[0], 0.6400f, 1e-6f);
+    FL_CHECK_CLOSE(p.input_xy_g[1], 0.6000f, 1e-6f);
+    FL_CHECK_CLOSE(p.input_xy_w[0], 0.31272f, 1e-5f);
+
+    set_input_gamut(&p, InputGamut::Rec2020);
+    FL_CHECK_CLOSE(p.input_xy_r[0], 0.7080f, 1e-6f);
+    FL_CHECK_CLOSE(p.input_xy_g[0], 0.1700f, 1e-6f);
+
+    set_input_gamut(&p, InputGamut::DciP3D65);
+    FL_CHECK_CLOSE(p.input_xy_r[0], 0.6800f, 1e-6f);
+    FL_CHECK_CLOSE(p.input_xy_g[0], 0.2650f, 1e-6f);
+    FL_CHECK_CLOSE(p.input_xy_w[0], 0.31272f, 1e-5f);  // D65
+
+    set_input_gamut(&p, InputGamut::DciP3D60);
+    // Same primaries as DciP3D65, different white (ACES D60).
+    FL_CHECK_CLOSE(p.input_xy_r[0], 0.6800f, 1e-6f);
+    FL_CHECK_CLOSE(p.input_xy_w[0], 0.32168f, 1e-5f);
+    FL_CHECK_CLOSE(p.input_xy_w[1], 0.33767f, 1e-5f);
+}
+
+
+FL_TEST_CASE("set_input_gamut: white override honored") {
+    DiodeProfile p = kRgbwDefaultProfile;
+    const float custom_white[2] = {0.34567f, 0.35850f};  // D50
+    set_input_gamut(&p, InputGamut::Rec709, custom_white);
+    FL_CHECK_CLOSE(p.input_xy_r[0], 0.6400f, 1e-6f);  // primaries: Rec709
+    FL_CHECK_CLOSE(p.input_xy_w[0], 0.34567f, 1e-6f); // white: override
+    FL_CHECK_CLOSE(p.input_xy_w[1], 0.35850f, 1e-6f);
+}
+
+
+FL_TEST_CASE("set_input_gamut: null profile is a no-op") {
+    // Defensive guard so caller code that passes a nullptr by mistake
+    // doesn't fault; consistent with set_rgbw_colorimetric_profile(nullptr)
+    // semantics.
+    set_input_gamut(nullptr, InputGamut::Rec709);
+    set_input_gamut(nullptr, InputGamut::Native);
+    // No assertions — just verify the calls don't crash.
 }
 
 

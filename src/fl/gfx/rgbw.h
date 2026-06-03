@@ -36,14 +36,21 @@ enum class RGBW_MODE {
 // `set_rgbw_colorimetric_profile`.
 //
 // Source-space fields (input_xy_*, issue #2705) define the color space the
-// input RGB triple is interpreted in. Defaults — set by `kRgbwDefaultProfile`
-// and the `make_diode_profile_*` helpers — are Rec709 / sRGB primaries with a
-// D65 white point. Solvers compute `X_t = M_src · source_rgb` where M_src is
-// the standard primary-matrix construction from these four chromaticities.
-// If input_xy_w[1] is left at 0.0f (the default for value-initialized profiles
-// `DiodeProfile{}`), solvers fall back to the legacy interpretation in which
-// the input RGB triple IS the device-emitter drive coordinates — preserved
-// for backward compatibility.
+// input RGB triple is interpreted in. The default profile (#2710) ships
+// with **native LED gamut + D65 white** — input primaries equal the LED's
+// own xy_r/g/b — so a saturated input like RGB=(255,0,0) reaches the LED
+// red diode at full drive and RGB=(255,255,255) lands on D65. Solvers
+// compute `X_t = M_src · source_rgb` where M_src is the standard CIE
+// primary-matrix construction from these four chromaticities.
+//
+// Users wanting standard color-space input semantics (Rec709 / sRGB,
+// Rec2020, DCI-P3 D65/D60) should opt in explicitly via
+// `fl::set_input_gamut(profile, fl::InputGamut::Rec709)` etc.
+//
+// If input_xy_w[1] is left at 0.0f (the default for value-initialized
+// profiles `DiodeProfile{}`), solvers fall back to the legacy
+// interpretation in which the input RGB triple IS the device-emitter
+// drive coordinates — preserved for backward compatibility.
 struct DiodeProfile {
     float xy_r[2];      // R diode chromaticity (CIE 1931 xy)
     float xy_g[2];      // G diode chromaticity
@@ -55,14 +62,42 @@ struct DiodeProfile {
     float lum_w;        // typically 1.0 by convention
     int nominal_cct;    // CCT at which xy_w was measured (e.g. 6000)
 
-    // Source / input color space (#2705). Without these populated the
-    // colorimetric solvers cannot target a meaningful white point and the
-    // verifier cannot match expected D65 / Rec709 reference results.
-    float input_xy_r[2];  // source R primary chromaticity (default sRGB)
-    float input_xy_g[2];  // source G primary chromaticity
-    float input_xy_b[2];  // source B primary chromaticity
+    // Source / input color space (#2705). See above for default behavior.
+    float input_xy_r[2];  // source R primary chromaticity (default: native LED R)
+    float input_xy_g[2];  // source G primary chromaticity (default: native LED G)
+    float input_xy_b[2];  // source B primary chromaticity (default: native LED B)
     float input_xy_w[2];  // source white chromaticity (default D65)
 };
+
+// Named source color spaces for opting into standard input-gamut semantics
+// (#2710). The default `kRgbwDefaultProfile` ships as `Native`; pick a
+// named gamut here when feeding content authored for that space (e.g.
+// sRGB / Rec.709 for ambilight, Rec.2020 for wide-gamut video, DCI-P3
+// for cinema-mastered material).
+enum class InputGamut : u8 {
+    Native = 0,    // Input primaries == this profile's LED primaries + D65 white
+    Rec709,        // sRGB / Rec.709 primaries + D65 white
+    Rec2020,       // Rec.2020 (UHDTV) primaries + D65 white
+    DciP3D65,      // DCI-P3 D65 — consumer display variant (e.g. Apple)
+    DciP3D60,      // DCI-P3 D60 — ACES / cinema mastering variant
+};
+
+// Reconfigure `profile`'s input_xy_r/g/b/w to one of the named gamuts.
+// For `InputGamut::Native`, copies the profile's own xy_r/g/b into
+// input_xy_r/g/b and sets input_xy_w to D65. For named gamuts, uses the
+// standard published primary chromaticities + that gamut's reference white.
+// Mutates `profile` in place; subsequent solver calls observe the new gamut
+// (the cache is keyed on the profile pointer and rebuilds automatically).
+// No-op if `profile == nullptr`.
+void set_input_gamut(DiodeProfile* profile, InputGamut g) FL_NOEXCEPT;
+
+// Same as the above, but lets you override the input white point.
+// `white_xy` must point to a 2-float array of (x, y) chromaticity.
+// Use this for niche cases (D50 photography workflow, D60 ACES cinema,
+// a custom calibration target) where the standard gamut's reference
+// white doesn't match your content.
+void set_input_gamut(DiodeProfile* profile, InputGamut g,
+                     const float white_xy[2]) FL_NOEXCEPT;
 
 // Default profile: SK6812 RGBW3535 @ ~6000K (datasheet wavelengths -> xy +
 // typical luminance ratios). Always declared so user code referencing it

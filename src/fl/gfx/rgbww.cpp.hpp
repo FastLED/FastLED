@@ -47,6 +47,9 @@ inline void zero_out(u8 *r, u8 *g, u8 *b, u8 *ww, u8 *wc) FL_NOEXCEPT {
 // initialization stays trivial (no CCT conversion at init time).
 //   2700K Planckian xy ≈ (0.4600, 0.4107)  (matches cct_to_xy(2700) ± 0.002)
 //   6500K Planckian xy ≈ (0.3135, 0.3237)  (matches cct_to_xy(6500) ± 0.002)
+// Default profile: native LED gamut + D65 source white on both warm and cool
+// paths (#2710). Users wanting Rec709 / Rec2020 / DCI-P3 input semantics
+// should call `fl::set_input_gamut()` on their per-strip profile copy.
 const colorimetric_detail::RgbcctProfile kRgbwwDefaultProfile = {
     /* warm_path */ {
         /* xy_r        */ { 0.700606f, 0.299300f },
@@ -58,10 +61,10 @@ const colorimetric_detail::RgbcctProfile kRgbwwDefaultProfile = {
         /* lum_b       */ 0.08f,
         /* lum_w       */ 1.00f,
         /* nominal_cct */ 2700,
-        /* input_xy_r  */ { 0.6400f, 0.3300f },
-        /* input_xy_g  */ { 0.3000f, 0.6000f },
-        /* input_xy_b  */ { 0.1500f, 0.0600f },
-        /* input_xy_w  */ { 0.31272f, 0.32903f },
+        /* input_xy_r  */ { 0.700606f, 0.299300f },  // native LED R
+        /* input_xy_g  */ { 0.097940f, 0.831593f },  // native LED G
+        /* input_xy_b  */ { 0.129086f, 0.049450f },  // native LED B
+        /* input_xy_w  */ { 0.31272f, 0.32903f },    // D65
     },
     /* cool_path */ {
         /* xy_r        */ { 0.700606f, 0.299300f },
@@ -73,10 +76,10 @@ const colorimetric_detail::RgbcctProfile kRgbwwDefaultProfile = {
         /* lum_b       */ 0.08f,
         /* lum_w       */ 1.00f,
         /* nominal_cct */ 6500,
-        /* input_xy_r  */ { 0.6400f, 0.3300f },
-        /* input_xy_g  */ { 0.3000f, 0.6000f },
-        /* input_xy_b  */ { 0.1500f, 0.0600f },
-        /* input_xy_w  */ { 0.31272f, 0.32903f },
+        /* input_xy_r  */ { 0.700606f, 0.299300f },  // native LED R
+        /* input_xy_g  */ { 0.097940f, 0.831593f },  // native LED G
+        /* input_xy_b  */ { 0.129086f, 0.049450f },  // native LED B
+        /* input_xy_w  */ { 0.31272f, 0.32903f },    // D65
     },
 };
 
