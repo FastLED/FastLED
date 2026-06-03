@@ -91,11 +91,12 @@ enum class InputGamut : u8 {
 // No-op if `profile == nullptr`.
 void set_input_gamut(DiodeProfile* profile, InputGamut g) FL_NOEXCEPT;
 
-// Same as the above, but lets you override the input white point.
-// `white_xy` must point to a 2-float array of (x, y) chromaticity.
-// Use this for niche cases (D50 photography workflow, D60 ACES cinema,
-// a custom calibration target) where the standard gamut's reference
-// white doesn't match your content.
+// Same as the above, but lets you optionally override the input white point.
+// `white_xy` either points to a 2-float (x, y) chromaticity OR is `nullptr`
+// to fall back to the gamut's standard reference white (equivalent to the
+// 2-argument overload above). Use the override for niche cases (D50
+// photography workflow, D60 ACES cinema, a custom calibration target) where
+// the standard gamut's reference white doesn't match your content.
 void set_input_gamut(DiodeProfile* profile, InputGamut g,
                      const float white_xy[2]) FL_NOEXCEPT;
 

@@ -231,6 +231,14 @@ constexpr NamedGamut kDciP3D60  = {{0.6800f, 0.3200f}, {0.2650f, 0.6900f},
                                     {0.1500f, 0.0600f}, {0.32168f, 0.33767f}};
 } // namespace
 
+// Forward declaration: real implementation lives inside the colorimetric
+// branch below (and is a no-op when colorimetric math is compiled out).
+// Called from set_input_gamut to evict per-process caches keyed on a profile
+// whose input_xy_* fields were just mutated in place — without this hook the
+// pointer+CCT cache key stays equal and stale M_src/LUT data is reused
+// after a gamut switch on the currently active profile.
+namespace { void invalidate_colorimetric_caches_for(const DiodeProfile* profile) FL_NOEXCEPT; }
+
 void set_input_gamut(DiodeProfile* profile, InputGamut g,
                      const float white_xy[2]) FL_NOEXCEPT {
     if (profile == nullptr) return;
@@ -248,19 +256,24 @@ void set_input_gamut(DiodeProfile* profile, InputGamut g,
         const float d65[2] = {0.31272f, 0.32903f};
         const float* w = (white_xy != nullptr) ? white_xy : d65;
         apply(profile->xy_r, profile->xy_g, profile->xy_b, w);
+        invalidate_colorimetric_caches_for(profile);
         return;
     }
     case InputGamut::Rec709:   apply(kRec709.xy_r,   kRec709.xy_g,   kRec709.xy_b,
-                                     white_xy != nullptr ? white_xy : kRec709.xy_w);   return;
+                                     white_xy != nullptr ? white_xy : kRec709.xy_w);
+                                invalidate_colorimetric_caches_for(profile);   return;
     case InputGamut::Rec2020:  apply(kRec2020.xy_r,  kRec2020.xy_g,  kRec2020.xy_b,
-                                     white_xy != nullptr ? white_xy : kRec2020.xy_w);  return;
+                                     white_xy != nullptr ? white_xy : kRec2020.xy_w);
+                                invalidate_colorimetric_caches_for(profile);  return;
     case InputGamut::DciP3D65: apply(kDciP3D65.xy_r, kDciP3D65.xy_g, kDciP3D65.xy_b,
-                                     white_xy != nullptr ? white_xy : kDciP3D65.xy_w); return;
+                                     white_xy != nullptr ? white_xy : kDciP3D65.xy_w);
+                                invalidate_colorimetric_caches_for(profile); return;
     case InputGamut::DciP3D60: apply(kDciP3D60.xy_r, kDciP3D60.xy_g, kDciP3D60.xy_b,
-                                     white_xy != nullptr ? white_xy : kDciP3D60.xy_w); return;
+                                     white_xy != nullptr ? white_xy : kDciP3D60.xy_w);
+                                invalidate_colorimetric_caches_for(profile); return;
     }
     // Default-fallthrough for forward-compat with future enum additions:
-    // leave the profile's input_xy_* untouched.
+    // leave the profile's input_xy_* untouched — also nothing to invalidate.
 }
 
 void set_input_gamut(DiodeProfile* profile, InputGamut g) FL_NOEXCEPT {
@@ -330,6 +343,24 @@ inline void rebuild_lut_if_stale(LutStateHolder& s, int cct) FL_NOEXCEPT {
         colorimetric_detail::build_lut(get_cache(cct), s.requested_grid_n));
     s.built_for = active;
     s.built_cct = override_cct;
+}
+
+// Drop both the ProfileCache and the LUT cache when `profile` matches the
+// current cache key. set_input_gamut() mutates input_xy_* in place without
+// touching the profile pointer or CCT, so the (pointer, cct) cache key
+// stays equal and would otherwise serve stale M_src / LUT data.
+void invalidate_colorimetric_caches_for(const DiodeProfile* profile) FL_NOEXCEPT {
+    ColorimetricCacheHolder& ch =
+        fl::Singleton<ColorimetricCacheHolder>::instance();
+    if (ch.cached_for == profile) {
+        ch.cached_for = nullptr;
+        ch.cached_cct = 0;
+    }
+    LutStateHolder& lh = fl::Singleton<LutStateHolder>::instance();
+    if (lh.built_for == profile) {
+        lh.built_for = nullptr;
+        lh.built_cct = 0;
+    }
 }
 } // namespace
 
@@ -445,6 +476,12 @@ bool rgbw_colorimetric_lut_enabled() FL_NOEXCEPT {
 }
 
 #else  // FASTLED_RGBW_COLORIMETRIC
+
+// No-op cache invalidation stub — the colorimetric cache machinery doesn't
+// exist when FASTLED_RGBW_COLORIMETRIC=0, so set_input_gamut has nothing to
+// evict. Keeping the forward-declared symbol available means the dispatch
+// path above doesn't need its own #if gate.
+namespace { void invalidate_colorimetric_caches_for(const DiodeProfile*) FL_NOEXCEPT {} }
 
 // Stub APIs for the LUT/CCT/RGBCCT path — no-ops when colorimetric is off.
 bool enable_rgbw_colorimetric_lut(int /*grid_n*/) FL_NOEXCEPT { return false; }
