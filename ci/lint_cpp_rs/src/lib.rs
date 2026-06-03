@@ -566,6 +566,545 @@ const TEST_INCLUDE_VALID_PREFIXES: &[&str] = &[
     "tests/",
 ];
 
+const NOEXCEPT_CTOR_QUALS: &[&str] = &[
+    "",
+    "explicit",
+    "virtual",
+    "inline",
+    "constexpr",
+    "explicit constexpr",
+    "constexpr explicit",
+    "inline explicit",
+    "explicit inline",
+    "inline constexpr",
+    "constexpr inline",
+    "virtual explicit",
+    "explicit virtual",
+    "inline virtual",
+    "virtual inline",
+];
+
+const NATIVE_TO_MODERN_DEFINES: &[(&str, &str)] = &[
+    ("__AVR__", "FL_IS_AVR"),
+    ("__AVR_ATmega328P__", "FL_IS_AVR_ATMEGA_328P"),
+    ("__AVR_ATmega328PB__", "FL_IS_AVR_ATMEGA_328P"),
+    ("__AVR_ATmega328__", "FL_IS_AVR_ATMEGA_328P"),
+    ("__AVR_ATmega168P__", "FL_IS_AVR_ATMEGA_328P"),
+    ("__AVR_ATmega168__", "FL_IS_AVR_ATMEGA_328P"),
+    ("__AVR_ATmega8__", "FL_IS_AVR_ATMEGA_328P"),
+    ("__AVR_ATmega8A__", "FL_IS_AVR_ATMEGA_328P"),
+    ("__AVR_ATmega2560__", "FL_IS_AVR_ATMEGA_2560"),
+    ("__AVR_ATmega1280__", "FL_IS_AVR_ATMEGA_2560"),
+    ("__AVR_ATmega32U4__", "FL_IS_AVR_ATMEGA"),
+    ("__AVR_ATmega1284__", "FL_IS_AVR_ATMEGA"),
+    ("__AVR_ATmega1284P__", "FL_IS_AVR_ATMEGA"),
+    ("__AVR_ATmega644P__", "FL_IS_AVR_ATMEGA"),
+    ("__AVR_ATmega644__", "FL_IS_AVR_ATMEGA"),
+    ("__AVR_ATmega32__", "FL_IS_AVR_ATMEGA"),
+    ("__AVR_ATmega16__", "FL_IS_AVR_ATMEGA"),
+    ("__AVR_ATmega128__", "FL_IS_AVR_ATMEGA"),
+    ("__AVR_ATmega64__", "FL_IS_AVR_ATMEGA"),
+    ("__AVR_ATmega32U2__", "FL_IS_AVR_ATMEGA"),
+    ("__AVR_ATmega16U2__", "FL_IS_AVR_ATMEGA"),
+    ("__AVR_ATmega8U2__", "FL_IS_AVR_ATMEGA"),
+    ("__AVR_AT90USB1286__", "FL_IS_AVR_ATMEGA"),
+    ("__AVR_AT90USB646__", "FL_IS_AVR_ATMEGA"),
+    ("__AVR_AT90USB162__", "FL_IS_AVR_ATMEGA"),
+    ("__AVR_AT90USB82__", "FL_IS_AVR_ATMEGA"),
+    ("__AVR_ATmega128RFA1__", "FL_IS_AVR_ATMEGA"),
+    ("__AVR_ATmega256RFR2__", "FL_IS_AVR_ATMEGA"),
+    ("__AVR_ATmega4809__", "FL_IS_AVR_MEGAAVR"),
+    ("__AVR_ATmega4808__", "FL_IS_AVR_MEGAAVR"),
+    ("__AVR_ATmega3209__", "FL_IS_AVR_MEGAAVR"),
+    ("__AVR_ATmega3208__", "FL_IS_AVR_MEGAAVR"),
+    ("__AVR_ATmega1609__", "FL_IS_AVR_MEGAAVR"),
+    ("__AVR_ATmega1608__", "FL_IS_AVR_MEGAAVR"),
+    ("__AVR_ATmega809__", "FL_IS_AVR_MEGAAVR"),
+    ("__AVR_ATmega808__", "FL_IS_AVR_MEGAAVR"),
+    ("__AVR_ATtiny13__", "FL_IS_AVR_ATTINY"),
+    ("__AVR_ATtiny13A__", "FL_IS_AVR_ATTINY"),
+    ("__AVR_ATtiny24__", "FL_IS_AVR_ATTINY"),
+    ("__AVR_ATtiny44__", "FL_IS_AVR_ATTINY"),
+    ("__AVR_ATtiny84__", "FL_IS_AVR_ATTINY"),
+    ("__AVR_ATtiny25__", "FL_IS_AVR_ATTINY"),
+    ("__AVR_ATtiny45__", "FL_IS_AVR_ATTINY"),
+    ("__AVR_ATtiny85__", "FL_IS_AVR_ATTINY"),
+    ("__AVR_ATtiny48__", "FL_IS_AVR_ATTINY"),
+    ("__AVR_ATtiny87__", "FL_IS_AVR_ATTINY"),
+    ("__AVR_ATtiny88__", "FL_IS_AVR_ATTINY"),
+    ("__AVR_ATtiny167__", "FL_IS_AVR_ATTINY"),
+    ("__AVR_ATtiny261__", "FL_IS_AVR_ATTINY"),
+    ("__AVR_ATtiny441__", "FL_IS_AVR_ATTINY"),
+    ("__AVR_ATtiny841__", "FL_IS_AVR_ATTINY"),
+    ("__AVR_ATtiny861__", "FL_IS_AVR_ATTINY"),
+    ("__AVR_ATtiny2313__", "FL_IS_AVR_ATTINY"),
+    ("__AVR_ATtiny2313A__", "FL_IS_AVR_ATTINY"),
+    ("__AVR_ATtiny4313__", "FL_IS_AVR_ATTINY"),
+    ("__AVR_ATtinyX41__", "FL_IS_AVR_ATTINY"),
+    ("__AVR_ATtiny202__", "FL_IS_AVR_ATTINY_MODERN"),
+    ("__AVR_ATtiny204__", "FL_IS_AVR_ATTINY_MODERN"),
+    ("__AVR_ATtiny212__", "FL_IS_AVR_ATTINY_MODERN"),
+    ("__AVR_ATtiny214__", "FL_IS_AVR_ATTINY_MODERN"),
+    ("__AVR_ATtiny402__", "FL_IS_AVR_ATTINY_MODERN"),
+    ("__AVR_ATtiny404__", "FL_IS_AVR_ATTINY_MODERN"),
+    ("__AVR_ATtiny406__", "FL_IS_AVR_ATTINY_MODERN"),
+    ("__AVR_ATtiny407__", "FL_IS_AVR_ATTINY_MODERN"),
+    ("__AVR_ATtiny412__", "FL_IS_AVR_ATTINY_MODERN"),
+    ("__AVR_ATtiny414__", "FL_IS_AVR_ATTINY_MODERN"),
+    ("__AVR_ATtiny416__", "FL_IS_AVR_ATTINY_MODERN"),
+    ("__AVR_ATtiny417__", "FL_IS_AVR_ATTINY_MODERN"),
+    ("__AVR_ATtiny1604__", "FL_IS_AVR_ATTINY_MODERN"),
+    ("__AVR_ATtiny1616__", "FL_IS_AVR_ATTINY_MODERN"),
+    ("__AVR_ATtiny3216__", "FL_IS_AVR_ATTINY_MODERN"),
+    ("__AVR_ATtiny3217__", "FL_IS_AVR_ATTINY_MODERN"),
+    ("__AVR_ATtinyxy4__", "FL_IS_AVR_ATTINY_MODERN"),
+    ("__AVR_ATtinyxy6__", "FL_IS_AVR_ATTINY_MODERN"),
+    ("__AVR_ATtinyxy7__", "FL_IS_AVR_ATTINY_MODERN"),
+    ("__AVR_ATtinyxy2__", "FL_IS_AVR_ATTINY_MODERN"),
+    ("ARDUINO_AVR_DIGISPARK", "FL_IS_AVR_ATTINY"),
+    ("ARDUINO_AVR_DIGISPARKPRO", "FL_IS_AVR_ATTINY"),
+    ("IS_BEAN", "FL_IS_AVR_ATTINY"),
+    ("ESP32", "FL_IS_ESP32"),
+    ("ESP8266", "FL_IS_ESP8266"),
+    ("ESP_PLATFORM", "FL_IS_ESP32"),
+    ("ARDUINO_ARCH_ESP32", "FL_IS_ESP32"),
+    ("ARDUINO_ARCH_ESP8266", "FL_IS_ESP8266"),
+    ("CONFIG_IDF_TARGET_ESP32", "FL_IS_ESP_32DEV"),
+    ("CONFIG_IDF_TARGET_ESP32S2", "FL_IS_ESP_32S2"),
+    ("CONFIG_IDF_TARGET_ESP32S3", "FL_IS_ESP_32S3"),
+    ("CONFIG_IDF_TARGET_ESP32C2", "FL_IS_ESP_32C2"),
+    ("CONFIG_IDF_TARGET_ESP32C3", "FL_IS_ESP_32C3"),
+    ("CONFIG_IDF_TARGET_ESP32C5", "FL_IS_ESP_32C5"),
+    ("CONFIG_IDF_TARGET_ESP32C6", "FL_IS_ESP_32C6"),
+    ("CONFIG_IDF_TARGET_ESP32H2", "FL_IS_ESP_32H2"),
+    ("CONFIG_IDF_TARGET_ESP32P4", "FL_IS_ESP_32P4"),
+    ("CONFIG_IDF_TARGET_ESP8266", "FL_IS_ESP8266"),
+    ("CONFIG_IDF_TARGET_ARCH_XTENSA", "FL_IS_ESP32_XTENSA"),
+    ("CONFIG_IDF_TARGET_ARCH_RISCV", "FL_IS_ESP32_RISCV"),
+    ("ESP32S3", "FL_IS_ESP_32S3"),
+    ("ESP32C3", "FL_IS_ESP_32C3"),
+    ("ESP32C6", "FL_IS_ESP_32C6"),
+    ("__MK20DX128__", "FL_IS_TEENSY_30"),
+    ("__MK20DX256__", "FL_IS_TEENSY_3X"),
+    ("__MKL26Z64__", "FL_IS_TEENSY_LC"),
+    ("__MK64FX512__", "FL_IS_TEENSY_35"),
+    ("__MK66FX1M0__", "FL_IS_TEENSY_36"),
+    ("__IMXRT1062__", "FL_IS_TEENSY_4X"),
+    ("__IMXRT1052__", "FL_IS_TEENSY_4X"),
+    ("__arm__", "FL_IS_ARM"),
+    ("__SAM3X8E__", "FL_IS_SAM"),
+    ("STM32F10X_MD", "FL_IS_STM32_F1"),
+    ("__STM32F1__", "FL_IS_STM32_F1"),
+    ("STM32F1", "FL_IS_STM32_F1"),
+    ("STM32F1xx", "FL_IS_STM32_F1"),
+    ("STM32F2XX", "FL_IS_STM32_F2"),
+    ("STM32F2xx", "FL_IS_STM32_F2"),
+    ("STM32F4", "FL_IS_STM32_F4"),
+    ("STM32F4xx", "FL_IS_STM32_F4"),
+    ("STM32F7", "FL_IS_STM32_F7"),
+    ("STM32F7xx", "FL_IS_STM32_F7"),
+    ("STM32L4", "FL_IS_STM32_L4"),
+    ("STM32L4xx", "FL_IS_STM32_L4"),
+    ("STM32H7", "FL_IS_STM32_H7"),
+    ("STM32H7xx", "FL_IS_STM32_H7"),
+    ("STM32G4", "FL_IS_STM32_G4"),
+    ("STM32G4xx", "FL_IS_STM32_G4"),
+    ("STM32U5", "FL_IS_STM32_U5"),
+    ("STM32U5xx", "FL_IS_STM32_U5"),
+    ("STM32U585xx", "FL_IS_STM32_U5"),
+    ("STM32U585XX", "FL_IS_STM32_U5"),
+    ("ARDUINO_UNO_Q", "FL_IS_STM32_U5"),
+    ("CONFIG_BOARD_ARDUINO_UNO_Q", "FL_IS_STM32_U5"),
+    ("CONFIG_SOC_STM32U585XX", "FL_IS_STM32_U5"),
+    ("NRF51", "FL_IS_NRF52"),
+    ("NRF52_SERIES", "FL_IS_NRF52"),
+    ("NRF52840_XXAA", "FL_IS_NRF52840"),
+    ("NRF52833_XXAA", "FL_IS_NRF52833"),
+    ("NRF52832_XXAA", "FL_IS_NRF52832"),
+    ("NRF52", "FL_IS_NRF52"),
+    ("NRF52840", "FL_IS_NRF52840"),
+    ("NRF52833", "FL_IS_NRF52833"),
+    ("NRF52832", "FL_IS_NRF52832"),
+    ("__SAMD21G18A__", "FL_IS_SAMD21"),
+    ("__SAMD21J18A__", "FL_IS_SAMD21"),
+    ("__SAMD21E17A__", "FL_IS_SAMD21"),
+    ("__SAMD21E18A__", "FL_IS_SAMD21"),
+    ("__SAMD21__", "FL_IS_SAMD21"),
+    ("__SAMD51G19A__", "FL_IS_SAMD51"),
+    ("__SAMD51J19A__", "FL_IS_SAMD51"),
+    ("__SAME51J19A__", "FL_IS_SAMD51"),
+    ("__SAMD51P19A__", "FL_IS_SAMD51"),
+    ("__SAMD51P20A__", "FL_IS_SAMD51"),
+    ("__SAMD51J20A__", "FL_IS_SAMD51"),
+    ("__SAMD51__", "FL_IS_SAMD51"),
+    ("TARGET_RP2040", "FL_IS_RP2040"),
+    ("ARDUINO_ARCH_RP2040", "FL_IS_RP2040"),
+    ("PICO_RP2040", "FL_IS_RP2040"),
+    ("ARDUINO_ARCH_RP2350", "FL_IS_RP2350"),
+    ("PICO_RP2350", "FL_IS_RP2350"),
+    ("ARDUINO_ARCH_SAMD", "FL_IS_SAMD"),
+    ("ARDUINO_ARCH_STM32", "FL_IS_STM32"),
+    ("ARDUINO_ARCH_NRF52", "FL_IS_NRF52"),
+    ("ARDUINO_ARCH_APOLLO3", "FL_IS_APOLLO3"),
+    ("ARDUINO_ARCH_RENESAS", "FL_IS_RENESAS"),
+    ("ARDUINO_ARCH_RENESAS_UNO", "FL_IS_RENESAS"),
+    ("ARDUINO_ARCH_RENESAS_PORTENTA", "FL_IS_RENESAS"),
+    ("ARDUINO_ARCH_SILABS", "FL_IS_SILABS"),
+    ("ARDUINO_ARCH_AVR", "FL_IS_AVR"),
+    ("ARDUINO_ARCH_MBED", "FL_IS_STM32_MBED"),
+    ("ARDUINO_SAM_DUE", "FL_IS_SAM"),
+    ("ARDUINO_GIGA", "FL_IS_STM32_H7"),
+    ("ARDUINO_GIGA_M7", "FL_IS_STM32_H7"),
+    ("ARDUINO_NRF52_ADAFRUIT", "FL_IS_NRF52"),
+    ("__EMSCRIPTEN__", "FL_IS_WASM"),
+    ("SPARK", "FL_IS_STM32_F2"),
+    ("APOLLO3", "FL_IS_APOLLO3"),
+    ("TEENSYDUINO", "FL_IS_TEENSY"),
+    ("CORE_TEENSY", "FL_IS_TEENSY"),
+    ("FASTLED_TEENSY3", "FL_IS_TEENSY_3X"),
+    ("FASTLED_TEENSY4", "FL_IS_TEENSY_4X"),
+    ("FASTLED_TEENSYLC", "FL_IS_TEENSY_LC"),
+    ("__RFduino__", "FL_IS_NRF52"),
+    ("__Simblee__", "FL_IS_NRF52"),
+    ("__APPLE__", "FL_IS_APPLE"),
+    ("__linux__", "FL_IS_LINUX"),
+    ("__unix__", "FL_IS_POSIX"),
+    ("_WIN32", "FL_IS_WIN"),
+    ("_WIN64", "FL_IS_WIN"),
+    ("__CYGWIN__", "FL_IS_WIN"),
+    ("__MINGW32__", "FL_IS_WIN_MINGW"),
+    ("__MINGW64__", "FL_IS_WIN_MINGW"),
+    ("_MSC_VER", "FL_IS_WIN_MSVC"),
+    ("__FreeBSD__", "FL_IS_BSD"),
+    ("__OpenBSD__", "FL_IS_BSD"),
+    ("__NetBSD__", "FL_IS_BSD"),
+    ("__DragonFly__", "FL_IS_BSD"),
+    ("__wasm__", "FL_IS_WASM"),
+    ("EMSCRIPTEN", "FL_IS_WASM"),
+    ("__clang__", "FL_IS_CLANG"),
+    ("__GNUC__", "FL_IS_GCC"),
+    ("__GNUG__", "FL_IS_GCC"),
+];
+
+const NATIVE_ROOT_DISPATCH_HEADERS: &[&str] = &[
+    "platforms.h",
+    "led_sysdefs.h",
+    "fastspi.h",
+    "fastled_progmem.h",
+];
+
+const NATIVE_DISPATCH_CONFIG_FILES: &[&str] = &["config.h"];
+
+const NATIVE_COMPILER_ABSTRACTION_FILES: &[&str] = &[
+    "deprecated.h",
+    "align.h",
+    "export.h",
+    "fltest.h",
+    "type_traits.h",
+    "m0clockless_c.h",
+];
+
+const BANNED_HEADERS_COMMON_RS: &[&str] = &[
+    "pthread.h",
+    "assert.h",
+    "iostream",
+    "stdio.h",
+    "cstdio",
+    "cstdlib",
+    "vector",
+    "list",
+    "map",
+    "unordered_map",
+    "set",
+    "unordered_set",
+    "multimap",
+    "multiset",
+    "queue",
+    "deque",
+    "algorithm",
+    "memory",
+    "thread",
+    "mutex",
+    "chrono",
+    "fstream",
+    "sstream",
+    "iomanip",
+    "exception",
+    "stdexcept",
+    "typeinfo",
+    "ctime",
+    "cmath",
+    "math.h",
+    "complex",
+    "valarray",
+    "cfloat",
+    "cassert",
+    "cerrno",
+    "cctype",
+    "cwctype",
+    "cstring",
+    "cwchar",
+    "cuchar",
+    "cstdint",
+    "stdint.h",
+    "stddef.h",
+    "cstddef",
+    "stdlib.h",
+    "malloc.h",
+    "string.h",
+    "type_traits",
+    "new",
+];
+
+const BANNED_HEADERS_CORE_RS: &[&str] = &[
+    "pthread.h",
+    "assert.h",
+    "iostream",
+    "stdio.h",
+    "cstdio",
+    "cstdlib",
+    "vector",
+    "list",
+    "map",
+    "unordered_map",
+    "set",
+    "unordered_set",
+    "multimap",
+    "multiset",
+    "queue",
+    "deque",
+    "algorithm",
+    "memory",
+    "thread",
+    "mutex",
+    "chrono",
+    "fstream",
+    "sstream",
+    "iomanip",
+    "exception",
+    "stdexcept",
+    "typeinfo",
+    "ctime",
+    "cmath",
+    "math.h",
+    "complex",
+    "valarray",
+    "cfloat",
+    "cassert",
+    "cerrno",
+    "cctype",
+    "cwctype",
+    "cstring",
+    "cwchar",
+    "cuchar",
+    "cstdint",
+    "stdint.h",
+    "stddef.h",
+    "cstddef",
+    "stdlib.h",
+    "malloc.h",
+    "string.h",
+    "type_traits",
+    "new",
+    "Arduino.h",
+];
+
+const BANNED_HEADER_RECOMMENDATIONS: &[(&str, &str)] = &[
+    (
+        "Arduino.h",
+        "fl/system/arduino.h (trampoline that includes Arduino.h + cleans up macros)",
+    ),
+    (
+        "pthread.h",
+        "fl/stl/thread.h or fl/stl/mutex.h (depending on what you need)",
+    ),
+    (
+        "assert.h",
+        "FL_CHECK or FL_ASSERT macros (check fl/stl/compiler_control.h)",
+    ),
+    ("iostream", "fl/stl/iostream.h or fl/str.h"),
+    (
+        "stdio.h",
+        "fl/stl/stdio.h (provides fl::printf, fl::snprintf, fl::sprintf)",
+    ),
+    (
+        "cstdio",
+        "fl/stl/cstdio.h (provides fl::print, fl::println)",
+    ),
+    ("cstdlib", "fl/stl/cstdlib.h or fl/string operations"),
+    ("vector", "fl/stl/vector.h"),
+    ("list", "fl/stl/list.h or fl/stl/vector.h"),
+    (
+        "map",
+        "fl/stl/map.h (check fl/stl/hash_map.h for hash-based)",
+    ),
+    ("unordered_map", "fl/stl/unordered_map.h"),
+    ("set", "fl/stl/set.h"),
+    ("unordered_set", "fl/stl/unordered_set.h"),
+    ("multimap", "fl/stl/multi_map.h"),
+    ("multiset", "fl/stl/multi_set.h"),
+    (
+        "queue",
+        "fl/stl/queue.h or fl/stl/vector.h with manual queue semantics",
+    ),
+    ("deque", "fl/stl/deque.h"),
+    ("algorithm", "fl/stl/algorithm.h"),
+    ("memory", "fl/stl/shared_ptr.h or fl/stl/unique_ptr.h"),
+    ("thread", "fl/stl/thread.h"),
+    ("mutex", "fl/stl/mutex.h"),
+    ("chrono", "fl/time.h"),
+    ("fstream", "fl/file.h or platform file operations"),
+    ("sstream", "fl/stl/sstream.h"),
+    ("iomanip", "fl/stl/iostream.h stream manipulators"),
+    (
+        "exception",
+        "Use error codes or fl/stl/exception.h if available",
+    ),
+    ("stdexcept", "Use error codes instead"),
+    (
+        "typeinfo",
+        "Use fl/stl/type_traits.h or RTTI if unavoidable",
+    ),
+    ("ctime", "fl/time.h"),
+    ("cmath", "fl/math.h"),
+    ("math.h", "fl/math.h"),
+    ("complex", "Custom complex number class or fl/geometry.h"),
+    ("valarray", "fl/stl/vector.h"),
+    ("cfloat", "fl/stl/limits.h or platform-specific headers"),
+    ("cassert", "FL_CHECK macros from fl/stl/compiler_control.h"),
+    ("cerrno", "Error handling through return codes"),
+    ("cctype", "Character classification (implement if needed)"),
+    (
+        "cwctype",
+        "Wide character classification (implement if needed)",
+    ),
+    ("cstring", "fl/str.h or fl/stl/cstring.h"),
+    ("cwchar", "Wide character support (implement if needed)"),
+    ("cuchar", "Character support (implement if needed)"),
+    ("cstdint", "fl/stl/stdint.h"),
+    ("stdint.h", "fl/stl/stdint.h"),
+    ("stddef.h", "fl/stl/stddef.h or fl/stl/cstddef.h"),
+    ("cstddef", "fl/stl/cstddef.h"),
+    (
+        "stdlib.h",
+        "fl/stl/cstdlib.h (provides fl::aligned_alloc, fl::strtol, fl::atoi, etc.)",
+    ),
+    (
+        "malloc.h",
+        "fl/stl/cstdlib.h (provides fl::aligned_alloc / fl::aligned_free)",
+    ),
+    (
+        "string.h",
+        "fl/str.h (or use extern declarations for memset/memcpy if only C functions needed)",
+    ),
+    ("type_traits", "fl/stl/type_traits.h"),
+    (
+        "new",
+        "Use stack allocation or custom allocators (placement new allowed in inplacenew.h)",
+    ),
+];
+
+const PRIVATE_LIBCPP_HEADER_MAPPINGS_RS: &[(&str, &str)] = &[
+    ("__algorithm", "\"fl/stl/algorithm.h\""),
+    ("__atomic", "\"fl/stl/atomic.h\""),
+    ("__chrono", "\"fl/stl/thread.h\""),
+    ("__functional", "\"fl/stl/functional.h\""),
+    ("__fwd/string", "\"fl/stl/string.h\""),
+    ("__iterator", "\"fl/stl/iterator.h\""),
+    ("__numeric", "\"fl/stl/algorithm.h\""),
+    ("__ostream", "\"fl/stl/ostream.h\""),
+    ("__random", "\"fl/math/random.h\""),
+    ("__thread", "\"fl/stl/thread.h\""),
+    ("__type_traits", "\"fl/stl/type_traits.h\""),
+    ("__utility", "\"fl/stl/utility.h\""),
+    ("__vector", "\"fl/stl/vector.h\""),
+    ("__hash_table", "\"fl/stl/unordered_map.h\""),
+    ("__tree", "\"fl/stl/map.h\""),
+    ("__node_handle", "\"fl/stl/unordered_map.h\""),
+];
+
+const BANNED_HEADER_EXCEPTIONS: &[(&str, &str)] = &[
+    ("new", "inplacenew.h"),
+    ("new", "platforms/wasm/new.h"),
+    ("new", "platforms/arm/new.h"),
+    ("new", "platforms/esp/new.h"),
+    ("new", "platforms/shared/new.h"),
+    ("Arduino.h", "fl/system/arduino.h"),
+    ("Arduino.h", "third_party/ezws2812/ezWS2812.h"),
+    (
+        "Arduino.h",
+        "third_party/object_fled/src/ObjectFLEDDmaManager.h",
+    ),
+    ("Arduino.h", "platforms/wasm/compiler/Arduino.h"),
+    ("Arduino.h", "platforms/wasm/led_sysdefs_wasm.h"),
+    ("pthread.h", "fl/stl/thread_local.h"),
+    ("mutex", "fl/stl/mutex.h"),
+    ("mutex", "platforms/stub/thread_stub_stl.h"),
+    ("mutex", "platforms/stub/mutex_stub_stl.h"),
+    ("mutex", "platforms/esp/32/mutex_esp32.h"),
+    ("mutex", "platforms/arm/stm32/mutex_stm32.h"),
+    ("mutex", "platforms/arm/d21/mutex_samd.h"),
+    ("mutex", "platforms/arm/rp/mutex_rp.h"),
+    ("thread", "fl/async.cpp.hpp"),
+    ("thread", "platforms/stub/isr_stub.hpp"),
+    ("thread", "platforms/stub/time_stub.cpp"),
+    ("thread", "platforms/stub/thread_stub_stl.h"),
+    ("thread", "platforms/wasm/timer.cpp"),
+    ("iostream", "platforms/stub/isr_stub.hpp"),
+    ("algorithm", "fl/stl/mutex.h"),
+    ("algorithm", "platforms/stub/fs_stub.hpp"),
+    ("stdint.h", "fl/stl/stdint.h"),
+    ("stdint.h", "fl/stl/time.cpp"),
+    ("stdint.h", "fl/stl/time.cpp.hpp"),
+    ("chrono", "fl/stl/time.cpp"),
+    ("chrono", "fl/stl/time.cpp.hpp"),
+    ("chrono", "platforms/stub/isr_stub.hpp"),
+    ("chrono", "platforms/stub/time_stub.cpp"),
+    ("chrono", "platforms/esp/32/condition_variable_esp32.h"),
+    ("chrono", "platforms/esp/32/semaphore_esp32.h"),
+    ("string.h", "fl/stl/str.cpp"),
+    ("string.h", "fl/stl/cstring.cpp.hpp"),
+    ("string.h", "fl/stl/detail/string_holder.cpp.hpp"),
+    ("stdlib.h", "fl/stl/str.cpp"),
+    ("stdlib.h", "fl/stl/cstdlib.cpp.hpp"),
+    ("stdlib.h", "fl/stl/cstring.cpp.hpp"),
+    ("stdlib.h", "fl/stl/detail/string_holder.cpp.hpp"),
+    ("stdlib.h", "fl/stl/malloc.cpp.hpp"),
+    ("stdlib.h", "fl/stl/undef.h"),
+    ("stdlib.h", "platforms/arm/teensy/coroutine_teensy.impl.hpp"),
+    (
+        "stdlib.h",
+        "platforms/shared/mock/esp/32/drivers/spi_peripheral_mock.cpp.hpp",
+    ),
+    ("stdlib.h", "platforms/shared/ui/json/json_console.cpp.hpp"),
+    ("stdlib.h", "third_party/libhelix_mp3/real/buffers.hpp"),
+    ("stdlib.h", "third_party/stb/truetype/stb_truetype.cpp.hpp"),
+    ("malloc.h", "fl/stl/cstdlib.cpp.hpp"),
+    ("malloc.h", "fl/stl/alloca.h"),
+    (
+        "malloc.h",
+        "platforms/shared/mock/esp/32/drivers/spi_peripheral_mock.cpp.hpp",
+    ),
+    ("malloc.h", "third_party/stb/stb_vorbis.cpp.hpp"),
+    ("math.h", "fl/math/math.cpp"),
+    ("math.h", "fl/math/math.cpp.hpp"),
+    ("math.h", "fl/audio/audio_reactive.cpp"),
+    ("math.h", "fl/colorutils.cpp"),
+    ("math.h", "fl/transform.cpp"),
+    ("math.h", "fl/xypath.cpp"),
+    ("math.h", "fl/xypath_impls.cpp"),
+    ("math.h", "fl/xypath_renderer.cpp"),
+    ("math.h", "fx/video/frame_interpolator.cpp"),
+    ("cmath", "platforms/wasm/timer.cpp"),
+    ("cerrno", "fl/stl/cerrno.h"),
+    ("cerrno", "fl/stl/fstream.h"),
+    ("cstdio", "fl/stl/detail/file_io.h"),
+    ("cstdio", "platforms/stub/fs_stub.hpp"),
+    ("cstdio", "platforms/wasm/io_wasm.h"),
+    ("cstdio", "platforms/wasm/compiler/wasm_pch.h"),
+    ("cstdlib", "fl/stl/cstdlib.cpp.hpp"),
+];
+
 #[derive(Debug, Clone)]
 pub struct FileContent {
     pub path: String,
@@ -690,6 +1229,7 @@ pub fn supported_checker_names() -> &'static [&'static str] {
         "attribute",
         "bare_allocation",
         "bare_using",
+        "banned_headers",
         "banned_define",
         "banned_macros",
         "banned_namespace",
@@ -711,7 +1251,10 @@ pub fn supported_checker_names() -> &'static [&'static str] {
         "iwyu_pragma_block",
         "member_style",
         "namespace_fl_declaration",
+        "namespace_includes",
         "namespace_platforms",
+        "native_platform_defines",
+        "noexcept_special_members",
         "numeric_limit_macros",
         "platform_includes",
         "platforms_fl_namespace",
@@ -752,6 +1295,7 @@ pub fn supported_python_checker_names() -> &'static [&'static str] {
         "BareAllocationChecker",
         "BareUsingChecker",
         "BannedDefineChecker",
+        "BannedHeadersChecker",
         "BannedMacrosChecker",
         "BannedNamespaceChecker",
         "BuiltinMemcpyChecker",
@@ -773,7 +1317,10 @@ pub fn supported_python_checker_names() -> &'static [&'static str] {
         "LoggingInIramChecker",
         "MemberStyleChecker",
         "NamespaceFlDeclarationChecker",
+        "NamespaceIncludesChecker",
         "NamespacePlatformsChecker",
+        "NativePlatformDefinesChecker",
+        "NoexceptSpecialMembersChecker",
         "NumericLimitMacroChecker",
         "PlatformIncludesChecker",
         "PlatformsFlNamespaceChecker",
@@ -814,6 +1361,62 @@ pub fn create_checkers(
         ("attribute", Box::new(AttributeChecker)),
         ("bare_allocation", Box::new(BareAllocationChecker)),
         ("bare_using", Box::new(BareUsingChecker)),
+        (
+            "banned_headers",
+            Box::new(BannedHeadersChecker {
+                banned_headers: BANNED_HEADERS_CORE_RS,
+                strict_mode: true,
+                scope: BannedHeadersScope::Fl,
+            }),
+        ),
+        (
+            "banned_headers",
+            Box::new(BannedHeadersChecker {
+                banned_headers: BANNED_HEADERS_CORE_RS,
+                strict_mode: true,
+                scope: BannedHeadersScope::Lib8tion,
+            }),
+        ),
+        (
+            "banned_headers",
+            Box::new(BannedHeadersChecker {
+                banned_headers: BANNED_HEADERS_CORE_RS,
+                strict_mode: false,
+                scope: BannedHeadersScope::FxSensorsPlatformsShared,
+            }),
+        ),
+        (
+            "banned_headers",
+            Box::new(BannedHeadersChecker {
+                banned_headers: BANNED_HEADERS_COMMON_RS,
+                strict_mode: false,
+                scope: BannedHeadersScope::Platforms,
+            }),
+        ),
+        (
+            "banned_headers",
+            Box::new(BannedHeadersChecker {
+                banned_headers: BANNED_HEADERS_COMMON_RS,
+                strict_mode: false,
+                scope: BannedHeadersScope::Examples,
+            }),
+        ),
+        (
+            "banned_headers",
+            Box::new(BannedHeadersChecker {
+                banned_headers: BANNED_HEADERS_COMMON_RS,
+                strict_mode: true,
+                scope: BannedHeadersScope::ThirdParty,
+            }),
+        ),
+        (
+            "banned_headers",
+            Box::new(BannedHeadersChecker {
+                banned_headers: BANNED_HEADERS_CORE_RS,
+                strict_mode: false,
+                scope: BannedHeadersScope::Tests,
+            }),
+        ),
         ("banned_define", Box::new(BannedDefineChecker)),
         ("banned_macros", Box::new(BannedMacrosChecker)),
         ("banned_namespace", Box::new(BannedNamespaceChecker)),
@@ -842,7 +1445,16 @@ pub fn create_checkers(
             "namespace_fl_declaration",
             Box::new(NamespaceFlDeclarationChecker),
         ),
+        ("namespace_includes", Box::new(NamespaceIncludesChecker)),
         ("namespace_platforms", Box::new(NamespacePlatformsChecker)),
+        (
+            "native_platform_defines",
+            Box::new(NativePlatformDefinesChecker),
+        ),
+        (
+            "noexcept_special_members",
+            Box::new(NoexceptSpecialMembersChecker),
+        ),
         ("numeric_limit_macros", Box::new(NumericLimitMacroChecker)),
         ("platform_includes", Box::new(PlatformIncludesChecker)),
         (
@@ -1535,6 +2147,31 @@ fn regex_any_include() -> &'static Regex {
     VALUE.get_or_init(|| Regex::new(r#"^\s*#\s*include\s*[<"].*[>"]"#).unwrap())
 }
 
+fn regex_banned_header_include() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r#"#include\s+[<"]([^>"]+)[>"]"#).unwrap())
+}
+
+fn regex_private_libcpp_header() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r#"#include\s+["<](__[^_][^">]*)[">]"#).unwrap())
+}
+
+fn regex_namespace_include_using() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"^\s*using\s+namespace\s+\w+\s*;").unwrap())
+}
+
+fn regex_namespace_include_open() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"^\s*namespace\s+\w+\s*\{").unwrap())
+}
+
+fn regex_namespace_include_directive() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"^\s*#\s*include").unwrap())
+}
+
 fn regex_named_enum() -> &'static Regex {
     static VALUE: OnceLock<Regex> = OnceLock::new();
     VALUE.get_or_init(|| Regex::new(r"\benum\s+([A-Za-z_]\w*)\s*[{:;]").unwrap())
@@ -1545,6 +2182,31 @@ fn regex_class_struct() -> &'static Regex {
     VALUE.get_or_init(|| {
         Regex::new(r"\b(?:class|struct)\s+(?:[A-Za-z_]\w*\s+)*[A-Za-z_]\w*").unwrap()
     })
+}
+
+fn regex_noexcept_class_def() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\b(?:class|struct)\s+(\w+)").unwrap())
+}
+
+fn regex_noexcept_suppress_special() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"(?i)//\s*(?:ok\s+no\s+FL_NOEXCEPT|nolint)\b").unwrap())
+}
+
+fn regex_has_noexcept_special() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\b(?:FL_NOEXCEPT|noexcept)\b").unwrap())
+}
+
+fn regex_destructor_decl() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"~(\w+)\s*\(").unwrap())
+}
+
+fn regex_operator_assign_decl() -> &'static Regex {
+    static VALUE: OnceLock<Regex> = OnceLock::new();
+    VALUE.get_or_init(|| Regex::new(r"\boperator\s*=\s*\(").unwrap())
 }
 
 fn regex_member_trailing_underscore() -> &'static Regex {
@@ -1925,6 +2587,147 @@ fn strip_comments_preserving_lines(lines: &[String]) -> String {
 
 fn is_ascii_word_byte(byte: u8) -> bool {
     byte.is_ascii_alphanumeric() || byte == b'_'
+}
+
+fn contains_ascii_word(code: &str, word: &str) -> bool {
+    let bytes = code.as_bytes();
+    let mut search_start = 0;
+    while let Some(relative_pos) = code[search_start..].find(word) {
+        let pos = search_start + relative_pos;
+        let end = pos + word.len();
+        search_start = end;
+        if (pos == 0 || !is_ascii_word_byte(bytes[pos - 1]))
+            && (end >= bytes.len() || !is_ascii_word_byte(bytes[end]))
+        {
+            return true;
+        }
+    }
+    false
+}
+
+fn banned_header_recommendation(header: &str) -> &'static str {
+    BANNED_HEADER_RECOMMENDATIONS
+        .iter()
+        .find_map(|(candidate, recommendation)| (*candidate == header).then_some(*recommendation))
+        .unwrap_or("Use fl/ alternatives instead of standard library headers")
+}
+
+fn private_libcpp_header_recommendation(header: &str) -> &'static str {
+    if let Some((_, recommendation)) = PRIVATE_LIBCPP_HEADER_MAPPINGS_RS
+        .iter()
+        .find(|(candidate, _)| *candidate == header)
+    {
+        return *recommendation;
+    }
+    PRIVATE_LIBCPP_HEADER_MAPPINGS_RS
+        .iter()
+        .find_map(|(prefix, recommendation)| header.starts_with(prefix).then_some(*recommendation))
+        .unwrap_or("\"appropriate FastLED header\" (check ci/iwyu/stdlib.imp)")
+}
+
+fn banned_header_matches_exception(file_path: &str, header: &str) -> bool {
+    let normalized = normalize_path(file_path);
+    BANNED_HEADER_EXCEPTIONS
+        .iter()
+        .filter(|(exception_header, _)| *exception_header == header)
+        .any(|(_, pattern)| normalized == *pattern || normalized.ends_with(&format!("/{pattern}")))
+}
+
+fn last_dot_extension(path: &str) -> &str {
+    path.rsplit('.').next().unwrap_or(path)
+}
+
+fn namespace_include_snippet(line: &str) -> String {
+    let text = line.trim();
+    if text.chars().count() <= 50 {
+        return text.to_string();
+    }
+    text.chars().take(47).collect::<String>() + "..."
+}
+
+fn namespace_include_message(
+    include_snippet: &str,
+    namespace_info: Option<(usize, &str)>,
+) -> String {
+    if let Some((line, snippet)) = namespace_info {
+        format!("{include_snippet} (namespace declared at line {line}: {snippet})")
+    } else {
+        include_snippet.to_string()
+    }
+}
+
+fn namespace_braces_are_balanced(lines: &[String]) -> bool {
+    let stripped = strip_comments_preserving_lines(lines);
+    stripped.matches('{').count() == stripped.matches('}').count()
+}
+
+fn namespace_include_thorough_violations(lines: &[String]) -> Vec<(usize, String)> {
+    let stripped_content = strip_comments_preserving_lines(lines);
+    let stripped_lines: Vec<&str> = stripped_content.split('\n').collect();
+    let mut violations = Vec::new();
+    let mut namespace_stack: Vec<(usize, String)> = Vec::new();
+    let mut last_namespace: Option<(usize, String)> = None;
+
+    for (index, original_line) in lines.iter().enumerate() {
+        let line_number = index + 1;
+        let line_no_comments = stripped_lines.get(index).copied().unwrap_or("");
+        let stripped = line_no_comments.trim();
+        if stripped.is_empty() {
+            continue;
+        }
+
+        let open_braces = line_no_comments.matches('{').count();
+        let close_braces = line_no_comments.matches('}').count();
+
+        if stripped.contains("using namespace")
+            && regex_namespace_include_using().is_match(stripped)
+        {
+            let info = (line_number, namespace_include_snippet(original_line));
+            last_namespace = Some(info.clone());
+            if namespace_stack.is_empty() {
+                namespace_stack.push(info);
+            }
+        }
+
+        if stripped.contains("namespace")
+            && stripped.contains('{')
+            && regex_namespace_include_open().is_match(stripped)
+        {
+            let info = (line_number, namespace_include_snippet(original_line));
+            last_namespace = Some(info.clone());
+            namespace_stack.push(info);
+        }
+
+        if stripped.contains("#include")
+            && regex_namespace_include_directive().is_match(stripped)
+            && !namespace_stack.is_empty()
+        {
+            // Includes inside namespace blocks are handled by IncludeAfterNamespaceChecker.
+        } else if stripped.contains("#include")
+            && regex_namespace_include_directive().is_match(stripped)
+            && !original_line.contains("// nolint")
+            && last_namespace.is_some()
+        {
+            let include_snippet = namespace_include_snippet(original_line);
+            let namespace_info = last_namespace
+                .as_ref()
+                .map(|(namespace_line, snippet)| (*namespace_line, snippet.as_str()));
+            violations.push((
+                line_number,
+                namespace_include_message(&include_snippet, namespace_info),
+            ));
+        }
+
+        if close_braces > open_braces {
+            for _ in 0..(close_braces - open_braces) {
+                if !namespace_stack.is_empty() {
+                    namespace_stack.pop();
+                }
+            }
+        }
+    }
+
+    violations
 }
 
 fn ctype_functions() -> impl Iterator<Item = &'static str> {
@@ -2447,6 +3250,238 @@ fn is_inside_parens(code_part: &str, pos: usize) -> bool {
         }
     }
     depth > 0
+}
+
+fn find_close_paren(text: &str, open_pos: usize) -> Option<usize> {
+    let mut depth = 1_i32;
+    for (offset, ch) in text[open_pos + 1..].char_indices() {
+        if ch == '(' {
+            depth += 1;
+        } else if ch == ')' {
+            depth -= 1;
+            if depth == 0 {
+                return Some(open_pos + 1 + offset);
+            }
+        }
+    }
+    None
+}
+
+fn find_close_paren_multiline(
+    lines: &[String],
+    start_idx: usize,
+    open_col: usize,
+) -> Option<(usize, usize)> {
+    let line = &lines[start_idx];
+    let mut depth = 1_i32;
+    for (offset, ch) in line[open_col + 1..].char_indices() {
+        if ch == '(' {
+            depth += 1;
+        } else if ch == ')' {
+            depth -= 1;
+            if depth == 0 {
+                return Some((start_idx, open_col + 1 + offset));
+            }
+        }
+    }
+    for lookahead in 1..15 {
+        let idx = start_idx + lookahead;
+        if idx >= lines.len() {
+            break;
+        }
+        for (col, ch) in lines[idx].char_indices() {
+            if ch == '(' {
+                depth += 1;
+            } else if ch == ')' {
+                depth -= 1;
+                if depth == 0 {
+                    return Some((idx, col));
+                }
+            }
+        }
+    }
+    None
+}
+
+fn compute_block_comment_mask(lines: &[String]) -> Vec<bool> {
+    let mut mask = Vec::with_capacity(lines.len());
+    let mut inside = false;
+    for line in lines {
+        let line_inside = inside;
+        let bytes = line.as_bytes();
+        let mut index = 0;
+        while index + 1 < bytes.len() {
+            if inside {
+                if bytes[index] == b'*' && bytes[index + 1] == b'/' {
+                    inside = false;
+                    index += 2;
+                    continue;
+                }
+            } else if bytes[index] == b'/' && bytes[index + 1] == b'*' {
+                inside = true;
+                index += 2;
+                continue;
+            } else if bytes[index] == b'/' && bytes[index + 1] == b'/' {
+                break;
+            }
+            index += 1;
+        }
+        mask.push(line_inside);
+    }
+    mask
+}
+
+fn strip_line_comment_code(line: &str) -> String {
+    let mut in_string = false;
+    let mut in_char = false;
+    let mut previous = '\0';
+    let chars: Vec<(usize, char)> = line.char_indices().collect();
+    for (idx, ch) in &chars {
+        if *ch == '"' && !in_char && previous != '\\' {
+            in_string = !in_string;
+        } else if *ch == '\'' && !in_string && previous != '\\' {
+            in_char = !in_char;
+        } else if !in_string && !in_char && *ch == '/' {
+            let next_is_slash = line[*idx + ch.len_utf8()..].starts_with('/');
+            if next_is_slash {
+                return line[..*idx].to_string();
+            }
+        }
+        previous = *ch;
+    }
+    line.to_string()
+}
+
+fn classify_noexcept_line(
+    line: &str,
+    class_names: &HashSet<String>,
+) -> Option<(&'static str, usize)> {
+    let code = strip_line_comment_code(line);
+    let stripped = code.trim();
+    if stripped.is_empty() || stripped.starts_with('#') {
+        return None;
+    }
+
+    if let Some(matched) = regex_destructor_decl().find(&code) {
+        let tilde_pos = matched.start();
+        let prefix = code[..tilde_pos].trim_end();
+        if !prefix.ends_with("->") && !prefix.ends_with('.') {
+            let paren = code[matched.start()..].find('(')? + matched.start();
+            let close = find_close_paren(&code, paren)?;
+            let inside = code[paren + 1..close].trim();
+            if inside.is_empty() || inside == "void" {
+                return Some(("destructor", paren));
+            }
+        }
+    }
+
+    if let Some(matched) = regex_operator_assign_decl().find(&code) {
+        let paren = code[matched.start()..].find('(')? + matched.start();
+        return Some(("assignment operator", paren));
+    }
+
+    for name in class_names {
+        let pattern = format!(r"\b{}\s*\(", regex::escape(name));
+        let Ok(regex) = Regex::new(&pattern) else {
+            continue;
+        };
+        for matched in regex.find_iter(&code) {
+            let prefix = code[..matched.start()].trim();
+            if !NOEXCEPT_CTOR_QUALS.contains(&prefix) {
+                continue;
+            }
+            let paren = matched.end() - 1;
+            let rest = code[paren + 1..].trim_start();
+            let copy_prefix = format!("const {name}");
+            if rest.starts_with(&copy_prefix) {
+                let after = rest[copy_prefix.len()..].trim_start();
+                if after.starts_with('&') {
+                    return Some(("copy constructor", paren));
+                }
+            }
+            if rest.starts_with(name) {
+                let after = rest[name.len()..].trim_start();
+                if after.starts_with("&&") {
+                    return Some(("move constructor", paren));
+                }
+            }
+            if rest.starts_with(')')
+                || rest.starts_with("void") && rest[4..].trim_start().starts_with(')')
+            {
+                return Some(("default constructor", paren));
+            }
+        }
+    }
+    None
+}
+
+fn join_multiline_signature(lines: &[String], start: usize) -> Option<String> {
+    let line = strip_line_comment_code(&lines[start]);
+    if !line.contains('(') {
+        return None;
+    }
+    let mut depth = 0_i32;
+    for ch in line.chars() {
+        if ch == '(' {
+            depth += 1;
+        } else if ch == ')' {
+            depth -= 1;
+        }
+    }
+    if depth <= 0 {
+        return None;
+    }
+    let mut joined = line;
+    for offset in 1..10 {
+        let idx = start + offset;
+        if idx >= lines.len() {
+            break;
+        }
+        let next = strip_line_comment_code(&lines[idx]).trim().to_string();
+        joined.push(' ');
+        joined.push_str(&next);
+        for ch in next.chars() {
+            if ch == '(' {
+                depth += 1;
+            } else if ch == ')' {
+                depth -= 1;
+            }
+        }
+        if depth <= 0 {
+            return Some(joined);
+        }
+    }
+    None
+}
+
+fn signature_has_noexcept(lines: &[String], start: usize, open_paren: usize) -> bool {
+    let Some((close_line, close_col)) = find_close_paren_multiline(lines, start, open_paren) else {
+        return false;
+    };
+    let tail = &lines[close_line][close_col + 1..];
+    if regex_has_noexcept_special().is_match(tail) {
+        return true;
+    }
+    for offset in 1..6 {
+        let idx = close_line + offset;
+        if idx >= lines.len() {
+            break;
+        }
+        let next = lines[idx].trim();
+        if regex_has_noexcept_special().is_match(next) {
+            return true;
+        }
+        if next.starts_with('{') || next.ends_with('{') || next == "};" {
+            break;
+        }
+        if next.starts_with(':') && !next.starts_with("::") {
+            break;
+        }
+        if next.ends_with(';') {
+            break;
+        }
+    }
+    false
 }
 
 fn platform_trampoline_suggestion(include_path: &str) -> &'static str {
@@ -5966,6 +7001,405 @@ impl FileContentChecker for TestAggregationChecker {
             .into_iter()
             .map(|message| (0, message))
             .collect()
+    }
+}
+
+#[derive(Clone, Copy)]
+enum BannedHeadersScope {
+    Fl,
+    Lib8tion,
+    FxSensorsPlatformsShared,
+    Platforms,
+    Examples,
+    ThirdParty,
+    Tests,
+}
+
+struct BannedHeadersChecker {
+    banned_headers: &'static [&'static str],
+    strict_mode: bool,
+    scope: BannedHeadersScope,
+}
+
+impl BannedHeadersChecker {
+    fn scope_matches(&self, path: &str, project_root: &Path) -> bool {
+        match self.scope {
+            BannedHeadersScope::Fl => is_under_project_subpath(path, project_root, "src/fl"),
+            BannedHeadersScope::Lib8tion => {
+                is_under_project_subpath(path, project_root, "src/lib8tion")
+            }
+            BannedHeadersScope::FxSensorsPlatformsShared => {
+                is_under_project_subpath(path, project_root, "src/fx")
+                    || is_under_project_subpath(path, project_root, "src/sensors")
+                    || is_under_project_subpath(path, project_root, "src/platforms/shared")
+            }
+            BannedHeadersScope::Platforms => {
+                is_under_project_subpath(path, project_root, "src/platforms")
+            }
+            BannedHeadersScope::Examples => {
+                is_under_project_subpath(path, project_root, "examples")
+            }
+            BannedHeadersScope::ThirdParty => {
+                is_under_project_subpath(path, project_root, "src/third_party")
+            }
+            BannedHeadersScope::Tests => is_under_project_subpath(path, project_root, "tests"),
+        }
+    }
+}
+
+impl FileContentChecker for BannedHeadersChecker {
+    fn name(&self) -> &'static str {
+        "BannedHeadersChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        if !ends_with_any(&normalized, &[".cpp", ".h", ".hpp", ".cpp.hpp", ".ino"]) {
+            return false;
+        }
+        if is_excluded_file(&normalized) {
+            return false;
+        }
+        self.scope_matches(&normalized, project_root)
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let file_ext = last_dot_extension(&file_content.path);
+        let mut violations = Vec::new();
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+            if stripped.starts_with("//") {
+                continue;
+            }
+
+            if let Some(capture) = regex_private_libcpp_header().captures(line) {
+                let header = capture.get(1).unwrap().as_str();
+                let public_header = private_libcpp_header_recommendation(header);
+                violations.push((
+                    index + 1,
+                    format!(
+                        "Found private libc++ header \"{header}\" - Use {public_header} instead. Private libc++ headers (starting with __) are internal implementation details and should never be included directly. They are unstable across libc++ versions and break portability."
+                    ),
+                ));
+            }
+
+            let Some(capture) = regex_banned_header_include().captures(line) else {
+                continue;
+            };
+            let header = capture.get(1).unwrap().as_str();
+            if !self.banned_headers.contains(&header) {
+                continue;
+            }
+            if banned_header_matches_exception(&file_content.path, header) {
+                continue;
+            }
+
+            let recommendation = banned_header_recommendation(header);
+            let has_bypass_comment =
+                line.contains("// ok include") || line.contains("// OK include");
+            if matches!(file_ext, "h" | "hpp") {
+                violations.push((
+                    index + 1,
+                    format!(
+                        "Found banned header '{header}' - Use {recommendation} instead (banned in header files). Try moving the #include to the corresponding .cpp implementation file, or find the equivalent header in fl/stl in the fl:: namespace."
+                    ),
+                ));
+            } else if self.strict_mode && !has_bypass_comment {
+                violations.push((
+                    index + 1,
+                    format!(
+                        "Found banned header '{header}' - Use {recommendation} instead (strict mode, no bypass allowed). Try moving the #include to a .cpp implementation file, or find the equivalent header in fl/stl in the fl:: namespace."
+                    ),
+                ));
+            } else if !self.strict_mode && !has_bypass_comment {
+                violations.push((
+                    index + 1,
+                    format!(
+                        "Found banned header '{header}' - Use {recommendation} instead. Try finding the equivalent header in fl/stl in the fl:: namespace, or if you need this header in a .cpp file, add '// ok include' comment to suppress this warning."
+                    ),
+                ));
+            }
+        }
+
+        violations
+    }
+}
+
+struct NamespaceIncludesChecker;
+
+impl FileContentChecker for NamespaceIncludesChecker {
+    fn name(&self) -> &'static str {
+        "NamespaceIncludesChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        if !is_under_project_subpath(&normalized, project_root, "src") {
+            return false;
+        }
+        let lower = normalized.to_ascii_lowercase();
+        if [
+            ".build",
+            ".pio",
+            ".venv",
+            "libdeps",
+            "third_party",
+            "vendor",
+            "tests",
+        ]
+        .iter()
+        .any(|part| lower.contains(part))
+        {
+            return false;
+        }
+        ends_with_any(&normalized, &[".h", ".hpp"])
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        if file_content
+            .lines
+            .iter()
+            .any(|line| regex_allow_include_after_namespace().is_match(line))
+        {
+            return Vec::new();
+        }
+
+        let mut current_namespace: Option<(usize, String)> = None;
+        let mut seen_namespace = false;
+        let mut seen_include_after_namespace = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+            if stripped.is_empty() || stripped.starts_with("//") || stripped.starts_with("/*") {
+                continue;
+            }
+            if current_namespace.is_some() && stripped.starts_with('}') {
+                current_namespace = None;
+            }
+            if stripped.contains("using namespace")
+                && regex_namespace_include_using().is_match(stripped)
+            {
+                current_namespace = Some((index + 1, namespace_include_snippet(line)));
+                seen_namespace = true;
+            }
+            if stripped.contains("namespace")
+                && stripped.contains('{')
+                && regex_namespace_include_open().is_match(stripped)
+            {
+                current_namespace = Some((index + 1, namespace_include_snippet(line)));
+                seen_namespace = true;
+            }
+            if stripped.contains("#include")
+                && regex_namespace_include_directive().is_match(stripped)
+            {
+                if line.contains("// nolint") {
+                    continue;
+                }
+                if current_namespace.is_some() {
+                    // The Python checker stores this as a provisional violation, then replaces it
+                    // with the thorough pass whenever a namespace/include pair was seen.
+                }
+                if seen_namespace {
+                    seen_include_after_namespace = true;
+                }
+            }
+        }
+
+        if seen_namespace && seen_include_after_namespace {
+            if !namespace_braces_are_balanced(&file_content.lines) {
+                return Vec::new();
+            }
+            return namespace_include_thorough_violations(&file_content.lines);
+        }
+
+        Vec::new()
+    }
+}
+
+struct NativePlatformDefinesChecker;
+
+impl FileContentChecker for NativePlatformDefinesChecker {
+    fn name(&self) -> &'static str {
+        "NativePlatformDefinesChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        if !is_under_project_subpath(&normalized, project_root, "src") {
+            return false;
+        }
+        if !ends_with_any(&normalized, &[".cpp", ".h", ".hpp"]) {
+            return false;
+        }
+        if is_under_project_subpath(&normalized, project_root, "src/third_party") {
+            return false;
+        }
+
+        let file_name = normalized.rsplit('/').next().unwrap_or(&normalized);
+        let file_name_lower = file_name.to_lowercase();
+        if file_name.starts_with("is_")
+            || file_name_lower.contains("core_detection")
+            || file_name_lower.contains("compile_test")
+            || NATIVE_COMPILER_ABSTRACTION_FILES.contains(&file_name)
+        {
+            return false;
+        }
+
+        let src_root_file = project_relative_path(&normalized)
+            .is_some_and(|rel| rel.starts_with("src/") && rel.matches('/').count() == 1);
+        if src_root_file && NATIVE_ROOT_DISPATCH_HEADERS.contains(&file_name) {
+            return false;
+        }
+        if NATIVE_DISPATCH_CONFIG_FILES.contains(&file_name)
+            && normalized.contains("/src/lib8tion/")
+        {
+            return false;
+        }
+
+        if is_under_project_subpath(&normalized, project_root, "src/platforms") {
+            let platforms_root_file = project_relative_path(&normalized).is_some_and(|rel| {
+                rel.starts_with("src/platforms/")
+                    && rel["src/platforms/".len()..].matches('/').count() == 0
+            });
+            if platforms_root_file {
+                return false;
+            }
+            if file_name.starts_with("fastpin_") || file_name.starts_with("fastspi_") {
+                return false;
+            }
+            if file_name.starts_with("led_sysdefs_") && file_name.matches('_').count() <= 2 {
+                return false;
+            }
+            if file_name_lower.contains("dispatch") || file_name == "fastpin_legacy.h" {
+                return false;
+            }
+        }
+
+        true
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        if !regex_preprocessor_conditional().is_match(&file_content.content) {
+            return Vec::new();
+        }
+        if !NATIVE_TO_MODERN_DEFINES
+            .iter()
+            .any(|(native, _)| file_content.content.contains(native))
+        {
+            return Vec::new();
+        }
+
+        let mut violations = Vec::new();
+        let mut in_multiline_comment = false;
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            if line.contains("/*") {
+                in_multiline_comment = true;
+            }
+            if line.contains("*/") {
+                in_multiline_comment = false;
+                continue;
+            }
+            if in_multiline_comment {
+                continue;
+            }
+
+            let stripped = line.trim();
+            if stripped.starts_with("//") || !regex_preprocessor_conditional().is_match(stripped) {
+                continue;
+            }
+            let code_part = split_line_comment(line);
+            for (native_define, modern_define) in NATIVE_TO_MODERN_DEFINES {
+                if !code_part.contains(native_define)
+                    || !contains_ascii_word(code_part, native_define)
+                {
+                    continue;
+                }
+                violations.push((
+                    index + 1,
+                    format!(
+                        "Native platform define '{native_define}' found in preprocessor conditional. Use '#ifdef {modern_define}' or '#if defined({modern_define})' instead (FL_IS_* macros are defined/undefined, never use bare '#if {modern_define}')."
+                    ),
+                ));
+            }
+        }
+
+        violations
+    }
+}
+
+struct NoexceptSpecialMembersChecker;
+
+impl FileContentChecker for NoexceptSpecialMembersChecker {
+    fn name(&self) -> &'static str {
+        "NoexceptSpecialMembersChecker"
+    }
+
+    fn should_process_file(&self, file_path: &str, project_root: &Path) -> bool {
+        let normalized = normalize_path(file_path);
+        if !ends_with_any(&normalized, &[".h", ".hpp", ".cpp", ".cpp.hpp"]) {
+            return false;
+        }
+        if !is_under_project_subpath(&normalized, project_root, "src/fl") {
+            return false;
+        }
+        if normalized.ends_with("/noexcept.h") || normalized.ends_with("fl/stl/noexcept.h") {
+            return false;
+        }
+        !normalized.contains("/third_party/")
+    }
+
+    fn check_file_content(&self, file_content: &FileContent) -> Vec<(usize, String)> {
+        let class_names: HashSet<String> = regex_noexcept_class_def()
+            .captures_iter(&file_content.content)
+            .map(|capture| capture[1].to_string())
+            .collect();
+        if class_names.is_empty() {
+            return Vec::new();
+        }
+
+        let comment_mask = compute_block_comment_mask(&file_content.lines);
+        let mut violations = Vec::new();
+
+        for (index, line) in file_content.lines.iter().enumerate() {
+            let stripped = line.trim();
+            if stripped.is_empty() || stripped.starts_with("//") || stripped.starts_with('#') {
+                continue;
+            }
+            if comment_mask.get(index).copied().unwrap_or(false) {
+                continue;
+            }
+            if stripped.starts_with("/*") || stripped.starts_with('*') {
+                continue;
+            }
+            if regex_noexcept_suppress_special().is_match(line) {
+                continue;
+            }
+
+            let mut info = classify_noexcept_line(line, &class_names);
+            if info.is_none() {
+                if let Some(joined) = join_multiline_signature(&file_content.lines, index) {
+                    if let Some((kind, open_paren)) = classify_noexcept_line(&joined, &class_names)
+                    {
+                        let original_open = line.find('(').unwrap_or(open_paren);
+                        info = Some((kind, original_open));
+                    }
+                }
+            }
+            let Some((kind, open_paren)) = info else {
+                continue;
+            };
+            if signature_has_noexcept(&file_content.lines, index, open_paren) {
+                continue;
+            }
+            violations.push((
+                index + 1,
+                format!("Missing FL_NOEXCEPT on {kind}: {stripped}"),
+            ));
+        }
+
+        violations
     }
 }
 

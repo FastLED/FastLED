@@ -17,6 +17,7 @@ from ci.lint_cpp import (
     is_header_include_checker,
     iwyu_pragma_block_checker,
     namespace_platforms_checker,
+    native_platform_defines_checker,
     no_namespace_fl_declaration,
     relative_include_checker,
     serial_printf_checker,
@@ -27,11 +28,13 @@ from ci.lint_cpp.arduino_macro_usage_checker import ArduinoMacroUsageChecker
 from ci.lint_cpp.asm_js_location_checker import AsmJsLocationChecker
 from ci.lint_cpp.attribute_checker import AttributeChecker
 from ci.lint_cpp.banned_define_checker import BannedDefineChecker
+from ci.lint_cpp.banned_headers_checker import BANNED_HEADERS_CORE, BannedHeadersChecker
 from ci.lint_cpp.banned_macros_checker import BannedMacrosChecker
 from ci.lint_cpp.banned_namespace_checker import BannedNamespaceChecker
 from ci.lint_cpp.bare_allocation_checker import BareAllocationChecker
 from ci.lint_cpp.bare_using_checker import BareUsingChecker
 from ci.lint_cpp.builtin_memcpy_checker import BuiltinMemcpyChecker
+from ci.lint_cpp.check_namespace_includes import NamespaceIncludesChecker
 from ci.lint_cpp.check_platform_includes import PlatformTrampolineChecker
 from ci.lint_cpp.check_platforms_fl_namespace import PlatformsFlNamespaceChecker
 from ci.lint_cpp.check_using_namespace import UsingNamespaceChecker
@@ -52,8 +55,10 @@ from ci.lint_cpp.iwyu_pragma_block_checker import IwyuPragmaBlockChecker
 from ci.lint_cpp.logging_in_iram_checker import LoggingInIramChecker
 from ci.lint_cpp.member_style_checker import MemberStyleChecker
 from ci.lint_cpp.namespace_platforms_checker import NamespacePlatformsChecker
+from ci.lint_cpp.native_platform_defines_checker import NativePlatformDefinesChecker
 from ci.lint_cpp.no_namespace_fl_declaration import NamespaceFlDeclarationChecker
 from ci.lint_cpp.no_using_namespace_fl_in_headers import UsingNamespaceFlChecker
+from ci.lint_cpp.noexcept_special_members_checker import NoexceptSpecialMembersChecker
 from ci.lint_cpp.numeric_limit_macros_checker import NumericLimitMacroChecker
 from ci.lint_cpp.platform_includes_checker import PlatformIncludesChecker
 from ci.lint_cpp.platform_pragma_checker import PlatformPragmaChecker
@@ -84,6 +89,29 @@ from ci.util.paths import PROJECT_ROOT
 
 def _normalize_path(path: Path | str) -> str:
     return str(path).replace("\\", "/")
+
+
+def _legacy_violation_item_to_line_content(item: Any) -> tuple[int, str]:
+    if isinstance(item, tuple) and len(item) >= 2:
+        line_num_raw, content_raw = item[0], item[1]
+        return int(line_num_raw), str(content_raw)
+
+    include_line = getattr(item, "include_line", None)
+    include_snippet = getattr(item, "include_snippet", None)
+    if include_line is None or include_snippet is None:
+        raise AssertionError(f"unsupported violation item: {item!r}")
+
+    message = str(include_snippet)
+    namespace_info = getattr(item, "namespace_info", None)
+    if namespace_info is not None:
+        namespace_line = getattr(namespace_info, "line_number", None)
+        namespace_snippet = getattr(namespace_info, "snippet", None)
+        if namespace_line is not None and namespace_snippet is not None:
+            message = (
+                f"{message} (namespace declared at line {int(namespace_line)}: "
+                f"{namespace_snippet})"
+            )
+    return int(include_line), message
 
 
 def _python_records(
@@ -124,15 +152,18 @@ def _python_records(
                 "message": violations,
             }
         ]
-    return [
-        {
-            "checker": checker.__class__.__name__,
-            "path": _normalize_path(file_path),
-            "line": line,
-            "message": message,
-        }
-        for line, message in violations
-    ]
+    records = []
+    for item in violations:
+        line, message = _legacy_violation_item_to_line_content(item)
+        records.append(
+            {
+                "checker": checker.__class__.__name__,
+                "path": _normalize_path(file_path),
+                "line": line,
+                "message": message,
+            }
+        )
+    return records
 
 
 def _rust_records(
@@ -189,6 +220,14 @@ def _rust_records(
             AttributeChecker(),
             Path("src/fl/example.h"),
             "[[nodiscard]] int value();\n",
+        ),
+        (
+            "banned_headers",
+            BannedHeadersChecker(
+                banned_headers_list=BANNED_HEADERS_CORE, strict_mode=True
+            ),
+            Path("src/fl/example.h"),
+            "#include <vector>\n",
         ),
         (
             "banned_define",
@@ -353,10 +392,28 @@ def _rust_records(
             "namespace fl {\n}\n",
         ),
         (
+            "namespace_includes",
+            NamespaceIncludesChecker(),
+            Path("src/fl/example.h"),
+            'namespace fl {\n}\n#include "fl/late.h"\n',
+        ),
+        (
             "namespace_platforms",
             NamespacePlatformsChecker(),
             Path("src/platforms/example.h"),
             "namespace platform {\n}\n",
+        ),
+        (
+            "native_platform_defines",
+            NativePlatformDefinesChecker(),
+            Path("src/fl/example.h"),
+            "#ifdef ESP32\n#endif\n",
+        ),
+        (
+            "noexcept_special_members",
+            NoexceptSpecialMembersChecker(),
+            Path("src/fl/example.h"),
+            "class Foo {\npublic:\n    Foo();\n};\n",
         ),
         (
             "numeric_limit_macros",
@@ -540,6 +597,10 @@ def test_rust_checker_matches_python_oracle(
     )
     monkeypatch.setattr(iwyu_pragma_block_checker, "PROJECT_ROOT", tmp_path)
     monkeypatch.setattr(namespace_platforms_checker, "SRC_ROOT", src_root)
+    monkeypatch.setattr(native_platform_defines_checker, "SRC_ROOT", src_root)
+    monkeypatch.setattr(
+        native_platform_defines_checker, "PLATFORMS_ROOT", src_root / "platforms"
+    )
     monkeypatch.setattr(no_namespace_fl_declaration, "SRC_ROOT", src_root)
     monkeypatch.setattr(relative_include_checker, "SRC_DIR", _normalize_path(src_root))
     monkeypatch.setattr(serial_printf_checker, "EXAMPLES_ROOT", examples_root)

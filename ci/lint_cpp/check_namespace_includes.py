@@ -152,6 +152,8 @@ def find_includes_after_namespace_thorough(
             # Check for includes OUTSIDE all namespaces (stack empty but we've seen a namespace)
             if "#include" in line_stripped:
                 if include_pattern.match(line_stripped):
+                    if "// nolint" in line:
+                        continue
                     # Violation if we've seen a namespace but are now outside all namespaces
                     if last_namespace and not namespace_stack:
                         include_snippet = truncate_snippet(line)
@@ -245,6 +247,8 @@ def find_includes_after_namespace(
             # Fast string search for "#include" before regex validation
             if "#include" in line:
                 if include_pattern.match(line):
+                    if "// nolint" in original_line:
+                        continue
                     # If we're inside a namespace, add as potential violation
                     if current_namespace:
                         include_snippet = truncate_snippet(original_line)
@@ -368,6 +372,8 @@ class NamespaceIncludesChecker(FileContentChecker):
             # Fast string search for "#include" before regex validation
             if "#include" in line_stripped:
                 if include_pattern.match(line_stripped):
+                    if "// nolint" in original_line:
+                        continue
                     # If we're inside a namespace, add as potential violation
                     if current_namespace:
                         include_snippet = truncate_snippet(original_line)
