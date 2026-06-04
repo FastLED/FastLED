@@ -673,10 +673,15 @@ void drawSquare(void* leds, uint16_t planeY, uint16_t planeX, int yCorner, int x
 				*((uint8_t*)leds + (yCorner * planeX + x) * 3 + 1) = ((color >> 8) & 0xFF);
 				*((uint8_t*)leds + (yCorner * planeX + x) * 3 + 2) = (color & 0xFF);
 			}
-			if ((yCorner + size >= 0) && (yCorner + size < planeY)) {
-				*((uint8_t*)leds + ((yCorner + size) * planeX + x) * 3) = ((color >> 16) & 0xFF);
-				*((uint8_t*)leds + ((yCorner + size) * planeX + x) * 3 + 1) = ((color >> 8) & 0xFF);
-				*((uint8_t*)leds + ((yCorner + size) * planeX + x) * 3 + 2) = (color & 0xFF);
+			// FastLED #2726: `size` is uint32_t so `yCorner + size` promotes
+			// to unsigned, making the `>= 0` clause always true (-Wtype-limits)
+			// and breaking the bounds check when yCorner is negative. Cast
+			// `size` to int to keep the arithmetic signed (matches the
+			// for-loop bound `x <= xCorner + (int)size` above).
+			if ((yCorner + (int)size >= 0) && (yCorner + (int)size < planeY)) {
+				*((uint8_t*)leds + ((yCorner + (int)size) * planeX + x) * 3) = ((color >> 16) & 0xFF);
+				*((uint8_t*)leds + ((yCorner + (int)size) * planeX + x) * 3 + 1) = ((color >> 8) & 0xFF);
+				*((uint8_t*)leds + ((yCorner + (int)size) * planeX + x) * 3 + 2) = (color & 0xFF);
 			}
 		}	//if valid x
 	}	//for x
@@ -687,10 +692,11 @@ void drawSquare(void* leds, uint16_t planeY, uint16_t planeX, int yCorner, int x
 				*((uint8_t*)leds + (xCorner + y * planeX) * 3 + 1) = ((color >> 8) & 0xFF);
 				*((uint8_t*)leds + (xCorner + y * planeX) * 3 + 2) = (color & 0xFF);
 			}
-			if ((xCorner + size >= 0) && (xCorner + size < planeX)) {
-				*((uint8_t*)leds + (xCorner + size + y * planeX) * 3) = ((color >> 16) & 0xFF);
-				*((uint8_t*)leds + (xCorner + size + y * planeX) * 3 + 1) = ((color >> 8) & 0xFF);
-				*((uint8_t*)leds + (xCorner + size + y * planeX) * 3 + 2) = (color & 0xFF);
+			// FastLED #2726: same -Wtype-limits fix as the yCorner branch above.
+			if ((xCorner + (int)size >= 0) && (xCorner + (int)size < planeX)) {
+				*((uint8_t*)leds + (xCorner + (int)size + y * planeX) * 3) = ((color >> 16) & 0xFF);
+				*((uint8_t*)leds + (xCorner + (int)size + y * planeX) * 3 + 1) = ((color >> 8) & 0xFF);
+				*((uint8_t*)leds + (xCorner + (int)size + y * planeX) * 3 + 2) = (color & 0xFF);
 			}
 		}	//if valid y
 	}	//for y
