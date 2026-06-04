@@ -38,8 +38,15 @@ dependencies = [
     "fpvgcc",
     "uv",
     "clang-tool-chain>=1.5.5",
-    # 1.11.13 ships the `--input-file` flag for the meson-configure
-    # wrapper (zackees/zccache#655, closes zackees/zccache#654). FastLED
+    # 1.11.14 ships the `--no-walk` flag plus an expanded skip-list for
+    # the meson-configure wrapper (zackees/zccache#660, closes zackees/
+    # zccache#659). With `--no-walk` the wrapper skips its recursive
+    # meson.build discovery walk entirely and trusts the caller's
+    # `--input-file` entries instead. FastLED enumerates its 7 known
+    # meson.build files explicitly, eliminating the ~5s `.venv/`
+    # traversal (~100k Python files) on every cold-with-cache
+    # reconfigure. 1.11.13 shipped the `--input-file` flag
+    # (zackees/zccache#655, closes zackees/zccache#654). FastLED
     # passes a sidecar digest of its test/example/source globs into the
     # wrapper's cache key so the reconfigure path benefits from cache
     # restoration — previously the wrapper had to be bypassed whenever
@@ -52,7 +59,7 @@ dependencies = [
     # incremental builds produce stale .obj files after a git pull that
     # changes transitive headers (symptom: `undefined symbol: ...` link
     # errors hours after a header actually changed).
-    "zccache>=1.11.13",
+    "zccache>=1.11.14",
     "ninja",
     "meson>=1.11.0",
     "download",
