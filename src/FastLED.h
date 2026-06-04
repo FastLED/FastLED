@@ -160,6 +160,7 @@
 
 #include "fl/channels/channel.h"
 #include "fl/channels/channel_events.h"
+#include "fl/wdt/watchdog.h"  // for fl::Watchdog (FastLED.watchdog() accessor)
 #include "fl/channels/manager.h"
 #include "fl/channels/config.h"  // for ChannelConfig, MultiChannelConfig
 #include "fl/channels/bus.h"          // for fl::Bus, fl::DefaultBus (Phase 3b, #2428)
@@ -643,6 +644,22 @@ public:
 	/// int id = FastLED.channelEvents().onChannelCreated.add([](const fl::IChannel& ch) { ... });
 	/// @endcode
 	static fl::ChannelEvents& channelEvents();
+
+	/// @brief Access the unified cross-platform watchdog timer.
+	/// @return Reference to the Watchdog singleton
+	/// @note See fl/wdt/watchdog.h and FastLED#2731. Tier 0 surface is universal.
+	/// @code
+	/// void setup() {
+	///     FastLED.watchdog().begin(15000);  // arm with 15s timeout
+	///     if (FastLED.watchdog().isInSafeMode()) { while (true) {} }
+	/// }
+	/// void loop() {
+	///     doWork();
+	///     FastLED.watchdog().feed();
+	///     FastLED.watchdog().markCleanShutdown();
+	/// }
+	/// @endcode
+	static fl::Watchdog& watchdog();
 
 	/// @name Manual Engine Events
 	/// When FASTLED_MANUAL_ENGINE_EVENTS is defined, these methods allow manual control of engine events.

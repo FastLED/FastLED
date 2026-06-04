@@ -725,6 +725,10 @@ fl::ChannelEvents& CFastLED::channelEvents() {
 	return fl::ChannelEvents::instance();
 }
 
+fl::Watchdog& CFastLED::watchdog() {
+	return fl::Watchdog::instance();
+}
+
 // ============================================================================
 // CFastLED audio method implementations - thin trampolines to AudioManager
 // ============================================================================
