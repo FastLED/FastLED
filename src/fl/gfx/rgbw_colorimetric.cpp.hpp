@@ -14,6 +14,51 @@
 namespace fl {
 namespace colorimetric_detail {
 
+// =============================================================================
+// Implementation map
+// =============================================================================
+//
+// The colorimetric path is deliberately small-matrix analytical math rather
+// than a baked 3D LUT.  The main implementation pieces are:
+//
+//   build_profile_cache()
+//     Converts measured xy/Y emitters into absolute XYZ columns, caches the
+//     three strict sub-gamut inverses, caches the RGB inverse used by W/LP
+//     solvers, and scales the source RGB->XYZ matrix into the same absolute
+//     device-Y domain.
+//
+//   solve_strict_subgamut()
+//     Reference strict RGBW solve. Native singles are exact identity; native
+//     dual edges are fixed-topology measured two-emitter solves; interiors
+//     solve a full-chroma endpoint in RGW/RBW/BGW and then apply value.
+//
+//   solve_wx_lp_legacy()
+//     Reference white-extraction solve. It maximizes W while preserving target
+//     chromaticity, then applies value. This is separate from boosted mode.
+//
+//   solve_wx_overdrive()
+//     Visual boosted policy that intentionally pushes W beyond the LP/strict
+//     residual boundary and therefore may drift toward the W diode.
+//
+// The most important invariant is value/chroma separation.  If we solve a
+// value-scaled RGB node directly and then normalize, several value levels can
+// collapse to the same saturated tuple.  Solving the full-chroma endpoint
+// first, normalizing/projection there, and applying the original value last
+// preserves fixed-hue HSV ramps and matches the Python reference model.
+
+// Build all per-profile quantities once so the per-pixel runtime path is just
+// a few matrix-vector operations and tiny fixed-size solves.
+//
+// Important scale convention:
+//   * P_R/P_G/P_B/P_W are measured emitter columns in absolute device XYZ/Y.
+//   * build_source_matrix() returns a normalized source matrix where white
+//     has Y=1.
+//   * We scale M_src by the same white-fit factor used by the reference math
+//     model so source targets and measured emitter columns share units.
+//
+// Without the M_src scale, native/D65 dual edges and LP legacy would compare
+// a Y=1 source target against hundreds/thousands of device-Y emitter units.
+// The result is underpowered solves and the wrong active-channel ratios.
 void build_profile_cache(const DiodeProfile* p, int cct_override,
                          ProfileCache* cache) FL_NOEXCEPT {
     cache->profile = p;
@@ -199,6 +244,9 @@ static bool project_to_hull(const ProfileCache& cache,
 }
 
 
+// Small leaf helpers used by the solvers below.  They are kept local to this
+// translation unit so the public header stays focused on reusable math helpers
+// and type declarations.
 static float max3f(float a, float b, float c) FL_NOEXCEPT {
     return fl::max(fl::max(a, b), c);
 }
@@ -224,6 +272,13 @@ static const float* column_for_idx(const ProfileCache& cache, int idx) FL_NOEXCE
     }
 }
 
+// Convert linear source RGB into measured-device absolute XYZ.
+//
+// In normal operation this uses cache.M_src, which has already been scaled into
+// the measured emitter domain by build_profile_cache().  The fallback is for
+// legacy / partially initialized profiles where input_xy_* is not populated:
+// then the caller's RGB values are interpreted as direct measured RGB emitter
+// drive fractions.
 static void source_rgb_to_XYZ(const ProfileCache& cache, float s_r,
                               float s_g, float s_b,
                               float X_t[3]) FL_NOEXCEPT {
@@ -237,6 +292,10 @@ static void source_rgb_to_XYZ(const ProfileCache& cache, float s_r,
     }
 }
 
+// Native single-axis authority.  For true native input primaries, a pure
+// R/G/B source coordinate is already a request for that exact LED channel.
+// Do not route it through RGW/RBW/BGW or W/LP paths, since that can introduce
+// W or another primary due to white-point/source-matrix differences.
 static bool native_single_identity(float s_r, float s_g, float s_b,
                                    float out[4]) FL_NOEXCEPT {
     out[0] = fl::clamp(s_r, 0.0f, 1.0f);
@@ -246,6 +305,13 @@ static bool native_single_identity(float s_r, float s_g, float s_b,
     return true;
 }
 
+// Solve a target XYZ using only a requested physical channel set.
+//
+// This is used for native outer edges.  It is intentionally not a generic
+// four-channel optimizer: RG/RB/GB authority means the inactive primary and W
+// must remain exactly zero.  For n==2 we solve the 3x2 least-squares normal
+// equations with a tiny non-negative active-set fallback.  That preserves the
+// edge topology while still respecting measured diode XYZ/Y ratios.
 static bool solve_fixed_topology_least_squares(const ProfileCache& cache,
                                                const float X[3],
                                                const int* idx,
@@ -299,6 +365,12 @@ static bool solve_fixed_topology_least_squares(const ProfileCache& cache,
     return false;
 }
 
+// Native dual-edge authority.  A native RG/RB/GB input must not introduce W or
+// the inactive RGB primary, but it also must not be raw passthrough.  The
+// target is first reduced to full-chroma edge coordinates, solved using only
+// the active measured emitters, normalized at the endpoint, and finally scaled
+// by the original source value.  This is the path that fixes yellow_half /
+// cyan_half / magenta_half without reintroducing illegal topology.
 static bool solve_native_dual_edge_fixed_topology(const ProfileCache& cache,
                                                   float s_r, float s_g,
                                                   float s_b,
@@ -344,6 +416,12 @@ static bool solve_native_dual_edge_fixed_topology(const ProfileCache& cache,
     return true;
 }
 
+// Strict full-chroma endpoint solve from an absolute XYZ target.
+//
+// Callers pass the full-chroma target here, not the original value-scaled RGB
+// node.  This function owns hull projection, xy routing into RGW/RBW/BGW, the
+// cached 3x3 inverse solve, and endpoint normalization.  Value scaling happens
+// in the public solve_strict_subgamut() wrapper after this endpoint is found.
 static bool solve_strict_subgamut_from_XYZ(const ProfileCache& cache,
                                            float X_t[3],
                                            float out_rgbw[4]) FL_NOEXCEPT {
@@ -507,6 +585,19 @@ bool solve_strict_subgamut_xy(const ProfileCache& cache,
 }
 
 
+// Reference wx_lp_legacy endpoint helper.
+//
+// Given a target xy, search the bounded four-channel manifold for a tuple that
+// preserves chromaticity while maximizing W.  The constraints are linear in
+// drive fractions when written as:
+//
+//   X_i - x_target * (X_i + Y_i + Z_i)
+//   Y_i - y_target * (X_i + Y_i + Z_i)
+//
+// so each candidate fixes two channels at low/high bounds and solves the other
+// two channels from the 2x2 xy residual system.  A small RGB floor is tried
+// before allowing channels to collapse, matching the reference LP legacy model
+// better for white-like / neutral values in wall-reflected profiles.
 static bool solve_wx_balanced_fraction_for_xy(const ProfileCache& cache,
                                               const float target_xy[2],
                                               float out[4]) FL_NOEXCEPT {
@@ -624,6 +715,12 @@ static bool solve_wx_balanced_fraction_for_xy(const ProfileCache& cache,
     return true;
 }
 
+// Chromaticity-preserving max-W solver.
+//
+// This is the FastLED analytical implementation of the math-model
+// wx_lp_legacy path.  It should not be merged with solve_wx_overdrive():
+// LP legacy's objective is "as much W as possible without moving xy", whereas
+// overdrive's objective is "more W/luminance, accepting controlled xy drift".
 bool solve_wx_lp_legacy(const ProfileCache& cache, float s_r,
                         float s_g, float s_b,
                         float out_rgbw[4]) FL_NOEXCEPT {
@@ -683,6 +780,12 @@ bool solve_wx_lp_legacy(const ProfileCache& cache, float s_r,
     return true;
 }
 
+// Boosted / overdrive solver.
+//
+// This remains useful as an optional visual policy, but it is deliberately
+// distinct from wx_lp_legacy.  The non-overdriven residual boundary gives the
+// chromaticity-preserving W limit; overdrive_ratio then moves W toward 1.0 and
+// accepts the corresponding drift toward the W diode.
 void solve_wx_overdrive(const ProfileCache& cache, float s_r, float s_g,
                         float s_b, float overdrive_ratio,
                         float out_rgbw[4]) FL_NOEXCEPT {

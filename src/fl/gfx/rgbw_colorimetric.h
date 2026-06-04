@@ -1,9 +1,30 @@
 /// @file rgbw_colorimetric.h
 /// Chromaticity-aware RGBW solvers — strict sub-gamut + wx_lp_legacy white
-/// overdrive + LUT + RGBCCT (issue #2545). This header carries the type
-/// declarations + tiny pure-math helpers; the heavy solver / LUT / RGBCCT
-/// implementations live in rgbw_colorimetric.cpp.hpp behind the
+/// extraction + boosted overdrive + LUT + RGBCCT (issue #2545).
+///
+/// This header carries the public/internal declarations and the small inline
+/// math helpers used by the implementation.  The heavier solver, LUT, and
+/// RGBCCT code lives in rgbw_colorimetric.cpp.hpp behind the
 /// FASTLED_RGBW_COLORIMETRIC compile gate.
+///
+/// Solver model in one paragraph:
+///   * Input RGB is treated as linear-light source-gamut coordinates.
+///   * A DiodeProfile supplies measured emitter xy + peak Y values.
+///   * The source matrix maps input RGB to target CIE XYZ in the measured
+///     device's absolute XYZ frame.
+///   * Strict mode routes that target into a legal RGBW topology and solves a
+///     small linear system.
+///   * wx_lp_legacy solves a chromaticity-preserving maximum-W endpoint.
+///   * boosted/overdrive intentionally trades chromaticity for more W/luminance.
+///
+/// Native-gamut invariants:
+///   * Single-channel R/G/B inputs are exact identity.
+///   * Native outer edges RG/RB/GB are topology-locked: no W and no inactive
+///     third RGB primary may appear.
+///   * Dual edges are still colorimetric solves, not raw 1:1 passthrough; the
+///     measured emitter XYZ/Y values determine the active-channel ratio.
+///   * Three-channel/interior inputs use chroma/value separation: solve the
+///     full-chroma endpoint, then apply the original source value.
 
 #pragma once
 
@@ -147,18 +168,25 @@ inline bool build_source_matrix(const float xy_r[2], const float xy_g[2],
 // within float tolerance — i.e. the user is feeding "native LED gamut"
 // drive coordinates rather than a foreign gamut like sRGB / Rec.2020.
 //
-// In native mode the strict sub-gamut solver MUST honor the reference
-// model's topology authority rules: single-channel and outer-edge (dual-
-// channel) inputs must round-trip back to the same single / dual channel
-// drive on the LED — no W bleed, no third-channel pull-in. Without this
-// guard, even pure (R, 0, 0) is routed through the [R, G, W] sub-gamut
-// inverse, which can drift due to white-point misalignment or numerical
-// boundary effects. See issue #2748 for the failing verifier rows.
+// Native mode has stricter topology authority than named-gamut mode:
 //
-// The W chromaticity (input_xy_w) is intentionally NOT compared: native
-// authority applies to topology (single / outer-edge) regardless of the
-// caller's target white. Different W targets only matter for full-3-
-// channel inputs, which fall through to the existing sub-gamut routing.
+//   * Single-channel inputs are exact drive identity:
+//       (R,0,0)->(R,0,0,0), (0,G,0)->(0,G,0,0), (0,0,B)->(0,0,B,0).
+//
+//   * Dual-channel outer edges are channel-set identity, not value identity.
+//     For RG/RB/GB edges the inactive RGB channel and W must remain zero, but
+//     the two active channels are still solved from the source target XYZ and
+//     the measured diode XYZ/Y columns.  This is why yellow_half is not simply
+//     raw (0.5,0.5,0,0): measured R/G luminance and the D65 source matrix set
+//     the correct active-channel ratio.
+//
+//   * Three-channel inputs fall through to the strict RGBW sub-gamut routing
+//     and may use W inside RGW/RBW/BGW.
+//
+// The W chromaticity (input_xy_w) is intentionally NOT compared here: native
+// authority is about RGB topology.  Different target whites affect the source
+// matrix and full-3-channel routing, not whether a pure/edge native input is
+// allowed to introduce W.
 inline bool is_native_input_gamut(const DiodeProfile& p) FL_NOEXCEPT {
     constexpr float kPrimaryEps = 1e-6f;
     auto close = [](const float a[2], const float b[2]) FL_NOEXCEPT {
@@ -172,8 +200,11 @@ inline bool is_native_input_gamut(const DiodeProfile& p) FL_NOEXCEPT {
 }
 
 // Topology activity classifier (#2748). Counts how many of `s_r, s_g, s_b`
-// are above the LSB-level epsilon, so the strict solver can route 1- and
-// 2-channel inputs directly to the device's matching channels.
+// are above the LSB-level epsilon.  The solvers use this to select the native
+// authority fast path:
+//   n == 1 : exact single-axis identity
+//   n == 2 : fixed-topology two-emitter solve
+//   n == 3 : normal strict / LP / overdrive interior solve
 inline int count_active_channels(float s_r, float s_g, float s_b) FL_NOEXCEPT {
     // 1 / 65535 — matches the 16-bit verifier precision used in the
     // reference math model; anything below this is below noise floor.
@@ -240,13 +271,22 @@ struct ProfileCache {
     float P_BGW_inv[3][3];                   // [B G W]^-1
     float d_W[3];                            // P_RGB_inv * P_W (wx_lp_legacy cache)
 
-    // Source-space → device-XYZ matrix (#2705). M_src · source_rgb = target
-    // XYZ in the device's absolute XYZ frame. Built from profile.input_xy_*
-    // via the standard CIE primary-matrix construction (column-normalized so
-    // M_src·[1,1,1] equals the source white XYZ at Y=1). When the source
-    // chromaticities are degenerate (input_xy_w[1] == 0, the default for
-    // value-initialized `DiodeProfile{}`), `has_source_space` is false and
-    // solvers fall back to the legacy device-emitter projection.
+    // Source-space → measured-device XYZ matrix (#2705).
+    //
+    // build_source_matrix() first derives the standard normalized CIE source
+    // matrix from profile.input_xy_* (source white has Y=1). build_profile_cache()
+    // then scales that matrix by the reference white-fit factor used by the
+    // math model so M_src·[1,1,1] is in the same absolute XYZ/Y domain as the
+    // measured emitter columns P_R/P_G/P_B/P_W.
+    //
+    // This scaling is essential: all runtime solves compare M_src targets
+    // directly against measured diode columns. Leaving M_src at Y=1 would make
+    // native D65 dual-edge and LP solves underpowered and would not match the
+    // reference model/cube.
+    //
+    // When the source chromaticities are degenerate (input_xy_w[1] == 0, the
+    // default for value-initialized `DiodeProfile{}`), `has_source_space` is
+    // false and solvers fall back to direct device-emitter projection.
     float M_src[3][3];
     bool has_source_space;
 };
@@ -336,26 +376,47 @@ inline void build_profile_cache(const DiodeProfile* p,
     build_profile_cache(p, 0, cache);
 }
 
-// Strict sub-gamut solver (gist sec 5). Routes target chromaticity to one of
-// {RGW, RBW, BGW} and solves the 3x3 system. Returns false if numerically
-// degenerate (caller should fall back to a simpler path).
+// Strict sub-gamut solver (gist sec 5).
+//
+// Runtime path:
+//   1. Black/near-black returns zero.
+//   2. Native single-axis inputs return exact identity.
+//   3. Native dual-edge inputs are locked to RG/RB/GB and solved as a measured
+//      two-emitter least-squares problem — no W/third-channel bleed, but also
+//      not raw passthrough.
+//   4. Interior inputs split source value from chroma, solve the full-chroma
+//      endpoint in one of {RGW, RBW, BGW}, then scale by source value.
+//
+// Returns false only for numerically degenerate profiles / matrices where the
+// caller should fall back to a simpler path.
 bool solve_strict_subgamut(const ProfileCache& cache, float s_r,
                            float s_g, float s_b,
                            float out_rgbw[4]) FL_NOEXCEPT;
 
 // Per-chromaticity variant: starts from explicit (xy, Y) instead of input RGB.
-// Used by the LUT builder.
+// Used by the LUT builder where xy/Y have already been chosen by the table
+// sampling pass. This path intentionally skips native input topology rules
+// because there is no source RGB active-channel mask attached to an arbitrary
+// xy sample.
 bool solve_strict_subgamut_xy(const ProfileCache& cache,
                               const float xy_t[2], float Y_t,
                               float out_rgbw[4]) FL_NOEXCEPT;
 
-// Reference wx_lp_legacy solver. Solves a chromaticity-preserving bounded LP
-// endpoint: project to the reachable hull, maximize W under xy constraints,
-// keep a small four-channel floor when feasible, normalize the endpoint, then
-// apply source value scaling. Native single-axis inputs remain exact identity;
-// native dual edges remain locked to RG/RB/GB but are solved from
-// measured/source XYZ instead of raw passthrough. This is intentionally
-// separate from boosted overdrive below.
+// Reference wx_lp_legacy solver.
+//
+// This is the analytical runtime counterpart of the reference math-model
+// "wx_lp_legacy" cube.  It is not the boosted/overdrive mode.  It solves a
+// chromaticity-preserving bounded endpoint:
+//   1. honor native single/dual topology authority;
+//   2. split source value from chroma;
+//   3. project the full-chroma target into the reachable hull if needed;
+//   4. solve the xy constraints while maximizing W;
+//   5. keep a small RGB floor when the four-channel manifold can represent the
+//      target, normalize the endpoint, then apply the original source value.
+//
+// Native single-axis inputs remain exact identity. Native dual edges remain
+// locked to RG/RB/GB but are solved from measured/source XYZ instead of raw
+// passthrough. This is intentionally separate from boosted overdrive below.
 bool solve_wx_lp_legacy(const ProfileCache& cache, float s_r, float s_g,
                         float s_b, float out_rgbw[4]) FL_NOEXCEPT;
 
