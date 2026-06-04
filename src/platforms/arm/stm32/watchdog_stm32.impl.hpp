@@ -68,10 +68,52 @@ void Watchdog::disable() FL_NOEXCEPT {
 ResetCause Watchdog::lastResetCause() const FL_NOEXCEPT {
     auto& s = platforms::stm32WatchdogState();
     if (!s.cause_cached) {
-        // IWatchdog::isReset() returns true if the previous reset was IWDG.
-        s.cached_cause = IWatchdog.isReset() ? ResetCause::WATCHDOG : ResetCause::POWER_ON;
+        // Read the RCC reset-cause register. STM32 H7 uses `RCC->RSR`,
+        // every other family in scope (F1/F4/F7/L4/G0/G4) uses `RCC->CSR`.
+        // The flag-bit layout is consistent across the families we cover.
+        #if defined(FL_IS_STM32_H7)
+            const fl::u32 csr = RCC->RSR;
+        #else
+            const fl::u32 csr = RCC->CSR;
+        #endif
+
+        // Bit positions per STM32 reference manuals. "Specific first"
+        // priority: WDT before brown-out, brown-out before generic POR.
+        ResetCause cause = ResetCause::UNKNOWN;
+        #ifdef RCC_CSR_IWDGRSTF
+            if      (csr & RCC_CSR_IWDGRSTF) cause = ResetCause::WATCHDOG;
+        #endif
+        #ifdef RCC_CSR_WWDGRSTF
+            else if (csr & RCC_CSR_WWDGRSTF) cause = ResetCause::WATCHDOG;
+        #endif
+        #ifdef RCC_CSR_SFTRSTF
+            else if (csr & RCC_CSR_SFTRSTF)  cause = ResetCause::SOFTWARE;
+        #endif
+        #ifdef RCC_CSR_BORRSTF
+            else if (csr & RCC_CSR_BORRSTF)  cause = ResetCause::BROWNOUT;
+        #endif
+        #ifdef RCC_CSR_PINRSTF
+            else if (csr & RCC_CSR_PINRSTF)  cause = ResetCause::EXTERNAL_PIN;
+        #endif
+        #ifdef RCC_CSR_LPWRRSTF
+            else if (csr & RCC_CSR_LPWRRSTF) cause = ResetCause::UNKNOWN;
+        #endif
+        #ifdef RCC_CSR_PORRSTF
+            else if (csr & RCC_CSR_PORRSTF)  cause = ResetCause::POWER_ON;
+        #endif
+
+        // STM32 reset flags are sticky — clear them so the NEXT boot only
+        // sees its own cause. RMVF (Remove flags) bit is in CSR/RSR; the
+        // exact name varies slightly across families.
+        #if defined(RCC_CSR_RMVF)
+            RCC->CSR |= RCC_CSR_RMVF;
+        #elif defined(RCC_RSR_RMVF)
+            RCC->RSR |= RCC_RSR_RMVF;
+        #endif
+
+        s.cached_cause = cause;
         s.cause_cached = true;
-        if (s.cached_cause == ResetCause::WATCHDOG && s.crash_count < 0xFFFF) {
+        if (cause == ResetCause::WATCHDOG && s.crash_count < 0xFFFF) {
             s.crash_count++;
         }
     }
