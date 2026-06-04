@@ -2,3 +2,50 @@ reviews:
   request_changes_workflow: true
   pre_merge_checks:
     enabled: true
+  path_instructions:
+    - path: "src/platforms/*.impl.cpp.hpp"
+      instructions: |
+        FastLED platform dispatch file. Verify:
+        - Dispatcher files are named `<component>.impl.cpp.hpp` and live in `src/platforms/` (root only — subdirectory `.cpp.hpp` files are translation-unit fragments, not dispatchers, and are out of scope for this rule).
+        - They start with `// IWYU pragma: private` and use `#if defined(FL_IS_*)` to
+          select platform fragments.
+        - The `#else` branch must include a no-op fallback from `src/platforms/shared/`
+          named `<component>_noop.hpp` (suffix is literally `_noop`, not `_null`, `_stub`,
+          or `_dummy`). Flag any other fallback naming.
+        - Platform fragments included by the dispatcher use the suffix `*.impl.hpp` (not
+          `*.cpp.hpp` — that suffix is reserved for the dispatcher itself).
+        - The `.impl.cpp.hpp` extension means "implementation router, include from exactly
+          one translation unit." If a header includes this file, that's a violation.
+        Reference: `agents/docs/cpp-standards.md` → "Naming convention (future standard)"
+        and "No-op Fallback (`_noop.hpp`)".
+    - path: "src/platforms/shared/*_noop.hpp"
+      instructions: |
+        FastLED no-op fallback header. Verify:
+        - Header is marked `// IWYU pragma: private`.
+        - All functions are `inline` and live in the `fl::platforms::` namespace
+          (NOT `fl::` directly).
+        - Function bodies return `0`, `false`, `nullptr`, or empty span — never assert,
+          throw, or call FL_WARN/FL_DBG. The whole point is unconditional compilation.
+        - If the parent subsystem declares `FL_<COMPONENT>_HAS_<FEATURE>` capability
+          flags, the no-op must define NONE of the boolean flags but MUST define every
+          numeric property to a sensible zero/default.
+        Reference: `agents/docs/cpp-standards.md` → "No-op Fallback (`_noop.hpp`)".
+    - path: "src/**/*.{h,hpp,cpp,cpp.hpp,impl.hpp}"
+      instructions: |
+        Macro naming — three types are recognized:
+        1. `FL_IS_<PLATFORM>` — platform detection, defined-or-undefined, no value.
+        2. `FASTLED_<NAME>` — legacy configuration macros with explicit 0/1/numeric values.
+        3. `FL_<COMPONENT>_HAS_<FEATURE>` — per-subsystem capability flag, defined-or-
+           undefined, no value. `FL_<COMPONENT>_<NUMERIC>` — numeric property, explicit
+           value.
+        Critical rule: `<COMPONENT>` is the SPELLED-OUT name, NOT an acronym. The macro
+        and the public API share a single vocabulary. If the API is `FastLED.watchdog()`,
+        the macros are `FL_WATCHDOG_*`, NOT `FL_WDT_*`. If a PR introduces acronym-style
+        capability macros, flag them and request the spelled-out form.
+        Reference: `agents/docs/cpp-standards.md` → "Type 3: Component Capability Flags".
+    - path: "src/**/*.h"
+      instructions: |
+        Header file. Verify it does NOT contain function definitions, function-local
+        statics with non-trivial constructors (Teensy 3.x `__cxa_guard` conflict), or
+        the `.cpp.hpp` / `.impl.hpp` content patterns. If function definitions are
+        needed, they belong in `.cpp.hpp` or `.impl.hpp` files.

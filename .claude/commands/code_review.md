@@ -110,6 +110,67 @@ meson.build (root)          → Source discovery, library compilation
 
 **If violations found**: Recommend refactoring similar to `tests/meson.build` (see git history)
 
+### src/platforms/** changes - PLATFORM DISPATCH CONVENTIONS
+
+**Authoritative reference:** `agents/docs/cpp-standards.md` → "Naming convention (future standard)" and "No-op Fallback (`_noop.hpp`)".
+
+**The three file-suffix roles in `src/platforms/`:**
+
+| Suffix | Role | Where it lives | Included by |
+|---|---|---|---|
+| `<component>.impl.cpp.hpp` | **Dispatcher / router.** Contains `#if defined(FL_IS_*)` selecting which platform fragment to include. | `src/platforms/` | Included from exactly **ONE** `.cpp` translation unit |
+| `<component>_<platform>.impl.hpp` | **Platform fragment.** Implementation for a specific MCU family. | `src/platforms/<family>/` | Included **only** by the matching dispatcher |
+| `<component>_noop.hpp` | **No-op fallback.** Empty/zero-returning bodies so unsupported platforms compile. | `src/platforms/shared/` | Included by dispatcher's `#else` branch |
+
+**Hard rules — flag any deviation:**
+
+1. **No-op fallbacks use the literal suffix `_noop`** — not `_null`, `_stub`, `_dummy`, `_empty`, or `_default`. The keyword `noop` is the grep marker for this convention.
+   - ✅ Good: `pin_noop.hpp`, `memory_noop.hpp`, `simd_noop.hpp`, `watchdog_noop.hpp`
+   - ❌ Wrong: `pin_null.hpp`, `memory_stub.hpp`, `simd_dummy.hpp`
+
+2. **No-op bodies do nothing.** Return `0`, `false`, `nullptr`, or empty span. Do not assert, throw, or log. The whole point is unconditional compilation.
+
+3. **No-op functions live in `fl::platforms::` namespace** — not `fl::` directly.
+
+4. **All three suffix types start with `// IWYU pragma: private`.** They are not meant for direct user inclusion.
+
+5. **Dispatcher (`.impl.cpp.hpp`) lives in `src/platforms/` root** — not inside a per-family subdirectory.
+
+6. **Platform fragments use `.impl.hpp`, not `.cpp.hpp`.** The `.cpp.hpp` suffix is reserved for the single dispatcher.
+
+7. **The dispatcher's `#else` branch MUST include a `_noop.hpp` fallback.** A dispatcher with no fallback breaks unsupported-platform builds.
+
+8. **Stub-only no-ops** (host-build pretending to be an OS primitive) live in `src/platforms/stub/` with the `_stub_noop.h` suffix instead. Use `shared/<x>_noop.hpp` when ANY platform might fall back; use `stub/<x>_stub_noop.h` when only the host build consumes it.
+
+**Exemplars to reference:**
+- Dispatcher: `src/platforms/coroutine.impl.cpp.hpp`, `src/platforms/channel_drivers.impl.cpp.hpp`
+- No-op fallback: `src/platforms/shared/memory_noop.hpp`, `src/platforms/shared/pin_noop.hpp`, `src/platforms/shared/simd_noop.hpp`
+
+### Macro Naming — THREE TYPES, NO ACRONYM-STYLE CAPABILITY FLAGS
+
+**Authoritative reference:** `agents/docs/cpp-standards.md` → "Macro Definition Patterns".
+
+The codebase recognizes three macro types:
+
+| Type | Pattern | Has value? | Use case |
+|---|---|---|---|
+| 1. Platform detection | `FL_IS_<PLATFORM>` | No (defined/undefined) | "Am I running on this platform?" |
+| 2. Configuration | `FASTLED_<NAME>` | Yes (0/1/numeric, explicit) | User-tunable build settings |
+| 3. Component capability flag | `FL_<COMPONENT>_HAS_<FEATURE>` or `FL_<COMPONENT>_<NUMERIC>` | Boolean: no value. Numeric: explicit value. | "Does this subsystem have this feature on this platform?" |
+
+**CRITICAL: Type 3 capability macros use SPELLED-OUT component names — no acronyms.**
+
+The macro identifier and the public API name share a single vocabulary. If the API is `FastLED.watchdog()`, the macros are `FL_WATCHDOG_*`. If the API is `FastLED.audio()`, the macros are `FL_AUDIO_*`. Forcing readers to learn an acronym in addition to the spelled-out API name is exactly the jargon failure these conventions exist to prevent.
+
+- ✅ Correct: `FL_WATCHDOG_HAS_WINDOW_MODE`, `FL_WATCHDOG_PERSIST_BYTES`, `FL_AUDIO_HAS_I2S`, `FL_CODEC_HAS_H264`
+- ❌ Wrong: `FL_WDT_HAS_WINDOW_MODE` (acronym hides the component), `FASTLED_WATCHDOG_*` (use `FL_` for newer per-component capability flags, reserve `FASTLED_` for Type 2 build settings), `WATCHDOG_HAS_WINDOW_MODE` (missing prefix)
+
+**Check Process for PRs:**
+1. Grep for any new `#define FL_*` in the diff.
+2. If it contains a known acronym for a longer component name (`WDT`, `IRQ`, `MUX`, `DMA` as a *component name* vs as a feature descriptor), flag it. (Note: `FL_WATCHDOG_HAS_DMA_RESET` is fine — `DMA` is a feature within the watchdog component, not the component itself.)
+3. If a no-op header is added and lacks the `_noop` suffix, flag it.
+4. If a new `*.cpp.hpp` lives in a per-family subdirectory rather than `src/platforms/` root, flag it as a misuse of the dispatcher suffix.
+
 ### **/*.h and **/*.cpp changes - PLATFORM HEADER ISOLATION
 
 **Core Principle**: Platform-specific headers MUST ONLY be included in .cpp files, NEVER in .h files.

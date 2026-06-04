@@ -18,6 +18,14 @@ Read `agents/docs/cpp-standards.md` for project-specific conventions:
 - API Object Pattern
 - Platform Dispatch Headers
 - `.cpp.hpp` sparse dispatch pattern
+- **Three-suffix platform dispatch convention** — see section "Naming convention (future standard)":
+  - `<component>.impl.cpp.hpp` — single dispatcher / router file in `src/platforms/`
+  - `<component>_<platform>.impl.hpp` — per-platform fragment in the family subdirectory
+  - `<component>_noop.hpp` — no-op fallback in `src/platforms/shared/` (literal `_noop` suffix; **not** `_null`, `_stub`, or `_dummy`). Bodies return zero/false/nullptr — never assert or log. Live in `fl::platforms::` namespace.
+- **Component capability macros (Type 3)** — see section "Type 3: Component Capability Flags":
+  - Pattern: `FL_<COMPONENT>_HAS_<FEATURE>` (boolean, defined-or-undefined) and `FL_<COMPONENT>_<NUMERIC>` (explicit value).
+  - **Spell out the component name — no acronyms.** If the public API is `FastLED.watchdog()`, the macros are `FL_WATCHDOG_*`, **NOT** `FL_WDT_*`. The macro and the API share one vocabulary; forcing readers to learn an acronym alias defeats the purpose of the convention.
+  - Distinct from Type 1 (`FL_IS_<PLATFORM>` for platform detection) and Type 2 (`FASTLED_<NAME>` for legacy configuration with explicit values).
 
 ## FastLED C++ Constraints
 

@@ -104,6 +104,28 @@ The names make roles explicit: `.impl.cpp.hpp` = "implementation router, include
 
 **Current exemplar:** `src/platforms/coroutine.impl.cpp.hpp`.
 
+### No-op Fallback (`_noop.hpp`)
+
+The dispatcher's `#else` branch needs a target — that's the **no-op implementation**. Platforms without hardware support for a feature get an implementation that satisfies the same API signature with empty / zero-returning bodies, so user code compiles unconditionally on any platform.
+
+**Naming and location:**
+- Lives in `src/platforms/shared/` with the suffix `_noop.hpp` — e.g., `pin_noop.hpp`, `memory_noop.hpp`, `simd_noop.hpp`, `codec/h264_noop.hpp`.
+- Never call it `_null.hpp`, `_stub.hpp`, or `_dummy.hpp`. The keyword is **`noop`** — this is what to grep for to find the convention.
+
+**File contents:**
+- Mark `// IWYU pragma: private` (header is only included via the dispatcher, never directly).
+- Functions are `inline` to stay ODR-safe if the header is reached from multiple TUs.
+- Live in the `fl::platforms::` namespace (not `fl::` — keeps the public surface clean).
+- Body convention: return a safe API-defined inert default — commonly `0`, `false`, `nullptr`, or empty span, but **documented sentinel values are also valid when the API contract requires them** (e.g., `pin_noop.hpp::needsPwmIsrFallback` returns `true` because the no-op platform genuinely needs the ISR fallback path; `setPwmFrequencyNative` returns `-4` as the documented "not supported" error code). **Never assert, throw, or call `FL_WARN`.** A no-op is a no-op — the whole point is that user code keeps running on unsupported platforms.
+- For multi-tier APIs that ship `FL_<COMPONENT>_HAS_<FEATURE>` capability macros (see Type 3 below), the no-op header **must not define any of the boolean capability flags** — so `#ifdef FL_<COMPONENT>_HAS_<FEATURE>` evaluates to false on the unsupported platform. It **must** still define any numeric properties (e.g., `#define FL_WATCHDOG_PERSIST_BYTES 0`) so user code that reads them compiles.
+
+**Stub-only variant (`_stub_noop.h`):**
+When the no-op only makes sense for the host/stub build (because it pretends to be a real OS primitive that no real MCU exposes), put it in `src/platforms/stub/` with the `_stub_noop.h` suffix instead — e.g., `mutex_stub_noop.h`, `thread_stub_noop.h`, `semaphore_stub_noop.h`. Rule of thumb:
+- **`shared/<x>_noop.hpp`** — fallback that *any* unsupported platform may include via the dispatcher.
+- **`stub/<x>_stub_noop.h`** — only the host/stub build consumes it.
+
+**Current exemplars:** `src/platforms/shared/memory_noop.hpp`, `src/platforms/shared/pin_noop.hpp`, `src/platforms/shared/simd_noop.hpp`, `src/platforms/shared/codec/h264_noop.hpp`.
+
 ## Span Usage
 - **Automatic span conversion**: `fl::span<T>` has implicit conversion constructors - you don't need explicit `fl::span<T>(...)` wrapping in function calls. Example:
   - Correct: `verifyPixels8bit(output, leds)` (implicit conversion)
@@ -145,6 +167,29 @@ The names make roles explicit: `.impl.cpp.hpp` = "implementation router, include
 - Correct: `#define FASTLED_STM32_GPIO_MAX_FREQ_MHZ 100`
 - Check as: `#if FASTLED_USE_PROGMEM` or `#if FASTLED_USE_PROGMEM == 1`
 - Wrong: `#define FASTLED_USE_PROGMEM` (missing value - ambiguous default behavior)
+
+### Type 3: Component Capability Flags (per-subsystem, defined/undefined for booleans, numeric for properties)
+
+For a subsystem (e.g., `Watchdog`, `Audio`, `Codec`) that has multi-tier platform support, document each platform's capabilities with `FL_<COMPONENT>_HAS_<FEATURE>` flags. These let user code compile-time gate optional features without doing platform detection itself.
+
+**Spelled-out names — no acronyms in macro identifiers.** The macro name and the public API name share a single vocabulary. If the API is `FastLED.watchdog()` then the macros are `FL_WATCHDOG_*`, not `FL_WDT_*`. If the API is `FastLED.audio()` then the macros are `FL_AUDIO_*`. Acronyms in macro names cost grepability and force readers to learn a second name for the same thing.
+- ✅ Correct: `FL_WATCHDOG_HAS_WINDOW_MODE`, `FL_WATCHDOG_PERSIST_BYTES`, `FL_AUDIO_HAS_I2S`, `FL_CODEC_HAS_H264`
+- ❌ Wrong: `FL_WDT_HAS_WINDOW_MODE` (abbreviation hides the component), `FASTLED_WATCHDOG_WINDOW_MODE` (use `FL_` for newer per-component flags), `WATCHDOG_HAS_WINDOW_MODE` (missing prefix)
+
+**Boolean capability flags:**
+- Defined or undefined (same shape as Type 1) — NO values
+- Define as: `#define FL_WATCHDOG_HAS_WINDOW_MODE` (no value)
+- Check as: `#if defined(FL_WATCHDOG_HAS_WINDOW_MODE)` or `#ifdef FL_WATCHDOG_HAS_WINDOW_MODE`
+
+**Numeric properties (sizes, limits, capacities):**
+- Explicit numeric values (same shape as Type 2)
+- Define as: `#define FL_WATCHDOG_PERSIST_BYTES 16`
+- Check as: `#if FL_WATCHDOG_PERSIST_BYTES >= 8`
+- User code may `static_assert(FL_WATCHDOG_PERSIST_BYTES >= 8, "...")` to enforce minimums the unified API promises.
+
+**Where they live:** Defined in the per-platform `*.impl.hpp` (or the component's public header) that implements the feature. The `_noop.hpp` fallback defines **none** of the boolean flags (so `#ifdef` checks correctly evaluate false on unsupported platforms) and **always** defines a zero/default for every numeric property the unified API exposes (so `#if`-on-numeric-value still compiles).
+
+**Distinction from Type 1 (`FL_IS_*`):** Type 1 says "I am running on platform X." Type 3 says "this component has feature Y on this platform." A single platform may carry many Type 3 flags from independent components.
 
 ## Warning and Debug Output
 - **Use proper warning macros** from `fl/stl/compiler_control.h`
