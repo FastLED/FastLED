@@ -70,3 +70,9 @@
     // The api still compiles and runs on every supported MCU.
     #include "platforms/shared/watchdog_noop.hpp"
 #endif
+
+// Platform-agnostic helpers (ResetInfo::describe(), ScopedWatchdog ctor/dtor,
+// print/delay sinks for the lazy first-init path) are emitted by
+// `src/fl/wdt/_build.cpp.hpp` — included from the regular fl/ unity build,
+// not from here. Including `.cpp.hpp` files outside the unity build is a
+// hard ban per agents/docs/cpp-standards.md.

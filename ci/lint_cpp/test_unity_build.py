@@ -80,6 +80,7 @@ EXPECTED_BUILD_FILES = {
     "fl/build/fl.test+.cpp",
     "fl/build/fl.ui+.cpp",
     "fl/build/fl.video+.cpp",
+    "fl/build/fl.wdt+.cpp",
     "fl/build/platforms+.cpp",
     "fl/build/third_party+.cpp",
 }
