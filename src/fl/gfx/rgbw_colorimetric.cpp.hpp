@@ -157,6 +157,28 @@ bool solve_strict_subgamut(const ProfileCache& cache, float s_r,
                            float out_rgbw[4]) FL_NOEXCEPT {
     out_rgbw[0] = out_rgbw[1] = out_rgbw[2] = out_rgbw[3] = 0.0f;
 
+    // Native topology authority guard (#2748). In native input gamut
+    // (input primaries == LED primaries), 1- and 2-channel source drives
+    // MUST round-trip back to the same 1- or 2-channel LED drive. The
+    // reference math model treats these as edge-locked legal topologies:
+    //   single  : R, G, B            (W = 0, two other channels = 0)
+    //   outer   : RG, RB, BG         (W = 0, third channel = 0)
+    // Routing these through the W-containing sub-gamut inverses pulls in
+    // unrelated channels in violation of the strict topology — exactly
+    // the bug filed in #2748 (e.g. (R, 0, 0) → (R, 0, 0, W>0)). Three-
+    // channel inputs (interior) fall through to the existing sub-gamut
+    // routing, where W participation is the whole point of the solver.
+    if (is_native_input_gamut(*cache.profile)) {
+        const int n_active = count_active_channels(s_r, s_g, s_b);
+        if (n_active <= 2) {
+            out_rgbw[0] = fl::clamp(s_r, 0.0f, 1.0f);
+            out_rgbw[1] = fl::clamp(s_g, 0.0f, 1.0f);
+            out_rgbw[2] = fl::clamp(s_b, 0.0f, 1.0f);
+            out_rgbw[3] = 0.0f;
+            return true;
+        }
+    }
+
     float X_t[3];
     if (cache.has_source_space) {
         // X_t = M_src · source_rgb (#2705): interpret the input triple in the
@@ -294,6 +316,22 @@ void solve_wx_overdrive(const ProfileCache& cache, float s_r, float s_g,
     // reduces to the strict vertex (degenerate with `solve_strict_subgamut`);
     // at overdrive_ratio = 1 it drives w to 1.0 and clamps residuals.
     //
+    // Native topology authority guard (#2748). The overdrive solver shares
+    // the strict solver's topology contract: 1- and 2-channel native inputs
+    // must NOT pull in W or unrelated channels. The chromaticity-drift
+    // overdrive only applies to interior (3-channel) targets, where W
+    // participation is intentional and bounded by `overdrive_ratio`.
+    if (is_native_input_gamut(*cache.profile)) {
+        const int n_active = count_active_channels(s_r, s_g, s_b);
+        if (n_active <= 2) {
+            out_rgbw[0] = fl::clamp(s_r, 0.0f, 1.0f);
+            out_rgbw[1] = fl::clamp(s_g, 0.0f, 1.0f);
+            out_rgbw[2] = fl::clamp(s_b, 0.0f, 1.0f);
+            out_rgbw[3] = 0.0f;
+            return;
+        }
+    }
+
     // Target XYZ comes from the source space (#2705) when available, so the
     // boosted mode targets the same standard white point as the strict mode.
     float X_t[3];
