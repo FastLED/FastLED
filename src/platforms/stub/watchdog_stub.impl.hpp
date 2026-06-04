@@ -42,17 +42,25 @@ namespace platforms {
 
 // Persistent storage layout — survives within a single process. Magic word at
 // the front separates first-run garbage from genuine persisted state.
+//
+// `crash_count` is touched by both the watchdog timer thread (bumped in
+// stubWatchdogReset()) and the test thread (read in consecutiveCrashCount() /
+// isInSafeMode(), zeroed in markCleanShutdown()) — promote it to atomic so
+// TSAN doesn't flag a data race and the safe-mode / crash-counter assertions
+// don't flake. The remaining persist fields are only mutated from the test
+// thread (or under s.mu via reset_if_unmagic on first construction), so they
+// stay plain memory.
 struct StubWatchdogPersist {
     static constexpr fl::u32 kMagic = 0xFA57DDADu;
     fl::u32 magic;
-    fl::u16 crash_count;
+    fl::atomic<fl::u16> crash_count;
     fl::u8  safe_mode_threshold;
     fl::u8  user[FL_WATCHDOG_PERSIST_BYTES];
 
     void reset_if_unmagic() {
         if (magic != kMagic) {
             magic = kMagic;
-            crash_count = 0;
+            crash_count.store(0);
             safe_mode_threshold = 2;
             fl::memset(user, 0, sizeof(user));
         }
@@ -106,10 +114,20 @@ inline StubWatchdogState& stubWatchdogState() {
 
 // Worker-thread side of a watchdog timeout: bump the crash counter and flag
 // the reset as watchdog-induced. Does NOT mark `software_reboot`.
+//
+// `crash_count` is incremented via a saturating CAS loop so concurrent
+// markCleanShutdown() resets are not lost and the counter never rolls over
+// from 0xFFFF back to 0.
 inline void stubWatchdogReset() {
     auto& p = stubWatchdogPersist();
     p.magic = StubWatchdogPersist::kMagic;
-    if (p.crash_count < 0xFFFF) p.crash_count++;
+    fl::u16 current = p.crash_count.load();
+    while (current < 0xFFFF) {
+        if (p.crash_count.compare_exchange_weak(current, static_cast<fl::u16>(current + 1))) {
+            break;
+        }
+        // current was reloaded by compare_exchange_weak — retry.
+    }
 
     auto& s = stubWatchdogState();
     s.reset_was_watchdog.store(true);
@@ -226,15 +244,15 @@ void Watchdog::persistWrite(fl::size idx, fl::u8 v) FL_NOEXCEPT {
 }
 
 fl::u16 Watchdog::consecutiveCrashCount() const FL_NOEXCEPT {
-    return platforms::stubWatchdogPersist().crash_count;
+    return platforms::stubWatchdogPersist().crash_count.load();
 }
 
 void Watchdog::markCleanShutdown() FL_NOEXCEPT {
-    platforms::stubWatchdogPersist().crash_count = 0;
+    platforms::stubWatchdogPersist().crash_count.store(0);
 }
 
 bool Watchdog::isInSafeMode() const FL_NOEXCEPT {
-    return platforms::stubWatchdogPersist().crash_count >= mSafeModeThreshold;
+    return platforms::stubWatchdogPersist().crash_count.load() >= mSafeModeThreshold;
 }
 
 fl::u16 Watchdog::safeModeThreshold() const FL_NOEXCEPT {
