@@ -525,7 +525,13 @@ void loop() {
     if (g_autoresearch_state->deliberate_hang_requested) {
         FL_WARN("[deliberateHang] entering forced-hang loop NOW");
         delay(200);  // give Serial TX FIFO time to flush
+        // noInterrupts() is an Arduino-only macro; guard it so the host stub
+        // build (which compiles this .ino for the unit-test framework) doesn't
+        // hit an undeclared identifier. On host the while(1) below still spins
+        // and prevents feed(), which is the actual hang we want to test.
+#if !defined(FL_IS_STUB) && !defined(FL_IS_WASM)
         noInterrupts();
+#endif
         while (true) { /* deliberate hang */ }
     }
 
