@@ -17,10 +17,12 @@
 ///   - FL_WATCHDOG_PERSIST_BYTES = 16
 ///   - FL_WATCHDOG_MAX_TIMEOUT_MS = 600000
 ///   - FL_WATCHDOG_HAS_PRE_TIMEOUT_IRQ   (callback fires from timer thread)
-///   - FL_WATCHDOG_HAS_WINDOW_MODE
 ///   - FL_WATCHDOG_HAS_CRASH_REPORT       (synthesized — no real fault frame)
 ///
-/// `FL_WATCHDOG_HAS_BOOTLOADER_REBOOT` is intentionally NOT defined.
+/// `FL_WATCHDOG_HAS_WINDOW_MODE` and `FL_WATCHDOG_HAS_BOOTLOADER_REBOOT` are
+/// intentionally NOT defined — the stub does not model windowed-feed
+/// violations and there is no bootloader to reboot into. `setWindow()` returns
+/// false; `rebootIntoBootloader()` returns false.
 
 #include "fl/wdt/watchdog.h"
 #include "fl/stl/atomic.h"
@@ -33,7 +35,6 @@
 #define FL_WATCHDOG_PERSIST_BYTES 16
 #define FL_WATCHDOG_MAX_TIMEOUT_MS 600000u
 #define FL_WATCHDOG_HAS_PRE_TIMEOUT_IRQ
-#define FL_WATCHDOG_HAS_WINDOW_MODE
 #define FL_WATCHDOG_HAS_CRASH_REPORT
 
 namespace fl {
@@ -65,6 +66,14 @@ inline StubWatchdogPersist& stubWatchdogPersist() {
 }
 
 // State shared between fl::Watchdog methods and the timer thread.
+//
+// `reset_was_watchdog`, `fired`, and `software_reboot` are written from the
+// worker thread and read/cleared from API calls; they must be atomic to avoid
+// data races (and the same races flaking the tests under TSAN-like builds).
+//
+// `software_reboot` is kept separate from `reset_was_watchdog` so an
+// intentional `reboot()` is reported as `ResetCause::SOFTWARE` and is not
+// counted as a watchdog crash.
 struct StubWatchdogState {
     fl::mutex                              mu;
     fl::atomic<bool>                       enabled;
@@ -74,14 +83,15 @@ struct StubWatchdogState {
     WatchdogTimeoutCallback                cb;
     void*                                  cb_user;
     fl::function<void()>                   cb_fn;
-    bool                                   reset_was_watchdog;
-    bool                                   fired;
+    fl::atomic<bool>                       reset_was_watchdog;
+    fl::atomic<bool>                       fired;
+    fl::atomic<bool>                       software_reboot;
     fl::thread                             worker;
 
     StubWatchdogState()
         : enabled(false), stop(false), timeout_ms(0),
           cb(nullptr), cb_user(nullptr),
-          reset_was_watchdog(false), fired(false) {}
+          reset_was_watchdog(false), fired(false), software_reboot(false) {}
 
     ~StubWatchdogState() {
         stop.store(true);
@@ -94,14 +104,27 @@ inline StubWatchdogState& stubWatchdogState() {
     return s;
 }
 
+// Worker-thread side of a watchdog timeout: bump the crash counter and flag
+// the reset as watchdog-induced. Does NOT mark `software_reboot`.
 inline void stubWatchdogReset() {
     auto& p = stubWatchdogPersist();
     p.magic = StubWatchdogPersist::kMagic;
     if (p.crash_count < 0xFFFF) p.crash_count++;
 
     auto& s = stubWatchdogState();
-    s.reset_was_watchdog = true;
-    s.fired = true;
+    s.reset_was_watchdog.store(true);
+    s.fired.store(true);
+}
+
+// Explicit `Watchdog::reboot()` path: mark the reset as SOFTWARE without
+// bumping crash_count or setting the watchdog-induced flag. Real-hardware
+// platforms similarly distinguish ESP_RST_SW from ESP_RST_TASK_WDT.
+inline void stubWatchdogSoftwareReboot() {
+    auto& p = stubWatchdogPersist();
+    p.magic = StubWatchdogPersist::kMagic;
+
+    auto& s = stubWatchdogState();
+    s.software_reboot.store(true);
 }
 
 inline void stubWatchdogTimerLoop() {
@@ -146,9 +169,14 @@ inline void stubWatchdogEnsureWorker() {
 } // namespace platforms
 
 // ---- fl::Watchdog method definitions ----
-// `Watchdog::instance()` is defined in the public header so every TU can
-// resolve the call. The rest are defined non-inline here; this header is
-// only included from the dispatcher in one TU, so each method is emitted once.
+// `Watchdog::instance()` is defined here (and in every sibling `.impl.hpp` /
+// the noop) so the function-local static lives in exactly one TU per program.
+// Avoids the Teensy 3.x `__cxa_guard` ABI conflict that a header-side
+// definition would impose on every TU including FastLED.h.
+Watchdog& Watchdog::instance() FL_NOEXCEPT {
+    static Watchdog sInstance;
+    return sInstance;
+}
 
 void Watchdog::begin(fl::u32 timeout_ms) FL_NOEXCEPT {
     if (timeout_ms == 0) timeout_ms = 1;
@@ -175,11 +203,16 @@ void Watchdog::disable() FL_NOEXCEPT {
 
 ResetCause Watchdog::lastResetCause() const FL_NOEXCEPT {
     auto& s = platforms::stubWatchdogState();
-    return s.reset_was_watchdog ? ResetCause::WATCHDOG : ResetCause::POWER_ON;
+    // Watchdog-induced reset takes precedence over a software reboot, but
+    // never get conflated: a clean `reboot()` reports SOFTWARE, a timeout
+    // reports WATCHDOG, and a fresh process reports POWER_ON.
+    if (s.reset_was_watchdog.load()) return ResetCause::WATCHDOG;
+    if (s.software_reboot.load())    return ResetCause::SOFTWARE;
+    return ResetCause::POWER_ON;
 }
 
 bool Watchdog::lastResetWasWatchdog() const FL_NOEXCEPT {
-    return platforms::stubWatchdogState().reset_was_watchdog;
+    return platforms::stubWatchdogState().reset_was_watchdog.load();
 }
 
 fl::u8 Watchdog::persistRead(fl::size idx) const FL_NOEXCEPT {
@@ -213,7 +246,9 @@ void Watchdog::setSafeModeThreshold(fl::u16 t) FL_NOEXCEPT {
 }
 
 FL_NORETURN void Watchdog::reboot() FL_NOEXCEPT {
-    platforms::stubWatchdogReset();
+    // Intentional software reboot — does NOT bump crash_count and does NOT
+    // mark the reset as watchdog-induced.
+    platforms::stubWatchdogSoftwareReboot();
     while (true) {}
 }
 
@@ -237,19 +272,29 @@ bool Watchdog::writeCrashLog(fl::span<const fl::u8> /*payload*/) FL_NOEXCEPT { r
 fl::size Watchdog::readCrashLog(fl::span<fl::u8> /*out*/) const FL_NOEXCEPT { return 0; }
 bool Watchdog::rebootIntoBootloader() FL_NOEXCEPT { return false; }
 
-bool Watchdog::setWindow(fl::u32 /*min*/, fl::u32 /*max*/) FL_NOEXCEPT { return true; }
+bool Watchdog::setWindow(fl::u32 /*min*/, fl::u32 /*max*/) FL_NOEXCEPT {
+    // Stub does NOT model windowed feeds (no min/max enforcement in feed() or
+    // the timer loop). Returning false matches FL_WATCHDOG_HAS_WINDOW_MODE
+    // not being defined and keeps user code that checks the return value
+    // honest.
+    return false;
+}
 bool Watchdog::hasCrashReport() const FL_NOEXCEPT {
-    return platforms::stubWatchdogState().reset_was_watchdog;
+    return platforms::stubWatchdogState().reset_was_watchdog.load();
 }
 WatchdogCrashReport Watchdog::readCrashReport() const FL_NOEXCEPT {
     WatchdogCrashReport r{};
-    r.valid = platforms::stubWatchdogState().reset_was_watchdog;
+    r.valid = platforms::stubWatchdogState().reset_was_watchdog.load();
     r.fault_type = r.valid ? "WatchdogTimeout (stub)" : "";
     return r;
 }
 void Watchdog::clearCrashReport() FL_NOEXCEPT {
-    platforms::stubWatchdogState().reset_was_watchdog = false;
-    platforms::stubWatchdogState().fired = false;
+    // Clear ONLY the watchdog-crash state — `software_reboot` is independent
+    // bookkeeping and must not be silently reset, otherwise lastResetCause()
+    // would flip back to POWER_ON after a clean reboot+clear sequence.
+    auto& s = platforms::stubWatchdogState();
+    s.reset_was_watchdog.store(false);
+    s.fired.store(false);
 }
 
 } // namespace fl

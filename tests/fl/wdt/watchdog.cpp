@@ -10,6 +10,7 @@
 #define FASTLED_STUB_WATCHDOG_NO_ABORT 1
 
 #include "fl/wdt/watchdog.h"
+#include "fl/stl/atomic.h"
 #include "fl/stl/chrono.h"
 #include "fl/stl/thread.h"
 #include "test.h"
@@ -30,17 +31,33 @@ FL_TEST_CASE("fl::Watchdog — Tier 0 begin/feed/disable doesn't crash") {
     dog.disable();
 }
 
+// Mirrors `FL_WATCHDOG_PERSIST_BYTES` from `platforms/stub/watchdog_stub.impl.hpp`.
+// The capability macro is only defined inside the impl TU (it's `// IWYU
+// pragma: private`), so the test holds a single-source mirror here so the
+// boundary asserts derive from the contract value rather than a magic
+// literal. If the stub's persist size ever changes, this constant must be
+// updated to match.
+static constexpr fl::size kStubPersistBytes = 16;
+
 FL_TEST_CASE("fl::Watchdog — persist read/write within bounds") {
     Watchdog& dog = Watchdog::instance();
+    // Derive indices from the contract so this test guards the actual
+    // boundary at `idx == kStubPersistBytes`, not a magic constant.
+    constexpr fl::size kLastValid = kStubPersistBytes - 1;
     dog.persistWrite(0, 0xAB);
-    dog.persistWrite(7, 0xCD);
+    dog.persistWrite(kLastValid, 0xCD);
     FL_CHECK_EQ(dog.persistRead(0), 0xAB);
-    FL_CHECK_EQ(dog.persistRead(7), 0xCD);
+    FL_CHECK_EQ(dog.persistRead(kLastValid), 0xCD);
 }
 
 FL_TEST_CASE("fl::Watchdog — persist read/write out of bounds is safe") {
     Watchdog& dog = Watchdog::instance();
-    dog.persistWrite(9999, 0xFF);   // ignored
+    // First invalid index is exactly the boundary — exercises the off-by-one
+    // edge that magic indices like `9999` would silently skip.
+    constexpr fl::size kFirstInvalid = kStubPersistBytes;
+    dog.persistWrite(kFirstInvalid, 0xFF);   // ignored
+    FL_CHECK_EQ(dog.persistRead(kFirstInvalid), 0);
+    dog.persistWrite(9999, 0xFF);            // far out-of-bounds also ignored
     FL_CHECK_EQ(dog.persistRead(9999), 0);
 }
 
@@ -91,9 +108,12 @@ FL_TEST_CASE("fl::Watchdog — Tier 1 surface, flash and bootloader return false
     FL_CHECK_FALSE(dog.rebootIntoBootloader());
 }
 
-FL_TEST_CASE("fl::Watchdog — Tier 2 setWindow returns true on stub") {
+FL_TEST_CASE("fl::Watchdog — Tier 2 setWindow returns false on stub (no window-mode support)") {
+    // Stub does not implement windowed-feed enforcement — `setWindow()` must
+    // return false to match `FL_WATCHDOG_HAS_WINDOW_MODE` NOT being defined,
+    // so user code that branches on the return value behaves correctly.
     Watchdog& dog = Watchdog::instance();
-    FL_CHECK(dog.setWindow(10, 1000));
+    FL_CHECK_FALSE(dog.setWindow(10, 1000));
 }
 
 FL_TEST_CASE("fl::Watchdog — Tier 2 crash report API surface") {
@@ -109,9 +129,12 @@ FL_TEST_CASE("fl::Watchdog — timeout fires callback and increments crash count
     dog.markCleanShutdown();
     dog.clearCrashReport();
 
-    static volatile bool fired = false;
-    fired = false;
-    dog.onTimeout([](void*) { fired = true; }, nullptr);
+    // `fired` is written from the stub's worker thread and read here on the
+    // test thread; `volatile` does NOT provide cross-thread atomicity, so use
+    // fl::atomic<bool>.
+    static fl::atomic<bool> fired;
+    fired.store(false);
+    dog.onTimeout([](void*) { fired.store(true); }, nullptr);
 
     dog.begin(50);
 
@@ -119,7 +142,7 @@ FL_TEST_CASE("fl::Watchdog — timeout fires callback and increments crash count
     // expiry + run the callback + bump the counter.
     fl::this_thread::sleep_for(fl::chrono::milliseconds(300));  // ok sleep for
 
-    FL_CHECK(fired);
+    FL_CHECK(fired.load());
     FL_CHECK(dog.consecutiveCrashCount() >= 1);
     FL_CHECK(dog.lastResetWasWatchdog());
 
@@ -133,9 +156,11 @@ FL_TEST_CASE("fl::Watchdog — feeding before timeout prevents fire") {
     dog.clearCrashReport();
     fl::u16 baseline = dog.consecutiveCrashCount();
 
-    static volatile bool fired = false;
-    fired = false;
-    dog.onTimeout([](void*) { fired = true; }, nullptr);
+    // Same rationale as the previous test case — cross-thread flag must be
+    // atomic, not volatile.
+    static fl::atomic<bool> fired;
+    fired.store(false);
+    dog.onTimeout([](void*) { fired.store(true); }, nullptr);
 
     dog.begin(200);
     for (int i = 0; i < 10; ++i) {
@@ -144,7 +169,7 @@ FL_TEST_CASE("fl::Watchdog — feeding before timeout prevents fire") {
     }
     dog.disable();
 
-    FL_CHECK_FALSE(fired);
+    FL_CHECK_FALSE(fired.load());
     FL_CHECK_EQ(dog.consecutiveCrashCount(), baseline);
 }
 

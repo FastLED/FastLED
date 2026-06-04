@@ -70,12 +70,14 @@ struct WatchdogCrashReport {
 /// Singleton accessed through `FastLED.watchdog()` or `fl::Watchdog::instance()`.
 class Watchdog {
 public:
-    // Singleton — defined here in the public header so every TU that includes
-    // it can resolve the call without needing access to the platform impl.
-    static Watchdog& instance() FL_NOEXCEPT {
-        static Watchdog sInstance;
-        return sInstance;
-    }
+    // Singleton accessor — DECLARATION ONLY. The function-local `static
+    // Watchdog` must live in a `.cpp.hpp` / `.impl.hpp` TU (one definition,
+    // one guard variable) so the Teensy 3.x `__cxa_guard` ABI conflict does
+    // not pull a guarded singleton path into every TU that includes
+    // FastLED.h. See `agents/docs/cpp-standards.md` → "Header rules:
+    // function-local statics with non-trivial constructors are forbidden in
+    // `src/**/*.h`."
+    static Watchdog& instance() FL_NOEXCEPT;
 
     // ========== Tier 0 — universal ==========
 

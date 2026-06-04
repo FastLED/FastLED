@@ -35,12 +35,33 @@ extern "C" {
 namespace fl {
 namespace platforms {
 
+// Persist layout: user payload occupies bytes [0, kUserStart);
+// the trailing 2 bytes of persist[] hold the consecutive crash_count.
+// When persist[] moves to RTC_NOINIT_ATTR / __NOINIT_ATTR in Phase 2 (#2731),
+// crash_count will then survive real resets automatically without further code
+// change.
 struct Esp32WatchdogState {
-    fl::u8  persist[FL_WATCHDOG_PERSIST_BYTES] = {0};
-    fl::u16 crash_count = 0;
-    bool    armed = false;
+    static constexpr fl::size kCrashCountBytes = 2;
+    static constexpr fl::size kUserBytes =
+        FL_WATCHDOG_PERSIST_BYTES > kCrashCountBytes
+            ? (FL_WATCHDOG_PERSIST_BYTES - kCrashCountBytes)
+            : 0;
+
+    fl::u8     persist[FL_WATCHDOG_PERSIST_BYTES] = {0};
+    bool       armed = false;
+    fl::u32    armed_timeout_ms = 0;
     ResetCause cached_cause = ResetCause::UNKNOWN;
-    bool    cause_cached = false;
+    bool       cause_cached = false;
+
+    fl::u16 load_crash_count() const {
+        // Little-endian read from the tail of persist[].
+        return static_cast<fl::u16>(persist[kUserBytes])
+             | (static_cast<fl::u16>(persist[kUserBytes + 1]) << 8);
+    }
+    void store_crash_count(fl::u16 v) {
+        persist[kUserBytes]     = static_cast<fl::u8>(v & 0xFF);
+        persist[kUserBytes + 1] = static_cast<fl::u8>((v >> 8) & 0xFF);
+    }
 };
 
 inline Esp32WatchdogState& esp32WatchdogState() {
@@ -66,14 +87,20 @@ inline ResetCause translateEsp32ResetReason(esp_reset_reason_t r) {
 
 } // namespace platforms
 
-// `Watchdog::instance()` defined in fl/wdt/watchdog.h — every TU resolves it
-// there. Rest of the API is defined non-inline here; this header is only
-// included from the dispatcher in one TU.
+// `Watchdog::instance()` is defined here (and in every sibling `.impl.hpp` /
+// the noop) so the function-local static lives in exactly one TU per program.
+// Avoids the Teensy 3.x `__cxa_guard` ABI conflict that a header-side
+// definition would impose on every TU including FastLED.h.
+Watchdog& Watchdog::instance() FL_NOEXCEPT {
+    static Watchdog sInstance;
+    return sInstance;
+}
 
 void Watchdog::begin(fl::u32 timeout_ms) FL_NOEXCEPT {
     if (timeout_ms == 0) timeout_ms = 1000;
     if (timeout_ms > FL_WATCHDOG_MAX_TIMEOUT_MS) timeout_ms = FL_WATCHDOG_MAX_TIMEOUT_MS;
     auto& s = platforms::esp32WatchdogState();
+    s.armed_timeout_ms = timeout_ms;
     fl::watchdog_setup(timeout_ms);
     s.armed = true;
 }
@@ -84,8 +111,19 @@ void Watchdog::feed() FL_NOEXCEPT {
 }
 
 void Watchdog::disable() FL_NOEXCEPT {
-    // No-op for now; TWDT deinit requires the FreeRTOS scheduler running and
-    // careful sequencing. Tracked in #2731.
+    // TWDT teardown requires the FreeRTOS scheduler to be running and careful
+    // sequencing across cores (delete each subscribed task, then deinit). The
+    // current `fl::watchdog_setup()` shim is one-shot install with no
+    // matching teardown entry point. Rather than silently letting the WDT
+    // fire after a documented `disable()`, re-arm the backend with the
+    // maximum supported timeout so any caller polling for life still has the
+    // longest possible window before reset. Real teardown is tracked in
+    // #2731 Phase 2 alongside esp_task_wdt_deinit() integration.
+    auto& s = platforms::esp32WatchdogState();
+    if (!s.armed) return;
+    fl::watchdog_setup(FL_WATCHDOG_MAX_TIMEOUT_MS);
+    s.armed = false;
+    s.armed_timeout_ms = 0;
 }
 
 ResetCause Watchdog::lastResetCause() const FL_NOEXCEPT {
@@ -94,7 +132,9 @@ ResetCause Watchdog::lastResetCause() const FL_NOEXCEPT {
         s.cached_cause = platforms::translateEsp32ResetReason(esp_reset_reason());
         s.cause_cached = true;
         if (s.cached_cause == ResetCause::WATCHDOG || s.cached_cause == ResetCause::PANIC) {
-            if (s.crash_count < 0xFFFF) s.crash_count++;
+            fl::u16 cc = s.load_crash_count();
+            if (cc < 0xFFFF) ++cc;
+            s.store_crash_count(cc);
         }
     }
     return s.cached_cause;
@@ -105,23 +145,25 @@ bool Watchdog::lastResetWasWatchdog() const FL_NOEXCEPT {
 }
 
 fl::u8 Watchdog::persistRead(fl::size idx) const FL_NOEXCEPT {
-    if (idx >= FL_WATCHDOG_PERSIST_BYTES) return 0;
+    // User-visible persist region is the leading kUserBytes; the trailing
+    // bytes hold the serialized crash_count and are NOT exposed.
+    if (idx >= platforms::Esp32WatchdogState::kUserBytes) return 0;
     return platforms::esp32WatchdogState().persist[idx];
 }
 
 void Watchdog::persistWrite(fl::size idx, fl::u8 v) FL_NOEXCEPT {
-    if (idx >= FL_WATCHDOG_PERSIST_BYTES) return;
+    if (idx >= platforms::Esp32WatchdogState::kUserBytes) return;
     platforms::esp32WatchdogState().persist[idx] = v;
 }
 
 fl::u16 Watchdog::consecutiveCrashCount() const FL_NOEXCEPT {
     // Side-effect: ensure cached_cause has bumped the counter at least once
     (void)lastResetCause();
-    return platforms::esp32WatchdogState().crash_count;
+    return platforms::esp32WatchdogState().load_crash_count();
 }
 
 void Watchdog::markCleanShutdown() FL_NOEXCEPT {
-    platforms::esp32WatchdogState().crash_count = 0;
+    platforms::esp32WatchdogState().store_crash_count(0);
 }
 
 bool Watchdog::isInSafeMode() const FL_NOEXCEPT {
@@ -137,10 +179,15 @@ FL_NORETURN void Watchdog::reboot() FL_NOEXCEPT {
 }
 
 bool Watchdog::onTimeout(WatchdogTimeoutCallback cb, void* user_data) FL_NOEXCEPT {
-    // Tier 1 hookup: re-init the watchdog with a callback bound. We don't
-    // know the timeout the user passed earlier, so use the existing 5000 ms
-    // default if begin() hasn't been called yet.
-    fl::watchdog_setup(5000, cb, user_data);
+    // Tier 1 hookup: re-init the watchdog with a callback bound. Reuse the
+    // timeout that begin() armed earlier — registering a callback must not
+    // silently shorten the watchdog window. If begin() hasn't been called,
+    // fall back to the documented default (5000 ms).
+    auto& s = platforms::esp32WatchdogState();
+    fl::u32 timeout_ms = s.armed_timeout_ms != 0 ? s.armed_timeout_ms : 5000u;
+    fl::watchdog_setup(timeout_ms, cb, user_data);
+    s.armed = true;
+    s.armed_timeout_ms = timeout_ms;
     return true;
 }
 

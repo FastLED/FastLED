@@ -34,9 +34,14 @@ namespace fl {
 // included from `platforms/watchdog.impl.cpp.hpp` in the dispatcher's TU, so
 // each method is defined exactly once across the program.
 //
-// `Watchdog::instance()` itself is a static-inline in `fl/wdt/watchdog.h` so
-// every TU that includes the public header can resolve the call without
-// pulling in the platform impl.
+// `Watchdog::instance()` is also defined here (and in every sibling
+// `.impl.hpp`) so the function-local static lives in exactly one TU per
+// program — keeps Teensy 3.x clear of the `__cxa_guard` ABI conflict.
+
+Watchdog& Watchdog::instance() FL_NOEXCEPT {
+    static Watchdog sInstance;
+    return sInstance;
+}
 
 // ---- Tier 0 ----
 
