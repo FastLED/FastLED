@@ -102,7 +102,9 @@ LcdSpiPeripheralEsp::LcdSpiPeripheralEsp() FL_NOEXCEPT
     : mInitialized(false), mConfig(), mI80Bus(nullptr), mPanelIo(nullptr),
       mCompleteSem(nullptr), mCallback(nullptr), mUserCtx(nullptr),
       mBusy(false), mPendingTransmits(0), mLastTransmitSize(0),
-      mOwner(LcdSpiOwnerDriver::NONE) {}
+      mOwner(LcdSpiOwnerDriver::NONE),
+      mLastWaitForSlotTimeout(false),
+      mLastPanelIoRecreateError(ESP_OK), mLastTxColorError(ESP_OK) {}
 
 LcdSpiPeripheralEsp::~LcdSpiPeripheralEsp() { deinitialize(); }
 
@@ -348,7 +350,10 @@ bool FL_IRAM LcdSpiPeripheralEsp::transmitInternal(
             }
         } else {
             if (xSemaphoreTake(mCompleteSem, pdMS_TO_TICKS(2000)) != pdTRUE) {
-                esp_rom_printf("LcdSpiPeripheralEsp: Timed out waiting for previous transmit to complete\n");  // ok esp_rom_printf - FL_IRAM transmit() context, FL_WARN unsafe
+                // Latch — LoggingInIramChecker forbids FL_WARN anywhere in an
+                // FL_IRAM function, even on a branch that's provably task-only.
+                // Reported from waitTransmitDone() in task context.
+                mLastWaitForSlotTimeout = true;
                 mBusy = false;
                 return false;
             }
@@ -395,7 +400,9 @@ bool FL_IRAM LcdSpiPeripheralEsp::transmitInternal(
         esp_err_t err =
             esp_lcd_new_panel_io_i80(mI80Bus, &io_config, &mPanelIo);
         if (err != ESP_OK) {
-            esp_rom_printf("LcdSpiPeripheralEsp: Failed to recreate panel IO: %d\n", static_cast<int>(err));  // ok esp_rom_printf - FL_IRAM transmit() context, FL_WARN unsafe
+            // Latch — transmit() can be entered from ISR context. Reported
+            // from waitTransmitDone() in task context.
+            mLastPanelIoRecreateError = err;
             return false;
         }
     }
@@ -426,7 +433,9 @@ bool FL_IRAM LcdSpiPeripheralEsp::transmitInternal(
             mPendingTransmits = mPendingTransmits - 1;
         }
         mBusy = mPendingTransmits > 0;
-        esp_rom_printf("LcdSpiPeripheralEsp: tx_color failed: %d\n", static_cast<int>(err));  // ok esp_rom_printf - FL_IRAM transmit() context, FL_WARN unsafe
+        // Latch — transmit() can be entered from ISR context. Reported
+        // from waitTransmitDone() in task context.
+        mLastTxColorError = err;
         return false;
     }
 
@@ -456,6 +465,22 @@ bool LcdSpiPeripheralEsp::waitTransmitDone(u32 timeout_ms) FL_NOEXCEPT {
         }
     }
     mBusy = false;
+
+    // Drain errors latched by the FL_IRAM transmit path. Safe here — this
+    // function is task-only (xSemaphoreTake above would fail configASSERT
+    // from ISR context).
+    if (mLastWaitForSlotTimeout) {
+        FL_WARN("LcdSpiPeripheralEsp: timed out waiting for previous transmit to complete");
+        mLastWaitForSlotTimeout = false;
+    }
+    if (mLastPanelIoRecreateError != ESP_OK) {
+        FL_WARN("LcdSpiPeripheralEsp: panel IO recreate failed: " << static_cast<int>(mLastPanelIoRecreateError));
+        mLastPanelIoRecreateError = ESP_OK;
+    }
+    if (mLastTxColorError != ESP_OK) {
+        FL_WARN("LcdSpiPeripheralEsp: tx_color failed: " << static_cast<int>(mLastTxColorError));
+        mLastTxColorError = ESP_OK;
+    }
     return true;
 }
 

@@ -159,12 +159,36 @@ public:
      */
     bool isBuffered() const FL_NOEXCEPT { return mBuffered; }
 
+    /**
+     * @brief Outcome of the constructor's driver-install attempt
+     *
+     * Records what happened during initDriver() so callers (notably EspIO)
+     * can surface a single human-readable diagnostic once the normal logging
+     * sink is up — the install runs inside the singleton constructor where
+     * FL_PRINT would re-enter the in-progress singleton.
+     */
+    enum class InitOutcome : u8 {
+        kNotInitialized = 0,
+        kPreInstalled,          ///< driver was already installed (Arduino/bootloader)
+        kInstalledOk,           ///< we installed and verified the driver
+        kInstalledUnverified,   ///< we installed, verification API unavailable (IDF<5.4)
+        kInstallFailed,         ///< usb_serial_jtag_driver_install returned non-OK
+        kVerificationFailed,    ///< installed but is_driver_installed() returned false
+        kNotAvailable,          ///< chip lacks USB-Serial JTAG support
+    };
+
+    InitOutcome initOutcome() const FL_NOEXCEPT { return mInitOutcome; }
+    // esp_err_t == int32_t. Returns ESP_OK (0) unless initOutcome() == kInstallFailed.
+    i32 initError() const FL_NOEXCEPT { return mInitError; }
+
 private:
     UsbSerialJtagConfig mConfig;  // Configuration parameters
     bool mBuffered;               // true if driver installed, false if using ROM fallback
     bool mInstalledDriver;        // true if WE installed the driver (vs inherited from Arduino)
     bool mHasPeek;                // true if available() cached one byte
     u8 mPeekByte;                 // cached byte from the non-blocking availability probe
+    InitOutcome mInitOutcome;     // recorded constructor outcome (see InitOutcome)
+    i32 mInitError;               // esp_err_t from driver_install on kInstallFailed
     static constexpr size_t kRxCacheSize = 64;
     u8 mRxCache[kRxCacheSize];    // bytes prefetched by available()
     size_t mRxCacheRead;          // read index into mRxCache
