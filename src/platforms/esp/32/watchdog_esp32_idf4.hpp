@@ -166,6 +166,12 @@ void watchdog_setup(u32 timeout_ms,
     log_watchdog_status(timeout_ms, callback);
 }
 
+void watchdog_disable() FL_NOEXCEPT {
+    deinit_existing_watchdog();
+    detail::s_user_callback = nullptr;
+    detail::s_user_data = nullptr;
+}
+
 } // namespace fl
 
 // ============================================================================

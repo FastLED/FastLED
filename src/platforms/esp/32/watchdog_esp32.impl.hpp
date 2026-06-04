@@ -111,17 +111,13 @@ void Watchdog::feed() FL_NOEXCEPT {
 }
 
 void Watchdog::disable() FL_NOEXCEPT {
-    // TWDT teardown requires the FreeRTOS scheduler to be running and careful
-    // sequencing across cores (delete each subscribed task, then deinit). The
-    // current `fl::watchdog_setup()` shim is one-shot install with no
-    // matching teardown entry point. Rather than silently letting the WDT
-    // fire after a documented `disable()`, re-arm the backend with the
-    // maximum supported timeout so any caller polling for life still has the
-    // longest possible window before reset. Real teardown is tracked in
-    // #2731 Phase 2 alongside esp_task_wdt_deinit() integration.
+    // Real TWDT teardown via `fl::watchdog_disable()` (added alongside this
+    // change in watchdog_esp32_idf{4,5}.hpp) — wraps `esp_task_wdt_deinit()`
+    // and is safely guarded against being called before the FreeRTOS
+    // scheduler is running. Honors the Tier-0 contract: after disable(), the
+    // watchdog truly does not fire on the registered idle task.
     auto& s = platforms::esp32WatchdogState();
-    if (!s.armed) return;
-    fl::watchdog_setup(FL_WATCHDOG_MAX_TIMEOUT_MS);
+    fl::watchdog_disable();
     s.armed = false;
     s.armed_timeout_ms = 0;
 }

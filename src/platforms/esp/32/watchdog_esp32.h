@@ -44,4 +44,10 @@ void watchdog_setup(u32 timeout_ms = 5000,
                     watchdog_callback_t callback = nullptr,
                     void* user_data = nullptr) FL_NOEXCEPT;
 
+/// @brief Tear down the ESP32 task watchdog.
+/// @note Real TWDT deinit via `esp_task_wdt_deinit()`. Safely guarded against
+///       being called before the FreeRTOS scheduler is running.
+/// @note Used by `fl::Watchdog::disable()` to honor the Tier-0 disable contract.
+void watchdog_disable() FL_NOEXCEPT;
+
 } // namespace fl
