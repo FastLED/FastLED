@@ -259,12 +259,12 @@ class CFastLED {
 2. ✅ **The wrapper is a `inline` one-liner that delegates** — no logic, no validation, no error handling. The free function holds all behavior.
 3. ✅ **Per-object configuration (e.g. one strip's diode profile, one controller's correction) MAY live on the per-object API.** This rule targets *library-wide / process-wide / default-profile* state.
 4. ✅ **Documentation, examples, and PR descriptions reference the god-instance form.** The free function is an implementation detail.
-5. ⚠️ **No grandfathered offenders.** Every public global setter under `fl::` must ship with a `CFastLED` wrapper. Bare functions added without one — including `fl::set_input_gamut` (#2710) — must be wrapped before merge.
+5. ⚠️ **Strict for new code; transitional allowlist for legacy names only.** Every *new* public global setter under `fl::` must ship with a `CFastLED` wrapper. A small transitional allowlist (`GRANDFATHERED_NAMES` in `ci/lint_cpp/public_settings_pattern_checker.py`) exempts pre-existing bare setters (e.g. `fl::set_input_gamut` #2710, `fl::enable_rgbw_colorimetric_lut`, `fl::set_rgbww_colorimetric_profile`) until their wrappers land. Entries are removed as each name is wrapped — the goal is an empty allowlist. New additions do NOT get grandfathered.
 
 **Check Process**:
 1. For every new public function in `src/fl/**/*.h` whose name matches `^set_|^enable_|^disable_|^use_` and that mutates a static / global / namespace-scope variable, grep `src/FastLED.h` for a `CFastLED` method that delegates to it.
 2. If none exists: violation — add the wrapper in the same PR.
-3. Enforced by `ci/lint_cpp/` (rule TBD). No allowlist — every match must wrap.
+3. Enforced by `ci/lint_cpp/public_settings_pattern_checker.py`. The checker carries a shrinking `GRANDFATHERED_NAMES` allowlist for legacy bare setters; remove a name from the list once its `CFastLED` wrapper is merged.
 
 **Where the rule does NOT apply**:
 - Helpers, constructors, factory functions — these are not setters of global state.

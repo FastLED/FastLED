@@ -104,7 +104,7 @@ Search for these patterns:
   - Grep `src/FastLED.h` for a `CFastLED` method that delegates to it.
   - If no wrapper exists, flag as **HIGH severity architectural violation** with this language:
     > "New global setter `fl::<name>` lacks a `CFastLED::<wrapperName>()` wrapper. The documented user-facing API for library-wide configuration is `FastLED.setX(...)`, not `fl::set_x(...)`. Add an `inline` one-liner on `CFastLED` that delegates to this free function (see exemplar `CFastLED::setPowerModel` in `src/FastLED.h:1455` → `fl::set_power_model`). Rationale: `agents/docs/cpp-standards.md` → 'Public Settings Pattern'."
-- No grandfathered exceptions. Bare `fl::` global setters introduced without a `CFastLED` wrapper — including `fl::set_input_gamut` (#2710) — are HIGH-severity violations and must be wrapped before merge.
+- Strict for new code. A small transitional allowlist (`GRANDFATHERED_NAMES` in `ci/lint_cpp/public_settings_pattern_checker.py`) exempts a handful of legacy bare setters (`fl::set_input_gamut` #2710, `fl::enable_rgbw_colorimetric_lut`, `fl::set_rgbww_colorimetric_profile`) until their wrappers land. Entries are removed as each name is wrapped; new additions do NOT get grandfathered.
 - Rule does not apply to: helpers, constructors, factories, per-object configuration, anonymous-namespace / `fl::detail::` internals, functions that only mutate caller-owned objects (e.g. `fl::fill_solid(span, color)`).
 
 ### 4. Check Dependency Direction
