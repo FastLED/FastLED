@@ -119,7 +119,7 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NOEXCEPT {
 
     // PRIMASK save/restore — see feed() for rationale (works correctly when
     // called from a context that already had IRQs disabled).
-    uint32_t primask;
+    fl::u32 primask;
     __asm__ volatile ("mrs %0, primask" : "=r" (primask));
     __asm__ volatile ("cpsid i" ::: "memory");
 
@@ -187,7 +187,7 @@ void Watchdog::feed() FL_NOEXCEPT {
     // re-enable interrupts when feed() is called from a context that had
     // them disabled (e.g. an ISR). __disable_irq()/__enable_irq() would
     // unconditionally re-enable, which is unsafe in nested-IRQ-off paths.
-    uint32_t primask;
+    fl::u32 primask;
     __asm__ volatile ("mrs %0, primask" : "=r" (primask));
     __asm__ volatile ("cpsid i" ::: "memory");
     WDOG3_CNT = platforms::kRtwdogRefreshKey;
@@ -204,7 +204,7 @@ void Watchdog::disable() FL_NOEXCEPT {
 
     // Save+restore PRIMASK so callers that already had IRQs off aren't
     // surprised by them coming back on.
-    uint32_t primask;
+    fl::u32 primask;
     __asm__ volatile ("mrs %0, primask" : "=r" (primask));
     __asm__ volatile ("cpsid i" ::: "memory");
 
