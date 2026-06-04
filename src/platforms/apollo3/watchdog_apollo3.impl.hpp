@@ -87,6 +87,13 @@ ResetCause Watchdog::lastResetCause() const FL_NOEXCEPT {
         else if (stat & (1u << 0)) cause = ResetCause::EXTERNAL_PIN;
         else if (stat & (1u << 1)) cause = ResetCause::POWER_ON;
         else if (stat & (1u << 6)) cause = ResetCause::POWER_ON;
+        // RSTGEN->STAT bits are sticky across resets. Writing 1 to the
+        // matching CLRSTAT bit clears them so the NEXT boot sees only
+        // its own reset cause and the crash counter isn't inflated by
+        // stale bits. (AmbiqSuite's `am_hal_reset_status_clear()` does
+        // the same — we write the register directly to avoid pulling in
+        // an additional HAL header.)
+        RSTGEN->CLRSTAT = 1u;
         s.cached_cause = cause;
         s.cause_cached = true;
         if (cause == ResetCause::WATCHDOG && s.crash_count < 0xFFFF) {
