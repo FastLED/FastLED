@@ -38,7 +38,17 @@ dependencies = [
     "fpvgcc",
     "uv",
     "clang-tool-chain>=1.5.5",
-    "zccache>=1.11.9",
+    # 1.11.11 ships the partial fix for zackees/zccache#637 (Windows daemon
+    # thundering-herd spawn race): PR #639 turns the post-bind "Access is
+    # denied" PermissionDenied / AddrInUse / AlreadyExists into a clean
+    # "deferring to existing daemon" INFO + exit 0 (no more spurious ERROR
+    # log entries when the loser-of-bind exits), and PR #641 adds the
+    # pre-bind probe wedge that short-circuits any second-wave spawn before
+    # the depgraph load when a lock file is present (covers most of the 277
+    # spawn cascade observed in the original repro). The remaining
+    # first-wave collapse tracked in zackees/zccache#640 (ArcSwap<DepGraph>
+    # refactor — meaningful work, not blocking).
+    "zccache>=1.11.11",
     "ninja",
     "meson>=1.11.0",
     "download",
