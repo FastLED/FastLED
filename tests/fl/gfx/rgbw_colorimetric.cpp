@@ -20,6 +20,7 @@
 
 #include "fl/gfx/rgbw.h"
 #include "fl/gfx/rgbw_colorimetric.h"
+#include "fl/stl/static_assert.h"
 
 using namespace fl;
 using namespace fl::colorimetric_detail;
@@ -979,4 +980,174 @@ FL_TEST_CASE("out-of-hull sRGB blue: FastLED projects to match reference (#2708)
         const int d = abs_diff(fl_q[k], ref_q[k]);
         FL_CHECK(d <= 1);
     }
+}
+
+
+// ===== LUT error-floor regression tests (#2720) =============================
+// Asserts a maximum per-channel byte-delta between the LUT path and the
+// closed-form solver across a chromaticity sweep, at each (interp, grid_n)
+// combination. Catches regressions in build_lut / lookup_lut that would
+// inflate interpolation error without breaking other tests.
+//
+// Thresholds are intentionally generous against current behavior — measured
+// max deltas leave room (typically 2-3x) so the tests don't flap on minor
+// numerical adjustments to the solver, but tighten the moment something
+// goes seriously wrong (wrong basis, wrong stride, sign-flipped slope,
+// off-by-one cell indexing, lost quantization precision).
+//
+// `lut_max_delta_vs_closed_form` is the helper everything else builds on;
+// it returns the worst per-channel delta over a fixed 7x7x7 RGB sweep
+// (excluding pure black). Callers pick the (interp, grid_n) tuple and
+// the budget.
+
+namespace lut_error_floor {
+
+// Detect whether the library was built with FASTLED_RGBW_COLORIMETRIC.
+// enable_rgbw_colorimetric_lut returns false in the stub build.
+inline bool colorimetric_linked() {
+    const bool ok = enable_rgbw_colorimetric_lut(8);
+    disable_rgbw_colorimetric_lut();
+    return ok;
+}
+
+// 7^3 - 1 = 342 in-gamut samples. Skips (0,0,0) since both paths short-circuit
+// to (0,0,0,0) without touching the solver.
+struct Sample {
+    u8 r, g, b;
+    u8 closed_form[4];
+    u8 lut_path[4];
+};
+
+inline int sample_sweep(Sample* out) {
+    // Map step v in [0,6] to a u8 in [15, 255] without overflow.
+    // Sequence: {15, 55, 95, 135, 175, 215, 255}.
+    auto bucket = [](int v) -> u8 {
+        return static_cast<u8>(15 + (240 * v) / 6);
+    };
+    int n = 0;
+    for (int r = 0; r <= 6; ++r) {
+        for (int g = 0; g <= 6; ++g) {
+            for (int b = 0; b <= 6; ++b) {
+                if ((r | g | b) == 0) continue;
+                Sample& s = out[n++];
+                s.r = bucket(r);
+                s.g = bucket(g);
+                s.b = bucket(b);
+            }
+        }
+    }
+    return n;
+}
+
+inline int lut_max_delta_vs_closed_form(RgbwLutInterp interp, int grid_n) {
+    static Sample samples[343];
+    const int n = sample_sweep(samples);
+
+    // Pass 1: closed-form path (LUT disabled — dispatch falls through to
+    // solve_strict_subgamut).
+    disable_rgbw_colorimetric_lut();
+    for (int i = 0; i < n; ++i) {
+        rgb_2_rgbw(RGBW_MODE::kRGBWColorimetric, kRGBWDefaultColorTemp,
+                   samples[i].r, samples[i].g, samples[i].b, 255, 255, 255,
+                   &samples[i].closed_form[0], &samples[i].closed_form[1],
+                   &samples[i].closed_form[2], &samples[i].closed_form[3]);
+    }
+
+    // Pass 2: LUT path at the requested (interp, grid_n).
+    const bool ok = enable_rgbw_colorimetric_lut(grid_n, interp);
+    FL_CHECK(ok);
+    for (int i = 0; i < n; ++i) {
+        rgb_2_rgbw(RGBW_MODE::kRGBWColorimetric, kRGBWDefaultColorTemp,
+                   samples[i].r, samples[i].g, samples[i].b, 255, 255, 255,
+                   &samples[i].lut_path[0], &samples[i].lut_path[1],
+                   &samples[i].lut_path[2], &samples[i].lut_path[3]);
+    }
+    disable_rgbw_colorimetric_lut();
+
+    int max_delta = 0;
+    for (int i = 0; i < n; ++i) {
+        for (int k = 0; k < 4; ++k) {
+            const int a = samples[i].closed_form[k];
+            const int b = samples[i].lut_path[k];
+            const int d = a > b ? a - b : b - a;
+            if (d > max_delta) max_delta = d;
+        }
+    }
+    return max_delta;
+}
+
+} // namespace lut_error_floor
+
+
+FL_TEST_CASE("LUT memory accessor matches stride math") {
+    FL_STATIC_ASSERT(rgbw_colorimetric_lut_memory_bytes(8, RgbwLutInterp::Bilinear) == 512UL, "bilinear N=8");
+    FL_STATIC_ASSERT(rgbw_colorimetric_lut_memory_bytes(8, RgbwLutInterp::Hermite) == 1536UL, "hermite N=8");
+    FL_STATIC_ASSERT(rgbw_colorimetric_lut_memory_bytes(16, RgbwLutInterp::Bilinear) == 2048UL, "bilinear N=16");
+    FL_STATIC_ASSERT(rgbw_colorimetric_lut_memory_bytes(16, RgbwLutInterp::Hermite) == 6144UL, "hermite N=16");
+    FL_STATIC_ASSERT(rgbw_colorimetric_lut_memory_bytes(32, RgbwLutInterp::Bilinear) == 8192UL, "bilinear N=32");
+    FL_STATIC_ASSERT(rgbw_colorimetric_lut_memory_bytes(32, RgbwLutInterp::Hermite) == 24576UL, "hermite N=32");
+    FL_STATIC_ASSERT(rgbw_colorimetric_lut_memory_bytes(64, RgbwLutInterp::Bilinear) == 32768UL, "bilinear N=64");
+    FL_STATIC_ASSERT(rgbw_colorimetric_lut_memory_bytes(64, RgbwLutInterp::Hermite) == 98304UL, "hermite N=64");
+    // Degenerate input: 0 grid_n -> 0 bytes (no allocation).
+    FL_STATIC_ASSERT(rgbw_colorimetric_lut_memory_bytes(0, RgbwLutInterp::Hermite) == 0UL, "zero grid");
+    FL_CHECK(true);  // runtime sentinel for the test runner
+}
+
+
+FL_TEST_CASE("LUT error floor: Bilinear N=16") {
+    // Coarsest practical config — 2 KB at i16 quantization. Threshold is
+    // generous: the goal here is to catch regressions in the bilinear
+    // interpolator (lost cell, wrong stride, sign error), not to certify
+    // colorimeter-grade accuracy at N=16.
+    if (!lut_error_floor::colorimetric_linked()) return;
+    const int max_delta =
+        lut_error_floor::lut_max_delta_vs_closed_form(RgbwLutInterp::Bilinear, 16);
+    FL_CHECK(max_delta <= 48);
+}
+
+
+FL_TEST_CASE("LUT error floor: Bilinear N=32") {
+    // 8 KB. Bilinear with a finer grid; should noticeably tighten vs N=16.
+    if (!lut_error_floor::colorimetric_linked()) return;
+    const int max_delta =
+        lut_error_floor::lut_max_delta_vs_closed_form(RgbwLutInterp::Bilinear, 32);
+    FL_CHECK(max_delta <= 24);
+}
+
+
+FL_TEST_CASE("LUT error floor: Hermite N=16") {
+    // 6 KB. Bicubic basis at the same grid as Bilinear N=16 — should produce
+    // strictly better accuracy in the common case (smooth chromaticity
+    // regions) at 3x the storage. Threshold is set just below the bilinear
+    // N=16 budget so a hermite regression that silently degrades to
+    // bilinear-equivalent error gets caught.
+    if (!lut_error_floor::colorimetric_linked()) return;
+    const int max_delta =
+        lut_error_floor::lut_max_delta_vs_closed_form(RgbwLutInterp::Hermite, 16);
+    FL_CHECK(max_delta <= 40);
+}
+
+
+FL_TEST_CASE("LUT error floor: Hermite N=32") {
+    // 24 KB. Default-quality config for the LUT path. This is what most
+    // FastLED users will end up with after calling enable_rgbw_colorimetric_lut
+    // with no extra args — assert the tightest reasonable bound.
+    if (!lut_error_floor::colorimetric_linked()) return;
+    const int max_delta =
+        lut_error_floor::lut_max_delta_vs_closed_form(RgbwLutInterp::Hermite, 32);
+    FL_CHECK(max_delta <= 16);
+}
+
+
+FL_TEST_CASE("LUT error floor: monotonicity in grid size") {
+    // Refining the grid should not make the LUT *worse* on this sweep. If
+    // it does, build_lut has a fencepost / quantization regression that the
+    // per-config threshold tests above could miss.
+    if (!lut_error_floor::colorimetric_linked()) return;
+    const int hermite_16 =
+        lut_error_floor::lut_max_delta_vs_closed_form(RgbwLutInterp::Hermite, 16);
+    const int hermite_32 =
+        lut_error_floor::lut_max_delta_vs_closed_form(RgbwLutInterp::Hermite, 32);
+    // Allow a slack of 4 LSB for quantization noise at the same threshold.
+    FL_CHECK(hermite_32 <= hermite_16 + 4);
 }

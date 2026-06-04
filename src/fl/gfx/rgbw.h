@@ -113,14 +113,35 @@ void set_rgbw_colorimetric_profile(const DiodeProfile* profile) FL_NOEXCEPT;
 // Currently active profile (defaults to &kRgbwDefaultProfile).
 const DiodeProfile* get_rgbw_colorimetric_profile() FL_NOEXCEPT;
 
+// Interpolation scheme used by the colorimetric LUT (#2720). Bilinear stores
+// 4 channel values per grid cell (8 B/cell at i16 quantization) — cheapest in
+// flash/RAM. Hermite additionally stores ∂/∂t_x and ∂/∂t_y per channel
+// (24 B/cell, 3x storage) and reaches lower error at the same grid size,
+// enabling small grids (N=8..16) on memory-constrained targets.
+enum class RgbwLutInterp : u8 {
+    Bilinear = 0,
+    Hermite = 1,
+};
+
 // Enable the 2D + 1D factored LUT path (issue #2545 Phase 2). When enabled,
-// the colorimetric modes use a bilinear-interpolated LUT instead of solving
-// per pixel. Available whenever FASTLED_RGBW_COLORIMETRIC=1 — no separate
+// the colorimetric modes use an interpolated LUT instead of solving per pixel.
+// Available whenever FASTLED_RGBW_COLORIMETRIC=1 — no separate
 // FASTLED_RGBW_COLORIMETRIC_LUT flag exists; gc-sections drops the LUT path
-// for sketches that never call this. `grid_n` controls the LUT edge length
-// (8 KB at N=32, ~2 KB at N=16, ~32 KB at N=64). LUT is rebuilt whenever
-// the active profile or CCT changes. Returns false on allocation failure
-// (or always false when FASTLED_RGBW_COLORIMETRIC is undefined).
+// for sketches that never call this. `grid_n` is clamped to [4, 256] and
+// controls the LUT edge length. LUT is rebuilt whenever the active profile,
+// CCT, grid size, or interp scheme changes. Returns false on allocation
+// failure (or always false when FASTLED_RGBW_COLORIMETRIC is undefined).
+//
+// Memory cost = grid_n * grid_n * (interp == Hermite ? 24 : 8) bytes:
+//   N=8   ->  Bilinear   512 B / Hermite  1 536 B
+//   N=16  ->  Bilinear 2 048 B / Hermite  6 144 B
+//   N=32  ->  Bilinear 8 192 B / Hermite 24 576 B
+//   N=64  ->  Bilinear 32 KB  / Hermite ~96 KB
+//
+// The single-arg overload preserves source compatibility and forwards to
+// RgbwLutInterp::Hermite (the historical default since #2707).
+bool enable_rgbw_colorimetric_lut(int grid_n,
+                                  RgbwLutInterp interp) FL_NOEXCEPT;
 bool enable_rgbw_colorimetric_lut(int grid_n) FL_NOEXCEPT;
 
 // Free the LUT and revert colorimetric calls to the closed-form solver.
@@ -128,6 +149,22 @@ void disable_rgbw_colorimetric_lut() FL_NOEXCEPT;
 
 // Returns true if the LUT path is currently active.
 bool rgbw_colorimetric_lut_enabled() FL_NOEXCEPT;
+
+// Compile-time memory-cost accessor. Mirrors the storage math used by the
+// LUT builder so users can size their RAM/flash budget before calling
+// enable_rgbw_colorimetric_lut(). The runtime API clamps grid_n to [4, 256],
+// so this helper applies the same clamp so callers do not under-estimate
+// for grid_n < 4 or over-estimate for grid_n > 256. Returns 0 for grid_n < 1.
+constexpr unsigned long rgbw_colorimetric_lut_memory_bytes(
+    int grid_n, RgbwLutInterp interp) FL_NOEXCEPT {
+    return (grid_n < 1)
+        ? 0UL
+        : (static_cast<unsigned long>(
+                  grid_n < 4 ? 4 : (grid_n > 256 ? 256 : grid_n))
+            * static_cast<unsigned long>(
+                  grid_n < 4 ? 4 : (grid_n > 256 ? 256 : grid_n))
+            * (interp == RgbwLutInterp::Hermite ? 24UL : 8UL));
+}
 
 enum {
     kRGBWDefaultColorTemp = 6000,
