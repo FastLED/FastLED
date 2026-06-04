@@ -115,11 +115,16 @@ void handle_system_reset(const char* handler_name) FL_NOEXCEPT {
 
 namespace {
 
-// Deinitializes existing watchdog if scheduler is running
-void deinit_existing_watchdog() FL_NOEXCEPT {
-    if (xTaskGetSchedulerState() == taskSCHEDULER_RUNNING) {
-        esp_task_wdt_deinit();
+// Deinitializes existing watchdog if scheduler is running.
+// Returns true on successful deinit (or if no deinit is needed because the
+// scheduler isn't running), false if `esp_task_wdt_deinit()` reported an
+// error (e.g., other tasks still subscribed, already deinitialized).
+bool deinit_existing_watchdog() FL_NOEXCEPT {
+    if (xTaskGetSchedulerState() != taskSCHEDULER_RUNNING) {
+        return true;
     }
+    esp_err_t err = esp_task_wdt_deinit();
+    return err == ESP_OK;
 }
 
 // Initializes watchdog with specified timeout
@@ -157,7 +162,9 @@ void watchdog_setup(u32 timeout_ms,
     detail::s_user_callback = callback;
     detail::s_user_data = user_data;
 
-    deinit_existing_watchdog();
+    // Best-effort deinit before re-init; failure here is non-fatal because
+    // we're about to overwrite the configuration anyway.
+    (void)deinit_existing_watchdog();
 
     if (!init_task_watchdog(timeout_ms)) {
         return;
@@ -166,10 +173,13 @@ void watchdog_setup(u32 timeout_ms,
     log_watchdog_status(timeout_ms, callback);
 }
 
-void watchdog_disable() FL_NOEXCEPT {
-    deinit_existing_watchdog();
+bool watchdog_disable() FL_NOEXCEPT {
+    if (!deinit_existing_watchdog()) {
+        return false;
+    }
     detail::s_user_callback = nullptr;
     detail::s_user_data = nullptr;
+    return true;
 }
 
 } // namespace fl

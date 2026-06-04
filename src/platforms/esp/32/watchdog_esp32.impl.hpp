@@ -111,15 +111,19 @@ void Watchdog::feed() FL_NOEXCEPT {
 }
 
 void Watchdog::disable() FL_NOEXCEPT {
-    // Real TWDT teardown via `fl::watchdog_disable()` (added alongside this
-    // change in watchdog_esp32_idf{4,5}.hpp) — wraps `esp_task_wdt_deinit()`
-    // and is safely guarded against being called before the FreeRTOS
-    // scheduler is running. Honors the Tier-0 contract: after disable(), the
-    // watchdog truly does not fire on the registered idle task.
+    // Real TWDT teardown via `fl::watchdog_disable()` (wraps
+    // `esp_task_wdt_deinit()` and is safely guarded against being called
+    // before the FreeRTOS scheduler is running). Only clear the local armed
+    // state if teardown actually succeeded — if `esp_task_wdt_deinit()`
+    // returned non-OK (other tasks still subscribed, already deinitialized)
+    // the TWDT is still active, so reporting "disabled" would lie. Leaving
+    // `armed`/`armed_timeout_ms` intact also means a subsequent `begin()`
+    // can reason about its prior state.
     auto& s = platforms::esp32WatchdogState();
-    fl::watchdog_disable();
-    s.armed = false;
-    s.armed_timeout_ms = 0;
+    if (fl::watchdog_disable()) {
+        s.armed = false;
+        s.armed_timeout_ms = 0;
+    }
 }
 
 ResetCause Watchdog::lastResetCause() const FL_NOEXCEPT {
