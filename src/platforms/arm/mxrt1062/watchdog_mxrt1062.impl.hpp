@@ -108,7 +108,11 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NOEXCEPT {
     if (toval == 0)         toval = 1;
     if (toval > 0xFFFFu)    toval = 0xFFFFu;
 
-    __disable_irq();
+    // PRIMASK save/restore — see feed() for rationale (works correctly when
+    // called from a context that already had IRQs disabled).
+    uint32_t primask;
+    __asm__ volatile ("mrs %0, primask" : "=r" (primask));
+    __asm__ volatile ("cpsid i" ::: "memory");
 
     // 32-bit unlock key (atomic store; relies on CS.CMD32EN=1, which is the
     // RTWDOG reset default and which we restore in the CS write below).
@@ -120,7 +124,10 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NOEXCEPT {
     {
         fl::u32 spin = 0;
         while (!(WDOG3_CS & WDOG_CS_ULK)) {
-            if (++spin > 1000000u) { __enable_irq(); return; }
+            if (++spin > 1000000u) {
+                __asm__ volatile ("msr primask, %0" :: "r" (primask) : "memory");
+                return;
+            }
         }
     }
 
@@ -161,21 +168,56 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NOEXCEPT {
 }
 
 void Watchdog::feed() FL_NOEXCEPT {
-    // 32-bit refresh key. Interrupts off so an ISR can't tear the write.
-    __disable_irq();
+    // 32-bit refresh key. Save+restore PRIMASK so we don't accidentally
+    // re-enable interrupts when feed() is called from a context that had
+    // them disabled (e.g. an ISR). __disable_irq()/__enable_irq() would
+    // unconditionally re-enable, which is unsafe in nested-IRQ-off paths.
+    uint32_t primask;
+    __asm__ volatile ("mrs %0, primask" : "=r" (primask));
+    __asm__ volatile ("cpsid i" ::: "memory");
     WDOG3_CNT = platforms::kRtwdogRefreshKey;
-    __enable_irq();
+    __asm__ volatile ("msr primask, %0" :: "r" (primask) : "memory");
 }
 
 void Watchdog::disable() FL_NOEXCEPT {
-    // RTWDOG cannot be cleanly disabled once armed and locked. To honor the
-    // Tier-0 contract conservatively, reconfigure with the maximum supported
-    // timeout so calling code that documents "watchdog disabled" still has
-    // the longest possible window before reset. Real teardown isn't possible
-    // without violating the CS write-protect after the first config.
+    // RTWDOG can be re-configured with CS.EN=0 via the unlock sequence as
+    // long as CS.UPDATE was 1 in the previous config (which our begin()
+    // always sets). Run the same unlock-then-CS pattern as begin() but
+    // write CS with EN=0.
     auto& s = platforms::mxrt1062WatchdogState();
     if (!s.armed) return;
-    begin(FL_WATCHDOG_MAX_TIMEOUT_MS);
+
+    // Save+restore PRIMASK so callers that already had IRQs off aren't
+    // surprised by them coming back on.
+    uint32_t primask;
+    __asm__ volatile ("mrs %0, primask" : "=r" (primask));
+    __asm__ volatile ("cpsid i" ::: "memory");
+
+    WDOG3_CNT = platforms::kRtwdogUnlockKey;
+    {
+        fl::u32 spin = 0;
+        while (!(WDOG3_CS & WDOG_CS_ULK)) {
+            if (++spin > 1000000u) {
+                __asm__ volatile ("msr primask, %0" :: "r" (primask) : "memory");
+                return;
+            }
+        }
+    }
+
+    WDOG3_TOVAL = 0xFFFFu;
+    WDOG3_WIN   = 0;
+    // EN = 0 → disable. Keep CMD32EN + UPDATE so a future begin() can re-arm.
+    WDOG3_CS = WDOG_CS_CMD32EN | WDOG_CS_UPDATE | WDOG_CS_CLK(1);
+
+    {
+        fl::u32 spin = 0;
+        while (!(WDOG3_CS & WDOG_CS_RCS)) {
+            if (++spin > 1000000u) break;
+        }
+    }
+
+    __asm__ volatile ("msr primask, %0" :: "r" (primask) : "memory");
+
     s.armed = false;
     s.armed_timeout_ms = 0;
 }
