@@ -679,9 +679,9 @@ void drawSquare(void* leds, uint16_t planeY, uint16_t planeX, int yCorner, int x
 			// `size` to int to keep the arithmetic signed (matches the
 			// for-loop bound `x <= xCorner + (int)size` above).
 			if ((yCorner + (int)size >= 0) && (yCorner + (int)size < planeY)) {
-				*((uint8_t*)leds + ((yCorner + size) * planeX + x) * 3) = ((color >> 16) & 0xFF);
-				*((uint8_t*)leds + ((yCorner + size) * planeX + x) * 3 + 1) = ((color >> 8) & 0xFF);
-				*((uint8_t*)leds + ((yCorner + size) * planeX + x) * 3 + 2) = (color & 0xFF);
+				*((uint8_t*)leds + ((yCorner + (int)size) * planeX + x) * 3) = ((color >> 16) & 0xFF);
+				*((uint8_t*)leds + ((yCorner + (int)size) * planeX + x) * 3 + 1) = ((color >> 8) & 0xFF);
+				*((uint8_t*)leds + ((yCorner + (int)size) * planeX + x) * 3 + 2) = (color & 0xFF);
 			}
 		}	//if valid x
 	}	//for x
@@ -694,9 +694,9 @@ void drawSquare(void* leds, uint16_t planeY, uint16_t planeX, int yCorner, int x
 			}
 			// FastLED #2726: same -Wtype-limits fix as the yCorner branch above.
 			if ((xCorner + (int)size >= 0) && (xCorner + (int)size < planeX)) {
-				*((uint8_t*)leds + (xCorner + size + y * planeX) * 3) = ((color >> 16) & 0xFF);
-				*((uint8_t*)leds + (xCorner + size + y * planeX) * 3 + 1) = ((color >> 8) & 0xFF);
-				*((uint8_t*)leds + (xCorner + size + y * planeX) * 3 + 2) = (color & 0xFF);
+				*((uint8_t*)leds + (xCorner + (int)size + y * planeX) * 3) = ((color >> 16) & 0xFF);
+				*((uint8_t*)leds + (xCorner + (int)size + y * planeX) * 3 + 1) = ((color >> 8) & 0xFF);
+				*((uint8_t*)leds + (xCorner + (int)size + y * planeX) * 3 + 2) = (color & 0xFF);
 			}
 		}	//if valid y
 	}	//for y
