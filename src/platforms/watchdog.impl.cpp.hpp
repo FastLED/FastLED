@@ -23,6 +23,15 @@
 ///   - MGM240           → `platforms/arm/mgm240/watchdog_mgm240.impl.hpp` (em_wdog)
 ///   - AVR              → `platforms/avr/watchdog_avr.impl.hpp` (avr/wdt.h + .init3 fix)
 ///   - Other            → `platforms/shared/watchdog_noop.hpp` (no-op fallback)
+///
+/// **Library availability guards:** Some platform impls depend on third-party
+/// Arduino libraries (Watchdog_t4, IWatchdog, Adafruit_SleepyDog, am_mcu_apollo,
+/// em_wdog) that may not be installed in every build configuration. We gate
+/// each such route with `__has_include(<header>)` so that when the optional
+/// library is missing the dispatcher falls through to the noop fallback rather
+/// than breaking the compile. User code that calls the watchdog API still
+/// works (as a no-op) — opt back into hardware behavior by installing the
+/// matching library.
 
 // Platform detection headers
 #include "platforms/is_platform.h"
@@ -35,26 +44,28 @@
     #include "platforms/stub/watchdog_stub.impl.hpp"
 #elif defined(FL_IS_ESP32)
     #include "platforms/esp/32/watchdog_esp32.impl.hpp"
-#elif defined(FL_IS_TEENSY_4X)
+#elif defined(FL_IS_TEENSY_4X) && __has_include(<Watchdog_t4.h>)
     #include "platforms/arm/mxrt1062/watchdog_mxrt1062.impl.hpp"
-#elif defined(FL_IS_TEENSY_3X) || defined(FL_IS_TEENSY_LC)
+#elif (defined(FL_IS_TEENSY_3X) || defined(FL_IS_TEENSY_LC)) && __has_include(<kinetis.h>)
     #include "platforms/arm/k20/watchdog_k20.impl.hpp"
-#elif defined(FL_IS_RP2040) || defined(FL_IS_RP2350)
+#elif (defined(FL_IS_RP2040) || defined(FL_IS_RP2350)) && __has_include(<hardware/watchdog.h>)
     #include "platforms/arm/rp/watchdog_rp.impl.hpp"
-#elif defined(FL_IS_NRF52)
+#elif defined(FL_IS_NRF52) && __has_include(<nrf.h>)
     #include "platforms/arm/nrf52/watchdog_nrf52.impl.hpp"
-#elif defined(FL_IS_STM32)
+#elif defined(FL_IS_STM32) && __has_include(<IWatchdog.h>)
     #include "platforms/arm/stm32/watchdog_stm32.impl.hpp"
-#elif defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)
+#elif (defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)) && __has_include(<Adafruit_SleepyDog.h>)
     #include "platforms/arm/samd/watchdog_samd.impl.hpp"
-#elif defined(FL_IS_APOLLO3)
+#elif defined(FL_IS_APOLLO3) && __has_include(<am_mcu_apollo.h>)
     #include "platforms/apollo3/watchdog_apollo3.impl.hpp"
-#elif defined(FL_IS_SILABS_MGM240)
+#elif defined(FL_IS_SILABS_MGM240) && __has_include(<em_wdog.h>)
     #include "platforms/arm/mgm240/watchdog_mgm240.impl.hpp"
-#elif defined(FL_IS_AVR)
+#elif defined(FL_IS_AVR) && __has_include(<avr/wdt.h>)
     #include "platforms/avr/watchdog_avr.impl.hpp"
 #else
     // Fallback: no real or emulated WDT available — all methods are no-ops.
+    // Reached when the platform isn't supported OR when the optional Arduino
+    // library backing this platform isn't installed (see header note above).
     // The api still compiles and runs on every supported MCU.
     #include "platforms/shared/watchdog_noop.hpp"
 #endif
