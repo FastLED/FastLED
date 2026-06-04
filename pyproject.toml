@@ -38,7 +38,14 @@ dependencies = [
     "fpvgcc",
     "uv",
     "clang-tool-chain>=1.5.5",
-    "zccache>=1.11.9",
+    # 1.11.11 ships the depfile-on-cache-hit fix (zackees/zccache#643): cache
+    # hits now restore the user's `-MF <path>` depfile alongside the .obj.
+    # Without it ninja's `deps = gcc` mode records `#deps 0` for every
+    # cached object, so incremental builds silently produce stale .obj
+    # files after a `git pull` that changes transitive headers — symptom
+    # is an `undefined symbol: ...` link error hours after a header
+    # actually changed.
+    "zccache>=1.11.11",
     "ninja",
     "meson>=1.11.0",
     "download",
