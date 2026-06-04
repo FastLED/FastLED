@@ -27,3 +27,4 @@
 #include "fl/test/_build.cpp.hpp"
 #include "fl/ui/_build.cpp.hpp"
 #include "fl/video/_build.cpp.hpp"
+#include "fl/wdt/_build.cpp.hpp"

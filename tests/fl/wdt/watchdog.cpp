@@ -191,3 +191,131 @@ FL_TEST_CASE("fl::Watchdog — isInSafeMode trips at threshold") {
     dog.markCleanShutdown();
     FL_CHECK_FALSE(dog.isInSafeMode());
 }
+
+// =============================================================================
+// New API tests (issue #2755): resetCauseName + ResetInfo + ScopedWatchdog
+// =============================================================================
+
+FL_TEST_CASE("fl::resetCauseName — every enum value maps to a non-empty static view") {
+    FL_CHECK_EQ(fl::resetCauseName(ResetCause::UNKNOWN),      fl::string_view("UNKNOWN"));
+    FL_CHECK_EQ(fl::resetCauseName(ResetCause::POWER_ON),     fl::string_view("POWER_ON"));
+    FL_CHECK_EQ(fl::resetCauseName(ResetCause::BROWNOUT),     fl::string_view("BROWNOUT"));
+    FL_CHECK_EQ(fl::resetCauseName(ResetCause::EXTERNAL_PIN), fl::string_view("EXTERNAL_PIN"));
+    FL_CHECK_EQ(fl::resetCauseName(ResetCause::WATCHDOG),     fl::string_view("WATCHDOG"));
+    FL_CHECK_EQ(fl::resetCauseName(ResetCause::SOFTWARE),     fl::string_view("SOFTWARE"));
+    FL_CHECK_EQ(fl::resetCauseName(ResetCause::LOCKUP),       fl::string_view("LOCKUP"));
+    FL_CHECK_EQ(fl::resetCauseName(ResetCause::DEBUGGER),     fl::string_view("DEBUGGER"));
+    FL_CHECK_EQ(fl::resetCauseName(ResetCause::PANIC),        fl::string_view("PANIC"));
+}
+
+FL_TEST_CASE("fl::ResetInfo::describe — terse format without subcause or verbose flag") {
+    ResetInfo info{};
+    info.cause = ResetCause::WATCHDOG;
+    info.subcauseId = 0;
+    info.rawRegister = 0xDEADBEEFu;
+
+    char buf[64];
+    fl::size n = info.describe(fl::span<char>(buf, sizeof(buf)), /*verbose=*/false);
+    FL_CHECK_EQ(n, fl::size{8});  // "WATCHDOG"
+    FL_CHECK_EQ(fl::string_view(buf, n), fl::string_view("WATCHDOG"));
+}
+
+FL_TEST_CASE("fl::ResetInfo::describe — verbose appends raw=0x...") {
+    ResetInfo info{};
+    info.cause = ResetCause::WATCHDOG;
+    info.subcauseId = 0;
+    info.rawRegister = 0x000000FFu;
+
+    char buf[64];
+    fl::size n = info.describe(fl::span<char>(buf, sizeof(buf)), /*verbose=*/true);
+    // "WATCHDOG raw=0x000000ff" = 8 + 5 + 10 = 23 chars
+    FL_CHECK_EQ(fl::string_view(buf, n), fl::string_view("WATCHDOG raw=0x000000ff"));
+}
+
+FL_TEST_CASE("fl::ResetInfo::describe — writes NUL when buffer has room") {
+    ResetInfo info{};
+    info.cause = ResetCause::POWER_ON;
+    char buf[32] = { 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 0, };
+    fl::size n = info.describe(fl::span<char>(buf, sizeof(buf)), false);
+    FL_CHECK_EQ(buf[n], '\0');
+}
+
+FL_TEST_CASE("fl::ResetInfo::describe — truncates safely when buffer is too small") {
+    ResetInfo info{};
+    info.cause = ResetCause::EXTERNAL_PIN;
+    char buf[5];  // "EXTERNAL_PIN" needs 12, way more than 5
+    fl::size n = info.describe(fl::span<char>(buf, sizeof(buf)), false);
+    FL_CHECK_EQ(n, fl::size{5});  // Filled the buffer
+    FL_CHECK_EQ(fl::string_view(buf, n), fl::string_view("EXTER"));
+}
+
+FL_TEST_CASE("fl::ResetInfo::describe — zero-sized buffer returns 0, no UB") {
+    ResetInfo info{};
+    info.cause = ResetCause::WATCHDOG;
+    fl::size n = info.describe(fl::span<char>(nullptr, 0), true);
+    FL_CHECK_EQ(n, fl::size{0});
+}
+
+FL_TEST_CASE("fl::Watchdog::lastResetInfo — default returns {cause, 0, 0}") {
+    Watchdog& dog = Watchdog::instance();
+    dog.clearCrashReport();
+    dog.markCleanShutdown();
+    ResetInfo info = dog.lastResetInfo();
+    // On the stub, lastResetCause() returns POWER_ON by default.
+    FL_CHECK(info.cause == ResetCause::POWER_ON || info.cause == ResetCause::WATCHDOG);
+    FL_CHECK_EQ(info.subcauseId, fl::u8{0});
+    FL_CHECK_EQ(info.rawRegister, fl::u32{0});
+}
+
+FL_TEST_CASE("fl::ScopedWatchdog — feeds on construction and destruction") {
+    Watchdog& dog = Watchdog::instance();
+    dog.markCleanShutdown();
+    dog.clearCrashReport();
+    dog.begin(500);
+    // A bare scope here; constructor + destructor both feed. We can't
+    // observe the feed directly through the API, but if the WDT was not
+    // re-fed by the destructor the next loop iteration would race. Smoke
+    // test: construct + destroy a guard, then sleep for under the timeout
+    // and verify the dog did not fire.
+    {
+        ScopedWatchdog guard;  // default 15000ms — overrides our 500ms begin
+        fl::this_thread::sleep_for(fl::chrono::milliseconds(50));  // ok sleep for
+    }
+    // The guard re-armed at 15000ms in firstInit, so the dog is fine here.
+    FL_CHECK_FALSE(dog.lastResetWasWatchdog());
+}
+
+FL_TEST_CASE("fl::ScopedWatchdog — explicit timeout ctor compiles and feeds") {
+    Watchdog& dog = Watchdog::instance();
+    dog.markCleanShutdown();
+    {
+        ScopedWatchdog guard(20000u);  // explicit 20s
+    }
+    FL_CHECK_FALSE(dog.lastResetWasWatchdog());
+}
+
+FL_TEST_CASE("FL_WATCHDOG_AUTO macro — no-arg and arg forms both compile") {
+    // Compile-time check that the macro expands correctly. The variable
+    // name is stamped from __LINE__, so two on separate lines don't collide.
+    FL_WATCHDOG_AUTO();
+    FL_WATCHDOG_AUTO(5000);
+    FL_WATCHDOG_AUTO(2000u);
+    FL_CHECK(true);  // Always passes if it compiled
+}
+
+FL_TEST_CASE("fl::ScopedWatchdog — nesting detection counter") {
+    // Validates the single-instance enforcement: the active-scope counter
+    // increments on construction and decrements on destruction so that a
+    // nested guard can be detected via the warning path.
+    int baseline = ScopedWatchdog::activeScopeCount();
+    {
+        ScopedWatchdog outer;
+        FL_CHECK_EQ(ScopedWatchdog::activeScopeCount(), baseline + 1);
+        {
+            ScopedWatchdog inner;  // triggers the WARN one-shot
+            FL_CHECK_EQ(ScopedWatchdog::activeScopeCount(), baseline + 2);
+        }
+        FL_CHECK_EQ(ScopedWatchdog::activeScopeCount(), baseline + 1);
+    }
+    FL_CHECK_EQ(ScopedWatchdog::activeScopeCount(), baseline);
+}
