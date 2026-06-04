@@ -12,6 +12,7 @@
 #include "platforms/debug_setup.cpp.hpp"
 #include "platforms/ota.cpp.hpp"
 #include "platforms/stub_main.cpp.hpp"
+#include "platforms/watchdog.impl.cpp.hpp" // ok include cpp.hpp
 
 // begin sub directory includes
 #include "platforms/adafruit/_build.cpp.hpp"
