@@ -58,7 +58,13 @@ inline void k20UnlockAndConfigureWdog(fl::u32 timeout_ms) {
     // WDOG_UNLOCK within bus-clock window. Then exactly ONE write to
     // WDOG_STCTRLH is permitted before lockout. We program LPO-clocked
     // (~1 kHz) so timeout_ms ≈ TOVAL count.
-    __disable_irq();
+    //
+    // PRIMASK save/restore so a caller that already had IRQs disabled
+    // doesn't get them surprise-re-enabled. Naked __disable_irq() pair
+    // would lose the prior PRIMASK state.
+    fl::u32 primask;
+    __asm__ volatile ("mrs %0, primask" : "=r" (primask));
+    __asm__ volatile ("cpsid i" ::: "memory");
     WDOG_UNLOCK = 0xC520;
     WDOG_UNLOCK = 0xD928;
     // Two NOPs per the reference manual to satisfy the timing requirement.
@@ -68,9 +74,12 @@ inline void k20UnlockAndConfigureWdog(fl::u32 timeout_ms) {
     if (toval == 0) toval = 1;
     WDOG_TOVALH = static_cast<fl::u16>((toval >> 16) & 0xFFFF);
     WDOG_TOVALL = static_cast<fl::u16>(toval & 0xFFFF);
-    // STCTRLH: ALLOWUPDATE | WDOGEN | LPO clock
+    // STCTRLH: ALLOWUPDATE | WDOGEN | STOPEN | WAITEN | LPO clock = 0x01D1.
+    // The STOPEN + WAITEN bits keep the WDT counting when the CPU enters
+    // STOP / WAIT modes — without them the WDT would pause and the
+    // caller's feed() cadence would be unsafe across low-power transitions.
     WDOG_STCTRLH = 0x01D1;
-    __enable_irq();
+    __asm__ volatile ("msr primask, %0" :: "r" (primask) : "memory");
 }
 
 } // namespace platforms
@@ -89,10 +98,14 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NOEXCEPT {
 
 void Watchdog::feed() FL_NOEXCEPT {
     // Refresh sequence: 0xA602 then 0xB480 with interrupts disabled.
-    __disable_irq();
+    // PRIMASK save/restore so a caller that already had IRQs disabled
+    // doesn't get them surprise-re-enabled (e.g. feed() from inside an ISR).
+    fl::u32 primask;
+    __asm__ volatile ("mrs %0, primask" : "=r" (primask));
+    __asm__ volatile ("cpsid i" ::: "memory");
     WDOG_REFRESH = 0xA602;
     WDOG_REFRESH = 0xB480;
-    __enable_irq();
+    __asm__ volatile ("msr primask, %0" :: "r" (primask) : "memory");
 }
 
 void Watchdog::disable() FL_NOEXCEPT {

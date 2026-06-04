@@ -46,6 +46,7 @@ struct AutoResearchState {
     bool net_server_active = false;  // Network server autoresearch active
     bool net_client_active = false;  // Network client autoresearch active
     bool ble_server_active = false;  // BLE GATT server autoresearch active
+    bool deliberate_hang_requested = false;  // Watchdog autoresearch hang trigger (#2731)
 };
 
 /// @brief Print JSON directly to Serial, bypassing fl::println and ScopedLogDisable

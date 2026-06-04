@@ -1005,6 +1005,22 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         return response;
     });
 
+    // Register "deliberateHang" - force an infinite loop with interrupts
+    // disabled to validate the unified Watchdog implementation (#2731).
+    // The watchdog should fire within its configured timeout, reset the
+    // device, and let the bootloader become reachable again.
+    // Returns success BEFORE hanging so the caller sees the ACK; the hang
+    // begins in the next iteration of the loop.
+    mRemote->bind("deliberateHang", [this](const fl::json& args) -> fl::json {
+        (void)args;
+        FL_WARN("[deliberateHang] watchdog test: spinning forever in 200 ms");
+        mState->deliberate_hang_requested = true;
+        fl::json response = fl::json::object();
+        response.set("success", true);
+        response.set("message", "device will hang after RPC returns; watchdog should reset within configured timeout");
+        return response;
+    });
+
     // Register "drivers" function - list available drivers
     mRemote->bind("drivers", [this](const fl::json& args) -> fl::json {
         fl::json drivers = fl::json::array();

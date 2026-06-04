@@ -293,6 +293,64 @@ using RemoteControlSingleton = fl::Singleton<AutoResearchRemoteControl>;
 uint32_t frame_counter = 0;
 
 
+#if defined(FL_IS_TEENSY_4X) && defined(__IMXRT1062__)
+// =============================================================================
+// CRITICAL: WDOG3 (RTWDOG) startup-early-hook recovery (FastLED#2731)
+// =============================================================================
+// The iMXRT1062 RTWDOG (WDOG3) is enabled by default at chip reset with
+// TOVAL = 0x400 LPO ticks ≈ 32 ms. The Teensy 4 core does NOT disable it in
+// startup.c — most sketches happen to be fast enough or stay in WAIT mode
+// where WDOG3 stops counting, so it never bites in practice.
+//
+// But if a previous run armed WDOG3 with a short timeout, or if any
+// peripheral init takes longer than 32 ms, the chip enters a reset loop
+// where the new sketch can't even complete USB enumeration. Symptom: red
+// LED double-blink + "Unknown USB Device (Device Descriptor Request Failed)".
+//
+// `startup_early_hook` is a weak symbol in Teensyduino's startup.c that runs
+// very early in ResetHandler2(), before main() and before ITCM is even
+// initialized. Overriding it here disables WDOG3 BEFORE any other code can
+// observe a reset. Must be in FLASHMEM (ITCM not ready yet).
+extern "C" FLASHMEM void startup_early_hook(void) {
+    // Enable the WDOG3 clock gate (CCM_CCGR5 bits 4-5) so the WDOG3
+    // peripheral registers are addressable. Per imxrt.h comment:
+    // "WDOG3 requires CCM_CCGR5_WDOG3".
+    CCM_CCGR5 |= CCM_CCGR5_WDOG3(3);
+    // Ensure the CCM store is visible to the peripheral bus before
+    // touching WDOG3.
+    __asm__ volatile ("dsb" ::: "memory");
+    __asm__ volatile ("isb" ::: "memory");
+
+    // Unlock RTWDOG with the 32-bit key (works because CS.CMD32EN=1 at reset).
+    WDOG3_CNT = 0xD928C520u;
+
+    // Wait for the unlock window to open. Bounded spin — if for any reason
+    // the unlock never lands, we'd rather continue and let the WDOG bite
+    // than hang here forever.
+    {
+        volatile uint32_t spin = 0;
+        while (!(WDOG3_CS & WDOG_CS_ULK)) {
+            if (++spin > 200000u) break;
+        }
+    }
+
+    // Disable: clear EN, keep CMD32EN+UPDATE+CLK(LPO) so future arms work.
+    // Set TOVAL to max so even if the disable doesn't take, we have ~524 sec
+    // before any reset can occur.
+    WDOG3_TOVAL = 0xFFFFu;
+    WDOG3_WIN = 0;
+    WDOG3_CS = WDOG_CS_CMD32EN | WDOG_CS_UPDATE | WDOG_CS_CLK(1);  // EN=0
+
+    // Wait for reconfigure complete (bounded).
+    {
+        volatile uint32_t spin = 0;
+        while (!(WDOG3_CS & WDOG_CS_RCS)) {
+            if (++spin > 200000u) break;
+        }
+    }
+}
+#endif
+
 void setup() {
     // Initialize serial buffers with platform-specific configuration
     // Must be called BEFORE Serial.begin()
@@ -311,9 +369,46 @@ void setup() {
     while (!fl::serial_ready() && (millis() - serial_wait_start) < AUTORESEARCH_SERIAL_WAIT_MS);  // Wait for serial monitor (early exits when connected)
 
     FL_WARN("[SETUP] AutoResearch sketch starting - serial output active");
-#if defined(FL_IS_ESP32)
-    fl::watchdog_setup(15000);
+
+    // Diagnostic: dump reset cause + bundled CrashReport so we can tell
+    // HardFault vs WDOG3 vs PIN vs POR. Direct register access — `imxrt.h`
+    // is already pulled by FastLED.h on Teensy 4.
+#if defined(FL_IS_TEENSY_4X) && defined(__IMXRT1062__)
+    {
+        const uint32_t srsr = SRC_SRSR;
+        Serial.print("[boot] SRC_SRSR = 0x");  // ok serial - boot diagnostic, Teensy 4 only
+        Serial.println(srsr, HEX);             // ok serial - boot diagnostic, Teensy 4 only
+        // Bit positions from imxrt.h SRC_SRSR_*_B macros (not hardcoded
+        // shifts, which were all wrong in an earlier version of this file).
+        if (srsr & SRC_SRSR_WDOG3_RST_B)        Serial.println("[boot]   WDOG3_RST_B (RTWDOG fired)");        // ok serial - boot diagnostic
+        if (srsr & SRC_SRSR_WDOG_RST_B)         Serial.println("[boot]   WDOG_RST_B (WDOG1/2 fired)");        // ok serial - boot diagnostic
+        if (srsr & SRC_SRSR_IPP_RESET_B)        Serial.println("[boot]   POR (power-on reset)");              // ok serial - boot diagnostic
+        if (srsr & SRC_SRSR_LOCKUP_SYSRESETREQ) Serial.println("[boot]   LOCKUP_SYSRESETREQ (HardFault)");    // ok serial - boot diagnostic
+        if (srsr & SRC_SRSR_IPP_USER_RESET_B)   Serial.println("[boot]   IPP_USER_RESET_B (external pin)");  // ok serial - boot diagnostic
+        if (srsr & SRC_SRSR_JTAG_SW_RST)        Serial.println("[boot]   JTAG/SW reset");                    // ok serial - boot diagnostic
+        // Write-1-to-clear so next boot sees only its own cause.
+        SRC_SRSR = srsr;
+        if (CrashReport) {
+            Serial.println("[boot] *** CrashReport present from previous boot: ***");  // ok serial - boot diagnostic
+            Serial.print(CrashReport);  // ok serial - bundled Teensy CrashReport, no fl:: equivalent
+            Serial.println("[boot] *** end CrashReport ***");  // ok serial - boot diagnostic
+        } else {
+            Serial.println("[boot] no CrashReport from previous boot");  // ok serial - boot diagnostic
+        }
+        Serial.flush();  // ok serial - boot diagnostic flush
+    }
 #endif
+
+    // Unified cross-platform watchdog (FastLED#2731). Arm with a generous
+    // 15-second timeout that matches the AutoResearch test budget. On
+    // Teensy 4 the bare-register WDOG3 begin() path now relies on the
+    // `startup_early_hook` above having pre-disabled WDOG3, so re-arming
+    // here goes through a clean unlock → write → RCS-wait sequence.
+    FastLED.watchdog().begin(15000);
+    if (FastLED.watchdog().lastResetWasWatchdog()) {
+        FL_WARN("[recovery] previous boot was killed by watchdog — crash#"
+                << static_cast<int>(FastLED.watchdog().consecutiveCrashCount()));
+    }
 
     // Initialize RX buffer dynamically (uses PSRAM if available, falls back to heap)
     g_rx_buffer_storage.resize(RX_BUFFER_SIZE);
@@ -477,6 +572,35 @@ void loop() {
     for (int i = 0; i < 100; i++) {
         fl::task::run();
     }
+
+    // ========================================================================
+    // Watchdog autoresearch trigger (FastLED#2731) — when the host RPC sends
+    // `deliberateHang`, the handler flips this flag. We let one more pass of
+    // task::run() drain the response queue so the host sees the ACK, then
+    // we disable interrupts (so no async machinery can keep the WDT happy)
+    // and spin forever. The next watchdog tick must fire and reset the chip.
+    // The host's recovery test passes if the device re-enumerates afterward
+    // and is reflashable.
+    // ========================================================================
+    if (g_autoresearch_state->deliberate_hang_requested) {
+        FL_WARN("[deliberateHang] entering forced-hang loop NOW");
+        delay(200);  // give Serial TX FIFO time to flush
+        // noInterrupts() is an Arduino-only macro; guard it so the host stub
+        // build (which compiles this .ino for the unit-test framework) doesn't
+        // hit an undeclared identifier. On host the while(1) below still spins
+        // and prevents feed(), which is the actual hang we want to test.
+#if !defined(FL_IS_STUB) && !defined(FL_IS_WASM)
+        noInterrupts();
+#endif
+        while (true) { /* deliberate hang */ }
+    }
+
+    // Feed the watchdog at the end of every loop iteration. On platforms
+    // where begin() was a no-op the feed is also a no-op. The mark-clean
+    // shutdown zeros the consecutive-crash counter so a transient hang
+    // doesn't eventually push the board into safe mode.
+    FastLED.watchdog().feed();
+    FastLED.watchdog().markCleanShutdown();
 
     // Run GPIO baseline test once after device is ready (allows JSON-RPC to be operational first)
     // This test is informational only - we continue regardless of pass/fail
