@@ -12,9 +12,13 @@
 
 /// @brief   Demonstrates how to overclock a FastLED setup
 
-#include "FastLED.h"
-
+// FASTLED_OVERCLOCK must be defined BEFORE including FastLED.h so the value
+// reaches led_timing.h's `#ifndef` guard. Defining it after include causes a
+// -Wmacro-redefined warning on every CI build. (#2728)
 #define FASTLED_OVERCLOCK 1.1 // Overclocks by 10%, I've seen 25% work fine.
+#define FASTLED_OVERCLOCK_SUPPRESS_WARNING 1
+
+#include "FastLED.h"
 
 #include "fl/fx/2d/noisepalette.h"
 #include "fl/fx/fx.h"
