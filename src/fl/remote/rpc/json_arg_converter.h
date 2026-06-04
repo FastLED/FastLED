@@ -73,7 +73,10 @@ public:
 
     static fl::tuple<args_tuple, TypeConversionResult> convert(const json& jsonArgs) {
         TypeConversionResult result;
-        args_tuple tuple;
+        // Value-init so the early-return branches below (not an array,
+        // arg-count mismatch) don't return an indeterminate tuple —
+        // convertArgs() is the only writer and runs after the bail-outs. #2722
+        args_tuple tuple{};
 
         if (!jsonArgs.is_array()) {
             result.setError("arguments must be a JSON array");
@@ -133,7 +136,10 @@ public:
 
     static fl::tuple<args_tuple, TypeConversionResult> convert(const json& jsonArgs) {
         TypeConversionResult result;
-        args_tuple tuple;
+        // Value-init so the early-return branches below (not an array,
+        // arg-count mismatch) don't return an indeterminate tuple —
+        // convertArgs() is the only writer and runs after the bail-outs. #2722
+        args_tuple tuple{};
 
         if (!jsonArgs.is_array()) {
             result.setError("arguments must be a JSON array");
