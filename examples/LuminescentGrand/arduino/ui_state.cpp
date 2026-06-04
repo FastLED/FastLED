@@ -12,13 +12,15 @@
 #define UI_DBG
 
 
+// Silent fallback: many Arduino-core variants (ESP32, RP2040, nRF52, …) do
+// not expose `A3` / `A4` aliases. Previously this emitted a `#warning` that
+// fired on every board build (-Wcpp / hundreds of lines per CI run). The
+// fallback is harmless — we only use these macros as opaque pin numbers. #2728
 #ifndef A3
 #define A3 3
-#warning "A3 is not defined, using 3"
 #endif
 #ifndef A4
 #define A4 4
-#warning "A4 is not defined, using 4"
 #endif
 
 #ifdef __STM32F1__
