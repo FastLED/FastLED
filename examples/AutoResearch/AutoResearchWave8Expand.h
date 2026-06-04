@@ -6,8 +6,8 @@
 /// production cost (expansion + 16-lane transpose) for both LUTs.
 ///
 /// **Invocation:** RPC-only. Call via the `wave8ExpandBenchmark` handler
-/// registered in AutoResearchRemote.cpp. Output uses `esp_rom_printf` because
-/// `FL_PRINT` doesn't currently reach COM25 on P4 (see #2540/#2541).
+/// registered in AutoResearchRemote.cpp. The result struct is JSON-serialized
+/// by the RPC handler; this header no longer prints directly.
 
 #pragma once
 
@@ -19,7 +19,6 @@
 
 #if defined(ARDUINO_ARCH_ESP32) || defined(ESP_PLATFORM)
 #include <Arduino.h>     // micros()
-#include <esp_rom_sys.h> // esp_rom_printf -> USB-Serial-JTAG console (#2540)
 #endif
 
 namespace autoresearch {
@@ -162,42 +161,9 @@ inline Wave8ExpandResult measureWave8Expand(int iters_in = 30000) {
     return result;
 }
 
-/// Optional helper that prints the result via esp_rom_printf (reaches COM25
-/// on P4 today). Used only by the gated boot-time bridge; the RPC handler
-/// JSON-serializes the struct directly. Will be retired in favor of FL_PRINT
-/// once the routing in #2541 is fixed (see #2540).
-inline void printWave8ExpandResultRom(const Wave8ExpandResult &r) {
-    const fl::u64 iters64 = (r.iters > 0) ? r.iters : 1;
-
-    fl::u32 spd_byte = (r.expand_byte_us > 0)
-        ? static_cast<fl::u32>(static_cast<fl::u64>(r.expand_nibble_us) * 100 / r.expand_byte_us) : 0;
-    fl::u32 spd_batched = (r.expand_batched_us > 0)
-        ? static_cast<fl::u32>(static_cast<fl::u64>(r.expand_nibble_us) * 100 / r.expand_batched_us) : 0;
-    fl::u32 spd_t16 = (r.transpose16_byte_us > 0)
-        ? static_cast<fl::u32>(static_cast<fl::u64>(r.transpose16_nibble_us) * 100 / r.transpose16_byte_us) : 0;
-
-    fl::u32 expand_nib_frame = static_cast<fl::u32>(static_cast<fl::u64>(r.expand_nibble_us) * 768 / iters64);
-    fl::u32 expand_byte_frame = static_cast<fl::u32>(static_cast<fl::u64>(r.expand_byte_us) * 768 / iters64);
-    fl::u32 t16_nib_frame = static_cast<fl::u32>(static_cast<fl::u64>(r.transpose16_nibble_us) * 768 / iters64);
-    fl::u32 t16_byte_frame = static_cast<fl::u32>(static_cast<fl::u64>(r.transpose16_byte_us) * 768 / iters64);
-
-    esp_rom_printf("\nBENCH_EXPAND_START (issue #2526)\n");  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
-    esp_rom_printf("BENCH_EXPAND iters=%u sink=%u\n", r.iters, r.sink);  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
-    esp_rom_printf("BENCH_EXPAND expand_only_us  nibble=%u byte=%u batched=%u\n",  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
-                   r.expand_nibble_us, r.expand_byte_us, r.expand_batched_us);
-    esp_rom_printf("BENCH_EXPAND transpose16_us  nibble=%u byte=%u\n",  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
-                   r.transpose16_nibble_us, r.transpose16_byte_us);
-    esp_rom_printf("BENCH_EXPAND frame_equiv_us  expand_nibble=%u expand_byte=%u t16_nibble=%u t16_byte=%u\n",  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
-                   expand_nib_frame, expand_byte_frame, t16_nib_frame, t16_byte_frame);
-    esp_rom_printf("BENCH_EXPAND speedup_x100  expand=%u batched=%u transpose16=%u\n",  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
-                   spd_byte, spd_batched, spd_t16);
-    esp_rom_printf("BENCH_EXPAND_END\n\n");  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
-}
-
 #else // non-ESP32
 
 inline Wave8ExpandResult measureWave8Expand(int /*iters*/ = 30000) { return {}; }
-inline void printWave8ExpandResultRom(const Wave8ExpandResult & /*r*/) {}
 
 #endif
 

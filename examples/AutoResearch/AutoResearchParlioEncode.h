@@ -17,9 +17,9 @@
 ///      indicates the P4 L2 cache fully hides PSRAM latency for this access
 ///      pattern (×1.00 SRAM vs PSRAM); this rechecks on the byte-LUT version.
 ///
-/// Output: `BENCH_PARLIO_*` lines via `esp_rom_printf` -> USB-Serial-JTAG (COM25)
-/// so capture works without depending on the testSimd RPC routing (#2541).
 /// **Invocation:** RPC-only via `parlioEncodeBenchmark` in AutoResearchRemote.cpp.
+/// The result struct is JSON-serialized by the RPC handler; this header no
+/// longer prints directly.
 ///
 /// Current implementation times the production BF1 pipe4 encode path and skips
 /// PSRAM-only placements when PSRAM is not present.
@@ -38,7 +38,6 @@
 #if defined(ARDUINO_ARCH_ESP32) || defined(ESP_PLATFORM)
 #include <Arduino.h>     // micros()
 #include <esp_heap_caps.h>
-#include <esp_rom_sys.h> // esp_rom_printf -> USB-Serial-JTAG console
 #define FL_PARLIO_BENCH_ENABLED 1
 #else
 #define FL_PARLIO_BENCH_ENABLED 0
@@ -263,59 +262,9 @@ inline ParlioEncodeResult measureParlioEncode(int iters_in = 12000) {
     return result;
 }
 
-inline void printParlioEncodeResultRom(const ParlioEncodeResult &r) {
-    if (r.iters == 0) {
-        esp_rom_printf("\nBENCH_PARLIO_START (issue #2526 follow-up)\n");  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
-        esp_rom_printf("BENCH_PARLIO ERROR: heap allocation failed\n");  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
-        esp_rom_printf("BENCH_PARLIO_END\n\n");  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
-        return;
-    }
-
-    // Per-byte-position cost (microseconds * 1000 for sub-us precision)
-    const fl::u64 iters64 = r.iters;
-    const fl::u32 ss_ns_per = static_cast<fl::u32>(static_cast<fl::u64>(r.perpos_ss_us) * 1000 / iters64);
-    const fl::u32 sp_ns_per = static_cast<fl::u32>(static_cast<fl::u64>(r.perpos_sp_us) * 1000 / iters64);
-    const fl::u32 ps_ns_per = static_cast<fl::u32>(static_cast<fl::u64>(r.perpos_ps_us) * 1000 / iters64);
-    const fl::u32 pp_ns_per = static_cast<fl::u32>(static_cast<fl::u64>(r.perpos_pp_us) * 1000 / iters64);
-
-    // Frame-equivalent micros: production frame = 768 byte-positions.
-    const fl::u32 ss_frame_us = static_cast<fl::u32>(static_cast<fl::u64>(r.perpos_ss_us) * 768 / iters64);
-    const fl::u32 sp_frame_us = static_cast<fl::u32>(static_cast<fl::u64>(r.perpos_sp_us) * 768 / iters64);
-    const fl::u32 ps_frame_us = static_cast<fl::u32>(static_cast<fl::u64>(r.perpos_ps_us) * 768 / iters64);
-    const fl::u32 pp_frame_us = static_cast<fl::u32>(static_cast<fl::u64>(r.perpos_pp_us) * 768 / iters64);
-
-    // PSRAM-vs-SRAM ratio x100 (>100 means PSRAM is slower)
-    fl::u32 ratio_pp_ss_x100 = (r.perpos_ss_us > 0)
-        ? static_cast<fl::u32>(static_cast<fl::u64>(r.perpos_pp_us) * 100 / r.perpos_ss_us) : 0;
-    fl::u32 ratio_ps_ss_x100 = (r.perpos_ss_us > 0)
-        ? static_cast<fl::u32>(static_cast<fl::u64>(r.perpos_ps_us) * 100 / r.perpos_ss_us) : 0;
-    fl::u32 ratio_sp_ss_x100 = (r.perpos_ss_us > 0)
-        ? static_cast<fl::u32>(static_cast<fl::u64>(r.perpos_sp_us) * 100 / r.perpos_ss_us) : 0;
-
-    // WS2812B 800kHz, 16 lanes in parallel, 256 LEDs * 24 bits * 1.25 us/bit.
-    constexpr fl::u32 WS2812B_FRAME_US = 7680;
-
-    esp_rom_printf("\nBENCH_PARLIO_START (16 lanes x 256 LEDs, byte-LUT, #2526 follow-up)\n");  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
-    esp_rom_printf("BENCH_PARLIO iters=%u lanes=%u leds=%u sink=%u\n",  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
-                   r.iters, r.lanes, r.leds_per_lane, r.sink);
-    esp_rom_printf("BENCH_PARLIO psram scratch=%u output=%u\n",  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
-                   r.scratch_psram_ok ? 1u : 0u,
-                   r.output_psram_ok ? 1u : 0u);
-    esp_rom_printf("BENCH_PARLIO perpos_us  ss=%u sp=%u ps=%u pp=%u\n",  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
-                   r.perpos_ss_us, r.perpos_sp_us, r.perpos_ps_us, r.perpos_pp_us);
-    esp_rom_printf("BENCH_PARLIO perpos_ns_each  ss=%u sp=%u ps=%u pp=%u\n",  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
-                   ss_ns_per, sp_ns_per, ps_ns_per, pp_ns_per);
-    esp_rom_printf("BENCH_PARLIO frame_equiv_us  ss=%u sp=%u ps=%u pp=%u  ws2812b_tx=%u\n",  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
-                   ss_frame_us, sp_frame_us, ps_frame_us, pp_frame_us, WS2812B_FRAME_US);
-    esp_rom_printf("BENCH_PARLIO ratio_x100  sp_vs_ss=%u ps_vs_ss=%u pp_vs_ss=%u\n",  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
-                   ratio_sp_ss_x100, ratio_ps_ss_x100, ratio_pp_ss_x100);
-    esp_rom_printf("BENCH_PARLIO_END\n\n");  // ok esp_rom_printf - boot-time bench output to COM25 (#2541)
-}
-
 #else // !FL_PARLIO_BENCH_ENABLED
 
 inline ParlioEncodeResult measureParlioEncode(int /*iters*/ = 12000) { return {}; }
-inline void printParlioEncodeResultRom(const ParlioEncodeResult & /*r*/) {}
 
 #endif
 
