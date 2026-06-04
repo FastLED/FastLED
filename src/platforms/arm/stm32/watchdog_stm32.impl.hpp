@@ -17,6 +17,7 @@
 /// backup registers (`RTC->BKPxR`) for VBAT-backed power-cycle survival.
 
 #include "fl/wdt/watchdog.h"
+#include "platforms/arm/stm32/is_stm32.h"
 
 // IWYU pragma: begin_keep
 #include <IWatchdog.h>   // ok include — STM32duino bundled watchdog wrapper

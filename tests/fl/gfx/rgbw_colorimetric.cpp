@@ -877,10 +877,12 @@ inline DiodeProfile reference_profile() {
     p.xy_g[0] = 0.1379f; p.xy_g[1] = 0.7480f;
     p.xy_b[0] = 0.1295f; p.xy_b[1] = 0.0663f;
     p.xy_w[0] = 0.3299f; p.xy_w[1] = 0.3582f;
-    // Luminance ratios from MAX_Y / MAX_Y["W"] in the reference.
-    p.lum_r = 149.658631f / 1511.803150f;
-    p.lum_g = 563.961804f / 1511.803150f;
-    p.lum_b = 129.540105f / 1511.803150f;
+    // Luminance ratios from MAX_Y / MAX_Y["W"] in the reference. Values
+    // sourced from the testBenchRgbwProfile verification session published
+    // in issue #2730 (Sub-Gamut + LP_Legacy session CSVs).
+    p.lum_r = 154.670592f / 1543.643989f;
+    p.lum_g = 566.278306f / 1543.643989f;
+    p.lum_b = 129.649350f / 1543.643989f;
     p.lum_w = 1.0f;
     p.nominal_cct = 6500;
     p.input_xy_r[0] = 0.6400f;  p.input_xy_r[1] = 0.3300f;
