@@ -34,8 +34,8 @@
 #include "platforms/memory_barrier.h"
 
 #if defined(FL_IS_ESP32) && !defined(FASTLED_STUB_IMPL)
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
+#include "freertos/FreeRTOS.h"  // IWYU pragma: keep
+#include "freertos/task.h"      // IWYU pragma: keep
 #endif
 
 // Include ESP peripheral for factory function
