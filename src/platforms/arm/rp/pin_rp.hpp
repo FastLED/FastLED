@@ -115,7 +115,7 @@ inline u16 analogRead(int pin) FL_NOEXCEPT {
 /// PWM frequency is approximately 244 Hz (system clock / 65536).
 inline void analogWrite(int pin, u16 val) FL_NOEXCEPT {
     // Check if pin supports PWM
-    if (pin >= NUM_BANK0_GPIOS) {
+    if (pin >= static_cast<int>(NUM_BANK0_GPIOS)) {  // #2727 -Wsign-compare
         return;  // Invalid pin for PWM
     }
 
@@ -146,7 +146,7 @@ inline void analogWrite(int pin, u16 val) FL_NOEXCEPT {
 /// PWM frequency is approximately 1.9 Hz @ 125 MHz (system clock / 65536).
 inline void setPwm16(int pin, u16 val) FL_NOEXCEPT {
     // Check if pin supports PWM
-    if (pin >= NUM_BANK0_GPIOS) {
+    if (pin >= static_cast<int>(NUM_BANK0_GPIOS)) {  // #2727 -Wsign-compare
         return;  // Invalid pin for PWM
     }
 
@@ -228,7 +228,7 @@ inline bool needsPwmIsrFallback(int /*pin*/, u32 frequency_hz) {
 /// The PWM output is enabled when analogWrite() or setPwm16() is called.
 inline int setPwmFrequencyNative(int pin, u32 frequency_hz) FL_NOEXCEPT {
     // Validate pin
-    if (pin < 0 || pin >= NUM_BANK0_GPIOS) {
+    if (pin < 0 || pin >= static_cast<int>(NUM_BANK0_GPIOS)) {  // #2727 -Wsign-compare
         return -1;
     }
 
@@ -284,7 +284,7 @@ inline int setPwmFrequencyNative(int pin, u32 frequency_hz) FL_NOEXCEPT {
 /// @param pin GPIO pin number (0-29)
 /// @return Configured frequency in Hz, or 0 if not configured
 inline u32 getPwmFrequencyNative(int pin) FL_NOEXCEPT {
-    if (pin < 0 || pin >= NUM_BANK0_GPIOS) {
+    if (pin < 0 || pin >= static_cast<int>(NUM_BANK0_GPIOS)) {  // #2727 -Wsign-compare
         return 0;
     }
     Rp2040PwmFreq* table = rp_pwm_freq_table();

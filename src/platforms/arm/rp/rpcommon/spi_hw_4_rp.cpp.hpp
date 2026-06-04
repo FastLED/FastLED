@@ -87,6 +87,10 @@ static inline int add_spi_quad_pio_program(PIO pio) {
         .instructions = spi_quad_pio_instr,
         .length = sizeof(spi_quad_pio_instr) / sizeof(spi_quad_pio_instr[0]),
         .origin = -1,
+#if defined(PICO_SDK_VERSION_MAJOR) && PICO_SDK_VERSION_MAJOR >= 2
+        .pio_version = 0,
+        .used_gpio_ranges = 0,
+#endif
     };
 
     if (!pio_can_add_program(pio, &spi_quad_pio_program))
@@ -195,12 +199,16 @@ private:
     bool mTransactionActive;
     bool mInitialized;
 
-    // Configuration
+    // Configuration. Data1/2/3 are i8 so `-1` (the SpiHw4::Config sentinel
+    // for "lane unused") round-trips through the storage and the
+    // `if (mData[1-3]Pin >= 0)` lane-presence checks below work as intended.
+    // Previously these were `u8`, which made the >= 0 checks tautologies
+    // (-Wtype-limits) and silently kept all 4 lanes "active". #2727
     u8 mClockPin;
     u8 mData0Pin;
-    u8 mData1Pin;
-    u8 mData2Pin;
-    u8 mData3Pin;
+    i8 mData1Pin;
+    i8 mData2Pin;
+    i8 mData3Pin;
 
     SPIQuadRP2040(const SPIQuadRP2040&) = delete;
     SPIQuadRP2040& operator=(const SPIQuadRP2040&) = delete;
@@ -225,9 +233,9 @@ SPIQuadRP2040::SPIQuadRP2040(int bus_id, const char* name)
     , mInitialized(false)
     , mClockPin(0)
     , mData0Pin(0)
-    , mData1Pin(0)
-    , mData2Pin(0)
-    , mData3Pin(0) {
+    , mData1Pin(-1)
+    , mData2Pin(-1)
+    , mData3Pin(-1) {
 }
 
 SPIQuadRP2040::~SPIQuadRP2040() {

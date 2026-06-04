@@ -45,6 +45,15 @@ static inline int add_clockless_pio_program(PIO pio, int T1, int T2, int T3) FL_
         .instructions = clockless_pio_instr,
         .length = sizeof(clockless_pio_instr) / sizeof(clockless_pio_instr[0]),
         .origin = -1,
+#if defined(PICO_SDK_VERSION_MAJOR) && PICO_SDK_VERSION_MAJOR >= 2
+        // pico-sdk 2.x (RP2350) added these. Zero-init preserves the previous
+        // implicit behavior while silencing -Wmissing-field-initializers and
+        // documenting intent: no specific PIO version pinned, no GPIO range
+        // pre-claimed. Revisit if RP2350 SDK starts enforcing used_gpio_ranges
+        // at pio_add_program time. #2727
+        .pio_version = 0,
+        .used_gpio_ranges = 0,
+#endif
     };
     
     if (!pio_can_add_program(pio, &clockless_pio_program))
