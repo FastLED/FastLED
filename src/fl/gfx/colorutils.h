@@ -483,17 +483,26 @@ class TColorPalette {
 
     operator TColor *() FL_NOEXCEPT { return &(entries[0]); }
 
-    bool operator==(const TColorPalette &rhs) const FL_NOEXCEPT {
-        const TColor *lhs = &(this->entries[0]);
+    // Hidden friends — C++20 deprecates synthesizing a reversed candidate
+    // for member operator==, producing -Wambiguous-reversed-operator at every
+    // call site. Defining the comparison as a non-member friend declared
+    // inside the class body solves that cleanly (found only via ADL on the
+    // palette type, no reverse-candidate synthesis applies). Derived classes
+    // get these for free through ADL on the base, so the prior
+    // `using Base::operator==/!=` injections are no longer needed. #2724
+    friend bool operator==(const TColorPalette &lhs,
+                           const TColorPalette &rhs) FL_NOEXCEPT {
+        const TColor *lhs_entries = &(lhs.entries[0]);
         const TColor *rhs_entries = &(rhs.entries[0]);
-        if (lhs == rhs_entries) {
+        if (lhs_entries == rhs_entries) {
             return true;
         }
-        return fl::memcmp(lhs, rhs_entries, sizeof(entries)) == 0;
+        return fl::memcmp(lhs_entries, rhs_entries, sizeof(lhs.entries)) == 0;
     }
 
-    bool operator!=(const TColorPalette &rhs) const FL_NOEXCEPT {
-        return !(*this == rhs);
+    friend bool operator!=(const TColorPalette &lhs,
+                           const TColorPalette &rhs) FL_NOEXCEPT {
+        return !(lhs == rhs);
     }
 
   protected:
@@ -515,9 +524,9 @@ class TCRGBPalette : public TColorPalette<CRGB, Size> {
     using Base = TColorPalette<CRGB, Size>;
     using Base::Base;
     using Base::entries;
-    using Base::operator!=;
+    // operator== / operator!= are hidden friends on Base (#2724); they reach
+    // derived classes automatically via ADL, so no using-declaration needed.
     using Base::operator=;
-    using Base::operator==;
     using Base::operator[];
     using Base::operator CRGB*;
 
@@ -605,9 +614,9 @@ class CHSVPalette16 : public detail::TColorPalette<CHSV, 16> {
     using Base = detail::TColorPalette<CHSV, 16>;
     using Base::Base;
     using Base::entries;
-    using Base::operator!=;
+    // operator== / operator!= are hidden friends on Base (#2724); they reach
+    // derived classes automatically via ADL, so no using-declaration needed.
     using Base::operator=;
-    using Base::operator==;
     using Base::operator[];
     using Base::operator CHSV*;
 
@@ -641,9 +650,9 @@ class CHSVPalette256 : public detail::TColorPalette<CHSV, 256> {
     using Base = detail::TColorPalette<CHSV, 256>;
     using Base::Base;
     using Base::entries;
-    using Base::operator!=;
+    // operator== / operator!= are hidden friends on Base (#2724); they reach
+    // derived classes automatically via ADL, so no using-declaration needed.
     using Base::operator=;
-    using Base::operator==;
     using Base::operator[];
     using Base::operator CHSV*;
 
@@ -698,9 +707,9 @@ class CRGBPalette16 : public detail::TCRGBPalette<16> {
     using Base = detail::TCRGBPalette<16>;
     using Base::Base;
     using Base::entries;
-    using Base::operator!=;
+    // operator== / operator!= are hidden friends on Base (#2724); they reach
+    // derived classes automatically via ADL, so no using-declaration needed.
     using Base::operator=;
-    using Base::operator==;
     using Base::operator[];
     using Base::operator CRGB*;
 
@@ -918,9 +927,9 @@ class CHSVPalette32 : public detail::TColorPalette<CHSV, 32> {
     using Base = detail::TColorPalette<CHSV, 32>;
     using Base::Base;
     using Base::entries;
-    using Base::operator!=;
+    // operator== / operator!= are hidden friends on Base (#2724); they reach
+    // derived classes automatically via ADL, so no using-declaration needed.
     using Base::operator=;
-    using Base::operator==;
     using Base::operator[];
     using Base::operator CHSV*;
 
@@ -985,9 +994,9 @@ class CRGBPalette32 : public detail::TCRGBPalette<32> {
     using Base = detail::TCRGBPalette<32>;
     using Base::Base;
     using Base::entries;
-    using Base::operator!=;
+    // operator== / operator!= are hidden friends on Base (#2724); they reach
+    // derived classes automatically via ADL, so no using-declaration needed.
     using Base::operator=;
-    using Base::operator==;
     using Base::operator[];
     using Base::operator CRGB*;
 
@@ -1197,9 +1206,9 @@ class CRGBPalette256 : public detail::TCRGBPalette<256> {
     using Base = detail::TCRGBPalette<256>;
     using Base::Base;
     using Base::entries;
-    using Base::operator!=;
+    // operator== / operator!= are hidden friends on Base (#2724); they reach
+    // derived classes automatically via ADL, so no using-declaration needed.
     using Base::operator=;
-    using Base::operator==;
     using Base::operator[];
     using Base::operator CRGB*;
 
