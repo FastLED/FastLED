@@ -2,6 +2,9 @@ reviews:
   request_changes_workflow: true
   pre_merge_checks:
     enabled: true
+
+  # Per-path natural-language review instructions.
+  # See https://docs.coderabbit.ai/getting-started/configure-coderabbit
   path_instructions:
     - path: "src/platforms/*.impl.cpp.hpp"
       instructions: |
@@ -49,3 +52,56 @@ reviews:
         statics with non-trivial constructors (Teensy 3.x `__cxa_guard` conflict), or
         the `.cpp.hpp` / `.impl.hpp` content patterns. If function definitions are
         needed, they belong in `.cpp.hpp` or `.impl.hpp` files.
+    - path: "src/fl/**/*.h"
+      instructions: |
+        FastLED Public Settings Pattern (see agents/docs/cpp-standards.md):
+
+        Any NEW public free function in the fl:: namespace whose name matches
+        `^set_|^enable_|^disable_|^use_` AND that mutates library-wide /
+        global / namespace-scope state MUST also be exposed as a method on
+        the `CFastLED` god instance in `src/FastLED.h`.
+
+        The CFastLED method is a thin `inline` one-liner that delegates to
+        the fl:: free function — that is the canonical pattern. Exemplar:
+        `CFastLED::setPowerModel` (FastLED.h:1455) → `fl::set_power_model`.
+
+        Flag as HIGH severity when a PR adds a `fl::set_*` / `fl::enable_*` /
+        `fl::disable_*` / `fl::use_*` public declaration WITHOUT a matching
+        `CFastLED::setX()` wrapper in `src/FastLED.h`. The fix is to add the
+        wrapper in the same PR; the user-facing documented call site should
+        be `FastLED.setX(...)`, never `fl::set_x(...)`.
+
+        No grandfathered exceptions: every public global setter under
+        `fl::` must have a `CFastLED` wrapper. Functions added without one
+        — including bare `fl::set_input_gamut` (#2710) and any future
+        additions — must be wrapped in the same PR.
+
+        Does NOT apply to: helpers, constructors, factories, functions that
+        only mutate caller-owned objects (e.g. fl::fill_solid(span, color)),
+        per-object/per-strip configuration on the object's own API, or
+        anything under fl::detail:: / anonymous namespaces.
+
+    - path: "src/FastLED.h"
+      instructions: |
+        FastLED Public Settings Pattern (see agents/docs/cpp-standards.md):
+
+        New `CFastLED` methods that configure library-wide state SHOULD be
+        thin `inline` delegators to a free function in `fl::` namespace
+        (testability + ADL), not embed configuration logic inline.
+
+        Exemplar pattern (FastLED.h:1455):
+          inline void setPowerModel(const PowerModelRGB& m) {
+              set_power_model(m);
+          }
+
+        Flag CFastLED setters that embed non-trivial logic instead of
+        delegating to a fl:: free function.
+
+    - path: "src/fl/gfx/**"
+      instructions: |
+        Color / colorimetric profile setters that affect default behavior
+        for all strips (e.g. set_rgbw_colorimetric_profile, set_input_gamut)
+        MUST be wrapped on CFastLED per the Public Settings Pattern. If
+        adding such a function, also add the `FastLED.setX(...)` wrapper in
+        `src/FastLED.h` and document the god-instance form in the PR
+        description / examples.

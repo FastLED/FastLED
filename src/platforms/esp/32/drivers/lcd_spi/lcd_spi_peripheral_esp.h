@@ -102,6 +102,14 @@ class LcdSpiPeripheralEsp : public ILcdSpiPeripheral {
     volatile size_t mPendingTransmits;
     size_t mLastTransmitSize;
     LcdSpiOwnerDriver mOwner; ///< Tracks which driver owns the singleton (#2270).
+
+    // Latched errors from the FL_IRAM transmit path. transmit() may be called
+    // from ISR context (see ChannelDriverLcdClockless::isrChunkDone), so direct
+    // FL_WARN there is unsafe (LoggingInIramChecker forbids it). waitTransmitDone()
+    // drains and reports these in task context.
+    volatile bool mLastWaitForSlotTimeout;
+    volatile esp_err_t mLastPanelIoRecreateError;
+    volatile esp_err_t mLastTxColorError;
 };
 
 } // namespace detail

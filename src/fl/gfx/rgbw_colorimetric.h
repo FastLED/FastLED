@@ -142,6 +142,49 @@ inline bool build_source_matrix(const float xy_r[2], const float xy_g[2],
     return true;
 }
 
+// Native-gamut detection (#2748). Returns true when the source primaries
+// of `p` (input_xy_r/g/b) match the LED's measured primaries (xy_r/g/b)
+// within float tolerance — i.e. the user is feeding "native LED gamut"
+// drive coordinates rather than a foreign gamut like sRGB / Rec.2020.
+//
+// In native mode the strict sub-gamut solver MUST honor the reference
+// model's topology authority rules: single-channel and outer-edge (dual-
+// channel) inputs must round-trip back to the same single / dual channel
+// drive on the LED — no W bleed, no third-channel pull-in. Without this
+// guard, even pure (R, 0, 0) is routed through the [R, G, W] sub-gamut
+// inverse, which can drift due to white-point misalignment or numerical
+// boundary effects. See issue #2748 for the failing verifier rows.
+//
+// The W chromaticity (input_xy_w) is intentionally NOT compared: native
+// authority applies to topology (single / outer-edge) regardless of the
+// caller's target white. Different W targets only matter for full-3-
+// channel inputs, which fall through to the existing sub-gamut routing.
+inline bool is_native_input_gamut(const DiodeProfile& p) FL_NOEXCEPT {
+    constexpr float kPrimaryEps = 1e-6f;
+    auto close = [](const float a[2], const float b[2]) FL_NOEXCEPT {
+        const float dx = a[0] - b[0];
+        const float dy = a[1] - b[1];
+        return (dx * dx + dy * dy) < kPrimaryEps;
+    };
+    return close(p.input_xy_r, p.xy_r)
+        && close(p.input_xy_g, p.xy_g)
+        && close(p.input_xy_b, p.xy_b);
+}
+
+// Topology activity classifier (#2748). Counts how many of `s_r, s_g, s_b`
+// are above the LSB-level epsilon, so the strict solver can route 1- and
+// 2-channel inputs directly to the device's matching channels.
+inline int count_active_channels(float s_r, float s_g, float s_b) FL_NOEXCEPT {
+    // 1 / 65535 — matches the 16-bit verifier precision used in the
+    // reference math model; anything below this is below noise floor.
+    constexpr float kTopoEps = 1.0f / 65535.0f;
+    int n = 0;
+    if (s_r > kTopoEps) ++n;
+    if (s_g > kTopoEps) ++n;
+    if (s_b > kTopoEps) ++n;
+    return n;
+}
+
 // Non-negative least squares for the 3×3 sub-system M·t = b with t ≥ 0
 // (#2708, gist §3). Projected-gradient form matching the reference
 // `_nnls_solve` fallback used when scipy is unavailable: 500 iterations at

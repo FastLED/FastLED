@@ -1,1025 +1,96 @@
 #!/usr/bin/env python3
-"""Meson build configuration and setup management for FastLED."""
+"""Meson build configuration and setup orchestration for FastLED.
+
+This module is the public entry point for ``setup_meson_build`` and
+``perform_ninja_maintenance``. The bulk of the setup logic lives in dedicated
+helper modules:
+
+- ``ci.meson.native_launchers``: ctc-* native launcher resolution + zccache
+- ``ci.meson.path_normalization``: zccache strict-path normalization
+- ``ci.meson.meson_markers``: per-build marker files + AR optimization patches
+- ``ci.meson.meson_cleanup``: build artifact cleanup + LLVM tool detection
+- ``ci.meson.meson_setup_phases``: state detection helpers (hashes, markers, file changes)
+- ``ci.meson.meson_setup_execute``: execution helpers (compiler detect, native file, run setup)
+
+Names re-exported from this module are kept stable for external callers
+(``wasm_build``, ``test_runner``, regression tests).
+"""
 # pyright: reportMissingImports=false, reportUnknownVariableType=false
 
-import glob
-import json
 import os
-import platform
-import re
-import shutil
-import subprocess
 import sys
 import time
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, cast
 
 from running_process import RunningProcess
-from typeguard import typechecked
 
-from ci.meson.cache_utils import get_max_dir_mtime
-from ci.meson.compiler import (
-    check_meson_installed,
-    check_meson_version_compatibility,
-    get_compiler_version,
-    get_meson_executable,
-    get_meson_version,
+from ci.meson.compiler import check_meson_version_compatibility
+from ci.meson.meson_cleanup import (
+    CleanupResult,
+    cleanup_build_artifacts,
+    detect_system_llvm_tools,
 )
-from ci.meson.io_utils import atomic_write_text, write_if_different
-from ci.meson.output import print_banner, print_warning
-from ci.meson.test_discovery import get_source_files_hash, get_split_source_hashes
+from ci.meson.meson_markers import (
+    cleanup_stale_meson_lockfile,
+    inject_ar_optimization_patches,
+)
+from ci.meson.meson_setup_execute import (
+    build_meson_setup_cmd,
+    build_setup_env,
+    detect_compiler_and_cache,
+    handle_skip_meson_setup,
+    run_meson_setup_command,
+    write_meson_native_file,
+)
+from ci.meson.meson_setup_phases import (
+    MarkerPaths,
+    check_meson_build_modified,
+    check_obsolete_zig_wrappers,
+    check_reconfigure_markers,
+    compute_source_hashes,
+    detect_example_file_changes,
+    detect_test_file_changes,
+)
+from ci.meson.native_launchers import (
+    EmccNativeLaunchers,
+    FastNativeEntries,
+    WasmNativeEntries,
+    _ensure_emcc_native_launcher,
+    _find_zccache_binary,
+    get_zccache_version,
+    resolve_wasm_native_entries,
+)
+from ci.meson.path_normalization import (
+    _enforce_strict_path_violations,
+    find_strict_path_violations,
+    is_ar_content_preserving_active,
+    normalize_meson_private_include_paths,
+)
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 from ci.util.output_formatter import TimestampFormatter
 from ci.util.timestamp_print import ts_print as _ts_print
 
 
-@dataclass
-class CleanupResult:
-    """Result of build artifact cleanup operation."""
-
-    deleted: int
-    failed: int
-    failed_files: list[str]
-
-
-@dataclass(slots=True)
-class FastNativeEntries:
-    cc: Optional[str]
-    cxx: Optional[str]
-    ar: Optional[str]
-
-
-@typechecked
-@dataclass(slots=True)
-class EmccNativeLaunchers:
-    """Compiled emscripten-tool launcher paths produced by ``compile_native()``.
-
-    Every field is a guaranteed-present absolute path. ``compile_native()``
-    in clang-tool-chain 1.5.1+ produces all seven launchers in one call;
-    if any is missing afterward the resolver raises rather than silently
-    falling back. clang-tool-chain >=1.5.1 is pinned in pyproject.toml.
-    """
-
-    emcc: str
-    empp: str
-    emar: str
-    emstrip: str
-    emranlib: str
-    emnm: str
-    wasm_ld: str
-
-
-@typechecked
-@dataclass(slots=True)
-class WasmNativeEntries:
-    """Native tool entries for the WASM cross-file.
-
-    All fields are absolute paths to compiled ctc-* native launchers.
-    No Python-wrapper fallbacks — clang-tool-chain >=1.5.1 is a hard
-    requirement and ``compile_native()`` is invoked eagerly.
-
-    ``wasm_ld`` is not consumed by meson directly. emcc invokes wasm-ld
-    internally; the integration is via the ``EMCC_WASM_LD`` env var picked
-    up by the shared.py patch that ``ensure_emscripten_available`` applies.
-    Carried here so the build orchestration can set the env var.
-    """
-
-    c: str
-    cpp: str
-    ar: str
-    strip: str
-    ranlib: str
-    nm: str
-    wasm_ld: str
-
-
-def _native_launcher_output_dir(project_root: Path) -> Path:
-    """Directory where compiled native launchers live."""
-    return project_root / ".cached" / "clang-native"
-
-
-def _ensure_native_launcher(project_root: Path) -> tuple[Optional[str], Optional[str]]:
-    """
-    Ensure ctc-clang/ctc-clang++ native launchers are compiled.
-
-    The native launcher is a compiled C++ binary that replaces the Python
-    clang-tool-chain wrapper with near-zero startup overhead (~34ms vs ~1200ms).
-    It auto-detects the platform, finds the clang installation, and adds all
-    necessary flags (--target, --sysroot, -stdlib, includes, etc.) automatically.
-
-    Returns:
-        Tuple of (ctc_clang_path, ctc_clangpp_path), or (None, None) on failure.
-    """
-    output_dir = _native_launcher_output_dir(project_root)
-    exe_suffix = ".exe" if sys.platform == "win32" else ""
-    ctc_clang = output_dir / f"ctc-clang{exe_suffix}"
-    ctc_clangpp = output_dir / f"ctc-clang++{exe_suffix}"
-
-    if ctc_clang.exists() and ctc_clangpp.exists():
-        return str(ctc_clang), str(ctc_clangpp)
-
-    try:
-        from clang_tool_chain.commands.compile_native import compile_native
-
-        output_dir.mkdir(parents=True, exist_ok=True)
-        rc = compile_native(str(output_dir))
-        if rc == 0 and ctc_clang.exists() and ctc_clangpp.exists():
-            return str(ctc_clang), str(ctc_clangpp)
-    except KeyboardInterrupt as ki:
-        handle_keyboard_interrupt(ki)
-    except Exception:
-        pass
-    return None, None
-
-
-def _ensure_emcc_native_launcher(project_root: Path) -> EmccNativeLaunchers:
-    """
-    Build and return all seven WASM-related ctc-* native launcher paths.
-
-    ``compile_native()`` from clang-tool-chain 1.5.1+ produces every binary
-    in a single invocation (clang + emcc + wasm-ld + emtool family with all
-    its hardlinked aliases). If any binary is missing afterward, raises
-    RuntimeError — no Python-wrapper fallback. clang-tool-chain >=1.5.1 is
-    pinned in pyproject.toml so this is a hard requirement.
-
-    Raises:
-        RuntimeError: if ``compile_native()`` fails or any launcher binary
-            is missing after a successful build.
-    """
-    output_dir = _native_launcher_output_dir(project_root)
-    exe_suffix = ".exe" if sys.platform == "win32" else ""
-    binaries = {
-        "emcc": output_dir / f"ctc-emcc{exe_suffix}",
-        "empp": output_dir / f"ctc-em++{exe_suffix}",
-        "emar": output_dir / f"ctc-emar{exe_suffix}",
-        "emstrip": output_dir / f"ctc-emstrip{exe_suffix}",
-        "emranlib": output_dir / f"ctc-emranlib{exe_suffix}",
-        "emnm": output_dir / f"ctc-emnm{exe_suffix}",
-        "wasm_ld": output_dir / f"ctc-wasm-ld{exe_suffix}",
-    }
-
-    # Warm-path presence check: one os.scandir() enumerates the whole dir
-    # in ~10-20 ms; 7 individual Path.exists() calls cost ~30 ms each on
-    # Windows NTFS (~240 ms total). Set-membership lookups are O(1).
-    try:
-        present_names: set[str] = {entry.name for entry in os.scandir(output_dir)}
-    except OSError:
-        present_names = set()
-    all_present = all(p.name in present_names for p in binaries.values())
-
-    if not all_present:
-        from clang_tool_chain.commands.compile_native import compile_native
-
-        output_dir.mkdir(parents=True, exist_ok=True)
-        rc = compile_native(str(output_dir))
-        if rc != 0:
-            raise RuntimeError(
-                f"clang-tool-chain compile_native() failed with rc={rc} "
-                f"in {output_dir}; cannot resolve WASM native launchers"
-            )
-        missing = [name for name, p in binaries.items() if not p.exists()]
-        if missing:
-            raise RuntimeError(
-                f"clang-tool-chain compile_native() succeeded but expected "
-                f"binaries are missing in {output_dir}: {missing}. "
-                f"Ensure clang-tool-chain >=1.5.1 is installed."
-            )
-
-    return EmccNativeLaunchers(**{name: str(p) for name, p in binaries.items()})
-
-
-def resolve_wasm_native_entries(project_root: Path) -> WasmNativeEntries:
-    """
-    Resolve compiler/archiver entries for the Meson WASM cross-file.
-
-    Returns absolute paths to the seven compiled ctc-* native launchers.
-    No Python-wrapper fallback — if ``compile_native()`` fails or any
-    binary is missing, raises (clang-tool-chain >=1.5.1 is pinned and
-    guarantees all seven launchers).
-
-    Raises:
-        RuntimeError: if ``compile_native()`` fails or any binary is missing.
-    """
-    launchers = _ensure_emcc_native_launcher(project_root)
-    return WasmNativeEntries(
-        c=launchers.emcc,
-        cpp=launchers.empp,
-        ar=launchers.emar,
-        strip=launchers.emstrip,
-        ranlib=launchers.emranlib,
-        nm=launchers.emnm,
-        wasm_ld=launchers.wasm_ld,
-    )
-
-
-def _find_zccache_binary() -> Optional[str]:
-    """
-    Find the zccache binary for compiler caching.
-
-    zccache is a blazing-fast local compiler cache daemon (43x faster than
-    other caches on warm hits). It works as a drop-in compiler launcher prefix.
-
-    Search order:
-    1. Sibling zccache repo (../zccache/target/{release,debug}) — dev builds
-    2. PATH (via shutil.which)
-    3. Common cargo install locations
-
-    Returns:
-        Path to zccache binary, or None if not found.
-    """
-    suffix = (
-        ".exe"
-        if os.name == "nt" or sys.platform.startswith(("win", "msys", "cygwin"))
-        else ""
-    )
-
-    # Check project .venv first (installed release version)
-    repo_root = Path(__file__).resolve().parent.parent.parent  # ci/meson/ -> repo root
-    venv_candidate = (
-        repo_root
-        / ".venv"
-        / ("Scripts" if os.name == "nt" else "bin")
-        / f"zccache{suffix}"
-    )
-    if venv_candidate.is_file():
-        return str(venv_candidate)
-
-    # Check sibling zccache repo (pick most recently built binary)
-    sibling_zccache = repo_root.parent / "zccache"
-    best: Optional[Path] = None
-    best_mtime: float = 0
-    for profile in ("release", "debug"):
-        candidate = sibling_zccache / "target" / profile / f"zccache{suffix}"
-        if candidate.is_file():
-            mtime = candidate.stat().st_mtime
-            if mtime > best_mtime:
-                best = candidate
-                best_mtime = mtime
-    if best is not None:
-        return str(best)
-
-    # Check PATH
-    path_result = shutil.which("zccache")
-    if path_result:
-        return path_result
-
-    # Check common cargo bin locations
-    for candidate_home in [
-        os.environ.get("CARGO_HOME", ""),
-        os.path.join(os.path.expanduser("~"), ".cargo"),
-    ]:
-        if candidate_home:
-            candidate_path = os.path.join(candidate_home, "bin", f"zccache{suffix}")
-            if os.path.isfile(candidate_path):
-                return candidate_path
-
-    return None
-
-
-def get_zccache_version(zccache_path: Optional[str] = None) -> str:
-    """
-    Get zccache version string for cache invalidation.
-
-    When the zccache version changes, cached compilation artifacts may be
-    incompatible and require a full rebuild.
-
-    Args:
-        zccache_path: Path to zccache binary. If None, auto-detected.
-
-    Returns:
-        Version string (e.g., "zccache 1.0.3") or "" if not available.
-    """
-    if zccache_path is None:
-        zccache_path = _find_zccache_binary()
-    if not zccache_path:
-        return ""
-    try:
-        result = subprocess.run(
-            [zccache_path, "--version"],
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            timeout=10,
-        )
-        if result.returncode == 0:
-            return result.stdout.strip()
-        return ""
-    except KeyboardInterrupt as ki:
-        handle_keyboard_interrupt(ki)
-        raise
-    except Exception:
-        return ""
-
-
-def _resolve_fast_native_entries(
-    cache_binary: Optional[str],
-) -> FastNativeEntries:
-    """
-    Resolve native launcher binaries for the Meson native file.
-
-    Uses ctc-clang/ctc-clang++ native launchers which handle all platform-
-    specific flags automatically (--target, --sysroot, -stdlib, includes, etc.)
-    with near-zero startup overhead (~34ms vs ~1200ms for Python wrappers).
-
-    Args:
-        cache_binary: Path to compiler cache binary (zccache),
-            or None to disable caching.
-
-    Returns:
-        FastNativeEntries with cc, cxx, and ar entries for the native file,
-        or all-None fields if resolution fails (falls back to wrappers).
-    """
-    _none = FastNativeEntries(cc=None, cxx=None, ar=None)
-    try:
-        from clang_tool_chain.platform.paths import (
-            find_tool_binary,
-        )
-    except ImportError:
-        return _none
-
-    try:
-        ar_path = str(find_tool_binary("llvm-ar"))
-
-        project_root = Path(__file__).resolve().parent.parent.parent
-        ctc_c, ctc_cpp = _ensure_native_launcher(project_root)
-        if ctc_c is None or ctc_cpp is None:
-            return _none
-
-        def _make_entry(binary: str) -> str:
-            parts: list[str] = []
-            if cache_binary:
-                parts.append(f"'{cache_binary}'")
-            parts.append(f"'{binary}'")
-            return "[" + ", ".join(parts) + "]"
-
-        return FastNativeEntries(
-            cc=_make_entry(ctc_c),
-            cxx=_make_entry(ctc_cpp),
-            ar=f"['{ar_path}']",
-        )
-
-    except KeyboardInterrupt as ki:
-        handle_keyboard_interrupt(ki)
-        return _none  # unreachable, satisfies type checker
-    except Exception:
-        return _none
-
-
-def _resolve_fast_compiler_binary() -> Optional[str]:
-    """
-    Resolve raw clang++ binary path, bypassing the Python entry point wrapper.
-
-    The Python wrapper (clang-tool-chain-cpp.EXE) has ~3.6 second startup
-    overhead. Using the raw binary directly saves this overhead for operations
-    like --version checks.
-
-    Returns:
-        Path to raw clang++ binary, or None if resolution fails.
-    """
-    try:
-        from clang_tool_chain.platform.paths import find_tool_binary
-
-        return str(find_tool_binary("clang++"))
-    except KeyboardInterrupt as ki:
-        handle_keyboard_interrupt(ki)
-        return None  # unreachable, satisfies type checker
-    except Exception:
-        return None
-
-
-def is_ar_content_preserving_active(build_dir: Path) -> bool:
-    """
-    Check if the content-preserving archive optimization is active in build.ninja.
-
-    Returns True if both patches are present:
-    - ar_content_preserving.py wrapper in the STATIC_LINKER command
-    - restat = 1 in the STATIC_LINKER rule
-
-    When this returns True, the BuildOptimizer's DLL fingerprinting is redundant:
-    - ar_content_preserving.py prevents the DLL relink cascade at the source
-    - BuildOptimizer.touch_dlls_if_lib_unchanged() (~5-6s) is no longer needed
-    - BuildOptimizer.save_fingerprints() (~5-6s) is no longer needed
-    - Skipping BuildOptimizer saves ~10-12 seconds per build
-
-    Performance: Uses a module-level cache populated by inject_ar_optimization_patches().
-    When inject_ar_optimization_patches() was called earlier in the same process
-    (which setup_meson_build() does), this function returns immediately from the cache
-    without reading build.ninja (~2ms saved per call).
-
-    Args:
-        build_dir: Meson build directory containing build.ninja
-
-    Returns:
-        True if both ar_content_preserving.py and restat=1 patches are active
-    """
-    # Fast path: check module-level cache populated by inject_ar_optimization_patches().
-    # In the normal code path, setup_meson_build() always calls that function first,
-    # so we get a cache hit here and avoid the build.ninja read (~2ms).
-    build_dir_key = str(build_dir)
-    if build_dir_key in _ar_opt_status_cache:
-        return _ar_opt_status_cache[build_dir_key]
-
-    # Cache miss: read build.ninja and check directly
-    build_ninja = build_dir / "build.ninja"
-    if not build_ninja.exists():
-        return False
-    try:
-        content = build_ninja.read_text(encoding="utf-8")
-        result = "ar_content_preserving.py" in content and "restat = 1" in content
-        _ar_opt_status_cache[build_dir_key] = result
-        return result
-    except OSError:
-        return False
-
-
-# Module-level cache for ar optimization status.
-# Populated by inject_ar_optimization_patches() to avoid repeated build.ninja reads.
-# Key: str(build_dir), Value: bool (True if both patches active)
-_ar_opt_status_cache: dict[str, bool] = {}
-
-
-# Path-bearing compiler flag prefixes that zccache strict path mode validates
-# (issue #2378). All accept an attached path (``-Idir``, ``-isystemdir``, ...)
-# as Meson always emits a single attached token per flag. Order matters: longer
-# prefixes must come first so the regex alternation matches the longest form
-# (``-include-pch`` before ``-include``).
-_STRICT_PATH_FLAG_PREFIXES: tuple[str, ...] = (
-    "-include-pch",
-    "-iframework",
-    "-idirafter",
-    "-isystem",
-    "-imacros",
-    "-include",
-    "-iquote",
-    "-imsvc",
-    "-I",
-    "-F",
-    "/I",
-)
-
-# Path char class excludes ``-`` as the FIRST character so the regex does not
-# mis-match the bare ``"-include-pch"`` token by falling back to the ``-include``
-# alternative + consuming ``-pch`` as the path. Real include paths never begin
-# with a hyphen.
-_STRICT_PATH_FLAG_RE = re.compile(
-    r'(?P<prefix>(?<!\S)"?(?:'
-    + "|".join(re.escape(p) for p in _STRICT_PATH_FLAG_PREFIXES)
-    + r'))(?P<path>[^\s"\-][^\s"]*)(?P<suffix>"?)'
-)
-
-
-def _is_forward_slash_absolute(path: str) -> bool:
-    return path.startswith("/") or re.match(r"^[A-Za-z]:/", path) is not None
-
-
-def _has_dot_components(path: str) -> bool:
-    for part in path.split("/"):
-        if part in (".", ".."):
-            return True
-    return False
-
-
-def normalize_meson_private_include_paths(build_dir: Path) -> bool:
-    """Normalize Meson-emitted path flags for zccache strict path mode.
-
-    Issue #2378 — ``ZCCACHE_STRICT_PATHS=absolute`` rejects path-bearing
-    compiler flags (``-I``, ``-isystem``, ``-iquote``, ``-iframework``,
-    ``-idirafter``, ``-imsvc``, ``-include``, ``-include-pch``, ``-imacros``,
-    ``-F``, ``/I``) that are not absolute, forward-slash, and free of ``.``
-    or ``..`` components.
-
-    Meson emits attached single-token flags like ``"-Ici/meson/native"`` and
-    ``"-I..\\..\\src"`` from subdir and ``implicit_include_directories``
-    behavior; this function rewrites them to canonical absolute forward-slash
-    form in both ``build.ninja`` and ``compile_commands.json``.
-    """
-
-    changed_any = False
-
-    def _replacement(match: re.Match[str]) -> str:
-        prefix, raw_path, suffix = match.groups()
-        normalized = raw_path.replace("\\", "/")
-        if _is_forward_slash_absolute(normalized) and not _has_dot_components(
-            normalized
-        ):
-            absolute = normalized
-        else:
-            absolute = (build_dir / normalized).resolve().as_posix()
-        if absolute == raw_path:
-            return match.group(0)
-        return f"{prefix}{absolute}{suffix}"
-
-    def _normalize_text(content: str) -> str:
-        return _STRICT_PATH_FLAG_RE.sub(_replacement, content)
-
-    build_ninja = build_dir / "build.ninja"
-    if build_ninja.exists():
-        try:
-            content = build_ninja.read_text(encoding="utf-8")
-        except OSError as e:
-            raise RuntimeError(
-                f"Could not read {build_ninja} while normalizing Meson strict paths"
-            ) from e
-        else:
-            normalized = _normalize_text(content)
-            if normalized != content:
-                try:
-                    build_ninja.write_text(normalized, encoding="utf-8")
-                    changed_any = True
-                except OSError as e:
-                    raise RuntimeError(
-                        f"Could not write {build_ninja} after normalizing Meson strict paths"
-                    ) from e
-
-    compile_commands = build_dir / "compile_commands.json"
-    if compile_commands.exists():
-        try:
-            data = json.loads(compile_commands.read_text(encoding="utf-8"))
-        except OSError as e:
-            raise RuntimeError(
-                f"Could not read {compile_commands} while normalizing Meson strict paths"
-            ) from e
-        except json.JSONDecodeError as e:
-            raise RuntimeError(
-                f"Could not parse {compile_commands} while normalizing Meson strict paths"
-            ) from e
-        if isinstance(data, list):
-            changed_json = False
-            for entry in data:
-                if not isinstance(entry, dict):
-                    continue
-                entry_dict = cast(dict[str, object], entry)
-                command = entry_dict.get("command")
-                if not isinstance(command, str):
-                    continue
-                normalized = _normalize_text(command)
-                if normalized != command:
-                    entry_dict["command"] = normalized
-                    changed_json = True
-            if changed_json:
-                try:
-                    compile_commands.write_text(
-                        json.dumps(data, indent=2) + "\n",
-                        encoding="utf-8",
-                    )
-                    changed_any = True
-                except OSError as e:
-                    raise RuntimeError(
-                        f"Could not write {compile_commands} after normalizing Meson strict paths"
-                    ) from e
-
-    return changed_any
-
-
-def find_strict_path_violations(build_dir: Path) -> list[str]:
-    """Return human-readable strict-path violations in ``compile_commands.json``.
-
-    Issue #2378 — every ``-I`` / ``-isystem`` / ``-iquote`` / ``-iframework`` /
-    ``-idirafter`` / ``-imsvc`` / ``-include`` / ``-include-pch`` / ``-imacros``
-    / ``-F`` / ``/I`` path must be absolute, forward-slash, and free of ``.``
-    or ``..`` components. This is the same predicate enforced by
-    ``ZCCACHE_STRICT_PATHS=absolute`` at compile time; checking it ourselves
-    after meson setup lets us fail before ninja schedules any compile work.
-
-    Returns an empty list when the file is missing (a fresh tree) or clean.
-    """
-    cc_json = build_dir / "compile_commands.json"
-    if not cc_json.exists():
-        return []
-    try:
-        data = json.loads(cc_json.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return []
-    if not isinstance(data, list):
-        return []
-
-    violations: list[str] = []
-    for entry in data:
-        if not isinstance(entry, dict):
-            continue
-        entry_dict = cast(dict[str, object], entry)
-        command = entry_dict.get("command")
-        if not isinstance(command, str):
-            continue
-        for match in _STRICT_PATH_FLAG_RE.finditer(command):
-            raw = match.group("path")
-            normalized = raw.replace("\\", "/")
-            if "\\" in raw:
-                violations.append(f"{match.group('prefix').lstrip(chr(34))}{raw}")
-                continue
-            if not _is_forward_slash_absolute(normalized):
-                violations.append(f"{match.group('prefix').lstrip(chr(34))}{raw}")
-                continue
-            if _has_dot_components(normalized):
-                violations.append(f"{match.group('prefix').lstrip(chr(34))}{raw}")
-    return violations
-
-
-def _enforce_strict_path_violations(build_dir: Path) -> None:
-    """Raise loudly when ``compile_commands.json`` still has strict-path offenders.
-
-    The normalizer above is meant to leave no offenders behind; this is the
-    fail-fast guard for issue #2378's "validation step that checks generated
-    compile commands before CI compiles". Any violation here is a bug in the
-    normalizer or a new Meson code-path that emits unnormalized flags.
-    """
-    violations = find_strict_path_violations(build_dir)
-    if not violations:
-        return
-
-    sample = violations[:10]
-    extra = len(violations) - len(sample)
-    lines = [
-        f"[MESON] ZCCACHE_STRICT_PATHS=absolute would reject {len(violations)}"
-        " compile flag(s) in compile_commands.json (issue #2378):",
-    ]
-    lines.extend(f"  {flag}" for flag in sample)
-    if extra > 0:
-        lines.append(f"  ... {extra} more")
-    message = "\n".join(lines)
-    _ts_print(message, file=sys.stderr)
-    raise RuntimeError(message)
-
-
-def cleanup_stale_meson_lockfile(build_dir: Path) -> bool:
-    """Remove a stale ``meson-private/meson.lock`` left by a killed meson process.
-
-    On Windows, meson <= 1.10.x crashed cryptically in ``DirectoryLock.__enter__``
-    when the underlying lockfile open() raised an OSError (e.g., from a stale
-    lockfile left by a killed/abandoned meson process). meson 1.11.0 fixed the
-    crash itself, but the underlying cause — a stale ``meson-private/meson.lock``
-    file — still produces an avoidable setup failure on Windows. Deleting the
-    stale lockfile before invoking ``meson setup`` avoids the failure entirely.
-
-    Args:
-        build_dir: The meson build directory (parent of ``meson-private``).
-
-    Returns:
-        True if a stale lockfile was found and successfully removed, False
-        otherwise (including when no lockfile exists or removal failed).
-    """
-    # Stale lockfile cleanup is intended for the Windows DirectoryLock bug.
-    # On POSIX, meson uses fcntl/flock (advisory) — removing an in-use lockfile
-    # could let a concurrent meson setup bypass the intended lock.
-    if os.name != "nt":
-        return False
-
-    lockfile = build_dir / "meson-private" / "meson.lock"
-    if not lockfile.exists():
-        return False
-    try:
-        lockfile.unlink()
-        _ts_print(f"[MESON] Removed stale lockfile: {lockfile}")
-        return True
-    except KeyboardInterrupt as ki:
-        handle_keyboard_interrupt(ki)
-        raise
-    except OSError as e:
-        # Be tolerant of file-in-use errors on Windows — if removal fails, log
-        # and continue. The caller will hit the original OSError from meson,
-        # which is now visible thanks to the 1.11.0 bump.
-        _ts_print(f"[MESON] Warning: Could not remove stale lockfile {lockfile}: {e}")
-        return False
-
-
-def _write_configuration_markers(
-    *,
-    build_mode_marker: Path,
-    build_mode: str,
-    thin_archive_marker: Path,
-    use_thin_archives: bool,
-    debug_marker: Path,
-    debug: bool,
-    check_marker: Path,
-    check: bool,
-    source_files_marker: Path,
-    current_source_hash: str,
-    current_source_files: list[str],
-    src_files_marker: Path,
-    current_src_hash: str,
-    test_files_marker: Path,
-    current_test_hash: str,
-    compiler_version_marker: Path,
-    current_compiler_version: str,
-    zccache_version_marker: Optional[Path] = None,
-    current_zccache_version: Optional[str] = None,
-    enable_examples_marker: Optional[Path] = None,
-    enable_examples: Optional[bool] = None,
-    enable_unit_tests_marker: Optional[Path] = None,
-    enable_unit_tests: Optional[bool] = None,
-    only_missing: bool = False,
-    verb: str = "Saved",
-) -> None:
-    """Write configuration marker files for cache invalidation.
-
-    Args:
-        only_missing: If True, only write markers that don't exist yet (migration path).
-                      If False, write all markers unconditionally (after meson setup).
-        verb: Display verb for log messages ("Saved" or "Created").
-    """
-    markers: list[tuple[Path, str, str]] = [
-        (build_mode_marker, build_mode, f"build_mode: {build_mode}"),
-        (
-            thin_archive_marker,
-            str(use_thin_archives),
-            f"thin archive: {use_thin_archives}",
-        ),
-        (debug_marker, str(debug), f"debug: {debug}"),
-        (check_marker, str(check), f"check: {check}"),
-        (
-            compiler_version_marker,
-            current_compiler_version,
-            f"compiler version: {current_compiler_version}",
-        ),
-    ]
-
-    # Add optional zccache version marker
-    if zccache_version_marker is not None and current_zccache_version is not None:
-        markers.append(
-            (
-                zccache_version_marker,
-                current_zccache_version,
-                f"zccache version: {current_zccache_version}",
-            )
-        )
-
-    # Add optional enable_examples/enable_unit_tests markers
-    if enable_examples_marker is not None and enable_examples is not None:
-        markers.append(
-            (
-                enable_examples_marker,
-                str(enable_examples),
-                f"enable_examples: {enable_examples}",
-            )
-        )
-    if enable_unit_tests_marker is not None and enable_unit_tests is not None:
-        markers.append(
-            (
-                enable_unit_tests_marker,
-                str(enable_unit_tests),
-                f"enable_unit_tests: {enable_unit_tests}",
-            )
-        )
-
-    for marker_path, value, description in markers:
-        if only_missing and marker_path.exists():
-            continue
-        try:
-            atomic_write_text(marker_path, value)
-            _ts_print(f"[MESON] ✅ {verb} {description}")
-        except (OSError, IOError) as e:
-            _ts_print(f"[MESON] Warning: Could not write {marker_path.name}: {e}")
-
-    # Source files markers: write combined hash (backward compat) and split hashes
-    if current_source_hash:
-        if not only_missing or not source_files_marker.exists():
-            try:
-                atomic_write_text(source_files_marker, current_source_hash)
-                _ts_print(
-                    f"[MESON] ✅ {verb} source/test files hash ({len(current_source_files)} files)"
-                )
-            except (OSError, IOError) as e:
-                _ts_print(f"[MESON] Warning: Could not write source files marker: {e}")
-    # Write split markers for granular change detection
-    if current_src_hash:
-        if not only_missing or not src_files_marker.exists():
-            try:
-                atomic_write_text(src_files_marker, current_src_hash)
-            except (OSError, IOError):
-                pass
-    if current_test_hash:
-        if not only_missing or not test_files_marker.exists():
-            try:
-                atomic_write_text(test_files_marker, current_test_hash)
-            except (OSError, IOError):
-                pass
-
-
-def inject_ar_optimization_patches(build_dir: Path, source_dir: Path) -> bool:
-    """
-    Apply both ar optimization patches to build.ninja in a single read-modify-write.
-
-    Reads build.ninja only ONCE and writes at most ONCE.
-
-    Also populates _ar_opt_status_cache so that a subsequent call to
-    is_ar_content_preserving_active() can return from cache without reading
-    build.ninja a third time. This saves ~4ms per incremental build.
-
-    Patches applied:
-    1. ``restat = 1`` added to STATIC_LINKER rule (enables ninja cascade suppression)
-    2. ar_content_preserving.py wrapper prepended to STATIC_LINKER command
-
-    Args:
-        build_dir: Meson build directory containing build.ninja
-        source_dir: Project source root (parent of ci/)
-
-    Returns:
-        True if both patches are active after this call, False if not applicable
-    """
-    ar_wrapper_script = source_dir / "ci" / "meson" / "ar_content_preserving.py"
-    build_ninja_path = build_dir / "build.ninja"
-
-    if not ar_wrapper_script.exists() or not build_ninja_path.exists():
-        return False
-
-    try:
-        content = build_ninja_path.read_text(encoding="utf-8")
-    except OSError:
-        return False
-
-    if "rule STATIC_LINKER" not in content:
-        return False
-
-    # Idempotency check: if both patches already present, no write needed
-    has_ar_wrapper = ar_wrapper_script.name in content
-    has_restat = "restat = 1" in content
-
-    if has_ar_wrapper and has_restat:
-        _ar_opt_status_cache[str(build_dir)] = True
-        return True
-
-    # Need to apply one or both patches; find the STATIC_LINKER rule block
-    static_linker_pos = content.find("rule STATIC_LINKER")
-    if static_linker_pos == -1:
-        return False
-
-    rule_end = content.find("\n\n", static_linker_pos)
-    if rule_end == -1:
-        rule_end = len(content)
-
-    rule_text = content[static_linker_pos:rule_end]
-    new_rule_text = rule_text
-
-    # Patch 1: restat = 1 (enables ninja cascade suppression after archive)
-    if not has_restat:
-        description_line = " description = Linking static target $out"
-        if description_line in new_rule_text:
-            new_rule_text = new_rule_text.replace(
-                description_line,
-                description_line + "\n restat = 1",
-            )
-
-    # Patch 2: ar_content_preserving.py wrapper (preserves mtime when content unchanged)
-    if not has_ar_wrapper:
-        command_prefix = " command = "
-        if command_prefix in new_rule_text:
-            cmd_start = new_rule_text.find(command_prefix)
-            cmd_line_start = cmd_start + len(command_prefix)
-            cmd_line_end = new_rule_text.find("\n", cmd_line_start)
-            if cmd_line_end == -1:
-                cmd_line_end = len(new_rule_text)
-            original_cmd = new_rule_text[cmd_line_start:cmd_line_end]
-            if "$LINK_ARGS $out $in" in original_cmd:
-                python_exe = sys.executable
-                new_cmd = f'"{python_exe}" "{ar_wrapper_script}" {original_cmd}'
-                new_rule_text = (
-                    new_rule_text[:cmd_line_start]
-                    + new_cmd
-                    + new_rule_text[cmd_line_end:]
-                )
-
-    # Write modified content if anything changed (at most one write)
-    if new_rule_text != rule_text:
-        new_content = content[:static_linker_pos] + new_rule_text + content[rule_end:]
-        try:
-            build_ninja_path.write_text(new_content, encoding="utf-8")
-        except OSError:
-            _ar_opt_status_cache[str(build_dir)] = False
-            return False
-
-    # Verify both patches are now active and populate cache
-    patches_active = (
-        ar_wrapper_script.name in new_rule_text and "restat = 1" in new_rule_text
-    )
-    _ar_opt_status_cache[str(build_dir)] = patches_active
-    return patches_active
-
-
-def cleanup_build_artifacts(build_dir: Path, reason: str) -> dict[str, CleanupResult]:
-    """
-    Clean all build artifacts from a build directory.
-
-    This function centralizes all build artifact cleanup logic and provides
-    consistent failure tracking and reporting. It's designed to be called
-    when debug mode, build mode, or compiler version changes.
-
-    Args:
-        build_dir: Meson build directory to clean
-        reason: Human-readable reason for cleanup (e.g., "debug mode changed")
-
-    Returns:
-        Dictionary mapping artifact type to CleanupResult with deletion stats
-    """
-    _ts_print(f"[MESON] 🗑️  {reason} - cleaning all build artifacts")
-
-    # Artifact types with their file extensions
-    # Format: (display_name, list of glob patterns)
-    artifact_types: list[tuple[str, list[str]]] = [
-        ("object files", ["*.obj", "*.o"]),
-        ("static libraries", ["*.a"]),
-        ("executables", ["*.exe"]),
-        ("precompiled headers", ["*.pch"]),
-        ("Windows static libraries", ["*.lib"]),
-        ("Windows DLLs", ["*.dll"]),
-        ("Linux shared objects", ["*.so"]),
-        ("macOS dynamic libraries", ["*.dylib"]),
-    ]
-
-    results: dict[str, CleanupResult] = {}
-
-    for display_name, patterns in artifact_types:
-        deleted = 0
-        failed = 0
-        failed_files: list[str] = []
-
-        for pattern in patterns:
-            files = glob.glob(str(build_dir / "**" / pattern), recursive=True)
-            for file_path in files:
-                try:
-                    Path(file_path).unlink()
-                    deleted += 1
-                except (OSError, IOError) as e:
-                    failed += 1
-                    failed_files.append(f"{file_path}: {e}")
-
-        results[display_name] = CleanupResult(
-            deleted=deleted, failed=failed, failed_files=failed_files
-        )
-
-    # Build summary message
-    summary_parts: list[str] = []
-    total_failed = 0
-    for display_name, result in results.items():
-        if result.deleted > 0 or result.failed > 0:
-            summary_parts.append(f"{result.deleted} {display_name}")
-            total_failed += result.failed
-
-    if summary_parts:
-        _ts_print(f"[MESON] 🗑️  Deleted {', '.join(summary_parts)}")
-
-    # Report failures if any occurred
-    if total_failed > 0:
-        _ts_print(f"[MESON] ⚠️  Failed to delete {total_failed} files:")
-        for display_name, result in results.items():
-            for failed_file in result.failed_files[:5]:  # Limit to 5 per type
-                _ts_print(f"[MESON]     {failed_file}")
-            if len(result.failed_files) > 5:
-                _ts_print(
-                    f"[MESON]     ... and {len(result.failed_files) - 5} more {display_name}"
-                )
-
-    return results
-
-
-def detect_system_llvm_tools() -> tuple[bool, bool]:
-    """
-    Detect if system has LLD and LLVM-AR that support thin archives.
-
-    Returns:
-        Tuple of (has_lld, has_llvm_ar)
-    """
-    has_lld = False
-    has_llvm_ar = False
-
-    # Check for system lld
-    # Try 'lld' first (created by workflow symlink or available by default)
-    # Then try 'ld.lld' (Linux naming) as fallback
-    for lld_cmd in ["lld", "ld.lld"]:
-        try:
-            result = subprocess.run(
-                [lld_cmd, "--version"],
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                timeout=5,
-            )
-            if result.returncode == 0:
-                has_lld = True
-                break
-        except (subprocess.SubprocessError, FileNotFoundError):
-            continue
-
-    # Check for llvm-ar with thin archive support
-    # Try unversioned first, then common versioned variants (llvm-ar-20, llvm-ar-19, etc.)
-    for ar_cmd in ["llvm-ar", "llvm-ar-20", "llvm-ar-19", "llvm-ar-18"]:
-        try:
-            result = subprocess.run(
-                [ar_cmd, "--help"],
-                capture_output=True,
-                encoding="utf-8",
-                errors="replace",
-                timeout=5,
-            )
-            if result.returncode == 0 and "thin" in result.stdout.lower():
-                has_llvm_ar = True
-                break
-        except (subprocess.SubprocessError, FileNotFoundError):
-            continue
-
-    return has_lld, has_llvm_ar
+# Re-exported names — kept here so external callers don't break.
+__all__ = [
+    "CleanupResult",
+    "EmccNativeLaunchers",
+    "FastNativeEntries",
+    "WasmNativeEntries",
+    "_ensure_emcc_native_launcher",
+    "_find_zccache_binary",
+    "cleanup_build_artifacts",
+    "cleanup_stale_meson_lockfile",
+    "detect_system_llvm_tools",
+    "find_strict_path_violations",
+    "get_zccache_version",
+    "inject_ar_optimization_patches",
+    "is_ar_content_preserving_active",
+    "normalize_meson_private_include_paths",
+    "perform_ninja_maintenance",
+    "resolve_wasm_native_entries",
+    "setup_meson_build",
+]
 
 
 def setup_meson_build(
@@ -1028,7 +99,7 @@ def setup_meson_build(
     reconfigure: bool = False,
     debug: bool = False,
     check: bool = False,
-    build_mode: Optional[str] = None,
+    build_mode: "str | None" = None,
     verbose: bool = False,
     enable_examples: bool = True,
     enable_unit_tests: bool = True,
@@ -1053,28 +124,21 @@ def setup_meson_build(
     # Derive build_mode from debug flag if not explicitly provided
     if build_mode is None:
         build_mode = "debug" if debug else "quick"
-
-    # Ensure debug flag matches build_mode for consistency
     if build_mode == "debug":
         debug = True
     elif build_mode in ("quick", "release", "profile"):
         debug = False
-    # Create build directory if it doesn't exist
-    build_dir.mkdir(parents=True, exist_ok=True)
 
-    # Check if already configured
+    build_dir.mkdir(parents=True, exist_ok=True)
     meson_info = build_dir / "meson-info"
     already_configured = meson_info.exists()
 
     force_reconfigure = False
-    compiler_version_changed = False  # Track for late check after compiler detection
+    force_reconfigure_reason: "str | None" = None
+    compiler_version_changed = False
 
-    # ============================================================================
-    # CRITICAL: Check meson version compatibility BEFORE proceeding
-    # ============================================================================
-    # Meson 1.9.x and 1.10.x create INCOMPATIBLE build directories!
-    # A build directory created by one version cannot be used by another version.
-    # If we detect a version mismatch, auto-reconfigure (self-healing).
+    # CRITICAL: Meson 1.9.x and 1.10.x produce incompatible build directories.
+    # If we detect a mismatch, auto-heal by forcing reconfigure + artifact cleanup.
     if already_configured:
         is_compatible, compatibility_message = check_meson_version_compatibility(
             build_dir
@@ -1095,871 +159,102 @@ def setup_meson_build(
                 "[MESON] 🔧 Auto-fix: Forcing reconfiguration with current meson version"
             )
             _ts_print("=" * 80)
-            # Auto-heal: Force reconfigure instead of failing
             force_reconfigure = True
             force_reconfigure_reason = "meson version mismatch (auto-healing)"
-            # Clean build artifacts to ensure clean slate
             cleanup_build_artifacts(build_dir, "Meson version mismatch")
 
-    # ============================================================================
-    # THIN ARCHIVES: ENABLED FOR CLANG-TOOL-CHAIN
-    # ============================================================================
-    #
-    # Background:
-    # -----------
-    # Thin archives (created with `ar crT` or `ar --thin`) store only file paths
-    # instead of embedding object files directly. This provides significant benefits:
-    # - Faster archive creation (no file copying)
-    # - Smaller disk usage (object files not duplicated in archive)
-    # - Faster incremental builds (archive update is just path table change)
-    #
-    # What Are Thin Archives?
-    # -----------------------
-    # Regular archive:  [header][obj1_data][obj2_data][obj3_data]  (~50MB)
-    # Thin archive:     [header][path_to_obj1][path_to_obj2]...    (~50KB)
-    #
-    # Regular archives embed copies of all object files. Thin archives only
-    # store file paths and let the linker read objects from their original
-    # locations. This is safe because build systems control object lifetime.
-    #
-    # Current Implementation:
-    # -----------------------
-    # As of commit 6bbe2725e7, FastLED now uses clang-tool-chain instead of Zig.
-    # The clang-tool-chain package provides LLVM-based tools (clang, lld, llvm-ar)
-    # that fully support thin archives.
-    #
-    # Historical Context:
-    # -------------------
-    # Previously, thin archives were disabled because Zig's bundled linker (lld)
-    # did not support the thin archive format (!<thin> header). This caused link
-    # failures when llvm-ar created thin archives but Zig's lld tried to read them.
-    #
-    # With the migration to clang-tool-chain, all toolchain components (compiler,
-    # linker, archiver) are now from the same LLVM toolchain and fully support
-    # thin archives. There is no longer any compatibility issue.
-    #
-    # Benefits of Re-enabling:
-    # ------------------------
-    # ✓ Faster archive creation (~100-500ms saved for libfastled.a)
-    # ✓ Smaller disk usage (~50MB → ~50KB for libfastled.a, 99% reduction)
-    # ✓ Faster incremental builds (archive update is just path table change)
-    # ✓ No compatibility issues with clang-tool-chain's LLVM toolchain
-    #
-    # Configuration:
-    # --------------
-    # Thin archives are automatically enabled with clang-tool-chain.
-    # They can be manually disabled by setting FASTLED_DISABLE_THIN_ARCHIVES=1
-    # environment variable if needed for debugging or compatibility testing.
-    # ============================================================================
-
+    # Thin archives — enabled for clang-tool-chain LLVM toolchain; off via env var.
     disable_thin_archives = os.environ.get("FASTLED_DISABLE_THIN_ARCHIVES", "0") == "1"
-
-    # Enable thin archives for clang-tool-chain (LLVM-based toolchain)
-    # clang-tool-chain provides llvm-ar and lld that fully support thin archives
     use_thin_archives = not disable_thin_archives
-
-    # ============================================================================
-    # CRITICAL: Check if thin archive configuration has changed
-    # ============================================================================
-    # When Meson is configured, it caches the AR tool path and flags in its
-    # build files. If we previously configured with thin archives enabled but
-    # now have them disabled (or vice versa), we MUST reconfigure Meson.
-    # Otherwise, Meson will continue using the old AR tool/settings.
-    #
-    # We use a marker file to track the last successful thin archive setting.
-    # If it doesn't match the current setting, we force a reconfigure.
-    # ============================================================================
-    thin_archive_marker = build_dir / ".thin_archive_config"
-    source_files_marker = build_dir / ".source_files_hash"
-    src_files_marker = build_dir / ".src_files_hash"
-    test_files_marker = build_dir / ".test_files_hash"
-    debug_marker = build_dir / ".debug_config"
-    check_marker = build_dir / ".check_config"
-    build_mode_marker = build_dir / ".build_mode_config"
-    compiler_version_marker = build_dir / ".compiler_version_config"
-    zccache_version_marker = build_dir / ".zccache_version_config"
-    enable_examples_marker = build_dir / ".enable_examples_config"
-    enable_unit_tests_marker = build_dir / ".enable_unit_tests_config"
-
-    # Pre-compute directory max-mtimes once for all fast-path checks below.
-    # The tests/ directory is needed by BOTH:
-    #   1. The source hash fast-path (src/ + tests/ combined max mtime, ~line 543)
-    #   2. The test discovery fast-path (tests/ max mtime alone, ~line 786)
-    # Without precomputation, tests/ is walked TWICE (~50ms each on Windows = ~100ms wasted).
-    # By computing once here and reusing below, we save ~50ms per incremental build.
-    _max_tests_dir_mtime: float = get_max_dir_mtime(source_dir / "tests")
-
-    # Get current source file hashes (split: src/ and tests/ independently).
-    #
-    # Fast path: if markers are newer than every directory under their respective
-    # trees, no files have been added or removed → use cached hashes without
-    # performing an expensive rglob walk (~200-500ms on large trees).
-    #
-    # Rationale: adding/removing a file always updates the PARENT directory's mtime
-    # on NTFS, ext4, and APFS.  So checking directory mtimes is an O(#dirs) proxy
-    # for the O(#files) rglob.  On a cache hit the walk is skipped entirely; on a
-    # miss we fall back to the full rglob as before.
-    #
-    # Split hashes allow the reconfigure message to report exactly which directory
-    # changed (src/ vs tests/) instead of a generic "source/test files changed".
-    current_src_hash: str = ""
-    current_test_hash: str = ""
-    current_source_hash: str = ""  # combined, for backward-compat marker
-    current_source_files: list[str] = []
-
-    # Try fast-path for src/ hash
-    _max_src_dir_mtime = get_max_dir_mtime(source_dir / "src")
-    if src_files_marker.exists():
-        try:
-            _marker_mtime = src_files_marker.stat().st_mtime
-            if _max_src_dir_mtime <= _marker_mtime:
-                _cached = src_files_marker.read_text(encoding="utf-8").strip()
-                if _cached:
-                    current_src_hash = _cached
-        except OSError:
-            pass
-
-    # Try fast-path for tests/ hash
-    if test_files_marker.exists():
-        try:
-            _marker_mtime = test_files_marker.stat().st_mtime
-            if _max_tests_dir_mtime <= _marker_mtime:
-                _cached = test_files_marker.read_text(encoding="utf-8").strip()
-                if _cached:
-                    current_test_hash = _cached
-        except OSError:
-            pass
-
-    # Fall back to combined hash for backward-compat marker (.source_files_hash)
-    # Also populates split hashes if fast-path missed either one
-    if not current_src_hash or not current_test_hash:
-        _split = get_split_source_hashes(source_dir)
-        if not current_src_hash:
-            current_src_hash = _split.src_hash
-        if not current_test_hash:
-            current_test_hash = _split.tests_hash
-        current_source_files = sorted(_split.src_files + _split.test_files)
-
-    # Compute combined hash for the legacy .source_files_hash marker
-    if source_files_marker.exists():
-        try:
-            _marker_mtime = source_files_marker.stat().st_mtime
-            _max_combined = max(_max_src_dir_mtime, _max_tests_dir_mtime)
-            if _max_combined <= _marker_mtime:
-                _cached = source_files_marker.read_text(encoding="utf-8").strip()
-                if _cached:
-                    current_source_hash = _cached
-        except OSError:
-            pass
-    if not current_source_hash:
-        current_source_hash, current_source_files = get_source_files_hash(source_dir)
-
-    # ============================================================================
-    # CONSOLIDATED MARKER CHECKING
-    # ============================================================================
-    # Instead of printing multiple "forcing reconfigure" messages for each missing
-    # marker, we collect all reasons and print a single consolidated message.
-    # This reduces noise when switching build modes or on first run.
-    # ============================================================================
-    reconfigure_reasons: list[str] = []  # Collect reasons for reconfiguration
-    force_reconfigure_reason: Optional[str] = (
-        None  # Primary reason for forced reconfigure
-    )
-    debug_changed = False
-    build_mode_changed = False
-    last_build_mode: Optional[str] = None
-
-    if already_configured:
-        # ============================================================================
-        # SELF-HEALING: Check for corrupted introspection files marker
-        # ============================================================================
-        # When meson introspect fails due to missing intro-*.json files, the
-        # test discovery code creates this marker to trigger auto-healing.
-        # This typically happens when the build directory is partially created/deleted
-        # or meson setup was interrupted mid-execution.
-        # ============================================================================
-        intro_corruption_marker = build_dir / ".intro_corruption_detected"
-        if intro_corruption_marker.exists():
-            _ts_print("")
-            _ts_print("=" * 80)
-            _ts_print(
-                "[MESON] ⚠️  INTROSPECTION FILE CORRUPTION DETECTED - AUTO-HEALING"
-            )
-            _ts_print("=" * 80)
-            _ts_print("[MESON] Corruption marker detected (created by test discovery)")
-            _ts_print("[MESON]")
-            _ts_print(
-                "[MESON] The build directory has corrupted or missing intro-*.json files."
-            )
-            _ts_print(
-                "[MESON] These files are required for Meson introspection (test discovery, etc)."
-            )
-            _ts_print("[MESON]")
-            _ts_print(
-                "[MESON] 🔧 Auto-fix: Forcing reconfiguration to regenerate intro files"
-            )
-            _ts_print("=" * 80)
-            _ts_print("")
-
-            # Delete the marker file so we don't reconfigure repeatedly
-            try:
-                intro_corruption_marker.unlink()
-                _ts_print("[MESON] ✅ Removed corruption marker")
-            except (OSError, IOError) as e:
-                _ts_print(f"[MESON] Warning: Could not remove corruption marker: {e}")
-
-            # Force reconfigure
-            force_reconfigure = True
-            force_reconfigure_reason = "introspection files corrupted (auto-healing)"
-            reconfigure_reasons.append("introspection files corrupted")
-
-            # Continue to other marker checks (they might also need attention)
-
-        # Check if thin archive setting has changed since last configure
-        if thin_archive_marker.exists():
-            try:
-                last_thin_setting = thin_archive_marker.read_text().strip() == "True"
-                if last_thin_setting != use_thin_archives:
-                    reconfigure_reasons.append(
-                        f"thin archive changed: {last_thin_setting} → {use_thin_archives}"
-                    )
-            except (OSError, IOError):
-                reconfigure_reasons.append("thin archive marker unreadable")
-        else:
-            reconfigure_reasons.append("thin archive marker missing")
-
-        # Check if source/test files have changed since last configure
-        # This detects when files are added or removed, which requires reconfigure
-        # CRITICAL: Test file tracking ensures organize_tests.py runs with current file list
-        # Split check: report exactly which directory changed (src/ vs tests/)
-        _src_changed = False
-        _test_changed = False
-        if current_src_hash:
-            if src_files_marker.exists():
-                try:
-                    if src_files_marker.read_text().strip() != current_src_hash:
-                        _src_changed = True
-                except (OSError, IOError):
-                    _src_changed = True
-            else:
-                _src_changed = True
-        if current_test_hash:
-            if test_files_marker.exists():
-                try:
-                    if test_files_marker.read_text().strip() != current_test_hash:
-                        _test_changed = True
-                except (OSError, IOError):
-                    _test_changed = True
-            else:
-                _test_changed = True
-        # Fall back to combined hash if split markers don't exist yet
-        if not _src_changed and not _test_changed and current_source_hash:
-            if source_files_marker.exists():
-                try:
-                    last_hash = source_files_marker.read_text().strip()
-                    if last_hash != current_source_hash:
-                        _src_changed = True  # can't tell which, assume both
-                        _test_changed = True
-                except (OSError, IOError):
-                    _src_changed = True
-                    _test_changed = True
-            else:
-                _src_changed = True
-                _test_changed = True
-        if _src_changed and _test_changed:
-            reconfigure_reasons.append("source and test files changed")
-        elif _src_changed:
-            reconfigure_reasons.append("source files changed (src/)")
-        elif _test_changed:
-            reconfigure_reasons.append("test files changed (tests/)")
-
-        # Check if debug mode setting has changed since last configure
-        # This is critical because debug mode changes compiler flags (sanitizers, optimization)
-        # Using old object files with different flags causes linker errors
-        # CRITICAL: When debug mode changes, we must delete all object files and archives
-        # because they were compiled with different sanitizer/optimization flags
-        if debug_marker.exists():
-            try:
-                last_debug_setting = debug_marker.read_text().strip() == "True"
-                if last_debug_setting != debug:
-                    reconfigure_reasons.append(
-                        f"debug mode changed: {last_debug_setting} → {debug}"
-                    )
-                    debug_changed = True
-            except (OSError, IOError):
-                reconfigure_reasons.append("debug marker unreadable")
-        else:
-            reconfigure_reasons.append("debug marker missing")
-
-        # Check if IWYU check setting has changed since last configure
-        # When check mode changes, we must reconfigure to update the C++ compiler wrapper
-        if check_marker.exists():
-            try:
-                last_check_setting = check_marker.read_text().strip() == "True"
-                if last_check_setting != check:
-                    reconfigure_reasons.append(
-                        f"IWYU check mode changed: {last_check_setting} → {check}"
-                    )
-            except (OSError, IOError):
-                reconfigure_reasons.append("check marker unreadable")
-        else:
-            reconfigure_reasons.append("check marker missing")
-
-        # Check if build_mode setting has changed since last configure
-        # CRITICAL: This detects quick <-> release transitions which both have debug=False
-        # but have different optimization flags (-O0 vs -O3)
-        # When build_mode changes, we must clean objects to avoid mixing different compiler flags
-        if build_mode_marker.exists():
-            try:
-                last_build_mode = build_mode_marker.read_text().strip()
-                if last_build_mode != build_mode:
-                    reconfigure_reasons.append(
-                        f"build mode changed: {last_build_mode} → {build_mode}"
-                    )
-                    build_mode_changed = True
-            except (OSError, IOError):
-                reconfigure_reasons.append("build_mode marker unreadable")
-        else:
-            reconfigure_reasons.append("build_mode marker missing")
-
-        # Check if enable_examples setting has changed since last configure
-        if enable_examples_marker.exists():
-            try:
-                last_enable_examples = (
-                    enable_examples_marker.read_text().strip() == "True"
-                )
-                if last_enable_examples != enable_examples:
-                    reconfigure_reasons.append(
-                        f"enable_examples changed: {last_enable_examples} → {enable_examples}"
-                    )
-            except (OSError, IOError):
-                reconfigure_reasons.append("enable_examples marker unreadable")
-
-        # Check if enable_unit_tests setting has changed since last configure
-        if enable_unit_tests_marker.exists():
-            try:
-                last_enable_unit_tests = (
-                    enable_unit_tests_marker.read_text().strip() == "True"
-                )
-                if last_enable_unit_tests != enable_unit_tests:
-                    reconfigure_reasons.append(
-                        f"enable_unit_tests changed: {last_enable_unit_tests} → {enable_unit_tests}"
-                    )
-            except (OSError, IOError):
-                reconfigure_reasons.append("enable_unit_tests marker unreadable")
-
-        # Print consolidated reconfigure message if there are any reasons
-        if reconfigure_reasons:
-            force_reconfigure = True
-            force_reconfigure_reason = "configuration markers changed"
-            # For missing markers (common case on first run), use a simpler message
-            missing_markers = [r for r in reconfigure_reasons if "missing" in r]
-            changed_settings = [
-                r
-                for r in reconfigure_reasons
-                if "missing" not in r and "unreadable" not in r
-            ]
-            unreadable_markers = [r for r in reconfigure_reasons if "unreadable" in r]
-
-            if missing_markers and not changed_settings and not unreadable_markers:
-                # All reasons are just missing markers - common on first run or mode switch
-                num_missing = len(missing_markers)
-                _ts_print(
-                    f"[MESON] ℹ️  Build directory needs configuration ({num_missing} marker files missing)"
-                )
-            else:
-                # Mix of reasons - show details
-                _ts_print("[MESON] 🔄 Reconfiguration required:")
-                for reason in reconfigure_reasons:
-                    _ts_print(f"[MESON]     - {reason}")
-
-        # CRITICAL: Delete all object files and archives when debug mode changes
-        # Object files compiled with sanitizers cannot be linked without sanitizer runtime
-        # We must force a complete rebuild with the new compiler flags
-        if debug_changed:
-            cleanup_build_artifacts(build_dir, "Debug mode changed")
-
-        # CRITICAL: Delete all object files and archives when build_mode changes
-        # Object files compiled with different optimization flags cannot be safely mixed
-        # E.g., -O0 vs -O3 produces incompatible object code
-        # Note: last_build_mode is guaranteed to be set if build_mode_changed is True
-        if build_mode_changed:
-            cleanup_build_artifacts(
-                build_dir, f"Build mode changed ({last_build_mode} → {build_mode})"
-            )
-
-    # Check if any meson.build files are newer than build.ninja (requires reconfigure)
-    build_ninja_path = build_dir / "build.ninja"
-    meson_build_modified = False
-    if already_configured and build_ninja_path.exists():
-        try:
-            build_ninja_mtime = build_ninja_path.stat().st_mtime
-            # Check all meson.build files (root + subdirs)
-            meson_build_files = [
-                source_dir / "meson.build",
-                source_dir / "tests" / "meson.build",
-                source_dir / "examples" / "meson.build",
-            ]
-            for meson_file in meson_build_files:
-                if meson_file.exists():
-                    meson_file_mtime = meson_file.stat().st_mtime
-                    if meson_file_mtime > build_ninja_mtime:
-                        _ts_print(
-                            f"[MESON] ⚠️  Detected modified meson.build: {meson_file.relative_to(source_dir)}"
-                        )
-                        _ts_print(
-                            f"[MESON]     File mtime: {meson_file_mtime:.6f} > build.ninja mtime: {build_ninja_mtime:.6f}"
-                        )
-                        meson_build_modified = True
-                        break
-        except (OSError, IOError) as e:
-            _ts_print(f"[MESON] Warning: Could not check meson.build timestamps: {e}")
-            # If we can't check, assume modification to be safe
-            meson_build_modified = True
-
-    # Force reconfigure if meson.build files were modified
-    # Note: The detection message is already printed above, no need for duplicate
-    if meson_build_modified:
-        force_reconfigure = True
-        force_reconfigure_reason = "meson.build modified"
-
-    # Check if test files have been added or removed (requires reconfigure)
-    # This ensures Meson discovers new tests and removes deleted tests
-    #
-    # Fast path: if test_list_cache.txt is newer than every directory in tests/,
-    # no test files have been added or removed → skip the expensive importlib
-    # loading + rglob discovery entirely (~100-200ms savings on cache hit).
-    _test_list_cache_path = build_dir / "test_list_cache.txt"
-    _skip_test_discovery = False
-    if _test_list_cache_path.exists():
-        try:
-            _tlc_mtime = _test_list_cache_path.stat().st_mtime
-            if (
-                _max_tests_dir_mtime <= _tlc_mtime
-            ):  # reuse precomputed value (no 2nd walk)
-                _skip_test_discovery = True  # dirs unchanged → cache still valid
-        except OSError:
-            pass  # Fall through to full discovery on any error
-
-    test_files_changed = False
-    if already_configured and not _skip_test_discovery:
-        try:
-            # Import test discovery functions from tests/ directory
-            # Uses importlib since tests/ is not a Python package
-            import importlib.util
-
-            tests_py_path = source_dir / "tests"
-
-            spec_dt = importlib.util.spec_from_file_location(
-                "discover_tests", tests_py_path / "discover_tests.py"
-            )
-            assert spec_dt is not None and spec_dt.loader is not None
-            mod_dt = importlib.util.module_from_spec(spec_dt)
-            spec_dt.loader.exec_module(mod_dt)
-            discover_test_files = mod_dt.discover_test_files
-
-            spec_tc = importlib.util.spec_from_file_location(
-                "test_config", tests_py_path / "test_config.py"
-            )
-            assert spec_tc is not None and spec_tc.loader is not None
-            mod_tc = importlib.util.module_from_spec(spec_tc)
-            spec_tc.loader.exec_module(mod_tc)
-            EXCLUDED_TEST_FILES = mod_tc.EXCLUDED_TEST_FILES
-            EXCLUDED_TEST_DIRS = mod_tc.EXCLUDED_TEST_DIRS
-
-            # Get current test files
-            tests_dir = source_dir / "tests"
-            current_test_files: list[str] = sorted(
-                discover_test_files(tests_dir, EXCLUDED_TEST_FILES, EXCLUDED_TEST_DIRS)
-            )
-
-            # Check cached test file list
-            # NOTE: We use try-except instead of exists() check to avoid TOCTOU race condition
-            # This is more robust when multiple builds could run concurrently
-            test_list_cache = build_dir / "test_list_cache.txt"
-            cached_test_files: list[str] = []
-            try:
-                with open(test_list_cache, "r") as f:
-                    cached_test_files = [
-                        line.strip()
-                        for line in f
-                        if line.strip() and not line.startswith("#")
-                    ]
-            except FileNotFoundError:
-                # File doesn't exist yet - treat as empty cache
-                cached_test_files = []
-            except (IOError, OSError) as e:
-                # Corrupted or inaccessible - treat as stale
-                _ts_print(f"[MESON] Warning: Could not read test cache: {e}")
-                cached_test_files = []
-
-            # Compare lists
-            if current_test_files != cached_test_files:
-                # Determine what changed
-                added: set[str] = set(current_test_files) - set(cached_test_files)
-                removed: set[str] = set(cached_test_files) - set(current_test_files)
-
-                print_warning("[MESON] ⚠️  Detected test file changes:")
-                if added:
-                    added_list = sorted(added)
-                    if len(added_list) > 10:
-                        # Summarize long lists
-                        print_warning(
-                            f"[MESON]     Added: {len(added_list)} test files"
-                        )
-                        print_warning(
-                            f"[MESON]     (First 10: {', '.join(added_list[:10])}...)"
-                        )
-                    else:
-                        print_warning(f"[MESON]     Added: {', '.join(added_list)}")
-                if removed:
-                    removed_list = sorted(removed)
-                    if len(removed_list) > 10:
-                        print_warning(
-                            f"[MESON]     Removed: {len(removed_list)} test files"
-                        )
-                        print_warning(
-                            f"[MESON]     (First 10: {', '.join(removed_list[:10])}...)"
-                        )
-                    else:
-                        print_warning(f"[MESON]     Removed: {', '.join(removed_list)}")
-
-                test_files_changed = True
-
-                # Update cache atomically using temp file + rename pattern
-                # This prevents torn reads if another process is reading the cache
-                temp_cache = test_list_cache.with_suffix(".tmp")
-                try:
-                    with open(temp_cache, "w") as f:
-                        f.write(
-                            "# Auto-generated test file list cache for Meson reconfiguration\n"
-                        )
-                        f.write(f"# Total tests: {len(current_test_files)}\n")
-                        f.write("# Generated by meson_runner.py\n\n")
-                        for test_file in current_test_files:
-                            f.write(f"{test_file}\n")
-                    # Atomic rename - either completes fully or not at all
-                    temp_cache.replace(test_list_cache)
-                except (OSError, IOError) as e:
-                    _ts_print(
-                        f"[MESON] Warning: Could not update test cache atomically: {e}"
-                    )
-                    # Clean up temp file if it exists
-                    try:
-                        temp_cache.unlink()
-                    except (OSError, IOError):
-                        pass
-            else:
-                # No test file changes detected.
-                # Touch the cache to update its mtime so that the directory-mtime
-                # fast-path can activate on the NEXT run (skipping this discovery).
-                # Without this, the cache stays old and fast-path never fires.
-                try:
-                    test_list_cache.touch()
-                except OSError:
-                    pass  # Non-critical - fast-path just won't fire next run
-
-        except KeyboardInterrupt as ki:
-            handle_keyboard_interrupt(ki)
-            raise
-        except Exception as e:
-            _ts_print(f"[MESON] Warning: Could not check test file changes: {e}")
-            # On error, assume files may have changed to be safe
-            test_files_changed = True
-
-    # Force reconfigure if test files were added or removed
-    # Note: The detection message is already printed above, no need for duplicate
-    if test_files_changed:
-        force_reconfigure = True
-        force_reconfigure_reason = "test files changed"
-
-    # Check if example files have changed (added, removed, or filter annotations modified)
-    # This ensures Meson picks up new examples and respects @filter changes in .ino files
-    example_files_changed = False
-    if already_configured:
-        try:
-            from ci.meson.example_metadata_cache import compute_example_files_hash
-
-            examples_dir = source_dir / "examples"
-            # Cache file location matches where meson.current_build_dir() writes it
-            # in examples/meson.build: .build/meson-quick/examples/example_metadata.cache
-            example_cache_file = build_dir / "examples" / "example_metadata.cache"
-
-            if examples_dir.exists():
-                # Mtime fast-path: if example_cache_file is newer than all directories
-                # in examples/, no files have been added or removed since the last meson
-                # setup → skip the expensive 3-pass rglob + stat() + SHA256 computation.
-                #
-                # Rationale: adding or removing a file always updates the PARENT
-                # directory's mtime on NTFS, ext4, and APFS.  Checking only directory
-                # mtimes is an O(#dirs) proxy for structural changes (~5ms vs ~100ms).
-                #
-                # Limitation: in-place file content modifications update the FILE mtime
-                # but NOT the parent directory mtime, so they will not be detected by
-                # this fast-path.  This is acceptable because modifying existing example
-                # content without adding/removing files is a rare developer activity,
-                # and the next structural change will trigger reconfiguration anyway.
-                _skip_example_hash = False
-                if example_cache_file.exists():
-                    try:
-                        _cache_mtime = example_cache_file.stat().st_mtime
-                        _max_example_dir_mtime = get_max_dir_mtime(examples_dir)
-                        if _max_example_dir_mtime <= _cache_mtime:
-                            _skip_example_hash = True  # No structural changes detected
-                    except OSError:
-                        pass  # Fall through to full hash computation
-
-                if not _skip_example_hash:
-                    current_example_hash = compute_example_files_hash(examples_dir)
-
-                    # Check cached example hash
-                    cached_example_hash = ""
-                    if example_cache_file.exists():
-                        try:
-                            with open(example_cache_file, "r") as f:
-                                cache_data = json.load(f)
-                            cached_example_hash = cache_data.get("hash", "")
-                        except KeyboardInterrupt as ki:
-                            handle_keyboard_interrupt(ki)
-                        except Exception:
-                            cached_example_hash = ""
-
-                    if current_example_hash != cached_example_hash:
-                        print_warning(
-                            "[MESON] \u26a0\ufe0f  Detected example file changes (files added/removed/modified)"
-                        )
-                        example_files_changed = True
-                        # Delete the stale cache so meson.build re-runs discovery
-                        if example_cache_file.exists():
-                            try:
-                                example_cache_file.unlink()
-                            except OSError:
-                                pass
-
-        except KeyboardInterrupt as ki:
-            handle_keyboard_interrupt(ki)
-            raise
-        except Exception as e:
-            _ts_print(f"[MESON] Warning: Could not check example file changes: {e}")
-            example_files_changed = True
-
-    # Force reconfigure if example files changed
-    if example_files_changed:
-        force_reconfigure = True
-        force_reconfigure_reason = "example files changed"
-
-    # Determine if we need to run meson setup/reconfigure
-    # We skip meson setup only if already configured, not explicitly reconfiguring,
-    # AND thin archive/source file settings haven't changed
-    skip_meson_setup = already_configured and not reconfigure and not force_reconfigure
-
-    # Declare native file path early (needed for meson commands)
-    # The native file will be generated later after tool detection
-    native_file_path = build_dir / "meson_native.txt"
-
-    cmd: Optional[list[str]] = None
-    if skip_meson_setup:
-        # Build already configured, check wrappers below (message consolidated below)
-        pass
-    elif already_configured and (reconfigure or force_reconfigure):
-        # Reconfigure existing build (explicitly requested or forced by config change)
-        if force_reconfigure and force_reconfigure_reason:
-            reason = force_reconfigure_reason
-        elif force_reconfigure:
-            reason = "configuration changed"
-        else:
-            reason = "explicitly requested"
-        _ts_print(f"[MESON] Reconfiguring build directory ({reason}): {build_dir}")
-        cmd = [
-            get_meson_executable(),
-            "setup",
-            "--reconfigure",
-            "--native-file",
-            str(native_file_path),
-            str(build_dir),
-        ]
-        # Always pass explicit build_mode to ensure meson uses correct optimization flags
-        cmd.extend([f"-Dbuild_mode={build_mode}"])
-        # Pass enable_examples and enable_unit_tests options
-        cmd.extend([f"-Denable_examples={str(enable_examples).lower()}"])
-        cmd.extend([f"-Denable_unit_tests={str(enable_unit_tests).lower()}"])
-    else:
-        # Initial setup
-        _ts_print(f"[MESON] Setting up build directory: {build_dir}")
-        cmd = [
-            get_meson_executable(),
-            "setup",
-            "--native-file",
-            str(native_file_path),
-            str(build_dir),
-        ]
-        # Always pass explicit build_mode to ensure meson uses correct optimization flags
-        cmd.extend([f"-Dbuild_mode={build_mode}"])
-        # Pass enable_examples and enable_unit_tests options
-        cmd.extend([f"-Denable_examples={str(enable_examples).lower()}"])
-        cmd.extend([f"-Denable_unit_tests={str(enable_unit_tests).lower()}"])
-
-    is_windows = sys.platform.startswith("win") or os.name == "nt"
-
-    # Thin archives configuration (faster builds, smaller disk usage when supported)
-    thin_flag = " --thin" if use_thin_archives else ""
-
-    # Build config summary is shown in toolchain line and mode lines elsewhere
-    # No need for separate config message here
-
-    # Only show thin archives warning when explicitly disabled (rare case)
     if not use_thin_archives and os.environ.get("FASTLED_DISABLE_THIN_ARCHIVES"):
         _ts_print(
             "[MESON] ⚠️  Thin archives DISABLED (FASTLED_DISABLE_THIN_ARCHIVES set)"
         )
 
-    # Check for obsolete zig wrapper artifacts before proceeding
-    # These wrappers were used in the old zig-based compiler system and must be removed
-    meson_dir = source_dir / ".build" / "meson"
-    if meson_dir.exists():
-        obsolete_wrappers = list(meson_dir.glob("zig-*-wrapper.exe"))
-        if obsolete_wrappers:
-            _ts_print("=" * 80)
-            _ts_print("[MESON] ❌ ERROR: Obsolete zig wrapper artifacts detected!")
-            _ts_print("[MESON]")
-            _ts_print(
-                "[MESON] Found old zig-based wrapper executables in .build/meson/ directory:"
-            )
-            for wrapper in obsolete_wrappers:
-                _ts_print(f"[MESON]   - {wrapper.name}")
-            _ts_print("[MESON]")
-            _ts_print(
-                "[MESON] These wrappers are from the old zig-based compiler system"
-            )
-            _ts_print("[MESON] and are no longer compatible with clang-tool-chain.")
-            _ts_print("[MESON]")
-            _ts_print("[MESON] To fix this issue, delete the .build/meson directory:")
-            _ts_print("[MESON]   rm -rf .build/meson")
-            _ts_print("[MESON]")
-            _ts_print("[MESON] Then run your build command again. The system will use")
-            _ts_print("[MESON] clang-tool-chain wrappers instead.")
-            _ts_print("=" * 80)
-            raise RuntimeError(
-                "Obsolete zig wrapper artifacts detected in .build/meson/ directory. "
-                "Delete .build/meson/ directory and try again."
-            )
+    markers = MarkerPaths.for_build_dir(build_dir)
+    hashes = compute_source_hashes(source_dir, markers)
 
-    # Get clang-tool-chain wrapper commands
-    # Use the wrapper commands (clang-tool-chain-c/cpp) instead of raw clang binaries
-    # The wrappers automatically handle GNU ABI setup on Windows
-
-    # Compiler cache detection: zccache or none
-    # zccache is a blazing-fast local compiler cache daemon.
-    # It works as a drop-in compiler launcher prefix.
-    # Skip compiler caching in Docker to avoid daemon startup delay.
-    in_docker = os.environ.get("FASTLED_DOCKER", "0") == "1"
-
-    # Resolve compiler cache binary
-    cache_binary: Optional[str] = None
-    cache_name: Optional[str] = None
-    if not in_docker:
-        zccache_binary = _find_zccache_binary()
-        if zccache_binary:
-            cache_binary = zccache_binary
-            cache_name = "zccache"
-        else:
-            _ts_print(
-                "[MESON] zccache not found, compilation will proceed without caching. To install, run: bash ./install"
-            )
-    else:
-        _ts_print("[MESON] Skipping compiler cache in Docker (startup delay too long)")
-
-    # Always use plain clang-tool-chain wrappers for compiler detection
-    # The cache binary is applied separately in the native file as a launcher prefix
-    clang_wrapper = shutil.which("clang-tool-chain-c")
-    clangxx_wrapper = shutil.which("clang-tool-chain-cpp")
-
-    llvm_ar_wrapper = shutil.which("clang-tool-chain-ar")
-
-    if not clang_wrapper or not clangxx_wrapper or not llvm_ar_wrapper:
-        _ts_print("[MESON] ERROR: clang-tool-chain wrapper commands not found in PATH")
-        _ts_print(
-            "[MESON] Install clang-tool-chain with: uv pip install clang-tool-chain"
-        )
-        _ts_print("[MESON] Missing commands:")
-        if not clang_wrapper:
-            _ts_print("[MESON]   - clang-tool-chain-c")
-        if not clangxx_wrapper:
-            _ts_print("[MESON]   - clang-tool-chain-cpp")
-        if not llvm_ar_wrapper:
-            _ts_print("[MESON]   - clang-tool-chain-ar")
-        raise RuntimeError("clang-tool-chain wrapper commands not available")
-
-    # Get compiler version for consolidated output.
-    # Optimization: Skip subprocess if the compiler binary hasn't changed since we
-    # last recorded its version. We compare the compiler wrapper's mtime against the
-    # compiler_version_marker's mtime: if the marker is NEWER than the binary, the
-    # binary predates the marker → the recorded version is still current.
-    current_compiler_version: str = ""  # initialized here; assigned below
-    _version_from_cache = False
-    _clangxx_path = Path(clangxx_wrapper)
-    if compiler_version_marker.exists() and _clangxx_path.exists():
-        try:
-            _compiler_mtime = _clangxx_path.stat().st_mtime
-            _marker_mtime = compiler_version_marker.stat().st_mtime
-            if _compiler_mtime < _marker_mtime:
-                # Compiler binary predates marker → version is stable → use cache
-                _cached_ver = compiler_version_marker.read_text(
-                    encoding="utf-8"
-                ).strip()
-                if _cached_ver and _cached_ver != "unknown":
-                    current_compiler_version = _cached_ver
-                    _version_from_cache = True
-        except OSError:
-            pass
-    if not _version_from_cache:
-        # PERFORMANCE: Use raw clang++ binary for version check (~60ms vs ~3600ms)
-        _fast_compiler = _resolve_fast_compiler_binary()
-        current_compiler_version = get_compiler_version(
-            _fast_compiler if _fast_compiler else clangxx_wrapper
-        )
-
-    # Get zccache version for cache invalidation.
-    # Optimization: Skip subprocess if the zccache binary hasn't changed since we
-    # last recorded its version.
-    current_zccache_version: str = ""
-    if cache_binary:
-        _zccache_version_from_cache = False
-        _zccache_path = Path(cache_binary)
-        if zccache_version_marker.exists() and _zccache_path.exists():
-            try:
-                _zccache_mtime = _zccache_path.stat().st_mtime
-                _zc_marker_mtime = zccache_version_marker.stat().st_mtime
-                if _zccache_mtime < _zc_marker_mtime:
-                    _cached_zc_ver = zccache_version_marker.read_text(
-                        encoding="utf-8"
-                    ).strip()
-                    if _cached_zc_ver:
-                        current_zccache_version = _cached_zc_ver
-                        _zccache_version_from_cache = True
-            except OSError:
-                pass
-        if not _zccache_version_from_cache:
-            current_zccache_version = get_zccache_version(cache_binary)
-
-    # Consolidated single-line toolchain summary (verbose mode only)
-    # Before: 7 lines of compiler details
-    # After: "Toolchain: clang 21.1.5 + zccache"
-    if verbose:
-        if cache_name:
-            print(f"Toolchain: {current_compiler_version} + {cache_name}")
-        else:
-            print(f"Toolchain: {current_compiler_version}")
-
-    # Late-stage compiler version check (requires compiler detection above)
-    # This check is separate because we need the detected compiler version
+    # Marker-based reconfigure detection (consolidated message + cleanup).
     if already_configured:
-        compiler_version_reason: Optional[str] = None
-        if compiler_version_marker.exists():
+        decision = check_reconfigure_markers(
+            build_dir=build_dir,
+            markers=markers,
+            hashes=hashes,
+            debug=debug,
+            check=check,
+            build_mode=build_mode,
+            enable_examples=enable_examples,
+            enable_unit_tests=enable_unit_tests,
+            use_thin_archives=use_thin_archives,
+        )
+        if decision.force_reconfigure:
+            force_reconfigure = True
+            force_reconfigure_reason = decision.force_reason
+
+    # meson.build files modified after build.ninja → reconfigure.
+    if already_configured and check_meson_build_modified(source_dir, build_dir):
+        force_reconfigure = True
+        force_reconfigure_reason = "meson.build modified"
+
+    # Test files added/removed → reconfigure.
+    if already_configured and detect_test_file_changes(
+        source_dir, build_dir, hashes.max_tests_dir_mtime
+    ):
+        force_reconfigure = True
+        force_reconfigure_reason = "test files changed"
+
+    # Example files added/removed/modified → reconfigure.
+    if already_configured and detect_example_file_changes(source_dir, build_dir):
+        force_reconfigure = True
+        force_reconfigure_reason = "example files changed"
+
+    skip_meson_setup = already_configured and not reconfigure and not force_reconfigure
+    native_file_path = build_dir / "meson_native.txt"
+
+    # Build the meson setup command (or defer it for compiler-version-late reconfigure).
+    cmd: "list[str] | None" = None
+    if skip_meson_setup:
+        pass
+    elif already_configured and (reconfigure or force_reconfigure):
+        reason = (
+            force_reconfigure_reason
+            if (force_reconfigure and force_reconfigure_reason)
+            else (
+                "configuration changed" if force_reconfigure else "explicitly requested"
+            )
+        )
+        _ts_print(f"[MESON] Reconfiguring build directory ({reason}): {build_dir}")
+        cmd = build_meson_setup_cmd(
+            native_file_path=native_file_path,
+            build_dir=build_dir,
+            build_mode=build_mode,
+            enable_examples=enable_examples,
+            enable_unit_tests=enable_unit_tests,
+            reconfigure=True,
+        )
+    else:
+        _ts_print(f"[MESON] Setting up build directory: {build_dir}")
+        cmd = build_meson_setup_cmd(
+            native_file_path=native_file_path,
+            build_dir=build_dir,
+            build_mode=build_mode,
+            enable_examples=enable_examples,
+            enable_unit_tests=enable_unit_tests,
+            reconfigure=False,
+        )
+
+    check_obsolete_zig_wrappers(source_dir)
+
+    compiler = detect_compiler_and_cache(markers, verbose)
+
+    # Late-stage compiler-version check: requires the detected compiler.
+    if already_configured:
+        compiler_version_reason: "str | None" = None
+        if markers.compiler_version.exists():
             try:
-                last_compiler_version = compiler_version_marker.read_text().strip()
-                if last_compiler_version != current_compiler_version:
-                    compiler_version_reason = f"compiler version changed: {last_compiler_version} → {current_compiler_version}"
+                last_compiler_version = markers.compiler_version.read_text().strip()
+                if last_compiler_version != compiler.compiler_version:
+                    compiler_version_reason = f"compiler version changed: {last_compiler_version} → {compiler.compiler_version}"
                     compiler_version_changed = True
             except (OSError, IOError):
                 compiler_version_reason = "compiler version marker unreadable"
@@ -1967,7 +262,6 @@ def setup_meson_build(
             compiler_version_reason = "compiler version marker missing"
 
         if compiler_version_reason:
-            # Only print if we haven't already printed a reconfigure message
             if not force_reconfigure:
                 _ts_print(
                     f"[MESON] 🔄 Reconfiguration required: {compiler_version_reason}"
@@ -1976,20 +270,17 @@ def setup_meson_build(
             force_reconfigure_reason = compiler_version_reason
             skip_meson_setup = False
 
-        # CRITICAL: Delete all object files, archives, and PCH when compiler version changes
-        # Objects compiled with a different compiler version can have incompatible ABI
         if compiler_version_changed:
             cleanup_build_artifacts(build_dir, "Compiler version changed")
 
-        # Late-stage zccache version check (requires cache binary detection above)
-        # When zccache version changes, cached artifacts may be incompatible
-        if current_zccache_version:
-            zccache_version_reason: Optional[str] = None
-            if zccache_version_marker.exists():
+        # Late-stage zccache version check
+        if compiler.zccache_version:
+            zccache_version_reason: "str | None" = None
+            if markers.zccache_version.exists():
                 try:
-                    last_zccache_version = zccache_version_marker.read_text().strip()
-                    if last_zccache_version != current_zccache_version:
-                        zccache_version_reason = f"zccache version changed: {last_zccache_version} → {current_zccache_version}"
+                    last_zccache_version = markers.zccache_version.read_text().strip()
+                    if last_zccache_version != compiler.zccache_version:
+                        zccache_version_reason = f"zccache version changed: {last_zccache_version} → {compiler.zccache_version}"
                 except (OSError, IOError):
                     zccache_version_reason = "zccache version marker unreadable"
             else:
@@ -2005,310 +296,54 @@ def setup_meson_build(
                 skip_meson_setup = False
                 cleanup_build_artifacts(build_dir, "zccache version changed")
 
-        # CRITICAL: If compiler version forced a reconfigure, we need to update cmd
-        # The original cmd assignment was based on pre-compiler-check values
+        # If compiler/zccache version forced reconfigure but we hadn't built a cmd yet
         if force_reconfigure and cmd is None:
             _ts_print(f"[MESON] Reconfiguring build directory: {build_dir}")
-            cmd = [
-                get_meson_executable(),
-                "setup",
-                "--reconfigure",
-                "--native-file",
-                str(native_file_path),
-                str(build_dir),
-            ]
-            cmd.extend([f"-Dbuild_mode={build_mode}"])
-            cmd.extend([f"-Denable_examples={str(enable_examples).lower()}"])
-            cmd.extend([f"-Denable_unit_tests={str(enable_unit_tests).lower()}"])
+            cmd = build_meson_setup_cmd(
+                native_file_path=native_file_path,
+                build_dir=build_dir,
+                build_mode=build_mode,
+                enable_examples=enable_examples,
+                enable_unit_tests=enable_unit_tests,
+                reconfigure=True,
+            )
 
-    # Generate native file for Meson that persists tool configuration across regenerations
-    # When Meson regenerates (e.g., when ninja detects meson.build changes),
-    # environment variables are lost. Native file ensures tools are configured.
-    try:
-        # Use ctc-clang/ctc-clang++ native launchers instead of Python wrappers.
-        # Native launchers handle all platform flags automatically with ~34ms
-        # startup vs ~1200ms for Python wrappers.
-        _fast = _resolve_fast_native_entries(cache_binary)
-        if _fast.cc is not None:
-            c_compiler = _fast.cc
-            cpp_compiler = _fast.cxx
-            ar_tool = _fast.ar
-        else:
-            # Fallback to Python wrappers if raw binary resolution fails
-            c_compiler = f"['{clang_wrapper}']"
-            cpp_compiler = f"['{clangxx_wrapper}']"
-            ar_tool = f"['{llvm_ar_wrapper}']"
+    write_meson_native_file(native_file_path=native_file_path, compiler=compiler)
 
-        # Detect platform for native file
-        is_darwin = sys.platform == "darwin"
+    env = build_setup_env(compiler)
 
-        # Detect CPU architecture
-        machine = platform.machine().lower()
-        if machine in ("x86_64", "amd64"):
-            cpu_family = "x86_64"
-            cpu = "x86_64"
-        elif machine in ("arm64", "aarch64"):
-            cpu_family = "aarch64"
-            cpu = "aarch64"
-        else:
-            cpu_family = "x86_64"  # Default fallback
-            cpu = "x86_64"
-
-        if is_windows:
-            host_system = "windows"
-        elif is_darwin:
-            host_system = "darwin"
-        else:
-            host_system = "linux"
-
-        native_file_content = f"""# ============================================================================
-# Meson Native Build Configuration for FastLED (Auto-generated)
-# ============================================================================
-# This file is auto-generated by meson_runner.py to configure tool paths.
-# It persists across build regenerations when ninja detects meson.build changes.
-#
-# IMPORTANT: LLD linker is forced via -fuse-ld=lld in meson.build link_args.
-# This ensures consistent linker behavior across Windows, Linux, and macOS.
-
-[binaries]
-c = {c_compiler}
-cpp = {cpp_compiler}
-ar = {ar_tool}
-
-[host_machine]
-system = '{host_system}'
-cpu_family = '{cpu_family}'
-cpu = '{cpu}'
-endian = 'little'
-
-[properties]
-# No additional properties needed - compiler flags are in meson.build
-"""
-        native_file_changed = write_if_different(native_file_path, native_file_content)
-
-        if native_file_changed:
-            _ts_print(f"[MESON] Regenerated native file: {native_file_path}")
-    except (OSError, IOError) as e:
-        _ts_print(f"[MESON] Warning: Could not write native file: {e}", file=sys.stderr)
-
-    env = os.environ.copy()
-    if cache_binary:
-        env.setdefault("ZCCACHE_STRICT_PATHS", "absolute")
-
-    # PERFORMANCE: Use raw compiler binaries for env vars when available.
-    # The native file takes precedence over env vars for meson, but these
-    # serve as fallback. Raw binaries avoid ~3.6s Python wrapper overhead.
-    _fast_compiler = _resolve_fast_compiler_binary()
-    if _fast_compiler:
-        try:
-            from clang_tool_chain.platform.paths import find_tool_binary
-
-            _fast_c = str(find_tool_binary("clang"))
-            _fast_ar = str(find_tool_binary("llvm-ar"))
-            env["CC"] = _fast_c
-            env["CXX"] = _fast_compiler
-            env["AR"] = _fast_ar
-        except KeyboardInterrupt as ki:
-            handle_keyboard_interrupt(ki)
-        except Exception:
-            env["CC"] = clang_wrapper
-            env["CXX"] = clangxx_wrapper
-            env["AR"] = llvm_ar_wrapper
-    else:
-        env["CC"] = clang_wrapper
-        env["CXX"] = clangxx_wrapper
-        env["AR"] = llvm_ar_wrapper
-
-    # Compiler cache status already shown in toolchain summary above
-
-    # If we're skipping meson setup (already configured), check for thin archive conflicts
     if skip_meson_setup:
-        # CRITICAL FIX: Check if libfastled.a exists as a thin archive
-        # If we've disabled thin archives but a thin archive exists from a previous build,
-        # we must delete it to force a rebuild. Otherwise the linker will fail.
-        libfastled_a = build_dir / "libfastled.a"
-        if libfastled_a.exists():
-            try:
-                # Read first 8 bytes to check for thin archive magic header
-                with open(libfastled_a, "rb") as f:
-                    header = f.read(8)
-                    is_thin_archive = header == b"!<thin>\n"
-
-                if is_thin_archive and not use_thin_archives:
-                    # Thin archive exists but we've disabled thin archives
-                    # Delete it to force rebuild with regular archive
-                    _ts_print("[MESON] ⚠️  Detected thin archive from previous build")
-                    _ts_print(
-                        "[MESON] 🗑️  Deleting libfastled.a to force rebuild with regular archive"
-                    )
-                    libfastled_a.unlink()
-                elif not is_thin_archive and use_thin_archives:
-                    # Regular archive exists but we've enabled thin archives
-                    # Delete it to force rebuild with thin archive
-                    _ts_print("[MESON] ℹ️  Detected regular archive from previous build")
-                    _ts_print(
-                        "[MESON] 🗑️  Deleting libfastled.a to force rebuild with thin archive"
-                    )
-                    libfastled_a.unlink()
-            except (OSError, IOError) as e:
-                # If we can't read/delete, that's okay - build will handle it
-                _ts_print(f"[MESON] Warning: Could not check/delete libfastled.a: {e}")
-                pass
-
-        # Create missing marker files (migration from older code)
-        _write_configuration_markers(
-            build_mode_marker=build_mode_marker,
-            build_mode=build_mode,
-            thin_archive_marker=thin_archive_marker,
+        handle_skip_meson_setup(
+            build_dir=build_dir,
+            source_dir=source_dir,
             use_thin_archives=use_thin_archives,
-            debug_marker=debug_marker,
+            markers=markers,
+            hashes=hashes,
             debug=debug,
-            check_marker=check_marker,
             check=check,
-            source_files_marker=source_files_marker,
-            current_source_hash=current_source_hash,
-            current_source_files=current_source_files,
-            src_files_marker=src_files_marker,
-            current_src_hash=current_src_hash,
-            test_files_marker=test_files_marker,
-            current_test_hash=current_test_hash,
-            compiler_version_marker=compiler_version_marker,
-            current_compiler_version=current_compiler_version,
-            zccache_version_marker=zccache_version_marker,
-            current_zccache_version=current_zccache_version or None,
-            enable_examples_marker=enable_examples_marker,
+            build_mode=build_mode,
             enable_examples=enable_examples,
-            enable_unit_tests_marker=enable_unit_tests_marker,
             enable_unit_tests=enable_unit_tests,
-            only_missing=True,
-            verb="Created",
+            compiler=compiler,
         )
-
-        # Ensure build.ninja has restat=1 and ar wrapper on STATIC_LINKER rule.
-        # Combined function reads build.ninja once and populates _ar_opt_status_cache,
-        # so a subsequent is_ar_content_preserving_active() call in runner.py is free.
-        inject_ar_optimization_patches(build_dir, source_dir)
-        if normalize_meson_private_include_paths(build_dir):
-            _ts_print(
-                "[MESON] Normalized private include paths for zccache strict mode"
-            )
-        _enforce_strict_path_violations(build_dir)
-
         return True
 
-    # Run meson setup using RunningProcess for proper streaming output
     assert cmd is not None, "cmd should be set when not skipping meson setup"
-    meson_cmd: list[str] = cmd  # Type narrowing for use in nested function
-    print_banner("MESON CONFIGURATION", "⚙️")
-
-    def _run_meson_setup() -> tuple[int, str]:
-        """Run meson setup and return (returncode, stdout)."""
-        proc = RunningProcess(
-            meson_cmd,
-            cwd=source_dir,
-            timeout=600,
-            auto_run=True,
-            check=False,  # We'll check returncode manually
-            env=env,
-            output_formatter=TimestampFormatter(),
-        )
-
-        returncode = cast(int, proc.wait(echo=True))
-        return returncode, str(proc.stdout)
-
-    def _clear_stale_caches() -> None:
-        """Clear stale test metadata caches that may reference deleted files."""
-        _ts_print("[MESON] 🔄 Clearing stale test metadata caches...")
-        cache_files = [
-            build_dir / "tests" / "test_metadata.cache",
-            build_dir / "test_list_cache.txt",
-            source_files_marker,  # Force re-discovery of source files
-        ]
-        for cache_file in cache_files:
-            if cache_file.exists():
-                try:
-                    cache_file.unlink()
-                    _ts_print(f"[MESON]   Deleted: {cache_file.name}")
-                except (OSError, IOError) as e:
-                    _ts_print(
-                        f"[MESON]   Warning: Could not delete {cache_file.name}: {e}"
-                    )
-
-    try:
-        # Remove any stale meson lockfile left by a killed/abandoned meson
-        # process (Windows bug, see issue #2484). No-op if build_dir or
-        # meson-private/ doesn't exist yet.
-        cleanup_stale_meson_lockfile(build_dir)
-        returncode, stdout = _run_meson_setup()
-
-        # Self-healing: If meson setup fails with "does not exist" error,
-        # it's likely due to stale test metadata cache referencing deleted files.
-        # Clear caches and retry once.
-        if returncode != 0 and "does not exist" in stdout:
-            _ts_print(
-                "[MESON] ⚠️  Setup failed due to missing file (stale cache detected)"
-            )
-            _clear_stale_caches()
-            _ts_print("[MESON] 🔄 Retrying meson setup...")
-            cleanup_stale_meson_lockfile(build_dir)
-            returncode, stdout = _run_meson_setup()
-
-        if returncode != 0:
-            _ts_print(
-                f"[MESON] Setup failed with return code {returncode}", file=sys.stderr
-            )
-            return False
-
-        _ts_print(f"[MESON] Setup successful")
-
-        # Write marker files to track settings for future runs
-        _write_configuration_markers(
-            build_mode_marker=build_mode_marker,
-            build_mode=build_mode,
-            thin_archive_marker=thin_archive_marker,
-            use_thin_archives=use_thin_archives,
-            debug_marker=debug_marker,
-            debug=debug,
-            check_marker=check_marker,
-            check=check,
-            source_files_marker=source_files_marker,
-            current_source_hash=current_source_hash,
-            current_source_files=current_source_files,
-            src_files_marker=src_files_marker,
-            current_src_hash=current_src_hash,
-            test_files_marker=test_files_marker,
-            current_test_hash=current_test_hash,
-            compiler_version_marker=compiler_version_marker,
-            current_compiler_version=current_compiler_version,
-            zccache_version_marker=zccache_version_marker,
-            current_zccache_version=current_zccache_version or None,
-            enable_examples_marker=enable_examples_marker,
-            enable_examples=enable_examples,
-            enable_unit_tests_marker=enable_unit_tests_marker,
-            enable_unit_tests=enable_unit_tests,
-            only_missing=False,
-            verb="Saved",
-        )
-
-        # Inject restat=1 and ar wrapper into STATIC_LINKER rule.
-        # Combined function reads build.ninja once and populates _ar_opt_status_cache,
-        # so a subsequent is_ar_content_preserving_active() call in runner.py is free.
-        # Must be called after meson setup so build.ninja exists.
-        inject_ar_optimization_patches(build_dir, source_dir)
-        if normalize_meson_private_include_paths(build_dir):
-            _ts_print(
-                "[MESON] Normalized private include paths for zccache strict mode"
-            )
-        _enforce_strict_path_violations(build_dir)
-
-        return True
-
-    except KeyboardInterrupt as ki:
-        handle_keyboard_interrupt(ki)
-        raise
-    except Exception as e:
-        _ts_print(f"[MESON] Setup failed with exception: {e}", file=sys.stderr)
-        return False
+    return run_meson_setup_command(
+        cmd=cmd,
+        source_dir=source_dir,
+        build_dir=build_dir,
+        env=env,
+        markers=markers,
+        hashes=hashes,
+        debug=debug,
+        check=check,
+        build_mode=build_mode,
+        enable_examples=enable_examples,
+        enable_unit_tests=enable_unit_tests,
+        use_thin_archives=use_thin_archives,
+        compiler=compiler,
+    )
 
 
 def perform_ninja_maintenance(build_dir: Path) -> bool:
@@ -2325,27 +360,21 @@ def perform_ninja_maintenance(build_dir: Path) -> bool:
     Returns:
         True if maintenance was performed or skipped successfully, False on error
     """
-    # Create marker file to track last maintenance time
     marker_file = build_dir / ".ninja_deps_maintenance"
 
-    # Check if maintenance was recently performed (within last 24 hours)
     if marker_file.exists():
         try:
             last_maintenance = marker_file.stat().st_mtime
             time_since_maintenance = time.time() - last_maintenance
             hours_since_maintenance = time_since_maintenance / 3600
-
-            # Skip if maintenance was done within last 24 hours
             if hours_since_maintenance < 24:
                 return True
         except (OSError, IOError):
-            # If we can't read the marker, proceed with maintenance
             pass
 
     _ts_print("[MESON] 🔧 Performing periodic Ninja dependency database maintenance...")
 
     try:
-        # Run ninja -t recompact to optimize dependency database
         repair_proc = RunningProcess(
             ["ninja", "-C", str(build_dir), "-t", "recompact"],
             timeout=60,
@@ -2360,21 +389,16 @@ def perform_ninja_maintenance(build_dir: Path) -> bool:
             _ts_print(
                 "[MESON] ✓ Dependency database maintenance completed successfully"
             )
-
-            # Update marker file timestamp
             try:
                 marker_file.touch()
             except (OSError, IOError):
-                # Not critical if marker update fails
                 pass
-
             return True
-        else:
-            _ts_print(
-                "[MESON] ⚠️  Maintenance completed with warnings (non-fatal)",
-                file=sys.stderr,
-            )
-            return True  # Non-fatal, continue anyway
+        _ts_print(
+            "[MESON] ⚠️  Maintenance completed with warnings (non-fatal)",
+            file=sys.stderr,
+        )
+        return True
 
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
@@ -2384,4 +408,4 @@ def perform_ninja_maintenance(build_dir: Path) -> bool:
             f"[MESON] ⚠️  Maintenance failed with exception: {e} (non-fatal)",
             file=sys.stderr,
         )
-        return True  # Non-fatal, continue anyway
+        return True

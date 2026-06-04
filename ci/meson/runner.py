@@ -1,457 +1,104 @@
 #!/usr/bin/env python3
-"""Meson build system runner for FastLED tests."""
+"""Meson build system runner for FastLED tests.
+
+This module is the top-level orchestrator. The execution paths and helpers
+have been split into focused modules:
+
+- ``ci.meson.runner_helpers``: timing aggregation, stale-build recovery,
+  build-dir cleanup with locked-file handling, failure-log writers, and
+  zccache session bootstrap.
+- ``ci.meson.streaming_runner``: parallel compile + execute path.
+- ``ci.meson.sequential_runner``: per-target compile + direct executable
+  invocation path used for single-test runs.
+
+This file owns the entry point ``run_meson_build_and_test`` and the CLI.
+"""
 
 import argparse
 import glob
 import os
-import re
-import shutil
-import subprocess
 import sys
-import threading
 import time
-import uuid
 from pathlib import Path
-from typing import Optional, cast
-
-from running_process import RunningProcess
+from typing import Optional
 
 from ci.meson.build_config import (
-    _find_zccache_binary,
-    cleanup_build_artifacts,
     perform_ninja_maintenance,
     setup_meson_build,
 )
 from ci.meson.build_optimizer import make_build_optimizer
 from ci.meson.build_timer import BuildTimer
-from ci.meson.cache_utils import save_test_result_state
-from ci.meson.compile import (
-    CompileResult,
-    _is_compilation_error,
-    compile_meson,
-    is_stale_build_error,
-)
-from ci.meson.compiler import check_meson_installed, get_meson_executable
-from ci.meson.output import print_banner, print_error, print_info, print_success
+from ci.meson.compiler import check_meson_installed
 from ci.meson.phase_tracker import PhaseTracker
-from ci.meson.streaming import StreamingResult, TestResult, stream_compile_and_run_tests
-from ci.meson.test_discovery import get_fuzzy_test_candidates
+from ci.meson.runner_helpers import _safe_rmtree, _start_zccache_session
+from ci.meson.sequential_runner import (
+    DirectTestContext,
+    SequentialCompileContext,
+    run_direct_test,
+    run_sequential_compile,
+)
+from ci.meson.streaming_runner import StreamingContext, run_streaming_path
 from ci.meson.test_execution import MesonTestResult, run_meson_test
 from ci.util.build_lock import libfastled_build_lock
-from ci.util.global_interrupt_handler import handle_keyboard_interrupt
-from ci.util.output_formatter import TimestampFormatter
 from ci.util.timestamp_print import ts_print as _ts_print
 
 
-def _apply_phase_timing(
-    result: MesonTestResult, build_timer: BuildTimer
-) -> MesonTestResult:
-    """Apply phase timing data from BuildTimer to MesonTestResult."""
-    build_timer.calculate_phases()
-    result.meson_setup_time = build_timer.meson_setup_time
-    result.ninja_maintenance_time = build_timer.ninja_maintenance_time
-    result.compile_time = build_timer.compile_time
-    result.test_execution_time = build_timer.test_execution_time
-    return result
+def _setup_sanitizer_env(source_dir: Path, verbose: bool) -> None:
+    """Configure ASan/LSan options for debug builds via clang-tool-chain."""
+    from clang_tool_chain import (
+        prepare_sanitizer_environment,  # noqa: PLC0415 - lazy: ~60ms on non-debug
+    )
 
+    sanitizer_flags = ["-fsanitize=address"]
+    sanitizer_env = prepare_sanitizer_environment(
+        base_env=os.environ.copy(),
+        compiler_flags=sanitizer_flags,
+    )
+    os.environ.update(sanitizer_env)
 
-def _apply_compile_sub_phases(
-    result: MesonTestResult, sub_phases: dict[str, float]
-) -> None:
-    """Calculate compile sub-phase durations from timestamps and set on result."""
-    if not sub_phases:
-        return
-
-    compile_start = sub_phases.get("compile_start")
-    core_done = sub_phases.get("core_done")
-    example_link_start = sub_phases.get("example_link_start")
-    test_link_start = sub_phases.get("test_link_start")
-    compile_done = sub_phases.get("compile_done")
-
-    if compile_start and core_done:
-        result.compile_core_time = core_done - compile_start
-    if core_done and compile_done:
-        # Object compilation = time between core_done and whichever linking starts first
-        link_start = None
-        if example_link_start and test_link_start:
-            link_start = min(example_link_start, test_link_start)
-        elif example_link_start:
-            link_start = example_link_start
-        elif test_link_start:
-            link_start = test_link_start
-
-        if link_start:
-            result.compile_objects_time = link_start - core_done
+    lsan_suppressions = source_dir / "tests" / "lsan_suppressions.txt"
+    if lsan_suppressions.exists():
+        existing_lsan = os.environ.get("LSAN_OPTIONS", "")
+        suppression_opt = f"suppressions={lsan_suppressions}"
+        if existing_lsan:
+            os.environ["LSAN_OPTIONS"] = f"{existing_lsan}:{suppression_opt}"
         else:
-            # No linking phases detected — all time after core is object compilation
-            result.compile_objects_time = compile_done - core_done
+            os.environ["LSAN_OPTIONS"] = suppression_opt
 
-    if example_link_start and compile_done:
-        # Example linking = from example_link_start to test_link_start (or compile_done)
-        end = test_link_start if test_link_start else compile_done
-        result.compile_example_link_time = end - example_link_start
-    if test_link_start and compile_done:
-        result.compile_test_link_time = compile_done - test_link_start
+    if verbose:
+        symbolizer_path = sanitizer_env.get("ASAN_SYMBOLIZER_PATH")
+        if symbolizer_path:
+            _ts_print(f"[MESON] Set ASAN_SYMBOLIZER_PATH={symbolizer_path}")
 
 
-def _recover_stale_build(
-    source_dir: Path,
-    build_dir: Path,
-    debug: bool,
-    check: bool,
-    build_mode: str,
-    verbose: bool,
-    enable_examples: bool = True,
-) -> bool:
+def _resolve_test_name_candidates(
+    build_dir: Path, test_name: str
+) -> tuple[str, str, list[str]]:
+    """Compute (primary, fallback, fuzzy) candidate names for a requested test.
+
+    The primary is the most specific guess; the fallback is the next-best
+    guess; the fuzzy list comes from globbing build_dir/tests/ for partial
+    matches. Each is matched against meson target names later.
     """
-    Attempt to recover from a stale build state.
-
-    This is called when compilation fails due to missing/renamed/deleted files.
-    It cleans stale Ninja deps, clears metadata caches, and forces Meson
-    reconfiguration so the next compilation attempt has a fresh build graph.
-
-    Args:
-        source_dir: Project root directory
-        build_dir: Meson build directory
-        debug: Debug mode flag
-        check: IWYU check flag
-        build_mode: Build mode string
-        verbose: Verbose output flag
-
-    Returns:
-        True if recovery setup succeeded (caller should retry compilation),
-        False if recovery failed
-    """
-    _ts_print("=" * 80)
-    _ts_print("[MESON] 🔧 SELF-HEALING: Stale build state detected - auto-recovering")
-    _ts_print("=" * 80)
-    _ts_print("[MESON] This typically happens when files are renamed or deleted.")
-    _ts_print("[MESON] Cleaning stale dependencies and reconfiguring...")
-
-    try:
-        # Step 1: Clean stale ninja deps using ninja -t cleandead
-        ninja_exe = shutil.which("ninja") or str(
-            Path(sys.prefix) / "Scripts" / "ninja.EXE"
-        )
-        try:
-            result = subprocess.run(
-                [ninja_exe, "-C", str(build_dir), "-t", "cleandead"],
-                capture_output=True,
-                text=True,
-                timeout=60,
-            )
-            if result.returncode == 0:
-                _ts_print(
-                    f"[MESON] 🗑️  Cleaned stale Ninja outputs: {result.stdout.strip()}"
-                )
-        except KeyboardInterrupt as ki:
-            handle_keyboard_interrupt(ki)
-            raise
-        except Exception as e:
-            _ts_print(f"[MESON] Warning: ninja cleandead failed: {e}")
-
-        # Step 2: Delete .ninja_deps to force full dependency re-scan
-        ninja_deps = build_dir / ".ninja_deps"
-        if ninja_deps.exists():
-            try:
-                ninja_deps.unlink()
-                _ts_print("[MESON] 🗑️  Deleted stale .ninja_deps")
-            except OSError as e:
-                _ts_print(f"[MESON] Warning: Could not delete .ninja_deps: {e}")
-
-        # Step 3: Clear metadata caches
-        cache_files = [
-            build_dir / "src_metadata.cache",
-            build_dir / "test_list_cache.txt",
-            build_dir / ".source_files_hash",
-            build_dir / "tests" / "test_metadata.cache",
-            build_dir / "example_metadata.cache",
-        ]
-        for cache_file in cache_files:
-            if cache_file.exists():
-                try:
-                    cache_file.unlink()
-                    _ts_print(f"[MESON] 🗑️  Deleted cache: {cache_file.name}")
-                except OSError as e:
-                    _ts_print(
-                        f"[MESON] Warning: Could not delete {cache_file.name}: {e}"
-                    )
-
-        # Step 4: Clean build artifacts (stale .obj files referencing old headers)
-        cleanup_build_artifacts(build_dir, "Stale build recovery")
-
-        # Step 5: Force Meson reconfiguration
-        _ts_print("[MESON] 🔄 Forcing Meson reconfiguration...")
-        success = setup_meson_build(
-            source_dir,
-            build_dir,
-            reconfigure=True,
-            debug=debug,
-            check=check,
-            build_mode=build_mode,
-            verbose=verbose,
-            enable_examples=enable_examples,
-            enable_unit_tests=True,
-        )
-
-        if success:
-            _ts_print("[MESON] ✅ Self-healing reconfiguration complete")
-            _ts_print("[MESON] 🔄 Retrying compilation...")
-        else:
-            _ts_print("[MESON] ❌ Self-healing reconfiguration failed")
-
-        return success
-
-    except KeyboardInterrupt as ki:
-        handle_keyboard_interrupt(ki)
-        raise
-    except Exception as e:
-        _ts_print(f"[MESON] ❌ Self-healing failed with exception: {e}")
-        return False
-
-
-def _purge_trash(trash_dir: Path) -> None:
-    """Purge unlocked files from .trash directory."""
-    if not trash_dir.exists():
-        return
-    for item in list(trash_dir.iterdir()):
-        try:
-            if item.is_file():
-                item.unlink()
-            elif item.is_dir():
-                shutil.rmtree(item)
-        except PermissionError:
-            pass  # Still locked, skip
-
-
-def _kill_zombie_zccache(build_dir: Path) -> None:
-    """Kill zccache processes whose CWD is inside build_dir.
-
-    When ninja is interrupted, zccache.exe wrappers can survive because they
-    communicate through a daemon and are not direct children of ninja. Their
-    CWD remains set to the build directory, which on Windows holds a kernel
-    handle that prevents directory deletion.
-    """
-    if sys.platform != "win32":
-        return
-    try:
-        import psutil  # noqa: PLC0415 - lazy import, only needed on Windows cleanup
-    except ImportError:
-        return
-    build_str = str(build_dir.resolve())
-    killed = 0
-    for proc in psutil.process_iter(["pid", "name"]):
-        try:
-            name = proc.info["name"] or ""
-            if "zccache" not in name.lower() or "daemon" in name.lower():
-                continue
-            cwd = proc.cwd()
-            if cwd and (cwd == build_str or cwd.startswith(build_str + os.sep)):
-                proc.kill()
-                killed += 1
-        except (psutil.NoSuchProcess, psutil.AccessDenied, OSError):
-            continue
-    if killed:
-        _ts_print(
-            f"[MESON] 🧹 Killed {killed} zombie zccache process(es) holding build directory"
-        )
-        time.sleep(0.5)  # Brief wait for Windows to release handles
-
-
-def _safe_rmtree(build_dir: Path) -> None:
-    """Remove build directory, relocating locked files to .trash/ for later cleanup."""
-    # Kill zombie zccache processes that may hold CWD handles on the build dir
-    _kill_zombie_zccache(build_dir)
-
-    trash_dir = build_dir.parent / ".trash"
-    # Purge any previously trashed files that are now unlocked
-    _purge_trash(trash_dir)
-
-    locked_files: list[str] = []
-
-    def _on_exc(func, path, exc):  # noqa: ARG001
-        """Handle locked files by renaming them into .trash/."""
-        p = Path(path)
-        trash_dir.mkdir(parents=True, exist_ok=True)
-        trash_name = f"{uuid.uuid4().hex[:8]}-{p.name}"
-        trash_path = trash_dir / trash_name
-        try:
-            p.rename(trash_path)
-            locked_files.append(p.name)
-        except (PermissionError, OSError):
-            locked_files.append(f"{p.name} (unmovable)")
-
-    if sys.version_info >= (3, 12):
-        shutil.rmtree(build_dir, onexc=_on_exc)
+    test_name_lower = test_name.lower()
+    if test_name_lower.startswith("test_"):
+        meson_test_name = test_name_lower
+        fallback_test_name = test_name_lower[5:]
     else:
-        shutil.rmtree(build_dir, onerror=lambda f, p, e: _on_exc(f, p, e[1]))
+        meson_test_name = f"test_{test_name_lower}"
+        fallback_test_name = test_name_lower
 
-    # If the directory still exists (some files couldn't be moved), try once more
-    if build_dir.exists():
-        try:
-            shutil.rmtree(build_dir)
-        except OSError:
-            _ts_print(f"[MESON] ⚠️  Some locked files moved to {trash_dir}")
-            for name in locked_files:
-                _ts_print(f"  - {name}")
+    fuzzy_candidates: list[str] = []
+    tests_dir = build_dir / "tests"
+    if tests_dir.exists():
+        exe_pattern = f"*{test_name_lower}*.exe"
+        matches = glob.glob(str(tests_dir / exe_pattern))
+        for match_path in matches:
+            exe_name = Path(match_path).stem
+            if exe_name not in [meson_test_name, fallback_test_name]:
+                fuzzy_candidates.append(exe_name)
 
-
-def _write_failure_log(
-    log_dir: Optional[Path], name: str, suffix: str, content: str
-) -> None:
-    """Write a failure log file to the log_failures directory.
-
-    Args:
-        log_dir: Directory to write to (None = no-op)
-        name: Test name (will be sanitized for filename)
-        suffix: 'compile' or 'run'
-        content: Log content
-    """
-    if log_dir is None:
-        return
-    log_dir.mkdir(parents=True, exist_ok=True)
-    safe_name = name.replace(":", "_").replace("/", "_").replace("\\", "_")
-    log_path = log_dir / f"{safe_name}_{suffix}.log"
-    with open(log_path, "w", encoding="utf-8", errors="replace") as f:
-        f.write(content)
-
-
-def _extract_compile_failures(compile_output: str) -> dict[str, str]:
-    """Extract per-target compilation failures from ninja output.
-
-    Parses FAILED: lines to identify which targets had errors and collects
-    the associated error output. Handles timestamped output (e.g., "7.59 FAILED: ...")
-    and [code=N] prefixes.
-
-    Returns:
-        Dict mapping target name to error output text.
-    """
-    failures: dict[str, str] = {}
-    lines = compile_output.splitlines()
-    i = 0
-    while i < len(lines):
-        line = lines[i]
-        if "FAILED:" in line:
-            # Extract target name from path like "tests/fl_async.dll.p/fl/async.cpp.o"
-            target = line.split("FAILED:", 1)[1].strip()
-            # Strip optional [code=N] prefix
-            target = re.sub(r"^\[code=\d+\]\s*", "", target)
-            m = re.match(r"tests[/\\]([^.]+)\.", target)
-            test_name = m.group(1) if m else "unknown"
-
-            # Collect error lines until next FAILED or ninja stop
-            error_lines = [line]
-            i += 1
-            while i < len(lines):
-                if "FAILED:" in lines[i] or (
-                    "ninja:" in lines[i] and "build stopped" in lines[i]
-                ):
-                    break
-                error_lines.append(lines[i])
-                i += 1
-
-            existing = failures.get(test_name, "")
-            failures[test_name] = existing + "\n".join(error_lines) + "\n"
-        else:
-            i += 1
-
-    return failures
-
-
-def _write_testlog_failures(build_dir: Path, log_dir: Path) -> None:
-    """Parse testlog.txt and write per-test failure logs.
-
-    Args:
-        build_dir: Meson build directory (contains meson-logs/testlog.txt)
-        log_dir: Directory to write failure logs to
-    """
-    from ci.meson.testlog_parser import parse_testlog
-
-    testlog = build_dir / "meson-logs" / "testlog.txt"
-    entries = parse_testlog(testlog)
-    for entry in entries:
-        if "exit status 0" in entry.result:
-            continue
-        content = f"# Test: {entry.test_name}\n"
-        content += f"# Result: {entry.result}\n"
-        content += f"# Duration: {entry.duration}\n\n"
-        if entry.stdout:
-            content += "--- stdout ---\n" + entry.stdout + "\n\n"
-        if entry.stderr:
-            content += "--- stderr ---\n" + entry.stderr + "\n"
-        safe_name = entry.test_name.replace(":", "_").replace("/", "_")
-        _write_failure_log(log_dir, safe_name, "run", content)
-
-
-def _start_zccache_session(build_dir: Path) -> None:
-    """Start a zccache session with logging to the build directory.
-
-    Sets ZCCACHE_SESSION_ID in os.environ so all subsequent compiler
-    invocations through zccache use this session and get logged.
-    The session auto-cleans up via PID monitoring when the process exits.
-
-    Also sets ZCCACHE_LINK_DEPLOY_CMD so zccache invokes
-    `clang-tool-chain-libdeploy` after each cache-miss link. This
-    materializes runtime DLLs next to the linked binary (on Windows
-    these otherwise don't get deployed because the native ctc-clang++
-    trampoline skips Python post-link hooks) and lets zccache's
-    side-effect scanner bundle them into the cached artifact set —
-    fixing flaky error-126 DLL load failures under parallel test
-    execution. See https://github.com/FastLED/FastLED/issues/2329.
-    """
-    # Set the deploy hook regardless of zccache binary availability —
-    # zccache reads it from client env if set, and it's a no-op otherwise.
-    if "ZCCACHE_LINK_DEPLOY_CMD" not in os.environ:
-        os.environ["ZCCACHE_LINK_DEPLOY_CMD"] = "clang-tool-chain-libdeploy"
-    os.environ.setdefault("ZCCACHE_STRICT_PATHS", "absolute")
-
-    zccache_bin = _find_zccache_binary()
-    if not zccache_bin:
-        return
-
-    # Log file goes in the build directory
-    build_dir.mkdir(parents=True, exist_ok=True)
-    log_path = build_dir / "zccache-session.log"
-    journal_path = build_dir / "zccache-session.jsonl"
-
-    try:
-        result = subprocess.run(
-            [
-                zccache_bin,
-                "session-start",
-                "--stats",
-                "--log",
-                str(log_path),
-                "--journal",
-                str(journal_path),
-            ],
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-        if result.returncode == 0:
-            import json
-            import re
-
-            output = result.stdout.strip()
-            try:
-                data = json.loads(output)
-                session_id = str(data["session_id"])
-            except (json.JSONDecodeError, KeyError):
-                # Windows paths with backslashes break json.loads.
-                # Extract session_id with regex as fallback.
-                m = re.search(r'"session_id"\s*:\s*"([^"]+)"', output)
-                if m:
-                    session_id = m.group(1)
-                else:
-                    session_id = output
-            os.environ["ZCCACHE_SESSION_ID"] = session_id
-            _ts_print(f"[ZCCACHE] Session {session_id} started, log: {log_path}")
-    except KeyboardInterrupt as ki:
-        handle_keyboard_interrupt(ki)
-        raise
-    except Exception:
-        pass  # Non-fatal — build proceeds without session logging
+    return meson_test_name, fallback_test_name, fuzzy_candidates
 
 
 def run_meson_build_and_test(
@@ -487,16 +134,12 @@ def run_meson_build_and_test(
         MesonTestResult with success status, duration, and test counts
     """
     start_time = time.time()
-
-    # Initialize build timer for phase tracking
     build_timer = BuildTimer()
     build_timer.start()
 
-    # Determine build mode: explicit build_mode parameter takes precedence over debug flag
     if build_mode is None:
         build_mode = "debug" if debug else "quick"
 
-    # Validate build_mode
     if build_mode not in ["quick", "debug", "release", "profile"]:
         _ts_print(
             f"[MESON] Error: Invalid build_mode '{build_mode}'. Must be 'quick', 'debug', 'release', or 'profile'",
@@ -510,16 +153,10 @@ def run_meson_build_and_test(
             num_tests_failed=0,
         )
 
-    # Construct mode-specific build directory
-    # This enables caching libfastled.a per mode when source unchanged but flags differ
-    # Example: .build/meson-quick, .build/meson-debug, .build/meson-release
-    original_build_dir = build_dir
+    # Mode-specific build dir lets libfastled.a cache per mode when source is
+    # unchanged but compiler flags differ (e.g. .build/meson-quick vs ...-debug).
     build_dir = build_dir.parent / f"{build_dir.name}-{build_mode}"
 
-    # Build dir and mode info is consolidated in setup_meson_build output
-    # No need for separate verbose messages here
-
-    # Check if Meson is installed
     if not check_meson_installed():
         _ts_print("[MESON] Error: Meson build system is not installed", file=sys.stderr)
         _ts_print("[MESON] Install with: pip install meson ninja", file=sys.stderr)
@@ -531,68 +168,23 @@ def run_meson_build_and_test(
             num_tests_failed=0,
         )
 
-    # Clean if requested
     if clean and build_dir.exists():
         _ts_print(f"[MESON] Cleaning build directory: {build_dir}")
         _safe_rmtree(build_dir)
 
-    # Setup build
-    # Pass debug=True when build_mode is "debug" to enable sanitizers and full symbols
-    # Also pass explicit build_mode to ensure proper cache invalidation on mode changes
     use_debug = build_mode == "debug"
-
-    # Configure ASan/LSan options for debug mode using clang-tool-chain's API
-    # This automatically:
-    # - Sets ASAN_OPTIONS with optimal settings (fast_unwind_on_malloc=0:symbolize=1)
-    # - Sets LSAN_OPTIONS with optimal settings
-    # - Sets ASAN_SYMBOLIZER_PATH to llvm-symbolizer from clang-tool-chain
-    # The API only injects settings when sanitizers are detected in compiler flags
     if use_debug:
-        # Get sanitizer-configured environment from clang-tool-chain
-        # Pass compiler flags so the API knows sanitizers are active
-        from clang_tool_chain import (
-            prepare_sanitizer_environment,  # noqa: PLC0415 - lazy: ~60ms saved on non-debug paths
-        )
-
-        sanitizer_flags = ["-fsanitize=address"]
-        sanitizer_env = prepare_sanitizer_environment(
-            base_env=os.environ.copy(),
-            compiler_flags=sanitizer_flags,
-        )
-        # Update current environment with sanitizer settings
-        os.environ.update(sanitizer_env)
-
-        # Add LSAN suppression file for known false positives (pthread library leaks)
-        lsan_suppressions = source_dir / "tests" / "lsan_suppressions.txt"
-        if lsan_suppressions.exists():
-            existing_lsan = os.environ.get("LSAN_OPTIONS", "")
-            suppression_opt = f"suppressions={lsan_suppressions}"
-            if existing_lsan:
-                os.environ["LSAN_OPTIONS"] = f"{existing_lsan}:{suppression_opt}"
-            else:
-                os.environ["LSAN_OPTIONS"] = suppression_opt
-
-        if verbose:
-            symbolizer_path = sanitizer_env.get("ASAN_SYMBOLIZER_PATH")
-            if symbolizer_path:
-                _ts_print(f"[MESON] Set ASAN_SYMBOLIZER_PATH={symbolizer_path}")
+        _setup_sanitizer_env(source_dir, verbose)
 
     _ts_print(f"Preparing build ({build_mode} mode)...")
-
-    # Start a zccache session so all compiler invocations are logged
     _start_zccache_session(build_dir)
 
-    # Initialize phase tracker for error diagnostics
     phase_tracker = PhaseTracker(build_dir, build_mode)
     phase_tracker.set_phase("CONFIGURE")
 
-    # Always configure Meson with examples enabled to avoid expensive
-    # reconfigure (~9s) when switching between unit-only and full modes.
-    # Example exclusion is handled at compile time (target selection) and
-    # test time (suite filtering via exclude_suites), not at configure time.
-
+    # Always configure with examples enabled — example exclusion is handled at
+    # compile-time (target selection) + test-time (suite filter), not configure-time.
     _ts_print("[MESON] Configuring build (compiler probes may take 20-30s)...")
-
     if not setup_meson_build(
         source_dir,
         build_dir,
@@ -612,639 +204,63 @@ def run_meson_build_and_test(
             num_tests_failed=0,
         )
 
-    # Checkpoint: Meson configuration complete
     build_timer.checkpoint("meson_setup_done")
-
-    # Perform periodic maintenance on Ninja dependency database (once per day)
-    # This helps prevent .ninja_deps corruption and keeps builds fast
     perform_ninja_maintenance(build_dir)
-
-    # Checkpoint: Ninja maintenance complete
     build_timer.checkpoint("ninja_maintenance_done")
 
-    # Note: PCH dependency tracking is handled automatically by Ninja via depfiles.
-    # The compile_pch.py wrapper ensures depfiles reference the .pch output correctly,
-    # and Ninja loads these dependencies into .ninja_deps database (897 headers tracked).
-    # No manual staleness checking needed - Ninja rebuilds PCH when any dependency changes.
-
-    # Convert test name to executable name (convert to lowercase to match Meson target naming)
-    # Support both test_*.exe and *.exe naming patterns with fallback
-    # Try test_<name> first (for tests like test_async.cpp), then fallback to <name> (for async.cpp)
+    # Resolve test name candidates (only when a specific test was requested).
     meson_test_name: Optional[str] = None
     fallback_test_name: Optional[str] = None
     fuzzy_candidates: list[str] = []
     if test_name:
-        # Convert to lowercase to match Meson target naming convention
-        test_name_lower = test_name.lower()
+        meson_test_name, fallback_test_name, fuzzy_candidates = (
+            _resolve_test_name_candidates(build_dir, test_name)
+        )
 
-        # Check if test name already starts with "test_"
-        if test_name_lower.startswith("test_"):
-            # Already has test_ prefix, try as-is first, then without prefix as fallback
-            meson_test_name = test_name_lower
-            # Fallback: strip test_ prefix to try bare name
-            fallback_test_name = test_name_lower[5:]  # Remove "test_" prefix
-        else:
-            # Try with test_ prefix first, then fallback to without prefix
-            meson_test_name = f"test_{test_name_lower}"
-            fallback_test_name = test_name_lower
-
-        # Build fuzzy candidate list using meson introspect after setup
-        # This handles patterns like fl_async.exe when user specifies "async"
-        # Note: We'll populate this after meson setup, since introspect requires
-        # a configured build directory
-        # For now, try legacy file-based approach as fallback
-        tests_dir = build_dir / "tests"
-        if tests_dir.exists():
-            # Look for executables matching *<name>*
-            exe_pattern = f"*{test_name_lower}*.exe"
-            matches = glob.glob(str(tests_dir / exe_pattern))
-            # Extract just the executable name without path and extension
-            for match_path in matches:
-                exe_name = Path(match_path).stem  # Remove .exe extension
-                # Add to candidates if not already in primary/fallback
-                if exe_name not in [meson_test_name, fallback_test_name]:
-                    fuzzy_candidates.append(exe_name)
-
-    # Compile and test with build lock to prevent conflicts with example builds
-    # STREAMING MODE: When no specific test requested, use stream_compile_and_run_tests()
-    # for parallel compilation + execution
     use_streaming = not meson_test_name
-
-    # Create build optimizer for DLL relink suppression via binary fingerprinting.
-    # Only used in streaming mode (all-tests run), where the 328-DLL relink cascade
-    # from zccache mtime updates causes the biggest performance penalty.
+    # BuildOptimizer suppresses the 328-DLL relink cascade; only worth it for
+    # the streaming all-tests path, where the cascade hurts most.
     build_optimizer = make_build_optimizer(build_dir) if use_streaming else None
 
     try:
-        with libfastled_build_lock():  # uses LOCK_TIMEOUT_S default
+        with libfastled_build_lock():
             if use_streaming:
-                # STREAMING EXECUTION PATH
-                # Compile and run tests in parallel - as soon as a test finishes linking,
-                # it's immediately executed while other tests continue compiling
-                if verbose:
-                    _ts_print(
-                        "[MESON] Using streaming execution (compile + test in parallel)"
-                    )
-
-                # Dict to capture per-test output for failure logging
-                _failed_test_outputs: dict[str, str] = {}
-
-                # Create test callback for streaming execution
-                # Prepare environment with fastled shared lib dir on PATH
-                _streaming_env = os.environ.copy()
-                _fastled_lib_dir = str(build_dir / "ci" / "meson" / "native")
-                if os.name == "nt":
-                    # Add fastled.dll dir + clang toolchain runtime dirs
-                    # (libwinpthread-1.dll etc.) so DLLs load without MSYS2
-                    from clang_tool_chain import get_runtime_dll_paths
-
-                    _extra_dirs = os.pathsep.join(
-                        [_fastled_lib_dir] + get_runtime_dll_paths()
-                    )
-                    _streaming_env["PATH"] = (
-                        _extra_dirs + os.pathsep + _streaming_env.get("PATH", "")
-                    )
-                else:
-                    _streaming_env["LD_LIBRARY_PATH"] = (
-                        _fastled_lib_dir
-                        + os.pathsep
-                        + _streaming_env.get("LD_LIBRARY_PATH", "")
-                    )
-
-                # Lock for thread-safe writes to _failed_test_outputs from
-                # parallel worker threads.
-                _failed_outputs_lock = threading.Lock()
-
-                # Track running subprocesses so they can be killed on halt.
-                _active_procs: set[RunningProcess] = set()
-                _active_procs_lock = threading.Lock()
-
-                def test_callback(test_path: Path) -> TestResult:
-                    """Run a single test executable and return TestResult.
-
-                    Output is always captured silently (echo=False) so that the
-                    caller can print it sequentially on the main thread, avoiding
-                    interleaved output when tests run in parallel.
-                    """
-                    try:
-                        # Handle shared library tests (.dll/.so/.dylib): use runner to load them
-                        if test_path.suffix.lower() in (".dll", ".so", ".dylib"):
-                            runner_suffix = ".exe" if os.name == "nt" else ""
-                            if test_path.parent.name == "tests":
-                                runner = build_dir / "tests" / f"runner{runner_suffix}"
-                            else:
-                                runner = (
-                                    build_dir
-                                    / "examples"
-                                    / f"example_runner{runner_suffix}"
-                                )
-                            if not runner.exists():
-                                return TestResult(
-                                    success=False,
-                                    output=f"[MESON] ⚠️  Runner not found: {runner}",
-                                )
-                            cmd = [str(runner), str(test_path)]
-                        else:
-                            cmd = [str(test_path)]
-
-                        # Inject test file filter into subprocess env if the
-                        # streaming layer attached one (os.environ was already
-                        # copied into _streaming_env before the filter was set).
-                        env = _streaming_env
-                        file_filter = getattr(test_callback, "_test_file_filter", None)
-                        if file_filter:
-                            env = dict(_streaming_env)
-                            env["FL_TEST_FILE_FILTER"] = file_filter
-
-                        # Use environment with fastled shared lib dir and ASAN_OPTIONS
-                        proc = RunningProcess(
-                            cmd,
-                            cwd=source_dir,  # Run from project root
-                            timeout=600,  # 10 minute timeout per test
-                            auto_run=True,
-                            check=False,
-                            env=env,
-                            output_formatter=TimestampFormatter(),
-                        )
-
-                        # Register so the process can be killed on halt.
-                        with _active_procs_lock:
-                            _active_procs.add(proc)
-                        try:
-                            # Always capture silently — caller prints sequentially
-                            returncode = proc.wait(echo=False)
-                        finally:
-                            with _active_procs_lock:
-                                _active_procs.discard(proc)
-                        captured = str(proc.stdout)
-
-                        # Enhanced error detection for streaming tests
-                        if returncode != 0:
-                            # Store output for end-of-run failure summary
-                            with _failed_outputs_lock:
-                                _failed_test_outputs[test_path.stem] = captured
-
-                        return TestResult(success=returncode == 0, output=captured)
-
-                    except KeyboardInterrupt as ki:
-                        handle_keyboard_interrupt(ki)
-                        return TestResult(
-                            success=False,
-                            output="[MESON] Test interrupted by user",
-                        )
-                    except Exception as e:
-                        return TestResult(
-                            success=False,
-                            output=f"[MESON] Test execution error: {e}",
-                        )
-
-                def _kill_active_procs() -> None:
-                    """Kill all running test subprocesses (called on halt)."""
-                    with _active_procs_lock:
-                        for p in list(_active_procs):
-                            try:
-                                p.kill()
-                            except KeyboardInterrupt as ki:
-                                handle_keyboard_interrupt(ki)
-                            except Exception:
-                                pass
-
-                setattr(test_callback, "kill_all", _kill_active_procs)
-
-                # Determine compile timeout based on build mode
-                # Debug builds with ASAN are significantly slower, especially on Windows CI
-                # Default: 10 minutes (600s), Debug: 45 minutes (2700s)
-                compile_timeout = 2700 if use_debug else 600
-
-                # Determine compile target: build everything (tests + examples) in
-                # a single Ninja invocation when examples are included, or just
-                # default targets (unit tests only) when examples are excluded.
-                include_examples = not (
-                    exclude_suites and "fastled:examples" in exclude_suites
-                )
-                compile_target = "all-with-examples" if include_examples else None
-
-                # PROACTIVE CHECK: Verify the all-with-examples target exists
-                # in build.ninja before trying to compile it. The marker file
-                # (.enable_examples_config) can get desynchronized from the
-                # actual build configuration, causing "target not found" errors.
-                if compile_target == "all-with-examples":
-                    build_ninja = build_dir / "build.ninja"
-                    if build_ninja.exists():
-                        try:
-                            content = build_ninja.read_text(encoding="utf-8")
-                            if "all-with-examples" not in content:
-                                _ts_print(
-                                    "[MESON] ⚠️  Target 'all-with-examples' missing from build.ninja"
-                                )
-                                _ts_print(
-                                    "[MESON] 🔄 Forcing reconfiguration with enable_examples=true..."
-                                )
-                                setup_meson_build(
-                                    source_dir,
-                                    build_dir,
-                                    reconfigure=True,
-                                    debug=use_debug,
-                                    check=check,
-                                    build_mode=build_mode,
-                                    verbose=verbose,
-                                    enable_examples=True,
-                                    enable_unit_tests=True,
-                                )
-                        except (OSError, IOError):
-                            pass  # If we can't read it, let compilation try and fail
-
-                # Run streaming compilation and testing
-                sr = stream_compile_and_run_tests(
+                ctx = StreamingContext(
+                    source_dir=source_dir,
                     build_dir=build_dir,
-                    test_callback=test_callback,
-                    target=compile_target,
+                    use_debug=use_debug,
+                    check=check,
+                    build_mode=build_mode,
                     verbose=verbose,
-                    compile_timeout=compile_timeout,
-                    build_optimizer=build_optimizer,
+                    exclude_suites=exclude_suites,
                     test_file_filter=test_file_filter,
+                    log_failures=log_failures,
+                    start_time=start_time,
                     build_timer=build_timer,
+                    build_optimizer=build_optimizer,
                 )
+                return run_streaming_path(ctx)
 
-                # SELF-HEALING: If compilation failed due to stale build state,
-                # recover and retry once
-                if not sr.success and is_stale_build_error(sr.compile_output):
-                    if _recover_stale_build(
-                        source_dir,
-                        build_dir,
-                        use_debug,
-                        check,
-                        build_mode,
-                        verbose,
-                        enable_examples=True,
-                    ):
-                        # Retry compilation after recovery
-                        sr = stream_compile_and_run_tests(
-                            build_dir=build_dir,
-                            test_callback=test_callback,
-                            target=compile_target,
-                            verbose=verbose,
-                            compile_timeout=compile_timeout,
-                            build_optimizer=build_optimizer,
-                            test_file_filter=test_file_filter,
-                            build_timer=build_timer,
-                        )
+            seq_ctx = SequentialCompileContext(
+                source_dir=source_dir,
+                build_dir=build_dir,
+                build_mode=build_mode,
+                verbose=verbose,
+                test_name=test_name,
+                meson_test_name=meson_test_name,
+                fallback_test_name=fallback_test_name,
+                fuzzy_candidates=fuzzy_candidates,
+                log_failures=log_failures,
+                start_time=start_time,
+                build_timer=build_timer,
+                phase_tracker=phase_tracker,
+            )
+            compile_outcome = run_sequential_compile(seq_ctx)
+            if not compile_outcome.success:
+                assert compile_outcome.error_result is not None
+                return compile_outcome.error_result
+            meson_test_name = compile_outcome.meson_test_name
 
-                # Save binary fingerprints of libfastled.a and all DLLs after a
-                # successful build so future runs can suppress unnecessary relinking.
-                if sr.success and build_optimizer is not None:
-                    build_optimizer.save_fingerprints(build_dir)
-
-                duration = time.time() - start_time
-                num_tests_run = sr.num_passed + sr.num_failed
-
-                # FALLBACK: If no tests were run during streaming (e.g., everything already compiled),
-                # fall back to running all tests via Meson test runner
-                # Show simplified message instead of detailed "0/0" breakdown
-                if num_tests_run == 0 and sr.success:
-                    if verbose:
-                        print_info(
-                            "[MESON] Build up-to-date, running existing tests..."
-                        )
-                    # Record compile_done before test fallback
-                    build_timer.checkpoint("compile_done")
-
-                    # Note: run_meson_test already prints the RUNNING TESTS banner
-                    result = run_meson_test(
-                        build_dir,
-                        test_name=None,
-                        verbose=verbose,
-                        exclude_suites=exclude_suites,
-                    )
-
-                    # Propagate full timing into result so the summary table
-                    # shows setup/compile/test phases instead of just test duration
-                    build_timer.checkpoint("test_execution_done")
-                    build_timer.calculate_phases()
-                    test_only_duration = result.duration
-                    result.duration = time.time() - start_time
-                    result.meson_setup_time = build_timer.meson_setup_time
-                    result.ninja_maintenance_time = build_timer.ninja_maintenance_time
-                    result.compile_time = build_timer.compile_time
-                    result.test_execution_time = test_only_duration
-
-                    # Calculate compile sub-phase durations from timestamps
-                    _apply_compile_sub_phases(result, sr.compile_sub_phases)
-                    # Write per-test failure logs from testlog.txt
-                    if not result.success and log_failures is not None:
-                        _write_testlog_failures(build_dir, log_failures)
-                    return result
-
-                if not sr.success:
-                    print_error(
-                        f"[MESON] ❌ Some tests failed ({sr.num_passed}/{num_tests_run} tests in {duration:.2f}s)"
-                    )
-                    # Snapshot under lock — workers may still be running
-                    # after executor.shutdown(wait=False).
-                    with _failed_outputs_lock:
-                        _failed_snapshot = dict(_failed_test_outputs)
-
-                    # Print captured error outputs to console
-                    if _failed_snapshot:
-                        print_error(f"\n{'=' * 80}")
-                        print_error(
-                            f"[MESON] Test failure details ({len(_failed_snapshot)} tests):"
-                        )
-                        print_error(f"{'=' * 80}")
-                        for tname, output in _failed_snapshot.items():
-                            print_error(f"\n--- {tname} ---")
-                            for line in output.splitlines()[-30:]:
-                                print_error(f"  {line}")
-                        print_error(f"{'=' * 80}")
-                    # Write failure logs
-                    if log_failures is not None:
-                        if num_tests_run == 0:
-                            # Compilation failed (no tests ran) — write per-target compile logs
-                            per_target = _extract_compile_failures(sr.compile_output)
-                            if per_target:
-                                for tname, output in per_target.items():
-                                    _write_failure_log(
-                                        log_failures, tname, "compile", output
-                                    )
-                            else:
-                                # Couldn't parse per-target; write full output
-                                _write_failure_log(
-                                    log_failures,
-                                    "compile",
-                                    "compile",
-                                    sr.compile_output,
-                                )
-                        else:
-                            # Tests ran and some failed — write per-test run logs
-                            for tname, output in _failed_snapshot.items():
-                                _write_failure_log(log_failures, tname, "run", output)
-                    return MesonTestResult(
-                        success=False,
-                        duration=duration,
-                        num_tests_run=num_tests_run,
-                        num_tests_passed=sr.num_passed,
-                        num_tests_failed=sr.num_failed,
-                        failed_test_names=sr.failed_names,
-                    )
-
-                # Print timing breakdown
-                _ts_print(build_timer.format_table())
-
-                print_success(
-                    f"✅ All tests passed ({sr.num_passed}/{num_tests_run} in {duration:.2f}s)"
-                )
-                result = MesonTestResult(
-                    success=True,
-                    duration=duration,
-                    num_tests_run=num_tests_run,
-                    num_tests_passed=sr.num_passed,
-                    num_tests_failed=sr.num_failed,
-                )
-                result = _apply_phase_timing(result, build_timer)
-                _apply_compile_sub_phases(result, sr.compile_sub_phases)
-                return result
-
-            else:
-                # TRADITIONAL SEQUENTIAL PATH
-                # Used for specific test requests
-                compile_target: Optional[str] = None
-                if meson_test_name:
-                    compile_target = meson_test_name
-
-                # Try target resolution with fallback - suppress all output during discovery
-                # to avoid confusing users with internal target name guessing
-                targets_to_try = [compile_target]
-                if fallback_test_name and fallback_test_name != compile_target:
-                    targets_to_try.append(fallback_test_name)
-
-                # Build the full list of candidates up front so we can try quietly
-                if test_name:
-                    # Get fuzzy candidates early
-                    fuzzy_candidates = (
-                        get_fuzzy_test_candidates(build_dir, test_name)
-                        if not fuzzy_candidates
-                        else fuzzy_candidates
-                    )
-                    # Add fuzzy candidates not already in the list
-                    for c in fuzzy_candidates:
-                        if c not in targets_to_try:
-                            targets_to_try.append(c)
-
-                # Add path-qualified variants for disambiguation.
-                # Meson supports "subdir/target" format to resolve ambiguous names
-                # (e.g., "tests/fastled" disambiguates from the library "fastled").
-                path_qualified: list[str] = []
-                for candidate in targets_to_try:
-                    if candidate and "/" not in candidate:
-                        # Try tests/<name> and tests/profile/<name>
-                        for prefix in ["tests/", "tests/profile/"]:
-                            qualified = f"{prefix}{candidate}"
-                            if (
-                                qualified not in targets_to_try
-                                and qualified not in path_qualified
-                            ):
-                                path_qualified.append(qualified)
-                targets_to_try.extend(path_qualified)
-
-                # Show build stage banner before compilation starts
-                # WARNING: This build progress reporting is essential for user feedback!
-                #   Do NOT suppress this message - it provides:
-                #   1. Build mode visibility (quick/debug/release)
-                #   2. Stage progression (users know compilation has started)
-                #   3. Context for subsequent build messages (libraries, PCH, tests)
-                _ts_print(f"[BUILD] Building FastLED engine ({build_mode} mode)...")
-
-                # When there are multiple candidates, run all in quiet mode
-                # Only show banner once with final resolved target
-                has_fallbacks = len(targets_to_try) > 1
-                compilation_success = False
-                successful_target: Optional[str] = None
-                last_error_output: str = ""
-                last_result: Optional[CompileResult] = (
-                    None  # Track last result for error reporting
-                )
-                all_suppressed_errors: list[
-                    str
-                ] = []  # Collect validation errors from all attempts
-
-                for candidate in targets_to_try:
-                    # Track compilation phase for error diagnostics
-                    phase_tracker.set_phase(
-                        "COMPILE",
-                        test_name=test_name,
-                        target=candidate,
-                        path="sequential",
-                    )
-
-                    # Use quiet mode when there are fallbacks (suppress failure noise)
-                    result = compile_meson(
-                        build_dir,
-                        target=candidate,
-                        quiet=has_fallbacks,
-                        verbose=verbose,
-                    )
-                    last_result = result  # Save for error reporting
-                    compilation_success = result.success
-                    if compilation_success:
-                        # Track link phase for successful compilation
-                        phase_tracker.set_phase(
-                            "LINK",
-                            test_name=test_name,
-                            target=candidate,
-                            path="sequential",
-                        )
-
-                        successful_target = candidate
-                        compile_target = candidate
-                        # Strip path prefix for executable lookup: meson_test_name is used
-                        # to find binaries in build_dir/tests/, so "tests/fastled" → "fastled"
-                        meson_test_name = (
-                            candidate.removeprefix("tests/") if candidate else candidate
-                        )
-                        break
-                    last_error_output = result.error_output
-                    # Collect suppressed validation errors (capped at 5 per attempt)
-                    all_suppressed_errors.extend(result.suppressed_errors)
-
-                # Checkpoint: Compilation complete (successful or not)
-                build_timer.checkpoint("compile_done")
-
-                # Show the final result after target resolution
-                if compilation_success and has_fallbacks:
-                    print_banner("Compile", "📦", verbose=verbose)
-                    print(f"Compiling: {successful_target}")
-                    # Note: Don't print "Compilation successful" - redundant before Running phase
-
-                if not compilation_success:
-                    # SMART ERROR DETECTION: Check for saved compilation error
-                    last_error_file = (
-                        build_dir.parent / "meson-state" / "last-compilation-error.txt"
-                    )
-                    phase_data = phase_tracker.get_phase()
-                    phase_name = (
-                        phase_data.get("phase", "COMPILE") if phase_data else "COMPILE"
-                    )
-
-                    # Display header with phase context
-                    print_error(f"\n[MESON] ❌ Build FAILED during {phase_name} phase")
-                    print_error("=" * 80)
-
-                    # Always show full log path prominently if available
-                    if last_result and last_result.error_log_file:
-                        print_error(f"[MESON] 📄 Full compilation log:")
-                        print_error(f"[MESON]    {last_result.error_log_file}")
-                        print_error("")
-
-                    # Try to show error snippet from saved file or directly from log
-                    error_snippet_shown = False
-
-                    if last_error_file.exists():
-                        # Show saved error snippet with metadata
-                        with open(last_error_file, "r", encoding="utf-8") as f:
-                            error_context = f.read()
-                            # Print with error line highlighting
-                            for line in error_context.splitlines():
-                                if _is_compilation_error(line):
-                                    print_error(f"\033[91m{line}\033[0m")  # Red
-                                else:
-                                    print_error(line)
-                        error_snippet_shown = True
-
-                    elif (
-                        last_result
-                        and last_result.error_log_file
-                        and last_result.error_log_file.exists()
-                    ):
-                        # Fallback: read last 50 error lines directly from log file
-                        print_error("[MESON] 🔍 Error excerpt from compilation log:")
-                        print_error("")
-                        try:
-                            with open(
-                                last_result.error_log_file, "r", encoding="utf-8"
-                            ) as f:
-                                log_lines = f.readlines()
-                                # Find error lines and show context
-                                error_lines = [
-                                    (i, line.rstrip())
-                                    for i, line in enumerate(log_lines)
-                                    if _is_compilation_error(line)
-                                ]
-                                if error_lines:
-                                    # Show last error with context (up to 10 lines)
-                                    last_error_idx = error_lines[-1][0]
-                                    start_idx = max(0, last_error_idx - 5)
-                                    end_idx = min(len(log_lines), last_error_idx + 5)
-                                    for line in log_lines[start_idx:end_idx]:
-                                        line = line.rstrip()
-                                        if _is_compilation_error(line):
-                                            print_error(f"\033[91m{line}\033[0m")  # Red
-                                        else:
-                                            print_error(line)
-                                    error_snippet_shown = True
-                        except KeyboardInterrupt as ki:
-                            handle_keyboard_interrupt(ki)
-                            raise
-                        except Exception as e:
-                            print_error(f"[MESON] ⚠️  Could not read error log: {e}")
-
-                    if error_snippet_shown:
-                        print_error("=" * 80)
-                    else:
-                        # No error snippet available - show legacy diagnostics
-                        # SELF-HEALING DIAGNOSTICS: Show validation errors that were suppressed during fallback
-                        if all_suppressed_errors:
-                            print_error(
-                                "[MESON] Self-healing triggered - showing suppressed validation errors:"
-                            )
-                            for err in all_suppressed_errors[
-                                :5
-                            ]:  # Cap at 5 total (already capped per-attempt)
-                                print_error(f"  {err}")
-                            print_error("")
-
-                        # Print diagnostic: show what was tried and why it failed
-                        print_error(
-                            f"[MESON] Compilation failed for test '{test_name}'"
-                        )
-                        if has_fallbacks:
-                            tried = ", ".join(str(t) for t in targets_to_try)
-                            print_error(f"[MESON] Tried targets: {tried}")
-                        # Show the last meson error if it's informative (e.g., ambiguous target)
-                        if last_error_output:
-                            for line in last_error_output.splitlines():
-                                if "ERROR:" in line or "Can't invoke target" in line:
-                                    print_error(f"[MESON] {line.strip()}")
-                                    break
-                        print_error("=" * 80)
-
-                    # Write compilation failure log
-                    if log_failures is not None:
-                        compile_content = last_error_output
-                        if (
-                            last_result
-                            and last_result.error_log_file
-                            and last_result.error_log_file.exists()
-                        ):
-                            try:
-                                compile_content = last_result.error_log_file.read_text(
-                                    encoding="utf-8", errors="replace"
-                                )
-                            except OSError:
-                                pass
-                        _write_failure_log(
-                            log_failures,
-                            test_name or "unknown",
-                            "compile",
-                            compile_content,
-                        )
-
-                    return MesonTestResult(
-                        success=False,
-                        duration=time.time() - start_time,
-                        num_tests_run=0,
-                        num_tests_passed=0,
-                        num_tests_failed=0,
-                    )
     except TimeoutError as e:
         _ts_print(f"[MESON] {e}", file=sys.stderr)
         return MesonTestResult(
@@ -1255,8 +271,7 @@ def run_meson_build_and_test(
             num_tests_failed=0,
         )
 
-    # In IWYU check mode, we only compile (to run static analysis)
-    # Skip test execution and return success after successful compilation
+    # IWYU check mode only compiles for static analysis; skip test execution.
     if check:
         duration = time.time() - start_time
         _ts_print(
@@ -1270,305 +285,24 @@ def run_meson_build_and_test(
             num_tests_failed=0,
         )
 
-    # Run tests (traditional path only - streaming already ran tests above)
-    # When a specific test is requested, run the executable directly
-    # to avoid meson test discovery issues
     if meson_test_name:
-        # Find the test executable or DLL
-        # Tests can be either:
-        # 1. A copied runner .exe (e.g., fl_async.exe) - legacy naming
-        # 2. A DLL loaded by the shared runner.exe (e.g., fl_fixed_point_s16x16.dll)
-        # 3. A profile test in tests/profile/ subdirectory
-        test_cmd: list[str] = []
-        _artifact_path: Optional[Path] = None  # Tracked for test_result_cache update
-
-        # Check for profile tests (in tests/profile/ subdirectory)
-        # Profile tests can have any name (not just profile_* prefix)
-        profile_exe_path = build_dir / "tests" / "profile" / f"{meson_test_name}.exe"
-        if profile_exe_path.exists():
-            test_cmd = [str(profile_exe_path)]
-            _artifact_path = profile_exe_path
-        else:
-            # Try Unix variant (no .exe extension)
-            profile_exe_unix = build_dir / "tests" / "profile" / meson_test_name
-            if profile_exe_unix.exists():
-                test_cmd = [str(profile_exe_unix)]
-                _artifact_path = profile_exe_unix
-
-        # If not a profile test, check standard locations
-        if not test_cmd:
-            test_exe_path = build_dir / "tests" / f"{meson_test_name}.exe"
-            if test_exe_path.exists():
-                # Found copied runner .exe (may be a copy of runner.exe that auto-loads the DLL)
-                test_cmd = [str(test_exe_path)]
-                # Prefer DLL as artifact_path: DLL changes with test code; .exe is a runner copy
-                _dll_candidate = build_dir / "tests" / f"{meson_test_name}.dll"
-                _artifact_path = (
-                    _dll_candidate if _dll_candidate.exists() else test_exe_path
-                )
-
-        if not test_cmd:
-            # Try Unix variant (no .exe extension)
-            test_exe_unix = build_dir / "tests" / meson_test_name
-            if test_exe_unix.exists():
-                test_cmd = [str(test_exe_unix)]
-                _artifact_path = test_exe_unix
-            else:
-                # Try DLL-based test architecture: runner + test.dll/.so/.dylib
-                # On Windows: runner.exe + test.dll
-                # On Linux: runner + test.so
-                # On macOS: runner + test.dylib
-                runner_name = "runner.exe" if os.name == "nt" else "runner"
-                runner_exe = build_dir / "tests" / runner_name
-
-                if not runner_exe.exists():
-                    # Try compiling the runner target
-                    _runner_result = compile_meson(
-                        build_dir, target="runner", quiet=True, verbose=verbose
-                    )
-
-                if runner_exe.exists():
-                    # Try each shared library extension
-                    for ext in (".dll", ".so", ".dylib"):
-                        candidate = build_dir / "tests" / f"{meson_test_name}{ext}"
-                        if candidate.exists():
-                            test_cmd = [str(runner_exe), str(candidate)]
-                            _artifact_path = candidate
-                            break
-
-        if not test_cmd:
-            _ts_print(
-                f"[MESON] Error: test executable not found for: {meson_test_name}",
-                file=sys.stderr,
+        return run_direct_test(
+            DirectTestContext(
+                source_dir=source_dir,
+                build_dir=build_dir,
+                meson_test_name=meson_test_name,
+                build_mode=build_mode,
+                verbose=verbose,
+                log_failures=log_failures,
+                start_time=start_time,
+                build_timer=build_timer,
+                phase_tracker=phase_tracker,
             )
-            return MesonTestResult(
-                success=False,
-                duration=time.time() - start_time,
-                num_tests_run=0,
-                num_tests_passed=0,
-                num_tests_failed=0,
-            )
-
-        print_banner("Test", "▶️", verbose=verbose)
-        print(f"Running: {meson_test_name}")
-
-        # Track execution phase for error diagnostics
-        phase_tracker.set_phase("EXECUTE", test_name=meson_test_name, path="sequential")
-
-        # Run the test executable directly
-        try:
-            # Ensure fastled shared library is discoverable at runtime
-            test_env = os.environ.copy()
-            fastled_lib_dir = str(build_dir / "ci" / "meson" / "native")
-            if os.name == "nt":
-                from clang_tool_chain import get_runtime_dll_paths
-
-                _extra = os.pathsep.join([fastled_lib_dir] + get_runtime_dll_paths())
-                test_env["PATH"] = _extra + os.pathsep + test_env.get("PATH", "")
-            else:
-                test_env["LD_LIBRARY_PATH"] = (
-                    fastled_lib_dir + os.pathsep + test_env.get("LD_LIBRARY_PATH", "")
-                )
-            # Set runner watchdog timeout to match meson slow test timeout (60s)
-            if "FASTLED_TEST_TIMEOUT" not in test_env:
-                test_env["FASTLED_TEST_TIMEOUT"] = "60"
-            # Disable crash handler in debug mode on Windows - ASAN's vectored
-            # exception handler conflicts with our crash handler (causes deadlock)
-            if build_mode == "debug" and os.name == "nt":
-                test_env["FASTLED_DISABLE_CRASH_HANDLER"] = "1"
-            proc = RunningProcess(
-                test_cmd,
-                cwd=source_dir,  # Run from project root
-                timeout=600,  # 10 minute timeout
-                auto_run=True,
-                check=False,
-                env=test_env,
-                output_formatter=TimestampFormatter(),
-            )
-
-            # Profile tests always echo output (they produce benchmark reports)
-            # Regular tests only echo in verbose mode
-            is_profile_test = _artifact_path and "profile" in str(_artifact_path)
-            echo_callback = verbose or is_profile_test
-            test_start = time.time()
-            returncode = cast(int, proc.wait(echo=bool(echo_callback)))
-            test_duration = time.time() - test_start
-            duration = time.time() - start_time
-
-            # Checkpoint: Test execution complete
-            build_timer.checkpoint("test_execution_done")
-
-            if returncode != 0:
-                # Phase-aware error message
-                phase_data = phase_tracker.get_phase()
-
-                if phase_data and phase_data["phase"] == "EXECUTE":
-                    print_error(
-                        f"[MESON] ❌ Test FAILED during execution (exit code {returncode})"
-                    )
-                    print_error(f"[MESON] Test: {meson_test_name}")
-
-                    # Write test output to error log file (for ALL failures)
-                    compile_errors_dir = build_dir.parent / "compile-errors"
-                    compile_errors_dir.mkdir(exist_ok=True)
-                    test_name_slug = meson_test_name.replace("test_", "").replace(
-                        "/", "_"
-                    )
-                    error_log_path = compile_errors_dir / f"{test_name_slug}.log"
-
-                    with open(error_log_path, "w", encoding="utf-8") as f:
-                        f.write(f"# Test: {meson_test_name}\n")
-                        f.write(f"# Exit code: {returncode}\n")
-                        f.write(f"# Full test output below:\n\n")
-                        f.write("--- Test Output ---\n\n")
-                        f.write(str(proc.stdout))
-
-                    print_error(f"[MESON] 📄 Full test output: {error_log_path}")
-
-                    # Enhanced crash detection: Check if doctest actually ran
-                    # Doctest prints patterns like "test cases:", "assertions:", "[doctest]"
-                    stdout_lower = str(proc.stdout).lower()
-                    has_doctest_output = any(
-                        pattern in stdout_lower
-                        for pattern in [
-                            "test cases:",
-                            "assertions:",
-                            "[doctest]",
-                            "test case failed",
-                        ]
-                    )
-
-                    has_watchdog_timeout = (
-                        "internal timeout watchdog triggered" in stdout_lower
-                    )
-
-                    if returncode == 1 and not proc.stdout.strip():
-                        # No output at all - immediate crash
-                        print_error(f"[MESON] ⚠️  No output - possible crash at startup")
-                    elif (
-                        returncode == 1
-                        and has_watchdog_timeout
-                        and not has_doctest_output
-                    ):
-                        # Watchdog killed the process before doctest ran
-                        print_error(
-                            f"[MESON] ⚠️  Test killed by internal timeout watchdog (exceeded time limit)"
-                        )
-                        print_error(
-                            f"[MESON] 💡 This is a timeout, not a crash. Consider adding to slow_tests in tests/meson.build"
-                        )
-                    elif returncode == 1 and not has_doctest_output:
-                        # Has output but no doctest execution - initialization failure
-                        print_error(
-                            f"[MESON] ⚠️  Test failed during initialization (before doctest ran)"
-                        )
-
-                        # Filter stderr/stdout for error messages (case insensitive)
-                        error_lines = [
-                            line.strip()
-                            for line in str(proc.stdout).splitlines()
-                            if "error" in line.lower() and line.strip()
-                        ]
-
-                        if error_lines:
-                            print_error(f"[MESON] 🔍 Error messages found in output:")
-                            # Show up to 10 error lines
-                            for error_line in error_lines[:10]:
-                                print_error(f"[MESON]    {error_line}")
-                            if len(error_lines) > 10:
-                                print_error(
-                                    f"[MESON]    ... ({len(error_lines) - 10} more error(s))"
-                                )
-
-                        print_error(f"[MESON] 💡 Possible causes:")
-                        print_error(
-                            f"[MESON]    - Static initialization failure (global object constructor crash)"
-                        )
-                        print_error(
-                            f"[MESON]    - Test registration issue (FL_TEST_CASE macro problem)"
-                        )
-                        print_error(
-                            f"[MESON]    - DLL loading failure (missing dependency or symbol)"
-                        )
-                        print_error(
-                            f"[MESON]    - All test cases disabled with #if 0 (check test file)"
-                        )
-                else:
-                    phase_name = (
-                        phase_data.get("phase", "UNKNOWN") if phase_data else "UNKNOWN"
-                    )
-                    print_error(
-                        f"[MESON] ❌ Build FAILED during {phase_name} phase (exit code {returncode})"
-                    )
-
-                # Show test output for failures (even if not verbose)
-                if not verbose and proc.stdout:
-                    print_error("[MESON] Test output:")
-                    for line in str(proc.stdout).splitlines()[-50:]:  # Last 50 lines
-                        _ts_print(f"  {line}")
-                if _artifact_path is not None:
-                    save_test_result_state(
-                        build_dir, meson_test_name, _artifact_path, passed=False
-                    )
-                # Write test run failure log
-                if log_failures is not None and meson_test_name:
-                    _write_failure_log(
-                        log_failures, meson_test_name, "run", str(proc.stdout)
-                    )
-                return MesonTestResult(
-                    success=False,
-                    duration=duration,
-                    num_tests_run=1,
-                    num_tests_passed=0,
-                    num_tests_failed=1,
-                    failed_test_names=[meson_test_name] if meson_test_name else [],
-                )
-
-            # Clear phase tracking on success
-            phase_tracker.clear()
-
-            if _artifact_path is not None:
-                save_test_result_state(
-                    build_dir, meson_test_name, _artifact_path, passed=True
-                )
-            build_duration = duration - test_duration
-
-            # Print timing breakdown
-            _ts_print(build_timer.format_table())
-
-            print_success(
-                f"✅ All tests passed (1/1 in {test_duration:.2f}s, build: {build_duration:.1f}s)"
-            )
-            result = MesonTestResult(
-                success=True,
-                duration=duration,
-                num_tests_run=1,
-                num_tests_passed=1,
-                num_tests_failed=0,
-            )
-            return _apply_phase_timing(result, build_timer)
-
-        except KeyboardInterrupt as ki:
-            handle_keyboard_interrupt(ki)
-            raise
-        except Exception as e:
-            duration = time.time() - start_time
-            _ts_print(
-                f"[MESON] Test execution failed with exception: {e}",
-                file=sys.stderr,
-            )
-            return MesonTestResult(
-                success=False,
-                duration=duration,
-                num_tests_run=1,
-                num_tests_passed=0,
-                num_tests_failed=1,
-            )
-    else:
-        # No specific test - use Meson's test runner for all tests
-        return run_meson_test(
-            build_dir, test_name=None, verbose=verbose, exclude_suites=exclude_suites
         )
+
+    return run_meson_test(
+        build_dir, test_name=None, verbose=verbose, exclude_suites=exclude_suites
+    )
 
 
 def main() -> None:

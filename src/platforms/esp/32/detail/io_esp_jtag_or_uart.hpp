@@ -8,6 +8,7 @@
 
 #include "platforms/esp/is_esp.h"
 
+#include "fl/log/log.h"  // FL_PRINT (used by reportInitDiagnosticsIfNeeded)
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/singleton.h"
 #include "platforms/esp/32/drivers/uart_esp32.h"
@@ -65,6 +66,7 @@ public:
 
     // Print string to serial
     void print(const char* str) FL_NOEXCEPT {
+        reportInitDiagnosticsIfNeeded();
 #if FL_ESP_HAS_USB_SERIAL_JTAG
         if (mUseUsbSerialJtag) {
             mUsbSerialJtag.write(str);
@@ -78,6 +80,7 @@ public:
 
     // Print string with newline to serial
     void println(const char* str) FL_NOEXCEPT {
+        reportInitDiagnosticsIfNeeded();
 #if FL_ESP_HAS_USB_SERIAL_JTAG
         if (mUseUsbSerialJtag) {
             mUsbSerialJtag.writeln(str);
@@ -211,6 +214,7 @@ private:
     UartEsp32 mUart;       // UART driver (UART0 with console-specific configuration)
     int mPeekByte;         // Cached peek byte
     bool mHasPeek;         // True if peek byte is valid
+    bool mDiagnosticsReported;  // true once the one-shot init diagnostic ran
 
     // Constructor: Initialize drivers with runtime detection
     EspIO()
@@ -221,21 +225,44 @@ private:
 #endif
           mUart(UartConfig::reliable(UartPort::UART0)),
           mPeekByte(-1),
-          mHasPeek(false) {
+          mHasPeek(false),
+          mDiagnosticsReported(false) {
 
 #if FL_ESP_HAS_USB_SERIAL_JTAG
-        // Runtime detection: Prefer USB-Serial JTAG if available and working
-        // The drivers already print their status during initialization
+        // Runtime detection: Prefer USB-Serial JTAG if available and working.
+        // The chosen backend and the JTAG init outcome are surfaced via
+        // reportInitDiagnosticsIfNeeded() on the first user-facing print —
+        // FL_PRINT here would re-enter the in-progress singleton.
+        mUseUsbSerialJtag = mUsbSerialJtag.isBuffered();
+#endif
+    }
 
-        if (mUsbSerialJtag.isBuffered()) {
-            // Our USB-Serial JTAG driver installed successfully
-            mUseUsbSerialJtag = true;
-            esp_rom_printf("EspIO: Using ESP-IDF USB-Serial JTAG driver\n");  // ok esp_rom_printf - USB-Serial-JTAG vs ROM-UART selection log (pre-logging)
-        } else {
-            // USB-Serial JTAG driver failed to install - fall back to UART0
-            mUseUsbSerialJtag = false;
-            esp_rom_printf("EspIO: USB-Serial JTAG installation failed - falling back to UART0\n");  // ok esp_rom_printf - USB-Serial-JTAG vs ROM-UART selection log (pre-logging)
+    // Emit a one-shot human-readable summary of the boot-time backend choice
+    // and the USB-Serial JTAG init outcome. Called from the first user-facing
+    // print/println — guaranteed to run after EspIO construction completes,
+    // so FL_PRINT (which dispatches back through this singleton) is safe.
+    void reportInitDiagnosticsIfNeeded() FL_NOEXCEPT {
+        if (mDiagnosticsReported) {
+            return;
         }
+        mDiagnosticsReported = true;
+#if FL_ESP_HAS_USB_SERIAL_JTAG
+        const char* backend = mUseUsbSerialJtag ? "USB-JTAG" : "UART0";
+        const char* outcome = nullptr;
+        switch (mUsbSerialJtag.initOutcome()) {
+            case UsbSerialJtagEsp32::InitOutcome::kNotInitialized:      outcome = "NotInitialized"; break;
+            case UsbSerialJtagEsp32::InitOutcome::kPreInstalled:        outcome = "PreInstalled"; break;
+            case UsbSerialJtagEsp32::InitOutcome::kInstalledOk:         outcome = "InstalledOk"; break;
+            case UsbSerialJtagEsp32::InitOutcome::kInstalledUnverified: outcome = "InstalledUnverified"; break;
+            case UsbSerialJtagEsp32::InitOutcome::kInstallFailed:       outcome = "InstallFailed"; break;
+            case UsbSerialJtagEsp32::InitOutcome::kVerificationFailed:  outcome = "VerificationFailed"; break;
+            case UsbSerialJtagEsp32::InitOutcome::kNotAvailable:        outcome = "NotAvailable"; break;
+        }
+        FL_PRINT("EspIO: backend=" << backend
+                 << " usb_jtag_outcome=" << outcome
+                 << " err=" << static_cast<int>(mUsbSerialJtag.initError()));
+#else
+        FL_PRINT("EspIO: backend=UART0 (USB-Serial JTAG not compiled)");
 #endif
     }
 

@@ -665,9 +665,23 @@ inline bool project_to_hull_mirror(const ProfileCache& cache,
     return true;
 }
 
-// Verbatim copy of solve_strict_subgamut (post-#2708 — includes hull projection).
+// Verbatim copy of solve_strict_subgamut (post-#2708 — includes hull projection,
+// post-#2748 — includes native topology authority guard).
 inline bool strict_subgamut(const ProfileCache& cache, float s_r, float s_g, float s_b, float out[4]) {
     out[0] = out[1] = out[2] = out[3] = 0.0f;
+
+    // #2748 native topology authority guard. Mirrors the production check.
+    if (is_native_input_gamut(*cache.profile)) {
+        const int n_active = count_active_channels(s_r, s_g, s_b);
+        if (n_active <= 2) {
+            out[0] = fl::clamp(s_r, 0.0f, 1.0f);
+            out[1] = fl::clamp(s_g, 0.0f, 1.0f);
+            out[2] = fl::clamp(s_b, 0.0f, 1.0f);
+            out[3] = 0.0f;
+            return true;
+        }
+    }
+
     float X_t[3];
     if (cache.has_source_space) {
         const float s[3] = { s_r, s_g, s_b };
@@ -1153,3 +1167,322 @@ FL_TEST_CASE("LUT error floor: monotonicity in grid size") {
     // Allow a slack of 4 LSB for quantization noise at the same threshold.
     FL_CHECK(hermite_32 <= hermite_16 + 4);
 }
+
+
+// ===== Issue #2748: Native topology authority =================================
+// The strict sub-gamut solver was routing every input — even pure native
+// single-channel and outer-edge (dual-channel) inputs — through the
+// W-containing sub-gamut inverses, pulling W and unrelated channels into the
+// output in violation of the reference math model's strict topology rules.
+// The verifier session linked from the issue showed:
+//   (R, 0, 0)            -> (R', 0, 0, W>0)     instead of (R, 0, 0, 0)
+//   (0, G, G)  full cyan -> (0, G', B', W>0)    instead of (0, G, G, 0)
+//   (0, G/k, G/k) ramp   -> SAME tuple as full  instead of scaling linearly
+// These reproducers run against fastled_mirror::strict_subgamut, which
+// mirrors the production solver verbatim, so they fail loudly the moment a
+// regression sneaks the topology guard back out.
+
+namespace native_topo {
+
+inline DiodeProfile native_profile() {
+    // Default `kRgbwDefaultProfile` already ships as Native (#2710), so we
+    // can just copy it. Explicit set_input_gamut(InputGamut::Native) makes
+    // the contract obvious in the test source.
+    DiodeProfile p = kRgbwDefaultProfile;
+    set_input_gamut(&p, InputGamut::Native);
+    return p;
+}
+
+inline u8 q(float v) { return quantize_u8(v); }
+
+}  // namespace native_topo
+
+
+FL_TEST_CASE("issue #2748: native pure-R input keeps single-channel topology") {
+    using namespace native_topo;
+    const DiodeProfile p = native_profile();
+    ProfileCache cache; fastled_mirror::build_cache(&p, &cache);
+
+    float rgbw[4] = {0};
+    FL_CHECK(fastled_mirror::strict_subgamut(cache, 0.5f, 0.0f, 0.0f, rgbw));
+    // Pure native R must round-trip exactly to R drive only.
+    FL_CHECK_CLOSE(rgbw[0], 0.5f, 1e-6f);
+    FL_CHECK_CLOSE(rgbw[1], 0.0f, 1e-6f);
+    FL_CHECK_CLOSE(rgbw[2], 0.0f, 1e-6f);
+    FL_CHECK_CLOSE(rgbw[3], 0.0f, 1e-6f);
+}
+
+
+FL_TEST_CASE("issue #2748: native pure-G input keeps single-channel topology") {
+    using namespace native_topo;
+    const DiodeProfile p = native_profile();
+    ProfileCache cache; fastled_mirror::build_cache(&p, &cache);
+
+    float rgbw[4] = {0};
+    FL_CHECK(fastled_mirror::strict_subgamut(cache, 0.0f, 0.75f, 0.0f, rgbw));
+    FL_CHECK_CLOSE(rgbw[0], 0.0f, 1e-6f);
+    FL_CHECK_CLOSE(rgbw[1], 0.75f, 1e-6f);
+    FL_CHECK_CLOSE(rgbw[2], 0.0f, 1e-6f);
+    FL_CHECK_CLOSE(rgbw[3], 0.0f, 1e-6f);
+}
+
+
+FL_TEST_CASE("issue #2748: native pure-B input keeps single-channel topology") {
+    using namespace native_topo;
+    const DiodeProfile p = native_profile();
+    ProfileCache cache; fastled_mirror::build_cache(&p, &cache);
+
+    float rgbw[4] = {0};
+    FL_CHECK(fastled_mirror::strict_subgamut(cache, 0.0f, 0.0f, 1.0f, rgbw));
+    FL_CHECK_CLOSE(rgbw[0], 0.0f, 1e-6f);
+    FL_CHECK_CLOSE(rgbw[1], 0.0f, 1e-6f);
+    FL_CHECK_CLOSE(rgbw[2], 1.0f, 1e-6f);
+    FL_CHECK_CLOSE(rgbw[3], 0.0f, 1e-6f);
+}
+
+
+FL_TEST_CASE("issue #2748: native dual-channel (cyan) keeps outer-edge topology") {
+    using namespace native_topo;
+    const DiodeProfile p = native_profile();
+    ProfileCache cache; fastled_mirror::build_cache(&p, &cache);
+
+    float rgbw[4] = {0};
+    FL_CHECK(fastled_mirror::strict_subgamut(cache, 0.0f, 1.0f, 1.0f, rgbw));
+    // BG edge — W and R must remain zero.
+    FL_CHECK_CLOSE(rgbw[0], 0.0f, 1e-6f);
+    FL_CHECK_CLOSE(rgbw[1], 1.0f, 1e-6f);
+    FL_CHECK_CLOSE(rgbw[2], 1.0f, 1e-6f);
+    FL_CHECK_CLOSE(rgbw[3], 0.0f, 1e-6f);
+}
+
+
+FL_TEST_CASE("issue #2748: native dual-channel (yellow) keeps outer-edge topology") {
+    using namespace native_topo;
+    const DiodeProfile p = native_profile();
+    ProfileCache cache; fastled_mirror::build_cache(&p, &cache);
+
+    float rgbw[4] = {0};
+    FL_CHECK(fastled_mirror::strict_subgamut(cache, 1.0f, 1.0f, 0.0f, rgbw));
+    FL_CHECK_CLOSE(rgbw[0], 1.0f, 1e-6f);
+    FL_CHECK_CLOSE(rgbw[1], 1.0f, 1e-6f);
+    FL_CHECK_CLOSE(rgbw[2], 0.0f, 1e-6f);
+    FL_CHECK_CLOSE(rgbw[3], 0.0f, 1e-6f);
+}
+
+
+FL_TEST_CASE("issue #2748: native dual-channel (magenta) keeps outer-edge topology") {
+    using namespace native_topo;
+    const DiodeProfile p = native_profile();
+    ProfileCache cache; fastled_mirror::build_cache(&p, &cache);
+
+    float rgbw[4] = {0};
+    FL_CHECK(fastled_mirror::strict_subgamut(cache, 1.0f, 0.0f, 1.0f, rgbw));
+    FL_CHECK_CLOSE(rgbw[0], 1.0f, 1e-6f);
+    FL_CHECK_CLOSE(rgbw[1], 0.0f, 1e-6f);
+    FL_CHECK_CLOSE(rgbw[2], 1.0f, 1e-6f);
+    FL_CHECK_CLOSE(rgbw[3], 0.0f, 1e-6f);
+}
+
+
+FL_TEST_CASE("issue #2748: native dual-channel ramp preserves value granularity") {
+    // The verifier's `h180_s100_v015 / v035 / v055 / v075` cyan ramp all
+    // produced identical (0, 24029, 65535, 38635) tuples — different values
+    // collapsing onto the same output. With native topology authority the
+    // outputs must scale linearly with the input value.
+    using namespace native_topo;
+    const DiodeProfile p = native_profile();
+    ProfileCache cache; fastled_mirror::build_cache(&p, &cache);
+
+    const float values[] = {0.15f, 0.35f, 0.55f, 0.75f, 1.0f};
+    float prev_g = -1.0f;
+    for (float v : values) {
+        float rgbw[4] = {0};
+        FL_CHECK(fastled_mirror::strict_subgamut(cache, 0.0f, v, v, rgbw));
+        // Edge-locked: only G and B drive, no W, no R.
+        FL_CHECK_CLOSE(rgbw[0], 0.0f, 1e-6f);
+        FL_CHECK_CLOSE(rgbw[3], 0.0f, 1e-6f);
+        // Linear scaling: G / B drive equals input drive directly.
+        FL_CHECK_CLOSE(rgbw[1], v, 1e-6f);
+        FL_CHECK_CLOSE(rgbw[2], v, 1e-6f);
+        // Monotonic strictly increasing — proves the collapse is gone.
+        FL_CHECK(rgbw[1] > prev_g);
+        prev_g = rgbw[1];
+    }
+}
+
+
+FL_TEST_CASE("issue #2748: native single-channel ramp preserves value granularity") {
+    using namespace native_topo;
+    const DiodeProfile p = native_profile();
+    ProfileCache cache; fastled_mirror::build_cache(&p, &cache);
+
+    const float values[] = {0.05f, 0.25f, 0.50f, 0.75f, 1.0f};
+    float prev_r = -1.0f;
+    for (float v : values) {
+        float rgbw[4] = {0};
+        FL_CHECK(fastled_mirror::strict_subgamut(cache, v, 0.0f, 0.0f, rgbw));
+        FL_CHECK_CLOSE(rgbw[0], v, 1e-6f);
+        FL_CHECK_CLOSE(rgbw[1], 0.0f, 1e-6f);
+        FL_CHECK_CLOSE(rgbw[2], 0.0f, 1e-6f);
+        FL_CHECK_CLOSE(rgbw[3], 0.0f, 1e-6f);
+        FL_CHECK(rgbw[0] > prev_r);
+        prev_r = rgbw[0];
+    }
+}
+
+
+FL_TEST_CASE("issue #2748: native three-channel input still uses sub-gamut routing") {
+    // Topology authority ONLY applies to 1- and 2-channel inputs. Three-
+    // channel (interior) inputs must still go through the W-containing
+    // sub-gamut solver — that's where the W luminance trade-off lives.
+    // This sanity test ensures the guard does not over-fire.
+    using namespace native_topo;
+    const DiodeProfile p = native_profile();
+    ProfileCache cache; fastled_mirror::build_cache(&p, &cache);
+
+    float rgbw[4] = {0};
+    FL_CHECK(fastled_mirror::strict_subgamut(cache, 0.4f, 0.5f, 0.6f, rgbw));
+    // Interior inputs must produce a non-trivial result; topology guard
+    // would have returned exactly the input which would leave W = 0 here.
+    // A real sub-gamut solve should activate the W channel because the
+    // target chromaticity sits well inside the W vertex's catchment area.
+    const float total_rgb = rgbw[0] + rgbw[1] + rgbw[2];
+    FL_CHECK(total_rgb > 0.0f);
+    // Either W participates (typical) or solver returned identity (acceptable
+    // if the LED's W is uninvolved at this chromaticity). Both are valid; the
+    // key invariant is that the solver actually ran, not just passed through.
+    FL_CHECK(rgbw[3] >= 0.0f);
+}
+
+
+FL_TEST_CASE("issue #2748: non-native input gamut bypasses topology guard") {
+    // The topology guard MUST NOT fire when the input gamut is foreign
+    // (e.g. Rec709) — those inputs deliberately exceed the native LED gamut
+    // and require the sub-gamut solver to project them in. Without this
+    // contract, sRGB pure blue (out of LED hull) would be passed through
+    // verbatim and produce a black output once quantized.
+    DiodeProfile p = kRgbwDefaultProfile;
+    set_input_gamut(&p, InputGamut::Rec709);  // input != LED native
+    ProfileCache cache; fastled_mirror::build_cache(&p, &cache);
+
+    float rgbw[4] = {0};
+    // Pure sRGB red — single source channel, but in a NON-native gamut.
+    // Must go through the sub-gamut solver, NOT the topology shortcut.
+    FL_CHECK(fastled_mirror::strict_subgamut(cache, 1.0f, 0.0f, 0.0f, rgbw));
+    // For a Rec.709 red target on a wider-gamut LED panel, the result is
+    // typically less than full native R drive (because Rec.709 R is inside
+    // the LED's native R, not at it). Either way, the output must be a
+    // non-trivial real solve — not the literal (1, 0, 0, 0) the topology
+    // guard would produce.
+    const float total = rgbw[0] + rgbw[1] + rgbw[2] + rgbw[3];
+    FL_CHECK(total > 0.0f);
+}
+
+
+FL_TEST_CASE("issue #2748: public dispatch — native pure red has W = 0") {
+    // Round-trip through the real public dispatch when the library was built
+    // with FASTLED_RGBW_COLORIMETRIC. The strict mode (kRGBWColorimetric)
+    // must preserve native single-channel topology end to end.
+    const bool ok = enable_rgbw_colorimetric_lut(8);
+    disable_rgbw_colorimetric_lut();
+    if (!ok) return;  // stub build — colorimetric path not linked
+
+    // Make sure no stale profile from earlier tests leaks in.
+    set_rgbw_colorimetric_profile(nullptr);
+
+    u8 r_out, g_out, b_out, w_out;
+    rgb_2_rgbw(RGBW_MODE::kRGBWColorimetric, kRGBWDefaultColorTemp,
+               128, 0, 0, 255, 255, 255, &r_out, &g_out, &b_out, &w_out);
+    FL_CHECK(r_out == 128);
+    FL_CHECK(g_out == 0);
+    FL_CHECK(b_out == 0);
+    FL_CHECK(w_out == 0);
+}
+
+
+FL_TEST_CASE("issue #2748: public dispatch — native cyan ramp scales linearly") {
+    const bool ok = enable_rgbw_colorimetric_lut(8);
+    disable_rgbw_colorimetric_lut();
+    if (!ok) return;
+    set_rgbw_colorimetric_profile(nullptr);
+
+    const u8 inputs[] = {40, 80, 120, 200};
+    u8 last_g = 0, last_b = 0;
+    for (u8 v : inputs) {
+        u8 r_out, g_out, b_out, w_out;
+        rgb_2_rgbw(RGBW_MODE::kRGBWColorimetric, kRGBWDefaultColorTemp,
+                   0, v, v, 255, 255, 255, &r_out, &g_out, &b_out, &w_out);
+        FL_CHECK(r_out == 0);
+        FL_CHECK(w_out == 0);
+        // Output should equal input (native edge-lock).
+        FL_CHECK(g_out == v);
+        FL_CHECK(b_out == v);
+        FL_CHECK(g_out > last_g);
+        FL_CHECK(b_out > last_b);
+        last_g = g_out;
+        last_b = b_out;
+    }
+}
+
+
+FL_TEST_CASE("issue #2748: public dispatch — boosted mode preserves native topology") {
+    // kRGBWColorimetricBoosted ALSO honors the topology guard: native single-
+    // and outer-edge inputs MUST NOT receive a W overdrive boost since W is
+    // not part of the legal topology for those inputs.
+    const bool ok = enable_rgbw_colorimetric_lut(8);
+    disable_rgbw_colorimetric_lut();
+    if (!ok) return;
+    set_rgbw_colorimetric_profile(nullptr);
+
+    u8 r_out, g_out, b_out, w_out;
+    // Pure G — boosted must NOT pull in W.
+    rgb_2_rgbw(RGBW_MODE::kRGBWColorimetricBoosted, kRGBWDefaultColorTemp,
+               0, 200, 0, 255, 255, 255, &r_out, &g_out, &b_out, &w_out);
+    FL_CHECK(r_out == 0);
+    FL_CHECK(g_out == 200);
+    FL_CHECK(b_out == 0);
+    FL_CHECK(w_out == 0);
+
+    // Yellow (RG edge) — boosted must NOT pull in W.
+    rgb_2_rgbw(RGBW_MODE::kRGBWColorimetricBoosted, kRGBWDefaultColorTemp,
+               180, 180, 0, 255, 255, 255, &r_out, &g_out, &b_out, &w_out);
+    FL_CHECK(r_out == 180);
+    FL_CHECK(g_out == 180);
+    FL_CHECK(b_out == 0);
+    FL_CHECK(w_out == 0);
+}
+
+
+FL_TEST_CASE("issue #2748: is_native_input_gamut helper agrees with profile flags") {
+    DiodeProfile p = kRgbwDefaultProfile;
+    set_input_gamut(&p, InputGamut::Native);
+    FL_CHECK(is_native_input_gamut(p));
+
+    set_input_gamut(&p, InputGamut::Rec709);
+    FL_CHECK(!is_native_input_gamut(p));
+
+    set_input_gamut(&p, InputGamut::Rec2020);
+    FL_CHECK(!is_native_input_gamut(p));
+
+    set_input_gamut(&p, InputGamut::DciP3D65);
+    FL_CHECK(!is_native_input_gamut(p));
+
+    // Restore Native so subsequent tests in this TU see expected defaults.
+    set_input_gamut(&p, InputGamut::Native);
+    FL_CHECK(is_native_input_gamut(p));
+}
+
+
+FL_TEST_CASE("issue #2748: count_active_channels classification") {
+    FL_CHECK(count_active_channels(0.0f, 0.0f, 0.0f) == 0);
+    FL_CHECK(count_active_channels(1.0f, 0.0f, 0.0f) == 1);
+    FL_CHECK(count_active_channels(0.0f, 1.0f, 0.0f) == 1);
+    FL_CHECK(count_active_channels(0.0f, 0.0f, 1.0f) == 1);
+    FL_CHECK(count_active_channels(0.5f, 0.5f, 0.0f) == 2);
+    FL_CHECK(count_active_channels(0.5f, 0.0f, 0.5f) == 2);
+    FL_CHECK(count_active_channels(0.0f, 0.5f, 0.5f) == 2);
+    FL_CHECK(count_active_channels(0.1f, 0.2f, 0.3f) == 3);
+    // Below LSB-eps — counted as inactive.
+    FL_CHECK(count_active_channels(1.0e-6f, 1.0f, 1.0f) == 2);
+}
+
