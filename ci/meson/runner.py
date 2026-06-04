@@ -73,7 +73,7 @@ def _setup_sanitizer_env(source_dir: Path, verbose: bool) -> None:
 
 def _resolve_test_name_candidates(
     build_dir: Path, test_name: str
-) -> tuple[str, str, list[str]]:
+) -> tuple[str, str, list[str]]:  # noqa: DCT002
     """Compute (primary, fallback, fuzzy) candidate names for a requested test.
 
     The primary is the most specific guess; the fallback is the next-best

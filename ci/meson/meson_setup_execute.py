@@ -11,6 +11,7 @@ construction, the skip-setup branch, and the actual ``meson setup`` call.
 import os
 import platform
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 from typing import Optional, cast
@@ -321,6 +322,52 @@ def handle_skip_meson_setup(
     _enforce_strict_path_violations(build_dir)
 
 
+def _get_zccache_meson_configure_path() -> Optional[Path]:
+    """Resolve the venv zccache binary IF it supports `meson configure`.
+
+    Returns the path to ``zccache.exe`` only when the binary is found and
+    is recent enough to ship the configure-cache wrapper (zccache 1.11.12+,
+    zackees/zccache#649). Returns ``None`` otherwise so the caller falls
+    back to a plain ``meson setup`` invocation.
+
+    Detection is intentionally cheap: we don't parse the version string —
+    instead we check whether ``zccache meson configure --help`` prints the
+    wrapper's docstring rather than passing through to meson. That sidesteps
+    the upgrade window where the binary is installed but predates #649.
+    """
+    script_dir = Path(__file__).resolve().parent
+    project_root = script_dir.parent.parent
+    is_windows = sys.platform.startswith("win") or os.name == "nt"
+    venv_zccache = (
+        project_root
+        / ".venv"
+        / "Scripts"
+        / ("zccache.exe" if is_windows else "zccache")
+    )
+    if not venv_zccache.exists():
+        return None
+    try:
+        # Cheap probe: ask zccache to describe its meson configure subcommand.
+        # The wrapper-equipped binary prints "Cache-aware `meson setup`..." at
+        # the top; a passthrough binary forwards to real meson which prints
+        # "usage: meson [-h]..." instead.
+        result = subprocess.run(
+            [str(venv_zccache), "meson", "configure", "--help"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise ki
+    except (subprocess.SubprocessError, OSError):
+        return None
+    if "Cache-aware" not in result.stdout:
+        return None
+    return venv_zccache
+
+
 def build_meson_setup_cmd(
     *,
     native_file_path: Path,
@@ -330,23 +377,52 @@ def build_meson_setup_cmd(
     enable_unit_tests: bool,
     reconfigure: bool,
 ) -> list[str]:
-    """Build the ``meson setup [--reconfigure] ...`` command list."""
-    cmd: list[str] = [
-        get_meson_executable(),
-        "setup",
+    """Build the ``meson setup [--reconfigure] ...`` command list.
+
+    When the venv ships a zccache (>= 1.11.12) that supports the
+    ``meson configure`` wrapper (zackees/zccache#649) AND we are NOT
+    forcing a reconfigure, route the invocation through that wrapper so a
+    warm hit can restore the configured build directory and skip meson
+    entirely. Reconfigures bypass the wrapper because FastLED's
+    metadata-cache layer flagged a source/test/example file change — the
+    wrapper hashes only ``meson.build`` files and would otherwise serve a
+    stale-state hit.
+    """
+    meson_exe = get_meson_executable()
+    meson_args: list[str] = [
+        "--native-file",
+        str(native_file_path),
+        f"-Dbuild_mode={build_mode}",
+        f"-Denable_examples={str(enable_examples).lower()}",
+        f"-Denable_unit_tests={str(enable_unit_tests).lower()}",
     ]
+
+    if not reconfigure:
+        zccache_exe = _get_zccache_meson_configure_path()
+        if zccache_exe is not None:
+            # The wrapper provides `meson setup <build_dir> <source_dir>`
+            # itself; pass `.` as source-dir so it resolves to the cwd that
+            # `run_meson_setup_command` sets (the project root). The `--`
+            # separator is required so trailing `-D...` args aren't parsed
+            # as zccache flags.
+            return [
+                str(zccache_exe),
+                "meson",
+                "configure",
+                "--source-dir",
+                ".",
+                "--build-dir",
+                str(build_dir),
+                "--meson-bin",
+                meson_exe,
+                "--",
+                *meson_args,
+            ]
+
+    cmd: list[str] = [meson_exe, "setup"]
     if reconfigure:
         cmd.append("--reconfigure")
-    cmd.extend(
-        [
-            "--native-file",
-            str(native_file_path),
-            str(build_dir),
-            f"-Dbuild_mode={build_mode}",
-            f"-Denable_examples={str(enable_examples).lower()}",
-            f"-Denable_unit_tests={str(enable_unit_tests).lower()}",
-        ]
-    )
+    cmd.extend([*meson_args[:2], str(build_dir), *meson_args[2:]])
     return cmd
 
 
