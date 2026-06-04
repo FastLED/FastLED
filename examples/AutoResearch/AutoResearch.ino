@@ -312,23 +312,15 @@ void setup() {
 
     FL_WARN("[SETUP] AutoResearch sketch starting - serial output active");
 
-    // Unified cross-platform watchdog (FastLED#2731). 15 s timeout matches
-    // the AutoResearch test budget. On Teensy 4 / Teensy 3 / RP / nRF52 /
-    // STM32 / SAMD / AVR / Apollo3 / MGM240 this is a real hardware WDT;
-    // on platforms without an impl (or with their optional library missing)
-    // this is a no-op via the FL_HAS_INCLUDE fallback. ESP32 also keeps its
-    // existing fl::watchdog_setup() wiring via the same accessor.
+    // Unified cross-platform watchdog (FastLED#2731) is wired through the
+    // FastLED.watchdog() accessor. On ESP32 we keep the existing
+    // fl::watchdog_setup() behavior (universally validated). On Teensy 4
+    // the bare-register WDOG3 path needs more hardware iteration before
+    // it's safe to arm here by default — the unified API still compiles
+    // and is available for sketches that opt in.
+#if defined(FL_IS_ESP32)
     FastLED.watchdog().begin(15000);
-    if (FastLED.watchdog().isInSafeMode()) {
-        FL_WARN("[SAFE MODE] previous boots crashed — LED peripheral disabled");
-        // Hang here forever WITHOUT feeding the watchdog so the board
-        // stays USB-recoverable and a new firmware upload can rescue it.
-        while (true) { fl::task::run(); }
-    }
-    if (FastLED.watchdog().lastResetWasWatchdog()) {
-        FL_WARN("[recovery] previous boot was killed by watchdog — crash#"
-                << static_cast<int>(FastLED.watchdog().consecutiveCrashCount()));
-    }
+#endif
 
     // Initialize RX buffer dynamically (uses PSRAM if available, falls back to heap)
     g_rx_buffer_storage.resize(RX_BUFFER_SIZE);
@@ -509,12 +501,13 @@ void loop() {
         while (true) { /* deliberate hang */ }
     }
 
-    // Feed the watchdog. We do this AFTER the dangerous work (task::run +
-    // GPIO baseline below) succeeded. If anything wedged above, this line
-    // is never reached, the watchdog fires, and the board resets into
-    // safe-mode recovery on the next boot.
+    // Feed + markCleanShutdown only on platforms where we armed in setup().
+    // On platforms where begin() was a no-op, these are also no-ops, but
+    // gating keeps the intent explicit.
+#if defined(FL_IS_ESP32)
     FastLED.watchdog().feed();
     FastLED.watchdog().markCleanShutdown();
+#endif
 
     // Run GPIO baseline test once after device is ready (allows JSON-RPC to be operational first)
     // This test is informational only - we continue regardless of pass/fail
