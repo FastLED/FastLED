@@ -253,7 +253,11 @@ bool ChannelDriverLcdSpi::isrChunkDone(void *panel_io, const void *edata,
     self->transposeToWords(self->mTransmittingChannels, buf,
                            ctx.mNextByteOffset, chunkBytes);
 
-    ctx.mNextByteOffset += chunkBytes;
+    // Explicit read-modify-write — `mNextByteOffset` is volatile (ISR/main
+    // memory model, see channel_driver_lcd_spi.h:117-130). C++20 deprecates
+    // compound assignment on volatile (-Wvolatile); C++23 makes it a hard
+    // error. #2723
+    ctx.mNextByteOffset = ctx.mNextByteOffset + chunkBytes;
     ctx.mRingWriteIdx = (writeIdx + 1) % kRingBufferCount;
 
     // Submit this chunk for DMA
