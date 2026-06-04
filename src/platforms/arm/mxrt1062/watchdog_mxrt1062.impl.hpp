@@ -71,13 +71,17 @@ inline Mxrt1062WatchdogState& mxrt1062WatchdogState() {
 }
 
 inline ResetCause translateSrcSrsr(fl::u32 srsr) {
-    // Bits per iMXRT1062 reference manual. Priority: most-specific first.
-    if (srsr & (1u << 16)) return ResetCause::WATCHDOG;      // WDOG3_RST_B
-    if (srsr & (1u << 7))  return ResetCause::WATCHDOG;      // WDOG_RST_B (WDOG1/2)
-    if (srsr & (1u << 4))  return ResetCause::LOCKUP;        // LOCKUP_SYSRESETREQ
-    if (srsr & (1u << 8))  return ResetCause::DEBUGGER;      // JTAG_SW_RST
-    if (srsr & (1u << 5))  return ResetCause::EXTERNAL_PIN;  // IPP_USER_RESET_B
-    if (srsr & (1u << 0))  return ResetCause::POWER_ON;      // POR
+    // Bit positions from imxrt.h (which matches the iMXRT1062 reference
+    // manual and NXP MCUXpresso SDK SRC_SRSR_*_SHIFT). Earlier hand-coded
+    // shifts were all wrong (off by 1-9 bits in different places) so
+    // lastResetCause() reported UNKNOWN for nearly every real reset cause.
+    // Priority: most-specific first.
+    if (srsr & SRC_SRSR_WDOG3_RST_B)        return ResetCause::WATCHDOG;
+    if (srsr & SRC_SRSR_WDOG_RST_B)         return ResetCause::WATCHDOG;
+    if (srsr & SRC_SRSR_LOCKUP_SYSRESETREQ) return ResetCause::LOCKUP;
+    if (srsr & SRC_SRSR_JTAG_SW_RST)        return ResetCause::DEBUGGER;
+    if (srsr & SRC_SRSR_IPP_USER_RESET_B)   return ResetCause::EXTERNAL_PIN;
+    if (srsr & SRC_SRSR_IPP_RESET_B)        return ResetCause::POWER_ON;
     return ResetCause::UNKNOWN;
 }
 
@@ -100,6 +104,11 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NOEXCEPT {
     // The previous WDOG3 init attempt (AutoResearch.ino TODO at lines 204-214)
     // almost certainly missed this. CCGR=3 → clock always on.
     CCM_CCGR5 |= CCM_CCGR5_WDOG3(3);
+    // Per iMXRT1062 RM, ensure the CCM clock-gate store is visible to the
+    // peripheral bus before the first WDOG3 access. NXP MCUXpresso's CCM
+    // driver inserts these barriers after every CCGR write.
+    __asm__ volatile ("dsb" ::: "memory");
+    __asm__ volatile ("isb" ::: "memory");
 
     // Convert ms to TOVAL counts. With LPO (~32 kHz) and /256 prescaler
     // (CS.PRES set) the tick rate is 125 Hz → 8 ms per count. Clamp to the
@@ -156,11 +165,17 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NOEXCEPT {
     {
         fl::u32 spin = 0;
         while (!(WDOG3_CS & WDOG_CS_RCS)) {
-            if (++spin > 1000000u) { __enable_irq(); return; }
+            if (++spin > 1000000u) {
+                __asm__ volatile ("msr primask, %0" :: "r" (primask) : "memory");
+                return;
+            }
         }
     }
 
-    __enable_irq();
+    // Restore the caller's prior PRIMASK state (NOT __enable_irq() — that
+    // would unconditionally re-enable interrupts even if the caller had
+    // them disabled before invoking begin()).
+    __asm__ volatile ("msr primask, %0" :: "r" (primask) : "memory");
 
     auto& s = platforms::mxrt1062WatchdogState();
     s.armed = true;

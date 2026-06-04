@@ -316,6 +316,10 @@ extern "C" FLASHMEM void startup_early_hook(void) {
     // peripheral registers are addressable. Per imxrt.h comment:
     // "WDOG3 requires CCM_CCGR5_WDOG3".
     CCM_CCGR5 |= CCM_CCGR5_WDOG3(3);
+    // Ensure the CCM store is visible to the peripheral bus before
+    // touching WDOG3.
+    __asm__ volatile ("dsb" ::: "memory");
+    __asm__ volatile ("isb" ::: "memory");
 
     // Unlock RTWDOG with the 32-bit key (works because CS.CMD32EN=1 at reset).
     WDOG3_CNT = 0xD928C520u;
@@ -374,11 +378,14 @@ void setup() {
         const uint32_t srsr = SRC_SRSR;
         Serial.print("[boot] SRC_SRSR = 0x");  // ok serial - boot diagnostic, Teensy 4 only
         Serial.println(srsr, HEX);             // ok serial - boot diagnostic, Teensy 4 only
-        if (srsr & (1u << 7))  Serial.println("[boot]   WDOG3_RST_B (RTWDOG fired)");  // ok serial - boot diagnostic
-        if (srsr & (1u << 0))  Serial.println("[boot]   POR (power-on reset)");  // ok serial - boot diagnostic
-        if (srsr & (1u << 4))  Serial.println("[boot]   LOCKUP_SYSRESETREQ (HardFault SYSRESETREQ)");  // ok serial - boot diagnostic
-        if (srsr & (1u << 5))  Serial.println("[boot]   IPP_USER_RESET_B (external pin)");  // ok serial - boot diagnostic
-        if (srsr & (1u << 8))  Serial.println("[boot]   JTAG/SW reset");  // ok serial - boot diagnostic
+        // Bit positions from imxrt.h SRC_SRSR_*_B macros (not hardcoded
+        // shifts, which were all wrong in an earlier version of this file).
+        if (srsr & SRC_SRSR_WDOG3_RST_B)        Serial.println("[boot]   WDOG3_RST_B (RTWDOG fired)");        // ok serial - boot diagnostic
+        if (srsr & SRC_SRSR_WDOG_RST_B)         Serial.println("[boot]   WDOG_RST_B (WDOG1/2 fired)");        // ok serial - boot diagnostic
+        if (srsr & SRC_SRSR_IPP_RESET_B)        Serial.println("[boot]   POR (power-on reset)");              // ok serial - boot diagnostic
+        if (srsr & SRC_SRSR_LOCKUP_SYSRESETREQ) Serial.println("[boot]   LOCKUP_SYSRESETREQ (HardFault)");    // ok serial - boot diagnostic
+        if (srsr & SRC_SRSR_IPP_USER_RESET_B)   Serial.println("[boot]   IPP_USER_RESET_B (external pin)");  // ok serial - boot diagnostic
+        if (srsr & SRC_SRSR_JTAG_SW_RST)        Serial.println("[boot]   JTAG/SW reset");                    // ok serial - boot diagnostic
         // Write-1-to-clear so next boot sees only its own cause.
         SRC_SRSR = srsr;
         if (CrashReport) {

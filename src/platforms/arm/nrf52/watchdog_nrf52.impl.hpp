@@ -61,7 +61,12 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NOEXCEPT {
         // CRV = (timeout_sec * 32768) - 1, computed from ms with rounding.
         NRF_WDT->CRV = ((static_cast<fl::u64>(timeout_ms) * 32768u + 999u) / 1000u) - 1u;
         NRF_WDT->RREN = 1u;            // enable reload register 0
-        NRF_WDT->CONFIG = 1u;           // run during CPU sleep, pause in debug
+        // CONFIG: bit 0 SLEEP (1 = run during CPU sleep), bit 3 HALT
+        // (1 = pause when debugger has halted the CPU, developer-friendly).
+        // Previously we wrote 1u which left HALT=0 → watchdog kept counting
+        // through a debugger break and reset the chip mid-debug. Same class
+        // of bit-semantic inversion that bit us on Teensy 4's WDOG_CS_DBG.
+        NRF_WDT->CONFIG = (1u << 0) | (1u << 3);
         NRF_WDT->TASKS_START = 1u;
     }
     platforms::nrf52WatchdogState().armed = true;
