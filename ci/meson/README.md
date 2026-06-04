@@ -24,9 +24,18 @@ The `ci.meson` package is organized into 9 focused modules following a tier-base
 
 ### Tier 3: Core Operations
 
-- **`build_config.py`** (~650 lines) - Build configuration and setup
-  - Types: `CleanupResult` dataclass
-  - Functions: `cleanup_build_artifacts()`, `detect_system_llvm_tools()`, `setup_meson_build()`, `perform_ninja_maintenance()`
+- **`build_config.py`** (~410 lines) - Build configuration orchestrator + re-exports
+  - Functions: `setup_meson_build()`, `perform_ninja_maintenance()`
+  - Backed by smaller modules: `native_launchers.py`, `path_normalization.py`,
+    `meson_markers.py`, `meson_cleanup.py`, `meson_setup_phases.py`,
+    `meson_setup_execute.py`
+
+- **`native_launchers.py`** (~370 lines) - ctc-* native launcher resolution + zccache discovery
+- **`path_normalization.py`** (~275 lines) - zccache strict-path normalization (issue #2378)
+- **`meson_markers.py`** (~280 lines) - per-build marker files + AR optimization patches
+- **`meson_cleanup.py`** (~140 lines) - build artifact cleanup + LLVM tool detection
+- **`meson_setup_phases.py`** (~590 lines) - source hashes, marker reconfigure detection, file-change detection
+- **`meson_setup_execute.py`** (~465 lines) - compiler detect, native file, meson setup execution
 
 - **`compile.py`** (~280 lines) - Compilation execution with IWYU support
   - Functions: `compile_meson()`, `create_error_context_filter()`
@@ -37,13 +46,18 @@ The `ci.meson` package is organized into 9 focused modules following a tier-base
 
 ### Tier 4: Advanced Operations
 
-- **`streaming.py`** (~300 lines) - Parallel streaming compilation and testing
+- **`streaming.py`** (~770 lines) - Parallel streaming compilation and testing
   - Functions: `stream_compile_and_run_tests()`
 
 ### Tier 5: Orchestration
 
-- **`runner.py`** (~450 lines) - Main orchestration and CLI entry point
+- **`runner.py`** (~350 lines) - Main orchestration and CLI entry point
   - Functions: `run_meson_build_and_test()`, `main()`
+  - Backed by: `runner_helpers.py`, `streaming_runner.py`, `sequential_runner.py`
+
+- **`runner_helpers.py`** (~420 lines) - Timing, recovery, cleanup, failure logs
+- **`streaming_runner.py`** (~360 lines) - Streaming compile + parallel test execution
+- **`sequential_runner.py`** (~545 lines) - Per-target compile + direct test invocation
 
 ## Migration Guide
 
