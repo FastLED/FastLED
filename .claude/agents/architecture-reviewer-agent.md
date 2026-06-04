@@ -18,6 +18,24 @@ Before starting, read `agents/docs/cpp-standards.md` for:
 - API Object Pattern (public header + implementation directory)
 - Platform Dispatch Headers and `.cpp.hpp` pattern
 - Sparse Platform Dispatch Pattern
+- **Three-suffix dispatch convention** — `<component>.impl.cpp.hpp` (router in `src/platforms/`), `<component>_<platform>.impl.hpp` (per-family fragment), `<component>_noop.hpp` (no-op fallback in `src/platforms/shared/`, literal `_noop` suffix only)
+- **Component capability macros** — `FL_<COMPONENT>_HAS_<FEATURE>` / `FL_<COMPONENT>_<NUMERIC>`. Always spell out the component name; no acronym aliases (e.g. `FL_WATCHDOG_*`, **NOT** `FL_WDT_*`).
+
+## Platform Dispatch Architectural Checks
+
+When reviewing platform-dispatch additions or changes, verify:
+
+1. **One dispatcher per component.** A single `<component>.impl.cpp.hpp` lives in `src/platforms/` root (not in a per-family subdirectory). It is `#include`d from exactly one `.cpp` translation unit.
+2. **All per-platform implementations end with `.impl.hpp`** — not `.cpp.hpp` (that's reserved for the dispatcher) and not bare `.hpp` (that signals a regular header).
+3. **The dispatcher's `#else` branch falls back to a `_noop.hpp` header in `src/platforms/shared/`.** Flag any dispatcher with no fallback (breaks unsupported-platform compilation).
+4. **No-op headers use the literal `_noop` suffix** — `_null.hpp`, `_stub.hpp`, `_dummy.hpp`, `_empty.hpp` are all violations of the established keyword.
+5. **No-op bodies are truly no-ops** — return `0`/`false`/`nullptr`/empty span. No assertions, no logging, no side effects.
+6. **No-op functions live in `fl::platforms::` namespace** — keeps the public `fl::` surface clean.
+7. **Capability flags belong to the component, not the platform.** If a PR adds `FL_<PLATFORM>_<COMPONENT>_HAS_<FEATURE>` (platform-prefixed) that's a smell — the flag should be the component-scoped form so user code doesn't need to know which platform supplies the feature. Likewise flag any capability macro that uses an acronym for the component name.
+
+Exemplars to cite when explaining the pattern:
+- Dispatcher: `src/platforms/coroutine.impl.cpp.hpp`
+- No-op fallback: `src/platforms/shared/memory_noop.hpp`, `src/platforms/shared/pin_noop.hpp`, `src/platforms/shared/simd_noop.hpp`
 
 ## FastLED Architecture Layers
 
