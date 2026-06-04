@@ -392,17 +392,16 @@ void setup() {
     }
 #endif
 
-    // Unified cross-platform watchdog (FastLED#2731). DEBUG: gated to ESP32
-    // only while we bisect why the Teensy 4 boot is failing — the diagnostic
-    // prints above run unconditionally, so if Teensy enumerates USB cleanly
-    // now we know begin() is the trigger and SRC_SRSR will reveal the cause.
-#if defined(FL_IS_ESP32)
+    // Unified cross-platform watchdog (FastLED#2731). Arm with a generous
+    // 15-second timeout that matches the AutoResearch test budget. On
+    // Teensy 4 the bare-register WDOG3 begin() path now relies on the
+    // `startup_early_hook` above having pre-disabled WDOG3, so re-arming
+    // here goes through a clean unlock → write → RCS-wait sequence.
     FastLED.watchdog().begin(15000);
     if (FastLED.watchdog().lastResetWasWatchdog()) {
         FL_WARN("[recovery] previous boot was killed by watchdog — crash#"
                 << static_cast<int>(FastLED.watchdog().consecutiveCrashCount()));
     }
-#endif
 
     // Initialize RX buffer dynamically (uses PSRAM if available, falls back to heap)
     g_rx_buffer_storage.resize(RX_BUFFER_SIZE);
@@ -589,12 +588,12 @@ void loop() {
         while (true) { /* deliberate hang */ }
     }
 
-    // DEBUG: gated to ESP32 while we bisect Teensy 4 boot. If feed() also
-    // touches WDOG3 registers without armed state it could be the culprit.
-#if defined(FL_IS_ESP32)
+    // Feed the watchdog at the end of every loop iteration. On platforms
+    // where begin() was a no-op the feed is also a no-op. The mark-clean
+    // shutdown zeros the consecutive-crash counter so a transient hang
+    // doesn't eventually push the board into safe mode.
     FastLED.watchdog().feed();
     FastLED.watchdog().markCleanShutdown();
-#endif
 
     // Run GPIO baseline test once after device is ready (allows JSON-RPC to be operational first)
     // This test is informational only - we continue regardless of pass/fail
