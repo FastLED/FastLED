@@ -37,6 +37,7 @@
 #include "platforms/is_platform.h"
 #include "platforms/esp/is_esp.h"
 #include "platforms/wasm/is_wasm.h"
+#include "fl/stl/has_include.h"
 
 #if defined(FL_IS_WASM)
     #include "platforms/wasm/watchdog_wasm.impl.hpp"
@@ -44,23 +45,23 @@
     #include "platforms/stub/watchdog_stub.impl.hpp"
 #elif defined(FL_IS_ESP32)
     #include "platforms/esp/32/watchdog_esp32.impl.hpp"
-#elif defined(FL_IS_TEENSY_4X) && __has_include(<Watchdog_t4.h>)
+#elif defined(FL_IS_TEENSY_4X) && FL_HAS_INCLUDE(<Watchdog_t4.h>)
     #include "platforms/arm/mxrt1062/watchdog_mxrt1062.impl.hpp"
-#elif (defined(FL_IS_TEENSY_3X) || defined(FL_IS_TEENSY_LC)) && __has_include(<kinetis.h>)
+#elif (defined(FL_IS_TEENSY_3X) || defined(FL_IS_TEENSY_LC)) && FL_HAS_INCLUDE(<kinetis.h>)
     #include "platforms/arm/k20/watchdog_k20.impl.hpp"
-#elif (defined(FL_IS_RP2040) || defined(FL_IS_RP2350)) && __has_include(<hardware/watchdog.h>)
+#elif (defined(FL_IS_RP2040) || defined(FL_IS_RP2350)) && FL_HAS_INCLUDE(<hardware/watchdog.h>)
     #include "platforms/arm/rp/watchdog_rp.impl.hpp"
-#elif defined(FL_IS_NRF52) && __has_include(<nrf.h>)
+#elif defined(FL_IS_NRF52) && FL_HAS_INCLUDE(<nrf.h>)
     #include "platforms/arm/nrf52/watchdog_nrf52.impl.hpp"
-#elif defined(FL_IS_STM32) && __has_include(<IWatchdog.h>)
+#elif defined(FL_IS_STM32) && FL_HAS_INCLUDE(<IWatchdog.h>)
     #include "platforms/arm/stm32/watchdog_stm32.impl.hpp"
-#elif (defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)) && __has_include(<Adafruit_SleepyDog.h>)
+#elif (defined(FL_IS_SAMD21) || defined(FL_IS_SAMD51)) && FL_HAS_INCLUDE(<Adafruit_SleepyDog.h>)
     #include "platforms/arm/samd/watchdog_samd.impl.hpp"
-#elif defined(FL_IS_APOLLO3) && __has_include(<am_mcu_apollo.h>)
+#elif defined(FL_IS_APOLLO3) && FL_HAS_INCLUDE(<am_mcu_apollo.h>)
     #include "platforms/apollo3/watchdog_apollo3.impl.hpp"
-#elif defined(FL_IS_SILABS_MGM240) && __has_include(<em_wdog.h>)
+#elif defined(FL_IS_SILABS_MGM240) && FL_HAS_INCLUDE(<em_wdog.h>)
     #include "platforms/arm/mgm240/watchdog_mgm240.impl.hpp"
-#elif defined(FL_IS_AVR) && __has_include(<avr/wdt.h>)
+#elif defined(FL_IS_AVR) && FL_HAS_INCLUDE(<avr/wdt.h>)
     #include "platforms/avr/watchdog_avr.impl.hpp"
 #else
     // Fallback: no real or emulated WDT available — all methods are no-ops.

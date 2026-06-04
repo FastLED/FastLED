@@ -62,10 +62,12 @@ inline ResetCause translateAvrMcusr(fl::u8 mcusr) {
 // watchdog only supports a discrete set; pick the smallest constant whose
 // timeout is >= the requested timeout (or the maximum if exceeded).
 inline fl::u8 timeoutToWdtoConstant(fl::u32 ms) {
-    if (ms <=   15) return WDTO_15MS;
-    if (ms <=   30) return WDTO_30MS;
-    if (ms <=   60) return WDTO_60MS;
-    if (ms <=  120) return WDTO_120MS;
+    // Use the actual AVR watchdog prescaler bucket boundaries:
+    // WDTO_15MS=16ms, WDTO_30MS=32ms, WDTO_60MS=64ms, WDTO_120MS=125ms.
+    if (ms <=   16) return WDTO_15MS;
+    if (ms <=   32) return WDTO_30MS;
+    if (ms <=   64) return WDTO_60MS;
+    if (ms <=  125) return WDTO_120MS;
     if (ms <=  250) return WDTO_250MS;
     if (ms <=  500) return WDTO_500MS;
     if (ms <= 1000) return WDTO_1S;
@@ -77,7 +79,14 @@ inline fl::u8 timeoutToWdtoConstant(fl::u32 ms) {
 // `.init3` constructor: runs after the C runtime has zeroed BSS but before
 // `main()`. Captures MCUSR for later cause reporting, then clears it and
 // disables the WDT so a post-WDT-reset boot cannot loop forever.
-__attribute__((naked, used, section(".init3")))
+//
+// NOTE: We deliberately do NOT mark this `naked`. `naked` functions are not
+// intended to hold ordinary C/C++ statements — GCC still needs to manage
+// register/stack expectations around the assignments and the `wdt_disable()`
+// call, and the result is fragile across optimization/toolchain versions.
+// A normal `.init3` hook works correctly here because `.init3` runs after
+// `.init2` (BSS zeroed, stack set up).
+__attribute__((used, section(".init3")))
 inline void fastled_watchdog_init3() {
     sAvrCapturedMcusr = MCUSR;
     MCUSR = 0;
