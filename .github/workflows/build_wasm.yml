@@ -44,6 +44,8 @@ permissions:
 
 jobs:
   build:
+    # Hard-block external-fork pull requests (no exceptions per #2757).
+    if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     strategy:

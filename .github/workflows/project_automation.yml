@@ -3,6 +3,45 @@ name: project-automation
 on:
   issues:
     types: [opened, closed, reopened]
+  # ──────────────────────────────────────────────────────────────────────────
+  # SECURITY: pull_request_target is KEPT ON THIS WORKFLOW ONLY.
+  # ──────────────────────────────────────────────────────────────────────────
+  # pull_request_target is the highest-risk GitHub Actions trigger because
+  # it runs with secrets in scope on fork PR events. This workflow is the
+  # one documented exception in the repo — it needs the App private key to
+  # update the project board on PR open/close/draft, and a vanilla
+  # pull_request trigger from a fork has no access to secrets.
+  #
+  # The safety invariants below MUST be preserved by every future editor:
+  #
+  #   1. NEVER add `ref: ${{ github.event.pull_request.head.sha }}` (or
+  #      `head_ref`, or `head_branch`) to the actions/checkout step. The
+  #      checkout MUST stay on the base ref (the default for
+  #      pull_request_target). Pulling fork code into the trusted context
+  #      while secrets are live is the classic pull_request_target RCE.
+  #
+  #   2. NEVER run a script whose path could be edited by the fork PR.
+  #      `python ci/github_project_sync.py` is base-controlled because of
+  #      invariant #1 — keep it that way. No `bash test`, no `./install`,
+  #      nothing from the workspace that the PR could rewrite.
+  #
+  #   3. NEVER interpolate PR-controlled data (title, body, branch name,
+  #      head SHA, author login) directly into a `run:` block. Pass via
+  #      `env:` only — the env-var quoting prevents shell injection.
+  #
+  #   4. Keep `permissions:` at the workflow level minimal (currently
+  #      contents: read). Do not add `contents: write` or grant the
+  #      default GITHUB_TOKEN any write scope — the App token already
+  #      provides the project write capability without exposing repo
+  #      write to fork code.
+  #
+  #   5. The App token in scope grants project read/write only. Verify
+  #      this remains true if the App installation permissions ever
+  #      change. (Org-level setting outside this repo.)
+  #
+  # Audited 2026-06-04 under #2757; all five invariants verified holding.
+  # See PR #2759 description for full audit notes.
+  # ──────────────────────────────────────────────────────────────────────────
   pull_request_target:
     types: [opened, closed, reopened, converted_to_draft, ready_for_review]
 
@@ -17,6 +56,9 @@ jobs:
       vars.PROJECT_NUMBER != '' &&
       vars.PROJECT_OWNER != ''
     steps:
+      # SECURITY: do NOT add `ref:` here. See invariant #1 above. Default
+      # ref for pull_request_target is the BASE branch (trusted), which is
+      # what we want. sparse-checkout further limits the surface to ci/.
       - uses: actions/checkout@v4
         with:
           sparse-checkout: ci

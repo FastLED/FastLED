@@ -38,6 +38,8 @@ on:
 
 jobs:
   test:
+    # Hard-block external-fork pull requests (no exceptions per #2757).
+    if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
     uses: ./.github/workflows/template_example_test.yml
     with:
       os: ubuntu-latest
