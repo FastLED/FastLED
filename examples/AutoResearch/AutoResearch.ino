@@ -293,6 +293,60 @@ using RemoteControlSingleton = fl::Singleton<AutoResearchRemoteControl>;
 uint32_t frame_counter = 0;
 
 
+#if defined(FL_IS_TEENSY_4X) && defined(__IMXRT1062__)
+// =============================================================================
+// CRITICAL: WDOG3 (RTWDOG) startup-early-hook recovery (FastLED#2731)
+// =============================================================================
+// The iMXRT1062 RTWDOG (WDOG3) is enabled by default at chip reset with
+// TOVAL = 0x400 LPO ticks ≈ 32 ms. The Teensy 4 core does NOT disable it in
+// startup.c — most sketches happen to be fast enough or stay in WAIT mode
+// where WDOG3 stops counting, so it never bites in practice.
+//
+// But if a previous run armed WDOG3 with a short timeout, or if any
+// peripheral init takes longer than 32 ms, the chip enters a reset loop
+// where the new sketch can't even complete USB enumeration. Symptom: red
+// LED double-blink + "Unknown USB Device (Device Descriptor Request Failed)".
+//
+// `startup_early_hook` is a weak symbol in Teensyduino's startup.c that runs
+// very early in ResetHandler2(), before main() and before ITCM is even
+// initialized. Overriding it here disables WDOG3 BEFORE any other code can
+// observe a reset. Must be in FLASHMEM (ITCM not ready yet).
+extern "C" FLASHMEM void startup_early_hook(void) {
+    // Enable the WDOG3 clock gate (CCM_CCGR5 bits 4-5) so the WDOG3
+    // peripheral registers are addressable. Per imxrt.h comment:
+    // "WDOG3 requires CCM_CCGR5_WDOG3".
+    CCM_CCGR5 |= CCM_CCGR5_WDOG3(3);
+
+    // Unlock RTWDOG with the 32-bit key (works because CS.CMD32EN=1 at reset).
+    WDOG3_CNT = 0xD928C520u;
+
+    // Wait for the unlock window to open. Bounded spin — if for any reason
+    // the unlock never lands, we'd rather continue and let the WDOG bite
+    // than hang here forever.
+    {
+        volatile uint32_t spin = 0;
+        while (!(WDOG3_CS & WDOG_CS_ULK)) {
+            if (++spin > 200000u) break;
+        }
+    }
+
+    // Disable: clear EN, keep CMD32EN+UPDATE+CLK(LPO) so future arms work.
+    // Set TOVAL to max so even if the disable doesn't take, we have ~524 sec
+    // before any reset can occur.
+    WDOG3_TOVAL = 0xFFFFu;
+    WDOG3_WIN = 0;
+    WDOG3_CS = WDOG_CS_CMD32EN | WDOG_CS_UPDATE | WDOG_CS_CLK(1);  // EN=0
+
+    // Wait for reconfigure complete (bounded).
+    {
+        volatile uint32_t spin = 0;
+        while (!(WDOG3_CS & WDOG_CS_RCS)) {
+            if (++spin > 200000u) break;
+        }
+    }
+}
+#endif
+
 void setup() {
     // Initialize serial buffers with platform-specific configuration
     // Must be called BEFORE Serial.begin()
