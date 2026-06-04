@@ -78,9 +78,11 @@ void Watchdog::feed() FL_NOEXCEPT {
 }
 
 void Watchdog::disable() FL_NOEXCEPT {
-    // Pico SDK's `watchdog_disable()` inhibits the count but the underlying
-    // enable bit remains set. Honest action: stop feeding from this layer
-    // and document that the SDK provides no clean teardown.
+    // Pico SDK's `watchdog_disable()` clears WATCHDOG_CTRL_ENABLE_BITS, which
+    // halts the counter. Subsequent `feed()` calls are still safe (they only
+    // write LOAD).
+    watchdog_disable();
+    platforms::rpWatchdogState().armed = false;
 }
 
 ResetCause Watchdog::lastResetCause() const FL_NOEXCEPT {

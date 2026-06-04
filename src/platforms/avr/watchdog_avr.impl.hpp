@@ -31,8 +31,13 @@ namespace platforms {
 
 // Captured copy of MCUSR before we cleared it in .init3. Set in the
 // constructor below, read by lastResetCause().
+//
+// CRITICAL: This MUST live in `.noinit` (no initializer, no `= 0`). avr-libc's
+// `.init4` step clears `.bss` and copies `.data`, which runs AFTER our `.init3`
+// hook. Any `.bss`/`.data` placement would clobber the captured MCUSR before
+// `lastResetCause()` could read it. `.noinit` is excluded from that step.
 extern fl::u8 sAvrCapturedMcusr;
-fl::u8 sAvrCapturedMcusr = 0;
+__attribute__((section(".noinit"))) fl::u8 sAvrCapturedMcusr;
 
 struct AvrWatchdogState {
     fl::u8     persist[FL_WATCHDOG_PERSIST_BYTES] = {0};

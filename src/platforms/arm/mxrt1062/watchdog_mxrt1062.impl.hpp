@@ -23,8 +23,12 @@
 #define FL_WATCHDOG_HAS_HARDWARE
 #define FL_WATCHDOG_PERSIST_BYTES 16
 #define FL_WATCHDOG_MAX_TIMEOUT_MS 128000u
-#define FL_WATCHDOG_HAS_PRE_TIMEOUT_IRQ
-#define FL_WATCHDOG_HAS_WINDOW_MODE
+// NOTE: WDT_T4 / RTWDOG technically exposes pre-timeout IRQ + windowed mode,
+// but our Tier-1/2 wrappers (`onTimeout()`, `setWindow()`) currently return
+// false on this platform. Capability macros must match runtime behavior, so
+// we deliberately do NOT advertise `FL_WATCHDOG_HAS_PRE_TIMEOUT_IRQ` /
+// `FL_WATCHDOG_HAS_WINDOW_MODE` until those wrappers are implemented in a
+// follow-up.
 
 namespace fl {
 namespace platforms {
