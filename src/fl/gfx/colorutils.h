@@ -523,6 +523,14 @@ class TCRGBPalette : public TColorPalette<CRGB, Size> {
 
     TCRGBPalette() FL_NOEXCEPT {}
 
+    // Explicit Rule of 5 — the user-defined ctors below otherwise force the
+    // copy-assign / destructor to be implicitly-declared, which C++11+
+    // deprecates (-Wdeprecated-copy, ~472 hits across teensy30/31/40/41/LC).
+    // Mirrors what CRGBPalette16 already does at lines 699-701. #2725
+    TCRGBPalette(const TCRGBPalette &) FL_NOEXCEPT = default;
+    TCRGBPalette &operator=(const TCRGBPalette &) FL_NOEXCEPT = default;
+    ~TCRGBPalette() FL_NOEXCEPT = default;
+
     TCRGBPalette(const TColorPalette<CHSV, Size> &rhs) FL_NOEXCEPT {
         Base::copyConverted(rhs.entries);
     }
