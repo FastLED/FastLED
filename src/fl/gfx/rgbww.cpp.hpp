@@ -205,7 +205,7 @@ inline float compute_eta_from_input(const colorimetric_detail::RgbcctProfile& pr
     // primaries — exactly the regression flagged on this PR.
     EtaSourceMatrixCache& cache =
         fl::Singleton<EtaSourceMatrixCache>::instance();
-    const colorimetric_detail::DiodeProfile& wp = profile.warm_path;
+    const fl::DiodeProfile& wp = profile.warm_path;
     const bool key_changed =
         !cache.initialized ||
         !xy_equal(cache.xy_r, wp.input_xy_r) ||
