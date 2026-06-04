@@ -294,11 +294,28 @@ FL_TEST_CASE("fl::ScopedWatchdog — explicit timeout ctor compiles and feeds") 
     FL_CHECK_FALSE(dog.lastResetWasWatchdog());
 }
 
-FL_TEST_CASE("FL_WATCHDOG_AUTOFEED macro — no-arg and arg forms both compile") {
+FL_TEST_CASE("FL_WATCHDOG_AUTO macro — no-arg and arg forms both compile") {
     // Compile-time check that the macro expands correctly. The variable
     // name is stamped from __LINE__, so two on separate lines don't collide.
-    FL_WATCHDOG_AUTOFEED();
-    FL_WATCHDOG_AUTOFEED(5000);
-    FL_WATCHDOG_AUTOFEED(2000u);
+    FL_WATCHDOG_AUTO();
+    FL_WATCHDOG_AUTO(5000);
+    FL_WATCHDOG_AUTO(2000u);
     FL_CHECK(true);  // Always passes if it compiled
+}
+
+FL_TEST_CASE("fl::ScopedWatchdog — nesting detection counter") {
+    // Validates the single-instance enforcement: the active-scope counter
+    // increments on construction and decrements on destruction so that a
+    // nested guard can be detected via the warning path.
+    int baseline = ScopedWatchdog::activeScopeCount();
+    {
+        ScopedWatchdog outer;
+        FL_CHECK_EQ(ScopedWatchdog::activeScopeCount(), baseline + 1);
+        {
+            ScopedWatchdog inner;  // triggers the WARN one-shot
+            FL_CHECK_EQ(ScopedWatchdog::activeScopeCount(), baseline + 2);
+        }
+        FL_CHECK_EQ(ScopedWatchdog::activeScopeCount(), baseline + 1);
+    }
+    FL_CHECK_EQ(ScopedWatchdog::activeScopeCount(), baseline);
 }

@@ -192,8 +192,16 @@ private:
 /// a fresh deadline; destruction feeds it again so the next iteration also
 /// starts fresh.
 ///
-/// Prefer the `FL_WATCHDOG_AUTOFEED(...)` macro below — it stamps a unique
-/// stack variable name so nested guards don't collide.
+/// **Single-instance rule.** Only one `ScopedWatchdog` should be alive at a
+/// time. The class detects nested / overlapping live instances at runtime
+/// and prints a one-shot warning via `fl::println` (the WDT is still fed in
+/// both ctors and dtors so the program keeps running). Two guards on the
+/// same source line are a compile error (the `FL_WATCHDOG_AUTO` macro
+/// stamps the local variable name from `__LINE__`, so a duplicate would
+/// collide).
+///
+/// Prefer the `FL_WATCHDOG_AUTO(...)` macro below — it stamps a unique
+/// stack variable name and is the canonical entry point.
 class ScopedWatchdog {
 public:
     /// Default construct with the library default timeout (15 000 ms).
@@ -207,6 +215,11 @@ public:
     /// a clean deadline window.
     ~ScopedWatchdog() FL_NOEXCEPT;
 
+    /// Observability: number of simultaneously-alive ScopedWatchdog instances.
+    /// Used by tests + diagnostics. A value > 1 means a nested-guard
+    /// programmer error was hit; the WDT is still being fed.
+    static int activeScopeCount() FL_NOEXCEPT;
+
     ScopedWatchdog(const ScopedWatchdog&)            FL_NOEXCEPT = delete;
     ScopedWatchdog& operator=(const ScopedWatchdog&) FL_NOEXCEPT = delete;
 };
@@ -214,30 +227,37 @@ public:
 } // namespace fl
 
 // ============================================================================
-// FL_WATCHDOG_AUTOFEED(...) — the canonical zero-setup loop()-top guard.
+// FL_WATCHDOG_AUTO(...) — the canonical zero-setup loop()-top guard.
 //
 // Variadic so the same macro covers both the no-argument default (15 000 ms)
 // and the explicit-timeout form:
 //
 //   void loop() {
-//       FL_WATCHDOG_AUTOFEED();      // 15 000 ms default
+//       FL_WATCHDOG_AUTO();      // 15 000 ms default
 //       doWork();
 //   }
 //
 //   void loop() {
-//       FL_WATCHDOG_AUTOFEED(5000);  // 5-second timeout
+//       FL_WATCHDOG_AUTO(5000);  // 5-second timeout
 //       doWork();
 //   }
 //
-// The macro stamps a unique local-variable name from __LINE__ so nested
-// scopes (or multiple guards in one function — rare but valid) don't
-// collide. Both construction-time and destruction-time feeds are performed
-// by `fl::ScopedWatchdog`.
+// "AUTO" because this macro does more than just feed: it lazily arms the WDT
+// on first call, prints the prior-boot reset/crash diagnostic, pauses 3 s on
+// a crash so the developer can read the message, and feeds the WDT on both
+// construction AND destruction. Single source-line use; the macro stamps the
+// local variable name from `__LINE__` so two `FL_WATCHDOG_AUTO()` on the same
+// line are a compile error. Two on different lines but simultaneously alive
+// (nested scopes) trigger a one-shot runtime warning — see ScopedWatchdog.
+//
+// Future variants stay grouped under the `FL_WATCHDOG_*` prefix:
+//   FL_WATCHDOG_AUTO_QUIET / FL_WATCHDOG_AUTO_VERBOSE — log-level variants
+//   FL_WATCHDOG_MANUAL                                — non-RAII setup helper
 // ============================================================================
 
 #define FL_WATCHDOG__CONCAT_INNER(a, b) a##b
 #define FL_WATCHDOG__CONCAT(a, b)       FL_WATCHDOG__CONCAT_INNER(a, b)
-#define FL_WATCHDOG_AUTOFEED(...)                                              \
+#define FL_WATCHDOG_AUTO(...)                                                  \
     ::fl::ScopedWatchdog FL_WATCHDOG__CONCAT(_fl_wdt_, __LINE__) { __VA_ARGS__ }
 
 // ============================================================================

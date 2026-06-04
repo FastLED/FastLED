@@ -112,6 +112,17 @@ namespace platforms {
 void scopedWatchdogPrintLine(fl::string_view sv) FL_NOEXCEPT;
 void scopedWatchdogPause3s() FL_NOEXCEPT;
 
+// Counts simultaneously-alive ScopedWatchdog instances. >1 is almost always
+// a programmer error: nested guards mean the lazy-init's timeout argument
+// of the second instance is silently ignored, and timeout semantics across
+// the two scopes become ambiguous. Singleton-style accessor (function-local
+// static) so the counter has well-defined lifetime even if a guard is
+// constructed before main().
+inline int& scopedWatchdogActiveCount() FL_NOEXCEPT {
+    static int count = 0;
+    return count;
+}
+
 // First-init helper, used by ScopedWatchdog's constructor. Runs only once
 // per process. Single-threaded loop() is the canonical caller — no atomics
 // are needed for the guard byte on supported MCUs.
@@ -135,7 +146,7 @@ inline void scopedWatchdogFirstInit(fl::u32 timeout_ms) FL_NOEXCEPT {
         }
         scopedWatchdogPause3s();
     }
-    scopedWatchdogPrintLine(fl::string_view("[FastLED.watchdog] armed via FL_WATCHDOG_AUTOFEED()"));
+    scopedWatchdogPrintLine(fl::string_view("[FastLED.watchdog] armed via FL_WATCHDOG_AUTO()"));
 }
 
 } // namespace platforms
@@ -146,11 +157,34 @@ ScopedWatchdog::ScopedWatchdog(fl::u32 timeout_ms) FL_NOEXCEPT {
         sInitialized = true;
         platforms::scopedWatchdogFirstInit(timeout_ms);
     }
+
+    // Single-instance enforcement. A second simultaneously-alive ScopedWatchdog
+    // is almost always a bug — the timeout argument here was silently ignored
+    // (only the first instance gets to arm the WDT). Warn once per process so
+    // the developer notices, but still feed so the program survives.
+    int& count = platforms::scopedWatchdogActiveCount();
+    if (count >= 1) {
+        static bool sWarnedOnce = false;
+        if (!sWarnedOnce) {
+            sWarnedOnce = true;
+            platforms::scopedWatchdogPrintLine(fl::string_view(
+                "[FastLED.watchdog] WARN: nested FL_WATCHDOG_AUTO() detected — "
+                "only one scoped guard should be alive at a time"));
+        }
+    }
+    ++count;
+
     Watchdog::instance().feed();
 }
 
 ScopedWatchdog::~ScopedWatchdog() FL_NOEXCEPT {
+    int& count = platforms::scopedWatchdogActiveCount();
+    if (count > 0) --count;
     Watchdog::instance().feed();
+}
+
+int ScopedWatchdog::activeScopeCount() FL_NOEXCEPT {
+    return platforms::scopedWatchdogActiveCount();
 }
 
 } // namespace fl
