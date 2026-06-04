@@ -3,8 +3,12 @@ name: project-automation
 on:
   issues:
     types: [opened, closed, reopened]
-  pull_request_target:
-    types: [opened, closed, reopened, converted_to_draft, ready_for_review]
+  # NOTE: pull_request_target trigger removed per #2757 ("ban pull_request_target").
+  # Project-board sync for PRs no longer auto-fires. If PR-side automation is
+  # needed in the future, use a less risky trigger (e.g. workflow_dispatch with
+  # a maintainer-provided PR number, or a webhook from a trusted middleware).
+  # pull_request_target was the only trigger here capable of running with the
+  # PROJECT_APP_PRIVATE_KEY secret on fork PRs, which is now disallowed.
 
 permissions:
   contents: read
