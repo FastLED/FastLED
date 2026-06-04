@@ -328,19 +328,31 @@ struct LutStateHolder {
     const DiodeProfile* built_for = nullptr;
     int built_cct = 0;
     int requested_grid_n = 0;
+    RgbwLutInterp requested_interp = RgbwLutInterp::Hermite;
     bool enabled = false;
 };
+
+inline colorimetric_detail::LutInterp to_internal_interp(
+    RgbwLutInterp i) FL_NOEXCEPT {
+    return (i == RgbwLutInterp::Hermite)
+        ? colorimetric_detail::LutInterp::Hermite
+        : colorimetric_detail::LutInterp::Bilinear;
+}
 
 inline void rebuild_lut_if_stale(LutStateHolder& s, int cct) FL_NOEXCEPT {
     if (!s.enabled || s.requested_grid_n <= 0) return;
     const DiodeProfile* active = get_rgbw_colorimetric_profile();
     const int override_cct = resolve_cct_override(active, cct);
+    const colorimetric_detail::LutInterp interp =
+        to_internal_interp(s.requested_interp);
     if (s.table && s.built_for == active && s.built_cct == override_cct
-        && s.table->N == s.requested_grid_n) {
+        && s.table->N == s.requested_grid_n
+        && s.table->interp == interp) {
         return;  // up-to-date
     }
     s.table = fl::make_unique<colorimetric_detail::LutTable>(
-        colorimetric_detail::build_lut(get_cache(cct), s.requested_grid_n));
+        colorimetric_detail::build_lut(get_cache(cct), s.requested_grid_n,
+                                       interp));
     s.built_for = active;
     s.built_cct = override_cct;
 }
@@ -450,16 +462,22 @@ void rgb_2_rgbw_colorimetric_boosted(u16 w_color_temperature, u8 r,
     *out_w = colorimetric_detail::quantize_u8(rgbw[3]);
 }
 
-bool enable_rgbw_colorimetric_lut(int grid_n) FL_NOEXCEPT {
+bool enable_rgbw_colorimetric_lut(int grid_n,
+                                  RgbwLutInterp interp) FL_NOEXCEPT {
     if (grid_n < 4) grid_n = 4;
     if (grid_n > 256) grid_n = 256;
     LutStateHolder& s = fl::Singleton<LutStateHolder>::instance();
     s.enabled = true;
     s.requested_grid_n = grid_n;
+    s.requested_interp = interp;
     // Force a rebuild on next colorimetric call.
     s.built_for = nullptr;
     s.built_cct = -1;
     return true;
+}
+
+bool enable_rgbw_colorimetric_lut(int grid_n) FL_NOEXCEPT {
+    return enable_rgbw_colorimetric_lut(grid_n, RgbwLutInterp::Hermite);
 }
 
 void disable_rgbw_colorimetric_lut() FL_NOEXCEPT {
@@ -467,6 +485,7 @@ void disable_rgbw_colorimetric_lut() FL_NOEXCEPT {
     s.enabled = false;
     s.table.reset();  // unique_ptr destructor frees the cells storage
     s.requested_grid_n = 0;
+    s.requested_interp = RgbwLutInterp::Hermite;
     s.built_for = nullptr;
     s.built_cct = 0;
 }
@@ -484,6 +503,10 @@ bool rgbw_colorimetric_lut_enabled() FL_NOEXCEPT {
 namespace { void invalidate_colorimetric_caches_for(const DiodeProfile*) FL_NOEXCEPT {} }
 
 // Stub APIs for the LUT/CCT/RGBCCT path — no-ops when colorimetric is off.
+bool enable_rgbw_colorimetric_lut(int /*grid_n*/,
+                                  RgbwLutInterp /*interp*/) FL_NOEXCEPT {
+    return false;
+}
 bool enable_rgbw_colorimetric_lut(int /*grid_n*/) FL_NOEXCEPT { return false; }
 void disable_rgbw_colorimetric_lut() FL_NOEXCEPT {}
 bool rgbw_colorimetric_lut_enabled() FL_NOEXCEPT { return false; }
