@@ -231,6 +231,7 @@ def setup_meson_build(
             enable_examples=enable_examples,
             enable_unit_tests=enable_unit_tests,
             reconfigure=True,
+            source_hashes=hashes,
         )
     else:
         _ts_print(f"[MESON] Setting up build directory: {build_dir}")
@@ -241,6 +242,7 @@ def setup_meson_build(
             enable_examples=enable_examples,
             enable_unit_tests=enable_unit_tests,
             reconfigure=False,
+            source_hashes=hashes,
         )
 
     check_obsolete_zig_wrappers(source_dir)

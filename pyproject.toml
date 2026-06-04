@@ -38,21 +38,21 @@ dependencies = [
     "fpvgcc",
     "uv",
     "clang-tool-chain>=1.5.5",
-    # 1.11.12 ships the `zccache meson configure` wrapper
-    # (zackees/zccache#649, closes #627) — a cache-aware wrapper around
-    # `meson setup` that captures the configured build directory on a
-    # miss and restores it on a hit, skipping meson entirely. This is
-    # the upstream piece FastLED's build_meson_setup_cmd integrates with
-    # to keep warm-path ninja generation near-instant. PR #649 merged
-    # 2026-06-04 after the 1.11.11 tag, so the previous `>=1.11.11` pin
-    # would have silently fallen through to an older zccache that just
-    # passed `meson` through; bumping forward closes that gap. 1.11.11
-    # also ships the depfile-on-cache-hit fix (zackees/zccache#643) —
-    # without that, `deps = gcc` mode records `#deps 0` for every cached
-    # object and incremental builds produce stale .obj files after a
-    # git pull that changes transitive headers (symptom: `undefined
-    # symbol: ...` link errors hours after a header actually changed).
-    "zccache>=1.11.12",
+    # 1.11.13 ships the `--input-file` flag for the meson-configure
+    # wrapper (zackees/zccache#655, closes zackees/zccache#654). FastLED
+    # passes a sidecar digest of its test/example/source globs into the
+    # wrapper's cache key so the reconfigure path benefits from cache
+    # restoration — previously the wrapper had to be bypassed whenever
+    # FastLED's metadata-cache layer flagged a change, because the
+    # wrapper hashed only meson.build files and a hit would have served
+    # a stale-target tree. 1.11.12 added the wrapper itself
+    # (zackees/zccache#649, closes zackees/zccache#627). 1.11.11 ships
+    # the depfile-on-cache-hit fix (zackees/zccache#643) — without that,
+    # `deps = gcc` mode records `#deps 0` for every cached object and
+    # incremental builds produce stale .obj files after a git pull that
+    # changes transitive headers (symptom: `undefined symbol: ...` link
+    # errors hours after a header actually changed).
+    "zccache>=1.11.13",
     "ninja",
     "meson>=1.11.0",
     "download",
