@@ -152,14 +152,18 @@ bool rgbw_colorimetric_lut_enabled() FL_NOEXCEPT;
 
 // Compile-time memory-cost accessor. Mirrors the storage math used by the
 // LUT builder so users can size their RAM/flash budget before calling
-// enable_rgbw_colorimetric_lut(). Returns 0 for grid_n < 1.
+// enable_rgbw_colorimetric_lut(). The runtime API clamps grid_n to [4, 256],
+// so this helper applies the same clamp so callers do not under-estimate
+// for grid_n < 4 or over-estimate for grid_n > 256. Returns 0 for grid_n < 1.
 constexpr unsigned long rgbw_colorimetric_lut_memory_bytes(
     int grid_n, RgbwLutInterp interp) FL_NOEXCEPT {
     return (grid_n < 1)
         ? 0UL
-        : static_cast<unsigned long>(grid_n)
-            * static_cast<unsigned long>(grid_n)
-            * (interp == RgbwLutInterp::Hermite ? 24UL : 8UL);
+        : (static_cast<unsigned long>(
+                  grid_n < 4 ? 4 : (grid_n > 256 ? 256 : grid_n))
+            * static_cast<unsigned long>(
+                  grid_n < 4 ? 4 : (grid_n > 256 ? 256 : grid_n))
+            * (interp == RgbwLutInterp::Hermite ? 24UL : 8UL));
 }
 
 enum {

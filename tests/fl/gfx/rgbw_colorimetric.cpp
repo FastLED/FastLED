@@ -1019,15 +1019,20 @@ struct Sample {
 };
 
 inline int sample_sweep(Sample* out) {
+    // Map step v in [0,6] to a u8 in [15, 255] without overflow.
+    // Sequence: {15, 55, 95, 135, 175, 215, 255}.
+    auto bucket = [](int v) -> u8 {
+        return static_cast<u8>(15 + (240 * v) / 6);
+    };
     int n = 0;
     for (int r = 0; r <= 6; ++r) {
         for (int g = 0; g <= 6; ++g) {
             for (int b = 0; b <= 6; ++b) {
                 if ((r | g | b) == 0) continue;
                 Sample& s = out[n++];
-                s.r = static_cast<u8>(r * 42 + 15);  // {15,57,99,141,183,225,255-ish}
-                s.g = static_cast<u8>(g * 42 + 15);
-                s.b = static_cast<u8>(b * 42 + 15);
+                s.r = bucket(r);
+                s.g = bucket(g);
+                s.b = bucket(b);
             }
         }
     }
