@@ -263,6 +263,13 @@ void LcdSpiPeripheralEsp::teardownLocked() FL_NOEXCEPT {
     mPendingTransmits = 0;
     mLastTransmitSize = 0;
     mOwner = LcdSpiOwnerDriver::NONE;
+
+    // Clear latched errors so a new session (e.g. owner-driver change #2270)
+    // starts clean and a stale error doesn't surface from the next
+    // session's first waitTransmitDone().
+    mLastWaitForSlotTimeout = false;
+    mLastPanelIoRecreateError = ESP_OK;
+    mLastTxColorError = ESP_OK;
 }
 
 void LcdSpiPeripheralEsp::deinitialize() FL_NOEXCEPT {
