@@ -3,10 +3,10 @@ reviews:
   pre_merge_checks:
     enabled: true
   path_instructions:
-    - path: "src/platforms/**/*.cpp.hpp"
+    - path: "src/platforms/*.impl.cpp.hpp"
       instructions: |
         FastLED platform dispatch file. Verify:
-        - Dispatcher files are named `<component>.impl.cpp.hpp` and live in `src/platforms/`.
+        - Dispatcher files are named `<component>.impl.cpp.hpp` and live in `src/platforms/` (root only — subdirectory `.cpp.hpp` files are translation-unit fragments, not dispatchers, and are out of scope for this rule).
         - They start with `// IWYU pragma: private` and use `#if defined(FL_IS_*)` to
           select platform fragments.
         - The `#else` branch must include a no-op fallback from `src/platforms/shared/`
