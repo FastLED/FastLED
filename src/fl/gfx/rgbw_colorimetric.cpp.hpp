@@ -73,7 +73,53 @@ void build_profile_cache(const DiodeProfile* p, int cct_override,
                             && build_source_matrix(p->input_xy_r, p->input_xy_g,
                                                    p->input_xy_b, p->input_xy_w,
                                                    cache->M_src);
-    if (!cache->has_source_space) {
+    if (cache->has_source_space) {
+        // build_source_matrix() produces the standard normalized CIE source
+        // matrix with source white at Y=1. The solver matrices below are in
+        // measured-device absolute XYZ units, so scale M_src by the same
+        // white-fit factor used by the reference math model:
+        //   K = 1 / max(solve_subgamut(source_white_Y1))
+        // This makes M_src·[1,1,1] land at the brightest achievable device
+        // white instead of an underpowered Y=1 target. Without this scale,
+        // native/D65 dual-edge and LP solves cannot match the Python model.
+        float X_w[3];
+        xyY_to_XYZ(p->input_xy_w[0], p->input_xy_w[1], 1.0f, X_w);
+
+        const float (*invs[3])[3] = {
+            cache->P_RGW_inv, cache->P_RBW_inv, cache->P_BGW_inv,
+        };
+        float best_max_t = 0.0f;
+        bool found_scale = false;
+        constexpr float kScaleEps = 1e-6f;
+        for (int k = 0; k < 3; ++k) {
+            float t[3];
+            matvec3(invs[k], X_w, t);
+            if (t[0] < -kScaleEps || t[1] < -kScaleEps || t[2] < -kScaleEps) {
+                continue;
+            }
+            const float mt = fl::max(fl::max(t[0], t[1]), t[2]);
+            if (mt > kScaleEps && (!found_scale || mt < best_max_t)) {
+                best_max_t = mt;
+                found_scale = true;
+            }
+        }
+        if (!found_scale) {
+            float t[3];
+            matvec3(cache->P_RGB_inv, X_w, t);
+            const float mt = fl::max(fl::max(fl::fabs(t[0]), fl::fabs(t[1])),
+                                     fl::fabs(t[2]));
+            if (mt > kScaleEps) {
+                best_max_t = mt;
+                found_scale = true;
+            }
+        }
+        const float scale_k = found_scale ? (1.0f / best_max_t) : 1.0f;
+        for (int i = 0; i < 3; ++i) {
+            for (int j = 0; j < 3; ++j) {
+                cache->M_src[i][j] *= scale_k;
+            }
+        }
+    } else {
         for (int i = 0; i < 3; ++i)
             for (int j = 0; j < 3; ++j) cache->M_src[i][j] = 0.0f;
     }
@@ -152,39 +198,36 @@ static bool project_to_hull(const ProfileCache& cache,
     return true;
 }
 
-bool solve_strict_subgamut(const ProfileCache& cache, float s_r,
-                           float s_g, float s_b,
-                           float out_rgbw[4]) FL_NOEXCEPT {
-    out_rgbw[0] = out_rgbw[1] = out_rgbw[2] = out_rgbw[3] = 0.0f;
 
-    // Native topology authority guard (#2748). In native input gamut
-    // (input primaries == LED primaries), 1- and 2-channel source drives
-    // MUST round-trip back to the same 1- or 2-channel LED drive. The
-    // reference math model treats these as edge-locked legal topologies:
-    //   single  : R, G, B            (W = 0, two other channels = 0)
-    //   outer   : RG, RB, BG         (W = 0, third channel = 0)
-    // Routing these through the W-containing sub-gamut inverses pulls in
-    // unrelated channels in violation of the strict topology — exactly
-    // the bug filed in #2748 (e.g. (R, 0, 0) → (R, 0, 0, W>0)). Three-
-    // channel inputs (interior) fall through to the existing sub-gamut
-    // routing, where W participation is the whole point of the solver.
-    if (is_native_input_gamut(*cache.profile)) {
-        const int n_active = count_active_channels(s_r, s_g, s_b);
-        if (n_active <= 2) {
-            out_rgbw[0] = fl::clamp(s_r, 0.0f, 1.0f);
-            out_rgbw[1] = fl::clamp(s_g, 0.0f, 1.0f);
-            out_rgbw[2] = fl::clamp(s_b, 0.0f, 1.0f);
-            out_rgbw[3] = 0.0f;
-            return true;
-        }
+static float max3f(float a, float b, float c) FL_NOEXCEPT {
+    return fl::max(fl::max(a, b), c);
+}
+
+static void zero4(float out[4]) FL_NOEXCEPT {
+    out[0] = out[1] = out[2] = out[3] = 0.0f;
+}
+
+static void normalize4_if_needed(float out[4]) FL_NOEXCEPT {
+    const float m = fl::max(fl::max(out[0], out[1]), fl::max(out[2], out[3]));
+    if (m > 1.0f) {
+        const float inv_m = 1.0f / m;
+        out[0] *= inv_m; out[1] *= inv_m; out[2] *= inv_m; out[3] *= inv_m;
     }
+}
 
-    float X_t[3];
+static const float* column_for_idx(const ProfileCache& cache, int idx) FL_NOEXCEPT {
+    switch (idx) {
+    case 0: return cache.P_R;
+    case 1: return cache.P_G;
+    case 2: return cache.P_B;
+    default: return cache.P_W;
+    }
+}
+
+static void source_rgb_to_XYZ(const ProfileCache& cache, float s_r,
+                              float s_g, float s_b,
+                              float X_t[3]) FL_NOEXCEPT {
     if (cache.has_source_space) {
-        // X_t = M_src · source_rgb (#2705): interpret the input triple in the
-        // profile's source color space (defaults to Rec709/sRGB-D65). Without
-        // this step the solver targets the native-gamut sum chromaticity, not
-        // any standard white point.
         const float s[3] = { s_r, s_g, s_b };
         matvec3(cache.M_src, s, X_t);
     } else {
@@ -192,17 +235,128 @@ bool solve_strict_subgamut(const ProfileCache& cache, float s_r,
         X_t[1] = cache.P_R[1] * s_r + cache.P_G[1] * s_g + cache.P_B[1] * s_b;
         X_t[2] = cache.P_R[2] * s_r + cache.P_G[2] * s_g + cache.P_B[2] * s_b;
     }
+}
+
+static bool native_single_identity(float s_r, float s_g, float s_b,
+                                   float out[4]) FL_NOEXCEPT {
+    out[0] = fl::clamp(s_r, 0.0f, 1.0f);
+    out[1] = fl::clamp(s_g, 0.0f, 1.0f);
+    out[2] = fl::clamp(s_b, 0.0f, 1.0f);
+    out[3] = 0.0f;
+    return true;
+}
+
+static bool solve_fixed_topology_least_squares(const ProfileCache& cache,
+                                               const float X[3],
+                                               const int* idx,
+                                               int n,
+                                               float out[4]) FL_NOEXCEPT {
+    zero4(out);
+    constexpr float kEps = 1e-9f;
+
+    if (n == 1) {
+        const float* A = column_for_idx(cache, idx[0]);
+        const float aa = A[0]*A[0] + A[1]*A[1] + A[2]*A[2];
+        const float ax = A[0]*X[0] + A[1]*X[1] + A[2]*X[2];
+        out[idx[0]] = (aa > kEps) ? fl::max(ax / aa, 0.0f) : 0.0f;
+        return true;
+    }
+
+    if (n == 2) {
+        const float* A = column_for_idx(cache, idx[0]);
+        const float* B = column_for_idx(cache, idx[1]);
+        const float aa = A[0]*A[0] + A[1]*A[1] + A[2]*A[2];
+        const float ab = A[0]*B[0] + A[1]*B[1] + A[2]*B[2];
+        const float bb = B[0]*B[0] + B[1]*B[1] + B[2]*B[2];
+        const float ax = A[0]*X[0] + A[1]*X[1] + A[2]*X[2];
+        const float bx = B[0]*X[0] + B[1]*X[1] + B[2]*X[2];
+        const float det = aa * bb - ab * ab;
+        if (fl::fabs(det) < kEps) {
+            return false;
+        }
+
+        float t0 = ( ax * bb - bx * ab) / det;
+        float t1 = (-ax * ab + bx * aa) / det;
+
+        // Non-negative active-set fallback for the 2-column case. If one
+        // coefficient goes negative, project onto the remaining column.
+        if (t0 < 0.0f && t1 >= 0.0f) {
+            t0 = 0.0f;
+            t1 = (bb > kEps) ? fl::max(bx / bb, 0.0f) : 0.0f;
+        } else if (t1 < 0.0f && t0 >= 0.0f) {
+            t1 = 0.0f;
+            t0 = (aa > kEps) ? fl::max(ax / aa, 0.0f) : 0.0f;
+        } else if (t0 < 0.0f && t1 < 0.0f) {
+            t0 = 0.0f;
+            t1 = 0.0f;
+        }
+
+        out[idx[0]] = fl::max(t0, 0.0f);
+        out[idx[1]] = fl::max(t1, 0.0f);
+        return true;
+    }
+
+    return false;
+}
+
+static bool solve_native_dual_edge_fixed_topology(const ProfileCache& cache,
+                                                  float s_r, float s_g,
+                                                  float s_b,
+                                                  float out[4]) FL_NOEXCEPT {
+    zero4(out);
+    constexpr float kEps = 1.0f / 65535.0f;
+    const float value = max3f(s_r, s_g, s_b);
+    if (value <= kEps) {
+        return true;
+    }
+
+    // Native dual authority means edge-lock the active channel set, not raw
+    // input passthrough. Solve the full-chroma edge target against the active
+    // two measured emitter columns, normalize at the endpoint, then apply the
+    // original value scale so yellow_half/cyan_half/etc remain granular.
+    const float c_r = s_r / value;
+    const float c_g = s_g / value;
+    const float c_b = s_b / value;
+
+    float X_full[3];
+    source_rgb_to_XYZ(cache, c_r, c_g, c_b, X_full);
+
+    int active[2];
+    int n = 0;
+    if (s_r > kEps) active[n++] = 0;
+    if (s_g > kEps) active[n++] = 1;
+    if (s_b > kEps) active[n++] = 2;
+    if (n != 2) {
+        return false;
+    }
+
+    float full[4];
+    if (!solve_fixed_topology_least_squares(cache, X_full, active, n, full)) {
+        return false;
+    }
+    normalize4_if_needed(full);
+
+    out[0] = full[0] * value;
+    out[1] = full[1] * value;
+    out[2] = full[2] * value;
+    out[3] = 0.0f;
+    normalize4_if_needed(out);
+    return true;
+}
+
+static bool solve_strict_subgamut_from_XYZ(const ProfileCache& cache,
+                                           float X_t[3],
+                                           float out_rgbw[4]) FL_NOEXCEPT {
+    zero4(out_rgbw);
     const float sum_xyz = X_t[0] + X_t[1] + X_t[2];
     if (sum_xyz < 1e-9f) {
         return true;
     }
     float xy_t[2] = { X_t[0] / sum_xyz, X_t[1] / sum_xyz };
 
-    // Out-of-hull projection (#2708, gist §3): if the target xy lies outside
-    // the LED RGB triangle (typical for sRGB-blue and Rec.2020-green inputs),
-    // project onto the achievable LED hull via NNLS across all three
-    // sub-gamuts. Without this, named-gamut targets just outside the LED's
-    // primary triangle silently return (0,0,0,0).
+    // Project full-chroma endpoints before topology routing. This keeps
+    // value-scaled nodes from repeatedly normalizing to the same saturated
+    // tuple and mirrors the reference model's endpoint-first structure.
     project_to_hull(cache, X_t, xy_t);
 
     struct SubGamut {
@@ -212,9 +366,6 @@ bool solve_strict_subgamut(const ProfileCache& cache, float s_r,
         const float (*Pinv)[3];
         int idx_a, idx_b, idx_c;
     };
-    // Route barycentric containment against the *effective* W chromaticity
-    // (cache.xy_w) so CCT-shifted whites land in the same simplex the matrix
-    // solve uses. Using profile->xy_w here would mis-route shifted targets.
     const SubGamut sgs[3] = {
         { cache.profile->xy_r, cache.profile->xy_g, cache.xy_w,
           cache.P_RGW_inv, 0, 1, 3 },
@@ -236,7 +387,7 @@ bool solve_strict_subgamut(const ProfileCache& cache, float s_r,
         t[0] = fl::max(t[0], 0.0f);
         t[1] = fl::max(t[1], 0.0f);
         t[2] = fl::max(t[2], 0.0f);
-        const float m = fl::max(fl::max(t[0], t[1]), t[2]);
+        const float m = max3f(t[0], t[1], t[2]);
         if (m > 1.0f) {
             const float inv_m = 1.0f / m;
             t[0] *= inv_m; t[1] *= inv_m; t[2] *= inv_m;
@@ -247,6 +398,58 @@ bool solve_strict_subgamut(const ProfileCache& cache, float s_r,
         return true;
     }
     return false;
+}
+
+bool solve_strict_subgamut(const ProfileCache& cache, float s_r,
+                           float s_g, float s_b,
+                           float out_rgbw[4]) FL_NOEXCEPT {
+    zero4(out_rgbw);
+
+    const float value = max3f(s_r, s_g, s_b);
+    if (value <= 1e-9f) {
+        return true;
+    }
+
+    // Native topology authority is split by case:
+    //   n == 1: exact single-axis identity is correct.
+    //   n == 2: keep the active RG/RB/GB edge locked, but still solve that
+    //           two-emitter topology colorimetrically from measured XYZ/Y.
+    // The previous n<=2 passthrough fixed W/third-channel bleed, but regressed
+    // dual edges into raw 1:1 input->output tuples.
+    if (is_native_input_gamut(*cache.profile)) {
+        const int n_active = count_active_channels(s_r, s_g, s_b);
+        if (n_active == 1) {
+            return native_single_identity(s_r, s_g, s_b, out_rgbw);
+        }
+        if (n_active == 2) {
+            return solve_native_dual_edge_fixed_topology(cache, s_r, s_g,
+                                                         s_b, out_rgbw);
+        }
+    }
+
+    // Interior colors must preserve value separately from chroma. Solving the
+    // already value-scaled node and then normalizing is what collapsed several
+    // HSV v055/v075/v100 rows to identical saturated tuples. Instead, solve
+    // the full-chroma endpoint once, normalize/project there, then apply the
+    // original value scale.
+    const float c_r = s_r / value;
+    const float c_g = s_g / value;
+    const float c_b = s_b / value;
+
+    float X_full[3];
+    source_rgb_to_XYZ(cache, c_r, c_g, c_b, X_full);
+
+    float full[4];
+    if (!solve_strict_subgamut_from_XYZ(cache, X_full, full)) {
+        return false;
+    }
+
+    out_rgbw[0] = full[0] * value;
+    out_rgbw[1] = full[1] * value;
+    out_rgbw[2] = full[2] * value;
+    out_rgbw[3] = full[3] * value;
+    normalize4_if_needed(out_rgbw);
+    return true;
 }
 
 bool solve_strict_subgamut_xy(const ProfileCache& cache,
@@ -303,55 +506,222 @@ bool solve_strict_subgamut_xy(const ProfileCache& cache,
     return false;
 }
 
+
+static bool solve_wx_balanced_fraction_for_xy(const ProfileCache& cache,
+                                              const float target_xy[2],
+                                              float out[4]) FL_NOEXCEPT {
+    zero4(out);
+    if (!(target_xy[0] == target_xy[0]) || !(target_xy[1] == target_xy[1])) {
+        return false;
+    }
+
+    const float* cols[4] = { cache.P_R, cache.P_G, cache.P_B, cache.P_W };
+    float A[2][4];
+    const float x = target_xy[0];
+    const float y = target_xy[1];
+    for (int i = 0; i < 4; ++i) {
+        const float* P = cols[i];
+        const float S = P[0] + P[1] + P[2];
+        A[0][i] = P[0] - x * S;
+        A[1][i] = P[1] - y * S;
+    }
+
+    const float y_max = fl::max(fl::max(cache.P_R[1], cache.P_G[1]),
+                                fl::max(cache.P_B[1], cache.P_W[1]));
+    const float y_weight[4] = {
+        (y_max > 1e-12f) ? cache.P_R[1] / y_max : 0.0f,
+        (y_max > 1e-12f) ? cache.P_G[1] / y_max : 0.0f,
+        (y_max > 1e-12f) ? cache.P_B[1] / y_max : 0.0f,
+        (y_max > 1e-12f) ? cache.P_W[1] / y_max : 0.0f,
+    };
+
+    bool found = false;
+    float best_obj = -1e30f;
+    float best[4] = {0, 0, 0, 0};
+    const float floors[4] = { 1.0f / 1024.0f, 1.0f / 2048.0f,
+                              1.0f / 4096.0f, 0.0f };
+    constexpr float kEps = 1e-5f;
+
+    for (int fidx = 0; fidx < 4 && !found; ++fidx) {
+        const float lo = floors[fidx];
+        const float hi = 1.0f;
+        for (int free0 = 0; free0 < 4; ++free0) {
+            for (int free1 = free0 + 1; free1 < 4; ++free1) {
+                int fixed[2];
+                int nf = 0;
+                for (int i = 0; i < 4; ++i) {
+                    if (i != free0 && i != free1) fixed[nf++] = i;
+                }
+                for (int b0 = 0; b0 < 2; ++b0) {
+                    for (int b1 = 0; b1 < 2; ++b1) {
+                        float cand[4] = {0, 0, 0, 0};
+                        cand[fixed[0]] = b0 ? hi : lo;
+                        cand[fixed[1]] = b1 ? hi : lo;
+
+                        const float rhs0 = -(A[0][fixed[0]] * cand[fixed[0]]
+                                           + A[0][fixed[1]] * cand[fixed[1]]);
+                        const float rhs1 = -(A[1][fixed[0]] * cand[fixed[0]]
+                                           + A[1][fixed[1]] * cand[fixed[1]]);
+                        const float a00 = A[0][free0];
+                        const float a01 = A[0][free1];
+                        const float a10 = A[1][free0];
+                        const float a11 = A[1][free1];
+                        const float det = a00 * a11 - a01 * a10;
+                        if (fl::fabs(det) < 1e-12f) {
+                            continue;
+                        }
+                        cand[free0] = (rhs0 * a11 - a01 * rhs1) / det;
+                        cand[free1] = (a00 * rhs1 - rhs0 * a10) / det;
+
+                        bool ok = true;
+                        for (int i = 0; i < 4; ++i) {
+                            if (cand[i] < lo - kEps || cand[i] > hi + kEps) {
+                                ok = false;
+                                break;
+                            }
+                            cand[i] = fl::clamp(cand[i], lo, hi);
+                        }
+                        if (!ok) continue;
+
+                        const float residual0 = A[0][0]*cand[0] + A[0][1]*cand[1]
+                                              + A[0][2]*cand[2] + A[0][3]*cand[3];
+                        const float residual1 = A[1][0]*cand[0] + A[1][1]*cand[1]
+                                              + A[1][2]*cand[2] + A[1][3]*cand[3];
+                        if (fl::fabs(residual0) > 5e-4f || fl::fabs(residual1) > 5e-4f) {
+                            continue;
+                        }
+
+                        const float obj = cand[3]
+                                        + 1e-6f * (y_weight[0]*cand[0]
+                                                 + y_weight[1]*cand[1]
+                                                 + y_weight[2]*cand[2]
+                                                 + y_weight[3]*cand[3]);
+                        if (!found || obj > best_obj) {
+                            found = true;
+                            best_obj = obj;
+                            best[0] = cand[0]; best[1] = cand[1];
+                            best[2] = cand[2]; best[3] = cand[3];
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (!found) {
+        return false;
+    }
+
+    const float m = fl::max(fl::max(best[0], best[1]), fl::max(best[2], best[3]));
+    if (m <= 1e-12f) {
+        return false;
+    }
+    const float inv_m = 1.0f / m;
+    out[0] = fl::clamp(best[0] * inv_m, 0.0f, 1.0f);
+    out[1] = fl::clamp(best[1] * inv_m, 0.0f, 1.0f);
+    out[2] = fl::clamp(best[2] * inv_m, 0.0f, 1.0f);
+    out[3] = fl::clamp(best[3] * inv_m, 0.0f, 1.0f);
+    return true;
+}
+
+bool solve_wx_lp_legacy(const ProfileCache& cache, float s_r,
+                        float s_g, float s_b,
+                        float out_rgbw[4]) FL_NOEXCEPT {
+    zero4(out_rgbw);
+
+    const float value = max3f(s_r, s_g, s_b);
+    if (value <= 1e-9f) {
+        return true;
+    }
+
+    // LP legacy shares the native topology contract. Single-axis inputs are
+    // exact identity. Dual edges are locked to RG/RB/GB but still solved from
+    // measured/source XYZ; they are not W-overdrive candidates.
+    if (is_native_input_gamut(*cache.profile)) {
+        const int n_active = count_active_channels(s_r, s_g, s_b);
+        if (n_active == 1) {
+            return native_single_identity(s_r, s_g, s_b, out_rgbw);
+        }
+        if (n_active == 2) {
+            return solve_native_dual_edge_fixed_topology(cache, s_r, s_g,
+                                                         s_b, out_rgbw);
+        }
+    }
+
+    // Reference wx_lp_legacy uses the current math model's bounded LP endpoint:
+    // project to the strict reachable hull, solve xy constraints while
+    // maximizing W, use a small four-channel floor when feasible, normalize the
+    // endpoint, then apply source value. This matches the LP legacy cube much
+    // better than the old direct residual formula, which collapses D65-like
+    // values toward W plus a tiny RGB residual.
+    const float c_r = s_r / value;
+    const float c_g = s_g / value;
+    const float c_b = s_b / value;
+
+    float X_t[3];
+    source_rgb_to_XYZ(cache, c_r, c_g, c_b, X_t);
+
+    float xy_t[2];
+    project_to_hull(cache, X_t, xy_t);
+
+    float full[4];
+    if (!solve_wx_balanced_fraction_for_xy(cache, xy_t, full)) {
+        // Degenerate edge fallback: strict projected endpoint. This mirrors the
+        // Python reference's fallback when the balanced four-channel manifold
+        // cannot represent the requested xy.
+        if (!solve_strict_subgamut_from_XYZ(cache, X_t, full)) {
+            return false;
+        }
+        normalize4_if_needed(full);
+    }
+
+    out_rgbw[0] = full[0] * value;
+    out_rgbw[1] = full[1] * value;
+    out_rgbw[2] = full[2] * value;
+    out_rgbw[3] = full[3] * value;
+    normalize4_if_needed(out_rgbw);
+    return true;
+}
+
 void solve_wx_overdrive(const ProfileCache& cache, float s_r, float s_g,
                         float s_b, float overdrive_ratio,
                         float out_rgbw[4]) FL_NOEXCEPT {
-    // Replaces the original `solve_wx_lp` (issue #2706). The original was
-    // `max w s.t. (a - w*d) >= 0`, which produces the *same vertex of the
-    // feasible polytope* as the strict sub-gamut solver — bit-identical
-    // output for any in-gamut target. This formulation instead computes the
-    // strict-vertex w and then pushes W *past* it by `overdrive_ratio`,
-    // accepting chromaticity drift toward the W diode in exchange for higher
-    // luminance / a brighter output. At overdrive_ratio = 0 the function
-    // reduces to the strict vertex (degenerate with `solve_strict_subgamut`);
-    // at overdrive_ratio = 1 it drives w to 1.0 and clamps residuals.
-    //
-    // Native topology authority guard (#2748). The overdrive solver shares
-    // the strict solver's topology contract: 1- and 2-channel native inputs
-    // must NOT pull in W or unrelated channels. The chromaticity-drift
-    // overdrive only applies to interior (3-channel) targets, where W
-    // participation is intentional and bounded by `overdrive_ratio`.
+    zero4(out_rgbw);
+
+    const float value = max3f(s_r, s_g, s_b);
+    if (value <= 1e-9f) {
+        return;
+    }
+
+    // Boosted/overdrive is a distinct visual policy, but it still must keep
+    // native single/dual topology authority. Single axes stay exact; dual
+    // edges stay locked to RG/RB/GB through the measured two-emitter solve.
     if (is_native_input_gamut(*cache.profile)) {
         const int n_active = count_active_channels(s_r, s_g, s_b);
-        if (n_active <= 2) {
-            out_rgbw[0] = fl::clamp(s_r, 0.0f, 1.0f);
-            out_rgbw[1] = fl::clamp(s_g, 0.0f, 1.0f);
-            out_rgbw[2] = fl::clamp(s_b, 0.0f, 1.0f);
-            out_rgbw[3] = 0.0f;
+        if (n_active == 1) {
+            native_single_identity(s_r, s_g, s_b, out_rgbw);
+            return;
+        }
+        if (n_active == 2) {
+            solve_native_dual_edge_fixed_topology(cache, s_r, s_g,
+                                                  s_b, out_rgbw);
             return;
         }
     }
 
-    // Target XYZ comes from the source space (#2705) when available, so the
-    // boosted mode targets the same standard white point as the strict mode.
+    // Solve the full-chroma endpoint first and scale value later. This keeps
+    // boosted mode from flattening fixed-hue HSV value ramps into repeated
+    // saturated endpoint tuples.
+    const float c_r = s_r / value;
+    const float c_g = s_g / value;
+    const float c_b = s_b / value;
+
     float X_t[3];
-    if (cache.has_source_space) {
-        const float s[3] = { s_r, s_g, s_b };
-        matvec3(cache.M_src, s, X_t);
-    } else {
-        X_t[0] = cache.P_R[0] * s_r + cache.P_G[0] * s_g + cache.P_B[0] * s_b;
-        X_t[1] = cache.P_R[1] * s_r + cache.P_G[1] * s_g + cache.P_B[1] * s_b;
-        X_t[2] = cache.P_R[2] * s_r + cache.P_G[2] * s_g + cache.P_B[2] * s_b;
-    }
-    // Out-of-hull projection (#2708): out-of-hull targets produce a negative
-    // entry in `a` that the LP would otherwise zero, collapsing the result.
-    // Projecting to the achievable LED hull first keeps the overdrive
-    // formulation chromaticity-faithful even on sRGB / Rec.2020 boundary
-    // colors.
+    source_rgb_to_XYZ(cache, c_r, c_g, c_b, X_t);
+
     float xy_t[2];
     project_to_hull(cache, X_t, xy_t);
-    // a = P_RGB_inv · X_t — the 3-channel solution if W were unused. d is the
-    // RGB-channel cost of one unit of W (cached at build_profile_cache time).
+
     float a[3];
     matvec3(cache.P_RGB_inv, X_t, a);
     const float* d = cache.d_W;
@@ -371,21 +741,18 @@ void solve_wx_overdrive(const ProfileCache& cache, float s_r, float s_g,
     float w = w_strict + rho * (1.0f - w_strict);
     w = fl::clamp(w, 0.0f, 1.0f);
 
-    float t[4];
-    t[0] = fl::max(a[0] - w * d[0], 0.0f);
-    t[1] = fl::max(a[1] - w * d[1], 0.0f);
-    t[2] = fl::max(a[2] - w * d[2], 0.0f);
-    t[3] = w;
+    float full[4];
+    full[0] = fl::max(a[0] - w * d[0], 0.0f);
+    full[1] = fl::max(a[1] - w * d[1], 0.0f);
+    full[2] = fl::max(a[2] - w * d[2], 0.0f);
+    full[3] = w;
+    normalize4_if_needed(full);
 
-    const float m = fl::max(fl::max(t[0], t[1]), fl::max(t[2], t[3]));
-    if (m > 1.0f) {
-        const float inv_m = 1.0f / m;
-        t[0] *= inv_m; t[1] *= inv_m; t[2] *= inv_m; t[3] *= inv_m;
-    }
-    out_rgbw[0] = t[0];
-    out_rgbw[1] = t[1];
-    out_rgbw[2] = t[2];
-    out_rgbw[3] = t[3];
+    out_rgbw[0] = full[0] * value;
+    out_rgbw[1] = full[1] * value;
+    out_rgbw[2] = full[2] * value;
+    out_rgbw[3] = full[3] * value;
+    normalize4_if_needed(out_rgbw);
 }
 
 LutTable build_lut(const ProfileCache& cache, int grid_n,

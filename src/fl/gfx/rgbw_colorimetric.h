@@ -349,13 +349,21 @@ bool solve_strict_subgamut_xy(const ProfileCache& cache,
                               const float xy_t[2], float Y_t,
                               float out_rgbw[4]) FL_NOEXCEPT;
 
-// White-overdrive solver (#2706). Computes the strict-vertex W (same as
-// `solve_strict_subgamut`) and then pushes W past it by `overdrive_ratio`,
-// accepting chromaticity drift toward the W diode in exchange for higher
-// luminance. At overdrive_ratio = 0 this matches the strict-vertex output;
-// at overdrive_ratio = 1 W is driven to 1.0. Default boosted mode uses
-// `kDefaultOverdriveRatio` (see below). Replaces the previous `solve_wx_lp`
-// which was mathematically equivalent to the strict sub-gamut solver.
+// Reference wx_lp_legacy solver. Solves a chromaticity-preserving bounded LP
+// endpoint: project to the reachable hull, maximize W under xy constraints,
+// keep a small four-channel floor when feasible, normalize the endpoint, then
+// apply source value scaling. Native single-axis inputs remain exact identity;
+// native dual edges remain locked to RG/RB/GB but are solved from
+// measured/source XYZ instead of raw passthrough. This is intentionally
+// separate from boosted overdrive below.
+bool solve_wx_lp_legacy(const ProfileCache& cache, float s_r, float s_g,
+                        float s_b, float out_rgbw[4]) FL_NOEXCEPT;
+
+// White-overdrive / boosted solver (#2706). Uses a separate visual policy
+// that pushes W past the non-overdriven residual boundary by
+// `overdrive_ratio`, accepting chromaticity drift toward the W diode in
+// exchange for higher luminance. Keep this separate from wx_lp_legacy; the LP
+// legacy reference is the bounded chromaticity-preserving solver above.
 void solve_wx_overdrive(const ProfileCache& cache, float s_r, float s_g,
                         float s_b, float overdrive_ratio,
                         float out_rgbw[4]) FL_NOEXCEPT;
