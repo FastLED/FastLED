@@ -370,40 +370,13 @@ void setup() {
 
     FL_WARN("[SETUP] AutoResearch sketch starting - serial output active");
 
-    // Diagnostic: dump reset cause + bundled CrashReport so we can tell
-    // HardFault vs WDOG3 vs PIN vs POR. Direct register access — `imxrt.h`
-    // is already pulled by FastLED.h on Teensy 4. This boot-diagnostic
-    // block is complementary to FL_WATCHDOG_AUTO()'s ResetInfo print: this
-    // one shows individual bit positions + the bundled Teensy CrashReport
-    // (full HardFault stack), while FL_WATCHDOG_AUTO() shows the normalized
-    // cross-platform cause name.
-#if defined(FL_IS_TEENSY_4X) && defined(__IMXRT1062__)
-    {
-        const uint32_t srsr = SRC_SRSR;
-        Serial.print("[boot] SRC_SRSR = 0x");  // ok serial - boot diagnostic, Teensy 4 only
-        Serial.println(srsr, HEX);             // ok serial - boot diagnostic, Teensy 4 only
-        if (srsr & SRC_SRSR_WDOG3_RST_B)        Serial.println("[boot]   WDOG3_RST_B (RTWDOG fired)");        // ok serial - boot diagnostic
-        if (srsr & SRC_SRSR_WDOG_RST_B)         Serial.println("[boot]   WDOG_RST_B (WDOG1/2 fired)");        // ok serial - boot diagnostic
-        if (srsr & SRC_SRSR_IPP_RESET_B)        Serial.println("[boot]   POR (power-on reset)");              // ok serial - boot diagnostic
-        if (srsr & SRC_SRSR_LOCKUP_SYSRESETREQ) Serial.println("[boot]   LOCKUP_SYSRESETREQ (HardFault)");    // ok serial - boot diagnostic
-        if (srsr & SRC_SRSR_IPP_USER_RESET_B)   Serial.println("[boot]   IPP_USER_RESET_B (external pin)");  // ok serial - boot diagnostic
-        if (srsr & SRC_SRSR_JTAG_SW_RST)        Serial.println("[boot]   JTAG/SW reset");                    // ok serial - boot diagnostic
-        SRC_SRSR = srsr;  // W1C so next boot sees only its own cause
-        if (CrashReport) {
-            Serial.println("[boot] *** CrashReport present from previous boot: ***");  // ok serial - boot diagnostic
-            Serial.print(CrashReport);  // ok serial - bundled Teensy CrashReport, no fl:: equivalent
-            Serial.println("[boot] *** end CrashReport ***");  // ok serial - boot diagnostic
-        } else {
-            Serial.println("[boot] no CrashReport from previous boot");  // ok serial - boot diagnostic
-        }
-        Serial.flush();  // ok serial - boot diagnostic flush
-    }
-#endif
-
-    // Note: the unified watchdog is armed lazily by FL_WATCHDOG_AUTO() at
-    // the top of loop() — no explicit setup() call needed. See
-    // fl/wdt/watchdog.h. The macro also prints prior-boot reset info via
-    // ResetInfo::describe() and pauses 3 s on crash before reset.
+    // Note: the unified watchdog is armed lazily by FL_WATCHDOG_AUTO() at the
+    // top of loop() — no explicit setup() call needed. The macro prints the
+    // prior-boot reset info via ResetInfo::describe() and pauses 3 s on crash
+    // before the new timer arms. Per-platform boot diagnostics (Teensy 4
+    // SRC_SRSR bit decode + bundled CrashReport, ESP32 panic backtrace, etc.)
+    // are emitted by the platform watchdog impl from Watchdog::begin() — see
+    // src/fl/wdt/watchdog.h and src/platforms/*/watchdog_*.impl.hpp.
 
     // Initialize RX buffer dynamically (uses PSRAM if available, falls back to heap)
     g_rx_buffer_storage.resize(RX_BUFFER_SIZE);
