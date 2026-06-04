@@ -311,9 +311,24 @@ void setup() {
     while (!fl::serial_ready() && (millis() - serial_wait_start) < AUTORESEARCH_SERIAL_WAIT_MS);  // Wait for serial monitor (early exits when connected)
 
     FL_WARN("[SETUP] AutoResearch sketch starting - serial output active");
-#if defined(FL_IS_ESP32)
-    fl::watchdog_setup(15000);
-#endif
+
+    // Unified cross-platform watchdog (FastLED#2731). 15 s timeout matches
+    // the AutoResearch test budget. On Teensy 4 / Teensy 3 / RP / nRF52 /
+    // STM32 / SAMD / AVR / Apollo3 / MGM240 this is a real hardware WDT;
+    // on platforms without an impl (or with their optional library missing)
+    // this is a no-op via the FL_HAS_INCLUDE fallback. ESP32 also keeps its
+    // existing fl::watchdog_setup() wiring via the same accessor.
+    FastLED.watchdog().begin(15000);
+    if (FastLED.watchdog().isInSafeMode()) {
+        FL_WARN("[SAFE MODE] previous boots crashed — LED peripheral disabled");
+        // Hang here forever WITHOUT feeding the watchdog so the board
+        // stays USB-recoverable and a new firmware upload can rescue it.
+        while (true) { fl::task::run(); }
+    }
+    if (FastLED.watchdog().lastResetWasWatchdog()) {
+        FL_WARN("[recovery] previous boot was killed by watchdog — crash#"
+                << static_cast<int>(FastLED.watchdog().consecutiveCrashCount()));
+    }
 
     // Initialize RX buffer dynamically (uses PSRAM if available, falls back to heap)
     g_rx_buffer_storage.resize(RX_BUFFER_SIZE);
@@ -477,6 +492,29 @@ void loop() {
     for (int i = 0; i < 100; i++) {
         fl::task::run();
     }
+
+    // ========================================================================
+    // Watchdog autoresearch trigger (FastLED#2731) — when the host RPC sends
+    // `deliberateHang`, the handler flips this flag. We let one more pass of
+    // task::run() drain the response queue so the host sees the ACK, then
+    // we disable interrupts (so no async machinery can keep the WDT happy)
+    // and spin forever. The next watchdog tick must fire and reset the chip.
+    // The host's recovery test passes if the device re-enumerates afterward
+    // and is reflashable.
+    // ========================================================================
+    if (g_autoresearch_state->deliberate_hang_requested) {
+        FL_WARN("[deliberateHang] entering forced-hang loop NOW");
+        delay(200);  // give Serial TX FIFO time to flush
+        noInterrupts();
+        while (true) { /* deliberate hang */ }
+    }
+
+    // Feed the watchdog. We do this AFTER the dangerous work (task::run +
+    // GPIO baseline below) succeeded. If anything wedged above, this line
+    // is never reached, the watchdog fires, and the board resets into
+    // safe-mode recovery on the next boot.
+    FastLED.watchdog().feed();
+    FastLED.watchdog().markCleanShutdown();
 
     // Run GPIO baseline test once after device is ready (allows JSON-RPC to be operational first)
     // This test is informational only - we continue regardless of pass/fail

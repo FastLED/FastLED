@@ -45,7 +45,7 @@
     #include "platforms/stub/watchdog_stub.impl.hpp"
 #elif defined(FL_IS_ESP32)
     #include "platforms/esp/32/watchdog_esp32.impl.hpp"
-#elif defined(FL_IS_TEENSY_4X) && FL_HAS_INCLUDE(<Watchdog_t4.h>)
+#elif defined(FL_IS_TEENSY_4X) && FL_HAS_INCLUDE(<imxrt.h>)
     #include "platforms/arm/mxrt1062/watchdog_mxrt1062.impl.hpp"
 #elif (defined(FL_IS_TEENSY_3X) || defined(FL_IS_TEENSY_LC)) && FL_HAS_INCLUDE(<kinetis.h>)
     #include "platforms/arm/k20/watchdog_k20.impl.hpp"
