@@ -92,6 +92,15 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NOEXCEPT {
     if (timeout_ms == 0) timeout_ms = 1000;
     if (timeout_ms > FL_WATCHDOG_MAX_TIMEOUT_MS) timeout_ms = FL_WATCHDOG_MAX_TIMEOUT_MS;
 
+    // *** Enable the WDOG3 CCM clock gate FIRST. ***
+    //
+    // imxrt.h calls this out explicitly: "WDOG3 requires CCM_CCGR5_WDOG3".
+    // Writes to WDOG3_* registers when the clock gate is off either get
+    // silently ignored or cause a bus fault → HardFault → instant reset.
+    // The previous WDOG3 init attempt (AutoResearch.ino TODO at lines 204-214)
+    // almost certainly missed this. CCGR=3 → clock always on.
+    CCM_CCGR5 |= CCM_CCGR5_WDOG3(3);
+
     // Convert ms to TOVAL counts. With LPO (~32 kHz) and /256 prescaler
     // (CS.PRES set) the tick rate is 125 Hz → 8 ms per count. Clamp to the
     // 16-bit register range.
@@ -106,7 +115,14 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NOEXCEPT {
     WDOG3_CNT = platforms::kRtwdogUnlockKey;
     // Wait for the unlock window to open. The RM allows up to ~32 LPO ticks;
     // at 32 kHz that's ~1 ms, far longer than the bus stores below take.
-    while (!(WDOG3_CS & WDOG_CS_ULK)) { /* spin */ }
+    // Bounded spin to avoid an infinite loop if the unlock never lands
+    // (e.g. CCM clock gate didn't get enabled for some reason).
+    {
+        fl::u32 spin = 0;
+        while (!(WDOG3_CS & WDOG_CS_ULK)) {
+            if (++spin > 1000000u) { __enable_irq(); return; }
+        }
+    }
 
     WDOG3_TOVAL = toval;
     WDOG3_WIN   = 0;   // No window mode — feeds at any time are valid.
@@ -128,8 +144,13 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NOEXCEPT {
              | WDOG_CS_CLK(1)
              | WDOG_CS_DBG;
 
-    // Wait for the reconfigure to take effect.
-    while (!(WDOG3_CS & WDOG_CS_RCS)) { /* spin */ }
+    // Wait for the reconfigure to take effect (also bounded).
+    {
+        fl::u32 spin = 0;
+        while (!(WDOG3_CS & WDOG_CS_RCS)) {
+            if (++spin > 1000000u) { __enable_irq(); return; }
+        }
+    }
 
     __enable_irq();
 

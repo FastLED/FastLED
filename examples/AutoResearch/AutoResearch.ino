@@ -312,15 +312,37 @@ void setup() {
 
     FL_WARN("[SETUP] AutoResearch sketch starting - serial output active");
 
-    // Unified cross-platform watchdog (FastLED#2731) is wired through the
-    // FastLED.watchdog() accessor. On ESP32 we keep the existing
-    // fl::watchdog_setup() behavior (universally validated). On Teensy 4
-    // the bare-register WDOG3 path needs more hardware iteration before
-    // it's safe to arm here by default — the unified API still compiles
-    // and is available for sketches that opt in.
-#if defined(FL_IS_ESP32)
-    FastLED.watchdog().begin(15000);
+    // Diagnostic: dump reset cause + bundled CrashReport so we can tell
+    // HardFault vs WDOG3 vs PIN vs POR. Direct register access — `imxrt.h`
+    // is already pulled by FastLED.h on Teensy 4.
+#if defined(FL_IS_TEENSY_4X) && defined(__IMXRT1062__)
+    {
+        const uint32_t srsr = SRC_SRSR;
+        Serial.printf("[boot] SRC_SRSR = 0x%08lx\n", (unsigned long)srsr);
+        if (srsr & (1u << 7))  Serial.println("[boot]   WDOG3_RST_B (RTWDOG fired)");
+        if (srsr & (1u << 0))  Serial.println("[boot]   POR (power-on reset)");
+        if (srsr & (1u << 4))  Serial.println("[boot]   LOCKUP_SYSRESETREQ (HardFault SYSRESETREQ)");
+        if (srsr & (1u << 5))  Serial.println("[boot]   IPP_USER_RESET_B (external pin)");
+        if (srsr & (1u << 8))  Serial.println("[boot]   JTAG/SW reset");
+        // Write-1-to-clear so next boot sees only its own cause.
+        SRC_SRSR = srsr;
+        if (CrashReport) {
+            Serial.println("[boot] *** CrashReport present from previous boot: ***");
+            Serial.print(CrashReport);
+            Serial.println("[boot] *** end CrashReport ***");
+        } else {
+            Serial.println("[boot] no CrashReport from previous boot");
+        }
+        Serial.flush();
+    }
 #endif
+
+    // Unified cross-platform watchdog (FastLED#2731). Arm at 15 s.
+    FastLED.watchdog().begin(15000);
+    if (FastLED.watchdog().lastResetWasWatchdog()) {
+        FL_WARN("[recovery] previous boot was killed by watchdog — crash#"
+                << static_cast<int>(FastLED.watchdog().consecutiveCrashCount()));
+    }
 
     // Initialize RX buffer dynamically (uses PSRAM if available, falls back to heap)
     g_rx_buffer_storage.resize(RX_BUFFER_SIZE);
@@ -501,13 +523,11 @@ void loop() {
         while (true) { /* deliberate hang */ }
     }
 
-    // Feed + markCleanShutdown only on platforms where we armed in setup().
-    // On platforms where begin() was a no-op, these are also no-ops, but
-    // gating keeps the intent explicit.
-#if defined(FL_IS_ESP32)
+    // Feed the watchdog at the end of every loop iteration. On platforms
+    // where begin() was a no-op the feed is also a no-op, so this is
+    // unconditional.
     FastLED.watchdog().feed();
     FastLED.watchdog().markCleanShutdown();
-#endif
 
     // Run GPIO baseline test once after device is ready (allows JSON-RPC to be operational first)
     // This test is informational only - we continue regardless of pass/fail
