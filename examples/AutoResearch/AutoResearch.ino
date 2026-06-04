@@ -318,31 +318,37 @@ void setup() {
 #if defined(FL_IS_TEENSY_4X) && defined(__IMXRT1062__)
     {
         const uint32_t srsr = SRC_SRSR;
-        Serial.printf("[boot] SRC_SRSR = 0x%08lx\n", (unsigned long)srsr);
-        if (srsr & (1u << 7))  Serial.println("[boot]   WDOG3_RST_B (RTWDOG fired)");
-        if (srsr & (1u << 0))  Serial.println("[boot]   POR (power-on reset)");
-        if (srsr & (1u << 4))  Serial.println("[boot]   LOCKUP_SYSRESETREQ (HardFault SYSRESETREQ)");
-        if (srsr & (1u << 5))  Serial.println("[boot]   IPP_USER_RESET_B (external pin)");
-        if (srsr & (1u << 8))  Serial.println("[boot]   JTAG/SW reset");
+        Serial.print("[boot] SRC_SRSR = 0x");  // ok serial - boot diagnostic, Teensy 4 only
+        Serial.println(srsr, HEX);             // ok serial - boot diagnostic, Teensy 4 only
+        if (srsr & (1u << 7))  Serial.println("[boot]   WDOG3_RST_B (RTWDOG fired)");  // ok serial - boot diagnostic
+        if (srsr & (1u << 0))  Serial.println("[boot]   POR (power-on reset)");  // ok serial - boot diagnostic
+        if (srsr & (1u << 4))  Serial.println("[boot]   LOCKUP_SYSRESETREQ (HardFault SYSRESETREQ)");  // ok serial - boot diagnostic
+        if (srsr & (1u << 5))  Serial.println("[boot]   IPP_USER_RESET_B (external pin)");  // ok serial - boot diagnostic
+        if (srsr & (1u << 8))  Serial.println("[boot]   JTAG/SW reset");  // ok serial - boot diagnostic
         // Write-1-to-clear so next boot sees only its own cause.
         SRC_SRSR = srsr;
         if (CrashReport) {
-            Serial.println("[boot] *** CrashReport present from previous boot: ***");
-            Serial.print(CrashReport);
-            Serial.println("[boot] *** end CrashReport ***");
+            Serial.println("[boot] *** CrashReport present from previous boot: ***");  // ok serial - boot diagnostic
+            Serial.print(CrashReport);  // ok serial - bundled Teensy CrashReport, no fl:: equivalent
+            Serial.println("[boot] *** end CrashReport ***");  // ok serial - boot diagnostic
         } else {
-            Serial.println("[boot] no CrashReport from previous boot");
+            Serial.println("[boot] no CrashReport from previous boot");  // ok serial - boot diagnostic
         }
-        Serial.flush();
+        Serial.flush();  // ok serial - boot diagnostic flush
     }
 #endif
 
-    // Unified cross-platform watchdog (FastLED#2731). Arm at 15 s.
+    // Unified cross-platform watchdog (FastLED#2731). DEBUG: gated to ESP32
+    // only while we bisect why the Teensy 4 boot is failing — the diagnostic
+    // prints above run unconditionally, so if Teensy enumerates USB cleanly
+    // now we know begin() is the trigger and SRC_SRSR will reveal the cause.
+#if defined(FL_IS_ESP32)
     FastLED.watchdog().begin(15000);
     if (FastLED.watchdog().lastResetWasWatchdog()) {
         FL_WARN("[recovery] previous boot was killed by watchdog — crash#"
                 << static_cast<int>(FastLED.watchdog().consecutiveCrashCount()));
     }
+#endif
 
     // Initialize RX buffer dynamically (uses PSRAM if available, falls back to heap)
     g_rx_buffer_storage.resize(RX_BUFFER_SIZE);
@@ -523,11 +529,12 @@ void loop() {
         while (true) { /* deliberate hang */ }
     }
 
-    // Feed the watchdog at the end of every loop iteration. On platforms
-    // where begin() was a no-op the feed is also a no-op, so this is
-    // unconditional.
+    // DEBUG: gated to ESP32 while we bisect Teensy 4 boot. If feed() also
+    // touches WDOG3 registers without armed state it could be the culprit.
+#if defined(FL_IS_ESP32)
     FastLED.watchdog().feed();
     FastLED.watchdog().markCleanShutdown();
+#endif
 
     // Run GPIO baseline test once after device is ready (allows JSON-RPC to be operational first)
     // This test is informational only - we continue regardless of pass/fail
