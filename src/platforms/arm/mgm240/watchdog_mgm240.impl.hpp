@@ -18,7 +18,9 @@
 
 #define FL_WATCHDOG_HAS_HARDWARE
 #define FL_WATCHDOG_PERSIST_BYTES 8
-#define FL_WATCHDOG_MAX_TIMEOUT_MS 32000u
+// Largest WDOG_PeriodSel_TypeDef (`wdogPeriod_256k` ≈ 262145 cycles) at the
+// LFRCO's 32.768 kHz gives a ~8.00 s ceiling.
+#define FL_WATCHDOG_MAX_TIMEOUT_MS 8000u
 
 namespace fl {
 namespace platforms {
@@ -46,23 +48,42 @@ inline ResetCause translateMgm240RstCause(fl::u32 cause) {
     return ResetCause::UNKNOWN;
 }
 
-// Map ms timeout to nearest `WDOG_PeriodSel_TypeDef`. LFRCO ~32.768 kHz; the
-// period field is power-of-two counts: 9 (256 cycles ≈ 8 ms) up through
-// 17 (65536 cycles ≈ 2 s) and beyond. Pick smallest period >= requested.
+// Map ms timeout to the smallest `WDOG_PeriodSel_TypeDef` whose tick count
+// satisfies the request. Per the Gecko SDK / EFR32MG24 reference, the enum
+// values are clock-cycle counts on the watchdog source clock (LFRCO ≈ 32.768
+// kHz). Conversion: ms ≈ cycles * 1000 / 32768.
+//
+//   wdogPeriod_9    =      9 cycles ≈ 0.3 ms
+//   wdogPeriod_17   =     17 cycles ≈ 0.5 ms
+//   wdogPeriod_33   =     33 cycles ≈ 1.0 ms
+//   wdogPeriod_65   =     65 cycles ≈ 2.0 ms
+//   wdogPeriod_129  =    129 cycles ≈ 3.9 ms
+//   wdogPeriod_257  =    257 cycles ≈ 7.8 ms
+//   wdogPeriod_513  =    513 cycles ≈ 15.6 ms
+//   wdogPeriod_1k   =   1025 cycles ≈ 31 ms
+//   wdogPeriod_2k   =   2049 cycles ≈ 63 ms
+//   wdogPeriod_4k   =   4097 cycles ≈ 125 ms
+//   wdogPeriod_8k   =   8193 cycles ≈ 250 ms
+//   wdogPeriod_16k  =  16385 cycles ≈ 500 ms
+//   wdogPeriod_32k  =  32769 cycles ≈ 1000 ms
+//   wdogPeriod_64k  =  65537 cycles ≈ 2000 ms
+//   wdogPeriod_128k = 131073 cycles ≈ 4000 ms
+//   wdogPeriod_256k = 262145 cycles ≈ 8000 ms
 inline WDOG_PeriodSel_TypeDef mgm240PickPeriod(fl::u32 ms) {
-    if (ms <=    8) return wdogPeriod_9;
-    if (ms <=   16) return wdogPeriod_16;
-    if (ms <=   32) return wdogPeriod_32;
-    if (ms <=   64) return wdogPeriod_64;
-    if (ms <=  125) return wdogPeriod_128;
-    if (ms <=  250) return wdogPeriod_256;
-    if (ms <=  500) return wdogPeriod_512;
-    if (ms <= 1000) return wdogPeriod_1k;
-    if (ms <= 2000) return wdogPeriod_2k;
-    if (ms <= 4000) return wdogPeriod_4k;
-    if (ms <= 8000) return wdogPeriod_8k;
-    if (ms <=16000) return wdogPeriod_16k;
-    return wdogPeriod_32k;
+    if (ms <=    1) return wdogPeriod_33;
+    if (ms <=    2) return wdogPeriod_65;
+    if (ms <=    4) return wdogPeriod_129;
+    if (ms <=    8) return wdogPeriod_257;
+    if (ms <=   16) return wdogPeriod_513;
+    if (ms <=   31) return wdogPeriod_1k;
+    if (ms <=   63) return wdogPeriod_2k;
+    if (ms <=  125) return wdogPeriod_4k;
+    if (ms <=  250) return wdogPeriod_8k;
+    if (ms <=  500) return wdogPeriod_16k;
+    if (ms <= 1000) return wdogPeriod_32k;
+    if (ms <= 2000) return wdogPeriod_64k;
+    if (ms <= 4000) return wdogPeriod_128k;
+    return wdogPeriod_256k;
 }
 
 } // namespace platforms
