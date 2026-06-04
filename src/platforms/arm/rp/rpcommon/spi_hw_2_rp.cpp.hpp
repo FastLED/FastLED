@@ -85,6 +85,10 @@ static inline int add_spi_dual_pio_program(PIO pio) {
         .instructions = spi_dual_pio_instr,
         .length = sizeof(spi_dual_pio_instr) / sizeof(spi_dual_pio_instr[0]),
         .origin = -1,
+#if defined(PICO_SDK_VERSION_MAJOR) && PICO_SDK_VERSION_MAJOR >= 2
+        .pio_version = 0,
+        .used_gpio_ranges = 0,
+#endif
     };
 
     if (!pio_can_add_program(pio, &spi_dual_pio_program))
