@@ -127,22 +127,23 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NOEXCEPT {
     WDOG3_TOVAL = toval;
     WDOG3_WIN   = 0;   // No window mode — feeds at any time are valid.
 
-    // Configure CS:
+    // Configure CS. Per iMXRT1062 RM 65.6.1, the STOP/WAIT/DBG bits mean
+    // "enabled in stop/wait/debug mode", i.e. setting them keeps the WDT
+    // counting in those modes. We deliberately leave all three clear so a
+    // debugger session pauses the watchdog (developer-friendly) and so any
+    // CPU power-down also pauses it.
     //  - EN        = 1  → enable RTWDOG
     //  - CMD32EN   = 1  → keep 32-bit unlock/refresh keying (matches the
     //                     CNT writes we use)
     //  - UPDATE    = 1  → allow future reconfigures via the unlock sequence
     //  - PRES      = 1  → /256 prescaler → 8 ms per TOVAL count
-    //  - CLK = 0b01    → LPO clock source (32 kHz, low-power, runs in wait/stop)
-    //  - WAIT/STOP/DBG → leave at reset defaults (continue counting in WAIT
-    //                    and STOP; stop in DEBUG so a debugger session
-    //                    doesn't reset the chip during a breakpoint).
+    //  - CLK = 0b01     → LPO clock source (~32 kHz)
+    //  - STOP/WAIT/DBG = 0 → pause in stop/wait/debug modes
     WDOG3_CS = WDOG_CS_EN
              | WDOG_CS_CMD32EN
              | WDOG_CS_UPDATE
              | WDOG_CS_PRES
-             | WDOG_CS_CLK(1)
-             | WDOG_CS_DBG;
+             | WDOG_CS_CLK(1);
 
     // Wait for the reconfigure to take effect (also bounded).
     {
