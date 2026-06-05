@@ -30,6 +30,7 @@ from ci.boards import Board, create_board
 from ci.compiler.build_config import (
     apply_board_specific_config,
     generate_build_info_json_from_existing_build,
+    get_root_platformio_build_flags,
 )
 from ci.compiler.build_utils import (
     create_building_banner,
@@ -143,6 +144,21 @@ def _init_platformio_build(
     except Exception:
         # Non-fatal: continue without optimization artifacts if path resolution fails
         pass
+
+    # Merge any per-env build_flags the user has declared in the root
+    # platformio.ini (issue #2664). Without this step, flags in
+    # [env:<board>].build_flags of the root file are silently discarded
+    # when bash compile --backend platformio synthesises a fresh project
+    # from ci/boards.py. Board flags come first, root flags are appended,
+    # so root values take precedence per PlatformIO's "last wins" semantics
+    # for repeated -D / linker flags.
+    root_build_flags = get_root_platformio_build_flags(board.board_name, project_root)
+    if root_build_flags:
+        print(
+            f"Merging {len(root_build_flags)} build_flag(s) from root "
+            f"platformio.ini [env:{board.board_name}]: {root_build_flags}"
+        )
+        board_with_sketch_include.build_flags.extend(root_build_flags)
 
     # Apply board-specific configuration
     if not apply_board_specific_config(
