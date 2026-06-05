@@ -276,3 +276,99 @@ def inject_ar_optimization_patches(build_dir: Path, source_dir: Path) -> bool:
     )
     _ar_opt_status_cache[str(build_dir)] = patches_active
     return patches_active
+
+
+# Ninja rules whose ``command =`` line should be prepended with zccache.
+# STATIC_LINKER is intentionally excluded — it is already wrapped by
+# ar_content_preserving.py (see ``inject_ar_optimization_patches``).
+_ZCCACHE_TARGET_RULES: tuple[str, ...] = (
+    "cpp_COMPILER",
+    "cpp_LINKER",
+    "c_COMPILER",
+    "c_LINKER",
+)
+
+
+def inject_zccache_wrapping(build_dir: Path, zccache_path: Optional[str]) -> bool:
+    """
+    Prepend ``zccache`` to the compile/link rule commands in ``build.ninja``.
+
+    The meson native file emits the BARE compiler (``ctc-clang++.exe``) so
+    that meson's configure-phase probes (``-xc++ -E -v -`` etc.) run against
+    a compiler that meson can parse. This helper applies the zccache
+    wrapping to the build-phase commands as a post-patch on the generated
+    ``build.ninja``, so caching behaviour is preserved.
+
+    Reads ``build.ninja`` once and writes at most once. Idempotent: if the
+    rule commands already start with the zccache path, nothing is written.
+
+    Args:
+        build_dir: Meson build directory containing ``build.ninja``.
+        zccache_path: Absolute path to the zccache binary, or ``None`` to
+            skip wrapping (e.g. in Docker where caching is disabled).
+
+    Returns:
+        True if wrapping is active (or zccache is None and no wrapping was
+        requested), False on read/write error or when ``build.ninja`` is
+        missing. See issue #2714.
+    """
+    if zccache_path is None:
+        return True
+
+    build_ninja_path = build_dir / "build.ninja"
+    if not build_ninja_path.exists():
+        return False
+
+    try:
+        content = build_ninja_path.read_text(encoding="utf-8")
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except OSError:
+        return False
+
+    # Normalize zccache_path to forward slashes so the idempotency check
+    # works regardless of whether the input path uses backslashes (Windows
+    # ``Path.__str__()``) or forward slashes (Meson normalisation). Meson
+    # emits forward slashes in ``build.ninja`` even on Windows, so we
+    # inject the normalized form and compare against it. Without this, a
+    # second invocation with a backslashed input path would not match the
+    # already-injected forward-slash prefix and would double-wrap.
+    zccache_path_normalized = zccache_path.replace("\\", "/")
+    zccache_quoted = f'"{zccache_path_normalized}"'
+
+    new_content = content
+    for rule_name in _ZCCACHE_TARGET_RULES:
+        rule_marker = f"rule {rule_name}\n"
+        rule_pos = new_content.find(rule_marker)
+        if rule_pos == -1:
+            continue
+        # Find the command line inside this rule block.
+        block_end = new_content.find("\n\n", rule_pos)
+        if block_end == -1:
+            block_end = len(new_content)
+        cmd_prefix = " command = "
+        cmd_start = new_content.find(cmd_prefix, rule_pos, block_end)
+        if cmd_start == -1:
+            continue
+        value_start = cmd_start + len(cmd_prefix)
+        # Idempotency: if the command already starts with the zccache path,
+        # nothing to do for this rule.
+        existing_value = new_content[value_start:block_end]
+        if existing_value.startswith(zccache_quoted + " "):
+            continue
+        new_content = (
+            new_content[:value_start] + zccache_quoted + " " + new_content[value_start:]
+        )
+
+    if new_content == content:
+        return True
+
+    try:
+        build_ninja_path.write_text(new_content, encoding="utf-8")
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except OSError:
+        return False
+    return True

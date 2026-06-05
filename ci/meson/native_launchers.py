@@ -293,9 +293,7 @@ def get_zccache_version(zccache_path: Optional[str] = None) -> str:
         return ""
 
 
-def _resolve_fast_native_entries(
-    cache_binary: Optional[str],
-) -> FastNativeEntries:
+def _resolve_fast_native_entries() -> FastNativeEntries:
     """
     Resolve native launcher binaries for the Meson native file.
 
@@ -303,9 +301,18 @@ def _resolve_fast_native_entries(
     specific flags automatically (--target, --sysroot, -stdlib, includes, etc.)
     with near-zero startup overhead (~34ms vs ~1200ms for Python wrappers).
 
-    Args:
-        cache_binary: Path to compiler cache binary (zccache),
-            or None to disable caching.
+    Note: zccache wrapping is intentionally NOT applied here. The meson
+    configure phase runs probes like ``<cc> -xc++ -E -v -`` to scan the
+    compiler's include search paths and capabilities. zccache (and other
+    full-path compiler caches that meson does not recognise — see
+    ``mesonbuild/envconfig.py:BinaryTable.parse_entry`` which only strips
+    the literal strings ``'ccache'`` / ``'sccache'``) wraps those probes
+    and causes them to hang or return non-parseable output, leading to
+    "No include directory found" warnings followed by failing capability
+    probes. Instead, zccache is applied as a post-patch on the generated
+    ``build.ninja`` via ``inject_zccache_wrapping`` — probes run against
+    the bare compiler, build runs through zccache as before. See issue
+    #2714.
 
     Returns:
         FastNativeEntries with cc, cxx, and ar entries for the native file,
@@ -327,17 +334,18 @@ def _resolve_fast_native_entries(
         if ctc_c is None or ctc_cpp is None:
             return _none
 
-        def _make_entry(binary: str) -> str:
-            parts: list[str] = []
-            if cache_binary:
-                parts.append(f"'{cache_binary}'")
-            parts.append(f"'{binary}'")
-            return "[" + ", ".join(parts) + "]"
+        # Escape any single quotes in the path so the generated Meson
+        # list-of-strings remains valid even if a path happens to contain
+        # one. Paths under ``.cached/clang-native/`` are extremely unlikely
+        # to contain ``'`` in practice, but defensive escaping costs nothing
+        # and avoids a hard-to-debug native-file parse error.
+        def _q(p: str) -> str:
+            return p.replace("'", "\\'")
 
         return FastNativeEntries(
-            cc=_make_entry(ctc_c),
-            cxx=_make_entry(ctc_cpp),
-            ar=f"['{ar_path}']",
+            cc=f"['{_q(ctc_c)}']",
+            cxx=f"['{_q(ctc_cpp)}']",
+            ar=f"['{_q(ar_path)}']",
         )
 
     except KeyboardInterrupt as ki:
