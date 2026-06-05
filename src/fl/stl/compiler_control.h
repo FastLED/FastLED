@@ -330,6 +330,23 @@
   #define FL_NO_INLINE_IF_AVR
 #endif
 
+// Unconditional "do not inline this function" attribute, portable across
+// GCC/Clang/MSVC. Prefer this over a bare `__attribute__((noinline))` in
+// `src/` — a lint check in `ci/lint_cpp/bare_noinline_checker.py` enforces
+// the use of the macro so the GCC-only syntax doesn't sneak in.
+//
+// Typical use: cold helpers extracted out of a hot path so the compiler
+// can't fold them back via inline expansion. Pair with the lint guard.
+//
+// Usage: FL_NO_INLINE void coldHelper() { ... }
+#if defined(FL_IS_GCC) || defined(FL_IS_CLANG)
+  #define FL_NO_INLINE __attribute__((noinline))
+#elif defined(FL_IS_WIN_MSVC)
+  #define FL_NO_INLINE __declspec(noinline)
+#else
+  #define FL_NO_INLINE
+#endif
+
 // Mark functions to run during C++ static initialization (before main())
 // Used for auto-registration of platform-specific implementations
 #if defined(FL_IS_GCC) || defined(FL_IS_CLANG)

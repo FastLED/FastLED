@@ -247,7 +247,7 @@ public:
     }
 
     template <u8 FLAGS, class D, EOrder RGB_ORDER>
-    __attribute__((noinline)) void writePixels(PixelController<RGB_ORDER> pixels, void* context) {
+    FL_NO_INLINE void writePixels(PixelController<RGB_ORDER> pixels, void* context) {
         #if FASTLED_ESP32_SPI_BULK_TRANSFER
         select();
         int len = pixels.mLen;

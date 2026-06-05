@@ -26,6 +26,7 @@ from ci.lint_cpp.banned_headers_checker import (
 from ci.lint_cpp.banned_macros_checker import BannedMacrosChecker
 from ci.lint_cpp.banned_namespace_checker import BannedNamespaceChecker
 from ci.lint_cpp.bare_allocation_checker import BareAllocationChecker
+from ci.lint_cpp.bare_noinline_checker import BareNoInlineChecker
 from ci.lint_cpp.bare_snprintf_checker import BareSnprintfChecker
 from ci.lint_cpp.bare_using_checker import BareUsingChecker
 from ci.lint_cpp.builtin_memcpy_checker import BuiltinMemcpyChecker
@@ -199,6 +200,7 @@ def create_checkers(
         SpanFromPointerChecker(),  # Checks for span<T>(container.data(), container.size()) → span<T>(container)
         BareAllocationChecker(),  # Checks for bare new/delete/malloc/free — use fl::unique_ptr/fl::shared_ptr
         BareSnprintfChecker(),  # Bans bare C ::snprintf/::printf/::sprintf in src/ — use fl::snprintf (#2773 item 1.5)
+        BareNoInlineChecker(),  # Bans bare __attribute__((noinline)) in src/ — use FL_NO_INLINE (#2773 item 2.1 follow-up)
         SleepForChecker(),  # Checks for sleep_for() — bypasses async runner, use fl::yield/fl::async_run
         ThreadLocalKeywordChecker(),  # Checks for thread_local keyword — use fl::SingletonThreadLocal<T>::instance()
         BannedDefineChecker(),  # Checks for wrong #if patterns (e.g., #if ESP32 → #ifdef ESP32)

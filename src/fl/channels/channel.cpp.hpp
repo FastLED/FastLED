@@ -335,6 +335,61 @@ void writeUCS7604(fl::vector_psram<u8>* data, PixelIterator& pixelIterator,
 
 } // anonymous namespace
 
+/// @brief Cold fallback for the non-pre-bound driver path. Handles dynamic
+///        `ChannelManager::selectDriverForChannel` lookup AND the
+///        bus-key-miss diagnostic chain. Hoisted out of `showPixels` so the
+///        hot legacy `addLeds<>` path stays compact — see #2773 item 2.1.
+///
+/// Marked `noinline` (via `FL_NOINLINE`) so the compiler doesn't fold the
+/// cold body back into `showPixels`. The whole helper is reachable only
+/// when `mDriverPreBound == false`, which on stock Blink is never true —
+/// LTO can use that across the call site to keep the cold body off the
+/// hot icache line.
+FL_NO_INLINE
+fl::shared_ptr<IChannelDriver> Channel::resolveDynamicDriver() {
+    // Build busKey only when we actually need it (mBus != AUTO).
+    fl::string busKey;
+    if (mBus != Bus::AUTO) {
+        busKey = fl::string::from_literal(busName(mBus));
+    }
+
+    fl::shared_ptr<IChannelDriver> driver =
+        ChannelManager::instance().selectDriverForChannel(mChannelData, busKey);
+    mDriver = driver;
+
+    // #2455 / #2459: one-shot diagnostic when a typed-Bus miss happens.
+    // Probe via `findDriverByName` (silent) to distinguish "driver wasn't
+    // instantiated" from "driver exists but canHandle() rejected this
+    // chipset" — resolution paths differ. The mBusWarned guard suppresses
+    // duplicate logs on subsequent shows of the same channel.
+    if (mBus != Bus::AUTO && !mBusWarned &&
+        (!driver || driver->getName() != busKey)) {
+        auto busDriver = ChannelManager::instance().findDriverByName(busKey);
+        if (!busDriver) {
+            // Typed Bus miss — emit the actionable hint with the three
+            // currently-shipping remediations (option 3 added in #2460).
+            FL_ERROR("Channel '" << mName << "': Driver '" << busKey
+                << "' wasn't instantiated. Resolve with: "
+                << "(1) fl::enableDrivers<fl::Bus::" << busKey << ">() "
+                << "(links only this driver), "
+                << "(2) FastLED.enableAllDrivers() (links every driver), or "
+                << "(3) FastLED.addLeds<..., fl::Bus::" << busKey << ">(...) "
+                << "(legacy API; pins Bus + triggers linker keep-alive). "
+                << "Defaulting to AUTO/priority dispatch.");
+        } else {
+            // Registered, but canHandle() said no — bus/chipset mismatch.
+            FL_ERROR("Channel '" << mName << "': Driver '" << busKey
+                << "' is registered but cannot handle this channel's chipset "
+                << "(bus/chipset mismatch). Defaulting to AUTO/priority dispatch.");
+        }
+        mBusWarned = true;
+    }
+    if (!driver) {
+        FL_ERROR("Channel '" << mName << "': No compatible driver found - cannot transmit");
+    }
+    return driver;
+}
+
 void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     FL_SCOPED_TRACE;
 
@@ -360,50 +415,28 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     // their constructor), bypass ChannelManager entirely. Channels created via
     // the manager-based API (Channel::create(cfg) without affinity) keep their
     // existing per-frame re-selection so users can swap drivers at runtime.
-    // Resolve dispatch via the typed `mBus` field (#2459). `Bus::AUTO`
-    // means "no pinning — let the manager pick by priority"; any other
-    // value pins this channel to `busName(mBus)`.
-    fl::string busKey;
-    if (mBus != Bus::AUTO) {
-        busKey = fl::string::from_literal(busName(mBus));
-    }
+    //
+    // **Fast path (#2773 item 2.1):** the legacy `addLeds<NEOPIXEL>` flow is
+    // by far the hot per-frame path on stock Blink. It needs no busKey
+    // construction, no dynamic driver lookup, no busKey-miss diagnostics,
+    // and no fallback `FL_ERROR` reporting — the driver was already pre-bound
+    // in the controller's constructor. Pulling all of that boilerplate out
+    // of `showPixels` lets the compiler keep the hot path compact and lets
+    // the slow path's `fl::string` ops / `ChannelManager::selectDriverForChannel`
+    // / diagnostic literals tree-shake on the slow-path branch's coldness.
     fl::shared_ptr<IChannelDriver> driver;
     if (mDriverPreBound) {
         driver = mDriver.lock();
-    } else {
-        driver = ChannelManager::instance().selectDriverForChannel(mChannelData, busKey);
-        mDriver = driver;
-    }
-    // #2455 / #2459: one-shot diagnostic when a typed-Bus miss happens.
-    // Probe via `findDriverByName` (silent) to distinguish "driver wasn't
-    // instantiated" from "driver exists but canHandle() rejected this
-    // chipset" — resolution paths differ. The mBusWarned guard suppresses
-    // duplicate logs on subsequent shows of the same channel.
-    if (!mDriverPreBound && mBus != Bus::AUTO && !mBusWarned &&
-        (!driver || driver->getName() != busKey)) {
-        auto busDriver = ChannelManager::instance().findDriverByName(busKey);
-        if (!busDriver) {
-            // Typed Bus miss — emit the actionable hint with the three
-            // currently-shipping remediations (option 3 added in #2460).
-            FL_ERROR("Channel '" << mName << "': Driver '" << busKey
-                << "' wasn't instantiated. Resolve with: "
-                << "(1) fl::enableDrivers<fl::Bus::" << busKey << ">() "
-                << "(links only this driver), "
-                << "(2) FastLED.enableAllDrivers() (links every driver), or "
-                << "(3) FastLED.addLeds<..., fl::Bus::" << busKey << ">(...) "
-                << "(legacy API; pins Bus + triggers linker keep-alive). "
-                << "Defaulting to AUTO/priority dispatch.");
-        } else {
-            // Registered, but canHandle() said no — bus/chipset mismatch.
-            FL_ERROR("Channel '" << mName << "': Driver '" << busKey
-                << "' is registered but cannot handle this channel's chipset "
-                << "(bus/chipset mismatch). Defaulting to AUTO/priority dispatch.");
+        if (!driver) {
+            // Pre-bound driver got destroyed (singleton shutdown, etc.). Silent
+            // bail — this is unrecoverable from showPixels.
+            return;
         }
-        mBusWarned = true;
-    }
-    if (!driver) {
-        FL_ERROR("Channel '" << mName << "': No compatible driver found - cannot transmit");
-        return;
+    } else {
+        driver = resolveDynamicDriver();
+        if (!driver) {
+            return;
+        }
     }
 
     // Build pixel iterator with optional addressing transformation

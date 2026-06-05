@@ -199,6 +199,18 @@ protected:
     /// @note Does not set LED data or channel options - caller must do that
     Channel(const ChipsetVariant& chipset, EOrder rgbOrder, RegistrationMode mode);
 
+private:
+    /// @brief Cold slow-path helper for `showPixels()` when the driver was
+    ///        NOT pre-bound via `setDriver()`. Handles dynamic
+    ///        `ChannelManager::selectDriverForChannel()` lookup AND the
+    ///        bus-key-miss diagnostics (#2455 / #2459).
+    ///
+    /// Marked `FL_NO_INLINE` so the legacy `addLeds<>` hot path stays compact —
+    /// see #2773 item 2.1. Returns `nullptr` on a hard miss (caller should
+    /// silently bail).
+    FL_NO_INLINE fl::shared_ptr<IChannelDriver> resolveDynamicDriver();
+protected:
+
     /// @brief Pre-bind a driver, bypassing `ChannelManager::selectDriverForChannel()`
     ///        on every subsequent `showPixels()` call.
     ///

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "platforms/is_platform.h"
+#include "fl/stl/compiler_control.h"  // FL_NO_INLINE
 
 ///////////////////////////////////////////////////////////////////////
 ///
@@ -12,8 +13,8 @@
 #if defined(FL_IS_AVR) || defined(FASTLED_DOXYGEN)
 extern "C" {
 void * memmove8( void * dst, const void * src, fl::u16 num );  ///< Faster alternative to memmove() on AVR
-void * memcpy8 ( void * dst, const void * src, fl::u16 num )  __attribute__ ((noinline));  ///< Faster alternative to memcpy() on AVR
-void * memset8 ( void * ptr, fl::u8 value, fl::u16 num ) __attribute__ ((noinline)) ;  ///< Faster alternative to memset() on AVR
+void * memcpy8 ( void * dst, const void * src, fl::u16 num )  FL_NO_INLINE;  ///< Faster alternative to memcpy() on AVR
+void * memset8 ( void * ptr, fl::u8 value, fl::u16 num ) FL_NO_INLINE ;  ///< Faster alternative to memset() on AVR
 }
 #else
 #include "fl/stl/cstring.h"

@@ -281,7 +281,7 @@ private:
     // reordering on Xtensa (l32r: literal placed after use)
     // ═══════════════════════════════════════════════════════════════════════════
 
-    static __attribute__((noinline)) IRAM_ATTR void handleInterrupt(void* arg) FL_NOEXCEPT {
+    static FL_NO_INLINE IRAM_ATTR void handleInterrupt(void* arg) FL_NOEXCEPT {
         // Main ISR dispatcher
         auto* driver = static_cast<ChannelEngineRMT4Impl*>(arg);
 
@@ -329,7 +329,7 @@ private:
         }
     }
 
-    __attribute__((noinline)) IRAM_ATTR void onThresholdInterrupt(int channelNum) FL_NOEXCEPT {
+    FL_NO_INLINE IRAM_ATTR void onThresholdInterrupt(int channelNum) FL_NOEXCEPT {
         // Threshold interrupt: Half of the RMT buffer has been transmitted
         ChannelState* state = findChannelByNumber(channelNum);
         if (state == nullptr || !state->inUse) {
@@ -340,7 +340,7 @@ private:
         fillNextBuffer(state, true);
     }
 
-    __attribute__((noinline)) IRAM_ATTR void onTxDoneInterrupt(int channelNum) FL_NOEXCEPT {
+    FL_NO_INLINE IRAM_ATTR void onTxDoneInterrupt(int channelNum) FL_NOEXCEPT {
         // TX done interrupt: Transmission is complete on this channel
         ChannelState* state = findChannelByNumber(channelNum);
         if (state == nullptr || !state->inUse) {
@@ -371,7 +371,7 @@ private:
         state->transmissionComplete = true;
     }
 
-    __attribute__((noinline)) IRAM_ATTR void fillNextBuffer(ChannelState* state, bool checkTime) FL_NOEXCEPT {
+    FL_NO_INLINE IRAM_ATTR void fillNextBuffer(ChannelState* state, bool checkTime) FL_NOEXCEPT {
         // Fill the next half of the RMT double-buffer with pixel data
         if (!state) {
             return;
@@ -421,7 +421,7 @@ private:
         state->memPtr = pItem;
     }
 
-    static __attribute__((noinline)) IRAM_ATTR void convertByteToRMT(
+    static FL_NO_INLINE IRAM_ATTR void convertByteToRMT(
         u8 byteval,
         const rmt_item32_t& zero,
         const rmt_item32_t& one,
@@ -452,7 +452,7 @@ private:
         pItem[7].val = tmp[7];
     }
 
-    static __attribute__((noinline)) IRAM_ATTR void tx_start(ChannelState* state) FL_NOEXCEPT {
+    static FL_NO_INLINE IRAM_ATTR void tx_start(ChannelState* state) FL_NOEXCEPT {
         // Start RMT transmission by setting hardware flag
         if (!state) {
             return;
@@ -533,7 +533,7 @@ private:
 #endif
     }
 
-    __attribute__((noinline)) IRAM_ATTR ChannelState* findChannelByNumber(int channelNum) FL_NOEXCEPT {
+    FL_NO_INLINE IRAM_ATTR ChannelState* findChannelByNumber(int channelNum) FL_NOEXCEPT {
         // Linear search through active channels
         for (auto& state : mChannels) {
             if (state.inUse && state.channel == channelNum) {
