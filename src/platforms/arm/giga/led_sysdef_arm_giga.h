@@ -36,6 +36,10 @@
 typedef volatile fl::u32 RoReg;
 typedef volatile fl::u32 RwReg;
 
+// Mbed-on-STM32H7 toolchains often supply `F_CPU` on the command line; only
+// define it here when the build environment hasn't already.
+#ifndef F_CPU
 #define F_CPU 480000000
+#endif
 
 #endif

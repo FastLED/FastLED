@@ -27,31 +27,54 @@
 // Core Detection - Mutually Exclusive
 // ============================================================================
 
-#if defined(ARDUINO_ARCH_STM32)
-  #define _FL_STM32_HAS_STMDUINO 1
-#else
-  #define _FL_STM32_HAS_STMDUINO 0
-#endif
+// Each per-core flag mirrors the priority of the elif chain below — Zephyr
+// wins over Mbed wins over STM32duino wins over LibMaple wins over Particle.
+// This priority gating matters because Arduino frameworks define each other's
+// compat identifiers: Mbed-on-STM32 (e.g. Arduino GIGA R1) defines
+// `ARDUINO_ARCH_STM32`, and its CMSIS layer pulls in `STM32_MCU_SERIES`.
+// Without the priority gate the validation below would false-positive on
+// legitimate single-core builds. With the gate, genuine misconfigurations
+// (e.g. two frameworks' libraries linked into the same image with neither
+// taking precedence) still produce a count > 1 and fire the hard error.
 
+// Zephyr — highest priority. Requires ARDUINO_ARCH_ZEPHYR + UNO Q identifier.
 #if defined(ARDUINO_ARCH_ZEPHYR) && (defined(ARDUINO_UNO_Q) || defined(CONFIG_BOARD_ARDUINO_UNO_Q) || defined(CONFIG_SOC_STM32U585XX))
   #define _FL_STM32_HAS_ZEPHYR 1
 #else
   #define _FL_STM32_HAS_ZEPHYR 0
 #endif
 
-#if defined(ARDUINO_ARCH_MBED)
+// Mbed — second priority. Counted whenever ARDUINO_ARCH_MBED is set and
+// the higher-priority Zephyr selection isn't already taken.
+#if defined(ARDUINO_ARCH_MBED) && !_FL_STM32_HAS_ZEPHYR
   #define _FL_STM32_HAS_MBED 1
 #else
   #define _FL_STM32_HAS_MBED 0
 #endif
 
-#if defined(__STM32F1__) || defined(__STM32F4__) || defined(STM32_MCU_SERIES)
+// STM32duino — third priority. Only counted when no higher-priority modern
+// framework (Mbed, Zephyr) is also detected. Mbed-on-STM32 also defines
+// ARDUINO_ARCH_STM32 as a compat macro, so the bare presence of that
+// identifier doesn't on its own mean STM32duino is in use.
+#if defined(ARDUINO_ARCH_STM32) && !_FL_STM32_HAS_MBED && !_FL_STM32_HAS_ZEPHYR
+  #define _FL_STM32_HAS_STMDUINO 1
+#else
+  #define _FL_STM32_HAS_STMDUINO 0
+#endif
+
+// LibMaple and Particle — secondary cores. Their identifier macros
+// (`__STM32F1__`, `__STM32F4__`, `STM32_MCU_SERIES`, `PLATFORM_ID`, `SPARK`)
+// can also leak in from modern frameworks' CMSIS/HAL layers, so they only
+// count when no modern framework is detected.
+#if (defined(__STM32F1__) || defined(__STM32F4__) || defined(STM32_MCU_SERIES)) \
+    && !_FL_STM32_HAS_STMDUINO && !_FL_STM32_HAS_MBED && !_FL_STM32_HAS_ZEPHYR
   #define _FL_STM32_HAS_LIBMAPLE 1
 #else
   #define _FL_STM32_HAS_LIBMAPLE 0
 #endif
 
-#if defined(PLATFORM_ID) || defined(SPARK)
+#if (defined(PLATFORM_ID) || defined(SPARK)) \
+    && !_FL_STM32_HAS_STMDUINO && !_FL_STM32_HAS_MBED && !_FL_STM32_HAS_ZEPHYR
   #define _FL_STM32_HAS_PARTICLE 1
 #else
   #define _FL_STM32_HAS_PARTICLE 0
