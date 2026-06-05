@@ -1321,6 +1321,19 @@ def create_board(board_name: str, no_project_options: bool = False) -> Board:
                 board = candidate
                 break
 
+        # Case-insensitive fallback: some boards registered in `_BOARD_MAP`
+        # use camelCase (`ATtiny1604`, `ATtiny1616`) while CI workflows and
+        # docs frequently spell them lowercase. Resolving by lowercase
+        # before falling through to a generic Board avoids
+        # `UndefinedEnvPlatformError` at PlatformIO env-resolution time
+        # (FastLED #2779).
+        if board is None:
+            target = board_name.lower()
+            for candidate in ALL:
+                if candidate.board_name.lower() == target:
+                    board = candidate
+                    break
+
         if board is None:
             # No match found - create generic board without special overrides
             # Assume platformio will know what to do with it
