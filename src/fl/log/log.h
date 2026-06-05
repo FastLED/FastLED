@@ -38,6 +38,43 @@
 #endif
 
 // =============================================================================
+// Release Verbosity Knob (FASTLED_LOG_VERBOSITY) — #2773 item 2.3
+// =============================================================================
+//
+// FastLED's `FL_WARN` / `FL_INFO` / `FL_ERROR` / `FL_PRINT` macros each bake
+// the source file, line number, severity label, and user message string into
+// the binary at every call site. On a stock ESP32-S3 Blink build the merged
+// `.str1.1` rodata pool reaches ~58 KB — by far the single biggest rodata
+// contributor — even when no host is listening on Serial.
+//
+// `FASTLED_LOG_VERBOSITY` lets users explicitly trade diagnostic detail for
+// flash space without flipping the heavier `FASTLED_NO_LOG` switch (which is
+// all-or-nothing and also disables third-party loggers). Levels:
+//
+//   0  — Release: FL_WARN/FL_INFO/FL_ERROR/FL_PRINT expand to type-checked
+//        no-ops (`if (false) sstream_noop() << X`). Format strings and
+//        sstream operator chains disappear; the linker garbage-collects the
+//        merged string pool. Best for shipping firmware where Serial isn't
+//        used at runtime.
+//   1  — Default (current behavior): full stream formatting on platforms
+//        where SKETCH_HAS_LARGE_MEMORY allows it.
+//   2  — Verbose: reserved for future use; currently behaves like 1.
+//
+// Override at build time:
+//   build_flags = -DFASTLED_LOG_VERBOSITY=0
+//
+// When unset, the default is 1 so existing sketches do not change behavior.
+// `FASTLED_NO_LOG` is still honored and forces level 0.
+
+#ifndef FASTLED_LOG_VERBOSITY
+#if defined(FASTLED_NO_LOG) && FASTLED_NO_LOG
+#define FASTLED_LOG_VERBOSITY 0
+#else
+#define FASTLED_LOG_VERBOSITY 1
+#endif
+#endif
+
+// =============================================================================
 // Forward Declarations
 // =============================================================================
 
@@ -73,16 +110,18 @@ const char *fastled_file_offset(const char *file) FL_NOEXCEPT;
 #endif
 
 #ifndef FL_ERROR
-#if SKETCH_HAS_LARGE_MEMORY
+#if SKETCH_HAS_LARGE_MEMORY && FASTLED_LOG_VERBOSITY > 0
 // FL_ERROR: Supports both string literals and stream-style formatting with << operator
 // Uses sstream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
 // Includes file and line number for easier debugging
 #define FL_ERROR(X) fl::println((fl::sstream() << (fl::fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): ERROR: " << X).c_str())
 #define FL_ERROR_IF(COND, MSG) do { if (COND) FL_ERROR(MSG); } while(0)
 #else
-// No-op macros for memory-constrained platforms
-#define FL_ERROR(X) do { } while(0)
-#define FL_ERROR_IF(COND, MSG) do { } while(0)
+// No-op macros for memory-constrained platforms (or FASTLED_LOG_VERBOSITY=0).
+// The `if (false)` form keeps the user's expression type-checked but lets
+// the optimizer drop the format strings — #2773 item 2.3.
+#define FL_ERROR(X) do { if (false) { (void)(fl::sstream_noop() << X); } } while(0)
+#define FL_ERROR_IF(COND, MSG) do { if (false) { (void)(COND); (void)(fl::sstream_noop() << MSG); } } while(0)
 #endif
 #endif
 
@@ -99,7 +138,7 @@ const char *fastled_file_offset(const char *file) FL_NOEXCEPT;
 #endif
 
 #ifndef FL_WARN
-#if SKETCH_HAS_LARGE_MEMORY
+#if SKETCH_HAS_LARGE_MEMORY && FASTLED_LOG_VERBOSITY > 0
 // FL_WARN: Supports both string literals and stream-style formatting with << operator
 // Uses sstream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
 // Includes file and line number for easier debugging
@@ -131,13 +170,15 @@ const char *fastled_file_offset(const char *file) FL_NOEXCEPT;
     } \
 } while(0)
 #else
-// No-op macros for memory-constrained platforms
-#define FL_WARN(X) do { } while(0)
-#define FL_WARN_IF(COND, MSG) if(false) { void(fl::sstream_noop() << MSG); }
-#define FL_WARN_ONCE(X) do { } while(0)
-#define FL_WARN_FMT(X) do { } while(0)
-#define FL_WARN_FMT_IF(COND, MSG) do { } while(0)
-#define FL_WARN_EVERY(MILLIS, X) do { } while(0)
+// No-op macros (memory-constrained platforms OR FASTLED_LOG_VERBOSITY=0).
+// All variants route through `sstream_noop` inside `if (false)` so user
+// expressions stay type-checked but format strings dead-strip — #2773 item 2.3.
+#define FL_WARN(X) do { if (false) { (void)(fl::sstream_noop() << X); } } while(0)
+#define FL_WARN_IF(COND, MSG) do { if (false) { (void)(COND); (void)(fl::sstream_noop() << MSG); } } while(0)
+#define FL_WARN_ONCE(X) do { if (false) { (void)(fl::sstream_noop() << X); } } while(0)
+#define FL_WARN_FMT(X) do { if (false) { (void)(fl::sstream_noop() << X); } } while(0)
+#define FL_WARN_FMT_IF(COND, MSG) do { if (false) { (void)(COND); (void)(fl::sstream_noop() << MSG); } } while(0)
+#define FL_WARN_EVERY(MILLIS, X) do { if (false) { (void)(MILLIS); (void)(fl::sstream_noop() << X); } } while(0)
 #endif
 #endif
 
@@ -154,7 +195,7 @@ const char *fastled_file_offset(const char *file) FL_NOEXCEPT;
 #endif
 
 #ifndef FL_INFO
-#if SKETCH_HAS_LARGE_MEMORY
+#if SKETCH_HAS_LARGE_MEMORY && FASTLED_LOG_VERBOSITY > 0
 // FL_INFO: Supports both string literals and stream-style formatting with << operator
 // Uses sstream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
 // Includes file and line number for easier debugging
@@ -171,10 +212,10 @@ const char *fastled_file_offset(const char *file) FL_NOEXCEPT;
     } \
 } while(0)
 #else
-// No-op macros for memory-constrained platforms
-#define FL_INFO(X) do { } while(0)
-#define FL_INFO_IF(COND, MSG) do { } while(0)
-#define FL_INFO_ONCE(X) do { } while(0)
+// No-op macros (memory-constrained or FASTLED_LOG_VERBOSITY=0) — #2773 item 2.3.
+#define FL_INFO(X) do { if (false) { (void)(fl::sstream_noop() << X); } } while(0)
+#define FL_INFO_IF(COND, MSG) do { if (false) { (void)(COND); (void)(fl::sstream_noop() << MSG); } } while(0)
+#define FL_INFO_ONCE(X) do { if (false) { (void)(fl::sstream_noop() << X); } } while(0)
 #endif
 #endif
 
@@ -277,7 +318,7 @@ const char *fastled_file_offset(const char *file) FL_NOEXCEPT;
 ///   FL_PRINT("Value: " << x);
 ///   FL_PRINT(ss.str());
 #ifndef FL_PRINT
-#if SKETCH_HAS_LARGE_MEMORY
+#if SKETCH_HAS_LARGE_MEMORY && FASTLED_LOG_VERBOSITY > 0
 #define FL_PRINT(X) fl::println((fl::sstream() << X).c_str())
 
 // FL_PRINT_EVERY: Rate-limited print that outputs at most once per interval
@@ -291,9 +332,9 @@ const char *fastled_file_offset(const char *file) FL_NOEXCEPT;
     } \
 } while(0)
 #else
-// No-op macro for memory-constrained platforms
-#define FL_PRINT(X) do { } while(0)
-#define FL_PRINT_EVERY(MILLIS, X) do { } while(0)
+// No-op (memory-constrained OR FASTLED_LOG_VERBOSITY=0) — #2773 item 2.3.
+#define FL_PRINT(X) do { if (false) { (void)(fl::sstream_noop() << X); } } while(0)
+#define FL_PRINT_EVERY(MILLIS, X) do { if (false) { (void)(MILLIS); (void)(fl::sstream_noop() << X); } } while(0)
 #endif
 #endif
 
