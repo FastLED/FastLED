@@ -22,6 +22,33 @@
 #include <avr/io.h>      // ok include — MCUSR
 // IWYU pragma: end_keep
 
+// Capability gate. The implementation below assumes the classic-AVR symbol
+// surface (`MCUSR` + `WDRF`/`BORF`/`EXTRF`/`PORF` reset-cause bits, and the
+// extended `WDTO_8S` timeout constant). That surface is present on the bulk
+// of the AVR line — ATmega328P, ATmega2560, ATtiny85, ATtiny88, ATtiny4313,
+// etc. — but is **not** universal:
+//
+//   * **ATmega8 / ATmega8A** — the original ATmega8 caps the WDT prescaler
+//     at `WDTO_2S`; `WDTO_4S` and `WDTO_8S` are not defined. Reset cause is
+//     reported via `MCUCSR` (different name) on these older parts.
+//   * **megaAVR-0 / tinyAVR-1 series** (ATmega4809 a.k.a. nano_every,
+//     ATtiny1604, ATtiny1616, etc.) — these use the new RSTCTRL peripheral
+//     for reset cause and the new WDT peripheral via `WDT.CTRLA`. None of
+//     `MCUSR`, `WDRF`, `EXTRF`, `PORF`, or `WDTO_8S` are declared on these
+//     chips. The avr-libc `<avr/wdt.h>` shim exists but the legacy symbols
+//     do not.
+//
+// When the required symbols aren't all present we fall back to the platform-
+// agnostic no-op watchdog so the firmware still links. Real hardware WDT
+// support for the megaAVR-0 / tinyAVR-1 / ATmega8 families can be added
+// later as separate per-family impls without changing the dispatcher.
+#if !(defined(WDTO_8S) && defined(MCUSR) && defined(WDRF) && \
+      defined(BORF) && defined(EXTRF) && defined(PORF))
+
+#include "platforms/shared/watchdog_noop.hpp"
+
+#else  // classic-AVR symbol surface available — full hardware implementation
+
 #define FL_WATCHDOG_HAS_HARDWARE
 #define FL_WATCHDOG_PERSIST_BYTES 8
 #define FL_WATCHDOG_MAX_TIMEOUT_MS 8000u
@@ -192,3 +219,5 @@ WatchdogCrashReport Watchdog::readCrashReport() const FL_NOEXCEPT {
 void                Watchdog::clearCrashReport() FL_NOEXCEPT {}
 
 } // namespace fl
+
+#endif  // classic-AVR symbol surface available
