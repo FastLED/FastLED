@@ -160,6 +160,13 @@ bool RmtMemoryManager::isPlatformGlobalPool() FL_NOEXCEPT {
 }
 
 size_t RmtMemoryManager::calculateMemoryBlocks(bool networkActive) FL_NOEXCEPT {
+#if FASTLED_RMT_STATIC_ALLOCATION
+    // Static-allocation mode: skip the runtime planner entirely.
+    // User has asserted single fixed strip / no network / boot-time init.
+    // See #2773 item 2.5.
+    (void)networkActive;
+    return FASTLED_RMT_MEM_BLOCKS;
+#else
     // Read memory block strategy from singleton instance
     auto& mgr = instance();
     size_t idleBlocks = mgr.mIdleBlocks;
@@ -301,6 +308,7 @@ size_t RmtMemoryManager::calculateMemoryBlocks(bool networkActive) FL_NOEXCEPT {
            << ", allocated_tx_channels=" << allocated_tx_channels << ")");
 
     return requested_blocks;
+#endif // FASTLED_RMT_STATIC_ALLOCATION
 }
 
 void RmtMemoryManager::setMemoryBlockStrategy(size_t idleBlocks, size_t networkBlocks) FL_NOEXCEPT {
