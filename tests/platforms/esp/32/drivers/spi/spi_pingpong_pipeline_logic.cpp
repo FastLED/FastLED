@@ -109,25 +109,28 @@ struct PipelineModel {
     bool stepStreaming() {
         if (!anyInFlight()) return false;
 
-        // Drain one completion (FIFO: A queued first completes first).
+        // Drain one completion. Record which buffer freed up so the refill
+        // goes to that same buffer — modeling the ESP-IDF SPI driver where
+        // each staging buffer is independently tracked. Encoding always
+        // targets the just-freed buffer, never the one still in flight.
+        int drainedBuf = -1;
         if (usePolling) {
             int lastBuf = (encodeIdx - 1) & 1;
-            if (lastBuf == 0) transAInFlight = false;
-            else              transBInFlight = false;
+            if (lastBuf == 0) { transAInFlight = false; drainedBuf = 0; }
+            else              { transBInFlight = false; drainedBuf = 1; }
         } else {
             // FIFO: A completes before B if both are in flight.
-            if (transAInFlight)      transAInFlight = false;
-            else if (transBInFlight) transBInFlight = false;
+            if (transAInFlight)      { transAInFlight = false; drainedBuf = 0; }
+            else if (transBInFlight) { transBInFlight = false; drainedBuf = 1; }
         }
         ++completedCount;
 
         // Refill the just-freed buffer when more data remains.
-        if (ledBytesRemaining > 0) {
-            int bufIdx = encodeIdx & 1;
-            size_t encoded = encodeChunk(bufIdx);
+        if (ledBytesRemaining > 0 && drainedBuf >= 0) {
+            size_t encoded = encodeChunk(drainedBuf);
             if (encoded > 0) {
-                if (bufIdx == 0) transAInFlight = true;
-                else             transBInFlight = true;
+                if (drainedBuf == 0) transAInFlight = true;
+                else                 transBInFlight = true;
                 ++encodeIdx;
                 ++queuedCount;
             }
