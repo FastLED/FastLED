@@ -33,13 +33,13 @@ from dataclasses import dataclass
 from typing import Any
 
 
+# `pyserial` is checked at `main()` entry, not at import, so test discovery
+# (e.g. pytest collection on a CI runner without the dep installed) does not
+# abort before the caller can decide to skip the hardware bench.
 try:
     import serial  # type: ignore
-except ImportError:
-    print(
-        "ERROR: pyserial not installed. Run: uv pip install pyserial", file=sys.stderr
-    )
-    sys.exit(2)
+except ImportError:  # pragma: no cover — handled at main() entry
+    serial = None  # type: ignore
 
 
 DEFAULT_PORT = "COM20"
@@ -144,6 +144,13 @@ def main() -> int:
         "must be in kFlexIo1Pins[] in the firmware)",
     )
     args = p.parse_args()
+
+    if serial is None:
+        print(
+            "ERROR: pyserial not installed. Run: uv pip install pyserial",
+            file=sys.stderr,
+        )
+        return 2
 
     print(f"[flexio-rx-bench] opening {args.port} @ {args.baud}")
     try:

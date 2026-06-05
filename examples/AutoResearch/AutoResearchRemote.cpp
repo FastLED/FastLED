@@ -1151,10 +1151,18 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         analogWrite(tx_pin, 128);  // 50% duty
 
         // 2. Create the FlexIO RX channel.
-        // Width budget: edges_needed_per_ms * duration_ms, with a small ceiling.
-        // For 100 kHz that's ~200 edges/ms; we cap at 1024 to bound RAM use.
+        // Width budget — size the edge buffer for the actual capture window:
+        //   expected_edges = 2 * frequency_hz * duration_ms / 1000     (transitions)
+        //   target = expected_edges * 1.5  (50% headroom for jitter/skew)
+        // Clamped to [1024, 16384] so the DMA buffer stays reasonable and
+        // matches the FlexIO RX driver's internal cap.
         fl::RxChannelConfig rx_cfg(rx_pin, fl::RxBackend::FLEXIO);
-        rx_cfg.edge_capacity = 1024;
+        const fl::u64 expected_edges =
+            (fl::u64)2 * (fl::u64)frequency_hz * (fl::u64)duration_ms / 1000ULL;
+        fl::u64 target = expected_edges + expected_edges / 2;  // +50%
+        if (target < 1024ULL) target = 1024ULL;
+        if (target > 16384ULL) target = 16384ULL;
+        rx_cfg.edge_capacity = (size_t)target;
         rx_cfg.start_low = false;  // PWM output idles in either state, just track transitions
         auto rx_channel = fl::RxChannel::create(rx_cfg);
         if (!rx_channel) {
@@ -1757,9 +1765,17 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         parlioStreamValidate_fn.set("description", "Functional test of the PARLIO ISR-chunked streaming engine (#2548). Drives N back-to-back FastLED.show() calls through the production engine (which uses BF1+pipe4 on 16-lane Wave8 since #2559) and verifies all complete within timeout. Catches hangs/stalls.");
         functions.push_back(parlioStreamValidate_fn);
 
+        fl::json flexioRxBenchmark_fn = fl::json::object();
+        flexioRxBenchmark_fn.set("name", "flexioRxBenchmark");
+        flexioRxBenchmark_fn.set("phase", "Phase 4: Utility");
+        flexioRxBenchmark_fn.set("args", "[{frequency_hz=1000, duration_ms=100, tx_pin=3, rx_pin=4}] (all optional)");
+        flexioRxBenchmark_fn.set("returns", "{success, frequency_hz, duration_ms, tx_pin, rx_pin, edges_captured, periods, period_mean_ns, period_sigma_ns, period_min_ns, period_max_ns}");
+        flexioRxBenchmark_fn.set("description", "Square-wave validation for the FlexIO RX backend (Teensy 4.x only, FastLED#2764 Phase 2). Drives tx_pin via analogWriteFrequency at 50%% duty, captures via RxBackend::FLEXIO on rx_pin, reports per-period statistics.");
+        functions.push_back(flexioRxBenchmark_fn);
+
         fl::json response = fl::json::object();
         response.set("success", true);
-        response.set("totalFunctions", static_cast<int64_t>(25));
+        response.set("totalFunctions", static_cast<int64_t>(26));
         response.set("functions", functions);
         return response;
     });
