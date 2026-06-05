@@ -368,10 +368,12 @@ bool FlexIoRxChannelImpl::begin(const RxConfig &config) {
 
     // Size the capture buffer for the requested timing budget. We allocate
     // one u32 per captured inter-edge delta. Cap at a safe upper bound so
-    // we never balloon RAM during exploratory runs.
+    // we never balloon RAM during exploratory runs. The 16 384-entry cap
+    // (64 KiB) covers a 100 ms window at 100 kHz square wave with 50 %
+    // headroom — see `flexioRxBenchmark` in `AutoResearchRemote.cpp`.
     const size_t requested = config.buffer_size > 0 ? config.buffer_size
                                                     : mBufferSize;
-    mBufferSize = requested > 4096 ? 4096 : requested;
+    mBufferSize = requested > 16384 ? 16384 : requested;
     mCaptureBuffer.assign(mBufferSize, 0u);
 
     flexio1_clock_init();

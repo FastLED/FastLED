@@ -1088,6 +1088,161 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         return response;
     });
 
+    // Register "flexioRxBenchmark" — square-wave validation for the new
+    // FlexIO RX backend (Phase 2 of FastLED#2764).
+    //
+    // Drives `tx_pin` with a `frequency_hz` square wave via the Teensy core's
+    // `analogWriteFrequency` PWM, configures an RxChannel on `rx_pin` using
+    // `RxBackend::FLEXIO`, captures for `duration_ms`, and reports per-period
+    // statistics: count, mean ns, σ ns, min ns, max ns.
+    //
+    // Args (positional, all optional with defaults):
+    //   {
+    //     "frequency_hz": int = 1000,
+    //     "duration_ms":  int = 100,
+    //     "tx_pin":       int = 3,   // matches GPIO 3↔4 jumper
+    //     "rx_pin":       int = 4
+    //   }
+    //
+    // Teensy-4-only because FLEXIO1 is iMXRT1062-specific. Other platforms
+    // get a clean "not supported" response so the RPC harness can still
+    // round-trip.
+    mRemote->bind("flexioRxBenchmark", [this](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+#if !defined(FL_IS_TEENSY_4X)
+        (void)args;
+        response.set("success", false);
+        response.set("error", "PlatformNotSupported");
+        response.set("message",
+                     "flexioRxBenchmark is Teensy 4.x-only (FLEXIO1 capture).");
+        return response;
+#else
+        // Parse args
+        int frequency_hz = 1000;
+        int duration_ms  = 100;
+        int tx_pin       = 3;
+        int rx_pin       = 4;
+        if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
+            fl::json cfg = args[0];
+            if (cfg.contains("frequency_hz") && cfg["frequency_hz"].is_int()) {
+                frequency_hz = static_cast<int>(cfg["frequency_hz"].as_int().value());
+            }
+            if (cfg.contains("duration_ms") && cfg["duration_ms"].is_int()) {
+                duration_ms = static_cast<int>(cfg["duration_ms"].as_int().value());
+            }
+            if (cfg.contains("tx_pin") && cfg["tx_pin"].is_int()) {
+                tx_pin = static_cast<int>(cfg["tx_pin"].as_int().value());
+            }
+            if (cfg.contains("rx_pin") && cfg["rx_pin"].is_int()) {
+                rx_pin = static_cast<int>(cfg["rx_pin"].as_int().value());
+            }
+        }
+        if (frequency_hz < 1 || frequency_hz > 5000000 ||
+            duration_ms < 1 || duration_ms > 5000) {
+            response.set("success", false);
+            response.set("error", "InvalidArgs");
+            response.set("message",
+                         "frequency_hz in [1, 5_000_000]; duration_ms in [1, 5000].");
+            return response;
+        }
+
+        // 1. Drive the TX pin with a square wave.
+        analogWriteFrequency(tx_pin, (float)frequency_hz);
+        analogWrite(tx_pin, 128);  // 50% duty
+
+        // 2. Create the FlexIO RX channel.
+        // Width budget — size the edge buffer for the actual capture window:
+        //   expected_edges = 2 * frequency_hz * duration_ms / 1000     (transitions)
+        //   target = expected_edges * 1.5  (50% headroom for jitter/skew)
+        // Clamped to [1024, 16384] so the DMA buffer stays reasonable and
+        // matches the FlexIO RX driver's internal cap.
+        fl::RxChannelConfig rx_cfg(rx_pin, fl::RxBackend::FLEXIO);
+        const fl::u64 expected_edges =
+            (fl::u64)2 * (fl::u64)frequency_hz * (fl::u64)duration_ms / 1000ULL;
+        fl::u64 target = expected_edges + expected_edges / 2;  // +50%
+        if (target < 1024ULL) target = 1024ULL;
+        if (target > 16384ULL) target = 16384ULL;
+        rx_cfg.edge_capacity = (size_t)target;
+        rx_cfg.start_low = false;  // PWM output idles in either state, just track transitions
+        auto rx_channel = fl::RxChannel::create(rx_cfg);
+        if (!rx_channel) {
+            analogWrite(tx_pin, 0);
+            response.set("success", false);
+            response.set("error", "RxCreateFailed");
+            response.set("message",
+                         "Failed to create FlexIO RX channel on pin (no FLEXIO1 mapping).");
+            return response;
+        }
+        if (!rx_channel->begin(rx_cfg)) {
+            analogWrite(tx_pin, 0);
+            response.set("success", false);
+            response.set("error", "RxBeginFailed");
+            response.set("message",
+                         "RxChannel::begin() returned false (see device WARN log).");
+            return response;
+        }
+
+        // 3. Let it capture for the requested window.
+        rx_channel->wait((u32)duration_ms);
+
+        // 4. Stop the square wave so the line is quiet for stats computation.
+        analogWrite(tx_pin, 0);
+
+        // 5. Pull captured edges out.
+        fl::vector<fl::EdgeTime> edges;
+        edges.assign(rx_cfg.edge_capacity, fl::EdgeTime());
+        size_t edges_captured =
+            rx_channel->getRawEdgeTimes(fl::span<fl::EdgeTime>(edges), 0);
+        edges.resize(edges_captured);
+
+        // 6. Compute period statistics. A "period" = duration_high + duration_low
+        //    for adjacent edges, so we iterate in pairs.
+        fl::u64 sum_ns = 0;
+        fl::u64 sum_sq_ns = 0;
+        fl::u32 min_ns = 0xFFFFFFFFu;
+        fl::u32 max_ns = 0;
+        size_t periods = 0;
+        for (size_t i = 0; i + 1 < edges_captured; i += 2) {
+            const fl::u32 period_ns =
+                (fl::u32)edges[i].ns + (fl::u32)edges[i + 1].ns;
+            if (period_ns == 0) continue;
+            sum_ns += period_ns;
+            sum_sq_ns += (fl::u64)period_ns * (fl::u64)period_ns;
+            if (period_ns < min_ns) min_ns = period_ns;
+            if (period_ns > max_ns) max_ns = period_ns;
+            ++periods;
+        }
+        fl::u32 mean_ns = 0;
+        fl::u32 sigma_ns = 0;
+        if (periods > 0) {
+            mean_ns = (fl::u32)(sum_ns / (fl::u64)periods);
+            const fl::u64 mean64 = (fl::u64)mean_ns;
+            const fl::u64 var =
+                periods > 0 ? (sum_sq_ns / (fl::u64)periods) - (mean64 * mean64)
+                            : 0;
+            // Integer sqrt for σ — adequate for the tolerance ranges we
+            // assert in Phase 2 (σ < 100 ns at 100 kHz).
+            fl::u32 s = 0;
+            while ((fl::u64)(s + 1) * (fl::u64)(s + 1) <= var) ++s;
+            sigma_ns = s;
+        }
+        if (min_ns == 0xFFFFFFFFu) min_ns = 0;
+
+        response.set("success", true);
+        response.set("frequency_hz", static_cast<int64_t>(frequency_hz));
+        response.set("duration_ms", static_cast<int64_t>(duration_ms));
+        response.set("tx_pin", static_cast<int64_t>(tx_pin));
+        response.set("rx_pin", static_cast<int64_t>(rx_pin));
+        response.set("edges_captured", static_cast<int64_t>(edges_captured));
+        response.set("periods", static_cast<int64_t>(periods));
+        response.set("period_mean_ns", static_cast<int64_t>(mean_ns));
+        response.set("period_sigma_ns", static_cast<int64_t>(sigma_ns));
+        response.set("period_min_ns", static_cast<int64_t>(min_ns));
+        response.set("period_max_ns", static_cast<int64_t>(max_ns));
+        return response;
+#endif
+    });
+
     // Register "setDebug" function - enable/disable runtime debug logging
     mRemote->bind("setDebug", [this](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
@@ -1610,9 +1765,17 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         parlioStreamValidate_fn.set("description", "Functional test of the PARLIO ISR-chunked streaming engine (#2548). Drives N back-to-back FastLED.show() calls through the production engine (which uses BF1+pipe4 on 16-lane Wave8 since #2559) and verifies all complete within timeout. Catches hangs/stalls.");
         functions.push_back(parlioStreamValidate_fn);
 
+        fl::json flexioRxBenchmark_fn = fl::json::object();
+        flexioRxBenchmark_fn.set("name", "flexioRxBenchmark");
+        flexioRxBenchmark_fn.set("phase", "Phase 4: Utility");
+        flexioRxBenchmark_fn.set("args", "[{frequency_hz=1000, duration_ms=100, tx_pin=3, rx_pin=4}] (all optional)");
+        flexioRxBenchmark_fn.set("returns", "{success, frequency_hz, duration_ms, tx_pin, rx_pin, edges_captured, periods, period_mean_ns, period_sigma_ns, period_min_ns, period_max_ns}");
+        flexioRxBenchmark_fn.set("description", "Square-wave validation for the FlexIO RX backend (Teensy 4.x only, FastLED#2764 Phase 2). Drives tx_pin via analogWriteFrequency at 50%% duty, captures via RxBackend::FLEXIO on rx_pin, reports per-period statistics.");
+        functions.push_back(flexioRxBenchmark_fn);
+
         fl::json response = fl::json::object();
         response.set("success", true);
-        response.set("totalFunctions", static_cast<int64_t>(25));
+        response.set("totalFunctions", static_cast<int64_t>(26));
         response.set("functions", functions);
         return response;
     });
