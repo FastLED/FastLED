@@ -512,7 +512,7 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     // disable re-emits the diagnostic.
     fl::string driverName = driver->getName();
     auto status = ChannelManager::instance().driverStatus(driverName);
-    if (status == ChannelManager::DriverStatus::DISABLED) {
+    if (status == ChannelManager::DriverStatus::STATUS_DISABLED) {
         if (!mDisabledDriverWarned) {
             const fl::string& exclusive =
                 ChannelManager::instance().exclusiveDriverName();
@@ -534,7 +534,7 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
         // it here matches the existing behaviour (rather than leaving stale
         // bytes in the driver's pending queue across an enable/disable flip).
         return;
-    } else if (status == ChannelManager::DriverStatus::ENABLED) {
+    } else if (status == ChannelManager::DriverStatus::STATUS_ENABLED) {
         // Reset the one-shot guard so a future disable re-emits the diagnostic.
         mDisabledDriverWarned = false;
     }

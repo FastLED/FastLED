@@ -266,8 +266,8 @@ ChannelManager::DriverStatus ChannelManager::driverStatus(const fl::string& name
     }
     for (const auto& entry : mDrivers) {
         if (entry.name == name) {
-            return entry.enabled ? DriverStatus::ENABLED
-                                  : DriverStatus::DISABLED;
+            return entry.enabled ? DriverStatus::STATUS_ENABLED
+                                  : DriverStatus::STATUS_DISABLED;
         }
     }
     return DriverStatus::NOT_REGISTERED;
