@@ -44,8 +44,12 @@ dependencies = [
     # cached object, so incremental builds silently produce stale .obj
     # files after a `git pull` that changes transitive headers — symptom
     # is an `undefined symbol: ...` link error hours after a header
-    # actually changed.
-    "zccache>=1.11.11",
+    # actually changed. 1.11.14 collapses the Windows thundering-herd
+    # daemon spawn race (zackees/zccache#637, #640) — observable here as
+    # 6/16 cold-start `zccache start` clients taking ~5 s each instead of
+    # exactly one spawn, plus expanded meson discovery skip-list (#659)
+    # for the .venv/.cached/.cargo/.pio/.fbuild trees we already gitignore.
+    "zccache>=1.11.14",
     "ninja",
     "meson>=1.11.0",
     "download",
