@@ -46,13 +46,26 @@ static inline int add_clockless_pio_program(PIO pio, int T1, int T2, int T3) FL_
         .length = sizeof(clockless_pio_instr) / sizeof(clockless_pio_instr[0]),
         .origin = -1,
 #if defined(PICO_SDK_VERSION_MAJOR) && PICO_SDK_VERSION_MAJOR >= 2
-        // pico-sdk 2.x (RP2350) added these. Zero-init preserves the previous
-        // implicit behavior while silencing -Wmissing-field-initializers and
-        // documenting intent: no specific PIO version pinned, no GPIO range
-        // pre-claimed. Revisit if RP2350 SDK starts enforcing used_gpio_ranges
-        // at pio_add_program time. #2727
+        // pico-sdk 2.x added these two fields to `pio_program`. They are
+        // gated by *different* macros in the SDK header — getting the gating
+        // wrong here is what regressed RP2040 builds in #2792 / #2727.
+        //
+        //   * `pio_version` is unconditionally present in 2.x — guard on
+        //     PICO_SDK_VERSION_MAJOR only.
+        //   * `used_gpio_ranges` is per-chip, gated on PICO_PIO_VERSION > 0
+        //     in rp2_common/hardware_pio/include/hardware/pio.h. RP2350
+        //     defines `PICO_PIO_VERSION = 1` so the field exists; RP2040
+        //     defines `PICO_PIO_VERSION = 0` so the field is genuinely
+        //     absent even on the 2.x SDK.
+        //
+        // Zero-init preserves the previous implicit behavior while silencing
+        // -Wmissing-field-initializers and documenting intent: no specific
+        // PIO version pinned, no GPIO range pre-claimed. Revisit if the SDK
+        // starts enforcing `used_gpio_ranges` at pio_add_program time.
         .pio_version = 0,
+    #if defined(PICO_PIO_VERSION) && PICO_PIO_VERSION > 0
         .used_gpio_ranges = 0,
+    #endif
 #endif
     };
     
