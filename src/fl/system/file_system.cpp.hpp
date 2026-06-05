@@ -4,24 +4,18 @@
 #include "fl/stl/vector.h"
 #include "fl/math/math.h"
 
-#ifdef FASTLED_TESTING
-// Test filesystem implementation that maps to real hard drive
-// IWYU pragma: begin_keep
-#include "platforms/stub/fs_stub.hpp" // ok platform headers
-// IWYU pragma: end_keep
-#define FASTLED_HAS_SDCARD 1
-#elif defined(FL_IS_WASM)
-// IWYU pragma: begin_keep
-#include "platforms/wasm/fs_wasm.h" // ok platform headers
-// IWYU pragma: end_keep
-#define FASTLED_HAS_SDCARD 1
-#elif FL_HAS_INCLUDE(<SD.h>) && FL_HAS_INCLUDE(<fs.h>)
-// Include Arduino SD card implementation when SD library is available
-#include "platforms/fs_sdcard_arduino.hpp"
-#define FASTLED_HAS_SDCARD 1
-#else
-#define FASTLED_HAS_SDCARD 0
-#endif
+// NOTE: SD card support (FileSystem::beginSd and make_sdcard_filesystem)
+// lives in a SEPARATE translation unit at `src/fl/system/sd/file_system_sd.cpp.hpp`,
+// compiled into `fl.system.sd+.cpp.o` via `src/fl/build/fl.system.sd+.cpp`.
+//
+// This split lets the linker tree-shake the entire SD chain
+// (libSD.a, libFS.a, Arduino's VFSImpl, the printf engine VFSFileImpl
+// drags in via snprintf) when the user never calls
+// `FileSystem::beginSd()`. See FastLED #2773 item 1.2.
+//
+// All other FileSystem methods (begin, openRead, readText, ...) and the
+// NullFileSystem stub stay here, so existing sketches that use only
+// `FileSystem::begin(platform_filesystem)` are unaffected.
 
 #include "fl/stl/json.h"
 #include "fl/math/screenmap.h"
@@ -87,14 +81,12 @@ class NullFileSystem : public FsImpl {
 };
 
 
-bool FileSystem::beginSd(int cs_pin) {
-    mFs = make_sdcard_filesystem(cs_pin);
-    if (!mFs) {
-        return false;
-    }
-    mFs->begin();
-    return true;
-}
+// FileSystem::beginSd() is intentionally NOT defined in this TU. The
+// definition lives in `fl/system/file_system_sd.cpp.hpp` which is
+// compiled into its own `.o` (`fl.system.sd+.cpp.o`). The linker only
+// pulls that `.o` when the user actually calls `fs.beginSd(...)`,
+// keeping all SD library code (~15 KB on ESP32-S3) out of sketches that
+// don't use it. See FastLED #2773 item 1.2.
 
 bool FileSystem::begin(FsImplPtr platform_filesystem) {
     mFs = platform_filesystem;
@@ -203,16 +195,7 @@ bool FileSystem::readText(const char *path, fl::string *out) {
 
 } // namespace fl
 
-namespace fl {
-
-#if !FASTLED_HAS_SDCARD
-// Weak fallback implementation when SD library is not available
-FL_LINK_WEAK FsImplPtr make_sdcard_filesystem(int cs_pin) {
-    FASTLED_UNUSED(cs_pin);
-    fl::shared_ptr<NullFileSystem> ptr = fl::make_shared<NullFileSystem>();
-    FsImplPtr out = ptr;
-    return out;
-}
-#endif
-
-} // namespace fl
+// `make_sdcard_filesystem(int cs_pin)` is defined in the separate SD TU
+// (`fl/system/sd/file_system_sd.cpp.hpp`). When the SD TU is not linked
+// (the user never calls `fs.beginSd()`), the symbol is also dead-stripped
+// alongside `FileSystem::beginSd` itself.

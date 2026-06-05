@@ -76,6 +76,7 @@ EXPECTED_BUILD_FILES = {
     "fl/build/fl.sensors+.cpp",
     "fl/build/fl.stl+.cpp",
     "fl/build/fl.system+.cpp",
+    "fl/build/fl.system.sd+.cpp",
     "fl/build/fl.task+.cpp",
     "fl/build/fl.test+.cpp",
     "fl/build/fl.ui+.cpp",
