@@ -14,6 +14,9 @@
 
 // Include platform-specific detection headers
 // IWYU pragma: begin_keep
+#include "lpc/is_lpc.h"
+// IWYU pragma: end_keep
+// IWYU pragma: begin_keep
 #include "nrf52/is_nrf52.h"
 // IWYU pragma: end_keep
 // IWYU pragma: begin_keep
@@ -68,6 +71,8 @@
     defined(__SAMD21E17A__) || defined(__SAMD21E18A__) || \
     /* Microchip SAMD51/SAME51 */ \
     defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || \
-    defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
+    defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__) || \
+    /* NXP LPC8xx (LPC845 / LPC804 Cortex-M0+) - defined by lpc/is_lpc.h */ \
+    defined(FL_IS_ARM_LPC)
 #define FL_IS_ARM
 #endif  // ARM platform detection
