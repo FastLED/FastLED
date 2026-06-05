@@ -114,7 +114,10 @@ def evaluate(case: TestCase, result: dict[str, Any]) -> tuple[bool, str]:
     return True, (f"decoded={decoded}/{expected} all matched, edges={edges}")
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    # `argv` accepted so that unit tests can inject argument lists without
+    # touching the real `sys.argv`. Defaults to `None`, which argparse
+    # interprets as "use sys.argv[1:]".
     p = argparse.ArgumentParser()
     p.add_argument("--port", default=DEFAULT_PORT)
     p.add_argument("--baud", default=DEFAULT_BAUD, type=int)
@@ -130,7 +133,7 @@ def main() -> int:
         type=int,
         help="Capture window per test case in ms (default: 50)",
     )
-    args = p.parse_args()
+    args = p.parse_args(argv)
 
     if serial is None:
         print(
@@ -142,6 +145,10 @@ def main() -> int:
     print(f"[flexio-objectfled] opening {args.port} @ {args.baud}")
     try:
         s = serial.Serial(args.port, args.baud, timeout=0.1)
+    except KeyboardInterrupt:
+        # Catch Ctrl-C before the bare `Exception`/`SerialException` block so
+        # interactive users can abort cleanly without dumping a stack trace.
+        raise
     except serial.SerialException as e:
         print(f"ERROR: could not open {args.port}: {e}", file=sys.stderr)
         return 2

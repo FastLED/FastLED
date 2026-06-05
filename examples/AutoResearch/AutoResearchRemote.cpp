@@ -1393,11 +1393,22 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
             return response;
         }
 
-        // 5. Trigger TX. FastLED.show() schedules the DMA, returns once the
-        //    frame has been queued. We then wait for RX completion (which
-        //    covers both TX-completion and capture-buffer-fill in one go).
+        // 5. Trigger TX. FastLED.show() schedules the DMA and returns once
+        //    the frame has been queued. The RX wait must be long enough to
+        //    cover BOTH the TX transmission time AND the capture-buffer
+        //    fill — otherwise teardown happens mid-frame and the hardware
+        //    can be left in a bad state. Compute a minimum from the actual
+        //    WS2812 timing (1.25 µs per bit, 24 bits per LED, plus reset
+        //    gap) and use the larger of the caller's `capture_ms` and that
+        //    minimum.
         FastLED.show();
-        rx_channel->wait((u32)capture_ms);
+        const u32 ws2812_tx_us =
+            (u32)num_leds * 24u * 13u / 10u + 100u;  // 1.25 µs/bit + reset
+        const u32 min_capture_ms = (ws2812_tx_us + 999u) / 1000u + 10u;
+        const u32 effective_capture_ms = ((u32)capture_ms > min_capture_ms)
+                                              ? (u32)capture_ms
+                                              : min_capture_ms;
+        rx_channel->wait(effective_capture_ms);
 
         // 6. Decode the captured edge stream against WS2812 4-phase timing.
         const fl::ChipsetTiming ws2812_timing =
@@ -1991,7 +2002,7 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
 
         fl::json response = fl::json::object();
         response.set("success", true);
-        response.set("totalFunctions", static_cast<int64_t>(27));
+        response.set("totalFunctions", static_cast<int64_t>(28));
         response.set("functions", functions);
         return response;
     });
