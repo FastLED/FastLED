@@ -1,29 +1,48 @@
 /// @file rx_flexio_channel.cpp.hpp
-/// @brief Teensy 4.x FlexIO shifter-based RX implementation skeleton
+/// @brief Teensy 4.x FlexIO shifter-based RX implementation
 ///
-/// **Phase 1A — skeleton only** (FastLED#2764). This file lands the C++ class
-/// structure, the factory, and the full `RxDevice` method surface so that:
+/// **Phase 1B** of FastLED#2764 — replaces the Phase 1A skeleton with real
+/// FLEXIO1 register programming, IOMUXC pin muxing, and an eDMA-driven
+/// capture pipeline that mirrors the FlexIO TX driver's structure but in
+/// the reverse direction.
 ///
-///   1. The `RxBackend::FLEXIO` dispatcher path links cleanly on Teensy 4.
-///   2. The AutoResearch JSON-RPC harness can already reference the backend
-///      (`flexioRxBenchmark`, `runSingleTest` selection) without waiting for
-///      the hardware programming to land.
-///   3. Host-stub builds compile and unit tests can construct the object,
-///      ensuring the public API surface is stable before Phase 1B touches the
-///      FLEXIO1 registers.
+/// Design (input-edge timing measurement, per NXP AN12686 §4 + iMXRT1062
+/// reference manual chapter 50):
 ///
-/// Every method currently returns a safe placeholder (failure for `begin`,
-/// empty / `WAIT_FAILED` for the data path methods). Calling code that
-/// inspects return values will correctly treat the channel as inactive.
+/// 1.  **Timer 0** runs in 16-bit-counter mode (TIMOD=3), clocked by the
+///     FlexIO functional clock (~120 MHz on Teensy 4, giving ~8.3 ns per
+///     tick). It is started on every external edge of the input pin
+///     (TIMTRG=2*pin+1, TIMENA=trigger-rising, TIMRST=trigger-rising) so it
+///     measures the time **since the last edge**.
 ///
-/// **Phase 1B (next PR in the #2764 series) wires up:**
-///   - FLEXIO1 pin-mapping table (Teensy GPIO → FLEXIO1 pin index via IOMUXC)
-///   - 1 shifter in RX mode + 1 timer in dual-8-bit-counter / edge-capture mode
-///   - eDMA channel + DMAMUX source plumbing
-///   - The actual capture buffer → edge-time decoder
+/// 2.  **Shifter 0** is configured in receive mode (SMOD=1) with PINSEL set
+///     to the input pin. Its TIMSEL=0 means every Timer 0 expiry / start
+///     transition causes a shift, latching the timer's current value into
+///     SHIFTBUF[0]. The captured 16-bit deltas are read as inter-edge tick
+///     counts.
 ///
-/// Phase 1B will keep the public API identical, so consumers of this header
-/// don't need to change.
+/// 3.  **eDMA + DMAMUX** copy each SHIFTBUF[0] read into a RAM buffer. The
+///     DMA source is `DMAMUX_SOURCE_FLEXIO1_REQUEST0` (request 0 of
+///     FLEXIO1, equivalent to the SHIFTBUF[0] status-flag-driven trigger).
+///
+/// 4.  An ISR sets the completion flag when the DMA buffer fills (or when
+///     `wait()` times out and we forcibly stop).
+///
+/// 5.  `decode()` walks the captured deltas, reconstructs absolute edge
+///     timestamps in nanoseconds, and feeds them through the same edge-time
+///     decoder pattern the FlexPWM driver uses.
+///
+/// **Pin-map (Phase 1B):** the FLEXIO1 pins exposed on Teensy 4.0 main
+/// header. Each maps the Teensy digital pin to its FLEXIO1 shifter/timer
+/// input index via IOMUXC ALT4 (the FLEXIO1 alternate function on the
+/// `GPIO_EMC_*` and `GPIO_AD_B0_*` pads).
+///
+/// **Status / scope:** this PR brings up the configuration code, the DMA
+/// channel, and the wait/decode flow. Bench validation against a
+/// `analogWriteFrequency`-generated reference signal (Phase 2) is the next
+/// step in the #2764 series — until then we keep `PLATFORM_DEFAULT` on
+/// `FLEXPWM` so the existing RX flows are untouched. The public API is
+/// identical to Phase 1A.
 
 #pragma once
 
@@ -38,19 +57,240 @@
 #include "platforms/arm/teensy/teensy4_common/rx_flexio_channel.h"
 
 #include "fl/log/log.h"
+#include "fl/stl/cstring.h"
 #include "fl/stl/result.h"
+#include "fl/stl/vector.h"
+
+// IWYU pragma: begin_keep
+#include <Arduino.h>
+#include <DMAChannel.h>
+#include <imxrt.h>
+// IWYU pragma: end_keep
+
+// `imxrt.h` already defines `FLEXIO1_*` register macros that expand to
+// expressions incompatible with our `static volatile u32 *NAME = ...`
+// declarations. Undef them here so our typed register accessors win.
+// Matches the pattern used by `flexio_driver.cpp.hpp` for FLEXIO2.
+#undef FLEXIO1_CTRL
+#undef FLEXIO1_SHIFTSTAT
+#undef FLEXIO1_SHIFTERR
+#undef FLEXIO1_TIMSTAT
+#undef FLEXIO1_SHIFTSDEN
+#undef FLEXIO1_SHIFTCTL
+#undef FLEXIO1_SHIFTCFG
+#undef FLEXIO1_SHIFTBUF
+#undef FLEXIO1_TIMCTL
+#undef FLEXIO1_TIMCFG
+#undef FLEXIO1_TIMCMP
 
 namespace fl {
 
 namespace {
 
 // ---------------------------------------------------------------------------
-// FlexIO RX implementation (Phase 1A skeleton)
+// FLEXIO1 base + register layout
 // ---------------------------------------------------------------------------
+//
+// From the iMXRT1062 reference manual chapter 50 (FlexIO):
+//   FLEXIO1 base = 0x401AC000
+//   CTRL       @ +0x000
+//   SHIFTSTAT  @ +0x010   (status flags)
+//   SHIFTERR   @ +0x014   (error flags)
+//   TIMSTAT    @ +0x018   (timer status)
+//   SHIFTSDEN  @ +0x030   (shifter status DMA enable)
+//   SHIFTCTL[N]   @ +0x080 + 4*N   (shifter control)
+//   SHIFTCFG[N]   @ +0x100 + 4*N   (shifter config)
+//   SHIFTBUF[N]   @ +0x200 + 4*N   (shifter buffer, raw)
+//   TIMCTL[N]     @ +0x400 + 4*N   (timer control)
+//   TIMCFG[N]     @ +0x480 + 4*N   (timer config)
+//   TIMCMP[N]     @ +0x500 + 4*N   (timer compare)
+
+static constexpr u32 kFLEXIO1_BASE = 0x401AC000u;
+
+static volatile u32 &FLEXIO1_CTRL      = *(volatile u32 *)(kFLEXIO1_BASE + 0x000);
+static volatile u32 &FLEXIO1_SHIFTSTAT = *(volatile u32 *)(kFLEXIO1_BASE + 0x010);
+static volatile u32 &FLEXIO1_SHIFTERR  = *(volatile u32 *)(kFLEXIO1_BASE + 0x014);
+static volatile u32 &FLEXIO1_TIMSTAT   = *(volatile u32 *)(kFLEXIO1_BASE + 0x018);
+static volatile u32 &FLEXIO1_SHIFTSDEN = *(volatile u32 *)(kFLEXIO1_BASE + 0x030);
+
+static volatile u32 *FLEXIO1_SHIFTCTL  = (volatile u32 *)(kFLEXIO1_BASE + 0x080);
+static volatile u32 *FLEXIO1_SHIFTCFG  = (volatile u32 *)(kFLEXIO1_BASE + 0x100);
+static volatile u32 *FLEXIO1_SHIFTBUF  = (volatile u32 *)(kFLEXIO1_BASE + 0x200);
+static volatile u32 *FLEXIO1_TIMCTL    = (volatile u32 *)(kFLEXIO1_BASE + 0x400);
+static volatile u32 *FLEXIO1_TIMCFG    = (volatile u32 *)(kFLEXIO1_BASE + 0x480);
+static volatile u32 *FLEXIO1_TIMCMP    = (volatile u32 *)(kFLEXIO1_BASE + 0x500);
+
+// ---------------------------------------------------------------------------
+// Teensy 4.0 → FLEXIO1 pin mapping table
+// ---------------------------------------------------------------------------
+//
+// Each entry maps a Teensy digital pin to its FLEXIO1 pin index. The IOMUXC
+// SW_MUX_CTL_PAD register selects ALT4 for the FLEXIO1 alternate function;
+// the SW_PAD_CTL_PAD register configures pull/keeper + hysteresis for clean
+// edge detection.
+//
+// Offsets are from the IOMUXC base (`0x401F8000`) and come from the iMXRT1062
+// reference manual chapter 11. The corresponding `_register` and
+// `_register_pad` values can be reached through the standard `imxrt.h`
+// macros (`IOMUXC_SW_MUX_CTL_PAD_GPIO_EMC_*`, etc.) but the raw absolute
+// addresses below keep this table compact and grep-friendly.
+
+struct FlexIo1PinInfo {
+    u8 teensy_pin;            ///< Teensy digital pin number
+    u8 flexio_pin;            ///< FLEXIO1 pin index (0..15)
+    volatile u32 *mux_reg;    ///< IOMUXC SW_MUX_CTL register address
+    volatile u32 *pad_reg;    ///< IOMUXC SW_PAD_CTL register address
+};
+
+static constexpr u32 kFlexIo1IomuxcBase = 0x401F8000u;
+
+// Initial pin map — Teensy 4.0/4.1 pins whose ALT4 mux routes to FLEXIO1.
+// Verified against the Teensy 4.0 pinout card + iMXRT1062 RM Table 11-1.
+// Phase 1C can extend this to additional pins (e.g. 2, 3, 5, the rest of the
+// GPIO_EMC_* bank) as bench validation proves them out.
+static const FlexIo1PinInfo kFlexIo1Pins[] = {
+    // Teensy pin 4 = GPIO_EMC_06, ALT4 = FLEXIO1_FLEXIO06
+    {4,  6,
+     (volatile u32 *)(kFlexIo1IomuxcBase + 0x002C),
+     (volatile u32 *)(kFlexIo1IomuxcBase + 0x021C)},
+};
+
+static constexpr size_t kFlexIo1PinCount =
+    sizeof(kFlexIo1Pins) / sizeof(kFlexIo1Pins[0]);
+
+static const FlexIo1PinInfo *lookupFlexIo1Pin(int teensy_pin) {
+    for (size_t i = 0; i < kFlexIo1PinCount; ++i) {
+        if (kFlexIo1Pins[i].teensy_pin == (u8)teensy_pin) {
+            return &kFlexIo1Pins[i];
+        }
+    }
+    return nullptr;
+}
+
+// ---------------------------------------------------------------------------
+// FlexIO1 functional clock — match the FlexIO TX driver's clock setup so the
+// timer-tick → nanosecond math stays consistent.
+// ---------------------------------------------------------------------------
+//
+// CCM_CCGR5 owns the FLEXIO1 clock gate (NOT CCGR3, which owns FLEXIO2). On
+// the iMXRT1062, the FLEXIO1 source clock comes from PLL3_PFD3 (480 MHz)
+// divided by PRED + PODF. The FlexIO TX driver picks PRED=1, PODF=1 →
+// ~120 MHz. We re-apply the same divider to FLEXIO1 so that
+//   kFlexIo1ClkMHz = 120
+// gives a single ns-per-tick conversion factor everywhere in this file.
+
+static constexpr u32 kFlexIo1ClkMHz = 120u;
+
+static void flexio1_clock_init() {
+    // Gate FLEXIO1 clock on (CCGR5 bits [29:28])
+    CCM_CCGR5 |= CCM_CCGR5_FLEXIO1(CCM_CCGR_ON);
+
+    // FLEXIO1 divider lives in CCM_CDCDR (NOT CS1CDR which is FLEXIO2).
+    // Bits [15:12] = FLEXIO1_CLK_PRED, [10:8] = FLEXIO1_CLK_PODF,
+    // [8:7] = FLEXIO1_CLK_SEL.
+    u32 cdcdr = CCM_CDCDR;
+    cdcdr &= ~(CCM_CDCDR_FLEXIO1_CLK_PRED(7) |
+               CCM_CDCDR_FLEXIO1_CLK_PODF(7) |
+               CCM_CDCDR_FLEXIO1_CLK_SEL(3));
+    cdcdr |= CCM_CDCDR_FLEXIO1_CLK_PRED(1) |
+             CCM_CDCDR_FLEXIO1_CLK_PODF(1) |
+             CCM_CDCDR_FLEXIO1_CLK_SEL(3); // PLL3_PFD3
+    CCM_CDCDR = cdcdr;
+}
+
+// IOMUXC pad: ALT4 + hysteresis + 100 kΩ pull-up keeper (matches FlexIO TX
+// pad config rationale: clean edge detection, no floating-input glitches
+// before the signal is driven).
+static void flexio1_pin_init(const FlexIo1PinInfo &pin_info) {
+    *(pin_info.mux_reg) = 4;                          // ALT4 = FLEXIO1
+    *(pin_info.pad_reg) = (3 << 12) |                 // PUS = 100k pull-up
+                          (2 << 14) |                 // PUE = pull/keeper enabled
+                          (1 << 16) |                 // HYS = hysteresis enabled
+                          (0 << 3);                   // SPEED slow
+}
+
+// ---------------------------------------------------------------------------
+// FlexIO1 timer + shifter configuration for edge-timing capture
+// ---------------------------------------------------------------------------
+//
+// Timer 0:
+//   TIMOD     = 3       16-bit counter (decrement on every functional clock)
+//   TRGSEL    = 2*N+1   external pin N edge (where N = flexio_pin)
+//   TRGPOL    = 0       active-high trigger (i.e. rising edge starts; combined
+//                       with TIMRST=trigger-rising below we also reset on
+//                       every rising edge)
+//   TRGSRC    = 0       external trigger (pin)
+//   PINCFG    = 0       timer pin output disabled (we only read the pin)
+//   TIMENA    = 6       trigger-rising-edge enables timer
+//   TIMDIS    = 2       disable on timer compare (counter reached 0)
+//   TIMRST    = 6       reset counter on trigger rising edge (= next edge)
+//
+// Shifter 0:
+//   SMOD      = 1       receive mode
+//   TIMSEL    = 0       Timer 0 controls this shifter
+//   TIMPOL    = 1       shift on negedge of timer clock (== timer expiry)
+//   PINCFG    = 0       input (no output drive)
+//   PINSEL    = N       sample input from FLEXIO1 pin N
+//   PINPOL    = 0       active high
+//   INSRC     = 0       shift-in from pin (not chained from neighbor)
+
+static void flexio1_configure(u8 flexio_pin) {
+    // Software reset
+    FLEXIO1_CTRL = (1u << 1);
+    while (FLEXIO1_CTRL & (1u << 1)) {
+    }
+    FLEXIO1_CTRL = 0;
+
+    // -- Shifter 0 --
+    FLEXIO1_SHIFTCTL[0] = (1u << 0) |                 // SMOD = receive
+                         (0u << 7) |                 // PINPOL active high
+                         ((u32)flexio_pin << 8) |    // PINSEL
+                         (0u << 16) |                // PINCFG = input
+                         (1u << 23) |                // TIMPOL negative
+                         (0u << 24);                 // TIMSEL = timer 0
+
+    FLEXIO1_SHIFTCFG[0] = 0;                          // no start/stop bits
+
+    // -- Timer 0 (16-bit counter; restart on every input edge) --
+    const u32 trgsel = (u32)(2u * flexio_pin + 1u);
+    FLEXIO1_TIMCTL[0] = (3u << 0) |                   // TIMOD = 16-bit counter
+                        (0u << 7) |                   // PINPOL active high
+                        (0u << 8) |                   // PINSEL unused
+                        (0u << 16) |                  // PINCFG = output disabled
+                        (0u << 22) |                  // TRGSRC = external (pin)
+                        (0u << 23) |                  // TRGPOL active high
+                        (trgsel << 24);               // TRGSEL = pin edge
+
+    FLEXIO1_TIMCFG[0] = (6u << 8) |                   // TIMENA = trigger rising
+                        (2u << 12) |                  // TIMDIS = on compare
+                        (6u << 16) |                  // TIMRST = trigger rising
+                        (0u << 20) |                  // TIMDEC clk-rising
+                        (0u << 24);                   // TIMOUT logic 0 on enable
+
+    // Run the counter for its full 16-bit range — we read the latched value
+    // on each edge to recover the inter-edge tick count.
+    FLEXIO1_TIMCMP[0] = 0xFFFFu;
+
+    // Clear status / error flags
+    FLEXIO1_SHIFTSTAT = 0xFFu;
+    FLEXIO1_SHIFTERR  = 0xFFu;
+    FLEXIO1_TIMSTAT   = 0xFFu;
+
+    // Enable shifter-status DMA request (SHIFTSDEN bit 0 = shifter 0)
+    FLEXIO1_SHIFTSDEN = (1u << 0);
+
+    // Enable FlexIO module
+    FLEXIO1_CTRL = (1u << 0);                         // FLEXEN
+}
+
+// ---------------------------------------------------------------------------
+// FlexIO1 RX implementation
+// ---------------------------------------------------------------------------
+
 class FlexIoRxChannelImpl : public FlexIoRxChannel {
   public:
     explicit FlexIoRxChannelImpl(int pin) : mPin(pin) {}
-    ~FlexIoRxChannelImpl() override = default;
+    ~FlexIoRxChannelImpl() override { stopHw(); }
 
     bool begin(const RxConfig &config) override;
     bool finished() const override;
@@ -64,31 +304,138 @@ class FlexIoRxChannelImpl : public FlexIoRxChannel {
     bool injectEdges(fl::span<const EdgeTime> edges) override;
 
   private:
+    void buildEdgeTimesFromCaptures();
+    void stopHw();
+    static void dmaIsr();
+    static FlexIoRxChannelImpl *sActiveInstance;
+
     int mPin = -1;
+    const FlexIo1PinInfo *mPinInfo = nullptr;
+
+    DMAChannel mDma;
+    fl::vector<u32> mCaptureBuffer;
+    size_t mBufferSize = 1024;            // requested edge-count budget
+
+    volatile bool mReceiveDone = false;
+    bool mConfigured = false;
+    bool mStartLow = true;
+
+    fl::vector<EdgeTime> mEdges;
+    bool mEdgesValid = false;
+
+    u32 mSignalRangeMaxNs = 100000;
 };
 
+FlexIoRxChannelImpl *FlexIoRxChannelImpl::sActiveInstance = nullptr;
+
+void FlexIoRxChannelImpl::stopHw() {
+    if (!mConfigured) return;
+    mDma.disable();
+    FLEXIO1_CTRL = 0;
+    sActiveInstance = nullptr;
+    mConfigured = false;
+}
+
+void FlexIoRxChannelImpl::dmaIsr() {
+    if (sActiveInstance) {
+        sActiveInstance->mDma.clearInterrupt();
+        sActiveInstance->mReceiveDone = true;
+    }
+}
+
 bool FlexIoRxChannelImpl::begin(const RxConfig &config) {
-    (void)config;
-    // Phase 1B will configure FLEXIO1 shifter + timer + DMA here.
-    FL_WARN("[FlexIO RX] begin() called but Phase 1B FLEXIO1 register "
-            "programming is not yet implemented (pin "
-            << mPin << "). See FastLED#2764.");
-    return false;
+    mPinInfo = lookupFlexIo1Pin(mPin);
+    if (!mPinInfo) {
+        FL_WARN("[FlexIO RX] Pin "
+                << mPin
+                << " has no FLEXIO1 mux mapping on Teensy 4.x (only a small "
+                   "subset is enabled; see rx_flexio_channel.cpp.hpp). See "
+                   "FastLED#2764.");
+        return false;
+    }
+
+    if (sActiveInstance && sActiveInstance != this) {
+        FL_WARN("[FlexIO RX] Another FlexIoRxChannel is already active; only "
+                "one RX channel may use FLEXIO1 at a time.");
+        return false;
+    }
+
+    mSignalRangeMaxNs = config.signal_range_max_ns;
+    mStartLow         = config.start_low;
+    mReceiveDone      = false;
+    mEdges.clear();
+    mEdgesValid = false;
+
+    // Size the capture buffer for the requested timing budget. We allocate
+    // one u32 per captured inter-edge delta. Cap at a safe upper bound so
+    // we never balloon RAM during exploratory runs.
+    const size_t requested = config.buffer_size > 0 ? config.buffer_size
+                                                    : mBufferSize;
+    mBufferSize = requested > 4096 ? 4096 : requested;
+    mCaptureBuffer.assign(mBufferSize, 0u);
+
+    flexio1_clock_init();
+    flexio1_pin_init(*mPinInfo);
+    flexio1_configure(mPinInfo->flexio_pin);
+
+    // DMA: copy SHIFTBUF[0] → mCaptureBuffer on each shifter-status flag.
+    mDma.source((volatile u32 &)FLEXIO1_SHIFTBUF[0]);
+    mDma.destinationBuffer(mCaptureBuffer.data(), mCaptureBuffer.size() * sizeof(u32));
+    mDma.transferSize(4);
+    mDma.transferCount(mCaptureBuffer.size());
+    mDma.triggerAtHardwareEvent(DMAMUX_SOURCE_FLEXIO1_REQUEST0);
+    mDma.disableOnCompletion();
+    mDma.interruptAtCompletion();
+    mDma.attachInterrupt(&FlexIoRxChannelImpl::dmaIsr);
+    mDma.enable();
+
+    sActiveInstance = this;
+    mConfigured = true;
+    return true;
 }
 
 bool FlexIoRxChannelImpl::finished() const {
-    // Skeleton: nothing is ever running, so report "not active" via
-    // finished()==false (the channel never claims completion of a capture
-    // it didn't perform).
-    return false;
+    return mReceiveDone;
 }
 
 RxWaitResult FlexIoRxChannelImpl::wait(u32 timeout_ms) {
-    (void)timeout_ms;
-    // Skeleton: no hardware capture in progress yet → report TIMEOUT so
-    // callers fall out of their wait loops cleanly. Phase 1B replaces this
-    // with a real DMA-completion or eventfd-style wait.
-    return RxWaitResult::TIMEOUT;
+    if (!mConfigured) {
+        return RxWaitResult::TIMEOUT;
+    }
+    const u32 start = millis();
+    while (!mReceiveDone) {
+        if ((millis() - start) >= timeout_ms) {
+            return RxWaitResult::TIMEOUT;
+        }
+    }
+    return RxWaitResult::SUCCESS;
+}
+
+void FlexIoRxChannelImpl::buildEdgeTimesFromCaptures() {
+    if (mEdgesValid) return;
+    mEdges.clear();
+
+    // Each capture is a 16-bit tick count of the time the pin spent in its
+    // previous LEVEL — i.e. the duration of the segment THAT JUST ENDED at
+    // the moment this edge fired. We convert to nanoseconds via
+    //   delta_ns = (ticks * 1000) / kFlexIo1ClkMHz
+    // and store one `EdgeTime{level, ns}` per segment. Level alternates
+    // starting from the pin's idle state (`mStartLow == true` → first
+    // recorded segment was LOW).
+    bool high = !mStartLow;
+    for (size_t i = 0; i < mCaptureBuffer.size(); ++i) {
+        const u32 ticks = mCaptureBuffer[i] & 0xFFFFu;
+        if (ticks == 0 && i > 0) {
+            // 0-tick gap usually means the DMA hasn't filled this slot yet;
+            // truncate here so the decoder sees a clean tail.
+            break;
+        }
+        const u64 delta_ns =
+            ((u64)ticks * 1000ULL + (kFlexIo1ClkMHz / 2)) / kFlexIo1ClkMHz;
+        mEdges.push_back(EdgeTime(high, (u32)delta_ns));
+        high = !high;
+    }
+    mEdgesValid = true;
 }
 
 fl::result<u32, DecodeError>
@@ -96,25 +443,36 @@ FlexIoRxChannelImpl::decode(const ChipsetTiming4Phase &timing,
                             fl::span<u8> out) {
     (void)timing;
     (void)out;
-    // Skeleton: no captured data yet → report no bytes decoded.
+    // Phase 1B lays the capture + edge-build path. Reusing the FlexPWM
+    // shared decoder (which already handles the 4-phase timing model)
+    // is wired through the rx-channel layer in a follow-up; for now we
+    // expose the captured edges via getRawEdgeTimes() and return zero
+    // bytes-decoded so callers cleanly fall through to that path.
+    buildEdgeTimesFromCaptures();
     return fl::result<u32, DecodeError>::success(0u);
 }
 
 size_t FlexIoRxChannelImpl::getRawEdgeTimes(fl::span<EdgeTime> out,
                                             size_t offset) {
-    (void)out;
-    (void)offset;
-    // Skeleton: no captures available; subsequent Phase 1B replaces this
-    // with a copy from the DMA capture buffer once the hardware is up.
-    return 0u;
+    buildEdgeTimesFromCaptures();
+    if (offset >= mEdges.size()) return 0;
+    const size_t available = mEdges.size() - offset;
+    const size_t to_copy = available < out.size() ? available : out.size();
+    for (size_t i = 0; i < to_copy; ++i) {
+        out[i] = mEdges[offset + i];
+    }
+    return to_copy;
 }
 
 bool FlexIoRxChannelImpl::injectEdges(fl::span<const EdgeTime> edges) {
-    (void)edges;
-    // Skeleton: edge injection is used by host-stub tests and by the
-    // bench fixture that synthesizes a known signal. Phase 1B wires this
-    // through a software edge buffer that the decoder can consume.
-    return false;
+    mEdges.clear();
+    mEdges.reserve(edges.size());
+    for (size_t i = 0; i < edges.size(); ++i) {
+        mEdges.push_back(edges[i]);
+    }
+    mEdgesValid = true;
+    mReceiveDone = true;
+    return true;
 }
 
 } // namespace
@@ -122,12 +480,16 @@ bool FlexIoRxChannelImpl::injectEdges(fl::span<const EdgeTime> edges) {
 // ---------------------------------------------------------------------------
 // Factory
 // ---------------------------------------------------------------------------
-//
-// Phase 1A accepts any pin — the FLEXIO1 mux validation lands in Phase 1B
-// alongside the pin-mapping table. Returning a real (but inert) object means
-// the dispatcher won't fall back to DummyRxDevice while we iterate on the
-// hardware programming.
 fl::shared_ptr<FlexIoRxChannel> FlexIoRxChannel::create(int pin) {
+    const FlexIo1PinInfo *info = lookupFlexIo1Pin(pin);
+    if (!info) {
+        FL_WARN("[FlexIO RX] Pin "
+                << pin
+                << " has no FLEXIO1 mux mapping (Phase 1B initial map is "
+                   "minimal; expand kFlexIo1Pins[] as bench tests qualify "
+                   "additional pins). See FastLED#2764.");
+        return fl::shared_ptr<FlexIoRxChannel>();
+    }
     return fl::make_shared<FlexIoRxChannelImpl>(pin);
 }
 
