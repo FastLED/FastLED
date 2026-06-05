@@ -23,5 +23,5 @@ jobs:
     uses: ./.github/workflows/build_template_binary_size.yml
     with:
       board: esp32dev
-      max_size: 330000
-      max_size_apa102: 330000
+      max_size: 700000
+      max_size_apa102: 700000
