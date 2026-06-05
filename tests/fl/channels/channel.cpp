@@ -468,3 +468,180 @@ FL_TEST_CASE("mBus miss to unregistered known Bus falls back and still renders")
 
     channel->removeFromDrawList();
 }
+
+// ============ #2517 Silent-drop diagnostic ============
+// When a channel's bound driver is disabled (typically by
+// `FastLED.setExclusiveDriver<OtherBus>()`) the previous behaviour was a
+// silent drop in `ChannelManager::onEndFrame()` — the driver still received
+// `enqueue()` calls, but the manager never called `show()` on a disabled
+// driver, so the frame was dropped on the floor with no diagnostic.
+//
+// After the fix, `Channel::showPixels()` short-circuits the enqueue and
+// emits one actionable FL_ERROR per (channel × disable-event), naming the
+// channel, the bound driver, the active exclusive-driver setting (if any),
+// and the `FastLED.enableDrivers<>()` / `FastLED.enableAllDrivers()`
+// remediation. Verification is behavioural — the project log macros don't
+// have a capture hook today, so each test asserts the enqueue did NOT land.
+
+namespace {
+
+/// Minimal fake driver — records every enqueue call so the test can assert
+/// whether a frame was actually queued or silently dropped at the manager
+/// layer.
+class CountingFakeDriver : public IChannelDriver {
+public:
+    explicit CountingFakeDriver(const char* name) : mName(name) {}
+
+    int enqueueCount = 0;
+    int showCount = 0;
+
+    bool canHandle(const ChannelDataPtr& data) const override {
+        (void)data;
+        return true;
+    }
+
+    void enqueue(ChannelDataPtr channelData) override {
+        (void)channelData;
+        ++enqueueCount;
+    }
+
+    void show() override {
+        ++showCount;
+    }
+
+    DriverState poll() override {
+        return DriverState::READY;
+    }
+
+    fl::string getName() const override { return mName; }
+
+    Capabilities getCapabilities() const override {
+        return Capabilities(true, true);
+    }
+
+private:
+    fl::string mName;
+};
+
+/// Minimal WS2812 ChannelConfig on pin 7 with 4 LEDs.
+ChannelConfig makeSilentDropTestConfig(fl::span<CRGB> leds) {
+    auto timing = makeTimingConfig<TIMING_WS2812_800KHZ>();
+    return ChannelConfig(7, timing, leds, RGB);
+}
+
+}  // namespace
+
+FL_TEST_CASE("[#2517] Disabled driver: enqueue is suppressed (would-be silent drop)") {
+    auto& mgr = freshBusTestManager();
+    FL_REQUIRE(mgr.getDriverCount() == 0);
+
+    // Register a fake "PARLIO_TEST" driver — this is the only enabled driver,
+    // so the priority-dispatch path picks it on the first showLeds() call.
+    auto fakeDriver = fl::make_shared<CountingFakeDriver>("PARLIO_TEST");
+    mgr.addDriver(9000, fakeDriver);
+    FL_REQUIRE(mgr.driverStatus(fl::string::from_literal("PARLIO_TEST"))
+               == ChannelManager::DriverStatus::ENABLED);
+
+    CRGB leds[4] = {};
+    auto channel = Channel::create(makeSilentDropTestConfig(fl::span<CRGB>(leds, 4)));
+    FL_REQUIRE(channel != nullptr);
+
+    auto cleanup = fl::make_scope_exit([&]() {
+        channel->removeFromDrawList();
+        mgr.clearAllDrivers();
+    });
+
+    channel->addToDrawList();
+
+    // Frame 1: happy path — driver is enabled, enqueue should land.
+    channel->showLeds(0);
+    FL_CHECK_EQ(fakeDriver->enqueueCount, 1);
+
+    // Now disable PARLIO_TEST exclusively in favor of a name that isn't
+    // registered. All drivers (including PARLIO_TEST) become DISABLED, but
+    // the channel still holds a strong reference to the previously-bound
+    // driver via its cached `mDriver` weak_ptr being valid.
+    mgr.setExclusiveDriverByName("DOES_NOT_EXIST");
+    FL_CHECK(mgr.driverStatus(fl::string::from_literal("PARLIO_TEST"))
+             == ChannelManager::DriverStatus::DISABLED);
+    FL_CHECK_EQ(mgr.exclusiveDriverName(),
+                fl::string::from_literal("DOES_NOT_EXIST"));
+
+    // Frame 2: this used to be the silent drop. After the #2517 fix:
+    //   (a) Channel::showPixels emits FL_ERROR (visible in test output), and
+    //   (b) skips the driver->enqueue() call — so enqueueCount stays at 1.
+    channel->showLeds(0);
+    FL_CHECK_EQ(fakeDriver->enqueueCount, 1);
+
+    // Frame 3: one-shot guard suppresses duplicate per-frame FL_ERROR, but
+    // enqueue is still suppressed — the data still wouldn't be transmitted.
+    channel->showLeds(0);
+    FL_CHECK_EQ(fakeDriver->enqueueCount, 1);
+}
+
+FL_TEST_CASE("[#2517] Normal flush path does NOT trigger the silent-drop FL_ERROR") {
+    auto& mgr = freshBusTestManager();
+    FL_REQUIRE(mgr.getDriverCount() == 0);
+
+    auto fakeDriver = fl::make_shared<CountingFakeDriver>("HAPPY_DRIVER");
+    mgr.addDriver(9000, fakeDriver);
+
+    CRGB leds[4] = {};
+    auto channel = Channel::create(makeSilentDropTestConfig(fl::span<CRGB>(leds, 4)));
+    FL_REQUIRE(channel != nullptr);
+
+    auto cleanup = fl::make_scope_exit([&]() {
+        channel->removeFromDrawList();
+        mgr.clearAllDrivers();
+    });
+
+    channel->addToDrawList();
+
+    // Multiple consecutive happy-path frames — driver stays ENABLED, every
+    // enqueue lands. Behavioural proxy for "no extra FL_ERROR fires": each
+    // frame is faithfully delivered to the driver.
+    channel->showLeds(0);
+    channel->showLeds(0);
+    channel->showLeds(0);
+    FL_CHECK_EQ(fakeDriver->enqueueCount, 3);
+}
+
+FL_TEST_CASE("[#2517] Re-enabling the driver resumes enqueue and re-arms the latch") {
+    auto& mgr = freshBusTestManager();
+    FL_REQUIRE(mgr.getDriverCount() == 0);
+
+    auto fakeDriver = fl::make_shared<CountingFakeDriver>("RECOVERY_DRIVER");
+    mgr.addDriver(9000, fakeDriver);
+
+    CRGB leds[4] = {};
+    auto channel = Channel::create(makeSilentDropTestConfig(fl::span<CRGB>(leds, 4)));
+    FL_REQUIRE(channel != nullptr);
+
+    auto cleanup = fl::make_scope_exit([&]() {
+        channel->removeFromDrawList();
+        mgr.clearAllDrivers();
+    });
+
+    channel->addToDrawList();
+
+    // Happy frame: enqueue lands.
+    channel->showLeds(0);
+    FL_CHECK_EQ(fakeDriver->enqueueCount, 1);
+
+    // Disable: subsequent frame is suppressed.
+    mgr.setDriverEnabled("RECOVERY_DRIVER", false);
+    channel->showLeds(0);
+    FL_CHECK_EQ(fakeDriver->enqueueCount, 1);
+
+    // Re-enable: enqueue resumes.
+    mgr.setDriverEnabled("RECOVERY_DRIVER", true);
+    channel->showLeds(0);
+    FL_CHECK_EQ(fakeDriver->enqueueCount, 2);
+
+    // Disable a second time — the one-shot latch should have been cleared by
+    // the intervening ENABLED frame, so the diagnostic re-arms (we can't
+    // observe the FL_ERROR directly, but the enqueue is still suppressed).
+    mgr.setDriverEnabled("RECOVERY_DRIVER", false);
+    channel->showLeds(0);
+    FL_CHECK_EQ(fakeDriver->enqueueCount, 2);
+}
