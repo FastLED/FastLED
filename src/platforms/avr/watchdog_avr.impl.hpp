@@ -108,9 +108,11 @@ inline fl::u8 timeoutToWdtoConstant(fl::u32 ms) {
     return WDTO_8S;
 }
 
-// `.init3` hook: runs after the C runtime has zeroed BSS but before `main()`.
-// Captures MCUSR for later cause reporting, then clears it and disables the
-// WDT so a post-WDT-reset boot cannot loop forever.
+// `.init3` hook: runs before avr-libc's `.init4` BSS/data initialization
+// and before `main()`. Captures MCUSR for later cause reporting, then clears
+// it and disables the WDT so a post-WDT-reset boot cannot loop forever.
+// (See the `sAvrCapturedMcusr` declaration above for why that variable must
+// stay in `.noinit` — `.init4` would otherwise wipe it after we capture.)
 //
 // **MUST be `naked`.** `.init3` is not a function call site — the linker
 // concatenates this code inline between `.init2` and `.init4`, and there is
