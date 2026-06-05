@@ -23,10 +23,5 @@ jobs:
     uses: ./.github/workflows/build_template_binary_size.yml
     with:
       board: esp32dev
-      # TODO(#2802): bumped 330000 → 700000 to clear CI; current real Blink
-      # size ≈635768 B. Apa102 not currently measurable (Blink fails first);
-      # raised in lockstep with Blink. Follow-up: audit ESP32 link map for
-      # accidental inclusions (fl::ifstream / fl::posix_filebuf / etc.)
-      # similar to the teensy41 case before deciding the real budget.
-      max_size: 700000
-      max_size_apa102: 700000
+      max_size: 330000
+      max_size_apa102: 330000
