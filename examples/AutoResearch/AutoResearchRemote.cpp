@@ -1243,6 +1243,214 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
 #endif
     });
 
+    // Register "flexioObjectFledTest" — end-to-end ObjectFLED TX → FlexIO RX
+    // loopback verification (Phase 3 of FastLED#2764).
+    //
+    // Drives a small WS2812 pattern through `Bus::OBJECT_FLED` on `tx_pin`,
+    // captures the wire signal back through the new `RxBackend::FLEXIO` on
+    // `rx_pin`, decodes the bit stream against WS2812B-V5 timing, and reports
+    // how many bytes matched the transmitted pattern.
+    //
+    // Test cases (parent issue Phase 3 table):
+    //   0 — Red single LED            (1 LED, 0xFF0000 → wire-order GRB 00,FF,00)
+    //   1 — RGB three-LED chain       (3 LEDs)
+    //   2 — All zeros                 (1 LED, 0x000000 — T0H/T0L fidelity)
+    //   3 — All ones                  (1 LED, 0xFFFFFF — T1H/T1L fidelity)
+    //   4 — 100-LED alternating R/G/B (long capture, watchdog-safety)
+    //
+    // Args (positional, all optional):
+    //   { "test_case": int = 0,
+    //     "tx_pin":    int = 3,   // matches GPIO 3↔4 jumper
+    //     "rx_pin":    int = 4,
+    //     "capture_ms": int = 50 }
+    //
+    // Returns:
+    //   { success, test_case, num_leds, expected_bytes, decoded_bytes,
+    //     matched, mismatched, edges_captured }
+    //
+    // Teensy-4-only — FLEXIO1 is iMXRT1062-specific. ObjectFLED also relies
+    // on Teensy 4-core APIs, so non-Teensy builds return `PlatformNotSupported`.
+    mRemote->bind("flexioObjectFledTest", [this](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+#if !defined(FL_IS_TEENSY_4X)
+        (void)args;
+        response.set("success", false);
+        response.set("error", "PlatformNotSupported");
+        response.set("message",
+                     "flexioObjectFledTest is Teensy 4.x-only (FLEXIO1 RX + "
+                     "Teensy-core ObjectFLED driver).");
+        return response;
+#else
+        // Parse args
+        int test_case = 0;
+        int tx_pin    = 3;
+        int rx_pin    = 4;
+        int capture_ms = 50;
+        if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
+            fl::json cfg = args[0];
+            if (cfg.contains("test_case") && cfg["test_case"].is_int()) {
+                test_case = static_cast<int>(cfg["test_case"].as_int().value());
+            }
+            if (cfg.contains("tx_pin") && cfg["tx_pin"].is_int()) {
+                tx_pin = static_cast<int>(cfg["tx_pin"].as_int().value());
+            }
+            if (cfg.contains("rx_pin") && cfg["rx_pin"].is_int()) {
+                rx_pin = static_cast<int>(cfg["rx_pin"].as_int().value());
+            }
+            if (cfg.contains("capture_ms") && cfg["capture_ms"].is_int()) {
+                capture_ms = static_cast<int>(cfg["capture_ms"].as_int().value());
+            }
+        }
+        if (test_case < 0 || test_case > 4 ||
+            capture_ms < 1 || capture_ms > 5000) {
+            response.set("success", false);
+            response.set("error", "InvalidArgs");
+            response.set("message",
+                         "test_case in [0,4]; capture_ms in [1, 5000].");
+            return response;
+        }
+
+        // 1. Build the test pattern. Fixed upper bound (100 LEDs) covers
+        //    case 4 — the larger cases reuse the same static buffer.
+        static CRGB leds_buf[100];
+        int num_leds = 0;
+        switch (test_case) {
+            case 0:
+                num_leds = 1;
+                leds_buf[0] = CRGB::Red;
+                break;
+            case 1:
+                num_leds = 3;
+                leds_buf[0] = CRGB::Red;
+                leds_buf[1] = CRGB::Green;
+                leds_buf[2] = CRGB::Blue;
+                break;
+            case 2:
+                num_leds = 1;
+                leds_buf[0] = CRGB::Black;
+                break;
+            case 3:
+                num_leds = 1;
+                leds_buf[0] = CRGB(0xFF, 0xFF, 0xFF);
+                break;
+            case 4:
+                num_leds = 100;
+                for (int i = 0; i < 100; ++i) {
+                    leds_buf[i] = (i % 3 == 0) ? CRGB::Red
+                                : (i % 3 == 1) ? CRGB::Green
+                                               : CRGB::Blue;
+                }
+                break;
+        }
+
+        // 2. Build the expected wire-order byte stream (WS2812 is GRB).
+        fl::vector<u8> expected;
+        expected.reserve((size_t)num_leds * 3);
+        for (int i = 0; i < num_leds; ++i) {
+            expected.push_back(leds_buf[i].g);
+            expected.push_back(leds_buf[i].r);
+            expected.push_back(leds_buf[i].b);
+        }
+
+        // 3. Set up FlexIO RX. Size the edge buffer for 24 bits per LED ×
+        //    2 transitions per bit, with 25% headroom.
+        const size_t expected_edges = (size_t)num_leds * 24u * 2u;
+        size_t edge_capacity = expected_edges + expected_edges / 4u + 64u;
+        if (edge_capacity > 16384u) edge_capacity = 16384u;
+
+        fl::RxChannelConfig rx_cfg(rx_pin, fl::RxBackend::FLEXIO);
+        rx_cfg.edge_capacity = edge_capacity;
+        rx_cfg.start_low = true;
+        auto rx_channel = fl::RxChannel::create(rx_cfg);
+        if (!rx_channel || !rx_channel->begin(rx_cfg)) {
+            response.set("success", false);
+            response.set("error", "RxBeginFailed");
+            response.set("message",
+                         "Failed to bring up FlexIO RX on the requested pin "
+                         "(check kFlexIo1Pins[] mapping).");
+            return response;
+        }
+
+        // 4. Configure ObjectFLED TX via FastLED.add().
+        fl::ChannelOptions opts;
+        opts.mBus = fl::Bus::OBJECT_FLED;
+        auto resolved_timing  = fl::makeTimingConfig<fl::TIMING_WS2812B_V5>();
+        auto resolved_encoder = fl::encoder_for<fl::TIMING_WS2812B_V5>();
+        fl::NamedTimingConfig timing_cfg(resolved_timing, "WS2812B-V5",
+                                         resolved_encoder);
+        fl::ChannelConfig tx_cfg(
+            tx_pin,
+            timing_cfg.timing,
+            fl::span<CRGB>(leds_buf, (size_t)num_leds),
+            RGB,
+            opts);
+        auto tx_channel = FastLED.add(tx_cfg);
+        if (!tx_channel) {
+            response.set("success", false);
+            response.set("error", "TxAddFailed");
+            response.set("message",
+                         "FastLED.add() rejected the ObjectFLED ChannelConfig.");
+            return response;
+        }
+
+        // 5. Trigger TX. FastLED.show() schedules the DMA, returns once the
+        //    frame has been queued. We then wait for RX completion (which
+        //    covers both TX-completion and capture-buffer-fill in one go).
+        FastLED.show();
+        rx_channel->wait((u32)capture_ms);
+
+        // 6. Decode the captured edge stream against WS2812 4-phase timing.
+        const fl::ChipsetTiming ws2812_timing =
+            fl::to_runtime_timing<fl::TIMING_WS2812B_V5>();
+        fl::ChipsetTiming4Phase rx_timing =
+            fl::make4PhaseTiming(ws2812_timing);
+        fl::vector<u8> decoded;
+        decoded.assign(expected.size() + 16u, 0u);
+        auto decode_result =
+            rx_channel->decode(rx_timing, fl::span<u8>(decoded));
+
+        // 7. Compare decoded bytes against expected.
+        u32 decoded_bytes = 0u;
+        if (decode_result) {
+            decoded_bytes = decode_result.value();
+        }
+        const size_t cmp_n = (decoded_bytes < expected.size())
+                                 ? (size_t)decoded_bytes
+                                 : expected.size();
+        size_t matched = 0;
+        size_t mismatched = 0;
+        for (size_t i = 0; i < cmp_n; ++i) {
+            if (decoded[i] == expected[i]) ++matched; else ++mismatched;
+        }
+        if (decoded_bytes < expected.size()) {
+            mismatched += expected.size() - decoded_bytes;
+        }
+
+        // 8. Read raw edge count for diagnostics.
+        fl::vector<fl::EdgeTime> edges;
+        edges.assign(edge_capacity, fl::EdgeTime());
+        const size_t edges_captured =
+            rx_channel->getRawEdgeTimes(fl::span<fl::EdgeTime>(edges), 0);
+
+        // 9. Tear the TX channel back down so subsequent tests can use the
+        //    same pin (FastLED.clear(ClearFlags::CHANNELS) matches the
+        //    pattern used by runSingleTestImpl in this file).
+        FastLED.clear(ClearFlags::CHANNELS);
+
+        response.set("success", mismatched == 0 && decoded_bytes == expected.size());
+        response.set("test_case", static_cast<int64_t>(test_case));
+        response.set("tx_pin", static_cast<int64_t>(tx_pin));
+        response.set("rx_pin", static_cast<int64_t>(rx_pin));
+        response.set("num_leds", static_cast<int64_t>(num_leds));
+        response.set("expected_bytes", static_cast<int64_t>(expected.size()));
+        response.set("decoded_bytes", static_cast<int64_t>(decoded_bytes));
+        response.set("matched", static_cast<int64_t>(matched));
+        response.set("mismatched", static_cast<int64_t>(mismatched));
+        response.set("edges_captured", static_cast<int64_t>(edges_captured));
+        return response;
+#endif
+    });
+
     // Register "setDebug" function - enable/disable runtime debug logging
     mRemote->bind("setDebug", [this](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
@@ -1773,9 +1981,17 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         flexioRxBenchmark_fn.set("description", "Square-wave validation for the FlexIO RX backend (Teensy 4.x only, FastLED#2764 Phase 2). Drives tx_pin via analogWriteFrequency at 50%% duty, captures via RxBackend::FLEXIO on rx_pin, reports per-period statistics.");
         functions.push_back(flexioRxBenchmark_fn);
 
+        fl::json flexioObjectFledTest_fn = fl::json::object();
+        flexioObjectFledTest_fn.set("name", "flexioObjectFledTest");
+        flexioObjectFledTest_fn.set("phase", "Phase 4: Utility");
+        flexioObjectFledTest_fn.set("args", "[{test_case=0..4, tx_pin=3, rx_pin=4, capture_ms=50}] (all optional)");
+        flexioObjectFledTest_fn.set("returns", "{success, test_case, tx_pin, rx_pin, num_leds, expected_bytes, decoded_bytes, matched, mismatched, edges_captured}");
+        flexioObjectFledTest_fn.set("description", "End-to-end ObjectFLED TX -> FlexIO RX loopback verification (Teensy 4.x only, FastLED#2764 Phase 3). Drives WS2812 patterns through Bus::OBJECT_FLED, captures via RxBackend::FLEXIO, decodes the bit stream, and reports byte-level match counts. Five fixed test patterns: 0=red, 1=RGB triple, 2=all zeros, 3=all ones, 4=100-LED alternating.");
+        functions.push_back(flexioObjectFledTest_fn);
+
         fl::json response = fl::json::object();
         response.set("success", true);
-        response.set("totalFunctions", static_cast<int64_t>(26));
+        response.set("totalFunctions", static_cast<int64_t>(27));
         response.set("functions", functions);
         return response;
     });

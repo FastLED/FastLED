@@ -168,6 +168,81 @@ static const FlexIo1PinInfo *lookupFlexIo1Pin(int teensy_pin) {
 }
 
 // ---------------------------------------------------------------------------
+// WS2812 bit decoder — mirrors the FlexPWM RX driver's decode path.
+// ---------------------------------------------------------------------------
+//
+// Phase 3 of FastLED#2764 wires the same edge-pair → bit-cell decoder that
+// the existing FlexPWM RX driver uses, so the new FlexIO RX backend can be
+// used as a drop-in source for AutoResearch's TX→RX byte-verification flow.
+//
+// Kept as static helpers in this TU rather than extracting to a shared
+// header so the FlexPWM and FlexIO RX paths remain independently reviewable.
+// A follow-up refactor can consolidate into `src/fl/channels/rx/decode_ws2812.h`
+// once both backends are bench-validated against the same test matrix.
+
+static inline int decodeBitFlexIo(u32 high_ns, u32 low_ns,
+                                  const ChipsetTiming4Phase &timing) {
+    if (high_ns >= timing.t0h_min_ns && high_ns <= timing.t0h_max_ns &&
+        low_ns >= timing.t0l_min_ns && low_ns <= timing.t0l_max_ns) {
+        return 0;
+    }
+    if (high_ns >= timing.t1h_min_ns && high_ns <= timing.t1h_max_ns &&
+        low_ns >= timing.t1l_min_ns && low_ns <= timing.t1l_max_ns) {
+        return 1;
+    }
+    return -1;
+}
+
+static fl::result<u32, DecodeError>
+decodeEdgesFlexIo(const ChipsetTiming4Phase &timing,
+                  fl::span<const EdgeTime> edges, fl::span<u8> bytes_out) {
+    if (edges.size() == 0 || bytes_out.size() == 0) {
+        return fl::result<u32, DecodeError>::success(0);
+    }
+    u32 byte_index = 0;
+    u8 current_byte = 0;
+    u8 bit_count = 0;
+    u32 error_count = 0;
+    u32 total_bits = 0;
+    size_t i = 0;
+    while (i + 1 < edges.size()) {
+        // Each bit cell = (HIGH, LOW) pair. Polarity error → skip + resync.
+        if (!edges[i].high) {
+            ++i;
+            continue;
+        }
+        const u32 high_ns = edges[i].ns;
+        const u32 low_ns  = edges[i + 1].ns;
+        i += 2;
+        const int bit = decodeBitFlexIo(high_ns, low_ns, timing);
+        ++total_bits;
+        if (bit < 0) {
+            ++error_count;
+            continue;
+        }
+        current_byte = static_cast<u8>((current_byte << 1) | (u8)bit);
+        if (++bit_count == 8) {
+            if (byte_index >= bytes_out.size()) {
+                return fl::result<u32, DecodeError>::failure(
+                    DecodeError::BUFFER_OVERFLOW);
+            }
+            bytes_out[byte_index++] = current_byte;
+            current_byte = 0;
+            bit_count = 0;
+        }
+    }
+    if (bit_count > 0 && byte_index < bytes_out.size()) {
+        bytes_out[byte_index++] =
+            static_cast<u8>(current_byte << (8 - bit_count));
+    }
+    if (total_bits > 0 && (error_count * 10) > total_bits) {
+        return fl::result<u32, DecodeError>::failure(
+            DecodeError::HIGH_ERROR_RATE);
+    }
+    return fl::result<u32, DecodeError>::success(byte_index);
+}
+
+// ---------------------------------------------------------------------------
 // FlexIO1 functional clock — match the FlexIO TX driver's clock setup so the
 // timer-tick → nanosecond math stays consistent.
 // ---------------------------------------------------------------------------
@@ -443,15 +518,11 @@ void FlexIoRxChannelImpl::buildEdgeTimesFromCaptures() {
 fl::result<u32, DecodeError>
 FlexIoRxChannelImpl::decode(const ChipsetTiming4Phase &timing,
                             fl::span<u8> out) {
-    (void)timing;
-    (void)out;
-    // Phase 1B lays the capture + edge-build path. Reusing the FlexPWM
-    // shared decoder (which already handles the 4-phase timing model)
-    // is wired through the rx-channel layer in a follow-up; for now we
-    // expose the captured edges via getRawEdgeTimes() and return zero
-    // bytes-decoded so callers cleanly fall through to that path.
     buildEdgeTimesFromCaptures();
-    return fl::result<u32, DecodeError>::success(0u);
+    return decodeEdgesFlexIo(
+        timing,
+        fl::span<const EdgeTime>(mEdges),
+        out);
 }
 
 size_t FlexIoRxChannelImpl::getRawEdgeTimes(fl::span<EdgeTime> out,
