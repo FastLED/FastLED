@@ -30,171 +30,10 @@ if TYPE_CHECKING:
     from ci.compiler.argument_parser import CompilationConfig
 
 
-def handle_docker_compilation(config: CompilationConfig) -> int:
-    """
-    Handle Docker compilation workflow using the new Docker manager.
-
-    This function builds the Docker image (if needed) and runs the compilation
-    inside a Docker container with pre-cached dependencies.
-
-    Args:
-        config: Compilation configuration
-
-    Returns:
-        Exit code (0 for success, non-zero for failure)
-    """
-    import subprocess
-    from pathlib import Path
-
-    from ci.compiler.docker_manager import (
-        DockerCompilationOrchestrator,
-        DockerConfig,
-        DockerContainerManager,
-    )
-    from ci.util.docker_command import get_docker_command
-
-    # Validate arguments
-    if not config.boards:
-        print("Error: --docker requires at least a board name")
-        print("Usage: compile --docker <board> <example1> [example2 ...]")
-        return 1
-
-    board = config.boards[0]  # Use first board for Docker
-    board_name = board.board_name
-
-    # Get examples
-    examples = config.examples
-    if not examples:
-        print("Error: --docker requires at least one example")
-        print("Usage: compile --docker <board> <example1> [example2 ...]")
-        return 1
-
-    print("🐳 Docker compilation mode enabled")
-    print(f"Board: {board_name}")
-    print(f"Examples: {', '.join(examples)}")
-    print()
-
-    # Get project root
-    project_root = Path(__file__).parent.parent.absolute()
-
-    # Determine output directory for volume mounting
-    output_dir = None
-    if config.output_path:
-        output_path_str = str(config.output_path)
-        # Determine the directory to mount
-        if output_path_str.endswith((".bin", ".hex", ".elf")):
-            # Output is a file, use its parent directory
-            output_dir = Path(output_path_str).parent
-        else:
-            # Output is already a directory
-            output_dir = Path(output_path_str)
-
-    # Create Docker configuration with optional output directory
-    docker_config = DockerConfig.from_board(board_name, project_root, output_dir)
-
-    # Create container manager
-    container_mgr = DockerContainerManager(docker_config)
-
-    # Create orchestrator
-    orchestrator = DockerCompilationOrchestrator(docker_config, container_mgr)
-
-    # Ensure image exists
-    if not orchestrator.ensure_image_exists(build_if_missing=config.docker_build):
-        return 1
-
-    # Pass actual image name to container manager (may differ from config if local image exists)
-    actual_image_name = orchestrator._get_image_name()
-    if actual_image_name != docker_config.image_name:
-        container_mgr.set_image_name(actual_image_name)
-
-    # Print container management info
-    print()
-    print(f"Managing Docker container: {docker_config.container_name}")
-
-    # Build the compile command with optional flags
-    example_name = examples[0] if examples else "Blink"
-    compile_cmd = f"bash compile {board_name} {example_name}"
-    if config.defines:
-        compile_cmd += f" --defines {','.join(config.defines)}"
-    if config.merged_bin:
-        compile_cmd += " --merged-bin"
-    if config.output_path:
-        # If output directory is mounted, use the container path (/fastled/output)
-        # Otherwise, use POSIX path format for Docker/Linux compatibility
-        if docker_config.output_dir is not None:
-            # Preserve filename for file outputs (e.g., merged.bin)
-            if config.output_path.suffix:  # Has extension (.bin, .hex, etc.)
-                filename = config.output_path.name
-                compile_cmd += f" -o output/{filename}"
-            else:
-                # Directory output - use as-is
-                compile_cmd += " -o output"
-        else:
-            # Use POSIX path format (forward slashes) for Docker/Linux compatibility
-            # On Windows, backslashes in paths get interpreted as escape characters in bash
-            output_path_posix = config.output_path.as_posix()
-            compile_cmd += f" -o {output_path_posix}"
-    if config.max_failures is not None:
-        compile_cmd += f" --max-failures {config.max_failures}"
-
-    # Run compilation
-    result = orchestrator.run_compilation(compile_cmd, stream_output=True)
-
-    # Always copy build artifacts (firmware.elf, firmware.bin, firmware.map, build_info)
-    # from the container's .build/pio/{board}/ to the host, so analysis tools work.
-    if result.returncode == 0:
-        build_subdir = f".build/pio/{board_name}"
-        container_build_path = f"/fastled/{build_subdir}"
-        host_build_path = project_root / build_subdir
-        print()
-        orchestrator.copy_artifacts(container_build_path, host_build_path)
-
-    # Copy output artifacts from container to host if -o flag was used
-    # Skip if output directory is already mounted as a volume (artifacts are already on host)
-    if (
-        result.returncode == 0
-        and config.output_path
-        and docker_config.output_dir is None
-    ):
-        output_path = str(config.output_path)
-        # Determine the directory to copy
-        if output_path.endswith(".bin"):
-            # Output is a file, copy its parent directory
-            output_dir_str = str(Path(output_path).parent)
-        else:
-            # Output is already a directory
-            output_dir_str = output_path
-
-        # Copy artifacts from container to host using docker cp
-        container_path = f"/fastled/{output_dir_str}"
-        host_path = project_root / output_dir_str
-        orchestrator.copy_artifacts(container_path, host_path)
-    elif result.returncode == 0 and docker_config.output_dir is not None:
-        print()
-        print(
-            f"✅ Build artifacts available in mounted volume: {docker_config.output_dir}"
-        )
-
-    # Clean up container registration (keeps container alive for debugging)
-    print()
-    print(f"Cleaning up container registration: {docker_config.container_name}")
-    container_mgr.cleanup()
-
-    # Stop container after compilation to trigger auto-removal (--rm flag)
-    # This ensures fresh bind mounts on next run and prevents stale source issues
-    print(f"Stopping container: {docker_config.container_name}")
-    try:
-        subprocess.run(
-            [get_docker_command(), "stop", docker_config.container_name],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            timeout=30,
-        )
-    except (FileNotFoundError, subprocess.TimeoutExpired):
-        # Silently fail if Docker is not available
-        pass
-
-    return result.returncode
+# handle_docker_compilation() removed in #2812 — compilation Docker has been
+# decommissioned. The niteris/fastled-compiler-* image family that wrapped
+# `bash compile --docker` was a stop-gap against PlatformIO self-poisoning;
+# fbuild does not self-poison and has been the default backend for some time.
 
 
 def _wasm_fast_path() -> int | None:
@@ -284,11 +123,9 @@ def main() -> int:
     # Parse arguments using new CompilationArgumentParser
     from ci.compiler.argument_parser import CompilationArgumentParser, WorkflowType
 
-    # Detect if running inside Docker container
-    if os.environ.get("FASTLED_DOCKER") == "1":
-        project_root = Path("/fastled")
-    else:
-        project_root = Path(__file__).parent.parent.absolute()
+    # Compilation Docker has been decommissioned (#2812). Project root is
+    # always derived from this file's location.
+    project_root = Path(__file__).parent.parent.absolute()
     parser = CompilationArgumentParser(project_root)
 
     # First check if --supported-boards was requested before full parsing
@@ -337,8 +174,6 @@ def main() -> int:
             merged_bin=config.merged_bin,
             log_failures=config.log_failures,
             max_failures=config.max_failures,
-            docker_build=config.docker_build,
-            force_local=config.force_local,
             wasm_run=config.wasm_run,
             global_cache_dir=config.global_cache_dir,
             skip_filters=config.skip_filters,
@@ -346,54 +181,10 @@ def main() -> int:
             backend=config.backend,
         )
 
-    # Auto-detect Docker availability if neither --docker nor --local is specified
-    # and not already running inside Docker
-    # IMPORTANT: Force --local on GitHub Actions to avoid pulling Docker images
-    if (
-        config.workflow == WorkflowType.NATIVE
-        and not config.force_local
-        and not os.environ.get("FASTLED_DOCKER")
-        and config.boards
-        and len(config.boards) == 1
-    ):
-        # Check if we're on GitHub Actions - if so, force local compilation
-        from ci.compiler.formatting_utils import yellow_text
-        from ci.util.github_env import is_github_actions
-
-        if is_github_actions():
-            print(
-                yellow_text(
-                    "ℹ️  GitHub Actions detected - using --local (native compilation)"
-                )
-            )
-            print("   This avoids pulling Docker images on CI runners")
-            # Force local compilation by setting force_local=True
-            from ci.compiler.argument_parser import CompilationConfig
-
-            config = CompilationConfig(
-                boards=config.boards,
-                examples=config.examples,
-                workflow=WorkflowType.NATIVE,
-                defines=config.defines,
-                extra_packages=config.extra_packages,
-                verbose=config.verbose,
-                output_path=config.output_path,
-                merged_bin=config.merged_bin,
-                log_failures=config.log_failures,
-                max_failures=config.max_failures,
-                docker_build=config.docker_build,
-                force_local=True,  # Force local on GitHub Actions
-                wasm_run=config.wasm_run,
-                global_cache_dir=config.global_cache_dir,
-                skip_filters=config.skip_filters,
-                no_parallel=config.no_parallel,
-                backend=config.backend,
-            )
-
-    # Handle Docker compilation mode
-    # Skip if already running inside Docker (FASTLED_DOCKER env var is set)
-    if config.workflow == WorkflowType.DOCKER and not os.environ.get("FASTLED_DOCKER"):
-        return handle_docker_compilation(config)
+    # The "auto-detect Docker availability + force --local on GitHub Actions"
+    # block that lived here was removed in #2812. With compilation Docker
+    # decommissioned, native compilation is the only path — no auto-detection
+    # or CI override needed.
 
     # Handle WASM compilation by delegating to wasm_compile.py
     if config.workflow == WorkflowType.WASM:

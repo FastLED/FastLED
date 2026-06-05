@@ -1,3 +1,14 @@
+"""Generic Docker subprocess wrapper.
+
+After the compilation-Docker decommission (#2812) this module is retained
+only because the qemu emulator runner
+(`ci/docker_utils/qemu_esp32_docker.py`) delegates its `docker run` /
+`docker stop` plumbing to `DockerManager.run_container_streaming()`. The
+compile-side code that previously called in here
+(`ci/compiler/docker_manager.py`, the per-board orchestrator) was removed
+in the same PR.
+"""
+
 import os
 import subprocess
 import sys

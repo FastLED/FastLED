@@ -31,15 +31,16 @@ docker build -f docker/unit-tests/Dockerfile -t fastled-unit-tests .
 docker run --rm -v "$(pwd):/fastled" fastled-unit-tests bash -c "uv run test.py --cpp"
 ```
 
-### 2. PlatformIO Compilation (`ci/docker_utils/`)
+### 2. Emulators (`ci/docker_utils/`)
 
-Production Docker images for cross-platform compilation via PlatformIO. Used by CI and `bash compile --docker`.
+Docker images for hardware emulation:
 
-- `Dockerfile.base` - Base image with PlatformIO, UV, and dependencies
-- `Dockerfile.template` - Platform-specific image with pre-cached toolchains
-- `Dockerfile.avr8js` - AVR8JS simulator for Arduino Uno emulation
+- `Dockerfile.avr8js` — AVR8JS simulator for Arduino Uno emulation (used by `uno AVR8JS Test` workflow).
+- qemu helpers — ESP32 qemu runner for `qemu_esp32*_test.yml` workflows.
 
-See `ci/docker_utils/README.md` for detailed documentation.
+See `ci/docker_utils/README.md` for detail.
+
+> **Note**: The PlatformIO cross-compilation Docker images (`niteris/fastled-compiler-*`) that used to live here were decommissioned in #2812 — fbuild is now the default compile backend and does not have the PlatformIO self-poisoning behavior the compiler images were designed to work around.
 
 ### 3. VS Code DevContainer (`.devcontainer/`)
 
@@ -52,6 +53,6 @@ Open the project in VS Code and select "Reopen in Container" when prompted.
 | Use Case | Image |
 |----------|-------|
 | Run unit tests in clean environment | `docker/unit-tests/` |
-| Cross-compile for Arduino/ESP32/etc | `ci/docker_utils/` (via `bash compile --docker`) |
+| Run AVR8JS / ESP32 qemu emulator | `ci/docker_utils/` (driven by CI) |
 | VS Code remote development | `.devcontainer/` |
-| CI/CD workflows | `ci/docker_utils/` |
+| Cross-compile for Arduino/ESP32/etc | Native — `bash compile <board>` (no Docker; fbuild backend). |

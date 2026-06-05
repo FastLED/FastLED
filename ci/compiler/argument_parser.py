@@ -15,7 +15,6 @@ class WorkflowType(Enum):
     """Compilation workflow types."""
 
     NATIVE = "native"
-    DOCKER = "docker"
     WASM = "wasm"
 
 
@@ -44,10 +43,6 @@ class CompilationConfig:
     merged_bin: bool = False
     log_failures: Optional[Path] = None
     max_failures: Optional[int] = None
-
-    # Docker options
-    docker_build: bool = False
-    force_local: bool = False  # True when --local explicitly specified
 
     # WASM options
     wasm_run: bool = False
@@ -230,21 +225,9 @@ class CompilationArgumentParser:
         )
 
         # Workflow options
-        parser.add_argument(
-            "--docker",
-            action="store_true",
-            help="Run compilation inside Docker container with pre-cached dependencies",
-        )
-        parser.add_argument(
-            "--build",
-            action="store_true",
-            help="Build Docker image if it doesn't exist (use with --docker)",
-        )
-        parser.add_argument(
-            "--local",
-            action="store_true",
-            help="Force local/native compilation, disabling Docker even if available",
-        )
+        # --docker / --build / --local removed in #2812 (compilation-Docker
+        # decommission). Native fbuild is the only supported path; the
+        # niteris/fastled-compiler-* images are no longer maintained.
         parser.add_argument(
             "--run",
             action="store_true",
@@ -312,8 +295,8 @@ class CompilationArgumentParser:
         # Resolve boards
         boards = self._resolve_boards(args.boards)
 
-        # Determine workflow type
-        workflow = self._determine_workflow(boards, args.docker, args.local)
+        # Determine workflow type (NATIVE for everything except wasm board)
+        workflow = self._determine_workflow(boards)
 
         # Resolve examples
         examples, skip_filters = self._resolve_examples(args, args.no_filter)
@@ -350,8 +333,6 @@ class CompilationArgumentParser:
             merged_bin=args.merged_bin,
             log_failures=Path(args.log_failures) if args.log_failures else None,
             max_failures=args.max_failures if hasattr(args, "max_failures") else None,
-            docker_build=args.build,
-            force_local=args.local,
             wasm_run=args.run,
             global_cache_dir=Path(args.global_cache) if args.global_cache else None,
             skip_filters=skip_filters,
@@ -467,12 +448,10 @@ class CompilationArgumentParser:
 
         return sorted(examples)
 
-    def _determine_workflow(
-        self, boards: list[Board], docker_flag: bool, local_flag: bool
-    ) -> WorkflowType:
-        """Determine workflow type from boards and flags."""
-        if docker_flag and not local_flag:
-            return WorkflowType.DOCKER
+    def _determine_workflow(self, boards: list[Board]) -> WorkflowType:
+        """Determine workflow type from boards. WASM has its own pipeline;
+        everything else compiles natively. (DOCKER workflow removed in
+        #2812 — compilation Docker is decommissioned.)"""
         if boards and boards[0].board_name == "wasm":
             return WorkflowType.WASM
         return WorkflowType.NATIVE
