@@ -161,6 +161,28 @@ public:
     /// @return true if enabled, false if disabled or not registered
     bool isDriverEnabled(const char* name) const FL_NOEXCEPT;
 
+    /// @brief Registration status of a driver by name (silent lookup)
+    enum class DriverStatus {
+        NOT_REGISTERED,  ///< No driver with that name is registered
+        DISABLED,        ///< Driver is registered but disabled
+        ENABLED,         ///< Driver is registered and enabled
+    };
+
+    /// @brief Look up a driver's registration status without logging on miss.
+    /// @param name Driver name (case-sensitive)
+    /// @return DriverStatus tri-state (NOT_REGISTERED / DISABLED / ENABLED)
+    /// @note Companion to `findDriverByName()` — same silent-on-miss behavior.
+    ///       Used by `Channel::showPixels()` to detect the #2517 silent-drop
+    ///       case (enqueued data routed to a disabled / unregistered driver).
+    DriverStatus driverStatus(const fl::string& name) const FL_NOEXCEPT;
+
+    /// @brief Get the currently-active exclusive-driver selection (if any).
+    /// @return Driver name set via `setExclusiveDriver(...)`, or empty string
+    ///         if no exclusive mode is active.
+    /// @note Diagnostic accessor — used by the #2517 silent-drop FL_ERROR to
+    ///       name the current exclusive-driver setting in its remediation hint.
+    const fl::string& exclusiveDriverName() const FL_NOEXCEPT { return mExclusiveDriver; }
+
     /// @brief Get count of registered drivers (including unnamed ones)
     /// @return Total number of registered drivers
     fl::size getDriverCount() const FL_NOEXCEPT;

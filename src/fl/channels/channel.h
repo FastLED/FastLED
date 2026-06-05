@@ -255,6 +255,12 @@ private:
                                      // named driver wasn't registered with ChannelManager).
                                      // Subsequent shows on the same channel skip the warn even
                                      // though the priority-dispatch fallback re-runs every frame.
+    bool mDisabledDriverWarned = false;  // One-shot guard for the #2517 FL_ERROR. Flipped on the
+                                         // first showPixels() that would have enqueued data to a
+                                         // driver disabled by `setExclusiveDriver(...)` (or
+                                         // `setDriverEnabled(name, false)`). Cleared whenever the
+                                         // resolved driver returns to ENABLED so a subsequent
+                                         // disable re-emits the diagnostic.
     const i32 mId;
     fl::string mName;               // User-specified or auto-generated name
     ChannelOptions mSettings;           // Per-channel settings (gamma, rgbw, etc.)

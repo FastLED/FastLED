@@ -500,6 +500,48 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
 
 
 
+    // #2517: detect the silent-drop scenario before enqueuing — if the
+    // resolved driver is registered with ChannelManager but currently
+    // disabled (typically by `FastLED.setExclusiveDriver<OtherBus>()`),
+    // `ChannelManager::onEndFrame()` will skip its `show()` call and the
+    // frame is silently dropped on the floor. Emit an actionable
+    // FL_ERROR so users can diagnose the missing output.
+    //
+    // One-shot via `mDisabledDriverWarned` to avoid per-frame spam.
+    // Reset the latch whenever the driver returns to ENABLED so a later
+    // disable re-emits the diagnostic.
+    fl::string driverName = driver->getName();
+    auto status = ChannelManager::instance().driverStatus(driverName);
+    if (status == ChannelManager::DriverStatus::DISABLED) {
+        if (!mDisabledDriverWarned) {
+            const fl::string& exclusive =
+                ChannelManager::instance().exclusiveDriverName();
+            if (!exclusive.empty()) {
+                FL_ERROR("Channel '" << mName << "': bound driver '" << driverName
+                    << "' is currently DISABLED by exclusive-driver selection '"
+                    << exclusive << "'. Frame will be silently dropped. "
+                    << "Resolve with: FastLED.enableDrivers<fl::Bus::"
+                    << driverName << ">() or FastLED.enableAllDrivers().");
+            } else {
+                FL_ERROR("Channel '" << mName << "': bound driver '" << driverName
+                    << "' is currently DISABLED. Frame will be silently dropped. "
+                    << "Resolve with: FastLED.enableDrivers<fl::Bus::"
+                    << driverName << ">() or FastLED.enableAllDrivers().");
+            }
+            mDisabledDriverWarned = true;
+        }
+        // Skip the enqueue — the data wouldn't be sent anyway, and dropping
+        // it here matches the existing behaviour (rather than leaving stale
+        // bytes in the driver's pending queue across an enable/disable flip).
+        return;
+    } else if (status == ChannelManager::DriverStatus::ENABLED) {
+        // Reset the one-shot guard so a future disable re-emits the diagnostic.
+        mDisabledDriverWarned = false;
+    }
+    // NOT_REGISTERED: driver is not managed by ChannelManager (e.g. a custom
+    // test driver, or one that was removed). Fall through to enqueue and let
+    // the driver decide what to do — this is the historic behaviour.
+
     // Enqueue for transmission (will be sent when driver->show() is called)
     driver->enqueue(mChannelData);
     auto& events = ChannelEvents::instance();

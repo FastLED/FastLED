@@ -259,6 +259,19 @@ bool ChannelManager::isDriverEnabled(const char* name) const {
     return false;
 }
 
+ChannelManager::DriverStatus ChannelManager::driverStatus(const fl::string& name) const {
+    if (name.empty()) {
+        return DriverStatus::NOT_REGISTERED;
+    }
+    for (const auto& entry : mDrivers) {
+        if (entry.name == name) {
+            return entry.enabled ? DriverStatus::ENABLED
+                                  : DriverStatus::DISABLED;
+        }
+    }
+    return DriverStatus::NOT_REGISTERED;
+}
+
 fl::size ChannelManager::getDriverCount() const {
     return mDrivers.size();
 }
