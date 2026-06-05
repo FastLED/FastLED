@@ -1,0 +1,43 @@
+# Standardized per-platform smoke sketches (refs #2411, Part A)
+#
+# This file is the canonical list of sketches that EVERY supported board must
+# compile in CI. The set is intentionally small and representative — one sketch
+# per "category" of FastLED feature surface, chosen to catch the most common
+# regression classes across all backends (fbuild, PlatformIO, arduino-cli):
+#
+#   Blink             — basic clockless one-pixel sanity (no APIs beyond
+#                       FastLED.addLeds + .show()). If this fails, the toolchain
+#                       can't link the simplest FastLED program.
+#
+#   XYMatrix          — 2D matrix wiring + XY helper. Exercises XYMap, the
+#                       most common 2D abstraction.
+#
+#   Apa102            — clocked SPI chipset + 8-bit gamma/palette code. Picked
+#                       over Apa102HD because Apa102 has the smaller exclusion
+#                       set (only stm32f103cb is filtered out) and matches the
+#                       "PROGMEM gradient/palette tables" intent in #2411.
+#
+#   AudioFftParity    — exercises FFT / sin LUT paths. ESP32-only by its own
+#                       @filter directive (esp_dsp.h availability — see #2623);
+#                       on non-ESP32 boards the existing sketch_filter machinery
+#                       will skip it cleanly. The slot is reserved here so when
+#                       a cross-platform FFT-parity sketch lands later it can
+#                       replace this entry without churning every CI consumer.
+#
+# Format: one example name per line. Lines starting with '#' and blank lines
+# are ignored. Each name resolves to examples/<name>/. Per-board skipping is
+# governed by the @filter directives inside each .ino — this manifest stays
+# platform-agnostic on purpose.
+#
+# Per-board *overrides* (additional or replacement smoke sketches) continue to
+# live under tests/platforms/<board>/ as today.
+#
+# Consumed by: ci/standardized_smoke_sketches.py
+#
+# Part B (opt-in PlatformIO comparison job in build_template.yml) is deferred
+# to a follow-up PR; this manifest is the prerequisite that unblocks it.
+
+Blink
+XYMatrix
+Apa102
+AudioFftParity
