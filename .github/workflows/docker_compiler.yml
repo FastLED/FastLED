@@ -11,9 +11,13 @@ on:
         description: 'Trigger template workflow after base build'
         type: boolean
         default: true
-  schedule:
-    # Base image: once daily at 23:00 UTC (1 hour before smart build at 00:00)
-    - cron: '0 23 * * *'
+  # schedule: disabled per #2812 — the niteris/fastled-compiler-* images
+  # are being decommissioned (fbuild is now the default backend; the PIO
+  # self-poisoning that justified the Docker stop-gap is no longer a
+  # concern). `workflow_dispatch` retained so admin can rebuild on demand
+  # during the transition. Original cron preserved for reference:
+  # schedule:
+  #   - cron: '0 23 * * *'  # daily 23:00 UTC, base image
 
 env:
   BASE_IMAGE: niteris/fastled-compiler-base

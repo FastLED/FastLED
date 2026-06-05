@@ -1,9 +1,10 @@
 name: Docker Compiler Smart Build
 
 on:
-  schedule:
-    # Run every 24 hours at 00:00 UTC
-    - cron: '0 0 * * *'
+  # schedule: disabled per #2812 — niteris/fastled-compiler-* images being
+  # decommissioned. `workflow_dispatch` retained for manual rebuild.
+  # schedule:
+  #   - cron: '0 0 * * *'  # daily 00:00 UTC, smart incremental
   workflow_dispatch:
     inputs:
       limit:

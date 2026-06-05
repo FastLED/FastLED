@@ -2,9 +2,10 @@ name: Docker Compiler - RP2040
 
 on:
   workflow_dispatch:
-  schedule:
-    # Run every Saturday at 00:00 UTC
-    - cron: '0 0 * * 6'
+  # schedule: disabled per #2812 — niteris/fastled-compiler-* images being
+  # decommissioned. `workflow_dispatch` retained for manual rebuild.
+  # schedule:
+  #   - cron: '0 0 * * 6'  # weekly Saturday 00:00 UTC
 
 env:
   BASE_IMAGE: niteris/fastled-compiler-base
