@@ -88,8 +88,15 @@ static inline int add_spi_quad_pio_program(PIO pio) {
         .length = sizeof(spi_quad_pio_instr) / sizeof(spi_quad_pio_instr[0]),
         .origin = -1,
 #if defined(PICO_SDK_VERSION_MAJOR) && PICO_SDK_VERSION_MAJOR >= 2
+        // See pio_gen.h for the full rationale on these two fields.
+        // `pio_version` is unconditionally present in 2.x (gate on SDK
+        // version). `used_gpio_ranges` is per-chip, only present when
+        // PICO_PIO_VERSION > 0 — RP2040 has PICO_PIO_VERSION == 0, so
+        // the field is genuinely absent there even under the 2.x SDK.
         .pio_version = 0,
+    #if defined(PICO_PIO_VERSION) && PICO_PIO_VERSION > 0
         .used_gpio_ranges = 0,
+    #endif
 #endif
     };
 
