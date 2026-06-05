@@ -22,6 +22,7 @@ class LintArgs:
     run_tidy: bool = False
     use_rust_cpp_lint: bool = False
     iwyu_fix: bool = False
+    skip_platformio_check: bool = False
     files: list[str] = field(default_factory=lambda: list[str]())
 
 
@@ -122,6 +123,12 @@ Examples:
     )
 
     parser.add_argument(
+        "--skip-platformio-check",
+        action="store_true",
+        help="Skip the PlatformIO-internal-usage checker (issue #2701, warn-only).",
+    )
+
+    parser.add_argument(
         "files",
         nargs="*",
         default=[],
@@ -151,5 +158,6 @@ Examples:
         run_tidy=args.tidy,
         use_rust_cpp_lint=args.rust,
         iwyu_fix=args.fix,
+        skip_platformio_check=args.skip_platformio_check,
         files=files,
     )
