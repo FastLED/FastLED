@@ -30,6 +30,8 @@ import time
 from dataclasses import dataclass
 from typing import Any
 
+from typeguard import typechecked
+
 
 # `pyserial` is checked at `main()` entry, not at import — see the matching
 # rationale in test_flexio_rx_squarewave.py.
@@ -43,11 +45,23 @@ DEFAULT_PORT = "COM20"
 DEFAULT_BAUD = 115200
 
 
+@typechecked
 @dataclass
 class TestCase:
     index: int
     label: str
     expected_bytes: int
+
+
+@typechecked
+@dataclass
+class EvaluationResult:
+    """Per-case result returned from `evaluate()`. Replaces the older
+    `(bool, str)` tuple with a typed struct so downstream code can introspect
+    individual fields without positional-index brittleness."""
+
+    ok: bool
+    message: str
 
 
 CASES: list[TestCase] = [
@@ -95,23 +109,33 @@ def send_rpc(
     return None
 
 
-def evaluate(case: TestCase, result: dict[str, Any]) -> tuple[bool, str]:
+@typechecked
+def evaluate(case: TestCase, result: dict[str, Any]) -> EvaluationResult:
     expected = result.get("expected_bytes", 0)
     decoded = result.get("decoded_bytes", 0)
     matched = result.get("matched", 0)
     mismatched = result.get("mismatched", 0)
     edges = result.get("edges_captured", 0)
     if expected != case.expected_bytes:
-        return False, (
-            f"firmware reported expected_bytes={expected} but test case expects "
-            f"{case.expected_bytes}"
+        return EvaluationResult(
+            ok=False,
+            message=(
+                f"firmware reported expected_bytes={expected} but test case "
+                f"expects {case.expected_bytes}"
+            ),
         )
     if mismatched != 0 or decoded != expected:
-        return False, (
-            f"byte mismatch: decoded={decoded}/{expected}, matched={matched}, "
-            f"mismatched={mismatched}, edges={edges}"
+        return EvaluationResult(
+            ok=False,
+            message=(
+                f"byte mismatch: decoded={decoded}/{expected}, "
+                f"matched={matched}, mismatched={mismatched}, edges={edges}"
+            ),
         )
-    return True, (f"decoded={decoded}/{expected} all matched, edges={edges}")
+    return EvaluationResult(
+        ok=True,
+        message=f"decoded={decoded}/{expected} all matched, edges={edges}",
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -194,12 +218,12 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"  FAIL: firmware reported error: {result}")
                 fails += 1
                 continue
-            ok, msg = evaluate(case, result)
-            if ok:
-                print(f"  PASS: {msg}")
+            eval_result = evaluate(case, result)
+            if eval_result.ok:
+                print(f"  PASS: {eval_result.message}")
                 passes += 1
             else:
-                print(f"  FAIL: {msg}")
+                print(f"  FAIL: {eval_result.message}")
                 print(f"        raw result: {result}")
                 fails += 1
 
