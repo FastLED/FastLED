@@ -13,6 +13,7 @@
 
 #include "fl/stl/asio/ip/tcp.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/stdio.h"  // fl::snprintf — avoids _svfprintf_r (#2773 item 1.1)
 
 // Ensure MSG_NOSIGNAL is available (not defined on Windows/macOS)
 #ifndef MSG_NOSIGNAL
@@ -192,7 +193,7 @@ error_code socket::connect(const endpoint &ep) {
     hints.ai_protocol = IPPROTO_TCP;
 
     char portStr[16];
-    snprintf(portStr, sizeof(portStr), "%u", ep.port);
+    fl::snprintf(portStr, sizeof(portStr), "%u", ep.port);
 
     int ret = getaddrinfo(ep.host.c_str(), portStr, &hints, &result);
     if (ret != 0 || result == nullptr) {

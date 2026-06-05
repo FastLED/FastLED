@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/net/http/chunked_encoding.h"
+#include "fl/stl/stdio.h"  // fl::snprintf — avoids _svfprintf_r (#2773 item 1.1)
 #include "fl/stl/string.h"
 // Note: fl/stl/cstdio.h intentionally NOT included — workaround for
 // zackees/zccache#619 (Windows PCH path-spelling drift). Dead include.
@@ -178,14 +179,14 @@ size_t ChunkedWriter::chunkOverhead(size_t dataLen) {
     // Overhead: hex-digits + "\r\n" + data + "\r\n"
     // Count hex digits needed
     char sizeHex[32];
-    int hexLen = snprintf(sizeHex, sizeof(sizeHex), "%zx", dataLen);
+    int hexLen = fl::snprintf(sizeHex, sizeof(sizeHex), "%zx", dataLen);
     return static_cast<size_t>(hexLen) + 2 + dataLen + 2; // hex + \r\n + data + \r\n
 }
 
 size_t ChunkedWriter::writeChunk(fl::span<const u8> data, fl::span<u8> out) {
     // Format: <size-hex>\r\n<data>\r\n
     char sizeHex[32];
-    int hexLen = snprintf(sizeHex, sizeof(sizeHex), "%zx\r\n", data.size());
+    int hexLen = fl::snprintf(sizeHex, sizeof(sizeHex), "%zx\r\n", data.size());
     size_t totalNeeded = static_cast<size_t>(hexLen) + data.size() + 2;
     if (out.size() < totalNeeded) {
         return 0;

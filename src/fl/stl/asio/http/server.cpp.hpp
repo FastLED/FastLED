@@ -4,6 +4,7 @@
 #pragma once
 
 #include "fl/stl/asio/http/server.h"
+#include "fl/stl/stdio.h"  // fl::snprintf — avoids _svfprintf_r (#2773 item 1.1)
 #include "fl/task/executor.h"
 #include "platforms/esp/is_esp.h"  // ok platform headers - for FL_IS_ESP32  // IWYU pragma: keep
 
@@ -719,7 +720,7 @@ int Server::handle_esp_request(void* raw_req) {
     // Send response using Response::to_string() which serializes to HTTP format
     // Use esp_http_server APIs to send the response parts
     char status_str[32];
-    snprintf(status_str, sizeof(status_str), "%d", resp.mStatusCode);
+    fl::snprintf(status_str, sizeof(status_str), "%d", resp.mStatusCode);
     httpd_resp_set_status(req, status_str);
 
     for (auto it = resp.mHeaders.begin(); it != resp.mHeaders.end(); ++it) {
