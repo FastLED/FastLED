@@ -37,6 +37,7 @@ from ci.lint_cpp.check_using_namespace import UsingNamespaceChecker
 from ci.lint_cpp.cpp_hpp_header_pair_checker import CppHppHeaderPairChecker
 from ci.lint_cpp.cpp_hpp_includes_checker import CppHppIncludesChecker
 from ci.lint_cpp.cpp_include_checker import CppIncludeChecker
+from ci.lint_cpp.cstdio_printf_checker import CstdioPrintfChecker
 from ci.lint_cpp.ctype_global_checker import CtypeGlobalChecker
 from ci.lint_cpp.enum_class_checker import EnumClassChecker
 from ci.lint_cpp.esp_rom_printf_checker import EspRomPrintfChecker
@@ -218,6 +219,7 @@ def create_checkers(
         FastLEDHeaderUsageChecker(),
         StdintTypeChecker(),  # Covers all src/ (excludes third_party/ internally)
         CtypeGlobalChecker(),  # Checks for global-scope ctype functions (use fl:: variants)
+        CstdioPrintfChecker(),  # Checks for raw C printf-family — use fl::snprintf / fl::printf (#2773 item 1.5)
         SimdIntrinsicsChecker(),  # Checks for direct platform SIMD intrinsics — use fl::simd
         PragmaOnceChecker(),  # Checks headers have #pragma once, .cpp files don't
     ]
