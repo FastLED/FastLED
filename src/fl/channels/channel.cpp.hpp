@@ -333,6 +333,50 @@ void writeUCS7604(fl::vector_psram<u8>* data, PixelIterator& pixelIterator,
                   mode, wire_current, is_rgbw, gamma8.get());
 }
 
+// Out-of-line cold-path diagnostic emitters for Channel::showPixels (#2773).
+// Each multi-line `FL_ERROR(... << ... << ...)` chain in showPixels was
+// inlining ~10 `operator<<` instantiations into the hot path, all behind
+// one-shot guards (`mBusWarned`, `mDisabledDriverWarned`) that fire at
+// most once per channel lifetime. Marking the helpers `noinline` keeps
+// the operator-chain code out of showPixels' prologue/epilogue while
+// preserving the exact diagnostic output. Symbol-level data: showPixels
+// was 4243 B before the split.
+__attribute__((noinline)) static void emitTypedBusNotInstantiatedError(
+    const fl::string& name, const fl::string& busKey) FL_NOEXCEPT {
+    FL_ERROR("Channel '" << name << "': Driver '" << busKey
+        << "' wasn't instantiated. Resolve with: "
+        << "(1) fl::enableDrivers<fl::Bus::" << busKey << ">() "
+        << "(links only this driver), "
+        << "(2) FastLED.enableAllDrivers() (links every driver), or "
+        << "(3) FastLED.addLeds<..., fl::Bus::" << busKey << ">(...) "
+        << "(legacy API; pins Bus + triggers linker keep-alive). "
+        << "Defaulting to AUTO/priority dispatch.");
+}
+
+__attribute__((noinline)) static void emitTypedBusChipsetMismatchError(
+    const fl::string& name, const fl::string& busKey) FL_NOEXCEPT {
+    FL_ERROR("Channel '" << name << "': Driver '" << busKey
+        << "' is registered but cannot handle this channel's chipset "
+        << "(bus/chipset mismatch). Defaulting to AUTO/priority dispatch.");
+}
+
+__attribute__((noinline)) static void emitDisabledDriverError(
+    const fl::string& name, const fl::string& driverName,
+    const fl::string& exclusive) FL_NOEXCEPT {
+    if (!exclusive.empty()) {
+        FL_ERROR("Channel '" << name << "': bound driver '" << driverName
+            << "' is currently DISABLED by exclusive-driver selection '"
+            << exclusive << "'. Frame will be silently dropped. "
+            << "Resolve with: FastLED.enableDrivers<fl::Bus::"
+            << driverName << ">() or FastLED.enableAllDrivers().");
+    } else {
+        FL_ERROR("Channel '" << name << "': bound driver '" << driverName
+            << "' is currently DISABLED. Frame will be silently dropped. "
+            << "Resolve with: FastLED.enableDrivers<fl::Bus::"
+            << driverName << ">() or FastLED.enableAllDrivers().");
+    }
+}
+
 } // anonymous namespace
 
 void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
@@ -385,19 +429,10 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
         if (!busDriver) {
             // Typed Bus miss — emit the actionable hint with the three
             // currently-shipping remediations (option 3 added in #2460).
-            FL_ERROR("Channel '" << mName << "': Driver '" << busKey
-                << "' wasn't instantiated. Resolve with: "
-                << "(1) fl::enableDrivers<fl::Bus::" << busKey << ">() "
-                << "(links only this driver), "
-                << "(2) FastLED.enableAllDrivers() (links every driver), or "
-                << "(3) FastLED.addLeds<..., fl::Bus::" << busKey << ">(...) "
-                << "(legacy API; pins Bus + triggers linker keep-alive). "
-                << "Defaulting to AUTO/priority dispatch.");
+            emitTypedBusNotInstantiatedError(mName, busKey);
         } else {
             // Registered, but canHandle() said no — bus/chipset mismatch.
-            FL_ERROR("Channel '" << mName << "': Driver '" << busKey
-                << "' is registered but cannot handle this channel's chipset "
-                << "(bus/chipset mismatch). Defaulting to AUTO/priority dispatch.");
+            emitTypedBusChipsetMismatchError(mName, busKey);
         }
         mBusWarned = true;
     }
@@ -514,20 +549,9 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     auto status = ChannelManager::instance().driverStatus(driverName);
     if (status == ChannelManager::DriverStatus::STATUS_DISABLED) {
         if (!mDisabledDriverWarned) {
-            const fl::string& exclusive =
-                ChannelManager::instance().exclusiveDriverName();
-            if (!exclusive.empty()) {
-                FL_ERROR("Channel '" << mName << "': bound driver '" << driverName
-                    << "' is currently DISABLED by exclusive-driver selection '"
-                    << exclusive << "'. Frame will be silently dropped. "
-                    << "Resolve with: FastLED.enableDrivers<fl::Bus::"
-                    << driverName << ">() or FastLED.enableAllDrivers().");
-            } else {
-                FL_ERROR("Channel '" << mName << "': bound driver '" << driverName
-                    << "' is currently DISABLED. Frame will be silently dropped. "
-                    << "Resolve with: FastLED.enableDrivers<fl::Bus::"
-                    << driverName << ">() or FastLED.enableAllDrivers().");
-            }
+            emitDisabledDriverError(
+                mName, driverName,
+                ChannelManager::instance().exclusiveDriverName());
             mDisabledDriverWarned = true;
         }
         // Skip the enqueue — the data wouldn't be sent anyway, and dropping

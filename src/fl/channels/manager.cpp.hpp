@@ -107,7 +107,12 @@ void ChannelManager::addDriver(int priority, fl::shared_ptr<IChannelDriver> driv
 
     mDrivers.push_back({priority, driver, engineName, enabled});
 
-    // Build capability string for debug output
+    // Build capability string for debug output. Gate the entire block
+    // behind FASTLED_HAS_DBG because the capStr exists ONLY for the
+    // FL_DBG below — on release builds (FASTLED_HAS_DBG=0) it was dead
+    // code that still built `fl::string` and ran two branches. (#2773
+    // memory-hunt iter 3.)
+#if FASTLED_HAS_DBG
     IChannelDriver::Capabilities caps = driver->getCapabilities();
     fl::string capStr;
     if (caps.supportsClockless) {
@@ -122,6 +127,7 @@ void ChannelManager::addDriver(int priority, fl::shared_ptr<IChannelDriver> driv
     }
 
     FL_DBG("ChannelManager: Added driver '" << engineName.c_str() << "' (priority " << priority << ", caps: " << capStr.c_str() << ")");
+#endif
 
     // Sort drivers by priority descending (higher values first) after each insertion
     // Higher priority values = higher precedence (e.g., priority 50 selected over priority 10)
