@@ -118,9 +118,23 @@ SoundState SoundOrchestrator::classify(fl::u32 nowMs) {
     const float tempoConf = mProcessor->getTempoConfidence();
     const float beatConf  = mProcessor->getBeatConfidence();
 
+    // Silence-exit gate: when we're currently in Silence, require the
+    // configured silenceExitMs of *contiguous* non-silent audio before we
+    // even consider leaving. Without this, mNonSilentSinceMs would be
+    // tracked but never consulted, so a single non-silent frame would
+    // immediately bounce us out -- defeating the asymmetric silence
+    // hysteresis documented on OrchestratorConfig.
+    const bool silenceReleased =
+        !isSilent &&
+        mNonSilentSinceMs != 0 &&
+        (nowMs - mNonSilentSinceMs) >= mCfg.silenceExitMs;
+
     // --- determine the candidate (instantaneous) state ---
     SoundState instant;
     if (isSilent && mSilentSinceMs && (nowMs - mSilentSinceMs) >= mCfg.silenceEnterMs) {
+        instant = SoundState::Silence;
+    } else if (mState == SoundState::Silence && !silenceReleased) {
+        // Hold Silence until the non-silent run reaches silenceExitMs.
         instant = SoundState::Silence;
     } else if (!isSilent &&
                tempoConf >= mCfg.tempoConfidenceEnter &&

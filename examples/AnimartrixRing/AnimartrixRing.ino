@@ -117,14 +117,20 @@ void setup() {
     fxEngine.addFx(fx2dTo1d);
 
     // Route audio through FastLED.add() for auto-pump when available.
+    // gAutoPump may only be set true when FastLED.add() actually returned a
+    // live processor -- otherwise loop() would skip the manual pump path and
+    // the orchestrator would never see any samples.
     auto input = audio.audioInput();
     if (input) {
         gAudioProcessor = FastLED.add(input);
-        gAutoPump = true;
-        printf("AnimartrixRing: Audio routed via FastLED.add() (auto-pump)\n");
+        if (gAudioProcessor) {
+            gAutoPump = true;
+            printf("AnimartrixRing: Audio routed via FastLED.add() (auto-pump)\n");
+        }
     }
     if (!gAudioProcessor) {
         gAudioProcessor = fl::make_shared<fl::audio::Processor>();
+        gAutoPump = false;
         printf("AnimartrixRing: Audio using manual pump (fallback)\n");
     }
 
