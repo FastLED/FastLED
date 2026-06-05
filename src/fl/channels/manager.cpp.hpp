@@ -107,7 +107,14 @@ void ChannelManager::addDriver(int priority, fl::shared_ptr<IChannelDriver> driv
 
     mDrivers.push_back({priority, driver, engineName, enabled});
 
-    // Build capability string for debug output
+    // Build capability string for debug output. Gate the entire block behind
+    // FASTLED_HAS_DBG because the `capStr` exists ONLY to feed the FL_DBG
+    // line below. On release builds (FASTLED_HAS_DBG=0 — i.e. the default
+    // SKETCH_HAS_LARGE_MEMORY=0 path AND any -DFASTLED_LOG_VERBOSITY=0
+    // opt-in build via the gating in fl/log/log.h) the FL_DBG itself is a
+    // no-op, but without this guard the `fl::string capStr` allocation +
+    // two `if` branches still emitted code. See #2773 item 2.3 follow-up.
+#if FASTLED_HAS_DBG
     IChannelDriver::Capabilities caps = driver->getCapabilities();
     fl::string capStr;
     if (caps.supportsClockless) {
@@ -122,6 +129,7 @@ void ChannelManager::addDriver(int priority, fl::shared_ptr<IChannelDriver> driv
     }
 
     FL_DBG("ChannelManager: Added driver '" << engineName.c_str() << "' (priority " << priority << ", caps: " << capStr.c_str() << ")");
+#endif
 
     // Sort drivers by priority descending (higher values first) after each insertion
     // Higher priority values = higher precedence (e.g., priority 50 selected over priority 10)
