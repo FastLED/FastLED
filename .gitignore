@@ -114,6 +114,16 @@ src/platforms/wasm/compiler/node_modules/
 .claude/settings.local.json
 .claude/worktrees/
 .claude/scheduled_tasks.lock
+
+# Claude Code per-session scratch (PR review fetches, CI logs, issue drafts)
+.claude/cr-*.json
+.claude/pr*-*.json
+.claude/pr*_*.json
+.claude/issue_*.md
+.claude/*.log
+
+# Misc agent/tool transient stdout/stderr captures
+.tmp_*.txt
 ci/lint_cpp_rs/target/
 
 # AutoResearch transient logs
