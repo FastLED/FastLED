@@ -91,9 +91,14 @@ namespace {
 // FLEXIO1 base + register layout
 // ---------------------------------------------------------------------------
 //
-// From the iMXRT1062 reference manual chapter 50 (FlexIO):
+// From the iMXRT1062 reference manual chapter 50 (FlexIO) + cross-checked
+// against the Teensy core's `imxrt.h` `FLEXIO1_*` macros (which expand to
+// `IMXRT_FLEXIO1.offsetNNN`):
+//
 //   FLEXIO1 base = 0x401AC000
-//   CTRL       @ +0x000
+//   VERID      @ +0x000   (Version ID, read-only — NOT CTRL!)
+//   PARAM      @ +0x004   (Parameter, read-only)
+//   CTRL       @ +0x008   (Control register — module enable + SW reset bit)
 //   SHIFTSTAT  @ +0x010   (status flags)
 //   SHIFTERR   @ +0x014   (error flags)
 //   TIMSTAT    @ +0x018   (timer status)
@@ -104,10 +109,18 @@ namespace {
 //   TIMCTL[N]     @ +0x400 + 4*N   (timer control)
 //   TIMCFG[N]     @ +0x480 + 4*N   (timer config)
 //   TIMCMP[N]     @ +0x500 + 4*N   (timer compare)
+//
+// **#2772 root cause:** the original Phase 1B code put CTRL at +0x000.
+// Writes to FLEXIO1 +0x000 (VERID) on iMXRT1062 with the FLEXIO1 clock
+// gated on are silently ignored — but the subsequent **read** of +0x000
+// the spin loop performed to check the SW-reset bit produced an
+// imprecise data-bus error (IMPRECISERR, CFSR=0x400) → LOCKUP HardFault
+// → SYSRESETREQ. Cross-checked against `xtensa-esp32s3-elf-nm`-style
+// disassembly of `firmware.elf` (`addr2line 0x2D166` → `FlexIoRxChannelImpl::begin`).
 
 static constexpr u32 kFLEXIO1_BASE = 0x401AC000u;
 
-static volatile u32 &FLEXIO1_CTRL      = *(volatile u32 *)(kFLEXIO1_BASE + 0x000);
+static volatile u32 &FLEXIO1_CTRL      = *(volatile u32 *)(kFLEXIO1_BASE + 0x008);
 static volatile u32 &FLEXIO1_SHIFTSTAT = *(volatile u32 *)(kFLEXIO1_BASE + 0x010);
 static volatile u32 &FLEXIO1_SHIFTERR  = *(volatile u32 *)(kFLEXIO1_BASE + 0x014);
 static volatile u32 &FLEXIO1_TIMSTAT   = *(volatile u32 *)(kFLEXIO1_BASE + 0x018);
@@ -243,34 +256,49 @@ decodeEdgesFlexIo(const ChipsetTiming4Phase &timing,
 }
 
 // ---------------------------------------------------------------------------
-// FlexIO1 functional clock — match the FlexIO TX driver's clock setup so the
-// timer-tick → nanosecond math stays consistent.
+// FlexIO1 functional clock
 // ---------------------------------------------------------------------------
 //
-// CCM_CCGR5 owns the FLEXIO1 clock gate (NOT CCGR3, which owns FLEXIO2). On
-// the iMXRT1062, the FLEXIO1 source clock comes from PLL3_PFD3 (480 MHz)
-// divided by PRED + PODF. The FlexIO TX driver picks PRED=1, PODF=1 →
-// ~120 MHz. We re-apply the same divider to FLEXIO1 so that
-//   kFlexIo1ClkMHz = 120
-// gives a single ns-per-tick conversion factor everywhere in this file.
+// CCM_CCGR5 owns the FLEXIO1 clock gate (NOT CCGR3, which owns FLEXIO2).
+//
+// **Source-clock choice**: we deliberately pick OSC (24 MHz, always-on) via
+// CCM_CDCDR_FLEXIO1_CLK_SEL(1) rather than PLL3_PFD3. Teensy 4's `startup.c`
+// programs the four PLL3 PFDs but leaves their CLKGATE bits **set** (line
+// 139–141: `CCM_ANALOG_PFD_480_SET = 0x80808080`). PFD3 is gated off post-
+// boot. If FLEXIO1 selects a gated PFD as its source, the first write to
+// any FLEXIO1 register hits an imprecise data-bus error → HardFault →
+// LOCKUP reset. Confirmed against the dev-bench Teensy 4.0 in #2772.
+//
+// Cost of using OSC: ~41.7 ns/tick resolution instead of ~8.3 ns. Plenty
+// for WS2812 inter-edge timing (worst-case T0H ~350 ns) and for the bench
+// matrix (1 / 10 / 100 kHz square waves whose half-period is ≥5 µs).
 
-static constexpr u32 kFlexIo1ClkMHz = 120u;
+static constexpr u32 kFlexIo1ClkMHz = 24u;
 
 static void flexio1_clock_init() {
-    // Gate FLEXIO1 clock on (CCGR5 bits [29:28])
+    // Gate FLEXIO1 clock on (CCGR5 bits [3:2])
     CCM_CCGR5 |= CCM_CCGR5_FLEXIO1(CCM_CCGR_ON);
 
     // FLEXIO1 divider lives in CCM_CDCDR (NOT CS1CDR which is FLEXIO2).
-    // Bits [15:12] = FLEXIO1_CLK_PRED, [10:8] = FLEXIO1_CLK_PODF,
-    // [8:7] = FLEXIO1_CLK_SEL.
+    // Bits [15:12] = FLEXIO1_CLK_PRED, [11:9] = FLEXIO1_CLK_PODF,
+    // [8:7]   = FLEXIO1_CLK_SEL.
     u32 cdcdr = CCM_CDCDR;
     cdcdr &= ~(CCM_CDCDR_FLEXIO1_CLK_PRED(7) |
                CCM_CDCDR_FLEXIO1_CLK_PODF(7) |
                CCM_CDCDR_FLEXIO1_CLK_SEL(3));
-    cdcdr |= CCM_CDCDR_FLEXIO1_CLK_PRED(1) |
-             CCM_CDCDR_FLEXIO1_CLK_PODF(1) |
-             CCM_CDCDR_FLEXIO1_CLK_SEL(3); // PLL3_PFD3
+    cdcdr |= CCM_CDCDR_FLEXIO1_CLK_PRED(0) |  // /1
+             CCM_CDCDR_FLEXIO1_CLK_PODF(0) |  // /1 → 24 MHz functional clock
+             CCM_CDCDR_FLEXIO1_CLK_SEL(1);    // 24 MHz OSC (always-on; see
+                                              // header comment + #2772)
     CCM_CDCDR = cdcdr;
+
+    // Memory barrier so the CCM writes have actually committed before any
+    // downstream code touches FLEXIO1_CTRL. Without this, the very next
+    // read/write of FLEXIO1_CTRL on a fresh-from-reset chip can hit the
+    // module while its clock is still gated off — observed on the dev-bench
+    // Teensy 4.0 as an infinite spin on the software-reset wait (#2772).
+    __asm__ volatile("dsb 0xF" ::: "memory");
+    __asm__ volatile("isb 0xF" ::: "memory");
 }
 
 // IOMUXC pad: ALT4 + hysteresis + 100 kΩ pull-up keeper (matches FlexIO TX
@@ -309,10 +337,36 @@ static void flexio1_pin_init(const FlexIo1PinInfo &pin_info) {
 //   PINPOL    = 0       active high
 //   INSRC     = 0       shift-in from pin (not chained from neighbor)
 
-static void flexio1_configure(u8 flexio_pin) {
-    // Software reset
+/// @brief Configure FLEXIO1 for edge-timing capture on the given pin.
+/// @return true on success; false if the software-reset hardware spin
+///         never cleared within the bounded budget (typically means the
+///         FLEXIO1 clock gate isn't actually on — see #2772). Caller MUST
+///         treat false as a hard error and not enable downstream DMA.
+static bool flexio1_configure(u8 flexio_pin) {
+    // Software reset. The hardware self-clears the bit once the reset has
+    // taken effect, BUT only if FLEXIO1 is actually clocked. If the CCM
+    // clock-gate write hasn't yet committed (or selected an unsupported
+    // source), the bit stays high forever and the CPU spins until WDOG3
+    // fires (15 s on the dev-bench Teensy 4.0 — #2772).
+    //
+    // Bound the spin so the failure mode is "RPC reports error" instead
+    // of "device hard-resets and re-enumerates USB CDC". 1,000,000
+    // iterations at ~600 MHz Cortex-M7 is well under 10 ms — way longer
+    // than the documented reset window (a handful of bus cycles) but well
+    // under the WDOG3 budget, so we always lose the race deliberately if
+    // the hardware is sick.
     FLEXIO1_CTRL = (1u << 1);
-    while (FLEXIO1_CTRL & (1u << 1)) {
+    {
+        fl::u32 spin = 0;
+        while (FLEXIO1_CTRL & (1u << 1)) {
+            if (++spin > 1000000u) {
+                FL_WARN("[FlexIO RX] FLEXIO1 software-reset bit never "
+                        "cleared after 1e6 polls — clock gate likely not "
+                        "on, refusing to enable RX (#2772). Pin="
+                        << (int)flexio_pin);
+                return false;
+            }
+        }
     }
     FLEXIO1_CTRL = 0;
 
@@ -356,6 +410,7 @@ static void flexio1_configure(u8 flexio_pin) {
 
     // Enable FlexIO module
     FLEXIO1_CTRL = (1u << 0);                         // FLEXEN
+    return true;
 }
 
 // ---------------------------------------------------------------------------
@@ -453,7 +508,13 @@ bool FlexIoRxChannelImpl::begin(const RxConfig &config) {
 
     flexio1_clock_init();
     flexio1_pin_init(*mPinInfo);
-    flexio1_configure(mPinInfo->flexio_pin);
+    if (!flexio1_configure(mPinInfo->flexio_pin)) {
+        // Reset spin hit its bound. Don't enable DMA — there's nothing on
+        // the other end to feed it, and leaving the channel armed would
+        // corrupt mCaptureBuffer if the FlexIO module came alive later.
+        // The caller already got an FL_WARN with the diagnostic.
+        return false;
+    }
 
     // DMA: copy SHIFTBUF[0] → mCaptureBuffer on each shifter-status flag.
     mDma.source((volatile u32 &)FLEXIO1_SHIFTBUF[0]);
