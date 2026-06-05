@@ -99,7 +99,7 @@ class FL_ALIGN_AS_T(max_align<Types...>::value) variant {
     emplace(Args &&...args) FL_NOEXCEPT {
         reset();
         construct<T>(fl::forward<Args>(args)...);
-        return ptr<T>();
+        return *ptr<T>();
     }
 
     void reset() FL_NOEXCEPT {
