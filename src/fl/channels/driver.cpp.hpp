@@ -1,5 +1,6 @@
 
 #include "fl/channels/driver.h"
+#include "fl/channels/detail/wait_spin_budget.h"
 #include "fl/log/log.h"
 #include "fl/net/network_detector.h"
 #include "fl/stl/chrono.h"
@@ -11,6 +12,30 @@ namespace fl {
 template<typename Condition>
 bool IChannelDriver::waitForCondition(Condition condition, u32 timeoutMs) {
     const u32 startTime = timeoutMs > 0 ? millis() : 0;
+
+    // Tier 1: instant non-blocking check.
+    if (condition()) {
+        return true;
+    }
+
+    // Tier 2: bounded microsecond spin (#2818). Catches short DMA tails
+    // without paying the >=1-tick floor below. Budget runtime-tunable via
+    // FastLED.setWaitSpinBudgetUs(N); 0 disables.
+    {
+        const u32 spinBudget = fl::detail::getWaitSpinBudgetUs();
+        if (spinBudget > 0) {
+            const u32 spinStart = fl::micros();
+            while ((fl::micros() - spinStart) < spinBudget) {
+                if (condition()) {
+                    return true;
+                }
+                if (timeoutMs > 0 && (millis() - startTime) >= timeoutMs) {
+                    FL_ERROR("Timeout occurred while waiting for condition");
+                    return false;
+                }
+            }
+        }
+    }
 
     while (!condition()) {
         // Check timeout if specified

@@ -2,6 +2,7 @@
 /// @brief Implementation of unified channel bus manager
 
 #include "fl/channels/manager.h"
+#include "fl/channels/detail/wait_spin_budget.h"
 #include "fl/stl/singleton.h"
 #include "fl/log/log.h"
 #include "fl/log/log.h"
@@ -364,6 +365,32 @@ fl::shared_ptr<IChannelDriver> ChannelManager::selectDriverForChannel(const Chan
 template<typename Condition>
 bool ChannelManager::waitForCondition(Condition condition, u32 timeoutMs) {
     const u32 startTime = timeoutMs > 0 ? millis() : 0;
+
+    // Tier 1: instant non-blocking check (avoid micros() / millis() cost on
+    // the common already-ready path).
+    if (condition()) {
+        return true;
+    }
+
+    // Tier 2: bounded microsecond spin (#2818). Catches short DMA tails
+    // (APA102 small strips, WS2812B <=8 LEDs) without paying the >=1-tick
+    // floor of the cooperator yield below. Budget is runtime-tunable via
+    // FastLED.setWaitSpinBudgetUs(N); set to 0 to disable.
+    {
+        const u32 spinBudget = fl::detail::getWaitSpinBudgetUs();
+        if (spinBudget > 0) {
+            const u32 spinStart = fl::micros();
+            while ((fl::micros() - spinStart) < spinBudget) {
+                if (condition()) {
+                    return true;
+                }
+                if (timeoutMs > 0 && (millis() - startTime) >= timeoutMs) {
+                    FL_ERROR("ChannelManager: Timeout occurred while waiting for condition");
+                    return false;
+                }
+            }
+        }
+    }
 
     while (!condition()) {
         // Check timeout if specified
