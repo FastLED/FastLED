@@ -25,8 +25,8 @@ from ci.standardized_smoke_sketches import (
 
 def test_live_manifest_exists() -> None:
     """The canonical manifest must exist at the documented path."""
-    assert manifest_path().is_file(), (
-        f"Manifest missing at {manifest_path()} (expected at {MANIFEST_RELATIVE_PATH})"
+    assert manifest_path(None).is_file(), (
+        f"Manifest missing at {manifest_path(None)} (expected at {MANIFEST_RELATIVE_PATH})"
     )
 
 
@@ -36,7 +36,7 @@ def test_live_manifest_contains_canonical_sketches() -> None:
     If a future change replaces one of these, this test should be updated in
     the same commit so the contract change is explicit.
     """
-    names = load_smoke_sketches()
+    names = load_smoke_sketches(None)
     expected = {"Blink", "XYMatrix", "Apa102", "AudioFftParity"}
     missing = expected - set(names)
     assert not missing, (
@@ -49,7 +49,7 @@ def test_live_manifest_entries_resolve_to_existing_examples() -> None:
     """Every entry must point at an existing examples/<name>/ directory."""
     root = Path(__file__).resolve().parent.parent.parent
     examples_dir = root / "examples"
-    for entry in load_smoke_sketches_detailed():
+    for entry in load_smoke_sketches_detailed(None):
         example_dir = examples_dir / entry.name
         assert example_dir.is_dir(), (
             f"Smoke-sketch '{entry.name}' (manifest line {entry.manifest_line}) "

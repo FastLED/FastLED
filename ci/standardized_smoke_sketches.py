@@ -6,24 +6,29 @@ The manifest at ``tests/platforms/_standard/SMOKE_SKETCHES.txt`` is the
 canonical list of FastLED example sketches that EVERY supported board must
 compile in CI. Per-board overrides remain under ``tests/platforms/<board>/``.
 
-The format is intentionally trivial — one example name per line, ``#`` for
-comments, blank lines ignored — so any consumer (Python, bash, shell scripts,
+The format is intentionally trivial - one example name per line, ``#`` for
+comments, blank lines ignored - so any consumer (Python, bash, shell scripts,
 GitHub Actions) can parse it without pulling in YAML/TOML dependencies.
 
 Typical usage::
 
     from ci.standardized_smoke_sketches import load_smoke_sketches
-    for sketch in load_smoke_sketches():
+    for sketch in load_smoke_sketches(None):
         # feed to ci-compile.py / fbuild / pio_compile / arduino-cli ...
         ...
 
 Per-board filtering (e.g. ``AudioFftParity`` is ESP32-only) is handled by the
-existing ``@filter`` directives inside each ``.ino`` — this loader stays
+existing ``@filter`` directives inside each ``.ino`` - this loader stays
 platform-agnostic on purpose.
 """
 
+import sys
 from dataclasses import dataclass
 from pathlib import Path
+
+from typeguard import typechecked
+
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 # Repo-relative location of the manifest. Kept as a module-level constant so
@@ -31,6 +36,7 @@ from pathlib import Path
 MANIFEST_RELATIVE_PATH = "tests/platforms/_standard/SMOKE_SKETCHES.txt"
 
 
+@typechecked
 @dataclass(frozen=True)
 class SmokeSketch:
     """A single entry from the standardized smoke-sketch manifest.
@@ -55,19 +61,19 @@ def _project_root() -> Path:
     return Path(__file__).resolve().parent.parent
 
 
-def manifest_path(project_root: Path | None = None) -> Path:
+def manifest_path(project_root: Path | None) -> Path:
     """Return the absolute path to the smoke-sketch manifest.
 
     Args:
-        project_root: Optional override (used by tests). Defaults to the
-            FastLED repo root inferred from this file's location.
+        project_root: Repo root override (used by tests). Pass ``None`` to
+            use the FastLED repo root inferred from this file's location.
     """
     root = project_root if project_root is not None else _project_root()
     return root / MANIFEST_RELATIVE_PATH
 
 
 def load_smoke_sketches_detailed(
-    project_root: Path | None = None,
+    project_root: Path | None,
 ) -> list[SmokeSketch]:
     """Parse the manifest and return entries with line-number metadata.
 
@@ -75,7 +81,8 @@ def load_smoke_sketches_detailed(
     comments are supported (``Blink  # basic clockless``).
 
     Args:
-        project_root: Optional override (used by tests).
+        project_root: Repo root override (used by tests). Pass ``None`` to
+            use the FastLED repo root inferred from this file's location.
 
     Returns:
         List of :class:`SmokeSketch` entries in manifest order.
@@ -97,7 +104,7 @@ def load_smoke_sketches_detailed(
                 continue
             if line in seen:
                 # Duplicate names would silently double-compile the same
-                # sketch — surface this as a hard error so the manifest
+                # sketch - surface this as a hard error so the manifest
                 # stays the single source of truth.
                 raise ValueError(
                     f"Duplicate smoke sketch '{line}' on line {lineno} of {path}"
@@ -108,20 +115,24 @@ def load_smoke_sketches_detailed(
     return entries
 
 
-def load_smoke_sketches(project_root: Path | None = None) -> list[str]:
+def load_smoke_sketches(project_root: Path | None) -> list[str]:
     """Return just the sketch names from the manifest, in manifest order.
 
     Convenience wrapper around :func:`load_smoke_sketches_detailed` for
     callers (e.g. shell pipelines) that don't need line-number metadata.
 
     Args:
-        project_root: Optional override (used by tests).
+        project_root: Repo root override (used by tests). Pass ``None`` to
+            use the FastLED repo root inferred from this file's location.
     """
-    return [entry.name for entry in load_smoke_sketches_detailed(project_root)]
+    names: list[str] = []
+    for entry in load_smoke_sketches_detailed(project_root):
+        names.append(entry.name)
+    return names
 
 
 def _main() -> int:
-    """CLI entry point — prints the smoke-sketch names, one per line.
+    """CLI entry point - prints the smoke-sketch names, one per line.
 
     Sample invocations::
 
@@ -129,8 +140,11 @@ def _main() -> int:
         bash compile esp32dev --examples $(uv run python ci/standardized_smoke_sketches.py | tr '\\n' ' ')
     """
     try:
-        for name in load_smoke_sketches():
+        for name in load_smoke_sketches(None):
             print(name)
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        return 130
     except FileNotFoundError as exc:
         print(f"ERROR: {exc}")
         return 1
@@ -141,6 +155,4 @@ def _main() -> int:
 
 
 if __name__ == "__main__":
-    import sys
-
     sys.exit(_main())
