@@ -127,21 +127,46 @@ def should_skip_hook() -> bool:
 
 
 def count_stale_worktrees() -> int:
-    """Count directories under .claude/worktrees/ (best-effort, never raises)."""
+    """Count directories under .claude/worktrees/.
+
+    Iterates with an explicit loop so failures surface a descriptive error
+    on stderr (per coding-standards "no silent fallbacks") while still
+    keeping the stop-hook itself non-fatal — the loop body propagates the
+    underlying OSError up.
+    """
     if not WORKTREES_DIR.exists():
         return 0
     try:
-        return sum(
-            1 for p in WORKTREES_DIR.iterdir() if p.is_dir() and not p.is_symlink()
-        )
+        iterator = WORKTREES_DIR.iterdir()
     except KeyboardInterrupt:
+        import _thread
+
+        _thread.interrupt_main()
         raise
-    except OSError:
-        return 0
+    except OSError as exc:
+        raise OSError(
+            f"count_stale_worktrees: cannot iterate {WORKTREES_DIR}: {exc}"
+        ) from exc
+    count = 0
+    for p in iterator:
+        if p.is_dir() and not p.is_symlink():
+            count += 1
+    return count
 
 
 def warn_stale_worktrees() -> None:
-    n = count_stale_worktrees()
+    try:
+        n = count_stale_worktrees()
+    except KeyboardInterrupt:
+        import _thread
+
+        _thread.interrupt_main()
+        raise
+    except OSError as exc:
+        # Don't crash the stop hook on a directory-scan failure, but do
+        # surface the descriptive error so it isn't silently swallowed.
+        print(f"warn_stale_worktrees: {exc}", file=sys.stderr)
+        return
     if n > STALE_WORKTREE_THRESHOLD:
         print(
             f"Note: {n} stale agent worktrees in .claude/worktrees/, "

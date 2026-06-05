@@ -8,12 +8,14 @@ unpushed commits.
 import importlib.util
 import os
 import subprocess
+import sys
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from types import ModuleType
 
 
-def _load_helper():
+def _load_helper() -> ModuleType:
     """Load ci/clean-worktrees.py as a module (filename contains a hyphen)."""
     project_root = Path(__file__).resolve().parent.parent.parent
     src = project_root / "ci" / "clean-worktrees.py"
@@ -21,8 +23,6 @@ def _load_helper():
     assert spec and spec.loader
     mod = importlib.util.module_from_spec(spec)
     # Make the module discoverable by sys.modules so dataclass works.
-    import sys
-
     sys.modules[spec.name] = mod
     spec.loader.exec_module(mod)
     return mod
@@ -56,6 +56,11 @@ class TestClassifyWorktree(unittest.TestCase):
                 p = Path(root) / name
                 try:
                     p.chmod(0o700)
+                except KeyboardInterrupt:
+                    import _thread
+
+                    _thread.interrupt_main()
+                    raise
                 except OSError:
                     pass
         self._tmp.cleanup()

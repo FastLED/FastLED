@@ -27,6 +27,10 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from types import TracebackType
+from typing import Any, Callable
+
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -48,9 +52,7 @@ class RemovalResult:
     error: str  # empty on success
 
 
-def run_git(
-    args: list[str], cwd: Path | None = None
-) -> subprocess.CompletedProcess[str]:
+def run_git(args: list[str], cwd: Path | None) -> subprocess.CompletedProcess[str]:
     """Run a git command and return the completed process (no raise)."""
     return subprocess.run(
         ["git", *args],
@@ -72,12 +74,14 @@ def directory_size_bytes(path: Path) -> int:
                 fp = Path(root) / name
                 try:
                     total += fp.stat().st_size
-                except KeyboardInterrupt:
+                except KeyboardInterrupt as ki:
+                    handle_keyboard_interrupt(ki)
                     raise
                 except OSError:
                     # Permission denied, broken symlink, race -- ignore.
                     continue
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except OSError:
         pass
@@ -161,7 +165,8 @@ def clear_readonly(path: Path) -> None:
             try:
                 current = fp.lstat().st_mode
                 os.chmod(fp, current | stat.S_IWUSR)
-            except KeyboardInterrupt:
+            except KeyboardInterrupt as ki:
+                handle_keyboard_interrupt(ki)
                 raise
             except OSError:
                 continue
@@ -187,7 +192,8 @@ def remove_worktree(wt: Path) -> RemovalResult:
     if wt.exists():
         try:
             shutil.rmtree(wt, ignore_errors=False, onerror=_rmtree_onerror)
-        except KeyboardInterrupt:
+        except KeyboardInterrupt as ki:
+            handle_keyboard_interrupt(ki)
             raise
         except OSError as exc:
             rmtree_error = str(exc)
@@ -225,12 +231,17 @@ def remove_worktree(wt: Path) -> RemovalResult:
     )
 
 
-def _rmtree_onerror(func, path, exc_info) -> None:  # type: ignore[no-untyped-def]
+def _rmtree_onerror(
+    func: Callable[..., Any],
+    path: str,
+    exc_info: tuple[type[BaseException], BaseException, TracebackType],
+) -> None:
     """shutil.rmtree onerror callback: clear read-only and retry once."""
     try:
         os.chmod(path, stat.S_IWUSR | stat.S_IRUSR)
         func(path)
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         raise
     except OSError:
         # Let the outer rmtree re-raise on subsequent attempts.
@@ -241,9 +252,11 @@ def list_worktree_paths() -> list[Path]:
     """Return sorted list of immediate child directories under WORKTREES_DIR."""
     if not WORKTREES_DIR.exists():
         return []
-    return sorted(
-        p for p in WORKTREES_DIR.iterdir() if p.is_dir() and not p.is_symlink()
-    )
+    paths: list[Path] = []
+    for p in WORKTREES_DIR.iterdir():
+        if p.is_dir() and not p.is_symlink():
+            paths.append(p)
+    return sorted(paths)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -267,7 +280,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"No worktrees found under {WORKTREES_DIR}")
         return 0
 
-    classifications = [classify_worktree(p) for p in paths]
+    classifications: list[WorktreeStatus] = []
+    for p in paths:
+        classifications.append(classify_worktree(p))
     removed = 0
     skipped = 0
     failed = 0
@@ -318,6 +333,7 @@ def main(argv: list[str] | None = None) -> int:
 if __name__ == "__main__":
     try:
         sys.exit(main())
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
         print("interrupted", file=sys.stderr)
         sys.exit(130)
