@@ -282,19 +282,20 @@ FL_TEST_CASE("Ping-pong - polling path drains all bytes") {
 }
 
 // ---------------------------------------------------------------------------
-// Regression: the issue's specific repro — 680-LED boundary.
-// 680 LEDs * 3 channels = 2040 LED bytes; wave8 → 16320 SPI bytes; just under
-// 16 KB. 681 LEDs goes over the single-chunk limit.
+// Regression: the issue's specific repro — chunk-boundary behaviour around
+// the >~680-LED case. A 16 KB staging buffer with wave8 expansion holds
+// exactly 2048 LED bytes (≈ 682 RGB LEDs). 682-LED strips fit in a single
+// chunk; 683+ LED strips need two and must trigger the pre-queue path.
 // ---------------------------------------------------------------------------
-FL_TEST_CASE("Ping-pong - 680-LED boundary regression (#2304)") {
-    // 680 LEDs RGB → 2040 LED bytes → 16320 SPI bytes → fits in 16 KB
-    auto small = PipelineModel::make(/*bytes=*/2040, /*capacity=*/16 * 1024,
+FL_TEST_CASE("Ping-pong - 682-LED boundary regression (#2304)") {
+    // 682 LEDs RGB → 2046 LED bytes → 16368 SPI bytes → still fits in 16 KB
+    auto small = PipelineModel::make(/*bytes=*/2046, /*capacity=*/16 * 1024,
                                      /*polling=*/false);
     small.startFirstDma();
     FL_CHECK_EQ(small.queuedCount, 1);  // single chunk, no pre-queue needed
 
-    // 681 LEDs RGB → 2043 LED bytes → 16344 SPI bytes → needs 2 chunks
-    auto big = PipelineModel::make(/*bytes=*/2043, /*capacity=*/16 * 1024,
+    // 683 LEDs RGB → 2049 LED bytes → 16392 SPI bytes → needs 2 chunks
+    auto big = PipelineModel::make(/*bytes=*/2049, /*capacity=*/16 * 1024,
                                    /*polling=*/false);
     big.startFirstDma();
     FL_CHECK_EQ(big.queuedCount, 2);  // pre-queues both A and B

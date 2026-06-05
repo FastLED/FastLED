@@ -1501,6 +1501,14 @@ void ChannelEngineSpi::startFirstDma() FL_NOEXCEPT {
         // the encode/wait overlap but cannot get the ISR-chained gap-free
         // behaviour without an ESP-IDF API change.
         if (!kSpiUsePolling && ch->ledBytesRemaining > 0) {
+            // Save source state so we can roll back if the SPI driver refuses
+            // to queue transB. encodeChunk() advances ch->ledSource /
+            // ch->ledBytesRemaining as a side-effect, so a failure here would
+            // otherwise drop the chunk we just consumed instead of letting the
+            // refill loop retry it on the next poll() iteration.
+            const u8* savedSource = ch->ledSource;
+            size_t savedRemaining = ch->ledBytesRemaining;
+
             size_t encoded_b = encodeChunk(ch, ch->stagingB, ch->stagingCapacity);
             if (encoded_b > 0) {
                 spi_transaction_t* transB = &ch->transB;
@@ -1519,8 +1527,12 @@ void ChannelEngineSpi::startFirstDma() FL_NOEXCEPT {
                     ch->transBInFlight = true;
                     mPipeline.mEncodeIdx = 2; // Both A and B queued
                 } else {
-                    // Pre-queue failed but A is already in flight; let the
-                    // pipeline fall back to one-chunk-at-a-time refill.
+                    // Pre-queue failed but A is already in flight. Roll back
+                    // the source pointer so the refill loop re-encodes this
+                    // chunk into B once A completes instead of truncating the
+                    // stream after A.
+                    ch->ledSource = savedSource;
+                    ch->ledBytesRemaining = savedRemaining;
                     FL_WARN("ChannelEngineSpi: startFirstDma pre-queue B failed: " << retB);
                 }
             }
