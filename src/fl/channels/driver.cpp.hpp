@@ -2,7 +2,7 @@
 #include "fl/channels/driver.h"
 #include "fl/channels/detail/wait_spin_budget.h"
 #include "fl/log/log.h"
-#include "fl/net/network_detector.h"
+#include "fl/network_detector.h"
 #include "fl/stl/chrono.h"
 #include "fl/task/executor.h"
 #include "platforms/is_platform.h"

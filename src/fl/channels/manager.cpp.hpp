@@ -13,7 +13,7 @@
 #include "fl/stl/move.h"
 #include "fl/system/trace.h"
 #include "fl/task/executor.h"
-#include "fl/net/network_detector.h"
+#include "fl/network_detector.h"
 #include "platforms/init_channel_driver.h"
 #include "platforms/is_platform.h"
 #include "fl/stl/noexcept.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-/// @file fl/net/network_detector.h
+/// @file fl/network_detector.h
 /// @brief Cross-platform facade for runtime network activity detection.
 ///
 /// The full implementation lives at
