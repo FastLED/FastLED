@@ -5,6 +5,7 @@
 #include "fl/net/http/stream_client.h"
 #include "fl/stl/string.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/stdio.h"  // for fl::snprintf (avoids newlib _svfprintf_r, #2773)
 #include "fl/stl/chrono.h"
 // Note: fl/stl/cstdio.h intentionally NOT included — workaround for
 // zackees/zccache#619 (Windows PCH path-spelling drift). This TU doesn't
@@ -112,7 +113,7 @@ bool HttpStreamClient::sendHttpRequestHeader() {
     if (mPort != 80) {
         header.append(":");
         char portStr[8];
-        snprintf(portStr, sizeof(portStr), "%u", mPort);
+        fl::snprintf(portStr, sizeof(portStr), "%u", mPort);
         header.append(portStr);
     }
     header.append("\r\n");

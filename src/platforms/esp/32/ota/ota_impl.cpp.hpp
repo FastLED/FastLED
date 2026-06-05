@@ -39,6 +39,7 @@
 #include "fl/stl/cstring.h"  // ok include - for string functions
 
 // FastLED headers
+#include "fl/stl/stdio.h"  // for fl::snprintf (avoids newlib _svfprintf_r, #2773)
 #include "fl/stl/string.h"
 #include "fl/log/log.h"
 #include "fl/log/log.h"
@@ -930,7 +931,7 @@ private:
 
         // Convert to hex string
         for (size_t i = 0; i < 32 && i * 2 + 1 < len; i++) {
-            snprintf(nonce + i * 2, 3, "%02x", hash[i]);
+            fl::snprintf(nonce + i * 2, 3, "%02x", hash[i]);
         }
     }
 
@@ -949,7 +950,7 @@ private:
         // Convert password hash to hex
         char pass_hash_hex[65];
         for (int i = 0; i < 32; i++) {
-            snprintf(pass_hash_hex + i * 2, 3, "%02x", pass_hash[i]);
+            fl::snprintf(pass_hash_hex + i * 2, 3, "%02x", pass_hash[i]);
         }
         pass_hash_hex[64] = '\0';
 
@@ -963,13 +964,13 @@ private:
         // Convert derived key to hex
         char derived_key_hex[65];
         for (int i = 0; i < 32; i++) {
-            snprintf(derived_key_hex + i * 2, 3, "%02x", derived_key[i]);
+            fl::snprintf(derived_key_hex + i * 2, 3, "%02x", derived_key[i]);
         }
         derived_key_hex[64] = '\0';
 
         // Compute expected response: SHA256(derived_key_hex:nonce:cnonce)
         char auth_string[256];
-        snprintf(auth_string, sizeof(auth_string), "%s:%s:%s",
+        fl::snprintf(auth_string, sizeof(auth_string), "%s:%s:%s",
                 derived_key_hex, nonce, cnonce);
 
         unsigned char expected_hash[32];
@@ -978,7 +979,7 @@ private:
 
         char expected_response[65];
         for (int i = 0; i < 32; i++) {
-            snprintf(expected_response + i * 2, 3, "%02x", expected_hash[i]);
+            fl::snprintf(expected_response + i * 2, 3, "%02x", expected_hash[i]);
         }
         expected_response[64] = '\0';
 
@@ -1142,7 +1143,7 @@ private:
 
         char computed_md5[33];
         for (int i = 0; i < 16; i++) {
-            snprintf(computed_md5 + i * 2, 3, "%02x", md5_hash[i]);
+            fl::snprintf(computed_md5 + i * 2, 3, "%02x", md5_hash[i]);
         }
         computed_md5[32] = '\0';
 
@@ -1275,7 +1276,7 @@ private:
                 self->mOtaNonce = nonce;
 
                 char auth_response[128];
-                snprintf(auth_response, sizeof(auth_response), "AUTH %s", nonce);
+                fl::snprintf(auth_response, sizeof(auth_response), "AUTH %s", nonce);
                 lwip_sendto(self->mOtaUdpSocket, auth_response, strlen(auth_response), 0,
                       (struct sockaddr*)&client_addr, client_len);
                 FL_DBG("OTA: Sent AUTH challenge");

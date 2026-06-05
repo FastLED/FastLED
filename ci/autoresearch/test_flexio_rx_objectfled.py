@@ -169,9 +169,12 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[flexio-objectfled] opening {args.port} @ {args.baud}")
     try:
         s = serial.Serial(args.port, args.baud, timeout=0.1)
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
         # Catch Ctrl-C before the bare `Exception`/`SerialException` block so
         # interactive users can abort cleanly without dumping a stack trace.
+        from ci.util.global_interrupt_handler import handle_keyboard_interrupt
+
+        handle_keyboard_interrupt(ki)
         raise
     except serial.SerialException as e:
         print(f"ERROR: could not open {args.port}: {e}", file=sys.stderr)

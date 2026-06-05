@@ -11,6 +11,7 @@
 #include "fl/stl/cctype.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/malloc.h"
+#include "fl/stl/stdio.h"  // for fl::snprintf (avoids newlib _svfprintf_r, #2773)
 #include "fl/log/log.h"
 
 // ESP32 HTTP server header (must be before namespace declarations)
@@ -719,7 +720,7 @@ int Server::handle_esp_request(void* raw_req) {
     // Send response using Response::to_string() which serializes to HTTP format
     // Use esp_http_server APIs to send the response parts
     char status_str[32];
-    snprintf(status_str, sizeof(status_str), "%d", resp.mStatusCode);
+    fl::snprintf(status_str, sizeof(status_str), "%d", resp.mStatusCode);
     httpd_resp_set_status(req, status_str);
 
     for (auto it = resp.mHeaders.begin(); it != resp.mHeaders.end(); ++it) {
