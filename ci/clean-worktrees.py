@@ -234,9 +234,14 @@ def remove_worktree(wt: Path) -> RemovalResult:
 def _rmtree_onerror(
     func: Callable[..., Any],
     path: str,
-    exc_info: tuple[type[BaseException], BaseException, TracebackType],
+    exc_info: tuple[type[BaseException], BaseException, TracebackType],  # noqa: DCT002
 ) -> None:
-    """shutil.rmtree onerror callback: clear read-only and retry once."""
+    """shutil.rmtree onerror callback: clear read-only and retry once.
+
+    The 3-tuple signature is Python's documented `shutil.rmtree(onerror=...)`
+    contract — replacing with a dataclass would break that interface, so the
+    DCT002 complexity warning is suppressed here.
+    """
     try:
         os.chmod(path, stat.S_IWUSR | stat.S_IRUSR)
         func(path)
