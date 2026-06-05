@@ -22,11 +22,11 @@
 ///   - add_sat_u8_16   (UQADD8 x4)
 ///   - sub_sat_u8_16   (UQSUB8 x4)
 ///   - avg_u8_16       (UHADD8 x4)      [floor average]
-///   - and_u8_16       (AND x4 — plain 32-bit AND is already optimal]
-///   - or_u8_16        (ORR x4]
-///   - xor_u8_16       (EOR x4]
-///   - andnot_u8_16    (BIC x4]
-///   - add_u16_8       (UADD16 x4]
+///   - and_u8_16       (AND x4 — plain 32-bit AND is already optimal)
+///   - or_u8_16        (ORR x4)
+///   - xor_u8_16       (EOR x4)
+///   - andnot_u8_16    (BIC x4)
+///   - add_u16_8       (UADD16 x4)
 ///
 /// Everything else (scale, blend, narrow/widen, u32 ops, f32 ops) falls
 /// through to scalar reference implementations identical to the noop
@@ -122,7 +122,7 @@ FASTLED_FORCE_INLINE FL_IRAM u32 fl_dsp_uadd16(u32 a, u32 b) FL_NOEXCEPT {
 }
 
 //==============================================================================
-// Atomic Load/Store Operations
+// Load/Store Operations (NOT atomic — no thread-safety / memory-order semantics)
 //==============================================================================
 //
 // We use word-granular loads/stores. The DSP-ext ops want u32-shaped chunks;
@@ -441,6 +441,19 @@ FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 sub_i32_4(simd_u32x4 a, simd_u32x4 b) FL
     return result;
 }
 
+// NOTE on `mulhi_*_4` vs `mulhi32_*_4` naming
+// --------------------------------------------
+// This is the FastLED-wide SIMD API convention (mirrored across simd_noop,
+// simd_x86, simd_arm_neon, simd_xtensa, simd_riscv):
+//   - mulhi_{i,u}32_4   →  (a * b) >> 16   (low-32 of a 16.16 fixed-point
+//                                            multiply — matches the SSE2
+//                                            PMULHW-style "high half of a
+//                                            16-bit product" semantics that
+//                                            FastLED scales/blends rely on)
+//   - mulhi32_{i,u}32_4 →  (a * b) >> 32   (true high-32 of the full
+//                                            64-bit product — the SMMUL /
+//                                            UMMUL semantics)
+// Do not rename one without renaming the matching ops in every other backend.
 FASTLED_FORCE_INLINE FL_IRAM simd_u32x4 mulhi_i32_4(simd_u32x4 a, simd_u32x4 b) FL_NOEXCEPT {
     // SMMUL gives (i32 × i32) >> 32 in one cycle; we want >> 16, so use a wide
     // SMULL pair and shift. Scalar long-multiply lets the compiler pick SMULL.
