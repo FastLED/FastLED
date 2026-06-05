@@ -230,7 +230,9 @@ def create_stages(args: LintArgs) -> list[LintStage]:
         )
 
     # Meson build file stage (runs in parallel with other stages)
-    if run_cpp:
+    # Skipped when --skip-meson is passed (e.g. by the stop hook when no
+    # meson.build / meson_options.txt files changed this session).
+    if run_cpp and not args.skip_meson:
         stages.append(
             LintStage(
                 name="meson_linting",
