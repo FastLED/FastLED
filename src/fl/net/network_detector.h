@@ -25,7 +25,9 @@
 #include "platforms/is_platform.h"
 
 #if defined(FL_IS_ESP32)
-#include "platforms/esp/32/feature_flags/enabled.h"
+// IWYU pragma: begin_keep
+#include "platforms/esp/32/feature_flags/enabled.h"  // ok platform headers
+// IWYU pragma: end_keep
 #endif
 
 // Use the real RMT5 implementation when available; otherwise fall through to
@@ -33,7 +35,9 @@
 // including it on RMT4-only / non-ESP32 builds is harmless (the class
 // definition simply disappears).
 #if defined(FL_IS_ESP32) && FASTLED_RMT5
-#include "platforms/esp/32/drivers/rmt/rmt_5/network_detector.h"
+// IWYU pragma: begin_keep
+#include "platforms/esp/32/drivers/rmt/rmt_5/network_detector.h"  // ok platform headers
+// IWYU pragma: end_keep
 #define FL_NETWORK_DETECTOR_HAS_REAL_IMPL 1
 #else
 #define FL_NETWORK_DETECTOR_HAS_REAL_IMPL 0
@@ -65,10 +69,10 @@ class NetworkDetector {
     static bool isAnyNetworkConnected() FL_NOEXCEPT { return false; }
 
   private:
-    NetworkDetector() = delete;
-    ~NetworkDetector() = delete;
-    NetworkDetector(const NetworkDetector &) = delete;
-    NetworkDetector &operator=(const NetworkDetector &) = delete;
+    NetworkDetector() FL_NOEXCEPT = delete;
+    ~NetworkDetector() FL_NOEXCEPT = delete;
+    NetworkDetector(const NetworkDetector &) FL_NOEXCEPT = delete;
+    NetworkDetector &operator=(const NetworkDetector &) FL_NOEXCEPT = delete;
 };
 
 } // namespace fl

@@ -1520,6 +1520,37 @@ public:
 
 	/// @} RGBW Input Gamut Configuration
 
+private:
+	// Forward shims for the tiered-wait spin budget (#2818). Full impl
+	// lives in src/fl/channels/detail/wait_spin_budget.{h,cpp.hpp}.
+	// Declared here so we don't drag the channel-detail include graph
+	// into FastLED.h.
+	static void _setWaitSpinBudgetUs(fl::u32 budget_us) FL_NOEXCEPT;
+	static fl::u32 _getWaitSpinBudgetUs() FL_NOEXCEPT;
+public:
+
+	/// Override the channel-manager tiered-wait spin budget (microseconds).
+	///
+	/// `waitForReady()` and per-driver `waitForCondition()` use a tiered
+	/// wait: instant check -> bounded microsecond spin -> cooperator yield.
+	/// This setter changes the Tier-2 spin budget at runtime. Default is
+	/// `FASTLED_WAIT_SPIN_BUDGET_US` (250 us).
+	///
+	/// Pass `0` to disable the spin tier entirely (always fall through to
+	/// the cooperator yield - restores pre-#2818 behavior).
+	///
+	/// Higher values catch larger DMA tails inside the spin without paying
+	/// the FreeRTOS >=1 ms tick floor, at the cost of busy-spinning the
+	/// LED-pinned core. See #2815 for design rationale.
+	inline void setWaitSpinBudgetUs(fl::u32 budget_us) FL_NOEXCEPT {
+		_setWaitSpinBudgetUs(budget_us);
+	}
+
+	/// Get the current tiered-wait spin budget (microseconds).
+	inline fl::u32 getWaitSpinBudgetUs() const FL_NOEXCEPT {
+		return _getWaitSpinBudgetUs();
+	}
+
 	/// Set custom RGBW LED power consumption model
 	/// @param model RGBW power consumption model
 	/// @note Future API enhancement - currently uses RGB components only
