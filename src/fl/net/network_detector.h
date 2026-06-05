@@ -47,7 +47,8 @@
 
 #include "fl/stl/noexcept.h"
 
-namespace fl::net {
+namespace fl {
+namespace net {
 
 /// @brief Stub NetworkDetector for platforms without the real implementation.
 ///
@@ -75,14 +76,10 @@ class NetworkDetector {
     NetworkDetector &operator=(const NetworkDetector &) FL_NOEXCEPT = delete;
 };
 
-} // namespace fl::net
+} // namespace net
 
-// Back-compat: the existing channel wait sites and the real RMT5 impl both
-// expose the type as fl::NetworkDetector. Keep that name working in the
-// no-real-impl case via a using alias, so this PR is a pure lint fix with
-// no consumer churn.
-namespace fl {
 using NetworkDetector = ::fl::net::NetworkDetector;
+
 } // namespace fl
 
 #endif // !FL_NETWORK_DETECTOR_HAS_REAL_IMPL
