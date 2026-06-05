@@ -459,6 +459,48 @@ IChannelDriver::DriverState ChannelManager::poll() {
 }
 
 bool ChannelManager::waitForReady(u32 timeoutMs) {
+    // Phase 2 of #2815 (#2819): single-driver fast path. If exactly one
+    // driver is BUSY, delegate to its waitDone() so drivers with an
+    // ISR-driven completion primitive can block directly on it (no spin
+    // tier, no cooperator yield loop). Drivers that haven't overridden
+    // waitDone() get the default delegate, which is identical to the
+    // existing waitForReady tiered loop -- so unmigrated drivers behave
+    // exactly as before.
+    //
+    // For N > 1 (multi-driver aggregate wait) we fall through to the
+    // tiered waitForCondition loop. Phase 3 (#2815 design) adds a
+    // shared-sem / task-notification fan-in for that path.
+    IChannelDriver* onlyBusy = nullptr;
+    int busyCount = 0;
+    bool sawError = false;
+    for (const auto& entry : mDrivers) {
+        if (!entry.enabled) continue;
+        const auto state = entry.driver->poll();
+        if (state.state == IChannelDriver::DriverState::ERROR) {
+            // Mirror the pre-existing waitForCondition behavior: ERROR
+            // is treated as "not READY", we fall through to the loop and
+            // either spin out the timeout or recover. A future fail-fast
+            // change can land separately.
+            sawError = true;
+            break;
+        }
+        if (state.state == IChannelDriver::DriverState::READY) continue;
+        ++busyCount;
+        onlyBusy = entry.driver.get();
+        if (busyCount > 1) {
+            onlyBusy = nullptr;
+            break;
+        }
+    }
+    if (!sawError && busyCount == 0) return true;
+    if (!sawError && busyCount == 1 && onlyBusy != nullptr) {
+        const bool ok = onlyBusy->waitDone(timeoutMs);
+        if (!ok) {
+            FL_ERROR("ChannelManager: Timeout in single-driver waitDone fast path");
+        }
+        return ok;
+    }
+
     bool ok = waitForCondition([this]() {
         return poll().state == IChannelDriver::DriverState::READY;
     }, timeoutMs);
