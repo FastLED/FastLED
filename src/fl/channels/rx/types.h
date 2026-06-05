@@ -9,7 +9,8 @@ enum class RxBackend : u8 {
     PLATFORM_DEFAULT = 0,  ///< Use the recommended backend for the active platform (currently RMT on ESP32, FlexPWM on Teensy 4.x, native RX on stub/host builds).
     RMT = 1,               ///< ESP32-only RMT capture backend.
     ISR = 2,               ///< Platform-neutral interrupt-driven edge capture backend when available.
-    FLEXPWM = 3            ///< Teensy 4.x-only FlexPWM capture backend.
+    FLEXPWM = 3,           ///< Teensy 4.x-only FlexPWM capture backend.
+    FLEXIO = 4             ///< Teensy 4.x-only FlexIO capture backend (FLEXIO1; FLEXIO2 is owned by the TX driver). See FastLED#2764.
 };
 
 inline const char* toString(RxBackend backend) FL_NOEXCEPT {
@@ -18,6 +19,7 @@ inline const char* toString(RxBackend backend) FL_NOEXCEPT {
     case RxBackend::RMT: return "RMT";
     case RxBackend::ISR: return "ISR";
     case RxBackend::FLEXPWM: return "FLEXPWM";
+    case RxBackend::FLEXIO: return "FLEXIO";
     }
     return "UNKNOWN";
 }

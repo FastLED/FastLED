@@ -19,6 +19,7 @@
 
 #ifdef FL_IS_TEENSY_4X
 // IWYU pragma: begin_keep
+#include "platforms/arm/teensy/teensy4_common/rx_flexio_channel.h"  // ok platform headers
 #include "platforms/arm/teensy/teensy4_common/rx_flexpwm_channel.h" // ok platform headers
 // IWYU pragma: end_keep
 #endif
@@ -110,6 +111,13 @@ fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::FLEXPWM>(int pin) FL_NOE
     return fl::make_shared<DummyRxDevice>("FLEXPWM RX not supported on ESP32");
 }
 
+// FLEXIO not available on ESP32 (Teensy 4.x peripheral). See FastLED#2764.
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::FLEXIO>(int pin) FL_NOEXCEPT {
+    (void)pin;
+    return fl::make_shared<DummyRxDevice>("FLEXIO RX not supported on ESP32");
+}
+
 // DEFAULT maps to RMT on ESP32
 template <>
 fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::PLATFORM_DEFAULT>(int pin) FL_NOEXCEPT {
@@ -128,6 +136,18 @@ fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::FLEXPWM>(int pin) FL_NOE
     return device;
 }
 
+// FLEXIO device specialization for Teensy 4.x — Phase 1A skeleton (FastLED#2764).
+// Returns a real FlexIoRxChannel object whose methods report inactive until
+// Phase 1B lands the FLEXIO1 register programming.
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::FLEXIO>(int pin) FL_NOEXCEPT {
+    auto device = FlexIoRxChannel::create(pin);
+    if (!device) {
+        return fl::make_shared<DummyRxDevice>("FlexIO RX channel creation failed");
+    }
+    return device;
+}
+
 // RMT not available on Teensy
 template <>
 fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::RMT>(int pin) FL_NOEXCEPT {
@@ -142,7 +162,8 @@ fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>(int pin) FL_NOEXCEP
     return fl::make_shared<DummyRxDevice>("ISR RX not supported on Teensy");
 }
 
-// DEFAULT maps to FLEXPWM on Teensy 4.x
+// DEFAULT maps to FLEXPWM on Teensy 4.x (intentionally NOT switched to FLEXIO yet
+// — that ships in a separate PR after Phase 3 verification per FastLED#2764).
 template <>
 fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::PLATFORM_DEFAULT>(int pin) FL_NOEXCEPT {
     return RxDevice::create<RxDeviceType::FLEXPWM>(pin);
@@ -165,6 +186,14 @@ fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>(int pin) FL_NOEXCEP
 // FLEXPWM device specialization (native stub for host/desktop testing)
 template <>
 fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::FLEXPWM>(int pin) FL_NOEXCEPT {
+    return NativeRxDevice::create(pin);
+}
+
+// FLEXIO device specialization (native stub for host/desktop testing). Same
+// NativeRxDevice fallback as the other backends so host-stub tests can exercise
+// `RxBackend::FLEXIO` against the synthetic capture buffer.
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::FLEXIO>(int pin) FL_NOEXCEPT {
     return NativeRxDevice::create(pin);
 }
 
@@ -193,6 +222,13 @@ fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>(int pin) FL_NOEXCEP
 // FLEXPWM device specialization (dummy for unsupported platforms)
 template <>
 fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::FLEXPWM>(int pin) FL_NOEXCEPT {
+    (void)pin;  // Suppress unused parameter warning
+    return RxDevice::createDummy();
+}
+
+// FLEXIO device specialization (dummy for unsupported platforms)
+template <>
+fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::FLEXIO>(int pin) FL_NOEXCEPT {
     (void)pin;  // Suppress unused parameter warning
     return RxDevice::createDummy();
 }

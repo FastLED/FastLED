@@ -164,7 +164,8 @@ enum class RxDeviceType : u8 {
     PLATFORM_DEFAULT = 0,  ///< Platform default (RMT on ESP32, FLEXPWM on Teensy 4.x)
     ISR = 1,      ///< GPIO ISR-based receiver (ESP32)
     RMT = 2,      ///< RMT-based receiver (ESP32)
-    FLEXPWM = 3   ///< FlexPWM input-capture receiver (Teensy 4.x)
+    FLEXPWM = 3,  ///< FlexPWM input-capture receiver (Teensy 4.x)
+    FLEXIO = 4    ///< FlexIO shifter-based receiver (Teensy 4.x, FLEXIO1; see FastLED#2764)
 };
 
 /**
@@ -178,6 +179,7 @@ inline const char* toString(RxDeviceType type) FL_NOEXCEPT {
     case RxDeviceType::ISR:     return "ISR";
     case RxDeviceType::RMT:     return "RMT";
     case RxDeviceType::FLEXPWM: return "FLEXPWM";
+    case RxDeviceType::FLEXIO:  return "FLEXIO";
     }
     return "UNKNOWN";
 }
