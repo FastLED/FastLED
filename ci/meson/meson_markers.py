@@ -321,14 +321,21 @@ def inject_zccache_wrapping(build_dir: Path, zccache_path: Optional[str]) -> boo
 
     try:
         content = build_ninja_path.read_text(encoding="utf-8")
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
     except OSError:
         return False
 
-    # Use forward slashes so the prefix matches whatever path style meson
-    # emitted (meson normalises paths to forward slashes in some cases).
-    # The actual quoting in build.ninja uses backslashes on Windows; we
-    # use a substring search that doesn't care about quote style.
-    zccache_quoted = f'"{zccache_path}"'
+    # Normalize zccache_path to forward slashes so the idempotency check
+    # works regardless of whether the input path uses backslashes (Windows
+    # ``Path.__str__()``) or forward slashes (Meson normalisation). Meson
+    # emits forward slashes in ``build.ninja`` even on Windows, so we
+    # inject the normalized form and compare against it. Without this, a
+    # second invocation with a backslashed input path would not match the
+    # already-injected forward-slash prefix and would double-wrap.
+    zccache_path_normalized = zccache_path.replace("\\", "/")
+    zccache_quoted = f'"{zccache_path_normalized}"'
 
     new_content = content
     for rule_name in _ZCCACHE_TARGET_RULES:
@@ -359,6 +366,9 @@ def inject_zccache_wrapping(build_dir: Path, zccache_path: Optional[str]) -> boo
 
     try:
         build_ninja_path.write_text(new_content, encoding="utf-8")
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
     except OSError:
         return False
     return True

@@ -334,10 +334,18 @@ def _resolve_fast_native_entries() -> FastNativeEntries:
         if ctc_c is None or ctc_cpp is None:
             return _none
 
+        # Escape any single quotes in the path so the generated Meson
+        # list-of-strings remains valid even if a path happens to contain
+        # one. Paths under ``.cached/clang-native/`` are extremely unlikely
+        # to contain ``'`` in practice, but defensive escaping costs nothing
+        # and avoids a hard-to-debug native-file parse error.
+        def _q(p: str) -> str:
+            return p.replace("'", "\\'")
+
         return FastNativeEntries(
-            cc=f"['{ctc_c}']",
-            cxx=f"['{ctc_cpp}']",
-            ar=f"['{ar_path}']",
+            cc=f"['{_q(ctc_c)}']",
+            cxx=f"['{_q(ctc_cpp)}']",
+            ar=f"['{_q(ar_path)}']",
         )
 
     except KeyboardInterrupt as ki:

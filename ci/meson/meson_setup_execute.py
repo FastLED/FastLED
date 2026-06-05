@@ -325,7 +325,14 @@ def handle_skip_meson_setup(
     )
 
     inject_ar_optimization_patches(build_dir, source_dir)
-    inject_zccache_wrapping(build_dir, compiler.cache_binary)
+    if compiler.cache_binary and not inject_zccache_wrapping(
+        build_dir, compiler.cache_binary
+    ):
+        _ts_print(
+            f"[MESON] Warning: Failed to inject zccache wrapping into build.ninja "
+            f"(build_dir={build_dir}, zccache={compiler.cache_binary})",
+            file=sys.stderr,
+        )
     if normalize_meson_private_include_paths(build_dir):
         _ts_print("[MESON] Normalized private include paths for zccache strict mode")
     _enforce_strict_path_violations(build_dir)
@@ -637,7 +644,14 @@ def run_meson_setup_command(
         )
 
         inject_ar_optimization_patches(build_dir, source_dir)
-        inject_zccache_wrapping(build_dir, compiler.cache_binary)
+        if compiler.cache_binary and not inject_zccache_wrapping(
+            build_dir, compiler.cache_binary
+        ):
+            _ts_print(
+                f"[MESON] Warning: Failed to inject zccache wrapping into build.ninja "
+                f"(build_dir={build_dir}, zccache={compiler.cache_binary})",
+                file=sys.stderr,
+            )
         if normalize_meson_private_include_paths(build_dir):
             _ts_print(
                 "[MESON] Normalized private include paths for zccache strict mode"
