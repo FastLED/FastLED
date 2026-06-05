@@ -27,6 +27,7 @@ from ci.meson.meson_markers import (
     _write_configuration_markers,
     cleanup_stale_meson_lockfile,
     inject_ar_optimization_patches,
+    inject_zccache_wrapping,
 )
 from ci.meson.meson_setup_phases import (
     CompilerDetection,
@@ -153,9 +154,16 @@ def write_meson_native_file(
     native_file_path: Path,
     compiler: CompilerDetection,
 ) -> None:
-    """Generate/update the Meson native file with tool paths + platform info."""
+    """Generate/update the Meson native file with tool paths + platform info.
+
+    The compiler entries point at the BARE ctc-clang/ctc-clang++ binaries.
+    zccache wrapping is applied later as a post-patch on ``build.ninja`` via
+    ``inject_zccache_wrapping`` so the meson configure-phase probes (e.g.
+    ``-xc++ -E -v -``) run against the bare compiler and complete in <1s
+    instead of timing out under zccache. See issue #2714.
+    """
     try:
-        fast = _resolve_fast_native_entries(compiler.cache_binary)
+        fast = _resolve_fast_native_entries()
         if fast.cc is not None:
             c_compiler = fast.cc
             cpp_compiler = fast.cxx
@@ -317,6 +325,7 @@ def handle_skip_meson_setup(
     )
 
     inject_ar_optimization_patches(build_dir, source_dir)
+    inject_zccache_wrapping(build_dir, compiler.cache_binary)
     if normalize_meson_private_include_paths(build_dir):
         _ts_print("[MESON] Normalized private include paths for zccache strict mode")
     _enforce_strict_path_violations(build_dir)
@@ -628,6 +637,7 @@ def run_meson_setup_command(
         )
 
         inject_ar_optimization_patches(build_dir, source_dir)
+        inject_zccache_wrapping(build_dir, compiler.cache_binary)
         if normalize_meson_private_include_paths(build_dir):
             _ts_print(
                 "[MESON] Normalized private include paths for zccache strict mode"
