@@ -540,7 +540,7 @@ FL_TEST_CASE("[#2517] Disabled driver: enqueue is suppressed (would-be silent dr
     auto fakeDriver = fl::make_shared<CountingFakeDriver>("PARLIO_TEST");
     mgr.addDriver(9000, fakeDriver);
     FL_REQUIRE(mgr.driverStatus(fl::string::from_literal("PARLIO_TEST"))
-               == ChannelManager::DriverStatus::ENABLED);
+               == ChannelManager::DriverStatus::STATUS_ENABLED);
 
     CRGB leds[4] = {};
     auto channel = Channel::create(makeSilentDropTestConfig(fl::span<CRGB>(leds, 4)));
@@ -563,7 +563,7 @@ FL_TEST_CASE("[#2517] Disabled driver: enqueue is suppressed (would-be silent dr
     // driver via its cached `mDriver` weak_ptr being valid.
     mgr.setExclusiveDriverByName("DOES_NOT_EXIST");
     FL_CHECK(mgr.driverStatus(fl::string::from_literal("PARLIO_TEST"))
-             == ChannelManager::DriverStatus::DISABLED);
+             == ChannelManager::DriverStatus::STATUS_DISABLED);
     FL_CHECK_EQ(mgr.exclusiveDriverName(),
                 fl::string::from_literal("DOES_NOT_EXIST"));
 

@@ -162,15 +162,19 @@ public:
     bool isDriverEnabled(const char* name) const FL_NOEXCEPT;
 
     /// @brief Registration status of a driver by name (silent lookup)
+    /// @note Values are prefixed (`STATUS_*`) because Arduino-ESP32's
+    ///       `esp32-hal-gpio.h` defines `#define DISABLED 0x00` for pinMode
+    ///       and would textually rewrite the unprefixed labels at every call
+    ///       site (`DriverStatus::DISABLED` -> `DriverStatus::0x00`).
     enum class DriverStatus {
-        NOT_REGISTERED,  ///< No driver with that name is registered
-        DISABLED,        ///< Driver is registered but disabled
-        ENABLED,         ///< Driver is registered and enabled
+        NOT_REGISTERED,    ///< No driver with that name is registered
+        STATUS_DISABLED,   ///< Driver is registered but disabled
+        STATUS_ENABLED,    ///< Driver is registered and enabled
     };
 
     /// @brief Look up a driver's registration status without logging on miss.
     /// @param name Driver name (case-sensitive)
-    /// @return DriverStatus tri-state (NOT_REGISTERED / DISABLED / ENABLED)
+    /// @return DriverStatus tri-state (NOT_REGISTERED / STATUS_DISABLED / STATUS_ENABLED)
     /// @note Companion to `findDriverByName()` — same silent-on-miss behavior.
     ///       Used by `Channel::showPixels()` to detect the #2517 silent-drop
     ///       case (enqueued data routed to a disabled / unregistered driver).
