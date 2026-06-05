@@ -38,6 +38,61 @@
 #endif
 
 // =============================================================================
+// FASTLED_LOG_VERBOSITY — release-mode knob to no-op FL_WARN/FL_INFO/
+//                          FL_ERROR/FL_PRINT and free ~20-40 KB of
+//                          `.flash.rodata` string-pool bloat on embedded
+//                          builds. See FastLED #2773 item 2.3.
+// =============================================================================
+//
+// Each `FL_WARN(...)` / `FL_INFO(...)` / `FL_ERROR(...)` / `FL_PRINT(...)`
+// call site bakes a `__FILE__ + __LINE__ + user-supplied message` literal
+// into `.flash.rodata`. On the ESP32-S3 NEOPIXEL Blink build that pool is
+// ~57 KB — the single biggest `.rodata` contributor (see the audit on
+// #2473). The strings are live only because their call sites are live.
+//
+// Levels (mirror standard log-verbosity conventions; higher = more output):
+//
+//   * `FASTLED_LOG_VERBOSITY == 0` → ALL of FL_WARN/FL_INFO/FL_ERROR/
+//     FL_PRINT/FL_DBG expand to `do {} while(0)`. Strings, `fl::sstream`
+//     uses, and any transitive `fl::println` references vanish; the
+//     downstream printf chain may shrink further as a result.
+//   * `FASTLED_LOG_VERBOSITY == 1` → current behavior; FL_WARN /
+//     FL_INFO / FL_ERROR / FL_PRINT fire on platforms where
+//     `SKETCH_HAS_LARGE_MEMORY` is set. FL_DBG follows its existing
+//     `FASTLED_HAS_DBG` gate.
+//   * `FASTLED_LOG_VERBOSITY >= 2` → reserved for future "even noisier
+//     than debug" output; currently equivalent to level 1.
+//
+// Default: 1 (preserve current behavior). Define `FASTLED_LOG_VERBOSITY=0`
+// in your build flags (e.g. `build_flags = -DFASTLED_LOG_VERBOSITY=0` in
+// platformio.ini) to opt into the savings on release builds. Host unit
+// tests pin verbosity to 1 unconditionally so test diagnostics keep
+// firing regardless of build configuration.
+#ifdef FASTLED_TESTING
+  // Host unit tests always want the full diagnostic stream so assertion
+  // and warning messages can be checked in CI.
+  #if !defined(FASTLED_LOG_VERBOSITY) || FASTLED_LOG_VERBOSITY < 1
+    #undef FASTLED_LOG_VERBOSITY
+    #define FASTLED_LOG_VERBOSITY 1
+  #endif
+#else
+  #ifndef FASTLED_LOG_VERBOSITY
+    #define FASTLED_LOG_VERBOSITY 1
+  #endif
+#endif
+
+// Resolved compile-time gate. Logging fires only when BOTH the platform
+// has a sufficient memory budget AND the user hasn't opted out via
+// `FASTLED_LOG_VERBOSITY=0`. The two gates are independent — embedded
+// targets without `SKETCH_HAS_LARGE_MEMORY` are no-op regardless of the
+// verbosity knob (matching the pre-#2773 behavior on AVR/ATtiny).
+#if SKETCH_HAS_LARGE_MEMORY && (FASTLED_LOG_VERBOSITY >= 1)
+  #define FASTLED_LOG_RUNTIME_ENABLED 1
+#else
+  #define FASTLED_LOG_RUNTIME_ENABLED 0
+#endif
+
+// =============================================================================
 // Forward Declarations
 // =============================================================================
 
@@ -73,14 +128,14 @@ const char *fastled_file_offset(const char *file) FL_NOEXCEPT;
 #endif
 
 #ifndef FL_ERROR
-#if SKETCH_HAS_LARGE_MEMORY
+#if FASTLED_LOG_RUNTIME_ENABLED
 // FL_ERROR: Supports both string literals and stream-style formatting with << operator
 // Uses sstream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
 // Includes file and line number for easier debugging
 #define FL_ERROR(X) fl::println((fl::sstream() << (fl::fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): ERROR: " << X).c_str())
 #define FL_ERROR_IF(COND, MSG) do { if (COND) FL_ERROR(MSG); } while(0)
 #else
-// No-op macros for memory-constrained platforms
+// No-op macros — either memory-constrained platform or FASTLED_LOG_VERBOSITY=0.
 #define FL_ERROR(X) do { } while(0)
 #define FL_ERROR_IF(COND, MSG) do { } while(0)
 #endif
@@ -99,7 +154,7 @@ const char *fastled_file_offset(const char *file) FL_NOEXCEPT;
 #endif
 
 #ifndef FL_WARN
-#if SKETCH_HAS_LARGE_MEMORY
+#if FASTLED_LOG_RUNTIME_ENABLED
 // FL_WARN: Supports both string literals and stream-style formatting with << operator
 // Uses sstream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
 // Includes file and line number for easier debugging
@@ -131,7 +186,7 @@ const char *fastled_file_offset(const char *file) FL_NOEXCEPT;
     } \
 } while(0)
 #else
-// No-op macros for memory-constrained platforms
+// No-op macros — either memory-constrained platform or FASTLED_LOG_VERBOSITY=0.
 #define FL_WARN(X) do { } while(0)
 #define FL_WARN_IF(COND, MSG) if(false) { void(fl::sstream_noop() << MSG); }
 #define FL_WARN_ONCE(X) do { } while(0)
@@ -154,7 +209,7 @@ const char *fastled_file_offset(const char *file) FL_NOEXCEPT;
 #endif
 
 #ifndef FL_INFO
-#if SKETCH_HAS_LARGE_MEMORY
+#if FASTLED_LOG_RUNTIME_ENABLED
 // FL_INFO: Supports both string literals and stream-style formatting with << operator
 // Uses sstream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
 // Includes file and line number for easier debugging
@@ -171,7 +226,7 @@ const char *fastled_file_offset(const char *file) FL_NOEXCEPT;
     } \
 } while(0)
 #else
-// No-op macros for memory-constrained platforms
+// No-op macros — either memory-constrained platform or FASTLED_LOG_VERBOSITY=0.
 #define FL_INFO(X) do { } while(0)
 #define FL_INFO_IF(COND, MSG) do { } while(0)
 #define FL_INFO_ONCE(X) do { } while(0)
@@ -191,12 +246,17 @@ const char *fastled_file_offset(const char *file) FL_NOEXCEPT;
 
 // Debug printing control:
 // - FASTLED_DISABLE_DBG=1: Explicitly disable FL_DBG output (highest priority)
+// - FASTLED_LOG_VERBOSITY=0: Disable FL_DBG along with all other macros
 // - FASTLED_FORCE_DBG: Force enable FL_DBG (auto-set for debug builds)
 // - SKETCH_HAS_LARGE_MEMORY: Enable FL_DBG when platform has enough memory
 //
-// Priority: FASTLED_DISABLE_DBG > FASTLED_FORCE_DBG > SKETCH_HAS_LARGE_MEMORY
+// Priority: FASTLED_DISABLE_DBG > FASTLED_LOG_VERBOSITY > FASTLED_FORCE_DBG > SKETCH_HAS_LARGE_MEMORY
 #if defined(FASTLED_DISABLE_DBG) && FASTLED_DISABLE_DBG
 // Explicit disable takes highest priority - useful for reducing serial spam
+#define FASTLED_HAS_DBG 0
+#define _FASTLED_DGB(X) FL_DBG_NO_OP(X)
+#elif FASTLED_LOG_VERBOSITY < 1
+// FASTLED_LOG_VERBOSITY=0 disables FL_DBG too. See #2773 item 2.3.
 #define FASTLED_HAS_DBG 0
 #define _FASTLED_DGB(X) FL_DBG_NO_OP(X)
 #elif !defined(FASTLED_FORCE_DBG) && !SKETCH_HAS_LARGE_MEMORY
@@ -277,7 +337,7 @@ const char *fastled_file_offset(const char *file) FL_NOEXCEPT;
 ///   FL_PRINT("Value: " << x);
 ///   FL_PRINT(ss.str());
 #ifndef FL_PRINT
-#if SKETCH_HAS_LARGE_MEMORY
+#if FASTLED_LOG_RUNTIME_ENABLED
 #define FL_PRINT(X) fl::println((fl::sstream() << X).c_str())
 
 // FL_PRINT_EVERY: Rate-limited print that outputs at most once per interval
