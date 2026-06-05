@@ -117,13 +117,19 @@ def run_command(cmd: str) -> str:
     """Run a command and return stdout"""
     try:
         proc = RunningProcess(cmd, shell=True, auto_run=True, timeout=30)
-        output = ""
         from running_process import EndOfStream
 
+        # `get_next_line` strips the trailing newline. Re-add it so callers
+        # that `output.split("\n")` actually get one entry per line rather
+        # than a single mega-line that no parser can split on whitespace
+        # (the cause of "nm: 1 symbols" on toolchains like xtensa-esp-elf
+        # whose nm prints many hundreds of lines).
+        output_lines: list[str] = []
         while line := proc.get_next_line(timeout=30):
             if isinstance(line, EndOfStream):
                 break
-            output += str(line)
+            output_lines.append(str(line))
+        output = "\n".join(output_lines)
         exit_code = proc.wait()
         if exit_code != 0:
             print(f"Error running command: {cmd}")

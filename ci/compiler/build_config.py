@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from running_process import EndOfStream, RunningProcess
 
@@ -89,6 +89,61 @@ def get_root_platformio_build_flags(board_name: str, project_root: Path) -> list
         return []
 
 
+def _override_prog_path_for_fbuild(
+    build_dir: Path, data: dict[str, dict[str, Any]], board: "Board"
+) -> None:
+    """If fbuild produced a fresher ELF than PlatformIO's `prog_path`,
+    rewrite the path to point at the fbuild artifact so symbol/size
+    analysis reads the build we just produced — not whatever an older
+    `pio run` left in `.pio/build/<env>/`.
+
+    No-op when the fbuild directory is absent (pure PlatformIO build),
+    when the PIO ELF is newer (PIO was the active backend), or when the
+    metadata blob has no recognisable environment entry.
+    """
+    fbuild_root = build_dir / ".fbuild" / "build"
+    if not fbuild_root.is_dir():
+        return
+
+    if not data:
+        return
+
+    env_name = board.board_name if board.board_name in data else next(iter(data), None)
+    if env_name is None:
+        return
+    env = data[env_name]
+
+    fbuild_elf = fbuild_root / env_name / "release" / "firmware.elf"
+    if not fbuild_elf.exists():
+        return
+
+    current_prog_raw = env.get("prog_path")
+    if isinstance(current_prog_raw, str) and current_prog_raw:
+        current_prog = Path(current_prog_raw)
+        # Only override when fbuild's ELF is strictly newer (or PIO's is
+        # missing). A successful `pio run` that beats the most recent
+        # fbuild run should win.
+        if current_prog.exists():
+            try:
+                if current_prog.stat().st_mtime >= fbuild_elf.stat().st_mtime:
+                    return
+            except OSError:
+                pass
+
+    fbuild_elf_str = str(fbuild_elf.resolve())
+    env["prog_path"] = fbuild_elf_str
+    fbuild_bin = fbuild_elf.with_suffix(".bin")
+    if fbuild_bin.exists() and "prog_size" in env:
+        try:
+            env["prog_size"] = fbuild_bin.stat().st_size
+        except OSError:
+            pass
+    print(
+        f"  Pointed prog_path at fbuild artifact: {fbuild_elf_str} "
+        f"(was {current_prog_raw!r})"
+    )
+
+
 def generate_build_info_json_from_existing_build(
     build_dir: Path, board: "Board", example: Optional[str] = None
 ) -> bool:
@@ -155,6 +210,19 @@ def generate_build_info_json_from_existing_build(
         try:
             metadata_output = "".join(metadata_lines)
             data = json.loads(metadata_output)
+
+            # When the build was driven by fbuild (which writes its ELF to
+            # `<build_dir>/.fbuild/build/<env>/release/firmware.elf`), the
+            # `prog_path` we just got from `pio project metadata` still
+            # points at the PlatformIO output path under `.pio/build/<env>/`.
+            # That `.pio/` ELF is whatever an older `pio run` left there
+            # (often empty or stale), so downstream symbol/size analysis
+            # would silently analyze the wrong binary. Detect the fresher
+            # fbuild ELF and rewrite `prog_path` to it so the consumers
+            # (ci/symbol_analysis_runner.py, ci/inspect_elf.py,
+            # ci/compiled_size.py firmware.bin fallback) see the build we
+            # just made.
+            _override_prog_path_for_fbuild(build_dir, data, board)
 
             # Add tool aliases for symbol analysis and debugging
             insert_tool_aliases(data)
