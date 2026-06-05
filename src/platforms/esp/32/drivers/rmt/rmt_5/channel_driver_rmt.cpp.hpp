@@ -381,6 +381,60 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     /// @brief Release a channel (marks as available for reuse)
     void releaseChannel(ChannelState *channel) FL_NOEXCEPT;
 
+    /// @brief Out-of-line diagnostic emitters (#2773 item 2.2).
+    /// Both messages are ~15 lines of multi-line literal + integer
+    /// interpolation, and live only on the cold recovery / failure paths of
+    /// createChannel. Keeping them inside createChannel bloated the function
+    /// to ~6.3 KB because every `operator<<` instantiation got inlined.
+    /// Splitting into `noinline` helpers moves those instantiations into
+    /// their own (also cold-path) functions so `--gc-sections` can keep
+    /// them tiny, and createChannel shrinks proportionally.
+    __attribute__((noinline)) void emitRecoveryWarning(
+        size_t original_symbols, size_t reduced_symbols,
+        size_t external_words) FL_NOEXCEPT {
+        fl::sstream msg;
+        msg << "\n========================================\n"
+            << "RMT ALLOCATION RECOVERY - ACTION REQUIRED\n"
+            << "========================================\n"
+            << "FastLED detected external RMT memory usage!\n"
+            << "  Expected: " << original_symbols << " symbols available\n"
+            << "  Actual: " << reduced_symbols << " symbols available\n"
+            << "  External usage: ~" << external_words << " words\n"
+            << "\n"
+            << "To prevent future recovery attempts, add this to setup():\n"
+            << "----------------------------------------\n"
+            << "  auto& rmtMgr = fl::RmtMemoryManager::instance();\n"
+            << "  rmtMgr.reserveExternalMemory(" << external_words << ", 0);\n"
+            << "----------------------------------------\n"
+            << "\n"
+            << "FastLED will continue with reduced buffer size.\n"
+            << "Performance may be degraded during WiFi/network activity.\n"
+            << "========================================";
+        FL_WARN(msg.str());
+    }
+
+    __attribute__((noinline)) void emitAllocationFailureError(
+        size_t retry_count, size_t original_symbols, size_t min_symbols,
+        int pin) FL_NOEXCEPT {
+        fl::sstream msg;
+        msg << "\n========================================\n"
+            << "RMT CHANNEL ALLOCATION FAILED\n"
+            << "========================================\n"
+            << "FastLED could not allocate RMT channel after " << retry_count << " retry attempts\n"
+            << "  Platform: " << CONFIG_IDF_TARGET << "\n"
+            << "  Requested: " << original_symbols << " symbols\n"
+            << "  Minimum attempted: " << min_symbols << " symbols\n"
+            << "\n"
+            << "Possible causes:\n"
+            << "  1. External code is using all RMT channels\n"
+            << "  2. RMT hardware failure\n"
+            << "  3. Insufficient RMT memory for platform\n"
+            << "\n"
+            << "LEDs on pin " << pin << " will NOT work!\n"
+            << "========================================";
+        FL_ERROR(msg.str());
+    }
+
     /// @brief Create new RMT channel with given configuration
     /// @param dataSize Size of LED data in bytes (0 = use default buffer size)
     /// @return true if channel created successfully
@@ -667,25 +721,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
                     // Show recovery warning with user action guidance
                     if (!mRecoveryWarningShown) {
-                        fl::sstream msg;
-                        msg << "\n========================================\n"
-                            << "RMT ALLOCATION RECOVERY - ACTION REQUIRED\n"
-                            << "========================================\n"
-                            << "FastLED detected external RMT memory usage!\n"
-                            << "  Expected: " << original_symbols << " symbols available\n"
-                            << "  Actual: " << reduced_symbols << " symbols available\n"
-                            << "  External usage: ~" << external_words << " words\n"
-                            << "\n"
-                            << "To prevent future recovery attempts, add this to setup():\n"
-                            << "----------------------------------------\n"
-                            << "  auto& rmtMgr = fl::RmtMemoryManager::instance();\n"
-                            << "  rmtMgr.reserveExternalMemory(" << external_words << ", 0);\n"
-                            << "----------------------------------------\n"
-                            << "\n"
-                            << "FastLED will continue with reduced buffer size.\n"
-                            << "Performance may be degraded during WiFi/network activity.\n"
-                            << "========================================";
-                        FL_WARN(msg.str());
+                        emitRecoveryWarning(original_symbols, reduced_symbols, external_words);
                         mRecoveryWarningShown = true;
                     }
 
@@ -706,23 +742,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
             // If recovery failed, show detailed error
             if (!recovery_succeeded) {
-                fl::sstream msg;
-                msg << "\n========================================\n"
-                    << "RMT CHANNEL ALLOCATION FAILED\n"
-                    << "========================================\n"
-                    << "FastLED could not allocate RMT channel after " << retry_count << " retry attempts\n"
-                    << "  Platform: " << CONFIG_IDF_TARGET << "\n"
-                    << "  Requested: " << original_symbols << " symbols\n"
-                    << "  Minimum attempted: " << min_symbols << " symbols\n"
-                    << "\n"
-                    << "Possible causes:\n"
-                    << "  1. External code is using all RMT channels\n"
-                    << "  2. RMT hardware failure\n"
-                    << "  3. Insufficient RMT memory for platform\n"
-                    << "\n"
-                    << "LEDs on pin " << static_cast<int>(pin) << " will NOT work!\n"
-                    << "========================================";
-                FL_ERROR(msg.str());
+                emitAllocationFailureError(retry_count, original_symbols,
+                                           min_symbols, static_cast<int>(pin));
 
                 state->channel = nullptr;
                 memMgr.free(state->memoryChannelId, true);
