@@ -1,36 +1,27 @@
-// @filter: (board is esp32dev) or (board is esp32s3) or (board is esp32c3) or (board is esp32c6) or (board is esp32p4) or (board is esp32wroom)
-//
-// Restrict to ESP32 boards that ship esp_dsp.h in their PlatformIO toolchain
-// bundle. esp32c2 / esp32s2 / esp32h2 / esp32c5 don't include esp_dsp, so the
-// `#define FL_FFT_USE_ESP_DSP 1` below causes a "esp_dsp.h: No such file"
-// fatal error there. See FastLED #2623.
-
 /// @file AudioFftParity.ino
 /// @brief Sanity test for the ESP-DSP real-FFT backend in fl::audio::fft.
 ///
 /// Validates that `detail::espDspRealForward()` produces mathematically
-/// correct output for several known test signals — unblocking opt-in to
-/// `FL_FFT_USE_ESP_DSP=1`. Does NOT compare against kiss_fftr directly
-/// (kiss defaults to FIXED16 int16 on FastLED; ESP-DSP is float32, so
-/// scale/precision differ). Instead checks known analytic properties:
+/// correct output for several known test signals. Does NOT compare against
+/// kiss_fftr directly (kiss defaults to FIXED16 int16 on FastLED; ESP-DSP is
+/// float32, so scale/precision differ). Instead checks known analytic
+/// properties:
 ///
 ///   sine_single:  delta at bin k, ~0 elsewhere. Peak|mag > 10 × next|mag.
 ///   impulse:      uniform magnitude across all bins (flat spectrum).
 ///   dc:           only bin 0 non-zero; bins 1..N/2 effectively zero.
 ///   zero_input:   all bins zero.
 ///
+/// The ESP-DSP backend is auto-detected via FL_HAS_INCLUDE("esp_dsp.h") —
+/// no opt-in #define needed. ESP32 variants whose toolchain does not ship
+/// esp_dsp.h (esp32c2 / esp32s2 / esp32h2 / esp32c5) fall through to the
+/// empty-sketch path below and build cleanly. See issues #2308 / #2629.
+///
 /// Usage (ESP32 only):
 ///     bash compile esp32s3 --examples AudioFftParity
 ///     bash debug AudioFftParity --expect FFT_PARITY_PASS --fail-on FFT_PARITY_FAIL
 /// or:
 ///     bash autoresearch esp32s3 ... (wire up a custom expect via --expect)
-///
-/// See issue #2308.
-
-// Enable the ESP-DSP backend compilation for this sketch only. The backend's
-// math correctness is what this example tests; keeping the define local means
-// no other code is affected.
-#define FL_FFT_USE_ESP_DSP 1
 
 #include <Arduino.h>
 #include <FastLED.h>
@@ -39,9 +30,11 @@
 
 #if !FL_FFT_ESP_DSP_AVAILABLE
 
-// Non-ESP32 targets: empty sketch. The ESP-DSP backend only compiles on ESP32;
-// on host / AVR / Teensy / etc. this example has nothing to test. Keep the
-// sketch buildable so the host example-compile CI stage doesn't fail.
+// Non-ESP32 targets (and ESP32 variants without esp_dsp.h): empty sketch.
+// The ESP-DSP backend only compiles when esp_dsp.h is present in the
+// toolchain; on host / AVR / Teensy / esp32c2 / esp32s2 / esp32h2 / esp32c5
+// this example has nothing to test. Keep the sketch buildable so the
+// example-compile CI stage stays green.
 void setup() {}
 void loop() {}
 

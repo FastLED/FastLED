@@ -5,7 +5,7 @@
 // Centralizes the forward real-to-complex FFT call so the implementation can
 // select between:
 //   - kiss_fftr (third_party, portable, default everywhere)
-//   - ESP-DSP dsps_fft2r_fc32 (ESP32*, opt-in via FL_FFT_USE_ESP_DSP=1)
+//   - ESP-DSP dsps_fft2r_fc32 (ESP32*, auto-detected via FL_HAS_INCLUDE("esp_dsp.h"))
 //   - CMSIS-DSP arm_rfft_fast_f32 (ARM Cortex-M4/M7/M33, FUTURE)
 //
 // ----------------------------------------------------------------------------
@@ -61,42 +61,41 @@
 //                     DC and Nyquist positions expected by kiss layout
 //
 // ----------------------------------------------------------------------------
-// Opt-in: ESP-DSP on ESP32 is typically 3-5× faster than kiss_fftr.
+// Auto-detect: ESP-DSP on ESP32 is typically 3-5× faster than kiss_fftr.
 // Expected cost on ESP32-S3: ~15 µs vs ~54 µs for the default 512-point
 // real FFT. See issue #2308 for the broader audio performance plan.
 //
-// Default is OFF — enabling requires additional validation (numeric output
-// parity vs kiss_fftr, hardware benchmarks, linker verification across ESP32
-// variants). Users opt in via:
+// Gate has moved from user opt-in (FL_FFT_USE_ESP_DSP=1) to automatic
+// `__has_include("esp_dsp.h")` detection — same pattern used for esp_cache.h
+// in src/platforms/esp/32/drivers/lcd_spi/. The ESP32 variants that do not
+// ship esp_dsp in their toolchain bundle (esp32c2 / esp32s2 / esp32h2 /
+// esp32c5) automatically fall through to the kiss_fftr scalar path; no per-
+// example `@filter` line is needed. See issue #2629 / PR #2625 for history.
 //
-//   -DFL_FFT_USE_ESP_DSP=1
-//
-// in build_flags. The math is the standard "real FFT from packed N/2-complex
-// FFT" identity; see inline comments on the unpack for derivation.
+// The math is the standard "real FFT from packed N/2-complex FFT" identity;
+// see inline comments on the unpack for derivation.
 
 #include "fl/stl/compiler_control.h"
+#include "fl/stl/has_include.h"
 #include "platforms/is_platform.h"
 // IWYU pragma: begin_keep
 #include "third_party/cq_kernel/kiss_fftr.h"
 // IWYU pragma: end_keep
 
-#ifndef FL_FFT_USE_ESP_DSP
-#define FL_FFT_USE_ESP_DSP 0
-#endif
-
 // FL_FFT_ESP_DSP_AVAILABLE: ESP-DSP backend code is compiled in.
 // FL_FFT_ESP_DSP_ACTIVE:    dispatcher routes real FFT calls through it.
 //
-// Both gate on FL_FFT_USE_ESP_DSP to keep the experimental backend fully
-// dormant in default builds. The AudioFftParity example sketch sets
-// FL_FFT_USE_ESP_DSP=1 locally to exercise the implementation.
+// Both gate on `defined(FL_IS_ESP32) && FL_HAS_INCLUDE("esp_dsp.h")` so the
+// backend is silently elided on toolchains that do not provide esp_dsp.h
+// (esp32c2 / esp32s2 / esp32h2 / esp32c5). The AudioFftParity example
+// exercises the backend on any ESP32 board where the header is present.
 //
 // NOTE: the ESP-DSP implementation below is NOT yet bit-for-bit validated
 // against kiss_fftr — hardware sanity tests via AudioFftParity currently
 // report incorrect output (flat magnitudes for DC / single-tone inputs).
-// Root cause is under investigation; do NOT enable this in production.
-// See issue #2308.
-#if FL_FFT_USE_ESP_DSP && defined(FL_IS_ESP32)
+// Root cause is under investigation; the dispatcher (`fl_fft_real_forward`)
+// stays on kiss_fftr by default. See issue #2308.
+#if defined(FL_IS_ESP32) && FL_HAS_INCLUDE("esp_dsp.h")
 #define FL_FFT_ESP_DSP_AVAILABLE 1
 #include "esp_dsp.h"
 #include "fl/stl/vector.h"
@@ -246,12 +245,13 @@ inline void fl_fft_real_forward(kiss_fftr_cfg cfg, int N,
     //
     // Future work: either (a) add an int16 packed-FFT variant using
     // dsps_fft2r_sc16 to match FIXED16 mode, or (b) auto-switch the library
-    // to FASTLED_FFT_FLOAT when FL_FFT_USE_ESP_DSP is enabled. Once wired,
+    // to FASTLED_FFT_FLOAT when FL_FFT_ESP_DSP_AVAILABLE is on. Once wired,
     // replace the below with a conditional call to detail::espDspRealForward.
     //
-    // The ESP-DSP code is compiled in (when FL_FFT_USE_ESP_DSP=1 + ESP32)
-    // and exposed as fl::audio::fft::detail::espDspRealForward() so the
-    // AudioFftParity example can exercise it directly for validation.
+    // The ESP-DSP code is compiled in whenever the ESP32 toolchain ships
+    // esp_dsp.h (auto-detected via FL_HAS_INCLUDE) and exposed as
+    // fl::audio::fft::detail::espDspRealForward() so the AudioFftParity
+    // example can exercise it directly for validation.
     (void)N;
     kiss_fftr(cfg, in, out);
 }
