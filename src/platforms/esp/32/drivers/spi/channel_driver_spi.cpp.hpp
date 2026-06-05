@@ -1479,6 +1479,64 @@ void ChannelEngineSpi::startFirstDma() FL_NOEXCEPT {
         mPipeline.mDmaInFlight = true;
         mPipeline.mEncodeIdx = 1; // Next encode goes to buffer B
         mPipeline.mPhase = DmaPipelineState::STREAMING;
+
+        // Back-to-back DMA streaming (issue #2304):
+        //
+        // For long strips (>~680 LEDs) the encoded SPI data spans more than one
+        // staging buffer. The naive approach (queue chunk A, wait, queue B,
+        // wait, ...) leaves the SPI line idle for the poll() latency between
+        // chunks. Under RTOS contention that gap can exceed WS2812B's ~50µs
+        // reset threshold and trigger a visible refresh.
+        //
+        // Fix: when async DMA is available, pre-encode and pre-queue the
+        // second chunk right away so the SPI ISR transitions directly from
+        // transA -> transB without host involvement. ESP-IDF's
+        // spi_device_queue_trans permits multiple in-flight transactions
+        // (dev_config.queue_size = 4 already in place); we cap at 2 to keep
+        // the pipeline shallow and predictable.
+        //
+        // ESP32-C6 split-polling path: spi_device_polling_start only allows
+        // one in-flight polling transaction at a time, so we keep the
+        // existing single-queue behaviour there. The C6 still benefits from
+        // the encode/wait overlap but cannot get the ISR-chained gap-free
+        // behaviour without an ESP-IDF API change.
+        if (!kSpiUsePolling && ch->ledBytesRemaining > 0) {
+            // Save source state so we can roll back if the SPI driver refuses
+            // to queue transB. encodeChunk() advances ch->ledSource /
+            // ch->ledBytesRemaining as a side-effect, so a failure here would
+            // otherwise drop the chunk we just consumed instead of letting the
+            // refill loop retry it on the next poll() iteration.
+            const u8* savedSource = ch->ledSource;
+            size_t savedRemaining = ch->ledBytesRemaining;
+
+            size_t encoded_b = encodeChunk(ch, ch->stagingB, ch->stagingCapacity);
+            if (encoded_b > 0) {
+                spi_transaction_t* transB = &ch->transB;
+                fl::memset(transB, 0, sizeof(*transB));
+                transB->length = encoded_b * 8;
+                transB->tx_buffer = ch->stagingB;
+
+                if (ch->numLanes >= 4) {
+                    transB->flags = SPI_TRANS_MODE_QIO;
+                } else if (ch->numLanes >= 2) {
+                    transB->flags = SPI_TRANS_MODE_DIO;
+                }
+
+                esp_err_t retB = spiStart(ch->spi_device, transB);
+                if (retB == ESP_OK) {
+                    ch->transBInFlight = true;
+                    mPipeline.mEncodeIdx = 2; // Both A and B queued
+                } else {
+                    // Pre-queue failed but A is already in flight. Roll back
+                    // the source pointer so the refill loop re-encodes this
+                    // chunk into B once A completes instead of truncating the
+                    // stream after A.
+                    ch->ledSource = savedSource;
+                    ch->ledBytesRemaining = savedRemaining;
+                    FL_WARN("ChannelEngineSpi: startFirstDma pre-queue B failed: " << retB);
+                }
+            }
+        }
     } else {
         FL_WARN("ChannelEngineSpi: startFirstDma spiStart failed: " << ret);
         ch->transmissionComplete = true;
@@ -1499,8 +1557,15 @@ IChannelDriver::DriverState ChannelEngineSpi::advancePipeline() FL_NOEXCEPT {
             return DriverState::READY;
         }
 
-        // Check if current DMA is complete
-        if (mPipeline.mDmaInFlight) {
+        // "Any chunk in flight" — refreshed each iteration. Tracks the real
+        // state of both transA and transB so that pre-queued back-to-back
+        // chunks are accounted for (issue #2304).
+        bool anyInFlight = ch->transAInFlight || ch->transBInFlight;
+
+        // Check if a DMA has completed. In async mode this drains the next
+        // completed transaction from ESP-IDF's FIFO queue; in polling mode
+        // it ends the current (single) polling transaction.
+        if (anyInFlight) {
             spi_transaction_t* completed = nullptr;
             esp_err_t ret = spiCheckDone(ch->spi_device, &completed);
             if (ret != ESP_OK) {
@@ -1516,10 +1581,16 @@ IChannelDriver::DriverState ChannelEngineSpi::advancePipeline() FL_NOEXCEPT {
                 if (completed == &ch->transA) ch->transAInFlight = false;
                 else if (completed == &ch->transB) ch->transBInFlight = false;
             }
-            mPipeline.mDmaInFlight = false;
+            // Re-evaluate after draining one completion
+            anyInFlight = ch->transAInFlight || ch->transBInFlight;
+            mPipeline.mDmaInFlight = anyInFlight;
         }
 
-        // Encode and queue next chunk if data remains
+        // Encode and queue next chunk if data remains. After the back-to-back
+        // pre-queue in startFirstDma(), this fires on each subsequent
+        // completion and refills the buffer that just freed up — keeping
+        // two transactions in the SPI ISR's queue so it can chain them
+        // gap-free.
         if (ch->ledBytesRemaining > 0) {
             int bufIdx = mPipeline.mEncodeIdx & 1;
             u8* buffer = (bufIdx == 0) ? ch->stagingA : ch->stagingB;
@@ -1545,8 +1616,9 @@ IChannelDriver::DriverState ChannelEngineSpi::advancePipeline() FL_NOEXCEPT {
             return DriverState::DRAINING;
         }
 
-        // No more data to encode
-        if (mPipeline.mDmaInFlight) {
+        // No more data to encode — drain any chunks still in flight before
+        // marking the channel complete.
+        if (anyInFlight) {
             mPipeline.mPhase = DmaPipelineState::COMPLETING;
             return DriverState::DRAINING;
         }
