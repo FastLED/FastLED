@@ -188,6 +188,26 @@ clang-tool-chain provides a uniform GNU-style build environment across all platf
   - Never use: `ZCCACHE_DISABLE=1` as a workaround for zccache errors
   - Rationale: zccache provides critical compilation performance optimization - disabling it dramatically slows down builds
 
+### Decision: Explicit Input Declaration Over Tool Auto-Discovery
+
+**Rule**: When integrating an external tool that builds its own cache key (zccache `meson configure`, `zccache exec`, future content-addressable wrappers we adopt), enumerate the inputs ourselves rather than letting the tool auto-discover them.
+
+**Why**: Auto-discovery is convenient until the tool walks a scratch dir we don't care about. FastLED's `.venv/` is ~100k Python files; the zccache `meson configure` walk traversed it on every invocation and cost ~5s of pure overhead. Explicit declaration is faster (we know what we have), more precise (no over-invalidation from unrelated touches), and forces the integration to be reviewable — the input set lives in code, not in the tool's heuristics.
+
+**Concrete instances in this repo** (`ci/meson/meson_setup_execute.py`):
+- `FASTLED_MESON_BUILD_FILES`: the canonical 7-entry tuple naming every `meson.build` (top-level, `tests/`, `tests/profile/`, `examples/`, `ci/meson/{native,shared,wasm}/`). Passed as repeated `--input-file` entries with `--no-walk` so the wrapper skips its recursive `--source-dir` traversal entirely.
+- `_write_zccache_input_sidecar`: persists FastLED's `SourceHashes` (src / test / source-glob digests) to `.build/.zccache-meson-inputs-<mode>.hash` and feeds the path in as one more `--input-file`. This is the source-aware half of invalidation — `--no-walk` covers the build-script half (`meson.build` content), the sidecar covers the `.cpp`/`.h` half.
+
+**Result**: cold-with-cache reconfigure dropped from ~5.6s (walked hit) to **0.62s** (no-walk hit, measured on master post-#2761). Cold miss is still ~13s.
+
+**Applying this to future tool adoptions** — checklist:
+1. Does the tool support an "I'll declare every input, don't walk" mode? (`--no-walk`, `--inputs-from`, an explicit input manifest, etc.) Use it.
+2. Where does FastLED's source-change detection actually live? If it's not in the tool's view of the world (e.g. it hashes `.cpp` content but the tool only hashes build scripts), wire the gap via a sidecar file written by us and fed in as one more declared input — see `_write_zccache_input_sidecar` for the pattern.
+3. Cache-key namespacing: confirm the tool keys empty-input-set distinctly from walked-input-set (or rotates its key-domain tag when its hashing rules change). The zccache `meson configure` wrapper guarantees this via `KEY_DOMAIN_TAG` rotation plus the empty `input_files` map for `--no-walk` mode — pinned upstream by `no_walk_is_keyed_distinctly_from_walked` in zackees/zccache#660.
+4. Capability detection: probe the binary in the venv (e.g. `tool --help` grep for the flag name) rather than parsing a version string. Lets older binaries fall through to the previous code path silently — see `_get_zccache_meson_configure_path` returning `Optional[ZccacheCapability]` with a `supports_no_walk` flag.
+
+**Counter-example — when auto-discovery is fine**: tools whose discovery surface is bounded by the project layout and unaffected by scratch dirs (e.g. compiler `--include-scan` resolving `#include` chains under explicit `-I`/`-isystem` dirs). The rule is about wholesale recursive walks of `--source-dir`, not bounded resolution of declared starting points.
+
 ## Meson Build System Standards
 **Critical Information for Working with meson.build Files**:
 
