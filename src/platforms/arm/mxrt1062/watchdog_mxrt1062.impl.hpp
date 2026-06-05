@@ -92,9 +92,52 @@ Watchdog& Watchdog::instance() FL_NOEXCEPT {
     return sInstance;
 }
 
+namespace platforms {
+
+// First-call boot diagnostic. Prints the SRC_SRSR raw value + decoded bit
+// names and the bundled Teensy `CrashReport` (if present) directly to
+// `Serial`. Runs at most once per process. Called from `Watchdog::begin()`
+// before any WDT writes so the user sees the prior-boot cause before the
+// new WDT timer arms. SRC_SRSR is write-1-to-clear so the next boot reads
+// only its own cause. This used to live behind `#if defined(FL_IS_TEENSY_4X)`
+// in `examples/AutoResearch/AutoResearch.ino`; moving it into the platform
+// impl lets every Teensy 4 sketch get the diagnostic for free by using
+// `FL_WATCHDOG_AUTO()` or `FastLED.watchdog().begin()`.
+inline void mxrt1062PrintBootDiagnosticOnce() {
+    static bool sPrinted = false;  // okay static in header — single-TU `.impl.hpp`
+    if (sPrinted) return;
+    sPrinted = true;
+
+    const fl::u32 srsr = SRC_SRSR;
+    Serial.print("[FastLED.watchdog] SRC_SRSR = 0x");  // ok serial - platform-specific boot diagnostic
+    Serial.println(srsr, HEX);                          // ok serial - platform-specific boot diagnostic
+    if (srsr & SRC_SRSR_WDOG3_RST_B)        Serial.println("[FastLED.watchdog]   WDOG3_RST_B (RTWDOG fired)");        // ok serial
+    if (srsr & SRC_SRSR_WDOG_RST_B)         Serial.println("[FastLED.watchdog]   WDOG_RST_B (WDOG1/2 fired)");        // ok serial
+    if (srsr & SRC_SRSR_IPP_RESET_B)        Serial.println("[FastLED.watchdog]   POR (power-on reset)");              // ok serial
+    if (srsr & SRC_SRSR_LOCKUP_SYSRESETREQ) Serial.println("[FastLED.watchdog]   LOCKUP_SYSRESETREQ (HardFault)");    // ok serial
+    if (srsr & SRC_SRSR_IPP_USER_RESET_B)   Serial.println("[FastLED.watchdog]   IPP_USER_RESET_B (external pin)");   // ok serial
+    if (srsr & SRC_SRSR_JTAG_SW_RST)        Serial.println("[FastLED.watchdog]   JTAG/SW reset");                     // ok serial
+    SRC_SRSR = srsr;  // W1C
+    if (CrashReport) {
+        Serial.println("[FastLED.watchdog] *** CrashReport from previous boot: ***");  // ok serial
+        Serial.print(CrashReport);                                                      // ok serial - bundled Teensy CrashReport
+        Serial.println("[FastLED.watchdog] *** end CrashReport ***");                  // ok serial
+    } else {
+        Serial.println("[FastLED.watchdog] no CrashReport from previous boot");        // ok serial
+    }
+    Serial.flush();  // ok serial - flush the boot diagnostic before WDT arms
+}
+
+} // namespace platforms
+
 void Watchdog::begin(fl::u32 timeout_ms) FL_NOEXCEPT {
     if (timeout_ms == 0) timeout_ms = 1000;
     if (timeout_ms > FL_WATCHDOG_MAX_TIMEOUT_MS) timeout_ms = FL_WATCHDOG_MAX_TIMEOUT_MS;
+
+    // Print the boot diagnostic exactly once per process — before any WDT
+    // writes so the user sees prior-boot cause + CrashReport before the
+    // new timer arms.
+    platforms::mxrt1062PrintBootDiagnosticOnce();
 
     // *** Enable the WDOG3 CCM clock gate FIRST. ***
     //

@@ -183,9 +183,7 @@
 
 #include <FastLED.h>
 #include "fl/channels/all_drivers.h"  // for FastLED.enableAllDrivers() post-#2428
-#if defined(FL_IS_ESP32)
-#include "platforms/esp/32/watchdog_esp32.h"
-#endif
+#include "fl/wdt/watchdog.h"  // FL_WATCHDOG_AUTO() — unified cross-platform WDT guard
 #include "fl/stl/undef.h"  // Undefine Arduino macros (DEFAULT, INPUT, OUTPUT)
 #include "fl/stl/sstream.h"
 #include "Common.h"
@@ -202,16 +200,18 @@
 #include "AutoResearchParlioStream.h" // #2548 PARLIO streaming validation (RPC-driven)
 
 // ============================================================================
-// Teensy Hardware Watchdog (crash recovery) - DISABLED
+// Hardware Watchdog (crash recovery)
 // ============================================================================
-// TODO: WDOG3 (RTWDOG) initialization causes immediate reset loop on
-// iMXRT1062, bricking the Teensy. Needs investigation into correct
-// unlock/configure sequence before enabling. The Teensy core does not
-// touch WDOG3 at startup, so the issue is in our init code.
+// Use the unified cross-platform fl::Watchdog API via the FL_WATCHDOG_AUTO()
+// macro at the top of loop(). It lazily arms the WDT on first call, prints
+// the prior-boot reset/crash diagnostic, pauses 3 s on a crash so the
+// developer can read the message, and feeds the WDT on both ctor and dtor.
+// Works portably across ESP32 / Teensy 4 / Teensy 3 / RP2040 / nRF52 /
+// STM32 / SAMD / Apollo3 / MGM240 / AVR (the noop fallback on platforms
+// without a real WDT keeps the call safe).
 //
-// For now, watchdog is disabled. The primary fix is the FlexPWM RX
-// gap-aware decoder which should prevent the crash that motivated
-// the watchdog in the first place.
+// The previous `fl::watchdog_setup(...)` prototype is superseded by
+// `fl::Watchdog::instance().begin()` and the FL_WATCHDOG_AUTO() macro.
 
 // ============================================================================
 // Configuration
@@ -370,45 +370,13 @@ void setup() {
 
     FL_WARN("[SETUP] AutoResearch sketch starting - serial output active");
 
-    // Diagnostic: dump reset cause + bundled CrashReport so we can tell
-    // HardFault vs WDOG3 vs PIN vs POR. Direct register access — `imxrt.h`
-    // is already pulled by FastLED.h on Teensy 4.
-#if defined(FL_IS_TEENSY_4X) && defined(__IMXRT1062__)
-    {
-        const uint32_t srsr = SRC_SRSR;
-        Serial.print("[boot] SRC_SRSR = 0x");  // ok serial - boot diagnostic, Teensy 4 only
-        Serial.println(srsr, HEX);             // ok serial - boot diagnostic, Teensy 4 only
-        // Bit positions from imxrt.h SRC_SRSR_*_B macros (not hardcoded
-        // shifts, which were all wrong in an earlier version of this file).
-        if (srsr & SRC_SRSR_WDOG3_RST_B)        Serial.println("[boot]   WDOG3_RST_B (RTWDOG fired)");        // ok serial - boot diagnostic
-        if (srsr & SRC_SRSR_WDOG_RST_B)         Serial.println("[boot]   WDOG_RST_B (WDOG1/2 fired)");        // ok serial - boot diagnostic
-        if (srsr & SRC_SRSR_IPP_RESET_B)        Serial.println("[boot]   POR (power-on reset)");              // ok serial - boot diagnostic
-        if (srsr & SRC_SRSR_LOCKUP_SYSRESETREQ) Serial.println("[boot]   LOCKUP_SYSRESETREQ (HardFault)");    // ok serial - boot diagnostic
-        if (srsr & SRC_SRSR_IPP_USER_RESET_B)   Serial.println("[boot]   IPP_USER_RESET_B (external pin)");  // ok serial - boot diagnostic
-        if (srsr & SRC_SRSR_JTAG_SW_RST)        Serial.println("[boot]   JTAG/SW reset");                    // ok serial - boot diagnostic
-        // Write-1-to-clear so next boot sees only its own cause.
-        SRC_SRSR = srsr;
-        if (CrashReport) {
-            Serial.println("[boot] *** CrashReport present from previous boot: ***");  // ok serial - boot diagnostic
-            Serial.print(CrashReport);  // ok serial - bundled Teensy CrashReport, no fl:: equivalent
-            Serial.println("[boot] *** end CrashReport ***");  // ok serial - boot diagnostic
-        } else {
-            Serial.println("[boot] no CrashReport from previous boot");  // ok serial - boot diagnostic
-        }
-        Serial.flush();  // ok serial - boot diagnostic flush
-    }
-#endif
-
-    // Unified cross-platform watchdog (FastLED#2731). Arm with a generous
-    // 15-second timeout that matches the AutoResearch test budget. On
-    // Teensy 4 the bare-register WDOG3 begin() path now relies on the
-    // `startup_early_hook` above having pre-disabled WDOG3, so re-arming
-    // here goes through a clean unlock → write → RCS-wait sequence.
-    FastLED.watchdog().begin(15000);
-    if (FastLED.watchdog().lastResetWasWatchdog()) {
-        FL_WARN("[recovery] previous boot was killed by watchdog — crash#"
-                << static_cast<int>(FastLED.watchdog().consecutiveCrashCount()));
-    }
+    // Note: the unified watchdog is armed lazily by FL_WATCHDOG_AUTO() at the
+    // top of loop() — no explicit setup() call needed. The macro prints the
+    // prior-boot reset info via ResetInfo::describe() and pauses 3 s on crash
+    // before the new timer arms. Per-platform boot diagnostics (Teensy 4
+    // SRC_SRSR bit decode + bundled CrashReport, ESP32 panic backtrace, etc.)
+    // are emitted by the platform watchdog impl from Watchdog::begin() — see
+    // src/fl/wdt/watchdog.h and src/platforms/*/watchdog_*.impl.hpp.
 
     // Initialize RX buffer dynamically (uses PSRAM if available, falls back to heap)
     g_rx_buffer_storage.resize(RX_BUFFER_SIZE);
@@ -567,6 +535,11 @@ void setup() {
 //   - Easy retry logic and error recovery
 
 void loop() {
+    // Unified watchdog guard. First iteration: arms the WDT, prints any
+    // prior-boot reset/crash info, pauses 3 s on a crash. Every iteration:
+    // feeds on construction (now) and again on destruction (end of scope).
+    FL_WATCHDOG_AUTO();
+
     // Aggressively pump async tasks (including JSON-RPC task)
     // This ensures RPC commands are processed frequently even without delay() calls
     for (int i = 0; i < 100; i++) {
