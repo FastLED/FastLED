@@ -28,6 +28,7 @@ from ci.lint.stage_impls import (
 )
 from ci.lint.stages import LintStage
 from ci.lint_meson.run_all_checkers import run_meson_lint
+from ci.lint_platformio.run_all_checkers import run_platformio_lint
 from ci.util.global_interrupt_handler import install_signal_handler, wait_for_cleanup
 
 
@@ -235,6 +236,19 @@ def create_stages(args: LintArgs) -> list[LintStage]:
                 name="meson_linting",
                 display_name="MESON BUILD LINTING",
                 run_fn=run_meson_lint,
+                timeout=30.0,
+            )
+        )
+
+    # PlatformIO-internal-usage stage (issue #2701, warn-only by default).
+    # Runs whenever non-JS-only linting is invoked — repo hygiene check
+    # for build/CI scripts. Skipped via --skip-platformio-check.
+    if not args.js_only and not args.skip_platformio_check:
+        stages.append(
+            LintStage(
+                name="platformio_internal_usage",
+                display_name="PLATFORMIO-INTERNAL-USAGE LINT",
+                run_fn=lambda: run_platformio_lint(),
                 timeout=30.0,
             )
         )
