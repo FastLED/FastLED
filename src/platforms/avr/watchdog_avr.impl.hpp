@@ -108,21 +108,27 @@ inline fl::u8 timeoutToWdtoConstant(fl::u32 ms) {
     return WDTO_8S;
 }
 
-// `.init3` constructor: runs after the C runtime has zeroed BSS but before
-// `main()`. Captures MCUSR for later cause reporting, then clears it and
-// disables the WDT so a post-WDT-reset boot cannot loop forever.
+// `.init3` hook: runs after the C runtime has zeroed BSS but before `main()`.
+// Captures MCUSR for later cause reporting, then clears it and disables the
+// WDT so a post-WDT-reset boot cannot loop forever.
 //
-// NOTE: We deliberately do NOT mark this `naked`. `naked` functions are not
-// intended to hold ordinary C/C++ statements — GCC still needs to manage
-// register/stack expectations around the assignments and the `wdt_disable()`
-// call, and the result is fragile across optimization/toolchain versions.
-// A normal `.init3` hook works correctly here because `.init3` runs after
-// `.init2` (BSS zeroed, stack set up).
-__attribute__((used, section(".init3")))
-inline void fastled_watchdog_init3() {
+// **MUST be `naked`.** `.init3` is not a function call site — the linker
+// concatenates this code inline between `.init2` and `.init4`, and there is
+// no return address on the stack when it runs. A non-`naked` function emits
+// a prologue/epilogue ending in `ret`, which on AVR pops two bytes of
+// uninitialized SRAM and jumps there, hanging the chip before `setup()` can
+// run. This is the canonical avr-libc pattern for clearing `MCUSR` /
+// `WDT` in `.init3`; see issue #2798 for the AVR8JS regression that proved
+// out the previous non-naked version. The three statements below compile
+// to bare `STS`/inline-asm sequences with no stack temps, so `naked` is
+// safe — and is in fact the only correct choice for code placed in `.initN`.
+__attribute__((naked, used, section(".init3")))
+void fastled_watchdog_init3() {
     sAvrCapturedMcusr = MCUSR;
     MCUSR = 0;
     wdt_disable();
+    // Intentionally no `ret`: the linker concatenates `.init3` directly into
+    // the boot init chain and execution falls through to `.init4`.
 }
 
 } // namespace platforms
