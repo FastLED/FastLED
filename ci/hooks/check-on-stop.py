@@ -25,6 +25,8 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).parent.resolve()
 PROJECT_ROOT = SCRIPT_DIR.parent.parent
 SESSION_FINGERPRINT_FILE = PROJECT_ROOT / ".cache" / "session_fingerprint.json"
+WORKTREES_DIR = PROJECT_ROOT / ".claude" / "worktrees"
+STALE_WORKTREE_THRESHOLD = 5
 
 
 @dataclass
@@ -124,11 +126,36 @@ def should_skip_hook() -> bool:
     return False
 
 
+def count_stale_worktrees() -> int:
+    """Count directories under .claude/worktrees/ (best-effort, never raises)."""
+    if not WORKTREES_DIR.exists():
+        return 0
+    try:
+        return sum(
+            1 for p in WORKTREES_DIR.iterdir() if p.is_dir() and not p.is_symlink()
+        )
+    except KeyboardInterrupt:
+        raise
+    except OSError:
+        return 0
+
+
+def warn_stale_worktrees() -> None:
+    n = count_stale_worktrees()
+    if n > STALE_WORKTREE_THRESHOLD:
+        print(
+            f"Note: {n} stale agent worktrees in .claude/worktrees/, "
+            "run `bash clean-worktrees` to reclaim space",
+            file=sys.stderr,
+        )
+
+
 def main() -> int:
     if should_skip_hook():
         print(
             "⏭️  Skipping lint+tests (no changes during this session)", file=sys.stderr
         )
+        warn_stale_worktrees()
         return 0
 
     print("🔧 Running lint and tests (changes detected this session)", file=sys.stderr)
@@ -177,6 +204,7 @@ def main() -> int:
             "\nREMINDER - FIX ALL ERRORS FROM STOP HOOK, MAKE AT LEAST TWO ATTEMPTS!",
             file=sys.stderr,
         )
+        warn_stale_worktrees()
         return 2
 
     # Lint passed — wait for tests
@@ -217,8 +245,10 @@ def main() -> int:
             "\nREMINDER - FIX ALL ERRORS FROM STOP HOOK, MAKE AT LEAST TWO ATTEMPTS!",
             file=sys.stderr,
         )
+        warn_stale_worktrees()
         return 2
 
+    warn_stale_worktrees()
     return 0
 
 
