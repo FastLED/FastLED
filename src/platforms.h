@@ -2,14 +2,18 @@
 
 #include "fastled_config.h"
 
-
+// Pull in ARM-family detection so platform-routed FL_IS_ARM_* defines are
+// visible before the dispatcher below.
+#include "platforms/arm/is_arm.h"  // ok platform headers
 
 
 /// @file platforms.h
 /// Determines which platforms headers to include
 
 
-#if defined(NRF51)
+#if defined(FL_IS_ARM_LPC)
+#include "platforms/arm/lpc/fastled_arm_lpc.h"  // ok platform headers
+#elif defined(NRF51)
 #include "platforms/arm/nrf51/fastled_arm_nrf51.h"  // ok platform headers
 #elif defined(NRF52_SERIES)
 #include "platforms/arm/nrf52/fastled_arm_nrf52.h"  // ok platform headers
