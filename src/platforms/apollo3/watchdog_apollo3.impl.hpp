@@ -66,34 +66,38 @@ ResetCause Watchdog::lastResetCause() const FL_NOEXCEPT {
     auto& s = platforms::apollo3WatchdogState();
     if (!s.cause_cached) {
         // Read the Apollo3 reset status register directly. `RSTGEN->STAT`
-        // exposes one bit per reset source per the Apollo3 datasheet:
-        //   bit 0  EXRSTAT  external pin
-        //   bit 1  PORSTAT  power-on reset
-        //   bit 2  BORSTAT  brown-out reset
-        //   bit 3  SWRSTAT  software reset (AIRCR SYSRESETREQ)
-        //   bit 4  POIRSTAT power-on initialized (software POR)
-        //   bit 5  DBGRSTAT debugger reset
-        //   bit 6  POISTAT  power-on initiated
-        //   bit 7  WDRSTAT  watchdog timer
-        // "Specific first" priority puts watchdog above the generic POR/BOR
-        // bits because the latter are often also set after a watchdog reset.
+        // bit layout per the SparkFun Arduino_Apollo3 CMSIS header
+        // (RSTGEN_Type::STAT_b in apollo3.h) — every field is `(SBL)`,
+        // meaning the Secondary Boot Loader latches it at boot:
+        //   bit 0   EXRSTAT  external pin
+        //   bit 1   PORSTAT  power-on reset
+        //   bit 2   BORSTAT  brown-out reset (general)
+        //   bit 3   SWRSTAT  SW POR or AIRCR SYSRESETREQ
+        //   bit 4   POIRSTAT software POI reset
+        //   bit 5   DBGRSTAT debugger reset
+        //   bit 6   WDRSTAT  watchdog timer
+        //   bit 7   BOUSTAT  unregulated-supply brown-out
+        //   bit 8   BOCSTAT  core-regulator brown-out
+        //   bit 9   BOFSTAT  memory-regulator brown-out
+        //   bit 10  BOBSTAT  BLE/burst-regulator brown-out
+        // "Specific first" priority puts watchdog above the generic
+        // POR/BOR bits because the latter are often also set after a
+        // watchdog reset. All BO* variants map to BROWNOUT.
         const fl::u32 stat = RSTGEN->STAT;
         ResetCause cause = ResetCause::UNKNOWN;
-        if      (stat & (1u << 7)) cause = ResetCause::WATCHDOG;
-        else if (stat & (1u << 3)) cause = ResetCause::SOFTWARE;
-        else if (stat & (1u << 4)) cause = ResetCause::SOFTWARE;
-        else if (stat & (1u << 5)) cause = ResetCause::DEBUGGER;
-        else if (stat & (1u << 2)) cause = ResetCause::BROWNOUT;
-        else if (stat & (1u << 0)) cause = ResetCause::EXTERNAL_PIN;
-        else if (stat & (1u << 1)) cause = ResetCause::POWER_ON;
-        else if (stat & (1u << 6)) cause = ResetCause::POWER_ON;
-        // RSTGEN->STAT bits are sticky across resets. Writing 1 to the
-        // matching CLRSTAT bit clears them so the NEXT boot sees only
-        // its own reset cause and the crash counter isn't inflated by
-        // stale bits. (AmbiqSuite's `am_hal_reset_status_clear()` does
-        // the same — we write the register directly to avoid pulling in
-        // an additional HAL header.)
-        RSTGEN->CLRSTAT = 1u;
+        if      (stat & (1u << 6))                       cause = ResetCause::WATCHDOG;
+        else if (stat & (1u << 3))                       cause = ResetCause::SOFTWARE;
+        else if (stat & (1u << 4))                       cause = ResetCause::SOFTWARE;
+        else if (stat & (1u << 5))                       cause = ResetCause::DEBUGGER;
+        else if (stat & ((1u << 2) | (1u << 7) | (1u << 8) | (1u << 9) | (1u << 10)))
+                                                         cause = ResetCause::BROWNOUT;
+        else if (stat & (1u << 0))                       cause = ResetCause::EXTERNAL_PIN;
+        else if (stat & (1u << 1))                       cause = ResetCause::POWER_ON;
+        // `RSTGEN->STAT` bits are SBL-latched and remain set for the
+        // lifetime of this boot — there is no software-clearable
+        // mirror register on Apollo3. Re-reads are prevented by the
+        // `cause_cached` flag above, so the watchdog crash counter
+        // cannot be inflated by stale bits across calls.
         s.cached_cause = cause;
         s.cause_cached = true;
         if (cause == ResetCause::WATCHDOG && s.crash_count < 0xFFFF) {
