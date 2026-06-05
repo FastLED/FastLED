@@ -15,8 +15,19 @@
 #include "platforms/wasm/fs_wasm.h" // ok platform headers
 // IWYU pragma: end_keep
 #define FASTLED_HAS_SDCARD 1
-#elif FL_HAS_INCLUDE(<SD.h>) && FL_HAS_INCLUDE(<fs.h>)
-// Include Arduino SD card implementation when SD library is available
+#elif defined(FASTLED_USE_SDCARD) && FL_HAS_INCLUDE(<SD.h>) && FL_HAS_INCLUDE(<fs.h>)
+// Include Arduino SD card implementation only when the user opts in by
+// defining FASTLED_USE_SDCARD. Auto-detecting `<SD.h>` on the include
+// path causes PlatformIO LDF to link libSD.a + libFS.a + Arduino's
+// VFSImpl unconditionally — ~14 KB of dead code (and pulls newlib's
+// _svfprintf_r via VFSFileImpl) for sketches that never call
+// FileSystem::beginSd(). See FastLED #2773 item 1.2 for the chain.
+//
+// Migration: sketches that need SD support add
+//     #define FASTLED_USE_SDCARD
+// before #include <FastLED.h>. Without this define, FileSystem::beginSd()
+// returns false (the weak NullFileSystem fallback in file_system.cpp.hpp
+// below kicks in).
 #include "platforms/fs_sdcard_arduino.hpp"
 #define FASTLED_HAS_SDCARD 1
 #else
