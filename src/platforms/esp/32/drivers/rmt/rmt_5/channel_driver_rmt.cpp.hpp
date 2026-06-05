@@ -413,6 +413,84 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         FL_WARN(msg.str());
     }
 
+    /// @brief Cold-path recovery loop for failed initial RMT allocations.
+    /// Extracted from createChannel so the hot path (initial allocation
+    /// succeeds, which is the common case at boot) stays small. The retry
+    /// loop pulls FL_LOG_RMT/FL_WARN `fl::sstream` operator<< instantiations
+    /// and a per-iteration Rmt5ChannelConfig constructor — all of which the
+    /// linker would otherwise have to keep live inside the hot function body.
+    /// Returns true on successful recovery (caller continues to encoder
+    /// creation), false otherwise (caller returns false). Mutates
+    /// mem_block_symbols to the recovered size on success. See #2773 item 2.2.
+    FL_NO_INLINE bool attemptAllocationRecovery(
+        ChannelState *state, int pin, int intr_priority,
+        fl::size &mem_block_symbols) FL_NOEXCEPT {
+        auto &memMgr = RmtMemoryManager::instance();
+
+        FL_WARN("RMT channel allocation failed (initial request: "
+                << mem_block_symbols << " symbols)");
+        FL_WARN("Attempting progressive memory reduction recovery...");
+
+        mConsecutiveAllocationFailures++;
+        size_t original_symbols = mem_block_symbols;
+        size_t retry_count = 0;
+        const size_t min_symbols = SOC_RMT_MEM_WORDS_PER_CHANNEL; // Minimum 1 block
+        bool recovery_succeeded = false;
+        bool success = false;
+
+        // Progressively reduce memory until it works or we hit minimum.
+        // CRITICAL: mem_block_symbols MUST be a multiple of
+        // SOC_RMT_MEM_WORDS_PER_CHANNEL. Step down by whole blocks
+        // (48 symbols on ESP32-S3), not by 1 symbol.
+        for (size_t reduced_symbols = mem_block_symbols - SOC_RMT_MEM_WORDS_PER_CHANNEL;
+             reduced_symbols >= min_symbols;
+             reduced_symbols -= SOC_RMT_MEM_WORDS_PER_CHANNEL) {
+            retry_count++;
+
+            // Free previous allocation attempt
+            memMgr.free(state->memoryChannelId, true);
+
+            Rmt5ChannelConfig retry_config(pin, FASTLED_RMT5_CLOCK_HZ,
+                                            reduced_symbols, 1, false, intr_priority);
+
+            FL_LOG_RMT("Retry #" << retry_count << ": Attempting " << reduced_symbols
+                       << " symbols (reduced by " << (original_symbols - reduced_symbols) << ")");
+
+            success = mPeripheral.createTxChannel(retry_config, (void**)&state->channel);
+            if (success) {
+                mMemoryReductionOffset = original_symbols - reduced_symbols;
+                mConsecutiveAllocationFailures = 0;
+
+                size_t external_words = original_symbols - reduced_symbols;
+
+                if (!mRecoveryWarningShown) {
+                    emitRecoveryWarning(original_symbols, reduced_symbols, external_words);
+                    mRecoveryWarningShown = true;
+                }
+
+                memMgr.recordRecoveryAllocation(state->memoryChannelId, reduced_symbols, true);
+                FL_LOG_RMT("Recovery: Re-added allocation to ledger: "
+                           << reduced_symbols << " words for channel "
+                           << static_cast<int>(state->memoryChannelId));
+
+                mem_block_symbols = reduced_symbols;
+                recovery_succeeded = true;
+                break;
+            }
+        }
+
+        if (!recovery_succeeded) {
+            emitAllocationFailureError(retry_count, original_symbols,
+                                       min_symbols, static_cast<int>(pin));
+
+            state->channel = nullptr;
+            memMgr.free(state->memoryChannelId, true);
+            return false;
+        }
+
+        return true;
+    }
+
     FL_NO_INLINE void emitAllocationFailureError(
         size_t retry_count, size_t original_symbols, size_t min_symbols,
         int pin) FL_NOEXCEPT {
@@ -681,76 +759,13 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         // - Minimum: SOC_RMT_MEM_WORDS_PER_CHANNEL (1 block)
 
         if (!success && mem_block_symbols > SOC_RMT_MEM_WORDS_PER_CHANNEL) {
-            FL_WARN("RMT channel allocation failed (initial request: "
-                    << mem_block_symbols << " symbols)");
-            FL_WARN("Attempting progressive memory reduction recovery...");
-
-            mConsecutiveAllocationFailures++;
-            size_t original_symbols = mem_block_symbols;
-            size_t retry_count = 0;
-            const size_t min_symbols = SOC_RMT_MEM_WORDS_PER_CHANNEL; // Minimum 1 block
-            bool recovery_succeeded = false;
-
-            // Progressively reduce memory until it works or we hit minimum
-            // CRITICAL: mem_block_symbols MUST be a multiple of SOC_RMT_MEM_WORDS_PER_CHANNEL
-            // Step down by whole blocks (48 symbols on ESP32-S3), not by 1 symbol
-            for (size_t reduced_symbols = mem_block_symbols - SOC_RMT_MEM_WORDS_PER_CHANNEL;
-                 reduced_symbols >= min_symbols;
-                 reduced_symbols -= SOC_RMT_MEM_WORDS_PER_CHANNEL) {
-                retry_count++;
-
-                // Free previous allocation attempt
-                memMgr.free(state->memoryChannelId, true);
-
-                // Try allocating with reduced memory (bypass memory manager, direct allocation)
-                // We need to manually account for this since we're going below expected size
-                Rmt5ChannelConfig retry_config(pin, FASTLED_RMT5_CLOCK_HZ,
-                                                 reduced_symbols, 1, false, intr_priority);
-
-                FL_LOG_RMT("Retry #" << retry_count << ": Attempting " << reduced_symbols
-                           << " symbols (reduced by " << (original_symbols - reduced_symbols) << ")");
-
-                success = mPeripheral.createTxChannel(retry_config, (void**)&state->channel);
-                if (success) {
-                    // SUCCESS - Record the memory reduction offset
-                    mMemoryReductionOffset = original_symbols - reduced_symbols;
-                    mConsecutiveAllocationFailures = 0; // Reset failure counter
-
-                    // Calculate how many words we actually need to reserve
-                    size_t external_words = original_symbols - reduced_symbols;
-
-                    // Show recovery warning with user action guidance
-                    if (!mRecoveryWarningShown) {
-                        emitRecoveryWarning(original_symbols, reduced_symbols, external_words);
-                        mRecoveryWarningShown = true;
-                    }
-
-                    // Re-allocate through memory manager with reduced size
-                    // to keep accounting synchronized
-                    // Note: We bypass allocateTx() since channel already created,
-                    // but we need to update the ledger manually
-                    memMgr.recordRecoveryAllocation(state->memoryChannelId, reduced_symbols, true);
-                    FL_LOG_RMT("Recovery: Re-added allocation to ledger: "
-                               << reduced_symbols << " words for channel "
-                               << static_cast<int>(state->memoryChannelId));
-
-                    mem_block_symbols = reduced_symbols;
-                    recovery_succeeded = true;
-                    break; // Exit retry loop
-                }
-            }
-
-            // If recovery failed, show detailed error
-            if (!recovery_succeeded) {
-                emitAllocationFailureError(retry_count, original_symbols,
-                                           min_symbols, static_cast<int>(pin));
-
-                state->channel = nullptr;
-                memMgr.free(state->memoryChannelId, true);
+            // Progressive memory-reduction recovery is a cold path: extracted
+            // into an FL_NO_INLINE helper so its FL_WARN/FL_LOG_RMT operator<<
+            // instantiations don't bloat the hot createChannel body.
+            // See #2773 item 2.2.
+            if (!attemptAllocationRecovery(state, pin, intr_priority, mem_block_symbols)) {
                 return false;
             }
-
-            // Recovery succeeded - fall through to encoder creation
             success = true;
         }
 
