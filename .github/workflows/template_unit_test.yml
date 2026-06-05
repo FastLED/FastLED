@@ -56,6 +56,19 @@ jobs:
         run: |
           uv run python ci/lint_cpp/no_using_namespace_fl_in_headers.py
 
+      - name: Reset zccache daemon (Windows flake mitigation, FastLED#2805)
+        if: runner.os == 'Windows'
+        run: |
+          # The zccache daemon's named-pipe IPC drops mid-link under heavy
+          # parallel link load on Windows hosted runners — the daemon's own
+          # diagnostic emits 'lost connection to daemon ... try `zccache stop`'.
+          # Start each Windows job with a known-clean daemon state so the
+          # first wave of test-DLL links doesn't race a stale/partially-
+          # initialized daemon. `|| true` because there may be no daemon to
+          # stop on a fresh runner — that's the desired end state anyway.
+          zccache stop || true
+        shell: bash
+
       - name: Run All Unit Tests
         id: run_tests
         run: |

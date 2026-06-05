@@ -184,7 +184,7 @@ clang-tool-chain provides a uniform GNU-style build environment across all platf
 
 ## zccache
 - **NEVER disable zccache**: Do NOT set `ZCCACHE_DISABLE=1` or disable zccache in any way
-  - If zccache fails: Investigate and fix the root cause (e.g., `zccache --stop-server` to reset)
+  - If zccache fails: Investigate and fix the root cause (e.g., `zccache stop` to reset the daemon — see the Windows mitigation in `.github/workflows/template_unit_test.yml`)
   - Never use: `ZCCACHE_DISABLE=1` as a workaround for zccache errors
   - Rationale: zccache provides critical compilation performance optimization - disabling it dramatically slows down builds
 
