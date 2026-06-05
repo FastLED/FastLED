@@ -25,6 +25,8 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).parent.resolve()
 PROJECT_ROOT = SCRIPT_DIR.parent.parent
 SESSION_FINGERPRINT_FILE = PROJECT_ROOT / ".cache" / "session_fingerprint.json"
+WORKTREES_DIR = PROJECT_ROOT / ".claude" / "worktrees"
+STALE_WORKTREE_THRESHOLD = 5
 
 
 @dataclass
@@ -124,11 +126,61 @@ def should_skip_hook() -> bool:
     return False
 
 
+def count_stale_worktrees() -> int:
+    """Count directories under .claude/worktrees/.
+
+    Iterates with an explicit loop so failures surface a descriptive error
+    on stderr (per coding-standards "no silent fallbacks") while still
+    keeping the stop-hook itself non-fatal — the loop body propagates the
+    underlying OSError up.
+    """
+    if not WORKTREES_DIR.exists():
+        return 0
+    try:
+        iterator = WORKTREES_DIR.iterdir()
+    except KeyboardInterrupt:
+        import _thread
+
+        _thread.interrupt_main()
+        raise
+    except OSError as exc:
+        raise OSError(
+            f"count_stale_worktrees: cannot iterate {WORKTREES_DIR}: {exc}"
+        ) from exc
+    count = 0
+    for p in iterator:
+        if p.is_dir() and not p.is_symlink():
+            count += 1
+    return count
+
+
+def warn_stale_worktrees() -> None:
+    try:
+        n = count_stale_worktrees()
+    except KeyboardInterrupt:
+        import _thread
+
+        _thread.interrupt_main()
+        raise
+    except OSError as exc:
+        # Don't crash the stop hook on a directory-scan failure, but do
+        # surface the descriptive error so it isn't silently swallowed.
+        print(f"warn_stale_worktrees: {exc}", file=sys.stderr)
+        return
+    if n > STALE_WORKTREE_THRESHOLD:
+        print(
+            f"Note: {n} stale agent worktrees in .claude/worktrees/, "
+            "run `bash clean-worktrees` to reclaim space",
+            file=sys.stderr,
+        )
+
+
 def main() -> int:
     if should_skip_hook():
         print(
             "⏭️  Skipping lint+tests (no changes during this session)", file=sys.stderr
         )
+        warn_stale_worktrees()
         return 0
 
     print("🔧 Running lint and tests (changes detected this session)", file=sys.stderr)
@@ -177,6 +229,7 @@ def main() -> int:
             "\nREMINDER - FIX ALL ERRORS FROM STOP HOOK, MAKE AT LEAST TWO ATTEMPTS!",
             file=sys.stderr,
         )
+        warn_stale_worktrees()
         return 2
 
     # Lint passed — wait for tests
@@ -217,8 +270,10 @@ def main() -> int:
             "\nREMINDER - FIX ALL ERRORS FROM STOP HOOK, MAKE AT LEAST TWO ATTEMPTS!",
             file=sys.stderr,
         )
+        warn_stale_worktrees()
         return 2
 
+    warn_stale_worktrees()
     return 0
 
 
