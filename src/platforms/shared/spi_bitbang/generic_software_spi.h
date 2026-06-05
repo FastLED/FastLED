@@ -375,7 +375,7 @@ public:
 	/// @tparam D Per-byte modifier class, e.g. ::DATA_NOP
 	/// @tparam RGB_ORDER the rgb ordering for the LED data (e.g. what order red, green, and blue data is written out in)
 	/// @param pixels a ::PixelController with the LED data and modifier options
-	template <fl::u8 FLAGS, class D, EOrder RGB_ORDER>  __attribute__((noinline)) FL_NOEXCEPT void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
+	template <fl::u8 FLAGS, class D, EOrder RGB_ORDER>  FL_NO_INLINE FL_NOEXCEPT void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
 		FASTLED_UNUSED(context);
 		select();
 		int len = pixels.mLen;

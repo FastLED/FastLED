@@ -389,7 +389,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     /// Splitting into `noinline` helpers moves those instantiations into
     /// their own (also cold-path) functions so `--gc-sections` can keep
     /// them tiny, and createChannel shrinks proportionally.
-    __attribute__((noinline)) void emitRecoveryWarning(
+    FL_NO_INLINE void emitRecoveryWarning(
         size_t original_symbols, size_t reduced_symbols,
         size_t external_words) FL_NOEXCEPT {
         fl::sstream msg;
@@ -413,7 +413,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         FL_WARN(msg.str());
     }
 
-    __attribute__((noinline)) void emitAllocationFailureError(
+    FL_NO_INLINE void emitAllocationFailureError(
         size_t retry_count, size_t original_symbols, size_t min_symbols,
         int pin) FL_NOEXCEPT {
         fl::sstream msg;

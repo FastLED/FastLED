@@ -503,7 +503,7 @@ template <> struct conv1ch<4> {
 
 // AVR noinline per-channel pass for CRGB (no alpha).
 template <int R>
-__attribute__((noinline)) FL_OPTIMIZE_FUNCTION
+FL_NO_INLINE FL_OPTIMIZE_FUNCTION
 static void apply_pass_1ch(const CRGB *pad, CRGB *out, int count, int stride) {
     constexpr int shift = (R == 0) ? 0 : 8;
     for (int i = 0; i < count; ++i) {
@@ -517,7 +517,7 @@ static void apply_pass_1ch(const CRGB *pad, CRGB *out, int count, int stride) {
 
 // AVR noinline per-channel pass for CRGB with alpha dim.
 template <int R>
-__attribute__((noinline)) FL_OPTIMIZE_FUNCTION
+FL_NO_INLINE FL_OPTIMIZE_FUNCTION
 static void apply_pass_alpha_1ch(const CRGB *pad, CRGB *out, int count,
                                   int stride, alpha8 alpha) {
     constexpr int shift = (R == 0) ? 0 : 8;
@@ -536,7 +536,7 @@ static void apply_pass_alpha_1ch(const CRGB *pad, CRGB *out, int count,
 
 // AVR noinline per-channel pass for CRGB with alpha16 dim.
 template <int R>
-__attribute__((noinline)) FL_OPTIMIZE_FUNCTION
+FL_NO_INLINE FL_OPTIMIZE_FUNCTION
 static void apply_pass_alpha_1ch(const CRGB *pad, CRGB *out, int count,
                                   int stride, alpha16 alpha) {
     constexpr int shift = (R == 0) ? 0 : 8;
