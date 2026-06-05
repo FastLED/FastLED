@@ -8,6 +8,7 @@
 #include "platforms/arm/teensy/teensy4_common/clockless_objectfled.cpp.hpp"
 #include "platforms/arm/teensy/teensy4_common/flexpwm_rx_channel.cpp.hpp"
 #include "platforms/arm/teensy/teensy4_common/init_channel_driver_mxrt1062.cpp.hpp"
+#include "platforms/arm/teensy/teensy4_common/rx_flexio_channel.cpp.hpp"
 #include "platforms/arm/teensy/teensy4_common/rx_flexpwm_channel.cpp.hpp"
 #include "platforms/arm/teensy/teensy4_common/spi_hw_2_mxrt1062.cpp.hpp"
 #include "platforms/arm/teensy/teensy4_common/spi_hw_4_mxrt1062.cpp.hpp"

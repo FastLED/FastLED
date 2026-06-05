@@ -30,6 +30,8 @@ static fl::shared_ptr<RxDevice> createBackendDevice(const RxChannelConfig& confi
         return RxDevice::create<RxDeviceType::ISR>(config.pin);
     case RxBackend::FLEXPWM:
         return RxDevice::create<RxDeviceType::FLEXPWM>(config.pin);
+    case RxBackend::FLEXIO:
+        return RxDevice::create<RxDeviceType::FLEXIO>(config.pin);
     }
     return RxDevice::create<RxDeviceType::PLATFORM_DEFAULT>(config.pin);
 }
