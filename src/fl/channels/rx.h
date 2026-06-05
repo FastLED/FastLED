@@ -161,7 +161,7 @@ enum class RxWaitResult : u8 {
  * factory pattern for compile-time device selection.
  */
 enum class RxDeviceType : u8 {
-    PLATFORM_DEFAULT = 0,  ///< Platform default (RMT on ESP32, FLEXPWM on Teensy 4.x)
+    PLATFORM_DEFAULT = 0,  ///< Platform default (RMT on ESP32, FLEXPWM on Teensy 4.x; FLEXIO available as opt-in on Teensy 4 — see FastLED#2764)
     ISR = 1,      ///< GPIO ISR-based receiver (ESP32)
     RMT = 2,      ///< RMT-based receiver (ESP32)
     FLEXPWM = 3,  ///< FlexPWM input-capture receiver (Teensy 4.x)

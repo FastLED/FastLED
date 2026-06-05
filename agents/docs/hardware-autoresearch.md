@@ -318,6 +318,57 @@ The JSON-RPC architecture allows agents to easily add new test functionality:
 - `ci/rpc_client.py` — minimal `send(method, args)` client used in examples above
 - `ci/autoresearch_agent.py` / `ci/autoresearch_loop.py` — higher-level wrapper. NOTE: parts of this wrapper still call legacy RPC names (`configure`, `runTest`, `getState`, `reset`) that are no longer bound — prefer `rpc_client` until the wrapper is reconciled.
 
+## FlexIO RX Backend (Teensy 4 — opt-in)
+
+A second RX capture backend exists for the Teensy 4.x family alongside the default FlexPWM path. It uses the iMXRT1062 **FLEXIO1** peripheral with a 16-bit timer in edge-restart mode and an eDMA shifter for raw inter-edge tick capture. Brought up across PRs #2765 (skeleton), #2766 (FLEXIO1 hardware), #2767 (square-wave bench), and #2769 (ObjectFLED loopback) per the [#2764](https://github.com/FastLED/FastLED/issues/2764) plan.
+
+### Selecting the backend
+
+Two opt-in paths — both leave `RxBackend::PLATFORM_DEFAULT` resolving to FlexPWM, so existing AutoResearch flows are untouched:
+
+```cpp
+// C++ from a sketch — explicit RxBackend
+fl::RxChannelConfig cfg(rx_pin, fl::RxBackend::FLEXIO);
+auto rx = fl::RxChannel::create(cfg);
+```
+
+```python
+# Python — call the dedicated RPCs from any harness with pyserial open
+send_rpc(s, "flexioRxBenchmark",
+         {"frequency_hz": 100000, "duration_ms": 100, "tx_pin": 3, "rx_pin": 4})
+send_rpc(s, "flexioObjectFledTest",
+         {"test_case": 4, "tx_pin": 3, "rx_pin": 4, "capture_ms": 50})
+```
+
+### Pin support
+
+Phase 1B ships with a minimal pin map (`kFlexIo1Pins[]` in `src/platforms/arm/teensy/teensy4_common/rx_flexio_channel.cpp.hpp`). The first entry covers the dev-bench GPIO 3↔4 jumper used to validate the bring-up:
+
+| Teensy pin | FLEXIO1 input | IOMUXC `SW_MUX_CTL` | IOMUXC `SW_PAD_CTL` |
+|---|---|---|---|
+| 4 | `FLEXIO1_FLEXIO06` (ALT4) | `0x401F802C` | `0x401F821C` |
+
+Adding a pin: append a row mapping its Teensy digital number to its FLEXIO1 input index and the matching IOMUXC offsets. The pad config is set to ALT4 + 100 kΩ pull-up keeper + hysteresis for clean edge detection.
+
+### Peripheral resource budget
+
+| Resource | Use |
+|---|---|
+| FLEXIO1 Shifter 0 | Receive-mode, PINSEL = mapped FLEXIO1 input |
+| FLEXIO1 Timer 0 | 16-bit counter, TRGSEL = `2*pin+1`, TIMRST = trigger-rising |
+| eDMA channel | Auto-allocated by `DMAChannel` |
+| `DMAMUX_SOURCE_FLEXIO1_REQUEST0` | DMA request driven by Shifter 0 status flag |
+| FLEXIO1 functional clock | PLL3_PFD3 (480 MHz) / PRED=2 / PODF=2 → ~120 MHz (~8.3 ns/tick) |
+| FlexIO **2** | Untouched — owned by the existing FastLED WS2812 TX driver (`flexio_driver.cpp.hpp`) |
+| FlexIO **3** | Untouched — free for future use |
+
+### Verification
+
+- **`flexioRxBenchmark`** — RPC that drives a square wave via `analogWriteFrequency` and reports per-period mean / σ / min / max nanoseconds. Phase 2 acceptance: σ < 1 µs at 1 kHz, < 500 ns at 10 kHz, < 100 ns at 100 kHz; mean within ±1 % of expected period. See `ci/autoresearch/test_flexio_rx_squarewave.py`.
+- **`flexioObjectFledTest`** — RPC that drives a WS2812 pattern via `Bus::OBJECT_FLED` and decodes the captured edge stream against `TIMING_WS2812B_V5`. Five fixed patterns: red single LED, RGB chain, all zeros, all ones, 100-LED alternating R/G/B. Acceptance: byte-for-byte match against the transmitted CRGB array. See `ci/autoresearch/test_flexio_rx_objectfled.py`.
+
+`RxBackend::PLATFORM_DEFAULT` switching from FlexPWM to FlexIO on Teensy 4 is intentionally **deferred** to a follow-up PR — keeps the bench-validation surface small and the existing FlexPWM-based AutoResearch flows untouched until both backends are equally exercised.
+
 ## Package Installation Daemon Management
 `bash daemon <command>` - Manage the singleton daemon that handles PlatformIO package installations:
 
