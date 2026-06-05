@@ -11,6 +11,9 @@ from __future__ import annotations
 import importlib.util
 import sys
 from pathlib import Path
+from types import ModuleType
+
+import pytest
 
 
 # The script lives at ci/check_backend_flag_drift.py (no underscore in the
@@ -20,11 +23,14 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 _SCRIPT_PATH = _REPO_ROOT / "ci" / "check_backend_flag_drift.py"
 
 
-def _load_script_module():
+def _load_script_module() -> ModuleType:
     spec = importlib.util.spec_from_file_location(
         "check_backend_flag_drift", _SCRIPT_PATH
     )
-    assert spec is not None and spec.loader is not None
+    assert spec is not None and spec.loader is not None, (
+        f"Failed to load module spec for {_SCRIPT_PATH}: "
+        f"spec or spec.loader was None (script missing or unreadable?)"
+    )
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
@@ -155,12 +161,45 @@ def test_should_ignore_dep_machinery() -> None:
 
 
 def test_split_fbuild_combined_flags() -> None:
-    cc, defs, incs = _M._split_fbuild_combined_flags(
+    split = _M._split_fbuild_combined_flags(
         ["-Os", "-DFOO=1", "-Wall", "-I/path/to/inc", "-DBAR"]
     )
-    assert cc == ["-Os", "-Wall"]
-    assert defs == ["FOO=1", "BAR"]
-    assert incs == ["/path/to/inc"]
+    assert split.pure == ["-Os", "-Wall"]
+    assert split.defines == ["FOO=1", "BAR"]
+    assert split.includes == ["/path/to/inc"]
+
+
+def test_clean_flags_drops_operand_after_standalone_path_flag() -> None:
+    """``-include header.h`` and friends must consume the operand token too.
+
+    Without this, the trailing path (``header.h``, ``foo.o``, depfile path)
+    survives normalization and shows up as false drift signal.
+    """
+    cleaned = _M._clean_flags(
+        [
+            "-O2",  # real signal
+            "-include",
+            "stdint_pre.h",  # operand: must be dropped
+            "-o",
+            "main.o",  # operand: must be dropped
+            "-c",
+            "main.cpp",  # operand: must be dropped
+            "-MF",
+            "main.d",  # -MF is a noise prefix; operand also drops
+            "-mcpu=cortex-m7",  # real signal
+        ]
+    )
+    assert cleaned == {"-O2", "-mcpu=cortex-m7"}, (
+        f"Expected only the real-signal flags, got {sorted(cleaned)}"
+    )
+
+
+def test_normalize_build_info_fails_fast_on_missing_board() -> None:
+    """If the requested board key is absent we must raise, not silently
+    fall back to the first top-level record."""
+    raw = {"some_other_board": {"cc_flags": ["-O2"]}}
+    with pytest.raises(ValueError, match="missing board key 'teensy41'"):
+        _M.normalize_build_info(raw, "teensy41", "fbuild")
 
 
 # ---------------------------------------------------------------------------

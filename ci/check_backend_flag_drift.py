@@ -41,13 +41,24 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from running_process import RunningProcess
 
 from ci.util.global_interrupt_handler import handle_keyboard_interrupt
+
+
+if TYPE_CHECKING:
+    from typeguard import typechecked
+else:
+    # No-op decorator: skip typeguard's ~277ms import cost at runtime.
+    # Static type checkers (mypy/pyright) still see the real decorator.
+    def typechecked(f):  # type: ignore[no-redef]
+        return f
 
 
 # ---------------------------------------------------------------------------
@@ -80,6 +91,13 @@ _STANDALONE_PATH_FLAGS: frozenset[str] = frozenset(
     {"-MMD", "-MD", "-MP", "-o", "-c", "-include", "-imacros"}
 )
 
+# Flags whose bare form takes the *next* argv token as an operand. They can
+# also appear glued (``-MFfile.d``) — that variant is caught by the prefix
+# match in :func:`_should_ignore_flag`. When we see the bare form during
+# normalization, we must also drop the following token; otherwise pure path
+# noise like ``main.d`` survives and masquerades as drift.
+_FLAGS_WITH_VALUE: frozenset[str] = frozenset({"-MF", "-MT", "-MQ"})
+
 
 # Defines we deliberately strip because they reflect which backend ran the
 # build, not a real difference in the compiler's view of the program:
@@ -88,6 +106,7 @@ _STANDALONE_PATH_FLAGS: frozenset[str] = frozenset(
 _PIO_VERSION_DEFINE_RE = re.compile(r"^PLATFORMIO=\d+$")
 
 
+@typechecked
 @dataclass(frozen=True)
 class NormalizedFlags:
     """Backend-agnostic view of the compiler invocation for one board."""
@@ -98,6 +117,7 @@ class NormalizedFlags:
     includes: frozenset[str]
 
 
+@typechecked
 @dataclass
 class DriftReport:
     """Per-section diff produced by :func:`compute_drift`."""
@@ -200,13 +220,22 @@ def _normalize_flag(flag: str) -> str:
     return flag
 
 
-def _split_fbuild_combined_flags(
-    cc_flags: list[str],
-) -> tuple[list[str], list[str], list[str]]:
+@typechecked
+@dataclass(frozen=True)
+class SplitFlags:
+    """Result of pulling the ``-D``/``-I`` tokens back out of fbuild's cc_flags."""
+
+    pure: list[str]
+    defines: list[str]
+    includes: list[str]
+
+
+def _split_fbuild_combined_flags(cc_flags: list[str]) -> SplitFlags:
     """fbuild's ``cc_flags`` mixes ``-D``/``-I`` in; split them back out.
 
-    Returns (pure_cc_flags, defines, includes). Defines drop the ``-D``
-    prefix to match PIO's format. Includes drop the ``-I`` prefix.
+    Returns a :class:`SplitFlags` with pure compiler flags, defines (``-D``
+    prefix stripped to match PIO's format), and includes (``-I`` prefix
+    stripped).
     """
     pure: list[str] = []
     defines: list[str] = []
@@ -218,7 +247,31 @@ def _split_fbuild_combined_flags(
             includes.append(raw[2:])
         else:
             pure.append(raw)
-    return pure, defines, includes
+    return SplitFlags(pure=pure, defines=defines, includes=includes)
+
+
+def _clean_flags(flags: list[str]) -> set[str]:
+    """Drop build-noise flags AND the operand that follows standalone path flags.
+
+    Without consuming the operand, tokens like ``header.h`` (after
+    ``-include``) or ``foo.o`` (after ``-o``) survive normalization and
+    masquerade as drift signal. This loop is the single normalization site
+    that both ``cc_flags`` and ``cxx_flags`` flow through.
+    """
+    cleaned: set[str] = set()
+    skip_next = False
+    for flag in flags:
+        if skip_next:
+            skip_next = False
+            continue
+        if flag in _STANDALONE_PATH_FLAGS or flag in _FLAGS_WITH_VALUE:
+            # The argv token after one of these is a path operand. Drop it.
+            skip_next = True
+            continue
+        if _should_ignore_flag(flag):
+            continue
+        cleaned.add(_normalize_flag(flag))
+    return cleaned
 
 
 def normalize_build_info(raw: dict, board: str, backend: str) -> NormalizedFlags:
@@ -234,17 +287,16 @@ def normalize_build_info(raw: dict, board: str, backend: str) -> NormalizedFlags
       ``defines`` (no ``-D``) and ``includes.build`` / ``includes.compatlib``
       as the source of truth.
     """
+    # Fail fast if the requested board key is missing. A silent fallback to
+    # "the only top-level entry" hides real schema mismatches and can flip a
+    # genuine drift into a false clean (or vice versa) by normalizing the
+    # wrong snapshot.
     if board not in raw:
-        # Some build_info variants are keyed by the example or env name.
-        # Use the first (and usually only) top-level entry as a fallback.
-        if len(raw) != 1:
-            raise ValueError(
-                f"{backend} build_info has unexpected top-level keys "
-                f"{sorted(raw)}; expected exactly one ('{board}')"
-            )
-        board_record = next(iter(raw.values()))
-    else:
-        board_record = raw[board]
+        raise ValueError(
+            f"{backend} build_info is missing board key {board!r}; "
+            f"found top-level keys: {sorted(raw)}"
+        )
+    board_record = raw[board]
 
     raw_cc = list(board_record.get("cc_flags", []))
     raw_cxx = list(board_record.get("cxx_flags", []))
@@ -253,17 +305,16 @@ def normalize_build_info(raw: dict, board: str, backend: str) -> NormalizedFlags
 
     # Split fbuild's combined cc_flags back into clean buckets.
     if backend == "fbuild":
-        raw_cc, extracted_defines, extracted_includes = _split_fbuild_combined_flags(
-            raw_cc
-        )
+        split = _split_fbuild_combined_flags(raw_cc)
+        raw_cc = split.pure
         if not raw_defines:
-            raw_defines = extracted_defines
+            raw_defines = split.defines
         if not raw_includes_field:
-            raw_includes_field = extracted_includes
+            raw_includes_field = split.includes
         # fbuild often duplicates the same cc set into cxx_flags or doesn't
         # populate cxx_flags separately. If empty, fall back to cc.
         if raw_cxx:
-            raw_cxx, _, _ = _split_fbuild_combined_flags(raw_cxx)
+            raw_cxx = _split_fbuild_combined_flags(raw_cxx).pure
         else:
             raw_cxx = list(raw_cc)
 
@@ -276,8 +327,8 @@ def normalize_build_info(raw: dict, board: str, backend: str) -> NormalizedFlags
     else:
         flat_includes = list(raw_includes_field)
 
-    cc_clean = {_normalize_flag(f) for f in raw_cc if not _should_ignore_flag(f)}
-    cxx_clean = {_normalize_flag(f) for f in raw_cxx if not _should_ignore_flag(f)}
+    cc_clean = _clean_flags(raw_cc)
+    cxx_clean = _clean_flags(raw_cxx)
     defines_clean = {
         norm for d in raw_defines if (norm := _normalize_define(d)) is not None
     }
@@ -405,7 +456,10 @@ def _run_compile(
         backend_flag,
     ]
 
-    print(f"\n>>> Compiling [{backend}]: {' '.join(cmd)}", flush=True)
+    print(
+        f"\n>>> Compiling [{backend}]: {subprocess.list2cmdline(cmd)}",
+        flush=True,
+    )
     try:
         result = RunningProcess.run(
             cmd,
@@ -520,7 +574,17 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 2
-    fbuild_info = json.loads(fbuild_bi_path.read_text())
+    try:
+        fbuild_info = json.loads(fbuild_bi_path.read_text())
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except (OSError, json.JSONDecodeError) as e:
+        print(
+            f"ERROR: failed to load fbuild build_info {fbuild_bi_path}: {e}",
+            file=sys.stderr,
+        )
+        return 2
     print(f"  fbuild snapshot: {fbuild_bi_path}")
 
     if not _run_compile(
@@ -539,7 +603,17 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 2
-    pio_info = json.loads(pio_bi_path.read_text())
+    try:
+        pio_info = json.loads(pio_bi_path.read_text())
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except (OSError, json.JSONDecodeError) as e:
+        print(
+            f"ERROR: failed to load PlatformIO build_info {pio_bi_path}: {e}",
+            file=sys.stderr,
+        )
+        return 2
     print(f"  pio    snapshot: {pio_bi_path}")
 
     try:
