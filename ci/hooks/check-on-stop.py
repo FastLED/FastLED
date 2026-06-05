@@ -158,7 +158,13 @@ def classify_changes(porcelain: str) -> ChangeBuckets:
         is_examples = norm.startswith("examples/")
         is_meson_file = base == "meson.build" or base == "meson_options.txt"
         is_cmake_file = base == "CMakeLists.txt"
-        is_build = is_meson_file or is_cmake_file
+        # `is_build` only flips for TOP-LEVEL build files. A nested
+        # `docs/meson.build` (or similar) must NOT force the expensive
+        # C++ test phase to run. We keep `is_meson_file` broad so the
+        # cheaper meson-lint stage still runs whenever any meson file
+        # changes, but C++ tests are gated on root-only build files.
+        is_top_level = "/" not in norm
+        is_build = is_top_level and (is_meson_file or is_cmake_file)
 
         if is_src:
             buckets.src = True
@@ -175,18 +181,37 @@ def classify_changes(porcelain: str) -> ChangeBuckets:
     return buckets
 
 
+class GitPorcelainError(RuntimeError):
+    """`git status --porcelain` exited non-zero."""
+
+
 def get_porcelain() -> str | None:
-    """Return `git status --porcelain` output, or None on failure / no changes."""
+    """Return `git status --porcelain` output, or None if the tree is clean.
+
+    Raises:
+        GitPorcelainError: if the underlying ``git status`` invocation fails.
+            Per coding guidelines, we never silently fall back on missing
+            critical resources; a broken Git invocation must surface as a
+            hook failure rather than being collapsed into the clean-tree
+            "skip" path.
+    """
     result = run_cmd(["git", "status", "--porcelain"])
     if result.returncode != 0:
-        return None
+        raise GitPorcelainError(
+            f"git status --porcelain failed (exit {result.returncode}): "
+            f"{(result.stderr or '').strip() or '(no stderr)'}"
+        )
     if not result.stdout.strip():
         return None
     return result.stdout
 
 
 def get_current_fingerprint(porcelain: str | None = None) -> str | None:
-    """Get MD5 fingerprint of current git status."""
+    """Get MD5 fingerprint of current git status.
+
+    Returns None only when the tree is genuinely clean. Git failures
+    propagate as ``GitPorcelainError`` from ``get_porcelain()``.
+    """
     if porcelain is None:
         porcelain = get_porcelain()
     if porcelain is None:
@@ -211,12 +236,19 @@ def get_session_fingerprint() -> str | None:
 
 
 def should_skip_hook(porcelain: str | None) -> bool:
-    """Check if hook should skip based on session fingerprints."""
+    """Check if hook should skip based on session fingerprints.
+
+    ``porcelain is None`` means the working tree is genuinely clean (callers
+    must distinguish a clean tree from a Git failure before reaching here -
+    Git failures are raised as ``GitPorcelainError`` by ``get_porcelain()``).
+    """
     # No changes at all right now - skip
     if porcelain is None:
         return True
 
     current_fp = get_current_fingerprint(porcelain)
+    # current_fp is only None when porcelain is None, which is handled above.
+    # Belt-and-braces: skip if for any reason the fingerprint is missing.
     if current_fp is None:
         return True
 
@@ -289,7 +321,15 @@ def _fmt_seconds(seconds: float) -> str:
 
 
 def main() -> int:
-    porcelain = get_porcelain()
+    try:
+        porcelain = get_porcelain()
+    except GitPorcelainError as exc:
+        # Fail fast with a descriptive error instead of silently treating a
+        # broken git invocation as "clean tree, nothing to do". The hook
+        # depends on `git status --porcelain` to know what changed; if it
+        # cannot run, we cannot safely decide whether to skip lint/tests.
+        print(f"[stop-hook] FATAL: {exc}", file=sys.stderr)
+        return 2
     if should_skip_hook(porcelain):
         print("Skipping lint+tests (no changes during this session)", file=sys.stderr)
         warn_stale_worktrees()
@@ -327,6 +367,11 @@ def main() -> int:
     test_results: list[subprocess.CompletedProcess[str]] = []
     lint_duration: list[float] = []
     test_duration: list[float] = []
+    # Signalled once the test subprocess has either been spawned and registered
+    # in test_proc_holder OR the thread has exited without spawning (e.g. Popen
+    # raised). The lint-failure cancellation path waits on this so it cannot
+    # race past the start of run_tests() and miss the spawned child.
+    test_ready = threading.Event()
 
     def run_lint() -> None:
         lint_cmd: list[str] = ["uv", "run", "ci/lint.py"]
@@ -340,16 +385,22 @@ def main() -> int:
 
     def run_tests() -> None:
         t0 = time.perf_counter()
-        proc = subprocess.Popen(
-            ["uv", "run", "test.py", "--cpp"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            cwd=str(PROJECT_ROOT),
-        )
-        test_proc_holder.append(proc)
+        try:
+            proc = subprocess.Popen(
+                ["uv", "run", "test.py", "--cpp"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                cwd=str(PROJECT_ROOT),
+            )
+            test_proc_holder.append(proc)
+        finally:
+            # Always signal readiness so the lint-failure cancellation path
+            # never blocks forever on a Popen that raised before producing a
+            # process handle.
+            test_ready.set()
         stdout, stderr = proc.communicate()
         test_duration.append(time.perf_counter() - t0)
         test_results.append(
@@ -386,7 +437,14 @@ def main() -> int:
         )
 
     if lint_result.returncode != 0:
-        # Lint failed - cancel tests, report lint errors only
+        # Lint failed - cancel tests, report lint errors only.
+        # We must wait for run_tests() to publish the Popen handle (or finish
+        # without one) before killing, otherwise we can race past the start
+        # of the thread and leak a `uv run test.py --cpp` child that keeps
+        # running after the hook exits.
+        if test_thread is not None:
+            # Bounded wait so a hung Popen cannot block the hook forever.
+            test_ready.wait(timeout=10)
         for proc in test_proc_holder:
             proc.kill()
         if test_thread is not None:
