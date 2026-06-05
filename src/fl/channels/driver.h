@@ -131,6 +131,27 @@ public:
     bool waitForReady(u32 timeoutMs = 1000) FL_NOEXCEPT;
     bool waitForReadyOrDraining(u32 timeoutMs = 1000) FL_NOEXCEPT;
 
+    /// @brief Block until this driver finishes any in-flight transmit.
+    ///
+    /// Phase 2 of #2815: drivers that have an ISR-driven completion
+    /// primitive (semaphore, IDF wait-all-done call, event-group) should
+    /// override this to block directly on it. The default delegates to
+    /// `waitForReady(timeoutMs)` so unmigrated drivers (and all bare-metal
+    /// / non-FreeRTOS targets) continue to work via the tiered-spin path
+    /// from Phase 1 (#2818).
+    ///
+    /// `ChannelManager::waitForReady()` short-circuits to
+    /// `driver->waitDone(timeoutMs)` when exactly one driver is BUSY,
+    /// bypassing the spin tier entirely on the single-driver fast path.
+    /// The wait then wakes precisely when the DMA-done ISR fires
+    /// (~microseconds) instead of paying the 250 us spin budget.
+    ///
+    /// @param timeoutMs Optional timeout in milliseconds (0 = no timeout)
+    /// @return true if driver became READY, false if timeout occurred
+    virtual bool waitDone(u32 timeoutMs = 1000) FL_NOEXCEPT {
+        return waitForReady(timeoutMs);
+    }
+
     /// @brief Virtual destructor
     virtual ~IChannelDriver() FL_NOEXCEPT = default;
 
