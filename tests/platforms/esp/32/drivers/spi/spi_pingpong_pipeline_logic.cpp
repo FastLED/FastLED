@@ -113,16 +113,18 @@ struct PipelineModel {
         // goes to that same buffer — modeling the ESP-IDF SPI driver where
         // each staging buffer is independently tracked. Encoding always
         // targets the just-freed buffer, never the one still in flight.
+        //
+        // Polling and async share the same drain logic: drain whichever
+        // buffer is currently in flight (A first if both are, mirroring the
+        // ESP-IDF FIFO). The previous polling branch used `encodeIdx & 1`,
+        // which alternated between A and B independently of which one was
+        // actually in flight — that produced spurious "drain B" steps when
+        // only A had been queued, and the resulting infinite loop manifested
+        // as a UBSan signed-integer-overflow on `++completedCount`
+        // (refs the test failure on this file at line 126).
         int drainedBuf = -1;
-        if (usePolling) {
-            int lastBuf = (encodeIdx - 1) & 1;
-            if (lastBuf == 0) { transAInFlight = false; drainedBuf = 0; }
-            else              { transBInFlight = false; drainedBuf = 1; }
-        } else {
-            // FIFO: A completes before B if both are in flight.
-            if (transAInFlight)      { transAInFlight = false; drainedBuf = 0; }
-            else if (transBInFlight) { transBInFlight = false; drainedBuf = 1; }
-        }
+        if (transAInFlight)      { transAInFlight = false; drainedBuf = 0; }
+        else if (transBInFlight) { transBInFlight = false; drainedBuf = 1; }
         ++completedCount;
 
         // Refill the just-freed buffer when more data remains.
