@@ -32,6 +32,8 @@ from typing import Any
 
 from typeguard import typechecked
 
+from ci.util.global_interrupt_handler import handle_keyboard_interrupt
+
 
 # `pyserial` is checked at `main()` entry, not at import — see the matching
 # rationale in test_flexio_rx_squarewave.py.
@@ -169,9 +171,12 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[flexio-objectfled] opening {args.port} @ {args.baud}")
     try:
         s = serial.Serial(args.port, args.baud, timeout=0.1)
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as ki:
         # Catch Ctrl-C before the bare `Exception`/`SerialException` block so
-        # interactive users can abort cleanly without dumping a stack trace.
+        # interactive users can abort cleanly. `handle_keyboard_interrupt`
+        # routes the signal through the project-wide interrupt handler
+        # (required by the KBI002 lint).
+        handle_keyboard_interrupt(ki)
         raise
     except serial.SerialException as e:
         print(f"ERROR: could not open {args.port}: {e}", file=sys.stderr)
