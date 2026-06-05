@@ -10,7 +10,7 @@ Drive **30,000+ LEDs** on high-end devices • **Sub-$1 compatibility** on tiny 
 
 [![Example Tests (Linux)](https://github.com/FastLED/FastLED/actions/workflows/example_test_linux.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/example_test_linux.yml) [![Example Tests (macOS)](https://github.com/FastLED/FastLED/actions/workflows/example_test_macos.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/example_test_macos.yml) [![Example Tests (Windows)](https://github.com/FastLED/FastLED/actions/workflows/example_test_windows.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/example_test_windows.yml)
 
-[![Docker Platform Builds](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_template.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_template.yml) [![Documentation](https://img.shields.io/badge/Docs-Doxygen-blue.svg)](http://fastled.io/docs) [![Community](https://img.shields.io/badge/reddit-/r/FastLED-orange.svg?logo=reddit)](https://www.reddit.com/r/FastLED/)
+[![Documentation](https://img.shields.io/badge/Docs-Doxygen-blue.svg)](http://fastled.io/docs) [![Community](https://img.shields.io/badge/reddit-/r/FastLED-orange.svg?logo=reddit)](https://www.reddit.com/r/FastLED/)
 
 
 ## ⚡ Get Blinking in 30 Seconds
@@ -143,24 +143,6 @@ FastLED's codebase is organized into several major areas. Each directory contain
 **Teensy Platforms:** [![check_teensylc_size](https://github.com/FastLED/FastLED/actions/workflows/check_teensylc_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_teensylc_size.yml) [![check_teensy30_size](https://github.com/FastLED/FastLED/actions/workflows/check_teensy30_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_teensy30_size.yml) [![check_teensy31_size](https://github.com/FastLED/FastLED/actions/workflows/check_teensy31_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_teensy31_size.yml) [![check_teensy32_size](https://github.com/FastLED/FastLED/actions/workflows/check_teensy32_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_teensy32_size.yml) [![check_teensy35_size](https://github.com/FastLED/FastLED/actions/workflows/check_teensy35_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_teensy35_size.yml) [![check_teensy36_size](https://github.com/FastLED/FastLED/actions/workflows/check_teensy36_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_teensy36_size.yml) [![teensy41_binary_size](https://github.com/FastLED/FastLED/actions/workflows/check_teensy41_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_teensy41_size.yml)
 
 
-
-### Docker Compiler Builds
-
-Pre-built Docker images of PlatformIO optimized for compiling FastLED across all supported platforms. Weekly builds ensure up-to-date toolchains.
-
-**Build Status:**
-
-| **AVR** (Mon) | **ESP** (Tue) | **STM32** (Wed) | **NRF52** (Thu) | **Teensy** (Fri) | **RP2040** (Sat) | **SAM** (Sun) |
-|---------------|---------------|-----------------|-----------------|------------------|------------------|---------------|
-| [![AVR](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_avr.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_avr.yml) | [![ESP](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_esp.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_esp.yml) | [![STM32](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_stm32.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_stm32.yml) | [![NRF52](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_nrf52.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_nrf52.yml) | [![Teensy](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_teensy.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_teensy.yml) | [![RP2040](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_rp.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_rp.yml) | [![SAM](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_sam.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_sam.yml) |
-
-**Platform Images:**
-
-| **AVR** | **ESP** | **Teensy** | **STM32** | **RP2040** | **NRF52** | **SAM** |
-|---------|---------|------------|-----------|------------|-----------|---------|
-| [![fastled-compiler-avr](https://img.shields.io/docker/v/niteris/fastled-compiler-avr/latest?label=avr)](https://hub.docker.com/r/niteris/fastled-compiler-avr) | [![fastled-compiler-esp-32s3](https://img.shields.io/docker/v/niteris/fastled-compiler-esp-32s3/latest?label=esp)](https://hub.docker.com/r/niteris/fastled-compiler-esp-32s3) | [![fastled-compiler-teensy](https://img.shields.io/docker/v/niteris/fastled-compiler-teensy/latest?label=teensy)](https://hub.docker.com/r/niteris/fastled-compiler-teensy) | [![fastled-compiler-stm32-f103c8](https://img.shields.io/docker/v/niteris/fastled-compiler-stm32-f103c8/latest?label=stm32)](https://hub.docker.com/r/niteris/fastled-compiler-stm32-f103c8) | [![fastled-compiler-rp](https://img.shields.io/docker/v/niteris/fastled-compiler-rp/latest?label=rp2040)](https://hub.docker.com/r/niteris/fastled-compiler-rp) | [![fastled-compiler-nrf52](https://img.shields.io/docker/v/niteris/fastled-compiler-nrf52/latest?label=nrf52)](https://hub.docker.com/r/niteris/fastled-compiler-nrf52) | [![fastled-compiler-sam-3x8e](https://img.shields.io/docker/v/niteris/fastled-compiler-sam-3x8e/latest?label=sam)](https://hub.docker.com/r/niteris/fastled-compiler-sam-3x8e) |
-
-Most Docker images contain pre-cached toolchains for all boards in their platform family (AVR, Teensy, etc.), while ESP, STM32, and SAM boards use individual images per chip to prevent build artifact accumulation. All images enable fast compilation without downloading dependencies for every build.
 
 ### Header Compilation Performance
 

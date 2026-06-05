@@ -2,24 +2,22 @@ from ci.util.global_interrupt_handler import handle_keyboard_interrupt
 
 
 #!/usr/bin/env python3
-"""Docker helper utilities for FastLED compilation optimization.
+"""Generic Docker daemon helpers used by callers that need a running Docker
+engine (e.g. `bash test --docker`, `bash profile --docker`, the qemu/avr8js
+emulator runners).
 
-This module provides utilities to detect Docker availability and determine
-whether Docker should be used for compilation based on system configuration.
+The compile-Docker bits that used to live here (`get_docker_image_name`,
+`is_docker_image_available`, `should_use_docker_for_board`) were removed in
+#2812 along with the rest of the `niteris/fastled-compiler-*` image family
+and `bash compile --docker`. What remains is platform-agnostic daemon-start
+logic — install detection, Docker Desktop start (Windows / macOS / Linux),
+and WSL2-backend diagnostics on Windows.
 """
 
 import os
 import subprocess
 import sys
 import time
-from typing import Optional
-
-from ci.docker_utils.build_platforms import (
-    get_docker_image_name as get_platform_image_name,
-)
-from ci.docker_utils.build_platforms import (
-    get_platform_for_board,
-)
 
 # Import Docker command utilities from separate module to avoid circular imports
 from ci.util.docker_command import (
@@ -340,81 +338,79 @@ def _start_docker_macos() -> tuple[bool, str]:
         Tuple of (success, message)
     """
     try:
-        # Try to open Docker Desktop app
+        # Use `open -a` to launch Docker Desktop
         subprocess.run(
             ["open", "-a", "Docker"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            timeout=5,
+            capture_output=True,
+            timeout=10,
+            check=False,
         )
-
-        # Wait for Docker to become available
-        for _ in range(30):  # Try for 30 seconds
+        # Wait for Docker to start - up to 60 seconds
+        print("  Waiting for Docker Desktop to initialize...", flush=True)
+        for attempt in range(60):
             time.sleep(1)
             if is_docker_available():
                 return True, "Docker Desktop started successfully"
-
-        return (
-            False,
-            "Docker Desktop started but failed to become available after 30 seconds",
-        )
-    except KeyboardInterrupt as ki:
-        handle_keyboard_interrupt(ki)
-        raise
-    except Exception:
+            if (attempt + 1) % 10 == 0:
+                print(f"  Still waiting ({attempt + 1}s)...", flush=True)
+        return False, "Docker Desktop did not start within 60 seconds"
+    except FileNotFoundError:
         return (
             False,
             "Docker Desktop not found. Please install it from https://www.docker.com/products/docker-desktop",
         )
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception as e:
+        return False, f"Failed to start Docker Desktop on macOS: {e}"
 
 
 def _start_docker_linux() -> tuple[bool, str]:
-    """Attempt to start Docker on Linux using systemctl or service.
+    """Attempt to start Docker daemon on Linux.
 
     Returns:
         Tuple of (success, message)
     """
     try:
-        # Try systemctl first (modern systemd systems)
-        result = subprocess.run(
-            ["sudo", "systemctl", "start", "docker"],
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
+        # Try systemctl first (modern systems)
+        try:
+            result = subprocess.run(
+                ["sudo", "systemctl", "start", "docker"],
+                capture_output=True,
+                text=True,
+                timeout=30,
+                check=False,
+            )
+            if result.returncode == 0:
+                # Wait for Docker to be ready
+                for _ in range(30):
+                    time.sleep(1)
+                    if is_docker_available():
+                        return True, "Docker daemon started via systemctl"
+                return False, "Docker daemon started but is not responding"
+        except FileNotFoundError:
+            pass
 
-        if result.returncode == 0:
-            # Wait a bit for Docker to start
-            for _ in range(10):
-                time.sleep(1)
-                if is_docker_available():
-                    return True, "Docker service started successfully"
+        # Try service command (older systems)
+        try:
+            result = subprocess.run(
+                ["sudo", "service", "docker", "start"],
+                capture_output=True,
+                text=True,
+                timeout=30,
+                check=False,
+            )
+            if result.returncode == 0:
+                # Wait for Docker to be ready
+                for _ in range(30):
+                    time.sleep(1)
+                    if is_docker_available():
+                        return True, "Docker daemon started via service"
+                return False, "Docker daemon started but is not responding"
+        except FileNotFoundError:
+            pass
 
-            return False, "Docker service started but failed to become available"
-
-        # Try service command as fallback
-        result = subprocess.run(
-            ["sudo", "service", "docker", "start"],
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-
-        if result.returncode == 0:
-            for _ in range(10):
-                time.sleep(1)
-                if is_docker_available():
-                    return True, "Docker service started successfully"
-
-            return False, "Docker service started but failed to become available"
-
-        return (
-            False,
-            "Failed to start Docker service. Please ensure Docker is installed or start it manually.",
-        )
-    except subprocess.TimeoutExpired:
-        return False, "Timeout attempting to start Docker service"
-    except FileNotFoundError:
         return (
             False,
             "Could not find systemctl or service command. Please ensure Docker is installed.",
@@ -424,135 +420,3 @@ def _start_docker_linux() -> tuple[bool, str]:
         raise
     except Exception:
         return False, "Failed to start Docker: Unknown error"
-
-
-def get_docker_image_name(board_name: str) -> str:
-    """Get the Docker image name for a specific board.
-
-    Uses the new platform-based naming scheme: niteris/fastled-compiler-{platform}:latest
-
-    Args:
-        board_name: Name of the board (e.g., 'uno', 'esp32dev', 'esp32s3')
-
-    Returns:
-        Docker image name with tag (e.g., 'niteris/fastled-compiler-avr:latest',
-        'niteris/fastled-compiler-esp-32s3:latest')
-
-    Raises:
-        ValueError: If board is not mapped to a platform
-    """
-    # Get platform for this board using the new mapping
-    platform = get_platform_for_board(board_name)
-    if not platform:
-        raise ValueError(
-            f"Board '{board_name}' is not mapped to a Docker platform family. "
-            f"Please check ci/docker_utils/build_platforms.py"
-        )
-
-    # Generate full image name with tag
-    image_base = get_platform_image_name(platform)
-    return f"{image_base}:latest"
-
-
-def is_docker_image_available(board_name: str) -> bool:
-    """Check if a Docker image exists for the specified board.
-
-    Args:
-        board_name: Name of the board (e.g., 'uno', 'esp32dev')
-
-    Returns:
-        True if Docker image exists locally, False otherwise
-    """
-    try:
-        docker_exe = find_docker_executable()
-        if not docker_exe:
-            return False
-
-        image_name = get_docker_image_name(board_name)
-        result = subprocess.run(
-            [docker_exe, "image", "inspect", image_name],
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=5,
-        )
-        return result.returncode == 0
-    except KeyboardInterrupt as ki:
-        handle_keyboard_interrupt(ki)
-        raise
-    except (subprocess.TimeoutExpired, ValueError, Exception):
-        return False
-
-
-def should_use_docker_for_board(
-    board_name: str, verbose: bool = False
-) -> tuple[bool, Optional[str]]:
-    """Determine if Docker should be used for compiling a specific board.
-
-    This function checks:
-    1. If Docker is installed and running
-    2. If the Docker image for the board exists locally
-
-    Args:
-        board_name: Name of the board (e.g., 'uno', 'esp32dev')
-        verbose: Whether to print diagnostic messages
-
-    Returns:
-        Tuple of (should_use_docker, reason)
-        - should_use_docker: True if Docker should be used, False otherwise
-        - reason: Optional string explaining the decision
-    """
-    # Check if Docker is available
-    if not is_docker_available():
-        reason = "Docker not installed or not running"
-        if verbose:
-            print(f"ℹ  {reason} - using native compilation")
-        return False, reason
-
-    # Check if Docker image exists
-    if not is_docker_image_available(board_name):
-        try:
-            image_name = get_docker_image_name(board_name)
-            reason = f"Docker image '{image_name}' not found"
-            if verbose:
-                print(f"ℹ  {reason} - using native compilation")
-                print("   To build the image, run:")
-                print(f"   bash compile --docker --build {board_name} Blink")
-        except ValueError as e:
-            reason = str(e)
-            if verbose:
-                print(f"ℹ  {reason} - using native compilation")
-        return False, reason
-
-    # Docker is available and image exists
-    try:
-        image_name = get_docker_image_name(board_name)
-        reason = f"Using Docker image '{image_name}'"
-        if verbose:
-            print(f"✓ {reason} for faster compilation")
-        return True, reason
-    except ValueError as e:
-        reason = str(e)
-        if verbose:
-            print(f"ℹ  {reason} - using native compilation")
-        return False, reason
-
-
-if __name__ == "__main__":
-    import sys
-
-    if len(sys.argv) < 2:
-        print("Usage: python docker_helper.py <board_name>")
-        print("Example: python docker_helper.py uno")
-        sys.exit(1)
-
-    board = sys.argv[1]
-    use_docker, reason = should_use_docker_for_board(board, verbose=True)
-
-    if use_docker:
-        print(f"\nResult: Docker SHOULD be used for {board}")
-        sys.exit(0)
-    else:
-        print(f"\nResult: Docker should NOT be used for {board}")
-        print(f"Reason: {reason}")
-        sys.exit(1)

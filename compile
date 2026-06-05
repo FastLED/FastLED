@@ -22,13 +22,12 @@ fi
 
 cd "$(dirname "$0")"
 
-# Skip .venv setup if running inside Docker (system packages are pre-installed)
-if [ -z "$FASTLED_DOCKER" ]; then
-    # if .venv not found
-    if [ ! -d .venv ]; then
-        # create virtual environment
-        ./install
-    fi
+# if .venv not found, create virtual environment.
+# (The FASTLED_DOCKER skip-guard that lived here was removed in #2812 — the
+# niteris/fastled-compiler-* compilation Docker images that set that env var
+# are decommissioned.)
+if [ ! -d .venv ]; then
+    ./install
 fi
 
 show_boards_stmt=""

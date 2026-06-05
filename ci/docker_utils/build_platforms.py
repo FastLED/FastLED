@@ -1,12 +1,16 @@
 """
 Docker Platform to Boards Mapping
 
-This module defines which boards belong to which Docker platform family.
-Each Docker platform image (e.g., niteris/fastled-compiler-avr) pre-caches
-toolchains for ALL boards in its family.
+After the compilation-Docker decommission (#2812) this module is retained
+for the **emulator** Docker runners only — `ci/docker_utils/qemu_esp32_docker.py`
+uses `get_platform_for_board()` to resolve a board's platform family for
+naming qemu simulator images (`niteris/fastled-simulator-*`). The full
+mapping is kept rather than slimmed to ESP-only so future emulator
+additions (AVR8JS, etc.) can reuse the same lookup without re-deriving it.
 
-This is the single source of truth for platform→boards relationships used
-during Docker image builds.
+The `niteris/fastled-compiler-*` image names that historically used this
+mapping are no longer published or referenced anywhere in the code; that
+side of the system was removed in the same PR.
 """
 
 from typing import Optional
