@@ -1,8 +1,16 @@
 // @filter: (memory is large)
 
-// AnimartrixRing: Sample a circle from an Animartrix rectangular grid
-// Uses Processor's Vibe for self-normalizing bass/mid/treb
-// levels. Bass level warps animation speed via FxEngine's TimeWarp.
+// AnimartrixRing: Sample a circle from an Animartrix rectangular grid.
+//
+// Audio model (issue #2713):
+//
+//   audio -> SoundOrchestrator { Silence | Disorganized | BpmLocked }
+//         -> per-state Animartrix bank
+//         -> per-state audio->visual mapping (energy, bass, kick, downbeat, ...)
+//
+// Time warp is preserved as a *secondary* effect inside the Disorganized state
+// (vibe.bass nudges engine speed within a bounded span). It is no longer the
+// primary audio interaction.
 
 // Use SPI-based WS2812 driver instead of RMT on ESP32
 #define FASTLED_ESP32_USE_CLOCKLESS_SPI
@@ -19,7 +27,6 @@
 #include "fl/math/math.h"
 #include "fl/math/screenmap.h"
 #include "fl/ui/ui.h"
-#include "fl/math/math.h"
 #include "fl/fx/2d/animartrix.hpp"
 #include "fl/audio/audio_processor.h"
 #include "fl/audio/detector/vibe.h"
@@ -28,6 +35,7 @@
 #include <FastLED.h>
 
 #include "auto_brightness.h"
+#include "sound_orchestrator.h"
 
 FASTLED_TITLE("AnimartrixRing");
 
@@ -52,8 +60,7 @@ CRGB leds[NUM_LEDS];
 
 // Animartrix 2D effect
 XYMap xymap = XYMap::constructRectangularGrid(GRID_WIDTH, GRID_HEIGHT);
-auto animartrix = fl::make_shared<fl::Animartrix>(xymap, fl::AnimartrixAnim::RGB_BLOBS5);
-int currentAnimationIndex = 0;
+auto animartrix = fl::make_shared<fl::Animartrix>(xymap, fl::AnimartrixAnim::SLOW_FADE);
 
 // ScreenMap for the ring - defines circular sampling positions using a lambda
 fl::ScreenMap screenmap =
@@ -73,22 +80,7 @@ auto fx2dTo1d = fl::make_shared<fl::Fx2dTo1d>(NUM_LEDS, animartrix, screenmap,
 // FxEngine for the 1D strip
 fl::FxEngine fxEngine(NUM_LEDS);
 
-// Helper function to get animation names for dropdown
-fl::vector<fl::string> getAnimationNames() {
-    fl::vector<fl::pair<int, fl::string>> animList =
-        fl::Animartrix::getAnimationList();
-    fl::vector<fl::string> names;
-    for (const auto &item : animList) {
-        names.push_back(item.second);
-    }
-    return names;
-}
-
-// Store animation names in a static variable so they persist
-static fl::vector<fl::string> animationNames = getAnimationNames();
-
 // UI controls
-fl::UIDropdown animationSelector("Animation", animationNames);
 fl::UISlider timeSpeed("Time Speed", 1, -10, 10, .1);
 fl::UISlider brightness("Brightness", BRIGHTNESS, 0, 255, 1);
 fl::UICheckbox autoBrightness("Auto Brightness", true);
@@ -100,12 +92,13 @@ fl::UISlider autoBrightnessHighThreshold("Auto Brightness High Threshold", 22,
 
 // Audio UI controls
 fl::UIAudio audio("Audio Input");
-fl::UICheckbox enableVibeReactive("Enable Vibe Reactive", false);
-fl::UISlider vibeSpeedMultiplier("Vibe Speed Multiplier", 3.0, 0.0, 10.0, 0.1);
-fl::UISlider vibeBaseSpeed("Vibe Base Speed", 1.0, 0.0, 5.0, 0.1);
+fl::UICheckbox enableOrchestrator("Enable Sound Orchestrator", false);
+fl::UISlider orchestratorDwellMs("Orchestrator Min Dwell (ms)", 1500, 200, 5000, 100);
+fl::UISlider orchestratorHysteresisMs("Orchestrator Hysteresis (ms)", 400, 0, 2000, 50);
 
-// Processor with Vibe (initialized in setup via FastLED.add or fallback)
+// Processor + orchestrator (initialized in setup)
 fl::shared_ptr<fl::audio::Processor> gAudioProcessor;
+fl::shared_ptr<animartrix_ring::SoundOrchestrator> gOrchestrator;
 bool gAutoPump = false;
 
 void setup() {
@@ -123,83 +116,71 @@ void setup() {
     // Add the 2D-to-1D effect to FxEngine
     fxEngine.addFx(fx2dTo1d);
 
-    // Setup animation selector callback
-    animationSelector.onChanged([](fl::UIDropdown &dropdown) {
-        int index = dropdown.as_int();
-        animartrix->fxSet(index);
-    });
-
-    // Route audio through FastLED.add() for auto-pump when available
+    // Route audio through FastLED.add() for auto-pump when available.
+    // gAutoPump may only be set true when FastLED.add() actually returned a
+    // live processor -- otherwise loop() would skip the manual pump path and
+    // the orchestrator would never see any samples.
     auto input = audio.audioInput();
     if (input) {
         gAudioProcessor = FastLED.add(input);
-        gAutoPump = true;
-        printf("AnimartrixRing: Audio routed via FastLED.add() (auto-pump)\n");
+        if (gAudioProcessor) {
+            gAutoPump = true;
+            printf("AnimartrixRing: Audio routed via FastLED.add() (auto-pump)\n");
+        }
     }
     if (!gAudioProcessor) {
         gAudioProcessor = fl::make_shared<fl::audio::Processor>();
+        gAutoPump = false;
         printf("AnimartrixRing: Audio using manual pump (fallback)\n");
     }
 
-    // Hook Vibe bass level to FxEngine timewarp.
-    // onVibeLevels fires every frame with self-normalizing levels:
-    //   bass ~1.0 = average, >1.0 = louder than normal, <1.0 = quieter
-    // We map bass level directly to animation speed so beats accelerate
-    // the animation.
-    gAudioProcessor->onVibeLevels([](const fl::audio::detector::VibeLevels &vibe) {
-        if (!enableVibeReactive.value()) {
-            return;
-        }
-        // Print beat/mid/treble levels and spike flags each frame
-        printf("Vibe: bass=%.2f mid=%.2f treb=%.2f | spikes: bass=%d mid=%d treb=%d\n",
-               vibe.bass, vibe.mid, vibe.treb,
-               vibe.bassSpike, vibe.midSpike, vibe.trebSpike);
+    // Build the 3-state orchestrator. It owns nothing: it just polls the
+    // Processor, asks the Animartrix to switch banks, and pokes the FxEngine
+    // speed on every frame.
+    gOrchestrator = fl::make_shared<animartrix_ring::SoundOrchestrator>(
+        gAudioProcessor, animartrix, &fxEngine);
+    gOrchestrator->begin();
 
-        // bass hovers around 1.0; scale it into a speed multiplier
-        float bassBoost = (vibe.bass - 1.0f) * vibeSpeedMultiplier.value();
-        float speed = vibeBaseSpeed.value() + bassBoost;
-        // Combine with the user's manual time speed slider
-        speed *= timeSpeed.value();
-        fxEngine.setSpeed(speed);
-    });
+    // Log state transitions so a developer can see the classifier in action.
+    static animartrix_ring::SoundState sLastState =
+        animartrix_ring::SoundState::Silence;
+    (void)sLastState;
 
-    // Log spike events
-    gAudioProcessor->onVibeBassSpike([]() {
-        printf(">>> BASS SPIKE!\n");
-    });
-    gAudioProcessor->onVibeMidSpike([]() {
-        printf(">>> MID SPIKE!\n");
-    });
-    gAudioProcessor->onVibeTrebSpike([]() {
-        printf(">>> TREB SPIKE!\n");
-    });
-
-    Serial.println("AnimartrixRing setup complete");
+    Serial.println("AnimartrixRing setup complete (3-state orchestrator)");
 }
 
 void loop() {
-    // When auto-pump is not available, manually drain audio and feed processor
+    // Manual audio pump fallback (e.g. WASM / when FastLED.add() didn't take).
     if (!gAutoPump) {
         fl::audio::Sample sample = audio.next();
-        if (sample.isValid()) {
-            static uint32_t sAudioSamples = 0;
-            sAudioSamples++;
-            if (sAudioSamples == 1) {
-                printf("AnimartrixRing: First audio sample received! "
-                       "enableVibeReactive=%d\n",
-                       (int)enableVibeReactive.value());
-            } else if (sAudioSamples % 172 == 0) {
-                printf("AnimartrixRing: %u audio samples processed, "
-                       "enableVibeReactive=%d\n",
-                       (unsigned)sAudioSamples,
-                       (int)enableVibeReactive.value());
-            }
-            if (enableVibeReactive.value()) {
-                gAudioProcessor->update(sample);
-            }
+        if (sample.isValid() && enableOrchestrator.value()) {
+            gAudioProcessor->update(sample);
         }
     }
-    if (!enableVibeReactive.value()) {
+
+    // Per-frame orchestrator tick. When disabled, fall back to plain manual
+    // speed so the sketch still behaves like a non-audio Animartrix demo.
+    if (enableOrchestrator.value()) {
+        // Apply UI overrides cheaply on every tick.
+        animartrix_ring::OrchestratorConfig cfg = gOrchestrator->config();
+        cfg.minDwellMs = static_cast<fl::u32>(orchestratorDwellMs.value());
+        cfg.classifierHysteresisMs =
+            static_cast<fl::u32>(orchestratorHysteresisMs.value());
+        gOrchestrator->setConfig(cfg);
+
+        const fl::u32 now = millis();
+        gOrchestrator->tick(now, timeSpeed.value());
+
+        // Log state transitions.
+        static animartrix_ring::SoundState sLast =
+            animartrix_ring::SoundState::Silence;
+        if (gOrchestrator->state() != sLast) {
+            sLast = gOrchestrator->state();
+            printf("AnimartrixRing: state -> %s (engine speed=%.2f)\n",
+                   animartrix_ring::toString(sLast),
+                   gOrchestrator->lastEngineSpeed());
+        }
+    } else {
         fxEngine.setSpeed(timeSpeed.value());
     }
 
