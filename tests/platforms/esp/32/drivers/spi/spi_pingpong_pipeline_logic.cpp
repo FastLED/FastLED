@@ -251,9 +251,15 @@ FL_TEST_CASE("Ping-pong - all bytes accounted for after drain") {
                                  /*polling=*/false);
 
     m.startFirstDma();
+    // Safety counter mirrors the queue-depth test above: if a future
+    // regression spins the drain loop, fail-fast with a clear assertion
+    // instead of waiting 20 s for the runner watchdog (see #2824).
+    int safety = 1000;
     while (m.anyInFlight() || m.ledBytesRemaining > 0) {
-        m.stepStreaming();
+        if (!m.stepStreaming()) break;
+        if (--safety <= 0) break;
     }
+    FL_CHECK_GT(safety, 0);
     m.drainAll();
 
     FL_CHECK_EQ(m.ledBytesRemaining, (size_t)0);
@@ -271,9 +277,16 @@ FL_TEST_CASE("Ping-pong - polling path drains all bytes") {
                                  /*polling=*/true);
 
     m.startFirstDma();
+    // Safety counter — this is the exact loop that hung at 20 s before #2843
+    // dropped the encodeIdx-based polling branch (see #2824). Keeping the
+    // guard means a future regression of the same shape fails in ms with a
+    // clear assertion, not as a runner-watchdog timeout.
+    int safety = 1000;
     while (m.anyInFlight() || m.ledBytesRemaining > 0) {
-        m.stepStreaming();
+        if (!m.stepStreaming()) break;
+        if (--safety <= 0) break;
     }
+    FL_CHECK_GT(safety, 0);
     m.drainAll();
 
     FL_CHECK_EQ(m.ledBytesRemaining, (size_t)0);
