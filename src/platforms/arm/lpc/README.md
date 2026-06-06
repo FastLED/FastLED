@@ -15,8 +15,9 @@ The LPC family currently covers two ARM cores:
 |----------|------|-----|---------------|-----------------|--------|
 | **LPC845** | LPC845M301 | Cortex-M0+ @ 30 MHz | 30 MHz | Bit-bang (default) + optional SCT/PWM+DMA (#2850) | ✅ Compiles; hardware bring-up pending |
 | **LPC804** | LPC804M101 | Cortex-M0+ @ 15 MHz | 15 MHz | Bit-bang (default) + optional PLU (#2848) | ✅ Compiles; hardware bring-up pending |
-| **LPC11xx** | LPC1114, LPC1115, LPC11U24, LPC11U35 | Cortex-M0 | — | None yet | ⚠️ Detection scaffold only (#2849) |
-| **LPC15xx** | LPC1517…LPC1549 | Cortex-M3 | — | None yet | ⚠️ Detection scaffold only (#2859) |
+| **LPC11Uxx** | LPC11U24, LPC11U35 | Cortex-M0 | 12 MHz (IRC) | Shared LPC8xx fastpin + M0 C++ clockless (#2872) | ✅ Compiles; hardware bring-up pending |
+| **LPC11xx legacy** | LPC1110, LPC1112, LPC1114, LPC1115 | Cortex-M0 | — | None — legacy GPIO at 0x50000000 needs its own fastpin | ⚠️ `#error` if targeted; driver wiring TBD |
+| **LPC15xx** | LPC1517…LPC1549 | Cortex-M3 | 12 MHz (IRC) | Shared LPC8xx fastpin + M3-compatible C++ clockless (#2872) | ✅ Compiles; hardware bring-up pending |
 
 ## Files (quick pass)
 

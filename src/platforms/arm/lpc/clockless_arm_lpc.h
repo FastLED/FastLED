@@ -10,13 +10,17 @@
 // (clockless_arm_lpc_plu.h) provides the ClocklessController specialisation;
 // compile this bit-banged driver out so we don't double-define the template.
 //
-// Scoped to LPC8xx (LPC845 / LPC804) only. LPC11xx (Cortex-M0) and LPC15xx
-// (Cortex-M3) detected via #2849 / #2859 also set FL_IS_ARM_LPC but ship
-// different GPIO controller layouts (UM10398 / UM10462 / UM11074), so the
-// FL_LPC_HI_OFFSET / FL_LPC_LO_OFFSET constants below (which assume the
-// LPC8xx 0xA0000000 GPIO controller) do not apply. Driver wiring for those
-// families is tracked in #2845 Stage 4.
-#if (defined(FL_LPC845) || defined(FL_LPC804)) && !(defined(FL_LPC804) && defined(FASTLED_LPC_PLU))
+// Scoped to LPC chips that share the "modern" 0xA0000000 GPIO controller
+// (LPC845, LPC804, LPC11U24/U35, LPC15xx — see fastpin_arm_lpc.h). The
+// FL_LPC_HI_OFFSET / FL_LPC_LO_OFFSET constants below are byte offsets in
+// that controller's register layout and apply uniformly.
+//
+// On LPC11xx legacy parts (LPC1110/1112/1114/1115) the GPIO is at
+// 0x50000000 with 12-bit masked-access semantics — that family needs its
+// own clockless driver, tracked in #2845 Stage 4.
+#if (defined(FL_LPC845) || defined(FL_LPC804) || \
+     defined(FL_LPC11_USB) || defined(FL_LPC15)) && \
+    !(defined(FL_LPC804) && defined(FASTLED_LPC_PLU))
 
 #include "platforms/arm/common/m0clockless.h"
 #include "fl/chipsets/timing_traits.h"
