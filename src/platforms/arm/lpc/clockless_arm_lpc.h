@@ -6,7 +6,10 @@
 #include "platforms/arm/is_arm.h"
 #include "platforms/arm/lpc/is_lpc.h"
 
-#if defined(FL_IS_ARM_LPC)
+// When the PLU opt-in is set on an LPC804 build, the dedicated PLU driver
+// (clockless_arm_lpc_plu.h) provides the ClocklessController specialisation;
+// compile this bit-banged driver out so we don't double-define the template.
+#if defined(FL_IS_ARM_LPC) && !(defined(FL_LPC804) && defined(FASTLED_LPC_PLU))
 
 #include "platforms/arm/common/m0clockless.h"
 #include "fl/chipsets/timing_traits.h"
@@ -78,5 +81,5 @@ public:
 
 }  // namespace fl
 
-#endif  // FL_IS_ARM_LPC
+#endif  // FL_IS_ARM_LPC && !(FL_LPC804 && FASTLED_LPC_PLU)
 #endif  // __INC_CLOCKLESS_ARM_LPC_H
