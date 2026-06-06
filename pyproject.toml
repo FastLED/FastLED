@@ -5,27 +5,40 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.2.17 — routes ESP32-S3 native deploys through esptool
-    # (FastLED/fbuild#380), which is one of the user-visible failure modes
-    # tracked in FastLED #2700 (fbuild ESP toolchain resolution). The
-    # remaining end-to-end RISC-V helper toolchain provisioning work is
-    # tracked separately upstream as a follow-up to 2.2.17.
-    # Prior pins preserved for context: 2.2.15 added Arduino UNO Q / STM32U5
-    # board defaults and the compile-many stage-2 framework-archive share
-    # (FastLED/fbuild#337) which prevents every stage-2 sketch from
-    # re-building the framework from scratch (the regression that originally
-    # forced the FASTLED_USE_FBUILD_CI=1 gate to default-off in #2662). Also
-    # picked up the stage-2 jobs split (#336), the real-toolchain stage-2
-    # perf regression test (#342), the daemon-side fmt-tracing-to-stderr
-    # fix (#348), the bounded zccache start-up timeout (#349), and
-    # project-lock acquire instrumentation (#350) — together these address
-    # the silent esp32c6 hang reported in fbuild#346 and unblock flipping
-    # FASTLED_USE_FBUILD_CI=1 default-on in a follow-up. Also preserves
-    # quoted Adafruit nRF52 BSP defines in response files, unblocking
-    # nRF52840 builds under fbuild. 2.2.16 completed ESP32-C2 framework
-    # skeleton installs and patched the missing touch_sensor_legacy_types.h
-    # no-touch compatibility header (FastLED/fbuild#378).
-    "fbuild==2.2.17",
+    # Pin to fbuild 2.2.18 (released 2026-06-05). 2.2.18 adds the
+    # FastLED #2836 Stage 1 deliverable — LPC804 + LPC845 bare-metal
+    # targets (FastLED/fbuild#419) — plus a batch of vendor-warning
+    # scopings (renesas FSP, nRF52 Adafruit BSP), the
+    # ESP32-S2/S3 USB_VID/USB_PID redef-warning fix
+    # (FastLED/fbuild#413), nested-example build-info parent-dir
+    # creation (FastLED/fbuild#410), a larger CLI Windows stack
+    # reservation, and the SAMD/STM32/ATmega/CH559 test-fixture
+    # coverage that backs the validate_boards reconciliation
+    # tracked at FastLED/fbuild#421/#422. zccache pinned >=1.11.15.
+    # Prior pins preserved for context:
+    #   2.2.17 — routed ESP32-S3 native deploys through esptool
+    #            (FastLED/fbuild#380), one of the user-visible
+    #            failure modes tracked in FastLED #2700.
+    #   2.2.15 — Arduino UNO Q / STM32U5 board defaults; compile-
+    #            many stage-2 framework-archive share
+    #            (FastLED/fbuild#337) that prevents every stage-2
+    #            sketch from re-building the framework from scratch
+    #            (the regression that originally forced
+    #            FASTLED_USE_FBUILD_CI=1 default-off in #2662);
+    #            stage-2 jobs split (#336), real-toolchain stage-2
+    #            perf regression test (#342), daemon-side
+    #            fmt-tracing-to-stderr fix (#348), bounded zccache
+    #            start-up timeout (#349), project-lock acquire
+    #            instrumentation (#350) — together address the
+    #            silent esp32c6 hang reported in fbuild#346 and
+    #            unblock flipping FASTLED_USE_FBUILD_CI=1
+    #            default-on; quoted Adafruit nRF52 BSP defines
+    #            preserved in response files, unblocking nRF52840
+    #            builds under fbuild.
+    #   2.2.16 — completed ESP32-C2 framework skeleton installs
+    #            and patched the missing touch_sensor_legacy_types.h
+    #            no-touch compatibility header (FastLED/fbuild#378).
+    "fbuild==2.2.18",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
