@@ -37,4 +37,9 @@
 #include "platforms/arm/lpc/clockless_arm_lpc_plu.h"
 #endif
 
+// LPC8xx hardware SPI driver — APA102 / SK9822 / WS2801 strip support.
+// Stage 4 item 3 of #2845. Self-gated to LPC845 / LPC804; LPC11xx /
+// LPC15xx variants have different SPI controllers and are not yet wired.
+#include "platforms/arm/lpc/spi_arm_lpc.h"
+
 #endif
