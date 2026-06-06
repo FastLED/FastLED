@@ -51,7 +51,37 @@
 #define FL_LPC11
 #endif
 
+// LPC15xx family (ARM Cortex-M3, up to 72 MHz, SCT/PLU on some variants:
+// LPC1517, LPC1518, LPC1519, LPC1547, LPC1548, LPC1549). This is the
+// family detection portion of the FastLED/FastLED#2845 Stage 4 LPC15xx
+// port scaffold — driver wiring is a follow-up.
+//
+// IMPORTANT: LPC15xx is Cortex-M3, NOT M0 / M0+. The M3 has a barrel
+// shifter and the full Thumb-2 instruction set, so the clockless driver
+// can target tighter cycle counts than the M0 / M0+ ASM template
+// permits. Do not gate this family on FL_IS_ARM_M0 or FL_IS_ARM_M0_PLUS
+// — the M0 template's load/store offset encoding restrictions do not
+// apply. The follow-up driver will key on FL_IS_ARM_LPC + an M3-class
+// path. The shared M3 clockless template (src/platforms/arm/common/
+// m3_clockless_asm.h if present, or a new file alongside it) is the
+// right entry point.
+#if defined(__LPC15xx__) || defined(LPC15xx) || \
+    defined(CPU_LPC1517JBD48) || defined(CPU_LPC1517JBD64) || \
+    defined(CPU_LPC1518JBD48) || defined(CPU_LPC1518JBD64) || \
+    defined(CPU_LPC1518JBD100) || \
+    defined(CPU_LPC1519JBD48) || defined(CPU_LPC1519JBD64) || \
+    defined(CPU_LPC1519JBD100) || \
+    defined(CPU_LPC1547JBD48) || defined(CPU_LPC1547JBD64) || \
+    defined(CPU_LPC1547JBD100) || \
+    defined(CPU_LPC1548JBD48) || defined(CPU_LPC1548JBD64) || \
+    defined(CPU_LPC1548JBD100) || \
+    defined(CPU_LPC1549JBD48) || defined(CPU_LPC1549JBD64) || \
+    defined(CPU_LPC1549JBD100)
+#define FL_LPC15
+#endif
+
 // General LPC family roll-up (any LPC variant supported by this port)
-#if defined(FL_LPC845) || defined(FL_LPC804) || defined(FL_LPC11)
+#if defined(FL_LPC845) || defined(FL_LPC804) || defined(FL_LPC11) || \
+    defined(FL_LPC15)
 #define FL_IS_ARM_LPC
 #endif
