@@ -6,18 +6,33 @@
 
 #include "platforms/arm/lpc/fastpin_arm_lpc.h"
 
-// LPC11xx (Cortex-M0) and LPC15xx (Cortex-M3) detection scaffolds shipped in
-// #2849 / #2859 (#2845 Stage 4). Driver wiring for those families is a
-// follow-up - the existing LPC8xx fastpin / clockless headers target the
-// LPC8xx GPIO controller at 0xA0000000 (SET / CLR registers) and the M0+ ASM
-// path, neither of which applies to LPC11xx (legacy GPIO at 0x50000000,
-// masked-access semantics, M0 instruction encoding) or LPC15xx (different
-// GPIO layout per UM11074, M3 instruction set). Emit a clear error rather
-// than silently compiling LPC8xx-targeted code for the wrong family.
-#if (defined(FL_LPC11) || defined(FL_LPC15)) && \
-    !(defined(FL_LPC845) || defined(FL_LPC804))
-#error "FastLED LPC11xx / LPC15xx driver wiring is a follow-up to #2849 / #2859, tracked in #2845 Stage 4. The LPC8xx clockless driver targets a different GPIO controller and cannot be used on LPC11xx (Cortex-M0, legacy GPIO at 0x50000000) or LPC15xx (Cortex-M3, GPIO per UM11074). Either contribute the family-specific driver via #2845 or revert to a supported LPC variant."
-#endif
+// LPC family driver-wiring status (#2845 Stage 4 items 1 + 2 land here):
+//   FL_LPC845 / FL_LPC804  — supported (Stage 2a #2837, optional Stage 2b/2c)
+//   FL_LPC11_USB           — supported via shared LPC8xx fastpin + M0
+//                            clockless path. UM10462 §9 confirms the
+//                            LPC11Uxx GPIO controller layout is identical
+//                            to LPC8xx (DIR/MASK/PIN/SET/CLR/NOT at the
+//                            same offsets). The M0-vs-M0+ ISA swap is
+//                            handled in led_sysdefs_arm_lpc.h via
+//                            FL_IS_ARM_M0 (not _PLUS), and the C++
+//                            clockless implementation is already used
+//                            (FASTLED_M0_USE_C_IMPLEMENTATION), so the
+//                            single-instruction encoding limit of plain
+//                            M0 doesn't bite us.
+//   FL_LPC15               — supported via shared LPC8xx fastpin + the
+//                            same C++ clockless path. UM11074 confirms
+//                            the same modern GPIO controller at
+//                            0xA0000000. M3 has DWT cycle counters and
+//                            full Thumb-2 encoding (no offset limit), but
+//                            the unified C++ path keeps the driver
+//                            surface consistent.
+//   FL_LPC11_LEGACY        — NOT supported. LPC1110/1112/1114/1115 use
+//                            the legacy GPIO controller at 0x50000000
+//                            with 12-bit masked-access semantics
+//                            (UM10398). The fastpin header emits a
+//                            #error if this family is detected without
+//                            an overlapping modern variant. Driver
+//                            wiring is a follow-up.
 
 // LPC845 has an optional PWM+DMA-to-GPIO clockless driver (Stage 2c of #2836,
 // see #2842). It is opt-in via FASTLED_LPC_PWM_DMA=1 because it consumes the
@@ -36,5 +51,10 @@
 // is completely unaffected.
 #include "platforms/arm/lpc/clockless_arm_lpc_plu.h"
 #endif
+
+// LPC8xx hardware SPI driver — APA102 / SK9822 / WS2801 strip support.
+// Stage 4 item 3 of #2845. Self-gated to LPC845 / LPC804; LPC11xx /
+// LPC15xx variants have different SPI controllers and are not yet wired.
+#include "platforms/arm/lpc/spi_arm_lpc.h"
 
 #endif

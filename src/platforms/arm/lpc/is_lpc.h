@@ -42,12 +42,30 @@
 // code path gated on FL_IS_ARM_M0_PLUS — that would mis-encode load/store
 // offsets on parts that lack the M0+ instruction extensions. The led
 // sysdefs follow-up will set FL_IS_ARM_M0 (not M0+) for this family.
-#if defined(__LPC11xx__) || defined(LPC11xx) || \
-    defined(CPU_LPC1114FBD48) || defined(CPU_LPC1114FHN33) || \
-    defined(CPU_LPC1115FBD48) || \
+// Sub-family split:
+//   FL_LPC11_USB    — LPC11U24 / LPC11U35 ("USB-capable" M0 parts). Modern
+//     GPIO controller at 0xA0000000 with the same DIR/MASK/PIN/SET/CLR/NOT
+//     layout as LPC8xx per UM10462 §9. Can reuse the LPC8xx fastpin + M0
+//     ASM clockless path (NOT M0+).
+//   FL_LPC11_LEGACY — LPC1110 / LPC1112 / LPC1114 / LPC1115. Legacy GPIO
+//     controller at 0x50000000 with 12-bit "masked access" semantics per
+//     UM10398 §12. Different fastpin layout from LPC8xx; driver wiring
+//     deferred — emit a clear `#error` so users on these chips know.
+#if defined(__LPC11Uxx__) || defined(LPC11Uxx) || \
     defined(CPU_LPC11U24FBD48) || defined(CPU_LPC11U24FHI33) || \
     defined(CPU_LPC11U35FBD48) || defined(CPU_LPC11U35FHI33) || \
     defined(CPU_LPC11U35FHN33)
+#define FL_LPC11_USB
+#endif
+
+#if defined(__LPC11xx__) || defined(LPC11xx) || \
+    defined(CPU_LPC1114FBD48) || defined(CPU_LPC1114FHN33) || \
+    defined(CPU_LPC1115FBD48)
+#define FL_LPC11_LEGACY
+#endif
+
+// Roll-up
+#if defined(FL_LPC11_USB) || defined(FL_LPC11_LEGACY)
 #define FL_LPC11
 #endif
 

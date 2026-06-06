@@ -15,8 +15,9 @@ The LPC family currently covers two ARM cores:
 |----------|------|-----|---------------|-----------------|--------|
 | **LPC845** | LPC845M301 | Cortex-M0+ @ 30 MHz | 30 MHz | Bit-bang (default) + optional SCT/PWM+DMA (#2850) | ✅ Compiles; hardware bring-up pending |
 | **LPC804** | LPC804M101 | Cortex-M0+ @ 15 MHz | 15 MHz | Bit-bang (default) + optional PLU (#2848) | ✅ Compiles; hardware bring-up pending |
-| **LPC11xx** | LPC1114, LPC1115, LPC11U24, LPC11U35 | Cortex-M0 | — | None yet | ⚠️ Detection scaffold only (#2849) |
-| **LPC15xx** | LPC1517…LPC1549 | Cortex-M3 | — | None yet | ⚠️ Detection scaffold only (#2859) |
+| **LPC11Uxx** | LPC11U24, LPC11U35 | Cortex-M0 | 12 MHz (IRC) | Shared LPC8xx fastpin + M0 C++ clockless (#2872) | ✅ Compiles; hardware bring-up pending |
+| **LPC11xx legacy** | LPC1110, LPC1112, LPC1114, LPC1115 | Cortex-M0 | — | None — legacy GPIO at 0x50000000 needs its own fastpin | ⚠️ `#error` if targeted; driver wiring TBD |
+| **LPC15xx** | LPC1517…LPC1549 | Cortex-M3 | 12 MHz (IRC) | Shared LPC8xx fastpin + M3-compatible C++ clockless (#2872) | ✅ Compiles; hardware bring-up pending |
 
 ## Files (quick pass)
 
@@ -25,6 +26,7 @@ The LPC family currently covers two ARM cores:
 - `clockless_arm_lpc.h` — Bit-banged WS2812-family driver built on `arm/common/m0clockless.h` (C++ implementation, since LPC8xx GPIO SET/CLR offsets exceed the M0+ STR-immediate encoding range).
 - `clockless_arm_lpc_plu.h` — LPC804-only Programmable Logic Unit (PLU) clockless driver. Hardware pulse-shaping via 26-LUT reconfigurable fabric; CPU only writes serial data per bit. See UM11065 §12.
 - `clockless_arm_lpc_pwm_dma.h` — LPC845-only SCT + DMA-to-GPIO clockless driver. CPU-free WS2812 output via three DMA channels (T0_RISE / T_MID / T_END). See UM11029 §16-17.
+- `spi_arm_lpc.h` — LPC845 / LPC804 hardware SPI driver for **APA102 / SK9822 / WS2801** clocked strips. Targets the LPC8xx SPI peripheral (UM11029 §"SPI") in master / MSB-first / mode-0 / 8-bit configuration. SPI0 default; users route to SPI1 via the `pSPIX` template arg. Pin routing through the LPC Switch Matrix is the user's responsibility (matching the bit-bang clockless driver's "FastPin sees raw GPIO" convention). Closes #2845 Stage 4 item 3.
 - `led_sysdefs_arm_lpc.h` — System defines (sets `FL_IS_ARM_M0_PLUS`, `F_CPU`, forces `FASTLED_M0_USE_C_IMPLEMENTATION`, includes `<LPC845.h>` / `<LPC804.h>` CMSIS device headers).
 - `fastpin_arm_lpc.h` — see above.
 - `is_lpc.h` — Detection macros (`FL_LPC845`, `FL_LPC804`, `FL_LPC11`, `FL_LPC15`, `FL_IS_ARM_LPC`).
@@ -59,6 +61,32 @@ For LPC11xx and LPC15xx, no fbuild board entry exists yet; community contributor
 
 - **LPC11xx (Cortex-M0)** — `is_lpc.h` recognises `__LPC11xx__`, `CPU_LPC1114*`, `CPU_LPC1115*`, `CPU_LPC11U24*`, `CPU_LPC11U35*` and similar. LPC11xx is **Cortex-M0**, not M0+ — do not gate any code path on `FL_IS_ARM_M0_PLUS` when adding the driver. Driver wiring will reuse `arm/common/m0clockless_asm.h` (the same path nRF51 uses); the GPIO controller is the legacy "masked-access" peripheral at `0x50000000` (UM10398 §9 / UM10462 §9), so a new `fastpin_arm_lpc11.h` is required — the LPC8xx 0xA0000000 SET/CLR template does not apply.
 - **LPC15xx (Cortex-M3)** — `is_lpc.h` recognises `__LPC15xx__` and `CPU_LPC15{17,18,19,47,48,49}*`. LPC15xx is **Cortex-M3** with the full Thumb-2 instruction set; do not gate on `FL_IS_ARM_M0` or `FL_IS_ARM_M0_PLUS`. Driver wiring should target the M3 clockless template; the GPIO controller layout per UM11074 differs again from both LPC8xx and LPC11xx.
+
+## Implementation map — which repo owns which #2845 item
+
+The LPC roadmap meta [#2845](https://github.com/FastLED/FastLED/issues/2845) spans two repositories. This is the table to consult before opening a PR against either side:
+
+| Stage / Item | Owner repo | Status | Notes |
+|---|---|---|---|
+| **Stage 3.1** — Real `SystemInit` for LPC845 (FRO 30 MHz + PLL + flash wait states) | **`FastLED/fbuild`** | Not started | Lives in `fbuild/crates/fbuild-build/src/nxplpc/assets/startup_lpc845.S`. Needs UM11029 §4. **Hardware verification required.** |
+| **Stage 3.2** — Real `SystemInit` for LPC804 | **`FastLED/fbuild`** | Not started | Same crate; UM11065 §4. **Hardware verification required.** |
+| **Stage 3.3** — Vector table expansion (DMA-end IRQ, SCT match IRQ, USART RX) | **`FastLED/fbuild`** | Partial | Vector table in `fbuild` startup assets. Add IRQs as drivers reach a state where they need them. |
+| **Stage 3.4** — Per-chip `mcu_config` split in `get_nxplpc_config` | **`FastLED/fbuild`** | Not started | Crate: `fbuild-build`. |
+| **Stage 3.5** — Linker memory-layout verification on hardware | Hardware | Not started | Cannot be done without a real LPC845 board + flash + run. |
+| **Stage 3.6** — `examples/AutoResearch/AutoResearch.ino` UART integration | **FastLED** | Not started | Wire LPC845 USART0 into the existing RPC harness. Code-only is possible, but ship gated on Stage 3.1 (so cycle counts derive from a real 30 MHz `F_CPU`) and Stage 3.5 (so the link succeeds on real silicon). |
+| **Stage 3.7** — fbuild CI `continue-on-error` flip | **`FastLED/fbuild`** | Blocked on 3.1 + 3.5 | Workflows at `.github/workflows/build-lpc{804,845}.yml` in fbuild. |
+| **Stage 3.8** — `validate_boards.py` reconciliation | **`FastLED/fbuild`** | Filed: [fbuild#421/#422](https://github.com/FastLED/fbuild/issues/421) | Script lives in fbuild; the FastLED `ci/` tree does not have a `validate_boards.py`. |
+| **Stage 4.1** — LPC11Uxx clockless driver | **FastLED** | ✅ Shipped in #2872 | Reuses LPC8xx fastpin + M0 C++ clockless. |
+| **Stage 4.1 (legacy)** — LPC1110/1112/1114/1115 clockless | **FastLED** | Not started | Needs new `fastpin_arm_lpc11_legacy.h` for the 0x50000000 GPIO. `#error` makes the unsupported case loud. |
+| **Stage 4.2** — LPC15xx clockless driver | **FastLED** | ✅ Shipped in #2872 | Reuses LPC8xx fastpin + M3-compatible C++ clockless. |
+| **Stage 4.3** — APA102 / SK9822 / WS2801 hardware SPI | **FastLED** | ✅ Shipped in #2872 | New `spi_arm_lpc.h` per UM11029. |
+| **Stage 4.4** — Multi-strip parallel output | **FastLED** | Blocked on Stage 2c hardware validation | The meta gates this on PWM+DMA driver hardware validation. |
+| **Stage 4.5** — PlatformIO upstream donation | **PlatformIO** (3rd party) | Not started | Board JSON + linker scripts donation to `platformio/platform-nxplpc` (does not exist yet — would be a new platform). |
+| **Stage 4.6** — `fl::set_*` settings for LPC clock-speed / DMA-channel overrides | **FastLED** | No concrete user requirement | The existing build-time `F_CPU` override (define before `#include <FastLED.h>`) already covers the clock-speed case for users on stable boot clocks. Runtime override on `CFastLED` would need machinery to recompute per-chipset cycle counts when clock changes — out of scope until a user reports needing it. |
+
+**Of the 14 items, 5 live in `FastLED/fbuild`, 1 lives in `platformio/*`, and 8 live here.** Of those 8: 3 shipped in this PR (#2872), 2 are explicitly hardware-gated (3.5, 3.6, 4.4), 1 is the legacy-LPC11 fastpin follow-on, 1 (4.6) has no concrete user requirement, and 1 (4.5) is upstream-PlatformIO outside FastLED's control.
+
+The meta should be **split into per-repo issues** once #2872 lands, since the single-issue tracking matrix obscures the cross-repo distribution of the work.
 
 ## References
 
