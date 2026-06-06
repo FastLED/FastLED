@@ -175,6 +175,17 @@ const char *fastled_file_offset(const char *file) FL_NOEXCEPT;
 #define FL_WARN_FMT(X) FL_WARN(X)
 #define FL_WARN_FMT_IF(COND, MSG) FL_WARN_IF(COND, MSG)
 
+// FL_WARN_LIT: Minimal-overhead variant for literal-only messages. Bypasses
+// the fl::sstream + operator<< chain that FL_WARN inlines at every call
+// site, and drops the `__FILE__(__LINE__): WARN:` prefix (the literal
+// itself should identify the origin, e.g. "[RMT] ..."). Use at well-known
+// WARN sites where the message is a fixed string and the byte budget
+// matters. See FastLED #2856 item 3.2. The non-literal FL_WARN remains
+// available for sites that need operator<< formatting or the file/line
+// prefix.
+#define FL_WARN_LIT(LITERAL) fl::println(LITERAL)
+#define FL_LOG_LIT(LITERAL) fl::println(LITERAL)
+
 // FL_WARN_EVERY: Rate-limited warning that prints at most once per interval
 // Uses static timestamp to track last print time - throttles output in tight loops
 #define FL_WARN_EVERY(MILLIS, X) do { \
@@ -193,6 +204,8 @@ const char *fastled_file_offset(const char *file) FL_NOEXCEPT;
 #define FL_WARN_FMT(X) do { } while(0)
 #define FL_WARN_FMT_IF(COND, MSG) do { } while(0)
 #define FL_WARN_EVERY(MILLIS, X) do { } while(0)
+#define FL_WARN_LIT(LITERAL) do { } while(0)
+#define FL_LOG_LIT(LITERAL) do { } while(0)
 #endif
 #endif
 

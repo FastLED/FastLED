@@ -140,6 +140,15 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     }
 
     ~ChannelEngineRMTImpl() override {
+        // The destructor body (drain-wait + per-channel cleanup loop +
+        // FL_WARN timeout diagnostic + FL_LOG_RMT trailer) is a cold path —
+        // only reached at process end. Move it into an FL_NO_INLINE helper
+        // so its operator<< instantiations + cleanup loop body don't
+        // contribute to icache footprint. #2856 item 3.1.
+        destructorCleanup();
+    }
+
+    FL_NO_INLINE void destructorCleanup() FL_NOEXCEPT {
         // Wait for all active transmissions to complete (with timeout)
         // Must wait for READY (not just !BUSY) since poll() can return DRAINING
         int timeout_iterations = 100000; // 10 seconds at 100us per iteration
@@ -150,7 +159,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             state = poll();
         }
         if (timeout_iterations == 0) {
-            FL_WARN("ChannelEngineRMT destructor timeout - forcing cleanup");
+            FL_WARN_LIT("[RMT] ChannelEngineRMT destructor timeout - forcing cleanup");
         }
 
         // Get memory manager reference
@@ -552,8 +561,17 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         // Get memory manager reference
         auto &memMgr = RmtMemoryManager::instance();
 
-        // Get current Network state for memory allocation
+        // Get current Network state for memory allocation.
+        // Under FASTLED_RMT_STATIC_ALLOCATION the user has asserted no
+        // network during LED transmission, so this resolves to a compile-
+        // time constant — the linker then drops the entire NetworkDetector
+        // singleton + WiFi-state-reading chain from the binary. See #2856
+        // item 3.3.
+#if FASTLED_RMT_STATIC_ALLOCATION
+        constexpr bool networkActive = false;
+#else
         bool networkActive = NetworkDetector::isAnyNetworkActive();
+#endif
 
         // ============================================================================
         // DMA ALLOCATION POLICY - ESP32-S3 TX/RX Conflict Avoidance
