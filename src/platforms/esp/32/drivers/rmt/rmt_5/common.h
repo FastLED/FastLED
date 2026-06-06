@@ -177,6 +177,35 @@ FL_EXTERN_C_END
 #define FASTLED_RMT5_MAX_PULSES (FASTLED_RMT_MEM_WORDS_PER_CHANNEL * FASTLED_RMT_MEM_BLOCKS)
 #define FASTLED_RMT5_PULSES_PER_FILL (FASTLED_RMT5_MAX_PULSES / FASTLED_RMT_MEM_BLOCKS)  // Half buffer
 
+// ============================================================================
+// FASTLED_RMT_STATIC_ALLOCATION — opt-in size-trim for fixed single-strip sketches
+// ============================================================================
+//
+// Default (0): the RmtMemoryManager runs its full adaptive planner —
+// memory-pressure detection, network-aware buffering, single-buffer
+// fallback, and detailed failure diagnostics. Correct for any sketch that
+// has multiple strips, calls removeLeds()/addLeds() dynamically, or runs
+// WiFi/Ethernet/Bluetooth.
+//
+// Opt in (1): the planner collapses to a constant. calculateMemoryBlocks
+// returns FASTLED_RMT_MEM_BLOCKS unconditionally, allocateTx skips the
+// fallback retry + diagnostic block, and freeDMA becomes a no-op. This
+// is a contractual opt-in: the user is responsible for ensuring the
+// following constraints hold, since they are NOT enforced by
+// static_assert or any preprocessor check. Violating them produces
+// runtime misbehavior (e.g. failed RMT allocation with no recovery, no
+// network-mode buffering), not a compile error:
+//   - Exactly one addLeds<>() call, made before setup() returns
+//   - No removeLeds() / late addLeds()
+//   - No WiFi / Ethernet / Bluetooth during LED transmission
+//
+// In exchange the user gets ~2-3 KB shaved off the .text segment on
+// ESP32-S3 NEOPIXEL Blink (additive on top of FASTLED_LOG_VERBOSITY=0).
+// See FastLED #2773 item 2.5 for the design notes.
+#ifndef FASTLED_RMT_STATIC_ALLOCATION
+#define FASTLED_RMT_STATIC_ALLOCATION 0
+#endif
+
 
 
 // === Platform-Specific Signal Routing ===
