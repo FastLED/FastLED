@@ -97,6 +97,38 @@ def get_fbuild_executable() -> str | None:
     return shutil.which("fbuild")
 
 
+def fbuild_subprocess_env() -> dict[str, str]:
+    """Build an env dict with the venv's Scripts dir prepended to PATH.
+
+    Why this exists (#2853): fbuild internally shells out to helper tools
+    like ``zccache`` via plain PATH resolution. If the user has another
+    ``zccache.exe`` earlier on the system PATH (e.g.
+    ``C:\\tools\\python13\\Scripts\\zccache.exe`` from a globally
+    installed ``clang-tool-chain``), it can race with the venv-installed
+    one and produce cross-version daemon corruption — the symptom that
+    motivated #2853 (5 GB daemon balloons, locked named pipes, "daemon
+    started but not accepting connections after 10s").
+
+    Building the env here ensures any tool fbuild's Rust binary resolves
+    via PATH picks the venv copy first. This mirrors what
+    ``get_fbuild_executable()`` already does for ``fbuild`` itself —
+    extending the same hygiene to its dependencies.
+    """
+    env = os.environ.copy()
+    venv_scripts = Path(sys.executable).resolve().parent
+    if venv_scripts.is_dir():
+        path_sep = os.pathsep
+        existing_path = env.get("PATH", "")
+        # Only prepend if not already first — avoids unbounded growth on
+        # repeated invocations.
+        existing_head = existing_path.split(path_sep, 1)[0] if existing_path else ""
+        if existing_head.lower() != str(venv_scripts).lower():
+            env["PATH"] = str(venv_scripts) + (
+                path_sep + existing_path if existing_path else ""
+            )
+    return env
+
+
 def ensure_fbuild_daemon() -> None:
     """Ensure the fbuild daemon is running."""
     Daemon.ensure_running()
@@ -318,6 +350,7 @@ def run_fbuild_compile(
             timeout=int(timeout),
             auto_run=False,
             capture=True,
+            env=fbuild_subprocess_env(),
         )
         process.start()
         returncode = cast(
@@ -412,6 +445,7 @@ def _run_fbuild_batch_command(
             timeout=int(timeout),
             auto_run=False,
             capture=True,
+            env=fbuild_subprocess_env(),
         )
         process.start()
         returncode = cast(
