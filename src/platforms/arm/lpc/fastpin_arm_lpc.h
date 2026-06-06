@@ -12,7 +12,13 @@
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
-#if defined(FL_IS_ARM_LPC)
+// Scoped to LPC8xx (LPC845 / LPC804) only. The family-level FL_IS_ARM_LPC
+// gate also matches LPC11xx (M0) and LPC15xx (M3) detected via #2849 / #2859,
+// but those families have different GPIO controller layouts (legacy GPIO at
+// 0x50000000 with masked-access semantics for LPC11xx per UM10398/UM10462;
+// LPC15xx GPIO per UM11074 with a different register layout). The driver
+// wiring for those families is tracked in #2845 Stage 4.
+#if defined(FL_LPC845) || defined(FL_LPC804)
 
 namespace fl {
 
@@ -125,7 +131,7 @@ _FL_DEFPIN(28); _FL_DEFPIN(29); _FL_DEFPIN(30); _FL_DEFPIN(31);
 
 }  // namespace fl
 
-#endif  // FL_IS_ARM_LPC
+#endif  // FL_LPC845 || FL_LPC804
 
 FL_DISABLE_WARNING_POP
 
