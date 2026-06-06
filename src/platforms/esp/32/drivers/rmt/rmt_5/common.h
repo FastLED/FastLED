@@ -188,9 +188,13 @@ FL_EXTERN_C_END
 // WiFi/Ethernet/Bluetooth.
 //
 // Opt in (1): the planner collapses to a constant. calculateMemoryBlocks
-// returns FASTLED_RMT_MEM_BLOCKS unconditionally; allocateTx skips the
-// fallback retry + diagnostic block; freeDMA is a no-op. The user is
-// asserting at compile time:
+// returns FASTLED_RMT_MEM_BLOCKS unconditionally, allocateTx skips the
+// fallback retry + diagnostic block, and freeDMA becomes a no-op. This
+// is a contractual opt-in: the user is responsible for ensuring the
+// following constraints hold, since they are NOT enforced by
+// static_assert or any preprocessor check. Violating them produces
+// runtime misbehavior (e.g. failed RMT allocation with no recovery, no
+// network-mode buffering), not a compile error:
 //   - Exactly one addLeds<>() call, made before setup() returns
 //   - No removeLeds() / late addLeds()
 //   - No WiFi / Ethernet / Bluetooth during LED transmission
