@@ -18,6 +18,7 @@ Names re-exported from this module are kept stable for external callers
 # pyright: reportMissingImports=false, reportUnknownVariableType=false
 
 import os
+import shutil
 import sys
 import time
 from pathlib import Path
@@ -352,17 +353,28 @@ def perform_ninja_maintenance(build_dir: Path) -> bool:
     """
     Perform periodic maintenance on Ninja dependency database.
 
-    This function runs 'ninja -t recompact' to optimize and repair the
-    .ninja_deps file. It only runs once per day (tracked via marker file)
-    to avoid unnecessary overhead.
+    Runs ``ninja -t recompact`` to optimize the ``.ninja_deps`` log. Three
+    markers govern behavior:
 
-    Windows quirk: a partially-written ``.ninja_deps`` (e.g. left by a
-    build process that was killed mid-write) triggers a recursive crash
-    in ninja's recompact tool that emits ~150 minidumps before stack
-    overflowing. To avoid the cascade we quarantine an existing deps log
-    to ``.ninja_deps.bak`` before invoking recompact, and we always touch
-    the marker afterward — so a host where recompact deterministically
-    fails does not regenerate the noise on every invocation.
+    - ``.ninja_deps_maintenance``: 24h cooldown timestamp (touched on every
+      attempt, regardless of outcome).
+    - ``.ninja_deps_recompact_broken``: sentinel set when recompact has been
+      observed to fail in this build dir. Once present, recompact is skipped
+      entirely on subsequent calls — it is an optimization, not a correctness
+      requirement.
+    - ``.ninja_deps.bak``: snapshot of the original deps log taken before
+      recompact runs. Restored if recompact fails so the build dir keeps its
+      incremental header→TU dependency information. Deleted on success.
+
+    Why the snapshot+restore + broken-marker strategy: on Windows, a
+    partially-written ``.ninja_deps`` (left by a build killed mid-write)
+    triggers a recursive crash in ninja's recompact tool (upstream
+    https://github.com/ninja-build/ninja/issues/2787). Previous attempts
+    quarantined the deps log up-front to dodge the crash, but that discarded
+    valid records once per 24h and silently degraded one build's worth of
+    incremental rebuilds. Snapshotting + restoring keeps the log intact, and
+    the broken-marker caps total damage to one cascade per build dir
+    lifetime instead of one per 24h.
 
     Args:
         build_dir: Meson build directory containing .ninja_deps
@@ -371,6 +383,11 @@ def perform_ninja_maintenance(build_dir: Path) -> bool:
         True if maintenance was performed or skipped successfully, False on error
     """
     marker_file = build_dir / ".ninja_deps_maintenance"
+    broken_marker = build_dir / ".ninja_deps_recompact_broken"
+
+    # If recompact has been observed broken on this build dir, skip entirely.
+    if broken_marker.exists():
+        return True
 
     if marker_file.exists():
         try:
@@ -382,18 +399,36 @@ def perform_ninja_maintenance(build_dir: Path) -> bool:
         except (OSError, IOError):
             pass
 
-    # Quarantine existing .ninja_deps so recompact starts from a clean
-    # state. A real-world deps log with a valid header plus a partial
-    # second record is the trigger for the recursive crash handler.
+    # Snapshot .ninja_deps so we can restore it if recompact fails. Use a
+    # copy (not a rename): recompact reads .ninja_deps in place, and we want
+    # both the original-in-position and the backup to exist during the run.
+    # If the snapshot can't be taken, skip recompact entirely — running it
+    # without a rollback path could leave the deps log in a worse state if
+    # recompact itself partially succeeds before crashing.
     deps_file = build_dir / ".ninja_deps"
     deps_bak = build_dir / ".ninja_deps.bak"
+    snapshot_taken = False
     if deps_file.exists():
         try:
             if deps_bak.exists():
                 deps_bak.unlink()
-            deps_file.rename(deps_bak)
-        except OSError:
-            pass
+            shutil.copy2(str(deps_file), str(deps_bak))
+            snapshot_taken = True
+        except OSError as e:
+            _ts_print(
+                f"[MESON] ⚠️  Could not snapshot {deps_file} ({e}); "
+                "skipping recompact to keep the existing deps log intact.",
+                file=sys.stderr,
+            )
+            try:
+                marker_file.touch()
+            except (OSError, IOError):
+                pass
+            try:
+                broken_marker.touch()
+            except (OSError, IOError):
+                pass
+            return True
 
     _ts_print("[MESON] 🔧 Performing periodic Ninja dependency database maintenance...")
 
@@ -417,19 +452,45 @@ def perform_ninja_maintenance(build_dir: Path) -> bool:
             file=sys.stderr,
         )
 
-    # Touch marker on success OR non-fatal failure so the 24h cooldown
-    # also applies after a crash — otherwise a Windows host that crashes
-    # recompact every time would re-run it on every invocation.
+    # Touch cooldown marker regardless of outcome.
     try:
         marker_file.touch()
     except (OSError, IOError):
         pass
 
     if returncode == 0:
+        if snapshot_taken:
+            try:
+                deps_bak.unlink()
+            except OSError:
+                pass
         _ts_print("[MESON] ✓ Dependency database maintenance completed successfully")
-    else:
-        _ts_print(
-            "[MESON] ⚠️  Maintenance completed with warnings (non-fatal)",
-            file=sys.stderr,
-        )
+        return True
+
+    # Recompact failed. Restore the snapshot so subsequent ninja invocations
+    # keep the deps records they would otherwise lose, and flag this build
+    # dir so we skip recompact on future calls. os.replace is atomic on both
+    # POSIX and Windows — if it fails, neither file is touched, so we never
+    # end up with .ninja_deps missing.
+    if snapshot_taken:
+        try:
+            os.replace(str(deps_bak), str(deps_file))
+        except OSError as e:
+            _ts_print(
+                f"[MESON] ⚠️  Could not restore {deps_file} from {deps_bak} "
+                f"({e}); the in-place .ninja_deps from before recompact is "
+                "still on disk (ninja's atomic-replace only fires on success).",
+                file=sys.stderr,
+            )
+
+    try:
+        broken_marker.touch()
+    except (OSError, IOError):
+        pass
+
+    _ts_print(
+        "[MESON] ⚠️  Maintenance completed with warnings (non-fatal); "
+        "disabling future recompact on this build dir.",
+        file=sys.stderr,
+    )
     return True
