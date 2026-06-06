@@ -84,7 +84,7 @@ The LPC roadmap meta [#2845](https://github.com/FastLED/FastLED/issues/2845) spa
 | **Stage 4.5** — PlatformIO upstream donation | **PlatformIO** (3rd party) | Not started | Board JSON + linker scripts donation to `platformio/platform-nxplpc` (does not exist yet — would be a new platform). |
 | **Stage 4.6** — `fl::set_*` settings for LPC clock-speed / DMA-channel overrides | **FastLED** | No concrete user requirement | The existing build-time `F_CPU` override (define before `#include <FastLED.h>`) already covers the clock-speed case for users on stable boot clocks. Runtime override on `CFastLED` would need machinery to recompute per-chipset cycle counts when clock changes — out of scope until a user reports needing it. |
 
-**Of the 14 items, 5 live in `FastLED/fbuild`, 1 lives in `platformio/*`, and 8 live here.** Of those 8: 3 shipped in this PR (#2872), 2 are explicitly hardware-gated (3.5, 3.6, 4.4), 1 is the legacy-LPC11 fastpin follow-on, 1 (4.6) has no concrete user requirement, and 1 (4.5) is upstream-PlatformIO outside FastLED's control.
+**Of the 15 items, 6 live in `FastLED/fbuild`, 1 lives in `platformio/*`, 1 is pure hardware bring-up (3.5), and 7 live here.** Of those 7 FastLED items: 3 shipped in #2872 (4.1 LPC11Uxx, 4.2 LPC15xx, 4.3 SPI), 2 are explicitly hardware-gated (3.6 AutoResearch UART, 4.4 multi-strip), 1 is the legacy-LPC11 fastpin follow-on, and 1 (4.6) has no concrete user requirement.
 
 The meta should be **split into per-repo issues** once #2872 lands, since the single-issue tracking matrix obscures the cross-repo distribution of the work.
 
