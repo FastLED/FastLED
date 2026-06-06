@@ -531,6 +531,16 @@ result<size_t, RmtMemoryError> RmtMemoryManager::allocateRx(u8 channel_id, size_
 }
 
 void RmtMemoryManager::free(u8 channel_id, bool is_tx) FL_NOEXCEPT {
+#if FASTLED_RMT_STATIC_ALLOCATION
+    // Static-allocation mode: the user has asserted no removeLeds() / late
+    // addLeds(). The destructor still calls free() at process end but the
+    // ledger isn't meaningfully tracked, so erasing from the allocations
+    // vector + emitting the FL_LOG_RMT diagnostic is dead work. Skipping it
+    // lets the linker drop fl::vector_inlined::erase + the diagnostic
+    // operator<< chain. See #2856 item 3.6.
+    (void)channel_id;
+    (void)is_tx;
+#else
     ChannelAllocation* alloc = findAllocation(channel_id, is_tx);
     if (!alloc) {
         FL_WARN("RMT " << (is_tx ? "TX" : "RX") << " channel "
@@ -552,6 +562,7 @@ void RmtMemoryManager::free(u8 channel_id, bool is_tx) FL_NOEXCEPT {
             break;
         }
     }
+#endif
 }
 
 void RmtMemoryManager::recordRecoveryAllocation(u8 channel_id, size_t words, bool is_tx) FL_NOEXCEPT {
@@ -741,7 +752,14 @@ bool RmtMemoryManager::allocateDMA(u8 channel_id, bool is_tx) FL_NOEXCEPT {
 }
 
 void RmtMemoryManager::freeDMA(u8 channel_id, bool is_tx) FL_NOEXCEPT {
-#if FASTLED_RMT5_DMA_SUPPORTED
+#if FASTLED_RMT_STATIC_ALLOCATION
+    // Static-allocation mode: see RmtMemoryManager::free() for rationale.
+    // The destructor still reaches this; skipping the mismatch-diagnostic
+    // FL_WARN sites lets the linker drop the operator<< chains. See #2856
+    // item 3.6.
+    (void)channel_id;
+    (void)is_tx;
+#elif FASTLED_RMT5_DMA_SUPPORTED
     if (!mDMAAllocation.allocated) {
         FL_WARN("DMA free called but no DMA allocated");
         return;
