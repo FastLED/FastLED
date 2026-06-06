@@ -97,9 +97,16 @@ def _override_prog_path_for_fbuild(
     analysis reads the build we just produced — not whatever an older
     `pio run` left in `.pio/build/<env>/`.
 
+    fbuild emits to `.fbuild/build/<env>/<release|debug>/firmware.elf`,
+    where the subdir is picked by build mode (`fbuild build` defaults to
+    `release/`; `fbuild build --quick` lands in `debug/`). We probe both
+    candidates and pick whichever ELF is newer — that way `--quick`
+    builds get the same staleness override the default mode does.
+
     No-op when the fbuild directory is absent (pure PlatformIO build),
-    when the PIO ELF is newer (PIO was the active backend), or when the
-    metadata blob has no recognisable environment entry.
+    when the PIO ELF is newer than all fbuild candidates (PIO was the
+    active backend), or when the metadata blob has no recognisable
+    environment entry.
     """
     fbuild_root = build_dir / ".fbuild" / "build"
     if not fbuild_root.is_dir():
@@ -113,9 +120,20 @@ def _override_prog_path_for_fbuild(
         return
     env = data[env_name]
 
-    fbuild_elf = fbuild_root / env_name / "release" / "firmware.elf"
-    if not fbuild_elf.exists():
+    # fbuild lays out artifacts under <env>/<release|debug>/firmware.elf.
+    # `fbuild build`           -> release/
+    # `fbuild build --release` -> release/
+    # `fbuild build --quick`   -> debug/
+    # Pick whichever variant is newer so users running --quick still get
+    # a fresh staleness override (Closes #2852).
+    fbuild_elf_candidates = [
+        fbuild_root / env_name / "release" / "firmware.elf",
+        fbuild_root / env_name / "debug" / "firmware.elf",
+    ]
+    existing = [c for c in fbuild_elf_candidates if c.exists()]
+    if not existing:
         return
+    fbuild_elf = max(existing, key=lambda p: p.stat().st_mtime)
 
     current_prog_raw = env.get("prog_path")
     if isinstance(current_prog_raw, str) and current_prog_raw:

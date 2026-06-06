@@ -11,13 +11,23 @@ toolchain (e.g. CI's WASM/Windows host tests) can quietly lose the
 exists to prevent (the hot/cold split collapses back into the inlined
 hot path).
 
-Suppression: add `// ok noinline` at end of line. Two source paths are
+Suppression: add `// ok noinline` at end of line. Five source paths are
 exempt as a matter of course:
 
 - `fl/stl/compiler_control.h` — where the `FL_NO_INLINE` macro is
   defined; the bare attribute appears inside the macro body itself.
+- `fl/stl/compiler_control.cpp.hpp` — sibling of the above.
 - `src/third_party/` — upstream code we don't control.
 - the lint checker itself.
+- `src/platforms/arm/nrf52/led_sysdefs_arm_nrf52.h` — uses
+  `__attribute__((used, noinline))` on a linker keep-alive function;
+  the `used` attribute has no FL_NO_INLINE equivalent. The file is
+  hard-gated to nrf52 ARM builds (never flows through MSVC), so the
+  MSVC-drift risk the lint guards against does not apply here.
+- `src/platforms/arm/teensy/coroutine_teensy.impl.hpp` — uses
+  `__attribute__((naked, noinline, used))` on the ARM context-switch
+  trampoline; `naked` is required for the inline-asm prologue and has
+  no portable FL_ equivalent. Same ARM-only gate as the nrf52 case.
 """
 
 import re
@@ -28,20 +38,31 @@ from ci.util.paths import PROJECT_ROOT
 
 SRC_ROOT = PROJECT_ROOT / "src"
 
-# Whitelisted files inside src/ that legitimately use the bare attribute
-# (the macro shim itself; it expands to the bare attribute).
+# Whitelisted files inside src/ that legitimately use the bare attribute.
+# See the module docstring for rationale on each entry.
 EXEMPT_FILES = (
     "fl/stl/compiler_control.h",
     "fl/stl/compiler_control.cpp.hpp",
+    "platforms/arm/nrf52/led_sysdefs_arm_nrf52.h",
+    "platforms/arm/teensy/coroutine_teensy.impl.hpp",
 )
 
-# Match `__attribute__((noinline))` or `__attribute__ ((noinline))` or
-# `__declspec(noinline)`. We allow internal whitespace around the inner
-# `noinline` keyword and around the outer parens but require the rest
-# of the syntax to be intact so we don't false-positive on unrelated
-# tokens.
+# Match `__attribute__((noinline))`, `__attribute__ ((noinline))`, and
+# *compound* attribute lists that include `noinline` as one element —
+# e.g. `__attribute__((naked, noinline, used))` or
+# `__attribute__((used, noinline))` (#2854). The MSVC-drift risk the
+# lint exists to prevent applies identically to the compound forms; the
+# only reason they don't bite today is that the call sites happen to be
+# on ARM platforms that never flow through MSVC. That's a fragile
+# invariant — better to require an explicit `// ok noinline`
+# suppression on those sites so the intent is greppable.
+#
+# Compound matching is implemented with a `noinline` keyword anchored
+# inside the outer `__attribute__((...))` parens; `[^)]*` keeps the
+# match local to a single attribute list so we don't accidentally span
+# multiple lines or sibling attribute groups.
 _BANNED_PATTERN = re.compile(
-    r"__attribute__\s*\(\s*\(\s*noinline\s*\)\s*\)"
+    r"__attribute__\s*\(\s*\([^)]*\bnoinline\b[^)]*\)\s*\)"
     r"|"
     r"__declspec\s*\(\s*noinline\s*\)"
 )

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+import sys
 from pathlib import Path
 
 import pytest
@@ -33,6 +35,7 @@ def test_run_fbuild_ci_uses_expected_command_and_parses_results(
 
     class FakeRunningProcess:
         last_cmd: list[str] | None = None
+        last_env: dict[str, str] | None = None
 
         def __init__(
             self,
@@ -40,11 +43,13 @@ def test_run_fbuild_ci_uses_expected_command_and_parses_results(
             timeout: int,
             auto_run: bool,
             capture: bool,
+            env: dict[str, str] | None = None,
         ) -> None:
             assert auto_run is False
             assert capture is True
             assert timeout == 1800
             FakeRunningProcess.last_cmd = cmd
+            FakeRunningProcess.last_env = env
             self.stdout = output
             self.returncode = 0
 
@@ -72,6 +77,13 @@ def test_run_fbuild_ci_uses_expected_command_and_parses_results(
     )
 
     assert result.success is True
+    # #2853: ensure the env passed to RunningProcess has the venv's
+    # Scripts dir prepended to PATH so fbuild's internal helper-tool
+    # lookups (zccache etc.) don't race a stale system-PATH copy.
+    assert FakeRunningProcess.last_env is not None
+    venv_scripts = str(Path(sys.executable).resolve().parent)
+    actual_path = FakeRunningProcess.last_env.get("PATH", "")
+    assert actual_path.split(os.pathsep, 1)[0].lower() == venv_scripts.lower()
     assert FakeRunningProcess.last_cmd == [
         "fbuild.exe",
         "ci",
@@ -104,11 +116,14 @@ def test_run_fbuild_ci_fails_when_output_is_partially_unparseable(
             timeout: int,
             auto_run: bool,
             capture: bool,
+            env: dict[str, str] | None = None,
         ) -> None:
             assert cmd[1] == "ci"
             assert timeout == 1800
             assert auto_run is False
             assert capture is True
+            # #2853: env should be present and have venv Scripts on PATH.
+            assert env is not None
             self.stdout = "\n".join(
                 [
                     "compile-many results:",
