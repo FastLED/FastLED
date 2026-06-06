@@ -356,6 +356,14 @@ def perform_ninja_maintenance(build_dir: Path) -> bool:
     .ninja_deps file. It only runs once per day (tracked via marker file)
     to avoid unnecessary overhead.
 
+    Windows quirk: a partially-written ``.ninja_deps`` (e.g. left by a
+    build process that was killed mid-write) triggers a recursive crash
+    in ninja's recompact tool that emits ~150 minidumps before stack
+    overflowing. To avoid the cascade we quarantine an existing deps log
+    to ``.ninja_deps.bak`` before invoking recompact, and we always touch
+    the marker afterward — so a host where recompact deterministically
+    fails does not regenerate the noise on every invocation.
+
     Args:
         build_dir: Meson build directory containing .ninja_deps
 
@@ -374,8 +382,22 @@ def perform_ninja_maintenance(build_dir: Path) -> bool:
         except (OSError, IOError):
             pass
 
+    # Quarantine existing .ninja_deps so recompact starts from a clean
+    # state. A real-world deps log with a valid header plus a partial
+    # second record is the trigger for the recursive crash handler.
+    deps_file = build_dir / ".ninja_deps"
+    deps_bak = build_dir / ".ninja_deps.bak"
+    if deps_file.exists():
+        try:
+            if deps_bak.exists():
+                deps_bak.unlink()
+            deps_file.rename(deps_bak)
+        except OSError:
+            pass
+
     _ts_print("[MESON] 🔧 Performing periodic Ninja dependency database maintenance...")
 
+    returncode = -1
     try:
         repair_proc = RunningProcess(
             ["ninja", "-C", str(build_dir), "-t", "recompact"],
@@ -386,22 +408,6 @@ def perform_ninja_maintenance(build_dir: Path) -> bool:
             output_formatter=TimestampFormatter(),
         )
         returncode = repair_proc.wait(echo=True)
-
-        if returncode == 0:
-            _ts_print(
-                "[MESON] ✓ Dependency database maintenance completed successfully"
-            )
-            try:
-                marker_file.touch()
-            except (OSError, IOError):
-                pass
-            return True
-        _ts_print(
-            "[MESON] ⚠️  Maintenance completed with warnings (non-fatal)",
-            file=sys.stderr,
-        )
-        return True
-
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
         raise
@@ -410,4 +416,20 @@ def perform_ninja_maintenance(build_dir: Path) -> bool:
             f"[MESON] ⚠️  Maintenance failed with exception: {e} (non-fatal)",
             file=sys.stderr,
         )
-        return True
+
+    # Touch marker on success OR non-fatal failure so the 24h cooldown
+    # also applies after a crash — otherwise a Windows host that crashes
+    # recompact every time would re-run it on every invocation.
+    try:
+        marker_file.touch()
+    except (OSError, IOError):
+        pass
+
+    if returncode == 0:
+        _ts_print("[MESON] ✓ Dependency database maintenance completed successfully")
+    else:
+        _ts_print(
+            "[MESON] ⚠️  Maintenance completed with warnings (non-fatal)",
+            file=sys.stderr,
+        )
+    return True
