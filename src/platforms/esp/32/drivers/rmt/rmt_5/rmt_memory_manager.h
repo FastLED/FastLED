@@ -171,6 +171,21 @@ public:
     /// the DRAM buffer size, NOT on-chip RMT memory.
     result<size_t, RmtMemoryError> allocateRx(u8 channel_id, size_t symbols, bool use_dma = false) FL_NOEXCEPT;
 
+    /// @brief Status-code variant of allocateTx (no error discriminator).
+    /// @return true on success, writing the allocated word count to out_words.
+    ///
+    /// Saves the result<>-ABI overhead at call sites that treat all
+    /// allocation failures the same — i.e. log + return false. The full
+    /// error-bearing API (allocateTx) is retained for callers that need
+    /// to distinguish CHANNEL_ALREADY_ALLOCATED vs INSUFFICIENT_TX_MEMORY.
+    /// See #2856 item 3.5.
+    bool tryAllocateTx(u8 channel_id, bool use_dma, bool networkActive,
+                       size_t& out_words) FL_NOEXCEPT;
+
+    /// @brief Status-code variant of allocateRx. See tryAllocateTx for rationale.
+    bool tryAllocateRx(u8 channel_id, size_t symbols, bool use_dma,
+                       size_t& out_words) FL_NOEXCEPT;
+
     /// @brief Free allocated memory for a channel
     /// @param channel_id RMT channel ID
     /// @param is_tx true for TX channel, false for RX channel

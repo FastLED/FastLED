@@ -599,10 +599,11 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
         // STEP 1: Try DMA channel creation (first channel only on ESP32-S3)
         if (tryDMA && dataSize > 0) {
-            // Allocate memory from memory manager (DMA bypasses on-chip memory)
-            auto alloc_result = memMgr.allocateTx(
-                state->memoryChannelId, true, networkActive); // true = use DMA
-            if (!alloc_result.ok()) {
+            // Allocate memory from memory manager (DMA bypasses on-chip memory).
+            // Status-code variant avoids result<> ABI at call site (#2856 item 3.5).
+            size_t dma_alloc_words = 0;
+            if (!memMgr.tryAllocateTx(state->memoryChannelId, true,
+                                       networkActive, dma_alloc_words)) {
                 FL_WARN("Memory manager TX allocation failed for DMA channel "
                         << static_cast<int>(state->memoryChannelId));
                 return false;
@@ -687,10 +688,11 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         }
 
         // STEP 2: Create non-DMA channel (either DMA not attempted, failed, or
-        // disabled) Allocate memory from memory manager (double-buffer policy)
-        auto alloc_result = memMgr.allocateTx(state->memoryChannelId, false,
-                                              networkActive); // false = non-DMA
-        if (!alloc_result.ok()) {
+        // disabled) Allocate memory from memory manager (double-buffer policy).
+        // Status-code variant avoids result<> ABI at call site (#2856 item 3.5).
+        fl::size mem_block_symbols = 0;
+        if (!memMgr.tryAllocateTx(state->memoryChannelId, false,
+                                   networkActive, mem_block_symbols)) {
             // Memory allocation failed - this can happen when:
             // 1. External RMT users (USB CDC, etc.) consume memory
             // 2. Too many non-DMA channels requested
@@ -706,8 +708,6 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             FL_WARN("  DMA channels in use: " << memMgr.getDMAChannelsInUse() << "/1");
             return false;
         }
-
-        fl::size mem_block_symbols = alloc_result.value();
 
         // Apply previously discovered memory reduction offset (from self-healing)
         // This prevents re-running the progressive retry on every allocation
