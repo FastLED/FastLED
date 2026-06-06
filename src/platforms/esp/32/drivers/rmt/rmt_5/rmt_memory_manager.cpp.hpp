@@ -530,6 +530,26 @@ result<size_t, RmtMemoryError> RmtMemoryManager::allocateRx(u8 channel_id, size_
     return result<size_t, RmtMemoryError>::success(words_needed);
 }
 
+bool RmtMemoryManager::tryAllocateTx(u8 channel_id, bool use_dma, bool networkActive,
+                                      size_t& out_words) FL_NOEXCEPT {
+    auto r = allocateTx(channel_id, use_dma, networkActive);
+    if (r.ok()) {
+        out_words = r.value();
+        return true;
+    }
+    return false;
+}
+
+bool RmtMemoryManager::tryAllocateRx(u8 channel_id, size_t symbols, bool use_dma,
+                                      size_t& out_words) FL_NOEXCEPT {
+    auto r = allocateRx(channel_id, symbols, use_dma);
+    if (r.ok()) {
+        out_words = r.value();
+        return true;
+    }
+    return false;
+}
+
 void RmtMemoryManager::free(u8 channel_id, bool is_tx) FL_NOEXCEPT {
     ChannelAllocation* alloc = findAllocation(channel_id, is_tx);
     if (!alloc) {

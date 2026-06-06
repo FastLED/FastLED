@@ -572,8 +572,9 @@ class RmtRxChannelImpl : public RmtRxChannel {
         auto &memMgr = RmtMemoryManager::instance();
         mMemoryChannelId = static_cast<u8>(128 + (mPin & 0x7F));
         constexpr u32 kMinRxSymbols = 64;  // Minimum RX buffer size
-        auto alloc_result = memMgr.allocateRx(mMemoryChannelId, kMinRxSymbols, false);
-        if (alloc_result.ok()) {
+        // Status-code variant (#2856 item 3.5) — call site only needs success/fail.
+        size_t alloc_words = 0;
+        if (memMgr.tryAllocateRx(mMemoryChannelId, kMinRxSymbols, false, alloc_words)) {
             mMemoryRegistered = true;
             FL_LOG_RX("RMT RX pre-registered with memory manager in constructor (channel_id="
                       << static_cast<int>(mMemoryChannelId) << ")");
@@ -781,9 +782,10 @@ class RmtRxChannelImpl : public RmtRxChannel {
             // bypasses the on-chip RX pool (DMA uses DRAM). Without this,
             // larger mem_block_symbols values (e.g., 1024 for DMA) would
             // exceed ESP32-S3's 192-word dedicated RX pool and fail.
-            auto alloc_result = memMgr.allocateRx(
-                mMemoryChannelId, rx_config.mem_block_symbols, mUseDma);
-            if (!alloc_result.ok()) {
+            // Status-code variant (#2856 item 3.5).
+            size_t rx_alloc_words = 0;
+            if (!memMgr.tryAllocateRx(mMemoryChannelId, rx_config.mem_block_symbols,
+                                       mUseDma, rx_alloc_words)) {
                 FL_WARN("RMT RX memory allocation failed for channel "
                         << static_cast<int>(mMemoryChannelId));
                 return false;

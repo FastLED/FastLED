@@ -96,6 +96,14 @@ public:
     static fl::size calculateMemoryBlocks(bool) FL_NOEXCEPT { return 2; }
 
     AllocationResult allocateTx(u8, bool, bool) FL_NOEXCEPT { return AllocationResult{}; }
+    bool tryAllocateTx(u8, bool, bool, fl::size& out_words) FL_NOEXCEPT {
+        out_words = 64;
+        return true;
+    }
+    bool tryAllocateRx(u8, fl::size, bool, fl::size& out_words) FL_NOEXCEPT {
+        out_words = 64;
+        return true;
+    }
     void free(u8, bool) FL_NOEXCEPT {}  // ok bare allocation
     void recordRecoveryAllocation(u8, fl::size, bool) FL_NOEXCEPT {}
     bool isDMAAvailable() FL_NOEXCEPT { return false; }
