@@ -33,7 +33,9 @@ FL_DISABLE_WARNING_DEPRECATED_REGISTER
 
 namespace fl {
 
-// Minimal LPC8xx GPIO controller view used by the FastPin templates. The
+// Minimal "modern" LPC GPIO controller view used by the FastPin templates
+// (LPC8xx/LPC11Uxx/LPC15xx share the same DIR/MASK/PIN/SET/CLR/NOT layout at
+// 0xA0000000 — legacy LPC11xx at 0x50000000 is gated out above). The
 // MCUXpresso CMSIS device header defines an equivalent LPC_GPIO_Type; when
 // that header is on the include path (i.e. inside led_sysdefs_arm_lpc.h via
 // <LPC845.h>) the real struct is what code links against. This local mirror
@@ -74,8 +76,10 @@ typedef struct {
 #define LPC_GPIO ((FL_LPC_GPIO_Type*)FL_LPC_GPIO_BASE)
 #endif
 
-// FastPin template for LPC8xx pins. PORT0 is the only port populated on
-// LPC845/LPC804 packages currently supported.
+// FastPin template for "modern" LPC GPIO pins (LPC8xx / LPC11Uxx / LPC15xx).
+// PORT0 is the primary port populated on the LPC845/LPC804 packages this
+// driver covers today; multi-port support is per-variant and not currently
+// wired up.
 template <u8 PIN, u32 _MASK>
 class _ARMPIN : public ValidPinBase {
 public:

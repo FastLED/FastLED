@@ -36,6 +36,15 @@ namespace fl {
 /// Hardware verification gated on #2845 Stage 3 (no LPC845 board has run
 /// FastLED-output LEDs yet). Bytes-on-the-wire correctness is implied by
 /// adherence to UM11029; AC timing on real silicon needs scope verification.
+///
+/// **Header-only by necessity.** `ARMHardwareSPIOutput` is a class template
+/// whose definitions must be visible at every instantiation point. The
+/// repo's `*.impl.hpp` router pattern (cf. `watchdog.impl.cpp.hpp`) cannot
+/// host template definitions — only `.impl.cpp.hpp` files may include
+/// `.impl.hpp`, and those are non-template compile units. This matches the
+/// other template SPI drivers in `src/platforms/arm/*/spi_*.h`. The
+/// CodeRabbit suggestion to split into `.impl.hpp` (PR #2872 review,
+/// tracked at #2875) does not apply for template-heavy headers.
 
 #ifndef FL_LPC_SPI0_BASE
 #define FL_LPC_SPI0_BASE 0x40058000UL
@@ -106,7 +115,11 @@ class ARMHardwareSPIOutput {
     Selectable *mPSelect;
 
     static inline FL_LPC_SPI_Type* spi_block() __attribute__((always_inline)) {
-        return reinterpret_cast<FL_LPC_SPI_Type*>(pSPIX);
+        // C-style cast is the canonical embedded-register access pattern
+        // (cf. clockless_arm_lpc_plu.h::reg32); the FastLED
+        // reinterpret_cast linter explicitly allows C-style casts for MMIO
+        // base addresses, where reinterpret_cast is otherwise flagged.
+        return (FL_LPC_SPI_Type*)(pSPIX);  // MMIO base address
     }
 
 public:
@@ -168,7 +181,11 @@ public:
     inline static void writeBit(u8 b) FL_NOEXCEPT {
         wait();
         FL_LPC_SPI_Type *spi = spi_block();
-        spi->TXDATCTL = (b & (1u << BIT)) ? 1 : 0;
+        // OR in RXIGNORE so this transmit doesn't clock data into RXDAT;
+        // the driver never drains RXDAT, so otherwise repeated writeBit()
+        // calls would accumulate RXOV. Matches writeByte() below.
+        spi->TXDATCTL = ((b & (1u << BIT)) ? 1u : 0u) |
+                        FL_LPC_SPI_TXCTL_RXIGNORE;
     }
 
     /// Write a single 8-bit byte. Caller responsible for waiting on prior
@@ -201,13 +218,14 @@ public:
 
     /// Bracketed bulk byte write with optional per-byte adjuster D.
     template <class D>
-    void writeBytes(FASTLED_REGISTER u8 *data, int len) FL_NOEXCEPT {
+    void writeBytes(FASTLED_REGISTER u8 *data, int len,
+                    void *context = nullptr) FL_NOEXCEPT {
         u8 *end = data + len;
         select();
         while (data != end) {
             writeByte(D::adjust(*data++));
         }
-        D::postBlock(len);
+        D::postBlock(len, context);
         waitFully();
         release();
     }
@@ -220,7 +238,8 @@ public:
     /// Handles the optional FLAG_START_BIT prefix (APA102's 0xFF brightness
     /// byte per LED) via writeBit<0>.
     template <u8 FLAGS, class D, EOrder RGB_ORDER>
-    void writePixels(PixelController<RGB_ORDER> pixels, void* /*context*/ = nullptr) FL_NOEXCEPT {
+    void writePixels(PixelController<RGB_ORDER> pixels,
+                     void *context = nullptr) FL_NOEXCEPT {
         int len = pixels.mLen;
 
         select();
@@ -239,7 +258,7 @@ public:
             pixels.advanceData();
             pixels.stepDithering();
         }
-        D::postBlock(len);
+        D::postBlock(len, context);
         waitFully();
         release();
     }
