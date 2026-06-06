@@ -429,14 +429,14 @@ RmtMemoryManager::handleAllocateTxFailure(u8 channel_id, size_t mem_blocks,
         FL_LOG_RMT("  Attempting fallback to " << fallback_blocks << "× buffering (" << fallback_words << " words)...");
 
         if (tryAllocateWords(fallback_words, true)) {
-            FL_LOG_RMT("  ✓ Fallback successful: allocated " << fallback_words << " words (single-buffer mode)");
+            FL_LOG_RMT("  [OK] Fallback successful: allocated " << fallback_words << " words (single-buffer mode)");
             mLedger.allocations.push_back(ChannelAllocation(channel_id, fallback_words, true, false));
             FL_LOG_RMT("RMT TX channel " << static_cast<int>(channel_id)
                        << " allocated (non-DMA, " << fallback_words << " words, single-buffer)");
             return result<size_t, RmtMemoryError>::success(fallback_words);
         }
 
-        FL_LOG_RMT("  ✗ Fallback failed: insufficient memory even for single-buffer");
+        FL_LOG_RMT("  [FAIL] Fallback failed: insufficient memory even for single-buffer");
     }
 
     // Fallback failed or not attempted - provide detailed diagnostic message
