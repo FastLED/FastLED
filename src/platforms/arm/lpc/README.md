@@ -62,6 +62,32 @@ For LPC11xx and LPC15xx, no fbuild board entry exists yet; community contributor
 - **LPC11xx (Cortex-M0)** — `is_lpc.h` recognises `__LPC11xx__`, `CPU_LPC1114*`, `CPU_LPC1115*`, `CPU_LPC11U24*`, `CPU_LPC11U35*` and similar. LPC11xx is **Cortex-M0**, not M0+ — do not gate any code path on `FL_IS_ARM_M0_PLUS` when adding the driver. Driver wiring will reuse `arm/common/m0clockless_asm.h` (the same path nRF51 uses); the GPIO controller is the legacy "masked-access" peripheral at `0x50000000` (UM10398 §9 / UM10462 §9), so a new `fastpin_arm_lpc11.h` is required — the LPC8xx 0xA0000000 SET/CLR template does not apply.
 - **LPC15xx (Cortex-M3)** — `is_lpc.h` recognises `__LPC15xx__` and `CPU_LPC15{17,18,19,47,48,49}*`. LPC15xx is **Cortex-M3** with the full Thumb-2 instruction set; do not gate on `FL_IS_ARM_M0` or `FL_IS_ARM_M0_PLUS`. Driver wiring should target the M3 clockless template; the GPIO controller layout per UM11074 differs again from both LPC8xx and LPC11xx.
 
+## Implementation map — which repo owns which #2845 item
+
+The LPC roadmap meta [#2845](https://github.com/FastLED/FastLED/issues/2845) spans two repositories. This is the table to consult before opening a PR against either side:
+
+| Stage / Item | Owner repo | Status | Notes |
+|---|---|---|---|
+| **Stage 3.1** — Real `SystemInit` for LPC845 (FRO 30 MHz + PLL + flash wait states) | **`FastLED/fbuild`** | Not started | Lives in `fbuild/crates/fbuild-build/src/nxplpc/assets/startup_lpc845.S`. Needs UM11029 §4. **Hardware verification required.** |
+| **Stage 3.2** — Real `SystemInit` for LPC804 | **`FastLED/fbuild`** | Not started | Same crate; UM11065 §4. **Hardware verification required.** |
+| **Stage 3.3** — Vector table expansion (DMA-end IRQ, SCT match IRQ, USART RX) | **`FastLED/fbuild`** | Partial | Vector table in `fbuild` startup assets. Add IRQs as drivers reach a state where they need them. |
+| **Stage 3.4** — Per-chip `mcu_config` split in `get_nxplpc_config` | **`FastLED/fbuild`** | Not started | Crate: `fbuild-build`. |
+| **Stage 3.5** — Linker memory-layout verification on hardware | Hardware | Not started | Cannot be done without a real LPC845 board + flash + run. |
+| **Stage 3.6** — `examples/AutoResearch/AutoResearch.ino` UART integration | **FastLED** | Not started | Wire LPC845 USART0 into the existing RPC harness. Code-only is possible, but ship gated on Stage 3.1 (so cycle counts derive from a real 30 MHz `F_CPU`) and Stage 3.5 (so the link succeeds on real silicon). |
+| **Stage 3.7** — fbuild CI `continue-on-error` flip | **`FastLED/fbuild`** | Blocked on 3.1 + 3.5 | Workflows at `.github/workflows/build-lpc{804,845}.yml` in fbuild. |
+| **Stage 3.8** — `validate_boards.py` reconciliation | **`FastLED/fbuild`** | Filed: [fbuild#421/#422](https://github.com/FastLED/fbuild/issues/421) | Script lives in fbuild; the FastLED `ci/` tree does not have a `validate_boards.py`. |
+| **Stage 4.1** — LPC11Uxx clockless driver | **FastLED** | ✅ Shipped in #2872 | Reuses LPC8xx fastpin + M0 C++ clockless. |
+| **Stage 4.1 (legacy)** — LPC1110/1112/1114/1115 clockless | **FastLED** | Not started | Needs new `fastpin_arm_lpc11_legacy.h` for the 0x50000000 GPIO. `#error` makes the unsupported case loud. |
+| **Stage 4.2** — LPC15xx clockless driver | **FastLED** | ✅ Shipped in #2872 | Reuses LPC8xx fastpin + M3-compatible C++ clockless. |
+| **Stage 4.3** — APA102 / SK9822 / WS2801 hardware SPI | **FastLED** | ✅ Shipped in #2872 | New `spi_arm_lpc.h` per UM11029. |
+| **Stage 4.4** — Multi-strip parallel output | **FastLED** | Blocked on Stage 2c hardware validation | The meta gates this on PWM+DMA driver hardware validation. |
+| **Stage 4.5** — PlatformIO upstream donation | **PlatformIO** (3rd party) | Not started | Board JSON + linker scripts donation to `platformio/platform-nxplpc` (does not exist yet — would be a new platform). |
+| **Stage 4.6** — `fl::set_*` settings for LPC clock-speed / DMA-channel overrides | **FastLED** | No concrete user requirement | The existing build-time `F_CPU` override (define before `#include <FastLED.h>`) already covers the clock-speed case for users on stable boot clocks. Runtime override on `CFastLED` would need machinery to recompute per-chipset cycle counts when clock changes — out of scope until a user reports needing it. |
+
+**Of the 14 items, 5 live in `FastLED/fbuild`, 1 lives in `platformio/*`, and 8 live here.** Of those 8: 3 shipped in this PR (#2872), 2 are explicitly hardware-gated (3.5, 3.6, 4.4), 1 is the legacy-LPC11 fastpin follow-on, 1 (4.6) has no concrete user requirement, and 1 (4.5) is upstream-PlatformIO outside FastLED's control.
+
+The meta should be **split into per-repo issues** once #2872 lands, since the single-issue tracking matrix obscures the cross-repo distribution of the work.
+
 ## References
 
 - [#2836](https://github.com/FastLED/FastLED/issues/2836) — Meta: original LPC8xx port plan (closed)
