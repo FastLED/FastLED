@@ -30,6 +30,7 @@
 #include "fl/task/promise.h"
 #include "fl/math/simd.h"
 #include "AutoResearchSimd.h"
+#include "AutoResearchAnimartrixBench.h"  // animartrixPerlinBench RPC (#2628 follow-up)
 #include "AutoResearchWave8Expand.h"  // #2526 wave8ExpandBenchmark RPC
 #include "AutoResearchParlioEncode.h" // parlioEncodeBenchmark RPC (#2526 follow-up)
 #include "AutoResearchParlioStream.h" // parlioStreamValidate RPC (#2548 follow-up)
@@ -1960,6 +1961,14 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         testSimdBenchmark_fn.set("description", "Benchmark multiply speed: float vs s16x16 vs s16x16x4 SIMD");
         functions.push_back(testSimdBenchmark_fn);
 
+        fl::json animartrixPerlinBench_fn = fl::json::object();
+        animartrixPerlinBench_fn.set("name", "animartrixPerlinBench");
+        animartrixPerlinBench_fn.set("phase", "Phase 4: Utility");
+        animartrixPerlinBench_fn.set("args", "[{iterations}] (optional, default 100, max 10000)");
+        animartrixPerlinBench_fn.set("returns", "{success, iterations, pnoise_calls_per_iter, pnoise_float_us, pnoise_i16_us, speedup_x1000}");
+        animartrixPerlinBench_fn.set("description", "Animartrix-representative Perlin noise bench: scalar float pnoise vs s16x16 fixed-point pnoise2d (16x16 grid per iter, mirrors a real frame). Answers: how much does fixed-point beat float for Animartrix's hot path on this hardware?");
+        functions.push_back(animartrixPerlinBench_fn);
+
         fl::json wave8ExpandBenchmark_fn = fl::json::object();
         wave8ExpandBenchmark_fn.set("name", "wave8ExpandBenchmark");
         wave8ExpandBenchmark_fn.set("phase", "Phase 4: Utility");
@@ -2095,6 +2104,47 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         div.set("u16x16_us", result.div_u16x16_us);
         response.set("div", div);
 
+        return response;
+    });
+
+    // Register "animartrixPerlinBench" - Animartrix-representative Perlin
+    // noise bench: scalar float (fl::pnoise) vs s16x16 fixed-point
+    // (fl::perlin_i16_optimized::pnoise2d). Same workload that drives every
+    // Animartrix frame — one Perlin lookup per output pixel, 16x16 grid
+    // per iteration. Args: {iterations} (optional, default 100).
+    mRemote->bind("animartrixPerlinBench", [](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+
+        int iters = 100;
+        fl::json config;
+        if (args.is_object()) {
+            config = args;
+        } else if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
+            config = args[0];
+        }
+        if (!config.is_null() && config.contains("iterations") && config["iterations"].is_int()) {
+            iters = static_cast<int>(config["iterations"].as_int().value());
+            if (iters < 1) iters = 1;
+            if (iters > 10000) iters = 10000;
+        }
+
+        auto result = autoresearch::animartrix_check::runPerlinBenchmark(iters);
+
+        response.set("success", true);
+        response.set("iterations", result.iterations);
+        // Workload-per-iter is 16*16 = 256 pnoise calls. Surface this so
+        // the client can compute per-call timings without hardcoding.
+        response.set("pnoise_calls_per_iter", static_cast<int64_t>(256));
+        response.set("pnoise_float_us", result.pnoise_float_us);
+        response.set("pnoise_i16_us", result.pnoise_i16_us);
+        // Speedup expressed as float / i16 (>1 means i16 wins). Computed
+        // host-side too for cross-check; this is just convenience.
+        if (result.pnoise_i16_us > 0) {
+            double speedup = static_cast<double>(result.pnoise_float_us) /
+                             static_cast<double>(result.pnoise_i16_us);
+            // Encode as basis-points (1000ths) to avoid float in the json wire fmt
+            response.set("speedup_x1000", static_cast<int64_t>(speedup * 1000.0));
+        }
         return response;
     });
 
