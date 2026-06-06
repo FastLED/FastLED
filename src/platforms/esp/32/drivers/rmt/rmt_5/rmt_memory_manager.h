@@ -440,6 +440,16 @@ private:
     /// @param words Number of words to free
     /// @param is_tx true for TX pool, false for RX pool
     void freeWords(size_t words, bool is_tx) FL_NOEXCEPT;
+
+    /// @brief Cold-path fallback + diagnostic for failed TX allocations.
+    /// Extracted from allocateTx so the hot path (initial tryAllocateWords
+    /// succeeds — the common Blink boot case) doesn't inline the single-buffer
+    /// retry block, the FL_WARN diagnostic strings, or the suggestion
+    /// messages. Returns the recovered allocation size on success, or a
+    /// failure result on hard failure. See #2773 item 2.5.
+    result<size_t, RmtMemoryError> handleAllocateTxFailure(
+        u8 channel_id, size_t mem_blocks, size_t words_needed,
+        bool networkActive) FL_NOEXCEPT;
 };
 
 } // namespace fl
