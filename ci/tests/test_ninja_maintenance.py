@@ -1,16 +1,19 @@
-"""Tests for perform_ninja_maintenance (issue #2857).
+"""Tests for perform_ninja_maintenance (issues #2857, #2873).
 
-On Windows, a partially-written .ninja_deps file triggers a recursive
-crash handler in `ninja -t recompact` that emits ~150 minidumps before
-stack overflowing. To defuse that, ``perform_ninja_maintenance``:
+On Windows, a partially-written ``.ninja_deps`` triggers a recursive crash
+handler in ``ninja -t recompact`` (upstream ninja-build/ninja#2787). The
+FastLED-side workaround is a snapshot+restore + broken-marker scheme:
 
-  1. Quarantines an existing ``.ninja_deps`` to ``.ninja_deps.bak`` so
-     recompact always starts from a clean slate.
-  2. Touches the maintenance marker regardless of recompact's exit code
-     so a host where recompact deterministically fails does not re-run
-     it (and re-trigger the cascade) on every invocation.
+  1. Skip recompact entirely if ``.ninja_deps_recompact_broken`` exists.
+     Recompact is an optimization, not a correctness requirement.
+  2. Snapshot ``.ninja_deps`` to ``.ninja_deps.bak`` before invoking
+     recompact, so the original log can be put back if recompact fails.
+  3. On success: delete the snapshot, log success.
+  4. On failure: restore the snapshot, set the broken marker, and log
+     a warning. Subsequent calls short-circuit on the broken marker.
+  5. Touch the 24h cooldown marker on every attempt, success or failure.
 
-These tests pin both behaviors so future refactors don't regress them.
+These tests pin all of those behaviors.
 """
 
 # pyright: reportUnknownArgumentType=false, reportUnknownVariableType=false
@@ -50,24 +53,24 @@ def _fake_running_process(returncode: int) -> Any:
 
 
 class TestPerformNinjaMaintenance(unittest.TestCase):
-    def test_quarantines_existing_deps_before_recompact(self) -> None:
+    def test_snapshot_taken_then_discarded_on_success(self) -> None:
         with TemporaryDirectory() as td:
             build_dir = Path(td)
             deps = build_dir / ".ninja_deps"
-            deps.write_bytes(b"# ninjadeps\x04\x00\x00\x00partial")
+            deps.write_bytes(b"# ninjadeps\x04\x00\x00\x00valid_record")
 
             with mock.patch.object(
                 build_config, "RunningProcess", _fake_running_process(0)
             ):
                 self.assertTrue(build_config.perform_ninja_maintenance(build_dir))
 
-            self.assertFalse(
-                deps.exists(),
-                ".ninja_deps should have been moved aside before recompact",
-            )
             self.assertTrue(
+                deps.exists(),
+                ".ninja_deps must stay in place — recompact reads it directly",
+            )
+            self.assertFalse(
                 (build_dir / ".ninja_deps.bak").exists(),
-                ".ninja_deps.bak should have been created from the quarantined deps",
+                "snapshot must be discarded on successful recompact",
             )
 
     def test_stale_bak_is_replaced(self) -> None:
@@ -79,16 +82,70 @@ class TestPerformNinjaMaintenance(unittest.TestCase):
             bak.write_bytes(b"stale")
 
             with mock.patch.object(
-                build_config, "RunningProcess", _fake_running_process(0)
+                build_config, "RunningProcess", _fake_running_process(1)
             ):
                 build_config.perform_ninja_maintenance(build_dir)
 
-            self.assertEqual(bak.read_bytes(), b"current")
+            # On failure the snapshot is restored, so .ninja_deps holds the
+            # pre-call bytes (which were "current"); the stale "stale" bak is
+            # gone because it was overwritten before recompact ran.
+            self.assertEqual(deps.read_bytes(), b"current")
+
+    def test_snapshot_restored_on_recompact_failure(self) -> None:
+        # The single most important guarantee from #2873: if recompact
+        # crashes, the deps log is byte-identical to what we saw on entry.
+        with TemporaryDirectory() as td:
+            build_dir = Path(td)
+            deps = build_dir / ".ninja_deps"
+            original = b"# ninjadeps\x04\x00\x00\x00the original valid records"
+            deps.write_bytes(original)
+
+            with mock.patch.object(
+                build_config, "RunningProcess", _fake_running_process(1)
+            ):
+                build_config.perform_ninja_maintenance(build_dir)
+
+            self.assertEqual(
+                deps.read_bytes(),
+                original,
+                "failed recompact must restore the pre-call .ninja_deps bytes",
+            )
+            self.assertFalse(
+                (build_dir / ".ninja_deps.bak").exists(),
+                "after restore there should be no stray .bak left behind",
+            )
+
+    def test_broken_marker_set_on_recompact_failure(self) -> None:
+        with TemporaryDirectory() as td:
+            build_dir = Path(td)
+            broken = build_dir / ".ninja_deps_recompact_broken"
+
+            with mock.patch.object(
+                build_config, "RunningProcess", _fake_running_process(1)
+            ):
+                build_config.perform_ninja_maintenance(build_dir)
+
+            self.assertTrue(
+                broken.exists(),
+                ".ninja_deps_recompact_broken must be set when recompact fails",
+            )
+
+    def test_broken_marker_skips_future_runs(self) -> None:
+        # Once recompact is known broken on this dir, it should never be
+        # invoked again — no matter how stale the 24h cooldown is.
+        with TemporaryDirectory() as td:
+            build_dir = Path(td)
+            (build_dir / ".ninja_deps_recompact_broken").touch()
+
+            with mock.patch.object(build_config, "RunningProcess") as proc_cls:
+                self.assertTrue(build_config.perform_ninja_maintenance(build_dir))
+                proc_cls.assert_not_called()
 
     def test_marker_touched_on_recompact_failure(self) -> None:
-        # Regression: previously the marker was only touched on
-        # returncode == 0, so a Windows host crashing recompact every
-        # time would re-run it on every invocation.
+        # Belt-and-suspenders: the 24h marker also gets touched on
+        # failure, so even without the broken-marker we still honor the
+        # cooldown (defense in depth in case the broken-marker write
+        # itself fails, e.g. permission denied).
         with TemporaryDirectory() as td:
             build_dir = Path(td)
             marker = build_dir / ".ninja_deps_maintenance"
@@ -100,7 +157,7 @@ class TestPerformNinjaMaintenance(unittest.TestCase):
 
             self.assertTrue(
                 marker.exists(),
-                "marker must be touched on failure to honor the 24h cooldown",
+                "cooldown marker must be touched on failure too",
             )
 
     def test_within_cooldown_short_circuits(self) -> None:
