@@ -402,6 +402,9 @@ def perform_ninja_maintenance(build_dir: Path) -> bool:
     # Snapshot .ninja_deps so we can restore it if recompact fails. Use a
     # copy (not a rename): recompact reads .ninja_deps in place, and we want
     # both the original-in-position and the backup to exist during the run.
+    # If the snapshot can't be taken, skip recompact entirely — running it
+    # without a rollback path could leave the deps log in a worse state if
+    # recompact itself partially succeeds before crashing.
     deps_file = build_dir / ".ninja_deps"
     deps_bak = build_dir / ".ninja_deps.bak"
     snapshot_taken = False
@@ -411,8 +414,21 @@ def perform_ninja_maintenance(build_dir: Path) -> bool:
                 deps_bak.unlink()
             shutil.copy2(str(deps_file), str(deps_bak))
             snapshot_taken = True
-        except OSError:
-            pass
+        except OSError as e:
+            _ts_print(
+                f"[MESON] ⚠️  Could not snapshot {deps_file} ({e}); "
+                "skipping recompact to keep the existing deps log intact.",
+                file=sys.stderr,
+            )
+            try:
+                marker_file.touch()
+            except (OSError, IOError):
+                pass
+            try:
+                broken_marker.touch()
+            except (OSError, IOError):
+                pass
+            return True
 
     _ts_print("[MESON] 🔧 Performing periodic Ninja dependency database maintenance...")
 
@@ -451,16 +467,21 @@ def perform_ninja_maintenance(build_dir: Path) -> bool:
         _ts_print("[MESON] ✓ Dependency database maintenance completed successfully")
         return True
 
-    # Recompact failed (or never ran). Restore the snapshot so subsequent
-    # ninja invocations keep the deps records they would otherwise lose,
-    # and flag this build dir so we skip recompact on future calls.
+    # Recompact failed. Restore the snapshot so subsequent ninja invocations
+    # keep the deps records they would otherwise lose, and flag this build
+    # dir so we skip recompact on future calls. os.replace is atomic on both
+    # POSIX and Windows — if it fails, neither file is touched, so we never
+    # end up with .ninja_deps missing.
     if snapshot_taken:
         try:
-            if deps_file.exists():
-                deps_file.unlink()
-            deps_bak.rename(deps_file)
-        except OSError:
-            pass
+            os.replace(str(deps_bak), str(deps_file))
+        except OSError as e:
+            _ts_print(
+                f"[MESON] ⚠️  Could not restore {deps_file} from {deps_bak} "
+                f"({e}); the in-place .ninja_deps from before recompact is "
+                "still on disk (ninja's atomic-replace only fires on success).",
+                file=sys.stderr,
+            )
 
     try:
         broken_marker.touch()

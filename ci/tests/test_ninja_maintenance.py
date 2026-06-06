@@ -22,6 +22,7 @@ These tests pin all of those behaviors.
 
 from __future__ import annotations
 
+import shutil
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -169,6 +170,38 @@ class TestPerformNinjaMaintenance(unittest.TestCase):
             with mock.patch.object(build_config, "RunningProcess") as proc_cls:
                 self.assertTrue(build_config.perform_ninja_maintenance(build_dir))
                 proc_cls.assert_not_called()
+
+    def test_snapshot_failure_skips_recompact_and_flags_broken(self) -> None:
+        # If we can't take a snapshot we can't safely run recompact —
+        # better to keep the existing .ninja_deps untouched. The function
+        # must skip RunningProcess entirely and set the broken marker so
+        # the same host never tries again.
+        with TemporaryDirectory() as td:
+            build_dir = Path(td)
+            deps = build_dir / ".ninja_deps"
+            original = b"# ninjadeps\x04\x00\x00\x00records"
+            deps.write_bytes(original)
+
+            with (
+                mock.patch.object(
+                    shutil,
+                    "copy2",
+                    side_effect=OSError("simulated snapshot failure"),
+                ),
+                mock.patch.object(build_config, "RunningProcess") as proc_cls,
+            ):
+                self.assertTrue(build_config.perform_ninja_maintenance(build_dir))
+                proc_cls.assert_not_called()
+
+            self.assertEqual(
+                deps.read_bytes(),
+                original,
+                ".ninja_deps must stay untouched when snapshot fails",
+            )
+            self.assertTrue(
+                (build_dir / ".ninja_deps_recompact_broken").exists(),
+                "broken marker must be set when snapshot fails (no retry)",
+            )
 
     def test_no_deps_file_is_a_clean_no_op(self) -> None:
         with TemporaryDirectory() as td:
