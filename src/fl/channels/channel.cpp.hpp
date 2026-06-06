@@ -114,6 +114,37 @@ class ReorderingPixelIteratorAny {
     const PixelIterator& get() const { return mPixelIterator.get(); }
 };
 
+/// @brief Out-of-line cold-path emitter for the #2517 silent-drop
+/// DISABLED-driver diagnostic in `Channel::showPixels`.
+///
+/// `showPixels` runs every frame, but this diagnostic is gated behind a
+/// one-shot latch (`mDisabledDriverWarned`) and only fires when a bound
+/// driver has been runtime-disabled (typically by
+/// `FastLED.setExclusiveDriver<OtherBus>()`). Inlining the two
+/// alternative FL_ERROR chains was costing ~10 `operator<<`
+/// instantiations in showPixels' prologue/epilogue for code that runs
+/// at most once per channel lifetime. Splitting matches the same
+/// pattern the maintainer adopted for `resolveDynamicDriver()` in PR
+/// #2830 — keep the diagnostic chain in a `FL_NO_INLINE` helper so it
+/// can't fold back into the hot path. (#2773 follow-up to #2832.)
+FL_NO_INLINE
+static void emitDisabledDriverError(const fl::string& channelName,
+                                    const fl::string& driverName,
+                                    const fl::string& exclusive) FL_NOEXCEPT {
+    if (!exclusive.empty()) {
+        FL_ERROR("Channel '" << channelName << "': bound driver '" << driverName
+            << "' is currently DISABLED by exclusive-driver selection '"
+            << exclusive << "'. Frame will be silently dropped. "
+            << "Resolve with: FastLED.enableDrivers<fl::Bus::"
+            << driverName << ">() or FastLED.enableAllDrivers().");
+    } else {
+        FL_ERROR("Channel '" << channelName << "': bound driver '" << driverName
+            << "' is currently DISABLED. Frame will be silently dropped. "
+            << "Resolve with: FastLED.enableDrivers<fl::Bus::"
+            << driverName << ">() or FastLED.enableAllDrivers().");
+    }
+}
+
 }  // anonymous namespace
 
 
@@ -547,20 +578,9 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     auto status = ChannelManager::instance().driverStatus(driverName);
     if (status == ChannelManager::DriverStatus::STATUS_DISABLED) {
         if (!mDisabledDriverWarned) {
-            const fl::string& exclusive =
-                ChannelManager::instance().exclusiveDriverName();
-            if (!exclusive.empty()) {
-                FL_ERROR("Channel '" << mName << "': bound driver '" << driverName
-                    << "' is currently DISABLED by exclusive-driver selection '"
-                    << exclusive << "'. Frame will be silently dropped. "
-                    << "Resolve with: FastLED.enableDrivers<fl::Bus::"
-                    << driverName << ">() or FastLED.enableAllDrivers().");
-            } else {
-                FL_ERROR("Channel '" << mName << "': bound driver '" << driverName
-                    << "' is currently DISABLED. Frame will be silently dropped. "
-                    << "Resolve with: FastLED.enableDrivers<fl::Bus::"
-                    << driverName << ">() or FastLED.enableAllDrivers().");
-            }
+            emitDisabledDriverError(
+                mName, driverName,
+                ChannelManager::instance().exclusiveDriverName());
             mDisabledDriverWarned = true;
         }
         // Skip the enqueue — the data wouldn't be sent anyway, and dropping
