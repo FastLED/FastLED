@@ -26,8 +26,11 @@ namespace fl {
         }                                                                      \
     } while (0)
 #else
-// `sizeof((x), (MSG), 0)` keeps the expression syntactically validated
-// (catches typos at compile time) without evaluating it at runtime.
-#define FASTLED_ASSERT(x, MSG)                                                 \
-    do { (void)sizeof((void)(x), (void)(MSG), 0); } while (0)
+// Full no-op in release — matches standard C `<assert.h>` behavior under
+// NDEBUG. MSG is typically an `fl::sstream` operator<< chain like
+// `"text " << i`, which is only valid in the presence of a streamable
+// LHS. A previous attempt to syntactically validate `(MSG)` via
+// `sizeof((void)(MSG), 0)` broke the build because the chain has no
+// streamable LHS outside the sstream call expression. Just no-op.
+#define FASTLED_ASSERT(x, MSG) ((void)0)
 #endif
