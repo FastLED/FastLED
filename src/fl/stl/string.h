@@ -193,6 +193,18 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN : public basic_st
     ~StrN() FL_NOEXCEPT {}
 };
 
+// Public alias matching the design-doc vocabulary: `stringN<N>` is the
+// templated wrapper that owns an inline buffer of size N and trampolines
+// every mutation into `string_base` (a.k.a. `basic_string`). Callers
+// that want the default 64-byte inline buffer + heap-overflow should
+// prefer `fl::string`; `stringN<N>` is reserved for the rare case
+// where the caller really wants a different inline size (today: only
+// the OTA module's tiny scratch fields).
+//
+// See `agents/docs/string-architecture.md` for the layering rationale.
+template <fl::size N = FASTLED_STR_INLINED_SIZE>
+using stringN = StrN<N>;
+
 class string : public StrN<FASTLED_STR_INLINED_SIZE> {
   public:
     static constexpr fl::size npos = static_cast<fl::size>(-1);

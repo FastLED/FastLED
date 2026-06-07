@@ -487,4 +487,11 @@ class basic_string {
     const NotNullStringHolderPtr& heapData() const FL_NOEXCEPT;
 };
 
+// Public name matching the trampoline-pattern vocabulary used in design
+// docs: `string_base` is the concrete, type-erased class that holds all
+// string logic; `stringN<N>` (templated inline buffer) and `string`
+// (default inline + heap overflow) are thin wrappers that delegate
+// every mutation here. See `agents/docs/string-architecture.md`.
+using string_base = basic_string;
+
 } // namespace fl
