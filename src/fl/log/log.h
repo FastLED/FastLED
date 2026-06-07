@@ -63,11 +63,19 @@
 //   * `FASTLED_LOG_VERBOSITY >= 2` → reserved for future "even noisier
 //     than debug" output; currently equivalent to level 1.
 //
-// Default: 1 (preserve current behavior). Define `FASTLED_LOG_VERBOSITY=0`
-// in your build flags (e.g. `build_flags = -DFASTLED_LOG_VERBOSITY=0` in
-// platformio.ini) to opt into the savings on release builds. Host unit
-// tests pin verbosity to 1 unconditionally so test diagnostics keep
-// firing regardless of build configuration.
+// Default selection (in resolution order):
+//
+//   * `FASTLED_TESTING` is set     → 1 (host unit tests need full diagnostics)
+//   * `NDEBUG` is set (release)    → 0 (drop ~55 KB of FL_WARN/FL_LOG strings
+//                                      on ESP32-S3 NEOPIXEL Blink; see #2886)
+//   * otherwise (debug builds)     → 1 (preserve current behavior)
+//
+// Users who want logs back on a release build define
+// `-DFASTLED_LOG_VERBOSITY=1` in their build flags or
+// `#define FASTLED_LOG_VERBOSITY 1` before `#include <FastLED.h>`. The
+// per-channel logging defines (`FASTLED_LOG_RMT_ENABLED`, `FASTLED_LOG_SPI_ENABLED`,
+// etc.) are still gated by their own `#define`s — only the verbosity floor
+// changes here.
 #ifdef FASTLED_TESTING
   // Host unit tests always want the full diagnostic stream so assertion
   // and warning messages can be checked in CI.
@@ -77,7 +85,11 @@
   #endif
 #else
   #ifndef FASTLED_LOG_VERBOSITY
-    #define FASTLED_LOG_VERBOSITY 1
+    #ifdef NDEBUG
+      #define FASTLED_LOG_VERBOSITY 0
+    #else
+      #define FASTLED_LOG_VERBOSITY 1
+    #endif
   #endif
 #endif
 
