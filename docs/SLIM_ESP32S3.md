@@ -29,7 +29,8 @@ That combination drops the NEOPIXEL Blink baseline from ~388 KB to ~320-325 KB o
 | Quantity | Value | Source |
 |---|---:|---|
 | ESP32-S3 NEOPIXEL Blink baseline (pre-#2886) | 388,380 B flash | `bash bloat esp32s3 --top 25` against pre-Stage-1 master |
-| Stage 6 target | ≤ 280,000 B (-28 %) | #2886 goal |
+| Current (Stage 1 only, no opt-in flags) | **350,568 B flash** (−37,812 B / −9.7 %) | measured 2026-06-06 against `master @ 824cb5c0e3` — see [audit comment](https://github.com/FastLED/FastLED/issues/2886#issuecomment-4641413123) |
+| Stage 6 target | ≤ 280,000 B (−28 %) | #2886 goal |
 
 To measure your own build: `bash bloat esp32s3 --build` then `jq '.total_flash' .build/symbols/esp32s3/report.json`. Tool details live in [`agents/docs/binary-size-analysis.md`](../agents/docs/binary-size-analysis.md).
 
@@ -37,7 +38,7 @@ To measure your own build: `bash bloat esp32s3 --build` then `jq '.total_flash' 
 
 | # | Lever | How to enable | Savings | Status | PR |
 |---:|---|---|---:|:---:|---|
-| 1 | `FASTLED_LOG_VERBOSITY=0` | **Default on release builds** (NDEBUG); `-DFASTLED_LOG_VERBOSITY=1` to restore | ~43-58 KB | 📊 | #2890 |
+| 1 | `FASTLED_LOG_VERBOSITY=0` | **Default on release builds** (NDEBUG); `-DFASTLED_LOG_VERBOSITY=1` to restore | **−37,812 B measured** (388,380 → 350,568 B on 824cb5c0e3) | ✅ | #2890 |
 | 2 | `tools/sdkconfig_for_smallest_fastled.defaults` | `board_build.sdkconfig_defaults` in `platformio.ini` | ~10-15 KB | 📊 | #2896 |
 | 3 | `-DFASTLED_RMT_STATIC_ALLOCATION=1` | `build_flags`; for sketches that init LEDs in `setup()` and never `removeLeds()` | ~22-43 KB | 📊 | #2846 |
 | 4 | `-DFASTLED_SUPPRESS_ARDUINO_CHIP_DEBUG_REPORT=1` | `build_flags`; strong-overrides the Arduino-ESP32 boot-banner gate | ~3 KB | 📊 | #2894 |
@@ -45,7 +46,7 @@ To measure your own build: `bash bloat esp32s3 --build` then `jq '.total_flash' 
 
 **Legend:** ✅ measured against a recorded baseline · 📊 projected from the top-25 symbol attribution in #2886.
 
-All five entries are projections today; the column flips to ✅ once Stage 6 of #2886 wires the regression-gate run that records measured deltas. See the [Roadmap](#roadmap) below.
+Row 1 is empirically confirmed by the 2026-06-06 audit (see the [#2886 audit comment](https://github.com/FastLED/FastLED/issues/2886#issuecomment-4641413123) and the Stage 6 gate baseline at `tests/data/esp32s3_bloat_baseline.txt`). Rows 2-5 stay 📊 until a measured build with their flag / overlay enabled is recorded.
 
 ## Per-stage detail
 
