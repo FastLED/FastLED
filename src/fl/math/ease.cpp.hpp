@@ -423,21 +423,28 @@ private:
 };
 
 fl::shared_ptr<const Gamma8> Gamma8::getOrCreate(float gamma) {
+    // Single-entry weak_ptr cache. For the stock `addLeds<NEOPIXEL>` /
+    // every other legacy flow, a single fixed gamma value (typically 2.8)
+    // is reused for the lifetime of the sketch — the prior `fl::flat_map`
+    // cache was overkill for that case. Users who switch gamma values
+    // at runtime pay one extra `Gamma8Impl` reconstruction per switch
+    // (256 fixed-point pow operations + ~512 B alloc). See #2928 / #2886.
     GammaKey key(gamma);
+    static GammaKey sCachedKey{};
+    static fl::weak_ptr<const Gamma8> sCachedPtr;
+    static bool sCacheValid = false;
 
-    static fl::flat_map<GammaKey, fl::weak_ptr<const Gamma8>> sCache;
-
-    auto it = sCache.find(key);
-    if (it != sCache.end()) {
-        fl::shared_ptr<const Gamma8> existing = it->second.lock();
-        if (existing) {
+    if (sCacheValid && key == sCachedKey) {
+        if (auto existing = sCachedPtr.lock()) {
             return existing;
         }
     }
 
     fl::shared_ptr<const Gamma8> ptr =
         fl::make_shared<Gamma8Impl>(gamma);
-    sCache[key] = ptr;
+    sCachedKey = key;
+    sCachedPtr = ptr;
+    sCacheValid = true;
     return ptr;
 }
 
