@@ -497,8 +497,22 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
                              mSettings, mRgbOrder);
                 break;
         }
+#if !defined(FASTLED_DISABLE_SPI_CHIPSETS) || !FASTLED_DISABLE_SPI_CHIPSETS
     } else if (mChipset.is<SpiChipsetConfig>()) {
-        // SPI chipsets: dispatch based on chipset type (zero allocation)
+        // SPI chipsets: dispatch based on chipset type (zero allocation).
+        //
+        // Gated by FASTLED_DISABLE_SPI_CHIPSETS (#2913). For NEOPIXEL-only
+        // sketches on ESP32-S3 the SPI branch is dead at runtime, but the
+        // compiler cannot prove that — each pixelIterator.writeXXX(...)
+        // reference below is statically reachable, keeping ~720 B of
+        // encoder bodies (writeAPA102, writeSK9822, writeLPD8806,
+        // writeSM16716) plus the 11-case switch table linked. Setting
+        // `-DFASTLED_DISABLE_SPI_CHIPSETS=1` in build_flags drops the
+        // whole branch and recovers ~1.0-1.2 KB on a NEOPIXEL Blink.
+        //
+        // When the gate is enabled, calling showPixels() on an
+        // SpiChipsetConfig channel silently emits nothing — the user
+        // accepts that constraint by setting the flag.
         const SpiChipsetConfig* spi = mChipset.ptr<SpiChipsetConfig>();
         const SpiEncoder& config = spi->timing;
 
@@ -555,6 +569,7 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
         }
         // No default case - compiler will error if any enum value is missing
     }
+#endif  // !FASTLED_DISABLE_SPI_CHIPSETS
 
     // Fire event after encoding completes
     {

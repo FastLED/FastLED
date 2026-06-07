@@ -43,6 +43,7 @@ To measure your own build: `bash bloat esp32s3 --build` then `jq '.total_flash' 
 | 3 | `-DFASTLED_RMT_STATIC_ALLOCATION=1` | `build_flags`; for sketches that init LEDs in `setup()` and never `removeLeds()` | ~22-43 KB | 📊 | #2846 |
 | 4 | `-DFASTLED_SUPPRESS_ARDUINO_CHIP_DEBUG_REPORT=1` | `build_flags`; strong-overrides the Arduino-ESP32 boot-banner gate | ~3 KB | 📊 | #2894 |
 | 5 | `CONFIG_BT_ENABLED=n` | uncomment the situational block in `tools/sdkconfig_for_smallest_fastled.defaults` | ~15 KB (if currently on) | 📊 | — |
+| 6 | `-DFASTLED_DISABLE_SPI_CHIPSETS=1` | `build_flags`; drops the SPI dispatch branch in `Channel::showPixels`. **Constraint:** clockless-only sketches; calling `FastLED.addLeds<APA102, ...>` (or any SPI chipset) under this flag silently emits nothing. | ~1.0-1.2 KB | 📊 | #2913 |
 
 **Legend:** ✅ measured against a recorded baseline · 📊 projected from the top-25 symbol attribution in #2886.
 
