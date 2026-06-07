@@ -51,6 +51,18 @@ dependencies = [
     "fpvgcc",
     "uv",
     "clang-tool-chain>=1.5.5",
+    # 1.11.17 (released 2026-06-06): docs-only release that surfaces the
+    # ZCCACHE_PATH_REMAP env var in `zccache --help` (zackees/zccache#676).
+    # 1.11.16 (released 2026-06-06): adaptive daemon-spawn wait keyed on
+    # lockfile PID (zackees/zccache#674, closes #673) — eliminates the
+    # thundering-herd "daemon started but not accepting connections after
+    # 10s" wedge that hit our `clud-pr` parallel builds.
+    # 1.11.15 (released 2026-06-06): pipe-pool depletion + compile-path
+    # wedge recovery (zackees/zccache#669, refs #666) — daemon stopped
+    # responding after ~1h uptime on Windows during heavy concurrent
+    # compile load. Bumping to >=1.11.17 captures both fixes; the
+    # "lost connection to daemon (no response)" symptom we hit during
+    # the recent FastLED bloat-audit worktree builds maps to #673.
     # 1.11.14 ships the `--no-walk` flag plus an expanded skip-list for
     # the meson-configure wrapper (zackees/zccache#660, closes zackees/
     # zccache#659). With `--no-walk` the wrapper skips its recursive
@@ -72,7 +84,7 @@ dependencies = [
     # incremental builds produce stale .obj files after a git pull that
     # changes transitive headers (symptom: `undefined symbol: ...` link
     # errors hours after a header actually changed).
-    "zccache>=1.11.15",
+    "zccache>=1.11.17",
     "ninja",
     "meson>=1.11.0",
     "download",
