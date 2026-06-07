@@ -460,23 +460,40 @@ private:
 };
 
 fl::shared_ptr<const Gamma8> Gamma8::getOrCreate(float gamma) {
-    GammaKey key(gamma);
+    // Clamp gamma to the cache-key domain BEFORE deriving the key and
+    // before feeding it to s8x24. `GammaKey` is `ufixed_point<4, 12>`,
+    // so its representable range is [0, ~16). A negative input would
+    // wrap unsigned in the GammaKey ctor; an input ≥ 16 would either
+    // saturate or wrap. Clamping up-front also keeps the s8x24 bit
+    // budget safe: `exp * log2_fp(1/255) ≈ -7.994 * gamma` must stay
+    // within s8x24's signed [-128, 128) integer range — gamma ≤ 16
+    // gives -127.9, right at the edge.
+    constexpr float kGammaMax = 15.99975f;  // just under 4.12 ufixed max
+    const float gamma_clamped = (gamma < 0.0f)         ? 0.0f
+                                : (gamma > kGammaMax)  ? kGammaMax
+                                                       : gamma;
+    GammaKey key(gamma_clamped);
 
     // Fast path: gamma 2.8 is the canonical default (every legacy
     // `addLeds<NEOPIXEL>` flow, every WS281x chipset). We have a
     // precomputed `GAMMA_2_8_LUT` already in .rodata (used by the
-    // free function `fl::gamma_2_8`). Copy that table into the Gamma8
-    // instance instead of recomputing 256 fixed-point pow operations
-    // that would diverge from it by ~30-50 LSB. The singleton itself
-    // is allocated once on first call and cached for the lifetime of
-    // the program (no weak_ptr expiry — the table is tiny relative to
-    // its lifetime usage).
+    // free function `fl::gamma_2_8`). Construct a Gamma8 instance
+    // that copies that table directly instead of recomputing 256
+    // fixed-point pow operations (which would diverge from the
+    // precomputed values by ~30-50 LSB). Cached via weak_ptr to
+    // match the documented `getOrCreate` lifetime contract — the
+    // instance disappears once all callers drop their shared_ptr,
+    // and the next call rebuilds it.
     constexpr GammaKey k28(2.8f);
     if (key == k28) {
-        static fl::shared_ptr<const Gamma8> s28 =
-            fl::make_shared<Gamma8Impl>(
-                Gamma8Impl::from_progmem_lut_tag{}, GAMMA_2_8_LUT);
-        return s28;
+        static fl::weak_ptr<const Gamma8> s28_weak;
+        if (auto existing = s28_weak.lock()) {
+            return existing;
+        }
+        auto ptr = fl::make_shared<Gamma8Impl>(
+            Gamma8Impl::from_progmem_lut_tag{}, GAMMA_2_8_LUT);
+        s28_weak = ptr;
+        return ptr;
     }
 
     // Slow path: arbitrary gamma. Single-entry weak_ptr cache. Users
@@ -493,8 +510,10 @@ fl::shared_ptr<const Gamma8> Gamma8::getOrCreate(float gamma) {
         }
     }
 
+    // Use the clamped gamma so the LUT we build matches the cache key
+    // (otherwise out-of-range inputs would keep missing the cache).
     fl::shared_ptr<const Gamma8> ptr =
-        fl::make_shared<Gamma8Impl>(gamma);
+        fl::make_shared<Gamma8Impl>(gamma_clamped);
     sCachedKey = key;
     sCachedPtr = ptr;
     sCacheValid = true;

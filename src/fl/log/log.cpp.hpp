@@ -28,7 +28,7 @@ namespace detail {
 // FL_WARN call site, the inlined `<< file << "(" << line << "): KIND: "`
 // burst (~30-50 B) collapses to one `log_emit` call (~4 B).
 
-FL_NO_INLINE void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) {
+FL_NO_INLINE void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_NOEXCEPT {
     const char* tag;
     switch (kind) {
     case log_kind::WARN:  tag = "): WARN: ";  break;
