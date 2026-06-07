@@ -259,16 +259,45 @@ def _run_bloat_cmd() -> list[str]:
     return ["bash", "bloat", *args]
 
 
-def run_compile(example: str) -> bool:
-    cmd = _run_compile_cmd(example)
-    print(f"measure-opt-ins: $ {' '.join(cmd)}", flush=True)
-    return subprocess.run(cmd, cwd=PROJECT_ROOT).returncode == 0
+_LOG_DIR = PROJECT_ROOT / ".build" / "measure-logs"
 
 
-def run_bloat() -> bool:
-    cmd = _run_bloat_cmd()
+def _run_with_log(cmd: list[str], log_name: str) -> bool:
+    """Run `cmd` in PROJECT_ROOT, tee output to a per-config log file.
+
+    Pre-#2938 versions of the script swallowed each build's stdout/stderr,
+    so when a config crashed mid-run (#2935 saw 4 of 10 configs crash on
+    Windows with `extras+.cpp.o` exit 3221225794), there was no way to
+    diagnose without a manual rerun. This wrapper writes the combined
+    stream to `.build/measure-logs/<log_name>` while also printing it to
+    the operator's terminal. See #2938.
+    """
+    _LOG_DIR.mkdir(parents=True, exist_ok=True)
+    log_path = _LOG_DIR / log_name
     print(f"measure-opt-ins: $ {' '.join(cmd)}", flush=True)
-    return subprocess.run(cmd, cwd=PROJECT_ROOT).returncode == 0
+    print(
+        f"measure-opt-ins:   (log: {log_path.relative_to(PROJECT_ROOT).as_posix()})",
+        flush=True,
+    )
+    with log_path.open("wb") as log_f:
+        proc = subprocess.Popen(
+            cmd, cwd=PROJECT_ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        )
+        assert proc.stdout is not None
+        for chunk in iter(lambda: proc.stdout.read(4096), b""):
+            log_f.write(chunk)
+            sys.stdout.buffer.write(chunk)
+            sys.stdout.buffer.flush()
+        proc.wait()
+    return proc.returncode == 0
+
+
+def run_compile(example: str, config_name: str) -> bool:
+    return _run_with_log(_run_compile_cmd(example), f"{config_name}-compile.log")
+
+
+def run_bloat(config_name: str) -> bool:
+    return _run_with_log(_run_bloat_cmd(), f"{config_name}-bloat.log")
 
 
 def read_total_flash() -> int | None:
@@ -289,10 +318,10 @@ def measure_one(cfg: OptInConfig, example: str) -> int | None:
     print(f"\n=== measure-opt-ins: config {cfg.name} ({cfg.label}) ===", flush=True)
     restore_platformio_ini(keep_backup=True)
     patch_platformio_ini(cfg)
-    if not run_compile(example):
+    if not run_compile(example, cfg.name):
         print(f"measure-opt-ins: compile failed for {cfg.name}", file=sys.stderr)
         return None
-    if not run_bloat():
+    if not run_bloat(cfg.name):
         print(f"measure-opt-ins: bloat run failed for {cfg.name}", file=sys.stderr)
         return None
     total = read_total_flash()
