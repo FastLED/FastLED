@@ -404,6 +404,15 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     FL_NO_INLINE void emitRecoveryWarning(
         size_t original_symbols, size_t reduced_symbols,
         size_t external_words) FL_NOEXCEPT {
+        // Gate the entire body on FASTLED_LOG_RUNTIME_ENABLED. In release
+        // builds (NDEBUG → FASTLED_LOG_VERBOSITY=0 per Stage 1) the
+        // FL_WARN(msg.str()) call at the bottom is a no-op, but the
+        // `fl::sstream msg;` construction and 15 `operator<<` chain calls
+        // above happen unconditionally — they have observable side effects
+        // on msg's internal buffer that the optimizer can't prove away.
+        // Gating collapses the FL_NO_INLINE helper to an effectively-empty
+        // function in release (~5 B vs ~410 B). See #2917 / #2886.
+#if FASTLED_LOG_RUNTIME_ENABLED
         fl::sstream msg;
         msg << "\n========================================\n"
             << "RMT ALLOCATION RECOVERY - ACTION REQUIRED\n"
@@ -423,6 +432,11 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             << "Performance may be degraded during WiFi/network activity.\n"
             << "========================================";
         FL_WARN(msg.str());
+#else
+        (void)original_symbols;
+        (void)reduced_symbols;
+        (void)external_words;
+#endif
     }
 
     /// @brief Cold-path recovery loop for failed initial RMT allocations.
@@ -506,6 +520,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     FL_NO_INLINE void emitAllocationFailureError(
         size_t retry_count, size_t original_symbols, size_t min_symbols,
         int pin) FL_NOEXCEPT {
+        // Same gating rationale as emitRecoveryWarning above — see #2917.
+#if FASTLED_LOG_RUNTIME_ENABLED
         fl::sstream msg;
         msg << "\n========================================\n"
             << "RMT CHANNEL ALLOCATION FAILED\n"
@@ -523,6 +539,12 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             << "LEDs on pin " << pin << " will NOT work!\n"
             << "========================================";
         FL_ERROR(msg.str());
+#else
+        (void)retry_count;
+        (void)original_symbols;
+        (void)min_symbols;
+        (void)pin;
+#endif
     }
 
     /// @brief Create new RMT channel with given configuration
