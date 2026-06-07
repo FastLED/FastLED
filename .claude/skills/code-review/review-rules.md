@@ -135,3 +135,24 @@ Remove variables that are no longer referenced after refactoring.
 ## src/** changes - PERFORMANCE ATTRIBUTES ON HOT-PATH FUNCTIONS
 Available macros: `FL_OPTIMIZE_FUNCTION`, `FL_NO_INLINE_IF_AVR`, `FL_BUILTIN_MEMCPY`
 Flag new functions in hot-path files missing appropriate optimization attributes.
+
+## src/** changes - FL_WARN / FL_ERROR DEFAULT-VISIBILITY INVARIANT
+`FL_WARN` and `FL_ERROR` MUST remain active by default on NON-release
+builds. Flag any change that:
+
+1. Adds an outer guard around `FL_WARN(...)` / `FL_ERROR(...)` that
+   requires an opt-in macro to fire on debug/non-release builds.
+2. Changes the unset default of `FASTLED_LOG_VERBOSITY` so that
+   non-release builds (no `NDEBUG`) default below `1`. Release builds
+   (`NDEBUG` defined) default to `0` — that is intentional and not
+   a violation.
+3. Adds a new logging knob whose default suppresses FL_WARN/FL_ERROR
+   on non-release builds without explicit user opt-in.
+
+Rationale: developers depend on warnings/errors firing during
+development. The bloat-reduction work in #2886 is scoped to release
+builds via `NDEBUG`; it explicitly preserves the debug-build default
+at verbosity 1.
+
+**See:** `src/fl/log/log.h` (resolution order: `FASTLED_TESTING` → 1,
+`NDEBUG` → 0, otherwise → 1) and #2886 Stage 1.
