@@ -53,6 +53,8 @@ These are the gotchas the wrapper handles for you. They are documented here so t
    | `-DFASTLED_SUPPRESS_ARDUINO_CHIP_DEBUG_REPORT=1` | `build_flags`; strong-overrides the Arduino-ESP32 boot-banner gate | ~3 KB | #2894 (Stage 2) |
    | `-DFASTLED_RMT_STATIC_ALLOCATION=1` | `build_flags`; for sketches that init LEDs in `setup()` and never remove | ~22-43 KB | #2846 |
 
+   The user-facing copy of this table — same content, written for end users rather than agents, with platformio.ini snippets — lives at [`docs/SLIM_ESP32S3.md`](../../docs/SLIM_ESP32S3.md). When a new knob lands, update both: this table for the agent reference, and `docs/SLIM_ESP32S3.md` for the user copy.
+
 4. **`--nm` is still required.** fbuild's `build_info.json` does not yet carry toolchain paths (`nm_path` / `cppfilt_path`). The wrapper resolves them from PIO packages. fbuild issue #428 tracks the migration to build-info-driven resolution; when that lands, drop the explicit `--nm` path in `ci/bloat.py::run_fbuild_symbols`.
 
 5. **Diff two builds with the existing diff script.** Save two `report.json` files and run `uv run python .claude/symbolaudit/diff.py <old.json> <new.json>` for a per-symbol delta table (added / removed / grew / shrunk). The wrapper does NOT do this automatically; ship a follow-up PR if you need it inline.
