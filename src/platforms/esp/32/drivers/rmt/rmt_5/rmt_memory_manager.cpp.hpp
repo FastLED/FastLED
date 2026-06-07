@@ -447,7 +447,12 @@ RmtMemoryManager::handleAllocateTxFailure(u8 channel_id, size_t mem_blocks,
         FL_LOG_RMT("  [FAIL] Fallback failed: insufficient memory even for single-buffer");
     }
 
-    // Fallback failed or not attempted - provide detailed diagnostic message
+    // Fallback failed or not attempted - provide detailed diagnostic message.
+    // Gate the entire block on FASTLED_LOG_RUNTIME_ENABLED — in release
+    // builds (NDEBUG → FASTLED_LOG_VERBOSITY=0 per Stage 1) the 9 FL_WARN
+    // bodies collapse to do-while-0, but the locals they feed (including
+    // the getAvailableWords() call + 3 mLedger reads) still run. See #2956.
+#if FASTLED_LOG_RUNTIME_ENABLED
     size_t total = mLedger.is_global_pool ? mLedger.total_words : mLedger.total_tx_words;
     size_t allocated = mLedger.is_global_pool ? mLedger.allocated_words : mLedger.allocated_tx_words;
     size_t reserved = mLedger.reserved_tx_words;
@@ -473,6 +478,7 @@ RmtMemoryManager::handleAllocateTxFailure(u8 channel_id, size_t mem_blocks,
                 << " words per channel)");
         FL_WARN("              Consider disabling network or using DMA channels");
     }
+#endif
 
     return result<size_t, RmtMemoryError>::failure(RmtMemoryError::INSUFFICIENT_TX_MEMORY);
 }
