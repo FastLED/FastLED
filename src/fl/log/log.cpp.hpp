@@ -3,8 +3,51 @@
 
 #include "fl/log/log.h"
 #include "fl/log/async_logger.h"
+#include "fl/stl/strstream.h"
+#include "fl/stl/string.h"
+#include "fl/stl/move.h"
 
 namespace fl {
+namespace detail {
+
+// =============================================================================
+// Centralised log emit (#2963 Proposal B, Option 3)
+// =============================================================================
+// Rewrites `body` in place to hold "<file>(<line>): <KIND>: <user>" then
+// emits via `fl::println(body.c_str())`. `body` is an rvalue reference
+// bound to the FL_WARN/FL_ERROR/FL_INFO temporary in the CALLER's
+// stack frame — its lifetime extends to the end of the full
+// expression, exactly as the OLD inline macro's temp did. So
+// `body.c_str()` here has the same async-handler-safe lifetime as
+// before (Path C / Option 1's `prefixed` local broke this by
+// introducing an extra stack-frame teardown between println and
+// the full-expression end; Option 3 reuses the caller's temp and
+// avoids that hazard).
+//
+// Single out-of-line compilation of the prefix-format chain. Per
+// FL_WARN call site, the inlined `<< file << "(" << line << "): KIND: "`
+// burst (~30-50 B) collapses to one `log_emit` call (~4 B).
+
+FL_NO_INLINE void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_NOEXCEPT {
+    const char* tag;
+    switch (kind) {
+    case log_kind::WARN:  tag = "): WARN: ";  break;
+    case log_kind::ERROR: tag = "): ERROR: "; break;
+    case log_kind::INFO:
+    default:              tag = "): INFO: ";  break;
+    }
+    // Snapshot the user-supplied payload (the only thing `body`
+    // contains at entry — the macro fed it only `<< X`).
+    fl::string user_payload(body.str());
+    // Reset body's buffer and rebuild prefix-then-payload INTO body.
+    // body is in the caller's frame; the c_str() pointer we hand to
+    // println below lives until the end of the FL_WARN expression.
+    body.clear();
+    body << file << "(" << line << tag << user_payload.c_str();
+    fl::println(body.c_str());
+}
+
+} // namespace detail
 
 // ============================================================================
 // Debug Output Helpers
