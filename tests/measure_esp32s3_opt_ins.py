@@ -313,11 +313,43 @@ def archive_report(cfg: OptInConfig) -> Path:
     return dst
 
 
+_ELF_PATH = (
+    PROJECT_ROOT
+    / ".build"
+    / "pio"
+    / "esp32s3"
+    / ".pio"
+    / "build"
+    / "esp32s3"
+    / "firmware.elf"
+)
+
+
+def _force_relink() -> None:
+    """Delete the prior ELF so PIO's link step actually runs.
+
+    PIO's build cache returns cached .o files on consecutive runs with
+    overlapping object hashes — that's the right speed/correctness
+    trade-off. But the link step decides whether to relink based on
+    object-file timestamps, NOT on platformio.ini / sdkconfig changes.
+    Switching configs that affect only sdkconfig (e.g. stage3 ↔
+    baseline) can therefore leave the previous config's ELF on disk
+    even after `bash compile` returns successfully — and the downstream
+    `bash bloat` step measures that stale ELF.
+
+    Deleting the ELF before each compile forces the link to run; the
+    cached objects make the rebuild fast anyway. See #2940.
+    """
+    if _ELF_PATH.is_file():
+        _ELF_PATH.unlink()
+
+
 def measure_one(cfg: OptInConfig, example: str) -> int | None:
     """Build + bloat one config; return total_flash or None on failure."""
     print(f"\n=== measure-opt-ins: config {cfg.name} ({cfg.label}) ===", flush=True)
     restore_platformio_ini(keep_backup=True)
     patch_platformio_ini(cfg)
+    _force_relink()
     if not run_compile(example, cfg.name):
         print(f"measure-opt-ins: compile failed for {cfg.name}", file=sys.stderr)
         return None
