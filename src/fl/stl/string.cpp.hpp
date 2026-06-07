@@ -78,61 +78,42 @@ int string::strcmp(const string& a, const string& b) FL_NOEXCEPT {
 }
 
 // ======= CONSTRUCTORS =======
+// All forward to string_n<FASTLED_STR_INLINED_SIZE>'s ctors which
+// own the actual initialisation logic. fl::string is just the
+// composite-formatter + factory layer on top.
 
 string::string() FL_NOEXCEPT
-    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {}
+    : string_n<FASTLED_STR_INLINED_SIZE>() {}
 
 string::string(const char* str) FL_NOEXCEPT
-    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
-    if (str) copy(str);
-}
+    : string_n<FASTLED_STR_INLINED_SIZE>(str) {}
 
 string::string(const char* str, fl::size len) FL_NOEXCEPT
-    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
-    copy(str, len);
-}
+    : string_n<FASTLED_STR_INLINED_SIZE>(str, len) {}
 
 string::string(fl::size len, char c) FL_NOEXCEPT
-    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
-    resize(len, c);
-}
+    : string_n<FASTLED_STR_INLINED_SIZE>(len, c) {}
 
 string::string(const string& other) FL_NOEXCEPT
-    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
-    copy(static_cast<const basic_string&>(other));
-}
+    : string_n<FASTLED_STR_INLINED_SIZE>(static_cast<const string_n<FASTLED_STR_INLINED_SIZE>&>(other)) {}
 
 string::string(string&& other) FL_NOEXCEPT
-    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
-    moveFrom(fl::move(other));
-}
+    : string_n<FASTLED_STR_INLINED_SIZE>(static_cast<string_n<FASTLED_STR_INLINED_SIZE>&&>(other)) {}
 
 string::string(const basic_string& other) FL_NOEXCEPT
-    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
-    copy(other);
-}
+    : string_n<FASTLED_STR_INLINED_SIZE>(other) {}
 
 string::string(const string_view& sv) FL_NOEXCEPT
-    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
-    if (!sv.empty()) {
-        copy(sv.data(), sv.size());
-    }
-}
+    : string_n<FASTLED_STR_INLINED_SIZE>(sv) {}
 
 string::string(const fl::span<const char>& s) FL_NOEXCEPT
-    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
-    copy(s.data(), s.size());
-}
+    : string_n<FASTLED_STR_INLINED_SIZE>(s) {}
 
 string::string(const fl::span<char>& s) FL_NOEXCEPT
-    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
-    copy(s.data(), s.size());
-}
+    : string_n<FASTLED_STR_INLINED_SIZE>(s) {}
 
 string::string(const fl::shared_ptr<StringHolder>& holder) FL_NOEXCEPT
-    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
-    setSharedHolder(holder);
-}
+    : string_n<FASTLED_STR_INLINED_SIZE>(holder) {}
 
 // ======= ASSIGNMENT =======
 
@@ -206,7 +187,7 @@ string string::trim() const FL_NOEXCEPT {
 
 #ifdef FL_IS_WASM
 string::string(const std::string& str)  // okay std namespace
-    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
+    : string_n<FASTLED_STR_INLINED_SIZE>() {
     copy(str.c_str(), str.size());
 }
 
@@ -377,7 +358,7 @@ string &string::append(const json& val) {
 
 #if FL_STRING_NEEDS_ARDUINO_CONVERSION
 string::string(const ::String &str)
-    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
+    : string_n<FASTLED_STR_INLINED_SIZE>() {
     copy(str.c_str(), strlen(str.c_str()));
 }
 

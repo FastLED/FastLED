@@ -1,14 +1,26 @@
 # `fl::string` architecture
 
-Two layers. No template wrappers.
+Three layers. The top two are thin template wrappers; only the
+bottom one carries non-trivial code.
 
 | Type | Role | What it adds |
 |---|---|---|
 | `fl::basic_string` | **Concrete public class.** Holds *all* string logic (write, append, find, replace, resize, hashing, …), compiled exactly once. Directly constructible from `(char*, fl::size)` or `fl::span<char>`. | Storage state (length + variant<heap, literal, view>) + offset-based pointer to a caller-provided inline buffer. |
-| `fl::string` | Default convenience wrapper. Inherits `basic_string` and co-locates a `FASTLED_STR_INLINED_SIZE`-byte inline buffer + the inheritance-passed buffer pointer. Adds composite-type formatters (CRGB, vec2, span, vector, optional, …). | `char mInlineBuffer[64]` + ~30 `append(T)` overloads for FastLED-side composite types. |
+| `fl::string_n<N>` | **Templated inline-buffer storage policy.** Holds `char mInlineBuffer[N]` and passes it to `basic_string(mInlineBuffer, N)`. Per-N instantiations are thin constructor stubs — the actual write/append/find/replace logic stays in `basic_string` and is shared. | An inline buffer of exactly `N` bytes + the standard set of `string_n<N>(...)` constructors that hand the buffer to the base. |
+| `fl::string` | Default convenience wrapper. Inherits `string_n<FASTLED_STR_INLINED_SIZE>`. Adds composite-type formatters (CRGB, vec2, span, vector, optional, …), the `substring()` / `trim()` family (returning `string` so callers chain naturally), the static factory + comparison methods. | ~30 `append(T)` overloads for FastLED-side composite types, plus the per-string-typed methods (`substring`, comparisons, `operator+=`, factories). |
 | `fl::sstream` | Stream-style facade around an embedded `fl::string`. `operator<<` overloads forward to `mStr.append(...)`. | Sugar — no new storage. |
 
-The historical `fl::StrN<N>` template was removed when `basic_string` became publicly constructible. Callers who previously wrote `fl::StrN<32>` now write `fl::string` (which carries a 64-byte inline buffer + heap overflow — the 32-byte savings turned out not to matter anywhere in the codebase, including the OTA module's 5 fields). Callers who genuinely need a non-default-sized buffer construct `fl::basic_string` directly with `(char*, size)` or `fl::span<char>`.
+Convenience aliases over `string_n<N>`:
+
+- **`fl::string_small`** — `string_n<32>`. Use on constrained MCUs where the +32-byte default inline buffer is wasteful.
+- **`fl::string`** — `string_n<FASTLED_STR_INLINED_SIZE>` (default 64) extended with composite formatters. The everywhere-default.
+- **`fl::string_large`** — `string_n<256>`. Use on text-heavy paths where the default's 64-byte cap causes frequent heap promotion.
+
+All three are layout-compatible: copy/move/assign between sizes works because the underlying `basic_string` storage policy is uniform. Choosing a size is purely an "expected inline length" tuning knob — exceeding it triggers heap-backed `StringHolder` promotion in either case.
+
+## Why the template isn't bloat
+
+Each `string_n<N>` instantiation only emits constructor stubs — every one is essentially `: basic_string(mInlineBuffer, N) {}` plus a one-line body that calls a non-template helper on the base (`copy()`, `setLiteral()`, `setSharedHolder()`, etc.). The non-trivial bytes (`write`, `append(i32)`, `find`, `replace`, `resize`, `materialize`) all live in `basic_string` and are compiled exactly once into the FastLED library, then shared by every `N`. The compiler and linker fold identical per-N stubs under COMDAT, so e.g. `string_n<64>` (used everywhere via `fl::string`) is a single set of constructor instantiations no matter how many TUs reference it.
 
 ## Using `basic_string` directly
 
