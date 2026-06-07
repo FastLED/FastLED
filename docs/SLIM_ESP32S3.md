@@ -111,11 +111,19 @@ Compare two builds with `uv run python .claude/symbolaudit/diff.py <old.json> <n
 
 ## Roadmap
 
-Stages still in progress on the multi-stage plan tracked in [#2886](https://github.com/FastLED/FastLED/issues/2886):
+Status of every Stage on the multi-stage plan tracked in [#2886](https://github.com/FastLED/FastLED/issues/2886):
 
-- **Stage 4** — Cold-helper audit of the remaining FastLED hot paths (`Channel::showPixels`, `ChannelEngineRMTImpl::reconfigureForNetwork`, `ChannelManager::addDriver`, `RmtMemoryManager::handleAllocateTxFailure`). ~3-5 KB projected. (`ChannelManager::addDriver`'s `capStr` builder block was audited and is already correctly gated behind `#if FASTLED_HAS_DBG` at `src/fl/channels/manager.cpp.hpp:117-132`; no action there. The other three are still open.)
-- **Stage 5** — `fl::basic_string::write` simplification. ~0.5-1 KB projected. (Initial audit of `src/fl/stl/basic_string.cpp.hpp:193-283` found the function body is the COW + inline-vs-heap storage state machine — no formatted-stream machinery to drop. Projected savings may be smaller than 0.5 KB in practice.)
-- **Stage 6** — *(SHIPPED — #2899)* CI verification gate. The gate now runs on every PR via `.github/workflows/bloat_regression_esp32s3.yml` and asserts `bash bloat esp32s3` total stays ≤ the pinned baseline at `tests/data/esp32s3_bloat_baseline.txt` (currently `388380` B — the pre-Stage-1 baseline; ratchets DOWN as Stages 4/5 land measurable savings, eventually reaching the #2886 end goal of 280,000 B). The first successful CI run flips the per-knob ✅/📊 status flags on this page to measured values via a follow-up commit.
+- **Stage 0–3, 6** — ✅ shipped (see the [Per-stage detail](#per-stage-detail) section above and the [Related](#related) links below).
+- **Stage 4** — ✅ audited / no action (#2901). The four targets were authored before Stage 1 collapsed the FL_WARN string pool; re-audited against post-Stage-1 master, each is either already correctly gated or has nothing further to recover:
+  - `Channel::showPixels` — the `has_no_runtime_scaling_v<>` trait the #2886 description named does not exist in the source. The actual dispatch in `src/fl/chipsets/encoders/pixel_iterator.h:202-216` is a three-way runtime branch against compact 5-line encoders (`encodeWS2812_RGB` / `_RGBW` / `_RGBWW` in `src/fl/chipsets/encoders/ws2812.h:35-96`). The encoder bodies are too small to be worth a build-flag-gated removal.
+  - `ChannelEngineRMTImpl::reconfigureForNetwork` — body at `src/platforms/esp/32/drivers/rmt/rmt_5/channel_driver_rmt.cpp.hpp:1128-1236` is the channel destroy / recreate sequence around a Network state transition. Of 10 diagnostic emissions, 8 are FL_DBG (already gated by `FASTLED_HAS_DBG`) and 2 are FL_WARN (no-op'd by Stage 1 in release builds). The remaining bytes are essential peripheral teardown.
+  - `ChannelManager::addDriver` — the entire `capStr` builder block at `src/fl/channels/manager.cpp.hpp:117-132` is already wrapped in `#if FASTLED_HAS_DBG`. Verification only; no fix needed.
+  - `RmtMemoryManager::handleAllocateTxFailure` — at `src/platforms/esp/32/drivers/rmt/rmt_5/rmt_memory_manager.cpp.hpp:417-478`, already a `FL_NO_INLINE` cold helper. The 5 FL_LOG_RMT + 10 FL_WARN sites are no-op'd by `FASTLED_LOG_VERBOSITY=0`, and the size_t computations at lines 451-454 that fed those FL_WARNs are DCE'd by the optimizer.
+- **Stage 5** — ✅ audited / no action (#2901). The body at `src/fl/stl/basic_string.cpp.hpp:193-283` is the COW + inline-vs-heap storage state machine: four branches (non-owning, unique-heap, COW-heap, inline + inline→heap transition). No formatted-stream machinery in the body to drop; the projected ~0.5-1 KB overestimated.
+
+### Next round of structural savings — see [#2856](https://github.com/FastLED/FastLED/issues/2856)
+
+The #2886 stages have squeezed every release-build flash-saver knob and audit target available from the current architecture. The next round of *real* (multi-KB) savings is structural and tracked separately in [#2856 "Meta: ESP32-S3 binary-size reduction — Batch 3"](https://github.com/FastLED/FastLED/issues/2856), covering items 3.1–3.6 (template-trait static dispatch for `Channel::showPixels`, printf-style log backend, `ChannelManager` static-bind path, RMT5 encoder dedup, `fl::result<T,E>` → status code for internal APIs, fixed-size allocation ledger under `FASTLED_RMT_STATIC_ALLOCATION`). Several of those items are already shipped or in flight on `master`.
 
 ## Related
 
@@ -125,4 +133,5 @@ Stages still in progress on the multi-stage plan tracked in [#2886](https://gith
 - **[FastLED #2894](https://github.com/FastLED/FastLED/pull/2894)** — Stage 2 (Arduino-ESP32 boot-banner shim).
 - **[FastLED #2896](https://github.com/FastLED/FastLED/pull/2896)** — Stage 3 (sdkconfig overlay).
 - **[FastLED #2846](https://github.com/FastLED/FastLED/pull/2846)** — `FASTLED_RMT_STATIC_ALLOCATION` opt-in (pre-existing).
+- **[FastLED #2856](https://github.com/FastLED/FastLED/issues/2856)** — Batch 3 structural meta (the next round of multi-KB savings, beyond the knob/audit work of #2886).
 - **[FastLED #2773](https://github.com/FastLED/FastLED/issues/2773)** — original binary-size meta (closed, predecessor to #2886).
