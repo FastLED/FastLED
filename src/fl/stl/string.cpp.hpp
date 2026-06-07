@@ -46,20 +46,22 @@ string string::from_view(const string_view& sv) FL_NOEXCEPT {
 }
 
 string string::interned(const char* str, fl::size len) FL_NOEXCEPT {
-    string result;
-    if (!str || len == 0) return result;
-    auto holder = fl::make_shared<StringHolder>(str, len);
-    result.setSharedHolder(holder);
-    return result;
+    if (!str || len == 0) return string();
+    // Route through the global interner so identical content
+    // returns the same shared StringHolder (O(1) average lookup,
+    // matches `string::intern()`'s semantics). Previously this
+    // family wrapped a fresh StringHolder per call with no
+    // deduplication — see #2961 CR thread + the follow-on commit.
+    return global_interner().intern(fl::string_view(str, len));
 }
 
 string string::interned(const char* str) FL_NOEXCEPT {
     if (!str) return string();
-    return interned(str, fl::strlen(str));
+    return global_interner().intern(str);
 }
 
 string string::interned(const string_view& sv) FL_NOEXCEPT {
-    return interned(sv.data(), sv.size());
+    return global_interner().intern(sv);
 }
 
 string string::copy_no_view(const string& str) FL_NOEXCEPT {
