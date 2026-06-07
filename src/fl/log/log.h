@@ -3,6 +3,7 @@
 #include "fl/system/sketch_macros.h"
 #include "fl/stl/strstream.h"  // IWYU pragma: keep - Required by FL_WARN/FL_ERROR/FL_DBG macros
 #include "fl/stl/chrono.h"       // IWYU pragma: keep - Required by FL_WARN_EVERY/FL_DBG_EVERY/FL_PRINT_EVERY macros
+#include "fl/stl/compiler_control.h"  // IWYU pragma: keep - FL_NO_INLINE for log_emit
 
 // =============================================================================
 // FL_LOG_*_ENABLED → FASTLED_LOG_*_ENABLED backward compatibility
@@ -128,23 +129,78 @@ const char *fastled_file_offset(const char *file) FL_NOEXCEPT;
 } // namespace fl
 
 // =============================================================================
+// Centralised log emit (#2963 Proposal B, Option 3)
+// =============================================================================
+//
+// `fl::detail::log_emit(kind, file, line, body)` consumes the
+// user-supplied sstream (passed by rvalue reference) and **rewrites
+// it in place** to hold the full prefixed message:
+//
+//   "<file>(<line>): <KIND>: <user payload>"
+//
+// then emits via `fl::println(body.c_str())`.
+//
+// Lifetime-safe variant of Path C's "Option 1" attempt. The body
+// sstream temporary lives in the **caller's** frame — its
+// lifetime extends to the end of the FL_WARN/FL_ERROR/FL_INFO
+// full expression, exactly as the OLD inline macro's temporary
+// did. So `body.c_str()` passed to `println` has the same
+// async-handler-safe lifetime as before: whatever the test
+// harness or platform println did synchronously continues to
+// work, and async deferred-flush handlers still see a live
+// pointer until the semicolon.
+//
+// The legacy macro inlined the entire
+//   `<< file << "(" << line << "): KIND: " << X`
+// chain at every FL_WARN site (1,372 sites × ~30-50 B of inlined
+// prefix-format code). With this helper, the prefix-format chain
+// is compiled ONCE into libFastLED — each call site only emits
+// the `fl::sstream() << X` ctor + the user's payload chain + a
+// single `log_emit` call.
+namespace fl { namespace detail {
+enum class log_kind : fl::u8 {
+    WARN  = 0,
+    ERROR = 1,
+    INFO  = 2,
+};
+// Takes `body` by non-const lvalue reference (not `&&`) because the
+// macro's `fl::sstream() << X` expression has type `sstream&` (the
+// returned lvalue ref from chained operator<<). The underlying
+// temporary's lifetime is the FL_WARN full-expression's, so mutating
+// it through this lvalue ref is well-defined and the c_str() handed
+// to println outlives the call exactly as the OLD inline macro's
+// `(fl::sstream() << ...).c_str()` did.
+//
+// `FL_NO_INLINE` enforces the centralisation. Without it, at -O2
+// with LTO the compiler often inlines `log_emit` at every FL_WARN
+// site — defeating the whole point of moving the prefix chain
+// out-of-line. The noinline attribute is what makes this proposal
+// actually win bytes; bare centralisation alone isn't enough.
+void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_NO_INLINE FL_NOEXCEPT;
+} } // namespace fl::detail
+
+// =============================================================================
 // Error Macros (FL_ERROR)
 // =============================================================================
 
 #ifndef FASTLED_ERROR
-// FASTLED_ERROR: Supports stream-style formatting with << operator
-// Uses sstream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
-// Includes file and line number for easier debugging
-#define FASTLED_ERROR(MSG) fl::println((fl::sstream() << (fl::fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): ERROR: " << MSG).c_str())
+// FASTLED_ERROR: Supports stream-style formatting with << operator.
+// Routes through fl::detail::log_emit so the prefix-format chain
+// is single-copy in libFastLED instead of inlined at every site.
+#define FASTLED_ERROR(MSG) fl::detail::log_emit( \
+    fl::detail::log_kind::ERROR, \
+    fl::fastled_file_offset(__FILE__), int(__LINE__), \
+    fl::sstream() << MSG)
 #define FASTLED_ERROR_IF(COND, MSG) do { if (COND) FASTLED_ERROR(MSG); } while(0)
 #endif
 
 #ifndef FL_ERROR
 #if FASTLED_LOG_RUNTIME_ENABLED
-// FL_ERROR: Supports both string literals and stream-style formatting with << operator
-// Uses sstream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
-// Includes file and line number for easier debugging
-#define FL_ERROR(X) fl::println((fl::sstream() << (fl::fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): ERROR: " << X).c_str())
+// FL_ERROR: routes through fl::detail::log_emit (see header banner above).
+#define FL_ERROR(X) fl::detail::log_emit( \
+    fl::detail::log_kind::ERROR, \
+    fl::fastled_file_offset(__FILE__), int(__LINE__), \
+    fl::sstream() << X)
 #define FL_ERROR_IF(COND, MSG) do { if (COND) FL_ERROR(MSG); } while(0)
 #else
 // No-op macros — either memory-constrained platform or FASTLED_LOG_VERBOSITY=0.
@@ -158,19 +214,21 @@ const char *fastled_file_offset(const char *file) FL_NOEXCEPT;
 // =============================================================================
 
 #ifndef FASTLED_WARN
-// FASTLED_WARN: Supports stream-style formatting with << operator
-// Uses sstream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
-// Includes file and line number for easier debugging
-#define FASTLED_WARN(MSG) fl::println((fl::sstream() << (fl::fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): WARN: " << MSG).c_str())
+// FASTLED_WARN: Supports stream-style formatting with << operator.
+#define FASTLED_WARN(MSG) fl::detail::log_emit( \
+    fl::detail::log_kind::WARN, \
+    fl::fastled_file_offset(__FILE__), int(__LINE__), \
+    fl::sstream() << MSG)
 #define FASTLED_WARN_IF(COND, MSG) do { if (COND) FASTLED_WARN(MSG); } while(0)
 #endif
 
 #ifndef FL_WARN
 #if FASTLED_LOG_RUNTIME_ENABLED
-// FL_WARN: Supports both string literals and stream-style formatting with << operator
-// Uses sstream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
-// Includes file and line number for easier debugging
-#define FL_WARN(X) fl::println((fl::sstream() << (fl::fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): WARN: " << X).c_str())
+// FL_WARN: routes through fl::detail::log_emit (see header banner above).
+#define FL_WARN(X) fl::detail::log_emit( \
+    fl::detail::log_kind::WARN, \
+    fl::fastled_file_offset(__FILE__), int(__LINE__), \
+    fl::sstream() << X)
 #define FL_WARN_IF(COND, MSG) do { if (COND) FL_WARN(MSG); } while(0)
 
 // FL_WARN_ONCE: Emits warning only once per unique location (static flag per call site)
@@ -226,19 +284,21 @@ const char *fastled_file_offset(const char *file) FL_NOEXCEPT;
 // =============================================================================
 
 #ifndef FASTLED_INFO
-// FASTLED_INFO: Supports stream-style formatting with << operator
-// Uses sstream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
-// Includes file and line number for easier debugging
-#define FASTLED_INFO(MSG) fl::println((fl::sstream() << (fl::fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): INFO: " << MSG).c_str())
+// FASTLED_INFO: Supports stream-style formatting with << operator.
+#define FASTLED_INFO(MSG) fl::detail::log_emit( \
+    fl::detail::log_kind::INFO, \
+    fl::fastled_file_offset(__FILE__), int(__LINE__), \
+    fl::sstream() << MSG)
 #define FASTLED_INFO_IF(COND, MSG) do { if (COND) FASTLED_INFO(MSG); } while(0)
 #endif
 
 #ifndef FL_INFO
 #if FASTLED_LOG_RUNTIME_ENABLED
-// FL_INFO: Supports both string literals and stream-style formatting with << operator
-// Uses sstream for dynamic formatting (avoids printf bloat ~40KB, adds ~3KB)
-// Includes file and line number for easier debugging
-#define FL_INFO(X) fl::println((fl::sstream() << (fl::fastled_file_offset(__FILE__)) << "(" << int(__LINE__) << "): INFO: " << X).c_str())
+// FL_INFO: routes through fl::detail::log_emit (see header banner above).
+#define FL_INFO(X) fl::detail::log_emit( \
+    fl::detail::log_kind::INFO, \
+    fl::fastled_file_offset(__FILE__), int(__LINE__), \
+    fl::sstream() << X)
 #define FL_INFO_IF(COND, MSG) do { if (COND) FL_INFO(MSG); } while(0)
 
 // FL_INFO_ONCE: Emits info only once per unique location (static flag per call site)
