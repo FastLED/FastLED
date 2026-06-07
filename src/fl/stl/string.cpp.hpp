@@ -145,7 +145,12 @@ string& string::operator=(string&& other) FL_NOEXCEPT {
 }
 
 string& string::operator=(const char* str) FL_NOEXCEPT {
-    copy(str, fl::strlen(str));
+    // Match the string(const char*) ctor's contract: nullptr → empty.
+    if (str) {
+        copy(str, fl::strlen(str));
+    } else {
+        clear();
+    }
     return *this;
 }
 
@@ -216,20 +221,33 @@ string& string::append(const std::string& str) {  // okay std namespace
 
 // ======= COMPARISON OPERATORS =======
 
+// Length-aware lexicographic compare. Doesn't rely on strcmp's
+// NUL-termination, so view-backed strings (`setView`) and any
+// future embedded-NUL content compare correctly. Returns the same
+// sign convention as memcmp / strcmp.
+static inline int string_compare(const string& a, const string& b) FL_NOEXCEPT {
+    fl::size n = (a.size() < b.size()) ? a.size() : b.size();
+    int r = fl::memcmp(a.c_str(), b.c_str(), n);
+    if (r != 0) return r;
+    if (a.size() < b.size()) return -1;
+    if (a.size() > b.size()) return 1;
+    return 0;
+}
+
 bool string::operator>(const string& other) const FL_NOEXCEPT {
-    return fl::strcmp(c_str(), other.c_str()) > 0;
+    return string_compare(*this, other) > 0;
 }
 
 bool string::operator>=(const string& other) const FL_NOEXCEPT {
-    return fl::strcmp(c_str(), other.c_str()) >= 0;
+    return string_compare(*this, other) >= 0;
 }
 
 bool string::operator<(const string& other) const FL_NOEXCEPT {
-    return fl::strcmp(c_str(), other.c_str()) < 0;
+    return string_compare(*this, other) < 0;
 }
 
 bool string::operator<=(const string& other) const FL_NOEXCEPT {
-    return fl::strcmp(c_str(), other.c_str()) <= 0;
+    return string_compare(*this, other) <= 0;
 }
 
 bool string::operator==(const string& other) const FL_NOEXCEPT {
