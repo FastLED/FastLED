@@ -113,9 +113,9 @@ Compare two builds with `uv run python .claude/symbolaudit/diff.py <old.json> <n
 
 Stages still in progress on the multi-stage plan tracked in [#2886](https://github.com/FastLED/FastLED/issues/2886):
 
-- **Stage 4** — Cold-helper audit of the remaining FastLED hot paths (`Channel::showPixels`, `ChannelEngineRMTImpl::reconfigureForNetwork`, `ChannelManager::addDriver`, `RmtMemoryManager::handleAllocateTxFailure`). ~3-5 KB projected.
-- **Stage 5** — `fl::basic_string::write` simplification. ~0.5-1 KB projected.
-- **Stage 6** — CI verification gate (`tests/test_esp32s3_bloat_regression.sh`) that asserts `bash bloat esp32s3` total ≤ 280,000 B. Flips the per-knob ✅/📊 status flags on this page to measured values.
+- **Stage 4** — Cold-helper audit of the remaining FastLED hot paths (`Channel::showPixels`, `ChannelEngineRMTImpl::reconfigureForNetwork`, `ChannelManager::addDriver`, `RmtMemoryManager::handleAllocateTxFailure`). ~3-5 KB projected. (`ChannelManager::addDriver`'s `capStr` builder block was audited and is already correctly gated behind `#if FASTLED_HAS_DBG` at `src/fl/channels/manager.cpp.hpp:117-132`; no action there. The other three are still open.)
+- **Stage 5** — `fl::basic_string::write` simplification. ~0.5-1 KB projected. (Initial audit of `src/fl/stl/basic_string.cpp.hpp:193-283` found the function body is the COW + inline-vs-heap storage state machine — no formatted-stream machinery to drop. Projected savings may be smaller than 0.5 KB in practice.)
+- **Stage 6** — *(SHIPPED — #2899)* CI verification gate. The gate now runs on every PR via `.github/workflows/bloat_regression_esp32s3.yml` and asserts `bash bloat esp32s3` total stays ≤ the pinned baseline at `tests/data/esp32s3_bloat_baseline.txt` (currently `388380` B — the pre-Stage-1 baseline; ratchets DOWN as Stages 4/5 land measurable savings, eventually reaching the #2886 end goal of 280,000 B). The first successful CI run flips the per-knob ✅/📊 status flags on this page to measured values via a follow-up commit.
 
 ## Related
 

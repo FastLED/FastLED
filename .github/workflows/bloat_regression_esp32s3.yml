@@ -1,0 +1,77 @@
+name: bloat regression esp32s3
+
+# Asserts that `bash bloat esp32s3` total_flash stays at or below the
+# pinned baseline in tests/data/esp32s3_bloat_baseline.txt. Each Stage
+# PR that lands a measurable saving lowers the baseline file in the
+# same change; a PR that regresses the flash budget fails this gate.
+#
+# See FastLED #2886 (Stage 6) for the policy. The path filters mirror
+# build_esp32s3.yml so the gate runs on the same set of touch points
+# that could plausibly affect ESP32-S3 flash.
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/**'
+      - '!src/platforms/arm/**'
+      - '!src/platforms/wasm/**'
+      - '!src/platforms/avr/**'
+      - 'src/platforms/esp/**'
+      - 'examples/**'
+      - 'ci/**'
+      - 'tests/data/esp32s3_bloat_baseline.txt'
+      - 'tests/test_esp32s3_bloat_regression.py'
+      - '.github/workflows/bloat_regression_esp32s3.yml'
+      - 'CMakeLists.txt'
+      - 'platformio.ini'
+      - 'library.json'
+      - 'library.properties'
+      - 'pyproject.toml'
+      - 'uv.lock'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'src/**'
+      - '!src/platforms/arm/**'
+      - '!src/platforms/wasm/**'
+      - '!src/platforms/avr/**'
+      - 'src/platforms/esp/**'
+      - 'examples/**'
+      - 'ci/**'
+      - 'tests/data/esp32s3_bloat_baseline.txt'
+      - 'tests/test_esp32s3_bloat_regression.py'
+      - '.github/workflows/bloat_regression_esp32s3.yml'
+      - 'CMakeLists.txt'
+      - 'platformio.ini'
+      - 'library.json'
+      - 'library.properties'
+      - 'pyproject.toml'
+      - 'uv.lock'
+
+jobs:
+  bloat_regression:
+    name: bloat regression
+    runs-on: ubuntu-latest
+    # Hard-block external-fork pull requests (mirrors build_esp32s3.yml policy
+    # — see #2757).
+    if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up uv (Python toolchain)
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: Sync project dependencies
+        run: uv sync
+
+      - name: Run ESP32-S3 bloat regression gate
+        run: uv run python tests/test_esp32s3_bloat_regression.py
