@@ -634,19 +634,27 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     fl::string driverName = driver->getName();
     auto status = ChannelManager::instance().driverStatus(driverName);
     if (status == ChannelManager::DriverStatus::STATUS_DISABLED) {
+#if FASTLED_LOG_RUNTIME_ENABLED
         if (!mDisabledDriverWarned) {
             emitDisabledDriverError(
                 mName, driverName,
                 ChannelManager::instance().exclusiveDriverName());
             mDisabledDriverWarned = true;
         }
+#endif
         // Skip the enqueue — the data wouldn't be sent anyway, and dropping
         // it here matches the existing behaviour (rather than leaving stale
         // bytes in the driver's pending queue across an enable/disable flip).
+        // The drop happens in both debug and release; only the diagnostic
+        // and the one-shot latch are gated. In release, the empty
+        // emitDisabledDriverError + the exclusiveDriverName() call + the
+        // 3-arg fl::string chain dead-strip (see #2950).
         return;
     } else if (status == ChannelManager::DriverStatus::STATUS_ENABLED) {
+#if FASTLED_LOG_RUNTIME_ENABLED
         // Reset the one-shot guard so a future disable re-emits the diagnostic.
         mDisabledDriverWarned = false;
+#endif
     }
     // NOT_REGISTERED: driver is not managed by ChannelManager (e.g. a custom
     // test driver, or one that was removed). Fall through to enqueue and let
