@@ -5,17 +5,29 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.2.18 (released 2026-06-05). 2.2.18 adds the
-    # FastLED #2836 Stage 1 deliverable — LPC804 + LPC845 bare-metal
-    # targets (FastLED/fbuild#419) — plus a batch of vendor-warning
-    # scopings (renesas FSP, nRF52 Adafruit BSP), the
-    # ESP32-S2/S3 USB_VID/USB_PID redef-warning fix
-    # (FastLED/fbuild#413), nested-example build-info parent-dir
-    # creation (FastLED/fbuild#410), a larger CLI Windows stack
-    # reservation, and the SAMD/STM32/ATmega/CH559 test-fixture
-    # coverage that backs the validate_boards reconciliation
-    # tracked at FastLED/fbuild#421/#422. zccache pinned >=1.11.15.
+    # Pin to fbuild 2.2.20 (released 2026-06-07). 2.2.20 ships the
+    # `fbuild symbols`/bloat subcommand that `ci/bloat.py` relies on
+    # — without it the FastLED #2886 Stage-6 regression gate cannot
+    # run. Specifically it exposes linker --cref back-references as
+    # `referenced_by` (FastLED/fbuild#459/#460) and emits graphviz
+    # `.dot` back-reference graphs (FastLED/fbuild#463/#468). Also
+    # contains a cargo binary-locator fix
+    # (FastLED/fbuild#461), Stop-hook + pre-push hook polish
+    # (FastLED/fbuild#462/#464/#465/#467/#469), and the GH-Action
+    # release-flow rework (FastLED/fbuild#457). zccache pinned
+    # >=1.11.15. (No 2.2.19 release was tagged on GitHub; fbuild
+    # jumped from 2.2.18 → 2.2.20 directly.)
     # Prior pins preserved for context:
+    #   2.2.18 — FastLED #2836 Stage 1: LPC804/LPC845 bare-metal
+    #            (FastLED/fbuild#419) + vendor-warning scopings
+    #            (renesas FSP, nRF52 Adafruit BSP), the
+    #            ESP32-S2/S3 USB_VID/USB_PID redef-warning fix
+    #            (FastLED/fbuild#413), nested-example build-info
+    #            parent-dir creation (FastLED/fbuild#410), a
+    #            larger CLI Windows stack reservation, and the
+    #            SAMD/STM32/ATmega/CH559 test-fixture coverage
+    #            backing the validate_boards reconciliation
+    #            (FastLED/fbuild#421/#422).
     #   2.2.17 — routed ESP32-S3 native deploys through esptool
     #            (FastLED/fbuild#380), one of the user-visible
     #            failure modes tracked in FastLED #2700.
@@ -38,7 +50,7 @@ dependencies = [
     #   2.2.16 — completed ESP32-C2 framework skeleton installs
     #            and patched the missing touch_sensor_legacy_types.h
     #            no-touch compatibility header (FastLED/fbuild#378).
-    "fbuild==2.2.18",
+    "fbuild==2.2.20",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
