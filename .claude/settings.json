@@ -37,6 +37,11 @@
             "type": "command",
             "command": "[ \"$FL_HOOK_SKIP\" = \"1\" ] && exit 0; S=ci/hooks/check_pr_merge_reviews.py; d=$PWD; while [ \"$d\" != / ] && { [ ! -f \"$d/pyproject.toml\" ] || [ ! -f \"$d/$S\" ]; }; do d=$(dirname \"$d\"); done; if [ -f \"$d/pyproject.toml\" ] && [ -f \"$d/$S\" ] && ! grep -q '^<<<<<<< ' \"$d/pyproject.toml\"; then cd \"$d\" && uv run python \"$S\"; ST=$?; if [ \"$ST\" != 0 ] && [ \"$FL_HOOK_SOFT\" = \"1\" ]; then echo \"FL_HOOK_SOFT: $S exited $ST (forced to 0)\" >&2; exit 0; fi; exit $ST; else echo \"FastLED hook skipped: project root with $S not found above $PWD, or pyproject.toml has merge conflict markers\" >&2; exit 0; fi",
             "timeout": 45
+          },
+          {
+            "type": "command",
+            "command": "[ \"$FL_HOOK_SKIP\" = \"1\" ] && exit 0; S=ci/hooks/rust_tool_guard.py; d=$PWD; while [ \"$d\" != / ] && { [ ! -f \"$d/pyproject.toml\" ] || [ ! -f \"$d/$S\" ]; }; do d=$(dirname \"$d\"); done; if [ -f \"$d/pyproject.toml\" ] && [ -f \"$d/$S\" ] && ! grep -q '^<<<<<<< ' \"$d/pyproject.toml\"; then cd \"$d\" && uv run python \"$S\"; ST=$?; if [ \"$ST\" != 0 ] && [ \"$FL_HOOK_SOFT\" = \"1\" ]; then echo \"FL_HOOK_SOFT: $S exited $ST (forced to 0)\" >&2; exit 0; fi; exit $ST; else echo \"FastLED hook skipped: project root with $S not found above $PWD, or pyproject.toml has merge conflict markers\" >&2; exit 0; fi",
+            "timeout": 10
           }
         ]
       },
