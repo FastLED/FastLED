@@ -49,7 +49,7 @@ These are the gotchas the wrapper handles for you. They are documented here so t
    | Lever | How to enable | Savings | Source |
    |---|---|---:|---|
    | `FASTLED_LOG_VERBOSITY=0` | Now the release default (NDEBUG); explicit `-DFASTLED_LOG_VERBOSITY=1` to restore | ~43-58 KB | #2791 + #2890 |
-   | `tools/sdkconfig_for_smallest_fastled.defaults` | `board_build.sdkconfig_defaults` in `platformio.ini`; disables coredump, IDF log, bootloader log, panic-print | ~10-15 KB | #2895 (Stage 3) |
+   | `tools/sdkconfig_for_smallest_fastled.defaults` | `board_build.sdkconfig_defaults` in `platformio.ini`; disables coredump, IDF log, bootloader log, panic-print + **switches newlib to nano printf (#2915 — biggest single lever)** | ~30-45 KB | #2895 + #2915 (Stage 3) |
    | `-DFASTLED_SUPPRESS_ARDUINO_CHIP_DEBUG_REPORT=1` | `build_flags`; strong-overrides the Arduino-ESP32 boot-banner gate | ~3 KB | #2894 (Stage 2) |
    | `-DFASTLED_RMT_STATIC_ALLOCATION=1` | `build_flags`; for sketches that init LEDs in `setup()` and never remove | ~22-43 KB | #2846 |
 
