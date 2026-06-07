@@ -354,9 +354,29 @@ class Gamma8Impl : public Gamma8 {
 public:
     explicit Gamma8Impl(float gamma) {
         mLut[0] = 0;
+        // Compute the 256-entry u16 gamma LUT in fixed-point so we don't
+        // pull `__ieee754_pow` (libm, ~2.7 KB) into release builds — the
+        // double-precision pow chain dominates the top-9 bytes attributed
+        // to libm in the post-#2908 ESP32-S3 NEOPIXEL Blink audit
+        // (see #2886 / #2910).
+        //
+        // `s16x16` is 16-integer + 16-fractional bits. The exp2_fp /
+        // log2_fp implementation it uses for `pow` is a pure integer LUT
+        // (no libm dependency). The only float operation kept is the
+        // one-shot `s16x16(gamma)` conversion of the public float gamma
+        // parameter (one fmul + cast — pulls only `__mulsf3` / `__fixsfsi`
+        // helpers, both << 100 B).
+        const fl::s16x16 gamma_fp(gamma);
+        constexpr fl::s16x16 inv_255_fp(1.0f / 255.0f);
         for (int i = 1; i < 256; ++i) {
-            double v = fl::pow(static_cast<double>(i) / 255.0, static_cast<double>(gamma)) * 65535.0;
-            mLut[i] = static_cast<u16>(fl::round(v));
+            const fl::s16x16 x = static_cast<i32>(i) * inv_255_fp;  // [0, 1]
+            const fl::s16x16 r = fl::s16x16::pow(x, gamma_fp);      // (0, 1]
+            // r.raw() is the s16x16 raw with FRAC_BITS=16, range [0, 65536].
+            // Scale to u16 [0, 65535] with round-half-up:
+            //   result = ((u32)raw * 65535 + 0x8000) >> 16
+            const fl::u32 scaled =
+                (static_cast<fl::u32>(r.raw()) * 65535u + 0x8000u) >> 16;
+            mLut[i] = static_cast<u16>(scaled > 65535u ? 65535u : scaled);
         }
     }
 
