@@ -354,12 +354,15 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             mAllocationFailed = false;
         }
 
-        // Sort: smallest strips first (helps async parallelism)
+        // Sort: smallest strips first (helps async parallelism).
+        // Container is bounded at 16 by construction (fl::vector_inlined<T, 16>),
+        // so use sort_small to avoid instantiating quicksort_impl in the
+        // ClocklessIdf5 transitive closure — see #2907.
         fl::vector_inlined<ChannelDataPtr, 16> sorted;
         for (const auto& data : channelData) {
             sorted.push_back(data);
         }
-        fl::sort(sorted.begin(), sorted.end(), [](const ChannelDataPtr& a, const ChannelDataPtr& b) FL_NOEXCEPT {
+        fl::sort_small(sorted.begin(), sorted.end(), [](const ChannelDataPtr& a, const ChannelDataPtr& b) FL_NOEXCEPT {
             return a->getSize() > b->getSize();  // Reverse order for back-to-front processing
         });
 
