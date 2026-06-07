@@ -28,7 +28,7 @@ fl::basic_string s2(buf, 256);
 
 ## How the formatting layer trampolines
 
-```
+```text
 caller writes:           fl::sstream() << vec2<float>{1.0f, 2.0f}
                           │
                           ▼

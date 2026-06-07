@@ -171,8 +171,17 @@ string string::substring(fl::size start, fl::size end) const FL_NOEXCEPT {
 }
 
 string string::substr(fl::size start, fl::size length) const FL_NOEXCEPT {
-    fl::size end = start + length;
-    if (end > size()) end = size();
+    // Handle `npos` / overflow: when `length == npos` the caller
+    // means "to end of string", and when `length` is large enough
+    // that `start + length` would wrap, we clamp to the end before
+    // the addition can overflow.
+    fl::size end;
+    if (length == npos || length > size() - (start < size() ? start : size())) {
+        end = size();
+    } else {
+        end = start + length;
+        if (end > size()) end = size();
+    }
     return substring(start, end);
 }
 
@@ -347,7 +356,8 @@ string &string::append(const json& val) {
 }
 
 #if FL_STRING_NEEDS_ARDUINO_CONVERSION
-string::string(const ::String &str) {
+string::string(const ::String &str)
+    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
     copy(str.c_str(), strlen(str.c_str()));
 }
 

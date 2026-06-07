@@ -434,7 +434,9 @@ class basic_string {
     float toFloat() const FL_NOEXCEPT;
 
     // ======= DESTRUCTOR =======
-    ~basic_string() FL_NOEXCEPT {}
+    // Body in basic_string.cpp.hpp per the project's header-thin
+    // convention (declarations in `*.h`, definitions in `*.cpp.hpp`).
+    ~basic_string() FL_NOEXCEPT;
 
     // ======= PUBLIC CONSTRUCTION =======
     // Construct a basic_string backed by a caller-provided buffer.

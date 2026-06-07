@@ -14,6 +14,10 @@ const fl::size basic_string::npos;
 basic_string::basic_string(fl::span<char, static_cast<fl::size>(-1)> storage) FL_NOEXCEPT
     : basic_string(storage.data(), storage.size()) {}
 
+// ======= DESTRUCTOR =======
+
+basic_string::~basic_string() FL_NOEXCEPT {}
+
 // ======= string_view CONSTRUCTOR FROM basic_string =======
 // Defined here (in the same TU as basic_string itself) so
 // string_view.h can stay light: it forward-declares basic_string

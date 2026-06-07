@@ -4870,10 +4870,17 @@ FL_TEST_CASE("basic_string assignment + heap promotion") {
     }
 
     FL_SUBCASE("Copy long string that overflows the inline buffer") {
-        // String is longer than FASTLED_STR_INLINED_SIZE so heap promotion fires
-        fl::string big("This is a longer string that won't fit in 8 bytes");
+        // String is longer than FASTLED_STR_INLINED_SIZE (default 64)
+        // so heap promotion fires on construction and copy.
+        const char* long_literal =
+            "This is a deliberately long string that exceeds the default "
+            "FASTLED_STR_INLINED_SIZE of 64 bytes so heap promotion fires "
+            "on both construction and copy.";
+        fl::string big(long_literal);
+        FL_CHECK(big.size() > FASTLED_STR_INLINED_SIZE);
         fl::string tiny = big;
-        FL_CHECK(tiny == "This is a longer string that won't fit in 8 bytes");
+        FL_CHECK(tiny == long_literal);
+        FL_CHECK(tiny.size() == big.size());
     }
 }
 
