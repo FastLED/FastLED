@@ -133,8 +133,9 @@ void ChannelManager::addDriver(int priority, fl::shared_ptr<IChannelDriver> driv
 
     // Sort drivers by priority descending (higher values first) after each insertion
     // Higher priority values = higher precedence (e.g., priority 50 selected over priority 10)
-    // Only 1-4 drivers expected, so sorting on insert is negligible
-    fl::sort(mDrivers.begin(), mDrivers.end());
+    // Only 1-4 drivers expected — sort_small skips the quicksort_impl
+    // instantiation entirely (see #2907 for the bloat motivation).
+    fl::sort_small(mDrivers.begin(), mDrivers.end());
 }
 
 bool ChannelManager::removeDriver(fl::shared_ptr<IChannelDriver> driver) {
@@ -246,8 +247,9 @@ bool ChannelManager::setDriverPriority(const fl::string& name, int priority) {
         return false;
     }
 
-    // Re-sort drivers by priority (descending: higher values first)
-    fl::sort(mDrivers.begin(), mDrivers.end());
+    // Re-sort drivers by priority (descending: higher values first).
+    // 1-4 drivers expected here too — sort_small avoids the quicksort body.
+    fl::sort_small(mDrivers.begin(), mDrivers.end());
 
     FL_DBG("ChannelManager: Engine list re-sorted after priority change");
     return true;

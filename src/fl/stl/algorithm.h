@@ -595,6 +595,34 @@ void stable_sort(Iterator first, Iterator last) FL_NOEXCEPT {
     stable_sort(first, last, [](const value_type& a, const value_type& b) { return a < b; });
 }
 
+// Direct call to insertion sort — meant for call sites with statically
+// bounded input (typically <= 16-32 elements). Skips the runtime fall-through
+// inside `quicksort_impl`, so the compiler does NOT instantiate the
+// quicksort + partition + heap_sort body at all. Per-instantiation savings
+// land in the function symbol that anchors the static-init chain
+// (`ClocklessIdf5` on ESP32-S3). See #2886 / #2907.
+//
+// Use `sort_small` when:
+//   - the container's max size is bounded by construction (e.g. fl::vector_inlined<T, N>)
+//     and N is small (rule of thumb: <= 32);
+//   - O(n^2) worst-case is acceptable.
+//
+// Use `fl::sort` (quicksort) when the container is unbounded or large.
+template <typename Iterator, typename Compare>
+void sort_small(Iterator first, Iterator last, Compare comp) FL_NOEXCEPT {
+    if (first == last || first + 1 == last) {
+        return;  // Already sorted or empty
+    }
+    detail::insertion_sort(first, last, comp);
+}
+
+template <typename Iterator>
+void sort_small(Iterator first, Iterator last) FL_NOEXCEPT {
+    typedef typename fl::remove_reference<decltype(*first)>::type value_type;
+    sort_small(first, last,
+        [](const value_type& a, const value_type& b) { return a < b; });
+}
+
 // Shuffle function with custom random generator (Fisher-Yates shuffle)
 template <typename Iterator, typename RandomGenerator>
 void shuffle(Iterator first, Iterator last, RandomGenerator& g) FL_NOEXCEPT {
