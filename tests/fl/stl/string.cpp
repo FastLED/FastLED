@@ -2280,7 +2280,7 @@ FL_TEST_CASE("String find_last_not_of operations") {
 }
 
 // Test reverse iterators (fl::string compatibility)
-FL_TEST_CASE("StrN reverse iterators") {
+FL_TEST_CASE("string reverse iterators") {
     FL_SUBCASE("rbegin/rend on non-empty string") {
         fl::string s = "Hello";
         // rbegin() should point to last character
@@ -2885,11 +2885,11 @@ FL_TEST_CASE("String compare operations") {
     }
 }
 
-FL_TEST_CASE("StrN comparison operators") {
+FL_TEST_CASE("string comparison operators") {
     FL_SUBCASE("operator< basic comparison") {
-        fl::StrN<32> s1 = "abc";
-        fl::StrN<32> s2 = "def";
-        fl::StrN<32> s3 = "abc";
+        fl::string s1 = "abc";
+        fl::string s2 = "def";
+        fl::string s3 = "abc";
 
         FL_CHECK(s1 < s2);      // "abc" < "def"
         FL_CHECK_FALSE(s2 < s1); // NOT "def" < "abc"
@@ -2897,9 +2897,9 @@ FL_TEST_CASE("StrN comparison operators") {
     }
 
     FL_SUBCASE("operator> basic comparison") {
-        fl::StrN<32> s1 = "abc";
-        fl::StrN<32> s2 = "def";
-        fl::StrN<32> s3 = "abc";
+        fl::string s1 = "abc";
+        fl::string s2 = "def";
+        fl::string s3 = "abc";
 
         FL_CHECK(s2 > s1);      // "def" > "abc"
         FL_CHECK_FALSE(s1 > s2); // NOT "abc" > "def"
@@ -2907,9 +2907,9 @@ FL_TEST_CASE("StrN comparison operators") {
     }
 
     FL_SUBCASE("operator<= basic comparison") {
-        fl::StrN<32> s1 = "abc";
-        fl::StrN<32> s2 = "def";
-        fl::StrN<32> s3 = "abc";
+        fl::string s1 = "abc";
+        fl::string s2 = "def";
+        fl::string s3 = "abc";
 
         FL_CHECK(s1 <= s2);     // "abc" <= "def"
         FL_CHECK(s1 <= s3);     // "abc" <= "abc" (equal)
@@ -2917,9 +2917,9 @@ FL_TEST_CASE("StrN comparison operators") {
     }
 
     FL_SUBCASE("operator>= basic comparison") {
-        fl::StrN<32> s1 = "abc";
-        fl::StrN<32> s2 = "def";
-        fl::StrN<32> s3 = "abc";
+        fl::string s1 = "abc";
+        fl::string s2 = "def";
+        fl::string s3 = "abc";
 
         FL_CHECK(s2 >= s1);     // "def" >= "abc"
         FL_CHECK(s1 >= s3);     // "abc" >= "abc" (equal)
@@ -2927,9 +2927,9 @@ FL_TEST_CASE("StrN comparison operators") {
     }
 
     FL_SUBCASE("comparison with different template sizes") {
-        fl::StrN<32> s1 = "abc";
-        fl::StrN<64> s2 = "def";
-        fl::StrN<128> s3 = "abc";
+        fl::string s1 = "abc";
+        fl::string s2 = "def";
+        fl::string s3 = "abc";
 
         // Test < operator
         FL_CHECK(s1 < s2);      // "abc" < "def"
@@ -2953,9 +2953,9 @@ FL_TEST_CASE("StrN comparison operators") {
     }
 
     FL_SUBCASE("comparison with empty strings") {
-        fl::StrN<32> empty1 = "";
-        fl::StrN<32> empty2 = "";
-        fl::StrN<32> nonempty = "abc";
+        fl::string empty1 = "";
+        fl::string empty2 = "";
+        fl::string nonempty = "abc";
 
         // Empty strings are equal to each other
         FL_CHECK_FALSE(empty1 < empty2);  // NOT "" < ""
@@ -2977,8 +2977,8 @@ FL_TEST_CASE("StrN comparison operators") {
     }
 
     FL_SUBCASE("comparison with prefix strings") {
-        fl::StrN<32> s1 = "abc";
-        fl::StrN<32> s2 = "abcd";
+        fl::string s1 = "abc";
+        fl::string s2 = "abcd";
 
         FL_CHECK(s1 < s2);       // "abc" < "abcd" (prefix is less)
         FL_CHECK_FALSE(s1 > s2);  // NOT "abc" > "abcd"
@@ -2992,8 +2992,8 @@ FL_TEST_CASE("StrN comparison operators") {
     }
 
     FL_SUBCASE("case sensitivity") {
-        fl::StrN<32> lower = "abc";
-        fl::StrN<32> upper = "ABC";
+        fl::string lower = "abc";
+        fl::string upper = "ABC";
 
         // Uppercase letters have lower ASCII values than lowercase
         FL_CHECK(upper < lower);      // "ABC" < "abc" (ASCII 65 < 97)
@@ -3003,10 +3003,10 @@ FL_TEST_CASE("StrN comparison operators") {
     }
 
     FL_SUBCASE("lexicographical ordering for sorting") {
-        fl::StrN<32> s1 = "apple";
-        fl::StrN<32> s2 = "banana";
-        fl::StrN<32> s3 = "cherry";
-        fl::StrN<32> s4 = "apple";
+        fl::string s1 = "apple";
+        fl::string s2 = "banana";
+        fl::string s3 = "cherry";
+        fl::string s4 = "apple";
 
         // Verify transitivity and consistency for sorting
         FL_CHECK(s1 < s2);
@@ -3029,9 +3029,9 @@ FL_TEST_CASE("StrN comparison operators") {
     }
 
     FL_SUBCASE("comparison with special characters") {
-        fl::StrN<32> s1 = "abc!";
-        fl::StrN<32> s2 = "abc@";
-        fl::StrN<32> s3 = "abc#";
+        fl::string s1 = "abc!";
+        fl::string s2 = "abc@";
+        fl::string s3 = "abc#";
 
         // ASCII: ! (33) < # (35) < @ (64)
         FL_CHECK(s1 < s3);       // "abc!" < "abc#"
@@ -3044,9 +3044,9 @@ FL_TEST_CASE("StrN comparison operators") {
     }
 
     FL_SUBCASE("comparison with number strings") {
-        fl::StrN<32> s1 = "10";
-        fl::StrN<32> s2 = "2";
-        fl::StrN<32> s3 = "100";
+        fl::string s1 = "10";
+        fl::string s2 = "2";
+        fl::string s3 = "100";
 
         // Lexicographical, not numeric: "10" < "2" because '1' < '2'
         FL_CHECK(s1 < s2);       // "10" < "2" (lexicographical)
@@ -3057,9 +3057,9 @@ FL_TEST_CASE("StrN comparison operators") {
     }
 
     FL_SUBCASE("consistency with equality operators") {
-        fl::StrN<32> s1 = "test";
-        fl::StrN<32> s2 = "test";
-        fl::StrN<32> s3 = "different";
+        fl::string s1 = "test";
+        fl::string s2 = "test";
+        fl::string s3 = "different";
 
         // If s1 == s2, then s1 <= s2 and s1 >= s2
         FL_CHECK(s1 == s2);
@@ -3075,8 +3075,8 @@ FL_TEST_CASE("StrN comparison operators") {
     }
 
     FL_SUBCASE("comparison operator completeness") {
-        fl::StrN<32> s1 = "abc";
-        fl::StrN<32> s2 = "def";
+        fl::string s1 = "abc";
+        fl::string s2 = "def";
 
         // Exactly one of <, ==, > should be true
         int count = 0;
@@ -3100,12 +3100,12 @@ FL_TEST_CASE("StrN comparison operators") {
 
     FL_SUBCASE("comparison with heap vs inline storage") {
         // Short string (inline storage)
-        fl::StrN<64> short1 = "short";
-        fl::StrN<64> short2 = "short";
+        fl::string short1 = "short";
+        fl::string short2 = "short";
 
         // Long string (heap storage) - exceeds 64 bytes
-        fl::StrN<64> long1 = "this is a very long string that definitely exceeds the inline buffer size of 64 bytes";
-        fl::StrN<64> long2 = "this is a very long string that definitely exceeds the inline buffer size of 64 bytes";
+        fl::string long1 = "this is a very long string that definitely exceeds the inline buffer size of 64 bytes";
+        fl::string long2 = "this is a very long string that definitely exceeds the inline buffer size of 64 bytes";
 
         // Comparison should work correctly regardless of storage type
         FL_CHECK(short1 == short2);
@@ -4274,7 +4274,7 @@ FL_TEST_CASE("StringHolder - Memory safety with incorrect capacity") {
 
 
 FL_TEST_CASE("fl::string - Numeric append performance patterns") {
-    // Test numeric append operations that currently allocate temporary StrN<64> buffers
+    // Test numeric append operations that currently allocate temporary fl::string buffers
     // These tests validate that optimizations don't break functionality
 
     FL_SUBCASE("Integer append operations") {
@@ -4516,7 +4516,7 @@ FL_TEST_CASE("fl::string - Buffer size requirements") {
 
 FL_TEST_CASE("fl::string - Write method numeric variants") {
     // Test the write() methods that take numeric types
-    // These also use temporary StrN buffers
+    // These also use temporary fl::string buffers
 
     FL_SUBCASE("write() with integers") {
         fl::string s;
@@ -4561,7 +4561,7 @@ FL_TEST_CASE("fl::string - Memory efficiency improvements") {
     // Test patterns that could benefit from thread-local buffer optimization
 
     FL_SUBCASE("Repeated small string builds") {
-        // This pattern creates many temporary StrN<64> buffers (reduced from 1000 to 500 for performance)
+        // This pattern creates many temporary fl::string buffers (reduced from 1000 to 500 for performance)
         fl::vector<fl::string> results;
 
         for (int i = 0; i < 500; ++i) {
@@ -4852,24 +4852,35 @@ FL_TEST_CASE("basic_string self operations") {
     }
 }
 
-FL_TEST_CASE("basic_string cross-size StrN operations") {
-    FL_SUBCASE("Copy from StrN<128> to StrN<64>") {
-        fl::StrN<128> big("hello from big buffer");
-        fl::StrN<64> small = big;
+// Historically tested cross-size StrN<N> copies; with StrN removed
+// and all callers using `fl::string`, these become same-size sanity
+// checks for assignment + heap-promotion still covering the same
+// behaviors (long strings spill from inline buffer to heap).
+FL_TEST_CASE("basic_string assignment + heap promotion") {
+    FL_SUBCASE("Copy between same-size fl::string instances") {
+        fl::string big("hello from big buffer");
+        fl::string small = big;
         FL_CHECK(small == "hello from big buffer");
     }
 
-    FL_SUBCASE("Copy from StrN<64> to StrN<128>") {
-        fl::StrN<64> small("hello from small buffer");
-        fl::StrN<128> big = small;
+    FL_SUBCASE("Copy between two fl::string instances (reverse direction)") {
+        fl::string small("hello from small buffer");
+        fl::string big = small;
         FL_CHECK(big == "hello from small buffer");
     }
 
-    FL_SUBCASE("Copy long string from large to small StrN") {
-        // String fits in StrN<128> inline but not StrN<8>
-        fl::StrN<128> big("This is a longer string that won't fit in 8 bytes");
-        fl::StrN<8> tiny = big;
-        FL_CHECK(tiny == "This is a longer string that won't fit in 8 bytes");
+    FL_SUBCASE("Copy long string that overflows the inline buffer") {
+        // String is longer than FASTLED_STR_INLINED_SIZE (default 64)
+        // so heap promotion fires on construction and copy.
+        const char* long_literal =
+            "This is a deliberately long string that exceeds the default "
+            "FASTLED_STR_INLINED_SIZE of 64 bytes so heap promotion fires "
+            "on both construction and copy.";
+        fl::string big(long_literal);
+        FL_CHECK(big.size() > FASTLED_STR_INLINED_SIZE);
+        fl::string tiny = big;
+        FL_CHECK(tiny == long_literal);
+        FL_CHECK(tiny.size() == big.size());
     }
 }
 

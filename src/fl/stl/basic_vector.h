@@ -4,7 +4,8 @@
 /// @brief Type-erased base class for fl::vector<T>.
 /// All vector logic lives here, compiled once. vector<T> is a thin wrapper
 /// that provides type safety and sets up the element operations table.
-/// Follows the same pattern as basic_string / StrN<N>.
+/// Follows the same pattern as basic_string + fl::string (concrete
+/// base + co-located inline buffer in the wrapper).
 
 #include "fl/stl/int.h"
 #include "fl/stl/cstring.h"

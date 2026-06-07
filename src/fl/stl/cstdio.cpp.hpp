@@ -200,7 +200,7 @@ fl::optional<fl::string> readLine(char delimiter, char skipChar, fl::optional<u3
         return fl::nullopt;  // Timeout occurred
     }
 
-    // Convert to string and trim whitespace (trim() returns new StrN, convert to string)
+    // Convert to string and trim whitespace (trim() returns a new fl::string)
     fl::string result = buffer.str();
     return fl::string(result.trim());
 }

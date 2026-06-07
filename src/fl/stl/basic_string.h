@@ -1,9 +1,11 @@
 #pragma once
 
 /// @file basic_string.h
-/// @brief Type-erased base class for fl::StrN<N>.
-/// All string logic lives here, compiled once. StrN<N> is a thin wrapper
-/// that provides the inline buffer storage and delegates everything here.
+/// @brief Concrete type-erased string class operating on a caller-
+/// provided buffer (or `fl::span<char>`).
+/// All string logic lives here, compiled once. `fl::string` is the
+/// default convenience wrapper that co-locates a 64-byte inline
+/// buffer + heap-overflow with the basic_string state.
 
 #include "fl/stl/int.h"
 #include "fl/stl/cstring.h"
@@ -24,16 +26,21 @@
 
 namespace fl {
 
-// Forward declaration
+// Forward declarations
 class string_view;
+template <typename T, fl::size Extent> class span;
 
 // Define shared_ptr type for StringHolder
 using StringHolderPtr = fl::shared_ptr<fl::StringHolder>;
 using NotNullStringHolderPtr = fl::not_null<StringHolderPtr>;
 
-/// Type-erased string base class. Holds all string logic.
-/// StrN<N> inherits this and provides the inline buffer.
-/// This class cannot be constructed directly — only through StrN<N>.
+/// Concrete type-erased string class. Holds all string logic
+/// (write, append, find, replace, resize, hashing, …) and is
+/// directly constructible from a caller-provided buffer
+/// (`char* + len`) or `fl::span<char>`. `fl::string` is a thin
+/// wrapper that co-locates a default-sized inline buffer with the
+/// `basic_string` state and adds composite-type formatters
+/// (vec2, vector, span, …). See `agents/docs/string-architecture.md`.
 class basic_string {
   public:
     // ======= NESTED TYPES =======
@@ -427,10 +434,24 @@ class basic_string {
     float toFloat() const FL_NOEXCEPT;
 
     // ======= DESTRUCTOR =======
-    ~basic_string() {}
+    // Body in basic_string.cpp.hpp per the project's header-thin
+    // convention (declarations in `*.h`, definitions in `*.cpp.hpp`).
+    ~basic_string() FL_NOEXCEPT;
 
-  protected:
-    // ======= CONSTRUCTION (only callable by StrN<N>) =======
+    // ======= PUBLIC CONSTRUCTION =======
+    // Construct a basic_string backed by a caller-provided buffer.
+    // The span / (ptr, len) pair points at a block of `char` the
+    // caller owns; the resulting basic_string is non-owning until
+    // the first write that exceeds the buffer's capacity, which
+    // promotes to heap-backed storage via `mStorage`.
+    //
+    // Lifetime contract: the buffer must outlive the basic_string
+    // AND the basic_string must not be trivially relocated (bitwise
+    // copied to a different address) — `mInlineOffset` is computed
+    // from `this` at construction time. For member-stored use,
+    // either co-locate the buffer with the basic_string (the
+    // `fl::string` pattern) or arrange the buffer at a fixed
+    // offset from `this` (e.g. as a class field).
     basic_string(char* inlineBuffer, fl::size inlineCapacity) FL_NOEXCEPT
         : mInlineOffset(static_cast<fl::size>(
               inlineBuffer -
@@ -440,13 +461,17 @@ class basic_string {
         , mStorage() // empty variant = inline mode
     {}
 
-    // Deleted copy/move — StrN<N> handles these
+    basic_string(fl::span<char, static_cast<fl::size>(-1)> storage) FL_NOEXCEPT;
+
+  protected:
+    // Deleted copy/move — wrappers (fl::string) handle these via
+    // `copy(const basic_string&)` / `moveFrom(basic_string&&)`.
     basic_string(const basic_string&) FL_NOEXCEPT = delete;
     basic_string(basic_string&&) FL_NOEXCEPT = delete;
     basic_string& operator=(const basic_string&) FL_NOEXCEPT = delete;
     basic_string& operator=(basic_string&&) FL_NOEXCEPT = delete;
 
-    // ======= CONTENT POPULATION (for StrN<N> constructors) =======
+    // ======= CONTENT POPULATION (for wrapper constructors) =======
     void moveFrom(basic_string&& other) FL_NOEXCEPT;
     void moveAssign(basic_string&& other) FL_NOEXCEPT;
     void swapWith(basic_string& other) FL_NOEXCEPT;

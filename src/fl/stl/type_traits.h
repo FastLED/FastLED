@@ -1034,7 +1034,7 @@ using underlying_type_t = typename underlying_type<T>::type;
 // Integer type casting helper for string formatting
 //-------------------------------------------------------------------------------
 // Helper to determine target type for integer conversion based on size/signedness
-// Used by both StrN::append and sstream::operator<< for consistent formatting
+// Used by both basic_string::append and sstream::operator<< for consistent formatting
 namespace int_cast_detail {
     // Primary template: generic fallback using size/signedness
     // This handles any integer type by selecting the appropriate fl:: type based on its characteristics

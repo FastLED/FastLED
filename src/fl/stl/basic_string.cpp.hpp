@@ -1,11 +1,31 @@
 #include "fl/stl/basic_string.h"
 #include "fl/stl/cstring.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/span.h"
+#include "fl/stl/string_view.h"
 
 namespace fl {
 
 // ODR-use definition
 const fl::size basic_string::npos;
+
+// ======= PUBLIC CONSTRUCTORS (span delegate) =======
+
+basic_string::basic_string(fl::span<char, static_cast<fl::size>(-1)> storage) FL_NOEXCEPT
+    : basic_string(storage.data(), storage.size()) {}
+
+// ======= DESTRUCTOR =======
+
+basic_string::~basic_string() FL_NOEXCEPT {}
+
+// ======= string_view CONSTRUCTOR FROM basic_string =======
+// Defined here (in the same TU as basic_string itself) so
+// string_view.h can stay light: it forward-declares basic_string
+// and declares this ctor without needing basic_string's complete
+// type.
+
+string_view::string_view(const basic_string& str) FL_NOEXCEPT
+    : mData(str.c_str()), mSize(str.size()) {}
 
 // ======= ACCESSORS =======
 

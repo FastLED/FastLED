@@ -1392,11 +1392,14 @@ private:
         }
     }
 
-    // Configuration - using StrN for safe string storage
-    fl::StrN<64> mHostname;
-    fl::StrN<64> mPassword;
-    fl::StrN<32> mApSsid;
-    fl::StrN<64> mApPass;
+    // Configuration - fl::string carries a 64-byte inline buffer +
+    // heap overflow, replacing the former StrN<32>/StrN<64> template
+    // wrappers (which were removed when basic_string became the
+    // public concrete class).
+    fl::string mHostname;
+    fl::string mPassword;
+    fl::string mApSsid;
+    fl::string mApPass;
     bool mApFallbackEnabled;
     bool mWifiConnected;
 
@@ -1418,7 +1421,7 @@ private:
     // Custom ESP-IDF OTA server state (pure ESP-IDF, no Arduino)
     int mOtaUdpSocket = -1;              // UDP socket for OTA invitations
     TaskHandle_t mOtaServerTask = nullptr;  // FreeRTOS task handle for OTA server
-    fl::StrN<64> mOtaNonce;              // Authentication nonce
+    fl::string mOtaNonce;                // Authentication nonce
     bool mOtaRunning = false;            // OTA server running flag
 };
 

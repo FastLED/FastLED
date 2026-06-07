@@ -28,7 +28,7 @@ class bitset_dynamic;  // IWYU pragma: keep
 template <fl::u32 N> class bitset_inlined;  // IWYU pragma: keep
 
 // Note: int_cast_detail::cast_target is now defined in fl/stl/type_traits.h
-// and shared between sstream and StrN for consistent integer formatting
+// and shared between sstream and basic_string for consistent integer formatting
 
 
 class sstream {

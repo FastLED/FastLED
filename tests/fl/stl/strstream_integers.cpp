@@ -154,8 +154,8 @@ FL_TEST_CASE("sstream handles all integer types generically") {
     }
 }
 
-FL_TEST_CASE("StrN write handles all integer types generically") {
-    fl::StrN<64> sn;
+FL_TEST_CASE("string write handles all integer types generically") {
+    fl::string sn;
 
     FL_SUBCASE("various integer types") {
         int16_t i16 = -1000;
