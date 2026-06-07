@@ -147,7 +147,7 @@ class unordered_set {
     void clear() { data.clear(); }
     
     // Lookup operations
-    bool has(const Key &key) const { return data.has(key); }
+    bool has(const Key &key) const { return data.contains(key); }
     bool contains(const Key &key) const { return has(key); } // C++20 style
 
     /// Equality comparison (set equality: same elements, order-independent)

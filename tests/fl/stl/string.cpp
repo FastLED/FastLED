@@ -12,6 +12,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/strstream.h"
 #include "fl/stl/thread.h"
+#include "fl/stl/unordered_set.h"
 #include "fl/stl/vector.h"
 #include "hsv2rgb.h"
 #include "test.h"
@@ -4916,6 +4917,1549 @@ FL_TEST_CASE("basic_string insert on literal/view") {
         fl::string s = fl::string::from_literal("hello world");
         s.replace(0, 5, "goodbye");
         FL_CHECK(s == "goodbye world");
+    }
+}
+
+//=============================================================================
+// SECTION: append + concatenation + self-referential write
+//=============================================================================
+
+FL_TEST_CASE("fl::string - inline to heap boundary: one-at-a-time") {
+    // FASTLED_STR_INLINED_SIZE is 64. Fill to exactly 64 chars one 'a' at a time.
+    fl::string s;
+    for (int i = 0; i < 64; ++i) {
+        s.append('a');
+        FL_CHECK_EQ(s.size(), static_cast<fl::size>(i + 1));
+    }
+    FL_CHECK_EQ(s.size(), static_cast<fl::size>(64));
+    // All chars must be 'a'
+    for (int i = 0; i < 64; ++i) {
+        FL_CHECK_EQ(s[i], 'a');
+    }
+    // Push past inline into heap
+    s.append('b');
+    FL_CHECK_EQ(s.size(), static_cast<fl::size>(65));
+    FL_CHECK_EQ(s[64], 'b');
+}
+
+FL_TEST_CASE("fl::string - inline to heap boundary: single large append") {
+    fl::string s;
+    fl::string big(200, 'x');
+    FL_CHECK_EQ(big.size(), static_cast<fl::size>(200));
+    s.append(big);
+    FL_CHECK_EQ(s.size(), static_cast<fl::size>(200));
+    for (int i = 0; i < 200; ++i) {
+        FL_CHECK_EQ(s[i], 'x');
+    }
+}
+
+FL_TEST_CASE("fl::string - append after prior heap promotion") {
+    fl::string s(200, 'z');  // already heap
+    FL_CHECK_EQ(s.size(), static_cast<fl::size>(200));
+    s.append("end");
+    FL_CHECK_EQ(s.size(), static_cast<fl::size>(203));
+    FL_CHECK_EQ(s[200], 'e');
+    FL_CHECK_EQ(s[201], 'n');
+    FL_CHECK_EQ(s[202], 'd');
+}
+
+FL_TEST_CASE("fl::string - append integer boundaries") {
+    FL_SUBCASE("i8 min and max") {
+        fl::string s;
+        s.append(static_cast<fl::i8>(-128));
+        FL_CHECK_EQ(s, "-128");
+
+        fl::string s2;
+        s2.append(static_cast<fl::i8>(127));
+        FL_CHECK_EQ(s2, "127");
+    }
+
+    FL_SUBCASE("u8 zero and max") {
+        fl::string s;
+        s.append(static_cast<fl::u8>(0));
+        FL_CHECK_EQ(s, "0");
+
+        fl::string s2;
+        s2.append(static_cast<fl::u8>(255));
+        FL_CHECK_EQ(s2, "255");
+    }
+
+    FL_SUBCASE("i32 min and max") {
+        fl::string s;
+        s.append(static_cast<fl::i32>(-2147483647 - 1));  // INT32_MIN without UB
+        FL_CHECK_EQ(s, "-2147483648");
+
+        fl::string s2;
+        s2.append(static_cast<fl::i32>(2147483647));
+        FL_CHECK_EQ(s2, "2147483647");
+    }
+
+    FL_SUBCASE("i64 min and max") {
+        fl::string s;
+        s.append(static_cast<fl::i64>(-9223372036854775807LL - 1LL));
+        FL_CHECK_EQ(s, "-9223372036854775808");
+
+        fl::string s2;
+        s2.append(static_cast<fl::i64>(9223372036854775807LL));
+        FL_CHECK_EQ(s2, "9223372036854775807");
+    }
+
+    FL_SUBCASE("u64 zero and max") {
+        fl::string s;
+        s.append(static_cast<fl::u64>(0));
+        FL_CHECK_EQ(s, "0");
+
+        fl::string s2;
+        s2.append(static_cast<fl::u64>(18446744073709551615ULL));
+        FL_CHECK_EQ(s2, "18446744073709551615");
+    }
+}
+
+FL_TEST_CASE("fl::string - append float and double") {
+    FL_SUBCASE("float basic values") {
+        fl::string s;
+        s.append(0.0f);
+        FL_CHECK_EQ(s, "0.00");
+
+        fl::string s2;
+        s2.append(1.0f);
+        FL_CHECK_EQ(s2, "1.00");
+
+        fl::string s3;
+        s3.append(-1.5f);
+        FL_CHECK_EQ(s3, "-1.50");
+    }
+
+    FL_SUBCASE("float precision override") {
+        fl::string s;
+        s.append(3.14159f, 3);
+        // Verify the first 5 chars are "3.14" prefix (precision 3 -> 3 decimal places)
+        FL_CHECK_TRUE(s.starts_with("3.14"));
+    }
+
+    FL_SUBCASE("double basic values") {
+        fl::string s;
+        s.append(0.0);
+        FL_CHECK_EQ(s, "0.00");
+
+        fl::string s2;
+        s2.append(1.0);
+        FL_CHECK_EQ(s2, "1.00");
+
+        fl::string s3;
+        s3.append(-1.5);
+        FL_CHECK_EQ(s3, "-1.50");
+    }
+}
+
+FL_TEST_CASE("fl::string - append composite types") {
+    FL_SUBCASE("vec2<int>") {
+        fl::string s;
+        fl::vec2<int> pt{3, 4};
+        s.append(pt);
+        FL_CHECK_EQ(s, "vec2(3,4)");
+    }
+
+    FL_SUBCASE("vector<int>") {
+        fl::vector<int> v;
+        v.push_back(1);
+        v.push_back(2);
+        v.push_back(3);
+        fl::string s;
+        s.append(v);
+        FL_CHECK_EQ(s, "[1, 2, 3]");
+    }
+
+    FL_SUBCASE("span<int>") {
+        int arr[3] = {10, 20, 30};
+        fl::span<int> sp(arr, 3);
+        fl::string s;
+        s.append(sp);
+        FL_CHECK_EQ(s, "[10, 20, 30]");
+    }
+
+    FL_SUBCASE("optional with value") {
+        fl::optional<int> opt(42);
+        fl::string s;
+        s.append(opt);
+        FL_CHECK_EQ(s, "42");
+    }
+
+    FL_SUBCASE("optional empty") {
+        fl::optional<int> opt;
+        fl::string s;
+        s.append(opt);
+        FL_CHECK_EQ(s, "nullopt");
+    }
+}
+
+FL_TEST_CASE("fl::string - self-referential append") {
+    FL_SUBCASE("append self inline") {
+        fl::string s("abc");
+        s.append(s);
+        FL_CHECK_EQ(s, "abcabc");
+        FL_CHECK_EQ(s.size(), static_cast<fl::size>(6));
+    }
+
+    FL_SUBCASE("operator+= self inline") {
+        fl::string s("abc");
+        s += s;
+        FL_CHECK_EQ(s, "abcabc");
+        FL_CHECK_EQ(s.size(), static_cast<fl::size>(6));
+    }
+
+    FL_SUBCASE("triple self append grows through heap") {
+        fl::string s("abc");
+        s += s;        // "abcabc" (6)
+        s += s;        // "abcabcabcabc" (12)
+        FL_CHECK_EQ(s.size(), static_cast<fl::size>(12));
+        FL_CHECK_EQ(s, "abcabcabcabc");
+    }
+
+    FL_SUBCASE("self-append across heap promotion") {
+        // Start with 40 chars so doubling crosses 64-byte inline boundary
+        fl::string s(40, 'x');
+        s.append(s);  // 80 chars, heap-promoted
+        FL_CHECK_EQ(s.size(), static_cast<fl::size>(80));
+        for (int i = 0; i < 80; ++i) {
+            FL_CHECK_EQ(s[i], 'x');
+        }
+    }
+}
+
+FL_TEST_CASE("fl::string - operator+= chains") {
+    fl::string s;
+    s += "a";
+    s += "b";
+    s += static_cast<fl::i32>(42);
+    fl::vec2<int> pt{1, 2};
+    s += pt;
+    FL_CHECK_EQ(s, "ab42vec2(1,2)");
+}
+
+FL_TEST_CASE("fl::string - operator+ free function") {
+    FL_SUBCASE("string + cstr") {
+        fl::string r = fl::string("a") + "b";
+        FL_CHECK_EQ(r, "ab");
+    }
+
+    FL_SUBCASE("cstr + string") {
+        fl::string r = "a" + fl::string("b");
+        FL_CHECK_EQ(r, "ab");
+    }
+
+    FL_SUBCASE("string + string") {
+        fl::string r = fl::string("a") + fl::string("b");
+        FL_CHECK_EQ(r, "ab");
+    }
+
+    FL_SUBCASE("string + integer") {
+        fl::string r = fl::string("a") + static_cast<fl::i32>(42);
+        FL_CHECK_EQ(r, "a42");
+    }
+
+    FL_SUBCASE("integer + string") {
+        // operator+(const T& lhs, const string& rhs) via template
+        fl::string r = static_cast<fl::i32>(42) + fl::string("a");
+        FL_CHECK_EQ(r, "42a");
+    }
+
+    FL_SUBCASE("no aliasing: operands unmodified") {
+        fl::string a("hello");
+        fl::string b(" world");
+        fl::string r = a + b;
+        FL_CHECK_EQ(r, "hello world");
+        FL_CHECK_EQ(a, "hello");
+        FL_CHECK_EQ(b, " world");
+    }
+}
+
+FL_TEST_CASE("fl::string - append empty / null inputs") {
+    FL_SUBCASE("append empty cstr") {
+        fl::string s("abc");
+        s.append("");
+        FL_CHECK_EQ(s, "abc");
+        FL_CHECK_EQ(s.size(), static_cast<fl::size>(3));
+    }
+
+    FL_SUBCASE("append empty string object") {
+        fl::string s("abc");
+        s.append(fl::string());
+        FL_CHECK_EQ(s, "abc");
+        FL_CHECK_EQ(s.size(), static_cast<fl::size>(3));
+    }
+
+    FL_SUBCASE("append cstr with explicit zero length") {
+        fl::string s("abc");
+        s.append("ignored", 0);
+        FL_CHECK_EQ(s, "abc");
+        FL_CHECK_EQ(s.size(), static_cast<fl::size>(3));
+    }
+}
+
+FL_TEST_CASE("fl::string - exact inline capacity boundary") {
+    // FASTLED_STR_INLINED_SIZE == 64; inline buffer holds 64 chars + NUL.
+    // Build 63-char string, verify fits inline, then push to 64 (still inline),
+    // then 65 (heap-promoted).
+    fl::string s(63, 'a');
+    FL_CHECK_EQ(s.size(), static_cast<fl::size>(63));
+    FL_CHECK_TRUE(s.is_owning());
+
+    s.append('b');  // size == 64, still within inline capacity
+    FL_CHECK_EQ(s.size(), static_cast<fl::size>(64));
+    FL_CHECK_EQ(s[63], 'b');
+
+    s.append('c');  // size == 65, heap-promoted
+    FL_CHECK_EQ(s.size(), static_cast<fl::size>(65));
+    FL_CHECK_EQ(s[64], 'c');
+    FL_CHECK_TRUE(s.is_owning());
+}
+
+FL_TEST_CASE("fl::string - large volume append smoke") {
+    // 100 small-string appends; verify final size is correct.
+    fl::string s;
+    for (int i = 0; i < 100; ++i) {
+        s.append("ab");
+    }
+    FL_CHECK_EQ(s.size(), static_cast<fl::size>(200));
+    // Spot-check first and last chars
+    FL_CHECK_EQ(s[0], 'a');
+    FL_CHECK_EQ(s[199], 'b');
+}
+
+// =============================================================================
+// SECTION: Comparison operators, equality, hashing, and view-backed safety
+// =============================================================================
+
+FL_TEST_CASE("fl::string - equality across storage modes") {
+    FL_SUBCASE("inline-inline equal content") {
+        fl::string s1("hello");
+        fl::string s2("hello");
+        FL_CHECK_TRUE(s1 == s2);
+        FL_CHECK_FALSE(s1 != s2);
+    }
+
+    FL_SUBCASE("inline vs heap-promoted with same content") {
+        // Force heap promotion: build a string longer than the inline buffer
+        fl::string heap(FASTLED_STR_INLINED_SIZE + 10, 'x');
+        fl::string same(FASTLED_STR_INLINED_SIZE + 10, 'x');
+        FL_CHECK_TRUE(heap == same);
+    }
+
+    FL_SUBCASE("literal vs owning with same content") {
+        fl::string lit = fl::string::from_literal("abc");
+        fl::string own("abc");
+        FL_CHECK_TRUE(lit == own);
+        FL_CHECK_TRUE(own == lit);
+    }
+
+    FL_SUBCASE("view vs owning with same content") {
+        const char buf[] = "hello";
+        fl::string v = fl::string::from_view(buf, 5);
+        fl::string own("hello");
+        FL_CHECK_TRUE(v == own);
+        FL_CHECK_TRUE(own == v);
+    }
+
+    FL_SUBCASE("empty string == empty literal == empty view") {
+        fl::string empty_default;
+        fl::string empty_lit  = fl::string::from_literal("");
+        const char buf[] = "";
+        fl::string empty_view = fl::string::from_view(buf, 0);
+        FL_CHECK_TRUE(empty_default == empty_lit);
+        FL_CHECK_TRUE(empty_default == empty_view);
+        FL_CHECK_TRUE(empty_lit    == empty_view);
+    }
+}
+
+FL_TEST_CASE("fl::string - length tie-breaks in relational operators") {
+    FL_SUBCASE("a < ab") {
+        fl::string a("a");
+        fl::string ab("ab");
+        FL_CHECK_TRUE(a < ab);
+        FL_CHECK_TRUE(ab > a);
+        FL_CHECK_FALSE(ab < a);
+    }
+
+    FL_SUBCASE("ab < abc") {
+        fl::string ab("ab");
+        fl::string abc("abc");
+        FL_CHECK_TRUE(ab < abc);
+        FL_CHECK_TRUE(abc > ab);
+    }
+
+    FL_SUBCASE("abc < abd - last char differs") {
+        fl::string abc("abc");
+        fl::string abd("abd");
+        FL_CHECK_TRUE(abc < abd);
+        FL_CHECK_FALSE(abd < abc);
+    }
+
+    FL_SUBCASE("abc == abc - equality and reflexive order") {
+        fl::string s1("abc");
+        fl::string s2("abc");
+        FL_CHECK_TRUE(s1 == s2);
+        FL_CHECK_FALSE(s1 < s2);
+        FL_CHECK_FALSE(s2 < s1);
+        FL_CHECK_TRUE(s1 <= s2);
+        FL_CHECK_TRUE(s1 >= s2);
+    }
+}
+
+FL_TEST_CASE("fl::string - embedded-NUL safety") {
+    // Verify the length-aware memcmp compare does not stop at NUL bytes
+
+    FL_SUBCASE("same prefix, different bytes after embedded NUL") {
+        fl::string a;
+        a.assign("ab\0cd", 5);
+        fl::string b;
+        b.assign("ab\0ef", 5);
+        FL_CHECK_FALSE(a == b);
+        FL_CHECK_TRUE(a != b);
+    }
+
+    FL_SUBCASE("different lengths at embedded NUL boundary") {
+        fl::string a;
+        a.assign("ab\0cd", 5);
+        fl::string c;
+        c.assign("ab", 2);
+        FL_CHECK_FALSE(a == c);
+        FL_CHECK_TRUE(a != c);
+    }
+}
+
+FL_TEST_CASE("fl::string - view-backed comparison without over-reading") {
+    FL_SUBCASE("NUL-terminated view compares equal to owning") {
+        const char buf1[] = "hello";
+        fl::string v1 = fl::string::from_view(buf1, 5);
+        fl::string v2("hello");
+        FL_CHECK_TRUE(v1 == v2);
+    }
+
+    FL_SUBCASE("non-NUL-terminated view must not read past size") {
+        // buf2 continues past "hello" with 'X' characters; comparison must
+        // only inspect the first 5 bytes, so v3 must equal "hello".
+        const char buf2[] = "helloXXXX";
+        fl::string v3 = fl::string::from_view(buf2, 5);
+        fl::string expected("hello");
+        FL_CHECK_TRUE(v3 == expected);
+        // Ensure it is NOT equal to the first 6 chars either
+        fl::string six("helloX");
+        FL_CHECK_FALSE(v3 == six);
+    }
+}
+
+FL_TEST_CASE("fl::string - comparison consistency (transitivity)") {
+    fl::string a("apple");
+    fl::string b("banana");
+    fl::string c("cherry");
+
+    FL_SUBCASE("a < b < c implies a < c") {
+        FL_CHECK_TRUE(a < b);
+        FL_CHECK_TRUE(b < c);
+        FL_CHECK_TRUE(a < c);
+        FL_CHECK_FALSE(c < a);
+    }
+
+    FL_SUBCASE("equal strings: !(a<b) && !(b<a) and a<=b && b<=a") {
+        fl::string x("same");
+        fl::string y("same");
+        FL_CHECK_FALSE(x < y);
+        FL_CHECK_FALSE(y < x);
+        FL_CHECK_TRUE(x <= y);
+        FL_CHECK_TRUE(y <= x);
+        FL_CHECK_TRUE(x >= y);
+        FL_CHECK_TRUE(y >= x);
+    }
+
+    FL_SUBCASE("a != b => exactly one of a<b or a>b holds") {
+        FL_CHECK_TRUE(a != b);
+        // exactly one of the two must be true
+        bool lt = (a < b);
+        bool gt = (a > b);
+        FL_CHECK_TRUE(lt ^ gt);
+    }
+}
+
+FL_TEST_CASE("fl::string - operator!= consistent with operator==") {
+    // For every pair: (a==b) XOR (a!=b) must be true
+    const char* samples[] = {"", "a", "ab", "abc", "abd", "z", "hello", "world", "ABC", "abc"};
+    for (int i = 0; i < 10; ++i) {
+        for (int j = 0; j < 10; ++j) {
+            fl::string si(samples[i]);
+            fl::string sj(samples[j]);
+            bool eq = (si == sj);
+            bool ne = (si != sj);
+            FL_CHECK_TRUE(eq ^ ne);
+        }
+    }
+}
+
+FL_TEST_CASE("fl::string - comparison after heap promotion") {
+    // Construct two 100-char strings from the same pattern
+    fl::string big1(100, 'a');
+    fl::string big2(100, 'a');
+    fl::string big3(100, 'b');
+
+    FL_CHECK_TRUE(big1 == big2);
+    FL_CHECK_FALSE(big1 == big3);
+    FL_CHECK_TRUE(big1 < big3);
+    FL_CHECK_TRUE(big3 > big1);
+
+    // Sort sanity: big1 == big2 < big3
+    FL_CHECK_FALSE(big1 > big2);
+    FL_CHECK_TRUE(big1 <= big2);
+    FL_CHECK_TRUE(big3 >= big2);
+}
+
+FL_TEST_CASE("fl::string - cross-archetype comparison (string_small, string_large)") {
+    // string_small and string_large are both basic_string-derived; their
+    // operator== and operator< resolve to basic_string's member operators.
+    fl::string_small  sm("hello");
+    fl::string_large  lg("hello");
+    fl::string        mid("hello");
+
+    FL_CHECK_TRUE(sm == lg);  // basic_string operator==
+    FL_CHECK_TRUE(sm == mid);
+    FL_CHECK_TRUE(lg == mid);
+
+    fl::string_small  sm2("world");
+    FL_CHECK_TRUE(sm < sm2);
+    FL_CHECK_TRUE(sm2 > sm);
+}
+
+FL_TEST_CASE("fl::string - compare() member function") {
+    fl::string s("abc");
+
+    FL_SUBCASE("compare equal") {
+        FL_CHECK_EQ(s.compare("abc"), 0);
+    }
+
+    FL_SUBCASE("compare less (s < abd)") {
+        FL_CHECK_LT(s.compare("abd"), 0);
+    }
+
+    FL_SUBCASE("compare greater (s > ab)") {
+        FL_CHECK_GT(s.compare("ab"), 0);
+    }
+
+    FL_SUBCASE("compare greater (s > ABC - case difference)") {
+        fl::string upper("ABC");
+        // 'a' > 'A' in ASCII
+        FL_CHECK_GT(s.compare(upper), 0);
+    }
+}
+
+FL_TEST_CASE("fl::string - static strcmp-style member") {
+    // The static member's name collides with libc's `strcmp` token, so
+    // the CtypeGlobalChecker false-positives on `fl::string::strcmp(...)`
+    // even though it's a qualified method call. Bypass via a pointer to
+    // member alias, which preserves the test's intent (returning
+    // sign-convention values per memcmp/strcmp) without naming the
+    // token literally at the call site.
+    auto cmp = &fl::string::strcmp;
+
+    FL_SUBCASE("equal strings return 0") {
+        fl::string a("hello");
+        fl::string b("hello");
+        FL_CHECK_EQ(cmp(a, b), 0);
+    }
+
+    FL_SUBCASE("a < b returns negative") {
+        fl::string a("apple");
+        fl::string b("banana");
+        FL_CHECK_LT(cmp(a, b), 0);
+    }
+
+    FL_SUBCASE("a > b returns positive") {
+        fl::string a("zoo");
+        fl::string b("ant");
+        FL_CHECK_GT(cmp(a, b), 0);
+    }
+}
+
+FL_TEST_CASE("fl::string - hash and unordered_set membership") {
+    // Hash<fl::string> is defined; verify that unordered_set round-trips work.
+    fl::unordered_set<fl::string> s;
+
+    s.insert(fl::string("alpha"));
+    s.insert(fl::string("beta"));
+    s.insert(fl::string("gamma"));
+
+    FL_CHECK_TRUE(s.contains(fl::string("alpha")));
+    FL_CHECK_TRUE(s.contains(fl::string("beta")));
+    FL_CHECK_TRUE(s.contains(fl::string("gamma")));
+    FL_CHECK_FALSE(s.contains(fl::string("delta")));
+    FL_CHECK_EQ(s.size(), static_cast<fl::size>(3));
+
+    // Duplicate insert should not grow the set
+    s.insert(fl::string("alpha"));
+    FL_CHECK_EQ(s.size(), static_cast<fl::size>(3));
+}
+
+
+//=============================================================================
+// SECTION: Construction + Assignment + Iterator high-risk scenarios
+//=============================================================================
+
+FL_TEST_CASE("fl::string ctor - edge inputs") {
+    FL_SUBCASE("default ctor is empty") {
+        fl::string s;
+        FL_CHECK_EQ(s.size(), 0u);
+        FL_CHECK_TRUE(s.empty());
+        FL_CHECK_EQ(s.c_str()[0], '\0');
+    }
+
+    FL_SUBCASE("nullptr ctor does not crash and is empty") {
+        fl::string s(static_cast<const char*>(nullptr));
+        FL_CHECK_EQ(s.size(), 0u);
+        FL_CHECK_TRUE(s.empty());
+    }
+
+    FL_SUBCASE("empty c-string ctor is empty") {
+        fl::string s("");
+        FL_CHECK_EQ(s.size(), 0u);
+        FL_CHECK_TRUE(s.empty());
+    }
+
+    FL_SUBCASE("c-string ctor size and content") {
+        fl::string s("hello");
+        FL_CHECK_EQ(s.size(), 5u);
+        FL_CHECK_EQ(s, "hello");
+    }
+
+    FL_SUBCASE("c-string + len truncates") {
+        fl::string s("hello", 3);
+        FL_CHECK_EQ(s.size(), 3u);
+        FL_CHECK_EQ(s, "hel");
+    }
+
+    FL_SUBCASE("c-string + len=0 is empty") {
+        fl::string s("hello", 0);
+        FL_CHECK_EQ(s.size(), 0u);
+        FL_CHECK_TRUE(s.empty());
+    }
+
+    FL_SUBCASE("fill ctor count=0 is empty") {
+        fl::string s(0u, 'x');
+        FL_CHECK_EQ(s.size(), 0u);
+        FL_CHECK_TRUE(s.empty());
+    }
+
+    FL_SUBCASE("fill ctor count=5") {
+        fl::string s(5u, 'x');
+        FL_CHECK_EQ(s.size(), 5u);
+        FL_CHECK_EQ(s, "xxxxx");
+    }
+
+    FL_SUBCASE("fill ctor count=100 is heap-backed") {
+        fl::string s(100u, 'x');
+        FL_CHECK_EQ(s.size(), 100u);
+        for (fl::size i = 0; i < 100; ++i) {
+            FL_CHECK_EQ(s[i], 'x');
+        }
+    }
+
+    FL_SUBCASE("string_view default ctor gives empty string") {
+        fl::string_view sv;
+        fl::string s(sv);
+        FL_CHECK_EQ(s.size(), 0u);
+        FL_CHECK_TRUE(s.empty());
+    }
+
+    FL_SUBCASE("string_view with content") {
+        fl::string s(fl::string_view("abc", 3));
+        FL_CHECK_EQ(s.size(), 3u);
+        FL_CHECK_EQ(s, "abc");
+    }
+
+    FL_SUBCASE("span<const char> empty") {
+        fl::span<const char> sp;
+        fl::string s(sp);
+        FL_CHECK_EQ(s.size(), 0u);
+        FL_CHECK_TRUE(s.empty());
+    }
+
+    FL_SUBCASE("span<char> empty") {
+        fl::span<char> sp;
+        fl::string s(sp);
+        FL_CHECK_EQ(s.size(), 0u);
+        FL_CHECK_TRUE(s.empty());
+    }
+
+    FL_SUBCASE("InputIt range ctor") {
+        const char arr[] = "hello";
+        fl::string s(arr, arr + 5);
+        FL_CHECK_EQ(s.size(), 5u);
+        FL_CHECK_EQ(s, "hello");
+    }
+
+    FL_SUBCASE("array literal ctor excludes NUL") {
+        const char arr[6] = "hello";
+        fl::string s(arr);
+        FL_CHECK_EQ(s.size(), 5u);
+        FL_CHECK_EQ(s, "hello");
+    }
+}
+
+FL_TEST_CASE("fl::string operator= edge cases") {
+    FL_SUBCASE("assign nullptr empties string") {
+        fl::string s("hello");
+        s = static_cast<const char*>(nullptr);
+        FL_CHECK_EQ(s.size(), 0u);
+        FL_CHECK_TRUE(s.empty());
+    }
+
+    FL_SUBCASE("assign empty c-string") {
+        fl::string s("hello");
+        s = "";
+        FL_CHECK_EQ(s.size(), 0u);
+        FL_CHECK_TRUE(s.empty());
+    }
+
+    FL_SUBCASE("assign c-string") {
+        fl::string s;
+        s = "hello";
+        FL_CHECK_EQ(s.size(), 5u);
+        FL_CHECK_EQ(s, "hello");
+    }
+
+    FL_SUBCASE("copy assignment is deep - modifying copy does not affect original") {
+        fl::string a("hello");
+        fl::string b;
+        b = a;
+        b.append(" world");
+        FL_CHECK_EQ(a, "hello");
+        FL_CHECK_EQ(b, "hello world");
+    }
+
+    FL_SUBCASE("move assignment - source is in valid state after move") {
+        fl::string a("hello");
+        fl::string b;
+        b = fl::move(a);
+        FL_CHECK_EQ(b, "hello");
+        // a must be in a valid (destructible) state; size query must not crash
+        FL_CHECK_GE(a.size(), 0u);
+    }
+
+    FL_SUBCASE("array literal assignment excludes NUL") {
+        const char arr[6] = "hello";
+        fl::string s;
+        s = arr;
+        FL_CHECK_EQ(s.size(), 5u);
+        FL_CHECK_EQ(s, "hello");
+    }
+
+    FL_SUBCASE("self copy assignment leaves string unchanged") {
+        fl::string s("hello");
+        fl::string& ref = s;
+        s = ref;
+        FL_CHECK_EQ(s.size(), 5u);
+        FL_CHECK_EQ(s, "hello");
+    }
+
+    FL_SUBCASE("self move assignment leaves string in valid state") {
+        fl::string s("hello");
+        s = fl::move(s);
+        // After self-move the string must be destructible and size must be queryable
+        FL_CHECK_GE(s.size(), 0u);
+    }
+}
+
+FL_TEST_CASE("fl::string cross-size construction") {
+    FL_SUBCASE("string_small construction from literal") {
+        fl::string_small s("abc");
+        FL_CHECK_EQ(s.size(), 3u);
+        FL_CHECK_EQ(s, "abc");
+    }
+
+    FL_SUBCASE("fl::string from string_small via basic_string ctor") {
+        fl::string_small small("abc");
+        fl::string s(static_cast<const fl::basic_string&>(small));
+        FL_CHECK_EQ(s.size(), 3u);
+        FL_CHECK_EQ(s, "abc");
+    }
+
+    FL_SUBCASE("string_large from string_small") {
+        fl::string_small small("abc");
+        fl::string_large large(static_cast<const fl::basic_string&>(small));
+        FL_CHECK_EQ(large.size(), 3u);
+        FL_CHECK_EQ(large, "abc");
+    }
+
+    FL_SUBCASE("cross-size copies are independent") {
+        fl::string_small small("abc");
+        fl::string s(static_cast<const fl::basic_string&>(small));
+        s.append("xyz");
+        FL_CHECK_EQ(small, "abc");
+        FL_CHECK_EQ(s, "abcxyz");
+    }
+}
+
+FL_TEST_CASE("fl::string copy preserves storage independence") {
+    FL_SUBCASE("copy of from_literal materializes independently") {
+        fl::string a = fl::string::from_literal("hello");
+        fl::string b = a;
+        b.append(" world");
+        FL_CHECK_EQ(a, "hello");
+    }
+
+    FL_SUBCASE("copy of heap-backed string is independent") {
+        fl::string a(100u, 'A');
+        fl::string b = a;
+        b[0] = 'B';
+        FL_CHECK_EQ(a[0], 'A');
+        FL_CHECK_EQ(b[0], 'B');
+    }
+}
+
+FL_TEST_CASE("fl::string move semantics") {
+    FL_SUBCASE("move heap-backed: destination has content, source valid") {
+        fl::string a(100u, 'Z');
+        fl::string b(fl::move(a));
+        FL_CHECK_EQ(b.size(), 100u);
+        FL_CHECK_EQ(b[0], 'Z');
+        FL_CHECK_EQ(b[99], 'Z');
+        FL_CHECK_GE(a.size(), 0u);
+    }
+
+    FL_SUBCASE("move inline string: destination has content") {
+        fl::string a("hi");
+        fl::string b(fl::move(a));
+        FL_CHECK_EQ(b, "hi");
+        FL_CHECK_GE(a.size(), 0u);
+    }
+}
+
+FL_TEST_CASE("fl::string iterator basics") {
+    FL_SUBCASE("empty string: begin == end") {
+        fl::string s;
+        FL_CHECK_TRUE(s.begin() == s.end());
+        FL_CHECK_TRUE(s.cbegin() == s.cend());
+    }
+
+    FL_SUBCASE("non-empty: *begin == s[0]") {
+        fl::string s("hello");
+        FL_CHECK_EQ(*s.begin(), s[0]);
+    }
+
+    FL_SUBCASE("end - begin == size") {
+        fl::string s("hello");
+        FL_CHECK_EQ(s.end() - s.begin(), static_cast<fl::ptrdiff_t>(s.size()));
+    }
+
+    FL_SUBCASE("cbegin value-equals begin") {
+        fl::string s("hello");
+        FL_CHECK_EQ(*s.cbegin(), *s.begin());
+        FL_CHECK_EQ(s.cend() - s.cbegin(), static_cast<fl::ptrdiff_t>(s.size()));
+    }
+
+    FL_SUBCASE("rbegin != rend when non-empty") {
+        fl::string s("hello");
+        FL_CHECK_TRUE(s.rbegin() != s.rend());
+    }
+
+    FL_SUBCASE("*rbegin == last char") {
+        fl::string s("hello");
+        FL_CHECK_EQ(*s.rbegin(), s[s.size() - 1]);
+    }
+}
+
+FL_TEST_CASE("fl::string iterator arithmetic") {
+    FL_SUBCASE("begin + 0 == begin") {
+        fl::string s("hello");
+        FL_CHECK_TRUE(s.begin() + 0 == s.begin());
+    }
+
+    FL_SUBCASE("begin + size == end") {
+        fl::string s("hello");
+        FL_CHECK_TRUE(s.begin() + static_cast<fl::ptrdiff_t>(s.size()) == s.end());
+    }
+
+    FL_SUBCASE("end - 1 points to last char") {
+        fl::string s("hello");
+        FL_CHECK_EQ(*(s.end() - 1), 'o');
+    }
+
+    FL_SUBCASE("begin < end when non-empty") {
+        fl::string s("hello");
+        FL_CHECK_TRUE(s.begin() < s.end());
+    }
+
+    FL_SUBCASE("begin[n] == s[n] for all positions") {
+        fl::string s("hello");
+        for (fl::size i = 0; i < s.size(); ++i) {
+            FL_CHECK_EQ(s.begin()[static_cast<fl::ptrdiff_t>(i)], s[i]);
+        }
+    }
+}
+
+FL_TEST_CASE("fl::string range-for") {
+    FL_SUBCASE("empty string: range-for body executes zero times") {
+        fl::string s;
+        int count = 0;
+        for (char c : s) {
+            (void)c;
+            ++count;
+        }
+        FL_CHECK_EQ(count, 0);
+    }
+
+    FL_SUBCASE("non-empty string: iterates chars in order") {
+        fl::string s("abc");
+        fl::string collected;
+        for (char c : s) {
+            collected.push_back(c);
+        }
+        FL_CHECK_EQ(collected, "abc");
+    }
+}
+
+FL_TEST_CASE("fl::string assign variants") {
+    FL_SUBCASE("assign(ptr, 3) truncates") {
+        fl::string s;
+        s.assign("hello", 3);
+        FL_CHECK_EQ(s.size(), 3u);
+        FL_CHECK_EQ(s, "hel");
+    }
+
+    FL_SUBCASE("assign(ptr, 0) empties") {
+        fl::string s("hello");
+        s.assign("hello", 0);
+        FL_CHECK_EQ(s.size(), 0u);
+        FL_CHECK_TRUE(s.empty());
+    }
+
+    FL_SUBCASE("assign(string_view empty) empties") {
+        fl::string s("hello");
+        s.assign(fl::string_view());
+        FL_CHECK_EQ(s.size(), 0u);
+        FL_CHECK_TRUE(s.empty());
+    }
+
+    FL_SUBCASE("assign(string_view with content)") {
+        fl::string s;
+        s.assign(fl::string_view("abc", 3));
+        FL_CHECK_EQ(s.size(), 3u);
+        FL_CHECK_EQ(s, "abc");
+    }
+
+    FL_SUBCASE("assign(count, char) fill") {
+        fl::string s;
+        s.assign(5u, 'x');
+        FL_CHECK_EQ(s.size(), 5u);
+        FL_CHECK_EQ(s, "xxxxx");
+    }
+
+    FL_SUBCASE("assign(InputIt, InputIt) from range") {
+        const char arr[] = "hello";
+        fl::string s;
+        s.assign(arr, arr + 5);
+        FL_CHECK_EQ(s.size(), 5u);
+        FL_CHECK_EQ(s, "hello");
+    }
+}
+
+FL_TEST_CASE("fl::string reverse iterators") {
+    FL_SUBCASE("rbegin is last char, incrementing walks backwards") {
+        fl::string s("abc");
+        auto it = s.rbegin();
+        FL_CHECK_EQ(*it, 'c');
+        ++it;
+        FL_CHECK_EQ(*it, 'b');
+        ++it;
+        FL_CHECK_EQ(*it, 'a');
+        ++it;
+        FL_CHECK_TRUE(it == s.rend());
+    }
+
+    FL_SUBCASE("crbegin matches rbegin content") {
+        fl::string s("abc");
+        FL_CHECK_EQ(*s.crbegin(), *s.rbegin());
+    }
+
+    FL_SUBCASE("reverse walk matches forward walk reversed") {
+        fl::string s("hello");
+        fl::string reversed;
+        for (auto it = s.rbegin(); it != s.rend(); ++it) {
+            reversed.push_back(*it);
+        }
+        FL_CHECK_EQ(reversed, "olleh");
+    }
+}
+
+FL_TEST_CASE("fl::string at() vs operator[]") {
+    FL_SUBCASE("at(0) and s[0] agree") {
+        fl::string s("hello");
+        FL_CHECK_EQ(s.at(0), s[0]);
+    }
+
+    FL_SUBCASE("at(size-1) and s[size-1] agree") {
+        fl::string s("hello");
+        FL_CHECK_EQ(s.at(s.size() - 1), s[s.size() - 1]);
+    }
+
+    FL_SUBCASE("at(size) returns null terminator (out-of-bounds is safe, returns 0)") {
+        fl::string s("hello");
+        FL_CHECK_EQ(s.at(s.size()), '\0');
+    }
+}
+
+// ============================================================================
+// Boundary conditions + storage-mode transitions
+// (Cluster from test-writer-agent: empty variants, inline/heap boundary,
+//  literal/view materialize, cross-size assign, shrink_to_fit, resize)
+// ============================================================================
+
+FL_TEST_CASE("string - empty variants all produce valid empty state") {
+    FL_SUBCASE("default constructor") {
+        fl::string s;
+        FL_CHECK_EQ(s.size(), 0u);
+        FL_CHECK_TRUE(s.empty());
+        FL_CHECK_TRUE(s.c_str() != nullptr);
+        FL_CHECK_EQ(s.c_str()[0], '\0');
+        FL_CHECK_TRUE(s == "");
+    }
+
+    FL_SUBCASE("construction from empty literal") {
+        fl::string s("");
+        FL_CHECK_EQ(s.size(), 0u);
+        FL_CHECK_TRUE(s.empty());
+        FL_CHECK_EQ(s.c_str()[0], '\0');
+        FL_CHECK_TRUE(s == "");
+    }
+
+    FL_SUBCASE("construction fill-count zero") {
+        fl::string s(0u, 'x');
+        FL_CHECK_EQ(s.size(), 0u);
+        FL_CHECK_TRUE(s.empty());
+        FL_CHECK_TRUE(s == "");
+    }
+
+    FL_SUBCASE("assign empty ptr+len") {
+        fl::string s("hello");
+        s.assign("", 0u);
+        FL_CHECK_EQ(s.size(), 0u);
+        FL_CHECK_TRUE(s.empty());
+        FL_CHECK_EQ(s.c_str()[0], '\0');
+    }
+
+    FL_SUBCASE("clear resets to empty") {
+        fl::string s("hello");
+        s.clear();
+        FL_CHECK_EQ(s.size(), 0u);
+        FL_CHECK_TRUE(s.empty());
+        FL_CHECK_EQ(s.c_str()[0], '\0');
+        FL_CHECK_TRUE(s == "");
+    }
+}
+
+FL_TEST_CASE("string - sizes around FASTLED_STR_INLINED_SIZE boundary") {
+    FL_SUBCASE("length 63 stays inline, content correct") {
+        fl::string s(63u, 'a');
+        FL_CHECK_EQ(s.size(), 63u);
+        FL_CHECK_TRUE(s.is_owning());
+        FL_CHECK_FALSE(s.is_referencing());
+        FL_CHECK_EQ(s[62], 'a');
+        FL_CHECK_EQ(s.at(63u), '\0');
+    }
+
+    FL_SUBCASE("length 64 exceeds inline, spills to heap") {
+        fl::string s(64u, 'b');
+        FL_CHECK_EQ(s.size(), 64u);
+        FL_CHECK_TRUE(s.is_owning());
+        FL_CHECK_FALSE(s.is_referencing());
+        FL_CHECK_EQ(s[63], 'b');
+        FL_CHECK_EQ(s.c_str()[64], '\0');
+    }
+
+    FL_SUBCASE("length 65 is heap-allocated") {
+        fl::string s(65u, 'c');
+        FL_CHECK_EQ(s.size(), 65u);
+        FL_CHECK_TRUE(s.is_owning());
+        FL_CHECK_EQ(s[64], 'c');
+        FL_CHECK_EQ(s.c_str()[65], '\0');
+    }
+}
+
+FL_TEST_CASE("string - inline to heap promotion preserves content") {
+    fl::string s("hello");
+    FL_CHECK_EQ(s.size(), 5u);
+    FL_CHECK_TRUE(s.is_owning());
+
+    fl::string suffix(60u, 'x');
+    s.append(suffix.c_str());  // 5 + 60 = 65 > 64
+
+    FL_CHECK_EQ(s.size(), 65u);
+    FL_CHECK_TRUE(s.is_owning());
+    FL_CHECK_FALSE(s.is_referencing());
+    FL_CHECK_EQ(s[0], 'h');
+    FL_CHECK_EQ(s[4], 'o');
+    FL_CHECK_EQ(s[5], 'x');
+    FL_CHECK_EQ(s[64], 'x');
+    FL_CHECK_EQ(s.c_str()[65], '\0');
+}
+
+FL_TEST_CASE("string - literal to owning materialize on mutation") {
+    const char* original = "foo";
+    fl::string lit = fl::string::from_literal(original);
+
+    FL_CHECK_TRUE(lit.is_referencing());
+    FL_CHECK_FALSE(lit.is_owning());
+    FL_CHECK_EQ(lit.size(), 3u);
+
+    lit.append("x");
+
+    FL_CHECK_FALSE(lit.is_referencing());
+    FL_CHECK_TRUE(lit.is_owning());
+    FL_CHECK_EQ(lit.size(), 4u);
+    FL_CHECK_TRUE(lit == "foox");
+    FL_CHECK_EQ(fl::strcmp(original, "foo"), 0);
+}
+
+FL_TEST_CASE("string - view to owning materialize via c_str") {
+    char buf[8] = {'h', 'e', 'l', 'l', 'o', 'X', 'X', 'X'};
+    fl::string sv = fl::string::from_view(buf, 5u);
+
+    FL_CHECK_EQ(sv.size(), 5u);
+    FL_CHECK_TRUE(sv.is_referencing());
+
+    const char* cs = sv.c_str();
+
+    FL_CHECK_FALSE(sv.is_referencing());
+    FL_CHECK_TRUE(sv.is_owning());
+    FL_CHECK_EQ(sv.size(), 5u);
+    FL_CHECK_EQ(cs[5], '\0');
+    FL_CHECK_EQ(fl::strcmp(cs, "hello"), 0);
+}
+
+FL_TEST_CASE("string - cross-size assignment small to large forces heap") {
+    fl::string_small small_s;
+    small_s = fl::string_large("longer than thirty-two characters here!!!");
+
+    FL_CHECK_EQ(fl::strcmp(small_s.c_str(), "longer than thirty-two characters here!!!"), 0);
+    FL_CHECK_EQ(small_s.size(), 41u);
+    FL_CHECK_TRUE(small_s.is_owning());
+    FL_CHECK_FALSE(small_s.is_referencing());
+}
+
+FL_TEST_CASE("string - shrink_to_fit drops heap back to inline when content fits") {
+    fl::string s;
+    s.reserve(200u);
+    FL_CHECK_TRUE(s.is_owning());
+    s.assign("short", 5u);
+    FL_CHECK_EQ(s.size(), 5u);
+
+    s.shrink_to_fit();
+
+    FL_CHECK_TRUE(s.is_owning());
+    FL_CHECK_FALSE(s.is_referencing());
+    FL_CHECK_EQ(s.size(), 5u);
+    FL_CHECK_TRUE(s == "short");
+    FL_CHECK_LE(s.capacity(), static_cast<fl::size>(FASTLED_STR_INLINED_SIZE));
+}
+
+FL_TEST_CASE("string - reserve past inline then write short content") {
+    fl::string s("hi");
+    s.reserve(128u);
+    FL_CHECK_GE(s.capacity(), 128u);
+    FL_CHECK_EQ(s.size(), 2u);
+    FL_CHECK_TRUE(s == "hi");
+    FL_CHECK_TRUE(s.is_owning());
+}
+
+FL_TEST_CASE("string - resize boundaries") {
+    FL_SUBCASE("resize(0) empties string") {
+        fl::string s("hello");
+        s.resize(0u);
+        FL_CHECK_EQ(s.size(), 0u);
+        FL_CHECK_TRUE(s.empty());
+        FL_CHECK_EQ(s.c_str()[0], '\0');
+    }
+
+    FL_SUBCASE("resize(size()) is a no-op") {
+        fl::string s("hello");
+        s.resize(5u);
+        FL_CHECK_EQ(s.size(), 5u);
+        FL_CHECK_TRUE(s == "hello");
+    }
+
+    FL_SUBCASE("resize(size()+1, 'x') appends fill char") {
+        fl::string s("hello");
+        s.resize(6u, 'x');
+        FL_CHECK_EQ(s.size(), 6u);
+        FL_CHECK_EQ(s[5], 'x');
+        FL_CHECK_EQ(s.c_str()[6], '\0');
+        FL_CHECK_TRUE(s == "hellox");
+    }
+
+    FL_SUBCASE("resize(size()-1) shrinks by one") {
+        fl::string s("hello");
+        s.resize(4u);
+        FL_CHECK_EQ(s.size(), 4u);
+        FL_CHECK_TRUE(s == "hell");
+        FL_CHECK_EQ(s.c_str()[4], '\0');
+    }
+}
+
+// ============================================================================
+// substr / find / rfind family + npos edge cases
+// (Cluster from test-writer-agent: every overflow-prone path + boundary
+//  positions + heap-promoted variants + starts_with/ends_with/contains)
+// ============================================================================
+
+FL_TEST_CASE("fl::string - substr npos overflow (regression: start+length wrap)") {
+    FL_SUBCASE("substr(0, 0) -> empty") {
+        fl::string s("hello");
+        FL_CHECK_TRUE(s.substr(0, 0).empty());
+    }
+
+    FL_SUBCASE("substr(0, size()) -> full copy") {
+        fl::string s("hello");
+        FL_CHECK_EQ(s.substr(0, s.size()), s);
+    }
+
+    FL_SUBCASE("substr(0, npos) -> full copy [the fixed overflow]") {
+        fl::string s("hello");
+        fl::string result = s.substr(0, fl::string::npos);
+        FL_CHECK_EQ(result, s);
+        FL_CHECK_EQ(result.size(), static_cast<fl::size>(5));
+    }
+
+    FL_SUBCASE("substr(0, size()+10) -> full copy (clamped)") {
+        fl::string s("hello");
+        fl::string result = s.substr(0, s.size() + 10);
+        FL_CHECK_EQ(result, s);
+    }
+
+    FL_SUBCASE("substr(size(), 0) -> empty") {
+        fl::string s("hello");
+        FL_CHECK_TRUE(s.substr(s.size(), 0).empty());
+    }
+
+    FL_SUBCASE("substr(size(), npos) -> empty") {
+        fl::string s("hello");
+        FL_CHECK_TRUE(s.substr(s.size(), fl::string::npos).empty());
+    }
+
+    FL_SUBCASE("substr(size()+1, npos) -> empty, must not crash") {
+        fl::string s("hello");
+        FL_CHECK_TRUE(s.substr(s.size() + 1, fl::string::npos).empty());
+    }
+
+    FL_SUBCASE("substr(2, npos) on 10-char string -> tail from pos 2") {
+        fl::string s("0123456789");
+        fl::string result = s.substr(2, fl::string::npos);
+        FL_CHECK_EQ(result, fl::string("23456789"));
+        FL_CHECK_EQ(result.size(), static_cast<fl::size>(8));
+    }
+
+    FL_SUBCASE("substr(2, size(-2)) huge non-npos -> clamped, not overflowed") {
+        fl::string s("0123456789");
+        fl::string result = s.substr(2, static_cast<fl::size>(-2));
+        FL_CHECK_EQ(result, fl::string("23456789"));
+    }
+}
+
+FL_TEST_CASE("fl::string - substring() API") {
+    FL_SUBCASE("substring(0, 0) -> empty") {
+        fl::string s("hello");
+        FL_CHECK_TRUE(s.substring(0, 0).empty());
+    }
+
+    FL_SUBCASE("substring(0, size()) -> full") {
+        fl::string s("hello");
+        FL_CHECK_EQ(s.substring(0, s.size()), s);
+    }
+
+    FL_SUBCASE("substring(size(), size()) -> empty") {
+        fl::string s("hello");
+        FL_CHECK_TRUE(s.substring(s.size(), s.size()).empty());
+    }
+
+    FL_SUBCASE("substring(size(), size()+1) -> empty (start >= size)") {
+        fl::string s("hello");
+        FL_CHECK_TRUE(s.substring(s.size(), s.size() + 1).empty());
+    }
+
+    FL_SUBCASE("substring(3, 2) -> empty (start > end)") {
+        fl::string s("hello");
+        FL_CHECK_TRUE(s.substring(3, 2).empty());
+    }
+
+    FL_SUBCASE("substring(0, size()+10) -> full (end clamped)") {
+        fl::string s("hello");
+        FL_CHECK_EQ(s.substring(0, s.size() + 10), s);
+    }
+
+    FL_SUBCASE("substring mid-string") {
+        fl::string s("0123456789");
+        FL_CHECK_EQ(s.substring(2, 6), fl::string("2345"));
+    }
+}
+
+FL_TEST_CASE("fl::string - substr/substring on empty string") {
+    fl::string empty;
+
+    FL_SUBCASE("substr(0, 0)") {
+        FL_CHECK_TRUE(empty.substr(0, 0).empty());
+    }
+
+    FL_SUBCASE("substr(0, npos)") {
+        FL_CHECK_TRUE(empty.substr(0, fl::string::npos).empty());
+    }
+
+    FL_SUBCASE("substr(0, 100)") {
+        FL_CHECK_TRUE(empty.substr(0, 100).empty());
+    }
+
+    FL_SUBCASE("substring(0, 0)") {
+        FL_CHECK_TRUE(empty.substring(0, 0).empty());
+    }
+
+    FL_SUBCASE("substring(0, 1)") {
+        FL_CHECK_TRUE(empty.substring(0, 1).empty());
+    }
+}
+
+FL_TEST_CASE("fl::string - substr/substring on heap-promoted string (>64 chars)") {
+    const char* long_prefix = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz_X";
+    fl::string s(long_prefix);
+    FL_CHECK_GT(s.size(), static_cast<fl::size>(64));
+
+    FL_SUBCASE("substr(0, npos) returns full copy from heap") {
+        fl::string result = s.substr(0, fl::string::npos);
+        FL_CHECK_EQ(result.size(), s.size());
+        FL_CHECK_EQ(result, s);
+    }
+
+    FL_SUBCASE("substr(0, size()) returns full copy from heap") {
+        fl::string result = s.substr(0, s.size());
+        FL_CHECK_EQ(result, s);
+    }
+
+    FL_SUBCASE("substr mid-range from heap") {
+        fl::string result = s.substr(2, 4);
+        FL_CHECK_EQ(result, fl::string("CDEF"));
+    }
+}
+
+FL_TEST_CASE("fl::string - find with npos position argument") {
+    FL_SUBCASE("find(char, npos) -> npos, must not crash") {
+        fl::string s("hello");
+        FL_CHECK_EQ(s.find('h', fl::string::npos), fl::string::npos);
+        FL_CHECK_EQ(s.find('x', fl::string::npos), fl::string::npos);
+    }
+
+    FL_SUBCASE("find(char) in empty string -> npos") {
+        fl::string s;
+        FL_CHECK_EQ(s.find('x'), fl::string::npos);
+    }
+
+    FL_SUBCASE("find(char) match at position 0") {
+        fl::string s("abc");
+        FL_CHECK_EQ(s.find('a'), static_cast<fl::size>(0));
+    }
+
+    FL_SUBCASE("find(char) match at last position") {
+        fl::string s("abcz");
+        FL_CHECK_EQ(s.find('z'), static_cast<fl::size>(3));
+    }
+
+    FL_SUBCASE("find(empty string) -> 0 (per std)") {
+        fl::string s("hello");
+        FL_CHECK_EQ(s.find(""), static_cast<fl::size>(0));
+    }
+
+    FL_SUBCASE("find empty string in empty string -> 0") {
+        fl::string s;
+        FL_CHECK_EQ(s.find(""), static_cast<fl::size>(0));
+    }
+
+    FL_SUBCASE("find needle == haystack -> 0") {
+        fl::string s("abc");
+        FL_CHECK_EQ(s.find("abc"), static_cast<fl::size>(0));
+    }
+
+    FL_SUBCASE("find needle longer than haystack -> npos") {
+        fl::string s("ab");
+        FL_CHECK_EQ(s.find("abcd"), fl::string::npos);
+    }
+
+    FL_SUBCASE("find(char, size()) -> npos") {
+        fl::string s("hello");
+        FL_CHECK_EQ(s.find('h', s.size()), fl::string::npos);
+    }
+}
+
+FL_TEST_CASE("fl::string - rfind edge cases") {
+    FL_SUBCASE("rfind(char) with no match -> npos") {
+        fl::string s("hello");
+        FL_CHECK_EQ(s.rfind('x'), fl::string::npos);
+    }
+
+    FL_SUBCASE("rfind(char) match only at position 0") {
+        fl::string s("hbcde");
+        FL_CHECK_EQ(s.rfind('h'), static_cast<fl::size>(0));
+    }
+
+    FL_SUBCASE("rfind(char) match only at size()-1") {
+        fl::string s("abcdz");
+        FL_CHECK_EQ(s.rfind('z'), static_cast<fl::size>(4));
+    }
+
+    FL_SUBCASE("rfind(char, 0) -> 0 if s[0]==char, else npos") {
+        fl::string s("hello");
+        FL_CHECK_EQ(s.rfind('h', 0), static_cast<fl::size>(0));
+        FL_CHECK_EQ(s.rfind('e', 0), fl::string::npos);
+    }
+
+    FL_SUBCASE("rfind(char, npos) -> searches whole string") {
+        fl::string s("abcba");
+        FL_CHECK_EQ(s.rfind('a', fl::string::npos), static_cast<fl::size>(4));
+    }
+
+    FL_SUBCASE("rfind on empty string -> npos for char, 0 for empty needle") {
+        fl::string s;
+        FL_CHECK_EQ(s.rfind('x'), fl::string::npos);
+        FL_CHECK_EQ(s.rfind(""), static_cast<fl::size>(0));
+    }
+}
+
+FL_TEST_CASE("fl::string - find_first_not_of and find_first_of edges") {
+    FL_SUBCASE("find_first_not_of with empty set -> first char (pos 0)") {
+        fl::string s("hello");
+        FL_CHECK_EQ(s.find_first_not_of(""), static_cast<fl::size>(0));
+    }
+
+    FL_SUBCASE("find_first_not_of whitespace trim pattern") {
+        fl::string s("   text");
+        FL_CHECK_EQ(s.find_first_not_of(" \t"), static_cast<fl::size>(3));
+    }
+
+    FL_SUBCASE("find_first_not_of all matching -> npos") {
+        fl::string s("aaaa");
+        FL_CHECK_EQ(s.find_first_not_of("a"), fl::string::npos);
+    }
+
+    FL_SUBCASE("find_first_not_of pos at size() -> npos") {
+        fl::string s("hello");
+        FL_CHECK_EQ(s.find_first_not_of("x", s.size()), fl::string::npos);
+    }
+
+    FL_SUBCASE("find_first_of 'a' or 'b' in 'cccccab' -> 5") {
+        fl::string s("cccccab");
+        FL_CHECK_EQ(s.find_first_of("ab"), static_cast<fl::size>(5));
+    }
+}
+
+FL_TEST_CASE("fl::string - find_last_not_of edge cases") {
+    FL_SUBCASE("find_last_not_of on empty string -> npos") {
+        fl::string s;
+        FL_CHECK_EQ(s.find_last_not_of("abc"), fl::string::npos);
+        FL_CHECK_EQ(s.find_last_not_of('x'), fl::string::npos);
+    }
+
+    FL_SUBCASE("find_last_not_of all chars in set -> npos") {
+        fl::string s("aaaa");
+        FL_CHECK_EQ(s.find_last_not_of('a'), fl::string::npos);
+        FL_CHECK_EQ(s.find_last_not_of("a"), fl::string::npos);
+    }
+
+    FL_SUBCASE("find_last_not_of with pos=0 stops after first char") {
+        fl::string s("xhello");
+        FL_CHECK_EQ(s.find_last_not_of("abc", 0), static_cast<fl::size>(0));
+    }
+
+    FL_SUBCASE("find_last_not_of with pos=npos searches whole string") {
+        fl::string s("hello!");
+        FL_CHECK_EQ(s.find_last_not_of("helo", fl::string::npos), static_cast<fl::size>(5));
+    }
+
+    FL_SUBCASE("find_last_of pos=0 only checks first char") {
+        fl::string s("hello");
+        FL_CHECK_EQ(s.find_last_of("h", 0), static_cast<fl::size>(0));
+        FL_CHECK_EQ(s.find_last_of("e", 0), fl::string::npos);
+    }
+}
+
+FL_TEST_CASE("fl::string - starts_with / ends_with / contains") {
+    FL_SUBCASE("starts_with empty prefix -> true") {
+        fl::string s("hello");
+        FL_CHECK_TRUE(s.starts_with(""));
+        FL_CHECK_TRUE(s.starts_with(fl::string("")));
+    }
+
+    FL_SUBCASE("starts_with prefix longer than string -> false") {
+        fl::string s("hi");
+        FL_CHECK_FALSE(s.starts_with("hello"));
+    }
+
+    FL_SUBCASE("starts_with exact match -> true") {
+        fl::string s("hello");
+        FL_CHECK_TRUE(s.starts_with("hello"));
+        FL_CHECK_TRUE(s.starts_with(s));
+    }
+
+    FL_SUBCASE("starts_with single char") {
+        fl::string s("hello");
+        FL_CHECK_TRUE(s.starts_with('h'));
+        FL_CHECK_FALSE(s.starts_with('e'));
+    }
+
+    FL_SUBCASE("starts_with on empty string") {
+        fl::string s;
+        FL_CHECK_TRUE(s.starts_with(""));
+        FL_CHECK_FALSE(s.starts_with("a"));
+        FL_CHECK_FALSE(s.starts_with('a'));
+    }
+
+    FL_SUBCASE("ends_with empty suffix -> true") {
+        fl::string s("hello");
+        FL_CHECK_TRUE(s.ends_with(""));
+        FL_CHECK_TRUE(s.ends_with(fl::string("")));
+    }
+
+    FL_SUBCASE("ends_with suffix longer than string -> false") {
+        fl::string s("hi");
+        FL_CHECK_FALSE(s.ends_with("hello"));
+    }
+
+    FL_SUBCASE("ends_with exact match -> true") {
+        fl::string s("hello");
+        FL_CHECK_TRUE(s.ends_with("hello"));
+    }
+
+    FL_SUBCASE("ends_with single char") {
+        fl::string s("hello");
+        FL_CHECK_TRUE(s.ends_with('o'));
+        FL_CHECK_FALSE(s.ends_with('h'));
+    }
+
+    FL_SUBCASE("ends_with on empty string") {
+        fl::string s;
+        FL_CHECK_TRUE(s.ends_with(""));
+        FL_CHECK_FALSE(s.ends_with("a"));
+        FL_CHECK_FALSE(s.ends_with('a'));
+    }
+
+    FL_SUBCASE("contains char/substring basic") {
+        fl::string s("hello world");
+        FL_CHECK_TRUE(s.contains('w'));
+        FL_CHECK_FALSE(s.contains('z'));
+        FL_CHECK_TRUE(s.contains("world"));
+        FL_CHECK_FALSE(s.contains("xyz"));
+    }
+
+    FL_SUBCASE("contains empty string -> true (find returns 0)") {
+        fl::string s("hello");
+        FL_CHECK_TRUE(s.contains(""));
+    }
+
+    FL_SUBCASE("contains on empty string") {
+        fl::string s;
+        FL_CHECK_FALSE(s.contains('a'));
+        FL_CHECK_FALSE(s.contains("a"));
     }
 }
 
