@@ -121,6 +121,7 @@ src/platforms/wasm/compiler/node_modules/
 .claude/pr*_*.json
 .claude/issue_*.md
 .claude/*.log
+.claude/symbolaudit/
 
 # Misc agent/tool transient stdout/stderr captures
 .tmp_*.txt
