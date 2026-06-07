@@ -57,6 +57,24 @@ CONFIG_BOOTLOADER_LOG_LEVEL_NONE=y
 # Projected savings: ~1-2 KB.
 CONFIG_ESP_SYSTEM_PANIC_PRINT_HALT=y
 
+# Switch newlib to nano printf/scanf variants. This is BY FAR the
+# largest single lever in the overlay — the standard newlib printf
+# cluster (`_vfprintf_r`, `_svfprintf_r`, `_svfiprintf_r`, `_vfiprintf_r`,
+# `_dtoa_r`, `get_arg$isra$0` copies) collectively eats ~45 KB on the
+# ESP32-S3 NEOPIXEL Blink baseline (#2886 audit). Nano newlib drops
+# that cluster by 50-70%.
+#
+# CONSTRAINT: nano printf has no `%f` / `%lf` / `%lld` / positional-arg
+# support. Sketches that print floating-point values via printf will
+# see literal format specifiers in the output instead of the formatted
+# number. Most LED installations don't print floats; if yours does:
+#   - drop this overlay entirely, OR
+#   - layer your own sdkconfig overlay AFTER FastLED's with
+#     `CONFIG_NEWLIB_NANO_FORMAT=n` to override.
+#
+# Projected savings: ~20-30 KB.
+CONFIG_NEWLIB_NANO_FORMAT=y
+
 # -----------------------------------------------------------------------------
 # Situational knobs — uncomment ONLY if you know your project doesn't need them
 # -----------------------------------------------------------------------------

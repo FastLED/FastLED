@@ -39,7 +39,7 @@ To measure your own build: `bash bloat esp32s3 --build` then `jq '.total_flash' 
 | # | Lever | How to enable | Savings | Status | PR |
 |---:|---|---|---:|:---:|---|
 | 1 | `FASTLED_LOG_VERBOSITY=0` | **Default on release builds** (NDEBUG); `-DFASTLED_LOG_VERBOSITY=1` to restore | **−37,812 B measured** (388,380 → 350,568 B on 824cb5c0e3) | ✅ | #2890 |
-| 2 | `tools/sdkconfig_for_smallest_fastled.defaults` | `board_build.sdkconfig_defaults` in `platformio.ini` | ~10-15 KB | 📊 | #2896 |
+| 2 | `tools/sdkconfig_for_smallest_fastled.defaults` | `board_build.sdkconfig_defaults` in `platformio.ini`. **Includes `CONFIG_NEWLIB_NANO_FORMAT=y`** which drops the standard newlib printf cluster — see Stage 3 detail below. | ~30-45 KB | 📊 | #2896 + #2915 |
 | 3 | `-DFASTLED_RMT_STATIC_ALLOCATION=1` | `build_flags`; for sketches that init LEDs in `setup()` and never `removeLeds()` | ~22-43 KB | 📊 | #2846 |
 | 4 | `-DFASTLED_SUPPRESS_ARDUINO_CHIP_DEBUG_REPORT=1` | `build_flags`; strong-overrides the Arduino-ESP32 boot-banner gate | ~3 KB | 📊 | #2894 |
 | 5 | `CONFIG_BT_ENABLED=n` | uncomment the situational block in `tools/sdkconfig_for_smallest_fastled.defaults` | ~15 KB (if currently on) | 📊 | — |
@@ -66,16 +66,19 @@ Row 1 is empirically confirmed by the 2026-06-06 audit (see the [#2886 audit com
 
 ### 2. `tools/sdkconfig_for_smallest_fastled.defaults`
 
-**Mechanism:** ESP-IDF sdkconfig overlay applied via `board_build.sdkconfig_defaults`. The overlay flips four knobs:
+**Mechanism:** ESP-IDF sdkconfig overlay applied via `board_build.sdkconfig_defaults`. The overlay flips five knobs:
 
 | Knob | Disables | Savings |
 |---|---|---:|
+| `CONFIG_NEWLIB_NANO_FORMAT=y` | standard newlib printf cluster (`_vfprintf_r`, `_svfprintf_r`, `_svfiprintf_r`, `_vfiprintf_r`, `_dtoa_r`, `get_arg$isra$0`) | **~20-30 KB** |
 | `CONFIG_ESP_COREDUMP_ENABLE_TO_FLASH=n` | libespcoredump (top-25 rows #18 + #25) | ~8 KB |
 | `CONFIG_LOG_DEFAULT_LEVEL=ESP_LOG_NONE` | libesp_diagnostics + IDF log strings (row #19) | ~3 KB |
 | `CONFIG_BOOTLOADER_LOG_LEVEL_NONE=y` | bootloader-stage UART chatter | ~1 KB |
 | `CONFIG_ESP_SYSTEM_PANIC_PRINT_HALT=y` | panic-time backtrace formatter | ~1-2 KB |
 
 The overlay file at [`../tools/sdkconfig_for_smallest_fastled.defaults`](../tools/sdkconfig_for_smallest_fastled.defaults) carries the full per-knob commentary inline.
+
+**`CONFIG_NEWLIB_NANO_FORMAT=y` constraint:** nano printf has no `%f` / `%lf` / `%lld` / positional-arg support. Sketches that print floating-point values via printf will see literal format specifiers in the output instead of the formatted number. Most LED installations don't print floats; if yours does, either drop the overlay entirely or layer your own sdkconfig overlay AFTER FastLED's with `CONFIG_NEWLIB_NANO_FORMAT=n` to override.
 
 **`CONFIG_BT_ENABLED=n`** is shipped as a commented-out situational block — uncomment only if your sketch doesn't use BLE/BT (another ~15 KB).
 
