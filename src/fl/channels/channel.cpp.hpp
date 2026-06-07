@@ -378,6 +378,13 @@ void writeUCS7604(fl::vector_psram<u8>* data, PixelIterator& pixelIterator,
 /// hot icache line.
 FL_NO_INLINE
 fl::shared_ptr<IChannelDriver> Channel::resolveDynamicDriver() {
+#if defined(FASTLED_DISABLE_DYNAMIC_DRIVER) && FASTLED_DISABLE_DYNAMIC_DRIVER
+    // Body excluded via FASTLED_DISABLE_DYNAMIC_DRIVER (#2926). The
+    // showPixels call site is also gated so this is unreachable; the
+    // empty body lets the linker dead-strip ChannelManager::findDriverByName
+    // and selectDriverForChannel along with this symbol.
+    return {};
+#else
     // Build busKey only when we actually need it (mBus != AUTO).
     fl::string busKey;
     if (mBus != Bus::AUTO) {
@@ -419,6 +426,7 @@ fl::shared_ptr<IChannelDriver> Channel::resolveDynamicDriver() {
         FL_ERROR("Channel '" << mName << "': No compatible driver found - cannot transmit");
     }
     return driver;
+#endif  // !FASTLED_DISABLE_DYNAMIC_DRIVER
 }
 
 void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
@@ -464,10 +472,22 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
             return;
         }
     } else {
+#if !defined(FASTLED_DISABLE_DYNAMIC_DRIVER) || !FASTLED_DISABLE_DYNAMIC_DRIVER
         driver = resolveDynamicDriver();
         if (!driver) {
             return;
         }
+#else
+        // Dynamic-driver lookup gated out via FASTLED_DISABLE_DYNAMIC_DRIVER
+        // (#2926). The else branch is dead at runtime for every legacy
+        // `addLeds<>` flavor — those pre-bind their driver in the ctor. The
+        // gate lets `--gc-sections` drop the resolveDynamicDriver body plus
+        // the ChannelManager::findDriverByName / selectDriverForChannel
+        // chain (~400-900 B). Channels created via `Channel::create(cfg)`
+        // without a pre-bound driver silently emit nothing under this flag —
+        // user accepts the constraint.
+        return;
+#endif
     }
 
     // Build pixel iterator with optional addressing transformation

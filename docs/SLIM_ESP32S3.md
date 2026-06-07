@@ -45,6 +45,7 @@ To measure your own build: `bash bloat esp32s3 --build` then `jq '.total_flash' 
 | 5 | `CONFIG_BT_ENABLED=n` | uncomment the situational block in `tools/sdkconfig_for_smallest_fastled.defaults` | ~15 KB (if currently on) | 📊 | — |
 | 6 | `-DFASTLED_DISABLE_SPI_CHIPSETS=1` | `build_flags`; drops the SPI dispatch branch in `Channel::showPixels`. **Constraint:** clockless-only sketches; calling `FastLED.addLeds<APA102, ...>` (or any SPI chipset) under this flag silently emits nothing. | ~1.0-1.2 KB | 📊 | #2913 |
 | 7 | `-DFASTLED_DISABLE_UCS7604=1` | `build_flags`; drops the UCS7604 cases in `Channel::showPixels`'s clockless switch. **Constraint:** WS2812-only sketches; calling `FastLED.addLeds<UCS7604, ...>` under this flag silently emits nothing. | ~400-600 B | 📊 | #2920 |
+| 8 | `-DFASTLED_DISABLE_DYNAMIC_DRIVER=1` | `build_flags`; gates out `Channel::resolveDynamicDriver()` and its `ChannelManager::findDriverByName` / `selectDriverForChannel` lookup chain. **Constraint:** legacy `addLeds<>` flow only (every `addLeds<>` flavor pre-binds in its ctor). Channels created via manager-based `Channel::create(cfg)` without pre-binding silently emit nothing. | ~400-900 B | 📊 | #2926 |
 
 **Legend:** ✅ measured against a recorded baseline · 📊 projected from the top-25 symbol attribution in #2886.
 
