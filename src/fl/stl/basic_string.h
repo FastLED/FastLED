@@ -149,6 +149,16 @@ class basic_string {
     }
     bool is_referencing() const FL_NOEXCEPT { return is_literal() || is_view(); }
 
+    // ======= PUBLIC LITERAL ASSIGNMENT (#2963 Path C) =======
+    // Adopt `literal` as non-owning storage (no copy, no alloc). Caller
+    // guarantees the pointed-to bytes outlive the basic_string. Any
+    // subsequent mutation transparently materialises into an owning
+    // buffer — same contract as `from_literal` / `setLiteral`, but
+    // exposed publicly so `fl::sstream::operator<<(const char*)` can
+    // take the literal fast-path without going through a fl::string
+    // temporary.
+    void assign_literal(const char* literal) FL_NOEXCEPT { setLiteral(literal); }
+
     // ======= ACCESSORS =======
     fl::size size() const FL_NOEXCEPT { return mLength; }
     fl::size length() const FL_NOEXCEPT { return mLength; }

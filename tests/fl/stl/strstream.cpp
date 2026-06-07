@@ -1170,4 +1170,121 @@ FL_TEST_CASE("string append fixed_point types") {
     }
 }
 
+// ============================================================================
+// #2963 Path C — literal-aware sstream
+// Construction + a single `<<` with a string literal must stay in
+// ConstLiteral storage (no copy, no buffer use). Any mutating
+// operator<< after that must transparently materialise.
+// ============================================================================
+
+FL_TEST_CASE("sstream Path C - single literal stays in literal storage") {
+    FL_SUBCASE("const char* literal") {
+        fl::sstream s;
+        const char* msg = "constant message";
+        s << msg;
+        FL_CHECK_TRUE(s.is_pure_literal());
+        FL_CHECK_EQ(fl::strcmp(s.c_str(), "constant message"), 0);
+    }
+
+    FL_SUBCASE("char array literal") {
+        fl::sstream s;
+        s << "fixed array";
+        FL_CHECK_TRUE(s.is_pure_literal());
+        FL_CHECK_EQ(fl::strcmp(s.c_str(), "fixed array"), 0);
+    }
+
+    FL_SUBCASE("c_str() does NOT materialise pure literal storage") {
+        fl::sstream s;
+        const char* msg = "hold this pointer";
+        s << msg;
+        // c_str() on ConstLiteral returns the original pointer (no
+        // copy), so the address should be identical.
+        FL_CHECK_TRUE(s.c_str() == msg);
+        FL_CHECK_TRUE(s.is_pure_literal());
+    }
+
+    FL_SUBCASE("nullptr literal is a no-op (stays empty)") {
+        fl::sstream s;
+        const char* nul = nullptr;
+        s << nul;
+        FL_CHECK_FALSE(s.is_pure_literal());  // no literal stored
+        FL_CHECK_EQ(s.str().size(), 0u);
+    }
+}
+
+FL_TEST_CASE("sstream Path C - mutation materialises literal storage") {
+    FL_SUBCASE("literal then integer triggers materialise") {
+        fl::sstream s;
+        s << "hello ";
+        FL_CHECK_TRUE(s.is_pure_literal());
+        s << 42;
+        FL_CHECK_FALSE(s.is_pure_literal());
+        FL_CHECK_EQ(fl::strcmp(s.c_str(), "hello 42"), 0);
+    }
+
+    FL_SUBCASE("two consecutive literals materialise after the second") {
+        // basic_string can hold only one ConstLiteral. Two literal
+        // writes force the second to fall back to append, materialising.
+        fl::sstream s;
+        s << "foo";
+        FL_CHECK_TRUE(s.is_pure_literal());
+        s << "bar";
+        FL_CHECK_FALSE(s.is_pure_literal());
+        FL_CHECK_EQ(fl::strcmp(s.c_str(), "foobar"), 0);
+    }
+
+    FL_SUBCASE("literal then char materialises") {
+        fl::sstream s;
+        s << "x";
+        s << '!';
+        FL_CHECK_FALSE(s.is_pure_literal());
+        FL_CHECK_EQ(fl::strcmp(s.c_str(), "x!"), 0);
+    }
+
+    FL_SUBCASE("literal then string materialises") {
+        fl::sstream s;
+        s << "prefix-";
+        fl::string body("body");
+        s << body;
+        FL_CHECK_FALSE(s.is_pure_literal());
+        FL_CHECK_EQ(fl::strcmp(s.c_str(), "prefix-body"), 0);
+    }
+}
+
+FL_TEST_CASE("sstream Path C - non-literal first write keeps pure_literal false") {
+    FL_SUBCASE("integer first does not become literal") {
+        fl::sstream s;
+        s << 42;
+        FL_CHECK_FALSE(s.is_pure_literal());
+    }
+
+    FL_SUBCASE("char first does not become literal") {
+        fl::sstream s;
+        s << 'a';
+        FL_CHECK_FALSE(s.is_pure_literal());
+    }
+
+    FL_SUBCASE("string first does not become literal") {
+        fl::sstream s;
+        s << fl::string("hello");
+        FL_CHECK_FALSE(s.is_pure_literal());
+    }
+
+    FL_SUBCASE("integer then literal does NOT use literal path") {
+        // After a mutating write, subsequent const char* must append
+        // into the buffer — can't downgrade back to literal storage.
+        fl::sstream s;
+        s << 7;
+        s << " items";
+        FL_CHECK_FALSE(s.is_pure_literal());
+        FL_CHECK_EQ(fl::strcmp(s.c_str(), "7 items"), 0);
+    }
+}
+
+FL_TEST_CASE("sstream Path C - default-constructed is not pure_literal") {
+    fl::sstream s;
+    FL_CHECK_FALSE(s.is_pure_literal());
+    FL_CHECK_EQ(s.str().size(), 0u);
+}
+
 } // FL_TEST_FILE
