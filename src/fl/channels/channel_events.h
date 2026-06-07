@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/stl/function.h"
+#include "fl/stl/noexcept.h"
 #include "fl/stl/string.h"  // IWYU pragma: keep
 
 namespace fl {
@@ -39,6 +40,42 @@ struct ChannelConfig;
 /// Callbacks receive `const IChannel&` so the same listener works regardless
 /// of which `Channel<Bus, Chipset>` instantiation produced the event. See
 /// `fl/channels/ichannel.h` and issue #2428.
+#if defined(FASTLED_DISABLE_CHANNEL_EVENTS) && FASTLED_DISABLE_CHANNEL_EVENTS
+
+namespace detail {
+/// No-op event slot used when FASTLED_DISABLE_CHANNEL_EVENTS=1. All
+/// `operator()(...)` / `add(...)` / `remove(...)` calls compile and
+/// optimize to nothing. The class has no `fl::function_list` template
+/// instantiation, so `--gc-sections` can drop the supporting machinery
+/// it would have pulled in. See #2931 / #2886.
+struct NoOpChannelEvent {
+    template <typename... Args>
+    void operator()(Args&&...) const FL_NOEXCEPT {}
+
+    template <typename F>
+    int add(F&& /*f*/, int /*priority*/ = 0) const FL_NOEXCEPT { return -1; }
+
+    void remove(int /*id*/) const FL_NOEXCEPT {}
+};
+}  // namespace detail
+
+struct ChannelEvents {
+    static ChannelEvents& instance() FL_NOEXCEPT {
+        static ChannelEvents s;
+        return s;
+    }
+
+    detail::NoOpChannelEvent onChannelCreated;
+    detail::NoOpChannelEvent onChannelBeginDestroy;
+    detail::NoOpChannelEvent onChannelAdded;
+    detail::NoOpChannelEvent onChannelRemoved;
+    detail::NoOpChannelEvent onChannelConfigured;
+    detail::NoOpChannelEvent onChannelDataEncoded;
+    detail::NoOpChannelEvent onChannelEnqueued;
+};
+
+#else
+
 struct ChannelEvents {
     static ChannelEvents& instance();
 
@@ -74,5 +111,7 @@ struct ChannelEvents {
     /// Second parameter is the driver name (empty string for unnamed drivers)
     fl::function_list<void(const IChannel&, const fl::string& driverName)> onChannelEnqueued;
 };
+
+#endif  // FASTLED_DISABLE_CHANNEL_EVENTS
 
 }  // namespace fl
