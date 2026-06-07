@@ -278,24 +278,9 @@ class sstream {
 
     template<fl::size N>
     sstream &operator<<(const char (&str)[N]) FL_NOEXCEPT {
-        // Literal fast-path (#2963 Path C). A `const char (&)[N]` is by
-        // definition a literal array — same treatment as the const
-        // char* overload above.
-        if (mStr.empty() && !mStr.is_referencing()) {
-            mStr.assign_literal(str);
-        } else {
-            mStr.append(str);
-        }
+        mStr.append(str);
         return *this;
     }
-
-    // True when this sstream is still in pure-literal storage (set by
-    // exactly one `<< const char*` / `<< const char(&)[N]` since
-    // construction, with no mutating operators after). Callers (e.g.
-    // `fl::detail::log_emit`) use this to skip prefix materialisation
-    // and emit the literal pointer directly via `fl::println`. See
-    // #2963 Path C.
-    bool is_pure_literal() const FL_NOEXCEPT { return mStr.is_literal(); }
 
     template<fl::u32 N>
     sstream &operator<<(const bitset_fixed<N> &bs) FL_NOEXCEPT {
