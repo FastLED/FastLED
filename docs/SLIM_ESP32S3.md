@@ -39,7 +39,7 @@ To measure your own build: `bash bloat esp32s3 --build` then `jq '.total_flash' 
 
 | # | Lever | How to enable | Savings | Status | PR |
 |---:|---|---|---:|:---:|---|
-| 1 | `FASTLED_LOG_VERBOSITY=0` | **Default on release builds** (NDEBUG); `-DFASTLED_LOG_VERBOSITY=1` to restore | **−37,812 B measured** (388,380 → 350,568 B on 824cb5c0e3) | ✅ | #2890 |
+| 1 | `FASTLED_LOG_VERBOSITY=0` | **Default on release builds** (NDEBUG); `-DFASTLED_LOG_VERBOSITY=1` to restore | **−37,812 B from this flag alone** + post-Stage-1 cascade (see below) totalling **≈ −50,391 B** (388,380 → 337,989 B on master post-#2957) | ✅ | #2890 + cascade |
 | 2 | `tools/sdkconfig_for_smallest_fastled.defaults` | `board_build.sdkconfig_defaults` in `platformio.ini`. **Includes `CONFIG_NEWLIB_NANO_FORMAT=y`** which drops the standard newlib printf cluster — see Stage 3 detail below. | **−59,224 B measured** (339,962 → 280,738 B on `f43f76701a`) | ✅ | #2896 + #2915 |
 | 3 | `-DFASTLED_RMT_STATIC_ALLOCATION=1` | `build_flags`; for sketches that init LEDs in `setup()` and never `removeLeds()` | **−908 B measured** (339,962 → 339,054 B; well below projection) | ✅ | #2846 |
 | 4 | `-DFASTLED_SUPPRESS_ARDUINO_CHIP_DEBUG_REPORT=1` | `build_flags`; strong-overrides the Arduino-ESP32 boot-banner gate | ~3 KB | 📊 | #2894 |
@@ -52,6 +52,14 @@ To measure your own build: `bash bloat esp32s3 --build` then `jq '.total_flash' 
 **Legend:** ✅ measured against a recorded baseline · 📊 projected from the top-25 symbol attribution in #2886.
 
 Row 1 is empirically confirmed by the 2026-06-06 audit (see the [#2886 audit comment](https://github.com/FastLED/FastLED/issues/2886#issuecomment-4641413123) and the Stage 6 gate baseline at `tests/data/esp32s3_bloat_baseline.txt`). Rows 2-5 stay 📊 until a measured build with their flag / overlay enabled is recorded.
+
+> **Row 1 cascade.** PRs #2908/#2911/#2918/#2925/#2929/#2943/#2951/#2953 stacked
+> diagnostic-only cold-helper gates on top of #2890's Stage 1. Each individually
+> projected 100-800 B; several exceeded projection 4-10× thanks to dead-strip
+> cascades on supporting template machinery (notably #2918 −2,235 B, #2925
+> −3,937 B, #2929 −870 B, #2943 −1,845 B). Cumulative measured saving on top of
+> Stage 1: **−12,603 B**, bringing the total from the pre-Stage-1 baseline to
+> **≈ −50 KB / −13%**.
 
 ## Per-stage detail
 
