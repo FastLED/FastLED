@@ -490,12 +490,23 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
             case ClocklessEncoder::CLOCKLESS_ENCODER_WS2812:
                 pixelIterator.writeWS2812(&data);
                 break;
+#if !defined(FASTLED_DISABLE_UCS7604) || !FASTLED_DISABLE_UCS7604
+            // Gated by FASTLED_DISABLE_UCS7604 (#2920). For WS2812-only
+            // sketches the UCS7604 case is dead at runtime, but each
+            // `writeUCS7604(...)` reference is statically reachable,
+            // keeping the encoder bodies linked. Setting
+            // `-DFASTLED_DISABLE_UCS7604=1` drops the case + the
+            // `encodeUCS7604_16bit_RGB` / `encodeUCS7604_16bit_RGBW`
+            // template instantiations (~400-600 B). When the gate is
+            // enabled, calling showPixels() on a UCS7604 channel
+            // silently emits nothing.
             case ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_8BIT:
             case ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT:
             case ClocklessEncoder::CLOCKLESS_ENCODER_UCS7604_16BIT_1600:
                 writeUCS7604(&data, pixelIterator, clockless->encoder,
                              mSettings, mRgbOrder);
                 break;
+#endif  // !FASTLED_DISABLE_UCS7604
         }
 #if !defined(FASTLED_DISABLE_SPI_CHIPSETS) || !FASTLED_DISABLE_SPI_CHIPSETS
     } else if (mChipset.is<SpiChipsetConfig>()) {
