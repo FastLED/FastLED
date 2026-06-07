@@ -105,3 +105,33 @@ reviews:
         adding such a function, also add the `FastLED.setX(...)` wrapper in
         `src/FastLED.h` and document the god-instance form in the PR
         description / examples.
+
+    - path: "src/fl/log/**"
+      instructions: |
+        FL_WARN / FL_ERROR default-visibility invariant (#2886 Stage 1):
+
+        FL_WARN and FL_ERROR MUST remain active by default on NON-release
+        builds. Flag changes that:
+
+        1. Add an outer guard around FL_WARN(...) / FL_ERROR(...) that
+           requires an opt-in macro to fire on debug/non-release builds.
+        2. Change the unset default of FASTLED_LOG_VERBOSITY so that
+           non-release builds (no NDEBUG) default below 1. Release builds
+           (NDEBUG defined) default to 0 — that is intentional and not
+           a violation.
+        3. Add a new logging knob whose default suppresses FL_WARN /
+           FL_ERROR on non-release builds without explicit user opt-in.
+
+        Rationale: developers depend on warnings / errors firing during
+        development. The bloat-reduction work in #2886 is scoped to
+        release builds via NDEBUG; it explicitly preserves the
+        debug-build default at verbosity 1.
+
+        Resolution order (the contract): FASTLED_TESTING => 1, NDEBUG
+        => 0, otherwise => 1. See src/fl/log/log.h.
+
+        Flag any PR that wraps an existing or new FL_WARN(...) /
+        FL_ERROR(...) site in an additional `#if !defined(...)` or
+        `#ifdef FASTLED_LOG_*` block that would suppress the call on
+        non-release builds by default — that breaks the
+        developer-visibility contract above.
