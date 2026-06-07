@@ -411,6 +411,7 @@ fl::shared_ptr<IChannelDriver> Channel::resolveDynamicDriver() {
     // instantiated" from "driver exists but canHandle() rejected this
     // chipset" — resolution paths differ. The mBusWarned guard suppresses
     // duplicate logs on subsequent shows of the same channel.
+#if FASTLED_LOG_RUNTIME_ENABLED
     if (mBus != Bus::AUTO && !mBusWarned &&
         (!driver || driver->getName() != busKey)) {
         auto busDriver = ChannelManager::instance().findDriverByName(busKey);
@@ -436,6 +437,11 @@ fl::shared_ptr<IChannelDriver> Channel::resolveDynamicDriver() {
     if (!driver) {
         FL_ERROR("Channel '" << mName << "': No compatible driver found - cannot transmit");
     }
+#endif  // FASTLED_LOG_RUNTIME_ENABLED — release skips the per-frame
+        // driver->getName() != busKey compare + the silent
+        // findDriverByName probe (used only to differentiate the
+        // FL_ERROR message). The functional return value below is
+        // preserved in both builds. See #2952.
     return driver;
 #endif  // !FASTLED_DISABLE_DYNAMIC_DRIVER
 }
