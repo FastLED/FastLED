@@ -1,0 +1,69 @@
+# =============================================================================
+# sdkconfig_for_smallest_fastled.defaults
+#
+# FastLED Stage 3 / #2895 — opt-in ESP-IDF sdkconfig overlay for users who
+# want to drop ~10-15 KB of release-build flash on a typical ESP32 LED strip.
+#
+# USAGE — in your platformio.ini, layer this on top of your own defaults:
+#
+#   [env:esp32s3]
+#   platform = espressif32
+#   board = esp32-s3-devkitm-1
+#   framework = arduino
+#   board_build.sdkconfig_defaults =
+#       sdkconfig.defaults
+#       ${platformio.packages_dir}/framework-arduinoespressif32/tools/sdkconfig.defaults.esp32s3
+#       ${PROJECT_LIBDEPS_DIR}/${PIOENV}/FastLED/tools/sdkconfig_for_smallest_fastled.defaults
+#
+# (The exact path under `PROJECT_LIBDEPS_DIR` depends on how PIO resolves
+# library installs in your project. Substitute the absolute path if needed.)
+#
+# Each line below is grounded against the top-25 symbol table in #2886.
+# Conservative entries are uncommented; situational ones live below the
+# fold and require an explicit opt-in.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Conservative knobs — safe defaults for any deployed LED installation
+# -----------------------------------------------------------------------------
+
+# Disable coredump-to-flash. Eliminates symbols #18
+# (esp_core_dump_do_write_elf_pass, 1,835 B) and #25
+# (esp_core_dump_get_task_regs_dump, 1,103 B) plus ~5 KB of tail symbols in
+# libespcoredump.a. LED installations are headless; nobody retrieves a
+# coredump from the flash partition anyway. Re-enable explicitly if you
+# actively post-mortem crashes.
+# Projected savings: ~8 KB.
+CONFIG_ESP_COREDUMP_ENABLE_TO_FLASH=n
+
+# Drop the ESP-IDF runtime log infrastructure. Independent of FastLED's
+# FL_WARN/FL_LOG path — that's governed separately by FASTLED_LOG_VERBOSITY
+# (Stage 1 of #2886). Eliminates symbol #19 (diag_log_add, 1,604 B) and
+# ~1-2 KB of IDF log format strings scattered through
+# libespressif__esp_diagnostics, libesp_diagnostics, and libheap.
+# Projected savings: ~3 KB.
+CONFIG_LOG_DEFAULT_LEVEL=ESP_LOG_NONE
+
+# Silence the bootloader's per-stage progress messages. The strings live
+# in flash regardless of whether the bootloader actually runs them at
+# boot — a deployed installation has no console.
+# Projected savings: ~1 KB.
+CONFIG_BOOTLOADER_LOG_LEVEL_NONE=y
+
+# Switch the panic handler from "reboot with backtrace" to "halt with
+# minimal state dump". On a release LED installation a panic-time reboot
+# loop is more disruptive than a halt; the smaller code path also drops
+# the panic-time formatter strings.
+# Projected savings: ~1-2 KB.
+CONFIG_ESP_SYSTEM_PANIC_PRINT_HALT=y
+
+# -----------------------------------------------------------------------------
+# Situational knobs — uncomment ONLY if you know your project doesn't need them
+# -----------------------------------------------------------------------------
+
+# CONFIG_BT_ENABLED=n
+#   Disables the Bluetooth stack entirely. On projects that currently
+#   have BT on (the default for many esp32-s3 board configs), flipping
+#   this knob can drop another ~15 KB on top of the conservative set
+#   above. SAFE ONLY IF your sketch and dependencies do not use BLE/BT.
+#   Most FastLED LED-strip sketches don't.

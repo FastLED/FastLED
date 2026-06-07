@@ -42,7 +42,16 @@ These are the gotchas the wrapper handles for you. They are documented here so t
 
 2. **Map-derived synthesis is what makes the report useful.** fbuild PR #427 parses `.rodata.<owner>.str1.<N>` input-section names and attributes those bytes to the owning function. Without it, the single biggest contributor on ESP32-S3 Blink (the NEOPIXEL chipset ctor's `FL_WARN`/`FL_LOG` string pool, ~58 KB / 15 %) appears as anonymous bytes against `main.cpp.o` and there's no way to chase it. The `source: "map-derived"` field on each symbol tags rows whose attribution came from this synthesis pass; treat them with the same trust as `source: "nm"` rows.
 
-3. **The dominant flash lever on ESP32-S3 is `FASTLED_LOG_VERBOSITY=0`.** FastLED PR #2791 introduced this build-time knob. Setting it (define before `#include <FastLED.h>`) collapses ~43-58 KB of FL_WARN string pool with zero behaviour change for users who don't need release-mode logging. **Always check whether this knob is set before chasing other optimisations — it's a single define that dominates everything else.**
+3. **The dominant flash lever on ESP32-S3 is `FASTLED_LOG_VERBOSITY=0`.** FastLED PR #2791 introduced this build-time knob. Setting it (define before `#include <FastLED.h>`) collapses ~43-58 KB of FL_WARN string pool with zero behaviour change for users who don't need release-mode logging. **Always check whether this knob is set before chasing other optimisations — it's a single define that dominates everything else.** Since #2890 (Stage 1 of #2886), the default flips to `0` automatically when `NDEBUG` is set (release builds).
+
+   ### Release-build flash savers (in order of impact)
+
+   | Lever | How to enable | Savings | Source |
+   |---|---|---:|---|
+   | `FASTLED_LOG_VERBOSITY=0` | Now the release default (NDEBUG); explicit `-DFASTLED_LOG_VERBOSITY=1` to restore | ~43-58 KB | #2791 + #2890 |
+   | `tools/sdkconfig_for_smallest_fastled.defaults` | `board_build.sdkconfig_defaults` in `platformio.ini`; disables coredump, IDF log, bootloader log, panic-print | ~10-15 KB | #2895 (Stage 3) |
+   | `-DFASTLED_SUPPRESS_ARDUINO_CHIP_DEBUG_REPORT=1` | `build_flags`; strong-overrides the Arduino-ESP32 boot-banner gate | ~3 KB | #2894 (Stage 2) |
+   | `-DFASTLED_RMT_STATIC_ALLOCATION=1` | `build_flags`; for sketches that init LEDs in `setup()` and never remove | ~22-43 KB | #2846 |
 
 4. **`--nm` is still required.** fbuild's `build_info.json` does not yet carry toolchain paths (`nm_path` / `cppfilt_path`). The wrapper resolves them from PIO packages. fbuild issue #428 tracks the migration to build-info-driven resolution; when that lands, drop the explicit `--nm` path in `ci/bloat.py::run_fbuild_symbols`.
 
