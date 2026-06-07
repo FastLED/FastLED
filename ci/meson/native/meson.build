@@ -465,7 +465,7 @@ if has_libunwind
 endif
 
 crash_handler_lib = static_library('crash_handler',
-  files(meson.project_source_root() / 'tests' / 'shared' / 'crash_handler_main.cpp'),
+  files('../../../tests/shared/crash_handler_main.cpp'),
   cpp_args: crash_handler_cpp_args,
   implicit_include_directories: false,
   install: false
