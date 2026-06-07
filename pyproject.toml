@@ -51,6 +51,14 @@ dependencies = [
     "fpvgcc",
     "uv",
     "clang-tool-chain>=1.5.5",
+    # 1.11.18 (released 2026-06-06): drops the misleading
+    # "daemon-CLI protocol version mismatch" hint from the
+    # user-facing `lost connection to daemon (no response)` error.
+    # The hint was written before the thundering-herd fix (#674,
+    # 1.11.16) and pipe-pool wedge fix (#669, 1.11.15) landed and
+    # pointed users at a cause that is wrong in practice. New copy
+    # is centralized in `util::LOST_CONNECTION_MSG` and points users
+    # at `zccache status` first (zackees/zccache#678).
     # 1.11.17 (released 2026-06-06): docs-only release that surfaces the
     # ZCCACHE_PATH_REMAP env var in `zccache --help` (zackees/zccache#676).
     # 1.11.16 (released 2026-06-06): adaptive daemon-spawn wait keyed on
@@ -84,7 +92,7 @@ dependencies = [
     # incremental builds produce stale .obj files after a git pull that
     # changes transitive headers (symptom: `undefined symbol: ...` link
     # errors hours after a header actually changed).
-    "zccache>=1.11.17",
+    "zccache>=1.11.18",
     "ninja",
     "meson>=1.11.0",
     "download",
