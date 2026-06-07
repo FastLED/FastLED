@@ -27,8 +27,218 @@ namespace fl {
 // Define static constexpr member for npos (required for ODR-uses)
 const fl::size string::npos;
 
-int string::strcmp(const string& a, const string& b) {
+// ======= STATIC FACTORY METHODS =======
+
+string string::from_literal(const char* literal) FL_NOEXCEPT {
+    string result;
+    result.setLiteral(literal);
+    return result;
+}
+
+string string::from_view(const char* data, fl::size len) FL_NOEXCEPT {
+    string result;
+    result.setView(data, len);
+    return result;
+}
+
+string string::from_view(const string_view& sv) FL_NOEXCEPT {
+    return from_view(sv.data(), sv.size());
+}
+
+string string::interned(const char* str, fl::size len) FL_NOEXCEPT {
+    string result;
+    if (!str || len == 0) return result;
+    auto holder = fl::make_shared<StringHolder>(str, len);
+    result.setSharedHolder(holder);
+    return result;
+}
+
+string string::interned(const char* str) FL_NOEXCEPT {
+    if (!str) return string();
+    return interned(str, fl::strlen(str));
+}
+
+string string::interned(const string_view& sv) FL_NOEXCEPT {
+    return interned(sv.data(), sv.size());
+}
+
+string string::copy_no_view(const string& str) FL_NOEXCEPT {
+    if (str.is_referencing()) {
+        string result;
+        result.copy(str.c_str(), str.size());
+        return result;
+    }
+    return str;
+}
+
+int string::strcmp(const string& a, const string& b) FL_NOEXCEPT {
     return fl::strcmp(a.c_str(), b.c_str());
+}
+
+// ======= CONSTRUCTORS =======
+
+string::string() FL_NOEXCEPT
+    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {}
+
+string::string(const char* str) FL_NOEXCEPT
+    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
+    if (str) copy(str);
+}
+
+string::string(const char* str, fl::size len) FL_NOEXCEPT
+    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
+    copy(str, len);
+}
+
+string::string(fl::size len, char c) FL_NOEXCEPT
+    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
+    resize(len, c);
+}
+
+string::string(const string& other) FL_NOEXCEPT
+    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
+    copy(static_cast<const basic_string&>(other));
+}
+
+string::string(string&& other) FL_NOEXCEPT
+    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
+    moveFrom(fl::move(other));
+}
+
+string::string(const basic_string& other) FL_NOEXCEPT
+    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
+    copy(other);
+}
+
+string::string(const string_view& sv) FL_NOEXCEPT
+    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
+    if (!sv.empty()) {
+        copy(sv.data(), sv.size());
+    }
+}
+
+string::string(const fl::span<const char>& s) FL_NOEXCEPT
+    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
+    copy(s.data(), s.size());
+}
+
+string::string(const fl::span<char>& s) FL_NOEXCEPT
+    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
+    copy(s.data(), s.size());
+}
+
+string::string(const fl::shared_ptr<StringHolder>& holder) FL_NOEXCEPT
+    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
+    setSharedHolder(holder);
+}
+
+// ======= ASSIGNMENT =======
+
+string& string::operator=(const string& other) FL_NOEXCEPT {
+    copy(static_cast<const basic_string&>(other));
+    return *this;
+}
+
+string& string::operator=(string&& other) FL_NOEXCEPT {
+    moveAssign(fl::move(other));
+    return *this;
+}
+
+string& string::operator=(const char* str) FL_NOEXCEPT {
+    copy(str, fl::strlen(str));
+    return *this;
+}
+
+string& string::assign(string_view sv) FL_NOEXCEPT {
+    if (sv.empty()) {
+        clear();
+    } else {
+        copy(sv.data(), sv.size());
+    }
+    return *this;
+}
+
+// ======= SUBSTRING =======
+
+string string::substring(fl::size start, fl::size end) const FL_NOEXCEPT {
+    if (start == 0 && end == size()) return *this;
+    if (start >= size()) return string();
+    if (end > size()) end = size();
+    if (start >= end) return string();
+    string out;
+    out.copy(c_str() + start, end - start);
+    return out;
+}
+
+string string::substr(fl::size start, fl::size length) const FL_NOEXCEPT {
+    fl::size end = start + length;
+    if (end > size()) end = size();
+    return substring(start, end);
+}
+
+string string::substr(fl::size start) const FL_NOEXCEPT {
+    return substring(start, size());
+}
+
+string string::trim() const FL_NOEXCEPT {
+    fl::size start = 0;
+    fl::size end_pos = size();
+    while (start < size() && fl::isspace(c_str()[start])) start++;
+    while (end_pos > start && fl::isspace(c_str()[end_pos - 1])) end_pos--;
+    return substring(start, end_pos);
+}
+
+#ifdef FL_IS_WASM
+string::string(const std::string& str)  // okay std namespace
+    : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
+    copy(str.c_str(), str.size());
+}
+
+string& string::operator=(const std::string& str) FL_NOEXCEPT {  // okay std namespace
+    copy(str.c_str(), str.size());
+    return *this;
+}
+
+string& string::append(const std::string& str) {  // okay std namespace
+    write(str.c_str(), str.size());
+    return *this;
+}
+#endif
+
+// ======= COMPARISON OPERATORS =======
+
+bool string::operator>(const string& other) const FL_NOEXCEPT {
+    return fl::strcmp(c_str(), other.c_str()) > 0;
+}
+
+bool string::operator>=(const string& other) const FL_NOEXCEPT {
+    return fl::strcmp(c_str(), other.c_str()) >= 0;
+}
+
+bool string::operator<(const string& other) const FL_NOEXCEPT {
+    return fl::strcmp(c_str(), other.c_str()) < 0;
+}
+
+bool string::operator<=(const string& other) const FL_NOEXCEPT {
+    return fl::strcmp(c_str(), other.c_str()) <= 0;
+}
+
+bool string::operator==(const string& other) const FL_NOEXCEPT {
+    if (size() != other.size()) {
+        return false;
+    }
+    return fl::memcmp(c_str(), other.c_str(), size()) == 0;
+}
+
+bool string::operator!=(const string& other) const FL_NOEXCEPT {
+    return !(*this == other);
+}
+
+// ======= CONCATENATION =======
+
+string& string::operator+=(const string& other) FL_NOEXCEPT {
+    append(other.c_str(), other.size());
+    return *this;
 }
 
 string &string::append(const audio::fft::Bins &str) {

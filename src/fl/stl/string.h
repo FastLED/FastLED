@@ -96,87 +96,29 @@ class string : public basic_string {
     using basic_string::appendOct;
 
     // ======= STATIC FACTORY METHODS =======
-    static string from_literal(const char* literal) FL_NOEXCEPT {
-        string result;
-        result.setLiteral(literal);
-        return result;
-    }
-
-    static string from_view(const char* data, fl::size len) FL_NOEXCEPT {
-        string result;
-        result.setView(data, len);
-        return result;
-    }
-
-    static string from_view(const string_view& sv) FL_NOEXCEPT {
-        return from_view(sv.data(), sv.size());
-    }
-
-    static string interned(const char* str, fl::size len) FL_NOEXCEPT {
-        string result;
-        if (!str || len == 0) return result;
-        auto holder = fl::make_shared<StringHolder>(str, len);
-        result.setSharedHolder(holder);
-        return result;
-    }
-
-    static string interned(const char* str) FL_NOEXCEPT {
-        if (!str) return string();
-        return interned(str, fl::strlen(str));
-    }
-
-    static string interned(const string_view& sv) FL_NOEXCEPT {
-        return interned(sv.data(), sv.size());
-    }
-
-    static string copy_no_view(const string& str) FL_NOEXCEPT {
-        if (str.is_referencing()) {
-            string result;
-            result.copy(str.c_str(), str.size());
-            return result;
-        }
-        return str;
-    }
-
+    static string from_literal(const char* literal) FL_NOEXCEPT;
+    static string from_view(const char* data, fl::size len) FL_NOEXCEPT;
+    static string from_view(const string_view& sv) FL_NOEXCEPT;
+    static string interned(const char* str, fl::size len) FL_NOEXCEPT;
+    static string interned(const char* str) FL_NOEXCEPT;
+    static string interned(const string_view& sv) FL_NOEXCEPT;
+    static string copy_no_view(const string& str) FL_NOEXCEPT;
     static int strcmp(const string& a, const string& b) FL_NOEXCEPT;
 
     // ======= CONSTRUCTORS =======
-    // Every ctor passes its co-located mInlineBuffer to basic_string;
-    // string-content population happens via copy()/setLiteral()/etc.
-    // after the base is initialised.
-    string() FL_NOEXCEPT : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {}
-    string(const char* str) FL_NOEXCEPT : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
-        if (str) copy(str);
-    }
-    string(const char* str, fl::size len) FL_NOEXCEPT : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
-        copy(str, len);
-    }
-    string(fl::size len, char c) FL_NOEXCEPT : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
-        resize(len, c);
-    }
-    string(const string& other) FL_NOEXCEPT : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
-        copy(static_cast<const basic_string&>(other));
-    }
-    string(string&& other) FL_NOEXCEPT : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
-        moveFrom(fl::move(other));
-    }
-    string(const basic_string& other) FL_NOEXCEPT : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
-        copy(other);
-    }
-    string(const string_view& sv) FL_NOEXCEPT : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
-        if (!sv.empty()) {
-            copy(sv.data(), sv.size());
-        }
-    }
-    string(const fl::span<const char>& s) FL_NOEXCEPT : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
-        copy(s.data(), s.size());
-    }
-    string(const fl::span<char>& s) FL_NOEXCEPT : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
-        copy(s.data(), s.size());
-    }
-    string(const fl::shared_ptr<StringHolder>& holder) FL_NOEXCEPT : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
-        setSharedHolder(holder);
-    }
+    // Non-template ctors defined in string.cpp.hpp; templates stay
+    // inline here because they're parameterised on caller types.
+    string() FL_NOEXCEPT;
+    string(const char* str) FL_NOEXCEPT;
+    string(const char* str, fl::size len) FL_NOEXCEPT;
+    string(fl::size len, char c) FL_NOEXCEPT;
+    string(const string& other) FL_NOEXCEPT;
+    string(string&& other) FL_NOEXCEPT;
+    string(const basic_string& other) FL_NOEXCEPT;
+    string(const string_view& sv) FL_NOEXCEPT;
+    string(const fl::span<const char>& s) FL_NOEXCEPT;
+    string(const fl::span<char>& s) FL_NOEXCEPT;
+    string(const fl::shared_ptr<StringHolder>& holder) FL_NOEXCEPT;
     template <typename InputIt>
     string(InputIt first, InputIt last) FL_NOEXCEPT : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {
         assign(first, last);
@@ -187,73 +129,26 @@ class string : public basic_string {
     }
 
     // ======= ASSIGNMENT =======
-    string& operator=(const string& other) FL_NOEXCEPT {
-        copy(static_cast<const basic_string&>(other));
-        return *this;
-    }
-    string& operator=(string&& other) FL_NOEXCEPT {
-        moveAssign(fl::move(other));
-        return *this;
-    }
-    string& operator=(const char* str) FL_NOEXCEPT {
-        copy(str, fl::strlen(str));
-        return *this;
-    }
+    string& operator=(const string& other) FL_NOEXCEPT;
+    string& operator=(string&& other) FL_NOEXCEPT;
+    string& operator=(const char* str) FL_NOEXCEPT;
     template <int N> string& operator=(const char (&str)[N]) FL_NOEXCEPT {
         assign(str, N - 1);
         return *this;
     }
 
-    string& assign(string_view sv) FL_NOEXCEPT {
-        if (sv.empty()) {
-            clear();
-        } else {
-            copy(sv.data(), sv.size());
-        }
-        return *this;
-    }
+    string& assign(string_view sv) FL_NOEXCEPT;
 
     // ======= SUBSTRING (returns string, so must live here) =======
-    string substring(fl::size start, fl::size end) const FL_NOEXCEPT {
-        if (start == 0 && end == size()) return *this;
-        if (start >= size()) return string();
-        if (end > size()) end = size();
-        if (start >= end) return string();
-        string out;
-        out.copy(c_str() + start, end - start);
-        return out;
-    }
-
-    string substr(fl::size start, fl::size length) const FL_NOEXCEPT {
-        fl::size end = start + length;
-        if (end > size()) end = size();
-        return substring(start, end);
-    }
-
-    string substr(fl::size start) const FL_NOEXCEPT {
-        return substring(start, size());
-    }
-
-    string trim() const FL_NOEXCEPT {
-        fl::size start = 0;
-        fl::size end_pos = size();
-        while (start < size() && fl::isspace(c_str()[start])) start++;
-        while (end_pos > start && fl::isspace(c_str()[end_pos - 1])) end_pos--;
-        return substring(start, end_pos);
-    }
+    string substring(fl::size start, fl::size end) const FL_NOEXCEPT;
+    string substr(fl::size start, fl::size length) const FL_NOEXCEPT;
+    string substr(fl::size start) const FL_NOEXCEPT;
+    string trim() const FL_NOEXCEPT;
 
 #ifdef FL_IS_WASM
-    string(const std::string& str) : basic_string(mInlineBuffer, FASTLED_STR_INLINED_SIZE) {  // okay std namespace
-        copy(str.c_str(), str.size());
-    }
-    string& operator=(const std::string& str) FL_NOEXCEPT {  // okay std namespace
-        copy(str.c_str(), str.size());
-        return *this;
-    }
-    string& append(const std::string& str) {  // okay std namespace
-        write(str.c_str(), str.size());
-        return *this;
-    }
+    string(const std::string& str);  // okay std namespace; defined in string.cpp.hpp
+    string& operator=(const std::string& str) FL_NOEXCEPT;  // okay std namespace
+    string& append(const std::string& str);  // okay std namespace
 #endif
 
 #if FL_STRING_NEEDS_ARDUINO_CONVERSION
@@ -264,38 +159,15 @@ class string : public basic_string {
 
 
 
-    bool operator>(const string &other) const FL_NOEXCEPT {
-        return fl::strcmp(c_str(), other.c_str()) > 0;
-    }
-
-    bool operator>=(const string &other) const FL_NOEXCEPT {
-        return fl::strcmp(c_str(), other.c_str()) >= 0;
-    }
-
-    bool operator<(const string &other) const FL_NOEXCEPT {
-        return fl::strcmp(c_str(), other.c_str()) < 0;
-    }
-
-    bool operator<=(const string &other) const FL_NOEXCEPT {
-        return fl::strcmp(c_str(), other.c_str()) <= 0;
-    }
-
-    bool operator==(const string &other) const FL_NOEXCEPT {
-        if (size() != other.size()) {
-            return false;
-        }
-        return fl::memcmp(c_str(), other.c_str(), size()) == 0;
-    }
-
-    bool operator!=(const string &other) const FL_NOEXCEPT {
-        return !(*this == other);
-    }
+    bool operator>(const string &other) const FL_NOEXCEPT;
+    bool operator>=(const string &other) const FL_NOEXCEPT;
+    bool operator<(const string &other) const FL_NOEXCEPT;
+    bool operator<=(const string &other) const FL_NOEXCEPT;
+    bool operator==(const string &other) const FL_NOEXCEPT;
+    bool operator!=(const string &other) const FL_NOEXCEPT;
 
     // ======= CONCATENATION =======
-    string& operator+=(const string& other) FL_NOEXCEPT {
-        append(other.c_str(), other.size());
-        return *this;
-    }
+    string& operator+=(const string& other) FL_NOEXCEPT;
 
     template <typename T> string& operator+=(const T& val) FL_NOEXCEPT {
         append(val);
