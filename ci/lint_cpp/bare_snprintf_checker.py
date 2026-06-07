@@ -43,6 +43,8 @@ BANNED_FUNCS = (
     "vsprintf",
     "fprintf",
     "vfprintf",
+    "printf",
+    "vprintf",
 )
 
 # Match `<func>(` not preceded by `fl::`, `::`, `.`, or an identifier

@@ -177,7 +177,7 @@ public:
      * Note: Maximum formatted string length is 256 characters.
      */
     template<typename... Args>
-    size_t printf(const char* format, Args... args);
+    size_t printf(const char* format, Args... args);  // ok snprintf — method routes through fl::snprintf at line 284
 
     /**
      * @brief Wait for serial output to complete

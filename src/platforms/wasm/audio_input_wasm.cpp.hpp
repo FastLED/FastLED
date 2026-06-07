@@ -98,7 +98,7 @@ audio::Sample WasmAudioInput::read() {
     mReadBlocks++;
 
     if (mReadBlocks == 1) {
-        printf("WasmAudioInput: First audio block consumed by sketch "
+        fl::printf("WasmAudioInput: First audio block consumed by sketch "
                "(timestamp=%u ms)\n", (unsigned)block.timestamp);
     }
 
@@ -110,7 +110,7 @@ void WasmAudioInput::pushSamples(const fl::i16* samples, int count, fl::u32 time
         static bool warned = false;
         if (!warned) {
             warned = true;
-            printf("WasmAudioInput: pushSamples called but not running - "
+            fl::printf("WasmAudioInput: pushSamples called but not running - "
                    "audio data is being dropped!\n");
         }
         return;
@@ -160,10 +160,10 @@ void WasmAudioInput::flushAccumBuffer() {
     mAccumPos = 0;
 
     if (mPushedBlocks == 1) {
-        printf("WasmAudioInput: First audio block received from JS "
+        fl::printf("WasmAudioInput: First audio block received from JS "
                "(timestamp=%u ms)\n", (unsigned)mAccumTimestamp);
     } else if (mPushedBlocks % 172 == 0) {
-        printf("WasmAudioInput: %u blocks received, %u read, %u dropped\n",
+        fl::printf("WasmAudioInput: %u blocks received, %u read, %u dropped\n",
                (unsigned)mPushedBlocks, (unsigned)mReadBlocks,
                (unsigned)mDroppedBlocks);
     }
@@ -218,7 +218,7 @@ void pushAudioSamples(const fl::i16* samples, int count, fl::u32 timestamp) {
         static bool warned = false;
         if (!warned) {
             warned = true;
-            printf("pushAudioSamples: No WasmAudioInput instance - "
+            fl::printf("pushAudioSamples: No WasmAudioInput instance - "
                    "UIAudio not created yet. Audio data dropped!\n");
         }
         return;
