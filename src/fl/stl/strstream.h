@@ -227,21 +227,15 @@ class sstream {
         return *this;
     }
 
-    // Literal fast-path (#2963 Path C): if this sstream has not had
-    // any content stored yet, adopt the C-string as non-owning
-    // literal storage instead of copying. A subsequent operator<<
-    // call that mutates the string transparently materialises via
-    // basic_string's variant — so `sstream() << "literal"` followed
-    // by `.c_str()` costs ~3 instructions and zero buffer use,
-    // matching the hand-tuned `FL_WARN_LIT` path. Any non-empty
-    // starting state falls back to the regular append.
+    // Runtime const char* — ALWAYS copies. The literal fast-path
+    // (#2963 Path C) only fires on the `const char (&)[N]` template
+    // overload below, where the compiler proves the argument is a
+    // compile-time array literal. Storing an arbitrary runtime
+    // pointer as "literal" would risk dangling pointer aliasing if
+    // the caller's buffer outlives the sstream — the OLD copy-only
+    // behaviour is preserved here for that reason.
     sstream &operator<<(const char *str) FL_NOEXCEPT {
-        if (!str) {
-            return *this;
-        }
-        if (mStr.empty() && !mStr.is_referencing()) {
-            mStr.assign_literal(str);
-        } else {
+        if (str) {
             mStr.append(str);
         }
         return *this;

@@ -1177,37 +1177,39 @@ FL_TEST_CASE("string append fixed_point types") {
 // operator<< after that must transparently materialise.
 // ============================================================================
 
-FL_TEST_CASE("sstream Path C - single literal stays in literal storage") {
-    FL_SUBCASE("const char* literal") {
-        fl::sstream s;
-        const char* msg = "constant message";
-        s << msg;
-        FL_CHECK_TRUE(s.is_pure_literal());
-        FL_CHECK_EQ(fl::strcmp(s.c_str(), "constant message"), 0);
-    }
+FL_TEST_CASE("sstream Path C - char-array literal stays in literal storage") {
+    // The literal fast-path fires ONLY for the `const char (&)[N]`
+    // overload (where the compiler proves the argument is a
+    // compile-time array). Runtime `const char*` pointers always
+    // copy — see the safety note in strstream.h.
 
-    FL_SUBCASE("char array literal") {
+    FL_SUBCASE("compile-time string literal hits the array overload") {
         fl::sstream s;
         s << "fixed array";
         FL_CHECK_TRUE(s.is_pure_literal());
         FL_CHECK_EQ(fl::strcmp(s.c_str(), "fixed array"), 0);
     }
 
-    FL_SUBCASE("c_str() does NOT materialise pure literal storage") {
+    FL_SUBCASE("c_str() on literal storage returns valid contents") {
         fl::sstream s;
-        const char* msg = "hold this pointer";
-        s << msg;
-        // c_str() on ConstLiteral returns the original pointer (no
-        // copy), so the address should be identical.
-        FL_CHECK_TRUE(s.c_str() == msg);
+        s << "hold this pointer";
         FL_CHECK_TRUE(s.is_pure_literal());
+        FL_CHECK_EQ(fl::strcmp(s.c_str(), "hold this pointer"), 0);
     }
 
-    FL_SUBCASE("nullptr literal is a no-op (stays empty)") {
+    FL_SUBCASE("runtime const char* always copies (no literal storage)") {
+        fl::sstream s;
+        const char* runtime_ptr = "from a runtime variable";
+        s << runtime_ptr;
+        FL_CHECK_FALSE(s.is_pure_literal());
+        FL_CHECK_EQ(fl::strcmp(s.c_str(), "from a runtime variable"), 0);
+    }
+
+    FL_SUBCASE("nullptr is a no-op (stays empty, not literal)") {
         fl::sstream s;
         const char* nul = nullptr;
         s << nul;
-        FL_CHECK_FALSE(s.is_pure_literal());  // no literal stored
+        FL_CHECK_FALSE(s.is_pure_literal());
         FL_CHECK_EQ(s.str().size(), 0u);
     }
 }
