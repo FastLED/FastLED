@@ -223,14 +223,50 @@ def patch_platformio_ini(cfg: OptInConfig) -> None:
     PLATFORMIO_INI.write_text(new_text, encoding="utf-8")
 
 
+def _run_compile_cmd(example: str) -> list[str]:
+    """Pick the right compile entry point per platform.
+
+    On Linux/macOS: `bash compile esp32s3 --examples <example> --platformio`.
+    On Windows: `<PROJECT_ROOT>/compile.bat esp32s3 --examples <example>
+    --platformio` (absolute path — Windows subprocess.run does not
+    auto-resolve `.bat` files from the cwd argument). `bash` is not on
+    PATH in a non-WSL Windows Python launched by `uv run`, and there is
+    no `bash.exe` in the project; the project ships `compile.bat` for
+    this case. See #2935.
+    """
+    import os
+
+    args = ["esp32s3", "--examples", example, "--platformio"]
+    if os.name == "nt":
+        return [str(PROJECT_ROOT / "compile.bat"), *args]
+    return ["bash", "compile", *args]
+
+
+def _run_bloat_cmd() -> list[str]:
+    """Pick the right bloat entry point per platform.
+
+    On Linux/macOS: `bash bloat esp32s3 --no-summary`.
+    On Windows: `uv run ci/bloat.py esp32s3 --no-summary` — there is no
+    `bloat.bat` shim, so we invoke the underlying Python entry point
+    directly (the bash wrapper just does `uv run ci/bloat.py "$@"`).
+    See #2935.
+    """
+    import os
+
+    args = ["esp32s3", "--no-summary"]
+    if os.name == "nt":
+        return ["uv", "run", "ci/bloat.py", *args]
+    return ["bash", "bloat", *args]
+
+
 def run_compile(example: str) -> bool:
-    cmd = ["bash", "compile", "esp32s3", "--examples", example, "--platformio"]
+    cmd = _run_compile_cmd(example)
     print(f"measure-opt-ins: $ {' '.join(cmd)}", flush=True)
     return subprocess.run(cmd, cwd=PROJECT_ROOT).returncode == 0
 
 
 def run_bloat() -> bool:
-    cmd = ["bash", "bloat", "esp32s3", "--no-summary"]
+    cmd = _run_bloat_cmd()
     print(f"measure-opt-ins: $ {' '.join(cmd)}", flush=True)
     return subprocess.run(cmd, cwd=PROJECT_ROOT).returncode == 0
 
