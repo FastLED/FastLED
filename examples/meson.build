@@ -216,7 +216,7 @@ foreach example_name : example_paths.keys()
 
     # Use static wrapper template instead of generating wrapper at build time
     # This eliminates custom_target overhead and Python script dependency
-    wrapper_cpp = files(project_root / 'tests' / 'shared' / 'example_dll_wrapper_template.cpp')
+    wrapper_cpp = files('../tests/shared/example_dll_wrapper_template.cpp')
 
     # Absolute forward-slash -I args for FastLED + tests + per-example includes
     # (issue #2328). Used via cpp_args, NOT include_directories.
@@ -229,7 +229,7 @@ foreach example_name : example_paths.keys()
     example_source_list = example_sources.get(example_name, [])
     if example_source_list.length() > 0
         foreach src_file : example_source_list
-            additional_sources += files(project_root / src_file)
+            additional_sources += files('..' / src_file)
         endforeach
     endif
 
