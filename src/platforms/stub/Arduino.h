@@ -188,7 +188,7 @@ struct SerialEmulation {
 
     // Printf-style formatted output (variadic template implementation)
     template<typename... Args>
-    void printf(const char* format, Args... args) FL_NOEXCEPT {
+    void printf(const char* format, Args... args) FL_NOEXCEPT {  // ok snprintf — method routes through fl::printf
         fl::printf(format, args...);
     }
 

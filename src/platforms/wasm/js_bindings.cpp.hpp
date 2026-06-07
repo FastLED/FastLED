@@ -183,7 +183,7 @@ EMSCRIPTEN_KEEPALIVE bool hasNewFrameData(fl::u32 lastKnownVersion) {
  */
 EMSCRIPTEN_KEEPALIVE void processUiInput(const char* jsonInput) {
     if (!jsonInput) {
-        printf("Error: Received null UI input\n");
+        fl::printf("Error: Received null UI input\n");
         return;
     }
     
@@ -223,7 +223,7 @@ EMSCRIPTEN_KEEPALIVE void* getStripUpdateData(int stripId, int* dataSize) {
  */
 EMSCRIPTEN_KEEPALIVE void notifyStripAdded(int stripId, int numLeds) {
     // Simple notification - JavaScript will handle the async logic
-    printf("Strip added: ID %d, LEDs %d\n", stripId, numLeds);
+    fl::printf("Strip added: ID %d, LEDs %d\n", stripId, numLeds);
 }
 
 /**
@@ -324,13 +324,13 @@ EMSCRIPTEN_KEEPALIVE void jsFillInMissingScreenMaps(ActiveStripData &active_stri
         const auto &stripData = pair.second;
         const bool has_screen_map = active_strips.hasScreenMap(stripIndex);
         if (!has_screen_map) {
-            printf("Missing screenmap for strip %d\n", stripIndex);
+            fl::printf("Missing screenmap for strip %d\n", stripIndex);
             // okay now generate a screenmap for this strip, let's assume
             // a linear strip with only one row.
             const u32 pixel_count = stripData.size() / 3;
             ScreenMap screenmap(pixel_count);
             if (pixel_count > 255 && Function::isSquare(pixel_count)) {
-                printf("Creating square screenmap for %d\n", pixel_count);
+                fl::printf("Creating square screenmap for %d\n", pixel_count);
                 u32 side = sqrt(pixel_count);
                 // This is a square matrix, let's assume it's a square matrix
                 // and generate a screenmap for it.
@@ -349,7 +349,7 @@ EMSCRIPTEN_KEEPALIVE void jsFillInMissingScreenMaps(ActiveStripData &active_stri
                 // a screenmap for this strip.
                 _jsSetCanvasSize(stripIndex, screenmap);
             } else {
-                printf("Creating linear screenmap for %d\n", pixel_count);
+                fl::printf("Creating linear screenmap for %d\n", pixel_count);
                 ScreenMap screenmap(pixel_count);
                 for (u32 i = 0; i < pixel_count; i++) {
                     screenmap.set(i, {static_cast<float>(i), 0});
@@ -384,12 +384,12 @@ EMSCRIPTEN_KEEPALIVE void jsOnStripAdded(uintptr_t strip, u32 num_leds) {
  * Pure C++ UI Update Function - Simple data processing
  */
 EMSCRIPTEN_KEEPALIVE void updateJs(const char* jsonStr) {
-    printf("updateJs: ENTRY - PURE C++ VERSION - jsonStr=%s\n", jsonStr ? jsonStr : "nullptr");
+    fl::printf("updateJs: ENTRY - PURE C++ VERSION - jsonStr=%s\n", jsonStr ? jsonStr : "nullptr");
     
     // Process UI input using pure C++ function
     ::processUiInput(jsonStr);
     
-    printf("updateJs: EXIT - PURE C++ VERSION\n");
+    fl::printf("updateJs: EXIT - PURE C++ VERSION\n");
 }
 
 /**

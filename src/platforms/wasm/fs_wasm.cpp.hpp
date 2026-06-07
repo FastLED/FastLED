@@ -54,6 +54,7 @@
 #include "fl/math/math.h"
 #include "fl/stl/memory.h"
 #include "fl/stl/string.h"
+#include "fl/stl/stdio.h"
 #include "fl/log/log.h"
 #include "fl/stl/mutex.h"
 #include "platforms/wasm/js.h"
@@ -341,7 +342,7 @@ EMSCRIPTEN_KEEPALIVE void fastled_declare_files(const char* jsonStr) {
         fl::string path = file["path"] | fl::string("");
         
         if (size > 0 && !path.empty()) {
-            printf("Declaring file %s with size %d. These will become available as "
+            fl::printf("Declaring file %s with size %d. These will become available as "
                    "File system paths within the app.\n",
                    path.c_str(), size);
             jsDeclareFile(path.c_str(), size);
