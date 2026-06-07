@@ -29,7 +29,8 @@ That combination drops the NEOPIXEL Blink baseline from ~388 KB to ~320-325 KB o
 | Quantity | Value | Source |
 |---|---:|---|
 | ESP32-S3 NEOPIXEL Blink baseline (pre-#2886) | 388,380 B flash | `bash bloat esp32s3 --top 25` against pre-Stage-1 master |
-| Current (Stage 1 only, no opt-in flags) | **350,568 B flash** (−37,812 B / −9.7 %) | measured 2026-06-06 against `master @ 824cb5c0e3` — see [audit comment](https://github.com/FastLED/FastLED/issues/2886#issuecomment-4641413123) |
+| Current default-flag build (post-Stage-1 + recent micro-optimizations) | **339,962 B flash** (−48,418 B / −12.5 %) | measured 2026-06-07 against `master @ f43f76701a` |
+| **Stage 3 overlay alone (`tools/sdkconfig_for_smallest_fastled.defaults`)** | **280,738 B flash** (−107,642 B / −27.7 %) | measured 2026-06-07 — **hits the #2886 end goal at row 2 with one knob** |
 | Stage 6 target | ≤ 280,000 B (−28 %) | #2886 goal |
 
 To measure your own build: `bash bloat esp32s3 --build` then `jq '.total_flash' .build/symbols/esp32s3/report.json`. Tool details live in [`agents/docs/binary-size-analysis.md`](../agents/docs/binary-size-analysis.md).
@@ -39,14 +40,14 @@ To measure your own build: `bash bloat esp32s3 --build` then `jq '.total_flash' 
 | # | Lever | How to enable | Savings | Status | PR |
 |---:|---|---|---:|:---:|---|
 | 1 | `FASTLED_LOG_VERBOSITY=0` | **Default on release builds** (NDEBUG); `-DFASTLED_LOG_VERBOSITY=1` to restore | **−37,812 B measured** (388,380 → 350,568 B on 824cb5c0e3) | ✅ | #2890 |
-| 2 | `tools/sdkconfig_for_smallest_fastled.defaults` | `board_build.sdkconfig_defaults` in `platformio.ini`. **Includes `CONFIG_NEWLIB_NANO_FORMAT=y`** which drops the standard newlib printf cluster — see Stage 3 detail below. | ~30-45 KB | 📊 | #2896 + #2915 |
-| 3 | `-DFASTLED_RMT_STATIC_ALLOCATION=1` | `build_flags`; for sketches that init LEDs in `setup()` and never `removeLeds()` | ~22-43 KB | 📊 | #2846 |
+| 2 | `tools/sdkconfig_for_smallest_fastled.defaults` | `board_build.sdkconfig_defaults` in `platformio.ini`. **Includes `CONFIG_NEWLIB_NANO_FORMAT=y`** which drops the standard newlib printf cluster — see Stage 3 detail below. | **−59,224 B measured** (339,962 → 280,738 B on `f43f76701a`) | ✅ | #2896 + #2915 |
+| 3 | `-DFASTLED_RMT_STATIC_ALLOCATION=1` | `build_flags`; for sketches that init LEDs in `setup()` and never `removeLeds()` | **−908 B measured** (339,962 → 339,054 B; well below projection) | ✅ | #2846 |
 | 4 | `-DFASTLED_SUPPRESS_ARDUINO_CHIP_DEBUG_REPORT=1` | `build_flags`; strong-overrides the Arduino-ESP32 boot-banner gate | ~3 KB | 📊 | #2894 |
 | 5 | `CONFIG_BT_ENABLED=n` | uncomment the situational block in `tools/sdkconfig_for_smallest_fastled.defaults` | ~15 KB (if currently on) | 📊 | — |
 | 6 | `-DFASTLED_DISABLE_SPI_CHIPSETS=1` | `build_flags`; drops the SPI dispatch branch in `Channel::showPixels`. **Constraint:** clockless-only sketches; calling `FastLED.addLeds<APA102, ...>` (or any SPI chipset) under this flag silently emits nothing. | ~1.0-1.2 KB | 📊 | #2913 |
-| 7 | `-DFASTLED_DISABLE_UCS7604=1` | `build_flags`; drops the UCS7604 cases in `Channel::showPixels`'s clockless switch. **Constraint:** WS2812-only sketches; calling `FastLED.addLeds<UCS7604, ...>` under this flag silently emits nothing. | ~400-600 B | 📊 | #2920 |
-| 8 | `-DFASTLED_DISABLE_DYNAMIC_DRIVER=1` | `build_flags`; gates out `Channel::resolveDynamicDriver()` and its `ChannelManager::findDriverByName` / `selectDriverForChannel` lookup chain. **Constraint:** legacy `addLeds<>` flow only (every `addLeds<>` flavor pre-binds in its ctor). Channels created via manager-based `Channel::create(cfg)` without pre-binding silently emit nothing. | ~400-900 B | 📊 | #2926 |
-| 9 | `-DFASTLED_DISABLE_CHANNEL_EVENTS=1` | `build_flags`; replaces the 7 `fl::function_list` event slots in `fl::ChannelEvents` with no-op fallbacks. **Constraint:** user-registered listeners via `events.onChannelXxx.add(...)` are silently dropped — the registration compiles (returns -1) but the callback never fires. | ~1-2 KB | 📊 | #2931 |
+| 7 | `-DFASTLED_DISABLE_UCS7604=1` | `build_flags`; drops the UCS7604 cases in `Channel::showPixels`'s clockless switch. **Constraint:** WS2812-only sketches; calling `FastLED.addLeds<UCS7604, ...>` under this flag silently emits nothing. | **−3,804 B measured** (339,962 → 336,158 B; 6-9× projection) | ✅ | #2920 |
+| 8 | `-DFASTLED_DISABLE_DYNAMIC_DRIVER=1` | `build_flags`; gates out `Channel::resolveDynamicDriver()` and its `ChannelManager::findDriverByName` / `selectDriverForChannel` lookup chain. **Constraint:** legacy `addLeds<>` flow only (every `addLeds<>` flavor pre-binds in its ctor). Channels created via manager-based `Channel::create(cfg)` without pre-binding silently emit nothing. | **−937 B measured** (339,962 → 339,025 B) | ✅ | #2926 |
+| 9 | `-DFASTLED_DISABLE_CHANNEL_EVENTS=1` | `build_flags`; replaces the 7 `fl::function_list` event slots in `fl::ChannelEvents` with no-op fallbacks. **Constraint:** user-registered listeners via `events.onChannelXxx.add(...)` are silently dropped — the registration compiles (returns -1) but the callback never fires. | **−8,034 B measured** (339,962 → 331,928 B; 4-8× projection) | ✅ | #2931 |
 
 **Legend:** ✅ measured against a recorded baseline · 📊 projected from the top-25 symbol attribution in #2886.
 
