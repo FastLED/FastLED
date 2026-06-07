@@ -1,5 +1,6 @@
 #include "fl/channels/rx/channel.h"
 
+#include "fl/log/log.h"
 #include "fl/stl/atomic.h"
 #include "fl/stl/string.h"
 
@@ -47,7 +48,17 @@ fl::string RxChannel::makeName(i32 id, const fl::string& config_name) FL_NOEXCEP
     if (!config_name.empty()) {
         return config_name;
     }
+    // Mirrors Channel::makeName's release-build gate (#2942/#2943).
+    // mName is consumed only by FL_WARN/FL_ERROR sites that collapse to
+    // do-while-0 when FASTLED_LOG_VERBOSITY=0 (NDEBUG default per #2890),
+    // so the string + fl::to_string<i64> + heap concat run for nothing
+    // in release. See #2954.
+#if FASTLED_LOG_RUNTIME_ENABLED
     return "RxChannel_" + fl::to_string(static_cast<i64>(id));
+#else
+    (void)id;
+    return {};
+#endif
 }
 
 RxChannelPtr RxChannel::create(const RxChannelConfig& config) FL_NOEXCEPT {
