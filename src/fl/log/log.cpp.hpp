@@ -3,52 +3,8 @@
 
 #include "fl/log/log.h"
 #include "fl/log/async_logger.h"
-#include "fl/stl/strstream.h"
 
 namespace fl {
-namespace detail {
-
-// =============================================================================
-// Centralised log emit (#2963 Path C)
-// =============================================================================
-// One out-of-line copy of the prefix-format chain. FL_WARN / FL_ERROR /
-// FL_INFO call sites pay only the cost of constructing
-// `fl::sstream() << X` (cheap when X is a literal — see strstream.h's
-// Path C literal-storage overload), then trampoline through here.
-//
-// The legacy macro inlined the entire `<< file << "(" << line <<
-// "): WARN: " << X` chain at every call site, emitting per-site code
-// and `.rodata` for the prefix format. With this helper:
-//
-//   * The prefix-format chain exists in exactly one place in the
-//     binary, not at each of the ~1,372 FL_WARN / FL_ERROR / FL_INFO
-//     call sites.
-//   * When the caller passed a single literal (e.g.
-//     `FL_WARN("constant message")`), the body sstream stays in
-//     literal storage — `body.c_str()` returns the .rodata pointer
-//     directly with zero buffer use. This is the FL_WARN_LIT-style
-//     fast path applied automatically.
-//   * When the caller used a `<< value` chain, the body materialises
-//     and the same single helper emits it.
-//
-// `body.is_pure_literal()` remains a public sstream accessor —
-// useful for tests and for future emit backends that might want to
-// vector-write (prefix + literal + newline) without composing them
-// into one buffer.
-void log_emit(log_kind kind, const char* file, int line, const fl::sstream& body) {
-    const char* tag;
-    switch (kind) {
-    case log_kind::WARN:  tag = "): WARN: ";  break;
-    case log_kind::ERROR: tag = "): ERROR: "; break;
-    case log_kind::INFO:
-    default:              tag = "): INFO: ";  break;
-    }
-    fl::sstream prefixed;
-    prefixed << file << "(" << line << tag << body.c_str();
-    fl::println(prefixed.c_str());
-}
-
-} // namespace detail
 
 
 // ============================================================================
