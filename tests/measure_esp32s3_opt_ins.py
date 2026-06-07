@@ -61,13 +61,29 @@ class OptInConfig:
             build_flags. May be empty.
         overlay: True iff sdkconfig_for_smallest_fastled.defaults must
             be appended to board_build.sdkconfig_defaults.
+        slim_row: priority-table row in docs/SLIM_ESP32S3.md that
+            this config corresponds to (None for stacked combos).
     """
 
     name: str
     label: str
     build_flags: tuple[str, ...]
     overlay: bool
+    slim_row: int | None = None
 
+
+# All opt-in build flags we measure. The flag set extends over time as
+# new SLIM rows ship; each new row should add a per-config entry below
+# plus appear in `max_savings`. See #2906 (original) and #2933 (this
+# extension that added the 4 post-#2906 gates + max_savings).
+_ALL_OPT_IN_FLAGS: tuple[str, ...] = (
+    "-DFASTLED_SUPPRESS_ARDUINO_CHIP_DEBUG_REPORT=1",
+    "-DFASTLED_RMT_STATIC_ALLOCATION=1",
+    "-DFASTLED_DISABLE_SPI_CHIPSETS=1",
+    "-DFASTLED_DISABLE_UCS7604=1",
+    "-DFASTLED_DISABLE_DYNAMIC_DRIVER=1",
+    "-DFASTLED_DISABLE_CHANNEL_EVENTS=1",
+)
 
 CONFIGS: dict[str, OptInConfig] = {
     "baseline": OptInConfig(
@@ -75,33 +91,73 @@ CONFIGS: dict[str, OptInConfig] = {
         label="Stage 1 only (NDEBUG default — `FASTLED_LOG_VERBOSITY=0`)",
         build_flags=(),
         overlay=False,
+        slim_row=1,
     ),
     "stage2": OptInConfig(
         name="stage2",
         label="+ Stage 2 (`FASTLED_SUPPRESS_ARDUINO_CHIP_DEBUG_REPORT=1`)",
         build_flags=("-DFASTLED_SUPPRESS_ARDUINO_CHIP_DEBUG_REPORT=1",),
         overlay=False,
+        slim_row=4,
     ),
     "stage3": OptInConfig(
         name="stage3",
         label="+ Stage 3 (`tools/sdkconfig_for_smallest_fastled.defaults` overlay)",
         build_flags=(),
         overlay=True,
+        slim_row=2,
     ),
     "stage4": OptInConfig(
         name="stage4",
         label="+ Stage 4 (`FASTLED_RMT_STATIC_ALLOCATION=1`)",
         build_flags=("-DFASTLED_RMT_STATIC_ALLOCATION=1",),
         overlay=False,
+        slim_row=3,
     ),
     "stack": OptInConfig(
         name="stack",
-        label="Full SLIM TL;DR stack (Stages 2 + 3 + 4)",
+        label="SLIM TL;DR base stack (Stages 2 + 3 + 4)",
         build_flags=(
             "-DFASTLED_SUPPRESS_ARDUINO_CHIP_DEBUG_REPORT=1",
             "-DFASTLED_RMT_STATIC_ALLOCATION=1",
         ),
         overlay=True,
+        slim_row=None,
+    ),
+    "disable_spi": OptInConfig(
+        name="disable_spi",
+        label="+ #2914 (`FASTLED_DISABLE_SPI_CHIPSETS=1`)",
+        build_flags=("-DFASTLED_DISABLE_SPI_CHIPSETS=1",),
+        overlay=False,
+        slim_row=6,
+    ),
+    "disable_ucs7604": OptInConfig(
+        name="disable_ucs7604",
+        label="+ #2921 (`FASTLED_DISABLE_UCS7604=1`)",
+        build_flags=("-DFASTLED_DISABLE_UCS7604=1",),
+        overlay=False,
+        slim_row=7,
+    ),
+    "disable_dyndriver": OptInConfig(
+        name="disable_dyndriver",
+        label="+ #2927 (`FASTLED_DISABLE_DYNAMIC_DRIVER=1`)",
+        build_flags=("-DFASTLED_DISABLE_DYNAMIC_DRIVER=1",),
+        overlay=False,
+        slim_row=8,
+    ),
+    "disable_events": OptInConfig(
+        name="disable_events",
+        label="+ #2932 (`FASTLED_DISABLE_CHANNEL_EVENTS=1`)",
+        build_flags=("-DFASTLED_DISABLE_CHANNEL_EVENTS=1",),
+        overlay=False,
+        slim_row=9,
+    ),
+    "max_savings": OptInConfig(
+        name="max_savings",
+        label="Max-savings stack (Stages 2/3/4 + #2914 + #2921 + #2927 + #2932)",
+        build_flags=_ALL_OPT_IN_FLAGS,
+        overlay=True,
+        slim_row=None,
     ),
 }
 
@@ -222,8 +278,8 @@ def measure_one(cfg: OptInConfig, example: str) -> int | None:
 def format_table(results: dict[str, int]) -> str:
     baseline = results.get("baseline")
     lines = [
-        "| Config | Label | total_flash | Δ vs baseline | Δ vs previous |",
-        "|---|---|---:|---:|---:|",
+        "| Config | SLIM row | Label | total_flash | Δ vs baseline | Δ vs previous |",
+        "|---|:---:|---|---:|---:|---:|",
     ]
     prev: int | None = None
     for name, cfg in CONFIGS.items():
@@ -232,7 +288,10 @@ def format_table(results: dict[str, int]) -> str:
         total = results[name]
         dvb = "" if baseline is None else f"{total - baseline:+,} B"
         dvp = "" if prev is None else f"{total - prev:+,} B"
-        lines.append(f"| `{name}` | {cfg.label} | {total:,} B | {dvb} | {dvp} |")
+        row = "—" if cfg.slim_row is None else f"{cfg.slim_row}"
+        lines.append(
+            f"| `{name}` | {row} | {cfg.label} | {total:,} B | {dvb} | {dvp} |"
+        )
         prev = total
     return "\n".join(lines) + "\n"
 
