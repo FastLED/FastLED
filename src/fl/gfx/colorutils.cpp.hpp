@@ -8,6 +8,7 @@
 #include "fl/stl/int.h"
 #include "platforms/is_platform.h"
 #include "fl/math/math.h"
+#include "fl/math/fixed_point.h"  // for fl::s16x16 — used by applyGamma_video
 #include "fl/stl/stdint.h"
 
 #include "fl/system/fastled.h"
@@ -1287,12 +1288,22 @@ void nblendPaletteTowardPalette(CRGBPalette16 &current, CRGBPalette16 &target,
 }
 
 fl::u8 applyGamma_video(fl::u8 brightness, float gamma) {
-    float orig;
-    float adj;
-    orig = (float)(brightness) / (255.0);
-    adj = pow(orig, gamma) * (255.0);
-    fl::u8 result = (fl::u8)(adj);
-    if ((brightness > 0) && (result == 0)) {
+    // Fixed-point path (s16x16) avoids pulling `__ieee754_pow` (libm,
+    // ~2.7 KB) into release builds — see #2886 / #2910. Matches the
+    // gamma8 LUT generator's approach in src/fl/math/ease.cpp.hpp.
+    if (brightness == 0) {
+        return 0;
+    }
+    constexpr fl::s16x16 inv_255_fp(1.0f / 255.0f);
+    const fl::s16x16 gamma_fp(gamma);
+    const fl::s16x16 x = static_cast<i32>(brightness) * inv_255_fp;  // [0, 1]
+    const fl::s16x16 r = fl::s16x16::pow(x, gamma_fp);                // (0, 1]
+    // Scale to u8 [0, 255] with round-half-up:
+    //   result = ((u32)raw * 255 + 0x8000) >> 16
+    const fl::u32 scaled =
+        (static_cast<fl::u32>(r.raw()) * 255u + 0x8000u) >> 16;
+    fl::u8 result = static_cast<fl::u8>(scaled > 255u ? 255u : scaled);
+    if (result == 0) {
         result = 1; // never gamma-adjust a positive number down to zero
     }
     return result;
