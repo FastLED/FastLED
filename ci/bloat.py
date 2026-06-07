@@ -155,12 +155,11 @@ def assert_fbuild_has_symbols() -> None:
         ) from e
     except subprocess.CalledProcessError as e:
         raise SystemExit(
-            "Bloat: `fbuild symbols` rejected. fbuild 2.2.18 (the released "
-            "wheel) does NOT carry the symbols subcommand — it was merged "
-            "to fbuild#main after the 2.2.18 tag. Rebuild fbuild from main "
-            "(or wait for the 2.2.19 wheel) and drop the binary into "
-            ".venv/Scripts/fbuild.exe. See CLAUDE.md > 'Binary Size "
-            "Analysis' for the upgrade path.\n\n"
+            "Bloat: `fbuild symbols` rejected. Your installed fbuild "
+            "doesn't carry the symbols subcommand. Reinstall project "
+            "dependencies (`uv sync`) — pyproject.toml pins a release "
+            "that ships symbols/bloat. See agents/docs/binary-size-"
+            "analysis.md for the upgrade path.\n\n"
             f"Output:\n{e.output}"
         ) from e
     if "symbols" not in out.lower() and "bloat" not in out.lower():
