@@ -42,6 +42,11 @@
   * Arduino test compile
     * https://github.com/hpwit/arduino-test-compile/blob/master/arduino-test-compile.sh
 
+  * Ingest protocol implementations from open-source ESP32-Bit-Pirate
+    * https://github.com/geo-tp/ESP32-Bit-Pirate/wiki/12-USB (starting point: USB)
+    * Goal: harvest reference protocol logic from the project's wiki pages
+      (USB and any other protocol modules they document) for reuse / inspiration
+
 
 # Misc:
 
