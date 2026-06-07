@@ -7,7 +7,7 @@
 namespace fl {
 
 // Forward declarations
-template <fl::size SIZE> class StrN;
+class basic_string;
 class string;  // IWYU pragma: keep
 
 // string_view: A non-owning view into a contiguous sequence of characters
@@ -51,10 +51,9 @@ class string_view {
     constexpr string_view(const char (&arr)[N]) FL_NOEXCEPT
         : mData(arr), mSize(N - 1) {}  // Subtract 1 for null terminator
 
-    // Constructor from fl::string
-    template <fl::size SIZE>
-    string_view(const StrN<SIZE>& str) FL_NOEXCEPT
-        : mData(str.c_str()), mSize(str.size()) {}
+    // Constructor from fl::basic_string (and therefore fl::string).
+    // Defined in basic_string.cpp.hpp where basic_string is complete.
+    string_view(const basic_string& str) FL_NOEXCEPT;
 
     // Copy constructor
     string_view(const string_view& other) FL_NOEXCEPT = default;

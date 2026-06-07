@@ -833,7 +833,8 @@ class FL_ALIGN vector : public vector_basic {
 
 ///////////////////////////////////////////////////////////////////////////////
 // VectorN<T, N> — Vector with inline buffer (replaces InlinedVector).
-// Like StrN<N> for basic_string: provides the inline buffer storage.
+// Same wrapper pattern fl::string uses on top of fl::basic_string:
+// the wrapper co-locates an inline buffer with the type-erased base.
 // When size <= N, data lives inline. When size > N, spills to heap.
 // Uses the offset trick from basic_string for trivial relocatability.
 ///////////////////////////////////////////////////////////////////////////////
@@ -842,7 +843,7 @@ template <typename T, fl::size INLINED_SIZE>
 class FL_ALIGN VectorN : public vector<T> {
   private:
     // Raw aligned storage — address is valid even before initialization,
-    // same pattern as StrN<N>::mInlineBuffer in basic_string.
+    // same pattern as fl::string::mInlineBuffer above basic_string.
     FL_ALIGNAS(alignof(T) > alignof(fl::uptr) ? alignof(T) : alignof(fl::uptr))
     char mInlineBuffer[INLINED_SIZE * sizeof(T)] = {};
 
