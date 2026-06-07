@@ -157,7 +157,18 @@ fl::string Channel::makeName(i32 id, const fl::optional<fl::string>& configName)
     if (configName.has_value()) {
         return configName.value();
     }
+    // Auto-naming `"Channel_<id>"` only matters for diagnostics — in release
+    // builds (NDEBUG → FASTLED_LOG_VERBOSITY=0 per Stage 1) every FL_WARN /
+    // FL_ERROR site that reads mName collapses to `do { } while(0)`, so the
+    // string and the supporting `fl::to_string` + `operator+` chain go
+    // unused. Empty in release saves the `fl::to_string<i64>` instantiation
+    // plus the heap allocation per Channel ctor. See #2942 / #2886.
+#if FASTLED_LOG_RUNTIME_ENABLED
     return "Channel_" + fl::to_string(static_cast<i64>(id));
+#else
+    (void)id;
+    return {};
+#endif
 }
 
 ChannelPtr Channel::create(const ChannelConfig &config) {
