@@ -66,6 +66,11 @@
 #define FASTLED_USE_PROGMEM 0
 #endif
 
+// LPC doesn't have Arduino pin mapping functions
+#ifndef FASTLED_NO_PINMAP
+#define FASTLED_NO_PINMAP
+#endif
+
 #define FASTLED_SPI_BYTE_ONLY
 
 #include "fl/stl/stdint.h"

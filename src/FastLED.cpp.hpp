@@ -23,6 +23,7 @@
 #include "hsv2rgb.h"  // for CRGB
 #include "fl/stl/int.h"  // for u32, u16
 #include "platforms/init.h"  // IWYU pragma: keep
+#include "fl/system/yield.h"  // for fl::yield
 #include "fl/channels/config.h"  // for ChannelConfig
 #include "fl/stl/singleton.h"  // for fl::Singleton
 #include "platforms/is_platform.h"
@@ -382,7 +383,7 @@ void CFastLED::delay(unsigned long ms) {
 		fl::delay(1);
 #endif
 		show();
-		yield();
+		fl::yield();
 	}
 	while((fl::millis()-start) < ms);
 }

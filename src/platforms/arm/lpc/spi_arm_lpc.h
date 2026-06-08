@@ -7,6 +7,7 @@
 #include "fl/stl/noexcept.h"
 #include "platforms/arm/is_arm.h"
 #include "platforms/arm/lpc/is_lpc.h"
+#include "fastspi_types.h"
 
 // Scoped to LPC8xx (LPC845 / LPC804). The SPI register layout below is the
 // LPC8xx "SPI" peripheral block per NXP UM11029 (LPC84x) / UM11065 (LPC80x)

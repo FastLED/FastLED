@@ -116,6 +116,7 @@
 #include "fl/stl/noexcept.h"
 #include "fl/stl/cstring.h"
 #include "eorder.h"
+#include "fastled_delay.h"
 
 // Forward declarations for the CMSIS LPC845 peripheral struct types. When
 // the user's build pulls in <LPC845.h> via led_sysdefs_arm_lpc.h, the real

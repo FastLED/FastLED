@@ -2,12 +2,14 @@
 
 // IWYU pragma: private
 
-// Only compile for non-ESP32 Arduino platforms (not stub, not WASM)
+// Only compile for non-ESP32 Arduino platforms (not stub, not WASM, not LPC)
 // ESP32 has its own platform_time in platforms/esp/32/platform_time_esp32.cpp.hpp
+// LPC has its own platform_time in platforms/arm/lpc/platform_time_lpc.cpp.hpp
 #include "platforms/wasm/is_wasm.h"
 #include "platforms/esp/is_esp.h"
+#include "platforms/arm/lpc/is_lpc.h"
 
-#if defined(ARDUINO) && !defined(FASTLED_STUB_IMPL) && !defined(FL_IS_WASM) && !defined(FL_IS_ESP32)
+#if defined(ARDUINO) && !defined(FASTLED_STUB_IMPL) && !defined(FL_IS_WASM) && !defined(FL_IS_ESP32) && !defined(FL_IS_ARM_LPC)
 
 #include "platforms/time_platform.h"
 #include "fl/system/arduino.h"

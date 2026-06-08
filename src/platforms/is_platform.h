@@ -139,6 +139,7 @@
 // Include all platform detection headers
 #include "platforms/apollo3/is_apollo3.h"
 #include "platforms/arm/is_arm.h"
+#include "platforms/arm/lpc/is_lpc.h"
 #include "platforms/arm/nrf52/is_nrf52.h"
 #include "platforms/arm/renesas/is_renesas.h"
 #include "platforms/arm/rp/is_rp.h"

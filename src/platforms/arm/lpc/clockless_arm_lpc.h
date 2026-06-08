@@ -26,6 +26,7 @@
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/noexcept.h"
 #include "eorder.h"
+#include "fastled_delay.h"
 
 namespace fl {
 
