@@ -11,7 +11,7 @@ import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from ci.lint_cpp.arduino_macro_usage_checker import ArduinoMacroUsageChecker
 from ci.lint_cpp.asm_js_location_checker import AsmJsLocationChecker
@@ -609,24 +609,28 @@ class LegacyViolationLineContent:
 
 
 def _legacy_violation_item_to_line_content(item: Any) -> LegacyViolationLineContent:
-    if isinstance(item, tuple) and len(item) >= 2:
-        line_num_raw, content_raw = item[0], item[1]
-        return LegacyViolationLineContent(
-            line_number=int(line_num_raw), message=str(content_raw)
-        )
+    if isinstance(item, tuple):
+        tuple_item = cast(tuple[Any, ...], item)
+        if len(tuple_item) >= 2:
+            line_num_raw: Any = tuple_item[0]
+            content_raw: Any = tuple_item[1]
+            return LegacyViolationLineContent(
+                line_number=int(line_num_raw), message=str(content_raw)
+            )
 
-    include_line = getattr(item, "include_line", None)
-    include_snippet = getattr(item, "include_snippet", None)
+    item_any: Any = cast(Any, item)
+    include_line: Any = getattr(item_any, "include_line", None)
+    include_snippet: Any = getattr(item_any, "include_snippet", None)
     if include_line is None or include_snippet is None:
         raise ValueError(
-            f"Unsupported violation item shape: {item!r} ({type(item).__name__})"
+            f"Unsupported violation item shape: {item_any!r} ({type(item_any).__name__})"
         )
 
     message = str(include_snippet)
-    namespace_info = getattr(item, "namespace_info", None)
+    namespace_info: Any = getattr(item_any, "namespace_info", None)
     if namespace_info is not None:
-        namespace_line = getattr(namespace_info, "line_number", None)
-        namespace_snippet = getattr(namespace_info, "snippet", None)
+        namespace_line: Any = getattr(namespace_info, "line_number", None)
+        namespace_snippet: Any = getattr(namespace_info, "snippet", None)
         if namespace_line is not None and namespace_snippet is not None:
             message = (
                 f"{message} (namespace declared at line {int(namespace_line)}: "
