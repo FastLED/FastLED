@@ -45,6 +45,7 @@
 // (can be replaced with different implementations if desired)
 // Bind to fl/ equivalents instead of C standard library
 #include "fl/stl/cstring.h"
+#include "fl/stl/noexcept.h"
 
 #include "pub/mp3common.h"	/* includes mp3dec.h (public API) and internal, platform-independent API */
 
@@ -68,7 +69,7 @@ namespace third_party {
  *
  * Return:      handle to mp3 decoder instance, 0 if malloc fails
  **************************************************************************************/
-HMP3Decoder MP3InitDecoder(void)
+HMP3Decoder MP3InitDecoder(void) FL_NOEXCEPT
 {
 	MP3DecInfo *mp3DecInfo;
 
@@ -89,7 +90,7 @@ HMP3Decoder MP3InitDecoder(void)
  *
  * Return:      none
  **************************************************************************************/
-void MP3FreeDecoder(HMP3Decoder hMP3Decoder)
+void MP3FreeDecoder(HMP3Decoder hMP3Decoder) FL_NOEXCEPT
 {
 	MP3DecInfo *mp3DecInfo = (MP3DecInfo *)hMP3Decoder;
 
@@ -112,7 +113,7 @@ void MP3FreeDecoder(HMP3Decoder hMP3Decoder)
  * Return:      offset to first sync word (bytes from start of buf)
  *              -1 if sync not found after searching nBytes
  **************************************************************************************/
-int MP3FindSyncWord(const unsigned char *buf, int nBytes)
+int MP3FindSyncWord(const unsigned char *buf, int nBytes) FL_NOEXCEPT
 {
 	int i;
 
@@ -149,7 +150,7 @@ int MP3FindSyncWord(const unsigned char *buf, int nBytes)
  *                this function once (first frame) then store the result (nSlots)
  *                and just use it from then on
  **************************************************************************************/
-static int MP3FindFreeSync(const unsigned char *buf, const unsigned char firstFH[4], int nBytes)
+static int MP3FindFreeSync(const unsigned char *buf, const unsigned char firstFH[4], int nBytes) FL_NOEXCEPT
 {
 	int offset = 0;
 	const unsigned char *bufPtr = buf;
@@ -192,7 +193,7 @@ static int MP3FindFreeSync(const unsigned char *buf, const unsigned char firstFH
  *
  * Notes:       call this right after calling MP3Decode
  **************************************************************************************/
-void MP3GetLastFrameInfo(HMP3Decoder hMP3Decoder, MP3FrameInfo *mp3FrameInfo)
+void MP3GetLastFrameInfo(HMP3Decoder hMP3Decoder, MP3FrameInfo *mp3FrameInfo) FL_NOEXCEPT
 {
 	MP3DecInfo *mp3DecInfo = (MP3DecInfo *)hMP3Decoder;
 
@@ -229,7 +230,7 @@ void MP3GetLastFrameInfo(HMP3Decoder hMP3Decoder, MP3FrameInfo *mp3FrameInfo)
  *
  * Return:      error code, defined in mp3dec.h (0 means no error, < 0 means error)
  **************************************************************************************/
-int MP3GetNextFrameInfo(HMP3Decoder hMP3Decoder, MP3FrameInfo *mp3FrameInfo, unsigned char *buf)
+int MP3GetNextFrameInfo(HMP3Decoder hMP3Decoder, MP3FrameInfo *mp3FrameInfo, unsigned char *buf) FL_NOEXCEPT
 {
 	MP3DecInfo *mp3DecInfo = (MP3DecInfo *)hMP3Decoder;
 
@@ -256,7 +257,7 @@ int MP3GetNextFrameInfo(HMP3Decoder hMP3Decoder, MP3FrameInfo *mp3FrameInfo, uns
  *
  * Return:      none
  **************************************************************************************/
-static void MP3ClearBadFrame(MP3DecInfo *mp3DecInfo, short *outbuf)
+static void MP3ClearBadFrame(MP3DecInfo *mp3DecInfo, short *outbuf) FL_NOEXCEPT
 {
 	int i;
 
@@ -288,7 +289,7 @@ static void MP3ClearBadFrame(MP3DecInfo *mp3DecInfo, short *outbuf)
  * Notes:       switching useSize on and off between frames in the same stream 
  *                is not supported (bit reservoir is not maintained if useSize on)
  **************************************************************************************/
-int MP3Decode(HMP3Decoder hMP3Decoder, const unsigned char **inbuf, size_t *bytesLeft, short *outbuf, int useSize)
+int MP3Decode(HMP3Decoder hMP3Decoder, const unsigned char **inbuf, size_t *bytesLeft, short *outbuf, int useSize) FL_NOEXCEPT
 {
 	int offset, bitOffset, mainBits, gr, ch, fhBytes, siBytes, freeFrameBytes;
 	int prevBitOffset, sfBlockBits, huffBlockBits;

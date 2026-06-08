@@ -45,6 +45,7 @@
 #define _CODER_H
 
 #include "third_party/libhelix_mp3/pub/mp3common.h"
+#include "fl/stl/noexcept.h"
 
 #if defined(ASSERT)
 #undef ASSERT
@@ -64,7 +65,7 @@
 #endif
 
 /* Helper function for clipping to range [-2^n, 2^n - 1] */
-__inline int32_t clip_2n_helper(int32_t val, int32_t n) {
+__inline int32_t clip_2n_helper(int32_t val, int32_t n) FL_NOEXCEPT {
 	int32_t sign = val >> 31;
 	int32_t shifted;
 	int32_t mask;
@@ -280,22 +281,22 @@ typedef struct _SubbandInfo {
 } SubbandInfo;
 
 /* bitstream.c */
-void SetBitstreamPointer(BitStreamInfo *bsi, int32_t nBytes, const unsigned char *buf);
-uint32_t GetBits(BitStreamInfo *bsi, int32_t nBits);
-int32_t CalcBitsUsed(BitStreamInfo *bsi, const unsigned char *startBuf, int32_t startOffset);
+void SetBitstreamPointer(BitStreamInfo *bsi, int32_t nBytes, const unsigned char *buf) FL_NOEXCEPT;
+uint32_t GetBits(BitStreamInfo *bsi, int32_t nBits) FL_NOEXCEPT;
+int32_t CalcBitsUsed(BitStreamInfo *bsi, const unsigned char *startBuf, int32_t startOffset) FL_NOEXCEPT;
 
 /* dequant.c, dqchan.c, stproc.c */
 int32_t DequantChannel(int32_t *sampleBuf, int32_t *workBuf, int32_t *nonZeroBound, FrameHeader *fh, SideInfoSub *sis,
-					ScaleFactorInfoSub *sfis, CriticalBandInfo *cbi);
-void MidSideProc(int32_t x[MAX_NCHAN][MAX_NSAMP], int32_t nSamps, int32_t mOut[2]);
+					ScaleFactorInfoSub *sfis, CriticalBandInfo *cbi) FL_NOEXCEPT;
+void MidSideProc(int32_t x[MAX_NCHAN][MAX_NSAMP], int32_t nSamps, int32_t mOut[2]) FL_NOEXCEPT;
 void IntensityProcMPEG1(int32_t x[MAX_NCHAN][MAX_NSAMP], int32_t nSamps, FrameHeader *fh, ScaleFactorInfoSub *sfis,
-						CriticalBandInfo *cbi, int32_t midSideFlag, int32_t mixFlag, int32_t mOut[2]);
+						CriticalBandInfo *cbi, int32_t midSideFlag, int32_t mixFlag, int32_t mOut[2]) FL_NOEXCEPT;
 void IntensityProcMPEG2(int32_t x[MAX_NCHAN][MAX_NSAMP], int32_t nSamps, FrameHeader *fh, ScaleFactorInfoSub *sfis,
-						CriticalBandInfo *cbi, ScaleFactorJS *sfjs, int32_t midSideFlag, int32_t mixFlag, int32_t mOut[2]);
+						CriticalBandInfo *cbi, ScaleFactorJS *sfjs, int32_t midSideFlag, int32_t mixFlag, int32_t mOut[2]) FL_NOEXCEPT;
 
 /* dct32.c */
 // about 1 ms faster in RAM, but very large
-void FDCT32(int32_t *x, int32_t *d, int32_t offset, int32_t oddBlock, int32_t gb);// __attribute__ ((section (".data")));
+void FDCT32(int32_t *x, int32_t *d, int32_t offset, int32_t oddBlock, int32_t gb) FL_NOEXCEPT;// __attribute__ ((section (".data")));
 
 /* hufftabs.c */
 extern const HuffTabLookup huffTabLookup[HUFF_PAIRTABS];

@@ -2,9 +2,9 @@
 """AST-backed FL_NOEXCEPT enforcement for FastLED-owned src/ code.
 
 The check uses clang-query to find function declarations/definitions in
-src/fl/** and src/platforms/** whose parsed AST is not nothrow, then filters
-source signatures that are already annotated with FL_NOEXCEPT/noexcept or have
-an explicit suppression comment.
+src/fl/**, src/platforms/**, and src/third_party/** whose parsed AST is not
+nothrow, then filters source signatures that are already annotated with
+FL_NOEXCEPT/noexcept or have an explicit suppression comment.
 
 Default mode compares current findings against a checked-in baseline. This
 keeps normal C++ lint strict for newly introduced misses while allowing the
@@ -33,13 +33,16 @@ DEFAULT_BASELINE = PROJECT_ROOT / "ci" / "tools" / "noexcept_baseline.txt"
 
 _TU_PLATFORMS = "ci/tools/_noexcept_check_platforms_tu.cpp"
 _TU_FL = "ci/tools/_noexcept_check_fl_tu.cpp"
+_TU_THIRD_PARTY = "ci/tools/_noexcept_check_third_party_tu.cpp"
 
 _SCOPES: dict[str, list[tuple[str, str]]] = {
     "platforms": [(_TU_PLATFORMS, ".*src.platforms.*")],
     "fl": [(_TU_FL, ".*src.fl.*")],
+    "third_party": [(_TU_THIRD_PARTY, ".*src.third_party.*")],
     "all": [
         (_TU_PLATFORMS, ".*src.platforms.*"),
         (_TU_FL, ".*src.fl.*"),
+        (_TU_THIRD_PARTY, ".*src.third_party.*"),
     ],
 }
 
@@ -317,8 +320,8 @@ def _print_hits(hits: list[NoexceptHit]) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=(
-            "Check for missing FL_NOEXCEPT in src/fl and src/platforms using "
-            "clang-query AST analysis."
+            "Check for missing FL_NOEXCEPT in src/fl, src/platforms, and "
+            "src/third_party using clang-query AST analysis."
         )
     )
     parser.add_argument(

@@ -16,6 +16,7 @@
 #pragma once
 
 #include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
 #include <stdbool.h>
 
 namespace fl {
@@ -246,7 +247,7 @@ typedef struct nsgif_bitmap_cb_vt {
  * \param[in]  err  The error code to convert.
  * \return String representation of given error code.
  */
-const char *nsgif_strerror(nsgif_error err);
+const char *nsgif_strerror(nsgif_error err) FL_NOEXCEPT;
 
 /**
  * Create the NSGIF object.
@@ -260,14 +261,14 @@ const char *nsgif_strerror(nsgif_error err);
 nsgif_error nsgif_create(
 		const nsgif_bitmap_cb_vt *bitmap_vt,
 		nsgif_bitmap_fmt_t bitmap_fmt,
-		nsgif_t **gif_out);
+		nsgif_t **gif_out) FL_NOEXCEPT;
 
 /**
  * Free a NSGIF object.
  *
  * \param[in]  gif  The NSGIF to free.
  */
-void nsgif_destroy(nsgif_t *gif);
+void nsgif_destroy(nsgif_t *gif) FL_NOEXCEPT;
 
 /**
  * Scan the source image data.
@@ -301,7 +302,7 @@ void nsgif_destroy(nsgif_t *gif);
 nsgif_error nsgif_data_scan(
 		nsgif_t *gif,
 		fl::size size,
-		const fl::u8 *data);
+		const fl::u8 *data) FL_NOEXCEPT;
 
 /**
  * Tell libnsgif that all the gif data has been provided.
@@ -319,7 +320,7 @@ nsgif_error nsgif_data_scan(
  * \param[in]  gif     The \ref nsgif_t object.
  */
 void nsgif_data_complete(
-		nsgif_t *gif);
+		nsgif_t *gif) FL_NOEXCEPT;
 
 /**
  * Prepare to show a frame.
@@ -343,7 +344,7 @@ nsgif_error nsgif_frame_prepare(
 		nsgif_t *gif,
 		nsgif_rect_t *area,
 		fl::u32 *delay_cs,
-		fl::u32 *frame_new);
+		fl::u32 *frame_new) FL_NOEXCEPT;
 
 /**
  * Decodes a GIF frame.
@@ -358,7 +359,7 @@ nsgif_error nsgif_frame_prepare(
 nsgif_error nsgif_frame_decode(
 		nsgif_t *gif,
 		fl::u32 frame,
-		nsgif_bitmap_t **bitmap);
+		nsgif_bitmap_t **bitmap) FL_NOEXCEPT;
 
 /**
  * Reset a GIF animation.
@@ -373,7 +374,7 @@ nsgif_error nsgif_frame_decode(
  * \return NSGIF_OK on success, or appropriate error otherwise.
  */
 nsgif_error nsgif_reset(
-		nsgif_t *gif);
+		nsgif_t *gif) FL_NOEXCEPT;
 
 /**
  * Information about a GIF.
@@ -413,7 +414,7 @@ enum nsgif_disposal {
  * \param[in]  disposal  The disposal method to convert.
  * \return String representation of given disposal method.
  */
-const char *nsgif_str_disposal(enum nsgif_disposal disposal);
+const char *nsgif_str_disposal(enum nsgif_disposal disposal) FL_NOEXCEPT;
 
 /**
  * Information about a GIF frame.
@@ -443,7 +444,7 @@ typedef struct nsgif_frame_info {
  *
  * \return The gif info, or NULL on error.
  */
-const nsgif_info_t *nsgif_get_info(const nsgif_t *gif);
+const nsgif_info_t *nsgif_get_info(const nsgif_t *gif) FL_NOEXCEPT;
 
 /**
  * Get information about a GIF from an \ref nsgif_t object.
@@ -455,7 +456,7 @@ const nsgif_info_t *nsgif_get_info(const nsgif_t *gif);
  */
 const nsgif_frame_info_t *nsgif_get_frame_info(
 		const nsgif_t *gif,
-		fl::u32 frame);
+		fl::u32 frame) FL_NOEXCEPT;
 
 /**
  * Get the global colour palette.
@@ -472,7 +473,7 @@ const nsgif_frame_info_t *nsgif_get_frame_info(
 void nsgif_global_palette(
 		const nsgif_t *gif,
 		fl::u32 table[NSGIF_MAX_COLOURS],
-		fl::size *entries);
+		fl::size *entries) FL_NOEXCEPT;
 
 /**
  * Get the local colour palette for a frame.
@@ -492,7 +493,7 @@ bool nsgif_local_palette(
 		const nsgif_t *gif,
 		fl::u32 frame,
 		fl::u32 table[NSGIF_MAX_COLOURS],
-		fl::size *entries);
+		fl::size *entries) FL_NOEXCEPT;
 
 /**
  * Configure handling of small frame delays.
@@ -523,7 +524,7 @@ bool nsgif_local_palette(
 void nsgif_set_frame_delay_behaviour(
 		nsgif_t *gif,
 		fl::u16 delay_min,
-		fl::u16 delay_default);
+		fl::u16 delay_default) FL_NOEXCEPT;
 
 } // namespace third_party
 } // namespace fl

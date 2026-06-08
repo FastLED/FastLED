@@ -45,6 +45,7 @@
 #include "coder.h"
 #include "assembly.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace third_party {
@@ -76,7 +77,7 @@ namespace third_party {
  *                 gain from AntiAlias < 2.0)
  **************************************************************************************/
 // a little bit faster in RAM (< 1 ms per block)
-static void AntiAlias(int32_t *x, int32_t nBfly)
+static void AntiAlias(int32_t *x, int32_t nBfly) FL_NOEXCEPT
 {
 	int32_t k;
 	int32_t a0, b0, c0, c1;
@@ -137,7 +138,7 @@ static void AntiAlias(int32_t *x, int32_t nBfly)
  *              all blocks gain at least 1 guard bit via window (long blocks get extra
  *                sign bit, short blocks can have one addition but max gain < 1.0)
  **************************************************************************************/
-static void WinPrevious(int32_t *xPrev, int32_t *xPrevWin, int32_t btPrev)
+static void WinPrevious(int32_t *xPrev, int32_t *xPrevWin, int32_t btPrev) FL_NOEXCEPT
 {
 	int32_t i;
 	int32_t x, *xp, *xpwLo, *xpwHi, wLo, wHi;
@@ -191,7 +192,7 @@ static void WinPrevious(int32_t *xPrev, int32_t *xPrevWin, int32_t btPrev)
  *
  * Return:      updated mOut (from new outputs y)
  **************************************************************************************/
-static int32_t FreqInvertRescale(int32_t *y, int32_t *xPrev, int32_t blockIdx, int32_t es)
+static int32_t FreqInvertRescale(int32_t *y, int32_t *xPrev, int32_t blockIdx, int32_t es) FL_NOEXCEPT
 {
 	int32_t i;
 	int32_t d, mOut;
@@ -268,7 +269,7 @@ static const int32_t c18[9] = {
 };
 
 /* require at least 3 guard bits in x[] to ensure no overflow */
-static __inline void idct9(int32_t *x)
+static __inline void idct9(int32_t *x) FL_NOEXCEPT
 {
 	int32_t a1, a2, a3, a4, a5, a6, a7, a8, a9;
 	int32_t a10, a11, a12, a13, a14, a15, a16, a17, a18;
@@ -377,7 +378,7 @@ int32_t fastWin36[18] = {
  *                inline asm may or may not be helpful)
  **************************************************************************************/
 // barely faster in RAM
-static int32_t IMDCT36(int32_t *xCurr, int32_t *xPrev, int32_t *y, int32_t btCurr, int32_t btPrev, int32_t blockIdx, int32_t gb)
+static int32_t IMDCT36(int32_t *xCurr, int32_t *xPrev, int32_t *y, int32_t btCurr, int32_t btPrev, int32_t blockIdx, int32_t gb) FL_NOEXCEPT
 {
 	int32_t i, es;
 	int32_t xBuf[18], xPrevWin[18];
@@ -481,7 +482,7 @@ static int32_t c6[3] = { static_cast<int32_t>(0x7ba3751dU), static_cast<int32_t>
 /* 12-point inverse DCT, used in IMDCT12x3() 
  * 4 input guard bits will ensure no overflow
  */
-static __inline void imdct12 (int32_t *x, int32_t *out)
+static __inline void imdct12 (int32_t *x, int32_t *out) FL_NOEXCEPT
 {
 	int32_t a0, a1, a2;
 	int32_t x0, x1, x2, x3, x4, x5;
@@ -547,7 +548,7 @@ static __inline void imdct12 (int32_t *x, int32_t *out)
  * TODO:        optimize for ARM
  **************************************************************************************/
  // barely faster in RAM
-static int32_t IMDCT12x3(int32_t *xCurr, int32_t *xPrev, int32_t *y, int32_t btPrev, int32_t blockIdx, int32_t gb)
+static int32_t IMDCT12x3(int32_t *xCurr, int32_t *xPrev, int32_t *y, int32_t btPrev, int32_t blockIdx, int32_t gb) FL_NOEXCEPT
 {
 	int32_t i, es, mOut;
 	int32_t yLo, xBuf[18], xPrevWin[18];	/* need temp buffer for reordering short blocks */
@@ -630,7 +631,7 @@ static int32_t IMDCT12x3(int32_t *xCurr, int32_t *xPrev, int32_t *y, int32_t btP
  *
  * TODO:        examine mixedBlock/winSwitch logic carefully (test he_mode.bit)
  **************************************************************************************/
-static int32_t HybridTransform(int32_t *xCurr, int32_t *xPrev, int32_t y[BLOCK_SIZE][NBANDS], SideInfoSub *sis, BlockCount *bc)
+static int32_t HybridTransform(int32_t *xCurr, int32_t *xPrev, int32_t y[BLOCK_SIZE][NBANDS], SideInfoSub *sis, BlockCount *bc) FL_NOEXCEPT
 {
 	int32_t xPrevWin[18];
 	int32_t currWinIdx, prevWinIdx;
@@ -732,7 +733,7 @@ static int32_t HybridTransform(int32_t *xCurr, int32_t *xPrev, int32_t y[BLOCK_S
  * Return:      0 on success,  -1 if null input pointers
  **************************************************************************************/
  // a bit faster in RAM
-int32_t IMDCT(MP3DecInfo *mp3DecInfo, int32_t gr, int32_t ch)
+int32_t IMDCT(MP3DecInfo *mp3DecInfo, int32_t gr, int32_t ch) FL_NOEXCEPT
 {
 	int32_t nBfly, blockCutoff;
 	FrameHeader *fh;

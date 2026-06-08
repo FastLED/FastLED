@@ -7,6 +7,7 @@
 // Include standard library headers outside namespace to avoid conflicts
 #include "fl/stl/string.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/noexcept.h"
 #include "tjpgdcnf.h"
 
 namespace fl {
@@ -107,8 +108,8 @@ struct JDEC_Progressive {
 
 
 /* TJpgDec API functions */
-JRESULT jd_prepare (JDEC* jd, size_t (*infunc)(JDEC*,uint8_t*,size_t), void* pool, size_t sz_pool, void* dev);
-JRESULT jd_decomp (JDEC* jd, int (*outfunc)(JDEC*,void*,JRECT*), uint8_t scale);
+JRESULT jd_prepare (JDEC* jd, size_t (*infunc)(JDEC*,uint8_t*,size_t), void* pool, size_t sz_pool, void* dev) FL_NOEXCEPT;
+JRESULT jd_decomp (JDEC* jd, int (*outfunc)(JDEC*,void*,JRECT*), uint8_t scale) FL_NOEXCEPT;
 
 /* Progressive decompression API */
 enum { JDR_SUSPEND = 9 };  /* Suspended for progressive processing */
@@ -120,7 +121,7 @@ JRESULT jd_decomp_progressive(
     uint16_t max_mcus_per_call,                /* MCU processing limit per call */
     uint8_t* more_data_needed,                 /* Output: needs more input data */
     uint8_t* processing_complete               /* Output: decode finished */
-);
+) FL_NOEXCEPT;
 
 } // namespace third_party
 } // namespace fl

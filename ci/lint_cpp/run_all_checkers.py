@@ -579,6 +579,8 @@ def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
             scope = "fl"
         elif rel_file.startswith("src/platforms/"):
             scope = "platforms"
+        elif rel_file.startswith("src/third_party/"):
+            scope = "third_party"
         else:
             # Outside owned src scopes — nothing to check for this file.
             return results
@@ -608,26 +610,31 @@ class LegacyViolationLineContent:
     message: str
 
 
-def _legacy_violation_item_to_line_content(item: Any) -> LegacyViolationLineContent:
-    if isinstance(item, tuple):
-        tuple_item = cast(tuple[Any, ...], item)
+def _legacy_violation_item_to_line_content(raw: Any) -> LegacyViolationLineContent:
+    if isinstance(raw, tuple):
+        tuple_item = cast(tuple[Any, ...], raw)
         if len(tuple_item) >= 2:
             line_num_raw: Any = tuple_item[0]
             content_raw: Any = tuple_item[1]
             return LegacyViolationLineContent(
                 line_number=int(line_num_raw), message=str(content_raw)
             )
+        return _build_line_content_from_attrs(tuple_item)
 
-    item_any: Any = cast(Any, item)
-    include_line: Any = getattr(item_any, "include_line", None)
-    include_snippet: Any = getattr(item_any, "include_snippet", None)
+    return _build_line_content_from_attrs(raw)
+
+
+def _build_line_content_from_attrs(item: Any) -> LegacyViolationLineContent:
+    """Build a line-content record from a duck-typed legacy violation object."""
+    include_line: Any = getattr(item, "include_line", None)
+    include_snippet: Any = getattr(item, "include_snippet", None)
     if include_line is None or include_snippet is None:
         raise ValueError(
-            f"Unsupported violation item shape: {item_any!r} ({type(item_any).__name__})"
+            f"Unsupported violation item shape: {item!r} ({type(item).__name__})"
         )
 
     message = str(include_snippet)
-    namespace_info: Any = getattr(item_any, "namespace_info", None)
+    namespace_info: Any = getattr(item, "namespace_info", None)
     if namespace_info is not None:
         namespace_line: Any = getattr(namespace_info, "line_number", None)
         namespace_snippet: Any = getattr(namespace_info, "snippet", None)

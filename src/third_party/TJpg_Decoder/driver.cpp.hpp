@@ -4,11 +4,12 @@
 #include "fl/stl/stdio.h"
 #include "fl/stl/string.h"
 #include "fl/stl/cstring.h"  // for fl::memset() and fl::memcpy()
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace third_party {
 
-TJpgInstanceDecoder::TJpgInstanceDecoder() {
+TJpgInstanceDecoder::TJpgInstanceDecoder() FL_NOEXCEPT {
     fl::memset(&embedded_tjpg_, 0, sizeof(embedded_tjpg_));
     fl::memset(&progressive_state_, 0, sizeof(progressive_state_));
     embedded_tjpg_.decoder_instance = this;
@@ -18,7 +19,7 @@ TJpgInstanceDecoder::~TJpgInstanceDecoder() {
     endDecoding();
 }
 
-bool TJpgInstanceDecoder::beginDecodingStream(fl::filebuf_ptr stream, PixelFormat format) {
+bool TJpgInstanceDecoder::beginDecodingStream(fl::filebuf_ptr stream, PixelFormat format) FL_NOEXCEPT {
     if (!stream) {
         setError("Invalid stream provided");
         return false;
@@ -44,7 +45,7 @@ bool TJpgInstanceDecoder::beginDecodingStream(fl::filebuf_ptr stream, PixelForma
     return true;
 }
 
-bool TJpgInstanceDecoder::readStreamData() {
+bool TJpgInstanceDecoder::readStreamData() FL_NOEXCEPT {
     if (!input_stream_) {
         setError("No input stream");
         return false;
@@ -81,7 +82,7 @@ bool TJpgInstanceDecoder::readStreamData() {
     return true;
 }
 
-bool TJpgInstanceDecoder::initializeDecoder() {
+bool TJpgInstanceDecoder::initializeDecoder() FL_NOEXCEPT {
     // Create JDEC instance in our workspace
     JDEC* jdec = reinterpret_cast<JDEC*>(embedded_tjpg_.workspace);
 
@@ -136,7 +137,7 @@ bool TJpgInstanceDecoder::initializeDecoder() {
     return true;
 }
 
-bool TJpgInstanceDecoder::processChunk() {
+bool TJpgInstanceDecoder::processChunk() FL_NOEXCEPT {
     if (state_ == State::Complete || state_ == State::Error) {
         return false;
     }
@@ -220,7 +221,7 @@ bool TJpgInstanceDecoder::processChunk() {
     }
 }
 
-void TJpgInstanceDecoder::endDecoding() {
+void TJpgInstanceDecoder::endDecoding() FL_NOEXCEPT {
     input_stream_.reset();
     input_buffer_.reset();
     frame_buffer_.reset();
@@ -229,7 +230,7 @@ void TJpgInstanceDecoder::endDecoding() {
     progress_ = 0.0f;
 }
 
-bool TJpgInstanceDecoder::hasError(fl::string* msg) const {
+bool TJpgInstanceDecoder::hasError(fl::string* msg) const FL_NOEXCEPT {
     if (state_ == State::Error) {
         if (msg) {
             *msg = error_message_;
@@ -239,7 +240,7 @@ bool TJpgInstanceDecoder::hasError(fl::string* msg) const {
     return false;
 }
 
-Frame TJpgInstanceDecoder::getCurrentFrame() const {
+Frame TJpgInstanceDecoder::getCurrentFrame() const FL_NOEXCEPT {
     if (current_frame_) {
         return *current_frame_;
     }
@@ -247,15 +248,15 @@ Frame TJpgInstanceDecoder::getCurrentFrame() const {
 }
 
 
-bool TJpgInstanceDecoder::hasPartialImage() const {
+bool TJpgInstanceDecoder::hasPartialImage() const FL_NOEXCEPT {
     return current_frame_ && current_frame_->isValid();
 }
 
-Frame TJpgInstanceDecoder::getPartialFrame() const {
+Frame TJpgInstanceDecoder::getPartialFrame() const FL_NOEXCEPT {
     return getCurrentFrame();
 }
 
-fl::u16 TJpgInstanceDecoder::getDecodedRows() const {
+fl::u16 TJpgInstanceDecoder::getDecodedRows() const FL_NOEXCEPT {
     if (use_progressive_ && progressive_state_.total_mcus > 0) {
         fl::u16 mcu_height = progressive_state_.base.msy * 8;
         return progressive_state_.current_mcu_y * mcu_height;
@@ -263,11 +264,11 @@ fl::u16 TJpgInstanceDecoder::getDecodedRows() const {
     return 0;
 }
 
-fl::size TJpgInstanceDecoder::getBytesProcessed() const {
+fl::size TJpgInstanceDecoder::getBytesProcessed() const FL_NOEXCEPT {
     return embedded_tjpg_.array_index;
 }
 
-void TJpgInstanceDecoder::allocateFrameBuffer(fl::u16 width, fl::u16 height) {
+void TJpgInstanceDecoder::allocateFrameBuffer(fl::u16 width, fl::u16 height) FL_NOEXCEPT {
     frame_buffer_size_ = static_cast<fl::size>(width) * height * getBytesPerPixel();
     if (frame_buffer_size_ > 0) {
         frame_buffer_.reset(new fl::u8[frame_buffer_size_]);
@@ -275,26 +276,26 @@ void TJpgInstanceDecoder::allocateFrameBuffer(fl::u16 width, fl::u16 height) {
     }
 }
 
-fl::size TJpgInstanceDecoder::getBytesPerPixel() const {
+fl::size TJpgInstanceDecoder::getBytesPerPixel() const FL_NOEXCEPT {
     return fl::getBytesPerPixel(pixel_format_);
 }
 
-void TJpgInstanceDecoder::setError(const fl::string& msg) {
+void TJpgInstanceDecoder::setError(const fl::string& msg) FL_NOEXCEPT {
     error_message_ = msg;
     state_ = State::Error;
 }
 
-bool TJpgInstanceDecoder::shouldYield() const {
+bool TJpgInstanceDecoder::shouldYield() const FL_NOEXCEPT {
     return (fl::millis() - start_time_ms_) >= progressive_config_.max_time_per_tick_ms;
 }
 
-void TJpgInstanceDecoder::startTick() {
+void TJpgInstanceDecoder::startTick() FL_NOEXCEPT {
     start_time_ms_ = fl::millis();
     operations_this_tick_ = 0;
 }
 
 // Static input callback - reads from embedded state
-fl::size TJpgInstanceDecoder::inputCallback(JDEC* jd, fl::u8* buff, fl::size nbyte) {
+fl::size TJpgInstanceDecoder::inputCallback(JDEC* jd, fl::u8* buff, fl::size nbyte) FL_NOEXCEPT {
     EmbeddedTJpgState* state = reinterpret_cast<EmbeddedTJpgState*>(jd->device);
 
     if (!state || !state->array_data) {
@@ -313,7 +314,7 @@ fl::size TJpgInstanceDecoder::inputCallback(JDEC* jd, fl::u8* buff, fl::size nby
 }
 
 // Static output callback - writes to frame buffer
-int TJpgInstanceDecoder::outputCallback(JDEC* jd, void* bitmap, JRECT* rect) {
+int TJpgInstanceDecoder::outputCallback(JDEC* jd, void* bitmap, JRECT* rect) FL_NOEXCEPT {
 
     EmbeddedTJpgState* state = reinterpret_cast<EmbeddedTJpgState*>(jd->device);
 
@@ -383,7 +384,7 @@ int TJpgInstanceDecoder::outputCallback(JDEC* jd, void* bitmap, JRECT* rect) {
 }
 
 // Factory function
-TJpgInstanceDecoderPtr createTJpgInstanceDecoder() {
+TJpgInstanceDecoderPtr createTJpgInstanceDecoder() FL_NOEXCEPT {
     return fl::make_shared<TJpgInstanceDecoder>();
 }
 

@@ -44,6 +44,7 @@
 #include "coder.h"
 #include "assembly.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace third_party {
@@ -136,7 +137,7 @@ int32_t pow2frac[8] = {
  *
  * Return:      bitwise-OR of the unsigned outputs (for guard bit calculations)
  **************************************************************************************/
-static int DequantBlock(int32_t *inbuf, int32_t *outbuf, int num, int scale)
+static int DequantBlock(int32_t *inbuf, int32_t *outbuf, int num, int scale) FL_NOEXCEPT
 {
 	int tab4[4];
 	int32_t scalef, scalei, shift;
@@ -249,7 +250,7 @@ static int DequantBlock(int32_t *inbuf, int32_t *outbuf, int num, int scale)
  * Notes:       dequantized samples in Q(DQ_FRACBITS_OUT) format 
  **************************************************************************************/
 int32_t DequantChannel(int32_t *sampleBuf, int32_t *workBuf, int32_t *nonZeroBound, FrameHeader *fh, SideInfoSub *sis,
-					ScaleFactorInfoSub *sfis, CriticalBandInfo *cbi)
+					ScaleFactorInfoSub *sfis, CriticalBandInfo *cbi) FL_NOEXCEPT
 {
 	int32_t i, j, w, cb;
 	int32_t cbEndL, cbStartS, cbEndS;

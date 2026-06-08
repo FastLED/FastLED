@@ -56,7 +56,7 @@ using fl::fabs;
 
 #define hexwave_clamp(v,a,b)   ((v) < (a) ? (a) : (v) > (b) ? (b) : (v))
 
-void hexwave_change(HexWave *hex, int32_t reflect, float peak_time, float half_height, float zero_wait)
+void hexwave_change(HexWave *hex, int32_t reflect, float peak_time, float half_height, float zero_wait) FL_NOEXCEPT
 {
    hex->pending.reflect     = reflect;
    hex->pending.peak_time   = hexwave_clamp(peak_time,0.0f,1.0f);
@@ -66,7 +66,7 @@ void hexwave_change(HexWave *hex, int32_t reflect, float peak_time, float half_h
    hex->have_pending        = 1;
 }
 
-void hexwave_create(HexWave *hex, HexWaveEngine *engine, int32_t reflect, float peak_time, float half_height, float zero_wait)
+void hexwave_create(HexWave *hex, HexWaveEngine *engine, int32_t reflect, float peak_time, float half_height, float zero_wait) FL_NOEXCEPT
 {
    memset(hex, 0, sizeof(*hex));
    hex->engine = engine;
@@ -80,12 +80,12 @@ void hexwave_create(HexWave *hex, HexWaveEngine *engine, int32_t reflect, float 
 // Global engine for legacy API - lazily initialized
 static HexWaveEngine* sGlobalEngine = nullptr;
 
-void hexwave_create_legacy(HexWave *hex, int32_t reflect, float peak_time, float half_height, float zero_wait)
+void hexwave_create_legacy(HexWave *hex, int32_t reflect, float peak_time, float half_height, float zero_wait) FL_NOEXCEPT
 {
    hexwave_create(hex, sGlobalEngine, reflect, peak_time, half_height, zero_wait);
 }
 
-static void hex_add_oversampled_bleplike(float *output, float time_since_transition, float scale, float *data, HexWaveEngine *engine)
+static void hex_add_oversampled_bleplike(float *output, float time_since_transition, float scale, float *data, HexWaveEngine *engine) FL_NOEXCEPT
 {
    float *d1,*d2;
    float lerpweight;
@@ -103,12 +103,12 @@ static void hex_add_oversampled_bleplike(float *output, float time_since_transit
       output[i] += scale * (d1[i] + (d2[i]-d1[i])*lerpweight);
 }
 
-static void hex_blep (float *output, float time_since_transition, float scale, HexWaveEngine *engine)
+static void hex_blep (float *output, float time_since_transition, float scale, HexWaveEngine *engine) FL_NOEXCEPT
 {
    hex_add_oversampled_bleplike(output, time_since_transition, scale, engine->blep, engine);
 }
 
-static void hex_blamp(float *output, float time_since_transition, float scale, HexWaveEngine *engine)
+static void hex_blamp(float *output, float time_since_transition, float scale, HexWaveEngine *engine) FL_NOEXCEPT
 {
    hex_add_oversampled_bleplike(output, time_since_transition, scale, engine->blamp, engine);
 }
@@ -120,7 +120,7 @@ typedef struct
 
 // each half of the waveform needs 4 vertices to represent 3 line
 // segments, plus 1 more for wraparound
-static void hexwave_generate_linesegs(hexvert vert[9], HexWave *hex, float dt)
+static void hexwave_generate_linesegs(hexvert vert[9], HexWave *hex, float dt) FL_NOEXCEPT
 {
    int32_t j;
    float min_len = dt / 256.0f;
@@ -188,7 +188,7 @@ static void hexwave_generate_linesegs(hexvert vert[9], HexWave *hex, float dt)
    vert[8].s = vert[0].s;
 }
 
-void hexwave_generate_samples(float *output, int32_t num_samples, HexWave *hex, float freq)
+void hexwave_generate_samples(float *output, int32_t num_samples, HexWave *hex, float freq) FL_NOEXCEPT
 {
    HexWaveEngine *engine = hex->engine;
    hexvert vert[9];
@@ -317,7 +317,7 @@ void hexwave_generate_samples(float *output, int32_t num_samples, HexWave *hex, 
    hex->t = t;
 }
 
-void hexwave_engine_destroy(HexWaveEngine *engine)
+void hexwave_engine_destroy(HexWaveEngine *engine) FL_NOEXCEPT
 {
    if (engine == nullptr)
       return;
@@ -332,7 +332,7 @@ void hexwave_engine_destroy(HexWaveEngine *engine)
 }
 
 // buffer should be NULL or must be 4*(width*(oversample+1)*2 +
-HexWaveEngine* hexwave_engine_create(int32_t width, int32_t oversample, float *user_buffer)
+HexWaveEngine* hexwave_engine_create(int32_t width, int32_t oversample, float *user_buffer) FL_NOEXCEPT
 {
    if (width > FL_STB_HEXWAVE_MAX_BLEP_LENGTH)
       width = FL_STB_HEXWAVE_MAX_BLEP_LENGTH;
@@ -438,7 +438,7 @@ HexWaveEngine* hexwave_engine_create(int32_t width, int32_t oversample, float *u
 //
 //////////////////////////////////////////////////////////////////////////////
 
-void hexwave_shutdown(float *user_buffer)
+void hexwave_shutdown(float *user_buffer) FL_NOEXCEPT
 {
    (void)user_buffer;
    if (sGlobalEngine != nullptr) {
@@ -447,7 +447,7 @@ void hexwave_shutdown(float *user_buffer)
    }
 }
 
-void hexwave_init(int32_t width, int32_t oversample, float *user_buffer)
+void hexwave_init(int32_t width, int32_t oversample, float *user_buffer) FL_NOEXCEPT
 {
    if (sGlobalEngine != nullptr) {
       hexwave_engine_destroy(sGlobalEngine);

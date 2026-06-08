@@ -11,6 +11,7 @@ https://github.com/Bodmer/TJpg_Decoder
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/string.h"
 #include "fl/stl/cstring.h"  // for fl::memset() and fl::memcpy()
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace third_party {
@@ -19,7 +20,7 @@ namespace third_party {
 ** Function name:           TJpg_Decoder
 ** Description:             Constructor
 ***************************************************************************************/
-TJpg_Decoder::TJpg_Decoder(){
+TJpg_Decoder::TJpg_Decoder() FL_NOEXCEPT {
   // Constructor
 }
 
@@ -35,7 +36,7 @@ TJpg_Decoder::~TJpg_Decoder(){
 ** Function name:           setSwapBytes
 ** Description:             Set byte swapping for output
 ***************************************************************************************/
-void TJpg_Decoder::setSwapBytes(bool swapBytes){
+void TJpg_Decoder::setSwapBytes(bool swapBytes) FL_NOEXCEPT {
   _swap = swapBytes;
 }
 
@@ -43,7 +44,7 @@ void TJpg_Decoder::setSwapBytes(bool swapBytes){
 ** Function name:           setJpgScale
 ** Description:             Set the reduction scale factor (1, 2, 4 or 8)
 ***************************************************************************************/
-void TJpg_Decoder::setJpgScale(uint8_t scaleFactor)
+void TJpg_Decoder::setJpgScale(uint8_t scaleFactor) FL_NOEXCEPT
 {
   switch (scaleFactor)
   {
@@ -68,7 +69,7 @@ void TJpg_Decoder::setJpgScale(uint8_t scaleFactor)
 ** Function name:           setCallback
 ** Description:             Set the sketch callback function to render decoded blocks
 ***************************************************************************************/
-void TJpg_Decoder::setCallback(SketchCallback sketchCallback)
+void TJpg_Decoder::setCallback(SketchCallback sketchCallback) FL_NOEXCEPT
 {
   tft_output = sketchCallback;
 }
@@ -77,7 +78,7 @@ void TJpg_Decoder::setCallback(SketchCallback sketchCallback)
 ** Function name:           jd_input (declared static)
 ** Description:             Called by tjpgd.c to get more data
 ***************************************************************************************/
-size_t TJpg_Decoder::jd_input(JDEC* jdec, uint8_t* buf, size_t len)
+size_t TJpg_Decoder::jd_input(JDEC* jdec, uint8_t* buf, size_t len) FL_NOEXCEPT
 {
   // Retrieve instance pointer from JDEC device context
   TJpg_Decoder *thisPtr = static_cast<TJpg_Decoder*>(jdec->device);
@@ -104,7 +105,7 @@ size_t TJpg_Decoder::jd_input(JDEC* jdec, uint8_t* buf, size_t len)
 ** Description:             Called by tjpgd.c with an image block for rendering
 ***************************************************************************************/
 // Pass image block back to the sketch for rendering, may be a complete or partial MCU
-int TJpg_Decoder::jd_output(JDEC* jdec, void* bitmap, JRECT* jrect)
+int TJpg_Decoder::jd_output(JDEC* jdec, void* bitmap, JRECT* jrect) FL_NOEXCEPT
 {
   // Retrieve instance pointer from JDEC device context
   TJpg_Decoder *thisPtr = static_cast<TJpg_Decoder*>(jdec->device);
@@ -133,7 +134,7 @@ int TJpg_Decoder::jd_output(JDEC* jdec, void* bitmap, JRECT* jrect)
 ** Function name:           drawJpg
 ** Description:             Draw a jpg saved in a FLASH memory array
 ***************************************************************************************/
-JRESULT TJpg_Decoder::drawJpg(int32_t x, int32_t y, const uint8_t jpeg_data[], size_t  data_size) {
+JRESULT TJpg_Decoder::drawJpg(int32_t x, int32_t y, const uint8_t jpeg_data[], size_t  data_size) FL_NOEXCEPT {
   JDEC jdec;
   JRESULT jresult = JDR_OK;
 
@@ -164,7 +165,7 @@ JRESULT TJpg_Decoder::drawJpg(int32_t x, int32_t y, const uint8_t jpeg_data[], s
 ** Function name:           getJpgSize
 ** Description:             Get width and height of a jpg saved in a FLASH memory array
 ***************************************************************************************/
-JRESULT TJpg_Decoder::getJpgSize(uint16_t *w, uint16_t *h, const uint8_t jpeg_data[], size_t  data_size) {
+JRESULT TJpg_Decoder::getJpgSize(uint16_t *w, uint16_t *h, const uint8_t jpeg_data[], size_t  data_size) FL_NOEXCEPT {
   JDEC jdec;
   JRESULT jresult = JDR_OK;
 
