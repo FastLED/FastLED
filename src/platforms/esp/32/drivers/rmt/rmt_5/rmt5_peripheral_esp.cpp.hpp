@@ -137,7 +137,7 @@ Rmt5PeripheralESPImpl::~Rmt5PeripheralESPImpl() {
 //=============================================================================
 
 /// Track the GPIO number for the last created TX channel (for diagnostic purposes)
-static volatile int s_lastTxChannelGpio = -1;
+static volatile i16 s_lastTxChannelGpio = -1;
 
 bool Rmt5PeripheralESPImpl::createTxChannel(const Rmt5ChannelConfig& config,
                                              void** out_handle) FL_NOEXCEPT {
@@ -196,7 +196,7 @@ bool Rmt5PeripheralESPImpl::createTxChannel(const Rmt5ChannelConfig& config,
     // Reference: GitHub ESP-IDF issues #11768, #15861
 
     // Store GPIO for later diagnostic access
-    s_lastTxChannelGpio = config.gpio_num;
+    s_lastTxChannelGpio = static_cast<i16>(config.gpio_num);
 
     *out_handle = static_cast<void*>(channel);
     return true;

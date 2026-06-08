@@ -334,6 +334,21 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         u32 reset_us;
     };
 
+    enum class CreateChannelWarning : u8 {
+        TxRxDmaConflict,
+        DmaTxAllocationFailed,
+        DmaMemoryClaimFailed,
+        DmaEncoderCreateFailed,
+        DmaChannelCreateFailedFallback,
+        NonDmaTxAllocationFailed,
+        NonDmaEncoderCreateFailed,
+    };
+
+    enum class ReconfigureWarning : u8 {
+        CallbackRegisterFailed,
+        ChannelRecreateFailed,
+    };
+
     /// @brief Begin LED data transmission for all channels (internal)
     /// @param channelData Span of channel data to transmit
     void beginTransmission(fl::span<const ChannelDataPtr> channelData) FL_NOEXCEPT {
@@ -547,6 +562,77 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 #endif
     }
 
+    FL_NO_INLINE void emitCreateChannelWarning(
+        CreateChannelWarning warning, u8 memoryChannelId,
+        bool networkActive) FL_NOEXCEPT {
+#if FASTLED_LOG_RUNTIME_ENABLED
+        fl::sstream msg;
+        switch (warning) {
+        case CreateChannelWarning::TxRxDmaConflict:
+            msg << "TX Channel: RX channel detected - disabling DMA to avoid TX/RX conflict";
+            break;
+        case CreateChannelWarning::DmaTxAllocationFailed:
+            msg << "Memory manager TX allocation failed for DMA channel "
+                << static_cast<int>(memoryChannelId);
+            break;
+        case CreateChannelWarning::DmaMemoryClaimFailed:
+            msg << "DMA hardware creation succeeded but memory manager allocation failed";
+            break;
+        case CreateChannelWarning::DmaEncoderCreateFailed:
+            msg << "Failed to create encoder for DMA channel";
+            break;
+        case CreateChannelWarning::DmaChannelCreateFailedFallback:
+            msg << "DMA channel creation failed - unexpected failure on DMA-capable platform, falling back to non-DMA";
+            break;
+        case CreateChannelWarning::NonDmaTxAllocationFailed: {
+            auto &memMgr = RmtMemoryManager::instance();
+            msg << "Memory manager TX allocation failed for channel "
+                << static_cast<int>(memoryChannelId)
+                << " - insufficient on-chip memory\n"
+                << "  Available: " << memMgr.availableTxWords() << " words\n"
+                << "  Requested: "
+                << (RmtMemoryManager::calculateMemoryBlocks(networkActive) *
+                    SOC_RMT_MEM_WORDS_PER_CHANNEL)
+                << " words\n"
+                << "  DMA channels in use: "
+                << memMgr.getDMAChannelsInUse() << "/1";
+            break;
+        }
+        case CreateChannelWarning::NonDmaEncoderCreateFailed:
+            msg << "Failed to create encoder for channel";
+            break;
+        }
+
+        FL_WARN(msg.str());
+#else
+        (void)warning;
+        (void)memoryChannelId;
+        (void)networkActive;
+#endif
+    }
+
+    FL_NO_INLINE void emitReconfigureWarning(
+        ReconfigureWarning warning, size_t channelIndex) FL_NOEXCEPT {
+#if FASTLED_LOG_RUNTIME_ENABLED
+        fl::sstream msg;
+        switch (warning) {
+        case ReconfigureWarning::CallbackRegisterFailed:
+            msg << "Failed to re-register callback for reconfigured channel "
+                << channelIndex;
+            break;
+        case ReconfigureWarning::ChannelRecreateFailed:
+            msg << "Failed to recreate channel " << channelIndex
+                << " during Network reconfiguration";
+            break;
+        }
+
+        FL_WARN(msg.str());
+#else
+        (void)warning;
+        (void)channelIndex;
+#endif
+    }
+
     /// @brief Create new RMT channel with given configuration
     /// @param dataSize Size of LED data in bytes (0 = use default buffer size)
     /// @return true if channel created successfully
@@ -623,7 +709,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         // This prevents the observed issue where TX transmissions never complete
         // when both TX (DMA) and RX are using the RMT peripheral simultaneously.
         if (tryDMA && memMgr.hasActiveRxChannels()) {
-            FL_WARN("TX Channel: RX channel detected - disabling DMA to avoid TX/RX conflict");
+            emitCreateChannelWarning(CreateChannelWarning::TxRxDmaConflict,
+                                     state->memoryChannelId, networkActive);
             tryDMA = false;
         }
         if (tryDMA) {
@@ -647,8 +734,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             size_t dma_alloc_words = 0;
             if (!memMgr.tryAllocateTx(state->memoryChannelId, true,
                                        networkActive, dma_alloc_words)) {
-                FL_WARN("Memory manager TX allocation failed for DMA channel "
-                        << static_cast<int>(state->memoryChannelId));
+                emitCreateChannelWarning(CreateChannelWarning::DmaTxAllocationFailed,
+                                         state->memoryChannelId, networkActive);
                 return false;
             }
 
@@ -690,8 +777,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 // DMA SUCCESS - claim DMA slot in memory manager
                 if (!memMgr.allocateDMA(state->memoryChannelId,
                                         true)) { // true = TX channel
-                    FL_WARN("DMA hardware creation succeeded but memory "
-                            "manager allocation failed");
+                    emitCreateChannelWarning(CreateChannelWarning::DmaMemoryClaimFailed,
+                                             state->memoryChannelId, networkActive);
                     mPeripheral.deleteChannel(state->channel);
                     state->channel = nullptr;
                     memMgr.free(state->memoryChannelId, true);
@@ -707,7 +794,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 // Create encoder for this DMA channel
                 state->encoder = mPeripheral.createEncoder(timing, FASTLED_RMT5_CLOCK_HZ);
                 if (!state->encoder) {
-                    FL_WARN("Failed to create encoder for DMA channel");
+                    emitCreateChannelWarning(CreateChannelWarning::DmaEncoderCreateFailed,
+                                             state->memoryChannelId, networkActive);
                     mPeripheral.deleteChannel(state->channel);
                     state->channel = nullptr;
                     mDMAChannelsInUse--;
@@ -726,7 +814,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 // DMA FAILED - free memory and fall through to non-DMA
                 // Free memory allocation
                 memMgr.free(state->memoryChannelId, true);
-                FL_WARN("DMA channel creation failed - unexpected failure on DMA-capable platform, falling back to non-DMA");
+                emitCreateChannelWarning(CreateChannelWarning::DmaChannelCreateFailedFallback,
+                                         state->memoryChannelId, networkActive);
             }
         }
 
@@ -743,12 +832,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             //
             // Note: DMA channels consume 0 on-chip words, but ESP32-S3 only has
             // 1 DMA channel. Subsequent channels must use non-DMA (on-chip memory).
-            FL_WARN("Memory manager TX allocation failed for channel "
-                    << static_cast<int>(state->memoryChannelId)
-                    << " - insufficient on-chip memory");
-            FL_WARN("  Available: " << memMgr.availableTxWords() << " words");
-            FL_WARN("  Requested: " << (RmtMemoryManager::calculateMemoryBlocks(networkActive) * SOC_RMT_MEM_WORDS_PER_CHANNEL) << " words");
-            FL_WARN("  DMA channels in use: " << memMgr.getDMAChannelsInUse() << "/1");
+            emitCreateChannelWarning(CreateChannelWarning::NonDmaTxAllocationFailed,
+                                     state->memoryChannelId, networkActive);
             return false;
         }
 
@@ -832,7 +917,8 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         // Create encoder for this channel
         state->encoder = mPeripheral.createEncoder(timing, FASTLED_RMT5_CLOCK_HZ);
         if (!state->encoder) {
-            FL_WARN("Failed to create encoder for channel");
+            emitCreateChannelWarning(CreateChannelWarning::NonDmaEncoderCreateFailed,
+                                     state->memoryChannelId, networkActive);
             mPeripheral.deleteChannel(state->channel);
             state->channel = nullptr;
             // Free memory allocation
@@ -1209,12 +1295,10 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 state.encoder = nullptr;
             }
 
-            // Delete channel
-            if (state.channel) {
-                mPeripheral.waitAllDone(state.channel, 100);
-                mPeripheral.deleteChannel(state.channel);
-                state.channel = nullptr;
-            }
+            // Delete channel. The loop skips null channels above.
+            mPeripheral.waitAllDone(state.channel, 100);
+            mPeripheral.deleteChannel(state.channel);
+            state.channel = nullptr;
 
             // Free DMA if this channel was using it
             if (state.useDMA) {
@@ -1231,7 +1315,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             if (createChannel(&state, state.pin, state.timing, 0)) {
                 // Re-register callback for the recreated channel
                 if (!registerChannelCallback(&state)) {
-                    FL_WARN("Failed to re-register callback for reconfigured channel " << i);
+                    emitReconfigureWarning(ReconfigureWarning::CallbackRegisterFailed, i);
                     // Channel creation succeeded but callback failed - destroy it
                     if (state.channel) {
                         mPeripheral.deleteChannel(state.channel);
@@ -1253,7 +1337,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                     FL_DBG("Successfully reconfigured channel " << i);
                 }
             } else {
-                FL_WARN("Failed to recreate channel " << i << " during Network reconfiguration");
+                emitReconfigureWarning(ReconfigureWarning::ChannelRecreateFailed, i);
             }
         }
 
