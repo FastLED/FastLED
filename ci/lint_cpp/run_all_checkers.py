@@ -570,15 +570,26 @@ def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
 
     results = CheckerResults()
 
+    scope = "all"
+    rel_file: str | None = None
+    if file_path is not None:
+        rel_file = os.path.relpath(str(Path(file_path).resolve()), PROJECT_ROOT)
+        rel_file = rel_file.replace("\\", "/")
+        if rel_file.startswith("src/fl/"):
+            scope = "fl"
+        elif rel_file.startswith("src/platforms/"):
+            scope = "platforms"
+        else:
+            # Outside owned src scopes — nothing to check for this file.
+            return results
+
     try:
-        hits = find_missing_noexcept("all")
+        hits = find_missing_noexcept(scope)
     except NoexceptCheckError as exc:
         results.add_violation("ci/tools/check_noexcept.py", 0, str(exc))
         return results
 
-    if file_path is not None:
-        rel_file = os.path.relpath(str(Path(file_path).resolve()), PROJECT_ROOT)
-        rel_file = rel_file.replace("\\", "/")
+    if rel_file is not None:
         hits = [hit for hit in hits if hit.path == rel_file]
 
     new_hits, _stale = diff_against_baseline(hits, load_baseline(DEFAULT_BASELINE))
