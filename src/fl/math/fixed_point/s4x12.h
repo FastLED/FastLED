@@ -219,6 +219,13 @@ class s4x12 {
         constexpr s4x12 one(1.0f);
         if (exp.mValue == 0) return one;
         if (base == one) return one;
+        // Snap base values within ~2 ULPs of 1.0 to exactly 1.0 to dodge the
+        // log2(1+t) minimax polynomial's upper-endpoint residual (#2969).
+        constexpr i16 kOneRaw = static_cast<i16>(SCALE);
+        if (base.mValue >= static_cast<i16>(kOneRaw - 2) &&
+            base.mValue <= kOneRaw) {
+            return one;
+        }
         return exp2_fp(exp * log2_fp(base));
     }
 

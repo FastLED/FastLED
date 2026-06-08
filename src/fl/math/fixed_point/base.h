@@ -236,6 +236,16 @@ class fixed_point_base {
         constexpr Derived one(1.0f);
         if (exp.mValue == 0) return one;
         if (base == one) return one;
+        // Snap base values within ~2 ULPs of 1.0 to exactly 1.0 to dodge the
+        // log2(1+t) minimax polynomial's upper-endpoint residual (off by
+        // 0.000443 at t=1, which amplifies via exp2 to ~50-100 LSB at u16
+        // scale). See #2969.
+        constexpr raw_type kNearOneEpsilon = static_cast<raw_type>(2);
+        constexpr raw_type kOneRaw = static_cast<raw_type>(Derived::SCALE);
+        if (base.mValue >= static_cast<raw_type>(kOneRaw - kNearOneEpsilon) &&
+            base.mValue <= kOneRaw) {
+            return one;
+        }
         return exp2_fp(exp * log2_fp(base));
     }
 
