@@ -49,7 +49,7 @@ class FL_ALIGN_AS_T(max_align<Types...>::value) variant {
         }
     }
 
-    ~variant() FL_NOEXCEPT { reset(); }
+    ~variant() FL_DTOR_NOEXCEPT { reset(); }
 
     variant &operator=(const variant &other) FL_NOEXCEPT {
         if (this != &other) {
@@ -102,7 +102,7 @@ class FL_ALIGN_AS_T(max_align<Types...>::value) variant {
         return *ptr<T>();
     }
 
-    void reset() FL_NOEXCEPT {
+    void reset() FL_DTOR_NOEXCEPT {
         if (!empty()) {
             destroy_current();
             _tag = Empty;
@@ -219,7 +219,7 @@ class FL_ALIGN_AS_T(max_align<Types...>::value) variant {
     }
 
     // –– destroy via table
-    void destroy_current() FL_NOEXCEPT {
+    void destroy_current() FL_DTOR_NOEXCEPT {
         using Fn = void (*)(void *);
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING(array-bounds)
@@ -230,7 +230,7 @@ class FL_ALIGN_AS_T(max_align<Types...>::value) variant {
         FL_DISABLE_WARNING_POP
     }
 
-    template <typename T> static void destroy_fn(void *storage) FL_NOEXCEPT {
+    template <typename T> static void destroy_fn(void *storage) FL_DTOR_NOEXCEPT {
         // Use bit_cast_ptr for safe type-punning on properly aligned storage
         // The storage is guaranteed to be properly aligned by alignas(max_align<Types...>::value)
         T* typed_ptr = fl::bit_cast_ptr<T>(storage);

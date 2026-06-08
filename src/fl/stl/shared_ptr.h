@@ -36,9 +36,9 @@ struct ControlBlockBase {
         : shared_count(track ? 1 : NO_TRACKING_VALUE), weak_count(1) {}
     // Destructor defined out-of-line in shared_ptr.cpp.hpp to anchor vtable
     // to a single translation unit, preventing ODR violations when using shared libraries.
-    virtual ~ControlBlockBase() FL_NOEXCEPT;
-    virtual void destroy_object() FL_NOEXCEPT = 0;
-    virtual void destroy_control_block() FL_NOEXCEPT = 0;
+    virtual ~ControlBlockBase() FL_DTOR_NOEXCEPT;
+    virtual void destroy_object() FL_DTOR_NOEXCEPT = 0;
+    virtual void destroy_control_block() FL_DTOR_NOEXCEPT = 0;
     
     // Reference counting functions - defined out-of-line in shared_ptr.cpp.hpp
     // to prevent UBSAN vptr mismatch errors when objects cross shared library boundaries.
@@ -54,7 +54,7 @@ struct ControlBlockBase {
 // Default deleter implementation
 template<typename T>
 struct default_delete {
-    void operator()(T* ptr) const FL_NOEXCEPT {
+    void operator()(T* ptr) const FL_DTOR_NOEXCEPT {
         delete ptr;
     }
 };
@@ -62,7 +62,7 @@ struct default_delete {
 // Deleter that does nothing (for stack/static objects)
 template<typename T>
 struct no_op_deleter {
-    void operator()(T*) const FL_NOEXCEPT {
+    void operator()(T*) const FL_DTOR_NOEXCEPT {
         // Intentionally do nothing - object lifetime managed externally
     }
 };
@@ -70,7 +70,7 @@ struct no_op_deleter {
 // Array deleter implementation for delete[]
 template<typename T>
 struct array_delete {
-    void operator()(T* ptr) const FL_NOEXCEPT {
+    void operator()(T* ptr) const FL_DTOR_NOEXCEPT {
         delete[] ptr;
     }
 };
@@ -84,14 +84,14 @@ struct ControlBlock : public ControlBlockBase {
     ControlBlock(T* p, Deleter d = Deleter(), bool track = true) FL_NOEXCEPT
         : ControlBlockBase(track), ptr(p), deleter(d) {}
 
-    void destroy_object() FL_NOEXCEPT override {
+    void destroy_object() FL_DTOR_NOEXCEPT override {
         if (ptr && !is_no_tracking()) {  // Only delete if tracking
             deleter(ptr);
             ptr = nullptr;
         }
     }
 
-    void destroy_control_block() FL_NOEXCEPT override {
+    void destroy_control_block() FL_DTOR_NOEXCEPT override {
         delete this;
     }
 };
@@ -127,22 +127,22 @@ struct FL_ALIGNAS(control_block_alignment<T>::value) InlinedControlBlock : publi
     }
 
     // Get pointer to the inline object storage
-    T* get_object() FL_NOEXCEPT {
+    T* get_object() FL_DTOR_NOEXCEPT {
         return fl::bit_cast<T*>(&storage[0]);
     }
 
-    const T* get_object() const FL_NOEXCEPT {
+    const T* get_object() const FL_DTOR_NOEXCEPT {
         return fl::bit_cast<const T*>(&storage[0]);
     }
 
-    void destroy_object() FL_NOEXCEPT override {
+    void destroy_object() FL_DTOR_NOEXCEPT override {
         if (object_constructed) {
             get_object()->~T();  // Manual destructor call
             object_constructed = false;
         }
     }
 
-    void destroy_control_block() FL_NOEXCEPT override {
+    void destroy_control_block() FL_DTOR_NOEXCEPT override {
         delete this;
     }
 };
@@ -234,7 +234,7 @@ public:
     }
     
     // Destructor
-    ~shared_ptr() FL_NOEXCEPT {
+    ~shared_ptr() FL_DTOR_NOEXCEPT {
         //FL_WARN("shared_ptr destructor called, mPtr=" << mPtr 
         //          << ", mControlBlock=" << mControlBlock);
         reset();
@@ -283,7 +283,7 @@ public:
     }
     
     // Modifiers
-    void reset() FL_NOEXCEPT {
+    void reset() FL_DTOR_NOEXCEPT {
         //FL_WARN("shared_ptr::reset() called: mPtr=" << mPtr 
         //          << ", mControlBlock=" << mControlBlock);
         if (mControlBlock) {
@@ -301,7 +301,7 @@ public:
         mControlBlock = nullptr;
     }
 
-    void reset(shared_ptr&& other) FL_NOEXCEPT {
+    void reset(shared_ptr&& other) FL_DTOR_NOEXCEPT {
         this->swap(other);
         other.reset();
     }

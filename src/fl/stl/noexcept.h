@@ -13,6 +13,9 @@
 // FL_HAS_NOEXCEPT is never defined.  Code that checks whether noexcept is
 // in effect (e.g. static_assert(noexcept(...))) must be gated on this macro.
 //
-// When noexcept support is eventually re-enabled for a platform, add:
-//   #define FL_NOEXCEPT noexcept
-//   #define FL_HAS_NOEXCEPT 1
+// FL_DTOR_NOEXCEPT is narrower: it marks destructor-only cleanup paths that
+// are known not to throw, without changing every historical FL_NOEXCEPT use.
+#ifndef FL_DTOR_NOEXCEPT
+#define FL_DTOR_NOEXCEPT noexcept
+#define FL_HAS_DTOR_NOEXCEPT 1
+#endif

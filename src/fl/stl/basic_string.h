@@ -436,7 +436,7 @@ class basic_string {
     // ======= DESTRUCTOR =======
     // Body in basic_string.cpp.hpp per the project's header-thin
     // convention (declarations in `*.h`, definitions in `*.cpp.hpp`).
-    ~basic_string() FL_NOEXCEPT;
+    ~basic_string() FL_DTOR_NOEXCEPT;
 
     // ======= PUBLIC CONSTRUCTION =======
     // Construct a basic_string backed by a caller-provided buffer.

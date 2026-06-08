@@ -22,7 +22,7 @@ namespace fl {
 namespace detail {
 
 // Out-of-line destructor definition to anchor the vtable to this translation unit.
-ControlBlockBase::~ControlBlockBase() FL_NOEXCEPT = default;
+ControlBlockBase::~ControlBlockBase() FL_DTOR_NOEXCEPT = default;
 
 // Reference count increment - must be out-of-line to prevent cross-binary vtable issues.
 void ControlBlockBase::add_shared_ref() {
