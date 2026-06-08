@@ -44,6 +44,7 @@
 
 #include "coder.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/noexcept.h"
 #include "assembly.h"
 namespace fl {
 namespace third_party {
@@ -147,7 +148,7 @@ static const int32_t dcttab[48] = {
  *                enough registers)
  **************************************************************************************/
 // about 1ms faster in RAM
-void FDCT32(int32_t *buf, int32_t *dest, int32_t offset, int32_t oddBlock, int32_t gb)
+void FDCT32(int32_t *buf, int32_t *dest, int32_t offset, int32_t oddBlock, int32_t gb) FL_NOEXCEPT
 {
     int32_t i, s, tmp, es;
     const int32_t *cptr = dcttab;

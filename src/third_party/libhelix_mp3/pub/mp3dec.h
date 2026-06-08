@@ -45,6 +45,7 @@
 #define _MP3DEC_H
 
 #include "fl/stl/cstddef.h"
+#include "fl/stl/noexcept.h"
 
 #if defined(_WIN32) && !defined(_WIN32_WCE)
 #
@@ -120,13 +121,13 @@ namespace third_party {
 #endif
 
 /* Internal API - all symbols in fl::third_party namespace */
-HMP3Decoder MP3InitDecoder(void);
-void MP3FreeDecoder(HMP3Decoder hMP3Decoder);
-int MP3Decode(HMP3Decoder hMP3Decoder, const unsigned char **inbuf, size_t *bytesLeft, short *outbuf, int useSize);
+HMP3Decoder MP3InitDecoder(void) FL_NOEXCEPT;
+void MP3FreeDecoder(HMP3Decoder hMP3Decoder) FL_NOEXCEPT;
+int MP3Decode(HMP3Decoder hMP3Decoder, const unsigned char **inbuf, size_t *bytesLeft, short *outbuf, int useSize) FL_NOEXCEPT;
 
-void MP3GetLastFrameInfo(HMP3Decoder hMP3Decoder, MP3FrameInfo *mp3FrameInfo);
-int MP3GetNextFrameInfo(HMP3Decoder hMP3Decoder, MP3FrameInfo *mp3FrameInfo, unsigned char *buf);
-int MP3FindSyncWord(const unsigned char *buf, int nBytes);
+void MP3GetLastFrameInfo(HMP3Decoder hMP3Decoder, MP3FrameInfo *mp3FrameInfo) FL_NOEXCEPT;
+int MP3GetNextFrameInfo(HMP3Decoder hMP3Decoder, MP3FrameInfo *mp3FrameInfo, unsigned char *buf) FL_NOEXCEPT;
+int MP3FindSyncWord(const unsigned char *buf, int nBytes) FL_NOEXCEPT;
 
 #ifdef __cplusplus
 }  // namespace third_party

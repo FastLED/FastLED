@@ -82,7 +82,7 @@ static const char SFLenTab[16][2] = {
  *                (make sure dequantizer follows same convention)
  *              Illegal Intensity Position = 7 (always) for MPEG1 scale factors
  **************************************************************************************/
-static void UnpackSFMPEG1(BitStreamInfo *bsi, SideInfoSub *sis, ScaleFactorInfoSub *sfis, int32_t *scfsi, int gr, ScaleFactorInfoSub *sfisGr0)
+static void UnpackSFMPEG1(BitStreamInfo *bsi, SideInfoSub *sis, ScaleFactorInfoSub *sfis, int32_t *scfsi, int gr, ScaleFactorInfoSub *sfisGr0) FL_NOEXCEPT
 {
 	int sfb;
 	int slen0, slen1;
@@ -209,7 +209,7 @@ static const char NRTab[6][3][4] = {
  * TODO:        optimize the / and % stuff (only do one divide, get modulo x 
  *                with (x / m) * m, etc.)
  **************************************************************************************/
-static void UnpackSFMPEG2(BitStreamInfo *bsi, SideInfoSub *sis, ScaleFactorInfoSub *sfis, int gr, int ch, int modeExt, ScaleFactorJS *sfjs)
+static void UnpackSFMPEG2(BitStreamInfo *bsi, SideInfoSub *sis, ScaleFactorInfoSub *sfis, int gr, int ch, int modeExt, ScaleFactorJS *sfjs) FL_NOEXCEPT
 {
 	(void)gr;  // Unused parameter - kept for API consistency
 
@@ -354,7 +354,7 @@ static void UnpackSFMPEG2(BitStreamInfo *bsi, SideInfoSub *sis, ScaleFactorInfoS
  *
  * Return:      length (in bytes) of scale factor data, -1 if null input pointers
  **************************************************************************************/
-int UnpackScaleFactors(MP3DecInfo *mp3DecInfo, const unsigned char *buf, int *bitOffset, int bitsAvail, int gr, int ch)
+int UnpackScaleFactors(MP3DecInfo *mp3DecInfo, const unsigned char *buf, int *bitOffset, int bitsAvail, int gr, int ch) FL_NOEXCEPT
 {
 	int bitsUsed;
 	const unsigned char *startBuf;

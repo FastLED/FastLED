@@ -144,6 +144,7 @@ See below for detailed the API documentation.
 
 #include "fl/stl/cstddef.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace third_party {
@@ -280,19 +281,19 @@ typedef size_t(*plm_buffer_tell_callback)(plm_buffer_t *self, void *user);
 // free_when_done to let plmpeg call free() on the pointer when plm_destroy() 
 // is called.
 
-plm_t *plm_create_with_memory(uint8_t *bytes, size_t length, int free_when_done);
+plm_t *plm_create_with_memory(uint8_t *bytes, size_t length, int free_when_done) FL_NOEXCEPT;
 
 
 // Create a plmpeg instance with a plm_buffer as source. Pass TRUE to
 // destroy_when_done to let plmpeg call plm_buffer_destroy() on the buffer when
 // plm_destroy() is called.
 
-plm_t *plm_create_with_buffer(plm_buffer_t *buffer, int destroy_when_done);
+plm_t *plm_create_with_buffer(plm_buffer_t *buffer, int destroy_when_done) FL_NOEXCEPT;
 
 
 // Destroy a plmpeg instance and free all data.
 
-void plm_destroy(plm_t *self);
+void plm_destroy(plm_t *self) FL_NOEXCEPT;
 
 
 // Get whether we have headers on all available streams and we can report the 
@@ -301,7 +302,7 @@ void plm_destroy(plm_t *self);
 // This returns FALSE if the file is not an MPEG-PS file or - when not using a
 // file as source - when not enough data is available yet.
 
-int plm_has_headers(plm_t *self);
+int plm_has_headers(plm_t *self) FL_NOEXCEPT;
 
 
 // Probe the MPEG-PS data to find the actual number of video and audio streams
@@ -316,51 +317,51 @@ int plm_has_headers(plm_t *self);
 // streams in the file.
 // Returns TRUE if any streams were found within the probesize.
 
-int plm_probe(plm_t *self, size_t probesize);
+int plm_probe(plm_t *self, size_t probesize) FL_NOEXCEPT;
 
 
 // Get or set whether video decoding is enabled. Default TRUE.
 
-int plm_get_video_enabled(plm_t *self);
-void plm_set_video_enabled(plm_t *self, int enabled);
+int plm_get_video_enabled(plm_t *self) FL_NOEXCEPT;
+void plm_set_video_enabled(plm_t *self, int enabled) FL_NOEXCEPT;
 
 
 // Get the number of video streams (0--1) reported in the system header.
 
-int plm_get_num_video_streams(plm_t *self);
+int plm_get_num_video_streams(plm_t *self) FL_NOEXCEPT;
 
 
 // Get the display width/height of the video stream.
 
-int plm_get_width(plm_t *self);
-int plm_get_height(plm_t *self);
-double plm_get_pixel_aspect_ratio(plm_t *self);
+int plm_get_width(plm_t *self) FL_NOEXCEPT;
+int plm_get_height(plm_t *self) FL_NOEXCEPT;
+double plm_get_pixel_aspect_ratio(plm_t *self) FL_NOEXCEPT;
 
 
 // Get the framerate of the video stream in frames per second.
 
-double plm_get_framerate(plm_t *self);
+double plm_get_framerate(plm_t *self) FL_NOEXCEPT;
 
 
 // Get or set whether audio decoding is enabled. Default TRUE.
 
-int plm_get_audio_enabled(plm_t *self);
-void plm_set_audio_enabled(plm_t *self, int enabled);
+int plm_get_audio_enabled(plm_t *self) FL_NOEXCEPT;
+void plm_set_audio_enabled(plm_t *self, int enabled) FL_NOEXCEPT;
 
 
 // Get the number of audio streams (0--4) reported in the system header.
 
-int plm_get_num_audio_streams(plm_t *self);
+int plm_get_num_audio_streams(plm_t *self) FL_NOEXCEPT;
 
 
 // Set the desired audio stream (0--3). Default 0.
 
-void plm_set_audio_stream(plm_t *self, int stream_index);
+void plm_set_audio_stream(plm_t *self, int stream_index) FL_NOEXCEPT;
 
 
 // Get the samplerate of the audio stream in samples per second.
 
-int plm_get_samplerate(plm_t *self);
+int plm_get_samplerate(plm_t *self) FL_NOEXCEPT;
 
 
 // Get or set the audio lead time in seconds - the time in which audio samples
@@ -368,49 +369,49 @@ int plm_get_samplerate(plm_t *self);
 // should be set to the duration of the buffer of the audio API that you use
 // for output. E.g. for SDL2: (SDL_AudioSpec.samples / samplerate)
 
-double plm_get_audio_lead_time(plm_t *self);
-void plm_set_audio_lead_time(plm_t *self, double lead_time);
+double plm_get_audio_lead_time(plm_t *self) FL_NOEXCEPT;
+void plm_set_audio_lead_time(plm_t *self, double lead_time) FL_NOEXCEPT;
 
 
 // Get the current internal time in seconds.
 
-double plm_get_time(plm_t *self);
+double plm_get_time(plm_t *self) FL_NOEXCEPT;
 
 
 // Get the video duration of the underlying source in seconds.
 
-double plm_get_duration(plm_t *self);
+double plm_get_duration(plm_t *self) FL_NOEXCEPT;
 
 
 // Rewind all buffers back to the beginning.
 
-void plm_rewind(plm_t *self);
+void plm_rewind(plm_t *self) FL_NOEXCEPT;
 
 
 // Get or set looping. Default FALSE.
 
-int plm_get_loop(plm_t *self);
-void plm_set_loop(plm_t *self, int loop);
+int plm_get_loop(plm_t *self) FL_NOEXCEPT;
+void plm_set_loop(plm_t *self, int loop) FL_NOEXCEPT;
 
 
 // Get whether the file has ended. If looping is enabled, this will always
 // return FALSE.
 
-int plm_has_ended(plm_t *self);
+int plm_has_ended(plm_t *self) FL_NOEXCEPT;
 
 
 // Set the callback for decoded video frames used with plm_decode(). If no 
 // callback is set, video data will be ignored and not be decoded. The *user
 // Parameter will be passed to your callback.
 
-void plm_set_video_decode_callback(plm_t *self, plm_video_decode_callback fp, void *user);
+void plm_set_video_decode_callback(plm_t *self, plm_video_decode_callback fp, void *user) FL_NOEXCEPT;
 
 
 // Set the callback for decoded audio samples used with plm_decode(). If no 
 // callback is set, audio data will be ignored and not be decoded. The *user
 // Parameter will be passed to your callback.
 
-void plm_set_audio_decode_callback(plm_t *self, plm_audio_decode_callback fp, void *user);
+void plm_set_audio_decode_callback(plm_t *self, plm_audio_decode_callback fp, void *user) FL_NOEXCEPT;
 
 
 // Advance the internal timer by seconds and decode video/audio up to this time.
@@ -418,7 +419,7 @@ void plm_set_audio_decode_callback(plm_t *self, plm_audio_decode_callback fp, vo
 // of times. A frame-skip is not implemented, i.e. everything up to current time
 // will be decoded.
 
-void plm_decode(plm_t *self, double seconds);
+void plm_decode(plm_t *self, double seconds) FL_NOEXCEPT;
 
 
 // Decode and return one video frame. Returns NULL if no frame could be decoded
@@ -427,7 +428,7 @@ void plm_decode(plm_t *self, double seconds);
 // The returned plm_frame_t is valid until the next call to plm_decode_video() 
 // or until plm_destroy() is called.
 
-plm_frame_t *plm_decode_video(plm_t *self);
+plm_frame_t *plm_decode_video(plm_t *self) FL_NOEXCEPT;
 
 
 // Decode and return one audio frame. Returns NULL if no frame could be decoded
@@ -436,7 +437,7 @@ plm_frame_t *plm_decode_video(plm_t *self);
 // The returned plm_samples_t is valid until the next call to plm_decode_audio()
 // or until plm_destroy() is called.
 
-plm_samples_t *plm_decode_audio(plm_t *self);
+plm_samples_t *plm_decode_audio(plm_t *self) FL_NOEXCEPT;
 
 
 // Seek to the specified time, clamped between 0 -- duration. This can only be 
@@ -452,14 +453,14 @@ plm_samples_t *plm_decode_audio(plm_t *self);
 // satisfied.
 // Returns TRUE if seeking succeeded or FALSE if no frame could be found.
 
-int plm_seek(plm_t *self, double time, int seek_exact);
+int plm_seek(plm_t *self, double time, int seek_exact) FL_NOEXCEPT;
 
 
 // Similar to plm_seek(), but will not call the video_decode_callback,
 // audio_decode_callback or make any attempts to sync audio.
 // Returns the found frame or NULL if no frame could be found.
 
-plm_frame_t *plm_seek_frame(plm_t *self, double time, int seek_exact);
+plm_frame_t *plm_seek_frame(plm_t *self, double time, int seek_exact) FL_NOEXCEPT;
 
 
 
@@ -501,7 +502,7 @@ plm_buffer_t *plm_buffer_create_with_callbacks(
 	plm_buffer_tell_callback tell_callback,
 	size_t length,
 	void *user
-);
+) FL_NOEXCEPT;
 
 
 // Create a buffer instance with a pointer to memory as source. This assumes
@@ -509,13 +510,13 @@ plm_buffer_t *plm_buffer_create_with_callbacks(
 // free_when_done to let plmpeg call free() on the pointer when plm_destroy() 
 // is called.
 
-plm_buffer_t *plm_buffer_create_with_memory(uint8_t *bytes, size_t length, int free_when_done);
+plm_buffer_t *plm_buffer_create_with_memory(uint8_t *bytes, size_t length, int free_when_done) FL_NOEXCEPT;
 
 
 // Create an empty buffer with an initial capacity. The buffer will grow
 // as needed. Data that has already been read, will be discarded.
 
-plm_buffer_t *plm_buffer_create_with_capacity(size_t capacity);
+plm_buffer_t *plm_buffer_create_with_capacity(size_t capacity) FL_NOEXCEPT;
 
 
 // Create an empty buffer with an initial capacity. The buffer will grow
@@ -523,12 +524,12 @@ plm_buffer_t *plm_buffer_create_with_capacity(size_t capacity);
 // loading a file over the network, without needing to throttle the download. 
 // It also allows for seeking in the already loaded data.
 
-plm_buffer_t *plm_buffer_create_for_appending(size_t initial_capacity);
+plm_buffer_t *plm_buffer_create_for_appending(size_t initial_capacity) FL_NOEXCEPT;
 
 
 // Destroy a buffer instance and free all data
 
-void plm_buffer_destroy(plm_buffer_t *self);
+void plm_buffer_destroy(plm_buffer_t *self) FL_NOEXCEPT;
 
 
 // Copy data into the buffer. If the data to be written is larger than the 
@@ -537,7 +538,7 @@ void plm_buffer_destroy(plm_buffer_t *self);
 // passed in length, except when the buffer was created _with_memory() for
 // which _write() is forbidden.
 
-size_t plm_buffer_write(plm_buffer_t *self, uint8_t *bytes, size_t length);
+size_t plm_buffer_write(plm_buffer_t *self, uint8_t *bytes, size_t length) FL_NOEXCEPT;
 
 
 // Mark the current byte length as the end of this buffer and signal that no 
@@ -545,36 +546,36 @@ size_t plm_buffer_write(plm_buffer_t *self, uint8_t *bytes, size_t length);
 // just after the last plm_buffer_write().
 // For _with_capacity buffers, this is cleared on a plm_buffer_rewind().
 
-void plm_buffer_signal_end(plm_buffer_t *self);
+void plm_buffer_signal_end(plm_buffer_t *self) FL_NOEXCEPT;
 
 
 // Set a callback that is called whenever the buffer needs more data
 
-void plm_buffer_set_load_callback(plm_buffer_t *self, plm_buffer_load_callback fp, void *user);
+void plm_buffer_set_load_callback(plm_buffer_t *self, plm_buffer_load_callback fp, void *user) FL_NOEXCEPT;
 
 
 // Rewind the buffer back to the beginning. When loading from a file handle,
 // this also seeks to the beginning of the file.
 
-void plm_buffer_rewind(plm_buffer_t *self);
+void plm_buffer_rewind(plm_buffer_t *self) FL_NOEXCEPT;
 
 
 // Get the total size. For files, this returns the file size. For all other 
 // types it returns the number of bytes currently in the buffer.
 
-size_t plm_buffer_get_size(plm_buffer_t *self);
+size_t plm_buffer_get_size(plm_buffer_t *self) FL_NOEXCEPT;
 
 
 // Get the number of remaining (yet unread) bytes in the buffer. This can be
 // useful to throttle writing.
 
-size_t plm_buffer_get_remaining(plm_buffer_t *self);
+size_t plm_buffer_get_remaining(plm_buffer_t *self) FL_NOEXCEPT;
 
 
 // Get whether the read position of the buffer is at the end and no more data 
 // is expected.
 
-int plm_buffer_has_ended(plm_buffer_t *self);
+int plm_buffer_has_ended(plm_buffer_t *self) FL_NOEXCEPT;
 
 
 
@@ -596,46 +597,46 @@ static const int PLM_DEMUX_PACKET_VIDEO_1 = 0xE0;
 // Create a demuxer with a plm_buffer as source. This will also attempt to read
 // the pack and system headers from the buffer.
 
-plm_demux_t *plm_demux_create(plm_buffer_t *buffer, int destroy_when_done);
+plm_demux_t *plm_demux_create(plm_buffer_t *buffer, int destroy_when_done) FL_NOEXCEPT;
 
 
 // Destroy a demuxer and free all data.
 
-void plm_demux_destroy(plm_demux_t *self);
+void plm_demux_destroy(plm_demux_t *self) FL_NOEXCEPT;
 
 
 // Returns TRUE/FALSE whether pack and system headers have been found. This will
 // attempt to read the headers if non are present yet.
 
-int plm_demux_has_headers(plm_demux_t *self);
+int plm_demux_has_headers(plm_demux_t *self) FL_NOEXCEPT;
 
 
 // Probe the file for the actual number of video/audio streams. See
 // plm_probe() for the details.
 
-int plm_demux_probe(plm_demux_t *self, size_t probesize);
+int plm_demux_probe(plm_demux_t *self, size_t probesize) FL_NOEXCEPT;
 
 
 // Returns the number of video streams found in the system header. This will
 // attempt to read the system header if non is present yet.
 
-int plm_demux_get_num_video_streams(plm_demux_t *self);
+int plm_demux_get_num_video_streams(plm_demux_t *self) FL_NOEXCEPT;
 
 
 // Returns the number of audio streams found in the system header. This will
 // attempt to read the system header if non is present yet.
 
-int plm_demux_get_num_audio_streams(plm_demux_t *self);
+int plm_demux_get_num_audio_streams(plm_demux_t *self) FL_NOEXCEPT;
 
 
 // Rewind the internal buffer. See plm_buffer_rewind().
 
-void plm_demux_rewind(plm_demux_t *self);
+void plm_demux_rewind(plm_demux_t *self) FL_NOEXCEPT;
 
 
 // Get whether the file has ended. This will be cleared on seeking or rewind.
 
-int plm_demux_has_ended(plm_demux_t *self);
+int plm_demux_has_ended(plm_demux_t *self) FL_NOEXCEPT;
 
 
 // Seek to a packet of the specified type with a PTS just before specified time.
@@ -644,26 +645,26 @@ int plm_demux_has_ended(plm_demux_t *self);
 // Note that the specified time is considered 0-based, regardless of the first 
 // PTS in the data source.
 
-plm_packet_t *plm_demux_seek(plm_demux_t *self, double time, int type, int force_intra);
+plm_packet_t *plm_demux_seek(plm_demux_t *self, double time, int type, int force_intra) FL_NOEXCEPT;
 
 
 // Get the PTS of the first packet of this type. Returns PLM_PACKET_INVALID_TS
 // if not packet of this packet type can be found.
 
-double plm_demux_get_start_time(plm_demux_t *self, int type);
+double plm_demux_get_start_time(plm_demux_t *self, int type) FL_NOEXCEPT;
 
 
 // Get the duration for the specified packet type - i.e. the span between the
 // the first PTS and the last PTS in the data source. This only makes sense when
 // the underlying data source is a file or fixed memory.
 
-double plm_demux_get_duration(plm_demux_t *self, int type);
+double plm_demux_get_duration(plm_demux_t *self, int type) FL_NOEXCEPT;
 
 
 // Decode and return the next packet. The returned packet_t is valid until
 // the next call to plm_demux_decode() or until the demuxer is destroyed.
 
-plm_packet_t *plm_demux_decode(plm_demux_t *self);
+plm_packet_t *plm_demux_decode(plm_demux_t *self) FL_NOEXCEPT;
 
 
 
@@ -674,66 +675,66 @@ plm_packet_t *plm_demux_decode(plm_demux_t *self);
 
 // Create a video decoder with a plm_buffer as source.
 
-plm_video_t *plm_video_create_with_buffer(plm_buffer_t *buffer, int destroy_when_done);
+plm_video_t *plm_video_create_with_buffer(plm_buffer_t *buffer, int destroy_when_done) FL_NOEXCEPT;
 
 
 // Destroy a video decoder and free all data.
 
-void plm_video_destroy(plm_video_t *self);
+void plm_video_destroy(plm_video_t *self) FL_NOEXCEPT;
 
 
 // Get whether a sequence header was found and we can accurately report on
 // dimensions and framerate.
 
-int plm_video_has_header(plm_video_t *self);
+int plm_video_has_header(plm_video_t *self) FL_NOEXCEPT;
 
 
 // Get the framerate in frames per second.
 
-double plm_video_get_framerate(plm_video_t *self);
-double plm_video_get_pixel_aspect_ratio(plm_video_t *self);
+double plm_video_get_framerate(plm_video_t *self) FL_NOEXCEPT;
+double plm_video_get_pixel_aspect_ratio(plm_video_t *self) FL_NOEXCEPT;
 
 
 // Get the display width/height.
 
-int plm_video_get_width(plm_video_t *self);
-int plm_video_get_height(plm_video_t *self);
+int plm_video_get_width(plm_video_t *self) FL_NOEXCEPT;
+int plm_video_get_height(plm_video_t *self) FL_NOEXCEPT;
 
 
 // Set "no delay" mode. When enabled, the decoder assumes that the video does
 // *not* contain any B-Frames. This is useful for reducing lag when streaming.
 // The default is FALSE.
 
-void plm_video_set_no_delay(plm_video_t *self, int no_delay);
+void plm_video_set_no_delay(plm_video_t *self, int no_delay) FL_NOEXCEPT;
 
 
 // Get the current internal time in seconds.
 
-double plm_video_get_time(plm_video_t *self);
+double plm_video_get_time(plm_video_t *self) FL_NOEXCEPT;
 
 
 // Set the current internal time in seconds. This is only useful when you
 // manipulate the underlying video buffer and want to enforce a correct
 // timestamps.
 
-void plm_video_set_time(plm_video_t *self, double time);
+void plm_video_set_time(plm_video_t *self, double time) FL_NOEXCEPT;
 
 
 // Rewind the internal buffer. See plm_buffer_rewind().
 
-void plm_video_rewind(plm_video_t *self);
+void plm_video_rewind(plm_video_t *self) FL_NOEXCEPT;
 
 
 // Get whether the file has ended. This will be cleared on rewind.
 
-int plm_video_has_ended(plm_video_t *self);
+int plm_video_has_ended(plm_video_t *self) FL_NOEXCEPT;
 
 
 // Decode and return one frame of video and advance the internal time by 
 // 1/framerate seconds. The returned frame_t is valid until the next call of
 // plm_video_decode() or until the video decoder is destroyed.
 
-plm_frame_t *plm_video_decode(plm_video_t *self);
+plm_frame_t *plm_video_decode(plm_video_t *self) FL_NOEXCEPT;
 
 
 // Convert the YCrCb data of a frame into interleaved R G B data. The stride
@@ -743,12 +744,12 @@ plm_frame_t *plm_video_decode(plm_video_t *self);
 // size of at least (stride * frame->height).
 // Note that the alpha component of the dest buffer is always left untouched.
 
-void plm_frame_to_rgb(plm_frame_t *frame, uint8_t *dest, int stride);
-void plm_frame_to_bgr(plm_frame_t *frame, uint8_t *dest, int stride);
-void plm_frame_to_rgba(plm_frame_t *frame, uint8_t *dest, int stride);
-void plm_frame_to_bgra(plm_frame_t *frame, uint8_t *dest, int stride);
-void plm_frame_to_argb(plm_frame_t *frame, uint8_t *dest, int stride);
-void plm_frame_to_abgr(plm_frame_t *frame, uint8_t *dest, int stride);
+void plm_frame_to_rgb(plm_frame_t *frame, uint8_t *dest, int stride) FL_NOEXCEPT;
+void plm_frame_to_bgr(plm_frame_t *frame, uint8_t *dest, int stride) FL_NOEXCEPT;
+void plm_frame_to_rgba(plm_frame_t *frame, uint8_t *dest, int stride) FL_NOEXCEPT;
+void plm_frame_to_bgra(plm_frame_t *frame, uint8_t *dest, int stride) FL_NOEXCEPT;
+void plm_frame_to_argb(plm_frame_t *frame, uint8_t *dest, int stride) FL_NOEXCEPT;
+void plm_frame_to_abgr(plm_frame_t *frame, uint8_t *dest, int stride) FL_NOEXCEPT;
 
 
 // -----------------------------------------------------------------------------
@@ -758,45 +759,45 @@ void plm_frame_to_abgr(plm_frame_t *frame, uint8_t *dest, int stride);
 
 // Create an audio decoder with a plm_buffer as source.
 
-plm_audio_t *plm_audio_create_with_buffer(plm_buffer_t *buffer, int destroy_when_done);
+plm_audio_t *plm_audio_create_with_buffer(plm_buffer_t *buffer, int destroy_when_done) FL_NOEXCEPT;
 
 
 // Destroy an audio decoder and free all data.
 
-void plm_audio_destroy(plm_audio_t *self);
+void plm_audio_destroy(plm_audio_t *self) FL_NOEXCEPT;
 
 
 // Get whether a frame header was found and we can accurately report on
 // samplerate.
 
-int plm_audio_has_header(plm_audio_t *self);
+int plm_audio_has_header(plm_audio_t *self) FL_NOEXCEPT;
 
 
 // Get the samplerate in samples per second.
 
-int plm_audio_get_samplerate(plm_audio_t *self);
+int plm_audio_get_samplerate(plm_audio_t *self) FL_NOEXCEPT;
 
 
 // Get the current internal time in seconds.
 
-double plm_audio_get_time(plm_audio_t *self);
+double plm_audio_get_time(plm_audio_t *self) FL_NOEXCEPT;
 
 
 // Set the current internal time in seconds. This is only useful when you
 // manipulate the underlying video buffer and want to enforce a correct
 // timestamps.
 
-void plm_audio_set_time(plm_audio_t *self, double time);
+void plm_audio_set_time(plm_audio_t *self, double time) FL_NOEXCEPT;
 
 
 // Rewind the internal buffer. See plm_buffer_rewind().
 
-void plm_audio_rewind(plm_audio_t *self);
+void plm_audio_rewind(plm_audio_t *self) FL_NOEXCEPT;
 
 
 // Get whether the file has ended. This will be cleared on rewind.
 
-int plm_audio_has_ended(plm_audio_t *self);
+int plm_audio_has_ended(plm_audio_t *self) FL_NOEXCEPT;
 
 
 // Decode and return one "frame" of audio and advance the internal time by 
@@ -804,7 +805,7 @@ int plm_audio_has_ended(plm_audio_t *self);
 // is valid until the next call of plm_audio_decode() or until the audio
 // decoder is destroyed.
 
-plm_samples_t *plm_audio_decode(plm_audio_t *self);
+plm_samples_t *plm_audio_decode(plm_audio_t *self) FL_NOEXCEPT;
 
 } // namespace third_party
 } // namespace fl

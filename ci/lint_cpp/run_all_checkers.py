@@ -11,7 +11,7 @@ import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from ci.lint_cpp.arduino_macro_usage_checker import ArduinoMacroUsageChecker
 from ci.lint_cpp.asm_js_location_checker import AsmJsLocationChecker
@@ -558,31 +558,86 @@ def run_test_aggregation_check() -> tuple[int, list[str]]:
     return (len(violations), violations)
 
 
+def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
+    """Run the clang-query FL_NOEXCEPT ratchet used by default C++ lint."""
+    from ci.tools.check_noexcept import (
+        DEFAULT_BASELINE,
+        NoexceptCheckError,
+        diff_against_baseline,
+        find_missing_noexcept,
+        load_baseline,
+    )
+
+    results = CheckerResults()
+
+    scope = "all"
+    rel_file: str | None = None
+    if file_path is not None:
+        rel_file = os.path.relpath(str(Path(file_path).resolve()), PROJECT_ROOT)
+        rel_file = rel_file.replace("\\", "/")
+        if rel_file.startswith("src/fl/"):
+            scope = "fl"
+        elif rel_file.startswith("src/platforms/"):
+            scope = "platforms"
+        elif rel_file.startswith("src/third_party/"):
+            scope = "third_party"
+        else:
+            # Outside owned src scopes — nothing to check for this file.
+            return results
+
+    try:
+        hits = find_missing_noexcept(scope)
+    except NoexceptCheckError as exc:
+        results.add_violation("ci/tools/check_noexcept.py", 0, str(exc))
+        return results
+
+    if rel_file is not None:
+        hits = [hit for hit in hits if hit.path == rel_file]
+
+    new_hits, _stale = diff_against_baseline(hits, load_baseline(DEFAULT_BASELINE))
+    for hit in new_hits:
+        abs_path = str(PROJECT_ROOT / hit.path)
+        results.add_violation(
+            abs_path, hit.line, f"Missing FL_NOEXCEPT: {hit.line_text}"
+        )
+
+    return results
+
+
 @dataclass(frozen=True)
 class LegacyViolationLineContent:
     line_number: int
     message: str
 
 
-def _legacy_violation_item_to_line_content(item: Any) -> LegacyViolationLineContent:
-    if isinstance(item, tuple) and len(item) >= 2:
-        line_num_raw, content_raw = item[0], item[1]
-        return LegacyViolationLineContent(
-            line_number=int(line_num_raw), message=str(content_raw)
-        )
+def _legacy_violation_item_to_line_content(raw: Any) -> LegacyViolationLineContent:
+    if isinstance(raw, tuple):
+        tuple_item = cast(tuple[Any, ...], raw)
+        if len(tuple_item) >= 2:
+            line_num_raw: Any = tuple_item[0]
+            content_raw: Any = tuple_item[1]
+            return LegacyViolationLineContent(
+                line_number=int(line_num_raw), message=str(content_raw)
+            )
+        return _build_line_content_from_attrs(tuple_item)
 
-    include_line = getattr(item, "include_line", None)
-    include_snippet = getattr(item, "include_snippet", None)
+    return _build_line_content_from_attrs(raw)
+
+
+def _build_line_content_from_attrs(item: Any) -> LegacyViolationLineContent:
+    """Build a line-content record from a duck-typed legacy violation object."""
+    include_line: Any = getattr(item, "include_line", None)
+    include_snippet: Any = getattr(item, "include_snippet", None)
     if include_line is None or include_snippet is None:
         raise ValueError(
             f"Unsupported violation item shape: {item!r} ({type(item).__name__})"
         )
 
     message = str(include_snippet)
-    namespace_info = getattr(item, "namespace_info", None)
+    namespace_info: Any = getattr(item, "namespace_info", None)
     if namespace_info is not None:
-        namespace_line = getattr(namespace_info, "line_number", None)
-        namespace_snippet = getattr(namespace_info, "snippet", None)
+        namespace_line: Any = getattr(namespace_info, "line_number", None)
+        namespace_snippet: Any = getattr(namespace_info, "snippet", None)
         if namespace_line is not None and namespace_snippet is not None:
             message = (
                 f"{message} (namespace declared at line {int(namespace_line)}: "
@@ -848,6 +903,10 @@ def main() -> int:
                     agg_results.add_violation("test_aggregation", 0, violation)
                 results["TestAggregationChecker"] = agg_results
 
+        noexcept_results = run_noexcept_ast_check(str(file_path))
+        if noexcept_results.has_violations():
+            results["NoexceptAstChecker"] = noexcept_results
+
         # Format and print results
         if rust_ab and not run_rust_ab_check(results, [str(file_path)]):
             return 1
@@ -900,6 +959,11 @@ def main() -> int:
             for violation in pch_violations:
                 pch_results.add_violation("pch_files", 0, violation)
             results["PchFileChecker"] = pch_results
+
+        # Run AST-backed FL_NOEXCEPT enforcement from normal C++ lint.
+        noexcept_results = run_noexcept_ast_check()
+        if noexcept_results.has_violations():
+            results["NoexceptAstChecker"] = noexcept_results
 
         # Format and print results
         if rust_ab and not run_rust_ab_check(results, None):

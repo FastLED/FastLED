@@ -2,6 +2,7 @@
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/string.h"
 #include "fl/stl/cstring.h"  // for fl::memset() and fl::memcpy()
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace third_party {
@@ -17,7 +18,7 @@ nsgif_bitmap_cb_vt SoftwareGifDecoder::bitmapCallbacks_ = {
     nullptr  // get_rowspan (optional)
 };
 
-SoftwareGifDecoder::SoftwareGifDecoder(fl::PixelFormat format)
+SoftwareGifDecoder::SoftwareGifDecoder(fl::PixelFormat format) FL_NOEXCEPT
     : gif_(nullptr)
     , stream_(nullptr)
     , currentFrame_(nullptr)
@@ -33,7 +34,7 @@ SoftwareGifDecoder::~SoftwareGifDecoder() {
     end();
 }
 
-bool SoftwareGifDecoder::begin(fl::filebuf_ptr stream) {
+bool SoftwareGifDecoder::begin(fl::filebuf_ptr stream) FL_NOEXCEPT {
     if (!stream) {
         setError("Invalid stream provided");
         return false;
@@ -48,7 +49,7 @@ bool SoftwareGifDecoder::begin(fl::filebuf_ptr stream) {
     return loadMoreData();
 }
 
-void SoftwareGifDecoder::end() {
+void SoftwareGifDecoder::end() FL_NOEXCEPT {
     cleanupDecoder();
     stream_ = nullptr;
     currentFrame_ = nullptr;
@@ -61,14 +62,14 @@ void SoftwareGifDecoder::end() {
     dataBuffer_.clear();
 }
 
-bool SoftwareGifDecoder::hasError(fl::string* msg) const {
+bool SoftwareGifDecoder::hasError(fl::string* msg) const FL_NOEXCEPT {
     if (msg && hasError_) {
         *msg = errorMessage_;
     }
     return hasError_;
 }
 
-fl::DecodeResult SoftwareGifDecoder::decode() {
+fl::DecodeResult SoftwareGifDecoder::decode() FL_NOEXCEPT {
     if (hasError_) {
         return fl::DecodeResult::Error;
     }
@@ -122,14 +123,14 @@ fl::DecodeResult SoftwareGifDecoder::decode() {
     }
 }
 
-fl::Frame SoftwareGifDecoder::getCurrentFrame() {
+fl::Frame SoftwareGifDecoder::getCurrentFrame() FL_NOEXCEPT {
     if (currentFrame_) {
         return *currentFrame_;
     }
     return fl::Frame(0); // Empty frame
 }
 
-bool SoftwareGifDecoder::hasMoreFrames() const {
+bool SoftwareGifDecoder::hasMoreFrames() const FL_NOEXCEPT {
     if (hasError_ || !ready_) {
         return false;
     }
@@ -147,7 +148,7 @@ bool SoftwareGifDecoder::hasMoreFrames() const {
     return currentFrameIndex_ < info->frame_count || !dataComplete_;
 }
 
-fl::u32 SoftwareGifDecoder::getFrameCount() const {
+fl::u32 SoftwareGifDecoder::getFrameCount() const FL_NOEXCEPT {
     if (!ready_ || hasError_) {
         return 0;
     }
@@ -156,7 +157,7 @@ fl::u32 SoftwareGifDecoder::getFrameCount() const {
     return info ? info->frame_count : 0;
 }
 
-bool SoftwareGifDecoder::seek(fl::u32 frameIndex) {
+bool SoftwareGifDecoder::seek(fl::u32 frameIndex) FL_NOEXCEPT {
     if (!ready_ || hasError_) {
         return false;
     }
@@ -171,7 +172,7 @@ bool SoftwareGifDecoder::seek(fl::u32 frameIndex) {
     return true;
 }
 
-fl::u16 SoftwareGifDecoder::getWidth() const {
+fl::u16 SoftwareGifDecoder::getWidth() const FL_NOEXCEPT {
     if (!ready_ || hasError_) {
         return 0;
     }
@@ -180,7 +181,7 @@ fl::u16 SoftwareGifDecoder::getWidth() const {
     return info ? static_cast<fl::u16>(info->width) : 0;
 }
 
-fl::u16 SoftwareGifDecoder::getHeight() const {
+fl::u16 SoftwareGifDecoder::getHeight() const FL_NOEXCEPT {
     if (!ready_ || hasError_) {
         return 0;
     }
@@ -189,11 +190,11 @@ fl::u16 SoftwareGifDecoder::getHeight() const {
     return info ? static_cast<fl::u16>(info->height) : 0;
 }
 
-bool SoftwareGifDecoder::isAnimated() const {
+bool SoftwareGifDecoder::isAnimated() const FL_NOEXCEPT {
     return getFrameCount() > 1;
 }
 
-fl::u32 SoftwareGifDecoder::getLoopCount() const {
+fl::u32 SoftwareGifDecoder::getLoopCount() const FL_NOEXCEPT {
     if (!ready_ || hasError_) {
         return 0;
     }
@@ -202,7 +203,7 @@ fl::u32 SoftwareGifDecoder::getLoopCount() const {
     return info ? static_cast<fl::u32>(info->loop_max) : 0;
 }
 
-bool SoftwareGifDecoder::initializeDecoder() {
+bool SoftwareGifDecoder::initializeDecoder() FL_NOEXCEPT {
     // Determine bitmap format based on output format
     // Use R8G8B8A8 explicitly to ensure byte order: 0xRR, 0xGG, 0xBB, 0xAA
     nsgif_bitmap_fmt_t bitmapFormat = NSGIF_BITMAP_FMT_R8G8B8A8;
@@ -217,7 +218,7 @@ bool SoftwareGifDecoder::initializeDecoder() {
     return true;
 }
 
-void SoftwareGifDecoder::cleanupDecoder() {
+void SoftwareGifDecoder::cleanupDecoder() FL_NOEXCEPT {
     if (gif_) {
         nsgif_destroy(gif_);
         gif_ = nullptr;
@@ -225,13 +226,13 @@ void SoftwareGifDecoder::cleanupDecoder() {
     ready_ = false;
 }
 
-void SoftwareGifDecoder::setError(const fl::string& message) {
+void SoftwareGifDecoder::setError(const fl::string& message) FL_NOEXCEPT {
     hasError_ = true;
     errorMessage_ = message;
     ready_ = false;
 }
 
-bool SoftwareGifDecoder::loadMoreData() {
+bool SoftwareGifDecoder::loadMoreData() FL_NOEXCEPT {
     if (!stream_ || !gif_) {
         return false;
     }
@@ -273,7 +274,7 @@ bool SoftwareGifDecoder::loadMoreData() {
     return true;
 }
 
-fl::shared_ptr<fl::Frame> SoftwareGifDecoder::convertBitmapToFrame(nsgif_bitmap_t* bitmap) {
+fl::shared_ptr<fl::Frame> SoftwareGifDecoder::convertBitmapToFrame(nsgif_bitmap_t* bitmap) FL_NOEXCEPT {
     if (!bitmap) {
         setError("convertBitmapToFrame called with null bitmap");
         return nullptr;
@@ -312,20 +313,20 @@ fl::shared_ptr<fl::Frame> SoftwareGifDecoder::convertBitmapToFrame(nsgif_bitmap_
 }
 
 // Static callback implementations
-nsgif_bitmap_t* SoftwareGifDecoder::bitmapCreate(int width, int height) {
+nsgif_bitmap_t* SoftwareGifDecoder::bitmapCreate(int width, int height) FL_NOEXCEPT {
     // Create a GifBitmap wrapper
     // Note: In environments without exceptions, new will return nullptr on failure
     GifBitmap* bitmap = new GifBitmap(static_cast<fl::u16>(width), static_cast<fl::u16>(height), 4); // 4 bytes per pixel for RGBA
     return static_cast<nsgif_bitmap_t*>(bitmap);
 }
 
-void SoftwareGifDecoder::bitmapDestroy(nsgif_bitmap_t* bitmap) {
+void SoftwareGifDecoder::bitmapDestroy(nsgif_bitmap_t* bitmap) FL_NOEXCEPT {
     if (bitmap) {
         delete static_cast<GifBitmap*>(bitmap);
     }
 }
 
-fl::u8* SoftwareGifDecoder::bitmapGetBuffer(nsgif_bitmap_t* bitmap) {
+fl::u8* SoftwareGifDecoder::bitmapGetBuffer(nsgif_bitmap_t* bitmap) FL_NOEXCEPT {
     if (!bitmap) {
         return nullptr;
     }

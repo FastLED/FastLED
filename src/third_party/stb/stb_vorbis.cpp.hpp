@@ -81,6 +81,7 @@
 //
 #include "third_party/stb/stb_vorbis.h"
 #include "fl/stl/assert.h"    // For FASTLED_ASSERT
+#include "fl/stl/noexcept.h"
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -582,7 +583,7 @@ struct stb_vorbis
 
 typedef struct stb_vorbis vorb;
 
-static int32_t error(vorb *f, enum STBVorbisError e)
+static int32_t error(vorb *f, enum STBVorbisError e) FL_NOEXCEPT
 {
    f->error = e;
    if (!f->eof && e != VORBIS_need_more_data) {
@@ -597,7 +598,7 @@ static int32_t error(vorb *f, enum STBVorbisError e)
 // better portability and to avoid stack overflow on deeply nested calls.
 
 // Forward declaration needed for fl_stbv_temp_alloc_impl
-static void *setup_temp_malloc(vorb *f, int32_t sz);
+static void *setup_temp_malloc(vorb *f, int32_t sz) FL_NOEXCEPT;
 
 // Thread-local temporary buffer for vorbis decoding allocations
 // This replaces alloca() with heap-based thread-local storage.
@@ -607,7 +608,7 @@ struct StbvTempBuffer {
     fl::vector<uint8_t> buffer;
     int32_t offset = 0;  // Current allocation offset (allocates from front)
 
-    void* alloc(int32_t size) {
+    void* alloc(int32_t size) FL_NOEXCEPT {
         size = (size + 7) & ~7;  // Round up to 8-byte alignment
         int32_t new_offset = offset + size;
 
@@ -627,30 +628,30 @@ struct StbvTempBuffer {
         return ptr;
     }
 
-    int32_t save() const { return offset; }
-    void restore(int32_t saved_offset) { offset = saved_offset; }
+    int32_t save() const FL_NOEXCEPT { return offset; }
+    void restore(int32_t saved_offset) FL_NOEXCEPT { offset = saved_offset; }
 };
 
-static StbvTempBuffer& get_stbv_temp_buffer() {
+static StbvTempBuffer& get_stbv_temp_buffer() FL_NOEXCEPT {
     return SingletonThreadLocal<StbvTempBuffer>::instance();
 }
 
 // Helper functions for temp allocation (replaces macros for non-alloc_buffer case)
-static void* fl_stbv_temp_alloc_impl(vorb *f, int32_t size) {
+static void* fl_stbv_temp_alloc_impl(vorb *f, int32_t size) FL_NOEXCEPT {
     if (f->alloc.alloc_buffer) {
         return setup_temp_malloc(f, size);
     }
     return get_stbv_temp_buffer().alloc(size);
 }
 
-static int32_t fl_stbv_temp_alloc_save_impl(vorb *f) {
+static int32_t fl_stbv_temp_alloc_save_impl(vorb *f) FL_NOEXCEPT {
     if (f->alloc.alloc_buffer) {
         return f->temp_offset;
     }
     return get_stbv_temp_buffer().save();
 }
 
-static void fl_stbv_temp_alloc_restore_impl(vorb *f, int32_t saved) {
+static void fl_stbv_temp_alloc_restore_impl(vorb *f, int32_t saved) FL_NOEXCEPT {
     if (f->alloc.alloc_buffer) {
         f->temp_offset = saved;
     } else {
@@ -668,7 +669,7 @@ static void fl_stbv_temp_alloc_restore_impl(vorb *f, int32_t saved) {
 #define fl_stbv_temp_block_array(f,count,size)  make_block_array(fl_stbv_temp_alloc(f,fl_stbv_array_size_required(count,size)), count, size)
 
 // given a sufficiently large block of memory, make an array of pointers to subblocks of it
-static void *make_block_array(void *mem, int32_t count, int32_t size)
+static void *make_block_array(void *mem, int32_t count, int32_t size) FL_NOEXCEPT
 {
    int32_t i;
    void ** p = (void **) mem;
@@ -680,7 +681,7 @@ static void *make_block_array(void *mem, int32_t count, int32_t size)
    return p;
 }
 
-static void *setup_malloc(vorb *f, int32_t sz)
+static void *setup_malloc(vorb *f, int32_t sz) FL_NOEXCEPT
 {
    sz = (sz+7) & ~7; // round up to nearest 8 for alignment of future allocs.
    f->setup_memory_required += sz;
@@ -693,13 +694,13 @@ static void *setup_malloc(vorb *f, int32_t sz)
    return sz ? fl::malloc(sz) : nullptr;
 }
 
-static void setup_free(vorb *f, void *p)
+static void setup_free(vorb *f, void *p) FL_NOEXCEPT
 {
    if (f->alloc.alloc_buffer) return; // do nothing; setup mem is a stack
    fl::free(p);
 }
 
-static void *setup_temp_malloc(vorb *f, int32_t sz)
+static void *setup_temp_malloc(vorb *f, int32_t sz) FL_NOEXCEPT
 {
    sz = (sz+7) & ~7; // round up to nearest 8 for alignment of future allocs.
    if (f->alloc.alloc_buffer) {
@@ -710,7 +711,7 @@ static void *setup_temp_malloc(vorb *f, int32_t sz)
    return fl::malloc(sz);
 }
 
-static void setup_temp_free(vorb *f, void *p, int32_t sz)
+static void setup_temp_free(vorb *f, void *p, int32_t sz) FL_NOEXCEPT
 {
    if (f->alloc.alloc_buffer) {
       f->temp_offset += (sz+7)&~7;
@@ -722,7 +723,7 @@ static void setup_temp_free(vorb *f, void *p, int32_t sz)
 static constexpr uint32_t CRC32_POLY = 0x04c11db7;   // from spec
 
 static uint32 crc_table[256];
-static void crc32_init(void)
+static void crc32_init(void) FL_NOEXCEPT
 {
    int32_t i,j;
    uint32 s;
@@ -733,14 +734,14 @@ static void crc32_init(void)
    }
 }
 
-FL_ALWAYS_INLINE uint32 crc32_update(uint32 crc, uint8 byte)
+FL_ALWAYS_INLINE uint32 crc32_update(uint32 crc, uint8 byte) FL_NOEXCEPT
 {
    return (crc << 8) ^ crc_table[byte ^ (crc >> 24)];
 }
 
 
 // used in setup, and for huffman that doesn't go fast path
-static uint32_t bit_reverse(uint32_t n)
+static uint32_t bit_reverse(uint32_t n) FL_NOEXCEPT
 {
   n = ((n & 0xAAAAAAAA) >>  1) | ((n & 0x55555555) << 1);
   n = ((n & 0xCCCCCCCC) >>  2) | ((n & 0x33333333) << 2);
@@ -749,7 +750,7 @@ static uint32_t bit_reverse(uint32_t n)
   return (n >> 16) | (n << 16);
 }
 
-static float square(float x)
+static float square(float x) FL_NOEXCEPT
 {
    return x*x;
 }
@@ -757,7 +758,7 @@ static float square(float x)
 // this is a weird definition of log2() for which log2(1) = 1, log2(2) = 2, log2(4) = 3
 // as required by the specification. fast(?) implementation from stb.h
 // @OPTIMIZE: called multiple times per-packet with "constants"; move to setup
-static int32_t ilog(int32 n)
+static int32_t ilog(int32 n) FL_NOEXCEPT
 {
    static signed char log2_4[16] = { 0,1,2,2,3,3,3,3,4,4,4,4,4,4,4,4 };
 
@@ -783,7 +784,7 @@ static constexpr uint8_t NO_CODE = 255;
 // these functions are only called at setup, and only a few times
 // per file
 
-static float float32_unpack(uint32 x)
+static float float32_unpack(uint32 x) FL_NOEXCEPT
 {
    // from the specification
    uint32 mantissa = x & 0x1fffff;
@@ -801,7 +802,7 @@ static float float32_unpack(uint32 x)
 // vorbis allows a huffman table with non-sorted lengths. This
 // requires a more sophisticated construction, since symbols in
 // order do not map to huffman codes "in order".
-static void add_entry(Codebook *c, uint32 huff_code, int32_t symbol, int32_t count, int32_t len, uint32 *values)
+static void add_entry(Codebook *c, uint32 huff_code, int32_t symbol, int32_t count, int32_t len, uint32 *values) FL_NOEXCEPT
 {
    if (!c->sparse) {
       c->codewords      [symbol] = huff_code;
@@ -812,7 +813,7 @@ static void add_entry(Codebook *c, uint32 huff_code, int32_t symbol, int32_t cou
    }
 }
 
-static int32_t compute_codewords(Codebook *c, uint8 *len, int32_t n, uint32 *values)
+static int32_t compute_codewords(Codebook *c, uint8 *len, int32_t n, uint32 *values) FL_NOEXCEPT
 {
    int32_t i,k,m=0;
    uint32 available[32];
@@ -860,7 +861,7 @@ static int32_t compute_codewords(Codebook *c, uint8 *len, int32_t n, uint32 *val
 
 // accelerated huffman table allows fast O(1) match of all symbols
 // of length <= FL_STB_VORBIS_FAST_HUFFMAN_LENGTH
-static void compute_accelerated_huffman(Codebook *c)
+static void compute_accelerated_huffman(Codebook *c) FL_NOEXCEPT
 {
    int32_t i, len;
    for (i=0; i < FL_STBV_FAST_HUFFMAN_TABLE_SIZE; ++i)
@@ -882,14 +883,14 @@ static void compute_accelerated_huffman(Codebook *c)
    }
 }
 
-static int uint32_compare(const void *p, const void *q)
+static int uint32_compare(const void *p, const void *q) FL_NOEXCEPT
 {
    uint32 x = * (uint32 *) p;
    uint32 y = * (uint32 *) q;
    return x < y ? -1 : x > y;
 }
 
-static int32_t include_in_sort(Codebook *c, uint8 len)
+static int32_t include_in_sort(Codebook *c, uint8 len) FL_NOEXCEPT
 {
    if (c->sparse) { FL_ASSERT(len != NO_CODE, "len must not be NO_CODE"); return true; }
    if (len == NO_CODE) return false;
@@ -899,7 +900,7 @@ static int32_t include_in_sort(Codebook *c, uint8 len)
 
 // if the fast table above doesn't work, we want to binary
 // search them... need to reverse the bits
-static void compute_sorted_huffman(Codebook *c, uint8 *lengths, uint32 *values)
+static void compute_sorted_huffman(Codebook *c, uint8 *lengths, uint32 *values) FL_NOEXCEPT
 {
    int32_t i, len;
    // build a list of all the entries
@@ -953,7 +954,7 @@ static void compute_sorted_huffman(Codebook *c, uint8 *lengths, uint32 *values)
 }
 
 // only run while parsing the header (3 times)
-static int32_t vorbis_validate(uint8 *data)
+static int32_t vorbis_validate(uint8 *data) FL_NOEXCEPT
 {
    static uint8 vorbis[6] = { 'v', 'o', 'r', 'b', 'i', 's' };
    return memcmp(data, vorbis, 6) == 0;
@@ -961,7 +962,7 @@ static int32_t vorbis_validate(uint8 *data)
 
 // called from setup only, once per code book
 // (formula implied by specification)
-static int32_t lookup1_values(int32_t entries, int32_t dim)
+static int32_t lookup1_values(int32_t entries, int32_t dim) FL_NOEXCEPT
 {
    int32_t r = (int32_t) floor(exp((float) log((float) entries) / dim));
    if ((int32_t) floor(pow((float) r+1, dim)) <= entries)   // (int32_t) cast for MinGW warning;
@@ -974,7 +975,7 @@ static int32_t lookup1_values(int32_t entries, int32_t dim)
 }
 
 // called twice per file
-static void compute_twiddle_factors(int32_t n, float *A, float *B, float *C)
+static void compute_twiddle_factors(int32_t n, float *A, float *B, float *C) FL_NOEXCEPT
 {
    int32_t n4 = n >> 2, n8 = n >> 3;
    int32_t k,k2;
@@ -991,14 +992,14 @@ static void compute_twiddle_factors(int32_t n, float *A, float *B, float *C)
    }
 }
 
-static void compute_window(int32_t n, float *window)
+static void compute_window(int32_t n, float *window) FL_NOEXCEPT
 {
    int32_t n2 = n >> 1, i;
    for (i=0; i < n2; ++i)
       window[i] = (float) sin(0.5 * FL_PI * square((float) sin((i - 0 + 0.5) / n2 * 0.5 * FL_PI)));
 }
 
-static void compute_bitreverse(int32_t n, uint16 *rev)
+static void compute_bitreverse(int32_t n, uint16 *rev) FL_NOEXCEPT
 {
    int32_t ld = ilog(n) - 1; // ilog is off-by-one from normal definitions
    int32_t i, n8 = n >> 3;
@@ -1006,7 +1007,7 @@ static void compute_bitreverse(int32_t n, uint16 *rev)
       rev[i] = (bit_reverse(i) >> (32-ld+3)) << 2;
 }
 
-static int32_t init_blocksize(vorb *f, int32_t b, int32_t n)
+static int32_t init_blocksize(vorb *f, int32_t b, int32_t n) FL_NOEXCEPT
 {
    int32_t n2 = n >> 1, n4 = n >> 2, n8 = n >> 3;
    f->A[b] = (float *) setup_malloc(f, sizeof(float) * n2);
@@ -1023,7 +1024,7 @@ static int32_t init_blocksize(vorb *f, int32_t b, int32_t n)
    return true;
 }
 
-static void neighbors(uint16 *x, int32_t n, int32_t*plow, int32_t*phigh)
+static void neighbors(uint16 *x, int32_t n, int32_t*plow, int32_t*phigh) FL_NOEXCEPT
 {
    int32_t low = -1;
    int32_t high = 65536;
@@ -1040,7 +1041,7 @@ typedef struct
    uint16 x,id;
 } stbv__floor_ordering;
 
-static int point_compare(const void *p, const void *q)
+static int point_compare(const void *p, const void *q) FL_NOEXCEPT
 {
    stbv__floor_ordering *a = (stbv__floor_ordering *) p;
    stbv__floor_ordering *b = (stbv__floor_ordering *) q;
@@ -1057,7 +1058,7 @@ static int point_compare(const void *p, const void *q)
    #define FL_STBV_USE_MEMORY(z)    ((z)->stream)
 #endif
 
-static uint8 get8(vorb *z)
+static uint8 get8(vorb *z) FL_NOEXCEPT
 {
    if (FL_STBV_USE_MEMORY(z)) {
       if (z->stream >= z->stream_end) { z->eof = true; return 0; }
@@ -1073,7 +1074,7 @@ static uint8 get8(vorb *z)
    #endif
 }
 
-static uint32 get32(vorb *f)
+static uint32 get32(vorb *f) FL_NOEXCEPT
 {
    uint32 x;
    x = get8(f);
@@ -1083,7 +1084,7 @@ static uint32 get32(vorb *f)
    return x;
 }
 
-static int32_t getn(vorb *z, uint8 *data, int32_t n)
+static int32_t getn(vorb *z, uint8 *data, int32_t n) FL_NOEXCEPT
 {
    if (FL_STBV_USE_MEMORY(z)) {
       if (z->stream+n > z->stream_end) { z->eof = 1; return 0; }
@@ -1102,7 +1103,7 @@ static int32_t getn(vorb *z, uint8 *data, int32_t n)
    #endif
 }
 
-static void skip(vorb *z, int32_t n)
+static void skip(vorb *z, int32_t n) FL_NOEXCEPT
 {
    if (FL_STBV_USE_MEMORY(z)) {
       z->stream += n;
@@ -1117,7 +1118,7 @@ static void skip(vorb *z, int32_t n)
    #endif
 }
 
-static int32_t set_file_offset(stb_vorbis *f, uint32_t loc)
+static int32_t set_file_offset(stb_vorbis *f, uint32_t loc) FL_NOEXCEPT
 {
    #ifndef FL_STB_VORBIS_NO_PUSHDATA_API
    if (f->push_mode) return 0;
@@ -1155,7 +1156,7 @@ static int32_t set_file_offset(stb_vorbis *f, uint32_t loc)
 
 static uint8 ogg_page_header[4] = { 0x4f, 0x67, 0x67, 0x53 };
 
-static int32_t capture_pattern(vorb *f)
+static int32_t capture_pattern(vorb *f) FL_NOEXCEPT
 {
    if (0x4f != get8(f)) return false;
    if (0x67 != get8(f)) return false;
@@ -1168,7 +1169,7 @@ static constexpr uint8_t PAGEFLAG_continued_packet = 1;
 static constexpr uint8_t PAGEFLAG_first_page = 2;
 static constexpr uint8_t PAGEFLAG_last_page = 4;
 
-static int32_t start_page_no_capturepattern(vorb *f)
+static int32_t start_page_no_capturepattern(vorb *f) FL_NOEXCEPT
 {
    uint32 loc0,loc1,n;
    if (f->first_decode && !FL_STBV_IS_PUSH_MODE(f)) {
@@ -1221,13 +1222,13 @@ static int32_t start_page_no_capturepattern(vorb *f)
    return true;
 }
 
-static int32_t start_page(vorb *f)
+static int32_t start_page(vorb *f) FL_NOEXCEPT
 {
    if (!capture_pattern(f)) return error(f, VORBIS_missing_capture_pattern);
    return start_page_no_capturepattern(f);
 }
 
-static int32_t start_packet(vorb *f)
+static int32_t start_packet(vorb *f) FL_NOEXCEPT
 {
    while (f->next_seg == -1) {
       if (!start_page(f)) return false;
@@ -1242,7 +1243,7 @@ static int32_t start_packet(vorb *f)
    return true;
 }
 
-static int32_t maybe_start_packet(vorb *f)
+static int32_t maybe_start_packet(vorb *f) FL_NOEXCEPT
 {
    if (f->next_seg == -1) {
       int32_t x = get8(f);
@@ -1263,7 +1264,7 @@ static int32_t maybe_start_packet(vorb *f)
    return start_packet(f);
 }
 
-static int32_t next_segment(vorb *f)
+static int32_t next_segment(vorb *f) FL_NOEXCEPT
 {
    int32_t len;
    if (f->last_seg) return 0;
@@ -1287,7 +1288,7 @@ static int32_t next_segment(vorb *f)
 static constexpr int32_t EOP = -1;
 static constexpr int32_t INVALID_BITS = -1;
 
-static int32_t get8_packet_raw(vorb *f)
+static int32_t get8_packet_raw(vorb *f) FL_NOEXCEPT
 {
    if (!f->bytes_in_seg) {  // CLANG!
       if (f->last_seg) return EOP;
@@ -1299,14 +1300,14 @@ static int32_t get8_packet_raw(vorb *f)
    return get8(f);
 }
 
-static int32_t get8_packet(vorb *f)
+static int32_t get8_packet(vorb *f) FL_NOEXCEPT
 {
    int32_t x = get8_packet_raw(f);
    f->valid_bits = 0;
    return x;
 }
 
-static int32_t get32_packet(vorb *f)
+static int32_t get32_packet(vorb *f) FL_NOEXCEPT
 {
    uint32 x;
    x = get8_packet(f);
@@ -1316,14 +1317,14 @@ static int32_t get32_packet(vorb *f)
    return x;
 }
 
-static void flush_packet(vorb *f)
+static void flush_packet(vorb *f) FL_NOEXCEPT
 {
    while (get8_packet_raw(f) != EOP);
 }
 
 // @OPTIMIZE: this is the secondary bit decoder, so it's probably not as important
 // as the huffman decoder?
-static uint32 get_bits(vorb *f, int32_t n)
+static uint32 get_bits(vorb *f, int32_t n) FL_NOEXCEPT
 {
    uint32 z;
 
@@ -1358,7 +1359,7 @@ static uint32 get_bits(vorb *f, int32_t n)
 // expand the buffer to as many bits as possible without reading off end of packet
 // it might be nice to allow f->valid_bits and f->acc to be stored in registers,
 // e.g. cache them locally and decode locally
-FL_ALWAYS_INLINE void prep_huffman(vorb *f)
+FL_ALWAYS_INLINE void prep_huffman(vorb *f) FL_NOEXCEPT
 {
    if (f->valid_bits <= 24) {
       if (f->valid_bits == 0) f->acc = 0;
@@ -1380,7 +1381,7 @@ enum
    VORBIS_packet_setup = 5
 };
 
-static int32_t codebook_decode_scalar_raw(vorb *f, Codebook *c)
+static int32_t codebook_decode_scalar_raw(vorb *f, Codebook *c) FL_NOEXCEPT
 {
    int32_t i;
    prep_huffman(f);
@@ -1499,7 +1500,7 @@ static int32_t codebook_decode_scalar(vorb *f, Codebook *c)
 #define FL_STBV_CODEBOOK_ELEMENT_FAST(c,off)     (c->multiplicands[off])
 #define FL_STBV_CODEBOOK_ELEMENT_BASE(c)         (0)
 
-static int32_t codebook_decode_start(vorb *f, Codebook *c)
+static int32_t codebook_decode_start(vorb *f, Codebook *c) FL_NOEXCEPT
 {
    int32_t z = -1;
 
@@ -1519,7 +1520,7 @@ static int32_t codebook_decode_start(vorb *f, Codebook *c)
    return z;
 }
 
-static int32_t codebook_decode(vorb *f, Codebook *c, float *output, int32_t len)
+static int32_t codebook_decode(vorb *f, Codebook *c, float *output, int32_t len) FL_NOEXCEPT
 {
    int32_t i,z = codebook_decode_start(f,c);
    if (z < 0) return false;
@@ -1558,7 +1559,7 @@ static int32_t codebook_decode(vorb *f, Codebook *c, float *output, int32_t len)
    return true;
 }
 
-static int32_t codebook_decode_step(vorb *f, Codebook *c, float *output, int32_t len, int32_t step)
+static int32_t codebook_decode_step(vorb *f, Codebook *c, float *output, int32_t len, int32_t step) FL_NOEXCEPT
 {
    int32_t i,z = codebook_decode_start(f,c);
    float last = FL_STBV_CODEBOOK_ELEMENT_BASE(c);
@@ -1589,7 +1590,7 @@ static int32_t codebook_decode_step(vorb *f, Codebook *c, float *output, int32_t
    return true;
 }
 
-static int32_t codebook_decode_deinterleave_repeat(vorb *f, Codebook *c, float **outputs, int32_t ch, int32_t*c_inter_p, int32_t*p_inter_p, int32_t len, int32_t total_decode)
+static int32_t codebook_decode_deinterleave_repeat(vorb *f, Codebook *c, float **outputs, int32_t ch, int32_t*c_inter_p, int32_t*p_inter_p, int32_t len, int32_t total_decode) FL_NOEXCEPT
 {
    int32_t c_inter = *c_inter_p;
    int32_t p_inter = *p_inter_p;
@@ -1659,7 +1660,7 @@ static int32_t codebook_decode_deinterleave_repeat(vorb *f, Codebook *c, float *
    return true;
 }
 
-static int32_t predict_point(int32_t x, int32_t x0, int32_t x1, int32_t y0, int32_t y1)
+static int32_t predict_point(int32_t x, int32_t x0, int32_t x1, int32_t y0, int32_t y1) FL_NOEXCEPT
 {
    int32_t dy = y1 - y0;
    int32_t adx = x1 - x0;
@@ -1758,7 +1759,7 @@ static constexpr int32_t DIVTAB_DENOM = 64;
 int8 integer_divide_table[DIVTAB_NUMER][DIVTAB_DENOM]; // 2KB
 #endif
 
-FL_ALWAYS_INLINE void draw_line(float *output, int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t n)
+FL_ALWAYS_INLINE void draw_line(float *output, int32_t x0, int32_t y0, int32_t x1, int32_t y1, int32_t n) FL_NOEXCEPT
 {
    int32_t dy = y1 - y0;
    int32_t adx = x1 - x0;
@@ -1807,7 +1808,7 @@ FL_ALWAYS_INLINE void draw_line(float *output, int32_t x0, int32_t y0, int32_t x
    }
 }
 
-static int32_t residue_decode(vorb *f, Codebook *book, float *target, int32_t offset, int32_t n, int32_t rtype)
+static int32_t residue_decode(vorb *f, Codebook *book, float *target, int32_t offset, int32_t n, int32_t rtype) FL_NOEXCEPT
 {
    int32_t k;
    if (rtype == 0) {
@@ -1828,7 +1829,7 @@ static int32_t residue_decode(vorb *f, Codebook *book, float *target, int32_t of
 
 // n is 1/2 of the blocksize --
 // specification: "Correct per-vector decode length is [n]/2"
-static void decode_residue(vorb *f, float *residue_buffers[], int32_t ch, int32_t n, int32_t rn, uint8 *do_not_decode)
+static void decode_residue(vorb *f, float *residue_buffers[], int32_t ch, int32_t n, int32_t rn, uint8 *do_not_decode) FL_NOEXCEPT
 {
    int32_t i,j,pass;
    Residue *r = f->residue_config + rn;
@@ -2132,7 +2133,7 @@ void inverse_mdct(float *buffer, int32_t n, vorb *f, int32_t blocktype)
 // the following were split out into separate functions while optimizing;
 // they could be pushed back up but eh. __forceinline showed no change;
 // they're probably already being inlined.
-static void imdct_step3_iter0_loop(int32_t n, float *e, int32_t i_off, int32_t k_off, float *A)
+static void imdct_step3_iter0_loop(int32_t n, float *e, int32_t i_off, int32_t k_off, float *A) FL_NOEXCEPT
 {
    float *ee0 = e + i_off;
    float *ee2 = ee0 + k_off;
@@ -2177,7 +2178,7 @@ static void imdct_step3_iter0_loop(int32_t n, float *e, int32_t i_off, int32_t k
    }
 }
 
-static void imdct_step3_inner_r_loop(int32_t lim, float *e, int32_t d0, int32_t k_off, float *A, int32_t k1)
+static void imdct_step3_inner_r_loop(int32_t lim, float *e, int32_t d0, int32_t k_off, float *A, int32_t k1) FL_NOEXCEPT
 {
    int32_t i;
    float k00_20, k01_21;
@@ -2227,7 +2228,7 @@ static void imdct_step3_inner_r_loop(int32_t lim, float *e, int32_t d0, int32_t 
    }
 }
 
-static void imdct_step3_inner_s_loop(int32_t n, float *e, int32_t i_off, int32_t k_off, float *A, int32_t a_off, int32_t k0)
+static void imdct_step3_inner_s_loop(int32_t n, float *e, int32_t i_off, int32_t k_off, float *A, int32_t a_off, int32_t k0) FL_NOEXCEPT
 {
    int32_t i;
    // Renamed from A0-A7 to avoid conflict with Arduino analog pin macros
@@ -2279,7 +2280,7 @@ static void imdct_step3_inner_s_loop(int32_t n, float *e, int32_t i_off, int32_t
    }
 }
 
-FL_ALWAYS_INLINE void iter_54(float *z)
+FL_ALWAYS_INLINE void iter_54(float *z) FL_NOEXCEPT
 {
    float k00,k11,k22,k33;
    float y0,y1,y2,y3;
@@ -2311,7 +2312,7 @@ FL_ALWAYS_INLINE void iter_54(float *z)
    z[-7] = k11 + k22;    // z1 - z5 - z2 + z6
 }
 
-static void imdct_step3_inner_s_loop_ld654(int32_t n, float *e, int32_t i_off, float *A, int32_t base_n)
+static void imdct_step3_inner_s_loop_ld654(int32_t n, float *e, int32_t i_off, float *A, int32_t base_n) FL_NOEXCEPT
 {
    int32_t a_off = base_n >> 3;
    // Renamed from A2 to avoid conflict with Arduino analog pin macro
@@ -2355,7 +2356,7 @@ static void imdct_step3_inner_s_loop_ld654(int32_t n, float *e, int32_t i_off, f
    }
 }
 
-static void inverse_mdct(float *buffer, int32_t n, vorb *f, int32_t blocktype)
+static void inverse_mdct(float *buffer, int32_t n, vorb *f, int32_t blocktype) FL_NOEXCEPT
 {
    int32_t n2 = n >> 1, n4 = n >> 2, n8 = n >> 3, l;
    int32_t ld;
@@ -2785,7 +2786,7 @@ void inverse_mdct_naive(float *buffer, int32_t n)
 }
 #endif
 
-static float *get_window(vorb *f, int32_t len)
+static float *get_window(vorb *f, int32_t len) FL_NOEXCEPT
 {
    len <<= 1;
    if (len == f->blocksize_0) return f->window[0];
@@ -2798,7 +2799,7 @@ typedef int16 YTYPE;
 #else
 typedef int32_t YTYPE;
 #endif
-static int32_t do_floor(vorb *f, Mapping *map, int32_t i, int32_t n, float *target, YTYPE *finalY, uint8 *step2_flag)
+static int32_t do_floor(vorb *f, Mapping *map, int32_t i, int32_t n, float *target, YTYPE *finalY, uint8 *step2_flag) FL_NOEXCEPT
 {
    int32_t n2 = n >> 1;
    int32_t s = map->chan[i].mux, floor;
@@ -2850,7 +2851,7 @@ static int32_t do_floor(vorb *f, Mapping *map, int32_t i, int32_t n, float *targ
 //        has to be the same as frame N+1's left_end-left_start (which they are by
 //        construction)
 
-static int32_t vorbis_decode_initial(vorb *f, int32_t*p_left_start, int32_t*p_left_end, int32_t*p_right_start, int32_t*p_right_end, int32_t*mode)
+static int32_t vorbis_decode_initial(vorb *f, int32_t*p_left_start, int32_t*p_left_end, int32_t*p_right_start, int32_t*p_right_end, int32_t*mode) FL_NOEXCEPT
 {
    Mode *m;
    int32_t i, n, prev, next, window_center;
@@ -2906,7 +2907,7 @@ static int32_t vorbis_decode_initial(vorb *f, int32_t*p_left_start, int32_t*p_le
    return true;
 }
 
-static int32_t vorbis_decode_packet_rest(vorb *f, int32_t*len, Mode *m, int32_t left_start, int32_t left_end, int32_t right_start, int32_t right_end, int32_t*p_left)
+static int32_t vorbis_decode_packet_rest(vorb *f, int32_t*len, Mode *m, int32_t left_start, int32_t left_end, int32_t right_start, int32_t right_end, int32_t*p_left) FL_NOEXCEPT
 {
    Mapping *map;
    int32_t i,j,k,n,n2;
@@ -3175,14 +3176,14 @@ static int32_t vorbis_decode_packet_rest(vorb *f, int32_t*len, Mode *m, int32_t 
    return true;
 }
 
-static int32_t vorbis_decode_packet(vorb *f, int32_t*len, int32_t*p_left, int32_t*p_right)
+static int32_t vorbis_decode_packet(vorb *f, int32_t*len, int32_t*p_left, int32_t*p_right) FL_NOEXCEPT
 {
    int32_t mode, left_end, right_end;
    if (!vorbis_decode_initial(f, p_left, &left_end, p_right, &right_end, &mode)) return 0;
    return vorbis_decode_packet_rest(f, len, f->mode_config + mode, *p_left, left_end, *p_right, right_end, p_left);
 }
 
-static int32_t vorbis_finish_frame(stb_vorbis *f, int32_t len, int32_t left, int32_t right)
+static int32_t vorbis_finish_frame(stb_vorbis *f, int32_t len, int32_t left, int32_t right) FL_NOEXCEPT
 {
    int32_t prev,i,j;
    // we use right&left (the start of the right- and left-window sin()-regions)
@@ -3235,7 +3236,7 @@ static int32_t vorbis_finish_frame(stb_vorbis *f, int32_t len, int32_t left, int
    return right - left;
 }
 
-static int32_t vorbis_pump_first_frame(stb_vorbis *f)
+static int32_t vorbis_pump_first_frame(stb_vorbis *f) FL_NOEXCEPT
 {
    int32_t len, right, left, res;
    res = vorbis_decode_packet(f, &len, &left, &right);
@@ -3245,7 +3246,7 @@ static int32_t vorbis_pump_first_frame(stb_vorbis *f)
 }
 
 #ifndef FL_STB_VORBIS_NO_PUSHDATA_API
-static int32_t is_whole_packet_present(stb_vorbis *f)
+static int32_t is_whole_packet_present(stb_vorbis *f) FL_NOEXCEPT
 {
    // make sure that we have the packet available before continuing...
    // this requires a full ogg parse, but we know we can fetch from f->stream
@@ -3306,9 +3307,9 @@ static int32_t is_whole_packet_present(stb_vorbis *f)
 }
 #endif // !FL_STB_VORBIS_NO_PUSHDATA_API
 
-static int32_t start_decoder(vorb *f)
+static int32_t start_decoder(vorb *f) FL_NOEXCEPT
 {
-   
+
    uint8 header[6], x,y;
    int32_t len,i,j,k, max_submaps = 0;
    int32_t longest_floorlist=0;
@@ -3962,7 +3963,7 @@ static int32_t start_decoder(vorb *f)
    return true;
 }
 
-static void vorbis_deinit(stb_vorbis *p)
+static void vorbis_deinit(stb_vorbis *p) FL_NOEXCEPT
 {
    int32_t i,j;
 
@@ -4025,14 +4026,14 @@ static void vorbis_deinit(stb_vorbis *p)
    #endif
 }
 
-void stb_vorbis_close(stb_vorbis *p)
+void stb_vorbis_close(stb_vorbis *p) FL_NOEXCEPT
 {
    if (p == nullptr) return;
    vorbis_deinit(p);
    setup_free(p,p);
 }
 
-static void vorbis_init(stb_vorbis *p, const stb_vorbis_alloc *z)
+static void vorbis_init(stb_vorbis *p, const stb_vorbis_alloc *z) FL_NOEXCEPT
 {
    memset(p, 0, sizeof(*p)); // nullptr out all malloc'd pointers to start
    if (z) {
@@ -4051,7 +4052,7 @@ static void vorbis_init(stb_vorbis *p, const stb_vorbis_alloc *z)
    #endif
 }
 
-int32_t stb_vorbis_get_sample_offset(stb_vorbis *f)
+int32_t stb_vorbis_get_sample_offset(stb_vorbis *f) FL_NOEXCEPT
 {
    if (f->current_loc_valid)
       return f->current_loc;
@@ -4059,7 +4060,7 @@ int32_t stb_vorbis_get_sample_offset(stb_vorbis *f)
       return -1;
 }
 
-stb_vorbis_info stb_vorbis_get_info(stb_vorbis *f)
+stb_vorbis_info stb_vorbis_get_info(stb_vorbis *f) FL_NOEXCEPT
 {
    stb_vorbis_info d;
    d.channels = f->channels;
@@ -4071,7 +4072,7 @@ stb_vorbis_info stb_vorbis_get_info(stb_vorbis *f)
    return d;
 }
 
-stb_vorbis_comment stb_vorbis_get_comment(stb_vorbis *f)
+stb_vorbis_comment stb_vorbis_get_comment(stb_vorbis *f) FL_NOEXCEPT
 {
    stb_vorbis_comment d;
    d.vendor = f->vendor;
@@ -4080,14 +4081,14 @@ stb_vorbis_comment stb_vorbis_get_comment(stb_vorbis *f)
    return d;
 }
 
-int32_t stb_vorbis_get_error(stb_vorbis *f)
+int32_t stb_vorbis_get_error(stb_vorbis *f) FL_NOEXCEPT
 {
    int32_t e = f->error;
    f->error = VORBIS__no_error;
    return e;
 }
 
-static stb_vorbis * vorbis_alloc(stb_vorbis *f)
+static stb_vorbis * vorbis_alloc(stb_vorbis *f) FL_NOEXCEPT
 {
    stb_vorbis *p = (stb_vorbis *) setup_malloc(f, sizeof(*p));
    return p;
@@ -4095,7 +4096,7 @@ static stb_vorbis * vorbis_alloc(stb_vorbis *f)
 
 #ifndef FL_STB_VORBIS_NO_PUSHDATA_API
 
-void stb_vorbis_flush_pushdata(stb_vorbis *f)
+void stb_vorbis_flush_pushdata(stb_vorbis *f) FL_NOEXCEPT
 {
    f->previous_length = 0;
    f->page_crc_tests  = 0;
@@ -4107,7 +4108,7 @@ void stb_vorbis_flush_pushdata(stb_vorbis *f)
    f->channel_buffer_end = 0;
 }
 
-static int32_t vorbis_search_for_page_pushdata(vorb *f, uint8 *data, int32_t data_len)
+static int32_t vorbis_search_for_page_pushdata(vorb *f, uint8 *data, int32_t data_len) FL_NOEXCEPT
 {
    int32_t i,n;
    for (i=0; i < f->page_crc_tests; ++i)
@@ -4204,7 +4205,7 @@ int32_t stb_vorbis_decode_frame_pushdata(
          int32_t *channels,                   // place to write number of float * buffers
          float ***output,                 // place to write float ** array of float * buffers
          int32_t *samples                     // place to write number of output samples
-     )
+     ) FL_NOEXCEPT
 {
    int32_t i;
    int32_t len,right,left;
@@ -4271,7 +4272,7 @@ int32_t stb_vorbis_decode_frame_pushdata(
 stb_vorbis *stb_vorbis_open_pushdata(
          const unsigned char *data, int32_t data_len, // the memory available for decoding
          int32_t *data_used,              // only defined if result is not nullptr
-         int32_t *error, const stb_vorbis_alloc *alloc)
+         int32_t *error, const stb_vorbis_alloc *alloc) FL_NOEXCEPT
 {
    stb_vorbis *f, p;
    vorbis_init(&p, alloc);
@@ -4299,7 +4300,7 @@ stb_vorbis *stb_vorbis_open_pushdata(
 }
 #endif // FL_STB_VORBIS_NO_PUSHDATA_API
 
-uint32_t stb_vorbis_get_file_offset(stb_vorbis *f)
+uint32_t stb_vorbis_get_file_offset(stb_vorbis *f) FL_NOEXCEPT
 {
    #ifndef FL_STB_VORBIS_NO_PUSHDATA_API
    if (f->push_mode) return 0;
@@ -4315,7 +4316,7 @@ uint32_t stb_vorbis_get_file_offset(stb_vorbis *f)
 // DATA-PULLING API
 //
 
-static uint32 vorbis_find_page(stb_vorbis *f, uint32 *end, uint32 *last)
+static uint32 vorbis_find_page(stb_vorbis *f, uint32 *end, uint32 *last) FL_NOEXCEPT
 {
    for(;;) {
       int32_t n;
@@ -4397,7 +4398,7 @@ static constexpr uint32_t SAMPLE_unknown = 0xffffffff;
 // to try to bound either side of the binary search sensibly, while still
 // working in O(log n) time if they fail.
 
-static int32_t get_seek_page_info(stb_vorbis *f, ProbedPage *z)
+static int32_t get_seek_page_info(stb_vorbis *f, ProbedPage *z) FL_NOEXCEPT
 {
    uint8 header[27], lacing[255];
    int32_t i,len;
@@ -4429,7 +4430,7 @@ static int32_t get_seek_page_info(stb_vorbis *f, ProbedPage *z)
 
 // rarely used function to seek back to the preceding page while finding the
 // start of a packet
-static int32_t go_to_page_before(stb_vorbis *f, uint32_t limit_offset)
+static int32_t go_to_page_before(stb_vorbis *f, uint32_t limit_offset) FL_NOEXCEPT
 {
    uint32_t previous_safe, end;
 
@@ -4454,7 +4455,7 @@ static int32_t go_to_page_before(stb_vorbis *f, uint32_t limit_offset)
 // the function succeeds, current_loc_valid will be true and current_loc will
 // be less than or equal to the provided sample number (the closer the
 // better).
-static int32_t seek_to_sample_coarse(stb_vorbis *f, uint32 sample_number)
+static int32_t seek_to_sample_coarse(stb_vorbis *f, uint32 sample_number) FL_NOEXCEPT
 {
    ProbedPage left, right, mid;
    int32_t i, start_seg_with_known_loc, end_pos, page_start;
@@ -4609,7 +4610,7 @@ error:
 }
 
 // the same as vorbis_decode_initial, but without advancing
-static int32_t peek_decode_initial(vorb *f, int32_t*p_left_start, int32_t*p_left_end, int32_t*p_right_start, int32_t*p_right_end, int32_t*mode)
+static int32_t peek_decode_initial(vorb *f, int32_t*p_left_start, int32_t*p_left_end, int32_t*p_right_start, int32_t*p_right_end, int32_t*mode) FL_NOEXCEPT
 {
    int32_t bits_read, bytes_read;
 
@@ -4634,7 +4635,7 @@ static int32_t peek_decode_initial(vorb *f, int32_t*p_left_start, int32_t*p_left
    return 1;
 }
 
-int32_t stb_vorbis_seek_frame(stb_vorbis *f, uint32_t sample_number)
+int32_t stb_vorbis_seek_frame(stb_vorbis *f, uint32_t sample_number) FL_NOEXCEPT
 {
    uint32 max_frame_samples;
 
@@ -4673,7 +4674,7 @@ int32_t stb_vorbis_seek_frame(stb_vorbis *f, uint32_t sample_number)
    return 1;
 }
 
-int32_t stb_vorbis_seek(stb_vorbis *f, uint32_t sample_number)
+int32_t stb_vorbis_seek(stb_vorbis *f, uint32_t sample_number) FL_NOEXCEPT
 {
    if (!stb_vorbis_seek_frame(f, sample_number))
       return 0;
@@ -4690,7 +4691,7 @@ int32_t stb_vorbis_seek(stb_vorbis *f, uint32_t sample_number)
    return 1;
 }
 
-int32_t stb_vorbis_seek_start(stb_vorbis *f)
+int32_t stb_vorbis_seek_start(stb_vorbis *f) FL_NOEXCEPT
 {
    if (FL_STBV_IS_PUSH_MODE(f)) { return error(f, VORBIS_invalid_api_mixing); }
    set_file_offset(f, f->first_audio_page_offset);
@@ -4700,7 +4701,7 @@ int32_t stb_vorbis_seek_start(stb_vorbis *f)
    return vorbis_pump_first_frame(f);
 }
 
-uint32_t stb_vorbis_stream_length_in_samples(stb_vorbis *f)
+uint32_t stb_vorbis_stream_length_in_samples(stb_vorbis *f) FL_NOEXCEPT
 {
    uint32_t restore_offset, previous_safe;
    uint32_t end, last_page_loc;
@@ -4775,14 +4776,14 @@ uint32_t stb_vorbis_stream_length_in_samples(stb_vorbis *f)
    return f->total_samples == SAMPLE_unknown ? 0 : f->total_samples;
 }
 
-float stb_vorbis_stream_length_in_seconds(stb_vorbis *f)
+float stb_vorbis_stream_length_in_seconds(stb_vorbis *f) FL_NOEXCEPT
 {
    return stb_vorbis_stream_length_in_samples(f) / (float) f->sample_rate;
 }
 
 
 
-int32_t stb_vorbis_get_frame_float(stb_vorbis *f, int32_t *channels, float ***output)
+int32_t stb_vorbis_get_frame_float(stb_vorbis *f, int32_t *channels, float ***output) FL_NOEXCEPT
 {
    int32_t len, right,left,i;
    if (FL_STBV_IS_PUSH_MODE(f)) return error(f, VORBIS_invalid_api_mixing);
@@ -4853,9 +4854,9 @@ stb_vorbis * stb_vorbis_open_filename(const char *filename, int32_t *error, cons
 }
 #endif // FL_STB_VORBIS_NO_STDIO
 
-stb_vorbis * stb_vorbis_open_memory(const unsigned char *data, int32_t len, int32_t *error, const stb_vorbis_alloc *alloc)
+stb_vorbis * stb_vorbis_open_memory(const unsigned char *data, int32_t len, int32_t *error, const stb_vorbis_alloc *alloc) FL_NOEXCEPT
 {
-   
+
    stb_vorbis *f, p;
    if (!data) {
       
@@ -4928,7 +4929,7 @@ static int8 channel_position[7][6] =
    #define FL_STBV_FASTDEF(x)
 #endif
 
-static void copy_samples(short *dest, float *src, int32_t len)
+static void copy_samples(short *dest, float *src, int32_t len) FL_NOEXCEPT
 {
    int32_t i;
    fl_stbv_check_endianness();
@@ -4941,7 +4942,7 @@ static void copy_samples(short *dest, float *src, int32_t len)
    }
 }
 
-static void compute_samples(int32_t mask, short *output, int32_t num_c, float **data, int32_t d_offset, int32_t len)
+static void compute_samples(int32_t mask, short *output, int32_t num_c, float **data, int32_t d_offset, int32_t len) FL_NOEXCEPT
 {
    constexpr int32_t STB_BUFFER_SIZE = 32;
    float buffer[STB_BUFFER_SIZE];
@@ -4966,7 +4967,7 @@ static void compute_samples(int32_t mask, short *output, int32_t num_c, float **
    }
 }
 
-static void compute_stereo_samples(short *output, int32_t num_c, float **data, int32_t d_offset, int32_t len)
+static void compute_stereo_samples(short *output, int32_t num_c, float **data, int32_t d_offset, int32_t len) FL_NOEXCEPT
 {
    constexpr int32_t STB_BUFFER_SIZE = 32;
    float buffer[STB_BUFFER_SIZE];
@@ -5005,7 +5006,7 @@ static void compute_stereo_samples(short *output, int32_t num_c, float **data, i
    }
 }
 
-static void convert_samples_short(int32_t buf_c, short **buffer, int32_t b_offset, int32_t data_c, float **data, int32_t d_offset, int32_t samples)
+static void convert_samples_short(int32_t buf_c, short **buffer, int32_t b_offset, int32_t data_c, float **data, int32_t d_offset, int32_t samples) FL_NOEXCEPT
 {
    int32_t i;
    if (buf_c != data_c && buf_c <= 2 && data_c <= 6) {
@@ -5021,7 +5022,7 @@ static void convert_samples_short(int32_t buf_c, short **buffer, int32_t b_offse
    }
 }
 
-int32_t stb_vorbis_get_frame_short(stb_vorbis *f, int32_t num_c, short **buffer, int32_t num_samples)
+int32_t stb_vorbis_get_frame_short(stb_vorbis *f, int32_t num_c, short **buffer, int32_t num_samples) FL_NOEXCEPT
 {
    float **output = nullptr;
    int32_t len = stb_vorbis_get_frame_float(f, nullptr, &output);
@@ -5031,7 +5032,7 @@ int32_t stb_vorbis_get_frame_short(stb_vorbis *f, int32_t num_c, short **buffer,
    return len;
 }
 
-static void convert_channels_short_interleaved(int32_t buf_c, short *buffer, int32_t data_c, float **data, int32_t d_offset, int32_t len)
+static void convert_channels_short_interleaved(int32_t buf_c, short *buffer, int32_t data_c, float **data, int32_t d_offset, int32_t len) FL_NOEXCEPT
 {
    int32_t i;
    fl_stbv_check_endianness();
@@ -5057,7 +5058,7 @@ static void convert_channels_short_interleaved(int32_t buf_c, short *buffer, int
    }
 }
 
-int32_t stb_vorbis_get_frame_short_interleaved(stb_vorbis *f, int32_t num_c, short *buffer, int32_t num_shorts)
+int32_t stb_vorbis_get_frame_short_interleaved(stb_vorbis *f, int32_t num_c, short *buffer, int32_t num_shorts) FL_NOEXCEPT
 {
    float **output;
    int32_t len;
@@ -5070,7 +5071,7 @@ int32_t stb_vorbis_get_frame_short_interleaved(stb_vorbis *f, int32_t num_c, sho
    return len;
 }
 
-int32_t stb_vorbis_get_samples_short_interleaved(stb_vorbis *f, int32_t channels, short *buffer, int32_t num_shorts)
+int32_t stb_vorbis_get_samples_short_interleaved(stb_vorbis *f, int32_t channels, short *buffer, int32_t num_shorts) FL_NOEXCEPT
 {
    float **outputs;
    int32_t len = num_shorts / channels;
@@ -5089,7 +5090,7 @@ int32_t stb_vorbis_get_samples_short_interleaved(stb_vorbis *f, int32_t channels
    return n;
 }
 
-int32_t stb_vorbis_get_samples_short(stb_vorbis *f, int32_t channels, short **buffer, int32_t len)
+int32_t stb_vorbis_get_samples_short(stb_vorbis *f, int32_t channels, short **buffer, int32_t len) FL_NOEXCEPT
 {
    float **outputs;
    int32_t n=0;
@@ -5147,7 +5148,7 @@ int32_t stb_vorbis_decode_filename(const char *filename, int32_t *channels, int3
 }
 #endif // NO_STDIO
 
-int32_t stb_vorbis_decode_memory(const uint8 *mem, int32_t len, int32_t *channels, int32_t *sample_rate, short **output)
+int32_t stb_vorbis_decode_memory(const uint8 *mem, int32_t len, int32_t *channels, int32_t *sample_rate, short **output) FL_NOEXCEPT
 {
    int32_t data_len, offset, total, limit, error;
    short *data;
@@ -5187,7 +5188,7 @@ int32_t stb_vorbis_decode_memory(const uint8 *mem, int32_t len, int32_t *channel
 }
 #endif // FL_STB_VORBIS_NO_INTEGER_CONVERSION
 
-int32_t stb_vorbis_get_samples_float_interleaved(stb_vorbis *f, int32_t channels, float *buffer, int32_t num_floats)
+int32_t stb_vorbis_get_samples_float_interleaved(stb_vorbis *f, int32_t channels, float *buffer, int32_t num_floats) FL_NOEXCEPT
 {
    float **outputs;
    int32_t len = num_floats / channels;
@@ -5215,7 +5216,7 @@ int32_t stb_vorbis_get_samples_float_interleaved(stb_vorbis *f, int32_t channels
 }
 
 int32_t stb_vorbis_get_samples_float(stb_vorbis *f, int32_t channels, float **buffer, int32_t num_samples)
-{
+ FL_NOEXCEPT{
    float **outputs;
    int32_t n=0;
    int32_t z = f->channels;

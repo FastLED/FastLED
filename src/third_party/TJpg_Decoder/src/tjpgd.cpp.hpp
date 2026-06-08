@@ -28,6 +28,7 @@
 #include "fl/stl/cstdlib.h"
 #include "fl/stl/string.h"
 #include "fl/stl/cstring.h"  // for fl::memset() and fl::memcpy()
+#include "fl/stl/noexcept.h"
 
 #include "tjpgd.h"
 
@@ -122,7 +123,7 @@ static const uint8_t Clip8[1024] = {
 
 #else	/* JD_TBLCLIP */
 
-static uint8_t BYTECLIP (int val)
+static uint8_t BYTECLIP (int val) FL_NOEXCEPT
 {
 	if (val < 0) return 0;
 	else if (val > 255) return 255;
@@ -140,7 +141,7 @@ static uint8_t BYTECLIP (int val)
 static void* alloc_pool (	/* Pointer to allocated memory block (NULL:no memory available) */
 	JDEC* jd,				/* Pointer to the decompressor object */
 	size_t ndata			/* Number of bytes to allocate */
-)
+) FL_NOEXCEPT
 {
 	char *rp = 0;
 
@@ -167,7 +168,7 @@ static JRESULT create_qt_tbl (	/* 0:OK, !0:Failed */
 	JDEC* jd,				/* Pointer to the decompressor object */
 	const uint8_t* data,	/* Pointer to the quantizer tables */
 	size_t ndata			/* Size of input data */
-)
+) FL_NOEXCEPT
 {
 	unsigned int i, zi;
 	uint8_t d;
@@ -203,7 +204,7 @@ static JRESULT create_huffman_tbl (	/* 0:OK, !0:Failed */
 	JDEC* jd,					/* Pointer to the decompressor object */
 	const uint8_t* data,		/* Pointer to the packed huffman tables */
 	size_t ndata				/* Size of input data */
-)
+) FL_NOEXCEPT
 {
 	unsigned int i, j, b, cls, num;
 	size_t np;
@@ -291,7 +292,7 @@ static int huffext (	/* >=0: decoded data, <0: error code */
 	JDEC* jd,			/* Pointer to the decompressor object */
 	unsigned int id,	/* Table ID (0:Y, 1:C) */
 	unsigned int cls	/* Table class (0:DC, 1:AC) */
-)
+) FL_NOEXCEPT
 {
 	size_t dc = jd->dctr;
 	uint8_t *dp = jd->dptr;
@@ -431,7 +432,7 @@ static int huffext (	/* >=0: decoded data, <0: error code */
 static int bitext (	/* >=0: extracted data, <0: error code */
 	JDEC* jd,			/* Pointer to the decompressor object */
 	unsigned int nbit	/* Number of bits to extract (1 to 16) */
-)
+) FL_NOEXCEPT
 {
 	size_t dc = jd->dctr;
 	uint8_t *dp = jd->dptr;
@@ -516,7 +517,7 @@ static int bitext (	/* >=0: extracted data, <0: error code */
 static JRESULT restart (
 	JDEC* jd,		/* Pointer to the decompressor object */
 	uint16_t rstn	/* Expected restert sequense number */
-)
+) FL_NOEXCEPT
 {
 	unsigned int i;
 	uint8_t *dp = jd->dptr;
@@ -587,7 +588,7 @@ static JRESULT restart (
 static void block_idct (
 	int32_t* src,	/* Input block data (de-quantized and pre-scaled for Arai Algorithm) */
 	jd_yuv_t* dst	/* Pointer to the destination to store the block as byte array */
-)
+) FL_NOEXCEPT
 {
 	const int32_t M13 = (int32_t)(1.41421*4096), M2 = (int32_t)(1.08239*4096), M4 = (int32_t)(2.61313*4096), M5 = (int32_t)(1.84776*4096);
 	int32_t v0, v1, v2, v3, v4, v5, v6, v7;
@@ -709,7 +710,7 @@ static void block_idct (
 
 static JRESULT mcu_load (
 	JDEC* jd		/* Pointer to the decompressor object */
-)
+) FL_NOEXCEPT
 {
 	int32_t *tmp = (int32_t*)jd->workbuf;	/* Block working buffer for de-quantize and IDCT */
 	int d, e;
@@ -798,7 +799,7 @@ static JRESULT mcu_output (
 	int (*outfunc)(JDEC*, void*, JRECT*),	/* RGB output function */
 	unsigned int x,		/* MCU location in the image */
 	unsigned int y		/* MCU location in the image */
-)
+) FL_NOEXCEPT
 {
 	const int CVACC = (sizeof (int) > 2) ? 1024 : 128;	/* Adaptive accuracy for both 16-/32-bit systems */
 	unsigned int ix, iy, mx, my, rx, ry;
@@ -989,7 +990,7 @@ JRESULT jd_prepare (
 	void* pool,				/* Working buffer for the decompression session */
 	size_t sz_pool,			/* Size of working buffer */
 	void* dev				/* I/O device identifier for the session */
-)
+) FL_NOEXCEPT
 {
 	uint8_t *seg, b;
 	uint16_t marker;
@@ -1144,7 +1145,7 @@ JRESULT jd_decomp (
 	JDEC* jd,								/* Initialized decompression object */
 	int (*outfunc)(JDEC*, void*, JRECT*),	/* RGB output function */
 	uint8_t scale							/* Output de-scaling factor (0 to 3) */
-)
+) FL_NOEXCEPT
 {
 	unsigned int x, y, mx, my;
 	uint16_t rst, rsc;
@@ -1189,7 +1190,7 @@ JRESULT jd_decomp_progressive(
     uint16_t max_mcus_per_call,                /* MCU processing limit per call */
     uint8_t* more_data_needed,                 /* Output: needs more input data */
     uint8_t* processing_complete               /* Output: decode finished */
-)
+) FL_NOEXCEPT
 {
     JDEC* jd = &jpd->base;
     unsigned int mx, my;

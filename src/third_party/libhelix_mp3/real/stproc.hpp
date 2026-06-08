@@ -43,6 +43,7 @@
 
 #include "coder.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/noexcept.h"
 #include "assembly.h"
 
 namespace fl {
@@ -67,7 +68,7 @@ namespace third_party {
  *
  * Notes:       assume at least 1 GB in input
  **************************************************************************************/
-void MidSideProc(int32_t x[MAX_NCHAN][MAX_NSAMP], int32_t nSamps, int32_t mOut[2])
+void MidSideProc(int32_t x[MAX_NCHAN][MAX_NSAMP], int32_t nSamps, int32_t mOut[2]) FL_NOEXCEPT
 {
 	int32_t i, xr, xl, mOutL, mOutR;
 	
@@ -110,7 +111,7 @@ void MidSideProc(int32_t x[MAX_NCHAN][MAX_NSAMP], int32_t nSamps, int32_t mOut[2
  *              make sure all the mixed-block and IIP logic is right
  **************************************************************************************/
 void IntensityProcMPEG1(int32_t x[MAX_NCHAN][MAX_NSAMP], int32_t nSamps, FrameHeader *fh, ScaleFactorInfoSub *sfis,
-						CriticalBandInfo *cbi, int32_t midSideFlag, int32_t mixFlag, int32_t mOut[2])
+						CriticalBandInfo *cbi, int32_t midSideFlag, int32_t mixFlag, int32_t mOut[2]) FL_NOEXCEPT
 {
 	(void)mixFlag;  // Unused parameter - reserved for future use
 	int32_t i=0, j=0, n=0, cb=0, w=0;
@@ -217,7 +218,7 @@ void IntensityProcMPEG1(int32_t x[MAX_NCHAN][MAX_NSAMP], int32_t nSamps, FrameHe
  *                probably redo IIP logic to be simpler
  **************************************************************************************/
 void IntensityProcMPEG2(int32_t x[MAX_NCHAN][MAX_NSAMP], int32_t nSamps, FrameHeader *fh, ScaleFactorInfoSub *sfis,
-						CriticalBandInfo *cbi, ScaleFactorJS *sfjs, int32_t midSideFlag, int32_t mixFlag, int32_t mOut[2])
+						CriticalBandInfo *cbi, ScaleFactorJS *sfjs, int32_t midSideFlag, int32_t mixFlag, int32_t mOut[2]) FL_NOEXCEPT
 {
 	(void)mixFlag;  // Unused parameter - reserved for future use
 	int32_t i, j, k, n, r, cb, w;

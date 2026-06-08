@@ -9,6 +9,7 @@
 #include "fl/stl/cstddef.h"
 #include "fl/stl/string.h"
 #include "fl/stl/cstring.h"  // for fl::memset() and fl::memcpy()
+#include "fl/stl/noexcept.h"
 #include "_kiss_fft_guts.h"
 
 // Ensure NULL is defined (standard C macro)
@@ -24,7 +25,7 @@ static void kf_bfly2(
         const size_t fstride,
         const kiss_fft_cfg st,
         int m
-        )
+        ) FL_NOEXCEPT
 {
     kiss_fft_cpx * Fout2;
     kiss_fft_cpx * tw1 = st->twiddles;
@@ -47,7 +48,7 @@ static void kf_bfly4(
         const size_t fstride,
         const kiss_fft_cfg st,
         const size_t m
-        )
+        ) FL_NOEXCEPT
 {
     kiss_fft_cpx *tw1,*tw2,*tw3;
     kiss_fft_cpx scratch[6];
@@ -95,7 +96,7 @@ static void kf_bfly3(
          const size_t fstride,
          const kiss_fft_cfg st,
          size_t m
-         )
+         ) FL_NOEXCEPT
 {
      size_t k=m;
      const size_t m2 = 2*m;
@@ -139,7 +140,7 @@ static void kf_bfly5(
         const size_t fstride,
         const kiss_fft_cfg st,
         int m
-        )
+        ) FL_NOEXCEPT
 {
     kiss_fft_cpx *Fout0,*Fout1,*Fout2,*Fout3,*Fout4;
     int u;
@@ -202,7 +203,7 @@ static void kf_bfly_generic(
         const kiss_fft_cfg st,
         int m,
         int p
-        )
+        ) FL_NOEXCEPT
 {
     int u,k,q1,q;
     kiss_fft_cpx * twiddles = st->twiddles;
@@ -243,7 +244,7 @@ void kf_work(
         int in_stride,
         int * factors,
         const kiss_fft_cfg st
-        )
+        ) FL_NOEXCEPT
 {
     kiss_fft_cpx * Fout_beg=Fout;
     const int p=*factors++; /* the radix  */
@@ -312,7 +313,7 @@ void kf_work(
     p[i] * m[i] = m[i-1]
     m0 = n                  */
 static
-void kf_factor(int n,int * facbuf)
+void kf_factor(int n,int * facbuf) FL_NOEXCEPT
 {
     int p=4;
     double floor_sqrt;
@@ -359,7 +360,7 @@ void kf_factor(int n,int * facbuf)
  * The remainder is scratchpad memory, safe to ignore or overwrite.
  *
  */
-kiss_fft_cfg kiss_fft_alloc(int nfft,int inverse_fft,void * mem,size_t * lenmem )
+kiss_fft_cfg kiss_fft_alloc(int nfft,int inverse_fft,void * mem,size_t * lenmem ) FL_NOEXCEPT
 {
     kiss_fft_cfg st=NULL;
     size_t memneeded = sizeof(struct kiss_fft_state)
@@ -391,7 +392,7 @@ kiss_fft_cfg kiss_fft_alloc(int nfft,int inverse_fft,void * mem,size_t * lenmem 
 }
 
 
-void kiss_fft_stride(kiss_fft_cfg st,const kiss_fft_cpx *fin,kiss_fft_cpx *fout,int in_stride)
+void kiss_fft_stride(kiss_fft_cfg st,const kiss_fft_cpx *fin,kiss_fft_cpx *fout,int in_stride) FL_NOEXCEPT
 {
     if (fin == fout) {
         //NOTE: this is not really an in-place FFT algorithm.
@@ -405,18 +406,18 @@ void kiss_fft_stride(kiss_fft_cfg st,const kiss_fft_cpx *fin,kiss_fft_cpx *fout,
     }
 }
 
-void kiss_fft(kiss_fft_cfg cfg,const kiss_fft_cpx *fin,kiss_fft_cpx *fout)
+void kiss_fft(kiss_fft_cfg cfg,const kiss_fft_cpx *fin,kiss_fft_cpx *fout) FL_NOEXCEPT
 {
     kiss_fft_stride(cfg,fin,fout,1);
 }
 
 
-void kiss_fft_cleanup(void)
+void kiss_fft_cleanup(void) FL_NOEXCEPT
 {
     // nothing needed any more
 }
 
-int kiss_fft_next_fast_size(int n)
+int kiss_fft_next_fast_size(int n) FL_NOEXCEPT
 {
     while(1) {
         int m=n;

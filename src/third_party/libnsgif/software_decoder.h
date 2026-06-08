@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/codec/idecoder.h"
+#include "fl/stl/noexcept.h"
 #include "fl/codec/common.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/string.h"
@@ -23,7 +24,7 @@ namespace third_party {
         fl::u16 height;
         fl::u8 bytesPerPixel;
 
-        GifBitmap(fl::u16 w, fl::u16 h, fl::u8 bpp)
+        GifBitmap(fl::u16 w, fl::u16 h, fl::u8 bpp) FL_NOEXCEPT
             : pixels(fl::make_unique<fl::u8[]>(w * h * bpp))
             , width(w)
             , height(h)
@@ -59,41 +60,41 @@ namespace third_party {
         static nsgif_bitmap_cb_vt bitmapCallbacks_;
 
         // Internal helper methods
-        bool initializeDecoder();
-        void cleanupDecoder();
-        void setError(const fl::string& message);
-        bool loadMoreData();
-        fl::shared_ptr<fl::Frame> convertBitmapToFrame(nsgif_bitmap_t* bitmap);
+        bool initializeDecoder() FL_NOEXCEPT;
+        void cleanupDecoder() FL_NOEXCEPT;
+        void setError(const fl::string& message) FL_NOEXCEPT;
+        bool loadMoreData() FL_NOEXCEPT;
+        fl::shared_ptr<fl::Frame> convertBitmapToFrame(nsgif_bitmap_t* bitmap) FL_NOEXCEPT;
 
         // Static callbacks for libnsgif
-        static nsgif_bitmap_t* bitmapCreate(int width, int height);
-        static void bitmapDestroy(nsgif_bitmap_t* bitmap);
-        static fl::u8* bitmapGetBuffer(nsgif_bitmap_t* bitmap);
+        static nsgif_bitmap_t* bitmapCreate(int width, int height) FL_NOEXCEPT;
+        static void bitmapDestroy(nsgif_bitmap_t* bitmap) FL_NOEXCEPT;
+        static fl::u8* bitmapGetBuffer(nsgif_bitmap_t* bitmap) FL_NOEXCEPT;
 
     public:
-        explicit SoftwareGifDecoder(fl::PixelFormat format = fl::PixelFormat::RGB888);
+        explicit SoftwareGifDecoder(fl::PixelFormat format = fl::PixelFormat::RGB888) FL_NOEXCEPT;
         ~SoftwareGifDecoder();
 
         // IDecoder interface implementation
-        bool begin(fl::filebuf_ptr stream) override;
-        void end() override;
-        bool isReady() const override { return ready_; }
-        bool hasError(fl::string* msg = nullptr) const override;
+        bool begin(fl::filebuf_ptr stream) FL_NOEXCEPT override;
+        void end() FL_NOEXCEPT override;
+        bool isReady() const FL_NOEXCEPT override { return ready_; }
+        bool hasError(fl::string* msg = nullptr) const FL_NOEXCEPT override;
 
-        fl::DecodeResult decode() override;
-        fl::Frame getCurrentFrame() override;
-        bool hasMoreFrames() const override;
+        fl::DecodeResult decode() FL_NOEXCEPT override;
+        fl::Frame getCurrentFrame() FL_NOEXCEPT override;
+        bool hasMoreFrames() const FL_NOEXCEPT override;
 
         // Animation support methods
-        fl::u32 getFrameCount() const override;
-        fl::u32 getCurrentFrameIndex() const override { return currentFrameIndex_; }
-        bool seek(fl::u32 frameIndex) override;
+        fl::u32 getFrameCount() const FL_NOEXCEPT override;
+        fl::u32 getCurrentFrameIndex() const FL_NOEXCEPT override { return currentFrameIndex_; }
+        bool seek(fl::u32 frameIndex) FL_NOEXCEPT override;
 
         // Get GIF properties
-        fl::u16 getWidth() const;
-        fl::u16 getHeight() const;
-        bool isAnimated() const;
-        fl::u32 getLoopCount() const;
+        fl::u16 getWidth() const FL_NOEXCEPT;
+        fl::u16 getHeight() const FL_NOEXCEPT;
+        bool isAnimated() const FL_NOEXCEPT;
+        fl::u32 getLoopCount() const FL_NOEXCEPT;
     };
 
 } // namespace third_party

@@ -11,6 +11,7 @@
 #include "fl/stl/assert.h"
 #include "fl/stl/int.h"
 #include "fl/stl/allocator.h"
+#include "fl/stl/noexcept.h"
 
 #include "lzw.h"
 
@@ -100,7 +101,7 @@ struct lzw_ctx {
 };
 
 /* Exported function, documented in lzw.h */
-lzw_result lzw_context_create(struct lzw_ctx **ctx)
+lzw_result lzw_context_create(struct lzw_ctx **ctx) FL_NOEXCEPT
 {
 	struct lzw_ctx *c = static_cast<struct lzw_ctx*>(fl::Malloc(sizeof(*c)));
 	if (c == nullptr) {
@@ -112,7 +113,7 @@ lzw_result lzw_context_create(struct lzw_ctx **ctx)
 }
 
 /* Exported function, documented in lzw.h */
-void lzw_context_destroy(struct lzw_ctx *ctx)
+void lzw_context_destroy(struct lzw_ctx *ctx) FL_NOEXCEPT
 {
 	fl::Free(ctx);
 }
@@ -123,7 +124,7 @@ void lzw_context_destroy(struct lzw_ctx *ctx)
  * \param[in] ctx  LZW reading context, updated on success.
  * \return LZW_OK or LZW_OK_EOD on success, appropriate error otherwise.
  */
-static lzw_result lzw__block_advance(struct lzw_read_ctx * ctx)
+static lzw_result lzw__block_advance(struct lzw_read_ctx * ctx) FL_NOEXCEPT
 {
 	fl::size block_size;
 	fl::size next_block_pos = ctx->data_sb_next;
@@ -166,7 +167,7 @@ static lzw_result lzw__block_advance(struct lzw_read_ctx * ctx)
 static inline lzw_result lzw__read_code(
 		struct lzw_read_ctx * ctx,
 		fl::u16 code_size,
-		fl::u16 * code_out)
+		fl::u16 * code_out) FL_NOEXCEPT
 {
 	fl::u32 code = 0;
 	fl::u32 current_bit = ctx->sb_bit & 0x7;
@@ -231,7 +232,7 @@ static inline lzw_result lzw__read_code(
  */
 static inline lzw_result lzw__handle_clear(
 		struct lzw_ctx *ctx,
-		fl::u16 *code_out)
+		fl::u16 *code_out) FL_NOEXCEPT
 {
 	fl::u16 code = 0;
 
@@ -264,7 +265,7 @@ lzw_result lzw_decode_init(
 		fl::u8 minimum_code_size,
 		const fl::u8 *input_data,
 		fl::size input_length,
-		fl::size input_pos)
+		fl::size input_pos) FL_NOEXCEPT
 {
 	struct lzw_table_entry *table = ctx->table;
 	lzw_result res;
@@ -326,7 +327,7 @@ lzw_result lzw_decode_init_map(
 		const fl::u32 *colour_table,
 		const fl::u8 *input_data,
 		fl::size input_length,
-		fl::size input_pos)
+		fl::size input_pos) FL_NOEXCEPT
 {
 	lzw_result res;
 
@@ -355,7 +356,7 @@ lzw_result lzw_decode_init_map(
  */
 static inline void lzw__table_add_entry(
 		struct lzw_ctx *ctx,
-		fl::u16 code)
+		fl::u16 code) FL_NOEXCEPT
 {
 	struct lzw_table_entry *entry = &ctx->table[ctx->table_size];
 
@@ -390,7 +391,7 @@ static inline lzw_result lzw__decode(
 		lzw_writer_fn      write_fn,
 		void     * output_data,
 		fl::u32          output_length,
-		fl::u32 * output_written)
+		fl::u32 * output_written) FL_NOEXCEPT
 {
 	lzw_result res;
 	fl::u16 code = 0;
@@ -462,7 +463,7 @@ static inline fl::u32 lzw__write_fn(struct lzw_ctx *ctx,
 		fl::u32 output_length,
 		fl::u32 output_used,
 		fl::u16 code,
-		fl::u16 left)
+		fl::u16 left) FL_NOEXCEPT
 {
 	fl::u8 * output_pos = (fl::u8 *)output_data + output_used;
 	const struct lzw_table_entry * const table = ctx->table;
@@ -498,7 +499,7 @@ static inline fl::u32 lzw__write_fn(struct lzw_ctx *ctx,
 /* Exported function, documented in lzw.h */
 lzw_result lzw_decode(struct lzw_ctx *ctx,
 		const fl::u8 * *const output_data,
-		fl::u32 * output_written)
+		fl::u32 * output_written) FL_NOEXCEPT
 {
 	const fl::u32 output_length = sizeof(ctx->stack_base);
 
@@ -543,7 +544,7 @@ static inline fl::u32 lzw__map_write_fn(struct lzw_ctx *ctx,
 		fl::u32 output_length,
 		fl::u32 output_used,
 		fl::u16 code,
-		fl::u16 left)
+		fl::u16 left) FL_NOEXCEPT
 {
 	fl::u32 * output_pos = (fl::u32 *)output_data + output_used;
 	const struct lzw_table_entry * const table = ctx->table;
@@ -590,7 +591,7 @@ static inline fl::u32 lzw__map_write_fn(struct lzw_ctx *ctx,
 lzw_result lzw_decode_map(struct lzw_ctx *ctx,
 		fl::u32 * output_data,
 		fl::u32 output_length,
-		fl::u32 * output_written)
+		fl::u32 * output_written) FL_NOEXCEPT
 {
 	*output_written = 0;
 

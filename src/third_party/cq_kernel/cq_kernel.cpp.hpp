@@ -17,6 +17,7 @@
 #include "fl/stl/string.h"
 #include "fl/stl/malloc.h"
 #include "fl/stl/cstring.h"  // for fl::memset() and fl::memcpy()
+#include "fl/stl/noexcept.h"
 #include "cq_kernel.h"
 #include "fft_precision.h"
 
@@ -25,9 +26,9 @@
 #endif
 
 
-void _generate_guassian(kiss_fft_scalar window[], int N);
+void _generate_guassian(kiss_fft_scalar window[], int N) FL_NOEXCEPT;
 
-void _generate_center_freqs(float freq[], int bands, float fmin, float fmax){
+void _generate_center_freqs(float freq[], int bands, float fmin, float fmax) FL_NOEXCEPT {
     if (bands <= 1) {
         if (bands == 1) freq[0] = fmin;
         return;
@@ -36,7 +37,7 @@ void _generate_center_freqs(float freq[], int bands, float fmin, float fmax){
     for(int i = 0; i < bands; i++) freq[i] = fmin*FFT_EXP(m*i/(bands-1));
 }
 
-void _generate_hamming(kiss_fft_scalar window[], int N){
+void _generate_hamming(kiss_fft_scalar window[], int N) FL_NOEXCEPT {
     if (N <= 1) {
         if (N == 1) window[0] = 1;
         return;
@@ -52,7 +53,7 @@ void _generate_hamming(kiss_fft_scalar window[], int N){
     }
 }
 
-void _generate_guassian(kiss_fft_scalar window[], int N){
+void _generate_guassian(kiss_fft_scalar window[], int N) FL_NOEXCEPT {
     fft_float_t sigma = 0.5; // makes a window accurate to -30dB from peak, but smaller sigma is more accurate
     for(int i = 0; i < N; i++){
         #ifdef FIXED_POINT  // If fixed_point, represent window with integers
@@ -63,7 +64,7 @@ void _generate_guassian(kiss_fft_scalar window[], int N){
     }
 }
 
-void _generate_kernel(kiss_fft_cpx kernel[], kiss_fftr_cfg cfg, enum window_type window_type, float f, float fmin, float fs, int N){
+void _generate_kernel(kiss_fft_cpx kernel[], kiss_fftr_cfg cfg, enum window_type window_type, float f, float fmin, float fs, int N) FL_NOEXCEPT {
     // Generates window in the center and zero everywhere else
     float factor = f/fmin;
     int N_window = N/factor; // Scales inversely with frequency (see CQT paper)
@@ -95,11 +96,11 @@ void _generate_kernel(kiss_fft_cpx kernel[], kiss_fftr_cfg cfg, enum window_type
     fl::free(time_K);
 }
 
-kiss_fft_scalar _mag(kiss_fft_cpx x){
+kiss_fft_scalar _mag(kiss_fft_cpx x) FL_NOEXCEPT {
     return FFT_SQRT(x.r*x.r+x.i*x.i);
 }
 
-struct sparse_arr* generate_kernels(struct cq_kernel_cfg cfg){
+struct sparse_arr* generate_kernels(struct cq_kernel_cfg cfg) FL_NOEXCEPT {
     float *freq = (float*)fl::malloc(cfg.bands * sizeof(float));
     _generate_center_freqs(freq, cfg.bands, cfg.fmin, cfg.fmax);
 
@@ -139,7 +140,7 @@ struct sparse_arr* generate_kernels(struct cq_kernel_cfg cfg){
     return kernels;
 }
 
-struct sparse_arr* reallocate_kernels(struct sparse_arr *old_ptr, struct cq_kernel_cfg cfg){
+struct sparse_arr* reallocate_kernels(struct sparse_arr *old_ptr, struct cq_kernel_cfg cfg) FL_NOEXCEPT {
     struct sparse_arr *new_ptr = (struct sparse_arr*)fl::malloc(cfg.bands*sizeof(struct sparse_arr));
     for(int i = 0; i < cfg.bands; i++){
         new_ptr[i].n_elems = old_ptr[i].n_elems;
@@ -151,7 +152,7 @@ struct sparse_arr* reallocate_kernels(struct sparse_arr *old_ptr, struct cq_kern
     return new_ptr;
 }
 
-void apply_kernels(kiss_fft_cpx fft[], kiss_fft_cpx cq[], struct sparse_arr kernels[], struct cq_kernel_cfg cfg){
+void apply_kernels(kiss_fft_cpx fft[], kiss_fft_cpx cq[], struct sparse_arr kernels[], struct cq_kernel_cfg cfg) FL_NOEXCEPT {
     for(int i = 0; i < cfg.bands; i++){
         for(int j = 0; j < kernels[i].n_elems; j++){
             kiss_fft_cpx weighted_val;
@@ -161,7 +162,7 @@ void apply_kernels(kiss_fft_cpx fft[], kiss_fft_cpx cq[], struct sparse_arr kern
     }
 }
 
-void free_kernels(struct sparse_arr *kernels, struct cq_kernel_cfg cfg){
+void free_kernels(struct sparse_arr *kernels, struct cq_kernel_cfg cfg) FL_NOEXCEPT {
     for(int i = 0; i < cfg.bands; i++) fl::free(kernels[i].elems);
     fl::free(kernels);
 } 

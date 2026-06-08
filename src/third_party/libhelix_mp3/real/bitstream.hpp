@@ -43,6 +43,7 @@
 
 #include "coder.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/noexcept.h"
 #include "assembly.h"
 
 namespace fl {
@@ -61,7 +62,7 @@ namespace third_party {
  *
  * Return:      none
  **************************************************************************************/
-void SetBitstreamPointer(BitStreamInfo *bsi, int32_t nBytes, const unsigned char *buf)
+void SetBitstreamPointer(BitStreamInfo *bsi, int32_t nBytes, const unsigned char *buf) FL_NOEXCEPT
 {
 	/* init bitstream */
 	bsi->bytePtr = buf;
@@ -88,7 +89,7 @@ void SetBitstreamPointer(BitStreamInfo *bsi, int32_t nBytes, const unsigned char
  * TODO:        optimize for ARM
  *              possibly add little/big-endian modes for doing 32-bit loads
  **************************************************************************************/
-static __inline void RefillBitstreamCache(BitStreamInfo *bsi)
+static __inline void RefillBitstreamCache(BitStreamInfo *bsi) FL_NOEXCEPT
 {
 	int32_t nBytes = bsi->nBytes;
 
@@ -130,7 +131,7 @@ static __inline void RefillBitstreamCache(BitStreamInfo *bsi)
  *
  * TODO:        optimize for ARM
  **************************************************************************************/
-uint32_t GetBits(BitStreamInfo *bsi, int32_t nBits)
+uint32_t GetBits(BitStreamInfo *bsi, int32_t nBits) FL_NOEXCEPT
 {
 	uint32_t data, lowBits;
 
@@ -166,7 +167,7 @@ uint32_t GetBits(BitStreamInfo *bsi, int32_t nBits)
  *
  * Return:      number of bits read from bitstream, as offset from startBuf:startOffset
  **************************************************************************************/
-int32_t CalcBitsUsed(BitStreamInfo *bsi, const unsigned char *startBuf, int32_t startOffset)
+int32_t CalcBitsUsed(BitStreamInfo *bsi, const unsigned char *startBuf, int32_t startOffset) FL_NOEXCEPT
 {
 	int32_t bitsUsed;
 
@@ -189,7 +190,7 @@ int32_t CalcBitsUsed(BitStreamInfo *bsi, const unsigned char *startBuf, int32_t 
  *
  * Return:      1 if pad bit is set, 0 if not, -1 if null input pointer
  **************************************************************************************/
-int CheckPadBit(MP3DecInfo *mp3DecInfo)
+int CheckPadBit(MP3DecInfo *mp3DecInfo) FL_NOEXCEPT
 {
 	FrameHeader *fh;
 
@@ -219,7 +220,7 @@ int CheckPadBit(MP3DecInfo *mp3DecInfo)
  * TODO:        check for valid modes, depending on capabilities of decoder
  *              test CRC on actual stream (verify no endian problems)
  **************************************************************************************/
-int UnpackFrameHeader(MP3DecInfo *mp3DecInfo, const unsigned char *buf)
+int UnpackFrameHeader(MP3DecInfo *mp3DecInfo, const unsigned char *buf) FL_NOEXCEPT
 {
 
 	int verIdx;
@@ -300,7 +301,7 @@ int UnpackFrameHeader(MP3DecInfo *mp3DecInfo, const unsigned char *buf)
  * Return:      length (in bytes) of side info data
  *              -1 if null input pointers
  **************************************************************************************/
-int UnpackSideInfo(MP3DecInfo *mp3DecInfo, const unsigned char *buf)
+int UnpackSideInfo(MP3DecInfo *mp3DecInfo, const unsigned char *buf) FL_NOEXCEPT
 {
 	int gr, ch, bd, nBytes;
 	BitStreamInfo bitStreamInfo, *bsi;

@@ -57,7 +57,7 @@ struct StubWatchdogPersist {
     fl::u8  safe_mode_threshold;
     fl::u8  user[FL_WATCHDOG_PERSIST_BYTES];
 
-    void reset_if_unmagic() {
+    void reset_if_unmagic() FL_NOEXCEPT {
         if (magic != kMagic) {
             magic = kMagic;
             crash_count.store(0);
@@ -67,7 +67,7 @@ struct StubWatchdogPersist {
     }
 };
 
-inline StubWatchdogPersist& stubWatchdogPersist() {
+inline StubWatchdogPersist& stubWatchdogPersist() FL_NOEXCEPT {
     static StubWatchdogPersist s{};  // okay static in header — single-TU `.impl.hpp`
     s.reset_if_unmagic();
     return s;
@@ -96,7 +96,7 @@ struct StubWatchdogState {
     fl::atomic<bool>                       software_reboot;
     fl::thread                             worker;
 
-    StubWatchdogState()
+    StubWatchdogState() FL_NOEXCEPT
         : enabled(false), stop(false), timeout_ms(0),
           cb(nullptr), cb_user(nullptr),
           reset_was_watchdog(false), fired(false), software_reboot(false) {}
@@ -107,7 +107,7 @@ struct StubWatchdogState {
     }
 };
 
-inline StubWatchdogState& stubWatchdogState() {
+inline StubWatchdogState& stubWatchdogState() FL_NOEXCEPT {
     static StubWatchdogState s{};  // okay static in header — single-TU `.impl.hpp`
     return s;
 }
@@ -118,7 +118,7 @@ inline StubWatchdogState& stubWatchdogState() {
 // `crash_count` is incremented via a saturating CAS loop so concurrent
 // markCleanShutdown() resets are not lost and the counter never rolls over
 // from 0xFFFF back to 0.
-inline void stubWatchdogReset() {
+inline void stubWatchdogReset() FL_NOEXCEPT {
     auto& p = stubWatchdogPersist();
     p.magic = StubWatchdogPersist::kMagic;
     fl::u16 current = p.crash_count.load();
@@ -137,7 +137,7 @@ inline void stubWatchdogReset() {
 // Explicit `Watchdog::reboot()` path: mark the reset as SOFTWARE without
 // bumping crash_count or setting the watchdog-induced flag. Real-hardware
 // platforms similarly distinguish ESP_RST_SW from ESP_RST_TASK_WDT.
-inline void stubWatchdogSoftwareReboot() {
+inline void stubWatchdogSoftwareReboot() FL_NOEXCEPT {
     auto& p = stubWatchdogPersist();
     p.magic = StubWatchdogPersist::kMagic;
 
@@ -145,7 +145,7 @@ inline void stubWatchdogSoftwareReboot() {
     s.software_reboot.store(true);
 }
 
-inline void stubWatchdogTimerLoop() {
+inline void stubWatchdogTimerLoop() FL_NOEXCEPT {
     auto& s = stubWatchdogState();
     while (!s.stop.load()) {
         // Host-only watchdog timer thread; not part of async-scheduler pumping.
@@ -176,7 +176,7 @@ inline void stubWatchdogTimerLoop() {
     }
 }
 
-inline void stubWatchdogEnsureWorker() {
+inline void stubWatchdogEnsureWorker() FL_NOEXCEPT {
     auto& s = stubWatchdogState();
     fl::lock_guard<fl::mutex> g(s.mu);
     if (!s.worker.joinable()) {

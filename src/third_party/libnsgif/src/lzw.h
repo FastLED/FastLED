@@ -11,6 +11,7 @@
 #define LZW_H_
 
 #include "fl/stl/int.h"
+#include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace third_party {
@@ -49,7 +50,7 @@ typedef enum lzw_result {
  * \return LZW_OK on success, or appropriate error code otherwise.
  */
 lzw_result lzw_context_create(
-		struct lzw_ctx **ctx);
+		struct lzw_ctx **ctx) FL_NOEXCEPT;
 
 /**
  * Destroy an LZW decompression context.
@@ -57,7 +58,7 @@ lzw_result lzw_context_create(
  * \param[in] ctx  The LZW decompression context to destroy.
  */
 void lzw_context_destroy(
-		struct lzw_ctx *ctx);
+		struct lzw_ctx *ctx) FL_NOEXCEPT;
 
 /**
  * Initialise an LZW decompression context for decoding.
@@ -75,7 +76,7 @@ lzw_result lzw_decode_init(
 		fl::u8 minimum_code_size,
 		const fl::u8 *input_data,
 		fl::size input_length,
-		fl::size input_pos);
+		fl::size input_pos) FL_NOEXCEPT;
 
 /**
  * Read input codes until end of LZW context owned output buffer.
@@ -90,7 +91,7 @@ lzw_result lzw_decode_init(
  */
 lzw_result lzw_decode(struct lzw_ctx *ctx,
 		const fl::u8 **const output_data,
-		fl::u32 *output_written);
+		fl::u32 *output_written) FL_NOEXCEPT;
 
 /**
  * Initialise an LZW decompression context for decoding to colour map values.
@@ -116,7 +117,7 @@ lzw_result lzw_decode_init_map(
 		const fl::u32 *colour_table,
 		const fl::u8 *input_data,
 		fl::size input_length,
-		fl::size input_pos);
+		fl::size input_pos) FL_NOEXCEPT;
 
 /**
  * Read LZW codes into client buffer, mapping output to colours.
@@ -137,7 +138,7 @@ lzw_result lzw_decode_init_map(
 lzw_result lzw_decode_map(struct lzw_ctx *ctx,
 		fl::u32 *output_data,
 		fl::u32 output_length,
-		fl::u32 *output_written);
+		fl::u32 *output_written) FL_NOEXCEPT;
 
 } // namespace third_party
 } // namespace fl

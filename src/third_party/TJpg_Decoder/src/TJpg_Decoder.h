@@ -17,6 +17,7 @@ https://github.com/Bodmer/TJpg_Decoder
   #include "tjpgd.h"
     #include "fl/stl/stdint.h"
   #include "fl/stl/string.h"
+  #include "fl/stl/noexcept.h"
 
 namespace fl {
 namespace third_party {
@@ -33,19 +34,19 @@ class TJpg_Decoder {
 
 public:
 
-  TJpg_Decoder();
+  TJpg_Decoder() FL_NOEXCEPT;
   ~TJpg_Decoder();
 
-  static int jd_output(JDEC* jdec, void* bitmap, JRECT* jrect);
-  static size_t jd_input(JDEC* jdec, uint8_t* buf, size_t len);
+  static int jd_output(JDEC* jdec, void* bitmap, JRECT* jrect) FL_NOEXCEPT;
+  static size_t jd_input(JDEC* jdec, uint8_t* buf, size_t len) FL_NOEXCEPT;
 
-  void setJpgScale(uint8_t scale);
-  void setCallback(SketchCallback sketchCallback);
+  void setJpgScale(uint8_t scale) FL_NOEXCEPT;
+  void setCallback(SketchCallback sketchCallback) FL_NOEXCEPT;
 
-  JRESULT drawJpg(int32_t x, int32_t y, const uint8_t array[], size_t array_size);
-  JRESULT getJpgSize(uint16_t *w, uint16_t *h, const uint8_t array[], size_t array_size);
+  JRESULT drawJpg(int32_t x, int32_t y, const uint8_t array[], size_t array_size) FL_NOEXCEPT;
+  JRESULT getJpgSize(uint16_t *w, uint16_t *h, const uint8_t array[], size_t array_size) FL_NOEXCEPT;
 
-  void setSwapBytes(bool swap);
+  void setSwapBytes(bool swap) FL_NOEXCEPT;
 
   bool _swap = false;
 

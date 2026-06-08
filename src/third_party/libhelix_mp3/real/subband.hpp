@@ -44,6 +44,7 @@
 
 #include "coder.h"
 #include "fl/stl/stdint.h"
+#include "fl/stl/noexcept.h"
 #include "assembly.h"
 
 namespace fl {
@@ -61,7 +62,7 @@ namespace third_party {
  *
  * Return:      0 on success,  -1 if null input pointers
  **************************************************************************************/
-int Subband(MP3DecInfo *mp3DecInfo, short *pcmBuf)
+int Subband(MP3DecInfo *mp3DecInfo, short *pcmBuf) FL_NOEXCEPT
 {
 	int b;
 	IMDCTInfo *mi;
