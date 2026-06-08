@@ -558,6 +558,39 @@ def run_test_aggregation_check() -> tuple[int, list[str]]:
     return (len(violations), violations)
 
 
+def run_noexcept_ast_check(file_path: str | None = None) -> CheckerResults:
+    """Run the clang-query FL_NOEXCEPT ratchet used by default C++ lint."""
+    from ci.tools.check_noexcept import (
+        DEFAULT_BASELINE,
+        NoexceptCheckError,
+        diff_against_baseline,
+        find_missing_noexcept,
+        load_baseline,
+    )
+
+    results = CheckerResults()
+
+    try:
+        hits = find_missing_noexcept("all")
+    except NoexceptCheckError as exc:
+        results.add_violation("ci/tools/check_noexcept.py", 0, str(exc))
+        return results
+
+    if file_path is not None:
+        rel_file = os.path.relpath(str(Path(file_path).resolve()), PROJECT_ROOT)
+        rel_file = rel_file.replace("\\", "/")
+        hits = [hit for hit in hits if hit.path == rel_file]
+
+    new_hits, _stale = diff_against_baseline(hits, load_baseline(DEFAULT_BASELINE))
+    for hit in new_hits:
+        abs_path = str(PROJECT_ROOT / hit.path)
+        results.add_violation(
+            abs_path, hit.line, f"Missing FL_NOEXCEPT: {hit.line_text}"
+        )
+
+    return results
+
+
 @dataclass(frozen=True)
 class LegacyViolationLineContent:
     line_number: int
@@ -848,6 +881,10 @@ def main() -> int:
                     agg_results.add_violation("test_aggregation", 0, violation)
                 results["TestAggregationChecker"] = agg_results
 
+        noexcept_results = run_noexcept_ast_check(str(file_path))
+        if noexcept_results.has_violations():
+            results["NoexceptAstChecker"] = noexcept_results
+
         # Format and print results
         if rust_ab and not run_rust_ab_check(results, [str(file_path)]):
             return 1
@@ -900,6 +937,11 @@ def main() -> int:
             for violation in pch_violations:
                 pch_results.add_violation("pch_files", 0, violation)
             results["PchFileChecker"] = pch_results
+
+        # Run AST-backed FL_NOEXCEPT enforcement from normal C++ lint.
+        noexcept_results = run_noexcept_ast_check()
+        if noexcept_results.has_violations():
+            results["NoexceptAstChecker"] = noexcept_results
 
         # Format and print results
         if rust_ab and not run_rust_ab_check(results, None):

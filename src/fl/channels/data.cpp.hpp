@@ -12,7 +12,7 @@ namespace fl {
 ChannelDataPtr ChannelData::create(
     const ChipsetVariant& chipset,
     fl::vector_psram<u8>&& encodedData
-) {
+) FL_NOEXCEPT {
     return fl::make_shared<ChannelData>(chipset, fl::move(encodedData));
 }
 
@@ -20,11 +20,11 @@ ChannelDataPtr ChannelData::create(
     int pin,
     const ChipsetTimingConfig& timing,
     fl::vector_psram<u8>&& encodedData
-) {
+) FL_NOEXCEPT {
     return fl::make_shared<ChannelData>(pin, timing, fl::move(encodedData));
 }
 
-int ChannelData::getPin() const {
+int ChannelData::getPin() const FL_NOEXCEPT {
     if (const ClocklessChipset* cs = mChipset.ptr<ClocklessChipset>()) {
         return cs->pin;
     }
@@ -34,7 +34,7 @@ int ChannelData::getPin() const {
     return -1;
 }
 
-const ChipsetTimingConfig& ChannelData::getTiming() const {
+const ChipsetTimingConfig& ChannelData::getTiming() const FL_NOEXCEPT {
     if (const ClocklessChipset* cs = mChipset.ptr<ClocklessChipset>()) {
         return cs->timing;
     }
@@ -45,7 +45,7 @@ const ChipsetTimingConfig& ChannelData::getTiming() const {
 ChannelData::ChannelData(
     const ChipsetVariant& chipset,
     fl::vector_psram<u8>&& encodedData
-)
+) FL_NOEXCEPT
     : mChipset(chipset)
     , mEncodedData(fl::move(encodedData))
 {}
@@ -54,12 +54,12 @@ ChannelData::ChannelData(
     int pin,
     const ChipsetTimingConfig& timing,
     fl::vector_psram<u8>&& encodedData
-)
+) FL_NOEXCEPT
     : mChipset(ClocklessChipset(pin, timing))
     , mEncodedData(fl::move(encodedData))
 {}
 
-void ChannelData::writeWithPadding(fl::span<u8> dst) {
+void ChannelData::writeWithPadding(fl::span<u8> dst) FL_NOEXCEPT {
     size_t targetSize = dst.size();
     size_t currentSize = mEncodedData.size();
 

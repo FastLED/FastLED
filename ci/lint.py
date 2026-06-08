@@ -154,7 +154,9 @@ def print_ai_hints() -> None:
     print("  - Use 'bash lint --tidy' to run clang-tidy static analysis on src/fl")
     print("  - Python linting includes: ruff (lint + format) + KBI checker + ty")
     print("  - Use --strict to also run pyright (strict type checking)")
-    print("  - C++ linting includes: clang-format and custom checkers")
+    print(
+        "  - C++ linting includes: clang-format, custom checkers, and the default FL_NOEXCEPT AST ratchet"
+    )
     print("  - IWYU runs with --full, --iwyu, or --strict flags")
     print("  - clang-tidy runs with --tidy flag")
     print("  - JavaScript linting: FAST ONLY (no slow fallback)")
