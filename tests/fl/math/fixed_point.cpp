@@ -5130,16 +5130,17 @@ FL_TEST_CASE("Integer constructor - fixed_point<> wrapper delegation") {
 // ============================================================================
 //
 // Background: `pow(base, exp)` is implemented as `exp2_fp(exp * log2_fp(base))`.
-// `log2_fp` uses a 4-term minimax polynomial for `log2(1+t)` on `t ∈ [0, 1)`.
-// At the upper endpoint t→1 the polynomial evaluates to ≈0.999557 instead of
-// 1.0 — a 0.000443 error that, after exp2 + scale-to-u16, drops the output
-// by ~50-100 LSB below the expected 65535. The original failure mode was
-// `Gamma8Impl::mLut[255]` returning 65478 instead of 65535 for gamma=3.2.
+// `log2_fp` uses a 4-term minimax polynomial for `log2(1+t)` on `t in [0, 1)`.
+// At the upper endpoint t -> 1 the polynomial evaluates to approx 0.999557
+// instead of 1.0 -- a 0.000443 error that, after exp2 + scale-to-u16, drops
+// the output by ~50-100 LSB below the expected 65535. The original failure
+// mode was `Gamma8Impl::mLut[255]` returning 65478 instead of 65535 for
+// gamma=3.2.
 //
 // Fix: snap `base.mValue` values within 2 ULPs of exactly-1.0 to one before
 // calling the polynomial. The tests below pin that contract.
 
-// pow(1.0, exp) must equal exactly 1.0 for any exp — already true pre-fix
+// pow(1.0, exp) must equal exactly 1.0 for any exp -- already true pre-fix
 // thanks to the `base == one` short-circuit, but lock it in.
 template <typename FP>
 static void test_pow_exactly_one_impl() {
@@ -5165,16 +5166,18 @@ static void test_pow_one_ulp_below_one_impl() {
     FL_CHECK_EQ(FP::pow(just_below, gamma_3_2).raw(), one.raw());
 }
 
-// Same as above, two LSBs below 1.0 — also inside the snap window.
+// Same as above, two LSBs below 1.0 -- also inside the snap window.
 template <typename FP>
 static void test_pow_two_ulps_below_one_impl() {
     const FP just_below = FP::from_raw(static_cast<raw_t<FP>>(FP::SCALE - 2));
     const FP one(1.0f);
     const FP gamma_2_8(2.8f);
+    const FP gamma_3_2(3.2f);
     FL_CHECK_EQ(FP::pow(just_below, gamma_2_8).raw(), one.raw());
+    FL_CHECK_EQ(FP::pow(just_below, gamma_3_2).raw(), one.raw());
 }
 
-// For signed types: pow(0.5, 2.0) ≈ 0.25 — well below 1.0, snap must NOT
+// For signed types: pow(0.5, 2.0) approx 0.25 -- well below 1.0, snap must NOT
 // fire. Excludes u-types since their log2_fp doesn't support base < 1.0.
 template <typename FP>
 static void test_pow_well_below_one_signed_impl() {
@@ -5184,7 +5187,7 @@ static void test_pow_well_below_one_signed_impl() {
     FL_CHECK(FP::pow(half, two).raw() < one.raw());
 }
 
-// For unsigned types: pow(2.0, 0.5) ≈ 1.414 — well above 1.0, snap must NOT
+// For unsigned types: pow(2.0, 0.5) approx 1.414 -- well above 1.0, snap must NOT
 // fire (it only triggers on base near 1.0, not on result).
 template <typename FP>
 static void test_pow_above_one_unsigned_impl() {
