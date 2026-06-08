@@ -13,6 +13,7 @@
 #include "fl/channels/driver.h"  // for IChannelDriver
 #include "fl/channels/detail/wait_spin_budget.h"  // for tiered-wait spin-budget setters (#2818)
 #include "fl/system/delay.h"  // for delayMicroseconds
+#include "fl/system/yield.h"  // for fl::yield
 #include "fl/system/sketch_macros.h"
 #if SKETCH_HAS_LARGE_MEMORY
 #include "fl/task/executor.h"  // for task::run (WiFi yield in show() spin loop)
@@ -382,7 +383,7 @@ void CFastLED::delay(unsigned long ms) {
 		fl::delay(1);
 #endif
 		show();
-		yield();
+		fl::yield();
 	}
 	while((fl::millis()-start) < ms);
 }

@@ -66,6 +66,10 @@
 #define FASTLED_USE_PROGMEM 0
 #endif
 
+#ifndef FASTLED_NO_PINMAP
+#define FASTLED_NO_PINMAP
+#endif
+
 #define FASTLED_SPI_BYTE_ONLY
 
 #include "fl/stl/stdint.h"
@@ -73,7 +77,9 @@
 typedef volatile fl::u32 RoReg;
 typedef volatile fl::u32 RwReg;
 typedef fl::u32          prog_uint32_t;
+#if !defined(ARDUINO)
 typedef fl::u8           boolean;
+#endif
 
 #define PROGMEM
 #define NO_PROGMEM
