@@ -5,19 +5,32 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.2.20 (released 2026-06-07). 2.2.20 ships the
-    # `fbuild symbols`/bloat subcommand that `ci/bloat.py` relies on
-    # — without it the FastLED #2886 Stage-6 regression gate cannot
-    # run. Specifically it exposes linker --cref back-references as
-    # `referenced_by` (FastLED/fbuild#459/#460) and emits graphviz
-    # `.dot` back-reference graphs (FastLED/fbuild#463/#468). Also
-    # contains a cargo binary-locator fix
-    # (FastLED/fbuild#461), Stop-hook + pre-push hook polish
-    # (FastLED/fbuild#462/#464/#465/#467/#469), and the GH-Action
-    # release-flow rework (FastLED/fbuild#457). zccache pinned
-    # >=1.11.15. (No 2.2.19 release was tagged on GitHub; fbuild
-    # jumped from 2.2.18 → 2.2.20 directly.)
+    # Pin to fbuild 2.2.22 (released 2026-06-07). 2.2.22 brings the
+    # real NXP LPC Stage-2 build orchestrator (FastLED/fbuild#488,
+    # part of #487) — first step in honoring the LPC804/LPC845
+    # bare-metal coverage that was scaffolded back in 2.2.18 — plus
+    # the zccache floor bump 1.11.15 → 1.11.20 (FastLED/fbuild#489)
+    # which lines up with the FastLED #2891/#2967 zccache pin and
+    # matches what `ci/setup-zccache.py` now installs.
     # Prior pins preserved for context:
+    #   2.2.21 — bloat per-symbol forward refs + bidirectional graph
+    #            + dual-rank sub-table (FastLED/fbuild#470), cargo
+    #            binary-locator fix (FastLED/fbuild#458), and the
+    #            `symbol_analysis` split (FastLED/fbuild#474). The
+    #            bloat changes layer on top of the `referenced_by`
+    #            and graphviz `.dot` work landed in 2.2.20.
+    #   2.2.20 — ships the `fbuild symbols`/bloat subcommand that
+    #            `ci/bloat.py` relies on — without it the FastLED
+    #            #2886 Stage-6 regression gate cannot run.
+    #            Specifically exposes linker --cref back-references
+    #            as `referenced_by` (FastLED/fbuild#459/#460) and
+    #            emits graphviz `.dot` back-reference graphs
+    #            (FastLED/fbuild#463/#468). Also contains a cargo
+    #            binary-locator fix (FastLED/fbuild#461), Stop-hook
+    #            + pre-push hook polish (FastLED/fbuild#462/#464/
+    #            #465/#467/#469), and the GH-Action release-flow
+    #            rework (FastLED/fbuild#457). (No 2.2.19 release was
+    #            tagged on GitHub; fbuild jumped 2.2.18 → 2.2.20.)
     #   2.2.18 — FastLED #2836 Stage 1: LPC804/LPC845 bare-metal
     #            (FastLED/fbuild#419) + vendor-warning scopings
     #            (renesas FSP, nRF52 Adafruit BSP), the
@@ -50,7 +63,7 @@ dependencies = [
     #   2.2.16 — completed ESP32-C2 framework skeleton installs
     #            and patched the missing touch_sensor_legacy_types.h
     #            no-touch compatibility header (FastLED/fbuild#378).
-    "fbuild==2.2.20",
+    "fbuild==2.2.22",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
