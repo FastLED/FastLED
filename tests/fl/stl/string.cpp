@@ -6223,7 +6223,9 @@ FL_TEST_CASE("fl::string - substr/substring on empty string") {
 }
 
 FL_TEST_CASE("fl::string - substr/substring on heap-promoted string (>64 chars)") {
-    const char* long_prefix = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz_X";
+    // 26 + 10 + 26 + 4 = 66 chars, which exceeds FASTLED_STR_INLINED_SIZE (64)
+    // and forces the string to heap-promote.
+    const char* long_prefix = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz_XYZW";
     fl::string s(long_prefix);
     FL_CHECK_GT(s.size(), static_cast<fl::size>(64));
 

@@ -320,17 +320,24 @@ inline fl::string format_float(float value, int precision) FL_NOEXCEPT {
     }
 
     sstream stream;
+    // Preserve sign for values like -0.5 that round to int_part=0 (printed
+    // without sign by the integer write below).
+    if (value < 0 && int_part == 0) {
+        stream << "-";
+    }
     stream << int_part;
     stream << ".";
 
-    // Pad fractional part with leading zeros if needed
+    // Emit exactly `precision` fractional digits, zero-padded on the left.
+    // The previous implementation stopped padding once temp_multiplier dropped
+    // to 1, which produced "0.0"/"1.0" instead of "0.00"/"1.00" for any
+    // integer-valued input. It also omitted the digits entirely when
+    // frac_part == 0.
     int temp_multiplier = multiplier / 10;
-    while (temp_multiplier > frac_part && temp_multiplier > 1) {
-        stream << "0";
+    while (temp_multiplier > 0) {
+        int digit = (frac_part / temp_multiplier) % 10;
+        stream << static_cast<char>('0' + digit);
         temp_multiplier /= 10;
-    }
-    if (frac_part > 0) {
-        stream << frac_part;
     }
 
     return stream.str();
