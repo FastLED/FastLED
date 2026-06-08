@@ -353,17 +353,14 @@ using GammaKey = fl::ufixed_point<4, 12>;
 class Gamma8Impl : public Gamma8 {
 public:
     explicit Gamma8Impl(float gamma) {
-        // Boundary entries are mathematically exact regardless of gamma:
-        //   pow(0,   any) = 0
-        //   pow(1.0, any) = 1.0
-        // Set them directly instead of routing through the polynomial pow,
-        // which would otherwise lose accuracy at x→1 because the log2(1+t)
-        // minimax approximation has its largest residual at the upper
-        // endpoint AND `255 * (1/255)` in fixed-point is one LSB below 1.0
-        // (so input never hits the early-out at exactly 1.0). Both effects
-        // combine to drop mLut[255] by ~50-100 below the expected 65535.
-        mLut[0]   = 0;
-        mLut[255] = 65535;
+        // i=0 is mathematically exact regardless of gamma: pow(0, any) = 0.
+        // The s8x24::pow short-circuit covers exact 0 input, but we set it
+        // here directly anyway because (a) the loop below avoids the
+        // round-trip math and (b) `mLut` is otherwise uninitialized.
+        // i=255 used to need a workaround for the log2(1+t) endpoint
+        // residual; that snap is now handled inside s8x24::pow itself
+        // (see #2969).
+        mLut[0] = 0;
         // Compute the 256-entry u16 gamma LUT in fixed-point so we don't
         // pull `__ieee754_pow` (libm, ~2.7 KB) into release builds — the
         // double-precision pow chain dominates the top-9 bytes attributed
@@ -389,9 +386,9 @@ public:
         // call (pulls __mulsf3 / __fixsfsi helpers, both << 100 B).
         const fl::s8x24 gamma_fp(gamma);
         constexpr fl::s8x24 inv_255_fp(1.0f / 255.0f);
-        for (int i = 1; i < 255; ++i) {
-            const fl::s8x24 x = static_cast<i32>(i) * inv_255_fp;  // [0, 1)
-            const fl::s8x24 r = fl::s8x24::pow(x, gamma_fp);       // (0, 1)
+        for (int i = 1; i < 256; ++i) {
+            const fl::s8x24 x = static_cast<i32>(i) * inv_255_fp;  // (0, 1]
+            const fl::s8x24 r = fl::s8x24::pow(x, gamma_fp);       // (0, 1]
             // r.raw() is the s8x24 raw with FRAC_BITS=24, range [0, 2^24].
             // Scale to u16 [0, 65535] with round-half-up. 24+16 bit
             // multiplication needs a u64 intermediate:

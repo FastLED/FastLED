@@ -5125,6 +5125,106 @@ FL_TEST_CASE("Integer constructor - fixed_point<> wrapper delegation") {
     // constexpr SFP8x24 overflow(128);  // error: exceeds INT_BITS range
 }
 
+// ============================================================================
+// pow boundary regression tests (#2969)
+// ============================================================================
+//
+// Background: `pow(base, exp)` is implemented as `exp2_fp(exp * log2_fp(base))`.
+// `log2_fp` uses a 4-term minimax polynomial for `log2(1+t)` on `t in [0, 1)`.
+// At the upper endpoint t -> 1 the polynomial evaluates to approx 0.999557
+// instead of 1.0 -- a 0.000443 error that, after exp2 + scale-to-u16, drops
+// the output by ~50-100 LSB below the expected 65535. The original failure
+// mode was `Gamma8Impl::mLut[255]` returning 65478 instead of 65535 for
+// gamma=3.2.
+//
+// Fix: snap `base.mValue` values within 2 ULPs of exactly-1.0 to one before
+// calling the polynomial. The tests below pin that contract.
+
+// pow(1.0, exp) must equal exactly 1.0 for any exp -- already true pre-fix
+// thanks to the `base == one` short-circuit, but lock it in.
+template <typename FP>
+static void test_pow_exactly_one_impl() {
+    const FP one(1.0f);
+    const FP two(2.0f);
+    const FP gamma_2_8(2.8f);
+    const FP gamma_3_2(3.2f);
+    FL_CHECK_EQ(FP::pow(one, two).raw(), one.raw());
+    FL_CHECK_EQ(FP::pow(one, gamma_2_8).raw(), one.raw());
+    FL_CHECK_EQ(FP::pow(one, gamma_3_2).raw(), one.raw());
+}
+
+// pow(base, exp) where base.raw() == SCALE - 1 (one ULP below 1.0). Without
+// the snap, the polynomial gives a value ~50-100 LSB below expected. With
+// the snap, this must collapse to exactly one.
+template <typename FP>
+static void test_pow_one_ulp_below_one_impl() {
+    const FP just_below = FP::from_raw(static_cast<raw_t<FP>>(FP::SCALE - 1));
+    const FP one(1.0f);
+    const FP gamma_2_8(2.8f);
+    const FP gamma_3_2(3.2f);
+    FL_CHECK_EQ(FP::pow(just_below, gamma_2_8).raw(), one.raw());
+    FL_CHECK_EQ(FP::pow(just_below, gamma_3_2).raw(), one.raw());
+}
+
+// Same as above, two LSBs below 1.0 -- also inside the snap window.
+template <typename FP>
+static void test_pow_two_ulps_below_one_impl() {
+    const FP just_below = FP::from_raw(static_cast<raw_t<FP>>(FP::SCALE - 2));
+    const FP one(1.0f);
+    const FP gamma_2_8(2.8f);
+    const FP gamma_3_2(3.2f);
+    FL_CHECK_EQ(FP::pow(just_below, gamma_2_8).raw(), one.raw());
+    FL_CHECK_EQ(FP::pow(just_below, gamma_3_2).raw(), one.raw());
+}
+
+// For signed types: pow(0.5, 2.0) approx 0.25 -- well below 1.0, snap must NOT
+// fire. Excludes u-types since their log2_fp doesn't support base < 1.0.
+template <typename FP>
+static void test_pow_well_below_one_signed_impl() {
+    const FP half(0.5f);
+    const FP two(2.0f);
+    const FP one(1.0f);
+    FL_CHECK(FP::pow(half, two).raw() < one.raw());
+}
+
+// For unsigned types: pow(2.0, 0.5) approx 1.414 -- well above 1.0, snap must NOT
+// fire (it only triggers on base near 1.0, not on result).
+template <typename FP>
+static void test_pow_above_one_unsigned_impl() {
+    const FP two(2.0f);
+    const FP half(0.5f);
+    const FP one(1.0f);
+    FL_CHECK(FP::pow(two, half).raw() > one.raw());
+}
+
+FL_TEST_CASE("pow boundary - exactly 1.0 (#2969)") {
+    FL_SUBCASE("s16x16") { test_pow_exactly_one_impl<s16x16>(); }
+    FL_SUBCASE("s8x24")  { test_pow_exactly_one_impl<s8x24>();  }
+    FL_SUBCASE("u16x16") { test_pow_exactly_one_impl<u16x16>(); }
+    FL_SUBCASE("u8x24")  { test_pow_exactly_one_impl<u8x24>();  }
+}
+
+FL_TEST_CASE("pow boundary - one ULP below 1.0 snaps to 1.0 (#2969)") {
+    FL_SUBCASE("s16x16") { test_pow_one_ulp_below_one_impl<s16x16>(); }
+    FL_SUBCASE("s8x24")  { test_pow_one_ulp_below_one_impl<s8x24>();  }
+    FL_SUBCASE("u16x16") { test_pow_one_ulp_below_one_impl<u16x16>(); }
+    FL_SUBCASE("u8x24")  { test_pow_one_ulp_below_one_impl<u8x24>();  }
+}
+
+FL_TEST_CASE("pow boundary - two ULPs below 1.0 snaps to 1.0 (#2969)") {
+    FL_SUBCASE("s16x16") { test_pow_two_ulps_below_one_impl<s16x16>(); }
+    FL_SUBCASE("s8x24")  { test_pow_two_ulps_below_one_impl<s8x24>();  }
+    FL_SUBCASE("u16x16") { test_pow_two_ulps_below_one_impl<u16x16>(); }
+    FL_SUBCASE("u8x24")  { test_pow_two_ulps_below_one_impl<u8x24>();  }
+}
+
+FL_TEST_CASE("pow boundary - far from 1.0 not snapped (#2969)") {
+    FL_SUBCASE("s16x16 pow(0.5, 2)") { test_pow_well_below_one_signed_impl<s16x16>(); }
+    FL_SUBCASE("s8x24  pow(0.5, 2)") { test_pow_well_below_one_signed_impl<s8x24>();  }
+    FL_SUBCASE("u16x16 pow(2, 0.5)") { test_pow_above_one_unsigned_impl<u16x16>(); }
+    FL_SUBCASE("u8x24  pow(2, 0.5)") { test_pow_above_one_unsigned_impl<u8x24>();  }
+}
+
 } // anonymous namespace
 
 } // FL_TEST_FILE

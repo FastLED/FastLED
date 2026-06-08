@@ -177,6 +177,13 @@ class u8x8 {
         constexpr u8x8 one(1.0f);
         if (exp.mValue == 0) return one;
         if (base == one) return one;
+        // Snap base values within ~2 ULPs of 1.0 to exactly 1.0 to dodge the
+        // log2(1+t) minimax polynomial's upper-endpoint residual (#2969).
+        constexpr u16 kOneRaw = static_cast<u16>(SCALE);
+        if (base.mValue >= static_cast<u16>(kOneRaw - 2) &&
+            base.mValue <= kOneRaw) {
+            return one;
+        }
         return exp2_fp(exp * log2_fp(base));
     }
 
