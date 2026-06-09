@@ -342,6 +342,7 @@ ParlioEngine::ParlioEngine() FL_NOEXCEPT
       mSpiClockHz(0),
       mIsrContext(),
       mMainTaskHandle(nullptr),
+      mPollNeededCallback(),
       mRingBuffer(),
       mRingBufferCapacity(0),
       mScratchBuffer(nullptr),
@@ -419,6 +420,10 @@ ParlioEngine::~ParlioEngine() {
 
 ParlioEngine& ParlioEngine::getInstance() FL_NOEXCEPT {
     return fl::Singleton<ParlioEngine>::instance();
+}
+
+void ParlioEngine::setPollNeededCallback(IChannelDriver::PollNeededCallback callback) FL_NOEXCEPT {
+    mPollNeededCallback.set(callback);
 }
 
 void ParlioEngine::cleanup() FL_NOEXCEPT {
@@ -606,6 +611,7 @@ ParlioEngine::txDoneCallback(void* tx_unit,
             if (ctx->mBytesTransmitted > ctx->mTotalBytes) {
                 ctx->mRingError = true;  // Flag overflow for debugging
             }
+            self->mPollNeededCallback.invoke();
 
             // ASYNC MODE: No task notifications
             // - Worker task was removed (uses timer ISR instead)
@@ -2122,12 +2128,12 @@ ParlioEngineState ParlioEngine::poll() FL_NOEXCEPT {
         // Execute memory barrier to synchronize all ISR writes
         FL_MEMORY_BARRIER;
 
-        // Clear completion flags
-        mIsrContext->mTransmitting = false;
-        mIsrContext->mStreamComplete = false;
-
         // Wait for final chunk to complete (non-blocking poll)
         if (mPeripheral->waitAllDone(0)) {
+            // Clear completion flags only once the peripheral is truly idle.
+            mIsrContext->mTransmitting = false;
+            mIsrContext->mStreamComplete = false;
+
             // All transmissions complete - disable peripheral (only if currently enabled)
             if (mTxUnitEnabled) {
                 if (!mPeripheral->disable()) {

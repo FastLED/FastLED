@@ -458,6 +458,8 @@ class ChannelDriverPARLIOImpl : public IChannelDriver {
     /// @return Current driver state (READY, BUSY, DRAINING, or ERROR)
     DriverState poll() FL_NOEXCEPT override;
 
+    void setPollNeededCallback(PollNeededCallback callback) FL_NOEXCEPT override;
+
     /// @brief Get the driver name for affinity binding
     /// @return "PARLIO"
     fl::string getName() const FL_NOEXCEPT override { return fl::string::from_literal("PARLIO"); }
@@ -589,6 +591,8 @@ class ChannelDriverPARLIO : public IChannelDriver {
     /// @return Current driver state (READY, BUSY, DRAINING, or ERROR)
     DriverState poll() FL_NOEXCEPT override;
 
+    void setPollNeededCallback(PollNeededCallback callback) FL_NOEXCEPT override;
+
     /// @brief Get the driver name for affinity binding
     /// @return "PARLIO"
     fl::string getName() const FL_NOEXCEPT override { return fl::string::from_literal("PARLIO"); }
@@ -620,6 +624,9 @@ class ChannelDriverPARLIO : public IChannelDriver {
 
     /// @brief Current transmission phase
     TransmitPhase mPhase;
+
+    /// @brief Manager-owned callback signaled by the PARLIO engine ISR.
+    PollNeededCallback mPollNeededCallback;
 
     /// @brief All channels currently transmitting (for isInUse cleanup)
     fl::vector<ChannelDataPtr> mTransmittingChannels;

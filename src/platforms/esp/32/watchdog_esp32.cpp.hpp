@@ -9,9 +9,9 @@
 // This implementation fixes this by overriding the panic handler to perform a safe
 // USB disconnect sequence before reset.
 //
-// Provides a configurable proof-of-life watchdog that automatically monitors
-// the Arduino loop() task. No manual feeding required - the ESP32 framework
-// handles watchdog feeding automatically as long as loop() keeps executing.
+// Provides a configurable proof-of-life watchdog. The unified Watchdog wrapper
+// subscribes and feeds the Arduino loop task explicitly; the ESP32 backend also
+// keeps idle-task monitoring active so CPU starvation is still caught.
 //
 // This file dispatches to IDF version-specific implementations:
 // - watchdog_esp32_idf4.hpp: ESP-IDF v4.x (weak symbol override)

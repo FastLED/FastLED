@@ -18,6 +18,9 @@ FL_EXTERN_C_BEGIN
 // IWYU pragma: begin_keep
 #include "freertos/semphr.h"
 // IWYU pragma: end_keep
+// IWYU pragma: begin_keep
+#include "freertos/task.h"
+// IWYU pragma: end_keep
 FL_EXTERN_C_END
 
 // IWYU pragma: begin_keep
@@ -68,7 +71,16 @@ void CountingSemaphoreESP32<LeastMaxValue>::release(ptrdiff_t update) {
 
     // Release the semaphore 'update' times
     for (ptrdiff_t i = 0; i < update; ++i) {
-        BaseType_t result = xSemaphoreGive(handle);
+        BaseType_t result = pdFALSE;
+        if (xPortInIsrContext()) {
+            BaseType_t higherPriorityTaskWoken = pdFALSE;
+            result = xSemaphoreGiveFromISR(handle, &higherPriorityTaskWoken);
+            if (higherPriorityTaskWoken == pdTRUE) {
+                portYIELD_FROM_ISR();
+            }
+        } else {
+            result = xSemaphoreGive(handle);
+        }
 
         // If we fail to give, it means we would exceed the max value
         if (result != pdTRUE) {
@@ -105,6 +117,23 @@ bool CountingSemaphoreESP32<LeastMaxValue>::try_acquire() {
 }
 
 template<ptrdiff_t LeastMaxValue>
+bool CountingSemaphoreESP32<LeastMaxValue>::try_acquire_for_ms(fl::u32 timeout_ms) FL_NOEXCEPT {
+    if (mHandle == nullptr) {
+        return false;
+    }
+
+    TickType_t ticks = pdMS_TO_TICKS(timeout_ms);
+    if (timeout_ms > 0 && ticks == 0) {
+        ticks = 1;
+    }
+
+    SemaphoreHandle_t handle = static_cast<SemaphoreHandle_t>(mHandle);
+    BaseType_t result = xSemaphoreTake(handle, ticks);
+
+    return (result == pdTRUE);
+}
+
+template<ptrdiff_t LeastMaxValue>
 template<class Rep, class Period>
 bool CountingSemaphoreESP32<LeastMaxValue>::try_acquire_for(
     const std::chrono::duration<Rep, Period>& rel_time) {  // okay std namespace
@@ -115,7 +144,13 @@ bool CountingSemaphoreESP32<LeastMaxValue>::try_acquire_for(
 
     // Convert duration to FreeRTOS ticks
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(rel_time);  // okay std namespace
+    if (ms.count() <= 0) {
+        return try_acquire();
+    }
     TickType_t ticks = pdMS_TO_TICKS(ms.count());
+    if (ticks == 0) {
+        ticks = 1;
+    }
 
     SemaphoreHandle_t handle = static_cast<SemaphoreHandle_t>(mHandle);
     BaseType_t result = xSemaphoreTake(handle, ticks);

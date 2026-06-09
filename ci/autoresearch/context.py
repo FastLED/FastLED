@@ -258,6 +258,28 @@ def display_pattern_details(result: dict[str, Any]) -> None:
     print("-" * 62)
 
 
+def display_tight_timing(result: dict[str, Any]) -> None:
+    """Display tight timing metrics from runSingleTest responses."""
+    metric = result.get("tightTiming")
+    if not isinstance(metric, dict):
+        return
+
+    if not metric.get("supported", False):
+        reason = metric.get("message", "unsupported")
+        print(f"   Tight timing: unsupported ({reason})")
+        return
+
+    status = "PASS" if metric.get("passed", False) else "FAIL"
+    max_overhead = metric.get("max_overhead_us", "?")
+    max_allowed = metric.get("max_allowed_overhead_us", "?")
+    expected = metric.get("expected_wire_us", "?")
+    avg_total = metric.get("avg_total_us", "?")
+    print(
+        f"   Tight timing: {status} max overhead {max_overhead}us "
+        f"(limit {max_allowed}us, wire {expected}us, avg total {avg_total}us)"
+    )
+
+
 def print_run_summary(ctx: RunContext) -> None:
     """Print the compact configuration header."""
     print("\u2500" * 60)

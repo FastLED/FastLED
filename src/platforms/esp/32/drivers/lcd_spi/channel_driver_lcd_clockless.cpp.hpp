@@ -65,7 +65,7 @@ ChannelDriverLcdClockless::ChannelDriverLcdClockless(
       mRingBuffers{nullptr, nullptr, nullptr}, mRingCapacity(0),
       mNumLanes(0), mBusy(false), mIsrCtx(), mChunkInputBytesOverride(0),
       mWorkerTaskHandle(nullptr), mWorkerStop(false), mWorkerRunning(false),
-      mUseWave3(true), mWave3Lut(), mWave8Lut(), mClockHz(0),
+      mPollNeededCallback(), mUseWave3(true), mWave3Lut(), mWave8Lut(), mClockHz(0),
       mOutputBytesPerInputByte(0) {
     mIsrCtx.reset();
 }
@@ -306,12 +306,7 @@ void ChannelDriverLcdClockless::show() FL_NOEXCEPT {
         return;
     }
 
-    constexpr int kMaxIterations = 20000;
-    int iterations = 0;
-    while (mBusy && iterations++ < kMaxIterations) {
-        poll();
-        fl::task::run(250, fl::task::ExecFlags::SYSTEM);
-    }
+    (void)waitForReady(2000);
     if (mBusy) {
         FL_WARN("ChannelDriverLcdClockless: DMA hung — forcing release");
         mBusy = false;
@@ -370,6 +365,10 @@ IChannelDriver::DriverState ChannelDriverLcdClockless::poll() FL_NOEXCEPT {
 //=============================================================================
 // Encoding — wave3 or wave8 transpose into u16 DMA words
 //=============================================================================
+
+void ChannelDriverLcdClockless::setPollNeededCallback(PollNeededCallback callback) FL_NOEXCEPT {
+    mPollNeededCallback.set(callback);
+}
 
 // FL_IRAM matches the declaration in channel_driver_lcd_clockless.h. Keep the
 // encoder IRAM-safe because worker wake-up is triggered by the LCD ISR and this
@@ -441,6 +440,7 @@ bool FL_IRAM ChannelDriverLcdClockless::isrChunkDone(void *panel_io,
     if (ctx.mCompletedChunks >= ctx.mTotalChunks) {
         ctx.mStreamComplete = true;
         self->mBusy = false;
+        self->mPollNeededCallback.invoke();
         return false;
     }
 

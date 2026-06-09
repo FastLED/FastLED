@@ -12,6 +12,7 @@
 
 #include "fl/stl/assert.h"
 #include "fl/stl/cstddef.h"
+#include "fl/stl/int.h"
 
 // CRITICAL: Include <chrono> BEFORE opening namespace to avoid polluting std::
 // IWYU pragma: begin_keep
@@ -57,6 +58,8 @@ public:
     CountingSemaphoreESP32& operator=(CountingSemaphoreESP32&&) = delete;
 
     /// @brief Increment the semaphore count by update
+    /// @note On ESP32 this is ISR-aware and uses xSemaphoreGiveFromISR()
+    ///       plus portYIELD_FROM_ISR() when called from interrupt context.
     /// @param update Number to add to the count (default 1)
     void release(ptrdiff_t update = 1) FL_NOEXCEPT;
 
@@ -74,6 +77,9 @@ public:
     /// @return true if acquired within timeout, false otherwise
     template<class Rep, class Period>
     bool try_acquire_for(const std::chrono::duration<Rep, Period>& rel_time) FL_NOEXCEPT;  // okay std namespace
+
+    /// @brief Try to acquire with a millisecond timeout.
+    bool try_acquire_for_ms(fl::u32 timeout_ms) FL_NOEXCEPT;
 
     /// @brief Try to acquire until an absolute time point
     /// @tparam Clock Clock type

@@ -227,6 +227,11 @@ static constexpr uint32_t AUTORESEARCH_SERIAL_WAIT_MS = SERIAL_TIMEOUT_MS;
 
 const fl::RxBackend RX_BACKEND = fl::RxBackend::PLATFORM_DEFAULT;
 
+// AutoResearch must recover from a wedged driver/RPC command without host
+// intervention. Keep this shorter than the Python RPC timeout so a device-side
+// hang becomes a watchdog reboot instead of a permanently owned/dead port.
+static constexpr uint32_t AUTORESEARCH_WATCHDOG_TIMEOUT_MS = 5000;
+
 // ============================================================================
 // Platform-Specific Pin Defaults
 // ============================================================================
@@ -538,7 +543,7 @@ void loop() {
     // Unified watchdog guard. First iteration: arms the WDT, prints any
     // prior-boot reset/crash info, pauses 3 s on a crash. Every iteration:
     // feeds on construction (now) and again on destruction (end of scope).
-    FL_WATCHDOG_AUTO();
+    FL_WATCHDOG_AUTO(AUTORESEARCH_WATCHDOG_TIMEOUT_MS);
 
     // Aggressively pump async tasks (including JSON-RPC task)
     // This ensures RPC commands are processed frequently even without delay() calls

@@ -30,6 +30,7 @@
 #include "fl/stl/vector.h"
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/noexcept.h"
+#include "platforms/channel_poll_signal.h"
 
 namespace fl {
 
@@ -254,6 +255,11 @@ private:
     template<typename Condition>
     bool waitForCondition(Condition condition, u32 timeoutMs = 1000) FL_NOEXCEPT;
 
+    void notifyPollNeeded() FL_NOEXCEPT;
+    bool waitForPollNeededSignal(u32 timeoutMs) FL_NOEXCEPT;
+    u32 pollNeededWaitSliceMs(u32 startTime, u32 timeoutMs) const FL_NOEXCEPT;
+    static void notifyPollNeededThunk(void* context) FL_NOEXCEPT;
+
 private:
     /// @brief Engine registry entry (priority + shared pointer + runtime control)
     struct EngineEntry {
@@ -288,6 +294,12 @@ private:
     /// @note When non-empty, new drivers are auto-disabled if name doesn't match.
     ///       Set by `setExclusiveDriverByName()` / cleared on empty name.
     fl::string mExclusiveDriver;
+
+    /// @brief Shared callback installed on drivers that can signal poll-needed events.
+    IChannelDriver::PollNeededCallback mPollNeededCallback;
+
+    /// @brief Platform wait primitive owned by the manager.
+    platforms::ChannelPollSignal mPollNeededSignal;
 
     // Non-copyable, non-movable
     ChannelManager(const ChannelManager&) FL_NOEXCEPT = delete;

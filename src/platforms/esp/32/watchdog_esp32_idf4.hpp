@@ -134,6 +134,9 @@ bool init_task_watchdog(u32 timeout_ms) FL_NOEXCEPT {
     u32 timeout_s = (timeout_ms + 999) / 1000;  // Round up to nearest second
 
     esp_err_t err = esp_task_wdt_init(timeout_s, true);  // true = trigger panic on timeout
+    if (err == ESP_ERR_INVALID_STATE) {
+        err = ESP_OK;  // Already armed; keep the existing IDF4 timeout.
+    }
     if (err != ESP_OK) {
         FL_DBG("[WATCHDOG] Failed to initialize (error: " << err << ")");
         return false;
@@ -148,7 +151,7 @@ void log_watchdog_status(u32 timeout_ms, watchdog_callback_t callback) FL_NOEXCE
     if (callback != nullptr) {
         FL_DBG("[WATCHDOG] ℹ️  User callback registered");
     }
-    FL_DBG("[WATCHDOG] ℹ️  Automatically monitors loop() execution - no manual feeding needed");
+    FL_DBG("[WATCHDOG] Monitors the loop task plus idle-task CPU starvation");
 }
 
 } // anonymous namespace

@@ -36,7 +36,7 @@ using atomic_i32 = atomic<fl::i32>;
 
 // Forward declare memory_order enum (defined in platforms/shared/atomic.h for real atomics)
 #if !FASTLED_USE_REAL_ATOMICS
-enum class memory_order {
+enum memory_order { // ok plain enum
     memory_order_relaxed,
     memory_order_acquire,
     memory_order_release,
@@ -58,21 +58,21 @@ template <typename T> class AtomicFake {
 
     // Basic atomic operations - fake implementation (not actually atomic)
     // Memory order parameters are accepted but ignored (no-op in single-threaded mode)
-    T load(memory_order = memory_order::memory_order_seq_cst) const FL_NOEXCEPT {
+    T load(memory_order = memory_order_seq_cst) const FL_NOEXCEPT {
         return mValue;
     }
 
-    void store(T value, memory_order = memory_order::memory_order_seq_cst) FL_NOEXCEPT {
+    void store(T value, memory_order = memory_order_seq_cst) FL_NOEXCEPT {
         mValue = value;
     }
     
-    T exchange(T value) FL_NOEXCEPT {
+    T exchange(T value, memory_order = memory_order_seq_cst) FL_NOEXCEPT {
         T old = mValue;
         mValue = value;
         return old;
     }
     
-    bool compare_exchange_weak(T& expected, T desired, memory_order = memory_order::memory_order_seq_cst) FL_NOEXCEPT {
+    bool compare_exchange_weak(T& expected, T desired, memory_order = memory_order_seq_cst) FL_NOEXCEPT {
         if (mValue == expected) {
             mValue = desired;
             return true;
@@ -82,7 +82,7 @@ template <typename T> class AtomicFake {
         }
     }
 
-    bool compare_exchange_strong(T& expected, T desired, memory_order = memory_order::memory_order_seq_cst) FL_NOEXCEPT {
+    bool compare_exchange_strong(T& expected, T desired, memory_order = memory_order_seq_cst) FL_NOEXCEPT {
         return compare_exchange_weak(expected, desired);
     }
     

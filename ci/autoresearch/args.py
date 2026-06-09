@@ -92,6 +92,11 @@ class Args:
     # See issues #2254 and #2288 (ESP32-S3 SPI second-frame degradation).
     frames: int | None
 
+    # Tight timing metric (#2991)
+    tight_timing: bool
+    tight_timing_iterations: int
+    tight_timing_max_overhead_us: int
+
     @staticmethod
     def parse_args(argv: list[str] | None = None) -> "Args":
         """Parse command-line arguments and return Args dataclass instance."""
@@ -497,6 +502,30 @@ See Also:
             "See issues #2254, #2288.",
         )
 
+        timing_group = parser.add_argument_group(
+            "Tight Timing Metric",
+            "Measure show()+wait() latency against expected LED wire time.",
+        )
+        timing_group.add_argument(
+            "--tight-timing",
+            action="store_true",
+            help="Add the tight timing metric to each runSingleTest response and fail if it exceeds the overhead budget.",
+        )
+        timing_group.add_argument(
+            "--tight-timing-iterations",
+            type=int,
+            default=8,
+            metavar="N",
+            help="Number of steady-state show()+wait() samples for --tight-timing (default: 8).",
+        )
+        timing_group.add_argument(
+            "--tight-timing-max-overhead-us",
+            type=int,
+            default=2000,
+            metavar="US",
+            help="Maximum allowed max(show()+wait()-wire_time) overhead for --tight-timing (default: 2000us).",
+        )
+
         parsed = parser.parse_args(argv)
 
         if parsed.use_fbuild or parsed.no_fbuild:
@@ -554,4 +583,7 @@ See Also:
             parallel=parsed.parallel,
             decode=parsed.decode,
             frames=parsed.frames,
+            tight_timing=parsed.tight_timing,
+            tight_timing_iterations=parsed.tight_timing_iterations,
+            tight_timing_max_overhead_us=parsed.tight_timing_max_overhead_us,
         )

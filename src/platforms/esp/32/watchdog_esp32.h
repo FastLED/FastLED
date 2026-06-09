@@ -4,18 +4,20 @@
 //
 // This header provides a simple watchdog timer interface for detecting
 // when the main loop hangs or stops executing. Uses the ESP32 task watchdog
-// framework which automatically monitors the main loop task.
+// framework. The unified Watchdog wrapper subscribes the calling Arduino loop
+// task and feeds it explicitly, while the ESP backend also keeps idle-task
+// monitoring active for CPU-starvation detection.
 //
 // USAGE:
 // - Call fl::watchdog_setup() once in setup()
-// - Watchdog automatically monitors loop() execution (no manual feeding needed)
+// - Watchdog monitors loop() execution through FastLED.watchdog().feed()
 // - If loop() hangs for timeout duration, watchdog triggers safe reset
 // - Safe reset includes USB disconnect to prevent phantom devices
 // - Optionally provide a callback function to execute before reset
 //
 // PLATFORM SUPPORT:
 // - ESP32 family: Full watchdog implementation with configurable timeout
-// - Automatically feeds watchdog via idle task monitoring (no manual calls needed)
+// - The unified fl::Watchdog wrapper feeds the subscribed loop task explicitly.
 
 #pragma once
 
@@ -37,7 +39,7 @@ typedef void (*watchdog_callback_t)(void* user_data);
 /// @param callback Optional callback function to execute when watchdog fires (default: nullptr)
 /// @param user_data Optional user data pointer passed to callback (default: nullptr)
 /// @note ESP32: Installs watchdog that monitors loop() task execution
-/// @note Watchdog automatically fed by ESP32 framework - no manual feeding needed
+/// @note Use FastLED.watchdog().feed() or FL_WATCHDOG_AUTO() to reset the subscribed loop task
 /// @note On timeout: Calls user callback (if provided), prints message, disconnects USB, then resets
 /// @note Callback executes in ISR context - keep it simple and avoid logging functions
 void watchdog_setup(u32 timeout_ms = 5000,

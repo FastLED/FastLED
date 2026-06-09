@@ -67,6 +67,7 @@ ChannelEngineI2S::ChannelEngineI2S(fl::shared_ptr<detail::II2sLcdCamPeripheral> 
       mChipsetGroups(),
       mCurrentGroupIndex(0),
       mBusy(false),
+      mPollNeededCallback(),
       mFrameCounter(0),
       mWave8Lut(),
       mWave8LutValid(false),
@@ -79,7 +80,7 @@ ChannelEngineI2S::ChannelEngineI2S(fl::shared_ptr<detail::II2sLcdCamPeripheral> 
 
 ChannelEngineI2S::~ChannelEngineI2S() {
     // Wait for pending transmission
-    while (mBusy) {
+    while (mBusy.load(fl::memory_order_acquire)) {
         poll();
     }
 
@@ -162,7 +163,7 @@ IChannelDriver::DriverState ChannelEngineI2S::poll() FL_NOEXCEPT {
 
     // Check if current transmission is complete
     if (mPeripheral && !mPeripheral->isBusy()) {
-        mBusy = false;
+        mBusy.store(false, fl::memory_order_release);
 
         // Move to next chipset group if available
         mCurrentGroupIndex++;
@@ -188,7 +189,24 @@ IChannelDriver::DriverState ChannelEngineI2S::poll() FL_NOEXCEPT {
         return DriverState::READY;
     }
 
-    return mBusy ? DriverState::DRAINING : DriverState::READY;
+    return mBusy.load(fl::memory_order_acquire) ? DriverState::DRAINING : DriverState::READY;
+}
+
+void ChannelEngineI2S::setPollNeededCallback(PollNeededCallback callback) FL_NOEXCEPT {
+    mPollNeededCallback.set(callback);
+}
+
+bool FL_IRAM ChannelEngineI2S::isrTransmitDone(void* panel_io,
+                                               const void* edata,
+                                               void* user_ctx) FL_NOEXCEPT {
+    (void)panel_io;
+    (void)edata;
+    auto* self = static_cast<ChannelEngineI2S*>(user_ctx);
+    if (self != nullptr) {
+        self->mBusy.store(false, fl::memory_order_release);
+        self->mPollNeededCallback.invoke();
+    }
+    return false;
 }
 
 //=============================================================================
@@ -318,7 +336,7 @@ bool ChannelEngineI2S::beginTransmission(fl::span<const ChannelDataPtr> channelD
             // Wait for in-flight DMA to complete before touching buffers
             task::run(250, task::ExecFlags::SYSTEM);
         }
-        mBusy = false;
+        mBusy.store(false, fl::memory_order_release);
 
         // Free old buffers
         for (int i = 0; i < 2; i++) {
@@ -385,6 +403,12 @@ bool ChannelEngineI2S::beginTransmission(fl::span<const ChannelDataPtr> channelD
             FL_WARN("ChannelEngineI2S: Failed to initialize peripheral");
             return false;
         }
+        if (!mPeripheral->registerTransmitCallback(
+                reinterpret_cast<void*>(&isrTransmitDone), this)) { // ok reinterpret cast
+            FL_WARN("ChannelEngineI2S: registerTransmitCallback failed");
+            mPeripheral->deinitialize();
+            return false;
+        }
 
         // Allocate double buffers
         for (int i = 0; i < 2; i++) {
@@ -428,13 +452,13 @@ bool ChannelEngineI2S::beginTransmission(fl::span<const ChannelDataPtr> channelD
         // Wait for previous DMA to finish
         task::run(250, task::ExecFlags::SYSTEM);
     }
-    mBusy = false;
+    mBusy.store(false, fl::memory_order_release);
 
     // Start DMA transfer on the newly-encoded back buffer
-    mBusy = true;
+    mBusy.store(true, fl::memory_order_release);
     int backBuffer = 1 - mFrontBuffer;
     if (!mPeripheral->transmit(mBuffers[backBuffer], mBufferSize)) {
-        mBusy = false;
+        mBusy.store(false, fl::memory_order_release);
         // Clean up on failure - mark channels as not in use
         for (const auto& channel : channelData) {
             channel->setInUse(false);
