@@ -135,11 +135,14 @@ bool deinit_existing_watchdog() FL_NOEXCEPT {
 bool init_task_watchdog(u32 timeout_ms) FL_NOEXCEPT {
     esp_task_wdt_config_t config = {
         .timeout_ms = timeout_ms,
-        .idle_core_mask = (1 << 0),  // Monitor idle task on core 0 (main loop)
+        .idle_core_mask = (1 << 0),  // Also monitor CPU starvation via the idle task.
         .trigger_panic = true         // Trigger panic and reset on timeout
     };
 
     esp_err_t err = esp_task_wdt_init(&config);
+    if (err == ESP_ERR_INVALID_STATE) {
+        err = esp_task_wdt_reconfigure(&config);
+    }
     if (err != ESP_OK) {
         FL_DBG("[WATCHDOG] Failed to initialize (error: " << err << ")");
         return false;
@@ -154,7 +157,7 @@ void log_watchdog_status(u32 timeout_ms, watchdog_callback_t callback) FL_NOEXCE
     if (callback != nullptr) {
         FL_DBG("[WATCHDOG] ℹ️  User callback registered");
     }
-    FL_DBG("[WATCHDOG] ℹ️  Automatically monitors loop() execution - no manual feeding needed");
+    FL_DBG("[WATCHDOG] Monitors the loop task plus idle-task CPU starvation");
 }
 
 

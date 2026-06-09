@@ -64,6 +64,7 @@
 #include "fl/channels/wave8.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/stl/span.h"
+#include "fl/stl/atomic.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/unique_ptr.h"
 #include "platforms/esp/32/drivers/i2s/ii2s_lcd_cam_peripheral.h"
@@ -143,6 +144,8 @@ public:
     /// - Clean up completed transmissions
     DriverState poll() FL_NOEXCEPT override;
 
+    void setPollNeededCallback(PollNeededCallback callback) FL_NOEXCEPT override;
+
     /// @brief Get the driver name for affinity binding
     /// @return "I2S"
     fl::string getName() const FL_NOEXCEPT override { return fl::string::from_literal("I2S"); }
@@ -184,6 +187,10 @@ private:
     /// @param A Input byte array (16 bytes, one per lane)
     /// @param B Output word array (8 uint16_t words for bit-parallel output)
     static void transpose16x1(const u8* A, u16* B) FL_NOEXCEPT;
+
+    static bool FL_IRAM isrTransmitDone(void* panel_io,
+                                        const void* edata,
+                                        void* user_ctx) FL_NOEXCEPT;
 
 private:
     /// @brief Group of channels sharing the same chipset timing
@@ -231,7 +238,8 @@ private:
     size_t mCurrentGroupIndex;               ///< Index of currently transmitting group
 
     /// @brief Transfer state
-    volatile bool mBusy;
+    fl::atomic_bool mBusy;
+    PollNeededCallbackSlot mPollNeededCallback;
     u32 mFrameCounter;
 
     /// @brief Wave8 expansion LUT for current timing configuration

@@ -21,6 +21,7 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/string.h"  // IWYU pragma: keep
 #include "fl/stl/noexcept.h"
+#include "fl/stl/atomic.h"
 
 namespace fl {
 
@@ -47,6 +48,105 @@ FASTLED_SHARED_PTR(ChannelData);
 /// - poll(): Return current hardware state and perform cleanup when complete
 class IChannelDriver {
 public:
+    /// @brief ISR-safe callback handle invoked when the manager should poll again.
+    ///
+    /// ChannelManager installs this callback on every driver and owns the
+    /// corresponding wait primitive. A driver may call it from an ISR when a
+    /// chunk, batch, or transfer changed state. It does not imply READY; it only
+    /// means the manager should wake and poll. Drivers that do not have such a
+    /// signal leave this unused; the manager's timed wait slice is the fallback.
+    struct PollNeededCallback {
+        using Callback = void (*)(void*) FL_NOEXCEPT;
+
+        Callback callback = nullptr;
+        void* context = nullptr;
+
+        constexpr PollNeededCallback() FL_NOEXCEPT = default;
+        constexpr PollNeededCallback(Callback cb, void* ctx) FL_NOEXCEPT
+            : callback(cb), context(ctx) {}
+
+        bool isValid() const FL_NOEXCEPT { return callback != nullptr; }
+        explicit operator bool() const FL_NOEXCEPT { return isValid(); }
+
+        void invoke() const FL_NOEXCEPT {
+            if (callback != nullptr) {
+                callback(context);
+            }
+        }
+    };
+
+    /// @brief ISR-safe storage for a poll-needed callback handle.
+    ///
+    /// Task context installs or clears the handle. ISR context calls invoke().
+    /// The callback/context pair is published as one immutable snapshot pointer
+    /// so an ISR cannot observe a function from one registration and a context
+    /// from another.
+    class PollNeededCallbackSlot {
+      private:
+        struct Snapshot {
+            explicit Snapshot(PollNeededCallback cb) FL_NOEXCEPT
+                : callback(cb), next(nullptr) {}
+
+            PollNeededCallback callback;
+            Snapshot* next;
+        };
+
+      public:
+        PollNeededCallbackSlot() FL_NOEXCEPT
+            : mSnapshot(nullptr), mRetired(nullptr) {}
+
+        ~PollNeededCallbackSlot() FL_NOEXCEPT {
+            Snapshot* active =
+                mSnapshot.exchange(nullptr, fl::memory_order_acq_rel);
+            destroySnapshots(active);
+            destroySnapshots(mRetired);
+            mRetired = nullptr;
+        }
+
+        void set(PollNeededCallback callback) FL_NOEXCEPT {
+            if (callback.callback == nullptr) {
+                clear();
+                return;
+            }
+            Snapshot* snapshot = new Snapshot(callback); // ok bare allocation
+            retire(mSnapshot.exchange(snapshot, fl::memory_order_acq_rel));
+        }
+
+        void clear() FL_NOEXCEPT {
+            retire(mSnapshot.exchange(nullptr, fl::memory_order_acq_rel));
+        }
+
+        void invoke() const FL_NOEXCEPT {
+            Snapshot* snapshot = mSnapshot.load(fl::memory_order_acquire);
+            if (snapshot == nullptr) {
+                return;
+            }
+            snapshot->callback.invoke();
+        }
+
+      private:
+        void retire(Snapshot* snapshot) FL_NOEXCEPT {
+            if (snapshot == nullptr) {
+                return;
+            }
+            // An ISR may already have loaded this pointer, so reclaim only when
+            // the slot is destroyed and driver teardown has quiesced callbacks.
+            snapshot->next = mRetired;
+            mRetired = snapshot;
+        }
+
+        static void destroySnapshots(Snapshot* snapshot) FL_NOEXCEPT {
+            while (snapshot != nullptr) {
+                Snapshot* next = snapshot->next;
+                delete snapshot; // ok bare allocation
+                snapshot = next;
+            }
+        }
+
+        fl::atomic<Snapshot*> mSnapshot;
+        Snapshot* mRetired;
+    };
+
     /// @brief Driver capabilities
     struct Capabilities {
         bool supportsClockless;  ///< Supports clockless protocols (WS2812, SK6812, etc.)
@@ -131,20 +231,22 @@ public:
     bool waitForReady(u32 timeoutMs = 1000) FL_NOEXCEPT;
     bool waitForReadyOrDraining(u32 timeoutMs = 1000) FL_NOEXCEPT;
 
+    /// @brief Install the manager-owned poll-needed callback for ISR wakeups.
+    ///
+    /// Implementations that can signal from an ISR should store this callback
+    /// and invoke it after updating their own state. Implementations without
+    /// such a signal can ignore it; the manager will still make progress via
+    /// bounded timeout slices.
+    virtual void setPollNeededCallback(PollNeededCallback callback) FL_NOEXCEPT {
+        (void)callback;
+    }
+
     /// @brief Block until this driver finishes any in-flight transmit.
     ///
-    /// Phase 2 of #2815: drivers that have an ISR-driven completion
-    /// primitive (semaphore, IDF wait-all-done call, event-group) should
-    /// override this to block directly on it. The default delegates to
-    /// `waitForReady(timeoutMs)` so unmigrated drivers (and all bare-metal
-    /// / non-FreeRTOS targets) continue to work via the tiered-spin path
-    /// from Phase 1 (#2818).
-    ///
-    /// `ChannelManager::waitForReady()` short-circuits to
-    /// `driver->waitDone(timeoutMs)` when exactly one driver is BUSY,
-    /// bypassing the spin tier entirely on the single-driver fast path.
-    /// The wait then wakes precisely when the DMA-done ISR fires
-    /// (~microseconds) instead of paying the 250 us spin budget.
+    /// Compatibility hook for older direct-driver call sites. ChannelManager
+    /// does not use per-driver wait primitives for its aggregate wait; it owns
+    /// a single poll-needed wait signal and polls all active drivers after each
+    /// signal or timeout slice.
     ///
     /// @param timeoutMs Optional timeout in milliseconds (0 = no timeout)
     /// @return true if driver became READY, false if timeout occurred

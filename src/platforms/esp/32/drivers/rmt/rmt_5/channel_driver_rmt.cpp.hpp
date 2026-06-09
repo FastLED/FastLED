@@ -130,6 +130,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     // Testing constructor: Inject peripheral
     explicit ChannelEngineRMTImpl(IRMT5Peripheral& peripheral) FL_NOEXCEPT
         : mPeripheral(peripheral),
+          mPollNeededCallback(),
           mDMAChannelsInUse(0), mAllocationFailed(false),
           mMemoryReductionOffset(0),
           mConsecutiveAllocationFailures(0), mRecoveryWarningShown(false) {
@@ -251,7 +252,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
             activeCount++;
             anyActive = true;
 
-            if (ch.transmissionComplete) {
+            if (ch.transmissionComplete.load(fl::memory_order_acquire)) {
                 completedCount++;
                 FL_LOG_RMT("Channel on pin " << ch.pin
                                              << " completed transmission");
@@ -308,14 +309,71 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         return state;
     }
 
+    void setPollNeededCallback(PollNeededCallback callback) FL_NOEXCEPT override {
+        mPollNeededCallback.set(callback);
+    }
+
   private:
     /// @brief RMT channel state (replaces RmtWorkerSimple)
     struct ChannelState {
+        ChannelState() FL_NOEXCEPT
+            : owner(nullptr),
+              channel(nullptr),
+              encoder(nullptr),
+              pin(0),
+              timing{},
+              transmissionComplete(false),
+              inUse(false),
+              useDMA(false),
+              reset_us(0),
+              pooledBuffer(),
+              memoryChannelId(0) {}
+
+        ChannelState(const ChannelState& other) FL_NOEXCEPT
+            : owner(other.owner),
+              channel(other.channel),
+              encoder(other.encoder),
+              pin(other.pin),
+              timing(other.timing),
+              transmissionComplete(other.transmissionComplete.load(fl::memory_order_acquire)),
+              inUse(other.inUse),
+              useDMA(other.useDMA),
+              reset_us(other.reset_us),
+              pooledBuffer(other.pooledBuffer),
+              memoryChannelId(other.memoryChannelId) {}
+
+        ChannelState& operator=(const ChannelState& other) FL_NOEXCEPT {
+            if (this != &other) {
+                owner = other.owner;
+                channel = other.channel;
+                encoder = other.encoder;
+                pin = other.pin;
+                timing = other.timing;
+                transmissionComplete.store(
+                    other.transmissionComplete.load(fl::memory_order_acquire),
+                    fl::memory_order_release);
+                inUse = other.inUse;
+                useDMA = other.useDMA;
+                reset_us = other.reset_us;
+                pooledBuffer = other.pooledBuffer;
+                memoryChannelId = other.memoryChannelId;
+            }
+            return *this;
+        }
+
+        ChannelState(ChannelState&& other) FL_NOEXCEPT
+            : ChannelState(static_cast<const ChannelState&>(other)) {}
+
+        ChannelState& operator=(ChannelState&& other) FL_NOEXCEPT {
+            return operator=(static_cast<const ChannelState&>(other));
+        }
+
+        ChannelEngineRMTImpl* owner;
         void* channel;  // Opaque channel handle (matches IRMT5Peripheral interface)
         void* encoder;  // Encoder handle from peripheral interface (prevents race conditions)
         int pin;        // GPIO pin number (platform-agnostic)
         ChipsetTiming timing;
-        volatile bool transmissionComplete;
+        fl::atomic_bool transmissionComplete;
         bool inUse;
         bool useDMA; // Whether this channel uses DMA
         u32 reset_us;
@@ -702,7 +760,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
                 state->pin = pin;
                 state->timing = timing;
                 state->useDMA = true;
-                state->transmissionComplete = false;
+                state->transmissionComplete.store(false, fl::memory_order_release);
 
                 // Create encoder for this DMA channel
                 state->encoder = mPeripheral.createEncoder(timing, FASTLED_RMT5_CLOCK_HZ);
@@ -827,7 +885,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
         state->pin = pin;
         state->timing = timing;
         state->useDMA = false; // Non-DMA channel
-        state->transmissionComplete = false;
+        state->transmissionComplete.store(false, fl::memory_order_release);
 
         // Create encoder for this channel
         state->encoder = mPeripheral.createEncoder(timing, FASTLED_RMT5_CLOCK_HZ);
@@ -974,7 +1032,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
         // Update timing
         state->timing = timing;
-        state->transmissionComplete = false;
+        state->transmissionComplete.store(false, fl::memory_order_release);
     }
 
     /// @brief Process pending channels that couldn't be started earlier
@@ -1007,7 +1065,7 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
 
             // Start transmission
             channel->reset_us = pending.reset_us;
-            channel->transmissionComplete = false;
+            channel->transmissionComplete.store(false, fl::memory_order_release);
 
             // Acquire buffer from pool (PSRAM -> DRAM/DMA transfer)
             // Note: dataSize already retrieved earlier for channel acquisition
@@ -1268,6 +1326,9 @@ class ChannelEngineRMTImpl : public ChannelEngineRMT {
     /// @brief Peripheral interface (real or mock)
     IRMT5Peripheral& mPeripheral;
 
+    /// @brief Manager-owned callback signaled from TX-done ISR.
+    PollNeededCallbackSlot mPollNeededCallback;
+
     /// @brief All RMT channels (active and idle)
     fl::vector_inlined<ChannelState, 16> mChannels;
 
@@ -1412,7 +1473,7 @@ void ChannelEngineRMTImpl::releaseChannel(ChannelState *channel) FL_NOEXCEPT {
     }
 
     channel->inUse = false;
-    channel->transmissionComplete = false;
+    channel->transmissionComplete.store(false, fl::memory_order_release);
 
     // NOTE: Removed GPIO reconfiguration to InputPulldown
     // This was breaking RMT's GPIO matrix routing on ESP32-S3.
@@ -1427,6 +1488,7 @@ bool ChannelEngineRMTImpl::registerChannelCallback(ChannelState *state) FL_NOEXC
     FL_ASSERT(state != nullptr, "registerChannelCallback called with nullptr");
     FL_ASSERT(state->channel != nullptr,
               "registerChannelCallback called with null channel");
+    state->owner = this;
 
     // Register transmission completion callback
     // CRITICAL: state pointer must be stable (not on stack, not subject to
@@ -1577,9 +1639,12 @@ bool IRAM_ATTR ChannelEngineRMTImpl::transmitDoneCallback(
 
     // Mark transmission as complete (polled by main thread)
     // NOTE: This flag triggers releaseChannel(), which performs hardware wait
-    state->transmissionComplete = true;
+    state->transmissionComplete.store(true, fl::memory_order_release);
+    if (state->owner != nullptr) {
+        state->owner->mPollNeededCallback.invoke();
+    }
 
-    // Non-blocking design - no semaphore signal needed
+    // Non-blocking design - the manager-owned callback performs any wakeup.
     return false; // No task switch needed
 }
 

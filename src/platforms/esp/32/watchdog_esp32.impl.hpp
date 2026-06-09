@@ -22,10 +22,13 @@
 #include "fl/wdt/watchdog.h"
 #include "platforms/esp/32/watchdog_esp32.h"
 
-extern "C" {
-#include "esp_system.h"   // esp_reset_reason()
 #include "esp_idf_version.h"
-}
+#include "esp_system.h"   // esp_reset_reason()
+#include "esp_task_wdt.h"
+// IWYU pragma: begin_keep
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+// IWYU pragma: end_keep
 
 #define FL_WATCHDOG_HAS_HARDWARE
 #define FL_WATCHDOG_PERSIST_BYTES 16
@@ -50,6 +53,8 @@ struct Esp32WatchdogState {
     fl::u8     persist[FL_WATCHDOG_PERSIST_BYTES] = {0};
     bool       armed = false;
     fl::u32    armed_timeout_ms = 0;
+    void*      monitored_task = nullptr;  // TaskHandle_t; stored as void* to keep this state POD-like.
+    bool       monitored_task_added = false;
     ResetCause cached_cause = ResetCause::UNKNOWN;
     bool       cause_cached = false;
 
@@ -85,6 +90,82 @@ inline ResetCause translateEsp32ResetReason(esp_reset_reason_t r) {
     }
 }
 
+inline TaskHandle_t esp32MonitoredTask() {
+    return static_cast<TaskHandle_t>(esp32WatchdogState().monitored_task);
+}
+
+inline bool esp32SubscribeCurrentTask() {
+    if (xTaskGetSchedulerState() != taskSCHEDULER_RUNNING) {
+        return false;
+    }
+
+    TaskHandle_t current_task = xTaskGetCurrentTaskHandle();
+    if (current_task == nullptr) {
+        return false;
+    }
+
+    auto& s = esp32WatchdogState();
+    if (s.monitored_task == current_task && s.monitored_task != nullptr) {
+        (void)esp_task_wdt_reset();
+        return true;
+    }
+
+    if (s.monitored_task != nullptr && s.monitored_task_added) {
+        (void)esp_task_wdt_delete(esp32MonitoredTask());
+    }
+    s.monitored_task = nullptr;
+    s.monitored_task_added = false;
+
+    esp_err_t status = esp_task_wdt_status(current_task);
+    if (status == ESP_OK) {
+        s.monitored_task = current_task;
+        s.monitored_task_added = false;
+        (void)esp_task_wdt_reset();
+        return true;
+    }
+
+    if (status == ESP_ERR_INVALID_STATE) {
+        return false;
+    }
+
+    esp_err_t err = esp_task_wdt_add(current_task);
+    if (err != ESP_OK) {
+        return false;
+    }
+
+    s.monitored_task = current_task;
+    s.monitored_task_added = true;
+    (void)esp_task_wdt_reset();
+    return true;
+}
+
+inline void esp32ResetMonitoredTask() {
+    auto& s = esp32WatchdogState();
+    if (!s.armed || s.monitored_task == nullptr) {
+        return;
+    }
+    if (xTaskGetSchedulerState() != taskSCHEDULER_RUNNING) {
+        return;
+    }
+    if (xTaskGetCurrentTaskHandle() != esp32MonitoredTask()) {
+        return;
+    }
+    (void)esp_task_wdt_reset();
+}
+
+inline bool esp32UnsubscribeMonitoredTask() {
+    auto& s = esp32WatchdogState();
+    if (s.monitored_task != nullptr && s.monitored_task_added) {
+        esp_err_t err = esp_task_wdt_delete(esp32MonitoredTask());
+        if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+            return false;
+        }
+    }
+    s.monitored_task = nullptr;
+    s.monitored_task_added = false;
+    return true;
+}
+
 } // namespace platforms
 
 // `Watchdog::instance()` is defined here (and in every sibling `.impl.hpp` /
@@ -102,12 +183,12 @@ void Watchdog::begin(fl::u32 timeout_ms) FL_NOEXCEPT {
     auto& s = platforms::esp32WatchdogState();
     s.armed_timeout_ms = timeout_ms;
     fl::watchdog_setup(timeout_ms);
+    (void)platforms::esp32SubscribeCurrentTask();
     s.armed = true;
 }
 
 void Watchdog::feed() FL_NOEXCEPT {
-    // ESP32 framework auto-feeds via idle-task monitoring (see watchdog_esp32_idf{4,5}.hpp).
-    // No-op here; loop() liveness alone keeps the TWDT happy.
+    platforms::esp32ResetMonitoredTask();
 }
 
 void Watchdog::disable() FL_NOEXCEPT {
@@ -121,6 +202,7 @@ void Watchdog::disable() FL_NOEXCEPT {
     // can reason about its prior state.
     auto& s = platforms::esp32WatchdogState();
     if (fl::watchdog_disable()) {
+        (void)platforms::esp32UnsubscribeMonitoredTask();
         s.armed = false;
         s.armed_timeout_ms = 0;
     }
@@ -186,6 +268,7 @@ bool Watchdog::onTimeout(WatchdogTimeoutCallback cb, void* user_data) FL_NOEXCEP
     auto& s = platforms::esp32WatchdogState();
     fl::u32 timeout_ms = s.armed_timeout_ms != 0 ? s.armed_timeout_ms : 5000u;
     fl::watchdog_setup(timeout_ms, cb, user_data);
+    (void)platforms::esp32SubscribeCurrentTask();
     s.armed = true;
     s.armed_timeout_ms = timeout_ms;
     return true;

@@ -84,6 +84,8 @@ public:
      */
     virtual DriverState poll() FL_NOEXCEPT override = 0;
 
+    virtual void setPollNeededCallback(PollNeededCallback callback) FL_NOEXCEPT override = 0;
+
     /**
      * @brief Get the driver name for affinity binding
      * @return "RMT"

@@ -808,6 +808,7 @@ ESP32_C6_DEVKITC_1 = Board(
         "-funwind-tables",  # Better stack traces for RISC-V crash decoding
         "-DARDUINO_USB_MODE=1",  # Select HWCDC (USB-Serial/JTAG) over OTG
         "-DARDUINO_USB_CDC_ON_BOOT=1",  # Route Serial to HWCDC. Safe with setTxTimeoutMs(0); see #2668
+        "-DARDUINO_LOOP_STACK_SIZE=16384",  # AutoResearch PARLIO init plus JSON-RPC exceeds the Arduino 8KB default on C6
     ],
 )
 
@@ -819,6 +820,11 @@ ESP32_S3_DEVKITC_1 = Board(
     board_build_flash_size="4MB",  # Set to 4MB for QEMU compatibility (default is 8MB)
     board_partitions="huge_app.csv",  # 3MB app partition (default.csv only has 1.25MB, too small for Validation)
     build_unflags=["-DFASTLED_RMT5=0", "-DFASTLED_RMT5"],
+    build_flags=[
+        "-DARDUINO_USB_MODE=1",  # Route Serial over native USB for AutoResearch RPC on the upload port
+        "-DARDUINO_USB_CDC_ON_BOOT=1",
+        "-DARDUINO_LOOP_STACK_SIZE=16384",  # AutoResearch RPC plus ESP driver setup is deep enough to exceed the Arduino 8KB default
+    ],
 )
 
 ESP32_S2_DEVKITM_1 = Board(

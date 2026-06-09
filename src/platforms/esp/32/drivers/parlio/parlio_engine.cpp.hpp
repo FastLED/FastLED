@@ -342,6 +342,7 @@ ParlioEngine::ParlioEngine() FL_NOEXCEPT
       mSpiClockHz(0),
       mIsrContext(),
       mMainTaskHandle(nullptr),
+      mPollNeededCallback(),
       mRingBuffer(),
       mRingBufferCapacity(0),
       mScratchBuffer(nullptr),
@@ -390,9 +391,8 @@ ParlioEngine::~ParlioEngine() {
     if (mDebugTask.is_valid()) {
         // Signal task to exit by setting flags to false (task checks: while (mTransmitting || mStreamComplete))
         if (mIsrContext) {
-            mIsrContext->mTransmitting = false;
-            mIsrContext->mStreamComplete = false;  // Ensure loop exits (both conditions false)
-            FL_MEMORY_BARRIER;
+            mIsrContext->mTransmitting.store(false, fl::memory_order_release);
+            mIsrContext->mStreamComplete.store(false, fl::memory_order_release);
         }
         // Give task time to self-delete (task calls fl::task::exit_current() at end)
         // Task sleeps for 500ms, so we need to wait at least 500ms for it to wake up and check flags
@@ -421,6 +421,10 @@ ParlioEngine& ParlioEngine::getInstance() FL_NOEXCEPT {
     return fl::Singleton<ParlioEngine>::instance();
 }
 
+void ParlioEngine::setPollNeededCallback(IChannelDriver::PollNeededCallback callback) FL_NOEXCEPT {
+    mPollNeededCallback.set(callback);
+}
+
 void ParlioEngine::cleanup() FL_NOEXCEPT {
 #ifdef FL_DEBUG
     // Clean up debug task only - singleton remains alive
@@ -428,9 +432,8 @@ void ParlioEngine::cleanup() FL_NOEXCEPT {
     if (mDebugTask.is_valid()) {
         // Signal task to exit by setting flags to false
         if (mIsrContext) {
-            mIsrContext->mTransmitting = false;
-            mIsrContext->mStreamComplete = false;
-            FL_MEMORY_BARRIER;
+            mIsrContext->mTransmitting.store(false, fl::memory_order_release);
+            mIsrContext->mStreamComplete.store(false, fl::memory_order_release);
         }
         // Give task time to self-delete (task sleeps for 500ms)
         if (mPeripheral) {
@@ -463,14 +466,19 @@ void ParlioEngine::debugTaskFunction(void* arg) FL_NOEXCEPT {
     ParlioIsrContext *ctx = self->mIsrContext.get();
 
     // Loop while transmission is active
-    while (ctx->mTransmitting || ctx->mStreamComplete) {
+    while (ctx->mTransmitting.load(fl::memory_order_acquire) ||
+           ctx->mStreamComplete.load(fl::memory_order_acquire)) {
         // Wait 500ms between prints
         if (self->mPeripheral) {
             self->mPeripheral->delay(500);
         }
 
-        // Memory barrier to ensure we see latest ISR state
-        FL_MEMORY_BARRIER;
+        const bool transmitting =
+            ctx->mTransmitting.load(fl::memory_order_acquire);
+        const bool stream_complete =
+            ctx->mStreamComplete.load(fl::memory_order_acquire);
+        const bool hardware_idle =
+            ctx->mHardwareIdle.load(fl::memory_order_acquire);
 
         // Print ISR debug state (using FL_LOG_PARLIO which is safe from task context)
         FL_LOG_PARLIO("ISR_STATE:"
@@ -478,12 +486,12 @@ void ParlioEngine::debugTaskFunction(void* arg) FL_NOEXCEPT {
                << " worker=" << ctx->mDebugWorkerIsrCount
                << " ring_count=" << ctx->mRingCount
                << " bytes_tx=" << ctx->mBytesTransmitted << "/" << ctx->mTotalBytes
-               << " transmitting=" << (ctx->mTransmitting ? "YES" : "NO")
-               << " complete=" << (ctx->mStreamComplete ? "YES" : "NO")
-               << " hw_idle=" << (ctx->mHardwareIdle ? "YES" : "NO"));
+               << " transmitting=" << (transmitting ? "YES" : "NO")
+               << " complete=" << (stream_complete ? "YES" : "NO")
+               << " hw_idle=" << (hardware_idle ? "YES" : "NO"));
 
         // Check for ring buffer underrun (CRITICAL ERROR per LOOP.md)
-        if (ctx->mHardwareIdle && ctx->mRingCount == 0 && ctx->mTransmitting) {
+        if (hardware_idle && ctx->mRingCount == 0 && transmitting) {
             FL_ERROR("PARLIO: BUFFER UNDERRUN DETECTED - Hardware idle with empty ring during transmission"
                     << " | bytes_tx=" << ctx->mBytesTransmitted << "/" << ctx->mTotalBytes);
             // DO NOT restart PARLIO - per LOOP.md this is a critical error
@@ -492,7 +500,7 @@ void ParlioEngine::debugTaskFunction(void* arg) FL_NOEXCEPT {
         }
 
         // Exit if transmission complete
-        if (ctx->mStreamComplete && !ctx->mTransmitting) {
+        if (stream_complete && !transmitting) {
             break;
         }
     }
@@ -595,17 +603,17 @@ ParlioEngine::txDoneCallback(void* tx_unit,
         // Overflow can happen due to LED boundary rounding, but we still need to complete
         if (ctx->mBytesTransmitted >= ctx->mTotalBytes) {
             // All data transmitted - mark transmission complete
-            ctx->mStreamComplete = true;
-            ctx->mTransmitting = false;
-            ctx->mTransmissionActive = false;
-            ctx->mHardwareIdle = false;
+            ctx->mTransmissionActive.store(false, fl::memory_order_release);
+            ctx->mHardwareIdle.store(false, fl::memory_order_release);
             ctx->mEndTimeUs = ctx->mDebugLastTxDoneTime;
 
             // SAFETY CHECK: Detect byte overflow (tolerate small overflows from LED rounding)
             // Flag overflow for debugging, but don't prevent completion
             if (ctx->mBytesTransmitted > ctx->mTotalBytes) {
-                ctx->mRingError = true;  // Flag overflow for debugging
+                ctx->mRingError.store(true, fl::memory_order_release);
             }
+            ctx->mStreamComplete.store(true, fl::memory_order_release);
+            self->mPollNeededCallback.invoke();
 
             // ASYNC MODE: No task notifications
             // - Worker task was removed (uses timer ISR instead)
@@ -616,7 +624,7 @@ ParlioEngine::txDoneCallback(void* tx_unit,
         }
 
         // Ring empty but more data pending - call worker function directly
-        ctx->mHardwareIdle = true; // Signal that hardware needs restart
+        ctx->mHardwareIdle.store(true, fl::memory_order_release);
         ctx->mUnderrunCount = ctx->mUnderrunCount + 1;
 
         // ONE-SHOT PATTERN: Call worker function directly to populate next buffer
@@ -633,7 +641,7 @@ ParlioEngine::txDoneCallback(void* tx_unit,
 
     // Invalid buffer - set error flag
     if (!buffer_ptr || buffer_size == 0) {
-        ctx->mRingError = true;
+        ctx->mRingError.store(true, fl::memory_order_release);
         return false;
     }
 
@@ -651,7 +659,7 @@ ParlioEngine::txDoneCallback(void* tx_unit,
         // This is the SAME race documented in workerIsrCallback (line 830), viewed from txDone's perspective.
         // See detailed safety analysis there. Summary: bounded, self-correcting, no buffer corruption.
         ctx->mRingCount = ctx->mRingCount - 1;
-        ctx->mHardwareIdle = false; // Hardware is active again
+        ctx->mHardwareIdle.store(false, fl::memory_order_release);
 
         // ONE-SHOT PATTERN: Call worker function directly if more buffers needed
         // This eliminates the 50µs periodic timer overhead
@@ -668,7 +676,7 @@ ParlioEngine::txDoneCallback(void* tx_unit,
         return false; // No tasks woken
     } else {
         // Submission failed - set error flag for CPU to detect
-        ctx->mRingError = true;
+        ctx->mRingError.store(true, fl::memory_order_release);
     }
 
     return false; // No high-priority task woken
@@ -1303,7 +1311,7 @@ ParlioEngine::populateNextDMABuffer() FL_NOEXCEPT {
     mIsrContext->mRingCount = mIsrContext->mRingCount + 1;
 
     // CRITICAL: Check if hardware went idle while we were populating
-    if (mIsrContext->mHardwareIdle) {
+    if (mIsrContext->mHardwareIdle.load(fl::memory_order_acquire)) {
         // Get the buffer that was just populated (read_idx points to next buffer to transmit)
         size_t buffer_idx = mIsrContext->mRingReadIdx;
         u8 *buffer_ptr = mRingBuffer->ptrs[buffer_idx];  // Use cached pointer for optimization
@@ -1317,8 +1325,8 @@ ParlioEngine::populateNextDMABuffer() FL_NOEXCEPT {
                 // Successfully restarted - advance read index and decrement count
                 mIsrContext->mRingReadIdx = (mIsrContext->mRingReadIdx + 1) % ParlioRingBuffer3::RING_BUFFER_COUNT;
                 mIsrContext->mRingCount = mIsrContext->mRingCount - 1;
-                mIsrContext->mHardwareIdle = false;
-                mIsrContext->mTransmitting = true;
+                mIsrContext->mHardwareIdle.store(false, fl::memory_order_release);
+                mIsrContext->mTransmitting.store(true, fl::memory_order_release);
             } else {
                 //FL_WARN("PARLIO CPU: Failed to restart hardware: " << err);
                 mErrorOccurred = true;
@@ -1603,8 +1611,8 @@ bool ParlioEngine::initialize(size_t dataWidth,
 
     // Initialize ISR context state
     if (mIsrContext) {
-        mIsrContext->mTransmitting = false;
-        mIsrContext->mStreamComplete = false;
+        mIsrContext->mTransmitting.store(false, fl::memory_order_release);
+        mIsrContext->mStreamComplete.store(false, fl::memory_order_release);
         mIsrContext->mCurrentByte = 0;
         mIsrContext->mTotalBytes = 0;
     }
@@ -1732,8 +1740,8 @@ bool ParlioEngine::initializeSpi(const fl::vector<int>& pins,
 
     // Initialize ISR context state
     if (mIsrContext) {
-        mIsrContext->mTransmitting = false;
-        mIsrContext->mStreamComplete = false;
+        mIsrContext->mTransmitting.store(false, fl::memory_order_release);
+        mIsrContext->mStreamComplete.store(false, fl::memory_order_release);
         mIsrContext->mCurrentByte = 0;
         mIsrContext->mTotalBytes = 0;
     }
@@ -1838,7 +1846,7 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
     }
 
     // Check if already transmitting
-    if (mIsrContext->mTransmitting) {
+    if (mIsrContext->mTransmitting.load(fl::memory_order_acquire)) {
         FL_LOG_PARLIO("PARLIO_TX: FAILED - transmission already in progress");
         FL_LOG_PARLIO("PARLIO: Transmission already in progress");
         return false;
@@ -1884,16 +1892,16 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
     mIsrContext->mTotalBytes = mLaneStride;
     mIsrContext->mNumLanes = numLanes;
     mIsrContext->mCurrentByte = 0;
-    mIsrContext->mStreamComplete = false;
+    mIsrContext->mStreamComplete.store(false, fl::memory_order_release);
     mErrorOccurred = false;
-    mIsrContext->mTransmitting = false; // Will be set to true after first buffer submitted
+    mIsrContext->mTransmitting.store(false, fl::memory_order_release);
 
     // Initialize ring buffer indices and count
     mIsrContext->mRingReadIdx = 0;
     mIsrContext->mRingWriteIdx = 0;
     mIsrContext->mRingCount = 0;
-    mIsrContext->mRingError = false;
-    mIsrContext->mHardwareIdle = false;
+    mIsrContext->mRingError.store(false, fl::memory_order_release);
+    mIsrContext->mHardwareIdle.store(false, fl::memory_order_release);
     mIsrContext->mUnderrunCount = 0;
     mIsrContext->mNextByteOffset = 0;
 
@@ -1901,7 +1909,7 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
     mIsrContext->mIsrCount = 0;
     mIsrContext->mBytesTransmitted = 0;
     mIsrContext->mChunksCompleted = 0;
-    mIsrContext->mTransmissionActive = true;
+    mIsrContext->mTransmissionActive.store(true, fl::memory_order_release);
     mIsrContext->mEndTimeUs = 0;
 
     // Initialize debug counters
@@ -1963,7 +1971,7 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
 
     // CRITICAL FIX: Mark transmission started BEFORE submitting buffer
     // This closes the race window where txDoneCallback could fire before flag is set (Issue #2)
-    mIsrContext->mTransmitting = true;
+    mIsrContext->mTransmitting.store(true, fl::memory_order_release);
 
     // CRITICAL FIX (Iteration 2): Advance read index BEFORE submitting first buffer
     // This prevents race condition where txDone fires before index is advanced
@@ -1974,7 +1982,7 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
 
     if (!mPeripheral->transmit(mRingBuffer->ptrs[0], first_buffer_size * 8, 0x0000)) {
         FL_LOG_PARLIO("PARLIO: Failed to queue first buffer");
-        mIsrContext->mTransmitting = false;  // Rollback flag on error
+        mIsrContext->mTransmitting.store(false, fl::memory_order_release);
         mIsrContext->mRingReadIdx = 0;  // Rollback index on error
         mIsrContext->mRingCount = buffers_populated;  // Rollback count on error
         mErrorOccurred = true;
@@ -2040,9 +2048,10 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
     // Real hardware uses async mode where caller polls via poll() method
     #ifdef FASTLED_STUB_IMPL
     // Block until transmission completes by polling
-    FL_LOG_PARLIO("PARLIO STUB: Entering polling loop - totalBytes=" << totalBytes << " streamComplete=" << mIsrContext->mStreamComplete);
+    FL_LOG_PARLIO("PARLIO STUB: Entering polling loop - totalBytes=" << totalBytes
+                   << " streamComplete=" << mIsrContext->mStreamComplete.load(fl::memory_order_acquire));
     size_t poll_iterations = 0;
-    while (!mIsrContext->mStreamComplete && !mErrorOccurred) {
+    while (!mIsrContext->mStreamComplete.load(fl::memory_order_acquire) && !mErrorOccurred) {
         ParlioEngineState state = poll();
         poll_iterations++;
 
@@ -2050,8 +2059,8 @@ bool ParlioEngine::beginTransmission(const u8* scratchBuffer,
             FL_LOG_PARLIO("PARLIO STUB: Poll iteration " << poll_iterations
                    << " - bytesTransmitted=" << mIsrContext->mBytesTransmitted
                    << "/" << mIsrContext->mTotalBytes
-                   << " streamComplete=" << mIsrContext->mStreamComplete
-                   << " transmitting=" << mIsrContext->mTransmitting
+                   << " streamComplete=" << mIsrContext->mStreamComplete.load(fl::memory_order_acquire)
+                   << " transmitting=" << mIsrContext->mTransmitting.load(fl::memory_order_acquire)
                    << " ringCount=" << mIsrContext->mRingCount
                    << " txDone=" << mIsrContext->mDebugTxDoneCount
                    << " worker=" << mIsrContext->mDebugWorkerIsrCount);
@@ -2112,22 +2121,19 @@ ParlioEngineState ParlioEngine::poll() FL_NOEXCEPT {
     // Check for errors
     if (mErrorOccurred) {
         FL_LOG_PARLIO("PARLIO: Error occurred during transmission");
-        mIsrContext->mTransmitting = false;
+        mIsrContext->mTransmitting.store(false, fl::memory_order_release);
         mErrorOccurred = false;
         return ParlioEngineState::ERROR;
     }
 
     // Check if streaming is complete
-    if (mIsrContext->mStreamComplete) {
-        // Execute memory barrier to synchronize all ISR writes
-        FL_MEMORY_BARRIER;
-
-        // Clear completion flags
-        mIsrContext->mTransmitting = false;
-        mIsrContext->mStreamComplete = false;
-
+    if (mIsrContext->mStreamComplete.load(fl::memory_order_acquire)) {
         // Wait for final chunk to complete (non-blocking poll)
         if (mPeripheral->waitAllDone(0)) {
+            // Clear completion flags only once the peripheral is truly idle.
+            mIsrContext->mTransmitting.store(false, fl::memory_order_release);
+            mIsrContext->mStreamComplete.store(false, fl::memory_order_release);
+
             // All transmissions complete - disable peripheral (only if currently enabled)
             if (mTxUnitEnabled) {
                 if (!mPeripheral->disable()) {
@@ -2148,7 +2154,7 @@ ParlioEngineState ParlioEngine::poll() FL_NOEXCEPT {
     }
 
     // If not transmitting, we're ready
-    if (!mIsrContext->mTransmitting) {
+    if (!mIsrContext->mTransmitting.load(fl::memory_order_acquire)) {
         return ParlioEngineState::READY;
     }
 
@@ -2165,7 +2171,7 @@ bool ParlioEngine::isTransmitting() const FL_NOEXCEPT {
     if (!mIsrContext) {
         return false;
     }
-    return mIsrContext->mTransmitting;
+    return mIsrContext->mTransmitting.load(fl::memory_order_acquire);
 }
 
 ParlioDebugMetrics ParlioEngine::getDebugMetrics() const FL_NOEXCEPT {
@@ -2175,8 +2181,8 @@ ParlioDebugMetrics ParlioEngine::getDebugMetrics() const FL_NOEXCEPT {
         return metrics;
     }
 
-    // Execute memory barrier to ensure all ISR writes are visible
-    FL_MEMORY_BARRIER;
+    (void)mIsrContext->mStreamComplete.load(fl::memory_order_acquire);
+    (void)mIsrContext->mTransmitting.load(fl::memory_order_acquire);
 
     metrics.mStartTimeUs = 0; // Not tracked yet
     metrics.mEndTimeUs = mIsrContext->mEndTimeUs;
@@ -2190,9 +2196,10 @@ ParlioDebugMetrics ParlioEngine::getDebugMetrics() const FL_NOEXCEPT {
     metrics.mUnderrunCount = mIsrContext->mUnderrunCount;
     metrics.mRingCount = mIsrContext->mRingCount;
     metrics.mErrorCode = mErrorOccurred ? 1 : 0;
-    metrics.mRingError = mIsrContext->mRingError;
-    metrics.mHardwareIdle = mIsrContext->mHardwareIdle;
-    metrics.mTransmissionActive = mIsrContext->mTransmissionActive;
+    metrics.mRingError = mIsrContext->mRingError.load(fl::memory_order_acquire);
+    metrics.mHardwareIdle = mIsrContext->mHardwareIdle.load(fl::memory_order_acquire);
+    metrics.mTransmissionActive =
+        mIsrContext->mTransmissionActive.load(fl::memory_order_acquire);
 
     return metrics;
 }

@@ -50,6 +50,11 @@ public:
         __atomic_store_n(&mValue, value, order);
     }
 
+    // Exchange operation - atomically replaces the value and returns the old value
+    T exchange(T value, int order = memory_order_acq_rel) FL_NOEXCEPT {
+        return __atomic_exchange_n(&mValue, value, order);
+    }
+
     // Pre-increment: ++atomic
     // Returns the NEW value after increment
     T operator++() {

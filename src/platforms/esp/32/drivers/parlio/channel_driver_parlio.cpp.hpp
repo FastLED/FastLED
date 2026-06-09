@@ -289,6 +289,10 @@ IChannelDriver::DriverState ChannelDriverPARLIOImpl::poll() FL_NOEXCEPT {
     }
 }
 
+void ChannelDriverPARLIOImpl::setPollNeededCallback(PollNeededCallback callback) FL_NOEXCEPT {
+    mDriver.setPollNeededCallback(callback);
+}
+
 //=============================================================================
 // Private Methods - Transmission
 //=============================================================================
@@ -433,6 +437,7 @@ void ChannelDriverPARLIOImpl::prepareScratchBuffer(
 ChannelDriverPARLIO::ChannelDriverPARLIO() FL_NOEXCEPT
     : mCurrentDataWidth(0),
       mPhase(TransmitPhase::IDLE),
+      mPollNeededCallback(),
       mCurrentSpiChannelIndex(0),
       mSpiInitialized(false) {}
 
@@ -559,6 +564,14 @@ IChannelDriver::DriverState ChannelDriverPARLIO::poll() FL_NOEXCEPT {
     }
 }
 
+void ChannelDriverPARLIO::setPollNeededCallback(PollNeededCallback callback) FL_NOEXCEPT {
+    mPollNeededCallback = callback;
+    detail::ParlioEngine::getInstance().setPollNeededCallback(mPollNeededCallback);
+    if (mClocklessDriver) {
+        mClocklessDriver->setPollNeededCallback(mPollNeededCallback);
+    }
+}
+
 void ChannelDriverPARLIO::beginClocklessTransmission(
     fl::span<const ChannelDataPtr> channelData) FL_NOEXCEPT {
     if (channelData.size() == 0) {
@@ -581,6 +594,7 @@ void ChannelDriverPARLIO::beginClocklessTransmission(
     // Create or reconfigure clockless driver
     if (!mClocklessDriver || mCurrentDataWidth != required_width) {
         mClocklessDriver = fl::make_unique<ChannelDriverPARLIOImpl>(required_width);
+        mClocklessDriver->setPollNeededCallback(mPollNeededCallback);
         mCurrentDataWidth = required_width;
     }
 

@@ -106,6 +106,207 @@ fl::json makeResponse(bool success, ReturnCode returnCode, const char* message,
 
 // No forward declarations needed - using one-test-per-RPC architecture
 
+namespace {
+
+uint32_t expectedClocklessWireUs(const fl::ChipsetTimingConfig& timing,
+                                 uint32_t max_leds) {
+    const uint64_t bit_period_ns = timing.total_period_ns();
+    const uint64_t payload_ns =
+        static_cast<uint64_t>(max_leds) * 24ULL * bit_period_ns;
+    return static_cast<uint32_t>((payload_ns + 999ULL) / 1000ULL) +
+           timing.reset_us;
+}
+
+uint32_t maxLaneLeds(const fl::vector<fl::ChannelConfig>& tx_configs) {
+    uint32_t max_leds = 0;
+    for (fl::size i = 0; i < tx_configs.size(); i++) {
+        const uint32_t count =
+            static_cast<uint32_t>(tx_configs[i].mLeds.size());
+        if (count > max_leds) {
+            max_leds = count;
+        }
+    }
+    return max_leds;
+}
+
+class ScopedFastLedBrightness {
+  public:
+    explicit ScopedFastLedBrightness(uint8_t brightness) FL_NOEXCEPT
+        : mSavedBrightness(FastLED.getBrightness()) {
+        FastLED.setBrightness(brightness);
+    }
+
+    ~ScopedFastLedBrightness() FL_NOEXCEPT {
+        FastLED.setBrightness(mSavedBrightness);
+    }
+
+  private:
+    uint8_t mSavedBrightness;
+};
+
+fl::json measureTightTiming(const fl::string& driver_name,
+                            const fl::ChipsetTimingConfig& timing,
+                            const fl::vector<fl::ChannelConfig>& tx_configs,
+                            int iterations,
+                            uint32_t max_allowed_overhead_us,
+                            bool& out_passed) {
+    fl::json metric = fl::json::object();
+    out_passed = false;
+
+    metric.set("requested", true);
+    metric.set("supported", false);
+    metric.set("driver", driver_name.c_str());
+
+    if (iterations < 1) {
+        metric.set("message", "iterations must be >= 1");
+        return metric;
+    }
+    if (tx_configs.empty()) {
+        metric.set("message", "no channel configs");
+        return metric;
+    }
+    for (fl::size i = 0; i < tx_configs.size(); i++) {
+        if (tx_configs[i].isSpi()) {
+            metric.set("message", "clocked SPI timing metric is not supported");
+            return metric;
+        }
+    }
+
+    fl::vector<fl::ChannelConfig> sample_configs = tx_configs;
+    fl::vector<fl::shared_ptr<fl::Channel>> channels;
+    for (fl::size i = 0; i < sample_configs.size(); i++) {
+        fl::ChannelConfig channel_config(
+            sample_configs[i].getDataPin(),
+            timing,
+            sample_configs[i].mLeds,
+            sample_configs[i].rgb_order);
+        fl::shared_ptr<fl::Channel> channel = FastLED.add(channel_config);
+        if (!channel) {
+            FastLED.clear(ClearFlags::CHANNELS);
+            metric.set("message", "failed to create channel");
+            return metric;
+        }
+        channels.push_back(channel);
+    }
+
+    ScopedFastLedBrightness scoped_brightness(255);
+    for (fl::size lane = 0; lane < sample_configs.size(); lane++) {
+        fill_solid(sample_configs[lane].mLeds.data(),
+                   sample_configs[lane].mLeds.size(),
+                   CRGB::Black);
+    }
+    FastLED.show();
+    if (!FastLED.wait(1000)) {
+        FastLED.clear(ClearFlags::CHANNELS);
+        metric.set("message", "warmup wait timeout");
+        return metric;
+    }
+    delay(2);
+
+    const uint32_t expected_wire_us =
+        expectedClocklessWireUs(timing, maxLaneLeds(sample_configs));
+    uint32_t min_show_us = 0xFFFFFFFFu;
+    uint32_t max_show_us = 0;
+    uint32_t min_wait_us = 0xFFFFFFFFu;
+    uint32_t max_wait_us = 0;
+    uint32_t min_total_us = 0xFFFFFFFFu;
+    uint32_t max_total_us = 0;
+    uint32_t min_overhead_us = 0xFFFFFFFFu;
+    uint32_t max_overhead_us = 0;
+    uint64_t sum_show_us = 0;
+    uint64_t sum_wait_us = 0;
+    uint64_t sum_total_us = 0;
+    uint64_t sum_overhead_us = 0;
+    int samples = 0;
+    bool timed_out = false;
+
+    for (int sample = 0; sample < iterations; sample++) {
+        for (fl::size lane = 0; lane < sample_configs.size(); lane++) {
+            const uint8_t r = static_cast<uint8_t>(31 + sample * 17 + lane * 11);
+            const uint8_t g = static_cast<uint8_t>(67 + sample * 23 + lane * 7);
+            const uint8_t b = static_cast<uint8_t>(103 + sample * 29 + lane * 5);
+            fill_solid(sample_configs[lane].mLeds.data(),
+                       sample_configs[lane].mLeds.size(),
+                       CRGB(r, g, b));
+        }
+
+        const uint32_t t0 = micros();
+        FastLED.show();
+        const uint32_t t1 = micros();
+        const bool ok = FastLED.wait(1000);
+        const uint32_t t2 = micros();
+        if (!ok) {
+            timed_out = true;
+            break;
+        }
+
+        const uint32_t show_us = t1 - t0;
+        const uint32_t wait_us = t2 - t1;
+        const uint32_t total_us = t2 - t0;
+        const uint32_t overhead_us =
+            total_us > expected_wire_us ? total_us - expected_wire_us : 0;
+
+        if (show_us < min_show_us) min_show_us = show_us;
+        if (show_us > max_show_us) max_show_us = show_us;
+        if (wait_us < min_wait_us) min_wait_us = wait_us;
+        if (wait_us > max_wait_us) max_wait_us = wait_us;
+        if (total_us < min_total_us) min_total_us = total_us;
+        if (total_us > max_total_us) max_total_us = total_us;
+        if (overhead_us < min_overhead_us) min_overhead_us = overhead_us;
+        if (overhead_us > max_overhead_us) max_overhead_us = overhead_us;
+
+        sum_show_us += show_us;
+        sum_wait_us += wait_us;
+        sum_total_us += total_us;
+        sum_overhead_us += overhead_us;
+        samples++;
+    }
+
+    FastLED.clear(ClearFlags::CHANNELS);
+
+    metric.set("supported", true);
+    metric.set("samples", static_cast<int64_t>(samples));
+    metric.set("iterations", static_cast<int64_t>(iterations));
+    metric.set("expected_wire_us", static_cast<int64_t>(expected_wire_us));
+    metric.set("max_allowed_overhead_us",
+               static_cast<int64_t>(max_allowed_overhead_us));
+
+    if (samples == 0) {
+        metric.set("passed", false);
+        metric.set("message", timed_out ? "timing wait timeout" : "no samples");
+        return metric;
+    }
+
+    metric.set("min_show_us", static_cast<int64_t>(min_show_us));
+    metric.set("max_show_us", static_cast<int64_t>(max_show_us));
+    metric.set("avg_show_us",
+               static_cast<int64_t>(sum_show_us / static_cast<uint64_t>(samples)));
+    metric.set("min_wait_us", static_cast<int64_t>(min_wait_us));
+    metric.set("max_wait_us", static_cast<int64_t>(max_wait_us));
+    metric.set("avg_wait_us",
+               static_cast<int64_t>(sum_wait_us / static_cast<uint64_t>(samples)));
+    metric.set("min_total_us", static_cast<int64_t>(min_total_us));
+    metric.set("max_total_us", static_cast<int64_t>(max_total_us));
+    metric.set("avg_total_us",
+               static_cast<int64_t>(sum_total_us / static_cast<uint64_t>(samples)));
+    metric.set("min_overhead_us", static_cast<int64_t>(min_overhead_us));
+    metric.set("max_overhead_us", static_cast<int64_t>(max_overhead_us));
+    metric.set("avg_overhead_us",
+               static_cast<int64_t>(sum_overhead_us / static_cast<uint64_t>(samples)));
+
+    out_passed = !timed_out && max_overhead_us <= max_allowed_overhead_us;
+    metric.set("passed", out_passed);
+    if (timed_out) {
+        metric.set("message", "timing wait timeout");
+    } else {
+        metric.set("message", out_passed ? "tight timing within budget"
+                                         : "tight timing exceeded budget");
+    }
+    return metric;
+}
+
+} // namespace
+
 // ============================================================================
 // AutoResearchRemoteControl Private Helper Functions
 // ============================================================================
@@ -270,6 +471,39 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         use_legacy_api = config["useLegacyApi"].as_bool().value();
     }
 
+    // 9. Extract tightTiming (optional, default: false)
+    bool measure_tight_timing = false;
+    if (config.contains("tightTiming") && config["tightTiming"].is_bool()) {
+        measure_tight_timing = config["tightTiming"].as_bool().value();
+    }
+
+    int tight_timing_iterations = 8;
+    if (config.contains("tightTimingIterations") &&
+        config["tightTimingIterations"].is_int()) {
+        tight_timing_iterations =
+            static_cast<int>(config["tightTimingIterations"].as_int().value());
+        if (tight_timing_iterations < 1 || tight_timing_iterations > 64) {
+            response.set("success", false);
+            response.set("error", "InvalidTightTimingIterations");
+            response.set("message", "tightTimingIterations must be in [1, 64]");
+            return response;
+        }
+    }
+
+    uint32_t tight_timing_max_overhead_us = 2000;
+    if (config.contains("tightTimingMaxOverheadUs") &&
+        config["tightTimingMaxOverheadUs"].is_int()) {
+        const int max_overhead =
+            static_cast<int>(config["tightTimingMaxOverheadUs"].as_int().value());
+        if (max_overhead < 1) {
+            response.set("success", false);
+            response.set("error", "InvalidTightTimingMaxOverheadUs");
+            response.set("message", "tightTimingMaxOverheadUs must be >= 1");
+            return response;
+        }
+        tight_timing_max_overhead_us = static_cast<uint32_t>(max_overhead);
+    }
+
     // Legacy API: all pins must be in range 0-8 (compile-time template range)
     // Multi-lane uses consecutive pins starting at pin_tx
     if (use_legacy_api) {
@@ -388,6 +622,8 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     bool passed = false;
     uint32_t show_duration_ms = 0;
     fl::vector<fl::RunResult> run_results;
+    fl::json tight_timing_response = fl::json::object();
+    bool tight_timing_passed = true;
 
     {
         // Note: ScopedLogDisable removed to enable diagnostic output during test execution.
@@ -415,6 +651,34 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
         passed = (total_tests > 0) && (passed_tests == total_tests);
     }
 
+    if (measure_tight_timing) {
+        if (use_legacy_api) {
+            tight_timing_passed = false;
+            tight_timing_response.set("requested", true);
+            tight_timing_response.set("supported", false);
+            tight_timing_response.set("passed", false);
+            tight_timing_response.set("driver", driver_name.c_str());
+            tight_timing_response.set("message", "legacy API timing metric is not supported");
+        } else {
+            tight_timing_response = measureTightTiming(
+                driver_name,
+                timing_config.timing,
+                tx_configs,
+                tight_timing_iterations,
+                tight_timing_max_overhead_us,
+                tight_timing_passed);
+        }
+        bool tight_timing_supported = false;
+        if (tight_timing_response.contains("supported") &&
+            tight_timing_response["supported"].is_bool()) {
+            tight_timing_supported =
+                tight_timing_response["supported"].as_bool().value();
+        }
+        if (tight_timing_supported) {
+            passed = passed && tight_timing_passed;
+        }
+    }
+
     uint32_t duration_ms = millis() - start_ms;
 
     // ========== RESPONSE ==========
@@ -435,6 +699,9 @@ fl::json AutoResearchRemoteControl::runSingleTestImpl(const fl::json& args) {
     response.set("pattern", pattern.c_str());
     response.set("useLegacyApi", use_legacy_api);
     response.set("frameCount", static_cast<int64_t>(frame_count));
+    if (measure_tight_timing) {
+        response.set("tightTiming", tight_timing_response);
+    }
 
     // Free run_results before building response to reclaim heap
     // Only serialize pattern details when tests FAIL (saves heap on passing tests)

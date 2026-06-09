@@ -69,6 +69,7 @@
 #include "fl/channels/wave8.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/chipsets/chipset_timing_config.h"
+#include "fl/channels/driver.h"
 #include "fl/stl/span.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/unique_ptr.h"
@@ -213,6 +214,9 @@ public:
     /// @brief Access the underlying peripheral (for time/delay delegation)
     IParlioPeripheral* peripheral() FL_NOEXCEPT { return mPeripheral; }
 
+    /// @brief Install the manager-owned poll-needed callback.
+    void setPollNeededCallback(IChannelDriver::PollNeededCallback callback) FL_NOEXCEPT;
+
 private:
     // Singleton pattern - allow Singleton<T> to construct instance
     friend class fl::Singleton<ParlioEngine>;
@@ -315,6 +319,9 @@ private:
 
     // Main task handle for transmission completion signaling (TaskHandle_t)
     void* mMainTaskHandle;
+
+    // Manager-owned callback signaled when ISR state changed and poll() should run.
+    IChannelDriver::PollNeededCallbackSlot mPollNeededCallback;
 
 #ifdef FL_DEBUG
     // Debug task for periodic ISR state logging (unified task API)

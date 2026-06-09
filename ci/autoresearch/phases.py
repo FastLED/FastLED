@@ -26,6 +26,7 @@ from ci.autoresearch.context import (
     QuietContext,
     RunContext,
     display_pattern_details,
+    display_tight_timing,
 )
 from ci.autoresearch.gpio import run_gpio_pretest, run_pin_discovery
 from ci.debug_attached import run_cpp_lint
@@ -530,6 +531,21 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                         frame_count = 1
                     if frame_count > 1:
                         test_config["frameCount"] = frame_count
+                    if args.tight_timing:
+                        if (
+                            args.tight_timing_iterations < 1
+                            or args.tight_timing_iterations > 64
+                        ):
+                            print("Error: --tight-timing-iterations must be in [1, 64]")
+                            return 1
+                        if args.tight_timing_max_overhead_us < 1:
+                            print("Error: --tight-timing-max-overhead-us must be >= 1")
+                            return 1
+                        test_config["tightTiming"] = True
+                        test_config["tightTimingIterations"] = args.tight_timing_iterations
+                        test_config["tightTimingMaxOverheadUs"] = (
+                            args.tight_timing_max_overhead_us
+                        )
                     rpc_command = {"method": "runSingleTest", "params": test_config}
                     rpc_commands_list.append(rpc_command)
 
@@ -1441,6 +1457,8 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                             )
                         print(f"   Duration: {duration_str}")
 
+                    display_tight_timing(test_data)
+
                     if "drivers" in test_data and isinstance(
                         test_data["drivers"], list
                     ):
@@ -1474,6 +1492,8 @@ async def _run_rpc_tests(ctx: RunContext, qctx: QuietContext) -> int:
                         print(f"   Lane: {failure.get('lane', 'unknown')}")
                         print(f"   Expected: {failure.get('expected', 'unknown')}")
                         print(f"   Actual: {failure.get('actual', 'unknown')}")
+
+                    display_tight_timing(test_data)
 
                     if "patterns" in test_data:
                         display_pattern_details(test_data)

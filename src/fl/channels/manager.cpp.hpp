@@ -32,7 +32,9 @@ ChannelManager& ChannelManager::instance() {
     return out;
 }
 
-ChannelManager::ChannelManager() {
+ChannelManager::ChannelManager() FL_NOEXCEPT
+    : mPollNeededCallback(&ChannelManager::notifyPollNeededThunk, this),
+      mPollNeededSignal() {
     FL_DBG("ChannelManager: Initializing");
 
     // Register as frame event listener for per-frame reset
@@ -45,7 +47,41 @@ ChannelManager::~ChannelManager() FL_NOEXCEPT {
     // Remove self from EngineEvents listener list
     EngineEvents::removeListener(this);
 
+    for (auto& entry : mDrivers) {
+        if (entry.driver) {
+            entry.driver->setPollNeededCallback(IChannelDriver::PollNeededCallback());
+        }
+    }
+
     // Shared drivers automatically cleaned up by shared_ptr destructors
+}
+
+void ChannelManager::notifyPollNeeded() FL_NOEXCEPT {
+    mPollNeededSignal.notify();
+}
+
+void ChannelManager::notifyPollNeededThunk(void* context) FL_NOEXCEPT {
+    if (context == nullptr) {
+        return;
+    }
+    static_cast<ChannelManager*>(context)->notifyPollNeeded();
+}
+
+bool ChannelManager::waitForPollNeededSignal(u32 timeoutMs) FL_NOEXCEPT {
+    return mPollNeededSignal.wait(timeoutMs);
+}
+
+u32 ChannelManager::pollNeededWaitSliceMs(u32 startTime, u32 timeoutMs) const FL_NOEXCEPT {
+    constexpr u32 kPollNeededFallbackSliceMs = 1;
+    if (timeoutMs == 0) {
+        return kPollNeededFallbackSliceMs;
+    }
+    const u32 elapsed = millis() - startTime;
+    if (elapsed >= timeoutMs) {
+        return 0;
+    }
+    const u32 remaining = timeoutMs - elapsed;
+    return remaining < kPollNeededFallbackSliceMs ? remaining : kPollNeededFallbackSliceMs;
 }
 
 void ChannelManager::addDriver(int priority, fl::shared_ptr<IChannelDriver> driver) {
@@ -93,6 +129,9 @@ void ChannelManager::addDriver(int priority, fl::shared_ptr<IChannelDriver> driv
         for (size_t i = 0; i < mDrivers.size(); ++i) {
             if (mDrivers[i].name == engineName) {
                 FL_DBG("ChannelManager: Removing old driver '" << engineName.c_str() << "' (shared_ptr may delete)");
+                if (mDrivers[i].driver) {
+                    mDrivers[i].driver->setPollNeededCallback(IChannelDriver::PollNeededCallback());
+                }
                 mDrivers.erase(mDrivers.begin() + i);
                 break;
             }
@@ -106,6 +145,7 @@ void ChannelManager::addDriver(int priority, fl::shared_ptr<IChannelDriver> driv
     }
 
     mDrivers.push_back({priority, driver, engineName, enabled});
+    driver->setPollNeededCallback(mPollNeededCallback);
 
     // Build capability string for debug output. Gate the entire block behind
     // FASTLED_HAS_DBG because the `capStr` exists ONLY to feed the FL_DBG
@@ -149,6 +189,8 @@ bool ChannelManager::removeDriver(fl::shared_ptr<IChannelDriver> driver) {
         if (mDrivers[i].driver == driver) {
             FL_DBG("ChannelManager: Removing driver '" << mDrivers[i].name << "'");
 
+            mDrivers[i].driver->setPollNeededCallback(IChannelDriver::PollNeededCallback());
+
             // Remove using vector::erase (preserves sort order)
             mDrivers.erase(mDrivers.begin() + i);
             return true;  // Engine found and removed
@@ -168,6 +210,12 @@ void ChannelManager::clearAllDrivers() {
     waitForReady();
 
     FL_DBG("ChannelManager: Clearing " << mDrivers.size() << " drivers");
+
+    for (auto& entry : mDrivers) {
+        if (entry.driver) {
+            entry.driver->setPollNeededCallback(IChannelDriver::PollNeededCallback());
+        }
+    }
 
     // Clear all drivers (shared_ptr handles cleanup automatically)
     mDrivers.clear();
@@ -409,6 +457,14 @@ bool ChannelManager::waitForCondition(Condition condition, u32 timeoutMs) {
             return false;  // Timeout occurred
         }
 
+        const u32 sliceMs = pollNeededWaitSliceMs(startTime, timeoutMs);
+        if (sliceMs == 0) {
+            return false;
+        }
+        if (waitForPollNeededSignal(sliceMs)) {
+            continue;
+        }
+
         // Adaptive yield (refs #2815, generalizes the #2493 ESP32-P4 carve-out):
         //
         // The 1-tick (>=1 ms at CONFIG_FREERTOS_HZ=1000) floor only exists to
@@ -469,48 +525,6 @@ IChannelDriver::DriverState ChannelManager::poll() {
 }
 
 bool ChannelManager::waitForReady(u32 timeoutMs) {
-    // Phase 2 of #2815 (#2819): single-driver fast path. If exactly one
-    // driver is BUSY, delegate to its waitDone() so drivers with an
-    // ISR-driven completion primitive can block directly on it (no spin
-    // tier, no cooperator yield loop). Drivers that haven't overridden
-    // waitDone() get the default delegate, which is identical to the
-    // existing waitForReady tiered loop -- so unmigrated drivers behave
-    // exactly as before.
-    //
-    // For N > 1 (multi-driver aggregate wait) we fall through to the
-    // tiered waitForCondition loop. Phase 3 (#2815 design) adds a
-    // shared-sem / task-notification fan-in for that path.
-    IChannelDriver* onlyBusy = nullptr;
-    int busyCount = 0;
-    bool sawError = false;
-    for (const auto& entry : mDrivers) {
-        if (!entry.enabled) continue;
-        const auto state = entry.driver->poll();
-        if (state.state == IChannelDriver::DriverState::ERROR) {
-            // Mirror the pre-existing waitForCondition behavior: ERROR
-            // is treated as "not READY", we fall through to the loop and
-            // either spin out the timeout or recover. A future fail-fast
-            // change can land separately.
-            sawError = true;
-            break;
-        }
-        if (state.state == IChannelDriver::DriverState::READY) continue;
-        ++busyCount;
-        onlyBusy = entry.driver.get();
-        if (busyCount > 1) {
-            onlyBusy = nullptr;
-            break;
-        }
-    }
-    if (!sawError && busyCount == 0) return true;
-    if (!sawError && busyCount == 1 && onlyBusy != nullptr) {
-        const bool ok = onlyBusy->waitDone(timeoutMs);
-        if (!ok) {
-            FL_ERROR("ChannelManager: Timeout in single-driver waitDone fast path");
-        }
-        return ok;
-    }
-
     bool ok = waitForCondition([this]() {
         return poll().state == IChannelDriver::DriverState::READY;
     }, timeoutMs);

@@ -56,6 +56,7 @@ class ChannelDriverLcdClockless : public IChannelDriver {
     void enqueue(ChannelDataPtr channelData) FL_NOEXCEPT override;
     void show() FL_NOEXCEPT override;
     DriverState poll() FL_NOEXCEPT override;
+    void setPollNeededCallback(PollNeededCallback callback) FL_NOEXCEPT override;
 
     fl::string getName() const FL_NOEXCEPT override {
         return fl::string::from_literal("LCD_CLOCKLESS");
@@ -167,6 +168,7 @@ class ChannelDriverLcdClockless : public IChannelDriver {
     void *mWorkerTaskHandle;
     volatile bool mWorkerStop;
     volatile bool mWorkerRunning;
+    PollNeededCallbackSlot mPollNeededCallback;
 
     // Encoding state (set during beginTransmission, stable during ISR)
     bool mUseWave3;
