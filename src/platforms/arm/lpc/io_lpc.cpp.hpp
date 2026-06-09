@@ -9,6 +9,7 @@
 #include "fl/stl/cstddef.h"
 #include "fl/stl/noexcept.h"
 #include "fl/stl/stdint.h"
+#include "platforms/arm/is_arm.h"
 #include "platforms/io.h"
 
 namespace fl {
