@@ -545,6 +545,39 @@ def build_meson_setup_cmd(
     return cmd
 
 
+_ZCCACHE_MESON_HIT_MARKER = "[zccache-meson] hit"
+_PCH_ARTIFACT_SUFFIXES = (".pch", ".pch.input_hash", ".d.cache")
+
+
+def _purge_restored_pch_artifacts(build_dir: Path) -> None:
+    """Delete PCH binaries and their compile_pch.py sidecars from build_dir.
+
+    zccache meson snapshots capture the whole build dir (zackees/zccache#710),
+    so a restore can resurrect a stale clang PCH whose embedded file identities
+    silently defeat ``#pragma once`` dedup — along with the ``.input_hash`` /
+    ``.d.cache`` sidecars that make ``compile_pch.py`` skip rebuilding it
+    forever. Purging after a snapshot hit forces a fresh PCH compile.
+    """
+    removed = 0
+    for root, _dirs, files in os.walk(build_dir):
+        for name in files:
+            if name.endswith(_PCH_ARTIFACT_SUFFIXES):
+                path = Path(root) / name
+                try:
+                    path.unlink()
+                    removed += 1
+                except OSError as e:
+                    _ts_print(
+                        f"[MESON] Warning: could not delete {path}: {e}",
+                        file=sys.stderr,
+                    )
+    if removed:
+        _ts_print(
+            f"[MESON] Purged {removed} PCH artifact(s) restored by zccache "
+            f"meson snapshot (zackees/zccache#710)"
+        )
+
+
 def run_meson_setup_command(
     *,
     cmd: list[str],
@@ -614,6 +647,9 @@ def run_meson_setup_command(
             return False
 
         _ts_print("[MESON] Setup successful")
+
+        if _ZCCACHE_MESON_HIT_MARKER in stdout:
+            _purge_restored_pch_artifacts(build_dir)
 
         _write_configuration_markers(
             build_mode_marker=markers.build_mode,
