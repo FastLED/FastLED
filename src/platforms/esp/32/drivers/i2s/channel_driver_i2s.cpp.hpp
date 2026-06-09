@@ -84,8 +84,14 @@ ChannelEngineI2S::~ChannelEngineI2S() {
         poll();
     }
 
-    // Free buffers
     if (mPeripheral) {
+        if (mPeripheral->isInitialized()) {
+            (void)mPeripheral->registerTransmitCallback(nullptr, nullptr);
+            mPeripheral->deinitialize();
+            mInitialized = false;
+        }
+
+        // Free buffers after the peripheral is stopped so no ISR can reference them.
         for (int i = 0; i < 2; i++) {
             if (mBuffers[i] != nullptr) {
                 mPeripheral->freeBuffer(mBuffers[i]);

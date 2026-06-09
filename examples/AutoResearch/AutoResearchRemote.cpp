@@ -129,6 +129,21 @@ uint32_t maxLaneLeds(const fl::vector<fl::ChannelConfig>& tx_configs) {
     return max_leds;
 }
 
+class ScopedFastLedBrightness {
+  public:
+    explicit ScopedFastLedBrightness(uint8_t brightness) FL_NOEXCEPT
+        : mSavedBrightness(FastLED.getBrightness()) {
+        FastLED.setBrightness(brightness);
+    }
+
+    ~ScopedFastLedBrightness() FL_NOEXCEPT {
+        FastLED.setBrightness(mSavedBrightness);
+    }
+
+  private:
+    uint8_t mSavedBrightness;
+};
+
 fl::json measureTightTiming(const fl::string& driver_name,
                             const fl::ChipsetTimingConfig& timing,
                             const fl::vector<fl::ChannelConfig>& tx_configs,
@@ -174,7 +189,7 @@ fl::json measureTightTiming(const fl::string& driver_name,
         channels.push_back(channel);
     }
 
-    FastLED.setBrightness(255);
+    ScopedFastLedBrightness scoped_brightness(255);
     for (fl::size lane = 0; lane < sample_configs.size(); lane++) {
         fill_solid(sample_configs[lane].mLeds.data(),
                    sample_configs[lane].mLeds.size(),
@@ -281,8 +296,12 @@ fl::json measureTightTiming(const fl::string& driver_name,
 
     out_passed = !timed_out && max_overhead_us <= max_allowed_overhead_us;
     metric.set("passed", out_passed);
-    metric.set("message", out_passed ? "tight timing within budget"
-                                     : "tight timing exceeded budget");
+    if (timed_out) {
+        metric.set("message", "timing wait timeout");
+    } else {
+        metric.set("message", out_passed ? "tight timing within budget"
+                                         : "tight timing exceeded budget");
+    }
     return metric;
 }
 

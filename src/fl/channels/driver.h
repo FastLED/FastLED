@@ -78,40 +78,73 @@ public:
     /// @brief ISR-safe storage for a poll-needed callback handle.
     ///
     /// Task context installs or clears the handle. ISR context calls invoke().
-    /// The function pointer is published last and cleared first, so an ISR that
-    /// sees a non-null function also sees the corresponding context.
+    /// The callback/context pair is published as one immutable snapshot pointer
+    /// so an ISR cannot observe a function from one registration and a context
+    /// from another.
     class PollNeededCallbackSlot {
+      private:
+        struct Snapshot {
+            explicit Snapshot(PollNeededCallback cb) FL_NOEXCEPT
+                : callback(cb), next(nullptr) {}
+
+            PollNeededCallback callback;
+            Snapshot* next;
+        };
+
       public:
         PollNeededCallbackSlot() FL_NOEXCEPT
-            : mCallback(nullptr), mContext(nullptr) {}
+            : mSnapshot(nullptr), mRetired(nullptr) {}
+
+        ~PollNeededCallbackSlot() FL_NOEXCEPT {
+            Snapshot* active =
+                mSnapshot.exchange(nullptr, fl::memory_order_acq_rel);
+            destroySnapshots(active);
+            destroySnapshots(mRetired);
+            mRetired = nullptr;
+        }
 
         void set(PollNeededCallback callback) FL_NOEXCEPT {
             if (callback.callback == nullptr) {
                 clear();
                 return;
             }
-            mContext.store(callback.context, fl::memory_order_release);
-            mCallback.store(callback.callback, fl::memory_order_release);
+            Snapshot* snapshot = new Snapshot(callback); // ok bare allocation
+            retire(mSnapshot.exchange(snapshot, fl::memory_order_acq_rel));
         }
 
         void clear() FL_NOEXCEPT {
-            mCallback.store(nullptr, fl::memory_order_release);
-            mContext.store(nullptr, fl::memory_order_release);
+            retire(mSnapshot.exchange(nullptr, fl::memory_order_acq_rel));
         }
 
         void invoke() const FL_NOEXCEPT {
-            PollNeededCallback::Callback callback =
-                mCallback.load(fl::memory_order_acquire);
-            if (callback == nullptr) {
+            Snapshot* snapshot = mSnapshot.load(fl::memory_order_acquire);
+            if (snapshot == nullptr) {
                 return;
             }
-            void* context = mContext.load(fl::memory_order_acquire);
-            callback(context);
+            snapshot->callback.invoke();
         }
 
       private:
-        fl::atomic<PollNeededCallback::Callback> mCallback;
-        fl::atomic<void*> mContext;
+        void retire(Snapshot* snapshot) FL_NOEXCEPT {
+            if (snapshot == nullptr) {
+                return;
+            }
+            // An ISR may already have loaded this pointer, so reclaim only when
+            // the slot is destroyed and driver teardown has quiesced callbacks.
+            snapshot->next = mRetired;
+            mRetired = snapshot;
+        }
+
+        static void destroySnapshots(Snapshot* snapshot) FL_NOEXCEPT {
+            while (snapshot != nullptr) {
+                Snapshot* next = snapshot->next;
+                delete snapshot; // ok bare allocation
+                snapshot = next;
+            }
+        }
+
+        fl::atomic<Snapshot*> mSnapshot;
+        Snapshot* mRetired;
     };
 
     /// @brief Driver capabilities

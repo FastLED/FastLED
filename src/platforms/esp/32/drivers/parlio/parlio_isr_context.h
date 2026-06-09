@@ -40,8 +40,8 @@
 
 #include "fl/stl/compiler_control.h"
 
+#include "fl/stl/atomic.h"
 #include "fl/stl/isr/memcpy.h"
-#include "platforms/memory_barrier.h"
 #include "fl/stl/align.h"
 #include "fl/stl/noexcept.h"
 
@@ -55,30 +55,29 @@ namespace detail {
 /// @brief Cache-aligned ISR context for PARLIO transmission state
 ///
 /// Memory Synchronization Model:
-/// - ISR writes to volatile fields (mStreamComplete, mTransmitting, etc.)
-/// - Main thread reads volatile fields directly (compiler ensures fresh read)
-/// - After detecting mStreamComplete==true, main executes memory barrier
-/// - Memory barrier ensures all ISR writes visible before reading non-volatile fields
+/// - ISR writes completion flags with release ordering.
+/// - Main thread reads completion flags with acquire ordering.
+/// - Non-atomic counters are read after completion has been observed.
 struct FL_ALIGNAS(64) ParlioIsrContext {
-    // === Volatile Fields (ISR writes, main reads) ===
-    volatile bool mStreamComplete;
-    volatile bool mTransmitting;
+    // === ISR-shared fields (ISR writes, main reads) ===
+    fl::atomic_bool mStreamComplete;
+    fl::atomic_bool mTransmitting;
     volatile size_t mCurrentByte;
     volatile size_t mRingReadIdx;    // 0-2 (for 3-buffer ring)
     volatile size_t mRingWriteIdx;   // 0-2 (for 3-buffer ring)
     volatile size_t mRingCount;      // 0-3 (distinguishes full vs empty)
-    volatile bool mRingError;
-    volatile bool mHardwareIdle;
+    fl::atomic_bool mRingError;
+    fl::atomic_bool mHardwareIdle;
     volatile u32 mUnderrunCount;     // Ring emptied while source bytes remained
     volatile size_t mNextByteOffset; // Next byte offset in source data (Worker function updates)
 
-    // === Non-Volatile Fields (read after barrier only) ===
+    // === Fields read after completion has been observed ===
     size_t mTotalBytes;
     size_t mNumLanes;
     u32 mIsrCount;
     u32 mBytesTransmitted;
     u32 mChunksCompleted;
-    bool mTransmissionActive;
+    fl::atomic_bool mTransmissionActive;
     u64 mEndTimeUs;
 
     // === Debug Counters (volatile for ISR access) ===
