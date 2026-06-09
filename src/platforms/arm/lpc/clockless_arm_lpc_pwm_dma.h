@@ -5,6 +5,7 @@
 
 #include "platforms/arm/is_arm.h"
 #include "platforms/arm/lpc/is_lpc.h"
+#include "fastled_delay.h"
 
 // =============================================================================
 // LPC845 PWM+DMA-to-GPIO clockless driver (Stage 2c of #2836, issue #2842)

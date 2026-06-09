@@ -5,6 +5,7 @@
 
 #include "platforms/arm/is_arm.h"
 #include "platforms/arm/lpc/is_lpc.h"
+#include "fastled_delay.h"
 
 // When the PLU opt-in is set on an LPC804 build, the dedicated PLU driver
 // (clockless_arm_lpc_plu.h) provides the ClocklessController specialisation;

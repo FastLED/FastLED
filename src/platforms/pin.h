@@ -35,6 +35,8 @@
     #include "platforms/arm/nrf52/pin_nrf52.hpp"
 #elif defined(FL_IS_RENESAS)
     #include "platforms/arm/renesas/pin_renesas.hpp"
+#elif defined(FL_IS_ARM_LPC)
+    #include "platforms/shared/pin_noop.hpp"
 #elif defined(FL_IS_SILABS)
     #include "platforms/arm/silabs/pin_silabs.hpp"
 #elif defined(FL_IS_APOLLO3)

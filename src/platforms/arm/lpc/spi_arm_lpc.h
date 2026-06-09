@@ -5,6 +5,7 @@
 
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
+#include "fastspi_types.h"
 #include "platforms/arm/is_arm.h"
 #include "platforms/arm/lpc/is_lpc.h"
 
