@@ -688,7 +688,7 @@ fl::RxChannelPtr CFastLED::addRx(const fl::RxChannelConfig& config) {
 #ifdef NEED_CXX_BITS
 namespace __cxxabiv1
 {
-	#if !defined(FL_IS_ESP8266) && !defined(FL_IS_ESP32)
+	#if !defined(FL_IS_ESP8266) && !defined(FL_IS_ESP32) && !defined(ARDUINO)
 	extern "C" void __cxa_pure_virtual (void) {}
 	#endif
 

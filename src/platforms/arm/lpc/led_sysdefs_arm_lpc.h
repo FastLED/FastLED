@@ -73,22 +73,69 @@
 typedef volatile fl::u32 RoReg;
 typedef volatile fl::u32 RwReg;
 typedef fl::u32          prog_uint32_t;
+#ifndef ARDUINO
 typedef fl::u8           boolean;
+#endif
 
 #define PROGMEM
 #define NO_PROGMEM
 #define NEED_CXX_BITS
 
 // CMSIS device header from MCUXpresso SDK provides __disable_irq / __enable_irq
-// via core_cm0plus.h. Some integrations only pull in the SoC header (e.g.
-// LPC845.h / LPC804.h), which transitively includes the core header.
+// via core_cm0plus.h (M0+), core_cm0.h (M0), or core_cm3.h (M3). Some
+// integrations only pull in the SoC header (e.g. LPC845.h / LPC804.h), which
+// transitively includes the core header.
 // IWYU pragma: begin_keep
 #if defined(FL_LPC845)
 #include <LPC845.h>
 #elif defined(FL_LPC804)
 #include <LPC804.h>
+#elif defined(FL_LPC11_USB)
+// LPC11U24 / LPC11U35 — try device-specific headers if available
+#if defined(CPU_LPC11U35FBD48) || defined(CPU_LPC11U35FHI33) || defined(CPU_LPC11U35FHN33)
+#include <LPC11U35.h>
+#elif defined(CPU_LPC11U24FBD48) || defined(CPU_LPC11U24FHI33)
+#include <LPC11U24.h>
+#else
+// Fallback to family header or core directly
+#include <LPC11Uxx.h>
+#endif
+#elif defined(FL_LPC15)
+// LPC15xx — try common family header (LPC15xx covers all variants:
+// LPC1517/18/19, LPC1547/48/49)
+#include <LPC15xx.h>
 #endif
 // IWYU pragma: end_keep
+
+// CMSIS headers provide __disable_irq, __enable_irq, __get_PRIMASK, __set_PRIMASK
+// as static inline functions. However, for C++ two-phase name lookup in templates,
+// we need to ensure these are visible before use. Provide inline implementations
+// directly using the ARM CPSID/CPSIE/MRS/MSR instructions.
+#ifndef __disable_irq
+__attribute__((always_inline)) static inline void __disable_irq(void) {
+    __asm__ volatile ("cpsid i" : : : "memory");
+}
+#endif
+
+#ifndef __enable_irq
+__attribute__((always_inline)) static inline void __enable_irq(void) {
+    __asm__ volatile ("cpsie i" : : : "memory");
+}
+#endif
+
+#ifndef __get_PRIMASK
+__attribute__((always_inline)) static inline fl::u32 __get_PRIMASK(void) {
+    fl::u32 result;
+    __asm__ volatile ("MRS %0, primask" : "=r" (result));
+    return result;
+}
+#endif
+
+#ifndef __set_PRIMASK
+__attribute__((always_inline)) static inline void __set_PRIMASK(fl::u32 priMask) {
+    __asm__ volatile ("MSR primask, %0" : : "r" (priMask) : "memory");
+}
+#endif
 
 #define cli() __disable_irq()
 #define sei() __enable_irq()

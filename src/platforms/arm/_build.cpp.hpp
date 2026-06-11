@@ -7,6 +7,7 @@
 // Subdirectory implementations (alphabetical order)
 #include "platforms/arm/d21/_build.cpp.hpp"
 #include "platforms/arm/d51/_build.cpp.hpp"
+#include "platforms/arm/lpc/_build.cpp.hpp"
 #include "platforms/arm/mgm240/_build.cpp.hpp"
 #include "platforms/arm/nrf52/_build.cpp.hpp"
 #include "platforms/arm/renesas/_build.cpp.hpp"

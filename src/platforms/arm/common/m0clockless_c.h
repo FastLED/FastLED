@@ -361,7 +361,7 @@ int showLedData(volatile fl::u32* port, fl::u32 bitmask,
     // Local variables
     fl::u32 counter = num_leds;
     fl::u8 b0 = 0, b1 = 0, b2 = 0;  // Bytes for current pixel (positioned for output)
-    fl::u8 bn0 = 0, bn1 = 0, bn2 = 0;  // Next bytes being processed
+    //fl::u8 bn0 = 0, bn1 = 0, bn2 = 0;  // Next bytes being processed
 
 #if (FASTLED_SCALE8_FIXED == 1)
     ++pData->s[0];
