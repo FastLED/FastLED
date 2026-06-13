@@ -1,5 +1,7 @@
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/esp/32/channel_poll_signal_esp32.h
 /// @brief ESP32 channel-manager poll wake signal.
 

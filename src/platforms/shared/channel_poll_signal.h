@@ -1,6 +1,8 @@
 // ok no namespace fl
 #pragma once
 
+// IWYU pragma: private
+
 /// @file platforms/shared/channel_poll_signal.h
 /// @brief Fallback channel-manager poll wake signal.
 
