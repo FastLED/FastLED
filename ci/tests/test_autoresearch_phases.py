@@ -50,6 +50,7 @@ def _make_args(**overrides) -> Args:
         lcd_spi=False,
         lcd_rgb=False,
         object_fled=False,
+        flex_io=False,
         all=False,
         simd=False,
         coroutine=False,
@@ -85,6 +86,9 @@ def _make_args(**overrides) -> Args:
         parallel=False,
         decode=None,
         frames=None,
+        tight_timing=False,
+        tight_timing_iterations=8,
+        tight_timing_max_overhead_us=2000,
     )
     defaults.update(overrides)
     return Args(**defaults)
@@ -196,7 +200,8 @@ class TestParseArgsAndBuildCommands:
             "LCD_CLOCKLESS",
             "LCD_SPI",
             "LCD_RGB",
-            "OBJECTFLED",
+            "OBJECT_FLED",
+            "FLEX_IO",
         }
 
     def test_multiple_drivers(self, fake_project_dir: Path) -> None:
