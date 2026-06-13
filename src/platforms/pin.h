@@ -41,9 +41,6 @@
     #include "platforms/arm/silabs/pin_silabs.hpp"
 #elif defined(FL_IS_APOLLO3)
     #include "platforms/apollo3/pin_apollo3.hpp"
-#elif defined(FL_LPC845) || defined(FL_LPC804) || defined(FL_LPC11_USB) || defined(FL_LPC15) || defined(FL_LPC11_LEGACY)
-    // LPC platform uses fastpin (no pin management needed for now)
-    #include "platforms/shared/pin_noop.hpp"
 #elif defined(FL_IS_STUB)
     // Stub platform for testing — tracks pin state via fl::stub::setPinState
     #include "platforms/stub/pin_stub.hpp"

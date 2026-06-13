@@ -17,6 +17,8 @@
 // readStringUntil(), so readLineNative() is implemented by hand below.
 // IWYU pragma: begin_keep
 #include "fl/system/arduino.h"
+#include "fl/system/yield.h"
+#include "fl/stl/chrono.h"
 // IWYU pragma: end_keep
 #endif
 
@@ -57,14 +59,14 @@ int readLineNative(char delimiter, char* out, int outLen) FL_NOEXCEPT {
         return 0;
     }
     const unsigned long timeoutMs = 1000UL;
-    unsigned long start = millis();
+    unsigned long start = fl::millis();
     int len = 0;
     while (true) {
         if (!Serial.available()) {
-            if (millis() - start >= timeoutMs) {
+            if (fl::millis() - start >= timeoutMs) {
                 break;
             }
-            yield();
+            fl::yield();
             continue;
         }
         const int value = Serial.read();
@@ -78,7 +80,7 @@ int readLineNative(char delimiter, char* out, int outLen) FL_NOEXCEPT {
         if (len < outLen - 1) {
             out[len++] = c;
         }
-        start = millis();
+        start = fl::millis();
     }
     out[len] = '\0';
     return len;
