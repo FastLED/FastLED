@@ -30,16 +30,27 @@ fl::ScreenMap init_screenmap() {
   LedColumns cols = LedLayoutArray();
   const int length = cols.length;
   int sum = 0;
+  int y_max = 0;
   for (int i = 0; i < length; ++i) {
     sum += cols.array[i];
+    int stagger = i % 2 ? 4 : 0;
+    int col_top = (cols.array[i] - 1) * 8 + stagger;
+    if (col_top > y_max) {
+      y_max = col_top;
+    }
   }
   fl::ScreenMap screen_map(sum, 0.8f);
   int curr_idx = 0;
   for (int i = 0; i < length; ++i) {
     int n = cols.array[i];
     int stagger = i % 2 ? 4 : 0;
-    for (int j = 0; j < n; ++j) {
-      fl::vec2f xy(i*4, j*8 + stagger);
+    for (int k = 0; k < n; ++k) {
+      // Wiring is serpentine by column: even columns wind one way, odd
+      // columns the other, so a single rope can snake up and down.
+      int j = i % 2 ? (n - 1 - k) : k;
+      // Mirror y (horizontal flip + 180 deg rotation) so the rendered
+      // keyboard matches the physical Luminescent Grand orientation.
+      fl::vec2f xy(i*4, y_max - (j*8 + stagger));
       screen_map.set(curr_idx++, xy);
     }
   }
