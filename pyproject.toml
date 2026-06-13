@@ -5,13 +5,39 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    # Pin to fbuild 2.2.22 (released 2026-06-07). 2.2.22 brings the
-    # real NXP LPC Stage-2 build orchestrator (FastLED/fbuild#488,
-    # part of #487) — first step in honoring the LPC804/LPC845
-    # bare-metal coverage that was scaffolded back in 2.2.18 — plus
-    # the zccache floor bump 1.11.15 → 1.11.20 (FastLED/fbuild#489)
-    # which lines up with the FastLED #2891/#2967 zccache pin and
-    # matches what `ci/setup-zccache.py` now installs.
+    # Pin to fbuild 2.2.27 (released 2026-06-12). 2.2.27 bumps the
+    # bundled `running-process` daemon broker to 4.2.0
+    # (FastLED/fbuild#537) on top of the 2.2.26 ArmCompiler/zccache
+    # unification (FastLED/fbuild#526) and LPC845-BRK board stubs
+    # (FastLED/fbuild#536). It also rolls up the intermediate
+    # releases:
+    #   2.2.26 — ArmCompiler now wires zccache for the 8 generic-arm
+    #            platforms in one place (FastLED/fbuild#526), adds a
+    #            stub running-process broker adoption with diagnostics
+    #            (FastLED/fbuild#529/#530), and ships the
+    #            ArduinoCore LPC8xx board metadata
+    #            (FastLED/fbuild#514).
+    #   2.2.25 — `nxplpc` now picks up project-local
+    #            `variants/<variant>/pins_arduino.h` (FastLED/fbuild#521).
+    #   2.2.24 — daemon build path now threads `project_dir` through
+    #            board resolution (FastLED/fbuild#518) so per-project
+    #            board JSON gets picked up by the daemon, matching
+    #            the resolution path in 2.2.23 (#516).
+    #   2.2.23 — adds the `shrink` module scaffold + ShrinkMode CLI
+    #            flags (FastLED/fbuild#495/#497/#499 etc.) which is
+    #            the first step toward per-platform libc shrinkage
+    #            telemetry, plus the ESP32 `-Wl,-Map=firmware.map`
+    #            link-time emission (FastLED/fbuild#509) and
+    #            project-local `boards/*.json` resolution
+    #            (FastLED/fbuild#516).
+    #   2.2.22 — real NXP LPC Stage-2 build orchestrator
+    #            (FastLED/fbuild#488, part of #487) — first step in
+    #            honoring the LPC804/LPC845 bare-metal coverage that
+    #            was scaffolded back in 2.2.18 — plus the zccache
+    #            floor bump 1.11.15 → 1.11.20 (FastLED/fbuild#489)
+    #            which lines up with the FastLED #2891/#2967 zccache
+    #            pin and matches what `ci/setup-zccache.py` now
+    #            installs.
     # Prior pins preserved for context:
     #   2.2.21 — bloat per-symbol forward refs + bidirectional graph
     #            + dual-rank sub-table (FastLED/fbuild#470), cargo
@@ -63,7 +89,7 @@ dependencies = [
     #   2.2.16 — completed ESP32-C2 framework skeleton installs
     #            and patched the missing touch_sensor_legacy_types.h
     #            no-touch compatibility header (FastLED/fbuild#378).
-    "fbuild==2.2.22",
+    "fbuild==2.2.27",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
