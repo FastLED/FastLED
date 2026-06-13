@@ -90,7 +90,7 @@ public:
 
 #define ESP_ADJUST 0 // (2*(F_CPU/24000000))
 #define ESP_ADJUST2 0
-  	template<int BITS,int PX> __attribute__ ((always_inline)) FL_NOEXCEPT inline static void writeBits(FASTLED_REGISTER u32 & last_mark, FASTLED_REGISTER Lines & b, PixelController<RGB_ORDER, LANES, PORT_MASK> &pixels) { // , FASTLED_REGISTER uint32_t & b2)  {
+  	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & last_mark, FASTLED_REGISTER Lines & b, PixelController<RGB_ORDER, LANES, PORT_MASK> &pixels) FL_NOEXCEPT { // , FASTLED_REGISTER uint32_t & b2)  {
 	  	Lines b2 = b;
 		transpose8x1_noinline(b.bytes,b2.bytes);
 

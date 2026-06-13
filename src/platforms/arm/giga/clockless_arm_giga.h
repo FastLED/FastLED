@@ -58,7 +58,7 @@ protected:
 		mWait.mark();
 	}
 
-	template<int BITS> __attribute__ ((always_inline)) FL_NOEXCEPT inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER data_ptr_t port, FASTLED_REGISTER data_t hi, FASTLED_REGISTER data_t lo, FASTLED_REGISTER u8 & b)  {
+	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER data_ptr_t port, FASTLED_REGISTER data_t hi, FASTLED_REGISTER data_t lo, FASTLED_REGISTER u8 & b) FL_NOEXCEPT {
 		for(FASTLED_REGISTER u32 i = BITS-1; i > 0; --i) {
 			while(ARM_DWT_CYCCNT < next_mark);
 			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);

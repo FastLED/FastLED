@@ -15,7 +15,7 @@
 FASTLED_FORCE_INLINE void delay_cycles_generic(fl::u32 cycles) FL_NOEXCEPT {
   // Simple loop - not ideal but works on any platform
   while (cycles > 0) {
-    __asm__ __volatile__("nop\n") FL_NOEXCEPT;
+    __asm__ __volatile__("nop\n");
     cycles--;
   }
 }

@@ -397,10 +397,10 @@ class string : public string_n<FASTLED_STR_INLINED_SIZE> {
     // Any type with a to_float() method (e.g., fixed_point types)
     template <typename T>
     typename fl::enable_if<
-        fl::is_same<decltype(static_cast<const T*>(nullptr)->to_float()) FL_NOEXCEPT , float>::value
+        fl::is_same<decltype(static_cast<const T*>(nullptr)->to_float()), float>::value
         && !fl::is_floating_point<T>::value,
         string&>::type
-    append(const T& val) {
+    append(const T& val) FL_NOEXCEPT {
         basic_string::append(val.to_float());
         return *this;
     }

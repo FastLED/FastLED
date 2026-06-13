@@ -483,7 +483,7 @@ class function_list<void(Args...)> {
         }
 
         // Sort priorities (higher priority first) - cheap since there are usually very few unique priorities
-        fl::sort(priorities.begin(), priorities.end(), [](int a, int b) { return a > b; }) FL_NOEXCEPT;
+        fl::sort(priorities.begin(), priorities.end(), [](int a, int b) FL_NOEXCEPT { return a > b; });
 
         // Iterate through priorities (highest first), then through functions matching each priority
         for (size_t p_idx = 0; p_idx < priorities.size(); ++p_idx) {

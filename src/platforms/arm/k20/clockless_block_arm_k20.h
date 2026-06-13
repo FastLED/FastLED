@@ -114,7 +114,7 @@ public:
 		u32 raw[3];
 	} Lines;
 
-	template<int BITS,int PX> __attribute__ ((always_inline)) FL_NOEXCEPT inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER Lines & b, PixelController<RGB_ORDER, LANES, PORT_MASK> &pixels) { // , FASTLED_REGISTER uint32_t & b2)  {
+	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER Lines & b, PixelController<RGB_ORDER, LANES, PORT_MASK> &pixels) FL_NOEXCEPT { // , FASTLED_REGISTER uint32_t & b2)  {
 		FASTLED_REGISTER Lines b2;
 		if(USED_LANES>8) {
 			transpose8<1,2>(b.bytes,b2.bytes);
@@ -276,7 +276,7 @@ public:
 		u32 raw[4];
 	} Lines;
 
-	template<int BITS,int PX> __attribute__ ((always_inline)) FL_NOEXCEPT inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER Lines & b, PixelController<RGB_ORDER,LANES, PMASK> &pixels) { // , FASTLED_REGISTER uint32_t & b2)  {
+	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER Lines & b, PixelController<RGB_ORDER,LANES, PMASK> &pixels) FL_NOEXCEPT { // , FASTLED_REGISTER uint32_t & b2)  {
 		FASTLED_REGISTER Lines b2;
 		transpose8x1(b.bytes,b2.bytes);
 		transpose8x1(b.bytes+8,b2.bytes+8);

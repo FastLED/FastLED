@@ -549,8 +549,8 @@ template <typename T, fl::size Extent> class span {
 // ======= BYTE VIEW CONVERSION FUNCTIONS =======
 // Convert span to read-only byte view
 template<typename T, fl::size Extent>
-span<const fl::u8, (Extent == dynamic_extent) FL_NOEXCEPT ? dynamic_extent : (Extent * sizeof(T))>
-as_bytes(const span<T, Extent>& s) {
+span<const fl::u8, (Extent == dynamic_extent) ? dynamic_extent : (Extent * sizeof(T))>
+as_bytes(const span<T, Extent>& s) FL_NOEXCEPT {
     if (Extent == dynamic_extent) {
         return span<const fl::u8, dynamic_extent>(
             fl::bit_cast<const fl::u8*>(s.data()),
@@ -565,8 +565,8 @@ as_bytes(const span<T, Extent>& s) {
 
 // Convert span to writable byte view
 template<typename T, fl::size Extent>
-span<fl::u8, (Extent == dynamic_extent) FL_NOEXCEPT ? dynamic_extent : (Extent * sizeof(T))>
-as_writable_bytes(span<T, Extent>& s) {
+span<fl::u8, (Extent == dynamic_extent) ? dynamic_extent : (Extent * sizeof(T))>
+as_writable_bytes(span<T, Extent>& s) FL_NOEXCEPT {
     if (Extent == dynamic_extent) {
         return span<fl::u8, dynamic_extent>(
             fl::bit_cast<fl::u8*>(s.data()),

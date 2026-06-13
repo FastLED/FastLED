@@ -60,7 +60,7 @@ protected:
         mWait.mark();
     }
 
-	template<int BITS>  __attribute__ ((always_inline)) FL_NOEXCEPT inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER data_ptr_t port, FASTLED_REGISTER u8 & b) {
+	template<int BITS>  __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER data_ptr_t port, FASTLED_REGISTER u8 & b) FL_NOEXCEPT {
 		// Make sure we don't slot into a wrapping spot, this will delay up to 12.5µs for WS2812
 		// bool bShift=0;
 		// while(VAL < (TOTAL*10)) { bShift=true; }

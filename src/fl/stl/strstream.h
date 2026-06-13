@@ -327,10 +327,10 @@ class sstream {
     //-------------------------------------------------------------------------
     template<typename T>
     typename fl::enable_if<
-        fl::is_same<decltype(static_cast<const T*>(nullptr)->to_float()) FL_NOEXCEPT , float>::value
+        fl::is_same<decltype(static_cast<const T*>(nullptr)->to_float()), float>::value
         && !fl::is_floating_point<T>::value,
         sstream&>::type
-    operator<<(const T &val) {
+    operator<<(const T &val) FL_NOEXCEPT {
         mStr.append(val.to_float());
         return *this;
     }

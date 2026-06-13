@@ -57,9 +57,9 @@ bool NativeRxDevice::begin(const RxConfig& config) FL_NOEXCEPT {
     mEdges.clear();
     mFinished = false;
     // Register callback on the pin: simulateWS2812Output() will fire it
-    fl::stub::setPinEdgeCallback(mPin, [this](bool high, u32 duration_ns) {
+    fl::stub::setPinEdgeCallback(mPin, [this](bool high, u32 duration_ns) FL_NOEXCEPT {
         this->onEdge(high, duration_ns);
-    }) FL_NOEXCEPT;
+    });
     mArmed = true;
     return true;
 }

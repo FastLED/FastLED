@@ -205,21 +205,21 @@ struct has_copy_ctor<T, decltype(void(T(fl::declval<const T&>())))> : fl::true_t
 
 // Default construct: available when T has default ctor
 template <typename T>
-typename fl::enable_if<has_default_ctor<T>::value, void(*) FL_NOEXCEPT (void*)>::type
+typename fl::enable_if<has_default_ctor<T>::value, void(*)(void*) FL_NOEXCEPT>::type
 get_default_construct_fn() FL_NOEXCEPT {
     return [](void* ptr) FL_NOEXCEPT { new (ptr) T(); };
 }
 
 // Default construct: nullptr when T has no default ctor
 template <typename T>
-typename fl::enable_if<!has_default_ctor<T>::value, void(*) FL_NOEXCEPT (void*)>::type
+typename fl::enable_if<!has_default_ctor<T>::value, void(*)(void*) FL_NOEXCEPT>::type
 get_default_construct_fn() FL_NOEXCEPT {
     return nullptr;
 }
 
 // Copy construct: available when T has copy ctor
 template <typename T>
-typename fl::enable_if<has_copy_ctor<T>::value, void(*) FL_NOEXCEPT (void*, const void*)>::type
+typename fl::enable_if<has_copy_ctor<T>::value, void(*)(void*, const void*) FL_NOEXCEPT>::type
 get_copy_construct_fn() FL_NOEXCEPT {
     return [](void* dst, const void* src) FL_NOEXCEPT {
         new (dst) T(*static_cast<const T*>(src));
@@ -228,7 +228,7 @@ get_copy_construct_fn() FL_NOEXCEPT {
 
 // Copy construct: nullptr when T is not copyable
 template <typename T>
-typename fl::enable_if<!has_copy_ctor<T>::value, void(*) FL_NOEXCEPT (void*, const void*)>::type
+typename fl::enable_if<!has_copy_ctor<T>::value, void(*)(void*, const void*) FL_NOEXCEPT>::type
 get_copy_construct_fn() FL_NOEXCEPT {
     return nullptr;
 }
@@ -251,7 +251,7 @@ struct is_swappable<T, decltype(void(
 
 // Move construct: available
 template <typename T>
-typename fl::enable_if<has_move_ctor<T>::value, void(*) FL_NOEXCEPT (void*, void*)>::type
+typename fl::enable_if<has_move_ctor<T>::value, void(*)(void*, void*) FL_NOEXCEPT>::type
 get_move_construct_fn() FL_NOEXCEPT {
     return [](void* dst, void* src) FL_NOEXCEPT {
         new (dst) T(static_cast<T&&>(*static_cast<T*>(src)));
@@ -259,14 +259,14 @@ get_move_construct_fn() FL_NOEXCEPT {
 }
 
 template <typename T>
-typename fl::enable_if<!has_move_ctor<T>::value, void(*) FL_NOEXCEPT (void*, void*)>::type
+typename fl::enable_if<!has_move_ctor<T>::value, void(*)(void*, void*) FL_NOEXCEPT>::type
 get_move_construct_fn() FL_NOEXCEPT {
     return nullptr;
 }
 
 // Swap: available when swappable
 template <typename T>
-typename fl::enable_if<is_swappable<T>::value, void(*) FL_NOEXCEPT (void*, void*)>::type
+typename fl::enable_if<is_swappable<T>::value, void(*)(void*, void*) FL_NOEXCEPT>::type
 get_swap_fn() FL_NOEXCEPT {
     return [](void* a, void* b) FL_NOEXCEPT {
         T& ta = *static_cast<T*>(a);
@@ -278,14 +278,14 @@ get_swap_fn() FL_NOEXCEPT {
 }
 
 template <typename T>
-typename fl::enable_if<!is_swappable<T>::value, void(*) FL_NOEXCEPT (void*, void*)>::type
+typename fl::enable_if<!is_swappable<T>::value, void(*)(void*, void*) FL_NOEXCEPT>::type
 get_swap_fn() FL_NOEXCEPT {
     return nullptr;
 }
 
 // Uninitialized move N: available when move-constructible
 template <typename T>
-typename fl::enable_if<has_move_ctor<T>::value, void(*) FL_NOEXCEPT (void*, void*, fl::size)>::type
+typename fl::enable_if<has_move_ctor<T>::value, void(*)(void*, void*, fl::size) FL_NOEXCEPT>::type
 get_uninitialized_move_n_fn() FL_NOEXCEPT {
     return [](void* dst, void* src, fl::size count) FL_NOEXCEPT {
         T* d = static_cast<T*>(dst);
@@ -297,7 +297,7 @@ get_uninitialized_move_n_fn() FL_NOEXCEPT {
 }
 
 template <typename T>
-typename fl::enable_if<!has_move_ctor<T>::value, void(*) FL_NOEXCEPT (void*, void*, fl::size)>::type
+typename fl::enable_if<!has_move_ctor<T>::value, void(*)(void*, void*, fl::size) FL_NOEXCEPT>::type
 get_uninitialized_move_n_fn() FL_NOEXCEPT {
     return nullptr;
 }

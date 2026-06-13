@@ -106,7 +106,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     
     // writes bits to an in-memory buffer (to DMA from)
     // pico has enough memory to not really care about using a buffer for DMA
-    template<int BITS> __attribute__ ((always_inline)) FL_NOEXCEPT inline static int writeBitsToBuf(i32 *out_buf, u32 bitpos, u8 b)  {
+    template<int BITS> __attribute__ ((always_inline)) inline static int writeBitsToBuf(i32 *out_buf, u32 bitpos, u8 b) FL_NOEXCEPT {
         // not really optimised and I haven't checked output assembly, but this should take ~50 cycles worst case
         // (and on average substantially fewer -- LEDs without XTRA0 should never trigger the second half of the function)
         
