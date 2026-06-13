@@ -165,7 +165,7 @@ public:
 	/// Write the BIT'th bit out via SPI, setting the data pin then strobing the clock
 	/// @tparam BIT the bit index in the byte
 	/// @param b the byte to read the bit from
-	template <u8 BIT> __attribute__((always_inline, hot)) FL_NOEXCEPT inline static void writeBit(u8 b) {
+	template <u8 BIT> __attribute__((always_inline, hot)) inline static void writeBit(u8 b) FL_NOEXCEPT {
 		//cli();
 		if(b & (1 << BIT)) {
 			fl::FastPin<DATA_PIN>::hi();
@@ -375,7 +375,7 @@ public:
 	/// @tparam D Per-byte modifier class, e.g. ::DATA_NOP
 	/// @tparam RGB_ORDER the rgb ordering for the LED data (e.g. what order red, green, and blue data is written out in)
 	/// @param pixels a ::PixelController with the LED data and modifier options
-	template <fl::u8 FLAGS, class D, EOrder RGB_ORDER>  FL_NO_INLINE FL_NOEXCEPT void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
+	template <fl::u8 FLAGS, class D, EOrder RGB_ORDER>  FL_NO_INLINE void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) FL_NOEXCEPT {
 		FASTLED_UNUSED(context);
 		select();
 		int len = pixels.mLen;

@@ -72,7 +72,7 @@ protected:
 #define _ESP_ADJ (0)
 #define _ESP_ADJ2 (0)
 
-	template<int BITS> __attribute__ ((always_inline)) FL_NOEXCEPT inline static bool writeBits(FASTLED_REGISTER u32 & last_mark, FASTLED_REGISTER u32 b)  {
+	template<int BITS> __attribute__ ((always_inline)) inline static bool writeBits(FASTLED_REGISTER u32 & last_mark, FASTLED_REGISTER u32 b) FL_NOEXCEPT {
     b <<= 24; b = ~b;
     for(FASTLED_REGISTER u32 i = BITS; i > 0; --i) {
       while((__clock_cycles() - last_mark) < (T1+T2+T3)) {

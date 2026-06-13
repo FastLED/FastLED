@@ -157,7 +157,7 @@ public:
         return DUE_TIMER_VAL;
     }
 
-    template<int BITS,int PX> __attribute__ ((always_inline)) FL_NOEXCEPT inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER Lines & b, Lines & b3, PixelController<RGB_ORDER,LANES, PORT_MASK> &pixels) { // , FASTLED_REGISTER uint32_t & b2)  {
+    template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER Lines & b, Lines & b3, PixelController<RGB_ORDER,LANES, PORT_MASK> &pixels) FL_NOEXCEPT { // , FASTLED_REGISTER uint32_t & b2)  {
         Lines b2;
         fl::transpose8x1(b.bytes,b2.bytes);
 

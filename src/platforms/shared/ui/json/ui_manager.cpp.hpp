@@ -120,9 +120,9 @@ fl::vector<JsonUiInternalPtr> JsonUiManager::getComponents() FL_NOEXCEPT {
         }
     }
     // Sort components by ID to ensure consistent serialization order
-    fl::sort(out.begin(), out.end(), [](const JsonUiInternalPtr& a, const JsonUiInternalPtr& b) {
+    fl::sort(out.begin(), out.end(), [](const JsonUiInternalPtr& a, const JsonUiInternalPtr& b) FL_NOEXCEPT {
         return a->id() < b->id();
-    }) FL_NOEXCEPT;
+    });
     return out;
 }
 

@@ -231,14 +231,14 @@ struct LutArray {
 };
 
 template <typename Fn, fl::size... Is>
-constexpr LutArray<u8, sizeof...(Is) FL_NOEXCEPT >
-make_lut_u8(fl::index_sequence<Is...>) {
+constexpr LutArray<u8, sizeof...(Is)>
+make_lut_u8(fl::index_sequence<Is...>) FL_NOEXCEPT {
     return {{ Fn()(static_cast<u8>(Is))... }};
 }
 
 template <typename Fn, fl::size... Is>
-constexpr LutArray<u16, sizeof...(Is) FL_NOEXCEPT >
-make_lut_u16(fl::index_sequence<Is...>) {
+constexpr LutArray<u16, sizeof...(Is)>
+make_lut_u16(fl::index_sequence<Is...>) FL_NOEXCEPT {
     return {{ Fn()(static_cast<u8>(Is))... }};
 }
 

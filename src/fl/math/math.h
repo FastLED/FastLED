@@ -459,8 +459,8 @@ sqrt(T value) FL_NOEXCEPT { return sqrt_impl_float(static_cast<float>(value)); }
 // Generic sqrt that auto-binds to types with static sqrt method
 // If T doesn't have a static sqrt, this overload is discarded (SFINAE)
 template<typename T>
-inline typename enable_if<sqrt_detail::has_static_sqrt<T>::value, decltype(T::sqrt(declval<T>())) FL_NOEXCEPT >::type
-sqrt(T value) {
+inline typename enable_if<sqrt_detail::has_static_sqrt<T>::value, decltype(T::sqrt(declval<T>()))>::type
+sqrt(T value) FL_NOEXCEPT {
     return T::sqrt(value);
 }
 
@@ -475,8 +475,8 @@ struct has_static_floor<T, decltype(static_cast<void>(T::floor(declval<T>())))> 
 
 // Generic floor that auto-binds to types with static floor method
 template<typename T>
-inline typename enable_if<floor_detail::has_static_floor<T>::value, decltype(T::floor(declval<T>())) FL_NOEXCEPT >::type
-floor(T value) {
+inline typename enable_if<floor_detail::has_static_floor<T>::value, decltype(T::floor(declval<T>()))>::type
+floor(T value) FL_NOEXCEPT {
     return T::floor(value);
 }
 
@@ -491,8 +491,8 @@ struct has_static_ceil<T, decltype(static_cast<void>(T::ceil(declval<T>())))> : 
 
 // Generic ceil that auto-binds to types with static ceil method
 template<typename T>
-inline typename enable_if<ceil_detail::has_static_ceil<T>::value, decltype(T::ceil(declval<T>())) FL_NOEXCEPT >::type
-ceil(T value) {
+inline typename enable_if<ceil_detail::has_static_ceil<T>::value, decltype(T::ceil(declval<T>()))>::type
+ceil(T value) FL_NOEXCEPT {
     return T::ceil(value);
 }
 

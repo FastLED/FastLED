@@ -131,7 +131,7 @@ public:
   } _outlines;
 
 
-  template<int BITS,int PX> __attribute__ ((always_inline)) FL_NOEXCEPT inline void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER _outlines & b, PixelController<RGB_ORDER, LANES, __FL_T4_MASK> &pixels) {
+  template<int BITS,int PX> __attribute__ ((always_inline)) inline void writeBits(FASTLED_REGISTER u32 & next_mark, FASTLED_REGISTER _outlines & b, PixelController<RGB_ORDER, LANES, __FL_T4_MASK> &pixels) FL_NOEXCEPT {
         _outlines b2;
         transpose8x1(b.bg[3], b2.bg[3]);
         transpose8x1(b.bg[2], b2.bg[2]);

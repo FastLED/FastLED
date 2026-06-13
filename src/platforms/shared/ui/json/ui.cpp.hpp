@@ -59,7 +59,7 @@ JsonUiUpdateInput setJsonUiHandlers(const JsonUiUpdateOutput& updateJsHandler) F
         
         // Return a function that allows updating the driver state
         // FL_WARN("setJsonUiHandlers: Creating and returning updateEngineState lambda");
-        auto result = fl::function<void(const char*) FL_NOEXCEPT >([](const char* jsonStr) {
+        auto result = fl::function<void(const char*)>([](const char* jsonStr) FL_NOEXCEPT {
             // FL_WARN("*** updateEngineState lambda CALLED ***");
             // FL_WARN("*** updateEngineState lambda ENTRY: jsonStr=" << (jsonStr ? jsonStr : "nullptr"));
             // FL_WARN("*** updateEngineState lambda JSON LENGTH: " << (jsonStr ? strlen(jsonStr) : 0));
@@ -117,12 +117,12 @@ void removeJsonUiComponent(fl::weak_ptr<JsonUiInternal> component) FL_NOEXCEPT {
     
     // No manager exists, try to remove from pending list
     auto& pending = getPendingComponents();
-    auto it = pending.find_if([&component](const fl::weak_ptr<JsonUiInternal>& pending_component) {
+    auto it = pending.find_if([&component](const fl::weak_ptr<JsonUiInternal>& pending_component) FL_NOEXCEPT {
         // Compare the weak_ptrs by checking if they refer to the same object
         auto comp_locked = component.lock();
         auto pending_locked = pending_component.lock();
         return comp_locked && pending_locked && comp_locked == pending_locked;
-    }) FL_NOEXCEPT;
+    });
     
     if (it != pending.end()) {
         pending.erase(it);

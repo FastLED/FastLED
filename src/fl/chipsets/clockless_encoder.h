@@ -28,7 +28,7 @@ enum class ClocklessEncoder : u8 {
 /// @brief SFINAE helpers for detecting a static ENCODER member on timing structs
 namespace detail {
     template <typename T>
-    constexpr auto test_encoder(int) -> decltype(T::ENCODER, true) FL_NOEXCEPT { return true; }
+    constexpr auto test_encoder(int) FL_NOEXCEPT -> decltype(T::ENCODER, true) { return true; }
     template <typename T>
     constexpr bool test_encoder(...) FL_NOEXCEPT { return false; }
 
