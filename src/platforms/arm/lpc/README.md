@@ -18,23 +18,29 @@ The LPC family currently covers two ARM cores:
 
 | Platform | Chip | CPU | Default Clock | Drivers Shipped | Status |
 |----------|------|-----|---------------|-----------------|--------|
-| **LPC845** | LPC845M301 | Cortex-M0+ @ 30 MHz | 30 MHz | Bit-bang (default) + optional SCT/PWM+DMA (#2850) | ✅ Compiles + AutoResearch RPC bring-up sketch ([#3041](https://github.com/FastLED/FastLED/pull/3041)); hardware sign-off pending [#2880](https://github.com/FastLED/FastLED/issues/2880) |
-| **LPC804** | LPC804M101 | Cortex-M0+ @ 15 MHz | 15 MHz | Bit-bang (default) + optional PLU (#2848) | ✅ Compiles + AutoResearch RPC bring-up sketch ([#3041](https://github.com/FastLED/FastLED/pull/3041)); hardware sign-off pending [#2880](https://github.com/FastLED/FastLED/issues/2880) |
+| **LPC845** | LPC845M301 | Cortex-M0+ @ 30 MHz | 30 MHz | Bit-bang (default) + optional SCT/PWM+DMA (#2850) | ✅ Compiles + AutoResearch RPC bring-up sketch ([#3041](https://github.com/FastLED/FastLED/pull/3041)); AutoResearch loopback verification pending [#2880](https://github.com/FastLED/FastLED/issues/2880) |
+| **LPC804** | LPC804M101 | Cortex-M0+ @ 15 MHz | 15 MHz | Bit-bang (default) + optional PLU (#2848) | ✅ Compiles + AutoResearch RPC bring-up sketch ([#3041](https://github.com/FastLED/FastLED/pull/3041)); AutoResearch loopback verification pending [#2880](https://github.com/FastLED/FastLED/issues/2880) |
 | **LPC11Uxx** | LPC11U24, LPC11U35 | Cortex-M0 | 12 MHz (IRC) | Shared LPC8xx fastpin + M0 C++ clockless (#2872) | ✅ Compiles; hardware bring-up pending |
 | **LPC11xx legacy** | LPC1110, LPC1112, LPC1114, LPC1115 | Cortex-M0 | — | Dedicated `fastpin_arm_lpc11_legacy.h` ([#2878](https://github.com/FastLED/FastLED/pull/2878)) + shared M0 C++ clockless | ✅ Compiles; hardware bring-up pending |
 | **LPC15xx** | LPC1517…LPC1549 | Cortex-M3 | 12 MHz (IRC) | Shared LPC8xx fastpin + M3-compatible C++ clockless (#2872) | ✅ Compiles; hardware bring-up pending |
 
-## Hardware sign-off checklist ([#2880](https://github.com/FastLED/FastLED/issues/2880))
+## Hardware verification via AutoResearch loopback ([#2880](https://github.com/FastLED/FastLED/issues/2880))
 
-Software side is shipped — what remains is field verification on an LPC845-BRK / LPCXpresso845 / LPC824 Lite. A maintainer with hardware can close [#2880](https://github.com/FastLED/FastLED/issues/2880) by walking the following:
+**No maintainer sign-off required.** Verification is fully automated: wire a TX↔RX jumper on the LPC845-BRK and run AutoResearch. The Python orchestrator asserts pass/fail from the JSON-RPC results that come back over the same serial link.
 
-1. `fbuild build lpc845 --examples Blink` flashes successfully.
-2. `examples/Blink/Blink.ino` lights a WS2812 strip on the default TX pin (scope trace optional but recommended — capture T0H/T0L/T1H/T1L and confirm they match `TimingTraits<WS2812Chipset>`).
-3. `bash autoresearch lpc845brk` reaches the device and the JSON-RPC `echo` round-trip succeeds (proves Serial + RPC harness intact).
-4. `pinToggleRx` reports `success=1` with σ < ~500 ns on a jumper-wire loopback (proves SCT-RX path intact — see [#3035](https://github.com/FastLED/FastLED/issues/3035) for the broader RX bench validation).
-5. Comment on [#2880](https://github.com/FastLED/FastLED/issues/2880) with `nm firmware.elf | grep aeabi_` output (should be empty after [#3038](https://github.com/FastLED/FastLED/pull/3038)) so the no-soft-FP invariant is confirmed in the field.
+Loopback setup:
 
-Once those five items have been logged, [#2880](https://github.com/FastLED/FastLED/issues/2880) closes and the table above flips its LPC845 / LPC804 rows from "sign-off pending" to "✅ hardware verified".
+1. `fbuild build lpc845 --examples AutoResearch` flashes the consolidated `examples/AutoResearch/AutoResearch.ino` (its low-memory mode auto-engages on LPC8xx via `FL_PLATFORM_HAS_LARGE_MEMORY == 0`).
+2. Jumper TX pin → RX pin externally on the LPC845-BRK header (default: `P0_10` → `P0_11`).
+
+What the harness asserts:
+
+- **`bash autoresearch lpc845brk --bring-up`** — `echo` RPC round-trips; FL_WARN literal reaches the host; proves Serial + JSON-RPC + log pipeline intact.
+- **`bash autoresearch lpc845brk --pin-toggle-rx`** — SCT input-capture latches a bit-banged square wave; orchestrator asserts mean ±2 % and σ thresholds across 1/10/100 kHz rates ([#3035](https://github.com/FastLED/FastLED/issues/3035) Phase 1).
+- **`bash autoresearch lpc845brk --ws2812-loopback`** — WS2812 byte-match: `FastLED.show()` drives 1/3/100 LEDs through the bit-bang clockless path, SCT-RX latches the wire, decoder asserts `mismatched == 0` ([#3035](https://github.com/FastLED/FastLED/issues/3035) Phase 2b).
+- **Link-symbol check** — `arm-none-eabi-nm -C firmware.elf | grep -E '(aeabi_d|aeabi_f|f2iz|d2iz|__l2f|__floatdisf)'` stays empty after [#3038](https://github.com/FastLED/FastLED/pull/3038). The harness can fold this into its reporting path so the no-soft-FP invariant is asserted on every run.
+
+Once all four run green against an LPC845-BRK with the loopback jumper, [#2880](https://github.com/FastLED/FastLED/issues/2880) closes and the table above flips its LPC845 / LPC804 rows to "✅ hardware verified". No human-eyeball scope trace required.
 
 ## Files (quick pass)
 
