@@ -12,7 +12,7 @@ NXP LPC microcontroller family support. Initial port landed in #2837 ([meta #283
 The LPC family currently covers two ARM cores:
 
 - **Cortex-M0+** (LPC845, LPC804) — bare-metal target via [fbuild](https://github.com/FastLED/fbuild) ≥ v2.2.18. Bit-banged clockless driver shipped; optional hardware-assisted drivers available per chip.
-- **Cortex-M0** (LPC11xx) and **Cortex-M3** (LPC15xx) — family **detection** is wired (`FL_LPC11`, `FL_LPC15`), but full driver wiring (`led_sysdefs`, `fastpin`, clockless) is pending hardware bring-up. See [#2845](https://github.com/FastLED/FastLED/issues/2845) Stage 4.
+- **Cortex-M0** (LPC11xx) and **Cortex-M3** (LPC15xx) — family **detection** is wired (`FL_IS_ARM_LPC_11`, `FL_IS_ARM_LPC_15`), but full driver wiring (`led_sysdefs`, `fastpin`, clockless) is pending hardware bring-up. See [#2845](https://github.com/FastLED/FastLED/issues/2845) Stage 4.
 
 ### Supported Platforms
 
@@ -34,7 +34,7 @@ The LPC family currently covers two ARM cores:
 - `spi_arm_lpc.h` — LPC845 / LPC804 hardware SPI driver for **APA102 / SK9822 / WS2801** clocked strips. Targets the LPC8xx SPI peripheral (UM11029 §"SPI") in master / MSB-first / mode-0 / 8-bit configuration. SPI0 default; users route to SPI1 via the `pSPIX` template arg. Pin routing through the LPC Switch Matrix is the user's responsibility (matching the bit-bang clockless driver's "FastPin sees raw GPIO" convention). Closes #2845 Stage 4 item 3.
 - `led_sysdefs_arm_lpc.h` — System defines (sets `FL_IS_ARM_M0_PLUS`, `F_CPU`, forces `FASTLED_M0_USE_C_IMPLEMENTATION`, includes `<LPC845.h>` / `<LPC804.h>` CMSIS device headers).
 - `fastpin_arm_lpc.h` — see above.
-- `is_lpc.h` — Detection macros (`FL_LPC845`, `FL_LPC804`, `FL_LPC11`, `FL_LPC15`, `FL_IS_ARM_LPC`).
+- `is_lpc.h` — Detection macros (`FL_IS_ARM_LPC_845`, `FL_IS_ARM_LPC_804`, `FL_IS_ARM_LPC_11`, `FL_IS_ARM_LPC_15`, `FL_IS_ARM_LPC`).
 - `int.h` — Integer type definitions.
 
 ## Optional feature defines
@@ -60,7 +60,7 @@ fbuild build lpc804 --examples Blink
 
 The fbuild assets (board JSON, linker script, SystemInit, vector table) live in `crates/fbuild-config/assets/boards/json/lpc8{04,45}.json` and `crates/fbuild-build/src/nxplpc/assets/` in the fbuild repo. The board-validation script ([fbuild#421/#422](https://github.com/FastLED/fbuild/issues/421)) explicitly tallies these as fbuild-native (no PlatformIO upstream).
 
-For LPC11xx and LPC15xx, no fbuild board entry exists yet; community contributors targeting those families with their own PlatformIO platform should expect to wire `led_sysdefs`, `fastpin`, and clockless headers per family before FastLED can compile against them. The hold is documented in `fastled_arm_lpc.h` — attempting to build with only `FL_LPC11` or `FL_LPC15` set emits a clear `#error` pointing here.
+For LPC11xx and LPC15xx, no fbuild board entry exists yet; community contributors targeting those families with their own PlatformIO platform should expect to wire `led_sysdefs`, `fastpin`, and clockless headers per family before FastLED can compile against them. The hold is documented in `fastled_arm_lpc.h` — attempting to build with only `FL_IS_ARM_LPC_11` or `FL_IS_ARM_LPC_15` set emits a clear `#error` pointing here.
 
 ## Detection scaffolds
 

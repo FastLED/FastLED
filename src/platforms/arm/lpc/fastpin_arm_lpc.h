@@ -22,14 +22,14 @@ FL_DISABLE_WARNING_DEPRECATED_REGISTER
 // LPC1115) which use the older "legacy GPIO" controller at 0x50000000 with
 // 12-bit masked-access semantics (UM10398). Those need their own fastpin
 // layout; emit a clear `#error` rather than silently mis-encoding.
-#if defined(FL_LPC11_LEGACY) && \
-    !(defined(FL_LPC845) || defined(FL_LPC804) || \
-      defined(FL_LPC11_USB) || defined(FL_LPC15))
+#if defined(FL_IS_ARM_LPC_11_LEGACY) && \
+    !(defined(FL_IS_ARM_LPC_845) || defined(FL_IS_ARM_LPC_804) || \
+      defined(FL_IS_ARM_LPC_11_USB) || defined(FL_IS_ARM_LPC_15))
 #error "FastLED LPC1110/1112/1114/1115 (legacy M0 GPIO at 0x50000000) driver wiring is a Stage 4 follow-up to #2845. The modern LPC8xx-style fastpin in this file does not apply. Either target LPC11U24/U35 / LPC845 / LPC804 / LPC15xx, or contribute the legacy-GPIO fastpin via #2845."
 #endif
 
-#if defined(FL_LPC845) || defined(FL_LPC804) || \
-    defined(FL_LPC11_USB) || defined(FL_LPC15)
+#if defined(FL_IS_ARM_LPC_845) || defined(FL_IS_ARM_LPC_804) || \
+    defined(FL_IS_ARM_LPC_11_USB) || defined(FL_IS_ARM_LPC_15)
 
 namespace fl {
 
@@ -146,7 +146,7 @@ _FL_DEFPIN(28); _FL_DEFPIN(29); _FL_DEFPIN(30); _FL_DEFPIN(31);
 
 }  // namespace fl
 
-#endif  // FL_LPC845 || FL_LPC804 || FL_LPC11_USB || FL_LPC15
+#endif  // FL_IS_ARM_LPC_845 || FL_IS_ARM_LPC_804 || FL_IS_ARM_LPC_11_USB || FL_IS_ARM_LPC_15
 
 FL_DISABLE_WARNING_POP
 

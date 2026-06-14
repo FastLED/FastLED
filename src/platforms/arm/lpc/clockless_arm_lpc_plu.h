@@ -33,7 +33,7 @@
 //
 //  Build-time opt-in
 //  -----------------
-//      -DFASTLED_LPC_PLU=1   (only honoured when FL_LPC804 is set)
+//      -DFASTLED_LPC_PLU=1   (only honoured when FL_IS_ARM_LPC_804 is set)
 //
 //  When the macro is set, this header registers itself ahead of the bit-banged
 //  C++ driver in `fastled_arm_lpc.h`. The LPC845 path (no PLU) is unaffected.
@@ -61,7 +61,7 @@
 #include "platforms/arm/is_arm.h"
 #include "platforms/arm/lpc/is_lpc.h"
 
-#if defined(FL_LPC804) && defined(FASTLED_LPC_PLU)
+#if defined(FL_IS_ARM_LPC_804) && defined(FASTLED_LPC_PLU)
 
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/noexcept.h"
@@ -401,5 +401,5 @@ private:
 
 }  // namespace fl
 
-#endif  // FL_LPC804 && FASTLED_LPC_PLU
+#endif  // FL_IS_ARM_LPC_804 && FASTLED_LPC_PLU
 #endif  // __INC_CLOCKLESS_ARM_LPC_PLU_H
