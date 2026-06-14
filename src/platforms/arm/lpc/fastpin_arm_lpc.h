@@ -18,14 +18,15 @@ FL_DISABLE_WARNING_DEPRECATED_REGISTER
 //   - LPC11Uxx     (LPC11U24 / LPC11U35)        — UM10462 §9   (#2845 Stage 4.1)
 //   - LPC15xx      (LPC15{17,18,19,47,48,49})   — UM11074      (#2845 Stage 4.2)
 //
-// Out of scope here: LPC11xx legacy parts (LPC1110 / LPC1112 / LPC1114 /
-// LPC1115) which use the older "legacy GPIO" controller at 0x50000000 with
-// 12-bit masked-access semantics (UM10398). Those need their own fastpin
-// layout; emit a clear `#error` rather than silently mis-encoding.
+// LPC11xx legacy parts (LPC1110 / LPC1112 / LPC1114 / LPC1115) use the
+// older "legacy GPIO" controller at 0x50000000 with 12-bit masked-access
+// semantics (UM10398). They route to a sibling header
+// `fastpin_arm_lpc11_legacy.h` rather than this file's modern 0xA0000000
+// templates -- the two layouts are not register-compatible.
 #if defined(FL_IS_ARM_LPC_11_LEGACY) && \
     !(defined(FL_IS_ARM_LPC_845) || defined(FL_IS_ARM_LPC_804) || \
       defined(FL_IS_ARM_LPC_11_USB) || defined(FL_IS_ARM_LPC_15))
-#error "FastLED LPC1110/1112/1114/1115 (legacy M0 GPIO at 0x50000000) driver wiring is a Stage 4 follow-up to #2845. The modern LPC8xx-style fastpin in this file does not apply. Either target LPC11U24/U35 / LPC845 / LPC804 / LPC15xx, or contribute the legacy-GPIO fastpin via #2845."
+#include "platforms/arm/lpc/fastpin_arm_lpc11_legacy.h"
 #endif
 
 #if defined(FL_IS_ARM_LPC_845) || defined(FL_IS_ARM_LPC_804) || \

@@ -27,13 +27,12 @@
 //                            full Thumb-2 encoding (no offset limit), but
 //                            the unified C++ path keeps the driver
 //                            surface consistent.
-//   FL_IS_ARM_LPC_11_LEGACY        — NOT supported. LPC1110/1112/1114/1115 use
-//                            the legacy GPIO controller at 0x50000000
-//                            with 12-bit masked-access semantics
-//                            (UM10398). The fastpin header emits a
-//                            #error if this family is detected without
-//                            an overlapping modern variant. Driver
-//                            wiring is a follow-up.
+//   FL_IS_ARM_LPC_11_LEGACY        — supported via dedicated
+//                            `fastpin_arm_lpc11_legacy.h` (#2878) + shared
+//                            M0 C++ clockless driver. The legacy parts
+//                            (LPC1110/1112/1114/1115) use the
+//                            0x50000000 GPIO controller with 12-bit
+//                            masked-access semantics per UM10398 sec. 9.
 
 // LPC845 has an optional PWM+DMA-to-GPIO clockless driver (Stage 2c of #2836,
 // see #2842). It is opt-in via FASTLED_LPC_PWM_DMA=1 because it consumes the
