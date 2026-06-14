@@ -73,7 +73,19 @@ public:
     int getPin() const FL_NOEXCEPT override;
     bool injectEdges(fl::span<const EdgeTime> edges) FL_NOEXCEPT override;
 
-    ~LpcSctRxChannel() override = default;
+    /// @brief Drain pending SCT capture events into the edge buffer.
+    /// @return Number of new EdgeTime entries pushed.
+    ///
+    /// Used by the FastLED #3021 pin-toggle test to interleave bit-bang
+    /// TX with capture-buffer drains on a single-threaded M0+ — without
+    /// it the SCT CAP[0..1] registers overwrite each prior capture
+    /// before `wait()` gets a chance to read them. With the SCT→DMA
+    /// upgrade (Phase 2 of #3021) the DMA fills the ring autonomously
+    /// and this method becomes a no-op fast-path. On non-LPC builds /
+    /// builds without `FASTLED_LPC_RX_SCT` it is a no-op stub.
+    fl::size pollOnce() FL_NOEXCEPT;
+
+    ~LpcSctRxChannel() FL_NOEXCEPT override;
 
 private:
     template<typename T, typename... Args>
@@ -83,7 +95,11 @@ private:
 
     int                   mPin;
     bool                  mFinished;
-    fl::vector<EdgeTime>  mEdges;  ///< RAM-backed capture buffer (DMA target in follow-up)
+    size_t                mCapacity;  ///< Cap on mEdges growth set by begin(config.buffer_size)
+    fl::u32               mPrevTick;  ///< Last SCT capture tick (driver-internal state for pollOnce)
+    bool                  mPrevSeen;  ///< Whether mPrevTick is valid
+    bool                  mLastRising;///< Direction of the last edge — used to label phase HIGH/LOW
+    fl::vector<EdgeTime>  mEdges;     ///< RAM-backed capture buffer (DMA target in follow-up)
 };
 
 } // namespace fl

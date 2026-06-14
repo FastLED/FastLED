@@ -88,6 +88,9 @@ class Args:
     # Decode autoresearch mode (host-only, no device needed)
     decode: str | None
 
+    # LPC845 SCT-RX bench (#3021 Phase 1) — pin-toggle TX→SCT-RX loopback validation.
+    pin_toggle_rx: bool
+
     # Multi-frame capture — number of back-to-back show()/capture cycles per pattern.
     # None = driver-default (SPI → 2, others → 1). Explicit value overrides.
     # See issues #2254 and #2288 (ESP32-S3 SPI second-frame degradation).
@@ -314,6 +317,20 @@ See Also:
             default=None,
             metavar="PATH_OR_URL",
             help="Decode a media file (local path or URL). Supported: .mp4 .mpeg .mpg .gif .jpg .jpeg .mp3 .webp",
+        )
+
+        # LPC845 SCT-RX bench (#3021 Phase 1). Mirrors --flex-io / --object-fled
+        # in shape but routes through the LPC bring-up sketch's pinToggleRx RPC.
+        lpc_group = parser.add_argument_group(
+            "LPC AutoResearch (SCT-RX)",
+            "Hardware-bench tests for the LPC845 SCT input-capture RX backend.",
+        )
+        lpc_group.add_argument(
+            "--pin-toggle-rx",
+            action="store_true",
+            help="LPC845-only: bit-bang TX → SCT-RX pin-toggle loopback "
+            "(closes Phase 1 of FastLED #3021). Requires a jumper from "
+            "--tx-pin (default P0_10) to --rx-pin (default P0_11).",
         )
 
         # Standard options
@@ -589,6 +606,7 @@ See Also:
             ble=parsed.ble,
             parallel=parsed.parallel,
             decode=parsed.decode,
+            pin_toggle_rx=parsed.pin_toggle_rx,
             frames=parsed.frames,
             tight_timing=parsed.tight_timing,
             tight_timing_iterations=parsed.tight_timing_iterations,
