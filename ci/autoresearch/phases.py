@@ -1505,13 +1505,20 @@ async def _run_bring_up_tests(ctx: RunContext) -> int:
         # Look for the echo result
         result_token = f'"result":{sentinel}'.encode()
         echo_ok = result_token in accumulated
-        # Look for the FL_DBG line from fl::Remote
+        # Look for the FL_DBG line from fl::Remote (only present when
+        # FASTLED_FORCE_DBG or LARGE_MEMORY — bonus signal, not required)
         dbg_token = b"Stored request ID for echo"
         log_ok = dbg_token in accumulated
+        # Look for the FL_WARN_LIT marker the bring-up sketch emits during
+        # setup(). This works on Low-memory targets (FastLED #3002) because
+        # FL_WARN_LIT routes through fl::println(const char*) without the
+        # sstream/log_emit machinery.
+        warn_token = b"FL_WARN: LPC845 bring-up OK"
+        warn_ok = warn_token in accumulated
         # Look for the REMOTE: prefix proving Serial.println via the sink
         remote_ok = b"REMOTE: " in accumulated
 
-        passed = echo_ok and remote_ok
+        passed = echo_ok and remote_ok and warn_ok
         if passed:
             print(f"{Fore.GREEN}BRING-UP TEST PASSED{Style.RESET_ALL}")
             print(
@@ -1525,16 +1532,24 @@ async def _run_bring_up_tests(ctx: RunContext) -> int:
                 else f"   ❌ JSON-RPC echo — result mismatch"
             )
             print(
-                f"   ✅ FastLED log pipeline — FL_DBG emitted via same Serial transport"
+                f"   ✅ FL_WARN_LIT — FastLED warn pipeline reached host"
+                if warn_ok
+                else f"   ❌ FL_WARN_LIT — warning literal not observed"
+            )
+            print(
+                f"   ✅ FL_DBG — full log pipeline (bonus, LARGE_MEMORY only)"
                 if log_ok
-                else f"   ⚠️  FastLED log pipeline — FL_DBG line not observed"
-                "  (may be optimized out in release builds without FASTLED_FORCE_DBG)"
+                else f"   ⚠️  FL_DBG — full pipeline not active"
+                "  (expected on Low-memory targets — FL_WARN_LIT is the gate)"
             )
             print()
             return 0
         else:
             print(f"{Fore.RED}BRING-UP TEST FAILED{Style.RESET_ALL}")
-            print(f"   echo_ok={echo_ok} remote_ok={remote_ok} log_ok={log_ok}")
+            print(
+                f"   echo_ok={echo_ok} remote_ok={remote_ok} "
+                f"warn_ok={warn_ok} log_ok={log_ok}"
+            )
             return 1
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)

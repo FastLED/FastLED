@@ -105,6 +105,18 @@
   #define FASTLED_LOG_RUNTIME_ENABLED 0
 #endif
 
+// Lite gate for FL_WARN_LIT / FL_LOG_LIT — string-literal-only macros that
+// route through fl::println without the sstream / operator<< / log_emit
+// chain. These are intentionally usable on Low-memory targets (LPC845,
+// AVR, ATtiny) where the full FL_WARN pipeline is too expensive — the
+// caller pays for one `fl::println(const char*)` symbol and the literal
+// bytes, nothing more. See FastLED #3002 (LPC845 bring-up).
+#if FASTLED_LOG_VERBOSITY >= 1
+  #define FASTLED_LOG_LITE_ENABLED 1
+#else
+  #define FASTLED_LOG_LITE_ENABLED 0
+#endif
+
 // =============================================================================
 // Forward Declarations
 // =============================================================================
@@ -245,16 +257,9 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 #define FL_WARN_FMT(X) FL_WARN(X)
 #define FL_WARN_FMT_IF(COND, MSG) FL_WARN_IF(COND, MSG)
 
-// FL_WARN_LIT: Minimal-overhead variant for literal-only messages. Bypasses
-// the fl::sstream + operator<< chain that FL_WARN inlines at every call
-// site, and drops the `__FILE__(__LINE__): WARN:` prefix (the literal
-// itself should identify the origin, e.g. "[RMT] ..."). Use at well-known
-// WARN sites where the message is a fixed string and the byte budget
-// matters. See FastLED #2856 item 3.2. The non-literal FL_WARN remains
-// available for sites that need operator<< formatting or the file/line
-// prefix.
-#define FL_WARN_LIT(LITERAL) fl::println(LITERAL)
-#define FL_LOG_LIT(LITERAL) fl::println(LITERAL)
+// FL_WARN_LIT: defined below outside the FASTLED_LOG_RUNTIME_ENABLED block —
+// gated on FASTLED_LOG_LITE_ENABLED so it stays available on Low-memory
+// targets. See "Lite-variant literal macros" section below.
 
 // FL_WARN_EVERY: Rate-limited warning that prints at most once per interval
 // Uses static timestamp to track last print time - throttles output in tight loops
@@ -274,8 +279,20 @@ void log_emit(log_kind kind, const char* file, int line, fl::sstream& body) FL_N
 #define FL_WARN_FMT(X) do { } while(0)
 #define FL_WARN_FMT_IF(COND, MSG) do { } while(0)
 #define FL_WARN_EVERY(MILLIS, X) do { } while(0)
+#endif
+#endif
+
+// Lite-variant literal macros: gated on FASTLED_LOG_LITE_ENABLED so they
+// remain usable on Low-memory targets where the full FL_WARN chain is a
+// no-op. Use these at well-known WARN sites where the message is a fixed
+// string and the byte budget matters (FastLED #2856 item 3.2, #3002).
+#ifndef FL_WARN_LIT
+#if FASTLED_LOG_LITE_ENABLED
+#define FL_WARN_LIT(LITERAL) fl::println(LITERAL)
+#define FL_LOG_LIT(LITERAL)  fl::println(LITERAL)
+#else
 #define FL_WARN_LIT(LITERAL) do { } while(0)
-#define FL_LOG_LIT(LITERAL) do { } while(0)
+#define FL_LOG_LIT(LITERAL)  do { } while(0)
 #endif
 #endif
 

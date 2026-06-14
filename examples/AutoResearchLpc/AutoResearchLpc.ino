@@ -41,6 +41,7 @@
 #include "fl/remote/remote.h"
 #include "fl/remote/transport/serial.h"
 #include "fl/wdt/watchdog.h"
+#include "fl/log/log.h"
 
 namespace {
 fl::Remote* g_remote = nullptr;
@@ -54,6 +55,13 @@ void setup() {
     // short enough that "device is dead" reboots within human attention
     // span during bring-up debugging. See FastLED #3002 follow-up.
     fl::Watchdog::instance().begin(3000);
+
+    // Emit a literal-only warning so the autoresearch harness can verify
+    // the FL_WARN log pipeline reaches the host. `FL_WARN_LIT` bypasses
+    // the full sstream/log_emit chain (which is no-op'd on Low-memory
+    // targets) and goes straight to `fl::println(const char*)`, so it
+    // works on the LPC845 flash budget. See FastLED #3002.
+    FL_WARN_LIT("FL_WARN: LPC845 bring-up OK");
 
     static fl::Remote remote(
         fl::createSerialRequestSource(),
