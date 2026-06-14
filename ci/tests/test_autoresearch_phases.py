@@ -51,6 +51,7 @@ def _make_args(**overrides) -> Args:
         lcd_rgb=False,
         object_fled=False,
         flex_io=False,
+        lpuart=False,
         all=False,
         simd=False,
         coroutine=False,
@@ -89,6 +90,8 @@ def _make_args(**overrides) -> Args:
         tight_timing=False,
         tight_timing_iterations=8,
         tight_timing_max_overhead_us=2000,
+        pin_toggle_rx=False,
+        ws2812_loopback=False,
     )
     defaults.update(overrides)
     return Args(**defaults)
@@ -202,6 +205,7 @@ class TestParseArgsAndBuildCommands:
             "LCD_RGB",
             "OBJECT_FLED",
             "FLEX_IO",
+            "LPUART",
         }
 
     def test_multiple_drivers(self, fake_project_dir: Path) -> None:
