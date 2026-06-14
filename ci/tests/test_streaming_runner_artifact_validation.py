@@ -84,9 +84,7 @@ class TestValidateTestArtifact(unittest.TestCase):
 
             # Stale case
             dll.write_bytes(b"old")
-            stale = validate_test_artifact(
-                dll, dll.stat().st_mtime + 5.0
-            )
+            stale = validate_test_artifact(dll, dll.stat().st_mtime + 5.0)
             assert isinstance(stale, TestResult)
             self.assertIn("zccache stop", stale.output)
 
