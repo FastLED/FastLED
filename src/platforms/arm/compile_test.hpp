@@ -33,13 +33,14 @@ static void arm_compile_tests() {
     #if SKETCH_HAS_HUGE_MEMORY != 1
     #error "SKETCH_HAS_HUGE_MEMORY should be 1 for Teensy 3.5/3.6/4.x"
     #endif
-#elif defined(FL_IS_TEENSY_LC) || defined(ARDUINO_ARCH_RENESAS_UNO) || defined(STM32F1)
-    // Teensy LC, Renesas UNO, and STM32F1 have limited memory
+#elif defined(FL_IS_TEENSY_LC) || defined(ARDUINO_ARCH_RENESAS_UNO) || defined(STM32F1) \
+   || defined(FL_IS_ARM_LPC)
+    // Teensy LC, Renesas UNO, STM32F1, and LPC8xx have limited memory
     #if SKETCH_HAS_LARGE_MEMORY != 0
-    #error "SKETCH_HAS_LARGE_MEMORY should be 0 for Teensy LC, Renesas UNO, and STM32F1"
+    #error "SKETCH_HAS_LARGE_MEMORY should be 0 for Teensy LC, Renesas UNO, STM32F1, and LPC8xx"
     #endif
     #if SKETCH_HAS_HUGE_MEMORY != 0
-    #error "SKETCH_HAS_HUGE_MEMORY should be 0 for Teensy LC, Renesas UNO, and STM32F1"
+    #error "SKETCH_HAS_HUGE_MEMORY should be 0 for Teensy LC, Renesas UNO, STM32F1, and LPC8xx"
     #endif
 #elif defined(ARDUINO_ARCH_RP2040) || defined(PICO_RP2040) || defined(PICO_RP2350) \
    || defined(__SAMD51__) \
