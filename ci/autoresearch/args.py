@@ -91,6 +91,9 @@ class Args:
     # LPC845 SCT-RX bench (#3021 Phase 1) — pin-toggle TX→SCT-RX loopback validation.
     pin_toggle_rx: bool
 
+    # LPC845 SCT-RX bench (#3021 Phase 2) — WS2812 byte-match loopback.
+    ws2812_loopback: bool
+
     # Multi-frame capture — number of back-to-back show()/capture cycles per pattern.
     # None = driver-default (SPI → 2, others → 1). Explicit value overrides.
     # See issues #2254 and #2288 (ESP32-S3 SPI second-frame degradation).
@@ -331,6 +334,14 @@ See Also:
             help="LPC845-only: bit-bang TX → SCT-RX pin-toggle loopback "
             "(closes Phase 1 of FastLED #3021). Requires a jumper from "
             "--tx-pin (default P0_10) to --rx-pin (default P0_11).",
+        )
+        lpc_group.add_argument(
+            "--ws2812-loopback",
+            action="store_true",
+            help="LPC845-only: WS2812 byte-match loopback via "
+            "FastLED.show() (bit-bang TX) → SCT input-capture RX "
+            "(FastLED #3021 Phase 2). Requires the sketch to be built "
+            "with -DFASTLED_LPC_RX_SCT_WS2812=1.",
         )
 
         # Standard options
@@ -607,6 +618,7 @@ See Also:
             parallel=parsed.parallel,
             decode=parsed.decode,
             pin_toggle_rx=parsed.pin_toggle_rx,
+            ws2812_loopback=parsed.ws2812_loopback,
             frames=parsed.frames,
             tight_timing=parsed.tight_timing,
             tight_timing_iterations=parsed.tight_timing_iterations,

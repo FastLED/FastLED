@@ -1181,6 +1181,12 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
         # loopback bench instead of the default echo bring-up.
         if getattr(ctx.args, "pin_toggle_rx", False):
             return await _run_lpc_pin_toggle_rx_tests(ctx)
+        # FastLED #3021 Phase 2: --ws2812-loopback runs the WS2812
+        # byte-match loopback bench. Requires the sketch to be
+        # rebuilt with -DFASTLED_LPC_RX_SCT_WS2812=1 (gated due to
+        # flash budget — see issue #3002).
+        if getattr(ctx.args, "ws2812_loopback", False):
+            return await _run_lpc_ws2812_loopback_tests(ctx)
         return await _run_bring_up_tests(ctx)
 
     # GPIO-only mode
@@ -1610,6 +1616,48 @@ async def _run_lpc_pin_toggle_rx_tests(ctx: RunContext) -> int:
         "run",
         "python",
         "ci/autoresearch/test_lpc_pin_toggle_rx.py",
+        "--port",
+        upload_port,
+        "--tx-pin",
+        str(tx_pin),
+        "--rx-pin",
+        str(rx_pin),
+    ]
+    result = subprocess.run(cmd)
+    return 0 if result.returncode == 0 else 1
+
+
+async def _run_lpc_ws2812_loopback_tests(ctx: RunContext) -> int:
+    """Run the FastLED #3021 Phase-2 SCT-RX WS2812 byte-match bench.
+
+    Delegates to `ci/autoresearch/test_lpc_ws2812_loopback.py`. The
+    sketch must be built with `-DFASTLED_LPC_RX_SCT_WS2812=1` for the
+    `ws2812SctTest` RPC to be bound — without that flag the RPC is
+    absent from the sketch's `fl::Remote` registry and the orchestrator
+    will report `no response` for every test case. This is by design:
+    the WS2812 driver pulls in `<FastLED.h>` which overflows the
+    LPC845 64 KB flash budget until #3002 (fl::json soft-FP cleanup)
+    lands.
+    """
+    upload_port = ctx.upload_port
+    assert upload_port is not None
+
+    tx_pin = ctx.args.tx_pin if ctx.args.tx_pin is not None else 10
+    rx_pin = ctx.args.rx_pin if ctx.args.rx_pin is not None else 11
+
+    print()
+    print("=" * 60)
+    print("LPC SCT-RX MODE — WS2812 byte-match loopback (#3021 Phase 2)")
+    print(f"   Wiring required: jumper P0_{tx_pin} ↔ P0_{rx_pin} on LPC845-BRK")
+    print("   Sketch must be built with -DFASTLED_LPC_RX_SCT_WS2812=1")
+    print("=" * 60)
+    print()
+
+    cmd = [
+        "uv",
+        "run",
+        "python",
+        "ci/autoresearch/test_lpc_ws2812_loopback.py",
         "--port",
         upload_port,
         "--tx-pin",
