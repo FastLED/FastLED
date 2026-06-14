@@ -125,6 +125,12 @@ public:
 
         const u32 bytes_per_led = is_rgbw ? 4u : 3u;
         // 4 UART bytes per LED byte (2-bit-per-frame wave8 packing).
+        // Reject configurations whose buffer size cannot be represented in u32 —
+        // otherwise the multiplication wraps and we allocate an undersized TX
+        // buffer while still returning a seemingly-valid instance (CodeRabbit).
+        if (total_leds > (0xFFFFFFFFu / bytes_per_led) / 4u) {
+            return nullptr;
+        }
         const u32 buffer_bytes = total_leds * bytes_per_led * 4u;
         auto instance = fl::make_unique<LPUARTInstanceMock>(buffer_bytes);
         mLastInstance = instance.get();
