@@ -1225,4 +1225,149 @@ FL_TEST_CASE("wave8Transpose_16x4_pipe4 == four sequential wave8Transpose_16 (ra
     }
 }
 
+// =============================================================================
+// Cross-driver wave8 regression tests (issue #3023 workstream B).
+//
+// Every wave8-using driver (parlio, i2s, uart, spi, future lpuart) packs LED
+// bits through the shared `Wave8BitExpansionLut` / `Wave8ByteExpansionLut`
+// pipeline. A bug in the LUT builders corrupts every driver simultaneously.
+// The original "matches nibble path" test only walked one synthetic timing —
+// a regression that only shows up at a real chipset's bit distribution would
+// have slipped through. The cases below widen the matrix to the real timings
+// the project actually ships.
+// =============================================================================
+
+namespace {
+
+template <typename TRAIT>
+ChipsetTiming makeRealTiming() {
+    ChipsetTiming t;
+    t.T1 = TRAIT::T1;
+    t.T2 = TRAIT::T2;
+    t.T3 = TRAIT::T3;
+    return t;
+}
+
+struct RealTimingEntry {
+    const char* name;
+    ChipsetTiming timing;
+};
+
+}  // namespace
+
+FL_TEST_CASE("Wave8 byte LUT == nibble LUT for all 256 bytes across real chipsets") {
+    // Covers the wave8-using chipset families with distinct T1/T2/T3 ratios:
+    //  - 800 kHz: WS2812, WS2812B-V5, SK6812 RGBW, UCS1903B, TM1809, PL9823.
+    //  - 400 kHz: WS2811, WS2815 (overclockable), UCS1903_400KHZ.
+    const RealTimingEntry entries[] = {
+        {"WS2812_800KHZ",   makeRealTiming<TIMING_WS2812_800KHZ>()},
+        {"WS2812B_V5",      makeRealTiming<TIMING_WS2812B_V5>()},
+        {"WS2813",          makeRealTiming<TIMING_WS2813>()},
+        {"SK6812",          makeRealTiming<TIMING_SK6812>()},
+        {"UCS1903B_800KHZ", makeRealTiming<TIMING_UCS1903B_800KHZ>()},
+        {"TM1809_800KHZ",   makeRealTiming<TIMING_TM1809_800KHZ>()},
+        {"PL9823",          makeRealTiming<TIMING_PL9823>()},
+        {"WS2811_400KHZ",   makeRealTiming<TIMING_WS2811_400KHZ>()},
+        {"WS2815",          makeRealTiming<TIMING_WS2815>()},
+        {"UCS1903_400KHZ",  makeRealTiming<TIMING_UCS1903_400KHZ>()},
+    };
+
+    for (const auto& entry : entries) {
+        Wave8BitExpansionLut nibble = buildWave8ExpansionLUT(entry.timing);
+        Wave8ByteExpansionLut byteLut = buildWave8ByteExpansionLUT(nibble);
+
+        for (int b = 0; b < 256; ++b) {
+            Wave8Byte ref;
+            Wave8Byte got;
+            detail::wave8_convert_byte_to_wave8byte(static_cast<u8>(b), nibble, &ref);
+            detail::wave8_expand_byte(static_cast<u8>(b), byteLut, &got);
+            for (int s = 0; s < 8; ++s) {
+                FL_INFO("chipset=" << entry.name << " byte=0x" << b
+                        << " symbol=" << s);
+                FL_REQUIRE(got.symbols[s].data == ref.symbols[s].data);
+            }
+        }
+    }
+}
+
+FL_TEST_CASE("Wave8 bit cell starts HIGH and ends LOW for every real chipset") {
+    // The wave8 wire shape — every bit cell starts HIGH (T1 phase) and ends
+    // LOW (T3 phase) — is the framing constraint that lets an inverted UART
+    // (#3023 workstream A: `Bus::LPUART`) carry wave8 traffic byte-by-byte.
+    // Pinning the invariant here means a future timing-table edit can't
+    // quietly invalidate the assumption the LPUART canHandle() rests on.
+    const RealTimingEntry entries[] = {
+        {"WS2812_800KHZ",   makeRealTiming<TIMING_WS2812_800KHZ>()},
+        {"WS2812B_V5",      makeRealTiming<TIMING_WS2812B_V5>()},
+        {"WS2813",          makeRealTiming<TIMING_WS2813>()},
+        {"SK6812",          makeRealTiming<TIMING_SK6812>()},
+        {"UCS1903B_800KHZ", makeRealTiming<TIMING_UCS1903B_800KHZ>()},
+        {"TM1809_800KHZ",   makeRealTiming<TIMING_TM1809_800KHZ>()},
+        {"PL9823",          makeRealTiming<TIMING_PL9823>()},
+        {"WS2811_400KHZ",   makeRealTiming<TIMING_WS2811_400KHZ>()},
+        {"WS2815",          makeRealTiming<TIMING_WS2815>()},
+        {"UCS1903_400KHZ",  makeRealTiming<TIMING_UCS1903_400KHZ>()},
+    };
+
+    for (const auto& entry : entries) {
+        Wave8ByteExpansionLut lut = buildWave8ByteExpansionLUT(
+            buildWave8ExpansionLUT(entry.timing));
+
+        // byte 0xFF: first symbol's MSB is the very first pulse on the wire;
+        // last symbol's LSB is the last pulse. Both must satisfy the topology.
+        const Wave8Byte& all_ones = lut.lut[0xFF];
+        FL_INFO("chipset=" << entry.name << " byte=0xFF first pulse HIGH");
+        FL_REQUIRE((all_ones.symbols[0].data & 0x80) != 0);
+        FL_INFO("chipset=" << entry.name << " byte=0xFF last pulse LOW");
+        FL_REQUIRE((all_ones.symbols[7].data & 0x01) == 0);
+
+        // byte 0x00: same framing invariant on the all-zeros path.
+        const Wave8Byte& all_zeros = lut.lut[0x00];
+        FL_INFO("chipset=" << entry.name << " byte=0x00 first pulse HIGH");
+        FL_REQUIRE((all_zeros.symbols[0].data & 0x80) != 0);
+        FL_INFO("chipset=" << entry.name << " byte=0x00 last pulse LOW");
+        FL_REQUIRE((all_zeros.symbols[7].data & 0x01) == 0);
+    }
+}
+
+FL_TEST_CASE("wave8Transpose_4 matches between nibble LUT and byte LUT") {
+    // Transposing drivers (parlio multi-lane TX, future lpuart fan-out) take
+    // one of two `wave8Transpose_N` overloads. Drift between them is a silent
+    // cross-driver compat break.
+    const RealTimingEntry entries[] = {
+        {"WS2812_800KHZ", makeRealTiming<TIMING_WS2812_800KHZ>()},
+        {"SK6812",        makeRealTiming<TIMING_SK6812>()},
+        {"WS2811_400KHZ", makeRealTiming<TIMING_WS2811_400KHZ>()},
+    };
+
+    const uint8_t lane_patterns[][4] = {
+        {0xFF, 0x00, 0xFF, 0x00},
+        {0x00, 0xFF, 0x00, 0xFF},
+        {0xAA, 0x55, 0xAA, 0x55},
+        {0xDE, 0xAD, 0xBE, 0xEF},
+    };
+
+    for (const auto& entry : entries) {
+        Wave8BitExpansionLut nibble_lut = buildWave8ExpansionLUT(entry.timing);
+        Wave8ByteExpansionLut byte_lut = buildWave8ByteExpansionLUT(nibble_lut);
+
+        for (const auto& lanes : lane_patterns) {
+            uint8_t out_nibble[4 * sizeof(Wave8Byte)] = {};
+            uint8_t out_byte[4 * sizeof(Wave8Byte)] = {};
+
+            wave8Transpose_4(lanes, nibble_lut, out_nibble);
+            wave8Transpose_4(lanes, byte_lut, out_byte);
+
+            FL_INFO("chipset=" << entry.name
+                    << " lanes={0x" << static_cast<int>(lanes[0])
+                    << ",0x" << static_cast<int>(lanes[1])
+                    << ",0x" << static_cast<int>(lanes[2])
+                    << ",0x" << static_cast<int>(lanes[3]) << "}");
+            for (int i = 0; i < 4 * static_cast<int>(sizeof(Wave8Byte)); ++i) {
+                FL_REQUIRE(out_nibble[i] == out_byte[i]);
+            }
+        }
+    }
+}
+
 } // FL_TEST_FILE
