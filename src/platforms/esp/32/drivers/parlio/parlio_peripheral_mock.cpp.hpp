@@ -141,11 +141,22 @@ private:
     size_t mDeferredCallbackCount;
     bool mFiringCallbacks;  // Re-entrancy guard
 
+    // Re-entrancy guard for settleEngineState(), which calls
+    // ParlioEngine::poll() — and poll() itself calls waitAllDone(0), which
+    // can re-enter settleEngineState().
+    bool mSettlingEngine;
+
     /// Fire the ISR callback synchronously
     void fireCallback() FL_NOEXCEPT;
 
     /// Pump all deferred callbacks (called from delay/poll points)
     void pumpDeferredCallbacks() FL_NOEXCEPT;
+
+    /// Drive ParlioEngine::poll() once to settle the engine's async state
+    /// (mTransmitting / mStreamComplete) at a transmit boundary. See the
+    /// comment in waitAllDone() for why this is needed in the
+    /// post-#2992 async engine.
+    void settleEngineState() FL_NOEXCEPT;
 };
 
 //=============================================================================
@@ -175,7 +186,8 @@ ParlioPeripheralMockImpl::ParlioPeripheralMockImpl() FL_NOEXCEPT
       mPendingTransmissions(0),
       mSimulatedTimeUs(0),
       mDeferredCallbackCount(0),
-      mFiringCallbacks(false) {
+      mFiringCallbacks(false),
+      mSettlingEngine(false) {
 }
 
 ParlioPeripheralMockImpl::~ParlioPeripheralMockImpl() {
@@ -196,6 +208,12 @@ bool ParlioPeripheralMockImpl::initialize(const ParlioPeripheralConfig& config) 
 }
 
 bool ParlioPeripheralMockImpl::deinitialize() FL_NOEXCEPT {
+    // Settle engine state before tearing the peripheral down. The engine's
+    // own initialize() re-init path (parlio_engine.cpp.hpp:1411) hits
+    // deinitialize() between transmissions without first calling poll(), so
+    // this is the natural place to clear any leftover async state. See
+    // waitAllDone() for the full rationale.
+    settleEngineState();
     mInitialized = false;
     mEnabled = false;
     return true;
@@ -278,9 +296,35 @@ bool ParlioPeripheralMockImpl::waitAllDone(u32 timeout_ms) FL_NOEXCEPT {
         FL_WARN("ParlioPeripheralMock: Cannot wait - not initialized");
         return false;
     }
-    // Everything completes synchronously in the mock
+    // GAP CLOSURE (#2992 follow-up):
+    //
+    // Real ESP-IDF parlio_tx_unit_wait_all_done() blocks until the DMA queue
+    // drains and the per-buffer txDone ISRs fire. After #2992 the engine
+    // moved mTransmitting clearing out of the txDone ISR and into poll() —
+    // so on real hardware too, returning from waitAllDone() does NOT by
+    // itself clear mTransmitting; a poll() tick is also required.
+    //
+    // The mock has always fired txDone callbacks synchronously inside
+    // transmit(), so by the time we get here every callback has run and
+    // mStreamComplete is set. The only piece missing is the poll() tick.
+    // Drive it here so consecutive beginTransmission() calls don't observe
+    // a stuck mTransmitting=true from the previous frame.
+    settleEngineState();
     mTransmitting = false;
     return mPendingTransmissions == 0;
+}
+
+void ParlioPeripheralMockImpl::settleEngineState() FL_NOEXCEPT {
+    // Single-threaded re-entrancy guard: ParlioEngine::poll() calls
+    // waitAllDone(0), which would call us again.
+    if (mSettlingEngine) {
+        return;
+    }
+    mSettlingEngine = true;
+    // One poll() tick is sufficient when mStreamComplete is already set
+    // (the common path here); when nothing is pending it's a cheap no-op.
+    ParlioEngine::getInstance().poll();
+    mSettlingEngine = false;
 }
 
 //=============================================================================
@@ -465,6 +509,7 @@ void ParlioPeripheralMockImpl::reset() FL_NOEXCEPT {
     mSimulatedTimeUs = 0;
     mDeferredCallbackCount = 0;
     mFiringCallbacks = false;
+    mSettlingEngine = false;
 }
 
 //=============================================================================
