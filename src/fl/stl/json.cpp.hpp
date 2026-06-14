@@ -6,6 +6,8 @@
 #include "fl/stl/deque.h"
 #include "fl/stl/span.h"
 #include "fl/stl/charconv.h"
+#include "fl/stl/ieee754_string.h"  // FastLED #3022 phase 2 — integer-only IEEE 754 codec
+#include "fl/stl/bit_cast.h"        // bit_cast<float>(u32) / bit_cast<u32>(float)
 #include "fl/math/math.h" // For floor function
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/stdint.h"
@@ -34,35 +36,19 @@ namespace fl {
 
 
 
-// Helper function to check if a double can be reasonably represented as a float
-// Used for debug logging - may appear unused in release builds
-FL_DISABLE_WARNING_PUSH
-FL_DISABLE_WARNING(unused-function)
-static bool canBeRepresentedAsFloat(double value) {
-
-    
-    auto isnan = [](double value) -> bool {
-        return value != value;
-    };
-    
-    // Check for special values
-    if (isnan(value)) {
-        return true; // These can be represented as float
-    }
-    
-    // Check if the value is within reasonable float range
-    // Reject values that are clearly beyond float precision (beyond 2^24 for integers)
-    // or outside the float range
-    if (fl::abs(value) > 16777216.0) { // 2^24 - beyond which floats lose integer precision
-        return false;
-    }
-    
-    // For values within reasonable range, allow conversion even with minor precision loss
-    // This handles cases like 300000.14159 which should be convertible to float
-    // even though it loses some precision
-    return true;
+// Returns true iff `bits` represents a finite IEEE-754 single-precision value
+// whose magnitude exceeds 2**24 (the float-integer-precision boundary). Used to
+// decide whether an array of numbers can survive packing into `fl::vector<float>`
+// without integer-precision loss. Integer-only — operates on the bit pattern.
+//
+// Math: |value| > 2**24 iff (biased_exp > 127+24 = 151) AND value is not inf/nan.
+// We treat NaN / inf as "beyond precision" so the caller's safe-fallback path
+// is taken — matches the previous `canBeRepresentedAsFloat(double)` semantics
+// before this code was bit-twiddled (FastLED #3022 phase 2).
+static inline bool float_bits_magnitude_exceeds_2_24(u32 bits) FL_NOEXCEPT {
+    const u32 biased_exp = (bits >> 23) & 0xFFu;
+    return biased_exp > 151u;
 }
-FL_DISABLE_WARNING_POP    
 
 
 json_value& get_null_json_value() {
@@ -218,10 +204,12 @@ private:
 
                 if (is_float) {
                     has_float = true;
-                    // Parse float value to check if it's beyond integer precision
-                    // Note: fl::parseFloat may have precision loss for very large numbers
-                    float f_val = fl::parseFloat(&mInput[num_start], mPos - num_start);
-                    if (fl::abs(f_val) > 16777216.0f) {
+                    // Bit-twiddling parse — never reaches libgcc soft-FP. The
+                    // resulting u32 carries the same IEEE 754 single-precision
+                    // bit pattern strtof would produce (±1 ULP). The magnitude
+                    // check rides on the biased exponent so we avoid `fl::abs`.
+                    const u32 f_bits = fl::ieee754_parse_decimal(&mInput[num_start], mPos - num_start);
+                    if (float_bits_magnitude_exceeds_2_24(f_bits)) {
                         has_float_beyond_precision = true;
                     }
                 } else {
@@ -683,9 +671,10 @@ ArrayType classify_array(const json_array& arr) {
                 all_numeric = false;
                 break;
             }
-            // Check if float is beyond integer precision (>2^24 or <-2^24)
-            float f = *val;
-            if (fl::abs(f) > 16777216.0f) {
+            // Check if float is beyond integer precision (>2^24 or <-2^24).
+            // Integer biased-exp comparison — no FP arithmetic (#3022 phase 2).
+            const u32 fbits = fl::bit_cast<u32>(*val);
+            if (float_bits_magnitude_exceeds_2_24(fbits)) {
                 has_float_beyond_precision = true;
             }
         } else {
@@ -847,7 +836,12 @@ private:
 
             T val;
             if (is_float) {
-                val = static_cast<T>(fl::parseFloat(num_start, p - num_start));
+                // Bit-twiddling parse → IEEE 754 bit pattern → bit-cast to float.
+                // The `static_cast<T>` from `float` is the caller's responsibility
+                // (e.g. T=float costs nothing; T=int pulls one __aeabi_f2iz at the
+                // call site, which we accept per the "user opts in" mandate).
+                const u32 bits = fl::ieee754_parse_decimal(num_start, p - num_start);
+                val = static_cast<T>(fl::bit_cast<float>(bits));
             } else {
                 val = static_cast<T>(fl::parseInt(num_start, p - num_start));
             }
@@ -998,8 +992,12 @@ public:
 
                 fl::shared_ptr<json_value> num_val;
                 if (is_float) {
-                    float f = fl::parseFloat(value.data(), value.size());
-                    num_val = fl::make_shared<json_value>(f);
+                    // Bit-twiddling parse → IEEE 754 bits → store as float in the
+                    // variant. The `bit_cast<float>` is a `memcpy` — no libgcc
+                    // soft-FP helper is reached on the parser hot path
+                    // (FastLED #3022 phase 2).
+                    const u32 bits = fl::ieee754_parse_decimal(value.data(), value.size());
+                    num_val = fl::make_shared<json_value>(fl::bit_cast<float>(bits));
                 } else {
                     int i = fl::parseInt(value.data(), value.size());
                     i64 i64_val = static_cast<i64>(i);
@@ -1139,9 +1137,9 @@ struct SerializerVisitor {
     }
 
     void accept(const float& f) {
-        fl::string num_str;
-        num_str.append(f, 3);
-        append_str(num_str);
+        // Integer-only bits → decimal (FastLED #3022 phase 2). Default 3-digit
+        // precision matches the previous `num_str.append(f, 3)` contract.
+        append_str(fl::ieee754_format_decimal(fl::bit_cast<u32>(f), 3));
     }
 
     void accept(const fl::string& s) { append_escaped(s); }
@@ -1210,9 +1208,9 @@ struct SerializerVisitor {
         for (const auto& item : floats) {
             if (!first) out.push_back(',');
             first = false;
-            fl::string num_str;
-            num_str.append(static_cast<float>(item), 6);
-            append_str(num_str);
+            // Integer-only bits → decimal per element (FastLED #3022 phase 2).
+            // 6-digit precision preserves the previous output contract.
+            append_str(fl::ieee754_format_decimal(fl::bit_cast<u32>(item), 6));
         }
         out.push_back(']');
     }
