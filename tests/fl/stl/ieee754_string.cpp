@@ -1,7 +1,7 @@
-// Unit tests for fl::ieee754_string — integer-only IEEE 754 decimal codec.
+// Unit tests for fl::ieee754_string -- integer-only IEEE 754 decimal codec.
 //
 // Coverage focus: the parser path (task #1 of FastLED #3022 phase 2). The
-// serializer path is intentionally left for the follow-up task — its tests
+// serializer path is intentionally left for the follow-up task -- its tests
 // will land alongside its implementation.
 
 #include "test.h"
@@ -22,7 +22,7 @@ static float parse_as_float(const char* s) {
     return fl::bit_cast<float>(bits);
 }
 
-FL_TEST_CASE("ieee754_parse_decimal — well-known constants") {
+FL_TEST_CASE("ieee754_parse_decimal -- well-known constants") {
     FL_SUBCASE("zero") {
         FL_CHECK(ieee754_parse_decimal("0", 1) == 0x00000000u);
         FL_CHECK(ieee754_parse_decimal("-0", 2) == 0x80000000u);
@@ -51,7 +51,7 @@ FL_TEST_CASE("ieee754_parse_decimal — well-known constants") {
     }
 }
 
-FL_TEST_CASE("ieee754_parse_decimal — within ±1 ULP of strtof") {
+FL_TEST_CASE("ieee754_parse_decimal -- within +/-1 ULP of strtof") {
     auto ulp_diff = [](u32 a, u32 b) -> u32 {
         return a > b ? (a - b) : (b - a);
     };
@@ -71,7 +71,7 @@ FL_TEST_CASE("ieee754_parse_decimal — within ±1 ULP of strtof") {
     roundtrip_check("12345.6789", 12345.6789f);
 }
 
-FL_TEST_CASE("ieee754_parse_decimal — scientific notation") {
+FL_TEST_CASE("ieee754_parse_decimal -- scientific notation") {
     auto bits_of = [](float f) { return fl::bit_cast<u32>(f); };
 
     FL_CHECK(ieee754_parse_decimal("1e0", 3) == bits_of(1.0f));
@@ -81,17 +81,17 @@ FL_TEST_CASE("ieee754_parse_decimal — scientific notation") {
     FL_CHECK(ieee754_parse_decimal("-1e2", 4) == bits_of(-100.0f));
 }
 
-FL_TEST_CASE("ieee754_parse_decimal — overflow / underflow clamp") {
-    // 10**40 > single-precision max — clamp to +inf.
+FL_TEST_CASE("ieee754_parse_decimal -- overflow / underflow clamp") {
+    // 10**40 > single-precision max -- clamp to +inf.
     FL_CHECK(ieee754_parse_decimal("1e40", 4) == 0x7F800000u);
     FL_CHECK(ieee754_parse_decimal("-1e40", 5) == 0xFF800000u);
 
-    // 10**-50 < single-precision smallest denormal — clamp to ±0.
+    // 10**-50 < single-precision smallest denormal -- clamp to +/-0.
     FL_CHECK(ieee754_parse_decimal("1e-50", 5) == 0x00000000u);
     FL_CHECK(ieee754_parse_decimal("-1e-50", 6) == 0x80000000u);
 }
 
-FL_TEST_CASE("ieee754_parse_decimal — consumed bookkeeping") {
+FL_TEST_CASE("ieee754_parse_decimal -- consumed bookkeeping") {
     fl::size n = 0;
     u32 bits = ieee754_parse_decimal("3.14xyz", 7, &n);
     FL_CHECK(n == 4);  // "3.14"
@@ -102,14 +102,14 @@ FL_TEST_CASE("ieee754_parse_decimal — consumed bookkeeping") {
     FL_CHECK(n == 0);
     FL_CHECK(bits == 0u);
 
-    // Lone sign with no digits — invalid, zero consumed.
+    // Lone sign with no digits -- invalid, zero consumed.
     bits = ieee754_parse_decimal("-", 1, &n);
     FL_CHECK(n == 0);
     FL_CHECK(bits == 0u);
 }
 
-FL_TEST_CASE("ieee754_parse_decimal — integration via bit_cast<float>") {
-    // Make sure the parser composes cleanly with bit_cast<float>() — the
+FL_TEST_CASE("ieee754_parse_decimal -- integration via bit_cast<float>") {
+    // Make sure the parser composes cleanly with bit_cast<float>() -- the
     // intended API integration pattern for the JSON tokenizer.
     float a = parse_as_float("3.14");
     FL_CHECK(a > 3.13f);
@@ -120,7 +120,7 @@ FL_TEST_CASE("ieee754_parse_decimal — integration via bit_cast<float>") {
     FL_CHECK(b > -2.6f);
 }
 
-FL_TEST_CASE("ieee754_format_decimal — well-known constants") {
+FL_TEST_CASE("ieee754_format_decimal -- well-known constants") {
     FL_SUBCASE("zero") {
         FL_CHECK(ieee754_format_decimal(0x00000000u, 6) == fl::string("0.000000"));
         FL_CHECK(ieee754_format_decimal(0x80000000u, 6) == fl::string("-0.000000"));
@@ -144,15 +144,15 @@ FL_TEST_CASE("ieee754_format_decimal — well-known constants") {
     }
 }
 
-FL_TEST_CASE("ieee754_format_decimal — special values") {
+FL_TEST_CASE("ieee754_format_decimal -- special values") {
     FL_CHECK(ieee754_format_decimal(0x7F800000u, 6) == fl::string("inf"));
     FL_CHECK(ieee754_format_decimal(0xFF800000u, 6) == fl::string("-inf"));
     FL_CHECK(ieee754_format_decimal(0x7FC00000u, 6) == fl::string("nan"));
 }
 
-FL_TEST_CASE("ieee754_format_decimal — round-trip via parser") {
+FL_TEST_CASE("ieee754_format_decimal -- round-trip via parser") {
     // The serializer + parser should round-trip simple decimal values to
-    // within ±1 ULP. Pick values whose decimal representation terminates so
+    // within +/-1 ULP. Pick values whose decimal representation terminates so
     // we can compare bit patterns directly.
     auto round_trip = [](u32 bits) -> u32 {
         fl::string text = ieee754_format_decimal(bits, 9);
@@ -168,7 +168,7 @@ FL_TEST_CASE("ieee754_format_decimal — round-trip via parser") {
     FL_CHECK(round_trip(0x40000000u) == 0x40000000u);  // 2.0
     FL_CHECK(round_trip(0x3F000000u) == 0x3F000000u);  // 0.5
 
-    // Decimal values may drift by 1 ULP — that's the embedded-grade target.
+    // Decimal values may drift by 1 ULP -- that's the embedded-grade target.
     FL_CHECK(ulp_diff(round_trip(0x40490FDBu), 0x40490FDBu) <= 1u);  // pi-ish
     FL_CHECK(ulp_diff(round_trip(0x402DF854u), 0x402DF854u) <= 1u);  // e-ish
 
@@ -177,7 +177,7 @@ FL_TEST_CASE("ieee754_format_decimal — round-trip via parser") {
     FL_CHECK(round_trip(0xC1200000u) == 0xC1200000u);  // -10.0
 }
 
-FL_TEST_CASE("ieee754_format_decimal — precision clamping") {
+FL_TEST_CASE("ieee754_format_decimal -- precision clamping") {
     FL_CHECK(ieee754_format_decimal(0x3F800000u, -1) == fl::string("1"));
     FL_CHECK(ieee754_format_decimal(0x3F800000u, 15) == fl::string("1.000000000"));
 }

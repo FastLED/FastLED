@@ -19,15 +19,15 @@
 //     scaling against the same `10^k` table.
 //
 // API surface deliberately works on `fl::u32` bit-patterns (not `float`).
-// The caller can `fl::bit_cast<float>(bits)` at the API boundary — that is
+// The caller can `fl::bit_cast<float>(bits)` at the API boundary -- that is
 // a `memcpy` and never anchors libgcc. Doing the conversion *inside* this
 // codec would defeat the point.
 //
-// Precision target: ~6 significant decimal digits with at-most ±1 ULP
+// Precision target: ~6 significant decimal digits with at-most +/-1 ULP
 // drift from `strtof` / `snprintf("%g")` at the edges. Sufficient for
 // FastLED's JSON-RPC use case (brightness, ratios, coordinates). Callers
 // that need bit-exact round-trip on hosts should use the platform `strtof`
-// / `snprintf` directly — those are *intentionally* not wired through this
+// / `snprintf` directly -- those are *intentionally* not wired through this
 // header.
 //
 // See FastLED #3022 (parent), #3029 (gap), #3027 (superseded gate PR).
@@ -50,13 +50,13 @@ class string;
 /// `float` via `fl::bit_cast<float>(bits)` if needed.
 ///
 /// No FP arithmetic is performed. The implementation uses only integer
-/// shifts, masks, and 32x32->64 widening multiplies — libgcc soft-FP
+/// shifts, masks, and 32x32->64 widening multiplies -- libgcc soft-FP
 /// helpers (`__aeabi_d*`, `__aeabi_f*`) are never reached.
 ///
 /// Failure mode: malformed inputs return `0x00000000` (positive zero) and
 /// set `*consumed` to 0. Inputs that overflow IEEE 754 single-precision
 /// range (>~3.4e38) clamp to `+inf` / `-inf` bit patterns. Inputs that
-/// underflow (>~1.4e-45) clamp to ±0.
+/// underflow (>~1.4e-45) clamp to +/-0.
 ///
 /// @param s         Pointer to the decimal text.
 /// @param len       Length of the text in bytes (no NUL terminator assumed).

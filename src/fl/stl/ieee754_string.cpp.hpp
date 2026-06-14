@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// fl::ieee754_string — integer-only IEEE 754 single-precision codec.
+// fl::ieee754_string -- integer-only IEEE 754 single-precision codec.
 //
 // See ``src/fl/stl/ieee754_string.h`` for the design rationale and the
 // embedding into FastLED #3022 / #3029.
@@ -20,11 +20,30 @@ namespace {
 // normalized so the top bit (bit 63) is set.
 // ------------------------------------------------------------------ //
 
-static constexpr int kPow10KMin = -45;
+static constexpr int kPow10KMin = -64;
 static constexpr int kPow10KMax = 38;
-static constexpr fl::size kPow10Count = 84;
+static constexpr fl::size kPow10Count = 103;
 
 static constexpr fl::u64 kPow10Mant[kPow10Count] = {
+    0xA87FEA27A539E9A5u,  // 10**-64
+    0xD29FE4B18E88640Fu,  // 10**-63
+    0x83A3EEEEF9153E89u,  // 10**-62
+    0xA48CEAAAB75A8E2Bu,  // 10**-61
+    0xCDB02555653131B6u,  // 10**-60
+    0x808E17555F3EBF12u,  // 10**-59
+    0xA0B19D2AB70E6ED6u,  // 10**-58
+    0xC8DE047564D20A8Cu,  // 10**-57
+    0xFB158592BE068D2Fu,  // 10**-56
+    0x9CED737BB6C4183Du,  // 10**-55
+    0xC428D05AA4751E4Du,  // 10**-54
+    0xF53304714D9265E0u,  // 10**-53
+    0x993FE2C6D07B7FACu,  // 10**-52
+    0xBF8FDB78849A5F97u,  // 10**-51
+    0xEF73D256A5C0F77Du,  // 10**-50
+    0x95A8637627989AAEu,  // 10**-49
+    0xBB127C53B17EC159u,  // 10**-48
+    0xE9D71B689DDE71B0u,  // 10**-47
+    0x9226712162AB070Eu,  // 10**-46
     0xB6B00D69BB55C8D1u,  // 10**-45
     0xE45C10C42A2B3B06u,  // 10**-44
     0x8EB98A7A9A5B04E3u,  // 10**-43
@@ -112,6 +131,25 @@ static constexpr fl::u64 kPow10Mant[kPow10Count] = {
 };
 
 static constexpr fl::i16 kPow10BExp[kPow10Count] = {
+     -276,  // 10**-64
+     -273,  // 10**-63
+     -269,  // 10**-62
+     -266,  // 10**-61
+     -263,  // 10**-60
+     -259,  // 10**-59
+     -256,  // 10**-58
+     -253,  // 10**-57
+     -250,  // 10**-56
+     -246,  // 10**-55
+     -243,  // 10**-54
+     -240,  // 10**-53
+     -236,  // 10**-52
+     -233,  // 10**-51
+     -230,  // 10**-50
+     -226,  // 10**-49
+     -223,  // 10**-48
+     -220,  // 10**-47
+     -216,  // 10**-46
      -213,  // 10**-45
      -210,  // 10**-44
      -206,  // 10**-43
@@ -199,7 +237,7 @@ static constexpr fl::i16 kPow10BExp[kPow10Count] = {
 };
 
 // Top 64 bits of the 128-bit product of two u64 values, computed via four
-// 32x32->64 widening multiplies. Portable to every Cortex-M target — uses
+// 32x32->64 widening multiplies. Portable to every Cortex-M target -- uses
 // only integer ops, never the libgcc soft-FP cascade.
 inline fl::u64 mul_hi_u64(fl::u64 a, fl::u64 b) FL_NOEXCEPT {
     const fl::u64 ah = a >> 32;
@@ -239,21 +277,21 @@ u32 ieee754_parse_decimal(const char* s, fl::size len, fl::size* consumed) FL_NO
     if (i < len && s[i] == '-') { sign_bit = kSignBitMask; ++i; }
     else if (i < len && s[i] == '+') { ++i; }
 
-    const fl::size mantissa_start = i;
-
     // Mantissa: integer + optional fractional. Cap at 19 significant decimal
-    // digits — that is the max u64 can hold (10**19 < 2**64). Beyond that we
+    // digits -- that is the max u64 can hold (10**19 < 2**64). Beyond that we
     // drop digits but keep tracking the decimal exponent so values like
     // "100000000000000000000" (1e20) still round to the right magnitude.
     fl::u64 mantissa = 0;
     int decimal_exp = 0;
     int significant_digits = 0;
     bool seen_decimal = false;
+    bool seen_digit = false;
     constexpr int kMaxSignificantDigits = 19;
 
     while (i < len) {
         const char c = s[i];
         if (c >= '0' && c <= '9') {
+            seen_digit = true;
             if (significant_digits < kMaxSignificantDigits) {
                 // u64 max is ~1.8e19, mantissa * 10 + 9 stays below for 18 digits.
                 mantissa = mantissa * 10u + static_cast<fl::u64>(c - '0');
@@ -264,7 +302,7 @@ u32 ieee754_parse_decimal(const char* s, fl::size len, fl::size* consumed) FL_NO
                     --decimal_exp;
                 }
             } else {
-                // Out of mantissa precision — track magnitude via decimal_exp only.
+                // Out of mantissa precision -- track magnitude via decimal_exp only.
                 if (!seen_decimal) {
                     ++decimal_exp;
                 }
@@ -278,7 +316,10 @@ u32 ieee754_parse_decimal(const char* s, fl::size len, fl::size* consumed) FL_NO
         }
     }
 
-    if (i == mantissa_start) {
+    // Reject inputs that contained no digit (e.g. "", ".", "-.", "+.", "e5").
+    // `i == mantissa_start` only catches "" and "-"/"+" -- a lone "." passes
+    // the start-position guard because the loop consumed it.
+    if (!seen_digit) {
         return fail();
     }
 
@@ -301,7 +342,7 @@ u32 ieee754_parse_decimal(const char* s, fl::size len, fl::size* consumed) FL_NO
             decimal_exp += exp_sign * exp_val;
             i = j;
         }
-        // else: lone 'e' with no digits — treat as end-of-number, leave i at 'e'.
+        // else: lone 'e' with no digits -- treat as end-of-number, leave i at 'e'.
     }
 
     if (consumed) *consumed = i;
@@ -320,11 +361,14 @@ u32 ieee754_parse_decimal(const char* s, fl::size len, fl::size* consumed) FL_NO
     // After normalization: original_mantissa = mantissa * 2**(-mantissa_shift).
 
     // Out-of-table decimal exponent: under/overflow before we even multiply.
+    // The table floor (kPow10KMin) is chosen so the parser's raw 19-digit
+    // mantissa still covers IEEE 754 single-precision range -- see
+    // ci/tools/gen_pow10_table.py.
     if (decimal_exp < kPow10KMin) {
-        return sign_bit;  // ±0
+        return sign_bit;  // +/- 0
     }
     if (decimal_exp > kPow10KMax) {
-        return sign_bit | kInfBitsPos;  // ±inf
+        return sign_bit | kInfBitsPos;  // +/- inf
     }
 
     const fl::size idx = static_cast<fl::size>(decimal_exp - kPow10KMin);
@@ -351,12 +395,12 @@ u32 ieee754_parse_decimal(const char* s, fl::size len, fl::size* consumed) FL_NO
     int biased_exp = bin_exp + 63 + 127;
 
     if (biased_exp >= 0xFF) {
-        return sign_bit | kInfBitsPos;  // ±inf
+        return sign_bit | kInfBitsPos;  // +/- inf
     }
     if (biased_exp <= 0) {
         // Subnormal / underflow. For embedded-grade precision we collapse
-        // to ±0 — the JSON-RPC use case never needs denormals, and avoiding
-        // the subnormal path keeps the bit-twiddling logic compact.
+        // to +/- 0 -- the JSON-RPC use case never needs denormals, and
+        // avoiding the subnormal path keeps the bit-twiddling logic compact.
         return sign_bit;
     }
 
@@ -370,7 +414,7 @@ u32 ieee754_parse_decimal(const char* s, fl::size len, fl::size* consumed) FL_NO
     if (round_bit && (sticky != 0 || (ieee_mant & 1u))) {
         ++ieee_mant;
         if (ieee_mant == (1u << 23)) {
-            // Mantissa overflow on rounding — re-renormalize.
+            // Mantissa overflow on rounding -- re-renormalize.
             ieee_mant = 0;
             ++biased_exp;
             if (biased_exp >= 0xFF) {
@@ -383,7 +427,7 @@ u32 ieee754_parse_decimal(const char* s, fl::size len, fl::size* consumed) FL_NO
 }
 
 // Append the decimal digits of `value` to `out`. Reuses the integer-only
-// `fl::utoa64` helper from `fl/stl/charconv.h` — no FP arithmetic.
+// `fl::utoa64` helper from `fl/stl/charconv.h` -- no FP arithmetic.
 static void append_u64_decimal(fl::string& out, fl::u64 value) FL_NOEXCEPT {
     char buf[24];
     const int n = fl::utoa64(value, buf, 10);
@@ -416,7 +460,7 @@ fl::string ieee754_format_decimal(u32 bits, int precision) FL_NOEXCEPT {
         }
     };
 
-    // ±0 (and any subnormal — those collapse to zero per the parser's
+    // +/- 0 (and any subnormal -- those collapse to zero per the parser's
     // contract, so the serializer matches).
     if (biased_exp == 0) {
         if (neg) s += "-";
@@ -449,13 +493,13 @@ fl::string ieee754_format_decimal(u32 bits, int precision) FL_NOEXCEPT {
     }
 
     // Convert (scaled_hi, scaled_bin_exp) to a u64 integer count of
-    // `precision` decimal places. Overflow on the way up clamps to ±inf;
-    // underflow on the way down collapses to ±0 — same contract as the
+    // `precision` decimal places. Overflow on the way up clamps to +/- inf;
+    // underflow on the way down collapses to +/- 0 -- same contract as the
     // parser at the edges.
     u64 scaled_int;
     if (scaled_bin_exp >= 0) {
         if (scaled_bin_exp > 0) {
-            // (scaled_hi << scaled_bin_exp) drops the top bit — magnitude
+            // (scaled_hi << scaled_bin_exp) drops the top bit -- magnitude
             // beyond what u64 can carry. Treat as overflow.
             return neg ? fl::string("-inf") : fl::string("inf");
         }
@@ -478,7 +522,7 @@ fl::string ieee754_format_decimal(u32 bits, int precision) FL_NOEXCEPT {
 
     // For the integer / fractional split we need the EXACT integer value of
     // 10**precision (not the normalized form). precision is in [0, 9] so this
-    // fits in u32 easily — keep it inline to avoid pulling another table.
+    // fits in u32 easily -- keep it inline to avoid pulling another table.
     static constexpr u32 kPow10IntExact[] = {
         1u,           10u,           100u,         1000u,
         10000u,       100000u,       1000000u,     10000000u,
