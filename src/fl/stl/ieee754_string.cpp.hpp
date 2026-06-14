@@ -424,15 +424,15 @@ fl::string ieee754_format_decimal(u32 bits, int precision) FL_NOEXCEPT {
         return s;
     }
 
-    // Normal number: value = m_full * 2**bin_exp.
-    // m_full carries the implicit leading 1.
-    const u32 m_full = mant_bits | 0x800000u;       // 24 bits
+    // Normal number: value = mantissa_full * 2**bin_exp.
+    // mantissa_full carries the implicit leading 1.
+    const u32 mantissa_full = mant_bits | 0x800000u;       // 24 bits
     const int bin_exp_raw = biased_exp - 127 - 23;  // signed
 
     // Lift to a 64-bit normalized representation so we can multiply against
-    // the shared pow10 table.  m_full's bit 23 is set, so shifting left by 40
+    // the shared pow10 table.  mantissa_full's bit 23 is set, so shifting left by 40
     // puts that set bit in position 63.
-    const u64 mant64 = static_cast<u64>(m_full) << 40;
+    const u64 mant64 = static_cast<u64>(mantissa_full) << 40;
     const int bin_exp = bin_exp_raw - 40;
 
     // Look up the normalized representation of 10**precision.

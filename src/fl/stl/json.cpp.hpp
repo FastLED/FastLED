@@ -7,7 +7,9 @@
 #include "fl/stl/span.h"
 #include "fl/stl/charconv.h"
 #include "fl/stl/ieee754_string.h"  // FastLED #3022 phase 2 — integer-only IEEE 754 codec
+// IWYU pragma: begin_keep
 #include "fl/stl/bit_cast.h"        // bit_cast<float>(u32) / bit_cast<u32>(float)
+// IWYU pragma: end_keep
 #include "fl/math/math.h" // For floor function
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/stdint.h"
