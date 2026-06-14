@@ -75,6 +75,50 @@ void setup() {
         FL_WARN_LIT("FL_WARN: echo invoked");
         return v;
     });
+
+    // probePair(packed) -> 1 if pins bridged, 0 otherwise.
+    //   packed = (out_pin << 8) | in_pin    (single int to reuse the
+    //   existing JsonToType<int> instantiation that `echo` already
+    //   pulled in — adding a 2-int binding would re-instantiate the
+    //   tuple/arg-converter chain and blow 1.6 KB of flash budget.)
+    // Driving LOW with a pull-up on the input is the noise-tolerant
+    // probe direction — no contention risk and floating inputs default
+    // to HIGH. Used by the host-side pin-bridge scan during bring-up.
+    remote.bind("probePair", [](int packed) -> int {
+        int out_pin = (packed >> 8) & 0xFF;
+        int in_pin  = packed & 0xFF;
+        // Skip UART pins so the probe can't accidentally tank serial.
+        if (out_pin == PIN_SERIAL_TX || out_pin == PIN_SERIAL_RX ||
+            in_pin  == PIN_SERIAL_TX || in_pin  == PIN_SERIAL_RX) {
+            return 0;
+        }
+        if (out_pin == in_pin) return 0;
+
+        // Pre-charge: drive BOTH pins HIGH for 200 µs to flush residual
+        // capacitance left over from the previous probe pair. Without
+        // this, scanning gives "succeeds both ways" false positives for
+        // adjacent pins on the breakout header because each probe leaves
+        // a small charge that biases the next test.
+        pinMode(out_pin, OUTPUT);
+        pinMode(in_pin, OUTPUT);
+        digitalWrite(out_pin, HIGH);
+        digitalWrite(in_pin, HIGH);
+        delayMicroseconds(200);
+
+        // Probe: drive out LOW, switch in to INPUT_PULLUP, give the pull-up
+        // 2 ms to win against breadboard/PCB stray capacitance. A real
+        // jumper wire pulls in LOW within nanoseconds; parasitic coupling
+        // doesn't survive a 2 ms pull-up fight.
+        digitalWrite(out_pin, LOW);
+        pinMode(in_pin, INPUT_PULLUP);
+        delay(2);
+        int connected = (digitalRead(in_pin) == LOW) ? 1 : 0;
+
+        // Cleanup: both back to plain INPUT (high-Z, no pull).
+        pinMode(out_pin, INPUT);
+        pinMode(in_pin, INPUT);
+        return connected;
+    });
 }
 
 void loop() {
