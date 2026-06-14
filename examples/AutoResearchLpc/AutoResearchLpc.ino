@@ -253,9 +253,9 @@ void setup() {
 
             PinTogglePeriodStats stats = computePeriodStats(edges_buf, n_read);
 
-            // Format CSV. fl::strstream + manual concat is the lightest
+            // Format CSV. fl::sstream + manual concat is the lightest
             // option that avoids snprintf bloat on M0+.
-            fl::strstream s;
+            fl::sstream s;
             const bool success = (stats.periods > 0);
             s << (success ? 1 : 0) << ',' << static_cast<fl::u32>(n_read) << ','
               << stats.periods << ',' << stats.mean_ns << ',' << stats.sigma_ns << ','
