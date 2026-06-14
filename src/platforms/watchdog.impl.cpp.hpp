@@ -22,6 +22,7 @@
 ///   - Apollo3          → `platforms/apollo3/watchdog_apollo3.impl.hpp` (am_hal_wdt)
 ///   - MGM240           → `platforms/arm/mgm240/watchdog_mgm240.impl.hpp` (em_wdog)
 ///   - AVR              → `platforms/avr/watchdog_avr.impl.hpp` (avr/wdt.h + .init3 fix)
+///   - LPC8xx (LPC84x)  → `platforms/arm/lpc/watchdog_lpc.impl.hpp` (WWDT + WDOSC)
 ///   - Other            → `platforms/shared/watchdog_noop.hpp` (no-op fallback)
 ///
 /// **Library availability guards:** Some platform impls depend on third-party
@@ -63,6 +64,8 @@
     #include "platforms/arm/mgm240/watchdog_mgm240.impl.hpp"
 #elif defined(FL_IS_AVR) && FL_HAS_INCLUDE(<avr/wdt.h>)
     #include "platforms/avr/watchdog_avr.impl.hpp"
+#elif defined(FL_IS_ARM_LPC)
+    #include "platforms/arm/lpc/watchdog_lpc.impl.hpp"
 #else
     // Fallback: no real or emulated WDT available — all methods are no-ops.
     // Reached when the platform isn't supported OR when the optional Arduino

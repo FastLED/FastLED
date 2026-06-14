@@ -40,6 +40,7 @@
 #include <Arduino.h>
 #include "fl/remote/remote.h"
 #include "fl/remote/transport/serial.h"
+#include "fl/wdt/watchdog.h"
 
 namespace {
 fl::Remote* g_remote = nullptr;
@@ -47,6 +48,13 @@ fl::Remote* g_remote = nullptr;
 
 void setup() {
     Serial.begin(115200);
+
+    // Arm the LPC845 WWDT so a hung sketch unbricks itself on crash.
+    // ~3 second window — long enough for any legitimate setup() work,
+    // short enough that "device is dead" reboots within human attention
+    // span during bring-up debugging. See FastLED #3002 follow-up.
+    fl::Watchdog::instance().begin(3000);
+
     static fl::Remote remote(
         fl::createSerialRequestSource(),
         fl::createSerialResponseSink("REMOTE: "));
@@ -55,6 +63,7 @@ void setup() {
 }
 
 void loop() {
+    fl::Watchdog::instance().feed();
     if (g_remote) {
         g_remote->update(millis());
     }
