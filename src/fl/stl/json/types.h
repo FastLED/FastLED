@@ -23,6 +23,7 @@
 #include "fl/stl/string_view.h"
 
 #include "fl/stl/noexcept.h"
+#include "fl/stl/json/json_number.h"  // fl::json_number tagged Q-format (FastLED #3022 / #3029)
 #include "fl/system/sketch_macros.h"  // FL_PLATFORM_HAS_LARGE_MEMORY (FastLED #3000)
 
 // Compile-time gate for the `float` / `fl::vector<float>` alternatives in
@@ -650,12 +651,13 @@ struct SizeVisitor {
     void operator()(const fl::vector<u8>& vec) FL_NOEXCEPT { result = vec.size(); }
     void operator()(const fl::vector<float>& vec) FL_NOEXCEPT { result = vec.size(); }
 
-    // Generic fallback for other types (primitives, null)
+    // Generic fallback for other types (primitives, null, fl::json_number)
     void operator()(const fl::nullptr_t&) FL_NOEXCEPT { result = 0; }
     void operator()(const bool&) FL_NOEXCEPT { result = 0; }
     void operator()(const i64&) FL_NOEXCEPT { result = 0; }
     void operator()(const float&) FL_NOEXCEPT { result = 0; }
     void operator()(const fl::string&) FL_NOEXCEPT { result = 0; }
+    void operator()(const fl::json_number&) FL_NOEXCEPT { result = 0; }
 };
 
 // Forward declarations for visitors (defined after json_value)
@@ -689,7 +691,15 @@ struct json_value {
         json_array,      // array
         json_object,     // object
         fl::vector<i16>, // audio data (specialized array of int16_t)
-        fl::vector<u8>   // byte data (specialized array of uint8_t)
+        fl::vector<u8>,  // byte data (specialized array of uint8_t)
+        // Integer-only Q-format tagged number (FastLED #3022 / #3029).
+        // 8 bytes; sized identically to i64, so adding this alternative
+        // does not grow the variant. Distinct from i64 because the tag
+        // bits are part of the value — a plain JSON integer "42" parses
+        // into the i64 alternative, while a setter call from a
+        // fl::fixed_point<> value lands here so that as_fixed_point<FP>()
+        // can recover the original Q-format losslessly.
+        fl::json_number
 #if FL_JSON_HAS_FLOAT
         ,
         fl::vector<float>    // float data (specialized array of float)
@@ -706,6 +716,8 @@ struct json_value {
     json_value(fl::nullptr_t) FL_NOEXCEPT : data(nullptr) {}
     json_value(bool b) FL_NOEXCEPT : data(b) {}
     json_value(i64 i) FL_NOEXCEPT : data(i) {}
+    // Tagged Q-format number (FastLED #3022 / #3029) — see json_number.h.
+    json_value(fl::json_number n) FL_NOEXCEPT : data(n) {}
     // Explicit int/unsigned constructors to prevent ambiguity on platforms where
     // int != i64 (e.g., 32-bit ARM with GCC). Without these, int is equally
     // convertible to bool, i64, and float.
@@ -865,9 +877,17 @@ struct json_value {
         return false;
 #endif
     }
-    // is_number() returns true if the value is any numeric type (int or float)
+    // True iff this value holds a tagged Q-format number (FastLED
+    // #3022 / #3029). Distinct from is_int() / is_float() so callers can
+    // route to as_fixed_point<FP>() / to_q30_31() / to_q15_46() /
+    // to_uq32_29() instead of as_int / as_float.
+    bool is_fixed_point() const FL_NOEXCEPT {
+        return data.is<fl::json_number>();
+    }
+    // is_number() returns true if the value is any numeric type
+    // (integer, float, or tagged Q-format).
     bool is_number() const FL_NOEXCEPT {
-        return is_int() || is_float();
+        return is_int() || is_float() || is_fixed_point();
     }
     bool is_string() const FL_NOEXCEPT { 
         //FL_WARN("is_string called, tag=" << data.tag());
@@ -1016,6 +1036,12 @@ struct json_value {
     // Zero-copy pointer accessors (non-const)
     json_array*           as_array() FL_NOEXCEPT { return data.ptr<json_array>(); }
     json_object*          as_object() FL_NOEXCEPT { return data.ptr<json_object>(); }
+    // Direct access to the stored Q-format number, if any.
+    // (FastLED #3022 / #3029)
+    fl::optional<fl::json_number> as_json_number() const FL_NOEXCEPT {
+        if (auto p = data.ptr<fl::json_number>()) return *p;
+        return fl::nullopt;
+    }
 
     // Const overloads
     fl::optional<bool> as_bool() const FL_NOEXCEPT {
@@ -1641,6 +1667,26 @@ struct NumericExtractVisitor {
     void operator()(const i64& v) FL_NOEXCEPT { result = static_cast<T>(v); }
     void operator()(const float& v) FL_NOEXCEPT { result = static_cast<T>(v); }
     void operator()(const bool& v) FL_NOEXCEPT { result = static_cast<T>(v ? 1 : 0); }
+    // fl::json_number: integer-part-only extraction (truncates fractional
+    // bits per tag). Lossy by design; a numeric copy into a span<float>
+    // through a json_array of json_numbers gives the integer truncation
+    // without ever invoking soft-FP. See FastLED #3022 / #3029.
+    void operator()(const fl::json_number& n) FL_NOEXCEPT {
+        switch (n.tag()) {
+        case fl::json_number::tag_t::Q30_31:
+            result = static_cast<T>(n.raw_payload_signed() >> 31);
+            break;
+        case fl::json_number::tag_t::Q15_46:
+            result = static_cast<T>(n.raw_payload_signed() >> 46);
+            break;
+        case fl::json_number::tag_t::UQ32_29:
+            result = static_cast<T>(n.raw_payload_unsigned() >> 29);
+            break;
+        case fl::json_number::tag_t::UNINIT:
+        default:
+            break;
+        }
+    }
     // Non-numeric types → zero
     void operator()(const fl::nullptr_t&) FL_NOEXCEPT {}
     void operator()(const fl::string&) FL_NOEXCEPT {}
@@ -1687,6 +1733,7 @@ struct CopyToVisitor {
     void operator()(const float&) FL_NOEXCEPT {}
     void operator()(const fl::string&) FL_NOEXCEPT {}
     void operator()(const json_object&) FL_NOEXCEPT {}
+    void operator()(const fl::json_number&) FL_NOEXCEPT {}
 
 private:
     template<typename ElemT>
@@ -1736,6 +1783,7 @@ struct CopyToOutputIteratorVisitor {
     void operator()(const float&) FL_NOEXCEPT {}
     void operator()(const fl::string&) FL_NOEXCEPT {}
     void operator()(const json_object&) FL_NOEXCEPT {}
+    void operator()(const fl::json_number&) FL_NOEXCEPT {}
 
 private:
     template<typename ElemT>

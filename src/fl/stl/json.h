@@ -187,17 +187,19 @@ public:
             "truncation at the call site.");
     }
 #endif  // FL_JSON_HAS_FLOAT
-    // fl::fixed_point<> integration (FastLED #3029, phase 1 of #3022).
-    // Our number format is a "super fixed point" — fl::json's i64 storage
-    // is also the natural carrier for any Q-format fixed-point value, so
-    // this overload packs the raw integer representation directly into
-    // the i64 variant slot with zero IEEE-754 conversion. The Q-format
-    // (IntBits / FracBits / signedness) is encoded in the C++ type at
-    // the extraction site, not in the JSON value — the round-trip is
-    // lossless as long as the reader and writer agree on the type.
-    // Use as_fixed_point<FP>() below to read it back.
+    // fl::fixed_point<> integration (FastLED #3029, phase 1.5 of #3022).
+    // Routes the value through `fl::json_number`, the 64-bit
+    // packed-tagged Q-format type defined in fl/stl/json/json_number.h.
+    // Storage is a dedicated variant slot — the original Q-format
+    // (Q30.31 / Q15.46 / UQ32.29, selected by from_fixed_point per the
+    // source's INT_BITS / FRAC_BITS / signedness) is preserved in the
+    // tag bits, so a round-trip via as_fixed_point<FP>() reconstructs
+    // the original value with up to 61 bits of payload — strictly more
+    // precision than any of the existing 32-bit-wide
+    // `fl::fixed_point<>` types and headroom for higher-precision
+    // additions in the future. Pure integer path; never reaches IEEE-754.
     template <typename FP, typename fl::enable_if<detail::is_fl_fixed_point<FP>::value, int>::type = 0>
-    json(FP v) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(static_cast<i64>(v.raw()))) {}
+    json(FP v) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(fl::json_number::from_fixed_point(v))) {}
     json(const fl::string& s) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(s)) {}
     json(const char* s) FL_NOEXCEPT : json(fl::string(s)) {}
     json(json_array a) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(fl::move(a))) {}
@@ -286,9 +288,10 @@ public:
 #endif  // FL_JSON_HAS_FLOAT
 
     // fl::fixed_point<> assignment — see matching constructor above.
+    // Stores as fl::json_number so the Q-format tag is preserved.
     template <typename FP, typename fl::enable_if<detail::is_fl_fixed_point<FP>::value, int>::type = 0>
     json& operator=(FP v) FL_NOEXCEPT {
-        mValue = fl::make_shared<json_value>(static_cast<i64>(v.raw()));
+        mValue = fl::make_shared<json_value>(fl::json_number::from_fixed_point(v));
         return *this;
     }
 
@@ -320,6 +323,8 @@ public:
     bool is_null() const FL_NOEXCEPT { return mValue ? mValue->is_null() : true; }
     bool is_bool() const FL_NOEXCEPT { return mValue && mValue->is_bool(); }
     bool is_int() const FL_NOEXCEPT { return mValue && (mValue->is_int() || mValue->is_bool()); }
+    // True iff the value holds a tagged Q-format number — see #3022 / #3029.
+    bool is_fixed_point() const FL_NOEXCEPT { return mValue && mValue->is_fixed_point(); }
     bool is_float() const FL_NOEXCEPT { return mValue && mValue->is_float(); }
     bool is_double() const FL_NOEXCEPT { return mValue && mValue->is_double(); }
     // is_number() returns true if the value is any numeric type (int or float)
@@ -361,17 +366,49 @@ public:
         return mValue->template as_float<FloatType>();
     }
 
-    // fl::fixed_point<> extractor — reads the i64 storage back and
-    // rebuilds the typed value via FP::from_raw. Pure-integer path; no
-    // IEEE-754 helper is reachable from here. See the matching setter
-    // template `json(FP)` above and FastLED #3022 / #3029.
+    // fl::fixed_point<> extractor — reads the fl::json_number tagged
+    // payload and re-aligns it to FP's INT_BITS / FRAC_BITS. Falls back
+    // to interpreting a plain `i64` slot as the source's raw repr (so a
+    // sketch that pre-cfe8b9156d wrote raw integers still extracts).
+    // Pure-integer path; no IEEE-754 helper is reachable from here.
+    // See FastLED #3022 / #3029.
     template <typename FP>
     typename fl::enable_if<detail::is_fl_fixed_point<FP>::value, fl::optional<FP>>::type
     as_fixed_point() const FL_NOEXCEPT {
         if (!mValue) return fl::nullopt;
-        auto i = mValue->as_int();
-        if (!i) return fl::nullopt;
-        return FP::from_raw(static_cast<decltype(FP().raw())>(*i));
+        if (auto n = mValue->as_json_number()) {
+            return n->template to_fixed_point<FP>();
+        }
+        // Compatibility path: a plain integer in the i64 slot — interpret
+        // the bits directly as FP's raw representation.
+        if (auto i = mValue->as_int()) {
+            return FP::from_raw(static_cast<decltype(FP().raw())>(*i));
+        }
+        return fl::nullopt;
+    }
+
+    // Direct accessor for the stored fl::json_number (FastLED #3022 / #3029).
+    fl::optional<fl::json_number> as_json_number() const FL_NOEXCEPT {
+        if (!mValue) return fl::nullopt;
+        return mValue->as_json_number();
+    }
+
+    // Q-format pair-style accessors per #3029 design body. Each returns
+    // fl::nullopt when the value does not hold a tagged Q-format number,
+    // otherwise returns the (integer_part, fractional_part) decomposition
+    // formed by reinterpreting the stored payload as the requested format
+    // (independently of the actual stored tag).
+    fl::optional<fl::pair<i32, u32>> to_q30_31() const FL_NOEXCEPT {
+        if (auto n = as_json_number()) return n->to_q30_31();
+        return fl::nullopt;
+    }
+    fl::optional<fl::pair<i32, u32>> to_q15_46() const FL_NOEXCEPT {
+        if (auto n = as_json_number()) return n->to_q15_46();
+        return fl::nullopt;
+    }
+    fl::optional<fl::pair<u32, u32>> to_uq32_29() const FL_NOEXCEPT {
+        if (auto n = as_json_number()) return n->to_uq32_29();
+        return fl::nullopt;
     }
 
     fl::optional<fl::string> as_string() const FL_NOEXCEPT {
@@ -833,8 +870,8 @@ public:
     }
 #endif  // FL_JSON_HAS_FLOAT
 
-    // fl::fixed_point<> setter — packs the raw integer representation
-    // into the i64 variant slot. See json(FP) constructor above.
+    // fl::fixed_point<> setter — packs into the fl::json_number
+    // variant slot via the json(FP) constructor above.
     template <typename FP, typename fl::enable_if<detail::is_fl_fixed_point<FP>::value, int>::type = 0>
     void set(const fl::string& key, FP value) FL_NOEXCEPT { set(key, json(value)); }
     void set(const fl::string& key, const fl::string& value) FL_NOEXCEPT { set(key, json(value)); }

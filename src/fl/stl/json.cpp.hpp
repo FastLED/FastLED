@@ -1193,6 +1193,37 @@ struct SerializerVisitor {
         append_str(num_str);
     }
 
+    // fl::json_number (FastLED #3022 / #3029).
+    //
+    // Phase-1.5 behavior: write the integer part only and discard the
+    // fractional bits. A round-trip through JSON text is therefore lossy
+    // — the fractional payload survives in-memory transfers (set →
+    // as_fixed_point<FP>) but not text round-trips. Phase-2 will replace
+    // this with a proper integer-arithmetic Q-format decimal printer
+    // (no IEEE-754 helpers) once the json_number Q-format extractors are
+    // tied to a base-10 long-division routine.
+    void accept(const fl::json_number& n) FL_NOEXCEPT {
+        i64 int_part = 0;
+        switch (n.tag()) {
+        case fl::json_number::tag_t::Q30_31:
+            int_part = n.raw_payload_signed() >> 31;
+            break;
+        case fl::json_number::tag_t::Q15_46:
+            int_part = n.raw_payload_signed() >> 46;
+            break;
+        case fl::json_number::tag_t::UQ32_29:
+            int_part = static_cast<i64>(n.raw_payload_unsigned() >> 29);
+            break;
+        case fl::json_number::tag_t::UNINIT:
+        default:
+            int_part = 0;
+            break;
+        }
+        fl::string num_str;
+        num_str.append(int_part);
+        append_str(num_str);
+    }
+
 #if FL_JSON_HAS_FLOAT
     void accept(const float& f) {
         fl::string num_str;
