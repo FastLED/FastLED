@@ -124,8 +124,33 @@
 // Implementation details - users should not rely on these directly
 #include "fl/stl/json/types.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/static_assert.h"
 
 namespace fl {
+
+namespace detail {
+
+// SFINAE trait — true for fl::fixed_point<>-shaped types (s16x16, s0x32,
+// u24x8, ...). Used by fl::json setter / extractor templates so a
+// fixed_point value flows through the integer storage path and never
+// pulls IEEE-754 helpers into the link (FastLED #3022 / #3029). The
+// detection probes the public members every fixed_point type exposes:
+//   - `INT_BITS` / `FRAC_BITS`   — static layout constants
+//   - `raw()`                    — read the underlying integer repr
+//   - `from_raw(raw_type)`       — rebuild the value from that repr
+template <typename T, typename = void>
+struct is_fl_fixed_point : fl::false_type {};
+
+template <typename T>
+struct is_fl_fixed_point<T, decltype(
+    static_cast<void>(T::INT_BITS),
+    static_cast<void>(T::FRAC_BITS),
+    static_cast<void>(fl::declval<const T&>().raw()),
+    static_cast<void>(T::from_raw(fl::declval<const T&>().raw())),
+    void()
+)> : fl::true_type {};
+
+}  // namespace detail
 
 class json {
 private:
@@ -142,20 +167,37 @@ public:
     json(float f) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(f)) {}
     json(double d) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(static_cast<float>(d))) {}
 #else
-    // FL_JSON_HAS_FLOAT==0 (FastLED #3022): the variant carries no float
-    // alternative, but the user-facing constructor / setter API still
-    // accepts `float` and `double` so caller code (UI widgets, ScreenMap,
-    // diagnostics, etc.) keeps compiling unchanged. The library takes
-    // over the conversion here — values are truncated to `i64` storage
-    // via `static_cast`. Cost at the call site is a single
-    // `__aeabi_f2iz` / `__aeabi_d2iz` helper (~64B, no chained
-    // soft-double cascade); the linker drops it under `--gc-sections`
-    // for sketches that never invoke these constructors.
-    // TODO(#3022 phase 2): replace truncation with `json_number` Q-format
-    // tags so the fractional part is preserved.
-    json(float f) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(static_cast<i64>(f))) {}
-    json(double d) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(static_cast<i64>(d))) {}
+    // FL_JSON_HAS_FLOAT==0 (FastLED #3029): the library refuses to perform
+    // a silent float→i64 truncation here. Pulling `__aeabi_f2iz` /
+    // `__aeabi_d2iz` into the link is the user's call to make at the call
+    // site, not the library's; the mandate from #3022 is that the FastLED
+    // library code path is structurally free of soft-FP. Callers that need
+    // a fractional value must convert through `fl::fixed_point<>` (see
+    // `src/fl/math/fixed_point/`, e.g. `fl::s16x16`) — the templated
+    // fixed-point constructor below packs the raw integer representation
+    // and never touches IEEE-754. Callers that genuinely want integer
+    // truncation should `static_cast<i64>(v)` at the call site.
+    template <typename T, typename fl::enable_if<fl::is_floating_point<T>::value, int>::type = 0>
+    json(T) FL_NOEXCEPT {
+        FL_STATIC_ASSERT(sizeof(T) == 0,
+            "fl::json: FL_JSON_HAS_FLOAT=0 — float/double values cannot be "
+            "stored on this build (FastLED #3022 / #3029). Convert to "
+            "fl::fixed_point<> (e.g. fl::s16x16 from fl/math/fixed_point/) "
+            "and pass that, or static_cast<i64>(v) for explicit integer "
+            "truncation at the call site.");
+    }
 #endif  // FL_JSON_HAS_FLOAT
+    // fl::fixed_point<> integration (FastLED #3029, phase 1 of #3022).
+    // Our number format is a "super fixed point" — fl::json's i64 storage
+    // is also the natural carrier for any Q-format fixed-point value, so
+    // this overload packs the raw integer representation directly into
+    // the i64 variant slot with zero IEEE-754 conversion. The Q-format
+    // (IntBits / FracBits / signedness) is encoded in the C++ type at
+    // the extraction site, not in the JSON value — the round-trip is
+    // lossless as long as the reader and writer agree on the type.
+    // Use as_fixed_point<FP>() below to read it back.
+    template <typename FP, typename fl::enable_if<detail::is_fl_fixed_point<FP>::value, int>::type = 0>
+    json(FP v) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(static_cast<i64>(v.raw()))) {}
     json(const fl::string& s) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(s)) {}
     json(const char* s) FL_NOEXCEPT : json(fl::string(s)) {}
     json(json_array a) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(fl::move(a))) {}
@@ -233,19 +275,23 @@ public:
         return *this;
     }
 #else
-    // FL_JSON_HAS_FLOAT==0: library-owned float→i64 truncation, see
-    // json(float)/json(double) constructors above. Same semantics here.
-    json& operator=(float value) FL_NOEXCEPT {
-        mValue = fl::make_shared<json_value>(static_cast<i64>(value));
-        return *this;
-    }
-
-    json& operator=(double value) FL_NOEXCEPT {
-        mValue = fl::make_shared<json_value>(static_cast<i64>(value));
+    // FL_JSON_HAS_FLOAT==0: see json(float)/json(double) constructors above.
+    // Refuses silent narrowing; routes callers to fl::fixed_point<>.
+    template <typename T, typename fl::enable_if<fl::is_floating_point<T>::value, int>::type = 0>
+    json& operator=(T) FL_NOEXCEPT {
+        // FL_JSON_HAS_FLOAT=0: float/double assignment refused on Low-memory builds (FastLED #3022/#3029). Convert to fl::fixed_point<> (e.g. fl::s16x16), or static_cast<i64>(v).
+        FL_STATIC_ASSERT(sizeof(T) == 0, "fl::json: FL_JSON_HAS_FLOAT=0 forbids float/double assignment; see comment above");
         return *this;
     }
 #endif  // FL_JSON_HAS_FLOAT
-    
+
+    // fl::fixed_point<> assignment — see matching constructor above.
+    template <typename FP, typename fl::enable_if<detail::is_fl_fixed_point<FP>::value, int>::type = 0>
+    json& operator=(FP v) FL_NOEXCEPT {
+        mValue = fl::make_shared<json_value>(static_cast<i64>(v.raw()));
+        return *this;
+    }
+
     json& operator=(const fl::string& value) FL_NOEXCEPT {
         mValue = fl::make_shared<json_value>(value);
         return *this;
@@ -312,9 +358,22 @@ public:
     template<typename FloatType>
     fl::optional<FloatType> as_float() const FL_NOEXCEPT {
         if (!mValue) return fl::nullopt;
-        return mValue->template as_float<FloatType>(); 
+        return mValue->template as_float<FloatType>();
     }
-    
+
+    // fl::fixed_point<> extractor — reads the i64 storage back and
+    // rebuilds the typed value via FP::from_raw. Pure-integer path; no
+    // IEEE-754 helper is reachable from here. See the matching setter
+    // template `json(FP)` above and FastLED #3022 / #3029.
+    template <typename FP>
+    typename fl::enable_if<detail::is_fl_fixed_point<FP>::value, fl::optional<FP>>::type
+    as_fixed_point() const FL_NOEXCEPT {
+        if (!mValue) return fl::nullopt;
+        auto i = mValue->as_int();
+        if (!i) return fl::nullopt;
+        return FP::from_raw(static_cast<decltype(FP().raw())>(*i));
+    }
+
     fl::optional<fl::string> as_string() const FL_NOEXCEPT {
         if (!mValue) return fl::nullopt;
         return mValue->as_string(); 
@@ -757,11 +816,27 @@ public:
     void set(const fl::string& key, bool value) FL_NOEXCEPT { set(key, json(value)); }
     void set(const fl::string& key, int value) FL_NOEXCEPT { set(key, json(value)); }
     void set(const fl::string& key, i64 value) FL_NOEXCEPT { set(key, json(value)); }
-    // float / double setters: on FL_JSON_HAS_FLOAT==0 the `json(value)`
-    // constructors above truncate to i64 storage so this API keeps
-    // compiling and serializing for caller code (UI widgets, etc.).
+#if FL_JSON_HAS_FLOAT
     void set(const fl::string& key, float value) FL_NOEXCEPT { set(key, json(value)); }
     void set(const fl::string& key, double value) FL_NOEXCEPT { set(key, json(value)); }
+#else
+    // FL_JSON_HAS_FLOAT==0: see json(float)/json(double) constructors above.
+    // Refuses silent narrowing; routes callers to fl::fixed_point<>.
+    template <typename T, typename fl::enable_if<fl::is_floating_point<T>::value, int>::type = 0>
+    void set(const fl::string&, T) FL_NOEXCEPT {
+        FL_STATIC_ASSERT(sizeof(T) == 0,
+            "fl::json: FL_JSON_HAS_FLOAT=0 — json::set(key, float|double) "
+            "is refused on Low-memory builds (FastLED #3022 / #3029). "
+            "Convert to fl::fixed_point<> (e.g. fl::s16x16) and call "
+            "set(key, fixed_point_value), or static_cast<i64>(v) for "
+            "explicit integer truncation.");
+    }
+#endif  // FL_JSON_HAS_FLOAT
+
+    // fl::fixed_point<> setter — packs the raw integer representation
+    // into the i64 variant slot. See json(FP) constructor above.
+    template <typename FP, typename fl::enable_if<detail::is_fl_fixed_point<FP>::value, int>::type = 0>
+    void set(const fl::string& key, FP value) FL_NOEXCEPT { set(key, json(value)); }
     void set(const fl::string& key, const fl::string& value) FL_NOEXCEPT { set(key, json(value)); }
     void set(const fl::string& key, const char* value) FL_NOEXCEPT { set(key, json(value)); }
     template<typename T, typename = fl::enable_if_t<fl::is_same<T, char>::value>>

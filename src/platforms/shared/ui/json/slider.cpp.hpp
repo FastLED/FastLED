@@ -2,12 +2,22 @@
 
 #include "platforms/shared/ui/json/slider.h"
 #include "fl/stl/json.h"
-#include "fl/stl/json.h"
 #include "fl/math/math.h"
 #include "platforms/shared/ui/json/ui.h"
 
 #include "fl/stl/compiler_control.h"
 #include "fl/stl/noexcept.h"
+
+// FL_JSON_HAS_FLOAT==0 (FastLED #3029): the slider widget's value/min/max/
+// step are intrinsically `float`. Gating the whole TU keeps the soft-FP
+// cascade out of the library archive on Low-memory builds — a sketch
+// that does not use a slider sees zero impact; a sketch that *does* try
+// to instantiate JsonSliderImpl fails at link with `undefined reference`,
+// mirroring the FASTLED_NO_JSON ergonomics in ScreenMap. Phase-2 plan
+// (per #3022 / #3029): add a JsonSliderImplFixed<Q16x16>-style variant
+// so Low-memory sketches still have a working slider, just one whose
+// value type is fl::s16x16.
+#if FL_JSON_HAS_FLOAT
 
 FL_DISABLE_WARNING(deprecated-declarations)
 namespace fl {
@@ -150,3 +160,5 @@ int JsonSliderImpl::id() const FL_NOEXCEPT {
 }
 
 } // namespace fl
+
+#endif  // FL_JSON_HAS_FLOAT

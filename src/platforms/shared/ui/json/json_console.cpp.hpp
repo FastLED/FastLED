@@ -1,13 +1,21 @@
 // IWYU pragma: private
 
 #include "fl/system/sketch_macros.h"
+#include "fl/stl/json/types.h"  // FL_JSON_HAS_FLOAT (FastLED #3022 / #3029)
 
-#if SKETCH_HAS_LARGE_MEMORY
+// JsonConsole parses serial input through `strtod` and routes the
+// resulting `float` into `json::set(key, float)` (see parseCommand /
+// setSliderValue below). On FL_JSON_HAS_FLOAT==0 those setters are
+// refused (see fl/stl/json.h), and the parse path itself is soft-FP, so
+// the entire TU drops out on Low-memory builds — the existing
+// SKETCH_HAS_LARGE_MEMORY gate already covers the default case, and
+// adding FL_JSON_HAS_FLOAT makes the gate hold under user opt-out via
+// `-DFL_JSON_HAS_FLOAT=0` on a Large-memory part too.
+#if SKETCH_HAS_LARGE_MEMORY && FL_JSON_HAS_FLOAT
 
 
 #include "platforms/shared/ui/json/json_console.h"
 #include "fl/log/log.h"
-#include "fl/stl/json.h"
 #include "fl/stl/json.h"
 #include "fl/stl/algorithm.h"
 #include "fl/stl/stdint.h"
@@ -349,4 +357,4 @@ void JsonConsole::dump(fl::sstream& out) FL_NOEXCEPT {
 
 } // namespace fl
 
-#endif // SKETCH_HAS_LARGE_MEMORY
+#endif // SKETCH_HAS_LARGE_MEMORY && FL_JSON_HAS_FLOAT

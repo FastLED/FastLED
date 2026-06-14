@@ -1,12 +1,19 @@
 // IWYU pragma: private
 
 #include "fl/stl/json.h"
-#include "fl/stl/json.h"
 #include "fl/math/math.h"
 #include "platforms/shared/ui/json/number_field.h"
 #include "platforms/shared/ui/json/ui_internal.h"
 #include "platforms/shared/ui/json/ui.h"
 #include "fl/stl/noexcept.h"
+
+// FL_JSON_HAS_FLOAT==0 (FastLED #3029): JsonNumberFieldImpl carries
+// `float mValue/mMin/mMax` storage and serializes via
+// `json.set(key, float)`. Gating the whole TU keeps soft-FP out of the
+// library archive on Low-memory builds. See slider.cpp.hpp for the same
+// pattern and the phase-2 fixed-point variant tracked under #3022.
+#if FL_JSON_HAS_FLOAT
+
 namespace fl {
 
 // Definition of the internal class that was previously in number_field_internal.h
@@ -131,3 +138,5 @@ bool JsonNumberFieldImpl::operator!=(float v) const FL_NOEXCEPT { return !fl::al
 bool JsonNumberFieldImpl::operator!=(int v) const FL_NOEXCEPT { return !fl::almost_equal(value(), static_cast<float>(v)); }
 
 } // namespace fl
+
+#endif  // FL_JSON_HAS_FLOAT
