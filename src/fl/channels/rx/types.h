@@ -6,11 +6,12 @@
 namespace fl {
 
 enum class RxBackend : u8 {
-    PLATFORM_DEFAULT = 0,  ///< Use the recommended backend for the active platform (RMT on ESP32; FlexPWM on Teensy 4.x with FLEXIO as an opt-in alternative — see FastLED#2764; native RX on stub/host builds).
+    PLATFORM_DEFAULT = 0,  ///< Use the recommended backend for the active platform (RMT on ESP32; FlexPWM on Teensy 4.x with FLEXIO as an opt-in alternative — see FastLED#2764; LPC_SCT_CAPTURE on LPC845; native RX on stub/host builds).
     RMT = 1,               ///< ESP32-only RMT capture backend.
     ISR = 2,               ///< Platform-neutral interrupt-driven edge capture backend when available.
     FLEXPWM = 3,           ///< Teensy 4.x-only FlexPWM capture backend.
-    FLEXIO = 4             ///< Teensy 4.x-only FlexIO capture backend (FLEXIO1 — FLEXIO2 is owned by the WS2812 TX driver). Hardware-verified by `flexioRxBenchmark` (1/10/100 kHz square wave) and `flexioObjectFledTest` (5-pattern ObjectFLED loopback). See FastLED#2764.
+    FLEXIO = 4,            ///< Teensy 4.x-only FlexIO capture backend (FLEXIO1 — FLEXIO2 is owned by the WS2812 TX driver). Hardware-verified by `flexioRxBenchmark` (1/10/100 kHz square wave) and `flexioObjectFledTest` (5-pattern ObjectFLED loopback). See FastLED#2764.
+    LPC_SCT_CAPTURE = 5    ///< LPC8xx SCT input-capture + DMA edge backend (LPC845 et al). Capture path is a skeleton until follow-up bench validation lands — see FastLED#3015. Decoder + injectEdges() are fully functional and host-tested today.
 };
 
 inline const char* toString(RxBackend backend) FL_NOEXCEPT {
@@ -20,6 +21,7 @@ inline const char* toString(RxBackend backend) FL_NOEXCEPT {
     case RxBackend::ISR: return "ISR";
     case RxBackend::FLEXPWM: return "FLEXPWM";
     case RxBackend::FLEXIO: return "FLEXIO";
+    case RxBackend::LPC_SCT_CAPTURE: return "LPC_SCT_CAPTURE";
     }
     return "UNKNOWN";
 }

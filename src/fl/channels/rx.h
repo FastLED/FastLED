@@ -161,11 +161,12 @@ enum class RxWaitResult : u8 {
  * factory pattern for compile-time device selection.
  */
 enum class RxDeviceType : u8 {
-    PLATFORM_DEFAULT = 0,  ///< Platform default (RMT on ESP32, FLEXPWM on Teensy 4.x; FLEXIO available as opt-in on Teensy 4 — see FastLED#2764)
-    ISR = 1,      ///< GPIO ISR-based receiver (ESP32)
-    RMT = 2,      ///< RMT-based receiver (ESP32)
-    FLEXPWM = 3,  ///< FlexPWM input-capture receiver (Teensy 4.x)
-    FLEXIO = 4    ///< FlexIO shifter-based receiver (Teensy 4.x, FLEXIO1; see FastLED#2764)
+    PLATFORM_DEFAULT = 0,  ///< Platform default (RMT on ESP32, FLEXPWM on Teensy 4.x; FLEXIO available as opt-in on Teensy 4 — see FastLED#2764; LPC_SCT_CAPTURE on LPC845)
+    ISR = 1,              ///< GPIO ISR-based receiver (ESP32)
+    RMT = 2,              ///< RMT-based receiver (ESP32)
+    FLEXPWM = 3,          ///< FlexPWM input-capture receiver (Teensy 4.x)
+    FLEXIO = 4,           ///< FlexIO shifter-based receiver (Teensy 4.x, FLEXIO1; see FastLED#2764)
+    LPC_SCT_CAPTURE = 5   ///< SCT input-capture + DMA receiver (LPC8xx). Skeleton + decoder land in #3015; bench-verified register-level capture is a follow-up.
 };
 
 /**
@@ -180,6 +181,7 @@ inline const char* toString(RxDeviceType type) FL_NOEXCEPT {
     case RxDeviceType::RMT:     return "RMT";
     case RxDeviceType::FLEXPWM: return "FLEXPWM";
     case RxDeviceType::FLEXIO:  return "FLEXIO";
+    case RxDeviceType::LPC_SCT_CAPTURE: return "LPC_SCT_CAPTURE";
     }
     return "UNKNOWN";
 }
@@ -436,5 +438,6 @@ template <> fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::PLATFORM_DEF
 template <> fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::RMT>(int pin) FL_NOEXCEPT;
 template <> fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::ISR>(int pin) FL_NOEXCEPT;
 template <> fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::FLEXPWM>(int pin) FL_NOEXCEPT;
+template <> fl::shared_ptr<RxDevice> RxDevice::create<RxDeviceType::LPC_SCT_CAPTURE>(int pin) FL_NOEXCEPT;
 
 } // namespace fl
