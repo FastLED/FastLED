@@ -42,9 +42,13 @@ struct JsonToIntegerVisitor {
     // Float to integer
     void operator()(const float& raw) {
         mValue = static_cast<T>(raw);
-        double rawDouble = static_cast<double>(raw);
-        if (rawDouble != static_cast<double>(mValue)) {
-            mResult.addWarning("float " + fl::to_string(rawDouble) +
+        // Keep the precision check in single precision. The natural
+        // formulation `(double)raw != (double)mValue` drags libgcc's
+        // soft-double helpers (`__aeabi_dcmpeq`, `__ledf2`, `__gedf2`,
+        // `__aeabi_d2f`, ...) into the link on no-FPU targets — ~760 B
+        // we can't afford on LPC845 (FastLED #3002).
+        if (raw != static_cast<float>(mValue)) {
+            mResult.addWarning("float " + fl::to_string(raw, 6) +
                               " truncated to int " + fl::to_string(static_cast<i64>(mValue)));
         }
     }
@@ -118,7 +122,8 @@ struct JsonToBoolVisitor {
     // Float to bool
     void operator()(const float& raw) {
         mValue = raw != 0.0f;
-        mResult.addWarning("float " + fl::to_string(static_cast<double>(raw)) + " converted to bool " + (mValue ? "true" : "false"));
+        // No double promotion (see JsonToIntVisitor — same #3002 reason).
+        mResult.addWarning("float " + fl::to_string(raw, 6) + " converted to bool " + (mValue ? "true" : "false"));
     }
 
     // String to bool
@@ -195,7 +200,10 @@ struct JsonToFloatVisitor {
     // Bool to float
     void operator()(const bool& b) {
         mValue = b ? T(1) : T(0);
-        mResult.addWarning("bool converted to float " + fl::to_string(static_cast<double>(mValue)));
+        // Format through float to avoid pulling in double helpers on no-FPU
+        // targets (FastLED #3002). For T = double the round-trip costs one
+        // extra `.0f` digit of formatting precision, which is acceptable.
+        mResult.addWarning("bool converted to float " + fl::to_string(static_cast<float>(mValue), 6));
     }
 
     // String to float
@@ -204,7 +212,8 @@ struct JsonToFloatVisitor {
         double parsed = fl::strtod(str.c_str(), &end);
         if (end != str.c_str() && *end == '\0') {
             mValue = static_cast<T>(parsed);
-            mResult.addWarning("string '" + str + "' parsed to float " + fl::to_string(static_cast<double>(mValue)));
+            // Warning string uses float precision (see #3002).
+            mResult.addWarning("string '" + str + "' parsed to float " + fl::to_string(static_cast<float>(mValue), 6));
         } else {
             mResult.setError("cannot parse string '" + str + "' as float");
         }
@@ -266,7 +275,8 @@ struct JsonToStringVisitor {
 
     // Float to string
     void operator()(const float& raw) {
-        mValue = fl::to_string(static_cast<double>(raw));
+        // Format in float (see JsonToIntVisitor — same #3002 reason).
+        mValue = fl::to_string(raw, 6);
         mResult.addWarning("float " + mValue + " converted to string");
     }
 

@@ -8,9 +8,8 @@
 #include "fastpin.h"          // Pin
 #include "fl/system/sketch_macros.h"
 #if SKETCH_HAS_LARGE_MEMORY
-#include "fl/math/math.h"
+#include "fl/math/math.h"  // fl::pow, fl::lround — libm-gated wrappers
 #include "fl/stl/array.h"
-#include <math.h>
 #endif
 #include "fl/stl/int.h"           // fl::u32, fl::u8
 #include "power_mgt.h"        // Function declarations (to avoid redefinition errors)
@@ -84,7 +83,12 @@ static void rebuild_power_scaling_tables(float exponent) {
     state.forward[0] = 0;
     for (fl::size i = 1; i < kPowerScalingTableSize; ++i) {
         float normalized = static_cast<float>(i) / 255.0f;
-        int mapped = static_cast<int>(lroundf(powf(normalized, exponent) * 255.0f));
+        // Route through fl::powf / fl::lroundf (libm-gated via FL_MATH_USE_LIBM,
+        // see fl/math/math.cpp.hpp). Use the float overloads — fl::pow takes
+        // double, so passing floats would auto-promote and re-anchor the
+        // double-precision soft-FP chain that #3002 is trying to avoid.
+        int mapped = static_cast<int>(
+            fl::lroundf(fl::powf(normalized, exponent) * 255.0f));
         state.forward[i] = static_cast<fl::u8>(fl::clamp(mapped, 0, 255));
     }
     state.forward[255] = 255;

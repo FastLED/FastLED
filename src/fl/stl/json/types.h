@@ -262,12 +262,26 @@ struct int_conversion_visitor<i64> {
     }
 
     void operator()(const float& value) FL_NOEXCEPT {
-        // NEW INSTRUCTIONS: AUTO CONVERT FLOAT TO INT
-        result = static_cast<i64>(value);
+        // AUTO CONVERT FLOAT TO INT. Route through int32 first to avoid the
+        // direct (i64)float cast — libgcc's `__aeabi_f2lz` helper internally
+        // chains through `_fixunssfdi.o` which anchors `__aeabi_dmul/dsub`
+        // (soft-double helpers, ~6 KB on no-FPU targets). See FastLED #3002.
+        // The variant only ever holds float (not double — see line 652), so
+        // JSON numbers fitting in int32 cover every value the parser
+        // currently emits; larger magnitudes saturate.
+        if (value > static_cast<float>(2147483647)) {
+            result = static_cast<i64>(2147483647);
+        } else if (value < static_cast<float>(-2147483648.0f)) {
+            result = static_cast<i64>(-2147483648LL);
+        } else {
+            result = static_cast<i64>(static_cast<fl::i32>(value));
+        }
     }
 
     void operator()(const double& value) FL_NOEXCEPT {
-        // NEW INSTRUCTIONS: AUTO CONVERT FLOAT TO INT
+        // Same #3002 reasoning — but the variant never holds `double`, so
+        // this overload is dead code in practice. Keep the direct cast for
+        // semantic completeness; LTO will remove it.
         result = static_cast<i64>(value);
     }
 
