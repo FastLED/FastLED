@@ -1,15 +1,20 @@
 /// @file platforms/arm/lpc/rx_sct_capture.cpp.hpp
-/// @brief LPC8xx SCT input-capture RX implementation (scaffold + decoder).
+/// @brief LPC8xx SCT input-capture RX implementation.
 ///
-/// See `rx_sct_capture.h` for the status note. This file ships:
-///   * The full edge-pair → byte decoder (kept in-TU per the FlexPWM /
-///     FlexIO convention; the follow-up `src/fl/channels/rx/decode_ws2812.h`
-///     refactor will consolidate all three).
-///   * `injectEdges()` + `getRawEdgeTimes()` against an in-RAM vector.
-///   * A documented `// TODO` block in `begin()` mapping out the SCT +
-///     DMA register sequence per UM11029 — register references inline
-///     so a follow-up bench session can fill it in without re-reading
-///     the manual.
+/// **Status:**
+///   * Host / non-LPC builds: edge buffer is RAM-backed; `injectEdges()` +
+///     `decode()` round-trip works without hardware (see
+///     `tests/fl/channels/rx_sct_capture.cpp`).
+///   * LPC845 builds with `-DFASTLED_LPC_RX_SCT=1`: the SCT input-capture
+///     path in `begin()` / `wait()` polls SCT EVFLAG and reads CAPTURE[0..1]
+///     to populate the edge buffer from real silicon. The polling design is
+///     adequate for the Phase-1 pin-toggle test (≤ 100 kHz square waves —
+///     see #3021). Phase 2 (WS2812 at 800 kHz) will upgrade to SCT→DMA in a
+///     follow-up commit.
+///   * LPC845 builds *without* `-DFASTLED_LPC_RX_SCT`: same as host —
+///     `begin()` is a no-op past clearing the buffer; the flash budget on
+///     the LPC845 bring-up sketch is preserved for sketches that don't
+///     opt in to the RX driver.
 
 // IWYU pragma: private
 
@@ -22,6 +27,139 @@
 #include "fl/log/log.h"
 
 namespace fl {
+
+#if defined(FASTLED_LPC_RX_SCT) && defined(FL_IS_ARM_LPC_845)
+
+// ============================================================================
+// LPC845 SCT register access — see embedded comment block below for the
+// UM11029 source for every offset and bit position. Layout cross-checked
+// against the hardware-validated SYSCON offsets in `watchdog_lpc.impl.hpp`.
+// ============================================================================
+//
+// Memory map (UM11029 §3 Memory Map):
+//   SYSCON   0x40048000
+//   SWM      0x4000C000
+//   INPUTMUX 0x4002C000
+//   SCT      0x50004000
+//   DMA      0x50008000
+//
+// SYSCON SYSAHBCLKCTRL0 at +0x080, PRESETCTRL0 at +0x088 (UM11029 §8.6.22/24):
+//   bit  7 SWM    bit  8 SCT    bit 17 WWDT (validated by watchdog file)
+//   bit 18 IOCON  bit 29 DMA
+//
+// SWM PINASSIGN (UM11029 §10.5 Tables 186/187 — pin encoding: PIO0_n -> n,
+// PIO1_n -> 0x20+n, unassign = 0xFF):
+//   PINASSIGN6  +0x018  bits[31:24] = SCT0_GPIO_IN_A_I  (= SCT IOSEL=0)
+//   PINASSIGN7  +0x01C  bits[ 7: 0] = SCT0_GPIO_IN_B_I  (= SCT IOSEL=1)
+//                       bits[15: 8] = SCT0_GPIO_IN_C_I  (= SCT IOSEL=2)
+//                       bits[23:16] = SCT0_GPIO_IN_D_I  (= SCT IOSEL=3)
+//
+// SCT register offsets (UM11029 §21.6 Table 386, UNIFY=1):
+//   0x000 CONFIG     UNIFY=bit0, CLKMODE=[2:1], INSYNC=[12:9]
+//   0x004 CTRL       HALT_L=bit2, CLRCTR_L=bit3
+//   0x008 LIMIT      bits[7:0] = event mask that limits the unified counter
+//   0x040 COUNT      32-bit free-running counter (read/write)
+//   0x04C REGMODE    bits[7:0] : 1 = CAPTURE, 0 = MATCH (per index)
+//   0x05C DMAREQ0    bit n = event n raises SCT_DMA0 trigger line
+//   0x060 DMAREQ1    "                                "
+//   0x0F0 EVEN       bits[7:0] : per-event interrupt enable
+//   0x0F4 EVFLAG     bits[7:0] : per-event flag (W1C)
+//   0x100+4*n MATCH[n] / CAP[n]     (selected by REGMODE bit n)
+//   0x200+4*n MATCHREL[n] / CAPCTRL[n] (same — REGMODE selects)
+//   0x300+8*n EV[n].STATE  bit m = enabled in STATE m
+//   0x304+8*n EV[n].CTRL    layout below
+//
+// EV[n].CTRL fields (UM11029 §21.6.25 Table 411):
+//   [ 3: 0] MATCHSEL    (unused for pure IO events)
+//   [    4] HEVENT      must be 0 when UNIFY=1
+//   [    5] OUTSEL      0 = input, 1 = output
+//   [ 9: 6] IOSEL       SCT input number 0..3 (or output 0..6)
+//   [11:10] IOCOND      0=LOW, 1=Rise, 2=Fall, 3=HIGH
+//   [13:12] COMBMODE    0=OR, 1=MATCH-only, 2=IO-only, 3=AND
+//
+// CAPCTRL[n] (UM11029 §21.6.23 Table 409 — when REGMODE bit n = 1):
+//   [ 7: 0] CAPCONn_L : bit m = 1 → event m loads CAPn
+
+namespace {
+
+constexpr fl::u32 kSysconBase   = 0x40048000u;
+constexpr fl::u32 kSwmBase      = 0x4000C000u;
+constexpr fl::u32 kSctBase      = 0x50004000u;
+
+constexpr fl::u32 kOffSYSAHBCLKCTRL0 = 0x080u;
+constexpr fl::u32 kOffPRESETCTRL0    = 0x088u;
+constexpr fl::u32 kClkSWM = (1u <<  7);
+constexpr fl::u32 kClkSCT = (1u <<  8);
+constexpr fl::u32 kRstSWM = (1u <<  7);
+constexpr fl::u32 kRstSCT = (1u <<  8);
+
+constexpr fl::u32 kOffPINASSIGN6 = 0x018u;
+constexpr fl::u32 kOffPINASSIGN7 = 0x01Cu;
+constexpr fl::u8  kSwmUnassign   = 0xFFu;
+
+constexpr fl::u32 kOffCONFIG  = 0x000u;
+constexpr fl::u32 kOffCTRL    = 0x004u;
+constexpr fl::u32 kOffLIMIT   = 0x008u;
+constexpr fl::u32 kOffCOUNT   = 0x040u;
+constexpr fl::u32 kOffREGMODE = 0x04Cu;
+constexpr fl::u32 kOffEVEN    = 0x0F0u;
+constexpr fl::u32 kOffEVFLAG  = 0x0F4u;
+constexpr fl::u32 kOffMATCH0  = 0x100u;       // shared with CAP[n]
+constexpr fl::u32 kOffMATCHREL0 = 0x200u;     // shared with CAPCTRL[n]
+constexpr fl::u32 kOffEV0_STATE = 0x300u;
+constexpr fl::u32 kOffEV0_CTRL  = 0x304u;
+
+constexpr fl::u32 kCfgUnify    = (1u << 0);
+constexpr fl::u32 kCfgInsync0  = (1u << 9);
+constexpr fl::u32 kCtrlHaltL   = (1u << 2);
+constexpr fl::u32 kCtrlClrCtrL = (1u << 3);
+
+// EV CTRL builder for "input-capture on SCT input N, edge E"
+constexpr fl::u32 evCtrlInputCapture(fl::u32 iosel, fl::u32 iocond) {
+    return (0u << 5)                  // OUTSEL = 0 (input)
+         | ((iosel & 0xFu) << 6)      // IOSEL
+         | ((iocond & 0x3u) << 10)    // IOCOND  (1=Rise, 2=Fall)
+         | (2u << 12);                // COMBMODE = IO-only
+}
+constexpr fl::u32 kIoCondRise = 1u;
+constexpr fl::u32 kIoCondFall = 2u;
+
+inline volatile fl::u32& reg(fl::u32 base, fl::u32 offset) FL_NOEXCEPT {
+    return *reinterpret_cast<volatile fl::u32*>(base + offset);  // ok reinterpret cast — MMIO addressing
+}
+inline volatile fl::u32& sct(fl::u32 offset) FL_NOEXCEPT { return reg(kSctBase, offset); }
+inline volatile fl::u32& sct_cap(fl::u32 n) FL_NOEXCEPT { return reg(kSctBase, kOffMATCH0    + 4u * n); }
+inline volatile fl::u32& sct_capctrl(fl::u32 n) FL_NOEXCEPT { return reg(kSctBase, kOffMATCHREL0 + 4u * n); }
+inline volatile fl::u32& sct_ev_state(fl::u32 n) FL_NOEXCEPT { return reg(kSctBase, kOffEV0_STATE + 8u * n); }
+inline volatile fl::u32& sct_ev_ctrl(fl::u32 n) FL_NOEXCEPT { return reg(kSctBase, kOffEV0_CTRL  + 8u * n); }
+
+// Assign or unassign the user's GPIO pin to SCT input 0 (SCT0_GPIO_IN_A_I)
+// via SWM PINASSIGN6 byte[31:24]. The byte value is the encoded pin number
+// (PIO0_n -> n; PIO1_n -> 0x20+n).
+inline void swmAssignSctInput0(fl::u8 swm_byte) FL_NOEXCEPT {
+    volatile fl::u32& r = reg(kSwmBase, kOffPINASSIGN6);
+    fl::u32 v = r;
+    v = (v & 0x00FFFFFFu) | (static_cast<fl::u32>(swm_byte) << 24);
+    r = v;
+}
+
+// Convert an unsigned tick delta (free-running 32-bit SCT counter, F_CPU
+// ticks) to nanoseconds. F_CPU is the SCT clock when CLKMODE=0; on
+// LPC845-BRK that is 30_000_000 Hz, giving 33.33 ns per tick.
+// Compute with u64 to avoid mid-multiplication overflow at the long-period
+// extreme: a full 32-bit tick wrap at 30 MHz is ~143 s = 1.43e11 ns, which
+// fits u64 with margin. EdgeTime.ns is a 31-bit bitfield (max ~2.1 s) so
+// we saturate above that.
+inline fl::u32 ticksToNs(fl::u32 ticks) FL_NOEXCEPT {
+    constexpr fl::u32 kFcpuMHz = (F_CPU + 500000u) / 1000000u;  // 30 on LPC845
+    fl::u64 ns64 = (static_cast<fl::u64>(ticks) * 1000u + (kFcpuMHz / 2)) / kFcpuMHz;
+    if (ns64 > 0x7FFFFFFFull) ns64 = 0x7FFFFFFFull;
+    return static_cast<fl::u32>(ns64);
+}
+
+}  // namespace
+
+#endif  // FASTLED_LPC_RX_SCT && FL_IS_ARM_LPC_845
 
 // ============================================================================
 // Factory
@@ -37,7 +175,23 @@ fl::shared_ptr<LpcSctRxChannel> LpcSctRxChannel::create(int pin) FL_NOEXCEPT {
 
 LpcSctRxChannel::LpcSctRxChannel(int pin) FL_NOEXCEPT
     : mPin(pin)
-    , mFinished(false) {
+    , mFinished(false)
+    , mCapacity(0)
+    , mPrevTick(0)
+    , mPrevSeen(false)
+    , mLastRising(false) {
+}
+
+LpcSctRxChannel::~LpcSctRxChannel() FL_NOEXCEPT {
+#if defined(FASTLED_LPC_RX_SCT) && defined(FL_IS_ARM_LPC_845)
+    // Release the pin from SCT input 0 so a follow-up driver can claim it.
+    // Leave the SCT/SWM clocks gated on — turning them off would require
+    // proof no other driver is mid-flight, which is brittle. Cost of
+    // leaving them on: ~tens of µA static, negligible vs the WWDT (always on).
+    sct(kOffCTRL) |= kCtrlHaltL;
+    sct(kOffEVEN)  = 0;
+    swmAssignSctInput0(kSwmUnassign);
+#endif
 }
 
 // ============================================================================
@@ -45,59 +199,52 @@ LpcSctRxChannel::LpcSctRxChannel(int pin) FL_NOEXCEPT
 // ============================================================================
 
 bool LpcSctRxChannel::begin(const RxConfig& config) FL_NOEXCEPT {
-    (void)config;
-    mEdges.clear();
     mFinished = false;
+    mCapacity = config.buffer_size > 0 ? config.buffer_size : 4096u;
+    mPrevTick = 0;
+    mPrevSeen = false;
+    mLastRising = false;
+    mEdges.clear();
+    mEdges.reserve(mCapacity);
 
-    // ------------------------------------------------------------------------
-    // TODO (#3015 follow-up — hardware bench session required):
-    //
-    // Wire SCT input capture + DMA to populate `mEdges` on real silicon.
-    // The skeleton below is the sequence the follow-up should implement.
-    // Register references are UM11029 (LPC84x User Manual, Rev 1.6).
-    //
-    // 1. Enable SCT in SYSCON:
-    //      SYSCON->SYSAHBCLKCTRL0 |= (1 << 8);   // SCT clock
-    //      SYSCON->PRESETCTRL0    &= ~(1 << 8);  // de-assert SCT reset
-    //      SYSCON->PRESETCTRL0    |=  (1 << 8);  // pulse reset
-    //
-    // 2. Route the user's pin -> CTIN_0 via the Switch Matrix (SWM).
-    //    LPC845 SWM lets any GPIO map to any SCT capture input. The
-    //    register is `SWM->PINASSIGN5` (PINASSIGN5[7:0] = CTIN_0). The
-    //    value is the PIO0_n number; e.g. for P0_11 the byte is 0x0B.
-    //
-    // 3. Configure SCT for 32-bit unified up-counter:
-    //      SCT->CONFIG = (1 << 0) /*UNIFY*/ | (0 << 1) /*sys clk*/;
-    //
-    // 4. Set up four capture registers (one per WS2812 edge type — rising,
-    //    falling — alternating into CAPTURE[0..3] so the DMA can stream
-    //    the result without re-arming):
-    //      SCT->REGMODE_L |= 0xF;  // CAPTURE0..3 are CAPTURE (not MATCH)
-    //
-    // 5. Set up events EV_0..EV_3 each gated on CTIN_0 with alternating
-    //    edge polarity:
-    //      SCT->EV[0].CTRL = (1 << 10) /*HEVENT*/ | (0 << 12) /*rising*/
-    //                      | (1 << 13) /*IOSEL = CTIN_0*/;
-    //      SCT->EV[1].CTRL = ... falling ...
-    //      ...
-    //    Each event triggers its corresponding CAPTURE[n] register
-    //    snapshot of the unified counter.
-    //
-    // 6. Hook a DMA channel to one of the SCT_DMA0/DMA1 request lines
-    //    (LPC845 DMA mux: DMATRIGCFG[n]). Source = SCT capture
-    //    register address, destination = `mEdges.data()`. Configure as
-    //    32-bit width, no-increment src, post-increment dst, transfer
-    //    count = `mEdges.capacity()`.
-    //
-    // 7. Start the SCT: SCT->CTRL_U &= ~(1 << 2);   // clear HALT_L
-    //
-    // 8. The ISR fires when DMA hits its transfer-complete bit. Set
-    //    `mFinished = true;` in the ISR (or here in wait() if polling).
-    //
-    // None of this is exercised on the host build (FL_IS_STUB) — the
-    // edge buffer stays empty until `injectEdges()` populates it from
-    // the test harness or the follow-up firmware-side capture path.
-    // ------------------------------------------------------------------------
+#if defined(FASTLED_LPC_RX_SCT) && defined(FL_IS_ARM_LPC_845)
+    // ---- 1. Power up SCT + SWM (and pulse their resets). ----
+    reg(kSysconBase, kOffSYSAHBCLKCTRL0) |= (kClkSCT | kClkSWM);
+    volatile fl::u32& presetctrl = reg(kSysconBase, kOffPRESETCTRL0);
+    presetctrl &= ~(kRstSCT | kRstSWM);   // assert reset (low pulse)
+    presetctrl |=  (kRstSCT | kRstSWM);   // release reset
+
+    // ---- 2. Route mPin -> SCT input 0 via SWM PINASSIGN6 byte[31:24]. ----
+    swmAssignSctInput0(static_cast<fl::u8>(mPin & 0xFFu));
+
+    // ---- 3. Configure SCT: UNIFY counter + INSYNC for input 0. ----
+    // The 2-clock synchronizer adds ~67 ns of capture jitter at F_CPU=30 MHz,
+    // well below the WS2812 T0H/T1H discrimination window (~500 ns margin).
+    sct(kOffCTRL)    = kCtrlHaltL | kCtrlClrCtrL;   // halted, counter zeroed
+    sct(kOffCONFIG)  = kCfgUnify  | kCfgInsync0;
+    sct(kOffLIMIT)   = 0u;                          // free-running counter
+    sct(kOffCOUNT)   = 0u;
+
+    // ---- 4. Mark register slots 0 + 1 as CAPTURE (REGMODE bits 0,1 = 1). ----
+    sct(kOffREGMODE) = (1u << 0) | (1u << 1);
+
+    // ---- 5. Event 0 → rising edge on SCT input 0 → captures into CAP[0].
+    //         Event 1 → falling edge on SCT input 0 → captures into CAP[1].
+    sct_ev_state(0) = 0x1u;   // active in STATE 0
+    sct_ev_ctrl (0) = evCtrlInputCapture(0u, kIoCondRise);
+    sct_ev_state(1) = 0x1u;
+    sct_ev_ctrl (1) = evCtrlInputCapture(0u, kIoCondFall);
+
+    sct_capctrl(0) = (1u << 0);   // EV0 loads CAP[0]
+    sct_capctrl(1) = (1u << 1);   // EV1 loads CAP[1]
+
+    sct(kOffEVEN)   = 0u;                        // polling mode — IRQs off
+    sct(kOffEVFLAG) = 0xFFu;                     // clear any stale flags
+
+    // ---- 6. Release HALT so the counter runs. Capture events will start
+    //         latching CAP[0] / CAP[1] on every input edge from now on.
+    sct(kOffCTRL) &= ~kCtrlHaltL;
+#endif
 
     return true;
 }
@@ -106,15 +253,82 @@ bool LpcSctRxChannel::finished() const FL_NOEXCEPT {
     return mFinished;
 }
 
-RxWaitResult LpcSctRxChannel::wait(u32 timeout_ms) FL_NOEXCEPT {
-    (void)timeout_ms;
-    mFinished = true;
-    if (mEdges.empty()) {
-        // No edges captured. Either the SCT/DMA setup is still a TODO
-        // (the common case in this PR) or no signal reached the pin.
-        return RxWaitResult::TIMEOUT;
+fl::size LpcSctRxChannel::pollOnce() FL_NOEXCEPT {
+#if defined(FASTLED_LPC_RX_SCT) && defined(FL_IS_ARM_LPC_845)
+    // Drain SCT EVFLAG into the edge buffer. For each event that has
+    // fired since the last poll:
+    //   * EV0 (rising-edge capture) → read CAP[0]. If we already saw a
+    //     prior edge, the line was LOW from `mPrevTick` to `tick` (since
+    //     this is a rising edge, so it was LOW before).
+    //   * EV1 (falling-edge capture) → read CAP[1]. Line was HIGH from
+    //     `mPrevTick` to `tick`.
+    //
+    // The "phase level" labeled into EdgeTime.high is the level the line
+    // was at DURING the just-completed phase, not the edge direction.
+    // That matches the decoder's expectation: HIGH duration then LOW
+    // duration per WS2812 bit.
+    //
+    // We deliberately don't clear EVFLAG until AFTER reading CAP[n]; the
+    // SCT latches a fresh CAP[n] on the *next* matching edge regardless
+    // of the EVFLAG bit, so the read/W1C order matters only for the
+    // poll-once semantic (one capture per poll-cycle per event).
+
+    fl::size pushed = 0;
+    const fl::u32 evflag = sct(kOffEVFLAG);
+
+    if (evflag & 0x1u) {
+        const fl::u32 tick = sct_cap(0);
+        sct(kOffEVFLAG) = 0x1u;  // W1C
+        if (mPrevSeen) {
+            const fl::u32 delta = tick - mPrevTick;   // u32 wrap is fine — modulo arithmetic over 32-bit counter
+            if (mEdges.size() < mCapacity) {
+                mEdges.push_back(EdgeTime(mLastRising, ticksToNs(delta)));
+                ++pushed;
+            }
+        }
+        mPrevTick = tick;
+        mPrevSeen = true;
+        mLastRising = true;  // a rising edge just fired → line was LOW before, HIGH now
     }
-    return RxWaitResult::SUCCESS;
+
+    if (evflag & 0x2u) {
+        const fl::u32 tick = sct_cap(1);
+        sct(kOffEVFLAG) = 0x2u;
+        if (mPrevSeen) {
+            const fl::u32 delta = tick - mPrevTick;
+            if (mEdges.size() < mCapacity) {
+                mEdges.push_back(EdgeTime(mLastRising, ticksToNs(delta)));
+                ++pushed;
+            }
+        }
+        mPrevTick = tick;
+        mPrevSeen = true;
+        mLastRising = false;
+    }
+
+    return pushed;
+#else
+    return 0;
+#endif
+}
+
+RxWaitResult LpcSctRxChannel::wait(u32 timeout_ms) FL_NOEXCEPT {
+#if defined(FASTLED_LPC_RX_SCT) && defined(FL_IS_ARM_LPC_845)
+    // Spin-poll for `timeout_ms` or until the buffer is full. Callers
+    // that need to interleave TX (bit-bang) with capture should drive
+    // pollOnce() directly inside their TX loop — see
+    // `examples/AutoResearchLpc/AutoResearchLpc.ino::pinToggleRx`.
+    const fl::u32 start_ms = millis();
+    while ((millis() - start_ms) < timeout_ms && mEdges.size() < mCapacity) {
+        pollOnce();
+    }
+    sct(kOffCTRL) |= kCtrlHaltL;
+#else
+    (void)timeout_ms;
+#endif
+
+    mFinished = true;
+    return mEdges.empty() ? RxWaitResult::TIMEOUT : RxWaitResult::SUCCESS;
 }
 
 // ============================================================================

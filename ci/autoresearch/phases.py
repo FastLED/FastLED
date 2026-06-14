@@ -1177,6 +1177,10 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
     # echo check instead of bailing with a "no tests requested" success.
     bring_up_envs = {"lpc845brk", "lpcxpresso845max", "lpcxpresso804"}
     if ctx.final_environment in bring_up_envs:
+        # FastLED #3021 Phase 1: --pin-toggle-rx runs the SCT-RX
+        # loopback bench instead of the default echo bring-up.
+        if getattr(ctx.args, "pin_toggle_rx", False):
+            return await _run_lpc_pin_toggle_rx_tests(ctx)
         return await _run_bring_up_tests(ctx)
 
     # GPIO-only mode
@@ -1577,6 +1581,44 @@ async def _run_bring_up_tests(ctx: RunContext) -> int:
     finally:
         if ser is not None:
             ser.close()
+
+
+async def _run_lpc_pin_toggle_rx_tests(ctx: RunContext) -> int:
+    """Run the FastLED #3021 Phase-1 SCT-RX pin-toggle bench.
+
+    Delegates to `ci/autoresearch/test_lpc_pin_toggle_rx.py` so the
+    bench logic stays in one place (the script is also runnable
+    stand-alone for ad-hoc bring-up). Uses `subprocess` to keep the
+    pyserial dependency contained to the script — the autoresearch
+    runner itself stays import-free of `serial`.
+    """
+    upload_port = ctx.upload_port
+    assert upload_port is not None
+
+    tx_pin = ctx.args.tx_pin if ctx.args.tx_pin is not None else 10
+    rx_pin = ctx.args.rx_pin if ctx.args.rx_pin is not None else 11
+
+    print()
+    print("=" * 60)
+    print("LPC SCT-RX MODE — pin-toggle TX → SCT-RX loopback (#3021 Phase 1)")
+    print(f"   Wiring required: jumper P0_{tx_pin} ↔ P0_{rx_pin} on LPC845-BRK")
+    print("=" * 60)
+    print()
+
+    cmd = [
+        "uv",
+        "run",
+        "python",
+        "ci/autoresearch/test_lpc_pin_toggle_rx.py",
+        "--port",
+        upload_port,
+        "--tx-pin",
+        str(tx_pin),
+        "--rx-pin",
+        str(rx_pin),
+    ]
+    result = subprocess.run(cmd)
+    return 0 if result.returncode == 0 else 1
 
 
 async def _run_coroutine_tests(ctx: RunContext) -> int:
