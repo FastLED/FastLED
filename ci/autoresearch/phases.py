@@ -6,6 +6,7 @@ None (success) or int (exit code on failure).
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import subprocess
@@ -542,7 +543,9 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                             print("Error: --tight-timing-max-overhead-us must be >= 1")
                             return 1
                         test_config["tightTiming"] = True
-                        test_config["tightTimingIterations"] = args.tight_timing_iterations
+                        test_config["tightTimingIterations"] = (
+                            args.tight_timing_iterations
+                        )
                         test_config["tightTimingMaxOverheadUs"] = (
                             args.tight_timing_max_overhead_us
                         )
@@ -589,7 +592,20 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         print("   Make sure you're running this from a PlatformIO project directory")
         return 1
 
-    sketch_path = build_dir / "examples" / "AutoResearch"
+    # Board-specific sketch dispatch.
+    #
+    # Low-memory ARM boards (e.g. NXP LPC845-BRK, 64 KB Flash) cannot fit the
+    # full examples/AutoResearch/AutoResearch.ino \u2014 it requires RMT/PARLIO/SPI
+    # peripherals these chips don't have, and pulls in 100+ KB of LED-protocol
+    # code. They use a slimmed JSON-RPC echo harness (examples/AutoResearchLpc/)
+    # that exercises the same Serial/JSON-RPC/log-pipeline transport but skips
+    # the LED-protocol matrix. See FastLED#3004.
+    env_for_sketch = args.environment_positional or args.environment or ""
+    bring_up_envs = {"lpc845brk", "lpcxpresso845max", "lpcxpresso804"}
+    if env_for_sketch in bring_up_envs:
+        sketch_path = build_dir / "examples" / "AutoResearchLpc"
+    else:
+        sketch_path = build_dir / "examples" / "AutoResearch"
     if not sketch_path.exists():
         staged_sketch_path = build_dir / "src" / "sketch"
         if staged_sketch_path.exists():
@@ -823,7 +839,21 @@ async def _run_build_deploy(ctx: RunContext, qctx: QuietContext) -> int | None:
     # Phase 2+3: Build + Deploy
     print(f"\U0001f4e6 Using {build_driver.name}")
 
-    if not build_driver.deploy(
+    bring_up_envs = {"lpc845brk", "lpcxpresso845max", "lpcxpresso804"}
+    if final_environment in bring_up_envs:
+        # fbuild's nxplpc orchestrator does not yet ship a deployer
+        # (`daemon/.../deploy.rs` only dispatches avr/teensy). Bring-up boards
+        # run `fbuild build` followed by a pyocd-based flash + sw-reset here.
+        if not _build_and_flash_nxplpc(
+            build_dir,
+            environment=final_environment,
+            upload_port=upload_port,
+            verbose=args.verbose,
+        ):
+            qctx.emit("BUILD+FLASH FAIL (nxplpc)")
+            qctx.emit_log_path()
+            return 1
+    elif not build_driver.deploy(
         build_dir,
         environment=final_environment,
         upload_port=upload_port,
@@ -1116,6 +1146,15 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
     serial_iface = ctx.serial_iface
     use_fbuild = ctx.use_fbuild
 
+    # Low-memory ARM bring-up mode short-circuit. LPC845/LPC804 boards run a
+    # JSON-RPC echo verification (examples/AutoResearchLpc/) instead of the
+    # GPIO + LED-protocol matrix that ESP32/Teensy targets use. Must come
+    # BEFORE the gpio_only_mode early-return so the harness actually runs the
+    # echo check instead of bailing with a "no tests requested" success.
+    bring_up_envs = {"lpc845brk", "lpcxpresso845max", "lpcxpresso804"}
+    if ctx.final_environment in bring_up_envs:
+        return await _run_bring_up_tests(ctx)
+
     # GPIO-only mode
     if ctx.gpio_only_mode:
         print()
@@ -1197,6 +1236,9 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
     # Coroutine test mode
     if ctx.coroutine_test_mode:
         return await _run_coroutine_tests(ctx)
+
+    # (LPC bring-up mode short-circuits earlier — see the gpio_only_mode
+    # block above; reached only by ESP32/Teensy-class targets.)
 
     # Main RPC test execution
     return await _run_rpc_tests(ctx, qctx)
@@ -1283,6 +1325,217 @@ async def _run_simd_tests(ctx: RunContext) -> int:
     finally:
         if client is not None:
             await client.close()
+
+
+def _build_and_flash_nxplpc(
+    build_dir: Path,
+    *,
+    environment: str | None,
+    upload_port: str | None,
+    verbose: bool,
+) -> bool:
+    """Build via `fbuild build`, then flash + sw-reset via pyocd.
+
+    fbuild's nxplpc orchestrator does not yet implement a deployer
+    (daemon/handlers/operations/deploy.rs only wires avr/teensy). Until that
+    lands as an upstream fbuild PR, we run the build phase via fbuild and the
+    flash/reset phase via pyocd here. The pyocd path is identical to the
+    manual bring-up workflow used during initial LPC845 hardware validation.
+    """
+    import shutil
+
+    env = dict(os.environ)
+    # The pinned ArduinoCore-LPC8xx commit only stripped the GitHub-archive
+    # wrapping dir in fbuild >= 2.2.27. The bundled venv fbuild was bumped to
+    # match; assume the user's PATH-resolved binary is current.
+
+    print("\n📦 Building firmware via fbuild...")
+    build_cmd = [
+        "fbuild",
+        "build",
+        "--environment",
+        environment or "lpc845brk",
+    ]
+    if verbose:
+        build_cmd.append("--verbose")
+    result = subprocess.run(build_cmd, env=env, cwd=str(build_dir))
+    if result.returncode != 0:
+        print(
+            f"{Fore.RED}❌ fbuild build failed (exit {result.returncode}){Style.RESET_ALL}"
+        )
+        return False
+
+    firmware_bin = (
+        build_dir
+        / ".fbuild"
+        / "build"
+        / (environment or "lpc845brk")
+        / "release"
+        / "firmware.bin"
+    )
+    if not firmware_bin.is_file():
+        print(f"{Fore.RED}❌ firmware.bin not found at {firmware_bin}{Style.RESET_ALL}")
+        return False
+
+    pyocd = shutil.which("pyocd")
+    if pyocd is None:
+        # Fall back to uv-run pyocd (installed on demand). The bring-up
+        # workflow already used this pattern.
+        pyocd_cmd_prefix = ["uv", "run", "--with", "pyocd", "pyocd"]
+    else:
+        pyocd_cmd_prefix = [pyocd]
+
+    print("\n📡 Flashing firmware via pyocd...")
+    target = "lpc845" if "lpc845" in (environment or "") else "lpc804"
+    load_cmd = pyocd_cmd_prefix + [
+        "load",
+        "--target",
+        target,
+        "--no-reset",
+        str(firmware_bin),
+    ]
+    result = subprocess.run(load_cmd, env=env)
+    if result.returncode != 0:
+        print(
+            f"{Fore.RED}❌ pyocd load failed (exit {result.returncode}){Style.RESET_ALL}"
+        )
+        return False
+
+    print("\n🔄 Resetting target via pyocd (sw reset, VCOM-safe)...")
+    reset_cmd = pyocd_cmd_prefix + [
+        "commander",
+        "--target",
+        target,
+        "-O",
+        "reset_type=sw",
+        "-c",
+        "reset",
+        "-c",
+        "go",
+        "-c",
+        "quit",
+    ]
+    result = subprocess.run(reset_cmd, env=env)
+    if result.returncode != 0:
+        print(
+            f"{Fore.YELLOW}⚠️  pyocd reset returned {result.returncode}; continuing{Style.RESET_ALL}"
+        )
+
+    print(f"{Fore.GREEN}✓ Build + flash + reset complete{Style.RESET_ALL}\n")
+    return True
+
+
+async def _run_bring_up_tests(ctx: RunContext) -> int:
+    """Run minimal LPC845/LPC804 bring-up validation via JSON-RPC echo.
+
+    Verifies the three transport components the bring-up sketch
+    (examples/AutoResearchLpc/) exposes:
+      1. Serial.println — the response body itself ("REMOTE: {...}\\r\\n").
+      2. FastLED log pipeline — the FL_DBG line from fl::Remote
+         ("src/fl/remote/remote.cpp.hpp(151): Stored request ID for echo")
+         that emits before the response.
+      3. JSON-RPC echo round-trip — TX {method:echo, params:[N], id:I}
+         must produce RX {id:I, result:N, jsonrpc:"2.0"}.
+
+    Uses raw serial (not ``RpcClient``) because the bring-up sketch binds
+    ``echo`` as ``[](int v) -> int`` which expects a flat ``params:[N]``
+    JSON array; ``RpcClient.send`` wraps args one level deeper to support
+    the AutoResearch.ino style where bindings take a struct.
+    """
+    upload_port = ctx.upload_port
+    assert upload_port is not None
+
+    print()
+    print("=" * 60)
+    print("BRING-UP MODE — Serial + FastLED log + JSON-RPC echo")
+    print("=" * 60)
+    print()
+
+    import serial as _serial  # local — avoid top-level import in this hot path
+
+    sentinel = 4242
+    ser = None
+    try:
+        print("   Opening serial port...", end="", flush=True)
+        ser = _serial.Serial(upload_port, 115200, timeout=2)
+        ser.dtr = False  # type: ignore[assignment]
+        ser.rts = False  # type: ignore[assignment]
+        await asyncio.sleep(0.5)
+        ser.reset_input_buffer()
+        await asyncio.sleep(2.0)  # let boot banner drain
+        ser.reset_input_buffer()
+        print(f" {Fore.GREEN}ok{Style.RESET_ALL}")
+
+        req = (
+            '{"jsonrpc":"2.0","method":"echo","params":['
+            + str(sentinel)
+            + '],"id":1}\n'
+        )
+        print(f"   TX: {req.strip()}", flush=True)
+        ser.write(req.encode())
+        ser.flush()
+
+        # Collect for up to 5 seconds or until we see a complete REMOTE: line
+        deadline = time.monotonic() + 5.0
+        accumulated = b""
+        while time.monotonic() < deadline:
+            await asyncio.sleep(0.2)
+            if ser.in_waiting:
+                accumulated += ser.read(ser.in_waiting)
+                if (
+                    b'"result":' in accumulated
+                    and b"\r\n" in accumulated
+                    and b"REMOTE:" in accumulated
+                ):
+                    break
+
+        print(f"   RX: {accumulated!r}", flush=True)
+        print()
+
+        # Look for the echo result
+        result_token = f'"result":{sentinel}'.encode()
+        echo_ok = result_token in accumulated
+        # Look for the FL_DBG line from fl::Remote
+        dbg_token = b"Stored request ID for echo"
+        log_ok = dbg_token in accumulated
+        # Look for the REMOTE: prefix proving Serial.println via the sink
+        remote_ok = b"REMOTE: " in accumulated
+
+        passed = echo_ok and remote_ok
+        if passed:
+            print(f"{Fore.GREEN}BRING-UP TEST PASSED{Style.RESET_ALL}")
+            print(
+                f"   ✅ Serial.println — REMOTE: response received"
+                if remote_ok
+                else f"   ❌ Serial.println — REMOTE: prefix missing"
+            )
+            print(
+                f"   ✅ JSON-RPC echo — sentinel {sentinel} round-trip verified"
+                if echo_ok
+                else f"   ❌ JSON-RPC echo — result mismatch"
+            )
+            print(
+                f"   ✅ FastLED log pipeline — FL_DBG emitted via same Serial transport"
+                if log_ok
+                else f"   ⚠️  FastLED log pipeline — FL_DBG line not observed"
+                "  (may be optimized out in release builds without FASTLED_FORCE_DBG)"
+            )
+            print()
+            return 0
+        else:
+            print(f"{Fore.RED}BRING-UP TEST FAILED{Style.RESET_ALL}")
+            print(f"   echo_ok={echo_ok} remote_ok={remote_ok} log_ok={log_ok}")
+            return 1
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception as e:
+        print()
+        print(f"{Fore.RED}BRING-UP TEST ERROR: {e}{Style.RESET_ALL}")
+        return 1
+    finally:
+        if ser is not None:
+            ser.close()
 
 
 async def _run_coroutine_tests(ctx: RunContext) -> int:
