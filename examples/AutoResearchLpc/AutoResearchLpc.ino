@@ -411,7 +411,7 @@ void setup() {
 
             const bool success = (mismatched == 0 && decoded_bytes == (fl::u32)expected_bytes);
 
-            fl::strstream s;
+            fl::sstream s;
             s << (success ? 1 : 0) << ',' << test_case << ',' << num_leds << ','
               << expected_bytes << ',' << decoded_bytes << ','
               << matched << ',' << mismatched << ','
