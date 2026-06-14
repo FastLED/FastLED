@@ -28,6 +28,14 @@
 //
 // #define FASTLED_LPC_RX_SCT_WS2812 1
 
+// Opt in to the SCT→DMA RX capture path. Required for WS2812 hardware
+// loopback — polling-mode pollOnce() can't keep up with the 800 kHz
+// edge rate on M0+ @ 30 MHz, but DMA latches every edge without CPU
+// involvement. Auto-enabled when WS2812 mode is on.
+#if defined(FASTLED_LPC_RX_SCT_WS2812) && !defined(FASTLED_LPC_RX_SCT_DMA)
+#define FASTLED_LPC_RX_SCT_DMA 1
+#endif
+
 //
 // examples/AutoResearchLpc/AutoResearchLpc.ino
 //
