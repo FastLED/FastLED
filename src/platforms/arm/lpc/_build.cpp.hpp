@@ -6,3 +6,4 @@
 #include "platforms/arm/lpc/io_lpc.cpp.hpp"
 #include "platforms/arm/lpc/platform_time_lpc.cpp.hpp"
 #include "platforms/arm/lpc/runtime_lpc.cpp.hpp"
+#include "platforms/arm/lpc/rx_sct_capture.cpp.hpp"
