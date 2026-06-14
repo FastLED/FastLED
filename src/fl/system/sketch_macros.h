@@ -50,7 +50,8 @@
   || defined(FL_IS_STM32_F1) \
   || defined(FL_IS_ESP8266) \
   || defined(ARDUINO_ARCH_RENESAS_UNO) \
-  || defined(ARDUINO_BLUEPILL_F103C8)
+  || defined(ARDUINO_BLUEPILL_F103C8) \
+  || defined(FL_IS_ARM_LPC)
 #define SKETCH_HAS_LARGE_MEMORY 0
 #else
 #define SKETCH_HAS_LARGE_MEMORY 1
