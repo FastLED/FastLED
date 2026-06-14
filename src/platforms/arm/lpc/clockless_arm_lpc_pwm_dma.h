@@ -28,7 +28,7 @@
 // BUILD-TIME OPT-IN
 // -----------------
 // Activated only when *both* are defined:
-//   * FL_LPC845 (auto-detected from CMSIS device macros in is_lpc.h)
+//   * FL_IS_ARM_LPC_845 (auto-detected from CMSIS device macros in is_lpc.h)
 //   * FASTLED_LPC_PWM_DMA  (user-supplied, default off)
 //
 // When FASTLED_LPC_PWM_DMA is not set, fastled_arm_lpc.h continues to route
@@ -111,7 +111,7 @@
 // IMPLEMENTATION
 // =============================================================================
 
-#if defined(FL_IS_ARM_LPC) && defined(FL_LPC845) && defined(FASTLED_LPC_PWM_DMA)
+#if defined(FL_IS_ARM_LPC) && defined(FL_IS_ARM_LPC_845) && defined(FASTLED_LPC_PWM_DMA)
 
 #include "fl/chipsets/timing_traits.h"
 #include "fl/stl/noexcept.h"
@@ -582,5 +582,5 @@ u32 ClocklessController<P, T, R, X, F, W>::sChannelBuf
 
 }  // namespace fl
 
-#endif  // FL_IS_ARM_LPC && FL_LPC845 && FASTLED_LPC_PWM_DMA
+#endif  // FL_IS_ARM_LPC && FL_IS_ARM_LPC_845 && FASTLED_LPC_PWM_DMA
 #endif  // __INC_CLOCKLESS_ARM_LPC_PWM_DMA_H

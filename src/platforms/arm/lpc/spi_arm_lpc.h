@@ -15,7 +15,7 @@
 // different register layouts (UM10398 / UM10462 SSP for LPC11; LPC15 SPI is
 // closer to LPC8xx but uses different base addresses) — driver wiring for
 // those families is tracked in #2845 Stage 4.
-#if defined(FL_LPC845) || defined(FL_LPC804)
+#if defined(FL_IS_ARM_LPC_845) || defined(FL_IS_ARM_LPC_804)
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_DEPRECATED_REGISTER
@@ -273,6 +273,6 @@ public:
 
 FL_DISABLE_WARNING_POP
 
-#endif  // FL_LPC845 || FL_LPC804
+#endif  // FL_IS_ARM_LPC_845 || FL_IS_ARM_LPC_804
 
 #endif  // __INC_SPI_ARM_LPC_H

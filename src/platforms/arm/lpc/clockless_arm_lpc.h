@@ -19,9 +19,9 @@
 // On LPC11xx legacy parts (LPC1110/1112/1114/1115) the GPIO is at
 // 0x50000000 with 12-bit masked-access semantics — that family needs its
 // own clockless driver, tracked in #2845 Stage 4.
-#if (defined(FL_LPC845) || defined(FL_LPC804) || \
-     defined(FL_LPC11_USB) || defined(FL_LPC15)) && \
-    !(defined(FL_LPC804) && defined(FASTLED_LPC_PLU))
+#if (defined(FL_IS_ARM_LPC_845) || defined(FL_IS_ARM_LPC_804) || \
+     defined(FL_IS_ARM_LPC_11_USB) || defined(FL_IS_ARM_LPC_15)) && \
+    !(defined(FL_IS_ARM_LPC_804) && defined(FASTLED_LPC_PLU))
 
 #include "platforms/arm/common/m0clockless.h"
 #include "fl/chipsets/timing_traits.h"
@@ -93,5 +93,5 @@ public:
 
 }  // namespace fl
 
-#endif  // (FL_LPC845 || FL_LPC804) && !(FL_LPC804 && FASTLED_LPC_PLU)
+#endif  // (FL_IS_ARM_LPC_845 || FL_IS_ARM_LPC_804) && !(FL_IS_ARM_LPC_804 && FASTLED_LPC_PLU)
 #endif  // __INC_CLOCKLESS_ARM_LPC_H

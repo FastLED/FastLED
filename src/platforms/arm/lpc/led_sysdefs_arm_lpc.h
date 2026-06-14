@@ -15,11 +15,11 @@
 //   LPC8xx        — Cortex-M0+
 //   LPC11Uxx      — Cortex-M0   (NOT M0+)
 //   LPC15xx       — Cortex-M3   (different ISA, has DWT cycle counter)
-#if defined(FL_LPC845) || defined(FL_LPC804)
+#if defined(FL_IS_ARM_LPC_845) || defined(FL_IS_ARM_LPC_804)
 #define FL_IS_ARM_M0_PLUS
-#elif defined(FL_LPC11_USB)
+#elif defined(FL_IS_ARM_LPC_11_USB)
 #define FL_IS_ARM_M0
-#elif defined(FL_LPC15)
+#elif defined(FL_IS_ARM_LPC_15)
 #define FL_IS_ARM_M3
 #endif
 
@@ -37,16 +37,16 @@
 #endif
 
 #ifndef F_CPU
-#if defined(FL_LPC845)
+#if defined(FL_IS_ARM_LPC_845)
 #define F_CPU 30000000UL
-#elif defined(FL_LPC804)
+#elif defined(FL_IS_ARM_LPC_804)
 #define F_CPU 15000000UL
-#elif defined(FL_LPC11_USB)
+#elif defined(FL_IS_ARM_LPC_11_USB)
 // LPC11U24 / LPC11U35 — IRC at boot is 12 MHz. PLL boost to 48 MHz is
 // possible; default kept conservative since SystemInit is the user's
 // responsibility on bare-metal builds.
 #define F_CPU 12000000UL
-#elif defined(FL_LPC15)
+#elif defined(FL_IS_ARM_LPC_15)
 // LPC15xx — IRC at boot is 12 MHz. PLL boost to 72 MHz on most variants.
 // Default kept conservative; user code can override F_CPU once a PLL is
 // brought up.
@@ -89,9 +89,9 @@ typedef fl::u8           boolean;
 // via core_cm0plus.h. Some integrations only pull in the SoC header (e.g.
 // LPC845.h / LPC804.h), which transitively includes the core header.
 // IWYU pragma: begin_keep
-#if defined(FL_LPC845)
+#if defined(FL_IS_ARM_LPC_845)
 #include <LPC845.h>
-#elif defined(FL_LPC804)
+#elif defined(FL_IS_ARM_LPC_804)
 #include <LPC804.h>
 #endif
 // IWYU pragma: end_keep
