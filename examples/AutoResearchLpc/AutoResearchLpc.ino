@@ -65,12 +65,23 @@
 #include "fl/remote/transport/serial.h"
 #include "fl/wdt/watchdog.h"
 #include "fl/log/log.h"
+
+// The host-stub example DLL build (`tests/shared/example_dll_wrapper_template.cpp`)
+// compiles this sketch on Linux to surface ABI breaks. The RX SCT driver
+// types (`fl::EdgeTime`, `fl::RxConfig`, `fl::LpcSctRxChannel`) are
+// platform-gated behind `FL_IS_ARM_LPC` — they only exist on the real
+// LPC build. So the include + every RX usage below must be gated the
+// same way.
+#include "platforms/arm/lpc/is_lpc.h"
+#if defined(FL_IS_ARM_LPC)
 #include "fl/channels/rx_sct_capture.h"
 #include "fl/stl/strstream.h"
+#endif
 
 namespace {
 fl::Remote* g_remote = nullptr;
 
+#if defined(FL_IS_ARM_LPC)
 // ----------------------------------------------------------------------
 // Period-stat helpers for `pinToggleRx`. Mirror the FlexIO RX benchmark
 // logic in `examples/AutoResearch/AutoResearchRemote.cpp::flexioRxBenchmark`
@@ -117,6 +128,7 @@ PinTogglePeriodStats computePeriodStats(const fl::EdgeTime* edges,
     s.max_ns   = max_ns;
     return s;
 }
+#endif  // FL_IS_ARM_LPC
 
 }  // namespace
 
@@ -149,12 +161,17 @@ void setup() {
         return v;
     });
 
+#if defined(FL_IS_ARM_LPC)
     // ------------------------------------------------------------------
     // pinToggleRx (FastLED #3021 Phase 1)
     // ------------------------------------------------------------------
     // Drive tx_pin with a freq_hz square wave for duration_ms, while SCT
     // input-capture latches every edge on rx_pin. Returns CSV stats so the
     // Python orchestrator can assert mean and σ thresholds.
+    //
+    // Gated behind FL_IS_ARM_LPC so the example DLL host-stub build
+    // (tests/shared/example_dll_wrapper_template.cpp) doesn't try to
+    // compile the LPC-only RX driver path.
     //
     // CSV slot ordering (must match ci/autoresearch/test_lpc_pin_toggle_rx.py):
     //   success, edges, periods, mean_ns, sigma_ns, min_ns, max_ns
@@ -237,6 +254,7 @@ void setup() {
               << stats.min_ns << ',' << stats.max_ns;
             return s.str();
         });
+#endif  // FL_IS_ARM_LPC
 }
 
 void loop() {
