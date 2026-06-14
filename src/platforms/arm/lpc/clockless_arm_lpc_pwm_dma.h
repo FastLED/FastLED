@@ -102,10 +102,45 @@
 //       on the next bit's value (requires SCT INVAL evaluation - novel).
 // Stage 4 #2845 design review will pick one.
 //
-// MULTI-CHAIN SUPPORT
+// MULTI-CHAIN SUPPORT (FastLED #2879 — Stage 4.4 from #2845)
 // -------------------
 // v1 supports a single chain. Multi-chain (parallel output from one DMA
-// stream sharing the SCT timebase) is Stage 4 work tracked in #2845.
+// stream sharing the SCT timebase) is the Stage 4.4 follow-up. The design
+// extension is well-bounded; the gate is hardware verification of the v1
+// single-chain DMA path, not architectural risk.
+//
+// Sketch of the extension (kept here so a follow-up PR can drop into
+// well-prepared ground once the bench is open):
+//
+//   1. Add a LANE_COUNT template parameter to LpcPwmDmaController. Default
+//      to 1 to preserve the v1 ABI; users opt in via
+//      `addLeds<WS2812, PIN, GRB, /*LANE_COUNT=*/4>(leds, n)` or similar.
+//
+//   2. DMA channel sharing. The current v1 layout claims 3 contiguous
+//      channels per controller instance (T0_RISE / T_MID / T_END). For
+//      multi-strip, the SAME 3 channels are reused — only the SET/CLR
+//      bitmask written by each transfer changes. That means each match
+//      event's DMA descriptor table needs LANE_COUNT entries chained
+//      via DMA_DESCRIPTOR_NEXTDESC; the SCT match timebase stays single
+//      and drives all lanes synchronously.
+//
+//   3. Encode pass. Single-strip's encoder emits one 32-bit word per
+//      WS2812 bit (the GPIO mask for the active pin). Multi-strip emits
+//      LANE_COUNT words per WS2812 bit — bit i of word j across all lanes
+//      OR'd into one mask. The encode-time cost is O(LANE_COUNT * leds);
+//      DMA time is unchanged (still one bit per match event, just with a
+//      wider bitmask).
+//
+//   4. Pin constraints. All lane pins must live on GPIO port 0 (same
+//      constraint as v1 — DMA writes to LPC_GPIO->SET[0]/CLR[0]).
+//
+//   5. Test harness. The on-device verifier lands in
+//      `examples/AutoResearch/AutoResearch.ino` low-memory mode (post
+//      FastLED #3041) so the multi-strip RPC binding sits next to the
+//      single-strip `ws2812SctTest` already shipped.
+//
+// Architectural template references: RP2040 PIO `clockless_rp_pio.h`
+// (PIO state machine fan-out) and Teensy 4.x FlexIO multi-lane.
 
 // =============================================================================
 // IMPLEMENTATION
