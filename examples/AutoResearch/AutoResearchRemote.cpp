@@ -942,6 +942,7 @@ fl::json AutoResearchRemoteControl::runParallelTestImpl(const fl::json& args) {
                 else if (n == "UART")          opts.mBus = fl::Bus::UART;
                 else if (n == "FLEX_IO")       opts.mBus = fl::Bus::FLEX_IO;
                 else if (n == "OBJECT_FLED")   opts.mBus = fl::Bus::OBJECT_FLED;
+                else if (n == "LPUART")        opts.mBus = fl::Bus::LPUART;
                 else if (n == "BIT_BANG")      opts.mBus = fl::Bus::BIT_BANG;
                 else if (n == "STUB")          opts.mBus = fl::Bus::STUB;
                 // else: leave Bus::AUTO; priority dispatch will pick.

@@ -210,6 +210,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             "LCD_RGB",
             "OBJECT_FLED",
             "FLEX_IO",
+            "LPUART",
         ]
     else:
         if args.parlio:
@@ -230,6 +231,8 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             drivers.append("OBJECT_FLED")
         if args.flex_io:
             drivers.append("FLEX_IO")
+        if args.lpuart:
+            drivers.append("LPUART")
 
     parallel_mode = args.parallel
     if parallel_mode:
@@ -516,6 +519,11 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         # and the manager silently falls back to ObjectFLED. Pin the FLEX_IO
         # tests to a known FlexIO2 pin so the engine actually runs.
         flex_io_tx_pin = 6
+        # LPUART on Teensy 4.x routes through {1, 8, 14, 17, 20, 24, 29, 35,
+        # 47, 48}. Pin LPUART tests to pin 1 (LPUART6_TX, Teensy 4's default
+        # Serial2 TX) so the engine accepts the request when --tx-pin is not
+        # supplied. Mirrors the FLEX_IO override above.
+        lpuart_tx_pin = 1
         for driver in drivers_list:
             for lane_count in range(lane_range["min"], lane_range["max"] + 1):
                 for strip_size in strip_sizes:
@@ -529,6 +537,8 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                     }
                     if driver == "FLEX_IO" and args.tx_pin is None:
                         test_config["pinTx"] = flex_io_tx_pin
+                    if driver == "LPUART" and args.tx_pin is None:
+                        test_config["pinTx"] = lpuart_tx_pin
                     if args.legacy:
                         test_config["useLegacyApi"] = True
                     # Multi-frame capture: back-to-back show()/capture cycles per pattern.

@@ -23,6 +23,7 @@ class Args:
     lcd_rgb: bool
     object_fled: bool
     flex_io: bool
+    lpuart: bool
     all: bool
     simd: bool
     coroutine: bool
@@ -139,6 +140,7 @@ Driver Selection (JSON-RPC):
     --lcd-spi      Test only LCD_SPI driver (ESP32-S3 only, APA102/SK9822)
     --lcd-rgb      Test only LCD RGB driver (ESP32-P4 only)
     --object-fled  Test only ObjectFLED DMA driver (Teensy 4.x)
+    --lpuart       Test only LPUART driver (Teensy 4.x; eDMA-backed UART TX, pinned to pin 1 by default)
     --all          Test all drivers
 
 Strip Size Configuration:
@@ -244,9 +246,14 @@ See Also:
             help="Test only FlexIO clockless driver (Teensy 4.x only; requires --tx-pin in {6-13,32})",
         )
         driver_group.add_argument(
+            "--lpuart",
+            action="store_true",
+            help="Test only LPUART clockless driver (Teensy 4.x only; eDMA-backed UART TX; pin pinned to 1=LPUART6_TX by default, override with --tx-pin in {1,8,14,17,20,24,29,35,47,48})",
+        )
+        driver_group.add_argument(
             "--all",
             action="store_true",
-            help="Test all drivers (equivalent to --parlio --rmt --spi --uart --lcd --lcd-spi --lcd-rgb --object-fled --flex-io)",
+            help="Test all drivers (equivalent to --parlio --rmt --spi --uart --lcd --lcd-spi --lcd-rgb --object-fled --flex-io --lpuart)",
         )
         driver_group.add_argument(
             "--simd",
@@ -582,6 +589,7 @@ See Also:
             lcd_rgb=parsed.lcd_rgb,
             object_fled=parsed.object_fled,
             flex_io=parsed.flex_io,
+            lpuart=parsed.lpuart,
             all=parsed.all,
             simd=parsed.simd,
             coroutine=parsed.coroutine,
