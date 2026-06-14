@@ -1035,7 +1035,17 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
     serial_iface = ctx.serial_iface
 
     # Pin discovery
-    if ctx.simd_test_mode:
+    # LPC bring-up sketches only bind `echo` (no `findConnectedPins` RPC),
+    # so pin discovery would hang. Skip it for those boards — the bring-up
+    # short-circuit later in `_run_full_autoresearch_pipeline` will run
+    # `_run_bring_up_tests` directly against the configured upload port.
+    bring_up_envs = {"lpc845brk", "lpcxpresso845max", "lpcxpresso804"}
+    if ctx.final_environment in bring_up_envs:
+        print(
+            f"\n\U0001f4cc LPC bring-up mode ({ctx.final_environment}): "
+            "skipping pin discovery and GPIO pre-test"
+        )
+    elif ctx.simd_test_mode:
         print("\n\U0001f4cc SIMD mode: skipping pin discovery and GPIO pre-test")
     elif ctx.coroutine_test_mode:
         print("\n\U0001f4cc Coroutine mode: skipping pin discovery and GPIO pre-test")
@@ -1091,7 +1101,11 @@ async def _run_schema_and_pin_setup(ctx: RunContext) -> int | None:
         )
 
     # GPIO connectivity pre-test
-    if ctx.simd_test_mode:
+    if ctx.final_environment in bring_up_envs:
+        # LPC bring-up: no jumper wire / pin loop, the bring-up RPC test
+        # itself is the only check we run.
+        pass
+    elif ctx.simd_test_mode:
         pass
     elif ctx.coroutine_test_mode:
         pass
@@ -1505,13 +1519,22 @@ async def _run_bring_up_tests(ctx: RunContext) -> int:
         # Look for the echo result
         result_token = f'"result":{sentinel}'.encode()
         echo_ok = result_token in accumulated
-        # Look for the FL_DBG line from fl::Remote
+        # Look for the FL_DBG line from fl::Remote (only present when
+        # FASTLED_FORCE_DBG or LARGE_MEMORY — bonus signal, not required)
         dbg_token = b"Stored request ID for echo"
         log_ok = dbg_token in accumulated
+        # Look for the FL_WARN_LIT marker the bring-up sketch emits from
+        # inside the `echo` handler. Setup-time FL_WARN_LITs are emitted
+        # too, but the boot-banner drain above clears them — this token
+        # fires per-request and survives the drain. Works on Low-memory
+        # targets (FastLED #3002) because FL_WARN_LIT routes through
+        # fl::println(const char*) without the sstream/log_emit machinery.
+        warn_token = b"FL_WARN: echo invoked"
+        warn_ok = warn_token in accumulated
         # Look for the REMOTE: prefix proving Serial.println via the sink
         remote_ok = b"REMOTE: " in accumulated
 
-        passed = echo_ok and remote_ok
+        passed = echo_ok and remote_ok and warn_ok
         if passed:
             print(f"{Fore.GREEN}BRING-UP TEST PASSED{Style.RESET_ALL}")
             print(
@@ -1525,16 +1548,24 @@ async def _run_bring_up_tests(ctx: RunContext) -> int:
                 else f"   ❌ JSON-RPC echo — result mismatch"
             )
             print(
-                f"   ✅ FastLED log pipeline — FL_DBG emitted via same Serial transport"
+                f"   ✅ FL_WARN_LIT — FastLED warn pipeline reached host"
+                if warn_ok
+                else f"   ❌ FL_WARN_LIT — warning literal not observed"
+            )
+            print(
+                f"   ✅ FL_DBG — full log pipeline (bonus, LARGE_MEMORY only)"
                 if log_ok
-                else f"   ⚠️  FastLED log pipeline — FL_DBG line not observed"
-                "  (may be optimized out in release builds without FASTLED_FORCE_DBG)"
+                else f"   ⚠️  FL_DBG — full pipeline not active"
+                "  (expected on Low-memory targets — FL_WARN_LIT is the gate)"
             )
             print()
             return 0
         else:
             print(f"{Fore.RED}BRING-UP TEST FAILED{Style.RESET_ALL}")
-            print(f"   echo_ok={echo_ok} remote_ok={remote_ok} log_ok={log_ok}")
+            print(
+                f"   echo_ok={echo_ok} remote_ok={remote_ok} "
+                f"warn_ok={warn_ok} log_ok={log_ok}"
+            )
             return 1
     except KeyboardInterrupt as ki:
         handle_keyboard_interrupt(ki)
