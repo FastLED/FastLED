@@ -40,6 +40,61 @@ from ci.util.output_formatter import TimestampFormatter
 from ci.util.timestamp_print import ts_print as _ts_print
 
 
+def validate_test_artifact(
+    test_path: Path, build_start_time: float
+) -> Optional[TestResult]:
+    """Validate a test/example binary before running it.
+
+    Returns ``None`` if the artifact is fresh and ready to run. Returns
+    a populated ``TestResult`` (``success=False``) if the artifact is
+    missing or stale, so the caller can surface the failure directly
+    instead of silently running broken/old code.
+
+    Why this matters (FastLED #3011): the streaming compiler submits
+    tests to the runner as soon as Ninja prints ``[N/M] Linking <X>``
+    — but that line is Ninja's PRE-link announcement, NOT a success
+    signal. If the link then FAILS (zccache daemon crash under the
+    parallel-link storm, ld.lld permission error, etc.) ``test_path``
+    is either missing entirely (clean build) or stale from a previous
+    build sitting in the same build dir. Running it produces a
+    false pass or false fail; refusing to run it surfaces the link
+    failure where it belongs.
+    """
+    if not test_path.exists():
+        return TestResult(
+            success=False,
+            output=(
+                f"[MESON] ❌ Test artifact missing: {test_path}\n"
+                f"  Link likely failed during the parallel-link storm "
+                f"(zccache daemon crash, ld.lld error, etc.) — see "
+                f"FastLED #3011. Refusing to run a missing DLL.\n"
+                f"  Resolve the underlying link failure and re-run."
+            ),
+        )
+    try:
+        dll_mtime = test_path.stat().st_mtime
+    except OSError:
+        # stat() failure is non-fatal — let the subprocess loader
+        # surface whatever it actually sees on disk.
+        return None
+    if dll_mtime < build_start_time:
+        return TestResult(
+            success=False,
+            output=(
+                f"[MESON] ❌ Stale test artifact: {test_path}\n"
+                f"  DLL mtime ({dll_mtime:.2f}) predates this build's "
+                f"start ({build_start_time:.2f}). The current link "
+                f"likely failed and left a previous build's DLL behind "
+                f"— running it would produce misleading results (see "
+                f"FastLED #3011).\n"
+                f"  Resolve the underlying link failure (`zccache stop` "
+                f"+ retry usually clears the daemon-crash variant) and "
+                f"re-run."
+            ),
+        )
+    return None
+
+
 @dataclass
 class StreamingContext:
     """Parameters needed by the streaming execution path."""
@@ -215,6 +270,15 @@ def run_streaming_path(ctx: StreamingContext) -> MesonTestResult:
         output when tests run in parallel.
         """
         try:
+            # FastLED #3011 — refuse to run missing or stale artifacts.
+            # The streaming compiler submits tests as soon as Ninja prints
+            # "Linking <X>" (a PRE-link announcement, not success). If
+            # the link then fails, what's at test_path is either nothing
+            # or yesterday's DLL — running it produces false pass / fail.
+            failure = validate_test_artifact(test_path, ctx.start_time)
+            if failure is not None:
+                return failure
+
             if test_path.suffix.lower() in (".dll", ".so", ".dylib"):
                 runner_suffix = ".exe" if os.name == "nt" else ""
                 if test_path.parent.name == "tests":
