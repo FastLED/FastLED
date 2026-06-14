@@ -70,6 +70,7 @@ enum class Bus : fl::u8 {
     UART,            ///< ESP32 UART driver via wave8 framing.
     FLEX_IO,         ///< Teensy 4.x FlexIO2 driver.
     OBJECT_FLED,     ///< Teensy 4.x ObjectFLED driver.
+    LPUART,          ///< Teensy 4.x iMXRT1062 LPUART (inverted-TX + eDMA) clockless driver.
     BIT_BANG,        ///< Portable bit-bang fallback driver.
     STUB,            ///< Native/host/test stub driver.
 };
@@ -177,6 +178,7 @@ inline const char* busName(Bus b) FL_NOEXCEPT {
         case Bus::UART:          return "UART";
         case Bus::FLEX_IO:       return "FLEX_IO";
         case Bus::OBJECT_FLED:   return "OBJECT_FLED";
+        case Bus::LPUART:        return "LPUART";
         case Bus::BIT_BANG:      return "BIT_BANG";
         case Bus::STUB:          return "STUB";
     }
@@ -186,7 +188,7 @@ inline const char* busName(Bus b) FL_NOEXCEPT {
 // Drift-prevention: if a new `Bus` enumerator is added, the switch above must
 // gain a case. Update this assertion to the new last enumerator after you
 // wire the case in — its failure is the prompt to revisit `busName()`.
-FL_STATIC_ASSERT(static_cast<fl::u8>(Bus::STUB) == 13,
+FL_STATIC_ASSERT(static_cast<fl::u8>(Bus::STUB) == 14,
                  "Bus changed: add the new value to busName() in this file");  // ok plain enum
 
 }  // namespace fl
