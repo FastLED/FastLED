@@ -22,6 +22,7 @@ class Args:
     lcd_spi: bool
     lcd_rgb: bool
     object_fled: bool
+    flex_io: bool
     all: bool
     simd: bool
     coroutine: bool
@@ -232,9 +233,14 @@ See Also:
             help="Test only ObjectFLED DMA driver (Teensy 4.x only)",
         )
         driver_group.add_argument(
+            "--flex-io",
+            action="store_true",
+            help="Test only FlexIO clockless driver (Teensy 4.x only; requires --tx-pin in {6-13,32})",
+        )
+        driver_group.add_argument(
             "--all",
             action="store_true",
-            help="Test all drivers (equivalent to --parlio --rmt --spi --uart --lcd --lcd-spi --lcd-rgb --object-fled)",
+            help="Test all drivers (equivalent to --parlio --rmt --spi --uart --lcd --lcd-spi --lcd-rgb --object-fled --flex-io)",
         )
         driver_group.add_argument(
             "--simd",
@@ -547,6 +553,7 @@ See Also:
             lcd_spi=parsed.lcd_spi,
             lcd_rgb=parsed.lcd_rgb,
             object_fled=parsed.object_fled,
+            flex_io=parsed.flex_io,
             all=parsed.all,
             simd=parsed.simd,
             coroutine=parsed.coroutine,

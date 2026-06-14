@@ -208,7 +208,8 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             "LCD_CLOCKLESS",
             "LCD_SPI",
             "LCD_RGB",
-            "OBJECTFLED",
+            "OBJECT_FLED",
+            "FLEX_IO",
         ]
     else:
         if args.parlio:
@@ -226,7 +227,9 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         if args.lcd_rgb:
             drivers.append("LCD_RGB")
         if args.object_fled:
-            drivers.append("OBJECTFLED")
+            drivers.append("OBJECT_FLED")
+        if args.flex_io:
+            drivers.append("FLEX_IO")
 
     parallel_mode = args.parallel
     if parallel_mode:
@@ -508,6 +511,11 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
             f"({len(drivers_list)} drivers \u00d7 {lane_range['max'] - lane_range['min'] + 1} lane count(s) \u00d7 {len(strip_sizes)} strip size(s))"
         )
     else:
+        # FlexIO on Teensy 4.x only routes through pins {6-13, 32}; the global
+        # default TX pin (1) is not FlexIO2-capable so canHandle() rejects it
+        # and the manager silently falls back to ObjectFLED. Pin the FLEX_IO
+        # tests to a known FlexIO2 pin so the engine actually runs.
+        flex_io_tx_pin = 6
         for driver in drivers_list:
             for lane_count in range(lane_range["min"], lane_range["max"] + 1):
                 for strip_size in strip_sizes:
@@ -519,6 +527,8 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
                         "iterations": 1,
                         "timing": timing_name,
                     }
+                    if driver == "FLEX_IO" and args.tx_pin is None:
+                        test_config["pinTx"] = flex_io_tx_pin
                     if args.legacy:
                         test_config["useLegacyApi"] = True
                     # Multi-frame capture: back-to-back show()/capture cycles per pattern.
