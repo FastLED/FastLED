@@ -138,8 +138,24 @@ public:
     json(bool b) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(b)) {}
     json(int i) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(static_cast<i64>(i))) {}
     json(i64 i) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(i)) {}
-    json(float f) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(f)) {}  // Use float directly
-    json(double d) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(static_cast<float>(d))) {}  // Convert double to float
+#if FL_JSON_HAS_FLOAT
+    json(float f) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(f)) {}
+    json(double d) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(static_cast<float>(d))) {}
+#else
+    // FL_JSON_HAS_FLOAT==0 (FastLED #3022): the variant carries no float
+    // alternative, but the user-facing constructor / setter API still
+    // accepts `float` and `double` so caller code (UI widgets, ScreenMap,
+    // diagnostics, etc.) keeps compiling unchanged. The library takes
+    // over the conversion here — values are truncated to `i64` storage
+    // via `static_cast`. Cost at the call site is a single
+    // `__aeabi_f2iz` / `__aeabi_d2iz` helper (~64B, no chained
+    // soft-double cascade); the linker drops it under `--gc-sections`
+    // for sketches that never invoke these constructors.
+    // TODO(#3022 phase 2): replace truncation with `json_number` Q-format
+    // tags so the fractional part is preserved.
+    json(float f) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(static_cast<i64>(f))) {}
+    json(double d) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(static_cast<i64>(d))) {}
+#endif  // FL_JSON_HAS_FLOAT
     json(const fl::string& s) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(s)) {}
     json(const char* s) FL_NOEXCEPT : json(fl::string(s)) {}
     json(json_array a) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(fl::move(a))) {}
@@ -154,6 +170,7 @@ public:
         return result;
     }
     
+#if FL_JSON_HAS_FLOAT
     // Constructor for fl::vector<float> - converts to JSON array
     json(const fl::vector<float>& vec) FL_NOEXCEPT : mValue(fl::make_shared<json_value>(json_array{})) {
         auto ptr = mValue->data.ptr<json_array>();
@@ -163,6 +180,7 @@ public:
             }
         }
     }
+#endif  // FL_JSON_HAS_FLOAT
     
     // Special constructor for char values
     static json from_char(char c) FL_NOEXCEPT {
@@ -204,15 +222,29 @@ public:
         return *this;
     }
     
+#if FL_JSON_HAS_FLOAT
     json& operator=(float value) FL_NOEXCEPT {
         mValue = fl::make_shared<json_value>(value);
         return *this;
     }
-    
+
     json& operator=(double value) FL_NOEXCEPT {
         mValue = fl::make_shared<json_value>(static_cast<float>(value));
         return *this;
     }
+#else
+    // FL_JSON_HAS_FLOAT==0: library-owned float→i64 truncation, see
+    // json(float)/json(double) constructors above. Same semantics here.
+    json& operator=(float value) FL_NOEXCEPT {
+        mValue = fl::make_shared<json_value>(static_cast<i64>(value));
+        return *this;
+    }
+
+    json& operator=(double value) FL_NOEXCEPT {
+        mValue = fl::make_shared<json_value>(static_cast<i64>(value));
+        return *this;
+    }
+#endif  // FL_JSON_HAS_FLOAT
     
     json& operator=(const fl::string& value) FL_NOEXCEPT {
         mValue = fl::make_shared<json_value>(value);
@@ -224,6 +256,7 @@ public:
         return *this;
     }
     
+#if FL_JSON_HAS_FLOAT
     // Assignment operator for fl::vector<float>
     json& operator=(fl::vector<float> vec) FL_NOEXCEPT {
         mValue = fl::make_shared<json_value>(json_array{});
@@ -235,6 +268,7 @@ public:
         }
         return *this;
     }
+#endif  // FL_JSON_HAS_FLOAT
 
     // Type queries
     bool is_null() const FL_NOEXCEPT { return mValue ? mValue->is_null() : true; }
@@ -582,9 +616,12 @@ public:
             if (idx < p->size()) return json(static_cast<i64>((*p)[idx]));
         } else if (auto p = mValue->data.ptr<fl::vector<u8>>()) {
             if (idx < p->size()) return json(static_cast<i64>((*p)[idx]));
-        } else if (auto p = mValue->data.ptr<fl::vector<float>>()) {
+        }
+#if FL_JSON_HAS_FLOAT
+        else if (auto p = mValue->data.ptr<fl::vector<float>>()) {
             if (idx < p->size()) return json((*p)[idx]);
         }
+#endif  // FL_JSON_HAS_FLOAT
         return json(nullptr);
     }
     
@@ -720,6 +757,9 @@ public:
     void set(const fl::string& key, bool value) FL_NOEXCEPT { set(key, json(value)); }
     void set(const fl::string& key, int value) FL_NOEXCEPT { set(key, json(value)); }
     void set(const fl::string& key, i64 value) FL_NOEXCEPT { set(key, json(value)); }
+    // float / double setters: on FL_JSON_HAS_FLOAT==0 the `json(value)`
+    // constructors above truncate to i64 storage so this API keeps
+    // compiling and serializing for caller code (UI widgets, etc.).
     void set(const fl::string& key, float value) FL_NOEXCEPT { set(key, json(value)); }
     void set(const fl::string& key, double value) FL_NOEXCEPT { set(key, json(value)); }
     void set(const fl::string& key, const fl::string& value) FL_NOEXCEPT { set(key, json(value)); }

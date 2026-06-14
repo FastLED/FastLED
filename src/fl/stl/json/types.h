@@ -23,6 +23,20 @@
 #include "fl/stl/string_view.h"
 
 #include "fl/stl/noexcept.h"
+#include "fl/system/sketch_macros.h"  // FL_PLATFORM_HAS_LARGE_MEMORY (FastLED #3000)
+
+// Compile-time gate for the `float` / `fl::vector<float>` alternatives in
+// `fl::json_value::variant_t`. When 0, the variant carries no IEEE-754
+// alternative and no soft-FP cascade (libgcc `__aeabi_d*` / `__aeabi_f*`
+// helpers) is structurally reachable from the JSON code path. See FastLED
+// #3022 (and parent #3002) — defaults follow the platform memory tier so
+// no-FPU Low-memory targets (LPC845, ATmega328-class, STM32F1, ...) keep
+// soft-FP permanently absent from the link. Users can force-enable with
+// `-DFL_JSON_HAS_FLOAT=1` (e.g. to debug a Low-memory part with extra
+// flash headroom for the soft-FP cost).
+#ifndef FL_JSON_HAS_FLOAT
+  #define FL_JSON_HAS_FLOAT FL_PLATFORM_HAS_LARGE_MEMORY
+#endif
 
 namespace fl {
 
@@ -658,18 +672,28 @@ struct json_value {
     // Friend declarations
     friend class json;
     
-    // The variant holds exactly one of these alternatives
+    // The variant holds exactly one of these alternatives.
+    //
+    // `float` and `fl::vector<float>` are gated by `FL_JSON_HAS_FLOAT`
+    // (FastLED #3022). On Low-memory / no-FPU targets they are absent so
+    // the soft-FP cascade (libgcc `__aeabi_d*` / `__aeabi_f*` helpers,
+    // ~7 KB on LPC845) cannot be reached from this code path.
     using variant_t = fl::variant<
         fl::nullptr_t,   // null
         bool,            // true/false
-        i64,         // integer
-        float,           // floating-point (changed from double to float)
+        i64,             // integer
+#if FL_JSON_HAS_FLOAT
+        float,           // floating-point (host / Large-memory targets only)
+#endif
         fl::string,      // string
-        json_array,           // array
-        json_object,          // object
+        json_array,      // array
+        json_object,     // object
         fl::vector<i16>, // audio data (specialized array of int16_t)
-        fl::vector<u8>, // byte data (specialized array of uint8_t)
+        fl::vector<u8>   // byte data (specialized array of uint8_t)
+#if FL_JSON_HAS_FLOAT
+        ,
         fl::vector<float>    // float data (specialized array of float)
+#endif
     >;
 
     typedef json_value::iterator iterator;
@@ -687,7 +711,9 @@ struct json_value {
     // convertible to bool, i64, and float.
     json_value(int i) FL_NOEXCEPT : data(static_cast<i64>(i)) {}
     json_value(unsigned int i) FL_NOEXCEPT : data(static_cast<i64>(i)) {}
-    json_value(float f) FL_NOEXCEPT : data(f) {}  // Changed from double to float
+#if FL_JSON_HAS_FLOAT
+    json_value(float f) FL_NOEXCEPT : data(f) {}
+#endif
     json_value(const fl::string& s) FL_NOEXCEPT : data(s) {
     }
     json_value(const json_array& a) FL_NOEXCEPT : data(a) {
@@ -712,13 +738,15 @@ struct json_value {
         //FL_WARN("Created json_value with moved byte data");
     }
     
+#if FL_JSON_HAS_FLOAT
     json_value(const fl::vector<float>& floats) FL_NOEXCEPT : data(floats) {
         //FL_WARN("Created json_value with float data");
     }
-    
+
     json_value(fl::vector<float>&& floats) FL_NOEXCEPT : data(fl::move(floats)) {
         //FL_WARN("Created json_value with moved float data");
     }
+#endif
 
     // Copy constructor
     json_value(const json_value& other) FL_NOEXCEPT : data(other.data) {}
@@ -755,15 +783,17 @@ struct json_value {
         return *this;
     }
 
+#if FL_JSON_HAS_FLOAT
     json_value& operator=(double d) FL_NOEXCEPT {
         data = static_cast<float>(d);
         return *this;
     }
-    
+
     json_value& operator=(float f) FL_NOEXCEPT {
         data = f;
         return *this;
     }
+#endif
 
     json_value& operator=(fl::string s) FL_NOEXCEPT {
         data = fl::move(s);
@@ -785,10 +815,12 @@ struct json_value {
         return *this;
     }
     
+#if FL_JSON_HAS_FLOAT
     json_value& operator=(fl::vector<float> floats) FL_NOEXCEPT {
         data = fl::move(floats);
         return *this;
     }
+#endif
 
     // Special constructor for char values
     static fl::shared_ptr<json_value> from_char(char c) FL_NOEXCEPT {
@@ -819,12 +851,19 @@ struct json_value {
         //FL_WARN("is_int called, tag=" << data.tag());
         return data.is<i64>();
     }
-    bool is_double() const FL_NOEXCEPT { 
-        //FL_WARN("is_double called, tag=" << data.tag());
-        return data.is<float>(); 
+    bool is_double() const FL_NOEXCEPT {
+#if FL_JSON_HAS_FLOAT
+        return data.is<float>();
+#else
+        return false;
+#endif
     }
     bool is_float() const FL_NOEXCEPT {
+#if FL_JSON_HAS_FLOAT
         return data.is<float>();
+#else
+        return false;
+#endif
     }
     // is_number() returns true if the value is any numeric type (int or float)
     bool is_number() const FL_NOEXCEPT {
@@ -894,8 +933,11 @@ struct json_value {
         return data.is<fl::vector<u8>>();
     }
     bool is_floats() const FL_NOEXCEPT {
-        //FL_WARN("is_floats called, tag=" << data.tag());
+#if FL_JSON_HAS_FLOAT
         return data.is<fl::vector<float>>();
+#else
+        return false;
+#endif
     }
 
     // Safe extractors (return optional values, not references)
@@ -1062,6 +1104,7 @@ struct json_value {
             }
             return fl::optional<json_array>(result);
         }
+#if FL_JSON_HAS_FLOAT
         if (data.is<fl::vector<float>>()) {
             auto floatPtr = data.ptr<fl::vector<float>>();
             json_array result;
@@ -1070,6 +1113,7 @@ struct json_value {
             }
             return fl::optional<json_array>(result);
         }
+#endif  // FL_JSON_HAS_FLOAT
         return fl::nullopt;
     }
     fl::optional<json_object> clone_object() const FL_NOEXCEPT {

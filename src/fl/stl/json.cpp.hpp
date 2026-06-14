@@ -35,34 +35,42 @@ namespace fl {
 
 
 // Helper function to check if a double can be reasonably represented as a float
-// Used for debug logging - may appear unused in release builds
+// Used for debug logging - may appear unused in release builds.
+//
+// Gated behind FL_JSON_HAS_FLOAT — the body uses `double` arithmetic which
+// pulls in `__aeabi_dadd` / `__aeabi_dmul` (~3 KB of soft-FP on no-FPU
+// ARM). On FL_JSON_HAS_FLOAT==0 (LPC845 etc.) the variant never carries a
+// float alternative, so this helper has no remaining callers; omitting it
+// keeps libgcc's soft-double cascade out of the link. See FastLED #3022.
+#if FL_JSON_HAS_FLOAT
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(unused-function)
 static bool canBeRepresentedAsFloat(double value) {
 
-    
+
     auto isnan = [](double value) -> bool {
         return value != value;
     };
-    
+
     // Check for special values
     if (isnan(value)) {
         return true; // These can be represented as float
     }
-    
+
     // Check if the value is within reasonable float range
     // Reject values that are clearly beyond float precision (beyond 2^24 for integers)
     // or outside the float range
     if (fl::abs(value) > 16777216.0) { // 2^24 - beyond which floats lose integer precision
         return false;
     }
-    
+
     // For values within reasonable range, allow conversion even with minor precision loss
     // This handles cases like 300000.14159 which should be convertible to float
     // even though it loses some precision
     return true;
 }
-FL_DISABLE_WARNING_POP    
+FL_DISABLE_WARNING_POP
+#endif  // FL_JSON_HAS_FLOAT
 
 
 json_value& get_null_json_value() {
@@ -218,12 +226,26 @@ private:
 
                 if (is_float) {
                     has_float = true;
+#if FL_JSON_HAS_FLOAT
                     // Parse float value to check if it's beyond integer precision
                     // Note: fl::parseFloat may have precision loss for very large numbers
                     float f_val = fl::parseFloat(&mInput[num_start], mPos - num_start);
                     if (fl::abs(f_val) > 16777216.0f) {
                         has_float_beyond_precision = true;
                     }
+#else
+                    // FL_JSON_HAS_FLOAT==0: parser still detects fractional
+                    // syntax (for the type-classification logic below) but
+                    // never calls `fl::parseFloat`, since that helper would
+                    // pull in libgcc's soft-FP cascade. The corresponding
+                    // ARRAY_FLOAT branch in `JsonBuilder` is also gated out,
+                    // so this routes to the LBRACKET slow path where each
+                    // number flows through the phase-1 placeholder
+                    // integer-prefix parse (see `JsonToken::NUMBER` below
+                    // for the long-term Q-format plan tracked in FastLED
+                    // #3022).
+                    has_float_beyond_precision = true;  // forces LBRACKET slow path
+#endif
                 } else {
                     has_int = true;
                     // Parse actual value to get accurate range
@@ -676,6 +698,7 @@ ArrayType classify_array(const json_array& arr) {
                 all_numeric = false;
                 break;
             }
+#if FL_JSON_HAS_FLOAT
         } else if (elem->is_float()) {
             has_float = true;
             auto val = elem->as_float();
@@ -688,6 +711,7 @@ ArrayType classify_array(const json_array& arr) {
             if (fl::abs(f) > 16777216.0f) {
                 has_float_beyond_precision = true;
             }
+#endif
         } else {
             all_numeric = false;
             break;
@@ -714,11 +738,13 @@ ArrayType classify_array(const json_array& arr) {
         return ALL_INT16;
     }
 
+#if FL_JSON_HAS_FLOAT
     // Large integers (>32767 or <-32768) that don't fit in int16 but can be represented as float
     // Convert to float if within float's integer precision range (±2^24)
     if (min_val >= -16777216 && max_val <= 16777216) {
         return ALL_FLOATS;
     }
+#endif
 
     return GENERIC_ARRAY;
 }
@@ -750,6 +776,7 @@ fl::shared_ptr<json_value> optimize_array(fl::shared_ptr<json_value> array_val) 
             return fl::make_shared<json_value>(fl::move(vec));
         }
 
+#if FL_JSON_HAS_FLOAT
         case ALL_FLOATS: {
             fl::vector<float> vec;
             vec.reserve(arr->size());
@@ -764,6 +791,7 @@ fl::shared_ptr<json_value> optimize_array(fl::shared_ptr<json_value> array_val) 
             }
             return fl::make_shared<json_value>(fl::move(vec));
         }
+#endif
 
         default:
             return array_val;  // Keep as generic array
@@ -814,7 +842,11 @@ private:
         return true;
     }
 
-    // Parse float array directly from span into vector (zero allocations)
+#if FL_JSON_HAS_FLOAT
+    // Parse float array directly from span into vector (zero allocations).
+    // Gated behind FL_JSON_HAS_FLOAT — the `fl::parseFloat` call below is the
+    // direct anchor that pulls libgcc's soft-FP cascade onto Low-memory
+    // targets (~7 KB on LPC845). See FastLED #3022.
     template<typename T>
     bool parse_float_array(const fl::span<const char>& span, fl::vector<T>& out_vec) {
         const char* p = span.data();
@@ -862,6 +894,7 @@ private:
 
         return true;
     }
+#endif  // FL_JSON_HAS_FLOAT
 
     void push_value(const fl::shared_ptr<json_value>& val) {
         if (mStack.empty()) {
@@ -914,6 +947,7 @@ public:
                 return ParseState::KEEP_GOING;
             }
 
+#if FL_JSON_HAS_FLOAT
             case JsonToken::ARRAY_FLOAT: {
                 fl::vector<float> vec;
                 if (!parse_float_array(value, vec)) return ParseState::ERROR;
@@ -921,6 +955,7 @@ public:
                 push_value(arr_val);
                 return ParseState::KEEP_GOING;
             }
+#endif  // FL_JSON_HAS_FLOAT
 
             case JsonToken::LBRACE: {
                 auto obj_val = fl::make_shared<json_value>(json_object{});
@@ -998,8 +1033,28 @@ public:
 
                 fl::shared_ptr<json_value> num_val;
                 if (is_float) {
+#if FL_JSON_HAS_FLOAT
                     float f = fl::parseFloat(value.data(), value.size());
                     num_val = fl::make_shared<json_value>(f);
+#else
+                    // FL_JSON_HAS_FLOAT==0: variant has no float alternative
+                    // and `fl::parseFloat` would pull in libgcc's soft-FP
+                    // cascade. The library MUST own the fractional-number
+                    // conversion path here (not silently truncate). For
+                    // phase 1 of FastLED #3022 we land a placeholder that
+                    // parses only the integer prefix — phase 2 will replace
+                    // this with the `Q30.31` fixed-point parse and the
+                    // `to_q30_31()` extractors from the issue body, so
+                    // callers that need fractional precision on Low-memory
+                    // targets keep it without ever invoking IEEE-754.
+                    // See: github.com/FastLED/FastLED/issues/3022 — the
+                    // design-clarification comment on the placeholder
+                    // semantics is intentional and not a long-term contract.
+                    // TODO(#3022 phase 2): Replace with Q-format parse.
+                    int i = fl::parseInt(value.data(), value.size());
+                    i64 i64_val = static_cast<i64>(i);
+                    num_val = fl::make_shared<json_value>(i64_val);
+#endif
                 } else {
                     int i = fl::parseInt(value.data(), value.size());
                     i64 i64_val = static_cast<i64>(i);
@@ -1138,11 +1193,13 @@ struct SerializerVisitor {
         append_str(num_str);
     }
 
+#if FL_JSON_HAS_FLOAT
     void accept(const float& f) {
         fl::string num_str;
         num_str.append(f, 3);
         append_str(num_str);
     }
+#endif
 
     void accept(const fl::string& s) { append_escaped(s); }
 
@@ -1204,6 +1261,7 @@ struct SerializerVisitor {
         out.push_back(']');
     }
 
+#if FL_JSON_HAS_FLOAT
     void accept(const fl::vector<float>& floats) {
         out.push_back('[');
         bool first = true;
@@ -1216,6 +1274,7 @@ struct SerializerVisitor {
         }
         out.push_back(']');
     }
+#endif
 };
 
 fl::string json::to_string_native() const {

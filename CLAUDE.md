@@ -34,6 +34,15 @@
 - `bash profile <function>` — Performance profiling
 - `bash bloat <board>` — Per-symbol flash/RAM bloat report (see `agents/docs/binary-size-analysis.md`)
 
+**Inspecting an already-built embedded ELF (e.g. for soft-FP / libgcc / symbol audits):**
+
+Do NOT spend time hunting for `arm-none-eabi-nm` / `xtensa-esp32s3-elf-objdump` / etc. across PlatformIO package dirs. fbuild already records the right cross-tools for the board.
+
+- `fbuild symbols <PATH-to-elf-or-build-dir>` — runs `nm --print-size --size-sort -S | c++filt` with the board's correct cross-tools, auto-locating `build_info.json` for the toolchain path resolution. Add `--top N` for a longer per-archive / per-symbol table; `--json <path>` for machine output.
+- Toolchain paths live in `build_info.json` (or `build_info_<env>.json`) under: `nm_path`, `cppfilt_path`, `objdump_path`, `readelf_path`, `size_path`, `objcopy_path`, `ar_path`, `cc_path`, `cxx_path`. Read these instead of guessing the toolchain version under `~/.platformio/packages/` or `~/.fbuild/prod/cache/toolchains/`.
+- `bash compile <board> --build-info <out.json>` emits the `build_info.json` next to the build artifact even if one is not already present.
+- LPC845 example: after `fbuild build -e lpc845brk`, run `fbuild symbols .fbuild/build/lpc845brk/release/firmware.elf` — it picks up the correct `arm-none-eabi-nm` from `build_info.json` automatically.
+
 **NEVER use:** `uv run python test.py` — use `bash test` or `uv run test.py`
 **FORBIDDEN:** `--no-fingerprint` (use `bash test --clean`), bare `pio`/`platformio`, bare `meson`/`ninja`/`clang++`
 

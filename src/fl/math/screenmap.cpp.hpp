@@ -98,7 +98,12 @@ ScreenMap ScreenMap::DefaultStrip(int numLeds, float cm_between_leds,
 bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
                           fl::flat_map<string, ScreenMap> *segmentMaps, string *err) {
 
-#if FASTLED_NO_JSON
+#if FASTLED_NO_JSON || !FL_JSON_HAS_FLOAT
+    // FL_JSON_HAS_FLOAT==0 (FastLED #3022): the `fl::json` variant carries
+    // no float alternative on Low-memory targets. ScreenMap deserializes
+    // float coordinates and a float diameter, so it has no business
+    // running on a build that intentionally excised the IEEE-754 path —
+    // refuse the same way FASTLED_NO_JSON does.
     FL_UNUSED(jsonStrScreenMap);
     FL_UNUSED(segmentMaps);
     FL_UNUSED(err);
@@ -258,7 +263,11 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
 void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps,
                        fl::json *doc) {
 
-#if FASTLED_NO_JSON
+#if FASTLED_NO_JSON || !FL_JSON_HAS_FLOAT
+    // See ParseJson() above — FL_JSON_HAS_FLOAT==0 (FastLED #3022) has no
+    // float alternative in `fl::json::variant_t`, so writing float
+    // coordinates / diameter through the json API is structurally
+    // unavailable.
     FL_WARN("ScreenMap::toJson called with FASTLED_NO_JSON");
     return;
 #else
