@@ -143,7 +143,7 @@ dependencies = [
     # incremental builds produce stale .obj files after a git pull that
     # changes transitive headers (symptom: `undefined symbol: ...` link
     # errors hours after a header actually changed).
-    "zccache>=1.12.1",
+    "zccache>=1.12.3",
     "ninja",
     "meson>=1.11.0",
     "download",
