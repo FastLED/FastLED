@@ -120,4 +120,66 @@ FL_TEST_CASE("ieee754_parse_decimal — integration via bit_cast<float>") {
     FL_CHECK(b > -2.6f);
 }
 
+FL_TEST_CASE("ieee754_format_decimal — well-known constants") {
+    FL_SUBCASE("zero") {
+        FL_CHECK(ieee754_format_decimal(0x00000000u, 6) == fl::string("0.000000"));
+        FL_CHECK(ieee754_format_decimal(0x80000000u, 6) == fl::string("-0.000000"));
+        FL_CHECK(ieee754_format_decimal(0x00000000u, 0) == fl::string("0"));
+    }
+
+    FL_SUBCASE("one") {
+        FL_CHECK(ieee754_format_decimal(0x3F800000u, 6) == fl::string("1.000000"));
+        FL_CHECK(ieee754_format_decimal(0xBF800000u, 6) == fl::string("-1.000000"));
+        FL_CHECK(ieee754_format_decimal(0x3F800000u, 0) == fl::string("1"));
+    }
+
+    FL_SUBCASE("half") {
+        FL_CHECK(ieee754_format_decimal(0x3F000000u, 6) == fl::string("0.500000"));
+        FL_CHECK(ieee754_format_decimal(0xBF000000u, 6) == fl::string("-0.500000"));
+    }
+
+    FL_SUBCASE("ten and hundred") {
+        FL_CHECK(ieee754_format_decimal(0x41200000u, 2) == fl::string("10.00"));
+        FL_CHECK(ieee754_format_decimal(0x42C80000u, 1) == fl::string("100.0"));
+    }
+}
+
+FL_TEST_CASE("ieee754_format_decimal — special values") {
+    FL_CHECK(ieee754_format_decimal(0x7F800000u, 6) == fl::string("inf"));
+    FL_CHECK(ieee754_format_decimal(0xFF800000u, 6) == fl::string("-inf"));
+    FL_CHECK(ieee754_format_decimal(0x7FC00000u, 6) == fl::string("nan"));
+}
+
+FL_TEST_CASE("ieee754_format_decimal — round-trip via parser") {
+    // The serializer + parser should round-trip simple decimal values to
+    // within ±1 ULP. Pick values whose decimal representation terminates so
+    // we can compare bit patterns directly.
+    auto round_trip = [](u32 bits) -> u32 {
+        fl::string text = ieee754_format_decimal(bits, 9);
+        return ieee754_parse_decimal(text.c_str(), text.size());
+    };
+
+    auto ulp_diff = [](u32 a, u32 b) -> u32 {
+        return a > b ? (a - b) : (b - a);
+    };
+
+    // Powers of two divide cleanly in binary.
+    FL_CHECK(round_trip(0x3F800000u) == 0x3F800000u);  // 1.0
+    FL_CHECK(round_trip(0x40000000u) == 0x40000000u);  // 2.0
+    FL_CHECK(round_trip(0x3F000000u) == 0x3F000000u);  // 0.5
+
+    // Decimal values may drift by 1 ULP — that's the embedded-grade target.
+    FL_CHECK(ulp_diff(round_trip(0x40490FDBu), 0x40490FDBu) <= 1u);  // pi-ish
+    FL_CHECK(ulp_diff(round_trip(0x402DF854u), 0x402DF854u) <= 1u);  // e-ish
+
+    // Negative values keep the sign.
+    FL_CHECK(round_trip(0xBF800000u) == 0xBF800000u);  // -1.0
+    FL_CHECK(round_trip(0xC1200000u) == 0xC1200000u);  // -10.0
+}
+
+FL_TEST_CASE("ieee754_format_decimal — precision clamping") {
+    FL_CHECK(ieee754_format_decimal(0x3F800000u, -1) == fl::string("1"));
+    FL_CHECK(ieee754_format_decimal(0x3F800000u, 15) == fl::string("1.000000000"));
+}
+
 }

@@ -382,11 +382,130 @@ u32 ieee754_parse_decimal(const char* s, fl::size len, fl::size* consumed) FL_NO
     return sign_bit | (static_cast<fl::u32>(biased_exp) << 23) | ieee_mant;
 }
 
+// Append the decimal digits of `value` to `out`. Reuses the integer-only
+// `fl::utoa64` helper from `fl/stl/charconv.h` — no FP arithmetic.
+static void append_u64_decimal(fl::string& out, fl::u64 value) FL_NOEXCEPT {
+    char buf[24];
+    const int n = fl::utoa64(value, buf, 10);
+    for (int i = 0; i < n; ++i) {
+        out += fl::string(1, buf[i]);
+    }
+}
+
 fl::string ieee754_format_decimal(u32 bits, int precision) FL_NOEXCEPT {
-    // Phase-2 (task #2): full bit-twiddling decimal serializer.
-    (void)bits;
-    (void)precision;
-    return fl::string();
+    if (precision < 0) precision = 0;
+    if (precision > 9) precision = 9;
+
+    const bool neg = (bits >> 31) & 1u;
+    const int  biased_exp = static_cast<int>((bits >> 23) & 0xFFu);
+    const u32  mant_bits = bits & 0x7FFFFFu;
+
+    // Inf / NaN.
+    if (biased_exp == 0xFF) {
+        if (mant_bits != 0) return fl::string("nan");
+        return neg ? fl::string("-inf") : fl::string("inf");
+    }
+
+    fl::string s;
+
+    auto append_zero_with_precision = [&]() {
+        s += "0";
+        if (precision > 0) {
+            s += ".";
+            for (int i = 0; i < precision; ++i) s += "0";
+        }
+    };
+
+    // ±0 (and any subnormal — those collapse to zero per the parser's
+    // contract, so the serializer matches).
+    if (biased_exp == 0) {
+        if (neg) s += "-";
+        append_zero_with_precision();
+        return s;
+    }
+
+    // Normal number: value = m_full * 2**bin_exp.
+    // m_full carries the implicit leading 1.
+    const u32 m_full = mant_bits | 0x800000u;       // 24 bits
+    const int bin_exp_raw = biased_exp - 127 - 23;  // signed
+
+    // Lift to a 64-bit normalized representation so we can multiply against
+    // the shared pow10 table.  m_full's bit 23 is set, so shifting left by 40
+    // puts that set bit in position 63.
+    const u64 mant64 = static_cast<u64>(m_full) << 40;
+    const int bin_exp = bin_exp_raw - 40;
+
+    // Look up the normalized representation of 10**precision.
+    const fl::size idx = static_cast<fl::size>(precision - kPow10KMin);
+    const u64 pow_mant = kPow10Mant[idx];
+    const int pow_exp = kPow10BExp[idx];
+
+    // Multiply via the same widening helper the parser uses.
+    u64 scaled_hi = mul_hi_u64(mant64, pow_mant);
+    int scaled_bin_exp = bin_exp + pow_exp + 64;
+    if ((scaled_hi & 0x8000000000000000ull) == 0) {
+        scaled_hi <<= 1;
+        --scaled_bin_exp;
+    }
+
+    // Convert (scaled_hi, scaled_bin_exp) to a u64 integer count of
+    // `precision` decimal places. Overflow on the way up clamps to ±inf;
+    // underflow on the way down collapses to ±0 — same contract as the
+    // parser at the edges.
+    u64 scaled_int;
+    if (scaled_bin_exp >= 0) {
+        if (scaled_bin_exp > 0) {
+            // (scaled_hi << scaled_bin_exp) drops the top bit — magnitude
+            // beyond what u64 can carry. Treat as overflow.
+            return neg ? fl::string("-inf") : fl::string("inf");
+        }
+        scaled_int = scaled_hi;
+    } else {
+        const int shift = -scaled_bin_exp;
+        if (shift >= 64) {
+            scaled_int = 0;
+        } else {
+            // Round-half-to-even on the shifted-off low bits.
+            const u64 mask = (shift == 64) ? ~0ull : ((1ull << shift) - 1ull);
+            const u64 low = scaled_hi & mask;
+            scaled_int = scaled_hi >> shift;
+            const u64 half = (shift == 0) ? 0 : (1ull << (shift - 1));
+            if (low > half || (low == half && (scaled_int & 1ull))) {
+                ++scaled_int;
+            }
+        }
+    }
+
+    // For the integer / fractional split we need the EXACT integer value of
+    // 10**precision (not the normalized form). precision is in [0, 9] so this
+    // fits in u32 easily — keep it inline to avoid pulling another table.
+    static constexpr u32 kPow10IntExact[] = {
+        1u,           10u,           100u,         1000u,
+        10000u,       100000u,       1000000u,     10000000u,
+        100000000u,   1000000000u,
+    };
+    const u64 pow10_exact = kPow10IntExact[precision];
+
+    const u64 int_part = scaled_int / pow10_exact;
+    const u64 frac_part = scaled_int % pow10_exact;
+
+    if (neg && (int_part != 0 || frac_part != 0)) {
+        s += "-";
+    }
+    append_u64_decimal(s, int_part);
+
+    if (precision > 0) {
+        s += ".";
+        // Format `frac_part` as exactly `precision` digits, left-padded with
+        // zeros. utoa64 emits the minimum-digit form, so count its length and
+        // prepend the difference.
+        char buf[24];
+        const int n = fl::utoa64(frac_part, buf, 10);
+        for (int i = n; i < precision; ++i) s += "0";
+        for (int i = 0; i < n; ++i) s += fl::string(1, buf[i]);
+    }
+
+    return s;
 }
 
 } // namespace fl
