@@ -19,6 +19,15 @@
 // the lpc845brk fbuild target to compile with this flag set.
 #define FASTLED_LPC_RX_SCT 1
 
+// Opt in to the Phase-2 WS2812 byte-match loopback test (FastLED #3021).
+// Pulls in `<FastLED.h>` and the WS2812 driver to enable the `ws2812SctTest`
+// RPC. **Default off** because the LPC845 flash budget (64 KB) overflows
+// when FastLED.h is included alongside fl::Remote until FastLED #3002
+// (fl::json soft-FP elimination) lands. Once #3002 ships, this flag can
+// be enabled by default for the lpc845brk fbuild target.
+//
+// #define FASTLED_LPC_RX_SCT_WS2812 1
+
 //
 // examples/AutoResearchLpc/AutoResearchLpc.ino
 //
@@ -54,6 +63,17 @@
 //       min_ns,max_ns   period extrema in ns
 //     Wiring: jumper tx_pin to rx_pin externally on the LPC845-BRK header.
 //
+//   ws2812SctTest: [test_case, tx_pin, rx_pin, capture_ms] -> string
+//     Phase-2 SCT-RX WS2812 byte-match loopback (FastLED #3021). Builds
+//     a `CRGB[N]` pattern, kicks `FastLED.show()` through the bit-bang
+//     `clockless_arm_lpc.h` driver on tx_pin, captures the wire on
+//     rx_pin via SCT, decodes the 4-phase WS2812 timing, and reports
+//     how many bytes round-tripped intact.
+//     Returns CSV: "success,test_case,num_leds,exp_bytes,dec_bytes,matched,mismatched,edges"
+//     ONLY available when the sketch is compiled with
+//     `-DFASTLED_LPC_RX_SCT_WS2812=1` (default off — see flash budget
+//     note at the top of the file).
+//
 // FL_DBG output from inside fl::Remote (e.g. "Stored request ID for echo")
 // also reaches the host through this transport, demonstrating that the
 // FastLED log pipeline is wired correctly. FL_WARN proper is gated behind
@@ -76,6 +96,11 @@
 #if defined(FL_IS_ARM_LPC)
 #include "fl/channels/rx_sct_capture.h"
 #include "fl/stl/strstream.h"
+#endif
+
+#if defined(FASTLED_LPC_RX_SCT_WS2812)
+#include "FastLED.h"
+#include "fl/chipsets/timing_traits.h"
 #endif
 
 namespace {
@@ -254,6 +279,163 @@ void setup() {
               << stats.min_ns << ',' << stats.max_ns;
             return s.str();
         });
+
+#if defined(FASTLED_LPC_RX_SCT_WS2812)
+    // ------------------------------------------------------------------
+    // ws2812SctTest (FastLED #3021 Phase 2)
+    // ------------------------------------------------------------------
+    // End-to-end WS2812 byte-match loopback. Mirrors the FlexIO
+    // `flexioObjectFledTest` 5-case shape:
+    //   0 — Red single LED            (1 LED, 0xFF0000 → GRB 00,FF,00)
+    //   1 — RGB three-LED chain       (3 LEDs)
+    //   2 — All zeros                 (1 LED — T0H/T0L fidelity)
+    //   3 — All ones                  (1 LED — T1H/T1L fidelity)
+    //   4 — 100-LED alternating R/G/B (long capture, watchdog-safety)
+    //
+    // **Hardware status:** the SCT capture path used here is the same
+    // polling-mode `pollOnce()` as Phase 1's pinToggleRx. WS2812 runs
+    // at 800 kHz with 0.4–0.85 µs sub-pulses, faster than the M0+
+    // polling loop can keep up with. This handler ships the API +
+    // pattern surface so the Python orchestrator can be exercised
+    // and so the SCT→DMA RX upgrade has a callable RPC to target
+    // in the follow-up. Until DMA lands, `mismatched` will be
+    // non-zero in practice on real silicon — that's expected.
+    //
+    // CSV slot ordering (must match
+    // ci/autoresearch/test_lpc_ws2812_loopback.py):
+    //   success, test_case, num_leds, exp_bytes, dec_bytes,
+    //   matched, mismatched, edges_captured
+    remote.bind("ws2812SctTest",
+        [](int test_case, int tx_pin, int rx_pin, int capture_ms) -> fl::string {
+            if (test_case < 0 || test_case > 4 ||
+                tx_pin < 0 || rx_pin < 0 || capture_ms <= 0) {
+                return fl::string("0,0,0,0,0,0,0,0");
+            }
+
+            // Configure the test pattern + LED count for each case.
+            int num_leds = 1;
+            switch (test_case) {
+                case 1: num_leds = 3; break;
+                case 4: num_leds = 100; break;
+                default: num_leds = 1; break;
+            }
+
+            // The bit-bang clockless driver writes GRB on the wire.
+            // Build the in-memory CRGB buffer per case; the wire
+            // bytes are CRGB.toGrb() per pixel.
+            static CRGB leds_buf[100];
+            for (int i = 0; i < num_leds; ++i) {
+                switch (test_case) {
+                    case 0: leds_buf[i] = CRGB(0xFF, 0x00, 0x00); break;  // red
+                    case 1: {
+                        if (i == 0)      leds_buf[i] = CRGB(0xFF, 0x00, 0x00);
+                        else if (i == 1) leds_buf[i] = CRGB(0x00, 0xFF, 0x00);
+                        else             leds_buf[i] = CRGB(0x00, 0x00, 0xFF);
+                        break;
+                    }
+                    case 2: leds_buf[i] = CRGB(0x00, 0x00, 0x00); break;  // all zeros
+                    case 3: leds_buf[i] = CRGB(0xFF, 0xFF, 0xFF); break;  // all ones
+                    case 4: {
+                        const uint8_t r = (i % 3 == 0) ? 0xFFu : 0u;
+                        const uint8_t g = (i % 3 == 1) ? 0xFFu : 0u;
+                        const uint8_t b = (i % 3 == 2) ? 0xFFu : 0u;
+                        leds_buf[i] = CRGB(r, g, b);
+                        break;
+                    }
+                }
+            }
+
+            // Build the expected wire bytes (GRB-ordered, MSB first
+            // per WS2812). The decoder gives back the same wire bytes.
+            const int expected_bytes = num_leds * 3;
+            static uint8_t expected_buf[300];
+            for (int i = 0; i < num_leds; ++i) {
+                expected_buf[i * 3 + 0] = leds_buf[i].g;
+                expected_buf[i * 3 + 1] = leds_buf[i].r;
+                expected_buf[i * 3 + 2] = leds_buf[i].b;
+            }
+
+            // Arm SCT capture on rx_pin.
+            auto rx = fl::LpcSctRxChannel::create(rx_pin);
+            if (!rx) return fl::string("0,0,0,0,0,0,0,0");
+            fl::RxConfig cfg;
+            // 24 bits/LED × 2 edges/bit + 50% headroom, clamped.
+            const fl::u32 expected_edges = (fl::u32)num_leds * 24u * 2u;
+            fl::u32 cap = expected_edges + (expected_edges / 2u);
+            if (cap < 256u)  cap = 256u;
+            if (cap > 2048u) cap = 2048u;
+            cfg.buffer_size = cap;
+            cfg.start_low   = true;
+            if (!rx->begin(cfg)) return fl::string("0,0,0,0,0,0,0,0");
+
+            // Configure FastLED on tx_pin. Static so the controller
+            // registry doesn't grow on repeated calls.
+            //
+            // NOTE: the bit-bang `clockless_arm_lpc.h` driver requires
+            // a constexpr pin via the addLeds<CHIPSET, PIN> template;
+            // we use a compile-time pin here matching the orchestrator
+            // default (P0_10). Callers that pass a different tx_pin
+            // get a "tx_pin not bound" error.
+            constexpr int kFixedTxPin = 10;  // P0_10
+            if (tx_pin != kFixedTxPin) {
+                return fl::string("0,0,0,0,0,0,0,0");
+            }
+            static bool fastled_inited = false;
+            if (!fastled_inited) {
+                FastLED.addLeds<WS2812, kFixedTxPin, GRB>(leds_buf, 100);
+                fastled_inited = true;
+            }
+
+            // Kick TX. While show() runs, the SCT is free-running and
+            // CAP[0..1] is being clobbered by every edge. The
+            // polling-mode pollOnce() inside wait() below cannot keep
+            // up with WS2812's 800 kHz edge rate on a 30 MHz M0+,
+            // hence the documented hardware caveat. The DMA upgrade
+            // (#3021 follow-up) makes this section reliable.
+            FastLED.show();
+            rx->wait(capture_ms);
+
+            // Decode the captured edges.
+            static uint8_t decoded_buf[300];
+            for (int i = 0; i < expected_bytes; ++i) decoded_buf[i] = 0;
+
+            fl::ChipsetTiming4Phase timing =
+                fl::make4PhaseTiming(fl::TimingTraits<WS2812Chipset>::T1,
+                                     fl::TimingTraits<WS2812Chipset>::T2,
+                                     fl::TimingTraits<WS2812Chipset>::T3);
+
+            auto dec = rx->decode(timing, fl::span<u8>(decoded_buf, expected_bytes));
+            const fl::u32 decoded_bytes = dec.ok() ? dec.value() : 0u;
+
+            fl::u32 matched    = 0;
+            fl::u32 mismatched = 0;
+            for (fl::u32 i = 0; i < decoded_bytes && i < (fl::u32)expected_bytes; ++i) {
+                if (decoded_buf[i] == expected_buf[i]) ++matched;
+                else                                    ++mismatched;
+            }
+            const fl::u32 missing = (fl::u32)expected_bytes - decoded_bytes;
+            mismatched += missing;
+
+            // Edge count for diagnostics.
+            fl::EdgeTime edges_drop[1];
+            (void)rx->getRawEdgeTimes(fl::span<fl::EdgeTime>(edges_drop, 0));
+            // The cleanest way to count edges is to read the ring's
+            // length; the public API returns 0 when out.size() == 0
+            // so use a larger window.
+            fl::EdgeTime probe[1024];
+            const fl::size edges_captured = rx->getRawEdgeTimes(
+                fl::span<fl::EdgeTime>(probe, 1024));
+
+            const bool success = (mismatched == 0 && decoded_bytes == (fl::u32)expected_bytes);
+
+            fl::sstream s;
+            s << (success ? 1 : 0) << ',' << test_case << ',' << num_leds << ','
+              << expected_bytes << ',' << decoded_bytes << ','
+              << matched << ',' << mismatched << ','
+              << static_cast<fl::u32>(edges_captured);
+            return s.str();
+        });
+#endif  // FASTLED_LPC_RX_SCT_WS2812
 #endif  // FL_IS_ARM_LPC
 }
 
