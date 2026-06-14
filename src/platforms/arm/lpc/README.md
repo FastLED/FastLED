@@ -18,11 +18,23 @@ The LPC family currently covers two ARM cores:
 
 | Platform | Chip | CPU | Default Clock | Drivers Shipped | Status |
 |----------|------|-----|---------------|-----------------|--------|
-| **LPC845** | LPC845M301 | Cortex-M0+ @ 30 MHz | 30 MHz | Bit-bang (default) + optional SCT/PWM+DMA (#2850) | ✅ Compiles; hardware bring-up pending |
-| **LPC804** | LPC804M101 | Cortex-M0+ @ 15 MHz | 15 MHz | Bit-bang (default) + optional PLU (#2848) | ✅ Compiles; hardware bring-up pending |
+| **LPC845** | LPC845M301 | Cortex-M0+ @ 30 MHz | 30 MHz | Bit-bang (default) + optional SCT/PWM+DMA (#2850) | ✅ Compiles + AutoResearch RPC bring-up sketch ([#3041](https://github.com/FastLED/FastLED/pull/3041)); hardware sign-off pending [#2880](https://github.com/FastLED/FastLED/issues/2880) |
+| **LPC804** | LPC804M101 | Cortex-M0+ @ 15 MHz | 15 MHz | Bit-bang (default) + optional PLU (#2848) | ✅ Compiles + AutoResearch RPC bring-up sketch ([#3041](https://github.com/FastLED/FastLED/pull/3041)); hardware sign-off pending [#2880](https://github.com/FastLED/FastLED/issues/2880) |
 | **LPC11Uxx** | LPC11U24, LPC11U35 | Cortex-M0 | 12 MHz (IRC) | Shared LPC8xx fastpin + M0 C++ clockless (#2872) | ✅ Compiles; hardware bring-up pending |
 | **LPC11xx legacy** | LPC1110, LPC1112, LPC1114, LPC1115 | Cortex-M0 | — | None — legacy GPIO at 0x50000000 needs its own fastpin | ⚠️ `#error` if targeted; driver wiring TBD |
 | **LPC15xx** | LPC1517…LPC1549 | Cortex-M3 | 12 MHz (IRC) | Shared LPC8xx fastpin + M3-compatible C++ clockless (#2872) | ✅ Compiles; hardware bring-up pending |
+
+## Hardware sign-off checklist ([#2880](https://github.com/FastLED/FastLED/issues/2880))
+
+Software side is shipped — what remains is field verification on an LPC845-BRK / LPCXpresso845 / LPC824 Lite. A maintainer with hardware can close [#2880](https://github.com/FastLED/FastLED/issues/2880) by walking the following:
+
+1. `fbuild build lpc845 --examples Blink` flashes successfully.
+2. `examples/Blink/Blink.ino` lights a WS2812 strip on the default TX pin (scope trace optional but recommended — capture T0H/T0L/T1H/T1L and confirm they match `TimingTraits<WS2812Chipset>`).
+3. `bash autoresearch lpc845brk` reaches the device and the JSON-RPC `echo` round-trip succeeds (proves Serial + RPC harness intact).
+4. `pinToggleRx` reports `success=1` with σ < ~500 ns on a jumper-wire loopback (proves SCT-RX path intact — see [#3035](https://github.com/FastLED/FastLED/issues/3035) for the broader RX bench validation).
+5. Comment on [#2880](https://github.com/FastLED/FastLED/issues/2880) with `nm firmware.elf | grep aeabi_` output (should be empty after [#3038](https://github.com/FastLED/FastLED/pull/3038)) so the no-soft-FP invariant is confirmed in the field.
+
+Once those five items have been logged, [#2880](https://github.com/FastLED/FastLED/issues/2880) closes and the table above flips its LPC845 / LPC804 rows from "sign-off pending" to "✅ hardware verified".
 
 ## Files (quick pass)
 
@@ -77,8 +89,8 @@ The LPC roadmap meta [#2845](https://github.com/FastLED/FastLED/issues/2845) **c
 | **Stage 3.2** — Real `SystemInit` for LPC804 | **`FastLED/fbuild`** | Open | [fbuild #456](https://github.com/FastLED/fbuild/issues/456) |
 | **Stage 3.3** — Vector table expansion (DMA-end IRQ, SCT match IRQ, USART RX) | **`FastLED/fbuild`** | Open | [fbuild #456](https://github.com/FastLED/fbuild/issues/456) |
 | **Stage 3.4** — Per-chip `mcu_config` split in `get_nxplpc_config` | **`FastLED/fbuild`** | Open | [fbuild #456](https://github.com/FastLED/fbuild/issues/456) |
-| **Stage 3.5** — Linker memory-layout verification on hardware | Hardware | Open (hardware-gated) | [#2880](https://github.com/FastLED/FastLED/issues/2880) (LPC845 bring-up) |
-| **Stage 3.6** — `examples/AutoResearch/AutoResearch.ino` UART integration | **FastLED** | Open (hardware-gated) | [#2880](https://github.com/FastLED/FastLED/issues/2880) |
+| **Stage 3.5** — Linker memory-layout verification on hardware | Hardware | Field sign-off pending | [#2880](https://github.com/FastLED/FastLED/issues/2880) (LPC845 bring-up) |
+| **Stage 3.6** — `examples/AutoResearch/AutoResearch.ino` UART integration | **FastLED** | ✅ Shipped (consolidated via [#3041](https://github.com/FastLED/FastLED/pull/3041) / closes [#3030](https://github.com/FastLED/FastLED/issues/3030)) | `AutoResearch.ino` low-memory mode auto-engages on LPC8xx (`FL_PLATFORM_HAS_LARGE_MEMORY == 0`); same `echo` / `pinToggleRx` / `ws2812SctTest` RPC contract as the retired `AutoResearchLpc.ino`. |
 | **Stage 3.7** — fbuild CI `continue-on-error` flip | **`FastLED/fbuild`** | Blocked on 3.1 + 3.5 | [fbuild #456](https://github.com/FastLED/fbuild/issues/456) |
 | **Stage 3.8** — `validate_boards.py` reconciliation | **`FastLED/fbuild`** | Open | [fbuild #421/#422](https://github.com/FastLED/fbuild/issues/421) + [fbuild #456](https://github.com/FastLED/fbuild/issues/456) |
 | **Stage 4.1** — LPC11Uxx clockless driver | **FastLED** | ✅ Shipped in [#2872](https://github.com/FastLED/FastLED/pull/2872) | Reuses LPC8xx fastpin + M0 C++ clockless |
