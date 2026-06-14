@@ -67,7 +67,14 @@ void setup() {
         fl::createSerialRequestSource(),
         fl::createSerialResponseSink("REMOTE: "));
     g_remote = &remote;
-    remote.bind("echo", [](int v) -> int { return v; });
+    remote.bind("echo", [](int v) -> int {
+        // Re-emit the FL_WARN marker on every echo so the autoresearch
+        // harness can observe it even after the boot-banner drain step
+        // (see ci/autoresearch/phases.py — `_run_bring_up_tests` resets
+        // the input buffer twice before sending the first request).
+        FL_WARN_LIT("FL_WARN: echo invoked");
+        return v;
+    });
 }
 
 void loop() {
