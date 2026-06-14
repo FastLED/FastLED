@@ -48,13 +48,14 @@
 #include "fl/remote/transport/serial.h"
 #include "fl/wdt/watchdog.h"
 #include "fl/log/log.h"
+#include "fl/stl/cstdio.h"  // fl::serial_begin -- HWCDC-safe Serial.begin wrapper
 
 // The host-stub example DLL build (`tests/shared/example_dll_wrapper_template.cpp`)
 // compiles this sketch on Linux to surface ABI breaks. The RX SCT driver
 // types are platform-gated behind `FL_IS_ARM_LPC` -- they only exist on
 // the real LPC build. So the include + every RX usage below must be gated
 // the same way.
-#include "platforms/arm/lpc/is_lpc.h"
+#include "platforms/arm/lpc/is_lpc.h"  // ok platform headers - LPC RX driver gate
 #if defined(FL_IS_ARM_LPC)
 #include "fl/channels/rx_sct_capture.h"
 #include "fl/stl/strstream.h"
@@ -117,7 +118,7 @@ inline LowMemPinTogglePeriodStats computeLowMemPeriodStats(
 }  // namespace
 
 inline void autoResearchLowMemorySetup() {
-    Serial.begin(115200);
+    fl::serial_begin(115200);
 
     // Arm the watchdog so a hung sketch unbricks itself on crash.
     fl::Watchdog::instance().begin(3000);
@@ -126,7 +127,12 @@ inline void autoResearchLowMemorySetup() {
     // the FL_WARN log pipeline reaches the host.
     FL_WARN_LIT("FL_WARN: low-memory bring-up OK");
 
-    static fl::Remote remote(
+    // The C++ inline-ODR rule guarantees a single shared instance across
+    // every translation unit that calls this inline function, which is
+    // exactly what we want (one Remote bound to the singleton Serial
+    // transport). The included-once-per-sketch model of `.ino` builds
+    // also reduces to a single TU in practice.
+    static fl::Remote remote(  // okay static in header
         fl::createSerialRequestSource(),
         fl::createSerialResponseSink("REMOTE: "));
     g_low_memory_remote = &remote;
