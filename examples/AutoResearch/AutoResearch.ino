@@ -1,9 +1,25 @@
 // @filter
 // require:
-//   - board: esp32s3,esp32c6,esp32p4,teensy41,teensy40
-// exclude:
-//   - memory: low
+//   - board: esp32s3,esp32c6,esp32p4,teensy41,teensy40,lpc845brk,lpcxpresso845max,lpcxpresso804
 // @end-filter
+//
+// Low-memory mode (FastLED #3030): on Low-tier targets (LPC8xx etc., per
+// FastLED #3000 memory classification), this sketch is folded down to the
+// JSON-RPC echo + SCT-RX bring-up surface inherited from the retired
+// `examples/AutoResearchLpc/AutoResearchLpc.ino`. Auto-enabled when
+// `FL_PLATFORM_HAS_LARGE_MEMORY == 0`; can be forced on with
+// `-DFASTLED_AUTORESEARCH_LOW_MEMORY=1` or off with `=0`.
+
+#include "fl/system/sketch_macros.h"
+#if !defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && !FL_PLATFORM_HAS_LARGE_MEMORY
+  #define FASTLED_AUTORESEARCH_LOW_MEMORY 1
+#endif
+
+#if defined(FASTLED_AUTORESEARCH_LOW_MEMORY) && FASTLED_AUTORESEARCH_LOW_MEMORY
+#include "AutoResearchLowMemory.h"
+void setup() { autoResearchLowMemorySetup(); }
+void loop()  { autoResearchLowMemoryLoop(); }
+#else  // !FASTLED_AUTORESEARCH_LOW_MEMORY
 
 // examples/AutoResearch/AutoResearch.ino
 //
@@ -618,3 +634,5 @@ void loop() {
         last_status_ms = now;
     }
 }
+
+#endif  // FASTLED_AUTORESEARCH_LOW_MEMORY

@@ -612,20 +612,16 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         print("   Make sure you're running this from a PlatformIO project directory")
         return 1
 
-    # Board-specific sketch dispatch.
+    # Sketch selection.
     #
-    # Low-memory ARM boards (e.g. NXP LPC845-BRK, 64 KB Flash) cannot fit the
-    # full examples/AutoResearch/AutoResearch.ino \u2014 it requires RMT/PARLIO/SPI
-    # peripherals these chips don't have, and pulls in 100+ KB of LED-protocol
-    # code. They use a slimmed JSON-RPC echo harness (examples/AutoResearchLpc/)
-    # that exercises the same Serial/JSON-RPC/log-pipeline transport but skips
-    # the LED-protocol matrix. See FastLED#3004.
-    env_for_sketch = args.environment_positional or args.environment or ""
-    bring_up_envs = {"lpc845brk", "lpcxpresso845max", "lpcxpresso804"}
-    if env_for_sketch in bring_up_envs:
-        sketch_path = build_dir / "examples" / "AutoResearchLpc"
-    else:
-        sketch_path = build_dir / "examples" / "AutoResearch"
+    # Both Low-memory ARM boards (e.g. NXP LPC845-BRK, 64 KB Flash) and the
+    # rich ESP32 / Teensy targets now share examples/AutoResearch/AutoResearch.ino
+    # -- the sketch flips to its low-memory mode (compile-gated bring-up RPC
+    # surface only) when FL_PLATFORM_HAS_LARGE_MEMORY == 0. The previous
+    # standalone examples/AutoResearchLpc/ harness was retired by FastLED #3030
+    # once the soft-FP cascade from #3022 phase 2 freed up the LPC845 flash
+    # budget.
+    sketch_path = build_dir / "examples" / "AutoResearch"
     if not sketch_path.exists():
         staged_sketch_path = build_dir / "src" / "sketch"
         if staged_sketch_path.exists():
