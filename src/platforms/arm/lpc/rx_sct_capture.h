@@ -10,10 +10,13 @@
 ///     work that has its own capture front-end) can push a known edge
 ///     stream into the device and have it round-trip through `decode()`.
 ///   * `decode()` — fully functional. Delegates to the shared 4-phase
-///     WS2812 decoder in `src/fl/channels/rx/decode_ws2812.h`, also used
-///     by `NativeRxDevice`. The FlexPWM / FlexIO drivers use a different
-///     decoder variant (see FastLED #3035 Phase 3 for the consolidation
-///     status across the four EdgeTime-based RX backends).
+///     WS2812 decoder in `src/fl/channels/rx/decode_ws2812.h`, shared
+///     with `NativeRxDevice`. FastLED #3035 Phase 3 (decoder
+///     consolidation + LPC sketch retirement) is **shipped** via
+///     #3037 (decoder split into .h/.cpp.hpp) and #3041 (LPC sketch
+///     folded into the main AutoResearch low-memory mode). What remains
+///     in #3035 is the Phase-1 / 2a / 2b hardware bench validation,
+///     tracked alongside the #2880 hardware sign-off checklist.
 ///   * `getRawEdgeTimes()` / `finished()` / `wait()` / `name()` /
 ///     `getPin()` — fully functional against the in-RAM edge buffer.
 ///   * `begin()` — stores config, clears the buffer, returns `true`. The
