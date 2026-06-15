@@ -48,9 +48,10 @@ fl::UISlider slider("Speed", 0.18f, 0.0f, 1.0f);
 fl::UISlider dampening("Dampening", 9.0f, 0.0f, 20.0f, 0.1f);
 fl::UICheckbox halfDuplex("Half Duplex", true);
 fl::UISlider superSample("SuperSampleExponent", 1.f, 0.f, 3.f, 1.f);
+fl::UICheckbox isotropicStencil("Isotropic stencil (rounder ripples)", false);
 
 // Group related UI elements using fl::UIGroup template multi-argument constructor
-fl::UIGroup waveSimControls("Wave Simulation", slider, dampening, halfDuplex, superSample, xCyclical);
+fl::UIGroup waveSimControls("Wave Simulation", slider, dampening, halfDuplex, superSample, isotropicStencil, xCyclical);
 fl::UIGroup triggerControls("Trigger Controls", button, autoTrigger, extraFrames);
 
 fl::WaveSimulation2D waveSim(WIDTH, HEIGHT, fl::SuperSample::SUPER_SAMPLE_4X);
@@ -92,6 +93,11 @@ void loop() {
     waveSim.setDampening(dampening);
     waveSim.setHalfDuplex(halfDuplex);
     waveSim.setSuperSample(getSuperSample());
+    // Apply after setSuperSample() so the user's choice survives the
+    // wrapper's multiplier-based auto-select for the stencil.
+    waveSim.setStencil(isotropicStencil
+                           ? fl::LaplacianStencil::NinePointIsotropic
+                           : fl::LaplacianStencil::FivePoint);
     if (button) {
         triggerRipple(waveSim);
     }

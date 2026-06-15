@@ -72,6 +72,7 @@ fl::UISlider scale("Scale", 1.0f, 0.0f, 1.0f, 0.01f);
 fl::UISlider speed("Speed", 1.0f, -20.0f, 20.0f, 0.01f);
 fl::UISlider numberOfSteps("Number of Steps", 32.0f, 1.0f, 100.0f, 1.0f);
 fl::UISlider maxAnimation("Max Animation", 1.0f, 5.0f, 20.0f, 1.f);
+fl::UICheckbox isotropicStencil("Isotropic stencil (rounder ripples)", false);
 
 fl::TimeClampedTransition shapeProgress(TIME_ANIMATION);
 
@@ -119,6 +120,13 @@ void loop() {
     clearLeds();
     const uint32_t now = millis();
     uint32_t now_warped = time_warp.update(now);
+
+    // Apply UI stencil choice to both wave layers.
+    const fl::LaplacianStencil stencil = isotropicStencil
+        ? fl::LaplacianStencil::NinePointIsotropic
+        : fl::LaplacianStencil::FivePoint;
+    wave_fx.wave_fx_low->setStencil(stencil);
+    wave_fx.wave_fx_high->setStencil(stencil);
 
     auto shape = getShape(whichShape.as<int>());
     shape->setScale(scale.value());
