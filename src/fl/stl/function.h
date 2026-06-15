@@ -11,9 +11,33 @@
 #include "fl/stl/algorithm.h"  // for fl::sort
 #include "fl/stl/noexcept.h"
 #include "fl/stl/static_assert.h"
+#include "fl/system/sketch_macros.h"  // for FL_PLATFORM_HAS_LARGE_MEMORY
+
+// Low-memory targets (FL_PLATFORM_HAS_LARGE_MEMORY == 0) collapse the fl::function
+// callable variant from 5 alternatives to 2 (free fn + inlined lambda). The dropped
+// alternatives -- shared_ptr<CallableBase> heap fallback and NonConst/Const member
+// callables -- are dead code on Low-memory targets (audited 2026-06-15: only
+// tests/fl/stl/functional.cpp constructs from member functions; no production code
+// path on LPC8xx / AVR / similar targets). Saves ~3 KB of per-signature codegen tax
+// from per-alternative copy/move/destroy variant clones. See FastLED #3077.
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+  #define FL_FUNCTION_FULL_VARIANT 1
+#else
+  #define FL_FUNCTION_FULL_VARIANT 0
+#endif
 
 #ifndef FASTLED_INLINE_LAMBDA_SIZE
-#define FASTLED_INLINE_LAMBDA_SIZE 64
+  // Slim-variant builds drop the heap fallback, so the inline SBO must absorb
+  // closures that the full variant would have heap-allocated. UIButton::onClicked
+  // captures an outer fl::function<void()> (64 B SBO + tag = ~72 B), so the
+  // wrapping closure lands at ~80 B and needs headroom. 96 B leaves margin while
+  // keeping per-fl::function RAM cost modest. RPC dispatch tables on LowMemory
+  // hold ~4 entries; the extra 32 B per function is ~128 B total RAM cost.
+  #if FL_FUNCTION_FULL_VARIANT
+    #define FASTLED_INLINE_LAMBDA_SIZE 64
+  #else
+    #define FASTLED_INLINE_LAMBDA_SIZE 96
+  #endif
 #endif
 
 FL_DISABLE_WARNING_PUSH
@@ -47,6 +71,7 @@ template <typename> class function;
 template <typename R, typename... Args>
 class FL_ALIGN function<R(Args...)> {
 private:
+#if FL_FUNCTION_FULL_VARIANT
     struct CallableBase {
         virtual R invoke(Args... args) FL_NOEXCEPT = 0;
         virtual ~CallableBase() FL_NOEXCEPT = default;
@@ -58,6 +83,7 @@ private:
         Callable(F fn) FL_NOEXCEPT : f(fn) {}
         R invoke(Args... args) FL_NOEXCEPT override { return f(args...); }
     };
+#endif  // FL_FUNCTION_FULL_VARIANT
 
     // Type-erased free function callable - stored inline!
     struct FreeFunctionCallable {
@@ -154,6 +180,7 @@ private:
         }
     };
 
+#if FL_FUNCTION_FULL_VARIANT
     // Type-erased member function callable base
     struct MemberCallableBase {
         virtual R invoke(Args... args) const FL_NOEXCEPT = 0;
@@ -231,9 +258,17 @@ private:
             return invoker(obj, member_func_storage, args...);
         }
     };
+#endif  // FL_FUNCTION_FULL_VARIANT
 
-    // variant to store any of our callable types inline (with heap fallback for large lambdas)
+    // variant to store any of our callable types inline.
+    // Low-memory targets drop the heap-fallback CallableBase and the two
+    // MemberCallable alternatives (audited dead on those targets) to save
+    // ~3 KB of per-signature variant codegen tax. See FastLED #3077.
+#if FL_FUNCTION_FULL_VARIANT
     using Storage = variant<fl::shared_ptr<CallableBase>, FreeFunctionCallable, InlinedLambda, NonConstMemberCallable, ConstMemberCallable>;
+#else
+    using Storage = variant<FreeFunctionCallable, InlinedLambda>;
+#endif
     Storage mStorage;
 
     // Helper function to handle default return value for void and non-void types
@@ -286,30 +321,38 @@ public:
         construct_lambda_or_functor(fl::move(f), typename conditional<sizeof(F) <= kInlineLambdaSize, true_type, false_type>::type{});
     }
     
+#if FL_FUNCTION_FULL_VARIANT
     // 3) non‑const member function - stored inline!
     template <typename C>
     function(R (C::*mf)(Args...), C* obj) FL_NOEXCEPT {
         mStorage = NonConstMemberCallable(obj, mf);
     }
-    
+
     // 4) const member function - stored inline!
     template <typename C>
     function(R (C::*mf)(Args...) const, const C* obj) FL_NOEXCEPT {
         mStorage = ConstMemberCallable(obj, mf);
     }
-    
+#endif  // FL_FUNCTION_FULL_VARIANT
+
     R operator()(Args... args) const FL_NOEXCEPT {
         // Direct dispatch using type checking - efficient and simple
+#if FL_FUNCTION_FULL_VARIANT
         if (auto* heap_callable = mStorage.template ptr<fl::shared_ptr<CallableBase>>()) {
             return (*heap_callable)->invoke(args...);
         } else if (auto* free_func = mStorage.template ptr<FreeFunctionCallable>()) {
+#else
+        if (auto* free_func = mStorage.template ptr<FreeFunctionCallable>()) {
+#endif
             return free_func->invoke(args...);
         } else if (auto* inlined_lambda = mStorage.template ptr<InlinedLambda>()) {
             return inlined_lambda->invoke(args...);
+#if FL_FUNCTION_FULL_VARIANT
         } else if (auto* nonconst_member = mStorage.template ptr<NonConstMemberCallable>()) {
             return nonconst_member->invoke(args...);
         } else if (auto* const_member = mStorage.template ptr<ConstMemberCallable>()) {
             return const_member->invoke(args...);
+#endif
         }
         // This should never happen if the function is properly constructed
         return default_return_helper<R>();
@@ -339,12 +382,26 @@ private:
     void construct_lambda_or_functor(F f, true_type /* small */) FL_NOEXCEPT {
         mStorage = InlinedLambda(fl::move(f));
     }
-    
+
+#if FL_FUNCTION_FULL_VARIANT
     // Helper for large lambdas/functors - heap storage
     template <typename F>
     void construct_lambda_or_functor(F f, false_type /* large */) FL_NOEXCEPT {
         mStorage = fl::shared_ptr<CallableBase>(fl::make_shared<Callable<F>>(fl::move(f)));
     }
+#else
+    // Low-memory targets: heap fallback dropped per FastLED #3077 to save flash.
+    // Large lambdas (>kInlineLambdaSize) compile but leave the storage empty;
+    // operator() returns the default-constructed R. This degrades gracefully
+    // for link-dead code paths (e.g. UIButton::onClicked which the LPC845
+    // LowMemory build never reaches), and the linker DCE's the unreached
+    // instantiations. Code paths reachable at runtime should pre-validate that
+    // their lambdas fit in kInlineLambdaSize.
+    template <typename F>
+    void construct_lambda_or_functor(F /*f*/, false_type /* large */) FL_NOEXCEPT {
+        mStorage = Storage{};
+    }
+#endif
 };
 
 //----------------------------------------------------------------------------
