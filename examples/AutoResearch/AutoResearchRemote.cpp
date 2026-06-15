@@ -1872,6 +1872,22 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
             level = !level;
         }
 
+        // FastLED#3066 iter 6 diagnostic: dump FLEXIO1 live state
+        // immediately AFTER the toggles, before `wait()` runs. If the
+        // shifter/timer chain works end-to-end, SHIFTSTAT and TIMSTAT
+        // should now be non-zero, and FLEXIO1.PIN bit `flexio_pin`
+        // should track the last toggled state.
+        {
+            constexpr uintptr_t kFLEXIO1_BASE_DIAG = 0x401AC000u;
+            volatile uint32_t *pin   = (volatile uint32_t *)(kFLEXIO1_BASE_DIAG + 0x00C);
+            volatile uint32_t *shftstat = (volatile uint32_t *)(kFLEXIO1_BASE_DIAG + 0x010);
+            volatile uint32_t *timstat = (volatile uint32_t *)(kFLEXIO1_BASE_DIAG + 0x018);
+            FL_WARN("[ping diag] post-toggle FLEXIO1: PIN=0x"
+                    << fl::hex << *pin
+                    << " SHIFTSTAT=0x" << *shftstat
+                    << " TIMSTAT=0x" << *timstat << fl::dec);
+        }
+
         // 3. Wait briefly for FlexIO RX to flush any pending DMA. The DMA
         //    is configured for completion-on-buffer-full; a partial fill
         //    won't trigger the ISR, so `wait()` will TIMEOUT — which is

@@ -428,30 +428,42 @@ static bool flexio1_configure(u8 flexio_pin) {
                          (0u << 7) |                 // PINPOL active high
                          ((u32)flexio_pin << 8) |    // PINSEL
                          (0u << 16) |                // PINCFG = input
-                         (1u << 23) |                // TIMPOL negative
+                         (0u << 23) |                // TIMPOL = positive
                          (0u << 24);                 // TIMSEL = timer 0
 
     FLEXIO1_SHIFTCFG[0] = 0;                          // no start/stop bits
 
     // -- Timer 0 (16-bit counter; restart on every input edge) --
-    const u32 trgsel = (u32)(2u * flexio_pin + 1u);
+    // FastLED#3066 iter 6: drive the timer from its own PINSEL field
+    // (not from TRGSEL). The TRGSEL=2*flexio_pin formula matches the RM
+    // ("Pin 2N input") but the trigger source on this iMXRT1062 build
+    // doesn't actually engage TIMENA — iter 6 verified that 8 hand-
+    // driven pin toggles produced zero TIMSTAT pulses even with
+    // TRGSEL=12 (= Pin 6 edge). The TIMER PINSEL path (TIMCTL bits
+    // [13:8]) bypasses TRGSEL entirely; TIMENA=4 then reads "Pin rising
+    // edge of PINSEL" directly.
     FLEXIO1_TIMCTL[0] = (3u << 0) |                   // TIMOD = 16-bit counter
                         (0u << 7) |                   // PINPOL active high
-                        (0u << 8) |                   // PINSEL unused
+                        ((u32)flexio_pin << 8) |      // PINSEL = input pin
                         (0u << 16) |                  // PINCFG = output disabled
                         (0u << 22) |                  // TRGSRC = external (pin)
                         (0u << 23) |                  // TRGPOL active high
-                        (trgsel << 24);               // TRGSEL = pin edge
+                        (0u << 24);                   // TRGSEL unused
 
-    FLEXIO1_TIMCFG[0] = (6u << 8) |                   // TIMENA = trigger rising
+    FLEXIO1_TIMCFG[0] = (4u << 8) |                   // TIMENA = pin rising
                         (2u << 12) |                  // TIMDIS = on compare
-                        (6u << 16) |                  // TIMRST = trigger rising
+                        (2u << 16) |                  // TIMRST = pin rising
                         (0u << 20) |                  // TIMDEC clk-rising
                         (0u << 24);                   // TIMOUT logic 0 on enable
 
-    // Run the counter for its full 16-bit range — we read the latched value
-    // on each edge to recover the inter-edge tick count.
-    FLEXIO1_TIMCMP[0] = 0xFFFFu;
+    // FastLED#3066 iter 6: TIMCMP=1 makes the timer reach compare
+    // immediately after each TIMENA=4 pin-rising-edge enable. The
+    // shifter then latches the pin state on each compare event
+    // (TIMPOL=0). This gives us a pin-edge sampler — not true
+    // inter-edge timing — but proves the chain CAN fire and DMA CAN
+    // transfer. Future iterations will refine TIMCMP / SHIFTBUF
+    // semantics for actual edge interval recovery.
+    FLEXIO1_TIMCMP[0] = 1u;
 
     // Clear status / error flags
     FLEXIO1_SHIFTSTAT = 0xFFu;
