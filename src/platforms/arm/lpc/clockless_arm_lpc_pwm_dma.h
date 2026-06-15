@@ -60,13 +60,18 @@
 // SCT TIMING (UM11029 16.6.6 MATCH registers, 16.6.13 STATE/EVENT machine)
 // ------------------------------------------------------------------------
 // The SCT runs as a single 16-bit unified up-counter driven by the system
-// clock (F_CPU = 30 MHz on LPC845). At F_CPU = 30 MHz the SCT tick is
-// 33.33 ns; the WS2812 timing positions fall on these counts:
+// clock. At the canonical LPC845 default F_CPU = 24 MHz (Arduino core
+// + fbuild lpc845brk.json contract) the SCT tick is 41.67 ns; the
+// WS2812 timing positions fall on these counts:
 //
 //   T0_RISE  = 0            (rising edge of every bit)
-//   T0_FALL  = 11  (~367 ns) (T0H window end -> drop for '0' bits)
-//   T1_FALL  = 24  (~800 ns) (T1H window end -> drop for '1' bits)
-//   T_END    = 37  (~1233 ns) (counter reload, next bit starts)
+//   T0_FALL  =  9  (~375 ns) (T0H window end -> drop for '0' bits)
+//   T1_FALL  = 19  (~792 ns) (T1H window end -> drop for '1' bits)
+//   T_END    = 30  (~1250 ns) (counter reload, next bit starts)
+//
+// (Counts at F_CPU=30 MHz, an opt-in PLL configuration: T0_FALL=11 / 367 ns,
+//  T1_FALL=24 / 800 ns, T_END=37 / 1233 ns. The derivation macro at line 313
+//  picks up whichever F_CPU is set at compile time.)
 //
 // Three match registers fire the three DMA streams. MATCH3 is configured to
 // reload the counter on T_END.
@@ -206,6 +211,17 @@ namespace fl {
 // a real LPC845 toolchain include <LPC845.h> via led_sysdefs_arm_lpc.h and
 // the genuine struct wins.
 #if !defined(LPC_SCT) && !defined(LPC_SCT_TYPE_)
+// Arduino.h on the LPC8xx core defines INPUT / OUTPUT as preprocessor
+// macros for digitalRead/Write. The SCT register block uses identifiers
+// with the same names (INPUT at offset 0x048, OUTPUT at 0x054 per
+// UM11029 sec. 16.6); macro expansion would corrupt the struct fields.
+// Push the Arduino macros aside for the struct definition only;
+// downstream user code that calls pinMode(pin, OUTPUT) still works
+// because the macros get redefined at the bottom of this block.
+#pragma push_macro("INPUT")
+#pragma push_macro("OUTPUT")
+#undef INPUT
+#undef OUTPUT
 struct FL_LPC_SCT_Shim {
     volatile u32 CONFIG;        // 0x000  config
     volatile u32 CTRL;          // 0x004  control
@@ -248,6 +264,8 @@ struct FL_LPC_SCT_Shim {
         volatile u32 CTRL;      // 0x304, 0x30C, ...
     } EV[8];
 };
+#pragma pop_macro("OUTPUT")
+#pragma pop_macro("INPUT")
 #define LPC_SCT ((FL_LPC_SCT_Shim*)LPC_SCT_BASE)
 #endif  // !LPC_SCT
 

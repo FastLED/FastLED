@@ -38,7 +38,15 @@
 
 #ifndef F_CPU
 #if defined(FL_IS_ARM_LPC_845)
-#define F_CPU 30000000UL
+// LPC845 native FRO is 24 MHz (post-/2 divider direct path per UM11029
+// sec. 4.1). 30 MHz is only reachable via the PLL, which neither the
+// Arduino core (zackees/ArduinoCore-LPC8xx) nor fbuild programs by
+// default. Both sources of truth (Arduino boards.txt + fbuild
+// lpc845brk.json) declare f_cpu=24000000L. The previous 30 MHz default
+// in this header introduced a ~25%% cycle-count drift on the bit-bang
+// and SCT+DMA clockless drivers. Users who actually program the PLL
+// can override via -DF_CPU=30000000UL.
+#define F_CPU 24000000UL
 #elif defined(FL_IS_ARM_LPC_804)
 #define F_CPU 15000000UL
 #elif defined(FL_IS_ARM_LPC_11_USB)
