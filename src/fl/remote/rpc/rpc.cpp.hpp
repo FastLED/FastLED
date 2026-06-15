@@ -2,6 +2,7 @@
 #include "fl/stl/int.h"
 #include "fl/stl/json.h"
 #include "fl/log/log.h"
+#include "fl/system/sketch_macros.h"  // FL_PLATFORM_HAS_LARGE_MEMORY -- gates rpc.discover
 #include "fl/remote/rpc/rpc_invokers.h"
 #include "fl/remote/rpc/rpc_registry.h"
 #include "fl/remote/rpc/response_send.h"
@@ -74,7 +75,13 @@ json Rpc::handle(const json& request) {
     }
     fl::string methodName = methodOpt.value();
 
-    // Handle built-in rpc.discover method
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+    // Handle built-in rpc.discover method. Gated on Low-memory targets because
+    // it transitively anchors `TypedSchemaGenerator<Sig>::params()` for every
+    // registered method (each 800+ B per signature) plus the schema-building
+    // JSON tree. The LPC8xx / AVR-class JSON-RPC bring-up surface treats the
+    // RPC catalog as a known constant -- callers don't introspect at runtime.
+    // See FastLED #3081.
     if (methodName == "rpc.discover") {
         json response = json::object();
         response.set("jsonrpc", "2.0");
@@ -84,6 +91,7 @@ json Rpc::handle(const json& request) {
         }
         return response;
     }
+#endif
 
     // Look up the method
     auto it = mRegistry.find(methodName);
