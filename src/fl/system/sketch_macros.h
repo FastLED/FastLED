@@ -1,5 +1,15 @@
 #pragma once
 
+// Pull in platform detection BEFORE the tier classification fires. Without
+// this, FL_IS_ARM_LPC / FL_IS_TEENSY_LC / FL_IS_STM32_F1 etc. -- the gates
+// in the Low-tier branch below -- are undefined when sketch_macros.h is
+// transitively included via fl/system/engine_events.h before any other
+// platform-aware include. Result: LPC builds get FL_PLATFORM_HAS_LARGE_MEMORY=1
+// (wrong) and pull in FASTLED_HAS_ENGINE_EVENTS code that lacks symbol
+// definitions -- link fails. Pulling is_platform.h here makes the detection
+// canonical regardless of include order.
+#include "platforms/is_platform.h"
+
 // Four-tier platform-memory classification (FastLED #3000).
 //
 // Canonical names:

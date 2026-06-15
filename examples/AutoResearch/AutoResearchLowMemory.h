@@ -267,9 +267,9 @@ inline void autoResearchLowMemorySetup() {
             for (int i = 0; i < expected_bytes; ++i) decoded_buf[i] = 0;
 
             fl::ChipsetTiming4Phase timing =
-                fl::make4PhaseTiming(fl::TimingTraits<WS2812Chipset>::T1,
-                                     fl::TimingTraits<WS2812Chipset>::T2,
-                                     fl::TimingTraits<WS2812Chipset>::T3);
+                fl::make4PhaseTiming(
+                    fl::to_runtime_timing<fl::WS2812ChipsetTiming>(),
+                    /*reset_us=*/0u);
 
             auto dec = rx->decode(timing, fl::span<u8>(decoded_buf, expected_bytes));
             const fl::u32 decoded_bytes = dec.ok() ? dec.value() : 0u;
