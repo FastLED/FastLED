@@ -57,8 +57,8 @@ class PixelStream {
 
     // FLED v1 container accessors. True/non-empty only when begin() found
     // a valid FLED header on a seekable handle; otherwise empty / false.
-    bool hasEmbeddedScreenMap() const { return !mEmbeddedScreenMapJson.empty(); }
-    const fl::string& embeddedScreenMapJson() const { return mEmbeddedScreenMapJson; }
+    bool hasEmbeddedScreenMap() const;
+    const fl::string &embeddedScreenMapJson() const;
 
   private:
     fl::i32 mbytesPerFrame;

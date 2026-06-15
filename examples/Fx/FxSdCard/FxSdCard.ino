@@ -78,6 +78,20 @@ bool gError = false;
 // embedded JSON OR a sidecar screenmap.json — whichever is available.
 // On legacy .rgb the caller's `sidecarScreenmapPath` is loaded; for FLED
 // the embedded JSON wins and the sidecar path is ignored.
+// Reject any ScreenMap whose LED count disagrees with NUM_LEDS. A silent
+// mismatch corrupts the mapping in addLeds().setScreenMap() — there is no
+// runtime fix once frames start flowing, so fail loud at setup time.
+static bool validateScreenMapSize(const fl::ScreenMap &m, const char *source) {
+    if (m.getLength() != NUM_LEDS) {
+        FL_WARN("Screenmap from " << source << " has "
+            << m.getLength() << " LEDs but NUM_LEDS=" << NUM_LEDS
+            << " — mapping would silently corrupt playback.");
+        gError = true;
+        return false;
+    }
+    return true;
+}
+
 fl::Video openVideoEitherFormat(const char *fledPath,
                                 const char *rgbPath,
                                 const char *sidecarScreenmapPath,
@@ -90,7 +104,9 @@ fl::Video openVideoEitherFormat(const char *fledPath,
         if (!fl::ScreenMap::ParseJson(json.c_str(), "strip1", outScreenMap, &parseErr)) {
             FL_WARN("FLED embedded screenmap parse failed: " << parseErr.c_str());
             gError = true;
+            return v;
         }
+        validateScreenMapSize(*outScreenMap, fledPath);
         return v;
     }
     // No .fled (or it lacks an embedded map). Fall back to legacy .rgb.
@@ -103,7 +119,9 @@ fl::Video openVideoEitherFormat(const char *fledPath,
     if (!filesystem.readScreenMap(sidecarScreenmapPath, "strip1", outScreenMap)) {
         FL_WARN("Failed to read sidecar " << sidecarScreenmapPath);
         gError = true;
+        return legacy;
     }
+    validateScreenMapSize(*outScreenMap, sidecarScreenmapPath);
     return legacy;
 }
 

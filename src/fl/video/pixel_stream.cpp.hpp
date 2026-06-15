@@ -16,6 +16,10 @@ constexpr fl::u8 kFledMagic[4] = {'F', 'L', 'E', 'D'};
 constexpr fl::u8 kFledVersionV1 = 1;
 constexpr fl::u8 kFledPixelFormatRgb8 = 0x00;
 constexpr fl::size_t kFledHeaderBytes = 12;
+// Defensive cap on the embedded JSON to bound the worst-case heap
+// allocation if a malformed file claims a giant json_length. Real
+// screenmaps run ~500 B – ~50 KB; 1 MiB is well above that.
+constexpr fl::size_t kFledMaxJsonBytes = 1u * 1024u * 1024u;
 } // namespace
 
 PixelStream::PixelStream(int bytes_per_frame)
@@ -51,13 +55,21 @@ bool PixelStream::begin(filebuf_ptr h) {
                     | (static_cast<fl::u32>(static_cast<fl::u8>(hdr[9])) << 8)
                     | (static_cast<fl::u32>(static_cast<fl::u8>(hdr[10])) << 16)
                     | (static_cast<fl::u32>(static_cast<fl::u8>(hdr[11])) << 24);
-                if (kFledHeaderBytes + static_cast<fl::size_t>(jsonLen) <= mHandle->size()) {
-                    mEmbeddedScreenMapJson.resize(static_cast<fl::size>(jsonLen));
-                    fl::size_t jr = jsonLen > 0
-                        ? mHandle->read(&mEmbeddedScreenMapJson[0], jsonLen)
+                // Cap the JSON length against a defensive maximum BEFORE
+                // doing any size arithmetic — guards against a malformed
+                // file declaring a multi-gigabyte json_length that would
+                // either overflow the offset calc or trigger a huge resize.
+                const fl::size_t jsonLenSz = static_cast<fl::size_t>(jsonLen);
+                const fl::size_t fileSize = mHandle->size();
+                const bool jsonInRange = jsonLenSz <= kFledMaxJsonBytes
+                    && jsonLenSz <= fileSize - kFledHeaderBytes;
+                if (jsonInRange) {
+                    mEmbeddedScreenMapJson.resize(static_cast<fl::size>(jsonLenSz));
+                    fl::size_t jr = jsonLenSz > 0
+                        ? mHandle->read(&mEmbeddedScreenMapJson[0], jsonLenSz)
                         : 0;
-                    if (jr == jsonLen) {
-                        mPayloadOffset = kFledHeaderBytes + static_cast<fl::size_t>(jsonLen);
+                    if (jr == jsonLenSz) {
+                        mPayloadOffset = kFledHeaderBytes + jsonLenSz;
                         // Stream is now positioned at the first frame byte.
                         return mHandle->available();
                     }
@@ -119,8 +131,13 @@ bool PixelStream::hasFrame(fl::u32 frameNumber) {
         DBG("Not implemented and therefore always returns true");
         return true;
     }
-    size_t total_bytes = mHandle->size();
-    return mPayloadOffset + frameNumber * mbytesPerFrame < total_bytes;
+    // Use size_t throughout so frameNumber * bytesPerFrame doesn't overflow
+    // u32 for high-LED-count grids past ~1M frames.
+    fl::size_t total_bytes = mHandle->size();
+    fl::size_t frameBytes = static_cast<fl::size_t>(frameNumber)
+        * static_cast<fl::size_t>(mbytesPerFrame);
+    fl::size_t target = mPayloadOffset + frameBytes;
+    return target < total_bytes;
 }
 
 bool PixelStream::readFrameAt(fl::u32 frameNumber, Frame *frame) {
@@ -129,7 +146,9 @@ bool PixelStream::readFrameAt(fl::u32 frameNumber, Frame *frame) {
         FL_DBG("Streaming handle doesn't support seeking");
         return false;
     }
-    mHandle->seek(mPayloadOffset + frameNumber * mbytesPerFrame);
+    fl::size_t frameBytes = static_cast<fl::size_t>(frameNumber)
+        * static_cast<fl::size_t>(mbytesPerFrame);
+    mHandle->seek(mPayloadOffset + frameBytes);
     if (mHandle->bytesLeft() == 0) {
         return false;
     }
@@ -188,6 +207,14 @@ bool PixelStream::rewind() {
 
 PixelStream::Type PixelStream::getType() const {
     return mType;
+}
+
+bool PixelStream::hasEmbeddedScreenMap() const {
+    return !mEmbeddedScreenMapJson.empty();
+}
+
+const fl::string &PixelStream::embeddedScreenMapJson() const {
+    return mEmbeddedScreenMapJson;
 }
 
 size_t PixelStream::readBytes(u8 *dst, size_t len) {

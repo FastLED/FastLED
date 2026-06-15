@@ -4,6 +4,7 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/span.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/string.h"  // For fl::string return type on embeddedScreenMapJson()
 
 // Forward declarations - actual includes moved to cpp
 namespace fl {
