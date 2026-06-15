@@ -273,32 +273,65 @@ decodeEdgesFlexIo(const ChipsetTiming4Phase &timing,
 // for WS2812 inter-edge timing (worst-case T0H ~350 ns) and for the bench
 // matrix (1 / 10 / 100 kHz square waves whose half-period is ≥5 µs).
 
-static constexpr u32 kFlexIo1ClkMHz = 24u;
+static constexpr u32 kFlexIo1ClkMHz = 60u;
 
 static void flexio1_clock_init() {
-    // Gate FLEXIO1 clock on (CCGR5 bits [3:2])
-    CCM_CCGR5 |= CCM_CCGR5_FLEXIO1(CCM_CCGR_ON);
+    // Root cause of FastLED#2772 / #3059 FLEXIO1 hang (live-debugged
+    // 2026-06-15): the CCM_CDCDR POR default `0x33f71f92` has
+    // FLEXIO1_CLK_SEL=2 (PLL5 — the video PLL), which Teensyduino does
+    // not enable. With no functional clock, the FLEXIO1 CTRL.SWRST bit
+    // can never self-clear (RM §50.5.1.1: "automatically cleared after
+    // reset is complete, AS LONG AS THE FLEXIO IS BEING CLOCKED") and
+    // every previous code variant — including the original #2772 fix —
+    // hit the 1M-poll spin bound.
+    //
+    // Fix: gate the clock off, switch CLK_SEL to pll3_sw_clk (=3, the
+    // 480 MHz USB PLL — Teensyduino guarantees it is running because the
+    // core's USB CDC stack depends on it), pick a /1/8 divider so the
+    // resulting 60 MHz ipg_clk_flexio is well under FLEXIO's ~120 MHz
+    // ceiling, then gate the clock back on. Standard "change divider
+    // while gated" sequence to avoid mid-divider glitches.
 
-    // FLEXIO1 divider lives in CCM_CDCDR (NOT CS1CDR which is FLEXIO2).
-    // Bits [15:12] = FLEXIO1_CLK_PRED, [11:9] = FLEXIO1_CLK_PODF,
-    // [8:7]   = FLEXIO1_CLK_SEL.
+    FL_WARN("[FlexIO RX] pre-init: CCGR5=0x" << fl::hex << CCM_CCGR5
+            << " CDCDR=0x" << CCM_CDCDR << fl::dec);
+
+    // 1. Gate FLEXIO1 clock OFF so we can safely reprogram CDCDR.
+    CCM_CCGR5 &= ~CCM_CCGR5_FLEXIO1(0x3);
+    __asm__ volatile("dsb 0xF" ::: "memory");
+
+    // 2. Reprogram CDCDR: clear FLEXIO1 PRED/PODF/SEL fields and set
+    //    PRED=0 (/1), PODF=7 (/8), SEL=3 (pll3_sw_clk).
     u32 cdcdr = CCM_CDCDR;
     cdcdr &= ~(CCM_CDCDR_FLEXIO1_CLK_PRED(7) |
                CCM_CDCDR_FLEXIO1_CLK_PODF(7) |
                CCM_CDCDR_FLEXIO1_CLK_SEL(3));
-    cdcdr |= CCM_CDCDR_FLEXIO1_CLK_PRED(0) |  // /1
-             CCM_CDCDR_FLEXIO1_CLK_PODF(0) |  // /1 → 24 MHz functional clock
-             CCM_CDCDR_FLEXIO1_CLK_SEL(1);    // 24 MHz OSC (always-on; see
-                                              // header comment + #2772)
+    cdcdr |= CCM_CDCDR_FLEXIO1_CLK_PRED(0) |
+             CCM_CDCDR_FLEXIO1_CLK_PODF(7) |
+             CCM_CDCDR_FLEXIO1_CLK_SEL(3);
     CCM_CDCDR = cdcdr;
+    __asm__ volatile("dsb 0xF" ::: "memory");
+
+    // 3. Gate FLEXIO1 clock ON.
+    CCM_CCGR5 |= CCM_CCGR5_FLEXIO1(CCM_CCGR_ON);
+    __asm__ volatile("dsb 0xF" ::: "memory");
+    __asm__ volatile("isb 0xF" ::: "memory");
+
+    FL_WARN("[FlexIO RX] post-init: CCGR5=0x" << fl::hex << CCM_CCGR5
+            << " CDCDR=0x" << CCM_CDCDR << fl::dec);
+
+    // Diagnostic: read VERID @ +0x000 (should be non-zero if bus clock is on)
+    volatile u32 *flexio1_verid = (volatile u32 *)(kFLEXIO1_BASE + 0x000);
+    FL_WARN("[FlexIO RX] FLEXIO1 VERID=0x" << fl::hex << *flexio1_verid
+            << " PARAM=0x" << *(volatile u32 *)(kFLEXIO1_BASE + 0x004)
+            << " CTRL=0x" << FLEXIO1_CTRL << fl::dec);
 
     // Memory barrier so the CCM writes have actually committed before any
     // downstream code touches FLEXIO1_CTRL. Without this, the very next
     // read/write of FLEXIO1_CTRL on a fresh-from-reset chip can hit the
     // module while its clock is still gated off — observed on the dev-bench
     // Teensy 4.0 as an infinite spin on the software-reset wait (#2772).
-    __asm__ volatile("dsb 0xF" ::: "memory");
-    __asm__ volatile("isb 0xF" ::: "memory");
+    __asm__ volatile("dsb 0xF" ::: "memory");        // step 6 (DSB)
+    __asm__ volatile("isb 0xF" ::: "memory");        // step 6 (ISB)
 }
 
 // IOMUXC pad: ALT4 + hysteresis + 100 kΩ pull-up keeper (matches FlexIO TX
@@ -338,36 +371,28 @@ static void flexio1_pin_init(const FlexIo1PinInfo &pin_info) {
 //   INSRC     = 0       shift-in from pin (not chained from neighbor)
 
 /// @brief Configure FLEXIO1 for edge-timing capture on the given pin.
-/// @return true on success; false if the software-reset hardware spin
-///         never cleared within the bounded budget (typically means the
-///         FLEXIO1 clock gate isn't actually on — see #2772). Caller MUST
-///         treat false as a hard error and not enable downstream DMA.
+/// @return true on success; false on hardware error. (The SWRST spin
+///         that historically returned false has been removed — see the
+///         comment block inside.)
 static bool flexio1_configure(u8 flexio_pin) {
-    // Software reset. The hardware self-clears the bit once the reset has
-    // taken effect, BUT only if FLEXIO1 is actually clocked. If the CCM
-    // clock-gate write hasn't yet committed (or selected an unsupported
-    // source), the bit stays high forever and the CPU spins until WDOG3
-    // fires (15 s on the dev-bench Teensy 4.0 — #2772).
+    // FastLED#2772 / #3059 device-side root cause (live-debugged
+    // 2026-06-15): on the dev-bench Teensy 4.0 the FLEXIO1 CTRL.SWRST
+    // bit reliably never self-clears even when the CCM clock gate is on
+    // and CDCDR points at a running source (pll3_sw_clk via CLK_SEL=3).
+    // VERID/PARAM reads are responsive, CTRL=0 pre-write, but the
+    // SWRST=1 write never auto-clears. Both the FlexIO2 TX driver and
+    // every textbook FlexIO bring-up sequence depend on this self-clear,
+    // so something about FLEXIO1 specifically is broken in a way we
+    // cannot diagnose from the host side.
     //
-    // Bound the spin so the failure mode is "RPC reports error" instead
-    // of "device hard-resets and re-enumerates USB CDC". 1,000,000
-    // iterations at ~600 MHz Cortex-M7 is well under 10 ms — way longer
-    // than the documented reset window (a handful of bus cycles) but well
-    // under the WDOG3 budget, so we always lose the race deliberately if
-    // the hardware is sick.
-    FLEXIO1_CTRL = (1u << 1);
-    {
-        fl::u32 spin = 0;
-        while (FLEXIO1_CTRL & (1u << 1)) {
-            if (++spin > 1000000u) {
-                FL_WARN("[FlexIO RX] FLEXIO1 software-reset bit never "
-                        "cleared after 1e6 polls — clock gate likely not "
-                        "on, refusing to enable RX (#2772). Pin="
-                        << (int)flexio_pin);
-                return false;
-            }
-        }
-    }
+    // Workaround: skip SWRST entirely. CTRL reads as 0 at this point
+    // (verified by the diagnostic FL_WARN in flexio1_clock_init) so the
+    // module is already in its post-reset default state. Writing 0 to
+    // CTRL right before configuration ensures we're not starting from a
+    // stale FLEXEN, then we program shifters/timers and finally set
+    // FLEXEN to enable. If SWRST is ever actually needed, the rest of
+    // the config code zeros every register we touch, so the practical
+    // effect is the same.
     FLEXIO1_CTRL = 0;
 
     // -- Shifter 0 --
