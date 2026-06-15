@@ -26,6 +26,17 @@
 // IWYU pragma: end_keep  // okay banned header (STL wrapper implementation requires standard math.h)
 #endif
 
+// Arduino's WString.h (transitively included via the Arduino core on AVR and
+// other Arduino-framework targets) defines `F()` as a PROGMEM-string macro.
+// That macro collides with the `template <typename F>` parameter used by
+// the polynomial / Newton-iteration helpers in this file: every `F(value)`
+// constructor cast (e.g. `F(0.5)`) is rewritten to `WString::F(0.5)` and
+// fails to compile. Undefining the macro here is local to this translation
+// unit; the macro is only used in user sketches, never in fl::math itself.
+#ifdef F
+#undef F
+#endif
+
 namespace fl {
 
 // Standalone floor implementation for float
