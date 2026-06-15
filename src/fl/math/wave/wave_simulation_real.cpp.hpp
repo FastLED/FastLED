@@ -260,27 +260,33 @@ void WaveSimulation2D_Real::update() {
     // PSRAM-backed grids).
     const i32 q15_min = mHalfDuplex ? 0 : -32768;
 
-    // Update each inner cell.
+    // Update each inner cell. Per-row hoist: lift j*stride out of the inner
+    // loop, set up row pointers to curr/next/above/below, and mark them
+    // FL_RESTRICT_PARAM so the optimizer knows curr and next don't alias.
+    // This gives the compiler a clean dependency picture across iterations
+    // (it can vectorize / interleave loads without re-deriving the address).
     for (fl::size j = 1; j <= height; ++j) {
+        const fl::size row = j * stride;
+        const i16* FL_RESTRICT_PARAM row_curr  = curr + row;
+        const i16* FL_RESTRICT_PARAM row_above = curr + (row - stride);
+        const i16* FL_RESTRICT_PARAM row_below = curr + (row + stride);
+        i16*       FL_RESTRICT_PARAM row_next  = next + row;
         for (fl::size i = 1; i <= width; ++i) {
-            int index = j * stride + i;
+            const i32 c = row_curr[i];
             // Laplacian: sum of four neighbors minus 4 times the center.
-            i32 laplacian = (i32)curr[index + 1] + curr[index - 1] +
-                                curr[index + stride] + curr[index - stride] -
-                                ((i32)curr[index] << 2);
-            // Compute the new value:
-            // f = - next[index] + 2 * curr[index] + mCourantSq * laplacian
-            // The multiplication is in Q15, so we shift right by 15.
+            const i32 laplacian = (i32)row_curr[i + 1] + row_curr[i - 1] +
+                                  row_above[i] + row_below[i] -
+                                  (c << 2);
             // Promote to i64 before the multiply. With the 2D CFL clamp at
             // 0.5, max |mCourantSq32| = 16383 and max |laplacian| ~262,140
             // (saturated checkerboard) give a worst-case product of ~4.3e9
             // — past i32 max (2.15e9). The i64 promote also acts as a
             // safety net if the clamp is ever regressed; pre-clamp the
             // 2D product could already reach ~8.6e9.
-            i32 term = static_cast<i32>(
+            const i32 term = static_cast<i32>(
                 (static_cast<i64>(mCourantSq32) * laplacian) >> 15);
-            i32 f =
-                -(i32)next[index] + ((i32)curr[index] << 1) + term;
+            // f = -next[index] + 2 * curr[index] + mCourantSq * laplacian.
+            i32 f = -(i32)row_next[i] + (c << 1) + term;
 
             // Apply damping: dampening factor is 2^mDampening, so the
             // division simplifies to an arithmetic shift. See the 1D
@@ -289,7 +295,7 @@ void WaveSimulation2D_Real::update() {
 
             // Clamp f into [q15_min, 32767] in a single step — subsumes
             // both the Q15 saturation clamp and the half-duplex zero pass.
-            next[index] = static_cast<i16>(fl::clamp(f, q15_min, static_cast<i32>(32767)));
+            row_next[i] = static_cast<i16>(fl::clamp(f, q15_min, static_cast<i32>(32767)));
         }
     }
 
