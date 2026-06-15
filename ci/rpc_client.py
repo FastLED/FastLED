@@ -120,6 +120,14 @@ class RpcClient:
 
     RESPONSE_PREFIX = "REMOTE: "
 
+    # Post-ACK timeout floor for async (Phase 3) RPCs. After the device sends
+    # `{"acknowledged": true}` the client restarts its wait with at least this
+    # many seconds for the final response (or the caller-supplied timeout,
+    # whichever is larger). Picked generously so a 100-LED runSingleTest on a
+    # slow MCU has headroom; the typical run on Teensy 4 finishes in 80-90s.
+    # See FastLED#3060.
+    ASYNC_POST_ACK_TIMEOUT: float = 600.0
+
     def __init__(
         self,
         port: str,
@@ -639,11 +647,28 @@ class RpcClient:
                         and "acknowledged" in response_data
                         and response_data["acknowledged"] is True
                     ):
+                        # Async RPCs (Phase 3: runSingleTest, runParallelTest,
+                        # all testCoroutine*, the net/ble test runners) can run
+                        # for tens of seconds — the runSingleTest path through
+                        # 100 LEDs × 4 patterns takes ~80s on Teensy 4. Folding
+                        # both the ACK-wait and the result-wait into the single
+                        # caller-supplied `timeout` caused
+                        # `RpcTimeoutError('No response with ID N within 60s')`
+                        # for tests that genuinely needed 70-90s of post-ACK
+                        # time. Restart the wait with a budget large enough to
+                        # cover any reasonable test: the caller's own timeout
+                        # if they bumped it above the async floor, else
+                        # `ASYNC_POST_ACK_TIMEOUT` (10 min). See FastLED#3060.
+                        post_ack_timeout = max(timeout, self.ASYNC_POST_ACK_TIMEOUT)
                         if self.verbose:
                             print(
-                                f"[RPC] ACK received for request {expected_id}, waiting for final response..."
+                                f"[RPC] ACK received for request {expected_id}, "
+                                f"restarting wait for final response "
+                                f"(post-ACK timeout={post_ack_timeout}s)..."
                             )
-                        continue  # Skip ACK, wait for final response
+                        return await self._wait_for_response(
+                            post_ack_timeout, expected_id
+                        )
 
                     # Determine success: void functions return null, treat as success
                     success: bool  # Explicit type declaration
