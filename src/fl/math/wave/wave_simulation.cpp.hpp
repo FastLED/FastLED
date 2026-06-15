@@ -47,6 +47,15 @@ void WaveSimulation2D::init(u32 width, u32 height, SuperSample factor,
     u32 w = width * mMultiplier;
     u32 h = height * mMultiplier;
     mSim = fl::make_unique<WaveSimulation2D_Real>(w, h, speed, dampening);
+    // Auto-select the 9-point isotropic Laplacian when super-sampling is
+    // active: the 5-point stencil's anisotropy (square-ish ripples) is
+    // invisible at the native LED-grid resolution but becomes obvious
+    // at 2x and higher super-sample factors. The 9-point form costs ~2x
+    // reads + ALU per cell but the user has already opted into more CPU
+    // by requesting super-sampling.
+    if (mMultiplier >= 2) {
+        mSim->setStencil(LaplacianStencil::NinePointIsotropic);
+    }
     // Only allocate change grid if it's enabled (saves memory when disabled)
     if (mUseChangeGrid) {
         mChangeGrid.reset(w, h);

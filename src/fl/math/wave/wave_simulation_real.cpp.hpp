@@ -265,6 +265,14 @@ void WaveSimulation2D_Real::update() {
     // FL_RESTRICT_PARAM so the optimizer knows curr and next don't alias.
     // This gives the compiler a clean dependency picture across iterations
     // (it can vectorize / interleave loads without re-deriving the address).
+    //
+    // Outer-level branch on the stencil keeps the inner loop branchless;
+    // the two kernels are otherwise identical (Q15 multiply, damping,
+    // clamp). FivePoint is the backward-compatible default; the wrapper
+    // class WaveSimulation2D auto-selects NinePointIsotropic at high
+    // super-sample factors where the anisotropy of the 5-point stencil
+    // becomes visually obvious.
+    const bool nine_point = (mStencil == LaplacianStencil::NinePointIsotropic);
     for (fl::size j = 1; j <= height; ++j) {
         const fl::size row = j * stride;
         const i16* FL_RESTRICT_PARAM row_curr  = curr + row;
@@ -273,18 +281,40 @@ void WaveSimulation2D_Real::update() {
         i16*       FL_RESTRICT_PARAM row_next  = next + row;
         for (fl::size i = 1; i <= width; ++i) {
             const i32 c = row_curr[i];
-            // Laplacian: sum of four neighbors minus 4 times the center.
-            const i32 laplacian = (i32)row_curr[i + 1] + row_curr[i - 1] +
-                                  row_above[i] + row_below[i] -
-                                  (c << 2);
+            i32 laplacian;
+            if (nine_point) {
+                // 9-point isotropic Laplacian, scaled up by 6 to keep
+                // everything in integer arithmetic:
+                //   6 * lap = (NW+NE+SW+SE) + 4*(N+S+E+W) - 20*C
+                // The /6 is folded into the term computation below so we
+                // pay it once per cell rather than four times.
+                const i32 diag = (i32)row_above[i - 1] + row_above[i + 1] +
+                                 row_below[i - 1] + row_below[i + 1];
+                const i32 nbr  = (i32)row_above[i] + row_below[i] +
+                                 row_curr[i - 1] + row_curr[i + 1];
+                laplacian = diag + (nbr << 2) - 20 * c;
+            } else {
+                // Standard 5-point Laplacian: N + S + E + W - 4*C.
+                laplacian = (i32)row_curr[i + 1] + row_curr[i - 1] +
+                            row_above[i] + row_below[i] - (c << 2);
+            }
             // Promote to i64 before the multiply. With the 2D CFL clamp at
-            // 0.5, max |mCourantSq32| = 16383 and max |laplacian| ~262,140
-            // (saturated checkerboard) give a worst-case product of ~4.3e9
-            // — past i32 max (2.15e9). The i64 promote also acts as a
-            // safety net if the clamp is ever regressed; pre-clamp the
-            // 2D product could already reach ~8.6e9.
-            const i32 term = static_cast<i32>(
-                (static_cast<i64>(mCourantSq32) * laplacian) >> 15);
+            // 0.5, the 5-point worst case product is ~4.3e9 and the
+            // 9-point (scaled by 6, so |lap| ~6x larger) is ~2.6e10 — both
+            // past i32 max (2.15e9). The i64 promote also acts as a safety
+            // net if the clamp is ever regressed.
+            i64 product = static_cast<i64>(mCourantSq32) * laplacian;
+            i32 term;
+            if (nine_point) {
+                // Undo the x6 scaling on the 9-point Laplacian here.
+                // Integer division by a compile-time-constant 6 is lowered
+                // to a reciprocal-multiply on Cortex-M4+ and to a small
+                // shift+add on AVR; either way it's well under the cost
+                // of computing the Laplacian itself.
+                term = static_cast<i32>((product >> 15) / 6);
+            } else {
+                term = static_cast<i32>(product >> 15);
+            }
             // f = -next[index] + 2 * curr[index] + mCourantSq * laplacian.
             i32 f = -(i32)row_next[i] + (c << 1) + term;
 
