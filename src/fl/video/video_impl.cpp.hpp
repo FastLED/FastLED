@@ -355,12 +355,12 @@ bool VideoImpl::rewind() {
     return true;
 }
 
-bool VideoImpl::hasEmbeddedScreenMap() const {
+bool VideoImpl::hasEmbeddedScreenMap() const FL_NOEXCEPT {
     if (!mStream) return false;
     return mStream->hasEmbeddedScreenMap();
 }
 
-const fl::string &VideoImpl::embeddedScreenMapJson() const {
+const fl::string &VideoImpl::embeddedScreenMapJson() const FL_NOEXCEPT {
     static const fl::string kEmpty;
     if (!mStream) return kEmpty;
     return mStream->embeddedScreenMapJson();

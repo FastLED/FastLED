@@ -56,8 +56,8 @@ class VideoImpl {
 
     // FLED v1 container accessors. Forwards to the underlying PixelStream;
     // empty / false for legacy headerless `.rgb` files.
-    bool hasEmbeddedScreenMap() const;
-    const fl::string &embeddedScreenMapJson() const;
+    bool hasEmbeddedScreenMap() const FL_NOEXCEPT;
+    const fl::string &embeddedScreenMapJson() const FL_NOEXCEPT;
 
   private:
     bool updateBufferIfNecessary(fl::u32 prev, fl::u32 now);
