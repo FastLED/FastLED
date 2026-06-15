@@ -160,6 +160,127 @@ FL_TEST_CASE("ScreenMap getBounds functionality") {
     FL_CHECK(emptyBounds.y == 0.0f);
 }
 
+FL_TEST_CASE("ScreenMap v2 JSON parsing — basic segments") {
+    // v2: top-level `segments` array, each entry has its own x/y arrays.
+    const char* json = R"({
+        "version": 2,
+        "groups": { "trunk": { "color": "#ffffff" } },
+        "segments": [
+            { "id": "a", "pin": 1, "group": "trunk",
+              "x": [0.0, 1.0, 2.0], "y": [0.0, 0.0, 0.0] },
+            { "id": "b", "pin": 2, "group": "trunk",
+              "x": [10.0, 11.0], "y": [5.0, 5.0] }
+        ]
+    })";
+
+    fl::flat_map<string, ScreenMap> segmentMaps;
+    string err;
+    bool ok = ScreenMap::ParseJson(json, &segmentMaps, &err);
+    FL_CHECK(ok);
+    FL_CHECK(segmentMaps.size() == 2);
+
+    ScreenMap& a = segmentMaps["a"];
+    FL_CHECK(a.getLength() == 3);
+    FL_CHECK(a[0].x == 0.0f); FL_CHECK(a[0].y == 0.0f);
+    FL_CHECK(a[1].x == 1.0f); FL_CHECK(a[1].y == 0.0f);
+    FL_CHECK(a[2].x == 2.0f); FL_CHECK(a[2].y == 0.0f);
+
+    ScreenMap& b = segmentMaps["b"];
+    FL_CHECK(b.getLength() == 2);
+    FL_CHECK(b[0].x == 10.0f); FL_CHECK(b[0].y == 5.0f);
+    FL_CHECK(b[1].x == 11.0f); FL_CHECK(b[1].y == 5.0f);
+}
+
+FL_TEST_CASE("ScreenMap v2 JSON parsing — auto-detect without explicit version") {
+    // Same shape as the test above but no "version" key — parser should still
+    // route to v2 because the root has a `segments` array.
+    const char* json = R"({
+        "segments": [
+            { "id": "x", "pin": 1, "group": "g",
+              "x": [0.5, 1.5], "y": [2.5, 3.5] }
+        ]
+    })";
+
+    fl::flat_map<string, ScreenMap> segmentMaps;
+    string err;
+    bool ok = ScreenMap::ParseJson(json, &segmentMaps, &err);
+    FL_CHECK(ok);
+    FL_CHECK(segmentMaps.size() == 1);
+    ScreenMap& x = segmentMaps["x"];
+    FL_CHECK(x.getLength() == 2);
+    FL_CHECK(x[0].x == 0.5f); FL_CHECK(x[0].y == 2.5f);
+    FL_CHECK(x[1].x == 1.5f); FL_CHECK(x[1].y == 3.5f);
+}
+
+FL_TEST_CASE("ScreenMap v2 JSON parsing — forks produce separate entries") {
+    // A fork is just another segment with the same shape; in firmware-flat form
+    // each fork twin gets its own keyed entry under its `id`.
+    const char* json = R"({
+        "version": 2,
+        "groups": { "trunk": { "color": "#fff" }, "branch": { "color": "#f00" } },
+        "segments": [
+            { "id": "a", "pin": 1, "group": "trunk",
+              "x": [0.0, 1.0, 2.0, 3.0, 4.0],
+              "y": [0.0, 0.0, 0.0, 0.0, 0.0] },
+            { "id": "b", "pin": 2, "group": "branch", "parent": "a", "offset": 2,
+              "x": [2.0, 2.0, 2.0],
+              "y": [0.0, 1.0, 2.0] }
+        ]
+    })";
+
+    fl::flat_map<string, ScreenMap> segmentMaps;
+    string err;
+    bool ok = ScreenMap::ParseJson(json, &segmentMaps, &err);
+    FL_CHECK(ok);
+    FL_CHECK(segmentMaps.size() == 2);
+
+    ScreenMap& a = segmentMaps["a"];
+    FL_CHECK(a.getLength() == 5);
+    FL_CHECK(a[0].x == 0.0f); FL_CHECK(a[2].x == 2.0f); FL_CHECK(a[4].x == 4.0f);
+
+    ScreenMap& b = segmentMaps["b"];
+    FL_CHECK(b.getLength() == 3);
+    FL_CHECK(b[0].x == 2.0f); FL_CHECK(b[0].y == 0.0f);
+    FL_CHECK(b[2].x == 2.0f); FL_CHECK(b[2].y == 2.0f);
+}
+
+FL_TEST_CASE("ScreenMap v2 JSON parsing — v1 file with explicit version=1 still works") {
+    // Explicit "version": 1 should NOT trip v2 dispatch. Existing "map" path runs.
+    const char* json = R"({
+        "version": 1,
+        "map": {
+            "strip1": { "x": [1.0, 2.0], "y": [3.0, 4.0], "diameter": 0.25 }
+        }
+    })";
+
+    fl::flat_map<string, ScreenMap> segmentMaps;
+    string err;
+    bool ok = ScreenMap::ParseJson(json, &segmentMaps, &err);
+    FL_CHECK(ok);
+    FL_CHECK(segmentMaps.size() == 1);
+    ScreenMap& s = segmentMaps["strip1"];
+    FL_CHECK(s.getLength() == 2);
+    FL_CHECK(s.getDiameter() == 0.25f);
+    FL_CHECK(s[0].x == 1.0f); FL_CHECK(s[1].y == 4.0f);
+}
+
+FL_TEST_CASE("ScreenMap v2 JSON parsing — malformed segments errors cleanly") {
+    // Missing 'x' should produce an informative error string and return false.
+    const char* json = R"({
+        "version": 2,
+        "segments": [
+            { "id": "broken", "pin": 1, "group": "g", "y": [0.0, 1.0] }
+        ]
+    })";
+
+    fl::flat_map<string, ScreenMap> segmentMaps;
+    string err;
+    bool ok = ScreenMap::ParseJson(json, &segmentMaps, &err);
+    FL_CHECK(!ok);
+    FL_CHECK(segmentMaps.size() == 0);
+    FL_CHECK(err.size() > 0);
+}
+
 // Grouped tests
 #include "tests/fl/math/xymap.hpp"
 
