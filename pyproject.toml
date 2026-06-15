@@ -1,6 +1,6 @@
 [project]
 name = "ci"
-version = "0.1.0"
+version = "0.1.1"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -161,7 +161,7 @@ dependencies = [
     # `FileNotFoundError: meson_native.txt` / `ninja: error: rebuilding
     # 'build.ninja': subcommand failed` cascade we hit during long-session
     # `bash test --cpp` cycles.
-    "zccache>=1.12.5",
+    "zccache>=1.12.7",
     "ninja",
     "meson>=1.11.0",
     "download",
