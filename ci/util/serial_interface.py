@@ -174,7 +174,12 @@ class FbuildSerialAdapter:
 
     async def close(self) -> None:
         await self._run_in_thread(self._monitor.__exit__, None, None, None)
-        self._executor.shutdown(wait=False)
+        # NOTE: do NOT shut down self._executor here. The autoresearch
+        # recovery path (ci/autoresearch/gpio.py) calls close() then reuses
+        # the same adapter on a new RpcClient. Shutting the executor down
+        # makes the next _run_in_thread fail with "cannot schedule new
+        # futures after shutdown" and breaks DTR-reset retries. See
+        # FastLED/fbuild#592.
 
     async def write(self, data: str) -> None:
         await self._run_in_thread(self._monitor.write, data)
