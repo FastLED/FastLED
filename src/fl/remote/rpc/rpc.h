@@ -360,14 +360,24 @@ public:
         entry.mTypeTag = detail::TypeTag<Sig>::id();
         entry.mInvoker = fl::make_shared<detail::TypedInvoker<Sig>>(fn);
         entry.mTypedCallable = fl::make_shared<detail::TypedCallableHolder<Sig>>(fn);
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+        // Schema generator construction gated on Low-memory targets per
+        // FastLED #3081 / #3079. The schema generator is only consumed by
+        // `rpc.discover` (also gated). Skipping it on Low-memory drops
+        // `TypedSchemaGenerator<Sig>::params()` (~800 B per signature).
         entry.mSchemaGenerator = fl::make_shared<detail::TypedSchemaGenerator<Sig>>();
+#endif
         entry.mDescription = description;
         entry.mTags = tags;
         entry.mMode = mode;
 
+#if FL_PLATFORM_HAS_LARGE_MEMORY
         if (!paramNames.empty()) {
             entry.mSchemaGenerator->setParamNames(paramNames);
         }
+#else
+        (void)paramNames;
+#endif
 
         mRegistry[key] = fl::move(entry);
         return true;
