@@ -126,4 +126,85 @@ FL_TEST_CASE("WaveSimulation2D_Real stays bounded across many steps at CFL bound
     }
 }
 
+FL_TEST_CASE("WaveSimulation2D_Real stencil getter/setter round-trips") {
+    WaveSimulation2D_Real sim(8, 8, 0.16f, 6.0f);
+    // Default is FivePoint for backward compatibility.
+    FL_CHECK(sim.getStencil() == LaplacianStencil::FivePoint);
+    sim.setStencil(LaplacianStencil::NinePointIsotropic);
+    FL_CHECK(sim.getStencil() == LaplacianStencil::NinePointIsotropic);
+    sim.setStencil(LaplacianStencil::FivePoint);
+    FL_CHECK(sim.getStencil() == LaplacianStencil::FivePoint);
+}
+
+FL_TEST_CASE("WaveSimulation2D_Real 9-point Laplacian: constant input gives no change") {
+    // Both stencils satisfy lap(constant) == 0 by construction. With the
+    // discrete update u(t+1) = 2u - u_prev + C^2 * lap(u), feeding the
+    // same constant into curr (and zeros into prev — the leapfrog's
+    // first step) should yield f = 2*K + 0 = 2*K, then the clamp pins it
+    // to 32767. Crucially, every cell should produce the same value —
+    // no spatial structure should appear from the Laplacian.
+    const u32 W = 12;
+    const u32 H = 12;
+    WaveSimulation2D_Real sim(W, H, 0.16f, 6.0f);
+    sim.setStencil(LaplacianStencil::NinePointIsotropic);
+    sim.setHalfDuplex(false);
+
+    // Use 0.4 (Q15: 13107) — well inside Q15 range so 2*K doesn't clamp.
+    const float K = 0.4f;
+    for (u32 y = 0; y < H; ++y) {
+        for (u32 x = 0; x < W; ++x) {
+            sim.setf(x, y, K);
+        }
+    }
+    sim.update();
+
+    // All inner cells should be approximately equal; pick the center cell
+    // as reference and verify the others are within +/-2 LSB.
+    const i16 ref = sim.geti16(W / 2, H / 2);
+    for (u32 y = 0; y < H; ++y) {
+        for (u32 x = 0; x < W; ++x) {
+            const int diff = static_cast<int>(sim.geti16(x, y)) - static_cast<int>(ref);
+            FL_CHECK_GE(diff, -2);
+            FL_CHECK_LE(diff, 2);
+        }
+    }
+}
+
+FL_TEST_CASE("WaveSimulation2D_Real 9-point produces different output than 5-point on a delta") {
+    // A single-cell impulse should propagate differently under the two
+    // stencils — the 9-point spreads energy into the diagonal neighbors
+    // as well as the cardinal ones. After one step, the four diagonal
+    // cells around the center should be nonzero under 9-point and zero
+    // under 5-point.
+    const u32 W = 8;
+    const u32 H = 8;
+    WaveSimulation2D_Real five(W, H, 0.16f, 6.0f);
+    WaveSimulation2D_Real nine(W, H, 0.16f, 6.0f);
+    five.setStencil(LaplacianStencil::FivePoint);
+    nine.setStencil(LaplacianStencil::NinePointIsotropic);
+    five.setHalfDuplex(false);
+    nine.setHalfDuplex(false);
+
+    const u32 cx = W / 2;
+    const u32 cy = H / 2;
+    five.setf(cx, cy, 1.0f);
+    nine.setf(cx, cy, 1.0f);
+    five.update();
+    nine.update();
+
+    // 5-point: diagonal neighbors of (cx, cy) get no first-step contribution
+    // from the Laplacian of an isolated +impulse — they should be 0.
+    FL_CHECK_EQ(static_cast<int>(five.geti16(cx - 1, cy - 1)), 0);
+    FL_CHECK_EQ(static_cast<int>(five.geti16(cx + 1, cy - 1)), 0);
+    FL_CHECK_EQ(static_cast<int>(five.geti16(cx - 1, cy + 1)), 0);
+    FL_CHECK_EQ(static_cast<int>(five.geti16(cx + 1, cy + 1)), 0);
+
+    // 9-point: those same diagonal cells should be nonzero (the isotropic
+    // stencil leaks the impulse into them at weight 1/6 per the formula).
+    FL_CHECK(nine.geti16(cx - 1, cy - 1) != 0);
+    FL_CHECK(nine.geti16(cx + 1, cy - 1) != 0);
+    FL_CHECK(nine.geti16(cx - 1, cy + 1) != 0);
+    FL_CHECK(nine.geti16(cx + 1, cy + 1) != 0);
+}
+
 }  // FL_TEST_FILE

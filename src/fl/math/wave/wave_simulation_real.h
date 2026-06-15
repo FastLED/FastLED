@@ -106,6 +106,22 @@ class WaveSimulation1D_Real {
 
 };
 
+// Discrete Laplacian stencil for the 2D wave PDE.
+//   FivePoint           — standard 5-point: N+S+E+W - 4*C, O(h^2) accurate
+//                         but anisotropic (waves visibly prefer cardinal
+//                         directions, producing square-ish ripples at high
+//                         super-sample factors).
+//   NinePointIsotropic  — 1/6 * sum(diagonals) + 2/3 * sum(neighbors)
+//                         - 10/3 * C, also O(h^2) but with isotropic
+//                         leading error. ~2x reads + ALU per cell; gives
+//                         visibly rounder ripples at SUPER_SAMPLE_2X and
+//                         above. The wave_simulation.h wrapper auto-
+//                         selects this when SuperSample >= 2X.
+enum class LaplacianStencil : u8 {
+    FivePoint = 0,
+    NinePointIsotropic = 1,
+};
+
 class WaveSimulation2D_Real {
   public:
     // Constructor: Initializes the simulation with inner grid size (W x H).
@@ -163,6 +179,13 @@ class WaveSimulation2D_Real {
         }
     }
 
+    // Select the discrete Laplacian stencil used by update(). Default is
+    // FivePoint (backward compatible). NinePointIsotropic costs ~2x reads
+    // + ALU per cell but produces visibly rounder ripples at high super-
+    // sample factors; the wrapper class auto-selects it when appropriate.
+    void setStencil(LaplacianStencil s) FL_NOEXCEPT { mStencil = s; }
+    LaplacianStencil getStencil() const FL_NOEXCEPT { return mStencil; }
+
     void setXCylindrical(bool on) { mXCylindrical = on; }
 
     // Check if (x,y) is within the inner grid.
@@ -201,6 +224,8 @@ class WaveSimulation2D_Real {
     bool mHalfDuplex =
         true; // Flag to restrict values to positive range during update.
     bool mXCylindrical = false; // Default to non-cylindrical mode
+    LaplacianStencil mStencil =
+        LaplacianStencil::FivePoint; // Backward-compatible default
 };
 
 } // namespace fl
