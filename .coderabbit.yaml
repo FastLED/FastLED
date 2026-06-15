@@ -37,14 +37,47 @@ reviews:
       instructions: |
         Macro naming — three types are recognized:
         1. `FL_IS_<PLATFORM>` — platform detection, defined-or-undefined, no value.
-        2. `FASTLED_<NAME>` — legacy configuration macros with explicit 0/1/numeric values.
+        2. `FASTLED_<NAME>` — **LEGACY-ONLY** configuration macros with explicit
+           0/1/numeric values. **Frozen vocabulary** — do not invent new `FASTLED_*`
+           names. All new configuration macros use the `FL_*` prefix.
         3. `FL_<COMPONENT>_HAS_<FEATURE>` — per-subsystem capability flag, defined-or-
            undefined, no value. `FL_<COMPONENT>_<NUMERIC>` — numeric property, explicit
-           value.
+           value. `FL_<COMPONENT>_<NAME>` — new configuration / tuning macros with
+           explicit value (replaces the legacy `FASTLED_*` form).
         Critical rule: `<COMPONENT>` is the SPELLED-OUT name, NOT an acronym. The macro
         and the public API share a single vocabulary. If the API is `FastLED.watchdog()`,
         the macros are `FL_WATCHDOG_*`, NOT `FL_WDT_*`. If a PR introduces acronym-style
         capability macros, flag them and request the spelled-out form.
+
+        **NEW MACRO PREFIX RULE (HIGH severity):** Any newly introduced `#define`,
+        `-D<NAME>=...` build flag, or `defined(...)` check whose identifier starts with
+        `FASTLED_` is a violation. Use `FL_<COMPONENT>_<NAME>` instead. Renaming an
+        existing `FASTLED_*` macro is out of scope here — only NEW additions are flagged.
+        Existing `FASTLED_*` references in the diff (touched but not introduced) are
+        grandfathered. Examples:
+          - ❌ `#define FASTLED_LPC_PWM_DMA 1`        →  ✅ `#define FL_LPC_PWM_DMA 1`
+          - ❌ `#define FASTLED_LPC_RX_SCT_WS2812 1`  →  ✅ `#define FL_LPC_RX_SCT_WS2812 1`
+          - ❌ `-DFASTLED_NEW_FEATURE=1` in build_flags →  ✅ `-DFL_NEW_FEATURE=1`
+        Reference: `agents/docs/cpp-standards.md` → "Type 3: Component Capability Flags".
+
+    - path: "**/platformio.ini"
+      instructions: |
+        PlatformIO `build_flags` macro prefix rule (matches the `FL_*` vs `FASTLED_*`
+        rule applied to C/C++ sources):
+
+        Any NEWLY ADDED `-D<NAME>...` build flag whose identifier starts with `FASTLED_`
+        is a HIGH-severity violation. Use the `FL_*` prefix instead. The `FASTLED_*`
+        vocabulary is frozen — it exists only for backwards compatibility with
+        already-shipped macros.
+
+        Example violation (from PR diff):
+          build_flags =
+            -DRELEASE
+            -DFASTLED_LPC_PWM_DMA=1         ; ❌ flag — should be -DFL_LPC_PWM_DMA=1
+            -DFASTLED_LPC_RX_SCT_WS2812=1   ; ❌ flag — should be -DFL_LPC_RX_SCT_WS2812=1
+
+        Existing `-DFASTLED_*` flags that the PR merely moves or reformats (without
+        introducing a brand-new identifier) are grandfathered. Flag only new identifiers.
         Reference: `agents/docs/cpp-standards.md` → "Type 3: Component Capability Flags".
     - path: "src/**/*.h"
       instructions: |
