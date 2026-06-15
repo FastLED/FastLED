@@ -75,8 +75,8 @@ class Video : public Fx1d { // Fx1d because video can be irregular.
     // opened a FLED-formatted file (12-byte "FLED" magic header). Legacy
     // headerless `.rgb` files return false / empty string.
     // Spec: https://github.com/zackees/ledmapper/blob/main/docs/fled-format.md
-    bool hasEmbeddedScreenMap() const;
-    const fl::string &embeddedScreenMapJson() const;
+    bool hasEmbeddedScreenMap() const FL_NOEXCEPT;
+    const fl::string &embeddedScreenMapJson() const FL_NOEXCEPT;
     void pause(fl::u32 now) override;
     void resume(fl::u32 now) override;
     void setFade(fl::u32 fadeInTime, fl::u32 fadeOutTime);

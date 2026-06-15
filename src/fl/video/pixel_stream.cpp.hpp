@@ -209,11 +209,11 @@ PixelStream::Type PixelStream::getType() const {
     return mType;
 }
 
-bool PixelStream::hasEmbeddedScreenMap() const {
+bool PixelStream::hasEmbeddedScreenMap() const FL_NOEXCEPT {
     return !mEmbeddedScreenMapJson.empty();
 }
 
-const fl::string &PixelStream::embeddedScreenMapJson() const {
+const fl::string &PixelStream::embeddedScreenMapJson() const FL_NOEXCEPT {
     return mEmbeddedScreenMapJson;
 }
 

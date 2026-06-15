@@ -121,12 +121,12 @@ size_t Video::pixelsPerFrame() const {
     return mImpl->pixelsPerFrame();
 }
 
-bool Video::hasEmbeddedScreenMap() const {
+bool Video::hasEmbeddedScreenMap() const FL_NOEXCEPT {
     if (!mImpl) return false;
     return mImpl->hasEmbeddedScreenMap();
 }
 
-const fl::string &Video::embeddedScreenMapJson() const {
+const fl::string &Video::embeddedScreenMapJson() const FL_NOEXCEPT {
     static const fl::string kEmpty;
     if (!mImpl) return kEmpty;
     return mImpl->embeddedScreenMapJson();
