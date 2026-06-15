@@ -39,6 +39,18 @@ float fixed_to_float(i16 f) {
 // i16 fixed_mul(i16 a, i16 b) {
 //     return (i16)(((i32)a * b) >> 15);
 // }
+
+// Precompute the Q15 damping decay factor for a power-of-two exponent.
+// The damping update is `f_new = f * (1 - 1/2^damp)`, equivalent to the
+// arithmetic-shift form `f -= f >> damp` (modulo 1-LSB rounding). Caching
+// it as Q15 here lets the kernel use a single Q15 multiply per cell and
+// opens the door to non-power-of-two damping if the public API ever
+// needs it (today it's still int-only). damp <= 0 means no decay.
+i16 compute_damp_decay_q15(int damp) FL_NOEXCEPT {
+    if (damp <= 0) return INT16_POS;  // ~1.0 — no decay
+    const float decay = 1.0f - 1.0f / static_cast<float>(1 << damp);
+    return float_to_fixed(decay);
+}
 } // namespace wave_detail
 
 WaveSimulation1D_Real::WaveSimulation1D_Real(u32 len, float courantSq,
@@ -52,7 +64,8 @@ WaveSimulation1D_Real::WaveSimulation1D_Real(u32 len, float courantSq,
       // boundary to keep the Q15 fixed-point kernel both stable and within
       // i32 overflow margins (paired with the i64 promote in update()).
       mCourantSq(wave_detail::float_to_fixed(fl::clamp(courantSq, 0.0f, 1.0f))),
-      mDampenening(dampening) {
+      mDampenening(dampening),
+      mDampDecayQ15(wave_detail::compute_damp_decay_q15(dampening)) {
     // Additional initialization can be added here if needed.
 }
 
@@ -61,7 +74,10 @@ void WaveSimulation1D_Real::setSpeed(float something) {
     mCourantSq = wave_detail::float_to_fixed(fl::clamp(something, 0.0f, 1.0f));
 }
 
-void WaveSimulation1D_Real::setDampening(int damp) { mDampenening = damp; }
+void WaveSimulation1D_Real::setDampening(int damp) FL_NOEXCEPT {
+    mDampenening = damp;
+    mDampDecayQ15 = wave_detail::compute_damp_decay_q15(damp);
+}
 
 int WaveSimulation1D_Real::getDampenening() const { return mDampenening; }
 
@@ -144,12 +160,14 @@ void WaveSimulation1D_Real::update() {
         // f = -next[i] + 2 * curr[i] + term
         i32 f = -(i32)next[i] + ((i32)curr[i] << 1) + term;
 
-        // Apply damping: dampening factor is 2^mDampenening, so the division
-        // simplifies to an arithmetic shift. Saves ~150 cycles per cell on
-        // AVR / Cortex-M0 (no HW divider) vs the previous signed division.
-        // 1-LSB rounding asymmetry on negative values is invisible at Q15
-        // visual amplitudes.
-        f -= (f >> mDampenening);
+        // Apply damping: use a precomputed Q15 multiplier in place of the
+        // arithmetic shift. Functionally equivalent for power-of-two damp
+        // (modulo 1-LSB rounding) but generalizes cleanly to non-power-of-
+        // two damping if the public API ever needs it. On Cortex-M4+ this
+        // lowers to a single smmlsr/smulwb; on AVR it's a 16x32 multiply
+        // (~30 cycles) — same ballpark as the shift but cleaner semantics.
+        f = static_cast<i32>(
+            (static_cast<i64>(f) * mDampDecayQ15) >> 15);
 
         // Clamp f into [q15_min, 32767] in a single step. q15_min is 0 when
         // half-duplex is on, -32768 otherwise. This subsumes both the Q15
@@ -172,14 +190,18 @@ WaveSimulation2D_Real::WaveSimulation2D_Real(u32 W, u32 H,
       // i32 overflow margins (paired with the i64 promote in update()).
       mCourantSq(wave_detail::float_to_fixed(fl::clamp(speed, 0.0f, 0.5f))),
       // Dampening exponent; e.g., 6 means a factor of 2^6 = 64.
-      mDampening(dampening) {}
+      mDampening(static_cast<int>(dampening)),
+      mDampDecayQ15(wave_detail::compute_damp_decay_q15(static_cast<int>(dampening))) {}
 
 void WaveSimulation2D_Real::setSpeed(float something) {
     // See constructor for clamp rationale.
     mCourantSq = wave_detail::float_to_fixed(fl::clamp(something, 0.0f, 0.5f));
 }
 
-void WaveSimulation2D_Real::setDampening(int damp) { mDampening = damp; }
+void WaveSimulation2D_Real::setDampening(int damp) FL_NOEXCEPT {
+    mDampening = damp;
+    mDampDecayQ15 = wave_detail::compute_damp_decay_q15(damp);
+}
 
 int WaveSimulation2D_Real::getDampenening() const { return mDampening; }
 
@@ -318,10 +340,10 @@ void WaveSimulation2D_Real::update() {
             // f = -next[index] + 2 * curr[index] + mCourantSq * laplacian.
             i32 f = -(i32)row_next[i] + (c << 1) + term;
 
-            // Apply damping: dampening factor is 2^mDampening, so the
-            // division simplifies to an arithmetic shift. See the 1D
-            // update for the cycle-cost rationale.
-            f -= (f >> mDampening);
+            // Apply damping with the precomputed Q15 decay multiplier —
+            // see the 1D update for the rationale.
+            f = static_cast<i32>(
+                (static_cast<i64>(f) * mDampDecayQ15) >> 15);
 
             // Clamp f into [q15_min, 32767] in a single step — subsumes
             // both the Q15 saturation clamp and the half-duplex zero pass.

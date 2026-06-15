@@ -20,6 +20,11 @@ i16 float_to_fixed(float f);
 
 // Convert fixed Q15 to float.
 float fixed_to_float(i16 f);
+
+// Compute the Q15 damping decay factor for a power-of-two damping
+// exponent. Equivalent (modulo 1-LSB rounding) to the arithmetic-shift
+// form `f -= f >> damp` used by the kernel before #3099/§6.
+i16 compute_damp_decay_q15(int damp) FL_NOEXCEPT;
 } // namespace wave_detail
 
 class WaveSimulation1D_Real {
@@ -41,7 +46,7 @@ class WaveSimulation1D_Real {
     void setSpeed(float something);
 
     // Set the dampening exponent (effective damping factor is 2^(dampening)).
-    void setDampening(int damp);
+    void setDampening(int damp) FL_NOEXCEPT;
 
     // Get the current dampening exponent.
     int getDampenening() const;
@@ -101,6 +106,11 @@ class WaveSimulation1D_Real {
 
     i16 mCourantSq; // Simulation speed (courant squared) stored in Q15.
     int mDampenening; // Dampening exponent (damping factor = 2^(mDampenening)).
+    // Precomputed Q15 decay multiplier (1 - 1/2^mDampenening). The inner
+    // loop uses `f = (i64(f) * mDampDecayQ15) >> 15` instead of the shift,
+    // which generalizes cleanly to non-power-of-two damping if the public
+    // API ever needs it.
+    i16 mDampDecayQ15;
     bool mHalfDuplex =
         true; // Flag to restrict values to positive range during update.
 
@@ -141,7 +151,7 @@ class WaveSimulation2D_Real {
 
     // Set the dampening factor exponent.
     // The dampening factor used is 2^(dampening).
-    void setDampening(int damp);
+    void setDampening(int damp) FL_NOEXCEPT;
 
     // Get the current dampening exponent.
     int getDampenening() const;
@@ -221,6 +231,9 @@ class WaveSimulation2D_Real {
 
     i16 mCourantSq; // Fixed speed parameter in Q15.
     int mDampening;     // Dampening exponent; used as 2^(dampening).
+    // Precomputed Q15 decay multiplier (1 - 1/2^mDampening). See the 1D
+    // class for the rationale.
+    i16 mDampDecayQ15;
     bool mHalfDuplex =
         true; // Flag to restrict values to positive range during update.
     bool mXCylindrical = false; // Default to non-cylindrical mode
