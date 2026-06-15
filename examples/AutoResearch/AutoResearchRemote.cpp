@@ -1872,20 +1872,25 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
             level = !level;
         }
 
-        // FastLED#3066 iter 6 diagnostic: dump FLEXIO1 live state
-        // immediately AFTER the toggles, before `wait()` runs. If the
-        // shifter/timer chain works end-to-end, SHIFTSTAT and TIMSTAT
-        // should now be non-zero, and FLEXIO1.PIN bit `flexio_pin`
-        // should track the last toggled state.
+        // FastLED#3066 iter 7 diagnostic: also probe SHIFTBUF[0] +
+        // SHIFTBUFBIS (bit-swapped) + SHIFTBUFBYS (byte-swapped) so we
+        // can see whether the captured bit lands in a bit position
+        // different from what the canonical SHIFTBUF[0] read produces.
         {
             constexpr uintptr_t kFLEXIO1_BASE_DIAG = 0x401AC000u;
             volatile uint32_t *pin   = (volatile uint32_t *)(kFLEXIO1_BASE_DIAG + 0x00C);
             volatile uint32_t *shftstat = (volatile uint32_t *)(kFLEXIO1_BASE_DIAG + 0x010);
             volatile uint32_t *timstat = (volatile uint32_t *)(kFLEXIO1_BASE_DIAG + 0x018);
+            volatile uint32_t *shftbuf  = (volatile uint32_t *)(kFLEXIO1_BASE_DIAG + 0x200);
+            volatile uint32_t *shftbufbis = (volatile uint32_t *)(kFLEXIO1_BASE_DIAG + 0x280);
+            volatile uint32_t *shftbufbys = (volatile uint32_t *)(kFLEXIO1_BASE_DIAG + 0x300);
             FL_WARN("[ping diag] post-toggle FLEXIO1: PIN=0x"
                     << fl::hex << *pin
                     << " SHIFTSTAT=0x" << *shftstat
                     << " TIMSTAT=0x" << *timstat << fl::dec);
+            FL_WARN("[ping diag] SHIFTBUF[0]=0x" << fl::hex << *shftbuf
+                    << " SHIFTBUFBIS[0]=0x" << *shftbufbis
+                    << " SHIFTBUFBYS[0]=0x" << *shftbufbys << fl::dec);
         }
 
         // 3. Wait briefly for FlexIO RX to flush any pending DMA. The DMA

@@ -428,7 +428,7 @@ static bool flexio1_configure(u8 flexio_pin) {
                          (0u << 7) |                 // PINPOL active high
                          ((u32)flexio_pin << 8) |    // PINSEL
                          (0u << 16) |                // PINCFG = input
-                         (0u << 23) |                // TIMPOL = positive
+                         (1u << 23) |                // TIMPOL = negative
                          (0u << 24);                 // TIMSEL = timer 0
 
     FLEXIO1_SHIFTCFG[0] = 0;                          // no start/stop bits
@@ -463,7 +463,7 @@ static bool flexio1_configure(u8 flexio_pin) {
     // inter-edge timing — but proves the chain CAN fire and DMA CAN
     // transfer. Future iterations will refine TIMCMP / SHIFTBUF
     // semantics for actual edge interval recovery.
-    FLEXIO1_TIMCMP[0] = 1u;
+    FLEXIO1_TIMCMP[0] = 10u;
 
     // Clear status / error flags
     FLEXIO1_SHIFTSTAT = 0xFFu;
