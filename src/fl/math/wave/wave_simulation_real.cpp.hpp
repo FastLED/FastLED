@@ -116,9 +116,6 @@ void WaveSimulation1D_Real::update() {
     curr[0] = curr[1];
     curr[length + 1] = curr[length];
 
-    // Compute dampening factor as an integer value: 2^(mDampenening)
-    i32 dampening_factor = 1 << mDampenening;
-
     i32 mCourantSq32 = static_cast<i32>(mCourantSq);
     // Iterate over each inner cell.
     for (fl::size i = 1; i < length + 1; i++) {
@@ -141,8 +138,12 @@ void WaveSimulation1D_Real::update() {
         // f = -next[i] + 2 * curr[i] + term
         i32 f = -(i32)next[i] + ((i32)curr[i] << 1) + term;
 
-        // Apply damping:
-        f = f - (f / dampening_factor);
+        // Apply damping: dampening factor is 2^mDampenening, so the division
+        // simplifies to an arithmetic shift. Saves ~150 cycles per cell on
+        // AVR / Cortex-M0 (no HW divider) vs the previous signed division.
+        // 1-LSB rounding asymmetry on negative values is invisible at Q15
+        // visual amplitudes.
+        f -= (f >> mDampenening);
 
         // Clamp the result to the Q15 range [-32768, 32767].
         if (f > 32767)
@@ -258,8 +259,6 @@ void WaveSimulation2D_Real::update() {
         curr[(height + 1) * stride + i] = curr[height * stride + i];
     }
 
-    // Compute the dampening factor as an integer: 2^(dampening).
-    i32 dampening_factor = 1 << mDampening; // e.g., 6 -> 64
     i32 mCourantSq32 = static_cast<i32>(mCourantSq);
 
     // Update each inner cell.
@@ -284,8 +283,10 @@ void WaveSimulation2D_Real::update() {
             i32 f =
                 -(i32)next[index] + ((i32)curr[index] << 1) + term;
 
-            // Apply damping:
-            f = f - (f / dampening_factor);
+            // Apply damping: dampening factor is 2^mDampening, so the
+            // division simplifies to an arithmetic shift. See the 1D
+            // update for the cycle-cost rationale.
+            f -= (f >> mDampening);
 
             // Clamp f to the Q15 range.
             if (f > 32767)
