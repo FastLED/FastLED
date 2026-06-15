@@ -27,17 +27,16 @@
 #endif
 
 #ifndef FASTLED_INLINE_LAMBDA_SIZE
-  // Slim-variant builds drop the heap fallback, so the inline SBO must absorb
-  // closures that the full variant would have heap-allocated. UIButton::onClicked
-  // captures an outer fl::function<void()> (64 B SBO + tag = ~72 B), so the
-  // wrapping closure lands at ~80 B and needs headroom. 96 B leaves margin while
-  // keeping per-fl::function RAM cost modest. RPC dispatch tables on LowMemory
-  // hold ~4 entries; the extra 32 B per function is ~128 B total RAM cost.
-  #if FL_FUNCTION_FULL_VARIANT
-    #define FASTLED_INLINE_LAMBDA_SIZE 64
-  #else
-    #define FASTLED_INLINE_LAMBDA_SIZE 96
-  #endif
+  // Unified 64 B SBO across LargeMemory and Low-memory builds. The original
+  // #3084 fix bumped this to 96 B on Low-memory to absorb UIButton::onClicked's
+  // wrapping closure (which captures a 72 B fl::function<void()>), but the
+  // bump regressed the base LowMemory build by ~3 KB because every
+  // fl::function instance's variant storage / copy / move / destroy paths
+  // grew. The no-op heap-fallback branch (see construct_lambda_or_functor
+  // false_type below on Low-memory) lets large-lambda paths compile without
+  // a static_assert, so SBO=64 stays safe -- unreached paths get linker-DCE'd.
+  // See FastLED #3079.
+  #define FASTLED_INLINE_LAMBDA_SIZE 64
 #endif
 
 FL_DISABLE_WARNING_PUSH
