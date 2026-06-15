@@ -378,50 +378,67 @@ void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps,
         return;
     }
 
-    // Create the root object
+    // Emits the v2 screenmap shape (issue ledmapper#143):
+    //   { "version": 2,
+    //     "groups": { "<name>": { "color": "#hex" } },
+    //     "segments": [ { "id": "<name>", "pin": "pin1", "group": "<name>",
+    //                     "x": [...], "y": [...], "diameter": ... } ] }
+    // Bilingual readers (`ScreenMap::ParseJson`, ledmapper) accept both v1
+    // and v2, so any existing on-disk v1 JSON keeps loading. v1 emission
+    // is no longer supported.
     *doc = fl::json::object();
-    
-    // Create the map object
-    fl::json mapObj = fl::json::object();
-    
-    // Populate the map object with segments
+
+    fl::json groupsObj = fl::json::object();
+    fl::json segmentsArr = fl::json::array();
+
+    // Distinct palette so each strip lights up differently in the editor
+    // preview without the user having to pick a colour. Cycle on overflow.
+    static const char *const kPalette[] = {
+        "#3b82f6", "#10b981", "#f59e0b", "#ef4444",
+        "#a855f7", "#06b6d4", "#ec4899", "#84cc16",
+    };
+    constexpr size_t kPaletteSize = sizeof(kPalette) / sizeof(kPalette[0]);
+
+    size_t idx = 0;
     for (const auto& kv : segmentMaps) {
         if (kv.second.getLength() == 0) {
-            FL_WARN("ScreenMap::toJson called with empty segment: " << fl::string(kv.first));   
+            FL_WARN("ScreenMap::toJson called with empty segment: " << fl::string(kv.first));
             continue;
         }
-        
-        auto& name = kv.first;
-        auto& segment = kv.second;
-        float diameter = segment.getDiameter();
-        
-        // Create x array
+
+        const auto& name = kv.first;
+        const auto& segment = kv.second;
+        const float diameter = segment.getDiameter();
+
         fl::json xArray = fl::json::array();
         for (u16 i = 0; i < segment.getLength(); i++) {
             xArray.push_back(fl::json(static_cast<double>(segment[i].x)));
         }
-        
-        // Create y array
         fl::json yArray = fl::json::array();
         for (u16 i = 0; i < segment.getLength(); i++) {
             yArray.push_back(fl::json(static_cast<double>(segment[i].y)));
         }
-        
-        // Create segment object
+
+        fl::json groupObj = fl::json::object();
+        groupObj.set("color", fl::json(fl::string(kPalette[idx % kPaletteSize])));
+        groupsObj.set(name, groupObj);
+
         fl::json segmentObj = fl::json::object();
-        // Add arrays and diameter to segment object
+        segmentObj.set("id", fl::json(fl::string(name)));
+        segmentObj.set("pin", fl::json(fl::string("pin1")));
+        segmentObj.set("group", fl::json(fl::string(name)));
         segmentObj.set("x", xArray);
         segmentObj.set("y", yArray);
         segmentObj.set("diameter", fl::json(static_cast<double>(diameter)));
-        
-        // Add segment to map object
-        mapObj.set(name, segmentObj);
+        segmentsArr.push_back(segmentObj);
+
+        idx++;
     }
-    
-    // Add map object to root
-    doc->set("map", mapObj);
-    
-    // Debug output
+
+    doc->set("version", fl::json(static_cast<double>(2)));
+    doc->set("groups", groupsObj);
+    doc->set("segments", segmentsArr);
+
     fl::string debugStr = doc->to_string();
     FL_WARN("ScreenMap::toJson generated JSON: " << debugStr);
 #endif
