@@ -121,6 +121,17 @@ size_t Video::pixelsPerFrame() const {
     return mImpl->pixelsPerFrame();
 }
 
+bool Video::hasEmbeddedScreenMap() const {
+    if (!mImpl) return false;
+    return mImpl->hasEmbeddedScreenMap();
+}
+
+const fl::string &Video::embeddedScreenMapJson() const {
+    static const fl::string kEmpty;
+    if (!mImpl) return kEmpty;
+    return mImpl->embeddedScreenMapJson();
+}
+
 bool Video::finished() {
     if (!mImpl) {
         return true;

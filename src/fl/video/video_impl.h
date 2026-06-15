@@ -4,6 +4,7 @@
 #include "fl/stl/shared_ptr.h"
 #include "fl/stl/span.h"
 #include "fl/stl/noexcept.h"
+#include "fl/stl/string.h"  // For fl::string return type on embeddedScreenMapJson()
 
 // Forward declarations - actual includes moved to cpp
 namespace fl {
@@ -52,6 +53,11 @@ class VideoImpl {
     void resume(fl::u32 now);
     bool needsFrame(fl::u32 now) const;
     i32 durationMicros() const; // -1 if this is a stream.
+
+    // FLED v1 container accessors. Forwards to the underlying PixelStream;
+    // empty / false for legacy headerless `.rgb` files.
+    bool hasEmbeddedScreenMap() const;
+    const fl::string &embeddedScreenMapJson() const;
 
   private:
     bool updateBufferIfNecessary(fl::u32 prev, fl::u32 now);
