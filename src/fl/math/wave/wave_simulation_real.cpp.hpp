@@ -128,10 +128,12 @@ void WaveSimulation1D_Real::update() {
             (i32)curr[i + 1] - ((i32)curr[i] << 1) + curr[i - 1];
 
         // Multiply the Laplacian by the simulation speed using Q15 arithmetic.
-        // Promote to i64 before the multiply: worst-case |lap| in 1D is
-        // ~131,070 (saturated alternating cells), so |mCourantSq32 * lap|
-        // can reach ~4.3e9 which overflows i32 (max 2.15e9). The i64
-        // intermediate prevents that latent overflow.
+        // Promote to i64 before the multiply. With the 1D CFL clamp at 1.0,
+        // max |mCourantSq32| = 32767 and max |lap| ~131,070 (saturated
+        // alternating cells) give a worst-case product of ~4.3e9 — past
+        // i32 max (2.15e9). The i64 promote also acts as a safety net if
+        // the clamp is ever regressed; pre-clamp the same product could
+        // already reach ~4.3e9 in 1D and ~8.6e9 in 2D.
         i32 term = static_cast<i32>(
             (static_cast<i64>(mCourantSq32) * lap) >> 15);
 
@@ -271,11 +273,12 @@ void WaveSimulation2D_Real::update() {
             // Compute the new value:
             // f = - next[index] + 2 * curr[index] + mCourantSq * laplacian
             // The multiplication is in Q15, so we shift right by 15.
-            // Promote to i64 before the multiply: worst-case |laplacian| in
-            // 2D is ~262,140 (saturated checkerboard), so the i32 product
-            // |mCourantSq32 * laplacian| can reach ~8.6e9 which overflows
-            // i32 (max 2.15e9). The i64 intermediate prevents that latent
-            // overflow.
+            // Promote to i64 before the multiply. With the 2D CFL clamp at
+            // 0.5, max |mCourantSq32| = 16383 and max |laplacian| ~262,140
+            // (saturated checkerboard) give a worst-case product of ~4.3e9
+            // — past i32 max (2.15e9). The i64 promote also acts as a
+            // safety net if the clamp is ever regressed; pre-clamp the
+            // 2D product could already reach ~8.6e9.
             i32 term = static_cast<i32>(
                 (static_cast<i64>(mCourantSq32) * laplacian) >> 15);
             i32 f =
