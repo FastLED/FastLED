@@ -40,8 +40,11 @@ void Rpc::bindAsync(const char* name,
     entry.mIsResponseAware = true;
     entry.mResponseAwareFn = fl::move(fn);
 
-    // Create schema generator for void(json) signature (params not decomposed)
+#if FL_PLATFORM_HAS_LARGE_MEMORY
+    // Create schema generator for void(json) signature (params not decomposed).
+    // Gated on Low-memory per FastLED #3081 / #3079 (rpc.discover unreachable).
     entry.mSchemaGenerator = fl::make_shared<detail::TypedSchemaGenerator<void(const json&)>>();
+#endif
     entry.mDescription = "";
     entry.mTags = {};
 
