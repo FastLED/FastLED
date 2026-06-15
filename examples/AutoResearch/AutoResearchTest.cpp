@@ -349,7 +349,12 @@ size_t capture(fl::shared_ptr<fl::RxChannel> rx_channel, fl::span<uint8_t> rx_bu
     if (is_rmt_driver) {
         FL_WARN("[CAPTURE] RMT TX -> RMT RX: Internal loopback enabled (io_loop_back=true)");
     } else {
-        FL_WARN("[CAPTURE] " << driver_name << " TX -> RMT RX: External GPIO wire (io_loop_back=false, use_dma=true)");
+        // The RX peripheral is platform-dependent (RMT on ESP32, FlexPWM on
+        // Teensy 4, LPC_SCT on LPC845, …). Don't claim "RMT RX" on platforms
+        // that have no RMT — that label burned an hour of Teensy-4 debug
+        // (FastLED#3059). Just say "external RX" so the label stays correct
+        // regardless of backend.
+        FL_WARN("[CAPTURE] " << driver_name << " TX -> external RX: External GPIO wire (io_loop_back=false, use_dma=true)");
     }
 
     // Driver-aware capture strategy:
