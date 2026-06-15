@@ -42,17 +42,23 @@ float fixed_to_float(i16 f) {
 } // namespace wave_detail
 
 WaveSimulation1D_Real::WaveSimulation1D_Real(u32 len, float courantSq,
-                                             int dampening)
+                                             int dampening) FL_NOEXCEPT
     : length(len),
       grid1(length + 2), // Initialize vector with correct size
       grid2(length + 2), // Initialize vector with correct size
       whichGrid(0),
-      mCourantSq(wave_detail::float_to_fixed(courantSq)), mDampenening(dampening) {
+      // CFL stability bound for the explicit leapfrog 5-point stencil in 1D
+      // is C^2 <= 1. Negative speed has no physical meaning. Clamp at the
+      // boundary to keep the Q15 fixed-point kernel both stable and within
+      // i32 overflow margins (paired with the i64 promote in update()).
+      mCourantSq(wave_detail::float_to_fixed(fl::clamp(courantSq, 0.0f, 1.0f))),
+      mDampenening(dampening) {
     // Additional initialization can be added here if needed.
 }
 
 void WaveSimulation1D_Real::setSpeed(float something) {
-    mCourantSq = wave_detail::float_to_fixed(something);
+    // See constructor for clamp rationale.
+    mCourantSq = wave_detail::float_to_fixed(fl::clamp(something, 0.0f, 1.0f));
 }
 
 void WaveSimulation1D_Real::setDampening(int damp) { mDampenening = damp; }
@@ -121,8 +127,15 @@ void WaveSimulation1D_Real::update() {
         i32 lap =
             (i32)curr[i + 1] - ((i32)curr[i] << 1) + curr[i - 1];
 
-        // Multiply the Laplacian by the simulation speed using Q15 arithmetic:
-        i32 term = (mCourantSq32 * lap) >> 15;
+        // Multiply the Laplacian by the simulation speed using Q15 arithmetic.
+        // Promote to i64 before the multiply. With the 1D CFL clamp at 1.0,
+        // max |mCourantSq32| = 32767 and max |lap| ~131,070 (saturated
+        // alternating cells) give a worst-case product of ~4.3e9 — past
+        // i32 max (2.15e9). The i64 promote also acts as a safety net if
+        // the clamp is ever regressed; pre-clamp the same product could
+        // already reach ~4.3e9 in 1D and ~8.6e9 in 2D.
+        i32 term = static_cast<i32>(
+            (static_cast<i64>(mCourantSq32) * lap) >> 15);
 
         // Compute the new value:
         // f = -next[i] + 2 * curr[i] + term
@@ -154,17 +167,21 @@ void WaveSimulation1D_Real::update() {
 }
 
 WaveSimulation2D_Real::WaveSimulation2D_Real(u32 W, u32 H,
-                                             float speed, float dampening)
+                                             float speed, float dampening) FL_NOEXCEPT
     : width(W), height(H), stride(W + 2),
       grid1((W + 2) * (H + 2)),
       grid2((W + 2) * (H + 2)), whichGrid(0),
-      // Initialize speed 0.16 in fixed Q15
-      mCourantSq(wave_detail::float_to_fixed(speed)),
+      // CFL stability bound for the explicit leapfrog 5-point stencil in 2D
+      // is C^2 <= 1/2. Negative speed has no physical meaning. Clamp at the
+      // boundary to keep the Q15 fixed-point kernel both stable and within
+      // i32 overflow margins (paired with the i64 promote in update()).
+      mCourantSq(wave_detail::float_to_fixed(fl::clamp(speed, 0.0f, 0.5f))),
       // Dampening exponent; e.g., 6 means a factor of 2^6 = 64.
       mDampening(dampening) {}
 
 void WaveSimulation2D_Real::setSpeed(float something) {
-    mCourantSq = wave_detail::float_to_fixed(something);
+    // See constructor for clamp rationale.
+    mCourantSq = wave_detail::float_to_fixed(fl::clamp(something, 0.0f, 0.5f));
 }
 
 void WaveSimulation2D_Real::setDampening(int damp) { mDampening = damp; }
@@ -256,7 +273,14 @@ void WaveSimulation2D_Real::update() {
             // Compute the new value:
             // f = - next[index] + 2 * curr[index] + mCourantSq * laplacian
             // The multiplication is in Q15, so we shift right by 15.
-            i32 term = (mCourantSq32 * laplacian) >> 15;
+            // Promote to i64 before the multiply. With the 2D CFL clamp at
+            // 0.5, max |mCourantSq32| = 16383 and max |laplacian| ~262,140
+            // (saturated checkerboard) give a worst-case product of ~4.3e9
+            // — past i32 max (2.15e9). The i64 promote also acts as a
+            // safety net if the clamp is ever regressed; pre-clamp the
+            // 2D product could already reach ~8.6e9.
+            i32 term = static_cast<i32>(
+                (static_cast<i64>(mCourantSq32) * laplacian) >> 15);
             i32 f =
                 -(i32)next[index] + ((i32)curr[index] << 1) + term;
 
