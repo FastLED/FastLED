@@ -30,6 +30,12 @@ Thumbs.db
 .piolibdeps/
 .platformio/
 .vscode/c_cpp_properties.json
+# Per-developer IDE / language-server artifacts. clangd and VS Code drop
+# these into any directory they index (e.g. examples/AutoResearch/.clangd,
+# examples/<Sketch>/.vscode/). Globally ignore so they stop polluting
+# `git status` across the example tree.
+.clangd
+.vscode/
 .aider*
 !.aider.conf.yml
 !.aiderignore
