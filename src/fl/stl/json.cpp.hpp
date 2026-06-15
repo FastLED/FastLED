@@ -1,6 +1,7 @@
 
 #include "fl/stl/json.h"
 #include "fl/stl/json/types.h"
+#include "fl/system/sketch_macros.h"  // FL_PLATFORM_HAS_LARGE_MEMORY -- gates ieee754_format_decimal
 #include "fl/stl/string.h"
 #include "fl/stl/vector.h"
 #include "fl/stl/deque.h"
@@ -213,6 +214,7 @@ private:
 
                 if (is_float) {
                     has_float = true;
+#if FL_PLATFORM_HAS_LARGE_MEMORY
                     // Bit-twiddling parse -- never reaches libgcc soft-FP. The
                     // resulting u32 carries the same IEEE 754 single-precision
                     // bit pattern strtof would produce (+/-1 ULP). The magnitude
@@ -221,6 +223,13 @@ private:
                     if (float_bits_magnitude_exceeds_2_24(f_bits)) {
                         has_float_beyond_precision = true;
                     }
+#else
+                    // Low-memory gate per FastLED #3082: assume float values
+                    // exceed 2^24 (forces slow path / generic array fallback).
+                    // Drops `ieee754_parse_decimal` (598 B) + `kPow10Mant` LUT
+                    // (824 B) + `kPow10BExp` (206 B) from the link.
+                    has_float_beyond_precision = true;
+#endif
                 } else {
                     has_int = true;
                     // Parse actual value to get accurate range
@@ -845,12 +854,19 @@ private:
 
             T val;
             if (is_float) {
+#if FL_PLATFORM_HAS_LARGE_MEMORY
                 // Bit-twiddling parse -> IEEE 754 bit pattern -> bit-cast to float.
                 // The `static_cast<T>` from `float` is the caller's responsibility
                 // (e.g. T=float costs nothing; T=int pulls one __aeabi_f2iz at the
                 // call site, which we accept per the "user opts in" mandate).
                 const u32 bits = fl::ieee754_parse_decimal(num_start, p - num_start);
                 val = static_cast<T>(fl::bit_cast<float>(bits));
+#else
+                // Low-memory gate per FastLED #3082: float JSON literals in
+                // packed-array parse path saturate to zero. The integer-only
+                // RPC contract on LPC8xx / AVR never emits floats here.
+                val = static_cast<T>(0);
+#endif
             } else {
                 val = static_cast<T>(fl::parseInt(num_start, p - num_start));
             }
@@ -1001,12 +1017,19 @@ public:
 
                 fl::shared_ptr<json_value> num_val;
                 if (is_float) {
+#if FL_PLATFORM_HAS_LARGE_MEMORY
                     // Bit-twiddling parse -> IEEE 754 bits -> store as float in the
                     // variant. The `bit_cast<float>` is a `memcpy` -- no libgcc
                     // soft-FP helper is reached on the parser hot path
                     // (FastLED #3022 phase 2).
                     const u32 bits = fl::ieee754_parse_decimal(value.data(), value.size());
                     num_val = fl::make_shared<json_value>(fl::bit_cast<float>(bits));
+#else
+                    // Low-memory gate per FastLED #3082: float JSON literals
+                    // parse to 0.0f, no `ieee754_parse_decimal` / kPow10Mant
+                    // anchored. Integer-only RPC contract on LPC8xx / AVR.
+                    num_val = fl::make_shared<json_value>(0.0f);
+#endif
                 } else {
                     int i = fl::parseInt(value.data(), value.size());
                     i64 i64_val = static_cast<i64>(i);
@@ -1146,9 +1169,20 @@ struct SerializerVisitor {
     }
 
     void accept(const float& f) {
+#if FL_PLATFORM_HAS_LARGE_MEMORY
         // Integer-only bits -> decimal (FastLED #3022 phase 2). Default 3-digit
         // precision matches the previous `num_str.append(f, 3)` contract.
         append_str(fl::ieee754_format_decimal(fl::bit_cast<u32>(f), 3));
+#else
+        // Low-memory targets gate the float decimal codec to drop
+        // `ieee754_format_decimal` (594 B) + `kPow10Mant` LUT (824 B) from the
+        // link. The integer-only RPC contract on LPC8xx / AVR-class targets
+        // never serializes float values; this writes a stub for the rare cases
+        // where a `json(float)` round-trip happens to be exercised in test
+        // code that also runs on Low-memory. See FastLED #3082.
+        (void)f;
+        append_str(fl::string("0"));
+#endif
     }
 
     void accept(const fl::string& s) { append_escaped(s); }
@@ -1217,9 +1251,15 @@ struct SerializerVisitor {
         for (const auto& item : floats) {
             if (!first) out.push_back(',');
             first = false;
+#if FL_PLATFORM_HAS_LARGE_MEMORY
             // Integer-only bits -> decimal per element (FastLED #3022 phase 2).
             // 6-digit precision preserves the previous output contract.
             append_str(fl::ieee754_format_decimal(fl::bit_cast<u32>(item), 6));
+#else
+            // Low-memory gate per FastLED #3082; see scalar `accept(float)`.
+            (void)item;
+            append_str(fl::string("0"));
+#endif
         }
         out.push_back(']');
     }
