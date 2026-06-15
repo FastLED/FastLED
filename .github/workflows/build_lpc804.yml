@@ -1,0 +1,27 @@
+name: lpc804
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/**'
+      - 'examples/**'
+      - 'ci/**'
+      - '.github/workflows/build_lpc804.yml'
+      - '.github/workflows/build_template.yml'
+      - 'CMakeLists.txt'
+      - 'platformio.ini'
+      - 'library.json'
+      - 'library.properties'
+      - 'pyproject.toml'
+      - 'uv.lock'
+jobs:
+  build:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: lpc804 Blink
