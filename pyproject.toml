@@ -89,7 +89,17 @@ dependencies = [
     #   2.2.16 — completed ESP32-C2 framework skeleton installs
     #            and patched the missing touch_sensor_legacy_types.h
     #            no-touch compatibility header (FastLED/fbuild#378).
-    "fbuild==2.2.27",
+    # 2.2.28 (released 2026-06-15) -- LPC port delegates SystemInit +
+    # linker scripts to zackees/ArduinoCore-LPC8xx upstream; fbuild no
+    # longer ships shadow copies of those NXP-managed assets. Also rolls
+    # up the lite-SCons extra_scripts harness work (FastLED/fbuild#553
+    # steps 3-4, #581/#583/#585), the managed zccache bump to 1.12.4
+    # (FastLED/fbuild#582 -- separate from FastLED's own zccache pin
+    # which is a Python dep), the ESP auto-recovery-from-ROM-download
+    # primitive (FastLED/fbuild#532, #577/#580), and an
+    # http-connect-timeout fix on the managed-zccache client
+    # (FastLED/fbuild#573).
+    "fbuild==2.2.28",
     "platformio>=6.1.19,<6.2",
     "python-dateutil",
     "ruff",
