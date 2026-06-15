@@ -337,12 +337,40 @@ static void flexio1_clock_init() {
 // IOMUXC pad: ALT4 + hysteresis + 100 kΩ pull-up keeper (matches FlexIO TX
 // pad config rationale: clean edge detection, no floating-input glitches
 // before the signal is driven).
+//
+// FastLED#3066 phase 1.7 root cause: also set the **SION** (Software Input
+// On) bit. Without SION, the IOMUX doesn't force the input path through
+// to the peripheral when the pad's MUX_MODE selects an alternate function
+// — so even though pin 4 is muxed to ALT4 (FLEXIO1_FLEXIO06), the FLEXIO1
+// module never sees pad activity. The working FlexPWM RX driver sets
+// SION the same way (`rx_flexpwm_channel.cpp.hpp:405`); FlexIO RX needed
+// the same fix. Verified by `flexioRxLoopbackPing`: with SION cleared,
+// 8 hand-driven `digitalWrite` transitions on pin 3 produced
+// `edges_captured=0`; with SION set, the captured buffer reflects the
+// real pin activity.
 static void flexio1_pin_init(const FlexIo1PinInfo &pin_info) {
-    *(pin_info.mux_reg) = 4;                          // ALT4 = FLEXIO1
-    *(pin_info.pad_reg) = (3 << 12) |                 // PUS = 100k pull-up
-                          (2 << 14) |                 // PUE = pull/keeper enabled
-                          (1 << 16) |                 // HYS = hysteresis enabled
-                          (0 << 3);                   // SPEED slow
+    *(pin_info.mux_reg) = 4 | 0x10;                   // ALT4 + SION
+    *(pin_info.pad_reg) = (3 << 12) |                 // PKE + PUE (pull mode)
+                          (2 << 14) |                 // PUS = 100K pull-up
+                          (1 << 16);                  // HYS = hysteresis
+
+    // FastLED#3066 phase 1.7 diagnostic: read back the IOMUX registers
+    // and FLEXIO1 PIN status so we can see whether the mux writes
+    // committed and whether FLEXIO1 sees pad activity on the selected
+    // input pin.
+    FL_WARN("[FlexIO RX] post-pin-init: pin=" << (int)pin_info.teensy_pin
+            << " flexio_pin=" << (int)pin_info.flexio_pin
+            << " mux_reg=0x" << fl::hex << *(pin_info.mux_reg)
+            << " pad_reg=0x" << *(pin_info.pad_reg) << fl::dec);
+
+    // FLEXIO1 PIN @ +0x00C reflects the live state of each input pin.
+    // If our pad routing works, bit `flexio_pin` should track the pad.
+    // (offset 0x040 — used in the earlier iter 5 diagnostic — was the
+    // wrong register and read 0 unconditionally.)
+    volatile u32 *flexio1_pin_reg = (volatile u32 *)(kFLEXIO1_BASE + 0x00C);
+    FL_WARN("[FlexIO RX] FLEXIO1 PIN=0x" << fl::hex << *flexio1_pin_reg
+            << " (expect bit " << fl::dec << (int)pin_info.flexio_pin
+            << " to track pad)");
 }
 
 // ---------------------------------------------------------------------------

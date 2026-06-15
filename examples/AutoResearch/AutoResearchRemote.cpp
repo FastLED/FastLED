@@ -1785,6 +1785,131 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
 #endif
     });
 
+    // Register "flexioRxLoopbackPing" — FastLED#3066 phase 1.7 diagnostic.
+    //
+    // Bypasses every clockless driver entirely and tests whether the
+    // FlexIO RX backend can capture HAND-DRIVEN GPIO transitions. Drives
+    // `tx_pin` as a plain `digitalWrite` HIGH/LOW square wave while
+    // `RxBackend::FLEXIO` is armed on `rx_pin`. If the captured buffer
+    // shows any non-zero data, IOMUX ALT4 + PINSEL routing is correct
+    // and the WS2812-loopback failure mode is downstream (timer/shifter
+    // bandwidth, decoder thresholds, etc.). If the buffer stays all
+    // zero with a 4-edge ground-truth pin toggle, the routing itself is
+    // broken — debug that BEFORE more timer/shifter config experiments.
+    //
+    // Wiring: same TX↔RX jumper as flexioObjectFledTest (defaults 3↔4).
+    //
+    // Args:
+    //   { tx_pin?:    3,    // any digital pin
+    //     rx_pin?:    4,    // must be in kFlexIo1Pins[]
+    //     toggle_us?: 50,   // half-period of the manual square wave
+    //     edges?:     8 }   // number of digitalWrite transitions
+    // Returns:
+    //   { success, tx_pin, rx_pin, toggle_us, edges, edges_captured,
+    //     capture_buffer_first8_hex: [...], notes }
+    //
+    // Teensy-4-only.
+    mRemote->bind("flexioRxLoopbackPing", [this](const fl::json& args) -> fl::json {
+        fl::json response = fl::json::object();
+#if !defined(FL_IS_TEENSY_4X)
+        (void)args;
+        response.set("success", false);
+        response.set("error", "PlatformNotSupported");
+        response.set("message",
+                     "flexioRxLoopbackPing is Teensy 4.x-only (FLEXIO1 RX).");
+        return response;
+#else
+        int tx_pin = 3;
+        int rx_pin = 4;
+        int toggle_us = 50;
+        int edges = 8;
+        if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
+            const fl::json &cfg = args[0];
+            if (cfg.contains("tx_pin") && cfg["tx_pin"].is_int()) {
+                tx_pin = static_cast<int>(cfg["tx_pin"].as_int().value());
+            }
+            if (cfg.contains("rx_pin") && cfg["rx_pin"].is_int()) {
+                rx_pin = static_cast<int>(cfg["rx_pin"].as_int().value());
+            }
+            if (cfg.contains("toggle_us") && cfg["toggle_us"].is_int()) {
+                toggle_us = static_cast<int>(cfg["toggle_us"].as_int().value());
+            }
+            if (cfg.contains("edges") && cfg["edges"].is_int()) {
+                edges = static_cast<int>(cfg["edges"].as_int().value());
+            }
+        }
+        if (edges < 2 || edges > 64) {
+            response.set("success", false);
+            response.set("error", "InvalidEdges");
+            response.set("message", "edges must be in [2, 64]");
+            return response;
+        }
+
+        // 1. Arm FlexIO RX on rx_pin.
+        fl::RxChannelConfig rx_cfg(rx_pin, fl::RxBackend::FLEXIO);
+        rx_cfg.edge_capacity = 1024;   // plenty for ~10 edges
+        rx_cfg.start_low = true;
+        auto rx_channel = fl::RxChannel::create(rx_cfg);
+        if (!rx_channel || !rx_channel->begin(rx_cfg)) {
+            response.set("success", false);
+            response.set("error", "RxBeginFailed");
+            response.set("message",
+                         "FlexIO RX begin() failed (kFlexIo1Pins[] mapping?).");
+            return response;
+        }
+
+        // 2. Drive tx_pin as a plain GPIO output, toggle a known number of
+        //    transitions. Start LOW so the first digitalWrite(HIGH) is a
+        //    rising edge.
+        pinMode(tx_pin, OUTPUT);
+        digitalWrite(tx_pin, LOW);
+        delayMicroseconds(100);  // let the line settle + RX arm fully
+
+        bool level = true;
+        for (int i = 0; i < edges; ++i) {
+            digitalWrite(tx_pin, level ? HIGH : LOW);
+            delayMicroseconds(toggle_us);
+            level = !level;
+        }
+
+        // 3. Wait briefly for FlexIO RX to flush any pending DMA. The DMA
+        //    is configured for completion-on-buffer-full; a partial fill
+        //    won't trigger the ISR, so `wait()` will TIMEOUT — which is
+        //    fine, we read the captured edges directly.
+        rx_channel->wait(50);
+
+        // 4. Read the captured edges via the public API.
+        fl::vector<fl::EdgeTime> captured_edges;
+        captured_edges.assign(64, fl::EdgeTime());
+        size_t edge_count =
+            rx_channel->getRawEdgeTimes(fl::span<fl::EdgeTime>(captured_edges), 0);
+
+        // 5. Restore tx_pin so subsequent tests can use it.
+        pinMode(tx_pin, INPUT);
+
+        response.set("success", true);
+        response.set("tx_pin", static_cast<int64_t>(tx_pin));
+        response.set("rx_pin", static_cast<int64_t>(rx_pin));
+        response.set("toggle_us", static_cast<int64_t>(toggle_us));
+        response.set("edges", static_cast<int64_t>(edges));
+        response.set("edges_captured", static_cast<int64_t>(edge_count));
+
+        // Dump the first 8 captured edge durations (ns) so the host can
+        // see whether they roughly match the requested toggle_us *
+        // 1000 ns expectation.
+        fl::json edges_arr = fl::json::array();
+        const size_t to_dump = (edge_count < 8u) ? edge_count : 8u;
+        for (size_t i = 0; i < to_dump; ++i) {
+            fl::json e = fl::json::object();
+            e.set("high", captured_edges[i].high);
+            e.set("ns", static_cast<int64_t>(captured_edges[i].ns));
+            edges_arr.push_back(e);
+        }
+        response.set("first_edges", edges_arr);
+        return response;
+#endif
+    });
+
     // Register "setDebug" function - enable/disable runtime debug logging
     mRemote->bind("setDebug", [this](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
