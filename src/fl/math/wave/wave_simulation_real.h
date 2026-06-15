@@ -26,14 +26,18 @@ class WaveSimulation1D_Real {
   public:
     // Constructor:
     //  - length: inner simulation grid length (excluding the 2 boundary cells).
-    //  - speed: simulation speed (in float, will be stored in Q15).
+    //  - speed: simulation speed (Courant squared, C^2) stored in Q15.
+    //    Clamped to [0.0, 1.0] (CFL stability bound for the 1D 5-point
+    //    stencil). Values outside that range produce visual instability
+    //    and are silently clamped.
     //  - dampening: exponent so that the effective damping factor is
     //  2^(dampening).
     WaveSimulation1D_Real(u32 length, float speed = 0.16f,
-                          int dampening = 6);
+                          int dampening = 6) FL_NOEXCEPT;
     ~WaveSimulation1D_Real() FL_NOEXCEPT = default;
 
-    // Set simulation speed (courant parameter) using a float.
+    // Set simulation speed (Courant squared). Clamped to [0.0, 1.0] — see
+    // constructor for rationale.
     void setSpeed(float something);
 
     // Set the dampening exponent (effective damping factor is 2^(dampening)).
@@ -106,14 +110,17 @@ class WaveSimulation2D_Real {
   public:
     // Constructor: Initializes the simulation with inner grid size (W x H).
     // The grid dimensions include a 1-cell border on each side.
-    // Here, 'speed' is specified as a float (converted to fixed Q15)
-    // and 'dampening' is given as an exponent so that the damping factor is
-    // 2^dampening.
+    //  - speed: Courant squared (C^2) stored in Q15. Clamped to [0.0, 0.5]
+    //    (CFL stability bound for the 2D 5-point stencil — stricter than 1D).
+    //    Values outside that range produce visual instability and are
+    //    silently clamped.
+    //  - dampening: exponent so that the damping factor is 2^dampening.
     WaveSimulation2D_Real(u32 W, u32 H, float speed = 0.16f,
-                          float dampening = 6.0f);
+                          float dampening = 6.0f) FL_NOEXCEPT;
     ~WaveSimulation2D_Real() FL_NOEXCEPT = default;
 
-    // Set the simulation speed (courantSq) using a float value.
+    // Set the simulation speed (Courant squared). Clamped to [0.0, 0.5] — see
+    // constructor for rationale.
     void setSpeed(float something);
 
     // Set the dampening factor exponent.
