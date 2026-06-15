@@ -757,7 +757,15 @@ fl::shared_ptr<json_value> optimize_array(fl::shared_ptr<json_value> array_val) 
                     if (val) vec.push_back(*val);
                 } else if (elem->is_int()) {
                     auto val = elem->as_int();
-                    if (val) vec.push_back(static_cast<float>(*val));
+                    if (val) {
+                        // Route i64 -> float via i32 to avoid the direct cast
+                        // pulling libgcc-nofp's `_floatdisf.o` (~5 KB of soft-FP
+                        // double cascade) on no-FPU targets. ALL_FLOATS
+                        // classification only fires when every int is within
+                        // +/-2^24 anyway (classify_array line 717), so the int32
+                        // narrowing is lossless. See FastLED #3076.
+                        vec.push_back(static_cast<float>(static_cast<fl::i32>(*val)));
+                    }
                 }
             }
             return fl::make_shared<json_value>(fl::move(vec));

@@ -419,14 +419,27 @@ struct float_conversion_visitor {
     }
     
     void operator()(const i64& value) FL_NOEXCEPT {
-        // NEW INSTRUCTIONS: AUTO CONVERT INT TO FLOAT
-        result = static_cast<FloatType>(value);
+        // AUTO CONVERT INT TO FLOAT. Route through int32 first to avoid the
+        // direct (FloatType)i64 cast — libgcc-nofp's `__aeabi_l2f` helper lives
+        // in `_floatdisf.o` which anchors `__aeabi_dadd / dmul / i2d / ui2d / d2f`
+        // (soft-double helpers, ~5 KB on no-FPU targets). Values fitting in
+        // int32 cover every value the integer-only LowMemory JSON-RPC contract
+        // emits; larger magnitudes saturate at INT32_MIN/MAX. See FastLED #3076.
+        if (value > 2147483647LL) {
+            result = static_cast<FloatType>(2147483647);
+        } else if (value < -2147483648LL) {
+            result = static_cast<FloatType>(-2147483648);
+        } else {
+            result = static_cast<FloatType>(static_cast<fl::i32>(value));
+        }
     }
-    
+
     void operator()(const bool& value) FL_NOEXCEPT {
-        result = static_cast<FloatType>(value ? 1.0 : 0.0);
+        // Use float literals (1.0f / 0.0f), not double (1.0 / 0.0), to avoid
+        // pulling the soft-double helpers. See FastLED #3076.
+        result = static_cast<FloatType>(value ? 1.0f : 0.0f);
     }
-    
+
     void operator()(const fl::string& str) FL_NOEXCEPT {
         // NEW INSTRUCTIONS: AUTO CONVERT STRING TO FLOAT
         // Try to parse the string as a float using FastLED's StringFormatter
@@ -434,12 +447,12 @@ struct float_conversion_visitor {
         bool isValidFloat = true;
         bool hasDecimal = false;
         fl::size startPos = 0;
-        
+
         // Check for sign
         if (str.length() > 0 && (str[0] == '+' || str[0] == '-')) {
             startPos = 1;
         }
-        
+
         // Check that all remaining characters are valid for a float
         for (fl::size i = startPos; i < str.length(); i++) {
             char c = str[i];
@@ -455,7 +468,7 @@ struct float_conversion_visitor {
                 break;
             }
         }
-        
+
         // If it looks like a valid float, try to parse it
         if (isValidFloat && str.length() > 0) {
             // For simple cases, we can use a more precise approach
@@ -468,7 +481,7 @@ struct float_conversion_visitor {
                     break;
                 }
             }
-            
+
             if (isSimpleDecimal) {
                 // For simple decimals, we can do a more direct conversion
                 float parsed = fl::parseFloat(str.c_str(), str.length());
@@ -507,8 +520,17 @@ struct float_conversion_visitor<double> {
     }
     
     void operator()(const i64& value) FL_NOEXCEPT {
-        // NEW INSTRUCTIONS: AUTO CONVERT INT TO FLOAT
-        result = static_cast<double>(value);
+        // AUTO CONVERT INT TO FLOAT. Route through int32 to avoid pulling
+        // libgcc-nofp's `_floatdisf.o` soft-double cascade on no-FPU targets.
+        // The double path (`as_double()`) is DCE'd from LowMemory builds today,
+        // but keep the int32-route here as defense-in-depth. See FastLED #3076.
+        if (value > 2147483647LL) {
+            result = static_cast<double>(2147483647);
+        } else if (value < -2147483648LL) {
+            result = static_cast<double>(-2147483648);
+        } else {
+            result = static_cast<double>(static_cast<fl::i32>(value));
+        }
     }
     
     void operator()(const bool& value) FL_NOEXCEPT {
