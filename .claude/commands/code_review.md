@@ -179,9 +179,10 @@ The macro identifier and the public API name share a single vocabulary. If the A
 **Check Process for PRs:**
 1. Grep the diff for newly added lines matching `^\+.*#define\s+FASTLED_` — every hit is a HIGH-severity violation. Rewrite the identifier with the `FL_` prefix.
 2. Grep the diff for newly added lines matching `^\+.*-DFASTLED_` in `platformio.ini`, `meson.build`, `CMakeLists.txt`, or workflow YAML — same rule, HIGH severity.
-3. Grep the diff for newly added `#define FL_*` — verify it does NOT contain a known acronym for a longer component name (`WDT`, `IRQ`, `MUX`, `DMA` as a *component name* vs as a feature descriptor). Note: `FL_WATCHDOG_HAS_DMA_RESET` is fine — `DMA` is a feature within the watchdog component, not the component itself.
-4. If a no-op header is added and lacks the `_noop` suffix, flag it.
-5. If a new `*.cpp.hpp` lives in a per-family subdirectory rather than `src/platforms/` root, flag it as a misuse of the dispatcher suffix.
+3. Grep the diff for newly added lines matching `^\+.*defined\(\s*FASTLED_` or `^\+.*#\s*ifdef\s+FASTLED_` or `^\+.*#\s*ifndef\s+FASTLED_` — flag any preprocessor conditional that **introduces** a brand-new `FASTLED_*` identifier (i.e. the identifier is not present anywhere on the base branch). Conditionals merely guarding pre-existing `FASTLED_*` names are grandfathered. HIGH severity.
+4. Grep the diff for newly added `#define FL_*` — verify it does NOT contain a known acronym for a longer component name (`WDT`, `IRQ`, `MUX`, `DMA` as a *component name* vs as a feature descriptor). Note: `FL_WATCHDOG_HAS_DMA_RESET` is fine — `DMA` is a feature within the watchdog component, not the component itself.
+5. If a no-op header is added and lacks the `_noop` suffix, flag it.
+6. If a new `*.cpp.hpp` lives in a per-family subdirectory rather than `src/platforms/` root, flag it as a misuse of the dispatcher suffix.
 
 **Grandfathering:** Existing `FASTLED_*` references that the PR merely touches (reformat, move, comment) are NOT violations. Only NEW identifiers are flagged. If unsure whether a `FASTLED_*` token is new, search the base branch — if it already exists, it's grandfathered.
 

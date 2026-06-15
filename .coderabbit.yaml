@@ -79,6 +79,79 @@ reviews:
         Existing `-DFASTLED_*` flags that the PR merely moves or reformats (without
         introducing a brand-new identifier) are grandfathered. Flag only new identifiers.
         Reference: `agents/docs/cpp-standards.md` → "Type 3: Component Capability Flags".
+
+    - path: "**/meson.build"
+      instructions: |
+        Meson build macro prefix rule (matches the `FL_*` vs `FASTLED_*` rule applied
+        to C/C++ sources and PlatformIO):
+
+        Any NEWLY ADDED `-D<NAME>...` entry — typically inside
+        `add_project_arguments`, `cpp_args`, `c_args`, `args:`, or
+        `compile_args` — whose identifier starts with `FASTLED_` is a
+        HIGH-severity violation. Use the `FL_*` prefix instead. The `FASTLED_*`
+        vocabulary is frozen — it exists only for backwards compatibility with
+        already-shipped macros.
+
+        Example violations:
+          add_project_arguments('-DFASTLED_LPC_PWM_DMA=1', language: 'cpp')  ; ❌
+          cpp_args = ['-DFASTLED_NEW_FEATURE=1']                              ; ❌
+        Rewrites:
+          add_project_arguments('-DFL_LPC_PWM_DMA=1', language: 'cpp')       ; ✅
+          cpp_args = ['-DFL_NEW_FEATURE=1']                                   ; ✅
+
+        Existing `-DFASTLED_*` entries that the PR merely moves or reformats (without
+        introducing a brand-new identifier) are grandfathered. Flag only new identifiers.
+        Reference: `agents/docs/cpp-standards.md` → "Type 3: Component Capability Flags".
+
+    - path: "**/CMakeLists.txt"
+      instructions: |
+        CMake macro prefix rule (matches the `FL_*` vs `FASTLED_*` rule applied to
+        C/C++ sources and PlatformIO):
+
+        Any NEWLY ADDED compile definition or flag — `add_compile_definitions(...)`,
+        `target_compile_definitions(...)`, `add_definitions(-D...)`, or a raw
+        `-D<NAME>=...` token inside `set(... CMAKE_CXX_FLAGS ...)` / `string(APPEND
+        CMAKE_CXX_FLAGS ...)` — whose identifier starts with `FASTLED_` is a
+        HIGH-severity violation. Use the `FL_*` prefix instead. The `FASTLED_*`
+        vocabulary is frozen.
+
+        Example violations:
+          add_compile_definitions(FASTLED_LPC_PWM_DMA=1)                            ; ❌
+          target_compile_definitions(fastled PRIVATE FASTLED_LPC_RX_SCT_WS2812=1)   ; ❌
+          add_definitions(-DFASTLED_NEW_FEATURE=1)                                  ; ❌
+        Rewrites:
+          add_compile_definitions(FL_LPC_PWM_DMA=1)                                 ; ✅
+          target_compile_definitions(fastled PRIVATE FL_LPC_RX_SCT_WS2812=1)        ; ✅
+          add_definitions(-DFL_NEW_FEATURE=1)                                       ; ✅
+
+        Existing `FASTLED_*` entries that the PR merely moves or reformats (without
+        introducing a brand-new identifier) are grandfathered. Flag only new identifiers.
+        Reference: `agents/docs/cpp-standards.md` → "Type 3: Component Capability Flags".
+
+    - path: ".github/workflows/**/*.{yml,yaml}"
+      instructions: |
+        GitHub Actions macro prefix rule (matches the `FL_*` vs `FASTLED_*` rule
+        applied to C/C++ sources and other build systems):
+
+        Any NEWLY ADDED `-D<NAME>=...` token in a workflow step — typically inside
+        `env: { CXXFLAGS: ... }`, `env: { CFLAGS: ... }`, a `run:` script that
+        forwards build flags, or an `args:` list passed to a build wrapper — whose
+        identifier starts with `FASTLED_` is a HIGH-severity violation. Use the
+        `FL_*` prefix instead.
+
+        Example violations:
+          env:
+            CXXFLAGS: "-DFASTLED_LPC_PWM_DMA=1"            ; ❌
+          run: bash compile lpc --extra-flags=-DFASTLED_NEW_FEATURE=1   ; ❌
+        Rewrites:
+          env:
+            CXXFLAGS: "-DFL_LPC_PWM_DMA=1"                 ; ✅
+          run: bash compile lpc --extra-flags=-DFL_NEW_FEATURE=1        ; ✅
+
+        Existing `-DFASTLED_*` tokens that the PR merely moves or reformats (without
+        introducing a brand-new identifier) are grandfathered. Flag only new identifiers.
+        Reference: `agents/docs/cpp-standards.md` → "Type 3: Component Capability Flags".
+
     - path: "src/**/*.h"
       instructions: |
         Header file. Verify it does NOT contain function definitions, function-local
