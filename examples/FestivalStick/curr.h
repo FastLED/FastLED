@@ -167,6 +167,7 @@ UINumberField firePalette("Fire Palette", 0, 0, 2);
 fl::UISlider waveSpeed("Wave Speed", 0.03f, 0.0f, 1.0f, 0.01f);
 fl::UISlider waveDampening("Wave Dampening", 9.1f, 0.0f, 20.0f, 0.1f);
 fl::UICheckbox waveHalfDuplex("Wave Half Duplex", true);
+fl::UICheckbox waveIsotropicStencil("Wave Isotropic stencil (rounder ripples)", false);
 fl::UICheckbox waveAutoTrigger("Wave Auto Trigger", true);
 fl::UISlider waveTriggerSpeed("Wave Trigger Speed", 0.5f, 0.0f, 1.0f, 0.01f);
 fl::UIButton waveTriggerButton("Trigger Wave");
@@ -226,7 +227,7 @@ DEFINE_GRADIENT_PALETTE(waveRainbowpal){
 // This automatically assigns all specified controls to the "Noise Controls" group
 fl::UIGroup noiseGroup("Noise Controls", noiseScale, noiseSpeed, paletteDropdown);
 fl::UIGroup fireGroup("Fire Controls", fireScaleXY, fireSpeedY, fireScaleX, fireInvSpeedZ, firePalette);
-fl::UIGroup waveGroup("Wave Controls", waveSpeed, waveDampening, waveHalfDuplex, waveAutoTrigger, waveTriggerSpeed, waveTriggerButton, wavePalette, waveBlurAmount, waveBlurPasses);
+fl::UIGroup waveGroup("Wave Controls", waveSpeed, waveDampening, waveHalfDuplex, waveIsotropicStencil, waveAutoTrigger, waveTriggerSpeed, waveTriggerButton, wavePalette, waveBlurAmount, waveBlurPasses);
 fl::UIGroup renderGroup("Render Options", renderModeDropdown, splatRendering, allWhite, brightness);
 fl::UIGroup colorBoostGroup("Color Boost", saturationFunction, luminanceFunction);
 fl::UIGroup pointGraphicsGroup("Point Graphics Mode", speed, positionCoarse, positionFine, positionExtraFine, autoAdvance);
@@ -707,6 +708,9 @@ void drawWave(uint32_t now) {
     waveFx->setDampening(waveDampening.value());
     waveFx->setHalfDuplex(waveHalfDuplex.value());
     waveFx->setXCylindrical(true); // Always keep cylindrical for corkscrew
+    waveFx->setStencil(waveIsotropicStencil
+                           ? fl::LaplacianStencil::NinePointIsotropic
+                           : fl::LaplacianStencil::FivePoint);
     
     // Update wave color palette
     fl::CRGBPalette16 currentPalette = getWavePalette();

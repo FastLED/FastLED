@@ -247,6 +247,26 @@ class WaveFx : public Fx2d {
         mWaveSim.setEasingMode(mode);
     }
 
+    /// @brief Select the discrete Laplacian stencil
+    /// @param s LaplacianStencil::FivePoint (default at SuperSample 1X) or
+    ///          LaplacianStencil::NinePointIsotropic (auto-selected at
+    ///          SuperSample >= 2X; opt-in at 1X)
+    ///
+    /// 5-point is faster but anisotropic — ripples can look square-ish on
+    /// larger grids. 9-point is ~2x reads + ALU per cell but rounder,
+    /// noticeably so at 16x16+ native grids with gradient coloring.
+    /// Calling this marks the choice as user-set, so subsequent
+    /// setSuperSample() calls preserve it instead of re-applying the
+    /// multiplier-based default.
+    void setStencil(LaplacianStencil s) FL_NOEXCEPT {
+        mWaveSim.setStencil(s);
+    }
+
+    /// @brief Get the currently active Laplacian stencil
+    LaplacianStencil getStencil() const FL_NOEXCEPT {
+        return mWaveSim.getStencil();
+    }
+
     /// @brief Enable/disable change grid tracking optimization
     /// @param enabled If true, uses change tracking to optimize updates
     ///

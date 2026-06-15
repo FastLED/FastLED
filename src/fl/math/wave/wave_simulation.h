@@ -147,9 +147,30 @@ class WaveSimulation2D {
         if (u32(factor) == mMultiplier) {
             return;
         }
+        // Preserve a user-set stencil across re-init. Without this, the
+        // wrapper's auto-select (NinePointIsotropic at multiplier >= 2)
+        // overwrites a toggle the user made via setStencil().
+        const LaplacianStencil saved_stencil = mSim->getStencil();
+        const bool stencil_was_user_set = mUserSetStencil;
         init(mOuterWidth, mOuterHeight, factor, mSim->getSpeed(),
              mSim->getDampenening());
+        if (stencil_was_user_set) {
+            mSim->setStencil(saved_stencil);
+            mUserSetStencil = true;
+        }
     }
+
+    // Override the auto-selected Laplacian stencil. Calling this marks the
+    // choice as "user set" so subsequent setSuperSample() calls preserve
+    // it instead of re-applying the multiplier-based default. The default
+    // (no setStencil() ever called) is auto-selection: NinePointIsotropic
+    // at SuperSample >= 2X, FivePoint at 1X. See WaveSimulation2D_Real::
+    // setStencil() for the stencil semantics.
+    void setStencil(LaplacianStencil s) FL_NOEXCEPT {
+        mSim->setStencil(s);
+        mUserSetStencil = true;
+    }
+    LaplacianStencil getStencil() const FL_NOEXCEPT { return mSim->getStencil(); }
 
     void setXCylindrical(bool on) { mSim->setXCylindrical(on); }
 
@@ -205,6 +226,9 @@ class WaveSimulation2D {
     u32 mMultiplier = 1; // Supersampling multiplier (e.g., 1, 2, 4, or 8).
     U8EasingFunction mU8Mode = U8EasingFunction::WAVE_U8_MODE_LINEAR;
     bool mUseChangeGrid = false; // Whether to use change grid tracking (default: disabled for better visuals)
+    // True once setStencil() has been called from outside. Used to keep
+    // the user's stencil choice sticky across setSuperSample() re-inits.
+    bool mUserSetStencil = false;
     // Internal high-resolution simulation.
     fl::unique_ptr<WaveSimulation2D_Real> mSim;
     fl::Grid<i16> mChangeGrid; // Needed for multiple updates.

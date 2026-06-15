@@ -62,6 +62,7 @@ fl::UISlider dampeningUpper("Wave Upper: Dampening", 8.9f, 0.0f, 20.0f, 0.1f); /
 fl::UICheckbox halfDuplexUpper("Wave Upper: Half Duplex", true);           // If true, waves only go positive (not negative)
 fl::UISlider blurAmountUpper("Wave Upper: Blur Amount", 95, 0, 172, 1);    // Blur amount for upper wave layer
 fl::UISlider blurPassesUpper("Wave Upper: Blur Passes", 1, 1, 10, 1);      // Blur passes for upper wave layer
+fl::UICheckbox isotropicStencilUpper("Wave Upper: Isotropic stencil (rounder ripples)", false);
 
 // Lower wave layer controls:
 fl::UISlider speedLower("Wave Lower: Speed", 0.26f, 0.0f, 1.0f);           // How fast the lower wave propagates
@@ -69,6 +70,7 @@ fl::UISlider dampeningLower("Wave Lower: Dampening", 9.0f, 0.0f, 20.0f, 0.1f); /
 fl::UICheckbox halfDuplexLower("Wave Lower: Half Duplex", true);           // If true, waves only go positive (not negative)
 fl::UISlider blurAmountLower("Wave Lower: Blur Amount", 0, 0, 172, 1);     // Blur amount for lower wave layer
 fl::UISlider blurPassesLower("Wave Lower: Blur Passes", 1, 1, 10, 1);      // Blur passes for lower wave layer
+fl::UICheckbox isotropicStencilLower("Wave Lower: Isotropic stencil (rounder ripples)", false);
 
 // Fancy effect controls (for the cross-shaped effect):
 fl::UISlider fancySpeed("Fancy Speed", 796, 0, 1000, 1);                   // Speed of the fancy effect animation
@@ -274,6 +276,11 @@ ui_state ui() {
     waveFxLower.setDampening(dampeningLower);      // How quickly waves lose energy
     waveFxLower.setHalfDuplex(halfDuplexLower);    // Whether waves can go negative
     waveFxLower.setSuperSample(getSuperSample());  // Anti-aliasing quality
+    // Apply after setSuperSample() so the user's choice survives the
+    // wrapper's multiplier-based auto-select for the stencil.
+    waveFxLower.setStencil(isotropicStencilLower
+                               ? fl::LaplacianStencil::NinePointIsotropic
+                               : fl::LaplacianStencil::FivePoint);
     waveFxLower.setEasingMode(easeMode);           // Wave height calculation method
     waveFxLower.setUseChangeGrid(useChangeGrid);   // Performance optimization vs visual quality
 
@@ -282,6 +289,9 @@ ui_state ui() {
     waveFxUpper.setDampening(dampeningUpper);      // How quickly waves lose energy
     waveFxUpper.setHalfDuplex(halfDuplexUpper);    // Whether waves can go negative
     waveFxUpper.setSuperSample(getSuperSample());  // Anti-aliasing quality
+    waveFxUpper.setStencil(isotropicStencilUpper
+                               ? fl::LaplacianStencil::NinePointIsotropic
+                               : fl::LaplacianStencil::FivePoint);
     waveFxUpper.setEasingMode(easeMode);           // Wave height calculation method
     waveFxUpper.setUseChangeGrid(useChangeGrid);   // Performance optimization vs visual quality
     
@@ -388,6 +398,7 @@ void wavefx_setup() {
     halfDuplexUpper.setGroup("Upper Wave Layer");
     blurAmountUpper.setGroup("Upper Wave Layer");
     blurPassesUpper.setGroup("Upper Wave Layer");
+    isotropicStencilUpper.setGroup("Upper Wave Layer");
 
     // Lower Wave Layer
     speedLower.setGroup("Lower Wave Layer");
@@ -395,6 +406,7 @@ void wavefx_setup() {
     halfDuplexLower.setGroup("Lower Wave Layer");
     blurAmountLower.setGroup("Lower Wave Layer");
     blurPassesLower.setGroup("Lower Wave Layer");
+    isotropicStencilLower.setGroup("Lower Wave Layer");
 
     // Fancy Effects
     fancySpeed.setGroup("Fancy Effects");
