@@ -590,8 +590,46 @@ RxWaitResult FlexIoRxChannelImpl::wait(u32 timeout_ms) {
                     << " SHIFTERR=0x" << FLEXIO1_SHIFTERR
                     << " TIMSTAT=0x" << FLEXIO1_TIMSTAT
                     << " CTRL=0x" << FLEXIO1_CTRL << fl::dec);
+            // FastLED#3066 Phase 1 diagnostic: also dump the first few
+            // words of mCaptureBuffer so subsequent iterations can see
+            // whether the DMA actually copied any non-zero data into RAM
+            // — distinguishing "shifter never fired" from "shifter fired
+            // but latched all-zero pin samples".
+            if (mCaptureBuffer.size() >= 8u) {
+                FL_WARN("[FlexIO RX] mCaptureBuffer[0..7]: 0x"
+                        << fl::hex << mCaptureBuffer[0] << " 0x"
+                        << mCaptureBuffer[1] << " 0x"
+                        << mCaptureBuffer[2] << " 0x"
+                        << mCaptureBuffer[3] << " 0x"
+                        << mCaptureBuffer[4] << " 0x"
+                        << mCaptureBuffer[5] << " 0x"
+                        << mCaptureBuffer[6] << " 0x"
+                        << mCaptureBuffer[7] << fl::dec);
+            }
             return RxWaitResult::TIMEOUT;
         }
+    }
+    // FastLED#3066 Phase 1 diagnostic: also dump on SUCCESS so future
+    // iterations can compare buffer-fill behaviour between the timeout
+    // path and the completion path. Iter 4 surfaced a surprise: DMA can
+    // signal "complete" with `transfers_done=0/N` when the channel
+    // already reloaded CITER=BITER and the buffer is all-zero — meaning
+    // either the shifter never fired or the ISR was misfired.
+    if (mCaptureBuffer.size() >= 8u) {
+        const u32 citer = mDma.TCD->CITER & 0x7FFFu;
+        const u32 biter = mDma.TCD->BITER & 0x7FFFu;
+        const u32 transfers_done = (biter > citer) ? (biter - citer) : 0u;
+        FL_WARN("[FlexIO RX] wait() SUCCESS: transfers_done="
+                << transfers_done << "/" << biter);
+        FL_WARN("[FlexIO RX] mCaptureBuffer[0..7]: 0x"
+                << fl::hex << mCaptureBuffer[0] << " 0x"
+                << mCaptureBuffer[1] << " 0x"
+                << mCaptureBuffer[2] << " 0x"
+                << mCaptureBuffer[3] << " 0x"
+                << mCaptureBuffer[4] << " 0x"
+                << mCaptureBuffer[5] << " 0x"
+                << mCaptureBuffer[6] << " 0x"
+                << mCaptureBuffer[7] << fl::dec);
     }
     return RxWaitResult::SUCCESS;
 }
