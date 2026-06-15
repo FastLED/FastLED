@@ -568,6 +568,28 @@ RxWaitResult FlexIoRxChannelImpl::wait(u32 timeout_ms) {
     const u32 start = millis();
     while (!mReceiveDone) {
         if ((millis() - start) >= timeout_ms) {
+            // FastLED#3066 Phase 1 sub-task 1 diagnostic: when the
+            // completion ISR never fires, dump the DMA channel state +
+            // FLEXIO1 shifter/timer status so the host can see why.
+            // Reading `mDma.complete()`, `mDma.error()`, and the live TCD
+            // CITER/BITER tells us whether the channel even started, how
+            // many transfers it processed, and whether it errored. The
+            // FLEXIO1 SHIFTSTAT/SHIFTERR/TIMSTAT reads tell us whether
+            // the shifter ever latched a captured value to trigger DMA.
+            const u32 citer = mDma.TCD->CITER & 0x7FFFu;
+            const u32 biter = mDma.TCD->BITER & 0x7FFFu;
+            const u32 transfers_done = (biter > citer) ? (biter - citer) : 0u;
+            FL_WARN("[FlexIO RX] wait() TIMEOUT after "
+                    << timeout_ms << "ms:"
+                    << " DMA complete=" << (mDma.complete() ? 1 : 0)
+                    << " error=" << (mDma.error() ? 1 : 0)
+                    << " CITER=" << citer << "/" << biter
+                    << " (transfers_done=" << transfers_done << ")");
+            FL_WARN("[FlexIO RX] post-timeout FLEXIO1:"
+                    << " SHIFTSTAT=0x" << fl::hex << FLEXIO1_SHIFTSTAT
+                    << " SHIFTERR=0x" << FLEXIO1_SHIFTERR
+                    << " TIMSTAT=0x" << FLEXIO1_TIMSTAT
+                    << " CTRL=0x" << FLEXIO1_CTRL << fl::dec);
             return RxWaitResult::TIMEOUT;
         }
     }
