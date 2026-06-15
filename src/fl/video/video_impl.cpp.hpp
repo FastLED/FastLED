@@ -355,5 +355,16 @@ bool VideoImpl::rewind() {
     return true;
 }
 
+bool VideoImpl::hasEmbeddedScreenMap() const {
+    if (!mStream) return false;
+    return mStream->hasEmbeddedScreenMap();
+}
+
+const fl::string &VideoImpl::embeddedScreenMapJson() const {
+    static const fl::string kEmpty;
+    if (!mStream) return kEmpty;
+    return mStream->embeddedScreenMapJson();
+}
+
 } // namespace video
 } // namespace fl
