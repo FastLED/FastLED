@@ -117,6 +117,12 @@ void WaveSimulation1D_Real::update() {
     curr[length + 1] = curr[length];
 
     i32 mCourantSq32 = static_cast<i32>(mCourantSq);
+    // Hoist the lower-saturation bound: in half-duplex mode the new value
+    // must be >= 0 (negative parts of the wave are clipped); in full-duplex
+    // mode the full Q15 negative range is allowed. Folding this into the
+    // per-cell clamp via fl::clamp lets us drop the dedicated second pass
+    // that used to walk the whole grid after the update loop.
+    const i32 q15_min = mHalfDuplex ? 0 : -32768;
     // Iterate over each inner cell.
     for (fl::size i = 1; i < length + 1; i++) {
         // Compute the 1D Laplacian:
@@ -145,22 +151,10 @@ void WaveSimulation1D_Real::update() {
         // visual amplitudes.
         f -= (f >> mDampenening);
 
-        // Clamp the result to the Q15 range [-32768, 32767].
-        if (f > 32767)
-            f = 32767;
-        else if (f < -32768)
-            f = -32768;
-
-        next[i] = (i16)f;
-    }
-
-    if (mHalfDuplex) {
-        // Set the negative values to zero.
-        for (fl::size i = 1; i < length + 1; i++) {
-            if (next[i] < 0) {
-                next[i] = 0;
-            }
-        }
+        // Clamp f into [q15_min, 32767] in a single step. q15_min is 0 when
+        // half-duplex is on, -32768 otherwise. This subsumes both the Q15
+        // saturation clamp and the post-pass that used to zero negatives.
+        next[i] = static_cast<i16>(fl::clamp(f, q15_min, static_cast<i32>(32767)));
     }
 
     // Toggle the active grid.
@@ -260,6 +254,11 @@ void WaveSimulation2D_Real::update() {
     }
 
     i32 mCourantSq32 = static_cast<i32>(mCourantSq);
+    // Hoist the lower-saturation bound — see WaveSimulation1D_Real::update()
+    // for the rationale. Fold half-duplex into the per-cell clamp instead
+    // of running a second pass over the grid (especially expensive on
+    // PSRAM-backed grids).
+    const i32 q15_min = mHalfDuplex ? 0 : -32768;
 
     // Update each inner cell.
     for (fl::size j = 1; j <= height; ++j) {
@@ -288,25 +287,9 @@ void WaveSimulation2D_Real::update() {
             // update for the cycle-cost rationale.
             f -= (f >> mDampening);
 
-            // Clamp f to the Q15 range.
-            if (f > 32767)
-                f = 32767;
-            else if (f < -32768)
-                f = -32768;
-
-            next[index] = (i16)f;
-        }
-    }
-
-    if (mHalfDuplex) {
-        // Set negative values to zero.
-        for (fl::size j = 1; j <= height; ++j) {
-            for (fl::size i = 1; i <= width; ++i) {
-                int index = j * stride + i;
-                if (next[index] < 0) {
-                    next[index] = 0;
-                }
-            }
+            // Clamp f into [q15_min, 32767] in a single step — subsumes
+            // both the Q15 saturation clamp and the half-duplex zero pass.
+            next[index] = static_cast<i16>(fl::clamp(f, q15_min, static_cast<i32>(32767)));
         }
     }
 
