@@ -146,7 +146,7 @@ meson.build (root)          → Source discovery, library compilation
 - Dispatcher: `src/platforms/coroutine.impl.cpp.hpp`, `src/platforms/channel_drivers.impl.cpp.hpp`
 - No-op fallback: `src/platforms/shared/memory_noop.hpp`, `src/platforms/shared/pin_noop.hpp`, `src/platforms/shared/simd_noop.hpp`
 
-### Macro Naming — THREE TYPES, NO ACRONYM-STYLE CAPABILITY FLAGS
+### Macro Naming — THREE TYPES, NO ACRONYM-STYLE CAPABILITY FLAGS, NO NEW `FASTLED_*`
 
 **Authoritative reference:** `agents/docs/cpp-standards.md` → "Macro Definition Patterns".
 
@@ -155,21 +155,36 @@ The codebase recognizes three macro types:
 | Type | Pattern | Has value? | Use case |
 |---|---|---|---|
 | 1. Platform detection | `FL_IS_<PLATFORM>` | No (defined/undefined) | "Am I running on this platform?" |
-| 2. Configuration | `FASTLED_<NAME>` | Yes (0/1/numeric, explicit) | User-tunable build settings |
-| 3. Component capability flag | `FL_<COMPONENT>_HAS_<FEATURE>` or `FL_<COMPONENT>_<NUMERIC>` | Boolean: no value. Numeric: explicit value. | "Does this subsystem have this feature on this platform?" |
+| 2. Configuration (LEGACY) | `FASTLED_<NAME>` | Yes (0/1/numeric, explicit) | Pre-existing user-tunable build settings — **frozen vocabulary** |
+| 3. Component capability / config | `FL_<COMPONENT>_HAS_<FEATURE>` (bool) / `FL_<COMPONENT>_<NUMERIC>` (numeric) / `FL_<COMPONENT>_<NAME>` (new build settings) | Boolean: no value. Numeric: explicit value. | "Does this subsystem have this feature?" + **all new tunables** |
 
-**CRITICAL: Type 3 capability macros use SPELLED-OUT component names — no acronyms.**
+**CRITICAL RULE #1 — No new `FASTLED_*` macros.** The `FASTLED_*` prefix is frozen for backwards compatibility with already-shipped names. Every NEW macro — capability flag, tunable, build-time switch — uses the `FL_*` prefix. Renaming existing `FASTLED_*` macros is out of scope; this rule only blocks NEW additions.
+
+- ❌ Wrong (new code): `#define FASTLED_LPC_PWM_DMA 1`, `#define FASTLED_LPC_RX_SCT_WS2812 1`, `-DFASTLED_NEW_FEATURE=1`
+- ✅ Correct (new code): `#define FL_LPC_PWM_DMA 1`, `#define FL_LPC_RX_SCT_WS2812 1`, `-DFL_NEW_FEATURE=1`
+
+This applies to **all locations where macros are introduced**:
+- `#define` directives in `src/**`, `tests/**`, `examples/**`, `platforms/**`
+- `-D<NAME>=...` flags in `platformio.ini` `build_flags = ...` blocks
+- `-D<NAME>=...` flags in `meson.build`, `CMakeLists.txt`, GitHub Actions YAML
+- `defined(...)` / `#ifdef` checks introducing brand-new identifiers (not just guarding existing ones)
+
+**CRITICAL RULE #2 — Type 3 capability macros use SPELLED-OUT component names — no acronyms.**
 
 The macro identifier and the public API name share a single vocabulary. If the API is `FastLED.watchdog()`, the macros are `FL_WATCHDOG_*`. If the API is `FastLED.audio()`, the macros are `FL_AUDIO_*`. Forcing readers to learn an acronym in addition to the spelled-out API name is exactly the jargon failure these conventions exist to prevent.
 
 - ✅ Correct: `FL_WATCHDOG_HAS_WINDOW_MODE`, `FL_WATCHDOG_PERSIST_BYTES`, `FL_AUDIO_HAS_I2S`, `FL_CODEC_HAS_H264`
-- ❌ Wrong: `FL_WDT_HAS_WINDOW_MODE` (acronym hides the component), `FASTLED_WATCHDOG_*` (use `FL_` for newer per-component capability flags, reserve `FASTLED_` for Type 2 build settings), `WATCHDOG_HAS_WINDOW_MODE` (missing prefix)
+- ❌ Wrong: `FL_WDT_HAS_WINDOW_MODE` (acronym hides the component), `WATCHDOG_HAS_WINDOW_MODE` (missing prefix)
 
 **Check Process for PRs:**
-1. Grep for any new `#define FL_*` in the diff.
-2. If it contains a known acronym for a longer component name (`WDT`, `IRQ`, `MUX`, `DMA` as a *component name* vs as a feature descriptor), flag it. (Note: `FL_WATCHDOG_HAS_DMA_RESET` is fine — `DMA` is a feature within the watchdog component, not the component itself.)
-3. If a no-op header is added and lacks the `_noop` suffix, flag it.
-4. If a new `*.cpp.hpp` lives in a per-family subdirectory rather than `src/platforms/` root, flag it as a misuse of the dispatcher suffix.
+1. Grep the diff for newly added lines matching `^\+.*#define\s+FASTLED_` — every hit is a HIGH-severity violation. Rewrite the identifier with the `FL_` prefix.
+2. Grep the diff for newly added lines matching `^\+.*-DFASTLED_` in `platformio.ini`, `meson.build`, `CMakeLists.txt`, or workflow YAML — same rule, HIGH severity.
+3. Grep the diff for newly added lines matching `^\+.*defined\(\s*FASTLED_` or `^\+.*#\s*ifdef\s+FASTLED_` or `^\+.*#\s*ifndef\s+FASTLED_` — flag any preprocessor conditional that **introduces** a brand-new `FASTLED_*` identifier (i.e. the identifier is not present anywhere on the base branch). Conditionals merely guarding pre-existing `FASTLED_*` names are grandfathered. HIGH severity.
+4. Grep the diff for newly added `#define FL_*` — verify it does NOT contain a known acronym for a longer component name (`WDT`, `IRQ`, `MUX`, `DMA` as a *component name* vs as a feature descriptor). Note: `FL_WATCHDOG_HAS_DMA_RESET` is fine — `DMA` is a feature within the watchdog component, not the component itself.
+5. If a no-op header is added and lacks the `_noop` suffix, flag it.
+6. If a new `*.cpp.hpp` lives in a per-family subdirectory rather than `src/platforms/` root, flag it as a misuse of the dispatcher suffix.
+
+**Grandfathering:** Existing `FASTLED_*` references that the PR merely touches (reformat, move, comment) are NOT violations. Only NEW identifiers are flagged. If unsure whether a `FASTLED_*` token is new, search the base branch — if it already exists, it's grandfathered.
 
 ### **/*.h and **/*.cpp changes - PLATFORM HEADER ISOLATION
 
@@ -748,6 +763,7 @@ FL_TEST_CASE("my test") {
   - Missing performance attributes: N
   - DMA/poll wait loops missing yield: N
   - Public Settings Pattern violations (bare fl::set_* without CFastLED wrapper): N
+  - New `FASTLED_*` macros (should be `FL_*`): N
   - Other: N
 - Violations fixed: N
 - User confirmations needed: N
