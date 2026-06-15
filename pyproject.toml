@@ -143,7 +143,15 @@ dependencies = [
     # incremental builds produce stale .obj files after a git pull that
     # changes transitive headers (symptom: `undefined symbol: ...` link
     # errors hours after a header actually changed).
-    "zccache>=1.12.3",
+    # 1.12.5 (released 2026-06-14): native-file lifecycle fix on Windows
+    # (zackees/zccache#710, surfaced in FastLED #3048). The meson-snapshot
+    # restore path no longer leaves `meson_native.txt` in a broken state
+    # after the file-lock race -- restores rewrite the native file
+    # unconditionally on failure recovery. Eliminates the
+    # `FileNotFoundError: meson_native.txt` / `ninja: error: rebuilding
+    # 'build.ninja': subcommand failed` cascade we hit during long-session
+    # `bash test --cpp` cycles.
+    "zccache>=1.12.5",
     "ninja",
     "meson>=1.11.0",
     "download",
