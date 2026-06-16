@@ -47,13 +47,13 @@
 #include "fl/fx/frame.h"
 
 
-void AutoResearchRemoteControl::bindCoroutineMethods() {
+void AutoResearchRemoteControl::bindCoroutineMethods(fl::Remote* remote) {
     // ========================================================================
     // Coroutine Tests - fl::task::coroutine() and fl::task::await()
     // ========================================================================
 
     // Test: Basic coroutine creation and completion
-    mRemote->bind("testCoroutineBasic", [](const fl::json& args) -> fl::json {
+    remote->bind("testCoroutineBasic", [](const fl::json& args) -> fl::json {
         (void)args;
         fl::json r = fl::json::object();
 
@@ -84,7 +84,7 @@ void AutoResearchRemoteControl::bindCoroutineMethods() {
     });
 
     // Test: Task stop() while running
-    mRemote->bind("testCoroutineStop", [](const fl::json& args) -> fl::json {
+    remote->bind("testCoroutineStop", [](const fl::json& args) -> fl::json {
         (void)args;
         fl::json r = fl::json::object();
 
@@ -119,7 +119,7 @@ void AutoResearchRemoteControl::bindCoroutineMethods() {
     });
 
     // Test: Multiple concurrent coroutines
-    mRemote->bind("testCoroutineConcurrent", [](const fl::json& args) -> fl::json {
+    remote->bind("testCoroutineConcurrent", [](const fl::json& args) -> fl::json {
         (void)args;
         fl::json r = fl::json::object();
 
@@ -166,7 +166,7 @@ void AutoResearchRemoteControl::bindCoroutineMethods() {
     // Test: Consumer coroutine awaits promise, producer coroutine fulfills it.
     // Verifies fl::task::await() truly blocks until the producer resolves the promise.
     // Main thread does NOT touch the promise — only the producer coroutine does.
-    mRemote->bind("testCoroutineAwait", [](const fl::json& args) -> fl::json {
+    remote->bind("testCoroutineAwait", [](const fl::json& args) -> fl::json {
         (void)args;
         fl::json r = fl::json::object();
 
@@ -232,7 +232,7 @@ void AutoResearchRemoteControl::bindCoroutineMethods() {
 
     // Test: Consumer coroutine awaits promise, producer coroutine rejects it.
     // Verifies that fl::task::await() properly propagates errors from producer.
-    mRemote->bind("testCoroutineAwaitError", [](const fl::json& args) -> fl::json {
+    remote->bind("testCoroutineAwaitError", [](const fl::json& args) -> fl::json {
         (void)args;
         fl::json r = fl::json::object();
 
@@ -282,7 +282,7 @@ void AutoResearchRemoteControl::bindCoroutineMethods() {
     // Test: Promise then/catch_ callbacks fire correctly when fulfilled by a coroutine.
     // The promise is created with .then() and .catch_() callbacks attached BEFORE
     // the producer coroutine fulfills it, verifying callback dispatch works.
-    mRemote->bind("testCoroutinePromiseCallbacks", [](const fl::json& args) -> fl::json {
+    remote->bind("testCoroutinePromiseCallbacks", [](const fl::json& args) -> fl::json {
         (void)args;
         fl::json r = fl::json::object();
 
@@ -331,7 +331,7 @@ void AutoResearchRemoteControl::bindCoroutineMethods() {
     });
 
     // Test: Promise catch_ callback fires on rejection by a coroutine.
-    mRemote->bind("testCoroutinePromiseCatchCallback", [](const fl::json& args) -> fl::json {
+    remote->bind("testCoroutinePromiseCatchCallback", [](const fl::json& args) -> fl::json {
         (void)args;
         fl::json r = fl::json::object();
 
@@ -376,7 +376,7 @@ void AutoResearchRemoteControl::bindCoroutineMethods() {
 
     // Test: Pipeline of 3 coroutines passing data through promises.
     // coroutine A produces value -> promise1 -> coroutine B transforms -> promise2 -> coroutine C consumes
-    mRemote->bind("testCoroutineChainedAwait", [](const fl::json& args) -> fl::json {
+    remote->bind("testCoroutineChainedAwait", [](const fl::json& args) -> fl::json {
         (void)args;
         fl::json r = fl::json::object();
 
@@ -444,7 +444,7 @@ void AutoResearchRemoteControl::bindCoroutineMethods() {
     });
 
     // Run all coroutine tests sequentially
-    mRemote->bind("testCoroutineAll", [this](const fl::json& args) -> fl::json {
+    remote->bind("testCoroutineAll", [this](const fl::json& args) -> fl::json {
         (void)args;
         fl::json r = fl::json::object();
 
