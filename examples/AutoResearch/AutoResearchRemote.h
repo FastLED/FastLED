@@ -104,4 +104,15 @@ private:
     fl::json runSingleTestImpl(const fl::json& args);
     fl::json runParallelTestImpl(const fl::json& args);
     fl::json findConnectedPinsImpl(const fl::json& args);
+
+    // RPC binding helpers — each implemented in its own .cpp file to keep
+    // file sizes below 1 K LOC (#3132 / meta #3127). All are called from
+    // registerFunctions() in order on mRemote.
+    void bindBasicMethods();
+    void bindFlexioMethods();
+    void bindGpioMethods();
+    void bindBenchmarkMethods();
+    void bindAsyncNetMethods();
+    void bindCoroutineMethods();
+    void bindPerfMethods();
 };
