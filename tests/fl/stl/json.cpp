@@ -542,30 +542,31 @@ FL_TEST_CASE("Json2 Tests") {
         
         // First verify that the serialized JSON has the correct structure
         FL_CHECK(doc.is_object());
-        FL_CHECK(doc.contains("map"));
-        
-        json mapObj = doc["map"];
-        FL_CHECK(mapObj.is_object());
-        FL_CHECK(mapObj.contains("strip1"));
-        FL_CHECK(mapObj.contains("strip2"));
-        
-        json strip1Obj = mapObj["strip1"];
-        json strip2Obj = mapObj["strip2"];
-        FL_CHECK(strip1Obj.is_object());
-        FL_CHECK(strip2Obj.is_object());
-        
-        FL_CHECK(strip1Obj.contains("x"));
-        FL_CHECK(strip1Obj.contains("y"));
-        FL_CHECK(strip1Obj.contains("diameter"));
-        FL_CHECK(strip2Obj.contains("x"));
-        FL_CHECK(strip2Obj.contains("y"));
-        FL_CHECK(strip2Obj.contains("diameter"));
+        FL_CHECK(doc.contains("version"));
+        FL_CHECK(doc.contains("groups"));
+        FL_CHECK(doc.contains("segments"));
+
+        json groupsObj = doc["groups"];
+        FL_CHECK(groupsObj.is_object());
+        FL_CHECK(groupsObj.contains("strip1"));
+        FL_CHECK(groupsObj.contains("strip2"));
+
+        json segmentsArr = doc["segments"];
+        FL_CHECK(segmentsArr.is_array());
+        FL_CHECK_EQ(segmentsArr.size(), 2);
+
+        json firstSegment = segmentsArr[0];
+        FL_CHECK(firstSegment.is_object());
+        FL_CHECK(firstSegment.contains("id"));
+        FL_CHECK(firstSegment.contains("x"));
+        FL_CHECK(firstSegment.contains("y"));
+        FL_CHECK(firstSegment.contains("diameter"));
         
         // Also test with string serialization
         fl::string jsonBuffer = doc.to_string();
         json parsedJson = json::parse(jsonBuffer.c_str());
         FL_CHECK(parsedJson.is_object());
-        FL_CHECK(parsedJson.contains("map"));
+        FL_CHECK(parsedJson.contains("segments"));
         
         // Parse it back using new json2 implementation
         fl::flat_map<fl::string, fl::ScreenMap> parsedSegmentMaps;

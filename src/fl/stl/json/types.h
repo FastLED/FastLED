@@ -141,6 +141,31 @@ struct default_value_visitor {
 template<typename IntType = i64>
 struct int_conversion_visitor {
     fl::optional<IntType> result;
+
+    template<typename Target>
+    typename fl::enable_if<fl::is_signed<Target>::value, bool>::type
+    is_i64_out_of_range(const i64& value) FL_NOEXCEPT {
+        const i64 min_val = static_cast<i64>((fl::numeric_limits<Target>::min)());
+        const i64 max_val = static_cast<i64>((fl::numeric_limits<Target>::max)());
+        if (value < min_val || value > max_val) {
+            FL_WARN("JSON integer overflow: value " << value << " does not fit in target type (range: "
+                    << min_val << " to " << max_val << "), truncating");
+            return true;
+        }
+        return false;
+    }
+
+    template<typename Target>
+    typename fl::enable_if<!fl::is_signed<Target>::value, bool>::type
+    is_i64_out_of_range(const i64& value) FL_NOEXCEPT {
+        const u64 max_val = static_cast<u64>((fl::numeric_limits<Target>::max)());
+        if (value < 0 || static_cast<u64>(value) > max_val) {
+            FL_WARN("JSON integer overflow: value " << value << " does not fit in target type (range: 0 to "
+                    << max_val << "), truncating");
+            return true;
+        }
+        return false;
+    }
     
     template<typename U>
     void accept(const U& value) FL_NOEXCEPT {
@@ -174,20 +199,7 @@ struct int_conversion_visitor {
     template<typename T = IntType>
     typename fl::enable_if<!fl::is_same<T, i64>::value, void>::type
     operator()(const i64& value) FL_NOEXCEPT {
-        // Check for overflow before casting
-        // For signed types: check if value is within [min, max] range
-        // For unsigned types: check if value is non-negative and within [0, max] range
-        // Use parentheses around min/max to protect against Arduino min/max macros
-        const i64 min_val = static_cast<i64>((fl::numeric_limits<IntType>::min)());
-        const i64 max_val = static_cast<i64>((fl::numeric_limits<IntType>::max)());
-
-        if (value < min_val || value > max_val) {
-            // Log overflow error but still perform conversion (value will be truncated)
-            FL_ERROR("JSON integer overflow: value " << value << " does not fit in target type (range: "
-                     << min_val << " to " << max_val << "), truncating");
-        }
-
-        // Always perform conversion, even if overflow detected
+        is_i64_out_of_range<IntType>(value);
         result = static_cast<IntType>(value);
     }
     

@@ -288,6 +288,8 @@ _ZCCACHE_TARGET_RULES: tuple[str, ...] = (
     "c_LINKER",
 )
 
+_ZCCACHE_WINDOWS_TARGET_RULES: tuple[str, ...] = ()
+
 
 def inject_zccache_wrapping(build_dir: Path, zccache_path: Optional[str]) -> bool:
     """
@@ -338,6 +340,9 @@ def inject_zccache_wrapping(build_dir: Path, zccache_path: Optional[str]) -> boo
     zccache_quoted = f'"{zccache_path_normalized}"'
 
     new_content = content
+    target_rules = (
+        _ZCCACHE_WINDOWS_TARGET_RULES if os.name == "nt" else _ZCCACHE_TARGET_RULES
+    )
     for rule_name in _ZCCACHE_TARGET_RULES:
         rule_marker = f"rule {rule_name}\n"
         rule_pos = new_content.find(rule_marker)
@@ -355,6 +360,11 @@ def inject_zccache_wrapping(build_dir: Path, zccache_path: Optional[str]) -> boo
         # Idempotency: if the command already starts with the zccache path,
         # nothing to do for this rule.
         existing_value = new_content[value_start:block_end]
+        if rule_name not in target_rules:
+            if existing_value.startswith(zccache_quoted + " "):
+                remove_end = value_start + len(zccache_quoted) + 1
+                new_content = new_content[:value_start] + new_content[remove_end:]
+            continue
         if existing_value.startswith(zccache_quoted + " "):
             continue
         new_content = (
