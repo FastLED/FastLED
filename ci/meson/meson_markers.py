@@ -11,6 +11,7 @@ content is unchanged).
 """
 # pyright: reportMissingImports=false, reportUnknownVariableType=false
 
+import os
 import sys
 from pathlib import Path
 from typing import Optional
