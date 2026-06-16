@@ -1,0 +1,8 @@
+<map id="fl::beatsin88" name="fl::beatsin88">
+<area shape="rect" id="Node000001" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="5,29,108,55"/>
+<area shape="rect" id="Node000002" href="$d6/d6c/group___beat_generators_gac4b5cef78b913f63a26012d69ca37889.html#gac4b5cef78b913f63a26012d69ca37889" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM, with BPM specified in Q8.8 fixed&#45;point format." alt="" coords="156,29,239,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="108,39,143,39,143,45,108,45"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="287,29,361,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="239,39,273,39,273,45,239,45"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="302,30,298,21,300,11,309,5,324,3,341,6,349,14,345,18,339,11,324,8,311,10,305,14,303,20,307,28"/>
+</map>

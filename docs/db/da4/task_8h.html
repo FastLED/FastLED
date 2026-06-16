@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fl/task.h File Reference</title>
+<title>FastLED: fl/task/task.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -103,16 +103,18 @@ $(function(){initNavTree('db/da4/task_8h.html','../../'); initResizable(true); }
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#namespaces">Namespaces</a> &#124;
-<a href="#enum-members">Enumerations</a>  </div>
+<a href="#enum-members">Enumerations</a> &#124;
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">task.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="../../d8/dea/functional_8h_source.html">fl/functional.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../da/d66/string_8h_source.html">fl/string.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d1/d1b/trace_8h_source.html">fl/trace.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d6/d17/promise_8h_source.html">fl/promise.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../dd/d9a/fl_2time_8h_source.html">fl/time.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../dd/d98/ptr_8h_source.html">fl/ptr.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d8/dea/functional_8h_source.html">fl/stl/functional.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../da/d66/string_8h_source.html">fl/stl/string.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d1/d1b/trace_8h_source.html">fl/system/trace.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/d17/promise_8h_source.html">fl/task/promise.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d6a/shared__ptr_8h_source.html">fl/stl/shared_ptr.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d7/d84/cstddef_8h_source.html">fl/stl/cstddef.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for task.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -125,41 +127,137 @@ $(function(){initNavTree('db/da4/task_8h.html','../../'); initResizable(true); }
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d8/d25/task_8h__dep__incl.svg" width="654" height="315"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d8/d25/task_8h__dep__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../db/da4/task_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d86/classfl_1_1task.html">fl::task</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d24/classfl_1_1_task_impl.html">fl::TaskImpl</a></td></tr>
+<tr class="memitem:d2/d9a/structfl_1_1task_1_1_coroutine_config" id="r_d2/d9a/structfl_1_1task_1_1_coroutine_config"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task.html#d2/d9a/structfl_1_1task_1_1_coroutine_config">fl::task::CoroutineConfig</a></td></tr>
+<tr class="memdesc:d2/d9a/structfl_1_1task_1_1_coroutine_config"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configuration for OS-level coroutine tasks.  <a href="../../db/d5c/namespacefl_1_1task.html#d2/d9a/structfl_1_1task_1_1_coroutine_config">More...</a><br /></td></tr>
+<tr class="separator:d2/d9a/structfl_1_1task_1_1_coroutine_config"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/daf/classfl_1_1task_1_1_handle.html">fl::task::Handle</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Task <a class="el" href="../../de/daf/classfl_1_1task_1_1_handle.html" title="Task Handle with fluent API (was class fl::task, renamed to avoid namespace collision)">Handle</a> with fluent API (was class <a class="el" href="../../db/d5c/namespacefl_1_1task.html">fl::task</a>, renamed to avoid namespace collision)  <a href="../../de/daf/classfl_1_1task_1_1_handle.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task.html">fl::task</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:a73b931333e46f6705d0912a75155cd31" id="r_a73b931333e46f6705d0912a75155cd31"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a73b931333e46f6705d0912a75155cd31.html#a73b931333e46f6705d0912a75155cd31">fl::TaskType</a> { <a class="el" href="../../d4/d36/namespacefl_a73b931333e46f6705d0912a75155cd31.html#a73b931333e46f6705d0912a75155cd31a84cb9dce517300d191ffb2538bbc0d33">fl::kEveryMs</a>
-, <a class="el" href="../../d4/d36/namespacefl_a73b931333e46f6705d0912a75155cd31.html#a73b931333e46f6705d0912a75155cd31a6eb08055e15b5253c1505bc0e691d7c7">fl::kAtFramerate</a>
-, <a class="el" href="../../d4/d36/namespacefl_a73b931333e46f6705d0912a75155cd31.html#a73b931333e46f6705d0912a75155cd31a1b6d07cce4ad02e783b7dc300196cb7a">fl::kBeforeFrame</a>
-, <a class="el" href="../../d4/d36/namespacefl_a73b931333e46f6705d0912a75155cd31.html#a73b931333e46f6705d0912a75155cd31a6079a274a1dcd7e08722e5316af0b537">fl::kAfterFrame</a>
+<tr class="memitem:ae06d127a1ddb858d432f064e4393f4fd" id="r_ae06d127a1ddb858d432f064e4393f4fd"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd.html#ae06d127a1ddb858d432f064e4393f4fd">fl::task::TaskType</a> { <br />
+&#160;&#160;<a class="el" href="../../db/d5c/namespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd.html#ae06d127a1ddb858d432f064e4393f4fda84cb9dce517300d191ffb2538bbc0d33">fl::task::kEveryMs</a>
+, <a class="el" href="../../db/d5c/namespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd.html#ae06d127a1ddb858d432f064e4393f4fda6eb08055e15b5253c1505bc0e691d7c7">fl::task::kAtFramerate</a>
+, <a class="el" href="../../db/d5c/namespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd.html#ae06d127a1ddb858d432f064e4393f4fda1b6d07cce4ad02e783b7dc300196cb7a">fl::task::kBeforeFrame</a>
+, <a class="el" href="../../db/d5c/namespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd.html#ae06d127a1ddb858d432f064e4393f4fda6079a274a1dcd7e08722e5316af0b537">fl::task::kAfterFrame</a>
+, <br />
+&#160;&#160;<a class="el" href="../../db/d5c/namespacefl_1_1task_ae06d127a1ddb858d432f064e4393f4fd.html#ae06d127a1ddb858d432f064e4393f4fdaf79290fdb06503a03f8d833da7eabda2">fl::task::kCoroutine</a>
+<br />
  }</td></tr>
-<tr class="separator:a73b931333e46f6705d0912a75155cd31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="separator:ae06d127a1ddb858d432f064e4393f4fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:acab0bf8196d741b479424aafc2712663" id="r_acab0bf8196d741b479424aafc2712663"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../de/daf/classfl_1_1task_1_1_handle.html">Handle</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task_acab0bf8196d741b479424aafc2712663.html#acab0bf8196d741b479424aafc2712663">fl::task::after_frame</a> ()</td></tr>
+<tr class="separator:acab0bf8196d741b479424aafc2712663"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a85ef3cb9b8bb07bd4bbc5edbc43f5f2d" id="r_a85ef3cb9b8bb07bd4bbc5edbc43f5f2d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../de/daf/classfl_1_1task_1_1_handle.html">Handle</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task_a85ef3cb9b8bb07bd4bbc5edbc43f5f2d.html#a85ef3cb9b8bb07bd4bbc5edbc43f5f2d">fl::task::after_frame</a> (const <a class="el" href="../../d4/d36/namespacefl_ae079f226d5a78353525de38ad202ab4d.html#ae079f226d5a78353525de38ad202ab4d">TracePoint</a> &amp;trace)</td></tr>
+<tr class="separator:a85ef3cb9b8bb07bd4bbc5edbc43f5f2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af88b5acab6929ccc847201f0782b9974" id="r_af88b5acab6929ccc847201f0782b9974"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../de/daf/classfl_1_1task_1_1_handle.html">Handle</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task_af88b5acab6929ccc847201f0782b9974.html#af88b5acab6929ccc847201f0782b9974">fl::task::after_frame</a> (<a class="el" href="../../d4/d36/namespacefl.html#d0/ddd/classfl_1_1function">function</a>&lt; void()&gt; on_then)</td></tr>
+<tr class="separator:af88b5acab6929ccc847201f0782b9974"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a16ce0b0f1e293b1912d5a33a724bf253" id="r_a16ce0b0f1e293b1912d5a33a724bf253"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../de/daf/classfl_1_1task_1_1_handle.html">Handle</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task_a16ce0b0f1e293b1912d5a33a724bf253.html#a16ce0b0f1e293b1912d5a33a724bf253">fl::task::after_frame</a> (<a class="el" href="../../d4/d36/namespacefl.html#d0/ddd/classfl_1_1function">function</a>&lt; void()&gt; on_then, const <a class="el" href="../../d4/d36/namespacefl_ae079f226d5a78353525de38ad202ab4d.html#ae079f226d5a78353525de38ad202ab4d">TracePoint</a> &amp;trace)</td></tr>
+<tr class="separator:a16ce0b0f1e293b1912d5a33a724bf253"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5cfee14f67e65ebfdd3ad6764fd6ae38" id="r_a5cfee14f67e65ebfdd3ad6764fd6ae38"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../de/daf/classfl_1_1task_1_1_handle.html">Handle</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task_a5cfee14f67e65ebfdd3ad6764fd6ae38.html#a5cfee14f67e65ebfdd3ad6764fd6ae38">fl::task::at_framerate</a> (int fps)</td></tr>
+<tr class="separator:a5cfee14f67e65ebfdd3ad6764fd6ae38"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4292481e8b47093258ac009b4e04d72" id="r_ac4292481e8b47093258ac009b4e04d72"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../de/daf/classfl_1_1task_1_1_handle.html">Handle</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task_ac4292481e8b47093258ac009b4e04d72.html#ac4292481e8b47093258ac009b4e04d72">fl::task::at_framerate</a> (int fps, const <a class="el" href="../../d4/d36/namespacefl_ae079f226d5a78353525de38ad202ab4d.html#ae079f226d5a78353525de38ad202ab4d">TracePoint</a> &amp;trace)</td></tr>
+<tr class="separator:ac4292481e8b47093258ac009b4e04d72"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a72de96aef948cac07c81c8595499b61f" id="r_a72de96aef948cac07c81c8595499b61f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../de/daf/classfl_1_1task_1_1_handle.html">Handle</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task_a72de96aef948cac07c81c8595499b61f.html#a72de96aef948cac07c81c8595499b61f">fl::task::before_frame</a> ()</td></tr>
+<tr class="separator:a72de96aef948cac07c81c8595499b61f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a598e7d3c30240e88babe29f8c8b0c34e" id="r_a598e7d3c30240e88babe29f8c8b0c34e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../de/daf/classfl_1_1task_1_1_handle.html">Handle</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task_a598e7d3c30240e88babe29f8c8b0c34e.html#a598e7d3c30240e88babe29f8c8b0c34e">fl::task::before_frame</a> (const <a class="el" href="../../d4/d36/namespacefl_ae079f226d5a78353525de38ad202ab4d.html#ae079f226d5a78353525de38ad202ab4d">TracePoint</a> &amp;trace)</td></tr>
+<tr class="separator:a598e7d3c30240e88babe29f8c8b0c34e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab6148c619bb8b49594c64464aec8bcb5" id="r_ab6148c619bb8b49594c64464aec8bcb5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../de/daf/classfl_1_1task_1_1_handle.html">Handle</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task_ab6148c619bb8b49594c64464aec8bcb5.html#ab6148c619bb8b49594c64464aec8bcb5">fl::task::coroutine</a> (const <a class="el" href="../../db/d5c/namespacefl_1_1task.html#d2/d9a/structfl_1_1task_1_1_coroutine_config">CoroutineConfig</a> &amp;config)</td></tr>
+<tr class="separator:ab6148c619bb8b49594c64464aec8bcb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f002cad452f6b7f8dff6ba2b8f0f8b8" id="r_a0f002cad452f6b7f8dff6ba2b8f0f8b8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../de/daf/classfl_1_1task_1_1_handle.html">Handle</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task_a0f002cad452f6b7f8dff6ba2b8f0f8b8.html#a0f002cad452f6b7f8dff6ba2b8f0f8b8">fl::task::every_ms</a> (int interval_ms)</td></tr>
+<tr class="separator:a0f002cad452f6b7f8dff6ba2b8f0f8b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a09a9841e3369c4dbab77260c406040db" id="r_a09a9841e3369c4dbab77260c406040db"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../de/daf/classfl_1_1task_1_1_handle.html">Handle</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task_a09a9841e3369c4dbab77260c406040db.html#a09a9841e3369c4dbab77260c406040db">fl::task::every_ms</a> (int interval_ms, const <a class="el" href="../../d4/d36/namespacefl_ae079f226d5a78353525de38ad202ab4d.html#ae079f226d5a78353525de38ad202ab4d">TracePoint</a> &amp;trace)</td></tr>
+<tr class="separator:a09a9841e3369c4dbab77260c406040db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ada32f32d21efedfba7bd40ff85bb3190" id="r_ada32f32d21efedfba7bd40ff85bb3190"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task_ada32f32d21efedfba7bd40ff85bb3190.html#ada32f32d21efedfba7bd40ff85bb3190">fl::task::exit_current</a> ()</td></tr>
+<tr class="separator:ada32f32d21efedfba7bd40ff85bb3190"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<hr/><h2 class="groupheader">Class Documentation</h2>
+<a name="d2/d9a/structfl_1_1task_1_1_coroutine_config" id="d2/d9a/structfl_1_1task_1_1_coroutine_config"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#d2/d9a/structfl_1_1task_1_1_coroutine_config">&#9670;&#160;</a></span>fl::task::CoroutineConfig</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct fl::task::CoroutineConfig</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<div id="dynsection-2" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-2-trigger" src="../../closed.png" alt="+"/> Collaboration diagram for fl::task::CoroutineConfig:</div>
+<div id="dynsection-2-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-2-content" class="dyncontent" style="display:none;">
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d6/d9e/structfl_1_1task_1_1_coroutine_config__coll__graph.svg" width="100%" height="482"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<center><span class="legend">[<a target="top" href="../../graph_legend.html">legend</a>]</span></center></div>
+<table class="fieldtable">
+<tr><th colspan="3">Class Members</th></tr>
+<tr><td class="fieldtype">
+<a id="af58dece9572aee450014c2c763519c40" name="af58dece9572aee450014c2c763519c40"></a><a class="el" href="../../d4/d36/namespacefl_a451542d0bf4d13f0bc00e055c18e6726.html#a451542d0bf4d13f0bc00e055c18e6726">optional</a>&lt; int &gt;</td>
+<td class="fieldname">
+core_id</td>
+<td class="fielddoc">
+Pin task to specific CPU core (ESP32 and other dual cores in the future) </td></tr>
+<tr><td class="fieldtype">
+<a id="a6b7ce206ceb0acf1ed853df759b647ed" name="a6b7ce206ceb0acf1ed853df759b647ed"></a><a class="el" href="../../d4/d36/namespacefl.html#d0/ddd/classfl_1_1function">function</a>&lt; void()&gt;</td>
+<td class="fieldname">
+func</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="afad290a0bfa94ac5fa2884bc11bab1ce" name="afad290a0bfa94ac5fa2884bc11bab1ce"></a><a class="el" href="../../d2/db2/classfl_1_1string.html">string</a></td>
+<td class="fieldname">
+name = &quot;task&quot;</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="a9db16995be178cb2fef96b699248c29c" name="a9db16995be178cb2fef96b699248c29c"></a><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a></td>
+<td class="fieldname">
+priority = 5</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="ab075c5193b7d8d4e9f39c2bc8c4292a6" name="ab075c5193b7d8d4e9f39c2bc8c4292a6"></a><a class="el" href="../../d4/d36/namespacefl_a8a657d5e3d1c15816e367eada17134c9.html#a8a657d5e3d1c15816e367eada17134c9">size_t</a></td>
+<td class="fieldname">
+stack_size = 4096</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="ace9b53662cb1c14edb957ce9a1f4a791" name="ace9b53662cb1c14edb957ce9a1f4a791"></a><a class="el" href="../../d4/d36/namespacefl_a451542d0bf4d13f0bc00e055c18e6726.html#a451542d0bf4d13f0bc00e055c18e6726">optional</a>&lt; <a class="el" href="../../d4/d36/namespacefl_ae079f226d5a78353525de38ad202ab4d.html#ae079f226d5a78353525de38ad202ab4d">TracePoint</a> &gt;</td>
+<td class="fieldname">
+trace</td>
+<td class="fielddoc">
+</td></tr>
+</table>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../db/da4/task_8h.html">task.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_3c55ea006e4dd4fc925403c373dc7c52.html">task</a></li><li class="navelem"><a class="el" href="../../db/da4/task_8h.html">task.h</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

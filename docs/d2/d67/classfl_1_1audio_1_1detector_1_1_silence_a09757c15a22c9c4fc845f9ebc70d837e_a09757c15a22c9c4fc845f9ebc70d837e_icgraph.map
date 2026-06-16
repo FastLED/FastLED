@@ -1,0 +1,8 @@
+<map id="fl::audio::detector::Silence::getSmoothedRMS" name="fl::audio::detector::Silence::getSmoothedRMS">
+<area shape="rect" id="Node000001" title=" " alt="" coords="380,29,581,69"/>
+<area shape="rect" id="Node000002" href="$d2/d67/classfl_1_1audio_1_1detector_1_1_silence_ab70cbfa94fb4ad6d8e9553185963a7ca.html#ab70cbfa94fb4ad6d8e9553185963a7ca" title=" " alt="" coords="196,29,332,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="366,52,332,52,332,47,366,47"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="295,17,284,11,264,8,246,10,236,15,232,21,234,28,229,30,227,20,232,11,245,5,264,3,286,6,298,13"/>
+<area shape="rect" id="Node000003" href="$d2/d67/classfl_1_1audio_1_1detector_1_1_silence_ae464e368b003df751e3a916be4654346.html#ae464e368b003df751e3a916be4654346" title=" " alt="" coords="5,29,148,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="182,52,148,52,148,47,182,47"/>
+</map>

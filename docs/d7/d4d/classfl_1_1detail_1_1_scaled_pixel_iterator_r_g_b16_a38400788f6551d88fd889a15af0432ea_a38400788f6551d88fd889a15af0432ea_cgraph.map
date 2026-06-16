@@ -1,0 +1,8 @@
+<map id="fl::detail::ScaledPixelIteratorRGB16::operator++" name="fl::detail::ScaledPixelIteratorRGB16::operator++">
+<area shape="rect" id="Node000001" title="Pre&#45;increment operator." alt="" coords="5,35,211,75"/>
+<area shape="rect" id="Node000002" href="$d7/d4d/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b16_ab3926c2cf83169870bb4e03c29801c36.html#ab3926c2cf83169870bb4e03c29801c36" title="Construct from PixelIterator." alt="" coords="259,5,499,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="211,41,245,37,245,42,211,46"/>
+<area shape="rect" id="Node000003" href="$dd/d80/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b_a8cb2a98fcda78aab43f3a5b74b0ae6b5.html#a8cb2a98fcda78aab43f3a5b74b0ae6b5" title="Advance to next pixel (or mark as end)" alt="" coords="547,35,752,75"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="211,54,259,55,499,55,533,54,533,60,499,60,259,60,211,59"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="499,36,534,39,533,45,498,41"/>
+</map>

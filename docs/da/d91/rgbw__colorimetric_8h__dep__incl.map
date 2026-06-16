@@ -1,0 +1,14 @@
+<map id="fl/gfx/rgbw_colorimetric.h" name="fl/gfx/rgbw_colorimetric.h">
+<area shape="rect" id="Node000001" title="Chromaticity&#45;aware RGBW solvers — strict sub&#45;gamut + wx_lp_legacy white extraction + boosted overdriv..." alt="" coords="135,5,323,31"/>
+<area shape="rect" id="Node000002" href="$d9/d12/rgbw__colorimetric_8cpp_8hpp.html" title="Heavy implementations for the colorimetric RGBW solvers (issue #2545)." alt="" coords="5,79,236,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="201,40,140,81,137,76,199,36"/>
+<area shape="rect" id="Node000006" href="$df/d0b/rgbww_8cpp_8hpp.html" title="Dispatch + implementations for the 5&#45;channel RGB&#45;&gt;RGBWW path (issue #2558, Phase 3 of #2545)." alt="" coords="260,79,416,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="259,36,322,76,319,81,256,40"/>
+<area shape="rect" id="Node000003" href="$d5/d88/fl_2gfx_2__build_8cpp_8hpp.html" title="Unity build for fl/gfx/ — graphics types, primitives, and simulators." alt="" coords="152,152,305,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="151,109,212,150,210,154,148,114"/>
+<area shape="rect" id="Node000004" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="86,225,214,251"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="208,189,165,227,161,223,204,185"/>
+<area shape="rect" id="Node000005" href="$db/d06/fl_8gfx_09_8cpp.html" title="Unity build: recursive includes from src/fl/gfx/." alt="" coords="238,225,379,251"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="253,184,297,223,294,227,250,188"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="310,114,248,154,245,150,308,109"/>
+</map>

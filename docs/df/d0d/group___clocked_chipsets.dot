@@ -8,5 +8,7 @@ digraph "Clocked Chipsets"
   rankdir=LR;
   Node2 [id="Node000002",label="LED Chipset Controllers",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d28/group___chipsets.html",tooltip="Implementations of CLEDController classes for various led chipsets."];
   Node1 [id="Node000001",label="Clocked Chipsets",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Nominally SPI based, these chipsets have a data and a clock line."];
+  Node3 [id="Node000003",label="Silicon Labs ezWS2812\l Controllers",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d68/group___silabs_chipsets.html",tooltip="Note: SPI chipset controllers have been moved to separate headers in src/fl/chipsets/."];
   Node2->Node1 [shape=plaintext, dir="back", style="solid"];
+  Node1->Node3 [shape=plaintext, dir="back", style="solid"];
 }

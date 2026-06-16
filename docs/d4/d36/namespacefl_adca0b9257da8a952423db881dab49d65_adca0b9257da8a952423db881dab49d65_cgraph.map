@@ -1,0 +1,11 @@
+<map id="fl::shuffle" name="fl::shuffle">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,88,56"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a8d2ca4b34bd8bcae074055da7096c714.html#a8d2ca4b34bd8bcae074055da7096c714" title="Global default random number generator instance." alt="" coords="136,5,277,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,34,122,29,123,34,89,40"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_ad521cbc9c6d7b1e85fdbf5f559655284.html#ad521cbc9c6d7b1e85fdbf5f559655284" title=" " alt="" coords="165,55,248,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="89,47,152,57,152,62,88,52"/>
+<area shape="rect" id="Node000003" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="325,5,488,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="278,15,312,15,312,21,278,21"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a656e012612aa53c27b72bfc7d8c188a7.html#a656e012612aa53c27b72bfc7d8c188a7" title=" " alt="" coords="371,55,443,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="248,65,357,65,357,70,248,70"/>
+</map>

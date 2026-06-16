@@ -1,0 +1,15 @@
+<map id="getPlatformName" name="getPlatformName">
+<area shape="rect" id="Node000001" title="Get a human&#45;readable name for the current platform." alt="" coords="661,63,800,88"/>
+<area shape="rect" id="Node000002" href="$d8/da0/class_driver_test_runner_a5162083f7438ed1577175605a2b90549.html#a5162083f7438ed1577175605a2b90549" title="Print test startup header." alt="" coords="395,5,613,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="671,62,613,46,561,33,562,28,614,41,672,56"/>
+<area shape="rect" id="Node000005" href="$d8/da0/class_driver_test_runner_aba2ff20ff08ed16b5764bb73de7b4b23.html#aba2ff20ff08ed16b5764bb73de7b4b23" title="Print final test summary with pass/fail status." alt="" coords="112,120,347,145"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="678,95,614,110,476,127,347,134,347,128,475,121,613,105,677,89"/>
+<area shape="rect" id="Node000006" href="$d8/da0/class_driver_test_runner_aecda4c92e3d610584564ddf0d2f81e8e.html#aecda4c92e3d610584564ddf0d2f81e8e" title="Validate that all expected drivers are present." alt="" coords="407,55,601,95"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="647,78,601,78,601,73,647,73"/>
+<area shape="rect" id="Node000003" href="$d8/da0/class_driver_test_runner_aaab05c61d961d92ff48a5746076f8de6.html#aaab05c61d961d92ff48a5746076f8de6" title="Run all tests: validation + driver tests." alt="" coords="139,55,319,95"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="430,36,320,59,319,54,429,31"/>
+<area shape="rect" id="Node000004" href="$d8/de2/_driver_test_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,92,64,117"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="126,94,65,103,64,98,126,88"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="127,121,64,111,64,106,128,115"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="393,78,320,78,320,73,393,73"/>
+</map>

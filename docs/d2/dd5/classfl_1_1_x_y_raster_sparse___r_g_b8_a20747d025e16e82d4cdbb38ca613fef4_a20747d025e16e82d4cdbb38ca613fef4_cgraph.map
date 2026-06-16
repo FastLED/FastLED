@@ -1,0 +1,19 @@
+<map id="fl::XYRasterSparse_RGB8::setSize" name="fl::XYRasterSparse_RGB8::setSize">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,69,147,109"/>
+<area shape="rect" id="Node000002" href="$d2/dd5/classfl_1_1_x_y_raster_sparse___r_g_b8_af82f5c71688a541d50e2b305d8f418fd.html#af82f5c71688a541d50e2b305d8f418fd" title=" " alt="" coords="195,5,336,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="135,67,192,47,194,52,137,72"/>
+<area shape="rect" id="Node000006" href="$d2/dd5/classfl_1_1_x_y_raster_sparse___r_g_b8_a5ea09cc5c80c9445ff19015cb6ab23f3.html#a5ea09cc5c80c9445ff19015cb6ab23f3" title=" " alt="" coords="195,69,336,109"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="147,87,181,87,181,92,147,92"/>
+<area shape="rect" id="Node000007" href="$d2/dd5/classfl_1_1_x_y_raster_sparse___r_g_b8_a61ce08fb7b75ab1b1545a3099234e4ee.html#a61ce08fb7b75ab1b1545a3099234e4ee" title=" " alt="" coords="195,133,336,173"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="137,107,194,126,192,131,135,112"/>
+<area shape="rect" id="Node000003" href="$d2/dd5/classfl_1_1_x_y_raster_sparse___r_g_b8_aa7f9f8a5c30db648b65f53b480494a21.html#aa7f9f8a5c30db648b65f53b480494a21" title=" " alt="" coords="384,69,525,109"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="326,43,383,62,381,67,324,48"/>
+<area shape="rect" id="Node000005" href="$d2/d48/structfl_1_1rect_aecf504a5e48968c2f8d2c58f7c14f32e.html#aecf504a5e48968c2f8d2c58f7c14f32e" title=" " alt="" coords="399,13,511,38"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="336,23,385,23,385,28,336,28"/>
+<area shape="rect" id="Node000004" href="$d2/dd5/classfl_1_1_x_y_raster_sparse___r_g_b8_a6942db6e889813eed57aebb39999cff5.html#a6942db6e889813eed57aebb39999cff5" title=" " alt="" coords="573,69,739,109"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="525,87,560,87,560,92,525,92"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="336,87,370,87,370,92,336,92"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="324,131,381,111,383,116,326,136"/>
+<area shape="rect" id="Node000008" href="$d2/d48/structfl_1_1rect_aa7bc19df8ded3d56173324ff96f4abfa.html#aa7bc19df8ded3d56173324ff96f4abfa" title=" " alt="" coords="401,141,508,166"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="336,151,388,151,388,156,336,156"/>
+</map>

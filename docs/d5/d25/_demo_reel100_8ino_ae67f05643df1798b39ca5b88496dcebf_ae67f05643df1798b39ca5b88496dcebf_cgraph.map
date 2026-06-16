@@ -1,13 +1,7 @@
 <map id="sinelon" name="sinelon">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,75,80"/>
-<area shape="rect" id="Node000002" href="$d6/d6c/group___beat_generators_gaa46e5de1c4c27833359e7a97a18c839b.html#gaa46e5de1c4c27833359e7a97a18c839b" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="139,29,225,55"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="74,59,125,49,126,55,75,64"/>
-<area shape="rect" id="Node000006" href="$d1/dfb/colorutils_8h_a399e4e094995b8e97420b89a2dd6548b.html#a399e4e094995b8e97420b89a2dd6548b" title=" " alt="" coords="123,79,241,104"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="75,70,109,76,109,82,74,76"/>
-<area shape="rect" id="Node000003" href="$d6/d6c/group___beat_generators_gade6acbf6fd3c9d346148bccfcafb2fe2.html#gade6acbf6fd3c9d346148bccfcafb2fe2" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="292,5,359,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="225,32,278,23,279,28,226,37"/>
-<area shape="rect" id="Node000005" href="$d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145.html#ga1ff8ac00ad78e22acc7bb7445bfdb145" title="Scale a 16&#45;bit unsigned value by an 16&#45;bit value, which is treated as the numerator of a fraction who..." alt="" coords="289,55,361,80"/>
-<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="226,47,276,56,275,61,225,52"/>
-<area shape="rect" id="Node000004" href="$d6/d6c/group___beat_generators_ga1b48fc520db5f40910caf79974992395.html#ga1b48fc520db5f40910caf79974992395" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM, with BPM specified in Q8.8 fixed&#45;point format." alt="" coords="409,5,476,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="359,15,396,15,396,21,359,21"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,75,56"/>
+<area shape="rect" id="Node000002" href="$df/da5/lib8tion_8h_adf8e83564c52b94d0ff5594aede0be28.html#adf8e83564c52b94d0ff5594aede0be28" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="139,5,225,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="74,35,125,25,126,31,75,40"/>
+<area shape="rect" id="Node000003" href="$d1/dfb/colorutils_8h_a399e4e094995b8e97420b89a2dd6548b.html#a399e4e094995b8e97420b89a2dd6548b" title=" " alt="" coords="123,55,241,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="75,46,109,52,109,58,74,52"/>
 </map>

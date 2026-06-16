@@ -1,0 +1,17 @@
+<map id="fl::spi::MultiLaneDevice::waitComplete" name="fl::spi::MultiLaneDevice::waitComplete">
+<area shape="rect" id="Node000001" title="Wait for pending transmission to complete." alt="" coords="483,111,657,151"/>
+<area shape="rect" id="Node000002" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a68cfb14b18d62e7ccce04976e2fae78f.html#a68cfb14b18d62e7ccce04976e2fae78f" title="Shutdown hardware and release resources." alt="" coords="228,26,435,51"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="514,107,434,73,376,54,378,49,436,68,516,102"/>
+<area shape="rect" id="Node000004" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a512a780a7050fa0e91e83c5dba1e17bc.html#a512a780a7050fa0e91e83c5dba1e17bc" title=" " alt="" coords="5,69,180,109"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="469,121,434,117,180,97,180,92,435,112,469,116"/>
+<area shape="rect" id="Node000005" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_ad887a0e5eac7523dee2f0279eb91f449.html#ad887a0e5eac7523dee2f0279eb91f449" title="Convenience method &#45; wait for transmission to complete." alt="" coords="244,151,419,191"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="470,150,419,159,419,153,469,145"/>
+<area shape="rect" id="Node000006" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a547b2f30f70e16dbb22762f3f2370254.html#a547b2f30f70e16dbb22762f3f2370254" title="Internal implementation &#45; write all lanes atomically." alt="" coords="244,215,419,255"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="525,160,436,205,404,217,402,212,434,200,522,155"/>
+<area shape="rect" id="Node000003" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a2bc918c56583453aec7f6c3e8af8d7e7.html#a2bc918c56583453aec7f6c3e8af8d7e7" title="Destructor &#45; releases hardware resources." alt="" coords="5,5,180,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="214,35,180,33,180,28,214,29"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="258,57,181,73,180,68,257,52"/>
+<area shape="poly" id="edge6_Node000005_Node000005" title=" " alt="" coords="372,139,358,132,331,129,308,131,295,136,290,142,292,150,287,151,284,141,292,132,307,126,331,124,359,127,374,134"/>
+<area shape="rect" id="Node000007" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_ac20394c24a6406ccdd49a33d7e4f85ff.html#ac20394c24a6406ccdd49a33d7e4f85ff" title="Convenience method &#45; write multiple lanes in parallel (variadic template)" alt="" coords="5,215,180,255"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="230,237,180,237,180,232,230,232"/>
+</map>

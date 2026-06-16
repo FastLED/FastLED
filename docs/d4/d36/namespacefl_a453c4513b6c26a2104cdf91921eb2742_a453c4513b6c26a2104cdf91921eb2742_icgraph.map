@@ -1,0 +1,17 @@
+<map id="fl::formatJsonResponse" name="fl::formatJsonResponse">
+<area shape="rect" id="Node000001" title="Serialize JSON response to a string." alt="" coords="536,92,708,117"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aaaad760134ff434244ec0bfb2740a8f7.html#aaaad760134ff434244ec0bfb2740a8f7" title="Create a JSON&#45;RPC ResponseSink that writes to fl:: serial output." alt="" coords="281,43,488,68"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="546,92,446,71,447,65,547,87"/>
+<area shape="rect" id="Node000005" href="$db/dfb/_auto_research_remote_8cpp_a93e763eabce15abdcf77d67510e0da2c.html#a93e763eabce15abdcf77d67510e0da2c" title="Print JSON directly to Serial, bypassing fl::println and ScopedLogDisable This ensures RPC responses ..." alt="" coords="331,92,438,117"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="522,107,438,107,438,102,522,102"/>
+<area shape="rect" id="Node000006" href="$db/dfb/_auto_research_remote_8cpp_a34ed01c48f858d996b90eaf35a99dbc3.html#a34ed01c48f858d996b90eaf35a99dbc3" title="Print JSONL stream message directly to Serial, bypassing fl::println." alt="" coords="321,141,448,167"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="547,123,447,144,446,139,546,118"/>
+<area shape="rect" id="Node000003" href="$d1/df2/_auto_research_low_memory_8h_ae3f918f9121ab392058ef53302b021cf.html#ae3f918f9121ab392058ef53302b021cf" title=" " alt="" coords="5,5,233,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="280,43,210,33,211,28,281,38"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a7167ab7d0c24c14e0576b7df33c212b6.html#a7167ab7d0c24c14e0576b7df33c212b6" title="Create RequestSource and ResponseSink pair for serial I/O." alt="" coords="31,55,207,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="267,63,207,66,207,61,267,58"/>
+<area shape="rect" id="Node000007" href="$dd/dc8/_auto_research_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="94,116,145,141"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="308,149,145,134,145,128,308,144"/>
+<area shape="rect" id="Node000008" href="$dd/dc8/_auto_research_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="90,165,149,191"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="308,164,149,178,148,173,307,158"/>
+</map>

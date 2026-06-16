@@ -1,0 +1,17 @@
+<map id="fl/math/distance_lut.h" name="fl/math/distance_lut.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="123,5,285,31"/>
+<area shape="rect" id="Node000002" href="$de/d34/primitives_8h.html" title=" " alt="" coords="38,79,175,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,41,124,81,121,76,176,37"/>
+<area shape="rect" id="Node000005" href="$d4/d80/distance__lut_8cpp_8hpp.html" title="Single definition of distance antialiasing LUT This is included in the unity build via fl/gfx/_build...." alt="" coords="199,79,406,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="232,36,288,76,285,81,229,41"/>
+<area shape="rect" id="Node000003" href="$d8/dd5/gfx_8h.html" title="2D antialiased graphics for LED matrices" alt="" coords="61,152,153,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="109,118,109,152,104,152,104,118"/>
+<area shape="rect" id="Node000004" href="$d9/d2c/_perf_disc_8ino.html" title="Benchmark drawDisc on AVR (32x8 canvas, blend mode)" alt="" coords="5,225,208,280"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="109,191,109,225,104,225,104,191"/>
+<area shape="rect" id="Node000006" href="$dc/d5b/fl_2math_2__build_8cpp_8hpp.html" title="Unity build header for fl/math/ directory." alt="" coords="219,152,386,177"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="305,118,305,152,300,152,300,118"/>
+<area shape="rect" id="Node000007" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="236,240,364,265"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="305,191,303,240,298,239,299,191"/>
+<area shape="rect" id="Node000008" href="$d4/dc0/fl_8math_09_8cpp.html" title="Unity build: recursive includes from src/fl/math/." alt="" coords="388,240,543,265"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="338,181,444,237,442,242,335,186"/>
+</map>

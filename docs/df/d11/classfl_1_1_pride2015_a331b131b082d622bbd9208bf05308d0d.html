@@ -112,7 +112,7 @@ $(function(){initNavTree('df/d11/classfl_1_1_pride2015_a331b131b082d622bbd9208bf
         <tr>
           <td class="memname">void fl::Pride2015::draw </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="../../da/d5d/classfl_1_1_fx_a932d6e78e1afa4bb40cacefe1f01c97a.html#a932d6e78e1afa4bb40cacefe1f01c97a">Fx::DrawContext</a></td>          <td class="paramname"><span class="paramname"><em>context</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="../../da/d5d/classfl_1_1_fx_aa39b10c4da492882c4fe5a06556dbcee.html#aa39b10c4da492882c4fe5a06556dbcee">Fx::DrawContext</a></td>          <td class="paramname"><span class="paramname"><em>context</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -124,68 +124,71 @@ $(function(){initNavTree('df/d11/classfl_1_1_pride2015_a331b131b082d622bbd9208bf
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">now</td><td>The current time in milliseconds. <a class="el" href="../../da/d5d/classfl_1_1_fx.html">Fx</a> writers are encouraged to use this instead of millis() directly as this will more deterministic behavior. </td></tr>
+    <tr><td class="paramname">now</td><td>The current time in milliseconds. <a class="el" href="../../da/d5d/classfl_1_1_fx.html">Fx</a> writers are encouraged to use this instead of <a class="el" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer - returns milliseconds since system startup.">millis()</a> directly as this will more deterministic behavior. </td></tr>
   </table>
   </dd>
 </dl>
 
 <p>Implements <a class="el" href="../../da/d5d/classfl_1_1_fx_acd7594f99b0d75c1a14fce90f0219fd7.html#acd7594f99b0d75c1a14fce90f0219fd7">fl::Fx</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../d7/dc4/pride2015_8h_source.html#l00034">34</a> of file <a class="el" href="../../d7/dc4/pride2015_8h_source.html">pride2015.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   34</span>                                      {</div>
-<div class="line"><span class="lineno">   35</span>    <span class="keywordflow">if</span> (ctx.leds == <span class="keyword">nullptr</span> || <a class="code hl_variable" href="../../da/d5d/classfl_1_1_fx_a1535a3408666a39305db6532e4a57252.html#a1535a3408666a39305db6532e4a57252">mNumLeds</a> == 0) {</div>
-<div class="line"><span class="lineno">   36</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">   37</span>    }</div>
-<div class="line"><span class="lineno">   38</span> </div>
-<div class="line"><span class="lineno">   39</span>    uint8_t sat8 = <a class="code hl_function" href="../../d6/d6c/group___beat_generators_gaf917825ff26c8e1174c5b674a2f3c631.html#gaf917825ff26c8e1174c5b674a2f3c631">beatsin88</a>(87, 220, 250);</div>
-<div class="line"><span class="lineno">   40</span>    uint8_t brightdepth = <a class="code hl_function" href="../../d6/d6c/group___beat_generators_gaf917825ff26c8e1174c5b674a2f3c631.html#gaf917825ff26c8e1174c5b674a2f3c631">beatsin88</a>(341, 96, 224);</div>
-<div class="line"><span class="lineno">   41</span>    uint16_t brightnessthetainc16 = <a class="code hl_function" href="../../d6/d6c/group___beat_generators_gaf917825ff26c8e1174c5b674a2f3c631.html#gaf917825ff26c8e1174c5b674a2f3c631">beatsin88</a>(203, (25 * 256), (40 * 256));</div>
-<div class="line"><span class="lineno">   42</span>    uint8_t msmultiplier = <a class="code hl_function" href="../../d6/d6c/group___beat_generators_gaf917825ff26c8e1174c5b674a2f3c631.html#gaf917825ff26c8e1174c5b674a2f3c631">beatsin88</a>(147, 23, 60);</div>
-<div class="line"><span class="lineno">   43</span> </div>
-<div class="line"><span class="lineno">   44</span>    uint16_t hue16 = <a class="code hl_variable" href="../../df/d11/classfl_1_1_pride2015_a3f3c4f919eb0da5c95e1c9d31155b16f.html#a3f3c4f919eb0da5c95e1c9d31155b16f">mHue16</a>;</div>
-<div class="line"><span class="lineno">   45</span>    uint16_t hueinc16 = <a class="code hl_function" href="../../d6/d6c/group___beat_generators_gaf917825ff26c8e1174c5b674a2f3c631.html#gaf917825ff26c8e1174c5b674a2f3c631">beatsin88</a>(113, 1, 3000);</div>
-<div class="line"><span class="lineno">   46</span> </div>
-<div class="line"><span class="lineno">   47</span>    uint16_t ms = millis();</div>
-<div class="line"><span class="lineno">   48</span>    uint16_t deltams = ms - <a class="code hl_variable" href="../../df/d11/classfl_1_1_pride2015_a91573c55e5a17e5147e61e0b60174984.html#a91573c55e5a17e5147e61e0b60174984">mLastMillis</a>;</div>
-<div class="line"><span class="lineno">   49</span>    <a class="code hl_variable" href="../../df/d11/classfl_1_1_pride2015_a91573c55e5a17e5147e61e0b60174984.html#a91573c55e5a17e5147e61e0b60174984">mLastMillis</a> = ms;</div>
-<div class="line"><span class="lineno">   50</span>    <a class="code hl_variable" href="../../df/d11/classfl_1_1_pride2015_a3a3b096fe038eaeec775129d568ef758.html#a3a3b096fe038eaeec775129d568ef758">mPseudotime</a> += deltams * msmultiplier;</div>
-<div class="line"><span class="lineno">   51</span>    <a class="code hl_variable" href="../../df/d11/classfl_1_1_pride2015_a3f3c4f919eb0da5c95e1c9d31155b16f.html#a3f3c4f919eb0da5c95e1c9d31155b16f">mHue16</a> += deltams * <a class="code hl_function" href="../../d6/d6c/group___beat_generators_gaf917825ff26c8e1174c5b674a2f3c631.html#gaf917825ff26c8e1174c5b674a2f3c631">beatsin88</a>(400, 5, 9);</div>
-<div class="line"><span class="lineno">   52</span>    uint16_t brightnesstheta16 = <a class="code hl_variable" href="../../df/d11/classfl_1_1_pride2015_a3a3b096fe038eaeec775129d568ef758.html#a3a3b096fe038eaeec775129d568ef758">mPseudotime</a>;</div>
-<div class="line"><span class="lineno">   53</span> </div>
-<div class="line"><span class="lineno">   54</span>    <span class="comment">// set master brightness control</span></div>
-<div class="line"><span class="lineno">   55</span>    <span class="keywordflow">for</span> (uint16_t i = 0; i &lt; <a class="code hl_variable" href="../../da/d5d/classfl_1_1_fx_a1535a3408666a39305db6532e4a57252.html#a1535a3408666a39305db6532e4a57252">mNumLeds</a>; i++) {</div>
-<div class="line"><span class="lineno">   56</span>        hue16 += hueinc16;</div>
-<div class="line"><span class="lineno">   57</span>        uint8_t hue8 = hue16 / 256;</div>
-<div class="line"><span class="lineno">   58</span> </div>
-<div class="line"><span class="lineno">   59</span>        brightnesstheta16 += brightnessthetainc16;</div>
-<div class="line"><span class="lineno">   60</span>        uint16_t b16 = <a class="code hl_define" href="../../d1/ddc/group___trig_gace4cc675280eecec1eeb83da47406409.html#gace4cc675280eecec1eeb83da47406409">sin16</a>(brightnesstheta16) + 32768;</div>
-<div class="line"><span class="lineno">   61</span> </div>
-<div class="line"><span class="lineno">   62</span>        uint16_t bri16 = (fl::u32)((fl::u32)b16 * (fl::u32)b16) / 65536;</div>
-<div class="line"><span class="lineno">   63</span>        uint8_t bri8 = (fl::u32)(((fl::u32)bri16) * brightdepth) / 65536;</div>
-<div class="line"><span class="lineno">   64</span>        bri8 += (255 - brightdepth);</div>
+<p class="definition">Definition at line <a class="el" href="../../d7/dc4/pride2015_8h_source.html#l00032">32</a> of file <a class="el" href="../../d7/dc4/pride2015_8h_source.html">pride2015.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   32</span>                                      {</div>
+<div class="line"><span class="lineno">   33</span>    <span class="keywordflow">if</span> (ctx.leds.empty() || <a class="code hl_variable" href="../../da/d5d/classfl_1_1_fx_a6835ef50b9ce8c56d889a56210a89749.html#a6835ef50b9ce8c56d889a56210a89749">mNumLeds</a> == 0) {</div>
+<div class="line"><span class="lineno">   34</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">   35</span>    }</div>
+<div class="line"><span class="lineno">   36</span> </div>
+<div class="line"><span class="lineno">   37</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> sat8 = <a class="code hl_function" href="../../d6/d6c/group___beat_generators_ga4c4a1bcd3ca4f16cf04f1344afd601cc.html#ga4c4a1bcd3ca4f16cf04f1344afd601cc">beatsin88</a>(87, 220, 250);</div>
+<div class="line"><span class="lineno">   38</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> brightdepth = <a class="code hl_function" href="../../d6/d6c/group___beat_generators_ga4c4a1bcd3ca4f16cf04f1344afd601cc.html#ga4c4a1bcd3ca4f16cf04f1344afd601cc">beatsin88</a>(341, 96, 224);</div>
+<div class="line"><span class="lineno">   39</span>    u16 brightnessthetainc16 = <a class="code hl_function" href="../../d6/d6c/group___beat_generators_ga4c4a1bcd3ca4f16cf04f1344afd601cc.html#ga4c4a1bcd3ca4f16cf04f1344afd601cc">beatsin88</a>(203, (25 * 256), (40 * 256));</div>
+<div class="line"><span class="lineno">   40</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> msmultiplier = <a class="code hl_function" href="../../d6/d6c/group___beat_generators_ga4c4a1bcd3ca4f16cf04f1344afd601cc.html#ga4c4a1bcd3ca4f16cf04f1344afd601cc">beatsin88</a>(147, 23, 60);</div>
+<div class="line"><span class="lineno">   41</span> </div>
+<div class="line"><span class="lineno">   42</span>    u16 hue16 = <a class="code hl_variable" href="../../df/d11/classfl_1_1_pride2015_a6147ab9a63463aef290e076294ca0edb.html#a6147ab9a63463aef290e076294ca0edb">mHue16</a>;</div>
+<div class="line"><span class="lineno">   43</span>    u16 hueinc16 = <a class="code hl_function" href="../../d6/d6c/group___beat_generators_ga4c4a1bcd3ca4f16cf04f1344afd601cc.html#ga4c4a1bcd3ca4f16cf04f1344afd601cc">beatsin88</a>(113, 1, 3000);</div>
+<div class="line"><span class="lineno">   44</span> </div>
+<div class="line"><span class="lineno">   45</span>    u16 ms = <a class="code hl_function" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a>();</div>
+<div class="line"><span class="lineno">   46</span>    u16 deltams = ms - <a class="code hl_variable" href="../../df/d11/classfl_1_1_pride2015_afef042d9feb21ce133da400654e4387a.html#afef042d9feb21ce133da400654e4387a">mLastMillis</a>;</div>
+<div class="line"><span class="lineno">   47</span>    <a class="code hl_variable" href="../../df/d11/classfl_1_1_pride2015_afef042d9feb21ce133da400654e4387a.html#afef042d9feb21ce133da400654e4387a">mLastMillis</a> = ms;</div>
+<div class="line"><span class="lineno">   48</span>    <a class="code hl_variable" href="../../df/d11/classfl_1_1_pride2015_afaef15db18e9faebdad391fcbbb83441.html#afaef15db18e9faebdad391fcbbb83441">mPseudotime</a> += deltams * msmultiplier;</div>
+<div class="line"><span class="lineno">   49</span>    <a class="code hl_variable" href="../../df/d11/classfl_1_1_pride2015_a6147ab9a63463aef290e076294ca0edb.html#a6147ab9a63463aef290e076294ca0edb">mHue16</a> += deltams * <a class="code hl_function" href="../../d6/d6c/group___beat_generators_ga4c4a1bcd3ca4f16cf04f1344afd601cc.html#ga4c4a1bcd3ca4f16cf04f1344afd601cc">beatsin88</a>(400, 5, 9);</div>
+<div class="line"><span class="lineno">   50</span>    u16 brightnesstheta16 = <a class="code hl_variable" href="../../df/d11/classfl_1_1_pride2015_afaef15db18e9faebdad391fcbbb83441.html#afaef15db18e9faebdad391fcbbb83441">mPseudotime</a>;</div>
+<div class="line"><span class="lineno">   51</span> </div>
+<div class="line"><span class="lineno">   52</span>    <span class="comment">// set master brightness control</span></div>
+<div class="line"><span class="lineno">   53</span>    <span class="keywordflow">for</span> (u16 i = 0; i &lt; <a class="code hl_variable" href="../../da/d5d/classfl_1_1_fx_a6835ef50b9ce8c56d889a56210a89749.html#a6835ef50b9ce8c56d889a56210a89749">mNumLeds</a>; i++) {</div>
+<div class="line"><span class="lineno">   54</span>        hue16 += hueinc16;</div>
+<div class="line"><span class="lineno">   55</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> hue8 = hue16 / 256;</div>
+<div class="line"><span class="lineno">   56</span> </div>
+<div class="line"><span class="lineno">   57</span>        brightnesstheta16 += brightnessthetainc16;</div>
+<div class="line"><span class="lineno">   58</span>        u16 b16 = sin16(brightnesstheta16) + 32768;</div>
+<div class="line"><span class="lineno">   59</span> </div>
+<div class="line"><span class="lineno">   60</span>        u16 bri16 = (fl::u32)((fl::u32)b16 * (fl::u32)b16) / 65536;</div>
+<div class="line"><span class="lineno">   61</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> bri8 = (fl::u32)(((fl::u32)bri16) * brightdepth) / 65536;</div>
+<div class="line"><span class="lineno">   62</span>        bri8 += (255 - brightdepth);</div>
+<div class="line"><span class="lineno">   63</span> </div>
+<div class="line"><span class="lineno">   64</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a0d074c08905bad763e238b16d85e20e7.html#a0d074c08905bad763e238b16d85e20e7">CRGB</a> newcolor = <a class="code hl_typedef" href="../../dd/dc7/group___h_s_v2_r_g_b_ga259e6d3ae92ca32d2390e7d8eaa1c7ae.html#ga259e6d3ae92ca32d2390e7d8eaa1c7ae">CHSV</a>(hue8, sat8, bri8);</div>
 <div class="line"><span class="lineno">   65</span> </div>
-<div class="line"><span class="lineno">   66</span>        CRGB newcolor = CHSV(hue8, sat8, bri8);</div>
+<div class="line"><span class="lineno">   66</span>        u16 pixelnumber = (<a class="code hl_variable" href="../../da/d5d/classfl_1_1_fx_a6835ef50b9ce8c56d889a56210a89749.html#a6835ef50b9ce8c56d889a56210a89749">mNumLeds</a> - 1) - i;</div>
 <div class="line"><span class="lineno">   67</span> </div>
-<div class="line"><span class="lineno">   68</span>        uint16_t pixelnumber = (<a class="code hl_variable" href="../../da/d5d/classfl_1_1_fx_a1535a3408666a39305db6532e4a57252.html#a1535a3408666a39305db6532e4a57252">mNumLeds</a> - 1) - i;</div>
-<div class="line"><span class="lineno">   69</span> </div>
-<div class="line"><span class="lineno">   70</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6">nblend</a>(ctx.leds[pixelnumber], newcolor, 64);</div>
-<div class="line"><span class="lineno">   71</span>    }</div>
-<div class="line"><span class="lineno">   72</span>}</div>
-<div class="ttc" id="aclassfl_1_1_fx_a1535a3408666a39305db6532e4a57252_html_a1535a3408666a39305db6532e4a57252"><div class="ttname"><a href="../../da/d5d/classfl_1_1_fx_a1535a3408666a39305db6532e4a57252.html#a1535a3408666a39305db6532e4a57252">fl::Fx::mNumLeds</a></div><div class="ttdeci">uint16_t mNumLeds</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d0c/fx_8h_source.html#l00053">fx.h:53</a></div></div>
-<div class="ttc" id="aclassfl_1_1_pride2015_a3a3b096fe038eaeec775129d568ef758_html_a3a3b096fe038eaeec775129d568ef758"><div class="ttname"><a href="../../df/d11/classfl_1_1_pride2015_a3a3b096fe038eaeec775129d568ef758.html#a3a3b096fe038eaeec775129d568ef758">fl::Pride2015::mPseudotime</a></div><div class="ttdeci">uint16_t mPseudotime</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dc4/pride2015_8h_source.html#l00027">pride2015.h:27</a></div></div>
-<div class="ttc" id="aclassfl_1_1_pride2015_a3f3c4f919eb0da5c95e1c9d31155b16f_html_a3f3c4f919eb0da5c95e1c9d31155b16f"><div class="ttname"><a href="../../df/d11/classfl_1_1_pride2015_a3f3c4f919eb0da5c95e1c9d31155b16f.html#a3f3c4f919eb0da5c95e1c9d31155b16f">fl::Pride2015::mHue16</a></div><div class="ttdeci">uint16_t mHue16</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dc4/pride2015_8h_source.html#l00029">pride2015.h:29</a></div></div>
-<div class="ttc" id="aclassfl_1_1_pride2015_a91573c55e5a17e5147e61e0b60174984_html_a91573c55e5a17e5147e61e0b60174984"><div class="ttname"><a href="../../df/d11/classfl_1_1_pride2015_a91573c55e5a17e5147e61e0b60174984.html#a91573c55e5a17e5147e61e0b60174984">fl::Pride2015::mLastMillis</a></div><div class="ttdeci">uint16_t mLastMillis</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dc4/pride2015_8h_source.html#l00028">pride2015.h:28</a></div></div>
-<div class="ttc" id="agroup___beat_generators_gaf917825ff26c8e1174c5b674a2f3c631_html_gaf917825ff26c8e1174c5b674a2f3c631"><div class="ttname"><a href="../../d6/d6c/group___beat_generators_gaf917825ff26c8e1174c5b674a2f3c631.html#gaf917825ff26c8e1174c5b674a2f3c631">beatsin88</a></div><div class="ttdeci">LIB8STATIC uint16_t beatsin88(accum88 beats_per_minute_88, uint16_t lowest=0, uint16_t highest=65535, uint32_t timebase=0, uint16_t phase_offset=0)</div><div class="ttdoc">Generates a 16-bit sine wave at a given BPM that oscillates within a given range.</div><div class="ttdef"><b>Definition</b> <a href="../../df/da5/lib8tion_8h_source.html#l00801">lib8tion.h:801</a></div></div>
-<div class="ttc" id="agroup___trig_gace4cc675280eecec1eeb83da47406409_html_gace4cc675280eecec1eeb83da47406409"><div class="ttname"><a href="../../d1/ddc/group___trig_gace4cc675280eecec1eeb83da47406409.html#gace4cc675280eecec1eeb83da47406409">sin16</a></div><div class="ttdeci">#define sin16</div><div class="ttdoc">Platform-independent alias of the fast sin implementation.</div><div class="ttdef"><b>Definition</b> <a href="../../d3/db9/trig8_8h_source.html#l00112">trig8.h:112</a></div></div>
-<div class="ttc" id="anamespacefl_aa1e0cd66825220bead12cfc1ab7f33c6_html_aa1e0cd66825220bead12cfc1ab7f33c6"><div class="ttname"><a href="../../d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6">fl::nblend</a></div><div class="ttdeci">CRGB &amp; nblend(CRGB &amp;existing, const CRGB &amp;overlay, fract8 amountOfOverlay)</div><div class="ttdef"><b>Definition</b> <a href="../../da/d2d/colorutils_8cpp_source.html#l00020">colorutils.cpp:20</a></div></div>
+<div class="line"><span class="lineno">   68</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6">nblend</a>(ctx.leds[pixelnumber], newcolor, 64);</div>
+<div class="line"><span class="lineno">   69</span>    }</div>
+<div class="line"><span class="lineno">   70</span>}</div>
+<div class="ttc" id="aclassfl_1_1_fx_a6835ef50b9ce8c56d889a56210a89749_html_a6835ef50b9ce8c56d889a56210a89749"><div class="ttname"><a href="../../da/d5d/classfl_1_1_fx_a6835ef50b9ce8c56d889a56210a89749.html#a6835ef50b9ce8c56d889a56210a89749">fl::Fx::mNumLeds</a></div><div class="ttdeci">u16 mNumLeds</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d0c/fx_8h_source.html#l00053">fx.h:53</a></div></div>
+<div class="ttc" id="aclassfl_1_1_pride2015_a6147ab9a63463aef290e076294ca0edb_html_a6147ab9a63463aef290e076294ca0edb"><div class="ttname"><a href="../../df/d11/classfl_1_1_pride2015_a6147ab9a63463aef290e076294ca0edb.html#a6147ab9a63463aef290e076294ca0edb">fl::Pride2015::mHue16</a></div><div class="ttdeci">u16 mHue16</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dc4/pride2015_8h_source.html#l00027">pride2015.h:27</a></div></div>
+<div class="ttc" id="aclassfl_1_1_pride2015_afaef15db18e9faebdad391fcbbb83441_html_afaef15db18e9faebdad391fcbbb83441"><div class="ttname"><a href="../../df/d11/classfl_1_1_pride2015_afaef15db18e9faebdad391fcbbb83441.html#afaef15db18e9faebdad391fcbbb83441">fl::Pride2015::mPseudotime</a></div><div class="ttdeci">u16 mPseudotime</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dc4/pride2015_8h_source.html#l00025">pride2015.h:25</a></div></div>
+<div class="ttc" id="aclassfl_1_1_pride2015_afef042d9feb21ce133da400654e4387a_html_afef042d9feb21ce133da400654e4387a"><div class="ttname"><a href="../../df/d11/classfl_1_1_pride2015_afef042d9feb21ce133da400654e4387a.html#afef042d9feb21ce133da400654e4387a">fl::Pride2015::mLastMillis</a></div><div class="ttdeci">u16 mLastMillis</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dc4/pride2015_8h_source.html#l00026">pride2015.h:26</a></div></div>
+<div class="ttc" id="agroup___beat_generators_ga4c4a1bcd3ca4f16cf04f1344afd601cc_html_ga4c4a1bcd3ca4f16cf04f1344afd601cc"><div class="ttname"><a href="../../d6/d6c/group___beat_generators_ga4c4a1bcd3ca4f16cf04f1344afd601cc.html#ga4c4a1bcd3ca4f16cf04f1344afd601cc">fl::beatsin88</a></div><div class="ttdeci">LIB8STATIC u16 beatsin88(accum88 beats_per_minute_88, u16 lowest=0, u16 highest=65535, u32 timebase=0, u16 phase_offset=0) FL_NOEXCEPT</div><div class="ttdoc">Generates a 16-bit sine wave at a given BPM that oscillates within a given range.</div><div class="ttdef"><b>Definition</b> <a href="../../de/dd3/math_2beat_8h_source.html#l00063">beat.h:63</a></div></div>
+<div class="ttc" id="agroup___h_s_v2_r_g_b_ga259e6d3ae92ca32d2390e7d8eaa1c7ae_html_ga259e6d3ae92ca32d2390e7d8eaa1c7ae"><div class="ttname"><a href="../../dd/dc7/group___h_s_v2_r_g_b_ga259e6d3ae92ca32d2390e7d8eaa1c7ae.html#ga259e6d3ae92ca32d2390e7d8eaa1c7ae">CHSV</a></div><div class="ttdeci">fl::hsv8 CHSV</div><div class="ttdef"><b>Definition</b> <a href="../../d8/dd0/chsv_8h_source.html#l00011">chsv.h:11</a></div></div>
+<div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
+<div class="ttc" id="anamespacefl_a0d074c08905bad763e238b16d85e20e7_html_a0d074c08905bad763e238b16d85e20e7"><div class="ttname"><a href="../../d4/d36/namespacefl_a0d074c08905bad763e238b16d85e20e7.html#a0d074c08905bad763e238b16d85e20e7">fl::CRGB</a></div><div class="ttdeci">fl::CRGB CRGB</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d78/video_8h_source.html#l00015">video.h:15</a></div></div>
+<div class="ttc" id="anamespacefl_a335fa6e4af7f0a011997ea0137d49b5a_html_a335fa6e4af7f0a011997ea0137d49b5a"><div class="ttname"><a href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a></div><div class="ttdeci">fl::u32 millis()</div><div class="ttdoc">Universal millisecond timer - returns milliseconds since system startup.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d18/chrono_8cpp_8hpp_source.html#l00064">chrono.cpp.hpp:64</a></div></div>
+<div class="ttc" id="anamespacefl_aa1e0cd66825220bead12cfc1ab7f33c6_html_aa1e0cd66825220bead12cfc1ab7f33c6"><div class="ttname"><a href="../../d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6">fl::nblend</a></div><div class="ttdeci">CRGB &amp; nblend(CRGB &amp;existing, const CRGB &amp;overlay, fract8 amountOfOverlay)</div><div class="ttdef"><b>Definition</b> <a href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l00022">colorutils.cpp.hpp:22</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/da5/lib8tion_8h_source.html#l00801">beatsin88()</a>, <a class="el" href="../../db/ded/draw__context_8h_source.html#l00013">fl::_DrawContext::leds</a>, <a class="el" href="../../d7/dc4/pride2015_8h_source.html#l00029">mHue16</a>, <a class="el" href="../../d7/dc4/pride2015_8h_source.html#l00028">mLastMillis</a>, <a class="el" href="../../d2/d0c/fx_8h_source.html#l00053">fl::Fx::mNumLeds</a>, <a class="el" href="../../d7/dc4/pride2015_8h_source.html#l00027">mPseudotime</a>, <a class="el" href="../../da/d2d/colorutils_8cpp_source.html#l00020">fl::nblend()</a>, and <a class="el" href="../../d3/db9/trig8_8h_source.html#l00112">sin16</a>.</p>
+<p class="reference">References <a class="el" href="../../de/dd3/math_2beat_8h_source.html#l00063">fl::beatsin88()</a>, <a class="el" href="../../db/ded/draw__context_8h_source.html#l00012">fl::DrawContext::leds</a>, <a class="el" href="../../d7/dc4/pride2015_8h_source.html#l00027">mHue16</a>, <a class="el" href="../../db/d18/chrono_8cpp_8hpp_source.html#l00064">fl::millis()</a>, <a class="el" href="../../d7/dc4/pride2015_8h_source.html#l00026">mLastMillis</a>, <a class="el" href="../../d2/d0c/fx_8h_source.html#l00053">fl::Fx::mNumLeds</a>, <a class="el" href="../../d7/dc4/pride2015_8h_source.html#l00025">mPseudotime</a>, and <a class="el" href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l00022">fl::nblend()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../df/d11/classfl_1_1_pride2015_a331b131b082d622bbd9208bf05308d0d_a331b131b082d622bbd9208bf05308d0d_cgraph.svg" width="652" height="212"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../df/d11/classfl_1_1_pride2015_a331b131b082d622bbd9208bf05308d0d_a331b131b082d622bbd9208bf05308d0d_cgraph.svg" width="558" height="138"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -197,7 +200,7 @@ $(function(){initNavTree('df/d11/classfl_1_1_pride2015_a331b131b082d622bbd9208bf
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../df/d11/classfl_1_1_pride2015.html">Pride2015</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

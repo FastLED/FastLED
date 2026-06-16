@@ -107,7 +107,7 @@ $(function(){initNavTree('dd/d67/function_8h_ade8043ede62066d1f4666a7eece358d1.h
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../d4/d54/compiler__control_8h_a373eeaf762a6a66a0a6984bd204a72dd.html#a373eeaf762a6a66a0a6984bd204a72dd">FL_DISABLE_WARNING_PUSH</a> FL_DISABLE_WARNING </td>
+          <td class="memname"><a class="el" href="../../df/d96/s16x16x4_8h_a373eeaf762a6a66a0a6984bd204a72dd.html#a373eeaf762a6a66a0a6984bd204a72dd">FL_DISABLE_WARNING_PUSH</a> FL_DISABLE_WARNING </td>
           <td>(</td>
           <td class="paramtype">float-</td>          <td class="paramname"><span class="paramname"><em>equal</em></span></td><td>)</td>
           <td></td>
@@ -115,357 +115,570 @@ $(function(){initNavTree('dd/d67/function_8h_ade8043ede62066d1f4666a7eece358d1.h
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d67/function_8h_source.html#l00017">17</a> of file <a class="el" href="../../dd/d67/function_8h_source.html">function.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   19</span>             {</div>
-<div class="line"><span class="lineno">   20</span> </div>
-<div class="line"><span class="lineno">   21</span><span class="comment">//----------------------------------------------------------------------------</span></div>
-<div class="line"><span class="lineno">   22</span><span class="comment">// is_function_pointer trait - detects function pointers like R(*)(Args...)</span></div>
-<div class="line"><span class="lineno">   23</span><span class="comment">//----------------------------------------------------------------------------</span></div>
-<div class="line"><span class="lineno">   24</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt; <span class="keyword">struct </span>is_function_pointer {</div>
-<div class="line"><span class="lineno">   25</span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keywordtype">bool</span> value = <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">   26</span>};</div>
-<div class="line"><span class="lineno">   27</span> </div>
-<div class="line"><span class="lineno">   28</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> R, <span class="keyword">typename</span>... Args&gt; </div>
-<div class="line"><span class="lineno">   29</span><span class="keyword">struct </span>is_function_pointer&lt;R(*)(Args...)&gt; {</div>
-<div class="line"><span class="lineno">   30</span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keywordtype">bool</span> value = <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">   31</span>};</div>
-<div class="line"><span class="lineno">   32</span> </div>
-<div class="line"><span class="lineno">   33</span><span class="comment">//----------------------------------------------------------------------------</span></div>
-<div class="line"><span class="lineno">   34</span><span class="comment">// More or less a drop in replacement for std::function</span></div>
-<div class="line"><span class="lineno">   35</span><span class="comment">// function&lt;R(Args...)&gt;: type‐erasing &quot;std::function&quot; replacement</span></div>
-<div class="line"><span class="lineno">   36</span><span class="comment">// Supports free functions, lambdas/functors, member functions (const &amp;</span></div>
-<div class="line"><span class="lineno">   37</span><span class="comment">// non‑const)</span></div>
-<div class="line"><span class="lineno">   38</span><span class="comment">// </span></div>
-<div class="line"><span class="lineno">   39</span><span class="comment">// NEW: Uses inline storage for member functions, free functions, and small</span></div>
-<div class="line"><span class="lineno">   40</span><span class="comment">// lambdas/functors. Only large lambdas/functors use heap allocation.</span></div>
-<div class="line"><span class="lineno">   41</span><span class="comment">//----------------------------------------------------------------------------</span></div>
-<div class="line"><span class="lineno">   42</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span>&gt; <span class="keyword">class </span>function;</div>
-<div class="line"><span class="lineno">   43</span> </div>
-<div class="line"><span class="lineno">   44</span> </div>
-<div class="line"><span class="lineno">   45</span> </div>
-<div class="line"><span class="lineno">   46</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> R, <span class="keyword">typename</span>... Args&gt;</div>
-<div class="line"><span class="lineno">   47</span><span class="keyword">class </span><a class="code hl_define" href="../../d1/ddf/align_8h_af8ff064181a2295b94633541ca2e5930.html#af8ff064181a2295b94633541ca2e5930">FL_ALIGN</a> function&lt;R(Args...)&gt; {</div>
-<div class="line"><span class="lineno">   48</span><span class="keyword">private</span>:</div>
-<div class="line"><span class="lineno">   49</span>    <span class="keyword">struct </span>CallableBase {</div>
-<div class="line"><span class="lineno">   50</span>        <span class="keyword">virtual</span> R <a class="code hl_function" href="../../d4/d36/namespacefl_a165dae1c4d4ff24e46ccb72bdcb4cdd9.html#a165dae1c4d4ff24e46ccb72bdcb4cdd9">invoke</a>(Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>) = 0;</div>
-<div class="line"><span class="lineno">   51</span>        <span class="keyword">virtual</span> ~CallableBase() = <span class="keywordflow">default</span>;</div>
-<div class="line"><span class="lineno">   52</span>    };</div>
+<p class="definition">Definition at line <a class="el" href="../../dd/d67/function_8h_source.html#l00043">43</a> of file <a class="el" href="../../dd/d67/function_8h_source.html">function.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   45</span>             {</div>
+<div class="line"><span class="lineno">   46</span> </div>
+<div class="line"><span class="lineno">   47</span><span class="comment">//----------------------------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">   48</span><span class="comment">// is_function_pointer trait - detects function pointers like R(*)(Args...)</span></div>
+<div class="line"><span class="lineno">   49</span><span class="comment">//----------------------------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">   50</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt; <span class="keyword">struct </span>is_function_pointer {</div>
+<div class="line"><span class="lineno">   51</span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keywordtype">bool</span> value = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   52</span>};</div>
 <div class="line"><span class="lineno">   53</span> </div>
-<div class="line"><span class="lineno">   54</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> F&gt;</div>
-<div class="line"><span class="lineno">   55</span>    <span class="keyword">struct </span>Callable : CallableBase {</div>
-<div class="line"><span class="lineno">   56</span>        F f;</div>
-<div class="line"><span class="lineno">   57</span>        Callable(F fn) : f(fn) {}</div>
-<div class="line"><span class="lineno">   58</span>        R <a class="code hl_function" href="../../d4/d36/namespacefl_a165dae1c4d4ff24e46ccb72bdcb4cdd9.html#a165dae1c4d4ff24e46ccb72bdcb4cdd9">invoke</a>(Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>)<span class="keyword"> override </span>{ <span class="keywordflow">return</span> f(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...); }</div>
-<div class="line"><span class="lineno">   59</span>    };</div>
-<div class="line"><span class="lineno">   60</span> </div>
-<div class="line"><span class="lineno">   61</span>    <span class="comment">// Type-erased free function callable - stored inline!</span></div>
-<div class="line"><span class="lineno">   62</span>    <span class="keyword">struct </span>FreeFunctionCallable {</div>
-<div class="line"><span class="lineno">   63</span>        R (*func_ptr)(Args...);</div>
-<div class="line"><span class="lineno">   64</span>        </div>
-<div class="line"><span class="lineno">   65</span>        FreeFunctionCallable(R (*fp)(Args...)) : func_ptr(fp) {}</div>
-<div class="line"><span class="lineno">   66</span>        </div>
-<div class="line"><span class="lineno">   67</span>        R <a class="code hl_function" href="../../d4/d36/namespacefl_a165dae1c4d4ff24e46ccb72bdcb4cdd9.html#a165dae1c4d4ff24e46ccb72bdcb4cdd9">invoke</a>(Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>)<span class="keyword"> const </span>{</div>
-<div class="line"><span class="lineno">   68</span>            <span class="keywordflow">return</span> func_ptr(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
-<div class="line"><span class="lineno">   69</span>        }</div>
-<div class="line"><span class="lineno">   70</span>    };</div>
-<div class="line"><span class="lineno">   71</span> </div>
-<div class="line"><span class="lineno">   72</span>    <span class="comment">// Type-erased small lambda/functor callable - stored inline!</span></div>
-<div class="line"><span class="lineno">   73</span>    <span class="comment">// Size limit for inline storage - configurable via preprocessor define</span></div>
-<div class="line"><span class="lineno">   74</span> </div>
-<div class="line"><span class="lineno">   75</span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> fl::size kInlineLambdaSize = <a class="code hl_define" href="../../dd/d67/function_8h_a255e85529978bb20dbf35a725491f8cf.html#a255e85529978bb20dbf35a725491f8cf">FASTLED_INLINE_LAMBDA_SIZE</a>;</div>
-<div class="line"><span class="lineno">   76</span>    </div>
-<div class="line"><span class="lineno">   77</span>    <span class="keyword">struct </span>InlinedLambda {</div>
-<div class="line"><span class="lineno">   78</span>        <span class="comment">// Storage for the lambda/functor object</span></div>
-<div class="line"><span class="lineno">   79</span>        <span class="comment">// Use aligned storage to ensure proper alignment for any type</span></div>
-<div class="line"><span class="lineno">   80</span>        <span class="keyword">alignas</span>(max_align_t) <span class="keywordtype">char</span> bytes[kInlineLambdaSize];</div>
-<div class="line"><span class="lineno">   81</span>        </div>
-<div class="line"><span class="lineno">   82</span>        <span class="comment">// Type-erased invoker and destructor function pointers</span></div>
-<div class="line"><span class="lineno">   83</span>        R (*invoker)(<span class="keyword">const</span> InlinedLambda&amp; storage, Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>);</div>
-<div class="line"><span class="lineno">   84</span>        void (*destructor)(InlinedLambda&amp; storage);</div>
-<div class="line"><span class="lineno">   85</span>        </div>
-<div class="line"><span class="lineno">   86</span>        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Function&gt;</div>
-<div class="line"><span class="lineno">   87</span>        InlinedLambda(Function f) {</div>
-<div class="line"><span class="lineno">   88</span>            <span class="keyword">static_assert</span>(<span class="keyword">sizeof</span>(Function) &lt;= kInlineLambdaSize, </div>
-<div class="line"><span class="lineno">   89</span>                         <span class="stringliteral">&quot;Lambda/functor too large for inline storage&quot;</span>);</div>
-<div class="line"><span class="lineno">   90</span>            <span class="keyword">static_assert</span>(<span class="keyword">alignof</span>(Function) &lt;= <span class="keyword">alignof</span>(max_align_t), </div>
-<div class="line"><span class="lineno">   91</span>                         <span class="stringliteral">&quot;Lambda/functor requires stricter alignment than storage provides&quot;</span>);</div>
-<div class="line"><span class="lineno">   92</span>            </div>
-<div class="line"><span class="lineno">   93</span>            <span class="comment">// Initialize the entire storage to zero to avoid copying uninitialized memory</span></div>
-<div class="line"><span class="lineno">   94</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a4b8a9d50bb843c25b6392094c34e7fb1.html#a4b8a9d50bb843c25b6392094c34e7fb1">fl::memfill</a>(bytes, 0, kInlineLambdaSize);</div>
-<div class="line"><span class="lineno">   95</span>            </div>
-<div class="line"><span class="lineno">   96</span>            <span class="comment">// Construct the lambda/functor in-place</span></div>
-<div class="line"><span class="lineno">   97</span>            <span class="keyword">new</span> (bytes) Function(<a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">fl::move</a>(f));</div>
-<div class="line"><span class="lineno">   98</span>            </div>
-<div class="line"><span class="lineno">   99</span>            <span class="comment">// Set up type-erased function pointers</span></div>
-<div class="line"><span class="lineno">  100</span>            invoker = &amp;invoke_lambda&lt;Function&gt;;</div>
-<div class="line"><span class="lineno">  101</span>            destructor = &amp;destroy_lambda&lt;Function&gt;;</div>
-<div class="line"><span class="lineno">  102</span>        }</div>
-<div class="line"><span class="lineno">  103</span>        </div>
-<div class="line"><span class="lineno">  104</span>        <span class="comment">// Copy constructor</span></div>
-<div class="line"><span class="lineno">  105</span>        InlinedLambda(<span class="keyword">const</span> InlinedLambda&amp; other) </div>
-<div class="line"><span class="lineno">  106</span>            : invoker(other.invoker), destructor(other.destructor) {</div>
-<div class="line"><span class="lineno">  107</span>            <span class="comment">// This is tricky - we need to copy the stored object</span></div>
-<div class="line"><span class="lineno">  108</span>            <span class="comment">// For now, we&#39;ll use memcopy (works for trivially copyable types)</span></div>
-<div class="line"><span class="lineno">  109</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a249d9fd803dc27a27d8c078a4a3d57f3.html#a249d9fd803dc27a27d8c078a4a3d57f3">fl::memcopy</a>(bytes, other.bytes, kInlineLambdaSize);</div>
-<div class="line"><span class="lineno">  110</span>        }</div>
+<div class="line"><span class="lineno">   54</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> R, <span class="keyword">typename</span>... Args&gt; </div>
+<div class="line"><span class="lineno">   55</span><span class="keyword">struct </span>is_function_pointer&lt;R(*)(Args...)&gt; {</div>
+<div class="line"><span class="lineno">   56</span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keywordtype">bool</span> value = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">   57</span>};</div>
+<div class="line"><span class="lineno">   58</span> </div>
+<div class="line"><span class="lineno">   59</span><span class="comment">//----------------------------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">   60</span><span class="comment">// More or less a drop in replacement for std::function</span></div>
+<div class="line"><span class="lineno">   61</span><span class="comment">// function&lt;R(Args...)&gt;: type‐erasing &quot;std::function&quot; replacement</span></div>
+<div class="line"><span class="lineno">   62</span><span class="comment">// Supports free functions, lambdas/functors, member functions (const &amp;</span></div>
+<div class="line"><span class="lineno">   63</span><span class="comment">// non‑const)</span></div>
+<div class="line"><span class="lineno">   64</span><span class="comment">// </span></div>
+<div class="line"><span class="lineno">   65</span><span class="comment">// NEW: Uses inline storage for member functions, free functions, and small</span></div>
+<div class="line"><span class="lineno">   66</span><span class="comment">// lambdas/functors. Only large lambdas/functors use heap allocation.</span></div>
+<div class="line"><span class="lineno">   67</span><span class="comment">//----------------------------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">   68</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span>&gt; <span class="keyword">class </span>function;</div>
+<div class="line"><span class="lineno">   69</span> </div>
+<div class="line"><span class="lineno">   70</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> R, <span class="keyword">typename</span>... Args&gt;</div>
+<div class="line"><span class="lineno">   71</span><span class="keyword">class </span><a class="code hl_define" href="../../df/d96/s16x16x4_8h_af8ff064181a2295b94633541ca2e5930.html#af8ff064181a2295b94633541ca2e5930">FL_ALIGN</a> function&lt;R(Args...)&gt; {</div>
+<div class="line"><span class="lineno">   72</span><span class="keyword">private</span>:</div>
+<div class="line"><span class="lineno">   73</span><span class="preprocessor">#if FL_FUNCTION_FULL_VARIANT</span></div>
+<div class="line"><span class="lineno">   74</span>    <span class="keyword">struct </span>CallableBase {</div>
+<div class="line"><span class="lineno">   75</span>        <span class="keyword">virtual</span> R <a class="code hl_function" href="../../d4/d36/namespacefl_ab0814755ce899aaf015422de602d57d9.html#ab0814755ce899aaf015422de602d57d9">invoke</a>(Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> = 0;</div>
+<div class="line"><span class="lineno">   76</span>        <span class="keyword">virtual</span> ~CallableBase() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> = default;</div>
+<div class="line"><span class="lineno">   77</span>    };</div>
+<div class="line"><span class="lineno">   78</span> </div>
+<div class="line"><span class="lineno">   79</span>    template &lt;typename F&gt;</div>
+<div class="line"><span class="lineno">   80</span>    struct Callable : CallableBase {</div>
+<div class="line"><span class="lineno">   81</span>        F f;</div>
+<div class="line"><span class="lineno">   82</span>        Callable(F fn) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> : f(fn) {}</div>
+<div class="line"><span class="lineno">   83</span>        R <a class="code hl_function" href="../../d4/d36/namespacefl_ab0814755ce899aaf015422de602d57d9.html#ab0814755ce899aaf015422de602d57d9">invoke</a>(Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> <span class="keyword">override</span> { <span class="keywordflow">return</span> f(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...); }</div>
+<div class="line"><span class="lineno">   84</span>    };</div>
+<div class="line"><span class="lineno">   85</span><span class="preprocessor">#endif  </span><span class="comment">// FL_FUNCTION_FULL_VARIANT</span></div>
+<div class="line"><span class="lineno">   86</span> </div>
+<div class="line"><span class="lineno">   87</span>    <span class="comment">// Type-erased free function callable - stored inline!</span></div>
+<div class="line"><span class="lineno">   88</span>    <span class="keyword">struct </span>FreeFunctionCallable {</div>
+<div class="line"><span class="lineno">   89</span>        R (*func_ptr)(Args...);</div>
+<div class="line"><span class="lineno">   90</span>        </div>
+<div class="line"><span class="lineno">   91</span>        FreeFunctionCallable(R (*fp)(Args...)) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> : func_ptr(fp) {}</div>
+<div class="line"><span class="lineno">   92</span>        </div>
+<div class="line"><span class="lineno">   93</span>        R <a class="code hl_function" href="../../d4/d36/namespacefl_ab0814755ce899aaf015422de602d57d9.html#ab0814755ce899aaf015422de602d57d9">invoke</a>(Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">   94</span>            <span class="keywordflow">return</span> func_ptr(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
+<div class="line"><span class="lineno">   95</span>        }</div>
+<div class="line"><span class="lineno">   96</span>    };</div>
+<div class="line"><span class="lineno">   97</span> </div>
+<div class="line"><span class="lineno">   98</span>    <span class="comment">// Type-erased small lambda/functor callable - stored inline!</span></div>
+<div class="line"><span class="lineno">   99</span>    <span class="comment">// Size limit for inline storage - configurable via preprocessor define</span></div>
+<div class="line"><span class="lineno">  100</span> </div>
+<div class="line"><span class="lineno">  101</span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> fl::size kInlineLambdaSize = <a class="code hl_define" href="../../dd/d67/function_8h_a255e85529978bb20dbf35a725491f8cf.html#a255e85529978bb20dbf35a725491f8cf">FASTLED_INLINE_LAMBDA_SIZE</a>;</div>
+<div class="line"><span class="lineno">  102</span>    </div>
+<div class="line"><span class="lineno">  103</span>    <span class="keyword">struct </span>InlinedLambda {</div>
+<div class="line"><span class="lineno">  104</span>        <span class="comment">// Storage for the lambda/functor object</span></div>
+<div class="line"><span class="lineno">  105</span>        <span class="comment">// Use aligned storage to ensure proper alignment for any type</span></div>
+<div class="line"><span class="lineno">  106</span>        <a class="code hl_define" href="../../df/d96/s16x16x4_8h_a31f878ac21758b6e670cd8575335cdf9.html#a31f878ac21758b6e670cd8575335cdf9">FL_ALIGN_MAX</a> <span class="keywordtype">char</span> bytes[kInlineLambdaSize];</div>
+<div class="line"><span class="lineno">  107</span>        </div>
+<div class="line"><span class="lineno">  108</span>        <span class="comment">// Type-erased invoker and destructor function pointers</span></div>
+<div class="line"><span class="lineno">  109</span>        R (*invoker)(<span class="keyword">const</span> InlinedLambda&amp; storage, Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>);</div>
+<div class="line"><span class="lineno">  110</span>        void (*destructor)(InlinedLambda&amp; storage);</div>
 <div class="line"><span class="lineno">  111</span>        </div>
-<div class="line"><span class="lineno">  112</span>        <span class="comment">// Move constructor</span></div>
-<div class="line"><span class="lineno">  113</span>        InlinedLambda(InlinedLambda&amp;&amp; other) </div>
-<div class="line"><span class="lineno">  114</span>            : invoker(other.invoker), destructor(other.destructor) {</div>
-<div class="line"><span class="lineno">  115</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a249d9fd803dc27a27d8c078a4a3d57f3.html#a249d9fd803dc27a27d8c078a4a3d57f3">fl::memcopy</a>(bytes, other.bytes, kInlineLambdaSize);</div>
-<div class="line"><span class="lineno">  116</span>            <span class="comment">// Reset the other object to prevent double destruction</span></div>
-<div class="line"><span class="lineno">  117</span>            other.destructor = <span class="keyword">nullptr</span>;</div>
-<div class="line"><span class="lineno">  118</span>        }</div>
-<div class="line"><span class="lineno">  119</span>        </div>
-<div class="line"><span class="lineno">  120</span>        ~InlinedLambda() {</div>
-<div class="line"><span class="lineno">  121</span>            <span class="keywordflow">if</span> (destructor) {</div>
-<div class="line"><span class="lineno">  122</span>                destructor(*<span class="keyword">this</span>);</div>
-<div class="line"><span class="lineno">  123</span>            }</div>
-<div class="line"><span class="lineno">  124</span>        }</div>
-<div class="line"><span class="lineno">  125</span>        </div>
-<div class="line"><span class="lineno">  126</span>        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> FUNCTOR&gt;</div>
-<div class="line"><span class="lineno">  127</span>        <span class="keyword">static</span> R invoke_lambda(<span class="keyword">const</span> InlinedLambda&amp; storage, Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>) {</div>
-<div class="line"><span class="lineno">  128</span>            <span class="comment">// Use placement new to safely access the stored lambda</span></div>
-<div class="line"><span class="lineno">  129</span>            <span class="keyword">alignas</span>(FUNCTOR) <span class="keywordtype">char</span> temp_storage[<span class="keyword">sizeof</span>(FUNCTOR)];</div>
-<div class="line"><span class="lineno">  130</span>            <span class="comment">// Copy the lambda from storage</span></div>
-<div class="line"><span class="lineno">  131</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a249d9fd803dc27a27d8c078a4a3d57f3.html#a249d9fd803dc27a27d8c078a4a3d57f3">fl::memcopy</a>(temp_storage, storage.bytes, <span class="keyword">sizeof</span>(FUNCTOR));</div>
-<div class="line"><span class="lineno">  132</span>            <span class="comment">// Get a properly typed pointer to the copied lambda (non-const for mutable lambdas)</span></div>
-<div class="line"><span class="lineno">  133</span>            FUNCTOR* f = <span class="keyword">static_cast&lt;</span>FUNCTOR*<span class="keyword">&gt;</span>(<span class="keyword">static_cast&lt;</span><span class="keywordtype">void</span>*<span class="keyword">&gt;</span>(temp_storage));</div>
-<div class="line"><span class="lineno">  134</span>            <span class="comment">// Invoke the lambda</span></div>
-<div class="line"><span class="lineno">  135</span>            <span class="keywordflow">return</span> (*f)(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
+<div class="line"><span class="lineno">  112</span>        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Function&gt;</div>
+<div class="line"><span class="lineno">  113</span>        InlinedLambda(Function f) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  114</span>            <a class="code hl_define" href="../../df/d96/s16x16x4_8h_a1e4d1792cf482d5f64f27714ea210d47.html#a1e4d1792cf482d5f64f27714ea210d47">FL_STATIC_ASSERT</a>(<span class="keyword">sizeof</span>(Function) &lt;= kInlineLambdaSize,</div>
+<div class="line"><span class="lineno">  115</span>                         <span class="stringliteral">&quot;Lambda/functor too large for inline storage&quot;</span>);</div>
+<div class="line"><span class="lineno">  116</span>            <a class="code hl_define" href="../../df/d96/s16x16x4_8h_a1e4d1792cf482d5f64f27714ea210d47.html#a1e4d1792cf482d5f64f27714ea210d47">FL_STATIC_ASSERT</a>(<span class="keyword">alignof</span>(Function) &lt;= <span class="keyword">alignof</span>(max_align_t),</div>
+<div class="line"><span class="lineno">  117</span>                         <span class="stringliteral">&quot;Lambda/functor requires stricter alignment than storage provides&quot;</span>);</div>
+<div class="line"><span class="lineno">  118</span>            </div>
+<div class="line"><span class="lineno">  119</span>            <span class="comment">// Initialize the entire storage to zero to avoid copying uninitialized memory</span></div>
+<div class="line"><span class="lineno">  120</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a44a195439ac7fa303b4b0b0c956605be.html#a44a195439ac7fa303b4b0b0c956605be">fl::memset</a>(bytes, 0, kInlineLambdaSize);</div>
+<div class="line"><span class="lineno">  121</span>            </div>
+<div class="line"><span class="lineno">  122</span>            <span class="comment">// Construct the lambda/functor in-place</span></div>
+<div class="line"><span class="lineno">  123</span>            <span class="keyword">new</span> (bytes) Function(<a class="code hl_function" href="../../d4/d36/namespacefl_a03eeb690d9582a74cb2e4a1f5a806e80.html#a03eeb690d9582a74cb2e4a1f5a806e80">fl::move</a>(f));</div>
+<div class="line"><span class="lineno">  124</span>            </div>
+<div class="line"><span class="lineno">  125</span>            <span class="comment">// Set up type-erased function pointers</span></div>
+<div class="line"><span class="lineno">  126</span>            invoker = &amp;invoke_lambda&lt;Function&gt;;</div>
+<div class="line"><span class="lineno">  127</span>            destructor = &amp;destroy_lambda&lt;Function&gt;;</div>
+<div class="line"><span class="lineno">  128</span>        }</div>
+<div class="line"><span class="lineno">  129</span>        </div>
+<div class="line"><span class="lineno">  130</span>        <span class="comment">// Copy constructor</span></div>
+<div class="line"><span class="lineno">  131</span>        InlinedLambda(<span class="keyword">const</span> InlinedLambda&amp; other) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></div>
+<div class="line"><span class="lineno">  132</span>            : invoker(other.invoker), destructor(other.destructor) {</div>
+<div class="line"><span class="lineno">  133</span>            <span class="comment">// This is tricky - we need to copy the stored object</span></div>
+<div class="line"><span class="lineno">  134</span>            <span class="comment">// For now, we&#39;ll use memcopy (works for trivially copyable types)</span></div>
+<div class="line"><span class="lineno">  135</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d">fl::memcpy</a>(bytes, other.bytes, kInlineLambdaSize);</div>
 <div class="line"><span class="lineno">  136</span>        }</div>
 <div class="line"><span class="lineno">  137</span>        </div>
-<div class="line"><span class="lineno">  138</span>        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> FUNCTOR&gt;</div>
-<div class="line"><span class="lineno">  139</span>        <span class="keyword">static</span> <span class="keywordtype">void</span> destroy_lambda(InlinedLambda&amp; storage) {</div>
-<div class="line"><span class="lineno">  140</span>            <span class="comment">// For destruction, we need to call the destructor on the actual object</span></div>
-<div class="line"><span class="lineno">  141</span>            <span class="comment">// that was constructed with placement new in storage.bytes</span></div>
-<div class="line"><span class="lineno">  142</span>            <span class="comment">// We use the standard library approach: create a properly typed pointer</span></div>
-<div class="line"><span class="lineno">  143</span>            <span class="comment">// using placement new, then call the destructor through that pointer</span></div>
-<div class="line"><span class="lineno">  144</span>            </div>
-<div class="line"><span class="lineno">  145</span>            <span class="comment">// This is the standard-compliant way to get a properly typed pointer</span></div>
-<div class="line"><span class="lineno">  146</span>            <span class="comment">// to an object that was constructed with placement new</span></div>
-<div class="line"><span class="lineno">  147</span>            FUNCTOR* obj_ptr = <span class="keyword">static_cast&lt;</span>FUNCTOR*<span class="keyword">&gt;</span>(<span class="keyword">static_cast&lt;</span><span class="keywordtype">void</span>*<span class="keyword">&gt;</span>(storage.bytes));</div>
-<div class="line"><span class="lineno">  148</span>            obj_ptr-&gt;~FUNCTOR();</div>
-<div class="line"><span class="lineno">  149</span>        }</div>
-<div class="line"><span class="lineno">  150</span>        </div>
-<div class="line"><span class="lineno">  151</span>        R <a class="code hl_function" href="../../d4/d36/namespacefl_a165dae1c4d4ff24e46ccb72bdcb4cdd9.html#a165dae1c4d4ff24e46ccb72bdcb4cdd9">invoke</a>(Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>)<span class="keyword"> const </span>{</div>
-<div class="line"><span class="lineno">  152</span>            <span class="keywordflow">return</span> invoker(*<span class="keyword">this</span>, <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
-<div class="line"><span class="lineno">  153</span>        }</div>
-<div class="line"><span class="lineno">  154</span>    };</div>
-<div class="line"><span class="lineno">  155</span> </div>
-<div class="line"><span class="lineno">  156</span>    <span class="comment">// Type-erased member function callable base</span></div>
-<div class="line"><span class="lineno">  157</span>    <span class="keyword">struct </span>MemberCallableBase {</div>
-<div class="line"><span class="lineno">  158</span>        <span class="keyword">virtual</span> R <a class="code hl_function" href="../../d4/d36/namespacefl_a165dae1c4d4ff24e46ccb72bdcb4cdd9.html#a165dae1c4d4ff24e46ccb72bdcb4cdd9">invoke</a>(Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>) <span class="keyword">const</span> = 0;</div>
-<div class="line"><span class="lineno">  159</span>        <span class="keyword">virtual</span> ~MemberCallableBase() = <span class="keywordflow">default</span>;</div>
-<div class="line"><span class="lineno">  160</span>    };</div>
-<div class="line"><span class="lineno">  161</span> </div>
-<div class="line"><span class="lineno">  162</span>    <span class="comment">// Type-erased non-const member function callable</span></div>
-<div class="line"><span class="lineno">  163</span>    <span class="keyword">struct </span>NonConstMemberCallable : MemberCallableBase {</div>
-<div class="line"><span class="lineno">  164</span>        <span class="keywordtype">void</span>* obj;</div>
-<div class="line"><span class="lineno">  165</span>        <span class="comment">// Union to store member function pointer as raw bytes</span></div>
-<div class="line"><span class="lineno">  166</span>        <span class="keyword">union </span>MemberFuncStorage {</div>
-<div class="line"><span class="lineno">  167</span>            <span class="keywordtype">char</span> bytes[<span class="keyword">sizeof</span>(R (NonConstMemberCallable::*)(Args...))];</div>
-<div class="line"><span class="lineno">  168</span>            <span class="comment">// Ensure proper alignment</span></div>
-<div class="line"><span class="lineno">  169</span>            <span class="keywordtype">void</span>* alignment_dummy;</div>
-<div class="line"><span class="lineno">  170</span>        } member_func_storage;</div>
-<div class="line"><span class="lineno">  171</span>        </div>
-<div class="line"><span class="lineno">  172</span>        <span class="comment">// Type-erased invoker function - set at construction time</span></div>
-<div class="line"><span class="lineno">  173</span>        R (*invoker)(<span class="keywordtype">void</span>* obj, <span class="keyword">const</span> MemberFuncStorage&amp; mfp, Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>);</div>
-<div class="line"><span class="lineno">  174</span>        </div>
-<div class="line"><span class="lineno">  175</span>        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> C&gt;</div>
-<div class="line"><span class="lineno">  176</span>        NonConstMemberCallable(C* o, R (C::*mf)(Args...)) : obj(o) {</div>
-<div class="line"><span class="lineno">  177</span>            <span class="comment">// Store the member function pointer as raw bytes</span></div>
-<div class="line"><span class="lineno">  178</span>            <span class="keyword">static_assert</span>(<span class="keyword">sizeof</span>(mf) &lt;= <span class="keyword">sizeof</span>(member_func_storage), </div>
-<div class="line"><span class="lineno">  179</span>                         <span class="stringliteral">&quot;Member function pointer too large&quot;</span>);</div>
-<div class="line"><span class="lineno">  180</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a249d9fd803dc27a27d8c078a4a3d57f3.html#a249d9fd803dc27a27d8c078a4a3d57f3">fl::memcopy</a>(member_func_storage.bytes, &amp;mf, <span class="keyword">sizeof</span>(mf));</div>
-<div class="line"><span class="lineno">  181</span>            <span class="comment">// Set the invoker to a function that knows how to cast back and call</span></div>
-<div class="line"><span class="lineno">  182</span>            invoker = &amp;invoke_nonconst_member&lt;C&gt;;</div>
-<div class="line"><span class="lineno">  183</span>        }</div>
-<div class="line"><span class="lineno">  184</span>        </div>
-<div class="line"><span class="lineno">  185</span>        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> C&gt;</div>
-<div class="line"><span class="lineno">  186</span>        <span class="keyword">static</span> R invoke_nonconst_member(<span class="keywordtype">void</span>* obj, <span class="keyword">const</span> MemberFuncStorage&amp; mfp, Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>) {</div>
-<div class="line"><span class="lineno">  187</span>            C* typed_obj = <span class="keyword">static_cast&lt;</span>C*<span class="keyword">&gt;</span>(obj);</div>
-<div class="line"><span class="lineno">  188</span>            R (C::*typed_mf)(Args...);</div>
-<div class="line"><span class="lineno">  189</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a249d9fd803dc27a27d8c078a4a3d57f3.html#a249d9fd803dc27a27d8c078a4a3d57f3">fl::memcopy</a>(&amp;typed_mf, mfp.bytes, <span class="keyword">sizeof</span>(typed_mf));</div>
-<div class="line"><span class="lineno">  190</span>            <span class="keywordflow">return</span> (typed_obj-&gt;*typed_mf)(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
-<div class="line"><span class="lineno">  191</span>        }</div>
-<div class="line"><span class="lineno">  192</span>        </div>
-<div class="line"><span class="lineno">  193</span>        R <a class="code hl_function" href="../../d4/d36/namespacefl_a165dae1c4d4ff24e46ccb72bdcb4cdd9.html#a165dae1c4d4ff24e46ccb72bdcb4cdd9">invoke</a>(Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>)<span class="keyword"> const override </span>{</div>
-<div class="line"><span class="lineno">  194</span>            <span class="keywordflow">return</span> invoker(obj, member_func_storage, <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
-<div class="line"><span class="lineno">  195</span>        }</div>
-<div class="line"><span class="lineno">  196</span>    };</div>
-<div class="line"><span class="lineno">  197</span> </div>
-<div class="line"><span class="lineno">  198</span>    <span class="comment">// Type-erased const member function callable  </span></div>
-<div class="line"><span class="lineno">  199</span>    <span class="keyword">struct </span>ConstMemberCallable : MemberCallableBase {</div>
-<div class="line"><span class="lineno">  200</span>        <span class="keyword">const</span> <span class="keywordtype">void</span>* obj;</div>
-<div class="line"><span class="lineno">  201</span>        <span class="comment">// Union to store member function pointer as raw bytes</span></div>
-<div class="line"><span class="lineno">  202</span>        <span class="keyword">union </span>MemberFuncStorage {</div>
-<div class="line"><span class="lineno">  203</span>            <span class="keywordtype">char</span> bytes[<span class="keyword">sizeof</span>(R (ConstMemberCallable::*)(Args...) <span class="keyword">const</span>)];</div>
-<div class="line"><span class="lineno">  204</span>            <span class="comment">// Ensure proper alignment</span></div>
-<div class="line"><span class="lineno">  205</span>            <span class="keywordtype">void</span>* alignment_dummy;</div>
-<div class="line"><span class="lineno">  206</span>        } member_func_storage;</div>
-<div class="line"><span class="lineno">  207</span>        </div>
-<div class="line"><span class="lineno">  208</span>        <span class="comment">// Type-erased invoker function - set at construction time</span></div>
-<div class="line"><span class="lineno">  209</span>        R (*invoker)(<span class="keyword">const</span> <span class="keywordtype">void</span>* obj, <span class="keyword">const</span> MemberFuncStorage&amp; mfp, Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>);</div>
-<div class="line"><span class="lineno">  210</span>        </div>
-<div class="line"><span class="lineno">  211</span>        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> C&gt;</div>
-<div class="line"><span class="lineno">  212</span>        ConstMemberCallable(<span class="keyword">const</span> C* o, R (C::*mf)(Args...) <span class="keyword">const</span>) : obj(o) {</div>
-<div class="line"><span class="lineno">  213</span>            <span class="comment">// Store the member function pointer as raw bytes</span></div>
-<div class="line"><span class="lineno">  214</span>            <span class="keyword">static_assert</span>(<span class="keyword">sizeof</span>(mf) &lt;= <span class="keyword">sizeof</span>(member_func_storage), </div>
-<div class="line"><span class="lineno">  215</span>                         <span class="stringliteral">&quot;Member function pointer too large&quot;</span>);</div>
-<div class="line"><span class="lineno">  216</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a249d9fd803dc27a27d8c078a4a3d57f3.html#a249d9fd803dc27a27d8c078a4a3d57f3">fl::memcopy</a>(member_func_storage.bytes, &amp;mf, <span class="keyword">sizeof</span>(mf));</div>
-<div class="line"><span class="lineno">  217</span>            <span class="comment">// Set the invoker to a function that knows how to cast back and call</span></div>
-<div class="line"><span class="lineno">  218</span>            invoker = &amp;invoke_const_member&lt;C&gt;;</div>
-<div class="line"><span class="lineno">  219</span>        }</div>
-<div class="line"><span class="lineno">  220</span>        </div>
-<div class="line"><span class="lineno">  221</span>        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> C&gt;</div>
-<div class="line"><span class="lineno">  222</span>        <span class="keyword">static</span> R invoke_const_member(<span class="keyword">const</span> <span class="keywordtype">void</span>* obj, <span class="keyword">const</span> MemberFuncStorage&amp; mfp, Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>) {</div>
-<div class="line"><span class="lineno">  223</span>            <span class="keyword">const</span> C* typed_obj = <span class="keyword">static_cast&lt;</span><span class="keyword">const </span>C*<span class="keyword">&gt;</span>(obj);</div>
-<div class="line"><span class="lineno">  224</span>            R (C::*typed_mf)(Args...) <span class="keyword">const</span>;</div>
-<div class="line"><span class="lineno">  225</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a249d9fd803dc27a27d8c078a4a3d57f3.html#a249d9fd803dc27a27d8c078a4a3d57f3">fl::memcopy</a>(&amp;typed_mf, mfp.bytes, <span class="keyword">sizeof</span>(typed_mf));</div>
-<div class="line"><span class="lineno">  226</span>            <span class="keywordflow">return</span> (typed_obj-&gt;*typed_mf)(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
-<div class="line"><span class="lineno">  227</span>        }</div>
-<div class="line"><span class="lineno">  228</span>        </div>
-<div class="line"><span class="lineno">  229</span>        R <a class="code hl_function" href="../../d4/d36/namespacefl_a165dae1c4d4ff24e46ccb72bdcb4cdd9.html#a165dae1c4d4ff24e46ccb72bdcb4cdd9">invoke</a>(Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>)<span class="keyword"> const override </span>{</div>
-<div class="line"><span class="lineno">  230</span>            <span class="keywordflow">return</span> invoker(obj, member_func_storage, <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
-<div class="line"><span class="lineno">  231</span>        }</div>
-<div class="line"><span class="lineno">  232</span>    };</div>
-<div class="line"><span class="lineno">  233</span> </div>
-<div class="line"><span class="lineno">  234</span>    <span class="comment">// Variant to store any of our callable types inline (with heap fallback for large lambdas)</span></div>
-<div class="line"><span class="lineno">  235</span>    <span class="keyword">using </span>Storage = Variant&lt;fl::shared_ptr&lt;CallableBase&gt;, FreeFunctionCallable, InlinedLambda, NonConstMemberCallable, ConstMemberCallable&gt;;</div>
-<div class="line"><span class="lineno">  236</span>    Storage storage_;</div>
-<div class="line"><span class="lineno">  237</span> </div>
-<div class="line"><span class="lineno">  238</span>    <span class="comment">// Helper function to handle default return value for void and non-void types</span></div>
-<div class="line"><span class="lineno">  239</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> ReturnType&gt;</div>
-<div class="line"><span class="lineno">  240</span>    <span class="keyword">typename</span> enable_if&lt;!is_void&lt;ReturnType&gt;::value, ReturnType&gt;::type</div>
-<div class="line"><span class="lineno">  241</span>    default_return_helper()<span class="keyword"> const </span>{</div>
-<div class="line"><span class="lineno">  242</span>        <span class="keywordflow">return</span> ReturnType{};</div>
-<div class="line"><span class="lineno">  243</span>    }</div>
-<div class="line"><span class="lineno">  244</span>    </div>
-<div class="line"><span class="lineno">  245</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> ReturnType&gt;</div>
-<div class="line"><span class="lineno">  246</span>    <span class="keyword">typename</span> enable_if&lt;is_void&lt;ReturnType&gt;::value, ReturnType&gt;::type</div>
-<div class="line"><span class="lineno">  247</span>    default_return_helper()<span class="keyword"> const </span>{</div>
-<div class="line"><span class="lineno">  248</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  249</span>    }</div>
-<div class="line"><span class="lineno">  250</span> </div>
-<div class="line"><span class="lineno">  251</span><span class="keyword">public</span>:</div>
-<div class="line"><span class="lineno">  252</span>    function() = <span class="keywordflow">default</span>;</div>
-<div class="line"><span class="lineno">  253</span>    </div>
-<div class="line"><span class="lineno">  254</span>    <span class="comment">// Copy constructor - properly handle Variant alignment</span></div>
-<div class="line"><span class="lineno">  255</span>    function(<span class="keyword">const</span> function&amp; other) : storage_(other.storage_) {}</div>
-<div class="line"><span class="lineno">  256</span>    </div>
-<div class="line"><span class="lineno">  257</span>    <span class="comment">// Move constructor - properly handle Variant alignment  </span></div>
-<div class="line"><span class="lineno">  258</span>    function(function&amp;&amp; other) noexcept : storage_(<a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">fl::move</a>(other.storage_)) {}</div>
-<div class="line"><span class="lineno">  259</span>    </div>
-<div class="line"><span class="lineno">  260</span>    <span class="comment">// Copy assignment</span></div>
-<div class="line"><span class="lineno">  261</span>    function&amp; operator=(<span class="keyword">const</span> function&amp; other) {</div>
-<div class="line"><span class="lineno">  262</span>        <span class="keywordflow">if</span> (<span class="keyword">this</span> != &amp;other) {</div>
-<div class="line"><span class="lineno">  263</span>            storage_ = other.storage_;</div>
-<div class="line"><span class="lineno">  264</span>        }</div>
-<div class="line"><span class="lineno">  265</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><span class="lineno">  266</span>    }</div>
-<div class="line"><span class="lineno">  267</span>    </div>
-<div class="line"><span class="lineno">  268</span>    <span class="comment">// Move assignment</span></div>
-<div class="line"><span class="lineno">  269</span>    function&amp; operator=(function&amp;&amp; other) <span class="keyword">noexcept</span> {</div>
-<div class="line"><span class="lineno">  270</span>        <span class="keywordflow">if</span> (<span class="keyword">this</span> != &amp;other) {</div>
-<div class="line"><span class="lineno">  271</span>            storage_ = <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">fl::move</a>(other.storage_);</div>
-<div class="line"><span class="lineno">  272</span>        }</div>
-<div class="line"><span class="lineno">  273</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><span class="lineno">  274</span>    }</div>
-<div class="line"><span class="lineno">  275</span>    </div>
-<div class="line"><span class="lineno">  276</span>    <span class="comment">// 1) Free function constructor - stored inline!</span></div>
-<div class="line"><span class="lineno">  277</span>    function(R (*fp)(Args...)) {</div>
-<div class="line"><span class="lineno">  278</span>        storage_ = FreeFunctionCallable(fp);</div>
-<div class="line"><span class="lineno">  279</span>    }</div>
-<div class="line"><span class="lineno">  280</span>    </div>
-<div class="line"><span class="lineno">  281</span>    <span class="comment">// 2) Lambda/functor constructor - inline if small, heap if large</span></div>
-<div class="line"><span class="lineno">  282</span>    template &lt;typename F, typename = enable_if_t&lt;!is_member_function_pointer&lt;F&gt;::value &amp;&amp; !is_function_pointer&lt;F&gt;::value&gt;&gt;</div>
-<div class="line"><span class="lineno">  283</span>    function(F f) {</div>
-<div class="line"><span class="lineno">  284</span>        <span class="comment">// Use template specialization instead of if constexpr for C++14 compatibility</span></div>
-<div class="line"><span class="lineno">  285</span>        construct_lambda_or_functor(<a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">fl::move</a>(f), <span class="keyword">typename</span> conditional&lt;<span class="keyword">sizeof</span>(F) &lt;= kInlineLambdaSize, true_type, false_type&gt;::type{});</div>
-<div class="line"><span class="lineno">  286</span>    }</div>
-<div class="line"><span class="lineno">  287</span>    </div>
-<div class="line"><span class="lineno">  288</span>    <span class="comment">// 3) non‑const member function - stored inline!</span></div>
-<div class="line"><span class="lineno">  289</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> C&gt;</div>
-<div class="line"><span class="lineno">  290</span>    function(R (C::*mf)(Args...), C* obj) {</div>
-<div class="line"><span class="lineno">  291</span>        storage_ = NonConstMemberCallable(obj, mf);</div>
-<div class="line"><span class="lineno">  292</span>    }</div>
-<div class="line"><span class="lineno">  293</span>    </div>
-<div class="line"><span class="lineno">  294</span>    <span class="comment">// 4) const member function - stored inline!</span></div>
-<div class="line"><span class="lineno">  295</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> C&gt;</div>
-<div class="line"><span class="lineno">  296</span>    function(R (C::*mf)(Args...) <span class="keyword">const</span>, <span class="keyword">const</span> C* obj) {</div>
-<div class="line"><span class="lineno">  297</span>        storage_ = ConstMemberCallable(obj, mf);</div>
-<div class="line"><span class="lineno">  298</span>    }</div>
-<div class="line"><span class="lineno">  299</span>    </div>
-<div class="line"><span class="lineno">  300</span>    R operator()(Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>)<span class="keyword"> const </span>{</div>
-<div class="line"><span class="lineno">  301</span>        <span class="comment">// Direct dispatch using type checking - efficient and simple</span></div>
-<div class="line"><span class="lineno">  302</span>        <span class="keywordflow">if</span> (<span class="keyword">auto</span>* heap_callable = storage_.template ptr&lt;fl::shared_ptr&lt;CallableBase&gt;&gt;()) {</div>
-<div class="line"><span class="lineno">  303</span>            <span class="keywordflow">return</span> (*heap_callable)-&gt;invoke(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
-<div class="line"><span class="lineno">  304</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<span class="keyword">auto</span>* free_func = storage_.template ptr&lt;FreeFunctionCallable&gt;()) {</div>
-<div class="line"><span class="lineno">  305</span>            <span class="keywordflow">return</span> free_func-&gt;invoke(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
-<div class="line"><span class="lineno">  306</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<span class="keyword">auto</span>* inlined_lambda = storage_.template ptr&lt;InlinedLambda&gt;()) {</div>
-<div class="line"><span class="lineno">  307</span>            <span class="keywordflow">return</span> inlined_lambda-&gt;invoke(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
-<div class="line"><span class="lineno">  308</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<span class="keyword">auto</span>* nonconst_member = storage_.template ptr&lt;NonConstMemberCallable&gt;()) {</div>
-<div class="line"><span class="lineno">  309</span>            <span class="keywordflow">return</span> nonconst_member-&gt;invoke(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
-<div class="line"><span class="lineno">  310</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<span class="keyword">auto</span>* const_member = storage_.template ptr&lt;ConstMemberCallable&gt;()) {</div>
-<div class="line"><span class="lineno">  311</span>            <span class="keywordflow">return</span> const_member-&gt;invoke(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
-<div class="line"><span class="lineno">  312</span>        }</div>
-<div class="line"><span class="lineno">  313</span>        <span class="comment">// This should never happen if the function is properly constructed</span></div>
-<div class="line"><span class="lineno">  314</span>        <span class="keywordflow">return</span> default_return_helper&lt;R&gt;();</div>
-<div class="line"><span class="lineno">  315</span>    }</div>
-<div class="line"><span class="lineno">  316</span>    </div>
-<div class="line"><span class="lineno">  317</span>    <span class="keyword">explicit</span> <span class="keyword">operator</span> bool()<span class="keyword"> const </span>{</div>
-<div class="line"><span class="lineno">  318</span>        <span class="keywordflow">return</span> !storage_.empty();</div>
-<div class="line"><span class="lineno">  319</span>    }</div>
-<div class="line"><span class="lineno">  320</span>    </div>
-<div class="line"><span class="lineno">  321</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a29022c57817c486135e4939abce404d6.html#a29022c57817c486135e4939abce404d6">clear</a>() {</div>
-<div class="line"><span class="lineno">  322</span>        storage_ = Storage{};  <span class="comment">// Reset to empty variant</span></div>
-<div class="line"><span class="lineno">  323</span>    }</div>
-<div class="line"><span class="lineno">  324</span>    </div>
-<div class="line"><span class="lineno">  325</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="../../db/dd1/crgb_8h_a26d453dd63264efc07c23ce640205858.html#a26d453dd63264efc07c23ce640205858">operator==</a>(<span class="keyword">const</span> function&amp; o)<span class="keyword"> const </span>{</div>
-<div class="line"><span class="lineno">  326</span>        <span class="comment">// For simplicity, just check if both are empty or both are non-empty</span></div>
-<div class="line"><span class="lineno">  327</span>        <span class="comment">// Full equality would require more complex comparison logic</span></div>
-<div class="line"><span class="lineno">  328</span>        <span class="keywordflow">return</span> storage_.empty() == o.storage_.empty();</div>
-<div class="line"><span class="lineno">  329</span>    }</div>
-<div class="line"><span class="lineno">  330</span>    </div>
-<div class="line"><span class="lineno">  331</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="../../db/dd1/crgb_8h_a19fe40faf567a840c117aa10ed9542d2.html#a19fe40faf567a840c117aa10ed9542d2">operator!=</a>(<span class="keyword">const</span> function&amp; o)<span class="keyword"> const </span>{</div>
-<div class="line"><span class="lineno">  332</span>        <span class="keywordflow">return</span> !(*<span class="keyword">this</span> == o);</div>
-<div class="line"><span class="lineno">  333</span>    }</div>
-<div class="line"><span class="lineno">  334</span> </div>
-<div class="line"><span class="lineno">  335</span><span class="keyword">private</span>:</div>
-<div class="line"><span class="lineno">  336</span>    <span class="comment">// Helper for small lambdas/functors - inline storage</span></div>
-<div class="line"><span class="lineno">  337</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> F&gt;</div>
-<div class="line"><span class="lineno">  338</span>    <span class="keywordtype">void</span> construct_lambda_or_functor(F f, true_type <span class="comment">/* small */</span>) {</div>
-<div class="line"><span class="lineno">  339</span>        storage_ = InlinedLambda(<a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">fl::move</a>(f));</div>
-<div class="line"><span class="lineno">  340</span>    }</div>
-<div class="line"><span class="lineno">  341</span>    </div>
-<div class="line"><span class="lineno">  342</span>    <span class="comment">// Helper for large lambdas/functors - heap storage</span></div>
-<div class="line"><span class="lineno">  343</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> F&gt;</div>
-<div class="line"><span class="lineno">  344</span>    <span class="keywordtype">void</span> construct_lambda_or_functor(F f, false_type <span class="comment">/* large */</span>) {</div>
-<div class="line"><span class="lineno">  345</span>        storage_ = fl::shared_ptr&lt;CallableBase&gt;(<a class="code hl_function" href="../../d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared</a>&lt;Callable&lt;F&gt;&gt;(<a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">fl::move</a>(f)));</div>
-<div class="line"><span class="lineno">  346</span>    }</div>
-<div class="line"><span class="lineno">  347</span>};</div>
-<div class="line"><span class="lineno">  348</span> </div>
-<div class="line"><span class="lineno">  349</span>} <span class="comment">// namespace fl</span></div>
-<div class="ttc" id="aalign_8h_af8ff064181a2295b94633541ca2e5930_html_af8ff064181a2295b94633541ca2e5930"><div class="ttname"><a href="../../d1/ddf/align_8h_af8ff064181a2295b94633541ca2e5930.html#af8ff064181a2295b94633541ca2e5930">FL_ALIGN</a></div><div class="ttdeci">#define FL_ALIGN</div><div class="ttdef"><b>Definition</b> <a href="../../d1/ddf/align_8h_source.html#l00016">align.h:16</a></div></div>
-<div class="ttc" id="acrgb_8h_a19fe40faf567a840c117aa10ed9542d2_html_a19fe40faf567a840c117aa10ed9542d2"><div class="ttname"><a href="../../db/dd1/crgb_8h_a19fe40faf567a840c117aa10ed9542d2.html#a19fe40faf567a840c117aa10ed9542d2">operator!=</a></div><div class="ttdeci">FASTLED_FORCE_INLINE bool operator!=(const CRGB &amp;lhs, const CRGB &amp;rhs)</div><div class="ttdoc">Check if two CRGB objects do not have the same color data.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00797">crgb.h:797</a></div></div>
-<div class="ttc" id="acrgb_8h_a26d453dd63264efc07c23ce640205858_html_a26d453dd63264efc07c23ce640205858"><div class="ttname"><a href="../../db/dd1/crgb_8h_a26d453dd63264efc07c23ce640205858.html#a26d453dd63264efc07c23ce640205858">operator==</a></div><div class="ttdeci">FASTLED_FORCE_INLINE bool operator==(const CRGB &amp;lhs, const CRGB &amp;rhs)</div><div class="ttdoc">Check if two CRGB objects have the same color data.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00791">crgb.h:791</a></div></div>
-<div class="ttc" id="afunction_8h_a255e85529978bb20dbf35a725491f8cf_html_a255e85529978bb20dbf35a725491f8cf"><div class="ttname"><a href="../../dd/d67/function_8h_a255e85529978bb20dbf35a725491f8cf.html#a255e85529978bb20dbf35a725491f8cf">FASTLED_INLINE_LAMBDA_SIZE</a></div><div class="ttdeci">#define FASTLED_INLINE_LAMBDA_SIZE</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d67/function_8h_source.html#l00013">function.h:13</a></div></div>
-<div class="ttc" id="anamespacefl_a0445ddcae69ac4e524ec18098eb84dbf_html_a0445ddcae69ac4e524ec18098eb84dbf"><div class="ttname"><a href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">fl::move</a></div><div class="ttdeci">constexpr remove_reference&lt; T &gt;::type &amp;&amp; move(T &amp;&amp;t) noexcept</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d83/move_8h_source.html#l00027">move.h:27</a></div></div>
-<div class="ttc" id="anamespacefl_a165dae1c4d4ff24e46ccb72bdcb4cdd9_html_a165dae1c4d4ff24e46ccb72bdcb4cdd9"><div class="ttname"><a href="../../d4/d36/namespacefl_a165dae1c4d4ff24e46ccb72bdcb4cdd9.html#a165dae1c4d4ff24e46ccb72bdcb4cdd9">fl::invoke</a></div><div class="ttdeci">auto invoke(F &amp;&amp;f, T1 &amp;&amp;t1, Args &amp;&amp;... args) -&gt; enable_if_t&lt; is_member_function_pointer&lt; typename remove_reference&lt; F &gt;::type &gt;::value &amp;&amp;!detail::use_pointer_syntax&lt; T1 &gt;::value, decltype((fl::forward&lt; T1 &gt;(t1).*f)(fl::forward&lt; Args &gt;(args)...))&gt;</div><div class="ttdef"><b>Definition</b> <a href="../../d8/dea/functional_8h_source.html#l00049">functional.h:49</a></div></div>
-<div class="ttc" id="anamespacefl_a249d9fd803dc27a27d8c078a4a3d57f3_html_a249d9fd803dc27a27d8c078a4a3d57f3"><div class="ttname"><a href="../../d4/d36/namespacefl_a249d9fd803dc27a27d8c078a4a3d57f3.html#a249d9fd803dc27a27d8c078a4a3d57f3">fl::memcopy</a></div><div class="ttdeci">void * memcopy(void *dst, const void *src, fl::size num)</div><div class="ttdef"><b>Definition</b> <a href="../../d0/dda/memfill_8h_source.html#l00030">memfill.h:30</a></div></div>
-<div class="ttc" id="anamespacefl_a29022c57817c486135e4939abce404d6_html_a29022c57817c486135e4939abce404d6"><div class="ttname"><a href="../../d4/d36/namespacefl_a29022c57817c486135e4939abce404d6.html#a29022c57817c486135e4939abce404d6">fl::clear</a></div><div class="ttdeci">void clear(CRGB(&amp;arr)[N])</div><div class="ttdef"><b>Definition</b> <a href="../../df/db0/clear_8h_source.html#l00013">clear.h:13</a></div></div>
-<div class="ttc" id="anamespacefl_a4b8a9d50bb843c25b6392094c34e7fb1_html_a4b8a9d50bb843c25b6392094c34e7fb1"><div class="ttname"><a href="../../d4/d36/namespacefl_a4b8a9d50bb843c25b6392094c34e7fb1.html#a4b8a9d50bb843c25b6392094c34e7fb1">fl::memfill</a></div><div class="ttdeci">void * memfill(void *ptr, int value, fl::size num)</div><div class="ttdef"><b>Definition</b> <a href="../../d0/dda/memfill_8h_source.html#l00011">memfill.h:11</a></div></div>
-<div class="ttc" id="anamespacefl_a87ae8a24cc8b709a64f39370e71846af_html_a87ae8a24cc8b709a64f39370e71846af"><div class="ttname"><a href="../../d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared</a></div><div class="ttdeci">shared_ptr&lt; T &gt; make_shared(Args &amp;&amp;... args)</div><div class="ttdef"><b>Definition</b> <a href="../../df/d6a/shared__ptr_8h_source.html#l00348">shared_ptr.h:348</a></div></div>
-<div class="ttc" id="aold_8h_a690f84001beb455ff2f2bbd5fdcc79d5_html_a690f84001beb455ff2f2bbd5fdcc79d5"><div class="ttname"><a href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a></div><div class="ttdeci">corkscrew_args args</div><div class="ttdef"><b>Definition</b> <a href="../../d7/da1/old_8h_source.html#l00150">old.h:150</a></div></div>
+<div class="line"><span class="lineno">  138</span>        <span class="comment">// Move constructor</span></div>
+<div class="line"><span class="lineno">  139</span>        InlinedLambda(InlinedLambda&amp;&amp; other) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></div>
+<div class="line"><span class="lineno">  140</span>            : invoker(other.invoker), destructor(other.destructor) {</div>
+<div class="line"><span class="lineno">  141</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d">fl::memcpy</a>(bytes, other.bytes, kInlineLambdaSize);</div>
+<div class="line"><span class="lineno">  142</span>            <span class="comment">// Reset the other object to prevent double destruction</span></div>
+<div class="line"><span class="lineno">  143</span>            other.destructor = <span class="keyword">nullptr</span>;</div>
+<div class="line"><span class="lineno">  144</span>        }</div>
+<div class="line"><span class="lineno">  145</span>        </div>
+<div class="line"><span class="lineno">  146</span>        ~InlinedLambda() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  147</span>            <span class="keywordflow">if</span> (destructor) {</div>
+<div class="line"><span class="lineno">  148</span>                destructor(*<span class="keyword">this</span>);</div>
+<div class="line"><span class="lineno">  149</span>            }</div>
+<div class="line"><span class="lineno">  150</span>        }</div>
+<div class="line"><span class="lineno">  151</span>        </div>
+<div class="line"><span class="lineno">  152</span>        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> FUNCTOR&gt;</div>
+<div class="line"><span class="lineno">  153</span>        <span class="keyword">static</span> R invoke_lambda(<span class="keyword">const</span> InlinedLambda&amp; storage, Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  154</span>            <span class="comment">// Use placement new to safely access the stored lambda</span></div>
+<div class="line"><span class="lineno">  155</span>            <a class="code hl_define" href="../../df/d96/s16x16x4_8h_a29dcb94b335f8a78c78a00e2fc6541dd.html#a29dcb94b335f8a78c78a00e2fc6541dd">FL_ALIGN_AS</a>(FUNCTOR) <span class="keywordtype">char</span> temp_storage[<span class="keyword">sizeof</span>(FUNCTOR)];</div>
+<div class="line"><span class="lineno">  156</span>            <span class="comment">// Copy the lambda from storage</span></div>
+<div class="line"><span class="lineno">  157</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d">fl::memcpy</a>(temp_storage, storage.bytes, <span class="keyword">sizeof</span>(FUNCTOR));</div>
+<div class="line"><span class="lineno">  158</span>            <span class="comment">// Get a properly typed pointer to the copied lambda (non-const for mutable lambdas)</span></div>
+<div class="line"><span class="lineno">  159</span>            FUNCTOR* f = <span class="keyword">static_cast&lt;</span>FUNCTOR*<span class="keyword">&gt;</span>(<span class="keyword">static_cast&lt;</span><span class="keywordtype">void</span>*<span class="keyword">&gt;</span>(temp_storage));</div>
+<div class="line"><span class="lineno">  160</span>            <span class="comment">// Invoke the lambda</span></div>
+<div class="line"><span class="lineno">  161</span>            <span class="keywordflow">return</span> (*f)(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
+<div class="line"><span class="lineno">  162</span>        }</div>
+<div class="line"><span class="lineno">  163</span>        </div>
+<div class="line"><span class="lineno">  164</span>        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> FUNCTOR&gt;</div>
+<div class="line"><span class="lineno">  165</span>        <span class="keyword">static</span> <span class="keywordtype">void</span> destroy_lambda(InlinedLambda&amp; storage) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  166</span>            <span class="comment">// For destruction, we need to call the destructor on the actual object</span></div>
+<div class="line"><span class="lineno">  167</span>            <span class="comment">// that was constructed with placement new in storage.bytes</span></div>
+<div class="line"><span class="lineno">  168</span>            <span class="comment">// We use the standard library approach: create a properly typed pointer</span></div>
+<div class="line"><span class="lineno">  169</span>            <span class="comment">// using placement new, then call the destructor through that pointer</span></div>
+<div class="line"><span class="lineno">  170</span>            </div>
+<div class="line"><span class="lineno">  171</span>            <span class="comment">// This is the standard-compliant way to get a properly typed pointer</span></div>
+<div class="line"><span class="lineno">  172</span>            <span class="comment">// to an object that was constructed with placement new</span></div>
+<div class="line"><span class="lineno">  173</span>            FUNCTOR* obj_ptr = <span class="keyword">static_cast&lt;</span>FUNCTOR*<span class="keyword">&gt;</span>(<span class="keyword">static_cast&lt;</span><span class="keywordtype">void</span>*<span class="keyword">&gt;</span>(storage.bytes));</div>
+<div class="line"><span class="lineno">  174</span>            obj_ptr-&gt;~FUNCTOR();</div>
+<div class="line"><span class="lineno">  175</span>        }</div>
+<div class="line"><span class="lineno">  176</span>        </div>
+<div class="line"><span class="lineno">  177</span>        R <a class="code hl_function" href="../../d4/d36/namespacefl_ab0814755ce899aaf015422de602d57d9.html#ab0814755ce899aaf015422de602d57d9">invoke</a>(Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  178</span>            <span class="keywordflow">return</span> invoker(*<span class="keyword">this</span>, <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
+<div class="line"><span class="lineno">  179</span>        }</div>
+<div class="line"><span class="lineno">  180</span>    };</div>
+<div class="line"><span class="lineno">  181</span> </div>
+<div class="line"><span class="lineno">  182</span><span class="preprocessor">#if FL_FUNCTION_FULL_VARIANT</span></div>
+<div class="line"><span class="lineno">  183</span>    <span class="comment">// Type-erased member function callable base</span></div>
+<div class="line"><span class="lineno">  184</span>    <span class="keyword">struct </span>MemberCallableBase {</div>
+<div class="line"><span class="lineno">  185</span>        <span class="keyword">virtual</span> R <a class="code hl_function" href="../../d4/d36/namespacefl_ab0814755ce899aaf015422de602d57d9.html#ab0814755ce899aaf015422de602d57d9">invoke</a>(Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> = 0;</div>
+<div class="line"><span class="lineno">  186</span>        <span class="keyword">virtual</span> ~MemberCallableBase() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> = default;</div>
+<div class="line"><span class="lineno">  187</span>    };</div>
+<div class="line"><span class="lineno">  188</span> </div>
+<div class="line"><span class="lineno">  189</span>    <span class="comment">// Type-erased non-const member function callable</span></div>
+<div class="line"><span class="lineno">  190</span>    struct NonConstMemberCallable : MemberCallableBase {</div>
+<div class="line"><span class="lineno">  191</span>        <span class="keywordtype">void</span>* obj;</div>
+<div class="line"><span class="lineno">  192</span>        <span class="comment">// Union to store member function pointer as raw bytes</span></div>
+<div class="line"><span class="lineno">  193</span>        <span class="keyword">union </span>MemberFuncStorage {</div>
+<div class="line"><span class="lineno">  194</span>            <span class="keywordtype">char</span> bytes[<span class="keyword">sizeof</span>(R (NonConstMemberCallable::*)(Args...))];</div>
+<div class="line"><span class="lineno">  195</span>            <span class="comment">// Ensure proper alignment</span></div>
+<div class="line"><span class="lineno">  196</span>            <span class="keywordtype">void</span>* alignment_dummy;</div>
+<div class="line"><span class="lineno">  197</span>        } member_func_storage;</div>
+<div class="line"><span class="lineno">  198</span>        </div>
+<div class="line"><span class="lineno">  199</span>        <span class="comment">// Type-erased invoker function - set at construction time</span></div>
+<div class="line"><span class="lineno">  200</span>        R (*invoker)(<span class="keywordtype">void</span>* obj, <span class="keyword">const</span> MemberFuncStorage&amp; mfp, Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>);</div>
+<div class="line"><span class="lineno">  201</span>        </div>
+<div class="line"><span class="lineno">  202</span>        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> C&gt;</div>
+<div class="line"><span class="lineno">  203</span>        NonConstMemberCallable(C* o, R (C::*mf)(Args...)) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> : obj(o) {</div>
+<div class="line"><span class="lineno">  204</span>            <span class="comment">// Store the member function pointer as raw bytes</span></div>
+<div class="line"><span class="lineno">  205</span>            <a class="code hl_define" href="../../df/d96/s16x16x4_8h_a1e4d1792cf482d5f64f27714ea210d47.html#a1e4d1792cf482d5f64f27714ea210d47">FL_STATIC_ASSERT</a>(<span class="keyword">sizeof</span>(mf) &lt;= <span class="keyword">sizeof</span>(member_func_storage),</div>
+<div class="line"><span class="lineno">  206</span>                         <span class="stringliteral">&quot;Member function pointer too large&quot;</span>);</div>
+<div class="line"><span class="lineno">  207</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d">fl::memcpy</a>(member_func_storage.bytes, &amp;mf, <span class="keyword">sizeof</span>(mf));</div>
+<div class="line"><span class="lineno">  208</span>            <span class="comment">// Set the invoker to a function that knows how to cast back and call</span></div>
+<div class="line"><span class="lineno">  209</span>            invoker = &amp;invoke_nonconst_member&lt;C&gt;;</div>
+<div class="line"><span class="lineno">  210</span>        }</div>
+<div class="line"><span class="lineno">  211</span>        </div>
+<div class="line"><span class="lineno">  212</span>        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> C&gt;</div>
+<div class="line"><span class="lineno">  213</span>        <span class="keyword">static</span> R invoke_nonconst_member(<span class="keywordtype">void</span>* obj, <span class="keyword">const</span> MemberFuncStorage&amp; mfp, Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  214</span>            C* typed_obj = <span class="keyword">static_cast&lt;</span>C*<span class="keyword">&gt;</span>(obj);</div>
+<div class="line"><span class="lineno">  215</span>            R (C::*typed_mf)(Args...);</div>
+<div class="line"><span class="lineno">  216</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d">fl::memcpy</a>(&amp;typed_mf, mfp.bytes, <span class="keyword">sizeof</span>(typed_mf));</div>
+<div class="line"><span class="lineno">  217</span>            <span class="keywordflow">return</span> (typed_obj-&gt;*typed_mf)(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
+<div class="line"><span class="lineno">  218</span>        }</div>
+<div class="line"><span class="lineno">  219</span>        </div>
+<div class="line"><span class="lineno">  220</span>        R <a class="code hl_function" href="../../d4/d36/namespacefl_ab0814755ce899aaf015422de602d57d9.html#ab0814755ce899aaf015422de602d57d9">invoke</a>(Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> <span class="keyword">override</span> {</div>
+<div class="line"><span class="lineno">  221</span>            <span class="keywordflow">return</span> invoker(obj, member_func_storage, <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
+<div class="line"><span class="lineno">  222</span>        }</div>
+<div class="line"><span class="lineno">  223</span>    };</div>
+<div class="line"><span class="lineno">  224</span> </div>
+<div class="line"><span class="lineno">  225</span>    <span class="comment">// Type-erased const member function callable  </span></div>
+<div class="line"><span class="lineno">  226</span>    <span class="keyword">struct </span>ConstMemberCallable : MemberCallableBase {</div>
+<div class="line"><span class="lineno">  227</span>        <span class="keyword">const</span> <span class="keywordtype">void</span>* obj;</div>
+<div class="line"><span class="lineno">  228</span>        <span class="comment">// Union to store member function pointer as raw bytes</span></div>
+<div class="line"><span class="lineno">  229</span>        <span class="keyword">union </span>MemberFuncStorage {</div>
+<div class="line"><span class="lineno">  230</span>            <span class="keywordtype">char</span> bytes[<span class="keyword">sizeof</span>(R (ConstMemberCallable::*)(Args...) <span class="keyword">const</span>)];</div>
+<div class="line"><span class="lineno">  231</span>            <span class="comment">// Ensure proper alignment</span></div>
+<div class="line"><span class="lineno">  232</span>            <span class="keywordtype">void</span>* alignment_dummy;</div>
+<div class="line"><span class="lineno">  233</span>        } member_func_storage;</div>
+<div class="line"><span class="lineno">  234</span>        </div>
+<div class="line"><span class="lineno">  235</span>        <span class="comment">// Type-erased invoker function - set at construction time</span></div>
+<div class="line"><span class="lineno">  236</span>        R (*invoker)(<span class="keyword">const</span> <span class="keywordtype">void</span>* obj, <span class="keyword">const</span> MemberFuncStorage&amp; mfp, Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>);</div>
+<div class="line"><span class="lineno">  237</span>        </div>
+<div class="line"><span class="lineno">  238</span>        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> C&gt;</div>
+<div class="line"><span class="lineno">  239</span>        ConstMemberCallable(<span class="keyword">const</span> C* o, R (C::*mf)(Args...) <span class="keyword">const</span>) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> : obj(o) {</div>
+<div class="line"><span class="lineno">  240</span>            <span class="comment">// Store the member function pointer as raw bytes</span></div>
+<div class="line"><span class="lineno">  241</span>            <a class="code hl_define" href="../../df/d96/s16x16x4_8h_a1e4d1792cf482d5f64f27714ea210d47.html#a1e4d1792cf482d5f64f27714ea210d47">FL_STATIC_ASSERT</a>(<span class="keyword">sizeof</span>(mf) &lt;= <span class="keyword">sizeof</span>(member_func_storage),</div>
+<div class="line"><span class="lineno">  242</span>                         <span class="stringliteral">&quot;Member function pointer too large&quot;</span>);</div>
+<div class="line"><span class="lineno">  243</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d">fl::memcpy</a>(member_func_storage.bytes, &amp;mf, <span class="keyword">sizeof</span>(mf));</div>
+<div class="line"><span class="lineno">  244</span>            <span class="comment">// Set the invoker to a function that knows how to cast back and call</span></div>
+<div class="line"><span class="lineno">  245</span>            invoker = &amp;invoke_const_member&lt;C&gt;;</div>
+<div class="line"><span class="lineno">  246</span>        }</div>
+<div class="line"><span class="lineno">  247</span>        </div>
+<div class="line"><span class="lineno">  248</span>        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> C&gt;</div>
+<div class="line"><span class="lineno">  249</span>        <span class="keyword">static</span> R invoke_const_member(<span class="keyword">const</span> <span class="keywordtype">void</span>* obj, <span class="keyword">const</span> MemberFuncStorage&amp; mfp, Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  250</span>            <span class="keyword">const</span> C* typed_obj = <span class="keyword">static_cast&lt;</span><span class="keyword">const </span>C*<span class="keyword">&gt;</span>(obj);</div>
+<div class="line"><span class="lineno">  251</span>            R (C::*typed_mf)(Args...) <span class="keyword">const</span>;</div>
+<div class="line"><span class="lineno">  252</span>            <a class="code hl_function" href="../../d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d">fl::memcpy</a>(&amp;typed_mf, mfp.bytes, <span class="keyword">sizeof</span>(typed_mf));</div>
+<div class="line"><span class="lineno">  253</span>            <span class="keywordflow">return</span> (typed_obj-&gt;*typed_mf)(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
+<div class="line"><span class="lineno">  254</span>        }</div>
+<div class="line"><span class="lineno">  255</span>        </div>
+<div class="line"><span class="lineno">  256</span>        R <a class="code hl_function" href="../../d4/d36/namespacefl_ab0814755ce899aaf015422de602d57d9.html#ab0814755ce899aaf015422de602d57d9">invoke</a>(Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> <span class="keyword">override</span> {</div>
+<div class="line"><span class="lineno">  257</span>            <span class="keywordflow">return</span> invoker(obj, member_func_storage, <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
+<div class="line"><span class="lineno">  258</span>        }</div>
+<div class="line"><span class="lineno">  259</span>    };</div>
+<div class="line"><span class="lineno">  260</span><span class="preprocessor">#endif  </span><span class="comment">// FL_FUNCTION_FULL_VARIANT</span></div>
+<div class="line"><span class="lineno">  261</span> </div>
+<div class="line"><span class="lineno">  262</span>    <span class="comment">// variant to store any of our callable types inline.</span></div>
+<div class="line"><span class="lineno">  263</span>    <span class="comment">// Low-memory targets drop the heap-fallback CallableBase and the two</span></div>
+<div class="line"><span class="lineno">  264</span>    <span class="comment">// MemberCallable alternatives (audited dead on those targets) to save</span></div>
+<div class="line"><span class="lineno">  265</span>    <span class="comment">// ~3 KB of per-signature variant codegen tax. See FastLED #3077.</span></div>
+<div class="line"><span class="lineno">  266</span><span class="preprocessor">#if FL_FUNCTION_FULL_VARIANT</span></div>
+<div class="line"><span class="lineno">  267</span>    <span class="keyword">using </span>Storage = variant&lt;fl::shared_ptr&lt;CallableBase&gt;, FreeFunctionCallable, InlinedLambda, NonConstMemberCallable, ConstMemberCallable&gt;;</div>
+<div class="line"><span class="lineno">  268</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  269</span>    <span class="keyword">using </span>Storage = variant&lt;FreeFunctionCallable, InlinedLambda&gt;;</div>
+<div class="line"><span class="lineno">  270</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  271</span>    Storage mStorage;</div>
+<div class="line"><span class="lineno">  272</span> </div>
+<div class="line"><span class="lineno">  273</span>    <span class="comment">// Helper function to handle default return value for void and non-void types</span></div>
+<div class="line"><span class="lineno">  274</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> ReturnType&gt;</div>
+<div class="line"><span class="lineno">  275</span>    <span class="keyword">typename</span> enable_if&lt;!is_void&lt;ReturnType&gt;::value, ReturnType&gt;::type</div>
+<div class="line"><span class="lineno">  276</span>    default_return_helper() const <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  277</span>        <span class="keywordflow">return</span> ReturnType{};</div>
+<div class="line"><span class="lineno">  278</span>    }</div>
+<div class="line"><span class="lineno">  279</span>    </div>
+<div class="line"><span class="lineno">  280</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> ReturnType&gt;</div>
+<div class="line"><span class="lineno">  281</span>    <span class="keyword">typename</span> enable_if&lt;is_void&lt;ReturnType&gt;::value, ReturnType&gt;::type</div>
+<div class="line"><span class="lineno">  282</span>    default_return_helper() const <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  283</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  284</span>    }</div>
+<div class="line"><span class="lineno">  285</span> </div>
+<div class="line"><span class="lineno">  286</span><span class="keyword">public</span>:</div>
+<div class="line"><span class="lineno">  287</span>    function() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> = default;</div>
+<div class="line"><span class="lineno">  288</span>    </div>
+<div class="line"><span class="lineno">  289</span>    <span class="comment">// Copy constructor - properly handle variant alignment</span></div>
+<div class="line"><span class="lineno">  290</span>    function(const function&amp; other) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> : mStorage(other.mStorage) {}</div>
+<div class="line"><span class="lineno">  291</span>    </div>
+<div class="line"><span class="lineno">  292</span>    <span class="comment">// Move constructor - properly handle variant alignment  </span></div>
+<div class="line"><span class="lineno">  293</span>    function(function&amp;&amp; other) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> : mStorage(<a class="code hl_function" href="../../d4/d36/namespacefl_a03eeb690d9582a74cb2e4a1f5a806e80.html#a03eeb690d9582a74cb2e4a1f5a806e80">fl::move</a>(other.mStorage)) {}</div>
+<div class="line"><span class="lineno">  294</span>    </div>
+<div class="line"><span class="lineno">  295</span>    <span class="comment">// Copy assignment</span></div>
+<div class="line"><span class="lineno">  296</span>    function&amp; operator=(<span class="keyword">const</span> function&amp; other) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  297</span>        <span class="keywordflow">if</span> (<span class="keyword">this</span> != &amp;other) {</div>
+<div class="line"><span class="lineno">  298</span>            mStorage = other.mStorage;</div>
+<div class="line"><span class="lineno">  299</span>        }</div>
+<div class="line"><span class="lineno">  300</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">  301</span>    }</div>
+<div class="line"><span class="lineno">  302</span>    </div>
+<div class="line"><span class="lineno">  303</span>    <span class="comment">// Move assignment</span></div>
+<div class="line"><span class="lineno">  304</span>    function&amp; operator=(function&amp;&amp; other) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  305</span>        <span class="keywordflow">if</span> (<span class="keyword">this</span> != &amp;other) {</div>
+<div class="line"><span class="lineno">  306</span>            mStorage = <a class="code hl_function" href="../../d4/d36/namespacefl_a03eeb690d9582a74cb2e4a1f5a806e80.html#a03eeb690d9582a74cb2e4a1f5a806e80">fl::move</a>(other.mStorage);</div>
+<div class="line"><span class="lineno">  307</span>        }</div>
+<div class="line"><span class="lineno">  308</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">  309</span>    }</div>
+<div class="line"><span class="lineno">  310</span>    </div>
+<div class="line"><span class="lineno">  311</span>    <span class="comment">// 1) Free function constructor - stored inline!</span></div>
+<div class="line"><span class="lineno">  312</span>    function(R (*fp)(Args...)) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  313</span>        mStorage = FreeFunctionCallable(fp);</div>
+<div class="line"><span class="lineno">  314</span>    }</div>
+<div class="line"><span class="lineno">  315</span>    </div>
+<div class="line"><span class="lineno">  316</span>    <span class="comment">// 2) Lambda/functor constructor - inline if small, heap if large</span></div>
+<div class="line"><span class="lineno">  317</span>    template &lt;typename F, typename = enable_if_t&lt;!is_member_function_pointer&lt;F&gt;::value &amp;&amp; !is_function_pointer&lt;F&gt;::value&gt;&gt;</div>
+<div class="line"><span class="lineno">  318</span>    function(F f) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  319</span>        <span class="comment">// Use template specialization instead of if constexpr for C++14 compatibility</span></div>
+<div class="line"><span class="lineno">  320</span>        construct_lambda_or_functor(<a class="code hl_function" href="../../d4/d36/namespacefl_a03eeb690d9582a74cb2e4a1f5a806e80.html#a03eeb690d9582a74cb2e4a1f5a806e80">fl::move</a>(f), <span class="keyword">typename</span> conditional&lt;<span class="keyword">sizeof</span>(F) &lt;= kInlineLambdaSize, true_type, false_type&gt;::type{});</div>
+<div class="line"><span class="lineno">  321</span>    }</div>
+<div class="line"><span class="lineno">  322</span>    </div>
+<div class="line"><span class="lineno">  323</span><span class="preprocessor">#if FL_FUNCTION_FULL_VARIANT</span></div>
+<div class="line"><span class="lineno">  324</span>    <span class="comment">// 3) non‑const member function - stored inline!</span></div>
+<div class="line"><span class="lineno">  325</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> C&gt;</div>
+<div class="line"><span class="lineno">  326</span>    function(R (C::*mf)(Args...), C* obj) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  327</span>        mStorage = NonConstMemberCallable(obj, mf);</div>
+<div class="line"><span class="lineno">  328</span>    }</div>
+<div class="line"><span class="lineno">  329</span> </div>
+<div class="line"><span class="lineno">  330</span>    <span class="comment">// 4) const member function - stored inline!</span></div>
+<div class="line"><span class="lineno">  331</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> C&gt;</div>
+<div class="line"><span class="lineno">  332</span>    function(R (C::*mf)(Args...) <span class="keyword">const</span>, <span class="keyword">const</span> C* obj) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  333</span>        mStorage = ConstMemberCallable(obj, mf);</div>
+<div class="line"><span class="lineno">  334</span>    }</div>
+<div class="line"><span class="lineno">  335</span><span class="preprocessor">#endif  </span><span class="comment">// FL_FUNCTION_FULL_VARIANT</span></div>
+<div class="line"><span class="lineno">  336</span> </div>
+<div class="line"><span class="lineno">  337</span>    R operator()(Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  338</span>        <span class="comment">// Direct dispatch using type checking - efficient and simple</span></div>
+<div class="line"><span class="lineno">  339</span><span class="preprocessor">#if FL_FUNCTION_FULL_VARIANT</span></div>
+<div class="line"><span class="lineno">  340</span>        <span class="keywordflow">if</span> (<span class="keyword">auto</span>* heap_callable = mStorage.template ptr&lt;fl::shared_ptr&lt;CallableBase&gt;&gt;()) {</div>
+<div class="line"><span class="lineno">  341</span>            <span class="keywordflow">return</span> (*heap_callable)-&gt;invoke(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
+<div class="line"><span class="lineno">  342</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<span class="keyword">auto</span>* free_func = mStorage.template ptr&lt;FreeFunctionCallable&gt;()) {</div>
+<div class="line"><span class="lineno">  343</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  344</span>        <span class="keywordflow">if</span> (<span class="keyword">auto</span>* free_func = mStorage.template ptr&lt;FreeFunctionCallable&gt;()) {</div>
+<div class="line"><span class="lineno">  345</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  346</span>            <span class="keywordflow">return</span> free_func-&gt;invoke(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
+<div class="line"><span class="lineno">  347</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<span class="keyword">auto</span>* inlined_lambda = mStorage.template ptr&lt;InlinedLambda&gt;()) {</div>
+<div class="line"><span class="lineno">  348</span>            <span class="keywordflow">return</span> inlined_lambda-&gt;invoke(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
+<div class="line"><span class="lineno">  349</span><span class="preprocessor">#if FL_FUNCTION_FULL_VARIANT</span></div>
+<div class="line"><span class="lineno">  350</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<span class="keyword">auto</span>* nonconst_member = mStorage.template ptr&lt;NonConstMemberCallable&gt;()) {</div>
+<div class="line"><span class="lineno">  351</span>            <span class="keywordflow">return</span> nonconst_member-&gt;invoke(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
+<div class="line"><span class="lineno">  352</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<span class="keyword">auto</span>* const_member = mStorage.template ptr&lt;ConstMemberCallable&gt;()) {</div>
+<div class="line"><span class="lineno">  353</span>            <span class="keywordflow">return</span> const_member-&gt;invoke(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
+<div class="line"><span class="lineno">  354</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  355</span>        }</div>
+<div class="line"><span class="lineno">  356</span>        <span class="comment">// This should never happen if the function is properly constructed</span></div>
+<div class="line"><span class="lineno">  357</span>        <span class="keywordflow">return</span> default_return_helper&lt;R&gt;();</div>
+<div class="line"><span class="lineno">  358</span>    }</div>
+<div class="line"><span class="lineno">  359</span>    </div>
+<div class="line"><span class="lineno">  360</span>    <span class="keyword">explicit</span> <span class="keyword">operator</span> bool() const <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  361</span>        <span class="keywordflow">return</span> !mStorage.empty();</div>
+<div class="line"><span class="lineno">  362</span>    }</div>
+<div class="line"><span class="lineno">  363</span>    </div>
+<div class="line"><span class="lineno">  364</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a29022c57817c486135e4939abce404d6.html#a29022c57817c486135e4939abce404d6">clear</a>() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  365</span>        mStorage = Storage{};  <span class="comment">// Reset to empty variant</span></div>
+<div class="line"><span class="lineno">  366</span>    }</div>
+<div class="line"><span class="lineno">  367</span>    </div>
+<div class="line"><span class="lineno">  368</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a85ba05df525add48070aed53f3088b8c.html#a85ba05df525add48070aed53f3088b8c">operator==</a>(<span class="keyword">const</span> function&amp; o) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  369</span>        <span class="comment">// For simplicity, just check if both are empty or both are non-empty</span></div>
+<div class="line"><span class="lineno">  370</span>        <span class="comment">// Full equality would require more complex comparison logic</span></div>
+<div class="line"><span class="lineno">  371</span>        <span class="keywordflow">return</span> mStorage.empty() == o.mStorage.empty();</div>
+<div class="line"><span class="lineno">  372</span>    }</div>
+<div class="line"><span class="lineno">  373</span>    </div>
+<div class="line"><span class="lineno">  374</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a5c282abe564ddeed95d0ae0752190551.html#a5c282abe564ddeed95d0ae0752190551">operator!=</a>(<span class="keyword">const</span> function&amp; o) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  375</span>        <span class="keywordflow">return</span> !(*<span class="keyword">this</span> == o);</div>
+<div class="line"><span class="lineno">  376</span>    }</div>
+<div class="line"><span class="lineno">  377</span> </div>
+<div class="line"><span class="lineno">  378</span><span class="keyword">private</span>:</div>
+<div class="line"><span class="lineno">  379</span>    <span class="comment">// Helper for small lambdas/functors - inline storage</span></div>
+<div class="line"><span class="lineno">  380</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> F&gt;</div>
+<div class="line"><span class="lineno">  381</span>    <span class="keywordtype">void</span> construct_lambda_or_functor(F f, true_type <span class="comment">/* small */</span>) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  382</span>        mStorage = InlinedLambda(<a class="code hl_function" href="../../d4/d36/namespacefl_a03eeb690d9582a74cb2e4a1f5a806e80.html#a03eeb690d9582a74cb2e4a1f5a806e80">fl::move</a>(f));</div>
+<div class="line"><span class="lineno">  383</span>    }</div>
+<div class="line"><span class="lineno">  384</span> </div>
+<div class="line"><span class="lineno">  385</span><span class="preprocessor">#if FL_FUNCTION_FULL_VARIANT</span></div>
+<div class="line"><span class="lineno">  386</span>    <span class="comment">// Helper for large lambdas/functors - heap storage</span></div>
+<div class="line"><span class="lineno">  387</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> F&gt;</div>
+<div class="line"><span class="lineno">  388</span>    <span class="keywordtype">void</span> construct_lambda_or_functor(F f, false_type <span class="comment">/* large */</span>) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  389</span>        mStorage = fl::shared_ptr&lt;CallableBase&gt;(<a class="code hl_function" href="../../d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared</a>&lt;Callable&lt;F&gt;&gt;(<a class="code hl_function" href="../../d4/d36/namespacefl_a03eeb690d9582a74cb2e4a1f5a806e80.html#a03eeb690d9582a74cb2e4a1f5a806e80">fl::move</a>(f)));</div>
+<div class="line"><span class="lineno">  390</span>    }</div>
+<div class="line"><span class="lineno">  391</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  392</span>    <span class="comment">// Low-memory targets: heap fallback dropped per FastLED #3077 to save flash.</span></div>
+<div class="line"><span class="lineno">  393</span>    <span class="comment">// Large lambdas (&gt;kInlineLambdaSize) compile but leave the storage empty;</span></div>
+<div class="line"><span class="lineno">  394</span>    <span class="comment">// operator() returns the default-constructed R. This degrades gracefully</span></div>
+<div class="line"><span class="lineno">  395</span>    <span class="comment">// for link-dead code paths (e.g. UIButton::onClicked which the LPC845</span></div>
+<div class="line"><span class="lineno">  396</span>    <span class="comment">// LowMemory build never reaches), and the linker DCE&#39;s the unreached</span></div>
+<div class="line"><span class="lineno">  397</span>    <span class="comment">// instantiations. Code paths reachable at runtime should pre-validate that</span></div>
+<div class="line"><span class="lineno">  398</span>    <span class="comment">// their lambdas fit in kInlineLambdaSize.</span></div>
+<div class="line"><span class="lineno">  399</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> F&gt;</div>
+<div class="line"><span class="lineno">  400</span>    <span class="keywordtype">void</span> construct_lambda_or_functor(F <span class="comment">/*f*/</span>, false_type <span class="comment">/* large */</span>) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  401</span>        mStorage = Storage{};</div>
+<div class="line"><span class="lineno">  402</span>    }</div>
+<div class="line"><span class="lineno">  403</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  404</span>};</div>
+<div class="line"><span class="lineno">  405</span> </div>
+<div class="line"><span class="lineno">  406</span><span class="comment">//----------------------------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">  407</span><span class="comment">// function_list: Container for managing multiple callbacks with add/remove</span></div>
+<div class="line"><span class="lineno">  408</span><span class="comment">//----------------------------------------------------------------------------</span></div>
+<div class="line"><span class="lineno">  409</span> </div>
+<div class="line"><span class="lineno">  410</span><span class="comment">// Primary template declaration with static assertion for invalid usage</span></div>
+<div class="line"><span class="lineno">  411</span><span class="comment">// Only specializations for function signatures (e.g., function_list&lt;void(Args...)&gt;) are valid</span></div>
+<div class="line"><span class="lineno">  412</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><span class="lineno">  413</span><span class="keyword">class </span>function_list {</div>
+<div class="line"><span class="lineno">  414</span>    <a class="code hl_define" href="../../df/d96/s16x16x4_8h_a1e4d1792cf482d5f64f27714ea210d47.html#a1e4d1792cf482d5f64f27714ea210d47">FL_STATIC_ASSERT</a>(<a class="code hl_enumvalue" href="../../d3/d46/structfl_1_1is__same_af294c1891875ed98808b47d923231da9.html#af294c1891875ed98808b47d923231da9a8cf48c3e8a088fb732ef667283f5f293">fl::is_same&lt;T, void&gt;::value</a> &amp;&amp; !<a class="code hl_enumvalue" href="../../d3/d46/structfl_1_1is__same_af294c1891875ed98808b47d923231da9.html#af294c1891875ed98808b47d923231da9a8cf48c3e8a088fb732ef667283f5f293">fl::is_same&lt;T, void&gt;::value</a>,</div>
+<div class="line"><span class="lineno">  415</span>                  <span class="stringliteral">&quot;function_list requires a void returning function signature.&quot;</span>);</div>
+<div class="line"><span class="lineno">  416</span>};</div>
+<div class="line"><span class="lineno">  417</span> </div>
+<div class="line"><span class="lineno">  418</span><span class="comment">// Partial specialization for function signature syntax: function_list&lt;void(Args...)&gt;</span></div>
+<div class="line"><span class="lineno">  419</span><span class="comment">// Supports: function_list&lt;void()&gt;, function_list&lt;void(float)&gt;, function_list&lt;void(u8, float, float)&gt;, etc.</span></div>
+<div class="line"><span class="lineno">  420</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span>... Args&gt;</div>
+<div class="line"><span class="lineno">  421</span><span class="keyword">class </span>function_list&lt;void(Args...)&gt; {</div>
+<div class="line"><span class="lineno">  422</span>  <span class="keyword">private</span>:</div>
+<div class="line"><span class="lineno">  423</span>    <span class="keyword">using </span>FunctionType = function&lt;void(Args...)&gt;;</div>
+<div class="line"><span class="lineno">  424</span> </div>
+<div class="line"><span class="lineno">  425</span>    <span class="keyword">struct </span>FunctionEntry {</div>
+<div class="line"><span class="lineno">  426</span>        <span class="keywordtype">int</span> id;</div>
+<div class="line"><span class="lineno">  427</span>        <span class="keywordtype">int</span> priority;</div>
+<div class="line"><span class="lineno">  428</span>        FunctionType fn;</div>
+<div class="line"><span class="lineno">  429</span> </div>
+<div class="line"><span class="lineno">  430</span>        FunctionEntry() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> : <span class="keywordtype">id</span>(0), priority(0), fn() {}</div>
+<div class="line"><span class="lineno">  431</span>        FunctionEntry(<span class="keywordtype">int</span> idParam, <span class="keywordtype">int</span> priorityParam, FunctionType fnParam) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></div>
+<div class="line"><span class="lineno">  432</span>            : id(idParam), priority(priorityParam), fn(fnParam) {}</div>
+<div class="line"><span class="lineno">  433</span>    };</div>
+<div class="line"><span class="lineno">  434</span> </div>
+<div class="line"><span class="lineno">  435</span>    <span class="keyword">using </span>FunctionVector = fl::vector&lt;FunctionEntry&gt;;</div>
+<div class="line"><span class="lineno">  436</span> </div>
+<div class="line"><span class="lineno">  437</span>    FunctionVector mFunctions;</div>
+<div class="line"><span class="lineno">  438</span>    <span class="keywordtype">int</span> mIdCounter = 0;</div>
+<div class="line"><span class="lineno">  439</span> </div>
+<div class="line"><span class="lineno">  440</span>    <span class="keywordtype">bool</span> mNeedsCompact = <span class="keyword">false</span>;  <span class="comment">// True when functions have been cleared during invocation</span></div>
+<div class="line"><span class="lineno">  441</span> </div>
+<div class="line"><span class="lineno">  442</span>  <span class="keyword">public</span>:</div>
+<div class="line"><span class="lineno">  443</span>    function_list() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> : mFunctions(), mIdCounter(0), mNeedsCompact(false) {}</div>
+<div class="line"><span class="lineno">  444</span>    function_list(<span class="keyword">const</span> function_list&amp; other) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></div>
+<div class="line"><span class="lineno">  445</span>        : mFunctions(other.mFunctions), mIdCounter(other.mIdCounter), mNeedsCompact(other.mNeedsCompact) {}</div>
+<div class="line"><span class="lineno">  446</span>    function_list(function_list&amp;&amp; other) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></div>
+<div class="line"><span class="lineno">  447</span>        : mFunctions(<a class="code hl_function" href="../../d4/d36/namespacefl_a03eeb690d9582a74cb2e4a1f5a806e80.html#a03eeb690d9582a74cb2e4a1f5a806e80">fl::move</a>(other.mFunctions)), mIdCounter(other.mIdCounter), mNeedsCompact(other.mNeedsCompact) {}</div>
+<div class="line"><span class="lineno">  448</span>    function_list&amp; operator=(<span class="keyword">const</span> function_list&amp; other) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  449</span>        <span class="keywordflow">if</span> (<span class="keyword">this</span> != &amp;other) {</div>
+<div class="line"><span class="lineno">  450</span>            mFunctions = other.mFunctions;</div>
+<div class="line"><span class="lineno">  451</span>            mIdCounter = other.mIdCounter;</div>
+<div class="line"><span class="lineno">  452</span>            mNeedsCompact = other.mNeedsCompact;</div>
+<div class="line"><span class="lineno">  453</span>        }</div>
+<div class="line"><span class="lineno">  454</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">  455</span>    }</div>
+<div class="line"><span class="lineno">  456</span>    function_list&amp; operator=(function_list&amp;&amp; other) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  457</span>        <span class="keywordflow">if</span> (<span class="keyword">this</span> != &amp;other) {</div>
+<div class="line"><span class="lineno">  458</span>            mFunctions = <a class="code hl_function" href="../../d4/d36/namespacefl_a03eeb690d9582a74cb2e4a1f5a806e80.html#a03eeb690d9582a74cb2e4a1f5a806e80">fl::move</a>(other.mFunctions);</div>
+<div class="line"><span class="lineno">  459</span>            mIdCounter = other.mIdCounter;</div>
+<div class="line"><span class="lineno">  460</span>            mNeedsCompact = other.mNeedsCompact;</div>
+<div class="line"><span class="lineno">  461</span>        }</div>
+<div class="line"><span class="lineno">  462</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">  463</span>    }</div>
+<div class="line"><span class="lineno">  464</span>    ~function_list() = <span class="keywordflow">default</span>;</div>
+<div class="line"><span class="lineno">  465</span> </div>
+<div class="line"><span class="lineno">  466</span>    <span class="keywordtype">int</span> <a class="code hl_function" href="../../d4/d36/namespacefl_aa8f3e3bb82d704eddf109eae107bfcfb.html#aa8f3e3bb82d704eddf109eae107bfcfb">add</a>(function&lt;<span class="keywordtype">void</span>(Args...)&gt; fn, <span class="keywordtype">int</span> priority = 0) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  467</span>        <span class="keywordtype">int</span> <span class="keywordtype">id</span> = mIdCounter++;</div>
+<div class="line"><span class="lineno">  468</span>        mFunctions.push_back(FunctionEntry(<span class="keywordtype">id</span>, priority, fn));</div>
+<div class="line"><span class="lineno">  469</span>        <span class="keywordflow">return</span> id;</div>
+<div class="line"><span class="lineno">  470</span>    }</div>
+<div class="line"><span class="lineno">  471</span> </div>
+<div class="line"><span class="lineno">  472</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_aebcaa3afca0f718afb9d90a953b54860.html#aebcaa3afca0f718afb9d90a953b54860">remove</a>(<span class="keywordtype">int</span> <span class="keywordtype">id</span>) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  473</span>        <span class="comment">// During invocation: clear the function for deferred removal</span></div>
+<div class="line"><span class="lineno">  474</span>        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; mFunctions.size(); ++i) {</div>
+<div class="line"><span class="lineno">  475</span>            <span class="keywordflow">if</span> (mFunctions[i].<span class="keywordtype">id</span> == <span class="keywordtype">id</span>) {</div>
+<div class="line"><span class="lineno">  476</span>                mFunctions[i].fn.clear();</div>
+<div class="line"><span class="lineno">  477</span>                mNeedsCompact = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  478</span>            }</div>
+<div class="line"><span class="lineno">  479</span>        }</div>
+<div class="line"><span class="lineno">  480</span>    }</div>
+<div class="line"><span class="lineno">  481</span> </div>
+<div class="line"><span class="lineno">  482</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a29022c57817c486135e4939abce404d6.html#a29022c57817c486135e4939abce404d6">clear</a>() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  483</span>        mFunctions.clear();</div>
+<div class="line"><span class="lineno">  484</span>    }</div>
+<div class="line"><span class="lineno">  485</span> </div>
+<div class="line"><span class="lineno">  486</span>    <span class="comment">// Compact the storage by removing invalid (cleared) callbacks</span></div>
+<div class="line"><span class="lineno">  487</span>    <span class="comment">// Used internally after invocation if removals occurred</span></div>
+<div class="line"><span class="lineno">  488</span>    <span class="keywordtype">void</span> compact() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  489</span>        <span class="keywordflow">if</span> (!mNeedsCompact) <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  490</span>        <span class="keywordtype">size_t</span> write_pos = 0;</div>
+<div class="line"><span class="lineno">  491</span>        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> read_pos = 0; read_pos &lt; mFunctions.size(); ++read_pos) {</div>
+<div class="line"><span class="lineno">  492</span>            <span class="keywordflow">if</span> (mFunctions[read_pos].fn) {  <span class="comment">// Check if function is still valid</span></div>
+<div class="line"><span class="lineno">  493</span>                <span class="keywordflow">if</span> (write_pos != read_pos) {</div>
+<div class="line"><span class="lineno">  494</span>                    mFunctions[write_pos] = mFunctions[read_pos];</div>
+<div class="line"><span class="lineno">  495</span>                }</div>
+<div class="line"><span class="lineno">  496</span>                write_pos++;</div>
+<div class="line"><span class="lineno">  497</span>            }</div>
+<div class="line"><span class="lineno">  498</span>        }</div>
+<div class="line"><span class="lineno">  499</span>        mFunctions.resize(write_pos);</div>
+<div class="line"><span class="lineno">  500</span>        mNeedsCompact = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  501</span>    }</div>
+<div class="line"><span class="lineno">  502</span> </div>
+<div class="line"><span class="lineno">  503</span>    <span class="comment">// Size information - counts only valid (non-cleared) functions</span></div>
+<div class="line"><span class="lineno">  504</span>    fl::size size() const <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  505</span>        fl::size count = 0;</div>
+<div class="line"><span class="lineno">  506</span>        <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; entry : mFunctions) {</div>
+<div class="line"><span class="lineno">  507</span>            <span class="keywordflow">if</span> (entry.fn) {</div>
+<div class="line"><span class="lineno">  508</span>                ++count;</div>
+<div class="line"><span class="lineno">  509</span>            }</div>
+<div class="line"><span class="lineno">  510</span>        }</div>
+<div class="line"><span class="lineno">  511</span>        <span class="keywordflow">return</span> count;</div>
+<div class="line"><span class="lineno">  512</span>    }</div>
+<div class="line"><span class="lineno">  513</span>    <span class="keywordtype">bool</span> empty() const <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> { <span class="keywordflow">return</span> size() == 0; }</div>
+<div class="line"><span class="lineno">  514</span> </div>
+<div class="line"><span class="lineno">  515</span>    <span class="comment">// Boolean conversion for if (callback) checks</span></div>
+<div class="line"><span class="lineno">  516</span>    <span class="keyword">explicit</span> <span class="keyword">operator</span> bool() const <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> { <span class="keywordflow">return</span> !empty(); }</div>
+<div class="line"><span class="lineno">  517</span> </div>
+<div class="line"><span class="lineno">  518</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_ab0814755ce899aaf015422de602d57d9.html#ab0814755ce899aaf015422de602d57d9">invoke</a>(Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  519</span>        <span class="keywordflow">if</span> (mFunctions.empty()) <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  520</span>        <span class="comment">// Compact the storage by removing invalid (cleared) callbacks</span></div>
+<div class="line"><span class="lineno">  521</span>        compact();</div>
+<div class="line"><span class="lineno">  522</span>        <span class="comment">// Save size at start - newly added callbacks won&#39;t execute until next call</span></div>
+<div class="line"><span class="lineno">  523</span>        <span class="keyword">const</span> <span class="keywordtype">size_t</span> invoke_size = mFunctions.size();</div>
+<div class="line"><span class="lineno">  524</span>        <span class="comment">// Early return if no callbacks</span></div>
+<div class="line"><span class="lineno">  525</span>        <span class="keywordflow">if</span> (invoke_size == 0) {</div>
+<div class="line"><span class="lineno">  526</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  527</span>        }</div>
+<div class="line"><span class="lineno">  528</span> </div>
+<div class="line"><span class="lineno">  529</span>        <span class="comment">// Collect unique priorities into a small vector (usually very few unique values)</span></div>
+<div class="line"><span class="lineno">  530</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_acbd53e6d22e5c0bd83a5fb51b15712a7.html#acbd53e6d22e5c0bd83a5fb51b15712a7">fl::vector_inlined&lt;int, 16&gt;</a> priorities;</div>
+<div class="line"><span class="lineno">  531</span>        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; invoke_size; ++i) {</div>
+<div class="line"><span class="lineno">  532</span>            <span class="keywordflow">if</span> (!mFunctions[i].fn) <span class="keywordflow">continue</span>;  <span class="comment">// Skip already-cleared functions</span></div>
+<div class="line"><span class="lineno">  533</span> </div>
+<div class="line"><span class="lineno">  534</span>            <span class="keywordtype">int</span> p = mFunctions[i].priority;</div>
+<div class="line"><span class="lineno">  535</span>            <span class="comment">// Only add if not already present</span></div>
+<div class="line"><span class="lineno">  536</span>            <span class="keywordflow">if</span> (priorities.<a class="code hl_function" href="../../d2/d24/classfl_1_1vector_a1c782d4557998287e70342fa13ca86b0.html#a1c782d4557998287e70342fa13ca86b0">find</a>(p) == priorities.<a class="code hl_function" href="../../d2/d24/classfl_1_1vector_a434be8ec3779da485f8c7a19191b3017.html#a434be8ec3779da485f8c7a19191b3017">end</a>()) {</div>
+<div class="line"><span class="lineno">  537</span>                priorities.<a class="code hl_function" href="../../d2/d24/classfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980.html#ae9a8cea8d4b81d8f2f10a2b007ac2980">push_back</a>(p);</div>
+<div class="line"><span class="lineno">  538</span>            }</div>
+<div class="line"><span class="lineno">  539</span>        }</div>
+<div class="line"><span class="lineno">  540</span> </div>
+<div class="line"><span class="lineno">  541</span>        <span class="comment">// Sort priorities (higher priority first) - cheap since there are usually very few unique priorities</span></div>
+<div class="line"><span class="lineno">  542</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_ac62f183887fccce240012b87aca79f89.html#ac62f183887fccce240012b87aca79f89">fl::sort</a>(priorities.<a class="code hl_function" href="../../d2/d24/classfl_1_1vector_a0c7196bcc87ceba65bc1232be665230e.html#a0c7196bcc87ceba65bc1232be665230e">begin</a>(), priorities.<a class="code hl_function" href="../../d2/d24/classfl_1_1vector_a434be8ec3779da485f8c7a19191b3017.html#a434be8ec3779da485f8c7a19191b3017">end</a>(), [](<span class="keywordtype">int</span> a, <span class="keywordtype">int</span> b) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> { return a &gt; b; });</div>
+<div class="line"><span class="lineno">  543</span> </div>
+<div class="line"><span class="lineno">  544</span>        <span class="comment">// Iterate through priorities (highest first), then through functions matching each priority</span></div>
+<div class="line"><span class="lineno">  545</span>        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> p_idx = 0; p_idx &lt; priorities.<a class="code hl_function" href="../../d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c">size</a>(); ++p_idx) {</div>
+<div class="line"><span class="lineno">  546</span>            <span class="keywordtype">int</span> current_priority = priorities[p_idx];</div>
+<div class="line"><span class="lineno">  547</span>            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; invoke_size; ++i) {</div>
+<div class="line"><span class="lineno">  548</span>                <span class="keywordflow">if</span> (mFunctions.empty()) {</div>
+<div class="line"><span class="lineno">  549</span>                    <span class="keywordflow">return</span>;  <span class="comment">// Clear happened.</span></div>
+<div class="line"><span class="lineno">  550</span>                }</div>
+<div class="line"><span class="lineno">  551</span>                <span class="keywordflow">if</span> (mFunctions[i].fn &amp;&amp; mFunctions[i].priority == current_priority) {</div>
+<div class="line"><span class="lineno">  552</span>                    mFunctions[i].fn(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
+<div class="line"><span class="lineno">  553</span>                }</div>
+<div class="line"><span class="lineno">  554</span>            }</div>
+<div class="line"><span class="lineno">  555</span>        }</div>
+<div class="line"><span class="lineno">  556</span>        compact();</div>
+<div class="line"><span class="lineno">  557</span>    }</div>
+<div class="line"><span class="lineno">  558</span> </div>
+<div class="line"><span class="lineno">  559</span>    <span class="comment">// Call operator - syntactic sugar for invoke()</span></div>
+<div class="line"><span class="lineno">  560</span>    <span class="keywordtype">void</span> operator()(Args... <a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  561</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_ab0814755ce899aaf015422de602d57d9.html#ab0814755ce899aaf015422de602d57d9">invoke</a>(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>...);</div>
+<div class="line"><span class="lineno">  562</span>    }</div>
+<div class="line"><span class="lineno">  563</span>};</div>
+<div class="line"><span class="lineno">  564</span> </div>
+<div class="line"><span class="lineno">  565</span><span class="comment">// Partial specialization for non-void return types: function_list&lt;R(Args...)&gt; where R != void</span></div>
+<div class="line"><span class="lineno">  566</span><span class="comment">// Triggers a compile-time error when attempting to use non-void return types</span></div>
+<div class="line"><span class="lineno">  567</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> R, <span class="keyword">typename</span>... Args&gt;</div>
+<div class="line"><span class="lineno">  568</span><span class="keyword">class </span>function_list&lt;R(Args...)&gt; {</div>
+<div class="line"><span class="lineno">  569</span>    <a class="code hl_define" href="../../df/d96/s16x16x4_8h_a1e4d1792cf482d5f64f27714ea210d47.html#a1e4d1792cf482d5f64f27714ea210d47">FL_STATIC_ASSERT</a>(<a class="code hl_enumvalue" href="../../d3/d46/structfl_1_1is__same_af294c1891875ed98808b47d923231da9.html#af294c1891875ed98808b47d923231da9a8cf48c3e8a088fb732ef667283f5f293">fl::is_same&lt;R, void&gt;::value</a>,</div>
+<div class="line"><span class="lineno">  570</span>                  <span class="stringliteral">&quot;function_list only supports void return type. &quot;</span></div>
+<div class="line"><span class="lineno">  571</span>                  <span class="stringliteral">&quot;Use function_list&lt;void(Args...)&gt; instead of function_list&lt;ReturnType(Args...)&gt;.&quot;</span>);</div>
+<div class="line"><span class="lineno">  572</span>};</div>
+<div class="line"><span class="lineno">  573</span> </div>
+<div class="line"><span class="lineno">  574</span>} <span class="comment">// namespace fl</span></div>
+<div class="ttc" id="aclassfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c_html_a9a248c6b3d33d24ef21e4275c4fbae8c"><div class="ttname"><a href="../../d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c">fl::vector_basic::size</a></div><div class="ttdeci">fl::size size() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d47/basic__vector_8h_source.html#l00042">basic_vector.h:42</a></div></div>
+<div class="ttc" id="aclassfl_1_1vector_a0c7196bcc87ceba65bc1232be665230e_html_a0c7196bcc87ceba65bc1232be665230e"><div class="ttname"><a href="../../d2/d24/classfl_1_1vector_a0c7196bcc87ceba65bc1232be665230e.html#a0c7196bcc87ceba65bc1232be665230e">fl::vector::begin</a></div><div class="ttdeci">iterator begin() FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00655">vector.h:655</a></div></div>
+<div class="ttc" id="aclassfl_1_1vector_a1c782d4557998287e70342fa13ca86b0_html_a1c782d4557998287e70342fa13ca86b0"><div class="ttname"><a href="../../d2/d24/classfl_1_1vector_a1c782d4557998287e70342fa13ca86b0.html#a1c782d4557998287e70342fa13ca86b0">fl::vector::find</a></div><div class="ttdeci">iterator find(const T &amp;value) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00682">vector.h:682</a></div></div>
+<div class="ttc" id="aclassfl_1_1vector_a434be8ec3779da485f8c7a19191b3017_html_a434be8ec3779da485f8c7a19191b3017"><div class="ttname"><a href="../../d2/d24/classfl_1_1vector_a434be8ec3779da485f8c7a19191b3017.html#a434be8ec3779da485f8c7a19191b3017">fl::vector::end</a></div><div class="ttdeci">iterator end() FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00661">vector.h:661</a></div></div>
+<div class="ttc" id="aclassfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980_html_ae9a8cea8d4b81d8f2f10a2b007ac2980"><div class="ttname"><a href="../../d2/d24/classfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980.html#ae9a8cea8d4b81d8f2f10a2b007ac2980">fl::vector::push_back</a></div><div class="ttdeci">void push_back(const T &amp;value) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l00624">vector.h:624</a></div></div>
+<div class="ttc" id="afunction_8h_a255e85529978bb20dbf35a725491f8cf_html_a255e85529978bb20dbf35a725491f8cf"><div class="ttname"><a href="../../dd/d67/function_8h_a255e85529978bb20dbf35a725491f8cf.html#a255e85529978bb20dbf35a725491f8cf">FASTLED_INLINE_LAMBDA_SIZE</a></div><div class="ttdeci">#define FASTLED_INLINE_LAMBDA_SIZE</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d67/function_8h_source.html#l00039">function.h:39</a></div></div>
+<div class="ttc" id="anamespacefl_a0393d1d09fff5bccc427802cc22e756d_html_a0393d1d09fff5bccc427802cc22e756d"><div class="ttname"><a href="../../d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d">fl::memcpy</a></div><div class="ttdeci">void * memcpy(void *dest, const void *src, size_t n) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/da3/cstring_8cpp_8hpp_source.html#l00110">cstring.cpp.hpp:110</a></div></div>
+<div class="ttc" id="anamespacefl_a03eeb690d9582a74cb2e4a1f5a806e80_html_a03eeb690d9582a74cb2e4a1f5a806e80"><div class="ttname"><a href="../../d4/d36/namespacefl_a03eeb690d9582a74cb2e4a1f5a806e80.html#a03eeb690d9582a74cb2e4a1f5a806e80">fl::move</a></div><div class="ttdeci">constexpr remove_reference&lt; T &gt;::type &amp;&amp; move(T &amp;&amp;t) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d83/move_8h_source.html#l00028">move.h:28</a></div></div>
+<div class="ttc" id="anamespacefl_a29022c57817c486135e4939abce404d6_html_a29022c57817c486135e4939abce404d6"><div class="ttname"><a href="../../d4/d36/namespacefl_a29022c57817c486135e4939abce404d6.html#a29022c57817c486135e4939abce404d6">fl::clear</a></div><div class="ttdeci">void clear(CRGB(&amp;arr)[N])</div><div class="ttdef"><b>Definition</b> <a href="../../df/db0/clear_8h_source.html#l00012">clear.h:12</a></div></div>
+<div class="ttc" id="anamespacefl_a44a195439ac7fa303b4b0b0c956605be_html_a44a195439ac7fa303b4b0b0c956605be"><div class="ttname"><a href="../../d4/d36/namespacefl_a44a195439ac7fa303b4b0b0c956605be.html#a44a195439ac7fa303b4b0b0c956605be">fl::memset</a></div><div class="ttdeci">void * memset(void *s, int c, size_t n) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/da3/cstring_8cpp_8hpp_source.html#l00125">cstring.cpp.hpp:125</a></div></div>
+<div class="ttc" id="anamespacefl_a5c282abe564ddeed95d0ae0752190551_html_a5c282abe564ddeed95d0ae0752190551"><div class="ttname"><a href="../../d4/d36/namespacefl_a5c282abe564ddeed95d0ae0752190551.html#a5c282abe564ddeed95d0ae0752190551">fl::operator!=</a></div><div class="ttdeci">FASTLED_FORCE_INLINE bool operator!=(const CRGB &amp;lhs, const CRGB &amp;rhs) FL_NOEXCEPT</div><div class="ttdoc">Check if two CRGB objects do not have the same color data.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00739">crgb.h:739</a></div></div>
+<div class="ttc" id="anamespacefl_a85ba05df525add48070aed53f3088b8c_html_a85ba05df525add48070aed53f3088b8c"><div class="ttname"><a href="../../d4/d36/namespacefl_a85ba05df525add48070aed53f3088b8c.html#a85ba05df525add48070aed53f3088b8c">fl::operator==</a></div><div class="ttdeci">FASTLED_FORCE_INLINE bool operator==(const CRGB &amp;lhs, const CRGB &amp;rhs) FL_NOEXCEPT</div><div class="ttdoc">Check if two CRGB objects have the same color data.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00733">crgb.h:733</a></div></div>
+<div class="ttc" id="anamespacefl_a87ae8a24cc8b709a64f39370e71846af_html_a87ae8a24cc8b709a64f39370e71846af"><div class="ttname"><a href="../../d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared</a></div><div class="ttdeci">shared_ptr&lt; T &gt; make_shared(Args &amp;&amp;... args) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d6a/shared__ptr_8h_source.html#l00414">shared_ptr.h:414</a></div></div>
+<div class="ttc" id="anamespacefl_aa8f3e3bb82d704eddf109eae107bfcfb_html_aa8f3e3bb82d704eddf109eae107bfcfb"><div class="ttname"><a href="../../d4/d36/namespacefl_aa8f3e3bb82d704eddf109eae107bfcfb.html#aa8f3e3bb82d704eddf109eae107bfcfb">fl::add</a></div><div class="ttdeci">float add(float &amp;a, float &amp;b)</div><div class="ttdef"><b>Definition</b> <a href="../../da/d0b/engine__core_8h_source.html#l00153">engine_core.h:153</a></div></div>
+<div class="ttc" id="anamespacefl_ab0814755ce899aaf015422de602d57d9_html_ab0814755ce899aaf015422de602d57d9"><div class="ttname"><a href="../../d4/d36/namespacefl_ab0814755ce899aaf015422de602d57d9.html#ab0814755ce899aaf015422de602d57d9">fl::invoke</a></div><div class="ttdeci">auto invoke(F &amp;&amp;f, T1 &amp;&amp;t1, Args &amp;&amp;... args) FL_NOEXCEPT -&gt; enable_if_t&lt; is_member_function_pointer&lt; typename remove_reference&lt; F &gt;::type &gt;::value &amp;&amp;!detail::use_pointer_syntax&lt; T1 &gt;::value, decltype((fl::forward&lt; T1 &gt;(t1).*f)(fl::forward&lt; Args &gt;(args)...))&gt;</div><div class="ttdef"><b>Definition</b> <a href="../../d8/dea/functional_8h_source.html#l00043">functional.h:43</a></div></div>
+<div class="ttc" id="anamespacefl_ac62f183887fccce240012b87aca79f89_html_ac62f183887fccce240012b87aca79f89"><div class="ttname"><a href="../../d4/d36/namespacefl_ac62f183887fccce240012b87aca79f89.html#ac62f183887fccce240012b87aca79f89">fl::sort</a></div><div class="ttdeci">void sort(Iterator first, Iterator last, Compare comp) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd9/algorithm_8h_source.html#l00564">algorithm.h:564</a></div></div>
+<div class="ttc" id="anamespacefl_acbd53e6d22e5c0bd83a5fb51b15712a7_html_acbd53e6d22e5c0bd83a5fb51b15712a7"><div class="ttname"><a href="../../d4/d36/namespacefl_acbd53e6d22e5c0bd83a5fb51b15712a7.html#acbd53e6d22e5c0bd83a5fb51b15712a7">fl::vector_inlined</a></div><div class="ttdeci">VectorN&lt; T, INLINED_SIZE &gt; vector_inlined</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d68/vector_8h_source.html#l01133">vector.h:1133</a></div></div>
+<div class="ttc" id="anamespacefl_aebcaa3afca0f718afb9d90a953b54860_html_aebcaa3afca0f718afb9d90a953b54860"><div class="ttname"><a href="../../d4/d36/namespacefl_aebcaa3afca0f718afb9d90a953b54860.html#aebcaa3afca0f718afb9d90a953b54860">fl::remove</a></div><div class="ttdeci">Iterator remove(Iterator first, Iterator last, const T &amp;value) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd9/algorithm_8h_source.html#l00265">algorithm.h:265</a></div></div>
+<div class="ttc" id="aold_8h_a690f84001beb455ff2f2bbd5fdcc79d5_html_a690f84001beb455ff2f2bbd5fdcc79d5"><div class="ttname"><a href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a></div><div class="ttdeci">corkscrew_args args</div><div class="ttdef"><b>Definition</b> <a href="../../d7/da1/old_8h_source.html#l00149">old.h:149</a></div></div>
+<div class="ttc" id="as16x16x4_8h_a1e4d1792cf482d5f64f27714ea210d47_html_a1e4d1792cf482d5f64f27714ea210d47"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_a1e4d1792cf482d5f64f27714ea210d47.html#a1e4d1792cf482d5f64f27714ea210d47">FL_STATIC_ASSERT</a></div><div class="ttdeci">#define FL_STATIC_ASSERT(...)</div></div>
+<div class="ttc" id="as16x16x4_8h_a29dcb94b335f8a78c78a00e2fc6541dd_html_a29dcb94b335f8a78c78a00e2fc6541dd"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_a29dcb94b335f8a78c78a00e2fc6541dd.html#a29dcb94b335f8a78c78a00e2fc6541dd">FL_ALIGN_AS</a></div><div class="ttdeci">#define FL_ALIGN_AS(T)</div></div>
+<div class="ttc" id="as16x16x4_8h_a31f878ac21758b6e670cd8575335cdf9_html_a31f878ac21758b6e670cd8575335cdf9"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_a31f878ac21758b6e670cd8575335cdf9.html#a31f878ac21758b6e670cd8575335cdf9">FL_ALIGN_MAX</a></div><div class="ttdeci">#define FL_ALIGN_MAX</div></div>
+<div class="ttc" id="as16x16x4_8h_af54aac016b86a178940aca20946a8002_html_af54aac016b86a178940aca20946a8002"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></div><div class="ttdeci">#define FL_NOEXCEPT</div></div>
+<div class="ttc" id="as16x16x4_8h_af8ff064181a2295b94633541ca2e5930_html_af8ff064181a2295b94633541ca2e5930"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_af8ff064181a2295b94633541ca2e5930.html#af8ff064181a2295b94633541ca2e5930">FL_ALIGN</a></div><div class="ttdeci">#define FL_ALIGN</div></div>
+<div class="ttc" id="astructfl_1_1is__same_af294c1891875ed98808b47d923231da9_html_af294c1891875ed98808b47d923231da9a8cf48c3e8a088fb732ef667283f5f293"><div class="ttname"><a href="../../d3/d46/structfl_1_1is__same_af294c1891875ed98808b47d923231da9.html#af294c1891875ed98808b47d923231da9a8cf48c3e8a088fb732ef667283f5f293">fl::is_same::value</a></div><div class="ttdeci">@ value</div><div class="ttdef"><b>Definition</b> <a href="../../df/d63/type__traits_8h_source.html#l00092">type_traits.h:92</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/da1/old_8h_source.html#l00150">args</a>, <a class="el" href="../../dd/d67/function_8h_source.html#l00013">FASTLED_INLINE_LAMBDA_SIZE</a>, <a class="el" href="../../d1/ddf/align_8h_source.html#l00016">FL_ALIGN</a>, <a class="el" href="../../df/d6a/shared__ptr_8h_source.html#l00348">fl::make_shared()</a>, <a class="el" href="../../d0/dda/memfill_8h_source.html#l00030">fl::memcopy()</a>, <a class="el" href="../../d0/dda/memfill_8h_source.html#l00011">fl::memfill()</a>, <a class="el" href="../../d9/d83/move_8h_source.html#l00027">fl::move()</a>, <a class="el" href="../../db/dd1/crgb_8h_source.html#l00797">operator!=()</a>, and <a class="el" href="../../db/dd1/crgb_8h_source.html#l00791">operator==()</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/da1/old_8h_source.html#l00149">args</a>, <a class="el" href="../../d6/d68/vector_8h_source.html#l00655">fl::vector&lt; T &gt;::begin()</a>, <a class="el" href="../../d6/d68/vector_8h_source.html#l00661">fl::vector&lt; T &gt;::end()</a>, <a class="el" href="../../dd/d67/function_8h_source.html#l00039">FASTLED_INLINE_LAMBDA_SIZE</a>, <a class="el" href="../../d6/d68/vector_8h_source.html#l00682">fl::vector&lt; T &gt;::find()</a>, <a class="el" href="../../df/d96/s16x16x4_8h_af8ff064181a2295b94633541ca2e5930.html#af8ff064181a2295b94633541ca2e5930">FL_ALIGN</a>, <a class="el" href="../../df/d96/s16x16x4_8h_a29dcb94b335f8a78c78a00e2fc6541dd.html#a29dcb94b335f8a78c78a00e2fc6541dd">FL_ALIGN_AS</a>, <a class="el" href="../../df/d96/s16x16x4_8h_a31f878ac21758b6e670cd8575335cdf9.html#a31f878ac21758b6e670cd8575335cdf9">FL_ALIGN_MAX</a>, <a class="el" href="../../df/d96/s16x16x4_8h_a888ec6cdc7563315545ced9cff7a5fbf.html#a888ec6cdc7563315545ced9cff7a5fbf">FL_DISABLE_WARNING_POP</a>, <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a>, <a class="el" href="../../df/d96/s16x16x4_8h_a1e4d1792cf482d5f64f27714ea210d47.html#a1e4d1792cf482d5f64f27714ea210d47">FL_STATIC_ASSERT</a>, <a class="el" href="../../df/d6a/shared__ptr_8h_source.html#l00414">fl::make_shared()</a>, <a class="el" href="../../df/da3/cstring_8cpp_8hpp_source.html#l00110">fl::memcpy()</a>, <a class="el" href="../../df/da3/cstring_8cpp_8hpp_source.html#l00125">fl::memset()</a>, <a class="el" href="../../d9/d83/move_8h_source.html#l00028">fl::move()</a>, <a class="el" href="../../d6/d68/vector_8h_source.html#l00624">fl::vector&lt; T &gt;::push_back()</a>, <a class="el" href="../../d5/d47/basic__vector_8h_source.html#l00042">fl::vector_basic::size()</a>, <a class="el" href="../../df/dd9/algorithm_8h_source.html#l00564">fl::sort()</a>, <a class="el" href="../../dd/d37/static__constexpr__defs_8cpp_8hpp_source.html#l00082">fl::type_rank&lt; T &gt;::value</a>, and <a class="el" href="../../df/d63/type__traits_8h_source.html#l00092">fl::is_same&lt; T, U &gt;::value</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../dd/d67/function_8h_ade8043ede62066d1f4666a7eece358d1_ade8043ede62066d1f4666a7eece358d1_cgraph.svg" width="355" height="283"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dd/d67/function_8h_ade8043ede62066d1f4666a7eece358d1_ade8043ede62066d1f4666a7eece358d1_cgraph.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -476,8 +689,8 @@ $(function(){initNavTree('dd/d67/function_8h_ade8043ede62066d1f4666a7eece358d1.h
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dd/d67/function_8h.html">function.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_0dd6897a8ae40540acd9d694849e950e.html">stl</a></li><li class="navelem"><a class="el" href="../../dd/d67/function_8h.html">function.h</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

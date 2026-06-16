@@ -1,3 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$d4/da0/classfl_1_1_frame_tracker.html" title=" " alt="" coords="5,5,131,31"/>
+<area shape="rect" id="Node000000" href="$d1/d1c/classfl_1_1audio_1_1_i_synth_oscillator.html" title="Interface class for synth oscillator." alt="" coords="5,5,191,31"/>
+<area shape="rect" id="Node000001" href="$d7/d3a/classfl_1_1audio_1_1_synth_oscillator_impl.html" title=" " alt="" coords="239,5,449,31"/>
+<area shape="poly" id="edge32_Node000000_Node000001" title=" " alt="" coords="205,15,238,15,238,21,205,21"/>
 </map>

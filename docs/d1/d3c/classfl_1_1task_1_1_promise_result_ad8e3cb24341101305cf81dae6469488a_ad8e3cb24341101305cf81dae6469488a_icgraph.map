@@ -1,0 +1,9 @@
+<map id="fl::task::PromiseResult::error" name="fl::task::PromiseResult::error">
+<area shape="rect" id="Node000001" title="Get the error value." alt="" coords="221,69,389,109"/>
+<area shape="rect" id="Node000002" href="$d1/d3c/classfl_1_1task_1_1_promise_result_ab2bb0f40032ae21a2d29ce282fb8050c.html#ab2bb0f40032ae21a2d29ce282fb8050c" title="Construct an error PromiseResult." alt="" coords="5,5,173,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="223,68,157,48,158,43,224,63"/>
+<area shape="rect" id="Node000003" href="$d1/d3c/classfl_1_1task_1_1_promise_result_a378d4460ee63c4be61e90a48ae70ce6e.html#a378d4460ee63c4be61e90a48ae70ce6e" title="Construct an error PromiseResult (move)" alt="" coords="5,69,173,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="207,92,174,92,174,87,207,87"/>
+<area shape="rect" id="Node000004" href="$d1/d3c/classfl_1_1task_1_1_promise_result_af4d0a47cc2fbca58208c9a893242d697.html#af4d0a47cc2fbca58208c9a893242d697" title="Get the error message as a convenience." alt="" coords="5,133,173,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="224,116,158,136,157,131,223,111"/>
+</map>

@@ -1,0 +1,21 @@
+<map id="CFastLED::channels" name="CFastLED::channels">
+<area shape="rect" id="Node000001" title="stored ChannelPtrs to keep them alive" alt="" coords="364,131,512,156"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_ae2168abef3e75c1589a372be5f15f147.html#ae2168abef3e75c1589a372be5f15f147" title="Add multiple LED channels from a MultiChannelConfig." alt="" coords="9,5,124,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="416,122,372,81,345,60,315,44,267,29,216,20,124,17,125,11,217,15,268,24,317,40,348,56,376,77,419,119"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_ac1bc33cf75115ef770091396bbc57861.html#ac1bc33cf75115ef770091396bbc57861" title="Add a Channel&#45;based LED controller (from ChannelPtr)" alt="" coords="189,55,303,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="391,128,278,83,280,78,393,123"/>
+<area shape="rect" id="Node000005" href="$dd/dbb/class_c_fast_l_e_d_a3727b00b34b8c9b1c9fa1301b16d8954.html#a3727b00b34b8c9b1c9fa1301b16d8954" title="Add multiple LED channels from an initializer list." alt="" coords="9,105,124,131"/>
+<area shape="poly" id="edge7_Node000001_Node000005" title=" " alt="" coords="350,140,124,125,125,119,350,135"/>
+<area shape="rect" id="Node000006" href="$dd/dbb/class_c_fast_l_e_d_aad60fcbfda63e035ef49e7fc693f8049.html#aad60fcbfda63e035ef49e7fc693f8049" title="Add multiple LED channels from a config array." alt="" coords="9,156,124,181"/>
+<area shape="poly" id="edge8_Node000001_Node000006" title=" " alt="" coords="350,152,125,167,124,162,350,147"/>
+<area shape="rect" id="Node000007" href="$dd/dbb/class_c_fast_l_e_d_aa98f1c4caa3fbef233d34ee757d29994.html#aa98f1c4caa3fbef233d34ee757d29994" title="Clear/reset FastLED state based on the provided flags." alt="" coords="5,232,128,257"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="378,162,115,234,114,229,377,157"/>
+<area shape="rect" id="Node000008" href="$dd/dbb/class_c_fast_l_e_d_a4b9554c79ac12669a804e715ec55f2ef.html#a4b9554c79ac12669a804e715ec55f2ef" title="Remove a channel from the LED controller list." alt="" coords="176,257,316,283"/>
+<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="414,167,370,203,317,240,280,260,277,255,315,236,367,199,411,163"/>
+<area shape="poly" id="edge4_Node000003_Node000002" title=" " alt="" coords="185,53,113,33,115,28,187,48"/>
+<area shape="rect" id="Node000004" href="$dd/dbb/class_c_fast_l_e_d_a391a5eaa2e94590e1bc2adf1ac0f9456.html#a391a5eaa2e94590e1bc2adf1ac0f9456" title="Add LED channel with runtime configuration (from ChannelConfig)" alt="" coords="9,55,124,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="175,70,124,70,124,65,175,65"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="188,86,113,108,112,103,186,81"/>
+<area shape="poly" id="edge6_Node000003_Node000006" title=" " alt="" coords="217,90,129,144,100,158,98,154,127,140,214,85"/>
+<area shape="poly" id="edge11_Node000008_Node000007" title=" " alt="" coords="162,261,128,256,129,251,163,256"/>
+</map>

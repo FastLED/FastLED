@@ -1,0 +1,60 @@
+digraph "fl/codec/idecoder.h"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl/codec/idecoder.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl/codec/common.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d8d/src_2fl_2codec_2common_8h.html",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl/codec/gif.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d2a/gif_8h.html",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="/home/runner/work/FastLED\l/FastLED/examples/Codec\l/codec_processor.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/d9a/codec__processor_8h.html",tooltip=" "];
+  Node3 -> Node7 [id="edge4_Node000003_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl/codec/gif.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d62/fl_2codec_2gif_8cpp_8hpp.html",tooltip=" "];
+  Node2 -> Node11 [id="edge5_Node000002_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl/codec/h264.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d54/h264_8h.html",tooltip=" "];
+  Node11 -> Node12 [id="edge6_Node000011_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="/home/runner/work/FastLED\l/FastLED/examples/AutoResearch\l/AutoResearchRemote.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/dfb/_auto_research_remote_8cpp.html",tooltip=" "];
+  Node11 -> Node13 [id="edge7_Node000011_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl/codec/h264.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/da1/h264_8cpp_8hpp.html",tooltip=" "];
+  Node2 -> Node14 [id="edge8_Node000002_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl/codec/jpeg.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d31/jpeg_8h.html",tooltip=" "];
+  Node14 -> Node4 [id="edge9_Node000014_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 -> Node15 [id="edge10_Node000014_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl/codec/file_system\l_codecs.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$de/d4b/file__system__codecs_8cpp_8hpp.html",tooltip="FileSystem codec methods — compiled in fl.codec+ module."];
+  Node14 -> Node16 [id="edge11_Node000014_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl/codec/jpeg.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dd/d39/jpeg_8cpp_8hpp.html",tooltip=" "];
+  Node14 -> Node17 [id="edge12_Node000014_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl/system/file_system.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/d8d/file__system_8h.html",tooltip=" "];
+  Node17 -> Node15 [id="edge13_Node000017_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node40 [id="edge14_Node000002_Node000040",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node40 [id="Node000040",label="fl/codec/mp3.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/dd8/mp3_8h.html",tooltip=" "];
+  Node40 -> Node15 [id="edge15_Node000040_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node40 -> Node41 [id="edge16_Node000040_Node000041",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node41 [id="Node000041",label="fl/codec/mp3.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d3/df6/mp3_8cpp_8hpp.html",tooltip=" "];
+  Node2 -> Node42 [id="edge17_Node000002_Node000042",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node42 [id="Node000042",label="fl/codec/mpeg1.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/da7/mpeg1_8h.html",tooltip=" "];
+  Node42 -> Node4 [id="edge18_Node000042_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node42 -> Node15 [id="edge19_Node000042_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node42 -> Node43 [id="edge20_Node000042_Node000043",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node43 [id="Node000043",label="fl/codec/mpeg1.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d10/mpeg1_8cpp_8hpp.html",tooltip=" "];
+  Node2 -> Node44 [id="edge21_Node000002_Node000044",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node44 [id="Node000044",label="fl/codec/vorbis.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d3c/vorbis_8h.html",tooltip=" "];
+  Node44 -> Node45 [id="edge22_Node000044_Node000045",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node45 [id="Node000045",label="fl/codec/vorbis.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/db0/vorbis_8cpp_8hpp.html",tooltip=" "];
+  Node2 -> Node46 [id="edge23_Node000002_Node000046",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node46 [id="Node000046",label="third_party/libnsgif\l/software_decoder.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d3a/libnsgif_2software__decoder_8h.html",tooltip=" "];
+  Node46 -> Node7 [id="edge24_Node000046_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node46 -> Node47 [id="edge25_Node000046_Node000047",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node47 [id="Node000047",label="third_party/libnsgif\l/software_decoder.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/d62/libnsgif_2software__decoder_8cpp_8hpp.html",tooltip=" "];
+  Node2 -> Node49 [id="edge26_Node000002_Node000049",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node49 [id="Node000049",label="third_party/mpeg1_decoder\l/software_decoder.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d30/mpeg1__decoder_2software__decoder_8h.html",tooltip=" "];
+  Node49 -> Node42 [id="edge27_Node000049_Node000042",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node49 -> Node50 [id="edge28_Node000049_Node000050",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node50 [id="Node000050",label="third_party/mpeg1_decoder\l/software_decoder.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/dbf/mpeg1__decoder_2software__decoder_8cpp_8hpp.html",tooltip=" "];
+  Node1 -> Node15 [id="edge29_Node000001_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node46 [id="edge30_Node000001_Node000046",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

@@ -1,0 +1,8 @@
+<map id="fl::task::Promise::complete_with_error" name="fl::task::Promise::complete_with_error">
+<area shape="rect" id="Node000001" title="Complete the Promise with an error (used by networking library)" alt="" coords="5,35,161,75"/>
+<area shape="rect" id="Node000002" href="$d0/d34/classfl_1_1task_1_1_promise_a51a1be9fd686089d804cec834abd6ccc.html#a51a1be9fd686089d804cec834abd6ccc" title="Get the error (only valid if is_rejected() returns true)" alt="" coords="209,5,344,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="161,40,195,35,196,40,162,45"/>
+<area shape="rect" id="Node000003" href="$d0/d34/classfl_1_1task_1_1_promise_aa4a0fc861a1271cbb04a46aa7628c611.html#aa4a0fc861a1271cbb04a46aa7628c611" title="Check if Promise is valid." alt="" coords="392,35,527,75"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="162,54,209,55,344,55,378,54,378,59,344,60,209,60,162,59"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="344,33,379,39,378,44,344,39"/>
+</map>

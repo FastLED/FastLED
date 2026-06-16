@@ -1,0 +1,20 @@
+<map id="fl::Channel::removeFromDrawList" name="fl::Channel::removeFromDrawList">
+<area shape="rect" id="Node000001" title="Remove this channel from the global controller draw list." alt="" coords="5,70,244,95"/>
+<area shape="rect" id="Node000002" href="$da/db7/structfl_1_1_channel_events_aa02eba6c71d0300625657d33cefceab9.html#aa02eba6c71d0300625657d33cefceab9" title=" " alt="" coords="306,5,449,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="181,67,292,42,293,47,182,73"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a5e115bf146729c8868c918538feb06df.html#a5e115bf146729c8868c918538feb06df" title="Check if this controller is in the linked list." alt="" coords="524,67,660,107"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="244,81,510,83,510,89,244,86"/>
+<area shape="rect" id="Node000007" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a2929056de1378423feb303e26f015c1c.html#a2929056de1378423feb303e26f015c1c" title="Remove this controller from the draw list." alt="" coords="292,144,463,184"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="166,93,302,137,301,142,164,98"/>
+<area shape="rect" id="Node000003" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="511,13,673,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="449,23,497,23,497,28,449,28"/>
+<area shape="rect" id="Node000005" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a7e91fc8f83d62c9da5e5c3d6d1bc10ce.html#a7e91fc8f83d62c9da5e5c3d6d1bc10ce" title="Protected constructor with registration mode." alt="" coords="721,124,857,164"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="661,104,709,118,707,123,660,109"/>
+<area shape="rect" id="Node000006" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a9e51518d1427463dffd596c69c6f3e46.html#a9e51518d1427463dffd596c69c6f3e46" title="Add this controller to the linked list." alt="" coords="905,96,1041,136"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="857,131,892,126,892,131,858,136"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="905,113,673,96,674,90,905,108"/>
+<area shape="poly" id="edge8_Node000007_Node000007" title=" " alt="" coords="337,144,335,134,341,125,356,119,377,117,402,120,416,128,413,132,401,125,377,123,357,125,345,129,340,135,342,143"/>
+<area shape="rect" id="Node000008" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ab883396db2a06fb83865cbdcae94c07f.html#ab883396db2a06fb83865cbdcae94c07f" title="Remove a controller from the linked list." alt="" coords="524,139,660,179"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="463,159,510,158,510,163,463,165"/>
+<area shape="poly" id="edge10_Node000008_Node000005" title=" " alt="" coords="660,151,707,147,708,153,661,156"/>
+</map>

@@ -1,0 +1,13 @@
+digraph "fl::Remote::bind"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::Remote::bind",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Register method with config (name, function, optional metadata)"];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::Remote::bind",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/ddb/classfl_1_1_remote_aaa857a179fd0001e9c0480c6b07a8976.html#aaa857a179fd0001e9c0480c6b07a8976",tooltip="Register method by name, function, and optional mode (default SYNC)"];
+  Node1 -> Node1 [id="edge2_Node000001_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

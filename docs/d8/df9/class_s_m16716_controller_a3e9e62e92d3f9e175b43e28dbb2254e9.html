@@ -106,13 +106,13 @@ $(function(){initNavTree('d8/df9/class_s_m16716_controller_a3e9e62e92d3f9e175b43
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> DATA_PIN, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> CLOCK_PIN, <a class="el" href="../../d4/d36/namespacefl_ab289ace8bd149d39b87ebd778e9abe23.html#ab289ace8bd149d39b87ebd778e9abe23">EOrder</a> RGB_ORDER = RGB, uint32_t SPI_SPEED = DATA_RATE_MHZ(16)&gt; </div>
+template&lt;int DATA_PIN, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> CLOCK_PIN, <a class="el" href="../../d4/d36/namespacefl_ab289ace8bd149d39b87ebd778e9abe23.html#ab289ace8bd149d39b87ebd778e9abe23">EOrder</a> RGB_ORDER = RGB, fl::u32 SPI_SPEED = DATA_RATE_MHZ(16)&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="../../d8/df9/class_s_m16716_controller.html">SM16716Controller</a>&lt; <a class="el" href="../../d8/d21/_adafruit_bridge_8ino_adad67fe595ea440c8f8247ec2cddf070.html#adad67fe595ea440c8f8247ec2cddf070">DATA_PIN</a>, <a class="el" href="../../d0/dc3/_blink_8ino_a23b348310475af5d6544794f1a167ee8.html#a23b348310475af5d6544794f1a167ee8">CLOCK_PIN</a>, RGB_ORDER, SPI_SPEED &gt;::writeHeader </td>
+          <td class="memname">void <a class="el" href="../../d8/df9/class_s_m16716_controller.html">SM16716Controller</a>&lt; <a class="el" href="../../df/d01/_client_real_8h_adad67fe595ea440c8f8247ec2cddf070.html#adad67fe595ea440c8f8247ec2cddf070">DATA_PIN</a>, <a class="el" href="../../d0/dc3/_blink_8ino_a23b348310475af5d6544794f1a167ee8.html#a23b348310475af5d6544794f1a167ee8">CLOCK_PIN</a>, <a class="el" href="../../d3/d8b/_parallel___i_o_8ino_a87eecf85eebf5be8fb74183807e8e2f0.html#a87eecf85eebf5be8fb74183807e8e2f0">RGB_ORDER</a>, SPI_SPEED &gt;::writeHeader </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -125,27 +125,29 @@ template&lt;<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2b
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d66/chipsets_8h_source.html#l00719">719</a> of file <a class="el" href="../../db/d66/chipsets_8h_source.html">chipsets.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  719</span>                       {</div>
-<div class="line"><span class="lineno">  720</span>        <span class="comment">// Write out 50 zeros to the spi line (6 blocks of 8 followed by two single bit writes)</span></div>
-<div class="line"><span class="lineno">  721</span>        <a class="code hl_variable" href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">mSPI</a>.select();</div>
-<div class="line"><span class="lineno">  722</span>        <a class="code hl_variable" href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">mSPI</a>.template <a class="code hl_class" href="../../d8/df9/class_s_m16716_controller.html">writeBit&lt;0&gt;</a>(0);</div>
-<div class="line"><span class="lineno">  723</span>        <a class="code hl_variable" href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">mSPI</a>.writeByte(0);</div>
-<div class="line"><span class="lineno">  724</span>        <a class="code hl_variable" href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">mSPI</a>.writeByte(0);</div>
-<div class="line"><span class="lineno">  725</span>        <a class="code hl_variable" href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">mSPI</a>.writeByte(0);</div>
-<div class="line"><span class="lineno">  726</span>        <a class="code hl_variable" href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">mSPI</a>.template <a class="code hl_class" href="../../d8/df9/class_s_m16716_controller.html">writeBit&lt;0&gt;</a>(0);</div>
-<div class="line"><span class="lineno">  727</span>        <a class="code hl_variable" href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">mSPI</a>.writeByte(0);</div>
-<div class="line"><span class="lineno">  728</span>        <a class="code hl_variable" href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">mSPI</a>.writeByte(0);</div>
-<div class="line"><span class="lineno">  729</span>        <a class="code hl_variable" href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">mSPI</a>.writeByte(0);</div>
-<div class="line"><span class="lineno">  730</span>        <a class="code hl_variable" href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">mSPI</a>.waitFully();</div>
-<div class="line"><span class="lineno">  731</span>        <a class="code hl_variable" href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">mSPI</a>.release();</div>
-<div class="line"><span class="lineno">  732</span>    }</div>
-<div class="ttc" id="aclass_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424_html_ab3140509cb864482e6b624cf0efa0424"><div class="ttname"><a href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">SM16716Controller::mSPI</a></div><div class="ttdeci">SPI mSPI</div><div class="ttdef"><b>Definition</b> <a href="../../db/d66/chipsets_8h_source.html#l00717">chipsets.h:717</a></div></div>
-<div class="ttc" id="aclass_s_m16716_controller_html"><div class="ttname"><a href="../../d8/df9/class_s_m16716_controller.html">SM16716Controller</a></div><div class="ttdoc">SM16716 controller class.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d66/chipsets_8h_source.html#l00715">chipsets.h:715</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d0/dd2/sm16716_8h_source.html#l00029">29</a> of file <a class="el" href="../../d0/dd2/sm16716_8h_source.html">sm16716.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   29</span>                       {</div>
+<div class="line"><span class="lineno">   30</span>        <span class="comment">// Write out 50 zeros to the spi line (6 blocks of 8 followed by two single bit writes)</span></div>
+<div class="line"><span class="lineno">   31</span>        <a class="code hl_variable" href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">mSPI</a>.select();</div>
+<div class="line"><span class="lineno">   32</span>        <a class="code hl_variable" href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">mSPI</a>.template <a class="code hl_class" href="../../d8/df9/class_s_m16716_controller.html">writeBit&lt;0&gt;</a>(0);</div>
+<div class="line"><span class="lineno">   33</span>        <a class="code hl_variable" href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">mSPI</a>.writeByte(0);</div>
+<div class="line"><span class="lineno">   34</span>        <a class="code hl_variable" href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">mSPI</a>.writeByte(0);</div>
+<div class="line"><span class="lineno">   35</span>        <a class="code hl_variable" href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">mSPI</a>.writeByte(0);</div>
+<div class="line"><span class="lineno">   36</span>        <a class="code hl_variable" href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">mSPI</a>.template <a class="code hl_class" href="../../d8/df9/class_s_m16716_controller.html">writeBit&lt;0&gt;</a>(0);</div>
+<div class="line"><span class="lineno">   37</span>        <a class="code hl_variable" href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">mSPI</a>.writeByte(0);</div>
+<div class="line"><span class="lineno">   38</span>        <a class="code hl_variable" href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">mSPI</a>.writeByte(0);</div>
+<div class="line"><span class="lineno">   39</span>        <a class="code hl_variable" href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">mSPI</a>.writeByte(0);</div>
+<div class="line"><span class="lineno">   40</span>        <span class="comment">// Note: endTransaction() may not be strictly necessary for SM16716</span></div>
+<div class="line"><span class="lineno">   41</span>        <span class="comment">// since we&#39;re just streaming bytes. However, it&#39;s kept here for consistency</span></div>
+<div class="line"><span class="lineno">   42</span>        <span class="comment">// with other SPI-based controllers and as defensive programming.</span></div>
+<div class="line"><span class="lineno">   43</span>        <a class="code hl_variable" href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">mSPI</a>.endTransaction();</div>
+<div class="line"><span class="lineno">   44</span>    }</div>
+<div class="ttc" id="aclass_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424_html_ab3140509cb864482e6b624cf0efa0424"><div class="ttname"><a href="../../d8/df9/class_s_m16716_controller_ab3140509cb864482e6b624cf0efa0424.html#ab3140509cb864482e6b624cf0efa0424">SM16716Controller::mSPI</a></div><div class="ttdeci">SPI mSPI</div><div class="ttdef"><b>Definition</b> <a href="../../d0/dd2/sm16716_8h_source.html#l00027">sm16716.h:27</a></div></div>
+<div class="ttc" id="aclass_s_m16716_controller_html"><div class="ttname"><a href="../../d8/df9/class_s_m16716_controller.html">SM16716Controller</a></div><div class="ttdoc">SM16716 controller class.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/dd2/sm16716_8h_source.html#l00025">sm16716.h:25</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../db/d66/chipsets_8h_source.html#l00717">mSPI</a>.</p>
+<p class="reference">References <a class="el" href="../../d0/dd2/sm16716_8h_source.html#l00027">mSPI</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../db/d66/chipsets_8h_source.html#l00743">showPixels()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/dd2/sm16716_8h_source.html#l00055">showPixels()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -163,7 +165,7 @@ template&lt;<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2b
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d8/df9/class_s_m16716_controller.html">SM16716Controller</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

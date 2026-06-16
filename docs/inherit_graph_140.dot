@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::EqualTo\< T \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/de5/structfl_1_1_equal_to.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::audio::detector\l::MusicalBeat::Stats",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat.html#dd/d14/structfl_1_1audio_1_1detector_1_1_musical_beat_1_1_stats",tooltip="Get statistics (for debugging/monitoring)"];
 }

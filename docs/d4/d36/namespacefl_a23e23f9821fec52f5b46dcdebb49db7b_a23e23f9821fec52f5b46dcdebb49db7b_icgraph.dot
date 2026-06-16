@@ -1,0 +1,14 @@
+digraph "fl::makeScaledPixelRangeRGBWW"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::makeScaledPixelRange\lRGBWW",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Create RGBWW input iterator range from PixelIterator (issue #2558)"];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::PixelIterator::\lwriteWS2812",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d09/classfl_1_1_pixel_iterator_ab82e131fa7af425e2205e2df4c12c333.html#ab82e131fa7af425e2205e2df4c12c333",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::Channel::showPixels",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d8b/classfl_1_1_channel_a44414e176c7d2ef65fcdd390f6852322.html#a44414e176c7d2ef65fcdd390f6852322",tooltip=" "];
+}

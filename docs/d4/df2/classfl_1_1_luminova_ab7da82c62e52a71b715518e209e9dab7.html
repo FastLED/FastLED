@@ -115,23 +115,23 @@ $(function(){initNavTree('d4/df2/classfl_1_1_luminova_ab7da82c62e52a71b715518e20
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d2/d10/luminova_8cpp_source.html#l00022">22</a> of file <a class="el" href="../../d2/d10/luminova_8cpp_source.html">luminova.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   22</span>                                                {</div>
-<div class="line"><span class="lineno">   23</span>    <span class="keywordflow">if</span> (max_particles &lt;= 0) {</div>
-<div class="line"><span class="lineno">   24</span>        max_particles = 1;</div>
-<div class="line"><span class="lineno">   25</span>    }</div>
-<div class="line"><span class="lineno">   26</span>    <span class="keywordflow">if</span> (<span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../d4/df2/classfl_1_1_luminova_a94d9e2f910104f3aaf400f13e1046b03.html#a94d9e2f910104f3aaf400f13e1046b03">mParticles</a>.size()) == max_particles) {</div>
-<div class="line"><span class="lineno">   27</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">   28</span>    }</div>
-<div class="line"><span class="lineno">   29</span>    <a class="code hl_variable" href="../../d4/df2/classfl_1_1_luminova_a94d9e2f910104f3aaf400f13e1046b03.html#a94d9e2f910104f3aaf400f13e1046b03">mParticles</a>.clear();</div>
-<div class="line"><span class="lineno">   30</span>    <a class="code hl_variable" href="../../d4/df2/classfl_1_1_luminova_a94d9e2f910104f3aaf400f13e1046b03.html#a94d9e2f910104f3aaf400f13e1046b03">mParticles</a>.resize(<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(max_particles));</div>
-<div class="line"><span class="lineno">   31</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; <a class="code hl_variable" href="../../d4/df2/classfl_1_1_luminova_a94d9e2f910104f3aaf400f13e1046b03.html#a94d9e2f910104f3aaf400f13e1046b03">mParticles</a>.size(); ++i) {</div>
-<div class="line"><span class="lineno">   32</span>        <a class="code hl_variable" href="../../d4/df2/classfl_1_1_luminova_a94d9e2f910104f3aaf400f13e1046b03.html#a94d9e2f910104f3aaf400f13e1046b03">mParticles</a>[i].alive = <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">   33</span>    }</div>
-<div class="line"><span class="lineno">   34</span>}</div>
-<div class="ttc" id="aclassfl_1_1_luminova_a94d9e2f910104f3aaf400f13e1046b03_html_a94d9e2f910104f3aaf400f13e1046b03"><div class="ttname"><a href="../../d4/df2/classfl_1_1_luminova_a94d9e2f910104f3aaf400f13e1046b03.html#a94d9e2f910104f3aaf400f13e1046b03">fl::Luminova::mParticles</a></div><div class="ttdeci">fl::vector&lt; Particle &gt; mParticles</div><div class="ttdef"><b>Definition</b> <a href="../../d4/dd9/src_2fx_22d_2luminova_8h_source.html#l00065">luminova.h:65</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../db/dfe/luminova_8cpp_8hpp_source.html#l00032">32</a> of file <a class="el" href="../../db/dfe/luminova_8cpp_8hpp_source.html">luminova.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   32</span>                                                {</div>
+<div class="line"><span class="lineno">   33</span>    <span class="keywordflow">if</span> (max_particles &lt;= 0) {</div>
+<div class="line"><span class="lineno">   34</span>        max_particles = 1;</div>
+<div class="line"><span class="lineno">   35</span>    }</div>
+<div class="line"><span class="lineno">   36</span>    <span class="keywordflow">if</span> (<span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../d4/df2/classfl_1_1_luminova_a94d9e2f910104f3aaf400f13e1046b03.html#a94d9e2f910104f3aaf400f13e1046b03">mParticles</a>.size()) == max_particles) {</div>
+<div class="line"><span class="lineno">   37</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">   38</span>    }</div>
+<div class="line"><span class="lineno">   39</span>    <a class="code hl_variable" href="../../d4/df2/classfl_1_1_luminova_a94d9e2f910104f3aaf400f13e1046b03.html#a94d9e2f910104f3aaf400f13e1046b03">mParticles</a>.clear();</div>
+<div class="line"><span class="lineno">   40</span>    <a class="code hl_variable" href="../../d4/df2/classfl_1_1_luminova_a94d9e2f910104f3aaf400f13e1046b03.html#a94d9e2f910104f3aaf400f13e1046b03">mParticles</a>.resize(<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(max_particles));</div>
+<div class="line"><span class="lineno">   41</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; <a class="code hl_variable" href="../../d4/df2/classfl_1_1_luminova_a94d9e2f910104f3aaf400f13e1046b03.html#a94d9e2f910104f3aaf400f13e1046b03">mParticles</a>.size(); ++i) {</div>
+<div class="line"><span class="lineno">   42</span>        <a class="code hl_variable" href="../../d4/df2/classfl_1_1_luminova_a94d9e2f910104f3aaf400f13e1046b03.html#a94d9e2f910104f3aaf400f13e1046b03">mParticles</a>[i].alive = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   43</span>    }</div>
+<div class="line"><span class="lineno">   44</span>}</div>
+<div class="ttc" id="aclassfl_1_1_luminova_a94d9e2f910104f3aaf400f13e1046b03_html_a94d9e2f910104f3aaf400f13e1046b03"><div class="ttname"><a href="../../d4/df2/classfl_1_1_luminova_a94d9e2f910104f3aaf400f13e1046b03.html#a94d9e2f910104f3aaf400f13e1046b03">fl::Luminova::mParticles</a></div><div class="ttdeci">fl::vector&lt; Particle &gt; mParticles</div><div class="ttdef"><b>Definition</b> <a href="../../d3/dbf/src_2fl_2fx_22d_2luminova_8h_source.html#l00060">luminova.h:60</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/dd9/src_2fx_22d_2luminova_8h_source.html#l00065">mParticles</a>.</p>
+<p class="reference">References <a class="el" href="../../d3/dbf/src_2fl_2fx_22d_2luminova_8h_source.html#l00060">mParticles</a>.</p>
 
 </div>
 </div>
@@ -142,7 +142,7 @@ $(function(){initNavTree('d4/df2/classfl_1_1_luminova_ab7da82c62e52a71b715518e20
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d4/df2/classfl_1_1_luminova.html">Luminova</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

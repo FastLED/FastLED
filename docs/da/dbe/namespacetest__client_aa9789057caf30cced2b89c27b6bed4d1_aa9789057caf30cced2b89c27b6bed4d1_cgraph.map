@@ -1,0 +1,15 @@
+<map id="test_client.test_network_example" name="test_client.test_network_example">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,120,184,160"/>
+<area shape="rect" id="Node000002" href="$da/dbe/namespacetest__client_a4878be6532820b01dfddbfb8f83be627.html#a4878be6532820b01dfddbfb8f83be627" title=" " alt="" coords="232,74,359,99"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="170,117,233,100,234,106,171,123"/>
+<area shape="rect" id="Node000005" href="$da/dbe/namespacetest__client_ad8ef430d61e25f83ab9201ed330fb2fe.html#ad8ef430d61e25f83ab9201ed330fb2fe" title=" " alt="" coords="609,127,791,153"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="184,153,265,164,359,172,460,175,561,169,642,154,643,159,562,175,460,180,359,178,264,169,184,158"/>
+<area shape="rect" id="Node000006" href="$da/dbe/namespacetest__client_a6701f5bc7143e80a402ea36ae37301b2.html#a6701f5bc7143e80a402ea36ae37301b2" title=" " alt="" coords="411,120,557,160"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="184,137,397,137,397,143,184,143"/>
+<area shape="rect" id="Node000003" href="$da/dbe/namespacetest__client_aab31d9219ae90fd2cff040be6df73b9e.html#aab31d9219ae90fd2cff040be6df73b9e" title=" " alt="" coords="413,5,555,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="334,71,408,47,410,52,336,76"/>
+<area shape="rect" id="Node000004" href="$da/dbe/namespacetest__client_aa6bfc26bc281a11211e1ebd908a45d41.html#aa6bfc26bc281a11211e1ebd908a45d41" title=" " alt="" coords="407,70,561,95"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="359,83,393,82,393,87,359,88"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="342,97,400,114,399,119,340,102"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="533,93,639,121,638,126,532,98"/>
+</map>

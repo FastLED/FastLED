@@ -1,0 +1,13 @@
+<map id="fl::detail::UpscalePaletteInterpolated" name="fl::detail::UpscalePaletteInterpolated">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,47,185,87"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="233,55,384,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="185,65,219,65,219,70,185,70"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="432,5,507,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="350,52,418,31,419,36,351,57"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_ab169b38b75fd1ab29b3dc61a32497ff1.html#ab169b38b75fd1ab29b3dc61a32497ff1" title="Helper function to divide a number by 16, aka four logical shift right (LSR)&#39;s." alt="" coords="434,55,505,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="384,65,420,65,420,70,384,70"/>
+<area shape="rect" id="Node000006" href="$d6/d19/group___linear_interpolation_gaeb360269bf892a49b96b9ea8248ea8a7.html#gaeb360269bf892a49b96b9ea8248ea8a7" title="Map from one full&#45;range 8&#45;bit value into a narrower range of 8&#45;bit values, possibly a range of hues." alt="" coords="440,104,499,129"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="351,77,428,101,426,106,350,83"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6" title=" " alt="" coords="555,5,637,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="507,15,541,15,541,21,507,21"/>
+</map>

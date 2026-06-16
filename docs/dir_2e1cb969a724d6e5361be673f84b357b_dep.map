@@ -1,0 +1,26 @@
+<map id="/home/runner/work/FastLED/FastLED/examples/Asio" name="/home/runner/work/FastLED/FastLED/examples/Asio">
+<area shape="rect" id="node2" href="dir_8463951134ad125555f9924aaae8b52f.html" title="Client" alt="" coords="758,63,818,88"/>
+<area shape="rect" id="node9" href="dir_4d1829fa9bd13d7db71e765b2707b248.html" title="fl" alt="" coords="391,136,430,161"/>
+<area shape="poly" id="edge1" href="dir_000035_000074.html" alt="" coords="778,90,764,102,746,112,686,126,602,137,444,148,443,143,601,132,685,121,744,107,761,97,775,86"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000035_000074.html" title="3" alt="" coords="444,147,453,161"/>
+<area shape="rect" id="node3" href="dir_c0fba948aaab44662700704d101723f9.html" title="ClientValidation" alt="" coords="608,63,733,88"/>
+<area shape="poly" id="edge2" href="dir_000036_000074.html" alt="" coords="649,91,597,112,515,133,445,145,444,140,514,127,595,107,647,86"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000036_000074.html" title="3" alt="" coords="445,143,454,158"/>
+<area shape="rect" id="node4" href="dir_41ca89ff56dda4b9f98aacf1fc497dae.html" title="Loopback" alt="" coords="499,63,583,88"/>
+<area shape="poly" id="edge3" href="dir_000109_000074.html" alt="" coords="524,91,488,112,444,134,441,130,485,107,521,86"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000109_000074.html" title="3" alt="" coords="446,130,455,145"/>
+<area shape="rect" id="node5" href="dir_219e3a66eb4830f037b44ea1888dc9da.html" title="RpcBidirectional" alt="" coords="347,63,475,88"/>
+<area shape="poly" id="edge4" href="dir_000154_000074.html" alt="" coords="413,88,413,122,408,122,408,88"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000154_000074.html" title="14" alt="" coords="410,110,428,125"/>
+<area shape="rect" id="node6" href="dir_e435a67e6b4ad3b7214cb57ba421e46f.html" title="RpcClient" alt="" coords="238,63,322,88"/>
+<area shape="poly" id="edge5" href="dir_000155_000074.html" alt="" coords="300,86,336,107,380,130,378,134,333,112,297,91"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000155_000074.html" title="10" alt="" coords="370,115,387,130"/>
+<area shape="rect" id="node7" href="dir_78b0579ece2e0fb39da0e66c2a74a942.html" title="RpcServer" alt="" coords="125,63,213,88"/>
+<area shape="poly" id="edge6" href="dir_000156_000074.html" alt="" coords="187,86,228,107,308,129,378,141,377,146,307,135,226,112,185,91"/>
+<area shape="rect" id="edge6-headlabel" href="dir_000156_000074.html" title="9" alt="" coords="370,127,379,142"/>
+<area shape="rect" id="node8" href="dir_37c21fcc6acaf68b5eee5909dd6494ed.html" title="Server" alt="" coords="37,63,101,88"/>
+<area shape="poly" id="edge7" href="dir_000163_000074.html" alt="" coords="83,86,114,107,185,128,258,140,325,145,377,146,377,151,325,150,258,145,184,134,112,112,80,91"/>
+<area shape="rect" id="edge7-headlabel" href="dir_000163_000074.html" title="1" alt="" coords="368,133,377,147"/>
+<area shape="rect" id="clust2" href="dir_2e1cb969a724d6e5361be673f84b357b.html" alt="" coords="27,52,904,99"/>
+<area shape="rect" id="clust1" href="dir_d28a4824dc47e487b107a5db32ef43c4.html" title="examples" alt="" coords="16,16,915,109"/>
+</map>

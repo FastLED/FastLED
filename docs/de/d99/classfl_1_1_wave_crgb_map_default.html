@@ -107,10 +107,15 @@ $(function(){initNavTree('de/d99/classfl_1_1_wave_crgb_map_default.html','../../
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p class="definition">Definition at line <a class="el" href="../../de/de9/src_2fx_22d_2wave_8h_source.html#l00032">32</a> of file <a class="el" href="../../de/de9/src_2fx_22d_2wave_8h_source.html">wave.h</a>.</p>
+<div class="textblock"><p>Default wave-to-color mapper producing grayscale output. </p>
+<p>Maps wave amplitudes to grayscale colors where:</p><ul>
+<li>Zero amplitude = black (0,0,0)</li>
+<li>Maximum amplitude = white (255,255,255) This creates a simple but effective visualization of wave heights. </li>
+</ul>
+
+<p class="definition">Definition at line <a class="el" href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html#l00047">47</a> of file <a class="el" href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html">wave.h</a>.</p>
 </div>
-<p><code>#include &lt;<a class="el" href="../../de/de9/src_2fx_22d_2wave_8h_source.html">wave.h</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html">wave.h</a>&gt;</code></p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Inheritance diagram for fl::WaveCrgbMapDefault:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -128,14 +133,15 @@ $(function(){initNavTree('de/d99/classfl_1_1_wave_crgb_map_default.html','../../
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:aad5b5500fc88e04447d81d92447b49b3" id="r_aad5b5500fc88e04447d81d92447b49b3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d99/classfl_1_1_wave_crgb_map_default_aad5b5500fc88e04447d81d92447b49b3.html#aad5b5500fc88e04447d81d92447b49b3">mapWaveToLEDs</a> (const <a class="el" href="../../d0/dce/classfl_1_1_x_y_map.html">XYMap</a> &amp;<a class="el" href="../../df/d42/_blur2d_8ino_aec006558d688505c331eb481e3df4319.html#aec006558d688505c331eb481e3df4319">xymap</a>, <a class="el" href="../../da/d47/classfl_1_1_wave_simulation2_d.html">WaveSimulation2D</a> &amp;<a class="el" href="../../d8/d78/examples_2_wave_2wave_8h_a9c1ab94b23da54893875c5b6de8b8f3c.html#a9c1ab94b23da54893875c5b6de8b8f3c">waveSim</a>, <a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> *<a class="el" href="../../d8/d21/_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>) override</td></tr>
-<tr class="separator:aad5b5500fc88e04447d81d92447b49b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66461ce15c4c0f20cb2efa033bd32bcb" id="r_a66461ce15c4c0f20cb2efa033bd32bcb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d99/classfl_1_1_wave_crgb_map_default_a66461ce15c4c0f20cb2efa033bd32bcb.html#a66461ce15c4c0f20cb2efa033bd32bcb">mapWaveToLEDs</a> (const <a class="el" href="../../d0/dce/classfl_1_1_x_y_map.html">XYMap</a> &amp;<a class="el" href="../../df/dba/_animartrix_ring_8ino_a71419d0f152f6bfcffb8910cb8138945.html#a71419d0f152f6bfcffb8910cb8138945">xymap</a>, <a class="el" href="../../da/d47/classfl_1_1_wave_simulation2_d.html">WaveSimulation2D</a> &amp;<a class="el" href="../../d8/d78/examples_2_wave_2wave_8h_a2f7384c6694b02c64c672b7bfe08e968.html#a2f7384c6694b02c64c672b7bfe08e968">waveSim</a>, <a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span</a>&lt; <a class="el" href="../../da/dd6/structfl_1_1_c_r_g_b.html">CRGB</a> &gt; <a class="el" href="../../d6/d05/_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a>) override</td></tr>
+<tr class="memdesc:a66461ce15c4c0f20cb2efa033bd32bcb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map wave values to grayscale LED colors.  <br /></td></tr>
+<tr class="separator:a66461ce15c4c0f20cb2efa033bd32bcb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classfl_1_1_wave_crgb_map"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_classfl_1_1_wave_crgb_map')"><img src="../../closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="../../dc/dce/classfl_1_1_wave_crgb_map.html">fl::WaveCrgbMap</a></td></tr>
-<tr class="memitem:a9e720eb9fe501c5cd221de61bcaa31c0 inherit pub_methods_classfl_1_1_wave_crgb_map" id="r_a9e720eb9fe501c5cd221de61bcaa31c0"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dce/classfl_1_1_wave_crgb_map_a9e720eb9fe501c5cd221de61bcaa31c0.html#a9e720eb9fe501c5cd221de61bcaa31c0">~WaveCrgbMap</a> ()=default</td></tr>
-<tr class="separator:a9e720eb9fe501c5cd221de61bcaa31c0 inherit pub_methods_classfl_1_1_wave_crgb_map"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad3d828c6eeb07c7b65437fb7aa560412 inherit pub_methods_classfl_1_1_wave_crgb_map" id="r_ad3d828c6eeb07c7b65437fb7aa560412"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/dce/classfl_1_1_wave_crgb_map_ad3d828c6eeb07c7b65437fb7aa560412.html#ad3d828c6eeb07c7b65437fb7aa560412">~WaveCrgbMap</a> () <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a>=default</td></tr>
+<tr class="separator:ad3d828c6eeb07c7b65437fb7aa560412 inherit pub_methods_classfl_1_1_wave_crgb_map"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>fx/2d/<a class="el" href="../../de/de9/src_2fx_22d_2wave_8h_source.html">wave.h</a></li>
+<li>fl/fx/2d/<a class="el" href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html">wave.h</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -144,7 +150,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../de/d99/classfl_1_1_wave_crgb_map_default.html">WaveCrgbMapDefault</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

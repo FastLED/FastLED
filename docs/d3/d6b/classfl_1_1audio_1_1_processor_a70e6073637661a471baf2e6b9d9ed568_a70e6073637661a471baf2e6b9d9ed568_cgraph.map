@@ -1,0 +1,14 @@
+<map id="fl::audio::Processor::onFrequencyBands" name="fl::audio::Processor::onFrequencyBands">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,159,69"/>
+<area shape="poly" id="edge7_Node000001_Node000001" title=" " alt="" coords="45,30,43,20,48,11,62,5,82,3,105,6,118,13,115,18,104,11,82,8,63,10,52,15,48,21,50,28"/>
+<area shape="rect" id="Node000002" href="$d3/d6b/classfl_1_1audio_1_1_processor_a4b0b78e570223b9e4ffc29843c87b30a.html#a4b0b78e570223b9e4ffc29843c87b30a" title=" " alt="" coords="207,29,352,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="159,47,193,47,193,52,159,52"/>
+<area shape="poly" id="edge6_Node000002_Node000002" title=" " alt="" coords="242,30,240,20,246,11,259,5,279,3,303,6,315,13,313,18,301,11,279,8,260,10,249,15,245,21,247,28"/>
+<area shape="rect" id="Node000003" href="$d3/d6b/classfl_1_1audio_1_1_processor_a3ea6090ef70536d974a52c655f335783.html#a3ea6090ef70536d974a52c655f335783" title=" " alt="" coords="400,29,567,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="352,47,386,47,386,52,352,52"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="445,30,443,20,449,11,463,5,483,3,507,6,520,13,517,18,505,11,483,8,464,10,452,15,448,21,450,28"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="625,7,750,33"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="567,35,611,28,611,34,568,40"/>
+<area shape="rect" id="Node000005" href="$d3/d6b/classfl_1_1audio_1_1_processor_ade806d07af52e3d281939cebce7643d5.html#ade806d07af52e3d281939cebce7643d5" title=" " alt="" coords="615,57,760,97"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="568,58,601,63,600,68,567,63"/>
+</map>

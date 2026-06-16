@@ -1,0 +1,24 @@
+<map id="fl::audio::Reactive::getCurrentNote" name="fl::audio::Reactive::getCurrentNote">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,60,144,100"/>
+<area shape="rect" id="Node000002" href="$d8/dea/classfl_1_1audio_1_1_reactive_a657550d3cb28de4e06dea26c86ba83ae.html#a657550d3cb28de4e06dea26c86ba83ae" title=" " alt="" coords="192,5,367,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="144,59,190,46,192,51,145,64"/>
+<area shape="rect" id="Node000005" href="$d3/d6b/classfl_1_1audio_1_1_processor_a563d7ca8b8784ca9a29e63c6053a959e.html#a563d7ca8b8784ca9a29e63c6053a959e" title=" " alt="" coords="207,104,352,144"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="145,92,194,103,193,108,144,98"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a3fd92c727664a77396403265415789d3.html#a3fd92c727664a77396403265415789d3" title=" " alt="" coords="425,10,550,35"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="367,22,411,21,411,26,367,27"/>
+<area shape="rect" id="Node000004" href="$da/d3c/namespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259.html#a0bddf371925d8c4e94b88e9d7b35d259" title=" " alt="" coords="629,6,733,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="550,19,615,17,615,23,550,24"/>
+<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="241,104,239,94,245,85,259,79,279,77,303,80,316,88,313,92,301,85,279,83,260,85,248,89,244,95,246,103"/>
+<area shape="rect" id="Node000006" href="$d3/d6b/classfl_1_1audio_1_1_processor_a3a242f17c153d3fb4ceec0111f342a19.html#a3a242f17c153d3fb4ceec0111f342a19" title=" " alt="" coords="415,125,560,165"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="353,129,401,134,401,139,352,134"/>
+<area shape="poly" id="edge7_Node000006_Node000006" title=" " alt="" coords="451,126,449,116,455,107,468,101,487,99,510,102,522,109,520,113,508,107,487,104,469,106,458,111,454,117,456,124"/>
+<area shape="rect" id="Node000007" href="$d3/d6b/classfl_1_1audio_1_1_processor_ab92c9a9ebcf81275901443c19f5d515e.html#ab92c9a9ebcf81275901443c19f5d515e" title=" " alt="" coords="608,131,753,171"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="560,145,594,146,594,151,560,150"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="811,83,937,109"/>
+<area shape="poly" id="edge12_Node000006_Node000008" title=" " alt="" coords="524,123,564,105,607,92,656,85,706,82,798,85,797,90,706,87,657,90,609,97,565,110,527,128"/>
+<area shape="rect" id="Node000009" href="$d3/d6b/classfl_1_1audio_1_1_processor_ade806d07af52e3d281939cebce7643d5.html#ade806d07af52e3d281939cebce7643d5" title=" " alt="" coords="801,160,947,200"/>
+<area shape="poly" id="edge13_Node000006_Node000009" title=" " alt="" coords="541,163,608,180,700,187,787,185,787,190,700,192,608,185,540,168"/>
+<area shape="poly" id="edge9_Node000007_Node000007" title=" " alt="" coords="644,131,642,121,648,112,661,106,681,104,703,107,716,114,713,119,702,112,681,109,662,111,651,116,647,122,650,130"/>
+<area shape="poly" id="edge10_Node000007_Node000008" title=" " alt="" coords="751,128,814,110,816,115,753,133"/>
+<area shape="poly" id="edge11_Node000007_Node000009" title=" " alt="" coords="754,159,788,164,787,170,753,164"/>
+</map>

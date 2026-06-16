@@ -1,0 +1,19 @@
+<map id="fl/log/async_log_queue.h" name="fl/log/async_log_queue.h">
+<area shape="rect" id="Node000001" title="High&#45;performance ISR&#45;safe async logging queue (SPSC ring buffer) &#45; declarations only." alt="" coords="133,5,316,31"/>
+<area shape="rect" id="Node000002" href="$d8/d7c/async__log__queue_8cpp_8hpp.html" title=" " alt="" coords="5,79,231,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="198,40,137,81,134,76,195,36"/>
+<area shape="rect" id="Node000006" href="$df/df1/async__logger_8h.html" title="ISR&#45;safe async logger using SPSC queue backend (zero heap allocation)" alt="" coords="254,79,409,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="254,36,315,76,312,81,252,40"/>
+<area shape="rect" id="Node000003" href="$d4/d6c/fl_2log_2__build_8cpp_8hpp.html" title="Unity build header for fl/log/ directory." alt="" coords="178,225,330,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="123,117,129,147,144,176,160,191,178,204,217,223,215,228,176,209,156,195,140,179,124,149,117,119"/>
+<area shape="rect" id="Node000004" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="111,299,239,324"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="233,262,190,300,186,296,229,258"/>
+<area shape="rect" id="Node000005" href="$de/ddd/fl_8log_09_8cpp.html" title="Unity build: recursive includes from src/fl/log/." alt="" coords="264,299,404,324"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="279,258,323,296,319,300,275,262"/>
+<area shape="rect" id="Node000007" href="$d2/de0/async__logger_8cpp_8hpp.html" title=" " alt="" coords="155,152,353,177"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="311,115,268,154,265,150,307,111"/>
+<area shape="rect" id="Node000008" href="$d8/dab/log_8cpp_8hpp.html" title=" " alt="" coords="378,152,511,177"/>
+<area shape="poly" id="edge8_Node000006_Node000008" title=" " alt="" coords="363,109,428,150,425,154,360,114"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="257,191,257,225,251,225,251,191"/>
+<area shape="poly" id="edge9_Node000008_Node000003" title=" " alt="" coords="402,185,286,228,284,223,400,180"/>
+</map>

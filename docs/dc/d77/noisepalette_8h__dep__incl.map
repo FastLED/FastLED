@@ -1,9 +1,21 @@
-<map id="fx/2d/noisepalette.h" name="fx/2d/noisepalette.h">
-<area shape="rect" id="Node000001" title="Demonstrates how to mix noise generation with color palettes on a 2D LED matrix." alt="" coords="263,5,415,31"/>
-<area shape="rect" id="Node000002" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates FxEngine for switching between effects." alt="" coords="5,79,215,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="297,38,181,81,179,76,295,33"/>
-<area shape="rect" id="Node000003" href="$da/d40/wasm__impl_8h.html" title=" " alt="" coords="239,79,439,133"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="342,44,342,79,337,79,337,44"/>
-<area shape="rect" id="Node000004" href="$d6/d66/noisepalette_8cpp.html" title=" " alt="" coords="463,93,629,119"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="381,34,519,91,517,96,379,38"/>
+<map id="fl/fx/2d/noisepalette.h" name="fl/fx/2d/noisepalette.h">
+<area shape="rect" id="Node000001" title="Demonstrates how to mix noise generation with color palettes on a 2D LED matrix." alt="" coords="689,5,853,31"/>
+<area shape="rect" id="Node000002" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates FxEngine for switching between effects." alt="" coords="5,79,235,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="675,30,477,51,247,81,235,83,234,78,246,76,476,45,674,25"/>
+<area shape="rect" id="Node000003" href="$d5/d6f/_fx_noise_plus_palette_8ino.html" title="Noise plus palette effect with XYMap." alt="" coords="259,79,509,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="706,36,503,81,502,76,705,31"/>
+<area shape="rect" id="Node000004" href="$d7/d35/_fx_sd_card_8ino.html" title="Play a mapped video off an SD card." alt="" coords="533,79,763,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="744,41,687,81,684,76,741,37"/>
+<area shape="rect" id="Node000005" href="$df/d43/_overclock_8ino.html" title="High performance LED display example." alt="" coords="787,79,1002,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="800,36,858,76,855,81,797,41"/>
+<area shape="rect" id="Node000006" href="$da/d40/wasm__impl_8h.html" title=" " alt="" coords="1027,79,1227,133"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="832,31,1027,78,1026,83,831,36"/>
+<area shape="rect" id="Node000008" href="$df/da2/noisepalette_8cpp_8hpp.html" title=" " alt="" coords="1251,93,1458,119"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="867,26,1041,46,1239,76,1309,91,1308,96,1238,81,1040,52,866,31"/>
+<area shape="rect" id="Node000007" href="$d7/dd3/wasm_8ino.html" title="Demonstrates an advanced ino file with multiple effects and UI elements." alt="" coords="1027,181,1227,236"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="1129,147,1129,181,1124,181,1124,147"/>
+<area shape="rect" id="Node000009" href="$d8/d41/fl_2fx_22d_2__build_8cpp_8hpp.html" title="Unity build header for fl/fx/2d/ directory." alt="" coords="1272,196,1437,221"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="1357,133,1357,196,1352,196,1352,133"/>
+<area shape="rect" id="Node000010" href="$df/d9c/fl_2fx_2__build_8cpp_8hpp.html" title="Unity build header for fl/fx/ directory." alt="" coords="1282,284,1427,309"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="1357,235,1357,283,1352,283,1352,235"/>
 </map>

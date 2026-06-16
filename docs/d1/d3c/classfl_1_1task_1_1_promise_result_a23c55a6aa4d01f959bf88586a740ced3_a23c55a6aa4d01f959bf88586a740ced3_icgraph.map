@@ -1,0 +1,7 @@
+<map id="fl::task::PromiseResult::value" name="fl::task::PromiseResult::value">
+<area shape="rect" id="Node000001" title="Get the success value (const)" alt="" coords="221,37,389,77"/>
+<area shape="rect" id="Node000002" href="$d1/d3c/classfl_1_1task_1_1_promise_result_a520aca177f322579964e09b1a636ec98.html#a520aca177f322579964e09b1a636ec98" title="Construct a successful PromiseResult." alt="" coords="5,5,173,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="207,46,173,40,174,35,208,40"/>
+<area shape="rect" id="Node000003" href="$d1/d3c/classfl_1_1task_1_1_promise_result_a56831f276f5391d96f5e69a796f452e9.html#a56831f276f5391d96f5e69a796f452e9" title="Construct a successful PromiseResult (move)" alt="" coords="5,69,173,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="208,74,174,80,173,74,207,69"/>
+</map>

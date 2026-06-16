@@ -2,6 +2,7 @@ var class_n_o_p_s_p_i_output =
 [
     [ "NOPSPIOutput", "dc/d9e/class_n_o_p_s_p_i_output_a35b1e41d4b74fb8a1020073a324a9d01.html#a35b1e41d4b74fb8a1020073a324a9d01", null ],
     [ "NOPSPIOutput", "dc/d9e/class_n_o_p_s_p_i_output_a3f710f1b58277e67cebcaede84aadbc8.html#a3f710f1b58277e67cebcaede84aadbc8", null ],
+    [ "endTransaction", "dc/d9e/class_n_o_p_s_p_i_output_ac12cfcdc4e94a0a7299095c845dc2eb0.html#ac12cfcdc4e94a0a7299095c845dc2eb0", null ],
     [ "init", "dc/d9e/class_n_o_p_s_p_i_output_ad9ff9bf62427b69e3bb578699e0ce561.html#ad9ff9bf62427b69e3bb578699e0ce561", null ],
     [ "release", "dc/d9e/class_n_o_p_s_p_i_output_a0599fbdf5e04a633d24ff17033443237.html#a0599fbdf5e04a633d24ff17033443237", null ],
     [ "select", "dc/d9e/class_n_o_p_s_p_i_output_ae07bb6f787879f28979cccec9ec4965d.html#ae07bb6f787879f28979cccec9ec4965d", null ],
@@ -13,7 +14,7 @@ var class_n_o_p_s_p_i_output =
     [ "writeBytes", "dc/d9e/class_n_o_p_s_p_i_output_a1a870e52a6f145f48d9a3913af028de7.html#a1a870e52a6f145f48d9a3913af028de7", null ],
     [ "writeBytesValue", "dc/d9e/class_n_o_p_s_p_i_output_abab417663858c70008eedd0346a97b04.html#abab417663858c70008eedd0346a97b04", null ],
     [ "writeBytesValueRaw", "dc/d9e/class_n_o_p_s_p_i_output_a54612abed6ec87e8ba84ee2fb17c1c62.html#a54612abed6ec87e8ba84ee2fb17c1c62", null ],
-    [ "writePixels", "dc/d9e/class_n_o_p_s_p_i_output_a36d9217652b6f56522482476e06fd51e.html#a36d9217652b6f56522482476e06fd51e", null ],
-    [ "writeWord", "dc/d9e/class_n_o_p_s_p_i_output_a31ccabe3e4987751ad67a5d06e502df2.html#a31ccabe3e4987751ad67a5d06e502df2", null ],
-    [ "m_pSelect", "dc/d9e/class_n_o_p_s_p_i_output_a92f2da70670fee0c586565ff3071bf7d.html#a92f2da70670fee0c586565ff3071bf7d", null ]
+    [ "writePixels", "dc/d9e/class_n_o_p_s_p_i_output_a33c04724e0b89958c705fc7935146614.html#a33c04724e0b89958c705fc7935146614", null ],
+    [ "writeWord", "dc/d9e/class_n_o_p_s_p_i_output_a46700027153f645b108f9e447d364dc9.html#a46700027153f645b108f9e447d364dc9", null ],
+    [ "mPSelect", "dc/d9e/class_n_o_p_s_p_i_output_a9aaa7b90cd34bfa7fa9a6d53e75b40a3.html#a9aaa7b90cd34bfa7fa9a6d53e75b40a3", null ]
 ];

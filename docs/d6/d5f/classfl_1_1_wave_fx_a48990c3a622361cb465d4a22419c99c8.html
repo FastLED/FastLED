@@ -132,16 +132,28 @@ $(function(){initNavTree('d6/d5f/classfl_1_1_wave_fx_a48990c3a622361cb465d4a2241
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../de/de9/src_2fx_22d_2wave_8h_source.html#l00139">139</a> of file <a class="el" href="../../de/de9/src_2fx_22d_2wave_8h_source.html">wave.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  139</span>                                               {</div>
-<div class="line"><span class="lineno">  140</span>        <span class="comment">// Set the value at the given coordinates in the wave simulation.</span></div>
-<div class="line"><span class="lineno">  141</span>        <a class="code hl_variable" href="../../d6/d5f/classfl_1_1_wave_fx_af926598e0297888ebc5801a120ed17ff.html#af926598e0297888ebc5801a120ed17ff">mWaveSim</a>.setf(<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>, <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a>, value);</div>
-<div class="line"><span class="lineno">  142</span>    }</div>
-<div class="ttc" id="a_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33_html_a0a2f84ed7838f07779ae24c5a9086d33"><div class="ttname"><a href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a></div><div class="ttdeci">int y</div><div class="ttdef"><b>Definition</b> <a href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00093">simple.h:93</a></div></div>
-<div class="ttc" id="a_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc_html_a6150e0515f7202e2fb518f7206ed97dc"><div class="ttname"><a href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a></div><div class="ttdeci">int x</div><div class="ttdef"><b>Definition</b> <a href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">simple.h:92</a></div></div>
-<div class="ttc" id="aclassfl_1_1_wave_fx_af926598e0297888ebc5801a120ed17ff_html_af926598e0297888ebc5801a120ed17ff"><div class="ttname"><a href="../../d6/d5f/classfl_1_1_wave_fx_af926598e0297888ebc5801a120ed17ff.html#af926598e0297888ebc5801a120ed17ff">fl::WaveFx::mWaveSim</a></div><div class="ttdeci">WaveSimulation2D mWaveSim</div><div class="ttdef"><b>Definition</b> <a href="../../de/de9/src_2fx_22d_2wave_8h_source.html#l00184">wave.h:184</a></div></div>
+<p>Set wave amplitude at a specific grid position. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x</td><td>X coordinate in grid space </td></tr>
+    <tr><td class="paramname">y</td><td>Y coordinate in grid space </td></tr>
+    <tr><td class="paramname">value</td><td>Wave amplitude (0.0 to 1.0)</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>Use this to create a wave disturbance at a specific point. Value of 1.0 creates maximum amplitude wave that will propagate outward. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html#l00295">295</a> of file <a class="el" href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html">wave.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  295</span>                                               {</div>
+<div class="line"><span class="lineno">  296</span>        <span class="comment">// Set the value at the given coordinates in the wave simulation.</span></div>
+<div class="line"><span class="lineno">  297</span>        <a class="code hl_variable" href="../../d6/d5f/classfl_1_1_wave_fx_af926598e0297888ebc5801a120ed17ff.html#af926598e0297888ebc5801a120ed17ff">mWaveSim</a>.setf(<a class="code hl_variable" href="../../d4/d36/namespacefl_a01deac84db27d10f737f8a92973bea86.html#a01deac84db27d10f737f8a92973bea86">x</a>, <a class="code hl_variable" href="../../d4/d36/namespacefl_a19c81898aec29a20ef9d7e3be29eedfb.html#a19c81898aec29a20ef9d7e3be29eedfb">y</a>, <a class="code hl_variable" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>);</div>
+<div class="line"><span class="lineno">  298</span>    }</div>
+<div class="ttc" id="aclassfl_1_1_wave_fx_af926598e0297888ebc5801a120ed17ff_html_af926598e0297888ebc5801a120ed17ff"><div class="ttname"><a href="../../d6/d5f/classfl_1_1_wave_fx_af926598e0297888ebc5801a120ed17ff.html#af926598e0297888ebc5801a120ed17ff">fl::WaveFx::mWaveSim</a></div><div class="ttdeci">WaveSimulation2D mWaveSim</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html#l00376">wave.h:376</a></div></div>
+<div class="ttc" id="anamespacefl_a01deac84db27d10f737f8a92973bea86_html_a01deac84db27d10f737f8a92973bea86"><div class="ttname"><a href="../../d4/d36/namespacefl_a01deac84db27d10f737f8a92973bea86.html#a01deac84db27d10f737f8a92973bea86">fl::x</a></div><div class="ttdeci">x</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00024">transposition.cpp.hpp:24</a></div></div>
+<div class="ttc" id="anamespacefl_a13766ae9e150185981f5096f90a439d7_html_a13766ae9e150185981f5096f90a439d7"><div class="ttname"><a href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">fl::value</a></div><div class="ttdeci">constexpr int type_rank&lt; T &gt;::value</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d37/static__constexpr__defs_8cpp_8hpp_source.html#l00082">static_constexpr_defs.cpp.hpp:82</a></div></div>
+<div class="ttc" id="anamespacefl_a19c81898aec29a20ef9d7e3be29eedfb_html_a19c81898aec29a20ef9d7e3be29eedfb"><div class="ttname"><a href="../../d4/d36/namespacefl_a19c81898aec29a20ef9d7e3be29eedfb.html#a19c81898aec29a20ef9d7e3be29eedfb">fl::y</a></div><div class="ttdeci">y</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00023">transposition.cpp.hpp:23</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../de/de9/src_2fx_22d_2wave_8h_source.html#l00184">mWaveSim</a>, <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">x</a>, and <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00093">y</a>.</p>
+<p class="reference">References <a class="el" href="../../d2/d50/src_2fl_2fx_22d_2wave_8h_source.html#l00376">mWaveSim</a>, <a class="el" href="../../dd/d37/static__constexpr__defs_8cpp_8hpp_source.html#l00082">fl::type_rank&lt; T &gt;::value</a>, <a class="el" href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00024">fl::x</a>, and <a class="el" href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00023">fl::y</a>.</p>
 
 </div>
 </div>
@@ -152,7 +164,7 @@ $(function(){initNavTree('d6/d5f/classfl_1_1_wave_fx_a48990c3a622361cb465d4a2241
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d6/d5f/classfl_1_1_wave_fx.html">WaveFx</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

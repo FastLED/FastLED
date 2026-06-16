@@ -1,0 +1,8 @@
+<map id="fl::transpose8x1_MSB" name="fl::transpose8x1_MSB">
+<area shape="rect" id="Node000001" title="Simplified 8x1 bit transpose with MSB&#45;first output." alt="" coords="400,29,563,55"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ab609a244441c7d09afd0953c500e74cb.html#ab609a244441c7d09afd0953c500e74cb" title="Transpose 8 LED strips into parallel bit format." alt="" coords="199,29,352,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="386,45,352,45,352,39,386,39"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="310,19,300,11,275,8,254,10,243,15,241,20,247,28,243,31,236,21,239,11,253,5,275,3,302,6,314,15"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a6d887bb54674c3c61f3fffcb80193985.html#a6d887bb54674c3c61f3fffcb80193985" title="Helper to transpose N strips with automatic dispatch." alt="" coords="5,29,151,55"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="185,45,151,45,151,39,185,39"/>
+</map>

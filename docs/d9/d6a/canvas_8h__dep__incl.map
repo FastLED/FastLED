@@ -1,0 +1,44 @@
+<map id="fl/gfx/canvas.h" name="fl/gfx/canvas.h">
+<area shape="rect" id="Node000001" title="Canvas types for gfx primitives (implementation)" alt="" coords="1131,5,1249,31"/>
+<area shape="rect" id="Node000002" href="$d4/df5/blur_8h.html" title=" " alt="" coords="837,79,932,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1129,36,933,82,931,76,1127,31"/>
+<area shape="rect" id="Node000091" href="$d8/dd5/gfx_8h.html" title="2D antialiased graphics for LED matrices" alt="" coords="1251,152,1343,177"/>
+<area shape="poly" id="edge20_Node000001_Node000091" title=" " alt="" coords="1196,43,1203,73,1218,102,1245,130,1275,150,1272,154,1241,134,1213,106,1198,75,1191,45"/>
+<area shape="rect" id="Node000093" href="$de/d34/primitives_8h.html" title=" " alt="" coords="1228,79,1365,104"/>
+<area shape="poly" id="edge22_Node000001_Node000093" title=" " alt="" coords="1220,36,1281,76,1278,81,1217,40"/>
+<area shape="rect" id="Node000003" href="$df/da5/particles_8cpp_8hpp.html" title=" " alt="" coords="5,152,188,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="824,100,201,155,189,156,188,151,200,149,823,95"/>
+<area shape="rect" id="Node000008" href="$db/dfe/luminova_8cpp_8hpp.html" title=" " alt="" coords="213,152,399,177"/>
+<area shape="poly" id="edge4_Node000002_Node000008" title=" " alt="" coords="824,103,400,155,399,149,823,97"/>
+<area shape="rect" id="Node000010" href="$db/d8a/blur_8cpp_8hpp.html" title=" " alt="" coords="537,328,675,353"/>
+<area shape="poly" id="edge6_Node000002_Node000010" title=" " alt="" coords="824,105,729,124,620,152,568,168,523,186,487,206,464,227,457,240,454,252,457,265,464,278,479,295,496,308,538,326,536,330,494,313,475,299,460,282,452,267,449,252,452,238,460,224,484,202,521,182,566,163,618,147,728,119,823,100"/>
+<area shape="rect" id="Node000013" href="$d4/d1c/fl_2gfx_2colorutils_8h.html" title="Utility functions for color fill, palettes, blending, and more." alt="" coords="877,152,1007,177"/>
+<area shape="poly" id="edge8_Node000002_Node000013" title=" " alt="" coords="905,113,935,150,931,154,900,116"/>
+<area shape="rect" id="Node000058" href="$d4/d46/pixelset_8h.html" title="Declares classes for managing logical groups of LEDs." alt="" coords="1239,240,1325,265"/>
+<area shape="poly" id="edge19_Node000002_Node000058" title=" " alt="" coords="930,106,1064,157,1228,223,1260,237,1258,242,1226,228,1062,161,928,111"/>
+<area shape="rect" id="Node000004" href="$da/d62/fl_2fx_21d_2__build_8cpp_8hpp.html" title=" " alt="" coords="14,240,179,265"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="99,191,99,239,94,239,94,191"/>
+<area shape="rect" id="Node000009" href="$d8/d41/fl_2fx_22d_2__build_8cpp_8hpp.html" title="Unity build header for fl/fx/2d/ directory." alt="" coords="223,240,389,265"/>
+<area shape="poly" id="edge5_Node000008_Node000009" title=" " alt="" coords="309,191,309,239,303,239,303,191"/>
+<area shape="rect" id="Node000011" href="$d5/d88/fl_2gfx_2__build_8cpp_8hpp.html" title="Unity build for fl/gfx/ — graphics types, primitives, and simulators." alt="" coords="829,401,983,427"/>
+<area shape="poly" id="edge7_Node000010_Node000011" title=" " alt="" coords="668,354,858,399,857,404,667,359"/>
+<area shape="rect" id="Node000014" href="$d1/dfb/colorutils_8h.html" title=" " alt="" coords="475,240,569,265"/>
+<area shape="poly" id="edge9_Node000013_Node000014" title=" " alt="" coords="863,176,730,194,655,209,581,228,545,242,543,237,580,223,654,204,729,189,863,170"/>
+<area shape="rect" id="Node000063" href="$dc/da8/src_2fl_2audio_2audio__reactive_8h.html" title=" " alt="" coords="593,240,776,265"/>
+<area shape="poly" id="edge10_Node000013_Node000063" title=" " alt="" coords="895,184,720,242,718,237,894,179"/>
+<area shape="rect" id="Node000065" href="$d0/d3e/perlin__particle__punch_8h.html" title="Audio&#45;reactive perlin noise background with ambient particles and beat meteor overlay." alt="" coords="800,233,964,273"/>
+<area shape="poly" id="edge11_Node000013_Node000065" title=" " alt="" coords="928,190,898,234,893,231,924,187"/>
+<area shape="rect" id="Node000040" href="$db/d4e/colorutils_8cpp_8hpp.html" title=" " alt="" coords="819,328,993,353"/>
+<area shape="poly" id="edge12_Node000013_Node000040" title=" " alt="" coords="960,188,980,231,983,256,978,281,956,310,929,330,926,326,952,306,973,279,978,256,975,233,956,190"/>
+<area shape="rect" id="Node000068" href="$dc/d33/gradient_8cpp_8hpp.html" title=" " alt="" coords="1018,328,1186,353"/>
+<area shape="poly" id="edge14_Node000013_Node000068" title=" " alt="" coords="964,186,1093,326,1089,330,960,189"/>
+<area shape="rect" id="Node000069" href="$db/dfe/gradient_8h.html" title=" " alt="" coords="1090,240,1215,265"/>
+<area shape="poly" id="edge16_Node000013_Node000069" title=" " alt="" coords="984,180,1125,237,1123,242,982,185"/>
+<area shape="poly" id="edge18_Node000013_Node000058" title=" " alt="" coords="1022,175,1121,194,1228,223,1262,238,1260,242,1226,228,1120,199,1021,180"/>
+<area shape="poly" id="edge13_Node000040_Node000011" title=" " alt="" coords="909,367,909,401,903,401,903,367"/>
+<area shape="poly" id="edge15_Node000068_Node000011" title=" " alt="" coords="1059,360,939,404,937,399,1057,355"/>
+<area shape="poly" id="edge17_Node000069_Node000068" title=" " alt="" coords="1141,279,1111,329,1107,326,1137,276"/>
+<area shape="rect" id="Node000092" href="$d9/d2c/_perf_disc_8ino.html" title="Benchmark drawDisc on AVR (32x8 canvas, blend mode)" alt="" coords="1349,225,1551,280"/>
+<area shape="poly" id="edge21_Node000091_Node000092" title=" " alt="" coords="1330,182,1405,223,1402,228,1328,186"/>
+<area shape="poly" id="edge23_Node000093_Node000091" title=" " alt="" coords="1299,118,1299,152,1294,152,1294,118"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="fl::IChannelDriver" name="fl::IChannelDriver">
+<area shape="rect" id="Node000001" title="Minimal interface for LED channel transmission drivers." alt="" coords="5,37,140,63"/>
+<area shape="rect" id="Node000002" href="$d3/daf/classfl_1_1_spi_channel_engine_adapter.html" title="Adapter that wraps HW SPI controllers for ChannelManager." alt="" coords="202,5,409,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="154,36,212,28,213,33,154,42"/>
+<area shape="rect" id="Node000003" href="$df/def/classfl_1_1anonymous__namespace_02channel_8cpp_8hpp_03_1_1_stub_channel_engine.html" title=" " alt="" coords="188,55,423,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="154,58,188,63,187,68,154,64"/>
+</map>

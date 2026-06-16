@@ -1,0 +1,5 @@
+<map id="fl::ChannelManager::reset" name="fl::ChannelManager::reset">
+<area shape="rect" id="Node000001" title="Reset bus manager state, clearing all enqueued and transmitting channels." alt="" coords="176,5,324,45"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_aa98f1c4caa3fbef233d34ee757d29994.html#aa98f1c4caa3fbef233d34ee757d29994" title="Clear/reset FastLED state based on the provided flags." alt="" coords="5,13,128,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="162,28,129,28,129,23,162,23"/>
+</map>

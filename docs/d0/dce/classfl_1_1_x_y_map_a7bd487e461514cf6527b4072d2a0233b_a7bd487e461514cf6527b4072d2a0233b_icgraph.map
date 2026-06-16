@@ -1,0 +1,5 @@
+<map id="fl::XYMap::fromXMap" name="fl::XYMap::fromXMap">
+<area shape="rect" id="Node000001" title="Create an XYMap from an XMap (treats 1D as 2D with height=1)" alt="" coords="244,5,403,31"/>
+<area shape="rect" id="Node000002" href="$d5/d8b/classfl_1_1_channel_acfb78f07c618a1248db6c4fbbed5e408.html#acfb78f07c618a1248db6c4fbbed5e408" title="Set screen map for 1D strip remapping from XMap." alt="" coords="5,5,196,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="230,21,196,21,196,15,230,15"/>
+</map>

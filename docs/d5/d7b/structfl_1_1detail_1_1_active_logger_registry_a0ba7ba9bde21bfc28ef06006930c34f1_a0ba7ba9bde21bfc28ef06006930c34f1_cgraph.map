@@ -1,0 +1,18 @@
+<map id="fl::detail::ActiveLoggerRegistry::instance" name="fl::detail::ActiveLoggerRegistry::instance">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,93,173,133"/>
+<area shape="rect" id="Node000002" href="$db/d4a/classfl_1_1_singleton_shared_a138a66e14b03a073e9a15565e823b203.html#a138a66e14b03a073e9a15565e823b203" title=" " alt="" coords="221,93,365,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,111,208,111,208,116,174,116"/>
+<area shape="rect" id="Node000003" href="$db/d4a/classfl_1_1_singleton_shared_a7892d697818750c1f7611dea073ff66e.html#a7892d697818750c1f7611dea073ff66e" title=" " alt="" coords="413,29,557,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="353,91,411,71,413,76,355,96"/>
+<area shape="rect" id="Node000011" href="$df/d9e/namespacefl_1_1detail_a6bef973c17637a167f1f94d7db03905c.html#a6bef973c17637a167f1f94d7db03905c" title=" " alt="" coords="414,93,557,133"/>
+<area shape="poly" id="edge6_Node000002_Node000011" title=" " alt="" coords="366,111,400,111,400,116,366,116"/>
+<area shape="rect" id="Node000013" href="$df/d9e/namespacefl_1_1detail_af558e779ba2417d4cf14bdb1cbfd3d34.html#af558e779ba2417d4cf14bdb1cbfd3d34" title=" " alt="" coords="414,157,557,197"/>
+<area shape="poly" id="edge8_Node000002_Node000013" title=" " alt="" coords="355,131,413,150,411,155,353,136"/>
+<area shape="poly" id="edge5_Node000003_Node000003" title=" " alt="" coords="449,30,447,20,453,11,466,5,485,3,508,6,520,13,517,17,506,11,485,8,467,10,457,15,453,21,455,28"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a1e67c0c24ebcd98fcf8554753d1639a6.html#a1e67c0c24ebcd98fcf8554753d1639a6" title=" " alt="" coords="605,37,744,62"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="558,47,591,47,591,52,558,52"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="643,38,637,28,640,18,653,12,675,10,701,14,712,22,708,26,699,18,675,15,655,17,644,22,642,28,648,35"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_ae2e1ae9fd84b84af8b23721d551b9609.html#ae2e1ae9fd84b84af8b23721d551b9609" title=" " alt="" coords="633,133,716,158"/>
+<area shape="poly" id="edge7_Node000011_Node000012" title=" " alt="" coords="557,123,620,133,619,139,556,128"/>
+<area shape="poly" id="edge9_Node000013_Node000012" title=" " alt="" coords="556,163,619,152,620,157,557,168"/>
+</map>

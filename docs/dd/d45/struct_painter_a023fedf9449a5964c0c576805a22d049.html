@@ -137,72 +137,74 @@ $(function(){initNavTree('dd/d45/struct_painter_a023fedf9449a5964c0c576805a22d04
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d33/_painter_8cpp_source.html#l00408">408</a> of file <a class="el" href="../../db/d33/_painter_8cpp_source.html">Painter.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  411</span>                                {</div>
-<div class="line"><span class="lineno">  412</span> </div>
-<div class="line"><span class="lineno">  413</span>  led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_aabd7b16e96dfbbcf2dac2b21f389d0ac.html#aabd7b16e96dfbbcf2dac2b21f389d0ac">RawBeginDraw</a>();</div>
-<div class="line"><span class="lineno">  414</span>  <span class="keywordtype">int</span> total_counted = 0;</div>
-<div class="line"><span class="lineno">  415</span>  </div>
-<div class="line"><span class="lineno">  416</span>  <span class="keywordtype">float</span> r, g, b;</div>
-<div class="line"><span class="lineno">  417</span>  r = g = b = 0;</div>
-<div class="line"><span class="lineno">  418</span>  </div>
-<div class="line"><span class="lineno">  419</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; <a class="code hl_variable" href="../../db/d37/class_keyboard_state_a1627e92082392d5690a41ff2058199b2.html#a1627e92082392d5690a41ff2058199b2">KeyboardState::kNumKeys</a>; ++i) {</div>
-<div class="line"><span class="lineno">  420</span>    <span class="keyword">const</span> Key&amp; key = keyboard.<a class="code hl_variable" href="../../db/d37/class_keyboard_state_ab1438e70fd677a21c3601343ac5664f3.html#ab1438e70fd677a21c3601343ac5664f3">keys_</a>[i];</div>
-<div class="line"><span class="lineno">  421</span>    </div>
-<div class="line"><span class="lineno">  422</span> </div>
-<div class="line"><span class="lineno">  423</span>    <span class="keywordflow">if</span> (key.<a class="code hl_variable" href="../../db/d42/struct_key_a9f67c53a51f8b33667c327f79c6782dc.html#a9f67c53a51f8b33667c327f79c6782dc">curr_color_</a>.<a class="code hl_variable" href="../../d7/d38/struct_color_h_s_v_a0096a4003cbc683bc1ed7e675c5c029b.html#a0096a4003cbc683bc1ed7e675c5c029b">v_</a> &gt; 0.0f) {</div>
-<div class="line"><span class="lineno">  424</span>      <span class="keyword">const</span> Color3i rgb = key.<a class="code hl_variable" href="../../db/d42/struct_key_a9f67c53a51f8b33667c327f79c6782dc.html#a9f67c53a51f8b33667c327f79c6782dc">curr_color_</a>.<a class="code hl_function" href="../../d7/d38/struct_color_h_s_v_a46c2d7fa61b17ef44d98e7c64798ffe5.html#a46c2d7fa61b17ef44d98e7c64798ffe5">ToRGB</a>();</div>
-<div class="line"><span class="lineno">  425</span>      r += rgb.<a class="code hl_variable" href="../../de/d12/struct_color3i_ac82e943def8ec0943db1a50607fb6f38.html#ac82e943def8ec0943db1a50607fb6f38">r_</a>;</div>
-<div class="line"><span class="lineno">  426</span>      g += rgb.<a class="code hl_variable" href="../../de/d12/struct_color3i_aa31bd0c7fdeb7977ba1a3d6a349b1779.html#aa31bd0c7fdeb7977ba1a3d6a349b1779">g_</a>;</div>
-<div class="line"><span class="lineno">  427</span>      b += rgb.<a class="code hl_variable" href="../../de/d12/struct_color3i_a22493bbbe5034f47aefa051e2236a8b0.html#a22493bbbe5034f47aefa051e2236a8b0">b_</a>;</div>
-<div class="line"><span class="lineno">  428</span>      ++total_counted;</div>
-<div class="line"><span class="lineno">  429</span>    }</div>
-<div class="line"><span class="lineno">  430</span>  }</div>
-<div class="line"><span class="lineno">  431</span>  </div>
-<div class="line"><span class="lineno">  432</span>  <span class="keywordtype">float</span> denom = total_counted ? total_counted : 1;</div>
-<div class="line"><span class="lineno">  433</span>  r /= denom;</div>
-<div class="line"><span class="lineno">  434</span>  g /= denom;</div>
-<div class="line"><span class="lineno">  435</span>  b /= denom;</div>
-<div class="line"><span class="lineno">  436</span>  </div>
-<div class="line"><span class="lineno">  437</span> </div>
-<div class="line"><span class="lineno">  438</span>  <span class="keyword">const</span> Color3i rgb(r, g, b);</div>
-<div class="line"><span class="lineno">  439</span>  </div>
-<div class="line"><span class="lineno">  440</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; led_column_table_length; ++i) {</div>
-<div class="line"><span class="lineno">  441</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> n = led_column_table[i];</div>
-<div class="line"><span class="lineno">  442</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; n; ++i) {</div>
-<div class="line"><span class="lineno">  443</span>      led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_a0a54c27f180840a5713c0a20f14a8123.html#a0a54c27f180840a5713c0a20f14a8123">RawDrawPixel</a>(rgb);</div>
-<div class="line"><span class="lineno">  444</span>    }</div>
-<div class="line"><span class="lineno">  445</span>  }</div>
-<div class="line"><span class="lineno">  446</span>  led_rope-&gt;<a class="code hl_function" href="../../d2/d84/class_led_rope_interface_a4655ae1b8e1b02b5604bf2303a367e4a.html#a4655ae1b8e1b02b5604bf2303a367e4a">RawCommitDraw</a>();</div>
-<div class="line"><span class="lineno">  447</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/d33/_painter_8cpp_source.html#l00409">409</a> of file <a class="el" href="../../db/d33/_painter_8cpp_source.html">Painter.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  412</span>                                {</div>
+<div class="line"><span class="lineno">  413</span> </div>
+<div class="line"><span class="lineno">  414</span>  <a class="code hl_variable" href="../../d8/de5/_luminescent_grand_8ino_a8dca22aed95d1ff4d038b56167579319.html#a8dca22aed95d1ff4d038b56167579319">led_rope</a>-&gt;<a class="code hl_function" href="../../d4/df6/class_led_rope_t_c_l_ae60663b8c9b70e2dd58ebbfe14c22111.html#ae60663b8c9b70e2dd58ebbfe14c22111">RawBeginDraw</a>();</div>
+<div class="line"><span class="lineno">  415</span>  <span class="keywordtype">int</span> total_counted = 0;</div>
+<div class="line"><span class="lineno">  416</span>  </div>
+<div class="line"><span class="lineno">  417</span>  <span class="keywordtype">float</span> r, g, b;</div>
+<div class="line"><span class="lineno">  418</span>  r = g = b = 0;</div>
+<div class="line"><span class="lineno">  419</span>  </div>
+<div class="line"><span class="lineno">  420</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; <a class="code hl_variable" href="../../db/d37/class_keyboard_state_a1627e92082392d5690a41ff2058199b2.html#a1627e92082392d5690a41ff2058199b2">KeyboardState::kNumKeys</a>; ++i) {</div>
+<div class="line"><span class="lineno">  421</span>    <span class="keyword">const</span> Key&amp; key = <a class="code hl_variable" href="../../d8/de5/_luminescent_grand_8ino_ac00b91883c896ad0045234318d17b183.html#ac00b91883c896ad0045234318d17b183">keyboard</a>.<a class="code hl_variable" href="../../db/d37/class_keyboard_state_afefcfd0d49e4d7a07c483ba57de840e9.html#afefcfd0d49e4d7a07c483ba57de840e9">mKeys</a>[i];</div>
+<div class="line"><span class="lineno">  422</span>    </div>
+<div class="line"><span class="lineno">  423</span> </div>
+<div class="line"><span class="lineno">  424</span>    <span class="keywordflow">if</span> (key.<a class="code hl_variable" href="../../db/d42/struct_key_af029b59eff6813504425c91428fe162d.html#af029b59eff6813504425c91428fe162d">mCurrColor</a>.<a class="code hl_variable" href="../../d7/d38/struct_color_h_s_v_a0096a4003cbc683bc1ed7e675c5c029b.html#a0096a4003cbc683bc1ed7e675c5c029b">v_</a> &gt; 0.0f) {</div>
+<div class="line"><span class="lineno">  425</span>      <span class="keyword">const</span> Color3i rgb = key.<a class="code hl_variable" href="../../db/d42/struct_key_af029b59eff6813504425c91428fe162d.html#af029b59eff6813504425c91428fe162d">mCurrColor</a>.<a class="code hl_function" href="../../d7/d38/struct_color_h_s_v_a46c2d7fa61b17ef44d98e7c64798ffe5.html#a46c2d7fa61b17ef44d98e7c64798ffe5">ToRGB</a>();</div>
+<div class="line"><span class="lineno">  426</span>      r += rgb.<a class="code hl_variable" href="../../de/d12/struct_color3i_ac82e943def8ec0943db1a50607fb6f38.html#ac82e943def8ec0943db1a50607fb6f38">r_</a>;</div>
+<div class="line"><span class="lineno">  427</span>      g += rgb.<a class="code hl_variable" href="../../de/d12/struct_color3i_aa31bd0c7fdeb7977ba1a3d6a349b1779.html#aa31bd0c7fdeb7977ba1a3d6a349b1779">g_</a>;</div>
+<div class="line"><span class="lineno">  428</span>      b += rgb.<a class="code hl_variable" href="../../de/d12/struct_color3i_a22493bbbe5034f47aefa051e2236a8b0.html#a22493bbbe5034f47aefa051e2236a8b0">b_</a>;</div>
+<div class="line"><span class="lineno">  429</span>      ++total_counted;</div>
+<div class="line"><span class="lineno">  430</span>    }</div>
+<div class="line"><span class="lineno">  431</span>  }</div>
+<div class="line"><span class="lineno">  432</span>  </div>
+<div class="line"><span class="lineno">  433</span>  <span class="keywordtype">float</span> denom = total_counted ? total_counted : 1;</div>
+<div class="line"><span class="lineno">  434</span>  r /= denom;</div>
+<div class="line"><span class="lineno">  435</span>  g /= denom;</div>
+<div class="line"><span class="lineno">  436</span>  b /= denom;</div>
+<div class="line"><span class="lineno">  437</span>  </div>
+<div class="line"><span class="lineno">  438</span> </div>
+<div class="line"><span class="lineno">  439</span>  <span class="keyword">const</span> Color3i rgb(r, g, b);</div>
+<div class="line"><span class="lineno">  440</span>  </div>
+<div class="line"><span class="lineno">  441</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; led_column_table_length; ++i) {</div>
+<div class="line"><span class="lineno">  442</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> n = led_column_table[i];</div>
+<div class="line"><span class="lineno">  443</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; n; ++i) {</div>
+<div class="line"><span class="lineno">  444</span>      <a class="code hl_variable" href="../../d8/de5/_luminescent_grand_8ino_a8dca22aed95d1ff4d038b56167579319.html#a8dca22aed95d1ff4d038b56167579319">led_rope</a>-&gt;<a class="code hl_function" href="../../d4/df6/class_led_rope_t_c_l_a44e74c392ae8f3e56d58000912d38aed.html#a44e74c392ae8f3e56d58000912d38aed">RawDrawPixel</a>(rgb);</div>
+<div class="line"><span class="lineno">  445</span>    }</div>
+<div class="line"><span class="lineno">  446</span>  }</div>
+<div class="line"><span class="lineno">  447</span>  <a class="code hl_variable" href="../../d8/de5/_luminescent_grand_8ino_a8dca22aed95d1ff4d038b56167579319.html#a8dca22aed95d1ff4d038b56167579319">led_rope</a>-&gt;<a class="code hl_function" href="../../d4/df6/class_led_rope_t_c_l_a2c5c772faf24596d5be70d96581e7454.html#a2c5c772faf24596d5be70d96581e7454">RawCommitDraw</a>();</div>
+<div class="line"><span class="lineno">  448</span>}</div>
+<div class="ttc" id="a_luminescent_grand_8ino_a8dca22aed95d1ff4d038b56167579319_html_a8dca22aed95d1ff4d038b56167579319"><div class="ttname"><a href="../../d8/de5/_luminescent_grand_8ino_a8dca22aed95d1ff4d038b56167579319.html#a8dca22aed95d1ff4d038b56167579319">led_rope</a></div><div class="ttdeci">LedRopeTCL led_rope(kNumKeys)</div></div>
+<div class="ttc" id="a_luminescent_grand_8ino_ac00b91883c896ad0045234318d17b183_html_ac00b91883c896ad0045234318d17b183"><div class="ttname"><a href="../../d8/de5/_luminescent_grand_8ino_ac00b91883c896ad0045234318d17b183.html#ac00b91883c896ad0045234318d17b183">keyboard</a></div><div class="ttdeci">KeyboardState keyboard</div><div class="ttdef"><b>Definition</b> <a href="../../d8/de5/_luminescent_grand_8ino_source.html#l00060">LuminescentGrand.ino:60</a></div></div>
 <div class="ttc" id="aclass_keyboard_state_a1627e92082392d5690a41ff2058199b2_html_a1627e92082392d5690a41ff2058199b2"><div class="ttname"><a href="../../db/d37/class_keyboard_state_a1627e92082392d5690a41ff2058199b2.html#a1627e92082392d5690a41ff2058199b2">KeyboardState::kNumKeys</a></div><div class="ttdeci">static const int kNumKeys</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00101">Keyboard.h:101</a></div></div>
-<div class="ttc" id="aclass_keyboard_state_ab1438e70fd677a21c3601343ac5664f3_html_ab1438e70fd677a21c3601343ac5664f3"><div class="ttname"><a href="../../db/d37/class_keyboard_state_ab1438e70fd677a21c3601343ac5664f3.html#ab1438e70fd677a21c3601343ac5664f3">KeyboardState::keys_</a></div><div class="ttdeci">Key keys_[kNumKeys]</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00103">Keyboard.h:103</a></div></div>
-<div class="ttc" id="aclass_led_rope_interface_a0a54c27f180840a5713c0a20f14a8123_html_a0a54c27f180840a5713c0a20f14a8123"><div class="ttname"><a href="../../d2/d84/class_led_rope_interface_a0a54c27f180840a5713c0a20f14a8123.html#a0a54c27f180840a5713c0a20f14a8123">LedRopeInterface::RawDrawPixel</a></div><div class="ttdeci">virtual void RawDrawPixel(const Color3i &amp;c)=0</div></div>
-<div class="ttc" id="aclass_led_rope_interface_a4655ae1b8e1b02b5604bf2303a367e4a_html_a4655ae1b8e1b02b5604bf2303a367e4a"><div class="ttname"><a href="../../d2/d84/class_led_rope_interface_a4655ae1b8e1b02b5604bf2303a367e4a.html#a4655ae1b8e1b02b5604bf2303a367e4a">LedRopeInterface::RawCommitDraw</a></div><div class="ttdeci">virtual void RawCommitDraw()=0</div></div>
-<div class="ttc" id="aclass_led_rope_interface_aabd7b16e96dfbbcf2dac2b21f389d0ac_html_aabd7b16e96dfbbcf2dac2b21f389d0ac"><div class="ttname"><a href="../../d2/d84/class_led_rope_interface_aabd7b16e96dfbbcf2dac2b21f389d0ac.html#aabd7b16e96dfbbcf2dac2b21f389d0ac">LedRopeInterface::RawBeginDraw</a></div><div class="ttdeci">virtual void RawBeginDraw()=0</div></div>
+<div class="ttc" id="aclass_keyboard_state_afefcfd0d49e4d7a07c483ba57de840e9_html_afefcfd0d49e4d7a07c483ba57de840e9"><div class="ttname"><a href="../../db/d37/class_keyboard_state_afefcfd0d49e4d7a07c483ba57de840e9.html#afefcfd0d49e4d7a07c483ba57de840e9">KeyboardState::mKeys</a></div><div class="ttdeci">Key mKeys[kNumKeys]</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00103">Keyboard.h:103</a></div></div>
+<div class="ttc" id="aclass_led_rope_t_c_l_a2c5c772faf24596d5be70d96581e7454_html_a2c5c772faf24596d5be70d96581e7454"><div class="ttname"><a href="../../d4/df6/class_led_rope_t_c_l_a2c5c772faf24596d5be70d96581e7454.html#a2c5c772faf24596d5be70d96581e7454">LedRopeTCL::RawCommitDraw</a></div><div class="ttdeci">void RawCommitDraw()</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dc9/_led_rope_t_c_l_8cpp_source.html#l00111">LedRopeTCL.cpp:111</a></div></div>
+<div class="ttc" id="aclass_led_rope_t_c_l_a44e74c392ae8f3e56d58000912d38aed_html_a44e74c392ae8f3e56d58000912d38aed"><div class="ttname"><a href="../../d4/df6/class_led_rope_t_c_l_a44e74c392ae8f3e56d58000912d38aed.html#a44e74c392ae8f3e56d58000912d38aed">LedRopeTCL::RawDrawPixel</a></div><div class="ttdeci">void RawDrawPixel(const Color3i &amp;c)</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dc9/_led_rope_t_c_l_8cpp_source.html#l00079">LedRopeTCL.cpp:79</a></div></div>
+<div class="ttc" id="aclass_led_rope_t_c_l_ae60663b8c9b70e2dd58ebbfe14c22111_html_ae60663b8c9b70e2dd58ebbfe14c22111"><div class="ttname"><a href="../../d4/df6/class_led_rope_t_c_l_ae60663b8c9b70e2dd58ebbfe14c22111.html#ae60663b8c9b70e2dd58ebbfe14c22111">LedRopeTCL::RawBeginDraw</a></div><div class="ttdeci">void RawBeginDraw()</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dc9/_led_rope_t_c_l_8cpp_source.html#l00073">LedRopeTCL.cpp:73</a></div></div>
 <div class="ttc" id="astruct_color3i_a22493bbbe5034f47aefa051e2236a8b0_html_a22493bbbe5034f47aefa051e2236a8b0"><div class="ttname"><a href="../../de/d12/struct_color3i_a22493bbbe5034f47aefa051e2236a8b0.html#a22493bbbe5034f47aefa051e2236a8b0">Color3i::b_</a></div><div class="ttdeci">uint8_t b_</div><div class="ttdef"><b>Definition</b> <a href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00056">color.h:56</a></div></div>
 <div class="ttc" id="astruct_color3i_aa31bd0c7fdeb7977ba1a3d6a349b1779_html_aa31bd0c7fdeb7977ba1a3d6a349b1779"><div class="ttname"><a href="../../de/d12/struct_color3i_aa31bd0c7fdeb7977ba1a3d6a349b1779.html#aa31bd0c7fdeb7977ba1a3d6a349b1779">Color3i::g_</a></div><div class="ttdeci">uint8_t g_</div><div class="ttdef"><b>Definition</b> <a href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00056">color.h:56</a></div></div>
 <div class="ttc" id="astruct_color3i_ac82e943def8ec0943db1a50607fb6f38_html_ac82e943def8ec0943db1a50607fb6f38"><div class="ttname"><a href="../../de/d12/struct_color3i_ac82e943def8ec0943db1a50607fb6f38.html#ac82e943def8ec0943db1a50607fb6f38">Color3i::r_</a></div><div class="ttdeci">uint8_t r_</div><div class="ttdef"><b>Definition</b> <a href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00056">color.h:56</a></div></div>
 <div class="ttc" id="astruct_color_h_s_v_a0096a4003cbc683bc1ed7e675c5c029b_html_a0096a4003cbc683bc1ed7e675c5c029b"><div class="ttname"><a href="../../d7/d38/struct_color_h_s_v_a0096a4003cbc683bc1ed7e675c5c029b.html#a0096a4003cbc683bc1ed7e675c5c029b">ColorHSV::v_</a></div><div class="ttdeci">float v_</div><div class="ttdef"><b>Definition</b> <a href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00108">color.h:108</a></div></div>
 <div class="ttc" id="astruct_color_h_s_v_a46c2d7fa61b17ef44d98e7c64798ffe5_html_a46c2d7fa61b17ef44d98e7c64798ffe5"><div class="ttname"><a href="../../d7/d38/struct_color_h_s_v_a46c2d7fa61b17ef44d98e7c64798ffe5.html#a46c2d7fa61b17ef44d98e7c64798ffe5">ColorHSV::ToRGB</a></div><div class="ttdeci">Color3i ToRGB() const</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d03/color_8cpp_source.html#l00129">color.cpp:129</a></div></div>
-<div class="ttc" id="astruct_key_a9f67c53a51f8b33667c327f79c6782dc_html_a9f67c53a51f8b33667c327f79c6782dc"><div class="ttname"><a href="../../db/d42/struct_key_a9f67c53a51f8b33667c327f79c6782dc.html#a9f67c53a51f8b33667c327f79c6782dc">Key::curr_color_</a></div><div class="ttdeci">ColorHSV curr_color_</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00048">Keyboard.h:48</a></div></div>
+<div class="ttc" id="astruct_key_af029b59eff6813504425c91428fe162d_html_af029b59eff6813504425c91428fe162d"><div class="ttname"><a href="../../db/d42/struct_key_af029b59eff6813504425c91428fe162d.html#af029b59eff6813504425c91428fe162d">Key::mCurrColor</a></div><div class="ttdeci">ColorHSV mCurrColor</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00048">Keyboard.h:48</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00056">Color3i::b_</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00048">Key::curr_color_</a>, <a class="el" href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00056">Color3i::g_</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00103">KeyboardState::keys_</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00101">KeyboardState::kNumKeys</a>, <a class="el" href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00056">Color3i::r_</a>, <a class="el" href="../../d2/d84/class_led_rope_interface_aabd7b16e96dfbbcf2dac2b21f389d0ac.html#aabd7b16e96dfbbcf2dac2b21f389d0ac">LedRopeInterface::RawBeginDraw()</a>, <a class="el" href="../../d2/d84/class_led_rope_interface_a4655ae1b8e1b02b5604bf2303a367e4a.html#a4655ae1b8e1b02b5604bf2303a367e4a">LedRopeInterface::RawCommitDraw()</a>, <a class="el" href="../../d2/d84/class_led_rope_interface_a0a54c27f180840a5713c0a20f14a8123.html#a0a54c27f180840a5713c0a20f14a8123">LedRopeInterface::RawDrawPixel()</a>, <a class="el" href="../../d3/d03/color_8cpp_source.html#l00129">ColorHSV::ToRGB()</a>, and <a class="el" href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00108">ColorHSV::v_</a>.</p>
+<p class="reference">References <a class="el" href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00056">Color3i::b_</a>, <a class="el" href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00056">Color3i::g_</a>, <a class="el" href="../../d8/de5/_luminescent_grand_8ino_source.html#l00060">keyboard</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00101">KeyboardState::kNumKeys</a>, <a class="el" href="../../d8/de5/_luminescent_grand_8ino_a8dca22aed95d1ff4d038b56167579319.html#a8dca22aed95d1ff4d038b56167579319">led_rope</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00048">Key::mCurrColor</a>, <a class="el" href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00056">Color3i::r_</a>, <a class="el" href="../../d3/d03/color_8cpp_source.html#l00129">ColorHSV::ToRGB()</a>, and <a class="el" href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html#l00108">ColorHSV::v_</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../db/d33/_painter_8cpp_source.html#l00098">Paint()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../db/d33/_painter_8cpp_source.html#l00099">Paint()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../dd/d45/struct_painter_a023fedf9449a5964c0c576805a22d049_a023fedf9449a5964c0c576805a22d049_cgraph.svg" width="516" height="200"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../dd/d45/struct_painter_a023fedf9449a5964c0c576805a22d049_a023fedf9449a5964c0c576805a22d049_cgraph.svg" width="390" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../dd/d45/struct_painter_a023fedf9449a5964c0c576805a22d049_a023fedf9449a5964c0c576805a22d049_icgraph.svg" width="364" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../dd/d45/struct_painter_a023fedf9449a5964c0c576805a22d049_a023fedf9449a5964c0c576805a22d049_icgraph.svg" width="463" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -214,7 +216,7 @@ $(function(){initNavTree('dd/d45/struct_painter_a023fedf9449a5964c0c576805a22d04
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dd/d45/struct_painter.html">Painter</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -7,5 +7,8 @@ digraph "/home/runner/work/FastLED/FastLED/examples/Multiple/ParallelOutputDemo/
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   Node1 [id="Node000001",label="/home/runner/work/FastLED\l/FastLED/examples/Multiple\l/ParallelOutputDemo/ParallelOutput\lDemo.ino",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Demonstrates how to write to multiple strips simultaneously."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="platforms/sketch_fake.hpp",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node2 [id="Node000002",label="FastLED.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="ParallelOutputDemo.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d03/_parallel_output_demo_8h.html",tooltip=" "];
+  Node3 -> Node2 [id="edge3_Node000003_Node000002",color="steelblue1",style="solid",tooltip=" "];
 }

@@ -1,0 +1,6 @@
+<map id="fl::Watchdog::lastResetInfo" name="fl::Watchdog::lastResetInfo">
+<area shape="rect" id="Node000001" title="Detailed reset information including platform raw register + subcause id." alt="" coords="5,29,201,55"/>
+<area shape="rect" id="Node000002" href="$da/d45/classfl_1_1_watchdog_a5c1ddec6fa8ad283f62bf06d9ae0cbc9.html#a5c1ddec6fa8ad283f62bf06d9ae0cbc9" title=" " alt="" coords="249,29,460,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="202,39,236,39,236,45,202,45"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="314,31,305,21,310,11,327,5,355,3,390,7,400,11,404,17,399,20,397,15,389,12,355,8,328,10,313,15,311,20,318,27"/>
+</map>

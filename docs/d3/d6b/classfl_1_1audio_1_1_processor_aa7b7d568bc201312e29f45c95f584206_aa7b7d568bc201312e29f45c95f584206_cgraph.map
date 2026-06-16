@@ -1,0 +1,14 @@
+<map id="fl::audio::Processor::getTempoConfidence" name="fl::audio::Processor::getTempoConfidence">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,63,172,103"/>
+<area shape="poly" id="edge7_Node000001_Node000001" title=" " alt="" coords="50,64,48,54,54,45,68,39,89,37,113,40,126,47,123,52,111,45,89,42,69,44,57,49,53,55,55,62"/>
+<area shape="rect" id="Node000002" href="$db/dbf/namespacefl_1_1audio_a1cbdb2338ec760ba92ce43fece0713d2.html#a1cbdb2338ec760ba92ce43fece0713d2" title=" " alt="" coords="226,29,365,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="172,64,217,55,219,60,173,69"/>
+<area shape="rect" id="Node000003" href="$d3/d6b/classfl_1_1audio_1_1_processor_a908e871af0cb8e3c73a21acc5fc27c44.html#a908e871af0cb8e3c73a21acc5fc27c44" title=" " alt="" coords="220,103,371,143"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="173,97,207,104,206,109,172,102"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="263,31,256,21,260,11,273,5,295,3,322,6,333,15,330,19,320,11,295,8,275,10,264,15,262,20,267,28"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="259,104,256,94,262,85,275,79,295,77,318,80,331,87,328,91,317,85,295,82,277,84,266,89,262,95,264,102"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="429,81,554,107"/>
+<area shape="poly" id="edge5_Node000003_Node000004" title=" " alt="" coords="370,109,414,103,415,108,371,115"/>
+<area shape="rect" id="Node000005" href="$d3/d6b/classfl_1_1audio_1_1_processor_ade806d07af52e3d281939cebce7643d5.html#ade806d07af52e3d281939cebce7643d5" title=" " alt="" coords="419,131,564,171"/>
+<area shape="poly" id="edge6_Node000003_Node000005" title=" " alt="" coords="371,131,405,136,405,142,370,137"/>
+</map>

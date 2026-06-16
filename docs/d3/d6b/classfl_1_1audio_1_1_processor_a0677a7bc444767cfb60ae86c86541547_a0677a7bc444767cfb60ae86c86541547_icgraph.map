@@ -1,0 +1,7 @@
+<map id="fl::audio::Processor::getEqDominantFreqHz" name="fl::audio::Processor::getEqDominantFreqHz">
+<area shape="rect" id="Node000001" title="Frequency of strongest bin (Hz)" alt="" coords="199,29,375,69"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="322,18,309,11,287,8,267,10,255,15,250,21,253,28,248,30,245,20,251,10,265,5,287,3,311,6,324,13"/>
+<area shape="rect" id="Node000002" href="$d3/d6b/classfl_1_1audio_1_1_processor_a44c9bf7e90fafc4f6bc668d7796ef27c.html#a44c9bf7e90fafc4f6bc668d7796ef27c" title=" " alt="" coords="5,29,151,69"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="185,52,151,52,151,47,185,47"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="113,18,101,11,78,8,58,10,46,15,42,21,44,28,39,30,37,20,43,10,57,5,78,3,102,6,116,13"/>
+</map>

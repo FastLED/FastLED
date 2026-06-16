@@ -67,7 +67,7 @@ var sectionId = 'dynsection-0';
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../db/df7/class_c_pixel_view_a204a8e8cc2c99e6c172f8802d880a273.html#a204a8e8cc2c99e6c172f8802d880a273" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../db/df7/class_c_pixel_view_aeec15f676d5e26a7e13ff5426e60e4e6.html#aeec15f676d5e26a7e13ff5426e60e4e6" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="121,-1278 0,-1278 0,-1248 121,-1248 121,-1278"/>
 <text text-anchor="start" x="8" y="-1266" font-family="Helvetica,sans-Serif" font-size="10.00">CPixelView&lt; CRGB &gt;</text>
 <text text-anchor="middle" x="60.5" y="-1255" font-family="Helvetica,sans-Serif" font-size="10.00">::addToRGB</text>
@@ -162,7 +162,7 @@ var sectionId = 'dynsection-0';
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../db/df7/class_c_pixel_view_a96e9aee963f15b008d91ba1cbd9b6f6a.html#a96e9aee963f15b008d91ba1cbd9b6f6a" target="_top" xlink:title=" ">
+<g id="a_Node000007"><a xlink:href="../../db/df7/class_c_pixel_view_a3c7235e6b35736ae36b150c14e335ea3.html#a3c7235e6b35736ae36b150c14e335ea3" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="121,-1038 0,-1038 0,-1008 121,-1008 121,-1038"/>
 <text text-anchor="start" x="8" y="-1026" font-family="Helvetica,sans-Serif" font-size="10.00">CPixelView&lt; CRGB &gt;</text>
 <text text-anchor="middle" x="60.5" y="-1015" font-family="Helvetica,sans-Serif" font-size="10.00">::nscale8</text>
@@ -181,7 +181,7 @@ var sectionId = 'dynsection-0';
 <!-- Node8 -->
 <g id="Node000008" class="node">
 <title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../db/df7/class_c_pixel_view_a21ad8bc733a86d742a18c1fc73f85bd0.html#a21ad8bc733a86d742a18c1fc73f85bd0" target="_top" xlink:title=" ">
+<g id="a_Node000008"><a xlink:href="../../db/df7/class_c_pixel_view_a47021a70f103e65685f6ba07260c8e5d.html#a47021a70f103e65685f6ba07260c8e5d" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="121,-990 0,-990 0,-960 121,-960 121,-990"/>
 <text text-anchor="start" x="8" y="-978" font-family="Helvetica,sans-Serif" font-size="10.00">CPixelView&lt; CRGB &gt;</text>
 <text text-anchor="middle" x="60.5" y="-967" font-family="Helvetica,sans-Serif" font-size="10.00">::nscale8_video</text>
@@ -219,7 +219,7 @@ var sectionId = 'dynsection-0';
 <!-- Node10 -->
 <g id="Node000010" class="node">
 <title>Node10</title>
-<g id="a_Node000010"><a xlink:href="../../db/df7/class_c_pixel_view_a8e1737d2bb2b56a7f8d4753150c42bb2.html#a8e1737d2bb2b56a7f8d4753150c42bb2" target="_top" xlink:title=" ">
+<g id="a_Node000010"><a xlink:href="../../db/df7/class_c_pixel_view_a0e60e1140e4149b56767eb21c2aef8a0.html#a0e60e1140e4149b56767eb21c2aef8a0" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="121,-894 0,-894 0,-864 121,-864 121,-894"/>
 <text text-anchor="start" x="8" y="-882" font-family="Helvetica,sans-Serif" font-size="10.00">CPixelView&lt; CRGB &gt;</text>
 <text text-anchor="middle" x="60.5" y="-871" font-family="Helvetica,sans-Serif" font-size="10.00">::operator%=</text>
@@ -276,7 +276,7 @@ var sectionId = 'dynsection-0';
 <!-- Node13 -->
 <g id="Node000013" class="node">
 <title>Node13</title>
-<g id="a_Node000013"><a xlink:href="../../db/df7/class_c_pixel_view_adaee934b6e8be8aeccfe0ba4194eee4c.html#adaee934b6e8be8aeccfe0ba4194eee4c" target="_top" xlink:title=" ">
+<g id="a_Node000013"><a xlink:href="../../db/df7/class_c_pixel_view_a2e7e6fd619f9dd40f0ebae818bc31bc2.html#a2e7e6fd619f9dd40f0ebae818bc31bc2" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="121,-750 0,-750 0,-720 121,-720 121,-750"/>
 <text text-anchor="start" x="8" y="-738" font-family="Helvetica,sans-Serif" font-size="10.00">CPixelView&lt; CRGB &gt;</text>
 <text text-anchor="middle" x="60.5" y="-727" font-family="Helvetica,sans-Serif" font-size="10.00">::operator&amp;=</text>
@@ -295,7 +295,7 @@ var sectionId = 'dynsection-0';
 <!-- Node14 -->
 <g id="Node000014" class="node">
 <title>Node14</title>
-<g id="a_Node000014"><a xlink:href="../../db/df7/class_c_pixel_view_a35d451dbf7c80bf2be4187c33d5441fa.html#a35d451dbf7c80bf2be4187c33d5441fa" target="_top" xlink:title=" ">
+<g id="a_Node000014"><a xlink:href="../../db/df7/class_c_pixel_view_a4fc97f48f583e6b52141c29fc24522f1.html#a4fc97f48f583e6b52141c29fc24522f1" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="121,-702 0,-702 0,-672 121,-672 121,-702"/>
 <text text-anchor="start" x="8" y="-690" font-family="Helvetica,sans-Serif" font-size="10.00">CPixelView&lt; CRGB &gt;</text>
 <text text-anchor="middle" x="60.5" y="-679" font-family="Helvetica,sans-Serif" font-size="10.00">::operator*=</text>
@@ -428,7 +428,7 @@ var sectionId = 'dynsection-0';
 <!-- Node21 -->
 <g id="Node000021" class="node">
 <title>Node21</title>
-<g id="a_Node000021"><a xlink:href="../../db/df7/class_c_pixel_view_a96dd8c37339dc0dc945e9d5aa3abb5ce.html#a96dd8c37339dc0dc945e9d5aa3abb5ce" target="_top" xlink:title=" ">
+<g id="a_Node000021"><a xlink:href="../../db/df7/class_c_pixel_view_a0a25edd09ebe9da228a69c99c84dffa0.html#a0a25edd09ebe9da228a69c99c84dffa0" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="121,-366 0,-366 0,-336 121,-336 121,-366"/>
 <text text-anchor="start" x="8" y="-354" font-family="Helvetica,sans-Serif" font-size="10.00">CPixelView&lt; CRGB &gt;</text>
 <text text-anchor="middle" x="60.5" y="-343" font-family="Helvetica,sans-Serif" font-size="10.00">::operator/=</text>
@@ -485,7 +485,7 @@ var sectionId = 'dynsection-0';
 <!-- Node24 -->
 <g id="Node000024" class="node">
 <title>Node24</title>
-<g id="a_Node000024"><a xlink:href="../../db/df7/class_c_pixel_view_a9e6ccee7103ca8ee67767eb99f12e08c.html#a9e6ccee7103ca8ee67767eb99f12e08c" target="_top" xlink:title=" ">
+<g id="a_Node000024"><a xlink:href="../../db/df7/class_c_pixel_view_afcc5e61c649e92ccdc4f512cb9b8c6eb.html#afcc5e61c649e92ccdc4f512cb9b8c6eb" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="121,-222 0,-222 0,-192 121,-192 121,-222"/>
 <text text-anchor="start" x="8" y="-210" font-family="Helvetica,sans-Serif" font-size="10.00">CPixelView&lt; CRGB &gt;</text>
 <text text-anchor="middle" x="60.5" y="-199" font-family="Helvetica,sans-Serif" font-size="10.00">::operator&gt;&gt;=</text>
@@ -542,7 +542,7 @@ var sectionId = 'dynsection-0';
 <!-- Node27 -->
 <g id="Node000027" class="node">
 <title>Node27</title>
-<g id="a_Node000027"><a xlink:href="../../db/df7/class_c_pixel_view_ab45dceca9e8e9c56a0f464093aca9b53.html#ab45dceca9e8e9c56a0f464093aca9b53" target="_top" xlink:title=" ">
+<g id="a_Node000027"><a xlink:href="../../db/df7/class_c_pixel_view_a72761de85777a149bc2cdc3b0d969374.html#a72761de85777a149bc2cdc3b0d969374" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="121,-78 0,-78 0,-48 121,-48 121,-78"/>
 <text text-anchor="start" x="8" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">CPixelView&lt; CRGB &gt;</text>
 <text text-anchor="middle" x="60.5" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">::operator|=</text>
@@ -561,7 +561,7 @@ var sectionId = 'dynsection-0';
 <!-- Node28 -->
 <g id="Node000028" class="node">
 <title>Node28</title>
-<g id="a_Node000028"><a xlink:href="../../db/df7/class_c_pixel_view_ac9bc563c153ee6968df3d50648295a07.html#ac9bc563c153ee6968df3d50648295a07" target="_top" xlink:title=" ">
+<g id="a_Node000028"><a xlink:href="../../db/df7/class_c_pixel_view_a591bdad3c85f583d48279a1e962960ec.html#a591bdad3c85f583d48279a1e962960ec" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="121,-30 0,-30 0,0 121,0 121,-30"/>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">CPixelView&lt; CRGB &gt;</text>
 <text text-anchor="middle" x="60.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::subFromRGB</text>

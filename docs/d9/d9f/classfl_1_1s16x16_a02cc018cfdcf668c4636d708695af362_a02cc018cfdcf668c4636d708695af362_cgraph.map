@@ -1,0 +1,15 @@
+<map id="fl::s16x16::log2_fp" name="fl::s16x16::log2_fp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,56,147,81"/>
+<area shape="rect" id="Node000002" href="$d9/d9f/classfl_1_1s16x16_a5e82494e286448e4cad2de1b302b9168.html#a5e82494e286448e4cad2de1b302b9168" title=" " alt="" coords="412,5,552,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="129,53,194,41,300,28,398,20,398,25,301,33,195,46,130,59"/>
+<area shape="rect" id="Node000003" href="$d9/d9f/classfl_1_1s16x16_a9c7a5411b60510e5a513c5d1e305720d.html#a9c7a5411b60510e5a513c5d1e305720d" title=" " alt="" coords="200,56,355,81"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="147,66,186,66,186,71,147,71"/>
+<area shape="rect" id="Node000005" href="$d9/d9f/classfl_1_1s16x16_a0a6889550ee9d9b1bde0c3f6014f5bfa.html#a0a6889550ee9d9b1bde0c3f6014f5bfa" title=" " alt="" coords="195,120,360,145"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="118,79,224,113,223,118,116,84"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="329,53,416,31,418,37,330,58"/>
+<area shape="rect" id="Node000004" href="$d9/d9f/classfl_1_1s16x16_aa048b427f50f28993a67941e0f303a65.html#aa048b427f50f28993a67941e0f303a65" title=" " alt="" coords="423,55,541,80"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="355,65,409,65,409,70,355,71"/>
+<area shape="rect" id="Node000006" href="$d9/d9f/classfl_1_1s16x16_ad8b7552050e27d2811ca8d24951f51a3.html#ad8b7552050e27d2811ca8d24951f51a3" title=" " alt="" coords="408,129,556,169"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="360,136,394,139,394,144,360,142"/>
+<area shape="poly" id="edge7_Node000006_Node000006" title=" " alt="" coords="444,129,442,119,448,110,461,104,482,102,506,105,519,112,516,117,504,110,482,107,463,109,451,114,447,120,449,128"/>
+</map>

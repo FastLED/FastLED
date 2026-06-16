@@ -1,0 +1,14 @@
+digraph "fl::PerlinParticlePunch::tryAllocateAmbient"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::PerlinParticlePunch\l::tryAllocateAmbient",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::PerlinParticlePunch\l::spawnAmbient",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d58/classfl_1_1_perlin_particle_punch_aea526214d52709558f15f03d90c2bb5a.html#aea526214d52709558f15f03d90c2bb5a",tooltip="Spawn an ambient particle at a random position."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::PerlinParticlePunch\l::~PerlinParticlePunch",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d58/classfl_1_1_perlin_particle_punch_aae158d36e0b12c32e8a9dacfb065aaaa.html#aae158d36e0b12c32e8a9dacfb065aaaa",tooltip=" "];
+}

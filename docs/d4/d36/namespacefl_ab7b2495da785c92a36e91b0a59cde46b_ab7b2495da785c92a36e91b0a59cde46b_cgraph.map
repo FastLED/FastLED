@@ -1,0 +1,9 @@
+<map id="fl::analogWrite" name="fl::analogWrite">
+<area shape="rect" id="Node000001" title="Write analog value to pin (PWM)" alt="" coords="5,5,123,31"/>
+<area shape="rect" id="Node000002" href="$d9/d33/namespacefl_1_1pwm__state_aee72e1cd03d83550f0f59cd5a4356e07.html#aee72e1cd03d83550f0f59cd5a4356e07" title=" " alt="" coords="171,5,349,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="123,15,157,15,157,21,123,21"/>
+<area shape="rect" id="Node000003" href="$d9/d33/namespacefl_1_1pwm__state_a6df56c095fbd351947b973e0e1d5289a.html#a6df56c095fbd351947b973e0e1d5289a" title=" " alt="" coords="397,5,548,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="350,15,383,15,383,21,350,21"/>
+<area shape="rect" id="Node000004" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="596,5,759,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="548,15,582,15,582,21,548,21"/>
+</map>

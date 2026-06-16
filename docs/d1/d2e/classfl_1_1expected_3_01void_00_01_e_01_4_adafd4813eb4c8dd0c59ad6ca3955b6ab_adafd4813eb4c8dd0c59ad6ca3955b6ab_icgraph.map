@@ -1,0 +1,15 @@
+<map id="fl::expected&lt; void, E &gt;::expected" name="fl::expected&lt; void, E &gt;::expected">
+<area shape="rect" id="Node000001" title="Default constructor (creates error state)" alt="" coords="199,165,344,205"/>
+<area shape="rect" id="Node000002" href="$d1/d2e/classfl_1_1expected_3_01void_00_01_e_01_4_afd86c0c2535f44b9992f12bf5af73702.html#afd86c0c2535f44b9992f12bf5af73702" title="Copy constructor (needed for some use cases like Impl initialization)" alt="" coords="5,5,151,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="245,156,203,107,149,59,130,48,132,43,152,55,207,104,249,153"/>
+<area shape="rect" id="Node000003" href="$d1/d2e/classfl_1_1expected_3_01void_00_01_e_01_4_add0b1206ec13acb7024ddab5dd617093.html#add0b1206ec13acb7024ddab5dd617093" title="Move constructor (defaulted &#45; variant handles it)" alt="" coords="5,69,151,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="220,161,149,124,124,112,126,107,152,119,223,156"/>
+<area shape="rect" id="Node000004" href="$d1/d2e/classfl_1_1expected_3_01void_00_01_e_01_4_a77779d07d695741e726b036831f88a2b.html#a77779d07d695741e726b036831f88a2b" title=" " alt="" coords="5,133,151,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="185,174,151,168,152,163,186,168"/>
+<area shape="rect" id="Node000005" href="$d1/d2e/classfl_1_1expected_3_01void_00_01_e_01_4_a9ba99a5b88762b3e1981c745387f1ae5.html#a9ba99a5b88762b3e1981c745387f1ae5" title="Copy assignment." alt="" coords="5,197,151,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="186,202,152,208,151,203,185,197"/>
+<area shape="rect" id="Node000006" href="$d1/d2e/classfl_1_1expected_3_01void_00_01_e_01_4_ab8087c1885b5ef1a03047ae4de3b2ee4.html#ab8087c1885b5ef1a03047ae4de3b2ee4" title="Move assignment (defaulted &#45; variant handles it)" alt="" coords="5,261,151,301"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="223,215,152,252,126,264,124,259,149,247,220,210"/>
+<area shape="rect" id="Node000007" href="$d1/d2e/classfl_1_1expected_3_01void_00_01_e_01_4_a5f88637be870a9a2f76ec0c5696946b9.html#a5f88637be870a9a2f76ec0c5696946b9" title=" " alt="" coords="5,325,151,365"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="249,218,207,267,152,315,132,327,130,323,149,311,203,263,245,215"/>
+</map>

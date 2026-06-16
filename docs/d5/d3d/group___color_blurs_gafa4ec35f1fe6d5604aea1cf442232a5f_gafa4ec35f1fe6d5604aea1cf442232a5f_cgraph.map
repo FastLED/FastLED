@@ -1,0 +1,9 @@
+<map id="fl::gfx::blurRows" name="fl::gfx::blurRows">
+<area shape="rect" id="Node000001" title="Legacy raw&#45;pointer version of blurRows." alt="" coords="5,5,132,31"/>
+<area shape="rect" id="Node000002" href="$d5/d3d/group___color_blurs_ga83bb8ebe9bd3ab749bcb42aaa0fc7df5.html#ga83bb8ebe9bd3ab749bcb42aaa0fc7df5" title="Perform a blur1d() on every row of a rectangular matrix (span version)." alt="" coords="180,5,307,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="132,15,167,15,167,21,132,21"/>
+<area shape="rect" id="Node000003" href="$da/dd6/structfl_1_1_c_r_g_b_aa272170bea8120f101f27ebd2c323b55.html#aa272170bea8120f101f27ebd2c323b55" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="355,5,488,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="307,15,341,15,341,21,307,21"/>
+<area shape="rect" id="Node000004" href="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" title="Default constructor." alt="" coords="536,5,656,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="488,15,522,15,522,21,488,21"/>
+</map>

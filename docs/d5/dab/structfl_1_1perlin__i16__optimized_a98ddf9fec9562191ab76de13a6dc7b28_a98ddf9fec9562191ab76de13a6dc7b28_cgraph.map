@@ -1,0 +1,20 @@
+<map id="fl::perlin_i16_optimized::pnoise2d" name="fl::perlin_i16_optimized::pnoise2d">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,74,180,114"/>
+<area shape="rect" id="Node000002" href="$d9/d9f/classfl_1_1s16x16_a9c7a5411b60510e5a513c5d1e305720d.html#a9c7a5411b60510e5a513c5d1e305720d" title=" " alt="" coords="238,31,393,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,72,245,56,246,62,181,77"/>
+<area shape="rect" id="Node000004" href="$d9/d9f/classfl_1_1s16x16_aa048b427f50f28993a67941e0f303a65.html#aa048b427f50f28993a67941e0f303a65" title=" " alt="" coords="479,55,597,80"/>
+<area shape="poly" id="edge9_Node000001_Node000004" title=" " alt="" coords="180,86,465,69,465,74,181,91"/>
+<area shape="rect" id="Node000005" href="$d5/dab/structfl_1_1perlin__i16__optimized_a623d78b9dc575fcdf48de106dc38c502.html#a623d78b9dc575fcdf48de106dc38c502" title=" " alt="" coords="228,169,403,209"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="142,112,256,161,254,166,140,117"/>
+<area shape="rect" id="Node000003" href="$d9/d9f/classfl_1_1s16x16_a5e82494e286448e4cad2de1b302b9168.html#a5e82494e286448e4cad2de1b302b9168" title=" " alt="" coords="468,5,608,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="393,32,454,25,454,30,393,37"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="393,49,466,57,466,62,393,54"/>
+<area shape="rect" id="Node000006" href="$d5/dab/structfl_1_1perlin__i16__optimized_ae8ec49d465d7ac5bbc9a30a2cc6e9739.html#ae8ec49d465d7ac5bbc9a30a2cc6e9739" title=" " alt="" coords="451,105,625,145"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="385,166,454,146,455,151,386,171"/>
+<area shape="rect" id="Node000007" href="$d5/dab/structfl_1_1perlin__i16__optimized_a1546e36752b31ead2c70f610851e47ae.html#a1546e36752b31ead2c70f610851e47ae" title=" " alt="" coords="451,169,625,209"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="403,186,437,186,437,191,403,191"/>
+<area shape="rect" id="Node000008" href="$d5/dab/structfl_1_1perlin__i16__optimized_a4e027e60f12fa90ba577c1486fbf7a46.html#a4e027e60f12fa90ba577c1486fbf7a46" title=" " alt="" coords="451,233,625,273"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="386,206,455,226,454,231,385,211"/>
+<area shape="rect" id="Node000009" href="$d5/dab/structfl_1_1perlin__i16__optimized_ac42e9f0114a4bd7e226cb757dd9bc7f1.html#ac42e9f0114a4bd7e226cb757dd9bc7f1" title=" " alt="" coords="451,297,625,337"/>
+<area shape="poly" id="edge8_Node000005_Node000009" title=" " alt="" coords="342,207,391,244,452,282,465,289,463,294,449,287,388,249,339,211"/>
+</map>

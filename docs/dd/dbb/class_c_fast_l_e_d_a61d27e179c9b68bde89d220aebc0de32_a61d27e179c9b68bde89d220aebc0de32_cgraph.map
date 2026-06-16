@@ -1,0 +1,6 @@
+<map id="CFastLED::countFPS" name="CFastLED::countFPS">
+<area shape="rect" id="Node000001" title="For debugging, this will keep track of time between calls to countFPS()." alt="" coords="5,29,156,55"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="204,29,279,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="156,39,190,39,190,45,156,45"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="214,31,209,21,212,11,223,5,241,3,263,6,273,15,269,19,261,11,241,8,225,10,216,15,214,20,219,28"/>
+</map>

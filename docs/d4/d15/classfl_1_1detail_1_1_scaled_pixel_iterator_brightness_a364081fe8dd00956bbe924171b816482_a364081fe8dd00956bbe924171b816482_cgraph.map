@@ -1,0 +1,7 @@
+<map id="fl::detail::ScaledPixelIteratorBrightness::operator==" name="fl::detail::ScaledPixelIteratorBrightness::operator==">
+<area shape="rect" id="Node000001" title="Equality comparison." alt="" coords="5,5,211,45"/>
+<area shape="rect" id="Node000002" href="$d4/d15/classfl_1_1detail_1_1_scaled_pixel_iterator_brightness_a7be5e77c9985c7594817dedcda2c74d3.html#a7be5e77c9985c7594817dedcda2c74d3" title="Construct from PixelIterator." alt="" coords="259,5,549,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="211,23,245,23,245,28,211,28"/>
+<area shape="rect" id="Node000003" href="$dd/d80/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b_a8cb2a98fcda78aab43f3a5b74b0ae6b5.html#a8cb2a98fcda78aab43f3a5b74b0ae6b5" title="Advance to next pixel (or mark as end)" alt="" coords="597,5,803,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="549,23,584,23,584,28,549,28"/>
+</map>

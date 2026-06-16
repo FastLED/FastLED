@@ -1,0 +1,15 @@
+<map id="hsv2rgb_dispatch" name="hsv2rgb_dispatch">
+<area shape="rect" id="Node000001" title="HSV conversion function selection based on compile&#45;time defines This allows users to configure which ..." alt="" coords="5,103,141,128"/>
+<area shape="rect" id="Node000002" href="$dd/dc7/group___h_s_v2_r_g_b_gaeb2c441e92abfe7bcc495946729a8d2a.html#gaeb2c441e92abfe7bcc495946729a8d2a" title="Converts an HSV value to RGB using the algorithm from here: https://en.wikipedia.org/wiki/HSL_and_HSV..." alt="" coords="189,29,352,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,100,188,64,210,56,212,61,190,68,103,105"/>
+<area shape="rect" id="Node000005" href="$dd/dc7/group___h_s_v2_r_g_b_gab6a6fedf5fcb4f47b95eed3aee43c613.html#gab6a6fedf5fcb4f47b95eed3aee43c613" title=" " alt="" coords="204,103,337,128"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="142,113,190,113,190,118,142,118"/>
+<area shape="rect" id="Node000006" href="$dd/dc7/group___h_s_v2_r_g_b_ga0b6cf94608b55e342b9f5c6335289ba5.html#ga0b6cf94608b55e342b9f5c6335289ba5" title="Inline version of hsv2rgb_spectrum which returns a CRGB object." alt="" coords="199,176,342,201"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="110,126,223,168,221,173,108,131"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="400,5,467,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="352,27,386,22,387,27,353,33"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="402,55,465,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="353,52,389,58,388,63,352,57"/>
+<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="243,104,238,94,241,85,252,78,271,76,293,79,303,88,299,92,291,84,271,81,254,83,245,88,243,94,248,101"/>
+<area shape="poly" id="edge7_Node000006_Node000006" title=" " alt="" coords="243,177,238,168,241,158,252,152,271,149,293,153,303,161,299,165,291,158,271,155,254,157,245,161,243,167,248,174"/>
+</map>

@@ -1,0 +1,21 @@
+<map id="fl::validation::testRxChannel" name="fl::validation::testRxChannel">
+<area shape="rect" id="Node000001" title="Test RX channel with manual GPIO toggle pattern." alt="" coords="5,81,212,107"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aea219cb806e210fa698fe53624fbc7ac.html#aea219cb806e210fa698fe53624fbc7ac" title="Delay for a given number of microseconds." alt="" coords="260,5,423,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,79,287,33,289,38,149,84"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ab91b418b90c32e475842ad7ce3785afb.html#ab91b418b90c32e475842ad7ce3785afb" title="Write digital value to pin." alt="" coords="801,56,916,81"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="212,88,788,68,788,74,212,93"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aa7a47cf722a2586453e75f6e70284dad.html#aa7a47cf722a2586453e75f6e70284dad" title="Set pin mode (input, output, pull&#45;up, pull&#45;down)" alt="" coords="294,107,389,132"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="213,103,280,110,280,115,212,108"/>
+<area shape="rect" id="Node000012" href="$d3/d73/classfl_1_1_fixed_vector_af86cd6955983355051129798610c8def.html#af86cd6955983355051129798610c8def" title=" " alt="" coords="261,156,421,181"/>
+<area shape="poly" id="edge10_Node000001_Node000012" title=" " alt="" coords="149,104,261,141,288,149,286,154,259,146,147,109"/>
+<area shape="rect" id="Node000005" href="$d9/d33/namespacefl_1_1pwm__state_aee72e1cd03d83550f0f59cd5a4356e07.html#aee72e1cd03d83550f0f59cd5a4356e07" title=" " alt="" coords="491,156,669,181"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="389,126,505,151,504,156,388,132"/>
+<area shape="rect" id="Node000008" href="$d9/d33/namespacefl_1_1pwm__state_a567fc66f5ca74ddc7b7253ab96d5fe04.html#a567fc66f5ca74ddc7b7253ab96d5fe04" title=" " alt="" coords="471,107,689,132"/>
+<area shape="poly" id="edge6_Node000004_Node000008" title=" " alt="" coords="389,117,457,117,457,122,389,122"/>
+<area shape="rect" id="Node000006" href="$d9/d33/namespacefl_1_1pwm__state_a6df56c095fbd351947b973e0e1d5289a.html#a6df56c095fbd351947b973e0e1d5289a" title=" " alt="" coords="1028,131,1179,156"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="670,162,1014,145,1014,150,670,167"/>
+<area shape="poly" id="edge7_Node000008_Node000003" title=" " alt="" coords="650,104,787,79,788,84,651,109"/>
+<area shape="rect" id="Node000009" href="$d9/d33/namespacefl_1_1pwm__state_a1e6e308bd81ec9ab9f1bd0f62bbba1b2.html#a1e6e308bd81ec9ab9f1bd0f62bbba1b2" title=" " alt="" coords="737,105,980,131"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="690,116,724,116,724,121,690,121"/>
+<area shape="poly" id="edge9_Node000009_Node000006" title=" " alt="" coords="981,128,1015,132,1014,137,980,133"/>
+</map>

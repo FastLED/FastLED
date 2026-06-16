@@ -1,0 +1,10 @@
+<map id="fl::test::XMLReporter::testCaseEnd" name="fl::test::XMLReporter::testCaseEnd">
+<area shape="rect" id="Node000001" title="Called when a test case ends." alt="" coords="5,87,160,127"/>
+<area shape="rect" id="Node000002" href="$d5/d0f/classfl_1_1test_1_1_x_m_l_reporter_ace8e70cedd64dff339df6e2fe9334b0d.html#ace8e70cedd64dff339df6e2fe9334b0d" title=" " alt="" coords="208,5,363,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="132,84,221,48,223,53,134,89"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="248,94,323,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="160,104,234,104,234,109,160,109"/>
+<area shape="rect" id="Node000004" href="$d1/d27/classfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e.html#a08170cac6eba7241f099ae16730f6f8e" title=" " alt="" coords="227,143,343,169"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="161,123,220,137,218,143,160,128"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="252,96,245,86,249,76,262,70,285,67,314,71,325,80,321,84,311,76,285,73,264,75,252,79,250,85,256,92"/>
+</map>

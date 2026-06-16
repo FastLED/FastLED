@@ -123,42 +123,70 @@ $(function(){initNavTree('d4/d3d/classfl_1_1_time_warp_a65e443d7590e00bd4e28de66
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d56/fx_2time_8cpp_source.html#l00063">63</a> of file <a class="el" href="../../d5/d56/fx_2time_8cpp_source.html">time.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   63</span>                                       {</div>
-<div class="line"><span class="lineno">   64</span>    fl::u32 elapsedRealTime = timeNow - <a class="code hl_variable" href="../../d4/d3d/classfl_1_1_time_warp_a97c0c0b140c8f9ae68ec587e2afc0944.html#a97c0c0b140c8f9ae68ec587e2afc0944">mLastRealTime</a>;</div>
-<div class="line"><span class="lineno">   65</span>    <a class="code hl_variable" href="../../d4/d3d/classfl_1_1_time_warp_a97c0c0b140c8f9ae68ec587e2afc0944.html#a97c0c0b140c8f9ae68ec587e2afc0944">mLastRealTime</a> = timeNow;</div>
-<div class="line"><span class="lineno">   66</span>    int32_t diff = <span class="keyword">static_cast&lt;</span>int32_t<span class="keyword">&gt;</span>(elapsedRealTime * <a class="code hl_variable" href="../../d4/d3d/classfl_1_1_time_warp_a6aa66f8b2c25f8a29b5223d605f66bfa.html#a6aa66f8b2c25f8a29b5223d605f66bfa">mTimeScale</a>);</div>
-<div class="line"><span class="lineno">   67</span>    <span class="keywordflow">if</span> (diff == 0) {</div>
-<div class="line"><span class="lineno">   68</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">   69</span>    }</div>
-<div class="line"><span class="lineno">   70</span>    <span class="keywordflow">if</span> (diff &gt;= 0) {</div>
-<div class="line"><span class="lineno">   71</span>        <a class="code hl_variable" href="../../d4/d3d/classfl_1_1_time_warp_aea4f38061b01854adc4b881c27815f32.html#aea4f38061b01854adc4b881c27815f32">mRelativeTime</a> += diff;</div>
-<div class="line"><span class="lineno">   72</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">   73</span>    }</div>
-<div class="line"><span class="lineno">   74</span> </div>
-<div class="line"><span class="lineno">   75</span>    <span class="comment">// diff &lt; 0</span></div>
-<div class="line"><span class="lineno">   76</span>    fl::u32 abs_diff = -diff;</div>
-<div class="line"><span class="lineno">   77</span>    <span class="keywordflow">if</span> (abs_diff &gt; <a class="code hl_variable" href="../../d4/d3d/classfl_1_1_time_warp_aea4f38061b01854adc4b881c27815f32.html#aea4f38061b01854adc4b881c27815f32">mRelativeTime</a>) {</div>
-<div class="line"><span class="lineno">   78</span>        <span class="comment">// Protection against rollover.</span></div>
-<div class="line"><span class="lineno">   79</span>        <a class="code hl_variable" href="../../d4/d3d/classfl_1_1_time_warp_aea4f38061b01854adc4b881c27815f32.html#aea4f38061b01854adc4b881c27815f32">mRelativeTime</a> = 0;</div>
-<div class="line"><span class="lineno">   80</span>        <a class="code hl_variable" href="../../d4/d3d/classfl_1_1_time_warp_a97c0c0b140c8f9ae68ec587e2afc0944.html#a97c0c0b140c8f9ae68ec587e2afc0944">mLastRealTime</a> = timeNow;</div>
-<div class="line"><span class="lineno">   81</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">   82</span>    }</div>
-<div class="line"><span class="lineno">   83</span>    <a class="code hl_variable" href="../../d4/d3d/classfl_1_1_time_warp_a97c0c0b140c8f9ae68ec587e2afc0944.html#a97c0c0b140c8f9ae68ec587e2afc0944">mLastRealTime</a> = timeNow;</div>
-<div class="line"><span class="lineno">   84</span>    <a class="code hl_variable" href="../../d4/d3d/classfl_1_1_time_warp_aea4f38061b01854adc4b881c27815f32.html#aea4f38061b01854adc4b881c27815f32">mRelativeTime</a> -= abs_diff;</div>
-<div class="line"><span class="lineno">   85</span>}</div>
-<div class="ttc" id="aclassfl_1_1_time_warp_a6aa66f8b2c25f8a29b5223d605f66bfa_html_a6aa66f8b2c25f8a29b5223d605f66bfa"><div class="ttname"><a href="../../d4/d3d/classfl_1_1_time_warp_a6aa66f8b2c25f8a29b5223d605f66bfa.html#a6aa66f8b2c25f8a29b5223d605f66bfa">fl::TimeWarp::mTimeScale</a></div><div class="ttdeci">float mTimeScale</div><div class="ttdef"><b>Definition</b> <a href="../../da/da2/fx_2time_8h_source.html#l00050">time.h:50</a></div></div>
-<div class="ttc" id="aclassfl_1_1_time_warp_a97c0c0b140c8f9ae68ec587e2afc0944_html_a97c0c0b140c8f9ae68ec587e2afc0944"><div class="ttname"><a href="../../d4/d3d/classfl_1_1_time_warp_a97c0c0b140c8f9ae68ec587e2afc0944.html#a97c0c0b140c8f9ae68ec587e2afc0944">fl::TimeWarp::mLastRealTime</a></div><div class="ttdeci">fl::u32 mLastRealTime</div><div class="ttdef"><b>Definition</b> <a href="../../da/da2/fx_2time_8h_source.html#l00047">time.h:47</a></div></div>
-<div class="ttc" id="aclassfl_1_1_time_warp_aea4f38061b01854adc4b881c27815f32_html_aea4f38061b01854adc4b881c27815f32"><div class="ttname"><a href="../../d4/d3d/classfl_1_1_time_warp_aea4f38061b01854adc4b881c27815f32.html#aea4f38061b01854adc4b881c27815f32">fl::TimeWarp::mRelativeTime</a></div><div class="ttdeci">fl::u32 mRelativeTime</div><div class="ttdef"><b>Definition</b> <a href="../../da/da2/fx_2time_8h_source.html#l00049">time.h:49</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d9/dea/time_8cpp_8hpp_source.html#l00052">52</a> of file <a class="el" href="../../d9/dea/time_8cpp_8hpp_source.html">time.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   52</span>                                       {</div>
+<div class="line"><span class="lineno">   53</span>    <span class="comment">// Handle time going backwards - reset if this happens</span></div>
+<div class="line"><span class="lineno">   54</span>    <span class="keywordflow">if</span> (timeNow &lt; <a class="code hl_variable" href="../../d4/d3d/classfl_1_1_time_warp_a97c0c0b140c8f9ae68ec587e2afc0944.html#a97c0c0b140c8f9ae68ec587e2afc0944">mLastRealTime</a>) {</div>
+<div class="line"><span class="lineno">   55</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;TimeWarp::applyExact: time went backwards, resetting&quot;</span>);</div>
+<div class="line"><span class="lineno">   56</span>        <a class="code hl_function" href="../../d4/d3d/classfl_1_1_time_warp_a69adad573c748178c954836359e0d718.html#a69adad573c748178c954836359e0d718">reset</a>(timeNow);</div>
+<div class="line"><span class="lineno">   57</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">   58</span>    }</div>
+<div class="line"><span class="lineno">   59</span> </div>
+<div class="line"><span class="lineno">   60</span>    fl::u32 elapsedRealTime = timeNow - <a class="code hl_variable" href="../../d4/d3d/classfl_1_1_time_warp_a97c0c0b140c8f9ae68ec587e2afc0944.html#a97c0c0b140c8f9ae68ec587e2afc0944">mLastRealTime</a>;</div>
+<div class="line"><span class="lineno">   61</span>    <a class="code hl_variable" href="../../d4/d3d/classfl_1_1_time_warp_a97c0c0b140c8f9ae68ec587e2afc0944.html#a97c0c0b140c8f9ae68ec587e2afc0944">mLastRealTime</a> = timeNow;</div>
+<div class="line"><span class="lineno">   62</span> </div>
+<div class="line"><span class="lineno">   63</span>    <span class="comment">// Calculate scaled time difference with bounds checking</span></div>
+<div class="line"><span class="lineno">   64</span>    <span class="keywordtype">float</span> scaledTime = elapsedRealTime * <a class="code hl_variable" href="../../d4/d3d/classfl_1_1_time_warp_a6aa66f8b2c25f8a29b5223d605f66bfa.html#a6aa66f8b2c25f8a29b5223d605f66bfa">mTimeScale</a>;</div>
+<div class="line"><span class="lineno">   65</span> </div>
+<div class="line"><span class="lineno">   66</span>    <span class="comment">// Check for overflow/underflow before casting to int32_t</span></div>
+<div class="line"><span class="lineno">   67</span>    <span class="comment">// int32_t range is [-2147483648, 2147483647]</span></div>
+<div class="line"><span class="lineno">   68</span>    <span class="keywordflow">if</span> (scaledTime &gt; 2147483647.0f) {</div>
+<div class="line"><span class="lineno">   69</span>        scaledTime = 2147483647.0f;</div>
+<div class="line"><span class="lineno">   70</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (scaledTime &lt; -2147483648.0f) {</div>
+<div class="line"><span class="lineno">   71</span>        scaledTime = -2147483648.0f;</div>
+<div class="line"><span class="lineno">   72</span>    }</div>
+<div class="line"><span class="lineno">   73</span> </div>
+<div class="line"><span class="lineno">   74</span>    i32 diff = <span class="keyword">static_cast&lt;</span>i32<span class="keyword">&gt;</span>(scaledTime);</div>
+<div class="line"><span class="lineno">   75</span>    <span class="keywordflow">if</span> (diff == 0) {</div>
+<div class="line"><span class="lineno">   76</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">   77</span>    }</div>
+<div class="line"><span class="lineno">   78</span>    <span class="keywordflow">if</span> (diff &gt;= 0) {</div>
+<div class="line"><span class="lineno">   79</span>        <a class="code hl_variable" href="../../d4/d3d/classfl_1_1_time_warp_aea4f38061b01854adc4b881c27815f32.html#aea4f38061b01854adc4b881c27815f32">mRelativeTime</a> += diff;</div>
+<div class="line"><span class="lineno">   80</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">   81</span>    }</div>
+<div class="line"><span class="lineno">   82</span> </div>
+<div class="line"><span class="lineno">   83</span>    <span class="comment">// diff &lt; 0</span></div>
+<div class="line"><span class="lineno">   84</span>    fl::u32 abs_diff = -diff;</div>
+<div class="line"><span class="lineno">   85</span>    <span class="keywordflow">if</span> (abs_diff &gt; <a class="code hl_variable" href="../../d4/d3d/classfl_1_1_time_warp_aea4f38061b01854adc4b881c27815f32.html#aea4f38061b01854adc4b881c27815f32">mRelativeTime</a>) {</div>
+<div class="line"><span class="lineno">   86</span>        <span class="comment">// Protection against rollover.</span></div>
+<div class="line"><span class="lineno">   87</span>        <a class="code hl_variable" href="../../d4/d3d/classfl_1_1_time_warp_aea4f38061b01854adc4b881c27815f32.html#aea4f38061b01854adc4b881c27815f32">mRelativeTime</a> = 0;</div>
+<div class="line"><span class="lineno">   88</span>        <a class="code hl_variable" href="../../d4/d3d/classfl_1_1_time_warp_a97c0c0b140c8f9ae68ec587e2afc0944.html#a97c0c0b140c8f9ae68ec587e2afc0944">mLastRealTime</a> = timeNow;</div>
+<div class="line"><span class="lineno">   89</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">   90</span>    }</div>
+<div class="line"><span class="lineno">   91</span>    <a class="code hl_variable" href="../../d4/d3d/classfl_1_1_time_warp_a97c0c0b140c8f9ae68ec587e2afc0944.html#a97c0c0b140c8f9ae68ec587e2afc0944">mLastRealTime</a> = timeNow;</div>
+<div class="line"><span class="lineno">   92</span>    <a class="code hl_variable" href="../../d4/d3d/classfl_1_1_time_warp_aea4f38061b01854adc4b881c27815f32.html#aea4f38061b01854adc4b881c27815f32">mRelativeTime</a> -= abs_diff;</div>
+<div class="line"><span class="lineno">   93</span>}</div>
+<div class="ttc" id="aclassfl_1_1_time_warp_a69adad573c748178c954836359e0d718_html_a69adad573c748178c954836359e0d718"><div class="ttname"><a href="../../d4/d3d/classfl_1_1_time_warp_a69adad573c748178c954836359e0d718.html#a69adad573c748178c954836359e0d718">fl::TimeWarp::reset</a></div><div class="ttdeci">void reset(fl::u32 realTimeNow) override</div><div class="ttdef"><b>Definition</b> <a href="../../d9/dea/time_8cpp_8hpp_source.html#l00046">time.cpp.hpp:46</a></div></div>
+<div class="ttc" id="aclassfl_1_1_time_warp_a6aa66f8b2c25f8a29b5223d605f66bfa_html_a6aa66f8b2c25f8a29b5223d605f66bfa"><div class="ttname"><a href="../../d4/d3d/classfl_1_1_time_warp_a6aa66f8b2c25f8a29b5223d605f66bfa.html#a6aa66f8b2c25f8a29b5223d605f66bfa">fl::TimeWarp::mTimeScale</a></div><div class="ttdeci">float mTimeScale</div><div class="ttdef"><b>Definition</b> <a href="../../de/df7/time_8h_source.html#l00050">time.h:50</a></div></div>
+<div class="ttc" id="aclassfl_1_1_time_warp_a97c0c0b140c8f9ae68ec587e2afc0944_html_a97c0c0b140c8f9ae68ec587e2afc0944"><div class="ttname"><a href="../../d4/d3d/classfl_1_1_time_warp_a97c0c0b140c8f9ae68ec587e2afc0944.html#a97c0c0b140c8f9ae68ec587e2afc0944">fl::TimeWarp::mLastRealTime</a></div><div class="ttdeci">fl::u32 mLastRealTime</div><div class="ttdef"><b>Definition</b> <a href="../../de/df7/time_8h_source.html#l00047">time.h:47</a></div></div>
+<div class="ttc" id="aclassfl_1_1_time_warp_aea4f38061b01854adc4b881c27815f32_html_aea4f38061b01854adc4b881c27815f32"><div class="ttname"><a href="../../d4/d3d/classfl_1_1_time_warp_aea4f38061b01854adc4b881c27815f32.html#aea4f38061b01854adc4b881c27815f32">fl::TimeWarp::mRelativeTime</a></div><div class="ttdeci">fl::u32 mRelativeTime</div><div class="ttdef"><b>Definition</b> <a href="../../de/df7/time_8h_source.html#l00049">time.h:49</a></div></div>
+<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../da/da2/fx_2time_8h_source.html#l00047">mLastRealTime</a>, <a class="el" href="../../da/da2/fx_2time_8h_source.html#l00049">mRelativeTime</a>, and <a class="el" href="../../da/da2/fx_2time_8h_source.html#l00050">mTimeScale</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00276">FL_WARN</a>, <a class="el" href="../../de/df7/time_8h_source.html#l00047">mLastRealTime</a>, <a class="el" href="../../de/df7/time_8h_source.html#l00049">mRelativeTime</a>, <a class="el" href="../../de/df7/time_8h_source.html#l00050">mTimeScale</a>, and <a class="el" href="../../d9/dea/time_8cpp_8hpp_source.html#l00046">reset()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d5/d56/fx_2time_8cpp_source.html#l00040">update()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/dea/time_8cpp_8hpp_source.html#l00039">update()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d4/d3d/classfl_1_1_time_warp_a65e443d7590e00bd4e28de66456e25df_a65e443d7590e00bd4e28de66456e25df_cgraph.svg" width="388" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+<div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
+<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-1-content" class="dyncontent" style="display:none;">
 <div class="center"><iframe scrolling="no" frameborder="0" src="../../d4/d3d/classfl_1_1_time_warp_a65e443d7590e00bd4e28de66456e25df_a65e443d7590e00bd4e28de66456e25df_icgraph.svg" width="400" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
@@ -171,7 +199,7 @@ $(function(){initNavTree('d4/d3d/classfl_1_1_time_warp_a65e443d7590e00bd4e28de66
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d4/d3d/classfl_1_1_time_warp.html">TimeWarp</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

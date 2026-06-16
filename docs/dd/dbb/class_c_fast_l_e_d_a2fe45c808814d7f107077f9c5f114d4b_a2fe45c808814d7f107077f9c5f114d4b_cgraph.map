@@ -1,0 +1,10 @@
+<map id="CFastLED::addRx" name="CFastLED::addRx">
+<area shape="rect" id="Node000001" title="Add an RX channel with runtime configuration." alt="" coords="5,55,136,80"/>
+<area shape="rect" id="Node000002" href="$d3/d2b/classfl_1_1_rx_channel_ac17c63451fa2f0f5fa51808199804c1f.html#ac17c63451fa2f0f5fa51808199804c1f" title=" " alt="" coords="184,55,341,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="136,65,170,65,170,70,136,70"/>
+<area shape="rect" id="Node000003" href="$d3/d2b/classfl_1_1_rx_channel_abc90bc5973308d672d3577eba69013f1.html#abc90bc5973308d672d3577eba69013f1" title=" " alt="" coords="389,29,544,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="342,55,375,51,376,56,342,60"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="404,79,529,104"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="342,74,391,80,390,85,342,79"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="433,31,426,21,430,11,444,5,467,3,495,6,506,16,503,20,493,11,467,8,445,10,434,15,431,20,438,28"/>
+</map>

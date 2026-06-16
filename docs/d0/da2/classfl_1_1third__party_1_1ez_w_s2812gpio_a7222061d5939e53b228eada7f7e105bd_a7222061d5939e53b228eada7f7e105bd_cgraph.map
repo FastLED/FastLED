@@ -1,0 +1,5 @@
+<map id="fl::third_party::ezWS2812gpio::end_transfer" name="fl::third_party::ezWS2812gpio::end_transfer">
+<area shape="rect" id="Node000001" title="Complete LED data transfer." alt="" coords="5,5,217,45"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aea219cb806e210fa698fe53624fbc7ac.html#aea219cb806e210fa698fe53624fbc7ac" title="Delay for a given number of microseconds." alt="" coords="265,13,428,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="217,23,252,23,252,28,217,28"/>
+</map>

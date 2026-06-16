@@ -1,0 +1,7 @@
+<map id="fl::Rgbww" name="fl::Rgbww">
+<area shape="rect" id="Node000001" title="Per&#45;strip RGBWW configuration." alt="" coords="43,211,128,236"/>
+<area shape="rect" id="Node000002" href="$d7/df0/namespacefl_1_1colorimetric__detail.html#d1/d65/structfl_1_1colorimetric__detail_1_1_rgbcct_profile" title=" " alt="" coords="5,108,165,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,162,88,210,83,210,83,162"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl.html#d5/db5/structfl_1_1_diode_profile" title=" " alt="" coords="27,5,144,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="88,45,88,108,83,108,83,45"/>
+</map>

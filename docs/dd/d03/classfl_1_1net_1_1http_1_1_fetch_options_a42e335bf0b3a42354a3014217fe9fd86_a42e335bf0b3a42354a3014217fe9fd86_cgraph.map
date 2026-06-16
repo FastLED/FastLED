@@ -1,0 +1,7 @@
+<map id="fl::net::http::FetchOptions::method" name="fl::net::http::FetchOptions::method">
+<area shape="rect" id="Node000001" title="Set HTTP method." alt="" coords="5,5,192,45"/>
+<area shape="rect" id="Node000002" href="$dd/d03/classfl_1_1net_1_1http_1_1_fetch_options_a2886f08f0354d8631626717882dd9611.html#a2886f08f0354d8631626717882dd9611" title=" " alt="" coords="240,5,427,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,23,226,23,226,28,192,28"/>
+<area shape="rect" id="Node000003" href="$dd/d03/classfl_1_1net_1_1http_1_1_fetch_options_a30a374b7a5c6aebe22544bc097519f69.html#a30a374b7a5c6aebe22544bc097519f69" title="Get the URL for this request." alt="" coords="475,13,685,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="427,23,461,23,461,28,427,28"/>
+</map>

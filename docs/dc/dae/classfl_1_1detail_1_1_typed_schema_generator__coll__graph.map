@@ -1,0 +1,16 @@
+<map id="fl::detail::TypedSchemaGenerator&lt; Sig &gt;" name="fl::detail::TypedSchemaGenerator&lt; Sig &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,359,244,399"/>
+<area shape="rect" id="Node000002" href="$dd/d51/classfl_1_1detail_1_1_erased_schema_generator.html" title=" " alt="" coords="14,256,193,296"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,309,123,358,118,359,108,310"/>
+<area shape="rect" id="Node000003" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="217,263,379,289"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="268,298,159,361,156,356,265,293"/>
+<area shape="rect" id="Node000004" href="$d4/dad/classfl_1_1vector__basic.html" title="Type&#45;erased vector base class." alt="" coords="219,93,339,119"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="285,132,291,193,299,263,294,263,286,194,279,133"/>
+<area shape="rect" id="Node000007" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="301,168,418,193"/>
+<area shape="poly" id="edge7_Node000007_Node000004" title=" " alt="" coords="304,126,348,166,344,170,300,130"/>
+<area shape="rect" id="Node000005" href="$db/d13/classfl_1_1memory__resource.html" title="Polymorphic memory resource base class (PMR&#45;style)." alt="" coords="108,5,264,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="211,38,268,91,265,95,207,42"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl.html#d8/d72/structfl_1_1vector__element__ops" title="Function pointer table for type&#45;specific element operations." alt="" coords="289,5,459,31"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="355,42,324,71,295,95,292,91,320,67,351,39"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="346,206,308,265,303,262,342,203"/>
+</map>

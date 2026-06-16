@@ -1,0 +1,39 @@
+<map id="fl::third_party::nsgif__parse_image_data" name="fl::third_party::nsgif__parse_image_data">
+<area shape="rect" id="Node000001" title="Parse the image data for a gif frame." alt="" coords="5,199,161,239"/>
+<area shape="rect" id="Node000002" href="$d1/d86/namespacefl_1_1third__party_aa9b6d03b719534d98113784d4ad52b3f.html#aa9b6d03b719534d98113784d4ad52b3f" title=" " alt="" coords="209,199,357,239"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="162,216,195,216,195,221,162,221"/>
+<area shape="rect" id="Node000003" href="$d1/d86/namespacefl_1_1third__party_a16ccbeb5958b1d4b1dadd0d004f4a056.html#a16ccbeb5958b1d4b1dadd0d004f4a056" title="Helper to get the rendering bitmap for a gif." alt="" coords="619,73,767,113"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="288,197,302,158,325,109,359,62,380,41,404,24,448,6,486,4,524,11,571,24,616,41,654,63,652,68,613,46,570,29,523,16,485,9,449,12,407,29,383,45,363,65,330,112,307,160,293,199"/>
+<area shape="rect" id="Node000005" href="$d1/d86/namespacefl_1_1third__party_a2a185b02f4266a2a12a1b0119fb58890.html#a2a185b02f4266a2a12a1b0119fb58890" title="Helper to get the client to determine if the bitmap is opaque." alt="" coords="405,39,571,79"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="297,197,341,144,371,114,404,88,413,83,416,87,407,93,375,118,345,147,301,200"/>
+<area shape="rect" id="Node000006" href="$d1/d86/namespacefl_1_1third__party_aab447ff590246a8b0d1712511683caaf.html#aab447ff590246a8b0d1712511683caaf" title="Helper to tell the client that their bitmap was modified." alt="" coords="414,103,562,143"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="319,196,404,152,419,146,421,150,406,157,321,201"/>
+<area shape="rect" id="Node000007" href="$d1/d86/namespacefl_1_1third__party_af0cddaa3803e7a1d9982a18385565516.html#af0cddaa3803e7a1d9982a18385565516" title="Helper to tell the client that whether the bitmap is opaque." alt="" coords="406,167,570,207"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="357,204,392,199,393,204,358,210"/>
+<area shape="rect" id="Node000008" href="$d1/d86/namespacefl_1_1third__party_a8fc287776053178bc35887d52d498f11.html#a8fc287776053178bc35887d52d498f11" title=" " alt="" coords="414,431,562,471"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="295,238,337,319,368,366,407,409,425,422,422,426,404,413,364,369,332,322,291,240"/>
+<area shape="rect" id="Node000029" href="$d1/d86/namespacefl_1_1third__party_a17e7cbf4c06570cddcfcb56e99bd626a.html#a17e7cbf4c06570cddcfcb56e99bd626a" title=" " alt="" coords="414,231,562,271"/>
+<area shape="poly" id="edge12_Node000002_Node000029" title=" " alt="" coords="358,228,401,234,400,240,357,233"/>
+<area shape="rect" id="Node000032" href="$d1/d86/namespacefl_1_1third__party_a65df5e69dea106fd25cc48b35d7ea4e6.html#a65df5e69dea106fd25cc48b35d7ea4e6" title=" " alt="" coords="414,295,562,335"/>
+<area shape="poly" id="edge16_Node000002_Node000032" title=" " alt="" coords="321,236,406,280,421,287,419,292,404,285,319,241"/>
+<area shape="rect" id="Node000033" href="$d1/d86/namespacefl_1_1third__party_a108ec14c65bed42bcf15eb5f52991303.html#a108ec14c65bed42bcf15eb5f52991303" title="Restore a GIF to the background colour." alt="" coords="414,359,562,399"/>
+<area shape="poly" id="edge18_Node000002_Node000033" title=" " alt="" coords="301,237,345,290,375,319,407,344,416,350,413,354,404,349,371,323,341,294,297,241"/>
+<area shape="rect" id="Node000004" href="$d1/d86/namespacefl_1_1third__party_a0ce24d09df712e402b6983b8b28ab8b4.html#a0ce24d09df712e402b6983b8b28ab8b4" title="Updates the sprite memory size." alt="" coords="815,73,963,113"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="767,91,801,91,801,96,767,96"/>
+<area shape="rect" id="Node000009" href="$d1/d86/namespacefl_1_1third__party_af738855721b8fcadf601cfc4f8c913bf.html#af738855721b8fcadf601cfc4f8c913bf" title=" " alt="" coords="619,495,767,535"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="553,468,616,488,614,493,552,473"/>
+<area shape="rect" id="Node000025" href="$d1/d86/namespacefl_1_1third__party_a18f717ffc188f7182fed1b0f5afba660.html#a18f717ffc188f7182fed1b0f5afba660" title=" " alt="" coords="619,431,767,471"/>
+<area shape="poly" id="edge10_Node000008_Node000025" title=" " alt="" coords="562,448,605,448,605,453,562,453"/>
+<area shape="rect" id="Node000011" href="$d1/d86/namespacefl_1_1third__party_a3d5b039401750156ae4b525a465c6129.html#a3d5b039401750156ae4b525a465c6129" title="Get any frame clip adjustment for the image extent." alt="" coords="822,431,955,471"/>
+<area shape="poly" id="edge9_Node000009_Node000011" title=" " alt="" coords="754,492,813,472,815,477,755,497"/>
+<area shape="poly" id="edge11_Node000025_Node000011" title=" " alt="" coords="767,448,808,448,808,453,767,453"/>
+<area shape="poly" id="edge15_Node000029_Node000003" title=" " alt="" coords="548,228,569,216,624,170,666,123,670,126,627,174,572,221,550,233"/>
+<area shape="rect" id="Node000030" href="$d4/d36/namespacefl_a95dbc431c0b3451c8ffd336fe2793a47.html#a95dbc431c0b3451c8ffd336fe2793a47" title=" " alt="" coords="652,230,733,255"/>
+<area shape="poly" id="edge13_Node000029_Node000030" title=" " alt="" coords="562,245,638,242,638,247,562,250"/>
+<area shape="rect" id="Node000031" href="$d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d" title=" " alt="" coords="645,279,740,305"/>
+<area shape="poly" id="edge14_Node000029_Node000031" title=" " alt="" coords="563,263,632,277,631,282,562,268"/>
+<area shape="poly" id="edge17_Node000032_Node000031" title=" " alt="" coords="562,304,631,296,631,301,563,309"/>
+<area shape="poly" id="edge19_Node000033_Node000011" title=" " alt="" coords="562,360,609,354,661,351,715,354,768,365,817,389,858,419,854,423,814,394,766,370,714,360,661,357,609,359,563,365"/>
+<area shape="rect" id="Node000034" href="$d4/d36/namespacefl_a44a195439ac7fa303b4b0b0c956605be.html#a44a195439ac7fa303b4b0b0c956605be" title=" " alt="" coords="647,381,739,406"/>
+<area shape="poly" id="edge20_Node000033_Node000034" title=" " alt="" coords="562,381,632,386,632,392,562,387"/>
+</map>

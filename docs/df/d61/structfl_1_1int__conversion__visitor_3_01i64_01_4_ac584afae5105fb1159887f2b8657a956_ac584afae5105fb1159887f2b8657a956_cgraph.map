@@ -1,0 +1,9 @@
+<map id="fl::int_conversion_visitor&lt; i64 &gt;::operator()" name="fl::int_conversion_visitor&lt; i64 &gt;::operator()">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,23,199,63"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a355a80d75740e039fbfec1473725942a.html#a355a80d75740e039fbfec1473725942a" title="Check if character is a decimal digit (0&#45;9)" alt="" coords="253,5,331,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="199,28,239,22,239,28,200,33"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a3a06f2d2145ffee841732d6a3706b4d6.html#a3a06f2d2145ffee841732d6a3706b4d6" title="Parse an integer from a character buffer." alt="" coords="247,55,337,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="200,53,234,57,233,63,199,58"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a5e53fda23d9eab83d57f9c9df820c58e.html#a5e53fda23d9eab83d57f9c9df820c58e" title=" " alt="" coords="385,55,451,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="338,65,372,65,372,70,338,70"/>
+</map>

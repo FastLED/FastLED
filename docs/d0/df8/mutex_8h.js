@@ -1,6 +1,5 @@
 var mutex_8h =
 [
-    [ "fl::lock_guard< MutexType >", "db/dd0/classfl_1_1lock__guard.html", "db/dd0/classfl_1_1lock__guard" ],
-    [ "fl::MutexFake< T >", "df/d98/classfl_1_1_mutex_fake.html", "df/d98/classfl_1_1_mutex_fake" ],
-    [ "fl::mutex", "d4/d36/namespacefl_a2e00b0738772583f59233ccac0e22664.html#a2e00b0738772583f59233ccac0e22664", null ]
+    [ "fl::mutex", "d4/d36/namespacefl_af14175b9ccd89d0e7f3f567cb358d52f.html#af14175b9ccd89d0e7f3f567cb358d52f", null ],
+    [ "fl::recursive_mutex", "d4/d36/namespacefl_a9ee93a623f90afb816e6e5dbae489247.html#a9ee93a623f90afb816e6e5dbae489247", null ]
 ];

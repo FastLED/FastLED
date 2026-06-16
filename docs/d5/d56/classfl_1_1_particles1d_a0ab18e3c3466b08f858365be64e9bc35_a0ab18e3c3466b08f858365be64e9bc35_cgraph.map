@@ -1,0 +1,28 @@
+<map id="fl::Particles1d::~Particles1d" name="fl::Particles1d::~Particles1d">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,203,204,228"/>
+<area shape="rect" id="Node000002" href="$d5/d56/classfl_1_1_particles1d_ae4b5b0ed1b20858b9163be36f36688df.html#ae4b5b0ed1b20858b9163be36f36688df" title="Update and render all particles with overdraw technique." alt="" coords="284,29,433,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,201,166,135,205,97,251,65,270,56,272,61,253,70,209,101,170,139,117,204"/>
+<area shape="rect" id="Node000010" href="$d5/d56/classfl_1_1_particles1d_acdf608a69f7bc1c18cdf81e50148608c.html#acdf608a69f7bc1c18cdf81e50148608c" title=" " alt="" coords="274,79,443,104"/>
+<area shape="poly" id="edge7_Node000001_Node000010" title=" " alt="" coords="119,200,175,158,212,134,251,114,275,105,277,110,253,119,214,139,178,162,123,205"/>
+<area shape="rect" id="Node000011" href="$d5/d56/classfl_1_1_particles1d_a16a3f33720e72f3d3918e0c66a1dc795.html#a16a3f33720e72f3d3918e0c66a1dc795" title="Set cyclical mode (true = wrap around, false = stop at edges)" alt="" coords="265,128,453,153"/>
+<area shape="poly" id="edge8_Node000001_Node000011" title=" " alt="" coords="140,200,251,163,286,154,288,159,253,169,142,205"/>
+<area shape="rect" id="Node000012" href="$d5/d56/classfl_1_1_particles1d_a95f442dd69aee419d9fa6927190dd240.html#a95f442dd69aee419d9fa6927190dd240" title="Set fade rate for trails (0&#45;255, higher = shorter trails)" alt="" coords="260,177,457,203"/>
+<area shape="poly" id="edge9_Node000001_Node000012" title=" " alt="" coords="204,203,246,199,247,204,205,208"/>
+<area shape="rect" id="Node000013" href="$d5/d56/classfl_1_1_particles1d_af24c28ccb2a2a32ca84bba6eeff3b3ff.html#af24c28ccb2a2a32ca84bba6eeff3b3ff" title="Set average particle lifetime in milliseconds." alt="" coords="263,227,454,252"/>
+<area shape="poly" id="edge10_Node000001_Node000013" title=" " alt="" coords="205,222,250,226,249,232,204,227"/>
+<area shape="rect" id="Node000014" href="$d5/d56/classfl_1_1_particles1d_a9e3b5d8d6018af2b43f3674342af2b5f.html#a9e3b5d8d6018af2b43f3674342af2b5f" title="Set overdraw count (higher = smoother trails, more CPU)" alt="" coords="259,277,459,317"/>
+<area shape="poly" id="edge11_Node000001_Node000014" title=" " alt="" coords="143,225,253,262,278,270,276,275,251,267,142,231"/>
+<area shape="rect" id="Node000015" href="$d5/d56/classfl_1_1_particles1d_a12550d25d9f378aaf3a0b3a771764275.html#a12550d25d9f378aaf3a0b3a771764275" title="Set speed multiplier (1.0 = normal, &gt;1.0 = faster, &lt;1.0 = slower)" alt="" coords="270,341,447,367"/>
+<area shape="poly" id="edge12_Node000001_Node000015" title=" " alt="" coords="120,226,175,275,212,303,253,326,274,335,272,340,251,331,210,307,172,279,117,230"/>
+<area shape="rect" id="Node000016" href="$d5/d56/classfl_1_1_particles1d_accbbd5c9b4e95d96e1cadd3e29d76c75.html#accbbd5c9b4e95d96e1cadd3e29d76c75" title="Spawn a particle with random position, velocity, color, and lifetime." alt="" coords="252,391,465,431"/>
+<area shape="poly" id="edge13_Node000001_Node000016" title=" " alt="" coords="116,227,168,298,207,340,253,377,264,383,261,388,251,382,204,344,164,301,112,230"/>
+<area shape="poly" id="edge6_Node000002_Node000002" title=" " alt="" coords="318,31,310,21,314,11,331,5,359,3,394,7,404,11,407,17,403,20,400,15,392,12,359,8,332,10,318,15,315,20,322,27"/>
+<area shape="rect" id="Node000003" href="$d5/d56/classfl_1_1_particles1d_a4778f1bb869d213d5d5389d8d8563a64.html#a4778f1bb869d213d5d5389d8d8563a64" title=" " alt="" coords="513,5,701,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="434,32,499,26,500,31,434,37"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_aed9da76a781c194392d591b3391d46f2.html#aed9da76a781c194392d591b3391d46f2" title=" " alt="" coords="568,55,647,80"/>
+<area shape="poly" id="edge4_Node000002_Node000006" title=" " alt="" coords="434,47,554,59,554,65,434,52"/>
+<area shape="rect" id="Node000004" href="$d4/d1c/classfl_1_1_fx1d_ab7fbbc350f5c43865846e2338b502c41.html#ab7fbbc350f5c43865846e2338b502c41" title=" " alt="" coords="749,5,860,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="701,15,735,15,735,21,701,21"/>
+<area shape="rect" id="Node000007" href="$d5/d3d/group___color_blurs_ga49f52d9c240dbe519dcdeb778269b8d7.html#ga49f52d9c240dbe519dcdeb778269b8d7" title="One&#45;dimensional blur filter (span version)." alt="" coords="751,55,859,80"/>
+<area shape="poly" id="edge5_Node000006_Node000007" title=" " alt="" coords="647,65,737,65,737,70,647,70"/>
+</map>

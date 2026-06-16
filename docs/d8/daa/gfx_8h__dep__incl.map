@@ -1,0 +1,5 @@
+<map id="fl/gfx/gfx.h" name="fl/gfx/gfx.h">
+<area shape="rect" id="Node000001" title="2D antialiased graphics for LED matrices" alt="" coords="61,5,153,31"/>
+<area shape="rect" id="Node000002" href="$d9/d2c/_perf_disc_8ino.html" title="Benchmark drawDisc on AVR (32x8 canvas, blend mode)" alt="" coords="5,79,208,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,44,109,79,104,79,104,44"/>
+</map>

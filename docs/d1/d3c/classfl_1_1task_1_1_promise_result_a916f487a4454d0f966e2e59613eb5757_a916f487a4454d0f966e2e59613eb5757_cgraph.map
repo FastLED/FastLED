@@ -1,0 +1,7 @@
+<map id="fl::task::PromiseResult::value" name="fl::task::PromiseResult::value">
+<area shape="rect" id="Node000001" title="Get the success value (mutable)" alt="" coords="5,23,173,63"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ad2bd3fbfa62b8cb135f8c67ce6bfeefe.html#ad2bd3fbfa62b8cb135f8c67ce6bfeefe" title=" " alt="" coords="288,5,347,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,31,274,20,275,25,174,37"/>
+<area shape="rect" id="Node000003" href="$d1/d3c/classfl_1_1task_1_1_promise_result_a47bdae0780409cda6b8e25bb47cc0ec6.html#a47bdae0780409cda6b8e25bb47cc0ec6" title="Check if the result is successful." alt="" coords="221,55,413,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="174,50,208,53,208,58,174,55"/>
+</map>

@@ -1,0 +1,23 @@
+<map id="fl::task::CoroutineConfig" name="fl::task::CoroutineConfig">
+<area shape="rect" id="Node000001" title="Configuration for OS&#45;level coroutine tasks." alt="" coords="1135,109,1313,135"/>
+<area shape="rect" id="Node000002" href="$dd/dd8/classfl_1_1_optional.html" title=" " alt="" coords="877,5,1035,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1049,61,1186,107,1184,112,1047,66"/>
+<area shape="rect" id="Node000003" href="$dd/dd8/classfl_1_1_optional.html" title=" " alt="" coords="535,55,665,80"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="679,57,877,38,877,43,679,62"/>
+<area shape="rect" id="Node000010" href="$dd/dd8/classfl_1_1_optional.html" title=" " alt="" coords="886,84,1026,109"/>
+<area shape="poly" id="edge11_Node000010_Node000003" title=" " alt="" coords="680,79,707,82,800,89,886,93,885,98,800,95,706,87,679,84"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="879,133,1033,159"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="1047,143,1110,139,1161,132,1162,137,1111,145,1047,149"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl.html#d0/ddd/classfl_1_1function" title=" " alt="" coords="535,129,665,155"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="678,140,878,142,878,148,678,146"/>
+<area shape="rect" id="Node000006" href="$d2/db2/classfl_1_1string.html" title=" " alt="" coords="919,184,993,209"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="1006,186,1110,163,1193,132,1195,137,1111,169,1008,192"/>
+<area shape="rect" id="Node000007" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="517,179,683,219"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="696,196,918,194,918,200,696,201"/>
+<area shape="rect" id="Node000008" href="$de/d66/classfl_1_1basic__string.html" title="Concrete type&#45;erased string class." alt="" coords="5,187,121,212"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="135,191,145,190,319,186,493,190,517,191,517,196,493,195,319,191,145,195,135,196"/>
+<area shape="rect" id="Node000009" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="171,212,301,237"/>
+<area shape="poly" id="edge9_Node000009_Node000008" title=" " alt="" coords="136,207,171,212,170,218,135,212"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="316,225,401,225,493,219,517,216,518,221,494,225,401,231,316,231"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="1040,102,1134,111,1134,116,1039,107"/>
+</map>

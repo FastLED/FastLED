@@ -1,0 +1,12 @@
+<map id="fl/math/lib8tion/lib8static.h" name="fl/math/lib8tion/lib8static.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,203,31"/>
+<area shape="rect" id="Node000002" href="$d2/d0f/fl_2math_2lib8static_8h.html" title="Defines static inlining macros for lib8tion functions." alt="" coords="32,79,176,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,31,107,65,101,65,101,31"/>
+<area shape="rect" id="Node000003" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="17,152,191,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="107,104,107,138,101,138,101,104"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="17,299,191,324"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="102,178,89,226,90,256,97,285,92,286,85,257,84,225,97,177"/>
+<area shape="rect" id="Node000005" href="$d1/ddf/align_8h.html" title="Alignment macros and utilities for FastLED." alt="" coords="99,225,197,251"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="114,176,136,212,131,215,109,179"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="143,252,121,288,116,286,138,250"/>
+</map>

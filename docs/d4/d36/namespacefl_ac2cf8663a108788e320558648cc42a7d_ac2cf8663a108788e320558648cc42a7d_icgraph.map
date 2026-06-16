@@ -1,0 +1,14 @@
+<map id="fl::mapBrightness8to5" name="fl::mapBrightness8to5">
+<area shape="rect" id="Node000001" title="Map 8&#45;bit brightness to 5&#45;bit (0&#45;31)" alt="" coords="607,46,772,71"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_add26493b14b4d8fc2a0f076b487ce221.html#add26493b14b4d8fc2a0f076b487ce221" title="Encode pixel data in APA102 format with per&#45;LED brightness." alt="" coords="397,17,559,42"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="593,48,559,43,559,38,593,43"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_af92566759441f91065d207e3ad02e48f.html#af92566759441f91065d207e3ad02e48f" title="Encode pixel data in SK9822 format with per&#45;LED brightness." alt="" coords="397,70,559,95"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="593,72,559,76,559,71,592,67"/>
+<area shape="rect" id="Node000003" href="$d0/d09/classfl_1_1_pixel_iterator_a2c08448cbefb8e28d4945b15bbc7f38d.html#a2c08448cbefb8e28d4945b15bbc7f38d" title="Encode pixels in APA102/DOTSTAR format (zero allocation)" alt="" coords="224,5,349,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="384,30,350,29,350,24,384,25"/>
+<area shape="rect" id="Node000004" href="$d5/d8b/classfl_1_1_channel_a44414e176c7d2ef65fcdd390f6852322.html#a44414e176c7d2ef65fcdd390f6852322" title=" " alt="" coords="5,45,176,70"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="211,40,169,47,168,42,210,35"/>
+<area shape="rect" id="Node000006" href="$d0/d09/classfl_1_1_pixel_iterator_abbe36e88cafa622bb58093609a8467e7.html#abbe36e88cafa622bb58093609a8467e7" title="Encode pixels in SK9822 format (zero allocation)" alt="" coords="224,69,349,109"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="384,89,350,90,350,84,384,83"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="210,80,168,73,169,67,211,74"/>
+</map>

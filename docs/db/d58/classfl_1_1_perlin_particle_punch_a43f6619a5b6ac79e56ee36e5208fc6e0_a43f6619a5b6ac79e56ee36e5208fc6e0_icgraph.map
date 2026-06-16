@@ -1,0 +1,9 @@
+<map id="fl::PerlinParticlePunch::tryAllocateDebris" name="fl::PerlinParticlePunch::tryAllocateDebris">
+<area shape="rect" id="Node000001" title=" " alt="" coords="671,5,833,45"/>
+<area shape="rect" id="Node000002" href="$db/d58/classfl_1_1_perlin_particle_punch_a37515628f8fb47f6a383d9bc276028cf.html#a37515628f8fb47f6a383d9bc276028cf" title=" " alt="" coords="429,5,623,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="657,28,623,28,623,23,657,23"/>
+<area shape="rect" id="Node000003" href="$db/d58/classfl_1_1_perlin_particle_punch_a7f51ebdff4fc251768c41089fbfb53e3.html#a7f51ebdff4fc251768c41089fbfb53e3" title=" " alt="" coords="219,5,381,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="416,28,382,28,382,23,416,23"/>
+<area shape="rect" id="Node000004" href="$db/d58/classfl_1_1_perlin_particle_punch_aae158d36e0b12c32e8a9dacfb065aaaa.html#aae158d36e0b12c32e8a9dacfb065aaaa" title=" " alt="" coords="5,5,171,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="205,28,171,28,171,23,205,23"/>
+</map>

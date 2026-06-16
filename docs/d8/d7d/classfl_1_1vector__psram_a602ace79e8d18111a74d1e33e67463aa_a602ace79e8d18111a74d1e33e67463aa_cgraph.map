@@ -1,0 +1,23 @@
+<map id="fl::vector_psram::vector_psram" name="fl::vector_psram::vector_psram">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,117,181,157"/>
+<area shape="rect" id="Node000002" href="$d8/d7d/classfl_1_1vector__psram_ac11730d58d8eb6ea39eda5f393065125.html#ac11730d58d8eb6ea39eda5f393065125" title=" " alt="" coords="243,47,419,87"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="162,114,248,89,249,94,163,119"/>
+<area shape="rect" id="Node000005" href="$d4/dad/classfl_1_1vector__basic_a7ba7ea954f6b2e7af31b2d8181edc2d7.html#a7ba7ea954f6b2e7af31b2d8181edc2d7" title="Move&#45;steal contents from another vector_basic." alt="" coords="229,164,432,189"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="182,149,242,159,241,164,181,154"/>
+<area shape="rect" id="Node000003" href="$d2/d24/classfl_1_1vector_ac9d959e1d6e7a43a30b5d1c709e4050a.html#ac9d959e1d6e7a43a30b5d1c709e4050a" title=" " alt="" coords="523,5,651,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="418,48,509,30,510,35,419,53"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_abe0f645352cc535c08d01a446b1078bc.html#abe0f645352cc535c08d01a446b1078bc" title="Get the PSRAM memory resource (wraps PSRamAllocate / PSRamDeallocate)." alt="" coords="485,55,689,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="419,65,471,65,471,70,419,70"/>
+<area shape="rect" id="Node000006" href="$d4/dad/classfl_1_1vector__basic_a8d4a975029a68075a20d1aa3fa3e7cf5.html#a8d4a975029a68075a20d1aa3fa3e7cf5" title="Heap&#45;only vector (no inline buffer)." alt="" coords="502,129,671,169"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="432,163,488,157,489,162,432,168"/>
+<area shape="rect" id="Node000008" href="$d4/dad/classfl_1_1vector__basic_a307989a09148dc75fc5fbb2111cfef6f.html#a307989a09148dc75fc5fbb2111cfef6f" title=" " alt="" coords="480,193,693,219"/>
+<area shape="poly" id="edge8_Node000005_Node000008" title=" " alt="" coords="432,186,467,190,466,195,432,191"/>
+<area shape="rect" id="Node000012" href="$d4/dad/classfl_1_1vector__basic_a81fe1c9feb8228d4269494b7984c6270.html#a81fe1c9feb8228d4269494b7984c6270" title=" " alt="" coords="969,219,1173,244"/>
+<area shape="poly" id="edge11_Node000005_Node000012" title=" " alt="" coords="359,187,414,210,481,229,606,244,734,249,853,247,955,241,955,246,854,252,734,254,606,249,479,234,412,215,357,192"/>
+<area shape="poly" id="edge6_Node000006_Node000006" title=" " alt="" coords="541,129,539,119,546,110,562,104,587,102,615,105,630,112,628,117,613,110,587,107,563,109,549,114,544,120,547,128"/>
+<area shape="rect" id="Node000007" href="$d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c" title=" " alt="" coords="754,136,909,161"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="672,146,740,146,740,151,672,151"/>
+<area shape="rect" id="Node000009" href="$d4/dad/classfl_1_1vector__basic_a17f684eb95a4b6b0511454f7f80f87d1.html#a17f684eb95a4b6b0511454f7f80f87d1" title="Grow to new_capacity. Moves existing elements." alt="" coords="741,193,921,219"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="693,203,728,203,728,209,693,209"/>
+<area shape="poly" id="edge10_Node000009_Node000012" title=" " alt="" coords="922,213,956,216,955,222,921,218"/>
+</map>

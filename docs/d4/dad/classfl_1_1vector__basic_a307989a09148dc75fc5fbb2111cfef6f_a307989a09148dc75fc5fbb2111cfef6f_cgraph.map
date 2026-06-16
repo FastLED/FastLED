@@ -1,0 +1,14 @@
+<map id="fl::vector_basic::reserve_impl" name="fl::vector_basic::reserve_impl">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,66,219,91"/>
+<area shape="rect" id="Node000002" href="$d4/dad/classfl_1_1vector__basic_a17f684eb95a4b6b0511454f7f80f87d1.html#a17f684eb95a4b6b0511454f7f80f87d1" title="Grow to new_capacity. Moves existing elements." alt="" coords="267,66,447,91"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="219,76,253,76,253,81,219,81"/>
+<area shape="rect" id="Node000003" href="$d4/dad/classfl_1_1vector__basic_a4a79234edce9c9748432aba0f499b001.html#a4a79234edce9c9748432aba0f499b001" title="Is data currently in the inline buffer?" alt="" coords="509,39,684,65"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="446,66,495,61,496,66,447,71"/>
+<area shape="rect" id="Node000005" href="$d4/dad/classfl_1_1vector__basic_a81fe1c9feb8228d4269494b7984c6270.html#a81fe1c9feb8228d4269494b7984c6270" title=" " alt="" coords="495,90,699,115"/>
+<area shape="poly" id="edge5_Node000002_Node000005" title=" " alt="" coords="447,85,481,88,481,94,446,90"/>
+<area shape="rect" id="Node000004" href="$d4/dad/classfl_1_1vector__basic_ad3336dbd1270bce79415ef3ea783393a.html#ad3336dbd1270bce79415ef3ea783393a" title="Compute inline buffer pointer from offset." alt="" coords="747,29,911,69"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="684,48,733,48,733,53,684,54"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="785,30,783,20,790,10,805,5,829,3,856,6,870,13,868,18,854,11,829,8,806,10,793,15,788,21,790,28"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d" title=" " alt="" coords="781,94,876,119"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="699,102,767,103,767,108,699,107"/>
+</map>

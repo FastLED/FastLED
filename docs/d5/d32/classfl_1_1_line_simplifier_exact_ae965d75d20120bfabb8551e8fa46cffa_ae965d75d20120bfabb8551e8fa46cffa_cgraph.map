@@ -1,5 +1,7 @@
 <map id="fl::LineSimplifierExact::estimateMaxDistance" name="fl::LineSimplifierExact::estimateMaxDistance">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,179,45"/>
-<area shape="rect" id="Node000002" href="$d8/de4/classfl_1_1_slice_abe7b0c2539b61d18d30ee571680d5a91.html#abe7b0c2539b61d18d30ee571680d5a91" title=" " alt="" coords="227,13,329,38"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,23,213,23,213,28,179,28"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,23,179,63"/>
+<area shape="rect" id="Node000002" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="227,5,329,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,29,213,24,213,29,179,34"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1" title=" " alt="" coords="247,55,309,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="179,52,234,59,233,64,179,57"/>
 </map>

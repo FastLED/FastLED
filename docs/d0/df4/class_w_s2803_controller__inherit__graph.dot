@@ -12,7 +12,7 @@ digraph "WS2803Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;"
   Node3 -> Node2 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="CPixelLEDController\l\< RGB_ORDER, LANES,\l MASK \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d0/dc9/class_c_pixel_l_e_d_controller.html",tooltip="Template extension of the CLEDController class."];
   Node4 -> Node3 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="CLEDController",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/d2c/class_c_l_e_d_controller.html",tooltip="Base definition for an LED controller."];
+  Node4 [id="Node000004",label="CLEDController",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/da0/classfl_1_1_c_l_e_d_controller.html",tooltip=" "];
   Node5 -> Node2 [id="edge4_Node000002_Node000005",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< DATA_PIN, CLOCK_PIN,\l RGB, DATA_RATE_MHZ(25) \>",fontcolor="grey" ];
   Node5 [id="Node000005",label="WS2801Controller\< DATA\l_PIN, CLOCK_PIN, RGB_ORDER,\l SPI_SPEED \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d9/d95/class_w_s2801_controller.html",tooltip="WS2801 controller class."];
   Node6 -> Node5 [id="edge5_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];

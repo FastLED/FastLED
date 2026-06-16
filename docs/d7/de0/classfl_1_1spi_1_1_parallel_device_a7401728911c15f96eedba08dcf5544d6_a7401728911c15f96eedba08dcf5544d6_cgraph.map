@@ -1,0 +1,37 @@
+<map id="fl::spi::ParallelDevice::operator=" name="fl::spi::ParallelDevice::operator=">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,283,164,323"/>
+<area shape="rect" id="Node000002" href="$d7/de0/classfl_1_1spi_1_1_parallel_device_a98f45a4e7d85b985afa8d41577df29c9.html#a98f45a4e7d85b985afa8d41577df29c9" title="Construct parallel device." alt="" coords="228,22,387,62"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="89,282,104,239,128,183,164,124,185,96,210,72,217,67,220,71,214,76,189,100,168,127,133,185,109,241,94,284"/>
+<area shape="rect" id="Node000006" href="$d7/de0/classfl_1_1spi_1_1_parallel_device_ada8ae819354f0840e1c477fa5e11f04c.html#ada8ae819354f0840e1c477fa5e11f04c" title="Initialize hardware and setup LUT." alt="" coords="228,86,387,126"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="94,282,138,211,171,171,210,136,219,130,222,135,214,140,175,174,143,214,99,284"/>
+<area shape="rect" id="Node000007" href="$d7/de0/classfl_1_1spi_1_1_parallel_device_a74aa4366c8bbf792d1cc68d9081c7222.html#a74aa4366c8bbf792d1cc68d9081c7222" title="Configure custom LUT (advanced)" alt="" coords="228,150,387,190"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="104,281,151,241,211,200,224,193,226,198,213,204,154,245,108,285"/>
+<area shape="rect" id="Node000008" href="$d7/de0/classfl_1_1spi_1_1_parallel_device_aa434f17460d7b1b7895203ae4bbfbdd6.html#aa434f17460d7b1b7895203ae4bbfbdd6" title="Shutdown hardware and release resources." alt="" coords="212,215,403,240"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="142,281,211,257,255,242,256,247,213,262,144,286"/>
+<area shape="rect" id="Node000009" href="$d7/de0/classfl_1_1spi_1_1_parallel_device_a55e8051874809d18ba44ba944bf0710c.html#a55e8051874809d18ba44ba944bf0710c" title="Wait for pending transmission to complete." alt="" coords="451,251,609,291"/>
+<area shape="poly" id="edge15_Node000001_Node000009" title=" " alt="" coords="164,295,437,275,437,281,164,300"/>
+<area shape="rect" id="Node000010" href="$d7/de0/classfl_1_1spi_1_1_parallel_device_a03dc449fe80ed7de12a7f47d1671e416.html#a03dc449fe80ed7de12a7f47d1671e416" title="Check if device is initialized." alt="" coords="661,345,820,385"/>
+<area shape="poly" id="edge13_Node000001_Node000010" title=" " alt="" coords="164,308,648,353,648,359,164,313"/>
+<area shape="rect" id="Node000011" href="$d7/de0/classfl_1_1spi_1_1_parallel_device_a14db5b75912cb2c371b3c1814bf93a9d.html#a14db5b75912cb2c371b3c1814bf93a9d" title="Get current configuration." alt="" coords="228,366,387,406"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="140,321,241,359,239,364,138,326"/>
+<area shape="rect" id="Node000012" href="$d7/de0/classfl_1_1spi_1_1_parallel_device_a8f01a3b912d83a672dd06a0a3b0e68ec.html#a8f01a3b912d83a672dd06a0a3b0e68ec" title="Check if transmission is in progress." alt="" coords="451,381,609,421"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="102,322,147,372,178,397,213,416,271,430,332,434,391,430,445,421,445,426,392,435,332,439,270,436,211,420,175,401,144,376,98,325"/>
+<area shape="rect" id="Node000013" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="274,481,341,507"/>
+<area shape="poly" id="edge14_Node000001_Node000013" title=" " alt="" coords="99,322,143,389,176,427,214,460,237,473,262,482,260,487,235,478,210,464,172,431,139,393,95,325"/>
+<area shape="rect" id="Node000014" href="$d7/de0/classfl_1_1spi_1_1_parallel_device_a46d4c7d7aebd2478ad2d56532051ef75.html#a46d4c7d7aebd2478ad2d56532051ef75" title="Write data (single stream drives all pins via LUT)" alt="" coords="228,531,387,571"/>
+<area shape="poly" id="edge16_Node000001_Node000014" title=" " alt="" coords="95,323,110,364,135,416,170,470,190,495,214,517,220,522,217,526,210,521,187,499,165,474,130,419,105,366,90,325"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a3fd92c727664a77396403265415789d3.html#a3fd92c727664a77396403265415789d3" title=" " alt="" coords="467,5,593,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="387,31,453,24,454,29,387,36"/>
+<area shape="rect" id="Node000005" href="$d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c" title=" " alt="" coords="453,55,607,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="387,48,439,54,439,60,387,54"/>
+<area shape="rect" id="Node000004" href="$da/d3c/namespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259.html#a0bddf371925d8c4e94b88e9d7b35d259" title=" " alt="" coords="689,5,793,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="593,15,675,15,675,21,593,21"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="373,237,437,250,436,256,372,243"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="577,289,683,337,681,341,575,294"/>
+<area shape="poly" id="edge12_Node000012_Node000010" title=" " alt="" coords="609,385,647,378,648,383,610,390"/>
+<area shape="poly" id="edge19_Node000014_Node000010" title=" " alt="" coords="369,529,402,517,506,476,608,430,689,389,692,394,610,435,508,481,404,522,370,534"/>
+<area shape="rect" id="Node000015" href="$d7/d93/classfl_1_1expected_abbee0bb98c9bf0a1391cb3e810ea4fd5.html#abbee0bb98c9bf0a1391cb3e810ea4fd5" title="Create error result." alt="" coords="456,539,604,564"/>
+<area shape="poly" id="edge17_Node000014_Node000015" title=" " alt="" coords="387,549,442,549,442,554,387,554"/>
+<area shape="rect" id="Node000016" href="$d7/d93/classfl_1_1expected_a519c280d81d3683cfbfb758ed0198277.html#a519c280d81d3683cfbfb758ed0198277" title="Default constructor (creates error state)" alt="" coords="657,539,824,564"/>
+<area shape="poly" id="edge18_Node000015_Node000016" title=" " alt="" coords="604,549,643,549,643,554,604,554"/>
+</map>

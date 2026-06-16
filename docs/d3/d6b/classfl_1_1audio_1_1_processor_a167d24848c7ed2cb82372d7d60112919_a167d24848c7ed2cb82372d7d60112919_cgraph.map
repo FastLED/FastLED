@@ -1,0 +1,8 @@
+<map id="fl::audio::Processor::getBuildupDetector" name="fl::audio::Processor::getBuildupDetector">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,161,69"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="46,30,44,20,50,11,63,5,83,3,107,6,119,13,117,18,105,11,83,8,64,10,53,15,49,21,51,28"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="219,7,345,33"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="161,35,205,29,206,34,162,40"/>
+<area shape="rect" id="Node000003" href="$d3/d6b/classfl_1_1audio_1_1_processor_ade806d07af52e3d281939cebce7643d5.html#ade806d07af52e3d281939cebce7643d5" title=" " alt="" coords="209,57,355,97"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="162,58,196,63,195,68,161,63"/>
+</map>

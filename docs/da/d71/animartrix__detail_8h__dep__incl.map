@@ -1,0 +1,24 @@
+<map id="fl/fx/2d/animartrix_detail.h" name="fl/fx/2d/animartrix_detail.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="493,5,632,45"/>
+<area shape="rect" id="Node000002" href="$d3/dc3/animartrix_8hpp.html" title=" " alt="" coords="479,93,646,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="565,59,565,93,560,93,560,59"/>
+<area shape="rect" id="Node000003" href="$d6/d05/_animartrix_8ino.html" title="Demo of the Animatrix effects." alt="" coords="5,167,224,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="487,124,243,169,225,173,224,168,242,164,486,119"/>
+<area shape="rect" id="Node000004" href="$df/dba/_animartrix_ring_8ino.html" title=" " alt="" coords="93,269,339,324"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="466,122,361,141,317,154,287,169,265,191,247,218,225,270,220,268,242,215,260,188,284,164,315,149,360,136,465,117"/>
+<area shape="rect" id="Node000005" href="$d4/d67/sound__orchestrator_8h.html" title=" " alt="" coords="298,167,545,221"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="533,128,466,169,463,164,530,124"/>
+<area shape="rect" id="Node000007" href="$d4/d06/curr_8h.html" title=" " alt="" coords="568,174,840,214"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="595,124,674,172,671,176,592,128"/>
+<area shape="rect" id="Node000009" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates FxEngine for switching between effects." alt="" coords="864,167,1093,221"/>
+<area shape="poly" id="edge9_Node000002_Node000009" title=" " alt="" coords="632,119,853,164,864,166,863,172,851,169,631,124"/>
+<area shape="rect" id="Node000010" href="$da/d40/wasm__impl_8h.html" title=" " alt="" coords="1117,167,1317,221"/>
+<area shape="poly" id="edge10_Node000002_Node000010" title=" " alt="" coords="660,112,866,131,1106,164,1118,166,1117,171,1105,169,865,137,660,117"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="357,230,271,272,268,267,355,225"/>
+<area shape="rect" id="Node000006" href="$d8/d52/sound__orchestrator_8cpp.html" title=" " alt="" coords="363,269,610,324"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="448,231,472,268,467,271,444,234"/>
+<area shape="rect" id="Node000008" href="$dd/d43/_festival_stick_8ino.html" title=" " alt="" coords="635,269,867,324"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="721,225,741,268,736,270,716,228"/>
+<area shape="rect" id="Node000011" href="$d7/dd3/wasm_8ino.html" title="Demonstrates an advanced ino file with multiple effects and UI elements." alt="" coords="1117,269,1317,324"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="1220,235,1220,269,1215,269,1215,235"/>
+</map>

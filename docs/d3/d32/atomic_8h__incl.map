@@ -1,18 +1,13 @@
-<map id="fl/atomic.h" name="fl/atomic.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="148,5,239,31"/>
-<area shape="rect" id="Node000002" href="$db/dd5/thread_8h.html" title=" " alt="" coords="36,79,124,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="177,33,111,74,108,69,174,28"/>
-<area shape="rect" id="Node000004" href="$d3/d7e/int_8h.html" title=" " alt="" coords="162,79,225,104"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="196,31,196,65,191,65,191,31"/>
-<area shape="rect" id="Node000008" href="$d1/ddf/align_8h.html" title=" " alt="" coords="249,79,327,104"/>
-<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="210,29,263,68,260,72,207,33"/>
-<area shape="rect" id="Node000003" href="$da/d99/has__include_8h.html" title=" " alt="" coords="5,152,128,177"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="80,105,74,139,69,138,75,104"/>
-<area shape="rect" id="Node000005" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="152,152,235,177"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="196,104,196,138,191,138,191,104"/>
-<area shape="rect" id="Node000007" title=" " alt="" coords="283,152,402,177"/>
-<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="218,102,307,144,305,148,216,106"/>
-<area shape="poly" id="edge6_Node000005_Node000005" title=" " alt="" coords="224,149,249,151,258,156,261,165,254,176,238,181,237,175,251,172,256,164,254,159,247,156,224,155"/>
-<area shape="rect" id="Node000006" title=" " alt="" coords="156,225,231,251"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="196,178,196,212,191,212,191,178"/>
+<map id="fl/stl/atomic.h" name="fl/stl/atomic.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="99,5,210,31"/>
+<area shape="rect" id="Node000002" href="$d5/d5e/thread__config_8h.html" title="Platform detection for FASTLED_MULTITHREADED macro." alt="" coords="5,79,160,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="145,33,106,71,102,67,141,29"/>
+<area shape="rect" id="Node000004" href="$d3/d7e/int_8h.html" title=" " alt="" coords="185,79,268,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="168,29,207,67,203,71,165,33"/>
+<area shape="rect" id="Node000003" href="$da/d99/has__include_8h.html" title=" " alt="" coords="10,152,153,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="85,104,84,139,79,138,80,104"/>
+<area shape="rect" id="Node000005" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="177,152,279,177"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="230,104,230,138,225,139,224,104"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="169,225,287,251"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="231,178,231,212,225,212,225,178"/>
 </map>

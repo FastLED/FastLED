@@ -1,5 +1,9 @@
 <map id="Ripple::renderLed" name="Ripple::renderLed">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,141,31"/>
-<area shape="rect" id="Node000002" href="$de/de3/ripple_8h_ae191e193234145f67a5acafe9cd7b6b3.html#ae191e193234145f67a5acafe9cd7b6b3" title=" " alt="" coords="189,5,245,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="142,15,175,15,175,21,142,21"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,141,80"/>
+<area shape="rect" id="Node000002" href="$de/de3/ripple_8h_ae191e193234145f67a5acafe9cd7b6b3.html#ae191e193234145f67a5acafe9cd7b6b3" title=" " alt="" coords="195,5,251,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="112,52,181,29,183,34,113,57"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="189,55,256,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="142,65,176,65,176,70,142,70"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="191,104,254,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="113,78,179,100,177,105,112,83"/>
 </map>

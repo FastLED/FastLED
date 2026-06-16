@@ -1,0 +1,11 @@
+<map id="lib8tion/qfx.h" name="lib8tion/qfx.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="72,5,180,31"/>
+<area shape="rect" id="Node000002" href="$de/d34/fl_2math_2lib8tion_2qfx_8h.html" title=" " alt="" coords="47,79,205,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="129,31,129,65,123,65,123,31"/>
+<area shape="rect" id="Node000003" href="$dd/d0e/fl_2math_2qfx_8h.html" title=" " alt="" coords="73,152,179,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="129,104,129,138,123,138,123,104"/>
+<area shape="rect" id="Node000004" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="5,225,108,251"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="116,180,79,217,75,214,113,176"/>
+<area shape="rect" id="Node000006" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="132,225,259,251"/>
+<area shape="poly" id="edge4_Node000003_Node000006" title=" " alt="" coords="139,176,177,214,173,217,136,180"/>
+</map>

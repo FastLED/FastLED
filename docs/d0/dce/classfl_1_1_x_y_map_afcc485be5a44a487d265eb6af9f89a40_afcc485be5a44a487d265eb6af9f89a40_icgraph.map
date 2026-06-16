@@ -1,0 +1,47 @@
+<map id="fl::XYMap::XYMap" name="fl::XYMap::XYMap">
+<area shape="rect" id="Node000001" title=" " alt="" coords="787,404,923,429"/>
+<area shape="rect" id="Node000002" href="$d0/dce/classfl_1_1_x_y_map_acca498a14a06dd6102c2f64accaa137e.html#acca498a14a06dd6102c2f64accaa137e" title=" " alt="" coords="543,155,679,180"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="844,391,831,349,810,298,778,245,759,222,737,201,709,186,678,176,680,171,711,181,740,197,763,218,783,242,814,295,836,347,850,390"/>
+<area shape="rect" id="Node000003" href="$d0/dce/classfl_1_1_x_y_map_afa8bebe89b4ba6869deb9ae6c5dd5efe.html#afa8bebe89b4ba6869deb9ae6c5dd5efe" title=" " alt="" coords="483,256,739,281"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="819,399,631,284,634,279,822,394"/>
+<area shape="rect" id="Node000007" href="$d0/dce/classfl_1_1_x_y_map_a9894a2894d191fb277c936ac83ffd512.html#a9894a2894d191fb277c936ac83ffd512" title=" " alt="" coords="269,29,410,55"/>
+<area shape="poly" id="edge23_Node000001_Node000007" title=" " alt="" coords="841,392,826,358,804,318,774,278,737,246,703,228,670,221,639,221,608,224,577,226,546,225,514,215,481,193,467,178,460,162,456,129,452,98,445,83,433,68,409,54,412,49,436,64,450,80,457,96,461,129,465,160,472,175,484,189,516,210,547,219,577,221,608,218,639,215,671,216,705,223,740,241,778,275,808,315,831,356,846,390"/>
+<area shape="rect" id="Node000014" href="$d0/dce/classfl_1_1_x_y_map_a9fd108a23c7e820afdc73038bfe6bb67.html#a9fd108a23c7e820afdc73038bfe6bb67" title=" " alt="" coords="500,375,721,400"/>
+<area shape="poly" id="edge14_Node000001_Node000014" title=" " alt="" coords="772,410,716,403,717,397,773,404"/>
+<area shape="rect" id="Node000016" href="$d0/dce/classfl_1_1_x_y_map_af581cd5d50680b42571203ddcc6297ad.html#af581cd5d50680b42571203ddcc6297ad" title=" " alt="" coords="520,425,701,465"/>
+<area shape="poly" id="edge17_Node000001_Node000016" title=" " alt="" coords="773,429,702,437,701,432,772,423"/>
+<area shape="rect" id="Node000017" href="$d0/dce/classfl_1_1_x_y_map_a7bd487e461514cf6527b4072d2a0233b.html#a7bd487e461514cf6527b4072d2a0233b" title="Create an XYMap from an XMap (treats 1D as 2D with height=1)" alt="" coords="260,489,419,515"/>
+<area shape="poly" id="edge22_Node000001_Node000017" title=" " alt="" coords="825,439,785,461,739,479,655,497,569,506,488,510,419,509,419,504,488,504,569,501,654,492,738,474,783,456,822,434"/>
+<area shape="rect" id="Node000019" href="$d0/dce/classfl_1_1_x_y_map_a10771bee8cb11b0757e3f03cb3870196.html#a10771bee8cb11b0757e3f03cb3870196" title=" " alt="" coords="520,539,701,579"/>
+<area shape="poly" id="edge20_Node000001_Node000019" title=" " alt="" coords="835,442,794,483,740,523,697,542,695,537,737,518,791,479,832,438"/>
+<area shape="rect" id="Node000021" href="$d0/dce/classfl_1_1_x_y_map_a177b2eec7466e210bf9bb654e24310ca.html#a177b2eec7466e210bf9bb654e24310ca" title=" " alt="" coords="532,604,689,629"/>
+<area shape="poly" id="edge24_Node000001_Node000021" title=" " alt="" coords="846,443,831,478,808,519,778,560,740,594,716,606,690,614,689,609,714,601,737,589,774,556,804,516,826,476,842,441"/>
+<area shape="rect" id="Node000004" href="$dc/d2b/classfl_1_1_blend2d_a5ee229ce7c02bd25ae86ef184dbccbcc.html#a5ee229ce7c02bd25ae86ef184dbccbcc" title=" " alt="" coords="278,79,401,104"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="502,253,481,239,468,223,460,208,456,176,452,146,445,131,433,117,418,107,400,100,402,95,420,102,436,113,450,129,457,144,461,176,465,206,472,221,484,235,504,248"/>
+<area shape="rect" id="Node000006" href="$dc/d2b/classfl_1_1_blend2d_ad965648c61fd795366282d3b797a612f.html#ad965648c61fd795366282d3b797a612f" title=" " alt="" coords="274,128,405,153"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="508,253,481,239,464,221,456,202,449,184,433,167,404,153,406,148,436,163,453,181,461,200,469,218,484,235,511,249"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="499,252,481,239,464,217,457,195,456,151,455,109,448,88,433,68,409,53,412,49,436,64,453,86,461,108,461,151,462,194,469,215,485,235,502,248"/>
+<area shape="rect" id="Node000008" href="$d3/d04/_downscale_2src_2wave_8cpp_a8c4e0f33d090ec2df44840a6264b51ef.html#a8c4e0f33d090ec2df44840a6264b51ef" title=" " alt="" coords="252,177,427,203"/>
+<area shape="poly" id="edge8_Node000003_Node000008" title=" " alt="" coords="535,255,482,239,434,216,397,205,399,200,436,212,484,234,536,250"/>
+<area shape="rect" id="Node000010" href="$d5/d8b/classfl_1_1_channel_a6a2bf9a4ab0f0ee7df060a3d0cba96b3.html#a6a2bf9a4ab0f0ee7df060a3d0cba96b3" title="Set screen map for JS canvas visualization from dimensions." alt="" coords="244,227,435,252"/>
+<area shape="poly" id="edge10_Node000003_Node000010" title=" " alt="" coords="480,257,435,252,435,247,480,252"/>
+<area shape="rect" id="Node000011" href="$d8/da0/classfl_1_1_c_l_e_d_controller_af4748661698ef21bb2d746d36c503542.html#af4748661698ef21bb2d746d36c503542" title=" " alt="" coords="271,277,407,317"/>
+<area shape="poly" id="edge11_Node000003_Node000011" title=" " alt="" coords="474,285,408,292,407,287,474,280"/>
+<area shape="rect" id="Node000012" href="$de/d43/classfl_1_1_leds_x_y_aa276575a5d40d208b21c8ac16e6abcb3.html#aa276575a5d40d208b21c8ac16e6abcb3" title=" " alt="" coords="249,391,430,416"/>
+<area shape="poly" id="edge12_Node000003_Node000012" title=" " alt="" coords="583,292,518,336,436,380,400,393,398,388,434,376,515,332,580,288"/>
+<area shape="rect" id="Node000013" href="$da/dd2/_codec_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="310,341,369,367"/>
+<area shape="poly" id="edge13_Node000003_Node000013" title=" " alt="" coords="562,289,435,331,369,350,368,344,434,326,561,284"/>
+<area shape="rect" id="Node000005" href="$dc/d2b/classfl_1_1_blend2d_aa6b753d9f7a72e49bb11b0e25a6a2948.html#aa6b753d9f7a72e49bb11b0e25a6a2948" title=" " alt="" coords="39,79,162,104"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="264,94,162,94,162,89,264,89"/>
+<area shape="poly" id="edge7_Node000007_Node000007" title=" " alt="" coords="382,20,371,11,339,8,314,10,300,15,298,20,305,27,301,31,292,21,297,11,313,5,339,3,373,7,385,16"/>
+<area shape="rect" id="Node000009" href="$d7/d3b/complex_8h_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="71,177,130,203"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="238,193,131,193,131,187,238,187"/>
+<area shape="poly" id="edge15_Node000014_Node000012" title=" " alt="" coords="486,397,430,401,430,395,486,392"/>
+<area shape="rect" id="Node000015" href="$dc/db7/examples_2_luminova_2luminova_8h_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="310,440,369,465"/>
+<area shape="poly" id="edge16_Node000014_Node000015" title=" " alt="" coords="527,405,483,415,435,430,369,448,368,443,434,425,482,410,526,400"/>
+<area shape="poly" id="edge18_Node000016_Node000017" title=" " alt="" coords="507,469,401,492,400,487,506,464"/>
+<area shape="rect" id="Node000018" href="$d5/d8b/classfl_1_1_channel_acfb78f07c618a1248db6c4fbbed5e408.html#acfb78f07c618a1248db6c4fbbed5e408" title="Set screen map for 1D strip remapping from XMap." alt="" coords="5,489,196,515"/>
+<area shape="poly" id="edge19_Node000017_Node000018" title=" " alt="" coords="246,505,196,505,196,499,246,499"/>
+<area shape="rect" id="Node000020" href="$d5/d3d/group___color_blurs_gac8d0a702cc09bbdf4f0f5a97462204ce.html#gac8d0a702cc09bbdf4f0f5a97462204ce" title="Legacy version of blur2d, which does not require an XYMap but instead implicitly binds to XY() functi..." alt="" coords="285,547,393,572"/>
+<area shape="poly" id="edge21_Node000019_Node000020" title=" " alt="" coords="506,562,394,562,394,557,506,557"/>
+</map>

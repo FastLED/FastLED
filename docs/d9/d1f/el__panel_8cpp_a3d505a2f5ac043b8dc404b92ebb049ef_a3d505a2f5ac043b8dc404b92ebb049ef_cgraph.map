@@ -1,0 +1,39 @@
+<map id="initPanels" name="initPanels">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,56,91,81"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ab7b2495da785c92a36e91b0a59cde46b.html#ab7b2495da785c92a36e91b0a59cde46b" title="Write analog value to pin (PWM)" alt="" coords="159,5,276,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="90,53,161,32,162,37,92,59"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_aa7a47cf722a2586453e75f6e70284dad.html#aa7a47cf722a2586453e75f6e70284dad" title="Set pin mode (input, output, pull&#45;up, pull&#45;down)" alt="" coords="386,56,481,81"/>
+<area shape="poly" id="edge4_Node000001_Node000006" title=" " alt="" coords="91,66,372,66,372,71,91,71"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_a77306b4a5327eb19e8d003b550b1a0a5.html#a77306b4a5327eb19e8d003b550b1a0a5" title="Set PWM frequency for a pin." alt="" coords="139,157,296,183"/>
+<area shape="poly" id="edge10_Node000001_Node000012" title=" " alt="" coords="72,79,185,148,182,153,69,84"/>
+<area shape="rect" id="Node000003" href="$d9/d33/namespacefl_1_1pwm__state_aee72e1cd03d83550f0f59cd5a4356e07.html#aee72e1cd03d83550f0f59cd5a4356e07" title=" " alt="" coords="591,69,769,95"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="276,17,391,25,523,41,623,63,622,68,522,46,390,30,276,23"/>
+<area shape="rect" id="Node000004" href="$d9/d33/namespacefl_1_1pwm__state_a6df56c095fbd351947b973e0e1d5289a.html#a6df56c095fbd351947b973e0e1d5289a" title=" " alt="" coords="1128,208,1279,233"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="770,84,839,90,918,102,1000,119,1081,144,1133,169,1176,197,1173,202,1130,173,1079,148,999,124,917,107,838,96,769,89"/>
+<area shape="poly" id="edge5_Node000006_Node000003" title=" " alt="" coords="481,69,577,74,577,79,481,74"/>
+<area shape="rect" id="Node000007" href="$d9/d33/namespacefl_1_1pwm__state_a567fc66f5ca74ddc7b7253ab96d5fe04.html#a567fc66f5ca74ddc7b7253ab96d5fe04" title=" " alt="" coords="571,208,789,233"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="456,79,648,198,645,203,454,84"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_ab91b418b90c32e475842ad7ce3785afb.html#ab91b418b90c32e475842ad7ce3785afb" title="Write digital value to pin." alt="" coords="901,259,1016,284"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="751,231,888,256,887,261,750,236"/>
+<area shape="rect" id="Node000009" href="$d9/d33/namespacefl_1_1pwm__state_a1e6e308bd81ec9ab9f1bd0f62bbba1b2.html#a1e6e308bd81ec9ab9f1bd0f62bbba1b2" title=" " alt="" coords="837,208,1080,233"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="790,218,824,218,824,223,790,223"/>
+<area shape="poly" id="edge9_Node000009_Node000004" title=" " alt="" coords="1080,218,1114,218,1114,223,1080,223"/>
+<area shape="poly" id="edge21_Node000012_Node000003" title=" " alt="" coords="285,155,599,95,600,100,286,160"/>
+<area shape="poly" id="edge22_Node000012_Node000006" title=" " alt="" coords="238,155,285,128,343,98,379,84,381,88,345,103,288,132,241,159"/>
+<area shape="poly" id="edge23_Node000012_Node000007" title=" " alt="" coords="296,180,344,186,557,208,557,213,344,191,296,185"/>
+<area shape="poly" id="edge13_Node000012_Node000008" title=" " alt="" coords="251,180,345,210,495,238,645,256,782,265,888,268,888,274,781,270,645,261,494,244,343,215,250,185"/>
+<area shape="rect" id="Node000013" href="$d9/d33/namespacefl_1_1pwm__state_a2451f451b29c216f97fdc47161e279b7.html#a2451f451b29c216f97fdc47161e279b7" title=" " alt="" coords="873,159,1044,184"/>
+<area shape="poly" id="edge11_Node000012_Node000013" title=" " alt="" coords="296,167,859,168,859,174,296,173"/>
+<area shape="rect" id="Node000014" href="$d9/d33/namespacefl_1_1pwm__state_af4374568b5cc7ac35b4a70d554e66257.html#af4374568b5cc7ac35b4a70d554e66257" title=" " alt="" coords="344,373,523,413"/>
+<area shape="poly" id="edge14_Node000012_Node000014" title=" " alt="" coords="233,181,405,361,401,364,229,185"/>
+<area shape="poly" id="edge12_Node000013_Node000004" title=" " alt="" coords="1025,181,1081,193,1129,203,1128,208,1079,198,1024,187"/>
+<area shape="poly" id="edge20_Node000014_Node000004" title=" " alt="" coords="456,411,506,452,537,471,572,486,631,500,678,502,789,486,875,477,943,470,975,462,1007,451,1041,433,1078,408,1118,370,1150,326,1174,282,1190,245,1195,247,1179,284,1154,329,1122,374,1082,412,1043,438,1009,456,976,468,944,475,876,483,790,491,679,507,630,506,570,491,535,476,503,456,453,415"/>
+<area shape="rect" id="Node000015" href="$d6/d93/namespacefl_1_1isr_a5d882da3a1d346e782048222b578ab49.html#a5d882da3a1d346e782048222b578ab49" title="Attach a timer&#45;based ISR handler." alt="" coords="607,373,753,413"/>
+<area shape="poly" id="edge15_Node000014_Node000015" title=" " alt="" coords="523,390,593,390,593,395,523,395"/>
+<area shape="rect" id="Node000016" href="$d6/d93/namespacefl_1_1isr_a7603b9e69d51c703d829c702ba9fa29a.html#a7603b9e69d51c703d829c702ba9fa29a" title="Get platform&#45;specific error description." alt="" coords="619,309,741,349"/>
+<area shape="poly" id="edge16_Node000014_Node000016" title=" " alt="" coords="511,370,605,345,607,350,512,375"/>
+<area shape="rect" id="Node000017" href="$d9/d33/namespacefl_1_1pwm__state_ae9ceab1a15258e8f61c7ca4bacba4905.html#ae9ceab1a15258e8f61c7ca4bacba4905" title=" " alt="" coords="605,437,755,477"/>
+<area shape="poly" id="edge17_Node000014_Node000017" title=" " alt="" coords="512,410,592,431,591,436,511,415"/>
+<area shape="poly" id="edge19_Node000017_Node000004" title=" " alt="" coords="753,434,788,422,936,364,1079,293,1170,239,1173,243,1081,298,939,369,790,427,755,439"/>
+<area shape="poly" id="edge18_Node000017_Node000008" title=" " alt="" coords="755,438,788,422,803,410,813,398,835,368,883,326,927,290,931,295,887,330,839,372,817,401,807,414,791,427,757,443"/>
+</map>

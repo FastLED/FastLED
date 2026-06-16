@@ -1,9 +1,9 @@
 <map id="loop" name="loop">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,5,56,31"/>
-<area shape="rect" id="Node000002" href="$d8/df9/group___noise_generation_ga46e9de1842d8977b77bee089d0f3b25c.html#ga46e9de1842d8977b77bee089d0f3b25c" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="104,5,181,31"/>
+<area shape="rect" id="Node000002" href="$d8/df9/group___noise_generation_gaa452e57f154ab8d6d692375dba1ef5cb.html#gaa452e57f154ab8d6d692375dba1ef5cb" title=" " alt="" coords="104,5,181,31"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="56,15,90,15,90,21,56,21"/>
-<area shape="rect" id="Node000003" href="$d8/df9/group___noise_generation_ga810bdc406dcf8fd5b7add9041aa18abd.html#ga810bdc406dcf8fd5b7add9041aa18abd" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="229,5,337,31"/>
+<area shape="rect" id="Node000003" href="$d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59" title=" " alt="" coords="229,5,337,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="181,15,215,15,215,21,181,21"/>
-<area shape="rect" id="Node000004" href="$d6/de8/noise_8cpp_a24cd7f7232e48b10b8bba34614a168b5.html#a24cd7f7232e48b10b8bba34614a168b5" title=" " alt="" coords="385,5,452,31"/>
+<area shape="rect" id="Node000004" href="$da/dca/noise_8cpp_8hpp_aa1191276c67b1c0264857c9d802c665b.html#aa1191276c67b1c0264857c9d802c665b" title=" " alt="" coords="385,5,452,31"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="337,15,372,15,372,21,337,21"/>
 </map>

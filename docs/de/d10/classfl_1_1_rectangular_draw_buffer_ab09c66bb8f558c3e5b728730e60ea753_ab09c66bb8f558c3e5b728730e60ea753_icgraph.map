@@ -1,5 +1,8 @@
 <map id="fl::RectangularDrawBuffer::getBlockInfo" name="fl::RectangularDrawBuffer::getBlockInfo">
-<area shape="rect" id="Node000001" title=" " alt="" coords="243,5,432,45"/>
-<area shape="rect" id="Node000002" href="$de/d10/classfl_1_1_rectangular_draw_buffer_a793464dde6e4e1a324ab46973615345c.html#a793464dde6e4e1a324ab46973615345c" title=" " alt="" coords="5,5,195,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="229,28,195,28,195,23,229,23"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="483,5,672,45"/>
+<area shape="rect" id="Node000002" href="$de/d10/classfl_1_1_rectangular_draw_buffer_ada51b33f27f50070f13473dd195d1f04.html#ada51b33f27f50070f13473dd195d1f04" title=" " alt="" coords="5,5,197,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="469,25,435,24,245,24,197,25,197,20,245,19,435,19,469,19"/>
+<area shape="rect" id="Node000003" href="$de/d10/classfl_1_1_rectangular_draw_buffer_a793464dde6e4e1a324ab46973615345c.html#a793464dde6e4e1a324ab46973615345c" title=" " alt="" coords="245,33,435,73"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="470,41,435,45,435,40,469,35"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="231,43,197,39,198,34,232,38"/>
 </map>

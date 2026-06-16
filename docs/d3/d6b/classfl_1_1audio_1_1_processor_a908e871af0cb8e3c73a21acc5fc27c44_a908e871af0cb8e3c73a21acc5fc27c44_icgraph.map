@@ -1,0 +1,28 @@
+<map id="fl::audio::Processor::getTempoAnalyzer" name="fl::audio::Processor::getTempoAnalyzer">
+<area shape="rect" id="Node000001" title=" " alt="" coords="459,169,609,209"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="569,158,556,151,534,148,514,150,503,155,498,161,500,168,495,170,493,160,499,151,513,145,534,143,558,146,571,153"/>
+<area shape="rect" id="Node000002" href="$d3/d6b/classfl_1_1audio_1_1_processor_ab7c5207b37b92f1fee14e3514d846411.html#ab7c5207b37b92f1fee14e3514d846411" title=" " alt="" coords="255,37,400,77"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="500,162,459,126,409,92,386,80,388,75,412,87,462,122,504,158"/>
+<area shape="rect" id="Node000005" href="$d3/d6b/classfl_1_1audio_1_1_processor_aa7b7d568bc201312e29f45c95f584206.html#aa7b7d568bc201312e29f45c95f584206" title=" " alt="" coords="244,125,411,165"/>
+<area shape="poly" id="edge7_Node000001_Node000005" title=" " alt="" coords="445,173,410,166,411,160,446,168"/>
+<area shape="rect" id="Node000007" href="$d3/d6b/classfl_1_1audio_1_1_processor_a7000fcfc6e42c4572538e330400df124.html#a7000fcfc6e42c4572538e330400df124" title=" " alt="" coords="255,213,400,253"/>
+<area shape="poly" id="edge11_Node000001_Node000007" title=" " alt="" coords="446,211,401,221,400,215,445,206"/>
+<area shape="rect" id="Node000009" href="$d3/d6b/classfl_1_1audio_1_1_processor_a038a4fefc21ebde68fdbe5d495472bfb.html#a038a4fefc21ebde68fdbe5d495472bfb" title=" " alt="" coords="254,301,401,341"/>
+<area shape="poly" id="edge15_Node000001_Node000009" title=" " alt="" coords="492,219,361,303,358,299,489,215"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="362,26,350,19,327,16,308,18,296,23,292,29,294,36,289,38,286,28,293,19,306,13,327,11,351,14,365,21"/>
+<area shape="rect" id="Node000003" href="$d8/dea/classfl_1_1audio_1_1_reactive_a4220bda16cc4ed64dcd5cbfee0e8d94a.html#a4220bda16cc4ed64dcd5cbfee0e8d94a" title=" " alt="" coords="31,5,170,45"/>
+<area shape="poly" id="edge4_Node000002_Node000003" title=" " alt="" coords="241,48,170,38,171,32,241,43"/>
+<area shape="rect" id="Node000004" href="$d3/d6b/classfl_1_1audio_1_1_processor_a44c9bf7e90fafc4f6bc668d7796ef27c.html#a44c9bf7e90fafc4f6bc668d7796ef27c" title=" " alt="" coords="28,93,173,133"/>
+<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="242,81,174,98,173,93,241,76"/>
+<area shape="poly" id="edge6_Node000004_Node000004" title=" " alt="" coords="139,82,126,75,101,72,79,74,66,79,61,85,63,92,58,94,56,84,63,74,78,69,101,67,127,70,142,77"/>
+<area shape="poly" id="edge10_Node000005_Node000004" title=" " alt="" coords="230,134,173,126,174,121,231,129"/>
+<area shape="poly" id="edge8_Node000005_Node000005" title=" " alt="" coords="362,114,350,107,327,104,308,106,296,111,292,117,294,124,289,126,286,116,293,107,306,101,327,99,351,102,365,109"/>
+<area shape="rect" id="Node000006" href="$d8/dea/classfl_1_1audio_1_1_reactive_a56cdf2839bd5e16a0aeaa58f75a2f39a.html#a56cdf2839bd5e16a0aeaa58f75a2f39a" title=" " alt="" coords="17,157,184,197"/>
+<area shape="poly" id="edge9_Node000005_Node000006" title=" " alt="" coords="231,162,185,168,184,163,230,156"/>
+<area shape="poly" id="edge12_Node000007_Node000007" title=" " alt="" coords="362,202,350,195,327,192,308,194,296,199,292,205,294,212,289,214,286,204,293,195,306,189,327,187,351,190,365,197"/>
+<area shape="rect" id="Node000008" href="$d3/d6b/classfl_1_1audio_1_1_processor_a4b669aaaac2d1b02b2aa3fc61e70e17b.html#a4b669aaaac2d1b02b2aa3fc61e70e17b" title=" " alt="" coords="5,257,196,297"/>
+<area shape="poly" id="edge13_Node000007_Node000008" title=" " alt="" coords="242,253,197,261,196,256,241,247"/>
+<area shape="poly" id="edge14_Node000008_Node000008" title=" " alt="" coords="139,246,126,239,101,236,79,238,66,243,61,249,63,256,58,258,56,248,63,238,78,233,101,231,127,234,142,241"/>
+<area shape="poly" id="edge17_Node000009_Node000008" title=" " alt="" coords="240,307,196,298,197,293,241,302"/>
+<area shape="poly" id="edge16_Node000009_Node000009" title=" " alt="" coords="362,290,350,283,327,280,308,282,296,287,292,293,294,300,289,302,286,292,293,283,306,277,327,275,351,278,365,285"/>
+</map>

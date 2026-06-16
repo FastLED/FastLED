@@ -1,0 +1,18 @@
+<map id="fl::ResponseSend" name="fl::ResponseSend">
+<area shape="rect" id="Node000001" title="Helper class for sending responses in async/streaming RPC methods." alt="" coords="175,387,309,412"/>
+<area shape="rect" id="Node000002" href="$de/d40/classfl_1_1json.html" title=" " alt="" coords="147,291,212,317"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,329,189,346,196,361,208,374,222,384,219,389,204,378,192,364,184,348,179,331"/>
+<area shape="rect" id="Node000003" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="97,181,227,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="170,235,180,290,175,291,165,236"/>
+<area shape="rect" id="Node000004" href="$dc/dec/structfl_1_1json__value.html" title=" " alt="" coords="5,93,113,119"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="80,127,109,155,138,179,135,183,106,159,77,131"/>
+<area shape="rect" id="Node000005" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="84,5,283,31"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="183,44,177,94,167,181,161,181,171,93,177,44"/>
+<area shape="rect" id="Node000008" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="288,93,433,119"/>
+<area shape="poly" id="edge6_Node000008_Node000005" title=" " alt="" coords="220,34,338,91,335,95,218,39"/>
+<area shape="poly" id="edge5_Node000003_Node000008" title=" " alt="" coords="325,127,203,184,201,179,323,122"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="243,284,382,324"/>
+<area shape="poly" id="edge7_Node000001_Node000009" title=" " alt="" coords="297,337,279,364,257,388,253,385,275,361,293,334"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl.html#d0/ddd/classfl_1_1function" title=" " alt="" coords="252,189,381,214"/>
+<area shape="poly" id="edge8_Node000009_Node000010" title=" " alt="" coords="318,228,316,284,311,284,313,228"/>
+</map>

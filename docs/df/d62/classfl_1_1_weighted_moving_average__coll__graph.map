@@ -1,0 +1,19 @@
+<map id="fl::WeightedMovingAverage&lt; T, N &gt;" name="fl::WeightedMovingAverage&lt; T, N &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1091,88,1291,128"/>
+<area shape="rect" id="Node000002" href="$d2/d2a/classfl_1_1detail_1_1_weighted_moving_average_impl.html" title=" " alt="" coords="804,88,996,128"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1009,105,1091,105,1091,111,1009,111"/>
+<area shape="rect" id="Node000003" href="$d9/d12/classfl_1_1circular__buffer.html" title=" " alt="" coords="265,112,396,152"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="410,126,804,109,804,115,410,131"/>
+<area shape="rect" id="Node000004" href="$d0/deb/namespace_3global_scope_4.html#d0/ddf/class_n" title=" " alt="" coords="51,19,90,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="104,34,181,48,217,58,243,68,256,83,267,98,285,110,282,114,264,102,252,86,240,73,215,63,179,54,103,39"/>
+<area shape="rect" id="Node000009" href="$d9/d12/classfl_1_1circular__buffer.html" title=" " alt="" coords="265,48,396,88"/>
+<area shape="poly" id="edge8_Node000009_Node000004" title=" " alt="" coords="103,23,167,17,205,17,242,23,271,32,298,45,296,50,269,37,241,28,204,23,168,22,104,29"/>
+<area shape="rect" id="Node000005" href="$d4/d64/classfl_1_1circular__buffer__core.html" title=" " alt="" coords="5,157,136,197"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="149,161,265,141,265,146,150,166"/>
+<area shape="rect" id="Node000007" href="$d9/d12/classfl_1_1circular__buffer.html" title=" " alt="" coords="5,76,136,116"/>
+<area shape="poly" id="edge5_Node000003_Node000007" title=" " alt="" coords="150,109,160,111,266,124,265,129,160,116,149,114"/>
+<area shape="poly" id="edge9_Node000009_Node000007" title=" " alt="" coords="149,91,241,83,265,79,265,84,242,88,150,96"/>
+<area shape="rect" id="Node000008" href="$d2/d2a/classfl_1_1detail_1_1_weighted_moving_average_impl.html" title=" " alt="" coords="484,49,676,89"/>
+<area shape="poly" id="edge6_Node000002_Node000008" title=" " alt="" coords="690,80,804,94,804,99,689,85"/>
+<area shape="poly" id="edge7_Node000008_Node000009" title=" " alt="" coords="410,66,484,66,484,71,410,71"/>
+</map>

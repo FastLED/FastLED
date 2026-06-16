@@ -1,5 +1,7 @@
 <map id="anonymous_namespace{Painter::cpp}::CalcSaturation" name="anonymous_namespace{Painter::cpp}::CalcSaturation">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,223,45"/>
-<area shape="rect" id="Node000002" href="$df/d2d/util_8cpp_a06d59f8f94c4693a77270d804881f468.html#a06d59f8f94c4693a77270d804881f468" title=" " alt="" coords="271,13,327,38"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="223,23,257,23,257,28,223,28"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,23,223,63"/>
+<area shape="rect" id="Node000002" href="$df/d2d/util_8cpp_a06d59f8f94c4693a77270d804881f468.html#a06d59f8f94c4693a77270d804881f468" title=" " alt="" coords="274,5,330,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="223,26,260,21,261,26,224,31"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="271,55,333,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="223,55,257,59,257,64,223,60"/>
 </map>

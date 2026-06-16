@@ -108,12 +108,13 @@ $(function(){initNavTree('d0/dc9/kiss__fft_8h.html','../../'); initResizable(tru
   <div class="headertitle"><div class="title">kiss_fft.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;stdlib.h&gt;</code><br />
-<code>#include &lt;stdio.h&gt;</code><br />
-<code>#include &quot;<a class="el" href="../../df/dd8/stdint_8h_source.html">fl/stdint.h</a>&quot;</code><br />
-<code>#include &lt;<a class="el" href="../../df/db1/math_8h_source.html">math.h</a>&gt;</code><br />
-<code>#include &lt;<a class="el" href="../../da/d66/string_8h_source.html">string.h</a>&gt;</code><br />
-<code>#include &lt;sys/types.h&gt;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d7/d30/cstdlib_8h_source.html">fl/stl/cstdlib.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/dd1/stdio_8h_source.html">fl/stl/stdio.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/dd8/stdint_8h_source.html">fl/stl/stdint.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/db1/math_8h_source.html">fl/math/math.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../da/d66/string_8h_source.html">fl/stl/string.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d0/d4c/malloc_8h_source.html">fl/stl/malloc.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/d78/fft__precision_8h_source.html">fft_precision.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for kiss_fft.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -126,7 +127,7 @@ $(function(){initNavTree('d0/dc9/kiss__fft_8h.html','../../'); initResizable(tru
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../da/d34/kiss__fft_8h__dep__incl.svg" width="628" height="315"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../da/d34/kiss__fft_8h__dep__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../d0/dc9/kiss__fft_8h_source.html">Go to the source code of this file.</a></p>
@@ -140,12 +141,12 @@ Classes</h2></td></tr>
 Macros</h2></td></tr>
 <tr class="memitem:a26db2f437905e35d7c8305cfd9842307" id="r_a26db2f437905e35d7c8305cfd9842307"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/dc9/kiss__fft_8h_a26db2f437905e35d7c8305cfd9842307.html#a26db2f437905e35d7c8305cfd9842307">FIXED_POINT</a>&#160;&#160;&#160;1</td></tr>
 <tr class="separator:a26db2f437905e35d7c8305cfd9842307"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a167bff53d1f15bc13289353390b7faae" id="r_a167bff53d1f15bc13289353390b7faae"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/dc9/kiss__fft_8h_a167bff53d1f15bc13289353390b7faae.html#a167bff53d1f15bc13289353390b7faae">KISS_FFT_FREE</a>&#160;&#160;&#160;free</td></tr>
-<tr class="separator:a167bff53d1f15bc13289353390b7faae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a62e86236e852945b8e120d0228377d71" id="r_a62e86236e852945b8e120d0228377d71"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/dc9/kiss__fft_8h_a62e86236e852945b8e120d0228377d71.html#a62e86236e852945b8e120d0228377d71">kiss_fft_free</a>&#160;&#160;&#160;<a class="el" href="../../d0/dc9/kiss__fft_8h_a167bff53d1f15bc13289353390b7faae.html#a167bff53d1f15bc13289353390b7faae">KISS_FFT_FREE</a></td></tr>
+<tr class="memitem:ad058ff438cbada5529d97fe33c23170c" id="r_ad058ff438cbada5529d97fe33c23170c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/dc9/kiss__fft_8h_ad058ff438cbada5529d97fe33c23170c.html#ad058ff438cbada5529d97fe33c23170c">KISS_FFT_FREE</a>(ptr)</td></tr>
+<tr class="separator:ad058ff438cbada5529d97fe33c23170c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62e86236e852945b8e120d0228377d71" id="r_a62e86236e852945b8e120d0228377d71"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/dc9/kiss__fft_8h_a62e86236e852945b8e120d0228377d71.html#a62e86236e852945b8e120d0228377d71">kiss_fft_free</a>&#160;&#160;&#160;<a class="el" href="../../d0/dc9/kiss__fft_8h_ad058ff438cbada5529d97fe33c23170c.html#ad058ff438cbada5529d97fe33c23170c">KISS_FFT_FREE</a></td></tr>
 <tr class="separator:a62e86236e852945b8e120d0228377d71"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa6e24524bfa0247ac606c950e43a9a4d" id="r_aa6e24524bfa0247ac606c950e43a9a4d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/dc9/kiss__fft_8h_aa6e24524bfa0247ac606c950e43a9a4d.html#aa6e24524bfa0247ac606c950e43a9a4d">KISS_FFT_MALLOC</a>&#160;&#160;&#160;malloc</td></tr>
-<tr class="separator:aa6e24524bfa0247ac606c950e43a9a4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afa6ff82ec4dd7d6fc9d38937c856f270" id="r_afa6ff82ec4dd7d6fc9d38937c856f270"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/dc9/kiss__fft_8h_afa6ff82ec4dd7d6fc9d38937c856f270.html#afa6ff82ec4dd7d6fc9d38937c856f270">KISS_FFT_MALLOC</a>(nbytes)</td></tr>
+<tr class="separator:afa6ff82ec4dd7d6fc9d38937c856f270"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4d9bf2d6a2ce1b061545a16faf77d337" id="r_a4d9bf2d6a2ce1b061545a16faf77d337"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/dc9/kiss__fft_8h_a4d9bf2d6a2ce1b061545a16faf77d337.html#a4d9bf2d6a2ce1b061545a16faf77d337">kiss_fft_scalar</a>&#160;&#160;&#160;int16_t</td></tr>
 <tr class="separator:a4d9bf2d6a2ce1b061545a16faf77d337"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad5d759d8e80434375e61c6a7de9aee79" id="r_ad5d759d8e80434375e61c6a7de9aee79"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/dc9/kiss__fft_8h_ad5d759d8e80434375e61c6a7de9aee79.html#ad5d759d8e80434375e61c6a7de9aee79">kiss_fftr_next_fast_size_real</a>(n)</td></tr>
@@ -160,7 +161,7 @@ Typedefs</h2></td></tr>
 Functions</h2></td></tr>
 <tr class="memitem:ab36e2bb33b74c1a7eabe3271d0916030" id="r_ab36e2bb33b74c1a7eabe3271d0916030"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/dc9/kiss__fft_8h_ab36e2bb33b74c1a7eabe3271d0916030.html#ab36e2bb33b74c1a7eabe3271d0916030">kiss_fft</a> (<a class="el" href="../../d0/dc9/kiss__fft_8h_ab8c364e12d4cbde47dca54eb4bc3ce79.html#ab8c364e12d4cbde47dca54eb4bc3ce79">kiss_fft_cfg</a> cfg, const <a class="el" href="#d4/d47/structkiss__fft__cpx">kiss_fft_cpx</a> *fin, <a class="el" href="#d4/d47/structkiss__fft__cpx">kiss_fft_cpx</a> *fout)</td></tr>
 <tr class="separator:ab36e2bb33b74c1a7eabe3271d0916030"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab5ad1560b58375ec071da45401911358" id="r_ab5ad1560b58375ec071da45401911358"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d0/dc9/kiss__fft_8h_ab8c364e12d4cbde47dca54eb4bc3ce79.html#ab8c364e12d4cbde47dca54eb4bc3ce79">kiss_fft_cfg</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/dc9/kiss__fft_8h_ab5ad1560b58375ec071da45401911358.html#ab5ad1560b58375ec071da45401911358">kiss_fft_alloc</a> (int nfft, int inverse_fft, void *mem, size_t *lenmem)</td></tr>
+<tr class="memitem:ab5ad1560b58375ec071da45401911358" id="r_ab5ad1560b58375ec071da45401911358"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d0/dc9/kiss__fft_8h_ab8c364e12d4cbde47dca54eb4bc3ce79.html#ab8c364e12d4cbde47dca54eb4bc3ce79">kiss_fft_cfg</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/dc9/kiss__fft_8h_ab5ad1560b58375ec071da45401911358.html#ab5ad1560b58375ec071da45401911358">kiss_fft_alloc</a> (int nfft, int inverse_fft, void *mem, <a class="el" href="../../d7/d84/cstddef_8h_a1ed206c22241d418bcd1746517563727.html#a1ed206c22241d418bcd1746517563727">size_t</a> *lenmem)</td></tr>
 <tr class="separator:ab5ad1560b58375ec071da45401911358"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aab7972365fc8f30a13eed91fa29172ba" id="r_aab7972365fc8f30a13eed91fa29172ba"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/dc9/kiss__fft_8h_aab7972365fc8f30a13eed91fa29172ba.html#aab7972365fc8f30a13eed91fa29172ba">kiss_fft_cleanup</a> (void)</td></tr>
 <tr class="separator:aab7972365fc8f30a13eed91fa29172ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -206,7 +207,7 @@ r</td>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_c30bdf76ce759a4eae8387be42921388.html">third_party</a></li><li class="navelem"><a class="el" href="../../dir_c23718cd009cf675cffaf984d81a2fb9.html">cq_kernel</a></li><li class="navelem"><a class="el" href="../../d0/dc9/kiss__fft_8h.html">kiss_fft.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

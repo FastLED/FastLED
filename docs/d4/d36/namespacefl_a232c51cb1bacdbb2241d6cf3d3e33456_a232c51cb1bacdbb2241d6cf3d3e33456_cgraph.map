@@ -1,0 +1,5 @@
+<map id="fl::FL_ALIGNAS" name="fl::FL_ALIGNAS">
+<area shape="rect" id="Node000001" title="Combined sin+cos result for 4 angles (raw SIMD primitives)" alt="" coords="5,5,123,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a9439569ede870eaca8e687b00bb58f4e.html#a9439569ede870eaca8e687b00bb58f4e" title="Lookup table for nibble&#45;to&#45;waveform expansion in wave3 format (32 bytes)" alt="" coords="171,5,288,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="123,15,157,15,157,21,123,21"/>
+</map>

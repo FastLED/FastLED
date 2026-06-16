@@ -1,8 +1,9 @@
 var class_c_pixel_l_e_d_controller =
 [
+    [ "CPixelLEDController", "d0/dc9/class_c_pixel_l_e_d_controller_a98332904248a7d7def424ce6239de1b4.html#a98332904248a7d7def424ce6239de1b4", null ],
     [ "CPixelLEDController", "d0/dc9/class_c_pixel_l_e_d_controller_aa4ac3acb222dd0d31563b0ac32fa2f50.html#aa4ac3acb222dd0d31563b0ac32fa2f50", null ],
     [ "lanes", "d0/dc9/class_c_pixel_l_e_d_controller_a49852a9e0d1d479a430f1843e4ee6314.html#a49852a9e0d1d479a430f1843e4ee6314", null ],
-    [ "show", "d0/dc9/class_c_pixel_l_e_d_controller_af68ac3dc99e466b6f1b71dc1f5f1bd06.html#af68ac3dc99e466b6f1b71dc1f5f1bd06", null ],
+    [ "show", "d0/dc9/class_c_pixel_l_e_d_controller_a8af733ab9cdbbc87742932cf18e22346.html#a8af733ab9cdbbc87742932cf18e22346", null ],
     [ "showColor", "d0/dc9/class_c_pixel_l_e_d_controller_aab8df51126298945b1c08385b7b4cac1.html#aab8df51126298945b1c08385b7b4cac1", null ],
     [ "showPixels", "d0/dc9/class_c_pixel_l_e_d_controller_a1ab7248c894ba95c3a71665f5bed2a17.html#a1ab7248c894ba95c3a71665f5bed2a17", null ],
     [ "LANES_VALUE", "d0/dc9/class_c_pixel_l_e_d_controller_a65eef0060cd7bae5ea9919617557d71b.html#a65eef0060cd7bae5ea9919617557d71b", null ],

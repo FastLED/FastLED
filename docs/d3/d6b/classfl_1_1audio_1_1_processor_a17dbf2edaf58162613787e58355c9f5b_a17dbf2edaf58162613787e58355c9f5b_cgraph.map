@@ -1,0 +1,11 @@
+<map id="fl::audio::Processor::getSilenceDuration" name="fl::audio::Processor::getSilenceDuration">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,160,69"/>
+<area shape="poly" id="edge5_Node000001_Node000001" title=" " alt="" coords="44,30,42,20,48,11,62,5,83,3,106,6,119,13,117,18,105,11,83,8,63,10,52,15,47,21,50,28"/>
+<area shape="rect" id="Node000002" href="$d3/d6b/classfl_1_1audio_1_1_processor_a6f773a90d5b2570b1acca89939ba0719.html#a6f773a90d5b2570b1acca89939ba0719" title=" " alt="" coords="208,29,363,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="160,47,194,47,194,52,160,52"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="248,30,246,20,252,11,265,5,285,3,309,6,321,13,319,18,307,11,285,8,266,10,255,15,251,21,253,28"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="421,7,546,33"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="362,35,406,29,407,34,363,41"/>
+<area shape="rect" id="Node000004" href="$d3/d6b/classfl_1_1audio_1_1_processor_ade806d07af52e3d281939cebce7643d5.html#ade806d07af52e3d281939cebce7643d5" title=" " alt="" coords="411,57,556,97"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="363,58,397,63,397,68,362,63"/>
+</map>

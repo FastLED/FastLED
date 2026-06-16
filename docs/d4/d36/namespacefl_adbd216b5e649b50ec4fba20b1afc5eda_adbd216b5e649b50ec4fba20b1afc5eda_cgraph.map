@@ -1,0 +1,5 @@
+<map id="fl::encodeLPD8806" name="fl::encodeLPD8806">
+<area shape="rect" id="Node000001" title="Encode pixel data in LPD8806 format." alt="" coords="5,5,148,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ae99cb3afe48ba53ade83d9046f2f1c79.html#ae99cb3afe48ba53ade83d9046f2f1c79" title="Apply LPD8806 encoding to a single color byte." alt="" coords="196,5,333,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,15,182,15,182,21,148,21"/>
+</map>

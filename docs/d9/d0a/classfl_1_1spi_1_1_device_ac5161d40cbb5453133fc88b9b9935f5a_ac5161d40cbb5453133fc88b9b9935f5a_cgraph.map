@@ -1,0 +1,5 @@
+<map id="fl::spi::Device::acquireBuffer" name="fl::spi::Device::acquireBuffer">
+<area shape="rect" id="Node000001" title="Acquire DMA&#45;capable buffer for zero&#45;copy transmission." alt="" coords="5,5,172,45"/>
+<area shape="rect" id="Node000002" href="$d9/d0a/classfl_1_1spi_1_1_device_a1186e792511c298ed4bbd1c12a180c8c.html#a1186e792511c298ed4bbd1c12a180c8c" title="Check if device is initialized and ready for use." alt="" coords="220,13,391,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="172,23,207,23,207,28,172,28"/>
+</map>

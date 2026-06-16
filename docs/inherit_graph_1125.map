@@ -1,0 +1,7 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$d4/df9/structfl_1_1_rgbww.html" title="Per&#45;strip RGBWW configuration." alt="" coords="5,31,91,56"/>
+<area shape="rect" id="Node000001" href="$d6/dd0/structfl_1_1_rgbww_default.html" title="Default RGBWW configuration: colorimetric mode at warm=2700K / cool=6500K, default profile,..." alt="" coords="139,5,272,31"/>
+<area shape="poly" id="edge320_Node000000_Node000001" title=" " alt="" coords="104,32,138,26,139,31,104,37"/>
+<area shape="rect" id="Node000002" href="$d3/d33/structfl_1_1_rgbww_invalid.html" title="Sentinel: disables RGBWW (variant should hold fl::Empty instead, but this is kept for symmetry with R..." alt="" coords="141,55,270,80"/>
+<area shape="poly" id="edge321_Node000000_Node000002" title=" " alt="" coords="105,49,141,55,140,60,104,54"/>
+</map>

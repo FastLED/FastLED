@@ -1,0 +1,7 @@
+<map id="fl::ChipsetTimingConfig::total_period_ns" name="fl::ChipsetTimingConfig::total_period_ns">
+<area shape="rect" id="Node000001" title="Get total bit period (T1 + T2 + T3)" alt="" coords="544,13,717,53"/>
+<area shape="rect" id="Node000002" href="$d1/d1d/namespaceanonymous__namespace_02_auto_research_remote_8cpp_03_a710b1924c78469e49782e39670431e2a.html#a710b1924c78469e49782e39670431e2a" title=" " alt="" coords="257,5,496,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="530,35,496,35,496,30,530,30"/>
+<area shape="rect" id="Node000003" href="$d1/d1d/namespaceanonymous__namespace_02_auto_research_remote_8cpp_03_a9f2cb291549f3f626e7185c020e42591.html#a9f2cb291549f3f626e7185c020e42591" title=" " alt="" coords="5,5,209,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="244,35,210,35,210,30,244,30"/>
+</map>

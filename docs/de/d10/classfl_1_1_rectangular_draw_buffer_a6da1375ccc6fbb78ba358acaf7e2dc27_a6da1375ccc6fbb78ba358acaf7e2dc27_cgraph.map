@@ -1,7 +1,9 @@
 <map id="fl::RectangularDrawBuffer::getLedsBufferBytesForPin" name="fl::RectangularDrawBuffer::getLedsBufferBytesForPin">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,23,203,63"/>
-<area shape="rect" id="Node000002" href="$d8/de4/classfl_1_1_slice_ab1d9efdc701eec91c7b89910cab46afe.html#ab1d9efdc701eec91c7b89910cab46afe" title=" " alt="" coords="251,5,357,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="203,28,237,24,237,29,203,33"/>
-<area shape="rect" id="Node000003" href="$d8/de4/classfl_1_1_slice_abe7b0c2539b61d18d30ee571680d5a91.html#abe7b0c2539b61d18d30ee571680d5a91" title=" " alt="" coords="253,55,355,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="203,53,239,57,238,62,203,58"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,47,203,87"/>
+<area shape="rect" id="Node000002" href="$d0/d08/classfl_1_1span_a326aa9f29859fe8a92833fd5db12c3bb.html#a326aa9f29859fe8a92833fd5db12c3bb" title=" " alt="" coords="251,5,357,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="185,45,238,31,239,37,186,50"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a44a195439ac7fa303b4b0b0c956605be.html#a44a195439ac7fa303b4b0b0c956605be" title=" " alt="" coords="258,55,350,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="203,65,244,65,244,70,203,70"/>
+<area shape="rect" id="Node000004" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="253,104,355,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="186,85,240,98,239,103,185,90"/>
 </map>

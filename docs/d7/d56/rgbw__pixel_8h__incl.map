@@ -1,0 +1,7 @@
+<map id="fl/gfx/rgbw_pixel.h" name="fl/gfx/rgbw_pixel.h">
+<area shape="rect" id="Node000001" title="Simple RGBW pixel data structure for encoders." alt="" coords="5,5,147,31"/>
+<area shape="rect" id="Node000002" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="25,79,127,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="79,31,79,65,73,65,73,31"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="17,152,135,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="79,104,79,138,73,138,73,104"/>
+</map>

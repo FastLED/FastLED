@@ -108,25 +108,26 @@ $(function(){initNavTree('d0/da8/fastled__delay_8h.html','../../'); initResizabl
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Utility functions and classes for managing delay cycles. </p>
+<dl class="deprecated"><dt><b><a class="el" href="../../da/d58/deprecated.html#_deprecated000003">Deprecated</a></b></dt><dd>Use <a class="el" href="../../dd/dee/delay_8h.html" title="Delay utilities for FastLED Includes nanosecond-precision delays, cycle counting, and microsecond del...">fl/system/delay.h</a> for new code </dd></dl>
 
 <p class="definition">Definition in file <a class="el" href="../../d0/da8/fastled__delay_8h_source.html">fastled_delay.h</a>.</p>
-</div><div class="textblock"><code>#include &quot;<a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html">FastLED.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d7/da1/fl_2types_8h_source.html">fl/types.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d4/d64/force__inline_8h_source.html">fl/force_inline.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/int.h</a>&quot;</code><br />
+</div><div class="textblock"><code>#include &quot;platforms/cycle_type.h&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d54/compiler__control_8h_source.html">fl/stl/compiler_control.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dd/dee/delay_8h_source.html">fl/system/delay.h</a>&quot;</code><br />
+<code>#include &quot;platforms/cpu_frequency.h&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for fastled_delay.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d2/d82/fastled__delay_8h__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d2/d82/fastled__delay_8h__incl.svg" width="100%" height="547"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div><div class="textblock"><div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> This graph shows which files directly or indirectly include this file:</div>
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dc/dc0/fastled__delay_8h__dep__incl.svg" width="100%" height="459"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dc/dc0/fastled__delay_8h__dep__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../d0/da8/fastled__delay_8h_source.html">Go to the source code of this file.</a></p>
@@ -139,14 +140,14 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:ab10ea4d9b506b6fec5b84a3719c96edf" id="r_ab10ea4d9b506b6fec5b84a3719c96edf"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/da8/fastled__delay_8h_ab10ea4d9b506b6fec5b84a3719c96edf.html#ab10ea4d9b506b6fec5b84a3719c96edf">__INC_FL_DELAY_H</a></td></tr>
-<tr class="separator:ab10ea4d9b506b6fec5b84a3719c96edf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a74da5cf469888e05141f063a2ec5a29c" id="r_a74da5cf469888e05141f063a2ec5a29c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/da8/fastled__delay_8h_a74da5cf469888e05141f063a2ec5a29c.html#a74da5cf469888e05141f063a2ec5a29c">__INC_FASTLED_DELAY_H</a></td></tr>
+<tr class="separator:a74da5cf469888e05141f063a2ec5a29c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Some timing related macros/definitions</div></td></tr>
 <tr class="memitem:ae98c481f90653827c3a8af0edb59e195" id="r_ae98c481f90653827c3a8af0edb59e195"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/da8/fastled__delay_8h_ae98c481f90653827c3a8af0edb59e195.html#ae98c481f90653827c3a8af0edb59e195">CLKS_TO_MICROS</a>(_CLKS)</td></tr>
 <tr class="memdesc:ae98c481f90653827c3a8af0edb59e195"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert from number of clock cycles to microseconds.  <br /></td></tr>
 <tr class="separator:ae98c481f90653827c3a8af0edb59e195"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af4eefef410bd123f2a8b201a28c2352f" id="r_af4eefef410bd123f2a8b201a28c2352f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/da8/fastled__delay_8h_af4eefef410bd123f2a8b201a28c2352f.html#af4eefef410bd123f2a8b201a28c2352f">F_CPU_MHZ</a>&#160;&#160;&#160;(F_CPU / 1000000L)</td></tr>
-<tr class="memdesc:af4eefef410bd123f2a8b201a28c2352f"><td class="mdescLeft">&#160;</td><td class="mdescRight">CPU speed, in megahertz (MHz)  <br /></td></tr>
+<tr class="memitem:af4eefef410bd123f2a8b201a28c2352f" id="r_af4eefef410bd123f2a8b201a28c2352f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/da8/fastled__delay_8h_af4eefef410bd123f2a8b201a28c2352f.html#af4eefef410bd123f2a8b201a28c2352f">F_CPU_MHZ</a>&#160;&#160;&#160;(GET_CPU_FREQUENCY() / 1000000L)</td></tr>
+<tr class="memdesc:af4eefef410bd123f2a8b201a28c2352f"><td class="mdescLeft">&#160;</td><td class="mdescRight">CPU speed, in megahertz (MHz) - compile-time constant Uses GET_CPU_FREQUENCY() from platforms/cpu_frequency.h which provides a compile-time constant value, avoiding issues with platforms like STM32duino where F_CPU may be defined as a runtime variable (SystemCoreClock)  <br /></td></tr>
 <tr class="separator:af4eefef410bd123f2a8b201a28c2352f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acd145d740ef1b06533fce6d4659401a2" id="r_acd145d740ef1b06533fce6d4659401a2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/da8/fastled__delay_8h_acd145d740ef1b06533fce6d4659401a2.html#acd145d740ef1b06533fce6d4659401a2">NO_TIME</a>(A,  B,  C)</td></tr>
 <tr class="memdesc:acd145d740ef1b06533fce6d4659401a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Macro for making sure there's enough time available.  <br /></td></tr>
@@ -154,26 +155,6 @@ Macros</h2></td></tr>
 <tr class="memitem:a3c2d7a356c40ef25cfcaaad8556a71c2" id="r_a3c2d7a356c40ef25cfcaaad8556a71c2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/da8/fastled__delay_8h_a3c2d7a356c40ef25cfcaaad8556a71c2.html#a3c2d7a356c40ef25cfcaaad8556a71c2">NS</a>(_NS)</td></tr>
 <tr class="memdesc:a3c2d7a356c40ef25cfcaaad8556a71c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert from nanoseconds to number of clock cycles.  <br /></td></tr>
 <tr class="separator:a3c2d7a356c40ef25cfcaaad8556a71c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader">Clock cycle counted delay loop</h2></td></tr>
-<tr class="memitem:acdd14fccd97b45d3d566c95bff28ed76" id="r_acdd14fccd97b45d3d566c95bff28ed76"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="../../d4/d36/namespacefl_aa843289f533888e0bf8c45e599cf4ae4.html#aa843289f533888e0bf8c45e599cf4ae4">fl::cycle_t</a> CYCLES&gt; </td></tr>
-<tr class="memitem:acdd14fccd97b45d3d566c95bff28ed76"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d0/da8/fastled__delay_8h_acdd14fccd97b45d3d566c95bff28ed76.html#acdd14fccd97b45d3d566c95bff28ed76">delaycycles</a> ()</td></tr>
-<tr class="memdesc:acdd14fccd97b45d3d566c95bff28ed76"><td class="mdescLeft">&#160;</td><td class="mdescRight">Delay N clock cycles.  <br /></td></tr>
-<tr class="separator:acdd14fccd97b45d3d566c95bff28ed76"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a09be4e640c4988800c829b08b66723e5" id="r_a09be4e640c4988800c829b08b66723e5"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="../../d4/d36/namespacefl_aa843289f533888e0bf8c45e599cf4ae4.html#aa843289f533888e0bf8c45e599cf4ae4">fl::cycle_t</a> CYCLES&gt; </td></tr>
-<tr class="memitem:a09be4e640c4988800c829b08b66723e5"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d0/da8/fastled__delay_8h_a09be4e640c4988800c829b08b66723e5.html#a09be4e640c4988800c829b08b66723e5">delaycycles</a> ()</td></tr>
-<tr class="memdesc:a09be4e640c4988800c829b08b66723e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Delay N clock cycles.  <br /></td></tr>
-<tr class="separator:a09be4e640c4988800c829b08b66723e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a76328edb9ea1a1f017567ff835247d2d" id="r_a76328edb9ea1a1f017567ff835247d2d"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="../../d4/d36/namespacefl_aa843289f533888e0bf8c45e599cf4ae4.html#aa843289f533888e0bf8c45e599cf4ae4">fl::cycle_t</a> CYCLES&gt; </td></tr>
-<tr class="memitem:a76328edb9ea1a1f017567ff835247d2d"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d0/da8/fastled__delay_8h_a76328edb9ea1a1f017567ff835247d2d.html#a76328edb9ea1a1f017567ff835247d2d">delaycycles_min1</a> ()</td></tr>
-<tr class="memdesc:a76328edb9ea1a1f017567ff835247d2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">A variant of <a class="el" href="../../d0/da8/fastled__delay_8h_acdd14fccd97b45d3d566c95bff28ed76.html#acdd14fccd97b45d3d566c95bff28ed76" title="Delay N clock cycles.">delaycycles</a> that will always delay at least one cycle.  <br /></td></tr>
-<tr class="separator:a76328edb9ea1a1f017567ff835247d2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeb6476a23d9ef4d70d86b8c37344e39c" id="r_aeb6476a23d9ef4d70d86b8c37344e39c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/da8/fastled__delay_8h_aeb6476a23d9ef4d70d86b8c37344e39c.html#aeb6476a23d9ef4d70d86b8c37344e39c">FL_NOP</a>&#160;&#160;&#160;__asm__ __volatile__ (&quot;nop\n&quot;);</td></tr>
-<tr class="memdesc:aeb6476a23d9ef4d70d86b8c37344e39c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Single no operation ("no-op") instruction for delay.  <br /></td></tr>
-<tr class="separator:aeb6476a23d9ef4d70d86b8c37344e39c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a25a701b693218049c1c74b422353f8d9" id="r_a25a701b693218049c1c74b422353f8d9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/da8/fastled__delay_8h_a25a701b693218049c1c74b422353f8d9.html#a25a701b693218049c1c74b422353f8d9">FL_NOP2</a>&#160;&#160;&#160;__asm__ __volatile__ (&quot;nop\n\t nop\n&quot;);</td></tr>
-<tr class="memdesc:a25a701b693218049c1c74b422353f8d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Double no operation ("no-op") instruction for delay.  <br /></td></tr>
-<tr class="separator:a25a701b693218049c1c74b422353f8d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -182,7 +163,7 @@ Macros</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d0/da8/fastled__delay_8h.html">fastled_delay.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

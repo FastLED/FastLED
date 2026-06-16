@@ -1,0 +1,10 @@
+<map id="fl::audio::fft::Context::computeLogRebinNormFactors" name="fl::audio::fft::Context::computeLogRebinNormFactors">
+<area shape="rect" id="Node000001" title=" " alt="" coords="411,37,640,77"/>
+<area shape="rect" id="Node000002" href="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a2dbe052a76c3a2e57c9992dfd3def6f3.html#a2dbe052a76c3a2e57c9992dfd3def6f3" title=" " alt="" coords="208,5,363,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="397,43,362,38,363,33,398,38"/>
+<area shape="rect" id="Node000004" href="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_aa18665fa11fd20a61dbaacdedf356546.html#aa18665fa11fd20a61dbaacdedf356546" title=" " alt="" coords="208,69,363,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="398,77,363,82,362,76,397,72"/>
+<area shape="rect" id="Node000003" href="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_aa9f15ea3ca14b6f9b518a1878bafae71.html#aa9f15ea3ca14b6f9b518a1878bafae71" title=" " alt="" coords="5,37,160,77"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="195,42,161,48,160,42,194,37"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="194,78,160,72,161,67,195,72"/>
+</map>

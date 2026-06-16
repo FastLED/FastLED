@@ -1,0 +1,5 @@
+<map id="fl::DigitalMultiWrite16::allSamePort" name="fl::DigitalMultiWrite16::allSamePort">
+<area shape="rect" id="Node000001" title="Check whether all active pins (non &#45;1) share the same GPIO port." alt="" coords="219,5,384,45"/>
+<area shape="rect" id="Node000002" href="$d6/d2d/classfl_1_1_digital_multi_write16_acddfa0f31daba041d8076772c5bdb8ee.html#acddfa0f31daba041d8076772c5bdb8ee" title=" " alt="" coords="5,5,171,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="205,28,171,28,171,23,205,23"/>
+</map>

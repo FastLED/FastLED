@@ -1,0 +1,12 @@
+<map id="fl::Channel" name="fl::Channel">
+<area shape="rect" id="Node000001" title="LED channel for parallel output, pretty much a CPixelLEDController but with timing and pin informatio..." alt="" coords="145,287,235,312"/>
+<area shape="rect" id="Node000002" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title=" " alt="" coords="5,197,156,237"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,243,176,284,173,289,116,248"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller.html" title=" " alt="" coords="15,5,135,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="79,45,83,197,77,197,73,45"/>
+<area shape="rect" id="Node000004" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title="Template extension of the CLEDController class." alt="" coords="97,80,270,135"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="102,37,153,78,149,82,99,42"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="150,147,101,199,97,195,147,143"/>
+<area shape="rect" id="Node000005" href="$d8/dcc/classfl_1_1_i_channel.html" title="Polymorphic identification base for any channel in the system." alt="" coords="180,205,275,230"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="219,243,198,288,193,286,214,241"/>
+</map>

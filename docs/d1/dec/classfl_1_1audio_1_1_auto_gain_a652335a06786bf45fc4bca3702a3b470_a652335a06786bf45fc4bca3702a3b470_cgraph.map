@@ -1,0 +1,5 @@
+<map id="fl::audio::AutoGain::applyGain" name="fl::audio::AutoGain::applyGain">
+<area shape="rect" id="Node000001" title="Apply gain to audio samples." alt="" coords="5,5,148,45"/>
+<area shape="rect" id="Node000002" href="$d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c" title=" " alt="" coords="196,13,351,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,23,182,23,182,28,148,28"/>
+</map>

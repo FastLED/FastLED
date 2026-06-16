@@ -1,7 +1,9 @@
 <map id="fl::Tile2x2_u8::MaxTile" name="fl::Tile2x2_u8::MaxTile">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,175,56"/>
-<area shape="rect" id="Node000002" href="$d0/d2b/classfl_1_1_tile2x2__u8_afb1909069b64b353746728e101881cfc.html#afb1909069b64b353746728e101881cfc" title=" " alt="" coords="223,5,411,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,31,209,27,209,33,175,37"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,175,80"/>
+<area shape="rect" id="Node000002" href="$d0/d2b/classfl_1_1_tile2x2__u8_ae5fc47e841995003a71436cec5ebfb33.html#ae5fc47e841995003a71436cec5ebfb33" title=" " alt="" coords="223,5,411,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,52,244,31,245,36,150,57"/>
 <area shape="rect" id="Node000003" href="$d0/d2b/classfl_1_1_tile2x2__u8_a53d97221d08a4fc65b1a9bc28a908efd.html#a53d97221d08a4fc65b1a9bc28a908efd" title=" " alt="" coords="251,55,382,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="175,50,238,56,237,62,174,55"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="175,65,237,65,237,70,175,70"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="283,104,350,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="150,77,270,104,269,109,148,83"/>
 </map>

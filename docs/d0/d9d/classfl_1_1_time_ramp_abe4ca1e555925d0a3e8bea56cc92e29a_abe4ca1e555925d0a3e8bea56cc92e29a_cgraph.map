@@ -1,0 +1,9 @@
+<map id="fl::TimeRamp::update8" name="fl::TimeRamp::update8">
+<area shape="rect" id="Node000001" title="Compute current 0–255 output based on how much time has elapsed since trigger()." alt="" coords="5,31,176,56"/>
+<area shape="rect" id="Node000002" href="$d0/d9d/classfl_1_1_time_ramp_acb104aadbb7e7819eaf47c2f1b18ef01.html#acb104aadbb7e7819eaf47c2f1b18ef01" title=" " alt="" coords="224,5,393,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,31,210,27,211,32,177,36"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ac0cd0d573e17e7ec37d4d81dffff708f.html#ac0cd0d573e17e7ec37d4d81dffff708f" title=" " alt="" coords="249,55,368,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="177,50,236,57,235,62,176,55"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a3cdd970ae1ac06323addaec93ae7d4b9.html#a3cdd970ae1ac06323addaec93ae7d4b9" title=" " alt="" coords="441,55,504,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="368,65,427,65,427,70,368,70"/>
+</map>

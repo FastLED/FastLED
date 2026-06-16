@@ -1,0 +1,13 @@
+digraph "/home/runner/work/FastLED/FastLED/examples/SpecialDrivers/Teensy/OctoWS2811/OctoWS2811"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  compound=true
+  subgraph clusterdir_0158ba18d277bf8b9e402f3cae91727e {
+    graph [ bgcolor="#edf0f7", pencolor="grey50", label="OctoWS2811", fontname=Helvetica,fontsize=10 style="filled,dashed", URL="dir_0158ba18d277bf8b9e402f3cae91727e.html",tooltip=""]
+  dir_704669fb0ce845bca5671c3046a521d6 [label="OctoWS2811", fillcolor="#edf0f7", color="grey25", style="filled,bold", URL="dir_704669fb0ce845bca5671c3046a521d6.html",tooltip=""];
+  }
+}

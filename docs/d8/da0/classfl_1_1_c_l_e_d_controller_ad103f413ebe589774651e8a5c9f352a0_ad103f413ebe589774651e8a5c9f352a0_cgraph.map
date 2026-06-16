@@ -1,0 +1,10 @@
+<map id="fl::CLEDController::setTemperature" name="fl::CLEDController::setTemperature">
+<area shape="rect" id="Node000001" title="Set the color temperature, aka white point, for this controller." alt="" coords="5,35,141,75"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a7e91fc8f83d62c9da5e5c3d6d1bc10ce.html#a7e91fc8f83d62c9da5e5c3d6d1bc10ce" title="Protected constructor with registration mode." alt="" coords="189,35,325,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="142,52,176,52,176,57,142,57"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a9e51518d1427463dffd596c69c6f3e46.html#a9e51518d1427463dffd596c69c6f3e46" title="Add this controller to the linked list." alt="" coords="373,5,509,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="325,41,360,36,360,41,326,46"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a5e115bf146729c8868c918538feb06df.html#a5e115bf146729c8868c918538feb06df" title="Check if this controller is in the linked list." alt="" coords="557,35,693,75"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="510,34,544,39,544,44,509,39"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="557,59,509,60,373,60,339,59,339,54,373,55,509,55,557,54"/>
+</map>

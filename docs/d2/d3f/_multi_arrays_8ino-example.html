@@ -103,81 +103,224 @@ $(function(){initNavTree('d2/d3f/_multi_arrays_8ino-example.html','../../'); ini
   <div class="headertitle"><div class="title">MultiArrays.ino</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"></div>
+<div class="fragment"><div class="line"><span class="comment">// @filter: (memory is large)</span></div>
+<div class="line"></div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// MultiArrays - see https://github.com/FastLED/FastLED/wiki/Multiple-Controller-Examples for more info on</span></div>
 <div class="line"><span class="comment">// using multiple controllers.  In this example, we&#39;re going to set up three NEOPIXEL strips on three</span></div>
 <div class="line"><span class="comment">// different pins, each strip getting its own CRGB array to be played with</span></div>
 <div class="line"> </div>
-<div class="line"><span class="preprocessor">#include &lt;<a class="code" href="../../db/d97/_fast_l_e_d_8h.html">FastLED.h</a>&gt;</span></div>
+<div class="line"><span class="comment">/*</span></div>
+<div class="line"><span class="comment"> * SAFE PIN REFERENCE FOR MULTI-ARRAY PROJECTS</span></div>
+<div class="line"><span class="comment"> *</span></div>
+<div class="line"><span class="comment"> * When using multiple LED strips, choose pins carefully to avoid conflicts.</span></div>
+<div class="line"><span class="comment"> * Below are tested safe pins for common boards with sufficient memory:</span></div>
+<div class="line"><span class="comment"> *</span></div>
+<div class="line"><span class="comment"> * ESP32-DevKitC (esp32dev) - Original ESP32 WROOM-32:</span></div>
+<div class="line"><span class="comment"> *   Safe pins: 2, 4, 5, 12-19, 21-23, 25-27, 32, 33</span></div>
+<div class="line"><span class="comment"> *   Best for LED output: 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 25, 26, 27</span></div>
+<div class="line"><span class="comment"> *   Avoid: 0 (boot button), 1 (TX), 3 (RX), 6-11 (flash), 34-39 (input only)</span></div>
+<div class="line"><span class="comment"> *   Notes: GPIO 2 can cause boot issues if pulled high. Avoid strapping pins (0, 2, 5, 12, 15) if possible.</span></div>
+<div class="line"><span class="comment"> *</span></div>
+<div class="line"><span class="comment"> * ESP32-C3 (esp32-c3-devkitm-1):</span></div>
+<div class="line"><span class="comment"> *   Safe pins: 0-10 (most are safe after boot)</span></div>
+<div class="line"><span class="comment"> *   Best for LED output: 0, 1, 2, 3, 4, 5, 6, 7, 8, 10</span></div>
+<div class="line"><span class="comment"> *   Avoid: 9 (boot strapping), 18, 19 (USB if using native USB)</span></div>
+<div class="line"><span class="comment"> *   Notes: Fewer pins than ESP32, but most are GPIO capable. Pin 9 is strapping pin (keep low during boot).</span></div>
+<div class="line"><span class="comment"> *</span></div>
+<div class="line"><span class="comment"> * ESP32-S3 (esp32-s3-devkitc-1):</span></div>
+<div class="line"><span class="comment"> *   Safe pins: 1-18, 21, 38-48 (many options available)</span></div>
+<div class="line"><span class="comment"> *   Best for LED output: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 21, 38, 39, 40, 41, 42</span></div>
+<div class="line"><span class="comment"> *   Avoid: 0 (boot button), 19, 20 (USB JTAG by default), 26-32 (flash/PSRAM on some modules), 43, 44 (TX/RX)</span></div>
+<div class="line"><span class="comment"> *   Notes: Very flexible GPIO. Avoid 19/20 for USB-JTAG. Pin 1 is safe (avoids GPIO19 USB conflict).</span></div>
+<div class="line"><span class="comment"> *</span></div>
+<div class="line"><span class="comment"> * ESP32-C6:</span></div>
+<div class="line"><span class="comment"> *   Safe pins: 0-7, 15-23 (after boot)</span></div>
+<div class="line"><span class="comment"> *   Best for LED output: 0, 1, 2, 3, 4, 5, 6, 7, 15, 16, 17, 18, 19, 20, 21, 22, 23</span></div>
+<div class="line"><span class="comment"> *   Avoid: 8, 9 (strapping pins), 12, 13 (USB if using native USB)</span></div>
+<div class="line"><span class="comment"> *   Notes: Similar to C3 but with more pins. Most GPIO are multi-function capable.</span></div>
+<div class="line"><span class="comment"> *</span></div>
+<div class="line"><span class="comment"> * ESP32-P4 (if using esp32p4-devkit):</span></div>
+<div class="line"><span class="comment"> *   Safe pins: Varies by specific module - refer to your dev board documentation</span></div>
+<div class="line"><span class="comment"> *   Notes: Industrial ESP32 variant. Check your specific module&#39;s datasheet for GPIO capabilities.</span></div>
+<div class="line"><span class="comment"> *</span></div>
+<div class="line"><span class="comment"> * RP2040 (Raspberry Pi Pico):</span></div>
+<div class="line"><span class="comment"> *   Safe pins: GP0-GP22, GP26-GP28 (most GPIO pins)</span></div>
+<div class="line"><span class="comment"> *   Best for LED output: GP2-GP22 (any of these work well)</span></div>
+<div class="line"><span class="comment"> *   Avoid: GP23-GP25 (used for internal functions on Pico)</span></div>
+<div class="line"><span class="comment"> *   Notes: Very flexible - nearly all GPIO can be used. GP25 is the onboard LED on Pico.</span></div>
+<div class="line"><span class="comment"> *   No special strapping requirements. Consider leaving GP0/GP1 free for UART debugging.</span></div>
+<div class="line"><span class="comment"> *</span></div>
+<div class="line"><span class="comment"> * Teensy 4.0:</span></div>
+<div class="line"><span class="comment"> *   Safe pins: 0-23, 24-27 (some constraints), 28-33</span></div>
+<div class="line"><span class="comment"> *   Best for LED output: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23</span></div>
+<div class="line"><span class="comment"> *   Avoid: Pin 13 (onboard LED - can use but may blink), 0 (RX), consider avoiding for debugging</span></div>
+<div class="line"><span class="comment"> *   Notes: All digital pins are 3.3V. Very fast GPIO. Most pins work great for LEDs.</span></div>
+<div class="line"><span class="comment"> *</span></div>
+<div class="line"><span class="comment"> * Teensy 4.1:</span></div>
+<div class="line"><span class="comment"> *   Safe pins: 0-41, 54-57 (extensive GPIO)</span></div>
+<div class="line"><span class="comment"> *   Best for LED output: 1-12, 14-27, 28-39 (many options)</span></div>
+<div class="line"><span class="comment"> *   Avoid: Pin 13 (onboard LED), 0 (RX) if using Serial, 40-41 (I2C if using Wire)</span></div>
+<div class="line"><span class="comment"> *   Notes: Similar to 4.0 but with many more pins. Excellent for large multi-strip projects.</span></div>
+<div class="line"><span class="comment"> *</span></div>
+<div class="line"><span class="comment"> * Teensy 3.6:</span></div>
+<div class="line"><span class="comment"> *   Safe pins: 0-39, 54-57 (many GPIO available)</span></div>
+<div class="line"><span class="comment"> *   Best for LED output: 2-12, 14-23, 24-33</span></div>
+<div class="line"><span class="comment"> *   Avoid: Pin 13 (onboard LED), 0 (RX), 1 (TX) if using Serial</span></div>
+<div class="line"><span class="comment"> *   Notes: 3.3V GPIO. Good memory for multi-strip projects. Predecessor to Teensy 4.x.</span></div>
+<div class="line"><span class="comment"> *</span></div>
+<div class="line"><span class="comment"> * General Recommendations:</span></div>
+<div class="line"><span class="comment"> *   - Always test your specific board configuration before deploying</span></div>
+<div class="line"><span class="comment"> *   - Start with 2-3 strips to verify pin assignments work correctly</span></div>
+<div class="line"><span class="comment"> *   - Check for pin conflicts with other peripherals (SPI, I2C, UART)</span></div>
+<div class="line"><span class="comment"> *   - Consider power requirements separately from data pin selection</span></div>
+<div class="line"><span class="comment"> *   - For production, avoid pins needed for programming/debugging (TX, RX, USB pins)</span></div>
+<div class="line"><span class="comment"> *   - When in doubt, refer to your board&#39;s pinout diagram</span></div>
+<div class="line"><span class="comment"> *   - Use level shifters if mixing 3.3V boards with 5V LED strips (recommended for reliability)</span></div>
+<div class="line"><span class="comment"> *</span></div>
+<div class="line"><span class="comment"> * NOTE: This example uses platform-specific pin definitions to automatically</span></div>
+<div class="line"><span class="comment"> * select safe pins for your board. Finding truly &quot;universal&quot; safe pins across</span></div>
+<div class="line"><span class="comment"> * all platforms is challenging due to different architectures, boot requirements,</span></div>
+<div class="line"><span class="comment"> * and hardware constraints (strapping pins, flash interfaces, USB, etc.).</span></div>
+<div class="line"><span class="comment"> * The platform detection below handles these differences automatically.</span></div>
+<div class="line"><span class="comment"> * If you need different pins, simply define PIN_RED, PIN_GREEN, and PIN_BLUE</span></div>
+<div class="line"><span class="comment"> * before the platform detection code.</span></div>
+<div class="line"><span class="comment"> */</span></div>
+<div class="line"> </div>
+<div class="line"><span class="preprocessor">#include &lt;FastLED.h&gt;</span></div>
 <div class="line"> </div>
 <div class="line"><span class="preprocessor">#define NUM_LEDS_PER_STRIP 60</span></div>
-<div class="line"><a id="_a0" name="_a0"></a><a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_ab41a53948595e055472e1059af939fbf.html#ab41a53948595e055472e1059af939fbf">redLeds</a>[<a class="code hl_define" href="../../d6/dca/_array_of_led_arrays_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86.html#a12d6dbbf786a1b89a3cf4d23426e8d86">NUM_LEDS_PER_STRIP</a>];</div>
-<div class="line"><a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_a67146678552353381d4c462bd2700140.html#a67146678552353381d4c462bd2700140">greenLeds</a>[<a class="code hl_define" href="../../d6/dca/_array_of_led_arrays_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86.html#a12d6dbbf786a1b89a3cf4d23426e8d86">NUM_LEDS_PER_STRIP</a>];</div>
-<div class="line"><a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_a36791e56c4c2a18bf433bf2715c81185.html#a36791e56c4c2a18bf433bf2715c81185">blueLeds</a>[<a class="code hl_define" href="../../d6/dca/_array_of_led_arrays_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86.html#a12d6dbbf786a1b89a3cf4d23426e8d86">NUM_LEDS_PER_STRIP</a>];</div>
+<div class="line"><a class="code hl_typedef" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a> <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_ab41a53948595e055472e1059af939fbf.html#ab41a53948595e055472e1059af939fbf">redLeds</a>[<a class="code hl_define" href="../../d6/dca/_array_of_led_arrays_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86.html#a12d6dbbf786a1b89a3cf4d23426e8d86">NUM_LEDS_PER_STRIP</a>];</div>
+<div class="line"><a class="code hl_typedef" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a> <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_a67146678552353381d4c462bd2700140.html#a67146678552353381d4c462bd2700140">greenLeds</a>[<a class="code hl_define" href="../../d6/dca/_array_of_led_arrays_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86.html#a12d6dbbf786a1b89a3cf4d23426e8d86">NUM_LEDS_PER_STRIP</a>];</div>
+<div class="line"><a class="code hl_typedef" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a> <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_a36791e56c4c2a18bf433bf2715c81185.html#a36791e56c4c2a18bf433bf2715c81185">blueLeds</a>[<a class="code hl_define" href="../../d6/dca/_array_of_led_arrays_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86.html#a12d6dbbf786a1b89a3cf4d23426e8d86">NUM_LEDS_PER_STRIP</a>];</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Platform-specific safe pin definitions</span></div>
+<div class="line"><span class="comment">// These pins are chosen to avoid strapping pins, flash pins, USB pins, etc.</span></div>
+<div class="line"><span class="preprocessor">#if defined(ESP32)</span></div>
+<div class="line">  <span class="comment">// ESP32 variants - use universally safe pins that work across most ESP32 modules</span></div>
+<div class="line"><span class="preprocessor">  #if defined(CONFIG_IDF_TARGET_ESP32C3)</span></div>
+<div class="line">    <span class="comment">// ESP32-C3: Avoid pin 9 (strapping), use safe GPIO</span></div>
+<div class="line"><span class="preprocessor">    #define PIN_RED   2</span></div>
+<div class="line"><span class="preprocessor">    #define PIN_GREEN 3</span></div>
+<div class="line"><span class="preprocessor">    #define PIN_BLUE  4</span></div>
+<div class="line"><span class="preprocessor">  #elif defined(CONFIG_IDF_TARGET_ESP32S3)</span></div>
+<div class="line">    <span class="comment">// ESP32-S3: Use safe pins that avoid USB-JTAG (19, 20) and flash/PSRAM (26-32)</span></div>
+<div class="line"><span class="preprocessor">    #define PIN_RED   1</span></div>
+<div class="line"><span class="preprocessor">    #define PIN_GREEN 2</span></div>
+<div class="line"><span class="preprocessor">    #define PIN_BLUE  3</span></div>
+<div class="line"><span class="preprocessor">  #elif defined(CONFIG_IDF_TARGET_ESP32C6)</span></div>
+<div class="line">    <span class="comment">// ESP32-C6: Avoid strapping pins 8, 9 and USB pins 12, 13</span></div>
+<div class="line"><span class="preprocessor">    #define PIN_RED   2</span></div>
+<div class="line"><span class="preprocessor">    #define PIN_GREEN 3</span></div>
+<div class="line"><span class="preprocessor">    #define PIN_BLUE  4</span></div>
+<div class="line"><span class="preprocessor">  #elif defined(CONFIG_IDF_TARGET_ESP32C5)</span></div>
+<div class="line">    <span class="comment">// ESP32-C5: Avoid strapping pins 2, 7, 25, 27, 28, USB pins 13, 14, and flash pins 16-22</span></div>
+<div class="line"><span class="preprocessor">    #define PIN_RED   3</span></div>
+<div class="line"><span class="preprocessor">    #define PIN_GREEN 4</span></div>
+<div class="line"><span class="preprocessor">    #define PIN_BLUE  5</span></div>
+<div class="line"><span class="preprocessor">  #elif defined(CONFIG_IDF_TARGET_ESP32H2)</span></div>
+<div class="line">    <span class="comment">// ESP32-H2: Avoid flash pins 15-21, strapping pins 2, 3, 8, 9, 25, USB-Serial-JTAG 26, 27</span></div>
+<div class="line"><span class="preprocessor">    #define PIN_RED   0</span></div>
+<div class="line"><span class="preprocessor">    #define PIN_GREEN 1</span></div>
+<div class="line"><span class="preprocessor">    #define PIN_BLUE  4</span></div>
+<div class="line"><span class="preprocessor">  #elif defined(CONFIG_IDF_TARGET_ESP32C2)</span></div>
+<div class="line">    <span class="comment">// ESP32-C2: Only GPIO 0-20 available. Avoid flash pins 11-17, strapping pins 8, 9</span></div>
+<div class="line"><span class="preprocessor">    #define PIN_RED   0</span></div>
+<div class="line"><span class="preprocessor">    #define PIN_GREEN 1</span></div>
+<div class="line"><span class="preprocessor">    #define PIN_BLUE  2</span></div>
+<div class="line"><span class="preprocessor">  #else</span></div>
+<div class="line">    <span class="comment">// ESP32 classic (WROOM-32, WROVER, etc): Avoid strapping and flash pins</span></div>
+<div class="line"><span class="preprocessor">    #define PIN_RED   13</span></div>
+<div class="line"><span class="preprocessor">    #define PIN_GREEN 14</span></div>
+<div class="line"><span class="preprocessor">    #define PIN_BLUE  15</span></div>
+<div class="line"><span class="preprocessor">  #endif</span></div>
+<div class="line"><span class="preprocessor">#elif defined(ARDUINO_ARCH_RP2040)</span></div>
+<div class="line">  <span class="comment">// RP2040 (Raspberry Pi Pico): Most GPIO are safe, using mid-range pins</span></div>
+<div class="line"><span class="preprocessor">  #define PIN_RED   10</span></div>
+<div class="line"><span class="preprocessor">  #define PIN_GREEN 11</span></div>
+<div class="line"><span class="preprocessor">  #define PIN_BLUE  12</span></div>
+<div class="line"><span class="preprocessor">#elif defined(__IMXRT1062__)</span></div>
+<div class="line">  <span class="comment">// Teensy 4.0/4.1: Most pins are safe, using common GPIO</span></div>
+<div class="line"><span class="preprocessor">  #define PIN_RED   2</span></div>
+<div class="line"><span class="preprocessor">  #define PIN_GREEN 3</span></div>
+<div class="line"><span class="preprocessor">  #define PIN_BLUE  4</span></div>
+<div class="line"><span class="preprocessor">#elif defined(__MK66FX1M0__) || defined(__MK64FX512__)</span></div>
+<div class="line">  <span class="comment">// Teensy 3.6: Safe pins away from Serial</span></div>
+<div class="line"><span class="preprocessor">  #define PIN_RED   2</span></div>
+<div class="line"><span class="preprocessor">  #define PIN_GREEN 3</span></div>
+<div class="line"><span class="preprocessor">  #define PIN_BLUE  4</span></div>
+<div class="line"><span class="preprocessor">#else</span></div>
+<div class="line">  <span class="comment">// Universal fallback for other platforms (AVR, etc.)</span></div>
+<div class="line">  <span class="comment">// These are common digital pins on most Arduino boards</span></div>
+<div class="line"><span class="preprocessor">  #define PIN_RED   6</span></div>
+<div class="line"><span class="preprocessor">  #define PIN_GREEN 7</span></div>
+<div class="line"><span class="preprocessor">  #define PIN_BLUE  8</span></div>
+<div class="line"><span class="preprocessor">#endif</span></div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// For mirroring strips, all the &quot;special&quot; stuff happens just in setup.  We</span></div>
 <div class="line"><span class="comment">// just addLeds multiple times, once for each strip</span></div>
-<div class="line"><span class="keywordtype">void</span> <a id="a1" name="a1"></a><a class="code hl_function" href="../../d8/d21/_adafruit_bridge_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a>() {</div>
-<div class="line">  <span class="comment">// tell FastLED there&#39;s 60 NEOPIXEL leds on pin 10</span></div>
-<div class="line">  <a class="code hl_variable" href="../../d6/dda/_fast_l_e_d_8cpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.addLeds&lt;<a id="_a2" name="_a2"></a><a class="code hl_class" href="../../d5/d5c/class_n_e_o_p_i_x_e_l.html">NEOPIXEL</a>, 10&gt;(<a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_ab41a53948595e055472e1059af939fbf.html#ab41a53948595e055472e1059af939fbf">redLeds</a>, <a class="code hl_define" href="../../d6/dca/_array_of_led_arrays_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86.html#a12d6dbbf786a1b89a3cf4d23426e8d86">NUM_LEDS_PER_STRIP</a>);</div>
+<div class="line"><span class="keywordtype">void</span> <a id="a0" name="a0"></a><a class="code hl_function" href="../../d5/d17/_analog_output_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a>() {</div>
+<div class="line">  <span class="comment">// tell FastLED there&#39;s 60 NEOPIXEL leds on pin PIN_RED</span></div>
+<div class="line">  <a class="code hl_variable" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.addLeds&lt;NEOPIXEL, <a class="code hl_define" href="../../d1/d65/_multi_arrays_8ino_adfd4cc9c192282b75e285eefe051b4d8.html#adfd4cc9c192282b75e285eefe051b4d8">PIN_RED</a>&gt;(<a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_ab41a53948595e055472e1059af939fbf.html#ab41a53948595e055472e1059af939fbf">redLeds</a>, <a class="code hl_define" href="../../d6/dca/_array_of_led_arrays_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86.html#a12d6dbbf786a1b89a3cf4d23426e8d86">NUM_LEDS_PER_STRIP</a>);</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// tell FastLED there&#39;s 60 NEOPIXEL leds on pin 11</span></div>
-<div class="line">  <a class="code hl_variable" href="../../d6/dda/_fast_l_e_d_8cpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.addLeds&lt;<a class="code hl_class" href="../../d5/d5c/class_n_e_o_p_i_x_e_l.html">NEOPIXEL</a>, 11&gt;(<a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_a67146678552353381d4c462bd2700140.html#a67146678552353381d4c462bd2700140">greenLeds</a>, <a class="code hl_define" href="../../d6/dca/_array_of_led_arrays_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86.html#a12d6dbbf786a1b89a3cf4d23426e8d86">NUM_LEDS_PER_STRIP</a>);</div>
+<div class="line">  <span class="comment">// tell FastLED there&#39;s 60 NEOPIXEL leds on pin PIN_GREEN</span></div>
+<div class="line">  <a class="code hl_variable" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.addLeds&lt;NEOPIXEL, <a class="code hl_define" href="../../d1/d65/_multi_arrays_8ino_a6097d2615280de7b6a831e8262916dcb.html#a6097d2615280de7b6a831e8262916dcb">PIN_GREEN</a>&gt;(<a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_a67146678552353381d4c462bd2700140.html#a67146678552353381d4c462bd2700140">greenLeds</a>, <a class="code hl_define" href="../../d6/dca/_array_of_led_arrays_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86.html#a12d6dbbf786a1b89a3cf4d23426e8d86">NUM_LEDS_PER_STRIP</a>);</div>
 <div class="line"> </div>
-<div class="line">  <span class="comment">// tell FastLED there&#39;s 60 NEOPIXEL leds on pin 12</span></div>
-<div class="line">  <a class="code hl_variable" href="../../d6/dda/_fast_l_e_d_8cpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.addLeds&lt;<a class="code hl_class" href="../../d5/d5c/class_n_e_o_p_i_x_e_l.html">NEOPIXEL</a>, 12&gt;(<a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_a36791e56c4c2a18bf433bf2715c81185.html#a36791e56c4c2a18bf433bf2715c81185">blueLeds</a>, <a class="code hl_define" href="../../d6/dca/_array_of_led_arrays_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86.html#a12d6dbbf786a1b89a3cf4d23426e8d86">NUM_LEDS_PER_STRIP</a>);</div>
+<div class="line">  <span class="comment">// tell FastLED there&#39;s 60 NEOPIXEL leds on pin PIN_BLUE</span></div>
+<div class="line">  <a class="code hl_variable" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.addLeds&lt;NEOPIXEL, <a class="code hl_define" href="../../d1/d65/_multi_arrays_8ino_a76173092cec750a8b92990f2505e3df2.html#a76173092cec750a8b92990f2505e3df2">PIN_BLUE</a>&gt;(<a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_a36791e56c4c2a18bf433bf2715c81185.html#a36791e56c4c2a18bf433bf2715c81185">blueLeds</a>, <a class="code hl_define" href="../../d6/dca/_array_of_led_arrays_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86.html#a12d6dbbf786a1b89a3cf4d23426e8d86">NUM_LEDS_PER_STRIP</a>);</div>
 <div class="line"> </div>
 <div class="line">}</div>
 <div class="line"> </div>
-<div class="line"><span class="keywordtype">void</span> <a id="a3" name="a3"></a><a class="code hl_function" href="../../d8/d21/_adafruit_bridge_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop</a>() {</div>
+<div class="line"><span class="keywordtype">void</span> <a id="a1" name="a1"></a><a class="code hl_function" href="../../d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop</a>() {</div>
 <div class="line">  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0; i &lt; <a class="code hl_define" href="../../d6/dca/_array_of_led_arrays_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86.html#a12d6dbbf786a1b89a3cf4d23426e8d86">NUM_LEDS_PER_STRIP</a>; i++) {</div>
 <div class="line">    <span class="comment">// set our current dot to red, green, and blue</span></div>
-<div class="line">    <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_ab41a53948595e055472e1059af939fbf.html#ab41a53948595e055472e1059af939fbf">redLeds</a>[i] = <a class="code hl_enumvalue" href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99ab35114af96aa24d28e7901b1318cc43a">CRGB::Red</a>;</div>
-<div class="line">    <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_a67146678552353381d4c462bd2700140.html#a67146678552353381d4c462bd2700140">greenLeds</a>[i] = <a class="code hl_enumvalue" href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a684af7c4da07453f87c525fc009c3ec4">CRGB::Green</a>;</div>
-<div class="line">    <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_a36791e56c4c2a18bf433bf2715c81185.html#a36791e56c4c2a18bf433bf2715c81185">blueLeds</a>[i] = <a class="code hl_enumvalue" href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99ab16fc35a3771b58550363f15d2003976">CRGB::Blue</a>;</div>
-<div class="line">    <a class="code hl_variable" href="../../d6/dda/_fast_l_e_d_8cpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.show();</div>
+<div class="line">    <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_ab41a53948595e055472e1059af939fbf.html#ab41a53948595e055472e1059af939fbf">redLeds</a>[i] = <a class="code hl_enumvalue" href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9ba438f7535208e979d29ac4fb3b96cb5ce">CRGB::Red</a>;</div>
+<div class="line">    <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_a67146678552353381d4c462bd2700140.html#a67146678552353381d4c462bd2700140">greenLeds</a>[i] = <a class="code hl_enumvalue" href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9ba366aeff336f9374a595db79c77d0330b">CRGB::Green</a>;</div>
+<div class="line">    <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_a36791e56c4c2a18bf433bf2715c81185.html#a36791e56c4c2a18bf433bf2715c81185">blueLeds</a>[i] = <a class="code hl_enumvalue" href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9baa500c0dfa78aad62db9372a286f58423">CRGB::Blue</a>;</div>
+<div class="line">    <a class="code hl_variable" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.show();</div>
 <div class="line">    <span class="comment">// clear our current dot before we move on</span></div>
-<div class="line">    <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_ab41a53948595e055472e1059af939fbf.html#ab41a53948595e055472e1059af939fbf">redLeds</a>[i] = <a class="code hl_enumvalue" href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99abde6007b13c22c05d888db898ec814a7">CRGB::Black</a>;</div>
-<div class="line">    <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_a67146678552353381d4c462bd2700140.html#a67146678552353381d4c462bd2700140">greenLeds</a>[i] = <a class="code hl_enumvalue" href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99abde6007b13c22c05d888db898ec814a7">CRGB::Black</a>;</div>
-<div class="line">    <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_a36791e56c4c2a18bf433bf2715c81185.html#a36791e56c4c2a18bf433bf2715c81185">blueLeds</a>[i] = <a class="code hl_enumvalue" href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99abde6007b13c22c05d888db898ec814a7">CRGB::Black</a>;</div>
+<div class="line">    <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_ab41a53948595e055472e1059af939fbf.html#ab41a53948595e055472e1059af939fbf">redLeds</a>[i] = <a class="code hl_enumvalue" href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9bae7cccd0ac63e453ee6a924be685ce307">CRGB::Black</a>;</div>
+<div class="line">    <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_a67146678552353381d4c462bd2700140.html#a67146678552353381d4c462bd2700140">greenLeds</a>[i] = <a class="code hl_enumvalue" href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9bae7cccd0ac63e453ee6a924be685ce307">CRGB::Black</a>;</div>
+<div class="line">    <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_a36791e56c4c2a18bf433bf2715c81185.html#a36791e56c4c2a18bf433bf2715c81185">blueLeds</a>[i] = <a class="code hl_enumvalue" href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9bae7cccd0ac63e453ee6a924be685ce307">CRGB::Black</a>;</div>
 <div class="line">    delay(100);</div>
 <div class="line">  }</div>
 <div class="line"> </div>
 <div class="line">  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = <a class="code hl_define" href="../../d6/dca/_array_of_led_arrays_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86.html#a12d6dbbf786a1b89a3cf4d23426e8d86">NUM_LEDS_PER_STRIP</a>-1; i &gt;= 0; i--) {</div>
 <div class="line">    <span class="comment">// set our current dot to red, green, and blue</span></div>
-<div class="line">    <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_ab41a53948595e055472e1059af939fbf.html#ab41a53948595e055472e1059af939fbf">redLeds</a>[i] = <a class="code hl_enumvalue" href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99ab35114af96aa24d28e7901b1318cc43a">CRGB::Red</a>;</div>
-<div class="line">    <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_a67146678552353381d4c462bd2700140.html#a67146678552353381d4c462bd2700140">greenLeds</a>[i] = <a class="code hl_enumvalue" href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a684af7c4da07453f87c525fc009c3ec4">CRGB::Green</a>;</div>
-<div class="line">    <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_a36791e56c4c2a18bf433bf2715c81185.html#a36791e56c4c2a18bf433bf2715c81185">blueLeds</a>[i] = <a class="code hl_enumvalue" href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99ab16fc35a3771b58550363f15d2003976">CRGB::Blue</a>;</div>
-<div class="line">    <a class="code hl_variable" href="../../d6/dda/_fast_l_e_d_8cpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.show();</div>
+<div class="line">    <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_ab41a53948595e055472e1059af939fbf.html#ab41a53948595e055472e1059af939fbf">redLeds</a>[i] = <a class="code hl_enumvalue" href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9ba438f7535208e979d29ac4fb3b96cb5ce">CRGB::Red</a>;</div>
+<div class="line">    <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_a67146678552353381d4c462bd2700140.html#a67146678552353381d4c462bd2700140">greenLeds</a>[i] = <a class="code hl_enumvalue" href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9ba366aeff336f9374a595db79c77d0330b">CRGB::Green</a>;</div>
+<div class="line">    <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_a36791e56c4c2a18bf433bf2715c81185.html#a36791e56c4c2a18bf433bf2715c81185">blueLeds</a>[i] = <a class="code hl_enumvalue" href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9baa500c0dfa78aad62db9372a286f58423">CRGB::Blue</a>;</div>
+<div class="line">    <a class="code hl_variable" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.show();</div>
 <div class="line">    <span class="comment">// clear our current dot before we move on</span></div>
-<div class="line">    <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_ab41a53948595e055472e1059af939fbf.html#ab41a53948595e055472e1059af939fbf">redLeds</a>[i] = <a class="code hl_enumvalue" href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99abde6007b13c22c05d888db898ec814a7">CRGB::Black</a>;</div>
-<div class="line">    <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_a67146678552353381d4c462bd2700140.html#a67146678552353381d4c462bd2700140">greenLeds</a>[i] = <a class="code hl_enumvalue" href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99abde6007b13c22c05d888db898ec814a7">CRGB::Black</a>;</div>
-<div class="line">    <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_a36791e56c4c2a18bf433bf2715c81185.html#a36791e56c4c2a18bf433bf2715c81185">blueLeds</a>[i] = <a class="code hl_enumvalue" href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99abde6007b13c22c05d888db898ec814a7">CRGB::Black</a>;</div>
-<div class="line">    delay(100);</div>
+<div class="line">    <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_ab41a53948595e055472e1059af939fbf.html#ab41a53948595e055472e1059af939fbf">redLeds</a>[i] = <a class="code hl_enumvalue" href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9bae7cccd0ac63e453ee6a924be685ce307">CRGB::Black</a>;</div>
+<div class="line">    <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_a67146678552353381d4c462bd2700140.html#a67146678552353381d4c462bd2700140">greenLeds</a>[i] = <a class="code hl_enumvalue" href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9bae7cccd0ac63e453ee6a924be685ce307">CRGB::Black</a>;</div>
+<div class="line">    <a class="code hl_variable" href="../../d1/d65/_multi_arrays_8ino_a36791e56c4c2a18bf433bf2715c81185.html#a36791e56c4c2a18bf433bf2715c81185">blueLeds</a>[i] = <a class="code hl_enumvalue" href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9bae7cccd0ac63e453ee6a924be685ce307">CRGB::Black</a>;</div>
+<div class="line">    <a class="code hl_function" href="../../d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27">delay</a>(100);</div>
 <div class="line">  }</div>
 <div class="line">}</div>
-<div class="ttc" id="a_adafruit_bridge_8ino_a4fc01d736fe50cf5b977f755b675f11d_html_a4fc01d736fe50cf5b977f755b675f11d"><div class="ttname"><a href="../../d8/d21/_adafruit_bridge_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a></div><div class="ttdeci">void setup()</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d21/_adafruit_bridge_8ino_source.html#l00016">AdafruitBridge.ino:16</a></div></div>
-<div class="ttc" id="a_adafruit_bridge_8ino_afe461d27b9c48d5921c00d521181f12f_html_afe461d27b9c48d5921c00d521181f12f"><div class="ttname"><a href="../../d8/d21/_adafruit_bridge_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop</a></div><div class="ttdeci">void loop()</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d21/_adafruit_bridge_8ino_source.html#l00021">AdafruitBridge.ino:21</a></div></div>
-<div class="ttc" id="a_array_of_led_arrays_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86_html_a12d6dbbf786a1b89a3cf4d23426e8d86"><div class="ttname"><a href="../../d6/dca/_array_of_led_arrays_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86.html#a12d6dbbf786a1b89a3cf4d23426e8d86">NUM_LEDS_PER_STRIP</a></div><div class="ttdeci">#define NUM_LEDS_PER_STRIP</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dca/_array_of_led_arrays_8ino_source.html#l00013">ArrayOfLedArrays.ino:13</a></div></div>
-<div class="ttc" id="a_fast_l_e_d_8cpp_a8e94985674086ea368e1d51cbc0f82a9_html_a8e94985674086ea368e1d51cbc0f82a9"><div class="ttname"><a href="../../d6/dda/_fast_l_e_d_8cpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00074">FastLED.cpp:74</a></div></div>
-<div class="ttc" id="a_fast_l_e_d_8h_html"><div class="ttname"><a href="../../db/d97/_fast_l_e_d_8h.html">FastLED.h</a></div><div class="ttdoc">central include file for FastLED, defines the CFastLED class/object</div></div>
-<div class="ttc" id="a_multi_arrays_8ino_a36791e56c4c2a18bf433bf2715c81185_html_a36791e56c4c2a18bf433bf2715c81185"><div class="ttname"><a href="../../d1/d65/_multi_arrays_8ino_a36791e56c4c2a18bf433bf2715c81185.html#a36791e56c4c2a18bf433bf2715c81185">blueLeds</a></div><div class="ttdeci">CRGB blueLeds[NUM_LEDS_PER_STRIP]</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d65/_multi_arrays_8ino_source.html#l00014">MultiArrays.ino:14</a></div></div>
-<div class="ttc" id="a_multi_arrays_8ino_a67146678552353381d4c462bd2700140_html_a67146678552353381d4c462bd2700140"><div class="ttname"><a href="../../d1/d65/_multi_arrays_8ino_a67146678552353381d4c462bd2700140.html#a67146678552353381d4c462bd2700140">greenLeds</a></div><div class="ttdeci">CRGB greenLeds[NUM_LEDS_PER_STRIP]</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d65/_multi_arrays_8ino_source.html#l00013">MultiArrays.ino:13</a></div></div>
-<div class="ttc" id="a_multi_arrays_8ino_ab41a53948595e055472e1059af939fbf_html_ab41a53948595e055472e1059af939fbf"><div class="ttname"><a href="../../d1/d65/_multi_arrays_8ino_ab41a53948595e055472e1059af939fbf.html#ab41a53948595e055472e1059af939fbf">redLeds</a></div><div class="ttdeci">CRGB redLeds[NUM_LEDS_PER_STRIP]</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d65/_multi_arrays_8ino_source.html#l00012">MultiArrays.ino:12</a></div></div>
-<div class="ttc" id="aclass_n_e_o_p_i_x_e_l_html"><div class="ttname"><a href="../../d5/d5c/class_n_e_o_p_i_x_e_l.html">NEOPIXEL</a></div><div class="ttdoc">LED controller for WS2812 LEDs with GRB color order.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d97/_fast_l_e_d_8h_source.html#l00158">FastLED.h:158</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99_html_aeb40a08b7cb90c1e21bd408261558b99a684af7c4da07453f87c525fc009c3ec4"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a684af7c4da07453f87c525fc009c3ec4">CRGB::Green</a></div><div class="ttdeci">@ Green</div><div class="ttdoc">&lt;div style=&#39;background:#008000;width:4em;height:4em;&#39;&gt;&lt;/div&gt;</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00615">crgb.h:615</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99_html_aeb40a08b7cb90c1e21bd408261558b99ab16fc35a3771b58550363f15d2003976"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99ab16fc35a3771b58550363f15d2003976">CRGB::Blue</a></div><div class="ttdeci">@ Blue</div><div class="ttdoc">&lt;div style=&#39;background:#0000FF;width:4em;height:4em;&#39;&gt;&lt;/div&gt;</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00569">crgb.h:569</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99_html_aeb40a08b7cb90c1e21bd408261558b99ab35114af96aa24d28e7901b1318cc43a"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99ab35114af96aa24d28e7901b1318cc43a">CRGB::Red</a></div><div class="ttdeci">@ Red</div><div class="ttdoc">&lt;div style=&#39;background:#FF0000;width:4em;height:4em;&#39;&gt;&lt;/div&gt;</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00679">crgb.h:679</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99_html_aeb40a08b7cb90c1e21bd408261558b99abde6007b13c22c05d888db898ec814a7"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99abde6007b13c22c05d888db898ec814a7">CRGB::Black</a></div><div class="ttdeci">@ Black</div><div class="ttdoc">&lt;div style=&#39;background:#000000;width:4em;height:4em;&#39;&gt;&lt;/div&gt;</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00567">crgb.h:567</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00086">crgb.h:86</a></div></div>
+<div class="ttc" id="a_analog_output_8ino_a4fc01d736fe50cf5b977f755b675f11d_html_a4fc01d736fe50cf5b977f755b675f11d"><div class="ttname"><a href="../../d5/d17/_analog_output_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a></div><div class="ttdeci">void setup()</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d17/_analog_output_8ino_source.html#l00065">AnalogOutput.ino:65</a></div></div>
+<div class="ttc" id="a_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f_html_afe461d27b9c48d5921c00d521181f12f"><div class="ttname"><a href="../../d5/d17/_analog_output_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop</a></div><div class="ttdeci">void loop()</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d17/_analog_output_8ino_source.html#l00054">AnalogOutput.ino:54</a></div></div>
+<div class="ttc" id="a_array_of_led_arrays_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86_html_a12d6dbbf786a1b89a3cf4d23426e8d86"><div class="ttname"><a href="../../d6/dca/_array_of_led_arrays_8ino_a12d6dbbf786a1b89a3cf4d23426e8d86.html#a12d6dbbf786a1b89a3cf4d23426e8d86">NUM_LEDS_PER_STRIP</a></div><div class="ttdeci">#define NUM_LEDS_PER_STRIP</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dca/_array_of_led_arrays_8ino_source.html#l00015">ArrayOfLedArrays.ino:15</a></div></div>
+<div class="ttc" id="a_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9_html_a8e94985674086ea368e1d51cbc0f82a9"><div class="ttname"><a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00075">FastLED.cpp.hpp:75</a></div></div>
+<div class="ttc" id="a_multi_arrays_8ino_a36791e56c4c2a18bf433bf2715c81185_html_a36791e56c4c2a18bf433bf2715c81185"><div class="ttname"><a href="../../d1/d65/_multi_arrays_8ino_a36791e56c4c2a18bf433bf2715c81185.html#a36791e56c4c2a18bf433bf2715c81185">blueLeds</a></div><div class="ttdeci">CRGB blueLeds[NUM_LEDS_PER_STRIP]</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d65/_multi_arrays_8ino_source.html#l00093">MultiArrays.ino:93</a></div></div>
+<div class="ttc" id="a_multi_arrays_8ino_a6097d2615280de7b6a831e8262916dcb_html_a6097d2615280de7b6a831e8262916dcb"><div class="ttname"><a href="../../d1/d65/_multi_arrays_8ino_a6097d2615280de7b6a831e8262916dcb.html#a6097d2615280de7b6a831e8262916dcb">PIN_GREEN</a></div><div class="ttdeci">#define PIN_GREEN</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d65/_multi_arrays_8ino_source.html#l00154">MultiArrays.ino:154</a></div></div>
+<div class="ttc" id="a_multi_arrays_8ino_a67146678552353381d4c462bd2700140_html_a67146678552353381d4c462bd2700140"><div class="ttname"><a href="../../d1/d65/_multi_arrays_8ino_a67146678552353381d4c462bd2700140.html#a67146678552353381d4c462bd2700140">greenLeds</a></div><div class="ttdeci">CRGB greenLeds[NUM_LEDS_PER_STRIP]</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d65/_multi_arrays_8ino_source.html#l00092">MultiArrays.ino:92</a></div></div>
+<div class="ttc" id="a_multi_arrays_8ino_a76173092cec750a8b92990f2505e3df2_html_a76173092cec750a8b92990f2505e3df2"><div class="ttname"><a href="../../d1/d65/_multi_arrays_8ino_a76173092cec750a8b92990f2505e3df2.html#a76173092cec750a8b92990f2505e3df2">PIN_BLUE</a></div><div class="ttdeci">#define PIN_BLUE</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d65/_multi_arrays_8ino_source.html#l00155">MultiArrays.ino:155</a></div></div>
+<div class="ttc" id="a_multi_arrays_8ino_ab41a53948595e055472e1059af939fbf_html_ab41a53948595e055472e1059af939fbf"><div class="ttname"><a href="../../d1/d65/_multi_arrays_8ino_ab41a53948595e055472e1059af939fbf.html#ab41a53948595e055472e1059af939fbf">redLeds</a></div><div class="ttdeci">CRGB redLeds[NUM_LEDS_PER_STRIP]</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d65/_multi_arrays_8ino_source.html#l00091">MultiArrays.ino:91</a></div></div>
+<div class="ttc" id="a_multi_arrays_8ino_adfd4cc9c192282b75e285eefe051b4d8_html_adfd4cc9c192282b75e285eefe051b4d8"><div class="ttname"><a href="../../d1/d65/_multi_arrays_8ino_adfd4cc9c192282b75e285eefe051b4d8.html#adfd4cc9c192282b75e285eefe051b4d8">PIN_RED</a></div><div class="ttdeci">#define PIN_RED</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d65/_multi_arrays_8ino_source.html#l00153">MultiArrays.ino:153</a></div></div>
+<div class="ttc" id="agroup___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327_html_ga65c1895006b38f8c5114118b6a170327"><div class="ttname"><a href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a></div><div class="ttdeci">fl::CRGB CRGB</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00025">crgb.h:25</a></div></div>
+<div class="ttc" id="anamespacefl_a50131c41da2f619067d98360de35fa27_html_a50131c41da2f619067d98360de35fa27"><div class="ttname"><a href="../../d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27">fl::delay</a></div><div class="ttdeci">void delay(u32 ms, bool run_async=true) FL_NOEXCEPT</div><div class="ttdoc">Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all...</div><div class="ttdef"><b>Definition</b> <a href="../../dd/dee/delay_8h_source.html#l00098">delay.h:98</a></div></div>
+<div class="ttc" id="astructfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b_html_add5b03a29164cfe4d6e6f36185244a9ba366aeff336f9374a595db79c77d0330b"><div class="ttname"><a href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9ba366aeff336f9374a595db79c77d0330b">fl::CRGB::Green</a></div><div class="ttdeci">@ Green</div><div class="ttdoc">&lt;div style=&#39;background:#008000;width:4em;height:4em;&#39;&gt;&lt;/div&gt;</div><div class="ttdef"><b>Definition</b> <a href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00558">crgb.h:558</a></div></div>
+<div class="ttc" id="astructfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b_html_add5b03a29164cfe4d6e6f36185244a9ba438f7535208e979d29ac4fb3b96cb5ce"><div class="ttname"><a href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9ba438f7535208e979d29ac4fb3b96cb5ce">fl::CRGB::Red</a></div><div class="ttdeci">@ Red</div><div class="ttdoc">&lt;div style=&#39;background:#FF0000;width:4em;height:4em;&#39;&gt;&lt;/div&gt;</div><div class="ttdef"><b>Definition</b> <a href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00622">crgb.h:622</a></div></div>
+<div class="ttc" id="astructfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b_html_add5b03a29164cfe4d6e6f36185244a9baa500c0dfa78aad62db9372a286f58423"><div class="ttname"><a href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9baa500c0dfa78aad62db9372a286f58423">fl::CRGB::Blue</a></div><div class="ttdeci">@ Blue</div><div class="ttdoc">&lt;div style=&#39;background:#0000FF;width:4em;height:4em;&#39;&gt;&lt;/div&gt;</div><div class="ttdef"><b>Definition</b> <a href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00512">crgb.h:512</a></div></div>
+<div class="ttc" id="astructfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b_html_add5b03a29164cfe4d6e6f36185244a9bae7cccd0ac63e453ee6a924be685ce307"><div class="ttname"><a href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9bae7cccd0ac63e453ee6a924be685ce307">fl::CRGB::Black</a></div><div class="ttdeci">@ Black</div><div class="ttdoc">&lt;div style=&#39;background:#000000;width:4em;height:4em;&#39;&gt;&lt;/div&gt;</div><div class="ttdef"><b>Definition</b> <a href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00510">crgb.h:510</a></div></div>
 </div><!-- fragment --> </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:19 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:06:58 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

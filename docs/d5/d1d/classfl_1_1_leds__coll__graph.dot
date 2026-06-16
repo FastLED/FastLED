@@ -9,5 +9,9 @@ digraph "fl::Leds"
   Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mXyMap",fontcolor="grey" ];
   Node2 [id="Node000002",label="fl::XYMap",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d0/dce/classfl_1_1_x_y_map.html",tooltip=" "];
   Node3 -> Node1 [id="edge2_Node000001_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mLeds",fontcolor="grey" ];
-  Node3 [id="Node000003",label="CRGB",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b.html",tooltip="Representation of an RGB pixel (Red, Green, Blue)"];
+  Node3 [id="Node000003",label="fl::span\< fl::CRGB \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d0/d08/classfl_1_1span.html",tooltip=" "];
+  Node4 -> Node3 [id="edge3_Node000003_Node000004",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mData",fontcolor="grey" ];
+  Node4 [id="Node000004",label="fl::CRGB",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b.html",tooltip="Representation of an 8-bit RGB pixel (Red, Green, Blue)"];
+  Node5 -> Node3 [id="edge4_Node000003_Node000005",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::CRGB \>",fontcolor="grey" ];
+  Node5 [id="Node000005",label="fl::span\< T, Extent \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d0/d08/classfl_1_1span.html",tooltip=" "];
 }

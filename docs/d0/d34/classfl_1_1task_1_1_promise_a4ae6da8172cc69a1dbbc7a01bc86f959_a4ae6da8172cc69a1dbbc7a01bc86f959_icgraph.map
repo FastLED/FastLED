@@ -1,0 +1,45 @@
+<map id="fl::task::Promise::Promise" name="fl::task::Promise::Promise">
+<area shape="rect" id="Node000001" title="Default constructor &#45; creates invalid Promise." alt="" coords="697,307,832,347"/>
+<area shape="rect" id="Node000002" href="$d0/d34/classfl_1_1task_1_1_promise_a59291615f5a125ccda27b76972f7082d.html#a59291615f5a125ccda27b76972f7082d" title="Copy constructor (promises are now copyable via shared implementation)" alt="" coords="500,5,635,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="755,294,743,243,722,180,691,116,671,86,648,59,632,48,635,43,651,55,675,83,696,113,727,178,748,241,760,293"/>
+<area shape="rect" id="Node000003" href="$d0/d34/classfl_1_1task_1_1_promise_a395376cbf9ae8ef89f3d5e93ceb0d088.html#a395376cbf9ae8ef89f3d5e93ceb0d088" title="Move constructor." alt="" coords="500,69,635,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="750,294,735,255,713,210,684,164,648,123,630,112,633,107,651,119,688,160,718,207,740,253,755,293"/>
+<area shape="rect" id="Node000004" href="$d0/d34/classfl_1_1task_1_1_promise_a4cdb7be9121f0850c0714e09a594675c.html#a4cdb7be9121f0850c0714e09a594675c" title="Register error callback &#45; returns reference for chaining." alt="" coords="500,133,635,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="740,297,700,245,675,218,648,194,618,176,621,171,651,190,679,214,704,242,745,294"/>
+<area shape="rect" id="Node000005" href="$d0/d34/classfl_1_1task_1_1_promise_a9fd2b38e45453a1061acc972d64a2bed.html#a9fd2b38e45453a1061acc972d64a2bed" title="Create a pending Promise." alt="" coords="500,307,635,347"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="683,329,635,329,635,324,683,324"/>
+<area shape="rect" id="Node000008" href="$d0/d34/classfl_1_1task_1_1_promise_a9af1464fc77b450d7f501f9a9caddf8a.html#a9af1464fc77b450d7f501f9a9caddf8a" title="Create a rejected Promise with error." alt="" coords="265,243,399,283"/>
+<area shape="poly" id="edge19_Node000001_Node000008" title=" " alt="" coords="686,306,649,297,516,278,400,269,400,263,517,273,650,292,687,300"/>
+<area shape="rect" id="Node000011" href="$d0/d34/classfl_1_1task_1_1_promise_a1d7beb14a83c6bb2df0ef3775147318d.html#a1d7beb14a83c6bb2df0ef3775147318d" title="Create a rejected Promise with error message." alt="" coords="25,183,159,223"/>
+<area shape="poly" id="edge20_Node000001_Node000011" title=" " alt="" coords="720,302,686,283,648,268,583,249,516,233,380,214,257,205,159,204,160,198,257,200,381,209,517,228,585,243,650,263,688,279,722,297"/>
+<area shape="rect" id="Node000012" href="$d0/d34/classfl_1_1task_1_1_promise_a70811e463c0161394aae6e29b442b266.html#a70811e463c0161394aae6e29b442b266" title="Create a resolved Promise with value." alt="" coords="265,499,399,539"/>
+<area shape="poly" id="edge21_Node000001_Node000012" title=" " alt="" coords="685,352,563,389,514,406,487,418,472,435,464,452,456,471,439,489,401,508,399,503,436,485,451,468,459,450,467,432,484,414,512,401,561,384,683,347"/>
+<area shape="rect" id="Node000034" href="$d0/d34/classfl_1_1task_1_1_promise_a71f127c9ade421a1dd5203fc4f2cd113.html#a71f127c9ade421a1dd5203fc4f2cd113" title="Create a resolved Promise with value (move version)" alt="" coords="265,563,399,603"/>
+<area shape="poly" id="edge22_Node000001_Node000034" title=" " alt="" coords="735,358,696,390,651,418,626,428,604,433,564,436,527,441,508,448,487,462,470,483,464,506,457,529,439,553,421,565,400,573,398,568,418,560,436,549,452,527,459,504,465,481,484,458,505,444,526,435,564,430,603,428,625,423,648,414,693,385,731,354"/>
+<area shape="rect" id="Node000037" href="$d0/d34/classfl_1_1task_1_1_promise_a030a4ac749f53ec9529adcb0568ac8b2.html#a030a4ac749f53ec9529adcb0568ac8b2" title="Copy assignment operator." alt="" coords="500,472,635,512"/>
+<area shape="poly" id="edge17_Node000001_Node000037" title=" " alt="" coords="743,359,703,407,651,455,620,474,617,470,648,451,699,404,739,356"/>
+<area shape="rect" id="Node000038" href="$d0/d34/classfl_1_1task_1_1_promise_ab3654898f6d6faf95c000644e76d826f.html#ab3654898f6d6faf95c000644e76d826f" title="Move assignment operator." alt="" coords="500,536,635,576"/>
+<area shape="poly" id="edge18_Node000001_Node000038" title=" " alt="" coords="755,361,739,398,717,443,687,487,651,526,633,538,630,534,648,522,683,484,712,440,734,396,750,359"/>
+<area shape="rect" id="Node000039" href="$d0/d34/classfl_1_1task_1_1_promise_a6bf5459206f37ac5027db4f9a27a1b24.html#a6bf5459206f37ac5027db4f9a27a1b24" title="Register success callback &#45; returns reference for chaining." alt="" coords="485,601,649,626"/>
+<area shape="poly" id="edge23_Node000001_Node000039" title=" " alt="" coords="761,361,749,411,728,473,696,536,675,564,651,590,631,603,628,598,648,586,671,561,692,533,723,471,744,410,755,360"/>
+<area shape="rect" id="Node000006" href="$db/d63/class_auto_research_remote_control_abb6600e8a1e8c4ef46ba29e7bd3b78b4.html#abb6600e8a1e8c4ef46ba29e7bd3b78b4" title="Register all RPC functions with shared autoresearch state." alt="" coords="227,435,437,475"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="505,356,487,367,473,382,464,396,455,411,439,425,416,437,414,432,436,420,451,407,460,393,469,379,484,363,502,351"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="486,307,399,283,400,278,487,302"/>
+<area shape="poly" id="edge11_Node000005_Node000012" title=" " alt="" coords="500,356,487,367,476,382,470,397,465,428,460,458,452,473,439,489,421,501,401,510,399,505,418,497,436,485,448,470,455,456,460,427,465,396,471,380,483,364,497,352"/>
+<area shape="poly" id="edge14_Node000005_Node000034" title=" " alt="" coords="536,358,510,386,488,417,473,455,469,488,462,520,453,536,439,553,421,566,400,575,398,570,418,561,436,549,449,533,457,518,464,487,468,453,483,415,506,382,532,354"/>
+<area shape="rect" id="Node000035" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a5268be2c592ea322ab9e4b7612bda7f7.html#a5268be2c592ea322ab9e4b7612bda7f7" title="Send a pre&#45;built JSON&#45;RPC request." alt="" coords="244,371,420,411"/>
+<area shape="poly" id="edge15_Node000005_Node000035" title=" " alt="" coords="488,351,407,373,405,368,486,346"/>
+<area shape="rect" id="Node000036" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a31df9c89b9d57c3e277973d4021f8adc.html#a31df9c89b9d57c3e277973d4021f8adc" title="Send a streaming pre&#45;built JSON&#45;RPC request." alt="" coords="244,307,420,347"/>
+<area shape="poly" id="edge16_Node000005_Node000036" title=" " alt="" coords="486,329,420,329,420,324,486,324"/>
+<area shape="rect" id="Node000007" href="$dd/dc8/_auto_research_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="63,442,121,467"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="213,457,122,457,122,452,213,452"/>
+<area shape="rect" id="Node000009" href="$db/d5c/namespacefl_1_1task_a0b58138871d6ab845d072723971b393d.html#a0b58138871d6ab845d072723971b393d" title="Convenience function to create a rejected Promise (const char* overload)" alt="" coords="7,311,177,351"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="252,288,164,313,162,308,251,283"/>
+<area shape="rect" id="Node000010" href="$db/d5c/namespacefl_1_1task_af9b00b94fecdde360533514286ee0238.html#af9b00b94fecdde360533514286ee0238" title="Convenience function to create a rejected Promise." alt="" coords="7,247,177,287"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="251,267,177,268,177,263,251,261"/>
+<area shape="poly" id="edge10_Node000008_Node000011" title=" " alt="" coords="251,245,159,222,160,217,252,240"/>
+<area shape="rect" id="Node000013" href="$d1/d13/namespacefl_1_1net_1_1http_a957091a69596c0de70d12e178c8bd57d.html#a957091a69596c0de70d12e178c8bd57d" title="Internal helper to execute a fetch request and return a promise." alt="" coords="16,495,168,535"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="251,520,168,519,168,513,251,515"/>
+<area shape="rect" id="Node000033" href="$db/d5c/namespacefl_1_1task_aa3f17a59245199bde2c625c766db40f4.html#aa3f17a59245199bde2c625c766db40f4" title="Convenience function to create a resolved Promise." alt="" coords="5,559,179,599"/>
+<area shape="poly" id="edge13_Node000012_Node000033" title=" " alt="" coords="252,541,173,561,172,556,251,536"/>
+</map>

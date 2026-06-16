@@ -1,0 +1,19 @@
+<map id="fl::XYMap::toScreenMap" name="fl::XYMap::toScreenMap">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,104,181,129"/>
+<area shape="rect" id="Node000002" href="$d6/daf/direct_8h_a1ddd0aa76a31f81b55f0ffccc1f3d4de.html#a1ddd0aa76a31f81b55f0ffccc1f3d4de" title=" " alt="" coords="289,5,352,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,102,164,71,228,40,275,25,277,30,230,44,166,76,115,106"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="258,55,383,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="152,101,247,80,249,86,153,107"/>
+<area shape="rect" id="Node000004" href="$d0/dce/classfl_1_1_x_y_map_a010c25679ef2446541e665ea0746e821.html#a010c25679ef2446541e665ea0746e821" title=" " alt="" coords="235,104,406,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="182,114,222,114,222,119,182,119"/>
+<area shape="rect" id="Node000007" href="$d2/d78/classfl_1_1_screen_map_aced4058b2fbae9aa6531acb6108ad7c6.html#aced4058b2fbae9aa6531acb6108ad7c6" title=" " alt="" coords="251,153,390,179"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="153,127,249,148,247,153,152,132"/>
+<area shape="rect" id="Node000009" href="$d2/d78/classfl_1_1_screen_map_a1c8f5b29bc8fa6c2d61742f93f90167c.html#a1c8f5b29bc8fa6c2d61742f93f90167c" title="Set the source XYMap (used for pixel transformation during encoding)" alt="" coords="229,203,412,243"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="116,127,168,157,230,189,246,196,244,201,228,194,165,162,114,132"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a4da7f1b1461d0267333f18cf6d98a6aa.html#a4da7f1b1461d0267333f18cf6d98a6aa" title=" " alt="" coords="478,55,617,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="379,101,474,80,475,86,380,107"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a5c4d97d2fd230486baed612fb6cbc0f0.html#a5c4d97d2fd230486baed612fb6cbc0f0" title=" " alt="" coords="482,104,613,129"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="406,114,468,114,468,119,406,119"/>
+<area shape="rect" id="Node000008" href="$d6/d18/classfl_1_1_l_u_t_a647020c97a4947f97d31ebfe72d922f3.html#a647020c97a4947f97d31ebfe72d922f3" title=" " alt="" coords="460,153,635,179"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="390,163,446,163,446,169,390,169"/>
+</map>

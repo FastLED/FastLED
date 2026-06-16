@@ -1,5 +1,8 @@
 <map id="/home/runner/work/FastLED/FastLED/examples/Luminova/Luminova.ino" name="/home/runner/work/FastLED/FastLED/examples/Luminova/Luminova.ino">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,5,219,60"/>
-<area shape="rect" id="Node000002" href="$d1/dbc/sketch__macros_8h.html" title=" " alt="" coords="41,108,183,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="115,60,115,94,109,94,109,60"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="69,181,155,207"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="106,61,98,95,97,133,106,168,101,169,92,134,93,95,100,59"/>
+<area shape="rect" id="Node000003" href="$dc/db7/examples_2_luminova_2luminova_8h.html" title=" " alt="" coords="107,108,205,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="128,59,146,94,141,97,123,61"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="151,135,129,171,124,168,146,132"/>
 </map>

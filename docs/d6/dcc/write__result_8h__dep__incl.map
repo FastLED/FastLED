@@ -1,0 +1,19 @@
+<map id="fl/channels/spi/write_result.h" name="fl/channels/spi/write_result.h">
+<area shape="rect" id="Node000001" title="Result type for SPI write operations." alt="" coords="218,5,370,45"/>
+<area shape="rect" id="Node000002" href="$d9/df0/channels_2spi_8h.html" title="Multi&#45;lane SPI interface for LED output Hardware (SPI_HW): 1&#45;8 parallel data lanes Software (SPI_BITB..." alt="" coords="180,189,307,214"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="280,58,265,94,252,147,247,189,242,188,247,146,259,93,275,56"/>
+<area shape="rect" id="Node000009" href="$da/dc3/multi__lane__device_8h.html" title="Multi&#45;lane SPI device for 2&#45;8 independent LED strips." alt="" coords="275,93,428,133"/>
+<area shape="poly" id="edge6_Node000001_Node000009" title=" " alt="" coords="317,56,341,92,336,95,312,58"/>
+<area shape="rect" id="Node000003" href="$d0/daf/device_8cpp_8hpp.html" title=" " alt="" coords="5,269,223,295"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="214,223,135,271,132,267,211,219"/>
+<area shape="rect" id="Node000008" href="$d9/de8/spi_8cpp_8hpp.html" title=" " alt="" coords="247,269,440,295"/>
+<area shape="poly" id="edge4_Node000002_Node000008" title=" " alt="" coords="271,221,330,267,327,271,267,225"/>
+<area shape="rect" id="Node000004" href="$da/d51/fl_2channels_2spi_2__build_8cpp_8hpp.html" title=" " alt="" coords="237,343,450,368"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="165,296,307,340,305,345,163,301"/>
+<area shape="poly" id="edge5_Node000008_Node000004" title=" " alt="" coords="346,308,346,343,341,343,341,308"/>
+<area shape="poly" id="edge7_Node000009_Node000002" title=" " alt="" coords="319,144,260,190,257,186,315,140"/>
+<area shape="poly" id="edge10_Node000009_Node000008" title=" " alt="" coords="352,147,347,269,341,269,347,147"/>
+<area shape="rect" id="Node000010" href="$dc/d95/multi__lane__device_8cpp_8hpp.html" title=" " alt="" coords="393,181,555,221"/>
+<area shape="poly" id="edge8_Node000009_Node000010" title=" " alt="" coords="391,139,448,179,445,183,388,143"/>
+<area shape="poly" id="edge9_Node000010_Node000004" title=" " alt="" coords="475,236,468,266,454,296,438,313,419,326,381,345,379,340,417,322,434,309,449,293,463,265,470,234"/>
+</map>

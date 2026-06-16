@@ -1,0 +1,9 @@
+<map id="loop" name="loop">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,56,56"/>
+<area shape="rect" id="Node000002" href="$d1/dfb/colorutils_8h_a5e33a6635101019cce6b0936c9415a6f.html#a5e33a6635101019cce6b0936c9415a6f" title="Fill a range of LEDs with a rainbow of colors." alt="" coords="104,5,201,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="56,36,90,28,91,34,57,41"/>
+<area shape="rect" id="Node000003" href="$d3/d8b/_parallel___i_o_8ino_a6d4ae9ba50f9cb29cd6e9dbc1ede55ad.html#a6d4ae9ba50f9cb29cd6e9dbc1ede55ad" title="Helper: Rotate array elements." alt="" coords="122,55,183,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="57,46,109,56,108,61,56,51"/>
+<area shape="rect" id="Node000004" href="$d6/daf/direct_8h_a1ddd0aa76a31f81b55f0ffccc1f3d4de.html#a1ddd0aa76a31f81b55f0ffccc1f3d4de" title=" " alt="" coords="249,55,312,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="184,65,235,65,235,70,184,70"/>
+</map>

@@ -1,0 +1,28 @@
+<map id="fl::Channel::setGamma" name="fl::Channel::setGamma">
+<area shape="rect" id="Node000001" title="Set gamma correction value." alt="" coords="5,141,176,167"/>
+<area shape="rect" id="Node000002" href="$d5/d8b/classfl_1_1_channel_aba6af4be09d5ab9bd2bed306e4238925.html#aba6af4be09d5ab9bd2bed306e4238925" title="Protected constructor for template subclasses (e.g., ClocklessIdf5)" alt="" coords="224,116,376,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,141,210,137,211,142,176,146"/>
+<area shape="rect" id="Node000015" href="$d4/d36/namespacefl_ab48f77d450cf05f81e3cb66a588e5ae5.html#ab48f77d450cf05f81e3cb66a588e5ae5" title=" " alt="" coords="256,165,344,191"/>
+<area shape="poly" id="edge13_Node000001_Node000015" title=" " alt="" coords="176,161,242,169,242,174,176,166"/>
+<area shape="rect" id="Node000003" href="$d0/dc9/class_c_pixel_l_e_d_controller_a98332904248a7d7def424ce6239de1b4.html#a98332904248a7d7def424ce6239de1b4" title=" " alt="" coords="424,9,641,49"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="320,114,366,86,423,58,442,51,444,56,425,63,368,91,322,118"/>
+<area shape="rect" id="Node000004" href="$d5/df4/classfl_1_1_channel_data_a80140c6e38f6da20d344df2958358209.html#a80140c6e38f6da20d344df2958358209" title="Create channel transmission data (modern variant&#45;based API)" alt="" coords="447,73,618,99"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="369,113,449,99,450,104,370,119"/>
+<area shape="rect" id="Node000007" href="$d5/d8b/classfl_1_1_channel_a27ac9770da107f25ff6b2e3cbabd4f2a.html#a27ac9770da107f25ff6b2e3cbabd4f2a" title=" " alt="" coords="445,159,620,184"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="370,139,450,154,449,159,369,144"/>
+<area shape="rect" id="Node000013" href="$d5/d8b/classfl_1_1_channel_a9bec154f95cb34d5173f74f00d750a38.html#a9bec154f95cb34d5173f74f00d750a38" title=" " alt="" coords="463,232,603,257"/>
+<area shape="poly" id="edge11_Node000002_Node000013" title=" " alt="" coords="352,139,377,150,392,161,402,172,426,193,485,224,483,229,422,198,398,175,389,165,375,155,350,144"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="719,5,845,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="594,71,641,58,688,39,714,32,716,37,690,45,642,63,595,76"/>
+<area shape="rect" id="Node000006" href="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a" title=" " alt="" coords="737,55,827,80"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="618,77,723,69,724,74,618,82"/>
+<area shape="rect" id="Node000008" href="$dd/dd8/classfl_1_1_optional_ad5f53bf55f59f43884a71b107dee14c7.html#ad5f53bf55f59f43884a71b107dee14c7" title=" " alt="" coords="699,104,865,129"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="591,156,709,130,710,135,592,161"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_a00be5c89d851d3cf8f72d28097905f42.html#a00be5c89d851d3cf8f72d28097905f42" title=" " alt="" coords="735,177,829,203"/>
+<area shape="poly" id="edge8_Node000007_Node000010" title=" " alt="" coords="620,175,721,183,721,188,620,181"/>
+<area shape="rect" id="Node000011" href="$dd/dd8/classfl_1_1_optional_a1a7216013ea48bf987511dae97d2915f.html#a1a7216013ea48bf987511dae97d2915f" title=" " alt="" coords="713,227,851,252"/>
+<area shape="poly" id="edge10_Node000007_Node000011" title=" " alt="" coords="581,182,722,220,721,226,580,187"/>
+<area shape="poly" id="edge9_Node000010_Node000010" title=" " alt="" coords="742,179,733,169,738,159,754,153,782,151,817,155,827,159,831,165,826,168,823,163,816,160,782,156,755,158,741,163,738,168,746,175"/>
+<area shape="rect" id="Node000014" href="$da/d98/classfl_1_1_atomic_fake_ae7cc69cf515cdd4f11f4ed9b44b0ef83.html#ae7cc69cf515cdd4f11f4ed9b44b0ef83" title=" " alt="" coords="689,276,875,301"/>
+<area shape="poly" id="edge12_Node000013_Node000014" title=" " alt="" coords="603,254,697,271,696,276,602,260"/>
+</map>

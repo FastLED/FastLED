@@ -1,0 +1,7 @@
+<map id="fl::Server" name="fl::Server">
+<area shape="rect" id="Node000001" title="JSON&#45;RPC server with callback&#45;based I/O." alt="" coords="10,5,90,31"/>
+<area shape="rect" id="Node000002" href="$dc/ddb/classfl_1_1_remote.html" title="JSON&#45;RPC server with scheduling support." alt="" coords="5,79,95,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="53,44,53,79,47,79,47,44"/>
+<area shape="rect" id="Node000003" href="$d2/d9f/classfl_1_1_w_l_e_d.html" title="WLED&#45;specific Remote RPC extension." alt="" coords="12,152,88,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="53,118,53,152,47,152,47,118"/>
+</map>

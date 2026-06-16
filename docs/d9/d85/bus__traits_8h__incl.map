@@ -1,0 +1,26 @@
+<map id="fl/channels/bus_traits.h" name="fl/channels/bus_traits.h">
+<area shape="rect" id="Node000001" title="Per&#45;driver traits keyed on fl::Bus." alt="" coords="69,5,241,31"/>
+<area shape="rect" id="Node000002" href="$d4/d9b/bus_8h.html" title="Compile&#45;time identifier for an LED channel transmission bus." alt="" coords="401,79,531,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="206,28,403,73,402,78,205,33"/>
+<area shape="rect" id="Node000003" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="5,225,132,251"/>
+<area shape="poly" id="edge7_Node000001_Node000003" title=" " alt="" coords="137,33,108,52,76,79,46,113,26,153,24,169,29,185,48,214,44,217,24,187,19,170,21,151,42,110,72,75,105,48,134,29"/>
+<area shape="rect" id="Node000008" href="$df/d63/type__traits_8h.html" title=" " alt="" coords="87,79,223,104"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="158,31,158,65,153,65,153,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="469,105,464,142,456,162,442,179,427,187,400,194,324,209,146,231,145,226,323,203,399,189,425,182,439,175,451,159,459,140,464,104"/>
+<area shape="rect" id="Node000004" href="$d0/d1b/static__assert_8h.html" title="Portable compile&#45;time assertion wrapper." alt="" coords="279,152,429,177"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="449,106,386,147,383,142,447,102"/>
+<area shape="rect" id="Node000005" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="189,225,292,251"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="532,93,599,101,661,116,685,127,701,141,704,159,693,179,673,190,638,200,534,215,306,235,305,230,533,210,637,194,671,185,689,175,699,158,696,143,682,131,660,121,598,106,531,99"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="504,152,679,177"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="487,102,560,143,558,147,485,106"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="181,299,300,324"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="243,251,243,285,238,285,238,251"/>
+<area shape="poly" id="edge13_Node000008_Node000003" title=" " alt="" coords="104,107,65,124,48,137,35,153,30,168,33,183,50,213,46,216,28,185,25,168,30,151,45,133,63,120,102,102"/>
+<area shape="poly" id="edge14_Node000008_Node000004" title=" " alt="" coords="188,102,309,145,308,150,186,107"/>
+<area shape="rect" id="Node000009" href="$d9/d83/move_8h.html" title=" " alt="" coords="45,152,148,177"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="148,106,117,143,113,140,144,103"/>
+<area shape="rect" id="Node000010" href="$d3/d7e/int_8h.html" title=" " alt="" coords="173,152,255,177"/>
+<area shape="poly" id="edge11_Node000008_Node000010" title=" " alt="" coords="167,103,198,140,194,143,163,106"/>
+<area shape="poly" id="edge10_Node000009_Node000003" title=" " alt="" coords="95,179,81,214,76,212,90,177"/>
+<area shape="poly" id="edge12_Node000010_Node000005" title=" " alt="" coords="221,177,234,212,229,214,216,179"/>
+</map>

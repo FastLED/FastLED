@@ -1,0 +1,23 @@
+<map id="fl::Channel::create" name="fl::Channel::create">
+<area shape="rect" id="Node000001" title="Create a new channel with optional mBus driver pinning." alt="" coords="5,71,145,97"/>
+<area shape="rect" id="Node000002" href="$da/db7/structfl_1_1_channel_events_aa02eba6c71d0300625657d33cefceab9.html#aa02eba6c71d0300625657d33cefceab9" title=" " alt="" coords="209,5,352,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="120,69,196,47,198,52,121,74"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="218,71,343,97"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="146,81,204,81,204,87,146,87"/>
+<area shape="rect" id="Node000005" href="$d5/d8b/classfl_1_1_channel_a27ac9770da107f25ff6b2e3cbabd4f2a.html#a27ac9770da107f25ff6b2e3cbabd4f2a" title=" " alt="" coords="193,125,368,150"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="126,94,219,119,217,124,125,99"/>
+<area shape="rect" id="Node000003" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="418,10,581,35"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="352,22,404,21,404,26,352,27"/>
+<area shape="rect" id="Node000006" href="$dd/dd8/classfl_1_1_optional_ad5f53bf55f59f43884a71b107dee14c7.html#ad5f53bf55f59f43884a71b107dee14c7" title=" " alt="" coords="416,59,583,85"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="322,122,415,93,440,86,442,91,417,99,324,127"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a00be5c89d851d3cf8f72d28097905f42.html#a00be5c89d851d3cf8f72d28097905f42" title=" " alt="" coords="452,133,547,158"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="369,138,438,140,438,146,369,143"/>
+<area shape="rect" id="Node000009" href="$dd/dd8/classfl_1_1_optional_a1a7216013ea48bf987511dae97d2915f.html#a1a7216013ea48bf987511dae97d2915f" title=" " alt="" coords="431,182,568,207"/>
+<area shape="poly" id="edge9_Node000005_Node000009" title=" " alt="" coords="331,147,438,176,436,181,329,153"/>
+<area shape="rect" id="Node000007" href="$dd/dd8/classfl_1_1_optional_a1c6d194efbcfda4ab12e09305999b667.html#a1c6d194efbcfda4ab12e09305999b667" title=" " alt="" coords="631,59,773,85"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="583,69,617,69,617,75,583,75"/>
+<area shape="poly" id="edge8_Node000008_Node000008" title=" " alt="" coords="466,134,459,124,463,114,476,108,499,106,528,110,539,119,535,123,525,115,499,111,478,113,466,118,464,124,470,131"/>
+<area shape="rect" id="Node000010" href="$dd/dd8/classfl_1_1_optional_a0c3fe141556cad218a68e49c72ac139a.html#a0c3fe141556cad218a68e49c72ac139a" title=" " alt="" coords="643,182,761,207"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="568,192,629,192,629,197,568,197"/>
+<area shape="poly" id="edge11_Node000010_Node000010" title=" " alt="" coords="669,184,662,174,665,164,679,158,702,155,730,159,742,168,738,172,728,164,702,161,680,163,669,167,667,173,673,180"/>
+</map>

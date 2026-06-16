@@ -1,6 +1,8 @@
 var searchData=
 [
-  ['scaling_20functions_0',['Scaling Functions',['../d0/da8/group___scaling.html',1,'']]],
-  ['scaling_20functions_20that_20leave_20r1_20dirty_1',['Scaling Functions that Leave R1 Dirty',['../d0/da5/group___scaling_dirty.html',1,'']]],
-  ['sets_2',['Pixel Data Sets',['../de/d64/group___pixel_set.html',1,'']]]
+  ['safe_0',['Async Logging (ISR-Safe)',['../d5/d54/group__log__async.html',1,'']]],
+  ['sets_1',['Pixel Data Sets',['../de/d64/group___pixel_set.html',1,'']]],
+  ['shape_20noise_20functions_2',['Shape Noise Functions',['../d7/dc3/group___shape_noise.html',1,'']]],
+  ['silicon_20labs_20ezws2812_20controllers_3',['Silicon Labs ezWS2812 Controllers',['../d1/d68/group___silabs_chipsets.html',1,'']]],
+  ['sphere_20noise_20functions_4',['Sphere Noise Functions',['../df/dd3/group___sphere_noise.html',1,'']]]
 ];

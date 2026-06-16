@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: ColorPalettes</title>
+<title>FastLED: Color Palettes</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -102,20 +102,71 @@ $(function(){initNavTree('d4/d98/group___color_palettes.html','../../'); initRes
 <div class="header">
   <div class="summary">
 <a href="#groups">Topics</a>  </div>
-  <div class="headertitle"><div class="title">ColorPalettes</div></div>
+  <div class="headertitle"><div class="title">Color Palettes</div></div>
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<p>ColorUtils</p>
+<p>Functions and class definitions for color palettes.</p>
+<p>RGB palettes map an 8-bit value (0-255) to an RGB color.</p>
+<p>You can create any color palette you wish; a couple of starters are provided: ForestColors_p, CloudColors_p, LavaColors_p, OceanColors_p, RainbowColors_p, and RainbowStripeColors_p.</p>
+<p>Palettes come in the traditional 256-entry variety, which take up 768 bytes of RAM, and lightweight 16-entry varieties. The 16-entry variety automatically interpolates between its entries to produce a full 256-element color map, but at a cost of only 48 bytes of RAM.</p>
+<p>Basic operation is like this (using the 16-entry variety):</p>
+<ol type="1">
+<li>Declare your palette storage: <div class="fragment"><div class="line">CRGBPalette16 myPalette;</div>
+</div><!-- fragment --></li>
+<li><p class="startli">Fill <code>myPalette</code> with your own 16 colors, or with a preset color scheme. You can specify your 16 colors a variety of ways: </p><div class="fragment"><div class="line">CRGBPalette16 myPalette(</div>
+<div class="line">    <a class="code hl_enumvalue" href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9bae7cccd0ac63e453ee6a924be685ce307">CRGB::Black</a>,</div>
+<div class="line">    <a class="code hl_enumvalue" href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9bae7cccd0ac63e453ee6a924be685ce307">CRGB::Black</a>,</div>
+<div class="line">    <a class="code hl_enumvalue" href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9ba438f7535208e979d29ac4fb3b96cb5ce">CRGB::Red</a>,</div>
+<div class="line">    <a class="code hl_enumvalue" href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9babd32fecb3a3e2481cabd3f48ed3091f5">CRGB::Yellow</a>,</div>
+<div class="line">    <a class="code hl_enumvalue" href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9ba366aeff336f9374a595db79c77d0330b">CRGB::Green</a>,</div>
+<div class="line">    <a class="code hl_enumvalue" href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9baa500c0dfa78aad62db9372a286f58423">CRGB::Blue</a>,</div>
+<div class="line">    <a class="code hl_enumvalue" href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9bae16f1f7e0b75ee0e1910fe6c3669f690">CRGB::Purple</a>,</div>
+<div class="line">    <a class="code hl_enumvalue" href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9bae7cccd0ac63e453ee6a924be685ce307">CRGB::Black</a>,</div>
+<div class="line"> </div>
+<div class="line">    0x100000,</div>
+<div class="line">    0x200000,</div>
+<div class="line">    0x400000,</div>
+<div class="line">    0x800000,</div>
+<div class="line"> </div>
+<div class="line">    <a class="code hl_typedef" href="../../dd/dc7/group___h_s_v2_r_g_b_ga259e6d3ae92ca32d2390e7d8eaa1c7ae.html#ga259e6d3ae92ca32d2390e7d8eaa1c7ae">CHSV</a>( 30,255,255),</div>
+<div class="line">    <a class="code hl_typedef" href="../../dd/dc7/group___h_s_v2_r_g_b_ga259e6d3ae92ca32d2390e7d8eaa1c7ae.html#ga259e6d3ae92ca32d2390e7d8eaa1c7ae">CHSV</a>( 50,255,255),</div>
+<div class="line">    <a class="code hl_typedef" href="../../dd/dc7/group___h_s_v2_r_g_b_ga259e6d3ae92ca32d2390e7d8eaa1c7ae.html#ga259e6d3ae92ca32d2390e7d8eaa1c7ae">CHSV</a>( 70,255,255),</div>
+<div class="line">    <a class="code hl_typedef" href="../../dd/dc7/group___h_s_v2_r_g_b_ga259e6d3ae92ca32d2390e7d8eaa1c7ae.html#ga259e6d3ae92ca32d2390e7d8eaa1c7ae">CHSV</a>( 90,255,255)</div>
+<div class="line">);</div>
+<div class="ttc" id="agroup___h_s_v2_r_g_b_ga259e6d3ae92ca32d2390e7d8eaa1c7ae_html_ga259e6d3ae92ca32d2390e7d8eaa1c7ae"><div class="ttname"><a href="../../dd/dc7/group___h_s_v2_r_g_b_ga259e6d3ae92ca32d2390e7d8eaa1c7ae.html#ga259e6d3ae92ca32d2390e7d8eaa1c7ae">CHSV</a></div><div class="ttdeci">fl::hsv8 CHSV</div><div class="ttdef"><b>Definition</b> <a href="../../d8/dd0/chsv_8h_source.html#l00011">chsv.h:11</a></div></div>
+<div class="ttc" id="astructfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b_html_add5b03a29164cfe4d6e6f36185244a9ba366aeff336f9374a595db79c77d0330b"><div class="ttname"><a href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9ba366aeff336f9374a595db79c77d0330b">fl::CRGB::Green</a></div><div class="ttdeci">@ Green</div><div class="ttdoc">&lt;div style=&#39;background:#008000;width:4em;height:4em;&#39;&gt;&lt;/div&gt;</div><div class="ttdef"><b>Definition</b> <a href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00558">crgb.h:558</a></div></div>
+<div class="ttc" id="astructfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b_html_add5b03a29164cfe4d6e6f36185244a9ba438f7535208e979d29ac4fb3b96cb5ce"><div class="ttname"><a href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9ba438f7535208e979d29ac4fb3b96cb5ce">fl::CRGB::Red</a></div><div class="ttdeci">@ Red</div><div class="ttdoc">&lt;div style=&#39;background:#FF0000;width:4em;height:4em;&#39;&gt;&lt;/div&gt;</div><div class="ttdef"><b>Definition</b> <a href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00622">crgb.h:622</a></div></div>
+<div class="ttc" id="astructfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b_html_add5b03a29164cfe4d6e6f36185244a9baa500c0dfa78aad62db9372a286f58423"><div class="ttname"><a href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9baa500c0dfa78aad62db9372a286f58423">fl::CRGB::Blue</a></div><div class="ttdeci">@ Blue</div><div class="ttdoc">&lt;div style=&#39;background:#0000FF;width:4em;height:4em;&#39;&gt;&lt;/div&gt;</div><div class="ttdef"><b>Definition</b> <a href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00512">crgb.h:512</a></div></div>
+<div class="ttc" id="astructfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b_html_add5b03a29164cfe4d6e6f36185244a9babd32fecb3a3e2481cabd3f48ed3091f5"><div class="ttname"><a href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9babd32fecb3a3e2481cabd3f48ed3091f5">fl::CRGB::Yellow</a></div><div class="ttdeci">@ Yellow</div><div class="ttdoc">&lt;div style=&#39;background:#FFFF00;width:4em;height:4em;&#39;&gt;&lt;/div&gt;</div><div class="ttdef"><b>Definition</b> <a href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00648">crgb.h:648</a></div></div>
+<div class="ttc" id="astructfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b_html_add5b03a29164cfe4d6e6f36185244a9bae16f1f7e0b75ee0e1910fe6c3669f690"><div class="ttname"><a href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9bae16f1f7e0b75ee0e1910fe6c3669f690">fl::CRGB::Purple</a></div><div class="ttdeci">@ Purple</div><div class="ttdoc">&lt;div style=&#39;background:#800080;width:4em;height:4em;&#39;&gt;&lt;/div&gt;</div><div class="ttdef"><b>Definition</b> <a href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00621">crgb.h:621</a></div></div>
+<div class="ttc" id="astructfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b_html_add5b03a29164cfe4d6e6f36185244a9bae7cccd0ac63e453ee6a924be685ce307"><div class="ttname"><a href="../../da/dd6/structfl_1_1_c_r_g_b_add5b03a29164cfe4d6e6f36185244a9b.html#add5b03a29164cfe4d6e6f36185244a9bae7cccd0ac63e453ee6a924be685ce307">fl::CRGB::Black</a></div><div class="ttdeci">@ Black</div><div class="ttdoc">&lt;div style=&#39;background:#000000;width:4em;height:4em;&#39;&gt;&lt;/div&gt;</div><div class="ttdef"><b>Definition</b> <a href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00510">crgb.h:510</a></div></div>
+</div><!-- fragment --><p class="startli">Or you can initiaize your palette with a preset color scheme: </p><div class="fragment"><div class="line">myPalette = <a class="code hl_define" href="../../d3/d4f/group___predefined_palettes_ga74989daf3663c88b35251ae9ddf5d188.html#ga74989daf3663c88b35251ae9ddf5d188">RainbowStripesColors_p</a>;</div>
+<div class="ttc" id="agroup___predefined_palettes_ga74989daf3663c88b35251ae9ddf5d188_html_ga74989daf3663c88b35251ae9ddf5d188"><div class="ttname"><a href="../../d3/d4f/group___predefined_palettes_ga74989daf3663c88b35251ae9ddf5d188.html#ga74989daf3663c88b35251ae9ddf5d188">RainbowStripesColors_p</a></div><div class="ttdeci">#define RainbowStripesColors_p</div><div class="ttdoc">Alias of RainbowStripeColors_p.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/df9/colorpalettes_8cpp_8hpp_source.html#l00133">colorpalettes.cpp.hpp:133</a></div></div>
+</div><!-- fragment --></li>
+<li><p class="startli">Any time you want to set a pixel to a color from your palette, use <code><a class="el" href="../../d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3">ColorFromPalette()</a></code> as shown:</p>
+<div class="fragment"><div class="line"><a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> index = <span class="comment">/* any value 0-255 */</span>;</div>
+<div class="line"><a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a>[i] = <a class="code hl_function" href="../../d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3">ColorFromPalette</a>(myPalette, index);</div>
+<div class="ttc" id="a_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad_html_a83a59cb1680f896fa1c411261436d4ad"><div class="ttname"><a href="../../d6/d05/_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a></div><div class="ttdeci">fl::CRGB leds[NUM_LEDS]</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d05/_animartrix_8ino_source.html#l00093">Animartrix.ino:93</a></div></div>
+<div class="ttc" id="acolorutils_8h_a3d488dd1e2d27e99307310527e51cad3_html_a3d488dd1e2d27e99307310527e51cad3"><div class="ttname"><a href="../../d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3">ColorFromPalette</a></div><div class="ttdeci">CRGB ColorFromPalette(const CRGBPalette16 &amp;pal, fl::u8 index, fl::u8 brightness, TBlendType blendType)</div><div class="ttdef"><b>Definition</b> <a href="../../db/d4e/colorutils_8cpp_8hpp_source.html#l00395">colorutils.cpp.hpp:395</a></div></div>
+<div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
+</div><!-- fragment --><p class="startli">Even though your palette has only 16 explicily defined entries, you can use an "index" from 0-255. The 16 explicit palette entries will be spread evenly across the 0-255 range, and the intermedate values will be RGB-interpolated between adjacent explicit entries.</p>
+<p class="startli">It's easier to use than it sounds.</p>
+</li>
+</ol>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Collaboration diagram for ColorPalettes:</div>
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Collaboration diagram for Color Palettes:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d4/d98/group___color_palettes.svg" width="352" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d4/d98/group___color_palettes.svg" width="390" height="86"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="groups" name="groups"></a>
 Topics</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../da/dd2/group___gamma_funcs.html">Gamma Adjustment Functions</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d4f/group___predefined_palettes.html">Predefined Color Palettes</a></td></tr>
 <tr class="memdesc:d3/d4f/group___predefined_palettes"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stock color palettes, only included when used. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -126,7 +177,7 @@ Topics</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

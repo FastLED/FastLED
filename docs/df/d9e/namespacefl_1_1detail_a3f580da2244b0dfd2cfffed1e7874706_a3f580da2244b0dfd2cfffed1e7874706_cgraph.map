@@ -1,0 +1,7 @@
+<map id="fl::detail::spread_transpose16_symbol" name="fl::detail::spread_transpose16_symbol">
+<area shape="rect" id="Node000001" title="Transpose one symbol of 16 lanes (16 input bytes) into 16 output bytes: 8 pulses × 2 bytes,..." alt="" coords="5,23,169,63"/>
+<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail_a85251852414197ed32d0dc54ab229984.html#a85251852414197ed32d0dc54ab229984" title="Pulses 7,6,5,4 of v (byte j = bit (7&#45;j)). Depends only on the high nibble." alt="" coords="217,5,353,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="169,30,203,26,204,31,170,35"/>
+<area shape="rect" id="Node000003" href="$df/d9e/namespacefl_1_1detail_ada26c9ef5cbebfb232811412781ecec9.html#ada26c9ef5cbebfb232811412781ecec9" title="Pulses 3,2,1,0 of v (byte j = bit (3&#45;j)). Depends only on the low nibble." alt="" coords="217,55,353,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="170,51,204,55,203,60,169,56"/>
+</map>

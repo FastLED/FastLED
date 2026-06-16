@@ -1,0 +1,13 @@
+<map id="fl::PerlinParticlePunch::spawnDebrisFromMeteor" name="fl::PerlinParticlePunch::spawnDebrisFromMeteor">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,77,199,117"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="308,5,383,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="151,74,246,39,294,26,295,32,247,45,153,79"/>
+<area shape="rect" id="Node000004" href="$d2/d0d/group___random_gadb05544426b14ef8d85fb2eb73cb8a0a.html#gadb05544426b14ef8d85fb2eb73cb8a0a" title="Generate an 8&#45;bit random number." alt="" coords="305,55,385,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="198,82,291,71,292,76,199,88"/>
+<area shape="rect" id="Node000005" href="$d3/d08/structfl_1_1_perlin_particle_punch_1_1_meteor_particle_af3c2a5a7aaaa68ccd626d161d98effec.html#af3c2a5a7aaaa68ccd626d161d98effec" title=" " alt="" coords="247,105,444,145"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="199,105,233,109,233,114,198,110"/>
+<area shape="rect" id="Node000006" href="$db/d58/classfl_1_1_perlin_particle_punch_a43f6619a5b6ac79e56ee36e5208fc6e0.html#a43f6619a5b6ac79e56ee36e5208fc6e0" title=" " alt="" coords="264,169,427,209"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="150,114,248,154,269,162,267,167,246,159,148,119"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6" title=" " alt="" coords="492,5,575,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="383,15,478,15,478,21,383,21"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="fl::response_aware_signature&lt; R(ResponseSend &amp;, Args...)&gt;" name="fl::response_aware_signature&lt; R(ResponseSend &amp;, Args...)&gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,123,220,177"/>
+<area shape="rect" id="Node000002" href="$d1/d0c/structfl_1_1response__aware__signature.html" title="Type trait to detect if a function signature has ResponseSend&amp; as first parameter." alt="" coords="41,5,185,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="115,59,115,122,110,122,110,59"/>
+</map>

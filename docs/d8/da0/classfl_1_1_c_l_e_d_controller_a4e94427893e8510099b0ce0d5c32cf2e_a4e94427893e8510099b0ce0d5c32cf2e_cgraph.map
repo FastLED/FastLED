@@ -1,0 +1,17 @@
+<map id="fl::CLEDController::setRgbww" name="fl::CLEDController::setRgbww">
+<area shape="rect" id="Node000001" title="Configure this channel for 5&#45;channel RGBWW (RGB + warm&#45;W + cool&#45;W) output." alt="" coords="5,91,141,131"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a7e91fc8f83d62c9da5e5c3d6d1bc10ce.html#a7e91fc8f83d62c9da5e5c3d6d1bc10ce" title="Protected constructor with registration mode." alt="" coords="210,61,346,101"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="141,98,196,90,196,96,142,104"/>
+<area shape="rect" id="Node000005" href="$d6/dd0/structfl_1_1_rgbww_default_ae9e8ab3af5a540d2d1003bccc7ec76c7.html#ae9e8ab3af5a540d2d1003bccc7ec76c7" title=" " alt="" coords="189,126,367,151"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="142,117,176,122,175,127,141,123"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a9e51518d1427463dffd596c69c6f3e46.html#a9e51518d1427463dffd596c69c6f3e46" title="Add this controller to the linked list." alt="" coords="465,5,601,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="346,64,451,40,452,46,347,69"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a5e115bf146729c8868c918538feb06df.html#a5e115bf146729c8868c918538feb06df" title="Check if this controller is in the linked list." alt="" coords="700,49,836,89"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="601,35,687,52,686,57,600,41"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="700,74,360,82,360,77,700,68"/>
+<area shape="rect" id="Node000006" href="$d4/df9/structfl_1_1_rgbww_a45ad99083ef8d9a1f7d8a02f660365aa.html#a45ad99083ef8d9a1f7d8a02f660365aa" title=" " alt="" coords="699,137,837,162"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="367,138,685,145,685,150,367,143"/>
+<area shape="rect" id="Node000007" href="$d6/dd0/structfl_1_1_rgbww_default_a853cb796d56e300299cfbbe5ac15b1e2.html#a853cb796d56e300299cfbbe5ac15b1e2" title=" " alt="" coords="415,174,651,199"/>
+<area shape="poly" id="edge7_Node000005_Node000007" title=" " alt="" coords="347,149,452,169,451,174,346,154"/>
+<area shape="poly" id="edge8_Node000007_Node000006" title=" " alt="" coords="613,171,685,160,685,165,614,177"/>
+</map>

@@ -134,31 +134,32 @@ $(function(){initNavTree('d4/df6/class_led_rope_t_c_l_a84123c2de8d329ed3d2e6314a
 
 <p>Implements <a class="el" href="../../d2/d84/class_led_rope_interface_a087cba16ddb2f2f3ada338ad09dd7a08.html#a087cba16ddb2f2f3ada338ad09dd7a08">LedRopeInterface</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../d6/dc9/_led_rope_t_c_l_8cpp_source.html#l00073">73</a> of file <a class="el" href="../../d6/dc9/_led_rope_t_c_l_8cpp_source.html">LedRopeTCL.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   73</span>                                                    {</div>
-<div class="line"><span class="lineno">   74</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/df6/class_led_rope_t_c_l_a2179761b83d1a84aa9f6bdc0317fe2dd.html#a2179761b83d1a84aa9f6bdc0317fe2dd">led_buffer_</a>.size() &gt;= <a class="code hl_variable" href="../../d4/df6/class_led_rope_t_c_l_a106ba8537c5926fd975defbb013fb0e5.html#a106ba8537c5926fd975defbb013fb0e5">mScreenMap</a>.getLength()) {</div>
-<div class="line"><span class="lineno">   75</span>    <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">   76</span>  }</div>
-<div class="line"><span class="lineno">   77</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d3/d78/namespaceanonymous__namespace_02_led_rope_t_c_l_8cpp_03_ac7d64c04c525c98f89f5cb113d1f1ae6.html#ac7d64c04c525c98f89f5cb113d1f1ae6">buttonAllWhite</a>.<a class="code hl_function" href="../../d3/d1d/classfl_1_1_u_i_button_a840152841a9986ba7ca08da3df06353f.html#a840152841a9986ba7ca08da3df06353f">isPressed</a>()) {</div>
-<div class="line"><span class="lineno">   78</span>    r = 0xff;</div>
-<div class="line"><span class="lineno">   79</span>    g = 0xff;</div>
-<div class="line"><span class="lineno">   80</span>    b = 0xff;</div>
-<div class="line"><span class="lineno">   81</span>  }</div>
-<div class="line"><span class="lineno">   82</span>  CRGB c(r, g, b);</div>
-<div class="line"><span class="lineno">   83</span>  <a class="code hl_variable" href="../../d4/df6/class_led_rope_t_c_l_a2179761b83d1a84aa9f6bdc0317fe2dd.html#a2179761b83d1a84aa9f6bdc0317fe2dd">led_buffer_</a>.push_back(CRGB(r, g, b));</div>
-<div class="line"><span class="lineno">   84</span>}</div>
-<div class="ttc" id="aclass_led_rope_t_c_l_a106ba8537c5926fd975defbb013fb0e5_html_a106ba8537c5926fd975defbb013fb0e5"><div class="ttname"><a href="../../d4/df6/class_led_rope_t_c_l_a106ba8537c5926fd975defbb013fb0e5.html#a106ba8537c5926fd975defbb013fb0e5">LedRopeTCL::mScreenMap</a></div><div class="ttdeci">fl::ScreenMap mScreenMap</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d7e/_led_rope_t_c_l_8h_source.html#l00078">LedRopeTCL.h:78</a></div></div>
-<div class="ttc" id="aclass_led_rope_t_c_l_a2179761b83d1a84aa9f6bdc0317fe2dd_html_a2179761b83d1a84aa9f6bdc0317fe2dd"><div class="ttname"><a href="../../d4/df6/class_led_rope_t_c_l_a2179761b83d1a84aa9f6bdc0317fe2dd.html#a2179761b83d1a84aa9f6bdc0317fe2dd">LedRopeTCL::led_buffer_</a></div><div class="ttdeci">fl::HeapVector&lt; CRGB &gt; led_buffer_</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d7e/_led_rope_t_c_l_8h_source.html#l00077">LedRopeTCL.h:77</a></div></div>
-<div class="ttc" id="aclassfl_1_1_u_i_button_a840152841a9986ba7ca08da3df06353f_html_a840152841a9986ba7ca08da3df06353f"><div class="ttname"><a href="../../d3/d1d/classfl_1_1_u_i_button_a840152841a9986ba7ca08da3df06353f.html#a840152841a9986ba7ca08da3df06353f">fl::UIButton::isPressed</a></div><div class="ttdeci">bool isPressed() const</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d3b/ui_8h_source.html#l00136">ui.h:136</a></div></div>
-<div class="ttc" id="anamespaceanonymous__namespace_02_led_rope_t_c_l_8cpp_03_ac7d64c04c525c98f89f5cb113d1f1ae6_html_ac7d64c04c525c98f89f5cb113d1f1ae6"><div class="ttname"><a href="../../d3/d78/namespaceanonymous__namespace_02_led_rope_t_c_l_8cpp_03_ac7d64c04c525c98f89f5cb113d1f1ae6.html#ac7d64c04c525c98f89f5cb113d1f1ae6">anonymous_namespace{LedRopeTCL.cpp}::buttonAllWhite</a></div><div class="ttdeci">UIButton buttonAllWhite(&quot;All white&quot;)</div></div>
+<p class="definition">Definition at line <a class="el" href="../../d6/dc9/_led_rope_t_c_l_8cpp_source.html#l00084">84</a> of file <a class="el" href="../../d6/dc9/_led_rope_t_c_l_8cpp_source.html">LedRopeTCL.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   84</span>                                                    {</div>
+<div class="line"><span class="lineno">   85</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/df6/class_led_rope_t_c_l_a6e64790229e7f73e4a3e9021704cbbf8.html#a6e64790229e7f73e4a3e9021704cbbf8">mLedBuffer</a>.size() &gt;= <a class="code hl_variable" href="../../d4/df6/class_led_rope_t_c_l_a106ba8537c5926fd975defbb013fb0e5.html#a106ba8537c5926fd975defbb013fb0e5">mScreenMap</a>.getLength()) {</div>
+<div class="line"><span class="lineno">   86</span>    <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">   87</span>  }</div>
+<div class="line"><span class="lineno">   88</span>  <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d3/d78/namespaceanonymous__namespace_02_led_rope_t_c_l_8cpp_03_a42518294b25652e63c932da22f1f24c2.html#a42518294b25652e63c932da22f1f24c2">buttonAllWhite</a>.<a class="code hl_function" href="../../d3/d1d/classfl_1_1_u_i_button_a3e9ed797554830831335b5fcdd6eb26b.html#a3e9ed797554830831335b5fcdd6eb26b">isPressed</a>()) {</div>
+<div class="line"><span class="lineno">   89</span>    r = 0xff;</div>
+<div class="line"><span class="lineno">   90</span>    g = 0xff;</div>
+<div class="line"><span class="lineno">   91</span>    b = 0xff;</div>
+<div class="line"><span class="lineno">   92</span>  }</div>
+<div class="line"><span class="lineno">   93</span>  <a class="code hl_typedef" href="../../d4/d36/namespacefl_a0d074c08905bad763e238b16d85e20e7.html#a0d074c08905bad763e238b16d85e20e7">fl::CRGB</a> c(r, g, b);</div>
+<div class="line"><span class="lineno">   94</span>  <a class="code hl_variable" href="../../d4/df6/class_led_rope_t_c_l_a6e64790229e7f73e4a3e9021704cbbf8.html#a6e64790229e7f73e4a3e9021704cbbf8">mLedBuffer</a>.push_back(<a class="code hl_typedef" href="../../d4/d36/namespacefl_a0d074c08905bad763e238b16d85e20e7.html#a0d074c08905bad763e238b16d85e20e7">fl::CRGB</a>(r, g, b));</div>
+<div class="line"><span class="lineno">   95</span>}</div>
+<div class="ttc" id="aclass_led_rope_t_c_l_a106ba8537c5926fd975defbb013fb0e5_html_a106ba8537c5926fd975defbb013fb0e5"><div class="ttname"><a href="../../d4/df6/class_led_rope_t_c_l_a106ba8537c5926fd975defbb013fb0e5.html#a106ba8537c5926fd975defbb013fb0e5">LedRopeTCL::mScreenMap</a></div><div class="ttdeci">fl::ScreenMap mScreenMap</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d7e/_led_rope_t_c_l_8h_source.html#l00077">LedRopeTCL.h:77</a></div></div>
+<div class="ttc" id="aclass_led_rope_t_c_l_a6e64790229e7f73e4a3e9021704cbbf8_html_a6e64790229e7f73e4a3e9021704cbbf8"><div class="ttname"><a href="../../d4/df6/class_led_rope_t_c_l_a6e64790229e7f73e4a3e9021704cbbf8.html#a6e64790229e7f73e4a3e9021704cbbf8">LedRopeTCL::mLedBuffer</a></div><div class="ttdeci">fl::vector&lt; fl::CRGB &gt; mLedBuffer</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d7e/_led_rope_t_c_l_8h_source.html#l00076">LedRopeTCL.h:76</a></div></div>
+<div class="ttc" id="aclassfl_1_1_u_i_button_a3e9ed797554830831335b5fcdd6eb26b_html_a3e9ed797554830831335b5fcdd6eb26b"><div class="ttname"><a href="../../d3/d1d/classfl_1_1_u_i_button_a3e9ed797554830831335b5fcdd6eb26b.html#a3e9ed797554830831335b5fcdd6eb26b">fl::UIButton::isPressed</a></div><div class="ttdeci">bool isPressed() const FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d7b/ui_2button_8h_source.html#l00045">button.h:45</a></div></div>
+<div class="ttc" id="anamespaceanonymous__namespace_02_led_rope_t_c_l_8cpp_03_a42518294b25652e63c932da22f1f24c2_html_a42518294b25652e63c932da22f1f24c2"><div class="ttname"><a href="../../d3/d78/namespaceanonymous__namespace_02_led_rope_t_c_l_8cpp_03_a42518294b25652e63c932da22f1f24c2.html#a42518294b25652e63c932da22f1f24c2">anonymous_namespace{LedRopeTCL.cpp}::buttonAllWhite</a></div><div class="ttdeci">fl::UIButton buttonAllWhite(&quot;All white&quot;)</div></div>
+<div class="ttc" id="anamespacefl_a0d074c08905bad763e238b16d85e20e7_html_a0d074c08905bad763e238b16d85e20e7"><div class="ttname"><a href="../../d4/d36/namespacefl_a0d074c08905bad763e238b16d85e20e7.html#a0d074c08905bad763e238b16d85e20e7">fl::CRGB</a></div><div class="ttdeci">fl::CRGB CRGB</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d78/video_8h_source.html#l00015">video.h:15</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d9/d3b/ui_8h_source.html#l00136">fl::UIButton::isPressed()</a>, <a class="el" href="../../d9/d7e/_led_rope_t_c_l_8h_source.html#l00077">led_buffer_</a>, and <a class="el" href="../../d9/d7e/_led_rope_t_c_l_8h_source.html#l00078">mScreenMap</a>.</p>
+<p class="reference">References <a class="el" href="../../d3/d7b/ui_2button_8h_source.html#l00045">fl::UIButton::isPressed()</a>, <a class="el" href="../../d9/d7e/_led_rope_t_c_l_8h_source.html#l00076">mLedBuffer</a>, and <a class="el" href="../../d9/d7e/_led_rope_t_c_l_8h_source.html#l00077">mScreenMap</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d4/df6/class_led_rope_t_c_l_a84123c2de8d329ed3d2e6314a08620e8_a84123c2de8d329ed3d2e6314a08620e8_cgraph.svg" width="427" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d4/df6/class_led_rope_t_c_l_a84123c2de8d329ed3d2e6314a08620e8_a84123c2de8d329ed3d2e6314a08620e8_cgraph.svg" width="427" height="60"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -170,7 +171,7 @@ $(function(){initNavTree('d4/df6/class_led_rope_t_c_l_a84123c2de8d329ed3d2e6314a
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/df6/class_led_rope_t_c_l.html">LedRopeTCL</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

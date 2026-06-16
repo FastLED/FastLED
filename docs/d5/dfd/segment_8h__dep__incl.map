@@ -1,0 +1,17 @@
+<map id="fl/fx/wled/segment.h" name="fl/fx/wled/segment.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="111,5,266,31"/>
+<area shape="rect" id="Node000002" href="$dd/df9/wled_8h.html" title=" " alt="" coords="77,159,172,185"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,44,154,80,138,123,130,160,124,158,133,122,149,78,170,41"/>
+<area shape="rect" id="Node000007" href="$d1/d9e/json__helpers_8h.html" title=" " alt="" coords="163,79,343,104"/>
+<area shape="poly" id="edge4_Node000001_Node000007" title=" " alt="" coords="210,39,244,77,240,80,206,43"/>
+<area shape="rect" id="Node000003" href="$d3/da5/wled_8cpp_8hpp.html" title=" " alt="" coords="5,240,175,265"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="117,198,98,241,93,239,112,196"/>
+<area shape="rect" id="Node000004" href="$d4/d50/fl_2control_2__build_8cpp_8hpp.html" title=" " alt="" coords="108,313,285,339"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="120,271,181,311,178,315,117,275"/>
+<area shape="poly" id="edge8_Node000007_Node000002" title=" " alt="" coords="224,113,145,161,142,157,221,109"/>
+<area shape="rect" id="Node000008" href="$de/d2c/json__helpers_8cpp_8hpp.html" title=" " alt="" coords="213,152,359,192"/>
+<area shape="poly" id="edge5_Node000007_Node000008" title=" " alt="" coords="265,116,280,151,276,153,260,118"/>
+<area shape="rect" id="Node000009" href="$da/d2a/fl_2control_2wled_2__build_8cpp_8hpp.html" title=" " alt="" coords="199,240,411,265"/>
+<area shape="poly" id="edge6_Node000008_Node000009" title=" " alt="" coords="296,205,304,239,299,240,291,206"/>
+<area shape="poly" id="edge7_Node000009_Node000004" title=" " alt="" coords="277,275,216,315,213,311,275,271"/>
+</map>

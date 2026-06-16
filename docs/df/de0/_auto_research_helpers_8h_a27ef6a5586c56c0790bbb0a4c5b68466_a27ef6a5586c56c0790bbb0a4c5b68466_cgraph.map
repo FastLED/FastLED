@@ -1,0 +1,56 @@
+<map id="testDriver" name="testDriver">
+<area shape="rect" id="Node000001" title="Test a specific driver with given timing configuration." alt="" coords="5,548,92,573"/>
+<area shape="rect" id="Node000002" href="$d4/df9/_auto_research_test_8cpp_a4c76939743f62fdeea55c4ec8a3e2a31.html#a4c76939743f62fdeea55c4ec8a3e2a31" title=" " alt="" coords="140,281,345,306"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="57,546,222,316,226,319,61,549"/>
+<area shape="rect" id="Node000047" href="$d7/d5f/_auto_research_helpers_8cpp_af11e0726690b752be396e68b0a813ac7.html#af11e0726690b752be396e68b0a813ac7" title="AutoResearch&#45;style helper: set an exclusive driver by name." alt="" coords="145,780,340,820"/>
+<area shape="poly" id="edge27_Node000001_Node000047" title=" " alt="" coords="62,572,219,768,215,771,58,575"/>
+<area shape="rect" id="Node000003" href="$d0/d08/classfl_1_1span_a326aa9f29859fe8a92833fd5db12c3bb.html#a326aa9f29859fe8a92833fd5db12c3bb" title=" " alt="" coords="899,230,1006,256"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="262,279,319,244,392,207,462,180,518,162,575,149,649,138,737,124,776,126,824,138,857,154,887,174,933,218,930,222,884,179,854,158,822,143,775,131,738,130,650,143,576,154,519,167,464,185,394,212,321,248,264,283"/>
+<area shape="rect" id="Node000004" href="$d1/dfb/colorutils_8h_afba4db18577c19e39c54f1c5793741b7.html#afba4db18577c19e39c54f1c5793741b7" title="Fill a range of LEDs with a solid color." alt="" coords="698,26,774,52"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="244,280,258,232,285,163,305,127,329,92,358,61,392,37,428,20,467,10,507,4,547,3,623,9,685,22,684,27,622,15,547,8,507,9,468,15,430,25,395,41,362,65,333,96,310,130,290,165,263,233,249,282"/>
+<area shape="rect" id="Node000005" href="$d4/df9/_auto_research_test_8cpp_a4bf2c967e5a9f824ed586e4f1b6685d3.html#a4bf2c967e5a9f824ed586e4f1b6685d3" title=" " alt="" coords="424,281,571,306"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="345,291,410,291,410,296,345,296"/>
+<area shape="rect" id="Node000006" href="$d2/d24/classfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980.html#ae9a8cea8d4b81d8f2f10a2b007ac2980" title=" " alt="" coords="658,153,814,178"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="292,278,672,179,673,184,294,283"/>
+<area shape="rect" id="Node000007" href="$d4/df9/_auto_research_test_8cpp_aac567188ee44c45d15b20231ecff68c9.html#aac567188ee44c45d15b20231ecff68c9" title=" " alt="" coords="446,356,549,381"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="288,304,441,349,439,354,287,309"/>
+<area shape="rect" id="Node000037" href="$d1/d27/classfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e.html#a08170cac6eba7241f099ae16730f6f8e" title=" " alt="" coords="1090,356,1206,381"/>
+<area shape="poly" id="edge26_Node000002_Node000037" title=" " alt="" coords="248,306,259,364,284,449,303,495,328,540,358,581,395,616,427,637,457,650,485,656,513,658,574,656,650,656,710,664,763,674,855,691,897,693,939,686,984,670,1033,640,1061,614,1083,584,1101,551,1116,516,1134,448,1142,395,1147,395,1139,449,1121,518,1106,553,1088,587,1065,618,1036,644,987,674,941,692,897,698,854,696,762,679,709,669,649,662,574,661,513,664,484,662,455,655,425,641,392,620,354,584,323,543,298,497,279,451,254,365,243,307"/>
+<area shape="rect" id="Node000035" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="901,605,1004,630"/>
+<area shape="poly" id="edge25_Node000002_Node000035" title=" " alt="" coords="255,305,307,369,396,463,452,513,514,560,580,602,650,634,682,643,714,648,781,650,844,642,897,631,898,636,844,648,781,655,714,654,681,648,648,639,578,607,511,565,449,517,392,467,303,372,251,308"/>
+<area shape="rect" id="Node000046" href="$d4/df9/_auto_research_test_8cpp_afe4be59bd4e119ec058b5952ac87893e.html#afe4be59bd4e119ec058b5952ac87893e" title=" " alt="" coords="425,52,570,77"/>
+<area shape="poly" id="edge23_Node000002_Node000046" title=" " alt="" coords="248,280,267,243,299,193,341,140,392,94,419,80,422,84,395,99,344,144,303,196,272,246,252,282"/>
+<area shape="poly" id="edge19_Node000007_Node000006" title=" " alt="" coords="539,353,571,338,599,316,611,301,617,286,622,256,627,227,635,211,648,196,666,182,669,186,651,200,639,214,633,228,627,257,622,288,615,303,603,320,574,343,542,358"/>
+<area shape="rect" id="Node000008" href="$d4/df9/_auto_research_test_8cpp_adaf2e23d83d4eb143bb3728848a40c30.html#adaf2e23d83d4eb143bb3728848a40c30" title="Build expected UCS7604 encoded bytes from LED data." alt="" coords="649,554,823,580"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="509,380,529,412,562,455,603,501,651,539,664,547,661,551,648,544,599,505,557,459,525,415,504,383"/>
+<area shape="rect" id="Node000029" href="$d4/df9/_auto_research_test_8cpp_ade4309c9f4171360f59ed787c7041584.html#ade4309c9f4171360f59ed787c7041584" title=" " alt="" coords="701,305,771,330"/>
+<area shape="poly" id="edge8_Node000007_Node000029" title=" " alt="" coords="548,355,686,325,687,331,549,360"/>
+<area shape="rect" id="Node000038" href="$d4/df9/_auto_research_test_8cpp_ac7607ef5b12973ed8cd8353da071aef8.html#ac7607ef5b12973ed8cd8353da071aef8" title="Dump raw edge timing data to console for debugging." alt="" coords="871,280,1035,305"/>
+<area shape="poly" id="edge16_Node000007_Node000038" title=" " alt="" coords="524,353,600,315,623,301,649,290,702,280,756,276,857,278,857,283,756,281,702,285,650,295,626,305,603,320,526,358"/>
+<area shape="rect" id="Node000039" href="$d1/d27/classfl_1_1sstream_a2020a3513ae92ed435685030c3127194.html#a2020a3513ae92ed435685030c3127194" title=" " alt="" coords="1083,230,1213,256"/>
+<area shape="poly" id="edge15_Node000007_Node000039" title=" " alt="" coords="531,353,565,337,600,316,614,302,622,290,632,277,648,265,701,237,748,218,791,206,834,201,877,200,923,203,1035,215,1088,225,1088,230,1034,220,923,208,877,205,834,206,793,212,750,223,703,242,651,269,636,281,627,293,618,306,603,320,568,342,533,358"/>
+<area shape="poly" id="edge22_Node000007_Node000037" title=" " alt="" coords="549,366,1077,366,1077,371,549,371"/>
+<area shape="poly" id="edge20_Node000007_Node000035" title=" " alt="" coords="505,380,522,423,552,481,594,541,621,567,651,589,679,603,709,613,772,625,833,628,887,624,887,630,833,633,771,630,707,618,677,608,648,593,617,571,590,544,547,484,517,425,500,382"/>
+<area shape="rect" id="Node000044" href="$d4/df9/_auto_research_test_8cpp_aab4e2f01a664c2f47e0313fa1728f367.html#aab4e2f01a664c2f47e0313fa1728f367" title="Check if an encoder selector identifies a UCS7604 variant." alt="" coords="690,406,782,432"/>
+<area shape="poly" id="edge17_Node000007_Node000044" title=" " alt="" coords="549,376,677,404,676,409,548,382"/>
+<area shape="rect" id="Node000045" href="$d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d" title=" " alt="" coords="707,456,765,481"/>
+<area shape="poly" id="edge18_Node000007_Node000045" title=" " alt="" coords="523,379,580,409,650,441,694,455,693,460,648,445,578,414,520,384"/>
+<area shape="rect" id="Node000036" href="$d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c" title=" " alt="" coords="659,505,813,530"/>
+<area shape="poly" id="edge21_Node000007_Node000036" title=" " alt="" coords="513,379,569,433,608,463,651,490,668,498,666,503,648,495,605,468,566,437,509,383"/>
+<area shape="poly" id="edge9_Node000029_Node000003" title=" " alt="" coords="768,302,870,264,893,257,894,262,872,270,770,307"/>
+<area shape="poly" id="edge10_Node000029_Node000038" title=" " alt="" coords="771,311,857,301,857,306,772,316"/>
+<area shape="poly" id="edge14_Node000029_Node000037" title=" " alt="" coords="772,319,1076,357,1076,362,771,325"/>
+<area shape="poly" id="edge13_Node000029_Node000035" title=" " alt="" coords="757,328,790,356,825,392,863,445,896,500,942,591,938,593,891,502,858,448,821,395,786,360,753,333"/>
+<area shape="poly" id="edge11_Node000038_Node000039" title=" " alt="" coords="1003,277,1083,257,1084,262,1004,282"/>
+<area shape="poly" id="edge12_Node000038_Node000037" title=" " alt="" coords="987,303,1102,348,1100,353,985,308"/>
+<area shape="poly" id="edge24_Node000046_Node000004" title=" " alt="" coords="570,54,684,42,684,47,570,59"/>
+<area shape="rect" id="Node000048" href="$d2/d6b/classfl_1_1_channel_manager_aed1be386f6b38cabd478d1d9c11c240c.html#aed1be386f6b38cabd478d1d9c11c240c" title="Get the global singleton instance." alt="" coords="423,780,571,820"/>
+<area shape="poly" id="edge28_Node000047_Node000048" title=" " alt="" coords="340,798,410,798,410,803,340,803"/>
+<area shape="rect" id="Node000054" href="$d2/d6b/classfl_1_1_channel_manager_adecf62095889aa618c970f93beb316fd.html#adecf62095889aa618c970f93beb316fd" title="Enable only one driver exclusively (disables all others) — by&#45;name escape hatch." alt="" coords="393,844,601,884"/>
+<area shape="poly" id="edge32_Node000047_Node000054" title=" " alt="" coords="324,818,405,838,403,844,322,823"/>
+<area shape="rect" id="Node000049" href="$d2/d6b/classfl_1_1_channel_manager_addc4b631522a2d44151c6b7c23a26ca1.html#addc4b631522a2d44151c6b7c23a26ca1" title="Constructor." alt="" coords="662,780,810,820"/>
+<area shape="poly" id="edge29_Node000048_Node000049" title=" " alt="" coords="571,798,648,798,648,803,571,803"/>
+<area shape="rect" id="Node000053" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="655,845,817,870"/>
+<area shape="poly" id="edge31_Node000048_Node000053" title=" " alt="" coords="572,815,670,839,669,844,571,821"/>
+<area shape="poly" id="edge30_Node000049_Node000049" title=" " alt="" coords="695,781,693,771,700,761,714,756,736,754,761,757,775,764,773,769,760,762,736,759,715,761,703,766,698,772,701,779"/>
+</map>

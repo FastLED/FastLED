@@ -1,0 +1,8 @@
+<map id="fl::s8x8::floor" name="fl::s8x8::floor">
+<area shape="rect" id="Node000001" title=" " alt="" coords="335,29,441,55"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="417,19,408,11,388,8,371,10,362,15,360,20,365,28,360,31,354,21,358,11,369,5,388,3,411,6,420,15"/>
+<area shape="rect" id="Node000002" href="$db/d64/classfl_1_1s8x8_aeb5ce7d74148c7a379d1e323f29f49e9.html#aeb5ce7d74148c7a379d1e323f29f49e9" title=" " alt="" coords="157,29,287,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="321,45,287,45,287,39,321,39"/>
+<area shape="rect" id="Node000003" href="$db/d64/classfl_1_1s8x8_acfdb65bccc547fcb67fd0864a06c92b7.html#acfdb65bccc547fcb67fd0864a06c92b7" title=" " alt="" coords="5,29,109,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="144,45,110,45,110,39,144,39"/>
+</map>

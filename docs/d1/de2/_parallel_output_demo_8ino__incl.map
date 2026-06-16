@@ -1,5 +1,8 @@
 <map id="/home/runner/work/FastLED/FastLED/examples/Multiple/ParallelOutputDemo/ParallelOutputDemo.ino" name="/home/runner/work/FastLED/FastLED/examples/Multiple/ParallelOutputDemo/ParallelOutputDemo.ino">
 <area shape="rect" id="Node000001" title="Demonstrates how to write to multiple strips simultaneously." alt="" coords="5,5,259,75"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="35,123,229,148"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="135,75,135,109,129,109,129,75"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="89,196,175,221"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,76,100,111,98,129,100,147,117,184,113,186,95,149,92,129,95,109,108,74"/>
+<area shape="rect" id="Node000003" href="$d2/d03/_parallel_output_demo_8h.html" title=" " alt="" coords="109,123,275,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="156,73,179,109,175,112,151,76"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="184,150,153,187,148,184,180,147"/>
 </map>

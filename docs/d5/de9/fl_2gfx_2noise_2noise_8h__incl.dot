@@ -1,0 +1,50 @@
+digraph "fl/gfx/noise/noise.h"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl/gfx/noise/noise.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Functions to generate noise patterns on rings and spheres."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl/gfx/hsv.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d4f/hsv_8h.html",tooltip="Defines the hue, saturation, and value (HSV) pixel struct."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl/stl/int.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d7e/int_8h.html",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl/stl/stdint.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/dd8/stdint_8h.html",tooltip=" "];
+  Node2 -> Node6 [id="edge4_Node000002_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl/stl/compiler_control.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d54/compiler__control_8h.html",tooltip=" "];
+  Node6 -> Node7 [id="edge5_Node000006_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="platforms/is_platform.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node6 -> Node8 [id="edge6_Node000006_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl/stl/align.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/ddf/align_8h.html",tooltip="Alignment macros and utilities for FastLED."];
+  Node8 -> Node7 [id="edge7_Node000008_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node8 -> Node10 [id="edge8_Node000008_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl/stl/noexcept.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d01/noexcept_8h.html",tooltip=" "];
+  Node2 -> Node10 [id="edge9_Node000002_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node11 [id="edge10_Node000001_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl/gfx/hsv16.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d1a/hsv16_8h.html",tooltip=" "];
+  Node11 -> Node3 [id="edge11_Node000011_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node11 -> Node12 [id="edge12_Node000011_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl/math/ease.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d19/ease_8h.html",tooltip=" "];
+  Node12 -> Node3 [id="edge13_Node000012_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node12 -> Node13 [id="edge14_Node000012_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl/stl/span.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d7a/span_8h.html",tooltip=" "];
+  Node13 -> Node3 [id="edge15_Node000013_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node13 -> Node10 [id="edge16_Node000013_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node12 -> Node25 [id="edge17_Node000012_Node000025",color="steelblue1",style="solid",tooltip=" "];
+  Node25 [id="Node000025",label="fl/stl/shared_ptr.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/d6a/shared__ptr_8h.html",tooltip=" "];
+  Node25 -> Node3 [id="edge18_Node000025_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node25 -> Node8 [id="edge19_Node000025_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node25 -> Node10 [id="edge20_Node000025_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node12 -> Node29 [id="edge21_Node000012_Node000029",color="steelblue1",style="solid",tooltip=" "];
+  Node29 [id="Node000029",label="fl/math/fixed_point.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$de/d62/fixed__point_8h.html",tooltip=" "];
+  Node29 -> Node10 [id="edge22_Node000029_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node12 -> Node10 [id="edge23_Node000012_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node11 -> Node10 [id="edge24_Node000011_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node57 [id="edge25_Node000001_Node000057",color="steelblue1",style="solid",tooltip=" "];
+  Node57 [id="Node000057",label="chsv.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dd0/chsv_8h.html",tooltip="Defines the hue, saturation, and value (HSV) pixel struct."];
+  Node57 -> Node2 [id="edge26_Node000057_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node58 [id="edge27_Node000001_Node000058",color="steelblue1",style="solid",tooltip=" "];
+  Node58 [id="Node000058",label="crgb.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+}

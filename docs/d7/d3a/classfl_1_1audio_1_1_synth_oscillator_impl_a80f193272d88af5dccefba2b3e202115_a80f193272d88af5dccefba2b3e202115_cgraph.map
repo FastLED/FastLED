@@ -1,0 +1,9 @@
+<map id="fl::audio::SynthOscillatorImpl::setShape" name="fl::audio::SynthOscillatorImpl::setShape">
+<area shape="rect" id="Node000001" title="Change waveform shape (takes effect at next cycle boundary)" alt="" coords="5,37,187,77"/>
+<area shape="rect" id="Node000002" href="$d3/d57/structfl_1_1audio_1_1_synth_params_acddb0e82f3d1357aa622aca68a034a0e.html#acddb0e82f3d1357aa622aca68a034a0e" title="Create parameters for a predefined shape." alt="" coords="242,5,409,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="187,42,228,36,229,42,187,47"/>
+<area shape="rect" id="Node000004" href="$d7/d3a/classfl_1_1audio_1_1_synth_oscillator_impl_a3cd9cbb66f0379672d8cd9d7273db61c.html#a3cd9cbb66f0379672d8cd9d7273db61c" title="Change waveform parameters (takes effect at next cycle boundary)" alt="" coords="235,69,416,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="187,67,221,72,221,77,187,73"/>
+<area shape="rect" id="Node000003" href="$d3/d57/structfl_1_1audio_1_1_synth_params_a63f7b1e9db2a72f25099ff38f83fd458.html#a63f7b1e9db2a72f25099ff38f83fd458" title="Default constructor &#45; sawtooth wave." alt="" coords="464,5,631,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="409,23,450,23,450,28,409,28"/>
+</map>

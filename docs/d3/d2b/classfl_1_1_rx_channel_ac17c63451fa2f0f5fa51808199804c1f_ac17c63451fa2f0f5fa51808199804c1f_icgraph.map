@@ -1,0 +1,9 @@
+<map id="fl::RxChannel::create" name="fl::RxChannel::create">
+<area shape="rect" id="Node000001" title=" " alt="" coords="371,35,528,60"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_a2fe45c808814d7f107077f9c5f114d4b.html#a2fe45c808814d7f107077f9c5f114d4b" title="Add an RX channel with runtime configuration." alt="" coords="152,5,283,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="356,38,283,29,283,24,357,33"/>
+<area shape="rect" id="Node000003" href="$db/d63/class_auto_research_remote_control_abb6600e8a1e8c4ef46ba29e7bd3b78b4.html#abb6600e8a1e8c4ef46ba29e7bd3b78b4" title="Register all RPC functions with shared autoresearch state." alt="" coords="112,55,323,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="357,61,323,65,323,60,357,56"/>
+<area shape="rect" id="Node000004" href="$dd/dc8/_auto_research_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,63,64,88"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="98,78,64,78,64,73,98,73"/>
+</map>

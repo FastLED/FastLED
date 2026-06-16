@@ -1,0 +1,14 @@
+<map id="fl::third_party::vorbis::fl_stbv_temp_alloc_save_impl" name="fl::third_party::vorbis::fl_stbv_temp_alloc_save_impl">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,79,232,119"/>
+<area shape="rect" id="Node000002" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_ad1016790150bacf1ed49795c44ca6ac8.html#ad1016790150bacf1ed49795c44ca6ac8" title=" " alt="" coords="280,47,452,87"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="232,81,266,77,267,82,233,87"/>
+<area shape="rect" id="Node000012" href="$dd/d19/structfl_1_1third__party_1_1vorbis_1_1_stbv_temp_buffer_a9574681af3ed85c610178dc3a2d1f157.html#a9574681af3ed85c610178dc3a2d1f157" title=" " alt="" coords="280,111,452,151"/>
+<area shape="poly" id="edge6_Node000001_Node000012" title=" " alt="" coords="233,111,267,115,266,120,232,116"/>
+<area shape="rect" id="Node000003" href="$dc/dad/classfl_1_1_singleton_thread_local_a00591689c0e4cc5d96b511b3277f7682.html#a00591689c0e4cc5d96b511b3277f7682" title=" " alt="" coords="500,47,679,87"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="452,64,486,64,486,69,452,69"/>
+<area shape="rect" id="Node000004" href="$dd/dfc/classfl_1_1_thread_local_fake_acf6d3e1d23583fb93008b3ca5c3799e5.html#acf6d3e1d23583fb93008b3ca5c3799e5" title=" " alt="" coords="727,5,873,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="678,47,712,40,713,45,679,52"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a1e67c0c24ebcd98fcf8554753d1639a6.html#a1e67c0c24ebcd98fcf8554753d1639a6" title=" " alt="" coords="731,94,869,119"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="679,81,719,89,718,94,678,86"/>
+<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="765,96,758,86,762,76,776,70,800,67,829,71,841,80,838,84,827,76,800,73,778,75,766,79,763,85,770,92"/>
+</map>

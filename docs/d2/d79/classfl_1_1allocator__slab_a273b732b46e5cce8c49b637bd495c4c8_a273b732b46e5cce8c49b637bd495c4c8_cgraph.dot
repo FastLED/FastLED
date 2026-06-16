@@ -1,0 +1,18 @@
+digraph "fl::allocator_slab::allocate"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::allocator_slab\l::allocate",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::allocator::allocate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dcd/classfl_1_1allocator_a3e83ded135ddb591aacb9b67dddd13d0.html#a3e83ded135ddb591aacb9b67dddd13d0",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::allocator_slab\l::get_allocator",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d79/classfl_1_1allocator__slab_abf558ae7257850cf186df7a27dac19f3.html#abf558ae7257850cf186df7a27dac19f3",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::detail::slab_allocator\l_registry_get",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_a763632edd218e22277a2b5762d6a2777.html#a763632edd218e22277a2b5762d6a2777",tooltip=" "];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::detail::slab_allocator\l_registry_set",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_ad88457ea9358af062d784aebaae9d6d5.html#ad88457ea9358af062d784aebaae9d6d5",tooltip=" "];
+}

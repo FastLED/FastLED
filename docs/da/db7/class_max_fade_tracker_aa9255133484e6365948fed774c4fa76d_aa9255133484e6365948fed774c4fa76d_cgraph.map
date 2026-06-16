@@ -1,8 +1,16 @@
 <map id="MaxFadeTracker::operator()" name="MaxFadeTracker::operator()">
-<area shape="rect" id="Node000001" title="Process one 512&#45;sample block; returns [0…1] with inertia." alt="" coords="5,55,204,80"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aa7af590ed35831bc251787adc813d504.html#aa7af590ed35831bc251787adc813d504" title=" " alt="" coords="252,29,315,55"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="194,52,238,46,239,51,195,57"/>
-<area shape="rect" id="Node000003" href="$d6/daf/direct_8h_a56a6f879483f3e06fdac34afba3711d8.html#a56a6f879483f3e06fdac34afba3711d8" title=" " alt="" coords="252,79,315,104"/>
-<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="200,77,239,83,238,88,199,83"/>
-<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="254,31,247,21,251,11,263,5,283,3,308,6,318,15,315,19,306,11,283,8,264,10,255,15,253,20,258,28"/>
+<area shape="rect" id="Node000001" title="Process one 512&#45;sample block; returns [0…1] with inertia." alt="" coords="5,80,204,105"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84" title=" " alt="" coords="255,5,316,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="136,77,241,33,243,38,138,82"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ae393fecb8f433ee4b88027955350bdc8.html#ae393fecb8f433ee4b88027955350bdc8" title=" " alt="" coords="254,55,317,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="195,77,240,71,241,76,196,83"/>
+<area shape="rect" id="Node000006" href="$d6/daf/direct_8h_a1ddd0aa76a31f81b55f0ffccc1f3d4de.html#a1ddd0aa76a31f81b55f0ffccc1f3d4de" title=" " alt="" coords="254,104,317,129"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="201,103,241,108,240,113,200,108"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="252,153,319,179"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="138,103,241,145,239,150,136,108"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a861b23e6d46aa20202c82561040de9ff.html#a861b23e6d46aa20202c82561040de9ff" title=" " alt="" coords="367,29,441,55"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="317,58,353,50,354,55,318,63"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a7f0a85a0d4318b7e8fff543b26907b01.html#a7f0a85a0d4318b7e8fff543b26907b01" title=" " alt="" coords="489,55,568,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="442,47,476,54,475,59,441,52"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="489,70,331,70,331,65,489,65"/>
 </map>

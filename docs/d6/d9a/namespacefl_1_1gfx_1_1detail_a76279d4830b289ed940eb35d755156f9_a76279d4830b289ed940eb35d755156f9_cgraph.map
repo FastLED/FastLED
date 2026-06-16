@@ -1,0 +1,12 @@
+<map id="fl::gfx::detail::drawDiscCore" name="fl::gfx::detail::drawDiscCore">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,118,208,143"/>
+<area shape="rect" id="Node000002" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_ace632a8bd8b1b176f9f882b536fc486c.html#ace632a8bd8b1b176f9f882b536fc486c" title="Precompute right&#45;shift and reciprocal multiplier for AA division." alt="" coords="277,29,446,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="145,115,255,79,280,71,282,76,257,84,146,120"/>
+<area shape="rect" id="Node000003" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_a6dfa4961e3abbbfbeeea1abe7d8d5259.html#a6dfa4961e3abbbfbeeea1abe7d8d5259" title="Render one scanline of a disc using incremental d²." alt="" coords="256,118,467,143"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="208,128,243,128,243,133,208,133"/>
+<area shape="rect" id="Node000004" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_ab04a22e2927673d2692b4f3e354af564.html#ab04a22e2927673d2692b4f3e354af564" title="Convert any Coord type to 8.8 fixed&#45;point (fl::i32)." alt="" coords="278,191,445,217"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="153,141,304,185,302,190,151,146"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="314,30,311,20,319,10,336,5,361,3,391,6,407,13,405,18,389,11,361,8,337,10,322,15,317,21,319,28"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="320,120,311,110,316,100,333,94,361,91,397,95,407,100,411,106,407,109,404,104,396,100,361,97,334,99,320,104,317,109,324,116"/>
+<area shape="poly" id="edge6_Node000004_Node000004" title=" " alt="" coords="320,193,311,183,316,173,333,167,361,165,397,169,407,173,411,179,407,182,404,177,396,174,361,170,334,172,320,177,317,182,324,189"/>
+</map>

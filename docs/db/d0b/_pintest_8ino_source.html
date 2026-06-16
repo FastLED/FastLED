@@ -103,14 +103,13 @@ $(function(){initNavTree('db/d0b/_pintest_8ino_source.html','../../'); initResiz
   <div class="headertitle"><div class="title">Pintest.ino</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="../../db/d0b/_pintest_8ino.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">// Platform detection logic</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#if !defined(__AVR_ATtiny88__) &amp;&amp; !defined(ARDUINO_attinyxy4) &amp;&amp; !defined(ARDUINO_attinyxy6) &amp;&amp; (defined(__AVR__) || (defined(__arm__) &amp;&amp; defined(TEENSYDUINO)))</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &quot;<a class="code" href="../../dc/da2/_pintest_8h.html">Pintest.h</a>&quot;</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;platforms/sketch_fake.hpp&quot;</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#endif</span></div>
+<a href="../../db/d0b/_pintest_8ino.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">// @filter: ((platform is avr) and not (board is attiny*) and not (board is atmega8*)) or (platform is teensy)</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">// FastLED.h must be included first to trigger precompiled headers for FastLED&#39;s build system</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;FastLED.h&quot;</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;<a class="code" href="../../dc/da2/_pintest_8h.html">Pintest.h</a>&quot;</span></div>
 <div class="ttc" id="a_pintest_8h_html"><div class="ttname"><a href="../../dc/da2/_pintest_8h.html">Pintest.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -119,7 +118,7 @@ $(function(){initNavTree('db/d0b/_pintest_8ino_source.html','../../'); initResiz
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_26c6288c6e5cb98dccb832f1aa4eaa4f.html">Pintest</a></li><li class="navelem"><a class="el" href="../../db/d0b/_pintest_8ino.html">Pintest.ino</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:19 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:06:58 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

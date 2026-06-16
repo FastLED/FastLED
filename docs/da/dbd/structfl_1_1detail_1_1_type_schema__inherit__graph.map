@@ -1,0 +1,13 @@
+<map id="fl::detail::TypeSchema&lt; T, Enable &gt;" name="fl::detail::TypeSchema&lt; T, Enable &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,208,171,248"/>
+<area shape="rect" id="Node000002" href="$d7/d61/structfl_1_1detail_1_1_type_schema_3_01_t_00_01typename_01fl_1_1enable__if_3_01fl_1_1is__floatina98068dc8b42a2b61ec4d2b3fd8151be.html" title=" " alt="" coords="416,5,599,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="106,194,143,147,166,124,193,104,248,78,306,60,363,48,416,41,416,47,364,54,307,65,250,83,196,109,170,128,147,151,111,198"/>
+<area shape="rect" id="Node000003" href="$d0/dbd/structfl_1_1detail_1_1_type_schema_3_01_t_00_01typename_01fl_1_1enable__if_3_01fl_1_1is__integra0b9ccb007d1b4f6bb181851b2b209e29.html" title=" " alt="" coords="404,99,611,183"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="184,206,403,160,404,165,185,211"/>
+<area shape="rect" id="Node000004" href="$dd/dc1/structfl_1_1detail_1_1_type_schema_3_01bool_00_01void_01_4.html" title=" " alt="" coords="425,208,590,248"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="185,225,424,225,424,231,185,231"/>
+<area shape="rect" id="Node000005" href="$d5/df6/structfl_1_1detail_1_1_type_schema_3_01fl_1_1string_00_01void_01_4.html" title=" " alt="" coords="425,272,590,312"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="185,244,195,245,425,279,424,284,194,251,184,249"/>
+<area shape="rect" id="Node000006" href="$d1/d0d/structfl_1_1detail_1_1_type_schema_3_01void_00_01void_01_4.html" title=" " alt="" coords="425,336,590,376"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="126,254,159,275,196,294,254,313,314,328,425,346,424,352,313,333,252,318,194,298,157,280,124,258"/>
+</map>

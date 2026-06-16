@@ -1,0 +1,16 @@
+<map id="fl::audio::fft::Context::computeLogRebinNormFactors" name="fl::audio::fft::Context::computeLogRebinNormFactors">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,71,235,111"/>
+<area shape="rect" id="Node000002" href="$db/d56/classfl_1_1u16x16_a76b587795d26b3b5385cd130ee4e86f7.html#a76b587795d26b3b5385cd130ee4e86f7" title=" " alt="" coords="289,29,407,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="212,69,275,55,276,60,214,74"/>
+<area shape="rect" id="Node000006" href="$d2/d24/classfl_1_1vector_af937c1c325072247a23862ef0adbc51b.html#af937c1c325072247a23862ef0adbc51b" title=" " alt="" coords="285,79,411,104"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="235,89,271,89,271,94,235,94"/>
+<area shape="rect" id="Node000007" href="$db/d56/classfl_1_1u16x16_abe2692bdeef863f4cb16be28c2dc2b0d.html#abe2692bdeef863f4cb16be28c2dc2b0d" title=" " alt="" coords="283,128,413,153"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="214,109,276,122,275,128,212,114"/>
+<area shape="rect" id="Node000003" href="$db/d56/classfl_1_1u16x16_abdfdcc5a2a8e4be8d29870c5f8d837a9.html#abdfdcc5a2a8e4be8d29870c5f8d837a9" title=" " alt="" coords="665,5,808,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="407,36,652,21,652,26,407,41"/>
+<area shape="rect" id="Node000004" href="$db/d56/classfl_1_1u16x16_ad4efc4f4b7252b0e56d4c845db9e22d1.html#ad4efc4f4b7252b0e56d4c845db9e22d1" title=" " alt="" coords="461,55,617,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="407,47,448,53,448,58,407,52"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="590,52,671,31,673,37,591,57"/>
+<area shape="rect" id="Node000005" href="$db/d56/classfl_1_1u16x16_a2ac5a2cd36c6cae6786f352a5a564c28.html#a2ac5a2cd36c6cae6786f352a5a564c28" title=" " alt="" coords="677,55,796,80"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="618,65,664,65,664,70,618,70"/>
+</map>

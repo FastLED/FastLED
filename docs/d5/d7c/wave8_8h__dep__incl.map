@@ -1,0 +1,22 @@
+<map id="fl/channels/wave8.h" name="fl/channels/wave8.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="295,5,445,31"/>
+<area shape="rect" id="Node000002" href="$d1/de7/_auto_research_parlio_encode_8h.html" title="Full PARLIO encode bench for ESP32&#45;P4 (post&#45;byte&#45;LUT, #2526 landed)." alt="" coords="268,167,507,221"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="359,44,346,79,343,99,346,118,356,143,369,165,365,168,351,145,341,119,338,99,341,78,354,42"/>
+<area shape="rect" id="Node000005" href="$d3/d03/_auto_research_wave8_expand_8h.html" title="Wave8 expansion micro&#45;benchmark for #2526." alt="" coords="5,167,244,221"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="344,41,163,169,160,164,341,36"/>
+<area shape="rect" id="Node000006" href="$dd/d4b/wave8_8hpp.html" title="Inline implementation details for wave8 transposition." alt="" coords="355,79,489,119"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="387,41,412,77,407,80,383,44"/>
+<area shape="rect" id="Node000007" href="$d8/d81/wave8_8cpp_8hpp.html" title=" " alt="" coords="531,181,726,207"/>
+<area shape="poly" id="edge12_Node000001_Node000007" title=" " alt="" coords="416,33,458,52,502,76,538,103,571,131,620,179,616,183,568,135,535,107,499,81,456,57,413,38"/>
+<area shape="rect" id="Node000003" href="$dd/dc8/_auto_research_8ino.html" title=" " alt="" coords="268,269,507,324"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="390,235,390,269,385,269,385,235"/>
+<area shape="rect" id="Node000004" href="$db/dfb/_auto_research_remote_8cpp.html" title=" " alt="" coords="5,269,244,324"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="307,229,194,272,192,267,305,224"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="207,224,320,267,318,272,205,229"/>
+<area shape="poly" id="edge6_Node000005_Node000004" title=" " alt="" coords="127,235,127,269,122,269,122,235"/>
+<area shape="poly" id="edge8_Node000006_Node000002" title=" " alt="" coords="413,132,400,168,395,166,408,130"/>
+<area shape="poly" id="edge9_Node000006_Node000005" title=" " alt="" coords="350,125,209,169,208,164,348,120"/>
+<area shape="poly" id="edge10_Node000006_Node000007" title=" " alt="" coords="477,122,604,179,602,184,475,127"/>
+<area shape="rect" id="Node000008" href="$d1/d97/fl_2channels_2__build_8cpp_8hpp.html" title=" " alt="" coords="533,284,724,309"/>
+<area shape="poly" id="edge11_Node000007_Node000008" title=" " alt="" coords="631,221,631,284,626,284,626,221"/>
+</map>

@@ -1,0 +1,24 @@
+<map id="fl/chipsets/ucs7604.h" name="fl/chipsets/ucs7604.h">
+<area shape="rect" id="Node000001" title="UCS7604 LED chipset controller implementation for FastLED." alt="" coords="166,5,325,31"/>
+<area shape="rect" id="Node000002" href="$db/d66/chipsets_8h.html" title="Contains the bulk of the definitions for the various LED chipsets supported." alt="" coords="31,79,119,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="206,38,104,81,102,76,204,33"/>
+<area shape="rect" id="Node000007" href="$d3/de6/channel_8cpp_8hpp.html" title=" " alt="" coords="144,79,347,104"/>
+<area shape="poly" id="edge4_Node000001_Node000007" title=" " alt="" coords="248,44,248,79,243,79,243,44"/>
+<area shape="rect" id="Node000011" href="$db/d67/ucs7604_8cpp_8hpp.html" title=" " alt="" coords="371,79,573,104"/>
+<area shape="poly" id="edge8_Node000001_Node000011" title=" " alt="" coords="296,32,436,76,435,81,294,37"/>
+<area shape="rect" id="Node000003" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="31,152,116,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="77,118,76,152,71,152,72,118"/>
+<area shape="rect" id="Node000004" href="$d7/de5/_fast_l_e_d_8cpp_8hpp.html" title=" " alt="" coords="5,225,133,251"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="75,191,73,225,67,225,69,191"/>
+<area shape="rect" id="Node000008" href="$d1/d97/fl_2channels_2__build_8cpp_8hpp.html" title=" " alt="" coords="151,152,342,177"/>
+<area shape="poly" id="edge5_Node000007_Node000008" title=" " alt="" coords="248,118,249,152,244,152,243,118"/>
+<area shape="rect" id="Node000009" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="360,225,488,251"/>
+<area shape="poly" id="edge6_Node000008_Node000009" title=" " alt="" coords="289,180,396,223,394,228,287,185"/>
+<area shape="rect" id="Node000010" href="$d7/d44/fl_8channels_09_8cpp.html" title="Unity build: recursive includes from src/fl/channels/." alt="" coords="157,225,336,251"/>
+<area shape="poly" id="edge7_Node000008_Node000010" title=" " alt="" coords="249,191,249,225,244,225,244,191"/>
+<area shape="rect" id="Node000012" href="$d6/dda/fl_2chipsets_2__build_8cpp_8hpp.html" title=" " alt="" coords="379,152,565,177"/>
+<area shape="poly" id="edge9_Node000011_Node000012" title=" " alt="" coords="475,118,475,152,469,152,469,118"/>
+<area shape="poly" id="edge10_Node000012_Node000009" title=" " alt="" coords="459,190,434,227,430,224,454,187"/>
+<area shape="rect" id="Node000013" href="$d3/d51/fl_8chipsets_09_8cpp.html" title="Unity build: recursive includes from src/fl/chipsets/." alt="" coords="513,225,687,251"/>
+<area shape="poly" id="edge11_Node000012_Node000013" title=" " alt="" coords="506,182,580,223,578,227,503,186"/>
+</map>

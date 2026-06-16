@@ -124,39 +124,32 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_a6819ff831058a710d4582dfc098
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00267">267</a> of file <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html">FastLED.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  267</span>                                     {</div>
-<div class="line"><span class="lineno">  268</span>    <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> start = millis();</div>
-<div class="line"><span class="lineno">  269</span>        <span class="keywordflow">do</span> {</div>
-<div class="line"><span class="lineno">  270</span><span class="preprocessor">#ifndef FASTLED_ACCURATE_CLOCK</span></div>
-<div class="line"><span class="lineno">  271</span>        <span class="comment">// make sure to allow at least one ms to pass to ensure the clock moves</span></div>
-<div class="line"><span class="lineno">  272</span>        <span class="comment">// forward</span></div>
-<div class="line"><span class="lineno">  273</span>        <a class="code hl_function" href="#a6819ff831058a710d4582dfc09817202">::delay</a>(1);</div>
-<div class="line"><span class="lineno">  274</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  275</span>        <a class="code hl_function" href="../../dd/dbb/class_c_fast_l_e_d_a3adb23ec5f919524928d576002cb45de.html#a3adb23ec5f919524928d576002cb45de">show</a>();</div>
-<div class="line"><span class="lineno">  276</span>        yield();</div>
-<div class="line"><span class="lineno">  277</span>    }</div>
-<div class="line"><span class="lineno">  278</span>    <span class="keywordflow">while</span>((millis()-start) &lt; ms);</div>
-<div class="line"><span class="lineno">  279</span>}</div>
-<div class="ttc" id="aclass_c_fast_l_e_d_a3adb23ec5f919524928d576002cb45de_html_a3adb23ec5f919524928d576002cb45de"><div class="ttname"><a href="../../dd/dbb/class_c_fast_l_e_d_a3adb23ec5f919524928d576002cb45de.html#a3adb23ec5f919524928d576002cb45de">CFastLED::show</a></div><div class="ttdeci">void show()</div><div class="ttdoc">Update all our controllers with the current led colors.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d97/_fast_l_e_d_8h_source.html#l00819">FastLED.h:819</a></div></div>
-<div class="ttc" id="aclass_c_fast_l_e_d_a6819ff831058a710d4582dfc09817202_html_a6819ff831058a710d4582dfc09817202"><div class="ttname"><a href="#a6819ff831058a710d4582dfc09817202">CFastLED::delay</a></div><div class="ttdeci">void delay(unsigned long ms)</div><div class="ttdoc">Delay for the given number of milliseconds.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00267">FastLED.cpp:267</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00377">377</a> of file <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html">FastLED.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  377</span>                                     {</div>
+<div class="line"><span class="lineno">  378</span>    <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> start = <a class="code hl_function" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a>();</div>
+<div class="line"><span class="lineno">  379</span>        <span class="keywordflow">do</span> {</div>
+<div class="line"><span class="lineno">  380</span><span class="preprocessor">#ifndef FASTLED_ACCURATE_CLOCK</span></div>
+<div class="line"><span class="lineno">  381</span>        <span class="comment">// make sure to allow at least one ms to pass to ensure the clock moves</span></div>
+<div class="line"><span class="lineno">  382</span>        <span class="comment">// forward</span></div>
+<div class="line"><span class="lineno">  383</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27">fl::delay</a>(1);</div>
+<div class="line"><span class="lineno">  384</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  385</span>        <a class="code hl_function" href="../../dd/dbb/class_c_fast_l_e_d_a3adb23ec5f919524928d576002cb45de.html#a3adb23ec5f919524928d576002cb45de">show</a>();</div>
+<div class="line"><span class="lineno">  386</span>        <a class="code hl_function" href="../../d4/d36/namespacefl_ac8bfd7357d354c16311ece7e62e08901.html#ac8bfd7357d354c16311ece7e62e08901">fl::yield</a>();</div>
+<div class="line"><span class="lineno">  387</span>    }</div>
+<div class="line"><span class="lineno">  388</span>    <span class="keywordflow">while</span>((<a class="code hl_function" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a>()-start) &lt; ms);</div>
+<div class="line"><span class="lineno">  389</span>}</div>
+<div class="ttc" id="aclass_c_fast_l_e_d_a3adb23ec5f919524928d576002cb45de_html_a3adb23ec5f919524928d576002cb45de"><div class="ttname"><a href="../../dd/dbb/class_c_fast_l_e_d_a3adb23ec5f919524928d576002cb45de.html#a3adb23ec5f919524928d576002cb45de">CFastLED::show</a></div><div class="ttdeci">void show()</div><div class="ttdoc">Update all our controllers with the current led colors.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d97/_fast_l_e_d_8h_source.html#l01649">FastLED.h:1649</a></div></div>
+<div class="ttc" id="anamespacefl_a335fa6e4af7f0a011997ea0137d49b5a_html_a335fa6e4af7f0a011997ea0137d49b5a"><div class="ttname"><a href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a></div><div class="ttdeci">fl::u32 millis()</div><div class="ttdoc">Universal millisecond timer - returns milliseconds since system startup.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d18/chrono_8cpp_8hpp_source.html#l00064">chrono.cpp.hpp:64</a></div></div>
+<div class="ttc" id="anamespacefl_a50131c41da2f619067d98360de35fa27_html_a50131c41da2f619067d98360de35fa27"><div class="ttname"><a href="../../d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27">fl::delay</a></div><div class="ttdeci">void delay(u32 ms, bool run_async=true) FL_NOEXCEPT</div><div class="ttdoc">Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all...</div><div class="ttdef"><b>Definition</b> <a href="../../dd/dee/delay_8h_source.html#l00098">delay.h:98</a></div></div>
+<div class="ttc" id="anamespacefl_ac8bfd7357d354c16311ece7e62e08901_html_ac8bfd7357d354c16311ece7e62e08901"><div class="ttname"><a href="../../d4/d36/namespacefl_ac8bfd7357d354c16311ece7e62e08901.html#ac8bfd7357d354c16311ece7e62e08901">fl::yield</a></div><div class="ttdeci">void yield()</div><div class="ttdoc">Yield to the platform scheduler.</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d5d/yield_8cpp_8hpp_source.html#l00031">yield.cpp.hpp:31</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00267">delay()</a>, and <a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html#l00819">show()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00267">delay()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/dee/delay_8h_source.html#l00098">fl::delay()</a>, <a class="el" href="../../db/d18/chrono_8cpp_8hpp_source.html#l00064">fl::millis()</a>, <a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html#l01649">show()</a>, and <a class="el" href="../../dd/d5d/yield_8cpp_8hpp_source.html#l00031">fl::yield()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../dd/dbb/class_c_fast_l_e_d_a6819ff831058a710d4582dfc09817202_a6819ff831058a710d4582dfc09817202_cgraph.svg" width="310" height="60"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
-</div>
-<div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
-<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
-</div>
-<div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../dd/dbb/class_c_fast_l_e_d_a6819ff831058a710d4582dfc09817202_a6819ff831058a710d4582dfc09817202_icgraph.svg" width="138" height="60"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dd/dbb/class_c_fast_l_e_d_a6819ff831058a710d4582dfc09817202_a6819ff831058a710d4582dfc09817202_cgraph.svg" width="100%" height="494"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -168,7 +161,7 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_a6819ff831058a710d4582dfc098
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dd/dbb/class_c_fast_l_e_d.html">CFastLED</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

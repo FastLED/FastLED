@@ -1,0 +1,23 @@
+<map id="fl/wdt/watchdog.h" name="fl/wdt/watchdog.h">
+<area shape="rect" id="Node000001" title="Unified cross&#45;platform Watchdog Timer API for FastLED." alt="" coords="412,5,549,31"/>
+<area shape="rect" id="Node000002" href="$dd/dc8/_auto_research_8ino.html" title=" " alt="" coords="5,79,244,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="421,36,234,81,233,76,419,31"/>
+<area shape="rect" id="Node000003" href="$d1/df2/_auto_research_low_memory_8h.html" title=" " alt="" coords="268,79,507,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="460,42,418,81,414,77,456,38"/>
+<area shape="rect" id="Node000004" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="531,93,617,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="505,38,563,91,559,95,502,42"/>
+<area shape="rect" id="Node000008" href="$d4/dc4/watchdog_8cpp_8hpp.html" title="Platform&#45;agnostic implementations for the unified watchdog API:" alt="" coords="645,93,825,119"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="529,33,702,91,700,96,527,38"/>
+<area shape="rect" id="Node000005" href="$d7/de5/_fast_l_e_d_8cpp_8hpp.html" title=" " alt="" coords="507,181,635,207"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="576,133,574,181,569,181,571,132"/>
+<area shape="rect" id="Node000006" href="$d7/dd5/__build_8cpp_8hpp.html" title=" " alt="" coords="379,255,495,280"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="539,215,460,257,457,252,536,211"/>
+<area shape="rect" id="Node000007" href="$dd/de2/src_8cpp.html" title="Unity build: flat includes from src/ root directory." alt="" coords="519,255,635,280"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="576,220,578,254,573,255,571,221"/>
+<area shape="rect" id="Node000009" href="$df/ddb/fl_2wdt_2__build_8cpp_8hpp.html" title="Unity build header for fl/wdt/ directory." alt="" coords="660,181,816,207"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="739,132,740,181,735,181,733,133"/>
+<area shape="rect" id="Node000010" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="669,255,797,280"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="739,221,736,255,731,254,733,220"/>
+<area shape="rect" id="Node000011" href="$d1/d12/fl_8wdt_09_8cpp.html" title="Unity build: recursive includes from src/fl/wdt/." alt="" coords="821,255,965,280"/>
+<area shape="poly" id="edge10_Node000009_Node000011" title=" " alt="" coords="776,210,868,252,866,257,774,215"/>
+</map>

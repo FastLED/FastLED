@@ -1,7 +1,16 @@
 <map id="third_party/object_fled/src/ObjectFLED.h" name="third_party/object_fled/src/ObjectFLED.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="40,5,207,45"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,108,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,47,77,84,73,81,105,44"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="132,93,251,119"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="142,44,174,81,170,84,138,47"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="129,5,295,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="109,167,272,207"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="129,35,97,43,66,54,38,72,15,95,9,108,9,119,14,130,25,139,56,155,97,167,95,172,54,160,21,143,10,133,4,121,4,107,11,92,35,67,64,50,96,37,128,30"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="26,93,129,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="181,48,110,89,107,84,178,43"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="153,93,271,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="215,46,215,79,209,79,209,46"/>
+<area shape="rect" id="Node000005" href="$da/d07/_object_f_l_e_d_dma_manager_8h.html" title=" " alt="" coords="295,93,491,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="256,43,355,85,353,90,254,48"/>
+<area shape="rect" id="Node000006" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="515,93,618,119"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="296,42,502,88,501,93,295,48"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="365,121,253,164,251,159,363,116"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="507,174,626,199"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="569,119,569,160,564,160,564,119"/>
 </map>

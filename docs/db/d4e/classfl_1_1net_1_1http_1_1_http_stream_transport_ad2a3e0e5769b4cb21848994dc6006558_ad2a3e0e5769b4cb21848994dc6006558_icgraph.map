@@ -1,0 +1,21 @@
+<map id="fl::net::http::HttpStreamTransport::idToString" name="fl::net::http::HttpStreamTransport::idToString">
+<area shape="rect" id="Node000001" title=" " alt="" coords="972,103,1148,143"/>
+<area shape="rect" id="Node000002" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_abcd0cfab5c8828fed71b4eb662761dc4.html#abcd0cfab5c8828fed71b4eb662761dc4" title=" " alt="" coords="677,103,924,143"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="958,125,924,125,924,120,958,120"/>
+<area shape="rect" id="Node000008" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a5268be2c592ea322ab9e4b7612bda7f7.html#a5268be2c592ea322ab9e4b7612bda7f7" title="Send a pre&#45;built JSON&#45;RPC request." alt="" coords="5,5,181,45"/>
+<area shape="poly" id="edge11_Node000001_Node000008" title=" " alt="" coords="969,102,924,93,716,65,509,47,324,36,182,30,182,25,324,30,509,41,717,60,924,88,970,97"/>
+<area shape="rect" id="Node000009" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a31df9c89b9d57c3e277973d4021f8adc.html#a31df9c89b9d57c3e277973d4021f8adc" title="Send a streaming pre&#45;built JSON&#45;RPC request." alt="" coords="5,163,181,203"/>
+<area shape="poly" id="edge12_Node000001_Node000009" title=" " alt="" coords="973,148,924,157,716,178,509,188,324,190,182,188,182,183,324,184,509,182,716,173,924,152,972,143"/>
+<area shape="rect" id="Node000003" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_aab4451d64b6a491f073f941fd22258c0.html#aab4451d64b6a491f073f941fd22258c0" title="Read next JSON&#45;RPC request from stream Non&#45;blocking, returns nullopt if no complete request available..." alt="" coords="453,77,629,117"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="663,112,629,109,630,103,664,107"/>
+<area shape="rect" id="Node000006" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a57c01766a42aa6cbab3d0c6b7617a5ff.html#a57c01766a42aa6cbab3d0c6b7617a5ff" title="Update connection state (handles reconnection, heartbeat) Call this in main loop." alt="" coords="5,77,181,117"/>
+<area shape="poly" id="edge10_Node000002_Node000006" title=" " alt="" coords="664,137,458,144,343,141,229,132,165,120,166,115,230,127,343,136,458,138,664,131"/>
+<area shape="rect" id="Node000004" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8237da9613a0a0c2bffbd8bfddd1f50e.html#a8237da9613a0a0c2bffbd8bfddd1f50e" title="Check if connected." alt="" coords="229,77,405,117"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="439,109,406,109,406,103,439,104"/>
+<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="419,86,453,86,453,91,419,91"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="355,66,342,59,317,56,296,58,283,63,278,69,281,76,275,78,273,68,280,58,295,53,317,51,343,54,358,61"/>
+<area shape="poly" id="edge6_Node000004_Node000008" title=" " alt="" coords="241,76,156,48,157,43,242,71"/>
+<area shape="poly" id="edge7_Node000004_Node000009" title=" " alt="" coords="252,125,148,165,146,160,250,120"/>
+<area shape="poly" id="edge8_Node000004_Node000006" title=" " alt="" coords="215,109,182,109,182,103,215,104"/>
+<area shape="poly" id="edge9_Node000006_Node000004" title=" " alt="" coords="195,86,229,86,229,91,195,91"/>
+</map>

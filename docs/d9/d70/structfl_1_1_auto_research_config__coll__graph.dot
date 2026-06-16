@@ -1,0 +1,48 @@
+digraph "fl::AutoResearchConfig"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::AutoResearchConfig",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Configuration for driver-agnostic autoresearch testing Contains all input parameters needed for autor..."];
+  Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" timing",fontcolor="grey" ];
+  Node2 [id="Node000002",label="fl::ChipsetTimingConfig",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d5/de9/structfl_1_1_chipset_timing_config.html",tooltip="Runtime bit-period timing for a clockless chipset."];
+  Node3 -> Node1 [id="edge2_Node000001_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" tx_configs",fontcolor="grey" ];
+  Node3 [id="Node000003",label="fl::span\< fl::ChannelConfig \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d0/d08/classfl_1_1span.html",tooltip=" "];
+  Node4 -> Node3 [id="edge3_Node000003_Node000004",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mData",fontcolor="grey" ];
+  Node4 [id="Node000004",label="fl::ChannelConfig",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$df/df5/structfl_1_1_channel_config.html",tooltip="Configuration for a single LED channel."];
+  Node5 -> Node4 [id="edge4_Node000004_Node000005",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mLeds",fontcolor="grey" ];
+  Node5 [id="Node000005",label="fl::span\< fl::CRGB \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d0/d08/classfl_1_1span.html",tooltip=" "];
+  Node7 -> Node5 [id="edge5_Node000005_Node000007",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::CRGB \>",fontcolor="grey" ];
+  Node7 [id="Node000007",label="fl::span\< T, Extent \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d0/d08/classfl_1_1span.html",tooltip=" "];
+  Node8 -> Node4 [id="edge6_Node000004_Node000008",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" options",fontcolor="grey" ];
+  Node8 [id="Node000008",label="fl::ChannelOptions",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/d87/structfl_1_1_channel_options.html",tooltip="Optional channel configuration parameters All fields have sensible defaults and can be overridden as ..."];
+  Node11 -> Node4 [id="edge7_Node000004_Node000011",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mScreenMap",fontcolor="grey" ];
+  Node11 [id="Node000011",label="fl::ScreenMap",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d78/classfl_1_1_screen_map.html",tooltip=" "];
+  Node18 -> Node4 [id="edge8_Node000004_Node000018",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mName",fontcolor="grey" ];
+  Node18 [id="Node000018",label="fl::Optional\< fl::string \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dd/dd8/classfl_1_1_optional.html",tooltip=" "];
+  Node7 -> Node3 [id="edge9_Node000003_Node000007",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::ChannelConfig \>",fontcolor="grey" ];
+  Node19 -> Node1 [id="edge10_Node000001_Node000019",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" rx_channel",fontcolor="grey" ];
+  Node19 [id="Node000019",label="fl::shared_ptr\< fl\l::RxChannel \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d1/d74/classfl_1_1shared__ptr.html",tooltip=" "];
+  Node20 -> Node19 [id="edge11_Node000019_Node000020",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mPtr",fontcolor="grey" ];
+  Node20 [id="Node000020",label="fl::RxChannel",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d3/d2b/classfl_1_1_rx_channel.html",tooltip=" "];
+  Node21 -> Node20 [id="edge12_Node000020_Node000021",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mName",fontcolor="grey" ];
+  Node21 [id="Node000021",label="fl::string",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/db2/classfl_1_1string.html",tooltip=" "];
+  Node25 -> Node20 [id="edge13_Node000020_Node000025",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mConfig",fontcolor="grey" ];
+  Node25 [id="Node000025",label="fl::RxChannelConfig",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d0/ddd/structfl_1_1_rx_channel_config.html",tooltip=" "];
+  Node21 -> Node25 [id="edge14_Node000025_Node000021",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" affinity\nname",fontcolor="grey" ];
+  Node27 -> Node20 [id="edge15_Node000020_Node000027",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mDevice",fontcolor="grey" ];
+  Node27 [id="Node000027",label="fl::shared_ptr\< fl\l::RxDevice \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/d74/classfl_1_1shared__ptr.html",tooltip=" "];
+  Node14 -> Node27 [id="edge16_Node000027_Node000014",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mControlBlock",fontcolor="grey" ];
+  Node14 [id="Node000014",label="fl::detail::ControlBlockBase",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html",tooltip=" "];
+  Node13 -> Node27 [id="edge17_Node000027_Node000013",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::RxDevice \>",fontcolor="grey" ];
+  Node13 [id="Node000013",label="fl::shared_ptr\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d1/d74/classfl_1_1shared__ptr.html",tooltip=" "];
+  Node14 -> Node13 [id="edge18_Node000013_Node000014",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mControlBlock",fontcolor="grey" ];
+  Node14 -> Node19 [id="edge19_Node000019_Node000014",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mControlBlock",fontcolor="grey" ];
+  Node13 -> Node19 [id="edge20_Node000019_Node000013",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::RxChannel \>",fontcolor="grey" ];
+  Node29 -> Node1 [id="edge21_Node000001_Node000029",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" rx_buffer",fontcolor="grey" ];
+  Node29 [id="Node000029",label="fl::span\< uint8_t \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d0/d08/classfl_1_1span.html",tooltip=" "];
+  Node7 -> Node29 [id="edge22_Node000029_Node000007",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< uint8_t \>",fontcolor="grey" ];
+}

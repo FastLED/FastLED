@@ -1,0 +1,17 @@
+<map id="fl::EngineEvents::onCanvasUiSet" name="fl::EngineEvents::onCanvasUiSet">
+<area shape="rect" id="Node000001" title=" " alt="" coords="483,77,681,117"/>
+<area shape="rect" id="Node000002" href="$d5/d8b/classfl_1_1_channel_a0dccce627f46ca1d42624d0f82889385.html#a0dccce627f46ca1d42624d0f82889385" title="Set screen map for JS canvas visualization." alt="" coords="244,5,435,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="518,74,434,45,394,33,395,28,435,39,519,69"/>
+<area shape="rect" id="Node000003" href="$d5/d8b/classfl_1_1_channel_ac3c700e8433fc9775f3f8a716161e3b1.html#ac3c700e8433fc9775f3f8a716161e3b1" title="Set screen map for JS canvas visualization from XYMap." alt="" coords="244,55,435,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="469,86,435,82,435,76,469,80"/>
+<area shape="rect" id="Node000006" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a3d2008db1fcb4a6b9b2ab3094da9cdd5.html#a3d2008db1fcb4a6b9b2ab3094da9cdd5" title=" " alt="" coords="271,105,407,145"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="469,112,408,119,407,114,468,107"/>
+<area shape="rect" id="Node000007" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a8f2605c05460f33429f5c9770f027832.html#a8f2605c05460f33429f5c9770f027832" title=" " alt="" coords="271,169,407,209"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="522,125,436,159,402,171,401,166,434,154,520,120"/>
+<area shape="rect" id="Node000004" href="$d5/d8b/classfl_1_1_channel_acfb78f07c618a1248db6c4fbbed5e408.html#acfb78f07c618a1248db6c4fbbed5e408" title="Set screen map for 1D strip remapping from XMap." alt="" coords="5,31,196,56"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="230,59,196,56,196,50,231,54"/>
+<area shape="rect" id="Node000005" href="$d5/d8b/classfl_1_1_channel_a6a2bf9a4ab0f0ee7df060a3d0cba96b3.html#a6a2bf9a4ab0f0ee7df060a3d0cba96b3" title="Set screen map for JS canvas visualization from dimensions." alt="" coords="5,80,196,105"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="231,82,196,85,196,80,230,76"/>
+<area shape="rect" id="Node000008" href="$d8/da0/classfl_1_1_c_l_e_d_controller_af4748661698ef21bb2d746d36c503542.html#af4748661698ef21bb2d746d36c503542" title=" " alt="" coords="33,169,169,209"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="258,191,169,191,169,186,258,186"/>
+</map>

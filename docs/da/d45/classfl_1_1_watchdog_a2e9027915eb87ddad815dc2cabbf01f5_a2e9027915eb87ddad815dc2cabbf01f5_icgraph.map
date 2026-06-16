@@ -1,0 +1,12 @@
+<map id="fl::Watchdog::feed" name="fl::Watchdog::feed">
+<area shape="rect" id="Node000001" title=" " alt="" coords="281,106,420,131"/>
+<area shape="poly" id="edge5_Node000001_Node000001" title=" " alt="" coords="392,97,381,88,351,85,326,87,313,92,310,97,317,104,313,108,305,98,309,88,325,82,351,79,383,83,395,93"/>
+<area shape="rect" id="Node000002" href="$d7/d76/classfl_1_1_scoped_watchdog_a196822062d7ab5c2b32c34a6d1efddd0.html#a196822062d7ab5c2b32c34a6d1efddd0" title="Construct with an explicit timeout." alt="" coords="45,5,194,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="316,102,232,60,193,46,195,41,234,55,318,97"/>
+<area shape="rect" id="Node000003" href="$d7/d76/classfl_1_1_scoped_watchdog_ae049c448ae90dc80c758ef5e6787db9e.html#ae049c448ae90dc80c758ef5e6787db9e" title="Feed the watchdog at end&#45;of&#45;scope so the next loop() iteration has a clean deadline window." alt="" coords="43,69,195,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="267,111,195,102,196,96,268,105"/>
+<area shape="rect" id="Node000004" href="$d1/df2/_auto_research_low_memory_8h_a313a652d1531f7d82fb04a3f6499ddff.html#a313a652d1531f7d82fb04a3f6499ddff" title=" " alt="" coords="8,134,231,159"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="267,131,225,137,224,131,267,126"/>
+<area shape="rect" id="Node000005" href="$d1/df2/_auto_research_low_memory_8h_ae3f918f9121ab392058ef53302b021cf.html#ae3f918f9121ab392058ef53302b021cf" title=" " alt="" coords="5,183,233,209"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="313,140,234,173,188,186,187,181,232,168,311,135"/>
+</map>

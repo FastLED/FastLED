@@ -1,0 +1,19 @@
+<map id="fl::PerlinParticlePunch::renderMeteor" name="fl::PerlinParticlePunch::renderMeteor">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,122,168,162"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="277,5,352,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,120,154,80,215,41,263,24,264,29,217,46,157,84,110,124"/>
+<area shape="rect" id="Node000004" href="$da/dd6/structfl_1_1_c_r_g_b_aa272170bea8120f101f27ebd2c323b55.html#aa272170bea8120f101f27ebd2c323b55" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="248,55,381,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="135,119,215,90,246,81,248,86,217,95,137,124"/>
+<area shape="rect" id="Node000006" href="$d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d" title=" " alt="" coords="285,104,344,129"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="168,130,271,119,272,124,168,136"/>
+<area shape="rect" id="Node000007" href="$d2/d0d/group___random_gadb05544426b14ef8d85fb2eb73cb8a0a.html#gadb05544426b14ef8d85fb2eb73cb8a0a" title="Generate an 8&#45;bit random number." alt="" coords="275,153,355,179"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="168,148,261,158,261,163,168,153"/>
+<area shape="rect" id="Node000008" href="$d3/d08/structfl_1_1_perlin_particle_punch_1_1_meteor_particle_af3c2a5a7aaaa68ccd626d161d98effec.html#af3c2a5a7aaaa68ccd626d161d98effec" title=" " alt="" coords="216,203,413,243"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="139,160,217,189,239,196,237,201,215,194,137,165"/>
+<area shape="rect" id="Node000009" href="$db/d58/classfl_1_1_perlin_particle_punch_a940ba15318dbcce3ab89d3ad590ba310.html#a940ba15318dbcce3ab89d3ad590ba310" title=" " alt="" coords="233,267,396,307"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="108,160,155,207,185,231,217,253,230,260,227,264,215,258,182,236,151,211,104,164"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6" title=" " alt="" coords="480,5,563,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="352,15,466,15,466,21,352,21"/>
+<area shape="rect" id="Node000005" href="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" title="Default constructor." alt="" coords="461,55,581,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="382,65,447,65,447,70,382,70"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="RGBWEmulatedController::ensureBuffer" name="RGBWEmulatedController::ensureBuffer">
+<area shape="rect" id="Node000001" title="Ensures the internal RGBW buffer is large enough for the LED count." alt="" coords="243,5,432,45"/>
+<area shape="rect" id="Node000002" href="$d4/d28/group___chipsets_gaba9a2f023f2950dbcdf3c2482f765350.html#gaba9a2f023f2950dbcdf3c2482f765350" title="Main rendering function that converts RGB to RGBW and shows pixels." alt="" coords="5,5,195,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="229,28,195,28,195,23,229,23"/>
+</map>

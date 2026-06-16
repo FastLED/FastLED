@@ -1,5 +1,10 @@
 <map id="CPixelLEDController::CPixelLEDController" name="CPixelLEDController::CPixelLEDController">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,164,45"/>
-<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller_a8c560c6d171f117dfd19c0f2ec780a32.html#a8c560c6d171f117dfd19c0f2ec780a32" title="Create an led controller object, add it to the chain of controllers." alt="" coords="212,13,439,38"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="165,23,198,23,198,28,165,28"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,164,75"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a7e91fc8f83d62c9da5e5c3d6d1bc10ce.html#a7e91fc8f83d62c9da5e5c3d6d1bc10ce" title="Protected constructor with registration mode." alt="" coords="212,35,348,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,52,198,52,198,57,164,57"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a9e51518d1427463dffd596c69c6f3e46.html#a9e51518d1427463dffd596c69c6f3e46" title="Add this controller to the linked list." alt="" coords="396,5,532,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="348,41,382,36,383,41,349,46"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a5e115bf146729c8868c918538feb06df.html#a5e115bf146729c8868c918538feb06df" title="Check if this controller is in the linked list." alt="" coords="580,35,716,75"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="533,34,567,39,566,44,532,39"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="580,59,532,60,396,60,361,59,362,54,396,55,532,55,580,54"/>
 </map>

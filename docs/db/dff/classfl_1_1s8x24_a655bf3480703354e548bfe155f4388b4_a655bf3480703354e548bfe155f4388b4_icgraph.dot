@@ -1,0 +1,18 @@
+digraph "fl::s8x24::atan_unit"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::s8x24::atan_unit",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::s8x24::atan",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/dff/classfl_1_1s8x24_ab48d07402ff56f6e3b9a105c43510081.html#ab48d07402ff56f6e3b9a105c43510081",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::s8x24::atan2",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/dff/classfl_1_1s8x24_a8137dfe3f218c6cba710a656d963f491.html#a8137dfe3f218c6cba710a656d963f491",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::s8x24::acos",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/dff/classfl_1_1s8x24_a588124dbbb0495490daef8c639039a75.html#a588124dbbb0495490daef8c639039a75",tooltip=" "];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::s8x24::asin",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/dff/classfl_1_1s8x24_a2a2c3957d27a80f7b3aa9b1ac8863558.html#a2a2c3957d27a80f7b3aa9b1ac8863558",tooltip=" "];
+}

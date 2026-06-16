@@ -1,0 +1,10 @@
+digraph "Graphical Class Hierarchy"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node0 [id="Node000000",label="fl::TIMING_UCS1904\l_800KHZ",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d47/structfl_1_1_t_i_m_i_n_g___u_c_s1904__800_k_h_z.html",tooltip="UCS1904 controller @ 800 kHz Four-phase: TH0=400ns, TH1=800ns, TL0=850ns, TL1=450ns."];
+}

@@ -1,0 +1,5 @@
+<map id="fl::ucs7604::set_brightness" name="fl::ucs7604::set_brightness">
+<area shape="rect" id="Node000001" title="Set global UCS7604 brightness with individual channel values (EXPERIMENTAL)" alt="" coords="5,5,200,31"/>
+<area shape="rect" id="Node000002" href="$db/dda/namespacefl_1_1ucs7604_aae5d26af4c1c95ff229685fc18f8bcb9.html#aae5d26af4c1c95ff229685fc18f8bcb9" title="Set global UCS7604 brightness via current control (EXPERIMENTAL)" alt="" coords="248,5,443,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,15,234,15,234,21,200,21"/>
+</map>

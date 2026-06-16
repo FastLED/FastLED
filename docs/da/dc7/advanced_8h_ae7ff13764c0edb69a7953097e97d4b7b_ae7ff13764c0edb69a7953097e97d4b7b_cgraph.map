@@ -1,0 +1,31 @@
+<map id="drawSpectrumBars" name="drawSpectrumBars">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,228,151,253"/>
+<area shape="rect" id="Node000002" href="$da/dc7/advanced_8h_abb57fa8cb7f9b04a07cf02ae6dc6c8ef.html#abb57fa8cb7f9b04a07cf02ae6dc6c8ef" title=" " alt="" coords="223,5,311,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="81,227,95,191,119,141,153,87,174,62,197,40,209,32,212,36,200,44,178,66,157,90,124,143,100,193,86,229"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350" title=" " alt="" coords="227,55,306,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="84,226,126,162,159,123,197,89,213,80,216,84,200,94,162,127,130,165,88,229"/>
+<area shape="rect" id="Node000004" href="$da/dc7/advanced_8h_afaa5f070126ac5184a648b484e7cf276.html#afaa5f070126ac5184a648b484e7cf276" title=" " alt="" coords="215,104,318,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="90,226,135,184,165,160,197,138,209,132,212,137,200,143,168,164,138,188,93,230"/>
+<area shape="rect" id="Node000008" href="$d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="199,153,334,179"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="107,225,198,188,215,181,217,186,200,192,109,230"/>
+<area shape="rect" id="Node000009" href="$da/dc7/advanced_8h_a36578b12275aa0bc0c3a9947f052b62f.html#a36578b12275aa0bc0c3a9947f052b62f" title=" " alt="" coords="199,203,335,228"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="150,228,184,224,185,229,151,234"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a33fb57d527658d545f129f9fd7cf5860.html#a33fb57d527658d545f129f9fd7cf5860" title=" " alt="" coords="211,252,322,277"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="151,247,198,253,197,259,150,253"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="233,301,300,327"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="112,251,200,286,221,295,219,300,198,291,110,256"/>
+<area shape="rect" id="Node000013" href="$da/dc7/advanced_8h_ab6f8910556329a6221ff314f388bdfe8.html#ab6f8910556329a6221ff314f388bdfe8" title=" " alt="" coords="217,351,316,376"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="94,252,139,292,200,336,214,343,212,348,197,340,136,296,90,256"/>
+<area shape="rect" id="Node000014" href="$da/dc7/advanced_8h_a7b715821956785a8bf37fbecbdd1e1a0.html#a7b715821956785a8bf37fbecbdd1e1a0" title=" " alt="" coords="221,400,312,425"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="89,252,131,315,163,352,200,385,211,392,208,396,197,389,159,356,127,318,84,255"/>
+<area shape="rect" id="Node000015" href="$d8/dd0/_fire_cylinder_8h_a470cec2dcb21e474c257065bb93bfcd1.html#a470cec2dcb21e474c257065bb93bfcd1" title=" " alt="" coords="233,449,301,475"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="86,253,100,289,124,338,158,390,178,415,200,436,221,448,218,453,197,440,174,418,153,394,119,341,95,291,81,255"/>
+<area shape="rect" id="Node000005" href="$da/dc7/advanced_8h_a54f99bb25114b6ba3dfdb9c39d18ac7c.html#a54f99bb25114b6ba3dfdb9c39d18ac7c" title=" " alt="" coords="397,55,487,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="312,101,382,81,384,86,313,107"/>
+<area shape="rect" id="Node000006" href="$d1/dfb/colorutils_8h_a399e4e094995b8e97420b89a2dd6548b.html#a399e4e094995b8e97420b89a2dd6548b" title=" " alt="" coords="383,104,501,129"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="318,114,369,114,369,119,318,119"/>
+<area shape="rect" id="Node000007" href="$d1/dfb/colorutils_8h_afba4db18577c19e39c54f1c5793741b7.html#afba4db18577c19e39c54f1c5793741b7" title="Fill a range of LEDs with a solid color." alt="" coords="404,153,480,179"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="313,127,392,149,390,154,312,132"/>
+<area shape="rect" id="Node000010" href="$da/dc7/advanced_8h_aa40f4f9f21c2392da36ba0259e623720.html#aa40f4f9f21c2392da36ba0259e623720" title=" " alt="" coords="393,203,491,228"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="335,213,379,213,379,218,335,218"/>
+</map>

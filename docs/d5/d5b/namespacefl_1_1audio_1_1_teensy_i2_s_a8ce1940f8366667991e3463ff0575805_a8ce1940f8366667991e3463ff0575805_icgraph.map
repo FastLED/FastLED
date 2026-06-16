@@ -1,0 +1,7 @@
+<map id="fl::audio::TeensyI2S::getPinWS" name="fl::audio::TeensyI2S::getPinWS">
+<area shape="rect" id="Node000001" title=" " alt="" coords="373,5,520,45"/>
+<area shape="rect" id="Node000002" href="$dc/d52/classfl_1_1audio_1_1_config_a2d5e36a3d0a95bd53a20e0152cec156c.html#a2d5e36a3d0a95bd53a20e0152cec156c" title=" " alt="" coords="195,5,325,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="360,28,326,28,326,23,360,23"/>
+<area shape="rect" id="Node000003" href="$d9/d05/_teensy_audio_input_8h_a04c2d6e212e7045ddb76e7d75b460aa9.html#a04c2d6e212e7045ddb76e7d75b460aa9" title=" " alt="" coords="5,13,147,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="181,28,147,28,147,23,181,23"/>
+</map>

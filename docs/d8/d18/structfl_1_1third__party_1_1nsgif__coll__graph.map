@@ -1,0 +1,15 @@
+<map id="fl::third_party::nsgif" name="fl::third_party::nsgif">
+<area shape="rect" id="Node000001" title="GIF animation data." alt="" coords="809,85,957,111"/>
+<area shape="rect" id="Node000002" href="$d1/d86/namespacefl_1_1third__party.html#d2/dbc/structfl_1_1third__party_1_1nsgif__info" title="Information about a GIF." alt="" coords="488,5,668,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="658,31,786,62,849,83,847,88,785,67,657,36"/>
+<area shape="rect" id="Node000003" href="$d1/d86/namespacefl_1_1third__party.html#de/dca/structfl_1_1third__party_1_1nsgif__bitmap__cb__vt" title="Bitmap callbacks function table." alt="" coords="504,55,652,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="666,79,809,90,809,95,666,84"/>
+<area shape="rect" id="Node000004" href="$d1/d86/namespacefl_1_1third__party.html#da/dc9/structfl_1_1third__party_1_1nsgif__frame" title="GIF frame data." alt="" coords="504,119,652,159"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="665,125,785,109,809,105,810,111,786,114,666,130"/>
+<area shape="rect" id="Node000005" href="$d1/d86/namespacefl_1_1third__party.html#d6/d4f/structfl_1_1third__party_1_1nsgif__frame__info" title="Information about a GIF frame." alt="" coords="263,119,411,159"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="424,137,504,137,504,142,424,142"/>
+<area shape="rect" id="Node000006" href="$d1/d86/namespacefl_1_1third__party.html#d5/d9b/structfl_1_1third__party_1_1nsgif__rect" title="LibNSGIF rectangle structure." alt="" coords="5,127,185,152"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="199,137,262,137,262,142,199,142"/>
+<area shape="rect" id="Node000007" href="$d1/d86/namespacefl_1_1third__party.html#d5/d8d/structfl_1_1third__party_1_1nsgif__colour__layout" title="Pixel format: colour component order." alt="" coords="504,183,652,223"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="664,180,784,142,858,108,860,113,786,147,666,185"/>
+</map>

@@ -1,0 +1,14 @@
+<map id="fl::audio::SpectralEqualizerConfig" name="fl::audio::SpectralEqualizerConfig">
+<area shape="rect" id="Node000001" title="Configuration for spectral equalizer." alt="" coords="85,344,279,384"/>
+<area shape="rect" id="Node000002" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="113,256,251,281"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="185,295,185,344,179,344,179,295"/>
+<area shape="rect" id="Node000003" href="$d4/dad/classfl_1_1vector__basic.html" title="Type&#45;erased vector base class." alt="" coords="117,93,237,119"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="180,132,184,256,179,256,175,133"/>
+<area shape="rect" id="Node000006" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="198,168,315,193"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="201,126,245,166,242,170,198,130"/>
+<area shape="rect" id="Node000004" href="$db/d13/classfl_1_1memory__resource.html" title="Polymorphic memory resource base class (PMR&#45;style)." alt="" coords="5,5,161,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="108,38,165,91,162,95,104,42"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl.html#d8/d72/structfl_1_1vector__element__ops" title="Function pointer table for type&#45;specific element operations." alt="" coords="186,5,357,31"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="252,42,221,71,193,95,189,91,218,67,248,39"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="240,206,194,257,190,254,236,202"/>
+</map>

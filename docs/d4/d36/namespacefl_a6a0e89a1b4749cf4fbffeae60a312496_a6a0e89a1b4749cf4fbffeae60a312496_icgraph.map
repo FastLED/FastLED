@@ -1,0 +1,25 @@
+<map id="fl::makeTimingConfig" name="fl::makeTimingConfig">
+<area shape="rect" id="Node000001" title="Convert compile&#45;time CHIPSET type to runtime timing config." alt="" coords="661,171,821,197"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a336a0d84589b1ad8d94fd4a267b68504.html#a336a0d84589b1ad8d94fd4a267b68504" title="Build a ClocklessChipset from a compile&#45;time TIMING trait." alt="" coords="426,13,562,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="721,162,675,110,645,83,612,60,561,39,563,35,615,55,648,79,679,106,725,159"/>
+<area shape="rect" id="Node000004" href="$d1/dc9/namespaceautoresearch_a1868ca9225c807cbaf571228e6629e34.html#a1868ca9225c807cbaf571228e6629e34" title="On FL_IS_STUB: register a one&#45;shot async task that drives autoresearch." alt="" coords="112,84,327,124"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="704,167,661,148,613,132,539,118,464,109,327,104,327,98,464,104,540,113,614,127,663,143,706,163"/>
+<area shape="rect" id="Node000006" href="$db/d63/class_auto_research_remote_control_abb6600e8a1e8c4ef46ba29e7bd3b78b4.html#abb6600e8a1e8c4ef46ba29e7bd3b78b4" title="Register all RPC functions with shared autoresearch state." alt="" coords="114,164,325,204"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="686,170,613,155,546,148,494,146,375,155,302,167,301,161,374,149,494,140,547,142,614,149,687,165"/>
+<area shape="rect" id="Node000007" href="$db/d63/class_auto_research_remote_control_a2e12a8f854f2f66312793a4405f4fddb.html#a2e12a8f854f2f66312793a4405f4fddb" title=" " alt="" coords="389,164,599,204"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="648,187,599,187,599,181,648,181"/>
+<area shape="rect" id="Node000008" href="$db/d63/class_auto_research_remote_control_a7992b62fd1f26fe1898d2ea8a78b370a.html#a7992b62fd1f26fe1898d2ea8a78b370a" title=" " alt="" coords="389,228,599,268"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="678,203,573,230,571,225,677,198"/>
+<area shape="rect" id="Node000009" href="$db/dad/_r_g_b_w_w_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="465,293,523,318"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="719,208,673,247,614,282,567,298,524,305,523,300,566,293,612,278,670,242,716,204"/>
+<area shape="rect" id="Node000010" href="$d6/d84/namespaceautoresearch_1_1parlio__stream_a83a87dbb8fccb4873f303d9821c35f0f.html#a83a87dbb8fccb4873f303d9821c35f0f" title="Run the PARLIO streaming functional test." alt="" coords="375,343,613,383"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="728,210,683,272,651,305,615,333,591,345,589,340,612,328,647,301,678,268,723,207"/>
+<area shape="rect" id="Node000003" href="$df/df5/structfl_1_1_channel_config_aaa382ee7bfe572aa96a4b55ad78f6d7c.html#aaa382ee7bfe572aa96a4b55ad78f6d7c" title="Template constructor with TIMING type (backwards compatibility)" alt="" coords="149,5,289,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="412,28,290,28,290,23,412,23"/>
+<area shape="rect" id="Node000005" href="$dd/dc8/_auto_research_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,125,64,150"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="99,129,65,135,64,130,98,123"/>
+<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="126,163,64,147,65,142,127,158"/>
+<area shape="poly" id="edge8_Node000007_Node000006" title=" " alt="" coords="374,187,325,187,325,181,374,181"/>
+<area shape="poly" id="edge10_Node000008_Node000006" title=" " alt="" coords="394,227,305,207,306,201,395,222"/>
+<area shape="poly" id="edge13_Node000010_Node000006" title=" " alt="" coords="387,340,373,333,330,303,291,269,234,206,238,203,295,265,333,299,376,328,389,335"/>
+</map>

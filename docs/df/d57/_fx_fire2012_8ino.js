@@ -11,6 +11,6 @@ var _fx_fire2012_8ino =
     [ "SPARKING", "df/d57/_fx_fire2012_8ino_ad8453bc3e6118be5f9c3a7b190ee4e34.html#ad8453bc3e6118be5f9c3a7b190ee4e34", null ],
     [ "loop", "df/d57/_fx_fire2012_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f", null ],
     [ "setup", "df/d57/_fx_fire2012_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d", null ],
-    [ "fire", "df/d57/_fx_fire2012_8ino_a134be447c5eb135a0782ea18fa6e4488.html#a134be447c5eb135a0782ea18fa6e4488", null ],
-    [ "leds", "df/d57/_fx_fire2012_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d", null ]
+    [ "fire", "df/d57/_fx_fire2012_8ino_ab889f27f7e33f2097ee5ee9cf6f83901.html#ab889f27f7e33f2097ee5ee9cf6f83901", null ],
+    [ "leds", "df/d57/_fx_fire2012_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad", null ]
 ];

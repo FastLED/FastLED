@@ -9,6 +9,8 @@ digraph "fl::TimeWarp::update"
   Node1 [id="Node000001",label="fl::TimeWarp::update",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::TimeWarp::applyExact",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d3d/classfl_1_1_time_warp_a65e443d7590e00bd4e28de66456e25df.html#a65e443d7590e00bd4e28de66456e25df",tooltip=" "];
-  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::TimeWarp::time",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d3d/classfl_1_1_time_warp_a6be5e653c49d50ed189ff3f37fe27513.html#a6be5e653c49d50ed189ff3f37fe27513",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::TimeWarp::reset",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d3d/classfl_1_1_time_warp_a69adad573c748178c954836359e0d718.html#a69adad573c748178c954836359e0d718",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::TimeWarp::time",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d3d/classfl_1_1_time_warp_a6be5e653c49d50ed189ff3f37fe27513.html#a6be5e653c49d50ed189ff3f37fe27513",tooltip=" "];
 }

@@ -6,5 +6,15 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::Hash\< i8 \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dd5/structfl_1_1_hash_3_01i8_01_4.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::basic_string",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d66/classfl_1_1basic__string.html",tooltip="Concrete type-erased string class."];
+  Node0 -> Node1 [id="edge33_Node000000_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 [id="Node000001",label="fl::string_n\< 32 \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2d/classfl_1_1string__n.html",tooltip=" "];
+  Node0 -> Node2 [id="edge34_Node000000_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::string_n\< 256 \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2d/classfl_1_1string__n.html",tooltip=" "];
+  Node0 -> Node3 [id="edge35_Node000000_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::string_n\< FASTLED\l_STR_INLINED_SIZE \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2d/classfl_1_1string__n.html",tooltip=" "];
+  Node3 -> Node4 [id="edge36_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::string",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/db2/classfl_1_1string.html",tooltip=" "];
+  Node0 -> Node5 [id="edge37_Node000000_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::string_n\< N \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2d/classfl_1_1string__n.html",tooltip=" "];
 }

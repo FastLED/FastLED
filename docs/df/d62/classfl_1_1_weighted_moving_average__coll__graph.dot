@@ -1,0 +1,26 @@
+digraph "fl::WeightedMovingAverage&lt; T, N &gt;"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::WeightedMovingAverage\l\< T, N \>",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mImpl",fontcolor="grey" ];
+  Node2 [id="Node000002",label="fl::detail::WeightedMoving\lAverageImpl\< float, 8 \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/d2a/classfl_1_1detail_1_1_weighted_moving_average_impl.html",tooltip=" "];
+  Node3 -> Node2 [id="edge2_Node000002_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mBuf",fontcolor="grey" ];
+  Node3 [id="Node000003",label="fl::circular_buffer\l\< float, N \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d9/d12/classfl_1_1circular__buffer.html",tooltip=" "];
+  Node4 -> Node3 [id="edge3_Node000003_Node000004",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mStorage",fontcolor="grey" ];
+  Node4 [id="Node000004",label="N",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d0/deb/namespace_3global_scope_4.html#d0/ddf/class_n",tooltip=" "];
+  Node5 -> Node3 [id="edge4_Node000003_Node000005",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mCore",fontcolor="grey" ];
+  Node5 [id="Node000005",label="fl::circular_buffer\l_core\< float \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d64/classfl_1_1circular__buffer__core.html",tooltip=" "];
+  Node7 -> Node3 [id="edge5_Node000003_Node000007",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< float, N \>",fontcolor="grey" ];
+  Node7 [id="Node000007",label="fl::circular_buffer\l\< T, N \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d9/d12/classfl_1_1circular__buffer.html",tooltip=" "];
+  Node8 -> Node2 [id="edge6_Node000002_Node000008",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< float, 8 \>",fontcolor="grey" ];
+  Node8 [id="Node000008",label="fl::detail::WeightedMoving\lAverageImpl\< T, N \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/d2a/classfl_1_1detail_1_1_weighted_moving_average_impl.html",tooltip=" "];
+  Node9 -> Node8 [id="edge7_Node000008_Node000009",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mBuf",fontcolor="grey" ];
+  Node9 [id="Node000009",label="fl::circular_buffer\l\< T, 0 \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d9/d12/classfl_1_1circular__buffer.html",tooltip=" "];
+  Node4 -> Node9 [id="edge8_Node000009_Node000004",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mStorage",fontcolor="grey" ];
+  Node7 -> Node9 [id="edge9_Node000009_Node000007",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< T, 0 \>",fontcolor="grey" ];
+}

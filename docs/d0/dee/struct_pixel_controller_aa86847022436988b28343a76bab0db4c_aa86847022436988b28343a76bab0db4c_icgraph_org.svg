@@ -11,7 +11,7 @@
 <!-- Node1 -->
 <g id="Node000001" class="node">
 <title>Node1</title>
-<g id="a_Node000001"><a xlink:title="Toggle dithering enable If dithering is set to enabled, this will re&#45;init the dithering values (init_...">
+<g id="a_Node000001"><a xlink:title="Toggle dithering enable/disable.">
 <polygon fill="#999999" stroke="#666666" points="328,-61.5 201,-61.5 201,-31.5 328,-31.5 328,-61.5"/>
 <text text-anchor="start" x="209" y="-49.5" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::enable</text>
 <text text-anchor="middle" x="264.5" y="-38.5" font-family="Helvetica,sans-Serif" font-size="10.00">_dithering</text>
@@ -57,7 +57,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d0/dee/struct_pixel_controller_ae1e1069b343fc0577828d28ffe3cead9.html#ae1e1069b343fc0577828d28ffe3cead9" target="_top" xlink:title="Constructor.">
+<g id="a_Node000004"><a xlink:href="../../d0/dee/struct_pixel_controller_a12e8445765cfedd2e09818f58daad6a0.html#a12e8445765cfedd2e09818f58daad6a0" target="_top" xlink:title="Constructor.">
 <polygon fill="white" stroke="#666666" points="165,-19 0,-19 0,0 165,0 165,-19"/>
 <text text-anchor="middle" x="82.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">PixelController::PixelController</text>
 </a>

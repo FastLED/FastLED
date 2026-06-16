@@ -124,83 +124,86 @@ $(function(){initNavTree('dc/da7/kiss__fftr_8h_aead7aaed139f58158b446ea623a8b8cb
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>lenmem</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="../../d7/d84/cstddef_8h_a1ed206c22241d418bcd1746517563727.html#a1ed206c22241d418bcd1746517563727">size_t</a> *</td>          <td class="paramname"><span class="paramname"><em>lenmem</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d2/da1/kiss__fftr_8cpp_source.html#l00021">21</a> of file <a class="el" href="../../d2/da1/kiss__fftr_8cpp_source.html">kiss_fftr.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   22</span>{</div>
-<div class="line"><span class="lineno">   23</span>    <span class="keywordtype">int</span> i;</div>
-<div class="line"><span class="lineno">   24</span>    <a class="code hl_typedef" href="../../dc/da7/kiss__fftr_8h_a9770a73a2aed969522b253322d069fb8.html#a9770a73a2aed969522b253322d069fb8">kiss_fftr_cfg</a> st = NULL;</div>
-<div class="line"><span class="lineno">   25</span>    <span class="keywordtype">size_t</span> subsize = 0, memneeded;</div>
-<div class="line"><span class="lineno">   26</span> </div>
-<div class="line"><span class="lineno">   27</span>    <span class="keywordflow">if</span> (nfft &amp; 1) {</div>
-<div class="line"><span class="lineno">   28</span>        fprintf(stderr,<span class="stringliteral">&quot;Real FFT optimization must be even.\n&quot;</span>);</div>
-<div class="line"><span class="lineno">   29</span>        <span class="keywordflow">return</span> NULL;</div>
-<div class="line"><span class="lineno">   30</span>    }</div>
-<div class="line"><span class="lineno">   31</span>    nfft &gt;&gt;= 1;</div>
-<div class="line"><span class="lineno">   32</span> </div>
-<div class="line"><span class="lineno">   33</span>    <a class="code hl_function" href="../../d7/dc2/kiss__fft_8cpp_ab5ad1560b58375ec071da45401911358.html#ab5ad1560b58375ec071da45401911358">kiss_fft_alloc</a> (nfft, inverse_fft, NULL, &amp;subsize);</div>
-<div class="line"><span class="lineno">   34</span>    memneeded = <span class="keyword">sizeof</span>(<span class="keyword">struct </span><a class="code hl_struct" href="../../d2/da1/kiss__fftr_8cpp.html#df/dc2/structkiss__fftr__state">kiss_fftr_state</a>) + subsize + sizeof(<a class="code hl_struct" href="../../d0/dc9/kiss__fft_8h.html#d4/d47/structkiss__fft__cpx">kiss_fft_cpx</a>) * ( nfft * 3 / 2);</div>
-<div class="line"><span class="lineno">   35</span> </div>
-<div class="line"><span class="lineno">   36</span>    <span class="keywordflow">if</span> (lenmem == NULL) {</div>
-<div class="line"><span class="lineno">   37</span>        st = (<a class="code hl_typedef" href="../../dc/da7/kiss__fftr_8h_a9770a73a2aed969522b253322d069fb8.html#a9770a73a2aed969522b253322d069fb8">kiss_fftr_cfg</a>) <a class="code hl_define" href="../../d0/dc9/kiss__fft_8h_aa6e24524bfa0247ac606c950e43a9a4d.html#aa6e24524bfa0247ac606c950e43a9a4d">KISS_FFT_MALLOC</a> (memneeded);</div>
-<div class="line"><span class="lineno">   38</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">   39</span>        <span class="keywordflow">if</span> (*lenmem &gt;= memneeded)</div>
-<div class="line"><span class="lineno">   40</span>            st = (<a class="code hl_typedef" href="../../dc/da7/kiss__fftr_8h_a9770a73a2aed969522b253322d069fb8.html#a9770a73a2aed969522b253322d069fb8">kiss_fftr_cfg</a>) mem;</div>
-<div class="line"><span class="lineno">   41</span>        *lenmem = memneeded;</div>
-<div class="line"><span class="lineno">   42</span>    }</div>
-<div class="line"><span class="lineno">   43</span>    <span class="keywordflow">if</span> (!st)</div>
-<div class="line"><span class="lineno">   44</span>        <span class="keywordflow">return</span> NULL;</div>
-<div class="line"><span class="lineno">   45</span> </div>
-<div class="line"><span class="lineno">   46</span>    st-&gt;<a class="code hl_variable" href="../../d2/da1/kiss__fftr_8cpp.html#acdccafcf502fec1c13450c2eae901738">substate</a> = (<a class="code hl_typedef" href="../../d0/dc9/kiss__fft_8h_ab8c364e12d4cbde47dca54eb4bc3ce79.html#ab8c364e12d4cbde47dca54eb4bc3ce79">kiss_fft_cfg</a>) (st + 1); <span class="comment">/*just beyond kiss_fftr_state struct */</span></div>
+<p class="definition">Definition at line <a class="el" href="../../da/dad/kiss__fftr_8cpp_8hpp_source.html#l00035">35</a> of file <a class="el" href="../../da/dad/kiss__fftr_8cpp_8hpp_source.html">kiss_fftr.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   36</span>{</div>
+<div class="line"><span class="lineno">   37</span>    <span class="keywordtype">int</span> i;</div>
+<div class="line"><span class="lineno">   38</span>    <a class="code hl_typedef" href="../../dc/da7/kiss__fftr_8h_a9770a73a2aed969522b253322d069fb8.html#a9770a73a2aed969522b253322d069fb8">kiss_fftr_cfg</a> st = <a class="code hl_define" href="../../d0/d8f/kiss__fft_8cpp_8hpp_a070d2ce7b6bb7e5c05602aa8c308d0c4.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><span class="lineno">   39</span>    <span class="keywordtype">size_t</span> subsize = 0, memneeded;</div>
+<div class="line"><span class="lineno">   40</span> </div>
+<div class="line"><span class="lineno">   41</span>    <span class="keywordflow">if</span> (nfft &amp; 1) {</div>
+<div class="line"><span class="lineno">   42</span>        <span class="comment">//fprintf(stderr,&quot;Real FFT optimization must be even.\n&quot;);</span></div>
+<div class="line"><span class="lineno">   43</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Real FFT optimization must be even.&quot;</span>);</div>
+<div class="line"><span class="lineno">   44</span>        <span class="keywordflow">return</span> <a class="code hl_define" href="../../d0/d8f/kiss__fft_8cpp_8hpp_a070d2ce7b6bb7e5c05602aa8c308d0c4.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><span class="lineno">   45</span>    }</div>
+<div class="line"><span class="lineno">   46</span>    nfft &gt;&gt;= 1;</div>
 <div class="line"><span class="lineno">   47</span> </div>
-<div class="line"><span class="lineno">   48</span><span class="preprocessor">    #pragma GCC diagnostic push</span></div>
-<div class="line"><span class="lineno">   49</span><span class="preprocessor">    #pragma GCC diagnostic ignored &quot;-Wcast-align&quot;</span></div>
-<div class="line"><span class="lineno">   50</span>    <span class="comment">// This cast alginment might be a problem, kiss_fft_cpx has alignment-2.</span></div>
-<div class="line"><span class="lineno">   51</span>    st-&gt;<a class="code hl_variable" href="../../d2/da1/kiss__fftr_8cpp.html#ae0b38b99d0ec7540abab4211093fdd99">tmpbuf</a> = (<a class="code hl_struct" href="../../d0/dc9/kiss__fft_8h.html#d4/d47/structkiss__fft__cpx">kiss_fft_cpx</a> *) (((<span class="keywordtype">char</span> *) st-&gt;<a class="code hl_variable" href="../../d2/da1/kiss__fftr_8cpp.html#acdccafcf502fec1c13450c2eae901738">substate</a>) + subsize);</div>
-<div class="line"><span class="lineno">   52</span>    #pragma GCC diagnostic pop</div>
-<div class="line"><span class="lineno">   53</span> </div>
-<div class="line"><span class="lineno">   54</span>    st-&gt;<a class="code hl_variable" href="../../d2/da1/kiss__fftr_8cpp.html#ae612ac0806b0ceee4868f1829aa05e78">super_twiddles</a> = st-&gt;<a class="code hl_variable" href="../../d2/da1/kiss__fftr_8cpp.html#ae0b38b99d0ec7540abab4211093fdd99">tmpbuf</a> + nfft;</div>
-<div class="line"><span class="lineno">   55</span>    <a class="code hl_function" href="../../d7/dc2/kiss__fft_8cpp_ab5ad1560b58375ec071da45401911358.html#ab5ad1560b58375ec071da45401911358">kiss_fft_alloc</a>(nfft, inverse_fft, st-&gt;<a class="code hl_variable" href="../../d2/da1/kiss__fftr_8cpp.html#acdccafcf502fec1c13450c2eae901738">substate</a>, &amp;subsize);</div>
-<div class="line"><span class="lineno">   56</span> </div>
-<div class="line"><span class="lineno">   57</span>    for (i = 0; i &lt; nfft/2; ++i) {</div>
-<div class="line"><span class="lineno">   58</span>        <span class="keywordtype">double</span> phase =</div>
-<div class="line"><span class="lineno">   59</span>            -3.14159265358979323846264338327 * ((double) (i+1) / nfft + .5);</div>
-<div class="line"><span class="lineno">   60</span>        <span class="keywordflow">if</span> (inverse_fft)</div>
-<div class="line"><span class="lineno">   61</span>            phase *= -1;</div>
-<div class="line"><span class="lineno">   62</span>        <a class="code hl_define" href="../../d3/d74/__kiss__fft__guts_8h_ac7852abdf2dc5ed4538551be6d1dd20b.html#ac7852abdf2dc5ed4538551be6d1dd20b">kf_cexp</a> (st-&gt;<a class="code hl_variable" href="../../d2/da1/kiss__fftr_8cpp.html#ae612ac0806b0ceee4868f1829aa05e78">super_twiddles</a>+i,phase);</div>
-<div class="line"><span class="lineno">   63</span>    }</div>
-<div class="line"><span class="lineno">   64</span>    <span class="keywordflow">return</span> st;</div>
-<div class="line"><span class="lineno">   65</span>}</div>
-<div class="ttc" id="a__kiss__fft__guts_8h_ac7852abdf2dc5ed4538551be6d1dd20b_html_ac7852abdf2dc5ed4538551be6d1dd20b"><div class="ttname"><a href="../../d3/d74/__kiss__fft__guts_8h_ac7852abdf2dc5ed4538551be6d1dd20b.html#ac7852abdf2dc5ed4538551be6d1dd20b">kf_cexp</a></div><div class="ttdeci">#define kf_cexp(x, phase)</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d74/__kiss__fft__guts_8h_source.html#l00137">_kiss_fft_guts.h:137</a></div></div>
-<div class="ttc" id="akiss__fft_8cpp_ab5ad1560b58375ec071da45401911358_html_ab5ad1560b58375ec071da45401911358"><div class="ttname"><a href="../../d7/dc2/kiss__fft_8cpp_ab5ad1560b58375ec071da45401911358.html#ab5ad1560b58375ec071da45401911358">kiss_fft_alloc</a></div><div class="ttdeci">kiss_fft_cfg kiss_fft_alloc(int nfft, int inverse_fft, void *mem, size_t *lenmem)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/dc2/kiss__fft_8cpp_source.html#l00354">kiss_fft.cpp:354</a></div></div>
-<div class="ttc" id="akiss__fft_8h_aa6e24524bfa0247ac606c950e43a9a4d_html_aa6e24524bfa0247ac606c950e43a9a4d"><div class="ttname"><a href="../../d0/dc9/kiss__fft_8h_aa6e24524bfa0247ac606c950e43a9a4d.html#aa6e24524bfa0247ac606c950e43a9a4d">KISS_FFT_MALLOC</a></div><div class="ttdeci">#define KISS_FFT_MALLOC</div><div class="ttdef"><b>Definition</b> <a href="../../d0/dc9/kiss__fft_8h_source.html#l00053">kiss_fft.h:53</a></div></div>
-<div class="ttc" id="akiss__fft_8h_ab8c364e12d4cbde47dca54eb4bc3ce79_html_ab8c364e12d4cbde47dca54eb4bc3ce79"><div class="ttname"><a href="../../d0/dc9/kiss__fft_8h_ab8c364e12d4cbde47dca54eb4bc3ce79.html#ab8c364e12d4cbde47dca54eb4bc3ce79">kiss_fft_cfg</a></div><div class="ttdeci">struct kiss_fft_state * kiss_fft_cfg</div><div class="ttdef"><b>Definition</b> <a href="../../d0/dc9/kiss__fft_8h_source.html#l00077">kiss_fft.h:77</a></div></div>
-<div class="ttc" id="akiss__fft_8h_html_d4/d47/structkiss__fft__cpx"><div class="ttname"><a href="../../d0/dc9/kiss__fft_8h.html#d4/d47/structkiss__fft__cpx">kiss_fft_cpx</a></div><div class="ttdef"><b>Definition</b> <a href="../../d0/dc9/kiss__fft_8h_source.html#l00072">kiss_fft.h:72</a></div></div>
-<div class="ttc" id="akiss__fftr_8cpp_html_acdccafcf502fec1c13450c2eae901738"><div class="ttname"><a href="../../d2/da1/kiss__fftr_8cpp.html#acdccafcf502fec1c13450c2eae901738">kiss_fftr_state::substate</a></div><div class="ttdeci">kiss_fft_cfg substate</div><div class="ttdef"><b>Definition</b> <a href="../../d2/da1/kiss__fftr_8cpp_source.html#l00013">kiss_fftr.cpp:13</a></div></div>
-<div class="ttc" id="akiss__fftr_8cpp_html_ae0b38b99d0ec7540abab4211093fdd99"><div class="ttname"><a href="../../d2/da1/kiss__fftr_8cpp.html#ae0b38b99d0ec7540abab4211093fdd99">kiss_fftr_state::tmpbuf</a></div><div class="ttdeci">kiss_fft_cpx * tmpbuf</div><div class="ttdef"><b>Definition</b> <a href="../../d2/da1/kiss__fftr_8cpp_source.html#l00014">kiss_fftr.cpp:14</a></div></div>
-<div class="ttc" id="akiss__fftr_8cpp_html_ae612ac0806b0ceee4868f1829aa05e78"><div class="ttname"><a href="../../d2/da1/kiss__fftr_8cpp.html#ae612ac0806b0ceee4868f1829aa05e78">kiss_fftr_state::super_twiddles</a></div><div class="ttdeci">kiss_fft_cpx * super_twiddles</div><div class="ttdef"><b>Definition</b> <a href="../../d2/da1/kiss__fftr_8cpp_source.html#l00015">kiss_fftr.cpp:15</a></div></div>
-<div class="ttc" id="akiss__fftr_8cpp_html_df/dc2/structkiss__fftr__state"><div class="ttname"><a href="../../d2/da1/kiss__fftr_8cpp.html#df/dc2/structkiss__fftr__state">kiss_fftr_state</a></div><div class="ttdef"><b>Definition</b> <a href="../../d2/da1/kiss__fftr_8cpp_source.html#l00012">kiss_fftr.cpp:12</a></div></div>
+<div class="line"><span class="lineno">   48</span>    <a class="code hl_function" href="../../d0/d8f/kiss__fft_8cpp_8hpp_aa3a3753f06cf36fa0e2c28751799ce55.html#aa3a3753f06cf36fa0e2c28751799ce55">kiss_fft_alloc</a> (nfft, inverse_fft, <a class="code hl_define" href="../../d0/d8f/kiss__fft_8cpp_8hpp_a070d2ce7b6bb7e5c05602aa8c308d0c4.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>, &amp;subsize);</div>
+<div class="line"><span class="lineno">   49</span>    memneeded = <span class="keyword">sizeof</span>(<span class="keyword">struct </span><a class="code hl_struct" href="../../da/dad/kiss__fftr_8cpp_8hpp.html#df/dc2/structkiss__fftr__state">kiss_fftr_state</a>) + subsize + sizeof(<a class="code hl_struct" href="../../d0/dc9/kiss__fft_8h.html#d4/d47/structkiss__fft__cpx">kiss_fft_cpx</a>) * ( nfft * 3 / 2);</div>
+<div class="line"><span class="lineno">   50</span> </div>
+<div class="line"><span class="lineno">   51</span>    <span class="keywordflow">if</span> (lenmem == <a class="code hl_define" href="../../d0/d8f/kiss__fft_8cpp_8hpp_a070d2ce7b6bb7e5c05602aa8c308d0c4.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>) {</div>
+<div class="line"><span class="lineno">   52</span>        st = (<a class="code hl_typedef" href="../../dc/da7/kiss__fftr_8h_a9770a73a2aed969522b253322d069fb8.html#a9770a73a2aed969522b253322d069fb8">kiss_fftr_cfg</a>) <a class="code hl_define" href="../../d0/dc9/kiss__fft_8h_afa6ff82ec4dd7d6fc9d38937c856f270.html#afa6ff82ec4dd7d6fc9d38937c856f270">KISS_FFT_MALLOC</a> (memneeded);</div>
+<div class="line"><span class="lineno">   53</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">   54</span>        <span class="keywordflow">if</span> (*lenmem &gt;= memneeded)</div>
+<div class="line"><span class="lineno">   55</span>            st = (<a class="code hl_typedef" href="../../dc/da7/kiss__fftr_8h_a9770a73a2aed969522b253322d069fb8.html#a9770a73a2aed969522b253322d069fb8">kiss_fftr_cfg</a>) mem;</div>
+<div class="line"><span class="lineno">   56</span>        *lenmem = memneeded;</div>
+<div class="line"><span class="lineno">   57</span>    }</div>
+<div class="line"><span class="lineno">   58</span>    <span class="keywordflow">if</span> (!st)</div>
+<div class="line"><span class="lineno">   59</span>        <span class="keywordflow">return</span> <a class="code hl_define" href="../../d0/d8f/kiss__fft_8cpp_8hpp_a070d2ce7b6bb7e5c05602aa8c308d0c4.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;</div>
+<div class="line"><span class="lineno">   60</span> </div>
+<div class="line"><span class="lineno">   61</span>    st-&gt;<a class="code hl_variable" href="../../da/dad/kiss__fftr_8cpp_8hpp.html#acdccafcf502fec1c13450c2eae901738">substate</a> = (<a class="code hl_typedef" href="../../d0/dc9/kiss__fft_8h_ab8c364e12d4cbde47dca54eb4bc3ce79.html#ab8c364e12d4cbde47dca54eb4bc3ce79">kiss_fft_cfg</a>) (st + 1); <span class="comment">/*just beyond kiss_fftr_state struct */</span></div>
+<div class="line"><span class="lineno">   62</span> </div>
+<div class="line"><span class="lineno">   63</span><span class="preprocessor">    #pragma GCC diagnostic push</span></div>
+<div class="line"><span class="lineno">   64</span><span class="preprocessor">    #pragma GCC diagnostic ignored &quot;-Wcast-align&quot;</span></div>
+<div class="line"><span class="lineno">   65</span>    <span class="comment">// This cast alginment might be a problem, kiss_fft_cpx has alignment-2.</span></div>
+<div class="line"><span class="lineno">   66</span>    st-&gt;<a class="code hl_variable" href="../../da/dad/kiss__fftr_8cpp_8hpp.html#ae0b38b99d0ec7540abab4211093fdd99">tmpbuf</a> = (<a class="code hl_struct" href="../../d0/dc9/kiss__fft_8h.html#d4/d47/structkiss__fft__cpx">kiss_fft_cpx</a> *) (((<span class="keywordtype">char</span> *) st-&gt;<a class="code hl_variable" href="../../da/dad/kiss__fftr_8cpp_8hpp.html#acdccafcf502fec1c13450c2eae901738">substate</a>) + subsize);</div>
+<div class="line"><span class="lineno">   67</span>    #pragma GCC diagnostic pop</div>
+<div class="line"><span class="lineno">   68</span> </div>
+<div class="line"><span class="lineno">   69</span>    st-&gt;<a class="code hl_variable" href="../../da/dad/kiss__fftr_8cpp_8hpp.html#ae612ac0806b0ceee4868f1829aa05e78">super_twiddles</a> = st-&gt;<a class="code hl_variable" href="../../da/dad/kiss__fftr_8cpp_8hpp.html#ae0b38b99d0ec7540abab4211093fdd99">tmpbuf</a> + nfft;</div>
+<div class="line"><span class="lineno">   70</span>    <a class="code hl_function" href="../../d0/d8f/kiss__fft_8cpp_8hpp_aa3a3753f06cf36fa0e2c28751799ce55.html#aa3a3753f06cf36fa0e2c28751799ce55">kiss_fft_alloc</a>(nfft, inverse_fft, st-&gt;<a class="code hl_variable" href="../../da/dad/kiss__fftr_8cpp_8hpp.html#acdccafcf502fec1c13450c2eae901738">substate</a>, &amp;subsize);</div>
+<div class="line"><span class="lineno">   71</span> </div>
+<div class="line"><span class="lineno">   72</span>    for (i = 0; i &lt; nfft/2; ++i) {</div>
+<div class="line"><span class="lineno">   73</span>        <span class="keywordtype">double</span> phase =</div>
+<div class="line"><span class="lineno">   74</span>            -3.14159265358979323846264338327 * ((double) (i+1) / nfft + .5);</div>
+<div class="line"><span class="lineno">   75</span>        <span class="keywordflow">if</span> (inverse_fft)</div>
+<div class="line"><span class="lineno">   76</span>            phase *= -1;</div>
+<div class="line"><span class="lineno">   77</span>        <a class="code hl_define" href="../../d3/d74/__kiss__fft__guts_8h_ac7852abdf2dc5ed4538551be6d1dd20b.html#ac7852abdf2dc5ed4538551be6d1dd20b">kf_cexp</a> (st-&gt;<a class="code hl_variable" href="../../da/dad/kiss__fftr_8cpp_8hpp.html#ae612ac0806b0ceee4868f1829aa05e78">super_twiddles</a>+i,phase);</div>
+<div class="line"><span class="lineno">   78</span>    }</div>
+<div class="line"><span class="lineno">   79</span>    <span class="keywordflow">return</span> st;</div>
+<div class="line"><span class="lineno">   80</span>}</div>
+<div class="ttc" id="a__kiss__fft__guts_8h_ac7852abdf2dc5ed4538551be6d1dd20b_html_ac7852abdf2dc5ed4538551be6d1dd20b"><div class="ttname"><a href="../../d3/d74/__kiss__fft__guts_8h_ac7852abdf2dc5ed4538551be6d1dd20b.html#ac7852abdf2dc5ed4538551be6d1dd20b">kf_cexp</a></div><div class="ttdeci">#define kf_cexp(x, phase)</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d74/__kiss__fft__guts_8h_source.html#l00143">_kiss_fft_guts.h:143</a></div></div>
+<div class="ttc" id="akiss__fft_8cpp_8hpp_a070d2ce7b6bb7e5c05602aa8c308d0c4_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="../../d0/d8f/kiss__fft_8cpp_8hpp_a070d2ce7b6bb7e5c05602aa8c308d0c4.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d8f/kiss__fft_8cpp_8hpp_source.html#l00017">kiss_fft.cpp.hpp:17</a></div></div>
+<div class="ttc" id="akiss__fft_8cpp_8hpp_aa3a3753f06cf36fa0e2c28751799ce55_html_aa3a3753f06cf36fa0e2c28751799ce55"><div class="ttname"><a href="../../d0/d8f/kiss__fft_8cpp_8hpp_aa3a3753f06cf36fa0e2c28751799ce55.html#aa3a3753f06cf36fa0e2c28751799ce55">kiss_fft_alloc</a></div><div class="ttdeci">kiss_fft_cfg kiss_fft_alloc(int nfft, int inverse_fft, void *mem, size_t *lenmem) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d8f/kiss__fft_8cpp_8hpp_source.html#l00363">kiss_fft.cpp.hpp:363</a></div></div>
+<div class="ttc" id="akiss__fft_8h_ab8c364e12d4cbde47dca54eb4bc3ce79_html_ab8c364e12d4cbde47dca54eb4bc3ce79"><div class="ttname"><a href="../../d0/dc9/kiss__fft_8h_ab8c364e12d4cbde47dca54eb4bc3ce79.html#ab8c364e12d4cbde47dca54eb4bc3ce79">kiss_fft_cfg</a></div><div class="ttdeci">struct kiss_fft_state * kiss_fft_cfg</div><div class="ttdef"><b>Definition</b> <a href="../../d0/dc9/kiss__fft_8h_source.html#l00089">kiss_fft.h:89</a></div></div>
+<div class="ttc" id="akiss__fft_8h_afa6ff82ec4dd7d6fc9d38937c856f270_html_afa6ff82ec4dd7d6fc9d38937c856f270"><div class="ttname"><a href="../../d0/dc9/kiss__fft_8h_afa6ff82ec4dd7d6fc9d38937c856f270.html#afa6ff82ec4dd7d6fc9d38937c856f270">KISS_FFT_MALLOC</a></div><div class="ttdeci">#define KISS_FFT_MALLOC(nbytes)</div><div class="ttdef"><b>Definition</b> <a href="../../d0/dc9/kiss__fft_8h_source.html#l00060">kiss_fft.h:60</a></div></div>
+<div class="ttc" id="akiss__fft_8h_html_d4/d47/structkiss__fft__cpx"><div class="ttname"><a href="../../d0/dc9/kiss__fft_8h.html#d4/d47/structkiss__fft__cpx">kiss_fft_cpx</a></div><div class="ttdef"><b>Definition</b> <a href="../../d0/dc9/kiss__fft_8h_source.html#l00084">kiss_fft.h:84</a></div></div>
+<div class="ttc" id="akiss__fftr_8cpp_8hpp_html_acdccafcf502fec1c13450c2eae901738"><div class="ttname"><a href="../../da/dad/kiss__fftr_8cpp_8hpp.html#acdccafcf502fec1c13450c2eae901738">kiss_fftr_state::substate</a></div><div class="ttdeci">kiss_fft_cfg substate</div><div class="ttdef"><b>Definition</b> <a href="../../da/dad/kiss__fftr_8cpp_8hpp_source.html#l00027">kiss_fftr.cpp.hpp:27</a></div></div>
+<div class="ttc" id="akiss__fftr_8cpp_8hpp_html_ae0b38b99d0ec7540abab4211093fdd99"><div class="ttname"><a href="../../da/dad/kiss__fftr_8cpp_8hpp.html#ae0b38b99d0ec7540abab4211093fdd99">kiss_fftr_state::tmpbuf</a></div><div class="ttdeci">kiss_fft_cpx * tmpbuf</div><div class="ttdef"><b>Definition</b> <a href="../../da/dad/kiss__fftr_8cpp_8hpp_source.html#l00028">kiss_fftr.cpp.hpp:28</a></div></div>
+<div class="ttc" id="akiss__fftr_8cpp_8hpp_html_ae612ac0806b0ceee4868f1829aa05e78"><div class="ttname"><a href="../../da/dad/kiss__fftr_8cpp_8hpp.html#ae612ac0806b0ceee4868f1829aa05e78">kiss_fftr_state::super_twiddles</a></div><div class="ttdeci">kiss_fft_cpx * super_twiddles</div><div class="ttdef"><b>Definition</b> <a href="../../da/dad/kiss__fftr_8cpp_8hpp_source.html#l00029">kiss_fftr.cpp.hpp:29</a></div></div>
+<div class="ttc" id="akiss__fftr_8cpp_8hpp_html_df/dc2/structkiss__fftr__state"><div class="ttname"><a href="../../da/dad/kiss__fftr_8cpp_8hpp.html#df/dc2/structkiss__fftr__state">kiss_fftr_state</a></div><div class="ttdef"><b>Definition</b> <a href="../../da/dad/kiss__fftr_8cpp_8hpp_source.html#l00026">kiss_fftr.cpp.hpp:26</a></div></div>
 <div class="ttc" id="akiss__fftr_8h_a9770a73a2aed969522b253322d069fb8_html_a9770a73a2aed969522b253322d069fb8"><div class="ttname"><a href="../../dc/da7/kiss__fftr_8h_a9770a73a2aed969522b253322d069fb8.html#a9770a73a2aed969522b253322d069fb8">kiss_fftr_cfg</a></div><div class="ttdeci">struct kiss_fftr_state * kiss_fftr_cfg</div><div class="ttdef"><b>Definition</b> <a href="../../dc/da7/kiss__fftr_8h_source.html#l00026">kiss_fftr.h:26</a></div></div>
+<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d3/d74/__kiss__fft__guts_8h_source.html#l00137">kf_cexp</a>, <a class="el" href="../../d7/dc2/kiss__fft_8cpp_source.html#l00354">kiss_fft_alloc()</a>, <a class="el" href="../../d0/dc9/kiss__fft_8h_source.html#l00053">KISS_FFT_MALLOC</a>, <a class="el" href="../../d2/da1/kiss__fftr_8cpp_source.html#l00013">kiss_fftr_state::substate</a>, <a class="el" href="../../d2/da1/kiss__fftr_8cpp_source.html#l00015">kiss_fftr_state::super_twiddles</a>, and <a class="el" href="../../d2/da1/kiss__fftr_8cpp_source.html#l00014">kiss_fftr_state::tmpbuf</a>.</p>
+<p class="reference">References <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00276">FL_WARN</a>, <a class="el" href="../../d3/d74/__kiss__fft__guts_8h_source.html#l00143">kf_cexp</a>, <a class="el" href="../../d0/d8f/kiss__fft_8cpp_8hpp_source.html#l00363">kiss_fft_alloc()</a>, <a class="el" href="../../d0/dc9/kiss__fft_8h_source.html#l00060">KISS_FFT_MALLOC</a>, <a class="el" href="../../d0/d8f/kiss__fft_8cpp_8hpp_source.html#l00017">NULL</a>, <a class="el" href="../../da/dad/kiss__fftr_8cpp_8hpp_source.html#l00027">kiss_fftr_state::substate</a>, <a class="el" href="../../da/dad/kiss__fftr_8cpp_8hpp_source.html#l00029">kiss_fftr_state::super_twiddles</a>, and <a class="el" href="../../da/dad/kiss__fftr_8cpp_8hpp_source.html#l00028">kiss_fftr_state::tmpbuf</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d1/dff/fft__impl_8cpp_source.html#l00043">fl::FFTContext::FFTContext()</a>, and <a class="el" href="../../d2/d90/cq__kernel_8cpp_source.html#l00089">generate_kernels()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l00061">fl::audio::fft::Context::Context()</a>, <a class="el" href="../../dc/dbc/cq__kernel_8cpp_8hpp_source.html#l00103">generate_kernels()</a>, and <a class="el" href="../../d5/df1/fft__impl_8cpp_8hpp_source.html#l00742">fl::audio::fft::Context::initHybrid()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/da7/kiss__fftr_8h_aead7aaed139f58158b446ea623a8b8cb_aead7aaed139f58158b446ea623a8b8cb_cgraph.svg" width="406" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/da7/kiss__fftr_8h_aead7aaed139f58158b446ea623a8b8cb_aead7aaed139f58158b446ea623a8b8cb_cgraph.svg" width="520" height="86"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/da7/kiss__fftr_8h_aead7aaed139f58158b446ea623a8b8cb_aead7aaed139f58158b446ea623a8b8cb_icgraph.svg" width="546" height="62"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dc/da7/kiss__fftr_8h_aead7aaed139f58158b446ea623a8b8cb_aead7aaed139f58158b446ea623a8b8cb_icgraph.svg" width="100%" height="435"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -212,7 +215,7 @@ $(function(){initNavTree('dc/da7/kiss__fftr_8h_aead7aaed139f58158b446ea623a8b8cb
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_c30bdf76ce759a4eae8387be42921388.html">third_party</a></li><li class="navelem"><a class="el" href="../../dir_c23718cd009cf675cffaf984d81a2fb9.html">cq_kernel</a></li><li class="navelem"><a class="el" href="../../dc/da7/kiss__fftr_8h.html">kiss_fftr.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

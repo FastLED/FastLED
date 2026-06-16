@@ -1,0 +1,12 @@
+<map id="hsv2rgb_spectrum" name="hsv2rgb_spectrum">
+<area shape="rect" id="Node000001" title="Inline version of hsv2rgb_spectrum which returns a CRGB object." alt="" coords="196,80,339,105"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="301,70,291,62,267,59,247,61,237,65,235,71,240,78,236,81,229,72,233,62,246,56,267,53,293,57,304,66"/>
+<area shape="rect" id="Node000002" href="$db/dd1/crgb_8h_a157722b593d32c306e8bb4b95b4d135b.html#a157722b593d32c306e8bb4b95b4d135b" title=" " alt="" coords="9,5,145,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="225,77,147,44,116,33,118,28,149,40,227,72"/>
+<area shape="rect" id="Node000003" href="$db/dd1/crgb_8h_aeae1fad39513e4829746c9ba4b5c2fd7.html#aeae1fad39513e4829746c9ba4b5c2fd7" title="HSV conversion function selection based on compile&#45;time defines This allows users to configure which ..." alt="" coords="9,55,145,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="182,84,145,79,145,74,183,79"/>
+<area shape="rect" id="Node000004" href="$dd/dc7/group___h_s_v2_r_g_b_gacfefb225d6630dca2104d1cae0e6706b.html#gacfefb225d6630dca2104d1cae0e6706b" title="Convert an HSV value to RGB using a mathematically straight spectrum." alt="" coords="5,104,148,129"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="183,106,148,110,148,105,182,101"/>
+<area shape="rect" id="Node000005" href="$de/dc1/_h_s_v_test_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="51,153,102,179"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="224,113,149,143,103,160,101,155,147,138,222,108"/>
+</map>

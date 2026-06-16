@@ -1,0 +1,9 @@
+<map id="CFastLED::getPowerModel" name="CFastLED::getPowerModel">
+<area shape="rect" id="Node000001" title="Get current RGB power model." alt="" coords="5,5,196,31"/>
+<area shape="rect" id="Node000002" href="$d9/d5f/group___power_model_gaec3b3e44c2f5e7f70127ad76f480ccd0.html#gaec3b3e44c2f5e7f70127ad76f480ccd0" title="Get current RGB power model." alt="" coords="244,5,383,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="197,15,230,15,230,21,197,21"/>
+<area shape="rect" id="Node000003" href="$d1/d2a/power__mgt_8cpp_8hpp_afe71d257dc9aca526178a992761bb812.html#afe71d257dc9aca526178a992761bb812" title="Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)" alt="" coords="431,5,541,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="383,15,417,15,417,21,383,21"/>
+<area shape="rect" id="Node000004" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="589,5,752,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="541,15,575,15,575,21,541,21"/>
+</map>

@@ -1,0 +1,8 @@
+<map id="fl::CRGB::CRGB" name="fl::CRGB::CRGB">
+<area shape="rect" id="Node000001" title="Allow construction from a hsv8 color." alt="" coords="5,43,125,68"/>
+<area shape="rect" id="Node000002" href="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" title="Default constructor." alt="" coords="180,5,300,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="125,40,167,31,168,36,126,45"/>
+<area shape="rect" id="Node000003" href="$dd/dc7/group___h_s_v2_r_g_b_gab6a6fedf5fcb4f47b95eed3aee43c613.html#gab6a6fedf5fcb4f47b95eed3aee43c613" title=" " alt="" coords="173,79,307,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="126,65,165,73,164,78,125,70"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="211,80,205,70,208,61,220,54,240,52,264,56,274,64,270,68,262,60,240,57,222,59,212,64,210,70,216,77"/>
+</map>

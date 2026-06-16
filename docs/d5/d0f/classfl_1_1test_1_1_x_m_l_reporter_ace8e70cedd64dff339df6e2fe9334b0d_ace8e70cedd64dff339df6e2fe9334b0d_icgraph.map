@@ -1,0 +1,7 @@
+<map id="fl::test::XMLReporter::escapeXml" name="fl::test::XMLReporter::escapeXml">
+<area shape="rect" id="Node000001" title=" " alt="" coords="208,37,363,77"/>
+<area shape="rect" id="Node000002" href="$d5/d0f/classfl_1_1test_1_1_x_m_l_reporter_a80c663d99e17ee30204362cba24f5f1d.html#a80c663d99e17ee30204362cba24f5f1d" title="Called when a test case ends." alt="" coords="5,5,160,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="194,46,160,40,161,35,195,40"/>
+<area shape="rect" id="Node000003" href="$d5/d0f/classfl_1_1test_1_1_x_m_l_reporter_a9d119fed553de14684dd1c43cd8894d6.html#a9d119fed553de14684dd1c43cd8894d6" title=" " alt="" coords="5,69,160,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="195,74,161,80,160,74,194,69"/>
+</map>

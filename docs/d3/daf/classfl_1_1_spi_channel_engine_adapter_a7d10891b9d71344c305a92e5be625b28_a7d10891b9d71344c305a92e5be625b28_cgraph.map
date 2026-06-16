@@ -1,0 +1,29 @@
+<map id="fl::SpiChannelEngineAdapter::show" name="fl::SpiChannelEngineAdapter::show">
+<area shape="rect" id="Node000001" title="Trigger transmission of enqueued data." alt="" coords="5,88,212,128"/>
+<area shape="rect" id="Node000002" href="$d3/daf/classfl_1_1_spi_channel_engine_adapter_a861447ffa5c2061eea127288ac152d00.html#a861447ffa5c2061eea127288ac152d00" title="Group channels by clock pin for efficient transmission." alt="" coords="260,5,467,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="170,85,287,47,289,52,172,91"/>
+<area shape="rect" id="Node000004" href="$d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c" title=" " alt="" coords="542,38,697,63"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="212,94,528,58,528,63,212,99"/>
+<area shape="rect" id="Node000005" href="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a" title=" " alt="" coords="318,121,409,146"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="212,116,305,125,304,130,212,121"/>
+<area shape="rect" id="Node000006" href="$d3/daf/classfl_1_1_spi_channel_engine_adapter_ae820ac9940fb9746f1f3c93709b72561.html#ae820ac9940fb9746f1f3c93709b72561" title="Transmit a batch of channels (all same clock pin)" alt="" coords="260,195,467,235"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="158,126,303,187,301,192,156,131"/>
+<area shape="rect" id="Node000003" href="$d2/d24/classfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980.html#ae9a8cea8d4b81d8f2f10a2b007ac2980" title=" " alt="" coords="803,66,959,91"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="467,14,590,11,658,15,724,23,786,38,840,58,839,63,785,43,724,28,658,20,590,17,467,19"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="467,33,529,39,528,44,467,38"/>
+<area shape="rect" id="Node000007" href="$d0/d08/classfl_1_1span_a326aa9f29859fe8a92833fd5db12c3bb.html#a326aa9f29859fe8a92833fd5db12c3bb" title=" " alt="" coords="566,87,673,113"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="402,192,465,156,489,139,514,123,552,110,553,115,516,128,492,143,468,161,405,197"/>
+<area shape="rect" id="Node000008" href="$d3/daf/classfl_1_1_spi_channel_engine_adapter_aa21579fa8f44cb319dda04d9d48c95d0.html#aa21579fa8f44cb319dda04d9d48c95d0" title="Initialize controller if needed for this clock pin." alt="" coords="515,137,724,177"/>
+<area shape="poly" id="edge8_Node000006_Node000008" title=" " alt="" coords="453,192,515,178,517,183,454,197"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d" title=" " alt="" coords="572,202,667,227"/>
+<area shape="poly" id="edge10_Node000006_Node000009" title=" " alt="" coords="467,212,558,212,558,217,467,217"/>
+<area shape="rect" id="Node000010" href="$d3/daf/classfl_1_1_spi_channel_engine_adapter_addb2a22bcf137545fb546ff8632cfe24.html#addb2a22bcf137545fb546ff8632cfe24" title="Select best controller for a given clock pin." alt="" coords="515,252,724,292"/>
+<area shape="poly" id="edge11_Node000006_Node000010" title=" " alt="" coords="454,232,517,246,515,252,453,237"/>
+<area shape="rect" id="Node000012" href="$de/d66/classfl_1_1basic__string_af4d95d1e9905eb5fb76e12c2c2bd7ebc.html#af4d95d1e9905eb5fb76e12c2c2bd7ebc" title=" " alt="" coords="544,317,695,342"/>
+<area shape="poly" id="edge13_Node000006_Node000012" title=" " alt="" coords="394,233,449,268,516,302,541,310,539,315,514,306,446,272,391,237"/>
+<area shape="rect" id="Node000013" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="568,366,671,391"/>
+<area shape="poly" id="edge14_Node000006_Node000013" title=" " alt="" coords="382,233,437,293,475,325,516,352,555,367,553,372,513,357,471,329,433,297,378,237"/>
+<area shape="poly" id="edge9_Node000008_Node000003" title=" " alt="" coords="686,135,824,93,826,98,688,140"/>
+<area shape="rect" id="Node000011" href="$d3/daf/classfl_1_1_spi_channel_engine_adapter_af0366a91a6c0c9c0e835c606a726cde8.html#af0366a91a6c0c9c0e835c606a726cde8" title="Check if controller can handle this clock pin." alt="" coords="772,252,991,292"/>
+<area shape="poly" id="edge12_Node000010_Node000011" title=" " alt="" coords="724,269,759,269,759,275,724,275"/>
+</map>

@@ -116,7 +116,7 @@ template&lt;typename VectorType&gt; </div>
         <tr>
           <td class="memname">void <a class="el" href="../../dc/d4a/classfl_1_1_line_simplifier.html">fl::LineSimplifier</a>&lt; NumberT &gt;::simplifyT </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="../../d4/d36/namespacefl_a41efc6482adf6ba3487dee62b02c7f13.html#a41efc6482adf6ba3487dee62b02c7f13">fl::span</a>&lt; const <a class="el" href="../../dc/d4a/classfl_1_1_line_simplifier_ae0463798d415f262a499765b9c7c77c8.html#ae0463798d415f262a499765b9c7c77c8">Point</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>polyLine</em></span>, </td>
+          <td class="paramtype">const <a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span</a>&lt; const <a class="el" href="../../dc/d4a/classfl_1_1_line_simplifier_ae0463798d415f262a499765b9c7c77c8.html#ae0463798d415f262a499765b9c7c77c8">Point</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>polyLine</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -131,21 +131,21 @@ template&lt;typename VectorType&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/da7/line__simplification_8h_source.html#l00120">120</a> of file <a class="el" href="../../d8/da7/line__simplification_8h_source.html">line_simplification.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  120</span>                                                                         {</div>
-<div class="line"><span class="lineno">  121</span>        <span class="comment">// run the simplification algorithm</span></div>
-<div class="line"><span class="lineno">  122</span>        <a class="code hl_function" href="../../dc/d4a/classfl_1_1_line_simplifier_a64f1c9e03f55225bcffbe6209dc1cda6.html#a64f1c9e03f55225bcffbe6209dc1cda6">simplifyInternal</a>(<a class="code hl_class" href="../../dc/d4a/classfl_1_1_line_simplifier.html">polyLine</a>);</div>
-<div class="line"><span class="lineno">  123</span> </div>
-<div class="line"><span class="lineno">  124</span>        <span class="comment">// copy the result to the output slice</span></div>
-<div class="line"><span class="lineno">  125</span>        <a class="code hl_class" href="../../dc/d4a/classfl_1_1_line_simplifier.html">out</a>-&gt;assign(<a class="code hl_variable" href="../../dc/d4a/classfl_1_1_line_simplifier_a06dcaec712e228079c166d5a1752c8aa.html#a06dcaec712e228079c166d5a1752c8aa">mSimplified</a>.begin(), <a class="code hl_variable" href="../../dc/d4a/classfl_1_1_line_simplifier_a06dcaec712e228079c166d5a1752c8aa.html#a06dcaec712e228079c166d5a1752c8aa">mSimplified</a>.end());</div>
-<div class="line"><span class="lineno">  126</span>    }</div>
-<div class="ttc" id="aclassfl_1_1_line_simplifier_a06dcaec712e228079c166d5a1752c8aa_html_a06dcaec712e228079c166d5a1752c8aa"><div class="ttname"><a href="../../dc/d4a/classfl_1_1_line_simplifier_a06dcaec712e228079c166d5a1752c8aa.html#a06dcaec712e228079c166d5a1752c8aa">fl::LineSimplifier::mSimplified</a></div><div class="ttdeci">VectorPoint mSimplified</div><div class="ttdef"><b>Definition</b> <a href="../../d8/da7/line__simplification_8h_source.html#l00210">line_simplification.h:210</a></div></div>
-<div class="ttc" id="aclassfl_1_1_line_simplifier_a64f1c9e03f55225bcffbe6209dc1cda6_html_a64f1c9e03f55225bcffbe6209dc1cda6"><div class="ttname"><a href="../../dc/d4a/classfl_1_1_line_simplifier_a64f1c9e03f55225bcffbe6209dc1cda6.html#a64f1c9e03f55225bcffbe6209dc1cda6">fl::LineSimplifier::simplifyInternal</a></div><div class="ttdeci">void simplifyInternal(const fl::span&lt; const Point &gt; &amp;polyLine)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/da7/line__simplification_8h_source.html#l00129">line_simplification.h:129</a></div></div>
-<div class="ttc" id="aclassfl_1_1_line_simplifier_html"><div class="ttname"><a href="../../dc/d4a/classfl_1_1_line_simplifier.html">fl::LineSimplifier</a></div><div class="ttdef"><b>Definition</b> <a href="../../d8/da7/line__simplification_8h_source.html#l00026">line_simplification.h:26</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d8/da7/line__simplification_8h_source.html#l00121">121</a> of file <a class="el" href="../../d8/da7/line__simplification_8h_source.html">line_simplification.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  121</span>                                                                         {</div>
+<div class="line"><span class="lineno">  122</span>        <span class="comment">// run the simplification algorithm</span></div>
+<div class="line"><span class="lineno">  123</span>        <a class="code hl_function" href="../../dc/d4a/classfl_1_1_line_simplifier_a64f1c9e03f55225bcffbe6209dc1cda6.html#a64f1c9e03f55225bcffbe6209dc1cda6">simplifyInternal</a>(<a class="code hl_class" href="../../dc/d4a/classfl_1_1_line_simplifier.html">polyLine</a>);</div>
+<div class="line"><span class="lineno">  124</span> </div>
+<div class="line"><span class="lineno">  125</span>        <span class="comment">// copy the result to the output slice</span></div>
+<div class="line"><span class="lineno">  126</span>        <a class="code hl_class" href="../../dc/d4a/classfl_1_1_line_simplifier.html">out</a>-&gt;assign(<a class="code hl_variable" href="../../dc/d4a/classfl_1_1_line_simplifier_a06dcaec712e228079c166d5a1752c8aa.html#a06dcaec712e228079c166d5a1752c8aa">mSimplified</a>.begin(), <a class="code hl_variable" href="../../dc/d4a/classfl_1_1_line_simplifier_a06dcaec712e228079c166d5a1752c8aa.html#a06dcaec712e228079c166d5a1752c8aa">mSimplified</a>.end());</div>
+<div class="line"><span class="lineno">  127</span>    }</div>
+<div class="ttc" id="aclassfl_1_1_line_simplifier_a06dcaec712e228079c166d5a1752c8aa_html_a06dcaec712e228079c166d5a1752c8aa"><div class="ttname"><a href="../../dc/d4a/classfl_1_1_line_simplifier_a06dcaec712e228079c166d5a1752c8aa.html#a06dcaec712e228079c166d5a1752c8aa">fl::LineSimplifier::mSimplified</a></div><div class="ttdeci">VectorPoint mSimplified</div><div class="ttdef"><b>Definition</b> <a href="../../d8/da7/line__simplification_8h_source.html#l00211">line_simplification.h:211</a></div></div>
+<div class="ttc" id="aclassfl_1_1_line_simplifier_a64f1c9e03f55225bcffbe6209dc1cda6_html_a64f1c9e03f55225bcffbe6209dc1cda6"><div class="ttname"><a href="../../dc/d4a/classfl_1_1_line_simplifier_a64f1c9e03f55225bcffbe6209dc1cda6.html#a64f1c9e03f55225bcffbe6209dc1cda6">fl::LineSimplifier::simplifyInternal</a></div><div class="ttdeci">void simplifyInternal(const fl::span&lt; const Point &gt; &amp;polyLine)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/da7/line__simplification_8h_source.html#l00130">line_simplification.h:130</a></div></div>
+<div class="ttc" id="aclassfl_1_1_line_simplifier_html"><div class="ttname"><a href="../../dc/d4a/classfl_1_1_line_simplifier.html">fl::LineSimplifier</a></div><div class="ttdef"><b>Definition</b> <a href="../../d8/da7/line__simplification_8h_source.html#l00027">line_simplification.h:27</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d8/da7/line__simplification_8h_source.html#l00210">mSimplified</a>, and <a class="el" href="../../d8/da7/line__simplification_8h_source.html#l00129">simplifyInternal()</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/da7/line__simplification_8h_source.html#l00211">mSimplified</a>, and <a class="el" href="../../d8/da7/line__simplification_8h_source.html#l00130">simplifyInternal()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/da7/line__simplification_8h_source.html#l00054">simplify()</a>, <a class="el" href="../../d8/da7/line__simplification_8h_source.html#l00059">simplify()</a>, and <a class="el" href="../../d8/da7/line__simplification_8h_source.html#l00113">simplifyInplaceT()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/da7/line__simplification_8h_source.html#l00055">simplify()</a>, <a class="el" href="../../d8/da7/line__simplification_8h_source.html#l00060">simplify()</a>, and <a class="el" href="../../d8/da7/line__simplification_8h_source.html#l00114">simplifyInplaceT()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -170,7 +170,7 @@ template&lt;typename VectorType&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../dc/d4a/classfl_1_1_line_simplifier.html">LineSimplifier</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

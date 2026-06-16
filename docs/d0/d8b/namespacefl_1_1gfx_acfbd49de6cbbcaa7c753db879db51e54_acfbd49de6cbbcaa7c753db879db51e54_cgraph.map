@@ -1,0 +1,11 @@
+<map id="fl::gfx::coordToU8&lt; fl::s16x16 &gt;" name="fl::gfx::coordToU8&lt; fl::s16x16 &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,23,140,63"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350" title=" " alt="" coords="226,5,305,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="140,32,212,22,213,28,141,37"/>
+<area shape="rect" id="Node000003" href="$d9/d9f/classfl_1_1s16x16_a9c7a5411b60510e5a513c5d1e305720d.html#a9c7a5411b60510e5a513c5d1e305720d" title=" " alt="" coords="188,55,343,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="141,49,175,53,174,59,140,54"/>
+<area shape="rect" id="Node000004" href="$d9/d9f/classfl_1_1s16x16_a5e82494e286448e4cad2de1b302b9168.html#a5e82494e286448e4cad2de1b302b9168" title=" " alt="" coords="391,29,531,55"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="342,55,377,50,378,55,343,60"/>
+<area shape="rect" id="Node000005" href="$d9/d9f/classfl_1_1s16x16_aa048b427f50f28993a67941e0f303a65.html#aa048b427f50f28993a67941e0f303a65" title=" " alt="" coords="402,79,519,104"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="343,74,389,80,388,85,342,79"/>
+</map>

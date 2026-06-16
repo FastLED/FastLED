@@ -1,7 +1,31 @@
-<map id="fl/fetch.h" name="fl/fetch.h">
-<area shape="rect" id="Node000001" title="Unified HTTP fetch API for FastLED (cross&#45;platform)" alt="" coords="151,5,230,31"/>
-<area shape="rect" id="Node000002" href="$d5/dec/_net_test_real_8h.html" title=" " alt="" coords="5,79,205,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="171,42,133,81,129,77,168,39"/>
-<area shape="rect" id="Node000003" href="$d9/ddd/fetch_8cpp.html" title=" " alt="" coords="230,93,325,119"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="214,38,267,91,263,95,210,42"/>
+<map id="fl/net/http/fetch.h" name="fl/net/http/fetch.h">
+<area shape="rect" id="Node000001" title="Unified HTTP fetch API for FastLED (cross&#45;platform)" alt="" coords="643,5,778,31"/>
+<area shape="rect" id="Node000002" href="$df/d01/_client_real_8h.html" title=" " alt="" coords="11,86,211,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="630,28,443,47,334,62,225,81,194,88,193,83,223,76,333,56,443,41,629,22"/>
+<area shape="rect" id="Node000004" href="$d9/dce/_client_validation_real_8h.html" title=" " alt="" coords="237,79,473,148"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="655,37,474,84,472,79,653,32"/>
+<area shape="rect" id="Node000006" href="$d3/d25/_loopback_test_runner_8h.html" title="Non&#45;blocking HTTP test runner for FastLED loopback testing." alt="" coords="496,86,733,141"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="691,42,644,88,640,84,687,38"/>
+<area shape="rect" id="Node000008" href="$dd/d56/http_8h.html" title="fl::net::http — High&#45;level HTTP client and server facade" alt="" coords="758,101,855,126"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="734,38,797,99,793,102,730,42"/>
+<area shape="rect" id="Node000010" href="$de/daa/fetch_8cpp_8hpp.html" title=" " alt="" coords="865,211,1042,236"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="779,32,825,50,868,77,889,102,912,139,950,209,945,212,908,142,885,105,865,81,823,54,777,37"/>
+<area shape="rect" id="Node000015" href="$d2/d83/fetch__request_8h.html" title=" " alt="" coords="931,101,1122,126"/>
+<area shape="poly" id="edge12_Node000001_Node000015" title=" " alt="" coords="763,32,988,98,987,103,762,37"/>
+<area shape="rect" id="Node000003" href="$d8/d11/_client_8ino.html" title="Educational tutorial for FastLED HTTP fetch API with explicit types." alt="" coords="5,196,205,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="111,155,109,196,104,196,106,155"/>
+<area shape="rect" id="Node000005" href="$d8/d5b/_client_validation_8ino.html" title="HTTP Client Validation Suite for FastLED fetch API." alt="" coords="229,196,489,251"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="359,161,360,196,355,196,354,162"/>
+<area shape="rect" id="Node000007" href="$dc/dba/_loopback_8ino.html" title="HTTP Server Loopback Test for FastLED @filter: (platform is native)" alt="" coords="515,196,715,251"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="617,155,617,196,612,196,612,155"/>
+<area shape="rect" id="Node000009" href="$d7/d97/net_8h.html" title="Umbrella header for fl::net — high&#45;level networking facade." alt="" coords="749,211,841,236"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="807,140,799,211,793,210,801,139"/>
+<area shape="rect" id="Node000011" href="$db/d91/fl_2net_2http_2__build_8cpp_8hpp.html" title="Unity build header for fl/net/http/ directory." alt="" coords="977,299,1159,324"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="981,242,1054,296,1051,301,978,246"/>
+<area shape="rect" id="Node000012" href="$df/ddb/fl_2net_2__build_8cpp_8hpp.html" title="Unity build header for fl/net/ directory." alt="" coords="991,372,1145,397"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="1071,338,1071,372,1065,372,1065,338"/>
+<area shape="poly" id="edge13_Node000015_Node000010" title=" " alt="" coords="1013,139,964,212,959,209,1009,136"/>
+<area shape="rect" id="Node000016" href="$d8/d7a/fetch__request_8cpp_8hpp.html" title=" " alt="" coords="1066,211,1299,236"/>
+<area shape="poly" id="edge14_Node000015_Node000016" title=" " alt="" coords="1056,132,1168,208,1165,213,1053,136"/>
+<area shape="poly" id="edge15_Node000016_Node000011" title=" " alt="" coords="1158,246,1085,301,1082,296,1155,242"/>
 </map>

@@ -1,0 +1,27 @@
+<map id="fl::sin" name="fl::sin">
+<area shape="rect" id="Node000001" title=" " alt="" coords="709,195,767,220"/>
+<area shape="rect" id="Node000002" href="$d2/d78/classfl_1_1_screen_map_af96d710c362acb2f8d9e52360ac873ec.html#af96d710c362acb2f8d9e52360ac873ec" title=" " alt="" coords="459,55,613,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="725,183,700,137,682,114,660,95,638,83,613,76,615,71,640,78,663,90,686,110,704,134,729,181"/>
+<area shape="rect" id="Node000006" href="$d4/dc8/classanimartrix__ring_1_1_sound_orchestrator_a0e328c23a90020e2489a2512e593f651.html#a0e328c23a90020e2489a2512e593f651" title=" " alt="" coords="411,105,661,145"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="708,189,660,160,625,147,627,142,662,156,710,184"/>
+<area shape="rect" id="Node000008" href="$d4/d06/curr_8h_a27ef46fa8abd1dedd29a3904d81622d2.html#a27ef46fa8abd1dedd29a3904d81622d2" title=" " alt="" coords="459,169,613,195"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="695,205,613,194,614,189,696,199"/>
+<area shape="rect" id="Node000011" href="$d7/da1/old_8h_a0209867ce457e38f7ec511498de87c9a.html#a0209867ce457e38f7ec511498de87c9a" title=" " alt="" coords="473,219,599,244"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="696,215,600,226,599,221,695,210"/>
+<area shape="rect" id="Node000012" href="$de/d65/ring__screenmap_8cpp_a0ede69fcbb7595ee36ba3c658bcda1bd.html#a0ede69fcbb7595ee36ba3c658bcda1bd" title=" " alt="" coords="457,268,615,293"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="711,231,662,259,616,273,615,268,660,254,709,226"/>
+<area shape="rect" id="Node000013" href="$d7/da1/old_8h_a036e9fc7c47cebac438763eb5dd2b4ab.html#a036e9fc7c47cebac438763eb5dd2b4ab" title=" " alt="" coords="471,317,601,343"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="727,234,701,273,683,292,663,308,633,322,602,329,601,324,632,317,660,304,680,288,697,269,722,231"/>
+<area shape="rect" id="Node000003" href="$d2/d78/classfl_1_1_screen_map_a0fbfe62bd1f20b020351970b790d73c7.html#a0fbfe62bd1f20b020351970b790d73c7" title=" " alt="" coords="139,5,335,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="445,55,315,33,316,28,446,50"/>
+<area shape="rect" id="Node000005" href="$d3/dac/_fx_noise_ring_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="208,55,267,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="445,70,267,70,267,65,445,65"/>
+<area shape="rect" id="Node000004" href="$d1/d8f/_fx_demo_reel100_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,5,64,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="126,21,64,21,64,15,126,15"/>
+<area shape="rect" id="Node000007" href="$d4/dc8/classanimartrix__ring_1_1_sound_orchestrator_a07b192a0628529c27d585a8cb23af0aa.html#a07b192a0628529c27d585a8cb23af0aa" title="Per&#45;frame tick." alt="" coords="112,105,363,145"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="397,127,363,127,363,122,397,122"/>
+<area shape="rect" id="Node000009" href="$d4/d06/curr_8h_a889977e3c2cad101b68a8c97148ef3c0.html#a889977e3c2cad101b68a8c97148ef3c0" title=" " alt="" coords="192,169,283,195"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="445,185,283,185,283,179,445,179"/>
+<area shape="rect" id="Node000010" href="$d4/d06/curr_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="9,169,60,195"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="178,185,60,185,60,179,178,179"/>
+</map>

@@ -8,12 +8,13 @@ digraph "CPixelLEDController::showColor"
   rankdir="LR";
   Node1 [id="Node000001",label="CPixelLEDController\l::showColor",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Set all the LEDs on the controller to a given color."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="brightness",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dc7/advanced_8h_a96d9503945476f13a97c8f406269fcef.html#a96d9503945476f13a97c8f406269fcef",tooltip=" "];
-  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="CLEDController::getAdjustmentData",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_a9f335f40a878f70d814404099c299727.html#a9f335f40a878f70d814404099c299727",tooltip=" "];
-  Node3 -> Node2 [id="edge3_Node000003_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node4 [id="edge4_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="CLEDController::getDither",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2c/class_c_l_e_d_controller_a87c584fec7d1644ca16371f8abd5e7a4.html#a87c584fec7d1644ca16371f8abd5e7a4",tooltip="Get the dithering option currently set for this controller."];
-  Node1 -> Node5 [id="edge5_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="CPixelLEDController\l::showPixels",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dc9/class_c_pixel_l_e_d_controller_a1ab7248c894ba95c3a71665f5bed2a17.html#a1ab7248c894ba95c3a71665f5bed2a17",tooltip="Send the LED data to the strip."];
+  Node2 [id="Node000002",label="fl::CLEDController\l::getAdjustmentData",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/da0/classfl_1_1_c_l_e_d_controller_ad9a3142e77c16f1e4e0d5384400a91dd.html#ad9a3142e77c16f1e4e0d5384400a91dd",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::CLEDController\l::getAdjustment",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/da0/classfl_1_1_c_l_e_d_controller_aac0e483e79124d23d3d1189e9301b740.html#aac0e483e79124d23d3d1189e9301b740",tooltip="Get the combined brightness/color adjustment for this controller."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::CRGB::computeAdjustment",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a86dcfb931c3d2fb58f823a7f06d9dbf4.html#a86dcfb931c3d2fb58f823a7f06d9dbf4",tooltip="Calculates the combined color adjustment to the LEDs at a given scale, color correction,..."];
+  Node1 -> Node6 [id="edge4_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::CLEDController\l::getDither",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/da0/classfl_1_1_c_l_e_d_controller_a280f23ed10b10068f0a7460f8977cb33.html#a280f23ed10b10068f0a7460f8977cb33",tooltip="Get the dithering option currently set for this controller."];
+  Node1 -> Node7 [id="edge5_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="CPixelLEDController\l::showPixels",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dc9/class_c_pixel_l_e_d_controller_a1ab7248c894ba95c3a71665f5bed2a17.html#a1ab7248c894ba95c3a71665f5bed2a17",tooltip="Send the LED data to the strip."];
 }

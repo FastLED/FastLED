@@ -1,0 +1,29 @@
+<map id="fl::task::detail::PromiseImpl::state" name="fl::task::detail::PromiseImpl::state">
+<area shape="rect" id="Node000001" title="Read the state atomically." alt="" coords="461,228,633,268"/>
+<area shape="rect" id="Node000002" href="$d0/d62/classfl_1_1task_1_1detail_1_1_promise_impl_a9da4f124d785a57070bd574a57a19300.html#a9da4f124d785a57070bd574a57a19300" title="Check if Promise is completed." alt="" coords="239,5,411,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="527,217,481,142,449,102,412,66,382,48,385,43,415,62,453,98,485,139,532,214"/>
+<area shape="rect" id="Node000004" href="$d0/d62/classfl_1_1task_1_1detail_1_1_promise_impl_a0dad5cb02f3a0e6a7c2f555bf00a2e7b.html#a0dad5cb02f3a0e6a7c2f555bf00a2e7b" title="Check if Promise is rejected." alt="" coords="239,387,411,427"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="520,280,473,325,415,370,380,389,377,384,412,366,469,321,516,276"/>
+<area shape="rect" id="Node000005" href="$d0/d62/classfl_1_1task_1_1detail_1_1_promise_impl_af0e94a3d4c4ac37e908179cafaac8afc.html#af0e94a3d4c4ac37e908179cafaac8afc" title="Check if Promise is resolved." alt="" coords="239,451,411,491"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="533,282,514,319,487,361,454,404,415,441,395,453,393,448,412,437,450,400,483,358,509,316,529,280"/>
+<area shape="rect" id="Node000006" href="$d0/d62/classfl_1_1task_1_1detail_1_1_promise_impl_a7406882f82063d080ef43de728acaed9.html#a7406882f82063d080ef43de728acaed9" title="Process pending callbacks." alt="" coords="236,171,413,211"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="455,227,402,213,404,208,456,222"/>
+<area shape="rect" id="Node000007" href="$d0/d62/classfl_1_1task_1_1detail_1_1_promise_impl_a310e9b10d4598567379963a9da17d745.html#a310e9b10d4598567379963a9da17d745" title="Reject Promise with error." alt="" coords="11,71,183,111"/>
+<area shape="poly" id="edge12_Node000001_Node000007" title=" " alt="" coords="519,219,473,173,444,151,412,133,355,113,295,100,236,93,183,91,183,85,237,88,296,95,356,108,414,128,447,146,476,169,523,216"/>
+<area shape="rect" id="Node000008" href="$d0/d62/classfl_1_1task_1_1detail_1_1_promise_impl_a91ca3e7d8c9f59a6f93358b0ee3a53db.html#a91ca3e7d8c9f59a6f93358b0ee3a53db" title="Resolve Promise with value." alt="" coords="11,135,183,175"/>
+<area shape="poly" id="edge13_Node000001_Node000008" title=" " alt="" coords="513,221,467,188,441,173,413,161,354,148,294,142,236,142,183,145,183,140,235,137,294,137,355,143,414,156,443,168,470,183,516,217"/>
+<area shape="rect" id="Node000009" href="$d0/d62/classfl_1_1task_1_1detail_1_1_promise_impl_a85857e1ee953eab2db00f1b84112ab39.html#a85857e1ee953eab2db00f1b84112ab39" title=" " alt="" coords="11,199,183,239"/>
+<area shape="poly" id="edge14_Node000001_Node000009" title=" " alt="" coords="448,244,183,227,183,222,448,239"/>
+<area shape="rect" id="Node000010" href="$d0/d62/classfl_1_1task_1_1detail_1_1_promise_impl_aeeda1853c2eeefdae223d415934404dd.html#aeeda1853c2eeefdae223d415934404dd" title="Set error callback." alt="" coords="5,263,188,303"/>
+<area shape="poly" id="edge15_Node000001_Node000010" title=" " alt="" coords="448,258,188,278,188,273,447,253"/>
+<area shape="rect" id="Node000011" href="$d0/d62/classfl_1_1task_1_1detail_1_1_promise_impl_a44a3782bbd4241dc773aef9992be9993.html#a44a3782bbd4241dc773aef9992be9993" title="Set success callback." alt="" coords="9,328,185,368"/>
+<area shape="poly" id="edge16_Node000001_Node000011" title=" " alt="" coords="448,273,185,331,184,326,447,267"/>
+<area shape="rect" id="Node000003" href="$d0/d62/classfl_1_1task_1_1detail_1_1_promise_impl_a69c67c779bae72b4c0b420dc7d5b654c.html#a69c67c779bae72b4c0b420dc7d5b654c" title="Update Promise state &#45; processes callbacks if needed." alt="" coords="11,7,183,47"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="224,29,183,29,183,23,224,23"/>
+<area shape="poly" id="edge11_Node000006_Node000003" title=" " alt="" coords="297,162,249,110,219,84,187,61,164,49,166,44,189,56,222,80,252,107,301,158"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="273,167,187,125,157,113,159,108,189,120,276,162"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="222,177,183,171,183,166,222,172"/>
+<area shape="poly" id="edge8_Node000006_Node000009" title=" " alt="" coords="222,206,183,211,183,205,222,201"/>
+<area shape="poly" id="edge9_Node000006_Node000010" title=" " alt="" coords="269,219,189,253,157,265,155,260,187,248,267,214"/>
+<area shape="poly" id="edge10_Node000006_Node000011" title=" " alt="" coords="299,223,251,270,189,317,163,330,161,325,187,312,247,266,295,219"/>
+</map>

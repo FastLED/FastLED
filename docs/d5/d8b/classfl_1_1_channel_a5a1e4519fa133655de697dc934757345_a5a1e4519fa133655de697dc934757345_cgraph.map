@@ -1,0 +1,7 @@
+<map id="fl::Channel::leds" name="fl::Channel::leds">
+<area shape="rect" id="Node000001" title="Get the LED array as a span (const)" alt="" coords="5,45,132,70"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a961d046a5488ecee3adf0b17a02328d5.html#a961d046a5488ecee3adf0b17a02328d5" title="Pointer to the CRGB array for this controller." alt="" coords="180,5,316,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="132,43,166,37,167,43,133,49"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ab8e1ee460f25af890c1d40479e4c5b09.html#ab8e1ee460f25af890c1d40479e4c5b09" title="How many LEDs does this controller manage?" alt="" coords="180,69,316,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="133,66,167,72,166,77,132,71"/>
+</map>

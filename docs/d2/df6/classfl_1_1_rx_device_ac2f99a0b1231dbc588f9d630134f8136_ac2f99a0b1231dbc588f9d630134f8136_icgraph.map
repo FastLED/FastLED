@@ -1,0 +1,5 @@
+<map id="fl::RxDevice::injectEdges" name="fl::RxDevice::injectEdges">
+<area shape="rect" id="Node000001" title="Manually inject edge timings for testing (Phase 1 &#45; PARLIO gap simulation)" alt="" coords="205,13,388,38"/>
+<area shape="rect" id="Node000002" href="$d2/df6/classfl_1_1_rx_device_a79db4be81227cbcc8e3391cb6caa8923.html#a79db4be81227cbcc8e3391cb6caa8923" title=" " alt="" coords="5,5,157,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,28,158,28,158,23,192,23"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="startNetServer" name="startNetServer">
+<area shape="rect" id="Node000001" title="Start WiFi Soft AP and HTTP server with test endpoints." alt="" coords="5,5,123,31"/>
+<area shape="rect" id="Node000002" href="$de/d40/classfl_1_1json_af8bc0968107152344bfa8468bba76f54.html#af8bc0968107152344bfa8468bba76f54" title=" " alt="" coords="171,5,284,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="123,15,157,15,157,21,123,21"/>
+</map>

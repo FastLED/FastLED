@@ -1,0 +1,10 @@
+<map id="fl::Potentiometer" name="fl::Potentiometer">
+<area shape="rect" id="Node000001" title=" " alt="" coords="216,93,347,119"/>
+<area shape="rect" id="Node000003" href="$de/d29/structfl_1_1_potentiometer_1_1_listener.html" title=" " alt="" coords="121,181,260,221"/>
+<area shape="poly" id="edge4_Node000003_Node000001" title=" " alt="" coords="208,127,189,144,184,162,186,180,181,181,178,161,184,141,204,123"/>
+<area shape="rect" id="Node000002" href="$de/d22/classfl_1_1_potentiometer_low_level.html" title=" " alt="" coords="185,5,377,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="284,45,284,93,279,93,279,45"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="233,171,250,156,264,136,274,118,279,120,269,139,254,159,236,175"/>
+<area shape="rect" id="Node000004" href="$db/da2/classfl_1_1_engine_events_1_1_listener.html" title=" " alt="" coords="5,93,192,119"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="121,126,174,179,170,183,117,130"/>
+</map>

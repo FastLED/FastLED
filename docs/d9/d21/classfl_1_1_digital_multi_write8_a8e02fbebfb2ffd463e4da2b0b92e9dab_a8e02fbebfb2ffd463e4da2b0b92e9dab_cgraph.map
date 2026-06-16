@@ -1,0 +1,10 @@
+<map id="fl::DigitalMultiWrite8::writeByte" name="fl::DigitalMultiWrite8::writeByte">
+<area shape="rect" id="Node000001" title="Write a single bitmask byte to the 8 pins." alt="" coords="5,29,163,69"/>
+<area shape="poly" id="edge4_Node000001_Node000001" title=" " alt="" coords="45,30,43,20,49,11,63,5,84,3,108,6,121,13,119,18,106,11,84,8,64,10,53,15,48,21,50,28"/>
+<area shape="rect" id="Node000002" href="$d9/d21/classfl_1_1_digital_multi_write8_a8528927863f57fdfcd04fb1466ef8963.html#a8528927863f57fdfcd04fb1466ef8963" title=" " alt="" coords="211,29,368,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="163,47,197,47,197,52,163,52"/>
+<area shape="rect" id="Node000003" href="$d9/df3/classfl_1_1set_a8d2f661a320b4e6ad287c6f0f54e2f1d.html#a8d2f661a320b4e6ad287c6f0f54e2f1d" title=" " alt="" coords="422,11,525,37"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="368,36,408,30,409,36,368,41"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_ab91b418b90c32e475842ad7ce3785afb.html#ab91b418b90c32e475842ad7ce3785afb" title="Write digital value to pin." alt="" coords="416,61,531,86"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="368,57,403,61,402,67,368,62"/>
+</map>

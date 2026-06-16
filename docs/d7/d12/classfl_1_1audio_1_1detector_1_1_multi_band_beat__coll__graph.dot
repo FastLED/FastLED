@@ -1,0 +1,14 @@
+digraph "fl::audio::detector::MultiBandBeat"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::audio::detector\l::MultiBandBeat",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="MultiBandBeat performs frequency-specific beat detection."];
+  Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mConfig",fontcolor="grey" ];
+  Node2 [id="Node000002",label="fl::audio::detector\l::MultiBandBeatDetectorConfig",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dd/d12/namespacefl_1_1audio_1_1detector.html#db/d81/structfl_1_1audio_1_1detector_1_1_multi_band_beat_detector_config",tooltip="Configuration for multi-band beat detection."];
+  Node3 -> Node1 [id="edge2_Node000001_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mStats",fontcolor="grey" ];
+  Node3 [id="Node000003",label="fl::audio::detector\l::MultiBandBeat::Stats",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat.html#dc/d46/structfl_1_1audio_1_1detector_1_1_multi_band_beat_1_1_stats",tooltip="Get statistics (for debugging/monitoring)"];
+}

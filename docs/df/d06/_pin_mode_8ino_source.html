@@ -105,14 +105,14 @@ $(function(){initNavTree('df/d06/_pin_mode_8ino_source.html','../../'); initResi
 <div class="contents">
 <a href="../../df/d06/_pin_mode_8ino.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;<a class="code" href="../../db/d97/_fast_l_e_d_8h.html">FastLED.h</a>&gt;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;FastLED.h&gt;</span></div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno"><a class="line" href="../../df/d06/_pin_mode_8ino_ae1a27401b7fb01ccb9a82dbddbb54eea.html#ae1a27401b7fb01ccb9a82dbddbb54eea">    7</a></span><span class="preprocessor">#define PIN 1</span></div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
 <div class="foldopen" id="foldopen00009" data-start="{" data-end="}">
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno"><a class="line" href="../../df/d06/_pin_mode_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">    9</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="../../df/d06/_pin_mode_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a>() {</div>
 <div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>  delay(1000);</div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>  Serial.begin(9600);</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>  <a class="code hl_define" href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a>.begin(9600);</div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>}</div>
 </div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
@@ -124,17 +124,17 @@ $(function(){initNavTree('df/d06/_pin_mode_8ino_source.html','../../'); initResi
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>  digitalWrite(<a class="code hl_define" href="../../df/d06/_pin_mode_8ino_ae1a27401b7fb01ccb9a82dbddbb54eea.html#ae1a27401b7fb01ccb9a82dbddbb54eea">PIN</a>, LOW);</div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>  pinMode(<a class="code hl_define" href="../../df/d06/_pin_mode_8ino_ae1a27401b7fb01ccb9a82dbddbb54eea.html#ae1a27401b7fb01ccb9a82dbddbb54eea">PIN</a>, INPUT);</div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>  <span class="keywordtype">bool</span> on = digitalRead(<a class="code hl_define" href="../../df/d06/_pin_mode_8ino_ae1a27401b7fb01ccb9a82dbddbb54eea.html#ae1a27401b7fb01ccb9a82dbddbb54eea">PIN</a>);</div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>  Serial.print(<span class="stringliteral">&quot;Pin: &quot;</span>);</div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>  Serial.print(<a class="code hl_define" href="../../df/d06/_pin_mode_8ino_ae1a27401b7fb01ccb9a82dbddbb54eea.html#ae1a27401b7fb01ccb9a82dbddbb54eea">PIN</a>);</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>  Serial.print(<span class="stringliteral">&quot; is &quot;</span>);</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>  Serial.println(on ? <span class="stringliteral">&quot;HIGH&quot;</span> : <span class="stringliteral">&quot;LOW&quot;</span>);</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>  <a class="code hl_define" href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a>.print(<span class="stringliteral">&quot;Pin: &quot;</span>);</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>  <a class="code hl_define" href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a>.print(<a class="code hl_define" href="../../df/d06/_pin_mode_8ino_ae1a27401b7fb01ccb9a82dbddbb54eea.html#ae1a27401b7fb01ccb9a82dbddbb54eea">PIN</a>);</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>  <a class="code hl_define" href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a>.print(<span class="stringliteral">&quot; is &quot;</span>);</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>  <a class="code hl_define" href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a>.println(on ? <span class="stringliteral">&quot;HIGH&quot;</span> : <span class="stringliteral">&quot;LOW&quot;</span>);</div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>  delay(1000);</div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>}</div>
 </div>
-<div class="ttc" id="a_fast_l_e_d_8h_html"><div class="ttname"><a href="../../db/d97/_fast_l_e_d_8h.html">FastLED.h</a></div><div class="ttdoc">central include file for FastLED, defines the CFastLED class/object</div></div>
 <div class="ttc" id="a_pin_mode_8ino_a4fc01d736fe50cf5b977f755b675f11d_html_a4fc01d736fe50cf5b977f755b675f11d"><div class="ttname"><a href="../../df/d06/_pin_mode_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a></div><div class="ttdeci">void setup()</div><div class="ttdef"><b>Definition</b> <a href="#l00009">PinMode.ino:9</a></div></div>
 <div class="ttc" id="a_pin_mode_8ino_ae1a27401b7fb01ccb9a82dbddbb54eea_html_ae1a27401b7fb01ccb9a82dbddbb54eea"><div class="ttname"><a href="../../df/d06/_pin_mode_8ino_ae1a27401b7fb01ccb9a82dbddbb54eea.html#ae1a27401b7fb01ccb9a82dbddbb54eea">PIN</a></div><div class="ttdeci">#define PIN</div><div class="ttdef"><b>Definition</b> <a href="#l00007">PinMode.ino:7</a></div></div>
 <div class="ttc" id="a_pin_mode_8ino_afe461d27b9c48d5921c00d521181f12f_html_afe461d27b9c48d5921c00d521181f12f"><div class="ttname"><a href="../../df/d06/_pin_mode_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop</a></div><div class="ttdeci">void loop()</div><div class="ttdef"><b>Definition</b> <a href="#l00014">PinMode.ino:14</a></div></div>
+<div class="ttc" id="asystem_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3_html_ab1a8531ded8c3d5bee8e36aebec7a8f3"><div class="ttname"><a href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a></div><div class="ttdeci">#define Serial</div><div class="ttdef"><b>Definition</b> <a href="../../de/d8b/system_2serial_8h_source.html#l00304">serial.h:304</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -142,7 +142,7 @@ $(function(){initNavTree('df/d06/_pin_mode_8ino_source.html','../../'); initResi
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_da6f56500606cfa389f05a45d20a23dc.html">PinMode</a></li><li class="navelem"><a class="el" href="../../df/d06/_pin_mode_8ino.html">PinMode.ino</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:19 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:06:58 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

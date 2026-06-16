@@ -1,0 +1,13 @@
+<map id="fl/math/lib8tion/memmove.h" name="fl/math/lib8tion/memmove.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,213,31"/>
+<area shape="rect" id="Node000002" href="$db/dae/fl_2math_2memmove_8h.html" title=" " alt="" coords="32,79,187,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="112,31,112,65,107,65,107,31"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="10,299,185,324"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="101,106,86,127,75,153,70,188,73,224,90,285,84,286,67,225,64,188,69,151,82,124,97,103"/>
+<area shape="rect" id="Node000004" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="85,152,259,177"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="122,103,155,140,151,143,118,106"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="162,179,143,200,125,227,113,257,105,286,99,284,108,255,120,224,139,197,158,176"/>
+<area shape="rect" id="Node000005" href="$d1/ddf/align_8h.html" title="Alignment macros and utilities for FastLED." alt="" coords="135,225,233,251"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="177,177,182,211,177,212,171,178"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="172,253,124,292,120,288,168,249"/>
+</map>

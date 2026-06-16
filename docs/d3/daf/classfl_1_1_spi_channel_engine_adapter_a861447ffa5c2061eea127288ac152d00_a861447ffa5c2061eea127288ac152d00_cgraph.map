@@ -1,0 +1,7 @@
+<map id="fl::SpiChannelEngineAdapter::groupByClockPin" name="fl::SpiChannelEngineAdapter::groupByClockPin">
+<area shape="rect" id="Node000001" title="Group channels by clock pin for efficient transmission." alt="" coords="5,23,212,63"/>
+<area shape="rect" id="Node000002" href="$d2/d24/classfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980.html#ae9a8cea8d4b81d8f2f10a2b007ac2980" title=" " alt="" coords="260,5,416,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="212,29,246,25,247,31,212,35"/>
+<area shape="rect" id="Node000003" href="$d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c" title=" " alt="" coords="261,55,415,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="212,51,248,55,247,61,212,57"/>
+</map>

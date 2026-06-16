@@ -1,0 +1,10 @@
+<map id="test_client.send_request" name="test_client.send_request">
+<area shape="rect" id="Node000001" title=" " alt="" coords="609,31,791,56"/>
+<area shape="rect" id="Node000002" href="$da/dbe/namespacetest__client_aa6bfc26bc281a11211e1ebd908a45d41.html#aa6bfc26bc281a11211e1ebd908a45d41" title=" " alt="" coords="407,5,561,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="595,34,561,30,562,24,596,28"/>
+<area shape="rect" id="Node000004" href="$da/dbe/namespacetest__client_aa9789057caf30cced2b89c27b6bed4d1.html#aa9789057caf30cced2b89c27b6bed4d1" title=" " alt="" coords="5,23,184,63"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="596,46,184,46,184,41,596,41"/>
+<area shape="rect" id="Node000003" href="$da/dbe/namespacetest__client_a4878be6532820b01dfddbfb8f83be627.html#a4878be6532820b01dfddbfb8f83be627" title=" " alt="" coords="232,5,359,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="393,21,359,21,359,15,393,15"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="219,30,185,35,184,29,218,25"/>
+</map>

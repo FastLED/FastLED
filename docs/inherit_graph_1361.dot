@@ -1,0 +1,10 @@
+digraph "Graphical Class Hierarchy"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node0 [id="Node000000",label="fl::TIMING_GE8822_800KHZ",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/df7/structfl_1_1_t_i_m_i_n_g___g_e8822__800_k_h_z.html",tooltip="GE8822 RGB controller @ 800 kHz Four-phase: TH0=350ns, TH1=1010ns, TL0=1010ns, TL1=350ns."];
+}

@@ -1,0 +1,9 @@
+<map id="fl/chipsets/encoders/ws2816.h" name="fl/chipsets/encoders/ws2816.h">
+<area shape="rect" id="Node000001" title="WS2816 encoder &#45; converts 16&#45;bit RGB pixels to dual 8&#45;bit RGB format." alt="" coords="5,5,156,45"/>
+<area shape="rect" id="Node000002" href="$db/d66/chipsets_8h.html" title="Contains the bulk of the definitions for the various LED chipsets supported." alt="" coords="37,93,125,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,59,83,93,78,93,78,59"/>
+<area shape="rect" id="Node000003" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="38,167,123,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="83,132,83,167,78,167,78,132"/>
+<area shape="rect" id="Node000004" href="$d7/de5/_fast_l_e_d_8cpp_8hpp.html" title=" " alt="" coords="17,240,145,265"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="83,206,83,240,78,240,78,206"/>
+</map>

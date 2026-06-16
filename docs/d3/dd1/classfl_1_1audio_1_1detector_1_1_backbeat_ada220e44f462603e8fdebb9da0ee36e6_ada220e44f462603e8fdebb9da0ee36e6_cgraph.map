@@ -1,0 +1,7 @@
+<map id="fl::audio::detector::Backbeat::Backbeat" name="fl::audio::detector::Backbeat::Backbeat">
+<area shape="rect" id="Node000001" title="Construct with standalone Beat." alt="" coords="5,35,165,75"/>
+<area shape="rect" id="Node000002" href="$d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_ae616d013654a60850d1ad4ea042a487d.html#ae616d013654a60850d1ad4ea042a487d" title="Construct with shared Beat." alt="" coords="213,5,373,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="165,41,199,36,200,41,166,46"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="231,70,356,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="166,63,217,70,216,75,165,68"/>
+</map>

@@ -7,14 +7,14 @@ var classfl_1_1_blend2d =
     [ "add", "dc/d2b/classfl_1_1_blend2d_a5ee229ce7c02bd25ae86ef184dbccbcc.html#a5ee229ce7c02bd25ae86ef184dbccbcc", null ],
     [ "clear", "dc/d2b/classfl_1_1_blend2d_af63cc066383bab3248aecba9c772f46c.html#af63cc066383bab3248aecba9c772f46c", null ],
     [ "draw", "dc/d2b/classfl_1_1_blend2d_ad965648c61fd795366282d3b797a612f.html#ad965648c61fd795366282d3b797a612f", null ],
-    [ "fxName", "dc/d2b/classfl_1_1_blend2d_a2b9f07ed3d9a76e86c52006392ae8931.html#a2b9f07ed3d9a76e86c52006392ae8931", null ],
-    [ "setGlobalBlurAmount", "dc/d2b/classfl_1_1_blend2d_a0af5cce50ddf09863bc5beffd2535dd4.html#a0af5cce50ddf09863bc5beffd2535dd4", null ],
-    [ "setGlobalBlurPasses", "dc/d2b/classfl_1_1_blend2d_a69f015473a08988d80f488f645ff255f.html#a69f015473a08988d80f488f645ff255f", null ],
+    [ "fxName", "dc/d2b/classfl_1_1_blend2d_a33843cb7e6f8e709f6fa5181f8b6a38d.html#a33843cb7e6f8e709f6fa5181f8b6a38d", null ],
+    [ "setGlobalBlurAmount", "dc/d2b/classfl_1_1_blend2d_a9ef4946e8f8f86bfbfe637962f60fc25.html#a9ef4946e8f8f86bfbfe637962f60fc25", null ],
+    [ "setGlobalBlurPasses", "dc/d2b/classfl_1_1_blend2d_aff06314bf8eae68ac2e148cad1657711.html#aff06314bf8eae68ac2e148cad1657711", null ],
     [ "setParams", "dc/d2b/classfl_1_1_blend2d_aad17ffdf04279a43a6f3825c910ccb13.html#aad17ffdf04279a43a6f3825c910ccb13", null ],
     [ "setParams", "dc/d2b/classfl_1_1_blend2d_a989a3acee044ae495572dcc277cd9fe4.html#a989a3acee044ae495572dcc277cd9fe4", null ],
-    [ "mFrame", "dc/d2b/classfl_1_1_blend2d_a7556f7a4774ea1ada2f37a1cf6c8160e.html#a7556f7a4774ea1ada2f37a1cf6c8160e", null ],
-    [ "mFrameTransform", "dc/d2b/classfl_1_1_blend2d_aac59daf24beddaada27a92ea7d8e4044.html#aac59daf24beddaada27a92ea7d8e4044", null ],
-    [ "mGlobalBlurAmount", "dc/d2b/classfl_1_1_blend2d_a7c33936b2b19da1ae551f8c35a1e2aec.html#a7c33936b2b19da1ae551f8c35a1e2aec", null ],
-    [ "mGlobalBlurPasses", "dc/d2b/classfl_1_1_blend2d_a2709b5a89156947b6990ae2b73fd056c.html#a2709b5a89156947b6990ae2b73fd056c", null ],
-    [ "mLayers", "dc/d2b/classfl_1_1_blend2d_ac38d2a3bb6178dfb745fb1b0e34e5959.html#ac38d2a3bb6178dfb745fb1b0e34e5959", null ]
+    [ "mFrame", "dc/d2b/classfl_1_1_blend2d_aa9c390a294e45460c8b4f701438894ac.html#aa9c390a294e45460c8b4f701438894ac", null ],
+    [ "mFrameTransform", "dc/d2b/classfl_1_1_blend2d_a31fa2db651c9d5d3aca551cef26fa6e0.html#a31fa2db651c9d5d3aca551cef26fa6e0", null ],
+    [ "mGlobalBlurAmount", "dc/d2b/classfl_1_1_blend2d_a5a71ce9a1bad3203c4925965eecf42ff.html#a5a71ce9a1bad3203c4925965eecf42ff", null ],
+    [ "mGlobalBlurPasses", "dc/d2b/classfl_1_1_blend2d_abe905eefdd08d86a52a5945651fc97dd.html#abe905eefdd08d86a52a5945651fc97dd", null ],
+    [ "mLayers", "dc/d2b/classfl_1_1_blend2d_af1ff855f026cae8299459a2568da2452.html#af1ff855f026cae8299459a2568da2452", null ]
 ];

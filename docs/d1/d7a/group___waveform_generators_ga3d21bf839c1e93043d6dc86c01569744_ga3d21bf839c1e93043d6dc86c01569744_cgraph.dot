@@ -1,0 +1,14 @@
+digraph "quadwave8"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="quadwave8",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Quadratic waveform generator."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="ease8InOutQuad",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dfe/group___easing_gaee4dea571f678c82a977de4e52c3d83f.html#gaee4dea571f678c82a977de4e52c3d83f",tooltip="8-bit quadratic ease-in / ease-out function."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="triwave8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d7a/group___waveform_generators_gae69e5ea856eeeb70a917ff18934ec7b0.html#gae69e5ea856eeeb70a917ff18934ec7b0",tooltip="Triangle wave generator."];
+}

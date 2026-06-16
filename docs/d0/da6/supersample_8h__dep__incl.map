@@ -1,26 +1,27 @@
-<map id="fl/supersample.h" name="fl/supersample.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="473,5,603,31"/>
-<area shape="rect" id="Node000002" href="$dc/d36/wave__simulation_8h.html" title=" " alt="" coords="405,174,562,199"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="528,44,513,80,497,132,488,174,483,173,492,131,507,78,523,42"/>
-<area shape="rect" id="Node000017" href="$dd/d8e/wave__simulation__real_8h.html" title=" " alt="" coords="521,79,667,119"/>
-<area shape="poly" id="edge10_Node000001_Node000017" title=" " alt="" coords="556,40,583,77,578,80,552,43"/>
-<area shape="rect" id="Node000003" href="$d8/d78/examples_2_wave_2wave_8h.html" title=" " alt="" coords="135,255,373,295"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="441,207,306,257,304,252,439,202"/>
-<area shape="rect" id="Node000004" href="$de/d8c/wave__simulation_8cpp.html" title=" " alt="" coords="397,262,569,287"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="486,213,486,261,481,261,481,213"/>
-<area shape="rect" id="Node000005" href="$de/de9/src_2fx_22d_2wave_8h.html" title=" " alt="" coords="594,262,701,287"/>
-<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="519,203,626,259,624,264,516,208"/>
-<area shape="rect" id="Node000006" href="$de/d79/examples_2_downscale_2src_2wave_8h.html" title=" " alt="" coords="5,343,225,397"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="598,294,583,297,486,315,411,323,335,331,238,345,226,348,225,342,238,340,334,326,410,318,486,309,581,292,597,288"/>
-<area shape="rect" id="Node000009" href="$d4/d06/curr_8h.html" title=" " alt="" coords="250,350,522,390"/>
-<area shape="poly" id="edge6_Node000005_Node000009" title=" " alt="" coords="603,294,440,353,438,347,602,289"/>
-<area shape="rect" id="Node000010" href="$d5/d94/_wave2d_8h.html" title=" " alt="" coords="547,343,748,397"/>
-<area shape="poly" id="edge7_Node000005_Node000010" title=" " alt="" coords="650,301,650,342,645,342,645,301"/>
-<area shape="rect" id="Node000011" href="$db/dd3/examples_2_x_y_path_2src_2wave_8h.html" title=" " alt="" coords="773,343,973,397"/>
-<area shape="poly" id="edge8_Node000005_Node000011" title=" " alt="" coords="689,290,810,340,808,345,687,295"/>
-<area shape="rect" id="Node000016" href="$d4/d7c/src_2fx_22d_2wave_8cpp.html" title=" " alt="" coords="997,357,1119,383"/>
-<area shape="poly" id="edge9_Node000005_Node000016" title=" " alt="" coords="715,284,841,307,985,340,1030,355,1028,360,984,345,840,312,714,289"/>
-<area shape="poly" id="edge11_Node000017_Node000002" title=" " alt="" coords="560,129,500,176,497,171,557,125"/>
-<area shape="rect" id="Node000018" href="$d8/da2/wave__simulation__real_8cpp.html" title=" " alt="" coords="587,167,732,207"/>
-<area shape="poly" id="edge12_Node000017_Node000018" title=" " alt="" coords="619,128,647,165,643,168,615,131"/>
+<map id="fl/math/supersample.h" name="fl/math/supersample.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="859,5,1027,31"/>
+<area shape="rect" id="Node000002" href="$dc/d36/wave__simulation_8h.html" title=" " alt="" coords="825,79,1060,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="945,44,945,79,940,79,940,44"/>
+<area shape="rect" id="Node000003" href="$d8/d78/examples_2_wave_2wave_8h.html" title=" " alt="" coords="269,152,507,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="849,109,507,157,507,151,848,103"/>
+<area shape="rect" id="Node000005" href="$d2/d50/src_2fl_2fx_22d_2wave_8h.html" title="2D wave simulation effect for LED matrices" alt="" coords="813,159,931,185"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="925,116,884,161,880,157,921,113"/>
+<area shape="rect" id="Node000025" href="$d9/d3e/src_2fl_2math_2wave_8h.html" title="Umbrella header for wave simulation subsystem." alt="" coords="955,159,1074,185"/>
+<area shape="poly" id="edge10_Node000002_Node000025" title=" " alt="" coords="965,112,1006,157,1002,161,961,116"/>
+<area shape="rect" id="Node000026" href="$d1/d24/wave__simulation_8cpp_8hpp.html" title=" " alt="" coords="1235,159,1512,185"/>
+<area shape="poly" id="edge11_Node000002_Node000026" title=" " alt="" coords="1019,104,1311,157,1310,162,1018,109"/>
+<area shape="rect" id="Node000004" href="$d1/d16/_wave_8ino.html" title=" " alt="" coords="5,240,205,295"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="319,199,186,242,184,237,317,194"/>
+<area shape="rect" id="Node000006" href="$de/d79/examples_2_downscale_2src_2wave_8h.html" title=" " alt="" coords="230,240,450,295"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="799,187,463,243,451,245,450,240,462,237,798,182"/>
+<area shape="rect" id="Node000010" href="$d4/d06/curr_8h.html" title=" " alt="" coords="475,247,747,287"/>
+<area shape="poly" id="edge6_Node000005_Node000010" title=" " alt="" coords="828,192,664,250,662,245,826,187"/>
+<area shape="rect" id="Node000012" href="$d5/d94/_wave2d_8h.html" title=" " alt="" coords="771,240,973,295"/>
+<area shape="poly" id="edge7_Node000005_Node000012" title=" " alt="" coords="875,198,875,240,869,240,869,198"/>
+<area shape="rect" id="Node000014" href="$db/dd3/examples_2_x_y_path_2src_2wave_8h.html" title=" " alt="" coords="997,240,1197,295"/>
+<area shape="poly" id="edge8_Node000005_Node000014" title=" " alt="" coords="913,187,1035,237,1033,242,911,192"/>
+<area shape="rect" id="Node000020" href="$dd/d65/wave_8cpp_8hpp.html" title=" " alt="" coords="1221,255,1382,280"/>
+<area shape="poly" id="edge9_Node000005_Node000020" title=" " alt="" coords="928,185,945,189,1077,213,1136,222,1210,237,1265,252,1263,257,1209,243,1135,227,1076,218,943,195,926,191"/>
+<area shape="rect" id="Node000027" href="$da/d36/fl_2math_2wave_2__build_8cpp_8hpp.html" title="Unity build header for fl/math/wave/ directory." alt="" coords="1407,255,1612,280"/>
+<area shape="poly" id="edge12_Node000026_Node000027" title=" " alt="" coords="1403,190,1494,252,1491,257,1400,195"/>
 </map>

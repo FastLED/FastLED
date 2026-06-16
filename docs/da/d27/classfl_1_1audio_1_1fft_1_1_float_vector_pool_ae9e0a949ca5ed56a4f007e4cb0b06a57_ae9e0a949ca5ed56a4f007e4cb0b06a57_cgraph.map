@@ -1,0 +1,9 @@
+<map id="fl::audio::fft::FloatVectorPool::acquire" name="fl::audio::fft::FloatVectorPool::acquire">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,47,184,87"/>
+<area shape="rect" id="Node000002" href="$d2/d24/classfl_1_1vector_a51b9ac42dba7a7b4bd5a08a276634cef.html#a51b9ac42dba7a7b4bd5a08a276634cef" title=" " alt="" coords="241,5,359,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="178,45,233,31,234,36,179,50"/>
+<area shape="rect" id="Node000003" href="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a" title=" " alt="" coords="255,55,345,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="184,65,241,65,241,70,184,70"/>
+<area shape="rect" id="Node000004" href="$d2/d24/classfl_1_1vector_a305fb6473faab9c2798479c057a58d50.html#a305fb6473faab9c2798479c057a58d50" title=" " alt="" coords="232,104,368,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="179,85,234,98,233,103,178,90"/>
+</map>

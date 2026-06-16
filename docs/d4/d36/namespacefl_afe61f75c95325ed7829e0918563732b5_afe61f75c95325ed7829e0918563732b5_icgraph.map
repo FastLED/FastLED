@@ -1,0 +1,9 @@
+<map id="fl::set_input_gamut" name="fl::set_input_gamut">
+<area shape="rect" id="Node000001" title=" " alt="" coords="240,55,387,80"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ae40649b519c1c03df42edf3fc67a182b.html#ae40649b519c1c03df42edf3fc67a182b" title=" " alt="" coords="25,5,172,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="243,54,154,33,155,28,245,49"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_ab7aae5e7e8583de310b628aca28ae872.html#ab7aae5e7e8583de310b628aca28ae872" title="Reconfigure profile&#39;s input gamut to one of the named source chromaticity sets (Native / Rec709 / Rec..." alt="" coords="5,55,192,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="226,70,192,70,192,65,226,65"/>
+<area shape="rect" id="Node000004" href="$dd/dbb/class_c_fast_l_e_d_add73fb0304bcd1bea679ca406cf4b390.html#add73fb0304bcd1bea679ca406cf4b390" title="Same as above with an explicit input white&#45;point override." alt="" coords="5,104,192,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="245,86,155,107,154,101,243,81"/>
+</map>

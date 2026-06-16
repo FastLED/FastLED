@@ -1,0 +1,67 @@
+digraph "fl/channels/adapters/_build.cpp.hpp"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl/channels/adapters\l/_build.cpp.hpp",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl/channels/adapters\l/spi_channel_adapter.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d93/spi__channel__adapter_8cpp_8hpp.html",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl/channels/adapters\l/spi_channel_adapter.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d8e/spi__channel__adapter_8h.html",tooltip="Adapter that wraps HW SPI controllers for ChannelManager."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl/stl/noexcept.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d01/noexcept_8h.html",tooltip=" "];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl/channels/driver.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d3/dc9/fl_2channels_2driver_8h.html",tooltip=" "];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl/stl/shared_ptr.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/d6a/shared__ptr_8h.html",tooltip=" "];
+  Node6 -> Node4 [id="edge6_Node000006_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node22 [id="edge7_Node000005_Node000022",color="steelblue1",style="solid",tooltip=" "];
+  Node22 [id="Node000022",label="fl/stl/string.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/d66/string_8h.html",tooltip=" "];
+  Node22 -> Node15 [id="edge8_Node000022_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl/stl/cstring.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dd/d8d/cstring_8h.html",tooltip=" "];
+  Node15 -> Node4 [id="edge9_Node000015_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node22 -> Node28 [id="edge10_Node000022_Node000028",color="steelblue1",style="solid",tooltip=" "];
+  Node28 [id="Node000028",label="fl/stl/compiler_control.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d54/compiler__control_8h.html",tooltip=" "];
+  Node22 -> Node6 [id="edge11_Node000022_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node22 -> Node40 [id="edge12_Node000022_Node000040",color="steelblue1",style="solid",tooltip=" "];
+  Node40 [id="Node000040",label="fl/stl/vector.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/d68/vector_8h.html",tooltip=" "];
+  Node40 -> Node15 [id="edge13_Node000040_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node40 -> Node28 [id="edge14_Node000040_Node000028",color="steelblue1",style="solid",tooltip=" "];
+  Node40 -> Node4 [id="edge15_Node000040_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node22 -> Node4 [id="edge16_Node000022_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node4 [id="edge17_Node000005_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node52 [id="edge18_Node000003_Node000052",color="steelblue1",style="solid",tooltip=" "];
+  Node52 [id="Node000052",label="fl/channels/data.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/dbd/data_8h.html",tooltip="Channel transmission data - lightweight DTO for driver transmission."];
+  Node52 -> Node4 [id="edge19_Node000052_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node52 -> Node40 [id="edge20_Node000052_Node000040",color="steelblue1",style="solid",tooltip=" "];
+  Node52 -> Node6 [id="edge21_Node000052_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node52 -> Node60 [id="edge22_Node000052_Node000060",color="steelblue1",style="solid",tooltip=" "];
+  Node60 [id="Node000060",label="fl/channels/config.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/d09/fl_2channels_2config_8h.html",tooltip=" "];
+  Node60 -> Node40 [id="edge23_Node000060_Node000040",color="steelblue1",style="solid",tooltip=" "];
+  Node60 -> Node6 [id="edge24_Node000060_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node60 -> Node22 [id="edge25_Node000060_Node000022",color="steelblue1",style="solid",tooltip=" "];
+  Node60 -> Node4 [id="edge26_Node000060_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node40 [id="edge27_Node000003_Node000040",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node6 [id="edge28_Node000003_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node22 [id="edge29_Node000003_Node000022",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node139 [id="edge30_Node000003_Node000139",color="steelblue1",style="solid",tooltip=" "];
+  Node139 [id="Node000139",label="platforms/shared/spi\l_hw_base.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node2 -> Node140 [id="edge31_Node000002_Node000140",color="steelblue1",style="solid",tooltip=" "];
+  Node140 [id="Node000140",label="fl/log/log.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d7f/log_8h.html",tooltip="Centralized logging categories for FastLED hardware interfaces and subsystems."];
+  Node140 -> Node59 [id="edge32_Node000140_Node000059",color="steelblue1",style="solid",tooltip=" "];
+  Node59 [id="Node000059",label="fl/system/sketch_macros.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/dbc/sketch__macros_8h.html",tooltip=" "];
+  Node140 -> Node141 [id="edge33_Node000140_Node000141",color="steelblue1",style="solid",tooltip=" "];
+  Node141 [id="Node000141",label="fl/stl/strstream.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/d00/strstream_8h.html",tooltip=" "];
+  Node141 -> Node22 [id="edge34_Node000141_Node000022",color="steelblue1",style="solid",tooltip=" "];
+  Node141 -> Node4 [id="edge35_Node000141_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node140 -> Node123 [id="edge36_Node000140_Node000123",color="steelblue1",style="solid",tooltip=" "];
+  Node123 [id="Node000123",label="fl/stl/chrono.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dd/d90/chrono_8h.html",tooltip="FastLED chrono implementation - duration types for time measurements."];
+  Node140 -> Node28 [id="edge37_Node000140_Node000028",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node15 [id="edge38_Node000002_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node60 [id="edge39_Node000002_Node000060",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node143 [id="edge40_Node000002_Node000143",color="steelblue1",style="solid",tooltip=" "];
+  Node143 [id="Node000143",label="platforms/shared/spi\l_hw_1.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node2 -> Node4 [id="edge41_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+}

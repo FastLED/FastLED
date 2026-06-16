@@ -31,9 +31,9 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d4/d36/namespacefl_a486349f0901f5cf84e65769cc1b854cd.html#a486349f0901f5cf84e65769cc1b854cd" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="229,-93 167,-93 167,-74 229,-74 229,-93"/>
-<text text-anchor="middle" x="198" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">fl::fl_max</text>
+<g id="a_Node000002"><a xlink:href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="223,-93 173,-93 173,-74 223,-74 223,-93"/>
+<text text-anchor="middle" x="198" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">fl::max</text>
 </a>
 </g>
 </g>
@@ -41,17 +41,17 @@
 <g id="edge1_Node000001_Node000002" class="edge">
 <title>Node1&#45;&gt;Node2</title>
 <g id="a_edge1_Node000001_Node000002"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M85.63,-56.03C107.46,-61.41 134.71,-68.14 156.8,-73.58"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="155.99,-76.99 166.54,-75.99 157.67,-70.19 155.99,-76.99"/>
+<path fill="none" stroke="#63b8ff" d="M85.63,-56.03C109.42,-61.9 139.64,-69.35 162.6,-75.02"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="162.04,-78.48 172.59,-77.48 163.72,-71.69 162.04,-78.48"/>
 </a>
 </g>
 </g>
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_a47dce91f91c991288fe7edefe2137bcf.html#a47dce91f91c991288fe7edefe2137bcf" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="227.5,-56 168.5,-56 168.5,-37 227.5,-37 227.5,-56"/>
-<text text-anchor="middle" x="198" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::fl_min</text>
+<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="221.5,-56 174.5,-56 174.5,-37 221.5,-37 221.5,-56"/>
+<text text-anchor="middle" x="198" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::min</text>
 </a>
 </g>
 </g>
@@ -59,8 +59,8 @@
 <g id="edge2_Node000001_Node000003" class="edge">
 <title>Node1&#45;&gt;Node3</title>
 <g id="a_edge2_Node000001_Node000003"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M92,-46.5C113.02,-46.5 137.8,-46.5 158.01,-46.5"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="158.11,-50 168.11,-46.5 158.11,-43 158.11,-50"/>
+<path fill="none" stroke="#63b8ff" d="M92,-46.5C115.19,-46.5 142.94,-46.5 164.09,-46.5"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="164.2,-50 174.2,-46.5 164.2,-43 164.2,-50"/>
 </a>
 </g>
 </g>

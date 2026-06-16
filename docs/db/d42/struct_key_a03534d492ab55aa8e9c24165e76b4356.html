@@ -115,28 +115,28 @@ $(function(){initNavTree('db/d42/struct_key_a03534d492ab55aa8e9c24165e76b4356.ht
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00023">23</a> of file <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html">Keyboard.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   23</span>                                {</div>
-<div class="line"><span class="lineno">   24</span>  <a class="code hl_variable" href="../../db/d42/struct_key_a4283fe28c2271ceb8a45fbab91b3ed84.html#a4283fe28c2271ceb8a45fbab91b3ed84">orig_color_</a> = <a class="code hl_variable" href="../../db/d42/struct_key_a9f67c53a51f8b33667c327f79c6782dc.html#a9f67c53a51f8b33667c327f79c6782dc">curr_color_</a>;</div>
-<div class="line"><span class="lineno">   25</span>  <a class="code hl_variable" href="../../db/d42/struct_key_ab2bfd7c1e68242f10dc13a84a52e7b67.html#ab2bfd7c1e68242f10dc13a84a52e7b67">on_</a> = <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">   26</span>  <a class="code hl_variable" href="../../db/d42/struct_key_aacec21e44be625a3163a6d01b761175d.html#aacec21e44be625a3163a6d01b761175d">event_time_</a> = now_ms;</div>
-<div class="line"><span class="lineno">   27</span>  <a class="code hl_variable" href="../../db/d42/struct_key_a9cacf11333d4f58f51c9b1ca0306cc26.html#a9cacf11333d4f58f51c9b1ca0306cc26">sustained_</a> = <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">   28</span>}</div>
-<div class="ttc" id="astruct_key_a4283fe28c2271ceb8a45fbab91b3ed84_html_a4283fe28c2271ceb8a45fbab91b3ed84"><div class="ttname"><a href="../../db/d42/struct_key_a4283fe28c2271ceb8a45fbab91b3ed84.html#a4283fe28c2271ceb8a45fbab91b3ed84">Key::orig_color_</a></div><div class="ttdeci">ColorHSV orig_color_</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00047">Keyboard.h:47</a></div></div>
-<div class="ttc" id="astruct_key_a9cacf11333d4f58f51c9b1ca0306cc26_html_a9cacf11333d4f58f51c9b1ca0306cc26"><div class="ttname"><a href="../../db/d42/struct_key_a9cacf11333d4f58f51c9b1ca0306cc26.html#a9cacf11333d4f58f51c9b1ca0306cc26">Key::sustained_</a></div><div class="ttdeci">bool sustained_</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00037">Keyboard.h:37</a></div></div>
-<div class="ttc" id="astruct_key_a9f67c53a51f8b33667c327f79c6782dc_html_a9f67c53a51f8b33667c327f79c6782dc"><div class="ttname"><a href="../../db/d42/struct_key_a9f67c53a51f8b33667c327f79c6782dc.html#a9f67c53a51f8b33667c327f79c6782dc">Key::curr_color_</a></div><div class="ttdeci">ColorHSV curr_color_</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00048">Keyboard.h:48</a></div></div>
-<div class="ttc" id="astruct_key_aacec21e44be625a3163a6d01b761175d_html_aacec21e44be625a3163a6d01b761175d"><div class="ttname"><a href="../../db/d42/struct_key_aacec21e44be625a3163a6d01b761175d.html#aacec21e44be625a3163a6d01b761175d">Key::event_time_</a></div><div class="ttdeci">unsigned long event_time_</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00041">Keyboard.h:41</a></div></div>
-<div class="ttc" id="astruct_key_ab2bfd7c1e68242f10dc13a84a52e7b67_html_ab2bfd7c1e68242f10dc13a84a52e7b67"><div class="ttname"><a href="../../db/d42/struct_key_ab2bfd7c1e68242f10dc13a84a52e7b67.html#ab2bfd7c1e68242f10dc13a84a52e7b67">Key::on_</a></div><div class="ttdeci">bool on_</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00036">Keyboard.h:36</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00024">24</a> of file <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html">Keyboard.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   24</span>                                {</div>
+<div class="line"><span class="lineno">   25</span>  <a class="code hl_variable" href="../../db/d42/struct_key_a62b57bd9017e2d8702d031dc16a760ec.html#a62b57bd9017e2d8702d031dc16a760ec">mOrigColor</a> = <a class="code hl_variable" href="../../db/d42/struct_key_af029b59eff6813504425c91428fe162d.html#af029b59eff6813504425c91428fe162d">mCurrColor</a>;</div>
+<div class="line"><span class="lineno">   26</span>  <a class="code hl_variable" href="../../db/d42/struct_key_a1e4c3ec15241f33f84f74377d742f0e7.html#a1e4c3ec15241f33f84f74377d742f0e7">mOn</a> = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   27</span>  <a class="code hl_variable" href="../../db/d42/struct_key_a85083f533a8eecfcc322cc85e1272d1a.html#a85083f533a8eecfcc322cc85e1272d1a">mEventTime</a> = now_ms;</div>
+<div class="line"><span class="lineno">   28</span>  <a class="code hl_variable" href="../../db/d42/struct_key_a64f8f0472468ea9bb5f2566295b178cf.html#a64f8f0472468ea9bb5f2566295b178cf">mSustained</a> = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   29</span>}</div>
+<div class="ttc" id="astruct_key_a1e4c3ec15241f33f84f74377d742f0e7_html_a1e4c3ec15241f33f84f74377d742f0e7"><div class="ttname"><a href="../../db/d42/struct_key_a1e4c3ec15241f33f84f74377d742f0e7.html#a1e4c3ec15241f33f84f74377d742f0e7">Key::mOn</a></div><div class="ttdeci">bool mOn</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00036">Keyboard.h:36</a></div></div>
+<div class="ttc" id="astruct_key_a62b57bd9017e2d8702d031dc16a760ec_html_a62b57bd9017e2d8702d031dc16a760ec"><div class="ttname"><a href="../../db/d42/struct_key_a62b57bd9017e2d8702d031dc16a760ec.html#a62b57bd9017e2d8702d031dc16a760ec">Key::mOrigColor</a></div><div class="ttdeci">ColorHSV mOrigColor</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00047">Keyboard.h:47</a></div></div>
+<div class="ttc" id="astruct_key_a64f8f0472468ea9bb5f2566295b178cf_html_a64f8f0472468ea9bb5f2566295b178cf"><div class="ttname"><a href="../../db/d42/struct_key_a64f8f0472468ea9bb5f2566295b178cf.html#a64f8f0472468ea9bb5f2566295b178cf">Key::mSustained</a></div><div class="ttdeci">bool mSustained</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00037">Keyboard.h:37</a></div></div>
+<div class="ttc" id="astruct_key_a85083f533a8eecfcc322cc85e1272d1a_html_a85083f533a8eecfcc322cc85e1272d1a"><div class="ttname"><a href="../../db/d42/struct_key_a85083f533a8eecfcc322cc85e1272d1a.html#a85083f533a8eecfcc322cc85e1272d1a">Key::mEventTime</a></div><div class="ttdeci">unsigned long mEventTime</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00041">Keyboard.h:41</a></div></div>
+<div class="ttc" id="astruct_key_af029b59eff6813504425c91428fe162d_html_af029b59eff6813504425c91428fe162d"><div class="ttname"><a href="../../db/d42/struct_key_af029b59eff6813504425c91428fe162d.html#af029b59eff6813504425c91428fe162d">Key::mCurrColor</a></div><div class="ttdeci">ColorHSV mCurrColor</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00048">Keyboard.h:48</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00048">curr_color_</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00041">event_time_</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00036">on_</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00047">orig_color_</a>, and <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00037">sustained_</a>.</p>
+<p class="reference">References <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00048">mCurrColor</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00041">mEventTime</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00036">mOn</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00047">mOrigColor</a>, and <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00037">mSustained</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00147">KeyboardState::HandleNoteOff()</a>, and <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00034">Update()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de5/_luminescent_grand_8ino_source.html#l00104">HandleAfterTouchChannel()</a>, <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00148">KeyboardState::HandleNoteOff()</a>, and <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00035">Update()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../db/d42/struct_key_a03534d492ab55aa8e9c24165e76b4356_a03534d492ab55aa8e9c24165e76b4356_icgraph.svg" width="642" height="86"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../db/d42/struct_key_a03534d492ab55aa8e9c24165e76b4356_a03534d492ab55aa8e9c24165e76b4356_icgraph.svg" width="642" height="135"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -148,7 +148,7 @@ $(function(){initNavTree('db/d42/struct_key_a03534d492ab55aa8e9c24165e76b4356.ht
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../db/d42/struct_key.html">Key</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

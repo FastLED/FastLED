@@ -1,0 +1,15 @@
+<map id="fl::ChannelManager::instance" name="fl::ChannelManager::instance">
+<area shape="rect" id="Node000001" title="Get the global singleton instance." alt="" coords="5,85,153,125"/>
+<area shape="rect" id="Node000002" href="$d2/d6b/classfl_1_1_channel_manager_addc4b631522a2d44151c6b7c23a26ca1.html#addc4b631522a2d44151c6b7c23a26ca1" title="Constructor." alt="" coords="209,55,357,95"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,91,194,85,195,91,154,97"/>
+<area shape="rect" id="Node000006" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="201,120,364,145"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="154,112,188,117,188,122,153,117"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="244,56,242,46,248,37,262,31,283,29,306,32,319,39,317,44,305,37,283,34,263,36,252,41,247,47,250,54"/>
+<area shape="rect" id="Node000003" href="$de/dca/classfl_1_1_engine_events_a82722c0166c257ae8bc81b08e8d00ffb.html#a82722c0166c257ae8bc81b08e8d00ffb" title=" " alt="" coords="412,5,623,31"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="356,54,411,41,450,31,451,36,413,46,357,60"/>
+<area shape="rect" id="Node000004" href="$d2/d6b/classfl_1_1_channel_manager_a7bffd7927e98f20d7449fa20f9fa5924.html#a7bffd7927e98f20d7449fa20f9fa5924" title=" " alt="" coords="427,55,608,95"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="357,81,413,82,413,87,357,86"/>
+<area shape="poly" id="edge5_Node000004_Node000002" title=" " alt="" coords="426,69,370,69,370,64,426,64"/>
+<area shape="rect" id="Node000005" href="$d2/d6b/classfl_1_1_channel_manager_aec84f1f8e6fc734720ebea52fcfe4a62.html#aec84f1f8e6fc734720ebea52fcfe4a62" title=" " alt="" coords="671,55,819,95"/>
+<area shape="poly" id="edge6_Node000004_Node000005" title=" " alt="" coords="608,73,657,73,657,78,608,78"/>
+</map>

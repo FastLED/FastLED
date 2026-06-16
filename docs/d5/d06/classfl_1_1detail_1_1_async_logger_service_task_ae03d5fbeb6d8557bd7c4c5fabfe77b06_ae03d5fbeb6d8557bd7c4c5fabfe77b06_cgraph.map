@@ -1,0 +1,34 @@
+<map id="fl::detail::AsyncLoggerServiceTask::~AsyncLoggerServiceTask" name="fl::detail::AsyncLoggerServiceTask::~AsyncLoggerServiceTask">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,171,236,211"/>
+<area shape="rect" id="Node000002" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a3bff7aaa6e1158fbbee95055b3458285.html#a3bff7aaa6e1158fbbee95055b3458285" title=" " alt="" coords="284,171,503,211"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="236,188,271,188,271,193,236,193"/>
+<area shape="rect" id="Node000003" href="$d2/d2b/classfl_1_1task_1_1_scheduler_ad1f60f825514d99a9ee0d06f564be1a7.html#ad1f60f825514d99a9ee0d06f564be1a7" title=" " alt="" coords="831,5,970,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="426,168,482,136,550,106,619,82,690,63,817,36,818,41,691,68,620,87,552,110,485,141,428,173"/>
+<area shape="rect" id="Node000005" href="$db/d5c/namespacefl_1_1task_a0f002cad452f6b7f8dff6ba2b8f0f8b8.html#a0f002cad452f6b7f8dff6ba2b8f0f8b8" title=" " alt="" coords="589,231,727,257"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="494,208,582,226,581,231,492,213"/>
+<area shape="rect" id="Node000007" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a266030d285c7f6ae31eb3c619cee8693.html#a266030d285c7f6ae31eb3c619cee8693" title=" " alt="" coords="831,171,970,211"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="503,188,817,188,817,193,503,193"/>
+<area shape="rect" id="Node000010" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_ab5cd1a92bcf542222607179a5363c2e0.html#ab5cd1a92bcf542222607179a5363c2e0" title="Service all registered loggers (called by task)" alt="" coords="551,309,765,349"/>
+<area shape="poly" id="edge9_Node000002_Node000010" title=" " alt="" coords="434,208,607,300,605,305,432,213"/>
+<area shape="rect" id="Node000029" href="$de/daf/classfl_1_1task_1_1_handle_a01b05372acab06bd2197d033aafe8cb9.html#a01b05372acab06bd2197d033aafe8cb9" title=" " alt="" coords="579,121,737,146"/>
+<area shape="poly" id="edge13_Node000002_Node000029" title=" " alt="" coords="486,168,585,146,586,152,487,173"/>
+<area shape="rect" id="Node000004" href="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a" title=" " alt="" coords="1072,42,1163,67"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="971,32,1059,44,1058,49,970,37"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="838,235,963,261"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="728,242,825,244,825,249,727,248"/>
+<area shape="rect" id="Node000008" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a56ea341e8b9965989c7634c973ef8027.html#a56ea341e8b9965989c7634c973ef8027" title=" " alt="" coords="1048,143,1187,183"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="970,179,1034,171,1035,176,971,184"/>
+<area shape="rect" id="Node000009" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="1036,207,1199,233"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="971,197,1023,205,1022,210,970,203"/>
+<area shape="rect" id="Node000011" href="$d6/d35/classfl_1_1_async_logger_a0571151055f77663758951a2458c8a4d.html#a0571151055f77663758951a2458c8a4d" title="Flush up to N messages from queue (bounded flush)" alt="" coords="815,285,986,310"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="765,313,801,308,802,313,766,318"/>
+<area shape="rect" id="Node000017" href="$d5/d7b/structfl_1_1detail_1_1_active_logger_registry_a428161495700eb0287637b406ec06ca3.html#a428161495700eb0287637b406ec06ca3" title=" " alt="" coords="817,335,985,375"/>
+<area shape="poly" id="edge11_Node000010_Node000017" title=" " alt="" coords="766,338,803,342,803,347,765,343"/>
+<area shape="rect" id="Node000018" href="$d5/d7b/structfl_1_1detail_1_1_active_logger_registry_a0ba7ba9bde21bfc28ef06006930c34f1.html#a0ba7ba9bde21bfc28ef06006930c34f1" title=" " alt="" coords="817,399,985,439"/>
+<area shape="poly" id="edge12_Node000010_Node000018" title=" " alt="" coords="714,347,833,391,831,396,712,352"/>
+<area shape="poly" id="edge15_Node000029_Node000003" title=" " alt="" coords="687,118,812,62,841,49,843,54,814,66,689,123"/>
+<area shape="poly" id="edge17_Node000029_Node000004" title=" " alt="" coords="733,118,1058,62,1059,67,734,123"/>
+<area shape="poly" id="edge16_Node000029_Node000007" title=" " alt="" coords="713,143,819,169,817,174,712,149"/>
+<area shape="rect" id="Node000030" href="$de/daf/classfl_1_1task_1_1_handle_a16eea6cd4df5ebb0c3cbb297b10c1707.html#a16eea6cd4df5ebb0c3cbb297b10c1707" title=" " alt="" coords="813,121,988,146"/>
+<area shape="poly" id="edge14_Node000029_Node000030" title=" " alt="" coords="737,131,800,131,800,136,737,136"/>
+</map>

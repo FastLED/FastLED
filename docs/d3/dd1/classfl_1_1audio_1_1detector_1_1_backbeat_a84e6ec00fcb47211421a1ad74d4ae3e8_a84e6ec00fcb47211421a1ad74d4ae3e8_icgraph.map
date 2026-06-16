@@ -1,0 +1,10 @@
+<map id="fl::audio::detector::Backbeat::isBackbeatPosition" name="fl::audio::detector::Backbeat::isBackbeatPosition">
+<area shape="rect" id="Node000001" title=" " alt="" coords="665,29,888,69"/>
+<area shape="rect" id="Node000002" href="$d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_a82bf97dd057d84089b5f6f8288c263b6.html#a82bf97dd057d84089b5f6f8288c263b6" title=" " alt="" coords="416,29,617,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="652,52,617,52,617,47,652,47"/>
+<area shape="rect" id="Node000003" href="$d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_a128515a9b1b491a4a3801ce743719b0c.html#a128515a9b1b491a4a3801ce743719b0c" title=" " alt="" coords="224,29,368,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="402,52,369,52,369,47,402,47"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="331,18,318,11,296,8,276,10,265,15,260,21,262,28,257,30,255,20,261,11,275,5,296,3,320,6,333,13"/>
+<area shape="rect" id="Node000004" href="$d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_ab80abe1a4f92cbd9fc5ee8a20244536a.html#ab80abe1a4f92cbd9fc5ee8a20244536a" title=" " alt="" coords="5,29,176,69"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="210,52,176,52,176,47,210,47"/>
+</map>

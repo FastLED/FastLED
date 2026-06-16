@@ -1,0 +1,12 @@
+<map id="fl::CLEDController::showLedsInternal" name="fl::CLEDController::showLedsInternal">
+<area shape="rect" id="Node000001" title="Write the data to the LEDs managed by this controller." alt="" coords="400,31,544,71"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_a93471b4babe96100496e8e25062cba3f.html#a93471b4babe96100496e8e25062cba3f" title="Update all our controllers with the current led colors, using the passed in brightness." alt="" coords="222,9,346,34"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="386,40,346,34,347,28,387,35"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a0fc5830eb1815a9268986bb46cb95972.html#a0fc5830eb1815a9268986bb46cb95972" title=" " alt="" coords="216,59,352,99"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="387,66,353,71,352,66,386,61"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_aefe2d04448733f36909d1dab7c5cb3e3.html#aefe2d04448733f36909d1dab7c5cb3e3" title="Clear out/zero out the given number of LEDs." alt="" coords="19,29,155,69"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="202,69,155,62,156,57,203,64"/>
+<area shape="rect" id="Node000005" href="$d5/d8b/classfl_1_1_channel_a56c6fceae41ac78584e120f7e01f7aff.html#a56c6fceae41ac78584e120f7e01f7aff" title="Show the LEDs with optional brightness scaling." alt="" coords="5,94,168,119"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="203,93,169,98,168,92,202,88"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="120,18,108,11,87,8,68,10,57,15,52,21,55,28,49,30,47,20,53,11,66,5,87,3,110,6,123,13"/>
+</map>

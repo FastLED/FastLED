@@ -1,0 +1,30 @@
+<map id="fl::net::http::HttpStreamTransport::handleConnectionStateChange" name="fl::net::http::HttpStreamTransport::handleConnectionStateChange">
+<area shape="rect" id="Node000001" title=" " alt="" coords="967,185,1208,239"/>
+<area shape="rect" id="Node000002" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a57c01766a42aa6cbab3d0c6b7617a5ff.html#a57c01766a42aa6cbab3d0c6b7617a5ff" title="Update connection state (handles reconnection, heartbeat) Call this in main loop." alt="" coords="743,163,919,203"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="953,199,918,195,919,190,953,194"/>
+<area shape="rect" id="Node000003" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8237da9613a0a0c2bffbd8bfddd1f50e.html#a8237da9613a0a0c2bffbd8bfddd1f50e" title="Check if connected." alt="" coords="519,163,695,203"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="729,194,695,194,695,189,729,189"/>
+<area shape="poly" id="edge3_Node000003_Node000001" title=" " alt="" coords="692,203,743,212,858,219,966,218,966,223,857,224,742,217,691,208"/>
+<area shape="poly" id="edge14_Node000003_Node000002" title=" " alt="" coords="709,171,743,171,742,177,709,176"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="645,151,631,144,607,141,585,143,572,148,567,154,570,162,565,163,562,153,569,144,584,138,607,136,633,139,647,146"/>
+<area shape="rect" id="Node000004" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a36aa20b252cc505454144d47d39dabd1.html#a36aa20b252cc505454144d47d39dabd1" title=" " alt="" coords="240,5,471,45"/>
+<area shape="poly" id="edge5_Node000003_Node000004" title=" " alt="" coords="576,154,529,109,469,66,429,48,431,43,472,62,532,105,580,150"/>
+<area shape="rect" id="Node000005" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_aab4451d64b6a491f073f941fd22258c0.html#aab4451d64b6a491f073f941fd22258c0" title="Read next JSON&#45;RPC request from stream Non&#45;blocking, returns nullopt if no complete request available..." alt="" coords="11,75,187,115"/>
+<area shape="poly" id="edge9_Node000003_Node000005" title=" " alt="" coords="504,178,470,172,168,117,169,112,471,167,505,173"/>
+<area shape="rect" id="Node000006" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a5268be2c592ea322ab9e4b7612bda7f7.html#a5268be2c592ea322ab9e4b7612bda7f7" title="Send a pre&#45;built JSON&#45;RPC request." alt="" coords="11,229,187,269"/>
+<area shape="poly" id="edge10_Node000003_Node000006" title=" " alt="" coords="505,199,187,240,187,235,505,193"/>
+<area shape="rect" id="Node000007" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a31df9c89b9d57c3e277973d4021f8adc.html#a31df9c89b9d57c3e277973d4021f8adc" title="Send a streaming pre&#45;built JSON&#45;RPC request." alt="" coords="11,148,187,188"/>
+<area shape="poly" id="edge11_Node000003_Node000007" title=" " alt="" coords="505,182,187,173,187,168,505,177"/>
+<area shape="rect" id="Node000008" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_af403cc0fa1c835f0354267646a1692a4.html#af403cc0fa1c835f0354267646a1692a4" title=" " alt="" coords="5,303,192,343"/>
+<area shape="poly" id="edge12_Node000003_Node000008" title=" " alt="" coords="582,215,535,261,504,283,472,300,401,321,327,333,256,336,192,335,192,329,256,331,327,327,400,316,470,295,502,278,531,257,578,211"/>
+<area shape="rect" id="Node000009" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a07968575a3145c9accb1a6386674af9b.html#a07968575a3145c9accb1a6386674af9b" title="Write JSON&#45;RPC response to stream." alt="" coords="262,245,449,285"/>
+<area shape="poly" id="edge15_Node000003_Node000009" title=" " alt="" coords="554,210,444,248,442,243,552,205"/>
+<area shape="poly" id="edge8_Node000004_Node000002" title=" " alt="" coords="445,46,565,81,696,124,785,160,783,165,694,129,563,86,444,52"/>
+<area shape="poly" id="edge6_Node000004_Node000005" title=" " alt="" coords="268,51,174,77,173,72,267,46"/>
+<area shape="poly" id="edge7_Node000005_Node000003" title=" " alt="" coords="201,99,471,143,557,160,556,165,470,148,200,104"/>
+<area shape="poly" id="edge13_Node000008_Node000002" title=" " alt="" coords="206,338,266,345,333,348,402,345,470,336,565,309,656,272,736,233,794,201,797,205,738,238,659,277,567,314,471,341,403,351,333,353,266,350,205,344"/>
+<area shape="poly" id="edge16_Node000009_Node000003" title=" " alt="" coords="409,238,518,200,520,205,410,243"/>
+<area shape="poly" id="edge17_Node000009_Node000006" title=" " alt="" coords="248,261,187,257,187,252,249,256"/>
+<area shape="poly" id="edge18_Node000009_Node000007" title=" " alt="" coords="288,243,152,191,154,186,290,238"/>
+<area shape="poly" id="edge19_Node000009_Node000008" title=" " alt="" coords="252,291,189,305,188,300,251,286"/>
+</map>

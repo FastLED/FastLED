@@ -1,0 +1,5 @@
+<map id="fl::spi::ParallelDevice::waitComplete" name="fl::spi::ParallelDevice::waitComplete">
+<area shape="rect" id="Node000001" title="Wait for pending transmission to complete." alt="" coords="5,5,164,45"/>
+<area shape="rect" id="Node000002" href="$d7/de0/classfl_1_1spi_1_1_parallel_device_a03dc449fe80ed7de12a7f47d1671e416.html#a03dc449fe80ed7de12a7f47d1671e416" title="Check if device is initialized." alt="" coords="212,5,371,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,23,198,23,198,28,164,28"/>
+</map>

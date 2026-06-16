@@ -1,0 +1,15 @@
+<map id="fl::channelManager" name="fl::channelManager">
+<area shape="rect" id="Node000001" title="Get the global ChannelManager singleton instance." alt="" coords="5,92,152,117"/>
+<area shape="rect" id="Node000002" href="$d2/d6b/classfl_1_1_channel_manager_aed1be386f6b38cabd478d1d9c11c240c.html#aed1be386f6b38cabd478d1d9c11c240c" title="Get the global singleton instance." alt="" coords="200,85,348,125"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="152,102,187,102,187,107,152,107"/>
+<area shape="rect" id="Node000003" href="$d2/d6b/classfl_1_1_channel_manager_addc4b631522a2d44151c6b7c23a26ca1.html#addc4b631522a2d44151c6b7c23a26ca1" title="Constructor." alt="" coords="403,55,551,95"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="348,91,389,85,390,91,349,97"/>
+<area shape="rect" id="Node000007" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="396,120,559,145"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="349,112,383,117,382,122,348,117"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="439,56,437,46,443,37,457,31,477,29,501,32,514,39,511,44,499,37,477,34,458,36,446,41,442,47,444,54"/>
+<area shape="rect" id="Node000004" href="$de/dca/classfl_1_1_engine_events_a82722c0166c257ae8bc81b08e8d00ffb.html#a82722c0166c257ae8bc81b08e8d00ffb" title=" " alt="" coords="607,5,817,31"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="551,54,606,41,645,31,646,36,607,46,552,60"/>
+<area shape="rect" id="Node000005" href="$d2/d6b/classfl_1_1_channel_manager_a7bffd7927e98f20d7449fa20f9fa5924.html#a7bffd7927e98f20d7449fa20f9fa5924" title=" " alt="" coords="621,55,803,95"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="551,81,607,82,607,87,551,86"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="621,69,565,69,565,64,621,64"/>
+</map>

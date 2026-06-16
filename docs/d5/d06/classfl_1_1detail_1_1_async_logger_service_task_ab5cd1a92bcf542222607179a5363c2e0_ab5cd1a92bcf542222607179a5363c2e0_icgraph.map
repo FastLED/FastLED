@@ -1,0 +1,17 @@
+<map id="fl::detail::AsyncLoggerServiceTask::serviceLoggers" name="fl::detail::AsyncLoggerServiceTask::serviceLoggers">
+<area shape="rect" id="Node000001" title="Service all registered loggers (called by task)" alt="" coords="839,107,1053,147"/>
+<area shape="rect" id="Node000002" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a3bff7aaa6e1158fbbee95055b3458285.html#a3bff7aaa6e1158fbbee95055b3458285" title=" " alt="" coords="572,73,791,113"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="825,114,790,110,791,104,825,109"/>
+<area shape="rect" id="Node000004" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a90e57dbaf9bc274b5302c859efd53af3.html#a90e57dbaf9bc274b5302c859efd53af3" title=" " alt="" coords="261,134,524,189"/>
+<area shape="poly" id="edge8_Node000001_Node000004" title=" " alt="" coords="825,137,524,156,524,150,825,132"/>
+<area shape="rect" id="Node000003" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_ae03d5fbeb6d8557bd7c4c5fabfe77b06.html#ae03d5fbeb6d8557bd7c4c5fabfe77b06" title=" " alt="" coords="277,5,508,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="582,73,478,48,479,43,583,68"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="583,119,510,136,509,131,582,114"/>
+<area shape="rect" id="Node000005" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_acc200cb8837f82379821217fb4a6bc29.html#acc200cb8837f82379821217fb4a6bc29" title=" " alt="" coords="285,69,500,109"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="558,94,500,93,500,88,558,89"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_abe4e89a0a574f2abfa9c1bb53b9bd343.html#abe4e89a0a574f2abfa9c1bb53b9bd343" title="Configure async logger automatic servicing task." alt="" coords="5,35,213,61"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="271,74,196,63,197,58,272,69"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a78c09365a5278caa64b43fe7ff242146.html#a78c09365a5278caa64b43fe7ff242146" title="Template&#45;based logger accessor with auto&#45;registration and enablement check." alt="" coords="33,109,185,149"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="272,109,186,121,185,116,271,104"/>
+<area shape="poly" id="edge7_Node000007_Node000007" title=" " alt="" coords="158,98,141,91,109,88,82,90,65,95,59,101,62,108,57,110,54,100,62,90,81,85,109,83,142,85,160,93"/>
+</map>

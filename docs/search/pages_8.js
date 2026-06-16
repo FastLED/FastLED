@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['source_20tree_20tt_20src_20tt_0',['FastLED Source Tree (&lt;tt&gt;src/&lt;/tt&gt;)',['../d3/dcc/md__r_e_a_d_m_e.html',1,'']]],
-  ['src_20tt_1',['FastLED Source Tree (&lt;tt&gt;src/&lt;/tt&gt;)',['../d3/dcc/md__r_e_a_d_m_e.html',1,'']]]
+  ['mp3_0',['ARM Assembly Optimization for libhelix-mp3',['../d2/df4/md_third__party_2libhelix__mp3_2_r_e_a_d_m_e___a_r_m___a_s_s_e_m_b_l_y.html',1,'']]]
 ];

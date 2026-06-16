@@ -1,0 +1,11 @@
+<map id="fl::audio::detector::MusicalBeat::isValidIBI" name="fl::audio::detector::MusicalBeat::isValidIBI">
+<area shape="rect" id="Node000001" title="Check if IBI is within valid BPM range." alt="" coords="5,47,184,87"/>
+<area shape="rect" id="Node000002" href="$d5/d25/_demo_reel100_8ino_a4875f6d9a2b0f08d3cf221974234121b.html#a4875f6d9a2b0f08d3cf221974234121b" title=" " alt="" coords="232,55,283,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,65,218,65,218,70,184,70"/>
+<area shape="rect" id="Node000003" href="$df/da5/lib8tion_8h_a696b9421eca961df0a68c7c6c3e983ab.html#a696b9421eca961df0a68c7c6c3e983ab" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="359,5,437,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="282,56,347,33,349,38,284,61"/>
+<area shape="rect" id="Node000004" href="$d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="331,55,465,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="283,65,317,65,317,70,283,70"/>
+<area shape="rect" id="Node000005" href="$d8/dd0/_fire_cylinder_8h_a470cec2dcb21e474c257065bb93bfcd1.html#a470cec2dcb21e474c257065bb93bfcd1" title=" " alt="" coords="364,104,432,129"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="284,73,352,98,350,103,282,78"/>
+</map>

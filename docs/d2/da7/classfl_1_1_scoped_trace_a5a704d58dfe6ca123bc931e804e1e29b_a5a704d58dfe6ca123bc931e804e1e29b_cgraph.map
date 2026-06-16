@@ -1,0 +1,29 @@
+<map id="fl::ScopedTrace::operator=" name="fl::ScopedTrace::operator=">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,132,199,157"/>
+<area shape="rect" id="Node000002" href="$d2/da7/classfl_1_1_scoped_trace_a4dcbf88189bcce7b53c8ac0b0599cede.html#a4dcbf88189bcce7b53c8ac0b0599cede" title="Construct and push function name onto stack." alt="" coords="247,107,455,132"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="199,132,233,129,233,134,199,137"/>
+<area shape="rect" id="Node000003" href="$d2/da7/classfl_1_1_scoped_trace_a15a731fc730bafb3789128ba90d33b9c.html#a15a731fc730bafb3789128ba90d33b9c" title="Push a function name onto the call stack." alt="" coords="505,107,664,132"/>
+<area shape="poly" id="edge16_Node000001_Node000003" title=" " alt="" coords="130,129,183,109,246,93,304,85,350,84,455,93,514,101,513,107,454,98,350,89,305,90,247,98,185,114,132,134"/>
+<area shape="rect" id="Node000014" href="$d2/da7/classfl_1_1_scoped_trace_a5b83424985517ed4873c7cf9b0632a52.html#a5b83424985517ed4873c7cf9b0632a52" title="Clear the entire call stack (primarily for testing)" alt="" coords="505,156,664,181"/>
+<area shape="poly" id="edge4_Node000001_Node000014" title=" " alt="" coords="199,147,492,161,491,167,199,152"/>
+<area shape="rect" id="Node000015" href="$d2/da7/classfl_1_1_scoped_trace_a705eb6b77df587c23a8a34df54178531.html#a705eb6b77df587c23a8a34df54178531" title="Get the current stack depth." alt="" coords="503,205,667,231"/>
+<area shape="poly" id="edge6_Node000001_Node000015" title=" " alt="" coords="183,155,247,165,489,201,488,207,246,170,183,160"/>
+<area shape="rect" id="Node000016" href="$d2/da7/classfl_1_1_scoped_trace_ae917094c7db1a836213a05bdbe7df4dc.html#ae917094c7db1a836213a05bdbe7df4dc" title="Dump the current call stack to a string." alt="" coords="269,259,433,284"/>
+<area shape="poly" id="edge8_Node000001_Node000016" title=" " alt="" coords="121,155,175,195,248,237,287,252,285,257,246,242,172,199,118,159"/>
+<area shape="rect" id="Node000027" href="$d2/da7/classfl_1_1_scoped_trace_a16442bae6b75d0d1ecd68519e795bf6f.html#a16442bae6b75d0d1ecd68519e795bf6f" title="Pop the most recent function from the call stack." alt="" coords="275,5,426,31"/>
+<area shape="poly" id="edge14_Node000001_Node000027" title=" " alt="" coords="118,130,172,90,246,48,285,32,287,37,248,52,175,95,121,134"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="455,117,492,117,492,122,455,122"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a48b8003a49079a3c633439ef958d63fb.html#a48b8003a49079a3c633439ef958d63fb" title=" " alt="" coords="715,156,857,181"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="638,129,721,150,719,155,637,135"/>
+<area shape="poly" id="edge5_Node000014_Node000004" title=" " alt="" coords="665,166,701,166,701,171,665,171"/>
+<area shape="poly" id="edge7_Node000015_Node000004" title=" " alt="" coords="637,203,719,182,721,187,638,208"/>
+<area shape="poly" id="edge9_Node000016_Node000004" title=" " alt="" coords="433,272,545,266,607,257,666,241,716,217,758,188,761,192,719,221,668,246,608,262,546,271,433,277"/>
+<area shape="rect" id="Node000017" href="$d4/d36/namespacefl_a6de1c828242d21937b5bd24cf3e81cba.html#a6de1c828242d21937b5bd24cf3e81cba" title="Sprintf&#45;like formatting function that writes to a buffer." alt="" coords="545,307,625,332"/>
+<area shape="poly" id="edge10_Node000016_Node000017" title=" " alt="" coords="414,281,532,306,531,311,413,287"/>
+<area shape="rect" id="Node000018" href="$d4/d36/namespacefl_aee6f6a125b8389786800233a69115983.html#aee6f6a125b8389786800233a69115983" title="Format with no arguments." alt="" coords="905,307,988,332"/>
+<area shape="poly" id="edge11_Node000017_Node000018" title=" " alt="" coords="625,317,892,317,892,322,625,322"/>
+<area shape="rect" id="Node000023" href="$d4/d36/namespacefl_a57cbbc0e3769d2f6c4a7919e29646708.html#a57cbbc0e3769d2f6c4a7919e29646708" title="Snprintf&#45;like formatting function that writes to a buffer." alt="" coords="742,332,830,357"/>
+<area shape="poly" id="edge12_Node000017_Node000023" title=" " alt="" coords="625,322,729,335,728,340,624,327"/>
+<area shape="poly" id="edge13_Node000023_Node000018" title=" " alt="" coords="830,335,891,325,892,331,831,340"/>
+<area shape="poly" id="edge15_Node000027_Node000004" title=" " alt="" coords="427,27,542,52,606,70,668,93,717,118,758,146,756,150,714,123,666,98,604,75,541,57,426,32"/>
+</map>

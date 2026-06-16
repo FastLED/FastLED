@@ -121,23 +121,27 @@ $(function(){initNavTree('d7/dd7/apollo3__test_8h_a38d1ded4c487e4ab562a696815492
 <div class="line"><span class="lineno">    7</span><span class="preprocessor">#error &quot;FASTLED_USE_PROGMEM should be 0 for Apollo3&quot;</span></div>
 <div class="line"><span class="lineno">    8</span><span class="preprocessor">#endif</span></div>
 <div class="line"><span class="lineno">    9</span> </div>
-<div class="line"><span class="lineno">   10</span><span class="preprocessor">#if SKETCH_HAS_LOTS_OF_MEMORY != 1</span></div>
-<div class="line"><span class="lineno">   11</span><span class="preprocessor">#error &quot;SKETCH_HAS_LOTS_OF_MEMORY should be 1 for Apollo3&quot;</span></div>
+<div class="line"><span class="lineno">   10</span><span class="preprocessor">#if SKETCH_HAS_LARGE_MEMORY != 1</span></div>
+<div class="line"><span class="lineno">   11</span><span class="preprocessor">#error &quot;SKETCH_HAS_LARGE_MEMORY should be 1 for Apollo3&quot;</span></div>
 <div class="line"><span class="lineno">   12</span><span class="preprocessor">#endif</span></div>
 <div class="line"><span class="lineno">   13</span> </div>
-<div class="line"><span class="lineno">   14</span><span class="preprocessor">#if FASTLED_ALLOW_INTERRUPTS != 1</span></div>
-<div class="line"><span class="lineno">   15</span><span class="preprocessor">#error &quot;FASTLED_ALLOW_INTERRUPTS should be 1 for Apollo3&quot;</span></div>
+<div class="line"><span class="lineno">   14</span><span class="preprocessor">#if SKETCH_HAS_HUGE_MEMORY != 0</span></div>
+<div class="line"><span class="lineno">   15</span><span class="preprocessor">#error &quot;SKETCH_HAS_HUGE_MEMORY should be 0 for Apollo3 (high tier, not huge)&quot;</span></div>
 <div class="line"><span class="lineno">   16</span><span class="preprocessor">#endif</span></div>
 <div class="line"><span class="lineno">   17</span> </div>
-<div class="line"><span class="lineno">   18</span><span class="preprocessor">#ifndef F_CPU</span></div>
-<div class="line"><span class="lineno">   19</span><span class="preprocessor">#error &quot;F_CPU should be defined for Apollo3&quot;</span></div>
+<div class="line"><span class="lineno">   18</span><span class="preprocessor">#if FASTLED_ALLOW_INTERRUPTS != 1</span></div>
+<div class="line"><span class="lineno">   19</span><span class="preprocessor">#error &quot;FASTLED_ALLOW_INTERRUPTS should be 1 for Apollo3&quot;</span></div>
 <div class="line"><span class="lineno">   20</span><span class="preprocessor">#endif</span></div>
 <div class="line"><span class="lineno">   21</span> </div>
-<div class="line"><span class="lineno">   22</span><span class="comment">// Check that Apollo3-specific features are available</span></div>
-<div class="line"><span class="lineno">   23</span><span class="preprocessor">#ifndef APOLLO3</span></div>
-<div class="line"><span class="lineno">   24</span><span class="preprocessor">#warning &quot;APOLLO3 macro not defined - this may indicate platform detection issues&quot;</span></div>
-<div class="line"><span class="lineno">   25</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">   26</span>}</div>
+<div class="line"><span class="lineno">   22</span><span class="preprocessor">#ifndef F_CPU</span></div>
+<div class="line"><span class="lineno">   23</span><span class="preprocessor">#error &quot;F_CPU should be defined for Apollo3&quot;</span></div>
+<div class="line"><span class="lineno">   24</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">   25</span> </div>
+<div class="line"><span class="lineno">   26</span><span class="comment">// Check that Apollo3-specific features are available</span></div>
+<div class="line"><span class="lineno">   27</span><span class="preprocessor">#ifndef APOLLO3</span></div>
+<div class="line"><span class="lineno">   28</span><span class="preprocessor">#warning &quot;APOLLO3 macro not defined - this may indicate platform detection issues&quot;</span></div>
+<div class="line"><span class="lineno">   29</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">   30</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -148,7 +152,7 @@ $(function(){initNavTree('d7/dd7/apollo3__test_8h_a38d1ded4c487e4ab562a696815492
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_a05861b8fd6eceda0b5bd14abd963e94.html">CompileTest</a></li><li class="navelem"><a class="el" href="../../d7/dd7/apollo3__test_8h.html">apollo3_test.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

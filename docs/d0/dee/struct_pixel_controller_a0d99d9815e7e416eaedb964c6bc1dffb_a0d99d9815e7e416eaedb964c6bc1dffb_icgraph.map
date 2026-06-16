@@ -1,0 +1,20 @@
+<map id="PixelController::size" name="PixelController::size">
+<area shape="rect" id="Node000001" title="Get the length of the LED strip." alt="" coords="640,265,791,291"/>
+<area shape="rect" id="Node000002" href="$d1/da3/classfl_1_1anonymous__namespace_02channel_8cpp_8hpp_03_1_1_reordering_pixel_iterator_any_aa1c4c1904aaafaf72a448c787f2e3129.html#aa1c4c1904aaafaf72a448c787f2e3129" title="Construct pixel iterator with optional addressing transformation." alt="" coords="276,5,584,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="703,253,688,213,664,165,632,116,612,94,590,75,570,62,573,58,594,71,616,90,636,112,669,162,693,211,708,251"/>
+<area shape="rect" id="Node000003" href="$dd/d78/classfl_1_1_u_c_s7604_controller_t_a0b8dc7f2f0f2e0a2ed3461aa905080ea.html#a0b8dc7f2f0f2e0a2ed3461aa905080ea" title=" " alt="" coords="268,85,592,183"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="686,259,642,228,591,198,567,186,569,181,593,193,645,224,689,255"/>
+<area shape="rect" id="Node000004" href="$d7/d62/class_h_d108_controller_a19d1b3e19ee46eff4d456185f0f32336.html#a19d1b3e19ee46eff4d456185f0f32336" title=" " alt="" coords="325,208,535,233"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="656,264,591,249,522,236,523,231,593,243,657,259"/>
+<area shape="rect" id="Node000005" href="$d0/d40/class_l_p_d6803_controller_a35f42384ada050146e6813f0fc766356.html#a35f42384ada050146e6813f0fc766356" title="Send the LED data to the strip." alt="" coords="355,258,505,298"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="626,281,506,281,506,275,626,275"/>
+<area shape="rect" id="Node000006" href="$d4/d28/group___chipsets_gaba9a2f023f2950dbcdf3c2482f765350.html#gaba9a2f023f2950dbcdf3c2482f765350" title="Main rendering function that converts RGB to RGBW and shows pixels." alt="" coords="335,322,525,362"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="655,297,593,313,526,327,524,322,591,307,654,292"/>
+<area shape="rect" id="Node000007" href="$d4/d96/class_a_p_a102_controller_a632117bec47c6b4ba7e3ed1703478a42.html#a632117bec47c6b4ba7e3ed1703478a42" title=" " alt="" coords="323,386,537,426"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="694,303,650,341,622,360,593,376,539,395,537,390,591,372,619,356,646,337,690,299"/>
+<area shape="rect" id="Node000009" href="$d4/d96/class_a_p_a102_controller_a040f761b3d3bb30a9275f96548ec5ef7.html#a040f761b3d3bb30a9275f96548ec5ef7" title=" " alt="" coords="323,450,537,490"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="705,304,687,336,662,373,631,410,593,440,567,454,538,463,537,458,565,449,591,436,627,406,658,370,683,333,700,302"/>
+<area shape="rect" id="Node000008" href="$d4/d96/class_a_p_a102_controller_a523f76b88c07e29cba6c40bd0cefe4b3.html#a523f76b88c07e29cba6c40bd0cefe4b3" title="Send the LED data to the strip." alt="" coords="5,425,220,451"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="310,421,220,430,220,425,309,415"/>
+<area shape="poly" id="edge9_Node000009_Node000008" title=" " alt="" coords="309,461,220,451,220,446,310,455"/>
+</map>

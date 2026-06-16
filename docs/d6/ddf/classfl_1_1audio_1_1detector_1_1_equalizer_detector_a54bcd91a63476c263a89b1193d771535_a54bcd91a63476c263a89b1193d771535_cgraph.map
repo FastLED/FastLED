@@ -1,0 +1,52 @@
+<map id="fl::audio::detector::EqualizerDetector::~EqualizerDetector" name="fl::audio::detector::EqualizerDetector::~EqualizerDetector">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,171,163,226"/>
+<area shape="rect" id="Node000002" href="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_a3f8cf150db9a60e9bad0ce8147c3586c.html#a3f8cf150db9a60e9bad0ce8147c3586c" title=" " alt="" coords="405,7,552,62"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,169,149,122,178,98,209,79,254,61,301,48,391,35,392,40,302,53,256,66,212,84,181,103,153,126,109,173"/>
+<area shape="rect" id="Node000015" href="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_a88188f71bc78dc8603f86597cec368a2.html#a88188f71bc78dc8603f86597cec368a2" title="Reconfigure equalizer tuning parameters at runtime." alt="" coords="211,118,357,173"/>
+<area shape="poly" id="edge9_Node000001_Node000015" title=" " alt="" coords="162,175,197,166,198,171,163,180"/>
+<area shape="rect" id="Node000021" href="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_ae3334e69f676a89f2cc0bafafd17a41e.html#ae3334e69f676a89f2cc0bafafd17a41e" title=" " alt="" coords="211,269,357,323"/>
+<area shape="poly" id="edge17_Node000001_Node000021" title=" " alt="" coords="142,224,216,260,214,265,140,228"/>
+<area shape="rect" id="Node000022" href="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_abd606d3420d9e403121104b8eedfcf6f.html#abd606d3420d9e403121104b8eedfcf6f" title=" " alt="" coords="628,281,775,335"/>
+<area shape="poly" id="edge18_Node000001_Node000022" title=" " alt="" coords="164,210,615,290,614,295,163,215"/>
+<area shape="rect" id="Node000003" href="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_aa776078eebff89abfe3d074504fe7e94.html#aa776078eebff89abfe3d074504fe7e94" title=" " alt="" coords="600,9,803,63"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="552,32,586,33,586,38,552,38"/>
+<area shape="rect" id="Node000004" href="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_aada0630bff50683427a6e81d0d647685.html#aada0630bff50683427a6e81d0d647685" title=" " alt="" coords="873,70,1032,125"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="803,58,861,72,859,77,802,63"/>
+<area shape="rect" id="Node000010" href="$db/dbf/namespacefl_1_1audio_abb758259be0e1ff6bf938c9eae4b6118.html#abb758259be0e1ff6bf938c9eae4b6118" title="Compute pink noise compensation gains for all bins." alt="" coords="851,5,1055,45"/>
+<area shape="poly" id="edge6_Node000003_Node000010" title=" " alt="" coords="803,29,837,28,837,33,803,34"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a2a5359f49a46263d1eb1fcdfe99b7bd5.html#a2a5359f49a46263d1eb1fcdfe99b7bd5" title=" " alt="" coords="1121,85,1187,110"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="1033,95,1107,95,1107,100,1033,100"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_af3a8e787bc8bcd73dcddb8b47a826554.html#af3a8e787bc8bcd73dcddb8b47a826554" title=" " alt="" coords="1123,146,1185,171"/>
+<area shape="poly" id="edge5_Node000004_Node000007" title=" " alt="" coords="1033,119,1110,143,1108,148,1032,124"/>
+<area shape="poly" id="edge7_Node000010_Node000005" title=" " alt="" coords="1021,43,1056,55,1112,77,1110,82,1054,60,1019,48"/>
+<area shape="poly" id="edge8_Node000010_Node000007" title=" " alt="" coords="1035,43,1056,55,1073,71,1082,86,1091,102,1105,119,1124,136,1120,140,1101,123,1086,105,1078,89,1069,74,1053,59,1032,48"/>
+<area shape="poly" id="edge10_Node000015_Node000002" title=" " alt="" coords="331,116,417,67,419,71,334,120"/>
+<area shape="poly" id="edge12_Node000015_Node000003" title=" " alt="" coords="357,124,586,63,588,68,358,129"/>
+<area shape="poly" id="edge11_Node000015_Node000015" title=" " alt="" coords="246,118,246,108,253,99,265,93,284,91,306,94,319,102,316,107,304,99,284,97,267,99,256,103,251,110,251,118"/>
+<area shape="rect" id="Node000016" href="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_a3a263b257d55afc4ace05d432939e792.html#a3a263b257d55afc4ace05d432939e792" title="Set microphone correction profile (propagated from Processor)." alt="" coords="405,138,552,193"/>
+<area shape="poly" id="edge13_Node000015_Node000016" title=" " alt="" coords="358,150,392,154,391,159,357,155"/>
+<area shape="poly" id="edge14_Node000016_Node000004" title=" " alt="" coords="552,140,600,129,736,110,859,99,860,105,736,115,600,135,553,146"/>
+<area shape="rect" id="Node000017" href="$db/dbf/namespacefl_1_1audio_a51b42dfdb22be4944a9a6d62c87a376c.html#a51b42dfdb22be4944a9a6d62c87a376c" title="Downsample a high&#45;resolution mic response curve to N output bins." alt="" coords="607,144,795,184"/>
+<area shape="poly" id="edge15_Node000016_Node000017" title=" " alt="" coords="552,162,594,162,594,167,552,168"/>
+<area shape="rect" id="Node000020" href="$db/dbf/namespacefl_1_1audio_a12d3939a6e866914ca5473e1710ae635.html#a12d3939a6e866914ca5473e1710ae635" title="Get the high&#45;resolution response curve for a given mic profile." alt="" coords="607,208,796,248"/>
+<area shape="poly" id="edge16_Node000016_Node000020" title=" " alt="" coords="553,183,617,202,616,207,551,188"/>
+<area shape="poly" id="edge23_Node000022_Node000007" title=" " alt="" coords="761,333,825,356,901,373,941,376,980,374,1018,365,1053,348,1074,333,1091,314,1118,269,1136,223,1146,184,1151,186,1141,225,1123,272,1095,317,1077,337,1056,353,1020,370,981,379,941,381,900,378,823,362,759,338"/>
+<area shape="rect" id="Node000023" href="$d6/d86/classfl_1_1audio_1_1fft_1_1_bins_ae29700860530fda3954e123a024ecc9d.html#ae29700860530fda3954e123a024ecc9d" title=" " alt="" coords="887,149,1019,189"/>
+<area shape="poly" id="edge19_Node000022_Node000023" title=" " alt="" coords="769,278,801,258,815,243,824,229,833,215,849,200,872,188,875,192,852,205,837,218,828,232,819,247,804,262,772,283"/>
+<area shape="rect" id="Node000024" href="$db/dbf/namespacefl_1_1audio_a7189558c538537464f1d31c91596631d.html#a7189558c538537464f1d31c91596631d" title="Compute the time delta (in seconds) for an audio buffer." alt="" coords="857,214,1048,239"/>
+<area shape="poly" id="edge22_Node000022_Node000024" title=" " alt="" coords="769,278,850,249,882,240,884,245,851,255,771,283"/>
+<area shape="rect" id="Node000025" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="921,263,984,289"/>
+<area shape="poly" id="edge24_Node000022_Node000025" title=" " alt="" coords="775,296,907,279,908,284,775,301"/>
+<area shape="rect" id="Node000026" href="$d6/d86/classfl_1_1audio_1_1fft_1_1_bins_a6ffb71ea065157cab03d64006e779d0d.html#a6ffb71ea065157cab03d64006e779d0d" title=" " alt="" coords="871,313,1035,338"/>
+<area shape="poly" id="edge25_Node000022_Node000026" title=" " alt="" coords="775,310,857,316,857,321,775,316"/>
+<area shape="rect" id="Node000027" href="$db/d49/_audio_2simple_2simple_8h_a588b0ed03ff3e39281e2bc8b149dbdbd.html#a588b0ed03ff3e39281e2bc8b149dbdbd" title=" " alt="" coords="929,438,976,463"/>
+<area shape="poly" id="edge26_Node000022_Node000027" title=" " alt="" coords="751,333,852,392,919,430,916,434,849,397,748,338"/>
+<area shape="rect" id="Node000028" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="1103,487,1205,513"/>
+<area shape="poly" id="edge30_Node000022_Node000028" title=" " alt="" coords="720,334,741,368,771,407,808,444,852,474,911,495,975,506,1036,508,1089,506,1089,511,1036,513,974,511,910,500,849,478,805,448,767,410,737,371,715,337"/>
+<area shape="poly" id="edge20_Node000023_Node000005" title=" " alt="" coords="1016,147,1054,133,1108,113,1110,118,1056,139,1017,152"/>
+<area shape="poly" id="edge21_Node000023_Node000007" title=" " alt="" coords="1019,163,1109,158,1109,164,1019,169"/>
+<area shape="poly" id="edge27_Node000027_Node000027" title=" " alt="" coords="927,444,914,434,914,422,928,414,953,411,973,413,987,418,993,427,990,435,985,434,987,427,984,422,972,418,953,417,929,419,919,425,919,431,931,440"/>
+<area shape="poly" id="edge28_Node000027_Node000028" title=" " alt="" coords="977,454,1090,482,1089,487,975,459"/>
+<area shape="rect" id="Node000029" href="$d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1" title=" " alt="" coords="1123,438,1185,463"/>
+<area shape="poly" id="edge29_Node000027_Node000029" title=" " alt="" coords="976,448,1109,448,1109,453,976,453"/>
+</map>

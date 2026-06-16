@@ -1,0 +1,5 @@
+<map id="fl::detail::TypeSchema&lt; T, typename fl::enable_if&lt; fl::is_integral&lt; T &gt;::value &amp;&amp;!fl::is_same&lt; T, bool &gt;::value &gt;::type &gt;" name="fl::detail::TypeSchema&lt; T, typename fl::enable_if&lt; fl::is_integral&lt; T &gt;::value &amp;&amp;!fl::is_same&lt; T, bool &gt;::value &gt;::type &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,152,212,236"/>
+<area shape="rect" id="Node000002" href="$d8/d47/structfl_1_1detail_1_1_type_schema.html" title=" " alt="" coords="26,5,191,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="111,59,111,152,106,152,106,59"/>
+</map>

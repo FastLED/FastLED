@@ -21,7 +21,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d5/d4d/pixel__controller_8h.html#d4/d7d/struct_color_adjustment" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d4/d7d/struct_color_adjustment.html" target="_top" xlink:title="Color adjustment structure for pixel output.">
 <polygon fill="white" stroke="#666666" points="119,-96 21,-96 21,-77 119,-77 119,-96"/>
 <text text-anchor="middle" x="70" y="-84" font-family="Helvetica,sans-Serif" font-size="10.00">ColorAdjustment</text>
 </a>
@@ -40,9 +40,9 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d7/d82/struct_c_r_g_b.html" target="_top" xlink:title="Representation of an RGB pixel (Red, Green, Blue)">
-<polygon fill="white" stroke="#666666" points="92,-162 48,-162 48,-143 92,-143 92,-162"/>
-<text text-anchor="middle" x="70" y="-150" font-family="Helvetica,sans-Serif" font-size="10.00">CRGB</text>
+<g id="a_Node000003"><a xlink:href="../../da/dd6/structfl_1_1_c_r_g_b.html" target="_top" xlink:title="Representation of an 8&#45;bit RGB pixel (Red, Green, Blue)">
+<polygon fill="white" stroke="#666666" points="98,-162 42,-162 42,-143 98,-143 98,-162"/>
+<text text-anchor="middle" x="70" y="-150" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CRGB</text>
 </a>
 </g>
 </g>

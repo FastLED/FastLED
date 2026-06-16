@@ -1,0 +1,12 @@
+digraph "fl::audio::fft::Bins::Bins"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::audio::fft::Bins\l::Bins",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::audio::fft::Bins\l::Bins",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d86/classfl_1_1audio_1_1fft_1_1_bins_ade488bc3098777f5b1f7508bb57b2cf7.html#ade488bc3098777f5b1f7508bb57b2cf7",tooltip=" "];
+}

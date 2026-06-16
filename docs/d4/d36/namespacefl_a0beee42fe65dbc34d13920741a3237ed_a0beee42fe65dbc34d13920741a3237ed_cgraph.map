@@ -1,0 +1,19 @@
+<map id="fl::digitalMultiWrite8" name="fl::digitalMultiWrite8">
+<area shape="rect" id="Node000001" title="Convenience free function — creates a temporary DigitalMultiWrite8, initializes it,..." alt="" coords="5,101,160,126"/>
+<area shape="rect" id="Node000002" href="$d9/d21/classfl_1_1_digital_multi_write8_a54a9d53882428b545e9343866f302fb0.html#a54a9d53882428b545e9343866f302fb0" title="Initialize from 8 pin numbers. &#45;1 means &quot;skip this bit position&quot;." alt="" coords="208,61,365,101"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="160,99,194,93,195,98,161,104"/>
+<area shape="rect" id="Node000005" href="$d9/d21/classfl_1_1_digital_multi_write8_aa5b3d3dc7ea64d70b0e835e8ef1ff702.html#aa5b3d3dc7ea64d70b0e835e8ef1ff702" title="Write pre&#45;transposed byte data to the 8 pins." alt="" coords="208,125,365,165"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="161,123,195,128,194,134,160,128"/>
+<area shape="rect" id="Node000003" href="$d9/d21/classfl_1_1_digital_multi_write8_a7fbae234ef762aa44e2d880ff3f83011.html#a7fbae234ef762aa44e2d880ff3f83011" title=" " alt="" coords="413,5,571,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="360,59,405,46,406,51,361,64"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a323f088e163b9ada03436721370e853f.html#a323f088e163b9ada03436721370e853f" title="Map a runtime pin number to an integer port ID using FastPin&lt;N&gt;::port()." alt="" coords="443,70,541,95"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="366,79,428,80,428,85,366,85"/>
+<area shape="rect" id="Node000006" href="$d9/d21/classfl_1_1_digital_multi_write8_a8528927863f57fdfcd04fb1466ef8963.html#a8528927863f57fdfcd04fb1466ef8963" title=" " alt="" coords="413,123,571,163"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="366,142,399,141,400,147,366,147"/>
+<area shape="rect" id="Node000009" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="441,187,543,213"/>
+<area shape="poly" id="edge8_Node000005_Node000009" title=" " alt="" coords="363,163,431,181,430,186,362,168"/>
+<area shape="rect" id="Node000007" href="$d9/df3/classfl_1_1set_a8d2f661a320b4e6ad287c6f0f54e2f1d.html#a8d2f661a320b4e6ad287c6f0f54e2f1d" title=" " alt="" coords="625,106,727,131"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="570,130,610,124,611,130,571,135"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_ab91b418b90c32e475842ad7ce3785afb.html#ab91b418b90c32e475842ad7ce3785afb" title="Write digital value to pin." alt="" coords="619,155,733,181"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="571,151,605,156,605,161,570,156"/>
+</map>

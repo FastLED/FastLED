@@ -1,0 +1,18 @@
+digraph "setup"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="setup",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="bench",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d1d/_blur_benchmark_8ino_abfcc7882a8861616eb741fd94d970aa9.html#abfcc7882a8861616eb741fd94d970aa9",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::gfx::blurGaussian",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d8b/namespacefl_1_1gfx_a2d0276b48f273dfb519f75e12846b0d4.html#a2d0276b48f273dfb519f75e12846b0d4",tooltip="Compile-time Gaussian blur with independent H/V radii."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::gfx::blurGaussianImpl",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d0/d8b/namespacefl_1_1gfx_a9c2302b4a1a567e89ab63f5ddc3b7532.html#a9c2302b4a1a567e89ab63f5ddc3b7532",tooltip=" "];
+  Node2 -> Node17 [id="edge4_Node000002_Node000017",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fill_test_data",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d1d/_blur_benchmark_8ino_a8a7c92da84cc49c9b6c79cbbc390d482.html#a8a7c92da84cc49c9b6c79cbbc390d482",tooltip=" "];
+}

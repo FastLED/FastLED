@@ -1,0 +1,28 @@
+<map id="fl/math/noise/perlin_s16x16_simd.cpp.hpp" name="fl/math/noise/perlin_s16x16_simd.cpp.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="391,5,562,45"/>
+<area shape="rect" id="Node000002" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="173,357,348,383"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="392,38,363,46,335,58,309,74,288,95,270,125,258,157,250,192,247,227,250,293,258,343,252,344,244,293,242,227,245,191,252,156,265,122,284,92,306,70,332,53,361,41,390,33"/>
+<area shape="rect" id="Node000007" href="$d7/db2/perlin__s16x16__simd_8h.html" title=" " alt="" coords="496,93,644,133"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="499,44,541,82,538,86,496,48"/>
+<area shape="rect" id="Node000015" href="$d8/de1/simd_8h.html" title="Umbrella header for SIMD subsystem." alt="" coords="568,189,684,214"/>
+<area shape="poly" id="edge13_Node000001_Node000015" title=" " alt="" coords="563,34,616,55,640,71,659,92,667,114,665,137,656,159,645,178,641,176,651,157,659,136,661,114,654,95,636,75,613,59,561,39"/>
+<area shape="rect" id="Node000031" href="$dd/d93/fx_22d_2animartrix__detail_2perlin__s16x16_8h.html" title=" " alt="" coords="298,93,471,133"/>
+<area shape="poly" id="edge14_Node000001_Node000031" title=" " alt="" coords="458,48,417,86,413,82,454,44"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,504,180,529"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="249,385,118,497,115,493,245,381"/>
+<area shape="rect" id="Node000004" href="$d1/ddf/align_8h.html" title="Alignment macros and utilities for FastLED." alt="" coords="211,431,310,456"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="263,383,263,417,258,417,258,383"/>
+<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="235,458,134,501,132,496,233,454"/>
+<area shape="rect" id="Node000005" href="$d7/d84/cstddef_8h.html" title=" " alt="" coords="204,504,317,529"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="263,456,263,490,258,490,258,456"/>
+<area shape="rect" id="Node000006" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="341,504,468,529"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="285,454,370,495,368,500,283,458"/>
+<area shape="rect" id="Node000008" href="$db/d65/math_2noise_2perlin__s16x16_8h.html" title=" " alt="" coords="316,181,464,221"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="532,136,443,178,440,173,529,131"/>
+<area shape="poly" id="edge12_Node000007_Node000015" title=" " alt="" coords="585,132,613,175,609,178,580,135"/>
+<area shape="rect" id="Node000009" href="$d7/d64/s16x16_8h.html" title=" " alt="" coords="319,269,461,309"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="393,222,393,255,387,255,387,222"/>
+<area shape="poly" id="edge10_Node000009_Node000002" title=" " alt="" coords="360,312,293,352,290,348,357,307"/>
+<area shape="poly" id="edge11_Node000009_Node000006" title=" " alt="" coords="394,309,406,490,400,490,389,310"/>
+<area shape="poly" id="edge15_Node000031_Node000008" title=" " alt="" coords="389,133,391,167,385,168,383,134"/>
+</map>

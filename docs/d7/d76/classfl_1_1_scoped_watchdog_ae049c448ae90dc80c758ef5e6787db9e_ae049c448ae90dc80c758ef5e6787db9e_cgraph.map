@@ -1,0 +1,14 @@
+<map id="fl::ScopedWatchdog::~ScopedWatchdog" name="fl::ScopedWatchdog::~ScopedWatchdog">
+<area shape="rect" id="Node000001" title="Feed the watchdog at end&#45;of&#45;scope so the next loop() iteration has a clean deadline window." alt="" coords="5,71,157,111"/>
+<area shape="rect" id="Node000002" href="$da/d45/classfl_1_1_watchdog_a2e9027915eb87ddad815dc2cabbf01f5.html#a2e9027915eb87ddad815dc2cabbf01f5" title=" " alt="" coords="245,29,384,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="157,73,240,55,241,60,158,78"/>
+<area shape="rect" id="Node000003" href="$da/d45/classfl_1_1_watchdog_a09a903bdc23fddbb6caac87080a2a567.html#a09a903bdc23fddbb6caac87080a2a567" title=" " alt="" coords="232,79,397,104"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="158,89,218,89,218,94,158,94"/>
+<area shape="rect" id="Node000005" href="$df/d52/namespacefl_1_1platforms_a3748991fede5f09157528ab282ecc954.html#a3748991fede5f09157528ab282ecc954" title=" " alt="" coords="205,153,424,193"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="141,109,245,146,243,151,139,114"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="277,31,269,21,273,11,289,5,315,3,347,7,360,16,356,20,345,11,315,8,290,10,277,15,274,20,281,27"/>
+<area shape="rect" id="Node000004" href="$da/d45/classfl_1_1_watchdog_aa289ba7fe21f2add007ae8680e51249a.html#aa289ba7fe21f2add007ae8680e51249a" title=" " alt="" coords="472,79,647,104"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="398,89,458,89,458,94,398,94"/>
+<area shape="poly" id="edge5_Node000004_Node000004" title=" " alt="" coords="520,80,511,70,516,60,532,54,559,52,594,56,603,61,607,66,603,69,600,65,592,61,559,57,533,59,519,64,517,70,524,77"/>
+<area shape="poly" id="edge7_Node000005_Node000005" title=" " alt="" coords="271,153,269,143,276,134,291,128,315,126,342,129,356,136,354,141,340,134,315,131,292,133,279,138,274,144,276,152"/>
+</map>

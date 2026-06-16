@@ -1,0 +1,9 @@
+<map id="fl::audio::fl_progmem_read_float" name="fl::audio::fl_progmem_read_float">
+<area shape="rect" id="Node000001" title="Read a float from PROGMEM." alt="" coords="660,13,820,53"/>
+<area shape="rect" id="Node000002" href="$db/dbf/namespacefl_1_1audio_a9abb1865a937d59bfb84c9b8358dfc4f.html#a9abb1865a937d59bfb84c9b8358dfc4f" title="Interpolate mic response at an arbitrary frequency (Hz)." alt="" coords="436,13,612,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="646,35,612,35,612,30,646,30"/>
+<area shape="rect" id="Node000003" href="$db/dbf/namespacefl_1_1audio_a51b42dfdb22be4944a9a6d62c87a376c.html#a51b42dfdb22be4944a9a6d62c87a376c" title="Downsample a high&#45;resolution mic response curve to N output bins." alt="" coords="200,13,388,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="422,35,388,35,388,30,422,30"/>
+<area shape="rect" id="Node000004" href="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_a3a263b257d55afc4ace05d432939e792.html#a3a263b257d55afc4ace05d432939e792" title="Set microphone correction profile (propagated from Processor)." alt="" coords="5,5,152,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="186,35,152,35,152,30,186,30"/>
+</map>

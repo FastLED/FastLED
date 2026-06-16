@@ -2,29 +2,28 @@ var _fast_l_e_d_8h =
 [
     [ "CFastLED", "dd/dbb/class_c_fast_l_e_d.html", "dd/dbb/class_c_fast_l_e_d" ],
     [ "CFastLED::ClockedChipsetHelper< CHIPSET, DATA_PIN, CLOCK_PIN >", "d3/de5/struct_c_fast_l_e_d_1_1_clocked_chipset_helper.html", "d3/de5/struct_c_fast_l_e_d_1_1_clocked_chipset_helper" ],
-    [ "UIButton", "da/d03/class_u_i_button.html", "da/d03/class_u_i_button" ],
-    [ "UICheckbox", "de/d39/class_u_i_checkbox.html", "de/d39/class_u_i_checkbox" ],
-    [ "UIDescription", "db/d0c/class_u_i_description.html", "db/d0c/class_u_i_description" ],
-    [ "UIDropdown", "df/d10/class_u_i_dropdown.html", "df/d10/class_u_i_dropdown" ],
-    [ "UIGroup", "d6/def/class_u_i_group.html", "d6/def/class_u_i_group" ],
-    [ "UIHelp", "df/d5a/class_u_i_help.html", "df/d5a/class_u_i_help" ],
-    [ "UINumberField", "db/d12/class_u_i_number_field.html", "db/d12/class_u_i_number_field" ],
-    [ "UISlider", "df/d68/class_u_i_slider.html", "df/d68/class_u_i_slider" ],
-    [ "UITitle", "d0/db2/class_u_i_title.html", "d0/db2/class_u_i_title" ],
-    [ "XYMap", "d7/de6/class_x_y_map.html", "d7/de6/class_x_y_map" ],
     [ "__INC_FASTSPI_LED2_H", "db/d97/_fast_l_e_d_8h_ab0613a480211e951d98654bf93a22e3d.html#ab0613a480211e951d98654bf93a22e3d", null ],
     [ "__PROG_TYPES_COMPAT__", "db/d97/_fast_l_e_d_8h_a00167d1f0bf80faa62c6d8952f540f82.html#a00167d1f0bf80faa62c6d8952f540f82", null ],
     [ "_FL_MAP_CLOCKED_CHIPSET", "db/d97/_fast_l_e_d_8h_a0f7ec59f76e5b6e949268f112f93c412.html#a0f7ec59f76e5b6e949268f112f93c412", null ],
-    [ "FASTLED_DESCRIPTION", "db/d97/_fast_l_e_d_8h_a17a3216cab4f898b0c50640b6662a431.html#a17a3216cab4f898b0c50640b6662a431", null ],
     [ "FASTLED_FAKE_SPI_FORWARDS_TO_FAKE_CLOCKLESS", "db/d97/_fast_l_e_d_8h_a47074a13009a68e567023696910c6f48.html#a47074a13009a68e567023696910c6f48", null ],
-    [ "FASTLED_HELP", "db/d97/_fast_l_e_d_8h_a842c3cd8df47ba69823ffc8153ed15b6.html#a842c3cd8df47ba69823ffc8153ed15b6", null ],
-    [ "FASTLED_TITLE", "db/d97/_fast_l_e_d_8h_a5fd45f117e524f0531f7d1dba2909aaa.html#a5fd45f117e524f0531f7d1dba2909aaa", null ],
+    [ "FASTLED_HAS_CHANNELS", "db/d97/_fast_l_e_d_8h_a827712edaf4e3d11253c691a29a2f6c7.html#a827712edaf4e3d11253c691a29a2f6c7", null ],
+    [ "FASTLED_LOOP_RUNS_ASYNC", "db/d97/_fast_l_e_d_8h_a21bcc87d5ab32dab1896675b6d0f4faa.html#a21bcc87d5ab32dab1896675b6d0f4faa", null ],
+    [ "FASTLED_SPI_USES_CHANNEL_API", "db/d97/_fast_l_e_d_8h_a380768dcc0b7902bdc3bf85c435183e5.html#a380768dcc0b7902bdc3bf85c435183e5", null ],
     [ "FASTLED_VERSION", "db/d97/_fast_l_e_d_8h_a2f9de4cfbd302323305a4ad0e99167f4.html#a2f9de4cfbd302323305a4ad0e99167f4", null ],
+    [ "FastSPI_LED", "db/d97/_fast_l_e_d_8h_a142a708c2ff8d157a967309a781ac815.html#a142a708c2ff8d157a967309a781ac815", null ],
+    [ "FastSPI_LED2", "db/d97/_fast_l_e_d_8h_ac30cd5abdb75244830caee11ae5a110c.html#ac30cd5abdb75244830caee11ae5a110c", null ],
+    [ "LEDS", "db/d97/_fast_l_e_d_8h_a61686d33603491344883775b9b31e172.html#a61686d33603491344883775b9b31e172", null ],
     [ "NO_HARDWARE_PIN_SUPPORT", "db/d97/_fast_l_e_d_8h_ad745fb280b8fb379961f6520f18f775a.html#ad745fb280b8fb379961f6520f18f775a", null ],
-    [ "fl_map", "db/d97/_fast_l_e_d_8h_adb20a8e8983d3b26a9067a2702d91f2b.html#adb20a8e8983d3b26a9067a2702d91f2b", null ],
-    [ "fl_string", "db/d97/_fast_l_e_d_8h_a051478a3b2b05f15df6da83652238a9f.html#a051478a3b2b05f15df6da83652238a9f", null ],
-    [ "fl_vector", "db/d97/_fast_l_e_d_8h_a519349faff85ec4d3f68edc9e75f09a6.html#a519349faff85ec4d3f68edc9e75f09a6", null ],
     [ "power_func", "db/d97/_fast_l_e_d_8h_ae35a6f671d142751029bb2371ce5872c.html#ae35a6f671d142751029bb2371ce5872c", null ],
+    [ "ClearFlags", "db/d97/_fast_l_e_d_8h_a15a661b6c3fff802200588e2b93fddb1.html#a15a661b6c3fff802200588e2b93fddb1", [
+      [ "NONE", "db/d97/_fast_l_e_d_8h_a15a661b6c3fff802200588e2b93fddb1.html#a15a661b6c3fff802200588e2b93fddb1ab50339a10e1de285ac99d4c3990b8693", null ],
+      [ "CHANNELS", "db/d97/_fast_l_e_d_8h_a15a661b6c3fff802200588e2b93fddb1.html#a15a661b6c3fff802200588e2b93fddb1a1fdf75ac0fba97b7f66ad06fdd4493fd", null ],
+      [ "POWER_SETTINGS", "db/d97/_fast_l_e_d_8h_a15a661b6c3fff802200588e2b93fddb1.html#a15a661b6c3fff802200588e2b93fddb1a702a39f82daca815e09bd84570c214e6", null ],
+      [ "BRIGHTNESS", "db/d97/_fast_l_e_d_8h_a15a661b6c3fff802200588e2b93fddb1.html#a15a661b6c3fff802200588e2b93fddb1a3a8a0aeb55d2886191dee8a5e0d07cc9", null ],
+      [ "REFRESH_RATE", "db/d97/_fast_l_e_d_8h_a15a661b6c3fff802200588e2b93fddb1.html#a15a661b6c3fff802200588e2b93fddb1acedc87893333b5e9ddee51696941490b", null ],
+      [ "FPS_COUNTER", "db/d97/_fast_l_e_d_8h_a15a661b6c3fff802200588e2b93fddb1.html#a15a661b6c3fff802200588e2b93fddb1a778030f0e27aa1ba1500f09b5954f0a5", null ],
+      [ "CHANNEL_ENGINES", "db/d97/_fast_l_e_d_8h_a15a661b6c3fff802200588e2b93fddb1.html#a15a661b6c3fff802200588e2b93fddb1a5b4d4bb800872d3c3016ac47da4b51f3", null ]
+    ] ],
     [ "EBlockChipsets", "db/d97/_fast_l_e_d_8h_adcf22542128a12d8c3c304777422c7cc.html#adcf22542128a12d8c3c304777422c7cc", null ],
     [ "ESM", "db/d97/_fast_l_e_d_8h_ac8839f06bbcecd0dc5bde0a94510a657.html#ac8839f06bbcecd0dc5bde0a94510a657", [
       [ "SMART_MATRIX", "db/d97/_fast_l_e_d_8h_ac8839f06bbcecd0dc5bde0a94510a657.html#ac8839f06bbcecd0dc5bde0a94510a657aad6c1549c0bf19cdf4ca4838d761987e", null ]
@@ -43,7 +42,8 @@ var _fast_l_e_d_8h =
       [ "DOTSTARHD", "db/d97/_fast_l_e_d_8h_ac06549dc4a351e2c8f1dda8ae81f7926.html#ac06549dc4a351e2c8f1dda8ae81f7926ad74c74695186923a5bac9867ec57e281", null ],
       [ "APA102HD", "db/d97/_fast_l_e_d_8h_ac06549dc4a351e2c8f1dda8ae81f7926.html#ac06549dc4a351e2c8f1dda8ae81f7926a00c730f7303410e1a5a22376b2f12d8f", null ],
       [ "HD107", "db/d97/_fast_l_e_d_8h_ac06549dc4a351e2c8f1dda8ae81f7926.html#ac06549dc4a351e2c8f1dda8ae81f7926a51a8c92c470a49a8e4aec78b1749c31c", null ],
-      [ "HD107HD", "db/d97/_fast_l_e_d_8h_ac06549dc4a351e2c8f1dda8ae81f7926.html#ac06549dc4a351e2c8f1dda8ae81f7926ad15fcba44c11c93f5e0ada6dede0cc93", null ]
+      [ "HD107HD", "db/d97/_fast_l_e_d_8h_ac06549dc4a351e2c8f1dda8ae81f7926.html#ac06549dc4a351e2c8f1dda8ae81f7926ad15fcba44c11c93f5e0ada6dede0cc93", null ],
+      [ "HD108", "db/d97/_fast_l_e_d_8h_ac06549dc4a351e2c8f1dda8ae81f7926.html#ac06549dc4a351e2c8f1dda8ae81f7926af9ce717e44360c28f29c5a47886cd7c7", null ]
     ] ],
     [ "OWS2811", "db/d97/_fast_l_e_d_8h_a69ae16731cd4ff30f81793033758d59c.html#a69ae16731cd4ff30f81793033758d59c", [
       [ "OCTOWS2811", "db/d97/_fast_l_e_d_8h_a69ae16731cd4ff30f81793033758d59c.html#a69ae16731cd4ff30f81793033758d59ca10d9d52d47d8577b3e576c5f807d8086", null ],
@@ -53,6 +53,13 @@ var _fast_l_e_d_8h =
     [ "SWS2812", "db/d97/_fast_l_e_d_8h_a5dd5101b1f189300219b06aaaaacff2e.html#a5dd5101b1f189300219b06aaaaacff2e", [
       [ "WS2812SERIAL", "db/d97/_fast_l_e_d_8h_a5dd5101b1f189300219b06aaaaacff2e.html#a5dd5101b1f189300219b06aaaaacff2ea272baf8a63080477fe5bffb2937db7c0", null ]
     ] ],
-    [ "cled_contoller_size", "db/d97/_fast_l_e_d_8h_a7fc9dbf6b6f9ae03c2e6de945adba338.html#a7fc9dbf6b6f9ae03c2e6de945adba338", null ],
+    [ "abs", "db/d97/_fast_l_e_d_8h_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84", null ],
+    [ "degrees", "db/d97/_fast_l_e_d_8h_af3b0c6f4467492d36fce0cec7d0d8548.html#af3b0c6f4467492d36fce0cec7d0d8548", null ],
+    [ "max", "db/d97/_fast_l_e_d_8h_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909", null ],
+    [ "min", "db/d97/_fast_l_e_d_8h_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb", null ],
+    [ "operator&", "db/d97/_fast_l_e_d_8h_ab4e8215eff6e86440de26fec4d259480.html#ab4e8215eff6e86440de26fec4d259480", null ],
+    [ "operator|", "db/d97/_fast_l_e_d_8h_a664d59edf00ef403547a6da19ba0cb01.html#a664d59edf00ef403547a6da19ba0cb01", null ],
+    [ "operator|=", "db/d97/_fast_l_e_d_8h_a1663fce3f269dfd635af10335edf8b87.html#a1663fce3f269dfd635af10335edf8b87", null ],
+    [ "radians", "db/d97/_fast_l_e_d_8h_a7f1ac1831fd9507b4a594ce211223d43.html#a7f1ac1831fd9507b4a594ce211223d43", null ],
     [ "FastLED", "db/d97/_fast_l_e_d_8h_a7077a6a69b1339a4c04f4bb9ecc0ad3f.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f", null ]
 ];

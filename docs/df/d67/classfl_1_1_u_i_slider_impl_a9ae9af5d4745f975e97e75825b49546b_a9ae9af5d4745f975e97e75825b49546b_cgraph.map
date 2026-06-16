@@ -1,5 +1,9 @@
 <map id="fl::UISliderImpl::setValue" name="fl::UISliderImpl::setValue">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,188,31"/>
-<area shape="rect" id="Node000002" href="$df/d67/classfl_1_1_u_i_slider_impl_a80bf3077ec7658ff9ef28ca9830f3043.html#a80bf3077ec7658ff9ef28ca9830f3043" title=" " alt="" coords="236,5,399,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="189,15,222,15,222,21,189,21"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,188,80"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="284,5,351,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="154,52,270,26,271,31,155,57"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="286,55,349,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="189,65,272,65,272,70,189,70"/>
+<area shape="rect" id="Node000004" href="$df/d67/classfl_1_1_u_i_slider_impl_a80bf3077ec7658ff9ef28ca9830f3043.html#a80bf3077ec7658ff9ef28ca9830f3043" title=" " alt="" coords="236,104,399,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="155,77,247,98,246,104,154,83"/>
 </map>

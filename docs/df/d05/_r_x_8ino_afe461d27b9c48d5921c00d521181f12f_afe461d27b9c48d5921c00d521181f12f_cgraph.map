@@ -1,0 +1,20 @@
+<map id="loop" name="loop">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,107,56,132"/>
+<area shape="rect" id="Node000002" href="$df/dac/test_8cpp_a18bbd716bb44e0b5a82f060f1f47dc11.html#a18bbd716bb44e0b5a82f060f1f47dc11" title="Execute pin toggles and initialize RX channel for capture." alt="" coords="119,57,241,83"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="55,109,127,85,129,90,57,114"/>
+<area shape="rect" id="Node000007" href="$df/d05/_r_x_8ino_a3c4e68a74a6a118bb84027384953d8b8.html#a3c4e68a74a6a118bb84027384953d8b8" title=" " alt="" coords="105,107,255,132"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="56,117,91,117,91,122,56,122"/>
+<area shape="rect" id="Node000008" href="$df/dac/test_8cpp_a9283a643baad57f59ff1140bfab330e0.html#a9283a643baad57f59ff1140bfab330e0" title="Validate captured edge timings against expected pattern." alt="" coords="104,156,256,181"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="57,126,105,142,126,149,125,154,103,147,56,131"/>
+<area shape="rect" id="Node000003" href="$d3/d2b/classfl_1_1_rx_channel_a2d88a0c7b8a757a5733e4ab8cf443617.html#a2d88a0c7b8a757a5733e4ab8cf443617" title=" " alt="" coords="309,5,461,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="230,55,321,31,322,37,232,60"/>
+<area shape="rect" id="Node000004" href="$d3/d2b/classfl_1_1_rx_channel_abc90bc5973308d672d3577eba69013f1.html#abc90bc5973308d672d3577eba69013f1" title=" " alt="" coords="515,31,669,56"/>
+<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="242,63,500,47,501,52,242,69"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_aea219cb806e210fa698fe53624fbc7ac.html#aea219cb806e210fa698fe53624fbc7ac" title="Delay for a given number of microseconds." alt="" coords="304,107,467,132"/>
+<area shape="poly" id="edge6_Node000002_Node000005" title=" " alt="" coords="234,80,319,101,318,106,233,85"/>
+<area shape="rect" id="Node000006" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="334,156,437,181"/>
+<area shape="poly" id="edge7_Node000002_Node000006" title=" " alt="" coords="231,80,257,93,273,106,282,119,291,131,305,142,322,151,320,155,303,147,287,134,278,122,269,110,255,98,229,85"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="462,25,501,30,501,35,461,30"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="558,32,551,22,555,12,569,6,592,4,621,8,632,17,629,21,618,13,592,9,570,11,559,16,556,22,562,29"/>
+<area shape="poly" id="edge10_Node000008_Node000006" title=" " alt="" coords="256,166,320,166,320,171,256,171"/>
+</map>

@@ -1,0 +1,16 @@
+<map id="fl::task::Promise::complete_with_error" name="fl::task::Promise::complete_with_error">
+<area shape="rect" id="Node000001" title="Complete the Promise with an error (used by networking library)" alt="" coords="781,69,937,109"/>
+<area shape="rect" id="Node000002" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a0b6fc002fa551b56dcdb14b8344330f0.html#a0b6fc002fa551b56dcdb14b8344330f0" title=" " alt="" coords="541,5,717,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="773,68,701,48,702,43,774,63"/>
+<area shape="rect" id="Node000013" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_af659ab8459593a819d70716506e76e19.html#af659ab8459593a819d70716506e76e19" title=" " alt="" coords="524,69,733,109"/>
+<area shape="poly" id="edge5_Node000001_Node000013" title=" " alt="" coords="767,92,733,92,733,87,767,87"/>
+<area shape="rect" id="Node000009" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a5268be2c592ea322ab9e4b7612bda7f7.html#a5268be2c592ea322ab9e4b7612bda7f7" title="Send a pre&#45;built JSON&#45;RPC request." alt="" coords="541,133,717,173"/>
+<area shape="poly" id="edge7_Node000001_Node000009" title=" " alt="" coords="774,116,702,136,701,131,773,110"/>
+<area shape="rect" id="Node000003" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_abcd0cfab5c8828fed71b4eb662761dc4.html#abcd0cfab5c8828fed71b4eb662761dc4" title=" " alt="" coords="229,37,476,77"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="527,40,476,46,476,40,526,34"/>
+<area shape="rect" id="Node000004" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_aab4451d64b6a491f073f941fd22258c0.html#aab4451d64b6a491f073f941fd22258c0" title="Read next JSON&#45;RPC request from stream Non&#45;blocking, returns nullopt if no complete request available..." alt="" coords="5,5,181,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="215,43,181,39,182,34,216,38"/>
+<area shape="rect" id="Node000007" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a57c01766a42aa6cbab3d0c6b7617a5ff.html#a57c01766a42aa6cbab3d0c6b7617a5ff" title="Update connection state (handles reconnection, heartbeat) Call this in main loop." alt="" coords="5,69,181,109"/>
+<area shape="poly" id="edge4_Node000003_Node000007" title=" " alt="" coords="216,77,182,81,181,76,215,72"/>
+<area shape="poly" id="edge6_Node000013_Node000003" title=" " alt="" coords="510,78,476,74,477,69,511,73"/>
+</map>

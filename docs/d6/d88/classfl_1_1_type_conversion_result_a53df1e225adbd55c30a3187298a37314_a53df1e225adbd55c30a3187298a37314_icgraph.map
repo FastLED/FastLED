@@ -1,0 +1,7 @@
+<map id="fl::TypeConversionResult::warnings" name="fl::TypeConversionResult::warnings">
+<area shape="rect" id="Node000001" title=" " alt="" coords="383,5,565,45"/>
+<area shape="rect" id="Node000002" href="$d7/dd1/classfl_1_1_rpc_a16bb9675b8d15f3713e49fbb5a8b05a3.html#a16bb9675b8d15f3713e49fbb5a8b05a3" title="Process a JSON&#45;RPC request." alt="" coords="220,13,335,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="369,28,335,28,335,23,369,23"/>
+<area shape="rect" id="Node000003" href="$d7/dd1/classfl_1_1_rpc_acfc87927e9e6affe54e4f2861adac5fd.html#acfc87927e9e6affe54e4f2861adac5fd" title="For notifications (no id), returns nullopt." alt="" coords="5,13,172,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="206,28,172,28,172,23,206,23"/>
+</map>

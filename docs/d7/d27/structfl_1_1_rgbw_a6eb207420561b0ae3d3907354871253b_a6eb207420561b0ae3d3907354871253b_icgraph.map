@@ -1,0 +1,10 @@
+<map id="fl::Rgbw::active" name="fl::Rgbw::active">
+<area shape="rect" id="Node000001" title=" " alt="" coords="377,106,499,131"/>
+<area shape="rect" id="Node000002" href="$d5/d87/structfl_1_1_channel_options_a8f21ac0e3643b4f7ef50f4a9d3cf806a.html#a8f21ac0e3643b4f7ef50f4a9d3cf806a" title="True if this channel emits 4&#45;channel RGBW." alt="" coords="97,5,238,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="406,101,370,79,328,60,283,46,237,37,239,32,284,41,330,55,372,74,409,96"/>
+<area shape="rect" id="Node000003" href="$dd/d78/classfl_1_1_u_c_s7604_controller_t_a0b8dc7f2f0f2e0a2ed3461aa905080ea.html#a0b8dc7f2f0f2e0a2ed3461aa905080ea" title=" " alt="" coords="5,69,329,168"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="363,121,330,121,330,116,363,116"/>
+<area shape="rect" id="Node000004" href="$dc/d8d/namespacefl_1_1anonymous__namespace_02channel_8cpp_8hpp_03_ad61b123c8a67b000fe20a82438d06343.html#ad61b123c8a67b000fe20a82438d06343" title="Encode UCS7604 pixel data into the channel data buffer." alt="" coords="41,216,293,256"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="407,141,330,182,236,218,234,213,328,178,404,136"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="213,204,197,197,167,195,141,197,125,201,120,207,123,215,117,216,114,206,123,197,140,191,167,189,199,192,216,199"/>
+</map>

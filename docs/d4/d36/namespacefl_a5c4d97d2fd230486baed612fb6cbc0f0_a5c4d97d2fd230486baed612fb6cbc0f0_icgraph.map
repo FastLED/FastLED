@@ -1,0 +1,21 @@
+<map id="fl::xy_serpentine" name="fl::xy_serpentine">
+<area shape="rect" id="Node000001" title=" " alt="" coords="785,175,916,200"/>
+<area shape="rect" id="Node000002" href="$d0/dce/classfl_1_1_x_y_map_a010c25679ef2446541e665ea0746e821.html#a010c25679ef2446541e665ea0746e821" title=" " alt="" coords="567,175,737,200"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="772,190,738,190,738,185,772,185"/>
+<area shape="rect" id="Node000003" href="$d1/da3/classfl_1_1anonymous__namespace_02channel_8cpp_8hpp_03_1_1_reordering_pixel_iterator_any_aa1c4c1904aaafaf72a448c787f2e3129.html#aa1c4c1904aaafaf72a448c787f2e3129" title="Construct pixel iterator with optional addressing transformation." alt="" coords="211,5,519,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="629,166,581,120,550,96,517,75,489,62,491,58,520,70,553,91,584,116,632,163"/>
+<area shape="rect" id="Node000004" href="$d0/dce/classfl_1_1_x_y_map_a52e69e69446195af07e48fc1581dd418.html#a52e69e69446195af07e48fc1581dd418" title=" " alt="" coords="272,85,457,125"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="608,172,518,139,457,124,458,119,519,134,610,167"/>
+<area shape="rect" id="Node000006" href="$d0/dce/classfl_1_1_x_y_map_aa04432f28f4f1efd9d84ec8c933b6247.html#aa04432f28f4f1efd9d84ec8c933b6247" title=" " alt="" coords="285,149,444,175"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="553,181,444,172,444,166,553,176"/>
+<area shape="rect" id="Node000007" href="$d0/dce/classfl_1_1_x_y_map_a5202b34f1a2147d53ebefbd884aabd73.html#a5202b34f1a2147d53ebefbd884aabd73" title=" " alt="" coords="279,199,450,224"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="553,198,450,207,450,202,553,193"/>
+<area shape="rect" id="Node000008" href="$d0/dce/classfl_1_1_x_y_map_a074e045abd75c2508d317064977733d2.html#a074e045abd75c2508d317064977733d2" title=" " alt="" coords="287,248,443,273"/>
+<area shape="poly" id="edge8_Node000002_Node000008" title=" " alt="" coords="609,208,519,238,443,253,442,248,518,233,607,203"/>
+<area shape="rect" id="Node000009" href="$d0/dce/classfl_1_1_x_y_map_a085bf3b239415c356bba528b96b390f0.html#a085bf3b239415c356bba528b96b390f0" title=" " alt="" coords="277,297,453,323"/>
+<area shape="poly" id="edge9_Node000002_Node000009" title=" " alt="" coords="630,211,582,251,552,271,520,287,487,298,453,305,452,300,486,293,518,282,549,266,578,247,626,207"/>
+<area shape="rect" id="Node000005" href="$d0/dce/classfl_1_1_x_y_map_a177b2eec7466e210bf9bb654e24310ca.html#a177b2eec7466e210bf9bb654e24310ca" title=" " alt="" coords="5,149,163,175"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="259,129,148,152,146,147,258,124"/>
+<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="271,165,163,165,163,159,271,159"/>
+<area shape="poly" id="edge10_Node000009_Node000005" title=" " alt="" coords="262,305,210,287,171,262,138,231,92,177,96,173,141,228,174,258,212,282,264,300"/>
+</map>

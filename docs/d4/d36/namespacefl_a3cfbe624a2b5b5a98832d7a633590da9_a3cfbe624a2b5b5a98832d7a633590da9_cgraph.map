@@ -1,0 +1,5 @@
+<map id="fl::delayNs" name="fl::delayNs">
+<area shape="rect" id="Node000001" title="Shorter alias for delayNanoseconds (runtime version)" alt="" coords="5,5,96,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a348e689622e8b2b40b1c3ec8a3c74123.html#a348e689622e8b2b40b1c3ec8a3c74123" title="Delay for a compile&#45;time constant number of nanoseconds." alt="" coords="144,5,305,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="96,15,130,15,130,21,96,21"/>
+</map>

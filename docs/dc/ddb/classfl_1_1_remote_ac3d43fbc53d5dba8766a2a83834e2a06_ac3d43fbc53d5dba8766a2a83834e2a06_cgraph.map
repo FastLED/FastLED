@@ -1,0 +1,28 @@
+<map id="fl::Remote::sendStreamUpdate" name="fl::Remote::sendStreamUpdate">
+<area shape="rect" id="Node000001" title="Send stream update for a streaming async method (ASYNC_STREAM mode) The request ID is automatically r..." alt="" coords="5,153,228,179"/>
+<area shape="rect" id="Node000002" href="$de/d40/classfl_1_1json_af8bc0968107152344bfa8468bba76f54.html#af8bc0968107152344bfa8468bba76f54" title=" " alt="" coords="473,153,586,179"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="228,163,459,163,459,169,228,169"/>
+<area shape="rect" id="Node000003" href="$de/d40/classfl_1_1json_af272c33451fcfba68454595a4f6d8444.html#af272c33451fcfba68454595a4f6d8444" title=" " alt="" coords="301,79,394,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="156,151,294,106,295,111,158,156"/>
+<area shape="rect" id="Node000011" href="$dc/ddb/classfl_1_1_remote_a4579a9af2b68eb330345740407ef37fd.html#a4579a9af2b68eb330345740407ef37fd" title="Main update: pull + tick + push (overrides Server::update)" alt="" coords="276,204,419,229"/>
+<area shape="poly" id="edge8_Node000001_Node000011" title=" " alt="" coords="176,176,276,198,275,204,175,181"/>
+<area shape="rect" id="Node000004" href="$de/d40/classfl_1_1json_a08247deaa089c843eae1e64655e2d761.html#a08247deaa089c843eae1e64655e2d761" title=" " alt="" coords="479,5,579,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="378,76,466,40,481,33,483,38,468,44,380,81"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="467,55,592,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="394,83,453,75,453,80,395,88"/>
+<area shape="rect" id="Node000006" href="$de/d40/classfl_1_1json_ad617704f72b6ca9c33c996466fde27b5.html#ad617704f72b6ca9c33c996466fde27b5" title=" " alt="" coords="475,104,584,129"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="395,95,461,105,460,110,394,100"/>
+<area shape="rect" id="Node000007" href="$de/d40/classfl_1_1json_a05686d9138b900b8d8b7d54a7d7dd9c7.html#a05686d9138b900b8d8b7d54a7d7dd9c7" title=" " alt="" coords="640,126,787,166"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="585,123,627,130,626,135,584,128"/>
+<area shape="rect" id="Node000008" href="$de/d40/classfl_1_1json_a788496d489a036e8829b552a8d4f4bf3.html#a788496d489a036e8829b552a8d4f4bf3" title=" " alt="" coords="657,76,770,101"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="584,106,643,97,644,102,584,111"/>
+<area shape="poly" id="edge9_Node000011_Node000002" title=" " alt="" coords="393,201,469,180,471,185,395,206"/>
+<area shape="rect" id="Node000012" href="$dc/d00/classfl_1_1_server_a4b8b9821566f8389e43734b90ae36798.html#a4b8b9821566f8389e43734b90ae36798" title="Pull requests from source, process, queue responses." alt="" coords="473,252,585,277"/>
+<area shape="poly" id="edge10_Node000011_Node000012" title=" " alt="" coords="397,227,468,246,466,251,396,232"/>
+<area shape="rect" id="Node000014" href="$dc/d00/classfl_1_1_server_a049bc5d74287eaf42b1b4b8086e7213d.html#a049bc5d74287eaf42b1b4b8086e7213d" title="Push queued responses to sink." alt="" coords="470,301,589,327"/>
+<area shape="poly" id="edge12_Node000011_Node000014" title=" " alt="" coords="368,227,413,256,468,288,481,294,478,298,465,292,410,261,365,232"/>
+<area shape="rect" id="Node000015" href="$dc/ddb/classfl_1_1_remote_a3653f4ef8d9753d8577e3c18a07d3e0a.html#a3653f4ef8d9753d8577e3c18a07d3e0a" title="Process scheduled calls (call regularly)" alt="" coords="469,203,590,228"/>
+<area shape="poly" id="edge13_Node000011_Node000015" title=" " alt="" coords="419,213,455,213,455,219,419,219"/>
+<area shape="rect" id="Node000013" href="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a" title=" " alt="" coords="668,252,759,277"/>
+<area shape="poly" id="edge11_Node000012_Node000013" title=" " alt="" coords="586,262,654,262,654,267,586,267"/>
+</map>

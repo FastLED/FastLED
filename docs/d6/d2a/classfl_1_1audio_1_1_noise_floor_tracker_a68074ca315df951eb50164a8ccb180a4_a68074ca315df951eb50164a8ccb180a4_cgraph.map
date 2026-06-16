@@ -1,0 +1,7 @@
+<map id="fl::audio::NoiseFloorTracker::configure" name="fl::audio::NoiseFloorTracker::configure">
+<area shape="rect" id="Node000001" title="Configure the noise floor tracker." alt="" coords="5,29,204,69"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="59,30,56,20,64,10,80,5,105,3,133,6,149,13,146,18,132,11,105,8,81,10,67,15,61,21,64,28"/>
+<area shape="rect" id="Node000002" href="$d6/d2a/classfl_1_1audio_1_1_noise_floor_tracker_af00fa4c8bb3e60a46665b2b65f4dfc4e.html#af00fa4c8bb3e60a46665b2b65f4dfc4e" title=" " alt="" coords="252,29,451,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,56,238,56,238,61,204,61"/>
+<area shape="poly" id="edge2_Node000002_Node000001" title=" " alt="" coords="252,43,218,43,218,38,252,38"/>
+</map>

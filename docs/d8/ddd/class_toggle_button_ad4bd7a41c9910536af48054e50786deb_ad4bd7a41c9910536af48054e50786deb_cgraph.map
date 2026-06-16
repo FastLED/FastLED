@@ -1,7 +1,10 @@
 <map id="ToggleButton::Read" name="ToggleButton::Read">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,13,153,38"/>
-<area shape="rect" id="Node000002" href="$d8/ddd/class_toggle_button_ae1977ade86af1a8cd8c2a2dec156ef5c.html#ae1977ade86af1a8cd8c2a2dec156ef5c" title=" " alt="" coords="201,13,364,38"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="154,23,188,23,188,28,154,28"/>
-<area shape="rect" id="Node000003" href="$d8/ddd/class_toggle_button_abf5257238197a7ce4ae9e4988729f834.html#abf5257238197a7ce4ae9e4988729f834" title=" " alt="" coords="412,5,560,45"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="364,23,398,23,398,28,364,28"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,153,80"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="245,29,320,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,55,232,46,232,51,154,61"/>
+<area shape="rect" id="Node000003" href="$d8/ddd/class_toggle_button_ae1977ade86af1a8cd8c2a2dec156ef5c.html#ae1977ade86af1a8cd8c2a2dec156ef5c" title=" " alt="" coords="201,79,364,104"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="154,73,188,78,188,83,153,79"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="249,31,242,21,246,11,260,5,283,3,311,6,322,16,319,20,309,11,283,8,261,10,250,15,247,20,254,28"/>
+<area shape="rect" id="Node000004" href="$d8/ddd/class_toggle_button_abf5257238197a7ce4ae9e4988729f834.html#abf5257238197a7ce4ae9e4988729f834" title=" " alt="" coords="412,71,560,111"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="364,89,398,89,398,94,364,94"/>
 </map>

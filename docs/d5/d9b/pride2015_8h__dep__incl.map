@@ -1,5 +1,5 @@
-<map id="fx/1d/pride2015.h" name="fx/1d/pride2015.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="53,5,189,31"/>
-<area shape="rect" id="Node000002" href="$d2/db0/_fx_pride2015_8ino.html" title="Pride2015 effect with ScreenMap." alt="" coords="5,79,236,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="123,44,123,79,118,79,118,44"/>
+<map id="fl/fx/1d/pride2015.h" name="fl/fx/1d/pride2015.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="57,5,205,31"/>
+<area shape="rect" id="Node000002" href="$d2/db0/_fx_pride2015_8ino.html" title="Pride2015 effect with fl::ScreenMap." alt="" coords="5,79,256,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="133,44,133,79,128,79,128,44"/>
 </map>

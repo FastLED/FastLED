@@ -100,19 +100,69 @@ $(function(){initNavTree('dc/d4e/ui__state_8cpp.html','../../'); initResizable(t
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#define-members">Macros</a> &#124;
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle"><div class="title">ui_state.cpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="../../d4/d78/_luminescent_grand_2shared_2defs_8h_source.html">../shared/defs.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d9/da7/ui__state_8h_source.html">./ui_state.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dc/db0/_painter_8h_source.html">shared/Painter.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d7/d7f/log_8h_source.html">fl/log/log.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d54/compiler__control_8h_source.html">fl/stl/compiler_control.h</a>&quot;</code><br />
+<code>#include &lt;<a class="el" href="../../d2/de0/arduino_8h_source.html">Arduino.h</a>&gt;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for ui_state.cpp:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../de/dda/ui__state_8cpp__incl.svg" width="282" height="139"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../de/dda/ui__state_8cpp__incl.svg" width="100%" height="569"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../dc/d4e/ui__state_8cpp_source.html">Go to the source code of this file.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:a48cdc6c9a75eb611d0a703c94bdac6b8" id="r_a48cdc6c9a75eb611d0a703c94bdac6b8"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d4e/ui__state_8cpp_a48cdc6c9a75eb611d0a703c94bdac6b8.html#a48cdc6c9a75eb611d0a703c94bdac6b8">A3</a>&#160;&#160;&#160;3</td></tr>
+<tr class="separator:a48cdc6c9a75eb611d0a703c94bdac6b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa0a03ad95ca0cb887a11e321fa1c9519" id="r_aa0a03ad95ca0cb887a11e321fa1c9519"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d4e/ui__state_8cpp_aa0a03ad95ca0cb887a11e321fa1c9519.html#aa0a03ad95ca0cb887a11e321fa1c9519">A4</a>&#160;&#160;&#160;4</td></tr>
+<tr class="separator:aa0a03ad95ca0cb887a11e321fa1c9519"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3325a2fe90a33e6016801ec63e751254" id="r_a3325a2fe90a33e6016801ec63e751254"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d4e/ui__state_8cpp_a3325a2fe90a33e6016801ec63e751254.html#a3325a2fe90a33e6016801ec63e751254">PIN_COLOR_SELECT</a>&#160;&#160;&#160;4</td></tr>
+<tr class="separator:a3325a2fe90a33e6016801ec63e751254"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aafa7e82dcfce16c2ed9baf313812f1f4" id="r_aafa7e82dcfce16c2ed9baf313812f1f4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d4e/ui__state_8cpp_aafa7e82dcfce16c2ed9baf313812f1f4.html#aafa7e82dcfce16c2ed9baf313812f1f4">PIN_POT_COLOR_SENSOR</a>&#160;&#160;&#160;<a class="el" href="../../dc/d4e/ui__state_8cpp_a48cdc6c9a75eb611d0a703c94bdac6b8.html#a48cdc6c9a75eb611d0a703c94bdac6b8">A3</a></td></tr>
+<tr class="separator:aafa7e82dcfce16c2ed9baf313812f1f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6571154bc555c6cc015150b693a0abb9" id="r_a6571154bc555c6cc015150b693a0abb9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d4e/ui__state_8cpp_a6571154bc555c6cc015150b693a0abb9.html#a6571154bc555c6cc015150b693a0abb9">PIN_POT_VEL_SENSOR</a>&#160;&#160;&#160;<a class="el" href="../../dc/d4e/ui__state_8cpp_aa0a03ad95ca0cb887a11e321fa1c9519.html#aa0a03ad95ca0cb887a11e321fa1c9519">A4</a></td></tr>
+<tr class="separator:a6571154bc555c6cc015150b693a0abb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d821cb61baa26b751f43894f1a9fac5" id="r_a6d821cb61baa26b751f43894f1a9fac5"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d4e/ui__state_8cpp_a6d821cb61baa26b751f43894f1a9fac5.html#a6d821cb61baa26b751f43894f1a9fac5">PIN_VIS_SELECT</a>&#160;&#160;&#160;2</td></tr>
+<tr class="separator:a6d821cb61baa26b751f43894f1a9fac5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8bed79e2024da24b0a317d95cae66e08" id="r_a8bed79e2024da24b0a317d95cae66e08"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d4e/ui__state_8cpp_a8bed79e2024da24b0a317d95cae66e08.html#a8bed79e2024da24b0a317d95cae66e08">UI_DBG</a></td></tr>
+<tr class="separator:a8bed79e2024da24b0a317d95cae66e08"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a145919b773e242e307a489ade2f513ef" id="r_a145919b773e242e307a489ade2f513ef"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d4e/ui__state_8cpp_a145919b773e242e307a489ade2f513ef.html#a145919b773e242e307a489ade2f513ef">UI_V2</a></td></tr>
+<tr class="separator:a145919b773e242e307a489ade2f513ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:abcaa2ae36d4a1c49bdacdd5b55ffa23e" id="r_abcaa2ae36d4a1c49bdacdd5b55ffa23e"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d4e/ui__state_8cpp_abcaa2ae36d4a1c49bdacdd5b55ffa23e.html#abcaa2ae36d4a1c49bdacdd5b55ffa23e">read_color_selector</a> ()</td></tr>
+<tr class="separator:abcaa2ae36d4a1c49bdacdd5b55ffa23e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab67c09212c8bc10741ad79d5063b215b" id="r_ab67c09212c8bc10741ad79d5063b215b"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d4e/ui__state_8cpp_ab67c09212c8bc10741ad79d5063b215b.html#ab67c09212c8bc10741ad79d5063b215b">read_velocity_bias</a> ()</td></tr>
+<tr class="separator:ab67c09212c8bc10741ad79d5063b215b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6f50ea564e0ba7375ce590a5196f12f" id="r_aa6f50ea564e0ba7375ce590a5196f12f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d4e/ui__state_8cpp_aa6f50ea564e0ba7375ce590a5196f12f.html#aa6f50ea564e0ba7375ce590a5196f12f">ui_init</a> ()</td></tr>
+<tr class="separator:aa6f50ea564e0ba7375ce590a5196f12f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17a6dc6626e7a7a2d1afc49f7d16ef94" id="r_a17a6dc6626e7a7a2d1afc49f7d16ef94"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../da/db7/structui__state.html">ui_state</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d4e/ui__state_8cpp_a17a6dc6626e7a7a2d1afc49f7d16ef94.html#a17a6dc6626e7a7a2d1afc49f7d16ef94">ui_update</a> (uint32_t now_ms, uint32_t delta_ms)</td></tr>
+<tr class="separator:a17a6dc6626e7a7a2d1afc49f7d16ef94"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:abac43f1b5a2c69fe97dd213086504dc1" id="r_abac43f1b5a2c69fe97dd213086504dc1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d3/d10/class_potentiometer.html">Potentiometer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d4e/ui__state_8cpp_abac43f1b5a2c69fe97dd213086504dc1.html#abac43f1b5a2c69fe97dd213086504dc1">color_pot</a> (<a class="el" href="../../dc/d4e/ui__state_8cpp_aafa7e82dcfce16c2ed9baf313812f1f4.html#aafa7e82dcfce16c2ed9baf313812f1f4">PIN_POT_COLOR_SENSOR</a>)</td></tr>
+<tr class="separator:abac43f1b5a2c69fe97dd213086504dc1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a891b091adb3714f444b98b8e794b0b85" id="r_a891b091adb3714f444b98b8e794b0b85"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../df/d79/class_color_selector.html">ColorSelector</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d4e/ui__state_8cpp_a891b091adb3714f444b98b8e794b0b85.html#a891b091adb3714f444b98b8e794b0b85">color_selector</a> (<a class="el" href="../../dc/d4e/ui__state_8cpp_a3325a2fe90a33e6016801ec63e751254.html#a3325a2fe90a33e6016801ec63e751254">PIN_COLOR_SELECT</a>)</td></tr>
+<tr class="separator:a891b091adb3714f444b98b8e794b0b85"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae4053718a9c4172f25f07329d891f264" id="r_ae4053718a9c4172f25f07329d891f264"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d3/d10/class_potentiometer.html">Potentiometer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d4e/ui__state_8cpp_ae4053718a9c4172f25f07329d891f264.html#ae4053718a9c4172f25f07329d891f264">velocity_pot</a> (<a class="el" href="../../dc/d4e/ui__state_8cpp_a6571154bc555c6cc015150b693a0abb9.html#a6571154bc555c6cc015150b693a0abb9">PIN_POT_VEL_SENSOR</a>)</td></tr>
+<tr class="separator:ae4053718a9c4172f25f07329d891f264"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10e2f05e1a841f236ed65f1db0ea5931" id="r_a10e2f05e1a841f236ed65f1db0ea5931"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d6/d58/class_counting_button.html">CountingButton</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d4e/ui__state_8cpp_a10e2f05e1a841f236ed65f1db0ea5931.html#a10e2f05e1a841f236ed65f1db0ea5931">vis_selector</a> (<a class="el" href="../../dc/d4e/ui__state_8cpp_a6d821cb61baa26b751f43894f1a9fac5.html#a6d821cb61baa26b751f43894f1a9fac5">PIN_VIS_SELECT</a>)</td></tr>
+<tr class="separator:a10e2f05e1a841f236ed65f1db0ea5931"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -120,7 +170,7 @@ $(function(){initNavTree('dc/d4e/ui__state_8cpp.html','../../'); initResizable(t
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_786f9dc3989cf40b3de9df2d18ba04d7.html">LuminescentGrand</a></li><li class="navelem"><a class="el" href="../../dir_7276da76aefd3f61ae33022be714ac97.html">arduino</a></li><li class="navelem"><a class="el" href="../../dc/d4e/ui__state_8cpp.html">ui_state.cpp</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

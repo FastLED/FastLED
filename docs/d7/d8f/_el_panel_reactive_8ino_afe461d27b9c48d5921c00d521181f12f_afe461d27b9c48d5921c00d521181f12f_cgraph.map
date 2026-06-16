@@ -1,0 +1,14 @@
+<map id="loop" name="loop">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,56,80"/>
+<area shape="rect" id="Node000002" href="$d9/d1f/el__panel_8cpp_a212827690ec1d11dc4c38a5cc6b541d5.html#a212827690ec1d11dc4c38a5cc6b541d5" title=" " alt="" coords="104,5,211,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="56,55,111,33,113,38,57,60"/>
+<area shape="rect" id="Node000007" href="$d9/d1f/el__panel_8cpp_ad3b5b489324dd03fc27ad993bae9f2ff.html#ad3b5b489324dd03fc27ad993bae9f2ff" title=" " alt="" coords="106,55,209,80"/>
+<area shape="poly" id="edge4_Node000001_Node000007" title=" " alt="" coords="56,65,92,65,92,70,56,70"/>
+<area shape="rect" id="Node000008" href="$d9/d1f/el__panel_8cpp_a63c04eff0373a053afdff3e80c3e1de5.html#a63c04eff0373a053afdff3e80c3e1de5" title=" " alt="" coords="108,104,207,129"/>
+<area shape="poly" id="edge6_Node000001_Node000008" title=" " alt="" coords="57,75,113,97,111,101,56,80"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ab7b2495da785c92a36e91b0a59cde46b.html#ab7b2495da785c92a36e91b0a59cde46b" title="Write analog value to pin (PWM)" alt="" coords="259,31,376,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="211,24,246,29,245,35,211,29"/>
+<area shape="rect" id="Node000004" href="$d9/d33/namespacefl_1_1pwm__state_aee72e1cd03d83550f0f59cd5a4356e07.html#aee72e1cd03d83550f0f59cd5a4356e07" title=" " alt="" coords="424,31,603,56"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="376,41,411,41,411,46,376,46"/>
+<area shape="poly" id="edge5_Node000007_Node000003" title=" " alt="" coords="208,57,245,51,246,57,209,62"/>
+</map>

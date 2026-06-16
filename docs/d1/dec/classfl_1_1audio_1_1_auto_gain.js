@@ -1,0 +1,37 @@
+var classfl_1_1audio_1_1_auto_gain =
+[
+    [ "Stats", "d1/dec/classfl_1_1audio_1_1_auto_gain.html#d1/dba/structfl_1_1audio_1_1_auto_gain_1_1_stats", [
+      [ "currentGain", "d1/dec/classfl_1_1audio_1_1_auto_gain.html#a9517017b49e2c83f57f854aea7a76762", null ],
+      [ "inputRMS", "d1/dec/classfl_1_1audio_1_1_auto_gain.html#a8b9847dbeb6951dbd5f7e0851abb7314", null ],
+      [ "integrator", "d1/dec/classfl_1_1audio_1_1_auto_gain.html#ac89ab00f9c8757b8602086ce08807912", null ],
+      [ "outputRMS", "d1/dec/classfl_1_1audio_1_1_auto_gain.html#a5e7b0c4f29c1c8b4347d0060bb73de57", null ],
+      [ "peakEnvelope", "d1/dec/classfl_1_1audio_1_1_auto_gain.html#a50dae6abc4f928d867097afc4a261a61", null ],
+      [ "samplesProcessed", "d1/dec/classfl_1_1audio_1_1_auto_gain.html#a49014693f3a9368f6c0e92c666acbd75", null ],
+      [ "targetGain", "d1/dec/classfl_1_1audio_1_1_auto_gain.html#ad9bdcfdb45232cbb7fad07a7bdfafdb2", null ]
+    ] ],
+    [ "AutoGain", "d1/dec/classfl_1_1audio_1_1_auto_gain_a1e8a853f5997a19afdfc8b1586c979e7.html#a1e8a853f5997a19afdfc8b1586c979e7", null ],
+    [ "AutoGain", "d1/dec/classfl_1_1audio_1_1_auto_gain_a763118e95033c3c51055d17d66a0dad8.html#a763118e95033c3c51055d17d66a0dad8", null ],
+    [ "~AutoGain", "d1/dec/classfl_1_1audio_1_1_auto_gain_a2b4a902f5f8a151104348d3188454e3c.html#a2b4a902f5f8a151104348d3188454e3c", null ],
+    [ "applyGain", "d1/dec/classfl_1_1audio_1_1_auto_gain_a652335a06786bf45fc4bca3702a3b470.html#a652335a06786bf45fc4bca3702a3b470", null ],
+    [ "computeTargetGain", "d1/dec/classfl_1_1audio_1_1_auto_gain_aa6aaedccec20537cca9dce4d4575bf4f.html#aa6aaedccec20537cca9dce4d4575bf4f", null ],
+    [ "configure", "d1/dec/classfl_1_1audio_1_1_auto_gain_aa0f573c5523b76a8d90d1a5da2e2dc56.html#aa0f573c5523b76a8d90d1a5da2e2dc56", null ],
+    [ "getGain", "d1/dec/classfl_1_1audio_1_1_auto_gain_a57c27608245fd460889fde151191f463.html#a57c27608245fd460889fde151191f463", null ],
+    [ "getStats", "d1/dec/classfl_1_1audio_1_1_auto_gain_ab38f73217acc18786c489e87da4e0672.html#ab38f73217acc18786c489e87da4e0672", null ],
+    [ "process", "d1/dec/classfl_1_1audio_1_1_auto_gain_aec6a3559e9ba8051df4c3a192e35208d.html#aec6a3559e9ba8051df4c3a192e35208d", null ],
+    [ "reset", "d1/dec/classfl_1_1audio_1_1_auto_gain_a0dbd72284bca632e82bce9b29fefd05a.html#a0dbd72284bca632e82bce9b29fefd05a", null ],
+    [ "resolvePreset", "d1/dec/classfl_1_1audio_1_1_auto_gain_af04483d2824d8a90ba7705897ec02b90.html#af04483d2824d8a90ba7705897ec02b90", null ],
+    [ "setSampleRate", "d1/dec/classfl_1_1audio_1_1_auto_gain_a936124b3dc422ecd865ff0855b557377.html#a936124b3dc422ecd865ff0855b557377", null ],
+    [ "updatePIController", "d1/dec/classfl_1_1audio_1_1_auto_gain_a83027121941c706557265359ca6297fe.html#a83027121941c706557265359ca6297fe", null ],
+    [ "mConfig", "d1/dec/classfl_1_1audio_1_1_auto_gain_add752932ea1c89e215a8331e21f784b3.html#add752932ea1c89e215a8331e21f784b3", null ],
+    [ "mGainFollowFastTau", "d1/dec/classfl_1_1audio_1_1_auto_gain_ada548d480292de1e309a0ef61d4846b3.html#ada548d480292de1e309a0ef61d4846b3", null ],
+    [ "mGainFollowSlowTau", "d1/dec/classfl_1_1audio_1_1_auto_gain_a9f5bbf53885c2912eff0c8d4434fe7a6.html#a9f5bbf53885c2912eff0c8d4434fe7a6", null ],
+    [ "mIntegrator", "d1/dec/classfl_1_1audio_1_1_auto_gain_add53bf8b88ce027759eee33a73fb7033.html#add53bf8b88ce027759eee33a73fb7033", null ],
+    [ "mKi", "d1/dec/classfl_1_1audio_1_1_auto_gain_a149b127707db25ae7715fc53c798d8d6.html#a149b127707db25ae7715fc53c798d8d6", null ],
+    [ "mKp", "d1/dec/classfl_1_1audio_1_1_auto_gain_ac7b15d98c98d8c9fba21a5ff41cb2b6e.html#ac7b15d98c98d8c9fba21a5ff41cb2b6e", null ],
+    [ "mLastGain", "d1/dec/classfl_1_1audio_1_1_auto_gain_a34bbed701d0cb6faa914ac7eccdbfbd5.html#a34bbed701d0cb6faa914ac7eccdbfbd5", null ],
+    [ "mOutputBuffer", "d1/dec/classfl_1_1audio_1_1_auto_gain_a76ff1cb61fe0b5b795c7505df30e77df.html#a76ff1cb61fe0b5b795c7505df30e77df", null ],
+    [ "mPeakDecayTau", "d1/dec/classfl_1_1audio_1_1_auto_gain_a20b8470969fdf558db42231d9b5fbe99.html#a20b8470969fdf558db42231d9b5fbe99", null ],
+    [ "mPeakEnvelope", "d1/dec/classfl_1_1audio_1_1_auto_gain_a59827ff9686b10d3cc06516b504ee357.html#a59827ff9686b10d3cc06516b504ee357", null ],
+    [ "mSampleRate", "d1/dec/classfl_1_1audio_1_1_auto_gain_a9245c71aaa6a2332719e26369d19cc45.html#a9245c71aaa6a2332719e26369d19cc45", null ],
+    [ "mStats", "d1/dec/classfl_1_1audio_1_1_auto_gain_a40ea1f50efd73ba37da2453a891eb892.html#a40ea1f50efd73ba37da2453a891eb892", null ]
+];

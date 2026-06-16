@@ -1,0 +1,4 @@
+<map id="fl::audio::NoiseFloorTracker::getFloor" name="fl::audio::NoiseFloorTracker::getFloor">
+<area shape="rect" id="Node000001" title="Get current noise floor estimate." alt="" coords="5,29,204,69"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="67,30,65,20,71,11,84,5,105,3,128,6,141,13,138,18,126,11,105,8,86,10,75,15,70,21,73,28"/>
+</map>

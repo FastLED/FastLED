@@ -1,0 +1,5 @@
+<map id="CFastLED::remove" name="CFastLED::remove">
+<area shape="rect" id="Node000001" title="Remove a channel from the LED controller list." alt="" coords="5,5,145,31"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_a12da17ab4b0d4daed6ceb429d68ac5cf.html#a12da17ab4b0d4daed6ceb429d68ac5cf" title="stored ChannelPtrs to keep them alive" alt="" coords="193,5,341,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="146,15,179,15,179,21,146,21"/>
+</map>

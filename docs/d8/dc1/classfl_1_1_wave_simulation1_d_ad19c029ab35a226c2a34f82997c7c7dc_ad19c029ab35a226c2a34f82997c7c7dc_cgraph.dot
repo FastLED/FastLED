@@ -8,11 +8,15 @@ digraph "fl::WaveSimulation1D::WaveSimulation1D"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::WaveSimulation1D\l::WaveSimulation1D",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="dampening",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d78/examples_2_wave_2wave_8h_aa7d6eb4e4f91328bcee5e19a6a76ee4e.html#aa7d6eb4e4f91328bcee5e19a6a76ee4e",tooltip=" "];
+  Node2 [id="Node000002",label="dampening",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d78/examples_2_wave_2wave_8h_ad4492f55d142b7728a4221681c440b30.html#ad4492f55d142b7728a4221681c440b30",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fl::WaveSimulation1D\l::init",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dc1/classfl_1_1_wave_simulation1_d_ab4890a1397a96d6cab3251453bc81db9.html#ab4890a1397a96d6cab3251453bc81db9",tooltip=" "];
   Node3 -> Node2 [id="edge3_Node000003_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node3 -> Node4 [id="edge4_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="length",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/daf/direct_8h_a56a6f879483f3e06fdac34afba3711d8.html#a56a6f879483f3e06fdac34afba3711d8",tooltip=" "];
-  Node1 -> Node4 [id="edge5_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="length",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/daf/direct_8h_a1ddd0aa76a31f81b55f0ffccc1f3d4de.html#a1ddd0aa76a31f81b55f0ffccc1f3d4de",tooltip=" "];
+  Node3 -> Node5 [id="edge5_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::make_unique",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a3fd92c727664a77396403265415789d3.html#a3fd92c727664a77396403265415789d3",tooltip=" "];
+  Node5 -> Node6 [id="edge6_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::fl::forward",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d3c/namespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259.html#a0bddf371925d8c4e94b88e9d7b35d259",tooltip=" "];
+  Node1 -> Node4 [id="edge7_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
 }

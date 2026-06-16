@@ -1,0 +1,30 @@
+<map id="fl::net::http::fetch_patch" name="fl::net::http::fetch_patch">
+<area shape="rect" id="Node000001" title="HTTP PATCH request." alt="" coords="5,133,140,173"/>
+<area shape="rect" id="Node000002" href="$dd/d03/classfl_1_1net_1_1http_1_1_fetch_options_a921e92a7b887e568cef838ffe44cfe2c.html#a921e92a7b887e568cef838ffe44cfe2c" title="Set request body." alt="" coords="188,133,375,173"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="140,151,174,151,174,156,140,156"/>
+<area shape="rect" id="Node000005" href="$d1/d13/namespacefl_1_1net_1_1http_a957091a69596c0de70d12e178c8bd57d.html#a957091a69596c0de70d12e178c8bd57d" title="Internal helper to execute a fetch request and return a promise." alt="" coords="205,261,357,301"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="95,172,137,209,189,247,202,253,199,258,187,252,133,214,91,175"/>
+<area shape="rect" id="Node000013" href="$dd/d03/classfl_1_1net_1_1http_1_1_fetch_options_a4456fb4f6ddd306b5f519993080c9889.html#a4456fb4f6ddd306b5f519993080c9889" title="Add header." alt="" coords="188,5,375,45"/>
+<area shape="poly" id="edge11_Node000001_Node000013" title=" " alt="" coords="91,131,133,93,187,55,199,48,202,53,189,60,137,97,95,135"/>
+<area shape="rect" id="Node000014" href="$dd/d03/classfl_1_1net_1_1http_1_1_fetch_options_af9afaa003f14f83e2f5df6d031a3bf2e.html#af9afaa003f14f83e2f5df6d031a3bf2e" title="Get the options for this request." alt="" coords="188,197,375,237"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="139,171,203,191,202,196,138,176"/>
+<area shape="rect" id="Node000015" href="$dd/d03/classfl_1_1net_1_1http_1_1_fetch_options_aaabc1d09931c784c5db43adff3355db1.html#aaabc1d09931c784c5db43adff3355db1" title="Set timeout in milliseconds." alt="" coords="188,69,375,109"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="138,131,202,111,203,116,139,136"/>
+<area shape="rect" id="Node000003" href="$dd/d03/classfl_1_1net_1_1http_1_1_fetch_options_a2886f08f0354d8631626717882dd9611.html#a2886f08f0354d8631626717882dd9611" title=" " alt="" coords="423,69,609,109"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="355,131,429,110,430,115,356,136"/>
+<area shape="rect" id="Node000004" href="$dd/d03/classfl_1_1net_1_1http_1_1_fetch_options_a30a374b7a5c6aebe22544bc097519f69.html#a30a374b7a5c6aebe22544bc097519f69" title="Get the URL for this request." alt="" coords="657,77,868,102"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="610,87,644,87,644,92,610,92"/>
+<area shape="rect" id="Node000006" href="$d0/d34/classfl_1_1task_1_1_promise_a70811e463c0161394aae6e29b442b266.html#a70811e463c0161394aae6e29b442b266" title="Create a resolved Promise with value." alt="" coords="449,293,583,333"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="358,289,435,300,435,305,357,294"/>
+<area shape="rect" id="Node000012" href="$d0/dd1/classfl_1_1net_1_1http_1_1_response_af9dec231f54603a4e87ea1c8dc9499d8.html#af9dec231f54603a4e87ea1c8dc9499d8" title=" " alt="" coords="434,229,598,269"/>
+<area shape="poly" id="edge10_Node000005_Node000012" title=" " alt="" coords="357,268,420,260,420,265,358,274"/>
+<area shape="rect" id="Node000007" href="$d0/d34/classfl_1_1task_1_1_promise_a4ae6da8172cc69a1dbbc7a01bc86f959.html#a4ae6da8172cc69a1dbbc7a01bc86f959" title="Default constructor &#45; creates invalid Promise." alt="" coords="916,323,1051,363"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="584,315,903,335,902,340,583,320"/>
+<area shape="rect" id="Node000008" href="$d0/d34/classfl_1_1task_1_1_promise_a9fd2b38e45453a1061acc972d64a2bed.html#a9fd2b38e45453a1061acc972d64a2bed" title="Create a pending Promise." alt="" coords="695,351,830,391"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="584,326,683,349,681,355,583,331"/>
+<area shape="rect" id="Node000010" href="$d0/d34/classfl_1_1task_1_1_promise_a2eccb92f3cd894efe9a728eea2db7c45.html#a2eccb92f3cd894efe9a728eea2db7c45" title="Get the result value (only valid if is_resolved() returns true)" alt="" coords="695,236,830,276"/>
+<area shape="poly" id="edge9_Node000006_Node000010" title=" " alt="" coords="583,295,681,272,683,277,584,300"/>
+<area shape="poly" id="edge8_Node000008_Node000007" title=" " alt="" coords="830,359,902,350,903,356,831,365"/>
+<area shape="poly" id="edge12_Node000013_Node000003" title=" " alt="" coords="356,43,430,63,429,68,355,48"/>
+<area shape="poly" id="edge15_Node000015_Node000003" title=" " alt="" coords="375,87,409,87,409,92,375,92"/>
+</map>

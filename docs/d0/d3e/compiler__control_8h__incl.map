@@ -1,0 +1,12 @@
+<map id="fl/stl/compiler_control.h" name="fl/stl/compiler_control.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="88,5,263,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,152,180,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="171,32,108,141,104,139,166,30"/>
+<area shape="rect" id="Node000003" href="$d1/ddf/align_8h.html" title="Alignment macros and utilities for FastLED." alt="" coords="190,79,289,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="188,29,222,67,218,70,184,33"/>
+<area shape="poly" id="edge4_Node000003_Node000002" title=" " alt="" coords="217,106,130,148,128,144,215,102"/>
+<area shape="rect" id="Node000004" href="$d7/d84/cstddef_8h.html" title=" " alt="" coords="204,152,317,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="245,104,256,138,251,140,240,105"/>
+<area shape="rect" id="Node000005" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="341,152,468,177"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="267,102,366,144,364,149,265,106"/>
+</map>

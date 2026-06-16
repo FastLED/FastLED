@@ -1,0 +1,7 @@
+<map id="fl::url::isValid" name="fl::url::isValid">
+<area shape="rect" id="Node000001" title=" " alt="" coords="377,5,484,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a0a4f1a4cca802944a086c97fe689f2a6.html#a0a4f1a4cca802944a086c97fe689f2a6" title="Resolve an asset handle to a URL (or local file path) at runtime." alt="" coords="201,5,329,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="364,21,330,21,330,15,364,15"/>
+<area shape="rect" id="Node000003" href="$d2/d4d/classfl_1_1_u_i_audio_ab43d38f3467f2315c042021c07fabd00.html#ab43d38f3467f2315c042021c07fabd00" title="Asset&#45;handle overload (issue #2284)." alt="" coords="5,5,153,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="188,21,154,21,154,15,188,15"/>
+</map>

@@ -1,0 +1,22 @@
+<map id="waveSim" name="waveSim">
+<area shape="rect" id="Node000001" title=" " alt="" coords="495,198,577,223"/>
+<area shape="rect" id="Node000002" href="$d0/da7/classfl_1_1_wave_crgb_gradient_map_a9b166756923fe372df8089a1a0ceb781.html#a9b166756923fe372df8089a1a0ceb781" title="Default constructor with no initial gradient." alt="" coords="5,24,193,64"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="527,185,518,151,502,110,478,72,463,56,445,42,412,26,376,15,339,10,302,8,229,14,167,27,165,21,229,9,302,3,340,4,378,10,414,21,448,38,467,52,483,69,507,108,523,149,533,184"/>
+<area shape="rect" id="Node000003" href="$d5/d94/_wave2d_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="74,190,125,215"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="508,192,480,172,446,157,390,144,345,142,299,147,242,157,178,174,126,194,124,189,177,169,241,152,299,142,345,137,391,139,448,152,482,167,511,187"/>
+<area shape="rect" id="Node000004" href="$d0/da7/classfl_1_1_wave_crgb_gradient_map_ad61a059764202924ff17456df354d6b5.html#ad61a059764202924ff17456df354d6b5" title="Map wave values to gradient&#45;colored LEDs." alt="" coords="250,52,438,92"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="517,188,486,150,445,113,411,94,413,90,448,108,490,146,521,185"/>
+<area shape="rect" id="Node000005" href="$dc/dce/classfl_1_1_wave_crgb_map_af223c1d9018508b95caa2051ff578d76.html#af223c1d9018508b95caa2051ff578d76" title="Convert wave simulation values to LED colors." alt="" coords="241,191,447,231"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="481,213,447,213,447,208,481,208"/>
+<area shape="rect" id="Node000006" href="$de/d99/classfl_1_1_wave_crgb_map_default_a66461ce15c4c0f20cb2efa033bd32bcb.html#a66461ce15c4c0f20cb2efa033bd32bcb" title="Map wave values to grayscale LED colors." alt="" coords="254,255,434,295"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="489,231,448,245,411,257,410,252,446,240,487,226"/>
+<area shape="rect" id="Node000007" href="$d8/d78/examples_2_wave_2wave_8h_ab4fbc04440d455f77823cdca4be70b34.html#ab4fbc04440d455f77823cdca4be70b34" title=" " alt="" coords="291,369,397,394"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="529,238,500,299,477,332,448,359,424,372,398,380,397,374,422,367,445,355,473,328,495,297,524,235"/>
+<area shape="rect" id="Node000009" href="$d5/d94/_wave2d_8h_af529816ccc3636ce2784f04170fe856b.html#af529816ccc3636ce2784f04170fe856b" title=" " alt="" coords="291,319,397,345"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="521,236,490,274,470,293,448,309,424,320,398,328,397,322,422,315,445,304,467,289,486,270,517,233"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="236,62,193,57,194,52,237,57"/>
+<area shape="poly" id="edge6_Node000005_Node000005" title=" " alt="" coords="376,179,365,172,344,169,326,171,315,176,311,182,313,190,308,191,306,181,311,172,324,166,344,164,367,167,379,174"/>
+<area shape="rect" id="Node000008" href="$d8/d78/examples_2_wave_2wave_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="74,369,125,394"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="276,384,125,384,125,379,276,379"/>
+<area shape="poly" id="edge11_Node000009_Node000003" title=" " alt="" coords="276,322,240,309,202,287,166,262,113,218,116,214,169,258,204,283,242,304,278,317"/>
+</map>

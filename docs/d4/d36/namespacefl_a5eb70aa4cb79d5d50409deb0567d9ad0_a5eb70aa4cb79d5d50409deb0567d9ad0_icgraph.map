@@ -1,0 +1,9 @@
+<map id="fl::serial_begin" name="fl::serial_begin">
+<area shape="rect" id="Node000001" title=" " alt="" coords="281,55,399,80"/>
+<area shape="rect" id="Node000002" href="$d1/df2/_auto_research_low_memory_8h_ae3f918f9121ab392058ef53302b021cf.html#ae3f918f9121ab392058ef53302b021cf" title=" " alt="" coords="5,5,233,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="273,54,233,45,182,33,183,28,234,39,274,49"/>
+<area shape="rect" id="Node000003" href="$de/d67/classfl_1_1_serial_port_a1568684468afd1b2bee9ed55f0d73e50.html#a1568684468afd1b2bee9ed55f0d73e50" title="Initialize serial communication." alt="" coords="47,55,192,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="267,70,192,70,192,65,267,65"/>
+<area shape="rect" id="Node000004" href="$dd/dc8/_auto_research_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="90,104,149,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="270,86,234,94,150,113,148,108,233,89,269,80"/>
+</map>

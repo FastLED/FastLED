@@ -1,0 +1,7 @@
+<map id="fl::PerlinParticlePunch::spawnAmbient" name="fl::PerlinParticlePunch::spawnAmbient">
+<area shape="rect" id="Node000001" title="Spawn an ambient particle at a random position." alt="" coords="5,27,168,67"/>
+<area shape="rect" id="Node000002" href="$d2/d0d/group___random_gadb05544426b14ef8d85fb2eb73cb8a0a.html#gadb05544426b14ef8d85fb2eb73cb8a0a" title="Generate an 8&#45;bit random number." alt="" coords="257,5,337,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,33,243,23,244,28,169,39"/>
+<area shape="rect" id="Node000003" href="$db/d58/classfl_1_1_perlin_particle_punch_abcc211e1dbd044865f5e25430f1fb5dc.html#abcc211e1dbd044865f5e25430f1fb5dc" title=" " alt="" coords="216,55,379,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="169,56,203,60,202,65,168,61"/>
+</map>

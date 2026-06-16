@@ -1,0 +1,21 @@
+<map id="fl::createSerialResponseSink" name="fl::createSerialResponseSink">
+<area shape="rect" id="Node000001" title="Create a JSON&#45;RPC ResponseSink that writes to fl:: serial output." alt="" coords="5,60,212,86"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a453c4513b6c26a2104cdf91921eb2742.html#a453c4513b6c26a2104cdf91921eb2742" title="Serialize JSON response to a string." alt="" coords="260,35,432,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="212,59,246,55,247,61,213,64"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a7cbb518d527a0cec0393f52826600e27.html#a7cbb518d527a0cec0393f52826600e27" title="Write a string with newline to a serial&#45;like output." alt="" coords="279,84,413,110"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="213,81,265,86,265,91,212,86"/>
+<area shape="rect" id="Node000003" href="$de/d66/classfl_1_1basic__string_af4d95d1e9905eb5fb76e12c2c2bd7ebc.html#af4d95d1e9905eb5fb76e12c2c2bd7ebc" title=" " alt="" coords="929,16,1080,42"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="408,32,480,21,592,9,680,3,769,4,882,10,916,13,916,19,881,16,768,9,680,9,593,14,480,26,409,37"/>
+<area shape="rect" id="Node000004" href="$d1/d27/classfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e.html#a08170cac6eba7241f099ae16730f6f8e" title=" " alt="" coords="499,35,615,60"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="432,45,486,45,486,50,432,50"/>
+<area shape="rect" id="Node000006" href="$de/d66/classfl_1_1basic__string_adc70863b5a29972d3e45c5e5b31e6686.html#adc70863b5a29972d3e45c5e5b31e6686" title=" " alt="" coords="480,103,635,128"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="414,100,467,105,466,110,413,105"/>
+<area shape="rect" id="Node000007" href="$de/d66/classfl_1_1basic__string_ab760f9d7335a2653ad300172b1443599.html#ab760f9d7335a2653ad300172b1443599" title=" " alt="" coords="703,49,861,89"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="619,100,688,86,689,91,620,105"/>
+<area shape="rect" id="Node000008" href="$de/d66/classfl_1_1basic__string_ad8cf512fb8663f75c77312c6fab902ad.html#ad8cf512fb8663f75c77312c6fab902ad" title=" " alt="" coords="687,114,877,139"/>
+<area shape="poly" id="edge9_Node000006_Node000008" title=" " alt="" coords="635,117,673,118,673,124,635,122"/>
+<area shape="rect" id="Node000012" href="$de/d66/classfl_1_1basic__string_a504b37116b93044654059cacba256510.html#a504b37116b93044654059cacba256510" title=" " alt="" coords="683,163,881,188"/>
+<area shape="poly" id="edge10_Node000006_Node000012" title=" " alt="" coords="602,126,683,149,715,157,713,162,682,154,600,131"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="861,52,920,41,921,47,862,57"/>
+<area shape="poly" id="edge7_Node000007_Node000007" title=" " alt="" coords="741,49,738,39,745,30,760,24,782,22,808,25,822,32,820,37,806,30,782,28,761,29,748,34,743,40,746,48"/>
+</map>

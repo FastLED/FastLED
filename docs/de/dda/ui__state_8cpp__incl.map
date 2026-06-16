@@ -1,5 +1,43 @@
 <map id="/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/arduino/ui_state.cpp" name="/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/arduino/ui_state.cpp">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,276,60"/>
-<area shape="rect" id="Node000002" href="$d4/d78/_luminescent_grand_2shared_2defs_8h.html" title=" " alt="" coords="79,108,202,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="143,60,143,94,138,94,138,60"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="308,5,579,60"/>
+<area shape="rect" id="Node000002" href="$d9/da7/ui__state_8h.html" title=" " alt="" coords="225,108,320,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="392,62,309,104,307,99,390,58"/>
+<area shape="rect" id="Node000003" href="$d2/de0/arduino_8h.html" title=" " alt="" coords="35,255,119,280"/>
+<area shape="poly" id="edge25_Node000001_Node000003" title=" " alt="" coords="321,63,266,83,214,110,175,142,141,178,93,245,88,241,137,175,172,138,211,106,263,78,319,58"/>
+<area shape="rect" id="Node000061" href="$d7/d7f/log_8h.html" title="Centralized logging categories for FastLED hardware interfaces and subsystems." alt="" coords="398,255,489,280"/>
+<area shape="poly" id="edge23_Node000001_Node000061" title=" " alt="" coords="446,60,446,241,441,241,441,60"/>
+<area shape="rect" id="Node000024" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="356,328,531,353"/>
+<area shape="poly" id="edge24_Node000001_Node000024" title=" " alt="" coords="462,59,484,102,504,158,511,189,514,220,512,251,503,281,490,303,472,321,468,318,485,300,498,279,506,250,508,220,506,189,499,159,479,104,457,62"/>
+<area shape="rect" id="Node000100" href="$dc/db0/_painter_8h.html" title=" " alt="" coords="783,108,909,133"/>
+<area shape="poly" id="edge11_Node000001_Node000100" title=" " alt="" coords="567,57,780,103,779,108,566,63"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="259,136,105,248,102,244,255,131"/>
+<area shape="rect" id="Node000005" href="$de/d05/buttons_8h.html" title=" " alt="" coords="231,181,314,207"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="275,134,275,168,270,168,270,134"/>
+<area shape="rect" id="Node000004" href="$da/d99/has__include_8h.html" title=" " alt="" coords="5,328,148,353"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="79,280,79,314,74,314,74,280"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="242,209,122,252,121,247,240,204"/>
+<area shape="rect" id="Node000006" href="$d9/d3b/ui_8h.html" title="Aggregator header for the fl/ui/ family of per&#45;element UI types." alt="" coords="299,255,374,280"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="285,205,319,243,315,246,281,209"/>
+<area shape="poly" id="edge7_Node000005_Node000061" title=" " alt="" coords="301,204,404,247,402,252,299,209"/>
+<area shape="rect" id="Node000097" href="$dd/dee/delay_8h.html" title="Delay utilities for FastLED Includes nanosecond&#45;precision delays, cycle counting, and microsecond del..." alt="" coords="143,255,275,280"/>
+<area shape="poly" id="edge9_Node000005_Node000097" title=" " alt="" coords="264,209,230,246,226,243,260,205"/>
+<area shape="poly" id="edge8_Node000061_Node000024" title=" " alt="" coords="446,280,446,314,441,314,441,280"/>
+<area shape="poly" id="edge10_Node000097_Node000024" title=" " alt="" coords="247,277,393,321,392,327,246,283"/>
+<area shape="rect" id="Node000101" href="$df/d85/_keyboard_8h.html" title=" " alt="" coords="751,181,853,207"/>
+<area shape="poly" id="edge12_Node000100_Node000101" title=" " alt="" coords="841,135,819,171,814,168,836,132"/>
+<area shape="rect" id="Node000103" href="$d8/d3c/util_8h.html" title=" " alt="" coords="929,255,992,280"/>
+<area shape="poly" id="edge19_Node000100_Node000103" title=" " alt="" coords="863,132,887,153,912,180,934,211,951,241,947,244,929,214,908,183,883,157,859,136"/>
+<area shape="rect" id="Node000104" href="$d7/dd8/_approximating_function_8h.html" title=" " alt="" coords="787,328,980,353"/>
+<area shape="poly" id="edge18_Node000100_Node000104" title=" " alt="" coords="853,133,867,181,879,253,884,314,879,315,874,254,862,182,848,134"/>
+<area shape="rect" id="Node000105" href="$de/d60/settings_8h.html" title=" " alt="" coords="1004,328,1099,353"/>
+<area shape="poly" id="edge20_Node000100_Node000105" title=" " alt="" coords="868,131,902,152,938,179,976,213,1007,253,1042,314,1038,317,1002,256,972,217,935,183,899,157,865,136"/>
+<area shape="rect" id="Node000106" href="$db/d19/led__rope__interface_8h.html" title=" " alt="" coords="563,181,726,207"/>
+<area shape="poly" id="edge21_Node000100_Node000106" title=" " alt="" coords="815,136,691,179,689,174,813,131"/>
+<area shape="poly" id="edge13_Node000101_Node000003" title=" " alt="" coords="751,208,738,209,570,226,437,232,303,238,133,257,132,252,303,233,436,226,569,220,738,204,750,202"/>
+<area shape="rect" id="Node000102" href="$de/de1/examples_2_luminescent_grand_2shared_2color_8h.html" title=" " alt="" coords="691,255,756,280"/>
+<area shape="poly" id="edge14_Node000101_Node000102" title=" " alt="" coords="791,209,748,247,744,244,788,205"/>
+<area shape="poly" id="edge15_Node000101_Node000103" title=" " alt="" coords="829,204,923,247,921,251,826,209"/>
+<area shape="poly" id="edge16_Node000103_Node000104" title=" " alt="" coords="950,282,908,320,904,317,946,278"/>
+<area shape="poly" id="edge17_Node000103_Node000105" title=" " alt="" coords="977,278,1027,317,1024,321,974,282"/>
+<area shape="poly" id="edge22_Node000106_Node000102" title=" " alt="" coords="659,205,702,244,699,247,656,209"/>
 </map>

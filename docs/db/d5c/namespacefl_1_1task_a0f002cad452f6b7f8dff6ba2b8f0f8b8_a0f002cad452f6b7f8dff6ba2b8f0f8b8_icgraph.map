@@ -1,0 +1,42 @@
+<map id="fl::task::every_ms" name="fl::task::every_ms">
+<area shape="rect" id="Node000001" title=" " alt="" coords="863,353,1001,378"/>
+<area shape="rect" id="Node000002" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a3bff7aaa6e1158fbbee95055b3458285.html#a3bff7aaa6e1158fbbee95055b3458285" title=" " alt="" coords="584,113,803,153"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="907,344,813,247,715,156,719,152,817,243,911,341"/>
+<area shape="rect" id="Node000022" href="$d3/d6b/classfl_1_1audio_1_1_processor_a0c7c1161cfabfdb0d8d9c159f8c1f9f7.html#a0c7c1161cfabfdb0d8d9c159f8c1f9f7" title=" " alt="" coords="611,281,775,321"/>
+<area shape="poly" id="edge8_Node000001_Node000022" title=" " alt="" coords="871,352,814,336,770,324,771,319,815,331,873,346"/>
+<area shape="rect" id="Node000030" href="$d1/dc9/namespaceautoresearch_a1868ca9225c807cbaf571228e6629e34.html#a1868ca9225c807cbaf571228e6629e34" title="On FL_IS_STUB: register a one&#45;shot async task that drives autoresearch." alt="" coords="586,345,801,385"/>
+<area shape="poly" id="edge17_Node000001_Node000030" title=" " alt="" coords="849,368,801,368,801,363,849,363"/>
+<area shape="rect" id="Node000032" href="$d3/d3a/_async_8h_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="664,410,723,435"/>
+<area shape="poly" id="edge19_Node000001_Node000032" title=" " alt="" coords="874,384,815,400,723,420,722,415,814,395,873,379"/>
+<area shape="rect" id="Node000033" href="$d1/dc9/namespaceautoresearch_a14b9dde802b1a01ef0d7f9ea258bd7f6.html#a14b9dde802b1a01ef0d7f9ea258bd7f6" title="Setup async task for JSON&#45;RPC processing." alt="" coords="572,459,815,485"/>
+<area shape="poly" id="edge20_Node000001_Node000033" title=" " alt="" coords="908,389,866,421,816,449,778,462,776,457,814,444,863,416,904,385"/>
+<area shape="rect" id="Node000003" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_ae03d5fbeb6d8557bd7c4c5fabfe77b06.html#ae03d5fbeb6d8557bd7c4c5fabfe77b06" title=" " alt="" coords="277,5,508,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="640,110,584,84,523,60,484,48,485,43,525,55,586,79,642,105"/>
+<area shape="rect" id="Node000004" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a90e57dbaf9bc274b5302c859efd53af3.html#a90e57dbaf9bc274b5302c859efd53af3" title=" " alt="" coords="261,70,524,125"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="570,121,524,116,525,110,571,116"/>
+<area shape="rect" id="Node000005" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_acc200cb8837f82379821217fb4a6bc29.html#acc200cb8837f82379821217fb4a6bc29" title=" " alt="" coords="285,149,500,189"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="571,151,500,159,500,154,570,145"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_abe4e89a0a574f2abfa9c1bb53b9bd343.html#abe4e89a0a574f2abfa9c1bb53b9bd343" title="Configure async logger automatic servicing task." alt="" coords="5,75,213,101"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="290,148,260,138,212,116,170,103,172,98,214,111,262,134,291,143"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a78c09365a5278caa64b43fe7ff242146.html#a78c09365a5278caa64b43fe7ff242146" title="Template&#45;based logger accessor with auto&#45;registration and enablement check." alt="" coords="33,149,185,189"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="272,172,185,172,185,167,272,167"/>
+<area shape="poly" id="edge7_Node000007_Node000007" title=" " alt="" coords="158,138,141,131,109,128,82,130,65,135,59,141,62,148,57,150,54,140,62,130,81,125,109,123,142,125,160,133"/>
+<area shape="poly" id="edge16_Node000022_Node000022" title=" " alt="" coords="734,270,720,263,693,260,670,262,657,267,652,273,654,280,649,282,646,272,654,262,669,257,693,255,721,258,736,265"/>
+<area shape="rect" id="Node000023" href="$d4/d9d/classfl_1_1audio_1_1_audio_manager_a19815b509ca8b88682cb93c9faba4360.html#a19815b509ca8b88682cb93c9faba4360" title=" " alt="" coords="289,289,497,314"/>
+<area shape="poly" id="edge9_Node000022_Node000023" title=" " alt="" coords="597,304,497,304,497,299,597,299"/>
+<area shape="rect" id="Node000029" href="$d4/d9d/classfl_1_1audio_1_1_audio_manager_ab4ec0824d17d0fa4968e21e287f44476.html#ab4ec0824d17d0fa4968e21e287f44476" title=" " alt="" coords="289,338,497,363"/>
+<area shape="poly" id="edge15_Node000022_Node000029" title=" " alt="" coords="598,320,471,341,470,335,597,314"/>
+<area shape="rect" id="Node000024" href="$dd/dbb/class_c_fast_l_e_d_aa6902ef0c06d6419b56e76662db6c5b9.html#aa6902ef0c06d6419b56e76662db6c5b9" title="Add an audio input and return an auto&#45;pumped Processor." alt="" coords="52,214,167,239"/>
+<area shape="poly" id="edge10_Node000023_Node000024" title=" " alt="" coords="335,287,213,253,166,242,167,237,214,248,337,282"/>
+<area shape="rect" id="Node000025" href="$dd/dbb/class_c_fast_l_e_d_a4c80cc41fe64d47acf02e810c57768d4.html#a4c80cc41fe64d47acf02e810c57768d4" title="Add a pre&#45;created audio input and return an auto&#45;pumped Processor." alt="" coords="52,263,167,289"/>
+<area shape="poly" id="edge11_Node000023_Node000025" title=" " alt="" coords="275,293,166,284,167,278,275,288"/>
+<area shape="rect" id="Node000026" href="$dd/dbb/class_c_fast_l_e_d_aa25cbb36c9196a7c2da75e86e6209792.html#aa25cbb36c9196a7c2da75e86e6209792" title="Add a UIAudio element and return an auto&#45;pumped Processor." alt="" coords="52,313,167,338"/>
+<area shape="poly" id="edge12_Node000023_Node000026" title=" " alt="" coords="275,314,167,323,166,318,275,309"/>
+<area shape="rect" id="Node000027" href="$d4/d9d/classfl_1_1audio_1_1_audio_manager_a97cc4cd17a7f475823fbb7f32e2847cf.html#a97cc4cd17a7f475823fbb7f32e2847cf" title=" " alt="" coords="5,362,213,387"/>
+<area shape="poly" id="edge13_Node000023_Node000027" title=" " alt="" coords="291,320,262,328,238,339,214,352,172,365,171,359,212,347,236,335,260,323,290,314"/>
+<area shape="rect" id="Node000028" href="$d2/d4d/classfl_1_1_u_i_audio_a0ea0030d28045b495e3b179a622995e5.html#a0ea0030d28045b495e3b179a622995e5" title=" " alt="" coords="29,411,189,437"/>
+<area shape="poly" id="edge14_Node000023_Node000028" title=" " alt="" coords="277,320,263,327,247,344,240,363,232,382,215,401,190,414,188,409,212,397,227,379,235,361,242,341,260,323,274,315"/>
+<area shape="rect" id="Node000031" href="$dd/dc8/_auto_research_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="363,423,422,449"/>
+<area shape="poly" id="edge18_Node000030_Node000031" title=" " alt="" coords="595,391,423,432,422,427,594,386"/>
+<area shape="poly" id="edge21_Node000033_Node000031" title=" " alt="" coords="573,460,422,442,422,437,574,455"/>
+</map>

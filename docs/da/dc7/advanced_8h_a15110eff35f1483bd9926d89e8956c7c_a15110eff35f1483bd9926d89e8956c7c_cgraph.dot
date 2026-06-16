@@ -8,5 +8,7 @@ digraph "detectBeat"
   rankdir="LR";
   Node1 [id="Node000001",label="detectBeat",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="beatSensitivity",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dc7/advanced_8h_a05101ecf298f8b4a523264c15e88e8dd.html#a05101ecf298f8b4a523264c15e88e8dd",tooltip=" "];
+  Node2 [id="Node000002",label="beatSensitivity",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dc7/advanced_8h_afb84b52cb6446aa7d83b7cb867f51b82.html#afb84b52cb6446aa7d83b7cb867f51b82",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::sqrt",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1",tooltip=" "];
 }

@@ -1,0 +1,5 @@
+<map id="CFastLED::addLeds" name="CFastLED::addLeds">
+<area shape="rect" id="Node000001" title="Add a CLEDController instance to the world." alt="" coords="271,13,415,38"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_a669d99b8f43d8af3f729ed4402ff0c2b.html#a669d99b8f43d8af3f729ed4402ff0c2b" title="Add an SPI based CLEDController instance to the world (legacy path)." alt="" coords="5,5,223,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="257,28,223,28,223,23,257,23"/>
+</map>

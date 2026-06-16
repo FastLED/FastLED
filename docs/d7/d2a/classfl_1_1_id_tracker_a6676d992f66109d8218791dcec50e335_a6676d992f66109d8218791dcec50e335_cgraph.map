@@ -1,0 +1,15 @@
+<map id="fl::IdTracker::IdTracker" name="fl::IdTracker::IdTracker">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,104,168,129"/>
+<area shape="rect" id="Node000002" href="$d7/d2a/classfl_1_1_id_tracker_ad47b1308e7d99d38d9833ae07615513e.html#ad47b1308e7d99d38d9833ae07615513e" title="Default constructor &#45; creates a new ID tracker instance." alt="" coords="216,104,379,129"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,114,202,114,202,119,168,119"/>
+<area shape="rect" id="Node000003" href="$d7/d2a/classfl_1_1_id_tracker_a05dc329f887fd8106946c74ca76fdc88.html#a05dc329f887fd8106946c74ca76fdc88" title="Clear all tracked pointers and reset ID counter." alt="" coords="456,5,592,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="315,102,364,71,426,40,447,32,449,37,428,44,367,75,318,106"/>
+<area shape="rect" id="Node000004" href="$d7/d2a/classfl_1_1_id_tracker_a31a30a0e96ac07c2d3604d5270dc67aa.html#a31a30a0e96ac07c2d3604d5270dc67aa" title="Get existing ID for pointer without creating a new one." alt="" coords="455,55,593,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="356,101,451,80,452,86,357,107"/>
+<area shape="rect" id="Node000005" href="$d7/d2a/classfl_1_1_id_tracker_a0fb6841f3de6fdd26fe8f2a6211be0d3.html#a0fb6841f3de6fdd26fe8f2a6211be0d3" title="Get existing ID for pointer, or create a new one if not found." alt="" coords="427,104,621,129"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="379,114,413,114,413,119,379,119"/>
+<area shape="rect" id="Node000006" href="$d7/d2a/classfl_1_1_id_tracker_a23870e6d543a9c72380e1e0c07968bec.html#a23870e6d543a9c72380e1e0c07968bec" title="Remove tracking for a pointer." alt="" coords="441,153,607,179"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="357,127,452,148,451,153,356,132"/>
+<area shape="rect" id="Node000007" href="$d7/d2a/classfl_1_1_id_tracker_a5b79d7b4d92c8a96c44448595880e6b0.html#a5b79d7b4d92c8a96c44448595880e6b0" title="Get the current number of tracked pointers." alt="" coords="459,203,589,228"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="319,127,367,157,428,188,452,196,450,201,426,192,364,162,316,132"/>
+</map>

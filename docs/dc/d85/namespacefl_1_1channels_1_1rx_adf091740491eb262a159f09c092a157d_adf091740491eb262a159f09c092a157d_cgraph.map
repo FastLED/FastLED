@@ -1,0 +1,16 @@
+<map id="fl::channels::rx::decodeWs2812Edges" name="fl::channels::rx::decodeWs2812Edges">
+<area shape="rect" id="Node000001" title="Decode a WS2812 edge&#45;pair stream into bytes." alt="" coords="5,23,177,63"/>
+<area shape="rect" id="Node000002" href="$d7/d93/classfl_1_1expected_abbee0bb98c9bf0a1391cb3e810ea4fd5.html#abbee0bb98c9bf0a1391cb3e810ea4fd5" title="Create error result." alt="" coords="230,5,378,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="177,30,216,26,217,31,178,36"/>
+<area shape="rect" id="Node000004" href="$d7/d93/classfl_1_1expected_ae712d6f5942009caa637e9181d47d40b.html#ae712d6f5942009caa637e9181d47d40b" title="Create successful result." alt="" coords="225,55,383,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="178,50,212,54,211,60,177,56"/>
+<area shape="rect" id="Node000003" href="$d7/d93/classfl_1_1expected_a519c280d81d3683cfbfb758ed0198277.html#a519c280d81d3683cfbfb758ed0198277" title="Default constructor (creates error state)" alt="" coords="431,5,597,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="378,15,417,15,417,21,378,21"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="358,52,445,31,447,36,359,57"/>
+<area shape="rect" id="Node000005" href="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a" title=" " alt="" coords="469,55,559,80"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="383,65,454,65,454,70,383,70"/>
+<area shape="rect" id="Node000006" href="$d7/d93/classfl_1_1expected_a85abd0dcb2c53b60f4ecb00c7cc31c6e.html#a85abd0dcb2c53b60f4ecb00c7cc31c6e" title="Get value (only valid if ok() == true)" alt="" coords="443,104,585,129"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="359,77,447,98,445,103,358,83"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_ad2bd3fbfa62b8cb135f8c67ce6bfeefe.html#ad2bd3fbfa62b8cb135f8c67ce6bfeefe" title=" " alt="" coords="645,104,704,129"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="586,114,632,114,632,119,586,119"/>
+</map>

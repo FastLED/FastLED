@@ -1,0 +1,43 @@
+digraph "fl::gfx::detail::toFixed8"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::gfx::detail::toFixed8",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Convert any Coord type to 8.8 fixed-point (fl::i32)."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::gfx::detail::drawDiscCore",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d9a/namespacefl_1_1gfx_1_1detail_a76279d4830b289ed940eb35d755156f9.html#a76279d4830b289ed940eb35d755156f9",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::gfx::drawDisc",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d8b/namespacefl_1_1gfx_a99e28c17bab90d96ecd6a950357fde83.html#a99e28c17bab90d96ecd6a950357fde83",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::gfx::Canvas::drawDisc",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d5c/structfl_1_1gfx_1_1_canvas_aba6d3279b2186afd2564efe7f71e9d8f.html#aba6d3279b2186afd2564efe7f71e9d8f",tooltip=" "];
+  Node1 -> Node5 [id="edge4_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::gfx::detail::drawLineCore",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d9a/namespacefl_1_1gfx_1_1detail_a4c7133be2d3aef492af1968ce467b55d.html#a4c7133be2d3aef492af1968ce467b55d",tooltip=" "];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::gfx::drawLine",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d8b/namespacefl_1_1gfx_a0efcb1204c3209937cf4fb131d9f6cf7.html#a0efcb1204c3209937cf4fb131d9f6cf7",tooltip="============================================================================"];
+  Node6 -> Node7 [id="edge6_Node000006_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::gfx::Canvas::drawLine",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d5c/structfl_1_1gfx_1_1_canvas_a46c1a93cc0dabb74c6e25f50ba91bc3c.html#a46c1a93cc0dabb74c6e25f50ba91bc3c",tooltip=" "];
+  Node1 -> Node8 [id="edge7_Node000001_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::gfx::detail::drawRingCore",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d9a/namespacefl_1_1gfx_1_1detail_ac1063e6536a3ebf22978c3a5fe41310b.html#ac1063e6536a3ebf22978c3a5fe41310b",tooltip=" "];
+  Node8 -> Node9 [id="edge8_Node000008_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::gfx::drawRing",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d8b/namespacefl_1_1gfx_ab43aaa534398d0c1572e2ecbbffcd631.html#ab43aaa534398d0c1572e2ecbbffcd631",tooltip=" "];
+  Node9 -> Node10 [id="edge9_Node000009_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::gfx::Canvas::drawRing",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d5c/structfl_1_1gfx_1_1_canvas_a4592348ee30cf7896ccbed4e9c2c5b95.html#a4592348ee30cf7896ccbed4e9c2c5b95",tooltip=" "];
+  Node1 -> Node11 [id="edge10_Node000001_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::gfx::detail::drawStroke\lLineCore",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d9a/namespacefl_1_1gfx_1_1detail_a0ed31accfda46ef3ddc9a0eb3ad5ef04.html#a0ed31accfda46ef3ddc9a0eb3ad5ef04",tooltip=" "];
+  Node11 -> Node12 [id="edge11_Node000011_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::gfx::drawStrokeLine",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d8b/namespacefl_1_1gfx_abe30294359092a06f52b99a369bca3ec.html#abe30294359092a06f52b99a369bca3ec",tooltip=" "];
+  Node12 -> Node13 [id="edge12_Node000012_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::gfx::Canvas::drawStrokeLine",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d5c/structfl_1_1gfx_1_1_canvas_ab3d4aedbb1e4bd95e5ef3f3c7b341e09.html#ab3d4aedbb1e4bd95e5ef3f3c7b341e09",tooltip=" "];
+  Node1 -> Node1 [id="edge13_Node000001_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node14 [id="edge14_Node000001_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::gfx::detail::toFixed8\l\< double \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d9a/namespacefl_1_1gfx_1_1detail_a2a3d5e125bf9b53e4953c382f21f1c02.html#a2a3d5e125bf9b53e4953c382f21f1c02",tooltip=" "];
+  Node1 -> Node15 [id="edge15_Node000001_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl::gfx::detail::toFixed8\l\< fl::s16x16 \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d9a/namespacefl_1_1gfx_1_1detail_a4741c9982a4380444572858a0a38e216.html#a4741c9982a4380444572858a0a38e216",tooltip=" "];
+  Node1 -> Node16 [id="edge16_Node000001_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::gfx::detail::toFixed8\l\< float \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d9a/namespacefl_1_1gfx_1_1detail_aa1fa5a2dc0f1fafaa6d21f0eadc9b840.html#aa1fa5a2dc0f1fafaa6d21f0eadc9b840",tooltip=" "];
+  Node1 -> Node17 [id="edge17_Node000001_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl::gfx::detail::toFixed8\l\< int \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d9a/namespacefl_1_1gfx_1_1detail_a47e406f97fff9bcf69063c8d072a581b.html#a47e406f97fff9bcf69063c8d072a581b",tooltip=" "];
+}

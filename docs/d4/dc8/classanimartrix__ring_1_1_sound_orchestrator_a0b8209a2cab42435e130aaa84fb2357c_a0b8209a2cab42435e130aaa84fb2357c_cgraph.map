@@ -1,0 +1,8 @@
+<map id="animartrix_ring::SoundOrchestrator::begin" name="animartrix_ring::SoundOrchestrator::begin">
+<area shape="rect" id="Node000001" title="Wire up audio callbacks (downbeat/kick/snare)." alt="" coords="5,47,256,87"/>
+<area shape="rect" id="Node000002" href="$d4/dc8/classanimartrix__ring_1_1_sound_orchestrator_a2f87e1c52ad19265743494d6ad016593.html#a2f87e1c52ad19265743494d6ad016593" title=" " alt="" coords="304,5,555,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="256,47,290,42,291,47,257,52"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="392,94,467,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="257,81,379,97,378,103,256,86"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="390,100,373,90,371,83,374,77,393,70,429,67,461,69,480,74,488,83,482,93,477,90,483,84,478,79,460,74,429,73,395,75,378,81,376,84,377,86,393,95"/>
+</map>

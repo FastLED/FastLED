@@ -8,7 +8,10 @@ digraph "ToggleButton::Read"
   rankdir="LR";
   Node1 [id="Node000001",label="ToggleButton::Read",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="ToggleButton::Update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/ddd/class_toggle_button_ae1977ade86af1a8cd8c2a2dec156ef5c.html#ae1977ade86af1a8cd8c2a2dec156ef5c",tooltip=" "];
-  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="ToggleButton::Read\l_Internal",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/ddd/class_toggle_button_abf5257238197a7ce4ae9e4988729f834.html#abf5257238197a7ce4ae9e4988729f834",tooltip=" "];
+  Node2 [id="Node000002",label="fl::millis",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a",tooltip="Universal millisecond timer - returns milliseconds since system startup."];
+  Node2 -> Node2 [id="edge2_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node3 [id="edge3_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="ToggleButton::Update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/ddd/class_toggle_button_ae1977ade86af1a8cd8c2a2dec156ef5c.html#ae1977ade86af1a8cd8c2a2dec156ef5c",tooltip=" "];
+  Node3 -> Node4 [id="edge4_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="ToggleButton::Read\l_Internal",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/ddd/class_toggle_button_abf5257238197a7ce4ae9e4988729f834.html#abf5257238197a7ce4ae9e4988729f834",tooltip=" "];
 }

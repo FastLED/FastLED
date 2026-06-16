@@ -1,17 +1,50 @@
-<map id="fl/sin32.h" name="fl/sin32.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="130,5,211,31"/>
-<area shape="rect" id="Node000002" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="5,152,88,177"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="142,33,107,52,75,80,60,109,52,139,47,138,55,107,71,77,104,48,139,28"/>
-<area shape="rect" id="Node000004" href="$d3/d7e/int_8h.html" title=" " alt="" coords="85,79,147,104"/>
-<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="164,33,135,69,131,66,160,29"/>
-<area shape="rect" id="Node000006" href="$d4/d64/force__inline_8h.html" title=" " alt="" coords="171,79,282,104"/>
-<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="182,29,211,66,207,69,178,33"/>
-<area shape="rect" id="Node000007" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="307,79,416,104"/>
-<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="202,28,318,71,316,76,200,33"/>
-<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="77,149,102,151,111,156,115,165,107,176,91,181,90,175,104,172,109,164,107,159,101,156,77,155"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="9,225,84,251"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="49,178,49,212,44,212,44,178"/>
-<area shape="poly" id="edge5_Node000004_Node000002" title=" " alt="" coords="106,106,69,144,65,140,103,102"/>
-<area shape="rect" id="Node000005" title=" " alt="" coords="137,152,255,177"/>
-<area shape="poly" id="edge6_Node000004_Node000005" title=" " alt="" coords="131,102,175,141,171,145,127,106"/>
+<map id="fl/math/sin32.h" name="fl/math/sin32.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="367,5,485,31"/>
+<area shape="rect" id="Node000002" href="$d3/d7e/int_8h.html" title=" " alt="" coords="23,152,106,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="367,25,293,31,212,42,139,58,111,69,92,81,82,93,75,107,68,138,63,137,70,106,77,90,88,77,109,64,137,53,211,37,292,26,366,20"/>
+<area shape="rect" id="Node000005" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="276,79,451,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="418,33,385,70,381,66,414,29"/>
+<area shape="rect" id="Node000007" href="$d1/ddf/align_8h.html" title="Alignment macros and utilities for FastLED." alt="" coords="346,152,445,177"/>
+<area shape="poly" id="edge28_Node000001_Node000007" title=" " alt="" coords="439,29,462,63,468,84,464,105,449,128,429,146,425,142,445,125,460,103,462,84,457,65,435,32"/>
+<area shape="rect" id="Node000009" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="476,225,603,251"/>
+<area shape="poly" id="edge29_Node000001_Node000009" title=" " alt="" coords="442,29,464,50,486,77,504,112,518,148,537,211,531,213,513,150,499,114,481,80,460,54,438,33"/>
+<area shape="rect" id="Node000010" href="$df/dab/fastled__progmem_8h.html" title="Wrapper definitions to allow seamless use of PROGMEM in environments that have it." alt="" coords="102,79,251,104"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="387,33,231,77,230,72,385,28"/>
+<area shape="rect" id="Node000011" href="$d8/de1/simd_8h.html" title="Umbrella header for SIMD subsystem." alt="" coords="925,79,1041,104"/>
+<area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="486,24,912,78,911,84,485,30"/>
+<area shape="rect" id="Node000003" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="13,225,116,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="67,178,67,212,62,212,62,178"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,299,124,324"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="67,251,67,285,62,285,62,251"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="140,225,315,251"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="354,106,249,217,246,214,350,103"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="371,103,387,139,382,141,366,105"/>
+<area shape="poly" id="edge8_Node000007_Node000006" title=" " alt="" coords="369,180,268,222,266,217,367,175"/>
+<area shape="rect" id="Node000008" href="$d7/d84/cstddef_8h.html" title=" " alt="" coords="339,225,452,251"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="398,178,398,212,393,212,393,178"/>
+<area shape="poly" id="edge9_Node000007_Node000009" title=" " alt="" coords="420,175,505,217,502,221,417,180"/>
+<area shape="poly" id="edge12_Node000010_Node000002" title=" " alt="" coords="160,106,96,147,93,142,157,102"/>
+<area shape="poly" id="edge11_Node000010_Node000006" title=" " alt="" coords="183,104,221,212,216,213,178,105"/>
+<area shape="rect" id="Node000012" href="$d0/d7e/fl_2math_2simd_2types_8h.html" title="SIMD register type aliases." alt="" coords="997,225,1153,251"/>
+<area shape="poly" id="edge14_Node000011_Node000012" title=" " alt="" coords="925,96,843,100,750,109,668,126,637,139,617,154,612,165,617,176,634,185,666,193,761,209,984,229,983,234,760,214,664,199,632,190,613,179,607,165,613,150,635,134,666,121,749,104,842,94,925,91"/>
+<area shape="rect" id="Node000014" href="$d0/d1e/u8x16_8h.html" title="SIMD operations on 16&#45;element uint8_t vectors." alt="" coords="627,152,787,177"/>
+<area shape="poly" id="edge16_Node000011_Node000014" title=" " alt="" coords="940,107,766,151,765,146,938,101"/>
+<area shape="rect" id="Node000015" href="$d7/d94/u8x32_8h.html" title="SIMD operations on 32&#45;element uint8_t vectors (256&#45;bit)" alt="" coords="811,152,971,177"/>
+<area shape="poly" id="edge18_Node000011_Node000015" title=" " alt="" coords="970,106,919,146,915,141,967,102"/>
+<area shape="rect" id="Node000016" href="$d3/d0c/u16x8_8h.html" title="SIMD operations on 8&#45;element uint16_t vectors." alt="" coords="995,152,1155,177"/>
+<area shape="poly" id="edge20_Node000011_Node000016" title=" " alt="" coords="1000,102,1051,141,1048,146,996,106"/>
+<area shape="rect" id="Node000017" href="$d5/d91/simd_2u16x16_8h.html" title="SIMD operations on 16&#45;element uint16_t vectors (256&#45;bit)" alt="" coords="1179,152,1347,177"/>
+<area shape="poly" id="edge22_Node000011_Node000017" title=" " alt="" coords="1029,101,1205,146,1204,151,1028,107"/>
+<area shape="rect" id="Node000018" href="$dc/d0c/u32x4_8h.html" title="SIMD operations on 4&#45;element uint32_t/int32_t vectors." alt="" coords="1371,152,1531,177"/>
+<area shape="poly" id="edge24_Node000011_Node000018" title=" " alt="" coords="1042,99,1363,147,1362,153,1041,104"/>
+<area shape="rect" id="Node000019" href="$d2/df4/f32x4_8h.html" title="SIMD operations on 4&#45;element float32 vectors." alt="" coords="1555,152,1713,177"/>
+<area shape="poly" id="edge26_Node000011_Node000019" title=" " alt="" coords="1042,96,1541,149,1541,154,1041,101"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="1009,299,1142,324"/>
+<area shape="poly" id="edge15_Node000012_Node000013" title=" " alt="" coords="1078,251,1078,285,1073,285,1073,251"/>
+<area shape="poly" id="edge17_Node000014_Node000012" title=" " alt="" coords="767,175,1003,220,1002,225,766,180"/>
+<area shape="poly" id="edge19_Node000015_Node000012" title=" " alt="" coords="922,175,1033,218,1031,223,920,180"/>
+<area shape="poly" id="edge21_Node000016_Node000012" title=" " alt="" coords="1078,178,1078,212,1073,212,1073,178"/>
+<area shape="poly" id="edge23_Node000017_Node000012" title=" " alt="" coords="1234,180,1120,223,1118,218,1232,175"/>
+<area shape="poly" id="edge25_Node000018_Node000012" title=" " alt="" coords="1391,180,1150,225,1149,220,1390,175"/>
+<area shape="poly" id="edge27_Node000019_Node000012" title=" " alt="" coords="1555,179,1167,228,1166,222,1555,173"/>
 </map>

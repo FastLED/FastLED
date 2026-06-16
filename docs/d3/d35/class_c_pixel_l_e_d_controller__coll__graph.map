@@ -1,10 +1,19 @@
 <map id="CPixelLEDController&lt; RGB_ORDER, LANES, MASK &gt;" name="CPixelLEDController&lt; RGB_ORDER, LANES, MASK &gt;">
-<area shape="rect" id="Node000001" title="Template extension of the CLEDController class." alt="" coords="32,216,205,271"/>
-<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller.html" title="Base definition for an LED controller." alt="" coords="59,132,179,157"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="121,171,121,216,116,216,116,171"/>
-<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="194,136,205,144,197,153,179,156,178,150,195,148,200,145,191,140"/>
-<area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)" alt="" coords="5,5,64,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="32,45,31,71,38,97,57,116,80,130,78,134,53,121,34,100,25,72,26,45"/>
-<area shape="rect" id="Node000004" href="$d7/d27/structfl_1_1_rgbw.html" title=" " alt="" coords="165,5,240,31"/>
-<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="200,45,190,72,176,100,158,119,139,134,136,130,154,115,171,97,186,70,195,43"/>
+<area shape="rect" id="Node000001" title="Template extension of the CLEDController class." alt="" coords="76,407,249,461"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller.html" title=" " alt="" coords="103,332,223,357"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="165,371,165,407,160,407,160,371"/>
+<area shape="rect" id="Node000003" href="$d0/d08/classfl_1_1span.html" title=" " alt="" coords="204,108,356,133"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="302,142,317,163,329,188,335,215,329,241,303,275,270,301,235,321,202,334,200,329,232,316,267,297,300,271,324,239,330,215,324,190,312,166,298,145"/>
+<area shape="rect" id="Node000006" href="$d8/da0/classfl_1_1_c_l_e_d_controller.html" title=" " alt="" coords="95,205,231,231"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="256,144,178,207,175,203,253,140"/>
+<area shape="rect" id="Node000004" href="$da/dd6/structfl_1_1_c_r_g_b.html" title="Representation of an 8&#45;bit RGB pixel (Red, Green, Blue)" alt="" coords="88,5,163,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="161,35,191,52,266,106,263,110,188,57,158,40"/>
+<area shape="rect" id="Node000007" href="$d5/d87/structfl_1_1_channel_options.html" title="Optional channel configuration parameters All fields have sensible defaults and can be overridden as ..." alt="" coords="21,108,163,133"/>
+<area shape="poly" id="edge9_Node000007_Node000004" title=" " alt="" coords="104,42,96,56,91,83,92,108,87,108,85,83,91,54,99,40"/>
+<area shape="rect" id="Node000005" href="$d0/d08/classfl_1_1span.html" title=" " alt="" coords="220,5,377,31"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="297,45,285,108,279,108,291,44"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="165,244,165,332,160,332,160,244"/>
+<area shape="poly" id="edge7_Node000006_Node000006" title=" " alt="" coords="245,208,254,212,257,218,249,227,231,230,230,225,247,222,252,218,250,216,243,213"/>
+<area shape="poly" id="edge10_Node000002_Node000007" title=" " alt="" coords="63,143,35,167,14,197,8,218,14,239,38,270,68,296,101,315,131,329,129,334,99,320,65,300,34,274,9,241,3,218,9,195,31,163,59,139"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="111,143,156,203,152,207,106,146"/>
 </map>

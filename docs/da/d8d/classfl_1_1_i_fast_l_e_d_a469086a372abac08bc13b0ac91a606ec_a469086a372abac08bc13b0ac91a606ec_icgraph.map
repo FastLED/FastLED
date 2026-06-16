@@ -1,0 +1,4 @@
+<map id="fl::IFastLED::getBrightness" name="fl::IFastLED::getBrightness">
+<area shape="rect" id="Node000001" title="Get the current global brightness." alt="" coords="5,29,196,55"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="134,19,125,11,101,8,81,10,70,15,68,20,74,28,69,31,63,21,66,11,79,5,101,3,127,6,138,15"/>
+</map>

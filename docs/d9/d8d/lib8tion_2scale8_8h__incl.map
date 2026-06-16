@@ -1,0 +1,19 @@
+<map id="lib8tion/scale8.h" name="lib8tion/scale8.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="177,5,306,31"/>
+<area shape="rect" id="Node000002" href="$da/d71/fl_2math_2lib8tion_2scale8_8h.html" title=" " alt="" coords="152,79,331,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="244,31,244,65,239,65,239,31"/>
+<area shape="rect" id="Node000003" href="$d4/de8/fl_2math_2scale8_8h.html" title="Legacy compatibility header for 8&#45;bit scaling functions." alt="" coords="178,152,305,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="244,104,244,138,239,138,239,104"/>
+<area shape="rect" id="Node000004" href="$df/dcc/fl_2gfx_2crgb_8h.html" title="Defines the 8&#45;bit red, green, and blue (RGB) pixel type in the fl namespace." alt="" coords="5,225,104,251"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="212,180,99,223,97,218,210,175"/>
+<area shape="rect" id="Node000008" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="54,299,229,324"/>
+<area shape="poly" id="edge8_Node000003_Node000008" title=" " alt="" coords="222,180,194,200,169,227,155,256,147,286,142,285,150,255,164,224,191,196,219,175"/>
+<area shape="rect" id="Node000059" href="$d5/d11/fastled__config_8h.html" title="Contains definitions that can be used to configure FastLED at compile time." alt="" coords="179,225,304,251"/>
+<area shape="poly" id="edge5_Node000003_Node000059" title=" " alt="" coords="244,178,244,212,239,212,239,178"/>
+<area shape="rect" id="Node000060" href="$d2/d0f/fl_2math_2lib8static_8h.html" title="Defines static inlining macros for lib8tion functions." alt="" coords="328,225,472,251"/>
+<area shape="poly" id="edge6_Node000003_Node000060" title=" " alt="" coords="268,175,363,217,361,222,266,180"/>
+<area shape="rect" id="Node000061" title=" " alt="" coords="497,225,639,251"/>
+<area shape="poly" id="edge9_Node000003_Node000061" title=" " alt="" coords="294,175,502,220,501,225,293,180"/>
+<area shape="poly" id="edge4_Node000004_Node000008" title=" " alt="" coords="70,249,118,288,115,292,67,253"/>
+<area shape="poly" id="edge7_Node000060_Node000008" title=" " alt="" coords="359,253,197,298,196,292,358,248"/>
+</map>

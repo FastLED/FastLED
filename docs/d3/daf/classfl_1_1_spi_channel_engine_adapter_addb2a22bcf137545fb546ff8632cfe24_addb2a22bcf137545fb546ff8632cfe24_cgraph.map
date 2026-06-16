@@ -1,0 +1,5 @@
+<map id="fl::SpiChannelEngineAdapter::selectControllerForClockPin" name="fl::SpiChannelEngineAdapter::selectControllerForClockPin">
+<area shape="rect" id="Node000001" title="Select best controller for a given clock pin." alt="" coords="5,5,215,45"/>
+<area shape="rect" id="Node000002" href="$d3/daf/classfl_1_1_spi_channel_engine_adapter_af0366a91a6c0c9c0e835c606a726cde8.html#af0366a91a6c0c9c0e835c606a726cde8" title="Check if controller can handle this clock pin." alt="" coords="263,5,481,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="215,23,249,23,249,28,215,28"/>
+</map>

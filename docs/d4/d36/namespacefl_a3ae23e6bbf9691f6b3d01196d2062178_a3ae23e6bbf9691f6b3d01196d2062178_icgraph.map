@@ -1,0 +1,5 @@
+<map id="fl::transpose_2strips" name="fl::transpose_2strips">
+<area shape="rect" id="Node000001" title="Transpose 2 LED strips into parallel bit format." alt="" coords="199,5,352,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a6d887bb54674c3c61f3fffcb80193985.html#a6d887bb54674c3c61f3fffcb80193985" title="Helper to transpose N strips with automatic dispatch." alt="" coords="5,5,151,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="185,21,151,21,151,15,185,15"/>
+</map>

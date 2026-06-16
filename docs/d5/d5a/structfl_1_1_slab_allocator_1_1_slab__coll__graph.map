@@ -1,6 +1,11 @@
 <map id="fl::SlabAllocator&lt; T, SLAB_SIZE &gt;::Slab" name="fl::SlabAllocator&lt; T, SLAB_SIZE &gt;::Slab">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,108,168,148"/>
-<area shape="rect" id="Node000002" href="$d9/d08/structfl_1_1_slab_allocator_1_1_slab.html" title=" " alt="" coords="5,5,168,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="89,59,89,108,84,108,84,59"/>
-<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="183,16,195,25,187,33,169,37,168,32,184,29,189,25,180,21"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="14,299,177,339"/>
+<area shape="rect" id="Node000002" href="$d9/d08/structfl_1_1_slab_allocator_1_1_slab.html" title=" " alt="" coords="211,196,374,236"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="245,245,133,301,131,296,242,240"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="389,207,401,216,393,224,375,227,374,222,390,219,395,216,386,211"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="5,93,185,133"/>
+<area shape="poly" id="edge5_Node000001_Node000003" title=" " alt="" coords="93,147,89,196,89,236,95,298,90,299,83,236,83,196,88,146"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="146,137,257,194,255,198,143,142"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl.html#db/dd6/classfl_1_1bitset__fixed" title=" " alt="" coords="19,5,172,31"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="98,44,98,93,93,93,93,44"/>
 </map>

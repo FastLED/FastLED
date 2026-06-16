@@ -1,0 +1,16 @@
+<map id="fl/audio/detector/tempo_analyzer.h" name="fl/audio/detector/tempo_analyzer.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="139,5,314,45"/>
+<area shape="rect" id="Node000002" href="$db/d4b/audio__processor_8cpp_8hpp.html" title=" " alt="" coords="5,189,240,214"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="211,59,132,190,127,187,206,56"/>
+<area shape="rect" id="Node000006" href="$de/df2/tempo__analyzer_8cpp_8hpp.html" title=" " alt="" coords="222,93,397,133"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="257,54,293,91,289,95,253,57"/>
+<area shape="rect" id="Node000003" href="$d1/d21/fl_2audio_2__build_8cpp_8hpp.html" title="Unity build header for fl/audio/ directory." alt="" coords="143,269,311,295"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="150,220,213,267,210,271,147,224"/>
+<area shape="rect" id="Node000004" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="80,343,208,368"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="205,306,159,344,156,340,201,302"/>
+<area shape="rect" id="Node000005" href="$db/d23/fl_8audio_09_8cpp.html" title="Unity build: recursive includes from src/fl/audio/." alt="" coords="233,343,389,368"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="252,302,299,340,295,344,249,306"/>
+<area shape="rect" id="Node000007" href="$dc/d6b/fl_2audio_2detector_2__build_8cpp_8hpp.html" title=" " alt="" coords="265,181,397,221"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="320,146,329,180,323,182,315,148"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="296,232,244,271,241,267,293,227"/>
+</map>

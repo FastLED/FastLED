@@ -1,0 +1,9 @@
+<map id="fl::audio::fft::Args::DefaultBands" name="fl::audio::fft::Args::DefaultBands">
+<area shape="rect" id="Node000001" title=" " alt="" coords="368,37,501,77"/>
+<area shape="rect" id="Node000002" href="$d9/d76/structfl_1_1audio_1_1fft_1_1_args_a90879d48496e1ac59e264d60bc7aa322.html#a90879d48496e1ac59e264d60bc7aa322" title=" " alt="" coords="187,37,320,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="354,60,320,60,320,55,354,55"/>
+<area shape="rect" id="Node000003" href="$d9/d76/structfl_1_1audio_1_1fft_1_1_args_a670da5ad1a1b548dfb0e9afb1d53474b.html#a670da5ad1a1b548dfb0e9afb1d53474b" title=" " alt="" coords="5,5,139,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="173,46,138,40,139,34,174,41"/>
+<area shape="rect" id="Node000004" href="$d9/d76/structfl_1_1audio_1_1fft_1_1_args_a11e31e3210b84a1f54db2baca382d29b.html#a11e31e3210b84a1f54db2baca382d29b" title=" " alt="" coords="5,69,139,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="174,74,139,80,138,75,173,69"/>
+</map>

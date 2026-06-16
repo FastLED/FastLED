@@ -1,0 +1,23 @@
+<map id="fl::asio::http::Server::operator=" name="fl::asio::http::Server::operator=">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,263,155,303"/>
+<area shape="rect" id="Node000002" href="$d9/d56/classfl_1_1asio_1_1http_1_1_server_ab944336362888c8c19a0cfcae9026ee2.html#ab944336362888c8c19a0cfcae9026ee2" title="Constructor." alt="" coords="217,5,367,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="84,261,99,219,122,164,156,106,177,79,201,55,207,50,211,55,204,59,181,83,161,109,127,166,104,221,89,263"/>
+<area shape="rect" id="Node000003" href="$d9/d56/classfl_1_1asio_1_1http_1_1_server_a03e0db2740982acfce142d4f0096aecb.html#a03e0db2740982acfce142d4f0096aecb" title="Convenience method for DELETE routes." alt="" coords="203,70,381,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="87,261,104,227,128,185,161,141,201,105,210,99,213,103,204,109,165,145,133,188,108,229,92,263"/>
+<area shape="rect" id="Node000004" href="$d9/d56/classfl_1_1asio_1_1http_1_1_server_a19fb6e075208ce7ee82185055c5bfcca.html#a19fb6e075208ce7ee82185055c5bfcca" title="Convenience method for GET routes." alt="" coords="203,119,381,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="93,261,137,208,168,180,201,155,217,147,219,152,204,160,171,184,141,212,97,264"/>
+<area shape="rect" id="Node000005" href="$d9/d56/classfl_1_1asio_1_1http_1_1_server_a8bc8035cefb2abccf094735f7a21cad0.html#a8bc8035cefb2abccf094735f7a21cad0" title="Get server port." alt="" coords="217,169,367,209"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="117,260,202,219,219,212,221,217,204,224,120,265"/>
+<area shape="rect" id="Node000006" href="$d9/d56/classfl_1_1asio_1_1http_1_1_server_a945df74a464c313a7611fbfafea05b7b.html#a945df74a464c313a7611fbfafea05b7b" title="Convenience method for POST routes." alt="" coords="217,233,367,273"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="155,270,203,263,204,268,156,275"/>
+<area shape="rect" id="Node000007" href="$d9/d56/classfl_1_1asio_1_1http_1_1_server_a41ffaa19229f0c58dd903d94cbaf4f9d.html#a41ffaa19229f0c58dd903d94cbaf4f9d" title="Convenience method for PUT routes." alt="" coords="203,298,381,323"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="155,290,189,294,189,300,155,295"/>
+<area shape="rect" id="Node000008" href="$d9/d56/classfl_1_1asio_1_1http_1_1_server_adfc6bcb6bdbe1a41cda52d6cadb0709c.html#adfc6bcb6bdbe1a41cda52d6cadb0709c" title="Register route handler using fl::function." alt="" coords="217,348,367,388"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="128,300,204,332,225,341,223,345,202,337,126,305"/>
+<area shape="rect" id="Node000009" href="$d9/d56/classfl_1_1asio_1_1http_1_1_server_ab46b85c6768313ddeb936b839adb472e.html#ab46b85c6768313ddeb936b839adb472e" title="Start server on specified port." alt="" coords="217,412,367,452"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="99,301,144,349,173,375,204,398,215,404,212,408,201,402,169,379,140,353,95,305"/>
+<area shape="rect" id="Node000010" href="$d9/d56/classfl_1_1asio_1_1http_1_1_server_a9004978f8c566e7336a2385cc4e88c06.html#a9004978f8c566e7336a2385cc4e88c06" title="Stop server and close all connections." alt="" coords="217,476,367,516"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="92,302,109,336,133,379,165,424,204,462,212,467,208,471,201,466,161,427,129,382,104,339,87,304"/>
+<area shape="rect" id="Node000011" href="$d9/d56/classfl_1_1asio_1_1http_1_1_server_aca75125908d18511118180f21e66b045.html#aca75125908d18511118180f21e66b045" title="Update server (process pending requests non&#45;blocking)" alt="" coords="217,540,367,580"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="88,302,101,348,124,408,158,471,180,500,204,526,210,530,206,535,201,530,176,504,154,474,119,410,96,350,83,304"/>
+</map>

@@ -1,0 +1,12 @@
+digraph "fl::makeClockless"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::makeClockless",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Build a ClocklessChipset from a compile-time TIMING trait."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::ChannelConfig::\lChannelConfig",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/df5/structfl_1_1_channel_config_aaa382ee7bfe572aa96a4b55ad78f6d7c.html#aaa382ee7bfe572aa96a4b55ad78f6d7c",tooltip="Template constructor with TIMING type (backwards compatibility)"];
+}

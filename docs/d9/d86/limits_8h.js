@@ -1,0 +1,26 @@
+var limits_8h =
+[
+    [ "fl::detail::integer_digits10_helper< T >", "d9/dfc/structfl_1_1detail_1_1integer__digits10__helper.html", "d9/dfc/structfl_1_1detail_1_1integer__digits10__helper" ],
+    [ "fl::detail::integer_digits_helper< T >", "dc/d2e/structfl_1_1detail_1_1integer__digits__helper.html", "dc/d2e/structfl_1_1detail_1_1integer__digits__helper" ],
+    [ "fl::detail::integer_max_helper< T, false >", "d9/db5/structfl_1_1detail_1_1integer__max__helper_3_01_t_00_01false_01_4.html", "d9/db5/structfl_1_1detail_1_1integer__max__helper_3_01_t_00_01false_01_4" ],
+    [ "fl::detail::integer_max_helper< T, true >", "d2/d00/structfl_1_1detail_1_1integer__max__helper_3_01_t_00_01true_01_4.html", "d2/d00/structfl_1_1detail_1_1integer__max__helper_3_01_t_00_01true_01_4" ],
+    [ "fl::detail::integer_min_helper< T, false >", "d6/d76/structfl_1_1detail_1_1integer__min__helper_3_01_t_00_01false_01_4.html", "d6/d76/structfl_1_1detail_1_1integer__min__helper_3_01_t_00_01false_01_4" ],
+    [ "fl::detail::integer_min_helper< T, true >", "d8/d43/structfl_1_1detail_1_1integer__min__helper_3_01_t_00_01true_01_4.html", "d8/d43/structfl_1_1detail_1_1integer__min__helper_3_01_t_00_01true_01_4" ],
+    [ "fl::numeric_limits< T >", "d6/d7c/structfl_1_1numeric__limits.html", "d6/d7c/structfl_1_1numeric__limits" ],
+    [ "fl::numeric_limits< bool >", "dc/d22/structfl_1_1numeric__limits_3_01bool_01_4.html", "dc/d22/structfl_1_1numeric__limits_3_01bool_01_4" ],
+    [ "fl::numeric_limits< char >", "d9/dd3/structfl_1_1numeric__limits_3_01char_01_4.html", "d9/dd3/structfl_1_1numeric__limits_3_01char_01_4" ],
+    [ "fl::numeric_limits< double >", "dd/d55/structfl_1_1numeric__limits_3_01double_01_4.html", "dd/d55/structfl_1_1numeric__limits_3_01double_01_4" ],
+    [ "fl::numeric_limits< float >", "dc/de7/structfl_1_1numeric__limits_3_01float_01_4.html", "dc/de7/structfl_1_1numeric__limits_3_01float_01_4" ],
+    [ "fl::numeric_limits< int >", "d7/d66/structfl_1_1numeric__limits_3_01int_01_4.html", "d7/d66/structfl_1_1numeric__limits_3_01int_01_4" ],
+    [ "fl::numeric_limits< long >", "d1/dcc/structfl_1_1numeric__limits_3_01long_01_4.html", "d1/dcc/structfl_1_1numeric__limits_3_01long_01_4" ],
+    [ "fl::numeric_limits< long long >", "dd/d06/structfl_1_1numeric__limits_3_01long_01long_01_4.html", "dd/d06/structfl_1_1numeric__limits_3_01long_01long_01_4" ],
+    [ "fl::numeric_limits< short >", "d0/d69/structfl_1_1numeric__limits_3_01short_01_4.html", "d0/d69/structfl_1_1numeric__limits_3_01short_01_4" ],
+    [ "fl::numeric_limits< signed char >", "dc/d85/structfl_1_1numeric__limits_3_01signed_01char_01_4.html", "dc/d85/structfl_1_1numeric__limits_3_01signed_01char_01_4" ],
+    [ "fl::numeric_limits< unsigned char >", "d8/d15/structfl_1_1numeric__limits_3_01unsigned_01char_01_4.html", "d8/d15/structfl_1_1numeric__limits_3_01unsigned_01char_01_4" ],
+    [ "fl::numeric_limits< unsigned int >", "db/da8/structfl_1_1numeric__limits_3_01unsigned_01int_01_4.html", "db/da8/structfl_1_1numeric__limits_3_01unsigned_01int_01_4" ],
+    [ "fl::numeric_limits< unsigned long >", "d4/d0e/structfl_1_1numeric__limits_3_01unsigned_01long_01_4.html", "d4/d0e/structfl_1_1numeric__limits_3_01unsigned_01long_01_4" ],
+    [ "fl::numeric_limits< unsigned long long >", "dd/de3/structfl_1_1numeric__limits_3_01unsigned_01long_01long_01_4.html", "dd/de3/structfl_1_1numeric__limits_3_01unsigned_01long_01long_01_4" ],
+    [ "fl::numeric_limits< unsigned short >", "d1/d0d/structfl_1_1numeric__limits_3_01unsigned_01short_01_4.html", "d1/d0d/structfl_1_1numeric__limits_3_01unsigned_01short_01_4" ],
+    [ "fl::detail::integer_digits10_func", "df/d9e/namespacefl_1_1detail_ab9304926ab91217e480451c4d4739d52.html#ab9304926ab91217e480451c4d4739d52", null ],
+    [ "fl::detail::integer_digits_func", "df/d9e/namespacefl_1_1detail_abea84fe8da25730201cbfead18a81ea5.html#abea84fe8da25730201cbfead18a81ea5", null ]
+];

@@ -1,0 +1,17 @@
+<map id="calculate_max_brightness_for_power_mW" name="calculate_max_brightness_for_power_mW">
+<area shape="rect" id="Node000001" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="5,88,197,128"/>
+<area shape="rect" id="Node000002" href="$d3/d1d/group___power_gafdf503b02fd644c3398d34f27c3d363d.html#gafdf503b02fd644c3398d34f27c3d363d" title=" " alt="" coords="273,5,420,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="161,85,273,47,274,52,162,91"/>
+<area shape="rect" id="Node000005" href="$d1/d2a/power__mgt_8cpp_8hpp_adcd9338466b0f22161f7281bfc7cdcdf.html#adcd9338466b0f22161f7281bfc7cdcdf" title=" " alt="" coords="496,70,637,95"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="197,100,482,85,483,90,198,105"/>
+<area shape="rect" id="Node000006" href="$d3/d1d/group___power_ga681489b02b2825095fd40db45906bf26.html#ga681489b02b2825095fd40db45906bf26" title="Applies the configured power&#45;scaling response to a total power value." alt="" coords="245,121,448,146"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="198,115,232,119,232,124,197,121"/>
+<area shape="rect" id="Node000007" href="$d1/d2a/power__mgt_8cpp_8hpp_a3beac85272db71b8f8a1c58f9e041b2e.html#a3beac85272db71b8f8a1c58f9e041b2e" title=" " alt="" coords="268,170,425,195"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="156,126,246,156,276,164,274,169,245,161,154,131"/>
+<area shape="rect" id="Node000003" href="$d1/d2a/power__mgt_8cpp_8hpp_afe71d257dc9aca526178a992761bb812.html#afe71d257dc9aca526178a992761bb812" title="Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)" alt="" coords="511,13,622,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="420,23,498,23,498,28,420,28"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="421,42,505,64,503,69,420,47"/>
+<area shape="rect" id="Node000004" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="685,13,848,38"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="622,23,672,23,672,28,622,28"/>
+<area shape="poly" id="edge7_Node000006_Node000005" title=" " alt="" coords="402,118,497,96,498,101,403,123"/>
+</map>

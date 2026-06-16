@@ -1,0 +1,4 @@
+<map id="fl::CRGB::maximizeBrightness" name="fl::CRGB::maximizeBrightness">
+<area shape="rect" id="Node000001" title="Maximize the brightness of this CRGB object." alt="" coords="5,29,223,55"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="153,20,142,11,114,8,91,10,79,15,76,20,83,28,79,31,71,21,75,11,90,5,114,3,144,6,156,15"/>
+</map>

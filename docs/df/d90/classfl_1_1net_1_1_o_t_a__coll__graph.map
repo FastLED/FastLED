@@ -1,0 +1,12 @@
+<map id="fl::net::OTA" name="fl::net::OTA">
+<area shape="rect" id="Node000001" title="OTA (Over&#45;The&#45;Air) update manager for ESP32 platforms." alt="" coords="58,401,151,427"/>
+<area shape="rect" id="Node000002" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="31,299,178,339"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,353,107,401,102,401,102,353"/>
+<area shape="rect" id="Node000003" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="5,123,204,148"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="104,162,99,211,100,258,104,298,99,299,95,258,94,211,99,161"/>
+<area shape="rect" id="Node000006" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="209,211,355,236"/>
+<area shape="poly" id="edge5_Node000006_Node000003" title=" " alt="" coords="142,152,259,208,257,213,139,156"/>
+<area shape="rect" id="Node000004" href="$da/d98/classfl_1_1_atomic_fake.html" title=" " alt="" coords="37,5,173,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="107,59,107,122,102,122,102,59"/>
+<area shape="poly" id="edge4_Node000002_Node000006" title=" " alt="" coords="249,245,142,301,140,296,247,240"/>
+</map>

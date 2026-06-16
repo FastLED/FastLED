@@ -1,0 +1,22 @@
+digraph "CodecProcessor::getPixelFromFrame"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="CodecProcessor::getPixel\lFromFrame",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="CodecProcessor::displayFrame\lOnLEDs",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dca/namespace_codec_processor_a4216b21d03f325b5d991d5f7a0a19062.html#a4216b21d03f325b5d991d5f7a0a19062",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="CodecProcessor::processGif",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dca/namespace_codec_processor_a5f9d84f7da33e23f4e05ea6f140c6630.html#a5f9d84f7da33e23f4e05ea6f140c6630",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd2/_codec_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node2 -> Node5 [id="edge4_Node000002_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="CodecProcessor::processJpeg",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dca/namespace_codec_processor_a2edcc19e73e616ac2e999bc6541ea618.html#a2edcc19e73e616ac2e999bc6541ea618",tooltip=" "];
+  Node5 -> Node4 [id="edge5_Node000005_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node6 [id="edge6_Node000002_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="CodecProcessor::processMpeg1",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dca/namespace_codec_processor_a5cc0e47ef4996897c86fb7861b6ffe32.html#a5cc0e47ef4996897c86fb7861b6ffe32",tooltip=" "];
+  Node6 -> Node4 [id="edge7_Node000006_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

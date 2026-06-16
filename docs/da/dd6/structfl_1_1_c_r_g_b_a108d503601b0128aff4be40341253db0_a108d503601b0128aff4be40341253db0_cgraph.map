@@ -1,0 +1,5 @@
+<map id="fl::CRGB::operator&#45;=" name="fl::CRGB::operator&#45;=">
+<area shape="rect" id="Node000001" title="Subtract one CRGB from another, saturating at 0x00 for each channel." alt="" coords="5,5,160,31"/>
+<area shape="rect" id="Node000002" href="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" title="Default constructor." alt="" coords="208,5,328,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="160,15,194,15,194,21,160,21"/>
+</map>

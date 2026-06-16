@@ -1,19 +1,7 @@
 var searchData=
 [
-  ['pcpx_0',['pcpx',['../d3/d74/__kiss__fft__guts_8h_ac1abb41ecdedd05dda5d1ce83b67a704.html#ac1abb41ecdedd05dda5d1ce83b67a704',1,'_kiss_fft_guts.h']]],
-  ['pi_1',['PI',['../d8/db8/math__macros_8h_a598a3330b3c21701223ee0ca14316eca.html#a598a3330b3c21701223ee0ca14316eca',1,'PI:&#160;math_macros.h'],['../d3/d3b/animartrix__detail_8hpp_a598a3330b3c21701223ee0ca14316eca.html#a598a3330b3c21701223ee0ca14316eca',1,'PI:&#160;animartrix_detail.hpp']]],
-  ['pin_2',['PIN',['../df/d06/_pin_mode_8ino_ae1a27401b7fb01ccb9a82dbddbb54eea.html#ae1a27401b7fb01ccb9a82dbddbb54eea',1,'PinMode.ino']]],
-  ['pin_5fbutton_3',['PIN_BUTTON',['../d7/da1/old_8h_a3be8154d350ce65f5e6c1dfc284700af.html#a3be8154d350ce65f5e6c1dfc284700af',1,'old.h']]],
-  ['pin_5fclock_4',['PIN_CLOCK',['../d4/d06/curr_8h_a4f9c1d495d837d141f20242e1e35427f.html#a4f9c1d495d837d141f20242e1e35427f',1,'PIN_CLOCK:&#160;curr.h'],['../d7/da1/old_8h_a4f9c1d495d837d141f20242e1e35427f.html#a4f9c1d495d837d141f20242e1e35427f',1,'PIN_CLOCK:&#160;old.h'],['../de/dc1/_h_s_v_test_8h_a4f9c1d495d837d141f20242e1e35427f.html#a4f9c1d495d837d141f20242e1e35427f',1,'PIN_CLOCK:&#160;HSVTest.h'],['../d6/dc9/_led_rope_t_c_l_8cpp_a4f9c1d495d837d141f20242e1e35427f.html#a4f9c1d495d837d141f20242e1e35427f',1,'PIN_CLOCK:&#160;LedRopeTCL.cpp']]],
-  ['pin_5fdata_5',['PIN_DATA',['../db/d49/_audio_2simple_2simple_8h_a573681f817f1ec4eca69d66cd687236d.html#a573681f817f1ec4eca69d66cd687236d',1,'PIN_DATA:&#160;simple.h'],['../df/d40/examples_2_corkscrew_2corkscrew_8h_a573681f817f1ec4eca69d66cd687236d.html#a573681f817f1ec4eca69d66cd687236d',1,'PIN_DATA:&#160;Corkscrew.h'],['../d4/d06/curr_8h_a573681f817f1ec4eca69d66cd687236d.html#a573681f817f1ec4eca69d66cd687236d',1,'PIN_DATA:&#160;curr.h'],['../d7/da1/old_8h_a573681f817f1ec4eca69d66cd687236d.html#a573681f817f1ec4eca69d66cd687236d',1,'PIN_DATA:&#160;old.h'],['../d6/dc9/_led_rope_t_c_l_8cpp_a573681f817f1ec4eca69d66cd687236d.html#a573681f817f1ec4eca69d66cd687236d',1,'PIN_DATA:&#160;LedRopeTCL.cpp']]],
-  ['pin_5fgrnd_6',['PIN_GRND',['../d7/da1/old_8h_a8e277fe7e489fc11705fd50644d99b78.html#a8e277fe7e489fc11705fd50644d99b78',1,'old.h']]],
-  ['pin_5fpir_7',['PIN_PIR',['../d5/d77/_fx_noise_ring_8h_a6a2b3ecf7171f0927c1aed215381c1d2.html#a6a2b3ecf7171f0927c1aed215381c1d2',1,'FxNoiseRing.h']]],
-  ['pink_8',['PINK',['../d8/d53/_octo_w_s2811__impl_8h_ada419fe3b48fcf19daed7cc57ccf1174.html#ada419fe3b48fcf19daed7cc57ccf1174',1,'OctoWS2811_impl.h']]],
-  ['pir_5ffalling_5ftime_9',['PIR_FALLING_TIME',['../d5/d77/_fx_noise_ring_8h_a3eb79767866e73ac3bb63dee81849d0d.html#a3eb79767866e73ac3bb63dee81849d0d',1,'FxNoiseRing.h']]],
-  ['pir_5flatch_5fms_10',['PIR_LATCH_MS',['../d5/d77/_fx_noise_ring_8h_a8e4b530d14bb6e8c85e3145b11d77dc3.html#a8e4b530d14bb6e8c85e3145b11d77dc3',1,'FxNoiseRing.h']]],
-  ['pir_5frising_5ftime_11',['PIR_RISING_TIME',['../d5/d77/_fx_noise_ring_8h_afb69960719f1531c640d3a6f558e8283.html#afb69960719f1531c640d3a6f558e8283',1,'FxNoiseRing.h']]],
-  ['pixelpin_12',['PIXELPIN',['../de/d71/_fire2023_8h_a98e618b0cc92b29726d523e2cc2aeb13.html#a98e618b0cc92b29726d523e2cc2aeb13',1,'Fire2023.h']]],
-  ['power_5fdebug_5fprint_13',['POWER_DEBUG_PRINT',['../dc/d56/power__mgt_8cpp_ae5caa0e4614a6e13ab3d8b7380337694.html#ae5caa0e4614a6e13ab3d8b7380337694',1,'power_mgt.cpp']]],
-  ['power_5fled_14',['POWER_LED',['../dc/d56/power__mgt_8cpp_a5accdd4ce7a8ad188df024ae552324e8.html#a5accdd4ce7a8ad188df024ae552324e8',1,'power_mgt.cpp']]],
-  ['print_5fheader_15',['PRINT_HEADER',['../d1/dff/fft__impl_8cpp_aaedcebcc011a5a75aea1e107ad435268.html#aaedcebcc011a5a75aea1e107ad435268',1,'fft_impl.cpp']]]
+  ['orange_0',['ORANGE',['../d8/d53/_octo_w_s2811__impl_8h_ac5b6e19bf06822021f35602c59658de3.html#ac5b6e19bf06822021f35602c59658de3',1,'OctoWS2811_impl.h']]],
+  ['output_5fpad_5fdse_1',['OUTPUT_PAD_DSE',['../de/d7a/_object_f_l_e_d_8h_a9a5c77b5bea733cb8a770066121acfbc.html#a9a5c77b5bea733cb8a770066121acfbc',1,'ObjectFLED.h']]],
+  ['output_5fpad_5fspeed_2',['OUTPUT_PAD_SPEED',['../de/d7a/_object_f_l_e_d_8h_ad6fa7c0e5f0a79b0b2ce064189e73d5d.html#ad6fa7c0e5f0a79b0b2ce064189e73d5d',1,'ObjectFLED.h']]],
+  ['override_5fif_5fnot_5favr_3',['OVERRIDE_IF_NOT_AVR',['../df/d96/s16x16x4_8h_ab8e162e0e373a8b6f35a1545ea73f9e4.html#ab8e162e0e373a8b6f35a1545ea73f9e4',1,'OVERRIDE_IF_NOT_AVR:&#160;s16x16x4.h'],['../d4/d54/compiler__control_8h_ab8e162e0e373a8b6f35a1545ea73f9e4.html#ab8e162e0e373a8b6f35a1545ea73f9e4',1,'OVERRIDE_IF_NOT_AVR:&#160;s16x16x4.h']]]
 ];

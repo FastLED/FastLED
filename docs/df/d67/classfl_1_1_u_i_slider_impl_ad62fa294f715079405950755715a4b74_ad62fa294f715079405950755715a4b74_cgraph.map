@@ -1,5 +1,11 @@
 <map id="fl::UISliderImpl::UISliderImpl" name="fl::UISliderImpl::UISliderImpl">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,212,31"/>
-<area shape="rect" id="Node000002" href="$df/d67/classfl_1_1_u_i_slider_impl_a80bf3077ec7658ff9ef28ca9830f3043.html#a80bf3077ec7658ff9ef28ca9830f3043" title=" " alt="" coords="260,5,423,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="212,15,246,15,246,21,212,21"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,80,212,105"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="308,5,375,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="146,77,259,39,294,29,296,34,261,45,148,82"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="310,55,373,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="212,79,296,69,297,75,213,84"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aa6f747fb354cae784bdd4c656cbdd9fb.html#aa6f747fb354cae784bdd4c656cbdd9fb" title=" " alt="" coords="308,104,375,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="212,101,294,109,294,115,212,106"/>
+<area shape="rect" id="Node000005" href="$df/d67/classfl_1_1_u_i_slider_impl_a80bf3077ec7658ff9ef28ca9830f3043.html#a80bf3077ec7658ff9ef28ca9830f3043" title=" " alt="" coords="260,153,423,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="151,103,261,138,288,147,286,152,259,143,149,108"/>
 </map>

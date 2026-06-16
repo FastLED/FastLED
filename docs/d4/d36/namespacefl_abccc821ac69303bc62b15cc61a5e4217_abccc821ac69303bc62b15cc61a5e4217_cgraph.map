@@ -1,0 +1,9 @@
+<map id="fl::analogWrite16" name="fl::analogWrite16">
+<area shape="rect" id="Node000001" title="Alias for setPwm16 &#45; Set PWM duty cycle with 16&#45;bit resolution." alt="" coords="5,5,139,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a4576b062b8c708eaee16aace718f85f6.html#a4576b062b8c708eaee16aace718f85f6" title="Set PWM duty cycle with 16&#45;bit resolution." alt="" coords="187,5,293,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="139,15,173,15,173,21,139,21"/>
+<area shape="rect" id="Node000003" href="$d9/d33/namespacefl_1_1pwm__state_aee72e1cd03d83550f0f59cd5a4356e07.html#aee72e1cd03d83550f0f59cd5a4356e07" title=" " alt="" coords="341,5,520,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="294,15,328,15,328,21,294,21"/>
+<area shape="rect" id="Node000004" href="$d9/d33/namespacefl_1_1pwm__state_a6df56c095fbd351947b973e0e1d5289a.html#a6df56c095fbd351947b973e0e1d5289a" title=" " alt="" coords="568,5,719,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="520,15,554,15,554,21,520,21"/>
+</map>

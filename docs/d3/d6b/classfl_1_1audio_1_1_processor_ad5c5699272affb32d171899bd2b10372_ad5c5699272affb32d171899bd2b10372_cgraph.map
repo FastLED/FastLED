@@ -1,0 +1,12 @@
+<map id="fl::audio::Processor::onTempoChange" name="fl::audio::Processor::onTempoChange">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,47,151,87"/>
+<area shape="poly" id="edge5_Node000001_Node000001" title=" " alt="" coords="50,47,48,38,53,29,63,23,78,21,95,24,105,31,102,35,93,29,78,26,65,28,57,32,54,39,55,46"/>
+<area shape="rect" id="Node000002" href="$d5/d25/_demo_reel100_8ino_a4875f6d9a2b0f08d3cf221974234121b.html#a4875f6d9a2b0f08d3cf221974234121b" title=" " alt="" coords="199,55,249,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="151,65,185,65,185,70,151,70"/>
+<area shape="rect" id="Node000003" href="$df/da5/lib8tion_8h_a696b9421eca961df0a68c7c6c3e983ab.html#a696b9421eca961df0a68c7c6c3e983ab" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="325,5,404,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="248,56,314,33,316,38,250,61"/>
+<area shape="rect" id="Node000004" href="$d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="297,55,432,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="249,65,283,65,283,70,249,70"/>
+<area shape="rect" id="Node000005" href="$d8/dd0/_fire_cylinder_8h_a470cec2dcb21e474c257065bb93bfcd1.html#a470cec2dcb21e474c257065bb93bfcd1" title=" " alt="" coords="331,104,399,129"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="250,73,318,98,316,103,248,78"/>
+</map>

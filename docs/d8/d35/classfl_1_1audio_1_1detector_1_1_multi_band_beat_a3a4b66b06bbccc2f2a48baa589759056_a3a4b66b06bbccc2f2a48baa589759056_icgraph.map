@@ -1,0 +1,7 @@
+<map id="fl::audio::detector::MultiBandBeat::calculateMidEnergy" name="fl::audio::detector::MultiBandBeat::calculateMidEnergy">
+<area shape="rect" id="Node000001" title="Calculate energy for mid band (bins 6&#45;7)" alt="" coords="555,5,748,60"/>
+<area shape="rect" id="Node000002" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_af83f9f7c2b2695b8a912a98ff6b8bde7.html#af83f9f7c2b2695b8a912a98ff6b8bde7" title="Detect beats in all frequency bands." alt="" coords="295,13,507,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="541,35,507,35,507,30,541,30"/>
+<area shape="rect" id="Node000003" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_ad89f61c68cafd22344ecbfb03e0cd899.html#ad89f61c68cafd22344ecbfb03e0cd899" title=" " alt="" coords="5,13,247,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="281,35,247,35,247,30,281,30"/>
+</map>

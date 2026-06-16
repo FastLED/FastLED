@@ -1,0 +1,56 @@
+<map id="fl/math/beat.h" name="fl/math/beat.h">
+<area shape="rect" id="Node000001" title="Waveform beat generators — sawtooth and sine waves at a given BPM." alt="" coords="333,5,446,31"/>
+<area shape="rect" id="Node000002" href="$d3/d7e/int_8h.html" title=" " alt="" coords="179,299,261,324"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="385,32,236,288,231,285,380,29"/>
+<area shape="rect" id="Node000005" href="$dd/d90/chrono_8h.html" title="FastLED chrono implementation &#45; duration types for time measurements." alt="" coords="89,152,199,177"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="335,33,278,52,220,81,187,111,161,142,157,139,183,107,217,76,276,47,334,28"/>
+<area shape="rect" id="Node000008" href="$d2/d0f/fl_2math_2lib8static_8h.html" title="Defines static inlining macros for lib8tion functions." alt="" coords="921,152,1065,177"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="447,23,586,43,669,58,751,76,862,110,954,144,952,149,861,115,750,81,668,63,585,48,446,28"/>
+<area shape="rect" id="Node000013" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="421,372,547,397"/>
+<area shape="poly" id="edge33_Node000001_Node000013" title=" " alt="" coords="392,31,395,123,403,186,417,250,443,310,471,359,466,362,438,313,412,251,398,187,390,123,386,31"/>
+<area shape="rect" id="Node000014" href="$dd/d0e/fl_2math_2qfx_8h.html" title=" " alt="" coords="286,299,391,324"/>
+<area shape="poly" id="edge15_Node000001_Node000014" title=" " alt="" coords="388,32,373,79,354,194,343,285,338,284,348,193,368,78,382,30"/>
+<area shape="rect" id="Node000015" href="$d3/deb/fl_2math_2trig8_8h.html" title="Legacy compatibility header for trigonometry functions." alt="" coords="1047,79,1161,104"/>
+<area shape="poly" id="edge18_Node000001_Node000015" title=" " alt="" coords="446,22,1033,80,1032,86,446,28"/>
+<area shape="rect" id="Node000017" href="$d4/de8/fl_2math_2scale8_8h.html" title="Legacy compatibility header for 8&#45;bit scaling functions." alt="" coords="611,79,738,104"/>
+<area shape="poly" id="edge20_Node000001_Node000017" title=" " alt="" coords="436,28,616,73,615,78,435,33"/>
+<area shape="rect" id="Node000003" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="229,372,331,397"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="232,323,264,360,259,363,228,326"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="221,445,339,471"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="283,398,283,432,277,432,277,398"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="153,177,210,285,205,288,148,179"/>
+<area shape="rect" id="Node000006" href="$d4/d8c/ratio_8h.html" title="FastLED ratio implementation &#45; compile&#45;time rational arithmetic." alt="" coords="53,225,149,251"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="139,179,117,215,113,212,135,176"/>
+<area shape="poly" id="edge7_Node000006_Node000002" title=" " alt="" coords="122,248,190,289,187,294,119,253"/>
+<area shape="rect" id="Node000007" href="$d0/d1b/static__assert_8h.html" title="Portable compile&#45;time assertion wrapper." alt="" coords="5,299,155,324"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="100,252,90,286,85,285,95,250"/>
+<area shape="rect" id="Node000009" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="706,225,881,251"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="962,180,840,223,838,218,960,175"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="662,372,837,397"/>
+<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="792,252,771,325,760,360,755,358,765,323,787,250"/>
+<area shape="rect" id="Node000011" href="$d1/ddf/align_8h.html" title="Alignment macros and utilities for FastLED." alt="" coords="657,299,756,324"/>
+<area shape="poly" id="edge12_Node000009_Node000011" title=" " alt="" coords="781,253,733,292,730,288,778,249"/>
+<area shape="poly" id="edge13_Node000011_Node000010" title=" " alt="" coords="716,323,738,359,733,362,711,326"/>
+<area shape="poly" id="edge14_Node000011_Node000013" title=" " alt="" coords="672,327,534,370,532,365,670,321"/>
+<area shape="poly" id="edge16_Node000014_Node000003" title=" " alt="" coords="331,326,300,363,296,360,327,323"/>
+<area shape="poly" id="edge17_Node000014_Node000013" title=" " alt="" coords="363,322,449,364,447,368,361,326"/>
+<area shape="rect" id="Node000016" title=" " alt="" coords="1089,152,1220,177"/>
+<area shape="poly" id="edge19_Node000015_Node000016" title=" " alt="" coords="1115,103,1141,139,1136,142,1110,106"/>
+<area shape="poly" id="edge30_Node000017_Node000008" title=" " alt="" coords="726,101,929,146,928,152,725,107"/>
+<area shape="poly" id="edge31_Node000017_Node000009" title=" " alt="" coords="686,103,777,213,773,216,682,106"/>
+<area shape="rect" id="Node000018" href="$df/dcc/fl_2gfx_2crgb_8h.html" title="Defines the 8&#45;bit red, green, and blue (RGB) pixel type in the fl namespace." alt="" coords="431,152,529,177"/>
+<area shape="poly" id="edge21_Node000017_Node000018" title=" " alt="" coords="644,107,525,150,524,145,642,102"/>
+<area shape="rect" id="Node000064" href="$d5/d11/fastled__config_8h.html" title="Contains definitions that can be used to configure FastLED at compile time." alt="" coords="772,152,897,177"/>
+<area shape="poly" id="edge29_Node000017_Node000064" title=" " alt="" coords="701,102,797,144,795,149,699,106"/>
+<area shape="rect" id="Node000065" title=" " alt="" coords="554,152,697,177"/>
+<area shape="poly" id="edge32_Node000017_Node000065" title=" " alt="" coords="669,106,643,142,639,139,664,103"/>
+<area shape="poly" id="edge22_Node000018_Node000002" title=" " alt="" coords="460,180,254,294,251,290,458,175"/>
+<area shape="poly" id="edge23_Node000018_Node000009" title=" " alt="" coords="530,175,730,220,729,225,529,180"/>
+<area shape="poly" id="edge28_Node000018_Node000013" title=" " alt="" coords="505,175,533,195,556,224,562,243,562,263,551,301,530,336,508,363,504,360,526,333,546,299,557,262,556,244,551,227,529,199,502,180"/>
+<area shape="rect" id="Node000019" href="$db/d19/ease_8h.html" title=" " alt="" coords="427,225,541,251"/>
+<area shape="poly" id="edge24_Node000018_Node000019" title=" " alt="" coords="483,178,485,212,480,212,478,178"/>
+<area shape="rect" id="Node000063" title=" " alt="" coords="617,225,682,251"/>
+<area shape="poly" id="edge27_Node000018_Node000063" title=" " alt="" coords="508,175,610,217,608,222,506,180"/>
+<area shape="poly" id="edge25_Node000019_Node000002" title=" " alt="" coords="442,253,275,298,274,293,441,248"/>
+<area shape="poly" id="edge26_Node000019_Node000013" title=" " alt="" coords="487,251,487,358,481,358,481,251"/>
+</map>

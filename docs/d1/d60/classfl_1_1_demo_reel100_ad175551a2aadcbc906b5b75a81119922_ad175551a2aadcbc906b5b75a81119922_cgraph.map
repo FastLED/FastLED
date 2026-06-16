@@ -1,0 +1,21 @@
+<map id="fl::DemoReel100::bpm" name="fl::DemoReel100::bpm">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,80,172,105"/>
+<area shape="rect" id="Node000002" href="$d6/d6c/group___beat_generators_ga696b9421eca961df0a68c7c6c3e983ab.html#ga696b9421eca961df0a68c7c6c3e983ab" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="248,19,343,44"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="132,77,238,45,240,50,133,83"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="220,80,371,105"/>
+<area shape="poly" id="edge4_Node000001_Node000007" title=" " alt="" coords="172,90,206,90,206,95,172,95"/>
+<area shape="rect" id="Node000012" href="$d8/dd0/_fire_cylinder_8h_a470cec2dcb21e474c257065bb93bfcd1.html#a470cec2dcb21e474c257065bb93bfcd1" title=" " alt="" coords="261,129,329,155"/>
+<area shape="poly" id="edge9_Node000001_Node000012" title=" " alt="" coords="143,103,248,128,247,133,142,108"/>
+<area shape="rect" id="Node000003" href="$d6/d6c/group___beat_generators_ga7195cd79b30358b151154623586631aa.html#ga7195cd79b30358b151154623586631aa" title="Generates an 8&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="419,5,493,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="343,25,404,20,405,25,343,30"/>
+<area shape="rect" id="Node000004" href="$d6/d6c/group___beat_generators_ga120dfa6dac7fa3d3958ae1e30b64e1d7.html#ga120dfa6dac7fa3d3958ae1e30b64e1d7" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="541,5,624,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="494,15,528,15,528,21,494,21"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="419,55,493,80"/>
+<area shape="poly" id="edge5_Node000007_Node000008" title=" " alt="" coords="371,78,405,73,406,78,371,83"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_ab169b38b75fd1ab29b3dc61a32497ff1.html#ab169b38b75fd1ab29b3dc61a32497ff1" title="Helper function to divide a number by 16, aka four logical shift right (LSR)&#39;s." alt="" coords="421,104,491,129"/>
+<area shape="poly" id="edge7_Node000007_Node000010" title=" " alt="" coords="371,101,408,107,407,112,371,107"/>
+<area shape="rect" id="Node000011" href="$d6/d19/group___linear_interpolation_gaeb360269bf892a49b96b9ea8248ea8a7.html#gaeb360269bf892a49b96b9ea8248ea8a7" title="Map from one full&#45;range 8&#45;bit value into a narrower range of 8&#45;bit values, possibly a range of hues." alt="" coords="427,153,485,179"/>
+<area shape="poly" id="edge8_Node000007_Node000011" title=" " alt="" coords="342,103,372,114,425,144,423,148,370,119,340,108"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6" title=" " alt="" coords="541,55,624,80"/>
+<area shape="poly" id="edge6_Node000008_Node000009" title=" " alt="" coords="494,65,528,65,528,70,494,70"/>
+</map>

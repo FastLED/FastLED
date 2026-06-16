@@ -1,0 +1,9 @@
+<map id="noiseGroup" name="noiseGroup">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,101,80"/>
+<area shape="rect" id="Node000002" href="$d4/d06/curr_8h_a67e738ebdddbd30452ca2372ca10708b.html#a67e738ebdddbd30452ca2372ca10708b" title=" " alt="" coords="171,5,263,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="95,52,160,32,162,37,97,57"/>
+<area shape="rect" id="Node000003" href="$d4/d06/curr_8h_a0006020893b797106e81f5bf34b8d06f.html#a0006020893b797106e81f5bf34b8d06f" title=" " alt="" coords="168,55,265,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="102,65,154,65,154,70,102,70"/>
+<area shape="rect" id="Node000004" href="$d4/d06/curr_8h_aabbc72a463b6096c8a39815654cdb315.html#aabbc72a463b6096c8a39815654cdb315" title=" " alt="" coords="149,104,284,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="97,77,162,97,160,102,95,83"/>
+</map>

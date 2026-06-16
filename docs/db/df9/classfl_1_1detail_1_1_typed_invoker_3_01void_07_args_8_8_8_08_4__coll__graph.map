@@ -1,0 +1,15 @@
+<map id="fl::detail::TypedInvoker&lt; void(Args...)&gt;" name="fl::detail::TypedInvoker&lt; void(Args...)&gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="931,55,1100,95"/>
+<area shape="rect" id="Node000002" href="$dc/d61/classfl_1_1detail_1_1_erased_invoker.html" title=" " alt="" coords="599,5,773,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="778,30,907,53,931,57,930,62,906,58,777,36"/>
+<area shape="rect" id="Node000003" href="$dc/db8/classfl_1_1_typed_rpc_binding_3_01void_07_args_8_8_8_08_4.html" title=" " alt="" coords="611,55,761,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="775,73,930,73,930,78,775,78"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="299,19,434,59"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="448,46,611,64,611,70,448,51"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl.html#d0/ddd/classfl_1_1function" title=" " alt="" coords="5,27,135,52"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="148,37,299,37,299,42,148,42"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl.html#dc/d37/classfl_1_1_typed_rpc_binding" title=" " alt="" coords="292,83,441,123"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="455,98,574,90,611,85,611,91,575,95,456,104"/>
+<area shape="rect" id="Node000007" href="$df/d9e/namespacefl_1_1detail.html#d1/df4/classfl_1_1detail_1_1_typed_invoker" title=" " alt="" coords="601,119,771,159"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="784,118,930,89,931,94,785,123"/>
+</map>

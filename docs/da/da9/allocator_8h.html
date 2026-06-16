@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fl/allocator.h File Reference</title>
+<title>FastLED: fl/stl/allocator.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -103,20 +103,23 @@ $(function(){initNavTree('da/da9/allocator_8h.html','../../'); initResizable(tru
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#namespaces">Namespaces</a> &#124;
+<a href="#define-members">Macros</a> &#124;
 <a href="#typedef-members">Typedefs</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">allocator.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;stdlib.h&gt;</code><br />
-<code>#include &lt;<a class="el" href="../../da/d66/string_8h_source.html">string.h</a>&gt;</code><br />
-<code>#include &quot;<a class="el" href="../../db/d36/inplacenew_8h_source.html">fl/inplacenew.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d0/dda/memfill_8h_source.html">fl/memfill.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../df/d63/type__traits_8h_source.html">fl/type_traits.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d8/d4b/unused_8h_source.html">fl/unused.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../df/d72/bit__cast_8h_source.html">fl/bit_cast.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../df/dd8/stdint_8h_source.html">fl/stdint.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d1/d69/bitset_8h_source.html">fl/bitset.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d7/d84/cstddef_8h_source.html">fl/stl/cstddef.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dd/d8d/cstring_8h_source.html">fl/stl/cstring.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d63/type__traits_8h_source.html">fl/stl/type_traits.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d54/compiler__control_8h_source.html">fl/stl/compiler_control.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d72/bit__cast_8h_source.html">fl/stl/bit_cast.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/dd8/stdint_8h_source.html">fl/stl/stdint.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d1/d69/bitset_8h_source.html">fl/stl/bitset.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d0/d4c/malloc_8h_source.html">fl/stl/malloc.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d1/ddf/align_8h_source.html">fl/stl/align.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d0/d1b/static__assert_8h_source.html">fl/stl/static_assert.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for allocator.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -136,6 +139,8 @@ $(function(){initNavTree('da/da9/allocator_8h.html','../../'); initResizable(tru
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:d7/d36/structfl_1_1allocation__result" id="r_d7/d36/structfl_1_1allocation__result"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html#d7/d36/structfl_1_1allocation__result">fl::allocation_result&lt; Pointer, SizeType &gt;</a></td></tr>
+<tr class="separator:d7/d36/structfl_1_1allocation__result"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/dcd/classfl_1_1allocator.html">fl::allocator&lt; T &gt;</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:d2/d69/structfl_1_1allocator_1_1rebind" id="r_d2/d69/structfl_1_1allocator_1_1rebind"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/dcd/classfl_1_1allocator.html#d2/d69/structfl_1_1allocator_1_1rebind">fl::allocator&lt; T &gt;::rebind&lt; U &gt;</a></td></tr>
@@ -150,11 +155,27 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:dd/d8d/structfl_1_1allocator__psram_1_1rebind" id="r_dd/d8d/structfl_1_1allocator__psram_1_1rebind"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/df2/classfl_1_1allocator__psram.html#dd/d8d/structfl_1_1allocator__psram_1_1rebind">fl::allocator_psram&lt; T &gt;::rebind&lt; U &gt;</a></td></tr>
 <tr class="separator:dd/d8d/structfl_1_1allocator__psram_1_1rebind"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d22/classfl_1_1allocator__realloc.html">fl::allocator_realloc&lt; T &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:db/d86/structfl_1_1allocator__realloc_1_1rebind" id="r_db/d86/structfl_1_1allocator__realloc_1_1rebind"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d22/classfl_1_1allocator__realloc.html#db/d86/structfl_1_1allocator__realloc_1_1rebind">fl::allocator_realloc&lt; T &gt;::rebind&lt; U &gt;</a></td></tr>
+<tr class="separator:db/d86/structfl_1_1allocator__realloc_1_1rebind"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d79/classfl_1_1allocator__slab.html">fl::allocator_slab&lt; T, SLAB_SIZE &gt;</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:de/dd0/structfl_1_1allocator__slab_1_1rebind" id="r_de/dd0/structfl_1_1allocator__slab_1_1rebind"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d79/classfl_1_1allocator__slab.html#de/dd0/structfl_1_1allocator__slab_1_1rebind">fl::allocator_slab&lt; T, SLAB_SIZE &gt;::rebind&lt; U &gt;</a></td></tr>
 <tr class="separator:de/dd0/structfl_1_1allocator__slab_1_1rebind"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d27/structfl_1_1allocator__traits.html">fl::allocator_traits&lt; Allocator &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/ddc/structfl_1_1allocator__traits_1_1has__allocate__at__least.html">fl::allocator_traits&lt; Allocator &gt;::has_allocate_at_least&lt; A, typename &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/dd7/structfl_1_1allocator__traits_1_1has__allocate__at__least_3_01_a_00_01decltype_07_07void_08_01flc4e738efb4c05b1b098fcc29d78711c1.html">fl::allocator_traits&lt; Allocator &gt;::has_allocate_at_least&lt; A, decltype((void) fl::declval&lt; A &gt;().allocate_at_least(fl::declval&lt; typename A::size_type &gt;()))&gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/dd8/structfl_1_1allocator__traits_1_1has__reallocate.html">fl::allocator_traits&lt; Allocator &gt;::has_reallocate&lt; A, typename &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/d6e/structfl_1_1allocator__traits_1_1has__reallocate_3_01_a_00_01decltype_07_07void_08_01fl_1_1declv3e5ef95caff3b644f7f02b3ff2406be0.html">fl::allocator_traits&lt; Allocator &gt;::has_reallocate&lt; A, decltype((void) fl::declval&lt; A &gt;().reallocate(fl::declval&lt; typename A::pointer &gt;(), fl::declval&lt; typename A::size_type &gt;(), fl::declval&lt; typename A::size_type &gt;()))&gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d2b/classfl_1_1_p_s_ram_allocator.html">fl::PSRamAllocator&lt; T &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/dce/structfl_1_1_p_s_ram_deleter.html">fl::PSRamDeleter&lt; T &gt;</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/db8/classfl_1_1_slab_allocator.html">fl::SlabAllocator&lt; T, SLAB_SIZE &gt;</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -164,8 +185,16 @@ Classes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail.html">fl::detail</a></td></tr>
+<tr class="memdesc:df/d9e/namespacefl_1_1detail"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile-time linker keep-alive hook for a single <code><a class="el" href="../../d4/d36/namespacefl_a7e1e94407fbd018269794d74ab7fb4c1.html#a7e1e94407fbd018269794d74ab7fb4c1" title="Driver identifier for compile-time bus selection.">fl::Bus</a></code>. <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:a2d502a5de5a5fb62792a95f5ab76c4a9" id="r_a2d502a5de5a5fb62792a95f5ab76c4a9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../da/da9/allocator_8h_a2d502a5de5a5fb62792a95f5ab76c4a9.html#a2d502a5de5a5fb62792a95f5ab76c4a9">FASTLED_DEFAULT_SLAB_SIZE</a>&#160;&#160;&#160;8</td></tr>
+<tr class="separator:a2d502a5de5a5fb62792a95f5ab76c4a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
@@ -189,10 +218,43 @@ Functions</h2></td></tr>
 <tr class="separator:ad9927f98d169c838ddb33a6b020cb0c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a927c08fb5d28927acc0e318fabf79985" id="r_a927c08fb5d28927acc0e318fabf79985"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a927c08fb5d28927acc0e318fabf79985.html#a927c08fb5d28927acc0e318fabf79985">fl::PSRamDeallocate</a> (void *ptr)</td></tr>
 <tr class="separator:a927c08fb5d28927acc0e318fabf79985"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8a058a2783745ceaf1e2313f5060c3e9" id="r_a8a058a2783745ceaf1e2313f5060c3e9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a8a058a2783745ceaf1e2313f5060c3e9.html#a8a058a2783745ceaf1e2313f5060c3e9">fl::SetPSRamAllocator</a> (void *(*alloc)(fl::size), void(*free)(void *))</td></tr>
+<tr class="memitem:a8a058a2783745ceaf1e2313f5060c3e9" id="r_a8a058a2783745ceaf1e2313f5060c3e9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a8a058a2783745ceaf1e2313f5060c3e9.html#a8a058a2783745ceaf1e2313f5060c3e9">fl::SetPSRamAllocator</a> (void *(*alloc)(fl::size), void(*<a class="el" href="../../d4/d36/namespacefl_a8d74e9eb1fcd03c2d38cf1c23fb33b82.html#a8d74e9eb1fcd03c2d38cf1c23fb33b82">free</a>)(void *))</td></tr>
 <tr class="separator:a8a058a2783745ceaf1e2313f5060c3e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a763632edd218e22277a2b5762d6a2777" id="r_a763632edd218e22277a2b5762d6a2777"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail_a763632edd218e22277a2b5762d6a2777.html#a763632edd218e22277a2b5762d6a2777">fl::detail::slab_allocator_registry_get</a> (fl::size block_size, fl::size slab_size)</td></tr>
+<tr class="separator:a763632edd218e22277a2b5762d6a2777"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad88457ea9358af062d784aebaae9d6d5" id="r_ad88457ea9358af062d784aebaae9d6d5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d9e/namespacefl_1_1detail_ad88457ea9358af062d784aebaae9d6d5.html#ad88457ea9358af062d784aebaae9d6d5">fl::detail::slab_allocator_registry_set</a> (fl::size block_size, fl::size slab_size, void *<a class="el" href="../../d8/dcd/classfl_1_1allocator.html">allocator</a>)</td></tr>
+<tr class="separator:ad88457ea9358af062d784aebaae9d6d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/><h2 class="groupheader">Class Documentation</h2>
+<a name="d7/d36/structfl_1_1allocation__result" id="d7/d36/structfl_1_1allocation__result"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#d7/d36/structfl_1_1allocation__result">&#9670;&#160;</a></span>fl::allocation_result</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct fl::allocation_result</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="3">Class Members</th></tr>
+<tr><td class="fieldtype">
+<a id="acaece898276c9db6d414d26b2d1e6afb" name="acaece898276c9db6d414d26b2d1e6afb"></a>SizeType</td>
+<td class="fieldname">
+count</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="af2fbdab4d4964ef8a9b18bc3216a4bbe" name="af2fbdab4d4964ef8a9b18bc3216a4bbe"></a>Pointer</td>
+<td class="fieldname">
+ptr</td>
+<td class="fielddoc">
+</td></tr>
+</table>
+
+</div>
+</div>
 <a name="d2/d69/structfl_1_1allocator_1_1rebind" id="d2/d69/structfl_1_1allocator_1_1rebind"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#d2/d69/structfl_1_1allocator_1_1rebind">&#9670;&#160;</a></span>fl::allocator::rebind</h2>
 
@@ -262,6 +324,29 @@ other <a class="el" href="../../d3/df2/classfl_1_1allocator__psram.html">allocat
 
 </div>
 </div>
+<a name="db/d86/structfl_1_1allocator__realloc_1_1rebind" id="db/d86/structfl_1_1allocator__realloc_1_1rebind"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#db/d86/structfl_1_1allocator__realloc_1_1rebind">&#9670;&#160;</a></span>fl::allocator_realloc::rebind</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct fl::allocator_realloc::rebind</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="3">Class Members</th></tr>
+<tr><td class="fieldtype">
+<a id="a01ab87f7f4d4bdf5233445d8d3c25614" name="a01ab87f7f4d4bdf5233445d8d3c25614"></a>typedef <a class="el" href="../../de/d22/classfl_1_1allocator__realloc.html">allocator_realloc</a>&lt; U &gt;</td>
+<td class="fieldname">
+other <a class="el" href="../../de/d22/classfl_1_1allocator__realloc.html">allocator_realloc</a>&lt;U&gt;</td>
+<td class="fielddoc">
+</td></tr>
+</table>
+
+</div>
+</div>
 <a name="de/dd0/structfl_1_1allocator__slab_1_1rebind" id="de/dd0/structfl_1_1allocator__slab_1_1rebind"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#de/dd0/structfl_1_1allocator__slab_1_1rebind">&#9670;&#160;</a></span>fl::allocator_slab::rebind</h2>
 
@@ -276,7 +361,7 @@ other <a class="el" href="../../d3/df2/classfl_1_1allocator__psram.html">allocat
 <table class="fieldtable">
 <tr><th colspan="3">Class Members</th></tr>
 <tr><td class="fieldtype">
-<a id="a4f37b7639b17bf4a59efffde1f3a04db" name="a4f37b7639b17bf4a59efffde1f3a04db"></a>typedef typename value, <a class="el" href="../../d2/d79/classfl_1_1allocator__slab.html">allocator_slab</a>&lt; char, SLAB_SIZE &gt;, <a class="el" href="../../d2/d79/classfl_1_1allocator__slab.html">allocator_slab</a>&lt; U, SLAB_SIZE &gt; &gt;::type</td>
+<a id="a4f37b7639b17bf4a59efffde1f3a04db" name="a4f37b7639b17bf4a59efffde1f3a04db"></a>typedef typename <a class="el" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>, <a class="el" href="../../d2/d79/classfl_1_1allocator__slab.html">allocator_slab</a>&lt; char, SLAB_SIZE &gt;, <a class="el" href="../../d2/d79/classfl_1_1allocator__slab.html">allocator_slab</a>&lt; U, SLAB_SIZE &gt; &gt;::type</td>
 <td class="fieldname">
 other</td>
 <td class="fielddoc">
@@ -291,8 +376,8 @@ other</td>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../da/da9/allocator_8h.html">allocator.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_0dd6897a8ae40540acd9d694849e950e.html">stl</a></li><li class="navelem"><a class="el" href="../../da/da9/allocator_8h.html">allocator.h</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

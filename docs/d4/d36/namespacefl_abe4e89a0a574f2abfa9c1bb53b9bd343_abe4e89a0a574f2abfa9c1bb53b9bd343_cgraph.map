@@ -1,0 +1,23 @@
+<map id="fl::configureAsyncLogService" name="fl::configureAsyncLogService">
+<area shape="rect" id="Node000001" title="Configure async logger automatic servicing task." alt="" coords="5,144,213,170"/>
+<area shape="rect" id="Node000002" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_acc200cb8837f82379821217fb4a6bc29.html#acc200cb8837f82379821217fb4a6bc29" title=" " alt="" coords="261,73,476,113"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="161,142,273,114,274,119,163,147"/>
+<area shape="rect" id="Node000032" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_aba33c1a305c0ecf16009a84461b06f43.html#aba33c1a305c0ecf16009a84461b06f43" title="Change the service interval (default 16ms)" alt="" coords="261,137,476,177"/>
+<area shape="poly" id="edge10_Node000001_Node000032" title=" " alt="" coords="214,154,247,154,247,160,214,160"/>
+<area shape="rect" id="Node000033" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a2f70d68ee9036fd6777ba14b5cd93e2d.html#a2f70d68ee9036fd6777ba14b5cd93e2d" title="Configure number of messages to flush per service call." alt="" coords="261,201,476,241"/>
+<area shape="poly" id="edge11_Node000001_Node000033" title=" " alt="" coords="163,167,274,195,273,200,161,172"/>
+<area shape="rect" id="Node000003" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a3bff7aaa6e1158fbbee95055b3458285.html#a3bff7aaa6e1158fbbee95055b3458285" title=" " alt="" coords="524,73,743,113"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="476,90,511,90,511,96,476,96"/>
+<area shape="rect" id="Node000004" href="$d2/d2b/classfl_1_1task_1_1_scheduler_ad1f60f825514d99a9ee0d06f564be1a7.html#ad1f60f825514d99a9ee0d06f564be1a7" title=" " alt="" coords="1053,29,1192,69"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="665,71,721,40,755,26,790,16,850,5,898,3,1006,16,1045,23,1044,28,1005,21,897,9,850,10,791,21,757,31,724,45,667,75"/>
+<area shape="rect" id="Node000006" href="$db/d5c/namespacefl_1_1task_a0f002cad452f6b7f8dff6ba2b8f0f8b8.html#a0f002cad452f6b7f8dff6ba2b8f0f8b8" title=" " alt="" coords="829,31,967,56"/>
+<area shape="poly" id="edge4_Node000003_Node000006" title=" " alt="" coords="741,70,815,56,816,62,742,76"/>
+<area shape="rect" id="Node000008" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a266030d285c7f6ae31eb3c619cee8693.html#a266030d285c7f6ae31eb3c619cee8693" title=" " alt="" coords="1053,118,1192,158"/>
+<area shape="poly" id="edge5_Node000003_Node000008" title=" " alt="" coords="661,111,719,149,754,167,791,180,850,193,897,195,945,190,1005,180,1066,161,1068,166,1006,185,946,196,897,201,850,198,790,185,752,171,716,153,658,115"/>
+<area shape="rect" id="Node000011" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_ab5cd1a92bcf542222607179a5363c2e0.html#ab5cd1a92bcf542222607179a5363c2e0" title="Service all registered loggers (called by task)" alt="" coords="791,130,1005,170"/>
+<area shape="poly" id="edge6_Node000003_Node000011" title=" " alt="" coords="727,111,792,125,791,130,726,116"/>
+<area shape="rect" id="Node000030" href="$de/daf/classfl_1_1task_1_1_handle_a01b05372acab06bd2197d033aafe8cb9.html#a01b05372acab06bd2197d033aafe8cb9" title=" " alt="" coords="819,80,977,106"/>
+<area shape="poly" id="edge7_Node000003_Node000030" title=" " alt="" coords="743,90,805,90,805,96,743,96"/>
+<area shape="poly" id="edge8_Node000030_Node000004" title=" " alt="" coords="963,78,1039,63,1040,68,964,83"/>
+<area shape="poly" id="edge9_Node000030_Node000008" title=" " alt="" coords="962,103,1040,119,1039,124,961,108"/>
+</map>

@@ -1,0 +1,4 @@
+<map id="fl::audio::ISynthOscillator::setShape" name="fl::audio::ISynthOscillator::setShape">
+<area shape="rect" id="Node000001" title="Change waveform shape (takes effect at next cycle boundary)" alt="" coords="5,29,191,69"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="63,30,61,20,67,11,79,5,98,3,120,6,132,13,129,17,118,11,98,8,81,10,70,15,66,21,68,28"/>
+</map>

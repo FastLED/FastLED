@@ -1,0 +1,10 @@
+<map id="set_power_scaling_exponent" name="set_power_scaling_exponent">
+<area shape="rect" id="Node000001" title="Set a non&#45;linear brightness&#45;to&#45;power response exponent." alt="" coords="5,5,216,31"/>
+<area shape="rect" id="Node000002" href="$d1/d2a/power__mgt_8cpp_8hpp_afe71d257dc9aca526178a992761bb812.html#afe71d257dc9aca526178a992761bb812" title="Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)" alt="" coords="449,5,560,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="216,15,436,15,436,21,216,21"/>
+<area shape="rect" id="Node000004" href="$d9/d5f/group___power_model_ga83d1cb7bfce9bd338765968bb40d54e5.html#ga83d1cb7bfce9bd338765968bb40d54e5" title="Set custom RGB LED power consumption model." alt="" coords="264,31,401,56"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="217,27,251,31,250,37,216,33"/>
+<area shape="rect" id="Node000003" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="608,5,771,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="560,15,594,15,594,21,560,21"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="401,31,435,25,436,31,402,36"/>
+</map>

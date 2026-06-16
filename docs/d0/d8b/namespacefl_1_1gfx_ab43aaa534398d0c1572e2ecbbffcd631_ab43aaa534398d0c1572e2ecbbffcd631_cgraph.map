@@ -1,0 +1,14 @@
+<map id="fl::gfx::drawRing" name="fl::gfx::drawRing">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,118,133,143"/>
+<area shape="rect" id="Node000002" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_ac1063e6536a3ebf22978c3a5fe41310b.html#ac1063e6536a3ebf22978c3a5fe41310b" title=" " alt="" coords="181,118,384,143"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="134,128,168,128,168,133,134,133"/>
+<area shape="rect" id="Node000003" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_ace632a8bd8b1b176f9f882b536fc486c.html#ace632a8bd8b1b176f9f882b536fc486c" title="Precompute right&#45;shift and reciprocal multiplier for AA division." alt="" coords="453,29,622,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="321,115,431,79,456,71,458,76,433,84,322,120"/>
+<area shape="rect" id="Node000004" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_abd0fb21c2ae83be519a7c70ebaa442fe.html#abd0fb21c2ae83be519a7c70ebaa442fe" title="Render one scanline of a ring using incremental d² with phase&#45;based scanning." alt="" coords="432,118,643,143"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="384,128,419,128,419,133,384,133"/>
+<area shape="rect" id="Node000005" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_ab04a22e2927673d2692b4f3e354af564.html#ab04a22e2927673d2692b4f3e354af564" title="Convert any Coord type to 8.8 fixed&#45;point (fl::i32)." alt="" coords="454,191,621,217"/>
+<area shape="poly" id="edge6_Node000002_Node000005" title=" " alt="" coords="329,141,480,185,478,190,327,146"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="490,30,487,20,495,10,512,5,537,3,567,6,583,13,581,18,565,11,537,8,513,10,498,15,493,21,495,28"/>
+<area shape="poly" id="edge5_Node000004_Node000004" title=" " alt="" coords="496,120,487,110,492,100,509,94,537,91,573,95,583,100,587,106,583,109,580,104,572,100,537,97,510,99,496,104,493,109,500,116"/>
+<area shape="poly" id="edge7_Node000005_Node000005" title=" " alt="" coords="496,193,487,183,492,173,509,167,537,165,573,169,583,173,587,179,583,182,580,177,572,174,537,170,510,172,496,177,493,182,500,189"/>
+</map>

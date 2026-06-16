@@ -1,0 +1,31 @@
+<map id="fl/stl/basic_vector.cpp.hpp" name="fl/stl/basic_vector.cpp.hpp">
+<area shape="rect" id="Node000001" title="Compiled&#45;once implementation of vector_basic methods." alt="" coords="497,5,688,31"/>
+<area shape="rect" id="Node000002" href="$d5/d47/basic__vector_8h.html" title="Type&#45;erased base class for fl::vector&lt;T&gt;." alt="" coords="405,79,551,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="576,33,510,74,507,69,573,28"/>
+<area shape="rect" id="Node000006" href="$dd/d8d/cstring_8h.html" title=" " alt="" coords="545,225,656,251"/>
+<area shape="poly" id="edge16_Node000001_Node000006" title=" " alt="" coords="596,31,602,211,597,211,590,31"/>
+<area shape="rect" id="Node000007" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="228,299,355,324"/>
+<area shape="poly" id="edge18_Node000001_Node000007" title=" " alt="" coords="513,33,457,48,398,72,343,106,320,128,300,153,287,186,282,222,284,256,288,285,283,286,278,257,277,221,282,185,296,151,316,125,340,102,395,67,455,43,512,28"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="689,79,865,104"/>
+<area shape="poly" id="edge17_Node000001_Node000013" title=" " alt="" coords="623,28,735,71,733,76,621,33"/>
+<area shape="rect" id="Node000003" href="$d3/d7e/int_8h.html" title=" " alt="" coords="438,225,521,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="493,103,512,124,527,151,529,169,524,187,504,217,500,214,520,185,524,169,522,153,508,127,489,106"/>
+<area shape="poly" id="edge4_Node000002_Node000006" title=" " alt="" coords="494,102,545,150,589,212,585,215,541,154,491,106"/>
+<area shape="poly" id="edge15_Node000002_Node000007" title=" " alt="" coords="405,105,358,123,337,136,319,154,301,185,292,220,290,255,291,285,285,285,284,255,287,220,296,183,315,150,333,132,356,118,404,100"/>
+<area shape="rect" id="Node000008" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="28,152,203,177"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="420,107,188,152,187,147,419,101"/>
+<area shape="rect" id="Node000012" href="$d8/de1/memory__resource_8h.html" title="PMR&#45;style polymorphic memory resource for type&#45;erased allocation." alt="" coords="329,152,513,177"/>
+<area shape="poly" id="edge12_Node000002_Node000012" title=" " alt="" coords="471,106,441,143,437,139,466,103"/>
+<area shape="rect" id="Node000004" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="488,299,591,324"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="491,249,523,286,519,290,487,253"/>
+<area shape="poly" id="edge5_Node000006_Node000004" title=" " alt="" coords="593,253,560,290,556,286,589,249"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="552,253,355,298,354,293,550,248"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="5,299,180,324"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="112,179,103,200,95,226,92,256,93,285,88,285,87,256,90,225,98,198,107,176"/>
+<area shape="rect" id="Node000010" href="$d1/ddf/align_8h.html" title="Alignment macros and utilities for FastLED." alt="" coords="105,225,203,251"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="124,176,144,212,139,215,119,179"/>
+<area shape="poly" id="edge11_Node000010_Node000007" title=" " alt="" coords="177,248,258,290,256,295,175,253"/>
+<area shape="poly" id="edge10_Node000010_Node000009" title=" " alt="" coords="146,253,114,290,110,286,142,249"/>
+<area shape="poly" id="edge13_Node000012_Node000003" title=" " alt="" coords="432,176,463,213,459,217,428,179"/>
+<area shape="poly" id="edge14_Node000012_Node000007" title=" " alt="" coords="412,180,313,290,309,287,408,176"/>
+</map>

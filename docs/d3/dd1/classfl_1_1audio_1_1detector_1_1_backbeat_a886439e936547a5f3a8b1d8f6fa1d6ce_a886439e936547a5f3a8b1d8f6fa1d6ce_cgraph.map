@@ -1,0 +1,9 @@
+<map id="fl::audio::detector::Backbeat::calculatePatternConfidence" name="fl::audio::detector::Backbeat::calculatePatternConfidence">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,40,209,95"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350" title=" " alt="" coords="257,5,336,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="209,38,243,29,245,34,210,43"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="265,55,328,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="210,65,252,65,252,70,210,70"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1" title=" " alt="" coords="265,104,328,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="210,91,253,103,251,108,209,97"/>
+</map>

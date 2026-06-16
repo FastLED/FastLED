@@ -1,0 +1,8 @@
+<map id="fl::audio::Processor::getSilenceDetector" name="fl::audio::Processor::getSilenceDetector">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,160,69"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="45,30,43,20,49,11,62,5,83,3,106,6,119,13,116,18,104,11,83,8,64,10,53,15,48,21,51,28"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="218,7,343,33"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="160,35,204,29,204,34,160,41"/>
+<area shape="rect" id="Node000003" href="$d3/d6b/classfl_1_1audio_1_1_processor_ade806d07af52e3d281939cebce7643d5.html#ade806d07af52e3d281939cebce7643d5" title=" " alt="" coords="208,57,353,97"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="160,58,195,63,194,68,160,63"/>
+</map>

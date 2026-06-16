@@ -1,0 +1,40 @@
+digraph "fl::net::http::HttpStreamTransport::rpc"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::net::http::HttpStream\lTransport::rpc",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Send a JSON-RPC request, returns promise that resolves with the final response."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::net::http::HttpStream\lTransport::isConnected",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8237da9613a0a0c2bffbd8bfddd1f50e.html#a8237da9613a0a0c2bffbd8bfddd1f50e",tooltip="Check if connected."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::net::http::HttpStream\lTransport::handleConnectionState\lChange",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a5154b7a4c4fcb1c3d14acb2b2f1cbc37.html#a5154b7a4c4fcb1c3d14acb2b2f1cbc37",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::net::http::HttpStream\lTransport::update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a57c01766a42aa6cbab3d0c6b7617a5ff.html#a57c01766a42aa6cbab3d0c6b7617a5ff",tooltip="Update connection state (handles reconnection, heartbeat) Call this in main loop."];
+  Node4 -> Node2 [id="edge4_Node000004_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node2 [id="edge5_Node000002_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node5 [id="edge6_Node000002_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::net::http::HttpStream\lTransport::processIncomingData",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a36aa20b252cc505454144d47d39dabd1.html#a36aa20b252cc505454144d47d39dabd1",tooltip=" "];
+  Node5 -> Node6 [id="edge7_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::net::http::HttpStream\lTransport::readRequest",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_aab4451d64b6a491f073f941fd22258c0.html#aab4451d64b6a491f073f941fd22258c0",tooltip="Read next JSON-RPC request from stream Non-blocking, returns nullopt if no complete request available..."];
+  Node6 -> Node2 [id="edge8_Node000006_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node4 [id="edge9_Node000005_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node6 [id="edge10_Node000002_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node7 [id="edge11_Node000002_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::net::http::HttpStream\lTransport::rpc",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a5268be2c592ea322ab9e4b7612bda7f7.html#a5268be2c592ea322ab9e4b7612bda7f7",tooltip="Send a pre-built JSON-RPC request."];
+  Node2 -> Node8 [id="edge12_Node000002_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::net::http::HttpStream\lTransport::rpcStream",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a31df9c89b9d57c3e277973d4021f8adc.html#a31df9c89b9d57c3e277973d4021f8adc",tooltip="Send a streaming pre-built JSON-RPC request."];
+  Node2 -> Node9 [id="edge13_Node000002_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::net::http::HttpStream\lTransport::sendHeartbeat",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_af403cc0fa1c835f0354267646a1692a4.html#af403cc0fa1c835f0354267646a1692a4",tooltip=" "];
+  Node9 -> Node4 [id="edge14_Node000009_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node4 [id="edge15_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node10 [id="edge16_Node000002_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::net::http::HttpStream\lTransport::writeResponse",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a07968575a3145c9accb1a6386674af9b.html#a07968575a3145c9accb1a6386674af9b",tooltip="Write JSON-RPC response to stream."];
+  Node10 -> Node2 [id="edge17_Node000010_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 -> Node7 [id="edge18_Node000010_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 -> Node8 [id="edge19_Node000010_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 -> Node9 [id="edge20_Node000010_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node1 [id="edge21_Node000001_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

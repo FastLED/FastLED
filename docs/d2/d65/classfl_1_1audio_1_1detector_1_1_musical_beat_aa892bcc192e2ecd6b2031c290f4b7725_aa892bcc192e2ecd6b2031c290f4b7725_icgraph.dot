@@ -1,0 +1,21 @@
+digraph "fl::audio::detector::MusicalBeat::getAverageIBI"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::audio::detector\l::MusicalBeat::getAverageIBI",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Get inter-beat interval (IBI) statistics."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::audio::detector\l::MusicalBeat::~MusicalBeat",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a8ead4e67bdff0c0600d13fc942313879.html#a8ead4e67bdff0c0600d13fc942313879",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::audio::detector\l::MusicalBeat::calculateBeat\lConfidence",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a25756788660507be8a6660dc23f82624.html#a25756788660507be8a6660dc23f82624",tooltip="Calculate beat confidence based on rhythmic consistency."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::audio::detector\l::MusicalBeat::processSample",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a14368f704c7c67d888b81f70c7004dcb.html#a14368f704c7c67d888b81f70c7004dcb",tooltip="Process one audio frame."];
+  Node4 -> Node2 [id="edge4_Node000004_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node4 [id="edge5_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node5 [id="edge6_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::audio::detector\l::MusicalBeat::updateBPMEstimate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_ae8c4e7e2d6ed27b8d955a9e2e1cd3db2.html#ae8c4e7e2d6ed27b8d955a9e2e1cd3db2",tooltip="Update BPM estimate from inter-beat intervals."];
+  Node5 -> Node4 [id="edge7_Node000005_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

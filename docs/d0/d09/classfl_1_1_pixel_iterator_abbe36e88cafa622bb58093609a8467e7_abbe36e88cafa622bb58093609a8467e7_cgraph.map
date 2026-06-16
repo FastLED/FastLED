@@ -1,0 +1,23 @@
+<map id="fl::PixelIterator::writeSK9822" name="fl::PixelIterator::writeSK9822">
+<area shape="rect" id="Node000001" title="Encode pixels in SK9822 format (zero allocation)" alt="" coords="5,122,131,162"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a403bd8d96e6625e5daef764daf780f26.html#a403bd8d96e6625e5daef764daf780f26" title="Helper function to create a back_insert_iterator." alt="" coords="235,5,362,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="84,120,123,79,149,57,178,40,221,24,222,29,180,44,152,62,127,82,87,123"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_afeb0eb685bd1d7f3bc42e790d751b3e3.html#afeb0eb685bd1d7f3bc42e790d751b3e3" title="Encode pixel data in SK9822 format with global brightness." alt="" coords="231,55,366,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="106,119,178,89,217,78,219,83,180,94,108,124"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a5e43ce3e648ff7c227a6dc493c221703.html#a5e43ce3e648ff7c227a6dc493c221703" title="Encode pixel data in SK9822 format (auto&#45;detected brightness from first pixel)" alt="" coords="179,104,419,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="131,132,170,128,170,133,131,138"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_af92566759441f91065d207e3ad02e48f.html#af92566759441f91065d207e3ad02e48f" title="Encode pixel data in SK9822 format with per&#45;LED brightness." alt="" coords="218,153,379,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="131,146,205,154,204,159,131,151"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a838e3eb7aadd2717af8899fbf69cdff4.html#a838e3eb7aadd2717af8899fbf69cdff4" title="Create brightness input iterator range from PixelIterator." alt="" coords="205,203,392,243"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="112,160,180,188,207,197,206,202,178,192,110,165"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_a0245017ca5e8aeaf10ccae7aee944f08.html#a0245017ca5e8aeaf10ccae7aee944f08" title="Create RGB input iterator range from PixelIterator." alt="" coords="190,292,407,317"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="86,160,126,206,152,231,180,253,211,271,244,285,241,290,209,276,177,258,149,235,122,210,82,164"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_ac2cf8663a108788e320558648cc42a7d.html#ac2cf8663a108788e320558648cc42a7d" title="Map 8&#45;bit brightness to 5&#45;bit (0&#45;31)" alt="" coords="467,153,632,179"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="379,163,453,163,453,169,379,169"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a9f32cf31427769f3900630cb3506f2c6.html#a9f32cf31427769f3900630cb3506f2c6" title=" " alt="" coords="496,251,603,276"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="393,236,483,250,482,255,392,241"/>
+<area shape="rect" id="Node000009" href="$da/d3c/namespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259.html#a0bddf371925d8c4e94b88e9d7b35d259" title=" " alt="" coords="680,251,784,276"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="603,261,667,261,667,266,603,266"/>
+<area shape="poly" id="edge10_Node000010_Node000008" title=" " alt="" coords="376,289,482,272,483,277,377,295"/>
+<area shape="poly" id="edge11_Node000010_Node000010" title=" " alt="" coords="261,294,253,284,257,274,273,268,299,265,331,269,343,279,340,283,329,274,299,271,274,273,261,278,258,283,265,290"/>
+</map>

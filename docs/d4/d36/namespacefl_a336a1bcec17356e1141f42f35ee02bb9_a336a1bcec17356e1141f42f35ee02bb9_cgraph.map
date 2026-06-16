@@ -1,0 +1,13 @@
+<map id="fl::asset" name="fl::asset">
+<area shape="rect" id="Node000001" title="Construct an asset handle from a relative sketch path at runtime." alt="" coords="5,59,79,84"/>
+<area shape="rect" id="Node000002" href="$de/dde/namespacefl_1_1asset__detail_a96ede9fc23fb9bf6983aada6a1c93e34.html#a96ede9fc23fb9bf6983aada6a1c93e34" title="Compile&#45;time length of a null&#45;terminated C string." alt="" coords="133,29,285,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="79,62,123,54,124,60,80,68"/>
+<area shape="rect" id="Node000003" href="$de/dde/namespacefl_1_1asset__detail_af361660dbfe3bbe551cd700ec8b371e9.html#af361660dbfe3bbe551cd700ec8b371e9" title="Compile&#45;time check: returns true if the string contains a &quot;..&quot; segment." alt="" coords="127,79,292,119"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="80,75,114,81,113,86,79,80"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="182,31,176,21,179,11,190,5,209,3,232,6,242,15,238,19,230,11,209,8,192,10,183,15,181,20,186,28"/>
+<area shape="rect" id="Node000004" href="$de/dde/namespacefl_1_1asset__detail_a6a167501a51d683604efe86303115145.html#a6a167501a51d683604efe86303115145" title="Recursive constexpr walk looking for any &quot;..&quot; segment." alt="" coords="340,79,525,119"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="292,97,326,97,326,102,292,102"/>
+<area shape="poly" id="edge6_Node000004_Node000004" title=" " alt="" coords="394,80,391,70,397,60,411,55,433,53,457,56,470,63,468,68,455,61,433,58,413,60,401,65,396,71,399,78"/>
+<area shape="rect" id="Node000005" href="$de/dde/namespacefl_1_1asset__detail_a9665e98fff6fe37d633373938e3586a1.html#a9665e98fff6fe37d633373938e3586a1" title="Compile&#45;time check: does position i in p start a &quot;..&quot; segment?" alt="" coords="573,79,709,119"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="526,97,559,97,559,102,526,102"/>
+</map>

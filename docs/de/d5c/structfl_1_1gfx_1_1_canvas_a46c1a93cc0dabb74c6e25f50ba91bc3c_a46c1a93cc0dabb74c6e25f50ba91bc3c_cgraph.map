@@ -1,0 +1,16 @@
+<map id="fl::gfx::Canvas::drawLine" name="fl::gfx::Canvas::drawLine">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,80,188,105"/>
+<area shape="rect" id="Node000002" href="$d0/d8b/namespacefl_1_1gfx_a0efcb1204c3209937cf4fb131d9f6cf7.html#a0efcb1204c3209937cf4fb131d9f6cf7" title="============================================================================" alt="" coords="236,80,363,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="188,90,222,90,222,95,188,95"/>
+<area shape="rect" id="Node000003" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_a4c7133be2d3aef492af1968ce467b55d.html#a4c7133be2d3aef492af1968ce467b55d" title=" " alt="" coords="411,80,612,105"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="363,90,397,90,397,95,363,95"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84" title=" " alt="" coords="717,5,778,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="547,77,659,39,702,27,704,32,661,45,549,82"/>
+<area shape="rect" id="Node000005" href="$d0/d8b/namespacefl_1_1gfx_a82edaad44f942771f5f99fe52a30daa0.html#a82edaad44f942771f5f99fe52a30daa0" title="Internal helper: add or set pixel to rectangular buffer with bounds checking Direct row&#45;major indexin..." alt="" coords="660,55,835,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="612,79,646,76,647,81,613,85"/>
+<area shape="rect" id="Node000006" href="$da/d3c/namespacefl_1_1fl_a5d5f266e22b532883d3bcc5159a7f1b8.html#a5d5f266e22b532883d3bcc5159a7f1b8" title=" " alt="" coords="703,104,791,129"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="613,100,689,108,689,113,612,106"/>
+<area shape="rect" id="Node000007" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_ab04a22e2927673d2692b4f3e354af564.html#ab04a22e2927673d2692b4f3e354af564" title="Convert any Coord type to 8.8 fixed&#45;point (fl::i32)." alt="" coords="664,177,831,203"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="544,103,704,170,702,175,542,108"/>
+<area shape="poly" id="edge7_Node000007_Node000007" title=" " alt="" coords="709,179,701,169,705,159,721,153,747,151,780,155,793,164,790,168,778,159,747,156,722,158,709,163,706,168,713,175"/>
+</map>

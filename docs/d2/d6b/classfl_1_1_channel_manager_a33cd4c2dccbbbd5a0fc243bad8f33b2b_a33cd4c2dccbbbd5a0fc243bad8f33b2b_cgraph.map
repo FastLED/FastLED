@@ -1,0 +1,8 @@
+<map id="fl::ChannelManager::selectDriverForChannel" name="fl::ChannelManager::selectDriverForChannel">
+<area shape="rect" id="Node000001" title="Select best driver for channel data (used by Channel::showPixels)" alt="" coords="5,5,188,45"/>
+<area shape="rect" id="Node000002" href="$de/d66/classfl_1_1basic__string_a409024020d4cdb01125a9b7fba3404b5.html#a409024020d4cdb01125a9b7fba3404b5" title=" " alt="" coords="435,13,601,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="188,20,236,19,387,19,421,19,421,25,387,24,236,24,188,25"/>
+<area shape="rect" id="Node000003" href="$d2/d6b/classfl_1_1_channel_manager_a84ed7b6e6c9fa10e656a0e4679422f67.html#a84ed7b6e6c9fa10e656a0e4679422f67" title="Silent counterpart to getDriverByName()." alt="" coords="236,33,387,73"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="189,35,223,39,222,44,188,40"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="387,41,421,36,422,41,387,46"/>
+</map>

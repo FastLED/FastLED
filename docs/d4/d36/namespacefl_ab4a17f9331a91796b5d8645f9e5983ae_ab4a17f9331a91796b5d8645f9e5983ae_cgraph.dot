@@ -1,0 +1,12 @@
+digraph "fl::wave3"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::wave3",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Convert byte to 3 wave3 bytes using nibble LUT."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::detail::wave3_convert\l_byte_to_wave3byte",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_afa4a607fdb31c744529cfe7156160684.html#afa4a607fdb31c744529cfe7156160684",tooltip="Helper: Convert byte to Wave3Byte using nibble LUT (internal use only)"];
+}

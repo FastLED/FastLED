@@ -1,0 +1,8 @@
+<map id="fl::audio::detector::TempoAnalyzer::detectOnset" name="fl::audio::detector::TempoAnalyzer::detectOnset">
+<area shape="rect" id="Node000001" title=" " alt="" coords="533,29,751,69"/>
+<area shape="rect" id="Node000002" href="$d6/df8/classfl_1_1audio_1_1detector_1_1_tempo_analyzer_a7dcd38afdfaaa982d15b12617ff22229.html#a7dcd38afdfaaa982d15b12617ff22229" title=" " alt="" coords="303,29,485,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="520,52,486,52,486,47,520,47"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="436,18,421,11,394,8,370,10,356,15,350,21,353,28,348,30,345,20,353,10,369,5,394,3,423,6,439,13"/>
+<area shape="rect" id="Node000003" href="$d6/df8/classfl_1_1audio_1_1detector_1_1_tempo_analyzer_ad4e015a56da87e725882351ec7a4d980.html#ad4e015a56da87e725882351ec7a4d980" title=" " alt="" coords="5,29,255,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="289,52,255,52,255,47,289,47"/>
+</map>

@@ -11,4 +11,8 @@ digraph "ColorHSV::operator="
   Node2 [id="Node000002",label="ColorHSV::ColorHSV",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d38/struct_color_h_s_v_a7cf7c942fb706544714de3cfe79ce4fa.html#a7cf7c942fb706544714de3cfe79ce4fa",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="ColorHSV::FromRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d38/struct_color_h_s_v_ac360c5be868ae4606e7a1df75adad682.html#ac360c5be868ae4606e7a1df75adad682",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::max",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909",tooltip=" "];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::min",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb",tooltip=" "];
 }

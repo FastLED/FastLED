@@ -1,0 +1,11 @@
+<map id="set_power_model" name="set_power_model">
+<area shape="rect" id="Node000001" title="Set custom RGBWW LED power consumption model." alt="" coords="5,31,143,56"/>
+<area shape="rect" id="Node000002" href="$d9/d5f/group___power_model_ga83d1cb7bfce9bd338765968bb40d54e5.html#ga83d1cb7bfce9bd338765968bb40d54e5" title="Set custom RGB LED power consumption model." alt="" coords="224,5,361,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="143,33,210,25,211,30,143,38"/>
+<area shape="rect" id="Node000005" href="$db/d18/struct_power_model_r_g_b_w_w_acca23fb0068537288b7c66bb654fcba0.html#acca23fb0068537288b7c66bb654fcba0" title="Convert to RGB model (folds W/WW power back into RGB so the brightness limiter doesn&#39;t under&#45;budget)." alt="" coords="191,55,395,80"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="143,48,177,52,177,57,143,54"/>
+<area shape="rect" id="Node000003" href="$d1/d2a/power__mgt_8cpp_8hpp_afe71d257dc9aca526178a992761bb812.html#afe71d257dc9aca526178a992761bb812" title="Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)" alt="" coords="443,5,553,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="361,15,428,15,428,21,361,21"/>
+<area shape="rect" id="Node000004" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="601,5,764,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="553,15,587,15,587,21,553,21"/>
+</map>

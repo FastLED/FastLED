@@ -1,0 +1,15 @@
+<map id="fl::net::http::HttpStreamTransport::resolveRpcStream" name="fl::net::http::HttpStreamTransport::resolveRpcStream">
+<area shape="rect" id="Node000001" title=" " alt="" coords="972,59,1181,99"/>
+<area shape="rect" id="Node000002" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_abcd0cfab5c8828fed71b4eb662761dc4.html#abcd0cfab5c8828fed71b4eb662761dc4" title=" " alt="" coords="677,59,924,99"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="958,81,924,81,924,76,958,76"/>
+<area shape="rect" id="Node000003" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_aab4451d64b6a491f073f941fd22258c0.html#aab4451d64b6a491f073f941fd22258c0" title="Read next JSON&#45;RPC request from stream Non&#45;blocking, returns nullopt if no complete request available..." alt="" coords="453,29,629,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="663,66,629,62,630,57,664,60"/>
+<area shape="rect" id="Node000006" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a57c01766a42aa6cbab3d0c6b7617a5ff.html#a57c01766a42aa6cbab3d0c6b7617a5ff" title="Update connection state (handles reconnection, heartbeat) Call this in main loop." alt="" coords="5,29,181,69"/>
+<area shape="poly" id="edge8_Node000002_Node000006" title=" " alt="" coords="664,91,458,96,343,93,229,84,165,72,166,67,230,79,343,88,458,91,664,86"/>
+<area shape="rect" id="Node000004" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8237da9613a0a0c2bffbd8bfddd1f50e.html#a8237da9613a0a0c2bffbd8bfddd1f50e" title="Check if connected." alt="" coords="229,29,405,69"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="439,61,406,61,406,55,439,56"/>
+<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="419,38,453,38,453,43,419,43"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="355,18,342,11,317,8,296,10,283,15,278,21,281,28,275,30,273,20,280,10,295,5,317,3,343,6,358,13"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="215,61,182,61,182,55,215,56"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="195,38,229,38,229,43,195,43"/>
+</map>

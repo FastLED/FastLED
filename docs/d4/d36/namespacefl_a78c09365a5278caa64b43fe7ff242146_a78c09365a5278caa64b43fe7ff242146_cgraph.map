@@ -1,0 +1,38 @@
+<map id="fl::get_async_logger_by_index" name="fl::get_async_logger_by_index">
+<area shape="rect" id="Node000001" title="Template&#45;based logger accessor with auto&#45;registration and enablement check." alt="" coords="5,95,157,135"/>
+<area shape="poly" id="edge4_Node000001_Node000001" title=" " alt="" coords="38,96,35,86,42,76,58,71,81,69,108,72,123,79,121,84,107,77,81,74,59,76,46,81,41,87,43,94"/>
+<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail_aa9f76c83c862a97dce4b86c77be98046.html#aa9f76c83c862a97dce4b86c77be98046" title="Check if logger is enabled and print error once if not." alt="" coords="205,29,423,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="145,93,259,56,261,61,146,98"/>
+<area shape="rect" id="Node000004" href="$d5/d7b/structfl_1_1detail_1_1_active_logger_registry_a0ba7ba9bde21bfc28ef06006930c34f1.html#a0ba7ba9bde21bfc28ef06006930c34f1" title=" " alt="" coords="1000,335,1168,375"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="103,134,147,178,176,201,207,221,346,292,405,316,461,334,582,361,738,385,798,392,844,394,952,385,1000,376,1001,381,952,390,845,400,797,398,737,390,581,366,460,339,403,321,344,297,204,226,173,205,144,182,99,138"/>
+<area shape="rect" id="Node000005" href="$db/d4a/classfl_1_1_singleton_shared_a138a66e14b03a073e9a15565e823b203.html#a138a66e14b03a073e9a15565e823b203" title=" " alt="" coords="1216,206,1360,246"/>
+<area shape="poly" id="edge21_Node000001_Node000005" title=" " alt="" coords="157,108,348,98,579,93,846,93,938,91,1011,92,1082,103,1169,133,1218,161,1259,194,1256,198,1215,165,1167,138,1081,109,1011,98,938,97,846,98,579,98,348,103,158,113"/>
+<area shape="rect" id="Node000017" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_acc200cb8837f82379821217fb4a6bc29.html#acc200cb8837f82379821217fb4a6bc29" title=" " alt="" coords="207,171,421,211"/>
+<area shape="poly" id="edge11_Node000001_Node000017" title=" " alt="" coords="145,133,240,164,238,169,143,138"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="276,31,268,21,272,11,288,5,314,3,347,7,359,16,356,20,345,11,314,8,289,10,276,15,273,20,280,27"/>
+<area shape="rect" id="Node000003" href="$df/d9e/namespacefl_1_1detail_ae18de49f03a7a361a888c1e75d5e2f86.html#ae18de49f03a7a361a888c1e75d5e2f86" title="Print error message for disabled logger (non&#45;template helper) Called from checkLoggerEnabled template..." alt="" coords="473,18,687,58"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="423,38,459,37,459,42,423,43"/>
+<area shape="poly" id="edge6_Node000004_Node000005" title=" " alt="" coords="1115,333,1243,251,1246,256,1118,337"/>
+<area shape="rect" id="Node000006" href="$db/d4a/classfl_1_1_singleton_shared_a7892d697818750c1f7611dea073ff66e.html#a7892d697818750c1f7611dea073ff66e" title=" " alt="" coords="1408,142,1552,182"/>
+<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="1348,203,1406,184,1407,189,1350,208"/>
+<area shape="rect" id="Node000014" href="$df/d9e/namespacefl_1_1detail_a6bef973c17637a167f1f94d7db03905c.html#a6bef973c17637a167f1f94d7db03905c" title=" " alt="" coords="1409,206,1551,246"/>
+<area shape="poly" id="edge9_Node000005_Node000014" title=" " alt="" coords="1360,223,1395,223,1395,229,1360,229"/>
+<area shape="rect" id="Node000016" href="$df/d9e/namespacefl_1_1detail_af558e779ba2417d4cf14bdb1cbfd3d34.html#af558e779ba2417d4cf14bdb1cbfd3d34" title=" " alt="" coords="1409,270,1551,310"/>
+<area shape="poly" id="edge10_Node000005_Node000016" title=" " alt="" coords="1350,244,1407,263,1406,268,1348,249"/>
+<area shape="poly" id="edge8_Node000006_Node000006" title=" " alt="" coords="1444,142,1442,132,1447,123,1460,117,1480,115,1503,118,1515,126,1512,130,1501,123,1480,121,1462,123,1451,127,1447,133,1449,141"/>
+<area shape="rect" id="Node000018" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a3bff7aaa6e1158fbbee95055b3458285.html#a3bff7aaa6e1158fbbee95055b3458285" title=" " alt="" coords="471,209,689,249"/>
+<area shape="poly" id="edge12_Node000017_Node000018" title=" " alt="" coords="422,204,458,209,457,214,421,209"/>
+<area shape="rect" id="Node000019" href="$d2/d2b/classfl_1_1task_1_1_scheduler_ad1f60f825514d99a9ee0d06f564be1a7.html#ad1f60f825514d99a9ee0d06f564be1a7" title=" " alt="" coords="1015,219,1153,259"/>
+<area shape="poly" id="edge13_Node000018_Node000019" title=" " alt="" coords="690,228,1001,235,1001,240,689,234"/>
+<area shape="rect" id="Node000020" href="$db/d5c/namespacefl_1_1task_a0f002cad452f6b7f8dff6ba2b8f0f8b8.html#a0f002cad452f6b7f8dff6ba2b8f0f8b8" title=" " alt="" coords="775,285,914,311"/>
+<area shape="poly" id="edge14_Node000018_Node000020" title=" " alt="" coords="658,246,783,279,781,284,656,251"/>
+<area shape="rect" id="Node000022" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a266030d285c7f6ae31eb3c619cee8693.html#a266030d285c7f6ae31eb3c619cee8693" title=" " alt="" coords="1015,147,1153,187"/>
+<area shape="poly" id="edge15_Node000018_Node000022" title=" " alt="" coords="624,206,677,186,737,170,806,161,876,157,1001,158,1001,164,876,162,806,166,738,175,679,191,626,211"/>
+<area shape="rect" id="Node000025" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_ab5cd1a92bcf542222607179a5363c2e0.html#ab5cd1a92bcf542222607179a5363c2e0" title="Service all registered loggers (called by task)" alt="" coords="737,335,952,375"/>
+<area shape="poly" id="edge16_Node000018_Node000025" title=" " alt="" coords="611,247,668,284,738,321,756,328,754,333,736,326,666,288,608,251"/>
+<area shape="rect" id="Node000032" href="$de/daf/classfl_1_1task_1_1_handle_a01b05372acab06bd2197d033aafe8cb9.html#a01b05372acab06bd2197d033aafe8cb9" title=" " alt="" coords="766,184,923,209"/>
+<area shape="poly" id="edge18_Node000018_Node000032" title=" " alt="" coords="689,213,752,205,752,210,690,218"/>
+<area shape="poly" id="edge17_Node000025_Node000004" title=" " alt="" coords="952,353,986,353,986,358,952,358"/>
+<area shape="poly" id="edge19_Node000032_Node000019" title=" " alt="" coords="917,207,1002,222,1001,227,916,212"/>
+<area shape="poly" id="edge20_Node000032_Node000022" title=" " alt="" coords="923,184,1001,175,1002,180,924,190"/>
+</map>

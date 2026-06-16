@@ -1,0 +1,16 @@
+<map id="fl::audio::fft::Context::scratch" name="fl::audio::fft::Context::scratch">
+<area shape="rect" id="Node000001" title=" " alt="" coords="440,101,595,141"/>
+<area shape="rect" id="Node000002" href="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a4c842a6f5023ef1144f1d0c63f850b3a.html#a4c842a6f5023ef1144f1d0c63f850b3a" title=" " alt="" coords="237,5,392,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="466,97,391,60,364,48,366,43,393,55,468,92"/>
+<area shape="rect" id="Node000004" href="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a4cd66183d61e2210388cdd23cc47aa5f.html#a4cd66183d61e2210388cdd23cc47aa5f" title=" " alt="" coords="237,69,392,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="426,110,392,104,393,99,427,104"/>
+<area shape="rect" id="Node000005" href="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_af55f1a9f44852cee054233b1bfc5ea23.html#af55f1a9f44852cee054233b1bfc5ea23" title=" " alt="" coords="237,133,392,173"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="427,138,393,144,392,138,426,133"/>
+<area shape="rect" id="Node000006" href="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_afe9dcd43e0591f626db7127bbc638f73.html#afe9dcd43e0591f626db7127bbc638f73" title=" " alt="" coords="237,197,392,237"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="468,150,393,188,366,200,364,195,391,183,466,145"/>
+<area shape="rect" id="Node000003" href="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_af90c3b64c4b213516e4904846f6b96e6.html#af90c3b64c4b213516e4904846f6b96e6" title=" " alt="" coords="5,109,189,134"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="253,53,238,60,127,111,125,106,236,55,251,48"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="224,105,184,111,183,106,223,100"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="223,143,183,137,184,131,224,137"/>
+<area shape="poly" id="edge8_Node000006_Node000003" title=" " alt="" coords="251,194,236,188,125,137,127,132,238,183,253,189"/>
+</map>

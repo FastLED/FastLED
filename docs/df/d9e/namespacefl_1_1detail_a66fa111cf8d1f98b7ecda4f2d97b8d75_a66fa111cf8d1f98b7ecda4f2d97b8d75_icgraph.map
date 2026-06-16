@@ -1,0 +1,15 @@
+<map id="fl::detail::wave8_expand_byte" name="fl::detail::wave8_expand_byte">
+<area shape="rect" id="Node000001" title="Byte&#45;indexed expansion (#2526): one indexed 8&#45;byte copy." alt="" coords="223,156,440,181"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a6d3dde4b59c470212560afa6b6d7a712.html#a6d3dde4b59c470212560afa6b6d7a712" title=" " alt="" coords="5,5,175,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="306,148,249,97,212,69,173,46,143,33,145,28,176,41,215,65,252,93,310,144"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a29b071bb16abe20602cffbbbada53cf0.html#a29b071bb16abe20602cffbbbada53cf0" title="Pipe2: transpose 16&#45;lane × 2&#45;byte&#45;positions (#2548)." alt="" coords="17,55,163,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="284,153,174,110,143,98,145,93,176,105,286,148"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a8ab9ceed35077aee8198f828008bf565.html#a8ab9ceed35077aee8198f828008bf565" title="Pipe4: transpose 16&#45;lane × 4&#45;byte&#45;positions (#2548)." alt="" coords="17,119,163,159"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="213,157,163,151,164,146,213,152"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a98dc6dd4e28207cc08d2a24de7621200.html#a98dc6dd4e28207cc08d2a24de7621200" title=" " alt="" coords="9,184,171,209"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="209,186,171,190,170,185,209,180"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a21638214c74e2b2d82569337e20be4fa.html#a21638214c74e2b2d82569337e20be4fa" title=" " alt="" coords="9,233,171,259"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="281,188,175,223,135,236,133,231,174,218,279,183"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_ae2acb08c338d6c448ad65af439834073.html#ae2acb08c338d6c448ad65af439834073" title=" " alt="" coords="9,283,171,308"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="304,192,247,232,176,272,142,285,141,280,174,268,244,228,301,188"/>
+</map>

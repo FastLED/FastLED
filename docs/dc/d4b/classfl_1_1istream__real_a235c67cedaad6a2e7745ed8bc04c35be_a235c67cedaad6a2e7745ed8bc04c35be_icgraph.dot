@@ -9,4 +9,6 @@ digraph "fl::istream_real::good"
   Node1 [id="Node000001",label="fl::istream_real::good",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::istream::good",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/def/classfl_1_1istream_a3f4a7cbba5b114bc12836d437f69b589.html#a3f4a7cbba5b114bc12836d437f69b589",tooltip=" "];
+  Node2 -> Node2 [id="edge2_Node000002_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node1 [id="edge3_Node000001_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
 }

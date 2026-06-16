@@ -1,8 +1,10 @@
 <map id="fmap" name="fmap">
-<area shape="rect" id="Node000001" title=" " alt="" coords="364,5,420,31"/>
-<area shape="rect" id="Node000002" href="$d1/d85/class_ripple_a8e381b2bdc3568c72a4a674b63a353ee.html#a8e381b2bdc3568c72a4a674b63a353ee" title=" " alt="" coords="5,5,132,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="350,21,132,21,132,15,350,15"/>
-<area shape="rect" id="Node000003" href="$d1/d85/class_ripple_a241c31312a2b5491e220567f551bfe02.html#a241c31312a2b5491e220567f551bfe02" title=" " alt="" coords="180,31,316,56"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="351,28,317,34,316,29,350,23"/>
-<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="166,34,132,30,133,24,167,29"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="364,25,420,50"/>
+<area shape="rect" id="Node000002" href="$d1/d85/class_ripple_a8e381b2bdc3568c72a4a674b63a353ee.html#a8e381b2bdc3568c72a4a674b63a353ee" title=" " alt="" coords="5,25,132,50"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="351,24,316,15,248,8,180,15,115,27,114,22,180,9,248,3,316,9,352,19"/>
+<area shape="rect" id="Node000003" href="$d1/ddb/_chromancer_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="223,25,273,50"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="350,40,274,40,274,35,350,35"/>
+<area shape="rect" id="Node000004" href="$d1/d85/class_ripple_a241c31312a2b5491e220567f551bfe02.html#a241c31312a2b5491e220567f551bfe02" title=" " alt="" coords="180,74,316,99"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="352,54,287,76,285,71,350,49"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="187,73,115,53,117,48,189,68"/>
 </map>

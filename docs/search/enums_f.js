@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['tasktype_0',['TaskType',['../d4/d36/namespacefl_a73b931333e46f6705d0912a75155cd31.html#a73b931333e46f6705d0912a75155cd31',1,'fl']]],
-  ['tgradientdirectioncode_1',['TGradientDirectionCode',['../d4/d36/namespacefl_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849',1,'fl::TGradientDirectionCode'],['../d1/dfb/colorutils_8h_a0a0558a9d844a5f0ed4c50bfb3fde849.html#a0a0558a9d844a5f0ed4c50bfb3fde849',1,'TGradientDirectionCode:&#160;colorutils_misc.h']]],
-  ['type_2',['Type',['../d7/d6c/classfl_1_1_x_map_aa5c04372432e62ff742d1ebe9681c893.html#aa5c04372432e62ff742d1ebe9681c893',1,'fl::XMap::Type'],['../d8/ddd/classfl_1_1_pixel_stream_ac011b30c890790b61fda843309bb6645.html#ac011b30c890790b61fda843309bb6645',1,'fl::PixelStream::Type']]]
+  ['quality_0',['Quality',['../dc/d8d/structfl_1_1_jpeg_config_a63245e155150c7ec009d73bff9083626.html#a63245e155150c7ec009d73bff9083626',1,'fl::JpegConfig']]],
+  ['queuestate_1',['QueueState',['../de/d10/classfl_1_1_rectangular_draw_buffer_a8a7ee487ac870855ded20e857acbfbbf.html#a8a7ee487ac870855ded20e857acbfbbf',1,'fl::RectangularDrawBuffer']]]
 ];

@@ -1,0 +1,15 @@
+<map id="fl::NoisePalette::mapNoiseToLEDsUsingPalette" name="fl::NoisePalette::mapNoiseToLEDsUsingPalette">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,73,200,113"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="248,55,399,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,79,234,75,235,80,201,84"/>
+<area shape="rect" id="Node000007" href="$d9/d41/classfl_1_1_noise_palette_abce629241db5cb79feff8add9b0bde25.html#abce629241db5cb79feff8add9b0bde25" title=" " alt="" coords="251,104,396,129"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="201,101,237,105,237,110,200,106"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="447,5,521,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="365,52,433,31,434,36,366,57"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_ab169b38b75fd1ab29b3dc61a32497ff1.html#ab169b38b75fd1ab29b3dc61a32497ff1" title="Helper function to divide a number by 16, aka four logical shift right (LSR)&#39;s." alt="" coords="449,55,519,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="399,65,435,65,435,70,399,70"/>
+<area shape="rect" id="Node000006" href="$d6/d19/group___linear_interpolation_gaeb360269bf892a49b96b9ea8248ea8a7.html#gaeb360269bf892a49b96b9ea8248ea8a7" title="Map from one full&#45;range 8&#45;bit value into a narrower range of 8&#45;bit values, possibly a range of hues." alt="" coords="455,104,513,129"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="366,77,442,101,441,106,365,83"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6" title=" " alt="" coords="569,5,652,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="522,15,556,15,556,21,522,21"/>
+</map>

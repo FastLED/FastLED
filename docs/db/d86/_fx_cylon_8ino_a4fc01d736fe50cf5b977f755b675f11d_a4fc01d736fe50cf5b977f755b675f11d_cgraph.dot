@@ -8,10 +8,14 @@ digraph "setup"
   rankdir="LR";
   Node1 [id="Node000001",label="setup",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::ScreenMap::DefaultStrip",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d78/classfl_1_1_screen_map_a736a47f15d6262809d6438d1c2f4c5b1.html#a736a47f15d6262809d6438d1c2f4c5b1",tooltip=" "];
+  Node2 [id="Node000002",label="fl::ScreenMap::DefaultStrip",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d78/classfl_1_1_screen_map_a0fbfe62bd1f20b020351970b790d73c7.html#a0fbfe62bd1f20b020351970b790d73c7",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::ScreenMap::ScreenMap",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d78/classfl_1_1_screen_map_a8875dd841783ec4816257ed74bd2afa0.html#a8875dd841783ec4816257ed74bd2afa0",tooltip=" "];
+  Node3 [id="Node000003",label="fl::ScreenMap::ScreenMap",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d78/classfl_1_1_screen_map_a63142bb78751fc505d8c54314c9cd386.html#a63142bb78751fc505d8c54314c9cd386",tooltip=" "];
   Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::ScreenMap::Circle",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d78/classfl_1_1_screen_map_a4e85c9cd6a6488bd83cfcf01190b137d.html#a4e85c9cd6a6488bd83cfcf01190b137d",tooltip=" "];
+  Node4 [id="Node000004",label="fl::ScreenMap::Circle",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d78/classfl_1_1_screen_map_af96d710c362acb2f8d9e52360ac873ec.html#af96d710c362acb2f8d9e52360ac873ec",tooltip=" "];
   Node4 -> Node3 [id="edge4_Node000004_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node4 -> Node5 [id="edge5_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::cos",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a9cda2472ab9bd68df745496533aa76e7.html#a9cda2472ab9bd68df745496533aa76e7",tooltip=" "];
+  Node4 -> Node6 [id="edge6_Node000004_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::sin",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_abc07da8d8983da7016b55f7626e9c060.html#abc07da8d8983da7016b55f7626e9c060",tooltip=" "];
 }

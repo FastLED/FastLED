@@ -1,0 +1,21 @@
+<map id="fl::isr::memcpy_16" name="fl::isr::memcpy_16">
+<area shape="rect" id="Node000001" title="ISR&#45;optimized 16&#45;bit block copy for 2&#45;byte aligned memory." alt="" coords="407,179,549,204"/>
+<area shape="rect" id="Node000002" href="$d6/d93/namespacefl_1_1isr_a87ccebcc8a496958569065ad778ac76d.html#a87ccebcc8a496958569065ad778ac76d" title="ISR&#45;optimized memcpy with alignment detection and switch dispatch." alt="" coords="240,179,359,204"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="393,194,359,194,359,189,393,189"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aff1a1fcfdff1c1d20f8e4144e31a10cd.html#aff1a1fcfdff1c1d20f8e4144e31a10cd" title=" " alt="" coords="5,5,192,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="285,168,249,105,222,72,190,44,169,33,171,28,194,40,226,68,253,102,289,165"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a8f8ddf96d8da66e41ae29a178864b041.html#a8f8ddf96d8da66e41ae29a178864b041" title=" " alt="" coords="9,55,188,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="277,169,240,130,216,110,191,94,164,82,166,78,193,89,219,106,243,126,281,166"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a279c5b0631fd9e5f7e979669e0ce9bf1.html#a279c5b0631fd9e5f7e979669e0ce9bf1" title=" " alt="" coords="9,104,188,129"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="261,175,191,143,155,132,157,127,193,138,263,170"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a8ddb7b24149fd1d473ed809fded487cb.html#a8ddb7b24149fd1d473ed809fded487cb" title=" " alt="" coords="9,153,188,179"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="226,185,188,180,188,175,227,180"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a1d5d5edd505834a44255390ffec62163.html#a1d5d5edd505834a44255390ffec62163" title=" " alt="" coords="5,203,192,228"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="227,203,192,207,192,202,226,197"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_ae758b3295667049b67b28ea7628df1c2.html#ae758b3295667049b67b28ea7628df1c2" title=" " alt="" coords="9,252,188,277"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="261,213,193,242,153,254,151,249,191,237,259,208"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a53485bf6aecfaca9134dd2be45a5934e.html#a53485bf6aecfaca9134dd2be45a5934e" title=" " alt="" coords="9,301,188,327"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="281,217,243,255,193,291,163,304,161,299,191,286,239,251,277,213"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_a09da435857ae2a973d727792b25bcaaf.html#a09da435857ae2a973d727792b25bcaaf" title=" " alt="" coords="9,351,188,376"/>
+<area shape="poly" id="edge9_Node000002_Node000010" title=" " alt="" coords="289,218,252,279,226,312,193,340,168,353,166,348,191,336,222,308,248,276,284,215"/>
+</map>

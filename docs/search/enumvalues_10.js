@@ -1,25 +1,7 @@
 var searchData=
 [
-  ['rbg_0',['RBG',['../d4/d36/namespacefl_ab289ace8bd149d39b87ebd778e9abe23.html#ab289ace8bd149d39b87ebd778e9abe23a1b4fe10e6cb3b977e21d8e9c4100c03a',1,'fl::RBG'],['../db/d07/eorder_8h_a1b4fe10e6cb3b977e21d8e9c4100c03a.html#a1b4fe10e6cb3b977e21d8e9c4100c03a',1,'RBG:&#160;eorder.h']]],
-  ['red_1',['RED',['../dd/d28/classfl_1_1_red_black_tree_a4566c51a366d57fcd85936fc5d11eda8.html#a4566c51a366d57fcd85936fc5d11eda8ab0329f524c800e3e5fa35435f4e90a71',1,'fl::RedBlackTree']]],
-  ['red_2',['Red',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99ab35114af96aa24d28e7901b1318cc43a',1,'CRGB']]],
-  ['red1_3',['Red1',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a449651f572a8f4fdd65c5e981bb07a45',1,'CRGB']]],
-  ['red2_4',['Red2',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99ae4875ed6e248211e79403654b70f3f2f',1,'CRGB']]],
-  ['red3_5',['Red3',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a41846f4cbd9672e3ac0c553a0c861113',1,'CRGB']]],
-  ['red4_6',['Red4',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a4f47fd02bb15db1524786278b2cb7103',1,'CRGB']]],
-  ['rejected_7',['REJECTED',['../df/d9e/namespacefl_1_1detail_ac9d7ddf35218d3b5f801eaf9418f26a0.html#ac9d7ddf35218d3b5f801eaf9418f26a0a9cc8ad3d99798c6726d4af0bd14e49d2',1,'fl::detail']]],
-  ['resetallcontrollers_8',['ResetAllControllers',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263a6b8d5952d0407d09b8fcba53f704ba0b',1,'midi_Defs.h']]],
-  ['resolved_9',['RESOLVED',['../df/d9e/namespacefl_1_1detail_ac9d7ddf35218d3b5f801eaf9418f26a0.html#ac9d7ddf35218d3b5f801eaf9418f26a0a874584b84df5da74c3964d8efbff7a02',1,'fl::detail']]],
-  ['rgb_10',['RGB',['../d4/d36/namespacefl_ab289ace8bd149d39b87ebd778e9abe23.html#ab289ace8bd149d39b87ebd778e9abe23aaa826ca9d5ce649650f396af274218ea',1,'fl::RGB'],['../db/d07/eorder_8h_aaa826ca9d5ce649650f396af274218ea.html#aaa826ca9d5ce649650f396af274218ea',1,'RGB:&#160;eorder.h']]],
-  ['rgb_5fblobs_11',['RGB_BLOBS',['../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a930df185b5e6e06e24b62d16612be9e0',1,'fl']]],
-  ['rgb_5fblobs2_12',['RGB_BLOBS2',['../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69ab63a39cf4ab72366e72709c0abb5d2e4',1,'fl']]],
-  ['rgb_5fblobs3_13',['RGB_BLOBS3',['../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69aecfb84709b4a69017a16c4a7edb3e08b',1,'fl']]],
-  ['rgb_5fblobs4_14',['RGB_BLOBS4',['../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a4dc891b308ac9b65e2c4b200d429a0ed',1,'fl']]],
-  ['rgb_5fblobs5_15',['RGB_BLOBS5',['../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69acde97309b0196141809564ffeb097bbe',1,'fl']]],
-  ['rings_16',['RINGS',['../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69acd0854bd65648e191ed2ff89e6453e19',1,'fl']]],
-  ['rosybrown_17',['RosyBrown',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a1bd175aab9ed0152cac250f911db0e81',1,'CRGB']]],
-  ['rotating_5fblob_18',['ROTATING_BLOB',['../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a8ad021e507bd2d347e3fa60fda39caa7',1,'fl']]],
-  ['royalblue_19',['RoyalBlue',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a750f32dcd4f5e4f11b28100e7d719218',1,'CRGB']]],
-  ['rpnlsb_20',['RPNLSB',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263a07f169cde38afb3868aa30714c14e1fc',1,'midi_Defs.h']]],
-  ['rpnmsb_21',['RPNMSB',['../d8/dd0/midi___defs_8h_aa1cfd7d9d1fe50ec27b566e854e98263.html#aa1cfd7d9d1fe50ec27b566e854e98263a38f51a1c3452ad452cb44868bc81c193',1,'midi_Defs.h']]]
+  ['quada_0',['quadA',['../d1/d86/namespacefl_1_1third__party_a2fff74a8e88feea617ca021bed4cdf30.html#a2fff74a8e88feea617ca021bed4cdf30a24a966570fc6bad8891b99b82915139b',1,'fl::third_party']]],
+  ['quadb_1',['quadB',['../d1/d86/namespacefl_1_1third__party_a2fff74a8e88feea617ca021bed4cdf30.html#a2fff74a8e88feea617ca021bed4cdf30a2c0791d3ec8d814c7bfda2ecd061d89a',1,'fl::third_party']]],
+  ['queue_5fdone_2',['QUEUE_DONE',['../de/d10/classfl_1_1_rectangular_draw_buffer_a8a7ee487ac870855ded20e857acbfbbf.html#a8a7ee487ac870855ded20e857acbfbbfaafbb6283fe1cf3600b547d579089e2b0',1,'fl::RectangularDrawBuffer']]],
+  ['queueing_3',['QUEUEING',['../de/d10/classfl_1_1_rectangular_draw_buffer_a8a7ee487ac870855ded20e857acbfbbf.html#a8a7ee487ac870855ded20e857acbfbbfa332f6d620a308da9cfc601c35b6d20b9',1,'fl::RectangularDrawBuffer']]]
 ];

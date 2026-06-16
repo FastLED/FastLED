@@ -1,0 +1,11 @@
+<map id="fl::parse_lnk" name="fl::parse_lnk">
+<area shape="rect" id="Node000001" title="Parse the contents of a .lnk file into a fl::url." alt="" coords="5,55,107,80"/>
+<area shape="rect" id="Node000002" href="$d0/ddb/classfl_1_1string__view_a046c8a6a9299f3ec395183dac2408d10.html#a046c8a6a9299f3ec395183dac2408d10" title=" " alt="" coords="155,5,317,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="102,52,174,32,176,37,104,57"/>
+<area shape="rect" id="Node000003" href="$d0/ddb/classfl_1_1string__view_a62053f60d43376477b7857084f50b3c3.html#a62053f60d43376477b7857084f50b3c3" title=" " alt="" coords="163,55,309,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="107,65,149,65,149,70,107,70"/>
+<area shape="rect" id="Node000004" href="$d0/ddb/classfl_1_1string__view_ae8a5f488501671f4a991a3202c2e2216.html#ae8a5f488501671f4a991a3202c2e2216" title=" " alt="" coords="156,104,316,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="104,77,176,98,174,103,102,83"/>
+<area shape="rect" id="Node000005" href="$d0/ddb/classfl_1_1string__view_affa2db6e3c9e989f0bea8a01a6e5e1db.html#affa2db6e3c9e989f0bea8a01a6e5e1db" title=" " alt="" coords="365,104,560,129"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="316,114,352,114,352,119,316,119"/>
+</map>

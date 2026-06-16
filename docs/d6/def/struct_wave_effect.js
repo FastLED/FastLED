@@ -2,9 +2,9 @@ var struct_wave_effect =
 [
     [ "addf", "d6/def/struct_wave_effect_a7bf18253563770d2da47ba8b5495ee1c.html#a7bf18253563770d2da47ba8b5495ee1c", null ],
     [ "addf", "d6/def/struct_wave_effect_a7bf18253563770d2da47ba8b5495ee1c.html#a7bf18253563770d2da47ba8b5495ee1c", null ],
-    [ "draw", "d6/def/struct_wave_effect_a2e9bf538b7b7dccd125a0e9cb8b8c61e.html#a2e9bf538b7b7dccd125a0e9cb8b8c61e", null ],
-    [ "draw", "d6/def/struct_wave_effect_a2e9bf538b7b7dccd125a0e9cb8b8c61e.html#a2e9bf538b7b7dccd125a0e9cb8b8c61e", null ],
-    [ "blend_stack", "d6/def/struct_wave_effect_acf30586f8fc31e56c3404ad80f9254ab.html#acf30586f8fc31e56c3404ad80f9254ab", null ],
-    [ "wave_fx_high", "d6/def/struct_wave_effect_ae1f5917845c800086e1235de3c464edc.html#ae1f5917845c800086e1235de3c464edc", null ],
-    [ "wave_fx_low", "d6/def/struct_wave_effect_abbe5a40058b5a1da3b3f8b82095eda93.html#abbe5a40058b5a1da3b3f8b82095eda93", null ]
+    [ "draw", "d6/def/struct_wave_effect_a354b83c73c052a12fd45dee5ae7d26c9.html#a354b83c73c052a12fd45dee5ae7d26c9", null ],
+    [ "draw", "d6/def/struct_wave_effect_a354b83c73c052a12fd45dee5ae7d26c9.html#a354b83c73c052a12fd45dee5ae7d26c9", null ],
+    [ "blend_stack", "d6/def/struct_wave_effect_ab624dc042f24c752c9d0dbe8155702b4.html#ab624dc042f24c752c9d0dbe8155702b4", null ],
+    [ "wave_fx_high", "d6/def/struct_wave_effect_af94bbbd946e455d44f11aaa064b9a61b.html#af94bbbd946e455d44f11aaa064b9a61b", null ],
+    [ "wave_fx_low", "d6/def/struct_wave_effect_a6e6a5cd57595dd8bc32b31da14215558.html#a6e6a5cd57595dd8bc32b31da14215558", null ]
 ];

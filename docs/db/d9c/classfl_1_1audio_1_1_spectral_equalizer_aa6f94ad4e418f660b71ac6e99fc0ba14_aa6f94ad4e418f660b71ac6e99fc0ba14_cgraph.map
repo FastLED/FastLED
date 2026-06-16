@@ -1,0 +1,5 @@
+<map id="fl::audio::SpectralEqualizer::calculateAWeightingGains" name="fl::audio::SpectralEqualizer::calculateAWeightingGains">
+<area shape="rect" id="Node000001" title="Calculate A&#45;weighting gains." alt="" coords="5,5,204,45"/>
+<area shape="rect" id="Node000002" href="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a98b8eafa2abe451f740b05be2260bdbb.html#a98b8eafa2abe451f740b05be2260bdbb" title="Calculate flat gains (all 1.0)" alt="" coords="252,5,447,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,23,238,23,238,28,204,28"/>
+</map>

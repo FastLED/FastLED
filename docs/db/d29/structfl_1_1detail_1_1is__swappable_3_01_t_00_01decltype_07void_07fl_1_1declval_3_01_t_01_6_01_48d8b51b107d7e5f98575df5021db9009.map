@@ -1,0 +1,13 @@
+<map id="fl::detail::is_swappable&lt; T, decltype(void(fl::declval&lt; T &amp; &gt;()=fl::declval&lt; T &amp;&amp; &gt;()))&gt;" name="fl::detail::is_swappable&lt; T, decltype(void(fl::declval&lt; T &amp; &gt;()=fl::declval&lt; T &amp;&amp; &gt;()))&gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="829,5,1035,75"/>
+<area shape="rect" id="Node000002" href="$dd/dca/structfl_1_1fl_1_1integral__constant.html" title=" " alt="" coords="323,42,429,67"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="421,35,478,20,571,11,664,10,752,15,829,22,829,28,752,20,664,16,571,16,479,25,422,40"/>
+<area shape="rect" id="Node000004" href="$dd/da8/structfl_1_1detail_1_1has__move__ctor.html" title=" " alt="" coords="481,35,647,75"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="443,52,480,52,480,57,443,57"/>
+<area shape="rect" id="Node000005" href="$d6/d92/structfl_1_1detail_1_1is__swappable.html" title=" " alt="" coords="479,99,649,139"/>
+<area shape="poly" id="edge6_Node000005_Node000002" title=" " alt="" coords="428,69,505,96,504,101,426,74"/>
+<area shape="rect" id="Node000003" href="$dd/dca/structfl_1_1fl_1_1integral__constant.html" title=" " alt="" coords="5,35,172,75"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="186,52,323,52,323,57,186,57"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="661,48,829,41,829,47,661,53"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="663,126,733,124,805,112,846,95,884,73,887,77,849,100,806,117,734,130,663,131"/>
+</map>

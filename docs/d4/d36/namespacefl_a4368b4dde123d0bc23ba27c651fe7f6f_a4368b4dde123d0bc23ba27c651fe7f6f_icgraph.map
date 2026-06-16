@@ -1,0 +1,9 @@
+<map id="fl::to_runtime_timing" name="fl::to_runtime_timing">
+<area shape="rect" id="Node000001" title="Convert enum&#45;based timing type to runtime ChipsetTiming struct." alt="" coords="388,35,547,60"/>
+<area shape="rect" id="Node000002" href="$d1/df2/_auto_research_low_memory_8h_ae3f918f9121ab392058ef53302b021cf.html#ae3f918f9121ab392058ef53302b021cf" title=" " alt="" coords="112,5,340,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="374,39,330,33,331,28,375,33"/>
+<area shape="rect" id="Node000003" href="$db/d63/class_auto_research_remote_control_abb6600e8a1e8c4ef46ba29e7bd3b78b4.html#abb6600e8a1e8c4ef46ba29e7bd3b78b4" title="Register all RPC functions with shared autoresearch state." alt="" coords="121,55,331,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="375,61,332,66,331,60,374,55"/>
+<area shape="rect" id="Node000004" href="$dd/dc8/_auto_research_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,63,64,88"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="107,78,64,78,64,73,107,73"/>
+</map>

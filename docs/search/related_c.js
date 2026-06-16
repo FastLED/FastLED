@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['task_0',['task',['../d5/d24/classfl_1_1_task_impl_a07ddcf513e260b5995e19229c3d9a019.html#a07ddcf513e260b5995e19229c3d9a019',1,'fl::TaskImpl']]]
+  ['redblacktree_0',['RedBlackTree',['../de/d4c/classfl_1_1_red_black_tree_1_1iterator_a13e4b926b0c01da42944ed204eead75c.html#a13e4b926b0c01da42944ed204eead75c',1,'fl::RedBlackTree::iterator::RedBlackTree()'],['../d0/ddb/classfl_1_1_red_black_tree_1_1const__iterator_a13e4b926b0c01da42944ed204eead75c.html#a13e4b926b0c01da42944ed204eead75c',1,'fl::RedBlackTree::const_iterator::RedBlackTree()'],['../d9/d76/classfl_1_1_red_black_tree_1_1reverse__iterator_a13e4b926b0c01da42944ed204eead75c.html#a13e4b926b0c01da42944ed204eead75c',1,'fl::RedBlackTree::reverse_iterator::RedBlackTree()'],['../dd/de7/classfl_1_1_red_black_tree_1_1const__reverse__iterator_a13e4b926b0c01da42944ed204eead75c.html#a13e4b926b0c01da42944ed204eead75c',1,'fl::RedBlackTree::const_reverse_iterator::RedBlackTree']]],
+  ['reverse_5fiterator_1',['reverse_iterator',['../dd/de7/classfl_1_1_red_black_tree_1_1const__reverse__iterator_af0a70641f2216cc31420487a62dd3b0d.html#af0a70641f2216cc31420487a62dd3b0d',1,'fl::RedBlackTree::const_reverse_iterator']]],
+  ['rgbwemulatedcontroller_3c_20controller_2c_20rgb_5forder_20_3e_2',['RGBWEmulatedController&lt; CONTROLLER, RGB_ORDER &gt;',['../d4/d28/group___chipsets_gaa842e0af0bd8638c9be5c5f19400941d.html#gaa842e0af0bd8638c9be5c5f19400941d',1,'RGBWEmulatedController::ControllerT']]]
 ];

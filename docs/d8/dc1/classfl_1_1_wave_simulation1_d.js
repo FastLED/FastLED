@@ -1,7 +1,7 @@
 var classfl_1_1_wave_simulation1_d =
 [
     [ "WaveSimulation1D", "d8/dc1/classfl_1_1_wave_simulation1_d_ad19c029ab35a226c2a34f82997c7c7dc.html#ad19c029ab35a226c2a34f82997c7c7dc", null ],
-    [ "~WaveSimulation1D", "d8/dc1/classfl_1_1_wave_simulation1_d_a6a11fb4df651de8708251bbe64f91ed2.html#a6a11fb4df651de8708251bbe64f91ed2", null ],
+    [ "~WaveSimulation1D", "d8/dc1/classfl_1_1_wave_simulation1_d_a215c5f3f25d85546a593a6a66d6a42a0.html#a215c5f3f25d85546a593a6a66d6a42a0", null ],
     [ "getDampenening", "d8/dc1/classfl_1_1_wave_simulation1_d_a735a76a9d6713618d54200baf26505e4.html#a735a76a9d6713618d54200baf26505e4", null ],
     [ "getf", "d8/dc1/classfl_1_1_wave_simulation1_d_a1e84b7a2ec084da1b211e7d8fda24b62.html#a1e84b7a2ec084da1b211e7d8fda24b62", null ],
     [ "geti16", "d8/dc1/classfl_1_1_wave_simulation1_d_af42153186139218cb3bf6295fd693a47.html#af42153186139218cb3bf6295fd693a47", null ],

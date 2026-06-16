@@ -1,0 +1,14 @@
+<map id="fl::third_party::nsgif__error_from_lzw" name="fl::third_party::nsgif__error_from_lzw">
+<area shape="rect" id="Node000001" title="Convert an LZW result code to equivalent GIF result code." alt="" coords="593,69,741,109"/>
+<area shape="rect" id="Node000002" href="$d1/d86/namespacefl_1_1third__party_af738855721b8fcadf601cfc4f8c913bf.html#af738855721b8fcadf601cfc4f8c913bf" title=" " alt="" coords="397,5,545,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="592,68,532,48,534,43,594,63"/>
+<area shape="rect" id="Node000012" href="$d1/d86/namespacefl_1_1third__party_a18f717ffc188f7182fed1b0f5afba660.html#a18f717ffc188f7182fed1b0f5afba660" title=" " alt="" coords="397,69,545,109"/>
+<area shape="poly" id="edge4_Node000001_Node000012" title=" " alt="" coords="579,92,546,92,546,87,579,87"/>
+<area shape="rect" id="Node000007" href="$d1/d86/namespacefl_1_1third__party_a34aa4d967d8ddaeefa12954d47fe7863.html#a34aa4d967d8ddaeefa12954d47fe7863" title="Scan the source image data." alt="" coords="397,133,545,173"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="594,116,534,136,532,131,592,111"/>
+<area shape="rect" id="Node000003" href="$d1/d86/namespacefl_1_1third__party_a8fc287776053178bc35887d52d498f11.html#a8fc287776053178bc35887d52d498f11" title=" " alt="" coords="201,37,349,77"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="384,42,350,48,349,43,383,37"/>
+<area shape="rect" id="Node000004" href="$d1/d86/namespacefl_1_1third__party_aa9b6d03b719534d98113784d4ad52b3f.html#aa9b6d03b719534d98113784d4ad52b3f" title=" " alt="" coords="5,37,153,77"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="187,60,154,60,154,55,187,55"/>
+<area shape="poly" id="edge5_Node000012_Node000003" title=" " alt="" coords="383,78,349,72,350,67,384,72"/>
+</map>

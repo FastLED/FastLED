@@ -1,6 +1,20 @@
 var searchData=
 [
-  ['green_0',['GREEN',['../d8/d53/_octo_w_s2811__impl_8h_acfbc006ea433ad708fdee3e82996e721.html#acfbc006ea433ad708fdee3e82996e721',1,'OctoWS2811_impl.h']]],
-  ['greenpin_1',['GREENPIN',['../d5/d17/_analog_output_8ino_ae5bf902243dd8d0ef455090c6149c55f.html#ae5bf902243dd8d0ef455090c6149c55f',1,'AnalogOutput.ino']]],
-  ['grid_5fserpentine_2',['GRID_SERPENTINE',['../da/d40/wasm__impl_8h_a0624422d96b3367d9d67b6ccd7c81daf.html#a0624422d96b3367d9d67b6ccd7c81daf',1,'wasm_impl.h']]]
+  ['getcwvq_0',['GetCWVQ',['../db/d7a/huffman_8hpp_a31b8e739c7d48a8112e0b3521ab2f666.html#a31b8e739c7d48a8112e0b3521ab2f666',1,'huffman.hpp']]],
+  ['getcwwq_1',['GetCWWQ',['../db/d7a/huffman_8hpp_a514153dc24c8555bcffec10e58307a36.html#a514153dc24c8555bcffec10e58307a36',1,'huffman.hpp']]],
+  ['getcwx_2',['GetCWX',['../db/d7a/huffman_8hpp_a1d1dd7adb01661d2049b7521beeed0c0.html#a1d1dd7adb01661d2049b7521beeed0c0',1,'huffman.hpp']]],
+  ['getcwxq_3',['GetCWXQ',['../db/d7a/huffman_8hpp_a9fd3a340a2640a5ea1328fa77c1168b8.html#a9fd3a340a2640a5ea1328fa77c1168b8',1,'huffman.hpp']]],
+  ['getcwy_4',['GetCWY',['../db/d7a/huffman_8hpp_a044ce87445749f6d890aabe50259f5b9.html#a044ce87445749f6d890aabe50259f5b9',1,'huffman.hpp']]],
+  ['getcwyq_5',['GetCWYQ',['../db/d7a/huffman_8hpp_aeea0d7cb40e425930d0721f08f57873f.html#aeea0d7cb40e425930d0721f08f57873f',1,'huffman.hpp']]],
+  ['gethlen_6',['GetHLen',['../db/d7a/huffman_8hpp_a3b5e1fd5b234ac192800e46eb793e7c8.html#a3b5e1fd5b234ac192800e46eb793e7c8',1,'huffman.hpp']]],
+  ['gethlenq_7',['GetHLenQ',['../db/d7a/huffman_8hpp_a64eefcb8aeac5f077a4a115b68473738.html#a64eefcb8aeac5f077a4a115b68473738',1,'huffman.hpp']]],
+  ['getmaxbits_8',['GetMaxbits',['../db/d7a/huffman_8hpp_a242ac4c144084eaf45e3bdedeb83036c.html#a242ac4c144084eaf45e3bdedeb83036c',1,'huffman.hpp']]],
+  ['getsignbits_9',['GetSignBits',['../db/d7a/huffman_8hpp_a1bb24e9949b0dd2478af7b5e9a37dbca.html#a1bb24e9949b0dd2478af7b5e9a37dbca',1,'huffman.hpp']]],
+  ['green_10',['GREEN',['../d8/d53/_octo_w_s2811__impl_8h_acfbc006ea433ad708fdee3e82996e721.html#acfbc006ea433ad708fdee3e82996e721',1,'OctoWS2811_impl.h']]],
+  ['greenpin_11',['GREENPIN',['../d5/d17/_analog_output_8ino_ae5bf902243dd8d0ef455090c6149c55f.html#ae5bf902243dd8d0ef455090c6149c55f',1,'AnalogOutput.ino']]],
+  ['grid_5fheight_12',['GRID_HEIGHT',['../df/dba/_animartrix_ring_8ino_a8bd9f95c4e7d0ae683aaa0434a72dca9.html#a8bd9f95c4e7d0ae683aaa0434a72dca9',1,'AnimartrixRing.ino']]],
+  ['grid_5fserpentine_13',['GRID_SERPENTINE',['../d5/d6f/_fx_noise_plus_palette_8ino_a0624422d96b3367d9d67b6ccd7c81daf.html#a0624422d96b3367d9d67b6ccd7c81daf',1,'GRID_SERPENTINE:&#160;FxNoisePlusPalette.ino'],['../df/d43/_overclock_8ino_a0624422d96b3367d9d67b6ccd7c81daf.html#a0624422d96b3367d9d67b6ccd7c81daf',1,'GRID_SERPENTINE:&#160;Overclock.ino'],['../da/d40/wasm__impl_8h_a0624422d96b3367d9d67b6ccd7c81daf.html#a0624422d96b3367d9d67b6ccd7c81daf',1,'GRID_SERPENTINE:&#160;wasm_impl.h']]],
+  ['grid_5fwidth_14',['GRID_WIDTH',['../df/dba/_animartrix_ring_8ino_a804eeb9892adae7306540eb33f2326eb.html#a804eeb9892adae7306540eb33f2326eb',1,'AnimartrixRing.ino']]],
+  ['gyroalpha_15',['gyroAlpha',['../d1/ddb/_chromancer_8ino_a57c5f1c2684e1eadfd183fcc1c5fcb6b.html#a57c5f1c2684e1eadfd183fcc1c5fcb6b',1,'Chromancer.ino']]],
+  ['gyrothreshold_16',['gyroThreshold',['../d1/ddb/_chromancer_8ino_a87133a83abb75650c274c2097f564707.html#a87133a83abb75650c274c2097f564707',1,'Chromancer.ino']]]
 ];

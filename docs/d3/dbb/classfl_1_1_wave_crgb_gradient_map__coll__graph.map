@@ -1,11 +1,7 @@
 <map id="fl::WaveCrgbGradientMap" name="fl::WaveCrgbGradientMap">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,313,193,339"/>
-<area shape="rect" id="Node000002" href="$dc/dce/classfl_1_1_wave_crgb_map.html" title=" " alt="" coords="12,225,144,251"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="87,263,99,312,94,313,82,265"/>
-<area shape="rect" id="Node000003" href="$d0/db5/classfl_1_1_gradient_inlined.html" title=" " alt="" coords="169,225,307,251"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="209,260,120,315,117,311,206,256"/>
-<area shape="rect" id="Node000004" href="$de/d60/classfl_1_1_variant.html" title=" " alt="" coords="117,108,359,163"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="241,176,241,225,235,225,235,176"/>
-<area shape="rect" id="Node000005" href="$de/d60/classfl_1_1_variant.html" title=" " alt="" coords="163,5,313,31"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="241,45,241,108,235,108,235,45"/>
+<area shape="rect" id="Node000001" title="Wave&#45;to&#45;color mapper using gradient/palette coloring." alt="" coords="57,93,245,119"/>
+<area shape="rect" id="Node000002" href="$dc/dce/classfl_1_1_wave_crgb_map.html" title="Abstract base class for mapping wave simulation values to LED colors." alt="" coords="5,5,137,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,39,142,91,138,95,89,43"/>
+<area shape="rect" id="Node000003" href="$d0/db5/classfl_1_1_gradient_inlined.html" title=" " alt="" coords="162,5,301,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="213,43,164,95,161,91,209,39"/>
 </map>

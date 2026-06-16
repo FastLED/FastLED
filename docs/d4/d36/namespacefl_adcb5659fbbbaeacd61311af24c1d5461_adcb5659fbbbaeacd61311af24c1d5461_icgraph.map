@@ -1,0 +1,21 @@
+<map id="fl::fill" name="fl::fill">
+<area shape="rect" id="Node000001" title=" " alt="" coords="561,157,616,183"/>
+<area shape="rect" id="Node000002" href="$da/d2a/namespacefl_1_1format__detail_a55e63a30ab96d32cfb6a9520c4f24355.html#a55e63a30ab96d32cfb6a9520c4f24355" title=" " alt="" coords="347,22,487,62"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="571,146,546,110,512,76,486,62,488,57,515,72,550,106,576,143"/>
+<area shape="rect" id="Node000093" href="$da/d5e/classfl_1_1audio_1_1detector_1_1_beat_aead064a5aafb54102b94b8e3b234d058.html#aead064a5aafb54102b94b8e3b234d058" title=" " alt="" coords="349,86,485,126"/>
+<area shape="poly" id="edge5_Node000001_Node000093" title=" " alt="" coords="548,155,512,140,479,129,481,124,514,136,550,150"/>
+<area shape="rect" id="Node000094" href="$d6/df8/classfl_1_1audio_1_1detector_1_1_tempo_analyzer_a2bd3850507662130fbea5b1edd05f36f.html#a2bd3850507662130fbea5b1edd05f36f" title=" " alt="" coords="331,150,502,190"/>
+<area shape="poly" id="edge6_Node000001_Node000094" title=" " alt="" coords="548,173,502,173,502,167,548,167"/>
+<area shape="rect" id="Node000095" href="$d3/da6/classfl_1_1audio_1_1detector_1_1_transient_a7839bc4e26cce9cb15cc43e92f0b3e81.html#a7839bc4e26cce9cb15cc43e92f0b3e81" title=" " alt="" coords="349,214,485,254"/>
+<area shape="poly" id="edge7_Node000001_Node000095" title=" " alt="" coords="550,190,514,204,481,216,479,211,512,200,548,185"/>
+<area shape="rect" id="Node000097" href="$d5/df4/classfl_1_1_channel_data_a3716e6b2f5048cc975fe85d8cb32eb2f.html#a3716e6b2f5048cc975fe85d8cb32eb2f" title="Write encoded data with padding to destination buffer." alt="" coords="320,278,513,318"/>
+<area shape="poly" id="edge9_Node000001_Node000097" title=" " alt="" coords="576,197,550,234,515,268,494,280,491,276,512,264,546,230,571,194"/>
+<area shape="rect" id="Node000003" href="$da/d2a/namespacefl_1_1format__detail_a892df3c6e93f2a0ce7cfe9b1ea83b035.html#a892df3c6e93f2a0ce7cfe9b1ea83b035" title=" " alt="" coords="137,22,271,62"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="333,45,271,45,271,39,333,39"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aee6f6a125b8389786800233a69115983.html#aee6f6a125b8389786800233a69115983" title="Format with no arguments." alt="" coords="5,5,88,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="123,32,88,27,89,22,123,27"/>
+<area shape="rect" id="Node000092" href="$d4/d36/namespacefl_abbc6c920eee143cf97e4ef1732639f55.html#abbc6c920eee143cf97e4ef1732639f55" title="Format with variadic arguments." alt="" coords="5,55,88,80"/>
+<area shape="poly" id="edge4_Node000003_Node000092" title=" " alt="" coords="124,58,89,63,88,58,123,52"/>
+<area shape="rect" id="Node000096" href="$d3/da6/classfl_1_1audio_1_1detector_1_1_transient_a9e48699116935e136222593a82234e19.html#a9e48699116935e136222593a82234e19" title=" " alt="" coords="136,214,272,254"/>
+<area shape="poly" id="edge8_Node000095_Node000096" title=" " alt="" coords="335,237,272,237,272,231,335,231"/>
+</map>

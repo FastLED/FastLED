@@ -1,0 +1,11 @@
+<map id="setup" name="setup">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,64,56"/>
+<area shape="rect" id="Node000002" href="$d1/d1d/_blur_benchmark_8ino_abfcc7882a8861616eb741fd94d970aa9.html#abfcc7882a8861616eb741fd94d970aa9" title=" " alt="" coords="112,31,173,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="64,41,98,41,98,46,64,46"/>
+<area shape="rect" id="Node000003" href="$d0/d8b/namespacefl_1_1gfx_a2d0276b48f273dfb519f75e12846b0d4.html#a2d0276b48f273dfb519f75e12846b0d4" title="Compile&#45;time Gaussian blur with independent H/V radii." alt="" coords="221,5,373,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="173,36,207,30,208,35,174,41"/>
+<area shape="rect" id="Node000017" href="$d1/d1d/_blur_benchmark_8ino_a8a7c92da84cc49c9b6c79cbbc390d482.html#a8a7c92da84cc49c9b6c79cbbc390d482" title=" " alt="" coords="244,55,351,80"/>
+<area shape="poly" id="edge4_Node000002_Node000017" title=" " alt="" coords="174,45,231,54,230,60,173,51"/>
+<area shape="rect" id="Node000004" href="$d0/d8b/namespacefl_1_1gfx_a9c2302b4a1a567e89ab63f5ddc3b7532.html#a9c2302b4a1a567e89ab63f5ddc3b7532" title=" " alt="" coords="421,5,603,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="373,15,408,15,408,21,373,21"/>
+</map>

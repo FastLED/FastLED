@@ -1,0 +1,5 @@
+<map id="fl::ClocklessChipset" name="fl::ClocklessChipset">
+<area shape="rect" id="Node000001" title="Clockless chipset configuration (single data pin)" alt="" coords="17,93,167,119"/>
+<area shape="rect" id="Node000002" href="$d5/de9/structfl_1_1_chipset_timing_config.html" title="Runtime bit&#45;period timing for a clockless chipset." alt="" coords="5,5,179,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="95,45,95,93,89,93,89,45"/>
+</map>

@@ -1,0 +1,16 @@
+<map id="fl/audio/detector/silence.h" name="fl/audio/detector/silence.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="131,5,322,31"/>
+<area shape="rect" id="Node000002" href="$db/d4b/audio__processor_8cpp_8hpp.html" title=" " alt="" coords="5,159,240,185"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="213,43,133,161,128,158,209,40"/>
+<area shape="rect" id="Node000006" href="$d5/d52/silence_8cpp_8hpp.html" title=" " alt="" coords="201,79,434,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="254,37,304,76,301,81,251,41"/>
+<area shape="rect" id="Node000003" href="$d1/d21/fl_2audio_2__build_8cpp_8hpp.html" title="Unity build header for fl/audio/ directory." alt="" coords="143,240,311,265"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="150,191,213,238,210,242,147,195"/>
+<area shape="rect" id="Node000004" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="80,313,208,339"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="205,276,159,315,156,311,201,272"/>
+<area shape="rect" id="Node000005" href="$db/d23/fl_8audio_09_8cpp.html" title="Unity build: recursive includes from src/fl/audio/." alt="" coords="233,313,389,339"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="252,272,299,311,295,315,249,276"/>
+<area shape="rect" id="Node000007" href="$dc/d6b/fl_2audio_2detector_2__build_8cpp_8hpp.html" title=" " alt="" coords="265,152,397,192"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="324,117,330,151,325,152,319,118"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="296,202,244,242,241,238,293,198"/>
+</map>

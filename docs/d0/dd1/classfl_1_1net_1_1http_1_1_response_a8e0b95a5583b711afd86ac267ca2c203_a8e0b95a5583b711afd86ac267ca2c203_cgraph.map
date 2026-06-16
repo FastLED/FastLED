@@ -1,0 +1,7 @@
+<map id="fl::net::http::Response::get_content_type" name="fl::net::http::Response::get_content_type">
+<area shape="rect" id="Node000001" title="Get content type convenience method." alt="" coords="5,5,169,45"/>
+<area shape="rect" id="Node000002" href="$d0/dd1/classfl_1_1net_1_1http_1_1_response_a32d1e99733df3de4ec21fdb6a3823020.html#a32d1e99733df3de4ec21fdb6a3823020" title="Get header value (like JavaScript response.headers.get())" alt="" coords="217,5,381,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="170,23,204,23,204,28,170,28"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a521850c6281549f94bcea643cc9af9ac.html#a521850c6281549f94bcea643cc9af9ac" title=" " alt="" coords="429,13,564,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="382,23,416,23,416,28,382,28"/>
+</map>

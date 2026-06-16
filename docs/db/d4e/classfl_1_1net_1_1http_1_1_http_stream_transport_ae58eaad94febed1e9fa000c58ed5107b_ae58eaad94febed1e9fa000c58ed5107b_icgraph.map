@@ -1,0 +1,12 @@
+<map id="fl::net::http::HttpStreamTransport::getTimeout" name="fl::net::http::HttpStreamTransport::getTimeout">
+<area shape="rect" id="Node000001" title="Get connection timeout." alt="" coords="748,59,924,99"/>
+<area shape="rect" id="Node000002" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_abf435d90483aa8f1acc7ab64dc2cb14e.html#abf435d90483aa8f1acc7ab64dc2cb14e" title=" " alt="" coords="453,29,700,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="734,70,700,66,701,61,735,65"/>
+<area shape="rect" id="Node000004" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8237da9613a0a0c2bffbd8bfddd1f50e.html#a8237da9613a0a0c2bffbd8bfddd1f50e" title="Check if connected." alt="" coords="5,29,181,69"/>
+<area shape="poly" id="edge6_Node000001_Node000004" title=" " alt="" coords="734,89,629,95,503,97,366,95,229,84,165,72,166,67,230,79,366,89,503,92,629,89,734,84"/>
+<area shape="rect" id="Node000003" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a57c01766a42aa6cbab3d0c6b7617a5ff.html#a57c01766a42aa6cbab3d0c6b7617a5ff" title="Update connection state (handles reconnection, heartbeat) Call this in main loop." alt="" coords="229,29,405,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="439,52,406,52,406,47,439,47"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="215,61,182,61,182,55,215,56"/>
+<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="195,38,229,38,229,43,195,43"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="131,18,118,11,93,8,72,10,59,15,54,21,57,28,51,30,49,20,56,10,71,5,93,3,119,6,134,13"/>
+</map>

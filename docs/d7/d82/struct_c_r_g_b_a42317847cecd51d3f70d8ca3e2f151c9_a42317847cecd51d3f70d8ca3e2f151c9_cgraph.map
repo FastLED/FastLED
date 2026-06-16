@@ -1,8 +1,0 @@
-<map id="CRGB::operator++" name="CRGB::operator++">
-<area shape="rect" id="Node000001" title="Add a constant of &#39;1&#39; from each channel, saturating at 0xFF." alt="" coords="5,5,149,31"/>
-<area shape="rect" id="Node000002" href="$d7/d82/struct_c_r_g_b_a4b0cc1cfefd9e0c66ea5c6583181df46.html#a4b0cc1cfefd9e0c66ea5c6583181df46" title="Default constructor." alt="" coords="379,5,483,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="150,15,365,15,365,21,150,21"/>
-<area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b_aabbd38b1a967352651f85a49f625c809.html#aabbd38b1a967352651f85a49f625c809" title="Add a constant to each channel, saturating at 0xFF." alt="" coords="197,31,331,56"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="150,25,184,30,183,35,149,30"/>
-<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="331,31,365,25,365,31,332,36"/>
-</map>

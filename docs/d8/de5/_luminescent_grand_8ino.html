@@ -101,28 +101,77 @@ $(function(){initNavTree('d8/de5/_luminescent_grand_8ino.html','../../'); initRe
 
 <div class="header">
   <div class="summary">
-<a href="#func-members">Functions</a>  </div>
+<a href="#define-members">Macros</a> &#124;
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle"><div class="title">LuminescentGrand.ino File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="../../d4/d78/_luminescent_grand_2shared_2defs_8h_source.html">shared/defs.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;FastLED.h&quot;</code><br />
+<code>#include &lt;<a class="el" href="../../d2/de0/arduino_8h_source.html">Arduino.h</a>&gt;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d85/_keyboard_8h_source.html">shared/Keyboard.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../de/de1/examples_2_luminescent_grand_2shared_2color_8h_source.html">shared/color.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/da2/led__layout__array_8h_source.html">shared/led_layout_array.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dc/db0/_painter_8h_source.html">shared/Painter.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../de/d60/settings_8h_source.html">shared/settings.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d9/d7e/_led_rope_t_c_l_8h_source.html">arduino/LedRopeTCL.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d9/da7/ui__state_8h_source.html">arduino/ui_state.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d29/dprint_8h_source.html">shared/dprint.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d7/d7f/log_8h_source.html">fl/log/log.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d9/d3b/ui_8h_source.html">fl/ui/ui.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d54/compiler__control_8h_source.html">fl/stl/compiler_control.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/d27/_m_i_d_i_8h_source.html">arduino/MIDI.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for LuminescentGrand.ino:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d1/dd7/_luminescent_grand_8ino__incl.svg" width="282" height="139"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d1/dd7/_luminescent_grand_8ino__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../d8/de5/_luminescent_grand_8ino_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:a851be5c067d1f6293e058687db193525" id="r_a851be5c067d1f6293e058687db193525"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/de5/_luminescent_grand_8ino_a851be5c067d1f6293e058687db193525.html#a851be5c067d1f6293e058687db193525">DEBUG_FORCED_KEYBOARD</a></td></tr>
+<tr class="memdesc:a851be5c067d1f6293e058687db193525"><td class="mdescLeft">&#160;</td><td class="mdescRight">This is a work in progress showcasing a complex MIDI keyboard visualizer.  <br /></td></tr>
+<tr class="separator:a851be5c067d1f6293e058687db193525"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c1a1683ee407512efd222a5d92e5cce" id="r_a3c1a1683ee407512efd222a5d92e5cce"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/de5/_luminescent_grand_8ino_a3c1a1683ee407512efd222a5d92e5cce.html#a3c1a1683ee407512efd222a5d92e5cce">FASTLED_UI</a></td></tr>
+<tr class="separator:a3c1a1683ee407512efd222a5d92e5cce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5cfd0980a683a9a2ab6abf5299d9fb00" id="r_a5cfd0980a683a9a2ab6abf5299d9fb00"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/de5/_luminescent_grand_8ino_a5cfd0980a683a9a2ab6abf5299d9fb00.html#a5cfd0980a683a9a2ab6abf5299d9fb00">MIDI_SERIAL_PORT</a>&#160;&#160;&#160;Serial1</td></tr>
+<tr class="separator:a5cfd0980a683a9a2ab6abf5299d9fb00"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:ab01084667a0497ee50445e20e9f6e097" id="r_ab01084667a0497ee50445e20e9f6e097"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/de5/_luminescent_grand_8ino_ab01084667a0497ee50445e20e9f6e097.html#ab01084667a0497ee50445e20e9f6e097">DbgDoSimulatedKeyboardPress</a> ()</td></tr>
+<tr class="separator:ab01084667a0497ee50445e20e9f6e097"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f040dda4a5fc43a2b390789026fffae" id="r_a5f040dda4a5fc43a2b390789026fffae"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/de5/_luminescent_grand_8ino_a5f040dda4a5fc43a2b390789026fffae.html#a5f040dda4a5fc43a2b390789026fffae">FASTLED_DESCRIPTION</a> (&quot;A midi <a class="el" href="../../d8/de5/_luminescent_grand_8ino_ac00b91883c896ad0045234318d17b183.html#ac00b91883c896ad0045234318d17b183">keyboard</a> visualizer.&quot;)</td></tr>
+<tr class="separator:a5f040dda4a5fc43a2b390789026fffae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac48799eadeee8e97627364bef8404b8e" id="r_ac48799eadeee8e97627364bef8404b8e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/de5/_luminescent_grand_8ino_ac48799eadeee8e97627364bef8404b8e.html#ac48799eadeee8e97627364bef8404b8e">FASTLED_TITLE</a> (&quot;Luminescent Grand&quot;)</td></tr>
+<tr class="separator:ac48799eadeee8e97627364bef8404b8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89d368b1771ecdeb3e47fa15090fb938" id="r_a89d368b1771ecdeb3e47fa15090fb938"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/de5/_luminescent_grand_8ino_a89d368b1771ecdeb3e47fa15090fb938.html#a89d368b1771ecdeb3e47fa15090fb938">HandleAfterTouchChannel</a> (<a class="el" href="../../d8/dd0/midi___defs_8h_ab8ef12fab634c171394422d0ee8baf94.html#ab8ef12fab634c171394422d0ee8baf94">byte</a> channel, <a class="el" href="../../d8/dd0/midi___defs_8h_ab8ef12fab634c171394422d0ee8baf94.html#ab8ef12fab634c171394422d0ee8baf94">byte</a> pressure)</td></tr>
+<tr class="separator:a89d368b1771ecdeb3e47fa15090fb938"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a447971793925792bdddf63367ea70a4c" id="r_a447971793925792bdddf63367ea70a4c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/de5/_luminescent_grand_8ino_a447971793925792bdddf63367ea70a4c.html#a447971793925792bdddf63367ea70a4c">HandleAfterTouchPoly</a> (<a class="el" href="../../d8/dd0/midi___defs_8h_ab8ef12fab634c171394422d0ee8baf94.html#ab8ef12fab634c171394422d0ee8baf94">byte</a> channel, <a class="el" href="../../d8/dd0/midi___defs_8h_ab8ef12fab634c171394422d0ee8baf94.html#ab8ef12fab634c171394422d0ee8baf94">byte</a> note, <a class="el" href="../../d8/dd0/midi___defs_8h_ab8ef12fab634c171394422d0ee8baf94.html#ab8ef12fab634c171394422d0ee8baf94">byte</a> pressure)</td></tr>
+<tr class="separator:a447971793925792bdddf63367ea70a4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf4c0204923f99d676ed4f9040a047cd" id="r_adf4c0204923f99d676ed4f9040a047cd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/de5/_luminescent_grand_8ino_adf4c0204923f99d676ed4f9040a047cd.html#adf4c0204923f99d676ed4f9040a047cd">HandleControlChange</a> (<a class="el" href="../../d8/dd0/midi___defs_8h_ab8ef12fab634c171394422d0ee8baf94.html#ab8ef12fab634c171394422d0ee8baf94">byte</a> channel, <a class="el" href="../../d8/dd0/midi___defs_8h_ab8ef12fab634c171394422d0ee8baf94.html#ab8ef12fab634c171394422d0ee8baf94">byte</a> d1, <a class="el" href="../../d8/dd0/midi___defs_8h_ab8ef12fab634c171394422d0ee8baf94.html#ab8ef12fab634c171394422d0ee8baf94">byte</a> d2)</td></tr>
+<tr class="separator:adf4c0204923f99d676ed4f9040a047cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98a0bed97c6da33828fae06e39e62b3b" id="r_a98a0bed97c6da33828fae06e39e62b3b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/de5/_luminescent_grand_8ino_a98a0bed97c6da33828fae06e39e62b3b.html#a98a0bed97c6da33828fae06e39e62b3b">HandleNoteOff</a> (<a class="el" href="../../d8/dd0/midi___defs_8h_ab8ef12fab634c171394422d0ee8baf94.html#ab8ef12fab634c171394422d0ee8baf94">byte</a> channel, <a class="el" href="../../d8/dd0/midi___defs_8h_ab8ef12fab634c171394422d0ee8baf94.html#ab8ef12fab634c171394422d0ee8baf94">byte</a> midi_note, <a class="el" href="../../d8/dd0/midi___defs_8h_ab8ef12fab634c171394422d0ee8baf94.html#ab8ef12fab634c171394422d0ee8baf94">byte</a> velocity)</td></tr>
+<tr class="separator:a98a0bed97c6da33828fae06e39e62b3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab0bc55c4addfc1a3e21270de2e7f5c3b" id="r_ab0bc55c4addfc1a3e21270de2e7f5c3b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/de5/_luminescent_grand_8ino_ab0bc55c4addfc1a3e21270de2e7f5c3b.html#ab0bc55c4addfc1a3e21270de2e7f5c3b">HandleNoteOn</a> (<a class="el" href="../../d8/dd0/midi___defs_8h_ab8ef12fab634c171394422d0ee8baf94.html#ab8ef12fab634c171394422d0ee8baf94">byte</a> channel, <a class="el" href="../../d8/dd0/midi___defs_8h_ab8ef12fab634c171394422d0ee8baf94.html#ab8ef12fab634c171394422d0ee8baf94">byte</a> midi_note, <a class="el" href="../../d8/dd0/midi___defs_8h_ab8ef12fab634c171394422d0ee8baf94.html#ab8ef12fab634c171394422d0ee8baf94">byte</a> velocity)</td></tr>
+<tr class="separator:ab0bc55c4addfc1a3e21270de2e7f5c3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afe461d27b9c48d5921c00d521181f12f" id="r_afe461d27b9c48d5921c00d521181f12f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/de5/_luminescent_grand_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop</a> ()</td></tr>
 <tr class="separator:afe461d27b9c48d5921c00d521181f12f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adad6fedd350d10a04015e64c41176693" id="r_adad6fedd350d10a04015e64c41176693"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/de5/_luminescent_grand_8ino_adad6fedd350d10a04015e64c41176693.html#adad6fedd350d10a04015e64c41176693">MIDI_CREATE_INSTANCE</a> (HardwareSerial, Serial1, MY_MIDI)</td></tr>
+<tr class="separator:adad6fedd350d10a04015e64c41176693"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4fc01d736fe50cf5b977f755b675f11d" id="r_a4fc01d736fe50cf5b977f755b675f11d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/de5/_luminescent_grand_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a> ()</td></tr>
-<tr class="memdesc:a4fc01d736fe50cf5b977f755b675f11d"><td class="mdescLeft">&#160;</td><td class="mdescRight">This is a work in progress showcasing a complex MIDI keyboard visualizer.  <br /></td></tr>
 <tr class="separator:a4fc01d736fe50cf5b977f755b675f11d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:ac00b91883c896ad0045234318d17b183" id="r_ac00b91883c896ad0045234318d17b183"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../db/d37/class_keyboard_state.html">KeyboardState</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/de5/_luminescent_grand_8ino_ac00b91883c896ad0045234318d17b183.html#ac00b91883c896ad0045234318d17b183">keyboard</a></td></tr>
+<tr class="separator:ac00b91883c896ad0045234318d17b183"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8dca22aed95d1ff4d038b56167579319" id="r_a8dca22aed95d1ff4d038b56167579319"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/df6/class_led_rope_t_c_l.html">LedRopeTCL</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/de5/_luminescent_grand_8ino_a8dca22aed95d1ff4d038b56167579319.html#a8dca22aed95d1ff4d038b56167579319">led_rope</a> (<a class="el" href="../../de/d60/settings_8h_a22176b8d4a09265837a22b79c1679b4f.html#a22176b8d4a09265837a22b79c1679b4faf2326181fe72c714b6a1f703f4122248">kNumKeys</a>)</td></tr>
+<tr class="separator:a8dca22aed95d1ff4d038b56167579319"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -131,7 +180,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_786f9dc3989cf40b3de9df2d18ba04d7.html">LuminescentGrand</a></li><li class="navelem"><a class="el" href="../../d8/de5/_luminescent_grand_8ino.html">LuminescentGrand.ino</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

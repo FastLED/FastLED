@@ -1,0 +1,18 @@
+<map id="fl::MultiChannelConfig::MultiChannelConfig" name="fl::MultiChannelConfig::MultiChannelConfig">
+<area shape="rect" id="Node000001" title=" " alt="" coords="467,191,632,231"/>
+<area shape="rect" id="Node000002" href="$d0/dd3/structfl_1_1_multi_channel_config_a7daecf9559b52a9e63958166283fc280.html#a7daecf9559b52a9e63958166283fc280" title=" " alt="" coords="237,5,403,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="527,180,481,119,451,87,417,60,395,48,398,43,420,55,455,83,485,115,531,177"/>
+<area shape="rect" id="Node000003" href="$d0/dd3/structfl_1_1_multi_channel_config_afe02dd31abdb2dcddf343c0999a32929.html#afe02dd31abdb2dcddf343c0999a32929" title=" " alt="" coords="237,69,403,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="511,184,468,153,417,124,390,112,392,107,420,119,470,149,514,180"/>
+<area shape="rect" id="Node000004" href="$d0/dd3/structfl_1_1_multi_channel_config_af7a61a6a8bb50e8950f60cb006a78913.html#af7a61a6a8bb50e8950f60cb006a78913" title=" " alt="" coords="237,133,403,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="455,190,400,176,401,171,456,185"/>
+<area shape="rect" id="Node000005" href="$d0/dd3/structfl_1_1_multi_channel_config_ae1977f595f5bd6b185293f07a7de7336.html#ae1977f595f5bd6b185293f07a7de7336" title=" " alt="" coords="5,216,173,256"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="453,219,174,234,174,229,453,213"/>
+<area shape="rect" id="Node000006" href="$d0/dd3/structfl_1_1_multi_channel_config_aea115e53df2070b3096af89ac31c7d19.html#aea115e53df2070b3096af89ac31c7d19" title="Add a channel configuration to the multi&#45;channel config." alt="" coords="221,249,419,274"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="454,235,379,251,378,246,452,229"/>
+<area shape="rect" id="Node000007" href="$d0/dd3/structfl_1_1_multi_channel_config_a028a8c38b07a231fb21025a7a067d199.html#a028a8c38b07a231fb21025a7a067d199" title=" " alt="" coords="237,299,403,339"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="507,240,420,288,387,301,385,296,418,283,504,236"/>
+<area shape="rect" id="Node000008" href="$d0/dd3/structfl_1_1_multi_channel_config_a13b11afce42ac7f407f55a6d90d5267f.html#a13b11afce42ac7f407f55a6d90d5267f" title=" " alt="" coords="237,363,403,403"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="529,244,483,299,453,328,420,353,397,365,395,360,417,348,449,324,479,296,524,240"/>
+<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="207,252,173,248,174,243,208,246"/>
+</map>

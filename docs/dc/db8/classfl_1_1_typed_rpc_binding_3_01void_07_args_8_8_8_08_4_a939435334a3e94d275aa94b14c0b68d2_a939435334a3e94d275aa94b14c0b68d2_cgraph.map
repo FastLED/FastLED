@@ -1,0 +1,8 @@
+<map id="fl::TypedRpcBinding&lt; void(Args...)&gt;::invoke" name="fl::TypedRpcBinding&lt; void(Args...)&gt;::invoke">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,184,45"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ad2bd3fbfa62b8cb135f8c67ce6bfeefe.html#ad2bd3fbfa62b8cb135f8c67ce6bfeefe" title=" " alt="" coords="487,13,545,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,20,232,19,439,19,473,20,473,25,439,24,232,24,184,25"/>
+<area shape="rect" id="Node000003" href="$dc/db8/classfl_1_1_typed_rpc_binding_3_01void_07_args_8_8_8_08_4_ad5d0d2bd8bb22520b3894cee525754c7.html#ad5d0d2bd8bb22520b3894cee525754c7" title=" " alt="" coords="232,33,439,73"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="185,33,219,37,218,42,184,38"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="439,35,473,29,473,35,440,40"/>
+</map>

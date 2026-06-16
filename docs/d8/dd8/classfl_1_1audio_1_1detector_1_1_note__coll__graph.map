@@ -1,0 +1,21 @@
+<map id="fl::audio::detector::Note" name="fl::audio::detector::Note">
+<area shape="rect" id="Node000001" title="Note &#45; Musical note detection with MIDI output." alt="" coords="49,445,185,485"/>
+<area shape="rect" id="Node000002" href="$df/d9b/classfl_1_1audio_1_1_detector.html" title=" " alt="" coords="5,130,144,155"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="81,169,117,445,112,446,75,169"/>
+<area shape="rect" id="Node000004" href="$db/d89/classfl_1_1audio_1_1detector_1_1_pitch.html" title="Pitch &#45; Continuous pitch tracking using autocorrelation." alt="" coords="217,225,353,265"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="112,159,247,223,245,228,110,164"/>
+<area shape="rect" id="Node000003" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="282,343,465,383"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="313,390,166,448,164,443,311,385"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="310,275,361,341,357,344,306,278"/>
+<area shape="rect" id="Node000005" href="$d6/db5/classfl_1_1_one_euro_filter.html" title=" " alt="" coords="331,123,469,163"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="382,176,358,203,324,227,321,223,354,199,378,173"/>
+<area shape="rect" id="Node000009" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="168,130,307,155"/>
+<area shape="poly" id="edge6_Node000004_Node000009" title=" " alt="" coords="236,169,237,185,241,200,260,224,255,227,236,203,232,186,231,169"/>
+<area shape="rect" id="Node000014" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="522,130,721,155"/>
+<area shape="poly" id="edge7_Node000003_Node000014" title=" " alt="" coords="631,168,635,186,633,229,622,271,609,304,599,321,577,333,544,343,466,356,465,351,543,338,575,328,595,317,604,302,617,270,628,229,629,187,626,169"/>
+<area shape="rect" id="Node000017" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="441,233,586,258"/>
+<area shape="poly" id="edge10_Node000017_Node000014" title=" " alt="" coords="568,163,549,174,533,188,521,211,517,233,511,232,516,209,529,185,546,170,565,159"/>
+<area shape="rect" id="Node000015" href="$da/d98/classfl_1_1_atomic_fake.html" title=" " alt="" coords="553,5,689,45"/>
+<area shape="poly" id="edge8_Node000014_Node000015" title=" " alt="" coords="624,59,624,130,619,130,619,59"/>
+<area shape="poly" id="edge9_Node000003_Node000017" title=" " alt="" coords="491,269,398,344,395,340,487,265"/>
+</map>

@@ -1,0 +1,10 @@
+<map id="fl::Optional::emplace" name="fl::Optional::emplace">
+<area shape="rect" id="Node000001" title="Emplace with rvalue reference." alt="" coords="5,31,163,56"/>
+<area shape="rect" id="Node000002" href="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a" title=" " alt="" coords="234,5,325,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="163,30,220,23,221,28,163,36"/>
+<area shape="rect" id="Node000003" href="$dd/dd8/classfl_1_1_optional_a1a7216013ea48bf987511dae97d2915f.html#a1a7216013ea48bf987511dae97d2915f" title=" " alt="" coords="211,55,348,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="163,50,197,55,197,60,163,56"/>
+<area shape="rect" id="Node000004" href="$dd/dd8/classfl_1_1_optional_a0c3fe141556cad218a68e49c72ac139a.html#a0c3fe141556cad218a68e49c72ac139a" title=" " alt="" coords="396,55,515,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="348,65,382,65,382,70,348,70"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="426,56,420,46,423,37,435,30,455,28,480,32,490,40,486,44,477,36,455,33,437,35,427,40,425,46,430,53"/>
+</map>

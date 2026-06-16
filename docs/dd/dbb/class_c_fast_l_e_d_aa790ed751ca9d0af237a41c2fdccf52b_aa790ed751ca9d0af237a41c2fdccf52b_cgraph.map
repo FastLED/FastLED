@@ -1,0 +1,14 @@
+<map id="CFastLED::getDriverCount" name="CFastLED::getDriverCount">
+<area shape="rect" id="Node000001" title="Get count of registered channel drivers." alt="" coords="5,95,195,121"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a8aafd1d8ccf1aab536564352dd23d204.html#a8aafd1d8ccf1aab536564352dd23d204" title="Get the global ChannelManager singleton instance." alt="" coords="243,66,390,91"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="194,93,229,88,230,93,194,98"/>
+<area shape="rect" id="Node000009" href="$d2/d6b/classfl_1_1_channel_manager_a9702b81a423bf2b2708c85c4bb485d61.html#a9702b81a423bf2b2708c85c4bb485d61" title="Get count of registered drivers (including unnamed ones)" alt="" coords="243,116,391,156"/>
+<area shape="poly" id="edge6_Node000001_Node000009" title=" " alt="" coords="196,118,229,122,228,127,195,123"/>
+<area shape="rect" id="Node000003" href="$d2/d6b/classfl_1_1_channel_manager_aed1be386f6b38cabd478d1d9c11c240c.html#aed1be386f6b38cabd478d1d9c11c240c" title="Get the global singleton instance." alt="" coords="439,59,587,99"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="391,76,425,76,425,81,391,81"/>
+<area shape="rect" id="Node000004" href="$d2/d6b/classfl_1_1_channel_manager_addc4b631522a2d44151c6b7c23a26ca1.html#addc4b631522a2d44151c6b7c23a26ca1" title="Constructor." alt="" coords="642,29,790,69"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="587,65,628,59,629,65,587,71"/>
+<area shape="rect" id="Node000008" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="635,94,797,119"/>
+<area shape="poly" id="edge5_Node000003_Node000008" title=" " alt="" coords="587,86,622,91,621,96,587,91"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="678,30,676,20,682,11,695,5,716,3,740,6,753,13,750,18,738,11,716,8,697,10,685,15,681,21,683,28"/>
+</map>

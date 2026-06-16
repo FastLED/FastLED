@@ -1,0 +1,11 @@
+<map id="fl::third_party::nsgif__update_bitmap" name="fl::third_party::nsgif__update_bitmap">
+<area shape="rect" id="Node000001" title=" " alt="" coords="601,37,749,77"/>
+<area shape="rect" id="Node000002" href="$d1/d86/namespacefl_1_1third__party_a69436b97b760adfd50dcf61530d5fa9f.html#a69436b97b760adfd50dcf61530d5fa9f" title="Parse the image data for a gif frame." alt="" coords="397,37,553,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="588,60,554,60,554,55,588,55"/>
+<area shape="rect" id="Node000003" href="$d1/d86/namespacefl_1_1third__party_aa00bee5c0f7b53c8e9441d62f98c61b2.html#aa00bee5c0f7b53c8e9441d62f98c61b2" title="Attempts to initialise the next frame." alt="" coords="201,37,349,77"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="383,60,350,60,350,55,383,55"/>
+<area shape="rect" id="Node000004" href="$d1/d86/namespacefl_1_1third__party_a34aa4d967d8ddaeefa12954d47fe7863.html#a34aa4d967d8ddaeefa12954d47fe7863" title="Scan the source image data." alt="" coords="5,5,153,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="187,46,153,40,154,35,188,40"/>
+<area shape="rect" id="Node000008" href="$d1/d86/namespacefl_1_1third__party_a3f914f8fd903813b728ce719ad8b59c7.html#a3f914f8fd903813b728ce719ad8b59c7" title="Decodes a GIF frame." alt="" coords="5,69,153,109"/>
+<area shape="poly" id="edge4_Node000003_Node000008" title=" " alt="" coords="188,74,154,80,153,75,187,69"/>
+</map>

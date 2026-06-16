@@ -1,0 +1,10 @@
+<map id="fl::Rpc::tags" name="fl::Rpc::tags">
+<area shape="rect" id="Node000001" title="Returns list of unique tags used across all methods." alt="" coords="516,29,615,55"/>
+<area shape="rect" id="Node000002" href="$d7/dd1/classfl_1_1_rpc_a4178792373064445ef93bf68a2769ac3.html#a4178792373064445ef93bf68a2769ac3" title=" " alt="" coords="299,29,468,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="502,45,468,45,468,39,502,39"/>
+<area shape="rect" id="Node000003" href="$d7/dd1/classfl_1_1_rpc_abcb5805b43e29dccaa852c4c27765a66.html#abcb5805b43e29dccaa852c4c27765a66" title="Bind a method with configuration (name, function, optional metadata)." alt="" coords="152,29,251,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="285,45,251,45,251,39,285,39"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="227,18,219,11,201,8,186,10,178,15,177,20,181,28,176,31,171,21,174,11,184,5,201,3,222,6,230,15"/>
+<area shape="rect" id="Node000004" href="$d7/dd1/classfl_1_1_rpc_a7848eb3c0697893c79d23518707a0231.html#a7848eb3c0697893c79d23518707a0231" title="Convenience overload: bind method by name, function, and optional mode." alt="" coords="5,29,104,55"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="138,45,104,45,104,39,138,39"/>
+</map>

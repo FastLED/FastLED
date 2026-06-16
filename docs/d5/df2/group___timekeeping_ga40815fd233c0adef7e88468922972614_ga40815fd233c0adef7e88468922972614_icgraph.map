@@ -1,0 +1,5 @@
+<map id="fl::div1024_32_16" name="fl::div1024_32_16">
+<area shape="rect" id="Node000001" title="Helper routine to divide a 32&#45;bit value by 1024, returning only the low 16 bits." alt="" coords="168,5,304,31"/>
+<area shape="rect" id="Node000002" href="$d5/df2/group___timekeeping_ga15da0271464b8f6b8bc8624be4b5022c.html#ga15da0271464b8f6b8bc8624be4b5022c" title="Returns the current time&#45;since&#45;boot in &quot;binary seconds&quot;, which are actually 1024/1000 of a second lon..." alt="" coords="5,5,120,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="154,21,120,21,120,15,154,15"/>
+</map>

@@ -1,0 +1,31 @@
+<map id="fl::detail::delay_impl" name="fl::detail::delay_impl">
+<area shape="rect" id="Node000001" title="Internal delay implementation used by the public fl::delay wrapper." alt="" coords="696,353,851,378"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27" title="Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all..." alt="" coords="556,214,631,239"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="743,346,609,242,613,237,747,342"/>
+<area shape="rect" id="Node000021" href="$d4/d36/namespacefl_a82d61c027070cb53f84ede1132299204.html#a82d61c027070cb53f84ede1132299204" title="Delay for a given number of milliseconds (legacy &#45; no async pumping)" alt="" coords="539,353,648,378"/>
+<area shape="poly" id="edge13_Node000001_Node000021" title=" " alt="" coords="682,368,648,368,648,363,682,363"/>
+<area shape="rect" id="Node000023" href="$d4/d36/namespacefl_a14b805b63f5e1d91d6897e6560f9d863.html#a14b805b63f5e1d91d6897e6560f9d863" title="Shorter alias for delay with optional async task pumping." alt="" coords="547,402,640,427"/>
+<area shape="poly" id="edge15_Node000001_Node000023" title=" " alt="" coords="714,384,641,405,639,399,713,379"/>
+<area shape="poly" id="edge7_Node000002_Node000002" title=" " alt="" coords="625,204,616,196,593,193,574,195,565,199,563,205,568,212,564,215,557,206,561,196,573,190,593,187,618,191,628,200"/>
+<area shape="rect" id="Node000003" href="$d0/ddf/class_midi_shield_button_a44897ca4c21626c1ad1277bc02e00455.html#a44897ca4c21626c1ad1277bc02e00455" title=" " alt="" coords="277,5,486,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="581,202,568,169,548,131,522,92,489,59,470,48,473,43,492,55,526,89,552,128,572,167,586,200"/>
+<area shape="rect" id="Node000004" href="$d8/ddd/class_toggle_button_a2a9e3bd18ffaaf27092378dba82114cb.html#a2a9e3bd18ffaaf27092378dba82114cb" title=" " alt="" coords="281,70,481,95"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="576,204,540,156,516,131,489,110,462,98,464,93,492,106,520,127,544,152,580,201"/>
+<area shape="rect" id="Node000005" href="$d7/d5f/classfl_1_1_http_connection_a5771485770bb65873ba278d1806af6e3.html#a5771485770bb65873ba278d1806af6e3" title=" " alt="" coords="294,120,469,160"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="558,209,490,174,457,163,459,158,492,170,561,204"/>
+<area shape="rect" id="Node000015" href="$dd/dbb/class_c_fast_l_e_d_a6819ff831058a710d4582dfc09817202.html#a6819ff831058a710d4582dfc09817202" title="Delay for the given number of milliseconds." alt="" coords="318,185,445,210"/>
+<area shape="poly" id="edge6_Node000002_Node000015" title=" " alt="" coords="542,222,445,209,445,203,542,217"/>
+<area shape="rect" id="Node000016" href="$d1/d86/namespacefl_1_1third__party_a969792a3f08da0146abd9e740081ac1c.html#a969792a3f08da0146abd9e740081ac1c" title=" " alt="" coords="285,235,478,275"/>
+<area shape="poly" id="edge8_Node000002_Node000016" title=" " alt="" coords="543,236,478,245,478,239,542,231"/>
+<area shape="rect" id="Node000017" href="$d1/d86/namespacefl_1_1third__party_a24141a300abe39176c4bd2d7d32b9e88.html#a24141a300abe39176c4bd2d7d32b9e88" title="Prepare to show a frame." alt="" coords="41,260,189,300"/>
+<area shape="poly" id="edge10_Node000002_Node000017" title=" " alt="" coords="567,250,532,272,491,289,412,304,330,307,254,304,189,296,189,291,254,298,330,302,411,298,490,284,530,267,564,246"/>
+<area shape="rect" id="Node000018" href="$df/d52/namespacefl_1_1platforms_ac009c87446b4a0e2fc2bbb7edd2c92b9.html#ac009c87446b4a0e2fc2bbb7edd2c92b9" title=" " alt="" coords="272,349,491,389"/>
+<area shape="poly" id="edge11_Node000002_Node000018" title=" " alt="" coords="576,252,540,293,492,333,455,352,452,347,489,328,536,289,572,249"/>
+<area shape="rect" id="Node000006" href="$d7/d5f/classfl_1_1_http_connection_ad9f710e04bb0829d726f68b851f29f21.html#ad9f710e04bb0829d726f68b851f29f21" title=" " alt="" coords="45,120,184,160"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="280,143,184,143,184,137,280,137"/>
+<area shape="poly" id="edge9_Node000016_Node000017" title=" " alt="" coords="271,268,189,276,189,270,271,262"/>
+<area shape="rect" id="Node000019" href="$df/d52/namespacefl_1_1platforms_a3333f9482b0798c0daebdc07be2cdd5c.html#a3333f9482b0798c0daebdc07be2cdd5c" title=" " alt="" coords="5,349,224,389"/>
+<area shape="poly" id="edge12_Node000018_Node000019" title=" " alt="" coords="258,372,224,372,224,367,258,367"/>
+<area shape="rect" id="Node000022" href="$d2/d63/class_sketch_halt_a5e483429ff3e8f7ddde2dfe726f7add9.html#a5e483429ff3e8f7ddde2dfe726f7add9" title="Check if sketch is halted and handle periodic message printing." alt="" coords="312,414,451,439"/>
+<area shape="poly" id="edge14_Node000021_Node000022" title=" " alt="" coords="547,385,491,404,443,416,442,411,490,399,546,380"/>
+</map>

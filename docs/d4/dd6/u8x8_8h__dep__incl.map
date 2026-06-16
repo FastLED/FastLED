@@ -1,0 +1,80 @@
+<map id="fl/math/fixed_point/u8x8.h" name="fl/math/fixed_point/u8x8.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1303,5,1445,45"/>
+<area shape="rect" id="Node000002" href="$dd/d14/crgb16_8h.html" title=" " alt="" coords="454,284,569,309"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1302,52,549,286,547,281,1300,47"/>
+<area shape="rect" id="Node000091" href="$de/d62/fixed__point_8h.html" title=" " alt="" coords="1297,101,1451,126"/>
+<area shape="poly" id="edge15_Node000001_Node000091" title=" " alt="" coords="1377,59,1377,100,1371,100,1371,59"/>
+<area shape="rect" id="Node000199" href="$da/d97/u8x8_8cpp_8hpp.html" title=" " alt="" coords="1937,93,2080,133"/>
+<area shape="poly" id="edge45_Node000001_Node000199" title=" " alt="" coords="1459,35,1937,100,1937,105,1459,41"/>
+<area shape="rect" id="Node000003" href="$db/d8a/blur_8cpp_8hpp.html" title=" " alt="" coords="601,387,739,412"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="542,314,653,384,651,389,540,319"/>
+<area shape="rect" id="Node000007" href="$d4/d1c/fl_2gfx_2colorutils_8h.html" title="Utility functions for color fill, palettes, blending, and more." alt="" coords="446,387,577,412"/>
+<area shape="poly" id="edge4_Node000002_Node000007" title=" " alt="" coords="514,323,514,387,509,387,509,323"/>
+<area shape="rect" id="Node000004" href="$d5/d88/fl_2gfx_2__build_8cpp_8hpp.html" title="Unity build for fl/gfx/ — graphics types, primitives, and simulators." alt="" coords="759,651,912,676"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="710,416,748,440,783,473,809,520,826,571,834,617,837,650,832,651,829,618,820,573,804,522,779,476,745,444,708,421"/>
+<area shape="rect" id="Node000008" href="$d1/dfb/colorutils_8h.html" title=" " alt="" coords="464,482,559,507"/>
+<area shape="poly" id="edge5_Node000007_Node000008" title=" " alt="" coords="514,426,514,482,509,482,509,426"/>
+<area shape="rect" id="Node000063" href="$dc/da8/src_2fl_2audio_2audio__reactive_8h.html" title=" " alt="" coords="873,482,1056,507"/>
+<area shape="poly" id="edge6_Node000007_Node000063" title=" " alt="" coords="556,414,589,424,743,457,880,479,879,485,742,462,588,429,554,419"/>
+<area shape="rect" id="Node000065" href="$d0/d3e/perlin__particle__punch_8h.html" title="Audio&#45;reactive perlin noise background with ambient particles and beat meteor overlay." alt="" coords="583,475,747,515"/>
+<area shape="poly" id="edge7_Node000007_Node000065" title=" " alt="" coords="543,417,635,472,632,477,540,421"/>
+<area shape="rect" id="Node000040" href="$db/d4e/colorutils_8cpp_8hpp.html" title=" " alt="" coords="5,482,180,507"/>
+<area shape="poly" id="edge8_Node000007_Node000040" title=" " alt="" coords="465,419,428,429,154,485,153,479,427,424,463,414"/>
+<area shape="rect" id="Node000068" href="$dc/d33/gradient_8cpp_8hpp.html" title=" " alt="" coords="630,570,798,595"/>
+<area shape="poly" id="edge10_Node000007_Node000068" title=" " alt="" coords="558,414,589,424,616,430,641,432,685,433,705,435,724,442,743,453,762,473,768,486,769,500,761,527,745,552,728,572,724,568,741,549,757,525,764,499,763,487,757,476,740,458,722,446,704,441,684,438,640,438,615,435,588,429,556,419"/>
+<area shape="rect" id="Node000069" href="$db/dfe/gradient_8h.html" title=" " alt="" coords="205,482,330,507"/>
+<area shape="poly" id="edge12_Node000007_Node000069" title=" " alt="" coords="469,419,298,484,297,479,467,414"/>
+<area shape="rect" id="Node000058" href="$d4/d46/pixelset_8h.html" title="Declares classes for managing logical groups of LEDs." alt="" coords="354,482,439,507"/>
+<area shape="poly" id="edge14_Node000007_Node000058" title=" " alt="" coords="489,422,413,484,409,480,485,418"/>
+<area shape="poly" id="edge9_Node000040_Node000004" title=" " alt="" coords="158,508,785,648,784,653,157,513"/>
+<area shape="poly" id="edge11_Node000068_Node000004" title=" " alt="" coords="745,601,819,648,816,653,742,605"/>
+<area shape="poly" id="edge13_Node000069_Node000068" title=" " alt="" coords="324,508,343,512,503,543,643,567,642,573,503,549,341,517,323,513"/>
+<area shape="poly" id="edge17_Node000091_Node000040" title=" " alt="" coords="1283,120,1121,132,909,157,793,176,674,202,556,233,443,272,389,295,336,323,238,384,159,443,108,484,104,480,156,438,235,380,334,318,387,290,441,267,555,228,673,197,792,171,908,152,1121,126,1283,115"/>
+<area shape="rect" id="Node000026" href="$d5/df1/fft__impl_8cpp_8hpp.html" title=" " alt="" coords="1186,189,1383,214"/>
+<area shape="poly" id="edge16_Node000091_Node000026" title=" " alt="" coords="1354,137,1299,190,1295,186,1350,134"/>
+<area shape="rect" id="Node000046" href="$df/d60/ease_8cpp_8hpp.html" title=" " alt="" coords="1928,387,2087,412"/>
+<area shape="poly" id="edge18_Node000091_Node000046" title=" " alt="" coords="1465,114,1659,124,1776,134,1895,148,2010,168,2113,194,2157,209,2195,227,2226,246,2249,268,2262,291,2259,313,2243,332,2218,348,2152,373,2080,389,2079,384,2150,368,2216,343,2239,328,2254,311,2256,292,2245,271,2223,250,2192,231,2155,214,2111,199,2009,173,1895,154,1775,139,1659,129,1465,119"/>
+<area shape="rect" id="Node000092" href="$db/d19/ease_8h.html" title=" " alt="" coords="1407,189,1522,214"/>
+<area shape="poly" id="edge20_Node000091_Node000092" title=" " alt="" coords="1398,134,1454,186,1450,190,1394,138"/>
+<area shape="rect" id="Node000047" href="$dc/d5b/fl_2math_2__build_8cpp_8hpp.html" title="Unity build header for fl/math/ directory." alt="" coords="2097,482,2264,507"/>
+<area shape="poly" id="edge19_Node000046_Node000047" title=" " alt="" coords="2042,416,2160,480,2158,484,2039,421"/>
+<area shape="poly" id="edge42_Node000092_Node000046" title=" " alt="" coords="1536,203,1593,209,1657,220,1722,239,1785,267,1802,280,1812,294,1821,308,1836,322,1869,342,1904,359,1969,384,1968,389,1902,364,1866,347,1832,326,1817,311,1807,297,1798,284,1782,272,1721,244,1655,225,1592,214,1536,208"/>
+<area shape="rect" id="Node000093" href="$d4/df9/_auto_research_test_8cpp.html" title=" " alt="" coords="1049,372,1288,427"/>
+<area shape="poly" id="edge21_Node000092_Node000093" title=" " alt="" coords="1412,220,1396,224,1358,230,1323,230,1261,226,1234,226,1208,232,1183,246,1158,271,1146,294,1145,320,1150,347,1158,371,1153,373,1145,348,1140,321,1141,293,1153,268,1180,242,1206,227,1233,221,1262,220,1323,225,1357,224,1395,219,1410,215"/>
+<area shape="rect" id="Node000094" href="$db/df4/_color_boost_8h.html" title="Demo of CRGB::colorBoost() for video display on WS2812 LEDs using animated rainbow effect (based on P..." alt="" coords="2015,269,2235,324"/>
+<area shape="poly" id="edge22_Node000092_Node000094" title=" " alt="" coords="1536,207,1745,230,2002,267,2015,269,2014,274,2002,272,1745,235,1535,212"/>
+<area shape="rect" id="Node000096" href="$dd/d55/_ease_in_out_8h.html" title=" " alt="" coords="1212,269,1427,324"/>
+<area shape="poly" id="edge23_Node000092_Node000096" title=" " alt="" coords="1437,224,1362,271,1359,267,1434,219"/>
+<area shape="rect" id="Node000098" href="$d3/de6/channel_8cpp_8hpp.html" title=" " alt="" coords="1081,482,1283,507"/>
+<area shape="poly" id="edge24_Node000092_Node000098" title=" " alt="" coords="1411,220,1396,224,1365,230,1336,231,1286,230,1264,232,1243,238,1223,250,1203,271,1195,284,1193,296,1196,309,1203,322,1213,334,1225,341,1251,345,1279,350,1292,358,1303,371,1310,385,1313,399,1310,413,1303,428,1287,448,1268,463,1225,484,1223,479,1265,459,1284,444,1298,425,1305,411,1307,399,1305,387,1298,373,1288,362,1277,355,1250,351,1223,346,1210,338,1198,326,1191,310,1188,296,1190,282,1199,268,1220,246,1241,233,1263,227,1286,225,1336,226,1364,224,1395,219,1409,215"/>
+<area shape="rect" id="Node000099" href="$d4/db7/encoders_2ucs7604_8h.html" title="UCS7604 LED chipset encoder implementation." alt="" coords="935,277,1085,317"/>
+<area shape="poly" id="edge25_Node000092_Node000099" title=" " alt="" coords="1413,220,1396,224,1314,239,1250,248,1186,257,1105,272,1075,279,1074,274,1104,267,1186,251,1250,243,1313,234,1395,219,1412,215"/>
+<area shape="rect" id="Node000100" href="$d0/d00/ucs7604_8h.html" title="UCS7604 LED chipset controller implementation for FastLED." alt="" coords="815,387,973,412"/>
+<area shape="poly" id="edge31_Node000092_Node000100" title=" " alt="" coords="1414,220,1396,224,1349,229,1289,230,1150,229,1080,231,1016,238,963,251,942,260,925,271,906,298,897,330,894,362,895,386,890,387,889,362,892,329,901,296,921,267,939,255,961,245,1015,232,1080,226,1150,224,1289,224,1348,223,1395,219,1413,215"/>
+<area shape="rect" id="Node000023" href="$d8/d61/hd108_8h.html" title=" " alt="" coords="1846,284,1990,309"/>
+<area shape="poly" id="edge30_Node000092_Node000023" title=" " alt="" coords="1536,211,1672,234,1828,267,1882,281,1880,286,1827,272,1671,240,1535,216"/>
+<area shape="rect" id="Node000104" href="$df/dcc/fl_2gfx_2crgb_8h.html" title="Defines the 8&#45;bit red, green, and blue (RGB) pixel type in the fl namespace." alt="" coords="674,284,773,309"/>
+<area shape="poly" id="edge32_Node000092_Node000104" title=" " alt="" coords="1414,220,1396,224,1251,245,1137,252,1023,258,877,272,773,289,772,283,876,267,1022,252,1136,247,1250,239,1395,219,1413,215"/>
+<area shape="rect" id="Node000041" href="$d8/d89/five__bit__hd__gamma_8cpp_8hpp.html" title=" " alt="" coords="1123,563,1257,603"/>
+<area shape="poly" id="edge36_Node000092_Node000041" title=" " alt="" coords="1465,228,1458,274,1442,325,1412,386,1382,430,1347,470,1297,517,1263,543,1228,565,1225,560,1260,539,1294,513,1343,466,1378,427,1407,383,1437,323,1453,273,1460,227"/>
+<area shape="rect" id="Node000196" href="$d8/d2f/hsv16_8cpp_8hpp.html" title=" " alt="" coords="1503,387,1656,412"/>
+<area shape="poly" id="edge38_Node000092_Node000196" title=" " alt="" coords="1536,211,1587,231,1610,247,1628,268,1635,284,1637,301,1628,335,1610,365,1592,388,1588,385,1606,362,1623,333,1632,300,1630,285,1624,271,1606,251,1584,236,1534,216"/>
+<area shape="rect" id="Node000197" href="$d0/d1a/hsv16_8h.html" title=" " alt="" coords="1503,284,1613,309"/>
+<area shape="poly" id="edge40_Node000092_Node000197" title=" " alt="" coords="1487,222,1548,282,1545,286,1484,225"/>
+<area shape="rect" id="Node000179" href="$df/da5/lib8tion_8h.html" title="Fast, efficient 8&#45;bit math functions specifically designed for high&#45;performance LED programming." alt="" coords="1689,284,1771,309"/>
+<area shape="poly" id="edge43_Node000092_Node000179" title=" " alt="" coords="1517,215,1671,267,1706,281,1704,286,1669,272,1515,220"/>
+<area shape="poly" id="edge26_Node000099_Node000093" title=" " alt="" coords="1053,322,1128,369,1126,374,1050,326"/>
+<area shape="poly" id="edge27_Node000099_Node000098" title=" " alt="" coords="1012,330,1018,378,1027,403,1040,425,1060,444,1083,459,1132,480,1130,484,1080,464,1056,448,1036,428,1022,405,1013,379,1007,331"/>
+<area shape="poly" id="edge28_Node000099_Node000100" title=" " alt="" coords="979,328,909,388,906,384,976,324"/>
+<area shape="poly" id="edge29_Node000100_Node000098" title=" " alt="" coords="943,414,1147,479,1146,484,941,419"/>
+<area shape="poly" id="edge34_Node000104_Node000003" title=" " alt="" coords="713,323,678,388,674,385,708,320"/>
+<area shape="poly" id="edge35_Node000104_Node000007" title=" " alt="" coords="688,318,537,389,534,384,685,313"/>
+<area shape="poly" id="edge33_Node000104_Node000063" title=" " alt="" coords="735,321,762,373,782,401,805,425,831,443,860,458,917,479,915,484,858,463,829,448,802,429,778,404,758,376,731,324"/>
+<area shape="poly" id="edge37_Node000041_Node000004" title=" " alt="" coords="1110,604,888,653,887,648,1109,599"/>
+<area shape="poly" id="edge39_Node000196_Node000004" title=" " alt="" coords="1567,425,1533,471,1510,495,1485,517,1430,553,1384,574,1271,605,1175,627,1078,643,913,660,912,655,1078,637,1174,622,1269,600,1382,569,1428,548,1482,513,1506,491,1529,467,1563,422"/>
+<area shape="poly" id="edge41_Node000197_Node000196" title=" " alt="" coords="1566,322,1580,386,1574,387,1561,323"/>
+<area shape="poly" id="edge44_Node000179_Node000046" title=" " alt="" coords="1769,312,1791,322,1972,384,1970,389,1789,326,1767,317"/>
+<area shape="rect" id="Node000200" href="$d6/df1/fl_2math_2fixed__point_2__build_8cpp_8hpp.html" title="Unity build header for fl/math/fixed_point/ directory." alt="" coords="2311,181,2453,221"/>
+<area shape="poly" id="edge46_Node000199_Node000200" title=" " alt="" coords="2094,131,2311,181,2309,186,2093,137"/>
+<area shape="poly" id="edge47_Node000200_Node000047" title=" " alt="" coords="2363,234,2191,483,2187,480,2359,231"/>
+</map>

@@ -1,0 +1,6 @@
+<map id="fl::spi::Lane::Lane" name="fl::spi::Lane::Lane">
+<area shape="rect" id="Node000001" title="Construct lane (called by MultiLaneDevice)" alt="" coords="5,37,140,62"/>
+<area shape="rect" id="Node000002" href="$d3/d3e/classfl_1_1spi_1_1_lane_a78c64752fc072a899160d0fb559f1566.html#a78c64752fc072a899160d0fb559f1566" title=" " alt="" coords="188,29,356,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="140,47,174,47,174,52,140,52"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="235,30,233,20,238,11,252,5,272,3,295,6,308,13,305,18,294,11,272,8,253,10,242,15,238,21,240,28"/>
+</map>

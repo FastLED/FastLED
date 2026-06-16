@@ -1,0 +1,6 @@
+<map id="fl::ResponseSend::send" name="fl::ResponseSend::send">
+<area shape="rect" id="Node000001" title="Send a single response (for ASYNC mode)" alt="" coords="112,29,284,55"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="226,19,218,11,198,8,181,10,172,15,170,20,175,28,171,31,165,21,168,11,179,5,198,3,220,6,230,15"/>
+<area shape="rect" id="Node000002" href="$d7/d08/_rpc_bidirectional_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,29,64,55"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="98,45,64,45,64,39,98,39"/>
+</map>

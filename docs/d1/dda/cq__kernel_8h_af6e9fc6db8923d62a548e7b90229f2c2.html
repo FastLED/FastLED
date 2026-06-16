@@ -129,20 +129,28 @@ $(function(){initNavTree('d1/dda/cq__kernel_8h_af6e9fc6db8923d62a548e7b90229f2c2
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d2/d90/cq__kernel_8cpp_source.html#l00026">26</a> of file <a class="el" href="../../d2/d90/cq__kernel_8cpp_source.html">cq_kernel.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   26</span>                                                                            {</div>
-<div class="line"><span class="lineno">   27</span>    <span class="keywordtype">float</span> m = log(fmax/fmin);</div>
-<div class="line"><span class="lineno">   28</span>    <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0; i &lt; bands; i++) freq[i] = fmin*<a class="code hl_function" href="../../d4/d36/namespacefl_aa7af590ed35831bc251787adc813d504.html#aa7af590ed35831bc251787adc813d504">exp</a>(m*i/(bands-1));</div>
-<div class="line"><span class="lineno">   29</span>}</div>
-<div class="ttc" id="anamespacefl_aa7af590ed35831bc251787adc813d504_html_aa7af590ed35831bc251787adc813d504"><div class="ttname"><a href="../../d4/d36/namespacefl_aa7af590ed35831bc251787adc813d504.html#aa7af590ed35831bc251787adc813d504">fl::exp</a></div><div class="ttdeci">T exp(T value)</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00040">math.h:40</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../dc/dbc/cq__kernel_8cpp_8hpp_source.html#l00031">31</a> of file <a class="el" href="../../dc/dbc/cq__kernel_8cpp_8hpp_source.html">cq_kernel.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   31</span>                                                                                         {</div>
+<div class="line"><span class="lineno">   32</span>    <span class="keywordflow">if</span> (bands &lt;= 1) {</div>
+<div class="line"><span class="lineno">   33</span>        <span class="keywordflow">if</span> (bands == 1) freq[0] = fmin;</div>
+<div class="line"><span class="lineno">   34</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">   35</span>    }</div>
+<div class="line"><span class="lineno">   36</span>    <a class="code hl_typedef" href="../../d6/d78/fft__precision_8h_ab164d8b5cb74f70552c5deb40ce1a77c.html#ab164d8b5cb74f70552c5deb40ce1a77c">fft_float_t</a> m = <a class="code hl_define" href="../../d6/d78/fft__precision_8h_af23a05d3417690584614907c0b4cb017.html#af23a05d3417690584614907c0b4cb017">FFT_LOG</a>(fmax/fmin);</div>
+<div class="line"><span class="lineno">   37</span>    <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0; i &lt; bands; i++) freq[i] = fmin*<a class="code hl_define" href="../../d6/d78/fft__precision_8h_a6be55d3f15ab571a750743acdf4be097.html#a6be55d3f15ab571a750743acdf4be097">FFT_EXP</a>(m*i/(bands-1));</div>
+<div class="line"><span class="lineno">   38</span>}</div>
+<div class="ttc" id="afft__precision_8h_a6be55d3f15ab571a750743acdf4be097_html_a6be55d3f15ab571a750743acdf4be097"><div class="ttname"><a href="../../d6/d78/fft__precision_8h_a6be55d3f15ab571a750743acdf4be097.html#a6be55d3f15ab571a750743acdf4be097">FFT_EXP</a></div><div class="ttdeci">#define FFT_EXP(x)</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d78/fft__precision_8h_source.html#l00050">fft_precision.h:50</a></div></div>
+<div class="ttc" id="afft__precision_8h_ab164d8b5cb74f70552c5deb40ce1a77c_html_ab164d8b5cb74f70552c5deb40ce1a77c"><div class="ttname"><a href="../../d6/d78/fft__precision_8h_ab164d8b5cb74f70552c5deb40ce1a77c.html#ab164d8b5cb74f70552c5deb40ce1a77c">fft_float_t</a></div><div class="ttdeci">float fft_float_t</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d78/fft__precision_8h_source.html#l00035">fft_precision.h:35</a></div></div>
+<div class="ttc" id="afft__precision_8h_af23a05d3417690584614907c0b4cb017_html_af23a05d3417690584614907c0b4cb017"><div class="ttname"><a href="../../d6/d78/fft__precision_8h_af23a05d3417690584614907c0b4cb017.html#af23a05d3417690584614907c0b4cb017">FFT_LOG</a></div><div class="ttdeci">#define FFT_LOG(x)</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d78/fft__precision_8h_source.html#l00051">fft_precision.h:51</a></div></div>
 </div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="../../d2/d90/cq__kernel_8cpp_source.html#l00089">generate_kernels()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d78/fft__precision_8h_source.html#l00050">FFT_EXP</a>, <a class="el" href="../../d6/d78/fft__precision_8h_source.html#l00051">FFT_LOG</a>, and <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../dc/dbc/cq__kernel_8cpp_8hpp_source.html#l00103">generate_kernels()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d1/dda/cq__kernel_8h_af6e9fc6db8923d62a548e7b90229f2c2_af6e9fc6db8923d62a548e7b90229f2c2_icgraph.svg" width="608" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d1/dda/cq__kernel_8h_af6e9fc6db8923d62a548e7b90229f2c2_af6e9fc6db8923d62a548e7b90229f2c2_icgraph.svg" width="100%" height="386"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -154,7 +162,7 @@ $(function(){initNavTree('d1/dda/cq__kernel_8h_af6e9fc6db8923d62a548e7b90229f2c2
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_c30bdf76ce759a4eae8387be42921388.html">third_party</a></li><li class="navelem"><a class="el" href="../../dir_c23718cd009cf675cffaf984d81a2fb9.html">cq_kernel</a></li><li class="navelem"><a class="el" href="../../d1/dda/cq__kernel_8h.html">cq_kernel.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

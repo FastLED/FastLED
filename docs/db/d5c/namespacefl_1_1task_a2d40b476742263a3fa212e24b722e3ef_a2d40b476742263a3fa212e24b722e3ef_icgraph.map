@@ -1,0 +1,94 @@
+<map id="fl::task::run" name="fl::task::run">
+<area shape="rect" id="Node000001" title="Run selected task subsystems." alt="" coords="933,672,1028,697"/>
+<area shape="rect" id="Node000002" href="$db/d5c/namespacefl_1_1task_ab96dc4828a01d1cff109d355d8ffc23d.html#ab96dc4828a01d1cff109d355d8ffc23d" title="Synchronously wait for a promise to complete (ONLY safe in top&#45;level contexts)" alt="" coords="726,122,865,162"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="968,660,801,163,806,162,973,658"/>
+<area shape="rect" id="Node000010" href="$df/d9e/namespacefl_1_1detail_abd6e1e8189dbbbf28d720923205bd0dd.html#abd6e1e8189dbbbf28d720923205bd0dd" title="Internal delay implementation used by the public fl::delay wrapper." alt="" coords="718,500,873,525"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="967,661,936,600,913,567,884,540,861,528,863,523,887,536,917,564,941,597,972,658"/>
+<area shape="rect" id="Node000033" href="$d1/d13/namespacefl_1_1net_1_1http_a25ef84b119ebfab47c0ecec96a224181.html#a25ef84b119ebfab47c0ecec96a224181" title="Legacy manual update for fetch promises (use fl::task::run() for new code)" alt="" coords="728,550,863,590"/>
+<area shape="poly" id="edge26_Node000001_Node000033" title=" " alt="" coords="957,664,924,633,884,604,860,593,863,588,887,600,927,629,960,660"/>
+<area shape="rect" id="Node000034" href="$dc/dba/_loopback_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="770,615,821,640"/>
+<area shape="poly" id="edge27_Node000001_Node000034" title=" " alt="" coords="930,670,885,655,820,636,822,631,886,650,931,665"/>
+<area shape="rect" id="Node000035" href="$d7/d37/classfl_1_1net_1_1http_1_1_fetch_engine_listener_a5c4b1669a29e122fd11f9b2f48641e1f.html#a5c4b1669a29e122fd11f9b2f48641e1f" title=" " alt="" coords="705,665,885,705"/>
+<area shape="poly" id="edge28_Node000001_Node000035" title=" " alt="" coords="920,687,885,687,885,682,920,682"/>
+<area shape="rect" id="Node000036" href="$dd/dbb/class_c_fast_l_e_d_a93471b4babe96100496e8e25062cba3f.html#a93471b4babe96100496e8e25062cba3f" title="Update all our controllers with the current led colors, using the passed in brightness." alt="" coords="733,729,857,755"/>
+<area shape="poly" id="edge29_Node000001_Node000036" title=" " alt="" coords="931,704,886,719,844,732,842,727,885,714,930,699"/>
+<area shape="rect" id="Node000037" href="$dd/dbb/class_c_fast_l_e_d_a50e30222e81562a7ef334dbe4fdfa856.html#a50e30222e81562a7ef334dbe4fdfa856" title="Set all leds on all controllers to the given color/scale." alt="" coords="716,779,875,804"/>
+<area shape="poly" id="edge30_Node000001_Node000037" title=" " alt="" coords="960,709,928,740,887,768,856,781,854,776,884,764,924,736,957,706"/>
+<area shape="rect" id="Node000039" href="$d2/d6b/classfl_1_1_channel_manager_adc62325e449dbe69df3b351071f50821.html#adc62325e449dbe69df3b351071f50821" title="Wait until a condition is met, with check&#45;pump&#45;delay logic." alt="" coords="721,829,869,869"/>
+<area shape="poly" id="edge32_Node000001_Node000039" title=" " alt="" coords="969,711,937,764,914,793,887,817,865,831,862,826,884,813,910,789,932,761,965,708"/>
+<area shape="rect" id="Node000053" href="$d3/da0/classfl_1_1_i_channel_driver_a9b3137f96a8915d980f7e33ba1e3b3d9.html#a9b3137f96a8915d980f7e33ba1e3b3d9" title=" " alt="" coords="725,1033,865,1073"/>
+<area shape="poly" id="edge42_Node000001_Node000053" title=" " alt="" coords="970,711,888,882,810,1034,805,1031,883,879,965,708"/>
+<area shape="rect" id="Node000003" href="$df/d01/_client_real_8h_a75e6549812ad7bff897e0c92a225878a.html#a75e6549812ad7bff897e0c92a225878a" title=" " alt="" coords="484,5,641,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="760,115,713,78,656,44,626,33,628,28,658,40,716,74,764,111"/>
+<area shape="rect" id="Node000005" href="$d9/dce/_client_validation_real_8h_a48d1b41170d4da38b2d99148b76a9a22.html#a48d1b41170d4da38b2d99148b76a9a22" title=" " alt="" coords="493,104,632,129"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="712,136,632,127,632,122,712,130"/>
+<area shape="rect" id="Node000007" href="$df/d01/_client_real_8h_a648cd3d90f8e240cbbfe5cb934057124.html#a648cd3d90f8e240cbbfe5cb934057124" title="APPROACH 4: JSON Response with await pattern &#160;&#160;Same JSON handling but using await_top_level for synch..." alt="" coords="501,55,625,80"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="730,120,657,94,617,83,618,78,658,89,732,114"/>
+<area shape="rect" id="Node000008" href="$d9/dce/_client_validation_real_8h_ad90185b2a71aa34da786634a378ac25b.html#ad90185b2a71aa34da786634a378ac25b" title=" " alt="" coords="490,153,635,179"/>
+<area shape="poly" id="edge8_Node000002_Node000008" title=" " alt="" coords="712,153,636,161,635,156,712,148"/>
+<area shape="rect" id="Node000009" href="$d9/dce/_client_validation_real_8h_a4a6f06023a5a6afd3efafcb856740c10.html#a4a6f06023a5a6afd3efafcb856740c10" title=" " alt="" coords="489,203,636,228"/>
+<area shape="poly" id="edge10_Node000002_Node000009" title=" " alt="" coords="728,169,658,193,614,205,613,200,657,187,726,164"/>
+<area shape="rect" id="Node000004" href="$df/d01/_client_real_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="285,29,336,55"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="471,29,337,42,336,37,470,24"/>
+<area shape="rect" id="Node000006" href="$d9/dce/_client_validation_real_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="285,128,336,153"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="480,127,336,141,336,136,479,122"/>
+<area shape="poly" id="edge7_Node000007_Node000004" title=" " alt="" coords="487,62,336,47,337,42,487,57"/>
+<area shape="poly" id="edge9_Node000008_Node000006" title=" " alt="" coords="476,160,336,146,336,140,476,155"/>
+<area shape="poly" id="edge11_Node000009_Node000006" title=" " alt="" coords="494,201,467,192,443,180,419,168,375,156,336,147,337,142,376,150,421,164,445,175,469,188,495,196"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27" title="Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all..." alt="" coords="525,387,600,412"/>
+<area shape="poly" id="edge13_Node000010_Node000011" title=" " alt="" coords="755,496,589,414,591,410,757,491"/>
+<area shape="rect" id="Node000030" href="$d4/d36/namespacefl_a82d61c027070cb53f84ede1132299204.html#a82d61c027070cb53f84ede1132299204" title="Delay for a given number of milliseconds (legacy &#45; no async pumping)" alt="" coords="508,500,617,525"/>
+<area shape="poly" id="edge23_Node000010_Node000030" title=" " alt="" coords="704,515,617,515,617,510,704,510"/>
+<area shape="rect" id="Node000032" href="$d4/d36/namespacefl_a14b805b63f5e1d91d6897e6560f9d863.html#a14b805b63f5e1d91d6897e6560f9d863" title="Shorter alias for delay with optional async task pumping." alt="" coords="516,549,609,575"/>
+<area shape="poly" id="edge25_Node000010_Node000032" title=" " alt="" coords="722,531,610,555,609,550,721,526"/>
+<area shape="poly" id="edge18_Node000011_Node000011" title=" " alt="" coords="604,378,593,369,563,365,538,367,525,372,522,378,529,385,525,388,517,378,521,368,537,362,563,360,595,364,608,373"/>
+<area shape="rect" id="Node000012" href="$d0/ddf/class_midi_shield_button_a44897ca4c21626c1ad1277bc02e00455.html#a44897ca4c21626c1ad1277bc02e00455" title=" " alt="" coords="206,178,415,218"/>
+<area shape="poly" id="edge14_Node000011_Node000012" title=" " alt="" coords="545,376,495,305,460,266,419,232,397,221,399,216,421,228,463,262,499,301,550,373"/>
+<area shape="rect" id="Node000013" href="$d8/ddd/class_toggle_button_a2a9e3bd18ffaaf27092378dba82114cb.html#a2a9e3bd18ffaaf27092378dba82114cb" title=" " alt="" coords="211,243,411,268"/>
+<area shape="poly" id="edge15_Node000011_Node000013" title=" " alt="" coords="539,378,487,329,454,304,419,283,386,271,388,266,421,278,457,300,491,325,542,374"/>
+<area shape="rect" id="Node000014" href="$d7/d5f/classfl_1_1_http_connection_a5771485770bb65873ba278d1806af6e3.html#a5771485770bb65873ba278d1806af6e3" title=" " alt="" coords="223,293,398,333"/>
+<area shape="poly" id="edge16_Node000011_Node000014" title=" " alt="" coords="517,384,419,347,382,335,383,330,421,342,519,379"/>
+<area shape="rect" id="Node000024" href="$dd/dbb/class_c_fast_l_e_d_a6819ff831058a710d4582dfc09817202.html#a6819ff831058a710d4582dfc09817202" title="Delay for the given number of milliseconds." alt="" coords="247,357,374,383"/>
+<area shape="poly" id="edge17_Node000011_Node000024" title=" " alt="" coords="512,396,374,380,375,375,512,391"/>
+<area shape="rect" id="Node000025" href="$d1/d86/namespacefl_1_1third__party_a969792a3f08da0146abd9e740081ac1c.html#a969792a3f08da0146abd9e740081ac1c" title=" " alt="" coords="214,407,407,447"/>
+<area shape="poly" id="edge19_Node000011_Node000025" title=" " alt="" coords="512,408,408,419,407,414,511,402"/>
+<area shape="rect" id="Node000026" href="$d1/d86/namespacefl_1_1third__party_a24141a300abe39176c4bd2d7d32b9e88.html#a24141a300abe39176c4bd2d7d32b9e88" title="Prepare to show a frame." alt="" coords="5,437,153,477"/>
+<area shape="poly" id="edge21_Node000011_Node000026" title=" " alt="" coords="529,421,479,444,421,462,350,472,279,475,154,469,154,463,279,469,350,466,419,457,477,439,526,416"/>
+<area shape="rect" id="Node000027" href="$df/d52/namespacefl_1_1platforms_ac009c87446b4a0e2fc2bbb7edd2c92b9.html#ac009c87446b4a0e2fc2bbb7edd2c92b9" title=" " alt="" coords="201,522,420,562"/>
+<area shape="poly" id="edge22_Node000011_Node000027" title=" " alt="" coords="538,423,486,464,421,506,379,524,377,519,419,501,483,460,535,419"/>
+<area shape="poly" id="edge20_Node000025_Node000026" title=" " alt="" coords="201,444,154,450,153,445,200,439"/>
+<area shape="rect" id="Node000031" href="$d2/d63/class_sketch_halt_a5e483429ff3e8f7ddde2dfe726f7add9.html#a5e483429ff3e8f7ddde2dfe726f7add9" title="Check if sketch is halted and handle periodic message printing." alt="" coords="241,587,380,612"/>
+<area shape="poly" id="edge24_Node000030_Node000031" title=" " alt="" coords="495,529,469,539,455,548,446,557,436,567,421,576,381,591,379,585,419,572,433,563,442,554,452,544,467,534,493,524"/>
+<area shape="rect" id="Node000038" href="$dd/dbb/class_c_fast_l_e_d_aeb7bd3e8f2dbced6284a2182191d5fcb.html#aeb7bd3e8f2dbced6284a2182191d5fcb" title="Clear the leds, wiping the local array of data." alt="" coords="501,779,624,804"/>
+<area shape="poly" id="edge31_Node000037_Node000038" title=" " alt="" coords="702,794,624,794,624,789,702,789"/>
+<area shape="rect" id="Node000040" href="$d2/d6b/classfl_1_1_channel_manager_aa50d7236c4ba7748aa21d88de539b1b9.html#aa50d7236c4ba7748aa21d88de539b1b9" title="Wait for all drivers to become READY." alt="" coords="489,829,637,869"/>
+<area shape="poly" id="edge33_Node000039_Node000040" title=" " alt="" coords="708,851,637,851,637,846,708,846"/>
+<area shape="rect" id="Node000051" href="$d2/d6b/classfl_1_1_channel_manager_ad0d6378634f1ed64275adacb367d845c.html#ad0d6378634f1ed64275adacb367d845c" title=" " alt="" coords="468,907,657,947"/>
+<area shape="poly" id="edge40_Node000039_Node000051" title=" " alt="" coords="723,876,623,910,622,905,722,871"/>
+<area shape="rect" id="Node000041" href="$d2/d6b/classfl_1_1_channel_manager_a98f45051a8d8277e9ecbae8b5db58f2b.html#a98f45051a8d8277e9ecbae8b5db58f2b" title="Add a driver with priority (higher priority = preferred)" alt="" coords="237,637,385,677"/>
+<area shape="poly" id="edge34_Node000040_Node000041" title=" " alt="" coords="475,825,466,817,453,801,446,784,442,752,438,721,431,706,418,691,402,679,384,671,386,666,405,674,422,687,435,703,443,719,447,751,451,783,458,798,470,813,479,821"/>
+<area shape="rect" id="Node000045" href="$d2/d6b/classfl_1_1_channel_manager_aa953ad4a44bfc74a4673954f5923aa80.html#aa953ad4a44bfc74a4673954f5923aa80" title="Remove all drivers from the manager." alt="" coords="237,701,385,741"/>
+<area shape="poly" id="edge35_Node000040_Node000045" title=" " alt="" coords="477,824,466,817,450,801,442,785,434,770,418,755,384,738,386,733,422,750,438,766,447,782,455,798,470,813,480,820"/>
+<area shape="rect" id="Node000047" href="$d2/d6b/classfl_1_1_channel_manager_add1a721d7508ff52a0dce3f8c30735b5.html#add1a721d7508ff52a0dce3f8c30735b5" title="Poll drivers before frame starts to clear previous frame state." alt="" coords="237,765,385,805"/>
+<area shape="poly" id="edge36_Node000040_Node000047" title=" " alt="" coords="475,829,384,806,386,801,476,824"/>
+<area shape="rect" id="Node000048" href="$d2/d6b/classfl_1_1_channel_manager_a77d76b8525c19a43c545d9ca590bab32.html#a77d76b8525c19a43c545d9ca590bab32" title="Reset bus manager state, clearing all enqueued and transmitting channels." alt="" coords="237,829,385,869"/>
+<area shape="poly" id="edge37_Node000040_Node000048" title=" " alt="" coords="475,851,385,851,385,846,475,846"/>
+<area shape="rect" id="Node000049" href="$dd/dbb/class_c_fast_l_e_d_aeb27e6f97287c4add5056c7218a78c82.html#aeb27e6f97287c4add5056c7218a78c82" title="Wait for all channel bus transmissions to complete." alt="" coords="251,893,370,919"/>
+<area shape="poly" id="edge38_Node000040_Node000049" title=" " alt="" coords="476,871,368,896,367,891,475,866"/>
+<area shape="rect" id="Node000050" href="$dd/dbb/class_c_fast_l_e_d_a234cfd99ebdb37ecd4aedf51484d74e2.html#a234cfd99ebdb37ecd4aedf51484d74e2" title="Wait for all channel bus transmissions to complete with timeout." alt="" coords="251,943,370,968"/>
+<area shape="poly" id="edge39_Node000040_Node000050" title=" " alt="" coords="506,877,469,898,446,916,421,932,371,949,369,944,419,928,443,912,467,893,504,873"/>
+<area shape="rect" id="Node000052" href="$d2/d6b/classfl_1_1_channel_manager_abedf56fd1c974a4177c2cf28bb26d068.html#abedf56fd1c974a4177c2cf28bb26d068" title="Trigger transmission of batched channel data." alt="" coords="237,993,385,1033"/>
+<area shape="poly" id="edge41_Node000051_Node000052" title=" " alt="" coords="497,955,421,982,380,995,378,990,419,977,495,950"/>
+<area shape="rect" id="Node000054" href="$d3/da0/classfl_1_1_i_channel_driver_a2a9f7401373af3ef80f3ea8e48a8f839.html#a2a9f7401373af3ef80f3ea8e48a8f839" title=" " alt="" coords="495,1001,630,1041"/>
+<area shape="poly" id="edge43_Node000053_Node000054" title=" " alt="" coords="711,1044,630,1033,631,1027,712,1039"/>
+<area shape="rect" id="Node000055" href="$d3/da0/classfl_1_1_i_channel_driver_a9e956fbce56cb0e64f49d4657d17d44e.html#a9e956fbce56cb0e64f49d4657d17d44e" title="Wait for driver to become READY." alt="" coords="495,1129,630,1169"/>
+<area shape="poly" id="edge44_Node000053_Node000055" title=" " alt="" coords="743,1081,658,1119,627,1131,625,1126,656,1114,740,1076"/>
+<area shape="rect" id="Node000058" href="$d3/da0/classfl_1_1_i_channel_driver_a282787aa70184218c84f3af77e9591d9.html#a282787aa70184218c84f3af77e9591d9" title=" " alt="" coords="468,1065,657,1105"/>
+<area shape="poly" id="edge48_Node000053_Node000058" title=" " alt="" coords="712,1067,658,1074,657,1069,711,1062"/>
+<area shape="rect" id="Node000056" href="$d3/da0/classfl_1_1_i_channel_driver_ab462336dccdfebe96350807253f1a509.html#ab462336dccdfebe96350807253f1a509" title="Check if this driver can handle the given channel data." alt="" coords="243,1081,378,1121"/>
+<area shape="poly" id="edge45_Node000055_Node000056" title=" " alt="" coords="481,1136,378,1116,379,1111,482,1131"/>
+<area shape="rect" id="Node000057" href="$d3/da0/classfl_1_1_i_channel_driver_a77efb070f7ead86b033df3267bfa8d88.html#a77efb070f7ead86b033df3267bfa8d88" title="Block until this driver finishes any in&#45;flight transmit." alt="" coords="243,1145,378,1185"/>
+<area shape="poly" id="edge47_Node000055_Node000057" title=" " alt="" coords="482,1156,378,1163,378,1158,482,1151"/>
+<area shape="poly" id="edge46_Node000056_Node000056" title=" " alt="" coords="350,1069,336,1062,311,1059,289,1061,275,1066,270,1072,273,1080,268,1081,265,1071,272,1062,287,1056,311,1054,337,1057,352,1064"/>
+<area shape="poly" id="edge49_Node000058_Node000056" title=" " alt="" coords="455,1094,378,1099,378,1094,454,1089"/>
+</map>

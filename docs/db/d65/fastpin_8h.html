@@ -101,23 +101,17 @@ $(function(){initNavTree('db/d65/fastpin_8h.html','../../'); initResizable(true)
 
 <div class="header">
   <div class="summary">
-<a href="#nested-classes">Classes</a> &#124;
 <a href="#define-members">Macros</a> &#124;
-<a href="#typedef-members">Typedefs</a> &#124;
-<a href="#var-members">Variables</a>  </div>
+<a href="#typedef-members">Typedefs</a>  </div>
   <div class="headertitle"><div class="title">fastpin.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Class base definitions for defining fast pin access. </p>
+<div class="textblock"><p>Backward compatibility header - use fl/fastpin.h directly. </p>
+<p>Legacy header. Prefer to use fl/fastpin.h instead. </p>
 
 <p class="definition">Definition in file <a class="el" href="../../db/d65/fastpin_8h_source.html">fastpin.h</a>.</p>
-</div><div class="textblock"><code>#include &quot;<a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html">FastLED.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d4/d54/compiler__control_8h_source.html">fl/compiler_control.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d9/d3e/led__sysdefs_8h_source.html">led_sysdefs.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d8/d4b/unused_8h_source.html">fl/unused.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/int.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../df/d80/register_8h_source.html">fl/register.h</a>&quot;</code><br />
+</div><div class="textblock"><code>#include &quot;<a class="el" href="../../d2/d16/fl_2system_2fastpin_8h_source.html">fl/system/fastpin.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for fastpin.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -130,69 +124,24 @@ $(function(){initNavTree('db/d65/fastpin_8h.html','../../'); initResizable(true)
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d9/d45/fastpin_8h__dep__incl.svg" width="100%" height="459"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d9/d45/fastpin_8h__dep__incl.svg" width="315" height="256"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 </div>
 <p><a href="../../db/d65/fastpin_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
-Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/de9/struct_____f_l___p_o_r_t___i_n_f_o.html">__FL_PORT_INFO&lt; port &gt;</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility template for tracking down information about pins and ports.  <a href="../../d4/de9/struct_____f_l___p_o_r_t___i_n_f_o.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d3b/class_fast_pin.html">FastPin&lt; PIN &gt;</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The simplest level of <a class="el" href="../../d7/d68/class_pin.html" title="Naive fallback solution for low level pin access.">Pin</a> class.  <a href="../../db/d3b/class_fast_pin.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d51/class_fast_pin_b_b.html">FastPinBB&lt; PIN &gt;</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="../../db/d3b/class_fast_pin.html" title="The simplest level of Pin class.">FastPin</a> implementation for bit-banded access.  <a href="../../d5/d51/class_fast_pin_b_b.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/dd7/class_input_pin.html">InputPin</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">I/O pin initially set to INPUT.  <a href="../../d8/dd7/class_input_pin.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/db0/class_output_pin.html">OutputPin</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">I/O pin initially set to OUTPUT.  <a href="../../d6/db0/class_output_pin.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d68/class_pin.html">Pin</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Naive fallback solution for low level pin access.  <a href="../../d7/d68/class_pin.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/da1/class_selectable.html">Selectable</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Abstract class for "selectable" things.  <a href="../../dd/da1/class_selectable.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
 <tr class="memitem:a9458e547f233e349c35878b4ecd1b84d" id="r_a9458e547f233e349c35878b4ecd1b84d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d65/fastpin_8h_a9458e547f233e349c35878b4ecd1b84d.html#a9458e547f233e349c35878b4ecd1b84d">__INC_FASTPIN_H</a></td></tr>
 <tr class="separator:a9458e547f233e349c35878b4ecd1b84d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aee857cc8afab1aa7af11a3c2f22dc94d" id="r_aee857cc8afab1aa7af11a3c2f22dc94d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d65/fastpin_8h_aee857cc8afab1aa7af11a3c2f22dc94d.html#aee857cc8afab1aa7af11a3c2f22dc94d">_FL_DEFINE_PORT</a>(L,  BASE)</td></tr>
-<tr class="memdesc:aee857cc8afab1aa7af11a3c2f22dc94d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Macro to create the instantiations for defined ports.  <br /></td></tr>
-<tr class="separator:aee857cc8afab1aa7af11a3c2f22dc94d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aecc2af2e3a64d6f736634822d71548ca" id="r_aecc2af2e3a64d6f736634822d71548ca"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d65/fastpin_8h_aecc2af2e3a64d6f736634822d71548ca.html#aecc2af2e3a64d6f736634822d71548ca">_FL_DEFINE_PORT3</a>(L,  LC,  BASE)</td></tr>
-<tr class="memdesc:aecc2af2e3a64d6f736634822d71548ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Macro to create the instantiations for defined ports.  <br /></td></tr>
-<tr class="separator:aecc2af2e3a64d6f736634822d71548ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4af4244f8a09607e0d6a5d0ee80f1de8" id="r_a4af4244f8a09607e0d6a5d0ee80f1de8"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d65/fastpin_8h_a4af4244f8a09607e0d6a5d0ee80f1de8.html#a4af4244f8a09607e0d6a5d0ee80f1de8">NO_PIN</a>&#160;&#160;&#160;255</td></tr>
-<tr class="memdesc:a4af4244f8a09607e0d6a5d0ee80f1de8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constant for "not a pin".  <br /></td></tr>
-<tr class="separator:a4af4244f8a09607e0d6a5d0ee80f1de8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:afcb4d76fe5b8dea8558542ecca421816" id="r_afcb4d76fe5b8dea8558542ecca421816"><td class="memItemLeft" align="right" valign="top">typedef volatile fl::u32 *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d65/fastpin_8h_afcb4d76fe5b8dea8558542ecca421816.html#afcb4d76fe5b8dea8558542ecca421816">ptr_reg32_t</a></td></tr>
-<tr class="memdesc:afcb4d76fe5b8dea8558542ecca421816"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to a 32-bit register, volatile.  <br /></td></tr>
-<tr class="separator:afcb4d76fe5b8dea8558542ecca421816"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adeb9ab7f3b79bcba7ab930327be6db48" id="r_adeb9ab7f3b79bcba7ab930327be6db48"><td class="memItemLeft" align="right" valign="top">typedef volatile fl::u32 &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d65/fastpin_8h_adeb9ab7f3b79bcba7ab930327be6db48.html#adeb9ab7f3b79bcba7ab930327be6db48">reg32_t</a></td></tr>
-<tr class="memdesc:adeb9ab7f3b79bcba7ab930327be6db48"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reference to a 32-bit register, volatile.  <br /></td></tr>
-<tr class="separator:adeb9ab7f3b79bcba7ab930327be6db48"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
-Variables</h2></td></tr>
-<tr class="memitem:a9aee5a02205a533975f75452a4d9a366" id="r_a9aee5a02205a533975f75452a4d9a366"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> PIN&gt; </td></tr>
-<tr class="memitem:a9aee5a02205a533975f75452a4d9a366"><td class="memTemplItemLeft" align="right" valign="top">volatile RoReg *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../db/d65/fastpin_8h_a9aee5a02205a533975f75452a4d9a366.html#a9aee5a02205a533975f75452a4d9a366">FastPin&lt; PIN &gt;::sInPort</a></td></tr>
-<tr class="separator:a9aee5a02205a533975f75452a4d9a366"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acc73a142140904088424fbb7f47d3a31" id="r_acc73a142140904088424fbb7f47d3a31"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> PIN&gt; </td></tr>
-<tr class="memitem:acc73a142140904088424fbb7f47d3a31"><td class="memTemplItemLeft" align="right" valign="top">RwReg&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../db/d65/fastpin_8h_acc73a142140904088424fbb7f47d3a31.html#acc73a142140904088424fbb7f47d3a31">FastPin&lt; PIN &gt;::sPinMask</a></td></tr>
-<tr class="separator:acc73a142140904088424fbb7f47d3a31"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae57faf828edbde8a46475a515f626582" id="r_ae57faf828edbde8a46475a515f626582"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> PIN&gt; </td></tr>
-<tr class="memitem:ae57faf828edbde8a46475a515f626582"><td class="memTemplItemLeft" align="right" valign="top">volatile RwReg *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../db/d65/fastpin_8h_ae57faf828edbde8a46475a515f626582.html#ae57faf828edbde8a46475a515f626582">FastPin&lt; PIN &gt;::sPort</a></td></tr>
-<tr class="separator:ae57faf828edbde8a46475a515f626582"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a31d6a8464287bc411dba5dcedbcd37e0" id="r_a31d6a8464287bc411dba5dcedbcd37e0"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> PIN&gt; </td></tr>
+<tr class="memitem:a31d6a8464287bc411dba5dcedbcd37e0"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../db/d65/fastpin_8h_a31d6a8464287bc411dba5dcedbcd37e0.html#a31d6a8464287bc411dba5dcedbcd37e0">FastPin</a> = fl::FastPin&lt;<a class="el" href="../../df/d06/_pin_mode_8ino_ae1a27401b7fb01ccb9a82dbddbb54eea.html#ae1a27401b7fb01ccb9a82dbddbb54eea">PIN</a>&gt;</td></tr>
+<tr class="separator:a31d6a8464287bc411dba5dcedbcd37e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a083a0682abe099bbfd4cbd1d4d84ce61" id="r_a083a0682abe099bbfd4cbd1d4d84ce61"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> PIN&gt; </td></tr>
+<tr class="memitem:a083a0682abe099bbfd4cbd1d4d84ce61"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../db/d65/fastpin_8h_a083a0682abe099bbfd4cbd1d4d84ce61.html#a083a0682abe099bbfd4cbd1d4d84ce61">FastPinBB</a> = fl::FastPinBB&lt;<a class="el" href="../../df/d06/_pin_mode_8ino_ae1a27401b7fb01ccb9a82dbddbb54eea.html#ae1a27401b7fb01ccb9a82dbddbb54eea">PIN</a>&gt;</td></tr>
+<tr class="separator:a083a0682abe099bbfd4cbd1d4d84ce61"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -201,7 +150,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../db/d65/fastpin_8h.html">fastpin.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

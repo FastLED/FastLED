@@ -1,0 +1,17 @@
+digraph "fl::third_party::hexwave::hex_add_oversampled_bleplike"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::third_party::hexwave\l::hex_add_oversampled_bleplike",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::third_party::hexwave\l::hex_blamp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d76/namespacefl_1_1third__party_1_1hexwave_afe1589840cddbec96237a5ed7865bee1.html#afe1589840cddbec96237a5ed7865bee1",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::third_party::hexwave\l::hexwave_generate_samples",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d76/namespacefl_1_1third__party_1_1hexwave_af3f50c133d31699878600252717015f7.html#af3f50c133d31699878600252717015f7",tooltip="Generate audio samples."];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::third_party::hexwave\l::hex_blep",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d76/namespacefl_1_1third__party_1_1hexwave_a42fbc5dd00dc2697f85e6530ecf2ceac.html#a42fbc5dd00dc2697f85e6530ecf2ceac",tooltip=" "];
+  Node4 -> Node3 [id="edge4_Node000004_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

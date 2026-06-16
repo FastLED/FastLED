@@ -1,10 +1,15 @@
 <map id="CheckPin" name="CheckPin">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,88,80"/>
-<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="22,56,17,46,20,37,30,30,47,28,67,32,75,40,71,44,64,36,47,33,32,35,24,40,22,46,27,53"/>
-<area shape="rect" id="Node000002" href="$dc/da2/_pintest_8h_a93bbe376a29543413d0db81f2b454521.html#a93bbe376a29543413d0db81f2b454521" title=" " alt="" coords="157,5,227,31"/>
-<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="84,52,143,32,145,37,86,57"/>
-<area shape="rect" id="Node000003" href="$db/d3b/class_fast_pin_a97fd678e7bc05979582254783a1b5e57.html#a97fd678e7bc05979582254783a1b5e57" title="Get the pin mask." alt="" coords="136,55,248,80"/>
-<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="88,65,122,65,122,70,88,70"/>
-<area shape="rect" id="Node000004" href="$db/d3b/class_fast_pin_ab005abe848eadb60051daccb4eb7dbe8.html#ab005abe848eadb60051daccb4eb7dbe8" title="Get the output state of the port." alt="" coords="141,104,243,129"/>
-<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="86,78,141,97,140,102,84,83"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,33,88,59"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="25,34,21,25,23,15,32,9,47,7,64,10,71,18,67,22,61,15,47,12,34,14,28,18,26,24,30,32"/>
+<area shape="rect" id="Node000002" href="$dc/da2/_pintest_8h_a93bbe376a29543413d0db81f2b454521.html#a93bbe376a29543413d0db81f2b454521" title=" " alt="" coords="136,33,205,59"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="88,43,122,43,122,49,88,49"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a57cbbc0e3769d2f6c4a7919e29646708.html#a57cbbc0e3769d2f6c4a7919e29646708" title="Snprintf&#45;like formatting function that writes to a buffer." alt="" coords="253,33,341,59"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="206,43,240,43,240,49,206,49"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aee6f6a125b8389786800233a69115983.html#aee6f6a125b8389786800233a69115983" title="Format with no arguments." alt="" coords="563,5,645,31"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="326,31,356,20,389,11,473,5,549,9,549,14,473,10,390,17,357,25,328,36"/>
+<area shape="rect" id="Node000009" href="$d2/de0/namespacefl_1_1printf__detail_af624455a71e2438c1653c74d94d37a13.html#af624455a71e2438c1653c74d94d37a13" title=" " alt="" coords="389,26,515,66"/>
+<area shape="poly" id="edge5_Node000003_Node000009" title=" " alt="" coords="341,43,375,43,375,49,341,49"/>
+<area shape="rect" id="Node000011" href="$d1/d27/classfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e.html#a08170cac6eba7241f099ae16730f6f8e" title=" " alt="" coords="394,91,510,116"/>
+<area shape="poly" id="edge7_Node000003_Node000011" title=" " alt="" coords="333,56,405,83,403,88,331,61"/>
+<area shape="poly" id="edge6_Node000009_Node000004" title=" " alt="" coords="514,32,549,25,550,31,515,37"/>
 </map>

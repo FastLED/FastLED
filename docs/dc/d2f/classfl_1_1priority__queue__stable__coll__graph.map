@@ -1,0 +1,21 @@
+<map id="fl::priority_queue_stable&lt; T, Compare &gt;" name="fl::priority_queue_stable&lt; T, Compare &gt;">
+<area shape="rect" id="Node000001" title="Stable priority queue that maintains FIFO ordering for equal&#45;priority elements." alt="" coords="1481,83,1656,123"/>
+<area shape="rect" id="Node000002" href="$df/d91/classfl_1_1_priority_queue.html" title=" " alt="" coords="1187,76,1373,131"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1387,101,1481,101,1481,106,1387,106"/>
+<area shape="rect" id="Node000003" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="739,25,973,65"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="987,58,1163,82,1187,86,1186,91,1162,87,986,63"/>
+<area shape="rect" id="Node000004" href="$d4/dad/classfl_1_1vector__basic.html" title="Type&#45;erased vector base class." alt="" coords="5,5,125,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="139,11,394,5,554,7,715,17,757,22,756,27,714,22,554,12,394,10,139,17"/>
+<area shape="rect" id="Node000007" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="339,39,456,64"/>
+<area shape="poly" id="edge5_Node000007_Node000004" title=" " alt="" coords="139,23,338,43,338,48,139,28"/>
+<area shape="poly" id="edge4_Node000003_Node000007" title=" " alt="" coords="470,48,715,46,738,45,739,51,715,51,470,54"/>
+<area shape="rect" id="Node000008" href="$d6/d07/structfl_1_1less.html" title=" " alt="" coords="480,85,715,125"/>
+<area shape="poly" id="edge6_Node000002_Node000008" title=" " alt="" coords="728,102,1186,101,1186,106,728,107"/>
+<area shape="rect" id="Node000009" href="$d6/d07/structfl_1_1less.html" title="Binary function object that returns whether the first argument is less than the second." alt="" coords="14,116,117,141"/>
+<area shape="poly" id="edge7_Node000008_Node000009" title=" " alt="" coords="131,123,480,107,480,113,131,128"/>
+<area shape="rect" id="Node000011" href="$d6/d07/structfl_1_1less.html" title=" " alt="" coords="346,147,449,172"/>
+<area shape="poly" id="edge10_Node000011_Node000009" title=" " alt="" coords="122,142,150,147,254,157,346,158,346,163,254,162,149,153,121,147"/>
+<area shape="rect" id="Node000010" href="$df/d91/classfl_1_1_priority_queue.html" title=" " alt="" coords="769,151,943,191"/>
+<area shape="poly" id="edge8_Node000002_Node000010" title=" " alt="" coords="957,170,1057,165,1162,149,1222,128,1224,133,1163,154,1057,170,957,176"/>
+<area shape="poly" id="edge9_Node000010_Node000011" title=" " alt="" coords="463,158,769,166,769,172,462,164"/>
+</map>

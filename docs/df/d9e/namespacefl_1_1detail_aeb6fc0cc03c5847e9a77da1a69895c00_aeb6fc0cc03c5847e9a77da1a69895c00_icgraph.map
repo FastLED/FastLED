@@ -1,0 +1,34 @@
+<map id="fl::detail::insertion_sort" name="fl::detail::insertion_sort">
+<area shape="rect" id="Node000001" title=" " alt="" coords="661,151,833,176"/>
+<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail_a257e0f62df86119fe04e1813b30cde21.html#a257e0f62df86119fe04e1813b30cde21" title=" " alt="" coords="427,57,613,83"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="702,148,551,85,553,80,704,143"/>
+<area shape="rect" id="Node000005" href="$df/d9e/namespacefl_1_1detail_a05050d88f5340fd6a2f53d5753791157.html#a05050d88f5340fd6a2f53d5753791157" title=" " alt="" coords="431,151,609,176"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="647,166,609,166,609,161,647,161"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_ad1e0049d12f06a7b102b765b4c7f4ce8.html#ad1e0049d12f06a7b102b765b4c7f4ce8" title=" " alt="" coords="467,287,573,312"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="715,185,544,289,541,284,712,181"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="558,48,548,39,520,36,497,38,485,43,483,48,489,56,485,59,478,49,481,39,496,33,520,31,550,34,561,43"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a734a1ed8e70d2c611fb5958050608ac2.html#a734a1ed8e70d2c611fb5958050608ac2" title=" " alt="" coords="249,16,360,41"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="439,57,360,42,361,37,440,52"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_ae32524e156c7eaaa62ff8b7e3b8e5c72.html#ae32524e156c7eaaa62ff8b7e3b8e5c72" title=" " alt="" coords="39,5,149,31"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="236,28,149,23,150,18,236,23"/>
+<area shape="poly" id="edge6_Node000005_Node000005" title=" " alt="" coords="558,141,548,133,520,129,497,131,485,136,483,142,489,149,485,152,478,142,481,132,496,126,520,124,550,128,561,137"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_ac62f183887fccce240012b87aca79f89.html#ac62f183887fccce240012b87aca79f89" title=" " alt="" coords="273,151,336,176"/>
+<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="417,166,336,166,336,161,417,161"/>
+<area shape="rect" id="Node000007" href="$dd/d67/function_8h_ade8043ede62066d1f4666a7eece358d1.html#ade8043ede62066d1f4666a7eece358d1" title=" " alt="" coords="9,55,179,80"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="273,145,230,119,182,94,150,83,151,78,184,89,233,114,275,141"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a8b66548c53f9acf4e1ad5b0ac1122649.html#a8b66548c53f9acf4e1ad5b0ac1122649" title=" " alt="" coords="63,104,125,129"/>
+<area shape="poly" id="edge9_Node000006_Node000008" title=" " alt="" coords="259,156,125,126,126,121,260,151"/>
+<area shape="rect" id="Node000009" href="$db/d3f/classfl_1_1detail_1_1_alpha_trimmed_mean_impl_afb20813588a07d869bb22bd74112b233.html#afb20813588a07d869bb22bd74112b233" title=" " alt="" coords="5,154,183,194"/>
+<area shape="poly" id="edge10_Node000006_Node000009" title=" " alt="" coords="259,168,183,172,183,167,259,163"/>
+<area shape="rect" id="Node000010" href="$d7/db6/classfl_1_1detail_1_1_median_filter_impl_a08fc173a6ad799910d9972f6f30639c2.html#a08fc173a6ad799910d9972f6f30639c2" title=" " alt="" coords="12,218,176,258"/>
+<area shape="poly" id="edge11_Node000006_Node000010" title=" " alt="" coords="261,181,152,221,150,215,259,176"/>
+<area shape="rect" id="Node000012" href="$d2/d6b/classfl_1_1_channel_manager_a98f45051a8d8277e9ecbae8b5db58f2b.html#a98f45051a8d8277e9ecbae8b5db58f2b" title="Add a driver with priority (higher priority = preferred)" alt="" coords="231,247,379,287"/>
+<area shape="poly" id="edge13_Node000011_Node000012" title=" " alt="" coords="453,292,378,281,379,276,454,287"/>
+<area shape="rect" id="Node000016" href="$d2/d6b/classfl_1_1_channel_manager_a89507c06ec7ae80b21a6a3fdeacec7a9.html#a89507c06ec7ae80b21a6a3fdeacec7a9" title="Change the priority of a registered driver." alt="" coords="231,311,379,351"/>
+<area shape="poly" id="edge16_Node000011_Node000016" title=" " alt="" coords="454,312,379,323,378,318,453,307"/>
+<area shape="rect" id="Node000017" href="$d4/d36/namespacefl_a38387a84fd6e55fb49b88f41534b09fc.html#a38387a84fd6e55fb49b88f41534b09fc" title=" " alt="" coords="251,376,358,401"/>
+<area shape="poly" id="edge17_Node000011_Node000017" title=" " alt="" coords="481,320,380,366,346,378,344,373,378,361,479,316"/>
+<area shape="rect" id="Node000013" href="$d2/d6b/classfl_1_1_channel_manager_a71ca7642adaace950f92da2855df4cbc.html#a71ca7642adaace950f92da2855df4cbc" title="Register a single driver at a priority above the platform default and disable all others (compile&#45;tim..." alt="" coords="18,306,170,346"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="220,294,167,309,166,303,218,289"/>
+<area shape="poly" id="edge15_Node000013_Node000013" title=" " alt="" coords="130,294,117,287,94,285,74,287,62,291,57,297,60,305,54,306,52,296,58,287,73,281,94,279,119,282,132,290"/>
+</map>

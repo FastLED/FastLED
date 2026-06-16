@@ -1,0 +1,21 @@
+<map id="fill_2dnoise16" name="fill_2dnoise16">
+<area shape="rect" id="Node000001" title="Fill an LED matrix with random colors, using 16&#45;bit noise." alt="" coords="5,116,117,141"/>
+<area shape="rect" id="Node000002" href="$d1/dfb/colorutils_8h_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="224,5,283,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="73,114,111,77,164,40,210,23,212,28,167,44,114,81,76,117"/>
+<area shape="rect" id="Node000003" href="$de/da4/group___noise_fill_ga5ef8a2d2d0ae634a8be8ea3a98e96ad6.html#ga5ef8a2d2d0ae634a8be8ea3a98e96ad6" title="Fill a 2D 8&#45;bit buffer with noise, using inoise16()" alt="" coords="165,79,341,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="117,115,174,104,175,109,118,120"/>
+<area shape="rect" id="Node000007" href="$de/da4/group___noise_fill_gac5e4db886061d72b10ca82cf52aa4d7c.html#gac5e4db886061d72b10ca82cf52aa4d7c" title="Fill a 2D 8&#45;bit buffer with noise, using inoise8()" alt="" coords="186,152,321,177"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="118,136,173,147,172,152,117,142"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_a44a195439ac7fa303b4b0b0c956605be.html#a44a195439ac7fa303b4b0b0c956605be" title=" " alt="" coords="207,201,299,227"/>
+<area shape="poly" id="edge10_Node000001_Node000012" title=" " alt="" coords="83,139,121,163,166,186,195,197,193,202,164,191,118,167,80,144"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="224,80,218,70,222,61,234,54,253,52,277,56,287,64,284,68,275,60,253,57,235,59,226,64,224,70,229,77"/>
+<area shape="rect" id="Node000004" href="$d8/df9/group___noise_generation_gaa452e57f154ab8d6d692375dba1ef5cb.html#gaa452e57f154ab8d6d692375dba1ef5cb" title=" " alt="" coords="389,79,467,104"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="342,89,376,89,376,94,342,94"/>
+<area shape="rect" id="Node000005" href="$d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59" title=" " alt="" coords="515,79,623,104"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="467,89,501,89,501,94,467,94"/>
+<area shape="poly" id="edge7_Node000007_Node000007" title=" " alt="" coords="224,153,218,144,222,134,234,128,253,125,277,129,287,138,284,142,275,134,253,131,235,133,226,137,224,143,229,150"/>
+<area shape="rect" id="Node000008" href="$d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" title=" " alt="" coords="393,152,463,177"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="321,162,379,162,379,167,321,167"/>
+<area shape="rect" id="Node000009" href="$d8/d5c/group___noise_gaa3db0f2f3777cf5bb7a4dd1359dba4fe.html#gaa3db0f2f3777cf5bb7a4dd1359dba4fe" title=" " alt="" coords="519,152,619,177"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="463,162,505,162,505,167,463,167"/>
+</map>

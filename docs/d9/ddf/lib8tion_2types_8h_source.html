@@ -103,68 +103,10 @@ $(function(){initNavTree('d9/ddf/lib8tion_2types_8h_source.html','../../'); init
   <div class="headertitle"><div class="title">types.h</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="../../d9/ddf/lib8tion_2types_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#pragma once</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/dd8/stdint_8h.html">fl/stdint.h</a>&quot;</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &quot;<a class="code" href="../../d3/d7e/int_8h.html">fl/int.h</a>&quot;</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/d2a/namespace_8h.html">fl/namespace.h</a>&quot;</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><a class="code hl_define" href="../../df/d2a/namespace_8h_a556e256b05a4b158f3606e4a978101ba.html#a556e256b05a4b158f3606e4a978101ba">FASTLED_NAMESPACE_BEGIN</a></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span></div>
-<div class="foldopen" id="foldopen00023" data-start="{" data-end="};">
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="../../db/d58/group___fractional_types.html">   23</a></span><span class="keyword">typedef</span> <span class="keyword">union </span>{</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="../../db/d58/group___fractional_types.html#aa999f6c1a14b333db5eff13abe4bdb50">   24</a></span>    uint32_t <a class="code hl_variable" href="../../db/d58/group___fractional_types.html#aa999f6c1a14b333db5eff13abe4bdb50">i</a>;  </div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="../../db/d58/group___fractional_types.html#aab5cc664d19fbca45bc9d4af1758ee7f">   25</a></span>    <span class="keywordtype">float</span>    <a class="code hl_variable" href="../../db/d58/group___fractional_types.html#aab5cc664d19fbca45bc9d4af1758ee7f">f</a>;  </div>
-<div class="foldopen" id="foldopen00026" data-start="{" data-end="};">
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="../../db/d58/group___fractional_types.html">   26</a></span>    <span class="keyword">struct </span>{</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>        uint32_t <a class="code hl_variable" href="../../db/d58/group___fractional_types.html#a8d53751fb2f972417c22f50994c3cb8b">mantissa</a>: 23;  </div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        uint32_t <a class="code hl_variable" href="../../db/d58/group___fractional_types.html#afacd4bc86b7f12740c83bcaa4e75ae0a">exponent</a>:  8;  </div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        uint32_t <a class="code hl_variable" href="../../db/d58/group___fractional_types.html#aaf6f283b87b866ca008541a707107ace">signbit</a>:   1;  </div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    };</div>
-</div>
-<div class="foldopen" id="foldopen00031" data-start="{" data-end="};">
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="../../db/d58/group___fractional_types.html">   31</a></span>    <span class="keyword">struct </span>{</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        uint32_t <a class="code hl_variable" href="../../db/d58/group___fractional_types.html#a88e70e08d5c0189bca70dfa37034e08c">mant7</a> :  7;  </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        uint32_t <a class="code hl_variable" href="../../db/d58/group___fractional_types.html#a4ef3ab78ee504be1170949e9336a6f6c">mant16</a>: 16;  </div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        uint32_t <a class="code hl_variable" href="../../db/d58/group___fractional_types.html#aa0012c437f9cb0d4f78aa3072fc8781a">exp_</a>  :  8;  </div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        uint32_t <a class="code hl_variable" href="../../db/d58/group___fractional_types.html#a12c56e1cd511aa41dcf486f3f5795eeb">sb_</a>   :  1;  </div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    };</div>
-</div>
-<div class="foldopen" id="foldopen00037" data-start="{" data-end="};">
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="../../db/d58/group___fractional_types.html">   37</a></span>    <span class="keyword">struct </span>{</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>        uint32_t <a class="code hl_variable" href="../../db/d58/group___fractional_types.html#ac00701da1609c609bfc836f8839c3e8e">mant_lo8</a> : 8;  </div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        uint32_t <a class="code hl_variable" href="../../db/d58/group___fractional_types.html#a9f01189b3205cf4bab5b74e309bd8d89">mant_hi16_exp_lo1</a> : 16;  </div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>        uint32_t <a class="code hl_variable" href="../../db/d58/group___fractional_types.html#aef373aad7e32899b9445f75b0def52be">sb_exphi7</a> : 8;  </div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    };</div>
-</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>} <a class="code hl_union" href="../../db/d58/group___fractional_types.html#d3/d2c/union_i_e_e_e754binary32__t">IEEE754binary32_t</a>;</div>
-</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><a class="code hl_define" href="../../df/d2a/namespace_8h_a1d5d01fb2365bb29ff7972156bff53e8.html#a1d5d01fb2365bb29ff7972156bff53e8">FASTLED_NAMESPACE_END</a></div>
-<div class="ttc" id="agroup___fractional_types_html_a12c56e1cd511aa41dcf486f3f5795eeb"><div class="ttname"><a href="../../db/d58/group___fractional_types.html#a12c56e1cd511aa41dcf486f3f5795eeb">IEEE754binary32_t.__unnamed1__::sb_</a></div><div class="ttdeci">uint32_t sb_</div></div>
-<div class="ttc" id="agroup___fractional_types_html_a4ef3ab78ee504be1170949e9336a6f6c"><div class="ttname"><a href="../../db/d58/group___fractional_types.html#a4ef3ab78ee504be1170949e9336a6f6c">IEEE754binary32_t.__unnamed1__::mant16</a></div><div class="ttdeci">uint32_t mant16</div></div>
-<div class="ttc" id="agroup___fractional_types_html_a88e70e08d5c0189bca70dfa37034e08c"><div class="ttname"><a href="../../db/d58/group___fractional_types.html#a88e70e08d5c0189bca70dfa37034e08c">IEEE754binary32_t.__unnamed1__::mant7</a></div><div class="ttdeci">uint32_t mant7</div></div>
-<div class="ttc" id="agroup___fractional_types_html_a8d53751fb2f972417c22f50994c3cb8b"><div class="ttname"><a href="../../db/d58/group___fractional_types.html#a8d53751fb2f972417c22f50994c3cb8b">IEEE754binary32_t.__unnamed0__::mantissa</a></div><div class="ttdeci">uint32_t mantissa</div><div class="ttdoc">23-bit mantissa</div></div>
-<div class="ttc" id="agroup___fractional_types_html_a9f01189b3205cf4bab5b74e309bd8d89"><div class="ttname"><a href="../../db/d58/group___fractional_types.html#a9f01189b3205cf4bab5b74e309bd8d89">IEEE754binary32_t.__unnamed2__::mant_hi16_exp_lo1</a></div><div class="ttdeci">uint32_t mant_hi16_exp_lo1</div></div>
-<div class="ttc" id="agroup___fractional_types_html_aa0012c437f9cb0d4f78aa3072fc8781a"><div class="ttname"><a href="../../db/d58/group___fractional_types.html#aa0012c437f9cb0d4f78aa3072fc8781a">IEEE754binary32_t.__unnamed1__::exp_</a></div><div class="ttdeci">uint32_t exp_</div></div>
-<div class="ttc" id="agroup___fractional_types_html_aa999f6c1a14b333db5eff13abe4bdb50"><div class="ttname"><a href="../../db/d58/group___fractional_types.html#aa999f6c1a14b333db5eff13abe4bdb50">IEEE754binary32_t::i</a></div><div class="ttdeci">uint32_t i</div><div class="ttdoc">raw value, as an integer</div><div class="ttdef"><b>Definition</b> <a href="#l00024">types.h:24</a></div></div>
-<div class="ttc" id="agroup___fractional_types_html_aab5cc664d19fbca45bc9d4af1758ee7f"><div class="ttname"><a href="../../db/d58/group___fractional_types.html#aab5cc664d19fbca45bc9d4af1758ee7f">IEEE754binary32_t::f</a></div><div class="ttdeci">float f</div><div class="ttdoc">raw value, as a float</div><div class="ttdef"><b>Definition</b> <a href="#l00025">types.h:25</a></div></div>
-<div class="ttc" id="agroup___fractional_types_html_aaf6f283b87b866ca008541a707107ace"><div class="ttname"><a href="../../db/d58/group___fractional_types.html#aaf6f283b87b866ca008541a707107ace">IEEE754binary32_t.__unnamed0__::signbit</a></div><div class="ttdeci">uint32_t signbit</div><div class="ttdoc">sign bit</div></div>
-<div class="ttc" id="agroup___fractional_types_html_ac00701da1609c609bfc836f8839c3e8e"><div class="ttname"><a href="../../db/d58/group___fractional_types.html#ac00701da1609c609bfc836f8839c3e8e">IEEE754binary32_t.__unnamed2__::mant_lo8</a></div><div class="ttdeci">uint32_t mant_lo8</div></div>
-<div class="ttc" id="agroup___fractional_types_html_aef373aad7e32899b9445f75b0def52be"><div class="ttname"><a href="../../db/d58/group___fractional_types.html#aef373aad7e32899b9445f75b0def52be">IEEE754binary32_t.__unnamed2__::sb_exphi7</a></div><div class="ttdeci">uint32_t sb_exphi7</div></div>
-<div class="ttc" id="agroup___fractional_types_html_afacd4bc86b7f12740c83bcaa4e75ae0a"><div class="ttname"><a href="../../db/d58/group___fractional_types.html#afacd4bc86b7f12740c83bcaa4e75ae0a">IEEE754binary32_t.__unnamed0__::exponent</a></div><div class="ttdeci">uint32_t exponent</div><div class="ttdoc">8-bit exponent</div></div>
-<div class="ttc" id="agroup___fractional_types_html_d3/d2c/union_i_e_e_e754binary32__t"><div class="ttname"><a href="../../db/d58/group___fractional_types.html#d3/d2c/union_i_e_e_e754binary32__t">IEEE754binary32_t</a></div><div class="ttdoc">typedef for IEEE754 &quot;binary32&quot; float type internals</div><div class="ttdef"><b>Definition</b> <a href="#l00023">types.h:23</a></div></div>
-<div class="ttc" id="aint_8h_html"><div class="ttname"><a href="../../d3/d7e/int_8h.html">int.h</a></div></div>
-<div class="ttc" id="anamespace_8h_a1d5d01fb2365bb29ff7972156bff53e8_html_a1d5d01fb2365bb29ff7972156bff53e8"><div class="ttname"><a href="../../df/d2a/namespace_8h_a1d5d01fb2365bb29ff7972156bff53e8.html#a1d5d01fb2365bb29ff7972156bff53e8">FASTLED_NAMESPACE_END</a></div><div class="ttdeci">#define FASTLED_NAMESPACE_END</div><div class="ttdef"><b>Definition</b> <a href="../../df/d2a/namespace_8h_source.html#l00023">namespace.h:23</a></div></div>
-<div class="ttc" id="anamespace_8h_a556e256b05a4b158f3606e4a978101ba_html_a556e256b05a4b158f3606e4a978101ba"><div class="ttname"><a href="../../df/d2a/namespace_8h_a556e256b05a4b158f3606e4a978101ba.html#a556e256b05a4b158f3606e4a978101ba">FASTLED_NAMESPACE_BEGIN</a></div><div class="ttdeci">#define FASTLED_NAMESPACE_BEGIN</div><div class="ttdef"><b>Definition</b> <a href="../../df/d2a/namespace_8h_source.html#l00022">namespace.h:22</a></div></div>
-<div class="ttc" id="anamespace_8h_html"><div class="ttname"><a href="../../df/d2a/namespace_8h.html">namespace.h</a></div><div class="ttdoc">Implements the FastLED namespace macros.</div></div>
-<div class="ttc" id="astdint_8h_html"><div class="ttname"><a href="../../df/dd8/stdint_8h.html">stdint.h</a></div></div>
+<a href="../../d9/ddf/lib8tion_2types_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment">// Legacy forwarding header — moved to fl/math/lib8tion/types.h</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &quot;<a class="code" href="../../dc/dac/fl_2math_2lib8tion_2types_8h.html">fl/math/lib8tion/types.h</a>&quot;</span></div>
+<div class="ttc" id="afl_2math_2lib8tion_2types_8h_html"><div class="ttname"><a href="../../dc/dac/fl_2math_2lib8tion_2types_8h.html">types.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -172,7 +114,7 @@ $(function(){initNavTree('d9/ddf/lib8tion_2types_8h_source.html','../../'); init
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d91669bda445047ed1892ac77a05ddb9.html">lib8tion</a></li><li class="navelem"><a class="el" href="../../d9/ddf/lib8tion_2types_8h.html">types.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:06:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

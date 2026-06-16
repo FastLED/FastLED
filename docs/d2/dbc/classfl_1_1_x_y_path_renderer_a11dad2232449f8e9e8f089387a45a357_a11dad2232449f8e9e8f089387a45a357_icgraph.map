@@ -1,5 +1,8 @@
 <map id="fl::XYPathRenderer::at_subpixel" name="fl::XYPathRenderer::at_subpixel">
-<area shape="rect" id="Node000001" title=" " alt="" coords="196,5,339,45"/>
-<area shape="rect" id="Node000002" href="$d2/dbc/classfl_1_1_x_y_path_renderer_a7c03ca116bbfb4f317474d05ea868c6b.html#a7c03ca116bbfb4f317474d05ea868c6b" title=" " alt="" coords="5,5,148,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="183,28,148,28,148,23,183,23"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="389,5,532,45"/>
+<area shape="rect" id="Node000002" href="$d2/dbc/classfl_1_1_x_y_path_renderer_abc12e093de808791fdea9c85d264bee6.html#abc12e093de808791fdea9c85d264bee6" title=" " alt="" coords="5,5,151,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="375,25,341,24,199,24,151,25,151,20,199,19,341,19,376,19"/>
+<area shape="rect" id="Node000003" href="$d2/dbc/classfl_1_1_x_y_path_renderer_a7c03ca116bbfb4f317474d05ea868c6b.html#a7c03ca116bbfb4f317474d05ea868c6b" title=" " alt="" coords="199,33,341,73"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="376,40,342,46,341,40,376,35"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="184,44,151,39,152,33,185,38"/>
 </map>

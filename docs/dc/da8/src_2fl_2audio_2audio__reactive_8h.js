@@ -1,0 +1,48 @@
+var src_2fl_2audio_2audio__reactive_8h =
+[
+    [ "fl::audio::BeatDetectors", "d7/dae/structfl_1_1audio_1_1_beat_detectors.html", "d7/dae/structfl_1_1audio_1_1_beat_detectors" ],
+    [ "fl::audio::Data", "db/dbf/namespacefl_1_1audio.html#d6/dbb/structfl_1_1audio_1_1_data", [
+      [ "bassBeatDetected", "db/dbf/namespacefl_1_1audio.html#ac31fb70b3a8b85b14540b21a56361835", null ],
+      [ "bassEnergy", "db/dbf/namespacefl_1_1audio.html#af8667335c212a62d74b1c1a61c9d75f8", null ],
+      [ "beatDetected", "db/dbf/namespacefl_1_1audio.html#a4768ad9c9be4762f97921f3988fe8fc9", null ],
+      [ "dominantFrequency", "db/dbf/namespacefl_1_1audio.html#a20d3ba5b505b74d3703e9cd340e3aff3", null ],
+      [ "frequencyBins", "db/dbf/namespacefl_1_1audio.html#a4e8f31f386c8288ad91f53f71c8da783", null ],
+      [ "magnitude", "db/dbf/namespacefl_1_1audio.html#adee862b78850fd5953e45f6292bc3fee", null ],
+      [ "midBeatDetected", "db/dbf/namespacefl_1_1audio.html#ad1a49bdec1608e47d701f0797cc149ab", null ],
+      [ "midEnergy", "db/dbf/namespacefl_1_1audio.html#a3f6285c9667fc71eddad8c429d55abb4", null ],
+      [ "peak", "db/dbf/namespacefl_1_1audio.html#a60add98a86e75d39e357efbbdbdb2620", null ],
+      [ "spectralFlux", "db/dbf/namespacefl_1_1audio.html#a0179d0e75e2456f8c8d8b9bd4a9de480", null ],
+      [ "timestamp", "db/dbf/namespacefl_1_1audio.html#a26bc91be2d0c35d5c4d9269aa5b1090c", null ],
+      [ "trebleBeatDetected", "db/dbf/namespacefl_1_1audio.html#ac5101c0d01b7eb0157e658c982069518", null ],
+      [ "trebleEnergy", "db/dbf/namespacefl_1_1audio.html#acee1f1409dcbf25a052a96123f5bfe30", null ],
+      [ "volume", "db/dbf/namespacefl_1_1audio.html#aed6b58654c09b33c0868554c33f82770", null ],
+      [ "volumeRaw", "db/dbf/namespacefl_1_1audio.html#a8ad7e004293ccbf63a7beb1626d8c0f4", null ]
+    ] ],
+    [ "fl::audio::PerceptualWeighting", "df/d0a/classfl_1_1audio_1_1_perceptual_weighting.html", "df/d0a/classfl_1_1audio_1_1_perceptual_weighting" ],
+    [ "fl::audio::Reactive", "d8/dea/classfl_1_1audio_1_1_reactive.html", "d8/dea/classfl_1_1audio_1_1_reactive" ],
+    [ "fl::audio::ReactiveConfig", "db/dbf/namespacefl_1_1audio.html#da/d51/structfl_1_1audio_1_1_reactive_config", [
+      [ "attack", "db/dbf/namespacefl_1_1audio.html#abb750de103ccba537738304b861ff8ce", null ],
+      [ "bassThreshold", "db/dbf/namespacefl_1_1audio.html#a51eb82b7c20698e56a8da49afbd0ec07", null ],
+      [ "decay", "db/dbf/namespacefl_1_1audio.html#ad4b40b72cff31bbcfda81501b01a9caa", null ],
+      [ "enableLogBinSpacing", "db/dbf/namespacefl_1_1audio.html#a96bb3118f9ab2e82386fd7b862ca2f4f", null ],
+      [ "enableMultiBand", "db/dbf/namespacefl_1_1audio.html#ad0efbcb1faef4296c6045118ed67419b", null ],
+      [ "enableMultiBandBeats", "db/dbf/namespacefl_1_1audio.html#a715189533b3384b8269cd68fe7f9b802", null ],
+      [ "enableMusicalBeatDetection", "db/dbf/namespacefl_1_1audio.html#af54eca5051945e872e336df616ede77f", null ],
+      [ "enableNoiseFloorTracking", "db/dbf/namespacefl_1_1audio.html#aad32d56ecdfdb7b9929c1d4bab1af2b1", null ],
+      [ "enableSignalConditioning", "db/dbf/namespacefl_1_1audio.html#a7d05026ae6ccfd15f8cef58f3fb71f8f", null ],
+      [ "enableSpectralEqualizer", "db/dbf/namespacefl_1_1audio.html#a52b50c19e184ec6d65ba0c3fec73bbd2", null ],
+      [ "enableSpectralFlux", "db/dbf/namespacefl_1_1audio.html#a6f38b068326c581b41071abd8d8238ab", null ],
+      [ "gain", "db/dbf/namespacefl_1_1audio.html#a619ec2cb658d8373dbfdaf28f47af5aa", null ],
+      [ "midThreshold", "db/dbf/namespacefl_1_1audio.html#a46407527fd90991f8907f9d015ab2fca", null ],
+      [ "musicalBeatConfidence", "db/dbf/namespacefl_1_1audio.html#aec58196e719f7324ff0644160f3bdb03", null ],
+      [ "musicalBeatMaxBPM", "db/dbf/namespacefl_1_1audio.html#af459ff6f508938fd549c1334a9f01747", null ],
+      [ "musicalBeatMinBPM", "db/dbf/namespacefl_1_1audio.html#a95b884ca9a2cc9aa90f46b9941376fa6", null ],
+      [ "noiseGate", "db/dbf/namespacefl_1_1audio.html#afae0590eaf4bcc6adfe7bde115e9bd89", null ],
+      [ "sampleRate", "db/dbf/namespacefl_1_1audio.html#a716ab7ef0b3cdaa4e879a71aff4f4ddc", null ],
+      [ "scalingMode", "db/dbf/namespacefl_1_1audio.html#aa77cdf47ff328be2301c95277b6a911d", null ],
+      [ "sensitivity", "db/dbf/namespacefl_1_1audio.html#a1e65baa55bc81cbb120ae4a074764a25", null ],
+      [ "spectralFluxThreshold", "db/dbf/namespacefl_1_1audio.html#a021c0615a5c298115759c8bc0296109b", null ],
+      [ "trebleThreshold", "db/dbf/namespacefl_1_1audio.html#a0664ad5ac504f5674b341aa97357b1b2", null ]
+    ] ],
+    [ "fl::audio::SpectralFluxDetector", "df/d68/classfl_1_1audio_1_1_spectral_flux_detector.html", "df/d68/classfl_1_1audio_1_1_spectral_flux_detector" ]
+];

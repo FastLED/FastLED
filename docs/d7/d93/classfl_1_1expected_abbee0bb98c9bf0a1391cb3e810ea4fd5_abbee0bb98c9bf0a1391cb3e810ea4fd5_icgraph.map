@@ -1,0 +1,21 @@
+<map id="fl::expected::failure" name="fl::expected::failure">
+<area shape="rect" id="Node000001" title="Create error result." alt="" coords="689,127,837,152"/>
+<area shape="rect" id="Node000002" href="$d3/d2b/classfl_1_1_rx_channel_a14a948e851faeb318738072647ac2b44.html#a14a948e851faeb318738072647ac2b44" title=" " alt="" coords="465,5,627,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="737,118,694,81,640,46,608,33,610,28,643,41,697,77,741,114"/>
+<area shape="rect" id="Node000003" href="$dc/d85/namespacefl_1_1channels_1_1rx_adf091740491eb262a159f09c092a157d.html#adf091740491eb262a159f09c092a157d" title="Decode a WS2812 edge&#45;pair stream into bytes." alt="" coords="460,55,632,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="706,125,614,98,615,93,707,120"/>
+<area shape="rect" id="Node000004" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a97018959f2c77546fa12f2a0adb2f540.html#a97018959f2c77546fa12f2a0adb2f540" title="Flush all lanes (transpose and transmit)" alt="" coords="459,119,633,159"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="676,142,634,142,634,137,676,137"/>
+<area shape="rect" id="Node000008" href="$d7/de0/classfl_1_1spi_1_1_parallel_device_a46d4c7d7aebd2478ad2d56532051ef75.html#a46d4c7d7aebd2478ad2d56532051ef75" title="Write data (single stream drives all pins via LUT)" alt="" coords="467,183,625,223"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="707,159,615,186,614,181,706,153"/>
+<area shape="rect" id="Node000010" href="$d9/d0a/classfl_1_1spi_1_1_device_a2242937ce5772a2fe9ba38632c000cc0.html#a2242937ce5772a2fe9ba38632c000cc0" title="Begin asynchronous write operation (returns immediately)" alt="" coords="451,248,641,273"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="741,164,697,202,643,238,610,250,608,245,640,233,694,198,737,160"/>
+<area shape="rect" id="Node000005" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a512a780a7050fa0e91e83c5dba1e17bc.html#a512a780a7050fa0e91e83c5dba1e17bc" title=" " alt="" coords="228,55,403,95"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="459,118,387,98,389,93,461,113"/>
+<area shape="rect" id="Node000006" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a547b2f30f70e16dbb22762f3f2370254.html#a547b2f30f70e16dbb22762f3f2370254" title="Internal implementation &#45; write all lanes atomically." alt="" coords="228,119,403,159"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="445,142,403,142,403,137,445,137"/>
+<area shape="rect" id="Node000007" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_ac20394c24a6406ccdd49a33d7e4f85ff.html#ac20394c24a6406ccdd49a33d7e4f85ff" title="Convenience method &#45; write multiple lanes in parallel (variadic template)" alt="" coords="5,119,180,159"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="214,142,180,142,180,137,214,137"/>
+<area shape="rect" id="Node000009" href="$d7/de0/classfl_1_1spi_1_1_parallel_device_a7401728911c15f96eedba08dcf5544d6.html#a7401728911c15f96eedba08dcf5544d6" title=" " alt="" coords="236,183,395,223"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="452,206,395,206,395,201,452,201"/>
+</map>

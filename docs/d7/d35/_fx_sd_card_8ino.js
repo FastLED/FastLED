@@ -1,5 +1,27 @@
 var _fx_sd_card_8ino =
 [
+    [ "CHIP_SELECT_PIN", "d7/d35/_fx_sd_card_8ino_abdf9543b76f1ba5db0b3a5176612a767.html#abdf9543b76f1ba5db0b3a5176612a767", null ],
+    [ "COLOR_ORDER", "d7/d35/_fx_sd_card_8ino_a00c9e5e8fdc981fc21a1e82e722980b2.html#a00c9e5e8fdc981fc21a1e82e722980b2", null ],
+    [ "FPS", "d7/d35/_fx_sd_card_8ino_ac92ca5ab87034a348decad7ee8d4bd1b.html#ac92ca5ab87034a348decad7ee8d4bd1b", null ],
+    [ "IS_SERPINTINE", "d7/d35/_fx_sd_card_8ino_aaef57fab56b804d85580f89cc5309d4d.html#aaef57fab56b804d85580f89cc5309d4d", null ],
+    [ "LED_PIN", "d7/d35/_fx_sd_card_8ino_ab4553be4db9860d940f81d7447173b2f.html#ab4553be4db9860d940f81d7447173b2f", null ],
+    [ "LED_TYPE", "d7/d35/_fx_sd_card_8ino_a364dc046543d8ab7d4214120afc9c814.html#a364dc046543d8ab7d4214120afc9c814", null ],
+    [ "MATRIX_HEIGHT", "d7/d35/_fx_sd_card_8ino_a144c7d32cf5ab713b7507dfd2a600cae.html#a144c7d32cf5ab713b7507dfd2a600cae", null ],
+    [ "MATRIX_WIDTH", "d7/d35/_fx_sd_card_8ino_af04e6ec3c92f294d177b2ffd4885ee71.html#af04e6ec3c92f294d177b2ffd4885ee71", null ],
+    [ "NUM_LEDS", "d7/d35/_fx_sd_card_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd", null ],
+    [ "NUM_VIDEO_FRAMES", "d7/d35/_fx_sd_card_8ino_a6891ad3a4e84a4482b1e3ab22762b945.html#a6891ad3a4e84a4482b1e3ab22762b945", null ],
     [ "loop", "d7/d35/_fx_sd_card_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f", null ],
-    [ "setup", "d7/d35/_fx_sd_card_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d", null ]
+    [ "openVideoEitherFormat", "d7/d35/_fx_sd_card_8ino_a31b8310bfbbef87ba721eb0104ea6119.html#a31b8310bfbbef87ba721eb0104ea6119", null ],
+    [ "setup", "d7/d35/_fx_sd_card_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d", null ],
+    [ "validateScreenMapSize", "d7/d35/_fx_sd_card_8ino_aac2dec8493c1618d241f28dec7447d81.html#aac2dec8493c1618d241f28dec7447d81", null ],
+    [ "whichVideo", "d7/d35/_fx_sd_card_8ino_add3ff24d5357dbeb92d3b450fd751a40.html#add3ff24d5357dbeb92d3b450fd751a40", null ],
+    [ "description", "d7/d35/_fx_sd_card_8ino_abb85c4a8fb39954e9a9b920895d2691c.html#abb85c4a8fb39954e9a9b920895d2691c", null ],
+    [ "filesystem", "d7/d35/_fx_sd_card_8ino_a596ed0ccdf138a1e53bd3b5329ed605e.html#a596ed0ccdf138a1e53bd3b5329ed605e", null ],
+    [ "gError", "d7/d35/_fx_sd_card_8ino_a9bb8de58107fc20b1e49669b6298eb28.html#a9bb8de58107fc20b1e49669b6298eb28", null ],
+    [ "leds", "d7/d35/_fx_sd_card_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad", null ],
+    [ "screenMap", "d7/d35/_fx_sd_card_8ino_a0f6106e4be0f5498d5b5b38c7fe51cc7.html#a0f6106e4be0f5498d5b5b38c7fe51cc7", null ],
+    [ "title", "d7/d35/_fx_sd_card_8ino_a98def8d1377dab40aab9364bf6741955.html#a98def8d1377dab40aab9364bf6741955", null ],
+    [ "video", "d7/d35/_fx_sd_card_8ino_a8667d527e3acf17e1c5de7ba92730d89.html#a8667d527e3acf17e1c5de7ba92730d89", null ],
+    [ "video2", "d7/d35/_fx_sd_card_8ino_aecb6e9283cc6d4f459aedaa3fdfd5569.html#aecb6e9283cc6d4f459aedaa3fdfd5569", null ],
+    [ "videoSpeed", "d7/d35/_fx_sd_card_8ino_a9f987514568eeb313e565a64adda931d.html#a9f987514568eeb313e565a64adda931d", null ]
 ];

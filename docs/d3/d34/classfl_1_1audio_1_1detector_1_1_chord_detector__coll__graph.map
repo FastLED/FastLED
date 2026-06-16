@@ -1,0 +1,41 @@
+<map id="fl::audio::detector::ChordDetector" name="fl::audio::detector::ChordDetector">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1580,91,1716,131"/>
+<area shape="rect" id="Node000002" href="$df/d9b/classfl_1_1audio_1_1_detector.html" title=" " alt="" coords="1265,5,1404,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1418,22,1487,33,1557,53,1592,70,1622,89,1619,94,1589,74,1555,58,1486,38,1417,27"/>
+<area shape="rect" id="Node000003" href="$d6/ddb/structfl_1_1audio_1_1detector_1_1_chord.html" title=" " alt="" coords="1267,55,1403,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1417,82,1580,101,1579,106,1417,87"/>
+<area shape="rect" id="Node000004" href="$d2/d26/classfl_1_1flat__map.html" title=" " alt="" coords="1245,120,1424,175"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="1437,133,1556,119,1580,117,1580,122,1556,125,1438,138"/>
+<area shape="rect" id="Node000005" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="474,141,655,167"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="669,154,857,158,1003,158,1245,149,1245,155,1003,163,857,163,669,160"/>
+<area shape="rect" id="Node000012" href="$d2/d26/classfl_1_1flat__map.html" title=" " alt="" coords="861,94,999,134"/>
+<area shape="poly" id="edge11_Node000012_Node000005" title=" " alt="" coords="669,142,833,125,860,121,861,127,834,130,670,147"/>
+<area shape="rect" id="Node000006" href="$d4/dad/classfl_1_1vector__basic.html" title="Type&#45;erased vector base class." alt="" coords="5,192,125,217"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="128,186,174,177,253,166,333,158,474,152,474,157,333,164,253,171,175,182,129,191"/>
+<area shape="rect" id="Node000009" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="184,192,301,217"/>
+<area shape="poly" id="edge7_Node000009_Node000006" title=" " alt="" coords="139,202,183,202,183,207,139,207"/>
+<area shape="rect" id="Node000016" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="495,253,634,279"/>
+<area shape="poly" id="edge17_Node000016_Node000006" title=" " alt="" coords="132,218,175,226,348,248,495,260,495,265,347,253,174,231,131,223"/>
+<area shape="poly" id="edge6_Node000005_Node000009" title=" " alt="" coords="315,193,441,174,497,164,498,169,442,179,315,198"/>
+<area shape="poly" id="edge18_Node000016_Node000009" title=" " alt="" coords="315,216,497,251,496,256,314,221"/>
+<area shape="rect" id="Node000010" href="$d6/d07/structfl_1_1less.html" title=" " alt="" coords="705,25,816,51"/>
+<area shape="poly" id="edge8_Node000004_Node000010" title=" " alt="" coords="830,32,912,31,1011,38,1118,55,1171,68,1223,86,1235,95,1247,105,1270,118,1267,122,1244,110,1232,99,1220,91,1170,74,1117,60,1011,43,911,37,830,37"/>
+<area shape="rect" id="Node000011" href="$d6/d07/structfl_1_1less.html" title="Binary function object that returns whether the first argument is less than the second." alt="" coords="191,69,294,95"/>
+<area shape="poly" id="edge9_Node000010_Node000011" title=" " alt="" coords="307,67,334,63,539,45,705,37,705,42,540,51,335,69,308,73"/>
+<area shape="rect" id="Node000013" href="$d6/d07/structfl_1_1less.html" title=" " alt="" coords="505,75,624,100"/>
+<area shape="poly" id="edge13_Node000013_Node000011" title=" " alt="" coords="308,80,505,84,505,89,308,86"/>
+<area shape="poly" id="edge10_Node000004_Node000012" title=" " alt="" coords="1013,118,1245,137,1245,143,1013,123"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="638,90,861,106,860,112,637,95"/>
+<area shape="rect" id="Node000014" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="1256,270,1413,310"/>
+<area shape="poly" id="edge14_Node000001_Node000014" title=" " alt="" coords="1382,261,1610,129,1613,134,1384,265"/>
+<area shape="rect" id="Node000015" href="$d6/d86/classfl_1_1audio_1_1fft_1_1_bins.html" title=" " alt="" coords="864,249,996,275"/>
+<area shape="poly" id="edge15_Node000014_Node000015" title=" " alt="" coords="1010,265,1256,282,1255,287,1009,270"/>
+<area shape="poly" id="edge16_Node000015_Node000016" title=" " alt="" coords="648,263,833,262,863,261,864,267,833,267,648,269"/>
+<area shape="rect" id="Node000017" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="465,333,664,359"/>
+<area shape="poly" id="edge19_Node000014_Node000017" title=" " alt="" coords="678,333,688,333,1256,292,1256,298,688,338,678,339"/>
+<area shape="rect" id="Node000020" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="857,363,1003,388"/>
+<area shape="poly" id="edge22_Node000020_Node000017" title=" " alt="" coords="678,352,857,367,857,372,677,358"/>
+<area shape="rect" id="Node000018" href="$da/d98/classfl_1_1_atomic_fake.html" title=" " alt="" coords="175,326,311,366"/>
+<area shape="poly" id="edge20_Node000017_Node000018" title=" " alt="" coords="324,343,465,343,465,349,324,349"/>
+<area shape="poly" id="edge21_Node000014_Node000020" title=" " alt="" coords="1016,380,1116,379,1169,372,1220,359,1269,336,1309,308,1312,312,1272,341,1222,365,1170,377,1116,384,1016,386"/>
+</map>

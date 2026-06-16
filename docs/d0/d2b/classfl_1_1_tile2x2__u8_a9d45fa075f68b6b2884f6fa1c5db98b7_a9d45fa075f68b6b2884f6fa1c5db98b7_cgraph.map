@@ -1,5 +1,7 @@
 <map id="fl::Tile2x2_u8::maxValue" name="fl::Tile2x2_u8::maxValue">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,188,31"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,188,56"/>
 <area shape="rect" id="Node000002" href="$d0/d2b/classfl_1_1_tile2x2__u8_a53d97221d08a4fc65b1a9bc28a908efd.html#a53d97221d08a4fc65b1a9bc28a908efd" title=" " alt="" coords="236,5,367,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="188,15,222,15,222,21,188,21"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="188,29,222,25,223,30,189,35"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="268,55,335,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="189,51,255,59,254,65,188,57"/>
 </map>

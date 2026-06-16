@@ -126,17 +126,20 @@ $(function(){initNavTree('d8/ddd/class_toggle_button_abf5257238197a7ce4ae9e49887
 <p class="definition">Definition at line <a class="el" href="../../de/d05/buttons_8h_source.html#l00045">45</a> of file <a class="el" href="../../de/d05/buttons_8h_source.html">buttons.h</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">   45</span>                       {</div>
 <div class="line"><span class="lineno">   46</span>    <span class="comment">// Toggle the pin back to INPUT and take a reading.</span></div>
-<div class="line"><span class="lineno">   47</span>    pinMode(<a class="code hl_variable" href="../../d8/ddd/class_toggle_button_ab6e67c71b9468f57141e3984a477f4a4.html#ab6e67c71b9468f57141e3984a477f4a4">pin_</a>, INPUT);</div>
-<div class="line"><span class="lineno">   48</span>    <span class="keywordtype">bool</span> on = (digitalRead(<a class="code hl_variable" href="../../d8/ddd/class_toggle_button_ab6e67c71b9468f57141e3984a477f4a4.html#ab6e67c71b9468f57141e3984a477f4a4">pin_</a>) == HIGH);</div>
+<div class="line"><span class="lineno">   47</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_aa7a47cf722a2586453e75f6e70284dad.html#aa7a47cf722a2586453e75f6e70284dad">pinMode</a>(<a class="code hl_variable" href="../../d8/ddd/class_toggle_button_adcc0684b1c8df4d8182207bd2d2da897.html#adcc0684b1c8df4d8182207bd2d2da897">mPin</a>, INPUT);</div>
+<div class="line"><span class="lineno">   48</span>    <span class="keywordtype">bool</span> on = (<a class="code hl_function" href="../../d4/d36/namespacefl_aa8c98e0a4c897eb7f4ce639498a78c5a.html#aa8c98e0a4c897eb7f4ce639498a78c5a">digitalRead</a>(<a class="code hl_variable" href="../../d8/ddd/class_toggle_button_adcc0684b1c8df4d8182207bd2d2da897.html#adcc0684b1c8df4d8182207bd2d2da897">mPin</a>) == HIGH);</div>
 <div class="line"><span class="lineno">   49</span>    <span class="comment">// Switch the pin back to output so that we can enable the</span></div>
 <div class="line"><span class="lineno">   50</span>    <span class="comment">// pulldown resister.</span></div>
-<div class="line"><span class="lineno">   51</span>    pinMode(<a class="code hl_variable" href="../../d8/ddd/class_toggle_button_ab6e67c71b9468f57141e3984a477f4a4.html#ab6e67c71b9468f57141e3984a477f4a4">pin_</a>, OUTPUT);</div>
-<div class="line"><span class="lineno">   52</span>    digitalWrite(<a class="code hl_variable" href="../../d8/ddd/class_toggle_button_ab6e67c71b9468f57141e3984a477f4a4.html#ab6e67c71b9468f57141e3984a477f4a4">pin_</a>, LOW);</div>
+<div class="line"><span class="lineno">   51</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_aa7a47cf722a2586453e75f6e70284dad.html#aa7a47cf722a2586453e75f6e70284dad">pinMode</a>(<a class="code hl_variable" href="../../d8/ddd/class_toggle_button_adcc0684b1c8df4d8182207bd2d2da897.html#adcc0684b1c8df4d8182207bd2d2da897">mPin</a>, OUTPUT);</div>
+<div class="line"><span class="lineno">   52</span>    <a class="code hl_function" href="../../d4/d36/namespacefl_ab91b418b90c32e475842ad7ce3785afb.html#ab91b418b90c32e475842ad7ce3785afb">digitalWrite</a>(<a class="code hl_variable" href="../../d8/ddd/class_toggle_button_adcc0684b1c8df4d8182207bd2d2da897.html#adcc0684b1c8df4d8182207bd2d2da897">mPin</a>, LOW);</div>
 <div class="line"><span class="lineno">   53</span>    <span class="keywordflow">return</span> on;</div>
 <div class="line"><span class="lineno">   54</span>  }</div>
-<div class="ttc" id="aclass_toggle_button_ab6e67c71b9468f57141e3984a477f4a4_html_ab6e67c71b9468f57141e3984a477f4a4"><div class="ttname"><a href="../../d8/ddd/class_toggle_button_ab6e67c71b9468f57141e3984a477f4a4.html#ab6e67c71b9468f57141e3984a477f4a4">ToggleButton::pin_</a></div><div class="ttdeci">int pin_</div><div class="ttdef"><b>Definition</b> <a href="../../de/d05/buttons_8h_source.html#l00057">buttons.h:57</a></div></div>
+<div class="ttc" id="aclass_toggle_button_adcc0684b1c8df4d8182207bd2d2da897_html_adcc0684b1c8df4d8182207bd2d2da897"><div class="ttname"><a href="../../d8/ddd/class_toggle_button_adcc0684b1c8df4d8182207bd2d2da897.html#adcc0684b1c8df4d8182207bd2d2da897">ToggleButton::mPin</a></div><div class="ttdeci">int mPin</div><div class="ttdef"><b>Definition</b> <a href="../../de/d05/buttons_8h_source.html#l00057">buttons.h:57</a></div></div>
+<div class="ttc" id="anamespacefl_aa7a47cf722a2586453e75f6e70284dad_html_aa7a47cf722a2586453e75f6e70284dad"><div class="ttname"><a href="../../d4/d36/namespacefl_aa7a47cf722a2586453e75f6e70284dad.html#aa7a47cf722a2586453e75f6e70284dad">fl::pinMode</a></div><div class="ttdeci">void pinMode(int pin, PinMode mode)</div><div class="ttdoc">Set pin mode (input, output, pull-up, pull-down)</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d48/pin_8cpp_8hpp_source.html#l00378">pin.cpp.hpp:378</a></div></div>
+<div class="ttc" id="anamespacefl_aa8c98e0a4c897eb7f4ce639498a78c5a_html_aa8c98e0a4c897eb7f4ce639498a78c5a"><div class="ttname"><a href="../../d4/d36/namespacefl_aa8c98e0a4c897eb7f4ce639498a78c5a.html#aa8c98e0a4c897eb7f4ce639498a78c5a">fl::digitalRead</a></div><div class="ttdeci">PinValue digitalRead(int pin)</div><div class="ttdoc">Read digital value from pin.</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d48/pin_8cpp_8hpp_source.html#l00055">pin.cpp.hpp:55</a></div></div>
+<div class="ttc" id="anamespacefl_ab91b418b90c32e475842ad7ce3785afb_html_ab91b418b90c32e475842ad7ce3785afb"><div class="ttname"><a href="../../d4/d36/namespacefl_ab91b418b90c32e475842ad7ce3785afb.html#ab91b418b90c32e475842ad7ce3785afb">fl::digitalWrite</a></div><div class="ttdeci">void digitalWrite(int pin, PinValue val)</div><div class="ttdoc">Write digital value to pin.</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d48/pin_8cpp_8hpp_source.html#l00051">pin.cpp.hpp:51</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../de/d05/buttons_8h_source.html#l00057">pin_</a>.</p>
+<p class="reference">References <a class="el" href="../../de/d05/buttons_8h_source.html#l00057">mPin</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../de/d05/buttons_8h_source.html#l00024">Update()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -156,7 +159,7 @@ $(function(){initNavTree('d8/ddd/class_toggle_button_abf5257238197a7ce4ae9e49887
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d8/ddd/class_toggle_button.html">ToggleButton</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

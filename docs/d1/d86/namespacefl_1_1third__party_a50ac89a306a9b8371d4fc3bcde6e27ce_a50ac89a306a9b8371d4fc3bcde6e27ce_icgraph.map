@@ -1,0 +1,17 @@
+<map id="fl::third_party::nsgif_get_info" name="fl::third_party::nsgif_get_info">
+<area shape="rect" id="Node000001" title="Get information about a GIF from an nsgif_t object." alt="" coords="485,165,633,205"/>
+<area shape="rect" id="Node000002" href="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_a11565a5cd20ee8e494411bb2e47d04bc.html#a11565a5cd20ee8e494411bb2e47d04bc" title=" " alt="" coords="233,5,435,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="534,156,492,106,465,81,436,60,413,48,415,43,439,55,469,77,496,103,538,152"/>
+<area shape="rect" id="Node000004" href="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_a1b231701c535992372f83cdfc8056a8d.html#a1b231701c535992372f83cdfc8056a8d" title=" " alt="" coords="247,69,421,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="511,161,436,124,404,112,406,107,438,119,513,156"/>
+<area shape="rect" id="Node000005" href="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_a8da1eee37f61945c5d7a3d5c3585764d.html#a8da1eee37f61945c5d7a3d5c3585764d" title=" " alt="" coords="237,133,431,173"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="471,176,430,170,431,164,472,170"/>
+<area shape="rect" id="Node000006" href="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_aa01afc654ae1d962f2addfb6c22798bc.html#aa01afc654ae1d962f2addfb6c22798bc" title=" " alt="" coords="247,197,421,237"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="472,200,421,208,420,202,471,195"/>
+<area shape="rect" id="Node000007" href="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_a35cda8da5d5b7eb7688dd88e42955f6c.html#a35cda8da5d5b7eb7688dd88e42955f6c" title=" " alt="" coords="231,261,437,301"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="513,215,438,252,406,264,404,259,436,247,511,210"/>
+<area shape="rect" id="Node000008" href="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_a453f529523517d3da86269da0e44df0a.html#a453f529523517d3da86269da0e44df0a" title=" " alt="" coords="247,325,421,365"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="538,218,496,268,469,294,439,316,415,328,413,323,436,311,465,289,492,264,534,215"/>
+<area shape="rect" id="Node000003" href="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_a678f427aa00bd807a83050108ead2edc.html#a678f427aa00bd807a83050108ead2edc" title=" " alt="" coords="5,5,183,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="219,28,183,28,183,23,219,23"/>
+</map>

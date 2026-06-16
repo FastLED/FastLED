@@ -1,0 +1,53 @@
+<map id="fl::digitalWrite" name="fl::digitalWrite">
+<area shape="rect" id="Node000001" title="Write digital value to pin." alt="" coords="917,377,1032,403"/>
+<area shape="rect" id="Node000002" href="$d6/d2d/classfl_1_1_digital_multi_write16_ab2fbb0f68e3c32263d9bbaf0cc7b0ec8.html#ab2fbb0f68e3c32263d9bbaf0cc7b0ec8" title=" " alt="" coords="665,97,830,137"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="962,365,927,284,900,237,867,195,830,163,791,139,794,135,834,159,871,191,905,234,932,282,967,363"/>
+<area shape="rect" id="Node000006" href="$d9/d21/classfl_1_1_digital_multi_write8_a8528927863f57fdfcd04fb1466ef8963.html#a8528927863f57fdfcd04fb1466ef8963" title=" " alt="" coords="669,205,826,245"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="957,367,921,316,896,289,868,266,825,245,828,240,871,261,900,285,925,312,961,364"/>
+<area shape="rect" id="Node000011" href="$d0/da2/classfl_1_1third__party_1_1ez_w_s2812gpio_abad8db01ff1ef8c38c5f8fee610254da.html#abad8db01ff1ef8c38c5f8fee610254da" title="Initialize GPIO pin." alt="" coords="139,322,351,362"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="951,368,915,336,892,321,868,310,794,290,717,279,639,277,563,280,490,288,422,300,314,325,312,319,421,294,489,283,562,275,639,271,718,274,795,285,870,305,895,316,918,332,955,365"/>
+<area shape="rect" id="Node000012" href="$d0/da2/classfl_1_1third__party_1_1ez_w_s2812gpio_ab55001d83187982f04f97f607c398fe7.html#ab55001d83187982f04f97f607c398fe7" title="End communication." alt="" coords="625,320,869,345"/>
+<area shape="poly" id="edge12_Node000001_Node000012" title=" " alt="" coords="921,376,869,361,814,348,815,343,870,355,923,371"/>
+<area shape="rect" id="Node000013" href="$d9/d33/namespacefl_1_1pwm__state_ae9ceab1a15258e8f61c7ca4bacba4905.html#ae9ceab1a15258e8f61c7ca4bacba4905" title=" " alt="" coords="672,370,823,410"/>
+<area shape="poly" id="edge13_Node000001_Node000013" title=" " alt="" coords="904,393,823,393,823,387,904,387"/>
+<area shape="rect" id="Node000015" href="$d4/d36/namespacefl_a77306b4a5327eb19e8d003b550b1a0a5.html#a77306b4a5327eb19e8d003b550b1a0a5" title="Set PWM frequency for a pin." alt="" coords="166,448,323,473"/>
+<area shape="poly" id="edge27_Node000001_Node000015" title=" " alt="" coords="927,410,870,425,719,446,568,458,432,463,324,464,323,459,431,458,568,453,719,441,869,419,926,404"/>
+<area shape="rect" id="Node000018" href="$d9/d33/namespacefl_1_1pwm__state_a567fc66f5ca74ddc7b7253ab96d5fe04.html#a567fc66f5ca74ddc7b7253ab96d5fe04" title=" " alt="" coords="638,511,857,536"/>
+<area shape="poly" id="edge17_Node000001_Node000018" title=" " alt="" coords="948,414,871,468,781,513,779,508,868,464,945,409"/>
+<area shape="rect" id="Node000021" href="$d8/d07/namespacefl_1_1validation_a46b68a701e41e321618f87bdb6d80cc2.html#a46b68a701e41e321618f87bdb6d80cc2" title="Test RX channel with manual GPIO toggle pattern." alt="" coords="141,637,348,663"/>
+<area shape="poly" id="edge28_Node000001_Node000021" title=" " alt="" coords="966,416,931,483,904,519,871,549,809,587,742,615,672,636,601,650,531,659,464,663,348,662,348,657,464,658,530,654,600,645,670,631,740,610,807,582,868,545,900,515,926,480,961,414"/>
+<area shape="rect" id="Node000025" href="$d3/d25/classfl_1_1_digital_pin_impl_a8a4517a0b4a1cd30f8864c6b11abeb95.html#a8a4517a0b4a1cd30f8864c6b11abeb95" title=" " alt="" coords="682,687,813,727"/>
+<area shape="poly" id="edge29_Node000001_Node000025" title=" " alt="" coords="974,417,965,470,948,538,918,609,897,642,871,671,844,689,814,700,812,695,842,684,868,667,892,638,913,606,943,536,960,469,968,416"/>
+<area shape="rect" id="Node000003" href="$d6/d2d/classfl_1_1_digital_multi_write16_a517c086da30ddcbef4425b2698b8acfb.html#a517c086da30ddcbef4425b2698b8acfb" title="Write pre&#45;transposed 16&#45;bit data to the 16 pins." alt="" coords="405,53,571,93"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="651,103,570,89,571,84,652,98"/>
+<area shape="rect" id="Node000004" href="$d6/d2d/classfl_1_1_digital_multi_write16_acddfa0f31daba041d8076772c5bdb8ee.html#acddfa0f31daba041d8076772c5bdb8ee" title=" " alt="" coords="162,55,327,95"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="391,76,327,77,327,72,391,71"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_ab5bc76750f7a0b948186397c6581fbf3.html#ab5bc76750f7a0b948186397c6581fbf3" title="Convenience free function — creates a temporary DigitalMultiWrite16, initializes it,..." alt="" coords="163,5,326,31"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="391,54,301,33,303,28,392,49"/>
+<area shape="rect" id="Node000007" href="$d9/d21/classfl_1_1_digital_multi_write8_aa5b3d3dc7ea64d70b0e835e8ef1ff702.html#aa5b3d3dc7ea64d70b0e835e8ef1ff702" title="Write pre&#45;transposed byte data to the 8 pins." alt="" coords="409,117,567,157"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="673,203,547,159,549,154,675,197"/>
+<area shape="rect" id="Node000010" href="$d9/d21/classfl_1_1_digital_multi_write8_a8e02fbebfb2ffd463e4da2b0b92e9dab.html#a8e02fbebfb2ffd463e4da2b0b92e9dab" title="Write a single bitmask byte to the 8 pins." alt="" coords="409,205,567,245"/>
+<area shape="poly" id="edge9_Node000006_Node000010" title=" " alt="" coords="655,227,567,227,567,222,655,222"/>
+<area shape="rect" id="Node000008" href="$d9/d21/classfl_1_1_digital_multi_write8_ad9c5db6010bb7ec249d2a525b69125dc.html#ad9c5db6010bb7ec249d2a525b69125dc" title=" " alt="" coords="166,173,323,213"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="397,160,324,177,323,172,396,155"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a0beee42fe65dbc34d13920741a3237ed.html#a0beee42fe65dbc34d13920741a3237ed" title="Convenience free function — creates a temporary DigitalMultiWrite8, initializes it,..." alt="" coords="167,123,322,148"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="396,139,322,138,322,133,396,133"/>
+<area shape="poly" id="edge10_Node000010_Node000010" title=" " alt="" coords="529,193,515,186,488,183,465,185,450,190,445,196,448,204,443,205,440,195,447,186,463,180,488,178,516,181,532,188"/>
+<area shape="rect" id="Node000014" href="$d9/d33/namespacefl_1_1pwm__state_af4374568b5cc7ac35b4a70d554e66257.html#af4374568b5cc7ac35b4a70d554e66257" title=" " alt="" coords="399,370,577,410"/>
+<area shape="poly" id="edge14_Node000013_Node000014" title=" " alt="" coords="658,393,577,393,577,387,658,387"/>
+<area shape="poly" id="edge15_Node000014_Node000015" title=" " alt="" coords="406,416,290,450,289,445,405,411"/>
+<area shape="rect" id="Node000016" href="$d9/d1f/el__panel_8cpp_a3d505a2f5ac043b8dc404b92ebb049ef.html#a3d505a2f5ac043b8dc404b92ebb049ef" title=" " alt="" coords="5,517,91,543"/>
+<area shape="poly" id="edge16_Node000015_Node000016" title=" " alt="" coords="168,479,140,488,73,520,71,515,138,484,167,474"/>
+<area shape="poly" id="edge26_Node000018_Node000015" title=" " alt="" coords="660,540,601,546,534,546,465,540,398,525,382,517,372,507,363,497,349,488,315,476,317,471,352,484,366,493,376,503,385,512,400,519,466,535,534,541,601,540,660,535"/>
+<area shape="rect" id="Node000019" href="$d4/d36/namespacefl_aa7a47cf722a2586453e75f6e70284dad.html#aa7a47cf722a2586453e75f6e70284dad" title="Set pin mode (input, output, pull&#45;up, pull&#45;down)" alt="" coords="441,587,535,612"/>
+<area shape="poly" id="edge18_Node000018_Node000019" title=" " alt="" coords="691,542,533,589,532,584,689,537"/>
+<area shape="rect" id="Node000024" href="$d4/d36/namespacefl_a799e0254efc7ac0e21305c2c38685f0b.html#a799e0254efc7ac0e21305c2c38685f0b" title="Release PWM channel and stop output on a pin." alt="" coords="441,485,535,511"/>
+<area shape="poly" id="edge25_Node000018_Node000024" title=" " alt="" coords="624,514,536,505,536,500,625,509"/>
+<area shape="poly" id="edge19_Node000019_Node000011" title=" " alt="" coords="456,580,426,555,397,524,381,500,372,480,364,460,349,437,310,397,272,364,275,360,314,393,353,434,368,457,377,478,386,498,401,520,430,551,460,576"/>
+<area shape="poly" id="edge23_Node000019_Node000015" title=" " alt="" coords="427,587,397,569,380,548,373,527,366,507,349,488,322,474,325,470,352,484,370,504,378,525,385,546,400,565,429,582"/>
+<area shape="poly" id="edge20_Node000019_Node000016" title=" " alt="" coords="427,605,293,601,215,592,138,577,100,562,68,545,71,540,102,557,139,571,216,587,293,596,427,599"/>
+<area shape="rect" id="Node000020" href="$d3/d25/classfl_1_1_digital_pin_impl_a52b7c62cb136adbb22283fc1345d6918.html#a52b7c62cb136adbb22283fc1345d6918" title=" " alt="" coords="179,522,310,562"/>
+<area shape="poly" id="edge21_Node000019_Node000020" title=" " alt="" coords="427,588,309,560,311,555,428,583"/>
+<area shape="poly" id="edge24_Node000019_Node000021" title=" " alt="" coords="427,615,307,640,306,635,426,609"/>
+<area shape="poly" id="edge22_Node000020_Node000020" title=" " alt="" coords="277,510,266,503,245,501,226,503,215,507,211,513,213,521,208,522,206,512,212,503,225,497,245,495,268,498,280,506"/>
+</map>

@@ -1,0 +1,16 @@
+<map id="fl::third_party::vorbis::codebook_decode_scalar_raw" name="fl::third_party::vorbis::codebook_decode_scalar_raw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,63,229,103"/>
+<area shape="rect" id="Node000002" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a9e8145eaad2ce44204c290ad153812ed.html#a9e8145eaad2ce44204c290ad153812ed" title=" " alt="" coords="277,5,433,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,60,263,45,265,50,202,65"/>
+<area shape="rect" id="Node000003" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a1683913568d2d627f6044d09ac1e724e.html#a1683913568d2d627f6044d09ac1e724e" title=" " alt="" coords="889,124,1045,164"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="230,75,355,74,509,76,676,86,842,105,895,118,894,123,841,111,675,91,508,81,355,79,230,81"/>
+<area shape="rect" id="Node000004" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_aa4e744102e3ff5caaa3043734f0c446d.html#aa4e744102e3ff5caaa3043734f0c446d" title=" " alt="" coords="277,120,433,160"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="202,100,265,115,263,121,200,105"/>
+<area shape="rect" id="Node000005" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a9bd861dc62af2d386a5275f53f928b0b.html#a9bd861dc62af2d386a5275f53f928b0b" title=" " alt="" coords="481,120,637,160"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="433,137,468,137,468,143,433,143"/>
+<area shape="rect" id="Node000006" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a85a16124231fdd97ad0d62275f49f529.html#a85a16124231fdd97ad0d62275f49f529" title=" " alt="" coords="685,120,841,160"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="637,137,672,137,672,143,637,143"/>
+<area shape="rect" id="Node000007" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_afc76b9e752a49de48731ffb2fe24ca0f.html#afc76b9e752a49de48731ffb2fe24ca0f" title=" " alt="" coords="685,184,841,224"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="625,158,687,177,685,182,623,163"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="832,181,885,165,886,171,833,186"/>
+</map>

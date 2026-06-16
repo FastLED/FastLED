@@ -1,0 +1,13 @@
+<map id="fl::detail::UpscalePaletteInterpolated" name="fl::detail::UpscalePaletteInterpolated">
+<area shape="rect" id="Node000001" title=" " alt="" coords="407,73,587,113"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_abf83f8c9171b3b60bb3f69e0d04b3e94.html#abf83f8c9171b3b60bb3f69e0d04b3e94" title=" " alt="" coords="224,5,359,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="428,70,358,45,327,33,329,28,360,39,430,65"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ac2561c87f2746c8d2d718cc226cd5dae.html#ac2561c87f2746c8d2d718cc226cd5dae" title=" " alt="" coords="224,55,359,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="393,83,359,78,359,73,393,77"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a17b7fd301b5691fcbb9136a675dc9faa.html#a17b7fd301b5691fcbb9136a675dc9faa" title=" " alt="" coords="224,104,359,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="393,107,359,111,359,106,393,102"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a090c84c8e40dd80e92fb76009a66b346.html#a090c84c8e40dd80e92fb76009a66b346" title=" " alt="" coords="224,153,359,179"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="428,120,329,156,327,151,426,115"/>
+<area shape="rect" id="Node000005" href="$d4/d1c/fl_2gfx_2colorutils_8h_a4ab605f27e67edf3cf9bd320c55042de.html#a4ab605f27e67edf3cf9bd320c55042de" title=" " alt="" coords="5,104,176,129"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="210,119,176,119,176,114,210,114"/>
+</map>

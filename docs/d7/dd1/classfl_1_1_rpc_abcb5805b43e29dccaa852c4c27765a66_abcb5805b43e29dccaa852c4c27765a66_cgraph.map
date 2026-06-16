@@ -1,0 +1,16 @@
+<map id="fl::Rpc::bind" name="fl::Rpc::bind">
+<area shape="rect" id="Node000001" title="Bind a method with configuration (name, function, optional metadata)." alt="" coords="5,104,104,129"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="25,105,18,96,22,86,34,80,55,77,80,81,90,90,87,94,77,86,55,83,36,85,26,89,23,95,29,102"/>
+<area shape="rect" id="Node000002" href="$d7/dd1/classfl_1_1_rpc_a4178792373064445ef93bf68a2769ac3.html#a4178792373064445ef93bf68a2769ac3" title=" " alt="" coords="152,104,321,129"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="104,114,138,114,138,119,104,119"/>
+<area shape="rect" id="Node000003" href="$d4/dad/classfl_1_1vector__basic_af188bd6e2b911e1127f3ef37b4b90143.html#af188bd6e2b911e1127f3ef37b4b90143" title=" " alt="" coords="369,5,540,31"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="256,101,306,71,368,40,388,32,390,37,370,44,308,76,259,106"/>
+<area shape="rect" id="Node000004" href="$da/da2/structfl_1_1detail_1_1_type_tag_adeda59a82d61221269f0b05102f4f465.html#adeda59a82d61221269f0b05102f4f465" title=" " alt="" coords="377,55,532,80"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="293,101,384,80,385,86,294,107"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="392,104,517,129"/>
+<area shape="poly" id="edge5_Node000002_Node000005" title=" " alt="" coords="322,114,378,114,378,119,322,119"/>
+<area shape="rect" id="Node000006" href="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a" title=" " alt="" coords="409,153,500,179"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="294,127,397,150,396,155,293,132"/>
+<area shape="rect" id="Node000007" href="$d7/dd1/classfl_1_1_rpc_a45e46f891a39a9fbda98172dd0a0f2c8.html#a45e46f891a39a9fbda98172dd0a0f2c8" title="Returns list of unique tags used across all methods." alt="" coords="405,203,504,228"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="259,127,309,157,370,188,393,196,391,201,368,192,306,161,256,132"/>
+</map>

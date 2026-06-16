@@ -1,0 +1,18 @@
+<map id="fl/build/fl.system.sd+.cpp" name="fl/build/fl.system.sd+.cpp">
+<area shape="rect" id="Node000001" title="Unity build entry&#45;point for SD&#45;card support, split out of fl.system+.cpp so the linker can drop the e..." alt="" coords="77,5,263,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,132,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="155,33,98,73,95,68,152,28"/>
+<area shape="rect" id="Node000003" href="$d2/de0/arduino_8h.html" title=" " alt="" coords="83,159,230,185"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="172,31,162,146,156,146,166,30"/>
+<area shape="rect" id="Node000005" href="$d7/d3b/fl_2system_2sd_2__build_8cpp_8hpp.html" title="Unity&#45;build aggregate for SD&#45;card support." alt="" coords="232,79,431,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="197,28,294,71,291,75,195,33"/>
+<area shape="rect" id="Node000004" href="$da/d99/has__include_8h.html" title=" " alt="" coords="88,240,231,265"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="160,185,161,226,156,226,154,185"/>
+<area shape="rect" id="Node000006" href="$d9/d55/file__system__sd_8cpp_8hpp.html" title="SD&#45;card support split off from file_system.cpp.hpp so the linker can tree&#45;shake the entire SD chain w..." alt="" coords="255,152,435,192"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="336,104,342,138,337,139,331,105"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="301,194,200,237,198,232,299,190"/>
+<area shape="rect" id="Node000007" href="$d6/d8d/file__system_8h.html" title=" " alt="" coords="257,240,430,265"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="347,192,346,226,341,226,342,192"/>
+<area shape="rect" id="Node000087" href="$d7/d7f/log_8h.html" title="Centralized logging categories for FastLED hardware interfaces and subsystems." alt="" coords="454,240,545,265"/>
+<area shape="poly" id="edge8_Node000006_Node000087" title=" " alt="" coords="383,190,466,231,463,236,381,194"/>
+</map>

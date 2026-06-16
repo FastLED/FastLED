@@ -1,0 +1,12 @@
+<map id="fl::audio::detector::DropDetector::DropDetector" name="fl::audio::detector::DropDetector::DropDetector">
+<area shape="rect" id="Node000001" title=" " alt="" coords="547,49,759,89"/>
+<area shape="rect" id="Node000002" href="$d9/d17/classfl_1_1audio_1_1detector_1_1_drop_detector_a6eef43f1fab35730485fe06bc6c4d6af.html#a6eef43f1fab35730485fe06bc6c4d6af" title=" " alt="" coords="276,5,499,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="533,52,499,46,499,41,534,47"/>
+<area shape="rect" id="Node000003" href="$d9/d17/classfl_1_1audio_1_1detector_1_1_drop_detector_a0c5baca6665a65b4868979c3332d066c.html#a0c5baca6665a65b4868979c3332d066c" title=" " alt="" coords="302,93,473,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="534,92,473,102,472,97,533,87"/>
+<area shape="poly" id="edge5_Node000003_Node000003" title=" " alt="" coords="432,82,417,75,387,72,362,74,346,79,341,85,343,92,338,94,335,84,343,74,361,69,387,67,418,69,435,77"/>
+<area shape="rect" id="Node000004" href="$d9/d17/classfl_1_1audio_1_1detector_1_1_drop_detector_a38e5d37d6e9906826496d7a2b98db502.html#a38e5d37d6e9906826496d7a2b98db502" title=" " alt="" coords="5,61,228,101"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="288,104,228,97,229,92,289,99"/>
+<area shape="rect" id="Node000005" href="$d9/d17/classfl_1_1audio_1_1detector_1_1_drop_detector_a79a8ab0e5caa6a2e14be1c3d48c92ee9.html#a79a8ab0e5caa6a2e14be1c3d48c92ee9" title=" " alt="" coords="31,125,202,165"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="289,128,203,138,202,133,288,122"/>
+</map>

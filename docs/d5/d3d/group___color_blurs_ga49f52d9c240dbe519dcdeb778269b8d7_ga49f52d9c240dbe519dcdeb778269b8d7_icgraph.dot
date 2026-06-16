@@ -1,0 +1,21 @@
+digraph "fl::gfx::blur1d"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::gfx::blur1d",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="One-dimensional blur filter (span version)."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::blur1d",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a9ba8dac69d028c66791e7a41cb42ac32.html#a9ba8dac69d028c66791e7a41cb42ac32",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::blur1d",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aed9da76a781c194392d591b3391d46f2.html#aed9da76a781c194392d591b3391d46f2",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::Particles1d::draw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d56/classfl_1_1_particles1d_ae4b5b0ed1b20858b9163be36f36688df.html#ae4b5b0ed1b20858b9163be36f36688df",tooltip="Update and render all particles with overdraw technique."];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::Particles1d::~Particles1d",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d56/classfl_1_1_particles1d_a0ab18e3c3466b08f858365be64e9bc35.html#a0ab18e3c3466b08f858365be64e9bc35",tooltip=" "];
+  Node4 -> Node4 [id="edge5_Node000004_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node6 [id="edge6_Node000001_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::gfx::blur1d",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d3d/group___color_blurs_ga29828f754440c8e5c261920f6863adb1.html#ga29828f754440c8e5c261920f6863adb1",tooltip="Legacy raw-pointer version of blur1d."];
+}

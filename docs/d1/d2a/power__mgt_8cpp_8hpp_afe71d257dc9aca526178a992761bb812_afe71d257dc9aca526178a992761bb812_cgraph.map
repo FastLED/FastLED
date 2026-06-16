@@ -1,0 +1,5 @@
+<map id="gPowerModel" name="gPowerModel">
+<area shape="rect" id="Node000001" title="Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)" alt="" coords="5,5,116,31"/>
+<area shape="rect" id="Node000002" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="164,5,327,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="116,15,150,15,150,21,116,21"/>
+</map>

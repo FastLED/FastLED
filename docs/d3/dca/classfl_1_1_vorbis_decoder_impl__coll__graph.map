@@ -1,0 +1,29 @@
+<map id="fl::VorbisDecoderImpl" name="fl::VorbisDecoderImpl">
+<area shape="rect" id="Node000001" title=" " alt="" coords="253,387,415,412"/>
+<area shape="rect" id="Node000002" href="$da/df9/classfl_1_1_stb_vorbis_decoder.html" title=" " alt="" coords="5,299,159,324"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="123,327,212,360,292,384,290,389,210,365,121,332"/>
+<area shape="rect" id="Node000003" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="183,299,325,324"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="276,333,303,361,325,384,321,388,299,364,272,336"/>
+<area shape="rect" id="Node000004" href="$d4/dad/classfl_1_1vector__basic.html" title="Type&#45;erased vector base class." alt="" coords="266,93,386,119"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="305,131,280,161,258,197,247,235,249,274,253,298,248,299,243,275,241,234,253,195,275,157,301,127"/>
+<area shape="rect" id="Node000007" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="267,203,385,229"/>
+<area shape="poly" id="edge7_Node000007_Node000004" title=" " alt="" coords="329,132,329,203,323,203,323,132"/>
+<area shape="rect" id="Node000008" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="349,299,495,324"/>
+<area shape="poly" id="edge9_Node000008_Node000004" title=" " alt="" coords="349,127,393,183,413,220,426,260,426,298,421,298,421,260,408,222,388,186,345,130"/>
+<area shape="rect" id="Node000005" href="$db/d13/classfl_1_1memory__resource.html" title="Polymorphic memory resource base class (PMR&#45;style)." alt="" coords="81,5,237,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="194,35,255,67,303,91,301,95,253,72,192,40"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl.html#d8/d72/structfl_1_1vector__element__ops" title="Function pointer table for type&#45;specific element operations." alt="" coords="262,5,433,31"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="344,45,332,93,326,92,339,43"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="283,237,269,248,258,261,253,280,254,298,249,299,247,279,253,259,265,244,280,233"/>
+<area shape="poly" id="edge10_Node000008_Node000007" title=" " alt="" coords="336,240,343,257,355,273,371,286,390,296,388,301,368,291,351,277,339,260,331,243"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="403,336,375,365,349,388,345,384,371,361,400,332"/>
+<area shape="rect" id="Node000009" href="$d2/db2/classfl_1_1string.html" title=" " alt="" coords="522,299,597,324"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="534,334,479,365,439,379,399,389,398,384,438,374,477,360,531,330"/>
+<area shape="rect" id="Node000010" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="479,196,645,236"/>
+<area shape="poly" id="edge12_Node000009_Node000010" title=" " alt="" coords="564,249,562,298,557,298,558,249"/>
+<area shape="rect" id="Node000011" href="$de/d66/classfl_1_1basic__string.html" title="Concrete type&#45;erased string class." alt="" coords="509,5,625,31"/>
+<area shape="poly" id="edge13_Node000010_Node000011" title=" " alt="" coords="564,44,557,94,557,149,562,195,556,196,551,149,551,93,559,44"/>
+<area shape="rect" id="Node000012" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="566,93,697,119"/>
+<area shape="poly" id="edge15_Node000012_Node000011" title=" " alt="" coords="586,40,625,91,620,94,582,43"/>
+<area shape="poly" id="edge14_Node000010_Node000012" title=" " alt="" coords="619,132,576,197,572,194,614,129"/>
+</map>

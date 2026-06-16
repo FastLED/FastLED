@@ -1,0 +1,11 @@
+digraph "fl::priority_queue_stable&lt; T, Compare &gt;"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl::priority_queue\l_stable\< T, Compare \>",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Stable priority queue that maintains FIFO ordering for equal-priority elements."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::net::RpcScheduler\l::ScheduledTask \>",fontcolor="grey" ];
+  Node2 [id="Node000002",label="fl::priority_queue\l_stable\< fl::net::RpcScheduler\l::ScheduledTask \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/dfa/classfl_1_1priority__queue__stable.html",tooltip=" "];
+}

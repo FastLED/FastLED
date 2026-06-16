@@ -1,0 +1,16 @@
+<map id="fl::SerialPort::readBytesUntil" name="fl::SerialPort::readBytesUntil">
+<area shape="rect" id="Node000001" title="Read bytes until delimiter is found." alt="" coords="5,85,180,125"/>
+<area shape="rect" id="Node000002" href="$de/d67/classfl_1_1_serial_port_ab121e35dbb39bd8a3ff0b9cc9af8e96a.html#ab121e35dbb39bd8a3ff0b9cc9af8e96a" title="Check how many bytes are available to read." alt="" coords="228,5,397,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="132,82,227,40,249,32,250,37,229,44,134,87"/>
+<area shape="rect" id="Node000004" href="$d6/daf/direct_8h_a1ddd0aa76a31f81b55f0ffccc1f3d4de.html#a1ddd0aa76a31f81b55f0ffccc1f3d4de" title=" " alt="" coords="281,55,344,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="180,87,267,72,268,77,181,92"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="275,128,350,153"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="181,116,262,130,261,135,180,122"/>
+<area shape="rect" id="Node000006" href="$de/d67/classfl_1_1_serial_port_aed1374fc28e70820bc39430f7a16940e.html#aed1374fc28e70820bc39430f7a16940e" title="Read next byte from serial input." alt="" coords="243,177,382,203"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="136,122,229,162,254,171,252,176,227,167,134,127"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a01186a22a1055c583d5408c116c84ffa.html#a01186a22a1055c583d5408c116c84ffa" title=" " alt="" coords="445,5,544,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="397,15,431,15,431,21,397,21"/>
+<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="283,129,276,120,280,110,292,104,313,101,338,105,348,114,345,118,335,110,313,107,294,109,284,113,281,119,287,126"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a18e7608a302c3628c24710b27480641b.html#a18e7608a302c3628c24710b27480641b" title=" " alt="" coords="461,177,528,203"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="382,187,448,187,448,193,382,193"/>
+</map>

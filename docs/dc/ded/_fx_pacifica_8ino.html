@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: /home/runner/work/FastLED/FastLED/examples/FxPacifica/FxPacifica.ino File Reference</title>
+<title>FastLED: /home/runner/work/FastLED/FastLED/examples/Fx/FxPacifica/FxPacifica.ino File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -102,18 +102,18 @@ $(function(){initNavTree('dc/ded/_fx_pacifica_8ino.html','../../'); initResizabl
 <div class="header">
   <div class="summary">
 <a href="#define-members">Macros</a> &#124;
-<a href="#func-members">Functions</a>  </div>
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle"><div class="title">FxPacifica.ino File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Pacifica ocean effect with ScreenMap. </p>
+<div class="textblock"><p>Pacifica ocean effect with <a class="el" href="../../d2/d78/classfl_1_1_screen_map.html">fl::ScreenMap</a>. </p>
 
 <p class="definition">Definition in file <a class="el" href="../../dc/ded/_fx_pacifica_8ino_source.html">FxPacifica.ino</a>.</p>
-</div><div class="textblock"><code>#include &lt;<a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html">FastLED.h</a>&gt;</code><br />
-<code>#include &quot;<a class="el" href="../../dc/d70/pacifica_8h_source.html">fx/1d/pacifica.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d7/d97/screenmap_8h_source.html">fl/screenmap.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d0/d7a/_fx_pacifica_2defs_8h_source.html">defs.h</a>&quot;</code><br />
+</div><div class="textblock"><code>#include &lt;FastLED.h&gt;</code><br />
+<code>#include &quot;<a class="el" href="../../dc/d70/pacifica_8h_source.html">fl/fx/1d/pacifica.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d7/d97/screenmap_8h_source.html">fl/math/screenmap.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for FxPacifica.ino:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -126,8 +126,16 @@ $(function(){initNavTree('dc/ded/_fx_pacifica_8ino.html','../../'); initResizabl
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a8b8054ea110c568ca88b250762ae4af9" id="r_a8b8054ea110c568ca88b250762ae4af9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/ded/_fx_pacifica_8ino_a8b8054ea110c568ca88b250762ae4af9.html#a8b8054ea110c568ca88b250762ae4af9">FASTLED_ALLOW_INTERRUPTS</a>&#160;&#160;&#160;0</td></tr>
-<tr class="separator:a8b8054ea110c568ca88b250762ae4af9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a00c9e5e8fdc981fc21a1e82e722980b2" id="r_a00c9e5e8fdc981fc21a1e82e722980b2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/ded/_fx_pacifica_8ino_a00c9e5e8fdc981fc21a1e82e722980b2.html#a00c9e5e8fdc981fc21a1e82e722980b2">COLOR_ORDER</a>&#160;&#160;&#160;<a class="el" href="../../db/d07/eorder_8h_a61ef4a09022f540ce448c547ad15ee6a.html#a61ef4a09022f540ce448c547ad15ee6a">GRB</a></td></tr>
+<tr class="separator:a00c9e5e8fdc981fc21a1e82e722980b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adad67fe595ea440c8f8247ec2cddf070" id="r_adad67fe595ea440c8f8247ec2cddf070"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/ded/_fx_pacifica_8ino_adad67fe595ea440c8f8247ec2cddf070.html#adad67fe595ea440c8f8247ec2cddf070">DATA_PIN</a>&#160;&#160;&#160;3</td></tr>
+<tr class="separator:adad67fe595ea440c8f8247ec2cddf070"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a364dc046543d8ab7d4214120afc9c814" id="r_a364dc046543d8ab7d4214120afc9c814"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/ded/_fx_pacifica_8ino_a364dc046543d8ab7d4214120afc9c814.html#a364dc046543d8ab7d4214120afc9c814">LED_TYPE</a>&#160;&#160;&#160;WS2812B</td></tr>
+<tr class="separator:a364dc046543d8ab7d4214120afc9c814"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a537104a4cb62ea1fc795ec25800df275" id="r_a537104a4cb62ea1fc795ec25800df275"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/ded/_fx_pacifica_8ino_a537104a4cb62ea1fc795ec25800df275.html#a537104a4cb62ea1fc795ec25800df275">MAX_POWER_MILLIAMPS</a>&#160;&#160;&#160;500</td></tr>
+<tr class="separator:a537104a4cb62ea1fc795ec25800df275"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c4ae9a4146ce8d6a5debc90300d9abd" id="r_a4c4ae9a4146ce8d6a5debc90300d9abd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/ded/_fx_pacifica_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>&#160;&#160;&#160;60</td></tr>
+<tr class="separator:a4c4ae9a4146ce8d6a5debc90300d9abd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
@@ -135,6 +143,13 @@ Functions</h2></td></tr>
 <tr class="separator:afe461d27b9c48d5921c00d521181f12f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4fc01d736fe50cf5b977f755b675f11d" id="r_a4fc01d736fe50cf5b977f755b675f11d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/ded/_fx_pacifica_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a> ()</td></tr>
 <tr class="separator:a4fc01d736fe50cf5b977f755b675f11d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a83a59cb1680f896fa1c411261436d4ad" id="r_a83a59cb1680f896fa1c411261436d4ad"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../da/dd6/structfl_1_1_c_r_g_b.html">fl::CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/ded/_fx_pacifica_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a> [<a class="el" href="../../d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>]</td></tr>
+<tr class="separator:a83a59cb1680f896fa1c411261436d4ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e32394d71f573b02f92fd9a6a047ca5" id="r_a3e32394d71f573b02f92fd9a6a047ca5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d2/db2/classfl_1_1_pacifica.html">fl::Pacifica</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/ded/_fx_pacifica_8ino_a3e32394d71f573b02f92fd9a6a047ca5.html#a3e32394d71f573b02f92fd9a6a047ca5">pacifica</a> (<a class="el" href="../../d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>)</td></tr>
+<tr class="separator:a3e32394d71f573b02f92fd9a6a047ca5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -142,8 +157,8 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_4dec6a2b642b823c2c3b9d47706b9e28.html">FxPacifica</a></li><li class="navelem"><a class="el" href="../../dc/ded/_fx_pacifica_8ino.html">FxPacifica.ino</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_e6c43ff3b6655e541cf2b1319207663d.html">Fx</a></li><li class="navelem"><a class="el" href="../../dir_01eb5085481dfc0e74b0dc3529421c72.html">FxPacifica</a></li><li class="navelem"><a class="el" href="../../dc/ded/_fx_pacifica_8ino.html">FxPacifica.ino</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,0 +1,16 @@
+digraph "fl::Rpc::methods"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::Rpc::methods",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Returns flat method array: [[\"name\", \"returnType\", [[\"param1\", \"type1\"], ...]], ....."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::Rpc::schema",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dd1/classfl_1_1_rpc_ac6f18db558acd4d13a36f34f6c26cd2d.html#ac6f18db558acd4d13a36f34f6c26cd2d",tooltip="Returns flat schema document."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::Rpc::handle",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dd1/classfl_1_1_rpc_a16bb9675b8d15f3713e49fbb5a8b05a3.html#a16bb9675b8d15f3713e49fbb5a8b05a3",tooltip="Process a JSON-RPC request."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::Rpc::handle_maybe",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dd1/classfl_1_1_rpc_acfc87927e9e6affe54e4f2861adac5fd.html#acfc87927e9e6affe54e4f2861adac5fd",tooltip="For notifications (no id), returns nullopt."];
+}

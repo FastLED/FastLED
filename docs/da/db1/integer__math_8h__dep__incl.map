@@ -1,0 +1,9 @@
+<map id="fl/math/integer_math.h" name="fl/math/integer_math.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="21,5,192,31"/>
+<area shape="rect" id="Node000002" href="$de/d34/primitives_8h.html" title=" " alt="" coords="38,79,175,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,44,109,79,104,79,104,44"/>
+<area shape="rect" id="Node000003" href="$d8/dd5/gfx_8h.html" title="2D antialiased graphics for LED matrices" alt="" coords="61,152,153,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="109,118,109,152,104,152,104,118"/>
+<area shape="rect" id="Node000004" href="$d9/d2c/_perf_disc_8ino.html" title="Benchmark drawDisc on AVR (32x8 canvas, blend mode)" alt="" coords="5,225,208,280"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="109,191,109,225,104,225,104,191"/>
+</map>

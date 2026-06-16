@@ -8,5 +8,5 @@ digraph "CFastLED::onEndShowLeds"
   rankdir="LR";
   Node1 [id="Node000001",label="CFastLED::onEndShowLeds",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Manually trigger the end show LEDs event."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::EngineEvents::onEndShowLeds",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/dca/classfl_1_1_engine_events_af1bb9a46fdc6694a1b5c87a49c516ae8.html#af1bb9a46fdc6694a1b5c87a49c516ae8",tooltip=" "];
+  Node2 [id="Node000002",label="fl::EngineEvents::onEndShowLeds",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/dca/classfl_1_1_engine_events_a11157d3edc6bca6c80a64c01ca16b1f9.html#a11157d3edc6bca6c80a64c01ca16b1f9",tooltip=" "];
 }

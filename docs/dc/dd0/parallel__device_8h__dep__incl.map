@@ -1,0 +1,9 @@
+<map id="fl/channels/spi/parallel_device.h" name="fl/channels/spi/parallel_device.h">
+<area shape="rect" id="Node000001" title="Parallel GPIO SPI device for 1&#45;32 outputs driven from single data stream." alt="" coords="28,5,196,45"/>
+<area shape="rect" id="Node000002" href="$d7/d37/parallel__device_8cpp_8hpp.html" title=" " alt="" coords="28,93,196,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="115,59,115,93,109,93,109,59"/>
+<area shape="rect" id="Node000003" href="$da/d51/fl_2channels_2spi_2__build_8cpp_8hpp.html" title=" " alt="" coords="5,181,219,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="115,147,115,181,109,181,109,147"/>
+<area shape="rect" id="Node000004" href="$d1/d97/fl_2channels_2__build_8cpp_8hpp.html" title=" " alt="" coords="17,255,207,280"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="115,220,115,255,109,255,109,220"/>
+</map>

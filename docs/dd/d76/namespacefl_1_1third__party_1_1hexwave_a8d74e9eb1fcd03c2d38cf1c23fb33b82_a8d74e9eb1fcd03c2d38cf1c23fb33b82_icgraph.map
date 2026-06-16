@@ -1,0 +1,12 @@
+<map id="fl::third_party::hexwave::free" name="fl::third_party::hexwave::free">
+<area shape="rect" id="Node000001" title=" " alt="" coords="472,37,647,77"/>
+<area shape="rect" id="Node000002" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_ae1d7f1bfbf1e38371ddb8430a353d7bf.html#ae1d7f1bfbf1e38371ddb8430a353d7bf" title="Create and initialize a new HexWaveEngine." alt="" coords="232,5,420,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="458,46,420,41,421,36,458,41"/>
+<area shape="rect" id="Node000004" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_a02ab69db1ef35ecf2336643ebbd4e742.html#a02ab69db1ef35ecf2336643ebbd4e742" title="Destroy a HexWaveEngine and free its resources." alt="" coords="228,69,424,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="458,74,424,79,424,73,458,69"/>
+<area shape="rect" id="Node000003" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_aa3919fa11833cf2e47534f6941a764b1.html#aa3919fa11833cf2e47534f6941a764b1" title="Initialize the hexwave library (DEPRECATED &#45; use hexwave_engine_create)" alt="" coords="5,5,180,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="218,28,180,28,180,23,218,23"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="238,68,165,48,167,43,240,63"/>
+<area shape="rect" id="Node000005" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_ad85887b0f8a194b325e94dce4942c60e.html#ad85887b0f8a194b325e94dce4942c60e" title="Shutdown the hexwave library (DEPRECATED &#45; use hexwave_engine_destroy)" alt="" coords="5,69,180,109"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="214,92,180,92,180,87,214,87"/>
+</map>

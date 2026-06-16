@@ -1,0 +1,15 @@
+<map id="ColorAdjustment::noAdjustment" name="ColorAdjustment::noAdjustment">
+<area shape="rect" id="Node000001" title="the per&#45;channel scale values premixed with brightness." alt="" coords="781,104,1012,129"/>
+<area shape="rect" id="Node000002" href="$d4/df9/_auto_research_test_8cpp_adaf2e23d83d4eb143bb3728848a40c30.html#adaf2e23d83d4eb143bb3728848a40c30" title="Build expected UCS7604 encoded bytes from LED data." alt="" coords="485,60,658,85"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="789,105,658,87,659,82,789,100"/>
+<area shape="rect" id="Node000013" href="$dd/d78/classfl_1_1_u_c_s7604_controller_t_a0b8dc7f2f0f2e0a2ed3461aa905080ea.html#a0b8dc7f2f0f2e0a2ed3461aa905080ea" title=" " alt="" coords="409,110,733,209"/>
+<area shape="poly" id="edge6_Node000001_Node000013" title=" " alt="" coords="786,134,734,141,733,135,786,128"/>
+<area shape="rect" id="Node000003" href="$d4/df9/_auto_research_test_8cpp_aac567188ee44c45d15b20231ecff68c9.html#aac567188ee44c45d15b20231ecff68c9" title=" " alt="" coords="259,35,361,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="471,66,361,55,362,50,471,60"/>
+<area shape="rect" id="Node000012" href="$d4/df9/_auto_research_test_8cpp_ab5d3883aa989a0c1298af1a8a0d2851a.html#ab5d3883aa989a0c1298af1a8a0d2851a" title=" " alt="" coords="275,84,345,109"/>
+<area shape="poly" id="edge5_Node000002_Node000012" title=" " alt="" coords="471,85,345,96,345,91,471,79"/>
+<area shape="rect" id="Node000004" href="$d4/df9/_auto_research_test_8cpp_a4c76939743f62fdeea55c4ec8a3e2a31.html#a4c76939743f62fdeea55c4ec8a3e2a31" title=" " alt="" coords="5,5,211,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="245,41,195,33,196,28,245,35"/>
+<area shape="rect" id="Node000011" href="$d4/df9/_auto_research_test_8cpp_a5acfa3d36f5c1ff77be18eecaedf19b3.html#a5acfa3d36f5c1ff77be18eecaedf19b3" title=" " alt="" coords="5,55,211,95"/>
+<area shape="poly" id="edge4_Node000003_Node000011" title=" " alt="" coords="245,59,211,64,211,58,245,54"/>
+</map>

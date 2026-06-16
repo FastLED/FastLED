@@ -1,0 +1,8 @@
+<map id="fl::audio::detector::MultiBandBeat::configure" name="fl::audio::detector::MultiBandBeat::configure">
+<area shape="rect" id="Node000001" title="Configure the multi&#45;band beat detector." alt="" coords="295,37,489,77"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="437,26,421,19,392,16,366,18,351,23,345,29,348,36,343,38,340,28,348,18,365,13,392,11,423,13,439,21"/>
+<area shape="rect" id="Node000002" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a781a269b8875a67640df514bb50bbff0.html#a781a269b8875a67640df514bb50bbff0" title=" " alt="" coords="11,5,241,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="281,47,241,42,242,37,281,41"/>
+<area shape="rect" id="Node000003" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_ad89f61c68cafd22344ecbfb03e0cd899.html#ad89f61c68cafd22344ecbfb03e0cd899" title=" " alt="" coords="5,69,247,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="281,73,247,77,247,72,281,68"/>
+</map>

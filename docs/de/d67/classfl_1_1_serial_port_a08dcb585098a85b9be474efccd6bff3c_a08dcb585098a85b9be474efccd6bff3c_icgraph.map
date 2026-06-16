@@ -1,0 +1,7 @@
+<map id="fl::SerialPort::peek" name="fl::SerialPort::peek">
+<area shape="rect" id="Node000001" title="Peek at next byte without removing it from buffer." alt="" coords="232,31,373,56"/>
+<area shape="rect" id="Node000002" href="$de/d67/classfl_1_1_serial_port_a591146c4165eaf7b8c3403091ca8722f.html#a591146c4165eaf7b8c3403091ca8722f" title="Parse floating&#45;point number from serial input." alt="" coords="5,5,184,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="218,36,184,32,184,26,219,30"/>
+<area shape="rect" id="Node000003" href="$de/d67/classfl_1_1_serial_port_a81d980e22fa592957c7e16eb3e46226e.html#a81d980e22fa592957c7e16eb3e46226e" title="Parse integer from serial input." alt="" coords="13,55,176,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="219,56,176,61,176,55,218,50"/>
+</map>

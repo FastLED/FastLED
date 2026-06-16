@@ -1,0 +1,59 @@
+digraph "fl::s4x12::raw"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::s4x12::raw",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::s4x12::s4x12",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d65/classfl_1_1s4x12_aa91cf4fd772c856b8d6e2c9adba4e4a2.html#aa91cf4fd772c856b8d6e2c9adba4e4a2",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::s4x12::s4x12",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d65/classfl_1_1s4x12_a6b11acc16636b6cbf9c3f05ad4ea37e9.html#a6b11acc16636b6cbf9c3f05ad4ea37e9",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::s4x12::from_raw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d65/classfl_1_1s4x12_a927570b3467d50c50b3f76ed542d6373.html#a927570b3467d50c50b3f76ed542d6373",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::s4x12::abs",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d65/classfl_1_1s4x12_ac37fd59a54f71a8832a6ba300847f819.html#ac37fd59a54f71a8832a6ba300847f819",tooltip=" "];
+  Node4 -> Node6 [id="edge5_Node000004_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::s4x12::ceil",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d65/classfl_1_1s4x12_afd805b8da1e4dcb62128f725b3f97ba5.html#afd805b8da1e4dcb62128f725b3f97ba5",tooltip=" "];
+  Node4 -> Node7 [id="edge6_Node000004_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::s4x12::cos",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d65/classfl_1_1s4x12_af0bb278c8e8b51da6be717082e7ae3cb.html#af0bb278c8e8b51da6be717082e7ae3cb",tooltip=" "];
+  Node4 -> Node8 [id="edge7_Node000004_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::s4x12::exp2_fp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d65/classfl_1_1s4x12_a217c3677ea3ca4c652dfdfec8e3218f6.html#a217c3677ea3ca4c652dfdfec8e3218f6",tooltip=" "];
+  Node8 -> Node9 [id="edge8_Node000008_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::s4x12::pow",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d65/classfl_1_1s4x12_a0764ccf1238137fe92f5059bfcd2f3f6.html#a0764ccf1238137fe92f5059bfcd2f3f6",tooltip=" "];
+  Node4 -> Node10 [id="edge9_Node000004_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::s4x12::floor",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d65/classfl_1_1s4x12_a8dc0a287bcd4afbad3e8d3fcceaacffd.html#a8dc0a287bcd4afbad3e8d3fcceaacffd",tooltip=" "];
+  Node4 -> Node11 [id="edge10_Node000004_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::s4x12::fract",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d65/classfl_1_1s4x12_ae0d4913b8ab616ecd0e9503bba491f7a.html#ae0d4913b8ab616ecd0e9503bba491f7a",tooltip=" "];
+  Node4 -> Node12 [id="edge11_Node000004_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::s4x12::log2_fp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d65/classfl_1_1s4x12_a0a82e94ccbf79bfb8c1d87673fcc0966.html#a0a82e94ccbf79bfb8c1d87673fcc0966",tooltip=" "];
+  Node12 -> Node9 [id="edge12_Node000012_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 -> Node13 [id="edge13_Node000004_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::s4x12::mod",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d65/classfl_1_1s4x12_a39f8f11ea4dc8ba6ea01a697a43a710d.html#a39f8f11ea4dc8ba6ea01a697a43a710d",tooltip=" "];
+  Node4 -> Node14 [id="edge14_Node000004_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::s4x12::operator*",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d65/classfl_1_1s4x12_a0dfa1c42994a469afa928e9f141557ad.html#a0dfa1c42994a469afa928e9f141557ad",tooltip=" "];
+  Node4 -> Node15 [id="edge15_Node000004_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl::s4x12::operator*",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d65/classfl_1_1s4x12_a0a18bb3f65807bb210f3029a24a158f4.html#a0a18bb3f65807bb210f3029a24a158f4",tooltip=" "];
+  Node4 -> Node16 [id="edge16_Node000004_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::s4x12::operator*",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d65/classfl_1_1s4x12_afe0063e44eb4063e2cbaee63dd3e9433.html#afe0063e44eb4063e2cbaee63dd3e9433",tooltip=" "];
+  Node4 -> Node17 [id="edge17_Node000004_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl::s4x12::operator+",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d65/classfl_1_1s4x12_a3d3f85ac3c6e30abdcbffc32722e1148.html#a3d3f85ac3c6e30abdcbffc32722e1148",tooltip=" "];
+  Node4 -> Node18 [id="edge18_Node000004_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="fl::s4x12::operator-",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d65/classfl_1_1s4x12_a69d569953ef029c12134fe9251f232da.html#a69d569953ef029c12134fe9251f232da",tooltip=" "];
+  Node4 -> Node19 [id="edge19_Node000004_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl::s4x12::operator-",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d65/classfl_1_1s4x12_a31dca78da9c0f5c023ddb6ce0505bfdf.html#a31dca78da9c0f5c023ddb6ce0505bfdf",tooltip=" "];
+  Node4 -> Node20 [id="edge20_Node000004_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="fl::s4x12::operator/",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d65/classfl_1_1s4x12_a6dd35cf238a7a1a2a1e1f34ba2789b78.html#a6dd35cf238a7a1a2a1e1f34ba2789b78",tooltip=" "];
+  Node4 -> Node21 [id="edge21_Node000004_Node000021",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node21 [id="Node000021",label="fl::s4x12::operator\>\>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d65/classfl_1_1s4x12_a45432899afbfe3b461287f76a3c08b8b.html#a45432899afbfe3b461287f76a3c08b8b",tooltip=" "];
+  Node4 -> Node22 [id="edge22_Node000004_Node000022",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node22 [id="Node000022",label="fl::s4x12::rsqrt",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d65/classfl_1_1s4x12_a703ec77a8e39df6afc70dcc399556d7f.html#a703ec77a8e39df6afc70dcc399556d7f",tooltip=" "];
+  Node4 -> Node23 [id="edge23_Node000004_Node000023",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node23 [id="Node000023",label="fl::s4x12::sin",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d65/classfl_1_1s4x12_a27de51cd7343382a2b0e0a6311842542.html#a27de51cd7343382a2b0e0a6311842542",tooltip=" "];
+  Node4 -> Node24 [id="edge24_Node000004_Node000024",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node24 [id="Node000024",label="fl::s4x12::sincos",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d65/classfl_1_1s4x12_acad7769ca418d2e2ddd2602fcaa41fdb.html#acad7769ca418d2e2ddd2602fcaa41fdb",tooltip=" "];
+  Node4 -> Node25 [id="edge25_Node000004_Node000025",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node25 [id="Node000025",label="fl::s4x12::sqrt",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d65/classfl_1_1s4x12_afad7f3bccc6a97b51c309bc2b8899dde.html#afad7f3bccc6a97b51c309bc2b8899dde",tooltip=" "];
+}

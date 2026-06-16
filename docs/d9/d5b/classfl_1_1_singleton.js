@@ -1,9 +1,9 @@
 var classfl_1_1_singleton =
 [
-    [ "Singleton", "d9/d5b/classfl_1_1_singleton_aed43031a42dbb7f7953ba4d54a70e7fc.html#aed43031a42dbb7f7953ba4d54a70e7fc", null ],
-    [ "Singleton", "d9/d5b/classfl_1_1_singleton_a9385dd1f2766d7bf40f320e4afe7562e.html#a9385dd1f2766d7bf40f320e4afe7562e", null ],
-    [ "~Singleton", "d9/d5b/classfl_1_1_singleton_ac5b679e18b2f213a947babbc63351027.html#ac5b679e18b2f213a947babbc63351027", null ],
-    [ "instance", "d9/d5b/classfl_1_1_singleton_a7e65fe8dee6b2a23a8b6138fa2c274cb.html#a7e65fe8dee6b2a23a8b6138fa2c274cb", null ],
-    [ "instanceRef", "d9/d5b/classfl_1_1_singleton_a49a566d80175a2bb489b18927d97bc68.html#a49a566d80175a2bb489b18927d97bc68", null ],
-    [ "operator=", "d9/d5b/classfl_1_1_singleton_a8ad847df235828cdd348c5ccea8f91c7.html#a8ad847df235828cdd348c5ccea8f91c7", null ]
+    [ "Singleton", "d9/d5b/classfl_1_1_singleton_a3650a4249a0dc51b7495de5f38a6bb5a.html#a3650a4249a0dc51b7495de5f38a6bb5a", null ],
+    [ "Singleton", "d9/d5b/classfl_1_1_singleton_a7e782111b47a71efa34a70fce0015bac.html#a7e782111b47a71efa34a70fce0015bac", null ],
+    [ "~Singleton", "d9/d5b/classfl_1_1_singleton_aaf2cc37a163358b36924706d9a4b5ae2.html#aaf2cc37a163358b36924706d9a4b5ae2", null ],
+    [ "instance", "d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01", null ],
+    [ "instanceRef", "d9/d5b/classfl_1_1_singleton_ae9089c8bb4b9670dd0ecbc3590ce676d.html#ae9089c8bb4b9670dd0ecbc3590ce676d", null ],
+    [ "operator=", "d9/d5b/classfl_1_1_singleton_a572206cdc3e070ba2262ec25910018bd.html#a572206cdc3e070ba2262ec25910018bd", null ]
 ];

@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::scoped_array\< T,\l Deleter \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d92/classfl_1_1scoped__array.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::detail::ScaledPixelIterator\lRGBWW",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/df9/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b_w_w.html",tooltip="Input iterator adapter yielding 5-byte RGBWW pixels (issue #2558)."];
 }

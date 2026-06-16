@@ -12,5 +12,9 @@ digraph "fl::x_linear"
   Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fl::XMap::convertToLookUp\lTable",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d6c/classfl_1_1_x_map_a04e4862b857692b252a94614a9981b92.html#a04e4862b857692b252a94614a9981b92",tooltip=" "];
   Node2 -> Node4 [id="edge3_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::XMap::operator()",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d6c/classfl_1_1_x_map_a70126c0667d5f8c1a1580b2ee4752797.html#a70126c0667d5f8c1a1580b2ee4752797",tooltip=" "];
+  Node4 [id="Node000004",label="fl::XYMap::fromXMap",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dce/classfl_1_1_x_y_map_a7bd487e461514cf6527b4072d2a0233b.html#a7bd487e461514cf6527b4072d2a0233b",tooltip="Create an XYMap from an XMap (treats 1D as 2D with height=1)"];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::Channel::setScreenMap",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d8b/classfl_1_1_channel_acfb78f07c618a1248db6c4fbbed5e408.html#acfb78f07c618a1248db6c4fbbed5e408",tooltip="Set screen map for 1D strip remapping from XMap."];
+  Node2 -> Node6 [id="edge5_Node000002_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::XMap::operator()",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d6c/classfl_1_1_x_map_a70126c0667d5f8c1a1580b2ee4752797.html#a70126c0667d5f8c1a1580b2ee4752797",tooltip=" "];
 }

@@ -1,7 +1,19 @@
 <map id="CFastLED::delay" name="CFastLED::delay">
-<area shape="rect" id="Node000001" title="Delay for the given number of milliseconds." alt="" coords="5,29,132,55"/>
-<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="40,31,34,21,37,11,49,5,69,3,93,6,103,15,99,19,90,11,69,8,50,10,41,15,39,20,44,28"/>
-<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_a3adb23ec5f919524928d576002cb45de.html#a3adb23ec5f919524928d576002cb45de" title="Update all our controllers with the current led colors." alt="" coords="180,29,304,55"/>
-<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="132,39,166,39,166,45,132,45"/>
-<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="213,31,207,21,210,11,222,5,242,3,266,6,276,15,272,19,264,11,242,8,224,10,214,15,212,20,218,28"/>
+<area shape="rect" id="Node000001" title="Delay for the given number of milliseconds." alt="" coords="5,117,132,143"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27" title="Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all..." alt="" coords="205,29,279,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="94,115,203,59,205,63,96,120"/>
+<area shape="rect" id="Node000026" href="$d4/d36/namespacefl_ac8bfd7357d354c16311ece7e62e08901.html#ac8bfd7357d354c16311ece7e62e08901" title="Yield to the platform scheduler." alt="" coords="697,55,768,80"/>
+<area shape="poly" id="edge10_Node000001_Node000026" title=" " alt="" coords="132,121,180,117,683,69,684,74,180,122,132,127"/>
+<area shape="rect" id="Node000022" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="205,155,279,180"/>
+<area shape="poly" id="edge6_Node000001_Node000022" title=" " alt="" coords="129,140,192,154,191,159,128,145"/>
+<area shape="rect" id="Node000028" href="$dd/dbb/class_c_fast_l_e_d_a3adb23ec5f919524928d576002cb45de.html#a3adb23ec5f919524928d576002cb45de" title="Update all our controllers with the current led colors." alt="" coords="180,228,304,253"/>
+<area shape="poly" id="edge8_Node000001_Node000028" title=" " alt="" coords="91,140,211,218,208,223,88,145"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="213,31,207,21,210,11,222,5,242,3,266,6,276,15,272,19,264,11,242,8,224,10,214,15,212,20,218,28"/>
+<area shape="rect" id="Node000003" href="$df/d9e/namespacefl_1_1detail_abd6e1e8189dbbbf28d720923205bd0dd.html#abd6e1e8189dbbbf28d720923205bd0dd" title="Internal delay implementation used by the public fl::delay wrapper." alt="" coords="352,29,507,55"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="279,39,338,39,338,45,279,45"/>
+<area shape="rect" id="Node000004" href="$db/d5c/namespacefl_1_1task_a2d40b476742263a3fa212e24b722e3ef.html#a2d40b476742263a3fa212e24b722e3ef" title="Run selected task subsystems." alt="" coords="555,29,649,55"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="507,39,541,39,541,45,507,45"/>
+<area shape="poly" id="edge5_Node000004_Node000026" title=" " alt="" coords="650,49,685,55,683,61,649,54"/>
+<area shape="poly" id="edge7_Node000022_Node000022" title=" " alt="" coords="213,156,207,146,210,137,222,130,242,128,266,132,276,140,272,144,264,136,242,133,224,135,214,140,212,146,218,153"/>
+<area shape="poly" id="edge9_Node000028_Node000028" title=" " alt="" coords="213,229,207,220,210,210,222,204,242,201,266,205,276,214,272,218,264,210,242,207,224,209,214,213,212,219,218,226"/>
 </map>

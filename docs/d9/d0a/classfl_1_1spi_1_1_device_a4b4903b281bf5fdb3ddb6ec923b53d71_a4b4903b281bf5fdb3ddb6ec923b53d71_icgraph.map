@@ -1,0 +1,5 @@
+<map id="fl::spi::Device::transmit" name="fl::spi::Device::transmit">
+<area shape="rect" id="Node000001" title="Transmit from previously acquired DMA buffer." alt="" coords="244,5,417,31"/>
+<area shape="rect" id="Node000002" href="$d9/d0a/classfl_1_1spi_1_1_device_a2242937ce5772a2fe9ba38632c000cc0.html#a2242937ce5772a2fe9ba38632c000cc0" title="Begin asynchronous write operation (returns immediately)" alt="" coords="5,5,196,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="230,21,196,21,196,15,230,15"/>
+</map>

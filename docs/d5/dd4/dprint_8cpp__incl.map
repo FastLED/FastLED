@@ -2,6 +2,11 @@
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,5,276,60"/>
 <area shape="rect" id="Node000002" href="$df/d29/dprint_8h.html" title=" " alt="" coords="105,108,177,133"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="143,60,143,94,138,94,138,60"/>
-<area shape="rect" id="Node000003" href="$d8/d4b/unused_8h.html" title=" " alt="" coords="94,181,187,207"/>
+<area shape="rect" id="Node000003" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="53,181,228,207"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="143,134,143,168,138,168,138,134"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="53,328,228,353"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="139,208,126,255,127,286,134,314,129,316,121,286,121,254,134,206"/>
+<area shape="rect" id="Node000005" href="$d1/ddf/align_8h.html" title="Alignment macros and utilities for FastLED." alt="" coords="135,255,234,280"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="150,206,173,242,168,244,146,208"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="180,282,157,318,153,315,175,279"/>
 </map>

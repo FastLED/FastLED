@@ -1,0 +1,15 @@
+<map id="platforms.cpp.hpp" name="platforms.cpp.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="85,5,225,31"/>
+<area shape="rect" id="Node000002" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="131,79,305,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,29,201,66,197,70,164,33"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,225,180,251"/>
+<area shape="poly" id="edge7_Node000001_Node000003" title=" " alt="" coords="148,32,134,54,120,80,110,115,103,150,96,212,91,211,98,150,105,113,116,78,129,51,144,29"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="210,106,114,217,110,213,206,103"/>
+<area shape="rect" id="Node000004" href="$d1/ddf/align_8h.html" title="Alignment macros and utilities for FastLED." alt="" coords="203,152,302,177"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="226,103,243,138,239,141,221,106"/>
+<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="228,180,132,222,130,217,226,175"/>
+<area shape="rect" id="Node000005" href="$d7/d84/cstddef_8h.html" title=" " alt="" coords="204,225,317,251"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="257,177,261,212,255,212,251,178"/>
+<area shape="rect" id="Node000006" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="341,225,468,251"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="278,175,369,217,367,222,276,180"/>
+</map>

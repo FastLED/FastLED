@@ -1,0 +1,8 @@
+<map id="fl::ScopedWatchdog::ScopedWatchdog" name="fl::ScopedWatchdog::ScopedWatchdog">
+<area shape="rect" id="Node000001" title="Default construct with the library default timeout (15 000 ms)." alt="" coords="203,37,352,77"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="311,26,299,19,277,16,258,18,247,23,243,29,245,36,240,38,238,28,244,19,257,13,277,11,301,14,313,21"/>
+<area shape="rect" id="Node000002" href="$d7/d76/classfl_1_1_scoped_watchdog_a74a86278827eda60b756cf5e936cd8ed.html#a74a86278827eda60b756cf5e936cd8ed" title=" " alt="" coords="5,5,155,45"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="189,46,155,40,155,35,190,40"/>
+<area shape="rect" id="Node000003" href="$d7/d76/classfl_1_1_scoped_watchdog_a0b8be193848809bf34fddcd326c21944.html#a0b8be193848809bf34fddcd326c21944" title=" " alt="" coords="5,69,155,109"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="190,74,155,80,155,75,189,69"/>
+</map>

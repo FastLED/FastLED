@@ -1,0 +1,29 @@
+<map id="fl::queue::queue" name="fl::queue::queue">
+<area shape="rect" id="Node000001" title="Default constructor &#45; creates an empty queue." alt="" coords="336,277,463,303"/>
+<area shape="rect" id="Node000002" href="$da/d7f/classfl_1_1queue_a7d4b50a1d5f1f95d562a8333190b7206.html#a7d4b50a1d5f1f95d562a8333190b7206" title="Construct queue with a copy of the given container." alt="" coords="143,5,270,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="391,264,380,216,360,157,330,96,310,68,286,44,269,33,272,28,290,40,314,65,334,93,365,155,385,215,396,263"/>
+<area shape="rect" id="Node000003" href="$da/d7f/classfl_1_1queue_ab0100fe50651e49cf3f03aa5f8850fa6.html#ab0100fe50651e49cf3f03aa5f8850fa6" title="Copy constructor." alt="" coords="143,55,270,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="388,265,375,227,353,180,324,133,286,93,268,82,270,78,290,89,328,130,358,178,379,225,393,263"/>
+<area shape="rect" id="Node000004" href="$da/d7f/classfl_1_1queue_a1648a2a9d49aa72299c5539af416dd95.html#a1648a2a9d49aa72299c5539af416dd95" title="Move constructor." alt="" coords="143,104,270,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="384,266,346,204,319,171,286,143,266,132,268,127,290,138,322,167,350,201,388,263"/>
+<area shape="rect" id="Node000005" href="$da/d7f/classfl_1_1queue_a6fecce96b7c737967a5711286a0d6bd4.html#a6fecce96b7c737967a5711286a0d6bd4" title="Inequality comparison." alt="" coords="128,153,285,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="377,269,337,230,287,192,261,181,263,176,289,188,341,226,381,265"/>
+<area shape="rect" id="Node000006" href="$da/d7f/classfl_1_1queue_a224fc24a685357117af311e5fb8258b7.html#a224fc24a685357117af311e5fb8258b7" title="Less&#45;than comparison (lexicographic)" alt="" coords="131,203,283,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="360,274,287,242,254,231,255,226,289,237,362,269"/>
+<area shape="rect" id="Node000007" href="$da/d7f/classfl_1_1queue_ac65e15b973143c4243c0713a1b53878b.html#ac65e15b973143c4243c0713a1b53878b" title="Less&#45;than&#45;or&#45;equal comparison." alt="" coords="125,252,288,277"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="322,283,288,278,288,273,323,277"/>
+<area shape="rect" id="Node000008" href="$da/d7f/classfl_1_1queue_a683b00b5b97d91629b01acb9f60924d3.html#a683b00b5b97d91629b01acb9f60924d3" title="Copy assignment operator." alt="" coords="131,301,283,327"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="323,302,283,307,283,302,322,297"/>
+<area shape="rect" id="Node000009" href="$da/d7f/classfl_1_1queue_a3ccab3dce0c242f632b0ce1a9bc22895.html#a3ccab3dce0c242f632b0ce1a9bc22895" title="Move assignment operator." alt="" coords="131,351,283,376"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="360,311,289,340,252,353,250,348,287,336,358,306"/>
+<area shape="rect" id="Node000010" href="$da/d7f/classfl_1_1queue_a20443b90faf6477de9d518a530a7a08e.html#a20443b90faf6477de9d518a530a7a08e" title="Equality comparison." alt="" coords="125,400,288,425"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="379,315,340,353,289,390,260,402,258,398,287,385,336,349,376,311"/>
+<area shape="rect" id="Node000011" href="$da/d7f/classfl_1_1queue_ad5c7538c0aee8a4e056219ec2b1eef75.html#ad5c7538c0aee8a4e056219ec2b1eef75" title="Greater&#45;than comparison." alt="" coords="131,449,283,475"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="388,316,350,377,322,410,290,439,265,452,263,447,286,434,318,407,345,374,384,313"/>
+<area shape="rect" id="Node000012" href="$da/d7f/classfl_1_1queue_a6eb4d982395a49fa0f7ca56ad1131187.html#a6eb4d982395a49fa0f7ca56ad1131187" title="Greater&#45;than&#45;or&#45;equal comparison." alt="" coords="125,499,288,524"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="393,317,379,354,358,401,328,448,290,488,268,501,265,496,286,484,324,444,353,398,374,352,388,315"/>
+<area shape="rect" id="Node000013" href="$da/d7f/classfl_1_1queue_a7a195e3499ef988538ef11e39ae8cee2.html#a7a195e3499ef988538ef11e39ae8cee2" title="Swap the contents with another queue." alt="" coords="147,548,267,573"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="396,317,385,364,365,423,334,484,313,512,290,537,268,551,266,546,286,533,309,509,329,481,360,421,380,362,391,316"/>
+<area shape="rect" id="Node000014" href="$d4/d36/namespacefl_ae24e32a84a80f74bc7280dc55f21bedf.html#ae24e32a84a80f74bc7280dc55f21bedf" title="Swap two queues." alt="" coords="5,548,77,573"/>
+<area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="133,563,78,563,78,558,133,558"/>
+</map>

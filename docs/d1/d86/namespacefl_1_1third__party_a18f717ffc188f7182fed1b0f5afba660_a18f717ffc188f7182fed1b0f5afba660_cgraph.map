@@ -1,0 +1,25 @@
+<map id="fl::third_party::nsgif__decode_simple" name="fl::third_party::nsgif__decode_simple">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,101,153,141"/>
+<area shape="rect" id="Node000002" href="$d1/d86/namespacefl_1_1third__party_a3d5b039401750156ae4b525a465c6129.html#a3d5b039401750156ae4b525a465c6129" title="Get any frame clip adjustment for the image extent." alt="" coords="209,5,342,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="116,99,200,55,213,49,216,54,203,60,118,104"/>
+<area shape="rect" id="Node000003" href="$d1/d86/namespacefl_1_1third__party_aa2433d5b202e98c0b70494c87c64a93a.html#aa2433d5b202e98c0b70494c87c64a93a" title="Initialise an LZW decompression context for decoding to colour map values." alt="" coords="205,69,345,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="153,107,191,100,192,106,154,112"/>
+<area shape="rect" id="Node000008" href="$d1/d86/namespacefl_1_1third__party_ae57d83f9ef1abc461a0f89c655c46931.html#ae57d83f9ef1abc461a0f89c655c46931" title="Read LZW codes into client buffer, mapping output to colours." alt="" coords="206,133,345,173"/>
+<area shape="poly" id="edge6_Node000001_Node000008" title=" " alt="" coords="154,131,193,137,192,142,153,136"/>
+<area shape="rect" id="Node000012" href="$d1/d86/namespacefl_1_1third__party_a86a3a8ce601875d7945a9366d954423e.html#a86a3a8ce601875d7945a9366d954423e" title="Convert an LZW result code to equivalent GIF result code." alt="" coords="201,197,349,237"/>
+<area shape="poly" id="edge12_Node000001_Node000012" title=" " alt="" coords="118,139,203,183,216,189,213,194,200,188,116,144"/>
+<area shape="rect" id="Node000004" href="$d1/d86/namespacefl_1_1third__party_a049f11895554e2c4b022cf0a10f2fef1.html#a049f11895554e2c4b022cf0a10f2fef1" title="Initialise an LZW decompression context for decoding." alt="" coords="397,69,536,109"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="346,87,383,87,383,92,346,92"/>
+<area shape="rect" id="Node000005" href="$d1/d86/namespacefl_1_1third__party_ad441e092ef34f474cbcb95ac4382c7ce.html#ad441e092ef34f474cbcb95ac4382c7ce" title="Handle clear code." alt="" coords="585,73,724,113"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="537,88,572,89,571,94,536,93"/>
+<area shape="rect" id="Node000006" href="$d1/d86/namespacefl_1_1third__party_a1e33977161df12579a850d54ef065783.html#a1e33977161df12579a850d54ef065783" title="Get the next LZW code of given size from the raw input data." alt="" coords="773,103,912,143"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="725,102,760,107,760,112,724,107"/>
+<area shape="rect" id="Node000009" href="$d1/d86/namespacefl_1_1third__party_a1652aecb5a36f531062b45a7491ef9a6.html#a1652aecb5a36f531062b45a7491ef9a6" title="Get the next LZW code and write its value(s) to output buffer." alt="" coords="397,133,536,173"/>
+<area shape="poly" id="edge7_Node000008_Node000009" title=" " alt="" coords="345,151,384,151,384,156,345,156"/>
+<area shape="rect" id="Node000011" href="$d1/d86/namespacefl_1_1third__party_a16ae1d8a0920f229ca4e52ec11897efb.html#a16ae1d8a0920f229ca4e52ec11897efb" title="Write colour mapped values for this code to the output." alt="" coords="397,197,536,237"/>
+<area shape="poly" id="edge11_Node000008_Node000011" title=" " alt="" coords="337,171,394,190,393,195,335,176"/>
+<area shape="poly" id="edge8_Node000009_Node000005" title=" " alt="" coords="529,131,577,115,579,120,531,136"/>
+<area shape="poly" id="edge9_Node000009_Node000006" title=" " alt="" coords="536,145,759,127,760,132,536,150"/>
+<area shape="rect" id="Node000010" href="$d1/d86/namespacefl_1_1third__party_ac22256614e544d5cbae5e9dedc4fd1fc.html#ac22256614e544d5cbae5e9dedc4fd1fc" title="Create new table entry." alt="" coords="584,188,725,228"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="537,171,573,182,572,187,535,176"/>
+</map>

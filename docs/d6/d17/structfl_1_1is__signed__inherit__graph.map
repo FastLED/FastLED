@@ -1,19 +1,27 @@
 <map id="fl::is_signed&lt; T &gt;" name="fl::is_signed&lt; T &gt;">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,183,143,208"/>
-<area shape="rect" id="Node000002" href="$d9/d79/structfl_1_1is__signed_3_01double_01_4.html" title=" " alt="" coords="301,5,475,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,169,113,112,137,82,165,57,197,40,232,28,300,16,301,21,233,33,199,45,168,62,140,85,118,114,87,171"/>
-<area shape="rect" id="Node000003" href="$db/d70/structfl_1_1is__signed_3_01float_01_4.html" title=" " alt="" coords="309,55,467,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="93,170,124,139,165,110,200,95,237,84,308,71,309,76,238,89,202,100,168,115,128,143,96,174"/>
-<area shape="rect" id="Node000004" href="$d1/dd5/structfl_1_1is__signed_3_01int_01_4.html" title=" " alt="" coords="315,104,461,129"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="112,175,166,154,242,136,314,123,315,128,243,141,167,159,114,180"/>
-<area shape="rect" id="Node000005" href="$d7/db1/structfl_1_1is__signed_3_01long_01_4.html" title=" " alt="" coords="309,153,467,179"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="156,185,309,171,309,176,157,190"/>
-<area shape="rect" id="Node000006" href="$df/d05/structfl_1_1is__signed_3_01long_01double_01_4.html" title=" " alt="" coords="317,203,459,243"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="157,206,167,207,317,218,316,224,166,213,156,211"/>
-<area shape="rect" id="Node000007" href="$d8/d25/structfl_1_1is__signed_3_01long_01long_01_4.html" title=" " alt="" coords="317,267,459,307"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="111,212,168,237,244,259,317,274,316,279,243,264,166,242,109,217"/>
-<area shape="rect" id="Node000008" href="$d0/d41/structfl_1_1is__signed_3_01short_01_4.html" title=" " alt="" coords="307,332,469,357"/>
-<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="94,217,126,253,168,286,201,303,237,316,307,332,306,338,235,321,199,308,165,291,123,257,90,221"/>
-<area shape="rect" id="Node000009" href="$d0/dcf/structfl_1_1is__signed_3_01signed_01char_01_4.html" title=" " alt="" coords="309,382,467,422"/>
-<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="86,220,98,250,115,285,139,319,168,348,201,367,237,381,310,396,309,401,236,386,199,372,165,352,134,323,111,287,93,252,81,222"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,306,143,331"/>
+<area shape="rect" id="Node000002" href="$d1/d4c/structfl_1_1is__signed_3_01char_01_4.html" title=" " alt="" coords="342,18,499,43"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="73,292,78,241,92,177,104,144,120,112,140,83,165,58,206,34,251,21,298,16,342,17,342,22,298,22,252,27,208,39,168,62,144,86,124,115,109,146,98,179,84,242,79,293"/>
+<area shape="rect" id="Node000003" href="$d8/d5f/structfl_1_1is__signed_3_01const_01_t_01_4.html" title=" " alt="" coords="333,67,509,93"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="77,292,86,252,102,205,128,157,145,136,165,118,204,96,247,81,291,74,332,71,333,77,291,79,248,87,206,100,168,122,149,140,133,160,107,207,91,254,82,293"/>
+<area shape="rect" id="Node000004" href="$db/d2d/structfl_1_1is__signed_3_01const_01volatile_01_t_01_4.html" title=" " alt="" coords="346,117,495,157"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="82,292,113,234,136,204,165,179,209,157,255,143,302,136,346,133,346,138,303,141,257,149,211,162,168,184,140,208,117,237,87,295"/>
+<area shape="rect" id="Node000005" href="$d9/d79/structfl_1_1is__signed_3_01double_01_4.html" title=" " alt="" coords="334,182,507,207"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="93,294,124,263,165,235,207,219,250,207,333,195,334,200,251,212,208,224,168,240,128,267,96,298"/>
+<area shape="rect" id="Node000006" href="$db/d70/structfl_1_1is__signed_3_01float_01_4.html" title=" " alt="" coords="341,231,500,257"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="114,298,166,280,256,261,341,249,341,254,257,266,167,285,116,303"/>
+<area shape="rect" id="Node000007" href="$d1/dd5/structfl_1_1is__signed_3_01int_01_4.html" title=" " alt="" coords="347,281,494,306"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="156,310,347,296,347,301,157,315"/>
+<area shape="rect" id="Node000008" href="$d7/db1/structfl_1_1is__signed_3_01long_01_4.html" title=" " alt="" coords="342,330,499,355"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="143,331,167,335,257,341,342,342,342,347,257,346,166,340,142,336"/>
+<area shape="rect" id="Node000009" href="$df/d05/structfl_1_1is__signed_3_01long_01double_01_4.html" title=" " alt="" coords="349,380,492,420"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="108,336,168,363,262,384,350,394,349,399,261,389,166,368,106,341"/>
+<area shape="rect" id="Node000010" href="$d8/d25/structfl_1_1is__signed_3_01long_01long_01_4.html" title=" " alt="" coords="349,444,492,484"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="94,341,126,377,146,395,168,410,213,429,260,443,349,458,349,463,259,449,211,434,165,414,143,399,122,381,90,345"/>
+<area shape="rect" id="Node000011" href="$d0/d41/structfl_1_1is__signed_3_01short_01_4.html" title=" " alt="" coords="339,509,502,534"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="85,344,97,374,114,410,138,444,168,473,208,494,252,509,297,517,340,521,339,526,297,522,251,514,206,499,165,477,134,448,110,412,92,376,80,346"/>
+<area shape="rect" id="Node000012" href="$d0/dcf/structfl_1_1is__signed_3_01signed_01char_01_4.html" title=" " alt="" coords="342,559,499,599"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="81,345,88,388,104,441,130,494,147,518,168,538,208,561,253,575,299,582,342,583,342,588,298,587,252,580,206,566,165,542,143,521,125,497,99,443,83,389,75,346"/>
+<area shape="rect" id="Node000013" href="$d9/daa/structfl_1_1is__signed_3_01volatile_01_t_01_4.html" title=" " alt="" coords="325,623,516,649"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="78,345,81,400,94,471,105,508,121,543,142,576,168,603,204,625,243,638,285,644,325,645,325,650,284,649,242,643,201,630,165,607,138,579,116,546,100,510,88,472,76,401,72,345"/>
 </map>

@@ -1,0 +1,14 @@
+<map id="fl::audio::Processor::getTransientStrength" name="fl::audio::Processor::getTransientStrength">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,63,171,103"/>
+<area shape="poly" id="edge7_Node000001_Node000001" title=" " alt="" coords="48,64,46,54,52,44,66,39,88,37,113,40,127,47,124,52,111,45,88,42,68,44,55,49,51,55,53,62"/>
+<area shape="rect" id="Node000002" href="$db/dbf/namespacefl_1_1audio_a1cbdb2338ec760ba92ce43fece0713d2.html#a1cbdb2338ec760ba92ce43fece0713d2" title=" " alt="" coords="233,29,371,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="171,65,222,55,223,60,172,70"/>
+<area shape="rect" id="Node000003" href="$d3/d6b/classfl_1_1audio_1_1_processor_a89421c1c88067ad797e89291eace5c3f.html#a89421c1c88067ad797e89291eace5c3f" title=" " alt="" coords="219,103,385,143"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="172,96,206,103,205,108,171,101"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="269,31,262,21,265,11,279,5,302,3,330,6,342,16,338,20,328,11,302,8,280,10,269,15,267,20,273,28"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="264,104,262,94,268,85,281,79,302,77,326,80,339,87,336,92,324,85,302,82,283,84,271,89,267,95,269,102"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="443,81,569,107"/>
+<area shape="poly" id="edge5_Node000003_Node000004" title=" " alt="" coords="385,109,429,102,430,108,386,114"/>
+<area shape="rect" id="Node000005" href="$d3/d6b/classfl_1_1audio_1_1_processor_ade806d07af52e3d281939cebce7643d5.html#ade806d07af52e3d281939cebce7643d5" title=" " alt="" coords="433,131,579,171"/>
+<area shape="poly" id="edge6_Node000003_Node000005" title=" " alt="" coords="386,132,420,137,419,142,385,137"/>
+</map>

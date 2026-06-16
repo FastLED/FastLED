@@ -123,7 +123,27 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_aa48b30165c438b30b06d7edc964
   </dd>
 </dl>
 
-<p class="reference">References <a class="el" href="../../d8/d90/dither__mode_8h_source.html#l00014">BINARY_DITHER</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00407">407</a> of file <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html">FastLED.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  407</span>                                         {</div>
+<div class="line"><span class="lineno">  408</span>    <a class="code hl_typedef" href="../../db/d6d/cled__controller_8h_a5c4c69e67efd8ee1b27833dfef522d6f.html#a5c4c69e67efd8ee1b27833dfef522d6f">CLEDController</a> *pCur = <a class="code hl_function" href="../../d8/da0/classfl_1_1_c_l_e_d_controller_ad9e0dfb8b8b333d9e48c7695b202710c.html#ad9e0dfb8b8b333d9e48c7695b202710c">CLEDController::head</a>();</div>
+<div class="line"><span class="lineno">  409</span>    <span class="keywordflow">while</span>(pCur) {</div>
+<div class="line"><span class="lineno">  410</span>        pCur-&gt;<a class="code hl_function" href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a83f37ea29f9b1009fadddb18c50c30c2.html#a83f37ea29f9b1009fadddb18c50c30c2">setDither</a>(ditherMode);</div>
+<div class="line"><span class="lineno">  411</span>        pCur = pCur-&gt;<a class="code hl_function" href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a87abe437742b3f2b06943fafd4404aef.html#a87abe437742b3f2b06943fafd4404aef">next</a>();</div>
+<div class="line"><span class="lineno">  412</span>    }</div>
+<div class="line"><span class="lineno">  413</span>}</div>
+<div class="ttc" id="aclassfl_1_1_c_l_e_d_controller_a83f37ea29f9b1009fadddb18c50c30c2_html_a83f37ea29f9b1009fadddb18c50c30c2"><div class="ttname"><a href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a83f37ea29f9b1009fadddb18c50c30c2.html#a83f37ea29f9b1009fadddb18c50c30c2">fl::CLEDController::setDither</a></div><div class="ttdeci">CLEDController &amp; setDither(fl::u8 ditherMode=BINARY_DITHER) FL_NOEXCEPT</div><div class="ttdoc">Set the dithering mode for this controller to use.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d9d/fl_2channels_2cled__controller_8h_source.html#l00289">cled_controller.h:289</a></div></div>
+<div class="ttc" id="aclassfl_1_1_c_l_e_d_controller_a87abe437742b3f2b06943fafd4404aef_html_a87abe437742b3f2b06943fafd4404aef"><div class="ttname"><a href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a87abe437742b3f2b06943fafd4404aef.html#a87abe437742b3f2b06943fafd4404aef">fl::CLEDController::next</a></div><div class="ttdeci">CLEDController * next() FL_NOEXCEPT</div><div class="ttdoc">Get the next controller in the linked list after this one.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d9d/fl_2channels_2cled__controller_8h_source.html#l00213">cled_controller.h:213</a></div></div>
+<div class="ttc" id="aclassfl_1_1_c_l_e_d_controller_ad9e0dfb8b8b333d9e48c7695b202710c_html_ad9e0dfb8b8b333d9e48c7695b202710c"><div class="ttname"><a href="../../d8/da0/classfl_1_1_c_l_e_d_controller_ad9e0dfb8b8b333d9e48c7695b202710c.html#ad9e0dfb8b8b333d9e48c7695b202710c">fl::CLEDController::head</a></div><div class="ttdeci">static CLEDController * head() FL_NOEXCEPT</div><div class="ttdoc">Get the first LED controller in the linked list of controllers.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d9d/fl_2channels_2cled__controller_8h_source.html#l00209">cled_controller.h:209</a></div></div>
+<div class="ttc" id="acled__controller_8h_a5c4c69e67efd8ee1b27833dfef522d6f_html_a5c4c69e67efd8ee1b27833dfef522d6f"><div class="ttname"><a href="../../db/d6d/cled__controller_8h_a5c4c69e67efd8ee1b27833dfef522d6f.html#a5c4c69e67efd8ee1b27833dfef522d6f">CLEDController</a></div><div class="ttdeci">fl::CLEDController CLEDController</div><div class="ttdef"><b>Definition</b> <a href="../../db/d6d/cled__controller_8h_source.html#l00010">cled_controller.h:10</a></div></div>
+</div><!-- fragment -->
+<p class="reference">References <a class="el" href="../../d6/d9d/fl_2channels_2cled__controller_8h_source.html#l00209">fl::CLEDController::head()</a>, <a class="el" href="../../d6/d9d/fl_2channels_2cled__controller_8h_source.html#l00213">fl::CLEDController::next()</a>, and <a class="el" href="../../d6/d9d/fl_2channels_2cled__controller_8h_source.html#l00289">fl::CLEDController::setDither()</a>.</p>
+<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dd/dbb/class_c_fast_l_e_d_aa48b30165c438b30b06d7edc964389f2_aa48b30165c438b30b06d7edc964389f2_cgraph.svg" width="100%" height="434"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+</div>
 
 </div>
 </div>
@@ -134,7 +154,7 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_aa48b30165c438b30b06d7edc964
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dd/dbb/class_c_fast_l_e_d.html">CFastLED</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

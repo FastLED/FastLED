@@ -1,0 +1,15 @@
+<map id="fl::gfx::blur2d" name="fl::gfx::blur2d">
+<area shape="rect" id="Node000001" title="Two&#45;dimensional blur filter (span version)." alt="" coords="352,80,460,105"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a2a71d5f71aa7a4e1480ee299b0780c66.html#a2a71d5f71aa7a4e1480ee299b0780c66" title=" " alt="" coords="211,5,289,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="366,76,303,44,279,33,281,28,305,40,369,71"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aca219e4ecfa76d0476e9f553f4066548.html#aca219e4ecfa76d0476e9f553f4066548" title=" " alt="" coords="211,55,289,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="338,84,289,76,290,71,339,79"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a66c80e00f13502a4221ca8632199a4ba.html#a66c80e00f13502a4221ca8632199a4ba" title=" " alt="" coords="211,104,289,129"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="339,106,290,113,289,108,338,100"/>
+<area shape="rect" id="Node000007" href="$d5/d3d/group___color_blurs_ga9d5d40ce297e6a89cb8bd0bcd68f2398.html#ga9d5d40ce297e6a89cb8bd0bcd68f2398" title="Legacy raw&#45;pointer version of blur2d." alt="" coords="196,153,304,179"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="367,114,279,156,277,151,365,109"/>
+<area shape="rect" id="Node000004" href="$dc/d2b/classfl_1_1_blend2d_ad965648c61fd795366282d3b797a612f.html#ad965648c61fd795366282d3b797a612f" title=" " alt="" coords="11,31,142,56"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="197,63,142,55,143,50,197,57"/>
+<area shape="rect" id="Node000005" href="$d4/df2/classfl_1_1_luminova_aa775ddcb74da9d8ae057ac8e4c3c50cc.html#aa775ddcb74da9d8ae057ac8e4c3c50cc" title=" " alt="" coords="5,80,148,105"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="197,78,148,85,148,80,196,72"/>
+</map>

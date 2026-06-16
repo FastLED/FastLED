@@ -1,0 +1,23 @@
+<map id="fl::ChannelManager::EngineEntry" name="fl::ChannelManager::EngineEntry">
+<area shape="rect" id="Node000001" title="Engine registry entry (priority + shared pointer + runtime control)" alt="" coords="1291,101,1439,141"/>
+<area shape="rect" id="Node000002" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="1057,59,1200,99"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1214,91,1291,105,1290,110,1213,97"/>
+<area shape="rect" id="Node000003" href="$d3/da0/classfl_1_1_i_channel_driver.html" title="Minimal interface for LED channel transmission drivers." alt="" coords="711,5,846,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="860,23,944,33,1034,49,1066,57,1064,62,1033,54,943,38,859,28"/>
+<area shape="rect" id="Node000004" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="281,97,480,123"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="494,96,504,95,812,82,1057,77,1057,83,813,87,504,101,494,101"/>
+<area shape="rect" id="Node000007" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="706,119,851,144"/>
+<area shape="poly" id="edge6_Node000007_Node000004" title=" " alt="" coords="494,113,706,125,706,130,493,119"/>
+<area shape="rect" id="Node000005" href="$da/d98/classfl_1_1_atomic_fake.html" title=" " alt="" coords="5,90,141,130"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="155,107,281,107,281,113,155,113"/>
+<area shape="poly" id="edge5_Node000002_Node000007" title=" " alt="" coords="865,122,946,114,1033,101,1057,96,1058,101,1034,106,947,119,865,128"/>
+<area shape="rect" id="Node000008" href="$d2/db2/classfl_1_1string.html" title=" " alt="" coords="1091,136,1166,161"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="1179,144,1266,137,1290,133,1291,138,1267,142,1180,149"/>
+<area shape="rect" id="Node000009" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="696,169,861,209"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="875,175,1091,150,1091,156,875,180"/>
+<area shape="rect" id="Node000010" href="$de/d66/classfl_1_1basic__string.html" title="Concrete type&#45;erased string class." alt="" coords="15,168,131,193"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="145,179,695,185,695,190,145,184"/>
+<area shape="rect" id="Node000011" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="315,208,446,233"/>
+<area shape="poly" id="edge11_Node000011_Node000010" title=" " alt="" coords="145,187,316,210,315,215,145,193"/>
+<area shape="poly" id="edge10_Node000009_Node000011" title=" " alt="" coords="460,223,561,224,672,215,715,206,716,211,672,221,561,229,460,228"/>
+</map>

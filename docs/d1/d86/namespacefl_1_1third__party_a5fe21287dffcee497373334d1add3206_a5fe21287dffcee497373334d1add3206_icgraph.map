@@ -1,0 +1,12 @@
+<map id="fl::third_party::nsgif__frame_next" name="fl::third_party::nsgif__frame_next">
+<area shape="rect" id="Node000001" title=" " alt="" coords="468,49,616,89"/>
+<area shape="rect" id="Node000002" href="$d1/d86/namespacefl_1_1third__party_a969792a3f08da0146abd9e740081ac1c.html#a969792a3f08da0146abd9e740081ac1c" title=" " alt="" coords="227,12,420,52"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="454,57,420,51,421,46,455,52"/>
+<area shape="rect" id="Node000004" href="$d1/d86/namespacefl_1_1third__party_a3f914f8fd903813b728ce719ad8b59c7.html#a3f914f8fd903813b728ce719ad8b59c7" title="Decodes a GIF frame." alt="" coords="249,81,397,121"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="454,85,398,93,397,88,454,80"/>
+<area shape="rect" id="Node000003" href="$d1/d86/namespacefl_1_1third__party_a24141a300abe39176c4bd2d7d32b9e88.html#a24141a300abe39176c4bd2d7d32b9e88" title="Prepare to show a frame." alt="" coords="18,5,166,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="213,31,166,30,166,25,213,26"/>
+<area shape="rect" id="Node000005" href="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_a31562819b41f08828f326096d848ec5b.html#a31562819b41f08828f326096d848ec5b" title=" " alt="" coords="5,93,179,133"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="236,109,179,112,179,106,236,103"/>
+<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="131,82,117,75,92,72,70,74,57,79,52,85,54,92,49,94,47,84,53,74,69,69,92,67,119,70,133,77"/>
+</map>

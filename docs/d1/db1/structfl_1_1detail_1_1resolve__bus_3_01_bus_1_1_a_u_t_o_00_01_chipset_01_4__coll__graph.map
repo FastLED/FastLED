@@ -1,0 +1,5 @@
+<map id="fl::detail::resolve_bus&lt; Bus::AUTO, Chipset &gt;" name="fl::detail::resolve_bus&lt; Bus::AUTO, Chipset &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,108,213,148"/>
+<area shape="rect" id="Node000002" href="$d2/d36/structfl_1_1detail_1_1resolve__bus.html" title="Resolve a possibly&#45;Bus::AUTO template argument to the concrete platform default for the given Chipset..." alt="" coords="35,5,183,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="112,59,112,108,107,108,107,59"/>
+</map>

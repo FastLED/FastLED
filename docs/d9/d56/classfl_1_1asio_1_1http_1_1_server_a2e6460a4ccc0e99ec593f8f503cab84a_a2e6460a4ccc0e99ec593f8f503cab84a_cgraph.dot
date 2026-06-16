@@ -1,0 +1,30 @@
+digraph "fl::asio::http::Server::operator="
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::asio::http::Server\l::operator=",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::asio::http::Server\l::Server",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d56/classfl_1_1asio_1_1http_1_1_server_ab944336362888c8c19a0cfcae9026ee2.html#ab944336362888c8c19a0cfcae9026ee2",tooltip="Constructor."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::asio::http::Server::del",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d56/classfl_1_1asio_1_1http_1_1_server_a03e0db2740982acfce142d4f0096aecb.html#a03e0db2740982acfce142d4f0096aecb",tooltip="Convenience method for DELETE routes."];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::asio::http::Server::get",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d56/classfl_1_1asio_1_1http_1_1_server_a19fb6e075208ce7ee82185055c5bfcca.html#a19fb6e075208ce7ee82185055c5bfcca",tooltip="Convenience method for GET routes."];
+  Node1 -> Node5 [id="edge4_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::asio::http::Server\l::port",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d56/classfl_1_1asio_1_1http_1_1_server_a8bc8035cefb2abccf094735f7a21cad0.html#a8bc8035cefb2abccf094735f7a21cad0",tooltip="Get server port."];
+  Node1 -> Node6 [id="edge5_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::asio::http::Server\l::post",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d56/classfl_1_1asio_1_1http_1_1_server_a945df74a464c313a7611fbfafea05b7b.html#a945df74a464c313a7611fbfafea05b7b",tooltip="Convenience method for POST routes."];
+  Node1 -> Node7 [id="edge6_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::asio::http::Server::put",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d56/classfl_1_1asio_1_1http_1_1_server_a41ffaa19229f0c58dd903d94cbaf4f9d.html#a41ffaa19229f0c58dd903d94cbaf4f9d",tooltip="Convenience method for PUT routes."];
+  Node1 -> Node8 [id="edge7_Node000001_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::asio::http::Server\l::route",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d56/classfl_1_1asio_1_1http_1_1_server_adfc6bcb6bdbe1a41cda52d6cadb0709c.html#adfc6bcb6bdbe1a41cda52d6cadb0709c",tooltip="Register route handler using fl::function."];
+  Node1 -> Node9 [id="edge8_Node000001_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::asio::http::Server\l::start",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d56/classfl_1_1asio_1_1http_1_1_server_ab46b85c6768313ddeb936b839adb472e.html#ab46b85c6768313ddeb936b839adb472e",tooltip="Start server on specified port."];
+  Node1 -> Node10 [id="edge9_Node000001_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::asio::http::Server\l::stop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d56/classfl_1_1asio_1_1http_1_1_server_a9004978f8c566e7336a2385cc4e88c06.html#a9004978f8c566e7336a2385cc4e88c06",tooltip="Stop server and close all connections."];
+  Node1 -> Node11 [id="edge10_Node000001_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::asio::http::Server\l::update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d56/classfl_1_1asio_1_1http_1_1_server_aca75125908d18511118180f21e66b045.html#aca75125908d18511118180f21e66b045",tooltip="Update server (process pending requests non-blocking)"];
+}

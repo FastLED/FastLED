@@ -1,0 +1,7 @@
+<map id="fl::third_party::nsgif_frame" name="fl::third_party::nsgif_frame">
+<area shape="rect" id="Node000001" title="GIF frame data." alt="" coords="21,196,169,236"/>
+<area shape="rect" id="Node000002" href="$d1/d86/namespacefl_1_1third__party.html#d6/d4f/structfl_1_1third__party_1_1nsgif__frame__info" title="Information about a GIF frame." alt="" coords="21,93,169,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="98,147,98,196,93,196,93,147"/>
+<area shape="rect" id="Node000003" href="$d1/d86/namespacefl_1_1third__party.html#d5/d9b/structfl_1_1third__party_1_1nsgif__rect" title="LibNSGIF rectangle structure." alt="" coords="5,5,185,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="98,44,98,93,93,93,93,44"/>
+</map>

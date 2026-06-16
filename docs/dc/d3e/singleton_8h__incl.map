@@ -1,5 +1,28 @@
-<map id="fl/singleton.h" name="fl/singleton.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="13,5,119,31"/>
-<area shape="rect" id="Node000002" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="5,79,127,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="69,31,69,65,63,65,63,31"/>
+<map id="fl/stl/singleton.h" name="fl/stl/singleton.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="252,5,379,31"/>
+<area shape="rect" id="Node000002" href="$d1/ddf/align_8h.html" title="Alignment macros and utilities for FastLED." alt="" coords="163,152,262,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="280,33,245,52,230,64,218,80,209,109,210,139,205,139,204,108,213,77,226,61,242,47,277,28"/>
+<area shape="rect" id="Node000005" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="5,225,132,251"/>
+<area shape="poly" id="edge14_Node000001_Node000005" title=" " alt="" coords="288,33,246,53,204,81,167,114,134,151,86,215,81,212,130,147,164,110,200,77,244,48,285,28"/>
+<area shape="rect" id="Node000006" href="$d7/d58/new_8h.html" title=" " alt="" coords="427,79,519,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="342,28,436,71,434,75,340,33"/>
+<area shape="rect" id="Node000008" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="228,79,403,104"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="318,31,318,65,313,65,313,31"/>
+<area shape="rect" id="Node000009" href="$d8/d7a/thread__local_8h.html" title=" " alt="" coords="543,79,690,104"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="364,28,555,73,554,78,363,33"/>
+<area shape="rect" id="Node000003" href="$d7/d84/cstddef_8h.html" title=" " alt="" coords="156,225,269,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="215,178,215,212,210,212,210,178"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="293,225,468,251"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="241,175,342,217,340,222,239,180"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="191,180,106,221,103,217,188,175"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="409,152,536,177"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="475,104,475,138,470,138,470,104"/>
+<area shape="poly" id="edge9_Node000008_Node000002" title=" " alt="" coords="300,106,242,146,239,142,297,102"/>
+<area shape="poly" id="edge8_Node000008_Node000004" title=" " alt="" coords="323,103,372,212,367,214,318,106"/>
+<area shape="rect" id="Node000010" href="$db/dd5/thread_8h.html" title=" " alt="" coords="563,152,671,177"/>
+<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="619,104,619,138,614,138,614,104"/>
+<area shape="rect" id="Node000011" href="$d5/d5e/thread__config_8h.html" title="Platform detection for FASTLED_MULTITHREADED macro." alt="" coords="690,225,845,251"/>
+<area shape="poly" id="edge12_Node000010_Node000011" title=" " alt="" coords="642,175,731,217,729,222,640,180"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="523,225,665,251"/>
+<area shape="poly" id="edge13_Node000010_Node000013" title=" " alt="" coords="615,178,604,213,599,211,610,177"/>
 </map>

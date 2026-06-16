@@ -1,0 +1,9 @@
+<map id="fl::BindResult&lt; R(Args...)&gt;" name="fl::BindResult&lt; R(Args...)&gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="197,211,391,236"/>
+<area shape="rect" id="Node000002" href="$d7/d93/classfl_1_1expected.html" title=" " alt="" coords="5,108,247,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="173,152,275,208,272,213,170,157"/>
+<area shape="rect" id="Node000003" href="$d7/d93/classfl_1_1expected.html" title="expected type for operations that can fail (C++23&#45;style)" alt="" coords="50,5,202,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="129,45,129,108,123,108,123,45"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl.html#df/d62/structfl_1_1_bind_result" title="Wraps the result of binding to a method by name." alt="" coords="271,115,429,141"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="338,154,303,212,299,209,334,151"/>
+</map>

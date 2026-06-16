@@ -1,5 +1,7 @@
 <map id="fl::istream_real::good" name="fl::istream_real::good">
-<area shape="rect" id="Node000001" title=" " alt="" coords="181,5,341,31"/>
-<area shape="rect" id="Node000002" href="$de/def/classfl_1_1istream_a3f4a7cbba5b114bc12836d437f69b589.html#a3f4a7cbba5b114bc12836d437f69b589" title=" " alt="" coords="5,5,133,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="167,21,133,21,133,15,167,15"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="181,29,341,55"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="295,19,286,11,261,8,241,10,230,15,228,20,234,28,230,31,223,21,226,11,240,5,261,3,288,6,299,15"/>
+<area shape="rect" id="Node000002" href="$de/def/classfl_1_1istream_a3f4a7cbba5b114bc12836d437f69b589.html#a3f4a7cbba5b114bc12836d437f69b589" title=" " alt="" coords="5,29,133,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="167,45,133,45,133,39,167,39"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="103,19,94,11,69,8,49,10,38,15,36,20,42,28,38,31,31,21,34,11,48,5,69,3,96,6,107,15"/>
 </map>

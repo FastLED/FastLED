@@ -1,34 +1,29 @@
 <map id="fl::TwinkleFox::draw" name="fl::TwinkleFox::draw">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,216,156,241"/>
-<area shape="rect" id="Node000002" href="$de/db5/classfl_1_1_twinkle_fox_a67375829d0da55e17d3f74ac9817914d.html#a67375829d0da55e17d3f74ac9817914d" title=" " alt="" coords="204,191,427,216"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="156,218,190,214,191,219,156,223"/>
-<area shape="rect" id="Node000020" href="$d4/d36/namespacefl_ada525b8983539d793931dd074928bacd.html#ada525b8983539d793931dd074928bacd" title=" " alt="" coords="206,240,425,265"/>
-<area shape="poly" id="edge18_Node000001_Node000020" title=" " alt="" coords="156,234,193,237,192,243,156,239"/>
-<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="972,5,1047,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="339,188,399,157,474,124,596,74,651,57,724,41,850,23,958,16,958,22,850,28,724,46,653,63,598,80,476,128,402,162,342,193"/>
-<area shape="rect" id="Node000008" href="$de/db5/classfl_1_1_twinkle_fox_a7b4a385bedd751f63937469cc850ee1a.html#a7b4a385bedd751f63937469cc850ee1a" title=" " alt="" coords="475,138,676,178"/>
-<area shape="poly" id="edge6_Node000002_Node000008" title=" " alt="" coords="388,188,461,175,462,180,389,193"/>
-<area shape="rect" id="Node000017" href="$d7/d82/struct_c_r_g_b_a940908cc69606bdabe3b2d32a9097356.html#a940908cc69606bdabe3b2d32a9097356" title="Get the average of the R, G, and B values." alt="" coords="1095,157,1268,183"/>
-<area shape="poly" id="edge13_Node000002_Node000017" title=" " alt="" coords="427,213,532,221,656,227,790,227,924,219,1027,204,1119,183,1120,189,1028,209,924,225,790,233,656,232,531,226,426,218"/>
-<area shape="rect" id="Node000018" href="$d7/d82/struct_c_r_g_b_af4cad72bcd9b925d527a3af3a8d956e6.html#af4cad72bcd9b925d527a3af3a8d956e6" title="Scale down a RGB to N/256ths of it&#39;s current brightness using &quot;video&quot; dimming rules." alt="" coords="495,285,655,311"/>
-<area shape="poly" id="edge16_Node000002_Node000018" title=" " alt="" coords="393,214,428,226,443,236,453,245,476,264,511,278,509,283,473,268,449,249,439,240,426,231,391,219"/>
-<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6" title=" " alt="" coords="1140,5,1223,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1047,15,1126,15,1126,21,1047,21"/>
-<area shape="rect" id="Node000006" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="1365,107,1463,132"/>
-<area shape="poly" id="edge4_Node000004_Node000006" title=" " alt="" coords="1203,28,1254,59,1317,90,1353,103,1351,108,1315,95,1251,64,1200,33"/>
-<area shape="rect" id="Node000007" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="1316,56,1512,81"/>
-<area shape="poly" id="edge5_Node000004_Node000007" title=" " alt="" coords="1223,24,1342,50,1341,56,1222,29"/>
-<area shape="rect" id="Node000009" href="$de/db5/classfl_1_1_twinkle_fox_a4fe4a588d8419d38c454e35b863a7672.html#a4fe4a588d8419d38c454e35b863a7672" title=" " alt="" coords="724,170,924,210"/>
-<area shape="poly" id="edge7_Node000008_Node000009" title=" " alt="" coords="676,168,711,173,710,178,676,174"/>
-<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="749,56,899,81"/>
-<area shape="poly" id="edge8_Node000008_Node000010" title=" " alt="" coords="617,136,723,91,753,82,755,87,725,97,619,140"/>
-<area shape="rect" id="Node000015" href="$de/db5/classfl_1_1_twinkle_fox_aff3c7b29001c2e1f4f6516e14000b22a.html#aff3c7b29001c2e1f4f6516e14000b22a" title=" " alt="" coords="739,106,909,146"/>
-<area shape="poly" id="edge12_Node000008_Node000015" title=" " alt="" coords="676,142,725,136,725,141,676,148"/>
-<area shape="poly" id="edge9_Node000010_Node000003" title=" " alt="" coords="871,53,958,29,959,34,872,58"/>
-<area shape="poly" id="edge10_Node000010_Node000006" title=" " alt="" coords="900,72,1352,111,1351,117,899,78"/>
-<area shape="poly" id="edge11_Node000010_Node000007" title=" " alt="" coords="900,66,1302,66,1302,71,900,71"/>
-<area shape="poly" id="edge14_Node000017_Node000006" title=" " alt="" coords="1240,155,1351,130,1352,135,1241,160"/>
-<area shape="poly" id="edge15_Node000017_Node000007" title=" " alt="" coords="1200,155,1251,124,1315,92,1340,83,1342,88,1317,96,1253,128,1203,160"/>
-<area shape="rect" id="Node000019" href="$d7/d82/struct_c_r_g_b_a4b0cc1cfefd9e0c66ea5c6583181df46.html#a4b0cc1cfefd9e0c66ea5c6583181df46" title="Default constructor." alt="" coords="772,285,876,311"/>
-<area shape="poly" id="edge17_Node000018_Node000019" title=" " alt="" coords="656,295,758,295,758,301,656,301"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,159,156,185"/>
+<area shape="rect" id="Node000002" href="$de/db5/classfl_1_1_twinkle_fox_aa9fdb7fd8471ebeca24ead4f5fa3585c.html#aa9fdb7fd8471ebeca24ead4f5fa3585c" title=" " alt="" coords="204,134,427,159"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="156,161,190,157,191,163,156,166"/>
+<area shape="rect" id="Node000015" href="$d4/d36/namespacefl_ada525b8983539d793931dd074928bacd.html#ada525b8983539d793931dd074928bacd" title=" " alt="" coords="206,183,425,209"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="156,177,193,181,192,186,156,182"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="972,49,1047,74"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="333,131,393,92,432,71,474,55,597,19,648,9,697,4,746,3,798,7,925,27,970,40,968,46,923,32,797,12,745,9,697,9,649,14,598,24,476,60,434,76,396,97,335,136"/>
+<area shape="rect" id="Node000005" href="$de/db5/classfl_1_1_twinkle_fox_ac0c48830370a7302cebe6100b8bd6226.html#ac0c48830370a7302cebe6100b8bd6226" title=" " alt="" coords="475,69,676,109"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="373,131,471,109,472,115,374,136"/>
+<area shape="rect" id="Node000011" href="$da/dd6/structfl_1_1_c_r_g_b_a8931f3bad3b656409122dc815850a000.html#a8931f3bad3b656409122dc815850a000" title="Get the average of the R, G, and B values." alt="" coords="481,134,670,159"/>
+<area shape="poly" id="edge9_Node000002_Node000011" title=" " alt="" coords="427,144,467,144,467,149,427,149"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="538,207,613,233"/>
+<area shape="poly" id="edge10_Node000002_Node000012" title=" " alt="" coords="381,157,427,168,527,200,525,205,426,173,380,162"/>
+<area shape="rect" id="Node000013" href="$da/dd6/structfl_1_1_c_r_g_b_ae30b045e289d2de1bfb985bf048a130a.html#ae30b045e289d2de1bfb985bf048a130a" title="Scale down a RGB to N/256ths of it&#39;s current brightness using &quot;video&quot; dimming rules." alt="" coords="487,257,663,282"/>
+<area shape="poly" id="edge12_Node000002_Node000013" title=" " alt="" coords="406,157,428,168,446,187,453,207,460,226,476,243,485,248,482,253,473,247,456,228,448,209,441,190,425,173,404,162"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6" title=" " alt="" coords="1095,49,1177,74"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1047,59,1081,59,1081,64,1047,64"/>
+<area shape="rect" id="Node000006" href="$de/db5/classfl_1_1_twinkle_fox_a43f099310635fac392d702664c97c3a5.html#a43f099310635fac392d702664c97c3a5" title=" " alt="" coords="724,41,924,81"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="676,75,710,71,711,77,676,81"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="749,106,899,131"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="676,98,735,105,734,111,676,104"/>
+<area shape="rect" id="Node000010" href="$de/db5/classfl_1_1_twinkle_fox_a5c68d964361dfa1535a5d5ae100f95b2.html#a5c68d964361dfa1535a5d5ae100f95b2" title=" " alt="" coords="739,156,909,196"/>
+<area shape="poly" id="edge8_Node000005_Node000010" title=" " alt="" coords="643,107,677,119,725,140,748,149,746,154,723,145,675,124,641,112"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="879,103,923,91,964,76,966,81,925,96,880,108"/>
+<area shape="poly" id="edge11_Node000012_Node000012" title=" " alt="" coords="536,209,526,199,531,189,547,183,575,181,611,185,621,190,624,196,619,198,617,194,610,190,575,186,548,188,534,193,532,198,540,206"/>
+<area shape="rect" id="Node000014" href="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" title="Default constructor." alt="" coords="764,257,884,282"/>
+<area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="663,267,750,267,750,272,663,272"/>
 </map>

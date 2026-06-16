@@ -1,0 +1,15 @@
+<map id="fl::expected::value" name="fl::expected::value">
+<area shape="rect" id="Node000001" title="Get value (only valid if ok() == true)" alt="" coords="672,77,815,102"/>
+<area shape="rect" id="Node000002" href="$d7/d93/classfl_1_1expected_ae712d6f5942009caa637e9181d47d40b.html#ae712d6f5942009caa637e9181d47d40b" title="Create successful result." alt="" coords="467,77,624,102"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="658,92,624,92,624,87,658,87"/>
+<area shape="rect" id="Node000003" href="$dc/d85/namespacefl_1_1channels_1_1rx_adf091740491eb262a159f09c092a157d.html#adf091740491eb262a159f09c092a157d" title="Decode a WS2812 edge&#45;pair stream into bytes." alt="" coords="237,5,409,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="486,75,393,48,394,43,488,70"/>
+<area shape="rect" id="Node000004" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a97018959f2c77546fa12f2a0adb2f540.html#a97018959f2c77546fa12f2a0adb2f540" title="Flush all lanes (transpose and transmit)" alt="" coords="236,69,411,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="452,92,411,92,411,87,452,87"/>
+<area shape="rect" id="Node000008" href="$d9/d0a/classfl_1_1spi_1_1_device_a2242937ce5772a2fe9ba38632c000cc0.html#a2242937ce5772a2fe9ba38632c000cc0" title="Begin asynchronous write operation (returns immediately)" alt="" coords="228,134,419,159"/>
+<area shape="poly" id="edge6_Node000002_Node000008" title=" " alt="" coords="483,108,374,137,373,131,481,103"/>
+<area shape="rect" id="Node000005" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a512a780a7050fa0e91e83c5dba1e17bc.html#a512a780a7050fa0e91e83c5dba1e17bc" title=" " alt="" coords="5,37,180,77"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="222,78,180,72,181,67,223,73"/>
+<area shape="rect" id="Node000006" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a547b2f30f70e16dbb22762f3f2370254.html#a547b2f30f70e16dbb22762f3f2370254" title="Internal implementation &#45; write all lanes atomically." alt="" coords="5,101,180,141"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="223,106,181,112,180,107,222,101"/>
+</map>

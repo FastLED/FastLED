@@ -1,0 +1,12 @@
+<map id="CFastLED::setPowerScalingExponent" name="CFastLED::setPowerScalingExponent">
+<area shape="rect" id="Node000001" title="Set a non&#45;linear brightness&#45;to&#45;power response exponent." alt="" coords="5,5,203,45"/>
+<area shape="rect" id="Node000002" href="$d9/d5f/group___power_model_gad213f217079d1c8e2453b74bd3aec6de.html#gad213f217079d1c8e2453b74bd3aec6de" title="Set a non&#45;linear brightness&#45;to&#45;power response exponent." alt="" coords="251,13,461,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="203,23,237,23,237,28,203,28"/>
+<area shape="rect" id="Node000003" href="$d1/d2a/power__mgt_8cpp_8hpp_afe71d257dc9aca526178a992761bb812.html#afe71d257dc9aca526178a992761bb812" title="Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)" alt="" coords="695,13,805,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="462,23,681,23,681,28,462,28"/>
+<area shape="rect" id="Node000005" href="$d9/d5f/group___power_model_ga83d1cb7bfce9bd338765968bb40d54e5.html#ga83d1cb7bfce9bd338765968bb40d54e5" title="Set custom RGB LED power consumption model." alt="" coords="509,38,647,63"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="462,35,496,39,496,44,462,40"/>
+<area shape="rect" id="Node000004" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="853,13,1016,38"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="805,23,839,23,839,28,805,28"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="646,38,681,33,681,38,647,43"/>
+</map>

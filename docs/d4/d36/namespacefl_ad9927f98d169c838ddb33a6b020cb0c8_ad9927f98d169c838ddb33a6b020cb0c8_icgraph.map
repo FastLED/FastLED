@@ -1,11 +1,15 @@
 <map id="fl::PSRamAllocate" name="fl::PSRamAllocate">
-<area shape="rect" id="Node000001" title=" " alt="" coords="433,63,571,88"/>
-<area shape="rect" id="Node000002" href="$d8/d2b/classfl_1_1_p_s_ram_allocator_a424705275e371c9adf8632c66bc6e485.html#a424705275e371c9adf8632c66bc6e485" title=" " alt="" coords="243,55,385,95"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="420,78,386,78,386,73,420,73"/>
-<area shape="rect" id="Node000003" href="$d6/d18/classfl_1_1_l_u_t_a9c90dbfacd9b8b4ca048801b2706bf29.html#a9c90dbfacd9b8b4ca048801b2706bf29" title=" " alt="" coords="25,5,175,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="229,55,147,33,149,28,230,50"/>
-<area shape="rect" id="Node000004" href="$d3/df2/classfl_1_1allocator__psram_a3d6d492507262e7d645084862b2697f7.html#a3d6d492507262e7d645084862b2697f7" title=" " alt="" coords="29,55,171,95"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="229,78,171,78,171,73,229,73"/>
-<area shape="rect" id="Node000005" href="$de/d10/classfl_1_1_rectangular_draw_buffer_a793464dde6e4e1a324ab46973615345c.html#a793464dde6e4e1a324ab46973615345c" title=" " alt="" coords="5,119,195,159"/>
-<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="234,102,168,122,167,117,232,97"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="761,103,899,128"/>
+<area shape="rect" id="Node000002" href="$d8/d2b/classfl_1_1_p_s_ram_allocator_aac712dc8b06c46ea6a70ecb868832ae4.html#aac712dc8b06c46ea6a70ecb868832ae4" title=" " alt="" coords="527,55,669,95"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="747,104,669,90,670,85,748,99"/>
+<area shape="rect" id="Node000007" href="$da/d68/classfl_1_1anonymous__namespace_02memory__resource_8cpp_8hpp_03_1_1_p_s_ram_memory_resource_a559e24b93c9c7df8973f633448ae4f4d.html#a559e24b93c9c7df8973f633448ae4f4d" title=" " alt="" coords="483,119,713,189"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="748,132,714,137,713,132,747,126"/>
+<area shape="rect" id="Node000003" href="$d6/d18/classfl_1_1_l_u_t_afa8ebfc889224d7654b4bcbd2d090228.html#afa8ebfc889224d7654b4bcbd2d090228" title=" " alt="" coords="265,5,415,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="513,59,397,33,399,28,514,54"/>
+<area shape="rect" id="Node000004" href="$d3/df2/classfl_1_1allocator__psram_ab3f96bc0317a449c09804587f080ec18.html#ab3f96bc0317a449c09804587f080ec18" title=" " alt="" coords="269,55,411,95"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="513,78,412,78,412,73,513,73"/>
+<area shape="rect" id="Node000005" href="$de/d10/classfl_1_1_rectangular_draw_buffer_a793464dde6e4e1a324ab46973615345c.html#a793464dde6e4e1a324ab46973615345c" title=" " alt="" coords="245,119,435,159"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="514,99,422,122,421,117,513,94"/>
+<area shape="rect" id="Node000006" href="$de/d10/classfl_1_1_rectangular_draw_buffer_ada51b33f27f50070f13473dd195d1f04.html#ada51b33f27f50070f13473dd195d1f04" title=" " alt="" coords="5,119,197,159"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="231,142,198,142,198,137,231,137"/>
 </map>

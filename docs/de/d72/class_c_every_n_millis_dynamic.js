@@ -1,16 +1,16 @@
 var class_c_every_n_millis_dynamic =
 [
-    [ "CEveryNMillisDynamic", "de/d72/class_c_every_n_millis_dynamic_a95ea23e4df044bec1fb0b8719dec5f5a.html#a95ea23e4df044bec1fb0b8719dec5f5a", null ],
-    [ "getElapsed", "de/d72/class_c_every_n_millis_dynamic_a753e6ba28827b47e9af63aca9a5b96d2.html#a753e6ba28827b47e9af63aca9a5b96d2", null ],
-    [ "getLastTriggerTime", "de/d72/class_c_every_n_millis_dynamic_a2487d17c9da2662d09418d892a31537a.html#a2487d17c9da2662d09418d892a31537a", null ],
-    [ "getPeriod", "de/d72/class_c_every_n_millis_dynamic_a3536277379733328861bd8319f2292ba.html#a3536277379733328861bd8319f2292ba", null ],
-    [ "getRemaining", "de/d72/class_c_every_n_millis_dynamic_a54e661ca75ee1894f21c9fe96e05cac6.html#a54e661ca75ee1894f21c9fe96e05cac6", null ],
-    [ "getTime", "de/d72/class_c_every_n_millis_dynamic_a4ee4031470f463a55b4160450aa58ae5.html#a4ee4031470f463a55b4160450aa58ae5", null ],
+    [ "CEveryNMillisDynamic", "de/d72/class_c_every_n_millis_dynamic_aff706b9f6a9efc96511a9062e78bdf38.html#aff706b9f6a9efc96511a9062e78bdf38", null ],
+    [ "getElapsed", "de/d72/class_c_every_n_millis_dynamic_ae1ddf3eaf3239d959ce50596d13a8f59.html#ae1ddf3eaf3239d959ce50596d13a8f59", null ],
+    [ "getLastTriggerTime", "de/d72/class_c_every_n_millis_dynamic_a82534a6c6e0dd9f3350ff926e55963a7.html#a82534a6c6e0dd9f3350ff926e55963a7", null ],
+    [ "getPeriod", "de/d72/class_c_every_n_millis_dynamic_aadf098b7caacb19f0472a0aba91d24cf.html#aadf098b7caacb19f0472a0aba91d24cf", null ],
+    [ "getRemaining", "de/d72/class_c_every_n_millis_dynamic_aebefe6aa543ca1e071e5de1091ac956f.html#aebefe6aa543ca1e071e5de1091ac956f", null ],
+    [ "getTime", "de/d72/class_c_every_n_millis_dynamic_a5a1c175a562410b02588fe4d59117ac0.html#a5a1c175a562410b02588fe4d59117ac0", null ],
     [ "operator bool", "de/d72/class_c_every_n_millis_dynamic_a708e65baedb0e502df282ca8c682522b.html#a708e65baedb0e502df282ca8c682522b", null ],
     [ "ready", "de/d72/class_c_every_n_millis_dynamic_adf560409fae3890034cc952aad0a7412.html#adf560409fae3890034cc952aad0a7412", null ],
     [ "reset", "de/d72/class_c_every_n_millis_dynamic_a993759a29aef7b9356f2861e6cb4faeb.html#a993759a29aef7b9356f2861e6cb4faeb", null ],
-    [ "setPeriod", "de/d72/class_c_every_n_millis_dynamic_a0572b514140c603c4ee92130bd5b527c.html#a0572b514140c603c4ee92130bd5b527c", null ],
+    [ "setPeriod", "de/d72/class_c_every_n_millis_dynamic_a9063c2c8283d82ec3d19fefad7960f36.html#a9063c2c8283d82ec3d19fefad7960f36", null ],
     [ "trigger", "de/d72/class_c_every_n_millis_dynamic_aa7fd8de7dd186ee5d3b4370882fb1ec2.html#aa7fd8de7dd186ee5d3b4370882fb1ec2", null ],
-    [ "mPeriod", "de/d72/class_c_every_n_millis_dynamic_ab1c5f8358daf15c0d53345f157f560c9.html#ab1c5f8358daf15c0d53345f157f560c9", null ],
-    [ "mPrevTrigger", "de/d72/class_c_every_n_millis_dynamic_a51ce5f7e287b34c3d4dbeed4c013062c.html#a51ce5f7e287b34c3d4dbeed4c013062c", null ]
+    [ "mPeriod", "de/d72/class_c_every_n_millis_dynamic_a55818337659c117e16e7152bc43a71ea.html#a55818337659c117e16e7152bc43a71ea", null ],
+    [ "mPrevTrigger", "de/d72/class_c_every_n_millis_dynamic_a2e62d3f2a1c136061516cba134c17140.html#a2e62d3f2a1c136061516cba134c17140", null ]
 ];

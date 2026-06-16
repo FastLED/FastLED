@@ -1,0 +1,9 @@
+<map id="fl::TimeRamp::isActive" name="fl::TimeRamp::isActive">
+<area shape="rect" id="Node000001" title=" " alt="" coords="448,42,617,67"/>
+<area shape="rect" id="Node000002" href="$d0/d9d/classfl_1_1_time_ramp_a42a35ea50f2e5f6d92c82d32554afc53.html#a42a35ea50f2e5f6d92c82d32554afc53" title="Get the current phase of the ramp." alt="" coords="213,5,400,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="434,45,400,40,400,35,434,39"/>
+<area shape="rect" id="Node000004" href="$d0/d9d/classfl_1_1_time_ramp_abe4ca1e555925d0a3e8bea56cc92e29a.html#abe4ca1e555925d0a3e8bea56cc92e29a" title="Compute current 0–255 output based on how much time has elapsed since trigger()." alt="" coords="221,70,392,95"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="435,69,393,75,392,69,434,64"/>
+<area shape="rect" id="Node000003" href="$d0/d9d/classfl_1_1_time_ramp_af2ed0a7927456db7d0be670f5692a28a.html#af2ed0a7927456db7d0be670f5692a28a" title="Call this when you want to (re)start the ramp cycle." alt="" coords="5,13,165,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="200,28,166,28,166,23,200,23"/>
+</map>

@@ -8,7 +8,7 @@ digraph "setup"
   rankdir="LR";
   Node1 [id="Node000001",label="setup",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="luminanceFunction",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/df4/_color_boost_8h_aa22bcb97ca40fd9d6445646fb86ebbe3.html#aa22bcb97ca40fd9d6445646fb86ebbe3",tooltip=" "];
+  Node2 [id="Node000002",label="luminanceFunction",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/df4/_color_boost_8h_adfecdb1dca929dcc593f71298bbf23c1.html#adfecdb1dca929dcc593f71298bbf23c1",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="saturationFunction",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/df4/_color_boost_8h_ac483a8d410fef50e841e927b0f6b81af.html#ac483a8d410fef50e841e927b0f6b81af",tooltip=" "];
+  Node3 [id="Node000003",label="saturationFunction",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/df4/_color_boost_8h_a184414d582661cfbf65e890bdf64fb95.html#a184414d582661cfbf65e890bdf64fb95",tooltip=" "];
 }

@@ -1,0 +1,12 @@
+<map id="splatRendering" name="splatRendering">
+<area shape="rect" id="Node000001" title=" " alt="" coords="345,70,465,95"/>
+<area shape="rect" id="Node000002" href="$d4/d06/curr_8h_a251ace8542fe093844e4ed2709e8a3d7.html#a251ace8542fe093844e4ed2709e8a3d7" title=" " alt="" coords="219,19,273,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="351,68,273,43,274,38,352,63"/>
+<area shape="rect" id="Node000004" href="$d4/d06/curr_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="51,70,101,95"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="332,85,102,85,102,80,332,80"/>
+<area shape="rect" id="Node000005" href="$d4/d06/curr_8h_ab54c8e473dcda60551e9b74842b44ea8.html#ab54c8e473dcda60551e9b74842b44ea8" title=" " alt="" coords="195,121,297,146"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="353,102,288,123,286,118,351,97"/>
+<area shape="rect" id="Node000003" href="$d2/dd5/classfl_1_1_x_y_raster_sparse___r_g_b8_a1684bbac54c06062b198aeaf53eba688.html#a1684bbac54c06062b198aeaf53eba688" title=" " alt="" coords="5,5,147,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="205,33,147,31,147,25,205,28"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="206,46,102,78,101,73,205,41"/>
+</map>

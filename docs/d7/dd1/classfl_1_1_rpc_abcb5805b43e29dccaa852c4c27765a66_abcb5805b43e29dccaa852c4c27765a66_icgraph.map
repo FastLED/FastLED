@@ -1,0 +1,6 @@
+<map id="fl::Rpc::bind" name="fl::Rpc::bind">
+<area shape="rect" id="Node000001" title="Bind a method with configuration (name, function, optional metadata)." alt="" coords="152,29,251,55"/>
+<area shape="poly" id="edge2_Node000001_Node000001" title=" " alt="" coords="227,18,219,11,201,8,186,10,178,15,177,20,181,28,176,31,171,21,174,11,184,5,201,3,222,6,230,15"/>
+<area shape="rect" id="Node000002" href="$d7/dd1/classfl_1_1_rpc_a7848eb3c0697893c79d23518707a0231.html#a7848eb3c0697893c79d23518707a0231" title="Convenience overload: bind method by name, function, and optional mode." alt="" coords="5,29,104,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="138,45,104,45,104,39,138,39"/>
+</map>

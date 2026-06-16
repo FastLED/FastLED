@@ -8,10 +8,20 @@ digraph "fl::Frame::size"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::Frame::size",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::Frame::interpolate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/de0/classfl_1_1_frame_a8a0c8d0a9e5bc93dd87dd70cbd8fdc64.html#a8a0c8d0a9e5bc93dd87dd70cbd8fdc64",tooltip=" "];
+  Node2 [id="Node000002",label="CodecProcessor::getPixel\lFromFrame",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dca/namespace_codec_processor_a4339272f6685f1fdc7c18717be608065.html#a4339272f6685f1fdc7c18717be608065",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::FrameInterpolator\l::draw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d94/classfl_1_1_frame_interpolator_acddaecb9d70872434081d109479d1659.html#acddaecb9d70872434081d109479d1659",tooltip=" "];
-  Node2 -> Node2 [id="edge3_Node000002_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node4 [id="edge4_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::Frame::interpolate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/de0/classfl_1_1_frame_a18b6f7181804a0392e40796f46352115.html#a18b6f7181804a0392e40796f46352115",tooltip=" "];
+  Node3 [id="Node000003",label="CodecProcessor::displayFrame\lOnLEDs",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dca/namespace_codec_processor_a4216b21d03f325b5d991d5f7a0a19062.html#a4216b21d03f325b5d991d5f7a0a19062",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="CodecProcessor::processGif",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dd/dca/namespace_codec_processor_a5f9d84f7da33e23f4e05ea6f140c6630.html#a5f9d84f7da33e23f4e05ea6f140c6630",tooltip=" "];
+  Node3 -> Node6 [id="edge4_Node000003_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="CodecProcessor::processJpeg",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dd/dca/namespace_codec_processor_a2edcc19e73e616ac2e999bc6541ea618.html#a2edcc19e73e616ac2e999bc6541ea618",tooltip=" "];
+  Node3 -> Node7 [id="edge5_Node000003_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="CodecProcessor::processMpeg1",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dd/dca/namespace_codec_processor_a5cc0e47ef4996897c86fb7861b6ffe32.html#a5cc0e47ef4996897c86fb7861b6ffe32",tooltip=" "];
+  Node1 -> Node8 [id="edge6_Node000001_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::Frame::interpolate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/de0/classfl_1_1_frame_aab2b23b23e0c3a86fca548c35a0d34d4.html#aab2b23b23e0c3a86fca548c35a0d34d4",tooltip=" "];
+  Node8 -> Node9 [id="edge7_Node000008_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::video::FrameInterpolator\l::draw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d2b/classfl_1_1video_1_1_frame_interpolator_a4c607b044a29b0bc1929e71ca69d30bc.html#a4c607b044a29b0bc1929e71ca69d30bc",tooltip=" "];
+  Node8 -> Node8 [id="edge8_Node000008_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node10 [id="edge9_Node000001_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::Frame::interpolate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/de0/classfl_1_1_frame_aa39313c1b5979e0cdc4204ee4c3cefc1.html#aa39313c1b5979e0cdc4204ee4c3cefc1",tooltip=" "];
 }

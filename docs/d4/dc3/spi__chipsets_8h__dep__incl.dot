@@ -1,0 +1,49 @@
+digraph "fl/chipsets/spi_chipsets.h"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl/chipsets/spi_chipsets.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="SPI LED chipset enumeration."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="FastLED.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d97/_fast_l_e_d_8h.html",tooltip="central include file for FastLED, defines the CFastLED class/object"];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="FastLED.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/de5/_fast_l_e_d_8cpp_8hpp.html",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="_build.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dd5/__build_8cpp_8hpp.html",tooltip=" "];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl/build/src.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/de2/src_8cpp.html",tooltip="Unity build: flat includes from src/ root directory."];
+  Node1 -> Node6 [id="edge5_Node000001_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl/chipsets/spi.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d58/chipsets_2spi_8h.html",tooltip="SPI encoder configuration for clocked LED chipsets."];
+  Node6 -> Node7 [id="edge6_Node000006_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="/home/runner/work/FastLED\l/FastLED/examples/AutoResearch\l/AutoResearchRemote.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/dfb/_auto_research_remote_8cpp.html",tooltip=" "];
+  Node6 -> Node8 [id="edge7_Node000006_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl/channels/config.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d09/fl_2channels_2config_8h.html",tooltip=" "];
+  Node8 -> Node7 [id="edge8_Node000008_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 -> Node9 [id="edge9_Node000008_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="/home/runner/work/FastLED\l/FastLED/examples/RGBWW\l/RGBWW.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/dad/_r_g_b_w_w_8ino.html",tooltip=" "];
+  Node8 -> Node10 [id="edge10_Node000008_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="/home/runner/work/FastLED\l/FastLED/examples/Sailboat\l/Sailboat.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/dda/_sailboat_8ino.html",tooltip="Audio-reactive sailboat lighting with perlin noise, ambient particles, and beat meteors for EDM music..."];
+  Node8 -> Node3 [id="edge11_Node000008_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 -> Node2 [id="edge12_Node000008_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 -> Node11 [id="edge13_Node000008_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl/channels/adapters\l/spi_channel_adapter.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/d93/spi__channel__adapter_8cpp_8hpp.html",tooltip=" "];
+  Node8 -> Node16 [id="edge14_Node000008_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl/channels/channel.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d3/de6/channel_8cpp_8hpp.html",tooltip=" "];
+  Node8 -> Node17 [id="edge15_Node000008_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl/channels/channel.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d7b/channel_8h.html",tooltip="ESP32-P4 Parallel IO (PARLIO) LED channel."];
+  Node17 -> Node9 [id="edge16_Node000017_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 -> Node3 [id="edge17_Node000017_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 -> Node2 [id="edge18_Node000017_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 -> Node16 [id="edge19_Node000017_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 -> Node18 [id="edge20_Node000017_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="fl/channels/channel\l_typed.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/de5/channel__typed_8h.html",tooltip="Phase 3b templated channel facade – Channel<Bus, Chipset> with compile-time bus/chipset enforcement."];
+  Node18 -> Node2 [id="edge21_Node000018_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 -> Node18 [id="edge22_Node000008_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 -> Node19 [id="edge23_Node000008_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl/channels/config.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/d53/config_8cpp_8hpp.html",tooltip=" "];
+  Node8 -> Node20 [id="edge24_Node000008_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="fl/channels/data.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/dbd/data_8h.html",tooltip="Channel transmission data - lightweight DTO for driver transmission."];
+  Node20 -> Node16 [id="edge25_Node000020_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

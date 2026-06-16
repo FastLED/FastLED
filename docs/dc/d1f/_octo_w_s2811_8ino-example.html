@@ -105,12 +105,9 @@ $(function(){initNavTree('dc/d1f/_octo_w_s2811_8ino-example.html','../../'); ini
 <div class="contents">
 <div class="fragment"><div class="line"></div>
 <div class="line"> </div>
-<div class="line"><span class="comment">// Platform detection logic</span></div>
-<div class="line"><span class="preprocessor">#if defined(__arm__) &amp;&amp; defined(TEENSYDUINO) &amp;&amp; !defined(__MKL26Z64__)  </span><span class="comment">// Teensy LC</span></div>
+<div class="line"><span class="comment">// @filter: (platform is teensy) and not (board is teensylc)</span></div>
+<div class="line"> </div>
 <div class="line"><span class="preprocessor">#include &quot;<a class="code" href="../../d8/d53/_octo_w_s2811__impl_8h.html">OctoWS2811_impl.h</a>&quot;</span></div>
-<div class="line"><span class="preprocessor">#else</span></div>
-<div class="line"><span class="preprocessor">#include &quot;platforms/sketch_fake.hpp&quot;</span></div>
-<div class="line"><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="a_octo_w_s2811__impl_8h_html"><div class="ttname"><a href="../../d8/d53/_octo_w_s2811__impl_8h.html">OctoWS2811_impl.h</a></div></div>
 </div><!-- fragment --> </div><!-- contents -->
 </div><!-- doc-content -->
@@ -118,7 +115,7 @@ $(function(){initNavTree('dc/d1f/_octo_w_s2811_8ino-example.html','../../'); ini
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:19 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:06:58 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

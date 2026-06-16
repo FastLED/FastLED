@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::function\< T \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl.html#d0/ddd/classfl_1_1function",tooltip=" "];
+  Node0 [id="Node000000",label="fl::audio::NoiseFloorTracker\l::Stats",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2a/classfl_1_1audio_1_1_noise_floor_tracker.html#da/dcd/structfl_1_1audio_1_1_noise_floor_tracker_1_1_stats",tooltip="Get current statistics (for monitoring/debugging)"];
 }

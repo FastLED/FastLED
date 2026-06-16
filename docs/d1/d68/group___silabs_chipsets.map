@@ -1,0 +1,4 @@
+<map id="Silicon Labs ezWS2812 Controllers" name="Silicon Labs ezWS2812 Controllers">
+<area shape="rect" id="Node000002" href="$df/d0d/group___clocked_chipsets.html" title="Nominally SPI based, these chipsets have a data and a clock line." alt="" coords="5,13,139,38"/>
+<area shape="rect" id="Node000001" title="Note: SPI chipset controllers have been moved to separate headers in src/fl/chipsets/." alt="" coords="187,5,357,45"/>
+</map>

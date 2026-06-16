@@ -1,0 +1,8 @@
+<map id="fl::RxChannel::create" name="fl::RxChannel::create">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,163,80"/>
+<area shape="rect" id="Node000002" href="$d3/d2b/classfl_1_1_rx_channel_abc90bc5973308d672d3577eba69013f1.html#abc90bc5973308d672d3577eba69013f1" title=" " alt="" coords="211,29,365,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="163,55,196,51,197,56,164,60"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="225,79,351,104"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="163,74,212,80,211,85,163,79"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="255,31,248,21,251,11,265,5,288,3,316,6,328,16,324,20,314,11,288,8,266,10,255,15,253,20,259,28"/>
+</map>

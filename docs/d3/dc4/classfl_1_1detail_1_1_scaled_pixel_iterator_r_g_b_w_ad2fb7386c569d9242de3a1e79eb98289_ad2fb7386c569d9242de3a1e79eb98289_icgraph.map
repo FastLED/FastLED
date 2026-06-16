@@ -1,0 +1,11 @@
+<map id="fl::detail::ScaledPixelIteratorRGBW::ScaledPixelIteratorRGBW" name="fl::detail::ScaledPixelIteratorRGBW::ScaledPixelIteratorRGBW">
+<area shape="rect" id="Node000001" title="Construct from PixelIterator." alt="" coords="259,101,492,141"/>
+<area shape="rect" id="Node000002" href="$d3/dc4/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b_w_a5aad45680ae6e18fee913dd2849c5b9f.html#a5aad45680ae6e18fee913dd2849c5b9f" title="Inequality comparison." alt="" coords="5,5,211,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="312,99,210,60,174,48,176,43,212,55,314,94"/>
+<area shape="rect" id="Node000003" href="$d3/dc4/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b_w_a994be4b604213ba60a30956caf56ffe4.html#a994be4b604213ba60a30956caf56ffe4" title="Pre&#45;increment operator." alt="" coords="5,69,211,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="245,108,210,104,211,99,245,103"/>
+<area shape="rect" id="Node000004" href="$d3/dc4/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b_w_a42e28e32e1f58323f3777b35109888bd.html#a42e28e32e1f58323f3777b35109888bd" title="Post&#45;increment operator." alt="" coords="5,133,211,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="245,140,211,144,210,138,245,134"/>
+<area shape="rect" id="Node000005" href="$d3/dc4/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b_w_aef2efd6671fc64d80156433ab301700e.html#aef2efd6671fc64d80156433ab301700e" title="Equality comparison." alt="" coords="5,197,211,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="314,149,212,188,176,200,174,195,210,183,312,144"/>
+</map>

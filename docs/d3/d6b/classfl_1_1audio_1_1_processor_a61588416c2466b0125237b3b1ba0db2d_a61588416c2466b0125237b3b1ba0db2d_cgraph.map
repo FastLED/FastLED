@@ -1,0 +1,16 @@
+<map id="fl::audio::Processor::getCurrentBeatNumber" name="fl::audio::Processor::getCurrentBeatNumber">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,53,187,93"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="54,53,52,43,58,34,73,28,96,26,122,29,136,36,134,41,121,34,96,31,74,33,62,38,57,44,59,52"/>
+<area shape="rect" id="Node000002" href="$d3/d6b/classfl_1_1audio_1_1_processor_a96d6f7467ad8a83eda659dd743cc7b3a.html#a96d6f7467ad8a83eda659dd743cc7b3a" title=" " alt="" coords="235,53,408,93"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="187,70,221,70,221,75,187,75"/>
+<area shape="poly" id="edge7_Node000002_Node000002" title=" " alt="" coords="283,53,280,43,287,34,300,28,321,26,345,29,359,36,356,41,344,34,321,31,302,33,290,38,286,44,288,52"/>
+<area shape="rect" id="Node000003" href="$d3/d6b/classfl_1_1audio_1_1_processor_ac09406be98e613b4f9c26a87538198e2.html#ac09406be98e613b4f9c26a87538198e2" title=" " alt="" coords="456,53,601,93"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="408,70,442,70,442,75,408,75"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="659,5,785,31"/>
+<area shape="poly" id="edge8_Node000002_Node000004" title=" " alt="" coords="358,50,404,30,455,14,504,7,554,4,646,7,645,12,554,10,505,12,457,19,406,35,360,55"/>
+<area shape="rect" id="Node000005" href="$d3/d6b/classfl_1_1audio_1_1_processor_ade806d07af52e3d281939cebce7643d5.html#ade806d07af52e3d281939cebce7643d5" title=" " alt="" coords="649,82,795,122"/>
+<area shape="poly" id="edge9_Node000002_Node000005" title=" " alt="" coords="393,90,456,102,529,105,601,102,635,101,635,107,601,107,529,110,456,107,392,95"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="492,53,490,43,496,34,509,28,529,26,551,29,564,36,561,41,550,34,529,31,510,33,499,38,495,44,498,52"/>
+<area shape="poly" id="edge5_Node000003_Node000004" title=" " alt="" coords="599,50,662,32,664,37,601,55"/>
+<area shape="poly" id="edge6_Node000003_Node000005" title=" " alt="" coords="602,81,636,86,635,92,601,86"/>
+</map>

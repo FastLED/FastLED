@@ -1,0 +1,37 @@
+<map id="fl::span::empty" name="fl::span::empty">
+<area shape="rect" id="Node000001" title=" " alt="" coords="731,348,849,373"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ad3e42d4adbe2315c61901d31c232be28.html#ad3e42d4adbe2315c61901d31c232be28" title=" " alt="" coords="488,60,627,85"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="776,337,739,259,712,213,681,170,656,145,628,122,579,88,582,83,632,118,659,141,685,167,717,210,744,256,781,334"/>
+<area shape="rect" id="Node000004" href="$d3/dfa/classfl_1_1_s_p_i_transposer_ab6ee4d2f7057e6599a6bc4dd730d834a.html#ab6ee4d2f7057e6599a6bc4dd730d834a" title="Get byte from lane at given index, handling padding automatically." alt="" coords="489,181,625,221"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="773,338,736,285,710,258,681,235,654,221,625,212,626,207,656,217,684,230,714,254,740,282,777,335"/>
+<area shape="rect" id="Node000013" href="$d1/de7/classfl_1_1_string_interner_ae5953e2cf196594e80bfced9f27c8d53.html#ae5953e2cf196594e80bfced9f27c8d53" title=" " alt="" coords="494,245,621,285"/>
+<area shape="poly" id="edge11_Node000001_Node000013" title=" " alt="" coords="759,342,723,320,682,299,620,280,622,274,684,294,725,315,761,338"/>
+<area shape="rect" id="Node000014" href="$d8/dea/classfl_1_1audio_1_1_reactive_a9f358b9c97f3073c24d412380256ba61.html#a9f358b9c97f3073c24d412380256ba61" title=" " alt="" coords="432,309,683,349"/>
+<area shape="poly" id="edge12_Node000001_Node000014" title=" " alt="" coords="717,353,682,349,683,343,717,348"/>
+<area shape="rect" id="Node000017" href="$da/db8/classfl_1_1_font_renderer_ab05cccca03e2d2576c86190153dea5c5.html#ab05cccca03e2d2576c86190153dea5c5" title=" " alt="" coords="462,373,653,413"/>
+<area shape="poly" id="edge15_Node000001_Node000017" title=" " alt="" coords="717,373,653,382,653,377,717,368"/>
+<area shape="rect" id="Node000018" href="$de/ded/classfl_1_1_gif_a2f3f9bb86be2519d35a36ba1627f156b.html#a2f3f9bb86be2519d35a36ba1627f156b" title=" " alt="" coords="485,437,629,463"/>
+<area shape="poly" id="edge16_Node000001_Node000018" title=" " alt="" coords="762,384,726,407,684,427,630,442,629,437,682,422,723,402,759,379"/>
+<area shape="rect" id="Node000019" href="$d6/d66/classfl_1_1_mp3_a05c327e508e430bc8959024aa100d1ab.html#a05c327e508e430bc8959024aa100d1ab" title=" " alt="" coords="476,487,639,512"/>
+<area shape="poly" id="edge17_Node000001_Node000019" title=" " alt="" coords="775,386,738,434,713,458,684,478,640,494,638,489,681,473,709,454,734,430,771,383"/>
+<area shape="rect" id="Node000020" href="$da/d7f/classfl_1_1_mpeg1_abbf8b5f359b804b02d10042a2036cfe1.html#abbf8b5f359b804b02d10042a2036cfe1" title=" " alt="" coords="460,536,655,561"/>
+<area shape="poly" id="edge18_Node000001_Node000020" title=" " alt="" coords="782,387,768,420,747,458,719,496,684,527,656,541,654,536,681,522,715,492,742,455,763,418,777,385"/>
+<area shape="rect" id="Node000003" href="$d5/d63/structfl_1_1detail_1_1_type_to_json_3_01fl_1_1vector_3_01fl_1_1u8_01_4_01_4_a8353ba6c2dc086e0506c8db3e0433f88.html#a8353ba6c2dc086e0506c8db3e0433f88" title=" " alt="" coords="228,5,384,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="474,62,384,48,384,42,474,57"/>
+<area shape="rect" id="Node000005" href="$d3/dfa/classfl_1_1_s_p_i_transposer_a8182f9233ebc9f7e54a3eff0b9866f8f.html#a8182f9233ebc9f7e54a3eff0b9866f8f" title="Transpose 16 lanes of data into interleaved hex&#45;SPI format." alt="" coords="238,85,374,125"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="490,178,358,127,360,122,492,173"/>
+<area shape="rect" id="Node000006" href="$d3/dfa/classfl_1_1_s_p_i_transposer_ab685cdd1edcc4b507a91d7dbfd5ba41b.html#ab685cdd1edcc4b507a91d7dbfd5ba41b" title="Transpose 2 lanes of data into interleaved dual&#45;SPI format." alt="" coords="238,149,374,189"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="475,193,374,180,375,175,476,188"/>
+<area shape="rect" id="Node000011" href="$d3/dfa/classfl_1_1_s_p_i_transposer_a409565f20b2d6f03c19989cc7a53b91d.html#a409565f20b2d6f03c19989cc7a53b91d" title="Transpose 4 lanes of data into interleaved quad&#45;SPI format." alt="" coords="238,213,374,253"/>
+<area shape="poly" id="edge7_Node000004_Node000011" title=" " alt="" coords="476,214,375,227,374,221,475,208"/>
+<area shape="rect" id="Node000012" href="$d3/dfa/classfl_1_1_s_p_i_transposer_a33641c518e945549b98264fed476ff12.html#a33641c518e945549b98264fed476ff12" title="Transpose 8 lanes of data into interleaved octal&#45;SPI format." alt="" coords="238,277,374,317"/>
+<area shape="poly" id="edge9_Node000004_Node000012" title=" " alt="" coords="477,220,433,235,409,250,385,267,360,279,358,274,383,262,406,246,431,230,475,215"/>
+<area shape="rect" id="Node000007" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a97018959f2c77546fa12f2a0adb2f540.html#a97018959f2c77546fa12f2a0adb2f540" title="Flush all lanes (transpose and transmit)" alt="" coords="5,213,180,253"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="226,195,161,215,159,210,225,190"/>
+<area shape="poly" id="edge8_Node000011_Node000007" title=" " alt="" coords="224,235,180,235,180,230,224,230"/>
+<area shape="poly" id="edge10_Node000012_Node000007" title=" " alt="" coords="225,275,159,255,161,250,226,270"/>
+<area shape="rect" id="Node000015" href="$d8/dea/classfl_1_1audio_1_1_reactive_a711ce57334bad9aa608f425fba0f263e.html#a711ce57334bad9aa608f425fba0f263e" title=" " alt="" coords="237,341,375,381"/>
+<area shape="poly" id="edge13_Node000014_Node000015" title=" " alt="" coords="419,349,376,354,376,349,418,344"/>
+<area shape="rect" id="Node000016" href="$d8/dea/classfl_1_1audio_1_1_reactive_a48123bbd9e966e23844167addbabc3ff.html#a48123bbd9e966e23844167addbabc3ff" title=" " alt="" coords="23,341,162,381"/>
+<area shape="poly" id="edge14_Node000015_Node000016" title=" " alt="" coords="223,363,162,363,162,358,223,358"/>
+</map>

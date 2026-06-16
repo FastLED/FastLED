@@ -8,7 +8,8 @@ digraph "fl::UICheckbox::FL_NO_COPY"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::UICheckbox::FL\l_NO_COPY",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::UICheckbox::UICheckbox",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dfe/classfl_1_1_u_i_checkbox_af76f946adbb7b46a4f8636cef8933271.html#af76f946adbb7b46a4f8636cef8933271",tooltip=" "];
+  Node2 [id="Node000002",label="fl::UICheckbox::UICheckbox",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dfe/classfl_1_1_u_i_checkbox_a00e5f8f21d8b1563ceb7800a4fa4b6b8.html#a00e5f8f21d8b1563ceb7800a4fa4b6b8",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::UICheckbox::value",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dfe/classfl_1_1_u_i_checkbox_a999a2bc4a7105a7b8975aee0a48302c3.html#a999a2bc4a7105a7b8975aee0a48302c3",tooltip=" "];
+  Node3 [id="Node000003",label="fl::UICheckbox::value",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dfe/classfl_1_1_u_i_checkbox_abcb7568e4461b38f7dcebd49840cfe75.html#abcb7568e4461b38f7dcebd49840cfe75",tooltip=" "];
+  Node1 -> Node3 [id="edge3_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
 }

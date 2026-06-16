@@ -1,0 +1,8 @@
+<map id="fl::audio::SpectralFluxDetector::calculateSpectralFlux" name="fl::audio::SpectralFluxDetector::calculateSpectralFlux">
+<area shape="rect" id="Node000001" title=" " alt="" coords="539,5,757,45"/>
+<area shape="rect" id="Node000002" href="$df/d68/classfl_1_1audio_1_1_spectral_flux_detector_a8e0f6473708a56c3d828b19ab9e05840.html#a8e0f6473708a56c3d828b19ab9e05840" title=" " alt="" coords="5,5,224,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="525,25,491,24,272,24,224,25,224,20,272,19,491,19,525,19"/>
+<area shape="rect" id="Node000003" href="$df/d68/classfl_1_1audio_1_1_spectral_flux_detector_ad9150f6d8238fa0d3899214f94281ec0.html#ad9150f6d8238fa0d3899214f94281ec0" title=" " alt="" coords="272,33,491,73"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="526,41,491,44,491,39,525,36"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="258,43,224,39,225,34,259,38"/>
+</map>

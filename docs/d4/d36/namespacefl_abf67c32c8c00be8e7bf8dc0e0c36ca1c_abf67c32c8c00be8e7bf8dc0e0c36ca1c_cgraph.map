@@ -1,0 +1,20 @@
+<map id="fl::readSerialLine" name="fl::readSerialLine">
+<area shape="rect" id="Node000001" title="Optimized readSerialLine for fl:: serial input." alt="" coords="5,153,136,179"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_af62a6a137d58541697cc30d451c9d751.html#af62a6a137d58541697cc30d451c9d751" title=" " alt="" coords="184,153,279,179"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="136,163,170,163,170,169,136,169"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ab9a569f3493b0267ba32021be174dd94.html#ab9a569f3493b0267ba32021be174dd94" title=" " alt="" coords="327,128,463,153"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="278,156,313,151,313,156,279,161"/>
+<area shape="rect" id="Node000011" href="$d1/d27/classfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e.html#a08170cac6eba7241f099ae16730f6f8e" title=" " alt="" coords="337,177,453,203"/>
+<area shape="poly" id="edge9_Node000002_Node000011" title=" " alt="" coords="279,170,323,177,322,182,278,176"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aea219cb806e210fa698fe53624fbc7ac.html#aea219cb806e210fa698fe53624fbc7ac" title="Delay for a given number of microseconds." alt="" coords="513,5,675,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="406,126,448,84,478,60,509,40,523,33,526,38,512,44,481,64,452,88,409,130"/>
+<area shape="rect" id="Node000005" href="$dd/dd8/classfl_1_1_optional_ad5f53bf55f59f43884a71b107dee14c7.html#ad5f53bf55f59f43884a71b107dee14c7" title=" " alt="" coords="511,55,677,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="422,125,510,89,532,82,533,87,512,94,424,130"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="557,128,631,153"/>
+<area shape="poly" id="edge5_Node000003_Node000007" title=" " alt="" coords="463,138,543,138,543,143,463,143"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a18e7608a302c3628c24710b27480641b.html#a18e7608a302c3628c24710b27480641b" title=" " alt="" coords="561,177,627,203"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="447,151,548,176,547,181,446,156"/>
+<area shape="rect" id="Node000009" href="$dd/dd8/classfl_1_1_optional_a1a7216013ea48bf987511dae97d2915f.html#a1a7216013ea48bf987511dae97d2915f" title=" " alt="" coords="525,227,663,252"/>
+<area shape="poly" id="edge8_Node000003_Node000009" title=" " alt="" coords="442,151,464,162,479,175,489,188,498,200,512,212,526,219,524,224,509,216,494,204,484,191,475,179,461,167,439,156"/>
+<area shape="poly" id="edge6_Node000007_Node000007" title=" " alt="" coords="561,129,555,120,558,110,572,104,594,101,621,105,632,114,629,118,619,110,594,107,573,109,562,113,560,119,566,126"/>
+</map>

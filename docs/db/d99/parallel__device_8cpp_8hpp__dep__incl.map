@@ -1,0 +1,11 @@
+<map id="fl/channels/spi/parallel_device.cpp.hpp" name="fl/channels/spi/parallel_device.cpp.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="73,5,241,45"/>
+<area shape="rect" id="Node000002" href="$da/d51/fl_2channels_2spi_2__build_8cpp_8hpp.html" title=" " alt="" coords="51,93,264,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="160,59,160,93,155,93,155,59"/>
+<area shape="rect" id="Node000003" href="$d1/d97/fl_2channels_2__build_8cpp_8hpp.html" title=" " alt="" coords="62,167,253,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="160,132,160,167,155,167,155,132"/>
+<area shape="rect" id="Node000004" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="5,240,133,265"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="134,203,85,242,82,238,131,198"/>
+<area shape="rect" id="Node000005" href="$d7/d44/fl_8channels_09_8cpp.html" title="Unity build: recursive includes from src/fl/channels/." alt="" coords="157,240,336,265"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="184,198,234,238,230,242,181,203"/>
+</map>

@@ -1,0 +1,10 @@
+<map id="fl::CLEDController::clearLedDataInternal" name="fl::CLEDController::clearLedDataInternal">
+<area shape="rect" id="Node000001" title="Zero out the LED data managed by this controller." alt="" coords="377,39,544,79"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_ac4f613f1b3e618528dca3189df88ce80.html#ac4f613f1b3e618528dca3189df88ce80" title="Clear out the local data array." alt="" coords="176,5,329,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="363,43,317,33,318,28,364,37"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_aefe2d04448733f36909d1dab7c5cb3e3.html#aefe2d04448733f36909d1dab7c5cb3e3" title="Clear out/zero out the given number of LEDs." alt="" coords="185,79,321,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="364,81,322,89,321,84,363,75"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_aeb7bd3e8f2dbced6284a2182191d5fcb.html#aeb7bd3e8f2dbced6284a2182191d5fcb" title="Clear the leds, wiping the local array of data." alt="" coords="5,5,128,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="162,21,128,21,128,15,162,15"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="283,67,273,61,253,58,235,60,225,65,221,71,223,78,218,80,216,70,221,61,234,55,253,53,274,56,286,63"/>
+</map>

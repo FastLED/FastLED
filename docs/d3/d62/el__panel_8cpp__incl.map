@@ -1,0 +1,13 @@
+<map id="/home/runner/work/FastLED/FastLED/examples/ElPanelReactive/el_panel.cpp" name="/home/runner/work/FastLED/FastLED/examples/ElPanelReactive/el_panel.cpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,259,60"/>
+<area shape="rect" id="Node000002" href="$db/d1b/el__panel_8h.html" title=" " alt="" coords="23,108,113,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="115,62,87,99,83,95,110,58"/>
+<area shape="rect" id="Node000004" href="$db/d4e/pin_8h.html" title=" " alt="" coords="137,108,255,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="154,58,181,95,177,99,149,62"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="25,181,111,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="71,134,71,168,65,168,65,134"/>
+<area shape="rect" id="Node000005" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="145,181,247,207"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="199,134,199,168,193,168,193,134"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="137,255,255,280"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="199,207,199,241,193,241,193,207"/>
+</map>

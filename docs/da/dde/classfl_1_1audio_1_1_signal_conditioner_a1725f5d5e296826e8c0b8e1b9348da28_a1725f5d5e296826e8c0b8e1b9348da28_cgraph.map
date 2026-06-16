@@ -1,0 +1,5 @@
+<map id="fl::audio::SignalConditioner::calculateDCOffset" name="fl::audio::SignalConditioner::calculateDCOffset">
+<area shape="rect" id="Node000001" title="Calculate DC offset from valid samples only." alt="" coords="5,5,203,45"/>
+<area shape="rect" id="Node000002" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="251,13,353,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="203,23,237,23,237,28,203,28"/>
+</map>

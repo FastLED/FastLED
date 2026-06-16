@@ -1,0 +1,11 @@
+<map id="autoresearch::simd_check::test_srl_u32_4" name="autoresearch::simd_check::test_srl_u32_4">
+<area shape="rect" id="Node000001" title=" " alt="" coords="565,37,735,77"/>
+<area shape="rect" id="Node000002" href="$d9/d1a/namespaceautoresearch_1_1simd__check_a81f34bf71b7b00b59cedf9fb126a6050.html#a81f34bf71b7b00b59cedf9fb126a6050" title="Get the static test table. Used by both runSimdTests() and the RPC handler." alt="" coords="371,37,517,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="551,60,517,60,517,55,551,55"/>
+<area shape="rect" id="Node000003" href="$db/d63/class_auto_research_remote_control_abb6600e8a1e8c4ef46ba29e7bd3b78b4.html#abb6600e8a1e8c4ef46ba29e7bd3b78b4" title="Register all RPC functions with shared autoresearch state." alt="" coords="112,5,323,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="357,48,322,43,323,38,357,42"/>
+<area shape="rect" id="Node000005" href="$d9/d1a/namespaceautoresearch_1_1simd__check_a4bd7c9fa82e77bb9c28efbf177f99216.html#a4bd7c9fa82e77bb9c28efbf177f99216" title="Run the full SIMD test suite. Returns the number of failures." alt="" coords="136,69,299,109"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="357,72,299,81,298,75,357,67"/>
+<area shape="rect" id="Node000004" href="$dd/dc8/_auto_research_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,13,64,38"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="98,28,64,28,64,23,98,23"/>
+</map>

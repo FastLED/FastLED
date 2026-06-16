@@ -1,0 +1,7 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$dc/d00/classfl_1_1_server.html" title="JSON&#45;RPC server with callback&#45;based I/O." alt="" coords="5,5,85,31"/>
+<area shape="rect" id="Node000001" href="$dc/ddb/classfl_1_1_remote.html" title="JSON&#45;RPC server with scheduling support." alt="" coords="133,5,223,31"/>
+<area shape="poly" id="edge322_Node000000_Node000001" title=" " alt="" coords="99,15,133,15,133,21,99,21"/>
+<area shape="rect" id="Node000002" href="$d2/d9f/classfl_1_1_w_l_e_d.html" title="WLED&#45;specific Remote RPC extension." alt="" coords="271,5,347,31"/>
+<area shape="poly" id="edge323_Node000001_Node000002" title=" " alt="" coords="236,15,270,15,270,21,236,21"/>
+</map>

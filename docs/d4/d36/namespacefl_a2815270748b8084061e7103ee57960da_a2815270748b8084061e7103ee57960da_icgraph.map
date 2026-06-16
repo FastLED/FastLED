@@ -1,0 +1,48 @@
+<map id="fl::ptr_to_int" name="fl::ptr_to_int">
+<area shape="rect" id="Node000001" title=" " alt="" coords="692,308,792,333"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a23aa5d45072b3359bfa897d4bc60272f.html#a23aa5d45072b3359bfa897d4bc60272f" title=" " alt="" coords="479,77,615,117"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="724,298,689,243,642,182,607,148,573,119,577,115,611,144,646,179,693,240,729,295"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a9c2841fd85934d22701eb5be54c04fe6.html#a9c2841fd85934d22701eb5be54c04fe6" title=" " alt="" coords="489,193,606,219"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="719,299,686,265,643,234,605,219,607,214,645,229,689,261,723,295"/>
+<area shape="rect" id="Node000010" href="$da/d2a/namespacefl_1_1format__detail_a4dd66be0e51d094d8a52123ff0e3d5ab.html#a4dd66be0e51d094d8a52123ff0e3d5ab" title=" " alt="" coords="480,243,615,283"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="684,307,614,286,616,281,686,301"/>
+<area shape="rect" id="Node000012" href="$d6/d93/namespacefl_1_1isr_a37181e73f3eacd6df1195039502948d5.html#a37181e73f3eacd6df1195039502948d5" title="Check if a pointer is aligned to a specific byte boundary." alt="" coords="483,308,611,333"/>
+<area shape="poly" id="edge12_Node000001_Node000012" title=" " alt="" coords="678,323,612,323,612,318,678,318"/>
+<area shape="rect" id="Node000013" href="$d6/d93/namespacefl_1_1isr_a87ccebcc8a496958569065ad778ac76d.html#a87ccebcc8a496958569065ad778ac76d" title="ISR&#45;optimized memcpy with alignment detection and switch dispatch." alt="" coords="488,357,607,383"/>
+<area shape="poly" id="edge13_Node000001_Node000013" title=" " alt="" coords="679,339,599,360,598,355,678,334"/>
+<area shape="rect" id="Node000022" href="$d6/d93/namespacefl_1_1isr_ae7336865f05d03188eb93400b3c152b7.html#ae7336865f05d03188eb93400b3c152b7" title="ISR&#45;safe memset with alignment optimization." alt="" coords="472,407,623,432"/>
+<area shape="poly" id="edge22_Node000001_Node000022" title=" " alt="" coords="719,345,685,372,645,396,612,409,610,404,643,392,682,367,715,341"/>
+<area shape="rect" id="Node000023" href="$dd/d98/structfl_1_1_hash_3_01_t_01_5_01_4_ae96077c5dbfac74fc7d394a2b53c1ed5.html#ae96077c5dbfac74fc7d394a2b53c1ed5" title=" " alt="" coords="451,456,644,481"/>
+<area shape="poly" id="edge23_Node000001_Node000023" title=" " alt="" coords="730,347,696,397,673,423,645,446,619,458,617,454,643,441,669,420,692,394,725,344"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_a93471b4babe96100496e8e25062cba3f.html#a93471b4babe96100496e8e25062cba3f" title="Update all our controllers with the current led colors, using the passed in brightness." alt="" coords="247,5,371,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="484,74,402,45,363,33,364,28,403,39,486,69"/>
+<area shape="rect" id="Node000004" href="$dd/dbb/class_c_fast_l_e_d_a50e30222e81562a7ef334dbe4fdfa856.html#a50e30222e81562a7ef334dbe4fdfa856" title="Set all leds on all controllers to the given color/scale." alt="" coords="230,55,389,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="465,89,389,80,389,74,466,84"/>
+<area shape="rect" id="Node000006" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a0fc5830eb1815a9268986bb46cb95972.html#a0fc5830eb1815a9268986bb46cb95972" title=" " alt="" coords="241,105,377,145"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="466,109,378,119,377,114,466,104"/>
+<area shape="rect" id="Node000005" href="$dd/dbb/class_c_fast_l_e_d_aeb7bd3e8f2dbced6284a2182191d5fcb.html#aeb7bd3e8f2dbced6284a2182191d5fcb" title="Clear the leds, wiping the local array of data." alt="" coords="25,31,148,56"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="216,60,148,53,149,47,217,55"/>
+<area shape="rect" id="Node000007" href="$d8/da0/classfl_1_1_c_l_e_d_controller_aefe2d04448733f36909d1dab7c5cb3e3.html#aefe2d04448733f36909d1dab7c5cb3e3" title="Clear out/zero out the given number of LEDs." alt="" coords="19,105,155,145"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="227,127,155,127,155,122,227,122"/>
+<area shape="rect" id="Node000008" href="$d5/d8b/classfl_1_1_channel_a56c6fceae41ac78584e120f7e01f7aff.html#a56c6fceae41ac78584e120f7e01f7aff" title="Show the LEDs with optional brightness scaling." alt="" coords="5,169,168,195"/>
+<area shape="poly" id="edge8_Node000006_Node000008" title=" " alt="" coords="228,148,137,172,136,167,227,143"/>
+<area shape="poly" id="edge7_Node000007_Node000007" title=" " alt="" coords="124,93,111,86,87,83,65,85,53,90,48,96,50,104,45,105,43,95,49,86,64,80,87,78,113,81,127,88"/>
+<area shape="rect" id="Node000011" href="$d5/d78/classfl_1_1format__detail_1_1_format_arg_af16fdff3e26b25c2ed5b9d1da56f52c1.html#af16fdff3e26b25c2ed5b9d1da56f52c1" title=" " alt="" coords="238,169,381,209"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="469,242,373,211,375,206,471,237"/>
+<area shape="rect" id="Node000014" href="$d4/d36/namespacefl_aff1a1fcfdff1c1d20f8e4144e31a10cd.html#aff1a1fcfdff1c1d20f8e4144e31a10cd" title=" " alt="" coords="216,233,403,259"/>
+<area shape="poly" id="edge14_Node000013_Node000014" title=" " alt="" coords="474,360,449,347,432,328,424,308,417,290,401,272,381,261,383,256,404,268,421,287,429,306,436,325,452,343,476,355"/>
+<area shape="rect" id="Node000015" href="$d4/d36/namespacefl_a8f8ddf96d8da66e41ae29a178864b041.html#a8f8ddf96d8da66e41ae29a178864b041" title=" " alt="" coords="220,283,399,308"/>
+<area shape="poly" id="edge15_Node000013_Node000015" title=" " alt="" coords="476,356,450,347,425,334,402,322,367,311,369,306,404,317,428,330,452,342,477,351"/>
+<area shape="rect" id="Node000016" href="$d4/d36/namespacefl_a279c5b0631fd9e5f7e979669e0ce9bf1.html#a279c5b0631fd9e5f7e979669e0ce9bf1" title=" " alt="" coords="220,332,399,357"/>
+<area shape="poly" id="edge16_Node000013_Node000016" title=" " alt="" coords="474,365,399,357,399,352,475,360"/>
+<area shape="rect" id="Node000017" href="$d4/d36/namespacefl_a8ddb7b24149fd1d473ed809fded487cb.html#a8ddb7b24149fd1d473ed809fded487cb" title=" " alt="" coords="220,381,399,407"/>
+<area shape="poly" id="edge17_Node000013_Node000017" title=" " alt="" coords="475,380,399,388,399,382,474,375"/>
+<area shape="rect" id="Node000018" href="$d4/d36/namespacefl_a1d5d5edd505834a44255390ffec62163.html#a1d5d5edd505834a44255390ffec62163" title=" " alt="" coords="216,431,403,456"/>
+<area shape="poly" id="edge18_Node000013_Node000018" title=" " alt="" coords="476,389,452,396,404,420,365,433,363,428,402,416,450,392,474,384"/>
+<area shape="rect" id="Node000019" href="$d4/d36/namespacefl_ae758b3295667049b67b28ea7628df1c2.html#ae758b3295667049b67b28ea7628df1c2" title=" " alt="" coords="220,480,399,505"/>
+<area shape="poly" id="edge19_Node000013_Node000019" title=" " alt="" coords="476,384,452,396,436,413,429,432,421,451,404,469,380,482,378,478,401,465,417,448,424,430,432,410,449,392,474,379"/>
+<area shape="rect" id="Node000020" href="$d4/d36/namespacefl_a53485bf6aecfaca9134dd2be45a5934e.html#a53485bf6aecfaca9134dd2be45a5934e" title=" " alt="" coords="220,529,399,555"/>
+<area shape="poly" id="edge20_Node000013_Node000020" title=" " alt="" coords="476,382,452,396,440,410,433,425,429,456,425,487,418,503,404,519,385,531,382,527,401,515,413,500,420,486,424,455,428,423,436,407,449,392,473,377"/>
+<area shape="rect" id="Node000021" href="$d4/d36/namespacefl_a09da435857ae2a973d727792b25bcaaf.html#a09da435857ae2a973d727792b25bcaaf" title=" " alt="" coords="220,579,399,604"/>
+<area shape="poly" id="edge21_Node000013_Node000021" title=" " alt="" coords="476,381,452,396,437,416,430,437,429,481,429,525,421,547,405,569,389,581,385,576,401,565,416,545,424,524,424,481,424,436,432,414,449,392,473,377"/>
+</map>

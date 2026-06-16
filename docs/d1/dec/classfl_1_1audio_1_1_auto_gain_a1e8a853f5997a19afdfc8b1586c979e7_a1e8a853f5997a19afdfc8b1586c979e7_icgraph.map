@@ -1,0 +1,11 @@
+<map id="fl::audio::AutoGain::AutoGain" name="fl::audio::AutoGain::AutoGain">
+<area shape="rect" id="Node000001" title=" " alt="" coords="387,37,529,77"/>
+<area shape="rect" id="Node000002" href="$d1/dec/classfl_1_1audio_1_1_auto_gain_aa0f573c5523b76a8d90d1a5da2e2dc56.html#aa0f573c5523b76a8d90d1a5da2e2dc56" title="Configure the auto gain controller." alt="" coords="196,37,339,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="373,69,339,69,339,63,373,64"/>
+<area shape="poly" id="edge2_Node000002_Node000001" title=" " alt="" coords="352,46,387,46,387,51,352,51"/>
+<area shape="poly" id="edge5_Node000002_Node000002" title=" " alt="" coords="299,25,288,19,267,16,249,18,239,23,235,29,237,36,231,38,229,28,235,19,248,13,267,11,290,14,302,21"/>
+<area shape="rect" id="Node000003" href="$d1/dec/classfl_1_1audio_1_1_auto_gain_a763118e95033c3c51055d17d66a0dad8.html#a763118e95033c3c51055d17d66a0dad8" title=" " alt="" coords="5,5,148,45"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="182,46,148,40,149,35,183,41"/>
+<area shape="rect" id="Node000004" href="$d1/dec/classfl_1_1audio_1_1_auto_gain_a2b4a902f5f8a151104348d3188454e3c.html#a2b4a902f5f8a151104348d3188454e3c" title=" " alt="" coords="5,69,148,109"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="183,74,149,80,148,75,182,69"/>
+</map>

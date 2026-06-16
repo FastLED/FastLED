@@ -1,7 +1,9 @@
 <map id="LedRopeInterface::Set" name="LedRopeInterface::Set">
-<area shape="rect" id="Node000001" title=" " alt="" coords="219,31,384,56"/>
-<area shape="rect" id="Node000002" href="$dd/d45/struct_painter_a99ab92bb8d2baae96c7b4b4aacda4de3.html#a99ab92bb8d2baae96c7b4b4aacda4de3" title=" " alt="" coords="35,5,141,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="205,35,141,27,142,22,205,29"/>
-<area shape="rect" id="Node000003" href="$d2/d84/class_led_rope_interface_a3afded4540e5ba7f429cbf0d7b16a1a3.html#a3afded4540e5ba7f429cbf0d7b16a1a3" title=" " alt="" coords="5,55,171,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="206,57,171,61,171,55,205,51"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="317,31,483,56"/>
+<area shape="rect" id="Node000002" href="$dd/d45/struct_painter_a99ab92bb8d2baae96c7b4b4aacda4de3.html#a99ab92bb8d2baae96c7b4b4aacda4de3" title=" " alt="" coords="133,5,240,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="303,35,240,27,240,22,304,29"/>
+<area shape="rect" id="Node000004" href="$d2/d84/class_led_rope_interface_a3afded4540e5ba7f429cbf0d7b16a1a3.html#a3afded4540e5ba7f429cbf0d7b16a1a3" title=" " alt="" coords="104,55,269,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="304,57,270,61,269,55,304,51"/>
+<area shape="rect" id="Node000003" href="$d8/de5/_luminescent_grand_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,5,56,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="119,21,56,21,56,15,119,15"/>
 </map>

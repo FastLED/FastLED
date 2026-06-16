@@ -1,0 +1,9 @@
+<map id="fl::third_party::nsgif_destroy" name="fl::third_party::nsgif_destroy">
+<area shape="rect" id="Node000001" title="Free a NSGIF object." alt="" coords="775,5,923,45"/>
+<area shape="rect" id="Node000002" href="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_a4d1c5e1d95fc0aa97179735b053c870a.html#a4d1c5e1d95fc0aa97179735b053c870a" title=" " alt="" coords="519,5,727,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="761,28,727,28,727,23,761,23"/>
+<area shape="rect" id="Node000003" href="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_a7ae4321cb04462960a62bb420a84a55c.html#a7ae4321cb04462960a62bb420a84a55c" title=" " alt="" coords="297,5,471,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="505,28,471,28,471,23,505,23"/>
+<area shape="rect" id="Node000004" href="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_a6d1e5b9f4d05b30de4828506ee612988.html#a6d1e5b9f4d05b30de4828506ee612988" title=" " alt="" coords="5,5,249,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="284,28,250,28,250,23,284,23"/>
+</map>

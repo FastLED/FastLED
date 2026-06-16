@@ -1,24 +1,48 @@
 <map id="fl::Animartrix" name="fl::Animartrix">
-<area shape="rect" id="Node000001" title=" " alt="" coords="381,175,488,201"/>
-<area shape="rect" id="Node000006" href="$d1/dda/classfl_1_1_fast_l_e_d_a_n_i_mart_r_i_x.html" title=" " alt="" coords="761,134,925,159"/>
-<area shape="poly" id="edge7_Node000006_Node000001" title=" " alt="" coords="501,179,760,152,761,158,502,184"/>
-<area shape="rect" id="Node000002" href="$d7/d3e/classfl_1_1_fx2d.html" title=" " alt="" coords="199,143,269,169"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="283,161,382,177,381,182,282,166"/>
-<area shape="rect" id="Node000003" href="$da/d5d/classfl_1_1_fx.html" title=" " alt="" coords="19,119,74,145"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="88,134,199,149,198,154,87,140"/>
-<area shape="rect" id="Node000004" href="$d0/dce/classfl_1_1_x_y_map.html" title=" " alt="" coords="5,169,88,194"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="101,175,174,167,198,162,199,167,175,172,102,180"/>
-<area shape="rect" id="Node000005" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="1165,93,1336,133"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="1176,140,1142,149,1042,174,940,188,813,196,687,198,488,194,488,188,687,193,813,191,940,183,1041,168,1141,144,1175,135"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="938,140,1141,125,1165,123,1165,128,1142,131,938,145"/>
-<area shape="rect" id="Node000007" href="$df/d5e/classanimartrix__detail_1_1_a_n_i_mart_r_i_x.html" title=" " alt="" coords="363,100,506,140"/>
-<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="520,123,722,136,761,139,760,144,721,141,520,128"/>
-<area shape="rect" id="Node000016" href="$d5/d2b/structfl_1_1default__delete.html" title=" " alt="" coords="745,5,940,45"/>
-<area shape="poly" id="edge8_Node000005_Node000016" title=" " alt="" coords="954,38,1046,54,1142,75,1195,91,1194,96,1141,80,1045,59,953,43"/>
-<area shape="rect" id="Node000017" href="$d5/d2b/structfl_1_1default__delete.html" title=" " alt="" coords="349,13,520,38"/>
-<area shape="poly" id="edge9_Node000016_Node000017" title=" " alt="" coords="534,23,745,23,745,28,534,28"/>
-<area shape="rect" id="Node000018" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="775,69,910,109"/>
-<area shape="poly" id="edge10_Node000005_Node000018" title=" " alt="" coords="924,91,1165,106,1165,111,923,97"/>
-<area shape="rect" id="Node000019" href="$d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)" alt="" coords="205,193,263,218"/>
-<area shape="poly" id="edge11_Node000001_Node000019" title=" " alt="" coords="277,199,381,190,381,195,277,204"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="1757,440,1864,465"/>
+<area shape="rect" id="Node000002" href="$d7/d3e/classfl_1_1_fx2d.html" title=" " alt="" coords="1437,55,1508,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1510,85,1559,115,1619,158,1681,211,1735,271,1764,316,1785,364,1809,439,1804,441,1780,366,1759,319,1731,274,1677,215,1616,162,1556,120,1507,89"/>
+<area shape="rect" id="Node000003" href="$da/d5d/classfl_1_1_fx.html" title=" " alt="" coords="1021,5,1076,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1090,19,1340,45,1437,59,1436,64,1340,50,1089,24"/>
+<area shape="rect" id="Node000004" href="$d0/dce/classfl_1_1_x_y_map.html" title=" " alt="" coords="1007,55,1090,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="1104,65,1437,65,1437,70,1104,70"/>
+<area shape="rect" id="Node000005" href="$dc/d58/structfl_1_1_context.html" title=" " alt="" coords="634,400,723,425"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="737,413,788,415,1356,436,1757,449,1757,454,1355,441,788,421,737,418"/>
+<area shape="rect" id="Node000012" href="$d5/d77/structfl_1_1_engine.html" title=" " alt="" coords="1007,348,1090,373"/>
+<area shape="poly" id="edge12_Node000012_Node000005" title=" " alt="" coords="737,402,1007,364,1008,369,737,407"/>
+<area shape="rect" id="Node000006" href="$d0/d08/classfl_1_1span.html" title=" " alt="" coords="304,401,456,427"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="470,411,634,410,634,416,470,416"/>
+<area shape="rect" id="Node000007" href="$da/dd6/structfl_1_1_c_r_g_b.html" title="Representation of an 8&#45;bit RGB pixel (Red, Green, Blue)" alt="" coords="47,443,121,468"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="134,447,274,429,304,424,305,429,275,434,135,452"/>
+<area shape="rect" id="Node000008" href="$d0/d08/classfl_1_1span.html" title=" " alt="" coords="5,393,163,419"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="176,406,304,409,304,415,176,411"/>
+<area shape="rect" id="Node000009" href="$dd/dd8/classfl_1_1_optional.html" title=" " alt="" coords="299,329,461,355"/>
+<area shape="poly" id="edge8_Node000005_Node000009" title=" " alt="" coords="447,355,486,365,634,400,633,405,485,370,446,361"/>
+<area shape="poly" id="edge13_Node000012_Node000009" title=" " alt="" coords="475,341,940,354,1007,356,1007,362,940,359,475,347"/>
+<area shape="rect" id="Node000010" href="$dd/dd8/classfl_1_1_optional.html" title=" " alt="" coords="19,329,149,355"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="163,339,299,339,299,345,163,345"/>
+<area shape="rect" id="Node000011" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="1407,321,1538,361"/>
+<area shape="poly" id="edge10_Node000005_Node000011" title=" " alt="" coords="1394,363,1340,374,1237,391,1134,402,903,413,724,416,724,410,903,408,1133,397,1237,386,1340,369,1393,357"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="1104,359,1157,359,1249,362,1340,359,1407,351,1407,356,1340,365,1249,367,1157,365,1104,364"/>
+<area shape="rect" id="Node000022" href="$d5/d2b/structfl_1_1default__delete.html" title=" " alt="" coords="983,283,1115,323"/>
+<area shape="poly" id="edge14_Node000011_Node000022" title=" " alt="" coords="1129,311,1158,314,1407,334,1407,339,1157,319,1129,316"/>
+<area shape="rect" id="Node000023" href="$d5/d2b/structfl_1_1default__delete.html" title=" " alt="" coords="593,213,764,239"/>
+<area shape="poly" id="edge15_Node000022_Node000023" title=" " alt="" coords="754,239,983,287,982,292,753,244"/>
+<area shape="rect" id="Node000027" href="$d5/d2b/structfl_1_1default__delete.html" title=" " alt="" coords="964,105,1133,145"/>
+<area shape="poly" id="edge20_Node000027_Node000023" title=" " alt="" coords="739,207,974,142,976,147,740,212"/>
+<area shape="rect" id="Node000024" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="981,219,1116,259"/>
+<area shape="poly" id="edge16_Node000011_Node000024" title=" " alt="" coords="1130,252,1341,299,1408,318,1406,323,1339,305,1129,258"/>
+<area shape="rect" id="Node000025" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="1399,185,1546,225"/>
+<area shape="poly" id="edge21_Node000025_Node000024" title=" " alt="" coords="1130,231,1340,215,1399,210,1399,215,1340,221,1130,237"/>
+<area shape="poly" id="edge17_Node000001_Node000025" title=" " alt="" coords="1514,231,1793,438,1790,442,1511,235"/>
+<area shape="rect" id="Node000026" href="$d1/d69/classfl_1_1_i_animartrix2_viz.html" title=" " alt="" coords="979,169,1118,195"/>
+<area shape="poly" id="edge18_Node000025_Node000026" title=" " alt="" coords="1132,184,1399,198,1399,203,1132,189"/>
+<area shape="poly" id="edge19_Node000025_Node000027" title=" " alt="" coords="1147,134,1241,148,1341,166,1405,182,1404,187,1339,171,1240,153,1146,139"/>
+<area shape="rect" id="Node000028" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="1364,512,1581,567"/>
+<area shape="poly" id="edge22_Node000001_Node000028" title=" " alt="" coords="1595,534,1664,524,1732,505,1767,485,1794,463,1798,468,1770,490,1734,510,1665,530,1596,540"/>
+<area shape="rect" id="Node000018" href="$d4/dad/classfl_1_1vector__basic.html" title="Type&#45;erased vector base class." alt="" coords="619,539,739,564"/>
+<area shape="poly" id="edge23_Node000028_Node000018" title=" " alt="" coords="752,548,1364,538,1364,544,752,553"/>
+<area shape="rect" id="Node000021" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="990,569,1107,595"/>
+<area shape="poly" id="edge25_Node000021_Node000018" title=" " alt="" coords="753,555,990,575,989,580,752,560"/>
+<area shape="poly" id="edge24_Node000028_Node000021" title=" " alt="" coords="1121,584,1225,586,1283,583,1340,577,1394,564,1395,569,1340,582,1283,588,1225,591,1121,590"/>
 </map>

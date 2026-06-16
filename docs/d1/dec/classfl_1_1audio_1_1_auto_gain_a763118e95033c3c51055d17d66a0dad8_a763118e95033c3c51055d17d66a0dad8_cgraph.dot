@@ -1,0 +1,18 @@
+digraph "fl::audio::AutoGain::AutoGain"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::audio::AutoGain\l::AutoGain",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::audio::AutoGain\l::configure",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dec/classfl_1_1audio_1_1_auto_gain_aa0f573c5523b76a8d90d1a5da2e2dc56.html#aa0f573c5523b76a8d90d1a5da2e2dc56",tooltip="Configure the auto gain controller."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::audio::AutoGain\l::AutoGain",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dec/classfl_1_1audio_1_1_auto_gain_a1e8a853f5997a19afdfc8b1586c979e7.html#a1e8a853f5997a19afdfc8b1586c979e7",tooltip=" "];
+  Node3 -> Node2 [id="edge3_Node000003_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node2 [id="edge4_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node4 [id="edge5_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::audio::AutoGain\l::resolvePreset",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dec/classfl_1_1audio_1_1_auto_gain_af04483d2824d8a90ba7705897ec02b90.html#af04483d2824d8a90ba7705897ec02b90",tooltip="Resolve preset enum into concrete PI tuning parameters."];
+}

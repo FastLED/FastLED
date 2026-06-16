@@ -1,0 +1,18 @@
+<map id="fl::audio::detector::Note::calculatePitchBend" name="fl::audio::detector::Note::calculatePitchBend">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,47,199,87"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350" title=" " alt="" coords="313,5,391,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="198,46,298,26,299,31,199,51"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_af3a8e787bc8bcd73dcddb8b47a826554.html#af3a8e787bc8bcd73dcddb8b47a826554" title=" " alt="" coords="321,55,383,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="199,65,307,65,307,70,199,70"/>
+<area shape="rect" id="Node000006" href="$d9/d77/classfl_1_1audio_1_1detector_1_1_note_a4af663d226c7d5189320a4ea5d83a728.html#a4af663d226c7d5189320a4ea5d83a728" title=" " alt="" coords="247,105,457,145"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="190,85,252,99,250,104,189,90"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a083789a22e6f21134e65d0d0ed247858.html#a083789a22e6f21134e65d0d0ed247858" title=" " alt="" coords="627,60,758,85"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="384,65,613,69,613,74,384,70"/>
+<area shape="rect" id="Node000005" href="$df/d9e/namespacefl_1_1detail_aefd5cee30614d18a52adbf22fc83f4a8.html#aefd5cee30614d18a52adbf22fc83f4a8" title=" " alt="" coords="809,85,972,111"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="759,78,796,83,795,88,758,84"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a20736f8f6d31db2c6ac9b4def3b1a80a.html#a20736f8f6d31db2c6ac9b4def3b1a80a" title=" " alt="" coords="505,109,576,135"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="458,121,491,120,491,125,458,126"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a96f5f2dd80fb8deeb8997822bedd433f.html#a96f5f2dd80fb8deeb8997822bedd433f" title=" " alt="" coords="624,109,761,135"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="576,119,610,119,610,125,576,125"/>
+<area shape="poly" id="edge8_Node000008_Node000005" title=" " alt="" coords="761,111,796,107,796,112,762,116"/>
+</map>

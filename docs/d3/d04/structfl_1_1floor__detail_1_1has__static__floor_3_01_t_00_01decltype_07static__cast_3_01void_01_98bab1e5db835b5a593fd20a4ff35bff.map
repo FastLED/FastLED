@@ -1,0 +1,13 @@
+<map id="fl::floor_detail::has_static_floor&lt; T, decltype(static_cast&lt; void &gt;(T::floor(declval&lt; T &gt;())))&gt;" name="fl::floor_detail::has_static_floor&lt; T, decltype(static_cast&lt; void &gt;(T::floor(declval&lt; T &gt;())))&gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="12,339,216,408"/>
+<area shape="rect" id="Node000002" href="$dd/dca/structfl_1_1fl_1_1integral__constant.html" title=" " alt="" coords="86,108,177,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,141,49,168,30,187,15,208,9,225,9,242,20,277,44,309,72,337,68,341,40,313,16,279,3,243,4,224,10,205,26,183,45,164,89,137"/>
+<area shape="rect" id="Node000005" href="$d4/dfa/structfl_1_1floor__detail_1_1has__static__floor.html" title=" " alt="" coords="25,207,238,247"/>
+<area shape="poly" id="edge6_Node000005_Node000002" title=" " alt="" coords="134,147,134,206,129,206,129,147"/>
+<area shape="rect" id="Node000003" href="$dd/dca/structfl_1_1fl_1_1integral__constant.html" title=" " alt="" coords="120,5,287,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="157,56,143,71,136,89,134,108,128,107,130,88,138,68,153,52"/>
+<area shape="rect" id="Node000004" href="$dd/dca/structfl_1_1fl_1_1integral__constant.html" title=" " alt="" coords="232,157,316,183"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="236,54,246,68,265,116,275,156,269,158,260,118,241,71,231,57"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="281,196,283,223,281,254,274,287,259,316,240,335,217,349,215,345,237,331,254,313,269,285,276,254,277,223,275,196"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="121,260,118,271,114,306,114,338,109,338,109,305,113,270,115,259"/>
+</map>

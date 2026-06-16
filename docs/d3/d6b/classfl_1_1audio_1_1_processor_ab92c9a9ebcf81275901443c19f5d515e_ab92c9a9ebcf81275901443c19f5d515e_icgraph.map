@@ -1,0 +1,39 @@
+<map id="fl::audio::Processor::getPitchDetector" name="fl::audio::Processor::getPitchDetector">
+<area shape="rect" id="Node000001" title=" " alt="" coords="613,248,759,288"/>
+<area shape="poly" id="edge24_Node000001_Node000001" title=" " alt="" coords="719,236,708,229,686,227,667,229,656,233,652,239,654,247,649,248,647,238,652,229,666,223,686,221,709,224,722,232"/>
+<area shape="rect" id="Node000002" href="$d3/d6b/classfl_1_1audio_1_1_processor_a3a242f17c153d3fb4ceec0111f342a19.html#a3a242f17c153d3fb4ceec0111f342a19" title=" " alt="" coords="415,139,561,179"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="636,244,524,181,527,177,639,239"/>
+<area shape="rect" id="Node000010" href="$d3/d6b/classfl_1_1audio_1_1_processor_aabf02223f6e550581edd6d8714aac63f.html#aabf02223f6e550581edd6d8714aac63f" title=" " alt="" coords="415,377,561,417"/>
+<area shape="poly" id="edge16_Node000001_Node000010" title=" " alt="" coords="644,298,521,379,518,375,641,294"/>
+<area shape="rect" id="Node000012" href="$d3/d6b/classfl_1_1audio_1_1_processor_aec45aa6c6cfdd52bb53f332973190726.html#aec45aa6c6cfdd52bb53f332973190726" title=" " alt="" coords="411,248,565,288"/>
+<area shape="poly" id="edge20_Node000001_Node000012" title=" " alt="" coords="599,271,566,271,566,265,599,265"/>
+<area shape="poly" id="edge11_Node000002_Node000002" title=" " alt="" coords="521,127,510,120,488,117,469,119,458,124,454,130,456,138,451,139,449,129,454,120,468,114,488,112,511,115,524,122"/>
+<area shape="rect" id="Node000003" href="$d3/d6b/classfl_1_1audio_1_1_processor_a563d7ca8b8784ca9a29e63c6053a959e.html#a563d7ca8b8784ca9a29e63c6053a959e" title=" " alt="" coords="213,29,358,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="444,133,361,84,336,72,339,67,364,79,447,129"/>
+<area shape="rect" id="Node000006" href="$d3/d6b/classfl_1_1audio_1_1_processor_a60ad9dcc744a8b622bac259bfb7d9400.html#a60ad9dcc744a8b622bac259bfb7d9400" title=" " alt="" coords="208,117,363,157"/>
+<area shape="poly" id="edge7_Node000002_Node000006" title=" " alt="" coords="401,152,363,148,363,143,402,147"/>
+<area shape="rect" id="Node000008" href="$d3/d6b/classfl_1_1audio_1_1_processor_a26a461883fadd554498bc51f6d441ecf.html#a26a461883fadd554498bc51f6d441ecf" title=" " alt="" coords="213,256,358,296"/>
+<area shape="poly" id="edge12_Node000002_Node000008" title=" " alt="" coords="442,188,323,258,320,253,439,183"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="319,18,307,11,285,8,266,10,254,15,250,21,252,28,247,30,245,20,251,11,265,5,285,3,309,6,322,13"/>
+<area shape="rect" id="Node000004" href="$d8/dea/classfl_1_1audio_1_1_reactive_a00a0c41ed8fbaad66a1f6bcad779a1a8.html#a00a0c41ed8fbaad66a1f6bcad779a1a8" title=" " alt="" coords="13,29,152,69"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="199,52,152,52,152,47,199,47"/>
+<area shape="rect" id="Node000005" href="$d3/d6b/classfl_1_1audio_1_1_processor_a44c9bf7e90fafc4f6bc668d7796ef27c.html#a44c9bf7e90fafc4f6bc668d7796ef27c" title=" " alt="" coords="10,187,155,227"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="216,79,210,83,194,100,185,116,177,133,162,153,118,189,115,184,158,149,172,130,181,114,190,97,206,79,213,74"/>
+<area shape="poly" id="edge6_Node000005_Node000005" title=" " alt="" coords="117,175,105,168,83,165,63,167,52,172,47,178,50,186,44,187,42,177,48,168,62,162,83,160,106,163,119,170"/>
+<area shape="poly" id="edge10_Node000006_Node000005" title=" " alt="" coords="214,164,143,189,141,184,213,159"/>
+<area shape="poly" id="edge8_Node000006_Node000006" title=" " alt="" coords="319,106,307,99,285,96,266,98,254,103,250,109,252,116,247,118,245,108,251,99,265,93,285,91,309,94,322,101"/>
+<area shape="rect" id="Node000007" href="$d8/dea/classfl_1_1audio_1_1_reactive_a692e82d6f2df1b0c2af5008b73f1cfdb.html#a692e82d6f2df1b0c2af5008b73f1cfdb" title=" " alt="" coords="5,99,160,139"/>
+<area shape="poly" id="edge9_Node000006_Node000007" title=" " alt="" coords="194,132,160,128,161,123,195,126"/>
+<area shape="poly" id="edge15_Node000008_Node000005" title=" " alt="" coords="213,254,141,229,143,224,214,249"/>
+<area shape="poly" id="edge13_Node000008_Node000008" title=" " alt="" coords="319,244,307,237,285,235,266,237,254,241,250,247,252,255,247,256,245,246,251,237,265,231,285,229,309,232,322,240"/>
+<area shape="rect" id="Node000009" href="$d8/dea/classfl_1_1audio_1_1_reactive_ab1cfa1177f7461fe0e10cef0d172164a.html#ab1cfa1177f7461fe0e10cef0d172164a" title=" " alt="" coords="13,256,152,296"/>
+<area shape="poly" id="edge14_Node000008_Node000009" title=" " alt="" coords="199,279,152,279,152,273,199,273"/>
+<area shape="poly" id="edge19_Node000010_Node000005" title=" " alt="" coords="402,414,354,416,302,412,252,399,206,374,192,359,183,344,179,311,175,278,169,262,158,246,137,229,140,225,162,242,174,260,181,277,184,311,188,342,196,356,210,370,254,394,303,407,354,411,402,409"/>
+<area shape="poly" id="edge17_Node000010_Node000010" title=" " alt="" coords="521,366,510,359,488,356,469,358,458,363,454,369,456,376,451,378,449,368,454,359,468,353,488,351,511,354,524,361"/>
+<area shape="rect" id="Node000011" href="$d8/dea/classfl_1_1audio_1_1_reactive_a90c8970968a4c5b9352d111b34e16f74.html#a90c8970968a4c5b9352d111b34e16f74" title=" " alt="" coords="216,435,355,475"/>
+<area shape="poly" id="edge18_Node000010_Node000011" title=" " alt="" coords="405,424,356,438,354,433,403,419"/>
+<area shape="poly" id="edge23_Node000012_Node000005" title=" " alt="" coords="431,245,362,223,309,214,254,209,156,206,156,201,255,203,309,209,363,217,433,240"/>
+<area shape="poly" id="edge21_Node000012_Node000012" title=" " alt="" coords="521,236,510,229,488,227,469,229,458,233,454,239,456,247,451,248,449,238,454,229,468,223,488,221,511,224,524,232"/>
+<area shape="rect" id="Node000013" href="$d8/dea/classfl_1_1audio_1_1_reactive_ae995535837de4647fc6be1a3d1d8f9f2.html#ae995535837de4647fc6be1a3d1d8f9f2" title=" " alt="" coords="208,320,363,360"/>
+<area shape="poly" id="edge22_Node000012_Node000013" title=" " alt="" coords="419,295,343,322,342,317,417,290"/>
+</map>

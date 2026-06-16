@@ -1,0 +1,17 @@
+<map id="fl/math/distance_lut.cpp.hpp" name="fl/math/distance_lut.cpp.hpp">
+<area shape="rect" id="Node000001" title="Single definition of distance antialiasing LUT This is included in the unity build via fl/gfx/_build...." alt="" coords="42,5,249,31"/>
+<area shape="rect" id="Node000002" href="$d0/d0f/distance__lut_8h.html" title=" " alt="" coords="5,79,168,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="138,33,107,70,103,67,134,29"/>
+<area shape="rect" id="Node000005" href="$df/dab/fastled__progmem_8h.html" title="Wrapper definitions to allow seamless use of PROGMEM in environments that have it." alt="" coords="131,152,280,177"/>
+<area shape="poly" id="edge8_Node000001_Node000005" title=" " alt="" coords="155,29,182,78,202,137,197,139,178,80,151,32"/>
+<area shape="rect" id="Node000003" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="167,299,270,324"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="87,105,84,133,84,170,91,211,108,249,133,274,165,291,162,296,130,278,103,252,86,213,79,171,79,132,82,104"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="107,102,175,142,173,147,104,106"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="159,372,278,397"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="221,324,221,358,216,358,216,324"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="118,225,293,251"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="208,178,208,212,203,212,203,178"/>
+<area shape="rect" id="Node000007" href="$d3/d7e/int_8h.html" title=" " alt="" coords="317,225,400,251"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="231,175,322,217,320,222,229,180"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="337,253,255,295,252,290,335,248"/>
+</map>

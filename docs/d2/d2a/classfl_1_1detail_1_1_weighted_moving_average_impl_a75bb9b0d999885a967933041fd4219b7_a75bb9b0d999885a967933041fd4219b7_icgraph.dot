@@ -1,0 +1,14 @@
+digraph "fl::detail::WeightedMovingAverageImpl::recompute"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::detail::WeightedMoving\lAverageImpl::recompute",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::detail::WeightedMoving\lAverageImpl::update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d2a/classfl_1_1detail_1_1_weighted_moving_average_impl_a71655fa9b77ee6cc37e40804b706f342.html#a71655fa9b77ee6cc37e40804b706f342",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::detail::WeightedMoving\lAverageImpl::update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d2a/classfl_1_1detail_1_1_weighted_moving_average_impl_a526ba51462630f6492c7b494f2476825.html#a526ba51462630f6492c7b494f2476825",tooltip=" "];
+}

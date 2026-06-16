@@ -8,7 +8,11 @@ digraph "fl::push_heap"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::push_heap",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::PriorityQueue::push",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d91/classfl_1_1_priority_queue_ae93f463b86a0c2bcc143fcddf92b0442.html#ae93f463b86a0c2bcc143fcddf92b0442",tooltip=" "];
+  Node2 [id="Node000002",label="fl::PriorityQueue::\lemplace",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d91/classfl_1_1_priority_queue_ad07710cdde60ef753e2b1e741d907b1a.html#ad07710cdde60ef753e2b1e741d907b1a",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::push_heap",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a2fd9bf3bf03f2985363538664d8fa8b2.html#a2fd9bf3bf03f2985363538664d8fa8b2",tooltip=" "];
+  Node3 [id="Node000003",label="fl::PriorityQueue::push",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d91/classfl_1_1_priority_queue_ae93f463b86a0c2bcc143fcddf92b0442.html#ae93f463b86a0c2bcc143fcddf92b0442",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::PriorityQueue::push",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d91/classfl_1_1_priority_queue_adc83e49b5c1c9513129bf7958a26b8fa.html#adc83e49b5c1c9513129bf7958a26b8fa",tooltip=" "];
+  Node1 -> Node5 [id="edge4_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::push_heap",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a2fd9bf3bf03f2985363538664d8fa8b2.html#a2fd9bf3bf03f2985363538664d8fa8b2",tooltip=" "];
 }

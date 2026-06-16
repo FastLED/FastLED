@@ -1,0 +1,33 @@
+<map id="fl::third_party::nsgif_frame_decode" name="fl::third_party::nsgif_frame_decode">
+<area shape="rect" id="Node000001" title="Decodes a GIF frame." alt="" coords="5,154,153,194"/>
+<area shape="rect" id="Node000002" href="$d1/d86/namespacefl_1_1third__party_a5fe21287dffcee497373334d1add3206.html#a5fe21287dffcee497373334d1add3206" title=" " alt="" coords="201,122,349,162"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,159,187,154,188,159,154,165"/>
+<area shape="rect" id="Node000003" href="$d1/d86/namespacefl_1_1third__party_aa00bee5c0f7b53c8e9441d62f98c61b2.html#aa00bee5c0f7b53c8e9441d62f98c61b2" title="Attempts to initialise the next frame." alt="" coords="201,186,349,226"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="154,183,188,189,187,194,153,189"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a3cdd970ae1ac06323addaec93ae7d4b9.html#a3cdd970ae1ac06323addaec93ae7d4b9" title=" " alt="" coords="464,40,527,65"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="332,184,347,172,364,148,370,124,377,100,396,76,422,61,450,54,451,59,424,66,399,80,381,102,375,126,369,150,351,176,335,188"/>
+<area shape="rect" id="Node000005" href="$d1/d86/namespacefl_1_1third__party_abd0590cc8ea888da867f0b97e06e7c1c.html#abd0590cc8ea888da867f0b97e06e7c1c" title=" " alt="" coords="421,90,569,130"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="324,184,348,172,372,155,396,140,412,133,414,137,399,144,375,160,351,176,327,188"/>
+<area shape="rect" id="Node000009" href="$d1/d86/namespacefl_1_1third__party_af750d842663ad165389fd35017401aea.html#af750d842663ad165389fd35017401aea" title="Get a frame&#39;s colour table." alt="" coords="416,154,575,194"/>
+<area shape="poly" id="edge8_Node000003_Node000009" title=" " alt="" coords="349,193,402,185,403,190,350,198"/>
+<area shape="rect" id="Node000012" href="$d1/d86/namespacefl_1_1third__party_a2dde749546d6b40a40f9d1b6f2311c2f.html#a2dde749546d6b40a40f9d1b6f2311c2f" title="Parse the frame&#39;s extensions." alt="" coords="397,218,593,258"/>
+<area shape="poly" id="edge10_Node000003_Node000012" title=" " alt="" coords="350,214,384,219,383,224,349,219"/>
+<area shape="rect" id="Node000017" href="$d1/d86/namespacefl_1_1third__party_a69436b97b760adfd50dcf61530d5fa9f.html#a69436b97b760adfd50dcf61530d5fa9f" title="Parse the image data for a gif frame." alt="" coords="417,282,573,322"/>
+<area shape="poly" id="edge13_Node000003_Node000017" title=" " alt="" coords="312,224,398,268,417,275,415,280,396,272,310,228"/>
+<area shape="rect" id="Node000049" href="$d1/d86/namespacefl_1_1third__party_a046e41c67418ff211cefb49ae4d04bd9.html#a046e41c67418ff211cefb49ae4d04bd9" title="Parse a GIF Image Descriptor." alt="" coords="399,346,591,386"/>
+<area shape="poly" id="edge15_Node000003_Node000049" title=" " alt="" coords="293,225,336,278,366,307,399,332,410,338,407,343,396,336,362,311,332,281,289,228"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a01907b76b610d0663ed9b4204cdf68a2.html#a01907b76b610d0663ed9b4204cdf68a2" title=" " alt="" coords="719,5,786,31"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="562,87,592,74,616,57,640,40,673,28,705,21,706,26,674,33,643,44,619,61,595,79,564,92"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a95dbc431c0b3451c8ffd336fe2793a47.html#a95dbc431c0b3451c8ffd336fe2793a47" title=" " alt="" coords="712,55,793,80"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="569,95,698,74,699,79,570,100"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d" title=" " alt="" coords="705,104,800,129"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="570,109,692,112,692,118,570,115"/>
+<area shape="rect" id="Node000010" href="$d1/d86/namespacefl_1_1third__party_a4bc70d5c7e8811c0f1ff6749f4fff86c.html#a4bc70d5c7e8811c0f1ff6749f4fff86c" title="Extract a GIF colour table into a LibNSGIF colour table buffer." alt="" coords="668,154,837,194"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="575,171,654,171,654,177,575,177"/>
+<area shape="rect" id="Node000013" href="$d1/d86/namespacefl_1_1third__party_ae24b0fa9c5b2e70510700c8f33f567ee.html#ae24b0fa9c5b2e70510700c8f33f567ee" title="Parse the application extension." alt="" coords="641,218,864,258"/>
+<area shape="poly" id="edge11_Node000012_Node000013" title=" " alt="" coords="594,235,628,235,628,241,594,241"/>
+<area shape="rect" id="Node000016" href="$d1/d86/namespacefl_1_1third__party_a7d93eb39d1c5539a274a67a6219c004f.html#a7d93eb39d1c5539a274a67a6219c004f" title="Parse the graphic control extension." alt="" coords="653,283,852,337"/>
+<area shape="poly" id="edge12_Node000012_Node000016" title=" " alt="" coords="568,255,642,276,641,282,567,261"/>
+<area shape="rect" id="Node000018" href="$d1/d86/namespacefl_1_1third__party_aa9b6d03b719534d98113784d4ad52b3f.html#aa9b6d03b719534d98113784d4ad52b3f" title=" " alt="" coords="679,362,827,402"/>
+<area shape="poly" id="edge14_Node000017_Node000018" title=" " alt="" coords="558,320,594,331,642,347,669,356,667,361,641,353,592,337,557,325"/>
+</map>

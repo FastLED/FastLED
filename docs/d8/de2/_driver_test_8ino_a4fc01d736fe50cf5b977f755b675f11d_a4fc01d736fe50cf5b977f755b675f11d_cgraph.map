@@ -1,0 +1,53 @@
+<map id="setup" name="setup">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,149,64,174"/>
+<area shape="rect" id="Node000002" href="$d8/da0/class_driver_test_runner_aba2ff20ff08ed16b5764bb73de7b4b23.html#aba2ff20ff08ed16b5764bb73de7b4b23" title="Print final test summary with pass/fail status." alt="" coords="572,94,807,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="64,156,558,115,558,120,64,162"/>
+<area shape="rect" id="Node000015" href="$d8/da0/class_driver_test_runner_aaab05c61d961d92ff48a5746076f8de6.html#aaab05c61d961d92ff48a5746076f8de6" title="Run all tests: validation + driver tests." alt="" coords="112,169,292,209"/>
+<area shape="poly" id="edge9_Node000001_Node000015" title=" " alt="" coords="65,164,99,169,98,175,64,169"/>
+<area shape="rect" id="Node000003" href="$de/d66/classfl_1_1basic__string_adc70863b5a29972d3e45c5e5b31e6686.html#adc70863b5a29972d3e45c5e5b31e6686" title=" " alt="" coords="869,94,1023,119"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="807,104,855,104,855,109,807,109"/>
+<area shape="rect" id="Node000013" href="$d4/d65/_platform_config_8h_a295ca0e8f3287e7e8c93c4673e27107f.html#a295ca0e8f3287e7e8c93c4673e27107f" title="Get a human&#45;readable name for the current platform." alt="" coords="877,143,1015,169"/>
+<area shape="poly" id="edge7_Node000002_Node000013" title=" " alt="" coords="757,117,866,138,865,143,756,122"/>
+<area shape="rect" id="Node000014" href="$d1/d27/classfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e.html#a08170cac6eba7241f099ae16730f6f8e" title=" " alt="" coords="888,193,1004,218"/>
+<area shape="poly" id="edge8_Node000002_Node000014" title=" " alt="" coords="781,117,808,128,824,141,833,153,842,166,856,178,876,187,874,192,853,182,838,170,829,157,820,144,805,133,779,122"/>
+<area shape="rect" id="Node000004" href="$de/d66/classfl_1_1basic__string_ab760f9d7335a2653ad300172b1443599.html#ab760f9d7335a2653ad300172b1443599" title=" " alt="" coords="1105,29,1264,69"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="999,91,1091,69,1093,74,1000,97"/>
+<area shape="rect" id="Node000006" href="$de/d66/classfl_1_1basic__string_ad8cf512fb8663f75c77312c6fab902ad.html#ad8cf512fb8663f75c77312c6fab902ad" title=" " alt="" coords="1089,94,1280,119"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="1024,104,1075,104,1075,109,1024,109"/>
+<area shape="rect" id="Node000010" href="$de/d66/classfl_1_1basic__string_a504b37116b93044654059cacba256510.html#a504b37116b93044654059cacba256510" title=" " alt="" coords="1085,143,1284,169"/>
+<area shape="poly" id="edge6_Node000003_Node000010" title=" " alt="" coords="1009,117,1110,138,1109,143,1008,122"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="1140,30,1138,20,1145,10,1161,5,1185,3,1212,6,1227,13,1225,18,1211,11,1185,8,1162,10,1148,15,1143,21,1146,28"/>
+<area shape="rect" id="Node000016" href="$d8/da0/class_driver_test_runner_a5162083f7438ed1577175605a2b90549.html#a5162083f7438ed1577175605a2b90549" title="Print test startup header." alt="" coords="580,143,799,169"/>
+<area shape="poly" id="edge10_Node000015_Node000016" title=" " alt="" coords="292,181,566,162,566,167,292,186"/>
+<area shape="rect" id="Node000017" href="$d8/da0/class_driver_test_runner_a635659d481050af473f4b5896a8d4f99.html#a635659d481050af473f4b5896a8d4f99" title="Test all available drivers." alt="" coords="340,195,524,235"/>
+<area shape="poly" id="edge14_Node000015_Node000017" title=" " alt="" coords="293,197,327,200,326,206,292,202"/>
+<area shape="rect" id="Node000029" href="$d8/da0/class_driver_test_runner_aecda4c92e3d610584564ddf0d2f81e8e.html#aecda4c92e3d610584564ddf0d2f81e8e" title="Validate that all expected drivers are present." alt="" coords="592,308,787,348"/>
+<area shape="poly" id="edge21_Node000015_Node000029" title=" " alt="" coords="247,207,341,244,464,279,579,305,578,310,462,284,339,249,245,212"/>
+<area shape="poly" id="edge11_Node000016_Node000003" title=" " alt="" coords="756,141,865,119,866,125,757,146"/>
+<area shape="poly" id="edge12_Node000016_Node000013" title=" " alt="" coords="799,153,863,153,863,159,799,159"/>
+<area shape="poly" id="edge13_Node000016_Node000014" title=" " alt="" coords="757,166,875,189,874,194,756,171"/>
+<area shape="poly" id="edge15_Node000017_Node000003" title=" " alt="" coords="444,193,465,165,494,133,530,102,571,79,613,66,658,58,703,56,747,58,829,71,896,87,895,93,828,76,747,64,703,62,658,64,615,71,573,84,533,106,498,137,469,168,449,196"/>
+<area shape="poly" id="edge16_Node000017_Node000014" title=" " alt="" coords="510,232,572,243,690,253,741,251,806,243,830,237,854,228,885,219,887,224,855,233,832,242,807,248,741,256,689,258,572,248,509,237"/>
+<area shape="rect" id="Node000018" href="$d8/da0/class_driver_test_runner_aa77889694f06958a884c104d33914044.html#aa77889694f06958a884c104d33914044" title="Test a single driver with LED patterns." alt="" coords="586,193,793,233"/>
+<area shape="poly" id="edge17_Node000017_Node000018" title=" " alt="" coords="524,212,572,211,572,217,524,217"/>
+<area shape="poly" id="edge18_Node000018_Node000003" title=" " alt="" coords="778,191,805,178,820,166,828,154,838,141,853,128,866,122,869,127,856,133,842,145,833,157,823,170,808,182,780,196"/>
+<area shape="poly" id="edge20_Node000018_Node000014" title=" " alt="" coords="793,207,874,205,874,210,793,213"/>
+<area shape="rect" id="Node000025" href="$d8/da0/class_driver_test_runner_a07c549a9509e7698b8800f5624ab70b0.html#a07c549a9509e7698b8800f5624ab70b0" title="Record a test result." alt="" coords="855,243,1037,283"/>
+<area shape="poly" id="edge19_Node000018_Node000025" title=" " alt="" coords="793,231,842,240,841,245,792,236"/>
+<area shape="poly" id="edge22_Node000029_Node000003" title=" " alt="" coords="728,306,768,279,805,244,820,213,825,185,832,157,840,143,853,129,859,124,862,128,856,133,844,146,837,159,831,186,825,215,809,247,771,283,731,310"/>
+<area shape="poly" id="edge27_Node000029_Node000013" title=" " alt="" coords="723,306,764,278,805,243,819,226,827,210,836,194,853,178,863,172,866,177,856,182,840,197,831,212,823,229,809,247,767,282,726,310"/>
+<area shape="poly" id="edge30_Node000029_Node000014" title=" " alt="" coords="770,306,805,287,820,273,828,258,837,243,853,228,874,218,876,223,856,233,841,247,833,261,824,276,808,292,772,310"/>
+<area shape="poly" id="edge28_Node000029_Node000025" title=" " alt="" coords="768,305,853,283,855,289,769,311"/>
+<area shape="rect" id="Node000030" href="$d1/d27/classfl_1_1sstream_ab9b0040db877961d943bbe8bd8760bc7.html#ab9b0040db877961d943bbe8bd8760bc7" title=" " alt="" coords="881,307,1011,333"/>
+<area shape="poly" id="edge23_Node000029_Node000030" title=" " alt="" coords="787,322,867,320,867,325,787,328"/>
+<area shape="rect" id="Node000031" href="$d1/d27/classfl_1_1sstream_a2020a3513ae92ed435685030c3127194.html#a2020a3513ae92ed435685030c3127194" title=" " alt="" coords="881,357,1011,382"/>
+<area shape="poly" id="edge24_Node000029_Node000031" title=" " alt="" coords="787,341,868,354,867,359,786,346"/>
+<area shape="rect" id="Node000032" href="$d4/dad/classfl_1_1vector__basic_af188bd6e2b911e1127f3ef37b4b90143.html#af188bd6e2b911e1127f3ef37b4b90143" title=" " alt="" coords="861,406,1031,431"/>
+<area shape="poly" id="edge25_Node000029_Node000032" title=" " alt="" coords="737,346,856,392,880,400,879,405,854,397,735,351"/>
+<area shape="rect" id="Node000033" href="$d4/d65/_platform_config_8h_af082ae533c8e9053c5953e6fc36c30ba.html#af082ae533c8e9053c5953e6fc36c30ba" title="Populate a vector with the expected drivers for this platform." alt="" coords="871,455,1021,481"/>
+<area shape="poly" id="edge26_Node000029_Node000033" title=" " alt="" coords="715,346,776,394,815,420,856,442,873,449,871,453,854,446,812,424,773,398,712,350"/>
+<area shape="rect" id="Node000035" href="$d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c" title=" " alt="" coords="869,505,1023,530"/>
+<area shape="poly" id="edge29_Node000029_Node000035" title=" " alt="" coords="707,346,767,418,809,457,856,491,869,497,866,502,853,496,805,461,763,421,703,350"/>
+<area shape="rect" id="Node000036" href="$d4/d36/namespacefl_ae2e1ae9fd84b84af8b23721d551b9609.html#ae2e1ae9fd84b84af8b23721d551b9609" title=" " alt="" coords="905,554,987,579"/>
+<area shape="poly" id="edge31_Node000029_Node000036" title=" " alt="" coords="703,347,725,388,759,440,803,495,828,519,856,540,893,556,891,561,853,545,825,523,799,498,754,444,720,391,698,349"/>
+</map>

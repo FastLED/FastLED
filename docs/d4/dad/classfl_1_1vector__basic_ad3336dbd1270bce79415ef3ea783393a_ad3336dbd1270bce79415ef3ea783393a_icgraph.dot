@@ -1,0 +1,37 @@
+digraph "fl::vector_basic::inlineBufferPtr"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::vector_basic::inline\lBufferPtr",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Compute inline buffer pointer from offset."];
+  Node1 -> Node1 [id="edge1_Node000001_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node2 [id="edge2_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::vector_basic::isInline",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dad/classfl_1_1vector__basic_a4a79234edce9c9748432aba0f499b001.html#a4a79234edce9c9748432aba0f499b001",tooltip="Is data currently in the inline buffer?"];
+  Node2 -> Node3 [id="edge3_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::vector_basic::\l~vector_basic",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dad/classfl_1_1vector__basic_af6e858579254c11d1f0622a3584ea6b4.html#af6e858579254c11d1f0622a3584ea6b4",tooltip=" "];
+  Node2 -> Node4 [id="edge4_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::vector_basic::grow_to",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dad/classfl_1_1vector__basic_a17f684eb95a4b6b0511454f7f80f87d1.html#a17f684eb95a4b6b0511454f7f80f87d1",tooltip="Grow to new_capacity. Moves existing elements."];
+  Node4 -> Node5 [id="edge5_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::vector_basic::ensure\l_capacity",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/dad/classfl_1_1vector__basic_a9a315ee221dc1563fecb0c0f84c73438.html#a9a315ee221dc1563fecb0c0f84c73438",tooltip="Ensure capacity for at least n elements. Grows if needed."];
+  Node4 -> Node29 [id="edge6_Node000004_Node000029",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node29 [id="Node000029",label="fl::vector_basic::reserve_impl",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/dad/classfl_1_1vector__basic_a307989a09148dc75fc5fbb2111cfef6f.html#a307989a09148dc75fc5fbb2111cfef6f",tooltip=" "];
+  Node2 -> Node47 [id="edge7_Node000002_Node000047",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node47 [id="Node000047",label="fl::vector_basic::move\l_assign",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/dad/classfl_1_1vector__basic_aa709d10073cb8bdbb18bf4ca4f8561e6.html#aa709d10073cb8bdbb18bf4ca4f8561e6",tooltip="Move-assign from another vector_basic (clears this first)."];
+  Node2 -> Node52 [id="edge8_Node000002_Node000052",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node52 [id="Node000052",label="fl::vector_basic::shrink\l_to_fit_impl",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dad/classfl_1_1vector__basic_a48223a8162cf9d3b9c3e31962cf3184e.html#a48223a8162cf9d3b9c3e31962cf3184e",tooltip=" "];
+  Node52 -> Node53 [id="edge9_Node000052_Node000053",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node53 [id="Node000053",label="fl::vector\< fl::i16\l \>::shrink_to_fit",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d24/classfl_1_1vector_a9fc7d614a5f15d6e28461feeacc53468.html#a9fc7d614a5f15d6e28461feeacc53468",tooltip=" "];
+  Node2 -> Node54 [id="edge10_Node000002_Node000054",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node54 [id="Node000054",label="fl::vector_basic::swap_impl",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dad/classfl_1_1vector__basic_af883d2217b11ac6ea91134588f181acf.html#af883d2217b11ac6ea91134588f181acf",tooltip="Swap contents with another vector_basic."];
+  Node54 -> Node55 [id="edge11_Node000054_Node000055",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node55 [id="Node000055",label="fl::vector\< fl::i16\l \>::swap",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d24/classfl_1_1vector_aa3ae32a9c2f09eab87fcff68a8ea78e2.html#aa3ae32a9c2f09eab87fcff68a8ea78e2",tooltip=" "];
+  Node54 -> Node56 [id="edge12_Node000054_Node000056",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node56 [id="Node000056",label="fl::vector\< fl::i16\l \>::swap",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d24/classfl_1_1vector_a7dd86cddda96caea12150c0f0cb87618.html#a7dd86cddda96caea12150c0f0cb87618",tooltip=" "];
+  Node54 -> Node54 [id="edge13_Node000054_Node000054",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node47 [id="edge14_Node000001_Node000047",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node52 [id="edge15_Node000001_Node000052",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node54 [id="edge16_Node000001_Node000054",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

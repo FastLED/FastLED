@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::SlabAllocator\<\l T, SLAB_SIZE \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/db8/classfl_1_1_slab_allocator.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::detail::TypeSchema\l\< fl::string, void \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/df6/structfl_1_1detail_1_1_type_schema_3_01fl_1_1string_00_01void_01_4.html",tooltip=" "];
 }

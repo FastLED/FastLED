@@ -1,0 +1,15 @@
+<map id="fl/channels/rx/types.h" name="fl/channels/rx/types.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="281,5,442,31"/>
+<area shape="rect" id="Node000002" href="$dd/d5c/fl_2channels_2rx_2config_8h.html" title=" " alt="" coords="279,79,443,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="364,44,364,79,359,79,359,44"/>
+<area shape="rect" id="Node000003" href="$da/d7b/rx_2channel_8h.html" title=" " alt="" coords="273,152,449,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="364,118,364,152,359,152,359,118"/>
+<area shape="rect" id="Node000004" href="$d2/ddc/test_8h.html" title=" " alt="" coords="5,225,213,265"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="312,184,171,228,169,223,311,179"/>
+<area shape="rect" id="Node000007" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="237,233,323,258"/>
+<area shape="poly" id="edge4_Node000003_Node000007" title=" " alt="" coords="342,189,294,234,290,231,338,185"/>
+<area shape="rect" id="Node000011" href="$d7/d1f/rx__test_8cpp_8hpp.html" title=" " alt="" coords="347,225,541,265"/>
+<area shape="poly" id="edge5_Node000003_Node000011" title=" " alt="" coords="385,185,426,223,422,227,381,189"/>
+<area shape="rect" id="Node000017" href="$d4/df5/rx_2channel_8cpp_8hpp.html" title=" " alt="" coords="565,233,784,258"/>
+<area shape="poly" id="edge6_Node000003_Node000017" title=" " alt="" coords="421,178,630,230,628,235,419,183"/>
+</map>

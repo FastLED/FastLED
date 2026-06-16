@@ -1,0 +1,22 @@
+<map id="fl::Channel::applyConfig" name="fl::Channel::applyConfig">
+<area shape="rect" id="Node000001" title="Apply reconfigurable settings from a ChannelConfig." alt="" coords="5,141,181,166"/>
+<area shape="rect" id="Node000002" href="$da/db7/structfl_1_1_channel_events_aa02eba6c71d0300625657d33cefceab9.html#aa02eba6c71d0300625657d33cefceab9" title=" " alt="" coords="229,5,372,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,138,161,99,228,55,238,49,241,54,231,60,164,104,112,143"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a0ad6a54c30af707e1bb3ad37c1e7e36b.html#a0ad6a54c30af707e1bb3ad37c1e7e36b" title="The color corrction to use for this controller, expressed as a CRGB object." alt="" coords="233,69,369,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="135,138,221,111,223,116,136,143"/>
+<area shape="rect" id="Node000008" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a83f37ea29f9b1009fadddb18c50c30c2.html#a83f37ea29f9b1009fadddb18c50c30c2" title="Set the dithering mode for this controller to use." alt="" coords="233,133,369,173"/>
+<area shape="poly" id="edge6_Node000001_Node000008" title=" " alt="" coords="181,151,219,151,219,156,181,156"/>
+<area shape="rect" id="Node000009" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a6ff5ae866bbc7e7ae7c82875607b52a7.html#a6ff5ae866bbc7e7ae7c82875607b52a7" title="Set the default array of LEDs to be used by this controller." alt="" coords="233,197,369,237"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="136,164,223,191,221,196,135,169"/>
+<area shape="rect" id="Node000010" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ad103f413ebe589774651e8a5c9f352a0.html#ad103f413ebe589774651e8a5c9f352a0" title="Set the color temperature, aka white point, for this controller." alt="" coords="233,261,369,301"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="112,164,164,203,231,247,241,253,238,257,228,252,161,207,109,168"/>
+<area shape="rect" id="Node000003" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="420,13,583,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="372,23,406,23,406,28,372,28"/>
+<area shape="rect" id="Node000005" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a7e91fc8f83d62c9da5e5c3d6d1bc10ce.html#a7e91fc8f83d62c9da5e5c3d6d1bc10ce" title="Protected constructor with registration mode." alt="" coords="433,165,569,205"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="348,107,373,119,449,156,447,161,371,124,345,112"/>
+<area shape="rect" id="Node000006" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a9e51518d1427463dffd596c69c6f3e46.html#a9e51518d1427463dffd596c69c6f3e46" title="Add this controller to the linked list." alt="" coords="631,165,767,205"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="570,183,617,183,617,188,570,188"/>
+<area shape="poly" id="edge7_Node000008_Node000005" title=" " alt="" coords="369,162,420,170,419,175,369,167"/>
+<area shape="poly" id="edge9_Node000009_Node000005" title=" " alt="" coords="369,204,419,196,420,201,369,209"/>
+<area shape="poly" id="edge11_Node000010_Node000005" title=" " alt="" coords="345,259,371,247,447,209,449,214,373,252,348,264"/>
+</map>

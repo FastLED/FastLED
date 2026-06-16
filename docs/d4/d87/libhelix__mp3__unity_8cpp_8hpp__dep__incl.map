@@ -1,0 +1,9 @@
+<map id="third_party/libhelix_mp3/libhelix_mp3_unity.cpp.hpp" name="third_party/libhelix_mp3/libhelix_mp3_unity.cpp.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,244,45"/>
+<area shape="rect" id="Node000002" href="$d7/dca/third__party_2libhelix__mp3_2__build_8cpp_8hpp.html" title=" " alt="" coords="47,93,203,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="127,59,127,93,122,93,122,59"/>
+<area shape="rect" id="Node000003" href="$d3/d75/third__party_2__build_8cpp_8hpp.html" title=" " alt="" coords="29,181,220,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="127,147,127,181,122,181,122,147"/>
+<area shape="rect" id="Node000004" href="$da/d76/third__party_09_8cpp.html" title="Unity build: recursive includes from src/third_party/." alt="" coords="35,255,214,280"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="127,220,127,255,122,255,122,220"/>
+</map>

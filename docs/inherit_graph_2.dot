@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="animartrix_detail::\lmodulators",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d74/namespaceanimartrix__detail.html#df/dfa/structanimartrix__detail_1_1modulators",tooltip=" "];
+  Node0 [id="Node000000",label="animartrix_ring::Orchestrator\lConfig",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d27/namespaceanimartrix__ring.html#d1/db0/structanimartrix__ring_1_1_orchestrator_config",tooltip=" "];
 }

@@ -1,0 +1,14 @@
+<map id="fl::vector_basic::ensure_capacity" name="fl::vector_basic::ensure_capacity">
+<area shape="rect" id="Node000001" title="Ensure capacity for at least n elements. Grows if needed." alt="" coords="5,59,177,99"/>
+<area shape="rect" id="Node000002" href="$d4/dad/classfl_1_1vector__basic_a17f684eb95a4b6b0511454f7f80f87d1.html#a17f684eb95a4b6b0511454f7f80f87d1" title="Grow to new_capacity. Moves existing elements." alt="" coords="225,66,405,91"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="178,76,212,76,212,81,178,81"/>
+<area shape="rect" id="Node000003" href="$d4/dad/classfl_1_1vector__basic_a4a79234edce9c9748432aba0f499b001.html#a4a79234edce9c9748432aba0f499b001" title="Is data currently in the inline buffer?" alt="" coords="468,39,643,65"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="405,66,454,61,455,66,406,71"/>
+<area shape="rect" id="Node000005" href="$d4/dad/classfl_1_1vector__basic_a81fe1c9feb8228d4269494b7984c6270.html#a81fe1c9feb8228d4269494b7984c6270" title=" " alt="" coords="453,90,657,115"/>
+<area shape="poly" id="edge5_Node000002_Node000005" title=" " alt="" coords="406,85,440,88,439,94,405,90"/>
+<area shape="rect" id="Node000004" href="$d4/dad/classfl_1_1vector__basic_ad3336dbd1270bce79415ef3ea783393a.html#ad3336dbd1270bce79415ef3ea783393a" title="Compute inline buffer pointer from offset." alt="" coords="705,29,869,69"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="643,48,692,48,692,53,643,54"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="744,30,741,20,748,10,764,5,787,3,814,6,829,13,827,18,813,11,787,8,765,10,752,15,747,21,749,28"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d" title=" " alt="" coords="740,94,835,119"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="658,102,726,103,726,108,658,107"/>
+</map>

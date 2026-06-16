@@ -1,0 +1,18 @@
+<map id="fl/math/lib8tion/random8.h" name="fl/math/lib8tion/random8.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="68,5,263,31"/>
+<area shape="rect" id="Node000002" href="$db/dab/fl_2math_2random8_8h.html" title="Fast, efficient random number generators specifically designed for high&#45;performance LED programming." alt="" coords="94,79,237,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,31,168,65,163,65,163,31"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="41,299,216,324"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="107,107,65,124,46,137,30,154,15,178,9,201,11,224,23,249,45,274,75,291,72,296,42,278,18,252,6,225,3,200,10,176,26,150,42,133,62,120,104,102"/>
+<area shape="rect" id="Node000004" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="41,152,144,177"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="155,106,116,144,112,140,152,102"/>
+<area shape="rect" id="Node000006" href="$d2/d0f/fl_2math_2lib8static_8h.html" title="Defines static inlining macros for lib8tion functions." alt="" coords="168,152,312,177"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="179,102,220,141,216,144,176,106"/>
+<area shape="rect" id="Node000010" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="337,152,464,177"/>
+<area shape="poly" id="edge8_Node000002_Node000010" title=" " alt="" coords="204,101,350,145,349,151,203,107"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="33,225,152,251"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="95,178,95,212,90,212,90,178"/>
+<area shape="rect" id="Node000007" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="176,225,350,251"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="247,177,258,211,253,213,242,178"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="243,253,164,294,161,290,240,248"/>
+</map>

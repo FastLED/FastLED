@@ -1,0 +1,11 @@
+<map id="fl::fl::remove_pointer&lt; T &gt;" name="fl::fl::remove_pointer&lt; T &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,109,200,134"/>
+<area shape="rect" id="Node000002" href="$da/d3c/namespacefl_1_1fl.html#de/d45/structfl_1_1fl_1_1remove__pointer_3_01_t_01_5_01_4" title=" " alt="" coords="390,5,547,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="150,101,223,77,389,38,390,43,225,83,152,106"/>
+<area shape="rect" id="Node000003" href="$da/d3c/namespacefl_1_1fl.html#d6/d21/structfl_1_1fl_1_1remove__pointer_3_01_t_01_5const_01_4" title=" " alt="" coords="390,69,547,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="214,109,389,94,390,99,214,114"/>
+<area shape="rect" id="Node000004" href="$da/d3c/namespacefl_1_1fl.html#d3/d86/structfl_1_1fl_1_1remove__pointer_3_01_t_01_5const_01volatile_01_4" title=" " alt="" coords="389,133,548,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="214,128,389,144,389,149,214,134"/>
+<area shape="rect" id="Node000005" href="$da/d3c/namespacefl_1_1fl.html#d7/dd5/structfl_1_1fl_1_1remove__pointer_3_01_t_01_5volatile_01_4" title=" " alt="" coords="390,197,547,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="150,136,225,161,310,183,391,200,389,206,309,188,223,167,148,141"/>
+</map>

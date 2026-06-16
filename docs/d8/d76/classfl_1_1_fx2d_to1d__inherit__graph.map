@@ -1,0 +1,7 @@
+<map id="fl::Fx2dTo1d" name="fl::Fx2dTo1d">
+<area shape="rect" id="Node000001" title="Fx2dTo1d samples a 2D effect into a 1D LED strip using a ScreenMap." alt="" coords="5,152,105,177"/>
+<area shape="rect" id="Node000002" href="$d4/d1c/classfl_1_1_fx1d.html" title=" " alt="" coords="20,79,91,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="58,118,58,152,53,152,53,118"/>
+<area shape="rect" id="Node000003" href="$da/d5d/classfl_1_1_fx.html" title=" " alt="" coords="28,5,83,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="58,44,58,79,53,79,53,44"/>
+</map>

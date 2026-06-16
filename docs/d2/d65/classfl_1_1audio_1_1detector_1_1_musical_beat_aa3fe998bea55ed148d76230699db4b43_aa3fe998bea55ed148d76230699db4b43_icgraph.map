@@ -1,0 +1,8 @@
+<map id="fl::audio::detector::MusicalBeat::configure" name="fl::audio::detector::MusicalBeat::configure">
+<area shape="rect" id="Node000001" title="Configure the beat detector." alt="" coords="263,37,441,77"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="393,26,378,19,352,16,329,18,315,23,310,29,312,36,307,38,305,28,312,18,328,13,352,11,380,14,395,21"/>
+<area shape="rect" id="Node000002" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a1303f97fb27f50d969728c8c7df3e2b4.html#a1303f97fb27f50d969728c8c7df3e2b4" title=" " alt="" coords="11,5,209,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="249,46,209,41,210,36,249,41"/>
+<area shape="rect" id="Node000003" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a8ead4e67bdff0c0600d13fc942313879.html#a8ead4e67bdff0c0600d13fc942313879" title=" " alt="" coords="5,69,215,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="249,74,215,78,215,73,249,68"/>
+</map>

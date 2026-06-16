@@ -1,0 +1,12 @@
+<map id="fl::third_party::nsgif_create" name="fl::third_party::nsgif_create">
+<area shape="rect" id="Node000001" title="Create the NSGIF object." alt="" coords="5,47,153,87"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a95dbc431c0b3451c8ffd336fe2793a47.html#a95dbc431c0b3451c8ffd336fe2793a47" title=" " alt="" coords="250,5,331,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,47,236,28,237,33,154,53"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a44a195439ac7fa303b4b0b0c956605be.html#a44a195439ac7fa303b4b0b0c956605be" title=" " alt="" coords="245,55,337,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="154,65,231,65,231,70,154,70"/>
+<area shape="rect" id="Node000004" href="$d1/d86/namespacefl_1_1third__party_a2566d948c574073795d590d29a67956b.html#a2566d948c574073795d590d29a67956b" title=" " alt="" coords="201,128,380,183"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="130,85,213,120,211,125,128,90"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="249,128,249,118,257,109,271,103,291,101,315,104,328,112,326,117,313,109,291,107,272,109,260,113,254,120,255,128"/>
+<area shape="rect" id="Node000005" href="$d1/d86/namespacefl_1_1third__party_abd7fb70feb84c5e7cec5dff5d7f79156.html#abd7fb70feb84c5e7cec5dff5d7f79156" title="Check whether the host is little endian." alt="" coords="428,135,599,175"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="380,153,414,153,414,158,380,158"/>
+</map>

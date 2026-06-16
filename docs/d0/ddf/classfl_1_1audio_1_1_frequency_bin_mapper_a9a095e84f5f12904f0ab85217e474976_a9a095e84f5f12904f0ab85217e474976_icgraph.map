@@ -1,0 +1,5 @@
+<map id="fl::audio::FrequencyBinMapper::mapBins" name="fl::audio::FrequencyBinMapper::mapBins">
+<area shape="rect" id="Node000001" title="Map FFT bins to frequency channels." alt="" coords="272,5,491,45"/>
+<area shape="rect" id="Node000002" href="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a87d17b79660b18efcade392935222299.html#a87d17b79660b18efcade392935222299" title=" " alt="" coords="5,5,224,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="258,28,224,28,224,23,258,23"/>
+</map>

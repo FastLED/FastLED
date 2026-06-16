@@ -1,15 +1,19 @@
 <map id="DMXSimpleController&lt; DATA_PIN, RGB_ORDER &gt;" name="DMXSimpleController&lt; DATA_PIN, RGB_ORDER &gt;">
-<area shape="rect" id="Node000001" title="DMX512 based LED controller class, using the DmxSimple library." alt="" coords="22,423,226,463"/>
-<area shape="rect" id="Node000002" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title=" " alt="" coords="49,333,199,373"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="127,387,127,423,121,423,121,387"/>
-<area shape="rect" id="Node000003" href="$d6/d2c/class_c_l_e_d_controller.html" title="Base definition for an LED controller." alt="" coords="59,132,179,157"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="122,171,126,333,121,333,117,171"/>
-<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="194,136,205,144,197,153,179,156,178,150,195,148,200,145,191,140"/>
-<area shape="rect" id="Node000006" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title="Template extension of the CLEDController class." alt="" coords="140,216,313,271"/>
-<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="143,164,199,214,195,218,140,168"/>
-<area shape="rect" id="Node000004" href="$d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)" alt="" coords="5,5,64,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="32,45,31,71,38,97,57,116,80,130,78,134,53,121,34,100,25,72,26,45"/>
-<area shape="rect" id="Node000005" href="$d7/d27/structfl_1_1_rgbw.html" title=" " alt="" coords="165,5,240,31"/>
-<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="200,45,190,72,176,100,158,119,139,134,136,130,154,115,171,97,186,70,195,43"/>
-<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="194,283,144,335,140,331,190,279"/>
+<area shape="rect" id="Node000001" title="DMX512 based LED controller class, using the DmxSimple library." alt="" coords="81,511,285,551"/>
+<area shape="rect" id="Node000002" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title=" " alt="" coords="107,421,258,461"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="185,475,185,511,180,511,180,475"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller.html" title=" " alt="" coords="117,229,237,255"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="181,269,185,421,179,421,175,269"/>
+<area shape="rect" id="Node000011" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title="Template extension of the CLEDController class." alt="" coords="199,304,372,359"/>
+<area shape="poly" id="edge10_Node000011_Node000003" title=" " alt="" coords="204,261,255,302,251,306,201,266"/>
+<area shape="rect" id="Node000004" href="$d0/d08/classfl_1_1span.html" title=" " alt="" coords="5,5,157,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="68,44,57,64,49,88,46,113,52,136,72,167,99,192,154,227,151,231,96,196,68,170,47,138,41,113,44,87,53,62,63,41"/>
+<area shape="rect" id="Node000007" href="$d8/da0/classfl_1_1_c_l_e_d_controller.html" title=" " alt="" coords="109,103,245,128"/>
+<area shape="poly" id="edge5_Node000007_Node000004" title=" " alt="" coords="105,39,167,100,164,104,101,42"/>
+<area shape="poly" id="edge4_Node000003_Node000007" title=" " alt="" coords="180,142,180,229,175,229,175,142"/>
+<area shape="poly" id="edge6_Node000007_Node000007" title=" " alt="" coords="260,105,268,109,272,116,264,124,246,128,245,122,261,119,267,115,265,113,258,110"/>
+<area shape="rect" id="Node000008" href="$d5/d87/structfl_1_1_channel_options.html" title="Optional channel configuration parameters All fields have sensible defaults and can be overridden as ..." alt="" coords="220,5,361,31"/>
+<area shape="poly" id="edge8_Node000003_Node000008" title=" " alt="" coords="314,39,325,53,339,75,349,94,351,115,344,139,318,172,285,199,249,218,216,232,214,227,247,213,282,194,314,169,339,136,346,114,344,96,335,77,321,56,310,43"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="268,42,193,105,189,101,265,38"/>
+<area shape="poly" id="edge9_Node000002_Node000011" title=" " alt="" coords="252,371,203,423,199,419,249,367"/>
 </map>

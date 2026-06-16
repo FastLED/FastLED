@@ -129,14 +129,15 @@ $(function(){initNavTree('d3/d10/class_potentiometer_ab3bd230b5533bf3ce06ffd4c24
 <div class="line"><span class="lineno">   86</span>    <span class="comment">// Filter by reading the value multiple times and taking</span></div>
 <div class="line"><span class="lineno">   87</span>    <span class="comment">// the average.</span></div>
 <div class="line"><span class="lineno">   88</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; 8; ++i) {</div>
-<div class="line"><span class="lineno">   89</span>      avg += analogRead(<a class="code hl_variable" href="../../d3/d10/class_potentiometer_a5d096ddf06a82c7e49771c5dc6e00d35.html#a5d096ddf06a82c7e49771c5dc6e00d35">sensor_pin_</a>);</div>
+<div class="line"><span class="lineno">   89</span>      avg += <a class="code hl_function" href="../../d4/d36/namespacefl_acefe08abf3b725b34bd2c61c94001506.html#acefe08abf3b725b34bd2c61c94001506">analogRead</a>(<a class="code hl_variable" href="../../d3/d10/class_potentiometer_a58a4784005e53952b9c84cc6807441b8.html#a58a4784005e53952b9c84cc6807441b8">mSensorPin</a>);</div>
 <div class="line"><span class="lineno">   90</span>    }</div>
 <div class="line"><span class="lineno">   91</span>    avg = avg / 8.0f;</div>
 <div class="line"><span class="lineno">   92</span>    <span class="keywordflow">return</span> avg;</div>
 <div class="line"><span class="lineno">   93</span>  }</div>
-<div class="ttc" id="aclass_potentiometer_a5d096ddf06a82c7e49771c5dc6e00d35_html_a5d096ddf06a82c7e49771c5dc6e00d35"><div class="ttname"><a href="../../d3/d10/class_potentiometer_a5d096ddf06a82c7e49771c5dc6e00d35.html#a5d096ddf06a82c7e49771c5dc6e00d35">Potentiometer::sensor_pin_</a></div><div class="ttdeci">int sensor_pin_</div><div class="ttdef"><b>Definition</b> <a href="../../de/d05/buttons_8h_source.html#l00095">buttons.h:95</a></div></div>
+<div class="ttc" id="aclass_potentiometer_a58a4784005e53952b9c84cc6807441b8_html_a58a4784005e53952b9c84cc6807441b8"><div class="ttname"><a href="../../d3/d10/class_potentiometer_a58a4784005e53952b9c84cc6807441b8.html#a58a4784005e53952b9c84cc6807441b8">Potentiometer::mSensorPin</a></div><div class="ttdeci">int mSensorPin</div><div class="ttdef"><b>Definition</b> <a href="../../de/d05/buttons_8h_source.html#l00095">buttons.h:95</a></div></div>
+<div class="ttc" id="anamespacefl_acefe08abf3b725b34bd2c61c94001506_html_acefe08abf3b725b34bd2c61c94001506"><div class="ttname"><a href="../../d4/d36/namespacefl_acefe08abf3b725b34bd2c61c94001506.html#acefe08abf3b725b34bd2c61c94001506">fl::analogRead</a></div><div class="ttdeci">u16 analogRead(int pin)</div><div class="ttdoc">Read analog value from pin.</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d48/pin_8cpp_8hpp_source.html#l00059">pin.cpp.hpp:59</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../de/d05/buttons_8h_source.html#l00095">sensor_pin_</a>.</p>
+<p class="reference">References <a class="el" href="../../de/d05/buttons_8h_source.html#l00095">mSensorPin</a>.</p>
 
 </div>
 </div>
@@ -147,7 +148,7 @@ $(function(){initNavTree('d3/d10/class_potentiometer_ab3bd230b5533bf3ce06ffd4c24
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d3/d10/class_potentiometer.html">Potentiometer</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

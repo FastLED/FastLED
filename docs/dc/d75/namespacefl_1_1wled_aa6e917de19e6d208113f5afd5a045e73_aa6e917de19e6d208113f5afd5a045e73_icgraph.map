@@ -1,0 +1,7 @@
+<map id="fl::wled::parseHexColor" name="fl::wled::parseHexColor">
+<area shape="rect" id="Node000001" title="Parse hex color string to RGB components." alt="" coords="449,5,623,31"/>
+<area shape="rect" id="Node000002" href="$dc/d75/namespacefl_1_1wled_a0e1b21aa8cf41f28a4973d7444282fce.html#a0e1b21aa8cf41f28a4973d7444282fce" title="Parse all fields from a segment JSON object into a WLEDSegment." alt="" coords="192,5,401,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="436,21,401,21,401,15,436,15"/>
+<area shape="rect" id="Node000003" href="$d2/d9f/classfl_1_1_w_l_e_d_a073f5478071f0b32ea9ac80cf3fd236c.html#a073f5478071f0b32ea9ac80cf3fd236c" title="Set WLED state from JSON object." alt="" coords="5,5,144,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="178,21,144,21,144,15,178,15"/>
+</map>

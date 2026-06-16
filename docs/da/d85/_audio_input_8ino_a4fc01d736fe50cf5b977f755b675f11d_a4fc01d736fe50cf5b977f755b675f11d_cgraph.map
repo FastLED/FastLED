@@ -1,0 +1,46 @@
+<map id="setup" name="setup">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,373,64,398"/>
+<area shape="rect" id="Node000002" href="$de/d66/classfl_1_1basic__string_adc70863b5a29972d3e45c5e5b31e6686.html#adc70863b5a29972d3e45c5e5b31e6686" title=" " alt="" coords="112,153,267,178"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="43,371,169,188,174,191,47,374"/>
+<area shape="rect" id="Node000012" href="$d7/d4d/classfl_1_1audio_1_1_i_input_aec83e8eae0b08942561ed52e99289922.html#aec83e8eae0b08942561ed52e99289922" title=" " alt="" coords="126,336,253,376"/>
+<area shape="poly" id="edge17_Node000001_Node000012" title=" " alt="" coords="64,377,112,368,113,373,65,383"/>
+<area shape="rect" id="Node000015" href="$d2/d22/_e_s_p32_audio_input_8h_a04c2d6e212e7045ddb76e7d75b460aa9.html#a04c2d6e212e7045ddb76e7d75b460aa9" title=" " alt="" coords="119,401,260,426"/>
+<area shape="poly" id="edge21_Node000001_Node000015" title=" " alt="" coords="65,388,106,396,105,401,64,393"/>
+<area shape="rect" id="Node000019" href="$d2/d22/_e_s_p32_audio_input_8h_a241ff4de8da9d97141236a8960a8415d.html#a241ff4de8da9d97141236a8960a8415d" title=" " alt="" coords="123,450,256,475"/>
+<area shape="poly" id="edge25_Node000001_Node000019" title=" " alt="" coords="54,396,81,416,113,435,131,443,129,448,111,440,78,420,51,400"/>
+<area shape="rect" id="Node000003" href="$de/d66/classfl_1_1basic__string_ab760f9d7335a2653ad300172b1443599.html#ab760f9d7335a2653ad300172b1443599" title=" " alt="" coords="335,29,493,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="211,150,313,94,355,73,358,78,316,98,214,155"/>
+<area shape="rect" id="Node000005" href="$de/d66/classfl_1_1basic__string_ad8cf512fb8663f75c77312c6fab902ad.html#ad8cf512fb8663f75c77312c6fab902ad" title=" " alt="" coords="319,153,509,178"/>
+<area shape="poly" id="edge5_Node000002_Node000005" title=" " alt="" coords="267,163,305,163,305,168,267,168"/>
+<area shape="rect" id="Node000009" href="$de/d66/classfl_1_1basic__string_a504b37116b93044654059cacba256510.html#a504b37116b93044654059cacba256510" title=" " alt="" coords="315,233,513,258"/>
+<area shape="poly" id="edge12_Node000002_Node000009" title=" " alt="" coords="227,176,365,225,363,230,225,181"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="372,30,370,20,376,10,391,5,414,3,440,6,454,13,452,18,439,11,414,8,392,10,380,15,375,21,377,28"/>
+<area shape="rect" id="Node000004" href="$de/d66/classfl_1_1basic__string_af4d95d1e9905eb5fb76e12c2c2bd7ebc.html#af4d95d1e9905eb5fb76e12c2c2bd7ebc" title=" " alt="" coords="571,29,722,54"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="494,44,557,42,558,47,494,49"/>
+<area shape="rect" id="Node000006" href="$de/d66/classfl_1_1basic__string_aa1a0710da50d0c96c08a13f5a0738ca5.html#aa1a0710da50d0c96c08a13f5a0738ca5" title=" " alt="" coords="570,102,723,127"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="473,150,574,128,575,133,474,155"/>
+<area shape="rect" id="Node000007" href="$de/d66/classfl_1_1basic__string_ab069d754c930a7557d1eb72ab925c7db.html#ab069d754c930a7557d1eb72ab925c7db" title=" " alt="" coords="567,225,727,265"/>
+<area shape="poly" id="edge9_Node000005_Node000007" title=" " alt="" coords="453,175,576,218,574,223,451,181"/>
+<area shape="rect" id="Node000008" href="$de/d66/classfl_1_1basic__string_a200eb5a16645bf60a46bf1aec11a661a.html#a200eb5a16645bf60a46bf1aec11a661a" title=" " alt="" coords="561,151,732,177"/>
+<area shape="poly" id="edge11_Node000005_Node000008" title=" " alt="" coords="510,162,548,162,548,167,510,167"/>
+<area shape="poly" id="edge7_Node000006_Node000002" title=" " alt="" coords="570,120,450,128,315,143,259,152,258,147,314,137,449,123,569,115"/>
+<area shape="poly" id="edge8_Node000006_Node000006" title=" " alt="" coords="609,104,601,94,605,84,621,78,647,75,679,79,692,89,688,93,677,84,647,81,622,83,609,88,606,93,613,100"/>
+<area shape="poly" id="edge10_Node000007_Node000007" title=" " alt="" coords="603,226,601,216,608,206,623,201,647,199,674,202,688,209,686,214,672,207,647,204,624,206,611,211,606,217,608,224"/>
+<area shape="poly" id="edge13_Node000009_Node000006" title=" " alt="" coords="441,230,476,211,512,187,525,174,534,161,544,149,560,136,572,130,574,135,563,141,548,153,539,164,529,177,515,191,479,216,444,235"/>
+<area shape="poly" id="edge14_Node000009_Node000007" title=" " alt="" coords="514,243,553,243,553,248,514,248"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="584,339,709,365"/>
+<area shape="poly" id="edge15_Node000009_Node000010" title=" " alt="" coords="447,256,515,290,539,308,563,324,582,332,579,337,560,329,535,312,512,294,444,260"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d" title=" " alt="" coords="599,290,694,315"/>
+<area shape="poly" id="edge16_Node000009_Node000011" title=" " alt="" coords="467,255,587,285,585,290,466,261"/>
+<area shape="rect" id="Node000013" href="$dc/d52/classfl_1_1audio_1_1_config_a07a3dee97dbc7d14698a61f21fef3c90.html#a07a3dee97dbc7d14698a61f21fef3c90" title=" " alt="" coords="349,368,479,408"/>
+<area shape="poly" id="edge18_Node000012_Node000013" title=" " alt="" coords="253,362,335,374,335,379,253,368"/>
+<area shape="rect" id="Node000014" href="$db/dbf/namespacefl_1_1audio_a584ff0ffe4e7ce2fb4a5bffda5eb32b5.html#a584ff0ffe4e7ce2fb4a5bffda5eb32b5" title=" " alt="" coords="337,304,491,344"/>
+<area shape="poly" id="edge19_Node000012_Node000014" title=" " alt="" coords="253,344,323,334,324,339,253,350"/>
+<area shape="poly" id="edge20_Node000014_Node000010" title=" " alt="" coords="492,331,571,340,570,346,491,336"/>
+<area shape="rect" id="Node000016" href="$dc/d52/classfl_1_1audio_1_1_config_aaace506af66baf0ff0f5704695b9513b.html#aaace506af66baf0ff0f5704695b9513b" title=" " alt="" coords="349,432,479,472"/>
+<area shape="poly" id="edge22_Node000015_Node000016" title=" " alt="" coords="261,423,336,436,335,441,260,428"/>
+<area shape="rect" id="Node000017" href="$dc/d52/classfl_1_1audio_1_1_config_aea6ac29e0ebdee4aadc8e38d9cb3a71f.html#aea6ac29e0ebdee4aadc8e38d9cb3a71f" title=" " alt="" coords="581,411,712,451"/>
+<area shape="poly" id="edge23_Node000016_Node000017" title=" " alt="" coords="479,443,568,435,568,441,480,449"/>
+<area shape="rect" id="Node000018" href="$dc/d52/classfl_1_1audio_1_1_config_a80ce537820ee6d81e2ec9fc24aef7a87.html#a80ce537820ee6d81e2ec9fc24aef7a87" title="Microphone pink noise correction profile." alt="" coords="581,475,712,515"/>
+<area shape="poly" id="edge24_Node000016_Node000018" title=" " alt="" coords="480,461,568,478,567,483,479,467"/>
+</map>

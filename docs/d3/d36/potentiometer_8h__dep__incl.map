@@ -1,0 +1,11 @@
+<map id="fl/sensors/potentiometer.h" name="fl/sensors/potentiometer.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="60,5,252,31"/>
+<area shape="rect" id="Node000002" href="$d4/d5e/potentiometer_8cpp_8hpp.html" title=" " alt="" coords="39,79,273,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="159,44,159,79,153,79,153,44"/>
+<area shape="rect" id="Node000003" href="$d0/dfc/fl_2sensors_2__build_8cpp_8hpp.html" title=" " alt="" coords="65,152,247,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="159,118,159,152,153,152,153,118"/>
+<area shape="rect" id="Node000004" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="5,225,133,251"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="133,188,85,227,82,223,130,184"/>
+<area shape="rect" id="Node000005" href="$d4/d87/fl_8sensors_09_8cpp.html" title="Unity build: recursive includes from src/fl/sensors/." alt="" coords="157,225,328,251"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="182,184,230,223,227,227,179,188"/>
+</map>

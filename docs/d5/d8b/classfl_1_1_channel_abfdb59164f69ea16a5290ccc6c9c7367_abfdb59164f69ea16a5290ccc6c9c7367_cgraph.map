@@ -1,0 +1,28 @@
+<map id="fl::Channel::operator=" name="fl::Channel::operator=">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,160,171,185"/>
+<area shape="rect" id="Node000002" href="$d5/d8b/classfl_1_1_channel_aba6af4be09d5ab9bd2bed306e4238925.html#aba6af4be09d5ab9bd2bed306e4238925" title="Protected constructor for template subclasses (e.g., ClocklessIdf5)" alt="" coords="219,109,371,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="140,157,228,135,230,141,141,162"/>
+<area shape="rect" id="Node000007" href="$d5/d8b/classfl_1_1_channel_a27ac9770da107f25ff6b2e3cbabd4f2a.html#a27ac9770da107f25ff6b2e3cbabd4f2a" title=" " alt="" coords="440,160,615,185"/>
+<area shape="poly" id="edge13_Node000001_Node000007" title=" " alt="" coords="171,170,426,170,426,175,171,175"/>
+<area shape="rect" id="Node000013" href="$d5/d8b/classfl_1_1_channel_a9bec154f95cb34d5173f74f00d750a38.html#a9bec154f95cb34d5173f74f00d750a38" title=" " alt="" coords="457,211,597,236"/>
+<area shape="poly" id="edge14_Node000001_Node000013" title=" " alt="" coords="171,179,444,211,443,216,171,185"/>
+<area shape="rect" id="Node000003" href="$d0/dc9/class_c_pixel_l_e_d_controller_a98332904248a7d7def424ce6239de1b4.html#a98332904248a7d7def424ce6239de1b4" title=" " alt="" coords="419,9,636,49"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="317,107,363,83,418,58,439,50,441,55,420,63,365,88,320,112"/>
+<area shape="rect" id="Node000004" href="$d5/df4/classfl_1_1_channel_data_a80140c6e38f6da20d344df2958358209.html#a80140c6e38f6da20d344df2958358209" title="Create channel transmission data (modern variant&#45;based API)" alt="" coords="442,73,613,99"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="370,108,431,98,432,103,371,113"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="355,132,456,154,455,160,353,137"/>
+<area shape="poly" id="edge11_Node000002_Node000013" title=" " alt="" coords="314,132,360,164,420,196,445,205,444,210,418,200,357,169,311,137"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="714,5,839,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="589,71,635,58,683,39,709,32,710,37,685,45,637,63,590,76"/>
+<area shape="rect" id="Node000006" href="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a" title=" " alt="" coords="731,55,822,80"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="613,77,718,69,718,74,613,82"/>
+<area shape="rect" id="Node000008" href="$dd/dd8/classfl_1_1_optional_ad5f53bf55f59f43884a71b107dee14c7.html#ad5f53bf55f59f43884a71b107dee14c7" title=" " alt="" coords="693,104,860,129"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="584,157,705,130,707,135,585,163"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_a00be5c89d851d3cf8f72d28097905f42.html#a00be5c89d851d3cf8f72d28097905f42" title=" " alt="" coords="729,177,824,203"/>
+<area shape="poly" id="edge8_Node000007_Node000010" title=" " alt="" coords="615,176,716,183,716,188,615,181"/>
+<area shape="rect" id="Node000011" href="$dd/dd8/classfl_1_1_optional_a1a7216013ea48bf987511dae97d2915f.html#a1a7216013ea48bf987511dae97d2915f" title=" " alt="" coords="708,227,845,252"/>
+<area shape="poly" id="edge10_Node000007_Node000011" title=" " alt="" coords="584,183,637,197,685,213,712,220,710,226,683,218,635,202,583,188"/>
+<area shape="poly" id="edge9_Node000010_Node000010" title=" " alt="" coords="736,179,728,169,732,159,749,153,777,151,812,155,822,159,825,165,821,168,818,163,810,160,777,156,750,158,736,163,733,168,740,175"/>
+<area shape="rect" id="Node000014" href="$da/d98/classfl_1_1_atomic_fake_ae7cc69cf515cdd4f11f4ed9b44b0ef83.html#ae7cc69cf515cdd4f11f4ed9b44b0ef83" title=" " alt="" coords="684,276,869,301"/>
+<area shape="poly" id="edge12_Node000013_Node000014" title=" " alt="" coords="577,233,685,262,715,270,713,275,683,267,576,239"/>
+</map>

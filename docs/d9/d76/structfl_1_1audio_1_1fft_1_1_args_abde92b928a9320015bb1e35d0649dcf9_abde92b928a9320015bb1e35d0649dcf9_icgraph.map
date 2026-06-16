@@ -1,0 +1,11 @@
+<map id="fl::audio::fft::Args::DefaultSampleRate" name="fl::audio::fft::Args::DefaultSampleRate">
+<area shape="rect" id="Node000001" title=" " alt="" coords="388,67,545,107"/>
+<area shape="rect" id="Node000002" href="$d9/d76/structfl_1_1audio_1_1fft_1_1_args_a90879d48496e1ac59e264d60bc7aa322.html#a90879d48496e1ac59e264d60bc7aa322" title=" " alt="" coords="197,37,330,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="374,76,330,70,331,64,375,71"/>
+<area shape="rect" id="Node000005" href="$d1/d24/classfl_1_1audio_1_1_sample_a9826c461f0dc48e17404badf3ca8223d.html#a9826c461f0dc48e17404badf3ca8223d" title=" " alt="" coords="187,102,340,127"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="375,102,340,107,340,102,374,97"/>
+<area shape="rect" id="Node000003" href="$d9/d76/structfl_1_1audio_1_1fft_1_1_args_a670da5ad1a1b548dfb0e9afb1d53474b.html#a670da5ad1a1b548dfb0e9afb1d53474b" title=" " alt="" coords="5,5,139,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="183,47,138,39,139,34,184,41"/>
+<area shape="rect" id="Node000004" href="$d9/d76/structfl_1_1audio_1_1fft_1_1_args_a11e31e3210b84a1f54db2baca382d29b.html#a11e31e3210b84a1f54db2baca382d29b" title=" " alt="" coords="5,69,139,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="184,73,139,81,138,76,183,68"/>
+</map>

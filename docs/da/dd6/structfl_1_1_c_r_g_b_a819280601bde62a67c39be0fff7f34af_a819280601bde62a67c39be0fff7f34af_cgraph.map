@@ -1,0 +1,8 @@
+<map id="fl::CRGB::blendAlphaMaxChannel" name="fl::CRGB::blendAlphaMaxChannel">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,243,31"/>
+<area shape="rect" id="Node000002" href="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" title="Default constructor." alt="" coords="457,5,577,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="243,15,444,15,444,21,243,21"/>
+<area shape="rect" id="Node000003" href="$da/dd6/structfl_1_1_c_r_g_b_a7e34886ec51c1aff8262123de5152437.html#a7e34886ec51c1aff8262123de5152437" title=" " alt="" coords="291,31,409,56"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="238,28,277,33,277,38,237,33"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="409,32,443,27,444,32,410,37"/>
+</map>

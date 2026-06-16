@@ -1,0 +1,13 @@
+<map id="fl::third_party::lzw__table_add_entry" name="fl::third_party::lzw__table_add_entry">
+<area shape="rect" id="Node000001" title="Create new table entry." alt="" coords="575,37,716,77"/>
+<area shape="rect" id="Node000002" href="$d1/d86/namespacefl_1_1third__party_a1652aecb5a36f531062b45a7491ef9a6.html#a1652aecb5a36f531062b45a7491ef9a6" title="Get the next LZW code and write its value(s) to output buffer." alt="" coords="388,37,527,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="561,60,527,60,527,55,561,55"/>
+<area shape="rect" id="Node000003" href="$d1/d86/namespacefl_1_1third__party_acb9e16033130408f9aa7f604f700e6d6.html#acb9e16033130408f9aa7f604f700e6d6" title="Read input codes until end of LZW context owned output buffer." alt="" coords="201,5,340,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="374,46,340,40,341,35,374,40"/>
+<area shape="rect" id="Node000014" href="$d1/d86/namespacefl_1_1third__party_ae57d83f9ef1abc461a0f89c655c46931.html#ae57d83f9ef1abc461a0f89c655c46931" title="Read LZW codes into client buffer, mapping output to colours." alt="" coords="201,69,340,109"/>
+<area shape="poly" id="edge4_Node000002_Node000014" title=" " alt="" coords="374,74,341,80,340,75,374,69"/>
+<area shape="rect" id="Node000004" href="$d1/d86/namespacefl_1_1third__party_af738855721b8fcadf601cfc4f8c913bf.html#af738855721b8fcadf601cfc4f8c913bf" title=" " alt="" coords="5,5,153,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="188,28,154,28,154,23,188,23"/>
+<area shape="rect" id="Node000015" href="$d1/d86/namespacefl_1_1third__party_a18f717ffc188f7182fed1b0f5afba660.html#a18f717ffc188f7182fed1b0f5afba660" title=" " alt="" coords="5,69,153,109"/>
+<area shape="poly" id="edge5_Node000014_Node000015" title=" " alt="" coords="188,92,154,92,154,87,188,87"/>
+</map>

@@ -15,7 +15,11 @@ digraph "anonymous_namespace{Painter::cpp}::CalcLuminance"
   Node4 [id="Node000004",label="Interp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/dd8/_approximating_function_8h_a5b61be736266623d9b4da9a66be9fa8e.html#a5b61be736266623d9b4da9a66be9fa8e",tooltip=" "];
   Node2 -> Node7 [id="edge4_Node000002_Node000007",color="steelblue1",style="solid",tooltip=" "];
   Node7 [id="Node000007",label="mapf",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d2d/util_8cpp_a06d59f8f94c4693a77270d804881f468.html#a06d59f8f94c4693a77270d804881f468",tooltip=" "];
-  Node1 -> Node8 [id="edge5_Node000001_Node000008",color="steelblue1",style="solid",tooltip=" "];
-  Node8 [id="Node000008",label="anonymous_namespace\l\{Painter::cpp\}::LuminanceDecay",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d9f/namespaceanonymous__namespace_02_painter_8cpp_03_afac2eea34857897444e6a1dd09bab603.html#afac2eea34857897444e6a1dd09bab603",tooltip=" "];
-  Node8 -> Node4 [id="edge6_Node000008_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node8 [id="edge5_Node000002_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::max",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909",tooltip=" "];
+  Node1 -> Node9 [id="edge6_Node000001_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="anonymous_namespace\l\{Painter::cpp\}::LuminanceDecay",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d9f/namespaceanonymous__namespace_02_painter_8cpp_03_afac2eea34857897444e6a1dd09bab603.html#afac2eea34857897444e6a1dd09bab603",tooltip=" "];
+  Node9 -> Node4 [id="edge7_Node000009_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node10 [id="edge8_Node000001_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::sqrt",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1",tooltip=" "];
 }

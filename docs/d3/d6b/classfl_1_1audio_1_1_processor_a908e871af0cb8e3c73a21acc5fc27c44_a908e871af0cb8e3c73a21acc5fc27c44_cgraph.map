@@ -1,0 +1,8 @@
+<map id="fl::audio::Processor::getTempoAnalyzer" name="fl::audio::Processor::getTempoAnalyzer">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,156,69"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="44,30,42,20,48,11,61,5,81,3,104,6,116,13,113,17,102,11,81,8,62,10,51,15,47,21,49,28"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="214,7,339,33"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="156,35,200,29,200,34,157,41"/>
+<area shape="rect" id="Node000003" href="$d3/d6b/classfl_1_1audio_1_1_processor_ade806d07af52e3d281939cebce7643d5.html#ade806d07af52e3d281939cebce7643d5" title=" " alt="" coords="204,57,349,97"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="157,57,191,62,190,68,156,63"/>
+</map>

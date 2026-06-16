@@ -1,0 +1,25 @@
+<map id="fl::test::JSONReporter" name="fl::test::JSONReporter">
+<area shape="rect" id="Node000001" title="JSON reporter that outputs test results in JSON format." alt="" coords="118,401,277,427"/>
+<area shape="rect" id="Node000002" href="$da/d63/classfl_1_1test_1_1_i_reporter.html" title=" " alt="" coords="5,299,136,324"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,330,185,399,181,403,94,335"/>
+<area shape="rect" id="Node000003" href="$d2/db2/classfl_1_1string.html" title=" " alt="" coords="160,299,235,324"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="200,338,200,401,195,401,195,338"/>
+<area shape="rect" id="Node000004" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="105,196,271,236"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="194,249,199,298,194,299,189,250"/>
+<area shape="rect" id="Node000005" href="$de/d66/classfl_1_1basic__string.html" title="Concrete type&#45;erased string class." alt="" coords="77,5,193,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="136,45,138,80,144,118,160,160,178,194,174,197,155,162,139,119,132,80,131,45"/>
+<area shape="rect" id="Node000006" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="153,93,284,119"/>
+<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="158,39,209,91,205,95,154,43"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="199,131,192,144,187,170,188,196,182,196,182,170,187,142,194,128"/>
+<area shape="rect" id="Node000007" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="295,299,457,324"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="368,338,354,360,335,379,307,395,278,405,276,400,305,390,332,375,350,356,364,335"/>
+<area shape="rect" id="Node000008" href="$d4/dad/classfl_1_1vector__basic.html" title="Type&#45;erased vector base class." alt="" coords="404,93,524,119"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="447,131,424,161,404,197,387,253,380,299,374,298,382,252,399,195,420,158,442,128"/>
+<area shape="rect" id="Node000011" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="413,203,531,229"/>
+<area shape="poly" id="edge12_Node000011_Node000008" title=" " alt="" coords="469,132,474,203,468,203,463,133"/>
+<area shape="rect" id="Node000009" href="$db/d13/classfl_1_1memory__resource.html" title="Polymorphic memory resource base class (PMR&#45;style)." alt="" coords="226,5,382,31"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="337,35,396,67,442,91,440,95,393,72,335,40"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl.html#d8/d72/structfl_1_1vector__element__ops" title="Function pointer table for type&#45;specific element operations." alt="" coords="407,5,577,31"/>
+<area shape="poly" id="edge10_Node000008_Node000010" title=" " alt="" coords="487,44,470,94,465,92,482,43"/>
+<area shape="poly" id="edge11_Node000007_Node000011" title=" " alt="" coords="452,240,390,300,386,297,449,236"/>
+</map>

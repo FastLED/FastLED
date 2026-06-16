@@ -107,19 +107,16 @@ $(function(){initNavTree('d4/d36/namespacefl_aa28553af69ffe6e3a60cde7f9fc02b4d.h
 <div class="memproto">
 <div class="memtemplate">
 template&lt;typename GridVisitor&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void fl::traverseGridSegment32 </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="../../d4/d36/namespacefl_a853ddd0222a0547e63df2afdd422e11a.html#a853ddd0222a0547e63df2afdd422e11a">vec2f</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>start</em></span>, </td>
+          <td class="paramtype">const <a class="el" href="../../d4/d36/namespacefl_a48a8de5776a08438981ff547032a8401.html#a48a8de5776a08438981ff547032a8401">vec2f</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>start</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="../../d4/d36/namespacefl_a853ddd0222a0547e63df2afdd422e11a.html#a853ddd0222a0547e63df2afdd422e11a">vec2f</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>end</em></span>, </td>
+          <td class="paramtype">const <a class="el" href="../../d4/d36/namespacefl_a48a8de5776a08438981ff547032a8401.html#a48a8de5776a08438981ff547032a8401">vec2f</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>end</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -127,11 +124,6 @@ template&lt;typename GridVisitor&gt; </div>
           <td class="paramtype">GridVisitor &amp;</td>          <td class="paramname"><span class="paramname"><em>visitor</em></span>&#160;)</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
@@ -149,91 +141,96 @@ template&lt;typename GridVisitor&gt; </div>
 </dl>
 <p>UNTESTED!!!! </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d42/traverse__grid_8h_source.html#l00203">203</a> of file <a class="el" href="../../d9/d42/traverse__grid_8h_source.html">traverse_grid.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  204</span>                                                        {</div>
-<div class="line"><span class="lineno">  205</span>    <span class="keyword">const</span> i32 FP_SHIFT = 8;</div>
-<div class="line"><span class="lineno">  206</span>    <span class="keyword">const</span> i32 FP_ONE = 1 &lt;&lt; FP_SHIFT;</div>
-<div class="line"><span class="lineno">  207</span>    <span class="comment">// const i32 FP_MASK = FP_ONE - 1;</span></div>
-<div class="line"><span class="lineno">  208</span> </div>
-<div class="line"><span class="lineno">  209</span>    <span class="comment">// Convert to fixed-point (Q24.8) signed</span></div>
-<div class="line"><span class="lineno">  210</span>    i32 startX_fp = <span class="keyword">static_cast&lt;</span>i32<span class="keyword">&gt;</span>(start.<a class="code hl_variable" href="../../d5/d5d/structfl_1_1vec2_a7fb6d3f81a093af442c44e8926e6b006.html#a7fb6d3f81a093af442c44e8926e6b006">x</a> * FP_ONE);</div>
-<div class="line"><span class="lineno">  211</span>    i32 startY_fp = <span class="keyword">static_cast&lt;</span>i32<span class="keyword">&gt;</span>(start.<a class="code hl_variable" href="../../d5/d5d/structfl_1_1vec2_a7fa3fbb51a98fcc66e3bc6b2bc23d0a5.html#a7fa3fbb51a98fcc66e3bc6b2bc23d0a5">y</a> * FP_ONE);</div>
-<div class="line"><span class="lineno">  212</span>    i32 endX_fp = <span class="keyword">static_cast&lt;</span>i32<span class="keyword">&gt;</span>(<a class="code hl_function" href="../../d4/d36/namespacefl_a56e7d4811c99d9aa696932bcb89a50b1.html#a56e7d4811c99d9aa696932bcb89a50b1">end</a>.x * FP_ONE);</div>
-<div class="line"><span class="lineno">  213</span>    i32 endY_fp = <span class="keyword">static_cast&lt;</span>i32<span class="keyword">&gt;</span>(<a class="code hl_function" href="../../d4/d36/namespacefl_a56e7d4811c99d9aa696932bcb89a50b1.html#a56e7d4811c99d9aa696932bcb89a50b1">end</a>.y * FP_ONE);</div>
-<div class="line"><span class="lineno">  214</span> </div>
-<div class="line"><span class="lineno">  215</span>    i32 x0 = startX_fp &gt;&gt; FP_SHIFT;</div>
-<div class="line"><span class="lineno">  216</span>    i32 y0 = startY_fp &gt;&gt; FP_SHIFT;</div>
-<div class="line"><span class="lineno">  217</span>    i32 x1 = endX_fp &gt;&gt; FP_SHIFT;</div>
-<div class="line"><span class="lineno">  218</span>    i32 y1 = endY_fp &gt;&gt; FP_SHIFT;</div>
-<div class="line"><span class="lineno">  219</span> </div>
-<div class="line"><span class="lineno">  220</span>    i32 stepX = (x1 &gt; x0) ? 1 : (x1 &lt; x0) ? -1 : 0;</div>
-<div class="line"><span class="lineno">  221</span>    i32 stepY = (y1 &gt; y0) ? 1 : (y1 &lt; y0) ? -1 : 0;</div>
-<div class="line"><span class="lineno">  222</span> </div>
-<div class="line"><span class="lineno">  223</span>    i32 deltaX_fp = endX_fp - startX_fp;</div>
-<div class="line"><span class="lineno">  224</span>    i32 deltaY_fp = endY_fp - startY_fp;</div>
-<div class="line"><span class="lineno">  225</span> </div>
-<div class="line"><span class="lineno">  226</span>    u32 absDeltaX_fp =</div>
-<div class="line"><span class="lineno">  227</span>        (deltaX_fp != 0) ? <span class="keyword">static_cast&lt;</span>u32<span class="keyword">&gt;</span>(</div>
-<div class="line"><span class="lineno">  228</span>                               <a class="code hl_define" href="../../d8/db8/math__macros_8h_a996f7be338ccb40d1a2a5abc1ad61759.html#a996f7be338ccb40d1a2a5abc1ad61759">ABS</a>((fl::i64(FP_ONE) &lt;&lt; FP_SHIFT) / deltaX_fp))</div>
-<div class="line"><span class="lineno">  229</span>                         : UINT32_MAX;</div>
-<div class="line"><span class="lineno">  230</span>    u32 absDeltaY_fp =</div>
-<div class="line"><span class="lineno">  231</span>        (deltaY_fp != 0) ? <span class="keyword">static_cast&lt;</span>u32<span class="keyword">&gt;</span>(</div>
-<div class="line"><span class="lineno">  232</span>                               <a class="code hl_define" href="../../d8/db8/math__macros_8h_a996f7be338ccb40d1a2a5abc1ad61759.html#a996f7be338ccb40d1a2a5abc1ad61759">ABS</a>((fl::i64(FP_ONE) &lt;&lt; FP_SHIFT) / deltaY_fp))</div>
-<div class="line"><span class="lineno">  233</span>                         : UINT32_MAX;</div>
-<div class="line"><span class="lineno">  234</span> </div>
-<div class="line"><span class="lineno">  235</span>    i32 nextX_fp = (stepX &gt; 0) ? ((x0 + 1) &lt;&lt; FP_SHIFT) : (x0 &lt;&lt; FP_SHIFT);</div>
-<div class="line"><span class="lineno">  236</span>    i32 nextY_fp = (stepY &gt; 0) ? ((y0 + 1) &lt;&lt; FP_SHIFT) : (y0 &lt;&lt; FP_SHIFT);</div>
-<div class="line"><span class="lineno">  237</span> </div>
-<div class="line"><span class="lineno">  238</span>    u32 tMaxX_fp =</div>
-<div class="line"><span class="lineno">  239</span>        (deltaX_fp != 0)</div>
-<div class="line"><span class="lineno">  240</span>            ? <span class="keyword">static_cast&lt;</span>u32<span class="keyword">&gt;</span>(</div>
-<div class="line"><span class="lineno">  241</span>                  <a class="code hl_define" href="../../d8/db8/math__macros_8h_a996f7be338ccb40d1a2a5abc1ad61759.html#a996f7be338ccb40d1a2a5abc1ad61759">ABS</a>(fl::i64(nextX_fp - startX_fp)) * absDeltaX_fp &gt;&gt; FP_SHIFT)</div>
-<div class="line"><span class="lineno">  242</span>            : UINT32_MAX;</div>
-<div class="line"><span class="lineno">  243</span>    u32 tMaxY_fp =</div>
-<div class="line"><span class="lineno">  244</span>        (deltaY_fp != 0)</div>
-<div class="line"><span class="lineno">  245</span>            ? <span class="keyword">static_cast&lt;</span>u32<span class="keyword">&gt;</span>(</div>
-<div class="line"><span class="lineno">  246</span>                  <a class="code hl_define" href="../../d8/db8/math__macros_8h_a996f7be338ccb40d1a2a5abc1ad61759.html#a996f7be338ccb40d1a2a5abc1ad61759">ABS</a>(fl::i64(nextY_fp - startY_fp)) * absDeltaY_fp &gt;&gt; FP_SHIFT)</div>
-<div class="line"><span class="lineno">  247</span>            : UINT32_MAX;</div>
-<div class="line"><span class="lineno">  248</span> </div>
-<div class="line"><span class="lineno">  249</span>    <span class="keyword">const</span> u32 maxT_fp = FP_ONE;</div>
-<div class="line"><span class="lineno">  250</span> </div>
-<div class="line"><span class="lineno">  251</span>    i32 currentX = x0;</div>
-<div class="line"><span class="lineno">  252</span>    i32 currentY = y0;</div>
-<div class="line"><span class="lineno">  253</span> </div>
-<div class="line"><span class="lineno">  254</span>    <span class="keywordflow">while</span> (<span class="keyword">true</span>) {</div>
-<div class="line"><span class="lineno">  255</span>        visitor.visit(currentX, currentY);</div>
+<p class="definition">Definition at line <a class="el" href="../../d9/d42/traverse__grid_8h_source.html#l00207">207</a> of file <a class="el" href="../../d9/d42/traverse__grid_8h_source.html">traverse_grid.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  208</span>                                                        {</div>
+<div class="line"><span class="lineno">  209</span>    <span class="keyword">const</span> i32 FP_SHIFT = 8;</div>
+<div class="line"><span class="lineno">  210</span>    <span class="keyword">const</span> i32 <a class="code hl_variable" href="../../d4/d36/namespacefl_a4ce899d67f48bcf59b2c227ab37e317c.html#a4ce899d67f48bcf59b2c227ab37e317c">FP_ONE</a> = 1 &lt;&lt; FP_SHIFT;</div>
+<div class="line"><span class="lineno">  211</span>    <span class="comment">// const i32 FP_MASK = FP_ONE - 1;</span></div>
+<div class="line"><span class="lineno">  212</span> </div>
+<div class="line"><span class="lineno">  213</span>    <span class="comment">// Convert to fixed-point (Q24.8) signed</span></div>
+<div class="line"><span class="lineno">  214</span>    i32 startX_fp = <span class="keyword">static_cast&lt;</span>i32<span class="keyword">&gt;</span>(start.<a class="code hl_variable" href="../../d5/d5d/structfl_1_1vec2_a7fb6d3f81a093af442c44e8926e6b006.html#a7fb6d3f81a093af442c44e8926e6b006">x</a> * <a class="code hl_variable" href="../../d4/d36/namespacefl_a4ce899d67f48bcf59b2c227ab37e317c.html#a4ce899d67f48bcf59b2c227ab37e317c">FP_ONE</a>);</div>
+<div class="line"><span class="lineno">  215</span>    i32 startY_fp = <span class="keyword">static_cast&lt;</span>i32<span class="keyword">&gt;</span>(start.<a class="code hl_variable" href="../../d5/d5d/structfl_1_1vec2_a7fa3fbb51a98fcc66e3bc6b2bc23d0a5.html#a7fa3fbb51a98fcc66e3bc6b2bc23d0a5">y</a> * <a class="code hl_variable" href="../../d4/d36/namespacefl_a4ce899d67f48bcf59b2c227ab37e317c.html#a4ce899d67f48bcf59b2c227ab37e317c">FP_ONE</a>);</div>
+<div class="line"><span class="lineno">  216</span>    i32 endX_fp = <span class="keyword">static_cast&lt;</span>i32<span class="keyword">&gt;</span>(<a class="code hl_function" href="../../d4/d36/namespacefl_a3cdd970ae1ac06323addaec93ae7d4b9.html#a3cdd970ae1ac06323addaec93ae7d4b9">end</a>.x * <a class="code hl_variable" href="../../d4/d36/namespacefl_a4ce899d67f48bcf59b2c227ab37e317c.html#a4ce899d67f48bcf59b2c227ab37e317c">FP_ONE</a>);</div>
+<div class="line"><span class="lineno">  217</span>    i32 endY_fp = <span class="keyword">static_cast&lt;</span>i32<span class="keyword">&gt;</span>(<a class="code hl_function" href="../../d4/d36/namespacefl_a3cdd970ae1ac06323addaec93ae7d4b9.html#a3cdd970ae1ac06323addaec93ae7d4b9">end</a>.y * <a class="code hl_variable" href="../../d4/d36/namespacefl_a4ce899d67f48bcf59b2c227ab37e317c.html#a4ce899d67f48bcf59b2c227ab37e317c">FP_ONE</a>);</div>
+<div class="line"><span class="lineno">  218</span> </div>
+<div class="line"><span class="lineno">  219</span>    i32 x0 = startX_fp &gt;&gt; FP_SHIFT;</div>
+<div class="line"><span class="lineno">  220</span>    i32 y0 = startY_fp &gt;&gt; FP_SHIFT;</div>
+<div class="line"><span class="lineno">  221</span>    i32 x1 = endX_fp &gt;&gt; FP_SHIFT;</div>
+<div class="line"><span class="lineno">  222</span>    i32 y1 = endY_fp &gt;&gt; FP_SHIFT;</div>
+<div class="line"><span class="lineno">  223</span> </div>
+<div class="line"><span class="lineno">  224</span>    i32 stepX = (x1 &gt; x0) ? 1 : (x1 &lt; x0) ? -1 : 0;</div>
+<div class="line"><span class="lineno">  225</span>    i32 stepY = (y1 &gt; y0) ? 1 : (y1 &lt; y0) ? -1 : 0;</div>
+<div class="line"><span class="lineno">  226</span> </div>
+<div class="line"><span class="lineno">  227</span>    i32 deltaX_fp = endX_fp - startX_fp;</div>
+<div class="line"><span class="lineno">  228</span>    i32 deltaY_fp = endY_fp - startY_fp;</div>
+<div class="line"><span class="lineno">  229</span> </div>
+<div class="line"><span class="lineno">  230</span>    <span class="comment">// Use (max)() to prevent macro expansion by Arduino.h&#39;s max macro</span></div>
+<div class="line"><span class="lineno">  231</span>    u32 absDeltaX_fp =</div>
+<div class="line"><span class="lineno">  232</span>        (deltaX_fp != 0) ? <span class="keyword">static_cast&lt;</span>u32<span class="keyword">&gt;</span>(</div>
+<div class="line"><span class="lineno">  233</span>                               <a class="code hl_function" href="../../d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84">fl::abs</a>((<a class="code hl_typedef" href="../../d4/d36/namespacefl_a7f7f9372e48c0906b258eb886cf1a59a.html#a7f7f9372e48c0906b258eb886cf1a59a">fl::i64</a>(<a class="code hl_variable" href="../../d4/d36/namespacefl_a4ce899d67f48bcf59b2c227ab37e317c.html#a4ce899d67f48bcf59b2c227ab37e317c">FP_ONE</a>) &lt;&lt; FP_SHIFT) / deltaX_fp))</div>
+<div class="line"><span class="lineno">  234</span>                         : (<a class="code hl_function" href="../../d6/d7c/structfl_1_1numeric__limits_a31c1687ca77003f233081c372a5c9922.html#a31c1687ca77003f233081c372a5c9922">fl::numeric_limits&lt;u32&gt;::max</a>)();</div>
+<div class="line"><span class="lineno">  235</span>    u32 absDeltaY_fp =</div>
+<div class="line"><span class="lineno">  236</span>        (deltaY_fp != 0) ? <span class="keyword">static_cast&lt;</span>u32<span class="keyword">&gt;</span>(</div>
+<div class="line"><span class="lineno">  237</span>                               <a class="code hl_function" href="../../d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84">fl::abs</a>((<a class="code hl_typedef" href="../../d4/d36/namespacefl_a7f7f9372e48c0906b258eb886cf1a59a.html#a7f7f9372e48c0906b258eb886cf1a59a">fl::i64</a>(<a class="code hl_variable" href="../../d4/d36/namespacefl_a4ce899d67f48bcf59b2c227ab37e317c.html#a4ce899d67f48bcf59b2c227ab37e317c">FP_ONE</a>) &lt;&lt; FP_SHIFT) / deltaY_fp))</div>
+<div class="line"><span class="lineno">  238</span>                         : (<a class="code hl_function" href="../../d6/d7c/structfl_1_1numeric__limits_a31c1687ca77003f233081c372a5c9922.html#a31c1687ca77003f233081c372a5c9922">fl::numeric_limits&lt;u32&gt;::max</a>)();</div>
+<div class="line"><span class="lineno">  239</span> </div>
+<div class="line"><span class="lineno">  240</span>    i32 nextX_fp = (stepX &gt; 0) ? ((x0 + 1) &lt;&lt; FP_SHIFT) : (x0 &lt;&lt; FP_SHIFT);</div>
+<div class="line"><span class="lineno">  241</span>    i32 nextY_fp = (stepY &gt; 0) ? ((y0 + 1) &lt;&lt; FP_SHIFT) : (y0 &lt;&lt; FP_SHIFT);</div>
+<div class="line"><span class="lineno">  242</span> </div>
+<div class="line"><span class="lineno">  243</span>    <span class="comment">// Use (max)() to prevent macro expansion by Arduino.h&#39;s max macro</span></div>
+<div class="line"><span class="lineno">  244</span>    u32 tMaxX_fp =</div>
+<div class="line"><span class="lineno">  245</span>        (deltaX_fp != 0)</div>
+<div class="line"><span class="lineno">  246</span>            ? <span class="keyword">static_cast&lt;</span>u32<span class="keyword">&gt;</span>(</div>
+<div class="line"><span class="lineno">  247</span>                  <a class="code hl_function" href="../../d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84">fl::abs</a>(<a class="code hl_typedef" href="../../d4/d36/namespacefl_a7f7f9372e48c0906b258eb886cf1a59a.html#a7f7f9372e48c0906b258eb886cf1a59a">fl::i64</a>(nextX_fp - startX_fp)) * absDeltaX_fp &gt;&gt; FP_SHIFT)</div>
+<div class="line"><span class="lineno">  248</span>            : (<a class="code hl_function" href="../../d6/d7c/structfl_1_1numeric__limits_a31c1687ca77003f233081c372a5c9922.html#a31c1687ca77003f233081c372a5c9922">fl::numeric_limits&lt;u32&gt;::max</a>)();</div>
+<div class="line"><span class="lineno">  249</span>    u32 tMaxY_fp =</div>
+<div class="line"><span class="lineno">  250</span>        (deltaY_fp != 0)</div>
+<div class="line"><span class="lineno">  251</span>            ? <span class="keyword">static_cast&lt;</span>u32<span class="keyword">&gt;</span>(</div>
+<div class="line"><span class="lineno">  252</span>                  <a class="code hl_function" href="../../d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84">fl::abs</a>(<a class="code hl_typedef" href="../../d4/d36/namespacefl_a7f7f9372e48c0906b258eb886cf1a59a.html#a7f7f9372e48c0906b258eb886cf1a59a">fl::i64</a>(nextY_fp - startY_fp)) * absDeltaY_fp &gt;&gt; FP_SHIFT)</div>
+<div class="line"><span class="lineno">  253</span>            : (<a class="code hl_function" href="../../d6/d7c/structfl_1_1numeric__limits_a31c1687ca77003f233081c372a5c9922.html#a31c1687ca77003f233081c372a5c9922">fl::numeric_limits&lt;u32&gt;::max</a>)();</div>
+<div class="line"><span class="lineno">  254</span> </div>
+<div class="line"><span class="lineno">  255</span>    <span class="keyword">const</span> u32 maxT_fp = <a class="code hl_variable" href="../../d4/d36/namespacefl_a4ce899d67f48bcf59b2c227ab37e317c.html#a4ce899d67f48bcf59b2c227ab37e317c">FP_ONE</a>;</div>
 <div class="line"><span class="lineno">  256</span> </div>
-<div class="line"><span class="lineno">  257</span>        u32 t_fp = (tMaxX_fp &lt; tMaxY_fp) ? tMaxX_fp : tMaxY_fp;</div>
-<div class="line"><span class="lineno">  258</span>        <span class="keywordflow">if</span> (t_fp &gt; maxT_fp)</div>
-<div class="line"><span class="lineno">  259</span>            <span class="keywordflow">break</span>;</div>
-<div class="line"><span class="lineno">  260</span> </div>
-<div class="line"><span class="lineno">  261</span>        <span class="keywordflow">if</span> (tMaxX_fp &lt; tMaxY_fp) {</div>
-<div class="line"><span class="lineno">  262</span>            tMaxX_fp += absDeltaX_fp;</div>
-<div class="line"><span class="lineno">  263</span>            currentX += stepX;</div>
-<div class="line"><span class="lineno">  264</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  265</span>            tMaxY_fp += absDeltaY_fp;</div>
-<div class="line"><span class="lineno">  266</span>            currentY += stepY;</div>
-<div class="line"><span class="lineno">  267</span>        }</div>
-<div class="line"><span class="lineno">  268</span>    }</div>
-<div class="line"><span class="lineno">  269</span> </div>
-<div class="line"><span class="lineno">  270</span>    <span class="keywordflow">if</span> (currentX != x1 || currentY != y1) {</div>
-<div class="line"><span class="lineno">  271</span>        visitor.visit(x1, y1);</div>
-<div class="line"><span class="lineno">  272</span>    }</div>
-<div class="line"><span class="lineno">  273</span>}</div>
-<div class="ttc" id="amath__macros_8h_a996f7be338ccb40d1a2a5abc1ad61759_html_a996f7be338ccb40d1a2a5abc1ad61759"><div class="ttname"><a href="../../d8/db8/math__macros_8h_a996f7be338ccb40d1a2a5abc1ad61759.html#a996f7be338ccb40d1a2a5abc1ad61759">ABS</a></div><div class="ttdeci">#define ABS(x)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/db8/math__macros_8h_source.html#l00053">math_macros.h:53</a></div></div>
-<div class="ttc" id="anamespacefl_a56e7d4811c99d9aa696932bcb89a50b1_html_a56e7d4811c99d9aa696932bcb89a50b1"><div class="ttname"><a href="../../d4/d36/namespacefl_a56e7d4811c99d9aa696932bcb89a50b1.html#a56e7d4811c99d9aa696932bcb89a50b1">fl::end</a></div><div class="ttdeci">constexpr T * end(T(&amp;array)[N]) noexcept</div><div class="ttdef"><b>Definition</b> <a href="../../d5/db6/range__access_8h_source.html#l00015">range_access.h:15</a></div></div>
+<div class="line"><span class="lineno">  257</span>    i32 currentX = x0;</div>
+<div class="line"><span class="lineno">  258</span>    i32 currentY = y0;</div>
+<div class="line"><span class="lineno">  259</span> </div>
+<div class="line"><span class="lineno">  260</span>    <span class="keywordflow">while</span> (<span class="keyword">true</span>) {</div>
+<div class="line"><span class="lineno">  261</span>        visitor.visit(currentX, currentY);</div>
+<div class="line"><span class="lineno">  262</span> </div>
+<div class="line"><span class="lineno">  263</span>        u32 t_fp = (tMaxX_fp &lt; tMaxY_fp) ? tMaxX_fp : tMaxY_fp;</div>
+<div class="line"><span class="lineno">  264</span>        <span class="keywordflow">if</span> (t_fp &gt; maxT_fp)</div>
+<div class="line"><span class="lineno">  265</span>            <span class="keywordflow">break</span>;</div>
+<div class="line"><span class="lineno">  266</span> </div>
+<div class="line"><span class="lineno">  267</span>        <span class="keywordflow">if</span> (tMaxX_fp &lt; tMaxY_fp) {</div>
+<div class="line"><span class="lineno">  268</span>            tMaxX_fp += absDeltaX_fp;</div>
+<div class="line"><span class="lineno">  269</span>            currentX += stepX;</div>
+<div class="line"><span class="lineno">  270</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  271</span>            tMaxY_fp += absDeltaY_fp;</div>
+<div class="line"><span class="lineno">  272</span>            currentY += stepY;</div>
+<div class="line"><span class="lineno">  273</span>        }</div>
+<div class="line"><span class="lineno">  274</span>    }</div>
+<div class="line"><span class="lineno">  275</span> </div>
+<div class="line"><span class="lineno">  276</span>    <span class="keywordflow">if</span> (currentX != x1 || currentY != y1) {</div>
+<div class="line"><span class="lineno">  277</span>        visitor.visit(x1, y1);</div>
+<div class="line"><span class="lineno">  278</span>    }</div>
+<div class="line"><span class="lineno">  279</span>}</div>
+<div class="ttc" id="anamespacefl_a3cdd970ae1ac06323addaec93ae7d4b9_html_a3cdd970ae1ac06323addaec93ae7d4b9"><div class="ttname"><a href="../../d4/d36/namespacefl_a3cdd970ae1ac06323addaec93ae7d4b9.html#a3cdd970ae1ac06323addaec93ae7d4b9">fl::end</a></div><div class="ttdeci">constexpr T * end(T(&amp;array)[N]) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d5/db6/range__access_8h_source.html#l00016">range_access.h:16</a></div></div>
+<div class="ttc" id="anamespacefl_a4ce899d67f48bcf59b2c227ab37e317c_html_a4ce899d67f48bcf59b2c227ab37e317c"><div class="ttname"><a href="../../d4/d36/namespacefl_a4ce899d67f48bcf59b2c227ab37e317c.html#a4ce899d67f48bcf59b2c227ab37e317c">fl::FP_ONE</a></div><div class="ttdeci">static constexpr i32 FP_ONE</div><div class="ttdef"><b>Definition</b> <a href="../../dd/dc3/flowfield_8cpp_8hpp_source.html#l00484">flowfield.cpp.hpp:484</a></div></div>
+<div class="ttc" id="anamespacefl_a7f7f9372e48c0906b258eb886cf1a59a_html_a7f7f9372e48c0906b258eb886cf1a59a"><div class="ttname"><a href="../../d4/d36/namespacefl_a7f7f9372e48c0906b258eb886cf1a59a.html#a7f7f9372e48c0906b258eb886cf1a59a">fl::i64</a></div><div class="ttdeci">fl::i64 i64</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00222">s16x16x4.h:222</a></div></div>
+<div class="ttc" id="anamespacefl_aefed87cfefc8330419d3393867945e84_html_aefed87cfefc8330419d3393867945e84"><div class="ttname"><a href="../../d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84">fl::abs</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type abs(T x) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d62/fixed__point_8h_source.html#l00525">fixed_point.h:525</a></div></div>
+<div class="ttc" id="astructfl_1_1numeric__limits_a31c1687ca77003f233081c372a5c9922_html_a31c1687ca77003f233081c372a5c9922"><div class="ttname"><a href="../../d6/d7c/structfl_1_1numeric__limits_a31c1687ca77003f233081c372a5c9922.html#a31c1687ca77003f233081c372a5c9922">fl::numeric_limits::max</a></div><div class="ttdeci">static constexpr T max() FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d86/limits_8h_source.html#l00108">limits.h:108</a></div></div>
 <div class="ttc" id="astructfl_1_1vec2_a7fa3fbb51a98fcc66e3bc6b2bc23d0a5_html_a7fa3fbb51a98fcc66e3bc6b2bc23d0a5"><div class="ttname"><a href="../../d5/d5d/structfl_1_1vec2_a7fa3fbb51a98fcc66e3bc6b2bc23d0a5.html#a7fa3fbb51a98fcc66e3bc6b2bc23d0a5">fl::vec2::y</a></div><div class="ttdeci">value_type y</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d67/geometry_8h_source.html#l00191">geometry.h:191</a></div></div>
 <div class="ttc" id="astructfl_1_1vec2_a7fb6d3f81a093af442c44e8926e6b006_html_a7fb6d3f81a093af442c44e8926e6b006"><div class="ttname"><a href="../../d5/d5d/structfl_1_1vec2_a7fb6d3f81a093af442c44e8926e6b006.html#a7fb6d3f81a093af442c44e8926e6b006">fl::vec2::x</a></div><div class="ttdeci">value_type x</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d67/geometry_8h_source.html#l00190">geometry.h:190</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d8/db8/math__macros_8h_source.html#l00053">ABS</a>, <a class="el" href="../../d5/db6/range__access_8h_source.html#l00015">end()</a>, <a class="el" href="../../d4/d67/geometry_8h_source.html#l00190">fl::vec2&lt; T &gt;::x</a>, and <a class="el" href="../../d4/d67/geometry_8h_source.html#l00191">fl::vec2&lt; T &gt;::y</a>.</p>
+<p class="reference">References <a class="el" href="../../de/d62/fixed__point_8h_source.html#l00525">abs()</a>, <a class="el" href="../../d5/db6/range__access_8h_source.html#l00016">end()</a>, <a class="el" href="../../dd/dc3/flowfield_8cpp_8hpp_source.html#l00484">FP_ONE</a>, <a class="el" href="../../d9/d86/limits_8h_source.html#l00108">fl::numeric_limits&lt; T &gt;::max()</a>, <a class="el" href="../../d4/d67/geometry_8h_source.html#l00190">fl::vec2&lt; T &gt;::x</a>, and <a class="el" href="../../d4/d67/geometry_8h_source.html#l00191">fl::vec2&lt; T &gt;::y</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d42/traverse__grid_8h_source.html#l00276">traverseGridSegment()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d42/traverse__grid_8h_source.html#l00282">traverseGridSegment()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_aa28553af69ffe6e3a60cde7f9fc02b4d_aa28553af69ffe6e3a60cde7f9fc02b4d_cgraph.svg" width="315" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_aa28553af69ffe6e3a60cde7f9fc02b4d_aa28553af69ffe6e3a60cde7f9fc02b4d_cgraph.svg" width="424" height="159"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
@@ -252,7 +249,7 @@ template&lt;typename GridVisitor&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:22 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

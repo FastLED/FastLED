@@ -4,6 +4,5 @@ var transform_8h =
     [ "fl::Transform16", "d0/dfa/structfl_1_1_transform16.html", "d0/dfa/structfl_1_1_transform16" ],
     [ "fl::TransformFloat", "d9/dd3/structfl_1_1_transform_float.html", "d9/dd3/structfl_1_1_transform_float" ],
     [ "fl::TransformFloatImpl", "d5/db7/classfl_1_1_transform_float_impl.html", "d5/db7/classfl_1_1_transform_float_impl" ],
-    [ "fl::alpha16", "d4/d36/namespacefl_a34c2bb53e3120475c5aa079be759840b.html#a34c2bb53e3120475c5aa079be759840b", null ],
-    [ "fl::FASTLED_SMART_PTR", "d4/d36/namespacefl_ad408bda38740d94779903498b86c2c92.html#ad408bda38740d94779903498b86c2c92", null ]
+    [ "fl::FASTLED_SHARED_PTR", "d4/d36/namespacefl_a8959f8d8f5423ccb4bae7e4f68953320.html#a8959f8d8f5423ccb4bae7e4f68953320", null ]
 ];

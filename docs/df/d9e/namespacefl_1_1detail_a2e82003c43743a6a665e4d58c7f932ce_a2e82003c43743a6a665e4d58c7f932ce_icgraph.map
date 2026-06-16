@@ -1,0 +1,7 @@
+<map id="fl::detail::async_log_flush_timer_isr" name="fl::detail::async_log_flush_timer_isr">
+<area shape="rect" id="Node000001" title=" " alt="" coords="575,5,723,45"/>
+<area shape="rect" id="Node000002" href="$d6/d35/classfl_1_1_async_logger_a9d75c7b5ffac34f42439fa954696064e.html#a9d75c7b5ffac34f42439fa954696064e" title="Enable background timer&#45;based flushing (opt&#45;in)" alt="" coords="276,5,527,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="561,28,527,28,527,23,561,23"/>
+<area shape="rect" id="Node000003" href="$d6/d35/classfl_1_1_async_logger_a55785739910a193b5b6dffeb455bd150.html#a55785739910a193b5b6dffeb455bd150" title=" " alt="" coords="5,13,228,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="263,28,228,28,228,23,263,23"/>
+</map>

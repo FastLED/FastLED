@@ -1,0 +1,14 @@
+<map id="fl::WLEDClient" name="fl::WLEDClient">
+<area shape="rect" id="Node000001" title="WLED Client for controlling LEDs through FastLED interface." alt="" coords="89,401,204,427"/>
+<area shape="rect" id="Node000002" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="81,299,212,339"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="149,353,149,401,144,401,144,353"/>
+<area shape="rect" id="Node000003" href="$da/d8d/classfl_1_1_i_fast_l_e_d.html" title="Pure virtual interface for FastLED operations." alt="" coords="5,211,99,236"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="70,245,94,273,122,297,118,301,90,277,66,249"/>
+<area shape="rect" id="Node000004" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="69,123,267,148"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="168,163,152,299,146,298,162,162"/>
+<area shape="rect" id="Node000007" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="273,211,418,236"/>
+<area shape="poly" id="edge6_Node000007_Node000004" title=" " alt="" coords="205,152,322,208,320,213,203,156"/>
+<area shape="rect" id="Node000005" href="$da/d98/classfl_1_1_atomic_fake.html" title=" " alt="" coords="100,5,236,45"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="171,59,171,122,165,122,165,59"/>
+<area shape="poly" id="edge5_Node000002_Node000007" title=" " alt="" coords="310,244,188,301,186,296,307,239"/>
+</map>

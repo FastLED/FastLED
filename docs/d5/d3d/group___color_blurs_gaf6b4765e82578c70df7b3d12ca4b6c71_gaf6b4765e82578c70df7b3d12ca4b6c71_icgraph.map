@@ -1,0 +1,27 @@
+<map id="fl::gfx::blurColumns" name="fl::gfx::blurColumns">
+<area shape="rect" id="Node000001" title="Perform a blur1d() on every column of a rectangular matrix (span version)." alt="" coords="549,153,699,179"/>
+<area shape="rect" id="Node000002" href="$d5/d3d/group___color_blurs_ga490098e97c6a0c9b4f0edc9f57cf2685.html#ga490098e97c6a0c9b4f0edc9f57cf2685" title="Two&#45;dimensional blur filter (Canvas version, no XYMap)." alt="" coords="373,29,481,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="599,145,555,106,500,68,475,57,477,52,503,64,558,102,602,141"/>
+<area shape="rect" id="Node000003" href="$d5/d3d/group___color_blurs_ga0699f1dd2dc72d5e683bd148378050a9.html#ga0699f1dd2dc72d5e683bd148378050a9" title="Two&#45;dimensional blur filter (span version)." alt="" coords="373,79,481,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="581,150,500,118,468,107,470,102,502,113,583,145"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_ac422097006eafd7aa7c868e23321ec1b.html#ac422097006eafd7aa7c868e23321ec1b" title=" " alt="" coords="367,128,487,153"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="535,157,487,151,487,146,536,152"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a224c1271a1a856411745a9bb86d08ae2.html#a224c1271a1a856411745a9bb86d08ae2" title=" " alt="" coords="367,177,487,203"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="536,179,487,185,487,180,535,174"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_a660e1726b231d6a6d774bf376d8eb957.html#a660e1726b231d6a6d774bf376d8eb957" title=" " alt="" coords="367,227,487,252"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="581,187,502,218,469,229,468,224,500,213,579,182"/>
+<area shape="rect" id="Node000013" href="$d5/d3d/group___color_blurs_ga9fc6700b7366a2ec475f60148f59205b.html#ga9fc6700b7366a2ec475f60148f59205b" title="Legacy raw&#45;pointer version of blurColumns." alt="" coords="352,276,501,301"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="602,191,558,229,503,267,477,278,475,273,500,262,555,225,599,187"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a2a71d5f71aa7a4e1480ee299b0780c66.html#a2a71d5f71aa7a4e1480ee299b0780c66" title=" " alt="" coords="211,5,289,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="371,76,351,68,303,44,279,33,281,28,305,40,353,64,373,71"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_aca219e4ecfa76d0476e9f553f4066548.html#aca219e4ecfa76d0476e9f553f4066548" title=" " alt="" coords="211,55,289,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="359,85,289,75,290,70,359,80"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a66c80e00f13502a4221ca8632199a4ba.html#a66c80e00f13502a4221ca8632199a4ba" title=" " alt="" coords="211,104,289,129"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="359,104,290,114,289,108,359,98"/>
+<area shape="rect" id="Node000009" href="$d5/d3d/group___color_blurs_ga9d5d40ce297e6a89cb8bd0bcd68f2398.html#ga9d5d40ce297e6a89cb8bd0bcd68f2398" title="Legacy raw&#45;pointer version of blur2d." alt="" coords="196,153,304,179"/>
+<area shape="poly" id="edge8_Node000003_Node000009" title=" " alt="" coords="370,111,353,118,305,143,279,156,277,151,303,138,351,113,368,106"/>
+<area shape="rect" id="Node000006" href="$dc/d2b/classfl_1_1_blend2d_ad965648c61fd795366282d3b797a612f.html#ad965648c61fd795366282d3b797a612f" title=" " alt="" coords="11,31,142,56"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="197,63,142,55,143,50,197,57"/>
+<area shape="rect" id="Node000007" href="$d4/df2/classfl_1_1_luminova_aa775ddcb74da9d8ae057ac8e4c3c50cc.html#aa775ddcb74da9d8ae057ac8e4c3c50cc" title=" " alt="" coords="5,80,148,105"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="197,78,148,85,148,80,196,72"/>
+</map>

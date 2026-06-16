@@ -1,0 +1,14 @@
+<map id="fl::detail::AsyncLoggerServiceTask" name="fl::detail::AsyncLoggerServiceTask">
+<area shape="rect" id="Node000001" title="Auto&#45;instantiating task for async logger servicing Registers itself with fl::task::Scheduler when fir..." alt="" coords="68,372,311,397"/>
+<area shape="rect" id="Node000002" href="$de/daf/classfl_1_1task_1_1_handle.html" title="Task Handle with fluent API (was class fl::task, renamed to avoid namespace collision)" alt="" coords="129,284,249,309"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,323,192,371,187,371,187,323"/>
+<area shape="rect" id="Node000003" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="118,181,261,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="192,235,192,284,187,284,187,235"/>
+<area shape="rect" id="Node000004" href="$d7/d04/classfl_1_1task_1_1_i_task_impl.html" title=" " alt="" coords="5,93,141,119"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="99,125,136,155,166,179,163,183,133,159,96,129"/>
+<area shape="rect" id="Node000005" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="111,5,310,31"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="210,45,194,181,189,181,205,45"/>
+<area shape="rect" id="Node000008" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="315,93,461,119"/>
+<area shape="poly" id="edge6_Node000008_Node000005" title=" " alt="" coords="248,34,365,91,363,95,245,39"/>
+<area shape="poly" id="edge5_Node000003_Node000008" title=" " alt="" coords="352,127,230,184,228,179,350,122"/>
+</map>

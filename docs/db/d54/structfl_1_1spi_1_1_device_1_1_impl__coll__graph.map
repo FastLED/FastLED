@@ -1,0 +1,23 @@
+<map id="fl::spi::Device::Impl" name="fl::spi::Device::Impl">
+<area shape="rect" id="Node000001" title="Private implementation data for Device class." alt="" coords="156,401,303,427"/>
+<area shape="rect" id="Node000002" href="$d3/dca/structfl_1_1_spi_config.html" title="Configuration for SPI device (supports 1&#45;8 lanes)" alt="" coords="33,306,132,331"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,336,213,399,210,403,111,341"/>
+<area shape="rect" id="Node000003" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="19,211,146,236"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="85,250,85,306,80,306,80,250"/>
+<area shape="rect" id="Node000004" href="$d4/dad/classfl_1_1vector__basic.html" title="Type&#45;erased vector base class." alt="" coords="5,13,125,38"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="67,52,66,97,69,148,82,210,77,211,64,148,61,97,61,52"/>
+<area shape="rect" id="Node000007" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="79,123,196,148"/>
+<area shape="poly" id="edge5_Node000007_Node000004" title=" " alt="" coords="83,48,132,121,127,124,78,51"/>
+<area shape="poly" id="edge4_Node000003_Node000007" title=" " alt="" coords="125,161,93,212,88,209,120,158"/>
+<area shape="rect" id="Node000008" href="$d1/d42/structfl_1_1spi_1_1_device_1_1_impl.html#d2/da9/structfl_1_1spi_1_1_device_1_1_impl_1_1_async_state" title="State for async operations." alt="" coords="156,299,303,339"/>
+<area shape="poly" id="edge6_Node000001_Node000008" title=" " alt="" coords="232,353,232,401,227,401,227,353"/>
+<area shape="rect" id="Node000009" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="327,306,537,331"/>
+<area shape="poly" id="edge7_Node000001_Node000009" title=" " alt="" coords="399,340,318,380,260,404,258,399,316,375,397,336"/>
+<area shape="rect" id="Node000010" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="275,123,474,148"/>
+<area shape="poly" id="edge8_Node000009_Node000010" title=" " alt="" coords="360,161,343,197,340,216,344,235,357,257,375,276,413,304,410,308,372,280,353,260,339,237,335,216,338,195,355,159"/>
+<area shape="rect" id="Node000013" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="454,211,599,236"/>
+<area shape="poly" id="edge11_Node000013_Node000010" title=" " alt="" coords="408,153,507,208,505,213,406,157"/>
+<area shape="rect" id="Node000011" href="$da/d98/classfl_1_1_atomic_fake.html" title=" " alt="" coords="307,5,443,45"/>
+<area shape="poly" id="edge9_Node000010_Node000011" title=" " alt="" coords="377,59,377,122,372,122,372,59"/>
+<area shape="poly" id="edge10_Node000009_Node000013" title=" " alt="" coords="507,247,446,308,442,304,504,244"/>
+</map>

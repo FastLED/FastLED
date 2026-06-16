@@ -120,9 +120,9 @@ Files</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>This example demonstrates advanced audio reactive visualization capabilities using FastLED. It processes real-time audio input and creates stunning visual effects synchronized to music.</p>
-<h1><a class="anchor" id="autotoc_md158"></a>
+<h1><a class="anchor" id="autotoc_md874"></a>
 Features</h1>
-<h2><a class="anchor" id="autotoc_md159"></a>
+<h2><a class="anchor" id="autotoc_md875"></a>
 Visualization Modes</h2>
 <ol type="1">
 <li><b>Spectrum Analyzer</b> - Classic frequency spectrum display with customizable colors</li>
@@ -132,7 +132,7 @@ Visualization Modes</h2>
 <li><b>Combined</b> - Split-screen showing both spectrum and waveform</li>
 <li><b>Reactive Patterns</b> - Dynamic patterns that respond to audio energy and beats</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md160"></a>
+<h2><a class="anchor" id="autotoc_md876"></a>
 Audio Processing</h2>
 <ul>
 <li><b>Real-time FFT</b> - Fast Fourier Transform for frequency analysis</li>
@@ -141,7 +141,7 @@ Audio Processing</h2>
 <li><b>Noise Floor Filtering</b> - Removes background noise for cleaner visuals</li>
 <li><b>Attack/Decay/Sustain</b> - Professional audio envelope controls</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md161"></a>
+<h2><a class="anchor" id="autotoc_md877"></a>
 Visual Controls</h2>
 <ul>
 <li><b>Multiple Color Palettes</b> - Heat, Rainbow, Ocean, Forest, Lava, Cloud, Party</li>
@@ -151,7 +151,7 @@ Visual Controls</h2>
 <li><b>Color Animation</b> - Animated color cycling with speed control</li>
 <li><b>Smoothing</b> - Optional smoothing for less jittery displays</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md162"></a>
+<h2><a class="anchor" id="autotoc_md878"></a>
 Advanced Features</h2>
 <ul>
 <li><b>Frequency Band Analysis</b> - 8-band frequency analyzer for detailed audio analysis</li>
@@ -160,15 +160,15 @@ Advanced Features</h2>
 <li><b>Freeze Frame</b> - Pause the visualization at any moment</li>
 <li><b>Frame Advance</b> - Step through frozen frames</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md163"></a>
+<h1><a class="anchor" id="autotoc_md879"></a>
 UI Controls</h1>
-<h2><a class="anchor" id="autotoc_md164"></a>
+<h2><a class="anchor" id="autotoc_md880"></a>
 Main Controls</h2>
 <ul>
 <li><b>Enable Audio Reactive Mode</b> - Master on/off switch for audio processing</li>
 <li><b>Visualization Mode</b> - Dropdown to select visualization type</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md165"></a>
+<h2><a class="anchor" id="autotoc_md881"></a>
 Audio Processing Group</h2>
 <ul>
 <li><b>Fade Time</b> - How quickly levels decay (0-4 seconds)</li>
@@ -177,7 +177,7 @@ Audio Processing Group</h2>
 <li><b>Audio Gain</b> - Manual gain adjustment (0.1-5.0)</li>
 <li><b>Noise Floor</b> - Background noise threshold (-80 to -20 dB)</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md166"></a>
+<h2><a class="anchor" id="autotoc_md882"></a>
 Visual Controls Group</h2>
 <ul>
 <li><b>Fade to Black</b> - Trail/persistence effect (0-50)</li>
@@ -187,7 +187,7 @@ Visual Controls Group</h2>
 <li><b>Mirror Mode</b> - Enable symmetrical display</li>
 <li><b>Smoothing</b> - Enable temporal smoothing</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md167"></a>
+<h2><a class="anchor" id="autotoc_md883"></a>
 FFT Controls Group</h2>
 <ul>
 <li><b>Min Frequency</b> - Lower frequency bound (20-1000 Hz)</li>
@@ -195,7 +195,7 @@ FFT Controls Group</h2>
 <li><b>Logarithmic Scale</b> - Use log scale for frequency</li>
 <li><b>FFT Smoothing</b> - Smoothing factor (0-0.95)</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md168"></a>
+<h2><a class="anchor" id="autotoc_md884"></a>
 Advanced Controls Group</h2>
 <ul>
 <li><b>Freeze Frame</b> - Pause visualization</li>
@@ -204,24 +204,24 @@ Advanced Controls Group</h2>
 <li><b>Beat Sensitivity</b> - Beat detection threshold (0.5-3.0)</li>
 <li><b>Auto Gain Control</b> - Enable automatic gain adjustment</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md169"></a>
+<h1><a class="anchor" id="autotoc_md885"></a>
 Hardware Setup</h1>
-<h2><a class="anchor" id="autotoc_md170"></a>
+<h2><a class="anchor" id="autotoc_md886"></a>
 LED Configuration</h2>
 <ul>
 <li>Default: 128x128 LED matrix (16,384 LEDs)</li>
 <li>Downscaled to 64x64 for output (4,096 LEDs)</li>
 <li>Data pin: GPIO 3 (configurable)</li>
-<li>LED type: <a class="el" href="d5/dd0/class_w_s2812_b.html" title="WS2812B controller class.">WS2812B</a> (Neopixel)</li>
+<li>LED type: WS2812B (Neopixel)</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md171"></a>
+<h2><a class="anchor" id="autotoc_md887"></a>
 Audio Input</h2>
 <p>The example uses the FastLED audio system which can accept input from:</p><ul>
 <li>Microphone (real-time audio capture)</li>
 <li>Audio file playback</li>
 <li>System audio (on supported platforms)</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md172"></a>
+<h1><a class="anchor" id="autotoc_md888"></a>
 Usage</h1>
 <ol type="1">
 <li><b>Basic Operation</b><ul>
@@ -245,16 +245,16 @@ Usage</h1>
 </ul>
 </li>
 </ol>
-<h1><a class="anchor" id="autotoc_md173"></a>
+<h1><a class="anchor" id="autotoc_md889"></a>
 Code Structure</h1>
-<h2><a class="anchor" id="autotoc_md174"></a>
+<h2><a class="anchor" id="autotoc_md890"></a>
 Main Components</h2>
 <ol type="1">
 <li><b>Audio Processing Pipeline</b> <div class="fragment"><div class="line">AudioSample → FFT → Band Analysis → Beat Detection → Visualization</div>
 </div><!-- fragment --></li>
 <li><b>Visualization Functions</b><ul>
 <li><code>drawSpectrumAnalyzer()</code> - Frequency spectrum bars</li>
-<li><code><a class="el" href="da/dc7/advanced_8h_a715d5587b1a493c350ae39b13e881463.html#a715d5587b1a493c350ae39b13e881463">drawWaveform()</a></code> - Audio waveform display</li>
+<li><code><a class="el" href="da/dc7/advanced_8h_aee649a9a7f0cce52f425ec28fb9331ac.html#aee649a9a7f0cce52f425ec28fb9331ac">drawWaveform()</a></code> - Audio waveform display</li>
 <li><code><a class="el" href="da/dc7/advanced_8h_a3cd847c9f0a4c2d5196727427f9900fe.html#a3cd847c9f0a4c2d5196727427f9900fe">drawVUMeter()</a></code> - Volume meter visualization</li>
 <li><code>drawSpectrogram()</code> - Time-frequency plot</li>
 <li><code>drawReactivePatterns()</code> - Beat-reactive patterns</li>
@@ -267,22 +267,22 @@ Main Components</h2>
 </ul>
 </li>
 </ol>
-<h1><a class="anchor" id="autotoc_md175"></a>
+<h1><a class="anchor" id="autotoc_md891"></a>
 Customization</h1>
-<h2><a class="anchor" id="autotoc_md176"></a>
+<h2><a class="anchor" id="autotoc_md892"></a>
 Adding New Visualizations</h2>
 <ol type="1">
 <li>Create a new draw function</li>
 <li>Add it to the visualization mode dropdown</li>
 <li>Add a case in the main switch statement</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md177"></a>
+<h2><a class="anchor" id="autotoc_md893"></a>
 Modifying Color Palettes</h2>
-<p>Edit the <code><a class="el" href="da/dc7/advanced_8h_ac17afe8b8a0d48cf8ffdaada59b5a7c4.html#ac17afe8b8a0d48cf8ffdaada59b5a7c4">getCurrentPalette()</a></code> function to add custom palettes.</p>
-<h2><a class="anchor" id="autotoc_md178"></a>
+<p>Edit the <code><a class="el" href="da/dc7/advanced_8h_a36578b12275aa0bc0c3a9947f052b62f.html#a36578b12275aa0bc0c3a9947f052b62f">getCurrentPalette()</a></code> function to add custom palettes.</p>
+<h2><a class="anchor" id="autotoc_md894"></a>
 Adjusting Frequency Bands</h2>
 <p>Modify the <code>FrequencyBandAnalyzer</code> constructor to change band boundaries.</p>
-<h1><a class="anchor" id="autotoc_md179"></a>
+<h1><a class="anchor" id="autotoc_md895"></a>
 Troubleshooting</h1>
 <ul>
 <li><b>No visualization</b>: Check audio input and ensure "Enable Audio Reactive Mode" is on</li>
@@ -291,7 +291,7 @@ Troubleshooting</h1>
 <li><b>No beat detection</b>: Adjust beat sensitivity or check audio levels</li>
 <li><b>Visualization too sensitive</b>: Increase noise floor value</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md180"></a>
+<h1><a class="anchor" id="autotoc_md896"></a>
 Memory Requirements</h1>
 <p>This example requires significant memory for:</p><ul>
 <li>Framebuffer: 128×128×3 = 49,152 bytes</li>
@@ -306,7 +306,7 @@ Memory Requirements</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="dir_1fe2633b6793b56f980e752e54e330d5.html">Audio</a></li><li class="navelem"><a class="el" href="dir_6f010ead3424cc5489c000491a783bcf.html">simple</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

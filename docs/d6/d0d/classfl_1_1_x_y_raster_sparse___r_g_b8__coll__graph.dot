@@ -1,0 +1,44 @@
+digraph "fl::XYRasterSparse_RGB8"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::XYRasterSparse_RGB8",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mSparseGrid",fontcolor="grey" ];
+  Node2 [id="Node000002",label="fl::unordered_map\<\l Key, Value, HashKey,\l EqualToKey, FASTLED\l_HASHMAP_INLINED_COUNT \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dc/d56/classfl_1_1unordered__map.html",tooltip=" "];
+  Node3 -> Node2 [id="edge2_Node000002_Node000003",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< Key, Value, HashKey,\l EqualToKey, FASTLED\l_HASHMAP_INLINED_COUNT \>",fontcolor="grey" ];
+  Node3 [id="Node000003",label="fl::unordered_map\<\l Key, T, Hash, KeyEqual,\l INLINED_COUNT \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dc/d56/classfl_1_1unordered__map.html",tooltip=" "];
+  Node4 -> Node3 [id="edge3_Node000003_Node000004",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" _buckets",fontcolor="grey" ];
+  Node4 [id="Node000004",label="fl::VectorN\< Entry,\l FASTLED_HASHMAP_INLINED\l_COUNT \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dc/d05/classfl_1_1_vector_n.html",tooltip=" "];
+  Node5 -> Node4 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::vector\< Entry \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d24/classfl_1_1vector.html",tooltip=" "];
+  Node10 -> Node4 [id="edge5_Node000004_Node000010",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< Entry, FASTLED_HASHMAP\l_INLINED_COUNT \>",fontcolor="grey" ];
+  Node10 [id="Node000010",label="fl::VectorN\< T, INLINED\l_SIZE \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dc/d05/classfl_1_1_vector_n.html",tooltip=" "];
+  Node12 -> Node3 [id="edge6_Node000003_Node000012",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" _hash",fontcolor="grey" ];
+  Node12 [id="Node000012",label="fl::Hash\< Key \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/dfd/structfl_1_1_hash.html",tooltip=" "];
+  Node14 -> Node3 [id="edge7_Node000003_Node000014",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" _equal",fontcolor="grey" ];
+  Node14 [id="Node000014",label="fl::EqualTo\< Key \>",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d3/de5/structfl_1_1_equal_to.html",tooltip=" "];
+  Node16 -> Node1 [id="edge8_Node000001_Node000016",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mCache",fontcolor="grey" ];
+  Node16 [id="Node000016",label="fl::unordered_map\<\l fl::vec2\< u16 \>, fl\l::CRGB *, fl::FastHash\l\< Key \>, fl::EqualTo\< Key\l \>, kMaxCacheSize \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dc/d56/classfl_1_1unordered__map.html",tooltip=" "];
+  Node17 -> Node16 [id="edge9_Node000016_Node000017",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" _buckets",fontcolor="grey" ];
+  Node17 [id="Node000017",label="fl::VectorN\< Entry,\l INLINED_COUNT \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dc/d05/classfl_1_1_vector_n.html",tooltip=" "];
+  Node5 -> Node17 [id="edge10_Node000017_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 -> Node17 [id="edge11_Node000017_Node000010",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< Entry, INLINED_COUNT \>",fontcolor="grey" ];
+  Node18 -> Node16 [id="edge12_Node000016_Node000018",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" _hash",fontcolor="grey" ];
+  Node18 [id="Node000018",label="fl::FastHash\< Key \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d8/d95/structfl_1_1_fast_hash.html",tooltip=" "];
+  Node19 -> Node18 [id="edge13_Node000018_Node000019",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< Key \>",fontcolor="grey" ];
+  Node19 [id="Node000019",label="fl::FastHash\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d8/d95/structfl_1_1_fast_hash.html",tooltip=" "];
+  Node14 -> Node16 [id="edge14_Node000016_Node000014",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" _equal",fontcolor="grey" ];
+  Node3 -> Node16 [id="edge15_Node000016_Node000003",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::vec2\< u16 \>,\l fl::CRGB *, fl::FastHash\l\< Key \>, fl::EqualTo\< Key\l \>, kMaxCacheSize \>",fontcolor="grey" ];
+  Node20 -> Node1 [id="edge16_Node000001_Node000020",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mAbsoluteBounds",fontcolor="grey" ];
+  Node20 [id="Node000020",label="fl::rect\< u16 \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/d48/structfl_1_1rect.html",tooltip=" "];
+  Node21 -> Node20 [id="edge17_Node000020_Node000021",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mMax\nmMin",fontcolor="grey" ];
+  Node21 [id="Node000021",label="fl::vec2\< u16 \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d5/d5d/structfl_1_1vec2.html",tooltip=" "];
+  Node22 -> Node21 [id="edge18_Node000021_Node000022",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< u16 \>",fontcolor="grey" ];
+  Node22 [id="Node000022",label="fl::vec2\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d5/d5d/structfl_1_1vec2.html",tooltip=" "];
+  Node23 -> Node20 [id="edge19_Node000020_Node000023",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< u16 \>",fontcolor="grey" ];
+  Node23 [id="Node000023",label="fl::rect\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/d48/structfl_1_1rect.html",tooltip=" "];
+}

@@ -1,0 +1,68 @@
+<map id="setup" name="setup">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,573,64,598"/>
+<area shape="rect" id="Node000002" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_aea2ac581ef439e865a98eae4778c7416.html#aea2ac581ef439e865a98eae4778c7416" title="Factory method for 400 Bad Request response." alt="" coords="112,197,283,237"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="36,571,62,477,83,413,110,350,140,294,171,247,175,250,144,297,114,352,88,415,67,479,42,573"/>
+<area shape="rect" id="Node000007" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_a5750f33732ba08a389f9f6ce4a387338.html#a5750f33732ba08a389f9f6ce4a387338" title="Set JSON response body with automatic Content&#45;Type header." alt="" coords="561,349,732,389"/>
+<area shape="poly" id="edge23_Node000001_Node000007" title=" " alt="" coords="35,572,40,538,53,493,75,447,91,426,110,409,162,379,217,357,275,344,335,336,393,334,449,335,548,346,548,352,449,341,393,339,335,341,276,349,219,362,164,383,114,413,95,429,80,449,58,495,45,539,40,573"/>
+<area shape="rect" id="Node000009" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_ab07b6f9e44bc8aba1f780b0230f5be21.html#ab07b6f9e44bc8aba1f780b0230f5be21" title="Factory method for 200 OK response." alt="" coords="549,414,744,439"/>
+<area shape="poly" id="edge27_Node000001_Node000009" title=" " alt="" coords="36,572,44,544,58,508,80,472,111,443,143,429,188,419,299,410,422,410,536,415,536,421,422,415,299,415,188,425,145,434,113,448,84,475,62,510,49,545,41,573"/>
+<area shape="rect" id="Node000011" href="$d4/d3c/classfl_1_1asio_1_1http_1_1_request_a814be5b440d586502aaf8434fbe73fe4.html#a814be5b440d586502aaf8434fbe73fe4" title="Get request body (for POST/PUT requests)" alt="" coords="117,457,277,497"/>
+<area shape="poly" id="edge20_Node000001_Node000011" title=" " alt="" coords="46,570,74,543,110,514,132,501,135,506,114,518,78,547,50,574"/>
+<area shape="rect" id="Node000012" href="$d1/dfb/colorutils_8h_afba4db18577c19e39c54f1c5793741b7.html#afba4db18577c19e39c54f1c5793741b7" title="Fill a range of LEDs with a solid color." alt="" coords="378,522,454,547"/>
+<area shape="poly" id="edge21_Node000001_Node000012" title=" " alt="" coords="63,572,111,557,179,546,248,539,364,533,364,538,248,544,180,551,113,563,65,577"/>
+<area shape="rect" id="Node000013" href="$de/d40/classfl_1_1json_a59f212a0074c9bad4d2519ddf272bc8f.html#a59f212a0074c9bad4d2519ddf272bc8f" title=" " alt="" coords="140,622,255,647"/>
+<area shape="poly" id="edge22_Node000001_Node000013" title=" " alt="" coords="65,592,113,607,141,615,139,620,111,612,63,597"/>
+<area shape="rect" id="Node000014" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="160,695,235,721"/>
+<area shape="poly" id="edge24_Node000001_Node000014" title=" " alt="" coords="49,596,78,625,114,657,160,686,157,691,110,661,74,629,46,600"/>
+<area shape="rect" id="Node000015" href="$de/d40/classfl_1_1json_af8bc0968107152344bfa8468bba76f54.html#af8bc0968107152344bfa8468bba76f54" title=" " alt="" coords="141,745,254,770"/>
+<area shape="poly" id="edge26_Node000001_Node000015" title=" " alt="" coords="41,597,50,625,64,662,85,699,114,731,129,741,126,745,110,735,81,702,59,664,45,627,36,599"/>
+<area shape="rect" id="Node000016" href="$de/d40/classfl_1_1json_af7d8a65ad376b44e25bf9653bcac2405.html#af7d8a65ad376b44e25bf9653bcac2405" title=" " alt="" coords="143,867,252,893"/>
+<area shape="poly" id="edge28_Node000001_Node000016" title=" " alt="" coords="39,598,44,640,56,701,78,769,94,801,114,830,131,846,150,859,147,863,127,850,110,834,90,804,73,771,51,703,39,641,34,598"/>
+<area shape="rect" id="Node000020" href="$de/d40/classfl_1_1json_af272c33451fcfba68454595a4f6d8444.html#af272c33451fcfba68454595a4f6d8444" title=" " alt="" coords="151,794,244,819"/>
+<area shape="poly" id="edge33_Node000001_Node000020" title=" " alt="" coords="40,598,45,634,57,683,79,736,95,760,114,781,139,795,136,800,110,785,91,763,75,738,52,685,40,635,34,598"/>
+<area shape="rect" id="Node000026" href="$d3/d1f/_server_real_8h_a3c7b93186aa45d9ff5d239f0d88f6008.html#a3c7b93186aa45d9ff5d239f0d88f6008" title=" " alt="" coords="148,573,247,598"/>
+<area shape="poly" id="edge39_Node000001_Node000026" title=" " alt="" coords="64,583,134,583,134,588,64,588"/>
+<area shape="rect" id="Node000003" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_a1a8b4038fa86119ce80f6b9857c7eee3.html#a1a8b4038fa86119ce80f6b9857c7eee3" title=" " alt="" coords="331,197,501,237"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="283,223,317,224,317,229,283,229"/>
+<area shape="poly" id="edge4_Node000003_Node000002" title=" " alt="" coords="330,211,296,211,297,206,330,206"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="375,198,373,188,379,178,394,173,416,171,442,174,456,181,453,186,440,179,416,176,395,178,382,183,378,189,380,196"/>
+<area shape="rect" id="Node000004" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_a8688692b19d75358b846a85f6c367b5c.html#a8688692b19d75358b846a85f6c367b5c" title="Set response body." alt="" coords="561,5,732,45"/>
+<area shape="poly" id="edge5_Node000003_Node000004" title=" " alt="" coords="432,196,478,133,511,98,548,67,588,48,590,52,551,72,515,102,483,136,436,199"/>
+<area shape="rect" id="Node000005" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_abd12ccbafacd9b44270123f766d91dc9.html#abd12ccbafacd9b44270123f766d91dc9" title="Add HTTP header." alt="" coords="561,69,732,109"/>
+<area shape="poly" id="edge7_Node000003_Node000005" title=" " alt="" coords="451,195,496,163,548,131,595,112,597,117,551,136,499,167,454,199"/>
+<area shape="rect" id="Node000006" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_a6844fcc0edb41a50dad5d21ee745ad1a.html#a6844fcc0edb41a50dad5d21ee745ad1a" title="Factory method for 500 Internal Server Error response." alt="" coords="561,133,732,173"/>
+<area shape="poly" id="edge9_Node000003_Node000006" title=" " alt="" coords="501,200,586,175,588,180,502,205"/>
+<area shape="poly" id="edge11_Node000003_Node000007" title=" " alt="" coords="435,235,486,277,551,323,578,340,575,345,548,328,483,282,432,239"/>
+<area shape="rect" id="Node000008" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_a571a6ad842ad6f23649072749926227e.html#a571a6ad842ad6f23649072749926227e" title="Factory method for 404 Not Found response." alt="" coords="561,197,732,237"/>
+<area shape="poly" id="edge14_Node000003_Node000008" title=" " alt="" coords="502,223,548,224,548,229,502,229"/>
+<area shape="poly" id="edge16_Node000003_Node000009" title=" " alt="" coords="426,237,442,273,466,317,500,363,541,404,537,408,496,367,462,320,437,275,421,239"/>
+<area shape="rect" id="Node000010" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_a7c2f923cab94b0b52945ce0bcfd12e90.html#a7c2f923cab94b0b52945ce0bcfd12e90" title="Set HTTP status code." alt="" coords="561,261,732,301"/>
+<area shape="poly" id="edge18_Node000003_Node000010" title=" " alt="" coords="464,235,549,260,547,265,462,240"/>
+<area shape="poly" id="edge6_Node000004_Node000003" title=" " alt="" coords="563,40,551,48,513,79,480,116,453,153,434,186,429,184,449,150,476,113,510,75,548,43,560,36"/>
+<area shape="poly" id="edge8_Node000005_Node000003" title=" " alt="" coords="562,106,551,112,491,149,443,189,440,185,488,145,548,107,560,101"/>
+<area shape="poly" id="edge10_Node000006_Node000003" title=" " alt="" coords="562,171,476,196,475,190,560,166"/>
+<area shape="poly" id="edge12_Node000007_Node000003" title=" " alt="" coords="624,351,548,304,467,248,470,243,551,299,627,347"/>
+<area shape="poly" id="edge13_Node000007_Node000007" title=" " alt="" coords="604,350,601,340,608,330,623,325,647,323,673,326,688,333,686,338,672,331,647,328,625,330,611,335,606,341,609,348"/>
+<area shape="poly" id="edge15_Node000008_Node000003" title=" " alt="" coords="561,211,515,211,515,206,561,206"/>
+<area shape="poly" id="edge17_Node000009_Node000003" title=" " alt="" coords="615,417,581,407,548,392,511,360,479,322,434,251,439,248,483,319,514,356,551,387,583,402,616,411"/>
+<area shape="poly" id="edge19_Node000010_Node000003" title=" " alt="" coords="599,264,514,238,515,233,601,259"/>
+<area shape="poly" id="edge25_Node000014_Node000014" title=" " alt="" coords="170,697,164,687,167,677,179,671,197,669,220,672,229,681,226,685,217,677,197,674,180,676,171,681,170,686,175,694"/>
+<area shape="poly" id="edge30_Node000016_Node000016" title=" " alt="" coords="170,869,164,859,167,849,179,843,197,841,220,844,229,853,226,857,217,849,197,846,180,848,171,853,170,858,175,866"/>
+<area shape="rect" id="Node000017" href="$de/d40/classfl_1_1json_a08247deaa089c843eae1e64655e2d761.html#a08247deaa089c843eae1e64655e2d761" title=" " alt="" coords="366,845,466,870"/>
+<area shape="poly" id="edge29_Node000016_Node000017" title=" " alt="" coords="252,872,352,861,353,867,252,877"/>
+<area shape="rect" id="Node000018" href="$dc/dec/structfl_1_1json__value_aa55ba03795c9d30a654c1385a9d28f8e.html#aa55ba03795c9d30a654c1385a9d28f8e" title=" " alt="" coords="336,894,496,919"/>
+<area shape="poly" id="edge31_Node000016_Node000018" title=" " alt="" coords="252,884,323,893,322,898,252,889"/>
+<area shape="rect" id="Node000019" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="584,843,709,869"/>
+<area shape="poly" id="edge32_Node000018_Node000019" title=" " alt="" coords="474,891,574,869,575,874,475,896"/>
+<area shape="poly" id="edge34_Node000020_Node000017" title=" " alt="" coords="245,815,353,840,352,845,244,820"/>
+<area shape="poly" id="edge35_Node000020_Node000019" title=" " alt="" coords="245,807,361,816,502,831,571,841,570,846,501,836,361,822,244,812"/>
+<area shape="rect" id="Node000021" href="$de/d40/classfl_1_1json_ad617704f72b6ca9c33c996466fde27b5.html#ad617704f72b6ca9c33c996466fde27b5" title=" " alt="" coords="361,743,471,769"/>
+<area shape="poly" id="edge36_Node000020_Node000021" title=" " alt="" coords="244,793,348,769,349,774,245,799"/>
+<area shape="rect" id="Node000022" href="$de/d40/classfl_1_1json_a05686d9138b900b8d8b7d54a7d7dd9c7.html#a05686d9138b900b8d8b7d54a7d7dd9c7" title=" " alt="" coords="573,708,720,748"/>
+<area shape="poly" id="edge37_Node000021_Node000022" title=" " alt="" coords="470,747,559,736,560,741,471,752"/>
+<area shape="rect" id="Node000023" href="$de/d40/classfl_1_1json_a788496d489a036e8829b552a8d4f4bf3.html#a788496d489a036e8829b552a8d4f4bf3" title=" " alt="" coords="590,773,703,798"/>
+<area shape="poly" id="edge38_Node000021_Node000023" title=" " alt="" coords="471,760,577,774,576,779,470,766"/>
+<area shape="poly" id="edge41_Node000026_Node000012" title=" " alt="" coords="247,571,364,544,365,549,248,577"/>
+<area shape="rect" id="Node000027" href="$df/da5/lib8tion_8h_a696b9421eca961df0a68c7c6c3e983ab.html#a696b9421eca961df0a68c7c6c3e983ab" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="377,573,455,598"/>
+<area shape="poly" id="edge40_Node000026_Node000027" title=" " alt="" coords="247,583,363,583,363,588,247,588"/>
+</map>

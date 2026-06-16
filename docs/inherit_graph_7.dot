@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="AVRSoftwareSPIOutput\l\< DATA_PIN, CLOCK_PIN,\l SPI_SPEED \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d57/class_a_v_r_software_s_p_i_output.html",tooltip="Software SPI (aka bit-banging) support Includes aggressive optimizations for when the clock and data ..."];
+  Node0 [id="Node000000",label="autoresearch::parlio\l_bench::ParlioEncodeResult",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/db1/namespaceautoresearch_1_1parlio__bench.html#dc/d0d/structautoresearch_1_1parlio__bench_1_1_parlio_encode_result",tooltip=" "];
 }

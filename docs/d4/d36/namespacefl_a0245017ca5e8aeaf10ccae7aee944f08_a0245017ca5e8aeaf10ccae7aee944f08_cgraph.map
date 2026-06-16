@@ -1,0 +1,8 @@
+<map id="fl::makeScaledPixelRangeRGB" name="fl::makeScaledPixelRangeRGB">
+<area shape="rect" id="Node000001" title="Create RGB input iterator range from PixelIterator." alt="" coords="5,29,223,55"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="80,31,73,21,76,11,91,5,114,3,143,6,154,15,151,20,141,11,114,8,92,10,80,15,78,20,84,28"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a9f32cf31427769f3900630cb3506f2c6.html#a9f32cf31427769f3900630cb3506f2c6" title=" " alt="" coords="271,29,377,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="223,39,257,39,257,45,223,45"/>
+<area shape="rect" id="Node000003" href="$da/d3c/namespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259.html#a0bddf371925d8c4e94b88e9d7b35d259" title=" " alt="" coords="425,29,529,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="378,39,411,39,411,45,378,45"/>
+</map>

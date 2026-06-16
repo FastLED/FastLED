@@ -1,5 +1,5 @@
 <map id="rainbow" name="rainbow">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,5,80,31"/>
-<area shape="rect" id="Node000002" href="$d1/dfb/colorutils_8h_a8cfac7f712d38ac9aa9bcd172283b453.html#a8cfac7f712d38ac9aa9bcd172283b453" title="Fill a range of LEDs with a rainbow of colors." alt="" coords="128,5,225,31"/>
+<area shape="rect" id="Node000002" href="$d1/dfb/colorutils_8h_a5e33a6635101019cce6b0936c9415a6f.html#a5e33a6635101019cce6b0936c9415a6f" title="Fill a range of LEDs with a rainbow of colors." alt="" coords="128,5,225,31"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="80,15,114,15,114,21,80,21"/>
 </map>

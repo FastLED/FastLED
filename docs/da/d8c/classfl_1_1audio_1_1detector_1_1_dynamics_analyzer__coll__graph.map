@@ -1,0 +1,16 @@
+<map id="fl::audio::detector::DynamicsAnalyzer" name="fl::audio::detector::DynamicsAnalyzer">
+<area shape="rect" id="Node000001" title=" " alt="" coords="20,344,172,384"/>
+<area shape="rect" id="Node000002" href="$df/d9b/classfl_1_1audio_1_1_detector.html" title=" " alt="" coords="5,256,144,281"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,294,94,343,89,344,78,295"/>
+<area shape="rect" id="Node000003" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="168,256,307,281"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="210,291,126,346,123,342,207,287"/>
+<area shape="rect" id="Node000004" href="$d4/dad/classfl_1_1vector__basic.html" title="Type&#45;erased vector base class." alt="" coords="159,93,279,119"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="224,132,231,193,238,255,233,256,225,194,219,133"/>
+<area shape="rect" id="Node000007" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="240,168,357,193"/>
+<area shape="poly" id="edge7_Node000007_Node000004" title=" " alt="" coords="243,126,287,166,284,170,240,130"/>
+<area shape="rect" id="Node000005" href="$db/d13/classfl_1_1memory__resource.html" title="Polymorphic memory resource base class (PMR&#45;style)." alt="" coords="47,5,203,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="150,38,207,91,204,95,146,42"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl.html#d8/d72/structfl_1_1vector__element__ops" title="Function pointer table for type&#45;specific element operations." alt="" coords="228,5,399,31"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="294,42,263,71,235,95,231,91,260,67,290,39"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="284,206,248,257,244,254,280,203"/>
+</map>

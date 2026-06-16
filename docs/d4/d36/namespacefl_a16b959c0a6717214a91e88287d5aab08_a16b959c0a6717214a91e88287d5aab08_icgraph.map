@@ -1,0 +1,17 @@
+<map id="fl::rescaleNoiseValue16" name="fl::rescaleNoiseValue16">
+<area shape="rect" id="Node000001" title="Rescale raw inoise16() output to full 16&#45;bit range [0, 65535] Curries in the global NOISE16_EXTENT_MI..." alt="" coords="537,80,712,105"/>
+<area shape="rect" id="Node000002" href="$d7/d91/group___cylinder_noise_ga2bdee5e155aa2ab13ece081198d7b990.html#ga2bdee5e155aa2ab13ece081198d7b990" title="Generate CRGB noise for a cylinder pattern." alt="" coords="322,5,486,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="578,77,488,45,452,33,453,28,490,39,580,72"/>
+<area shape="rect" id="Node000003" href="$d7/d91/group___cylinder_noise_ga73362dfc92c8e1badb3b3491852639a9.html#ga73362dfc92c8e1badb3b3491852639a9" title="Cylinder noise functions &#45; sample three z&#45;slices for independent component evolution." alt="" coords="319,55,489,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="523,84,489,80,490,74,524,78"/>
+<area shape="rect" id="Node000005" href="$d6/d5f/group___ring_noise_gaf4d521145a9a922c3469227ce7df4003.html#gaf4d521145a9a922c3469227ce7df4003" title="Generate CRGB noise for a ring pattern." alt="" coords="335,104,473,129"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="524,106,474,112,473,107,523,101"/>
+<area shape="rect" id="Node000006" href="$d6/d5f/group___ring_noise_ga424c29c488273a2f0efb1bb80bb0911a.html#ga424c29c488273a2f0efb1bb80bb0911a" title="Ring noise functions &#45; sample three z&#45;slices for independent component evolution." alt="" coords="331,153,477,179"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="577,113,490,143,450,156,448,151,488,138,576,108"/>
+<area shape="rect" id="Node000004" href="$d7/d91/group___cylinder_noise_ga63aad65ffc506c9ebb2beeceb56a89a8.html#ga63aad65ffc506c9ebb2beeceb56a89a8" title="Generate HSV8 (8&#45;bit) noise for a cylinder pattern." alt="" coords="108,55,271,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="305,70,271,70,271,65,305,65"/>
+<area shape="rect" id="Node000007" href="$d6/d5f/group___ring_noise_ga3b0969c97de0d33d2054483d6695c727.html#ga3b0969c97de0d33d2054483d6695c727" title="Generate HSV8 (8&#45;bit) noise for a ring pattern." alt="" coords="121,153,258,179"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="317,169,258,169,258,163,317,163"/>
+<area shape="rect" id="Node000008" href="$d3/dac/_fx_noise_ring_8ino_a7a1cdb28d8d83f314435a3a1dc13f17f.html#a7a1cdb28d8d83f314435a3a1dc13f17f" title=" " alt="" coords="5,153,60,179"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="107,169,60,169,60,163,107,163"/>
+</map>

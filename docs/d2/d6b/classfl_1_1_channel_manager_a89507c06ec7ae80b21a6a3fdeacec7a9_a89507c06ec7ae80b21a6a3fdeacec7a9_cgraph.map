@@ -1,0 +1,11 @@
+<map id="fl::ChannelManager::setDriverPriority" name="fl::ChannelManager::setDriverPriority">
+<area shape="rect" id="Node000001" title="Change the priority of a registered driver." alt="" coords="5,23,153,63"/>
+<area shape="rect" id="Node000002" href="$de/d66/classfl_1_1basic__string_a409024020d4cdb01125a9b7fba3404b5.html#a409024020d4cdb01125a9b7fba3404b5" title=" " alt="" coords="201,5,368,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="154,32,187,27,188,33,154,37"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ad1e0049d12f06a7b102b765b4c7f4ce8.html#ad1e0049d12f06a7b102b765b4c7f4ce8" title=" " alt="" coords="231,55,338,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="154,49,218,57,217,62,154,55"/>
+<area shape="rect" id="Node000004" href="$df/d9e/namespacefl_1_1detail_aeb6fc0cc03c5847e9a77da1a69895c00.html#aeb6fc0cc03c5847e9a77da1a69895c00" title=" " alt="" coords="416,55,588,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="339,65,402,65,402,70,339,70"/>
+<area shape="rect" id="Node000005" href="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a" title=" " alt="" coords="636,55,727,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="588,65,622,65,622,70,588,70"/>
+</map>

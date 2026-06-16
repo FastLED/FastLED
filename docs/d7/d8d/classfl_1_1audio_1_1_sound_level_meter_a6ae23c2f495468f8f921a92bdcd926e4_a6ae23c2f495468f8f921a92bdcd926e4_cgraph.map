@@ -1,0 +1,9 @@
+<map id="fl::audio::SoundLevelMeter::processBlock" name="fl::audio::SoundLevelMeter::processBlock">
+<area shape="rect" id="Node000001" title="Process a block of int16 PCM samples." alt="" coords="5,5,200,45"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ac86bcc74a05d5d43446725a3fd34a9d4.html#ac86bcc74a05d5d43446725a3fd34a9d4" title=" " alt="" coords="248,13,323,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,23,234,23,234,28,200,28"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a76e622d2a42e5cb7332ac4f2faa7fae2.html#a76e622d2a42e5cb7332ac4f2faa7fae2" title=" " alt="" coords="371,13,532,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="323,23,357,23,357,28,323,28"/>
+<area shape="rect" id="Node000004" href="$df/d9e/namespacefl_1_1detail_aefd5cee30614d18a52adbf22fc83f4a8.html#aefd5cee30614d18a52adbf22fc83f4a8" title=" " alt="" coords="580,13,743,38"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="532,23,567,23,567,28,532,28"/>
+</map>

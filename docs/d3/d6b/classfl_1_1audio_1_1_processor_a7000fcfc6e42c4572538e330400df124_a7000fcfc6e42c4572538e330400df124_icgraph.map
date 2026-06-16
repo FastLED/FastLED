@@ -1,0 +1,7 @@
+<map id="fl::audio::Processor::onTempoStable" name="fl::audio::Processor::onTempoStable">
+<area shape="rect" id="Node000001" title=" " alt="" coords="244,29,389,69"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="353,18,340,11,317,8,296,10,283,15,279,21,281,28,276,30,274,20,280,10,295,5,317,3,342,6,356,13"/>
+<area shape="rect" id="Node000002" href="$d3/d6b/classfl_1_1audio_1_1_processor_a4b669aaaac2d1b02b2aa3fc61e70e17b.html#a4b669aaaac2d1b02b2aa3fc61e70e17b" title=" " alt="" coords="5,29,196,69"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="230,52,196,52,196,47,230,47"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="137,18,124,11,101,8,80,10,67,15,63,21,65,28,60,30,58,20,64,10,79,5,101,3,126,6,140,13"/>
+</map>

@@ -109,7 +109,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a964d9f51bd69ec7269946cefb6507088.h
         <tr>
           <td class="memname">void fl::downscaleHalf </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> *</td>          <td class="paramname"><span class="paramname"><em>src</em></span>, </td>
+          <td class="paramtype">const <a class="el" href="../../da/dd6/structfl_1_1_c_r_g_b.html">CRGB</a> *</td>          <td class="paramname"><span class="paramname"><em>src</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -124,53 +124,18 @@ $(function(){initNavTree('d4/d36/namespacefl_a964d9f51bd69ec7269946cefb6507088.h
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> *</td>          <td class="paramname"><span class="paramname"><em>dst</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="../../da/dd6/structfl_1_1_c_r_g_b.html">CRGB</a> *</td>          <td class="paramname"><span class="paramname"><em>dst</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/df9/downscale_8cpp_source.html#l00018">18</a> of file <a class="el" href="../../d8/df9/downscale_8cpp_source.html">downscale.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   19</span>                              {</div>
-<div class="line"><span class="lineno">   20</span>    fl::u16 dstWidth = srcWidth / 2;</div>
-<div class="line"><span class="lineno">   21</span>    fl::u16 dstHeight = srcHeight / 2;</div>
-<div class="line"><span class="lineno">   22</span> </div>
-<div class="line"><span class="lineno">   23</span>    <span class="keywordflow">for</span> (fl::u16 <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> = 0; <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> &lt; dstHeight; ++<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a>) {</div>
-<div class="line"><span class="lineno">   24</span>        <span class="keywordflow">for</span> (fl::u16 <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> = 0; <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> &lt; dstWidth; ++<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>) {</div>
-<div class="line"><span class="lineno">   25</span>            <span class="comment">// Map to top-left of the 2x2 block in source</span></div>
-<div class="line"><span class="lineno">   26</span>            fl::u16 srcX = <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> * 2;</div>
-<div class="line"><span class="lineno">   27</span>            fl::u16 srcY = <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> * 2;</div>
-<div class="line"><span class="lineno">   28</span> </div>
-<div class="line"><span class="lineno">   29</span>            <span class="comment">// Fetch 2x2 block</span></div>
-<div class="line"><span class="lineno">   30</span>            <span class="keyword">const</span> <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> &amp;p00 = src[(srcY)*srcWidth + (srcX)];</div>
-<div class="line"><span class="lineno">   31</span>            <span class="keyword">const</span> <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> &amp;p10 = src[(srcY)*srcWidth + (srcX + 1)];</div>
-<div class="line"><span class="lineno">   32</span>            <span class="keyword">const</span> <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> &amp;p01 = src[(srcY + 1) * srcWidth + (srcX)];</div>
-<div class="line"><span class="lineno">   33</span>            <span class="keyword">const</span> <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> &amp;p11 = src[(srcY + 1) * srcWidth + (srcX + 1)];</div>
-<div class="line"><span class="lineno">   34</span> </div>
-<div class="line"><span class="lineno">   35</span>            <span class="comment">// Average each color channel</span></div>
-<div class="line"><span class="lineno">   36</span>            fl::u16 r =</div>
-<div class="line"><span class="lineno">   37</span>                (p00.r + p10.r + p01.r + p11.r + 2) / 4; <span class="comment">// +2 for rounding</span></div>
-<div class="line"><span class="lineno">   38</span>            fl::u16 g = (p00.g + p10.g + p01.g + p11.g + 2) / 4;</div>
-<div class="line"><span class="lineno">   39</span>            fl::u16 b = (p00.b + p10.b + p01.b + p11.b + 2) / 4;</div>
-<div class="line"><span class="lineno">   40</span> </div>
-<div class="line"><span class="lineno">   41</span>            <span class="comment">// Store result</span></div>
-<div class="line"><span class="lineno">   42</span>            dst[<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> * dstWidth + <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>] = <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a>((<a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a>)r, (<a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a>)g, (<a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a>)b);</div>
-<div class="line"><span class="lineno">   43</span>        }</div>
-<div class="line"><span class="lineno">   44</span>    }</div>
-<div class="line"><span class="lineno">   45</span>}</div>
-<div class="ttc" id="a_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33_html_a0a2f84ed7838f07779ae24c5a9086d33"><div class="ttname"><a href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a></div><div class="ttdeci">int y</div><div class="ttdef"><b>Definition</b> <a href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00093">simple.h:93</a></div></div>
-<div class="ttc" id="a_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc_html_a6150e0515f7202e2fb518f7206ed97dc"><div class="ttname"><a href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a></div><div class="ttdeci">int x</div><div class="ttdef"><b>Definition</b> <a href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">simple.h:92</a></div></div>
-<div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d7e/int_8h_source.html#l00017">int.h:17</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00086">crgb.h:86</a></div></div>
-</div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">x</a>, and <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00093">y</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d8/df9/downscale_8cpp_source.html#l00154">downscale()</a>, and <a class="el" href="../../d6/d1a/examples_2_downscale_2downscale_8h_source.html#l00132">loop()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d9e/downscale_8cpp_8hpp_source.html#l00015">FL_DISABLE_WARNING()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_a964d9f51bd69ec7269946cefb6507088_a964d9f51bd69ec7269946cefb6507088_icgraph.svg" width="484" height="110"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_a964d9f51bd69ec7269946cefb6507088_a964d9f51bd69ec7269946cefb6507088_icgraph.svg" width="364" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -182,7 +147,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a964d9f51bd69ec7269946cefb6507088.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:22 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

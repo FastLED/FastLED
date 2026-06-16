@@ -1,0 +1,64 @@
+<map id="fl::Optional::value" name="fl::Optional::value">
+<area shape="rect" id="Node000001" title=" " alt="" coords="932,383,1069,409"/>
+<area shape="rect" id="Node000002" href="$dd/dd8/classfl_1_1_optional_ac992a3708147d3825422f19ba46515a3.html#ac992a3708147d3825422f19ba46515a3" title=" " alt="" coords="717,186,873,211"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="987,372,971,338,948,298,919,258,882,225,862,214,864,209,886,220,923,255,953,295,976,335,992,369"/>
+<area shape="rect" id="Node000003" href="$dd/dd8/classfl_1_1_optional_afced5446613a34f3cac7e7ba92141b0a.html#afced5446613a34f3cac7e7ba92141b0a" title=" " alt="" coords="717,235,873,261"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="981,374,940,323,913,297,883,274,859,263,861,258,885,270,916,293,944,319,986,370"/>
+<area shape="rect" id="Node000004" href="$dd/dd8/classfl_1_1_optional_a3afb0aa53508efa140f1e461796428a9.html#a3afb0aa53508efa140f1e461796428a9" title="Emplace with rvalue reference." alt="" coords="716,285,873,310"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="971,377,930,350,883,324,852,313,854,308,885,319,933,345,974,373"/>
+<area shape="rect" id="Node000008" href="$d5/d8b/classfl_1_1_channel_a27ac9770da107f25ff6b2e3cbabd4f2a.html#a27ac9770da107f25ff6b2e3cbabd4f2a" title=" " alt="" coords="707,334,882,359"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="933,383,848,362,849,357,934,378"/>
+<area shape="rect" id="Node000022" href="$dd/dd8/classfl_1_1_optional_ad8ff29e13b27d2ba6b62efa79c65fb20.html#ad8ff29e13b27d2ba6b62efa79c65fb20" title=" " alt="" coords="711,383,878,409"/>
+<area shape="poly" id="edge24_Node000001_Node000022" title=" " alt="" coords="918,399,878,399,878,393,918,393"/>
+<area shape="rect" id="Node000023" href="$dd/dd8/classfl_1_1_optional_aa136a3578b1dcbc0a0c632f35cf621d8.html#aa136a3578b1dcbc0a0c632f35cf621d8" title=" " alt="" coords="711,433,878,458"/>
+<area shape="poly" id="edge25_Node000001_Node000023" title=" " alt="" coords="934,414,849,435,848,430,933,409"/>
+<area shape="rect" id="Node000024" href="$dd/dd8/classfl_1_1_optional_a07e804d0d79a352832890ed7f151ae06.html#a07e804d0d79a352832890ed7f151ae06" title=" " alt="" coords="705,482,884,507"/>
+<area shape="poly" id="edge26_Node000001_Node000024" title=" " alt="" coords="973,419,932,446,885,472,850,484,849,479,883,467,930,442,970,415"/>
+<area shape="rect" id="Node000025" href="$d4/d36/namespacefl_a186b596ee2d8dbd5386a081c95401c8b.html#a186b596ee2d8dbd5386a081c95401c8b" title=" " alt="" coords="708,531,881,557"/>
+<area shape="poly" id="edge27_Node000001_Node000025" title=" " alt="" coords="985,422,944,472,916,498,885,521,858,534,855,529,883,516,913,494,940,468,981,418"/>
+<area shape="rect" id="Node000027" href="$d4/d36/namespacefl_ab9a569f3493b0267ba32021be174dd94.html#ab9a569f3493b0267ba32021be174dd94" title=" " alt="" coords="727,582,863,607"/>
+<area shape="poly" id="edge29_Node000001_Node000027" title=" " alt="" coords="991,423,975,456,952,496,922,536,886,570,859,584,857,580,882,566,918,532,948,493,970,454,986,421"/>
+<area shape="rect" id="Node000005" href="$d3/dc7/classfl_1_1_pixel_iterator_any_aea17d97c9899a905de7199dbb846567d.html#aea17d97c9899a905de7199dbb846567d" title="Initialize the adapter with color order conversion." alt="" coords="510,69,653,109"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="713,280,704,274,684,251,675,229,668,205,655,179,628,142,600,111,604,108,632,139,660,176,673,204,680,227,688,249,707,270,716,276"/>
+<area shape="rect" id="Node000006" href="$d3/dc7/classfl_1_1_pixel_iterator_any_ab136b28e1a8d9f512d9ee5d97357ccc8.html#ab136b28e1a8d9f512d9ee5d97357ccc8" title=" " alt="" coords="279,5,422,45"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="496,69,421,48,423,42,497,63"/>
+<area shape="rect" id="Node000007" href="$d3/dc7/classfl_1_1_pixel_iterator_any_ac0406f961031d4acae7cf2233bab13f8.html#ac0406f961031d4acae7cf2233bab13f8" title="Construct adapter with color order conversion." alt="" coords="279,69,422,109"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="496,92,422,92,422,87,496,87"/>
+<area shape="rect" id="Node000009" href="$d5/d8b/classfl_1_1_channel_aba6af4be09d5ab9bd2bed306e4238925.html#aba6af4be09d5ab9bd2bed306e4238925" title="Protected constructor for template subclasses (e.g., ClocklessIdf5)" alt="" coords="505,285,657,310"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="725,333,636,313,638,307,726,328"/>
+<area shape="rect" id="Node000012" href="$d5/d8b/classfl_1_1_channel_abfdb59164f69ea16a5290ccc6c9c7367.html#abfdb59164f69ea16a5290ccc6c9c7367" title=" " alt="" coords="268,134,433,159"/>
+<area shape="poly" id="edge23_Node000008_Node000012" title=" " alt="" coords="719,331,704,324,688,311,679,299,670,287,656,274,604,238,561,214,456,173,418,162,420,157,458,168,564,209,607,234,659,270,674,283,683,296,692,308,707,319,722,327"/>
+<area shape="rect" id="Node000019" href="$d5/d8b/classfl_1_1_channel_a73b662986c55cfb31ff1e72065df03dd.html#a73b662986c55cfb31ff1e72065df03dd" title="Private constructor (use create() factory method)" alt="" coords="505,334,657,359"/>
+<area shape="poly" id="edge20_Node000008_Node000019" title=" " alt="" coords="694,349,658,349,658,344,694,344"/>
+<area shape="rect" id="Node000020" href="$d5/d8b/classfl_1_1_channel_a547ccb4c09f235fdad54564198d19028.html#a547ccb4c09f235fdad54564198d19028" title="Backwards&#45;compatible constructor (deprecated)" alt="" coords="505,383,657,409"/>
+<area shape="poly" id="edge21_Node000008_Node000020" title=" " alt="" coords="726,365,638,386,636,381,725,360"/>
+<area shape="rect" id="Node000021" href="$d5/d8b/classfl_1_1_channel_acb0aa97ad60c6c8a739a60610b2bc1f9.html#acb0aa97ad60c6c8a739a60610b2bc1f9" title="Create a new channel with optional mBus driver pinning." alt="" coords="511,433,651,458"/>
+<area shape="poly" id="edge22_Node000008_Node000021" title=" " alt="" coords="719,367,707,373,692,384,683,397,674,409,659,422,632,435,630,430,656,418,670,406,679,393,688,381,704,368,716,362"/>
+<area shape="rect" id="Node000010" href="$d5/d8b/classfl_1_1_channel_ac688f91aefbe88369c7c7a120a0d7772.html#ac688f91aefbe88369c7c7a120a0d7772" title=" " alt="" coords="275,183,427,209"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="551,278,508,249,456,222,422,211,424,206,458,218,511,245,554,274"/>
+<area shape="rect" id="Node000011" href="$d5/d8b/classfl_1_1_channel_a1024ab39998e20eaad3dc0f7ed0f60ca.html#a1024ab39998e20eaad3dc0f7ed0f60ca" title=" " alt="" coords="275,233,427,258"/>
+<area shape="poly" id="edge10_Node000009_Node000011" title=" " alt="" coords="511,284,457,272,407,261,408,255,458,267,512,279"/>
+<area shape="poly" id="edge11_Node000009_Node000012" title=" " alt="" coords="557,276,499,214,456,173,430,162,432,157,459,168,503,210,561,272"/>
+<area shape="rect" id="Node000013" href="$d5/d8b/classfl_1_1_channel_a5047a061dfeb02365ea94e5a850b1ccc.html#a5047a061dfeb02365ea94e5a850b1ccc" title=" " alt="" coords="268,282,433,307"/>
+<area shape="poly" id="edge12_Node000009_Node000013" title=" " alt="" coords="491,299,433,298,434,293,491,294"/>
+<area shape="rect" id="Node000014" href="$d5/d8b/classfl_1_1_channel_adb053871cd9d4b44b0e57837387e5599.html#adb053871cd9d4b44b0e57837387e5599" title="Set gamma correction value." alt="" coords="265,331,436,357"/>
+<area shape="poly" id="edge13_Node000009_Node000014" title=" " alt="" coords="505,315,415,334,414,329,504,310"/>
+<area shape="rect" id="Node000015" href="$d5/d8b/classfl_1_1_channel_a0dccce627f46ca1d42624d0f82889385.html#a0dccce627f46ca1d42624d0f82889385" title="Set screen map for JS canvas visualization." alt="" coords="255,381,446,406"/>
+<area shape="poly" id="edge14_Node000009_Node000015" title=" " alt="" coords="518,318,507,324,493,335,484,347,474,359,459,370,428,383,426,378,456,366,470,355,479,343,489,331,504,319,516,313"/>
+<area shape="rect" id="Node000016" href="$d5/d8b/classfl_1_1_channel_acfb78f07c618a1248db6c4fbbed5e408.html#acfb78f07c618a1248db6c4fbbed5e408" title="Set screen map for 1D strip remapping from XMap." alt="" coords="5,458,196,483"/>
+<area shape="poly" id="edge15_Node000009_Node000016" title=" " alt="" coords="513,319,507,323,497,335,490,346,485,371,478,396,471,408,459,419,439,430,413,439,346,453,270,463,196,469,196,464,269,458,345,448,411,434,437,425,456,415,467,405,474,394,480,370,485,345,492,332,504,319,509,315"/>
+<area shape="rect" id="Node000017" href="$d5/d8b/classfl_1_1_channel_ac3c700e8433fc9775f3f8a716161e3b1.html#ac3c700e8433fc9775f3f8a716161e3b1" title="Set screen map for JS canvas visualization from XYMap." alt="" coords="255,482,446,507"/>
+<area shape="poly" id="edge16_Node000009_Node000017" title=" " alt="" coords="512,319,507,323,494,340,487,357,484,392,481,428,473,447,459,465,428,484,425,480,456,461,469,444,476,427,479,392,482,356,489,338,503,320,508,315"/>
+<area shape="rect" id="Node000018" href="$d5/d8b/classfl_1_1_channel_a6a2bf9a4ab0f0ee7df060a3d0cba96b3.html#a6a2bf9a4ab0f0ee7df060a3d0cba96b3" title="Set screen map for JS canvas visualization from dimensions." alt="" coords="5,507,196,533"/>
+<area shape="poly" id="edge19_Node000009_Node000018" title=" " alt="" coords="511,320,507,323,491,348,485,373,484,398,488,424,490,449,489,474,479,498,459,521,421,544,378,558,333,564,288,565,203,553,137,535,138,530,204,548,288,559,333,559,377,553,418,539,456,517,475,495,483,473,485,449,482,424,479,398,479,372,486,345,503,320,507,316"/>
+<area shape="poly" id="edge17_Node000017_Node000016" title=" " alt="" coords="241,487,196,482,197,477,242,482"/>
+<area shape="poly" id="edge18_Node000017_Node000018" title=" " alt="" coords="242,508,197,513,196,508,241,503"/>
+<area shape="rect" id="Node000026" href="$d4/d36/namespacefl_a54c09f7965e851d33159fefd483004eb.html#a54c09f7965e851d33159fefd483004eb" title="Read a line from a serial&#45;like input source (blocking with optional timeout)" alt="" coords="516,531,647,557"/>
+<area shape="poly" id="edge28_Node000025_Node000026" title=" " alt="" coords="694,547,647,547,647,541,694,541"/>
+<area shape="rect" id="Node000028" href="$d4/d36/namespacefl_af62a6a137d58541697cc30d451c9d751.html#af62a6a137d58541697cc30d451c9d751" title=" " alt="" coords="534,583,629,609"/>
+<area shape="poly" id="edge30_Node000027_Node000028" title=" " alt="" coords="713,598,629,598,629,593,712,593"/>
+<area shape="rect" id="Node000029" href="$d4/d36/namespacefl_a6913bcc5545eb4b029ec170d48a14766.html#a6913bcc5545eb4b029ec170d48a14766" title="Create a JSON&#45;RPC RequestSource that reads from fl:: serial input." alt="" coords="244,583,457,609"/>
+<area shape="poly" id="edge31_Node000028_Node000029" title=" " alt="" coords="520,599,457,599,457,593,520,593"/>
+<area shape="rect" id="Node000032" href="$d4/d36/namespacefl_abf67c32c8c00be8e7bf8dc0e0c36ca1c.html#abf67c32c8c00be8e7bf8dc0e0c36ca1c" title="Optimized readSerialLine for fl:: serial input." alt="" coords="285,633,416,658"/>
+<area shape="poly" id="edge32_Node000028_Node000032" title=" " alt="" coords="521,612,411,635,410,630,520,606"/>
+</map>

@@ -1,0 +1,50 @@
+digraph "fl::audio::detector::BuildupDetector::update"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::audio::detector\l::BuildupDetector::update",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::audio::detector\l::BuildupDetector::Buildup\lDetector",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d5d/classfl_1_1audio_1_1detector_1_1_buildup_detector_a3dea43b086f90afe134cfbb1c8b88d2c.html#a3dea43b086f90afe134cfbb1c8b88d2c",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::audio::detector\l::BuildupDetector::calculate\lBuildupIntensity",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d5d/classfl_1_1audio_1_1detector_1_1_buildup_detector_aba0cb9109acd09f69a5bd17f96388bb1.html#aba0cb9109acd09f69a5bd17f96388bb1",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::max",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909",tooltip=" "];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::min",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb",tooltip=" "];
+  Node3 -> Node6 [id="edge5_Node000003_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="rms",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d49/_audio_2simple_2simple_8h_a588b0ed03ff3e39281e2bc8b149dbdbd.html#a588b0ed03ff3e39281e2bc8b149dbdbd",tooltip=" "];
+  Node6 -> Node6 [id="edge6_Node000006_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 -> Node7 [id="edge7_Node000006_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::span::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac",tooltip=" "];
+  Node6 -> Node8 [id="edge8_Node000006_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::sqrt",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1",tooltip=" "];
+  Node1 -> Node9 [id="edge9_Node000001_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::audio::detector\l::BuildupDetector::calculate\lEnergyTrend",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d5d/classfl_1_1audio_1_1detector_1_1_buildup_detector_a0a5452e280c1645217b0ba97f3e08b54.html#a0a5452e280c1645217b0ba97f3e08b54",tooltip=" "];
+  Node9 -> Node4 [id="edge10_Node000009_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node9 -> Node5 [id="edge11_Node000009_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node10 [id="edge12_Node000001_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::audio::detector\l::BuildupDetector::calculate\lTrebleTrend",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d5d/classfl_1_1audio_1_1detector_1_1_buildup_detector_a1a4cb2728734b3641fd095e84c82dddd.html#a1a4cb2728734b3641fd095e84c82dddd",tooltip=" "];
+  Node10 -> Node4 [id="edge13_Node000010_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node10 -> Node5 [id="edge14_Node000010_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node11 [id="edge15_Node000001_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::audio::detector\l::BuildupDetector::getTreble\lEnergy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d5d/classfl_1_1audio_1_1detector_1_1_buildup_detector_aac59f296de61aae480a54e9c2059d063.html#aac59f296de61aae480a54e9c2059d063",tooltip=" "];
+  Node1 -> Node5 [id="edge16_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node6 [id="edge17_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node12 [id="edge18_Node000001_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::audio::detector\l::BuildupDetector::shouldEnd\lBuildup",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d5d/classfl_1_1audio_1_1detector_1_1_buildup_detector_a86140aa6f54028822f8fdb3ad58da1df.html#a86140aa6f54028822f8fdb3ad58da1df",tooltip=" "];
+  Node12 -> Node9 [id="edge19_Node000012_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node13 [id="edge20_Node000001_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::audio::detector\l::BuildupDetector::shouldPeak",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d5d/classfl_1_1audio_1_1detector_1_1_buildup_detector_ad6fdfc43f133870af730fd9fd3ed336a.html#ad6fdfc43f133870af730fd9fd3ed336a",tooltip=" "];
+  Node1 -> Node14 [id="edge21_Node000001_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::audio::detector\l::BuildupDetector::shouldStart\lBuildup",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d5d/classfl_1_1audio_1_1detector_1_1_buildup_detector_acee1516847b0381cdff892780cb02932.html#acee1516847b0381cdff892780cb02932",tooltip=" "];
+  Node14 -> Node9 [id="edge22_Node000014_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node1 [id="edge23_Node000001_Node000001",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node15 [id="edge24_Node000001_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl::audio::detector\l::BuildupDetector::updateEnergy\lHistory",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d5d/classfl_1_1audio_1_1detector_1_1_buildup_detector_a3f7538abe003445eb66e7a66536b7d98.html#a3f7538abe003445eb66e7a66536b7d98",tooltip=" "];
+  Node1 -> Node16 [id="edge25_Node000001_Node000016",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::audio::detector\l::BuildupDetector::updateTreble\lHistory",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d5d/classfl_1_1audio_1_1detector_1_1_buildup_detector_ad448b14074afecfec483bf7cbeb662eb.html#ad448b14074afecfec483bf7cbeb662eb",tooltip=" "];
+}

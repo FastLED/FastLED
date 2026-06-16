@@ -1,0 +1,17 @@
+<map id="fl::audio::detector::FrequencyBands::update" name="fl::audio::detector::FrequencyBands::update">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,157,196,197"/>
+<area shape="poly" id="edge8_Node000001_Node000001" title=" " alt="" coords="55,157,52,147,59,138,76,132,101,130,129,133,145,140,143,145,128,138,101,135,77,137,62,142,57,148,60,156"/>
+<area shape="rect" id="Node000002" href="$d4/d0a/classfl_1_1audio_1_1detector_1_1_frequency_bands_a6c8300555da22b456d88352b3e1049b7.html#a6c8300555da22b456d88352b3e1049b7" title=" " alt="" coords="244,5,456,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="123,154,176,112,243,69,254,63,256,68,245,74,179,117,126,159"/>
+<area shape="rect" id="Node000003" href="$d4/d0a/classfl_1_1audio_1_1detector_1_1_frequency_bands_abdbe604aaabe7d4add88ebdbe6fe7dbf.html#abdbe604aaabe7d4add88ebdbe6fe7dbf" title=" " alt="" coords="248,84,452,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="177,154,234,139,235,144,178,159"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="506,156,569,181"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="196,172,492,167,492,172,196,178"/>
+<area shape="rect" id="Node000006" href="$db/dbf/namespacefl_1_1audio_a7189558c538537464f1d31c91596631d.html#a7189558c538537464f1d31c91596631d" title="Compute the time delta (in seconds) for an audio buffer." alt="" coords="255,215,445,240"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="197,193,274,209,273,215,196,199"/>
+<area shape="rect" id="Node000007" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="299,264,401,289"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="135,194,186,223,245,250,286,262,285,268,243,255,183,228,132,199"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="504,99,571,124"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="452,109,490,109,490,114,452,114"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="441,136,493,153,492,158,439,141"/>
+</map>

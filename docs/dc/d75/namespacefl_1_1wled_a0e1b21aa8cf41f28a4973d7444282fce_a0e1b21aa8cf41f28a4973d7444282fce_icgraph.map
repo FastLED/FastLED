@@ -1,0 +1,5 @@
+<map id="fl::wled::parseSegmentFields" name="fl::wled::parseSegmentFields">
+<area shape="rect" id="Node000001" title="Parse all fields from a segment JSON object into a WLEDSegment." alt="" coords="192,5,401,31"/>
+<area shape="rect" id="Node000002" href="$d2/d9f/classfl_1_1_w_l_e_d_a073f5478071f0b32ea9ac80cf3fd236c.html#a073f5478071f0b32ea9ac80cf3fd236c" title="Set WLED state from JSON object." alt="" coords="5,5,144,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="178,21,144,21,144,15,178,15"/>
+</map>

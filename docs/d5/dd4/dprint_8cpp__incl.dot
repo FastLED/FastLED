@@ -9,5 +9,10 @@ digraph "/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/shared/dpri
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="dprint.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d29/dprint_8h.html",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl/unused.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d4b/unused_8h.html",tooltip=" "];
+  Node3 [id="Node000003",label="fl/stl/compiler_control.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d54/compiler__control_8h.html",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="platforms/is_platform.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl/stl/align.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/ddf/align_8h.html",tooltip="Alignment macros and utilities for FastLED."];
+  Node5 -> Node4 [id="edge5_Node000005_Node000004",color="steelblue1",style="solid",tooltip=" "];
 }

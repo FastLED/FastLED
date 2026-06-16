@@ -1,0 +1,6 @@
+<map id="fl::Spi::ok" name="fl::Spi::ok">
+<area shape="rect" id="Node000001" title="Check if device was created and initialized successfully." alt="" coords="207,29,289,55"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="277,19,268,11,248,8,231,10,222,15,220,20,225,28,220,31,214,21,218,11,229,5,248,3,271,6,280,15"/>
+<area shape="rect" id="Node000002" href="$d0/d3a/classfl_1_1_spi_ad31585589b3a0a53b29def9509a12e16.html#ad31585589b3a0a53b29def9509a12e16" title="Explicit conversion to bool for contextual evaluation." alt="" coords="5,29,159,55"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="193,45,159,45,159,39,193,39"/>
+</map>

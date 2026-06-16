@@ -1,0 +1,10 @@
+<map id="fl::audio::detector::TempoAnalyzer::calculateTempoConfidence" name="fl::audio::detector::TempoAnalyzer::calculateTempoConfidence">
+<area shape="rect" id="Node000001" title=" " alt="" coords="812,22,1009,77"/>
+<area shape="rect" id="Node000002" href="$d6/df8/classfl_1_1audio_1_1detector_1_1_tempo_analyzer_a79640a25c63d08f93112fea474672c5d.html#a79640a25c63d08f93112fea474672c5d" title=" " alt="" coords="533,22,764,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="798,52,764,52,764,47,798,47"/>
+<area shape="rect" id="Node000003" href="$d6/df8/classfl_1_1audio_1_1detector_1_1_tempo_analyzer_a7dcd38afdfaaa982d15b12617ff22229.html#a7dcd38afdfaaa982d15b12617ff22229" title=" " alt="" coords="303,29,485,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="520,52,485,52,485,47,520,47"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="437,18,422,11,394,8,369,10,355,15,349,21,352,28,347,30,344,20,352,10,368,5,394,3,423,6,439,13"/>
+<area shape="rect" id="Node000004" href="$d6/df8/classfl_1_1audio_1_1detector_1_1_tempo_analyzer_ad4e015a56da87e725882351ec7a4d980.html#ad4e015a56da87e725882351ec7a4d980" title=" " alt="" coords="5,29,255,69"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="289,52,255,52,255,47,289,47"/>
+</map>

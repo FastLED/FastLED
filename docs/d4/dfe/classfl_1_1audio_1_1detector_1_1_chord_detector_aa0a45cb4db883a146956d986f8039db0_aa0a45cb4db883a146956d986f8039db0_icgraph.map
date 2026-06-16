@@ -1,0 +1,9 @@
+<map id="fl::audio::detector::ChordDetector::matchChordPattern" name="fl::audio::detector::ChordDetector::matchChordPattern">
+<area shape="rect" id="Node000001" title=" " alt="" coords="775,5,985,60"/>
+<area shape="rect" id="Node000002" href="$d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_ad28c159a43374c57a53fdee0b8d6e4af.html#ad28c159a43374c57a53fdee0b8d6e4af" title=" " alt="" coords="516,13,727,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="761,35,727,35,727,30,761,30"/>
+<area shape="rect" id="Node000003" href="$d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_a8d60404c1eba1a4424b6495478011ddb.html#a8d60404c1eba1a4424b6495478011ddb" title=" " alt="" coords="291,13,468,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="502,35,468,35,468,30,502,30"/>
+<area shape="rect" id="Node000004" href="$d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_acbc732d69cf26e673a19723d5f042c10.html#acbc732d69cf26e673a19723d5f042c10" title=" " alt="" coords="5,13,243,53"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="277,35,243,35,243,30,277,30"/>
+</map>

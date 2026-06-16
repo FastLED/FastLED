@@ -1,0 +1,46 @@
+<map id="fl::audio::detector::MusicalBeat::~MusicalBeat" name="fl::audio::detector::MusicalBeat::~MusicalBeat">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,240,215,280"/>
+<area shape="rect" id="Node000002" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a13472c5b2c18bcd9cc92903b52b18faa.html#a13472c5b2c18bcd9cc92903b52b18faa" title=" " alt="" coords="578,29,777,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="118,238,138,199,169,150,210,102,234,81,261,64,298,48,336,37,416,24,494,22,564,27,564,32,493,27,416,29,337,42,300,53,264,69,238,85,214,106,173,153,142,202,123,241"/>
+<area shape="rect" id="Node000003" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_aa3fe998bea55ed148d76230699db4b43.html#aa3fe998bea55ed148d76230699db4b43" title="Configure the beat detector." alt="" coords="294,103,473,143"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="136,238,192,199,261,159,296,145,298,150,264,164,195,203,139,242"/>
+<area shape="rect" id="Node000004" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a79e3a2459c58dda6768e059545035644.html#a79e3a2459c58dda6768e059545035644" title="Reset internal state (clear history, reset BPM)" alt="" coords="602,128,753,168"/>
+<area shape="poly" id="edge26_Node000001_Node000004" title=" " alt="" coords="167,237,262,209,435,176,588,155,589,160,436,181,263,215,168,242"/>
+<area shape="rect" id="Node000005" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_aa892bcc192e2ecd6b2031c290f4b7725.html#aa892bcc192e2ecd6b2031c290f4b7725" title="Get inter&#45;beat interval (IBI) statistics." alt="" coords="867,235,1076,275"/>
+<area shape="poly" id="edge7_Node000001_Node000005" title=" " alt="" coords="215,254,263,253,533,250,803,251,853,251,853,256,803,256,533,255,263,259,215,260"/>
+<area shape="rect" id="Node000006" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a2fe5ec0054341565f4278eda6c8303a4.html#a2fe5ec0054341565f4278eda6c8303a4" title="Get beat confidence for the last detected beat." alt="" coords="263,332,504,372"/>
+<area shape="poly" id="edge8_Node000001_Node000006" title=" " alt="" coords="159,278,264,317,290,326,288,331,262,323,157,283"/>
+<area shape="rect" id="Node000007" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_acae9037a2d919a71bac727c788306f99.html#acae9037a2d919a71bac727c788306f99" title="Get current BPM estimate." alt="" coords="299,396,467,436"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="132,278,188,330,225,358,264,382,287,392,285,397,261,386,222,362,185,334,129,282"/>
+<area shape="rect" id="Node000008" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a71e6e9f5e435e069bb2efa40eb992f3a.html#a71e6e9f5e435e069bb2efa40eb992f3a" title="Check if a musical beat was detected in the last frame." alt="" coords="304,460,463,500"/>
+<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="124,279,146,315,177,361,217,407,264,446,292,460,290,465,261,450,213,411,173,364,141,318,120,282"/>
+<area shape="rect" id="Node000009" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a14368f704c7c67d888b81f70c7004dcb.html#a14368f704c7c67d888b81f70c7004dcb" title="Process one audio frame." alt="" coords="275,268,492,308"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="215,268,261,273,261,278,215,273"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="623,30,620,20,629,10,648,5,677,3,711,5,730,13,728,18,710,11,677,8,649,10,631,15,625,21,628,28"/>
+<area shape="poly" id="edge4_Node000003_Node000002" title=" " alt="" coords="464,100,583,70,584,75,465,105"/>
+<area shape="poly" id="edge5_Node000003_Node000003" title=" " alt="" coords="333,103,330,93,338,84,356,78,383,76,415,79,432,86,430,91,414,84,383,81,357,83,341,88,335,94,338,101"/>
+<area shape="poly" id="edge6_Node000003_Node000004" title=" " alt="" coords="473,128,588,138,588,143,473,133"/>
+<area shape="poly" id="edge17_Node000009_Node000005" title=" " alt="" coords="492,279,852,259,853,264,492,285"/>
+<area shape="rect" id="Node000010" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a25756788660507be8a6660dc23f82624.html#a25756788660507be8a6660dc23f82624" title="Calculate beat confidence based on rhythmic consistency." alt="" coords="574,383,781,438"/>
+<area shape="poly" id="edge12_Node000009_Node000010" title=" " alt="" coords="480,306,505,318,521,330,530,344,539,356,554,368,565,375,562,380,550,373,535,360,526,347,517,334,503,322,478,310"/>
+<area shape="rect" id="Node000015" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a23c3f97cc42b2f345503145ce16499c8.html#a23c3f97cc42b2f345503145ce16499c8" title="Check if IBI is within valid BPM range." alt="" coords="882,513,1061,553"/>
+<area shape="poly" id="edge18_Node000009_Node000015" title=" " alt="" coords="489,306,506,318,520,335,527,352,530,386,534,418,541,434,553,448,869,511,868,517,551,453,536,437,529,420,525,386,522,353,515,337,502,322,486,310"/>
+<area shape="rect" id="Node000020" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_ae8c4e7e2d6ed27b8d955a9e2e1cd3db2.html#ae8c4e7e2d6ed27b8d955a9e2e1cd3db2" title="Update BPM estimate from inter&#45;beat intervals." alt="" coords="552,319,803,359"/>
+<area shape="poly" id="edge20_Node000009_Node000020" title=" " alt="" coords="493,304,548,314,547,319,492,309"/>
+<area shape="rect" id="Node000022" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_abef5ac55aa91cb94f03cda4f2c34d229.html#abef5ac55aa91cb94f03cda4f2c34d229" title="Validate if an onset is a true musical beat." alt="" coords="577,513,778,553"/>
+<area shape="poly" id="edge24_Node000009_Node000022" title=" " alt="" coords="490,306,506,318,523,340,530,363,531,407,532,450,539,472,554,493,567,504,564,508,550,496,534,474,526,451,526,407,525,364,518,343,502,322,487,310"/>
+<area shape="poly" id="edge15_Node000010_Node000005" title=" " alt="" coords="779,383,801,369,817,349,824,328,831,306,849,285,857,279,860,284,852,289,836,308,829,329,822,351,804,373,782,387"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84" title=" " alt="" coords="941,463,1002,489"/>
+<area shape="poly" id="edge13_Node000010_Node000011" title=" " alt="" coords="782,432,851,448,928,465,927,470,850,453,780,437"/>
+<area shape="rect" id="Node000012" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_af7ccbbd6059884bc88da1f7c171455b9.html#af7ccbbd6059884bc88da1f7c171455b9" title="Calculate standard deviation of IBI history." alt="" coords="851,399,1092,439"/>
+<area shape="poly" id="edge14_Node000010_Node000012" title=" " alt="" coords="781,411,837,412,837,418,781,416"/>
+<area shape="rect" id="Node000014" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="938,349,1005,374"/>
+<area shape="poly" id="edge16_Node000010_Node000014" title=" " alt="" coords="781,391,924,366,925,372,781,396"/>
+<area shape="rect" id="Node000016" href="$d5/d25/_demo_reel100_8ino_a4875f6d9a2b0f08d3cf221974234121b.html#a4875f6d9a2b0f08d3cf221974234121b" title=" " alt="" coords="1140,521,1191,546"/>
+<area shape="poly" id="edge19_Node000015_Node000016" title=" " alt="" coords="1061,531,1127,531,1127,536,1061,536"/>
+<area shape="poly" id="edge21_Node000020_Node000005" title=" " alt="" coords="743,316,850,284,880,276,881,281,851,289,744,321"/>
+<area shape="poly" id="edge22_Node000020_Node000014" title=" " alt="" coords="803,346,924,355,924,360,803,351"/>
+<area shape="rect" id="Node000021" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="940,299,1003,325"/>
+<area shape="poly" id="edge23_Node000020_Node000021" title=" " alt="" coords="803,325,926,313,927,319,803,330"/>
+<area shape="poly" id="edge25_Node000022_Node000015" title=" " alt="" coords="778,531,868,531,868,536,778,536"/>
+</map>

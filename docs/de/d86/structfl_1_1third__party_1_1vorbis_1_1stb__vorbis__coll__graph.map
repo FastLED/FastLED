@@ -1,0 +1,27 @@
+<map id="fl::third_party::vorbis::stb_vorbis" name="fl::third_party::vorbis::stb_vorbis">
+<area shape="rect" id="Node000001" title=" " alt="" coords="553,249,709,289"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl.html#d4/dc0/structfl_1_1_f_i_l_e__impl" title=" " alt="" coords="278,5,379,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="394,19,463,33,499,48,531,68,552,88,570,111,598,161,617,209,628,248,623,249,612,211,593,163,566,114,548,91,528,72,497,52,462,38,392,24"/>
+<area shape="rect" id="Node000003" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis.html#db/d55/structfl_1_1third__party_1_1vorbis_1_1_probed_page" title=" " alt="" coords="251,57,407,97"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="421,97,477,119,531,149,559,172,583,199,620,247,615,250,579,202,555,176,528,154,475,124,419,102"/>
+<area shape="rect" id="Node000004" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis.html#d9/d83/structfl_1_1third__party_1_1vorbis_1_1stb__vorbis__alloc" title=" " alt="" coords="251,121,407,161"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="417,162,473,181,531,205,602,246,600,251,528,210,472,186,415,167"/>
+<area shape="rect" id="Node000005" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis.html#df/d4e/structfl_1_1third__party_1_1vorbis_1_1_codebook" title=" " alt="" coords="251,185,407,225"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="421,221,554,250,553,255,420,227"/>
+<area shape="rect" id="Node000006" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis.html#da/d38/unionfl_1_1third__party_1_1vorbis_1_1_floor" title=" " alt="" coords="251,249,407,289"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="420,266,553,266,553,271,420,271"/>
+<area shape="rect" id="Node000007" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis.html#d6/d75/structfl_1_1third__party_1_1vorbis_1_1_floor0" title=" " alt="" coords="5,217,161,257"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="175,246,251,256,250,261,174,251"/>
+<area shape="rect" id="Node000008" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis.html#d1/d6c/structfl_1_1third__party_1_1vorbis_1_1_floor1" title=" " alt="" coords="5,281,161,321"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="174,286,250,276,251,281,175,291"/>
+<area shape="rect" id="Node000009" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis.html#d4/d03/structfl_1_1third__party_1_1vorbis_1_1_residue" title=" " alt="" coords="251,313,407,353"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="420,311,553,282,554,288,421,316"/>
+<area shape="rect" id="Node000010" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis.html#d0/d54/structfl_1_1third__party_1_1vorbis_1_1_mapping" title=" " alt="" coords="251,377,407,417"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="418,370,473,352,528,329,567,308,601,286,603,291,569,313,530,334,475,357,420,375"/>
+<area shape="rect" id="Node000011" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis.html#d9/dfc/structfl_1_1third__party_1_1vorbis_1_1_mapping_channel" title=" " alt="" coords="5,377,161,417"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="175,394,251,394,251,399,175,399"/>
+<area shape="rect" id="Node000012" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis.html#d2/df9/structfl_1_1third__party_1_1vorbis_1_1_mode" title=" " alt="" coords="251,441,407,481"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="419,437,475,416,528,386,555,363,580,337,616,287,620,290,584,340,559,367,531,391,477,421,421,442"/>
+<area shape="rect" id="Node000013" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis.html#df/d18/structfl_1_1third__party_1_1vorbis_1_1_c_r_cscan" title=" " alt="" coords="251,505,407,545"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="419,507,476,487,503,472,528,455,563,415,591,369,610,324,622,288,627,290,615,326,596,371,568,418,531,459,506,477,478,491,421,512"/>
+</map>

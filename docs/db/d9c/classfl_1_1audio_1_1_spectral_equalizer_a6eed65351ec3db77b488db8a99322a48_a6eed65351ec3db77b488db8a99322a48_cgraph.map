@@ -1,0 +1,27 @@
+<map id="fl::audio::SpectralEqualizer::~SpectralEqualizer" name="fl::audio::SpectralEqualizer::~SpectralEqualizer">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,132,200,172"/>
+<area shape="rect" id="Node000002" href="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aaf69c16c24bdb5099b9665ebeb41eb50.html#aaf69c16c24bdb5099b9665ebeb41eb50" title="Apply equalization to frequency bins." alt="" coords="248,68,443,108"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,129,255,109,257,114,180,135"/>
+<area shape="rect" id="Node000006" href="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a63bd5a8fe3f4719ee4648c824d263c64.html#a63bd5a8fe3f4719ee4648c824d263c64" title="Configure the spectral equalizer This calculates per&#45;band gain multipliers based on the selected curv..." alt="" coords="248,220,443,260"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="160,170,277,213,276,218,158,175"/>
+<area shape="rect" id="Node000011" href="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a569ebf8999e85e1e5c5631b223391994.html#a569ebf8999e85e1e5c5631b223391994" title="Set custom per&#45;band gains (switches to Custom curve)" alt="" coords="248,132,443,172"/>
+<area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="200,149,234,149,234,155,200,155"/>
+<area shape="rect" id="Node000003" href="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_ad7f44ec5f58bce14c88e4af1eb3ccff9.html#ad7f44ec5f58bce14c88e4af1eb3ccff9" title="Apply dynamic range compression per band." alt="" coords="491,5,685,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="423,65,496,46,497,51,424,71"/>
+<area shape="rect" id="Node000004" href="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a7e97098c6523794252c46a229df713ee.html#a7e97098c6523794252c46a229df713ee" title="Calculate makeup gain to maintain target level." alt="" coords="491,69,685,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="443,86,477,86,477,91,443,91"/>
+<area shape="rect" id="Node000005" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="537,137,639,162"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="426,105,525,131,523,136,425,111"/>
+<area shape="poly" id="edge12_Node000006_Node000006" title=" " alt="" coords="300,220,297,210,305,201,321,195,345,193,374,196,389,203,387,208,372,201,345,199,322,201,308,205,303,211,305,219"/>
+<area shape="rect" id="Node000007" href="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a35ee44583dde1fd3908700b39aa5a165.html#a35ee44583dde1fd3908700b39aa5a165" title=" " alt="" coords="491,220,685,260"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="443,246,477,246,477,252,443,252"/>
+<area shape="rect" id="Node000008" href="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a52e8f221c9fe9cba4ac96f387cc1f726.html#a52e8f221c9fe9cba4ac96f387cc1f726" title="Calculate gains based on current curve." alt="" coords="491,284,685,324"/>
+<area shape="poly" id="edge8_Node000006_Node000008" title=" " alt="" coords="423,257,499,278,498,283,421,263"/>
+<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="490,234,457,234,457,228,490,228"/>
+<area shape="rect" id="Node000009" href="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aa6f94ad4e418f660b71ac6e99fc0ba14.html#aa6f94ad4e418f660b71ac6e99fc0ba14" title="Calculate A&#45;weighting gains." alt="" coords="733,255,932,295"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="685,290,719,286,720,291,686,295"/>
+<area shape="rect" id="Node000010" href="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a98b8eafa2abe451f740b05be2260bdbb.html#a98b8eafa2abe451f740b05be2260bdbb" title="Calculate flat gains (all 1.0)" alt="" coords="980,284,1175,324"/>
+<area shape="poly" id="edge11_Node000008_Node000010" title=" " alt="" coords="685,303,733,304,932,304,966,304,966,309,932,309,733,309,685,309"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="932,284,967,288,966,293,932,289"/>
+<area shape="poly" id="edge14_Node000011_Node000005" title=" " alt="" coords="443,148,523,147,523,153,443,154"/>
+</map>

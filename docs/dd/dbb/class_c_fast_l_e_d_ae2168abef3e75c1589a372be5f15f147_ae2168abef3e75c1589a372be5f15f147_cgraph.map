@@ -1,0 +1,10 @@
+<map id="CFastLED::add" name="CFastLED::add">
+<area shape="rect" id="Node000001" title="Add multiple LED channels from a MultiChannelConfig." alt="" coords="5,56,120,81"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_ac1bc33cf75115ef770091396bbc57861.html#ac1bc33cf75115ef770091396bbc57861" title="Add a Channel&#45;based LED controller (from ChannelPtr)" alt="" coords="188,5,303,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,53,185,32,186,37,110,58"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_a12da17ab4b0d4daed6ceb429d68ac5cf.html#a12da17ab4b0d4daed6ceb429d68ac5cf" title="stored ChannelPtrs to keep them alive" alt="" coords="371,31,519,56"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="120,62,357,46,357,52,121,68"/>
+<area shape="rect" id="Node000004" href="$d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c" title=" " alt="" coords="168,107,323,132"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="110,79,186,100,185,105,109,84"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="303,23,358,30,357,35,303,28"/>
+</map>

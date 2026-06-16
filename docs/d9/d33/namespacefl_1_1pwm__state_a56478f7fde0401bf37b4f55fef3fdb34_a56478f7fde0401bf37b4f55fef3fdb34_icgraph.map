@@ -1,0 +1,14 @@
+<map id="fl::pwm_state::countIsrChannels" name="fl::pwm_state::countIsrChannels">
+<area shape="rect" id="Node000001" title=" " alt="" coords="911,56,1141,81"/>
+<area shape="rect" id="Node000002" href="$d9/d33/namespacefl_1_1pwm__state_a1e6e308bd81ec9ab9f1bd0f62bbba1b2.html#a1e6e308bd81ec9ab9f1bd0f62bbba1b2" title=" " alt="" coords="620,56,863,81"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="897,71,863,71,863,66,897,66"/>
+<area shape="rect" id="Node000003" href="$d9/d33/namespacefl_1_1pwm__state_a567fc66f5ca74ddc7b7253ab96d5fe04.html#a567fc66f5ca74ddc7b7253ab96d5fe04" title=" " alt="" coords="353,56,572,81"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="606,71,572,71,572,66,606,66"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aa7a47cf722a2586453e75f6e70284dad.html#aa7a47cf722a2586453e75f6e70284dad" title="Set pin mode (input, output, pull&#45;up, pull&#45;down)" alt="" coords="211,5,305,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="396,55,305,32,306,27,398,50"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a77306b4a5327eb19e8d003b550b1a0a5.html#a77306b4a5327eb19e8d003b550b1a0a5" title="Set PWM frequency for a pin." alt="" coords="5,31,163,56"/>
+<area shape="poly" id="edge6_Node000003_Node000009" title=" " alt="" coords="340,63,163,51,163,46,340,58"/>
+<area shape="rect" id="Node000013" href="$d4/d36/namespacefl_a799e0254efc7ac0e21305c2c38685f0b.html#a799e0254efc7ac0e21305c2c38685f0b" title="Release PWM channel and stop output on a pin." alt="" coords="211,107,305,132"/>
+<area shape="poly" id="edge5_Node000003_Node000013" title=" " alt="" coords="398,87,306,110,305,105,396,82"/>
+<area shape="poly" id="edge4_Node000004_Node000009" title=" " alt="" coords="197,29,163,35,162,29,196,24"/>
+</map>

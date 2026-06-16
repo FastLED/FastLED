@@ -1,0 +1,32 @@
+<map id="CFastLED::getEstimatedPowerInMilliWatts" name="CFastLED::getEstimatedPowerInMilliWatts">
+<area shape="rect" id="Node000001" title="Get estimated power consumption in milliwatts." alt="" coords="5,106,223,146"/>
+<area shape="rect" id="Node000002" href="$d3/d1d/group___power_gafdf503b02fd644c3398d34f27c3d363d.html#gafdf503b02fd644c3398d34f27c3d363d" title=" " alt="" coords="299,23,445,63"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,103,270,73,294,65,296,70,271,78,177,108"/>
+<area shape="rect" id="Node000006" href="$dd/dbb/class_c_fast_l_e_d_a22ea7bbda9ab2e306d1c0e7837d4d7f0.html#a22ea7bbda9ab2e306d1c0e7837d4d7f0" title="Get a pointer to led data for the first controller." alt="" coords="313,88,431,113"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="223,113,299,105,300,110,223,118"/>
+<area shape="rect" id="Node000007" href="$d3/d1d/group___power_ga681489b02b2825095fd40db45906bf26.html#ga681489b02b2825095fd40db45906bf26" title="Applies the configured power&#45;scaling response to a total power value." alt="" coords="271,137,473,163"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="223,133,257,137,257,142,223,139"/>
+<area shape="rect" id="Node000008" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a9fa4f7919cbab3fa89deb770bbf64f81.html#a9fa4f7919cbab3fa89deb770bbf64f81" title="Visit all controllers in the linked list with a visitor The visitor must be a callable that accepts (..." alt="" coords="304,191,440,231"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="176,143,299,184,297,190,174,149"/>
+<area shape="rect" id="Node000003" href="$d1/d2a/power__mgt_8cpp_8hpp_afe71d257dc9aca526178a992761bb812.html#afe71d257dc9aca526178a992761bb812" title="Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)" alt="" coords="537,5,647,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="445,32,523,23,524,29,446,38"/>
+<area shape="rect" id="Node000005" href="$d1/d2a/power__mgt_8cpp_8hpp_adcd9338466b0f22161f7281bfc7cdcdf.html#adcd9338466b0f22161f7281bfc7cdcdf" title=" " alt="" coords="521,55,663,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="446,49,508,55,507,61,445,54"/>
+<area shape="rect" id="Node000004" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="711,5,873,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="648,15,697,15,697,21,648,21"/>
+<area shape="poly" id="edge7_Node000007_Node000005" title=" " alt="" coords="432,135,472,122,496,110,520,97,549,83,551,88,523,102,499,115,474,127,434,140"/>
+<area shape="rect" id="Node000009" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a7e91fc8f83d62c9da5e5c3d6d1bc10ce.html#a7e91fc8f83d62c9da5e5c3d6d1bc10ce" title="Protected constructor with registration mode." alt="" coords="724,155,860,195"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="432,189,472,172,495,155,505,147,521,141,572,132,624,132,675,139,720,149,719,154,674,144,624,137,572,137,522,146,508,152,498,159,475,176,434,194"/>
+<area shape="rect" id="Node000012" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ad9e0dfb8b8b333d9e48c7695b202710c.html#ad9e0dfb8b8b333d9e48c7695b202710c" title="Get the first LED controller in the linked list of controllers." alt="" coords="524,155,660,195"/>
+<area shape="poly" id="edge11_Node000008_Node000012" title=" " alt="" coords="440,198,510,186,511,191,441,203"/>
+<area shape="rect" id="Node000013" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a961d046a5488ecee3adf0b17a02328d5.html#a961d046a5488ecee3adf0b17a02328d5" title="Pointer to the CRGB array for this controller." alt="" coords="524,219,660,259"/>
+<area shape="poly" id="edge13_Node000008_Node000013" title=" " alt="" coords="441,217,511,226,510,232,440,223"/>
+<area shape="rect" id="Node000014" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a87abe437742b3f2b06943fafd4404aef.html#a87abe437742b3f2b06943fafd4404aef" title="Get the next controller in the linked list after this one." alt="" coords="524,283,660,323"/>
+<area shape="poly" id="edge14_Node000008_Node000014" title=" " alt="" coords="422,229,532,276,530,280,420,234"/>
+<area shape="rect" id="Node000015" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ab8e1ee460f25af890c1d40479e4c5b09.html#ab8e1ee460f25af890c1d40479e4c5b09" title="How many LEDs does this controller manage?" alt="" coords="524,347,660,387"/>
+<area shape="poly" id="edge16_Node000008_Node000015" title=" " alt="" coords="396,230,451,280,523,333,532,339,529,343,520,338,448,284,392,234"/>
+<area shape="rect" id="Node000010" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a9e51518d1427463dffd596c69c6f3e46.html#a9e51518d1427463dffd596c69c6f3e46" title="Add this controller to the linked list." alt="" coords="921,155,1057,195"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="860,173,907,173,907,178,860,178"/>
+<area shape="poly" id="edge12_Node000012_Node000009" title=" " alt="" coords="660,173,710,173,710,178,660,178"/>
+<area shape="poly" id="edge15_Node000014_Node000009" title=" " alt="" coords="639,281,661,269,711,236,755,202,758,206,714,240,664,274,642,286"/>
+</map>

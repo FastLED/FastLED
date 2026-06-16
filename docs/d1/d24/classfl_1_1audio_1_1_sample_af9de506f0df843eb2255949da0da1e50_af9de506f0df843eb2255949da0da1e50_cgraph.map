@@ -1,0 +1,9 @@
+<map id="fl::audio::Sample::pcm" name="fl::audio::Sample::pcm">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,81,172,106"/>
+<area shape="rect" id="Node000002" href="$d1/d24/classfl_1_1audio_1_1_sample_a2648a902311aaeac6475b411f722a8ce.html#a2648a902311aaeac6475b411f722a8ce" title=" " alt="" coords="220,29,359,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="147,78,206,65,207,70,148,83"/>
+<area shape="rect" id="Node000003" href="$d1/d24/classfl_1_1audio_1_1_sample_a2c4f85477b6762bbc06c23ffea8a6a6f.html#a2c4f85477b6762bbc06c23ffea8a6a6f" title=" " alt="" coords="220,117,359,157"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="148,103,207,117,206,122,147,109"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="252,30,249,20,255,11,269,5,289,3,313,6,326,13,323,18,311,11,289,8,270,10,259,15,255,21,257,28"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="252,118,249,108,255,99,269,93,289,91,313,94,326,101,323,106,311,99,289,96,270,98,259,103,255,109,257,116"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="fl::third_party::ezWS2812::color_to_spi" name="fl::third_party::ezWS2812::color_to_spi">
+<area shape="rect" id="Node000001" title="Convert color byte to SPI bit pattern." alt="" coords="5,27,189,67"/>
+<area shape="rect" id="Node000002" href="$d9/db5/classfl_1_1third__party_1_1ez_w_s2812_a427987543c882f0c4507673065e641e5.html#a427987543c882f0c4507673065e641e5" title="Convert color bit to SPI signal for &#39;1&#39; bit." alt="" coords="237,5,453,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="189,34,224,30,225,35,190,39"/>
+<area shape="rect" id="Node000003" href="$d9/db5/classfl_1_1third__party_1_1ez_w_s2812_a7d568408d50ffd4b4f81e22aa4d081a8.html#a7d568408d50ffd4b4f81e22aa4d081a8" title="Convert color bit to SPI signal for &#39;0&#39; bit." alt="" coords="253,55,437,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="190,55,240,61,240,66,189,60"/>
+</map>

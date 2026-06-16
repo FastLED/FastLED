@@ -1,0 +1,5 @@
+<map id="fl::asio::error_code::to_error" name="fl::asio::error_code::to_error">
+<area shape="rect" id="Node000001" title="Convert to fl::task::Error for interop with existing FastLED code." alt="" coords="5,5,148,45"/>
+<area shape="rect" id="Node000002" href="$de/d33/structfl_1_1asio_1_1error__code_aa69757cace373f0830531c3e0ad303c4.html#aa69757cace373f0830531c3e0ad303c4" title="Convenience: true if no error." alt="" coords="196,13,363,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="149,23,182,23,182,28,149,28"/>
+</map>

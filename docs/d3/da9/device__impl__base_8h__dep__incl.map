@@ -1,0 +1,12 @@
+<map id="fl/channels/spi/device_impl_base.h" name="fl/channels/spi/device_impl_base.h">
+<area shape="rect" id="Node000001" title="Shared implementation helpers for SPI device classes." alt="" coords="100,5,263,45"/>
+<area shape="rect" id="Node000002" href="$dc/d95/multi__lane__device_8cpp_8hpp.html" title=" " alt="" coords="5,93,168,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="152,57,109,95,106,91,148,53"/>
+<area shape="rect" id="Node000007" href="$d7/d37/parallel__device_8cpp_8hpp.html" title=" " alt="" coords="192,93,360,133"/>
+<area shape="poly" id="edge4_Node000001_Node000007" title=" " alt="" coords="214,53,257,91,253,95,211,57"/>
+<area shape="rect" id="Node000003" href="$da/d51/fl_2channels_2spi_2__build_8cpp_8hpp.html" title=" " alt="" coords="75,181,288,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="122,140,169,179,165,183,119,144"/>
+<area shape="rect" id="Node000004" href="$d1/d97/fl_2channels_2__build_8cpp_8hpp.html" title=" " alt="" coords="86,255,277,280"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="184,220,184,255,179,255,179,220"/>
+<area shape="poly" id="edge5_Node000007_Node000003" title=" " alt="" coords="244,144,197,183,194,179,241,140"/>
+</map>

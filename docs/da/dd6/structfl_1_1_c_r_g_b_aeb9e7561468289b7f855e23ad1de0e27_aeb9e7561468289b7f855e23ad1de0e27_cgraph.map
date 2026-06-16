@@ -1,0 +1,8 @@
+<map id="fl::CRGB::setHue" name="fl::CRGB::setHue">
+<area shape="rect" id="Node000001" title="Allow assignment from just a hue." alt="" coords="5,43,135,68"/>
+<area shape="rect" id="Node000002" href="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" title="Default constructor." alt="" coords="189,5,309,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="131,40,175,31,176,36,132,45"/>
+<area shape="rect" id="Node000003" href="$dd/dc7/group___h_s_v2_r_g_b_gab6a6fedf5fcb4f47b95eed3aee43c613.html#gab6a6fedf5fcb4f47b95eed3aee43c613" title=" " alt="" coords="183,79,316,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="134,65,173,73,172,79,133,71"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="220,80,213,70,217,61,229,54,249,52,274,56,284,64,281,68,272,60,249,57,230,59,221,64,219,70,224,77"/>
+</map>

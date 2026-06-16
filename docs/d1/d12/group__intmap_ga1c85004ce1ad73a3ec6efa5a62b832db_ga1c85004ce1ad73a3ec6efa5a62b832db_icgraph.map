@@ -1,0 +1,15 @@
+<map id="fl::map8_to_16" name="fl::map8_to_16">
+<area shape="rect" id="Node000001" title=" " alt="" coords="384,70,503,95"/>
+<area shape="rect" id="Node000002" href="$d7/d4d/classfl_1_1detail_1_1_scaled_pixel_iterator_r_g_b16_aa62887f51fdf4363d88230f0dca03beb.html#aa62887f51fdf4363d88230f0dca03beb" title="Advance to next pixel (or mark as end)" alt="" coords="131,5,336,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="382,69,306,48,308,43,383,64"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a606fa1795edea35d7be0906909416aee.html#a606fa1795edea35d7be0906909416aee" title="8&#45;bit sine ease&#45;in/ease&#45;out function Takes an input value 0&#45;255 and returns an eased value 0&#45;255 Smoo..." alt="" coords="163,119,303,145"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="376,101,337,111,289,122,288,117,335,105,375,96"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a070d420bc9e4de555c15af460ecbd21e.html#a070d420bc9e4de555c15af460ecbd21e" title="8&#45;bit sine ease&#45;out function Takes an input value 0&#45;255 and returns an eased value 0&#45;255 Smooth sinus..." alt="" coords="169,70,297,95"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="370,85,298,85,298,80,370,80"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a3ae134b99f84708025815f808c9e66d9.html#a3ae134b99f84708025815f808c9e66d9" title=" " alt="" coords="5,70,83,95"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="162,119,130,111,82,97,84,92,131,105,163,113"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a0b1396f81fb427206240c23a8b609b65.html#a0b1396f81fb427206240c23a8b609b65" title=" " alt="" coords="5,119,83,145"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="150,135,83,135,83,129,150,129"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="156,85,83,85,83,80,156,80"/>
+<area shape="poly" id="edge7_Node000006_Node000005" title=" " alt="" coords="167,101,131,111,84,124,82,119,130,105,166,96"/>
+</map>

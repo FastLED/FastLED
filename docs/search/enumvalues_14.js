@@ -1,5 +1,21 @@
 var searchData=
 [
-  ['violet_0',['Violet',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a08966db6d19bc731401bec166936580b',1,'CRGB']]],
-  ['violetred_1',['VioletRed',['../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a67b0739685e9ffebf006f40ecd3b395c',1,'CRGB']]]
+  ['uart_0',['UART',['../d4/d36/namespacefl_a7e1e94407fbd018269794d74ab7fb4c1.html#a7e1e94407fbd018269794d74ab7fb4c1acec5769b01fb096efaf0d6186823c78f',1,'fl']]],
+  ['uart_5fpin_1',['UART_PIN',['../d4/dc4/namespaceobjectfled_a4574a1f31e16026e6881bf2c7706fe2e.html#a4574a1f31e16026e6881bf2c7706fe2ea11b5ee56b752a180d6f02c06a28a76f5',1,'objectfled']]],
+  ['ucs7604_5fmode_5f16bit_5f1600khz_2',['UCS7604_MODE_16BIT_1600KHZ',['../d4/d36/namespacefl_aa8072e9e0319c7fbc5e12eab46283fff.html#aa8072e9e0319c7fbc5e12eab46283fffa83503c1e0ab541b3eaa5804f94732bb2',1,'fl']]],
+  ['ucs7604_5fmode_5f16bit_5f800khz_3',['UCS7604_MODE_16BIT_800KHZ',['../d4/d36/namespacefl_aa8072e9e0319c7fbc5e12eab46283fff.html#aa8072e9e0319c7fbc5e12eab46283fffac899a610c4ea357e39364f1c0d142e72',1,'fl']]],
+  ['ucs7604_5fmode_5f8bit_5f800khz_4',['UCS7604_MODE_8BIT_800KHZ',['../d4/d36/namespacefl_aa8072e9e0319c7fbc5e12eab46283fff.html#aa8072e9e0319c7fbc5e12eab46283fffa187d9165b6b57051cc9fbadbe506e55a',1,'fl']]],
+  ['uint_5',['UInt',['../d5/d78/classfl_1_1format__detail_1_1_format_arg_a01298d45f82d922e6aae8519e1576074.html#a01298d45f82d922e6aae8519e1576074a0b1291eded63143ac04709711274785a',1,'fl::format_detail::FormatArg']]],
+  ['ulong_6',['ULong',['../d5/d78/classfl_1_1format__detail_1_1_format_arg_a01298d45f82d922e6aae8519e1576074.html#a01298d45f82d922e6aae8519e1576074a43963b8459ea654be36f373f1a036182',1,'fl::format_detail::FormatArg']]],
+  ['ulonglong_7',['ULongLong',['../d5/d78/classfl_1_1format__detail_1_1_format_arg_a01298d45f82d922e6aae8519e1576074.html#a01298d45f82d922e6aae8519e1576074a84a1d9f2b0b950d3e43f1afe65413ab2',1,'fl::format_detail::FormatArg']]],
+  ['uncorrectedcolor_8',['UncorrectedColor',['../d0/d89/group___color_enums_gadf6bcba67c9573665af20788c4431ae8.html#ggadf6bcba67c9573665af20788c4431ae8af964ffff5f2977a60a83aa3f9f8b4368',1,'color.h']]],
+  ['uncorrectedtemperature_9',['UncorrectedTemperature',['../d0/d89/group___color_enums_ga251e9e8dc2c7b981786b71706522b2a9.html#gga251e9e8dc2c7b981786b71706522b2a9ae3d35275ab8c374612bcfbcce732b39f',1,'color.h']]],
+  ['undefined_5ff4_10',['Undefined_F4',['../d8/dd0/midi___defs_8h_ab8db39dcdc3eea8045b9c71b56bba84c.html#ab8db39dcdc3eea8045b9c71b56bba84ca26e1b99f6b8cf33dc25cdaa2438513c0',1,'midi_Defs.h']]],
+  ['undefined_5ff5_11',['Undefined_F5',['../d8/dd0/midi___defs_8h_ab8db39dcdc3eea8045b9c71b56bba84c.html#ab8db39dcdc3eea8045b9c71b56bba84ca740f5180bf5fc2f2e0aaaf8816db7db5',1,'midi_Defs.h']]],
+  ['undefined_5ff9_12',['Undefined_F9',['../d8/dd0/midi___defs_8h_ab8db39dcdc3eea8045b9c71b56bba84c.html#ab8db39dcdc3eea8045b9c71b56bba84ca61425b2e2a9c5c559770e80cded9d5a7',1,'midi_Defs.h']]],
+  ['undefined_5ffd_13',['Undefined_FD',['../d8/dd0/midi___defs_8h_ab8db39dcdc3eea8045b9c71b56bba84c.html#ab8db39dcdc3eea8045b9c71b56bba84caa4ed40dd39749aed24df6224b3827ea7',1,'midi_Defs.h']]],
+  ['unknown_14',['UNKNOWN',['../dd/d12/namespacefl_1_1audio_1_1detector_a48f78ccc0932bdc5addc744bbe3578a5.html#a48f78ccc0932bdc5addc744bbe3578a5a696b031073e74bf2cb98e5ef201d4aa3',1,'fl::audio::detector::UNKNOWN'],['../d4/d36/namespacefl_a8b1ee295f40939df39d8df9a1960bbec.html#a8b1ee295f40939df39d8df9a1960bbeca696b031073e74bf2cb98e5ef201d4aa3',1,'fl::UNKNOWN'],['../d4/d36/namespacefl_a5096449b4a994331b3746d029e8c3187.html#a5096449b4a994331b3746d029e8c3187a696b031073e74bf2cb98e5ef201d4aa3',1,'fl::UNKNOWN']]],
+  ['unknown_15',['unknown',['../da/dba/namespacefl_1_1asio_a71ea0ec019fe8379abb69a2b643ed5da.html#a71ea0ec019fe8379abb69a2b643ed5daaad921d60486366258809553a3db49a4a',1,'fl::asio']]],
+  ['unsigned_16',['UNSIGNED',['../d4/d36/namespacefl_aeb640030fd78b58671d7d1e7baf6b17b.html#aeb640030fd78b58671d7d1e7baf6b17baaf36b47f395cd01f48b8fc1013665054',1,'fl']]],
+  ['unsupportedformat_17',['UnsupportedFormat',['../d4/d36/namespacefl_aaed350b21465df8c68244fc4d77fa693.html#aaed350b21465df8c68244fc4d77fa693ac82adc7582667b6bbc1e066757aad182',1,'fl']]]
 ];

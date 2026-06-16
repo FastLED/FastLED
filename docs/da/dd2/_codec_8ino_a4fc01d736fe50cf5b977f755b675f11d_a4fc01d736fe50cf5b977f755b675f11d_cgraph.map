@@ -1,0 +1,12 @@
+<map id="setup" name="setup">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,56,64,81"/>
+<area shape="rect" id="Node000002" href="$d0/dce/classfl_1_1_x_y_map_afa8bebe89b4ba6869deb9ae6c5dd5efe.html#afa8bebe89b4ba6869deb9ae6c5dd5efe" title=" " alt="" coords="112,31,368,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="64,62,123,55,124,60,65,68"/>
+<area shape="rect" id="Node000005" href="$d1/dfb/colorutils_8h_afba4db18577c19e39c54f1c5793741b7.html#afba4db18577c19e39c54f1c5793741b7" title="Fill a range of LEDs with a solid color." alt="" coords="202,80,278,105"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="64,69,188,84,188,89,64,75"/>
+<area shape="rect" id="Node000003" href="$d0/dce/classfl_1_1_x_y_map_afcc485be5a44a487d265eb6af9f89a40.html#afcc485be5a44a487d265eb6af9f89a40" title=" " alt="" coords="416,5,552,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="362,28,402,24,402,29,363,33"/>
+<area shape="rect" id="Node000004" href="$d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d" title=" " alt="" coords="600,31,659,56"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="368,41,586,41,586,46,368,46"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="553,27,587,33,586,39,552,32"/>
+</map>

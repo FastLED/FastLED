@@ -1,0 +1,5 @@
+<map id="fl::CRGB::addToRGB" name="fl::CRGB::addToRGB">
+<area shape="rect" id="Node000001" title="Add a constant to each channel, saturating at 0xFF." alt="" coords="213,5,363,31"/>
+<area shape="rect" id="Node000002" href="$da/dd6/structfl_1_1_c_r_g_b_a7ec7d590822424e963a49cfbafea49a5.html#a7ec7d590822424e963a49cfbafea49a5" title="Add a constant of &#39;1&#39; from each channel, saturating at 0xFF." alt="" coords="5,5,165,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,21,165,21,165,15,200,15"/>
+</map>

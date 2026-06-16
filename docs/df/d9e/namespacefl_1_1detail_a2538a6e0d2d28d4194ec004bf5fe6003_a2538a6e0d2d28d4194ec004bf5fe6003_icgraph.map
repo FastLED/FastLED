@@ -1,0 +1,13 @@
+<map id="fl::detail::wave8_convert_byte_to_wave8byte" name="fl::detail::wave8_convert_byte_to_wave8byte">
+<area shape="rect" id="Node000001" title="Helper: Convert byte to Wave8Byte using nibble LUT (internal use only)" alt="" coords="223,97,405,137"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a5b15f08d117ed2b984fbd6881dbbde51.html#a5b15f08d117ed2b984fbd6881dbbde51" title="Convert byte to 8 Wave8Bit structures using nibble LUT." alt="" coords="49,5,131,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="267,92,223,67,174,44,130,30,132,25,176,40,225,63,270,87"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a428be465fbb9564d7cf8e7badeb0ea99.html#a428be465fbb9564d7cf8e7badeb0ea99" title=" " alt="" coords="5,55,175,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="209,96,148,83,149,77,210,91"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a6f8c710360504ffec935d97b5b0e4ec1.html#a6f8c710360504ffec935d97b5b0e4ec1" title=" " alt="" coords="9,104,171,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="209,119,171,119,171,114,209,114"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_ad985fd78f5c428509d1bb0af53d5aa0c.html#ad985fd78f5c428509d1bb0af53d5aa0c" title=" " alt="" coords="9,153,171,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="210,142,149,156,148,151,209,137"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_ad0e6c4abefa2d795fcdba18f0d5c1573.html#ad0e6c4abefa2d795fcdba18f0d5c1573" title=" " alt="" coords="9,203,171,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="268,146,176,192,140,205,138,200,174,188,266,141"/>
+</map>

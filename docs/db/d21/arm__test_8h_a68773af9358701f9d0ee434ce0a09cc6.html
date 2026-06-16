@@ -117,8 +117,8 @@ $(function(){initNavTree('db/d21/arm__test_8h_a68773af9358701f9d0ee434ce0a09cc6.
 
 <p class="definition">Definition at line <a class="el" href="../../db/d21/arm__test_8h_source.html#l00005">5</a> of file <a class="el" href="../../db/d21/arm__test_8h_source.html">arm_test.h</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">    5</span>                 {</div>
-<div class="line"><span class="lineno">    6</span><span class="preprocessor">#ifndef FASTLED_ARM</span></div>
-<div class="line"><span class="lineno">    7</span><span class="preprocessor">#error &quot;FASTLED_ARM should be defined for ARM platforms&quot;</span></div>
+<div class="line"><span class="lineno">    6</span><span class="preprocessor">#ifndef FL_IS_ARM</span></div>
+<div class="line"><span class="lineno">    7</span><span class="preprocessor">#error &quot;FL_IS_ARM should be defined for ARM platforms&quot;</span></div>
 <div class="line"><span class="lineno">    8</span><span class="preprocessor">#endif</span></div>
 <div class="line"><span class="lineno">    9</span> </div>
 <div class="line"><span class="lineno">   10</span><span class="preprocessor">#if FASTLED_USE_PROGMEM != 0 &amp;&amp; FASTLED_USE_PROGMEM != 1</span></div>
@@ -127,69 +127,94 @@ $(function(){initNavTree('db/d21/arm__test_8h_a68773af9358701f9d0ee434ce0a09cc6.
 <div class="line"><span class="lineno">   13</span> </div>
 <div class="line"><span class="lineno">   14</span><span class="preprocessor">#if defined(ARDUINO_TEENSYLC) || defined(ARDUINO_TEENSY30) || defined(__MK20DX128__) || defined(__MK20DX256__) || defined(ARDUINO_ARCH_RENESAS_UNO) || defined(STM32F1)</span></div>
 <div class="line"><span class="lineno">   15</span>    <span class="comment">// Teensy LC, Teensy 3.0, Teensy 3.1/3.2, Renesas UNO, and STM32F1 have limited memory</span></div>
-<div class="line"><span class="lineno">   16</span><span class="preprocessor">    #if SKETCH_HAS_LOTS_OF_MEMORY != 0</span></div>
-<div class="line"><span class="lineno">   17</span><span class="preprocessor">    #error &quot;SKETCH_HAS_LOTS_OF_MEMORY should be 0 for Teensy LC, Teensy 3.0, Teensy 3.1/3.2, Renesas UNO, and STM32F1&quot;</span></div>
+<div class="line"><span class="lineno">   16</span><span class="preprocessor">    #if SKETCH_HAS_LARGE_MEMORY != 0</span></div>
+<div class="line"><span class="lineno">   17</span><span class="preprocessor">    #error &quot;SKETCH_HAS_LARGE_MEMORY should be 0 for Teensy LC, Teensy 3.0, Teensy 3.1/3.2, Renesas UNO, and STM32F1&quot;</span></div>
 <div class="line"><span class="lineno">   18</span><span class="preprocessor">    #endif</span></div>
-<div class="line"><span class="lineno">   19</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">   20</span>    <span class="comment">// Most other ARM platforms have lots of memory</span></div>
-<div class="line"><span class="lineno">   21</span><span class="preprocessor">    #if SKETCH_HAS_LOTS_OF_MEMORY != 1</span></div>
-<div class="line"><span class="lineno">   22</span><span class="preprocessor">    #error &quot;SKETCH_HAS_LOTS_OF_MEMORY should be 1 for most ARM platforms&quot;</span></div>
-<div class="line"><span class="lineno">   23</span><span class="preprocessor">    #endif</span></div>
-<div class="line"><span class="lineno">   24</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">   25</span> </div>
-<div class="line"><span class="lineno">   26</span><span class="preprocessor">#if FASTLED_ALLOW_INTERRUPTS != 1 &amp;&amp; FASTLED_ALLOW_INTERRUPTS != 0</span></div>
-<div class="line"><span class="lineno">   27</span><span class="preprocessor">#error &quot;FASTLED_ALLOW_INTERRUPTS should be either 0 or 1 for ARM platforms&quot;</span></div>
-<div class="line"><span class="lineno">   28</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">   29</span> </div>
-<div class="line"><span class="lineno">   30</span><span class="comment">// Check that F_CPU is defined</span></div>
-<div class="line"><span class="lineno">   31</span><span class="preprocessor">#ifndef F_CPU</span></div>
-<div class="line"><span class="lineno">   32</span><span class="preprocessor">#error &quot;F_CPU should be defined for ARM platforms&quot;</span></div>
-<div class="line"><span class="lineno">   33</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">   34</span> </div>
-<div class="line"><span class="lineno">   35</span><span class="comment">// Specific ARM variant checks</span></div>
-<div class="line"><span class="lineno">   36</span><span class="preprocessor">#if defined(ARDUINO_ARCH_STM32) || defined(STM32F1)</span></div>
-<div class="line"><span class="lineno">   37</span><span class="preprocessor">    #if FASTLED_ALLOW_INTERRUPTS != 0</span></div>
-<div class="line"><span class="lineno">   38</span><span class="preprocessor">    #error &quot;STM32 platforms should have FASTLED_ALLOW_INTERRUPTS set to 0&quot;</span></div>
-<div class="line"><span class="lineno">   39</span><span class="preprocessor">    #endif</span></div>
-<div class="line"><span class="lineno">   40</span><span class="preprocessor">    #if FASTLED_USE_PROGMEM != 0</span></div>
-<div class="line"><span class="lineno">   41</span><span class="preprocessor">    #error &quot;STM32 platforms should have FASTLED_USE_PROGMEM set to 0&quot;</span></div>
-<div class="line"><span class="lineno">   42</span><span class="preprocessor">    #endif</span></div>
-<div class="line"><span class="lineno">   43</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">   44</span> </div>
-<div class="line"><span class="lineno">   45</span><span class="preprocessor">#if defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_RASPBERRY_PI_PICO)</span></div>
-<div class="line"><span class="lineno">   46</span><span class="preprocessor">    #if FASTLED_USE_PROGMEM != 0</span></div>
-<div class="line"><span class="lineno">   47</span><span class="preprocessor">    #error &quot;RP2040 platforms should have FASTLED_USE_PROGMEM set to 0&quot;</span></div>
-<div class="line"><span class="lineno">   48</span><span class="preprocessor">    #endif</span></div>
-<div class="line"><span class="lineno">   49</span><span class="preprocessor">    #if FASTLED_ALLOW_INTERRUPTS != 1</span></div>
-<div class="line"><span class="lineno">   50</span><span class="preprocessor">    #error &quot;RP2040 platforms should have FASTLED_ALLOW_INTERRUPTS set to 1&quot;</span></div>
-<div class="line"><span class="lineno">   51</span><span class="preprocessor">    #endif</span></div>
-<div class="line"><span class="lineno">   52</span><span class="preprocessor">    #ifdef FASTLED_FORCE_SOFTWARE_SPI</span></div>
-<div class="line"><span class="lineno">   53</span>    <span class="comment">// RP2040 forces software SPI - this is expected</span></div>
-<div class="line"><span class="lineno">   54</span><span class="preprocessor">    #endif</span></div>
-<div class="line"><span class="lineno">   55</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">   56</span> </div>
-<div class="line"><span class="lineno">   57</span><span class="preprocessor">#if defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MK66FX1M0__) || defined(__IMXRT1062__)</span></div>
-<div class="line"><span class="lineno">   58</span>    <span class="comment">// Teensy platforms that use PROGMEM</span></div>
-<div class="line"><span class="lineno">   59</span><span class="preprocessor">    #if FASTLED_USE_PROGMEM != 1</span></div>
-<div class="line"><span class="lineno">   60</span><span class="preprocessor">    #error &quot;Teensy K20/K66/MXRT1062 platforms should have FASTLED_USE_PROGMEM set to 1&quot;</span></div>
-<div class="line"><span class="lineno">   61</span><span class="preprocessor">    #endif</span></div>
-<div class="line"><span class="lineno">   62</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">   63</span> </div>
-<div class="line"><span class="lineno">   64</span><span class="preprocessor">#if defined(ARDUINO_ARCH_SAMD) || defined(ARDUINO_SAM_DUE)</span></div>
-<div class="line"><span class="lineno">   65</span><span class="preprocessor">    #if FASTLED_USE_PROGMEM != 0</span></div>
-<div class="line"><span class="lineno">   66</span><span class="preprocessor">    #error &quot;SAMD/SAM platforms should have FASTLED_USE_PROGMEM set to 0&quot;</span></div>
-<div class="line"><span class="lineno">   67</span><span class="preprocessor">    #endif</span></div>
-<div class="line"><span class="lineno">   68</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">   69</span> </div>
-<div class="line"><span class="lineno">   70</span><span class="preprocessor">#if defined(NRF52_SERIES) || defined(ARDUINO_ARCH_NRF52)</span></div>
-<div class="line"><span class="lineno">   71</span><span class="preprocessor">    #if FASTLED_USE_PROGMEM != 0</span></div>
-<div class="line"><span class="lineno">   72</span><span class="preprocessor">    #error &quot;NRF52 platforms should have FASTLED_USE_PROGMEM set to 0&quot;</span></div>
-<div class="line"><span class="lineno">   73</span><span class="preprocessor">    #endif</span></div>
-<div class="line"><span class="lineno">   74</span><span class="preprocessor">    #ifndef CLOCKLESS_FREQUENCY</span></div>
-<div class="line"><span class="lineno">   75</span><span class="preprocessor">    #error &quot;NRF52 should have CLOCKLESS_FREQUENCY defined&quot;</span></div>
-<div class="line"><span class="lineno">   76</span><span class="preprocessor">    #endif</span></div>
-<div class="line"><span class="lineno">   77</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">   78</span>}</div>
+<div class="line"><span class="lineno">   19</span><span class="preprocessor">    #if SKETCH_HAS_HUGE_MEMORY != 0</span></div>
+<div class="line"><span class="lineno">   20</span><span class="preprocessor">    #error &quot;SKETCH_HAS_HUGE_MEMORY should be 0 for Teensy LC, Teensy 3.0, Teensy 3.1/3.2, Renesas UNO, and STM32F1&quot;</span></div>
+<div class="line"><span class="lineno">   21</span><span class="preprocessor">    #endif</span></div>
+<div class="line"><span class="lineno">   22</span><span class="preprocessor">#elif defined(FL_IS_TEENSY_35) || defined(FL_IS_TEENSY_36) || defined(FL_IS_TEENSY_4X) \</span></div>
+<div class="line"><span class="lineno">   23</span><span class="preprocessor">   || defined(ARDUINO_ARCH_RP2040) || defined(PICO_RP2040) || defined(PICO_RP2350) \</span></div>
+<div class="line"><span class="lineno">   24</span><span class="preprocessor">   || defined(__SAMD51__) \</span></div>
+<div class="line"><span class="lineno">   25</span><span class="preprocessor">   || defined(STM32F4xx) || defined(STM32H7xx) || defined(ARDUINO_GIGA)</span></div>
+<div class="line"><span class="lineno">   26</span>    <span class="comment">// Huge memory ARM platforms (&gt;= 256KB RAM)</span></div>
+<div class="line"><span class="lineno">   27</span><span class="preprocessor">    #if SKETCH_HAS_LARGE_MEMORY != 1</span></div>
+<div class="line"><span class="lineno">   28</span><span class="preprocessor">    #error &quot;SKETCH_HAS_LARGE_MEMORY should be 1 for huge ARM platforms&quot;</span></div>
+<div class="line"><span class="lineno">   29</span><span class="preprocessor">    #endif</span></div>
+<div class="line"><span class="lineno">   30</span><span class="preprocessor">    #if SKETCH_HAS_HUGE_MEMORY != 1</span></div>
+<div class="line"><span class="lineno">   31</span><span class="preprocessor">    #error &quot;SKETCH_HAS_HUGE_MEMORY should be 1 for huge ARM platforms&quot;</span></div>
+<div class="line"><span class="lineno">   32</span><span class="preprocessor">    #endif</span></div>
+<div class="line"><span class="lineno">   33</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">   34</span>    <span class="comment">// Most other ARM platforms have large memory but are not &quot;huge&quot;</span></div>
+<div class="line"><span class="lineno">   35</span>    <span class="comment">// (e.g., SAMD21, nRF52, generic Cortex-M)</span></div>
+<div class="line"><span class="lineno">   36</span><span class="preprocessor">    #if SKETCH_HAS_LARGE_MEMORY != 1</span></div>
+<div class="line"><span class="lineno">   37</span><span class="preprocessor">    #error &quot;SKETCH_HAS_LARGE_MEMORY should be 1 for most ARM platforms&quot;</span></div>
+<div class="line"><span class="lineno">   38</span><span class="preprocessor">    #endif</span></div>
+<div class="line"><span class="lineno">   39</span><span class="preprocessor">    #if SKETCH_HAS_HUGE_MEMORY != 0</span></div>
+<div class="line"><span class="lineno">   40</span><span class="preprocessor">    #error &quot;SKETCH_HAS_HUGE_MEMORY should be 0 for generic ARM platforms (high tier, not huge)&quot;</span></div>
+<div class="line"><span class="lineno">   41</span><span class="preprocessor">    #endif</span></div>
+<div class="line"><span class="lineno">   42</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">   43</span> </div>
+<div class="line"><span class="lineno">   44</span><span class="preprocessor">#if FASTLED_ALLOW_INTERRUPTS != 1 &amp;&amp; FASTLED_ALLOW_INTERRUPTS != 0</span></div>
+<div class="line"><span class="lineno">   45</span><span class="preprocessor">#error &quot;FASTLED_ALLOW_INTERRUPTS should be either 0 or 1 for ARM platforms&quot;</span></div>
+<div class="line"><span class="lineno">   46</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">   47</span> </div>
+<div class="line"><span class="lineno">   48</span><span class="comment">// Check that F_CPU is defined</span></div>
+<div class="line"><span class="lineno">   49</span><span class="preprocessor">#ifndef F_CPU</span></div>
+<div class="line"><span class="lineno">   50</span><span class="preprocessor">#error &quot;F_CPU should be defined for ARM platforms&quot;</span></div>
+<div class="line"><span class="lineno">   51</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">   52</span> </div>
+<div class="line"><span class="lineno">   53</span><span class="comment">// Specific ARM variant checks</span></div>
+<div class="line"><span class="lineno">   54</span><span class="preprocessor">#if defined(ARDUINO_ARCH_STM32) || defined(STM32F1)</span></div>
+<div class="line"><span class="lineno">   55</span><span class="preprocessor">    #if FASTLED_ALLOW_INTERRUPTS != 0</span></div>
+<div class="line"><span class="lineno">   56</span><span class="preprocessor">    #error &quot;STM32 platforms should have FASTLED_ALLOW_INTERRUPTS set to 0&quot;</span></div>
+<div class="line"><span class="lineno">   57</span><span class="preprocessor">    #endif</span></div>
+<div class="line"><span class="lineno">   58</span><span class="preprocessor">    #if FASTLED_USE_PROGMEM != 0</span></div>
+<div class="line"><span class="lineno">   59</span><span class="preprocessor">    #error &quot;STM32 platforms should have FASTLED_USE_PROGMEM set to 0&quot;</span></div>
+<div class="line"><span class="lineno">   60</span><span class="preprocessor">    #endif</span></div>
+<div class="line"><span class="lineno">   61</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">   62</span> </div>
+<div class="line"><span class="lineno">   63</span><span class="preprocessor">#if defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_RASPBERRY_PI_PICO)</span></div>
+<div class="line"><span class="lineno">   64</span><span class="preprocessor">    #if FASTLED_USE_PROGMEM != 0</span></div>
+<div class="line"><span class="lineno">   65</span><span class="preprocessor">    #error &quot;RP2040 platforms should have FASTLED_USE_PROGMEM set to 0&quot;</span></div>
+<div class="line"><span class="lineno">   66</span><span class="preprocessor">    #endif</span></div>
+<div class="line"><span class="lineno">   67</span><span class="preprocessor">    #if FASTLED_ALLOW_INTERRUPTS != 1</span></div>
+<div class="line"><span class="lineno">   68</span><span class="preprocessor">    #error &quot;RP2040 platforms should have FASTLED_ALLOW_INTERRUPTS set to 1&quot;</span></div>
+<div class="line"><span class="lineno">   69</span><span class="preprocessor">    #endif</span></div>
+<div class="line"><span class="lineno">   70</span><span class="preprocessor">    #ifdef FASTLED_FORCE_SOFTWARE_SPI</span></div>
+<div class="line"><span class="lineno">   71</span>    <span class="comment">// RP2040 forces software SPI - this is expected</span></div>
+<div class="line"><span class="lineno">   72</span><span class="preprocessor">    #endif</span></div>
+<div class="line"><span class="lineno">   73</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">   74</span> </div>
+<div class="line"><span class="lineno">   75</span><span class="preprocessor">#if defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MK66FX1M0__) || defined(__IMXRT1062__)</span></div>
+<div class="line"><span class="lineno">   76</span>    <span class="comment">// Teensy platforms that use PROGMEM</span></div>
+<div class="line"><span class="lineno">   77</span><span class="preprocessor">    #if FASTLED_USE_PROGMEM != 1</span></div>
+<div class="line"><span class="lineno">   78</span><span class="preprocessor">    #error &quot;Teensy K20/K66/MXRT1062 platforms should have FASTLED_USE_PROGMEM set to 1&quot;</span></div>
+<div class="line"><span class="lineno">   79</span><span class="preprocessor">    #endif</span></div>
+<div class="line"><span class="lineno">   80</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">   81</span> </div>
+<div class="line"><span class="lineno">   82</span><span class="preprocessor">#if defined(ARDUINO_ARCH_SAMD) || defined(ARDUINO_SAM_DUE)</span></div>
+<div class="line"><span class="lineno">   83</span><span class="preprocessor">    #if FASTLED_USE_PROGMEM != 0</span></div>
+<div class="line"><span class="lineno">   84</span><span class="preprocessor">    #error &quot;SAMD/SAM platforms should have FASTLED_USE_PROGMEM set to 0&quot;</span></div>
+<div class="line"><span class="lineno">   85</span><span class="preprocessor">    #endif</span></div>
+<div class="line"><span class="lineno">   86</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">   87</span> </div>
+<div class="line"><span class="lineno">   88</span><span class="preprocessor">#if defined(NRF52_SERIES) || defined(ARDUINO_ARCH_NRF52)</span></div>
+<div class="line"><span class="lineno">   89</span><span class="preprocessor">    #if FASTLED_USE_PROGMEM != 0</span></div>
+<div class="line"><span class="lineno">   90</span><span class="preprocessor">    #error &quot;NRF52 platforms should have FASTLED_USE_PROGMEM set to 0&quot;</span></div>
+<div class="line"><span class="lineno">   91</span><span class="preprocessor">    #endif</span></div>
+<div class="line"><span class="lineno">   92</span><span class="preprocessor">    #ifndef CLOCKLESS_FREQUENCY</span></div>
+<div class="line"><span class="lineno">   93</span><span class="preprocessor">    #error &quot;NRF52 should have CLOCKLESS_FREQUENCY defined&quot;</span></div>
+<div class="line"><span class="lineno">   94</span><span class="preprocessor">    #endif</span></div>
+<div class="line"><span class="lineno">   95</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">   96</span> </div>
+<div class="line"><span class="lineno">   97</span><span class="comment">// DEFAULT macro must survive FastLED.h inclusion (used by analogReference)</span></div>
+<div class="line"><span class="lineno">   98</span><span class="preprocessor">#if defined(ARDUINO)</span></div>
+<div class="line"><span class="lineno">   99</span><span class="preprocessor">#ifndef DEFAULT</span></div>
+<div class="line"><span class="lineno">  100</span><span class="preprocessor">#error &quot;DEFAULT macro should be defined after including FastLED.h on ARM Arduino platforms&quot;</span></div>
+<div class="line"><span class="lineno">  101</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  102</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  103</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -200,7 +225,7 @@ $(function(){initNavTree('db/d21/arm__test_8h_a68773af9358701f9d0ee434ce0a09cc6.
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_a05861b8fd6eceda0b5bd14abd963e94.html">CompileTest</a></li><li class="navelem"><a class="el" href="../../db/d21/arm__test_8h.html">arm_test.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

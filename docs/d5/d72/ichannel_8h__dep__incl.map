@@ -1,0 +1,23 @@
+<map id="fl/channels/ichannel.h" name="fl/channels/ichannel.h">
+<area shape="rect" id="Node000001" title="Type&#45;erased base for the templated Channel&lt;Bus, Chipset&gt; family." alt="" coords="215,5,377,31"/>
+<area shape="rect" id="Node000002" href="$d5/d7b/channel_8h.html" title="ESP32&#45;P4 Parallel IO (PARLIO) LED channel." alt="" coords="217,79,375,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="299,44,299,79,293,79,293,44"/>
+<area shape="rect" id="Node000003" href="$db/dad/_r_g_b_w_w_8ino.html" title=" " alt="" coords="5,152,208,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="259,112,165,154,163,150,257,107"/>
+<area shape="rect" id="Node000004" href="$d7/de5/_fast_l_e_d_8cpp_8hpp.html" title=" " alt="" coords="221,328,349,353"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="291,118,276,191,272,235,273,280,284,327,279,328,268,280,266,235,271,190,286,117"/>
+<area shape="rect" id="Node000007" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="283,255,368,280"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="303,117,326,254,321,255,298,118"/>
+<area shape="rect" id="Node000008" href="$d3/de6/channel_8cpp_8hpp.html" title=" " alt="" coords="504,167,707,192"/>
+<area shape="poly" id="edge8_Node000002_Node000008" title=" " alt="" coords="352,105,564,164,563,169,350,110"/>
+<area shape="rect" id="Node000012" href="$d4/de5/channel__typed_8h.html" title="Phase 3b templated channel facade – Channel&lt;Bus, Chipset&gt; with compile&#45;time bus/chipset enforcement." alt="" coords="333,159,480,199"/>
+<area shape="poly" id="edge10_Node000002_Node000012" title=" " alt="" coords="324,111,384,157,381,161,320,115"/>
+<area shape="rect" id="Node000005" href="$d7/dd5/__build_8cpp_8hpp.html" title=" " alt="" coords="158,401,274,427"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="266,365,229,403,225,399,263,361"/>
+<area shape="rect" id="Node000006" href="$dd/de2/src_8cpp.html" title="Unity build: flat includes from src/ root directory." alt="" coords="298,401,414,427"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="309,361,346,399,343,403,305,365"/>
+<area shape="poly" id="edge7_Node000007_Node000004" title=" " alt="" coords="314,294,294,329,289,327,310,291"/>
+<area shape="rect" id="Node000009" href="$d1/d97/fl_2channels_2__build_8cpp_8hpp.html" title=" " alt="" coords="510,255,701,280"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="608,206,608,254,603,254,603,206"/>
+<area shape="poly" id="edge11_Node000012_Node000007" title=" " alt="" coords="381,211,339,256,335,252,377,208"/>
+</map>

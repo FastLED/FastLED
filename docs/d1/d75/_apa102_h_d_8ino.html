@@ -109,7 +109,6 @@ $(function(){initNavTree('d1/d75/_apa102_h_d_8ino.html','../../'); initResizable
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Example showing how to use the APA102HD gamma correction. </p>
-<p>Example showing how to use the APA102HD gamma correction with user override.</p>
 <pre class="fragment">     In this example we compare two strips of LEDs.
      One strip is in HD mode, the other is in software gamma mode.
 
@@ -135,10 +134,10 @@ $(function(){initNavTree('d1/d75/_apa102_h_d_8ino.html','../../'); initResizable
            RGB
          &gt;(leds, NUM_LEDS);
        } 
-</pre>
+</pre> 
 <p class="definition">Definition in file <a class="el" href="../../d1/d75/_apa102_h_d_8ino_source.html">Apa102HD.ino</a>.</p>
-</div><div class="textblock"><code>#include &lt;Arduino.h&gt;</code><br />
-<code>#include &lt;<a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html">FastLED.h</a>&gt;</code><br />
+</div><div class="textblock"><code>#include &lt;<a class="el" href="../../d2/de0/arduino_8h_source.html">Arduino.h</a>&gt;</code><br />
+<code>#include &lt;FastLED.h&gt;</code><br />
 <code>#include &lt;<a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>&gt;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for Apa102HD.ino:</div>
@@ -169,16 +168,16 @@ Functions</h2></td></tr>
 <tr class="separator:afe461d27b9c48d5921c00d521181f12f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4fc01d736fe50cf5b977f755b675f11d" id="r_a4fc01d736fe50cf5b977f755b675f11d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d75/_apa102_h_d_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a> ()</td></tr>
 <tr class="separator:a4fc01d736fe50cf5b977f755b675f11d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3846c2e5efbf9845a845f01ec7af35ff" id="r_a3846c2e5efbf9845a845f01ec7af35ff"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d75/_apa102_h_d_8ino_a3846c2e5efbf9845a845f01ec7af35ff.html#a3846c2e5efbf9845a845f01ec7af35ff">software_gamma</a> (const <a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> &amp;in)</td></tr>
+<tr class="memitem:a3846c2e5efbf9845a845f01ec7af35ff" id="r_a3846c2e5efbf9845a845f01ec7af35ff"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d75/_apa102_h_d_8ino_a3846c2e5efbf9845a845f01ec7af35ff.html#a3846c2e5efbf9845a845f01ec7af35ff">software_gamma</a> (const <a class="el" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a> &amp;in)</td></tr>
 <tr class="separator:a3846c2e5efbf9845a845f01ec7af35ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac1b280972f64351c67c78e0b036f3a1c" id="r_ac1b280972f64351c67c78e0b036f3a1c"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d75/_apa102_h_d_8ino_ac1b280972f64351c67c78e0b036f3a1c.html#ac1b280972f64351c67c78e0b036f3a1c">wrap_8bit</a> (int i)</td></tr>
 <tr class="separator:ac1b280972f64351c67c78e0b036f3a1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:a1b4f26a01e11d7eb2848bc41b0f6dd9d" id="r_a1b4f26a01e11d7eb2848bc41b0f6dd9d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d75/_apa102_h_d_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a> [<a class="el" href="../../d8/d21/_adafruit_bridge_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>] = {0}</td></tr>
+<tr class="memitem:a1b4f26a01e11d7eb2848bc41b0f6dd9d" id="r_a1b4f26a01e11d7eb2848bc41b0f6dd9d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d75/_apa102_h_d_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a> [<a class="el" href="../../d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>] = {0}</td></tr>
 <tr class="separator:a1b4f26a01e11d7eb2848bc41b0f6dd9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7c99553bb79925596d232dbcf68fd2b3" id="r_a7c99553bb79925596d232dbcf68fd2b3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d75/_apa102_h_d_8ino_a7c99553bb79925596d232dbcf68fd2b3.html#a7c99553bb79925596d232dbcf68fd2b3">leds_hd</a> [<a class="el" href="../../d8/d21/_adafruit_bridge_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>] = {0}</td></tr>
+<tr class="memitem:a7c99553bb79925596d232dbcf68fd2b3" id="r_a7c99553bb79925596d232dbcf68fd2b3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d75/_apa102_h_d_8ino_a7c99553bb79925596d232dbcf68fd2b3.html#a7c99553bb79925596d232dbcf68fd2b3">leds_hd</a> [<a class="el" href="../../d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>] = {0}</td></tr>
 <tr class="separator:a7c99553bb79925596d232dbcf68fd2b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
@@ -188,7 +187,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_444f6549ff4d6964f399c8619651b3db.html">Apa102HD</a></li><li class="navelem"><a class="el" href="../../d1/d75/_apa102_h_d_8ino.html">Apa102HD.ino</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

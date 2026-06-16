@@ -1,0 +1,13 @@
+<map id="fl::RgbwwInvalid::RgbwwInvalid" name="fl::RgbwwInvalid::RgbwwInvalid">
+<area shape="rect" id="Node000001" title=" " alt="" coords="417,109,645,134"/>
+<area shape="rect" id="Node000002" href="$d3/d33/structfl_1_1_rgbww_invalid_aa1bef9258439f652fc5ea1b85139c1d3.html#aa1bef9258439f652fc5ea1b85139c1d3" title=" " alt="" coords="196,109,369,134"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="404,124,369,124,369,119,404,119"/>
+<area shape="rect" id="Node000003" href="$d0/d09/classfl_1_1_pixel_iterator_ae8d12b836ed8e228ad815d2a3be38d08.html#ae8d12b836ed8e228ad815d2a3be38d08" title=" " alt="" coords="14,5,139,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="241,105,147,60,121,48,123,43,149,55,244,100"/>
+<area shape="rect" id="Node000004" href="$d3/dc7/classfl_1_1_pixel_iterator_any_ab136b28e1a8d9f512d9ee5d97357ccc8.html#ab136b28e1a8d9f512d9ee5d97357ccc8" title=" " alt="" coords="5,69,148,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="186,109,148,103,149,98,187,104"/>
+<area shape="rect" id="Node000005" href="$d3/dc7/classfl_1_1_pixel_iterator_any_ac0406f961031d4acae7cf2233bab13f8.html#ac0406f961031d4acae7cf2233bab13f8" title="Construct adapter with color order conversion." alt="" coords="5,133,148,173"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="187,139,149,145,148,140,186,134"/>
+<area shape="rect" id="Node000006" href="$d5/d87/structfl_1_1_channel_options_ac2895236837f1893b4219c096856c63d.html#ac2895236837f1893b4219c096856c63d" title=" " alt="" coords="6,197,147,237"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="244,143,149,188,123,200,121,195,147,183,241,138"/>
+</map>

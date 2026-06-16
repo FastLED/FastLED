@@ -1,0 +1,18 @@
+digraph "fl::transpose_4lane_inline"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::transpose_4lane\l_inline",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Low-level bit-interleaving primitive for 4 lanes (ISR-safe)"];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::SPITransposer::\ltranspose4",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dfa/classfl_1_1_s_p_i_transposer_a409565f20b2d6f03c19989cc7a53b91d.html#a409565f20b2d6f03c19989cc7a53b91d",tooltip="Transpose 4 lanes of data into interleaved quad-SPI format."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::spi::MultiLaneDevice\l::flush",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a97018959f2c77546fa12f2a0adb2f540.html#a97018959f2c77546fa12f2a0adb2f540",tooltip="Flush all lanes (transpose and transmit)"];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::spi::MultiLaneDevice\l::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a512a780a7050fa0e91e83c5dba1e17bc.html#a512a780a7050fa0e91e83c5dba1e17bc",tooltip=" "];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::spi::MultiLaneDevice\l::writeImpl",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a547b2f30f70e16dbb22762f3f2370254.html#a547b2f30f70e16dbb22762f3f2370254",tooltip="Internal implementation - write all lanes atomically."];
+}

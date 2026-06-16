@@ -1,0 +1,11 @@
+<map id="transition" name="transition">
+<area shape="rect" id="Node000001" title=" " alt="" coords="435,31,519,56"/>
+<area shape="rect" id="Node000002" href="$d7/d3b/complex_8h_a9e9c4518aa86f4040526926f5d275900.html#a9e9c4518aa86f4040526926f5d275900" title=" " alt="" coords="218,5,361,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="420,38,361,30,361,25,421,33"/>
+<area shape="rect" id="Node000004" href="$d2/d9f/classfl_1_1_w_l_e_d_a0532a8b184db05d8165dbd7beac74def.html#a0532a8b184db05d8165dbd7beac74def" title="Get playlist configuration." alt="" coords="192,55,387,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="421,53,387,57,386,52,421,48"/>
+<area shape="rect" id="Node000003" href="$d7/d3b/complex_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="49,5,100,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="204,21,100,21,100,15,204,15"/>
+<area shape="rect" id="Node000005" href="$d2/d9f/classfl_1_1_w_l_e_d_ac8c92c79b2fcb96c31fc00e19204ca7c.html#ac8c92c79b2fcb96c31fc00e19204ca7c" title="Get current WLED state as JSON object." alt="" coords="5,55,144,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="178,70,145,70,145,65,178,65"/>
+</map>

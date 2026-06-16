@@ -134,31 +134,42 @@ $(function(){initNavTree('d2/dbc/classfl_1_1_x_y_path_renderer_a7c03ca116bbfb4f3
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d78/xypath_8cpp_source.html#l00078">78</a> of file <a class="el" href="../../d4/d78/xypath_8cpp_source.html">xypath.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   80</span>                                               {</div>
-<div class="line"><span class="lineno">   81</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; <a class="code hl_function" href="../../d6/daf/direct_8h_a1b7dc7e9feb3d26023be6578bdd7adf1.html#a1b7dc7e9feb3d26023be6578bdd7adf1">steps</a>; ++i) {</div>
-<div class="line"><span class="lineno">   82</span>        <span class="keywordtype">float</span> alpha = fl::map_range&lt;int, float&gt;(i, 0, <a class="code hl_function" href="../../d6/daf/direct_8h_a1b7dc7e9feb3d26023be6578bdd7adf1.html#a1b7dc7e9feb3d26023be6578bdd7adf1">steps</a> - 1, from, to);</div>
-<div class="line"><span class="lineno">   83</span>        Tile2x2_u8 tile = <a class="code hl_function" href="../../d2/dbc/classfl_1_1_x_y_path_renderer_a11dad2232449f8e9e8f089387a45a357.html#a11dad2232449f8e9e8f089387a45a357">at_subpixel</a>(alpha);</div>
-<div class="line"><span class="lineno">   84</span>        <span class="keywordflow">if</span> (optional_alpha_gen) {</div>
-<div class="line"><span class="lineno">   85</span>            <span class="comment">// Scale the tile based on the alpha value.</span></div>
-<div class="line"><span class="lineno">   86</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> a8 = (*optional_alpha_gen)(alpha);</div>
-<div class="line"><span class="lineno">   87</span>            tile.scale(a8);</div>
-<div class="line"><span class="lineno">   88</span>        }</div>
-<div class="line"><span class="lineno">   89</span>        <a class="code hl_function" href="../../d6/d1a/examples_2_downscale_2downscale_8h_acb4092d7281150d35815c8d21daf5410.html#acb4092d7281150d35815c8d21daf5410">raster</a>.rasterize(tile);</div>
-<div class="line"><span class="lineno">   90</span>    }</div>
-<div class="line"><span class="lineno">   91</span>}</div>
-<div class="ttc" id="aclassfl_1_1_x_y_path_renderer_a11dad2232449f8e9e8f089387a45a357_html_a11dad2232449f8e9e8f089387a45a357"><div class="ttname"><a href="../../d2/dbc/classfl_1_1_x_y_path_renderer_a11dad2232449f8e9e8f089387a45a357.html#a11dad2232449f8e9e8f089387a45a357">fl::XYPathRenderer::at_subpixel</a></div><div class="ttdeci">Tile2x2_u8 at_subpixel(float alpha)</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d31/xypath__renderer_8cpp_source.html#l00024">xypath_renderer.cpp:24</a></div></div>
-<div class="ttc" id="adirect_8h_a1b7dc7e9feb3d26023be6578bdd7adf1_html_a1b7dc7e9feb3d26023be6578bdd7adf1"><div class="ttname"><a href="../../d6/daf/direct_8h_a1b7dc7e9feb3d26023be6578bdd7adf1.html#a1b7dc7e9feb3d26023be6578bdd7adf1">steps</a></div><div class="ttdeci">UISlider steps(&quot;Steps&quot;, 100.0f, 1.0f, 200.0f, 1.0f)</div></div>
-<div class="ttc" id="aexamples_2_downscale_2downscale_8h_acb4092d7281150d35815c8d21daf5410_html_acb4092d7281150d35815c8d21daf5410"><div class="ttname"><a href="../../d6/d1a/examples_2_downscale_2downscale_8h_acb4092d7281150d35815c8d21daf5410.html#acb4092d7281150d35815c8d21daf5410">raster</a></div><div class="ttdeci">XYRaster raster(WIDTH, HEIGHT)</div></div>
-<div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d7e/int_8h_source.html#l00017">int.h:17</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d0/dd8/xypath_8cpp_8hpp_source.html#l00079">79</a> of file <a class="el" href="../../d0/dd8/xypath_8cpp_8hpp_source.html">xypath.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   81</span>                                               {</div>
+<div class="line"><span class="lineno">   82</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; <a class="code hl_function" href="../../d6/daf/direct_8h_a55bb90e5a671f3d42806580d2c4e231b.html#a55bb90e5a671f3d42806580d2c4e231b">steps</a>; ++i) {</div>
+<div class="line"><span class="lineno">   83</span>        <span class="keywordtype">float</span> alpha = <a class="code hl_function" href="../../d4/d36/namespacefl_a33fb57d527658d545f129f9fd7cf5860.html#a33fb57d527658d545f129f9fd7cf5860">fl::map_range&lt;int, float&gt;</a>(i, 0, <a class="code hl_function" href="../../d6/daf/direct_8h_a55bb90e5a671f3d42806580d2c4e231b.html#a55bb90e5a671f3d42806580d2c4e231b">steps</a> - 1, from, to);</div>
+<div class="line"><span class="lineno">   84</span>        Tile2x2_u8 tile = <a class="code hl_function" href="../../d2/dbc/classfl_1_1_x_y_path_renderer_a11dad2232449f8e9e8f089387a45a357.html#a11dad2232449f8e9e8f089387a45a357">at_subpixel</a>(alpha);</div>
+<div class="line"><span class="lineno">   85</span>        <span class="keywordflow">if</span> (optional_alpha_gen) {</div>
+<div class="line"><span class="lineno">   86</span>            <span class="comment">// Scale the tile based on the alpha value.</span></div>
+<div class="line"><span class="lineno">   87</span>            <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> a8 = (*optional_alpha_gen)(alpha);</div>
+<div class="line"><span class="lineno">   88</span>            tile.scale(a8);</div>
+<div class="line"><span class="lineno">   89</span>        }</div>
+<div class="line"><span class="lineno">   90</span>        <a class="code hl_function" href="../../d6/d1a/examples_2_downscale_2downscale_8h_a51b404b183c691bdd9d2c27f41f1de25.html#a51b404b183c691bdd9d2c27f41f1de25">raster</a>.<a class="code hl_function" href="../../d1/d5c/classfl_1_1_x_y_raster_u8_sparse_a0a0bccbb208326b342c16854353e872f.html#a0a0bccbb208326b342c16854353e872f">rasterize</a>(tile);</div>
+<div class="line"><span class="lineno">   91</span>    }</div>
+<div class="line"><span class="lineno">   92</span>}</div>
+<div class="ttc" id="aclassfl_1_1_x_y_path_renderer_a11dad2232449f8e9e8f089387a45a357_html_a11dad2232449f8e9e8f089387a45a357"><div class="ttname"><a href="../../d2/dbc/classfl_1_1_x_y_path_renderer_a11dad2232449f8e9e8f089387a45a357.html#a11dad2232449f8e9e8f089387a45a357">fl::XYPathRenderer::at_subpixel</a></div><div class="ttdeci">Tile2x2_u8 at_subpixel(float alpha)</div><div class="ttdef"><b>Definition</b> <a href="../../df/dfa/xypath__renderer_8cpp_8hpp_source.html#l00024">xypath_renderer.cpp.hpp:24</a></div></div>
+<div class="ttc" id="aclassfl_1_1_x_y_raster_u8_sparse_a0a0bccbb208326b342c16854353e872f_html_a0a0bccbb208326b342c16854353e872f"><div class="ttname"><a href="../../d1/d5c/classfl_1_1_x_y_raster_u8_sparse_a0a0bccbb208326b342c16854353e872f.html#a0a0bccbb208326b342c16854353e872f">fl::XYRasterU8Sparse::rasterize</a></div><div class="ttdeci">void rasterize(const vec2&lt; u16 &gt; &amp;pt, u8 value)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/df9/raster__sparse_8h_source.html#l00054">raster_sparse.h:54</a></div></div>
+<div class="ttc" id="adirect_8h_a55bb90e5a671f3d42806580d2c4e231b_html_a55bb90e5a671f3d42806580d2c4e231b"><div class="ttname"><a href="../../d6/daf/direct_8h_a55bb90e5a671f3d42806580d2c4e231b.html#a55bb90e5a671f3d42806580d2c4e231b">steps</a></div><div class="ttdeci">fl::UISlider steps(&quot;Steps&quot;, 100.0f, 1.0f, 200.0f, 1.0f)</div></div>
+<div class="ttc" id="aexamples_2_downscale_2downscale_8h_a51b404b183c691bdd9d2c27f41f1de25_html_a51b404b183c691bdd9d2c27f41f1de25"><div class="ttname"><a href="../../d6/d1a/examples_2_downscale_2downscale_8h_a51b404b183c691bdd9d2c27f41f1de25.html#a51b404b183c691bdd9d2c27f41f1de25">raster</a></div><div class="ttdeci">fl::XYRaster raster(WIDTH, HEIGHT)</div></div>
+<div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
+<div class="ttc" id="anamespacefl_a33fb57d527658d545f129f9fd7cf5860_html_a33fb57d527658d545f129f9fd7cf5860"><div class="ttname"><a href="../../d4/d36/namespacefl_a33fb57d527658d545f129f9fd7cf5860.html#a33fb57d527658d545f129f9fd7cf5860">fl::map_range</a></div><div class="ttdeci">FASTLED_FORCE_INLINE U map_range(T value, T in_min, T in_max, U out_min, U out_max) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00174">math.h:174</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d2/d31/xypath__renderer_8cpp_source.html#l00024">at_subpixel()</a>, <a class="el" href="../../d6/d1a/examples_2_downscale_2downscale_8h_acb4092d7281150d35815c8d21daf5410.html#acb4092d7281150d35815c8d21daf5410">raster()</a>, <a class="el" href="../../db/d15/tile2x2_8cpp_source.html#l00043">fl::Tile2x2_u8::scale()</a>, and <a class="el" href="../../d6/daf/direct_8h_a1b7dc7e9feb3d26023be6578bdd7adf1.html#a1b7dc7e9feb3d26023be6578bdd7adf1">steps()</a>.</p>
+<p class="reference">References <a class="el" href="../../df/dfa/xypath__renderer_8cpp_8hpp_source.html#l00024">at_subpixel()</a>, <a class="el" href="../../df/db1/math_8h_source.html#l00174">fl::map_range()</a>, <a class="el" href="../../d6/d1a/examples_2_downscale_2downscale_8h_a51b404b183c691bdd9d2c27f41f1de25.html#a51b404b183c691bdd9d2c27f41f1de25">raster()</a>, <a class="el" href="../../d9/d7d/tile2x2_8cpp_8hpp_source.html#l00043">fl::Tile2x2_u8::scale()</a>, and <a class="el" href="../../d6/daf/direct_8h_a55bb90e5a671f3d42806580d2c4e231b.html#a55bb90e5a671f3d42806580d2c4e231b">steps()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d2/dbc/classfl_1_1_x_y_path_renderer_abc12e093de808791fdea9c85d264bee6.html#abc12e093de808791fdea9c85d264bee6">~XYPathRenderer()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d2/dbc/classfl_1_1_x_y_path_renderer_a7c03ca116bbfb4f317474d05ea868c6b_a7c03ca116bbfb4f317474d05ea868c6b_cgraph.svg" width="100%" height="591"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d2/dbc/classfl_1_1_x_y_path_renderer_a7c03ca116bbfb4f317474d05ea868c6b_a7c03ca116bbfb4f317474d05ea868c6b_cgraph.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+</div>
+<div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
+<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-1-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d2/dbc/classfl_1_1_x_y_path_renderer_a7c03ca116bbfb4f317474d05ea868c6b_a7c03ca116bbfb4f317474d05ea868c6b_icgraph.svg" width="347" height="51"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -170,7 +181,7 @@ $(function(){initNavTree('d2/dbc/classfl_1_1_x_y_path_renderer_a7c03ca116bbfb4f3
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d2/dbc/classfl_1_1_x_y_path_renderer.html">XYPathRenderer</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

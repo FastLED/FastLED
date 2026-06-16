@@ -1,0 +1,23 @@
+digraph "fl::Rpc::bind"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::Rpc::bind",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Bind a method with configuration (name, function, optional metadata)."];
+  Node1 -> Node1 [id="edge1_Node000001_Node000001",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node2 [id="edge2_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::Rpc::registerMethod",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dd1/classfl_1_1_rpc_a4178792373064445ef93bf68a2769ac3.html#a4178792373064445ef93bf68a2769ac3",tooltip=" "];
+  Node2 -> Node3 [id="edge3_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::vector_basic::empty",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dad/classfl_1_1vector__basic_af188bd6e2b911e1127f3ef37b4b90143.html#af188bd6e2b911e1127f3ef37b4b90143",tooltip=" "];
+  Node2 -> Node4 [id="edge4_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::detail::TypeTag::id",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/da2/structfl_1_1detail_1_1_type_tag_adeda59a82d61221269f0b05102f4f465.html#adeda59a82d61221269f0b05102f4f465",tooltip=" "];
+  Node2 -> Node5 [id="edge5_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::make_shared",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af",tooltip=" "];
+  Node2 -> Node6 [id="edge6_Node000002_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::fl::move",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a",tooltip=" "];
+  Node2 -> Node7 [id="edge7_Node000002_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::Rpc::tags",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dd1/classfl_1_1_rpc_a45e46f891a39a9fbda98172dd0a0f2c8.html#a45e46f891a39a9fbda98172dd0a0f2c8",tooltip="Returns list of unique tags used across all methods."];
+}

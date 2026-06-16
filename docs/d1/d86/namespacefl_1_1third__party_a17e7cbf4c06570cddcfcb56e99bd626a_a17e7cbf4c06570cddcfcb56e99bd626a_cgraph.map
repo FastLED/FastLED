@@ -1,0 +1,11 @@
+<map id="fl::third_party::nsgif__record_frame" name="fl::third_party::nsgif__record_frame">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,47,153,87"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a95dbc431c0b3451c8ffd336fe2793a47.html#a95dbc431c0b3451c8ffd336fe2793a47" title=" " alt="" coords="235,5,316,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,46,221,29,222,34,154,51"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d" title=" " alt="" coords="228,55,323,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="154,65,214,65,214,70,154,70"/>
+<area shape="rect" id="Node000004" href="$d1/d86/namespacefl_1_1third__party_a16ccbeb5958b1d4b1dadd0d004f4a056.html#a16ccbeb5958b1d4b1dadd0d004f4a056" title="Helper to get the rendering bitmap for a gif." alt="" coords="201,105,349,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="149,85,194,98,192,103,148,90"/>
+<area shape="rect" id="Node000005" href="$d1/d86/namespacefl_1_1third__party_a0ce24d09df712e402b6983b8b28ab8b4.html#a0ce24d09df712e402b6983b8b28ab8b4" title="Updates the sprite memory size." alt="" coords="397,105,545,145"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="350,122,383,122,383,127,350,127"/>
+</map>

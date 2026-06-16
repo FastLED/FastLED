@@ -1,0 +1,8 @@
+<map id="fl::platforms::scopedWatchdogPrintLine" name="fl::platforms::scopedWatchdogPrintLine">
+<area shape="rect" id="Node000001" title=" " alt="" coords="469,5,688,45"/>
+<area shape="rect" id="Node000002" href="$d7/d76/classfl_1_1_scoped_watchdog_a196822062d7ab5c2b32c34a6d1efddd0.html#a196822062d7ab5c2b32c34a6d1efddd0" title="Construct with an explicit timeout." alt="" coords="5,5,155,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="455,25,421,24,203,24,155,25,155,20,203,19,421,19,456,19"/>
+<area shape="rect" id="Node000003" href="$df/d52/namespacefl_1_1platforms_a3333f9482b0798c0daebdc07be2cdd5c.html#a3333f9482b0798c0daebdc07be2cdd5c" title=" " alt="" coords="203,33,421,73"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="456,41,422,44,421,39,456,36"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="189,41,155,37,155,32,189,36"/>
+</map>

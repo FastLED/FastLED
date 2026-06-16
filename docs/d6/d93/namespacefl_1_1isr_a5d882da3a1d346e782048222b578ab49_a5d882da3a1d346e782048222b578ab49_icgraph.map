@@ -1,0 +1,13 @@
+<map id="fl::isr::attach_timer_handler" name="fl::isr::attach_timer_handler">
+<area shape="rect" id="Node000001" title="Attach a timer&#45;based ISR handler." alt="" coords="708,37,853,77"/>
+<area shape="rect" id="Node000002" href="$d6/d35/classfl_1_1_async_logger_a9d75c7b5ffac34f42439fa954696064e.html#a9d75c7b5ffac34f42439fa954696064e" title="Enable background timer&#45;based flushing (opt&#45;in)" alt="" coords="409,5,660,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="694,49,660,44,660,39,695,44"/>
+<area shape="rect" id="Node000004" href="$d9/d33/namespacefl_1_1pwm__state_af4374568b5cc7ac35b4a70d554e66257.html#af4374568b5cc7ac35b4a70d554e66257" title=" " alt="" coords="445,69,624,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="694,71,625,80,624,75,694,66"/>
+<area shape="rect" id="Node000003" href="$d6/d35/classfl_1_1_async_logger_a55785739910a193b5b6dffeb455bd150.html#a55785739910a193b5b6dffeb455bd150" title=" " alt="" coords="139,13,361,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="396,28,362,28,362,23,396,23"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a77306b4a5327eb19e8d003b550b1a0a5.html#a77306b4a5327eb19e8d003b550b1a0a5" title="Set PWM frequency for a pin." alt="" coords="171,77,329,102"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="432,92,329,92,329,87,432,87"/>
+<area shape="rect" id="Node000006" href="$d9/d1f/el__panel_8cpp_a3d505a2f5ac043b8dc404b92ebb049ef.html#a3d505a2f5ac043b8dc404b92ebb049ef" title=" " alt="" coords="5,77,91,102"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="157,92,91,92,91,87,157,87"/>
+</map>

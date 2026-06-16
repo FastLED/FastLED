@@ -1,0 +1,24 @@
+<map id="fl::Server::operator=" name="fl::Server::operator=">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,157,160,183"/>
+<area shape="rect" id="Node000002" href="$dc/d00/classfl_1_1_server_ae4f3955b12ab2ba328a610f37e5ee37d.html#ae4f3955b12ab2ba328a610f37e5ee37d" title="Default constructor." alt="" coords="242,5,373,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,155,138,104,170,74,207,48,238,33,241,38,209,52,174,78,141,108,96,159"/>
+<area shape="rect" id="Node000003" href="$dc/d00/classfl_1_1_server_a4b8b9821566f8389e43734b90ae36798.html#a4b8b9821566f8389e43734b90ae36798" title="Pull requests from source, process, queue responses." alt="" coords="505,107,617,132"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="97,155,144,121,174,104,207,91,246,83,286,78,367,79,441,88,503,101,502,106,440,93,366,84,287,84,247,88,209,97,177,109,147,126,100,159"/>
+<area shape="rect" id="Node000005" href="$dc/d00/classfl_1_1_server_a049bc5d74287eaf42b1b4b8086e7213d.html#a049bc5d74287eaf42b1b4b8086e7213d" title="Push queued responses to sink." alt="" coords="501,157,620,183"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="160,167,488,167,488,173,160,173"/>
+<area shape="rect" id="Node000006" href="$dc/d00/classfl_1_1_server_a55520babbe0af01fc78ddbc8a62c3632.html#a55520babbe0af01fc78ddbc8a62c3632" title="Set request handler." alt="" coords="455,208,667,233"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="161,175,441,205,441,211,160,181"/>
+<area shape="rect" id="Node000007" href="$dc/d00/classfl_1_1_server_a4751fa71311b9d42ff63581837ddbeab.html#a4751fa71311b9d42ff63581837ddbeab" title="Set request source callback." alt="" coords="458,257,663,283"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="121,180,209,206,336,233,455,253,454,258,335,238,207,211,120,185"/>
+<area shape="rect" id="Node000008" href="$dc/d00/classfl_1_1_server_aad9bda3fa471a457aef7fa4937827fce.html#aad9bda3fa471a457aef7fa4937827fce" title="Set response sink callback." alt="" coords="208,309,407,335"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="96,181,141,232,174,262,209,288,241,302,238,307,207,292,170,266,138,236,92,185"/>
+<area shape="rect" id="Node000009" href="$dc/d00/classfl_1_1_server_a29083a0d8c0d26ca3c6c4ab341a1b0cb.html#a29083a0d8c0d26ca3c6c4ab341a1b0cb" title="Main update: pull + push." alt="" coords="241,107,374,132"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="139,155,237,132,238,138,141,160"/>
+<area shape="rect" id="Node000004" href="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a" title=" " alt="" coords="715,233,805,259"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="618,124,643,131,668,142,692,159,713,180,745,220,741,223,709,183,688,164,665,147,642,136,616,129"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="661,231,701,236,701,241,661,236"/>
+<area shape="poly" id="edge8_Node000007_Node000004" title=" " alt="" coords="663,255,701,250,701,256,664,260"/>
+<area shape="poly" id="edge10_Node000008_Node000004" title=" " alt="" coords="407,323,532,317,600,308,666,293,698,280,727,264,730,269,701,285,667,298,601,313,532,322,407,328"/>
+<area shape="poly" id="edge12_Node000009_Node000003" title=" " alt="" coords="375,117,491,117,491,122,375,122"/>
+<area shape="poly" id="edge13_Node000009_Node000005" title=" " alt="" coords="372,130,489,153,488,158,371,135"/>
+</map>

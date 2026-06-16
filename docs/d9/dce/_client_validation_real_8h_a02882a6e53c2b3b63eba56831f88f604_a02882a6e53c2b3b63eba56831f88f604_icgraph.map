@@ -1,0 +1,28 @@
+<map id="show" name="show">
+<area shape="rect" id="Node000001" title=" " alt="" coords="643,120,699,145"/>
+<area shape="rect" id="Node000002" href="$d4/df9/_auto_research_test_8cpp_afaa70e9f2bc81a9ee2bb02e9237ff4d9.html#afaa70e9f2bc81a9ee2bb02e9237ff4d9" title=" " alt="" coords="433,31,561,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="647,112,622,90,593,71,561,58,563,53,596,66,626,86,650,108"/>
+<area shape="rect" id="Node000014" href="$d4/d1c/classfl_1_1_flow_field_af35912fb3a6212dc1a0f9713e02ed75b.html#af35912fb3a6212dc1a0f9713e02ed75b" title=" " alt="" coords="400,81,595,121"/>
+<area shape="poly" id="edge5_Node000001_Node000014" title=" " alt="" coords="629,128,594,121,595,116,630,123"/>
+<area shape="rect" id="Node000016" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a116882a08a4efc5c804d739c9355d1c6.html#a116882a08a4efc5c804d739c9355d1c6" title=" " alt="" coords="429,145,565,185"/>
+<area shape="poly" id="edge7_Node000001_Node000016" title=" " alt="" coords="630,143,566,155,565,149,629,138"/>
+<area shape="rect" id="Node000017" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a71543f73813054a556fd66205a74f25a.html#a71543f73813054a556fd66205a74f25a" title="Write the data to the LEDs managed by this controller." alt="" coords="425,209,569,249"/>
+<area shape="poly" id="edge8_Node000001_Node000017" title=" " alt="" coords="649,157,625,179,596,199,570,211,568,206,593,194,622,175,646,153"/>
+<area shape="rect" id="Node000003" href="$d4/df9/_auto_research_test_8cpp_ade4309c9f4171360f59ed787c7041584.html#ade4309c9f4171360f59ed787c7041584" title=" " alt="" coords="249,31,319,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="419,46,320,46,320,41,419,41"/>
+<area shape="rect" id="Node000004" href="$d4/df9/_auto_research_test_8cpp_aac567188ee44c45d15b20231ecff68c9.html#aac567188ee44c45d15b20231ecff68c9" title=" " alt="" coords="35,5,138,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="235,40,138,27,138,22,235,34"/>
+<area shape="rect" id="Node000013" href="$d4/df9/_auto_research_test_8cpp_ab5d3883aa989a0c1298af1a8a0d2851a.html#ab5d3883aa989a0c1298af1a8a0d2851a" title=" " alt="" coords="52,55,121,80"/>
+<area shape="poly" id="edge4_Node000003_Node000013" title=" " alt="" coords="235,52,122,66,121,61,235,47"/>
+<area shape="rect" id="Node000015" href="$d4/d72/_flow_field_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="259,88,309,113"/>
+<area shape="poly" id="edge6_Node000014_Node000015" title=" " alt="" coords="387,103,309,103,309,98,387,98"/>
+<area shape="rect" id="Node000018" href="$dd/dbb/class_c_fast_l_e_d_a93471b4babe96100496e8e25062cba3f.html#a93471b4babe96100496e8e25062cba3f" title="Update all our controllers with the current led colors, using the passed in brightness." alt="" coords="222,159,346,184"/>
+<area shape="poly" id="edge9_Node000017_Node000018" title=" " alt="" coords="411,208,332,187,333,182,413,203"/>
+<area shape="rect" id="Node000019" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a0fc5830eb1815a9268986bb46cb95972.html#a0fc5830eb1815a9268986bb46cb95972" title=" " alt="" coords="216,209,352,249"/>
+<area shape="poly" id="edge10_Node000017_Node000019" title=" " alt="" coords="412,231,352,231,352,226,412,226"/>
+<area shape="rect" id="Node000020" href="$d8/da0/classfl_1_1_c_l_e_d_controller_aefe2d04448733f36909d1dab7c5cb3e3.html#aefe2d04448733f36909d1dab7c5cb3e3" title="Clear out/zero out the given number of LEDs." alt="" coords="19,153,155,193"/>
+<area shape="poly" id="edge11_Node000019_Node000020" title=" " alt="" coords="202,208,154,195,156,189,203,203"/>
+<area shape="rect" id="Node000021" href="$d5/d8b/classfl_1_1_channel_a56c6fceae41ac78584e120f7e01f7aff.html#a56c6fceae41ac78584e120f7e01f7aff" title="Show the LEDs with optional brightness scaling." alt="" coords="5,217,168,243"/>
+<area shape="poly" id="edge13_Node000019_Node000021" title=" " alt="" coords="202,232,168,232,168,227,202,227"/>
+<area shape="poly" id="edge12_Node000020_Node000020" title=" " alt="" coords="120,141,108,134,87,131,68,133,57,138,52,144,55,152,49,153,47,143,53,134,66,128,87,126,110,129,123,136"/>
+</map>

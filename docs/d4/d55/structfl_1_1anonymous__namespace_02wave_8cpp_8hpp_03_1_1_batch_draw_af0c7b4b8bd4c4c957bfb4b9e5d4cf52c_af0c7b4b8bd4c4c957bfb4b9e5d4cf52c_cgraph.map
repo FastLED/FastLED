@@ -1,0 +1,7 @@
+<map id="fl::anonymous_namespace{wave::cpp::hpp}::BatchDraw::push" name="fl::anonymous_namespace{wave::cpp::hpp}::BatchDraw::push">
+<area shape="rect" id="Node000001" title="Add an LED to the current batch." alt="" coords="5,53,259,93"/>
+<area shape="rect" id="Node000002" href="$d4/d55/structfl_1_1anonymous__namespace_02wave_8cpp_8hpp_03_1_1_batch_draw_a67d5fbf1b06bd4a8b762f0b98cbfbe06.html#a67d5fbf1b06bd4a8b762f0b98cbfbe06" title="Process all accumulated entries and update LEDs." alt="" coords="307,5,521,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="258,52,293,47,294,52,259,57"/>
+<area shape="rect" id="Node000003" href="$d4/d55/structfl_1_1anonymous__namespace_02wave_8cpp_8hpp_03_1_1_batch_draw_a5e8bd4083f1fb87c419dafefdb42500c.html#a5e8bd4083f1fb87c419dafefdb42500c" title="Check if batch is full." alt="" coords="307,84,521,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="259,87,294,92,293,97,258,93"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="fxEngine" name="fxEngine">
+<area shape="rect" id="Node000001" title=" " alt="" coords="341,95,420,121"/>
+<area shape="rect" id="Node000002" href="$d3/da8/struct_audio_reactive_aacc80862b3b0403b4d05f6dab31ba236.html#aacc80862b3b0403b4d05f6dab31ba236" title=" " alt="" coords="104,5,293,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="347,90,292,60,263,48,265,43,294,55,350,86"/>
+<area shape="rect" id="Node000003" href="$d4/d06/curr_8h_abc951f5beb7dd71aed4d0a60a30ef5d0.html#abc951f5beb7dd71aed4d0a60a30ef5d0" title=" " alt="" coords="137,70,260,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="328,103,260,94,261,89,328,98"/>
+<area shape="rect" id="Node000005" href="$d6/d05/_animartrix_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="173,119,224,145"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="328,118,225,131,224,126,327,112"/>
+<area shape="rect" id="Node000006" href="$d6/d05/_animartrix_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="169,169,228,194"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="349,130,294,158,229,178,228,173,292,154,347,126"/>
+<area shape="rect" id="Node000004" href="$d4/d06/curr_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,70,56,95"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="124,85,56,85,56,80,124,80"/>
+</map>

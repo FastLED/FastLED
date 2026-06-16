@@ -1,0 +1,9 @@
+<map id="fl::CLEDController::getAdjustmentData" name="fl::CLEDController::getAdjustmentData">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,163,45"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_aac0e483e79124d23d3d1189e9301b740.html#aac0e483e79124d23d3d1189e9301b740" title="Get the combined brightness/color adjustment for this controller." alt="" coords="211,5,347,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="163,23,197,23,197,28,163,28"/>
+<area shape="rect" id="Node000003" href="$da/dd6/structfl_1_1_c_r_g_b_a86dcfb931c3d2fb58f823a7f06d9dbf4.html#a86dcfb931c3d2fb58f823a7f06d9dbf4" title="Calculates the combined color adjustment to the LEDs at a given scale, color correction,..." alt="" coords="395,13,609,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="347,23,381,23,381,28,347,28"/>
+<area shape="rect" id="Node000004" href="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" title="Default constructor." alt="" coords="657,13,777,38"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="610,23,644,23,644,28,610,28"/>
+</map>

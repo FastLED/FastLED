@@ -1,0 +1,25 @@
+digraph "fl/log/async_log_queue.h"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl/log/async_log_queue.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="High-performance ISR-safe async logging queue (SPSC ring buffer) - declarations only."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl/log/async_log_queue.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d7c/async__log__queue_8cpp_8hpp.html",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl/log/_build.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d6c/fl_2log_2__build_8cpp_8hpp.html",tooltip="Unity build header for fl/log/ directory."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl/_build.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/deb/fl_2__build_8cpp_8hpp.html",tooltip=" "];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl/build/fl.log+.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/ddd/fl_8log_09_8cpp.html",tooltip="Unity build: recursive includes from src/fl/log/."];
+  Node1 -> Node6 [id="edge5_Node000001_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl/log/async_logger.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/df1/async__logger_8h.html",tooltip="ISR-safe async logger using SPSC queue backend (zero heap allocation)"];
+  Node6 -> Node7 [id="edge6_Node000006_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl/log/async_logger.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/de0/async__logger_8cpp_8hpp.html",tooltip=" "];
+  Node7 -> Node3 [id="edge7_Node000007_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 -> Node8 [id="edge8_Node000006_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl/log/log.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dab/log_8cpp_8hpp.html",tooltip=" "];
+  Node8 -> Node3 [id="edge9_Node000008_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

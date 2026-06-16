@@ -1,0 +1,9 @@
+<map id="fl::net::ble::destroyTransport" name="fl::net::ble::destroyTransport">
+<area shape="rect" id="Node000001" title="Deinitialize BLE stack and free heap state." alt="" coords="661,13,865,38"/>
+<area shape="rect" id="Node000002" href="$db/d63/class_auto_research_remote_control_a5dc876faece5043348a46a5836c335c6.html#a5dc876faece5043348a46a5836c335c6" title="Process RPC system (pull + tick + push)" alt="" coords="403,5,613,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="647,28,613,28,613,23,647,23"/>
+<area shape="rect" id="Node000003" href="$d1/dc9/namespaceautoresearch_a14b9dde802b1a01ef0d7f9ea258bd7f6.html#a14b9dde802b1a01ef0d7f9ea258bd7f6" title="Setup async task for JSON&#45;RPC processing." alt="" coords="112,13,355,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="389,28,355,28,355,23,389,23"/>
+<area shape="rect" id="Node000004" href="$dd/dc8/_auto_research_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,13,64,38"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="98,28,64,28,64,23,98,23"/>
+</map>

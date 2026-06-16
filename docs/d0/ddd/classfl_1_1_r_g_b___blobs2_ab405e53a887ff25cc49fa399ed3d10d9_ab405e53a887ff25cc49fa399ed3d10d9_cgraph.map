@@ -1,0 +1,9 @@
+<map id="fl::RGB_Blobs2::draw" name="fl::RGB_Blobs2::draw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,163,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a0b5da884257d0f4003ead08f27915a2b.html#a0b5da884257d0f4003ead08f27915a2b" title=" " alt="" coords="211,5,279,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="163,15,197,15,197,21,163,21"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aaa77b1626998d6dc47d0e3245b1a3e4a.html#aaa77b1626998d6dc47d0e3245b1a3e4a" title=" " alt="" coords="327,5,461,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="279,15,313,15,313,21,279,21"/>
+<area shape="rect" id="Node000004" href="$df/d9e/namespacefl_1_1detail_af564e0d482e4925c603cb299c623c312.html#af564e0d482e4925c603cb299c623c312" title=" " alt="" coords="509,5,680,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="462,15,496,15,496,21,462,21"/>
+</map>

@@ -1,0 +1,28 @@
+<map id="fl::json::is_object" name="fl::json::is_object">
+<area shape="rect" id="Node000001" title=" " alt="" coords="847,155,977,180"/>
+<area shape="rect" id="Node000002" href="$d2/d78/classfl_1_1_screen_map_a9cc622d744a509ca7d0bd5a66bb4812d.html#a9cc622d744a509ca7d0bd5a66bb4812d" title=" " alt="" coords="387,104,567,129"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="877,150,840,133,798,119,739,110,678,106,567,109,567,104,678,101,739,105,799,114,842,128,879,146"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_aa0e5c1d0aacbd690c03dc20d746ca473.html#aa0e5c1d0aacbd690c03dc20d746ca473" title=" " alt="" coords="615,129,799,155"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="833,160,798,156,799,151,833,155"/>
+<area shape="rect" id="Node000010" href="$db/dfb/_auto_research_remote_8cpp_a34ed01c48f858d996b90eaf35a99dbc3.html#a34ed01c48f858d996b90eaf35a99dbc3" title="Print JSONL stream message directly to Serial, bypassing fl::println." alt="" coords="643,179,770,204"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="833,179,771,187,770,181,833,174"/>
+<area shape="rect" id="Node000013" href="$d2/d9f/classfl_1_1_w_l_e_d_a073f5478071f0b32ea9ac80cf3fd236c.html#a073f5478071f0b32ea9ac80cf3fd236c" title="Set WLED state from JSON object." alt="" coords="637,228,776,253"/>
+<area shape="poly" id="edge13_Node000001_Node000013" title=" " alt="" coords="872,188,800,218,759,230,757,225,798,213,870,183"/>
+<area shape="rect" id="Node000003" href="$d7/d35/_fx_sd_card_8ino_a31b8310bfbbef87ba721eb0104ea6119.html#a31b8310bfbbef87ba721eb0104ea6119" title=" " alt="" coords="138,5,313,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="444,99,395,71,338,44,300,33,302,28,340,40,397,66,446,94"/>
+<area shape="rect" id="Node000005" href="$d2/d78/classfl_1_1_screen_map_a1d131c7c809edbca9f87906ac79509c3.html#a1d131c7c809edbca9f87906ac79509c3" title=" " alt="" coords="135,55,315,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="397,104,290,83,291,77,398,99"/>
+<area shape="rect" id="Node000006" href="$df/d37/classfl_1_1_file_system_a76449b10863a3dee0631213504e817cc.html#a76449b10863a3dee0631213504e817cc" title=" " alt="" coords="116,104,335,129"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="373,119,335,119,335,114,373,114"/>
+<area shape="rect" id="Node000007" href="$df/d37/classfl_1_1_file_system_ad9bf0f8a5e0afcbbb85575c9f8785fc9.html#ad9bf0f8a5e0afcbbb85575c9f8785fc9" title=" " alt="" coords="112,153,339,179"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="398,135,291,156,290,151,397,129"/>
+<area shape="rect" id="Node000008" href="$d1/ddb/_chromancer_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="196,203,255,228"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="400,137,388,143,374,155,365,167,356,180,340,192,297,209,255,216,254,211,295,204,337,188,352,176,361,164,370,151,385,138,398,132"/>
+<area shape="rect" id="Node000004" href="$d7/d35/_fx_sd_card_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,5,64,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="124,21,64,21,64,15,124,15"/>
+<area shape="poly" id="edge9_Node000009_Node000002" title=" " alt="" coords="600,133,567,129,567,124,601,128"/>
+<area shape="rect" id="Node000011" href="$dd/dc8/_auto_research_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="451,153,502,179"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="629,186,502,171,502,166,630,180"/>
+<area shape="rect" id="Node000012" href="$dd/dc8/_auto_research_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="447,203,506,228"/>
+<area shape="poly" id="edge12_Node000010_Node000012" title=" " alt="" coords="630,202,507,215,506,210,629,197"/>
+</map>

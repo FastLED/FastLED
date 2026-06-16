@@ -1,0 +1,9 @@
+<map id="fl::spi::ParallelDevice::~ParallelDevice" name="fl::spi::ParallelDevice::~ParallelDevice">
+<area shape="rect" id="Node000001" title="Destructor &#45; releases hardware resources." alt="" coords="5,5,164,45"/>
+<area shape="rect" id="Node000002" href="$d7/de0/classfl_1_1spi_1_1_parallel_device_aa434f17460d7b1b7895203ae4bbfbdd6.html#aa434f17460d7b1b7895203ae4bbfbdd6" title="Shutdown hardware and release resources." alt="" coords="212,13,403,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,23,198,23,198,28,164,28"/>
+<area shape="rect" id="Node000003" href="$d7/de0/classfl_1_1spi_1_1_parallel_device_a55e8051874809d18ba44ba944bf0710c.html#a55e8051874809d18ba44ba944bf0710c" title="Wait for pending transmission to complete." alt="" coords="451,5,609,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="403,23,437,23,437,28,403,28"/>
+<area shape="rect" id="Node000004" href="$d7/de0/classfl_1_1spi_1_1_parallel_device_a03dc449fe80ed7de12a7f47d1671e416.html#a03dc449fe80ed7de12a7f47d1671e416" title="Check if device is initialized." alt="" coords="657,5,816,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="610,23,644,23,644,28,610,28"/>
+</map>

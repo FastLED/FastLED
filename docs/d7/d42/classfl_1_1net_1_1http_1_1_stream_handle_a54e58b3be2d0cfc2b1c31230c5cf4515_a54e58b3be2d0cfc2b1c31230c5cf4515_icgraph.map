@@ -1,0 +1,16 @@
+<map id="fl::net::http::StreamHandle::catch_" name="fl::net::http::StreamHandle::catch_">
+<area shape="rect" id="Node000001" title="Register callback for errors." alt="" coords="491,93,685,133"/>
+<area shape="rect" id="Node000002" href="$d7/d42/classfl_1_1net_1_1http_1_1_stream_handle_a1eacb2334461db8f8806ee33f4d1829c.html#a1eacb2334461db8f8806ee33f4d1829c" title=" " alt="" coords="248,93,443,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="477,125,443,125,443,120,477,120"/>
+<area shape="poly" id="edge3_Node000002_Node000001" title=" " alt="" coords="457,102,490,102,490,107,457,107"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="387,82,372,75,345,72,322,74,308,79,303,85,305,92,300,94,297,84,305,74,321,69,345,67,374,70,389,77"/>
+<area shape="rect" id="Node000003" href="$d7/d42/classfl_1_1net_1_1http_1_1_stream_handle_a64c49fc28003cd30678f7f512e7d1f52.html#a64c49fc28003cd30678f7f512e7d1f52" title=" " alt="" coords="5,29,200,69"/>
+<area shape="poly" id="edge4_Node000002_Node000003" title=" " alt="" coords="255,92,178,72,180,67,256,87"/>
+<area shape="rect" id="Node000004" href="$d7/d42/classfl_1_1net_1_1http_1_1_stream_handle_a2225a42bfd532c1a56baffc97c571059.html#a2225a42bfd532c1a56baffc97c571059" title="Register callback for intermediate stream data." alt="" coords="5,93,200,133"/>
+<area shape="poly" id="edge6_Node000002_Node000004" title=" " alt="" coords="234,125,200,125,200,120,234,120"/>
+<area shape="rect" id="Node000005" href="$d7/d42/classfl_1_1net_1_1http_1_1_stream_handle_aa4f3908d2e72ca70e505fdd4fce84856.html#aa4f3908d2e72ca70e505fdd4fce84856" title="Register callback for final result." alt="" coords="5,157,200,197"/>
+<area shape="poly" id="edge8_Node000002_Node000005" title=" " alt="" coords="284,140,201,163,199,158,283,135"/>
+<area shape="poly" id="edge5_Node000003_Node000003" title=" " alt="" coords="144,18,129,11,103,8,79,10,65,15,60,21,63,28,57,30,55,20,62,10,78,5,103,3,131,6,146,13"/>
+<area shape="poly" id="edge7_Node000004_Node000002" title=" " alt="" coords="214,102,248,102,248,107,214,107"/>
+<area shape="poly" id="edge9_Node000005_Node000002" title=" " alt="" coords="164,151,247,128,248,133,165,156"/>
+</map>

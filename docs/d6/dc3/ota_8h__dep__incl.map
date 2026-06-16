@@ -1,0 +1,15 @@
+<map id="fl/net/ota.h" name="fl/net/ota.h">
+<area shape="rect" id="Node000001" title="Minimal, batteries&#45;included OTA (Over&#45;The&#45;Air) update system for ESP32." alt="" coords="259,5,351,31"/>
+<area shape="rect" id="Node000002" href="$d9/da0/_o_t_a_8ino.html" title="Minimal OTA (Over&#45;The&#45;Air) update example for ESP32 @filter: (platform is esp32)" alt="" coords="5,79,235,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="267,38,166,81,164,76,265,33"/>
+<area shape="rect" id="Node000003" href="$d7/d97/net_8h.html" title="Umbrella header for fl::net — high&#45;level networking facade." alt="" coords="259,86,351,111"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="308,44,308,86,303,86,303,44"/>
+<area shape="rect" id="Node000004" href="$dd/d49/ota_8cpp_8hpp.html" title="OTA (Over&#45;The&#45;Air) update implementation &#45; wrapper around platform interface." alt="" coords="375,86,510,111"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="339,35,424,83,421,88,336,40"/>
+<area shape="rect" id="Node000005" href="$df/ddb/fl_2net_2__build_8cpp_8hpp.html" title="Unity build header for fl/net/ directory." alt="" coords="366,167,519,192"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="445,125,445,166,440,166,440,125"/>
+<area shape="rect" id="Node000006" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="300,240,428,265"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="422,203,379,242,375,238,418,199"/>
+<area shape="rect" id="Node000007" href="$d4/d79/fl_8net_09_8cpp.html" title="Unity build: recursive includes from src/fl/net/." alt="" coords="452,240,593,265"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="467,199,511,238,508,242,464,203"/>
+</map>

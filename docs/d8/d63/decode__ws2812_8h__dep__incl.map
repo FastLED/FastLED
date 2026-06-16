@@ -1,0 +1,9 @@
+<map id="fl/channels/rx/decode_ws2812.h" name="fl/channels/rx/decode_ws2812.h">
+<area shape="rect" id="Node000001" title="Shared 4&#45;phase WS2812 edge&#45;pair &#45;&gt; byte decoder (declaration)." alt="" coords="29,5,189,45"/>
+<area shape="rect" id="Node000002" href="$d9/db5/decode__ws2812_8cpp_8hpp.html" title="Shared 4&#45;phase WS2812 edge&#45;pair &#45;&gt; byte decoder (definition)." alt="" coords="29,93,189,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="111,59,111,93,106,93,106,59"/>
+<area shape="rect" id="Node000003" href="$d2/d8f/fl_2channels_2rx_2__build_8cpp_8hpp.html" title=" " alt="" coords="5,181,212,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="111,147,111,181,106,181,106,147"/>
+<area shape="rect" id="Node000004" href="$d1/d97/fl_2channels_2__build_8cpp_8hpp.html" title=" " alt="" coords="13,255,204,280"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="111,220,111,255,106,255,106,220"/>
+</map>

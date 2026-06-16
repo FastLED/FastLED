@@ -1,0 +1,14 @@
+<map id="fl::audio::detector::BuildupDetector::calculateEnergyTrend" name="fl::audio::detector::BuildupDetector::calculateEnergyTrend">
+<area shape="rect" id="Node000001" title=" " alt="" coords="697,71,900,125"/>
+<area shape="rect" id="Node000002" href="$db/d5d/classfl_1_1audio_1_1detector_1_1_buildup_detector_a86140aa6f54028822f8fdb3ad58da1df.html#a86140aa6f54028822f8fdb3ad58da1df" title=" " alt="" coords="435,5,646,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="683,72,645,62,647,57,685,66"/>
+<area shape="rect" id="Node000003" href="$db/d5d/classfl_1_1audio_1_1detector_1_1_buildup_detector_a95eca9735efc32b18255a9ba01380b8d.html#a95eca9735efc32b18255a9ba01380b8d" title=" " alt="" coords="196,78,384,118"/>
+<area shape="poly" id="edge7_Node000001_Node000003" title=" " alt="" coords="683,101,384,101,384,95,683,95"/>
+<area shape="rect" id="Node000005" href="$db/d5d/classfl_1_1audio_1_1detector_1_1_buildup_detector_acee1516847b0381cdff892780cb02932.html#acee1516847b0381cdff892780cb02932" title=" " alt="" coords="432,136,649,191"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="685,130,650,139,648,133,683,124"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="423,66,368,81,367,75,422,61"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="326,66,313,59,290,57,270,59,257,63,253,69,255,77,250,78,248,68,254,59,268,53,290,51,315,54,329,62"/>
+<area shape="rect" id="Node000004" href="$db/d5d/classfl_1_1audio_1_1detector_1_1_buildup_detector_a9cfcd4b63ec64b6c4fb0774b8d15bf4d.html#a9cfcd4b63ec64b6c4fb0774b8d15bf4d" title=" " alt="" coords="5,71,148,125"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="182,101,148,101,148,95,182,95"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="422,135,367,121,368,115,423,130"/>
+</map>

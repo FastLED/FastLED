@@ -1,0 +1,12 @@
+<map id="fl::audio::BeatDetectors::~BeatDetectors" name="fl::audio::BeatDetectors::~BeatDetectors">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,93,180,133"/>
+<area shape="rect" id="Node000002" href="$d7/dae/structfl_1_1audio_1_1_beat_detectors_a19cf7b1808f16de6c503d9c23b847da4.html#a19cf7b1808f16de6c503d9c23b847da4" title=" " alt="" coords="228,5,403,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="140,91,227,55,245,48,247,53,229,60,142,96"/>
+<area shape="rect" id="Node000003" href="$d7/dae/structfl_1_1audio_1_1_beat_detectors_abe42107745e95aa186819ad310d10b56.html#abe42107745e95aa186819ad310d10b56" title=" " alt="" coords="228,93,403,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="180,111,214,111,214,116,180,116"/>
+<area shape="rect" id="Node000005" href="$d7/dae/structfl_1_1audio_1_1_beat_detectors_a05b382499c8b1820c547bce5f26b4700.html#a05b382499c8b1820c547bce5f26b4700" title=" " alt="" coords="228,157,403,197"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="164,131,233,151,231,156,162,136"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="274,94,271,84,278,74,293,69,315,67,341,70,355,77,353,82,340,75,315,72,294,74,281,79,277,85,279,92"/>
+<area shape="rect" id="Node000004" href="$d7/dae/structfl_1_1audio_1_1_beat_detectors_ac77eec523973eaffd87bb5ed279e8aea.html#ac77eec523973eaffd87bb5ed279e8aea" title=" " alt="" coords="451,93,625,133"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="403,111,437,111,437,116,403,116"/>
+</map>

@@ -1,0 +1,21 @@
+<map id="fl::audio::detector::Pitch::updatePeriodRange" name="fl::audio::detector::Pitch::updatePeriodRange">
+<area shape="rect" id="Node000001" title=" " alt="" coords="607,157,804,197"/>
+<area shape="rect" id="Node000002" href="$db/d89/classfl_1_1audio_1_1detector_1_1_pitch_aeaabc8e931d21d5d5d720a291ac130a0.html#aeaabc8e931d21d5d5d720a291ac130a0" title=" " alt="" coords="398,49,534,89"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="656,153,558,104,528,92,530,87,560,99,658,148"/>
+<area shape="rect" id="Node000007" href="$db/d89/classfl_1_1audio_1_1detector_1_1_pitch_aa93bcf7aa00f8d17ec1da93b641d4a34.html#aa93bcf7aa00f8d17ec1da93b641d4a34" title=" " alt="" coords="373,113,559,153"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="593,159,559,153,560,148,594,154"/>
+<area shape="rect" id="Node000008" href="$db/d89/classfl_1_1audio_1_1detector_1_1_pitch_afc326bdc27303e756520ccd5d65080a1.html#afc326bdc27303e756520ccd5d65080a1" title=" " alt="" coords="375,201,557,241"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="594,201,557,207,556,202,593,195"/>
+<area shape="rect" id="Node000009" href="$db/d89/classfl_1_1audio_1_1detector_1_1_pitch_a0b0e2227620d1a07fa9b08f810df9f96.html#a0b0e2227620d1a07fa9b08f810df9f96" title=" " alt="" coords="381,265,551,305"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="658,207,560,256,530,268,528,263,558,251,656,202"/>
+<area shape="rect" id="Node000003" href="$db/d89/classfl_1_1audio_1_1detector_1_1_pitch_ac7cb844f809ef9a06cd0255bd2570fc5.html#ac7cb844f809ef9a06cd0255bd2570fc5" title=" " alt="" coords="189,5,325,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="384,55,325,42,326,37,385,50"/>
+<area shape="rect" id="Node000004" href="$db/d89/classfl_1_1audio_1_1detector_1_1_pitch_a6d63a505013cae6cc2d230fdf3504f70.html#a6d63a505013cae6cc2d230fdf3504f70" title=" " alt="" coords="189,93,325,133"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="385,89,326,102,325,96,384,84"/>
+<area shape="poly" id="edge6_Node000004_Node000004" title=" " alt="" coords="288,81,277,75,257,72,240,74,229,79,226,85,228,92,222,94,220,84,226,75,238,69,257,67,279,70,291,77"/>
+<area shape="rect" id="Node000005" href="$db/d89/classfl_1_1audio_1_1detector_1_1_pitch_a1802916544aa384cf5b56c39f883a2b2.html#a1802916544aa384cf5b56c39f883a2b2" title=" " alt="" coords="5,61,141,101"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="175,102,141,96,142,90,176,97"/>
+<area shape="rect" id="Node000006" href="$db/d89/classfl_1_1audio_1_1detector_1_1_pitch_a2049a792adf4ffe373daf98cb4dda3c1.html#a2049a792adf4ffe373daf98cb4dda3c1" title=" " alt="" coords="5,125,141,165"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="176,130,142,136,141,131,175,125"/>
+<area shape="poly" id="edge9_Node000008_Node000008" title=" " alt="" coords="501,190,489,183,466,180,446,182,434,187,430,193,432,200,427,202,425,192,431,182,445,177,466,175,490,178,504,185"/>
+</map>

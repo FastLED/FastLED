@@ -1,46 +1,26 @@
 <map id="loop" name="loop">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,344,56,369"/>
-<area shape="rect" id="Node000002" href="$da/dc7/advanced_8h_a96d9503945476f13a97c8f406269fcef.html#a96d9503945476f13a97c8f406269fcef" title=" " alt="" coords="303,5,393,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="30,344,35,305,47,252,68,194,83,166,102,140,144,101,193,71,243,47,289,31,290,36,245,52,196,75,148,106,106,144,88,168,73,196,52,254,41,306,36,344"/>
-<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="104,155,255,180"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="40,342,158,190,162,193,44,345"/>
-<area shape="rect" id="Node000012" href="$d5/d88/_fire_matrix_8h_a0c74bc312803a49e792bffc775a56220.html#a0c74bc312803a49e792bffc775a56220" title=" " alt="" coords="135,331,223,356"/>
-<area shape="poly" id="edge13_Node000001_Node000012" title=" " alt="" coords="56,352,121,346,121,351,56,357"/>
-<area shape="rect" id="Node000014" href="$d5/d88/_fire_matrix_8h_a593fb12ac1f018e17ad0f8ee5eeaa6ba.html#a593fb12ac1f018e17ad0f8ee5eeaa6ba" title=" " alt="" coords="117,393,241,419"/>
-<area shape="poly" id="edge15_Node000001_Node000014" title=" " alt="" coords="57,362,128,386,126,391,55,367"/>
-<area shape="rect" id="Node000022" href="$d8/dd0/_fire_cylinder_8h_a9b9d805245bf1d1789d4cf7a0b7693e8.html#a9b9d805245bf1d1789d4cf7a0b7693e8" title=" " alt="" coords="145,443,214,468"/>
-<area shape="poly" id="edge22_Node000001_Node000022" title=" " alt="" coords="44,368,70,398,105,428,133,441,131,446,103,432,66,402,40,372"/>
-<area shape="rect" id="Node000023" href="$d8/dd0/_fire_cylinder_8h_a0cfaf25385886642355a25f291ffd36b.html#a0cfaf25385886642355a25f291ffd36b" title=" " alt="" coords="136,492,223,517"/>
-<area shape="poly" id="edge23_Node000001_Node000023" title=" " alt="" coords="39,368,62,421,81,451,106,477,125,489,122,493,102,481,77,455,57,424,34,371"/>
-<area shape="poly" id="edge7_Node000003_Node000002" title=" " alt="" coords="190,153,246,93,301,40,307,36,310,40,304,44,250,97,194,156"/>
-<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="311,205,385,231"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="223,178,298,200,296,205,222,183"/>
-<area shape="rect" id="Node000007" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="647,181,744,207"/>
-<area shape="poly" id="edge8_Node000003_Node000007" title=" " alt="" coords="255,169,633,188,632,193,255,174"/>
-<area shape="rect" id="Node000008" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="597,231,793,256"/>
-<area shape="poly" id="edge12_Node000003_Node000008" title=" " alt="" coords="197,178,243,211,272,227,303,239,378,254,455,260,529,260,595,255,596,260,529,265,455,266,378,260,302,245,270,232,240,216,194,182"/>
-<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_ab169b38b75fd1ab29b3dc61a32497ff1.html#ab169b38b75fd1ab29b3dc61a32497ff1" title="Helper function to divide a number by 16, aka four logical shift right (LSR)&#39;s." alt="" coords="313,55,383,80"/>
-<area shape="poly" id="edge9_Node000003_Node000009" title=" " alt="" coords="199,152,301,89,309,84,312,89,304,94,202,157"/>
-<area shape="rect" id="Node000010" href="$d6/d19/group___linear_interpolation_gaf65357c7aeca9778e5a2f80a6bac2b5d.html#gaf65357c7aeca9778e5a2f80a6bac2b5d" title="Map from one full&#45;range 8&#45;bit value into a narrower range of 8&#45;bit values, possibly a range of hues." alt="" coords="319,104,377,129"/>
-<area shape="poly" id="edge10_Node000003_Node000010" title=" " alt="" coords="222,152,305,127,306,132,223,157"/>
-<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6" title=" " alt="" coords="454,205,537,231"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="385,215,440,215,440,221,385,221"/>
-<area shape="poly" id="edge5_Node000005_Node000007" title=" " alt="" coords="537,210,633,199,633,204,537,216"/>
-<area shape="poly" id="edge6_Node000005_Node000008" title=" " alt="" coords="537,221,584,227,583,232,537,226"/>
-<area shape="rect" id="Node000011" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="463,104,527,129"/>
-<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="378,114,449,114,449,119,378,119"/>
-<area shape="rect" id="Node000013" href="$d8/dd0/_fire_cylinder_8h_a470cec2dcb21e474c257065bb93bfcd1.html#a470cec2dcb21e474c257065bb93bfcd1" title=" " alt="" coords="314,307,382,332"/>
-<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="223,335,300,323,300,329,224,340"/>
-<area shape="rect" id="Node000015" href="$d5/d98/group___math_ga162169ac0c2d1f3d01eaff8f32e1b415.html#ga162169ac0c2d1f3d01eaff8f32e1b415" title="Take the absolute value of a signed 8&#45;bit uint8_t." alt="" coords="321,455,375,480"/>
-<area shape="poly" id="edge16_Node000014_Node000015" title=" " alt="" coords="222,416,256,427,310,449,308,454,254,433,221,421"/>
-<area shape="rect" id="Node000016" href="$d8/df9/group___noise_generation_ga46e9de1842d8977b77bee089d0f3b25c.html#ga46e9de1842d8977b77bee089d0f3b25c" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="309,504,387,529"/>
-<area shape="poly" id="edge17_Node000014_Node000016" title=" " alt="" coords="235,416,256,428,273,443,282,458,290,473,304,489,311,494,307,498,301,493,286,477,277,461,268,446,253,432,232,421"/>
-<area shape="rect" id="Node000019" href="$d8/dd0/_fire_cylinder_8h_acf92319b80354b342e7347b4187d8e16.html#acf92319b80354b342e7347b4187d8e16" title=" " alt="" coords="303,553,393,579"/>
-<area shape="poly" id="edge19_Node000014_Node000019" title=" " alt="" coords="239,417,256,428,269,442,276,456,283,483,288,511,294,525,305,539,309,543,305,547,301,542,290,527,283,512,278,484,271,458,264,445,253,432,236,421"/>
-<area shape="rect" id="Node000020" href="$d5/d98/group___math_gae261576a4c8155d6c0ba8615b2d2ecb3.html#gae261576a4c8155d6c0ba8615b2d2ecb3" title="Subtract one byte from another, saturating at 0x00." alt="" coords="317,356,379,381"/>
-<area shape="poly" id="edge20_Node000014_Node000020" title=" " alt="" coords="237,391,303,376,305,381,238,396"/>
-<area shape="rect" id="Node000021" href="$d8/dd0/_fire_cylinder_8h_a7b4981b519c086f0e47af6cb0e151437.html#a7b4981b519c086f0e47af6cb0e151437" title=" " alt="" coords="311,405,385,431"/>
-<area shape="poly" id="edge21_Node000014_Node000021" title=" " alt="" coords="242,408,298,412,297,417,241,413"/>
-<area shape="rect" id="Node000017" href="$d8/df9/group___noise_generation_ga810bdc406dcf8fd5b7add9041aa18abd.html#ga810bdc406dcf8fd5b7add9041aa18abd" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="441,504,549,529"/>
-<area shape="poly" id="edge18_Node000016_Node000017" title=" " alt="" coords="387,514,428,514,428,519,387,519"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,141,56,167"/>
+<area shape="rect" id="Node000002" href="$d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="104,5,239,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="35,140,59,92,78,64,102,40,109,35,112,39,106,44,82,67,64,94,39,142"/>
+<area shape="rect" id="Node000003" href="$d5/d88/_fire_matrix_8h_aa3b5ff96289668b51bfb9d352f27ff0a.html#aa3b5ff96289668b51bfb9d352f27ff0a" title=" " alt="" coords="127,55,215,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="42,139,69,114,103,89,114,83,116,88,105,94,72,118,46,143"/>
+<area shape="rect" id="Node000005" href="$d5/d88/_fire_matrix_8h_a593fb12ac1f018e17ad0f8ee5eeaa6ba.html#a593fb12ac1f018e17ad0f8ee5eeaa6ba" title=" " alt="" coords="109,104,233,129"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="55,145,109,130,111,136,57,150"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="134,177,209,203"/>
+<area shape="poly" id="edge9_Node000001_Node000011" title=" " alt="" coords="57,158,121,175,120,180,55,163"/>
+<area shape="rect" id="Node000012" href="$d8/dd0/_fire_cylinder_8h_aa3f463620d8c7f80b9532244d6632059.html#aa3f463620d8c7f80b9532244d6632059" title=" " alt="" coords="137,227,206,252"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="46,165,72,189,105,213,125,222,122,227,103,218,69,193,42,169"/>
+<area shape="rect" id="Node000013" href="$d8/dd0/_fire_cylinder_8h_a8ad2a8460d8423a3f7fdc23f7fb1910b.html#a8ad2a8460d8423a3f7fdc23f7fb1910b" title=" " alt="" coords="128,276,215,301"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="39,166,64,213,83,239,106,263,117,270,114,274,102,267,78,243,59,216,35,168"/>
+<area shape="rect" id="Node000004" href="$d8/dd0/_fire_cylinder_8h_a470cec2dcb21e474c257065bb93bfcd1.html#a470cec2dcb21e474c257065bb93bfcd1" title=" " alt="" coords="298,31,366,56"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="215,58,284,48,285,53,216,63"/>
+<area shape="rect" id="Node000006" href="$d8/df9/group___noise_generation_gaa452e57f154ab8d6d692375dba1ef5cb.html#gaa452e57f154ab8d6d692375dba1ef5cb" title=" " alt="" coords="293,80,371,105"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="233,105,279,98,280,103,234,110"/>
+<area shape="rect" id="Node000009" href="$d8/dd0/_fire_cylinder_8h_a148d5b071603b407f396609307344014.html#a148d5b071603b407f396609307344014" title=" " alt="" coords="287,129,377,155"/>
+<area shape="poly" id="edge7_Node000005_Node000009" title=" " alt="" coords="234,124,273,130,273,135,233,129"/>
+<area shape="rect" id="Node000010" href="$d8/dd0/_fire_cylinder_8h_a81ebe4d0bf62610d5afded1df20926ed.html#a81ebe4d0bf62610d5afded1df20926ed" title=" " alt="" coords="295,179,369,204"/>
+<area shape="poly" id="edge8_Node000005_Node000010" title=" " alt="" coords="212,127,240,138,298,169,295,174,238,143,210,132"/>
+<area shape="rect" id="Node000007" href="$d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59" title=" " alt="" coords="425,80,533,105"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="371,90,412,90,412,95,371,95"/>
+<area shape="poly" id="edge10_Node000011_Node000011" title=" " alt="" coords="148,178,143,169,145,159,155,153,171,151,191,154,199,163,195,166,188,159,171,156,157,158,150,163,148,168,152,176"/>
 </map>

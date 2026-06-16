@@ -1,0 +1,27 @@
+<map id="fl::anonymous_namespace{channel.cpp.hpp}::ReorderingPixelIteratorAny" name="fl::anonymous_namespace{channel.cpp.hpp}::ReorderingPixelIteratorAny">
+<area shape="rect" id="Node000001" title="Encapsulates pixel iterator construction with optional XYMap reordering." alt="" coords="1492,49,1715,103"/>
+<area shape="rect" id="Node000002" href="$dd/dd8/classfl_1_1_optional.html" title=" " alt="" coords="971,5,1173,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1187,34,1492,63,1492,68,1187,39"/>
+<area shape="rect" id="Node000003" href="$dd/dd8/classfl_1_1_optional.html" title=" " alt="" coords="368,30,499,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="513,38,970,25,970,31,513,43"/>
+<area shape="rect" id="Node000005" href="$dd/dd8/classfl_1_1_optional.html" title=" " alt="" coords="728,57,947,82"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="505,55,538,60,635,67,728,69,728,74,635,72,537,65,504,60"/>
+<area shape="rect" id="Node000004" href="$d3/dc7/classfl_1_1_pixel_iterator_any.html" title="Adapter class that creates a PixelIterator from any color order." alt="" coords="1201,106,1343,131"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="1357,105,1492,88,1492,93,1357,110"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="960,76,1174,99,1204,103,1203,109,1173,104,960,81"/>
+<area shape="rect" id="Node000006" href="$d7/d27/structfl_1_1_rgbw.html" title=" " alt="" coords="800,106,875,131"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="888,116,1201,116,1201,121,888,121"/>
+<area shape="rect" id="Node000007" href="$d4/df9/structfl_1_1_rgbww.html" title="Per&#45;strip RGBWW configuration." alt="" coords="795,155,880,181"/>
+<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="893,162,1021,153,1173,136,1214,129,1215,134,1174,141,1022,158,894,168"/>
+<area shape="rect" id="Node000008" href="$d7/df0/namespacefl_1_1colorimetric__detail.html#d1/d65/structfl_1_1colorimetric__detail_1_1_rgbcct_profile" title=" " alt="" coords="353,135,513,175"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="527,155,794,164,794,169,527,160"/>
+<area shape="rect" id="Node000010" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="759,219,916,259"/>
+<area shape="poly" id="edge9_Node000004_Node000010" title=" " alt="" coords="929,230,1047,212,1111,197,1172,178,1217,154,1253,129,1256,134,1220,159,1174,182,1112,203,1048,218,930,235"/>
+<area shape="rect" id="Node000011" href="$d0/dce/classfl_1_1_x_y_map.html" title=" " alt="" coords="392,199,475,225"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="489,213,759,231,758,236,488,218"/>
+<area shape="rect" id="Node000012" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="5,282,204,307"/>
+<area shape="poly" id="edge11_Node000010_Node000012" title=" " alt="" coords="218,283,758,242,759,247,218,289"/>
+<area shape="rect" id="Node000015" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="361,313,506,338"/>
+<area shape="poly" id="edge13_Node000015_Node000012" title=" " alt="" coords="218,303,361,316,360,321,218,308"/>
+<area shape="poly" id="edge12_Node000010_Node000015" title=" " alt="" coords="519,321,609,313,703,295,753,277,798,256,800,261,755,282,705,300,610,318,520,326"/>
+</map>

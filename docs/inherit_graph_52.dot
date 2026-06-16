@@ -6,5 +6,11 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::allocator\< T \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dcd/classfl_1_1allocator.html",tooltip=" "];
+  Node0 [id="Node000000",label="fixed_point_impl::type",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node0 -> Node1 [id="edge6_Node000000_Node000001",dir="back",color="darkgreen",style="solid",tooltip=" "];
+  Node1 [id="Node000001",label="fl::fixed_point\< IntBits,\l FracBits, Sign::SIGNED \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/da0/classfl_1_1fixed__point.html",tooltip=" "];
+  Node0 -> Node2 [id="edge7_Node000000_Node000002",dir="back",color="darkgreen",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::fixed_point\< IntBits,\l FracBits, Sign::UNSIGNED \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/da0/classfl_1_1fixed__point.html",tooltip=" "];
+  Node0 -> Node3 [id="edge8_Node000000_Node000003",dir="back",color="darkgreen",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::fixed_point\< IntBits,\l FracBits, S \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/da0/classfl_1_1fixed__point.html",tooltip=" "];
 }

@@ -1,0 +1,16 @@
+digraph "fl::Potentiometer"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl::Potentiometer",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mPot",fontcolor="grey" ];
+  Node2 [id="Node000002",label="fl::PotentiometerLowLevel",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$de/d22/classfl_1_1_potentiometer_low_level.html",tooltip=" "];
+  Node3 -> Node1 [id="edge2_Node000001_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mListener",fontcolor="grey" ];
+  Node3 [id="Node000003",label="fl::Potentiometer::\lListener",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$de/d29/structfl_1_1_potentiometer_1_1_listener.html",tooltip=" "];
+  Node4 -> Node3 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::EngineEvents::Listener",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/da2/classfl_1_1_engine_events_1_1_listener.html",tooltip=" "];
+  Node1 -> Node3 [id="edge4_Node000003_Node000001",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mOwner",fontcolor="grey" ];
+}

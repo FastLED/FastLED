@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fl/thread.h File Reference</title>
+<title>FastLED: fl/stl/thread.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -101,17 +101,20 @@ $(function(){initNavTree('db/dd5/thread_8h.html','../../'); initResizable(true);
 
 <div class="header">
   <div class="summary">
-<a href="#define-members">Macros</a>  </div>
+<a href="#namespaces">Namespaces</a> &#124;
+<a href="#define-members">Macros</a> &#124;
+<a href="#typedef-members">Typedefs</a>  </div>
   <div class="headertitle"><div class="title">thread.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="../../da/d99/has__include_8h_source.html">fl/has_include.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d5/d5e/thread__config_8h_source.html">fl/stl/thread_config.h</a>&quot;</code><br />
+<code>#include &quot;platforms/thread.h&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for thread.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d8/d2d/thread_8h__incl.svg" width="134" height="110"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d8/d2d/thread_8h__incl.svg" width="334" height="183"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 </div><div class="textblock"><div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> This graph shows which files directly or indirectly include this file:</div>
@@ -123,12 +126,28 @@ $(function(){initNavTree('db/dd5/thread_8h.html','../../'); initResizable(true);
 </div>
 <p><a href="../../db/dd5/thread_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d96/namespacefl_1_1this__thread.html">fl::this_thread</a></td></tr>
+<tr class="memdesc:d2/d96/namespacefl_1_1this__thread"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="../../d2/d96/namespacefl_1_1this__thread.html" title="this_thread namespace for thread-specific operations">this_thread</a> namespace for thread-specific operations <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a935cc865d343eadb007cdcc1c065fe38" id="r_a935cc865d343eadb007cdcc1c065fe38"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dd5/thread_8h_a935cc865d343eadb007cdcc1c065fe38.html#a935cc865d343eadb007cdcc1c065fe38">FASTLED_MULTITHREADED</a>&#160;&#160;&#160;0</td></tr>
-<tr class="separator:a935cc865d343eadb007cdcc1c065fe38"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a63ea788298020d207c89d81afd39683b" id="r_a63ea788298020d207c89d81afd39683b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dd5/thread_8h_a63ea788298020d207c89d81afd39683b.html#a63ea788298020d207c89d81afd39683b">FASTLED_USE_THREAD_LOCAL</a>&#160;&#160;&#160;<a class="el" href="../../db/dd5/thread_8h_a935cc865d343eadb007cdcc1c065fe38.html#a935cc865d343eadb007cdcc1c065fe38">FASTLED_MULTITHREADED</a></td></tr>
+<tr class="memitem:a63ea788298020d207c89d81afd39683b" id="r_a63ea788298020d207c89d81afd39683b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dd5/thread_8h_a63ea788298020d207c89d81afd39683b.html#a63ea788298020d207c89d81afd39683b">FASTLED_USE_THREAD_LOCAL</a>&#160;&#160;&#160;<a class="el" href="../../d5/d5e/thread__config_8h_a935cc865d343eadb007cdcc1c065fe38.html#a935cc865d343eadb007cdcc1c065fe38">FASTLED_MULTITHREADED</a></td></tr>
 <tr class="separator:a63ea788298020d207c89d81afd39683b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+Typedefs</h2></td></tr>
+<tr class="memitem:ac7786473cac1091981a6fe1e6606bb15" id="r_ac7786473cac1091981a6fe1e6606bb15"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ac7786473cac1091981a6fe1e6606bb15.html#ac7786473cac1091981a6fe1e6606bb15">fl::thread</a> = fl::platforms::thread</td></tr>
+<tr class="memdesc:ac7786473cac1091981a6fe1e6606bb15"><td class="mdescLeft">&#160;</td><td class="mdescRight">Thread abstraction for FastLED.  <br /></td></tr>
+<tr class="separator:ac7786473cac1091981a6fe1e6606bb15"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed204f2671d347be330609ba7d6f9bc8" id="r_aed204f2671d347be330609ba7d6f9bc8"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aed204f2671d347be330609ba7d6f9bc8.html#aed204f2671d347be330609ba7d6f9bc8">fl::thread_id</a> = fl::platforms::thread_id</td></tr>
+<tr class="memdesc:aed204f2671d347be330609ba7d6f9bc8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Thread ID type.  <br /></td></tr>
+<tr class="separator:aed204f2671d347be330609ba7d6f9bc8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -136,8 +155,8 @@ Macros</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../db/dd5/thread_8h.html">thread.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_0dd6897a8ae40540acd9d694849e950e.html">stl</a></li><li class="navelem"><a class="el" href="../../db/dd5/thread_8h.html">thread.h</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

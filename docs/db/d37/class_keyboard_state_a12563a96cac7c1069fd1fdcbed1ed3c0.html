@@ -119,17 +119,17 @@ $(function(){initNavTree('db/d37/class_keyboard_state_a12563a96cac7c1069fd1fdcbe
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00197">197</a> of file <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html">Keyboard.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  197</span>                                                             {</div>
-<div class="line"><span class="lineno">  198</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; <a class="code hl_variable" href="../../db/d37/class_keyboard_state_a1627e92082392d5690a41ff2058199b2.html#a1627e92082392d5690a41ff2058199b2">kNumKeys</a>; ++i) {</div>
-<div class="line"><span class="lineno">  199</span>    <a class="code hl_variable" href="../../db/d37/class_keyboard_state_ab1438e70fd677a21c3601343ac5664f3.html#ab1438e70fd677a21c3601343ac5664f3">keys_</a>[i].Update(now_ms, delta_ms, <a class="code hl_variable" href="../../db/d37/class_keyboard_state_a9d646ca8c490219be924db314c6e3e1c.html#a9d646ca8c490219be924db314c6e3e1c">sustain_pedal_</a>);</div>
-<div class="line"><span class="lineno">  200</span>  }</div>
-<div class="line"><span class="lineno">  201</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00198">198</a> of file <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html">Keyboard.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  198</span>                                                             {</div>
+<div class="line"><span class="lineno">  199</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; <a class="code hl_variable" href="../../db/d37/class_keyboard_state_a1627e92082392d5690a41ff2058199b2.html#a1627e92082392d5690a41ff2058199b2">kNumKeys</a>; ++i) {</div>
+<div class="line"><span class="lineno">  200</span>    <a class="code hl_variable" href="../../db/d37/class_keyboard_state_afefcfd0d49e4d7a07c483ba57de840e9.html#afefcfd0d49e4d7a07c483ba57de840e9">mKeys</a>[i].Update(now_ms, delta_ms, <a class="code hl_variable" href="../../db/d37/class_keyboard_state_ae3d2cb9b4628b2bf8af737813f07bb7a.html#ae3d2cb9b4628b2bf8af737813f07bb7a">mSustainPedal</a>);</div>
+<div class="line"><span class="lineno">  201</span>  }</div>
+<div class="line"><span class="lineno">  202</span>}</div>
 <div class="ttc" id="aclass_keyboard_state_a1627e92082392d5690a41ff2058199b2_html_a1627e92082392d5690a41ff2058199b2"><div class="ttname"><a href="../../db/d37/class_keyboard_state_a1627e92082392d5690a41ff2058199b2.html#a1627e92082392d5690a41ff2058199b2">KeyboardState::kNumKeys</a></div><div class="ttdeci">static const int kNumKeys</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00101">Keyboard.h:101</a></div></div>
-<div class="ttc" id="aclass_keyboard_state_a9d646ca8c490219be924db314c6e3e1c_html_a9d646ca8c490219be924db314c6e3e1c"><div class="ttname"><a href="../../db/d37/class_keyboard_state_a9d646ca8c490219be924db314c6e3e1c.html#a9d646ca8c490219be924db314c6e3e1c">KeyboardState::sustain_pedal_</a></div><div class="ttdeci">bool sustain_pedal_</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00102">Keyboard.h:102</a></div></div>
-<div class="ttc" id="aclass_keyboard_state_ab1438e70fd677a21c3601343ac5664f3_html_ab1438e70fd677a21c3601343ac5664f3"><div class="ttname"><a href="../../db/d37/class_keyboard_state_ab1438e70fd677a21c3601343ac5664f3.html#ab1438e70fd677a21c3601343ac5664f3">KeyboardState::keys_</a></div><div class="ttdeci">Key keys_[kNumKeys]</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00103">Keyboard.h:103</a></div></div>
+<div class="ttc" id="aclass_keyboard_state_ae3d2cb9b4628b2bf8af737813f07bb7a_html_ae3d2cb9b4628b2bf8af737813f07bb7a"><div class="ttname"><a href="../../db/d37/class_keyboard_state_ae3d2cb9b4628b2bf8af737813f07bb7a.html#ae3d2cb9b4628b2bf8af737813f07bb7a">KeyboardState::mSustainPedal</a></div><div class="ttdeci">bool mSustainPedal</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00102">Keyboard.h:102</a></div></div>
+<div class="ttc" id="aclass_keyboard_state_afefcfd0d49e4d7a07c483ba57de840e9_html_afefcfd0d49e4d7a07c483ba57de840e9"><div class="ttname"><a href="../../db/d37/class_keyboard_state_afefcfd0d49e4d7a07c483ba57de840e9.html#afefcfd0d49e4d7a07c483ba57de840e9">KeyboardState::mKeys</a></div><div class="ttdeci">Key mKeys[kNumKeys]</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00103">Keyboard.h:103</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00103">keys_</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00101">kNumKeys</a>, and <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00102">sustain_pedal_</a>.</p>
+<p class="reference">References <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00101">kNumKeys</a>, <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00103">mKeys</a>, and <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00102">mSustainPedal</a>.</p>
 
 </div>
 </div>
@@ -140,7 +140,7 @@ $(function(){initNavTree('db/d37/class_keyboard_state_a12563a96cac7c1069fd1fdcbe
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../db/d37/class_keyboard_state.html">KeyboardState</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

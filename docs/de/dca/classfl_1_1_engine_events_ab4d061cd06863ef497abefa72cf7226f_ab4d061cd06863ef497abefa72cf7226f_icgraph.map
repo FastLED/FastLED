@@ -1,0 +1,14 @@
+<map id="fl::EngineEvents::onBeginFrame" name="fl::EngineEvents::onBeginFrame">
+<area shape="rect" id="Node000001" title=" " alt="" coords="448,51,635,91"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_a47f2109e10010a77ba7a6db479d6b698.html#a47f2109e10010a77ba7a6db479d6b698" title="Manually trigger the begin frame event." alt="" coords="216,17,400,43"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="434,55,380,45,381,40,435,50"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a0fc5830eb1815a9268986bb46cb95972.html#a0fc5830eb1815a9268986bb46cb95972" title=" " alt="" coords="240,79,376,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="434,87,377,94,376,89,434,82"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_a93471b4babe96100496e8e25062cba3f.html#a93471b4babe96100496e8e25062cba3f" title="Update all our controllers with the current led colors, using the passed in brightness." alt="" coords="25,5,149,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="202,27,149,24,149,19,202,22"/>
+<area shape="rect" id="Node000005" href="$d8/da0/classfl_1_1_c_l_e_d_controller_aefe2d04448733f36909d1dab7c5cb3e3.html#aefe2d04448733f36909d1dab7c5cb3e3" title="Clear out/zero out the given number of LEDs." alt="" coords="19,79,155,119"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="226,102,155,102,155,97,226,97"/>
+<area shape="rect" id="Node000006" href="$d5/d8b/classfl_1_1_channel_a56c6fceae41ac78584e120f7e01f7aff.html#a56c6fceae41ac78584e120f7e01f7aff" title="Show the LEDs with optional brightness scaling." alt="" coords="5,144,168,169"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="227,123,137,147,136,141,226,118"/>
+<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="124,68,111,61,87,58,65,60,53,65,48,71,50,78,45,80,43,70,49,60,64,55,87,53,113,56,127,63"/>
+</map>

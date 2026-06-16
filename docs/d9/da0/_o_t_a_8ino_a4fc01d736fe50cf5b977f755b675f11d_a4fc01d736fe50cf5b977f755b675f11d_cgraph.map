@@ -1,0 +1,7 @@
+<map id="setup" name="setup">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,64,56"/>
+<area shape="rect" id="Node000002" href="$d1/d27/classfl_1_1sstream_ab9b0040db877961d943bbe8bd8760bc7.html#ab9b0040db877961d943bbe8bd8760bc7" title=" " alt="" coords="112,5,243,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="64,36,98,29,99,35,65,41"/>
+<area shape="rect" id="Node000003" href="$d1/dfb/colorutils_8h_afba4db18577c19e39c54f1c5793741b7.html#afba4db18577c19e39c54f1c5793741b7" title="Fill a range of LEDs with a solid color." alt="" coords="139,55,215,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="65,46,126,56,126,61,64,51"/>
+</map>

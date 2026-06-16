@@ -1,0 +1,11 @@
+<map id="fl::audio::detector::Downbeat::detectDownbeat" name="fl::audio::detector::Downbeat::detectDownbeat">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,77,216,117"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84" title=" " alt="" coords="324,5,385,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,74,263,39,310,26,311,31,265,45,165,79"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350" title=" " alt="" coords="315,55,394,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="216,81,302,71,302,76,216,87"/>
+<area shape="rect" id="Node000004" href="$df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_a382377178909b27271cc90f8d32e54ff.html#a382377178909b27271cc90f8d32e54ff" title="Returns true if downbeat was detected this frame." alt="" coords="264,105,445,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="216,106,251,110,250,115,216,111"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="321,169,388,195"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="160,114,265,154,309,168,307,173,263,159,158,119"/>
+</map>

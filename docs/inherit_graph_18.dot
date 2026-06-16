@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="Color3i",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d12/struct_color3i.html",tooltip=" "];
+  Node0 [id="Node000000",label="autoresearch::wave8\l_bench::Wave8ExpandResult",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d65/namespaceautoresearch_1_1wave8__bench.html#d5/da1/structautoresearch_1_1wave8__bench_1_1_wave8_expand_result",tooltip=" "];
 }

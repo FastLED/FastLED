@@ -1,0 +1,7 @@
+<map id="fl::millis64" name="fl::millis64">
+<area shape="rect" id="Node000001" title="64&#45;bit millisecond timer &#45; returns milliseconds since system startup without wraparound" alt="" coords="5,29,96,55"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="28,30,24,21,26,11,35,5,51,3,69,6,77,14,73,18,66,11,51,8,37,10,30,14,29,20,33,28"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="144,29,219,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="96,39,131,39,131,45,96,45"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="159,30,154,21,157,11,166,5,181,3,199,6,207,14,203,18,197,11,181,8,168,10,161,14,160,20,164,28"/>
+</map>

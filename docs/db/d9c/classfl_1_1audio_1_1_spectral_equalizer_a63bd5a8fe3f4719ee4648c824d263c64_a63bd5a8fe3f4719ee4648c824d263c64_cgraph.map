@@ -1,0 +1,14 @@
+<map id="fl::audio::SpectralEqualizer::configure" name="fl::audio::SpectralEqualizer::configure">
+<area shape="rect" id="Node000001" title="Configure the spectral equalizer This calculates per&#45;band gain multipliers based on the selected curv..." alt="" coords="5,29,200,69"/>
+<area shape="poly" id="edge7_Node000001_Node000001" title=" " alt="" coords="57,30,55,20,62,10,78,5,103,3,131,6,146,13,144,18,129,11,103,8,79,10,65,15,60,21,63,28"/>
+<area shape="rect" id="Node000002" href="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a35ee44583dde1fd3908700b39aa5a165.html#a35ee44583dde1fd3908700b39aa5a165" title=" " alt="" coords="248,29,443,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,56,234,56,234,61,200,61"/>
+<area shape="rect" id="Node000003" href="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a52e8f221c9fe9cba4ac96f387cc1f726.html#a52e8f221c9fe9cba4ac96f387cc1f726" title="Calculate gains based on current curve." alt="" coords="248,93,443,133"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="180,67,257,87,255,92,179,72"/>
+<area shape="poly" id="edge2_Node000002_Node000001" title=" " alt="" coords="248,43,214,43,214,38,248,38"/>
+<area shape="rect" id="Node000004" href="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aa6f94ad4e418f660b71ac6e99fc0ba14.html#aa6f94ad4e418f660b71ac6e99fc0ba14" title="Calculate A&#45;weighting gains." alt="" coords="491,64,689,104"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="443,99,477,95,477,100,443,104"/>
+<area shape="rect" id="Node000005" href="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a98b8eafa2abe451f740b05be2260bdbb.html#a98b8eafa2abe451f740b05be2260bdbb" title="Calculate flat gains (all 1.0)" alt="" coords="737,93,932,133"/>
+<area shape="poly" id="edge6_Node000003_Node000005" title=" " alt="" coords="443,113,491,113,689,113,724,113,724,118,689,119,491,119,443,118"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="690,93,724,97,723,103,689,99"/>
+</map>

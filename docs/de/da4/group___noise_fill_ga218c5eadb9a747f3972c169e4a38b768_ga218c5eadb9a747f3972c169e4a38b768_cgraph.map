@@ -1,0 +1,14 @@
+<map id="fill_2dnoise8" name="fill_2dnoise8">
+<area shape="rect" id="Node000001" title="Fill an LED matrix with random colors, using 8&#45;bit noise." alt="" coords="5,79,109,104"/>
+<area shape="rect" id="Node000002" href="$d1/dfb/colorutils_8h_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="195,5,254,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="81,76,156,40,181,30,183,35,158,44,83,81"/>
+<area shape="rect" id="Node000003" href="$de/da4/group___noise_fill_gac5e4db886061d72b10ca82cf52aa4d7c.html#gac5e4db886061d72b10ca82cf52aa4d7c" title="Fill a 2D 8&#45;bit buffer with noise, using inoise8()" alt="" coords="157,79,292,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="109,89,144,89,144,94,109,94"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a44a195439ac7fa303b4b0b0c956605be.html#a44a195439ac7fa303b4b0b0c956605be" title=" " alt="" coords="179,128,271,153"/>
+<area shape="poly" id="edge6_Node000001_Node000008" title=" " alt="" coords="102,101,168,121,167,126,100,107"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="199,80,194,70,197,61,207,54,225,52,245,56,254,64,250,68,243,60,225,57,209,59,201,64,199,70,204,77"/>
+<area shape="rect" id="Node000004" href="$d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" title=" " alt="" coords="340,79,409,104"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="292,89,326,89,326,94,292,94"/>
+<area shape="rect" id="Node000005" href="$d8/d5c/group___noise_gaa3db0f2f3777cf5bb7a4dd1359dba4fe.html#gaa3db0f2f3777cf5bb7a4dd1359dba4fe" title=" " alt="" coords="457,79,557,104"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="409,89,443,89,443,94,409,94"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="fl::validation::testRxChannel" name="fl::validation::testRxChannel">
+<area shape="rect" id="Node000001" title="Test RX channel with manual GPIO toggle pattern." alt="" coords="269,5,476,31"/>
+<area shape="rect" id="Node000002" href="$d7/d5f/_auto_research_helpers_8cpp_aec5c2c23f8a1e895555f21f61b66b74e.html#aec5c2c23f8a1e895555f21f61b66b74e" title="Test RX channel with manual GPIO toggle." alt="" coords="104,5,221,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="256,21,221,21,221,15,256,15"/>
+<area shape="rect" id="Node000003" href="$dd/dc8/_auto_research_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,5,56,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="90,21,56,21,56,15,90,15"/>
+</map>

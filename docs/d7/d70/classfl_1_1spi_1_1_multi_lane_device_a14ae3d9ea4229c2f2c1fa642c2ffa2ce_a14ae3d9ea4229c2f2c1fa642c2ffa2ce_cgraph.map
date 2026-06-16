@@ -1,0 +1,11 @@
+<map id="fl::spi::MultiLaneDevice::MultiLaneDevice" name="fl::spi::MultiLaneDevice::MultiLaneDevice">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,23,180,63"/>
+<area shape="rect" id="Node000002" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_ab88d95033af8f217808ba3b05dc823eb.html#ab88d95033af8f217808ba3b05dc823eb" title="Construct multi&#45;lane device." alt="" coords="228,23,403,63"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,41,214,41,214,46,180,46"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a3fd92c727664a77396403265415789d3.html#a3fd92c727664a77396403265415789d3" title=" " alt="" coords="465,5,591,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="402,30,451,24,452,30,403,36"/>
+<area shape="rect" id="Node000005" href="$d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c" title=" " alt="" coords="451,55,605,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="403,51,438,54,437,60,402,56"/>
+<area shape="rect" id="Node000004" href="$da/d3c/namespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259.html#a0bddf371925d8c4e94b88e9d7b35d259" title=" " alt="" coords="653,5,757,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="591,15,639,15,639,21,591,21"/>
+</map>

@@ -1,0 +1,6 @@
+<map id="CMinWait::mark" name="CMinWait::mark">
+<area shape="rect" id="Node000001" title="Reset the timestamp that marks the start of the wait period." alt="" coords="5,29,132,55"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a95a89c7ba649b9bd2c9136c0f517d82f.html#a95a89c7ba649b9bd2c9136c0f517d82f" title="Universal microsecond timer &#45; returns microseconds since system startup." alt="" coords="180,29,263,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="132,39,166,39,166,45,132,45"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="196,31,190,21,193,11,204,5,221,3,242,6,251,15,248,19,240,11,221,8,206,10,197,15,196,20,200,28"/>
+</map>

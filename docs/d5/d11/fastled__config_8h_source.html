@@ -106,45 +106,49 @@ $(function(){initNavTree('d5/d11/fastled__config_8h_source.html','../../'); init
 <a href="../../d5/d11/fastled__config_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment">// #define FASTLED_FORCE_SOFTWARE_PINS</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment">// #define FASTLED_FORCE_SOFTWARE_SPI</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment">// #define FASTLED_ALLOW_INTERRUPTS 1</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment">// #define FASTLED_ALLOW_INTERRUPTS 0</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#if defined(FASTLED_STUB_IMPL) || defined(FL_IS_WASM)</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">    #define FASTLED_ALL_PINS_VALID</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">// #define FASTLED_FORCE_SOFTWARE_PINS</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment">// #define FASTLED_FORCE_SOFTWARE_SPI</span></div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="comment">// #define FASTLED_NOISE_ALLOW_AVERAGE_TO_OVERFLOW 0</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="comment">// #define FASTLED_NOISE_ALLOW_AVERAGE_TO_OVERFLOW 1</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span></div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="../../d5/d11/fastled__config_8h_a07fe5e89a10e1d68a2dda7fd8b15e51d.html#a07fe5e89a10e1d68a2dda7fd8b15e51d">   39</a></span><span class="preprocessor">#define FASTLED_SCALE8_FIXED 1</span></div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="comment">// #define FASTLED_SCALE8_FIXED 0</span></div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="../../d5/d11/fastled__config_8h_aa5bc0db0ed4093ec81a2bf14c790fe22.html#aa5bc0db0ed4093ec81a2bf14c790fe22">   49</a></span><span class="preprocessor">#define FASTLED_BLEND_FIXED 1</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="comment">// #define FASTLED_BLEND_FIXED 0</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span></div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="../../d5/d11/fastled__config_8h_a514a1a03ad84981f78abaae386c0531b.html#a514a1a03ad84981f78abaae386c0531b">   59</a></span><span class="preprocessor">#define FASTLED_NOISE_FIXED 1</span></div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="comment">//#define FASTLED_NOISE_FIXED 0</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span></div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="preprocessor">#ifndef FASTLED_INTERRUPT_RETRY_COUNT</span></div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="../../d5/d11/fastled__config_8h_ada042072323051a75cb6627b47678771.html#ada042072323051a75cb6627b47678771">   66</a></span><span class="preprocessor">#define FASTLED_INTERRUPT_RETRY_COUNT 2</span></div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment">// #define FASTLED_ALLOW_INTERRUPTS 1</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment">// #define FASTLED_ALLOW_INTERRUPTS 0</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="comment">// #define FASTLED_NOISE_ALLOW_AVERAGE_TO_OVERFLOW 0</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="comment">// #define FASTLED_NOISE_ALLOW_AVERAGE_TO_OVERFLOW 1</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="../../d5/d11/fastled__config_8h_a07fe5e89a10e1d68a2dda7fd8b15e51d.html#a07fe5e89a10e1d68a2dda7fd8b15e51d">   46</a></span><span class="preprocessor">#define FASTLED_SCALE8_FIXED 1</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="comment">// #define FASTLED_SCALE8_FIXED 0</span></div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="../../d5/d11/fastled__config_8h_aa5bc0db0ed4093ec81a2bf14c790fe22.html#aa5bc0db0ed4093ec81a2bf14c790fe22">   56</a></span><span class="preprocessor">#define FASTLED_BLEND_FIXED 1</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="comment">// #define FASTLED_BLEND_FIXED 0</span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="../../d5/d11/fastled__config_8h_a514a1a03ad84981f78abaae386c0531b.html#a514a1a03ad84981f78abaae386c0531b">   66</a></span><span class="preprocessor">#define FASTLED_NOISE_FIXED 1</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="comment">//#define FASTLED_NOISE_FIXED 0</span></div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span></div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="comment">//#define FASTLED_USE_GLOBAL_BRIGHTNESS 1</span></div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="comment">// The defines are used for Doxygen documentation generation.</span></div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="comment">// They&#39;re commented out above and repeated here so the Doxygen parser</span></div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="comment">// will be able to find them. They will not affect your own configuration, </span></div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="comment">// and you do *NOT* need to modify them.</span></div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="preprocessor">#ifdef FASTLED_DOXYGEN</span></div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="../../d5/d11/fastled__config_8h_a6c54c7b9cee4328738f6cdf8e69b67ec.html#a6c54c7b9cee4328738f6cdf8e69b67ec">   81</a></span><span class="preprocessor">#define FASTLED_FORCE_SOFTWARE_PINS</span></div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno"><a class="line" href="../../d5/d11/fastled__config_8h_a8913ec6850b6d04b394d683950ca97a5.html#a8913ec6850b6d04b394d683950ca97a5">   82</a></span><span class="preprocessor">#define FASTLED_FORCE_SOFTWARE_SPI</span></div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="../../d5/d11/fastled__config_8h_a8b8054ea110c568ca88b250762ae4af9.html#a8b8054ea110c568ca88b250762ae4af9">   83</a></span><span class="preprocessor">#define FASTLED_ALLOW_INTERRUPTS</span></div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="../../d5/d11/fastled__config_8h_ad041a1dbe27ca518810d59a2d126363b.html#ad041a1dbe27ca518810d59a2d126363b">   84</a></span><span class="preprocessor">#define FASTLED_NOISE_ALLOW_AVERAGE_TO_OVERFLOW 0</span></div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="preprocessor">#define FASTLED_INTERRUPT_RETRY_COUNT 2</span></div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno"><a class="line" href="../../d5/d11/fastled__config_8h_a0577bf1839c0eccaa2724062887938e2.html#a0577bf1839c0eccaa2724062887938e2">   86</a></span><span class="preprocessor">#define FASTLED_USE_GLOBAL_BRIGHTNESS 0</span></div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="preprocessor">#ifndef FASTLED_INTERRUPT_RETRY_COUNT</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="../../d5/d11/fastled__config_8h_ada042072323051a75cb6627b47678771.html#ada042072323051a75cb6627b47678771">   73</a></span><span class="preprocessor">#define FASTLED_INTERRUPT_RETRY_COUNT 2</span></div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="comment">//#define FASTLED_USE_GLOBAL_BRIGHTNESS 1</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span><span class="comment">// The defines are used for Doxygen documentation generation.</span></div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span><span class="comment">// They&#39;re commented out above and repeated here so the Doxygen parser</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="comment">// will be able to find them. They will not affect your own configuration, </span></div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="comment">// and you do *NOT* need to modify them.</span></div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><span class="preprocessor">#ifdef FASTLED_DOXYGEN</span></div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="../../d5/d11/fastled__config_8h_a6c54c7b9cee4328738f6cdf8e69b67ec.html#a6c54c7b9cee4328738f6cdf8e69b67ec">   88</a></span><span class="preprocessor">#define FASTLED_FORCE_SOFTWARE_PINS</span></div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="../../d5/d11/fastled__config_8h_a8913ec6850b6d04b394d683950ca97a5.html#a8913ec6850b6d04b394d683950ca97a5">   89</a></span><span class="preprocessor">#define FASTLED_FORCE_SOFTWARE_SPI</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="../../d5/d11/fastled__config_8h_a8b8054ea110c568ca88b250762ae4af9.html#a8b8054ea110c568ca88b250762ae4af9">   90</a></span><span class="preprocessor">#define FASTLED_ALLOW_INTERRUPTS</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno"><a class="line" href="../../d5/d11/fastled__config_8h_ad041a1dbe27ca518810d59a2d126363b.html#ad041a1dbe27ca518810d59a2d126363b">   91</a></span><span class="preprocessor">#define FASTLED_NOISE_ALLOW_AVERAGE_TO_OVERFLOW 0</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span><span class="preprocessor">#define FASTLED_INTERRUPT_RETRY_COUNT 2</span></div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="../../d5/d11/fastled__config_8h_a0577bf1839c0eccaa2724062887938e2.html#a0577bf1839c0eccaa2724062887938e2">   93</a></span><span class="preprocessor">#define FASTLED_USE_GLOBAL_BRIGHTNESS 0</span></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -152,7 +156,7 @@ $(function(){initNavTree('d5/d11/fastled__config_8h_source.html','../../'); init
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d5/d11/fastled__config_8h.html">fastled_config.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:19 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:06:58 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

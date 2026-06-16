@@ -1,0 +1,13 @@
+<map id="fl::Pacifica::pacifica_one_layer" name="fl::Pacifica::pacifica_one_layer">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,47,151,87"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="199,55,349,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="151,65,185,65,185,70,151,70"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="397,5,472,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="315,52,383,31,385,36,317,57"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_ab169b38b75fd1ab29b3dc61a32497ff1.html#ab169b38b75fd1ab29b3dc61a32497ff1" title="Helper function to divide a number by 16, aka four logical shift right (LSR)&#39;s." alt="" coords="399,55,470,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="350,65,385,65,385,70,350,70"/>
+<area shape="rect" id="Node000006" href="$d6/d19/group___linear_interpolation_gaeb360269bf892a49b96b9ea8248ea8a7.html#gaeb360269bf892a49b96b9ea8248ea8a7" title="Map from one full&#45;range 8&#45;bit value into a narrower range of 8&#45;bit values, possibly a range of hues." alt="" coords="405,104,464,129"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="317,77,393,101,391,106,315,83"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6" title=" " alt="" coords="520,5,603,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="473,15,506,15,506,21,473,21"/>
+</map>

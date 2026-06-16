@@ -1,0 +1,10 @@
+<map id="fl::s16x16::fract" name="fl::s16x16::fract">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,128,55"/>
+<area shape="rect" id="Node000002" href="$d9/d9f/classfl_1_1s16x16_a5e82494e286448e4cad2de1b302b9168.html#a5e82494e286448e4cad2de1b302b9168" title=" " alt="" coords="379,5,519,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="128,36,365,21,365,26,128,41"/>
+<area shape="rect" id="Node000003" href="$d9/d9f/classfl_1_1s16x16_a9c7a5411b60510e5a513c5d1e305720d.html#a9c7a5411b60510e5a513c5d1e305720d" title=" " alt="" coords="176,55,331,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="129,48,162,52,162,58,128,53"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="304,52,384,32,385,37,305,57"/>
+<area shape="rect" id="Node000004" href="$d9/d9f/classfl_1_1s16x16_aa048b427f50f28993a67941e0f303a65.html#aa048b427f50f28993a67941e0f303a65" title=" " alt="" coords="390,55,507,80"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="331,65,376,65,376,70,331,70"/>
+</map>

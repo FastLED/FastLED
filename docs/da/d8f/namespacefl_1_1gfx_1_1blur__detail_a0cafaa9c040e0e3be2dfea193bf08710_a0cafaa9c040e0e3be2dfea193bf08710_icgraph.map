@@ -1,0 +1,33 @@
+<map id="fl::gfx::blur_detail::vpass_full" name="fl::gfx::blur_detail::vpass_full">
+<area shape="rect" id="Node000001" title=" " alt="" coords="772,221,908,261"/>
+<area shape="rect" id="Node000002" href="$d0/d8b/namespacefl_1_1gfx_a9c2302b4a1a567e89ab63f5ddc3b7532.html#a9c2302b4a1a567e89ab63f5ddc3b7532" title=" " alt="" coords="543,228,724,253"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="758,243,724,243,724,238,758,238"/>
+<area shape="rect" id="Node000003" href="$d0/d8b/namespacefl_1_1gfx_a773e8c5d88d58ddd941bdfb1fe1043cf.html#a773e8c5d88d58ddd941bdfb1fe1043cf" title="Higher&#45;precision dim overload (UNORM16)." alt="" coords="302,179,454,204"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="553,228,444,207,445,201,554,223"/>
+<area shape="rect" id="Node000004" href="$d0/d8b/namespacefl_1_1gfx_a2d0276b48f273dfb519f75e12846b0d4.html#a2d0276b48f273dfb519f75e12846b0d4" title="Compile&#45;time Gaussian blur with independent H/V radii." alt="" coords="302,228,454,253"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="529,243,454,243,454,238,529,238"/>
+<area shape="rect" id="Node000015" href="$d0/d8b/namespacefl_1_1gfx_afc0e7645d38e1c662353ef960797499e.html#afc0e7645d38e1c662353ef960797499e" title=" " alt="" coords="261,495,495,520"/>
+<area shape="poly" id="edge13_Node000002_Node000015" title=" " alt="" coords="612,265,393,496,389,493,608,262"/>
+<area shape="rect" id="Node000005" href="$d1/d1d/_blur_benchmark_8ino_abfcc7882a8861616eb741fd94d970aa9.html#abfcc7882a8861616eb741fd94d970aa9" title=" " alt="" coords="79,5,140,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="288,235,260,217,243,196,235,173,235,129,234,85,227,64,211,44,196,33,177,26,140,20,141,15,179,20,198,28,215,40,232,62,240,84,240,129,240,172,247,193,263,213,291,230"/>
+<area shape="rect" id="Node000007" href="$d0/d8b/namespacefl_1_1gfx_a398db03848b3dac5189507a2c7913830.html#a398db03848b3dac5189507a2c7913830" title="Convenience overload with no dimming." alt="" coords="33,55,185,80"/>
+<area shape="poly" id="edge5_Node000004_Node000007" title=" " alt="" coords="287,233,260,217,246,202,239,186,235,154,231,122,224,108,212,93,184,78,187,73,215,89,229,105,236,121,240,153,244,184,250,199,263,213,290,229"/>
+<area shape="rect" id="Node000008" href="$d0/d8b/namespacefl_1_1gfx_a5b37407558051b83c4be485658e41e2f.html#a5b37407558051b83c4be485658e41e2f" title=" " alt="" coords="33,104,185,129"/>
+<area shape="poly" id="edge6_Node000004_Node000008" title=" " alt="" coords="287,231,260,217,242,199,235,179,228,160,212,143,184,129,187,125,215,139,232,157,240,177,247,196,263,213,290,227"/>
+<area shape="rect" id="Node000009" href="$de/d5c/structfl_1_1gfx_1_1_canvas_a1c5611dcf8d5e2350fa0275d3caaabda.html#a1c5611dcf8d5e2350fa0275d3caaabda" title=" " alt="" coords="5,153,213,179"/>
+<area shape="poly" id="edge7_Node000004_Node000009" title=" " alt="" coords="291,227,260,218,236,205,212,192,176,181,177,176,214,188,239,200,262,213,292,222"/>
+<area shape="rect" id="Node000010" href="$de/d5c/structfl_1_1gfx_1_1_canvas_a759c2ed1098af7351c242f4982488606.html#a759c2ed1098af7351c242f4982488606" title=" " alt="" coords="5,203,213,228"/>
+<area shape="poly" id="edge8_Node000004_Node000010" title=" " alt="" coords="288,235,213,228,214,222,289,230"/>
+<area shape="rect" id="Node000011" href="$de/d5c/structfl_1_1gfx_1_1_canvas_aeddb2920f89f4e87e8d7a7eee6071d84.html#aeddb2920f89f4e87e8d7a7eee6071d84" title=" " alt="" coords="5,252,213,277"/>
+<area shape="poly" id="edge9_Node000004_Node000011" title=" " alt="" coords="289,251,214,258,213,253,288,246"/>
+<area shape="rect" id="Node000012" href="$d5/de3/structfl_1_1gfx_1_1_canvas_mapped_a962ec29d733754201d27e4d571111044.html#a962ec29d733754201d27e4d571111044" title=" " alt="" coords="26,302,193,342"/>
+<area shape="poly" id="edge10_Node000004_Node000012" title=" " alt="" coords="323,260,177,304,175,299,321,255"/>
+<area shape="rect" id="Node000013" href="$d5/de3/structfl_1_1gfx_1_1_canvas_mapped_a15dde4d06dbfa19dcde47d5bd51f287a.html#a15dde4d06dbfa19dcde47d5bd51f287a" title=" " alt="" coords="26,366,193,406"/>
+<area shape="poly" id="edge11_Node000004_Node000013" title=" " alt="" coords="352,265,292,310,215,356,186,368,184,363,212,352,289,306,349,260"/>
+<area shape="rect" id="Node000014" href="$d5/de3/structfl_1_1gfx_1_1_canvas_mapped_a39c7309c7f6df84ef72fae885b91ba0c.html#a39c7309c7f6df84ef72fae885b91ba0c" title=" " alt="" coords="26,430,193,470"/>
+<area shape="poly" id="edge12_Node000004_Node000014" title=" " alt="" coords="363,267,304,342,262,384,215,420,192,432,189,427,212,416,258,380,300,339,359,263"/>
+<area shape="rect" id="Node000016" href="$d0/d8b/namespacefl_1_1gfx_a0cff613753b89f4d03fdb3cbb0b8c85d.html#a0cff613753b89f4d03fdb3cbb0b8c85d" title="Higher&#45;precision dim overload for CanvasMapped (UNORM16)." alt="" coords="33,495,185,520"/>
+<area shape="poly" id="edge14_Node000015_Node000016" title=" " alt="" coords="247,510,185,510,185,505,247,505"/>
+<area shape="rect" id="Node000017" href="$d0/d8b/namespacefl_1_1gfx_a955705e50434d56764daab1cbd72d5ad.html#a955705e50434d56764daab1cbd72d5ad" title="XYMap&#45;backed Gaussian blur (non&#45;optimized, per&#45;pixel path)." alt="" coords="33,544,185,569"/>
+<area shape="poly" id="edge15_Node000015_Node000017" title=" " alt="" coords="295,525,180,547,179,541,294,520"/>
+</map>

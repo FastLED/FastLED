@@ -1,0 +1,10 @@
+<map id="fl::ferror" name="fl::ferror">
+<area shape="rect" id="Node000001" title="Check for file error." alt="" coords="435,45,509,70"/>
+<area shape="rect" id="Node000002" href="$dd/d65/classfl_1_1detail_1_1posix__filebuf_a73c5d5b2f8499ae0304c7ac50f25cee9.html#a73c5d5b2f8499ae0304c7ac50f25cee9" title=" " alt="" coords="220,5,387,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="421,50,386,44,387,39,422,45"/>
+<area shape="rect" id="Node000004" href="$dd/d65/classfl_1_1detail_1_1posix__filebuf_a09f33740ad21c0d1a77168a42208ffa8.html#a09f33740ad21c0d1a77168a42208ffa8" title=" " alt="" coords="220,69,387,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="422,69,387,76,386,71,421,64"/>
+<area shape="rect" id="Node000003" href="$dd/d65/classfl_1_1detail_1_1posix__filebuf_a46200abeb0d25077021531cac93f1346.html#a46200abeb0d25077021531cac93f1346" title=" " alt="" coords="5,37,172,77"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="206,42,173,48,172,42,205,37"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="205,77,172,72,173,67,206,72"/>
+</map>

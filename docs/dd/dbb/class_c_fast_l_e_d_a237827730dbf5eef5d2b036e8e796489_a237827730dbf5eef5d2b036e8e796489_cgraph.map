@@ -1,0 +1,14 @@
+<map id="CFastLED::isDriverEnabled" name="CFastLED::isDriverEnabled">
+<area shape="rect" id="Node000001" title="Check if a driver is enabled by name." alt="" coords="5,95,199,121"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a8aafd1d8ccf1aab536564352dd23d204.html#a8aafd1d8ccf1aab536564352dd23d204" title="Get the global ChannelManager singleton instance." alt="" coords="247,66,394,91"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,93,233,88,234,93,197,98"/>
+<area shape="rect" id="Node000009" href="$d2/d6b/classfl_1_1_channel_manager_a04b7846c6e3cd8c00586c2fb9a29ad59.html#a04b7846c6e3cd8c00586c2fb9a29ad59" title="Check if a driver is enabled by name." alt="" coords="247,116,395,156"/>
+<area shape="poly" id="edge6_Node000001_Node000009" title=" " alt="" coords="199,118,233,122,233,127,198,123"/>
+<area shape="rect" id="Node000003" href="$d2/d6b/classfl_1_1_channel_manager_aed1be386f6b38cabd478d1d9c11c240c.html#aed1be386f6b38cabd478d1d9c11c240c" title="Get the global singleton instance." alt="" coords="443,59,591,99"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="395,76,429,76,429,81,395,81"/>
+<area shape="rect" id="Node000004" href="$d2/d6b/classfl_1_1_channel_manager_addc4b631522a2d44151c6b7c23a26ca1.html#addc4b631522a2d44151c6b7c23a26ca1" title="Constructor." alt="" coords="646,29,794,69"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="591,65,632,59,633,65,591,71"/>
+<area shape="rect" id="Node000008" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="639,94,801,119"/>
+<area shape="poly" id="edge5_Node000003_Node000008" title=" " alt="" coords="591,86,626,91,625,96,591,91"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="682,30,680,20,686,11,699,5,720,3,744,6,757,13,754,18,742,11,720,8,701,10,689,15,685,21,687,28"/>
+</map>

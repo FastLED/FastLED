@@ -1,0 +1,5 @@
+<map id="fl::third_party::nsgif_local_palette" name="fl::third_party::nsgif_local_palette">
+<area shape="rect" id="Node000001" title="Get the local colour palette for a frame." alt="" coords="5,5,153,45"/>
+<area shape="rect" id="Node000002" href="$d1/d86/namespacefl_1_1third__party_a288566fcf4dd77919dd72091fac5e944.html#a288566fcf4dd77919dd72091fac5e944" title="Extract a GIF colour table into a LibNSGIF colour table buffer." alt="" coords="201,5,372,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,23,188,23,188,28,153,28"/>
+</map>

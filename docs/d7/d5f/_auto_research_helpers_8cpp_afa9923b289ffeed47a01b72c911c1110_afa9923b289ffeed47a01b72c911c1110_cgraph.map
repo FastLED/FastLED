@@ -1,0 +1,11 @@
+<map id="autoResearchExpectedEngines" name="autoResearchExpectedEngines">
+<area shape="rect" id="Node000001" title="AutoResearch that expected engines are available for this platform Prints ERROR if any expected engin..." alt="" coords="5,42,228,67"/>
+<area shape="rect" id="Node000002" href="$d8/d07/namespacefl_1_1validation_ac8e7ec799362b88cf653dc48935b458c.html#ac8e7ec799362b88cf653dc48935b458c" title="Print validation results (logs registered drivers and status)" alt="" coords="276,35,461,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="228,52,262,52,262,57,228,57"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a8aafd1d8ccf1aab536564352dd23d204.html#a8aafd1d8ccf1aab536564352dd23d204" title="Get the global ChannelManager singleton instance." alt="" coords="510,13,657,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="461,39,496,35,497,40,462,45"/>
+<area shape="rect" id="Node000010" href="$d2/d6b/classfl_1_1_channel_manager_a96f21ad5ff259842566e73eb07f14549.html#a96f21ad5ff259842566e73eb07f14549" title="Get full state of all registered drivers." alt="" coords="509,63,657,103"/>
+<area shape="poly" id="edge4_Node000002_Node000010" title=" " alt="" coords="462,64,496,69,495,74,461,69"/>
+<area shape="rect" id="Node000004" href="$d2/d6b/classfl_1_1_channel_manager_aed1be386f6b38cabd478d1d9c11c240c.html#aed1be386f6b38cabd478d1d9c11c240c" title="Get the global singleton instance." alt="" coords="705,5,853,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="657,23,692,23,692,28,657,28"/>
+</map>

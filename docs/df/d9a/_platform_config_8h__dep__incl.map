@@ -1,0 +1,8 @@
+<map id="/home/runner/work/FastLED/FastLED/examples/SpecialDrivers/ESP/DriverTest/PlatformConfig.h" name="/home/runner/work/FastLED/FastLED/examples/SpecialDrivers/ESP/DriverTest/PlatformConfig.h">
+<area shape="rect" id="Node000001" title="ESP32 Platform Detection and Configuration." alt="" coords="5,5,248,60"/>
+<area shape="rect" id="Node000002" href="$d8/de2/_driver_test_8ino.html" title="ESP32 Generic Driver Test &#45; Tests all available LED channel drivers." alt="" coords="5,211,248,265"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="96,72,76,109,70,135,76,162,88,187,104,209,99,212,83,190,71,164,65,135,71,107,91,69"/>
+<area shape="rect" id="Node000003" href="$d3/dd5/_test_runner_8h.html" title="Test Runner for ESP32 Driver Testing." alt="" coords="85,108,328,163"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="158,69,188,106,184,110,154,72"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="179,175,150,212,145,209,175,172"/>
+</map>

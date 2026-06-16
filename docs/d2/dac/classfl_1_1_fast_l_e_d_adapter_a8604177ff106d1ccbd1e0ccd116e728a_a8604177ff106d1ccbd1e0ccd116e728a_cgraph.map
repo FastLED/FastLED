@@ -1,0 +1,32 @@
+<map id="fl::FastLEDAdapter::~FastLEDAdapter" name="fl::FastLEDAdapter::~FastLEDAdapter">
+<area shape="rect" id="Node000001" title="Destructor." alt="" coords="5,408,148,448"/>
+<area shape="rect" id="Node000002" href="$d2/dac/classfl_1_1_fast_l_e_d_adapter_a445d07d5c121d075cd8fd7af50b8fbca.html#a445d07d5c121d075cd8fd7af50b8fbca" title="Clear all LEDs (set to black)" alt="" coords="205,5,345,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="76,408,82,342,100,248,115,197,135,147,161,99,194,56,198,52,202,56,198,59,166,101,140,149,120,199,105,250,87,342,81,408"/>
+<area shape="rect" id="Node000003" href="$d2/dac/classfl_1_1_fast_l_e_d_adapter_a931fb8e4db2516560d700430dd92752f.html#a931fb8e4db2516560d700430dd92752f" title="Clear the segment range (operate on full LED array)" alt="" coords="205,69,345,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="78,407,87,352,107,275,122,234,142,193,165,154,194,120,199,115,202,119,198,123,170,157,146,195,127,236,112,277,92,353,83,408"/>
+<area shape="rect" id="Node000004" href="$d2/dac/classfl_1_1_fast_l_e_d_adapter_a3a50ee238a531be5d223a8e0cf4287a1.html#a3a50ee238a531be5d223a8e0cf4287a1" title="Delay for a specified number of milliseconds." alt="" coords="205,133,345,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="81,407,95,363,118,306,151,245,171,216,194,190,208,178,212,183,198,194,175,220,155,248,123,308,100,365,86,408"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a3cdd970ae1ac06323addaec93ae7d4b9.html#a3cdd970ae1ac06323addaec93ae7d4b9" title=" " alt="" coords="403,451,465,477"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="81,407,94,367,117,319,150,271,171,250,195,234,238,213,277,205,315,211,356,234,379,254,397,279,410,306,420,335,432,391,435,437,430,437,426,392,415,336,405,308,392,282,375,258,353,238,313,216,277,210,240,218,197,238,174,254,154,274,121,322,99,369,86,408"/>
+<area shape="rect" id="Node000006" href="$d2/dac/classfl_1_1_fast_l_e_d_adapter_ab71f29491a9d1c0e11b1ef68ffb9ebfb.html#ab71f29491a9d1c0e11b1ef68ffb9ebfb" title="Get the current global brightness." alt="" coords="205,248,345,288"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="90,406,133,353,162,324,194,298,203,292,206,297,198,302,166,328,137,357,94,409"/>
+<area shape="rect" id="Node000007" href="$d2/dac/classfl_1_1_fast_l_e_d_adapter_ad89d2710d38989f3d04f2071c3df0bde.html#ad89d2710d38989f3d04f2071c3df0bde" title="Get the LED array as a span." alt="" coords="205,312,345,352"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="111,406,195,362,209,355,212,360,197,366,114,410"/>
+<area shape="rect" id="Node000008" href="$d2/dac/classfl_1_1_fast_l_e_d_adapter_a6def8943e2cb92ae797ae1772cc0a106.html#a6def8943e2cb92ae797ae1772cc0a106" title="Get the maximum refresh rate." alt="" coords="196,376,355,416"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="148,414,182,408,183,414,149,419"/>
+<area shape="rect" id="Node000009" href="$d2/dac/classfl_1_1_fast_l_e_d_adapter_a8f3f69b9c39fb0dbb0117b90b3c7360b.html#a8f3f69b9c39fb0dbb0117b90b3c7360b" title="Get the number of LEDs." alt="" coords="205,440,345,480"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="149,437,192,444,191,449,148,442"/>
+<area shape="rect" id="Node000010" href="$d2/dac/classfl_1_1_fast_l_e_d_adapter_a1f87cc9bda0b0e14351908828f5b7995.html#a1f87cc9bda0b0e14351908828f5b7995" title="Set the global brightness." alt="" coords="205,504,345,544"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="114,446,197,490,212,496,209,501,195,494,111,450"/>
+<area shape="rect" id="Node000011" href="$d2/dac/classfl_1_1_fast_l_e_d_adapter_ace9c22c0e4cd6ba17fbd0e9cbd707a07.html#ace9c22c0e4cd6ba17fbd0e9cbd707a07" title="Set color correction." alt="" coords="205,568,345,608"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="94,447,137,499,166,528,198,554,206,559,203,564,194,558,162,532,133,503,90,450"/>
+<area shape="rect" id="Node000012" href="$d2/dac/classfl_1_1_fast_l_e_d_adapter_a69008a2c175355064b54d226eedeee14.html#a69008a2c175355064b54d226eedeee14" title="Set the maximum refresh rate." alt="" coords="196,632,355,672"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="88,447,103,483,127,529,159,576,198,618,204,623,201,627,194,622,154,580,123,532,99,486,83,449"/>
+<area shape="rect" id="Node000013" href="$d2/dac/classfl_1_1_fast_l_e_d_adapter_ac372b466ab6b7511eacd5f7f0c393f0e.html#ac372b466ab6b7511eacd5f7f0c393f0e" title="Set a segment range for subsequent operations." alt="" coords="205,696,345,736"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="85,448,97,495,119,557,152,624,173,655,198,682,202,686,199,690,194,686,169,658,147,626,114,559,92,496,79,449"/>
+<area shape="rect" id="Node000014" href="$d2/dac/classfl_1_1_fast_l_e_d_adapter_a282b0ed91df8ceaf9365615dc0b376db.html#a282b0ed91df8ceaf9365615dc0b376db" title="Set color temperature." alt="" coords="205,760,345,800"/>
+<area shape="poly" id="edge14_Node000001_Node000014" title=" " alt="" coords="83,448,91,505,111,585,126,628,145,670,169,710,198,746,202,750,198,754,194,750,165,713,140,673,121,630,106,586,86,506,77,449"/>
+<area shape="rect" id="Node000015" href="$d2/dac/classfl_1_1_fast_l_e_d_adapter_ab294fd37ca544ad7da8d995bdf5b29f9.html#ab294fd37ca544ad7da8d995bdf5b29f9" title="Send the LED data to the strip Uses the current brightness setting." alt="" coords="205,824,345,864"/>
+<area shape="poly" id="edge15_Node000001_Node000015" title=" " alt="" coords="81,448,86,515,103,612,118,664,138,717,165,766,198,810,202,814,198,818,194,814,160,769,133,719,113,666,98,613,81,516,76,448"/>
+<area shape="poly" id="edge13_Node000013_Node000005" title=" " alt="" coords="338,694,353,682,371,660,386,636,408,582,421,531,428,490,433,491,426,532,413,584,390,638,375,663,357,686,341,698"/>
+</map>

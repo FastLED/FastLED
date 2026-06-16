@@ -10,11 +10,11 @@ digraph "CEveryNMillisDynamic::operator bool"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="CEveryNMillisDynamic\l::ready",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d72/class_c_every_n_millis_dynamic_adf560409fae3890034cc952aad0a7412.html#adf560409fae3890034cc952aad0a7412",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="CEveryNMillisDynamic\l::getElapsed",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d72/class_c_every_n_millis_dynamic_a753e6ba28827b47e9af63aca9a5b96d2.html#a753e6ba28827b47e9af63aca9a5b96d2",tooltip=" "];
+  Node3 [id="Node000003",label="CEveryNMillisDynamic\l::getElapsed",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d72/class_c_every_n_millis_dynamic_ae1ddf3eaf3239d959ce50596d13a8f59.html#ae1ddf3eaf3239d959ce50596d13a8f59",tooltip=" "];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="CEveryNMillisDynamic\l::getTime",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d72/class_c_every_n_millis_dynamic_a4ee4031470f463a55b4160450aa58ae5.html#a4ee4031470f463a55b4160450aa58ae5",tooltip=" "];
+  Node4 [id="Node000004",label="CEveryNMillisDynamic\l::getTime",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d72/class_c_every_n_millis_dynamic_a5a1c175a562410b02588fe4d59117ac0.html#a5a1c175a562410b02588fe4d59117ac0",tooltip=" "];
   Node2 -> Node5 [id="edge4_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="CEveryNMillisDynamic\l::getPeriod",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d72/class_c_every_n_millis_dynamic_a3536277379733328861bd8319f2292ba.html#a3536277379733328861bd8319f2292ba",tooltip=" "];
+  Node5 [id="Node000005",label="CEveryNMillisDynamic\l::getPeriod",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d72/class_c_every_n_millis_dynamic_aadf098b7caacb19f0472a0aba91d24cf.html#aadf098b7caacb19f0472a0aba91d24cf",tooltip=" "];
   Node2 -> Node6 [id="edge5_Node000002_Node000006",color="steelblue1",style="solid",tooltip=" "];
   Node6 [id="Node000006",label="CEveryNMillisDynamic\l::reset",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d72/class_c_every_n_millis_dynamic_a993759a29aef7b9356f2861e6cb4faeb.html#a993759a29aef7b9356f2861e6cb4faeb",tooltip=" "];
   Node6 -> Node4 [id="edge6_Node000006_Node000004",color="steelblue1",style="solid",tooltip=" "];

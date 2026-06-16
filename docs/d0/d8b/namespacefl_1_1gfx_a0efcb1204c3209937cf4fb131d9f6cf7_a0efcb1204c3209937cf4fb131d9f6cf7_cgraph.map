@@ -1,0 +1,14 @@
+<map id="fl::gfx::drawLine" name="fl::gfx::drawLine">
+<area shape="rect" id="Node000001" title="============================================================================" alt="" coords="5,80,132,105"/>
+<area shape="rect" id="Node000002" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_a4c7133be2d3aef492af1968ce467b55d.html#a4c7133be2d3aef492af1968ce467b55d" title=" " alt="" coords="180,80,381,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="132,90,166,90,166,95,132,95"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84" title=" " alt="" coords="486,5,547,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="317,77,429,39,472,27,473,32,430,45,318,82"/>
+<area shape="rect" id="Node000004" href="$d0/d8b/namespacefl_1_1gfx_a82edaad44f942771f5f99fe52a30daa0.html#a82edaad44f942771f5f99fe52a30daa0" title="Internal helper: add or set pixel to rectangular buffer with bounds checking Direct row&#45;major indexin..." alt="" coords="429,55,604,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="381,79,415,76,416,81,382,85"/>
+<area shape="rect" id="Node000005" href="$da/d3c/namespacefl_1_1fl_a5d5f266e22b532883d3bcc5159a7f1b8.html#a5d5f266e22b532883d3bcc5159a7f1b8" title=" " alt="" coords="473,104,561,129"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="382,100,459,108,458,113,381,106"/>
+<area shape="rect" id="Node000006" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_ab04a22e2927673d2692b4f3e354af564.html#ab04a22e2927673d2692b4f3e354af564" title="Convert any Coord type to 8.8 fixed&#45;point (fl::i32)." alt="" coords="433,177,600,203"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="314,103,474,170,471,175,311,108"/>
+<area shape="poly" id="edge6_Node000006_Node000006" title=" " alt="" coords="479,179,470,169,475,159,490,153,517,151,550,155,562,164,559,168,548,159,517,156,492,158,478,163,475,168,482,175"/>
+</map>

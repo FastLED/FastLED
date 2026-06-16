@@ -1,0 +1,11 @@
+<map id="fl::Particles1d::Particle::draw" name="fl::Particles1d::Particle::draw">
+<area shape="rect" id="Node000001" title="Render particle with sub&#45;pixel accuracy and power&#45;modulated color." alt="" coords="5,35,171,75"/>
+<area shape="rect" id="Node000002" href="$d1/d2c/structfl_1_1_particles1d_1_1_particle_a2a3d7e9509185fcabbfc3323424fd49a.html#a2a3d7e9509185fcabbfc3323424fd49a" title=" " alt="" coords="219,5,384,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="170,41,205,36,205,41,171,46"/>
+<area shape="rect" id="Node000004" href="$da/dd6/structfl_1_1_c_r_g_b_aa272170bea8120f101f27ebd2c323b55.html#aa272170bea8120f101f27ebd2c323b55" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="235,70,368,95"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="171,63,221,70,221,75,170,68"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350" title=" " alt="" coords="453,13,531,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="384,23,439,23,439,28,384,28"/>
+<area shape="rect" id="Node000005" href="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" title="Default constructor." alt="" coords="432,70,552,95"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="368,80,418,80,418,85,368,85"/>
+</map>

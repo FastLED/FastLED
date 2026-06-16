@@ -1,0 +1,37 @@
+var namespacefl_1_1colorimetric__detail =
+[
+    [ "LutTable", "d7/df0/namespacefl_1_1colorimetric__detail.html#db/dc9/structfl_1_1colorimetric__detail_1_1_lut_table", "d7/df0/namespacefl_1_1colorimetric__detail_db/dc9/structfl_1_1colorimetric__detail_1_1_lut_table_dup" ],
+    [ "ProfileCache", "d7/df0/namespacefl_1_1colorimetric__detail.html#df/d7b/structfl_1_1colorimetric__detail_1_1_profile_cache", "d7/df0/namespacefl_1_1colorimetric__detail_df/d7b/structfl_1_1colorimetric__detail_1_1_profile_cache_dup" ],
+    [ "RgbcctProfile", "d7/df0/namespacefl_1_1colorimetric__detail.html#d1/d65/structfl_1_1colorimetric__detail_1_1_rgbcct_profile", "d7/df0/namespacefl_1_1colorimetric__detail_d1/d65/structfl_1_1colorimetric__detail_1_1_rgbcct_profile_dup" ],
+    [ "LutInterp", "d7/df0/namespacefl_1_1colorimetric__detail_a1348fcc25f3ba41fb8402582755c56a6.html#a1348fcc25f3ba41fb8402582755c56a6", [
+      [ "Bilinear", "d7/df0/namespacefl_1_1colorimetric__detail_a1348fcc25f3ba41fb8402582755c56a6.html#a1348fcc25f3ba41fb8402582755c56a6aaf17c98bbd83c27d6426d2ff3fa81d7f", null ],
+      [ "Hermite", "d7/df0/namespacefl_1_1colorimetric__detail_a1348fcc25f3ba41fb8402582755c56a6.html#a1348fcc25f3ba41fb8402582755c56a6a70457be66a37fd77955ebfb026c57a24", null ]
+    ] ],
+    [ "barycentric_xy", "d7/df0/namespacefl_1_1colorimetric__detail_aa1ae828879a2d482569745a6017e8508.html#aa1ae828879a2d482569745a6017e8508", null ],
+    [ "build_lut", "d7/df0/namespacefl_1_1colorimetric__detail_afdc1ecd01cd1093a0671a5a880cf21ef.html#afdc1ecd01cd1093a0671a5a880cf21ef", null ],
+    [ "build_lut", "d7/df0/namespacefl_1_1colorimetric__detail_a25b43287c581abd9ee4761ccfeb11add.html#a25b43287c581abd9ee4761ccfeb11add", null ],
+    [ "build_profile_cache", "d7/df0/namespacefl_1_1colorimetric__detail_a652c2bd4e91f0781f10beb2264759c3d.html#a652c2bd4e91f0781f10beb2264759c3d", null ],
+    [ "build_profile_cache", "d7/df0/namespacefl_1_1colorimetric__detail_a775ee9dd2db84fc54e99955c3ad03f1f.html#a775ee9dd2db84fc54e99955c3ad03f1f", null ],
+    [ "build_source_matrix", "d7/df0/namespacefl_1_1colorimetric__detail_a2c7b3de180642cbf3dbe3d9bc370bb13.html#a2c7b3de180642cbf3dbe3d9bc370bb13", null ],
+    [ "cct_to_xy", "d7/df0/namespacefl_1_1colorimetric__detail_a1895dba2849e8b2b598216641d5bfa58.html#a1895dba2849e8b2b598216641d5bfa58", null ],
+    [ "count_active_channels", "d7/df0/namespacefl_1_1colorimetric__detail_af26c3f956ec791bee3c7231a5c99263b.html#af26c3f956ec791bee3c7231a5c99263b", null ],
+    [ "hermite_basis", "d7/df0/namespacefl_1_1colorimetric__detail_af4fb94732a8041d1ca8292c5b74a13ad.html#af4fb94732a8041d1ca8292c5b74a13ad", null ],
+    [ "invert3x3", "d7/df0/namespacefl_1_1colorimetric__detail_a9ec205eef98add93412ca4f94c20545f.html#a9ec205eef98add93412ca4f94c20545f", null ],
+    [ "is_native_input_gamut", "d7/df0/namespacefl_1_1colorimetric__detail_ad2da84bb03874948cb46d35a62bb0847.html#ad2da84bb03874948cb46d35a62bb0847", null ],
+    [ "lookup_lut", "d7/df0/namespacefl_1_1colorimetric__detail_a8899fc82f77ca012de007539780502f6.html#a8899fc82f77ca012de007539780502f6", null ],
+    [ "matvec3", "d7/df0/namespacefl_1_1colorimetric__detail_a47509bc954b97d0e7e96f9fad3a135e7.html#a47509bc954b97d0e7e96f9fad3a135e7", null ],
+    [ "nnls3", "d7/df0/namespacefl_1_1colorimetric__detail_a96cdfaf6702f4f88952bfd9275881c4d.html#a96cdfaf6702f4f88952bfd9275881c4d", null ],
+    [ "quantize_lut_cell", "d7/df0/namespacefl_1_1colorimetric__detail_a1e4b84d2750741237c0afb803ef645c0.html#a1e4b84d2750741237c0afb803ef645c0", null ],
+    [ "quantize_u8", "d7/df0/namespacefl_1_1colorimetric__detail_abe047207406681a109bbe458ec9613f5.html#abe047207406681a109bbe458ec9613f5", null ],
+    [ "rgbcct_eta_for_cct", "d7/df0/namespacefl_1_1colorimetric__detail_a9d6579f77ded72cabfc43c8c58ca25f3.html#a9d6579f77ded72cabfc43c8c58ca25f3", null ],
+    [ "solve_rgbcct", "d7/df0/namespacefl_1_1colorimetric__detail_ad4ec65bca63dc2270d9591c0f17d0a17.html#ad4ec65bca63dc2270d9591c0f17d0a17", null ],
+    [ "solve_strict_subgamut", "d7/df0/namespacefl_1_1colorimetric__detail_acaa6a0291c058f9249ffce8ee3962e5a.html#acaa6a0291c058f9249ffce8ee3962e5a", null ],
+    [ "solve_strict_subgamut_xy", "d7/df0/namespacefl_1_1colorimetric__detail_a38c332098b734f9565be5676f4a59106.html#a38c332098b734f9565be5676f4a59106", null ],
+    [ "solve_wx_lp_legacy", "d7/df0/namespacefl_1_1colorimetric__detail_a1100ab90ee21a056e66f348f84228e85.html#a1100ab90ee21a056e66f348f84228e85", null ],
+    [ "solve_wx_overdrive", "d7/df0/namespacefl_1_1colorimetric__detail_a4ccfef1f780abeb680d4563467ca7d05.html#a4ccfef1f780abeb680d4563467ca7d05", null ],
+    [ "xyY_to_XYZ", "d7/df0/namespacefl_1_1colorimetric__detail_a153ccfb8b0da08e9e2132f5cf1d8b8aa.html#a153ccfb8b0da08e9e2132f5cf1d8b8aa", null ],
+    [ "kDefaultOverdriveRatio", "d7/df0/namespacefl_1_1colorimetric__detail_a63aeb3d28d51681f2642605ffa0c9514.html#a63aeb3d28d51681f2642605ffa0c9514", null ],
+    [ "kLutQ", "d7/df0/namespacefl_1_1colorimetric__detail_aa15bad6a3210ef22fcdf76895b09aa76.html#aa15bad6a3210ef22fcdf76895b09aa76", null ],
+    [ "kLutStrideBilinear", "d7/df0/namespacefl_1_1colorimetric__detail_ad7539a8bf139928874bf9d677f7106d8.html#ad7539a8bf139928874bf9d677f7106d8", null ],
+    [ "kLutStrideHermite", "d7/df0/namespacefl_1_1colorimetric__detail_a12204d190b51509f69681e9785bf4790.html#a12204d190b51509f69681e9785bf4790", null ]
+];

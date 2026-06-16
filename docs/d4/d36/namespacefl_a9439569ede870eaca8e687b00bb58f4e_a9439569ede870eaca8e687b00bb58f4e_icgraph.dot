@@ -1,0 +1,14 @@
+digraph "fl::FL_ALIGNAS"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::FL_ALIGNAS",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Lookup table for nibble-to-waveform expansion in wave3 format (32 bytes)"];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::FL_ALIGNAS",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a232c51cb1bacdbb2241d6cf3d3e33456.html#a232c51cb1bacdbb2241d6cf3d3e33456",tooltip="Combined sin+cos result for 4 angles (raw SIMD primitives)"];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::FL_ALIGNAS",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a9c2841fd85934d22701eb5be54c04fe6.html#a9c2841fd85934d22701eb5be54c04fe6",tooltip=" "];
+}

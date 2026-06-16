@@ -1,0 +1,12 @@
+digraph "fl::ucs7604::set_brightness"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::ucs7604::set_brightness",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Set global UCS7604 brightness via current control (EXPERIMENTAL)"];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::ucs7604::set_brightness",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/dda/namespacefl_1_1ucs7604_a989b21e6f5a16c4cc134a01dfa13d0d9.html#a989b21e6f5a16c4cc134a01dfa13d0d9",tooltip="Set global UCS7604 brightness with individual channel values (EXPERIMENTAL)"];
+}

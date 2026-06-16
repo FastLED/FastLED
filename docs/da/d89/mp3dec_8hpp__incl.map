@@ -1,0 +1,23 @@
+<map id="third_party/libhelix_mp3/mp3dec.hpp" name="third_party/libhelix_mp3/mp3dec.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="113,5,259,45"/>
+<area shape="rect" id="Node000002" href="$dd/d8d/cstring_8h.html" title=" " alt="" coords="37,93,148,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="165,48,119,86,116,82,162,44"/>
+<area shape="rect" id="Node000005" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="148,240,275,265"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="191,45,211,226,206,227,185,46"/>
+<area shape="rect" id="Node000006" href="$d8/de9/mp3common_8h.html" title=" " alt="" coords="224,93,372,119"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="215,43,272,83,269,87,212,48"/>
+<area shape="rect" id="Node000003" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="45,167,148,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="96,119,98,153,93,153,91,119"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="76,121,57,136,40,153,30,172,31,181,35,190,50,203,76,215,142,234,140,239,74,220,48,207,31,194,25,183,25,171,35,150,53,132,73,117"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,240,124,265"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="94,193,78,229,73,227,89,191"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="267,121,143,165,141,159,265,116"/>
+<area shape="poly" id="edge8_Node000006_Node000005" title=" " alt="" coords="293,120,228,229,223,227,289,118"/>
+<area shape="rect" id="Node000007" href="$d5/db1/mp3dec_8h.html" title=" " alt="" coords="275,167,361,192"/>
+<area shape="poly" id="edge9_Node000006_Node000007" title=" " alt="" coords="304,118,314,153,309,154,299,120"/>
+<area shape="rect" id="Node000009" href="$d9/d4b/statname_8h.html" title=" " alt="" coords="386,167,482,192"/>
+<area shape="poly" id="edge12_Node000006_Node000009" title=" " alt="" coords="321,116,401,158,399,163,319,121"/>
+<area shape="poly" id="edge11_Node000007_Node000005" title=" " alt="" coords="302,194,242,235,239,230,299,190"/>
+<area shape="rect" id="Node000008" href="$d7/d84/cstddef_8h.html" title=" " alt="" coords="299,240,412,265"/>
+<area shape="poly" id="edge10_Node000007_Node000008" title=" " alt="" coords="327,191,345,227,341,229,322,194"/>
+</map>

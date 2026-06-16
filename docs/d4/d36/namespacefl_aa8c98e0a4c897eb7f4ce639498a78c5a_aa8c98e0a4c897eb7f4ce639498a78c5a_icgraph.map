@@ -1,0 +1,5 @@
+<map id="fl::digitalRead" name="fl::digitalRead">
+<area shape="rect" id="Node000001" title="Read digital value from pin." alt="" coords="184,13,296,38"/>
+<area shape="rect" id="Node000002" href="$d3/d25/classfl_1_1_digital_pin_impl_a77fc8365e288283da7b6ce4b31a89627.html#a77fc8365e288283da7b6ce4b31a89627" title=" " alt="" coords="5,5,136,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="170,28,136,28,136,23,170,23"/>
+</map>

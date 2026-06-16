@@ -1,0 +1,7 @@
+<map id="fl/math/simd/f32x4.h" name="fl/math/simd/f32x4.h">
+<area shape="rect" id="Node000001" title="SIMD operations on 4&#45;element float32 vectors." alt="" coords="5,5,163,31"/>
+<area shape="rect" id="Node000002" href="$d0/d7e/fl_2math_2simd_2types_8h.html" title="SIMD register type aliases." alt="" coords="6,79,162,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="87,31,87,65,81,65,81,31"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="17,152,151,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="87,104,87,138,81,138,81,104"/>
+</map>

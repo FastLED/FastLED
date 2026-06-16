@@ -1,20 +1,18 @@
 <map id="ColorSelector" name="ColorSelector">
-<area shape="rect" id="Node000001" title=" " alt="" coords="768,39,877,64"/>
-<area shape="rect" id="Node000002" href="$d6/d58/class_counting_button.html" title=" " alt="" coords="548,39,671,64"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="685,49,768,49,768,54,685,54"/>
-<area shape="rect" id="Node000003" href="$d0/ddf/class_midi_shield_button.html" title=" " alt="" coords="281,5,415,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="429,26,548,41,547,46,428,31"/>
-<area shape="rect" id="Node000004" href="$d3/d1d/classfl_1_1_u_i_button.html" title=" " alt="" coords="301,96,395,121"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="408,93,550,61,551,67,409,98"/>
-<area shape="rect" id="Node000018" href="$d2/d68/structfl_1_1_u_i_button_1_1_listener.html" title=" " alt="" coords="532,108,687,133"/>
-<area shape="poly" id="edge8_Node000018_Node000004" title=" " alt="" coords="409,109,532,114,532,120,409,114"/>
-<area shape="rect" id="Node000005" href="$df/d7b/classfl_1_1_u_i_element.html" title=" " alt="" coords="21,17,128,43"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="142,39,199,51,258,67,322,94,320,98,256,73,198,56,141,44"/>
-<area shape="rect" id="Node000009" href="$d6/d8d/classfl_1_1_u_i_button_impl.html" title=" " alt="" coords="13,67,137,92"/>
-<area shape="poly" id="edge5_Node000004_Node000009" title=" " alt="" coords="151,85,301,101,300,106,150,90"/>
-<area shape="rect" id="Node000010" href="$d1/d5d/classfl_1_1_function_list.html" title=" " alt="" coords="5,117,144,157"/>
-<area shape="poly" id="edge6_Node000004_Node000010" title=" " alt="" coords="157,130,257,121,300,114,301,120,258,126,158,135"/>
-<area shape="poly" id="edge7_Node000004_Node000018" title=" " alt="" coords="567,141,506,156,472,159,438,155,399,141,367,124,370,119,402,136,439,150,472,154,505,151,566,136"/>
-<area shape="rect" id="Node000020" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="9,181,140,221"/>
-<area shape="poly" id="edge9_Node000004_Node000020" title=" " alt="" coords="153,181,256,150,323,119,325,124,258,155,154,186"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="776,39,885,64"/>
+<area shape="rect" id="Node000002" href="$d6/d58/class_counting_button.html" title=" " alt="" coords="549,39,672,64"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="686,49,776,49,776,54,686,54"/>
+<area shape="rect" id="Node000003" href="$d0/ddf/class_midi_shield_button.html" title=" " alt="" coords="277,5,411,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="425,25,549,41,549,46,424,31"/>
+<area shape="rect" id="Node000004" href="$d3/d1d/classfl_1_1_u_i_button.html" title=" " alt="" coords="297,96,391,121"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="405,93,550,61,551,67,406,98"/>
+<area shape="rect" id="Node000017" href="$d2/d68/structfl_1_1_u_i_button_1_1_listener.html" title=" " alt="" coords="533,108,688,133"/>
+<area shape="poly" id="edge8_Node000017_Node000004" title=" " alt="" coords="405,109,533,115,533,120,405,114"/>
+<area shape="rect" id="Node000005" href="$df/d7b/classfl_1_1_u_i_element.html" title=" " alt="" coords="17,47,124,72"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="138,66,254,86,297,95,296,100,253,91,137,72"/>
+<area shape="rect" id="Node000010" href="$d6/d8d/classfl_1_1_u_i_button_impl.html" title=" " alt="" coords="9,96,133,121"/>
+<area shape="poly" id="edge5_Node000004_Node000010" title=" " alt="" coords="147,106,296,106,296,111,147,111"/>
+<area shape="rect" id="Node000011" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="5,146,136,186"/>
+<area shape="poly" id="edge6_Node000004_Node000011" title=" " alt="" coords="149,148,253,126,296,117,297,122,254,131,150,153"/>
+<area shape="poly" id="edge7_Node000004_Node000017" title=" " alt="" coords="568,141,505,157,469,159,434,155,395,141,363,124,366,119,398,136,435,150,469,154,504,151,567,135"/>
 </map>

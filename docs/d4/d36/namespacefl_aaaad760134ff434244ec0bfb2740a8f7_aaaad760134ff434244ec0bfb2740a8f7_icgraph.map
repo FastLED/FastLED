@@ -1,0 +1,7 @@
+<map id="fl::createSerialResponseSink" name="fl::createSerialResponseSink">
+<area shape="rect" id="Node000001" title="Create a JSON&#45;RPC ResponseSink that writes to fl:: serial output." alt="" coords="281,31,488,56"/>
+<area shape="rect" id="Node000002" href="$d1/df2/_auto_research_low_memory_8h_ae3f918f9121ab392058ef53302b021cf.html#ae3f918f9121ab392058ef53302b021cf" title=" " alt="" coords="5,5,233,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="267,35,233,32,234,26,268,29"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a7167ab7d0c24c14e0576b7df33c212b6.html#a7167ab7d0c24c14e0576b7df33c212b6" title="Create RequestSource and ResponseSink pair for serial I/O." alt="" coords="31,55,207,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="267,57,208,62,207,57,267,51"/>
+</map>

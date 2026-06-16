@@ -1,0 +1,27 @@
+<map id="fl::gfx::blurRows" name="fl::gfx::blurRows">
+<area shape="rect" id="Node000001" title="Perform a blur1d() on every row of a rectangular matrix (span version)." alt="" coords="527,153,653,179"/>
+<area shape="rect" id="Node000002" href="$d5/d3d/group___color_blurs_ga490098e97c6a0c9b4f0edc9f57cf2685.html#ga490098e97c6a0c9b4f0edc9f57cf2685" title="Two&#45;dimensional blur filter (Canvas version, no XYMap)." alt="" coords="361,29,469,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="567,145,527,107,477,68,455,57,458,52,480,64,531,103,570,142"/>
+<area shape="rect" id="Node000003" href="$d5/d3d/group___color_blurs_ga0699f1dd2dc72d5e683bd148378050a9.html#ga0699f1dd2dc72d5e683bd148378050a9" title="Two&#45;dimensional blur filter (span version)." alt="" coords="361,79,469,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="549,150,478,118,450,107,452,102,480,113,551,145"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_abf4987d163732fcb88c9f81f37723d1c.html#abf4987d163732fcb88c9f81f37723d1c" title=" " alt="" coords="366,128,465,153"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="513,158,465,150,466,145,513,152"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_ab378b80a4e96c47e6fc6e4203de738f4.html#ab378b80a4e96c47e6fc6e4203de738f4" title=" " alt="" coords="366,177,465,203"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="513,179,466,186,465,181,513,174"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_a4d16c8da516680becadf81344136caaf.html#a4d16c8da516680becadf81344136caaf" title=" " alt="" coords="366,227,465,252"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="550,187,480,218,452,229,450,224,478,213,548,182"/>
+<area shape="rect" id="Node000013" href="$d5/d3d/group___color_blurs_gafa4ec35f1fe6d5604aea1cf442232a5f.html#gafa4ec35f1fe6d5604aea1cf442232a5f" title="Legacy raw&#45;pointer version of blurRows." alt="" coords="352,276,479,301"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="570,191,530,229,480,267,458,278,455,273,477,262,527,225,566,187"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a2a71d5f71aa7a4e1480ee299b0780c66.html#a2a71d5f71aa7a4e1480ee299b0780c66" title=" " alt="" coords="211,5,289,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="368,76,351,68,303,44,279,33,281,28,305,40,353,64,370,71"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_aca219e4ecfa76d0476e9f553f4066548.html#aca219e4ecfa76d0476e9f553f4066548" title=" " alt="" coords="211,55,289,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="347,84,289,76,290,70,348,79"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a66c80e00f13502a4221ca8632199a4ba.html#a66c80e00f13502a4221ca8632199a4ba" title=" " alt="" coords="211,104,289,129"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="348,104,290,113,289,108,347,99"/>
+<area shape="rect" id="Node000009" href="$d5/d3d/group___color_blurs_ga9d5d40ce297e6a89cb8bd0bcd68f2398.html#ga9d5d40ce297e6a89cb8bd0bcd68f2398" title="Legacy raw&#45;pointer version of blur2d." alt="" coords="196,153,304,179"/>
+<area shape="poly" id="edge8_Node000003_Node000009" title=" " alt="" coords="367,112,353,118,305,143,279,156,277,151,303,138,351,113,365,107"/>
+<area shape="rect" id="Node000006" href="$dc/d2b/classfl_1_1_blend2d_ad965648c61fd795366282d3b797a612f.html#ad965648c61fd795366282d3b797a612f" title=" " alt="" coords="11,31,142,56"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="197,63,142,55,143,50,197,57"/>
+<area shape="rect" id="Node000007" href="$d4/df2/classfl_1_1_luminova_aa775ddcb74da9d8ae057ac8e4c3c50cc.html#aa775ddcb74da9d8ae057ac8e4c3c50cc" title=" " alt="" coords="5,80,148,105"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="197,78,148,85,148,80,196,72"/>
+</map>

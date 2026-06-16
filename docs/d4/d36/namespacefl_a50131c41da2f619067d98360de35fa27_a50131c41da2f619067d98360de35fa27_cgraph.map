@@ -1,0 +1,27 @@
+<map id="fl::delay" name="fl::delay">
+<area shape="rect" id="Node000001" title="Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all..." alt="" coords="5,271,80,297"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="15,273,10,263,13,253,24,247,43,245,65,248,75,257,71,261,63,253,43,250,26,252,17,257,15,262,20,270"/>
+<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail_abd6e1e8189dbbbf28d720923205bd0dd.html#abd6e1e8189dbbbf28d720923205bd0dd" title="Internal delay implementation used by the public fl::delay wrapper." alt="" coords="128,271,283,297"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="80,281,114,281,114,287,80,287"/>
+<area shape="rect" id="Node000003" href="$db/d5c/namespacefl_1_1task_a2d40b476742263a3fa212e24b722e3ef.html#a2d40b476742263a3fa212e24b722e3ef" title="Run selected task subsystems." alt="" coords="331,271,425,297"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="283,281,317,281,317,287,283,287"/>
+<area shape="rect" id="Node000004" href="$dc/dad/classfl_1_1_singleton_thread_local_a00591689c0e4cc5d96b511b3277f7682.html#a00591689c0e4cc5d96b511b3277f7682" title=" " alt="" coords="473,5,652,45"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="378,271,386,230,402,172,430,110,449,81,471,55,476,51,480,55,475,59,453,84,435,113,407,174,391,231,384,272"/>
+<area shape="rect" id="Node000013" href="$d0/dd2/classfl_1_1task_1_1_executor_ac534e963910c0f0acf445c8c61aee216.html#ac534e963910c0f0acf445c8c61aee216" title=" " alt="" coords="497,69,628,109"/>
+<area shape="poly" id="edge5_Node000003_Node000013" title=" " alt="" coords="381,270,392,240,411,199,437,157,472,119,483,111,486,115,475,123,442,160,416,202,397,242,386,272"/>
+<area shape="rect" id="Node000015" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a266030d285c7f6ae31eb3c619cee8693.html#a266030d285c7f6ae31eb3c619cee8693" title=" " alt="" coords="493,133,632,173"/>
+<area shape="poly" id="edge6_Node000003_Node000015" title=" " alt="" coords="386,270,421,228,445,204,472,183,482,177,485,182,475,188,448,208,425,231,390,273"/>
+<area shape="rect" id="Node000017" href="$d4/d36/namespacefl_a88411fb4cdce0874360d326ef1a2578f.html#a88411fb4cdce0874360d326ef1a2578f" title="Factory for C++11/14 (no CTAD)." alt="" coords="487,198,638,223"/>
+<area shape="poly" id="edge7_Node000003_Node000017" title=" " alt="" coords="399,269,472,232,493,225,495,230,474,237,402,274"/>
+<area shape="rect" id="Node000018" href="$d4/d36/namespacefl_a95a89c7ba649b9bd2c9136c0f517d82f.html#a95a89c7ba649b9bd2c9136c0f517d82f" title="Universal microsecond timer &#45; returns microseconds since system startup." alt="" coords="521,271,604,297"/>
+<area shape="poly" id="edge8_Node000003_Node000018" title=" " alt="" coords="426,281,508,281,508,287,426,287"/>
+<area shape="rect" id="Node000019" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="531,321,594,346"/>
+<area shape="poly" id="edge10_Node000003_Node000019" title=" " alt="" coords="426,294,519,319,517,324,425,299"/>
+<area shape="rect" id="Node000020" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a894dae01c9c6738eeae091f8fddeefb3.html#a894dae01c9c6738eeae091f8fddeefb3" title=" " alt="" coords="493,371,632,411"/>
+<area shape="poly" id="edge11_Node000003_Node000020" title=" " alt="" coords="395,295,430,324,475,355,490,363,487,368,472,360,426,329,391,299"/>
+<area shape="rect" id="Node000024" href="$d0/dd2/classfl_1_1task_1_1_executor_a8f94605a8078df47675753e193d1e969.html#a8f94605a8078df47675753e193d1e969" title="Update all registered runners." alt="" coords="497,435,628,475"/>
+<area shape="poly" id="edge12_Node000003_Node000024" title=" " alt="" coords="387,295,419,355,444,390,475,421,487,428,484,433,472,425,440,394,414,358,382,298"/>
+<area shape="rect" id="Node000025" href="$d4/d36/namespacefl_ac8bfd7357d354c16311ece7e62e08901.html#ac8bfd7357d354c16311ece7e62e08901" title="Yield to the platform scheduler." alt="" coords="527,499,598,525"/>
+<area shape="poly" id="edge13_Node000003_Node000025" title=" " alt="" coords="384,297,393,334,409,385,436,439,454,463,475,485,494,496,515,504,513,509,491,501,472,489,450,467,432,441,405,387,388,335,379,298"/>
+<area shape="poly" id="edge9_Node000018_Node000018" title=" " alt="" coords="532,273,526,263,529,253,542,247,563,245,588,248,599,257,595,261,586,253,563,250,543,252,533,257,531,262,536,270"/>
+</map>

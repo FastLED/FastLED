@@ -1,0 +1,9 @@
+<map id="fl::beatsin8" name="fl::beatsin8">
+<area shape="rect" id="Node000001" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="220,55,315,80"/>
+<area shape="rect" id="Node000002" href="$d1/d60/classfl_1_1_demo_reel100_ad175551a2aadcbc906b5b75a81119922.html#ad175551a2aadcbc906b5b75a81119922" title=" " alt="" coords="5,5,172,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="207,53,135,33,137,28,208,48"/>
+<area shape="rect" id="Node000003" href="$d2/db2/classfl_1_1_pacifica_a264d0c1db5db60028b6fab87af13d700.html#a264d0c1db5db60028b6fab87af13d700" title=" " alt="" coords="25,55,152,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="206,70,152,70,152,65,206,65"/>
+<area shape="rect" id="Node000004" href="$d2/db2/classfl_1_1_pacifica_af306b5850186d2aae2bdad30b7236307.html#af306b5850186d2aae2bdad30b7236307" title=" " alt="" coords="16,105,161,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="215,87,152,107,151,102,213,82"/>
+</map>

@@ -1,0 +1,17 @@
+<map id="fl::spi::Transaction::Impl" name="fl::spi::Transaction::Impl">
+<area shape="rect" id="Node000001" title="Private implementation data for Transaction class." alt="" coords="915,85,1053,125"/>
+<area shape="rect" id="Node000002" href="$d9/d0a/classfl_1_1spi_1_1_device.html" title="Single&#45;channel SPI device interface (TX&#45;only, transaction&#45;based, optimized for FastLED)" alt="" coords="687,63,798,88"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="812,81,915,94,914,99,811,86"/>
+<area shape="rect" id="Node000003" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="347,55,501,95"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="515,73,687,73,687,78,515,78"/>
+<area shape="rect" id="Node000004" href="$d1/d42/structfl_1_1spi_1_1_device_1_1_impl.html" title="Private implementation data for Device class." alt="" coords="21,5,167,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="182,29,323,53,347,57,346,62,322,58,181,34"/>
+<area shape="rect" id="Node000017" href="$d5/d2b/structfl_1_1default__delete.html" title=" " alt="" coords="5,55,183,95"/>
+<area shape="poly" id="edge4_Node000003_Node000017" title=" " alt="" coords="196,73,346,73,346,78,196,78"/>
+<area shape="rect" id="Node000019" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="27,119,161,159"/>
+<area shape="poly" id="edge5_Node000003_Node000019" title=" " alt="" coords="175,130,247,121,322,107,371,93,372,98,323,113,248,127,176,136"/>
+<area shape="rect" id="Node000020" href="$dd/dd8/classfl_1_1_optional.html" title=" " alt="" coords="667,113,819,153"/>
+<area shape="poly" id="edge6_Node000001_Node000020" title=" " alt="" coords="832,126,890,121,914,117,915,122,891,126,833,132"/>
+<area shape="rect" id="Node000021" href="$dd/dd8/classfl_1_1_optional.html" title=" " alt="" coords="359,120,489,145"/>
+<area shape="poly" id="edge7_Node000020_Node000021" title=" " alt="" coords="503,130,667,130,667,135,503,135"/>
+</map>

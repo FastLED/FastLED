@@ -1,0 +1,20 @@
+<map id="fl::audio::detector::Vocal::computeBroadSpectralFeatures" name="fl::audio::detector::Vocal::computeBroadSpectralFeatures">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,113,227,168"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a2a5359f49a46263d1eb1fcdfe99b7bd5.html#a2a5359f49a46263d1eb1fcdfe99b7bd5" title=" " alt="" coords="323,29,390,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="169,111,274,64,309,52,311,57,276,68,171,116"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a75ddcc545263c39f3ce214bbf92cae9e.html#a75ddcc545263c39f3ce214bbf92cae9e" title=" " alt="" coords="283,79,430,104"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="226,115,280,104,281,109,227,121"/>
+<area shape="rect" id="Node000005" href="$d6/d86/classfl_1_1audio_1_1fft_1_1_bins_a6ffb71ea065157cab03d64006e779d0d.html#a6ffb71ea065157cab03d64006e779d0d" title=" " alt="" coords="275,128,439,153"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="227,138,261,138,261,143,227,143"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a0b5da884257d0f4003ead08f27915a2b.html#a0b5da884257d0f4003ead08f27915a2b" title=" " alt="" coords="323,177,391,203"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="227,161,310,178,309,183,226,166"/>
+<area shape="rect" id="Node000009" href="$da/d3c/namespacefl_1_1fl_a5d5f266e22b532883d3bcc5159a7f1b8.html#a5d5f266e22b532883d3bcc5159a7f1b8" title=" " alt="" coords="313,227,401,252"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="173,166,276,212,300,220,298,225,274,216,170,171"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a30ea10d1fd20c323429a28dcd4c9bdd1.html#a30ea10d1fd20c323429a28dcd4c9bdd1" title=" " alt="" coords="487,29,621,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="390,39,473,39,473,45,390,45"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="521,31,515,21,518,11,532,5,554,3,581,6,592,15,589,19,579,11,554,8,533,10,522,15,520,20,526,28"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_aaa77b1626998d6dc47d0e3245b1a3e4a.html#aaa77b1626998d6dc47d0e3245b1a3e4a" title=" " alt="" coords="487,177,621,203"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="391,187,473,187,473,193,391,193"/>
+<area shape="rect" id="Node000008" href="$df/d9e/namespacefl_1_1detail_af564e0d482e4925c603cb299c623c312.html#af564e0d482e4925c603cb299c623c312" title=" " alt="" coords="669,177,840,203"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="622,187,656,187,656,193,622,193"/>
+</map>

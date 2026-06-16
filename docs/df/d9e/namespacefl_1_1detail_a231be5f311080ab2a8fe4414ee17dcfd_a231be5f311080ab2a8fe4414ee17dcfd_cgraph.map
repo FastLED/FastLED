@@ -1,0 +1,9 @@
+<map id="fl::detail::wave8_transpose_8_bf1" name="fl::detail::wave8_transpose_8_bf1">
+<area shape="rect" id="Node000001" title="BF1 for 8&#45;lane Wave8 — same algebraic identity as 16&#45;lane BF1." alt="" coords="5,23,203,63"/>
+<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail_a954bb6152db952896e31a856475eed32.html#a954bb6152db952896e31a856475eed32" title="Transpose one symbol of 8 lanes (8 input bytes) into 8 output bytes: 8 pulses × 1 byte (bit L = lane ..." alt="" coords="251,23,407,63"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="203,41,237,41,237,46,203,46"/>
+<area shape="rect" id="Node000003" href="$df/d9e/namespacefl_1_1detail_a85251852414197ed32d0dc54ab229984.html#a85251852414197ed32d0dc54ab229984" title="Pulses 7,6,5,4 of v (byte j = bit (7&#45;j)). Depends only on the high nibble." alt="" coords="455,5,591,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="406,31,441,26,442,31,407,36"/>
+<area shape="rect" id="Node000004" href="$df/d9e/namespacefl_1_1detail_ada26c9ef5cbebfb232811412781ecec9.html#ada26c9ef5cbebfb232811412781ecec9" title="Pulses 3,2,1,0 of v (byte j = bit (3&#45;j)). Depends only on the low nibble." alt="" coords="455,55,591,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="407,50,442,55,441,60,406,56"/>
+</map>

@@ -1,0 +1,10 @@
+<map id="fl::CLEDController::removeFromDrawList" name="fl::CLEDController::removeFromDrawList">
+<area shape="rect" id="Node000001" title="Remove this controller from the draw list." alt="" coords="5,29,176,69"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="53,30,51,20,57,11,70,5,91,3,114,6,127,13,124,18,112,11,91,8,72,10,60,15,56,21,58,28"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ab883396db2a06fb83865cbdcae94c07f.html#ab883396db2a06fb83865cbdcae94c07f" title="Remove a controller from the linked list." alt="" coords="224,29,360,69"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="176,47,210,47,210,52,176,52"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a7e91fc8f83d62c9da5e5c3d6d1bc10ce.html#a7e91fc8f83d62c9da5e5c3d6d1bc10ce" title="Protected constructor with registration mode." alt="" coords="408,29,544,69"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="360,47,394,47,394,52,360,52"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a9e51518d1427463dffd596c69c6f3e46.html#a9e51518d1427463dffd596c69c6f3e46" title="Add this controller to the linked list." alt="" coords="592,29,728,69"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="544,47,578,47,578,52,544,52"/>
+</map>

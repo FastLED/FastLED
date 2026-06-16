@@ -40,9 +40,9 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d8/de4/classfl_1_1_slice_ab1d9efdc701eec91c7b89910cab46afe.html#ab1d9efdc701eec91c7b89910cab46afe" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d0/d08/classfl_1_1span_a326aa9f29859fe8a92833fd5db12c3bb.html#a326aa9f29859fe8a92833fd5db12c3bb" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="375,-105 295,-105 295,-86 375,-86 375,-105"/>
-<text text-anchor="middle" x="335" y="-93" font-family="Helvetica,sans-Serif" font-size="10.00">fl::Slice::data</text>
+<text text-anchor="middle" x="335" y="-93" font-family="Helvetica,sans-Serif" font-size="10.00">fl::span::data</text>
 </a>
 </g>
 </g>
@@ -77,9 +77,9 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d8/de4/classfl_1_1_slice_abe7b0c2539b61d18d30ee571680d5a91.html#abe7b0c2539b61d18d30ee571680d5a91" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="373.5,-19 296.5,-19 296.5,0 373.5,0 373.5,-19"/>
-<text text-anchor="middle" x="335" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::Slice::size</text>
+<text text-anchor="middle" x="335" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::span::size</text>
 </a>
 </g>
 </g>

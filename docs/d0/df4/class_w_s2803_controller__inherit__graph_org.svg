@@ -62,7 +62,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d6/d2c/class_c_l_e_d_controller.html" target="_top" xlink:title="Base definition for an LED controller.">
+<g id="a_Node000004"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller.html" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="90,-56 0,-56 0,-37 90,-37 90,-56"/>
 <text text-anchor="middle" x="45" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">CLEDController</text>
 </a>

@@ -1,0 +1,42 @@
+digraph "fl::detail::atan_poly_unit_"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::detail::atan_poly\l_unit_",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::detail::atan_full_",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_a6639ef5e7932062a12de7451f274b003.html#a6639ef5e7932062a12de7451f274b003",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::asin_impl_double",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_adc1cb1d76f409bf23674b48c949639bb.html#adc1cb1d76f409bf23674b48c949639bb",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::acos_impl_double",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_a42f49d43177bf8f84f23d3e0a78f5ec1.html#a42f49d43177bf8f84f23d3e0a78f5ec1",tooltip=" "];
+  Node3 -> Node6 [id="edge4_Node000003_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::asin",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a6605c147bc04769dfb7372f2098656bb.html#a6605c147bc04769dfb7372f2098656bb",tooltip=" "];
+  Node2 -> Node7 [id="edge5_Node000002_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::asin_impl_float",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ad4a4c034eabfc8d9dbbebd219ab5a8ab.html#ad4a4c034eabfc8d9dbbebd219ab5a8ab",tooltip=" "];
+  Node7 -> Node8 [id="edge6_Node000007_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::acos_impl_float",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_a720681396dd079d5a32ce4b4c52f658a.html#a720681396dd079d5a32ce4b4c52f658a",tooltip=" "];
+  Node7 -> Node11 [id="edge7_Node000007_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::asin",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a7dcd671980e28b8a4d25c7860c4fba8f.html#a7dcd671980e28b8a4d25c7860c4fba8f",tooltip=" "];
+  Node7 -> Node12 [id="edge8_Node000007_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::asinf",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a811c16fc0f6625924b44f6c1e8cd5a6d.html#a811c16fc0f6625924b44f6c1e8cd5a6d",tooltip=" "];
+  Node2 -> Node13 [id="edge9_Node000002_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::detail::atan2_full_",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_a8ab119c69491195643cb94f6e46a069b.html#a8ab119c69491195643cb94f6e46a069b",tooltip=" "];
+  Node13 -> Node14 [id="edge10_Node000013_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::atan2_impl_double",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_a07f482ec35a92fa7bf4bed8f8ac6531c.html#a07f482ec35a92fa7bf4bed8f8ac6531c",tooltip=" "];
+  Node13 -> Node16 [id="edge11_Node000013_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::atan2_impl_float",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_a4ac74489c44234c2daaa67f710f95813.html#a4ac74489c44234c2daaa67f710f95813",tooltip=" "];
+  Node2 -> Node21 [id="edge12_Node000002_Node000021",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node21 [id="Node000021",label="fl::atan_impl_double",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a216f329d37baf4783860dc68a12e619b.html#a216f329d37baf4783860dc68a12e619b",tooltip=" "];
+  Node21 -> Node22 [id="edge13_Node000021_Node000022",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node22 [id="Node000022",label="fl::atan",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a3878129fede0f3d86ed2d40e4c56576b.html#a3878129fede0f3d86ed2d40e4c56576b",tooltip=" "];
+  Node2 -> Node23 [id="edge14_Node000002_Node000023",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node23 [id="Node000023",label="fl::atan_impl_float",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ab3d744bcb5f34963e4793ff4986d494b.html#ab3d744bcb5f34963e4793ff4986d494b",tooltip=" "];
+  Node23 -> Node24 [id="edge15_Node000023_Node000024",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node24 [id="Node000024",label="fl::atan",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ae049e51367cfef9d212c53515a0d002e.html#ae049e51367cfef9d212c53515a0d002e",tooltip=" "];
+  Node23 -> Node25 [id="edge16_Node000023_Node000025",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node25 [id="Node000025",label="fl::atanf",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a97ec89fe06395c29488d23be6e0447ab.html#a97ec89fe06395c29488d23be6e0447ab",tooltip=" "];
+}

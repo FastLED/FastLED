@@ -1,0 +1,7 @@
+<map id="fl::static_pointer_cast" name="fl::static_pointer_cast">
+<area shape="rect" id="Node000001" title=" " alt="" coords="472,13,633,38"/>
+<area shape="rect" id="Node000002" href="$d1/d1c/classfl_1_1audio_1_1_i_synth_oscillator_a789f29da94da34e7d2a187b8cc8f5048.html#a789f29da94da34e7d2a187b8cc8f5048" title="Factory function to create an oscillator with specified engine and parameters." alt="" coords="239,5,424,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="458,28,424,28,424,23,458,23"/>
+<area shape="rect" id="Node000003" href="$d1/d1c/classfl_1_1audio_1_1_i_synth_oscillator_a48f66a677506627672de7f30a58acffb.html#a48f66a677506627672de7f30a58acffb" title="Factory function to create an oscillator with specified engine and shape." alt="" coords="5,5,191,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="225,28,191,28,191,23,225,23"/>
+</map>

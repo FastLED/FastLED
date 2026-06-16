@@ -89,7 +89,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../da/de3/group___color_fills_gafcada3a28df2b4491cbee30297e39ea7.html#gafcada3a28df2b4491cbee30297e39ea7" target="_top" xlink:title="Fill a range of LEDs with a solid color.">
+<g id="a_Node000003"><a xlink:href="../../da/de3/group___color_fills_gafba4db18577c19e39c54f1c5793741b7.html#gafba4db18577c19e39c54f1c5793741b7" target="_top" xlink:title="Fill a range of LEDs with a solid color.">
 <polygon fill="white" stroke="#666666" points="450,-120.5 381,-120.5 381,-101.5 450,-101.5 450,-120.5"/>
 <text text-anchor="middle" x="415.5" y="-108.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::fill_solid</text>
 </a>
@@ -107,7 +107,7 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe" target="_top" xlink:title="Generate an 8&#45;bit random number.">
+<g id="a_Node000006"><a xlink:href="../../d2/d0d/group___random_gadb05544426b14ef8d85fb2eb73cb8a0a.html#gadb05544426b14ef8d85fb2eb73cb8a0a" target="_top" xlink:title="Generate an 8&#45;bit random number.">
 <polygon fill="white" stroke="#666666" points="445.5,-24.5 385.5,-24.5 385.5,-5.5 445.5,-5.5 445.5,-24.5"/>
 <text text-anchor="middle" x="415.5" y="-12.5" font-family="Helvetica,sans-Serif" font-size="10.00">random8</text>
 </a>

@@ -1,0 +1,32 @@
+<map id="fl::CLEDController::showLeds" name="fl::CLEDController::showLeds">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,271,141,311"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a0d03ac7c49f291499fe04f582a516bee.html#a0d03ac7c49f291499fe04f582a516bee" title=" " alt="" coords="241,88,377,128"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="87,269,129,218,157,189,188,163,242,131,245,136,191,168,161,193,133,221,91,272"/>
+<area shape="rect" id="Node000008" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a23aa5d45072b3359bfa897d4bc60272f.html#a23aa5d45072b3359bfa897d4bc60272f" title=" " alt="" coords="241,177,377,217"/>
+<area shape="poly" id="edge6_Node000001_Node000008" title=" " alt="" coords="106,268,145,247,188,227,226,214,228,219,190,232,147,252,109,273"/>
+<area shape="rect" id="Node000014" href="$de/dca/classfl_1_1_engine_events_ab4d061cd06863ef497abefa72cf7226f.html#ab4d061cd06863ef497abefa72cf7226f" title=" " alt="" coords="215,241,402,281"/>
+<area shape="poly" id="edge11_Node000001_Node000014" title=" " alt="" coords="141,280,201,272,202,277,142,285"/>
+<area shape="rect" id="Node000015" href="$de/dca/classfl_1_1_engine_events_aa8599b4b32e5a46f46503a6b75d0fe43.html#aa8599b4b32e5a46f46503a6b75d0fe43" title=" " alt="" coords="201,306,416,331"/>
+<area shape="poly" id="edge12_Node000001_Node000015" title=" " alt="" coords="142,296,189,302,188,307,141,301"/>
+<area shape="rect" id="Node000016" href="$de/dca/classfl_1_1_engine_events_a11157d3edc6bca6c80a64c01ca16b1f9.html#a11157d3edc6bca6c80a64c01ca16b1f9" title=" " alt="" coords="189,355,428,381"/>
+<area shape="poly" id="edge13_Node000001_Node000016" title=" " alt="" coords="115,308,190,340,224,350,222,355,188,345,113,313"/>
+<area shape="rect" id="Node000017" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a71543f73813054a556fd66205a74f25a.html#a71543f73813054a556fd66205a74f25a" title="Write the data to the LEDs managed by this controller." alt="" coords="237,405,381,445"/>
+<area shape="poly" id="edge14_Node000001_Node000017" title=" " alt="" coords="94,309,135,351,162,372,191,391,225,405,223,410,188,396,159,377,132,355,90,313"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a280f23ed10b10068f0a7460f8977cb33.html#a280f23ed10b10068f0a7460f8977cb33" title="Get the dithering option currently set for this controller." alt="" coords="476,5,612,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="365,85,472,47,474,52,367,91"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a27f07b0c6e824277ee5430352f66ba4a.html#a27f07b0c6e824277ee5430352f66ba4a" title=" " alt="" coords="494,70,594,95"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="376,98,480,87,481,92,377,103"/>
+<area shape="rect" id="Node000007" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ab8e1ee460f25af890c1d40479e4c5b09.html#ab8e1ee460f25af890c1d40479e4c5b09" title="How many LEDs does this controller manage?" alt="" coords="476,120,612,160"/>
+<area shape="poly" id="edge5_Node000002_Node000007" title=" " alt="" coords="377,115,463,126,462,132,376,120"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_ad200a6a214a70194b7c33fd67af6cea4.html#ad200a6a214a70194b7c33fd67af6cea4" title=" " alt="" coords="683,127,773,153"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="586,93,674,121,673,126,585,98"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a2815270748b8084061e7103ee57960da.html#a2815270748b8084061e7103ee57960da" title=" " alt="" coords="494,185,594,210"/>
+<area shape="poly" id="edge7_Node000008_Node000009" title=" " alt="" coords="377,195,480,195,480,200,377,200"/>
+<area shape="rect" id="Node000010" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a83f37ea29f9b1009fadddb18c50c30c2.html#a83f37ea29f9b1009fadddb18c50c30c2" title="Set the dithering mode for this controller to use." alt="" coords="476,235,612,275"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="377,211,464,232,462,238,376,216"/>
+<area shape="poly" id="edge8_Node000009_Node000005" title=" " alt="" coords="585,182,673,154,674,159,586,187"/>
+<area shape="rect" id="Node000011" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a7e91fc8f83d62c9da5e5c3d6d1bc10ce.html#a7e91fc8f83d62c9da5e5c3d6d1bc10ce" title="Protected constructor with registration mode." alt="" coords="660,235,796,275"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="612,252,646,252,646,257,612,257"/>
+<area shape="rect" id="Node000018" href="$d9/dce/_client_validation_real_8h_a02882a6e53c2b3b63eba56831f88f604.html#a02882a6e53c2b3b63eba56831f88f604" title=" " alt="" coords="516,413,572,438"/>
+<area shape="poly" id="edge15_Node000017_Node000018" title=" " alt="" coords="381,423,502,423,502,428,381,428"/>
+</map>

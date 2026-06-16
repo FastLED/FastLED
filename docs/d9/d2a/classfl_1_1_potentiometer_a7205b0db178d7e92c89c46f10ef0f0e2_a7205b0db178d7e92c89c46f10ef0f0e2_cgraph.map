@@ -1,0 +1,10 @@
+<map id="fl::Potentiometer::onChange" name="fl::Potentiometer::onChange">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,144,75"/>
+<area shape="rect" id="Node000002" href="$d9/d2a/classfl_1_1_potentiometer_a0e73e67bf70be8f9a0033b34b8129770.html#a0e73e67bf70be8f9a0033b34b8129770" title=" " alt="" coords="192,35,331,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="145,52,178,52,178,57,145,57"/>
+<area shape="rect" id="Node000003" href="$d9/d2a/classfl_1_1_potentiometer_a20438851fa1e09b1fd81f7c5460f6e75.html#a20438851fa1e09b1fd81f7c5460f6e75" title=" " alt="" coords="379,5,577,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="331,43,365,38,366,43,331,48"/>
+<area shape="rect" id="Node000004" href="$d9/d2a/classfl_1_1_potentiometer_a0b8f77e035c148e5b023f62c2e07a019.html#a0b8f77e035c148e5b023f62c2e07a019" title=" " alt="" coords="625,35,764,75"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="331,54,379,55,577,55,612,54,612,59,577,60,379,60,331,59"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="578,36,612,41,611,46,577,41"/>
+</map>

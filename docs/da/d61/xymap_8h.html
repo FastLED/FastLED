@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fl/xymap.h File Reference</title>
+<title>FastLED: fl/math/xymap.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -108,17 +108,12 @@ $(function(){initNavTree('da/d61/xymap_8h.html','../../'); initResizable(true); 
   <div class="headertitle"><div class="title">xymap.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/int.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../df/d2a/namespace_8h_source.html">fl/namespace.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d4/d64/force__inline_8h_source.html">fl/force_inline.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d3/d41/pair_8h_source.html">fl/pair.h</a>&quot;</code><br />
-<code>#include &lt;<a class="el" href="../../da/d66/string_8h_source.html">string.h</a>&gt;</code><br />
-<code>#include &quot;<a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d6/dd3/clamp_8h_source.html">fl/clamp.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../db/d54/lut_8h_source.html">fl/lut.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../dc/d18/memory_8h_source.html">fl/memory.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d4/dce/deprecated_8h_source.html">fl/deprecated.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../dd/dcc/xmap_8h_source.html">fl/xmap.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d4/d54/compiler__control_8h_source.html">fl/stl/compiler_control.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/db1/math_8h_source.html">fl/math/math.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../db/d54/lut_8h_source.html">fl/math/lut.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d63/type__traits_8h_source.html">fl/stl/type_traits.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/stl/int.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for xymap.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -131,7 +126,7 @@ $(function(){initNavTree('da/d61/xymap_8h.html','../../'); initResizable(true); 
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dd/d25/xymap_8h__dep__incl.svg" width="100%" height="580"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dd/d25/xymap_8h__dep__incl.svg" width="100%" height="558"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../da/d61/xymap_8h_source.html">Go to the source code of this file.</a></p>
@@ -144,20 +139,20 @@ Classes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:a5e5ddfd6e98fe27821bcaa3a6160da05" id="r_a5e5ddfd6e98fe27821bcaa3a6160da05"><td class="memItemLeft" align="right" valign="top">typedef u16(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a5e5ddfd6e98fe27821bcaa3a6160da05.html#a5e5ddfd6e98fe27821bcaa3a6160da05">fl::XYFunction</a>) (u16 <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>, u16 <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a>, u16 width, u16 height)</td></tr>
+<tr class="memitem:a5e5ddfd6e98fe27821bcaa3a6160da05" id="r_a5e5ddfd6e98fe27821bcaa3a6160da05"><td class="memItemLeft" align="right" valign="top">typedef u16(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a5e5ddfd6e98fe27821bcaa3a6160da05.html#a5e5ddfd6e98fe27821bcaa3a6160da05">fl::XYFunction</a>) (u16 <a class="el" href="../../d4/d36/namespacefl_a01deac84db27d10f737f8a92973bea86.html#a01deac84db27d10f737f8a92973bea86">x</a>, u16 <a class="el" href="../../d4/d36/namespacefl_a19c81898aec29a20ef9d7e3be29eedfb.html#a19c81898aec29a20ef9d7e3be29eedfb">y</a>, u16 <a class="el" href="../../d4/d36/namespacefl_a82c4062f46dbbd85ea8b41690bda4729.html#a82c4062f46dbbd85ea8b41690bda4729">width</a>, u16 <a class="el" href="../../d4/d36/namespacefl_a2cda7f93ddbdf70cb1b9f8ab2430ffc1.html#a2cda7f93ddbdf70cb1b9f8ab2430ffc1">height</a>)</td></tr>
 <tr class="separator:a5e5ddfd6e98fe27821bcaa3a6160da05"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a0b9a6b53502de07b22db515e4f136e2e" id="r_a0b9a6b53502de07b22db515e4f136e2e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> u16&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a0b9a6b53502de07b22db515e4f136e2e.html#a0b9a6b53502de07b22db515e4f136e2e">fl::xy_line_by_line</a> (u16 <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>, u16 <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a>, u16 width, u16 height)</td></tr>
-<tr class="separator:a0b9a6b53502de07b22db515e4f136e2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad45d0b4c7ccce43d69da76336f568982" id="r_ad45d0b4c7ccce43d69da76336f568982"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> u16&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ad45d0b4c7ccce43d69da76336f568982.html#ad45d0b4c7ccce43d69da76336f568982">fl::xy_serpentine</a> (u16 <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>, u16 <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a>, u16 width, u16 height)</td></tr>
-<tr class="separator:ad45d0b4c7ccce43d69da76336f568982"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4da7f1b1461d0267333f18cf6d98a6aa" id="r_a4da7f1b1461d0267333f18cf6d98a6aa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> u16&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a4da7f1b1461d0267333f18cf6d98a6aa.html#a4da7f1b1461d0267333f18cf6d98a6aa">fl::xy_line_by_line</a> (u16 <a class="el" href="../../d4/d36/namespacefl_a01deac84db27d10f737f8a92973bea86.html#a01deac84db27d10f737f8a92973bea86">x</a>, u16 <a class="el" href="../../d4/d36/namespacefl_a19c81898aec29a20ef9d7e3be29eedfb.html#a19c81898aec29a20ef9d7e3be29eedfb">y</a>, u16 <a class="el" href="../../d4/d36/namespacefl_a82c4062f46dbbd85ea8b41690bda4729.html#a82c4062f46dbbd85ea8b41690bda4729">width</a>, u16 <a class="el" href="../../d4/d36/namespacefl_a2cda7f93ddbdf70cb1b9f8ab2430ffc1.html#a2cda7f93ddbdf70cb1b9f8ab2430ffc1">height</a>) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
+<tr class="separator:a4da7f1b1461d0267333f18cf6d98a6aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c4d97d2fd230486baed612fb6cbc0f0" id="r_a5c4d97d2fd230486baed612fb6cbc0f0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> u16&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a5c4d97d2fd230486baed612fb6cbc0f0.html#a5c4d97d2fd230486baed612fb6cbc0f0">fl::xy_serpentine</a> (u16 <a class="el" href="../../d4/d36/namespacefl_a01deac84db27d10f737f8a92973bea86.html#a01deac84db27d10f737f8a92973bea86">x</a>, u16 <a class="el" href="../../d4/d36/namespacefl_a19c81898aec29a20ef9d7e3be29eedfb.html#a19c81898aec29a20ef9d7e3be29eedfb">y</a>, u16 <a class="el" href="../../d4/d36/namespacefl_a82c4062f46dbbd85ea8b41690bda4729.html#a82c4062f46dbbd85ea8b41690bda4729">width</a>, u16 <a class="el" href="../../d4/d36/namespacefl_a2cda7f93ddbdf70cb1b9f8ab2430ffc1.html#a2cda7f93ddbdf70cb1b9f8ab2430ffc1">height</a>) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
+<tr class="separator:a5c4d97d2fd230486baed612fb6cbc0f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -165,8 +160,8 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../da/d61/xymap_8h.html">xymap.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_94896ea2d28e1d34f24a1dbbb9436aa8.html">math</a></li><li class="navelem"><a class="el" href="../../da/d61/xymap_8h.html">xymap.h</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

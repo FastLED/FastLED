@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fl/ui.h File Reference</title>
+<title>FastLED: fl/ui/ui.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -100,29 +100,25 @@ $(function(){initNavTree('d9/d3b/ui_8h.html','../../'); initResizable(true); });
 </div>
 
 <div class="header">
-  <div class="summary">
-<a href="#nested-classes">Classes</a> &#124;
-<a href="#namespaces">Namespaces</a> &#124;
-<a href="#define-members">Macros</a> &#124;
-<a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">ui.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="../../df/d2a/namespace_8h_source.html">fl/namespace.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../dc/d18/memory_8h_source.html">fl/memory.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d7/d91/fl_2json_8h_source.html">fl/json.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d1/d93/str_8h_source.html">fl/str.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/int.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../da/d09/audio_8h_source.html">fl/audio.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../db/dc0/engine__events_8h_source.html">fl/engine_events.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d0/d64/function__list_8h_source.html">fl/function_list.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d8/db8/math__macros_8h_source.html">fl/math_macros.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../df/d63/type__traits_8h_source.html">fl/type_traits.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d6/dc0/ui__impl_8h_source.html">fl/ui_impl.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d8/d4b/unused_8h_source.html">fl/unused.h</a>&quot;</code><br />
-<code>#include &quot;platforms/ui_defs.h&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d7/d0e/button_8h_source.html">sensors/button.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../da/ddb/virtual__if__not__avr_8h_source.html">fl/virtual_if_not_avr.h</a>&quot;</code><br />
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Aggregator header for the fl/ui/ family of per-element UI types. </p>
+<p>Each UI type lives in its own header under fl/ui/. This file re-exports them so consumers can include the entire UI surface with one include. </p>
+
+<p class="definition">Definition in file <a class="el" href="../../d9/d3b/ui_8h_source.html">ui.h</a>.</p>
+</div><div class="textblock"><code>#include &quot;<a class="el" href="../../d0/d90/ui_2audio_8h_source.html">fl/ui/audio.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d7b/ui_2button_8h_source.html">fl/ui/button.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../da/dbb/checkbox_8h_source.html">fl/ui/checkbox.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d1/d59/description_8h_source.html">fl/ui/description.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../de/dc0/dropdown_8h_source.html">fl/ui/dropdown.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/dfe/element_8h_source.html">fl/ui/element.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d9/dd1/group_8h_source.html">fl/ui/group.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../db/df1/help_8h_source.html">fl/ui/help.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d1/d4a/number__field_8h_source.html">fl/ui/number_field.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dd/de2/slider_8h_source.html">fl/ui/slider.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d8/ddf/title_8h_source.html">fl/ui/title.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for ui.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -135,80 +131,18 @@ $(function(){initNavTree('d9/d3b/ui_8h.html','../../'); initResizable(true); });
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d9/d75/ui_8h__dep__incl.svg" width="100%" height="481"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d9/d75/ui_8h__dep__incl.svg" width="100%" height="558"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../d9/d3b/ui_8h_source.html">Go to the source code of this file.</a></p>
-<table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
-Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d4d/classfl_1_1_u_i_audio.html">fl::UIAudio</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d1d/classfl_1_1_u_i_button.html">fl::UIButton</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d68/structfl_1_1_u_i_button_1_1_listener.html">fl::UIButton::Listener</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/dfe/classfl_1_1_u_i_checkbox.html">fl::UICheckbox</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d6f/structfl_1_1_u_i_checkbox_1_1_listener.html">fl::UICheckbox::Listener</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d86/classfl_1_1_u_i_description.html">fl::UIDescription</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dc6/classfl_1_1_u_i_dropdown.html">fl::UIDropdown</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../da/da3/structfl_1_1_u_i_dropdown_1_1_listener.html">fl::UIDropdown::Listener</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d7b/classfl_1_1_u_i_element.html">fl::UIElement</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d3a/classfl_1_1_u_i_group.html">fl::UIGroup</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d0e/classfl_1_1_u_i_help.html">fl::UIHelp</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d5f/classfl_1_1_u_i_number_field.html">fl::UINumberField</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/d0d/structfl_1_1_u_i_number_field_1_1_listener.html">fl::UINumberField::Listener</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d47/classfl_1_1_u_i_slider.html">fl::UISlider</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../da/df8/structfl_1_1_u_i_slider_1_1_listener.html">fl::UISlider::Listener</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d82/classfl_1_1_u_i_title.html">fl::UITitle</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
-Namespaces</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
-Macros</h2></td></tr>
-<tr class="memitem:abe78ba1f320a6f6a32b4f942775a26b4" id="r_abe78ba1f320a6f6a32b4f942775a26b4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d3b/ui_8h_abe78ba1f320a6f6a32b4f942775a26b4.html#abe78ba1f320a6f6a32b4f942775a26b4">FASTLED_UI_DEFINE_OPERATORS</a>(UI_CLASS)</td></tr>
-<tr class="separator:abe78ba1f320a6f6a32b4f942775a26b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3f12a6f103811ac4b69d42f3ddb08fe4" id="r_a3f12a6f103811ac4b69d42f3ddb08fe4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d3b/ui_8h_a3f12a6f103811ac4b69d42f3ddb08fe4.html#a3f12a6f103811ac4b69d42f3ddb08fe4">FL_NO_COPY</a>(CLASS)</td></tr>
-<tr class="separator:a3f12a6f103811ac4b69d42f3ddb08fe4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
-Functions</h2></td></tr>
-<tr class="memitem:a17a25f9a9eb5be6d08ee831a92abbb57" id="r_a17a25f9a9eb5be6d08ee831a92abbb57"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a17a25f9a9eb5be6d08ee831a92abbb57.html#a17a25f9a9eb5be6d08ee831a92abbb57">fl::FASTLED_UI_DEFINE_OPERATORS</a> (<a class="el" href="../../d3/d1d/classfl_1_1_u_i_button.html">UIButton</a>)</td></tr>
-<tr class="separator:a17a25f9a9eb5be6d08ee831a92abbb57"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afdcefd5871d3520e7067b1382d7de7f8" id="r_afdcefd5871d3520e7067b1382d7de7f8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_afdcefd5871d3520e7067b1382d7de7f8.html#afdcefd5871d3520e7067b1382d7de7f8">fl::FASTLED_UI_DEFINE_OPERATORS</a> (<a class="el" href="../../d7/dfe/classfl_1_1_u_i_checkbox.html">UICheckbox</a>)</td></tr>
-<tr class="separator:afdcefd5871d3520e7067b1382d7de7f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaad3a37b6c0d01c1a30e924dba0a4fc1" id="r_aaad3a37b6c0d01c1a30e924dba0a4fc1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aaad3a37b6c0d01c1a30e924dba0a4fc1.html#aaad3a37b6c0d01c1a30e924dba0a4fc1">fl::FASTLED_UI_DEFINE_OPERATORS</a> (<a class="el" href="../../d1/dc6/classfl_1_1_u_i_dropdown.html">UIDropdown</a>)</td></tr>
-<tr class="separator:aaad3a37b6c0d01c1a30e924dba0a4fc1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a62401430f1f8254f5a13b7cb1e96281e" id="r_a62401430f1f8254f5a13b7cb1e96281e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a62401430f1f8254f5a13b7cb1e96281e.html#a62401430f1f8254f5a13b7cb1e96281e">fl::FASTLED_UI_DEFINE_OPERATORS</a> (<a class="el" href="../../d9/d5f/classfl_1_1_u_i_number_field.html">UINumberField</a>)</td></tr>
-<tr class="separator:a62401430f1f8254f5a13b7cb1e96281e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acc16a00adb82fd4391ac38a63dd2eed3" id="r_acc16a00adb82fd4391ac38a63dd2eed3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_acc16a00adb82fd4391ac38a63dd2eed3.html#acc16a00adb82fd4391ac38a63dd2eed3">fl::FASTLED_UI_DEFINE_OPERATORS</a> (<a class="el" href="../../dd/d47/classfl_1_1_u_i_slider.html">UISlider</a>)</td></tr>
-<tr class="separator:acc16a00adb82fd4391ac38a63dd2eed3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d9/d3b/ui_8h.html">ui.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_a07f19b7f86e604d2aac7ea6a5a83e59.html">ui</a></li><li class="navelem"><a class="el" href="../../d9/d3b/ui_8h.html">ui.h</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

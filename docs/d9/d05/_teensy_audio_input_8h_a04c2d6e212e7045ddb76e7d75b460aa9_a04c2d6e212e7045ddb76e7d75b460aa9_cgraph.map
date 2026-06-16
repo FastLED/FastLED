@@ -1,0 +1,15 @@
+<map id="createAudioConfig" name="createAudioConfig">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,141,147,166"/>
+<area shape="rect" id="Node000002" href="$dc/d52/classfl_1_1audio_1_1_config_a2d5e36a3d0a95bd53a20e0152cec156c.html#a2d5e36a3d0a95bd53a20e0152cec156c" title=" " alt="" coords="195,133,325,173"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="147,151,181,151,181,156,147,156"/>
+<area shape="rect" id="Node000003" href="$dc/d52/classfl_1_1audio_1_1_config_aea6ac29e0ebdee4aadc8e38d9cb3a71f.html#aea6ac29e0ebdee4aadc8e38d9cb3a71f" title=" " alt="" coords="381,5,512,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="280,131,321,94,372,55,382,49,385,54,375,60,324,98,283,135"/>
+<area shape="rect" id="Node000004" href="$d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_aaf0f048705bb3fc909d2dd1540052858.html#aaf0f048705bb3fc909d2dd1540052858" title=" " alt="" coords="373,69,520,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="318,131,374,111,376,116,320,136"/>
+<area shape="rect" id="Node000005" href="$d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_a3a4595ecf32ef89e2c79900ddff859ef.html#a3a4595ecf32ef89e2c79900ddff859ef" title=" " alt="" coords="373,133,520,173"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="326,151,360,151,360,156,326,156"/>
+<area shape="rect" id="Node000006" href="$d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_a8ce1940f8366667991e3463ff0575805.html#a8ce1940f8366667991e3463ff0575805" title=" " alt="" coords="373,197,520,237"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="320,171,376,190,374,195,318,176"/>
+<area shape="rect" id="Node000007" href="$dc/d52/classfl_1_1audio_1_1_config_a80ce537820ee6d81e2ec9fc24aef7a87.html#a80ce537820ee6d81e2ec9fc24aef7a87" title="Microphone pink noise correction profile." alt="" coords="381,261,512,301"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="283,172,324,209,375,247,385,253,382,257,372,252,321,213,280,176"/>
+</map>

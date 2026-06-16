@@ -1,0 +1,24 @@
+digraph "fl/remote/types.cpp.hpp"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl/remote/types.cpp.hpp",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl/remote/types.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d07/fl_2remote_2types_8h.html",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl/stl/json.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d05/json_8h.html",tooltip="FastLED's Elegant JSON Library: fl::json"];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl/stl/json/types.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/d5e/fl_2stl_2json_2types_8h.html",tooltip=" "];
+  Node4 -> Node8 [id="edge4_Node000004_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl/stl/string.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/d66/string_8h.html",tooltip=" "];
+  Node8 -> Node11 [id="edge5_Node000008_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl/stl/noexcept.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d01/noexcept_8h.html",tooltip=" "];
+  Node4 -> Node11 [id="edge6_Node000004_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node11 [id="edge7_Node000003_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node6 [id="edge8_Node000002_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl/stl/stdint.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/dd8/stdint_8h.html",tooltip=" "];
+  Node2 -> Node8 [id="edge9_Node000002_Node000008",color="steelblue1",style="solid",tooltip=" "];
+}

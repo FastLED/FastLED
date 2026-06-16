@@ -1,0 +1,15 @@
+<map id="fl::expected::success" name="fl::expected::success">
+<area shape="rect" id="Node000001" title="Create successful result." alt="" coords="689,77,847,102"/>
+<area shape="rect" id="Node000002" href="$dc/d85/namespacefl_1_1channels_1_1rx_adf091740491eb262a159f09c092a157d.html#adf091740491eb262a159f09c092a157d" title="Decode a WS2812 edge&#45;pair stream into bytes." alt="" coords="460,5,632,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="709,75,615,48,617,43,710,70"/>
+<area shape="rect" id="Node000003" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a97018959f2c77546fa12f2a0adb2f540.html#a97018959f2c77546fa12f2a0adb2f540" title="Flush all lanes (transpose and transmit)" alt="" coords="459,69,633,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="675,92,634,92,634,87,675,87"/>
+<area shape="rect" id="Node000007" href="$d9/d0a/classfl_1_1spi_1_1_device_a2242937ce5772a2fe9ba38632c000cc0.html#a2242937ce5772a2fe9ba38632c000cc0" title="Begin asynchronous write operation (returns immediately)" alt="" coords="451,134,641,159"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="705,108,597,137,595,131,704,103"/>
+<area shape="rect" id="Node000004" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a512a780a7050fa0e91e83c5dba1e17bc.html#a512a780a7050fa0e91e83c5dba1e17bc" title=" " alt="" coords="228,37,403,77"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="445,78,403,72,403,67,445,73"/>
+<area shape="rect" id="Node000005" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a547b2f30f70e16dbb22762f3f2370254.html#a547b2f30f70e16dbb22762f3f2370254" title="Internal implementation &#45; write all lanes atomically." alt="" coords="228,101,403,141"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="445,106,403,112,403,107,445,101"/>
+<area shape="rect" id="Node000006" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_ac20394c24a6406ccdd49a33d7e4f85ff.html#ac20394c24a6406ccdd49a33d7e4f85ff" title="Convenience method &#45; write multiple lanes in parallel (variadic template)" alt="" coords="5,101,180,141"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="214,124,180,124,180,119,214,119"/>
+</map>

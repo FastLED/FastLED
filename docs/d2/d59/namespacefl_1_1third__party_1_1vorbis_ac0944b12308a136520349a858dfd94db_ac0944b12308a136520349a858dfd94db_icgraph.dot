@@ -1,0 +1,29 @@
+digraph "fl::third_party::vorbis::maybe_start_packet"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::third_party::vorbis\l::maybe_start_packet",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::third_party::vorbis\l::stb_vorbis_seek_frame",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d59/namespacefl_1_1third__party_1_1vorbis_acc25538a006168e09502608a76565d01.html#acc25538a006168e09502608a76565d01",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::third_party::vorbis\l::stb_vorbis_seek",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a57cd87e6c849a39170e842785bec8c20.html#a57cd87e6c849a39170e842785bec8c20",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::third_party::vorbis\l::vorbis_decode_initial",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a5a413f4bebbbff75b92501662dc5a9d4.html#a5a413f4bebbbff75b92501662dc5a9d4",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::third_party::vorbis\l::peek_decode_initial",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d59/namespacefl_1_1third__party_1_1vorbis_ae572324cb1489e4bd83d545f71ed716e.html#ae572324cb1489e4bd83d545f71ed716e",tooltip=" "];
+  Node5 -> Node2 [id="edge5_Node000005_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 -> Node6 [id="edge6_Node000004_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::third_party::vorbis\l::vorbis_decode_packet",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a7db6b09a88e147aae04c098a9a6c770b.html#a7db6b09a88e147aae04c098a9a6c770b",tooltip=" "];
+  Node6 -> Node7 [id="edge7_Node000006_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::third_party::vorbis\l::stb_vorbis_decode_frame\l_pushdata",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a96f72e92c74aa0ba648f1664fcf75729.html#a96f72e92c74aa0ba648f1664fcf75729",tooltip=" "];
+  Node6 -> Node8 [id="edge8_Node000006_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::third_party::vorbis\l::stb_vorbis_get_frame_float",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a5a2442d84b370143f16d0e7ac829ebe2.html#a5a2442d84b370143f16d0e7ac829ebe2",tooltip=" "];
+  Node8 -> Node3 [id="edge9_Node000008_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 -> Node17 [id="edge10_Node000006_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl::third_party::vorbis\l::vorbis_pump_first_frame",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a2904e015b772ead82d14a942fda42ab4.html#a2904e015b772ead82d14a942fda42ab4",tooltip=" "];
+  Node17 -> Node2 [id="edge11_Node000017_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

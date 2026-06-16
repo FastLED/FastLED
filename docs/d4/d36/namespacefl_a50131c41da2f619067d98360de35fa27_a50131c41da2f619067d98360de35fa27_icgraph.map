@@ -1,0 +1,35 @@
+<map id="fl::delay" name="fl::delay">
+<area shape="rect" id="Node000001" title="Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all..." alt="" coords="736,198,811,223"/>
+<area shape="poly" id="edge11_Node000001_Node000001" title=" " alt="" coords="808,188,798,180,773,177,753,179,742,183,740,189,745,196,741,199,734,190,738,180,751,174,773,171,800,175,811,184"/>
+<area shape="rect" id="Node000002" href="$d0/ddf/class_midi_shield_button_a44897ca4c21626c1ad1277bc02e00455.html#a44897ca4c21626c1ad1277bc02e00455" title=" " alt="" coords="474,19,683,59"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="761,186,733,128,712,98,686,73,667,61,670,57,690,69,716,95,738,126,766,184"/>
+<area shape="rect" id="Node000003" href="$d8/ddd/class_toggle_button_a2a9e3bd18ffaaf27092378dba82114cb.html#a2a9e3bd18ffaaf27092378dba82114cb" title=" " alt="" coords="479,83,679,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="754,188,725,154,687,124,658,111,660,106,689,119,728,150,758,185"/>
+<area shape="rect" id="Node000004" href="$d7/d5f/classfl_1_1_http_connection_a5771485770bb65873ba278d1806af6e3.html#a5771485770bb65873ba278d1806af6e3" title=" " alt="" coords="491,133,666,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="722,198,687,188,647,176,649,171,689,183,723,193"/>
+<area shape="rect" id="Node000014" href="$dd/dbb/class_c_fast_l_e_d_a6819ff831058a710d4582dfc09817202.html#a6819ff831058a710d4582dfc09817202" title="Delay for the given number of milliseconds." alt="" coords="515,198,642,223"/>
+<area shape="poly" id="edge10_Node000001_Node000014" title=" " alt="" coords="722,213,642,213,642,208,722,208"/>
+<area shape="rect" id="Node000015" href="$d1/d86/namespacefl_1_1third__party_a969792a3f08da0146abd9e740081ac1c.html#a969792a3f08da0146abd9e740081ac1c" title=" " alt="" coords="482,248,675,288"/>
+<area shape="poly" id="edge12_Node000001_Node000015" title=" " alt="" coords="724,228,648,251,646,245,722,223"/>
+<area shape="rect" id="Node000016" href="$d1/d86/namespacefl_1_1third__party_a24141a300abe39176c4bd2d7d32b9e88.html#a24141a300abe39176c4bd2d7d32b9e88" title="Prepare to show a frame." alt="" coords="238,273,386,313"/>
+<area shape="poly" id="edge14_Node000001_Node000016" title=" " alt="" coords="759,237,731,273,711,290,689,302,651,316,611,325,530,330,452,325,386,314,387,309,453,320,530,325,610,319,649,311,687,298,708,285,727,269,755,233"/>
+<area shape="rect" id="Node000017" href="$df/d52/namespacefl_1_1platforms_ac009c87446b4a0e2fc2bbb7edd2c92b9.html#ac009c87446b4a0e2fc2bbb7edd2c92b9" title=" " alt="" coords="469,363,688,403"/>
+<area shape="poly" id="edge15_Node000001_Node000017" title=" " alt="" coords="764,237,736,292,715,321,690,346,658,365,655,360,686,342,711,317,731,289,760,235"/>
+<area shape="rect" id="Node000005" href="$d7/d5f/classfl_1_1_http_connection_ad9f710e04bb0829d726f68b851f29f21.html#ad9f710e04bb0829d726f68b851f29f21" title=" " alt="" coords="243,133,381,173"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="478,156,382,156,382,151,478,151"/>
+<area shape="rect" id="Node000006" href="$d7/d5f/classfl_1_1_http_connection_aada6a19a18d76f0291a81ec1d4e51a46.html#aada6a19a18d76f0291a81ec1d4e51a46" title=" " alt="" coords="11,5,149,45"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="268,128,153,60,129,48,131,43,156,55,271,124"/>
+<area shape="rect" id="Node000007" href="$d7/d5f/classfl_1_1_http_connection_aca69b124e62bb6273a56aff7038e4a87.html#aca69b124e62bb6273a56aff7038e4a87" title=" " alt="" coords="11,69,149,109"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="229,133,149,111,150,106,230,128"/>
+<area shape="rect" id="Node000009" href="$d7/d5f/classfl_1_1_http_connection_a7be36c00ff0b05c0c0ec2bf488ef45bd.html#a7be36c00ff0b05c0c0ec2bf488ef45bd" title=" " alt="" coords="11,133,149,173"/>
+<area shape="poly" id="edge7_Node000005_Node000009" title=" " alt="" coords="229,156,150,156,150,151,229,151"/>
+<area shape="rect" id="Node000010" href="$d7/d5f/classfl_1_1_http_connection_aaba22bc2bc03acc4eb3f666c4de837d2.html#aaba22bc2bc03acc4eb3f666c4de837d2" title=" " alt="" coords="11,197,149,237"/>
+<area shape="poly" id="edge8_Node000005_Node000010" title=" " alt="" coords="230,179,150,201,149,196,229,173"/>
+<area shape="rect" id="Node000012" href="$d7/d5f/classfl_1_1_http_connection_a2cc7c7f25e39d7282a114019671c74f7.html#a2cc7c7f25e39d7282a114019671c74f7" title=" " alt="" coords="11,261,149,301"/>
+<area shape="poly" id="edge9_Node000005_Node000012" title=" " alt="" coords="271,183,156,252,131,264,129,259,153,247,268,178"/>
+<area shape="poly" id="edge13_Node000015_Node000016" title=" " alt="" coords="468,281,387,289,386,284,468,276"/>
+<area shape="rect" id="Node000018" href="$df/d52/namespacefl_1_1platforms_a3333f9482b0798c0daebdc07be2cdd5c.html#a3333f9482b0798c0daebdc07be2cdd5c" title=" " alt="" coords="203,363,421,403"/>
+<area shape="poly" id="edge16_Node000017_Node000018" title=" " alt="" coords="456,385,422,385,422,380,456,380"/>
+<area shape="rect" id="Node000019" href="$d7/d76/classfl_1_1_scoped_watchdog_a196822062d7ab5c2b32c34a6d1efddd0.html#a196822062d7ab5c2b32c34a6d1efddd0" title="Construct with an explicit timeout." alt="" coords="5,363,155,403"/>
+<area shape="poly" id="edge17_Node000018_Node000019" title=" " alt="" coords="189,385,155,385,155,380,189,380"/>
+</map>

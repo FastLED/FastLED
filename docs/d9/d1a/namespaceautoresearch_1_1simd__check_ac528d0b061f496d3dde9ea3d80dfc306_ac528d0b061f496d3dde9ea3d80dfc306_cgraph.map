@@ -1,0 +1,12 @@
+<map id="autoresearch::simd_check::benchU16x16_4" name="autoresearch::simd_check::benchU16x16_4">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,59,184,99"/>
+<area shape="rect" id="Node000002" href="$db/d56/classfl_1_1u16x16_ad4efc4f4b7252b0e56d4c845db9e22d1.html#ad4efc4f4b7252b0e56d4c845db9e22d1" title=" " alt="" coords="232,29,388,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,61,223,54,224,60,185,66"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a95a89c7ba649b9bd2c9136c0f517d82f.html#a95a89c7ba649b9bd2c9136c0f517d82f" title="Universal microsecond timer &#45; returns microseconds since system startup." alt="" coords="269,103,351,128"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="185,92,255,104,254,109,184,97"/>
+<area shape="rect" id="Node000003" href="$db/d56/classfl_1_1u16x16_abdfdcc5a2a8e4be8d29870c5f8d837a9.html#abdfdcc5a2a8e4be8d29870c5f8d837a9" title=" " alt="" coords="436,5,579,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="388,30,422,26,423,31,389,35"/>
+<area shape="rect" id="Node000004" href="$db/d56/classfl_1_1u16x16_a2ac5a2cd36c6cae6786f352a5a564c28.html#a2ac5a2cd36c6cae6786f352a5a564c28" title=" " alt="" coords="448,55,567,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="389,49,435,55,434,61,388,55"/>
+<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="277,104,271,94,274,84,288,78,310,76,337,80,348,88,345,93,335,84,310,81,289,83,278,88,276,94,282,101"/>
+</map>

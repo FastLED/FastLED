@@ -47,7 +47,7 @@
   </g>
 </defs>
 <script type="application/ecmascript">
-var viewWidth = 528;
+var viewWidth = 540;
 var viewHeight = 64;
 var sectionId = 'dynsection-0';
 </script>
@@ -103,9 +103,9 @@ var sectionId = 'dynsection-0';
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d1/d12/group__intmap_ga43a52eb77959095c09b86f6d514eee5e.html#ga43a52eb77959095c09b86f6d514eee5e" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="517,-56 440,-56 440,-37 517,-37 517,-56"/>
-<text text-anchor="middle" x="478.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">map16_to_8</text>
+<g id="a_Node000004"><a xlink:href="../../d1/d12/group__intmap_gaa22e4ff6f570b2e2662c77854c5c6148.html#gaa22e4ff6f570b2e2662c77854c5c6148" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="529,-56 440,-56 440,-37 529,-37 529,-56"/>
+<text text-anchor="middle" x="484.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">fl::map16_to_8</text>
 </a>
 </g>
 </g>
@@ -113,17 +113,17 @@ var sectionId = 'dynsection-0';
 <g id="edge3_Node000003_Node000004" class="edge">
 <title>Node3&#45;&gt;Node4</title>
 <g id="a_edge3_Node000003_Node000004"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M401.24,-34.57C410.56,-36.03 420.39,-37.57 429.79,-39.04"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="429.35,-42.51 439.77,-40.6 430.44,-35.6 429.35,-42.51"/>
+<path fill="none" stroke="#63b8ff" d="M401.31,-34.25C410.46,-35.62 420.16,-37.06 429.57,-38.46"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="429.21,-41.95 439.62,-39.96 430.24,-35.03 429.21,-41.95"/>
 </a>
 </g>
 </g>
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d1/d12/group__intmap_ga941524c476a65f30ca1a31d5629f5de5.html#ga941524c476a65f30ca1a31d5629f5de5" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="520,-19 437,-19 437,0 520,0 520,-19"/>
-<text text-anchor="middle" x="478.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">map32_to_16</text>
+<g id="a_Node000005"><a xlink:href="../../d1/d12/group__intmap_ga8e50a18fc577d3c0aafcdc300de507ef.html#ga8e50a18fc577d3c0aafcdc300de507ef" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="532,-19 437,-19 437,0 532,0 532,-19"/>
+<text text-anchor="middle" x="484.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::map32_to_16</text>
 </a>
 </g>
 </g>
@@ -131,8 +131,8 @@ var sectionId = 'dynsection-0';
 <g id="edge4_Node000003_Node000005" class="edge">
 <title>Node3&#45;&gt;Node5</title>
 <g id="a_edge4_Node000003_Node000005"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M401.24,-20.8C409.49,-19.58 418.15,-18.29 426.55,-17.05"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="427.25,-20.48 436.63,-15.55 426.23,-13.56 427.25,-20.48"/>
+<path fill="none" stroke="#63b8ff" d="M401.31,-21.1C409.45,-19.95 418.03,-18.74 426.46,-17.55"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="427.2,-20.98 436.61,-16.12 426.22,-14.05 427.2,-20.98"/>
 </a>
 </g>
 </g>

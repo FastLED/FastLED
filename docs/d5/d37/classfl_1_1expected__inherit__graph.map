@@ -1,0 +1,7 @@
+<map id="fl::expected&lt; T, E &gt;" name="fl::expected&lt; T, E &gt;">
+<area shape="rect" id="Node000001" title="expected type for operations that can fail (C++23&#45;style)" alt="" coords="5,42,157,67"/>
+<area shape="rect" id="Node000002" href="$d7/d93/classfl_1_1expected.html" title=" " alt="" coords="391,5,632,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="171,46,390,31,390,36,171,51"/>
+<area shape="rect" id="Node000003" href="$d1/d2e/classfl_1_1expected_3_01void_00_01_e_01_4.html" title="Specialization for void (no value to return)" alt="" coords="425,70,597,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="171,66,182,67,309,75,425,79,425,84,309,81,181,72,171,71"/>
+</map>

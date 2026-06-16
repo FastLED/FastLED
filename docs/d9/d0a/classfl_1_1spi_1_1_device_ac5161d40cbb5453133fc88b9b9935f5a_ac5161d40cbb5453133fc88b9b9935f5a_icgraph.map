@@ -1,0 +1,5 @@
+<map id="fl::spi::Device::acquireBuffer" name="fl::spi::Device::acquireBuffer">
+<area shape="rect" id="Node000001" title="Acquire DMA&#45;capable buffer for zero&#45;copy transmission." alt="" coords="244,5,411,45"/>
+<area shape="rect" id="Node000002" href="$d9/d0a/classfl_1_1spi_1_1_device_a2242937ce5772a2fe9ba38632c000cc0.html#a2242937ce5772a2fe9ba38632c000cc0" title="Begin asynchronous write operation (returns immediately)" alt="" coords="5,13,196,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="230,28,196,28,196,23,230,23"/>
+</map>

@@ -1,0 +1,56 @@
+digraph "fl::createSerialTransport"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::createSerialTransport",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Create RequestSource and ResponseSink pair for serial I/O."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::createSerialRequestSource",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a6913bcc5545eb4b029ec170d48a14766.html#a6913bcc5545eb4b029ec170d48a14766",tooltip="Create a JSON-RPC RequestSource that reads from fl:: serial input."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::available",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a01186a22a1055c583d5408c116c84ffa.html#a01186a22a1055c583d5408c116c84ffa",tooltip=" "];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::string_view::back",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/ddb/classfl_1_1string__view_adc38da990a3a3aa5911bfdf42c50cfc4.html#adc38da990a3a3aa5911bfdf42c50cfc4",tooltip=" "];
+  Node2 -> Node5 [id="edge4_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::string_view::empty",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/ddb/classfl_1_1string__view_a046c8a6a9299f3ec395183dac2408d10.html#a046c8a6a9299f3ec395183dac2408d10",tooltip=" "];
+  Node2 -> Node6 [id="edge5_Node000002_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::string_view::front",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/ddb/classfl_1_1string__view_a624f61713ddf7fe75c0f215185fdcd7e.html#a624f61713ddf7fe75c0f215185fdcd7e",tooltip=" "];
+  Node2 -> Node7 [id="edge6_Node000002_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::isspace",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_af438d7f5c0c5ffcdbcd0b563adf1c40d.html#af438d7f5c0c5ffcdbcd0b563adf1c40d",tooltip="Check if character is whitespace (space, tab, newline, carriage return)"];
+  Node2 -> Node8 [id="edge7_Node000002_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::json::parse",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d40/classfl_1_1json_af7d8a65ad376b44e25bf9653bcac2405.html#af7d8a65ad376b44e25bf9653bcac2405",tooltip=" "];
+  Node8 -> Node9 [id="edge8_Node000008_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::json::json",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d40/classfl_1_1json_a08247deaa089c843eae1e64655e2d761.html#a08247deaa089c843eae1e64655e2d761",tooltip=" "];
+  Node8 -> Node8 [id="edge9_Node000008_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 -> Node10 [id="edge10_Node000008_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::json_value::parse2",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dc/dec/structfl_1_1json__value_aa55ba03795c9d30a654c1385a9d28f8e.html#aa55ba03795c9d30a654c1385a9d28f8e",tooltip=" "];
+  Node2 -> Node12 [id="edge11_Node000002_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::readLine",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_af62a6a137d58541697cc30d451c9d751.html#af62a6a137d58541697cc30d451c9d751",tooltip=" "];
+  Node12 -> Node13 [id="edge12_Node000012_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::readStringUntil",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_ab9a569f3493b0267ba32021be174dd94.html#ab9a569f3493b0267ba32021be174dd94",tooltip=" "];
+  Node12 -> Node21 [id="edge13_Node000012_Node000021",color="steelblue1",style="solid",tooltip=" "];
+  Node21 [id="Node000021",label="fl::sstream::str",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d27/classfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e.html#a08170cac6eba7241f099ae16730f6f8e",tooltip=" "];
+  Node2 -> Node22 [id="edge14_Node000002_Node000022",color="steelblue1",style="solid",tooltip=" "];
+  Node22 [id="Node000022",label="fl::string_view::remove\l_prefix",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/ddb/classfl_1_1string__view_aff716853de587e04e571f431c509fb51.html#aff716853de587e04e571f431c509fb51",tooltip=" "];
+  Node2 -> Node23 [id="edge15_Node000002_Node000023",color="steelblue1",style="solid",tooltip=" "];
+  Node23 [id="Node000023",label="fl::string_view::remove\l_suffix",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/ddb/classfl_1_1string__view_a535a8f0b60da2723febb6ddc3792dbc8.html#a535a8f0b60da2723febb6ddc3792dbc8",tooltip=" "];
+  Node2 -> Node24 [id="edge16_Node000002_Node000024",color="steelblue1",style="solid",tooltip=" "];
+  Node24 [id="Node000024",label="fl::string_view::starts_with",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/ddb/classfl_1_1string__view_ad7b51d579c6cc9878c863c70f34ff1fa.html#ad7b51d579c6cc9878c863c70f34ff1fa",tooltip=" "];
+  Node24 -> Node25 [id="edge17_Node000024_Node000025",color="steelblue1",style="solid",tooltip=" "];
+  Node25 [id="Node000025",label="fl::string_view::string_view",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/ddb/classfl_1_1string__view_affa2db6e3c9e989f0bea8a01a6e5e1db.html#affa2db6e3c9e989f0bea8a01a6e5e1db",tooltip=" "];
+  Node2 -> Node26 [id="edge18_Node000002_Node000026",color="steelblue1",style="solid",tooltip=" "];
+  Node26 [id="Node000026",label="fl::strlen",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a2b133338a142a6ec52750f65eb3a33e5.html#a2b133338a142a6ec52750f65eb3a33e5",tooltip=" "];
+  Node1 -> Node27 [id="edge19_Node000001_Node000027",color="steelblue1",style="solid",tooltip=" "];
+  Node27 [id="Node000027",label="fl::createSerialResponseSink",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aaaad760134ff434244ec0bfb2740a8f7.html#aaaad760134ff434244ec0bfb2740a8f7",tooltip="Create a JSON-RPC ResponseSink that writes to fl:: serial output."];
+  Node27 -> Node28 [id="edge20_Node000027_Node000028",color="steelblue1",style="solid",tooltip=" "];
+  Node28 [id="Node000028",label="fl::formatJsonResponse",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a453c4513b6c26a2104cdf91921eb2742.html#a453c4513b6c26a2104cdf91921eb2742",tooltip="Serialize JSON response to a string."];
+  Node28 -> Node29 [id="edge21_Node000028_Node000029",color="steelblue1",style="solid",tooltip=" "];
+  Node29 [id="Node000029",label="fl::basic_string::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d66/classfl_1_1basic__string_af4d95d1e9905eb5fb76e12c2c2bd7ebc.html#af4d95d1e9905eb5fb76e12c2c2bd7ebc",tooltip=" "];
+  Node28 -> Node21 [id="edge22_Node000028_Node000021",color="steelblue1",style="solid",tooltip=" "];
+  Node27 -> Node30 [id="edge23_Node000027_Node000030",color="steelblue1",style="solid",tooltip=" "];
+  Node30 [id="Node000030",label="fl::writeSerialLine",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a7cbb518d527a0cec0393f52826600e27.html#a7cbb518d527a0cec0393f52826600e27",tooltip="Write a string with newline to a serial-like output."];
+  Node30 -> Node31 [id="edge24_Node000030_Node000031",color="steelblue1",style="solid",tooltip=" "];
+  Node31 [id="Node000031",label="fl::basic_string::c_str",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$de/d66/classfl_1_1basic__string_adc70863b5a29972d3e45c5e5b31e6686.html#adc70863b5a29972d3e45c5e5b31e6686",tooltip=" "];
+}

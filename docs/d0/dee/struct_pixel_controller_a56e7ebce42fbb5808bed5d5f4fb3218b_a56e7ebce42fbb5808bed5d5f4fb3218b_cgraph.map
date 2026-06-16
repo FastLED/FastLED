@@ -1,0 +1,8 @@
+<map id="PixelController::scale" name="PixelController::scale">
+<area shape="rect" id="Node000001" title="Scale a value using the per&#45;channel scale data." alt="" coords="5,29,164,55"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_ae44229e20fb4ba4473b057dcda87122e.html#ae44229e20fb4ba4473b057dcda87122e" title="Copy constructor." alt="" coords="212,29,432,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,39,198,39,198,45,164,45"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="284,31,276,21,280,11,296,5,322,3,355,7,368,16,364,20,353,11,322,8,297,10,283,15,281,20,288,27"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_af3310e3a869dfeafae981291b76b572d.html#af3310e3a869dfeafae981291b76b572d" title=" " alt="" coords="480,29,636,55"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="432,39,466,39,466,45,432,45"/>
+</map>

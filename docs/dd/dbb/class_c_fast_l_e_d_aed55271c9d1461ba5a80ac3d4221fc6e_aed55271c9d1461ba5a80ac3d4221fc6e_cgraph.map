@@ -1,0 +1,15 @@
+<map id="CFastLED::setCorrection" name="CFastLED::setCorrection">
+<area shape="rect" id="Node000001" title="Set a global color correction." alt="" coords="5,77,183,102"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ad9e0dfb8b8b333d9e48c7695b202710c.html#ad9e0dfb8b8b333d9e48c7695b202710c" title="Get the first LED controller in the linked list of controllers." alt="" coords="231,5,367,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="135,74,220,47,222,52,137,79"/>
+<area shape="rect" id="Node000006" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a87abe437742b3f2b06943fafd4404aef.html#a87abe437742b3f2b06943fafd4404aef" title="Get the next controller in the linked list after this one." alt="" coords="231,69,367,109"/>
+<area shape="poly" id="edge4_Node000001_Node000006" title=" " alt="" coords="183,87,217,87,217,92,183,92"/>
+<area shape="rect" id="Node000007" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a0ad6a54c30af707e1bb3ad37c1e7e36b.html#a0ad6a54c30af707e1bb3ad37c1e7e36b" title="The color corrction to use for this controller, expressed as a CRGB object." alt="" coords="231,133,367,173"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="137,100,222,127,220,132,135,105"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a7e91fc8f83d62c9da5e5c3d6d1bc10ce.html#a7e91fc8f83d62c9da5e5c3d6d1bc10ce" title="Protected constructor with registration mode." alt="" coords="415,69,551,109"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="358,43,413,62,411,67,356,48"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a9e51518d1427463dffd596c69c6f3e46.html#a9e51518d1427463dffd596c69c6f3e46" title="Add this controller to the linked list." alt="" coords="599,69,735,109"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="551,87,585,87,585,92,551,92"/>
+<area shape="poly" id="edge5_Node000006_Node000003" title=" " alt="" coords="367,87,401,87,401,92,367,92"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="356,131,411,111,413,116,358,136"/>
+</map>

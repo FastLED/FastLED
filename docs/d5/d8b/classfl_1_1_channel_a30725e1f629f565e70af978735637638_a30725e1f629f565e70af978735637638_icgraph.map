@@ -1,0 +1,7 @@
+<map id="fl::Channel::leds" name="fl::Channel::leds">
+<area shape="rect" id="Node000001" title="Get the LED array as a span (non&#45;const)" alt="" coords="205,31,332,56"/>
+<area shape="rect" id="Node000002" href="$d5/d8b/classfl_1_1_channel_a73b662986c55cfb31ff1e72065df03dd.html#a73b662986c55cfb31ff1e72065df03dd" title="Private constructor (use create() factory method)" alt="" coords="5,5,157,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="191,36,157,31,158,26,192,30"/>
+<area shape="rect" id="Node000003" href="$d5/d8b/classfl_1_1_channel_a547ccb4c09f235fdad54564198d19028.html#a547ccb4c09f235fdad54564198d19028" title="Backwards&#45;compatible constructor (deprecated)" alt="" coords="5,55,157,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="192,56,158,60,157,55,191,51"/>
+</map>

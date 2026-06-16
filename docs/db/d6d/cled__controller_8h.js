@@ -1,4 +1,4 @@
 var cled__controller_8h =
 [
-    [ "CLEDController", "d6/d2c/class_c_l_e_d_controller.html", "d6/d2c/class_c_l_e_d_controller" ]
+    [ "CLEDController", "db/d6d/cled__controller_8h_a5c4c69e67efd8ee1b27833dfef522d6f.html#a5c4c69e67efd8ee1b27833dfef522d6f", null ]
 ];

@@ -1,0 +1,5 @@
+<map id="AutoResearchRemoteControl::stopBleRemote" name="AutoResearchRemoteControl::stopBleRemote">
+<area shape="rect" id="Node000001" title="Stop BLE remote (destroys BLE Remote + GATT server)" alt="" coords="5,5,216,45"/>
+<area shape="rect" id="Node000002" href="$de/d40/classfl_1_1json_af8bc0968107152344bfa8468bba76f54.html#af8bc0968107152344bfa8468bba76f54" title=" " alt="" coords="264,13,377,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="216,23,250,23,250,28,216,28"/>
+</map>

@@ -1,0 +1,6 @@
+<map id="fl::Engine::getTime" name="fl::Engine::getTime">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,149,55"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="197,29,272,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="150,39,183,39,183,45,150,45"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="208,31,203,21,206,11,217,5,235,3,256,6,266,15,262,19,254,11,235,8,218,10,210,15,208,20,213,28"/>
+</map>

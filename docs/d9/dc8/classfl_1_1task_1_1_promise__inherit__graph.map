@@ -1,0 +1,7 @@
+<map id="fl::task::Promise&lt; T &gt;" name="fl::task::Promise&lt; T &gt;">
+<area shape="rect" id="Node000001" title="Promise class that provides fluent .then() and .catch_() semantics This is a lightweight wrapper arou..." alt="" coords="118,5,283,31"/>
+<area shape="rect" id="Node000002" href="$d0/d34/classfl_1_1task_1_1_promise.html" title=" " alt="" coords="5,93,188,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="120,39,100,56,94,74,95,93,89,93,89,73,96,53,116,35"/>
+<area shape="rect" id="Node000003" href="$d0/d34/classfl_1_1task_1_1_promise.html" title=" " alt="" coords="235,93,374,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="251,34,277,53,292,72,301,92,296,94,287,75,273,57,248,39"/>
+</map>

@@ -112,7 +112,7 @@ template&lt;typename T&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../d4/d36/namespacefl.html#d5/d67/structfl_1_1enable__if">fl::enable_if</a>&lt; <a class="el" href="../../d3/d46/structfl_1_1is__same.html">fl::is_same</a>&lt; T, fl::size &gt;::value||<a class="el" href="../../d3/d46/structfl_1_1is__same.html">fl::is_same</a>&lt; T, fl::u16 &gt;::value, <a class="el" href="../../de/def/classfl_1_1istream.html">istream</a> &amp; &gt;::type fl::istream::operator&gt;&gt; </td>
+          <td class="memname"><a class="el" href="../../da/d3c/namespacefl_1_1fl.html#da/dbd/structfl_1_1fl_1_1enable__if">fl::enable_if</a>&lt; <a class="el" href="../../de/dc0/structfl_1_1fl_1_1is__same.html">fl::is_same</a>&lt; T, fl::size &gt;<a class="el" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">::value</a>||<a class="el" href="../../de/dc0/structfl_1_1fl_1_1is__same.html">fl::is_same</a>&lt; T, fl::u16 &gt;<a class="el" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">::value</a>, <a class="el" href="../../de/def/classfl_1_1istream.html">istream</a> &amp; &gt;::type fl::istream::operator&gt;&gt; </td>
           <td>(</td>
           <td class="paramtype">T &amp;</td>          <td class="paramname"><span class="paramname"><em>n</em></span></td><td>)</td>
           <td></td>
@@ -125,16 +125,16 @@ template&lt;typename T&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/dc9/istream_8h_source.html#l00230">230</a> of file <a class="el" href="../../db/dc9/istream_8h_source.html">istream.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  230</span>                           {</div>
-<div class="line"><span class="lineno">  231</span><span class="preprocessor">#if SKETCH_HAS_LOTS_OF_MEMORY</span></div>
-<div class="line"><span class="lineno">  232</span>        real_stream_ &gt;&gt; n;</div>
-<div class="line"><span class="lineno">  233</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  234</span>        <span class="comment">// No-op on memory-constrained platforms</span></div>
-<div class="line"><span class="lineno">  235</span>        n = 0;</div>
-<div class="line"><span class="lineno">  236</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  237</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><span class="lineno">  238</span>    }</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dc9/istream_8h_source.html#l00225">225</a> of file <a class="el" href="../../db/dc9/istream_8h_source.html">istream.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  225</span>                           {</div>
+<div class="line"><span class="lineno">  226</span><span class="preprocessor">#if SKETCH_HAS_LARGE_MEMORY</span></div>
+<div class="line"><span class="lineno">  227</span>        mRealStream &gt;&gt; n;</div>
+<div class="line"><span class="lineno">  228</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">  229</span>        <span class="comment">// No-op on memory-constrained platforms</span></div>
+<div class="line"><span class="lineno">  230</span>        n = 0;</div>
+<div class="line"><span class="lineno">  231</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  232</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">  233</span>    }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -145,7 +145,7 @@ template&lt;typename T&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../de/def/classfl_1_1istream.html">istream</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

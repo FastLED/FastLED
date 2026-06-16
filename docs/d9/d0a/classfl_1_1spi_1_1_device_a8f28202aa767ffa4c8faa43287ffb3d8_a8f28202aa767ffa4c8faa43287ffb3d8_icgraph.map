@@ -1,0 +1,7 @@
+<map id="fl::spi::Device::Device" name="fl::spi::Device::Device">
+<area shape="rect" id="Node000001" title="Construct SPI device with configuration." alt="" coords="237,31,400,56"/>
+<area shape="rect" id="Node000002" href="$d9/d0a/classfl_1_1spi_1_1_device_a164c4a5d432910862a3a908727a11138.html#a164c4a5d432910862a3a908727a11138" title=" " alt="" coords="16,5,179,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="223,35,179,30,179,25,224,30"/>
+<area shape="rect" id="Node000003" href="$d9/d0a/classfl_1_1spi_1_1_device_a0d4f32bfdbe507e52ff28f4d11c601a8.html#a0d4f32bfdbe507e52ff28f4d11c601a8" title=" " alt="" coords="5,55,189,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="224,56,190,60,189,55,223,51"/>
+</map>

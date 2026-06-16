@@ -1,0 +1,9 @@
+<map id="fl::audio::BeatDetectors" name="fl::audio::BeatDetectors">
+<area shape="rect" id="Node000001" title=" " alt="" coords="27,269,202,295"/>
+<area shape="rect" id="Node000002" href="$df/d68/classfl_1_1audio_1_1_spectral_flux_detector.html" title=" " alt="" coords="5,181,224,207"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="117,221,117,269,112,269,112,221"/>
+<area shape="rect" id="Node000003" href="$d4/dca/classfl_1_1array.html" title=" " alt="" coords="37,93,192,119"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="117,133,117,181,112,181,112,133"/>
+<area shape="rect" id="Node000004" href="$d4/dca/classfl_1_1array.html" title="A fixed&#45;size array implementation similar to std::array." alt="" coords="51,5,179,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="117,45,117,93,112,93,112,45"/>
+</map>

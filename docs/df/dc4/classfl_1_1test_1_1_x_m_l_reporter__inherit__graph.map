@@ -1,0 +1,5 @@
+<map id="fl::test::XMLReporter" name="fl::test::XMLReporter">
+<area shape="rect" id="Node000001" title="XML reporter that outputs JUnit&#45;compatible XML format The output is accumulated in a string buffer pr..." alt="" coords="5,79,160,104"/>
+<area shape="rect" id="Node000002" href="$da/d63/classfl_1_1test_1_1_i_reporter.html" title=" " alt="" coords="17,5,148,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="85,44,85,79,80,79,80,44"/>
+</map>

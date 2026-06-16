@@ -1,0 +1,22 @@
+<map id="fl::set::count" name="fl::set::count">
+<area shape="rect" id="Node000001" title=" " alt="" coords="645,99,748,125"/>
+<area shape="rect" id="Node000002" href="$d6/d2d/classfl_1_1_digital_multi_write16_ab2fbb0f68e3c32263d9bbaf0cc7b0ec8.html#ab2fbb0f68e3c32263d9bbaf0cc7b0ec8" title=" " alt="" coords="432,60,597,100"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="631,103,597,97,598,92,632,98"/>
+<area shape="rect" id="Node000006" href="$d9/d21/classfl_1_1_digital_multi_write8_a8528927863f57fdfcd04fb1466ef8963.html#a8528927863f57fdfcd04fb1466ef8963" title=" " alt="" coords="436,124,593,164"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="632,126,594,133,593,128,631,121"/>
+<area shape="rect" id="Node000003" href="$d6/d2d/classfl_1_1_digital_multi_write16_a517c086da30ddcbef4425b2698b8acfb.html#a517c086da30ddcbef4425b2698b8acfb" title="Write pre&#45;transposed 16&#45;bit data to the 16 pins." alt="" coords="219,60,384,100"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="418,83,384,83,384,77,418,77"/>
+<area shape="rect" id="Node000004" href="$d6/d2d/classfl_1_1_digital_multi_write16_acddfa0f31daba041d8076772c5bdb8ee.html#acddfa0f31daba041d8076772c5bdb8ee" title=" " alt="" coords="5,5,171,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="209,59,166,48,167,43,210,54"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_ab5bc76750f7a0b948186397c6581fbf3.html#ab5bc76750f7a0b948186397c6581fbf3" title="Convenience free function — creates a temporary DigitalMultiWrite16, initializes it,..." alt="" coords="7,70,169,95"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="205,84,170,84,169,79,205,79"/>
+<area shape="rect" id="Node000007" href="$d9/d21/classfl_1_1_digital_multi_write8_aa5b3d3dc7ea64d70b0e835e8ef1ff702.html#aa5b3d3dc7ea64d70b0e835e8ef1ff702" title="Write pre&#45;transposed byte data to the 8 pins." alt="" coords="223,124,380,164"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="422,147,380,147,380,141,422,141"/>
+<area shape="rect" id="Node000010" href="$d9/d21/classfl_1_1_digital_multi_write8_a8e02fbebfb2ffd463e4da2b0b92e9dab.html#a8e02fbebfb2ffd463e4da2b0b92e9dab" title="Write a single bitmask byte to the 8 pins." alt="" coords="223,212,380,252"/>
+<area shape="poly" id="edge9_Node000006_Node000010" title=" " alt="" coords="454,172,352,214,350,209,451,167"/>
+<area shape="rect" id="Node000008" href="$d9/d21/classfl_1_1_digital_multi_write8_ad9c5db6010bb7ec249d2a525b69125dc.html#ad9c5db6010bb7ec249d2a525b69125dc" title=" " alt="" coords="9,123,167,163"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="208,146,167,146,167,140,208,141"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a0beee42fe65dbc34d13920741a3237ed.html#a0beee42fe65dbc34d13920741a3237ed" title="Convenience free function — creates a temporary DigitalMultiWrite8, initializes it,..." alt="" coords="11,187,165,213"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="212,170,138,190,137,185,211,165"/>
+<area shape="poly" id="edge10_Node000010_Node000010" title=" " alt="" coords="337,200,325,193,301,191,281,193,269,197,264,203,266,211,261,212,259,202,265,193,280,187,301,185,326,188,340,196"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="RGBWEmulatedController::ensureBuffer" name="RGBWEmulatedController::ensureBuffer">
+<area shape="rect" id="Node000001" title="Ensures the internal RGBW buffer is large enough for the LED count." alt="" coords="5,5,195,45"/>
+<area shape="rect" id="Node000002" href="$db/d74/struct_rgbw_a10319a45c0582fd4ea504324e3fcf2fe.html#a10319a45c0582fd4ea504324e3fcf2fe" title=" " alt="" coords="243,13,384,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="195,23,228,23,228,28,195,28"/>
+</map>

@@ -1,0 +1,22 @@
+<map id="fl::gfx::detail::computeBandShift" name="fl::gfx::detail::computeBandShift">
+<area shape="rect" id="Node000001" title="Precompute right&#45;shift and reciprocal multiplier for AA division." alt="" coords="741,47,911,87"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="865,36,852,29,826,26,804,28,790,33,785,39,788,46,783,48,780,38,787,28,802,23,826,21,853,24,868,31"/>
+<area shape="rect" id="Node000002" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_a76279d4830b289ed940eb35d755156f9.html#a76279d4830b289ed940eb35d755156f9" title=" " alt="" coords="491,5,693,31"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="727,49,652,33,653,28,729,44"/>
+<area shape="rect" id="Node000005" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_ac1063e6536a3ebf22978c3a5fe41310b.html#ac1063e6536a3ebf22978c3a5fe41310b" title=" " alt="" coords="491,55,693,80"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="728,70,694,70,694,65,728,65"/>
+<area shape="rect" id="Node000008" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_a0ed31accfda46ef3ddc9a0eb3ad5ef04.html#a0ed31accfda46ef3ddc9a0eb3ad5ef04" title=" " alt="" coords="499,105,685,145"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="731,93,675,107,674,102,730,88"/>
+<area shape="rect" id="Node000003" href="$d0/d8b/namespacefl_1_1gfx_a99e28c17bab90d96ecd6a950357fde83.html#a99e28c17bab90d96ecd6a950357fde83" title=" " alt="" coords="296,5,423,31"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="477,21,423,21,423,15,477,15"/>
+<area shape="rect" id="Node000004" href="$de/d5c/structfl_1_1gfx_1_1_canvas_aba6d3279b2186afd2564efe7f71e9d8f.html#aba6d3279b2186afd2564efe7f71e9d8f" title=" " alt="" coords="25,5,208,31"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="282,21,208,21,208,15,282,15"/>
+<area shape="rect" id="Node000006" href="$d0/d8b/namespacefl_1_1gfx_ab43aaa534398d0c1572e2ecbbffcd631.html#ab43aaa534398d0c1572e2ecbbffcd631" title=" " alt="" coords="295,55,423,80"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="477,70,423,70,423,65,477,65"/>
+<area shape="rect" id="Node000007" href="$de/d5c/structfl_1_1gfx_1_1_canvas_a4592348ee30cf7896ccbed4e9c2c5b95.html#a4592348ee30cf7896ccbed4e9c2c5b95" title=" " alt="" coords="25,55,209,80"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="281,70,209,70,209,65,281,65"/>
+<area shape="rect" id="Node000009" href="$d0/d8b/namespacefl_1_1gfx_abe30294359092a06f52b99a369bca3ec.html#abe30294359092a06f52b99a369bca3ec" title=" " alt="" coords="276,112,443,137"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="486,127,443,127,443,122,486,122"/>
+<area shape="rect" id="Node000010" href="$de/d5c/structfl_1_1gfx_1_1_canvas_ab3d4aedbb1e4bd95e5ef3f3c7b341e09.html#ab3d4aedbb1e4bd95e5ef3f3c7b341e09" title=" " alt="" coords="5,112,228,137"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="262,127,228,127,228,122,262,122"/>
+</map>

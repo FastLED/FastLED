@@ -1,0 +1,23 @@
+<map id="fl::third_party::nsgif_frame_prepare" name="fl::third_party::nsgif_frame_prepare">
+<area shape="rect" id="Node000001" title="Prepare to show a frame." alt="" coords="5,113,153,153"/>
+<area shape="rect" id="Node000002" href="$d2/d48/structfl_1_1rect_a3782633b18cb56aa3e1e793f234ac5a1.html#a3782633b18cb56aa3e1e793f234ac5a1" title=" " alt="" coords="250,5,346,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,110,145,75,200,41,236,28,238,33,202,46,148,79,104,114"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27" title="Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all..." alt="" coords="479,128,554,153"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="153,131,466,137,465,142,153,137"/>
+<area shape="rect" id="Node000029" href="$d1/d86/namespacefl_1_1third__party_a6fdd6b9a6260ecc32605a2adbd5607c4.html#a6fdd6b9a6260ecc32605a2adbd5607c4" title=" " alt="" coords="213,55,383,95"/>
+<area shape="poly" id="edge6_Node000001_Node000029" title=" " alt="" coords="153,111,207,96,209,101,154,116"/>
+<area shape="rect" id="Node000031" href="$d1/d86/namespacefl_1_1third__party_a969792a3f08da0146abd9e740081ac1c.html#a969792a3f08da0146abd9e740081ac1c" title=" " alt="" coords="201,170,395,210"/>
+<area shape="poly" id="edge8_Node000001_Node000031" title=" " alt="" coords="154,149,209,164,207,169,153,155"/>
+<area shape="rect" id="Node000033" href="$d1/d86/namespacefl_1_1third__party_a8fd9d7e3e5bca359919d1a198c272a27.html#a8fd9d7e3e5bca359919d1a198c272a27" title=" " alt="" coords="215,234,381,274"/>
+<area shape="poly" id="edge11_Node000001_Node000033" title=" " alt="" coords="105,151,149,185,203,220,216,226,214,231,200,224,146,190,102,155"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="484,129,477,120,481,110,494,104,517,101,544,105,555,114,552,118,542,110,517,107,496,109,485,113,482,119,488,126"/>
+<area shape="rect" id="Node000004" href="$df/d9e/namespacefl_1_1detail_abd6e1e8189dbbbf28d720923205bd0dd.html#abd6e1e8189dbbbf28d720923205bd0dd" title="Internal delay implementation used by the public fl::delay wrapper." alt="" coords="639,128,793,153"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="554,138,625,138,625,143,554,143"/>
+<area shape="rect" id="Node000005" href="$db/d5c/namespacefl_1_1task_a2d40b476742263a3fa212e24b722e3ef.html#a2d40b476742263a3fa212e24b722e3ef" title="Run selected task subsystems." alt="" coords="841,128,936,153"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="793,138,828,138,828,143,793,143"/>
+<area shape="rect" id="Node000030" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="483,55,550,80"/>
+<area shape="poly" id="edge7_Node000029_Node000030" title=" " alt="" coords="383,70,469,66,470,72,384,75"/>
+<area shape="poly" id="edge9_Node000031_Node000003" title=" " alt="" coords="387,167,466,149,467,154,388,173"/>
+<area shape="rect" id="Node000032" href="$d1/d86/namespacefl_1_1third__party_a5fe21287dffcee497373334d1add3206.html#a5fe21287dffcee497373334d1add3206" title=" " alt="" coords="443,178,591,218"/>
+<area shape="poly" id="edge10_Node000031_Node000032" title=" " alt="" coords="395,191,429,192,429,197,395,196"/>
+</map>

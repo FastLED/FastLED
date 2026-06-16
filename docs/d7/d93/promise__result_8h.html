@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fl/promise_result.h File Reference</title>
+<title>FastLED: fl/task/promise_result.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -103,19 +103,12 @@ $(function(){initNavTree('d7/d93/promise__result_8h.html','../../'); initResizab
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#namespaces">Namespaces</a> &#124;
-<a href="#typedef-members">Typedefs</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">promise_result.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Result type for promise operations with ok() semantics. </p>
-<p>PromiseResult&lt;T&gt; provides a Rust-like Result type that wraps either a success value of type T or an Error. It provides convenient ok() checking and safe value access with assertions on misuse. </p>
-
-<p class="definition">Definition in file <a class="el" href="../../d7/d93/promise__result_8h_source.html">promise_result.h</a>.</p>
-</div><div class="textblock"><code>#include &quot;<a class="el" href="../../df/d2a/namespace_8h_source.html">fl/namespace.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d6/d10/variant_8h_source.html">fl/variant.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d6/d17/promise_8h_source.html">fl/promise.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d6/d10/variant_8h_source.html">fl/stl/variant.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/d17/promise_8h_source.html">fl/task/promise.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for promise_result.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -128,56 +121,51 @@ $(function(){initNavTree('d7/d93/promise__result_8h.html','../../'); initResizab
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d6/d66/promise__result_8h__dep__incl.svg" width="654" height="315"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d6/d66/promise__result_8h__dep__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../d7/d93/promise__result_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d6d/classfl_1_1result.html">fl::result&lt; T &gt;</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result type for promise operations.  <a href="../../dc/d6d/classfl_1_1result.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d3c/classfl_1_1task_1_1_promise_result.html">fl::task::PromiseResult&lt; T &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result type for promise operations.  <a href="../../d1/d3c/classfl_1_1task_1_1_promise_result.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
-Typedefs</h2></td></tr>
-<tr class="memitem:a27d194831b950c9e98e899583bfd6a25" id="r_a27d194831b950c9e98e899583bfd6a25"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
-<tr class="memitem:a27d194831b950c9e98e899583bfd6a25"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a27d194831b950c9e98e899583bfd6a25.html#a27d194831b950c9e98e899583bfd6a25">fl::PromiseResult</a> = <a class="el" href="../../dc/d6d/classfl_1_1result.html">result</a>&lt;T&gt;</td></tr>
-<tr class="memdesc:a27d194831b950c9e98e899583bfd6a25"><td class="mdescLeft">&#160;</td><td class="mdescRight">Type alias for backwards compatibility.  <br /></td></tr>
-<tr class="separator:a27d194831b950c9e98e899583bfd6a25"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task.html">fl::task</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a74580045a8d08796026868c73a0c3cb5" id="r_a74580045a8d08796026868c73a0c3cb5"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
-<tr class="memitem:a74580045a8d08796026868c73a0c3cb5"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../dc/d6d/classfl_1_1result.html">result</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a74580045a8d08796026868c73a0c3cb5.html#a74580045a8d08796026868c73a0c3cb5">fl::make_error</a> (const char *message)</td></tr>
-<tr class="memdesc:a74580045a8d08796026868c73a0c3cb5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to create an error result from C-string.  <br /></td></tr>
-<tr class="separator:a74580045a8d08796026868c73a0c3cb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a87a280249d9011ddf6ecf4ca8b6b244c" id="r_a87a280249d9011ddf6ecf4ca8b6b244c"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
-<tr class="memitem:a87a280249d9011ddf6ecf4ca8b6b244c"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../dc/d6d/classfl_1_1result.html">result</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a87a280249d9011ddf6ecf4ca8b6b244c.html#a87a280249d9011ddf6ecf4ca8b6b244c">fl::make_error</a> (const <a class="el" href="../../da/d46/structfl_1_1_error.html">Error</a> &amp;error)</td></tr>
-<tr class="memdesc:a87a280249d9011ddf6ecf4ca8b6b244c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to create an error result.  <br /></td></tr>
-<tr class="separator:a87a280249d9011ddf6ecf4ca8b6b244c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa15b18014b7bfa3a227faac227069e4c" id="r_aa15b18014b7bfa3a227faac227069e4c"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
-<tr class="memitem:aa15b18014b7bfa3a227faac227069e4c"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../dc/d6d/classfl_1_1result.html">result</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aa15b18014b7bfa3a227faac227069e4c.html#aa15b18014b7bfa3a227faac227069e4c">fl::make_error</a> (const <a class="el" href="../../d2/db2/classfl_1_1string.html">fl::string</a> &amp;message)</td></tr>
-<tr class="memdesc:aa15b18014b7bfa3a227faac227069e4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to create an error result from string.  <br /></td></tr>
-<tr class="separator:aa15b18014b7bfa3a227faac227069e4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab080ef775d498bdebf1813dc8aab1deb" id="r_ab080ef775d498bdebf1813dc8aab1deb"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
-<tr class="memitem:ab080ef775d498bdebf1813dc8aab1deb"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../dc/d6d/classfl_1_1result.html">result</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ab080ef775d498bdebf1813dc8aab1deb.html#ab080ef775d498bdebf1813dc8aab1deb">fl::make_error</a> (<a class="el" href="../../da/d46/structfl_1_1_error.html">Error</a> &amp;&amp;error)</td></tr>
-<tr class="memdesc:ab080ef775d498bdebf1813dc8aab1deb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to create an error result (move)  <br /></td></tr>
-<tr class="separator:ab080ef775d498bdebf1813dc8aab1deb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7e24e45bbf4433495b8a800be7c60a28" id="r_a7e24e45bbf4433495b8a800be7c60a28"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
-<tr class="memitem:a7e24e45bbf4433495b8a800be7c60a28"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../dc/d6d/classfl_1_1result.html">result</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a7e24e45bbf4433495b8a800be7c60a28.html#a7e24e45bbf4433495b8a800be7c60a28">fl::make_success</a> (const T &amp;value)</td></tr>
-<tr class="memdesc:a7e24e45bbf4433495b8a800be7c60a28"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to create a successful result.  <br /></td></tr>
-<tr class="separator:a7e24e45bbf4433495b8a800be7c60a28"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5307121d1190b55244e83aae23d80377" id="r_a5307121d1190b55244e83aae23d80377"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
-<tr class="memitem:a5307121d1190b55244e83aae23d80377"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../dc/d6d/classfl_1_1result.html">result</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a5307121d1190b55244e83aae23d80377.html#a5307121d1190b55244e83aae23d80377">fl::make_success</a> (T &amp;&amp;value)</td></tr>
-<tr class="memdesc:a5307121d1190b55244e83aae23d80377"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to create a successful result (move)  <br /></td></tr>
-<tr class="separator:a5307121d1190b55244e83aae23d80377"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a711cd941776eddb82036bca338add1df" id="r_a711cd941776eddb82036bca338add1df"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
+<tr class="memitem:a711cd941776eddb82036bca338add1df"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d1/d3c/classfl_1_1task_1_1_promise_result.html">PromiseResult</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task_a711cd941776eddb82036bca338add1df.html#a711cd941776eddb82036bca338add1df">fl::task::make_error</a> (const char *message)</td></tr>
+<tr class="memdesc:a711cd941776eddb82036bca338add1df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to create an error result from C-string.  <br /></td></tr>
+<tr class="separator:a711cd941776eddb82036bca338add1df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad825b06c2050f8ccbb83547496bec96d" id="r_ad825b06c2050f8ccbb83547496bec96d"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
+<tr class="memitem:ad825b06c2050f8ccbb83547496bec96d"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d1/d3c/classfl_1_1task_1_1_promise_result.html">PromiseResult</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task_ad825b06c2050f8ccbb83547496bec96d.html#ad825b06c2050f8ccbb83547496bec96d">fl::task::make_error</a> (const <a class="el" href="../../d4/dda/structfl_1_1task_1_1_error.html">Error</a> &amp;error)</td></tr>
+<tr class="memdesc:ad825b06c2050f8ccbb83547496bec96d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to create an error result.  <br /></td></tr>
+<tr class="separator:ad825b06c2050f8ccbb83547496bec96d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a60965f75d35becdd28a09d8116bae477" id="r_a60965f75d35becdd28a09d8116bae477"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
+<tr class="memitem:a60965f75d35becdd28a09d8116bae477"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d1/d3c/classfl_1_1task_1_1_promise_result.html">PromiseResult</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task_a60965f75d35becdd28a09d8116bae477.html#a60965f75d35becdd28a09d8116bae477">fl::task::make_error</a> (const <a class="el" href="../../d2/db2/classfl_1_1string.html">fl::string</a> &amp;message)</td></tr>
+<tr class="memdesc:a60965f75d35becdd28a09d8116bae477"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to create an error result from string.  <br /></td></tr>
+<tr class="separator:a60965f75d35becdd28a09d8116bae477"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a935dfe05413e5dd22457fd3a51b7bae3" id="r_a935dfe05413e5dd22457fd3a51b7bae3"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
+<tr class="memitem:a935dfe05413e5dd22457fd3a51b7bae3"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d1/d3c/classfl_1_1task_1_1_promise_result.html">PromiseResult</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task_a935dfe05413e5dd22457fd3a51b7bae3.html#a935dfe05413e5dd22457fd3a51b7bae3">fl::task::make_error</a> (<a class="el" href="../../d4/dda/structfl_1_1task_1_1_error.html">Error</a> &amp;&amp;error)</td></tr>
+<tr class="memdesc:a935dfe05413e5dd22457fd3a51b7bae3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to create an error result (move)  <br /></td></tr>
+<tr class="separator:a935dfe05413e5dd22457fd3a51b7bae3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f88c7d21ca665e4b874f60575f0e8c8" id="r_a1f88c7d21ca665e4b874f60575f0e8c8"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
+<tr class="memitem:a1f88c7d21ca665e4b874f60575f0e8c8"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d1/d3c/classfl_1_1task_1_1_promise_result.html">PromiseResult</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task_a1f88c7d21ca665e4b874f60575f0e8c8.html#a1f88c7d21ca665e4b874f60575f0e8c8">fl::task::make_success</a> (const T &amp;<a class="el" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>)</td></tr>
+<tr class="memdesc:a1f88c7d21ca665e4b874f60575f0e8c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to create a successful result.  <br /></td></tr>
+<tr class="separator:a1f88c7d21ca665e4b874f60575f0e8c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ffea087444767b0c9a74fc1dff65ed2" id="r_a5ffea087444767b0c9a74fc1dff65ed2"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
+<tr class="memitem:a5ffea087444767b0c9a74fc1dff65ed2"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d1/d3c/classfl_1_1task_1_1_promise_result.html">PromiseResult</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../db/d5c/namespacefl_1_1task_a5ffea087444767b0c9a74fc1dff65ed2.html#a5ffea087444767b0c9a74fc1dff65ed2">fl::task::make_success</a> (T &amp;&amp;<a class="el" href="../../d4/d36/namespacefl_a13766ae9e150185981f5096f90a439d7.html#a13766ae9e150185981f5096f90a439d7">value</a>)</td></tr>
+<tr class="memdesc:a5ffea087444767b0c9a74fc1dff65ed2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function to create a successful result (move)  <br /></td></tr>
+<tr class="separator:a5ffea087444767b0c9a74fc1dff65ed2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -185,8 +173,8 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d7/d93/promise__result_8h.html">promise_result.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_3c55ea006e4dd4fc925403c373dc7c52.html">task</a></li><li class="navelem"><a class="el" href="../../d7/d93/promise__result_8h.html">promise_result.h</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,0 +1,5 @@
+<map id="fl::hd108GammaCorrect" name="fl::hd108GammaCorrect">
+<area shape="rect" id="Node000001" title="Convert 8&#45;bit color to HD108 16&#45;bit gamma&#45;corrected value (gamma 2.8)" alt="" coords="5,20,183,45"/>
+<area shape="rect" id="Node000002" href="$d3/d1a/structfl_1_1_progmem_l_u_t16_a7aef23d2239be4d68b4ffff4cb51629f.html#a7aef23d2239be4d68b4ffff4cb51629f" title=" " alt="" coords="231,5,484,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="183,30,217,30,217,35,183,35"/>
+</map>

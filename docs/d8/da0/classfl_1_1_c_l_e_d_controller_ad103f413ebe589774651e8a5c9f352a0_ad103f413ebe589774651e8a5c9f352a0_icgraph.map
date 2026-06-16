@@ -1,0 +1,11 @@
+<map id="fl::CLEDController::setTemperature" name="fl::CLEDController::setTemperature">
+<area shape="rect" id="Node000001" title="Set the color temperature, aka white point, for this controller." alt="" coords="245,73,381,113"/>
+<area shape="rect" id="Node000002" href="$d5/d8b/classfl_1_1_channel_a73b662986c55cfb31ff1e72065df03dd.html#a73b662986c55cfb31ff1e72065df03dd" title="Private constructor (use create() factory method)" alt="" coords="25,5,177,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="257,69,196,45,158,33,160,28,198,39,259,64"/>
+<area shape="rect" id="Node000003" href="$d5/d8b/classfl_1_1_channel_a547ccb4c09f235fdad54564198d19028.html#a547ccb4c09f235fdad54564198d19028" title="Backwards&#45;compatible constructor (deprecated)" alt="" coords="25,55,177,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="231,86,177,79,178,74,232,80"/>
+<area shape="rect" id="Node000004" href="$d5/d8b/classfl_1_1_channel_a4fd9736141ec00c1a8f5db47a0af1882.html#a4fd9736141ec00c1a8f5db47a0af1882" title="Apply reconfigurable settings from a ChannelConfig." alt="" coords="13,104,189,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="232,105,190,109,189,104,231,99"/>
+<area shape="rect" id="Node000005" href="$dd/dbb/class_c_fast_l_e_d_a322d924794233b3ea163d4865c63e976.html#a322d924794233b3ea163d4865c63e976" title="Set a global color temperature." alt="" coords="5,153,197,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="257,121,198,143,156,156,154,151,196,138,255,116"/>
+</map>

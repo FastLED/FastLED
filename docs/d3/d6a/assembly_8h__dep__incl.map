@@ -1,0 +1,30 @@
+<map id="third_party/libhelix_mp3/real/assembly.h" name="third_party/libhelix_mp3/real/assembly.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="681,5,845,45"/>
+<area shape="rect" id="Node000002" href="$d1/d57/bitstream_8hpp.html" title=" " alt="" coords="5,93,188,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="668,39,454,63,201,96,189,98,188,93,200,91,453,57,668,34"/>
+<area shape="rect" id="Node000007" href="$d1/d07/dct32_8hpp.html" title=" " alt="" coords="213,93,367,133"/>
+<area shape="poly" id="edge4_Node000001_Node000007" title=" " alt="" coords="668,45,380,96,368,98,367,93,379,91,667,40"/>
+<area shape="rect" id="Node000008" href="$d7/d5e/dequant_8hpp.html" title=" " alt="" coords="392,93,564,133"/>
+<area shape="poly" id="edge6_Node000001_Node000008" title=" " alt="" coords="688,52,541,96,540,91,687,47"/>
+<area shape="rect" id="Node000009" href="$dd/d0f/dqchan_8hpp.html" title=" " alt="" coords="588,93,755,133"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="735,57,694,95,690,91,731,53"/>
+<area shape="rect" id="Node000010" href="$d6/da2/imdct_8hpp.html" title=" " alt="" coords="779,93,935,133"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="796,53,838,91,834,95,792,57"/>
+<area shape="rect" id="Node000011" href="$dd/d16/polyphase_8hpp.html" title=" " alt="" coords="959,93,1146,133"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="840,47,990,91,989,96,839,52"/>
+<area shape="rect" id="Node000012" href="$df/d24/stproc_8hpp.html" title=" " alt="" coords="1171,93,1329,133"/>
+<area shape="poly" id="edge14_Node000001_Node000012" title=" " alt="" coords="859,39,1158,91,1171,93,1170,98,1158,96,859,45"/>
+<area shape="rect" id="Node000013" href="$d3/d85/subband_8hpp.html" title=" " alt="" coords="1353,93,1528,133"/>
+<area shape="poly" id="edge16_Node000001_Node000013" title=" " alt="" coords="859,33,1080,56,1342,91,1353,92,1353,98,1342,96,1080,62,859,38"/>
+<area shape="rect" id="Node000003" href="$db/dd4/libhelix__mp3__unity_8cpp_8hpp.html" title=" " alt="" coords="644,181,883,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="202,131,442,163,644,185,644,191,441,168,202,136"/>
+<area shape="rect" id="Node000004" href="$d7/dca/third__party_2libhelix__mp3_2__build_8cpp_8hpp.html" title=" " alt="" coords="685,269,841,309"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="766,235,766,269,761,269,761,235"/>
+<area shape="poly" id="edge5_Node000007_Node000003" title=" " alt="" coords="381,131,650,179,649,184,380,136"/>
+<area shape="poly" id="edge7_Node000008_Node000003" title=" " alt="" coords="555,135,702,179,700,184,553,140"/>
+<area shape="poly" id="edge9_Node000009_Node000003" title=" " alt="" coords="703,141,745,179,741,183,700,145"/>
+<area shape="poly" id="edge11_Node000010_Node000003" title=" " alt="" coords="828,145,786,183,782,179,824,141"/>
+<area shape="poly" id="edge13_Node000011_Node000003" title=" " alt="" coords="977,140,827,184,826,179,976,135"/>
+<area shape="poly" id="edge15_Node000012_Node000003" title=" " alt="" coords="1157,136,881,184,880,179,1156,131"/>
+<area shape="poly" id="edge17_Node000013_Node000003" title=" " alt="" coords="1340,136,1092,169,883,191,883,186,1092,164,1339,131"/>
+</map>

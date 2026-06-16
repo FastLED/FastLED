@@ -1,0 +1,21 @@
+<map id="fl::ChannelData" name="fl::ChannelData">
+<area shape="rect" id="Node000001" title="Transmission data for a single LED channel." alt="" coords="1108,73,1231,98"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="767,15,913,84"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="927,56,1108,76,1107,81,926,61"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl.html#d0/ddd/classfl_1_1function" title=" " alt="" coords="409,37,538,62"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="552,47,767,47,767,52,552,52"/>
+<area shape="rect" id="Node000004" href="$d8/d7d/classfl_1_1vector__psram.html" title=" " alt="" coords="753,109,927,134"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="940,109,1084,93,1108,90,1108,96,1084,99,940,114"/>
+<area shape="rect" id="Node000005" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="411,94,536,119"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="549,107,753,115,753,121,549,112"/>
+<area shape="rect" id="Node000006" href="$d4/dad/classfl_1_1vector__basic.html" title="Type&#45;erased vector base class." alt="" coords="5,94,125,119"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="123,88,174,79,271,74,367,84,412,91,411,97,366,89,271,79,175,84,124,93"/>
+<area shape="rect" id="Node000009" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="175,94,292,119"/>
+<area shape="poly" id="edge7_Node000009_Node000006" title=" " alt="" coords="139,104,175,104,175,109,139,109"/>
+<area shape="rect" id="Node000011" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="175,143,292,169"/>
+<area shape="poly" id="edge10_Node000011_Node000006" title=" " alt="" coords="123,121,190,141,188,146,122,126"/>
+<area shape="poly" id="edge6_Node000005_Node000009" title=" " alt="" coords="306,104,411,104,411,109,306,109"/>
+<area shape="rect" id="Node000010" href="$d8/d7d/classfl_1_1vector__psram.html" title=" " alt="" coords="391,143,556,169"/>
+<area shape="poly" id="edge8_Node000004_Node000010" title=" " alt="" coords="570,147,729,133,752,131,753,136,730,139,570,152"/>
+<area shape="poly" id="edge9_Node000010_Node000011" title=" " alt="" coords="306,153,390,153,390,159,306,159"/>
+</map>

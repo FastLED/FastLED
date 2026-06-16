@@ -1,0 +1,14 @@
+<map id="fl::gfx::blur2d" name="fl::gfx::blur2d">
+<area shape="rect" id="Node000001" title="Legacy version of blur2d, which does not require an XYMap but instead implicitly binds to XY() functi..." alt="" coords="5,81,113,107"/>
+<area shape="rect" id="Node000002" href="$d0/dce/classfl_1_1_x_y_map_a10771bee8cb11b0757e3f03cb3870196.html#a10771bee8cb11b0757e3f03cb3870196" title=" " alt="" coords="161,45,343,85"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,83,147,78,148,83,114,88"/>
+<area shape="rect" id="Node000005" href="$da/dd6/structfl_1_1_c_r_g_b_aa272170bea8120f101f27ebd2c323b55.html#aa272170bea8120f101f27ebd2c323b55" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="185,109,319,135"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="114,99,172,108,171,113,113,104"/>
+<area shape="rect" id="Node000003" href="$d0/dce/classfl_1_1_x_y_map_afcc485be5a44a487d265eb6af9f89a40.html#afcc485be5a44a487d265eb6af9f89a40" title=" " alt="" coords="391,5,527,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="340,42,388,31,389,36,342,47"/>
+<area shape="rect" id="Node000004" href="$d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d" title=" " alt="" coords="575,31,633,56"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="343,57,561,43,561,49,343,62"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="527,27,562,33,561,39,526,32"/>
+<area shape="rect" id="Node000006" href="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" title="Default constructor." alt="" coords="399,109,519,135"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="319,119,385,119,385,125,319,125"/>
+</map>

@@ -1,0 +1,17 @@
+<map id="fl::spi::Transaction" name="fl::spi::Transaction">
+<area shape="rect" id="Node000001" title="Handle for asynchronous SPI operations." alt="" coords="929,128,1068,153"/>
+<area shape="rect" id="Node000002" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="701,113,840,168"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="854,138,929,138,929,143,854,143"/>
+<area shape="rect" id="Node000003" href="$d4/dc1/structfl_1_1spi_1_1_transaction_1_1_impl.html" title="Private implementation data for Transaction class." alt="" coords="369,49,508,89"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="522,84,702,123,701,128,521,89"/>
+<area shape="rect" id="Node000004" href="$d9/d0a/classfl_1_1spi_1_1_device.html" title="Single&#45;channel SPI device interface (TX&#45;only, transaction&#45;based, optimized for FastLED)" alt="" coords="35,5,146,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="160,24,338,49,369,54,369,59,337,54,159,29"/>
+<area shape="rect" id="Node000022" href="$dd/dd8/classfl_1_1_optional.html" title=" " alt="" coords="15,55,167,95"/>
+<area shape="poly" id="edge4_Node000003_Node000022" title=" " alt="" coords="180,71,369,67,369,73,180,76"/>
+<area shape="rect" id="Node000024" href="$d5/d2b/structfl_1_1default__delete.html" title=" " alt="" coords="361,113,516,168"/>
+<area shape="poly" id="edge5_Node000002_Node000024" title=" " alt="" coords="530,138,701,138,701,143,530,143"/>
+<area shape="rect" id="Node000020" href="$d5/d2b/structfl_1_1default__delete.html" title=" " alt="" coords="5,128,176,153"/>
+<area shape="poly" id="edge6_Node000024_Node000020" title=" " alt="" coords="190,138,361,138,361,143,190,143"/>
+<area shape="rect" id="Node000021" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="371,193,506,233"/>
+<area shape="poly" id="edge7_Node000002_Node000021" title=" " alt="" coords="519,202,596,190,677,173,700,166,702,171,678,178,597,195,520,207"/>
+</map>

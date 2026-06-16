@@ -1,0 +1,5 @@
+<map id="fl::SpiEncoder::dotstarHD" name="fl::SpiEncoder::dotstarHD">
+<area shape="rect" id="Node000001" title="Create DOTSTARHD encoder configuration (alias for APA102HD)" alt="" coords="243,13,427,38"/>
+<area shape="rect" id="Node000002" href="$d0/d69/structfl_1_1_spi_encoder_a2968300f53d0a9c8c9fc63f3023932fe.html#a2968300f53d0a9c8c9fc63f3023932fe" title="Look up the default SpiEncoder for a given chipset." alt="" coords="5,5,195,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="229,28,195,28,195,23,229,23"/>
+</map>

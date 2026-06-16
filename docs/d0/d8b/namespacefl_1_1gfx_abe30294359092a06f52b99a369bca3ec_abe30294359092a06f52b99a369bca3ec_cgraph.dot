@@ -1,0 +1,29 @@
+digraph "fl::gfx::drawStrokeLine"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::gfx::drawStrokeLine",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::gfx::detail::drawStroke\lLineCore",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d9a/namespacefl_1_1gfx_1_1detail_a0ed31accfda46ef3ddc9a0eb3ad5ef04.html#a0ed31accfda46ef3ddc9a0eb3ad5ef04",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::gfx::detail::compute\lBandShift",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d9a/namespacefl_1_1gfx_1_1detail_ace632a8bd8b1b176f9f882b536fc486c.html#ace632a8bd8b1b176f9f882b536fc486c",tooltip="Precompute right-shift and reciprocal multiplier for AA division."];
+  Node3 -> Node3 [id="edge3_Node000003_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node4 [id="edge4_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::isqrt32",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aef88a9667b8b893abab1e0e41a3e81d3.html#aef88a9667b8b893abab1e0e41a3e81d3",tooltip=" "];
+  Node4 -> Node5 [id="edge5_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::_isqrt32_start",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a8f27048f2254fbf4acb9a3b00e7cb305.html#a8f27048f2254fbf4acb9a3b00e7cb305",tooltip=" "];
+  Node5 -> Node5 [id="edge6_Node000005_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node4 -> Node6 [id="edge7_Node000004_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::_isqrt32_step",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a033fb4e082027bb0756c5de35ddcbd98.html#a033fb4e082027bb0756c5de35ddcbd98",tooltip=" "];
+  Node6 -> Node6 [id="edge8_Node000006_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node7 [id="edge9_Node000002_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::gfx::detail::renderStrokeRow",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d9a/namespacefl_1_1gfx_1_1detail_a57e26c64aa843c6d1d1080fa16f4306a.html#a57e26c64aa843c6d1d1080fa16f4306a",tooltip="Render one scanline of a stroke line using phase-based scanning."];
+  Node7 -> Node7 [id="edge10_Node000007_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node8 [id="edge11_Node000002_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::gfx::detail::toFixed8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d9a/namespacefl_1_1gfx_1_1detail_ab04a22e2927673d2692b4f3e354af564.html#ab04a22e2927673d2692b4f3e354af564",tooltip="Convert any Coord type to 8.8 fixed-point (fl::i32)."];
+  Node8 -> Node8 [id="edge12_Node000008_Node000008",color="steelblue1",style="solid",tooltip=" "];
+}

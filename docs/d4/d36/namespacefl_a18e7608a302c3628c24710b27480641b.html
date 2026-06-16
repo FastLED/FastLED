@@ -115,45 +115,26 @@ $(function(){initNavTree('d4/d36/namespacefl_a18e7608a302c3628c24710b27480641b.h
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d5a/io_8cpp_source.html#l00148">148</a> of file <a class="el" href="../../d5/d5a/io_8cpp_source.html">io.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  148</span>           {</div>
-<div class="line"><span class="lineno">  149</span><span class="preprocessor">#ifdef FASTLED_TESTING</span></div>
-<div class="line"><span class="lineno">  150</span>    <span class="comment">// Check for injected handler first</span></div>
-<div class="line"><span class="lineno">  151</span>    <span class="keywordflow">if</span> (get_read_handler()) {</div>
-<div class="line"><span class="lineno">  152</span>        <span class="keywordflow">return</span> get_read_handler()();</div>
-<div class="line"><span class="lineno">  153</span>    }</div>
-<div class="line"><span class="lineno">  154</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  155</span> </div>
-<div class="line"><span class="lineno">  156</span><span class="preprocessor">#ifdef __EMSCRIPTEN__</span></div>
-<div class="line"><span class="lineno">  157</span>    <span class="keywordflow">return</span> read_wasm();</div>
-<div class="line"><span class="lineno">  158</span><span class="preprocessor">#elif defined(FASTLED_TESTING) || defined(__linux__) || defined(__APPLE__) || defined(_WIN32)</span></div>
-<div class="line"><span class="lineno">  159</span>    <span class="keywordflow">return</span> read_native();</div>
-<div class="line"><span class="lineno">  160</span><span class="preprocessor">#elif defined(ESP32) || defined(ESP8266)</span></div>
-<div class="line"><span class="lineno">  161</span>    <span class="keywordflow">return</span> read_esp();</div>
-<div class="line"><span class="lineno">  162</span><span class="preprocessor">#elif defined(__AVR__) &amp;&amp; !defined(ARDUINO_ARCH_MEGAAVR)</span></div>
-<div class="line"><span class="lineno">  163</span>    <span class="keywordflow">return</span> read_avr();</div>
-<div class="line"><span class="lineno">  164</span><span class="preprocessor">#elif defined(__MKL26Z64__)</span></div>
-<div class="line"><span class="lineno">  165</span>    <span class="comment">// Teensy LC uses special no-op functions to avoid _write linker issues</span></div>
-<div class="line"><span class="lineno">  166</span>    <span class="keywordflow">return</span> read_teensy_lc();</div>
-<div class="line"><span class="lineno">  167</span><span class="preprocessor">#elif defined(__IMXRT1062__) || defined(__MK66FX1M0__) || defined(__MK64FX512__) || defined(__MK20DX256__) || defined(__MK20DX128__)</span></div>
-<div class="line"><span class="lineno">  168</span>    <span class="comment">// All other Teensy platforms use lightweight implementation</span></div>
-<div class="line"><span class="lineno">  169</span>    <span class="keywordflow">return</span> read_teensy();</div>
-<div class="line"><span class="lineno">  170</span><span class="preprocessor">#else</span></div>
-<div class="line"><span class="lineno">  171</span>    <span class="comment">// Use generic Arduino input for all other platforms including:</span></div>
-<div class="line"><span class="lineno">  172</span>    <span class="comment">// - STM32 (STM32F1, STM32F4, STM32H7, ARDUINO_GIGA)</span></div>
-<div class="line"><span class="lineno">  173</span>    <span class="comment">// - NRF (NRF52, NRF52832, NRF52840, ARDUINO_NRF52_DK)</span></div>
-<div class="line"><span class="lineno">  174</span>    <span class="comment">// - All other Arduino-compatible platforms</span></div>
-<div class="line"><span class="lineno">  175</span>    <span class="keywordflow">return</span> read_arduino();</div>
-<div class="line"><span class="lineno">  176</span><span class="preprocessor">#endif</span></div>
-<div class="line"><span class="lineno">  177</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../dd/d7a/cstdio_8cpp_8hpp_source.html#l00127">127</a> of file <a class="el" href="../../dd/d7a/cstdio_8cpp_8hpp_source.html">cstdio.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  127</span>           {</div>
+<div class="line"><span class="lineno">  128</span><span class="preprocessor">#ifdef FASTLED_TESTING</span></div>
+<div class="line"><span class="lineno">  129</span>    <span class="comment">// Check for injected handler first</span></div>
+<div class="line"><span class="lineno">  130</span>    <span class="keywordflow">if</span> (get_read_handler()) {</div>
+<div class="line"><span class="lineno">  131</span>        <span class="keywordflow">return</span> get_read_handler()();</div>
+<div class="line"><span class="lineno">  132</span>    }</div>
+<div class="line"><span class="lineno">  133</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  134</span> </div>
+<div class="line"><span class="lineno">  135</span>    <span class="comment">// Delegate to platform implementation</span></div>
+<div class="line"><span class="lineno">  136</span>    <span class="keywordflow">return</span> platforms::read();</div>
+<div class="line"><span class="lineno">  137</span>}</div>
 </div><!-- fragment -->
-<p class="reference">Referenced by <a class="el" href="../../d7/d52/istream_8cpp_source.html#l00369">fl::istream_real::get()</a>, <a class="el" href="../../d7/d52/istream_8cpp_source.html#l00337">fl::istream_real::getline()</a>, <a class="el" href="../../dd/d2b/bytestream_8h_source.html#l00024">fl::ByteStream::readCRGB()</a>, <a class="el" href="../../d6/d8d/file__system_8h_source.html#l00081">fl::FileHandle::readCRGB()</a>, <a class="el" href="../../da/d7a/pixel__stream_8cpp_source.html#l00099">fl::PixelStream::readFrameAt()</a>, and <a class="el" href="../../d7/d52/istream_8cpp_source.html#l00136">fl::istream_real::readLine()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/dbb/unordered__map__small_8h_source.html#l00390">fl::unordered_map_small&lt; Key, Value, Equal &gt;::compact()</a>, <a class="el" href="../../d4/d99/istream_8cpp_8hpp_source.html#l00369">fl::istream_real::get()</a>, <a class="el" href="../../d4/d99/istream_8cpp_8hpp_source.html#l00337">fl::istream_real::getline()</a>, <a class="el" href="../../db/d5f/pl__mpeg_8hpp_source.html#l01017">fl::third_party::plm_buffer_read()</a>, <a class="el" href="../../df/d25/file__handle_8h_source.html#l00060">fl::filebuf::read()</a>, <a class="el" href="../../df/d25/file__handle_8h_source.html#l00057">fl::filebuf::read()</a>, <a class="el" href="../../de/d25/fstream_8h_source.html#l00177">fl::ifstream::read()</a>, <a class="el" href="../../de/d25/fstream_8h_source.html#l00171">fl::ifstream::read()</a>, <a class="el" href="../../d6/d5f/system_2serial_8cpp_8hpp_source.html#l00030">fl::SerialPort::read()</a>, <a class="el" href="../../db/d51/remote_2transport_2serial_8h_source.html#l00073">fl::SerialReader::read()</a>, <a class="el" href="../../d2/db2/pixel__stream_8cpp_8hpp_source.html#l00143">fl::video::PixelStream::readFrameAt()</a>, <a class="el" href="../../d4/d99/istream_8cpp_8hpp_source.html#l00136">fl::istream_real::readLine()</a>, <a class="el" href="../../df/d25/file__handle_8h_source.html#l00065">fl::filebuf::readRGB8()</a>, <a class="el" href="../../de/d25/fstream_8h_source.html#l00182">fl::ifstream::readRGB8()</a>, and <a class="el" href="../../dd/d7a/cstdio_8cpp_8hpp_source.html#l00139">readStringUntil()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_a18e7608a302c3628c24710b27480641b_a18e7608a302c3628c24710b27480641b_icgraph.svg" width="100%" height="596"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_a18e7608a302c3628c24710b27480641b_a18e7608a302c3628c24710b27480641b_icgraph.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -165,7 +146,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a18e7608a302c3628c24710b27480641b.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:22 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

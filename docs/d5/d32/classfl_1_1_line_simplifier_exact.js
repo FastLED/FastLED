@@ -1,7 +1,7 @@
 var classfl_1_1_line_simplifier_exact =
 [
     [ "Point", "d5/d32/classfl_1_1_line_simplifier_exact_af90d27256357c2f1058422a3b4ac90e9.html#af90d27256357c2f1058422a3b4ac90e9", null ],
-    [ "LineSimplifierExact", "d5/d32/classfl_1_1_line_simplifier_exact_a161f0640c2ec73adf6f2f23372725866.html#a161f0640c2ec73adf6f2f23372725866", null ],
+    [ "LineSimplifierExact", "d5/d32/classfl_1_1_line_simplifier_exact_a1c6f1d11f8bb01e643e36fa09b21b416.html#a1c6f1d11f8bb01e643e36fa09b21b416", null ],
     [ "LineSimplifierExact", "d5/d32/classfl_1_1_line_simplifier_exact_a79acc4ccb2be6e3f001da161bb829371.html#a79acc4ccb2be6e3f001da161bb829371", null ],
     [ "estimateMaxDistance", "d5/d32/classfl_1_1_line_simplifier_exact_ae965d75d20120bfabb8551e8fa46cffa.html#ae965d75d20120bfabb8551e8fa46cffa", null ],
     [ "safeCopy", "d5/d32/classfl_1_1_line_simplifier_exact_a95eec92ab0f3e1dfcc0984dc8728913b.html#a95eec92ab0f3e1dfcc0984dc8728913b", null ],

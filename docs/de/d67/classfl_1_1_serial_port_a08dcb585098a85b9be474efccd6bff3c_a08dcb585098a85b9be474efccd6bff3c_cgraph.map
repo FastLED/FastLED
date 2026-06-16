@@ -1,0 +1,5 @@
+<map id="fl::SerialPort::peek" name="fl::SerialPort::peek">
+<area shape="rect" id="Node000001" title="Peek at next byte without removing it from buffer." alt="" coords="5,5,147,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a1c402f3af608afc3ab940729650dd9d5.html#a1c402f3af608afc3ab940729650dd9d5" title=" " alt="" coords="195,5,265,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="147,15,181,15,181,21,147,21"/>
+</map>

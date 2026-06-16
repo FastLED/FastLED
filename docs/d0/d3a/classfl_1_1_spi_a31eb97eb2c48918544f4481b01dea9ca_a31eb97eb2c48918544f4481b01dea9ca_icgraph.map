@@ -1,0 +1,9 @@
+<map id="fl::Spi::Spi" name="fl::Spi::Spi">
+<area shape="rect" id="Node000001" title="Default constructor &#45; creates device in error state." alt="" coords="185,55,272,80"/>
+<area shape="rect" id="Node000002" href="$d0/d3a/classfl_1_1_spi_ae9fddc83c863bf6d075e6f16159be6cf.html#ae9fddc83c863bf6d075e6f16159be6cf" title="Construct and initialize SPI device." alt="" coords="28,5,115,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,53,112,33,114,28,175,48"/>
+<area shape="rect" id="Node000003" href="$d0/d3a/classfl_1_1_spi_a0ab260bcc5cbdcb29f4468644ba0aa0e.html#a0ab260bcc5cbdcb29f4468644ba0aa0e" title="Move constructor." alt="" coords="28,55,115,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="171,70,115,70,115,65,171,65"/>
+<area shape="rect" id="Node000004" href="$d0/d3a/classfl_1_1_spi_a667c025c510c634b8a123ad214248e4a.html#a667c025c510c634b8a123ad214248e4a" title="Move assignment." alt="" coords="5,104,137,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="175,87,114,106,112,101,174,82"/>
+</map>

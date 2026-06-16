@@ -1,0 +1,7 @@
+<map id="fl::third_party::hexwave::malloc" name="fl::third_party::hexwave::malloc">
+<area shape="rect" id="Node000001" title=" " alt="" coords="464,5,639,45"/>
+<area shape="rect" id="Node000002" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_ae1d7f1bfbf1e38371ddb8430a353d7bf.html#ae1d7f1bfbf1e38371ddb8430a353d7bf" title="Create and initialize a new HexWaveEngine." alt="" coords="228,5,416,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="450,28,416,28,416,23,450,23"/>
+<area shape="rect" id="Node000003" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_aa3919fa11833cf2e47534f6941a764b1.html#aa3919fa11833cf2e47534f6941a764b1" title="Initialize the hexwave library (DEPRECATED &#45; use hexwave_engine_create)" alt="" coords="5,5,180,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="214,28,180,28,180,23,214,23"/>
+</map>

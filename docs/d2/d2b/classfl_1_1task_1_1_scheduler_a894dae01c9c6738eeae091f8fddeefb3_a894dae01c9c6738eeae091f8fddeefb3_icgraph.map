@@ -1,0 +1,54 @@
+<map id="fl::task::Scheduler::update" name="fl::task::Scheduler::update">
+<area shape="rect" id="Node000001" title=" " alt="" coords="657,441,796,481"/>
+<area shape="rect" id="Node000002" href="$d4/d60/classfl_1_1_fx_engine_ab4bd2776efb0a1fa06ccae2ea8a16c8b.html#ab4bd2776efb0a1fa06ccae2ea8a16c8b" title="Renders the current effect or transition to the output buffer." alt="" coords="471,423,609,448"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="643,452,610,447,610,442,644,447"/>
+<area shape="rect" id="Node000003" href="$db/d5c/namespacefl_1_1task_a2d40b476742263a3fa212e24b722e3ef.html#a2d40b476742263a3fa212e24b722e3ef" title="Run selected task subsystems." alt="" coords="493,472,587,497"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="643,474,588,481,587,476,643,469"/>
+<area shape="rect" id="Node000004" href="$db/d5c/namespacefl_1_1task_ab96dc4828a01d1cff109d355d8ffc23d.html#ab96dc4828a01d1cff109d355d8ffc23d" title="Synchronously wait for a promise to complete (ONLY safe in top&#45;level contexts)" alt="" coords="263,122,402,162"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="479,470,469,461,452,440,442,419,436,379,433,337,429,314,420,288,383,219,347,164,351,161,388,216,425,286,434,313,439,336,441,378,448,417,457,437,473,457,483,466"/>
+<area shape="rect" id="Node000012" href="$df/d9e/namespacefl_1_1detail_abd6e1e8189dbbbf28d720923205bd0dd.html#abd6e1e8189dbbbf28d720923205bd0dd" title="Internal delay implementation used by the public fl::delay wrapper." alt="" coords="255,300,410,325"/>
+<area shape="poly" id="edge9_Node000003_Node000012" title=" " alt="" coords="479,469,469,461,456,445,449,429,445,398,440,368,433,354,421,340,402,328,405,323,424,336,438,351,445,367,450,398,454,428,461,443,473,457,482,465"/>
+<area shape="rect" id="Node000035" href="$d1/d13/namespacefl_1_1net_1_1http_a25ef84b119ebfab47c0ecec96a224181.html#a25ef84b119ebfab47c0ecec96a224181" title="Legacy manual update for fetch promises (use fl::task::run() for new code)" alt="" coords="265,350,400,390"/>
+<area shape="poly" id="edge14_Node000003_Node000035" title=" " alt="" coords="481,469,469,461,453,447,444,432,436,418,421,404,399,392,402,387,424,400,440,415,449,429,458,443,472,457,483,464"/>
+<area shape="rect" id="Node000036" href="$dc/dba/_loopback_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="307,415,358,440"/>
+<area shape="poly" id="edge15_Node000003_Node000036" title=" " alt="" coords="479,471,358,437,359,432,481,466"/>
+<area shape="rect" id="Node000037" href="$d7/d37/classfl_1_1net_1_1http_1_1_fetch_engine_listener_a5c4b1669a29e122fd11f9b2f48641e1f.html#a5c4b1669a29e122fd11f9b2f48641e1f" title=" " alt="" coords="243,465,423,505"/>
+<area shape="poly" id="edge16_Node000003_Node000037" title=" " alt="" coords="479,487,423,487,423,482,479,482"/>
+<area shape="rect" id="Node000038" href="$dd/dbb/class_c_fast_l_e_d_a93471b4babe96100496e8e25062cba3f.html#a93471b4babe96100496e8e25062cba3f" title="Update all our controllers with the current led colors, using the passed in brightness." alt="" coords="271,529,395,555"/>
+<area shape="poly" id="edge17_Node000003_Node000038" title=" " alt="" coords="481,504,380,532,379,527,479,499"/>
+<area shape="rect" id="Node000039" href="$dd/dbb/class_c_fast_l_e_d_a50e30222e81562a7ef334dbe4fdfa856.html#a50e30222e81562a7ef334dbe4fdfa856" title="Set all leds on all controllers to the given color/scale." alt="" coords="253,579,412,604"/>
+<area shape="poly" id="edge18_Node000003_Node000039" title=" " alt="" coords="515,508,474,539,424,568,390,581,389,576,422,564,471,535,512,504"/>
+<area shape="rect" id="Node000041" href="$d2/d6b/classfl_1_1_channel_manager_adc62325e449dbe69df3b351071f50821.html#adc62325e449dbe69df3b351071f50821" title="Wait until a condition is met, with check&#45;pump&#45;delay logic." alt="" coords="259,629,407,669"/>
+<area shape="poly" id="edge20_Node000003_Node000041" title=" " alt="" coords="525,510,483,564,455,592,424,618,400,631,398,626,421,613,452,588,479,560,521,507"/>
+<area shape="rect" id="Node000055" href="$d3/da0/classfl_1_1_i_channel_driver_a9b3137f96a8915d980f7e33ba1e3b3d9.html#a9b3137f96a8915d980f7e33ba1e3b3d9" title=" " alt="" coords="263,757,403,797"/>
+<area shape="poly" id="edge23_Node000003_Node000055" title=" " alt="" coords="528,511,485,589,425,682,390,724,357,758,353,755,386,720,421,679,481,586,524,508"/>
+<area shape="rect" id="Node000005" href="$df/d01/_client_real_8h_a75e6549812ad7bff897e0c92a225878a.html#a75e6549812ad7bff897e0c92a225878a" title=" " alt="" coords="21,5,179,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="298,115,250,78,194,44,163,33,165,28,196,40,253,74,301,111"/>
+<area shape="rect" id="Node000007" href="$d9/dce/_client_validation_real_8h_a48d1b41170d4da38b2d99148b76a9a22.html#a48d1b41170d4da38b2d99148b76a9a22" title=" " alt="" coords="31,55,169,80"/>
+<area shape="poly" id="edge5_Node000004_Node000007" title=" " alt="" coords="267,120,194,94,154,83,156,78,195,89,269,114"/>
+<area shape="rect" id="Node000009" href="$df/d01/_client_real_8h_a648cd3d90f8e240cbbfe5cb934057124.html#a648cd3d90f8e240cbbfe5cb934057124" title="APPROACH 4: JSON Response with await pattern &#160;&#160;Same JSON handling but using await_top_level for synch..." alt="" coords="38,104,162,129"/>
+<area shape="poly" id="edge6_Node000004_Node000009" title=" " alt="" coords="249,136,162,126,162,121,250,130"/>
+<area shape="rect" id="Node000010" href="$d9/dce/_client_validation_real_8h_ad90185b2a71aa34da786634a378ac25b.html#ad90185b2a71aa34da786634a378ac25b" title=" " alt="" coords="27,153,173,179"/>
+<area shape="poly" id="edge7_Node000004_Node000010" title=" " alt="" coords="250,153,173,161,173,156,249,148"/>
+<area shape="rect" id="Node000011" href="$d9/dce/_client_validation_real_8h_a4a6f06023a5a6afd3efafcb856740c10.html#a4a6f06023a5a6afd3efafcb856740c10" title=" " alt="" coords="27,203,173,228"/>
+<area shape="poly" id="edge8_Node000004_Node000011" title=" " alt="" coords="265,169,195,193,152,205,150,200,194,187,264,164"/>
+<area shape="rect" id="Node000013" href="$d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27" title="Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all..." alt="" coords="63,276,137,301"/>
+<area shape="poly" id="edge10_Node000012_Node000013" title=" " alt="" coords="241,306,137,295,138,290,241,301"/>
+<area shape="rect" id="Node000032" href="$d4/d36/namespacefl_a82d61c027070cb53f84ede1132299204.html#a82d61c027070cb53f84ede1132299204" title="Delay for a given number of milliseconds (legacy &#45; no async pumping)" alt="" coords="45,325,155,351"/>
+<area shape="poly" id="edge12_Node000012_Node000032" title=" " alt="" coords="242,325,155,335,154,329,241,320"/>
+<area shape="rect" id="Node000034" href="$d4/d36/namespacefl_a14b805b63f5e1d91d6897e6560f9d863.html#a14b805b63f5e1d91d6897e6560f9d863" title="Shorter alias for delay with optional async task pumping." alt="" coords="53,375,147,400"/>
+<area shape="poly" id="edge13_Node000012_Node000034" title=" " alt="" coords="268,332,244,340,196,364,148,379,146,374,194,360,242,336,267,327"/>
+<area shape="poly" id="edge11_Node000013_Node000013" title=" " alt="" coords="142,267,131,258,100,255,75,257,62,262,59,267,66,274,62,278,54,268,58,258,74,252,100,249,133,253,145,263"/>
+<area shape="rect" id="Node000040" href="$dd/dbb/class_c_fast_l_e_d_aeb7bd3e8f2dbced6284a2182191d5fcb.html#aeb7bd3e8f2dbced6284a2182191d5fcb" title="Clear the leds, wiping the local array of data." alt="" coords="39,547,161,572"/>
+<area shape="poly" id="edge19_Node000039_Node000040" title=" " alt="" coords="239,581,161,570,162,565,240,576"/>
+<area shape="rect" id="Node000042" href="$d2/d6b/classfl_1_1_channel_manager_aa50d7236c4ba7748aa21d88de539b1b9.html#aa50d7236c4ba7748aa21d88de539b1b9" title="Wait for all drivers to become READY." alt="" coords="26,597,174,637"/>
+<area shape="poly" id="edge21_Node000041_Node000042" title=" " alt="" coords="245,639,174,629,174,624,245,634"/>
+<area shape="rect" id="Node000053" href="$d2/d6b/classfl_1_1_channel_manager_ad0d6378634f1ed64275adacb367d845c.html#ad0d6378634f1ed64275adacb367d845c" title=" " alt="" coords="5,661,195,701"/>
+<area shape="poly" id="edge22_Node000041_Node000053" title=" " alt="" coords="245,663,195,670,194,665,245,658"/>
+<area shape="rect" id="Node000056" href="$d3/da0/classfl_1_1_i_channel_driver_a2a9f7401373af3ef80f3ea8e48a8f839.html#a2a9f7401373af3ef80f3ea8e48a8f839" title=" " alt="" coords="33,725,167,765"/>
+<area shape="poly" id="edge24_Node000055_Node000056" title=" " alt="" coords="249,768,167,757,168,751,249,763"/>
+<area shape="rect" id="Node000057" href="$d3/da0/classfl_1_1_i_channel_driver_a9e956fbce56cb0e64f49d4657d17d44e.html#a9e956fbce56cb0e64f49d4657d17d44e" title="Wait for driver to become READY." alt="" coords="33,789,167,829"/>
+<area shape="poly" id="edge25_Node000055_Node000057" title=" " alt="" coords="249,791,168,802,167,797,249,785"/>
+<area shape="rect" id="Node000060" href="$d3/da0/classfl_1_1_i_channel_driver_a282787aa70184218c84f3af77e9591d9.html#a282787aa70184218c84f3af77e9591d9" title=" " alt="" coords="5,853,195,893"/>
+<area shape="poly" id="edge26_Node000055_Node000060" title=" " alt="" coords="280,805,196,843,164,855,162,850,194,838,278,800"/>
+</map>

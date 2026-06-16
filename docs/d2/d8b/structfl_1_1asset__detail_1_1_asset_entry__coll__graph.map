@@ -1,0 +1,17 @@
+<map id="fl::asset_detail::AssetEntry" name="fl::asset_detail::AssetEntry">
+<area shape="rect" id="Node000001" title="Process&#45;local registry of (asset_path → resolved URL) pairs." alt="" coords="82,551,277,576"/>
+<area shape="rect" id="Node000002" href="$d2/db2/classfl_1_1string.html" title=" " alt="" coords="153,272,227,297"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,310,202,321,208,379,209,425,203,470,193,527,186,551,181,550,187,526,198,469,203,424,203,379,197,322,195,311"/>
+<area shape="rect" id="Node000006" href="$d2/db7/classfl_1_1url.html" title=" " alt="" coords="115,463,169,488"/>
+<area shape="poly" id="edge7_Node000006_Node000002" title=" " alt="" coords="172,309,164,322,152,361,146,401,144,462,139,462,141,400,147,360,160,320,167,307"/>
+<area shape="rect" id="Node000003" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="107,183,273,223"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="193,236,193,272,187,272,187,236"/>
+<area shape="rect" id="Node000004" href="$de/d66/classfl_1_1basic__string.html" title="Concrete type&#45;erased string class." alt="" coords="127,5,243,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="188,44,192,183,187,183,183,45"/>
+<area shape="rect" id="Node000005" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="206,80,337,105"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="211,38,259,78,255,82,207,42"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="256,118,206,184,202,181,252,115"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="155,499,177,549,172,551,150,501"/>
+<area shape="rect" id="Node000007" href="$d2/db7/classfl_1_1url.html#d2/d9e/structfl_1_1url_1_1_span" title=" " alt="" coords="5,272,100,297"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="49,311,44,339,43,372,48,406,62,437,72,449,86,457,115,467,114,472,83,462,69,453,57,440,43,408,38,373,39,339,44,310"/>
+</map>

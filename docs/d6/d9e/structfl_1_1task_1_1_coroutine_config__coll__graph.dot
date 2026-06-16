@@ -1,0 +1,30 @@
+digraph "fl::task::CoroutineConfig"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::task::CoroutineConfig",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Configuration for OS-level coroutine tasks."];
+  Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" trace",fontcolor="grey" ];
+  Node2 [id="Node000002",label="fl::Optional\< fl::tuple\l\< const char *, int, fl\l::u32 \> \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dd/dd8/classfl_1_1_optional.html",tooltip=" "];
+  Node3 -> Node2 [id="edge2_Node000002_Node000003",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::tuple\< const\l char *, int, fl::u32 \> \>",fontcolor="grey" ];
+  Node3 [id="Node000003",label="fl::Optional\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dd/dd8/classfl_1_1_optional.html",tooltip=" "];
+  Node4 -> Node1 [id="edge3_Node000001_Node000004",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" func",fontcolor="grey" ];
+  Node4 [id="Node000004",label="fl::function\< void()\>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl.html#d4/d36/namespacefl",tooltip=" "];
+  Node5 -> Node4 [id="edge4_Node000004_Node000005",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< void()\>",fontcolor="grey" ];
+  Node5 [id="Node000005",label="fl::function\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl.html#d0/ddd/classfl_1_1function",tooltip=" "];
+  Node6 -> Node1 [id="edge5_Node000001_Node000006",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" name",fontcolor="grey" ];
+  Node6 [id="Node000006",label="fl::string",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/db2/classfl_1_1string.html",tooltip=" "];
+  Node7 -> Node6 [id="edge6_Node000006_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::string_n\< FASTLED\l_STR_INLINED_SIZE \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d6/d2d/classfl_1_1string__n.html",tooltip=" "];
+  Node8 -> Node7 [id="edge7_Node000007_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::basic_string",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$de/d66/classfl_1_1basic__string.html",tooltip="Concrete type-erased string class."];
+  Node9 -> Node7 [id="edge8_Node000007_Node000009",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< FASTLED_STR_INLINED\l_SIZE \>",fontcolor="grey" ];
+  Node9 [id="Node000009",label="fl::string_n\< N \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d6/d2d/classfl_1_1string__n.html",tooltip=" "];
+  Node8 -> Node9 [id="edge9_Node000009_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 -> Node1 [id="edge10_Node000001_Node000010",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" core_id",fontcolor="grey" ];
+  Node10 [id="Node000010",label="fl::Optional\< int \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dd/dd8/classfl_1_1_optional.html",tooltip=" "];
+  Node3 -> Node10 [id="edge11_Node000010_Node000003",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< int \>",fontcolor="grey" ];
+}

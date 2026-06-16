@@ -1,0 +1,8 @@
+<map id="fl::beat16" name="fl::beat16">
+<area shape="rect" id="Node000001" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="5,29,88,55"/>
+<area shape="rect" id="Node000002" href="$d6/d6c/group___beat_generators_gac4b5cef78b913f63a26012d69ca37889.html#gac4b5cef78b913f63a26012d69ca37889" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM, with BPM specified in Q8.8 fixed&#45;point format." alt="" coords="136,29,219,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,39,122,39,122,45,88,45"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="267,29,341,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="219,39,253,39,253,45,219,45"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="282,30,278,21,280,11,289,5,304,3,321,6,329,14,325,18,319,11,304,8,291,10,285,14,283,20,287,28"/>
+</map>

@@ -1,0 +1,63 @@
+digraph "fl::strcmp"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::strcmp",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="capture",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/df9/_auto_research_test_8cpp_ade4309c9f4171360f59ed787c7041584.html#ade4309c9f4171360f59ed787c7041584",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="runMultiTest",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/df9/_auto_research_test_8cpp_aac567188ee44c45d15b20231ecff68c9.html#aac567188ee44c45d15b20231ecff68c9",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="autoResearchChipsetTiming",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/df9/_auto_research_test_8cpp_a4c76939743f62fdeea55c4ec8a3e2a31.html#a4c76939743f62fdeea55c4ec8a3e2a31",tooltip=" "];
+  Node3 -> Node11 [id="edge4_Node000003_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="autoResearchChipsetTiming\lLegacy",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/df9/_auto_research_test_8cpp_a5acfa3d36f5c1ff77be18eecaedf19b3.html#a5acfa3d36f5c1ff77be18eecaedf19b3",tooltip=" "];
+  Node2 -> Node12 [id="edge5_Node000002_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="runTest",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/df9/_auto_research_test_8cpp_ab5d3883aa989a0c1298af1a8a0d2851a.html#ab5d3883aa989a0c1298af1a8a0d2851a",tooltip=" "];
+  Node1 -> Node13 [id="edge6_Node000001_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::basic_string::compare",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d66/classfl_1_1basic__string_ab85d5479ab5824723f63dfc9afcc9652.html#ab85d5479ab5824723f63dfc9afcc9652",tooltip=" "];
+  Node1 -> Node14 [id="edge7_Node000001_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::basic_string::compare",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d66/classfl_1_1basic__string_afdae40958ed56e90ab7b8cadd523e2c9.html#afdae40958ed56e90ab7b8cadd523e2c9",tooltip=" "];
+  Node1 -> Node15 [id="edge8_Node000001_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl::basic_string::operator!=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d66/classfl_1_1basic__string_ad68222a1761f17c0dad62fba13fccc94.html#ad68222a1761f17c0dad62fba13fccc94",tooltip=" "];
+  Node1 -> Node16 [id="edge9_Node000001_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::basic_string::operator!=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d66/classfl_1_1basic__string_a171b40cdbd9ef2efc823c828da828d23.html#a171b40cdbd9ef2efc823c828da828d23",tooltip=" "];
+  Node1 -> Node17 [id="edge10_Node000001_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl::basic_string::operator\<",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d66/classfl_1_1basic__string_a4deafc1b7a3c5819599bf17482c02603.html#a4deafc1b7a3c5819599bf17482c02603",tooltip=" "];
+  Node1 -> Node18 [id="edge11_Node000001_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="fl::basic_string::operator\<=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d66/classfl_1_1basic__string_a22c62d5036237beedcd1edec91c20fb8.html#a22c62d5036237beedcd1edec91c20fb8",tooltip=" "];
+  Node1 -> Node19 [id="edge12_Node000001_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl::basic_string::operator==",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d66/classfl_1_1basic__string_a0f95b8165a0e4ea8b746657aeb8e2fe5.html#a0f95b8165a0e4ea8b746657aeb8e2fe5",tooltip=" "];
+  Node1 -> Node20 [id="edge13_Node000001_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="fl::basic_string::operator==",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d66/classfl_1_1basic__string_a10926f9bef3fa942e3d22b854fdc6a96.html#a10926f9bef3fa942e3d22b854fdc6a96",tooltip=" "];
+  Node1 -> Node21 [id="edge14_Node000001_Node000021",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node21 [id="Node000021",label="fl::test::SubcaseSignature\l::operator==",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d1e/structfl_1_1test_1_1_subcase_signature_a6a1aa3e58b11349ea10c827515bef8f2.html#a6a1aa3e58b11349ea10c827515bef8f2",tooltip=" "];
+  Node1 -> Node22 [id="edge15_Node000001_Node000022",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node22 [id="Node000022",label="fl::basic_string::operator\>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d66/classfl_1_1basic__string_aec6291808043608b890b9325a7061eea.html#aec6291808043608b890b9325a7061eea",tooltip=" "];
+  Node1 -> Node23 [id="edge16_Node000001_Node000023",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node23 [id="Node000023",label="fl::basic_string::operator\>=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d66/classfl_1_1basic__string_a169e183235fcb33980ae0fe88e9a8689.html#a169e183235fcb33980ae0fe88e9a8689",tooltip=" "];
+  Node1 -> Node24 [id="edge17_Node000001_Node000024",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node24 [id="Node000024",label="fl::detail::singleton\l_registry_get",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_a6bef973c17637a167f1f94d7db03905c.html#a6bef973c17637a167f1f94d7db03905c",tooltip=" "];
+  Node24 -> Node25 [id="edge18_Node000024_Node000025",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node25 [id="Node000025",label="fl::SingletonShared\l::instance",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d4a/classfl_1_1_singleton_shared_a138a66e14b03a073e9a15565e823b203.html#a138a66e14b03a073e9a15565e823b203",tooltip=" "];
+  Node25 -> Node26 [id="edge19_Node000025_Node000026",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node26 [id="Node000026",label="fl::get_async_logger\l_by_index",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_a78c09365a5278caa64b43fe7ff242146.html#a78c09365a5278caa64b43fe7ff242146",tooltip="Template-based logger accessor with auto-registration and enablement check."];
+  Node26 -> Node26 [id="edge20_Node000026_Node000026",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node25 -> Node41 [id="edge21_Node000025_Node000041",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node41 [id="Node000041",label="fl::detail::ActiveLogger\lRegistry::instance",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/d7b/structfl_1_1detail_1_1_active_logger_registry_a0ba7ba9bde21bfc28ef06006930c34f1.html#a0ba7ba9bde21bfc28ef06006930c34f1",tooltip=" "];
+  Node41 -> Node26 [id="edge22_Node000041_Node000026",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node49 [id="edge23_Node000001_Node000049",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node49 [id="Node000049",label="fl::detail::singleton\l_registry_set",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_af558e779ba2417d4cf14bdb1cbfd3d34.html#af558e779ba2417d4cf14bdb1cbfd3d34",tooltip=" "];
+  Node49 -> Node25 [id="edge24_Node000049_Node000025",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node50 [id="edge25_Node000001_Node000050",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node50 [id="Node000050",label="fl::string::strcmp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/db2/classfl_1_1string_a703c3ad0e0c7d091deeeb32d78d3cc38.html#a703c3ad0e0c7d091deeeb32d78d3cc38",tooltip=" "];
+  Node1 -> Node51 [id="edge26_Node000001_Node000051",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node51 [id="Node000051",label="DriverTestRunner::validate\lExpectedDrivers",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/da0/class_driver_test_runner_aecda4c92e3d610584564ddf0d2f81e8e.html#aecda4c92e3d610584564ddf0d2f81e8e",tooltip="Validate that all expected drivers are present."];
+  Node51 -> Node52 [id="edge27_Node000051_Node000052",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node52 [id="Node000052",label="DriverTestRunner::runAll\lTests",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/da0/class_driver_test_runner_aaab05c61d961d92ff48a5746076f8de6.html#aaab05c61d961d92ff48a5746076f8de6",tooltip="Run all tests: validation + driver tests."];
+  Node52 -> Node53 [id="edge28_Node000052_Node000053",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node53 [id="Node000053",label="setup",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/de2/_driver_test_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d",tooltip=" "];
+}

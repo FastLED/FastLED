@@ -1,0 +1,34 @@
+digraph "fl::audio::SpectralEqualizer::~SpectralEqualizer"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::audio::SpectralEqualizer\l::~SpectralEqualizer",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::audio::SpectralEqualizer\l::apply",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aaf69c16c24bdb5099b9665ebeb41eb50.html#aaf69c16c24bdb5099b9665ebeb41eb50",tooltip="Apply equalization to frequency bins."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::audio::SpectralEqualizer\l::applyCompression",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_ad7f44ec5f58bce14c88e4af1eb3ccff9.html#ad7f44ec5f58bce14c88e4af1eb3ccff9",tooltip="Apply dynamic range compression per band."];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::audio::SpectralEqualizer\l::calculateMakeupGain",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a7e97098c6523794252c46a229df713ee.html#a7e97098c6523794252c46a229df713ee",tooltip="Calculate makeup gain to maintain target level."];
+  Node2 -> Node5 [id="edge4_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::span::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac",tooltip=" "];
+  Node1 -> Node6 [id="edge5_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::audio::SpectralEqualizer\l::configure",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a63bd5a8fe3f4719ee4648c824d263c64.html#a63bd5a8fe3f4719ee4648c824d263c64",tooltip="Configure the spectral equalizer This calculates per-band gain multipliers based on the selected curv..."];
+  Node6 -> Node7 [id="edge6_Node000006_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::audio::SpectralEqualizer\l::SpectralEqualizer",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a35ee44583dde1fd3908700b39aa5a165.html#a35ee44583dde1fd3908700b39aa5a165",tooltip=" "];
+  Node7 -> Node6 [id="edge7_Node000007_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 -> Node8 [id="edge8_Node000006_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::audio::SpectralEqualizer\l::calculateGains",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a52e8f221c9fe9cba4ac96f387cc1f726.html#a52e8f221c9fe9cba4ac96f387cc1f726",tooltip="Calculate gains based on current curve."];
+  Node8 -> Node9 [id="edge9_Node000008_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::audio::SpectralEqualizer\l::calculateAWeightingGains",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aa6f94ad4e418f660b71ac6e99fc0ba14.html#aa6f94ad4e418f660b71ac6e99fc0ba14",tooltip="Calculate A-weighting gains."];
+  Node9 -> Node10 [id="edge10_Node000009_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::audio::SpectralEqualizer\l::calculateFlatGains",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a98b8eafa2abe451f740b05be2260bdbb.html#a98b8eafa2abe451f740b05be2260bdbb",tooltip="Calculate flat gains (all 1.0)"];
+  Node8 -> Node10 [id="edge11_Node000008_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node6 -> Node6 [id="edge12_Node000006_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node11 [id="edge13_Node000001_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::audio::SpectralEqualizer\l::setCustomGains",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a569ebf8999e85e1e5c5631b223391994.html#a569ebf8999e85e1e5c5631b223391994",tooltip="Set custom per-band gains (switches to Custom curve)"];
+  Node11 -> Node5 [id="edge14_Node000011_Node000005",color="steelblue1",style="solid",tooltip=" "];
+}

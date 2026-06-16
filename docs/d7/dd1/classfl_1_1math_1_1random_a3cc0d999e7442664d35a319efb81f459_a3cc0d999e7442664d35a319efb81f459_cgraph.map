@@ -1,0 +1,5 @@
+<map id="fl::math::random::random" name="fl::math::random::random">
+<area shape="rect" id="Node000001" title="Default constructor &#45; uses current global random seed." alt="" coords="5,5,193,31"/>
+<area shape="rect" id="Node000002" href="$d2/d0d/group___random_ga7f7f0698c5dad7566b51568d52f2beed.html#ga7f7f0698c5dad7566b51568d52f2beed" title="Get the current seed value for the random number generator." alt="" coords="241,5,396,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="194,15,228,15,228,21,194,21"/>
+</map>

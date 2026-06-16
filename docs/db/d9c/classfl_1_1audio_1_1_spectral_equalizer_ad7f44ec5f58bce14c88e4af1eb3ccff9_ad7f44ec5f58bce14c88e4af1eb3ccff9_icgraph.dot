@@ -1,0 +1,14 @@
+digraph "fl::audio::SpectralEqualizer::applyCompression"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::audio::SpectralEqualizer\l::applyCompression",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Apply dynamic range compression per band."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::audio::SpectralEqualizer\l::apply",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aaf69c16c24bdb5099b9665ebeb41eb50.html#aaf69c16c24bdb5099b9665ebeb41eb50",tooltip="Apply equalization to frequency bins."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::audio::SpectralEqualizer\l::~SpectralEqualizer",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a6eed65351ec3db77b488db8a99322a48.html#a6eed65351ec3db77b488db8a99322a48",tooltip=" "];
+}

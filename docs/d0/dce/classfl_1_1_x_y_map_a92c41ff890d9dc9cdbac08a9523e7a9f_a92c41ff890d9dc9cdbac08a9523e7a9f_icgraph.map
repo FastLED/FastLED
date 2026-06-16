@@ -1,0 +1,9 @@
+<map id="fl::XYMap::isRectangularGrid" name="fl::XYMap::isRectangularGrid">
+<area shape="rect" id="Node000001" title=" " alt="" coords="487,31,693,56"/>
+<area shape="rect" id="Node000002" href="$d0/d8b/namespacefl_1_1gfx_afc0e7645d38e1c662353ef960797499e.html#afc0e7645d38e1c662353ef960797499e" title=" " alt="" coords="205,31,439,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="473,46,439,46,439,41,473,41"/>
+<area shape="rect" id="Node000003" href="$d0/d8b/namespacefl_1_1gfx_a0cff613753b89f4d03fdb3cbb0b8c85d.html#a0cff613753b89f4d03fdb3cbb0b8c85d" title="Higher&#45;precision dim overload for CanvasMapped (UNORM16)." alt="" coords="5,5,157,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="191,32,157,29,158,23,192,27"/>
+<area shape="rect" id="Node000004" href="$d0/d8b/namespacefl_1_1gfx_a955705e50434d56764daab1cbd72d5ad.html#a955705e50434d56764daab1cbd72d5ad" title="XYMap&#45;backed Gaussian blur (non&#45;optimized, per&#45;pixel path)." alt="" coords="5,55,157,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="192,59,158,62,157,57,191,54"/>
+</map>

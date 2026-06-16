@@ -1,0 +1,13 @@
+<map id="fl::audio::Config::CreateTeensyI2S" name="fl::audio::Config::CreateTeensyI2S">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,133,136,173"/>
+<area shape="rect" id="Node000002" href="$dc/d52/classfl_1_1audio_1_1_config_aea6ac29e0ebdee4aadc8e38d9cb3a71f.html#aea6ac29e0ebdee4aadc8e38d9cb3a71f" title=" " alt="" coords="192,5,323,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="90,131,131,94,183,55,193,49,195,54,185,60,135,98,94,135"/>
+<area shape="rect" id="Node000003" href="$d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_aaf0f048705bb3fc909d2dd1540052858.html#aaf0f048705bb3fc909d2dd1540052858" title=" " alt="" coords="184,69,331,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="129,131,185,111,187,116,131,136"/>
+<area shape="rect" id="Node000004" href="$d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_a3a4595ecf32ef89e2c79900ddff859ef.html#a3a4595ecf32ef89e2c79900ddff859ef" title=" " alt="" coords="184,133,331,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="136,151,170,151,170,156,136,156"/>
+<area shape="rect" id="Node000005" href="$d5/d5b/namespacefl_1_1audio_1_1_teensy_i2_s_a8ce1940f8366667991e3463ff0575805.html#a8ce1940f8366667991e3463ff0575805" title=" " alt="" coords="184,197,331,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="131,171,187,190,185,195,129,176"/>
+<area shape="rect" id="Node000006" href="$dc/d52/classfl_1_1audio_1_1_config_a80ce537820ee6d81e2ec9fc24aef7a87.html#a80ce537820ee6d81e2ec9fc24aef7a87" title="Microphone pink noise correction profile." alt="" coords="192,261,323,301"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="94,172,135,209,185,247,195,253,193,257,183,252,131,213,90,176"/>
+</map>

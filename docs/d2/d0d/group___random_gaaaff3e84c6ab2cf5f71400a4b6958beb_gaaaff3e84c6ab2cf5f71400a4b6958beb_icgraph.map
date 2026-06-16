@@ -1,0 +1,42 @@
+<map id="random16" name="random16">
+<area shape="rect" id="Node000001" title="Generate a 16&#45;bit random number." alt="" coords="756,295,844,320"/>
+<area shape="rect" id="Node000002" href="$d9/d41/classfl_1_1_noise_palette_ace0d9f2e7767ae3fb89dc47434024244.html#ace0d9f2e7767ae3fb89dc47434024244" title=" " alt="" coords="497,5,708,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="795,281,790,231,776,166,764,133,749,100,730,70,706,44,690,33,693,29,710,40,734,67,754,98,769,131,781,165,795,230,800,281"/>
+<area shape="rect" id="Node000003" href="$d5/d25/_demo_reel100_8ino_ab00a79f2963c57048ec1d9271fbfb2dd.html#ab00a79f2963c57048ec1d9271fbfb2dd" title=" " alt="" coords="559,55,646,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="793,281,784,239,768,188,743,137,726,114,706,93,678,78,646,71,647,66,680,73,710,89,730,110,748,134,773,186,789,238,798,280"/>
+<area shape="rect" id="Node000007" href="$d1/d60/classfl_1_1_demo_reel100_a1ba035dad2c205bc34cd84622bf15a96.html#a1ba035dad2c205bc34cd84622bf15a96" title=" " alt="" coords="501,104,704,129"/>
+<area shape="poly" id="edge5_Node000001_Node000007" title=" " alt="" coords="789,282,778,250,761,212,737,175,706,144,684,132,687,127,710,140,741,172,765,210,783,248,794,280"/>
+<area shape="rect" id="Node000009" href="$d3/df3/class_c_every_n_millis_random_a21b30e3129ca78838e60df5e7f3f0d1a.html#a21b30e3129ca78838e60df5e7f3f0d1a" title=" " alt="" coords="519,154,686,194"/>
+<area shape="poly" id="edge7_Node000001_Node000009" title=" " alt="" coords="779,286,748,250,707,215,670,196,673,192,709,210,751,246,783,282"/>
+<area shape="rect" id="Node000012" href="$d5/d25/_demo_reel100_8ino_ae67cd131fd8d3a78a25cb7f40998f292.html#ae67cd131fd8d3a78a25cb7f40998f292" title=" " alt="" coords="318,283,390,308"/>
+<area shape="poly" id="edge10_Node000001_Node000012" title=" " alt="" coords="769,289,740,272,707,259,650,248,604,246,498,259,474,265,450,273,391,289,389,283,449,267,472,260,497,254,603,240,650,242,709,254,742,267,772,284"/>
+<area shape="rect" id="Node000013" href="$d1/d60/classfl_1_1_demo_reel100_aca45289760902af830559c9ed4d06fec.html#aca45289760902af830559c9ed4d06fec" title=" " alt="" coords="509,269,697,295"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="742,303,697,297,697,291,743,297"/>
+<area shape="rect" id="Node000014" href="$d4/d26/_fire2012_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="577,319,628,344"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="743,317,629,331,628,326,742,312"/>
+<area shape="rect" id="Node000015" href="$d4/d06/curr_8h_a85b6d2ee052b034ecc0b34171af3c290.html#a85b6d2ee052b034ecc0b34171af3c290" title=" " alt="" coords="511,368,694,393"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="769,329,709,359,672,370,671,365,707,354,766,325"/>
+<area shape="rect" id="Node000018" href="$d2/d0d/group___random_ga0f72a5ba627eb71955a6641a590838ce.html#ga0f72a5ba627eb71955a6641a590838ce" title="Generate an 16&#45;bit random number between 0 and lim." alt="" coords="559,417,647,443"/>
+<area shape="poly" id="edge17_Node000001_Node000018" title=" " alt="" coords="785,333,753,372,733,392,709,408,679,421,648,429,647,423,677,416,707,404,729,388,749,369,781,330"/>
+<area shape="rect" id="Node000019" href="$d2/d0d/group___random_gafd74f2e94b14dd8aee0ed4071a0c3d37.html#gafd74f2e94b14dd8aee0ed4071a0c3d37" title="Generate an 16&#45;bit random number in the given range." alt="" coords="559,467,647,492"/>
+<area shape="poly" id="edge18_Node000001_Node000019" title=" " alt="" coords="792,334,763,397,739,430,710,458,679,472,648,480,647,474,678,467,706,453,735,426,758,394,788,332"/>
+<area shape="rect" id="Node000020" href="$d3/d4e/_noise_playground_8h_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="573,516,632,541"/>
+<area shape="poly" id="edge19_Node000001_Node000020" title=" " alt="" coords="797,334,787,373,771,420,745,467,729,488,710,507,691,518,671,525,633,531,632,526,670,520,689,513,706,503,725,485,741,464,766,417,782,371,792,333"/>
+<area shape="rect" id="Node000021" href="$d1/d2c/structfl_1_1_particles1d_1_1_particle_a2380106e829d1a062b6fd097cc0f0caa.html#a2380106e829d1a062b6fd097cc0f0caa" title="Spawn with random position, velocity, color, and lifetime." alt="" coords="520,566,685,606"/>
+<area shape="poly" id="edge20_Node000001_Node000021" title=" " alt="" coords="799,334,792,381,777,441,750,502,732,531,710,556,687,572,684,567,706,552,728,528,746,500,772,439,787,380,794,333"/>
+<area shape="rect" id="Node000004" href="$d5/d25/_demo_reel100_8ino_a1cecfe941bd75c57cea1a4f26c8ccb24.html#a1cecfe941bd75c57cea1a4f26c8ccb24" title=" " alt="" coords="281,40,427,65"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="545,67,427,60,427,54,546,61"/>
+<area shape="rect" id="Node000005" href="$d1/d60/classfl_1_1_demo_reel100_a340f4ba1c2a0e90c8b2925a77004c981.html#a340f4ba1c2a0e90c8b2925a77004c981" title=" " alt="" coords="5,161,211,187"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="282,72,260,80,184,123,127,163,124,159,181,118,258,76,280,67"/>
+<area shape="rect" id="Node000008" href="$d1/d60/classfl_1_1_demo_reel100_aa00439ba01e44b08b37259749ffd2f2c.html#aa00439ba01e44b08b37259749ffd2f2c" title=" " alt="" coords="259,90,449,130"/>
+<area shape="poly" id="edge6_Node000007_Node000008" title=" " alt="" coords="488,116,449,115,449,110,488,111"/>
+<area shape="rect" id="Node000010" href="$d3/df3/class_c_every_n_millis_random_a68e9cb752ed96911d3142d3f95cb0a0a.html#a68e9cb752ed96911d3142d3f95cb0a0a" title=" " alt="" coords="267,154,441,194"/>
+<area shape="poly" id="edge8_Node000009_Node000010" title=" " alt="" coords="505,177,442,177,442,171,505,171"/>
+<area shape="rect" id="Node000011" href="$d3/df3/class_c_every_n_millis_random_aa0783f52ff89ba25e9dc6de82261f1d4.html#aa0783f52ff89ba25e9dc6de82261f1d4" title=" " alt="" coords="271,218,437,258"/>
+<area shape="poly" id="edge9_Node000009_Node000011" title=" " alt="" coords="512,200,433,221,432,215,511,195"/>
+<area shape="poly" id="edge11_Node000012_Node000005" title=" " alt="" coords="304,288,258,272,181,230,124,189,127,185,184,225,260,268,305,283"/>
+<area shape="rect" id="Node000016" href="$d4/d06/curr_8h_a4b2149c246013cb6bcde35e7bc4bf332.html#a4b2149c246013cb6bcde35e7bc4bf332" title=" " alt="" coords="309,368,399,393"/>
+<area shape="poly" id="edge15_Node000015_Node000016" title=" " alt="" coords="498,383,400,383,400,378,498,378"/>
+<area shape="rect" id="Node000017" href="$d4/d06/curr_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="83,368,133,393"/>
+<area shape="poly" id="edge16_Node000016_Node000017" title=" " alt="" coords="295,383,134,383,134,378,295,378"/>
+</map>

@@ -1,5 +1,6 @@
 <map id="fl::WaveSimulation2D_Real::geti8" name="fl::WaveSimulation2D_Real::geti8">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,168,45"/>
-<area shape="rect" id="Node000002" href="$d5/d94/classfl_1_1_wave_simulation2_d___real_a717e0ad557e1eb519032799faf7fcdf6.html#a717e0ad557e1eb519032799faf7fcdf6" title=" " alt="" coords="216,5,379,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,23,202,23,202,28,168,28"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,168,69"/>
+<area shape="poly" id="edge2_Node000001_Node000001" title=" " alt="" coords="47,30,45,20,51,10,65,5,87,3,111,6,125,13,122,18,110,11,87,8,66,10,54,15,50,21,52,28"/>
+<area shape="rect" id="Node000002" href="$d5/d94/classfl_1_1_wave_simulation2_d___real_a717e0ad557e1eb519032799faf7fcdf6.html#a717e0ad557e1eb519032799faf7fcdf6" title=" " alt="" coords="216,29,379,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,47,202,47,202,52,168,52"/>
 </map>

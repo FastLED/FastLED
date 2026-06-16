@@ -1,0 +1,6 @@
+<map id="fl::Spi::operator bool" name="fl::Spi::operator bool">
+<area shape="rect" id="Node000001" title="Explicit conversion to bool for contextual evaluation." alt="" coords="5,29,159,55"/>
+<area shape="rect" id="Node000002" href="$d0/d3a/classfl_1_1_spi_af91ff37f7fe3e02b58a159aba338781a.html#af91ff37f7fe3e02b58a159aba338781a" title="Check if device was created and initialized successfully." alt="" coords="207,29,289,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="159,39,193,39,193,45,159,45"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="220,31,214,21,218,11,229,5,248,3,271,6,280,15,277,19,268,11,248,8,231,10,222,15,220,20,225,28"/>
+</map>

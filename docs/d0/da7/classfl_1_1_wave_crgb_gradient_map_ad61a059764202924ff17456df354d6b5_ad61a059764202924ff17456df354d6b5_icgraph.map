@@ -1,0 +1,5 @@
+<map id="fl::WaveCrgbGradientMap::mapWaveToLEDs" name="fl::WaveCrgbGradientMap::mapWaveToLEDs">
+<area shape="rect" id="Node000001" title="Map wave values to gradient&#45;colored LEDs." alt="" coords="241,5,429,45"/>
+<area shape="rect" id="Node000002" href="$d0/da7/classfl_1_1_wave_crgb_gradient_map_a9b166756923fe372df8089a1a0ceb781.html#a9b166756923fe372df8089a1a0ceb781" title="Default constructor with no initial gradient." alt="" coords="5,5,193,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="227,28,194,28,194,23,227,23"/>
+</map>

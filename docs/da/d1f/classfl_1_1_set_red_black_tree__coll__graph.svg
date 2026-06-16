@@ -105,7 +105,7 @@ var sectionId = 'dynsection-1';
 <polygon fill="#9a32cd" stroke="#9a32cd" points="312.16,-111.24 302.03,-114.33 311.88,-118.23 312.16,-111.24"/>
 </a>
 </g>
-<text text-anchor="middle" x="489.5" y="-121" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> root_</text>
+<text text-anchor="middle" x="489.5" y="-121" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> mRoot</text>
 </g>
 <!-- Node3&#45;&gt;Node3 -->
 <g id="edge3_Node000003_Node000003" class="edge">
@@ -137,7 +137,7 @@ var sectionId = 'dynsection-1';
 <polygon fill="#9a32cd" stroke="#9a32cd" points="311.53,-97.41 302.17,-102.37 312.58,-104.33 311.53,-97.41"/>
 </a>
 </g>
-<text text-anchor="middle" x="364.5" y="-103" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> root_</text>
+<text text-anchor="middle" x="364.5" y="-103" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> mRoot</text>
 </g>
 <!-- Node4 -->
 <g id="Node000004" class="node">
@@ -156,7 +156,7 @@ var sectionId = 'dynsection-1';
 <polygon fill="#9a32cd" stroke="#9a32cd" points="418.75,-188.04 409.2,-192.63 419.53,-195 418.75,-188.04"/>
 </a>
 </g>
-<text text-anchor="middle" x="489.5" y="-194" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> comp_</text>
+<text text-anchor="middle" x="489.5" y="-194" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> mComp</text>
 </g>
 <!-- Node5 -->
 <g id="Node000005" class="node">
@@ -214,7 +214,7 @@ var sectionId = 'dynsection-1';
 <polygon fill="#9a32cd" stroke="#9a32cd" points="303.28,-11.5 293.23,-14.83 303.17,-18.5 303.28,-11.5"/>
 </a>
 </g>
-<text text-anchor="middle" x="489.5" y="-41" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> alloc_</text>
+<text text-anchor="middle" x="489.5" y="-41" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> mAlloc</text>
 </g>
 <!-- Node6&#45;&gt;Node8 -->
 <g id="edge12_Node000008_Node000006" class="edge">
@@ -224,7 +224,7 @@ var sectionId = 'dynsection-1';
 <polygon fill="#9a32cd" stroke="#9a32cd" points="303.74,-23.89 293.22,-25.17 302.24,-30.73 303.74,-23.89"/>
 </a>
 </g>
-<text text-anchor="middle" x="364.5" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> alloc_</text>
+<text text-anchor="middle" x="364.5" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> mAlloc</text>
 </g>
 <!-- Node7 -->
 <g id="Node000007" class="node">
@@ -265,7 +265,7 @@ var sectionId = 'dynsection-1';
 <polygon fill="#9a32cd" stroke="#9a32cd" points="293.35,-61.66 283.2,-64.71 293.03,-68.66 293.35,-61.66"/>
 </a>
 </g>
-<text text-anchor="middle" x="364.5" y="-74" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> comp_</text>
+<text text-anchor="middle" x="364.5" y="-74" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> mComp</text>
 </g>
 </g>
 </svg>

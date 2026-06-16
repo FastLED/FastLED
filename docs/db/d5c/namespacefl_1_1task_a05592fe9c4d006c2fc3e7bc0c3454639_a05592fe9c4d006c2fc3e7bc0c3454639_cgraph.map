@@ -1,0 +1,9 @@
+<map id="fl::task::has_tasks" name="fl::task::has_tasks">
+<area shape="rect" id="Node000001" title="Check if any systems have active tasks." alt="" coords="5,45,144,70"/>
+<area shape="rect" id="Node000002" href="$d0/dd2/classfl_1_1task_1_1_executor_a84a9ca9764fdcf87af5ad27dcfc5dac1.html#a84a9ca9764fdcf87af5ad27dcfc5dac1" title="Check if there are any active tasks." alt="" coords="192,5,335,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="144,43,178,37,179,42,145,48"/>
+<area shape="rect" id="Node000003" href="$d0/dd2/classfl_1_1task_1_1_executor_ac534e963910c0f0acf445c8c61aee216.html#ac534e963910c0f0acf445c8c61aee216" title=" " alt="" coords="198,69,329,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="145,66,185,73,184,79,144,72"/>
+<area shape="rect" id="Node000004" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="383,77,545,102"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="329,87,369,87,369,92,329,92"/>
+</map>

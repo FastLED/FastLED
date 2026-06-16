@@ -1,19 +1,33 @@
 <map id="fl::Blend2d" name="fl::Blend2d">
-<area shape="rect" id="Node000001" title=" " alt="" coords="915,108,1005,133"/>
-<area shape="rect" id="Node000002" href="$d7/d3e/classfl_1_1_fx2d.html" title=" " alt="" coords="700,55,771,80"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="785,76,915,107,914,113,784,81"/>
-<area shape="rect" id="Node000003" href="$da/d5d/classfl_1_1_fx.html" title=" " alt="" coords="375,5,429,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="443,19,534,29,642,45,700,57,699,62,641,50,534,35,443,24"/>
-<area shape="rect" id="Node000004" href="$d0/dce/classfl_1_1_x_y_map.html" title=" " alt="" coords="361,55,443,80"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="457,65,700,65,700,70,457,70"/>
-<area shape="rect" id="Node000005" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="665,129,805,169"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="818,137,890,129,914,125,915,131,891,134,819,143"/>
-<area shape="rect" id="Node000006" href="$d3/d4d/structfl_1_1_blend2d_1_1_entry.html" title=" " alt="" coords="335,104,469,129"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="483,122,665,139,665,145,482,127"/>
-<area shape="rect" id="Node000007" href="$d8/dcd/classfl_1_1allocator.html" title=" " alt="" coords="336,154,468,194"/>
-<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="481,168,641,158,665,155,666,161,642,163,482,174"/>
-<area shape="rect" id="Node000008" href="$d8/dcd/classfl_1_1allocator.html" title=" " alt="" coords="5,161,139,187"/>
-<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="152,171,336,171,336,177,152,177"/>
-<area shape="rect" id="Node000009" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="332,218,472,258"/>
-<area shape="poly" id="edge8_Node000005_Node000009" title=" " alt="" coords="485,224,561,210,640,189,695,166,697,171,642,194,562,215,486,229"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="1333,137,1424,163"/>
+<area shape="rect" id="Node000002" href="$d7/d3e/classfl_1_1_fx2d.html" title=" " alt="" coords="1049,55,1119,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1133,78,1310,127,1335,135,1334,140,1309,133,1132,83"/>
+<area shape="rect" id="Node000003" href="$da/d5d/classfl_1_1_fx.html" title=" " alt="" coords="709,5,764,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="778,19,979,45,1049,58,1048,63,978,50,777,25"/>
+<area shape="rect" id="Node000004" href="$d0/dce/classfl_1_1_x_y_map.html" title=" " alt="" coords="695,55,778,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="792,65,1048,65,1048,70,792,70"/>
+<area shape="rect" id="Node000005" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="1003,130,1165,170"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="1179,147,1333,147,1333,153,1179,153"/>
+<area shape="rect" id="Node000006" href="$d4/dad/classfl_1_1vector__basic.html" title="Type&#45;erased vector base class." alt="" coords="355,141,475,167"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="489,144,538,141,759,129,855,128,979,134,1002,136,1002,141,978,139,855,134,759,134,539,146,489,150"/>
+<area shape="rect" id="Node000009" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="678,156,795,181"/>
+<area shape="poly" id="edge9_Node000009_Node000006" title=" " alt="" coords="489,155,678,163,678,169,489,160"/>
+<area shape="rect" id="Node000007" href="$db/d13/classfl_1_1memory__resource.html" title="Polymorphic memory resource base class (PMR&#45;style)." alt="" coords="13,117,169,143"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="182,134,355,147,355,152,182,139"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl.html#d8/d72/structfl_1_1vector__element__ops" title="Function pointer table for type&#45;specific element operations." alt="" coords="5,167,176,192"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="190,171,292,163,355,158,355,163,292,169,190,176"/>
+<area shape="poly" id="edge8_Node000005_Node000009" title=" " alt="" coords="809,162,1002,152,1002,157,809,167"/>
+<area shape="rect" id="Node000010" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="1019,213,1149,253"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="1162,219,1234,204,1308,182,1355,160,1357,165,1310,187,1235,209,1164,224"/>
+<area shape="rect" id="Node000011" href="$d1/de0/classfl_1_1_frame.html" title=" " alt="" coords="697,205,776,231"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="790,218,1019,227,1018,233,790,223"/>
+<area shape="rect" id="Node000012" href="$d8/d7d/classfl_1_1vector__psram.html" title=" " alt="" coords="340,198,491,238"/>
+<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="505,215,697,215,697,221,505,221"/>
+<area shape="rect" id="Node000016" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="316,284,515,309"/>
+<area shape="poly" id="edge13_Node000010_Node000016" title=" " alt="" coords="528,283,1018,236,1019,241,528,289"/>
+<area shape="rect" id="Node000019" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="664,319,809,344"/>
+<area shape="poly" id="edge16_Node000019_Node000016" title=" " alt="" coords="529,306,664,321,663,326,528,311"/>
+<area shape="rect" id="Node000017" href="$da/d98/classfl_1_1_atomic_fake.html" title=" " alt="" coords="23,277,159,317"/>
+<area shape="poly" id="edge14_Node000016_Node000017" title=" " alt="" coords="172,294,316,294,316,299,172,299"/>
+<area shape="poly" id="edge15_Node000010_Node000019" title=" " alt="" coords="823,329,900,321,939,313,978,301,1022,278,1059,251,1062,255,1025,282,980,306,941,318,900,326,823,334"/>
 </map>

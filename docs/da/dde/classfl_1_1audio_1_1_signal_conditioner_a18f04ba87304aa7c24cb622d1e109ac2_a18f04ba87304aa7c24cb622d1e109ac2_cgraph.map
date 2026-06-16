@@ -1,0 +1,39 @@
+<map id="fl::audio::SignalConditioner::~SignalConditioner" name="fl::audio::SignalConditioner::~SignalConditioner">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,365,203,405"/>
+<area shape="rect" id="Node000002" href="$da/dde/classfl_1_1audio_1_1_signal_conditioner_ad380b9ec2ddaf24266e4bdcd61b5078b.html#ad380b9ec2ddaf24266e4bdcd61b5078b" title="Configure the signal conditioner." alt="" coords="251,29,448,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="118,364,323,79,328,82,122,367"/>
+<area shape="rect" id="Node000004" href="$da/dde/classfl_1_1audio_1_1_signal_conditioner_a846d5792e5776acb968fd0a6949f4e89.html#a846d5792e5776acb968fd0a6949f4e89" title="Process a raw audio sample through the conditioning pipeline." alt="" coords="251,285,448,325"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="166,363,273,327,275,332,167,368"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a7028271728479d2b9330f545c776ca5b.html#a7028271728479d2b9330f545c776ca5b" title="Sample a pixel from a 2D CRGB grid at floating&#45;point coordinates." alt="" coords="776,346,863,371"/>
+<area shape="poly" id="edge22_Node000001_Node000006" title=" " alt="" coords="203,398,305,409,428,417,561,416,628,410,693,401,737,390,778,374,780,379,739,395,694,407,628,416,561,421,428,422,305,415,203,403"/>
+<area shape="rect" id="Node000021" href="$da/dde/classfl_1_1audio_1_1_signal_conditioner_adfb74e78e5bae3e458cee1ce229216bf.html#adfb74e78e5bae3e458cee1ce229216bf" title="Reset internal state (DC estimate, noise gate state)" alt="" coords="251,501,448,541"/>
+<area shape="poly" id="edge21_Node000001_Node000021" title=" " alt="" coords="133,403,187,441,252,480,280,493,277,498,249,485,184,446,130,408"/>
+<area shape="poly" id="edge4_Node000002_Node000002" title=" " alt="" coords="304,30,301,20,308,10,325,5,349,3,378,6,393,13,391,18,376,11,349,8,326,10,311,15,306,21,309,28"/>
+<area shape="rect" id="Node000003" href="$da/dde/classfl_1_1audio_1_1_signal_conditioner_ad722da4953e88a99dfe7ffa4a760e135.html#ad722da4953e88a99dfe7ffa4a760e135" title=" " alt="" coords="496,29,693,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="448,56,482,56,482,61,448,61"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="496,43,462,43,462,38,496,38"/>
+<area shape="rect" id="Node000005" href="$da/dde/classfl_1_1audio_1_1_signal_conditioner_a52859f3eeac3cbdeba4d2f5891c8cba0.html#a52859f3eeac3cbdeba4d2f5891c8cba0" title="Apply noise gate with hysteresis." alt="" coords="496,285,693,325"/>
+<area shape="poly" id="edge6_Node000004_Node000005" title=" " alt="" coords="448,303,482,303,482,308,448,308"/>
+<area shape="poly" id="edge20_Node000004_Node000006" title=" " alt="" coords="378,323,431,357,463,374,497,385,568,396,640,394,707,385,763,372,764,378,708,390,640,400,567,401,495,391,461,378,428,362,375,328"/>
+<area shape="rect" id="Node000014" href="$da/dde/classfl_1_1audio_1_1_signal_conditioner_a1725f5d5e296826e8c0b8e1b9348da28.html#a1725f5d5e296826e8c0b8e1b9348da28" title="Calculate DC offset from valid samples only." alt="" coords="496,157,693,197"/>
+<area shape="poly" id="edge9_Node000004_Node000014" title=" " alt="" coords="375,283,429,245,495,207,511,200,513,205,497,212,432,250,378,287"/>
+<area shape="rect" id="Node000015" href="$da/dde/classfl_1_1audio_1_1_signal_conditioner_a86de39eef2b9b36265f3b7825d13b409.html#a86de39eef2b9b36265f3b7825d13b409" title="Detect and reject spike samples." alt="" coords="496,93,693,133"/>
+<area shape="poly" id="edge11_Node000004_Node000015" title=" " alt="" coords="362,283,414,215,452,177,494,143,505,137,508,142,498,148,456,181,418,219,366,287"/>
+<area shape="rect" id="Node000019" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="532,350,657,375"/>
+<area shape="poly" id="edge17_Node000004_Node000019" title=" " alt="" coords="436,323,527,344,526,349,435,328"/>
+<area shape="rect" id="Node000020" href="$da/dde/classfl_1_1audio_1_1_signal_conditioner_a0075df48cfea0b1aaf4396df02d2daa9.html#a0075df48cfea0b1aaf4396df02d2daa9" title="Remove DC offset from samples." alt="" coords="496,221,693,261"/>
+<area shape="poly" id="edge18_Node000004_Node000020" title=" " alt="" coords="426,283,504,262,505,267,427,288"/>
+<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="680,323,764,343,762,348,679,328"/>
+<area shape="rect" id="Node000013" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="768,214,871,239"/>
+<area shape="poly" id="edge8_Node000005_Node000013" title=" " alt="" coords="658,283,692,271,771,242,773,247,694,276,659,288"/>
+<area shape="poly" id="edge10_Node000014_Node000013" title=" " alt="" coords="687,195,755,210,754,215,686,200"/>
+<area shape="poly" id="edge15_Node000015_Node000006" title=" " alt="" coords="678,131,695,143,716,169,725,194,731,220,744,251,773,295,801,333,797,337,768,298,739,253,726,222,720,196,711,172,692,147,675,136"/>
+<area shape="poly" id="edge16_Node000015_Node000013" title=" " alt="" coords="669,131,695,143,720,163,743,185,779,206,776,210,740,189,716,167,692,148,667,136"/>
+<area shape="rect" id="Node000016" href="$d2/d24/classfl_1_1vector_a51b9ac42dba7a7b4bd5a08a276634cef.html#a51b9ac42dba7a7b4bd5a08a276634cef" title=" " alt="" coords="760,101,879,126"/>
+<area shape="poly" id="edge12_Node000015_Node000016" title=" " alt="" coords="693,111,746,111,746,116,693,116"/>
+<area shape="rect" id="Node000017" href="$d2/d24/classfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980.html#ae9a8cea8d4b81d8f2f10a2b007ac2980" title=" " alt="" coords="741,150,897,175"/>
+<area shape="poly" id="edge13_Node000015_Node000017" title=" " alt="" coords="687,131,748,144,747,150,686,136"/>
+<area shape="rect" id="Node000018" href="$d2/d24/classfl_1_1vector_a305fb6473faab9c2798479c057a58d50.html#a305fb6473faab9c2798479c057a58d50" title=" " alt="" coords="751,51,887,77"/>
+<area shape="poly" id="edge14_Node000015_Node000018" title=" " alt="" coords="686,91,747,77,748,82,687,96"/>
+<area shape="poly" id="edge19_Node000020_Node000013" title=" " alt="" coords="693,232,754,228,754,234,694,238"/>
+</map>

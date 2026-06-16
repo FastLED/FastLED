@@ -1,25 +1,26 @@
 <map id="/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/shared/Painter.h" name="/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/shared/Painter.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="198,5,469,60"/>
-<area shape="rect" id="Node000002" href="$df/d85/_keyboard_8h.html" title=" " alt="" coords="193,108,295,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="308,62,268,100,264,96,304,58"/>
-<area shape="rect" id="Node000007" href="$d8/d3c/util_8h.html" title=" " alt="" coords="283,181,346,207"/>
-<area shape="poly" id="edge11_Node000001_Node000007" title=" " alt="" coords="333,61,320,168,315,167,328,60"/>
-<area shape="rect" id="Node000008" href="$d7/dd8/_approximating_function_8h.html" title=" " alt="" coords="215,255,409,280"/>
-<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="347,60,358,90,366,127,368,168,361,208,351,228,337,246,332,243,346,226,356,206,363,168,361,128,352,92,342,61"/>
-<area shape="rect" id="Node000009" href="$de/d60/settings_8h.html" title=" " alt="" coords="433,255,527,280"/>
-<area shape="poly" id="edge12_Node000001_Node000009" title=" " alt="" coords="352,59,468,242,463,244,348,62"/>
-<area shape="rect" id="Node000010" href="$db/d19/led__rope__interface_8h.html" title=" " alt="" coords="5,108,168,133"/>
-<area shape="poly" id="edge13_Node000001_Node000010" title=" " alt="" coords="259,63,133,106,132,101,257,58"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="175,181,259,207"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="242,135,229,170,224,168,237,133"/>
-<area shape="rect" id="Node000004" href="$de/de1/examples_2_luminescent_grand_2shared_2color_8h.html" title=" " alt="" coords="86,181,151,207"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="225,136,152,177,150,172,223,131"/>
-<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="258,132,296,170,292,174,254,136"/>
-<area shape="rect" id="Node000005" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="81,255,164,280"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="122,207,124,241,119,241,117,207"/>
-<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="153,252,178,253,187,258,191,268,183,279,167,283,166,278,180,275,185,267,183,262,177,258,153,257"/>
-<area shape="poly" id="edge7_Node000007_Node000005" title=" " alt="" coords="285,209,168,252,166,247,283,204"/>
-<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="317,207,316,241,310,241,312,207"/>
-<area shape="poly" id="edge9_Node000007_Node000009" title=" " alt="" coords="342,204,442,247,439,252,340,209"/>
-<area shape="poly" id="edge14_Node000010_Node000004" title=" " alt="" coords="94,133,110,168,106,170,90,135"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="260,5,531,60"/>
+<area shape="rect" id="Node000002" href="$df/d85/_keyboard_8h.html" title=" " alt="" coords="68,108,171,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="312,63,170,106,168,101,310,58"/>
+<area shape="rect" id="Node000008" href="$d8/d3c/util_8h.html" title=" " alt="" coords="345,181,408,207"/>
+<area shape="poly" id="edge11_Node000001_Node000008" title=" " alt="" coords="395,61,382,168,377,167,390,60"/>
+<area shape="rect" id="Node000009" href="$d7/dd8/_approximating_function_8h.html" title=" " alt="" coords="299,255,492,280"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="408,60,423,127,427,167,423,207,410,243,405,242,418,206,422,167,418,128,402,61"/>
+<area shape="rect" id="Node000010" href="$de/d60/settings_8h.html" title=" " alt="" coords="516,255,611,280"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="416,59,549,241,545,245,412,62"/>
+<area shape="rect" id="Node000011" href="$db/d19/led__rope__interface_8h.html" title=" " alt="" coords="195,108,358,133"/>
+<area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="361,62,305,102,302,98,358,58"/>
+<area shape="rect" id="Node000003" href="$d2/de0/arduino_8h.html" title=" " alt="" coords="59,181,143,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="119,134,110,169,105,168,114,133"/>
+<area shape="rect" id="Node000005" href="$de/de1/examples_2_luminescent_grand_2shared_2color_8h.html" title=" " alt="" coords="191,181,256,207"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="138,131,196,171,193,175,135,136"/>
+<area shape="poly" id="edge6_Node000002_Node000008" title=" " alt="" coords="161,131,332,178,331,183,160,136"/>
+<area shape="rect" id="Node000004" href="$da/d99/has__include_8h.html" title=" " alt="" coords="5,255,148,280"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="99,208,87,242,82,241,94,206"/>
+<area shape="rect" id="Node000006" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="172,255,275,280"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="226,207,226,241,221,241,221,207"/>
+<area shape="poly" id="edge7_Node000008_Node000006" title=" " alt="" coords="353,209,262,251,260,246,351,204"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="382,206,391,241,386,242,377,208"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="408,204,521,247,519,252,406,209"/>
+<area shape="poly" id="edge14_Node000011_Node000005" title=" " alt="" coords="270,135,242,172,238,169,266,132"/>
 </map>

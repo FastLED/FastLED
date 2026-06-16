@@ -1,0 +1,23 @@
+<map id="fl::audio::Context::getFFT" name="fl::audio::Context::getFFT">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,143,139,183"/>
+<area shape="poly" id="edge6_Node000001_Node000001" title=" " alt="" coords="38,143,36,133,41,124,53,118,72,116,93,119,105,126,102,131,92,124,72,121,55,123,45,128,41,134,43,142"/>
+<area shape="rect" id="Node000002" href="$d6/d7d/classfl_1_1audio_1_1_context_afd6acdd0f7703411ea9fd4f82e2977d4.html#afd6acdd0f7703411ea9fd4f82e2977d4" title=" " alt="" coords="188,5,321,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,140,134,103,185,62,203,50,206,55,188,66,137,107,96,144"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a7028271728479d2b9330f545c776ca5b.html#a7028271728479d2b9330f545c776ca5b" title="Sample a pixel from a 2D CRGB grid at floating&#45;point coordinates." alt="" coords="375,42,461,67"/>
+<area shape="poly" id="edge11_Node000001_Node000003" title=" " alt="" coords="109,140,186,105,277,79,360,61,362,67,279,84,188,111,111,145"/>
+<area shape="rect" id="Node000010" href="$d1/d74/classfl_1_1shared__ptr_a95dbc9c2aa5a2708b2d3598e70fe2921.html#a95dbc9c2aa5a2708b2d3598e70fe2921" title=" " alt="" coords="187,121,323,146"/>
+<area shape="poly" id="edge5_Node000001_Node000010" title=" " alt="" coords="138,149,173,144,174,149,139,155"/>
+<area shape="rect" id="Node000011" href="$d6/d7d/classfl_1_1audio_1_1_context_affb2f42c379efef2c94ece887829575e.html#affb2f42c379efef2c94ece887829575e" title=" " alt="" coords="188,171,321,211"/>
+<area shape="poly" id="edge7_Node000001_Node000011" title=" " alt="" coords="139,170,175,176,174,181,138,175"/>
+<area shape="rect" id="Node000013" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="192,235,317,261"/>
+<area shape="poly" id="edge9_Node000001_Node000013" title=" " alt="" coords="110,180,188,220,206,228,204,233,186,225,107,185"/>
+<area shape="rect" id="Node000014" href="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a" title=" " alt="" coords="209,285,300,310"/>
+<area shape="poly" id="edge10_Node000001_Node000014" title=" " alt="" coords="91,181,133,226,159,250,188,271,198,277,196,281,185,276,156,254,129,230,87,185"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="322,35,361,42,360,47,321,40"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_ae42bfeb5fc989a01c398b85f4e3accca.html#ae42bfeb5fc989a01c398b85f4e3accca" title="Bilinear interpolation sample from a 2D CRGB grid." alt="" coords="514,17,650,42"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="461,45,500,39,501,45,462,51"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a119e769098c559cc0883bed762678d55.html#a119e769098c559cc0883bed762678d55" title="Nearest&#45;neighbor sample from a 2D CRGB grid." alt="" coords="513,66,651,91"/>
+<area shape="poly" id="edge4_Node000003_Node000009" title=" " alt="" coords="462,58,500,64,499,69,461,64"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d" title=" " alt="" coords="371,178,465,203"/>
+<area shape="poly" id="edge8_Node000011_Node000012" title=" " alt="" coords="321,188,357,188,357,193,321,193"/>
+</map>

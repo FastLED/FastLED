@@ -1,0 +1,46 @@
+<map id="fl::platforms::scopedWatchdogFirstInit" name="fl::platforms::scopedWatchdogFirstInit">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,367,224,407"/>
+<area shape="rect" id="Node000002" href="$da/d45/classfl_1_1_watchdog_a263cc1557dc7c1259ae6e1705f929965.html#a263cc1557dc7c1259ae6e1705f929965" title=" " alt="" coords="308,153,455,179"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="124,365,145,327,178,278,220,229,271,188,294,177,296,181,273,192,224,233,182,282,150,330,128,368"/>
+<area shape="rect" id="Node000003" href="$df/dbf/structfl_1_1_reset_info_a6fa0c255743108e94b0473528ad94500.html#a6fa0c255743108e94b0473528ad94500" title="Write a single&#45;line human&#45;readable description into the caller&#39;s buffer." alt="" coords="300,203,463,228"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="145,365,348,233,350,238,148,370"/>
+<area shape="rect" id="Node000012" href="$da/d45/classfl_1_1_watchdog_a4f2ae912133e18dede49867b815c7f7c.html#a4f2ae912133e18dede49867b815c7f7c" title=" " alt="" coords="275,325,488,351"/>
+<area shape="poly" id="edge12_Node000001_Node000012" title=" " alt="" coords="223,365,298,351,299,356,224,370"/>
+<area shape="rect" id="Node000013" href="$da/d45/classfl_1_1_watchdog_a09a903bdc23fddbb6caac87080a2a567.html#a09a903bdc23fddbb6caac87080a2a567" title=" " alt="" coords="299,375,464,400"/>
+<area shape="poly" id="edge14_Node000001_Node000013" title=" " alt="" coords="224,385,285,385,285,390,224,390"/>
+<area shape="rect" id="Node000015" href="$da/d45/classfl_1_1_watchdog_ad817823bd41330b6f0d6afdfbcefa7ed.html#ad817823bd41330b6f0d6afdfbcefa7ed" title="Detailed reset information including platform raw register + subcause id." alt="" coords="283,424,479,449"/>
+<area shape="poly" id="edge17_Node000001_Node000015" title=" " alt="" coords="224,405,299,419,298,424,223,410"/>
+<area shape="rect" id="Node000017" href="$df/d52/namespacefl_1_1platforms_ac009c87446b4a0e2fc2bbb7edd2c92b9.html#ac009c87446b4a0e2fc2bbb7edd2c92b9" title=" " alt="" coords="272,474,491,514"/>
+<area shape="poly" id="edge20_Node000001_Node000017" title=" " alt="" coords="156,405,273,458,298,467,296,472,271,463,154,410"/>
+<area shape="rect" id="Node000044" href="$df/d52/namespacefl_1_1platforms_a721b457c3bdce812b4a86aa40ac12fd6.html#a721b457c3bdce812b4a86aa40ac12fd6" title=" " alt="" coords="272,538,491,578"/>
+<area shape="poly" id="edge24_Node000001_Node000044" title=" " alt="" coords="135,405,193,464,231,496,273,524,287,530,284,535,271,528,228,500,189,468,131,409"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="339,155,330,145,335,135,352,129,381,127,419,131,429,136,433,142,428,144,425,140,417,136,381,132,353,134,338,139,335,144,343,151"/>
+<area shape="rect" id="Node000004" href="$df/dbf/structfl_1_1_reset_info_a20ca4fcd4004173351cf745b2e485086.html#a20ca4fcd4004173351cf745b2e485086" title="Cause name (zero&#45;cost, static string_view)." alt="" coords="551,5,737,31"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="462,204,489,188,503,171,510,153,512,116,514,78,522,59,537,40,542,36,545,40,541,44,526,61,519,79,517,116,515,154,508,173,492,192,464,209"/>
+<area shape="rect" id="Node000006" href="$d0/ddb/classfl_1_1string__view_a62053f60d43376477b7857084f50b3c3.html#a62053f60d43376477b7857084f50b3c3" title=" " alt="" coords="571,55,717,80"/>
+<area shape="poly" id="edge6_Node000003_Node000006" title=" " alt="" coords="462,203,489,188,500,177,506,165,512,140,518,114,525,101,537,89,557,78,559,82,540,93,529,105,523,116,517,141,511,167,504,180,492,192,464,207"/>
+<area shape="rect" id="Node000007" href="$df/dbf/structfl_1_1_reset_info_a3e1d509f5f76c503d7c66f18a1e9f85b.html#a3e1d509f5f76c503d7c66f18a1e9f85b" title="Platform&#45;specific subcause name (zero&#45;cost, static string_view)." alt="" coords="540,104,748,129"/>
+<area shape="poly" id="edge7_Node000003_Node000007" title=" " alt="" coords="460,200,489,188,504,176,512,164,522,151,537,138,551,132,553,137,540,143,526,154,517,167,508,180,492,192,462,205"/>
+<area shape="rect" id="Node000008" href="$df/d52/namespacefl_1_1platforms_ad20e296d63b1caeff2411184fac4a386.html#ad20e296d63b1caeff2411184fac4a386" title=" " alt="" coords="558,153,730,179"/>
+<area shape="poly" id="edge8_Node000003_Node000008" title=" " alt="" coords="449,200,561,179,562,184,450,205"/>
+<area shape="rect" id="Node000009" href="$df/d52/namespacefl_1_1platforms_aa5d078387c6a4b12de6855b88efa546d.html#aa5d078387c6a4b12de6855b88efa546d" title=" " alt="" coords="560,203,728,228"/>
+<area shape="poly" id="edge9_Node000003_Node000009" title=" " alt="" coords="463,213,546,213,546,218,463,218"/>
+<area shape="rect" id="Node000010" href="$df/d52/namespacefl_1_1platforms_a36d9f55e28dc0a959619cf2e13f1ae71.html#a36d9f55e28dc0a959619cf2e13f1ae71" title=" " alt="" coords="539,252,749,277"/>
+<area shape="poly" id="edge10_Node000003_Node000010" title=" " alt="" coords="450,225,562,247,561,252,449,231"/>
+<area shape="rect" id="Node000011" href="$df/d52/namespacefl_1_1platforms_a9e23b7af1062b830c72c14c56841a88f.html#a9e23b7af1062b830c72c14c56841a88f" title=" " alt="" coords="557,301,731,327"/>
+<area shape="poly" id="edge11_Node000003_Node000011" title=" " alt="" coords="407,226,466,255,540,286,569,295,568,300,538,291,464,260,405,230"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_aaea3f6340440c4987e8c0f58bd4b0c10.html#aaea3f6340440c4987e8c0f58bd4b0c10" title="Return a static&#45;lifetime name for c — zero&#45;cost, no allocation." alt="" coords="799,5,950,31"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="737,15,785,15,785,21,737,21"/>
+<area shape="poly" id="edge13_Node000012_Node000012" title=" " alt="" coords="339,327,330,317,335,307,352,301,381,299,419,303,429,308,433,314,428,316,425,312,417,308,381,304,353,306,338,311,335,316,343,323"/>
+<area shape="rect" id="Node000014" href="$da/d45/classfl_1_1_watchdog_aa289ba7fe21f2add007ae8680e51249a.html#aa289ba7fe21f2add007ae8680e51249a" title=" " alt="" coords="557,375,731,400"/>
+<area shape="poly" id="edge15_Node000013_Node000014" title=" " alt="" coords="464,385,543,385,543,390,464,390"/>
+<area shape="poly" id="edge16_Node000014_Node000014" title=" " alt="" coords="607,376,599,366,603,356,618,350,644,348,676,352,689,361,685,366,674,357,644,353,619,355,606,360,604,366,611,373"/>
+<area shape="rect" id="Node000016" href="$da/d45/classfl_1_1_watchdog_a5c1ddec6fa8ad283f62bf06d9ae0cbc9.html#a5c1ddec6fa8ad283f62bf06d9ae0cbc9" title=" " alt="" coords="539,448,749,473"/>
+<area shape="poly" id="edge18_Node000015_Node000016" title=" " alt="" coords="480,443,525,447,525,452,479,448"/>
+<area shape="poly" id="edge19_Node000016_Node000016" title=" " alt="" coords="607,450,599,440,603,430,618,424,644,421,676,425,689,435,685,439,674,430,644,427,619,429,606,434,604,439,611,446"/>
+<area shape="rect" id="Node000018" href="$d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27" title="Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all..." alt="" coords="607,521,681,547"/>
+<area shape="poly" id="edge21_Node000017_Node000018" title=" " alt="" coords="491,508,593,524,592,529,490,513"/>
+<area shape="poly" id="edge22_Node000018_Node000018" title=" " alt="" coords="607,523,599,513,603,503,618,497,644,495,676,499,689,508,685,512,674,503,644,500,619,502,606,507,604,512,611,519"/>
+<area shape="rect" id="Node000019" href="$df/d9e/namespacefl_1_1detail_abd6e1e8189dbbbf28d720923205bd0dd.html#abd6e1e8189dbbbf28d720923205bd0dd" title="Internal delay implementation used by the public fl::delay wrapper." alt="" coords="797,521,952,547"/>
+<area shape="poly" id="edge23_Node000018_Node000019" title=" " alt="" coords="681,531,784,531,784,537,681,537"/>
+</map>

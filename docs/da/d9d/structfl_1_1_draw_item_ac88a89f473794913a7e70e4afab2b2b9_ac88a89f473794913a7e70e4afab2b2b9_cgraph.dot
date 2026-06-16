@@ -8,5 +8,5 @@ digraph "fl::DrawItem::DrawItem"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::DrawItem::DrawItem",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::Rgbw::size_as_rgb",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d27/structfl_1_1_rgbw_aae6f455908e529f3e0f4c67cd724281f.html#aae6f455908e529f3e0f4c67cd724281f",tooltip=" "];
+  Node2 [id="Node000002",label="fl::Rgbw::size_as_rgb",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d27/structfl_1_1_rgbw_a10319a45c0582fd4ea504324e3fcf2fe.html#a10319a45c0582fd4ea504324e3fcf2fe",tooltip=" "];
 }

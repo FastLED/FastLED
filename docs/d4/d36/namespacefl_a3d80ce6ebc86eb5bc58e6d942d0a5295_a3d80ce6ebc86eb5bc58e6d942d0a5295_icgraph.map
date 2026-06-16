@@ -1,0 +1,11 @@
+<map id="fl::transpose_2lane_inline" name="fl::transpose_2lane_inline">
+<area shape="rect" id="Node000001" title="Low&#45;level bit&#45;interleaving primitive for 2 lanes (ISR&#45;safe)" alt="" coords="635,37,780,77"/>
+<area shape="rect" id="Node000002" href="$d3/dfa/classfl_1_1_s_p_i_transposer_ab685cdd1edcc4b507a91d7dbfd5ba41b.html#ab685cdd1edcc4b507a91d7dbfd5ba41b" title="Transpose 2 lanes of data into interleaved dual&#45;SPI format." alt="" coords="451,37,587,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="621,60,587,60,587,55,621,55"/>
+<area shape="rect" id="Node000003" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a97018959f2c77546fa12f2a0adb2f540.html#a97018959f2c77546fa12f2a0adb2f540" title="Flush all lanes (transpose and transmit)" alt="" coords="228,37,403,77"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="437,60,403,60,403,55,437,55"/>
+<area shape="rect" id="Node000004" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a512a780a7050fa0e91e83c5dba1e17bc.html#a512a780a7050fa0e91e83c5dba1e17bc" title=" " alt="" coords="5,5,180,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="214,45,180,40,180,35,215,40"/>
+<area shape="rect" id="Node000005" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a547b2f30f70e16dbb22762f3f2370254.html#a547b2f30f70e16dbb22762f3f2370254" title="Internal implementation &#45; write all lanes atomically." alt="" coords="5,69,180,109"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="215,74,180,79,180,74,214,69"/>
+</map>

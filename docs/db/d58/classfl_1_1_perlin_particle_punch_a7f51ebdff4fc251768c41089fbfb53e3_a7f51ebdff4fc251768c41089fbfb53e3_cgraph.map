@@ -1,0 +1,70 @@
+<map id="fl::PerlinParticlePunch::draw" name="fl::PerlinParticlePunch::draw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,525,168,565"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a399e4e094995b8e97420b89a2dd6548b.html#a399e4e094995b8e97420b89a2dd6548b" title=" " alt="" coords="258,157,393,183"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="95,523,142,426,176,363,214,302,259,241,301,191,305,195,263,244,218,305,181,366,147,428,99,526"/>
+<area shape="rect" id="Node000004" href="$db/d58/classfl_1_1_perlin_particle_punch_a62d1f2478549ae87a03cbe41d05467d8.html#a62d1f2478549ae87a03cbe41d05467d8" title=" " alt="" coords="244,315,407,355"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="109,523,289,362,293,366,112,527"/>
+<area shape="rect" id="Node000026" href="$db/d58/classfl_1_1_perlin_particle_punch_ad9e55067159a64a760ce862b065a39d9.html#ad9e55067159a64a760ce862b065a39d9" title=" " alt="" coords="244,461,407,501"/>
+<area shape="poly" id="edge19_Node000001_Node000026" title=" " alt="" coords="161,522,236,502,238,507,163,527"/>
+<area shape="rect" id="Node000030" href="$db/d58/classfl_1_1_perlin_particle_punch_ad867b77f1f13af0f166acae10eca3b69.html#ad867b77f1f13af0f166acae10eca3b69" title=" " alt="" coords="244,525,407,565"/>
+<area shape="poly" id="edge25_Node000001_Node000030" title=" " alt="" coords="169,542,230,542,230,547,169,547"/>
+<area shape="rect" id="Node000031" href="$db/d58/classfl_1_1_perlin_particle_punch_a6b5fdf9e30db0eda07f6ef04cfcf1fa6.html#a6b5fdf9e30db0eda07f6ef04cfcf1fa6" title=" " alt="" coords="244,589,407,629"/>
+<area shape="poly" id="edge28_Node000001_Node000031" title=" " alt="" coords="163,562,238,583,236,588,161,567"/>
+<area shape="rect" id="Node000034" href="$d3/d08/structfl_1_1_perlin_particle_punch_1_1_meteor_particle_ac06220eb66d45703a3d110fd94d0ab44.html#ac06220eb66d45703a3d110fd94d0ab44" title=" " alt="" coords="216,779,435,833"/>
+<area shape="poly" id="edge35_Node000001_Node000034" title=" " alt="" coords="97,564,113,605,138,659,173,715,194,741,218,764,224,769,221,773,214,768,190,745,169,718,133,662,108,608,92,566"/>
+<area shape="rect" id="Node000035" href="$db/d58/classfl_1_1_perlin_particle_punch_a37515628f8fb47f6a383d9bc276028cf.html#a37515628f8fb47f6a383d9bc276028cf" title=" " alt="" coords="229,714,422,754"/>
+<area shape="poly" id="edge36_Node000001_Node000035" title=" " alt="" coords="115,563,290,703,286,707,112,567"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a5a8a33cdb0434211edc66189968155ea.html#a5a8a33cdb0434211edc66189968155ea" title=" " alt="" coords="537,71,625,96"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="355,155,482,106,523,94,525,99,484,111,357,160"/>
+<area shape="rect" id="Node000005" href="$db/d58/classfl_1_1_perlin_particle_punch_a84ecb8c54101723ac162fa497a166a38.html#a84ecb8c54101723ac162fa497a166a38" title=" " alt="" coords="500,121,663,161"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="346,313,406,260,481,200,532,166,535,170,484,204,409,264,350,317"/>
+<area shape="rect" id="Node000006" href="$d9/d9f/classfl_1_1s16x16_a9c7a5411b60510e5a513c5d1e305720d.html#a9c7a5411b60510e5a513c5d1e305720d" title=" " alt="" coords="911,132,1065,157"/>
+<area shape="poly" id="edge15_Node000004_Node000006" title=" " alt="" coords="353,313,410,277,445,258,482,243,538,227,587,218,671,213,756,210,805,204,862,191,906,177,947,161,949,165,908,182,863,197,806,209,757,215,671,218,587,223,539,232,484,249,448,263,413,281,356,317"/>
+<area shape="rect" id="Node000018" href="$d4/d36/namespacefl_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="506,421,657,447"/>
+<area shape="poly" id="edge11_Node000004_Node000018" title=" " alt="" coords="365,353,421,380,484,406,512,415,510,420,482,411,418,385,363,358"/>
+<area shape="rect" id="Node000023" href="$db/d58/classfl_1_1_perlin_particle_punch_a80f071dc8e07bc2e76c4e13ed6baecd6.html#a80f071dc8e07bc2e76c4e13ed6baecd6" title=" " alt="" coords="500,258,663,298"/>
+<area shape="poly" id="edge16_Node000004_Node000023" title=" " alt="" coords="406,315,486,296,487,302,407,320"/>
+<area shape="rect" id="Node000024" href="$d4/d36/namespacefl_aa6f747fb354cae784bdd4c656cbdd9fb.html#aa6f747fb354cae784bdd4c656cbdd9fb" title=" " alt="" coords="548,323,615,348"/>
+<area shape="poly" id="edge17_Node000004_Node000024" title=" " alt="" coords="407,333,534,333,534,338,407,338"/>
+<area shape="rect" id="Node000025" href="$d9/d9f/classfl_1_1s16x16_a590f31e60f8954944bb4ea7ccbbb4b88.html#a590f31e60f8954944bb4ea7ccbbb4b88" title=" " alt="" coords="516,372,647,397"/>
+<area shape="poly" id="edge18_Node000004_Node000025" title=" " alt="" coords="407,348,503,367,502,372,406,354"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="663,139,897,141,897,146,663,144"/>
+<area shape="rect" id="Node000008" href="$d9/d9f/classfl_1_1s16x16_aa048b427f50f28993a67941e0f303a65.html#aa048b427f50f28993a67941e0f303a65" title=" " alt="" coords="1113,107,1231,132"/>
+<area shape="poly" id="edge8_Node000005_Node000008" title=" " alt="" coords="663,128,728,122,930,115,1100,115,1100,120,930,120,728,127,663,133"/>
+<area shape="rect" id="Node000009" href="$d8/df9/group___noise_generation_gaa452e57f154ab8d6d692375dba1ef5cb.html#gaa452e57f154ab8d6d692375dba1ef5cb" title=" " alt="" coords="757,5,834,31"/>
+<area shape="poly" id="edge7_Node000005_Node000009" title=" " alt="" coords="655,118,678,105,693,92,702,78,711,63,726,48,747,35,750,39,730,52,715,67,707,81,697,95,682,110,657,123"/>
+<area shape="rect" id="Node000012" href="$d9/d9f/classfl_1_1s16x16_a16358cb4db9d9056cc85ea036c5ef1e4.html#a16358cb4db9d9056cc85ea036c5ef1e4" title=" " alt="" coords="728,157,863,183"/>
+<area shape="poly" id="edge9_Node000005_Node000012" title=" " alt="" coords="664,149,715,156,714,162,663,154"/>
+<area shape="poly" id="edge6_Node000006_Node000008" title=" " alt="" coords="1065,131,1099,127,1100,132,1066,137"/>
+<area shape="poly" id="edge10_Node000012_Node000006" title=" " alt="" coords="863,158,897,154,897,159,863,164"/>
+<area shape="rect" id="Node000019" href="$d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="758,636,833,661"/>
+<area shape="poly" id="edge12_Node000018_Node000019" title=" " alt="" coords="658,443,682,456,721,494,751,539,774,584,788,622,783,624,769,587,747,542,717,498,678,460,655,448"/>
+<area shape="rect" id="Node000021" href="$d4/d36/namespacefl_ab169b38b75fd1ab29b3dc61a32497ff1.html#ab169b38b75fd1ab29b3dc61a32497ff1" title="Helper function to divide a number by 16, aka four logical shift right (LSR)&#39;s." alt="" coords="760,421,831,447"/>
+<area shape="poly" id="edge13_Node000018_Node000021" title=" " alt="" coords="657,431,746,431,746,437,657,437"/>
+<area shape="rect" id="Node000022" href="$d6/d19/group___linear_interpolation_gaeb360269bf892a49b96b9ea8248ea8a7.html#gaeb360269bf892a49b96b9ea8248ea8a7" title="Map from one full&#45;range 8&#45;bit value into a narrower range of 8&#45;bit values, possibly a range of hues." alt="" coords="766,372,825,397"/>
+<area shape="poly" id="edge14_Node000018_Node000022" title=" " alt="" coords="636,419,752,392,753,397,638,424"/>
+<area shape="poly" id="edge20_Node000026_Node000018" title=" " alt="" coords="406,463,497,447,498,452,407,469"/>
+<area shape="rect" id="Node000027" href="$da/dd6/structfl_1_1_c_r_g_b_aa272170bea8120f101f27ebd2c323b55.html#aa272170bea8120f101f27ebd2c323b55" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="515,471,648,496"/>
+<area shape="poly" id="edge21_Node000026_Node000027" title=" " alt="" coords="407,479,501,480,501,485,407,484"/>
+<area shape="rect" id="Node000016" href="$d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d" title=" " alt="" coords="552,585,611,611"/>
+<area shape="poly" id="edge23_Node000026_Node000016" title=" " alt="" coords="408,496,436,510,452,526,461,542,469,556,484,570,511,583,539,591,538,596,509,588,481,575,465,560,456,544,448,529,433,515,406,501"/>
+<area shape="rect" id="Node000029" href="$db/d58/classfl_1_1_perlin_particle_punch_a940ba15318dbcce3ab89d3ad590ba310.html#a940ba15318dbcce3ab89d3ad590ba310" title=" " alt="" coords="500,521,663,561"/>
+<area shape="poly" id="edge24_Node000026_Node000029" title=" " alt="" coords="407,497,487,516,486,521,406,502"/>
+<area shape="rect" id="Node000028" href="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" title="Default constructor." alt="" coords="735,471,855,496"/>
+<area shape="poly" id="edge22_Node000027_Node000028" title=" " alt="" coords="648,481,722,481,722,486,648,486"/>
+<area shape="poly" id="edge26_Node000030_Node000027" title=" " alt="" coords="406,523,514,497,515,502,407,528"/>
+<area shape="poly" id="edge27_Node000030_Node000029" title=" " alt="" coords="407,541,486,539,487,545,407,546"/>
+<area shape="poly" id="edge29_Node000031_Node000019" title=" " alt="" coords="407,613,744,642,744,647,407,618"/>
+<area shape="poly" id="edge30_Node000031_Node000027" title=" " alt="" coords="406,589,433,575,448,558,456,541,464,524,481,507,500,496,503,501,484,511,469,527,461,544,453,561,436,579,408,594"/>
+<area shape="poly" id="edge31_Node000031_Node000016" title=" " alt="" coords="407,603,538,597,538,602,407,608"/>
+<area shape="poly" id="edge34_Node000031_Node000029" title=" " alt="" coords="401,586,492,562,493,567,402,591"/>
+<area shape="rect" id="Node000032" href="$d2/d0d/group___random_gadb05544426b14ef8d85fb2eb73cb8a0a.html#gadb05544426b14ef8d85fb2eb73cb8a0a" title="Generate an 8&#45;bit random number." alt="" coords="541,751,621,776"/>
+<area shape="poly" id="edge32_Node000031_Node000032" title=" " alt="" coords="352,627,427,692,484,736,529,752,527,757,481,740,424,696,348,631"/>
+<area shape="rect" id="Node000033" href="$d3/d08/structfl_1_1_perlin_particle_punch_1_1_meteor_particle_af3c2a5a7aaaa68ccd626d161d98effec.html#af3c2a5a7aaaa68ccd626d161d98effec" title=" " alt="" coords="483,686,680,726"/>
+<area shape="poly" id="edge33_Node000031_Node000033" title=" " alt="" coords="380,626,516,679,514,683,378,631"/>
+<area shape="poly" id="edge37_Node000035_Node000019" title=" " alt="" coords="400,752,436,764,459,775,483,785,539,798,584,806,627,803,679,785,713,762,741,732,764,701,780,672,785,675,768,703,745,736,716,766,681,790,628,808,584,811,538,803,482,790,457,780,434,768,398,757"/>
+<area shape="poly" id="edge38_Node000035_Node000032" title=" " alt="" coords="422,742,528,755,527,760,422,748"/>
+<area shape="poly" id="edge39_Node000035_Node000033" title=" " alt="" coords="422,721,469,716,469,721,422,726"/>
+<area shape="rect" id="Node000036" href="$db/d58/classfl_1_1_perlin_particle_punch_a43f6619a5b6ac79e56ee36e5208fc6e0.html#a43f6619a5b6ac79e56ee36e5208fc6e0" title=" " alt="" coords="500,851,663,891"/>
+<area shape="poly" id="edge40_Node000035_Node000036" title=" " alt="" coords="415,752,436,764,453,781,461,798,469,814,484,831,503,843,500,847,481,835,465,817,457,800,449,784,433,768,413,757"/>
+</map>

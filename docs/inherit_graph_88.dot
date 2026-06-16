@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::CHSV",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/ddc/structfl_1_1_c_h_s_v.html",tooltip="Representation of an HSV pixel (hue, saturation, value (aka brightness))."];
+  Node0 [id="Node000000",label="fl::anonymous_namespace\l\{json.cpp.hpp\}::JsonTokenizer",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d42/classfl_1_1anonymous__namespace_02json_8cpp_8hpp_03_1_1_json_tokenizer.html",tooltip=" "];
 }

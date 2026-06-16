@@ -1,0 +1,25 @@
+<map id="fl/stl/isr/critical_section.h" name="fl/stl/isr/critical_section.h">
+<area shape="rect" id="Node000001" title="RAII critical section helper and interrupt control declarations." alt="" coords="239,5,357,45"/>
+<area shape="rect" id="Node000002" href="$d8/d7c/async__log__queue_8cpp_8hpp.html" title=" " alt="" coords="5,101,231,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="247,54,143,103,141,98,245,49"/>
+<area shape="rect" id="Node000006" href="$d8/da8/isr_8h.html" title="Umbrella header for ISR subsystem." alt="" coords="257,101,339,126"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="301,59,301,100,295,100,295,59"/>
+<area shape="rect" id="Node000010" href="$db/d4d/critical__section_8cpp_8hpp.html" title="critical_section implementation" alt="" coords="393,93,523,133"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="346,49,424,91,422,96,344,54"/>
+<area shape="rect" id="Node000003" href="$d4/d6c/fl_2log_2__build_8cpp_8hpp.html" title="Unity build header for fl/log/ directory." alt="" coords="39,181,191,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="120,140,118,181,113,181,114,140"/>
+<area shape="rect" id="Node000004" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="235,328,363,353"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="79,215,56,229,38,245,30,262,30,270,35,278,47,289,66,298,117,313,178,324,236,331,235,337,177,330,116,319,64,303,44,293,31,282,25,271,24,261,34,242,53,225,76,211"/>
+<area shape="rect" id="Node000005" href="$de/ddd/fl_8log_09_8cpp.html" title="Unity build: recursive includes from src/fl/log/." alt="" coords="45,255,185,280"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="118,220,118,255,113,255,113,220"/>
+<area shape="rect" id="Node000007" href="$d2/d48/pin_8cpp_8hpp.html" title=" " alt="" coords="217,181,379,207"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="301,140,301,181,295,181,295,140"/>
+<area shape="rect" id="Node000008" href="$d7/d7b/fl_2system_2__build_8cpp_8hpp.html" title="Unity build header for fl/system/ directory." alt="" coords="209,255,389,280"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="301,220,302,254,296,255,296,221"/>
+<area shape="poly" id="edge8_Node000008_Node000004" title=" " alt="" coords="302,294,302,328,297,328,297,294"/>
+<area shape="rect" id="Node000011" href="$d9/de9/fl_2stl_2isr_2__build_8cpp_8hpp.html" title="Unity build header for fl/stl/isr/ directory." alt="" coords="403,181,571,207"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="472,145,485,180,480,182,467,147"/>
+<area shape="rect" id="Node000012" href="$dc/d07/fl_2stl_2__build_8cpp_8hpp.html" title=" " alt="" coords="413,255,561,280"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="490,220,490,255,485,255,485,220"/>
+<area shape="poly" id="edge12_Node000012_Node000004" title=" " alt="" coords="445,287,331,330,329,325,444,282"/>
+</map>

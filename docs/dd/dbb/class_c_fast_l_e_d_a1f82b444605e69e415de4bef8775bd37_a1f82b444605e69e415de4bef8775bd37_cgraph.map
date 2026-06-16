@@ -1,9 +1,17 @@
 <map id="CFastLED::setMaxPowerInVoltsAndMilliamps" name="CFastLED::setMaxPowerInVoltsAndMilliamps">
-<area shape="rect" id="Node000001" title="Set the maximum power to be used, given in volts and milliamps." alt="" coords="5,5,228,45"/>
-<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_a660c4ce3348e4463932f350be99215bf.html#a660c4ce3348e4463932f350be99215bf" title="Set the maximum power to be used, given in milliwatts." alt="" coords="276,5,495,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="228,23,262,23,262,28,228,28"/>
-<area shape="rect" id="Node000003" href="$d3/d1d/group___power_gafff15ebb8adee6a6c76fd46eb980397c.html#gafff15ebb8adee6a6c76fd46eb980397c" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="543,5,735,45"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="495,23,529,23,529,28,495,28"/>
-<area shape="rect" id="Node000004" href="$d3/d1d/group___power_ga594568be6aba941c635193a6d46f715e.html#ga594568be6aba941c635193a6d46f715e" title="Determines how many milliwatts the current LED data would draw at max brightness (255)" alt="" coords="783,5,929,45"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="735,23,769,23,769,28,735,28"/>
+<area shape="rect" id="Node000001" title="Set the maximum power to be used, given in volts and milliamps." alt="" coords="5,88,228,128"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_a660c4ce3348e4463932f350be99215bf.html#a660c4ce3348e4463932f350be99215bf" title="Set the maximum power to be used, given in milliwatts." alt="" coords="276,88,495,128"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="228,105,262,105,262,111,228,111"/>
+<area shape="rect" id="Node000003" href="$d3/d1d/group___power_gab540bd9608e32378f1fb29bd9226c970.html#gab540bd9608e32378f1fb29bd9226c970" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="543,88,735,128"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="495,105,529,105,529,111,495,111"/>
+<area shape="rect" id="Node000004" href="$d3/d1d/group___power_gafdf503b02fd644c3398d34f27c3d363d.html#gafdf503b02fd644c3398d34f27c3d363d" title=" " alt="" coords="811,5,957,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="698,85,810,47,812,52,700,91"/>
+<area shape="rect" id="Node000007" href="$d1/d2a/power__mgt_8cpp_8hpp_adcd9338466b0f22161f7281bfc7cdcdf.html#adcd9338466b0f22161f7281bfc7cdcdf" title=" " alt="" coords="1033,70,1175,95"/>
+<area shape="poly" id="edge5_Node000003_Node000007" title=" " alt="" coords="735,100,1020,85,1020,90,735,105"/>
+<area shape="rect" id="Node000008" href="$d3/d1d/group___power_ga681489b02b2825095fd40db45906bf26.html#ga681489b02b2825095fd40db45906bf26" title="Applies the configured power&#45;scaling response to a total power value." alt="" coords="783,121,985,146"/>
+<area shape="poly" id="edge6_Node000003_Node000008" title=" " alt="" coords="735,115,770,119,769,124,735,121"/>
+<area shape="rect" id="Node000009" href="$d1/d2a/power__mgt_8cpp_8hpp_a3beac85272db71b8f8a1c58f9e041b2e.html#a3beac85272db71b8f8a1c58f9e041b2e" title=" " alt="" coords="805,170,963,195"/>
+<area shape="poly" id="edge8_Node000003_Node000009" title=" " alt="" coords="695,126,783,155,817,164,815,169,782,160,694,131"/>
+<area shape="poly" id="edge4_Node000004_Node000007" title=" " alt="" coords="958,42,1042,64,1041,69,957,47"/>
+<area shape="poly" id="edge7_Node000008_Node000007" title=" " alt="" coords="940,118,1034,96,1036,101,941,123"/>
 </map>

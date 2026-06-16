@@ -1,0 +1,22 @@
+<map id="fl::gfx::drawStrokeLine" name="fl::gfx::drawStrokeLine">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,131,172,157"/>
+<area shape="rect" id="Node000002" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_a0ed31accfda46ef3ddc9a0eb3ad5ef04.html#a0ed31accfda46ef3ddc9a0eb3ad5ef04" title=" " alt="" coords="220,124,405,164"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="172,141,207,141,207,147,172,147"/>
+<area shape="rect" id="Node000003" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_ace632a8bd8b1b176f9f882b536fc486c.html#ace632a8bd8b1b176f9f882b536fc486c" title="Precompute right&#45;shift and reciprocal multiplier for AA division." alt="" coords="480,29,649,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="355,121,452,80,479,71,480,76,454,85,357,126"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aef88a9667b8b893abab1e0e41a3e81d3.html#aef88a9667b8b893abab1e0e41a3e81d3" title=" " alt="" coords="523,94,606,119"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="405,128,509,112,510,117,406,133"/>
+<area shape="rect" id="Node000007" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_a57e26c64aa843c6d1d1080fa16f4306a.html#a57e26c64aa843c6d1d1080fa16f4306a" title="Render one scanline of a stroke line using phase&#45;based scanning." alt="" coords="453,167,676,193"/>
+<area shape="poly" id="edge9_Node000002_Node000007" title=" " alt="" coords="406,155,462,163,461,168,405,160"/>
+<area shape="rect" id="Node000008" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_ab04a22e2927673d2692b4f3e354af564.html#ab04a22e2927673d2692b4f3e354af564" title="Convert any Coord type to 8.8 fixed&#45;point (fl::i32)." alt="" coords="481,241,648,266"/>
+<area shape="poly" id="edge11_Node000002_Node000008" title=" " alt="" coords="361,162,454,203,522,233,520,237,452,208,359,167"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="523,30,521,20,527,10,542,5,565,3,591,6,605,13,602,18,589,11,565,8,543,10,531,15,526,21,528,28"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a8f27048f2254fbf4acb9a3b00e7cb305.html#a8f27048f2254fbf4acb9a3b00e7cb305" title=" " alt="" coords="724,58,851,83"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="606,97,710,80,711,86,607,103"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a033fb4e082027bb0756c5de35ddcbd98.html#a033fb4e082027bb0756c5de35ddcbd98" title=" " alt="" coords="725,131,850,157"/>
+<area shape="poly" id="edge7_Node000004_Node000006" title=" " alt="" coords="607,111,712,129,711,134,606,116"/>
+<area shape="poly" id="edge6_Node000005_Node000005" title=" " alt="" coords="751,60,743,50,747,40,762,34,787,31,818,35,830,44,827,48,816,40,787,37,764,39,751,44,749,49,755,56"/>
+<area shape="poly" id="edge8_Node000006_Node000006" title=" " alt="" coords="751,133,743,123,747,113,762,107,787,105,818,108,830,117,827,122,816,113,787,110,764,112,751,117,749,122,755,130"/>
+<area shape="poly" id="edge10_Node000007_Node000007" title=" " alt="" coords="529,169,521,159,525,149,540,143,565,141,595,144,608,153,604,158,593,149,565,146,541,148,528,153,526,158,533,166"/>
+<area shape="poly" id="edge12_Node000008_Node000008" title=" " alt="" coords="529,242,521,232,525,222,540,216,565,214,595,218,608,227,604,231,593,223,565,219,541,221,528,226,526,232,533,239"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="fl::Channel::size" name="fl::Channel::size">
+<area shape="rect" id="Node000001" title="Get the number of LEDs in this channel." alt="" coords="5,13,131,38"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ab8e1ee460f25af890c1d40479e4c5b09.html#ab8e1ee460f25af890c1d40479e4c5b09" title="How many LEDs does this controller manage?" alt="" coords="179,5,315,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="131,23,164,23,164,28,131,28"/>
+</map>

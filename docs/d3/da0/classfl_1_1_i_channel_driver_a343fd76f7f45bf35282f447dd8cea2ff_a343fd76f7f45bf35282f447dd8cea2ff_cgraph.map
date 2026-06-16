@@ -1,0 +1,6 @@
+<map id="fl::IChannelDriver::getName" name="fl::IChannelDriver::getName">
+<area shape="rect" id="Node000001" title="Get the driver name for affinity binding." alt="" coords="5,29,140,69"/>
+<area shape="poly" id="edge2_Node000001_Node000001" title=" " alt="" coords="36,30,34,20,40,11,53,5,73,3,96,6,108,13,105,17,94,11,73,8,54,10,43,15,39,21,41,28"/>
+<area shape="rect" id="Node000002" href="$d2/db2/classfl_1_1string_ac7c03726cdaccf262f646f6da3e23a69.html#ac7c03726cdaccf262f646f6da3e23a69" title=" " alt="" coords="188,37,347,62"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="140,47,174,47,174,52,140,52"/>
+</map>

@@ -1,0 +1,6 @@
+<map id="fl::audio::ISynthOscillator::generateSamples" name="fl::audio::ISynthOscillator::generateSamples">
+<area shape="rect" id="Node000001" title="Generate audio samples." alt="" coords="239,29,424,69"/>
+<area shape="poly" id="edge2_Node000001_Node000001" title=" " alt="" coords="371,18,357,11,331,8,309,10,296,15,291,21,293,28,288,30,285,20,292,10,308,5,331,3,358,6,373,13"/>
+<area shape="rect" id="Node000002" href="$d1/d1c/classfl_1_1audio_1_1_i_synth_oscillator_a5dba93aa406a86b146a5eabaed9d1536.html#a5dba93aa406a86b146a5eabaed9d1536" title="Generate audio samples (span version)" alt="" coords="5,29,191,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="225,52,191,52,191,47,225,47"/>
+</map>

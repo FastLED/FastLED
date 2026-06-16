@@ -1,0 +1,49 @@
+digraph "fl::println"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::println",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::AsyncLogger::flush",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d35/classfl_1_1_async_logger_a43b98417e06216de6bad8e8bb2bbcf27.html#a43b98417e06216de6bad8e8bb2bbcf27",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::AsyncLogger::~AsyncLogger",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d35/classfl_1_1_async_logger_a55785739910a193b5b6dffeb455bd150.html#a55785739910a193b5b6dffeb455bd150",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::AsyncLogger::flushN",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d35/classfl_1_1_async_logger_a0571151055f77663758951a2458c8a4d.html#a0571151055f77663758951a2458c8a4d",tooltip="Flush up to N messages from queue (bounded flush)"];
+  Node4 -> Node3 [id="edge4_Node000004_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 -> Node5 [id="edge5_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::async_log_service",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_abe5657de2c328256b3c15a1388b793aa.html#abe5657de2c328256b3c15a1388b793aa",tooltip=" "];
+  Node4 -> Node6 [id="edge6_Node000004_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::detail::AsyncLoggerService\lTask::serviceLoggers",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_ab5cd1a92bcf542222607179a5363c2e0.html#ab5cd1a92bcf542222607179a5363c2e0",tooltip="Service all registered loggers (called by task)"];
+  Node6 -> Node7 [id="edge7_Node000006_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::detail::AsyncLoggerService\lTask::AsyncLoggerServiceTask",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a3bff7aaa6e1158fbbee95055b3458285.html#a3bff7aaa6e1158fbbee95055b3458285",tooltip=" "];
+  Node7 -> Node9 [id="edge8_Node000007_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::detail::AsyncLoggerService\lTask::SingletonShared\< AsyncLogger\lServiceTask \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a90e57dbaf9bc274b5302c859efd53af3.html#a90e57dbaf9bc274b5302c859efd53af3",tooltip=" "];
+  Node6 -> Node9 [id="edge9_Node000006_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node27 [id="edge10_Node000001_Node000027",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node27 [id="Node000027",label="fl::detail::log_emit",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail_a5cfabbe4eccdd905f23576cf5aeae97d.html#a5cfabbe4eccdd905f23576cf5aeae97d",tooltip=" "];
+  Node1 -> Node28 [id="edge11_Node000001_Node000028",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node28 [id="Node000028",label="printJsonRaw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/dfb/_auto_research_remote_8cpp_a93e763eabce15abdcf77d67510e0da2c.html#a93e763eabce15abdcf77d67510e0da2c",tooltip="Print JSON directly to Serial, bypassing fl::println and ScopedLogDisable This ensures RPC responses ..."];
+  Node1 -> Node29 [id="edge12_Node000001_Node000029",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node29 [id="Node000029",label="fl::SerialPort::println",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d67/classfl_1_1_serial_port_a5b6c8265d8a3815b4dc58371bfbf0ce3.html#a5b6c8265d8a3815b4dc58371bfbf0ce3",tooltip="Print newline only."];
+  Node29 -> Node30 [id="edge13_Node000029_Node000030",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node30 [id="Node000030",label="fl::SerialPort::println",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d67/classfl_1_1_serial_port_a59956b7e405022d909754417a8378d53.html#a59956b7e405022d909754417a8378d53",tooltip="Print string with newline to serial output."];
+  Node29 -> Node31 [id="edge14_Node000029_Node000031",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node31 [id="Node000031",label="fl::SerialPort::println",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d67/classfl_1_1_serial_port_a79ff623cf0ffa2d357dfe443d24ea674.html#a79ff623cf0ffa2d357dfe443d24ea674",tooltip="Print integer with newline to serial output."];
+  Node29 -> Node32 [id="edge15_Node000029_Node000032",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node32 [id="Node000032",label="fl::SerialPort::println",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d67/classfl_1_1_serial_port_a172a3323a2a8539693b4fb3167d503c7.html#a172a3323a2a8539693b4fb3167d503c7",tooltip="Print long integer with newline to serial output."];
+  Node29 -> Node33 [id="edge16_Node000029_Node000033",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node33 [id="Node000033",label="fl::SerialPort::println",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d67/classfl_1_1_serial_port_ab950c76e90cce5f2ebed7ec9ff8b82a9.html#ab950c76e90cce5f2ebed7ec9ff8b82a9",tooltip="Print generic unsigned integer with newline via SFINAE template Handles u32, unsigned long,..."];
+  Node1 -> Node30 [id="edge17_Node000001_Node000030",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node34 [id="edge18_Node000001_Node000034",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node34 [id="Node000034",label="fl::SerialWriter::println",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d8c/structfl_1_1_serial_writer_a8bb7f7db0d14829ac2b23241dc3b20c2.html#a8bb7f7db0d14829ac2b23241dc3b20c2",tooltip=" "];
+  Node1 -> Node35 [id="edge19_Node000001_Node000035",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node35 [id="Node000035",label="printStreamRaw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/dfb/_auto_research_remote_8cpp_a34ed01c48f858d996b90eaf35a99dbc3.html#a34ed01c48f858d996b90eaf35a99dbc3",tooltip="Print JSONL stream message directly to Serial, bypassing fl::println."];
+  Node35 -> Node36 [id="edge20_Node000035_Node000036",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node36 [id="Node000036",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dc8/_auto_research_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node35 -> Node37 [id="edge21_Node000035_Node000037",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node37 [id="Node000037",label="setup",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dc8/_auto_research_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d",tooltip=" "];
+}

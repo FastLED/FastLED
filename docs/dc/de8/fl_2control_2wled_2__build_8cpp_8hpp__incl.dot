@@ -1,0 +1,68 @@
+digraph "fl/control/wled/_build.cpp.hpp"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl/control/wled/_build.cpp.hpp",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl/control/wled/adapter.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/dbb/adapter_8cpp_8hpp.html",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl/fx/wled/adapter.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/df1/adapter_8h.html",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl/fx/wled/ifastled.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/d7c/ifastled_8h.html",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl/stl/span.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d7a/span_8h.html",tooltip=" "];
+  Node5 -> Node11 [id="edge5_Node000005_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl/stl/noexcept.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d01/noexcept_8h.html",tooltip=" "];
+  Node4 -> Node11 [id="edge6_Node000004_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node11 [id="edge7_Node000003_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node25 [id="edge8_Node000002_Node000025",color="steelblue1",style="solid",tooltip=" "];
+  Node25 [id="Node000025",label="FastLED.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node2 -> Node26 [id="edge9_Node000002_Node000026",color="steelblue1",style="solid",tooltip=" "];
+  Node26 [id="Node000026",label="fl/stl/memory.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d18/memory_8h.html",tooltip=" "];
+  Node26 -> Node27 [id="edge10_Node000026_Node000027",color="steelblue1",style="solid",tooltip=" "];
+  Node27 [id="Node000027",label="fl/stl/shared_ptr.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/d6a/shared__ptr_8h.html",tooltip=" "];
+  Node27 -> Node30 [id="edge11_Node000027_Node000030",color="steelblue1",style="solid",tooltip=" "];
+  Node30 [id="Node000030",label="fl/stl/cstdlib.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/d30/cstdlib_8h.html",tooltip=" "];
+  Node30 -> Node11 [id="edge12_Node000030_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node27 -> Node11 [id="edge13_Node000027_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node26 -> Node11 [id="edge14_Node000026_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node31 [id="edge15_Node000001_Node000031",color="steelblue1",style="solid",tooltip=" "];
+  Node31 [id="Node000031",label="fl/control/wled/client.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d3b/client_8cpp_8hpp.html",tooltip=" "];
+  Node31 -> Node32 [id="edge16_Node000031_Node000032",color="steelblue1",style="solid",tooltip=" "];
+  Node32 [id="Node000032",label="fl/fx/wled/client.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/de1/client_8h.html",tooltip=" "];
+  Node32 -> Node27 [id="edge17_Node000032_Node000027",color="steelblue1",style="solid",tooltip=" "];
+  Node32 -> Node5 [id="edge18_Node000032_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node31 -> Node33 [id="edge19_Node000031_Node000033",color="steelblue1",style="solid",tooltip=" "];
+  Node33 [id="Node000033",label="fl/log/log.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d7f/log_8h.html",tooltip="Centralized logging categories for FastLED hardware interfaces and subsystems."];
+  Node33 -> Node34 [id="edge20_Node000033_Node000034",color="steelblue1",style="solid",tooltip=" "];
+  Node34 [id="Node000034",label="fl/system/sketch_macros.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/dbc/sketch__macros_8h.html",tooltip=" "];
+  Node33 -> Node35 [id="edge21_Node000033_Node000035",color="steelblue1",style="solid",tooltip=" "];
+  Node35 [id="Node000035",label="fl/stl/strstream.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/d00/strstream_8h.html",tooltip=" "];
+  Node35 -> Node36 [id="edge22_Node000035_Node000036",color="steelblue1",style="solid",tooltip=" "];
+  Node36 [id="Node000036",label="fl/stl/string.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/d66/string_8h.html",tooltip=" "];
+  Node36 -> Node7 [id="edge23_Node000036_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl/stl/compiler_control.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d54/compiler__control_8h.html",tooltip=" "];
+  Node36 -> Node27 [id="edge24_Node000036_Node000027",color="steelblue1",style="solid",tooltip=" "];
+  Node36 -> Node5 [id="edge25_Node000036_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node36 -> Node11 [id="edge26_Node000036_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node35 -> Node11 [id="edge27_Node000035_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node33 -> Node61 [id="edge28_Node000033_Node000061",color="steelblue1",style="solid",tooltip=" "];
+  Node61 [id="Node000061",label="fl/stl/chrono.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dd/d90/chrono_8h.html",tooltip="FastLED chrono implementation - duration types for time measurements."];
+  Node33 -> Node7 [id="edge29_Node000033_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node63 [id="edge30_Node000001_Node000063",color="steelblue1",style="solid",tooltip=" "];
+  Node63 [id="Node000063",label="fl/control/wled/json\l_helpers.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d2c/json__helpers_8cpp_8hpp.html",tooltip=" "];
+  Node63 -> Node64 [id="edge31_Node000063_Node000064",color="steelblue1",style="solid",tooltip=" "];
+  Node64 [id="Node000064",label="fl/fx/wled/json_helpers.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d9e/json__helpers_8h.html",tooltip=" "];
+  Node64 -> Node65 [id="edge32_Node000064_Node000065",color="steelblue1",style="solid",tooltip=" "];
+  Node65 [id="Node000065",label="fl/fx/wled/segment.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d9/dcc/segment_8h.html",tooltip=" "];
+  Node65 -> Node36 [id="edge33_Node000065_Node000036",color="steelblue1",style="solid",tooltip=" "];
+  Node64 -> Node66 [id="edge34_Node000064_Node000066",color="steelblue1",style="solid",tooltip=" "];
+  Node66 [id="Node000066",label="fl/stl/json.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d05/json_8h.html",tooltip="FastLED's Elegant JSON Library: fl::json"];
+  Node66 -> Node11 [id="edge35_Node000066_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node64 -> Node36 [id="edge36_Node000064_Node000036",color="steelblue1",style="solid",tooltip=" "];
+  Node63 -> Node33 [id="edge37_Node000063_Node000033",color="steelblue1",style="solid",tooltip=" "];
+  Node63 -> Node30 [id="edge38_Node000063_Node000030",color="steelblue1",style="solid",tooltip=" "];
+}

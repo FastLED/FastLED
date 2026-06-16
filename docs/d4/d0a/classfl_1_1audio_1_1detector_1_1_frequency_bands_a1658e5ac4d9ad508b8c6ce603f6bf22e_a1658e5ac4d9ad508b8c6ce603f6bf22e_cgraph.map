@@ -1,0 +1,21 @@
+<map id="fl::audio::detector::FrequencyBands::~FrequencyBands" name="fl::audio::detector::FrequencyBands::~FrequencyBands">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,105,228,160"/>
+<area shape="rect" id="Node000002" href="$d4/d0a/classfl_1_1audio_1_1detector_1_1_frequency_bands_a272559df393844a4ad1b57dcdc664bed.html#a272559df393844a4ad1b57dcdc664bed" title=" " alt="" coords="276,69,505,109"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="228,112,262,107,263,112,229,117"/>
+<area shape="rect" id="Node000003" href="$d4/d0a/classfl_1_1audio_1_1detector_1_1_frequency_bands_aa4ec48388da847d2852cf28ac516c108.html#aa4ec48388da847d2852cf28ac516c108" title=" " alt="" coords="295,157,486,197"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="229,148,282,157,281,162,228,153"/>
+<area shape="poly" id="edge10_Node000003_Node000003" title=" " alt="" coords="341,157,338,147,346,138,364,132,391,130,422,133,438,140,436,145,420,138,391,135,365,137,349,142,343,148,346,155"/>
+<area shape="rect" id="Node000004" href="$d4/d0a/classfl_1_1audio_1_1detector_1_1_frequency_bands_a6c8300555da22b456d88352b3e1049b7.html#a6c8300555da22b456d88352b3e1049b7" title=" " alt="" coords="553,5,765,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="440,154,473,138,504,119,518,106,527,94,537,82,552,69,560,64,563,69,555,74,540,85,531,97,522,110,507,123,475,143,443,159"/>
+<area shape="rect" id="Node000005" href="$d4/d0a/classfl_1_1audio_1_1detector_1_1_frequency_bands_abdbe604aaabe7d4add88ebdbe6fe7dbf.html#abdbe604aaabe7d4add88ebdbe6fe7dbf" title=" " alt="" coords="557,84,761,139"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="473,154,544,137,545,142,474,159"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="815,156,878,181"/>
+<area shape="poly" id="edge8_Node000003_Node000007" title=" " alt="" coords="486,172,802,167,802,172,487,178"/>
+<area shape="rect" id="Node000008" href="$db/dbf/namespacefl_1_1audio_a7189558c538537464f1d31c91596631d.html#a7189558c538537464f1d31c91596631d" title="Compute the time delta (in seconds) for an audio buffer." alt="" coords="564,215,755,240"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="487,192,578,209,577,215,486,197"/>
+<area shape="rect" id="Node000009" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="608,264,711,289"/>
+<area shape="poly" id="edge9_Node000003_Node000009" title=" " alt="" coords="430,194,488,223,554,250,596,262,594,267,552,255,485,228,428,199"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="813,99,880,124"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="762,109,800,109,800,114,762,114"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="750,136,803,153,801,158,748,141"/>
+</map>

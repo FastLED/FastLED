@@ -1,0 +1,15 @@
+digraph "/home/runner/work/FastLED/FastLED/examples/Fx/FxTwinkleFox"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  compound=true
+  subgraph clusterdir_e6c43ff3b6655e541cf2b1319207663d {
+    graph [ bgcolor="#edf0f7", pencolor="grey50", label="Fx", fontname=Helvetica,fontsize=10 style="filled,dashed", URL="dir_e6c43ff3b6655e541cf2b1319207663d.html",tooltip=""]
+  dir_94756c45b265a05d5bc5fdc89b253f6f [label="FxTwinkleFox", fillcolor="#edf0f7", color="grey25", style="filled,bold", URL="dir_94756c45b265a05d5bc5fdc89b253f6f.html",tooltip=""];
+  }
+  dir_4d1829fa9bd13d7db71e765b2707b248 [label="fl", fillcolor="#edf0f7", color="red", style="filled", URL="dir_4d1829fa9bd13d7db71e765b2707b248.html",tooltip=""];
+  dir_94756c45b265a05d5bc5fdc89b253f6f->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="1", labeldistance=1.5 headhref="dir_000089_000074.html" href="dir_000089_000074.html" color="steelblue1" fontcolor="steelblue1"];
+}

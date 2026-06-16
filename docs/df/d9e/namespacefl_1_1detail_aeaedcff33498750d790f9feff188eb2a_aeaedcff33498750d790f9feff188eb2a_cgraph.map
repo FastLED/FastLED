@@ -1,0 +1,9 @@
+<map id="fl::detail::wave8_transpose_16_bf1" name="fl::detail::wave8_transpose_16_bf1">
+<area shape="rect" id="Node000001" title="BF1: chipset&#45;aware direct encode for Wave8 16&#45;lane (#2548 deep&#45;dive)." alt="" coords="5,23,203,63"/>
+<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail_a3f580da2244b0dfd2cfffed1e7874706.html#a3f580da2244b0dfd2cfffed1e7874706" title="Transpose one symbol of 16 lanes (16 input bytes) into 16 output bytes: 8 pulses × 2 bytes,..." alt="" coords="251,23,415,63"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="203,41,237,41,237,46,203,46"/>
+<area shape="rect" id="Node000003" href="$df/d9e/namespacefl_1_1detail_a85251852414197ed32d0dc54ab229984.html#a85251852414197ed32d0dc54ab229984" title="Pulses 7,6,5,4 of v (byte j = bit (7&#45;j)). Depends only on the high nibble." alt="" coords="463,5,599,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="415,30,449,26,449,31,415,35"/>
+<area shape="rect" id="Node000004" href="$df/d9e/namespacefl_1_1detail_ada26c9ef5cbebfb232811412781ecec9.html#ada26c9ef5cbebfb232811412781ecec9" title="Pulses 3,2,1,0 of v (byte j = bit (3&#45;j)). Depends only on the low nibble." alt="" coords="463,55,599,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="415,51,449,55,449,60,415,56"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="PowerModelRGBWW::toRGB" name="PowerModelRGBWW::toRGB">
+<area shape="rect" id="Node000001" title="Convert to RGB model (folds W/WW power back into RGB so the brightness limiter doesn&#39;t under&#45;budget)." alt="" coords="191,5,395,31"/>
+<area shape="rect" id="Node000002" href="$d9/d5f/group___power_model_gad42f079a40ba5d5a0db04e14b645e49e.html#gad42f079a40ba5d5a0db04e14b645e49e" title="Set custom RGBWW LED power consumption model." alt="" coords="5,5,143,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="177,21,143,21,143,15,177,15"/>
+</map>

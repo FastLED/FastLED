@@ -1,0 +1,17 @@
+<map id="calculate_max_brightness_for_power_vmA" name="calculate_max_brightness_for_power_vmA">
+<area shape="rect" id="Node000001" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="5,88,197,128"/>
+<area shape="rect" id="Node000002" href="$d3/d1d/group___power_gab540bd9608e32378f1fb29bd9226c970.html#gab540bd9608e32378f1fb29bd9226c970" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="245,88,437,128"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="197,105,232,105,232,111,197,111"/>
+<area shape="rect" id="Node000003" href="$d3/d1d/group___power_gafdf503b02fd644c3398d34f27c3d363d.html#gafdf503b02fd644c3398d34f27c3d363d" title=" " alt="" coords="513,5,660,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="401,85,513,47,514,52,402,91"/>
+<area shape="rect" id="Node000006" href="$d1/d2a/power__mgt_8cpp_8hpp_adcd9338466b0f22161f7281bfc7cdcdf.html#adcd9338466b0f22161f7281bfc7cdcdf" title=" " alt="" coords="736,70,877,95"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="437,100,722,85,723,90,438,105"/>
+<area shape="rect" id="Node000007" href="$d3/d1d/group___power_ga681489b02b2825095fd40db45906bf26.html#ga681489b02b2825095fd40db45906bf26" title="Applies the configured power&#45;scaling response to a total power value." alt="" coords="485,121,688,146"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="438,115,472,119,472,124,437,121"/>
+<area shape="rect" id="Node000008" href="$d1/d2a/power__mgt_8cpp_8hpp_a3beac85272db71b8f8a1c58f9e041b2e.html#a3beac85272db71b8f8a1c58f9e041b2e" title=" " alt="" coords="508,170,665,195"/>
+<area shape="poly" id="edge8_Node000002_Node000008" title=" " alt="" coords="396,126,486,156,516,164,514,169,485,161,394,131"/>
+<area shape="rect" id="Node000004" href="$d1/d2a/power__mgt_8cpp_8hpp_afe71d257dc9aca526178a992761bb812.html#afe71d257dc9aca526178a992761bb812" title="Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)" alt="" coords="751,13,862,38"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="660,23,738,23,738,28,660,28"/>
+<area shape="poly" id="edge4_Node000003_Node000006" title=" " alt="" coords="661,42,745,64,743,69,660,47"/>
+<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="642,118,737,96,738,101,643,123"/>
+</map>

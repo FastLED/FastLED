@@ -1,0 +1,18 @@
+<map id="third_party/libnsgif/include/nsgif.hpp" name="third_party/libnsgif/include/nsgif.hpp">
+<area shape="rect" id="Node000001" title="Interface to progressive animated GIF file decoding &#45; FastLED namespace wrapped version." alt="" coords="299,5,445,45"/>
+<area shape="rect" id="Node000002" href="$dc/d3a/libnsgif_2software__decoder_8h.html" title=" " alt="" coords="209,93,361,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="345,57,306,95,303,91,341,53"/>
+<area shape="rect" id="Node000011" href="$dc/d63/third__party_2libnsgif_2src_2gif_8cpp_8hpp.html" title="GIF image decoder." alt="" coords="397,93,542,133"/>
+<area shape="poly" id="edge6_Node000001_Node000011" title=" " alt="" coords="405,52,450,91,446,95,402,56"/>
+<area shape="rect" id="Node000003" href="$db/d62/fl_2codec_2gif_8cpp_8hpp.html" title=" " alt="" coords="17,189,164,214"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="231,141,118,191,116,186,229,137"/>
+<area shape="rect" id="Node000007" href="$d6/d62/libnsgif_2software__decoder_8cpp_8hpp.html" title=" " alt="" coords="188,181,383,221"/>
+<area shape="poly" id="edge4_Node000002_Node000007" title=" " alt="" coords="288,147,288,181,283,181,283,147"/>
+<area shape="rect" id="Node000004" href="$d7/df8/fl_2codec_2__build_8cpp_8hpp.html" title=" " alt="" coords="5,277,176,302"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="93,228,93,276,88,276,88,228"/>
+<area shape="rect" id="Node000008" href="$d0/df3/third__party_2libnsgif_2__build_8cpp_8hpp.html" title=" " alt="" coords="310,269,455,309"/>
+<area shape="poly" id="edge5_Node000007_Node000008" title=" " alt="" coords="319,228,363,267,359,271,315,232"/>
+<area shape="rect" id="Node000012" href="$d1/d1e/third__party_2libnsgif_2src_2__build_8cpp_8hpp.html" title=" " alt="" coords="407,181,553,221"/>
+<area shape="poly" id="edge7_Node000011_Node000012" title=" " alt="" coords="476,147,480,181,475,181,471,147"/>
+<area shape="poly" id="edge8_Node000012_Node000008" title=" " alt="" coords="450,232,406,271,402,267,447,228"/>
+</map>

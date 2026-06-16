@@ -1,0 +1,4 @@
+<map id="fl::audio::Processor::setSignalConditioningEnabled" name="fl::audio::Processor::setSignalConditioningEnabled">
+<area shape="rect" id="Node000001" title="Enable/disable signal conditioning pipeline (DC removal, spike filter, noise gate)" alt="" coords="5,29,229,69"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="76,30,73,20,80,10,95,5,117,3,143,6,157,13,155,18,142,11,117,8,96,10,83,15,79,21,81,28"/>
+</map>

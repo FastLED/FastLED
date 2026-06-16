@@ -1,0 +1,13 @@
+<map id="fl::audio::detector::Backbeat::calculateMultibandAccent" name="fl::audio::detector::Backbeat::calculateMultibandAccent">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,40,228,95"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350" title=" " alt="" coords="276,5,355,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="226,37,262,28,263,34,228,43"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a59b2ca835c8aaa9e67a6dce355013b3d.html#a59b2ca835c8aaa9e67a6dce355013b3d" title=" " alt="" coords="276,55,355,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="228,65,262,65,262,70,228,70"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="284,104,347,129"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="228,92,272,103,270,108,226,97"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a4a285f39138edafa16b69127b78d2b85.html#a4a285f39138edafa16b69127b78d2b85" title=" " alt="" coords="403,55,549,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="355,65,389,65,389,70,355,70"/>
+<area shape="rect" id="Node000005" href="$df/d9e/namespacefl_1_1detail_aefd5cee30614d18a52adbf22fc83f4a8.html#aefd5cee30614d18a52adbf22fc83f4a8" title=" " alt="" coords="597,55,760,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="550,65,584,65,584,70,550,70"/>
+</map>

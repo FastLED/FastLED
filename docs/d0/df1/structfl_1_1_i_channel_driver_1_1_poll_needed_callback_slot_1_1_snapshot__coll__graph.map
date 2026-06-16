@@ -1,0 +1,6 @@
+<map id="fl::IChannelDriver::PollNeededCallbackSlot::Snapshot" name="fl::IChannelDriver::PollNeededCallbackSlot::Snapshot">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,108,191,163"/>
+<area shape="poly" id="edge2_Node000001_Node000001" title=" " alt="" coords="206,126,217,135,209,144,191,148,190,143,207,139,212,136,203,130"/>
+<area shape="rect" id="Node000002" href="$d3/d8f/structfl_1_1_i_channel_driver_1_1_poll_needed_callback.html" title="ISR&#45;safe callback handle invoked when the manager should poll again." alt="" coords="18,5,178,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,59,101,108,95,108,95,59"/>
+</map>

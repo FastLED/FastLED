@@ -1,0 +1,29 @@
+<map id="fl::audio::detector::EqualizerDetector::update" name="fl::audio::detector::EqualizerDetector::update">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,172,152,227"/>
+<area shape="rect" id="Node000002" href="$d6/d86/classfl_1_1audio_1_1fft_1_1_bins_ae29700860530fda3954e123a024ecc9d.html#ae29700860530fda3954e123a024ecc9d" title=" " alt="" coords="229,22,361,62"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="100,170,143,124,198,78,221,66,224,70,202,83,147,128,104,174"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_af3a8e787bc8bcd73dcddb8b47a826554.html#af3a8e787bc8bcd73dcddb8b47a826554" title=" " alt="" coords="459,83,521,108"/>
+<area shape="poly" id="edge8_Node000001_Node000005" title=" " alt="" coords="113,170,153,144,199,122,265,105,332,96,445,91,445,96,332,101,266,110,201,127,155,148,116,174"/>
+<area shape="rect" id="Node000008" href="$db/dbf/namespacefl_1_1audio_a7189558c538537464f1d31c91596631d.html#a7189558c538537464f1d31c91596631d" title="Compute the time delta (in seconds) for an audio buffer." alt="" coords="200,137,391,163"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="152,180,225,163,226,168,153,185"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="264,187,327,212"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="152,197,251,197,251,202,152,202"/>
+<area shape="rect" id="Node000010" href="$d6/d86/classfl_1_1audio_1_1fft_1_1_bins_a6ffb71ea065157cab03d64006e779d0d.html#a6ffb71ea065157cab03d64006e779d0d" title=" " alt="" coords="213,236,377,261"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="153,213,226,230,225,235,152,219"/>
+<area shape="rect" id="Node000011" href="$db/d49/_audio_2simple_2simple_8h_a588b0ed03ff3e39281e2bc8b149dbdbd.html#a588b0ed03ff3e39281e2bc8b149dbdbd" title=" " alt="" coords="272,361,319,387"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="106,225,149,269,202,316,261,354,258,359,198,320,145,273,102,229"/>
+<area shape="rect" id="Node000012" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="439,299,541,324"/>
+<area shape="poly" id="edge15_Node000001_Node000012" title=" " alt="" coords="117,225,156,250,201,272,259,288,319,299,426,308,425,313,318,304,258,293,199,276,153,255,114,229"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a2a5359f49a46263d1eb1fcdfe99b7bd5.html#a2a5359f49a46263d1eb1fcdfe99b7bd5" title=" " alt="" coords="457,29,523,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="362,39,443,39,443,45,362,45"/>
+<area shape="poly" id="edge5_Node000002_Node000005" title=" " alt="" coords="362,57,446,81,445,86,361,63"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a30ea10d1fd20c323429a28dcd4c9bdd1.html#a30ea10d1fd20c323429a28dcd4c9bdd1" title=" " alt="" coords="589,29,724,55"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="523,39,576,39,576,45,523,45"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="629,31,623,21,626,11,638,5,657,3,679,6,689,15,686,19,677,11,657,8,639,10,630,15,628,20,633,28"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a083789a22e6f21134e65d0d0ed247858.html#a083789a22e6f21134e65d0d0ed247858" title=" " alt="" coords="591,83,722,108"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="521,93,577,93,577,98,521,98"/>
+<area shape="poly" id="edge12_Node000011_Node000011" title=" " alt="" coords="270,367,258,357,258,345,271,337,295,335,315,336,328,341,334,349,332,358,327,356,329,350,325,346,314,342,295,340,273,342,263,348,263,355,273,363"/>
+<area shape="poly" id="edge13_Node000011_Node000012" title=" " alt="" coords="318,364,436,326,437,331,320,369"/>
+<area shape="rect" id="Node000013" href="$d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1" title=" " alt="" coords="459,361,521,387"/>
+<area shape="poly" id="edge14_Node000011_Node000013" title=" " alt="" coords="319,371,445,371,445,377,319,377"/>
+</map>

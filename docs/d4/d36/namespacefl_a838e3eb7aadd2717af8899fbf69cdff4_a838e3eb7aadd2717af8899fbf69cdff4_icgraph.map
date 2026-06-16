@@ -1,0 +1,13 @@
+<map id="fl::makeScaledBrightnessRange" name="fl::makeScaledBrightnessRange">
+<area shape="rect" id="Node000001" title="Create brightness input iterator range from PixelIterator." alt="" coords="397,69,584,109"/>
+<area shape="rect" id="Node000002" href="$d0/d09/classfl_1_1_pixel_iterator_a2c08448cbefb8e28d4945b15bbc7f38d.html#a2c08448cbefb8e28d4945b15bbc7f38d" title="Encode pixels in APA102/DOTSTAR format (zero allocation)" alt="" coords="224,5,349,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="412,68,349,47,350,42,414,63"/>
+<area shape="rect" id="Node000004" href="$d0/d09/classfl_1_1_pixel_iterator_a2058de4fa68026d3bc5104ed55d91fdf.html#a2058de4fa68026d3bc5104ed55d91fdf" title="Encode pixels in HD108 format (zero allocation)" alt="" coords="224,69,349,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="383,92,349,92,349,87,383,87"/>
+<area shape="rect" id="Node000005" href="$d0/d09/classfl_1_1_pixel_iterator_abbe36e88cafa622bb58093609a8467e7.html#abbe36e88cafa622bb58093609a8467e7" title="Encode pixels in SK9822 format (zero allocation)" alt="" coords="224,133,349,173"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="414,116,350,136,349,131,412,111"/>
+<area shape="rect" id="Node000003" href="$d5/d8b/classfl_1_1_channel_a44414e176c7d2ef65fcdd390f6852322.html#a44414e176c7d2ef65fcdd390f6852322" title=" " alt="" coords="5,77,176,102"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="213,52,131,79,130,74,211,47"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="210,92,176,92,176,87,210,87"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="211,132,130,105,131,100,213,126"/>
+</map>

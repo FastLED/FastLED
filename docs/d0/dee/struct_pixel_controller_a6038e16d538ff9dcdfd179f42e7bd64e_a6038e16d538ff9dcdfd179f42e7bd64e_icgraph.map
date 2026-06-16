@@ -1,0 +1,23 @@
+<map id="PixelController::loadAndScale2" name="PixelController::loadAndScale2">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1016,200,1195,240"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_a6c9543d0dd9cb216d7ba0f363c032436.html#a6c9543d0dd9cb216d7ba0f363c032436" title=" " alt="" coords="789,113,968,153"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1038,197,931,156,933,151,1040,193"/>
+<area shape="rect" id="Node000008" href="$d0/dee/struct_pixel_controller_a650a6bebd28bdd32f404579c891ca98d.html#a650a6bebd28bdd32f404579c891ca98d" title=" " alt="" coords="789,200,968,240"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="1002,223,968,223,968,217,1002,217"/>
+<area shape="rect" id="Node000010" href="$d0/dee/struct_pixel_controller_a48468aafc35cdf4f317b7256c0221789.html#a48468aafc35cdf4f317b7256c0221789" title="Load + scale a single pixel to 5&#45;channel RGBWW (issue #2558)." alt="" coords="789,264,968,304"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="1021,246,951,267,949,261,1020,241"/>
+<area shape="rect" id="Node000003" href="$d4/d96/class_a_p_a102_controller_a7a97b41a9641119f70eaf13369875ab2.html#a7a97b41a9641119f70eaf13369875ab2" title=" " alt="" coords="531,5,741,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="828,109,740,66,694,48,696,43,742,62,830,105"/>
+<area shape="rect" id="Node000004" href="$d4/d96/class_a_p_a102_controller_a632117bec47c6b4ba7e3ed1703478a42.html#a632117bec47c6b4ba7e3ed1703478a42" title=" " alt="" coords="268,63,483,103"/>
+<area shape="poly" id="edge6_Node000002_Node000004" title=" " alt="" coords="775,116,741,111,607,97,483,89,483,84,607,92,742,105,776,110"/>
+<area shape="rect" id="Node000006" href="$d7/d62/class_h_d108_controller_a19d1b3e19ee46eff4d456185f0f32336.html#a19d1b3e19ee46eff4d456185f0f32336" title=" " alt="" coords="531,121,741,146"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="776,136,742,136,742,131,776,131"/>
+<area shape="rect" id="Node000007" href="$d4/d96/class_a_p_a102_controller_a040f761b3d3bb30a9275f96548ec5ef7.html#a040f761b3d3bb30a9275f96548ec5ef7" title=" " alt="" coords="268,145,483,185"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="776,157,742,161,607,170,483,171,483,165,607,164,741,156,775,152"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="532,51,467,65,466,60,531,46"/>
+<area shape="rect" id="Node000005" href="$d4/d96/class_a_p_a102_controller_a523f76b88c07e29cba6c40bd0cefe4b3.html#a523f76b88c07e29cba6c40bd0cefe4b3" title="Send the LED data to the strip." alt="" coords="5,121,220,146"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="259,108,180,123,178,118,258,103"/>
+<area shape="poly" id="edge8_Node000007_Node000005" title=" " alt="" coords="254,153,217,149,218,143,255,148"/>
+<area shape="rect" id="Node000009" href="$d4/d28/group___chipsets_gaba9a2f023f2950dbcdf3c2482f765350.html#gaba9a2f023f2950dbcdf3c2482f765350" title="Main rendering function that converts RGB to RGBW and shows pixels." alt="" coords="541,221,731,261"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="776,232,731,236,731,230,776,226"/>
+</map>

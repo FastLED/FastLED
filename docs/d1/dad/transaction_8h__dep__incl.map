@@ -1,0 +1,27 @@
+<map id="fl/channels/spi/transaction.h" name="fl/channels/spi/transaction.h">
+<area shape="rect" id="Node000001" title="Transaction class for asynchronous SPI operations." alt="" coords="283,5,487,31"/>
+<area shape="rect" id="Node000002" href="$d9/df0/channels_2spi_8h.html" title="Multi&#45;lane SPI interface for LED output Hardware (SPI_HW): 1&#45;8 parallel data lanes Software (SPI_BITB..." alt="" coords="228,174,355,199"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="271,32,227,50,209,64,194,80,187,98,194,117,207,135,224,150,261,172,258,176,221,155,203,139,189,120,182,98,189,77,205,60,225,46,269,27"/>
+<area shape="rect" id="Node000009" href="$db/de9/device_8h.html" title="SPI Device class for single&#45;channel communication." alt="" coords="204,86,379,111"/>
+<area shape="poly" id="edge6_Node000001_Node000009" title=" " alt="" coords="362,42,307,88,303,84,359,38"/>
+<area shape="rect" id="Node000010" href="$da/dc3/multi__lane__device_8h.html" title="Multi&#45;lane SPI device for 2&#45;8 independent LED strips." alt="" coords="403,79,556,119"/>
+<area shape="poly" id="edge8_Node000001_Node000010" title=" " alt="" coords="411,37,458,76,455,81,407,41"/>
+<area shape="rect" id="Node000012" href="$d3/d08/parallel__device_8h.html" title="Parallel GPIO SPI device for 1&#45;32 outputs driven from single data stream." alt="" coords="581,79,749,119"/>
+<area shape="poly" id="edge13_Node000001_Node000012" title=" " alt="" coords="439,32,598,76,597,81,438,37"/>
+<area shape="rect" id="Node000003" href="$d0/daf/device_8cpp_8hpp.html" title=" " alt="" coords="5,262,223,287"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="257,208,139,264,137,259,254,203"/>
+<area shape="rect" id="Node000008" href="$d9/de8/spi_8cpp_8hpp.html" title=" " alt="" coords="247,262,440,287"/>
+<area shape="poly" id="edge4_Node000002_Node000008" title=" " alt="" coords="308,210,338,260,334,263,303,213"/>
+<area shape="rect" id="Node000004" href="$da/d51/fl_2channels_2spi_2__build_8cpp_8hpp.html" title=" " alt="" coords="338,343,551,368"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="176,288,397,340,396,345,175,293"/>
+<area shape="poly" id="edge5_Node000008_Node000004" title=" " alt="" coords="371,294,431,340,428,345,368,298"/>
+<area shape="poly" id="edge7_Node000009_Node000002" title=" " alt="" coords="294,125,294,173,289,173,289,125"/>
+<area shape="poly" id="edge9_Node000010_Node000002" title=" " alt="" coords="427,127,317,176,315,172,425,122"/>
+<area shape="poly" id="edge12_Node000010_Node000008" title=" " alt="" coords="458,131,355,263,350,260,454,128"/>
+<area shape="rect" id="Node000011" href="$dc/d95/multi__lane__device_8cpp_8hpp.html" title=" " alt="" coords="465,255,627,295"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="494,131,541,254,536,255,489,132"/>
+<area shape="poly" id="edge11_Node000011_Node000004" title=" " alt="" coords="512,305,461,344,458,340,509,301"/>
+<area shape="rect" id="Node000013" href="$d7/d37/parallel__device_8cpp_8hpp.html" title=" " alt="" coords="581,167,749,207"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="667,133,667,166,662,166,662,133"/>
+<area shape="poly" id="edge15_Node000013_Node000004" title=" " alt="" coords="668,221,661,260,653,279,641,296,622,314,599,327,551,345,549,340,597,322,619,309,637,293,649,277,656,258,662,220"/>
+</map>

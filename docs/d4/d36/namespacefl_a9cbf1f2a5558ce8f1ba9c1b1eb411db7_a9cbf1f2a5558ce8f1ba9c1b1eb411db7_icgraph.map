@@ -1,0 +1,9 @@
+<map id="fl::encodeWS2812_RGBW" name="fl::encodeWS2812_RGBW">
+<area shape="rect" id="Node000001" title="Encode 4&#45;byte pixel data in WS2812 format." alt="" coords="411,35,597,60"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a5beacb81e5dc8002e573c44ef95564b9.html#a5beacb81e5dc8002e573c44ef95564b9" title="Encode pixel data in WS2812 format (automatic RGB/RGBW selection)" alt="" coords="224,5,363,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="399,35,363,30,363,25,400,30"/>
+<area shape="rect" id="Node000003" href="$d0/d09/classfl_1_1_pixel_iterator_ab82e131fa7af425e2205e2df4c12c333.html#ab82e131fa7af425e2205e2df4c12c333" title=" " alt="" coords="231,55,356,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="397,64,357,70,356,64,397,59"/>
+<area shape="rect" id="Node000004" href="$d5/d8b/classfl_1_1_channel_a44414e176c7d2ef65fcdd390f6852322.html#a44414e176c7d2ef65fcdd390f6852322" title=" " alt="" coords="5,63,176,88"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="217,78,176,78,176,73,217,73"/>
+</map>

@@ -119,27 +119,29 @@ $(function(){initNavTree('dc/d2b/classfl_1_1_blend2d_a989a3acee044ae495572dcc277
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d7/d68/blend_8cpp_source.html#l00103">103</a> of file <a class="el" href="../../d7/d68/blend_8cpp_source.html">blend.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  103</span>                                                   {</div>
-<div class="line"><span class="lineno">  104</span>    uint8_t blur_amount = p.blur_amount;</div>
-<div class="line"><span class="lineno">  105</span>    uint8_t blur_passes = p.blur_passes;</div>
-<div class="line"><span class="lineno">  106</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> &amp;layer : <a class="code hl_variable" href="../../dc/d2b/classfl_1_1_blend2d_ac38d2a3bb6178dfb745fb1b0e34e5959.html#ac38d2a3bb6178dfb745fb1b0e34e5959">mLayers</a>) {</div>
-<div class="line"><span class="lineno">  107</span>        <span class="keywordflow">if</span> (layer.fx == fx) {</div>
-<div class="line"><span class="lineno">  108</span>            layer.blur_amount = blur_amount;</div>
-<div class="line"><span class="lineno">  109</span>            layer.blur_passes = blur_passes;</div>
-<div class="line"><span class="lineno">  110</span>            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  111</span>        }</div>
-<div class="line"><span class="lineno">  112</span>    }</div>
-<div class="line"><span class="lineno">  113</span> </div>
-<div class="line"><span class="lineno">  114</span>    <a class="code hl_define" href="../../de/d77/warn_8h_a0291e2b944eb41a7ca52786382e21e82.html#a0291e2b944eb41a7ca52786382e21e82">FASTLED_WARN</a>(<span class="stringliteral">&quot;Fx2d not found in Blend2d::setBlurParams&quot;</span>);</div>
-<div class="line"><span class="lineno">  115</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  116</span>}</div>
-<div class="ttc" id="aclassfl_1_1_blend2d_ac38d2a3bb6178dfb745fb1b0e34e5959_html_ac38d2a3bb6178dfb745fb1b0e34e5959"><div class="ttname"><a href="../../dc/d2b/classfl_1_1_blend2d_ac38d2a3bb6178dfb745fb1b0e34e5959.html#ac38d2a3bb6178dfb745fb1b0e34e5959">fl::Blend2d::mLayers</a></div><div class="ttdeci">HeapVector&lt; Entry &gt; mLayers</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d4e/blend_8h_source.html#l00058">blend.h:58</a></div></div>
-<div class="ttc" id="awarn_8h_a0291e2b944eb41a7ca52786382e21e82_html_a0291e2b944eb41a7ca52786382e21e82"><div class="ttname"><a href="../../de/d77/warn_8h_a0291e2b944eb41a7ca52786382e21e82.html#a0291e2b944eb41a7ca52786382e21e82">FASTLED_WARN</a></div><div class="ttdeci">#define FASTLED_WARN</div><div class="ttdef"><b>Definition</b> <a href="../../de/d77/warn_8h_source.html#l00008">warn.h:8</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d1/ddd/blend_8cpp_8hpp_source.html#l00106">106</a> of file <a class="el" href="../../d1/ddd/blend_8cpp_8hpp_source.html">blend.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  106</span>                                                   {</div>
+<div class="line"><span class="lineno">  107</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> <a class="code hl_variable" href="../../d4/d36/namespacefl_a76916539c2ca5972eb4b86dffbaa3842.html#a76916539c2ca5972eb4b86dffbaa3842">blur_amount</a> = p.blur_amount;</div>
+<div class="line"><span class="lineno">  108</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> blur_passes = p.blur_passes;</div>
+<div class="line"><span class="lineno">  109</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> &amp;layer : <a class="code hl_variable" href="../../dc/d2b/classfl_1_1_blend2d_af1ff855f026cae8299459a2568da2452.html#af1ff855f026cae8299459a2568da2452">mLayers</a>) {</div>
+<div class="line"><span class="lineno">  110</span>        <span class="keywordflow">if</span> (layer.fx == fx) {</div>
+<div class="line"><span class="lineno">  111</span>            layer.blur_amount = <a class="code hl_variable" href="../../d4/d36/namespacefl_a76916539c2ca5972eb4b86dffbaa3842.html#a76916539c2ca5972eb4b86dffbaa3842">blur_amount</a>;</div>
+<div class="line"><span class="lineno">  112</span>            layer.blur_passes = blur_passes;</div>
+<div class="line"><span class="lineno">  113</span>            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  114</span>        }</div>
+<div class="line"><span class="lineno">  115</span>    }</div>
+<div class="line"><span class="lineno">  116</span> </div>
+<div class="line"><span class="lineno">  117</span>    <a class="code hl_define" href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Fx2d not found in Blend2d::setBlurParams&quot;</span>);</div>
+<div class="line"><span class="lineno">  118</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  119</span>}</div>
+<div class="ttc" id="aclassfl_1_1_blend2d_af1ff855f026cae8299459a2568da2452_html_af1ff855f026cae8299459a2568da2452"><div class="ttname"><a href="../../dc/d2b/classfl_1_1_blend2d_af1ff855f026cae8299459a2568da2452.html#af1ff855f026cae8299459a2568da2452">fl::Blend2d::mLayers</a></div><div class="ttdeci">vector&lt; Entry &gt; mLayers</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d4e/blend_8h_source.html#l00057">blend.h:57</a></div></div>
+<div class="ttc" id="alog_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../d7/d7f/log_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00276">log.h:276</a></div></div>
+<div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
+<div class="ttc" id="anamespacefl_a76916539c2ca5972eb4b86dffbaa3842_html_a76916539c2ca5972eb4b86dffbaa3842"><div class="ttname"><a href="../../d4/d36/namespacefl_a76916539c2ca5972eb4b86dffbaa3842.html#a76916539c2ca5972eb4b86dffbaa3842">fl::blur_amount</a></div><div class="ttdeci">u8 u8 fract8 blur_amount</div><div class="ttdef"><b>Definition</b> <a href="../../d4/df5/blur_8h_source.html#l00186">blur.h:186</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d8/d4e/blend_8h_source.html#l00023">fl::Blend2dParams::blur_amount</a>, <a class="el" href="../../d8/d4e/blend_8h_source.html#l00024">fl::Blend2dParams::blur_passes</a>, <a class="el" href="../../de/d77/warn_8h_source.html#l00008">FASTLED_WARN</a>, and <a class="el" href="../../d8/d4e/blend_8h_source.html#l00058">mLayers</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/d4e/blend_8h_source.html#l00022">fl::Blend2dParams::blur_amount</a>, <a class="el" href="../../d4/df5/blur_8h_source.html#l00186">fl::blur_amount</a>, <a class="el" href="../../d8/d4e/blend_8h_source.html#l00023">fl::Blend2dParams::blur_passes</a>, <a class="el" href="../../d7/d7f/log_8h_source.html#l00276">FL_WARN</a>, and <a class="el" href="../../d8/d4e/blend_8h_source.html#l00057">mLayers</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d7/d68/blend_8cpp_source.html#l00118">setParams()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d1/ddd/blend_8cpp_8hpp_source.html#l00121">setParams()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -157,7 +159,7 @@ $(function(){initNavTree('dc/d2b/classfl_1_1_blend2d_a989a3acee044ae495572dcc277
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../dc/d2b/classfl_1_1_blend2d.html">Blend2d</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:22 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

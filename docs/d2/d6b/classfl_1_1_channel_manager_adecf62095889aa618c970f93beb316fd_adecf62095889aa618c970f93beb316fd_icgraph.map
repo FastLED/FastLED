@@ -1,0 +1,19 @@
+<map id="fl::ChannelManager::setExclusiveDriverByName" name="fl::ChannelManager::setExclusiveDriverByName">
+<area shape="rect" id="Node000001" title="Enable only one driver exclusively (disables all others) — by&#45;name escape hatch." alt="" coords="876,117,1084,157"/>
+<area shape="rect" id="Node000002" href="$d7/d5f/_auto_research_helpers_8cpp_af11e0726690b752be396e68b0a813ac7.html#af11e0726690b752be396e68b0a813ac7" title="AutoResearch&#45;style helper: set an exclusive driver by name." alt="" coords="633,85,828,125"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="862,125,828,120,829,115,863,120"/>
+<area shape="rect" id="Node000008" href="$d2/d6b/classfl_1_1_channel_manager_a28c3225b01eb4b67cdaf1613fd17d4ca.html#a28c3225b01eb4b67cdaf1613fd17d4ca" title="Enable only one driver exclusively, by fl::Bus enum (runtime form)." alt="" coords="655,149,807,189"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="863,155,807,162,807,157,862,150"/>
+<area shape="rect" id="Node000003" href="$d1/dc9/namespaceautoresearch_a1868ca9225c807cbaf571228e6629e34.html#a1868ca9225c807cbaf571228e6629e34" title="On FL_IS_STUB: register a one&#45;shot async task that drives autoresearch." alt="" coords="112,5,327,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="619,87,585,81,327,42,327,37,586,76,620,82"/>
+<area shape="rect" id="Node000005" href="$db/d63/class_auto_research_remote_control_abb6600e8a1e8c4ef46ba29e7bd3b78b4.html#abb6600e8a1e8c4ef46ba29e7bd3b78b4" title="Register all RPC functions with shared autoresearch state." alt="" coords="114,69,325,109"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="619,105,325,95,325,90,619,99"/>
+<area shape="rect" id="Node000006" href="$db/d63/class_auto_research_remote_control_a7992b62fd1f26fe1898d2ea8a78b370a.html#a7992b62fd1f26fe1898d2ea8a78b370a" title=" " alt="" coords="375,113,585,153"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="620,120,586,124,585,119,619,115"/>
+<area shape="rect" id="Node000007" href="$d7/d5f/_auto_research_helpers_8cpp_a27ef6a5586c56c0790bbb0a4c5b68466.html#a27ef6a5586c56c0790bbb0a4c5b68466" title="Test a specific driver with given timing configuration." alt="" coords="437,178,523,203"/>
+<area shape="poly" id="edge8_Node000002_Node000007" title=" " alt="" coords="651,133,635,140,611,154,586,168,524,186,523,181,584,163,608,149,632,135,649,128"/>
+<area shape="rect" id="Node000004" href="$dd/dc8/_auto_research_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,45,64,70"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="99,49,65,55,64,50,98,44"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="100,71,64,65,65,60,101,66"/>
+<area shape="poly" id="edge7_Node000006_Node000005" title=" " alt="" coords="360,116,324,110,325,104,361,111"/>
+</map>

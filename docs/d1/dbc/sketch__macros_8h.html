@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fl/sketch_macros.h File Reference</title>
+<title>FastLED: fl/system/sketch_macros.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -105,11 +105,19 @@ $(function(){initNavTree('d1/dbc/sketch__macros_8h.html','../../'); initResizabl
   <div class="headertitle"><div class="title">sketch_macros.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> This graph shows which files directly or indirectly include this file:</div>
+<div class="textblock"><code>#include &quot;platforms/is_platform.h&quot;</code><br />
+</div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for sketch_macros.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../de/dc2/sketch__macros_8h__incl.svg" width="206" height="110"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+</div><div class="textblock"><div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> This graph shows which files directly or indirectly include this file:</div>
+<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-1-content" class="dyncontent" style="display:none;">
 <div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d5/d8b/sketch__macros_8h__dep__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
@@ -117,12 +125,26 @@ $(function(){initNavTree('d1/dbc/sketch__macros_8h.html','../../'); initResizabl
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a071a601c5266eb650e6f018f35878611" id="r_a071a601c5266eb650e6f018f35878611"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dbc/sketch__macros_8h_a071a601c5266eb650e6f018f35878611.html#a071a601c5266eb650e6f018f35878611">FASTLED_STRINGIFY</a>(<a class="el" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>)</td></tr>
-<tr class="separator:a071a601c5266eb650e6f018f35878611"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad955d33e091250178bdaf12a6c0b16e0" id="r_ad955d33e091250178bdaf12a6c0b16e0"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dbc/sketch__macros_8h_ad955d33e091250178bdaf12a6c0b16e0.html#ad955d33e091250178bdaf12a6c0b16e0">FASTLED_STRINGIFY_HELPER</a>(<a class="el" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>)</td></tr>
-<tr class="separator:ad955d33e091250178bdaf12a6c0b16e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af0fa82d87395831453998a199d597094" id="r_af0fa82d87395831453998a199d597094"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dbc/sketch__macros_8h_af0fa82d87395831453998a199d597094.html#af0fa82d87395831453998a199d597094">SKETCH_HAS_LOTS_OF_MEMORY</a>&#160;&#160;&#160;1</td></tr>
+<tr class="memitem:a57f6e4f5138ae6d803d627d29647f39b" id="r_a57f6e4f5138ae6d803d627d29647f39b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dbc/sketch__macros_8h_a57f6e4f5138ae6d803d627d29647f39b.html#a57f6e4f5138ae6d803d627d29647f39b">FL_PLATFORM_HAS_HUGE_MEMORY</a>&#160;&#160;&#160;0</td></tr>
+<tr class="separator:a57f6e4f5138ae6d803d627d29647f39b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa36e829478fc8510b54790b7fa56c0d5" id="r_aa36e829478fc8510b54790b7fa56c0d5"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dbc/sketch__macros_8h_aa36e829478fc8510b54790b7fa56c0d5.html#aa36e829478fc8510b54790b7fa56c0d5">FL_PLATFORM_HAS_LARGE_MEMORY</a>&#160;&#160;&#160;1</td></tr>
+<tr class="separator:aa36e829478fc8510b54790b7fa56c0d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1b629b092424e6ba9a68829634abc5a" id="r_aa1b629b092424e6ba9a68829634abc5a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dbc/sketch__macros_8h_aa1b629b092424e6ba9a68829634abc5a.html#aa1b629b092424e6ba9a68829634abc5a">FL_PLATFORM_HAS_TINY_MEMORY</a>&#160;&#160;&#160;0</td></tr>
+<tr class="separator:aa1b629b092424e6ba9a68829634abc5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3c85d51c83b9f709cfb676a830a343d" id="r_ac3c85d51c83b9f709cfb676a830a343d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dbc/sketch__macros_8h_ac3c85d51c83b9f709cfb676a830a343d.html#ac3c85d51c83b9f709cfb676a830a343d">SKETCH_HAS_HUGE_MEMORY</a>&#160;&#160;&#160;<a class="el" href="../../d1/dbc/sketch__macros_8h_a57f6e4f5138ae6d803d627d29647f39b.html#a57f6e4f5138ae6d803d627d29647f39b">FL_PLATFORM_HAS_HUGE_MEMORY</a></td></tr>
+<tr class="separator:ac3c85d51c83b9f709cfb676a830a343d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a743ae86c328324822477fc2047bcd406" id="r_a743ae86c328324822477fc2047bcd406"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dbc/sketch__macros_8h_a743ae86c328324822477fc2047bcd406.html#a743ae86c328324822477fc2047bcd406">SKETCH_HAS_LARGE_MEMORY</a>&#160;&#160;&#160;<a class="el" href="../../d1/dbc/sketch__macros_8h_aa36e829478fc8510b54790b7fa56c0d5.html#aa36e829478fc8510b54790b7fa56c0d5">FL_PLATFORM_HAS_LARGE_MEMORY</a></td></tr>
+<tr class="separator:a743ae86c328324822477fc2047bcd406"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af0fa82d87395831453998a199d597094" id="r_af0fa82d87395831453998a199d597094"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dbc/sketch__macros_8h_af0fa82d87395831453998a199d597094.html#af0fa82d87395831453998a199d597094">SKETCH_HAS_LOTS_OF_MEMORY</a>&#160;&#160;&#160;<a class="el" href="../../d1/dbc/sketch__macros_8h_aa36e829478fc8510b54790b7fa56c0d5.html#aa36e829478fc8510b54790b7fa56c0d5">FL_PLATFORM_HAS_LARGE_MEMORY</a></td></tr>
 <tr class="separator:af0fa82d87395831453998a199d597094"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a247deeb4735cd064574afcc3245c595b" id="r_a247deeb4735cd064574afcc3245c595b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dbc/sketch__macros_8h_a247deeb4735cd064574afcc3245c595b.html#a247deeb4735cd064574afcc3245c595b">SKETCH_HAS_TINY_MEMORY</a>&#160;&#160;&#160;<a class="el" href="../../d1/dbc/sketch__macros_8h_aa1b629b092424e6ba9a68829634abc5a.html#aa1b629b092424e6ba9a68829634abc5a">FL_PLATFORM_HAS_TINY_MEMORY</a></td></tr>
+<tr class="separator:a247deeb4735cd064574afcc3245c595b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c16cc4d87cc7806467f89603b85fdbb" id="r_a5c16cc4d87cc7806467f89603b85fdbb"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dbc/sketch__macros_8h_a5c16cc4d87cc7806467f89603b85fdbb.html#a5c16cc4d87cc7806467f89603b85fdbb">SKETCH_HAS_VERY_LARGE_MEMORY</a>&#160;&#160;&#160;<a class="el" href="../../d1/dbc/sketch__macros_8h_a57f6e4f5138ae6d803d627d29647f39b.html#a57f6e4f5138ae6d803d627d29647f39b">FL_PLATFORM_HAS_HUGE_MEMORY</a></td></tr>
+<tr class="separator:a5c16cc4d87cc7806467f89603b85fdbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c67929047b82587c1150800bb290392" id="r_a2c67929047b82587c1150800bb290392"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dbc/sketch__macros_8h_a2c67929047b82587c1150800bb290392.html#a2c67929047b82587c1150800bb290392">SKETCH_STRINGIFY</a>(<a class="el" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>)</td></tr>
+<tr class="separator:a2c67929047b82587c1150800bb290392"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6247a862ff4ccd9b634c369f71ae664" id="r_aa6247a862ff4ccd9b634c369f71ae664"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dbc/sketch__macros_8h_aa6247a862ff4ccd9b634c369f71ae664.html#aa6247a862ff4ccd9b634c369f71ae664">SKETCH_STRINGIFY_HELPER</a>(<a class="el" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>)</td></tr>
+<tr class="separator:aa6247a862ff4ccd9b634c369f71ae664"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -130,8 +152,8 @@ Macros</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d1/dbc/sketch__macros_8h.html">sketch_macros.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_c27a882fecb444156419346f13162968.html">system</a></li><li class="navelem"><a class="el" href="../../d1/dbc/sketch__macros_8h.html">sketch_macros.h</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

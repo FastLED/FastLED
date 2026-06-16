@@ -1,0 +1,14 @@
+<map id="fl::gfx::blur1d" name="fl::gfx::blur1d">
+<area shape="rect" id="Node000001" title="One&#45;dimensional blur filter (span version)." alt="" coords="605,55,713,80"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a9ba8dac69d028c66791e7a41cb42ac32.html#a9ba8dac69d028c66791e7a41cb42ac32" title=" " alt="" coords="464,5,543,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="605,53,542,33,544,28,606,48"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aed9da76a781c194392d591b3391d46f2.html#aed9da76a781c194392d591b3391d46f2" title=" " alt="" coords="464,55,543,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="592,70,543,70,543,65,592,65"/>
+<area shape="rect" id="Node000006" href="$d5/d3d/group___color_blurs_ga29828f754440c8e5c261920f6863adb1.html#ga29828f754440c8e5c261920f6863adb1" title="Legacy raw&#45;pointer version of blur1d." alt="" coords="449,104,557,129"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="607,87,545,106,544,101,605,82"/>
+<area shape="rect" id="Node000004" href="$d5/d56/classfl_1_1_particles1d_ae4b5b0ed1b20858b9163be36f36688df.html#ae4b5b0ed1b20858b9163be36f36688df" title="Update and render all particles with overdraw technique." alt="" coords="252,55,401,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="450,70,401,70,401,65,450,65"/>
+<area shape="poly" id="edge5_Node000004_Node000004" title=" " alt="" coords="358,44,349,36,327,33,308,35,298,40,296,46,302,53,297,56,291,46,294,37,307,30,327,28,351,32,361,40"/>
+<area shape="rect" id="Node000005" href="$d5/d56/classfl_1_1_particles1d_a0ab18e3c3466b08f858365be64e9bc35.html#a0ab18e3c3466b08f858365be64e9bc35" title=" " alt="" coords="5,55,204,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="238,70,204,70,204,65,238,65"/>
+</map>

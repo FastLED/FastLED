@@ -8,9 +8,9 @@ digraph "clearDisplay"
   rankdir="LR";
   Node1 [id="Node000001",label="clearDisplay",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fadeSpeed",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dc7/advanced_8h_a40fb0ce80fe239814f5a2d21922802b3.html#a40fb0ce80fe239814f5a2d21922802b3",tooltip=" "];
+  Node2 [id="Node000002",label="fadeSpeed",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dc7/advanced_8h_a54f99bb25114b6ba3dfdb9c39d18ac7c.html#a54f99bb25114b6ba3dfdb9c39d18ac7c",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fadeToBlackBy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dfb/colorutils_8h_a399e4e094995b8e97420b89a2dd6548b.html#a399e4e094995b8e97420b89a2dd6548b",tooltip=" "];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fill_solid",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dfb/colorutils_8h_afcada3a28df2b4491cbee30297e39ea7.html#afcada3a28df2b4491cbee30297e39ea7",tooltip="Fill a range of LEDs with a solid color."];
+  Node4 [id="Node000004",label="fill_solid",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dfb/colorutils_8h_afba4db18577c19e39c54f1c5793741b7.html#afba4db18577c19e39c54f1c5793741b7",tooltip="Fill a range of LEDs with a solid color."];
 }

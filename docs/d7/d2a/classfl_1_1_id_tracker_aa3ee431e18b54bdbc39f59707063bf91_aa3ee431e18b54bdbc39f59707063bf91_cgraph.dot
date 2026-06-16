@@ -1,0 +1,22 @@
+digraph "fl::IdTracker::IdTracker"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::IdTracker::IdTracker",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::IdTracker::IdTracker",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d2a/classfl_1_1_id_tracker_ad47b1308e7d99d38d9833ae07615513e.html#ad47b1308e7d99d38d9833ae07615513e",tooltip="Default constructor - creates a new ID tracker instance."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::IdTracker::clear",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d2a/classfl_1_1_id_tracker_a05dc329f887fd8106946c74ca76fdc88.html#a05dc329f887fd8106946c74ca76fdc88",tooltip="Clear all tracked pointers and reset ID counter."];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::IdTracker::getId",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d2a/classfl_1_1_id_tracker_a31a30a0e96ac07c2d3604d5270dc67aa.html#a31a30a0e96ac07c2d3604d5270dc67aa",tooltip="Get existing ID for pointer without creating a new one."];
+  Node2 -> Node5 [id="edge4_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::IdTracker::getOrCreateId",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d2a/classfl_1_1_id_tracker_a0fb6841f3de6fdd26fe8f2a6211be0d3.html#a0fb6841f3de6fdd26fe8f2a6211be0d3",tooltip="Get existing ID for pointer, or create a new one if not found."];
+  Node2 -> Node6 [id="edge5_Node000002_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::IdTracker::removeId",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d2a/classfl_1_1_id_tracker_a23870e6d543a9c72380e1e0c07968bec.html#a23870e6d543a9c72380e1e0c07968bec",tooltip="Remove tracking for a pointer."];
+  Node2 -> Node7 [id="edge6_Node000002_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::IdTracker::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d2a/classfl_1_1_id_tracker_a5b79d7b4d92c8a96c44448595880e6b0.html#a5b79d7b4d92c8a96c44448595880e6b0",tooltip="Get the current number of tracked pointers."];
+}

@@ -1,0 +1,45 @@
+digraph "fl::audio::detector::Backbeat::~Backbeat"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::audio::detector\l::Backbeat::~Backbeat",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::audio::detector\l::Backbeat::fireCallbacks",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_a0d53ce98f442e62eb9c9f583ed223564.html#a0d53ce98f442e62eb9c9f583ed223564",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::audio::detector\l::Backbeat::update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_a128515a9b1b491a4a3801ce743719b0c.html#a128515a9b1b491a4a3801ce743719b0c",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::audio::detector\l::Backbeat::Backbeat",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_ae616d013654a60850d1ad4ea042a487d.html#ae616d013654a60850d1ad4ea042a487d",tooltip="Construct with shared Beat."];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::audio::detector\l::Backbeat::calculateMultiband\lAccent",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_a1ba095cf2a5aa331a675235f229eabe9.html#a1ba095cf2a5aa331a675235f229eabe9",tooltip=" "];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::clamp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350",tooltip=" "];
+  Node5 -> Node7 [id="edge6_Node000005_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::log10f",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_a59b2ca835c8aaa9e67a6dce355013b3d.html#a59b2ca835c8aaa9e67a6dce355013b3d",tooltip=" "];
+  Node5 -> Node10 [id="edge7_Node000005_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::min",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb",tooltip=" "];
+  Node3 -> Node11 [id="edge8_Node000003_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::audio::detector\l::Backbeat::detectBackbeat",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_a82bf97dd057d84089b5f6f8288c263b6.html#a82bf97dd057d84089b5f6f8288c263b6",tooltip=" "];
+  Node11 -> Node12 [id="edge9_Node000011_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::audio::detector\l::Backbeat::calculatePattern\lConfidence",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_a886439e936547a5f3a8b1d8f6fa1d6ce.html#a886439e936547a5f3a8b1d8f6fa1d6ce",tooltip=" "];
+  Node12 -> Node6 [id="edge10_Node000012_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node12 -> Node10 [id="edge11_Node000012_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node11 -> Node6 [id="edge12_Node000011_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node11 -> Node14 [id="edge13_Node000011_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::audio::detector\l::Backbeat::isBackbeatPosition",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_a84e6ec00fcb47211421a1ad74d4ae3e8.html#a84e6ec00fcb47211421a1ad74d4ae3e8",tooltip=" "];
+  Node3 -> Node15 [id="edge14_Node000003_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl::audio::detector\l::Backbeat::detectBackbeat\lAccent",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_a1ead0f51d4413ffda911176db56c6847.html#a1ead0f51d4413ffda911176db56c6847",tooltip=" "];
+  Node3 -> Node3 [id="edge15_Node000003_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node16 [id="edge16_Node000003_Node000016",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::audio::detector\l::Backbeat::updateAdaptive\lThresholds",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_a3438369f0de8edbc40264dbe2d6a5f51.html#a3438369f0de8edbc40264dbe2d6a5f51",tooltip=" "];
+  Node3 -> Node17 [id="edge17_Node000003_Node000017",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl::audio::detector\l::Backbeat::updateBackbeat\lProfile",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_ad9e0d3c858847014443307cd0c049bc7.html#ad9e0d3c858847014443307cd0c049bc7",tooltip=" "];
+  Node17 -> Node10 [id="edge18_Node000017_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node18 [id="edge19_Node000003_Node000018",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="fl::audio::detector\l::Backbeat::updateBeatDetector",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_a846b455a2b6e3d7cf926dd443e7d6310.html#a846b455a2b6e3d7cf926dd443e7d6310",tooltip=" "];
+  Node3 -> Node19 [id="edge20_Node000003_Node000019",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl::audio::detector\l::Backbeat::updateBeatPosition",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_ae8f94d91a9d27412781efa9a5b48534f.html#ae8f94d91a9d27412781efa9a5b48534f",tooltip=" "];
+}

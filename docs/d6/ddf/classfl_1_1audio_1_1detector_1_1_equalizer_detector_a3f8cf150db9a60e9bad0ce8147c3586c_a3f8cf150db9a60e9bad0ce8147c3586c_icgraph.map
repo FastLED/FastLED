@@ -1,0 +1,9 @@
+<map id="fl::audio::detector::EqualizerDetector::EqualizerDetector" name="fl::audio::detector::EqualizerDetector::EqualizerDetector">
+<area shape="rect" id="Node000001" title=" " alt="" coords="405,5,552,60"/>
+<area shape="rect" id="Node000002" href="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_a54bcd91a63476c263a89b1193d771535.html#a54bcd91a63476c263a89b1193d771535" title=" " alt="" coords="5,5,163,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="391,19,357,15,284,11,211,15,163,21,163,16,210,10,284,6,358,10,392,14"/>
+<area shape="rect" id="Node000003" href="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_a88188f71bc78dc8603f86597cec368a2.html#a88188f71bc78dc8603f86597cec368a2" title="Reconfigure equalizer tuning parameters at runtime." alt="" coords="211,49,357,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="393,55,358,63,357,57,391,50"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="197,60,162,53,164,47,198,55"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="316,38,304,31,284,28,267,30,256,35,251,41,251,49,246,49,246,39,253,30,265,25,284,23,306,26,319,34"/>
+</map>

@@ -1,0 +1,35 @@
+digraph "fl/chipsets/encoders/sm16716.h"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl/chipsets/encoders\l/sm16716.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="SM16716 SPI chipset encoder."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl/chipsets/encoders\l/pixel_iterator.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d65/fl_2chipsets_2encoders_2pixel__iterator_8h.html",tooltip="Non-templated low level pixel data writing class."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="/home/runner/work/FastLED\l/FastLED/examples/AutoResearch\l/AutoResearchTest.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/df9/_auto_research_test_8cpp.html",tooltip=" "];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl/chipsets/ucs7604.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d00/ucs7604_8h.html",tooltip="UCS7604 LED chipset controller implementation for FastLED."];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="chipsets.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d66/chipsets_8h.html",tooltip="Contains the bulk of the definitions for the various LED chipsets supported."];
+  Node4 -> Node10 [id="edge5_Node000004_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl/channels/channel.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d3/de6/channel_8cpp_8hpp.html",tooltip=" "];
+  Node4 -> Node14 [id="edge6_Node000004_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl/chipsets/ucs7604.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d67/ucs7604_8cpp_8hpp.html",tooltip=" "];
+  Node2 -> Node17 [id="edge7_Node000002_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl/gfx/pixel_iterator.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d82/fl_2gfx_2pixel__iterator_8h.html",tooltip=" "];
+  Node2 -> Node18 [id="edge8_Node000002_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="fl/gfx/pixel_iterator\l_any.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d1e/pixel__iterator__any_8h.html",tooltip=" "];
+  Node18 -> Node10 [id="edge9_Node000018_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node19 [id="edge10_Node000002_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="pixel_iterator.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d6c/pixel__iterator_8h.html",tooltip="Legacy header."];
+  Node19 -> Node5 [id="edge11_Node000019_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 -> Node20 [id="edge12_Node000019_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="pixel_controller.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/d4d/pixel__controller_8h.html",tooltip="Low level pixel data writing class."];
+  Node20 -> Node3 [id="edge13_Node000020_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 -> Node10 [id="edge14_Node000020_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 -> Node4 [id="edge15_Node000020_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 -> Node18 [id="edge16_Node000020_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

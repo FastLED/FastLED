@@ -1,0 +1,6 @@
+<map id="fl::Channel::getRgbw" name="fl::Channel::getRgbw">
+<area shape="rect" id="Node000001" title="Get the RGBW conversion mode." alt="" coords="5,37,161,62"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_aa227300b021654312e2f12fe41a78c07.html#aa227300b021654312e2f12fe41a78c07" title=" " alt="" coords="209,29,345,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="161,47,196,47,196,52,161,52"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="241,30,239,20,245,11,258,5,277,3,300,6,312,13,310,17,298,11,277,8,259,10,248,15,244,21,246,28"/>
+</map>

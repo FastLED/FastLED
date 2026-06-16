@@ -1,0 +1,8 @@
+<map id="fl::third_party::nsgif_destroy" name="fl::third_party::nsgif_destroy">
+<area shape="rect" id="Node000001" title="Free a NSGIF object." alt="" coords="5,5,153,45"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a01907b76b610d0663ed9b4204cdf68a2.html#a01907b76b610d0663ed9b4204cdf68a2" title=" " alt="" coords="388,13,455,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,20,201,19,340,19,374,20,374,25,340,24,201,24,153,25"/>
+<area shape="rect" id="Node000003" href="$d1/d86/namespacefl_1_1third__party_a0e2fe51788662540b076c3f31b01b7f3.html#a0e2fe51788662540b076c3f31b01b7f3" title="Destroy an LZW decompression context." alt="" coords="201,33,340,73"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="154,34,188,39,187,44,153,39"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="340,38,374,31,375,37,341,43"/>
+</map>

@@ -1,0 +1,39 @@
+<map id="fl::HSV16::colorBoost" name="fl::HSV16::colorBoost">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,228,164,253"/>
+<area shape="rect" id="Node000002" href="$d4/d5d/structfl_1_1_h_s_v16_afb1735cc73fa0e364b7a24893e2f6f8b.html#afb1735cc73fa0e364b7a24893e2f6f8b" title=" " alt="" coords="212,179,344,204"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="134,225,213,205,215,210,136,231"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_adbc9938a37fd2f52f4c865a78914f420.html#adbc9938a37fd2f52f4c865a78914f420" title=" " alt="" coords="235,228,321,253"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="164,238,221,238,221,243,164,243"/>
+<area shape="rect" id="Node000018" href="$d4/d5d/structfl_1_1_h_s_v16_a66d9cc0fccee4175baaef83f1a2d7d7d.html#a66d9cc0fccee4175baaef83f1a2d7d7d" title=" " alt="" coords="213,352,343,377"/>
+<area shape="poly" id="edge16_Node000001_Node000018" title=" " alt="" coords="107,251,247,342,244,347,104,256"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a8b74797175db9120ba049e55c58a38e8.html#a8b74797175db9120ba049e55c58a38e8" title="16&#45;bit cubic ease&#45;in function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535" alt="" coords="403,5,537,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="319,229,342,213,357,192,364,171,365,128,366,84,374,62,390,40,394,36,398,40,394,44,379,65,371,85,370,128,369,172,362,194,346,217,322,233"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_ad8823354aeba367c5186ac293c2af395.html#ad8823354aeba367c5186ac293c2af395" title="16&#45;bit cubic ease&#45;in/ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;6553..." alt="" coords="392,55,548,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="319,228,342,213,354,198,360,183,365,152,370,121,377,105,390,89,395,85,399,89,394,93,382,108,375,123,370,153,366,185,359,201,346,217,322,233"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_aff27cf9c4119c4732f1663150a29bc7a.html#aff27cf9c4119c4732f1663150a29bc7a" title="16&#45;bit quadratic ease&#45;in/ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;..." alt="" coords="393,104,547,129"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="319,227,342,213,358,195,365,177,373,157,390,139,398,133,401,138,394,143,378,160,370,179,362,198,346,217,322,231"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_ab1554ada73484848739ca7aa2862e5f1.html#ab1554ada73484848739ca7aa2862e5f1" title="16&#45;bit sine ease&#45;in/ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535" alt="" coords="396,153,544,179"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="313,226,343,213,391,188,409,181,411,186,393,192,345,218,315,230"/>
+<area shape="rect" id="Node000013" href="$d4/d36/namespacefl_a65b52c144968bcdb8a1c2594cc9f57af.html#a65b52c144968bcdb8a1c2594cc9f57af" title="16&#45;bit quadratic ease&#45;in function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535" alt="" coords="405,203,535,228"/>
+<area shape="poly" id="edge9_Node000003_Node000013" title=" " alt="" coords="321,232,391,223,391,228,321,238"/>
+<area shape="rect" id="Node000014" href="$d4/d36/namespacefl_a9d07775cc4c7d6733b433f0775ef3975.html#a9d07775cc4c7d6733b433f0775ef3975" title="16&#45;bit sine ease&#45;in function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535" alt="" coords="407,252,533,277"/>
+<area shape="poly" id="edge10_Node000003_Node000014" title=" " alt="" coords="321,243,394,253,393,258,321,249"/>
+<area shape="rect" id="Node000015" href="$d4/d36/namespacefl_abad5ed43fd0a80c537f41bddf4bd5bcc.html#abad5ed43fd0a80c537f41bddf4bd5bcc" title="16&#45;bit cubic ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535" alt="" coords="398,301,542,327"/>
+<area shape="poly" id="edge12_Node000003_Node000015" title=" " alt="" coords="308,251,393,286,416,294,414,299,391,291,306,256"/>
+<area shape="rect" id="Node000016" href="$d4/d36/namespacefl_a8ab1577ba0a80cdab339d7a637c10516.html#a8ab1577ba0a80cdab339d7a637c10516" title="16&#45;bit quadratic ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535" alt="" coords="399,351,541,376"/>
+<area shape="poly" id="edge13_Node000003_Node000016" title=" " alt="" coords="293,252,335,293,363,316,393,336,409,343,406,348,391,340,360,320,332,297,289,256"/>
+<area shape="rect" id="Node000017" href="$d4/d36/namespacefl_ac7e0036bfa0fd076b4f57e1aa67e9cb5.html#ac7e0036bfa0fd076b4f57e1aa67e9cb5" title="16&#45;bit sine ease&#45;out function Takes an input value 0&#45;65535 and returns an eased value 0&#45;65535" alt="" coords="596,339,732,364"/>
+<area shape="poly" id="edge14_Node000003_Node000017" title=" " alt="" coords="289,252,338,327,368,364,393,386,422,397,453,402,485,403,516,399,575,385,624,367,626,372,577,390,517,405,485,408,453,408,421,402,391,391,364,368,334,330,285,255"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a289ad302494249edde0b6b9e28c831f1.html#a289ad302494249edde0b6b9e28c831f1" title=" " alt="" coords="626,252,702,277"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="520,176,549,188,597,214,637,242,634,246,594,219,547,192,518,181"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a37a484f9e39484372eee81c7a66fad7d.html#a37a484f9e39484372eee81c7a66fad7d" title=" " alt="" coords="780,296,853,321"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="703,273,767,292,766,297,701,278"/>
+<area shape="poly" id="edge11_Node000014_Node000008" title=" " alt="" coords="533,262,612,262,612,267,533,267"/>
+<area shape="poly" id="edge15_Node000017_Node000009" title=" " alt="" coords="709,336,766,320,767,325,711,341"/>
+<area shape="rect" id="Node000019" href="$d4/d36/namespacefl_a0704405150c9e2ea2647360203eef1a7.html#a0704405150c9e2ea2647360203eef1a7" title=" " alt="" coords="409,452,531,477"/>
+<area shape="poly" id="edge17_Node000018_Node000019" title=" " alt="" coords="300,375,393,430,424,444,421,449,391,435,297,380"/>
+<area shape="rect" id="Node000020" href="$d1/d12/group__intmap_gaa22e4ff6f570b2e2662c77854c5c6148.html#gaa22e4ff6f570b2e2662c77854c5c6148" title=" " alt="" coords="605,427,723,452"/>
+<area shape="poly" id="edge18_Node000019_Node000020" title=" " alt="" coords="531,454,591,446,591,451,532,459"/>
+<area shape="rect" id="Node000021" href="$d1/d12/group__intmap_ga8e50a18fc577d3c0aafcdc300de507ef.html#ga8e50a18fc577d3c0aafcdc300de507ef" title=" " alt="" coords="601,476,727,501"/>
+<area shape="poly" id="edge19_Node000019_Node000021" title=" " alt="" coords="532,470,587,477,587,482,531,475"/>
+</map>

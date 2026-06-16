@@ -1,0 +1,22 @@
+digraph "fl::audio::detector::Silence"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl::audio::detector\l::Silence",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::audio::Detector",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$df/d9b/classfl_1_1audio_1_1_detector.html",tooltip=" "];
+  Node3 -> Node1 [id="edge2_Node000001_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mRMSHistory",fontcolor="grey" ];
+  Node3 [id="Node000003",label="fl::vector\< float \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/d24/classfl_1_1vector.html",tooltip=" "];
+  Node4 -> Node3 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::vector_basic",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d4/dad/classfl_1_1vector__basic.html",tooltip="Type-erased vector base class."];
+  Node5 -> Node4 [id="edge4_Node000004_Node000005",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mResource",fontcolor="grey" ];
+  Node5 [id="Node000005",label="fl::memory_resource",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$db/d13/classfl_1_1memory__resource.html",tooltip="Polymorphic memory resource base class (PMR-style)."];
+  Node6 -> Node4 [id="edge5_Node000004_Node000006",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mOps",fontcolor="grey" ];
+  Node6 [id="Node000006",label="fl::vector_element_ops",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl.html#d8/d72/structfl_1_1vector__element__ops",tooltip="Function pointer table for type-specific element operations."];
+  Node7 -> Node3 [id="edge6_Node000003_Node000007",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< float \>",fontcolor="grey" ];
+  Node7 [id="Node000007",label="fl::vector\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d2/d24/classfl_1_1vector.html",tooltip=" "];
+  Node4 -> Node7 [id="edge7_Node000007_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

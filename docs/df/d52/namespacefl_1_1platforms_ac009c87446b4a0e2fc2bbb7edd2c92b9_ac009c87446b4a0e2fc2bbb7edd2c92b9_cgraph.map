@@ -1,0 +1,10 @@
+<map id="fl::platforms::scopedWatchdogPause3s" name="fl::platforms::scopedWatchdogPause3s">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,22,224,62"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27" title="Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all..." alt="" coords="272,29,347,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="224,39,258,39,258,45,224,45"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="282,31,276,21,279,11,291,5,309,3,332,6,341,15,338,19,329,11,309,8,292,10,283,15,282,20,287,28"/>
+<area shape="rect" id="Node000003" href="$df/d9e/namespacefl_1_1detail_abd6e1e8189dbbbf28d720923205bd0dd.html#abd6e1e8189dbbbf28d720923205bd0dd" title="Internal delay implementation used by the public fl::delay wrapper." alt="" coords="395,29,549,55"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="347,39,381,39,381,45,347,45"/>
+<area shape="rect" id="Node000004" href="$db/d5c/namespacefl_1_1task_a2d40b476742263a3fa212e24b722e3ef.html#a2d40b476742263a3fa212e24b722e3ef" title="Run selected task subsystems." alt="" coords="597,29,692,55"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="549,39,584,39,584,45,549,45"/>
+</map>

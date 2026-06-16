@@ -1,0 +1,5 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$da/d8d/classfl_1_1_i_fast_l_e_d.html" title="Pure virtual interface for FastLED operations." alt="" coords="5,5,99,31"/>
+<area shape="rect" id="Node000001" href="$d2/dac/classfl_1_1_fast_l_e_d_adapter.html" title="Real FastLED implementation adapter." alt="" coords="147,5,287,31"/>
+<area shape="poly" id="edge307_Node000000_Node000001" title=" " alt="" coords="113,15,147,15,147,21,113,21"/>
+</map>

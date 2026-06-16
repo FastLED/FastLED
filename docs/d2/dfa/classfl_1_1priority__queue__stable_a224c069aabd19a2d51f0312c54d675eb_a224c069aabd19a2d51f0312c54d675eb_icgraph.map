@@ -1,0 +1,5 @@
+<map id="fl::priority_queue_stable::pop" name="fl::priority_queue_stable::pop">
+<area shape="rect" id="Node000001" title="Remove the top element from the queue." alt="" coords="185,5,317,45"/>
+<area shape="rect" id="Node000002" href="$d2/dfa/classfl_1_1priority__queue__stable_ab02bc14572c0f7423be0942265c9472a.html#ab02bc14572c0f7423be0942265c9472a" title="Clear all elements from the queue." alt="" coords="5,5,137,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="171,28,138,28,138,23,171,23"/>
+</map>

@@ -1,0 +1,15 @@
+<map id="fl::third_party::nsgif__parse_frame_extensions" name="fl::third_party::nsgif__parse_frame_extensions">
+<area shape="rect" id="Node000001" title="Parse the frame&#39;s extensions." alt="" coords="861,39,1057,79"/>
+<area shape="rect" id="Node000002" href="$d1/d86/namespacefl_1_1third__party_aa00bee5c0f7b53c8e9441d62f98c61b2.html#aa00bee5c0f7b53c8e9441d62f98c61b2" title="Attempts to initialise the next frame." alt="" coords="665,39,813,79"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="847,61,814,61,814,56,847,56"/>
+<area shape="rect" id="Node000003" href="$d1/d86/namespacefl_1_1third__party_a34aa4d967d8ddaeefa12954d47fe7863.html#a34aa4d967d8ddaeefa12954d47fe7863" title="Scan the source image data." alt="" coords="469,8,617,48"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="651,48,617,42,618,37,652,42"/>
+<area shape="rect" id="Node000007" href="$d1/d86/namespacefl_1_1third__party_a3f914f8fd903813b728ce719ad8b59c7.html#a3f914f8fd903813b728ce719ad8b59c7" title="Decodes a GIF frame." alt="" coords="250,69,398,109"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="652,68,398,87,398,81,651,62"/>
+<area shape="rect" id="Node000004" href="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_a477899043772e64106571d7233be2793.html#a477899043772e64106571d7233be2793" title=" " alt="" coords="227,5,421,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="456,30,421,29,421,24,456,24"/>
+<area shape="rect" id="Node000006" href="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_a31562819b41f08828f326096d848ec5b.html#a31562819b41f08828f326096d848ec5b" title=" " alt="" coords="5,37,179,77"/>
+<area shape="poly" id="edge4_Node000004_Node000006" title=" " alt="" coords="213,43,179,48,179,43,212,38"/>
+<area shape="poly" id="edge5_Node000006_Node000006" title=" " alt="" coords="131,26,118,19,92,16,70,18,56,23,51,29,54,36,49,38,46,28,53,18,68,13,92,11,119,14,134,21"/>
+<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="236,80,179,72,179,67,236,75"/>
+</map>

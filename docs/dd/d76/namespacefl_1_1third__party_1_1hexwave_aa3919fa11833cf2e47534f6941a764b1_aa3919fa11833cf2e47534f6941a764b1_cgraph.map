@@ -1,0 +1,18 @@
+<map id="fl::third_party::hexwave::hexwave_init" name="fl::third_party::hexwave::hexwave_init">
+<area shape="rect" id="Node000001" title="Initialize the hexwave library (DEPRECATED &#45; use hexwave_engine_create)" alt="" coords="5,63,180,103"/>
+<area shape="rect" id="Node000002" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_ae1d7f1bfbf1e38371ddb8430a353d7bf.html#ae1d7f1bfbf1e38371ddb8430a353d7bf" title="Create and initialize a new HexWaveEngine." alt="" coords="232,95,420,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="181,92,219,97,218,103,180,97"/>
+<area shape="rect" id="Node000008" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_a02ab69db1ef35ecf2336643ebbd4e742.html#a02ab69db1ef35ecf2336643ebbd4e742" title="Destroy a HexWaveEngine and free its resources." alt="" coords="228,19,424,59"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="180,64,214,57,215,62,181,69"/>
+<area shape="rect" id="Node000003" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_a9cda2472ab9bd68df745496533aa76e7.html#a9cda2472ab9bd68df745496533aa76e7" title=" " alt="" coords="472,70,677,95"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="420,100,462,94,463,100,421,105"/>
+<area shape="rect" id="Node000004" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_a8d74e9eb1fcd03c2d38cf1c23fb33b82.html#a8d74e9eb1fcd03c2d38cf1c23fb33b82" title=" " alt="" coords="487,5,662,45"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="375,92,471,55,494,47,495,52,473,60,377,97"/>
+<area shape="rect" id="Node000005" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_a800f05fe5ce25fa8f4c2b55c45ba300f.html#a800f05fe5ce25fa8f4c2b55c45ba300f" title=" " alt="" coords="487,120,662,160"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="421,122,474,127,473,132,420,127"/>
+<area shape="rect" id="Node000006" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_abc07da8d8983da7016b55f7626e9c060.html#abc07da8d8983da7016b55f7626e9c060" title=" " alt="" coords="473,185,676,210"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="375,132,473,169,505,179,503,184,471,175,373,137"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_aa6f747fb354cae784bdd4c656cbdd9fb.html#aa6f747fb354cae784bdd4c656cbdd9fb" title=" " alt="" coords="541,234,608,259"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="350,133,404,177,437,201,473,220,529,237,527,243,471,225,435,205,400,182,347,137"/>
+<area shape="poly" id="edge8_Node000008_Node000004" title=" " alt="" coords="424,31,474,28,474,33,424,36"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="fl::CRGB::subtractFromRGB" name="fl::CRGB::subtractFromRGB">
+<area shape="rect" id="Node000001" title="Subtract a constant from each channel, saturating at 0x00." alt="" coords="201,5,399,31"/>
+<area shape="rect" id="Node000002" href="$da/dd6/structfl_1_1_c_r_g_b_a3bc1e35694dff2e08c62ee21d426603d.html#a3bc1e35694dff2e08c62ee21d426603d" title="Subtract a constant of &#39;1&#39; from each channel, saturating at 0x00." alt="" coords="5,5,153,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="188,21,154,21,154,15,188,15"/>
+</map>

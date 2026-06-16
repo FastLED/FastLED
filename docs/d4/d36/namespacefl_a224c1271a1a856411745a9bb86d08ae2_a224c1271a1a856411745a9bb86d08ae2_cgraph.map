@@ -1,0 +1,9 @@
+<map id="fl::blurColumns" name="fl::blurColumns">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,125,31"/>
+<area shape="rect" id="Node000002" href="$d5/d3d/group___color_blurs_gaf6b4765e82578c70df7b3d12ca4b6c71.html#gaf6b4765e82578c70df7b3d12ca4b6c71" title="Perform a blur1d() on every column of a rectangular matrix (span version)." alt="" coords="173,5,323,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="126,15,160,15,160,21,126,21"/>
+<area shape="rect" id="Node000003" href="$da/dd6/structfl_1_1_c_r_g_b_aa272170bea8120f101f27ebd2c323b55.html#aa272170bea8120f101f27ebd2c323b55" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="371,5,504,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="323,15,357,15,357,21,323,21"/>
+<area shape="rect" id="Node000004" href="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" title="Default constructor." alt="" coords="552,5,672,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="504,15,538,15,538,21,504,21"/>
+</map>

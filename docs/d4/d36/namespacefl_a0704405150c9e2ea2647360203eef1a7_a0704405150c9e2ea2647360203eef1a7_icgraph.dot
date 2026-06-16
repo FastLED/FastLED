@@ -10,11 +10,11 @@ digraph "fl::HSV16toRGB"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::HSV16::ToRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d5d/structfl_1_1_h_s_v16_a66d9cc0fccee4175baaef83f1a2d7d7d.html#a66d9cc0fccee4175baaef83f1a2d7d7d",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="CRGB::CRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d82/struct_c_r_g_b_aafb129d5109b627df6c8401c6b5105ef.html#aafb129d5109b627df6c8401c6b5105ef",tooltip="Allow construction from a fl::HSV16 color Enables automatic conversion from HSV16 to CRGB."];
+  Node3 [id="Node000003",label="fl::CRGB::CRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a04a5f8d4d52c62efb40aa95af8ebb160.html#a04a5f8d4d52c62efb40aa95af8ebb160",tooltip="Allow construction from a HSV16 color Enables automatic conversion from HSV16 to CRGB."];
   Node2 -> Node4 [id="edge3_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::HSV16::colorBoost",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d5d/structfl_1_1_h_s_v16_a0bd2c0fc64fc34d573637c10b849c320.html#a0bd2c0fc64fc34d573637c10b849c320",tooltip=" "];
+  Node4 [id="Node000004",label="fl::HSV16::colorBoost",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d5d/structfl_1_1_h_s_v16_a76546a195f4bb8cce8ac071d4d7786d4.html#a76546a195f4bb8cce8ac071d4d7786d4",tooltip=" "];
   Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="CRGB::colorBoost",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/d82/struct_c_r_g_b_a8b78ce444d74f2bc9e63d83bfd1b17ad.html#a8b78ce444d74f2bc9e63d83bfd1b17ad",tooltip=" "];
-  Node2 -> Node17 [id="edge5_Node000002_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node17 [id="Node000017",label="fl::HSV16::operator CRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d5d/structfl_1_1_h_s_v16_a3ece902080f8d4dbaca82dbc974c58d0.html#a3ece902080f8d4dbaca82dbc974c58d0",tooltip="Automatic conversion operator to CRGB Allows HSV16 to be automatically converted to CRGB."];
+  Node5 [id="Node000005",label="fl::CRGB::colorBoost",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/dd6/structfl_1_1_c_r_g_b_a2792268a864ed3d46b191c20fd56ff87.html#a2792268a864ed3d46b191c20fd56ff87",tooltip=" "];
+  Node2 -> Node16 [id="edge5_Node000002_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::HSV16::operator CRGB",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d5d/structfl_1_1_h_s_v16_a3ece902080f8d4dbaca82dbc974c58d0.html#a3ece902080f8d4dbaca82dbc974c58d0",tooltip="Automatic conversion operator to CRGB Allows HSV16 to be automatically converted to CRGB."];
 }

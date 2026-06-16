@@ -1,0 +1,27 @@
+<map id="fl::beat88" name="fl::beat88">
+<area shape="rect" id="Node000001" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM, with BPM specified in Q8.8 fixed&#45;point format." alt="" coords="773,229,856,254"/>
+<area shape="rect" id="Node000002" href="$d6/d6c/group___beat_generators_ga120dfa6dac7fa3d3958ae1e30b64e1d7.html#ga120dfa6dac7fa3d3958ae1e30b64e1d7" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="633,102,715,127"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="787,221,687,129,691,126,791,217"/>
+<area shape="rect" id="Node000011" href="$d6/d6c/group___beat_generators_ga4c4a1bcd3ca4f16cf04f1344afd601cc.html#ga4c4a1bcd3ca4f16cf04f1344afd601cc" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="623,278,725,303"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="766,261,712,280,710,275,764,256"/>
+<area shape="rect" id="Node000003" href="$d6/d6c/group___beat_generators_ga7195cd79b30358b151154623586631aa.html#ga7195cd79b30358b151154623586631aa" title="Generates an 8&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="466,26,541,51"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="631,99,532,54,534,49,633,94"/>
+<area shape="rect" id="Node000006" href="$d2/db2/classfl_1_1_pacifica_a264d0c1db5db60028b6fab87af13d700.html#a264d0c1db5db60028b6fab87af13d700" title=" " alt="" coords="15,91,141,117"/>
+<area shape="poly" id="edge11_Node000002_Node000006" title=" " alt="" coords="619,116,142,108,142,102,619,111"/>
+<area shape="rect" id="Node000008" href="$d6/d6c/group___beat_generators_gadf8e83564c52b94d0ff5594aede0be28.html#gadf8e83564c52b94d0ff5594aede0be28" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="452,153,555,178"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="620,133,548,155,546,150,618,128"/>
+<area shape="rect" id="Node000004" href="$d6/d6c/group___beat_generators_ga696b9421eca961df0a68c7c6c3e983ab.html#ga696b9421eca961df0a68c7c6c3e983ab" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="244,26,339,51"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="452,41,339,41,339,36,452,36"/>
+<area shape="rect" id="Node000007" href="$d2/db2/classfl_1_1_pacifica_af306b5850186d2aae2bdad30b7236307.html#af306b5850186d2aae2bdad30b7236307" title=" " alt="" coords="5,5,151,45"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="452,28,384,16,323,12,261,12,151,19,151,14,261,7,323,7,384,11,453,23"/>
+<area shape="poly" id="edge4_Node000004_Node000006" title=" " alt="" coords="237,58,121,94,120,89,235,53"/>
+<area shape="poly" id="edge5_Node000004_Node000007" title=" " alt="" coords="230,38,151,33,151,27,230,32"/>
+<area shape="poly" id="edge8_Node000008_Node000006" title=" " alt="" coords="438,159,141,116,142,110,439,153"/>
+<area shape="rect" id="Node000009" href="$d1/d60/classfl_1_1_demo_reel100_a2682e53533df396c22fab618fad5cc2d.html#a2682e53533df396c22fab618fad5cc2d" title=" " alt="" coords="202,178,381,203"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="439,176,381,183,381,177,438,170"/>
+<area shape="rect" id="Node000010" href="$d1/d60/classfl_1_1_demo_reel100_af845b12c1ba0165d46f16b65b9ff7feb.html#af845b12c1ba0165d46f16b65b9ff7feb" title=" " alt="" coords="199,227,384,253"/>
+<area shape="poly" id="edge10_Node000008_Node000010" title=" " alt="" coords="464,186,385,219,347,230,346,225,383,213,462,181"/>
+<area shape="poly" id="edge13_Node000011_Node000006" title=" " alt="" coords="609,297,507,299,388,298,276,289,231,280,197,268,175,253,154,234,121,192,97,150,82,118,87,116,101,148,125,189,158,231,178,249,200,263,232,275,277,283,388,293,507,294,609,291"/>
+<area shape="rect" id="Node000012" href="$df/d11/classfl_1_1_pride2015_a331b131b082d622bbd9208bf05308d0d.html#a331b131b082d622bbd9208bf05308d0d" title=" " alt="" coords="432,329,575,354"/>
+<area shape="poly" id="edge14_Node000011_Node000012" title=" " alt="" coords="618,310,548,331,546,326,616,305"/>
+</map>

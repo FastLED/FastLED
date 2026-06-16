@@ -1,0 +1,5 @@
+<map id="fl::Particles1d::Particle" name="fl::Particles1d::Particle">
+<area shape="rect" id="Node000001" title="Individual particle with power&#45;based lifecycle." alt="" coords="5,93,171,119"/>
+<area shape="rect" id="Node000002" href="$d6/dd5/structfl_1_1hsv8.html" title="Representation of an HSV pixel (hue, saturation, value (aka brightness))." alt="" coords="53,5,123,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,45,91,93,85,93,85,45"/>
+</map>

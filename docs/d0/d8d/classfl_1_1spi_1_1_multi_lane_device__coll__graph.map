@@ -1,0 +1,19 @@
+<map id="fl::spi::MultiLaneDevice" name="fl::spi::MultiLaneDevice">
+<area shape="rect" id="Node000001" title="Multi&#45;lane SPI device (1&#45;8 independent LED strips)" alt="" coords="1061,159,1236,184"/>
+<area shape="rect" id="Node000002" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="805,144,972,199"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="986,169,1061,169,1061,174,986,174"/>
+<area shape="rect" id="Node000003" href="$d1/dd2/structfl_1_1spi_1_1_multi_lane_device_1_1_impl.html" title=" " alt="" coords="403,58,578,98"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="591,99,806,149,804,154,590,104"/>
+<area shape="rect" id="Node000004" href="$d3/df8/structfl_1_1spi_1_1_device_impl_base.html" title="Common functionality for device implementation (pImpl pattern)" alt="" coords="5,5,176,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="190,24,372,49,407,55,406,61,372,54,189,30"/>
+<area shape="rect" id="Node000010" href="$d3/dca/structfl_1_1_spi_config.html" title="Configuration for SPI device (supports 1&#45;8 lanes)" alt="" coords="41,55,140,80"/>
+<area shape="poly" id="edge4_Node000003_Node000010" title=" " alt="" coords="154,66,403,73,403,78,154,72"/>
+<area shape="rect" id="Node000016" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="26,105,155,145"/>
+<area shape="poly" id="edge5_Node000003_Node000016" title=" " alt="" coords="169,115,372,93,403,89,403,94,372,98,169,120"/>
+<area shape="rect" id="Node000017" href="$d5/d2b/structfl_1_1default__delete.html" title=" " alt="" coords="396,144,585,199"/>
+<area shape="poly" id="edge6_Node000002_Node000017" title=" " alt="" coords="599,169,805,169,805,174,599,174"/>
+<area shape="rect" id="Node000018" href="$d5/d2b/structfl_1_1default__delete.html" title=" " alt="" coords="5,171,176,196"/>
+<area shape="poly" id="edge7_Node000017_Node000018" title=" " alt="" coords="190,182,372,179,396,178,396,183,372,185,190,188"/>
+<area shape="rect" id="Node000019" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="423,223,558,263"/>
+<area shape="poly" id="edge8_Node000002_Node000019" title=" " alt="" coords="571,234,672,223,781,203,808,196,810,201,782,209,673,228,572,240"/>
+</map>

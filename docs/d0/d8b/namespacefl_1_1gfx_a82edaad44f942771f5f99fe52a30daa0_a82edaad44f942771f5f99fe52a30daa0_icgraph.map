@@ -1,0 +1,9 @@
+<map id="fl::gfx::addPixelToBuffer" name="fl::gfx::addPixelToBuffer">
+<area shape="rect" id="Node000001" title="Internal helper: add or set pixel to rectangular buffer with bounds checking Direct row&#45;major indexin..." alt="" coords="660,5,835,31"/>
+<area shape="rect" id="Node000002" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_a4c7133be2d3aef492af1968ce467b55d.html#a4c7133be2d3aef492af1968ce467b55d" title=" " alt="" coords="411,5,612,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="646,21,612,21,612,15,646,15"/>
+<area shape="rect" id="Node000003" href="$d0/d8b/namespacefl_1_1gfx_a0efcb1204c3209937cf4fb131d9f6cf7.html#a0efcb1204c3209937cf4fb131d9f6cf7" title="============================================================================" alt="" coords="236,5,363,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="397,21,363,21,363,15,397,15"/>
+<area shape="rect" id="Node000004" href="$de/d5c/structfl_1_1gfx_1_1_canvas_a46c1a93cc0dabb74c6e25f50ba91bc3c.html#a46c1a93cc0dabb74c6e25f50ba91bc3c" title=" " alt="" coords="5,5,188,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="222,21,188,21,188,15,222,15"/>
+</map>

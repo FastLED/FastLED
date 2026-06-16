@@ -1,0 +1,9 @@
+<map id="fl/channels/detail/wait_spin_budget.h" name="fl/channels/detail/wait_spin_budget.h">
+<area shape="rect" id="Node000001" title="Runtime&#45;tunable microsecond spin budget for the channel&#45;manager and driver wait loops (Phase 1 of #28..." alt="" coords="62,5,214,45"/>
+<area shape="rect" id="Node000002" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="5,93,132,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="123,47,90,84,86,81,119,44"/>
+<area shape="rect" id="Node000003" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="156,93,259,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="157,44,190,81,186,84,153,47"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="148,167,267,192"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="210,119,210,153,205,153,205,119"/>
+</map>

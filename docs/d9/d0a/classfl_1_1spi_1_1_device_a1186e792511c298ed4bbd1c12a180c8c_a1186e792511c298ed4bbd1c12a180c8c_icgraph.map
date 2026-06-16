@@ -1,0 +1,19 @@
+<map id="fl::spi::Device::isReady" name="fl::spi::Device::isReady">
+<area shape="rect" id="Node000001" title="Check if device is initialized and ready for use." alt="" coords="724,121,895,146"/>
+<area shape="rect" id="Node000002" href="$d9/d0a/classfl_1_1spi_1_1_device_ac5161d40cbb5453133fc88b9b9935f5a.html#ac5161d40cbb5453133fc88b9b9935f5a" title="Acquire DMA&#45;capable buffer for zero&#45;copy transmission." alt="" coords="488,5,655,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="772,116,675,66,629,48,631,43,677,62,775,111"/>
+<area shape="rect" id="Node000003" href="$d9/d0a/classfl_1_1spi_1_1_device_a2242937ce5772a2fe9ba38632c000cc0.html#a2242937ce5772a2fe9ba38632c000cc0" title="Begin asynchronous write operation (returns immediately)" alt="" coords="228,70,419,95"/>
+<area shape="poly" id="edge9_Node000001_Node000003" title=" " alt="" coords="736,121,676,111,541,97,419,89,419,84,542,92,676,105,737,115"/>
+<area shape="rect" id="Node000004" href="$d9/d0a/classfl_1_1spi_1_1_device_afd5ca90209bbe39984aac0a40600d8dd.html#afd5ca90209bbe39984aac0a40600d8dd" title="Check if async operation is in progress." alt="" coords="491,121,652,146"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="710,136,652,136,652,131,710,131"/>
+<area shape="rect" id="Node000005" href="$d9/d0a/classfl_1_1spi_1_1_device_a4b4903b281bf5fdb3ddb6ec923b53d71.html#a4b4903b281bf5fdb3ddb6ec923b53d71" title="Transmit from previously acquired DMA buffer." alt="" coords="485,170,658,195"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="735,151,634,173,633,167,734,146"/>
+<area shape="rect" id="Node000006" href="$d9/d0a/classfl_1_1spi_1_1_device_a851fa0298ee8a47bd677be39404e8c15.html#a851fa0298ee8a47bd677be39404e8c15" title="Wait for pending async operation to complete." alt="" coords="467,219,676,245"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="780,156,733,184,677,210,641,222,639,217,675,206,730,179,777,151"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="475,50,380,73,379,67,474,45"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="494,169,466,160,398,128,344,98,346,93,400,124,468,155,495,164"/>
+<area shape="rect" id="Node000007" href="$d9/d0a/classfl_1_1spi_1_1_device_a1efb1bb9dd5c9626afaa071b58ec1972.html#a1efb1bb9dd5c9626afaa071b58ec1972" title="Shutdown the SPI hardware and release resources." alt="" coords="252,219,395,245"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="453,235,395,235,395,229,453,229"/>
+<area shape="rect" id="Node000008" href="$d9/d0a/classfl_1_1spi_1_1_device_abfe19210e765c3b147865c530d48cccb.html#abfe19210e765c3b147865c530d48cccb" title="Destructor &#45; releases hardware resources." alt="" coords="5,219,180,245"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="238,235,180,235,180,229,238,229"/>
+</map>

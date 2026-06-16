@@ -9,4 +9,6 @@ digraph "fl::WaveSimulation2D::geti16Previous"
   Node1 [id="Node000001",label="fl::WaveSimulation2D\l::geti16Previous",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::WaveSimulation2D::has",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d47/classfl_1_1_wave_simulation2_d_ab5cd05c03667abbe1b971cb5ff31fac7.html#ab5cd05c03667abbe1b971cb5ff31fac7",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::max",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909",tooltip=" "];
 }

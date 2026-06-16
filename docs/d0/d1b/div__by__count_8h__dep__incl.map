@@ -1,0 +1,41 @@
+<map id="fl/math/filter/div_by_count.h" name="fl/math/filter/div_by_count.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1451,5,1578,45"/>
+<area shape="rect" id="Node000002" href="$de/dfc/alpha__trimmed__mean__impl_8h.html" title=" " alt="" coords="1235,93,1413,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1461,53,1367,96,1365,91,1459,49"/>
+<area shape="rect" id="Node000039" href="$d5/d2e/hampel__filter__impl_8h.html" title=" " alt="" coords="1437,93,1592,133"/>
+<area shape="poly" id="edge17_Node000001_Node000039" title=" " alt="" coords="1517,59,1517,93,1512,93,1512,59"/>
+<area shape="rect" id="Node000040" href="$d7/d36/savitzky__golay__filter__impl_8h.html" title=" " alt="" coords="1616,93,1776,133"/>
+<area shape="poly" id="edge19_Node000001_Node000040" title=" " alt="" coords="1568,49,1657,91,1655,96,1566,54"/>
+<area shape="rect" id="Node000003" href="$da/d6f/filter_2filter_8h.html" title=" " alt="" coords="1441,181,1588,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1383,136,1488,179,1485,184,1381,141"/>
+<area shape="rect" id="Node000004" href="$d7/d8f/_el_panel_reactive_8ino.html" title="Audio&#45;reactive EL panel driver with auto&#45;gain via Vibe detector." alt="" coords="5,255,259,309"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1428,198,1222,201,935,209,605,227,436,240,271,257,259,259,259,254,270,252,436,235,605,222,935,204,1222,195,1428,193"/>
+<area shape="rect" id="Node000005" href="$d9/d01/auto__gain_8h.html" title=" " alt="" coords="283,269,434,295"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="1427,200,925,219,648,236,534,246,447,257,392,272,390,267,446,252,533,240,648,230,925,214,1427,195"/>
+<area shape="rect" id="Node000010" href="$d6/d07/audio_2detector_2beat_8h.html" title=" " alt="" coords="459,269,632,295"/>
+<area shape="poly" id="edge5_Node000003_Node000010" title=" " alt="" coords="1428,198,1279,202,1083,211,864,229,644,257,583,272,581,267,644,252,864,223,1083,206,1279,197,1428,193"/>
+<area shape="rect" id="Node000014" href="$d0/d1c/buildup_8h.html" title=" " alt="" coords="656,269,848,295"/>
+<area shape="poly" id="edge6_Node000003_Node000014" title=" " alt="" coords="1428,202,1172,220,1016,236,860,257,794,272,793,267,860,252,1016,230,1172,214,1427,197"/>
+<area shape="rect" id="Node000016" href="$dc/dc3/energy__analyzer_8h.html" title=" " alt="" coords="873,262,1050,302"/>
+<area shape="poly" id="edge7_Node000003_Node000016" title=" " alt="" coords="1428,206,1258,226,1063,257,1030,265,1029,259,1062,252,1258,221,1427,201"/>
+<area shape="rect" id="Node000018" href="$d4/d84/equalizer_8h.html" title=" " alt="" coords="1075,269,1277,295"/>
+<area shape="poly" id="edge8_Node000003_Node000018" title=" " alt="" coords="1457,213,1222,272,1220,267,1456,207"/>
+<area shape="rect" id="Node000020" href="$d3/d71/frequency__bands_8h.html" title=" " alt="" coords="1301,262,1499,302"/>
+<area shape="poly" id="edge9_Node000003_Node000020" title=" " alt="" coords="1490,217,1427,264,1424,260,1487,213"/>
+<area shape="rect" id="Node000022" href="$d2/d49/percussion_8h.html" title=" " alt="" coords="1523,269,1738,295"/>
+<area shape="poly" id="edge10_Node000003_Node000022" title=" " alt="" coords="1543,213,1616,267,1613,271,1540,217"/>
+<area shape="rect" id="Node000024" href="$d0/daf/pitch_8h.html" title=" " alt="" coords="1763,269,1939,295"/>
+<area shape="poly" id="edge11_Node000003_Node000024" title=" " alt="" coords="1575,207,1751,252,1808,267,1807,272,1750,257,1573,213"/>
+<area shape="rect" id="Node000026" href="$de/d84/tempo__analyzer_8h.html" title=" " alt="" coords="1963,262,2138,302"/>
+<area shape="poly" id="edge12_Node000003_Node000026" title=" " alt="" coords="1602,201,1765,221,1951,252,1984,259,1983,265,1950,257,1764,227,1601,207"/>
+<area shape="rect" id="Node000028" href="$da/dc5/transient_8h.html" title=" " alt="" coords="2163,269,2365,295"/>
+<area shape="poly" id="edge13_Node000003_Node000028" title=" " alt="" coords="1602,197,1849,215,2000,231,2151,252,2221,267,2220,272,2150,257,2000,237,1849,221,1601,202"/>
+<area shape="rect" id="Node000030" href="$d3/d6c/vocal_8h.html" title=" " alt="" coords="2389,269,2568,295"/>
+<area shape="poly" id="edge14_Node000003_Node000030" title=" " alt="" coords="1602,193,1750,197,1943,207,2160,224,2378,252,2442,267,2440,272,2377,257,2159,229,1943,212,1750,203,1602,199"/>
+<area shape="rect" id="Node000032" href="$de/d99/flowfield_8h.html" title="2D flow field visualization: emitters paint color, noise advects it" alt="" coords="2592,269,2731,295"/>
+<area shape="poly" id="edge15_Node000003_Node000032" title=" " alt="" coords="1602,195,2103,212,2379,229,2494,240,2581,252,2633,267,2631,272,2579,257,2493,245,2379,235,2103,218,1602,200"/>
+<area shape="rect" id="Node000038" href="$dd/de7/filter_8h.html" title="Umbrella header for filter subsystem." alt="" coords="2755,269,2869,295"/>
+<area shape="poly" id="edge16_Node000003_Node000038" title=" " alt="" coords="1602,193,1852,197,2181,207,2507,224,2641,237,2743,252,2788,267,2786,272,2742,257,2641,242,2506,230,2181,212,1852,203,1602,199"/>
+<area shape="poly" id="edge18_Node000039_Node000003" title=" " alt="" coords="1517,147,1517,181,1512,181,1512,147"/>
+<area shape="poly" id="edge20_Node000040_Node000003" title=" " alt="" coords="1641,141,1542,184,1540,179,1639,136"/>
+</map>

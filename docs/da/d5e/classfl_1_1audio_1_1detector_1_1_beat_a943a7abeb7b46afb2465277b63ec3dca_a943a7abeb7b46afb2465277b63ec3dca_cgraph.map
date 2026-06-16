@@ -1,0 +1,30 @@
+<map id="fl::audio::detector::Beat::update" name="fl::audio::detector::Beat::update">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,191,141,231"/>
+<area shape="poly" id="edge8_Node000001_Node000001" title=" " alt="" coords="30,191,27,181,34,172,50,166,73,164,100,167,115,174,113,179,99,172,73,169,51,171,38,176,33,182,35,190"/>
+<area shape="rect" id="Node000002" href="$da/d5e/classfl_1_1audio_1_1detector_1_1_beat_a5d0c0991a3fca6c956d5bd53566edf8e.html#a5d0c0991a3fca6c956d5bd53566edf8e" title=" " alt="" coords="239,5,375,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="82,189,122,123,152,86,188,55,224,37,227,42,191,60,156,90,126,126,87,192"/>
+<area shape="rect" id="Node000003" href="$da/d5e/classfl_1_1audio_1_1detector_1_1_beat_a701d977e14d16a120397bf86a8c62b2e.html#a701d977e14d16a120397bf86a8c62b2e" title=" " alt="" coords="203,69,411,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="94,188,135,153,188,119,204,112,206,117,191,124,138,157,97,192"/>
+<area shape="rect" id="Node000005" href="$d9/d76/structfl_1_1audio_1_1fft_1_1_args_a77f3e2e45eca08b1ff1a2e93901ea4a7.html#a77f3e2e45eca08b1ff1a2e93901ea4a7" title=" " alt="" coords="220,133,393,173"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="141,191,210,174,212,179,142,197"/>
+<area shape="rect" id="Node000006" href="$da/dc7/advanced_8h_a15110eff35f1483bd9926d89e8956c7c.html#a15110eff35f1483bd9926d89e8956c7c" title=" " alt="" coords="260,198,353,223"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="141,208,246,208,246,213,141,213"/>
+<area shape="rect" id="Node000009" href="$da/d5e/classfl_1_1audio_1_1detector_1_1_beat_a07de7b2306bccf33241744a858d1c24f.html#a07de7b2306bccf33241744a858d1c24f" title=" " alt="" coords="189,248,424,288"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="142,225,212,242,210,247,141,230"/>
+<area shape="rect" id="Node000010" href="$da/d5e/classfl_1_1audio_1_1detector_1_1_beat_ae9c4aba9f9dbafe63ac0c9f658aed542.html#ae9c4aba9f9dbafe63ac0c9f658aed542" title=" " alt="" coords="231,312,383,352"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="97,229,138,264,191,298,218,309,216,314,188,302,135,268,94,233"/>
+<area shape="rect" id="Node000015" href="$da/d5e/classfl_1_1audio_1_1detector_1_1_beat_aa8b027627171d0704e2e0e09dc8ab22a.html#aa8b027627171d0704e2e0e09dc8ab22a" title=" " alt="" coords="229,376,385,416"/>
+<area shape="poly" id="edge13_Node000001_Node000015" title=" " alt="" coords="87,230,126,295,156,331,191,362,217,375,214,380,188,366,152,335,122,298,82,232"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="501,77,563,102"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="411,87,487,87,487,92,411,92"/>
+<area shape="rect" id="Node000007" href="$da/dc7/advanced_8h_afb84b52cb6446aa7d83b7cb867f51b82.html#afb84b52cb6446aa7d83b7cb867f51b82" title=" " alt="" coords="472,174,592,199"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="353,203,458,192,459,197,354,208"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1" title=" " alt="" coords="501,223,563,249"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="354,213,487,228,486,234,353,219"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a82abb457c658bd2a01ace4c815407143.html#a82abb457c658bd2a01ace4c815407143" title=" " alt="" coords="493,319,571,345"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="383,329,480,329,480,335,383,335"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_a47ce5fc43140ea5a3a0700964e1552b6.html#a47ce5fc43140ea5a3a0700964e1552b6" title=" " alt="" coords="640,319,784,345"/>
+<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="571,329,626,329,626,335,571,335"/>
+<area shape="rect" id="Node000016" href="$d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84" title=" " alt="" coords="501,383,563,409"/>
+<area shape="poly" id="edge14_Node000015_Node000016" title=" " alt="" coords="385,393,488,393,488,399,385,399"/>
+</map>

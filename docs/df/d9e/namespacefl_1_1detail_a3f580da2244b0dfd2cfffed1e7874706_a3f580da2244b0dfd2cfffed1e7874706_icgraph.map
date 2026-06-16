@@ -1,0 +1,29 @@
+<map id="fl::detail::spread_transpose16_symbol" name="fl::detail::spread_transpose16_symbol">
+<area shape="rect" id="Node000001" title="Transpose one symbol of 16 lanes (16 input bytes) into 16 output bytes: 8 pulses × 2 bytes,..." alt="" coords="491,186,655,226"/>
+<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail_af8a68cecaea535bce87ed6b98d58b149.html#af8a68cecaea535bce87ed6b98d58b149" title="Transpose 16 lanes of Wave3Byte data into interleaved format." alt="" coords="223,31,443,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="541,178,496,135,441,94,405,74,369,58,371,54,407,69,444,89,499,131,544,174"/>
+<area shape="rect" id="Node000004" href="$df/d9e/namespacefl_1_1detail_a1c33564a267c6374d9afeb116447102f.html#a1c33564a267c6374d9afeb116447102f" title="Transpose 16 lanes of Wave8Byte data into interleaved format." alt="" coords="223,104,443,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="523,182,442,144,399,132,400,127,444,140,525,177"/>
+<area shape="rect" id="Node000007" href="$df/d9e/namespacefl_1_1detail_aeaedcff33498750d790f9feff188eb2a.html#aeaedcff33498750d790f9feff188eb2a" title="BF1: chipset&#45;aware direct encode for Wave8 16&#45;lane (#2548 deep&#45;dive)." alt="" coords="234,154,431,194"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="476,196,431,190,432,184,477,191"/>
+<area shape="rect" id="Node000009" href="$df/d9e/namespacefl_1_1detail_a7dc59e9346ffd0bb292aab29f8bc3627.html#a7dc59e9346ffd0bb292aab29f8bc3627" title="Pipe2: transpose 16&#45;lane × 2&#45;byte&#45;positions in one fused call." alt="" coords="234,218,431,258"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="477,221,432,228,431,222,476,216"/>
+<area shape="rect" id="Node000011" href="$df/d9e/namespacefl_1_1detail_afb22507e740cb45f08daa8486da8bc6f.html#afb22507e740cb45f08daa8486da8bc6f" title="BF1 + pipe4: 4&#45;position software&#45;pipelined BF1 (#2548 deep&#45;dive)." alt="" coords="234,282,431,322"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="524,235,444,272,410,284,408,279,442,268,522,230"/>
+<area shape="rect" id="Node000013" href="$df/d9e/namespacefl_1_1detail_a60c5eda3b70551f1f5cf466822abdc3f.html#a60c5eda3b70551f1f5cf466822abdc3f" title="Pipe4: transpose 16&#45;lane × 4&#45;byte&#45;positions in one fused call." alt="" coords="234,346,431,386"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="550,239,504,289,475,314,444,336,419,348,417,343,441,332,472,310,500,285,546,235"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_afce0e81eba51e7f8494c32187ff61b07.html#afce0e81eba51e7f8494c32187ff61b07" title=" " alt="" coords="5,5,175,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="209,33,175,29,175,24,209,28"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a428be465fbb9564d7cf8e7badeb0ea99.html#a428be465fbb9564d7cf8e7badeb0ea99" title=" " alt="" coords="5,55,175,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="256,104,153,83,154,77,257,99"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a6d3dde4b59c470212560afa6b6d7a712.html#a6d3dde4b59c470212560afa6b6d7a712" title=" " alt="" coords="5,104,175,129"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="209,119,175,119,175,114,209,114"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a1df4d9fcc9dfd67233d3020ef1507dd7.html#a1df4d9fcc9dfd67233d3020ef1507dd7" title="BF1: chipset&#45;aware direct encode for 16&#45;lane Wave8 (#2548 deep&#45;dive)." alt="" coords="17,154,163,194"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="220,177,163,177,163,171,220,171"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_a29b071bb16abe20602cffbbbada53cf0.html#a29b071bb16abe20602cffbbbada53cf0" title="Pipe2: transpose 16&#45;lane × 2&#45;byte&#45;positions (#2548)." alt="" coords="17,218,163,258"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="220,241,163,241,163,235,220,235"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_a9c979aca08593ac77dbfedb25c77df64.html#a9c979aca08593ac77dbfedb25c77df64" title="BF1 + pipe4: 4&#45;position&#45;pipelined direct encode (#2548 deep&#45;dive)." alt="" coords="17,282,163,322"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="220,305,163,305,163,299,220,299"/>
+<area shape="rect" id="Node000014" href="$d4/d36/namespacefl_a8ab9ceed35077aee8198f828008bf565.html#a8ab9ceed35077aee8198f828008bf565" title="Pipe4: transpose 16&#45;lane × 4&#45;byte&#45;positions (#2548)." alt="" coords="17,346,163,386"/>
+<area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="220,369,163,369,163,363,220,363"/>
+</map>

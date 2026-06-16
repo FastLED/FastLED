@@ -1,0 +1,10 @@
+digraph "Graphical Class Hierarchy"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node0 [id="Node000000",label="fl::TIMING_WS2815",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/db1/structfl_1_1_t_i_m_i_n_g___w_s2815.html",tooltip="WS2815 RGB controller @ 400 kHz Four-phase: TH0=250ns, TH1=1340ns, TL0=1640ns, TL1=550ns."];
+}

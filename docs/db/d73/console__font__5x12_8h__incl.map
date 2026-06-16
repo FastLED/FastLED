@@ -1,8 +1,11 @@
-<map id="fonts/console_font_5x12.h" name="fonts/console_font_5x12.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="65,5,207,45"/>
-<area shape="rect" id="Node000002" href="$df/dab/fastled__progmem_8h.html" title="Wrapper definitions to allow seamless use of PROGMEM in environments that have it." alt="" coords="5,93,155,119"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="125,47,98,84,94,80,120,44"/>
-<area shape="rect" id="Node000003" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="75,167,197,192"/>
-<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="151,44,167,78,171,99,169,119,154,156,149,154,164,118,165,99,162,80,146,47"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="91,117,121,154,116,157,87,121"/>
+<map id="fl/font/console_font_5x12.h" name="fl/font/console_font_5x12.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="95,5,242,45"/>
+<area shape="rect" id="Node000002" href="$df/dab/fastled__progmem_8h.html" title="Wrapper definitions to allow seamless use of PROGMEM in environments that have it." alt="" coords="94,93,243,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="171,46,171,79,166,79,166,46"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,167,180,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="158,121,117,159,113,155,155,117"/>
+<area shape="rect" id="Node000004" href="$d3/d7e/int_8h.html" title=" " alt="" coords="205,167,287,192"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="183,117,225,155,221,159,179,121"/>
+<area shape="rect" id="Node000005" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="195,240,297,265"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="249,192,249,226,243,226,243,192"/>
 </map>

@@ -1,0 +1,31 @@
+<map id="fl/remote/rpc/rpc.h" name="fl/remote/rpc/rpc.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="255,5,396,31"/>
+<area shape="rect" id="Node000002" href="$db/d04/remote_8cpp_8hpp.html" title=" " alt="" coords="232,167,419,192"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="328,44,328,166,323,166,323,44"/>
+<area shape="rect" id="Node000006" href="$d6/d06/remote_8h.html" title=" " alt="" coords="715,79,859,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="410,30,715,76,714,82,410,35"/>
+<area shape="rect" id="Node000015" href="$d5/d8f/rpc_8cpp_8hpp.html" title=" " alt="" coords="60,79,244,104"/>
+<area shape="poly" id="edge13_Node000001_Node000015" title=" " alt="" coords="286,38,181,81,179,76,284,33"/>
+<area shape="rect" id="Node000003" href="$d3/db1/fl_2remote_2__build_8cpp_8hpp.html" title=" " alt="" coords="127,255,305,280"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="301,203,233,257,229,252,298,199"/>
+<area shape="rect" id="Node000004" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="67,328,195,353"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="194,291,146,330,143,326,190,286"/>
+<area shape="rect" id="Node000005" href="$db/dff/fl_8remote_09_8cpp.html" title="Unity build: recursive includes from src/fl/remote/." alt="" coords="219,328,386,353"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="242,286,290,326,287,330,239,291"/>
+<area shape="poly" id="edge12_Node000006_Node000002" title=" " alt="" coords="701,108,574,128,431,155,369,169,368,164,430,149,573,123,700,102"/>
+<area shape="rect" id="Node000007" href="$d7/d08/_rpc_bidirectional_8ino.html" title="Example demonstrating bidirectional HTTP streaming RPC (server + client in same process)" alt="" coords="931,152,1197,207"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="838,106,980,149,979,155,836,111"/>
+<area shape="rect" id="Node000008" href="$d8/db9/_rpc_client_8ino.html" title="Example demonstrating HTTP streaming RPC client." alt="" coords="1221,152,1421,207"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="872,100,1030,120,1210,149,1222,152,1221,157,1209,155,1029,126,872,105"/>
+<area shape="rect" id="Node000009" href="$d2/df2/_rpc_server_8ino.html" title="Example demonstrating fl::Remote with HTTP streaming transport (server side)" alt="" coords="443,152,643,207"/>
+<area shape="poly" id="edge8_Node000006_Node000009" title=" " alt="" coords="742,111,618,155,616,149,740,106"/>
+<area shape="rect" id="Node000010" href="$d1/df2/_auto_research_low_memory_8h.html" title=" " alt="" coords="667,152,906,207"/>
+<area shape="poly" id="edge9_Node000006_Node000010" title=" " alt="" coords="789,118,789,152,784,152,784,118"/>
+<area shape="rect" id="Node000011" href="$dd/df9/wled_8h.html" title=" " alt="" coords="1446,167,1541,192"/>
+<area shape="poly" id="edge10_Node000006_Node000011" title=" " alt="" coords="872,89,985,92,1126,101,1281,119,1359,132,1434,149,1473,164,1471,169,1433,155,1357,138,1280,124,1126,106,985,97,872,95"/>
+<area shape="rect" id="Node000012" href="$d3/da5/wled_8cpp_8hpp.html" title=" " alt="" coords="1409,255,1578,280"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="1496,206,1496,254,1491,254,1491,206"/>
+<area shape="rect" id="Node000016" href="$de/d1e/fl_2remote_2rpc_2__build_8cpp_8hpp.html" title=" " alt="" coords="5,167,208,192"/>
+<area shape="poly" id="edge14_Node000015_Node000016" title=" " alt="" coords="142,118,115,167,111,165,137,115"/>
+<area shape="poly" id="edge15_Node000016_Node000003" title=" " alt="" coords="134,199,203,252,199,257,131,203"/>
+</map>

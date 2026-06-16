@@ -1,0 +1,13 @@
+<map id="fl::json::serialize" name="fl::json::serialize">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,63,133,88"/>
+<area shape="rect" id="Node000002" href="$de/d40/classfl_1_1json_a86875510e8d574abfbc6301dc16823f9.html#a86875510e8d574abfbc6301dc16823f9" title=" " alt="" coords="181,63,312,88"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="134,73,168,73,168,78,134,78"/>
+<area shape="rect" id="Node000003" href="$de/d40/classfl_1_1json_a43b8dab629d6fcbcb26ee79c94c91880.html#a43b8dab629d6fcbcb26ee79c94c91880" title=" " alt="" coords="360,55,491,95"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="312,73,346,73,346,78,312,78"/>
+<area shape="rect" id="Node000004" href="$dc/dfe/classfl_1_1deque_a24e7e15fdd77fedd85177d84b3642aaf.html#a24e7e15fdd77fedd85177d84b3642aaf" title=" " alt="" coords="545,5,673,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="489,53,554,32,556,37,491,58"/>
+<area shape="rect" id="Node000005" href="$d5/da0/structfl_1_1_serializer_visitor_af2688ec47073edf4484e7ec372b5c45d.html#af2688ec47073edf4484e7ec372b5c45d" title=" " alt="" coords="539,55,680,95"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="491,73,525,73,525,78,491,78"/>
+<area shape="rect" id="Node000007" href="$dc/dfe/classfl_1_1deque_a01c135a1ed719aa6e55feb07cd6021cb.html#a01c135a1ed719aa6e55feb07cd6021cb" title=" " alt="" coords="553,120,665,145"/>
+<area shape="poly" id="edge5_Node000003_Node000007" title=" " alt="" coords="491,93,556,113,554,118,489,98"/>
+</map>

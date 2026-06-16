@@ -1,0 +1,9 @@
+<map id="fl::spi::ParallelDevice::write" name="fl::spi::ParallelDevice::write">
+<area shape="rect" id="Node000001" title="Write data (single stream drives all pins via LUT)" alt="" coords="5,27,164,67"/>
+<area shape="rect" id="Node000002" href="$d7/d93/classfl_1_1expected_abbee0bb98c9bf0a1391cb3e810ea4fd5.html#abbee0bb98c9bf0a1391cb3e810ea4fd5" title="Create error result." alt="" coords="217,5,365,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,33,203,28,204,33,165,39"/>
+<area shape="rect" id="Node000004" href="$d7/de0/classfl_1_1spi_1_1_parallel_device_a03dc449fe80ed7de12a7f47d1671e416.html#a03dc449fe80ed7de12a7f47d1671e416" title="Check if device is initialized." alt="" coords="212,55,371,95"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="165,55,199,60,198,65,164,61"/>
+<area shape="rect" id="Node000003" href="$d7/d93/classfl_1_1expected_a519c280d81d3683cfbfb758ed0198277.html#a519c280d81d3683cfbfb758ed0198277" title="Default constructor (creates error state)" alt="" coords="419,5,585,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="365,15,405,15,405,21,365,21"/>
+</map>

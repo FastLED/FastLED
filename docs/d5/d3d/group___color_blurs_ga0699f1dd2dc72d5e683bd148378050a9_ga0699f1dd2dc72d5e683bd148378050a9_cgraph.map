@@ -1,0 +1,12 @@
+<map id="fl::gfx::blur2d" name="fl::gfx::blur2d">
+<area shape="rect" id="Node000001" title="Two&#45;dimensional blur filter (span version)." alt="" coords="5,31,113,56"/>
+<area shape="rect" id="Node000002" href="$d5/d3d/group___color_blurs_gaf6b4765e82578c70df7b3d12ca4b6c71.html#gaf6b4765e82578c70df7b3d12ca4b6c71" title="Perform a blur1d() on every column of a rectangular matrix (span version)." alt="" coords="161,5,311,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,33,147,28,148,33,114,38"/>
+<area shape="rect" id="Node000005" href="$d5/d3d/group___color_blurs_ga83bb8ebe9bd3ab749bcb42aaa0fc7df5.html#ga83bb8ebe9bd3ab749bcb42aaa0fc7df5" title="Perform a blur1d() on every row of a rectangular matrix (span version)." alt="" coords="173,55,299,80"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="114,48,159,54,159,60,113,53"/>
+<area shape="rect" id="Node000003" href="$da/dd6/structfl_1_1_c_r_g_b_aa272170bea8120f101f27ebd2c323b55.html#aa272170bea8120f101f27ebd2c323b55" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="359,31,492,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="311,25,345,30,345,35,311,31"/>
+<area shape="rect" id="Node000004" href="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" title="Default constructor." alt="" coords="540,31,660,56"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="492,41,526,41,526,46,492,46"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="299,57,344,51,345,56,300,62"/>
+</map>

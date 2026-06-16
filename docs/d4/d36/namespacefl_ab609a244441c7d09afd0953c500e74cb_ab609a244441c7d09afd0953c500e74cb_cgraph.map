@@ -1,0 +1,6 @@
+<map id="fl::transpose_8strips" name="fl::transpose_8strips">
+<area shape="rect" id="Node000001" title="Transpose 8 LED strips into parallel bit format." alt="" coords="5,29,159,55"/>
+<area shape="poly" id="edge2_Node000001_Node000001" title=" " alt="" coords="48,31,41,21,45,11,59,5,82,3,111,6,122,15,119,20,108,11,82,8,60,10,49,15,46,20,52,28"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a19902e964ff5d3d8a987902da36fe6a9.html#a19902e964ff5d3d8a987902da36fe6a9" title="Simplified 8x1 bit transpose with MSB&#45;first output." alt="" coords="207,29,369,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="159,39,193,39,193,45,159,45"/>
+</map>

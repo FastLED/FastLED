@@ -1,0 +1,44 @@
+<map id="fl::audio::AutoGain::process" name="fl::audio::AutoGain::process">
+<area shape="rect" id="Node000001" title="Process audio sample with automatic gain adjustment." alt="" coords="5,350,148,390"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84" title=" " alt="" coords="448,5,509,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="78,349,87,296,107,224,122,186,141,149,165,114,194,84,222,64,252,48,317,27,381,17,434,14,434,20,381,23,319,33,254,53,225,69,198,88,169,117,146,151,127,188,112,226,92,297,83,350"/>
+<area shape="rect" id="Node000003" href="$d1/dec/classfl_1_1audio_1_1_auto_gain_a652335a06786bf45fc4bca3702a3b470.html#a652335a06786bf45fc4bca3702a3b470" title="Apply gain to audio samples." alt="" coords="203,407,346,447"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="147,387,192,401,191,406,146,393"/>
+<area shape="rect" id="Node000005" href="$d1/dec/classfl_1_1audio_1_1_auto_gain_aa6aaedccec20537cca9dce4d4575bf4f.html#aa6aaedccec20537cca9dce4d4575bf4f" title="Compute target gain from peak envelope." alt="" coords="196,471,353,511"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="102,388,145,422,197,457,209,463,206,468,195,462,142,427,99,392"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="212,536,337,561"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="90,389,132,454,162,490,198,521,209,528,206,533,194,525,158,494,127,457,86,391"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="656,207,723,232"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="102,348,144,319,195,292,255,269,317,252,443,229,556,219,642,216,642,221,556,224,443,235,319,257,256,274,197,296,147,323,105,352"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="658,257,721,283"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="148,379,234,387,338,387,393,383,449,374,503,360,555,341,570,331,578,318,587,305,603,292,644,275,646,280,605,296,591,308,583,321,573,334,557,346,505,366,450,379,394,388,338,393,234,392,148,384"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a7028271728479d2b9330f545c776ca5b.html#a7028271728479d2b9330f545c776ca5b" title="Sample a pixel from a 2D CRGB grid at floating&#45;point coordinates." alt="" coords="231,307,318,332"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="148,349,217,331,219,336,149,354"/>
+<area shape="rect" id="Node000014" href="$d4/d36/namespacefl_a0b5da884257d0f4003ead08f27915a2b.html#a0b5da884257d0f4003ead08f27915a2b" title=" " alt="" coords="241,585,309,611"/>
+<area shape="poly" id="edge16_Node000001_Node000014" title=" " alt="" coords="87,389,101,428,124,477,156,528,176,552,198,572,228,587,226,592,194,576,172,555,152,531,119,480,96,430,82,391"/>
+<area shape="rect" id="Node000017" href="$d1/dec/classfl_1_1audio_1_1_auto_gain_a83027121941c706557265359ca6297fe.html#a83027121941c706557265359ca6297fe" title="Update PI controller toward target gain." alt="" coords="199,98,350,138"/>
+<area shape="poly" id="edge19_Node000001_Node000017" title=" " alt="" coords="89,348,134,281,194,199,241,146,245,150,198,202,138,284,93,351"/>
+<area shape="rect" id="Node000004" href="$d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c" title=" " alt="" coords="401,415,556,440"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="346,425,387,425,387,430,346,430"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_ae42bfeb5fc989a01c398b85f4e3accca.html#ae42bfeb5fc989a01c398b85f4e3accca" title="Bilinear interpolation sample from a 2D CRGB grid." alt="" coords="411,307,547,332"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="318,317,397,317,397,322,318,322"/>
+<area shape="rect" id="Node000013" href="$d4/d36/namespacefl_a119e769098c559cc0883bed762678d55.html#a119e769098c559cc0883bed762678d55" title="Nearest&#45;neighbor sample from a 2D CRGB grid." alt="" coords="410,257,547,283"/>
+<area shape="poly" id="edge13_Node000009_Node000013" title=" " alt="" coords="318,306,412,283,413,289,319,312"/>
+<area shape="poly" id="edge11_Node000010_Node000007" title=" " alt="" coords="529,304,555,292,569,280,578,268,587,255,603,242,642,226,644,231,605,247,591,259,582,271,573,283,557,296,531,309"/>
+<area shape="poly" id="edge12_Node000010_Node000008" title=" " alt="" coords="533,304,644,278,645,283,534,309"/>
+<area shape="rect" id="Node000011" href="$da/dd6/structfl_1_1_c_r_g_b_a7e34886ec51c1aff8262123de5152437.html#a7e34886ec51c1aff8262123de5152437" title=" " alt="" coords="630,307,749,332"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="547,317,616,317,616,322,547,322"/>
+<area shape="poly" id="edge14_Node000013_Node000007" title=" " alt="" coords="532,255,642,228,643,233,533,260"/>
+<area shape="poly" id="edge15_Node000013_Node000008" title=" " alt="" coords="548,267,645,267,645,273,548,273"/>
+<area shape="rect" id="Node000015" href="$d4/d36/namespacefl_aaa77b1626998d6dc47d0e3245b1a3e4a.html#aaa77b1626998d6dc47d0e3245b1a3e4a" title=" " alt="" coords="411,585,546,611"/>
+<area shape="poly" id="edge17_Node000014_Node000015" title=" " alt="" coords="309,595,398,595,398,601,309,601"/>
+<area shape="rect" id="Node000016" href="$df/d9e/namespacefl_1_1detail_af564e0d482e4925c603cb299c623c312.html#af564e0d482e4925c603cb299c623c312" title=" " alt="" coords="604,585,775,611"/>
+<area shape="poly" id="edge18_Node000015_Node000016" title=" " alt="" coords="546,595,590,595,590,601,546,601"/>
+<area shape="poly" id="edge20_Node000017_Node000002" title=" " alt="" coords="303,96,348,67,400,40,434,27,436,32,402,44,351,72,306,100"/>
+<area shape="poly" id="edge23_Node000017_Node000007" title=" " alt="" coords="350,116,449,125,504,134,557,147,612,171,659,197,657,202,610,175,555,153,503,139,449,130,350,122"/>
+<area shape="poly" id="edge24_Node000017_Node000008" title=" " alt="" coords="327,136,452,185,605,241,646,254,644,259,603,246,451,190,325,140"/>
+<area shape="rect" id="Node000018" href="$d4/d36/namespacefl_ae393fecb8f433ee4b88027955350bdc8.html#ae393fecb8f433ee4b88027955350bdc8" title=" " alt="" coords="447,55,510,80"/>
+<area shape="poly" id="edge21_Node000017_Node000018" title=" " alt="" coords="350,97,433,76,434,81,351,102"/>
+<area shape="rect" id="Node000019" href="$d4/d36/namespacefl_a861b23e6d46aa20202c82561040de9ff.html#a861b23e6d46aa20202c82561040de9ff" title=" " alt="" coords="652,55,727,80"/>
+<area shape="poly" id="edge22_Node000018_Node000019" title=" " alt="" coords="510,65,638,65,638,70,510,70"/>
+</map>

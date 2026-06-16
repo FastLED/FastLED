@@ -1,10 +1,12 @@
 <map id="/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/shared/framebuffer.h" name="/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/shared/framebuffer.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="92,5,363,60"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="179,5,449,60"/>
 <area shape="rect" id="Node000002" href="$d6/dc9/_led_rope_t_c_l_8cpp.html" title=" " alt="" coords="5,211,276,265"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="127,69,102,87,83,109,78,122,76,134,83,161,97,187,115,209,111,212,93,190,78,163,71,135,73,120,78,107,99,83,124,64"/>
-<area shape="rect" id="Node000003" href="$d9/d7e/_led_rope_t_c_l_8h.html" title=" " alt="" coords="92,108,363,163"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="230,74,230,108,225,108,225,74"/>
-<area shape="rect" id="Node000004" href="$d3/dd6/framebuffer_8cpp.html" title=" " alt="" coords="387,108,657,163"/>
-<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="318,62,446,105,444,110,316,67"/>
-<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="198,175,165,212,161,209,194,171"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="221,68,193,87,169,110,156,134,148,160,142,211,137,210,142,159,151,131,165,106,189,82,218,64"/>
+<area shape="rect" id="Node000003" href="$d9/d7e/_led_rope_t_c_l_8h.html" title=" " alt="" coords="179,108,449,163"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="317,74,317,108,311,108,311,74"/>
+<area shape="rect" id="Node000005" href="$d3/dd6/framebuffer_8cpp.html" title=" " alt="" coords="473,108,744,163"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="405,62,533,105,531,110,403,67"/>
+<area shape="poly" id="edge4_Node000003_Node000002" title=" " alt="" coords="259,172,187,213,185,208,256,167"/>
+<area shape="rect" id="Node000004" href="$d8/de5/_luminescent_grand_8ino.html" title=" " alt="" coords="300,211,571,265"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="358,169,405,209,402,213,355,174"/>
 </map>

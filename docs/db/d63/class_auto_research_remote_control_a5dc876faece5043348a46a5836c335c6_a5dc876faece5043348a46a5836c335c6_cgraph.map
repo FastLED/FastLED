@@ -1,0 +1,7 @@
+<map id="AutoResearchRemoteControl::tick" name="AutoResearchRemoteControl::tick">
+<area shape="rect" id="Node000001" title="Process RPC system (pull + tick + push)" alt="" coords="5,23,216,63"/>
+<area shape="rect" id="Node000002" href="$db/d24/namespacefl_1_1net_1_1ble_adf5498b241de23436558069ebfddb000.html#adf5498b241de23436558069ebfddb000" title="Deinitialize BLE stack and free heap state." alt="" coords="264,5,468,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="216,30,250,27,251,32,216,36"/>
+<area shape="rect" id="Node000003" href="$da/d79/_auto_research_ble_8cpp_a148423e1a23c3528f5499ffd84bbd65a.html#a148423e1a23c3528f5499ffd84bbd65a" title="Get current BLE autoresearch state." alt="" coords="317,55,415,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="216,51,303,59,303,64,216,56"/>
+</map>

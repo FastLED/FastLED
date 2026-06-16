@@ -1,0 +1,16 @@
+<map id="fl::NoiseBias2D" name="fl::NoiseBias2D">
+<area shape="rect" id="Node000001" title="Two&#45;axis attack/decay bias for 2D effects (per&#45;column X + per&#45;row Y)." alt="" coords="136,388,257,413"/>
+<area shape="rect" id="Node000002" href="$db/dd7/classfl_1_1_noise_bias1_d.html" title="Per&#45;position attack/decay bias for one axis." alt="" coords="136,285,257,311"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="199,325,199,388,194,388,194,325"/>
+<area shape="rect" id="Node000003" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="5,183,199,223"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="133,230,187,283,183,287,129,234"/>
+<area shape="rect" id="Node000004" href="$d4/dad/classfl_1_1vector__basic.html" title="Type&#45;erased vector base class." alt="" coords="157,5,277,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="184,40,133,77,109,102,91,130,88,143,88,156,95,182,90,183,83,157,82,142,86,128,105,98,129,73,181,35"/>
+<area shape="rect" id="Node000007" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="158,80,275,105"/>
+<area shape="poly" id="edge5_Node000007_Node000004" title=" " alt="" coords="219,45,219,80,214,80,214,45"/>
+<area shape="rect" id="Node000008" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="223,190,362,215"/>
+<area shape="poly" id="edge7_Node000008_Node000004" title=" " alt="" coords="253,35,305,73,330,98,348,128,353,144,348,160,334,179,317,192,313,188,330,175,344,157,348,144,344,130,325,102,301,77,250,40"/>
+<area shape="poly" id="edge4_Node000003_Node000007" title=" " alt="" coords="145,104,122,114,104,131,98,143,96,156,99,182,94,183,91,155,93,141,100,128,119,110,143,99"/>
+<area shape="poly" id="edge8_Node000008_Node000007" title=" " alt="" coords="247,112,261,128,280,160,292,189,287,191,275,162,257,131,243,116"/>
+<area shape="poly" id="edge6_Node000002_Node000008" title=" " alt="" coords="273,227,210,287,207,283,269,223"/>
+</map>

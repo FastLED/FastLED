@@ -1,0 +1,23 @@
+<map id="fl::Channel::Channel" name="fl::Channel::Channel">
+<area shape="rect" id="Node000001" title="Protected constructor for template subclasses (e.g., ClocklessIdf5)" alt="" coords="483,203,635,228"/>
+<area shape="rect" id="Node000002" href="$d5/d8b/classfl_1_1_channel_ac688f91aefbe88369c7c7a120a0d7772.html#ac688f91aefbe88369c7c7a120a0d7772" title=" " alt="" coords="263,5,415,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="544,191,527,158,503,118,471,78,433,44,412,33,414,28,436,40,475,74,507,115,532,155,549,189"/>
+<area shape="rect" id="Node000003" href="$d5/d8b/classfl_1_1_channel_a1024ab39998e20eaad3dc0f7ed0f60ca.html#a1024ab39998e20eaad3dc0f7ed0f60ca" title=" " alt="" coords="263,55,415,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="538,193,494,142,465,116,433,94,408,83,410,78,436,89,469,112,498,139,542,190"/>
+<area shape="rect" id="Node000004" href="$d5/d8b/classfl_1_1_channel_abfdb59164f69ea16a5290ccc6c9c7367.html#abfdb59164f69ea16a5290ccc6c9c7367" title=" " alt="" coords="257,104,422,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="527,197,484,169,434,143,401,132,403,127,436,138,487,164,530,192"/>
+<area shape="rect" id="Node000005" href="$d5/d8b/classfl_1_1_channel_a5047a061dfeb02365ea94e5a850b1ccc.html#a5047a061dfeb02365ea94e5a850b1ccc" title=" " alt="" coords="257,153,422,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="488,202,396,181,397,176,489,197"/>
+<area shape="rect" id="Node000006" href="$d5/d8b/classfl_1_1_channel_adb053871cd9d4b44b0e57837387e5599.html#adb053871cd9d4b44b0e57837387e5599" title="Set gamma correction value." alt="" coords="254,203,425,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="469,218,425,218,425,213,469,213"/>
+<area shape="rect" id="Node000007" href="$d5/d8b/classfl_1_1_channel_a0dccce627f46ca1d42624d0f82889385.html#a0dccce627f46ca1d42624d0f82889385" title="Set screen map for JS canvas visualization." alt="" coords="244,252,435,277"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="489,234,397,255,396,249,488,228"/>
+<area shape="rect" id="Node000008" href="$d5/d8b/classfl_1_1_channel_acfb78f07c618a1248db6c4fbbed5e408.html#acfb78f07c618a1248db6c4fbbed5e408" title="Set screen map for 1D strip remapping from XMap." alt="" coords="5,329,196,355"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="531,239,487,266,436,291,375,310,312,323,197,339,196,334,311,318,374,305,434,286,485,262,528,234"/>
+<area shape="rect" id="Node000009" href="$d5/d8b/classfl_1_1_channel_ac3c700e8433fc9775f3f8a716161e3b1.html#ac3c700e8433fc9775f3f8a716161e3b1" title="Set screen map for JS canvas visualization from XYMap." alt="" coords="244,353,435,379"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="541,241,496,289,467,314,436,336,392,356,390,351,433,332,464,310,492,285,537,237"/>
+<area shape="rect" id="Node000010" href="$d5/d8b/classfl_1_1_channel_a6a2bf9a4ab0f0ee7df060a3d0cba96b3.html#a6a2bf9a4ab0f0ee7df060a3d0cba96b3" title="Set screen map for JS canvas visualization from dimensions." alt="" coords="5,379,196,404"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="551,242,535,278,511,321,478,362,458,380,436,394,399,409,361,418,321,423,282,424,208,418,148,407,149,401,209,413,282,419,321,418,360,413,398,404,433,389,455,375,474,358,506,318,530,276,546,240"/>
+<area shape="poly" id="edge9_Node000009_Node000008" title=" " alt="" coords="230,358,196,354,196,349,231,352"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="231,380,196,384,196,379,230,375"/>
+</map>

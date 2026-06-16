@@ -1,0 +1,26 @@
+var dir_c839598b40e1646daff68c7b4defdc81 =
+[
+    [ "AutoResearch.ino", "dd/dc8/_auto_research_8ino.html", "dd/dc8/_auto_research_8ino" ],
+    [ "AutoResearchAnimartrixBench.h", "d9/d0a/_auto_research_animartrix_bench_8h.html", "d9/d0a/_auto_research_animartrix_bench_8h" ],
+    [ "AutoResearchAsync.h", "d2/df4/_auto_research_async_8h.html", "d2/df4/_auto_research_async_8h" ],
+    [ "AutoResearchBle.cpp", "da/d79/_auto_research_ble_8cpp.html", "da/d79/_auto_research_ble_8cpp" ],
+    [ "AutoResearchBle.h", "da/dec/_auto_research_ble_8h.html", "da/dec/_auto_research_ble_8h" ],
+    [ "AutoResearchHelpers.cpp", "d7/d5f/_auto_research_helpers_8cpp.html", "d7/d5f/_auto_research_helpers_8cpp" ],
+    [ "AutoResearchHelpers.h", "df/de0/_auto_research_helpers_8h.html", "df/de0/_auto_research_helpers_8h" ],
+    [ "AutoResearchLowMemory.h", "d1/df2/_auto_research_low_memory_8h.html", "d1/df2/_auto_research_low_memory_8h" ],
+    [ "AutoResearchNet.cpp", "d2/d00/_auto_research_net_8cpp.html", "d2/d00/_auto_research_net_8cpp" ],
+    [ "AutoResearchNet.h", "d5/d32/_auto_research_net_8h.html", "d5/d32/_auto_research_net_8h" ],
+    [ "AutoResearchOta.cpp", "dc/dd4/_auto_research_ota_8cpp.html", "dc/dd4/_auto_research_ota_8cpp" ],
+    [ "AutoResearchOta.h", "dc/dd7/_auto_research_ota_8h.html", "dc/dd7/_auto_research_ota_8h" ],
+    [ "AutoResearchParlioEncode.h", "d1/de7/_auto_research_parlio_encode_8h.html", "d1/de7/_auto_research_parlio_encode_8h" ],
+    [ "AutoResearchParlioStream.h", "db/dcf/_auto_research_parlio_stream_8h.html", "db/dcf/_auto_research_parlio_stream_8h" ],
+    [ "AutoResearchPlatform.h", "d4/d9d/_auto_research_platform_8h.html", "d4/d9d/_auto_research_platform_8h" ],
+    [ "AutoResearchRemote.cpp", "db/dfb/_auto_research_remote_8cpp.html", "db/dfb/_auto_research_remote_8cpp" ],
+    [ "AutoResearchRemote.h", "df/d9e/_auto_research_remote_8h.html", "df/d9e/_auto_research_remote_8h" ],
+    [ "AutoResearchSimd.h", "d7/dd1/_auto_research_simd_8h.html", "d7/dd1/_auto_research_simd_8h" ],
+    [ "AutoResearchTest.cpp", "d4/df9/_auto_research_test_8cpp.html", "d4/df9/_auto_research_test_8cpp" ],
+    [ "AutoResearchTest.h", "d8/d1c/_auto_research_test_8h.html", "d8/d1c/_auto_research_test_8h" ],
+    [ "AutoResearchWave8Expand.h", "d3/d03/_auto_research_wave8_expand_8h.html", "d3/d03/_auto_research_wave8_expand_8h" ],
+    [ "Common.h", "da/de5/examples_2_auto_research_2common_8h.html", "da/de5/examples_2_auto_research_2common_8h" ],
+    [ "LegacyClocklessProxy.h", "d0/d0f/_legacy_clockless_proxy_8h.html", "d0/d0f/_legacy_clockless_proxy_8h" ]
+];

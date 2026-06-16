@@ -1,0 +1,9 @@
+<map id="fl::audio::Processor::getCurrentBeatNumber" name="fl::audio::Processor::getCurrentBeatNumber">
+<area shape="rect" id="Node000001" title=" " alt="" coords="235,49,416,89"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="364,38,351,31,325,28,303,30,290,35,285,41,288,48,282,50,280,40,287,30,302,25,325,23,352,26,367,33"/>
+<area shape="rect" id="Node000002" href="$d8/dea/classfl_1_1audio_1_1_reactive_aeb419a40ffe54f716df7defd6003fd3a.html#aeb419a40ffe54f716df7defd6003fd3a" title=" " alt="" coords="5,5,187,45"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="221,52,187,45,188,40,222,47"/>
+<area shape="rect" id="Node000003" href="$d3/d6b/classfl_1_1audio_1_1_processor_a44c9bf7e90fafc4f6bc668d7796ef27c.html#a44c9bf7e90fafc4f6bc668d7796ef27c" title=" " alt="" coords="23,93,169,133"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="222,92,169,102,168,97,221,87"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="135,82,121,75,96,72,74,74,61,79,56,85,58,92,53,94,51,84,57,74,73,69,96,67,123,70,137,77"/>
+</map>

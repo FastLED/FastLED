@@ -1,0 +1,38 @@
+digraph "test_json_response"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="test_json_response",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="APPROACH 3: JSON Response Handling with FastLED's ideal JSON API This demonstrates fetch responses wi..."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::json::contains",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d40/classfl_1_1json_ac94ae67fc50a75046692cd52b2dfb3e6.html#ac94ae67fc50a75046692cd52b2dfb3e6",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::net::http::fetch_get",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d13/namespacefl_1_1net_1_1http_aa69a7e5a3706b6fb7c8627f19c7b10d2.html#aa69a7e5a3706b6fb7c8627f19c7b10d2",tooltip="HTTP GET request."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::net::http::FetchOptions\l::body",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d03/classfl_1_1net_1_1http_1_1_fetch_options_a921e92a7b887e568cef838ffe44cfe2c.html#a921e92a7b887e568cef838ffe44cfe2c",tooltip="Set request body."];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::net::http::FetchOptions\l::FetchOptions",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dd/d03/classfl_1_1net_1_1http_1_1_fetch_options_a2886f08f0354d8631626717882dd9611.html#a2886f08f0354d8631626717882dd9611",tooltip=" "];
+  Node3 -> Node7 [id="edge5_Node000003_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::net::http::execute\l_fetch_request",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d13/namespacefl_1_1net_1_1http_a957091a69596c0de70d12e178c8bd57d.html#a957091a69596c0de70d12e178c8bd57d",tooltip="Internal helper to execute a fetch request and return a promise."];
+  Node7 -> Node8 [id="edge6_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::task::Promise::\lresolve",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d0/d34/classfl_1_1task_1_1_promise_a70811e463c0161394aae6e29b442b266.html#a70811e463c0161394aae6e29b442b266",tooltip="Create a resolved Promise with value."];
+  Node7 -> Node14 [id="edge7_Node000007_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::net::http::Response\l::set_body",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dd1/classfl_1_1net_1_1http_1_1_response_af9dec231f54603a4e87ea1c8dc9499d8.html#af9dec231f54603a4e87ea1c8dc9499d8",tooltip=" "];
+  Node3 -> Node15 [id="edge8_Node000003_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl::net::http::FetchOptions\l::header",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d03/classfl_1_1net_1_1http_1_1_fetch_options_a4456fb4f6ddd306b5f519993080c9889.html#a4456fb4f6ddd306b5f519993080c9889",tooltip="Add header."];
+  Node15 -> Node5 [id="edge9_Node000015_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node16 [id="edge10_Node000003_Node000016",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::net::http::FetchOptions\l::options",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d03/classfl_1_1net_1_1http_1_1_fetch_options_af9afaa003f14f83e2f5df6d031a3bf2e.html#af9afaa003f14f83e2f5df6d031a3bf2e",tooltip="Get the options for this request."];
+  Node3 -> Node17 [id="edge11_Node000003_Node000017",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl::net::http::FetchOptions\l::timeout",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d03/classfl_1_1net_1_1http_1_1_fetch_options_aaabc1d09931c784c5db43adff3355db1.html#aaabc1d09931c784c5db43adff3355db1",tooltip="Set timeout in milliseconds."];
+  Node17 -> Node5 [id="edge12_Node000017_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node18 [id="edge13_Node000001_Node000018",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="fill_solid",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dfb/colorutils_8h_afba4db18577c19e39c54f1c5793741b7.html#afba4db18577c19e39c54f1c5793741b7",tooltip="Fill a range of LEDs with a solid color."];
+  Node1 -> Node19 [id="edge14_Node000001_Node000019",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl::json::is_array",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d40/classfl_1_1json_a43ce94fce4fd30a5904062a3d46ccb4a.html#a43ce94fce4fd30a5904062a3d46ccb4a",tooltip=" "];
+  Node1 -> Node20 [id="edge15_Node000001_Node000020",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="fl::json::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d40/classfl_1_1json_a7deadb5bf7dbc14de40b50534f529430.html#a7deadb5bf7dbc14de40b50534f529430",tooltip=" "];
+}

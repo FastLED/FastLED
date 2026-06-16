@@ -1,0 +1,7 @@
+<map id="fl::audio::detector::MusicalBeat::updateBPMEstimate" name="fl::audio::detector::MusicalBeat::updateBPMEstimate">
+<area shape="rect" id="Node000001" title="Update BPM estimate from inter&#45;beat intervals." alt="" coords="528,5,779,45"/>
+<area shape="rect" id="Node000002" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a14368f704c7c67d888b81f70c7004dcb.html#a14368f704c7c67d888b81f70c7004dcb" title="Process one audio frame." alt="" coords="263,5,480,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="514,28,480,28,480,23,514,23"/>
+<area shape="rect" id="Node000003" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a8ead4e67bdff0c0600d13fc942313879.html#a8ead4e67bdff0c0600d13fc942313879" title=" " alt="" coords="5,5,215,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="249,28,215,28,215,23,249,23"/>
+</map>

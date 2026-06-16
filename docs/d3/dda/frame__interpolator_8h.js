@@ -1,6 +1,6 @@
 var frame__interpolator_8h =
 [
-    [ "fl::FrameInterpolator", "d8/d94/classfl_1_1_frame_interpolator.html", "d8/d94/classfl_1_1_frame_interpolator" ],
-    [ "fl::FrameInterpolator::Less", "de/d7f/structfl_1_1_frame_interpolator_1_1_less.html", "de/d7f/structfl_1_1_frame_interpolator_1_1_less" ],
-    [ "fl::FASTLED_SMART_PTR", "d4/d36/namespacefl_a4ec0600be8cb6ac794566c67df6c0c0a.html#a4ec0600be8cb6ac794566c67df6c0c0a", null ]
+    [ "fl::video::FrameInterpolator", "d4/d2b/classfl_1_1video_1_1_frame_interpolator.html", "d4/d2b/classfl_1_1video_1_1_frame_interpolator" ],
+    [ "fl::video::FrameInterpolator::Less", "d2/d64/structfl_1_1video_1_1_frame_interpolator_1_1_less.html", "d2/d64/structfl_1_1video_1_1_frame_interpolator_1_1_less" ],
+    [ "fl::video::FASTLED_SHARED_PTR", "d7/dbc/namespacefl_1_1video_a42fa3b6254be14b89ece7bc1b13401b9.html#a42fa3b6254be14b89ece7bc1b13401b9", null ]
 ];

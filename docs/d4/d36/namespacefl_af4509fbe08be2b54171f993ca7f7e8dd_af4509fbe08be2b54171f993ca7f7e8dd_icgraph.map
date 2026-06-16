@@ -1,0 +1,15 @@
+<map id="fl::setLogLevel" name="fl::setLogLevel">
+<area shape="rect" id="Node000001" title="Set the global log level." alt="" coords="419,141,535,166"/>
+<area shape="rect" id="Node000002" href="$d4/d62/classfl_1_1_scoped_log_disable_a01ee5873cf65f195e2b01498441146a5.html#a01ee5873cf65f195e2b01498441146a5" title="Constructor &#45; saves current log level and disables logging." alt="" coords="212,101,369,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="405,144,369,137,370,132,405,138"/>
+<area shape="rect" id="Node000007" href="$d4/d62/classfl_1_1_scoped_log_disable_abb7b2c1658de518333f6639c7e2f306f.html#abb7b2c1658de518333f6639c7e2f306f" title="Destructor &#45; restores previous log level." alt="" coords="211,165,371,205"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="405,168,371,174,370,169,405,163"/>
+<area shape="rect" id="Node000003" href="$d4/d62/classfl_1_1_scoped_log_disable_a2a2e430adbfdf598bc2f597994e95004.html#a2a2e430adbfdf598bc2f597994e95004" title=" " alt="" coords="5,5,163,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="238,97,162,60,134,48,137,43,164,55,240,92"/>
+<area shape="rect" id="Node000004" href="$d4/d62/classfl_1_1_scoped_log_disable_aeb494d68726c465d710d7a7aa2a70f0a.html#aeb494d68726c465d710d7a7aa2a70f0a" title=" " alt="" coords="5,69,163,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="198,110,162,104,163,99,199,104"/>
+<area shape="rect" id="Node000005" href="$d4/d62/classfl_1_1_scoped_log_disable_a6ed4f9651bf3bdedd6926a4b6edda90d.html#a6ed4f9651bf3bdedd6926a4b6edda90d" title=" " alt="" coords="5,133,163,173"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="199,138,163,144,162,139,198,133"/>
+<area shape="rect" id="Node000006" href="$d4/d62/classfl_1_1_scoped_log_disable_af11e2c42d403213d59ff5e13d046e53e.html#af11e2c42d403213d59ff5e13d046e53e" title=" " alt="" coords="5,197,163,237"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="225,149,212,156,164,188,139,200,137,195,161,183,209,151,222,145"/>
+</map>

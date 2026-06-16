@@ -1,0 +1,12 @@
+<map id="fl::PixelIteratorAny::init" name="fl::PixelIteratorAny::init">
+<area shape="rect" id="Node000001" title="Initialize the adapter with color order conversion." alt="" coords="5,23,148,63"/>
+<area shape="rect" id="Node000002" href="$dd/dd8/classfl_1_1_optional_a3afb0aa53508efa140f1e461796428a9.html#a3afb0aa53508efa140f1e461796428a9" title="Emplace with rvalue reference." alt="" coords="196,31,353,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="149,41,182,41,182,46,149,46"/>
+<area shape="rect" id="Node000003" href="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a" title=" " alt="" coords="425,5,515,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="353,30,411,23,411,28,354,36"/>
+<area shape="rect" id="Node000004" href="$dd/dd8/classfl_1_1_optional_a1a7216013ea48bf987511dae97d2915f.html#a1a7216013ea48bf987511dae97d2915f" title=" " alt="" coords="401,55,539,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="354,50,388,55,387,60,353,56"/>
+<area shape="rect" id="Node000005" href="$dd/dd8/classfl_1_1_optional_a0c3fe141556cad218a68e49c72ac139a.html#a0c3fe141556cad218a68e49c72ac139a" title=" " alt="" coords="587,55,705,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="539,65,573,65,573,70,539,70"/>
+<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="617,56,611,46,614,37,626,30,646,28,670,32,680,40,677,44,668,36,646,33,627,35,618,40,616,46,621,53"/>
+</map>

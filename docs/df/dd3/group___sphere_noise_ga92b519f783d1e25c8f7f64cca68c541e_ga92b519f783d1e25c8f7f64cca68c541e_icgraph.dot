@@ -1,0 +1,12 @@
+digraph "fl::noiseSphereHSV16"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::noiseSphereHSV16",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Sphere noise functions - sample three z-slices for independent component evolution."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::noiseSphereHSV8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/dd3/group___sphere_noise_gaa4b051aa869617244405f816184296c0.html#gaa4b051aa869617244405f816184296c0",tooltip="Generate HSV8 (8-bit) noise for a sphere pattern."];
+}

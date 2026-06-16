@@ -1,0 +1,7 @@
+<map id="fl::task::ITaskImpl" name="fl::task::ITaskImpl">
+<area shape="rect" id="Node000001" title=" " alt="" coords="109,5,245,31"/>
+<area shape="rect" id="Node000002" href="$dd/d24/classfl_1_1task_1_1_coroutine_task.html" title=" " alt="" coords="5,79,172,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="154,41,105,81,101,76,150,37"/>
+<area shape="rect" id="Node000003" href="$da/d01/classfl_1_1task_1_1_time_task.html" title=" " alt="" coords="197,79,333,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="203,37,252,76,249,81,200,41"/>
+</map>

@@ -1,0 +1,14 @@
+<map id="fl/fx/wled/adapter.h" name="fl/fx/wled/adapter.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="145,5,291,31"/>
+<area shape="rect" id="Node000002" href="$de/dbb/adapter_8cpp_8hpp.html" title=" " alt="" coords="8,79,231,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="193,41,137,81,134,76,190,36"/>
+<area shape="rect" id="Node000007" href="$dd/df9/wled_8h.html" title=" " alt="" coords="271,79,365,104"/>
+<area shape="poly" id="edge4_Node000001_Node000007" title=" " alt="" coords="247,36,303,76,300,81,244,41"/>
+<area shape="rect" id="Node000003" href="$da/d2a/fl_2control_2wled_2__build_8cpp_8hpp.html" title=" " alt="" coords="5,152,217,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="119,118,115,152,110,152,114,117"/>
+<area shape="rect" id="Node000004" href="$d4/d50/fl_2control_2__build_8cpp_8hpp.html" title=" " alt="" coords="129,225,307,251"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="141,183,202,223,199,227,138,187"/>
+<area shape="rect" id="Node000008" href="$d3/da5/wled_8cpp_8hpp.html" title=" " alt="" coords="241,152,411,177"/>
+<area shape="poly" id="edge5_Node000007_Node000008" title=" " alt="" coords="323,117,327,152,322,152,318,118"/>
+<area shape="poly" id="edge6_Node000008_Node000004" title=" " alt="" coords="299,187,237,227,234,223,296,183"/>
+</map>

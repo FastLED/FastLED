@@ -1,0 +1,14 @@
+<map id="fl::validation::printEngineValidation" name="fl::validation::printEngineValidation">
+<area shape="rect" id="Node000001" title="Print validation results (logs registered drivers and status)" alt="" coords="5,88,191,128"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a8aafd1d8ccf1aab536564352dd23d204.html#a8aafd1d8ccf1aab536564352dd23d204" title="Get the global ChannelManager singleton instance." alt="" coords="239,66,386,91"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="191,93,226,88,226,93,191,98"/>
+<area shape="rect" id="Node000009" href="$d2/d6b/classfl_1_1_channel_manager_a96f21ad5ff259842566e73eb07f14549.html#a96f21ad5ff259842566e73eb07f14549" title="Get full state of all registered drivers." alt="" coords="239,116,387,156"/>
+<area shape="poly" id="edge6_Node000001_Node000009" title=" " alt="" coords="191,117,225,122,225,127,191,123"/>
+<area shape="rect" id="Node000003" href="$d2/d6b/classfl_1_1_channel_manager_aed1be386f6b38cabd478d1d9c11c240c.html#aed1be386f6b38cabd478d1d9c11c240c" title="Get the global singleton instance." alt="" coords="435,59,583,99"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="387,76,421,76,421,81,387,81"/>
+<area shape="rect" id="Node000004" href="$d2/d6b/classfl_1_1_channel_manager_addc4b631522a2d44151c6b7c23a26ca1.html#addc4b631522a2d44151c6b7c23a26ca1" title="Constructor." alt="" coords="638,29,786,69"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="583,65,624,59,625,65,583,71"/>
+<area shape="rect" id="Node000008" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="631,94,793,119"/>
+<area shape="poly" id="edge5_Node000003_Node000008" title=" " alt="" coords="583,86,618,91,617,96,583,91"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="674,30,672,20,678,11,691,5,712,3,736,6,749,13,746,18,734,11,712,8,693,10,681,15,677,21,679,28"/>
+</map>

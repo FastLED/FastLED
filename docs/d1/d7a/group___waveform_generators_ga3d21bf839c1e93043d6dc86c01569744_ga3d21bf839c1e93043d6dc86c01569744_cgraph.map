@@ -1,0 +1,7 @@
+<map id="quadwave8" name="quadwave8">
+<area shape="rect" id="Node000001" title="Quadratic waveform generator." alt="" coords="5,31,103,56"/>
+<area shape="rect" id="Node000002" href="$d4/dfe/group___easing_gaee4dea571f678c82a977de4e52c3d83f.html#gaee4dea571f678c82a977de4e52c3d83f" title="8&#45;bit quadratic ease&#45;in / ease&#45;out function." alt="" coords="151,5,281,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="102,33,137,28,138,33,103,38"/>
+<area shape="rect" id="Node000003" href="$d1/d7a/group___waveform_generators_gae69e5ea856eeeb70a917ff18934ec7b0.html#gae69e5ea856eeeb70a917ff18934ec7b0" title="Triangle wave generator." alt="" coords="177,55,255,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="103,48,163,57,162,62,102,53"/>
+</map>

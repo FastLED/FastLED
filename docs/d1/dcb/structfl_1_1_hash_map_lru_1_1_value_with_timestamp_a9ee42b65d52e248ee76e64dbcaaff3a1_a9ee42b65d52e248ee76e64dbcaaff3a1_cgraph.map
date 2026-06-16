@@ -1,6 +1,12 @@
 <map id="fl::HashMapLru::ValueWithTimestamp::ValueWithTimestamp" name="fl::HashMapLru::ValueWithTimestamp::ValueWithTimestamp">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,22,249,62"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a6e552aa2e05110d18704374c274dec78.html#a6e552aa2e05110d18704374c274dec78" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="297,29,365,55"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a2bccb5decc8613e4b6e232e0a881578f.html#a2bccb5decc8613e4b6e232e0a881578f" title="Alias for millis64() &#45; returns 64&#45;bit millisecond time." alt="" coords="297,29,365,55"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="250,39,284,39,284,45,250,45"/>
-<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="298,31,291,21,295,11,308,5,331,3,360,6,371,16,367,20,357,11,331,8,310,10,298,15,296,20,302,28"/>
+<area shape="poly" id="edge6_Node000002_Node000002" title=" " alt="" coords="310,30,305,21,308,11,317,5,331,3,349,6,356,14,352,18,346,11,331,8,319,10,312,14,311,20,314,28"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ac8ee0e5ecac16a6ee42def0436a43663.html#ac8ee0e5ecac16a6ee42def0436a43663" title="64&#45;bit millisecond timer &#45; returns milliseconds since system startup without wraparound" alt="" coords="413,29,504,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="365,39,400,39,400,45,365,45"/>
+<area shape="poly" id="edge5_Node000003_Node000003" title=" " alt="" coords="437,30,433,21,435,11,444,5,459,3,476,6,484,14,480,18,473,11,459,8,446,10,439,14,438,20,442,28"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="552,29,627,55"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="504,39,539,39,539,45,504,45"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="567,30,562,21,565,11,574,5,589,3,607,6,615,14,611,18,605,11,589,8,576,10,569,14,568,20,572,28"/>
 </map>

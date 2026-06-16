@@ -8,9 +8,13 @@ digraph "Key::SetOff"
   rankdir="RL";
   Node1 [id="Node000001",label="Key::SetOff",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="KeyboardState::HandleNoteOff",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d37/class_keyboard_state_af3b786ba848c2366f40115cd8765a697.html#af3b786ba848c2366f40115cd8765a697",tooltip=" "];
+  Node2 [id="Node000002",label="HandleAfterTouchChannel",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/de5/_luminescent_grand_8ino_a89d368b1771ecdeb3e47fa15090fb938.html#a89d368b1771ecdeb3e47fa15090fb938",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="KeyboardState::HandleNoteOn",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d37/class_keyboard_state_a6327c48f59e01741fbb2db535ad49c35.html#a6327c48f59e01741fbb2db535ad49c35",tooltip=" "];
+  Node3 [id="Node000003",label="setup",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/de5/_luminescent_grand_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d",tooltip=" "];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="Key::Update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d42/struct_key_ac841a3966fde8cd5df0eafa0bdcf0cca.html#ac841a3966fde8cd5df0eafa0bdcf0cca",tooltip=" "];
+  Node4 [id="Node000004",label="KeyboardState::HandleNoteOff",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d37/class_keyboard_state_af3b786ba848c2366f40115cd8765a697.html#af3b786ba848c2366f40115cd8765a697",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="KeyboardState::HandleNoteOn",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d37/class_keyboard_state_a6327c48f59e01741fbb2db535ad49c35.html#a6327c48f59e01741fbb2db535ad49c35",tooltip=" "];
+  Node1 -> Node6 [id="edge5_Node000001_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="Key::Update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d42/struct_key_ac841a3966fde8cd5df0eafa0bdcf0cca.html#ac841a3966fde8cd5df0eafa0bdcf0cca",tooltip=" "];
 }

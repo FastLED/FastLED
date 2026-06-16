@@ -1,0 +1,7 @@
+<map id="fl::third_party::ezWS2812::color_to_spi" name="fl::third_party::ezWS2812::color_to_spi">
+<area shape="rect" id="Node000001" title="Convert color byte to SPI bit pattern." alt="" coords="469,5,653,45"/>
+<area shape="rect" id="Node000002" href="$d9/db5/classfl_1_1third__party_1_1ez_w_s2812_ac685a46980ddb72910e7924076831238.html#ac685a46980ddb72910e7924076831238" title="Set color for specific number of LEDs." alt="" coords="237,5,421,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="455,28,422,28,422,23,455,23"/>
+<area shape="rect" id="Node000003" href="$d9/db5/classfl_1_1third__party_1_1ez_w_s2812_ab50502eecb84e1c0a23ac5c35a29b80e.html#ab50502eecb84e1c0a23ac5c35a29b80e" title="Set all LEDs to the same color." alt="" coords="5,5,189,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="223,28,190,28,190,23,223,23"/>
+</map>

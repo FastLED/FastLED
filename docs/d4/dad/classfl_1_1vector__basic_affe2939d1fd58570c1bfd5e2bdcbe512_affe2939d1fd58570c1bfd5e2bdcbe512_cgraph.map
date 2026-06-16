@@ -1,0 +1,9 @@
+<map id="fl::vector_basic::erase_range_impl" name="fl::vector_basic::erase_range_impl">
+<area shape="rect" id="Node000001" title="Erase range [first_index, first_index + count)." alt="" coords="5,27,169,67"/>
+<area shape="rect" id="Node000002" href="$d4/dad/classfl_1_1vector__basic_ab007e98763f01e1326ef5ddb39ddf006.html#ab007e98763f01e1326ef5ddb39ddf006" title="Pointer to element at index (byte arithmetic)." alt="" coords="217,5,424,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="169,34,206,30,207,35,170,40"/>
+<area shape="rect" id="Node000003" href="$d4/dad/classfl_1_1vector__basic_ae83f6aed7567a50bd2b7565e72eadf36.html#ae83f6aed7567a50bd2b7565e72eadf36" title=" " alt="" coords="237,55,404,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="170,54,224,61,223,66,169,60"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a852a5bd699a3fe38fd96cc4f1ddcb7a5.html#a852a5bd699a3fe38fd96cc4f1ddcb7a5" title=" " alt="" coords="472,63,581,88"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="404,73,458,73,458,78,404,78"/>
+</map>

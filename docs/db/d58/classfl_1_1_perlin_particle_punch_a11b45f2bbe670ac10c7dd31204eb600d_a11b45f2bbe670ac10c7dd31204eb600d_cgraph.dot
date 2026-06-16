@@ -1,0 +1,12 @@
+digraph "fl::PerlinParticlePunch::spawnMeteor"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::PerlinParticlePunch\l::spawnMeteor",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Spawn a BEAT meteor at position 0, traveling toward end of strip."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::PerlinParticlePunch\l::tryAllocateMeteor",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d58/classfl_1_1_perlin_particle_punch_a53f1ce275f6e20cd2fedea6abac2793a.html#a53f1ce275f6e20cd2fedea6abac2793a",tooltip=" "];
+}

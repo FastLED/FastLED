@@ -1,0 +1,5 @@
+<map id="fl/chipsets/encoders/ws2803.h" name="fl/chipsets/encoders/ws2803.h">
+<area shape="rect" id="Node000001" title="WS2803 SPI chipset encoder (WS2801 alias)" alt="" coords="5,5,156,45"/>
+<area shape="rect" id="Node000002" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="17,93,144,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,46,83,79,78,79,78,46"/>
+</map>

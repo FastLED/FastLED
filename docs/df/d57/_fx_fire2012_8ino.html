@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: /home/runner/work/FastLED/FastLED/examples/FxFire2012/FxFire2012.ino File Reference</title>
+<title>FastLED: /home/runner/work/FastLED/FastLED/examples/Fx/FxFire2012/FxFire2012.ino File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -108,12 +108,12 @@ $(function(){initNavTree('df/d57/_fx_fire2012_8ino.html','../../'); initResizabl
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p><a class="el" href="../../d5/d9b/classfl_1_1_fire2012.html">Fire2012</a> effect with <a class="el" href="../../d2/d78/classfl_1_1_screen_map.html">ScreenMap</a>. </p>
+<div class="textblock"><p>Fire2012 effect with ScreenMap. </p>
 
 <p class="definition">Definition in file <a class="el" href="../../df/d57/_fx_fire2012_8ino_source.html">FxFire2012.ino</a>.</p>
-</div><div class="textblock"><code>#include &lt;<a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html">FastLED.h</a>&gt;</code><br />
-<code>#include &quot;<a class="el" href="../../d5/dcb/fire2012_8h_source.html">fx/1d/fire2012.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d7/d97/screenmap_8h_source.html">fl/screenmap.h</a>&quot;</code><br />
+</div><div class="textblock"><code>#include &lt;FastLED.h&gt;</code><br />
+<code>#include &quot;<a class="el" href="../../d5/dcb/fire2012_8h_source.html">fl/fx/1d/fire2012.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d7/d97/screenmap_8h_source.html">fl/math/screenmap.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for FxFire2012.ino:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -128,15 +128,16 @@ $(function(){initNavTree('df/d57/_fx_fire2012_8ino.html','../../'); initResizabl
 Macros</h2></td></tr>
 <tr class="memitem:accd116060cc3445af11c45ec44fd69d9" id="r_accd116060cc3445af11c45ec44fd69d9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d57/_fx_fire2012_8ino_accd116060cc3445af11c45ec44fd69d9.html#accd116060cc3445af11c45ec44fd69d9">BRIGHTNESS</a>&#160;&#160;&#160;128</td></tr>
 <tr class="separator:accd116060cc3445af11c45ec44fd69d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab4e58b96c4493c06cc1dd38b52d7b79e" id="r_ab4e58b96c4493c06cc1dd38b52d7b79e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d57/_fx_fire2012_8ino_ab4e58b96c4493c06cc1dd38b52d7b79e.html#ab4e58b96c4493c06cc1dd38b52d7b79e">CHIPSET</a>&#160;&#160;&#160;<a class="el" href="../../d4/de9/class_w_s2811.html">WS2811</a></td></tr>
+<tr class="memitem:ab4e58b96c4493c06cc1dd38b52d7b79e" id="r_ab4e58b96c4493c06cc1dd38b52d7b79e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d57/_fx_fire2012_8ino_ab4e58b96c4493c06cc1dd38b52d7b79e.html#ab4e58b96c4493c06cc1dd38b52d7b79e">CHIPSET</a>&#160;&#160;&#160;WS2811</td></tr>
 <tr class="separator:ab4e58b96c4493c06cc1dd38b52d7b79e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a00c9e5e8fdc981fc21a1e82e722980b2" id="r_a00c9e5e8fdc981fc21a1e82e722980b2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d57/_fx_fire2012_8ino_a00c9e5e8fdc981fc21a1e82e722980b2.html#a00c9e5e8fdc981fc21a1e82e722980b2">COLOR_ORDER</a>&#160;&#160;&#160;<a class="el" href="../../db/d07/eorder_8h_a5f122d09c4a690c3921f929768f0ad7b.html#a5f122d09c4a690c3921f929768f0ad7b">GRB</a></td></tr>
+<tr class="memitem:a00c9e5e8fdc981fc21a1e82e722980b2" id="r_a00c9e5e8fdc981fc21a1e82e722980b2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d57/_fx_fire2012_8ino_a00c9e5e8fdc981fc21a1e82e722980b2.html#a00c9e5e8fdc981fc21a1e82e722980b2">COLOR_ORDER</a>&#160;&#160;&#160;<a class="el" href="../../db/d07/eorder_8h_a61ef4a09022f540ce448c547ad15ee6a.html#a61ef4a09022f540ce448c547ad15ee6a">GRB</a></td></tr>
 <tr class="separator:a00c9e5e8fdc981fc21a1e82e722980b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab0a5a46de18c70b767bea8e556b77560" id="r_ab0a5a46de18c70b767bea8e556b77560"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d57/_fx_fire2012_8ino_ab0a5a46de18c70b767bea8e556b77560.html#ab0a5a46de18c70b767bea8e556b77560">COOLING</a>&#160;&#160;&#160;55</td></tr>
 <tr class="separator:ab0a5a46de18c70b767bea8e556b77560"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a85f9d29551f1bf30f03229da27cb532f" id="r_a85f9d29551f1bf30f03229da27cb532f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d57/_fx_fire2012_8ino_a85f9d29551f1bf30f03229da27cb532f.html#a85f9d29551f1bf30f03229da27cb532f">FRAMES_PER_SECOND</a>&#160;&#160;&#160;30</td></tr>
 <tr class="separator:a85f9d29551f1bf30f03229da27cb532f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab4553be4db9860d940f81d7447173b2f" id="r_ab4553be4db9860d940f81d7447173b2f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d57/_fx_fire2012_8ino_ab4553be4db9860d940f81d7447173b2f.html#ab4553be4db9860d940f81d7447173b2f">LED_PIN</a>&#160;&#160;&#160;5</td></tr>
+<tr class="memdesc:ab4553be4db9860d940f81d7447173b2f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Simple one-dimensional fire animation function.  <br /></td></tr>
 <tr class="separator:ab4553be4db9860d940f81d7447173b2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4c4ae9a4146ce8d6a5debc90300d9abd" id="r_a4c4ae9a4146ce8d6a5debc90300d9abd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d57/_fx_fire2012_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>&#160;&#160;&#160;92</td></tr>
 <tr class="separator:a4c4ae9a4146ce8d6a5debc90300d9abd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -154,10 +155,10 @@ Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:a134be447c5eb135a0782ea18fa6e4488" id="r_a134be447c5eb135a0782ea18fa6e4488"><td class="memItemLeft" align="right" valign="top">Fire2012Ptr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d57/_fx_fire2012_8ino_a134be447c5eb135a0782ea18fa6e4488.html#a134be447c5eb135a0782ea18fa6e4488">fire</a> = <a class="el" href="../../d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared</a>&lt;<a class="el" href="../../d5/d9b/classfl_1_1_fire2012.html">Fire2012</a>&gt;(<a class="el" href="../../d8/d21/_adafruit_bridge_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>, <a class="el" href="../../d4/d26/_fire2012_8ino_ab0a5a46de18c70b767bea8e556b77560.html#ab0a5a46de18c70b767bea8e556b77560">COOLING</a>, <a class="el" href="../../d4/d26/_fire2012_8ino_ad8453bc3e6118be5f9c3a7b190ee4e34.html#ad8453bc3e6118be5f9c3a7b190ee4e34">SPARKING</a>, <a class="el" href="../../df/d57/_fx_fire2012_8ino_a6a46915ed7a76610388f176f47514438.html#a6a46915ed7a76610388f176f47514438">REVERSE_DIRECTION</a>)</td></tr>
-<tr class="separator:a134be447c5eb135a0782ea18fa6e4488"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1b4f26a01e11d7eb2848bc41b0f6dd9d" id="r_a1b4f26a01e11d7eb2848bc41b0f6dd9d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d57/_fx_fire2012_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a> [<a class="el" href="../../d8/d21/_adafruit_bridge_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>]</td></tr>
-<tr class="separator:a1b4f26a01e11d7eb2848bc41b0f6dd9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab889f27f7e33f2097ee5ee9cf6f83901" id="r_ab889f27f7e33f2097ee5ee9cf6f83901"><td class="memItemLeft" align="right" valign="top">fl::Fire2012Ptr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d57/_fx_fire2012_8ino_ab889f27f7e33f2097ee5ee9cf6f83901.html#ab889f27f7e33f2097ee5ee9cf6f83901">fire</a> = <a class="el" href="../../d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared</a>&lt;<a class="el" href="../../d5/d9b/classfl_1_1_fire2012.html">fl::Fire2012</a>&gt;(<a class="el" href="../../d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>, <a class="el" href="../../d4/d26/_fire2012_8ino_ab0a5a46de18c70b767bea8e556b77560.html#ab0a5a46de18c70b767bea8e556b77560">COOLING</a>, <a class="el" href="../../d4/d26/_fire2012_8ino_ad8453bc3e6118be5f9c3a7b190ee4e34.html#ad8453bc3e6118be5f9c3a7b190ee4e34">SPARKING</a>, <a class="el" href="../../df/d57/_fx_fire2012_8ino_a6a46915ed7a76610388f176f47514438.html#a6a46915ed7a76610388f176f47514438">REVERSE_DIRECTION</a>)</td></tr>
+<tr class="separator:ab889f27f7e33f2097ee5ee9cf6f83901"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83a59cb1680f896fa1c411261436d4ad" id="r_a83a59cb1680f896fa1c411261436d4ad"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../da/dd6/structfl_1_1_c_r_g_b.html">fl::CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d57/_fx_fire2012_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a> [<a class="el" href="../../d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>]</td></tr>
+<tr class="separator:a83a59cb1680f896fa1c411261436d4ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -165,8 +166,8 @@ Variables</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_c6d84a396416ba89ee9a9ef096630ab7.html">FxFire2012</a></li><li class="navelem"><a class="el" href="../../df/d57/_fx_fire2012_8ino.html">FxFire2012.ino</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_e6c43ff3b6655e541cf2b1319207663d.html">Fx</a></li><li class="navelem"><a class="el" href="../../dir_862101cba912c7b661bf5373d79892d5.html">FxFire2012</a></li><li class="navelem"><a class="el" href="../../df/d57/_fx_fire2012_8ino.html">FxFire2012.ino</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

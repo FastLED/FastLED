@@ -1,0 +1,9 @@
+<map id="fl::PerlinParticlePunch::renderDebris" name="fl::PerlinParticlePunch::renderDebris">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,27,168,67"/>
+<area shape="rect" id="Node000002" href="$da/dd6/structfl_1_1_c_r_g_b_aa272170bea8120f101f27ebd2c323b55.html#aa272170bea8120f101f27ebd2c323b55" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="231,5,364,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,33,217,26,218,32,169,39"/>
+<area shape="rect" id="Node000004" href="$db/d58/classfl_1_1_perlin_particle_punch_a940ba15318dbcce3ab89d3ad590ba310.html#a940ba15318dbcce3ab89d3ad590ba310" title=" " alt="" coords="216,55,379,95"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="169,56,203,60,202,65,168,61"/>
+<area shape="rect" id="Node000003" href="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" title="Default constructor." alt="" coords="427,5,547,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="364,15,413,15,413,21,364,21"/>
+</map>

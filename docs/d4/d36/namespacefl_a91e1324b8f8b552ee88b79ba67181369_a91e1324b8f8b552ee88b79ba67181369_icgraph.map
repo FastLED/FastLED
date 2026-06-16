@@ -1,0 +1,17 @@
+<map id="fl::make4PhaseTiming" name="fl::make4PhaseTiming">
+<area shape="rect" id="Node000001" title="Create 4&#45;phase RX timing from 3&#45;phase chipset timing with tolerance." alt="" coords="685,60,852,85"/>
+<area shape="rect" id="Node000002" href="$d1/df2/_auto_research_low_memory_8h_ae3f918f9121ab392058ef53302b021cf.html#ae3f918f9121ab392058ef53302b021cf" title=" " alt="" coords="409,11,637,36"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="691,60,587,39,588,33,692,55"/>
+<area shape="rect" id="Node000003" href="$d4/df9/_auto_research_test_8cpp_ade4309c9f4171360f59ed787c7041584.html#ade4309c9f4171360f59ed787c7041584" title=" " alt="" coords="488,60,559,85"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="672,75,559,75,559,70,672,70"/>
+<area shape="rect" id="Node000009" href="$db/d63/class_auto_research_remote_control_abb6600e8a1e8c4ef46ba29e7bd3b78b4.html#abb6600e8a1e8c4ef46ba29e7bd3b78b4" title="Register all RPC functions with shared autoresearch state." alt="" coords="418,110,629,150"/>
+<area shape="poly" id="edge7_Node000001_Node000009" title=" " alt="" coords="701,91,610,113,609,107,700,86"/>
+<area shape="rect" id="Node000004" href="$d4/df9/_auto_research_test_8cpp_aac567188ee44c45d15b20231ecff68c9.html#aac567188ee44c45d15b20231ecff68c9" title=" " alt="" coords="259,35,361,60"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="474,70,361,56,362,51,474,64"/>
+<area shape="rect" id="Node000013" href="$d4/df9/_auto_research_test_8cpp_ab5d3883aa989a0c1298af1a8a0d2851a.html#ab5d3883aa989a0c1298af1a8a0d2851a" title=" " alt="" coords="275,84,345,109"/>
+<area shape="poly" id="edge6_Node000003_Node000013" title=" " alt="" coords="474,81,345,95,345,90,474,75"/>
+<area shape="rect" id="Node000005" href="$d4/df9/_auto_research_test_8cpp_a4c76939743f62fdeea55c4ec8a3e2a31.html#a4c76939743f62fdeea55c4ec8a3e2a31" title=" " alt="" coords="5,5,211,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="245,41,195,33,196,28,245,35"/>
+<area shape="rect" id="Node000012" href="$d4/df9/_auto_research_test_8cpp_a5acfa3d36f5c1ff77be18eecaedf19b3.html#a5acfa3d36f5c1ff77be18eecaedf19b3" title=" " alt="" coords="5,55,211,95"/>
+<area shape="poly" id="edge5_Node000004_Node000012" title=" " alt="" coords="245,59,211,64,211,58,245,54"/>
+</map>

@@ -1,0 +1,25 @@
+<map id="fl::anonymous_namespace{channel::cpp::hpp}::ReorderingPixelIteratorAny::ReorderingPixelIteratorAny" name="fl::anonymous_namespace{channel::cpp::hpp}::ReorderingPixelIteratorAny::ReorderingPixelIteratorAny">
+<area shape="rect" id="Node000001" title="Construct pixel iterator with optional addressing transformation." alt="" coords="5,217,313,272"/>
+<area shape="rect" id="Node000002" href="$d2/d24/classfl_1_1vector_a51b9ac42dba7a7b4bd5a08a276634cef.html#a51b9ac42dba7a7b4bd5a08a276634cef" title=" " alt="" coords="435,5,554,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="177,216,207,175,250,127,301,79,360,40,390,28,421,20,422,26,391,33,363,44,305,83,253,131,212,179,181,219"/>
+<area shape="rect" id="Node000003" href="$d2/d24/classfl_1_1vector_a14c21203a1f583636c5ef6fdb9a58d4b.html#a14c21203a1f583636c5ef6fdb9a58d4b" title=" " alt="" coords="437,55,553,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="186,215,260,150,308,117,360,89,391,78,423,71,424,76,392,83,362,94,311,121,264,155,190,219"/>
+<area shape="rect" id="Node000004" href="$d0/dce/classfl_1_1_x_y_map_a291df891558d5d964d5b7048f5f30eec.html#a291df891558d5d964d5b7048f5f30eec" title=" " alt="" coords="417,104,572,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="203,215,275,175,360,138,403,127,405,132,362,143,278,180,206,219"/>
+<area shape="rect" id="Node000005" href="$d1/da3/classfl_1_1anonymous__namespace_02channel_8cpp_8hpp_03_1_1_reordering_pixel_iterator_any_ad08faea079904ae8a31f739f846eda2d.html#ad08faea079904ae8a31f739f846eda2d" title="Get thread&#45;local buffer for addressing transformation." alt="" coords="361,153,628,208"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="303,215,347,206,348,211,304,220"/>
+<area shape="rect" id="Node000006" href="$d0/dce/classfl_1_1_x_y_map_a13ac3af4e2ea9d7e48bb5f6eb3662b20.html#a13ac3af4e2ea9d7e48bb5f6eb3662b20" title=" " alt="" coords="419,232,570,257"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="313,242,405,242,405,247,313,247"/>
+<area shape="rect" id="Node000007" href="$d0/dce/classfl_1_1_x_y_map_a010c25679ef2446541e665ea0746e821.html#a010c25679ef2446541e665ea0746e821" title=" " alt="" coords="409,281,580,307"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="314,265,396,277,396,282,313,270"/>
+<area shape="rect" id="Node000010" href="$d2/d24/classfl_1_1vector_af937c1c325072247a23862ef0adbc51b.html#af937c1c325072247a23862ef0adbc51b" title=" " alt="" coords="431,331,558,356"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="228,270,293,293,362,315,418,328,417,334,361,321,291,298,226,275"/>
+<area shape="rect" id="Node000011" href="$d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c" title=" " alt="" coords="417,380,572,405"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="198,270,272,319,316,344,362,365,405,378,403,383,360,370,314,349,269,324,195,274"/>
+<area shape="rect" id="Node000012" href="$d0/dee/struct_pixel_controller_a0d99d9815e7e416eaedb964c6bc1dffb.html#a0d99d9815e7e416eaedb964c6bc1dffb" title="Get the length of the LED strip." alt="" coords="419,429,570,455"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="186,270,260,344,309,382,362,414,407,429,405,434,360,419,306,387,256,348,182,274"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a4da7f1b1461d0267333f18cf6d98a6aa.html#a4da7f1b1461d0267333f18cf6d98a6aa" title=" " alt="" coords="676,257,815,283"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="580,283,662,275,663,281,581,288"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a5c4d97d2fd230486baed612fb6cbc0f0.html#a5c4d97d2fd230486baed612fb6cbc0f0" title=" " alt="" coords="680,307,811,332"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="581,300,667,309,666,314,580,305"/>
+</map>

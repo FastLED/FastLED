@@ -106,13 +106,13 @@ $(function(){initNavTree('d0/dee/struct_pixel_controller_a894ca45aa17aea485defc3
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="../../d4/d36/namespacefl_ab289ace8bd149d39b87ebd778e9abe23.html#ab289ace8bd149d39b87ebd778e9abe23">EOrder</a> RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </div>
+template&lt;<a class="el" href="../../d4/d36/namespacefl_ab289ace8bd149d39b87ebd778e9abe23.html#ab289ace8bd149d39b87ebd778e9abe23">EOrder</a> RGB_ORDER, int LANES = 1, fl::u32 MASK = 0xFFFFFFFF&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="../../d0/dee/struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::disableColorAdjustment </td>
+          <td class="memname">void <a class="el" href="../../d0/dee/struct_pixel_controller.html">PixelController</a>&lt; <a class="el" href="../../d3/d8b/_parallel___i_o_8ino_a87eecf85eebf5be8fb74183807e8e2f0.html#a87eecf85eebf5be8fb74183807e8e2f0">RGB_ORDER</a>, LANES, MASK &gt;::disableColorAdjustment </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -125,17 +125,17 @@ template&lt;<a class="el" href="../../d4/d36/namespacefl_ab289ace8bd149d39b87ebd
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00102">102</a> of file <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html">pixel_controller.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  102</span>                                  {</div>
-<div class="line"><span class="lineno">  103</span><span class="preprocessor">        #if FASTLED_HD_COLOR_MIXING</span></div>
-<div class="line"><span class="lineno">  104</span>        <a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a69d37dea3d26dcd3c3abeb44a17dd13a.html#a69d37dea3d26dcd3c3abeb44a17dd13a">mColorAdjustment</a>.premixed = <a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">CRGB</a>(<a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a69d37dea3d26dcd3c3abeb44a17dd13a.html#a69d37dea3d26dcd3c3abeb44a17dd13a">mColorAdjustment</a>.brightness, <a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a69d37dea3d26dcd3c3abeb44a17dd13a.html#a69d37dea3d26dcd3c3abeb44a17dd13a">mColorAdjustment</a>.brightness, <a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a69d37dea3d26dcd3c3abeb44a17dd13a.html#a69d37dea3d26dcd3c3abeb44a17dd13a">mColorAdjustment</a>.brightness);</div>
-<div class="line"><span class="lineno">  105</span>        <a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a69d37dea3d26dcd3c3abeb44a17dd13a.html#a69d37dea3d26dcd3c3abeb44a17dd13a">mColorAdjustment</a>.color = <a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">CRGB</a>(0xff, 0xff, 0xff);</div>
-<div class="line"><span class="lineno">  106</span><span class="preprocessor">        #endif</span></div>
-<div class="line"><span class="lineno">  107</span>    }</div>
-<div class="ttc" id="astruct_pixel_controller_a69d37dea3d26dcd3c3abeb44a17dd13a_html_a69d37dea3d26dcd3c3abeb44a17dd13a"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller_a69d37dea3d26dcd3c3abeb44a17dd13a.html#a69d37dea3d26dcd3c3abeb44a17dd13a">PixelController::mColorAdjustment</a></div><div class="ttdeci">ColorAdjustment mColorAdjustment</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00091">pixel_controller.h:91</a></div></div>
-<div class="ttc" id="astruct_pixel_controller_html"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller.html">PixelController</a></div><div class="ttdoc">Pixel controller class.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00083">pixel_controller.h:83</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00121">121</a> of file <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html">pixel_controller.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  121</span>                                  {</div>
+<div class="line"><span class="lineno">  122</span><span class="preprocessor">        #if FASTLED_HD_COLOR_MIXING</span></div>
+<div class="line"><span class="lineno">  123</span>        <a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a69d37dea3d26dcd3c3abeb44a17dd13a.html#a69d37dea3d26dcd3c3abeb44a17dd13a">mColorAdjustment</a>.premixed = <a class="code hl_typedef" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a>(<a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a69d37dea3d26dcd3c3abeb44a17dd13a.html#a69d37dea3d26dcd3c3abeb44a17dd13a">mColorAdjustment</a>.brightness, <a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a69d37dea3d26dcd3c3abeb44a17dd13a.html#a69d37dea3d26dcd3c3abeb44a17dd13a">mColorAdjustment</a>.brightness, <a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a69d37dea3d26dcd3c3abeb44a17dd13a.html#a69d37dea3d26dcd3c3abeb44a17dd13a">mColorAdjustment</a>.brightness);</div>
+<div class="line"><span class="lineno">  124</span>        <a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a69d37dea3d26dcd3c3abeb44a17dd13a.html#a69d37dea3d26dcd3c3abeb44a17dd13a">mColorAdjustment</a>.color = <a class="code hl_typedef" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a>(0xff, 0xff, 0xff);</div>
+<div class="line"><span class="lineno">  125</span><span class="preprocessor">        #endif</span></div>
+<div class="line"><span class="lineno">  126</span>    }</div>
+<div class="ttc" id="agroup___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327_html_ga65c1895006b38f8c5114118b6a170327"><div class="ttname"><a href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a></div><div class="ttdeci">fl::CRGB CRGB</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00025">crgb.h:25</a></div></div>
+<div class="ttc" id="astruct_pixel_controller_a69d37dea3d26dcd3c3abeb44a17dd13a_html_a69d37dea3d26dcd3c3abeb44a17dd13a"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller_a69d37dea3d26dcd3c3abeb44a17dd13a.html#a69d37dea3d26dcd3c3abeb44a17dd13a">PixelController::mColorAdjustment</a></div><div class="ttdeci">ColorAdjustment mColorAdjustment</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00110">pixel_controller.h:110</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00091">mColorAdjustment</a>.</p>
+<p class="reference">References <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00110">mColorAdjustment</a>.</p>
 
 </div>
 </div>
@@ -146,7 +146,7 @@ template&lt;<a class="el" href="../../d4/d36/namespacefl_ab289ace8bd149d39b87ebd
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d0/dee/struct_pixel_controller.html">PixelController</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

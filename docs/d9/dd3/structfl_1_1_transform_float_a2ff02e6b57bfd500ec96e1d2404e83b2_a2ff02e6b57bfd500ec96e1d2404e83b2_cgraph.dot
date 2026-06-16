@@ -10,7 +10,5 @@ digraph "fl::TransformFloat::set_scale_x"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="fl::TransformFloat\l::scale",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/dd3/structfl_1_1_transform_float_a61dc91e6cd05d9525fa7b2c4f0b931d0.html#a61dc91e6cd05d9525fa7b2c4f0b931d0",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::TransformFloat\l::scale_x",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/dd3/structfl_1_1_transform_float_a60cb2379981e606474eaf24864f23f80.html#a60cb2379981e606474eaf24864f23f80",tooltip=" "];
-  Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::TransformFloat\l::scale_y",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/dd3/structfl_1_1_transform_float_a973a01e92bb16876048a9c75925161c0.html#a973a01e92bb16876048a9c75925161c0",tooltip=" "];
+  Node3 [id="Node000003",label="fl::min",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb",tooltip=" "];
 }

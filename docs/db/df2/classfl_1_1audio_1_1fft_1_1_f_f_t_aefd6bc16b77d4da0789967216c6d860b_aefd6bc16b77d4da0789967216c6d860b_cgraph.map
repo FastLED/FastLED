@@ -1,0 +1,14 @@
+<map id="fl::audio::fft::FFT::setFFTCacheSize" name="fl::audio::fft::FFT::setFFTCacheSize">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,33,144,73"/>
+<area shape="rect" id="Node000002" href="$db/df2/classfl_1_1audio_1_1fft_1_1_f_f_t_a989918144d742422cc05fd3dde5f553e.html#a989918144d742422cc05fd3dde5f553e" title=" " alt="" coords="426,5,553,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="136,31,192,19,249,13,308,12,412,16,412,21,308,17,250,19,192,24,137,36"/>
+<area shape="rect" id="Node000004" href="$d2/d98/structfl_1_1audio_1_1fft_1_1_f_f_t_1_1_impl_cache_a33003065df54c535b957fccdd525fb61.html#a33003065df54c535b957fccdd525fb61" title=" " alt="" coords="192,33,375,73"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="144,51,178,51,178,56,144,56"/>
+<area shape="rect" id="Node000005" href="$db/df2/classfl_1_1audio_1_1fft_1_1_f_f_t_a32d66b4dcfcb7d94c346e3fe8e65472a.html#a32d66b4dcfcb7d94c346e3fe8e65472a" title=" " alt="" coords="220,97,347,137"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="141,71,207,91,206,96,140,76"/>
+<area shape="rect" id="Node000003" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="604,13,767,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="553,23,590,23,590,28,553,28"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="344,95,374,83,440,50,442,55,376,88,346,100"/>
+<area shape="rect" id="Node000006" href="$d2/d98/structfl_1_1audio_1_1fft_1_1_f_f_t_1_1_impl_cache_a6aaa22314e84ddebfb016fa03bb60859.html#a6aaa22314e84ddebfb016fa03bb60859" title=" " alt="" coords="423,97,556,137"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="347,115,409,115,409,120,347,120"/>
+</map>

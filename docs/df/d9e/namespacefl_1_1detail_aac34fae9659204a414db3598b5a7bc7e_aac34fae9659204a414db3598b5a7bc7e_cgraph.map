@@ -1,0 +1,6 @@
+<map id="fl::detail::get_hex_int_width&lt; 2 &gt;" name="fl::detail::get_hex_int_width&lt; 2 &gt;">
+<area shape="rect" id="Node000001" title="Specialization for 2&#45;byte types (int16_t, uint16_t, short, etc.)" alt="" coords="5,29,140,69"/>
+<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail_a511e6f071fcd8150275c9b329eec23d9.html#a511e6f071fcd8150275c9b329eec23d9" title="Compile&#45;time integer width determination (default &#45; triggers error)" alt="" coords="188,29,323,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="140,47,174,47,174,52,140,52"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="221,30,219,20,224,11,237,5,255,3,277,6,289,13,286,17,275,11,255,8,238,10,228,15,224,21,226,28"/>
+</map>

@@ -1,0 +1,20 @@
+<map id="CFastLED::add" name="CFastLED::add">
+<area shape="rect" id="Node000001" title="Add LED channel with runtime configuration (from ChannelConfig)" alt="" coords="5,89,120,114"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_ac1bc33cf75115ef770091396bbc57861.html#ac1bc33cf75115ef770091396bbc57861" title="Add a Channel&#45;based LED controller (from ChannelPtr)" alt="" coords="185,10,299,35"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="89,86,167,50,194,38,196,43,169,54,91,91"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a8aafd1d8ccf1aab536564352dd23d204.html#a8aafd1d8ccf1aab536564352dd23d204" title="Get the global ChannelManager singleton instance." alt="" coords="169,63,315,89"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="120,91,155,86,156,91,121,96"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_af7311066003d7e979ee864ea8e8c4b9b.html#af7311066003d7e979ee864ea8e8c4b9b" title="Register every channel driver available on this platform with ChannelManager, restoring 3...." alt="" coords="169,113,315,138"/>
+<area shape="poly" id="edge8_Node000001_Node000011" title=" " alt="" coords="121,106,156,111,155,116,120,112"/>
+<area shape="rect" id="Node000012" href="$d2/d6b/classfl_1_1_channel_manager_a9702b81a423bf2b2708c85c4bb485d61.html#a9702b81a423bf2b2708c85c4bb485d61" title="Get count of registered drivers (including unnamed ones)" alt="" coords="168,163,316,203"/>
+<area shape="poly" id="edge9_Node000001_Node000012" title=" " alt="" coords="92,112,169,148,183,155,181,159,167,153,89,117"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_a12da17ab4b0d4daed6ceb429d68ac5cf.html#a12da17ab4b0d4daed6ceb429d68ac5cf" title="stored ChannelPtrs to keep them alive" alt="" coords="364,9,512,34"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="300,20,350,19,350,25,300,25"/>
+<area shape="rect" id="Node000005" href="$d2/d6b/classfl_1_1_channel_manager_aed1be386f6b38cabd478d1d9c11c240c.html#aed1be386f6b38cabd478d1d9c11c240c" title="Get the global singleton instance." alt="" coords="364,59,512,99"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="316,74,350,75,350,80,316,80"/>
+<area shape="rect" id="Node000006" href="$d2/d6b/classfl_1_1_channel_manager_addc4b631522a2d44151c6b7c23a26ca1.html#addc4b631522a2d44151c6b7c23a26ca1" title="Constructor." alt="" coords="567,29,715,69"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="512,65,553,59,554,65,513,71"/>
+<area shape="rect" id="Node000010" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="560,94,723,119"/>
+<area shape="poly" id="edge7_Node000005_Node000010" title=" " alt="" coords="513,86,547,91,546,96,512,91"/>
+<area shape="poly" id="edge6_Node000006_Node000006" title=" " alt="" coords="603,30,601,20,607,11,621,5,641,3,665,6,678,13,675,18,663,11,641,8,622,10,610,15,606,21,608,28"/>
+</map>

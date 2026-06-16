@@ -1,0 +1,44 @@
+digraph "fl::span::empty"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::span::empty",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::base64_encode",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ad3e42d4adbe2315c61901d31c232be28.html#ad3e42d4adbe2315c61901d31c232be28",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::detail::TypeToJson\l\< fl::vector\< fl::u8 \>\l \>::convert",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d63/structfl_1_1detail_1_1_type_to_json_3_01fl_1_1vector_3_01fl_1_1u8_01_4_01_4_a8353ba6c2dc086e0506c8db3e0433f88.html#a8353ba6c2dc086e0506c8db3e0433f88",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::SPITransposer::\lgetLaneByte",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dfa/classfl_1_1_s_p_i_transposer_ab6ee4d2f7057e6599a6bc4dd730d834a.html#ab6ee4d2f7057e6599a6bc4dd730d834a",tooltip="Get byte from lane at given index, handling padding automatically."];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::SPITransposer::\ltranspose16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dfa/classfl_1_1_s_p_i_transposer_a8182f9233ebc9f7e54a3eff0b9866f8f.html#a8182f9233ebc9f7e54a3eff0b9866f8f",tooltip="Transpose 16 lanes of data into interleaved hex-SPI format."];
+  Node4 -> Node6 [id="edge5_Node000004_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::SPITransposer::\ltranspose2",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dfa/classfl_1_1_s_p_i_transposer_ab685cdd1edcc4b507a91d7dbfd5ba41b.html#ab685cdd1edcc4b507a91d7dbfd5ba41b",tooltip="Transpose 2 lanes of data into interleaved dual-SPI format."];
+  Node6 -> Node7 [id="edge6_Node000006_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::spi::MultiLaneDevice\l::flush",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a97018959f2c77546fa12f2a0adb2f540.html#a97018959f2c77546fa12f2a0adb2f540",tooltip="Flush all lanes (transpose and transmit)"];
+  Node4 -> Node11 [id="edge7_Node000004_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::SPITransposer::\ltranspose4",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dfa/classfl_1_1_s_p_i_transposer_a409565f20b2d6f03c19989cc7a53b91d.html#a409565f20b2d6f03c19989cc7a53b91d",tooltip="Transpose 4 lanes of data into interleaved quad-SPI format."];
+  Node11 -> Node7 [id="edge8_Node000011_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 -> Node12 [id="edge9_Node000004_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::SPITransposer::\ltranspose8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dfa/classfl_1_1_s_p_i_transposer_a33641c518e945549b98264fed476ff12.html#a33641c518e945549b98264fed476ff12",tooltip="Transpose 8 lanes of data into interleaved octal-SPI format."];
+  Node12 -> Node7 [id="edge10_Node000012_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node13 [id="edge11_Node000001_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::StringInterner\l::intern",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/de7/classfl_1_1_string_interner_ae5953e2cf196594e80bfced9f27c8d53.html#ae5953e2cf196594e80bfced9f27c8d53",tooltip=" "];
+  Node1 -> Node14 [id="edge12_Node000001_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::audio::Reactive\l::mapFFTBinsToFrequencyChannels",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dea/classfl_1_1audio_1_1_reactive_a9f358b9c97f3073c24d412380256ba61.html#a9f358b9c97f3073c24d412380256ba61",tooltip=" "];
+  Node14 -> Node15 [id="edge13_Node000014_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl::audio::Reactive\l::processFFT",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dea/classfl_1_1audio_1_1_reactive_a711ce57334bad9aa608f425fba0f263e.html#a711ce57334bad9aa608f425fba0f263e",tooltip=" "];
+  Node15 -> Node16 [id="edge14_Node000015_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::audio::Reactive\l::processSample",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dea/classfl_1_1audio_1_1_reactive_a48123bbd9e966e23844167addbabc3ff.html#a48123bbd9e966e23844167addbabc3ff",tooltip=" "];
+  Node1 -> Node17 [id="edge15_Node000001_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl::FontRenderer::measure\lString",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/db8/classfl_1_1_font_renderer_ab05cccca03e2d2576c86190153dea5c5.html#ab05cccca03e2d2576c86190153dea5c5",tooltip=" "];
+  Node1 -> Node18 [id="edge16_Node000001_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="fl::Gif::parseGifInfo",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/ded/classfl_1_1_gif_a2f3f9bb86be2519d35a36ba1627f156b.html#a2f3f9bb86be2519d35a36ba1627f156b",tooltip=" "];
+  Node1 -> Node19 [id="edge17_Node000001_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl::Mp3::parseMp3Info",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d66/classfl_1_1_mp3_a05c327e508e430bc8959024aa100d1ab.html#a05c327e508e430bc8959024aa100d1ab",tooltip=" "];
+  Node1 -> Node20 [id="edge18_Node000001_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="fl::Mpeg1::parseMpeg1Info",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d7f/classfl_1_1_mpeg1_abbf8b5f359b804b02d10042a2036cfe1.html#abbf8b5f359b804b02d10042a2036cfe1",tooltip=" "];
+}

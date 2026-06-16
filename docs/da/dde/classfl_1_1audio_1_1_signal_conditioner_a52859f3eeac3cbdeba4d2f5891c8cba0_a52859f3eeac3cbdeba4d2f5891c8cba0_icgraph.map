@@ -1,0 +1,7 @@
+<map id="fl::audio::SignalConditioner::applyNoiseGate" name="fl::audio::SignalConditioner::applyNoiseGate">
+<area shape="rect" id="Node000001" title="Apply noise gate with hysteresis." alt="" coords="496,5,693,45"/>
+<area shape="rect" id="Node000002" href="$da/dde/classfl_1_1audio_1_1_signal_conditioner_a846d5792e5776acb968fd0a6949f4e89.html#a846d5792e5776acb968fd0a6949f4e89" title="Process a raw audio sample through the conditioning pipeline." alt="" coords="251,5,448,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="482,28,448,28,448,23,482,23"/>
+<area shape="rect" id="Node000003" href="$da/dde/classfl_1_1audio_1_1_signal_conditioner_a18f04ba87304aa7c24cb622d1e109ac2.html#a18f04ba87304aa7c24cb622d1e109ac2" title=" " alt="" coords="5,5,203,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="237,28,203,28,203,23,237,23"/>
+</map>

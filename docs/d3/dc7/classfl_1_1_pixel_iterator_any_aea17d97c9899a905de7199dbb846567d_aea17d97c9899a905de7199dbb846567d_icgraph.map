@@ -1,0 +1,7 @@
+<map id="fl::PixelIteratorAny::init" name="fl::PixelIteratorAny::init">
+<area shape="rect" id="Node000001" title="Initialize the adapter with color order conversion." alt="" coords="196,37,339,77"/>
+<area shape="rect" id="Node000002" href="$d3/dc7/classfl_1_1_pixel_iterator_any_ab136b28e1a8d9f512d9ee5d97357ccc8.html#ab136b28e1a8d9f512d9ee5d97357ccc8" title=" " alt="" coords="5,5,148,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="182,46,148,40,149,35,183,41"/>
+<area shape="rect" id="Node000003" href="$d3/dc7/classfl_1_1_pixel_iterator_any_ac0406f961031d4acae7cf2233bab13f8.html#ac0406f961031d4acae7cf2233bab13f8" title="Construct adapter with color order conversion." alt="" coords="5,69,148,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="183,74,149,80,148,75,182,69"/>
+</map>

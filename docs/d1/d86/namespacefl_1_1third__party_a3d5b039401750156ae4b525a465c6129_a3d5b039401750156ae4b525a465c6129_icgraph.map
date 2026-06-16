@@ -1,0 +1,15 @@
+<map id="fl::third_party::gif__clip" name="fl::third_party::gif__clip">
+<area shape="rect" id="Node000001" title="Get any frame clip adjustment for the image extent." alt="" coords="593,69,727,109"/>
+<area shape="rect" id="Node000002" href="$d1/d86/namespacefl_1_1third__party_af738855721b8fcadf601cfc4f8c913bf.html#af738855721b8fcadf601cfc4f8c913bf" title=" " alt="" coords="397,5,545,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="587,67,530,48,532,43,588,62"/>
+<area shape="rect" id="Node000012" href="$d1/d86/namespacefl_1_1third__party_a18f717ffc188f7182fed1b0f5afba660.html#a18f717ffc188f7182fed1b0f5afba660" title=" " alt="" coords="397,69,545,109"/>
+<area shape="poly" id="edge4_Node000001_Node000012" title=" " alt="" coords="580,92,546,92,546,87,580,87"/>
+<area shape="rect" id="Node000013" href="$d1/d86/namespacefl_1_1third__party_a108ec14c65bed42bcf15eb5f52991303.html#a108ec14c65bed42bcf15eb5f52991303" title="Restore a GIF to the background colour." alt="" coords="201,127,349,167"/>
+<area shape="poly" id="edge6_Node000001_Node000013" title=" " alt="" coords="583,116,546,124,444,138,350,146,349,141,443,133,545,119,581,110"/>
+<area shape="rect" id="Node000003" href="$d1/d86/namespacefl_1_1third__party_a8fc287776053178bc35887d52d498f11.html#a8fc287776053178bc35887d52d498f11" title=" " alt="" coords="201,63,349,103"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="390,52,345,65,344,60,389,47"/>
+<area shape="rect" id="Node000004" href="$d1/d86/namespacefl_1_1third__party_aa9b6d03b719534d98113784d4ad52b3f.html#aa9b6d03b719534d98113784d4ad52b3f" title=" " alt="" coords="5,95,153,135"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="188,100,154,105,153,100,187,94"/>
+<area shape="poly" id="edge5_Node000012_Node000003" title=" " alt="" coords="383,89,350,88,350,83,383,84"/>
+<area shape="poly" id="edge7_Node000013_Node000004" title=" " alt="" coords="187,135,153,129,154,124,188,130"/>
+</map>

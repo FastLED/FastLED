@@ -6,5 +6,9 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::unique_ptr\< T,\l Deleter \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d2e/classfl_1_1unique__ptr.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::fl::callable_traits\l\< decltype(&T::operator())\>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d3c/namespacefl_1_1fl.html",tooltip=" "];
+  Node0 -> Node1 [id="edge161_Node000000_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 [id="Node000001",label="fl::callable_traits\l\< T, typename enable\l_if\< is_member_function\l_pointer\< decltype(&T::\loperator())\>::value \>::type \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d70/structfl_1_1callable__traits_3_01_t_00_01typename_01enable__if_3_01is__member__function__pointer65f1b3b0e87f6c6e9a19e7685d261d87.html",tooltip=" "];
+  Node0 -> Node2 [id="edge162_Node000000_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::fl::callable_traits\l\< T, typename enable_if\l\< is_member_function_pointer\l\< decltype(&T::operator())\>\l::value \>::type \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d92/structfl_1_1fl_1_1callable__traits_3_01_t_00_01typename_01enable__if_3_01is__member__function__pdd9477073876afb981a754c3dce42748.html",tooltip=" "];
 }

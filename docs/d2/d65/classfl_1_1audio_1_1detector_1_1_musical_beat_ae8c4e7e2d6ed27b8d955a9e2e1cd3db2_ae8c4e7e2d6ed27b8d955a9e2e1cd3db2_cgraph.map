@@ -1,0 +1,9 @@
+<map id="fl::audio::detector::MusicalBeat::updateBPMEstimate" name="fl::audio::detector::MusicalBeat::updateBPMEstimate">
+<area shape="rect" id="Node000001" title="Update BPM estimate from inter&#45;beat intervals." alt="" coords="5,63,256,103"/>
+<area shape="rect" id="Node000002" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_aa892bcc192e2ecd6b2031c290f4b7725.html#aa892bcc192e2ecd6b2031c290f4b7725" title="Get inter&#45;beat interval (IBI) statistics." alt="" coords="304,5,513,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="228,60,297,46,298,51,229,65"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="375,70,442,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="256,80,361,80,361,85,256,85"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="377,119,440,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="244,100,364,122,363,127,244,105"/>
+</map>

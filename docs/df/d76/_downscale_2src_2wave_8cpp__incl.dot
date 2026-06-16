@@ -1,0 +1,48 @@
+digraph "/home/runner/work/FastLED/FastLED/examples/Downscale/src/wave.cpp"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="/home/runner/work/FastLED\l/FastLED/examples/Downscale\l/src/wave.cpp",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="FastLED.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="wave.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d79/examples_2_downscale_2src_2wave_8h.html",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl/fx/2d/blend.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d4e/blend_8h.html",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl/stl/stdint.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/dd8/stdint_8h.html",tooltip=" "];
+  Node4 -> Node7 [id="edge5_Node000004_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl/fx/fx2d.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d9/d43/fx2d_8h.html",tooltip=" "];
+  Node7 -> Node5 [id="edge6_Node000007_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node8 [id="edge7_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl/stl/shared_ptr.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/d6a/shared__ptr_8h.html",tooltip=" "];
+  Node8 -> Node11 [id="edge8_Node000008_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl/stl/noexcept.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d01/noexcept_8h.html",tooltip=" "];
+  Node7 -> Node23 [id="edge9_Node000007_Node000023",color="steelblue1",style="solid",tooltip=" "];
+  Node23 [id="Node000023",label="fl/math/xymap.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/d61/xymap_8h.html",tooltip=" "];
+  Node23 -> Node11 [id="edge10_Node000023_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node4 -> Node11 [id="edge11_Node000004_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node59 [id="edge12_Node000003_Node000059",color="steelblue1",style="solid",tooltip=" "];
+  Node59 [id="Node000059",label="fl/fx/2d/wave.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d50/src_2fl_2fx_22d_2wave_8h.html",tooltip="2D wave simulation effect for LED matrices"];
+  Node59 -> Node5 [id="edge13_Node000059_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node59 -> Node60 [id="edge14_Node000059_Node000060",color="steelblue1",style="solid",tooltip=" "];
+  Node60 [id="Node000060",label="fl/gfx/gradient.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/dfe/gradient_8h.html",tooltip=" "];
+  Node60 -> Node11 [id="edge15_Node000060_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node59 -> Node8 [id="edge16_Node000059_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node59 -> Node113 [id="edge17_Node000059_Node000113",color="steelblue1",style="solid",tooltip=" "];
+  Node113 [id="Node000113",label="fl/math/wave/wave_simulation.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dc/d36/wave__simulation_8h.html",tooltip=" "];
+  Node113 -> Node11 [id="edge18_Node000113_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node59 -> Node23 [id="edge19_Node000059_Node000023",color="steelblue1",style="solid",tooltip=" "];
+  Node59 -> Node7 [id="edge20_Node000059_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node59 -> Node11 [id="edge21_Node000059_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node7 [id="edge22_Node000003_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node117 [id="edge23_Node000003_Node000117",color="steelblue1",style="solid",tooltip=" "];
+  Node117 [id="Node000117",label="fl/gfx/raster.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d1e/raster_8h.html",tooltip=" "];
+  Node117 -> Node118 [id="edge24_Node000117_Node000118",color="steelblue1",style="solid",tooltip=" "];
+  Node118 [id="Node000118",label="fl/gfx/raster_sparse.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/df9/raster__sparse_8h.html",tooltip=" "];
+  Node118 -> Node23 [id="edge25_Node000118_Node000023",color="steelblue1",style="solid",tooltip=" "];
+  Node118 -> Node11 [id="edge26_Node000118_Node000011",color="steelblue1",style="solid",tooltip=" "];
+}

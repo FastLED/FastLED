@@ -1,0 +1,16 @@
+digraph "fl::net::http::fetch_active_requests"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::net::http::fetch\l_active_requests",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Get number of active requests."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::net::http::FetchManager\l::active_requests",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d80/classfl_1_1net_1_1http_1_1_fetch_manager_abf7db43b2ff0539639e01e9cbcdc4f35.html#abf7db43b2ff0539639e01e9cbcdc4f35",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::net::http::FetchManager\l::instance",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d80/classfl_1_1net_1_1http_1_1_fetch_manager_a7a8234baff179d381ac1bb12a05cd194.html#a7a8234baff179d381ac1bb12a05cd194",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::Singleton::instance",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01",tooltip=" "];
+}

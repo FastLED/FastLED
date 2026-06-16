@@ -1,0 +1,11 @@
+<map id="fl::perlin_i16_optimized::pnoise2d_raw" name="fl::perlin_i16_optimized::pnoise2d_raw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,101,180,141"/>
+<area shape="rect" id="Node000002" href="$d5/dab/structfl_1_1perlin__i16__optimized_ae8ec49d465d7ac5bbc9a30a2cc6e9739.html#ae8ec49d465d7ac5bbc9a30a2cc6e9739" title=" " alt="" coords="228,5,403,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="133,99,227,55,244,48,246,53,229,60,135,103"/>
+<area shape="rect" id="Node000003" href="$d5/dab/structfl_1_1perlin__i16__optimized_a1546e36752b31ead2c70f610851e47ae.html#a1546e36752b31ead2c70f610851e47ae" title=" " alt="" coords="228,69,403,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="180,106,214,101,215,106,181,111"/>
+<area shape="rect" id="Node000004" href="$d5/dab/structfl_1_1perlin__i16__optimized_a4e027e60f12fa90ba577c1486fbf7a46.html#a4e027e60f12fa90ba577c1486fbf7a46" title=" " alt="" coords="228,133,403,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="181,131,215,136,214,142,180,137"/>
+<area shape="rect" id="Node000005" href="$d5/dab/structfl_1_1perlin__i16__optimized_ac42e9f0114a4bd7e226cb757dd9bc7f1.html#ac42e9f0114a4bd7e226cb757dd9bc7f1" title=" " alt="" coords="228,197,403,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="135,139,229,183,246,190,244,195,227,188,133,144"/>
+</map>

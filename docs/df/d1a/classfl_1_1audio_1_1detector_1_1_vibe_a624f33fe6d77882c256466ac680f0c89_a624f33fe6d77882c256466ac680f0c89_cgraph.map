@@ -1,0 +1,16 @@
+<map id="fl::audio::detector::Vibe::update" name="fl::audio::detector::Vibe::update">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,99,141,139"/>
+<area shape="poly" id="edge7_Node000001_Node000001" title=" " alt="" coords="34,99,31,89,38,80,52,74,73,72,98,75,111,82,109,87,96,80,73,77,53,79,41,84,37,90,39,98"/>
+<area shape="rect" id="Node000002" href="$df/d1a/classfl_1_1audio_1_1detector_1_1_vibe_acee3233cb48550333ad72d46a96fcd25.html#acee3233cb48550333ad72d46a96fcd25" title=" " alt="" coords="217,5,353,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,96,188,55,206,48,208,53,190,60,110,101"/>
+<area shape="rect" id="Node000003" href="$df/d1a/classfl_1_1audio_1_1detector_1_1_vibe_aaca6d10e09a7383a1b42af847297c245.html#aaca6d10e09a7383a1b42af847297c245" title=" " alt="" coords="197,69,372,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="141,107,183,101,184,106,142,112"/>
+<area shape="rect" id="Node000008" href="$db/dbf/namespacefl_1_1audio_a7189558c538537464f1d31c91596631d.html#a7189558c538537464f1d31c91596631d" title="Compute the time delta (in seconds) for an audio buffer." alt="" coords="189,134,380,159"/>
+<area shape="poly" id="edge5_Node000001_Node000008" title=" " alt="" coords="142,125,176,130,175,135,141,130"/>
+<area shape="rect" id="Node000009" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="233,183,336,209"/>
+<area shape="poly" id="edge6_Node000001_Node000009" title=" " alt="" coords="116,136,190,168,221,178,219,183,188,173,114,141"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a20736f8f6d31db2c6ac9b4def3b1a80a.html#a20736f8f6d31db2c6ac9b4def3b1a80a" title=" " alt="" coords="428,77,499,102"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="372,87,414,87,414,92,372,92"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a96f5f2dd80fb8deeb8997822bedd433f.html#a96f5f2dd80fb8deeb8997822bedd433f" title=" " alt="" coords="547,77,684,102"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="499,87,533,87,533,92,499,92"/>
+</map>

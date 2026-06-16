@@ -1,0 +1,14 @@
+<map id="fl::HttpConnection::transitionTo" name="fl::HttpConnection::transitionTo">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,54,144,94"/>
+<area shape="rect" id="Node000002" href="$d7/d5f/classfl_1_1_http_connection_a5771485770bb65873ba278d1806af6e3.html#a5771485770bb65873ba278d1806af6e3" title=" " alt="" coords="200,22,375,62"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="144,61,186,55,187,60,145,66"/>
+<area shape="rect" id="Node000029" href="$d7/d5f/classfl_1_1_http_connection_a9f989774f6254b213699ab4cd688d858.html#a9f989774f6254b213699ab4cd688d858" title=" " alt="" coords="192,86,383,126"/>
+<area shape="poly" id="edge5_Node000001_Node000029" title=" " alt="" coords="145,82,179,87,178,92,144,87"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27" title="Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all..." alt="" coords="476,29,551,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="375,39,462,39,462,45,375,45"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="479,31,472,21,476,11,490,5,513,3,542,6,554,15,550,20,540,11,513,8,491,10,479,15,477,20,483,28"/>
+<area shape="rect" id="Node000004" href="$df/d9e/namespacefl_1_1detail_abd6e1e8189dbbbf28d720923205bd0dd.html#abd6e1e8189dbbbf28d720923205bd0dd" title="Internal delay implementation used by the public fl::delay wrapper." alt="" coords="644,29,799,55"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="551,39,630,39,630,45,551,45"/>
+<area shape="rect" id="Node000030" href="$d7/d5f/classfl_1_1_http_connection_afec0714bfaf76f6dd676f76f5faa8c43.html#afec0714bfaf76f6dd676f76f5faa8c43" title=" " alt="" coords="431,86,596,126"/>
+<area shape="poly" id="edge6_Node000029_Node000030" title=" " alt="" coords="383,103,417,103,417,109,383,109"/>
+</map>

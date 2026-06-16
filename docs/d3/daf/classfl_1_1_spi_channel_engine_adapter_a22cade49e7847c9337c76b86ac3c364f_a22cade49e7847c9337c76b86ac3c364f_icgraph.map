@@ -1,0 +1,11 @@
+<map id="fl::SpiChannelEngineAdapter::SpiChannelEngineAdapter" name="fl::SpiChannelEngineAdapter::SpiChannelEngineAdapter">
+<area shape="rect" id="Node000001" title="Private constructor &#45; use create() factory method." alt="" coords="260,101,467,141"/>
+<area shape="rect" id="Node000002" href="$d3/daf/classfl_1_1_spi_channel_engine_adapter_a21b05e07e1380815424a389ee9bf6433.html#a21b05e07e1380815424a389ee9bf6433" title=" " alt="" coords="5,5,212,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="304,98,211,60,176,48,178,43,213,55,307,93"/>
+<area shape="rect" id="Node000003" href="$d3/daf/classfl_1_1_spi_channel_engine_adapter_a4167c87d8b314a08c2d3391d948e6b08.html#a4167c87d8b314a08c2d3391d948e6b08" title=" " alt="" coords="5,69,212,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="246,109,212,105,213,100,247,104"/>
+<area shape="rect" id="Node000004" href="$d3/daf/classfl_1_1_spi_channel_engine_adapter_a440b7d97005e0ef73b9a794fa061b663.html#a440b7d97005e0ef73b9a794fa061b663" title=" " alt="" coords="5,133,212,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="247,139,213,143,212,138,246,133"/>
+<area shape="rect" id="Node000005" href="$d3/daf/classfl_1_1_spi_channel_engine_adapter_a7430d5e937784361f84c97254390bc07.html#a7430d5e937784361f84c97254390bc07" title=" " alt="" coords="5,197,212,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="307,149,213,188,178,200,176,195,211,183,304,145"/>
+</map>

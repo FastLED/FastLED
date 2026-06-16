@@ -1,0 +1,50 @@
+digraph "fl::make_tuple"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::make_tuple",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::Rpc::bindAsync",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dd1/classfl_1_1_rpc_af0c0d7b6410f120603f256edfd27649a.html#af0c0d7b6410f120603f256edfd27649a",tooltip="Bind async method with ResponseSend& parameter (for ASYNC/ASYNC_STREAM modes) Signature: void(Respons..."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::detail::JsonToType\l::convert",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d8e/structfl_1_1detail_1_1_json_to_type_a95c296afbad272cd567858021e9e5156.html#a95c296afbad272cd567858021e9e5156",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::detail::JsonToType\l\< fl::ConstCharPtrWrapper,\l void \>::convert",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/da6/structfl_1_1detail_1_1_json_to_type_3_01fl_1_1_const_char_ptr_wrapper_00_01void_01_4_a038e8de6da7fe83813446ede25af8ade.html#a038e8de6da7fe83813446ede25af8ade",tooltip=" "];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::detail::JsonToType\l\< fl::ConstSpanWrapper\l\< T \>, void \>::convert",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d6b/structfl_1_1detail_1_1_json_to_type_3_01fl_1_1_const_span_wrapper_3_01_t_01_4_00_01void_01_4_a05fec1dab73106d306c437eed8bd2242.html#a05fec1dab73106d306c437eed8bd2242",tooltip=" "];
+  Node3 -> Node6 [id="edge5_Node000003_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::detail::JsonToType\l\< fl::vector\< fl::u8 \>\l, void \>::convert",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d90/structfl_1_1detail_1_1_json_to_type_3_01fl_1_1vector_3_01fl_1_1u8_01_4_00_01void_01_4_a190122f0d31e82490b868e78571d0012.html#a190122f0d31e82490b868e78571d0012",tooltip=" "];
+  Node3 -> Node7 [id="edge6_Node000003_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::detail::JsonToType\l\< fl::vector\< T \>, void\l \>::convert",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d67/structfl_1_1detail_1_1_json_to_type_3_01fl_1_1vector_3_01_t_01_4_00_01void_01_4_ad700ae3154e169a4d9400abc90f05181.html#ad700ae3154e169a4d9400abc90f05181",tooltip=" "];
+  Node1 -> Node8 [id="edge7_Node000001_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::detail::JsonToType\l\< bool, void \>::convert",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d95/structfl_1_1detail_1_1_json_to_type_3_01bool_00_01void_01_4_a990cb506cf2a5097340e15acfbd0debd.html#a990cb506cf2a5097340e15acfbd0debd",tooltip=" "];
+  Node1 -> Node4 [id="edge8_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node5 [id="edge9_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node9 [id="edge10_Node000001_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::detail::JsonToType\l\< fl::json, void \>::convert",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/dfb/structfl_1_1detail_1_1_json_to_type_3_01fl_1_1json_00_01void_01_4_ab7531eb7c36ce6770041245896586149.html#ab7531eb7c36ce6770041245896586149",tooltip=" "];
+  Node1 -> Node10 [id="edge11_Node000001_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::detail::JsonToType\l\< fl::string, void \>::\lconvert",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dd5/structfl_1_1detail_1_1_json_to_type_3_01fl_1_1string_00_01void_01_4_a3b95a2e40f56404eaba0b2fbab5be410.html#a3b95a2e40f56404eaba0b2fbab5be410",tooltip=" "];
+  Node1 -> Node6 [id="edge12_Node000001_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node7 [id="edge13_Node000001_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node11 [id="edge14_Node000001_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::detail::JsonToType\l\< T, typename fl::enable\l_if\< fl::is_floating_point\l\< T \>::value \>::type \>::convert",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d65/structfl_1_1detail_1_1_json_to_type_3_01_t_00_01typename_01fl_1_1enable__if_3_01fl_1_1is__floati4f7131590a308462903318a8456f8a0a_aa81f7d0a1c6761fc6d1d626c6d277961.html#aa81f7d0a1c6761fc6d1d626c6d277961",tooltip=" "];
+  Node1 -> Node12 [id="edge15_Node000001_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::detail::JsonToType\l\< T, typename fl::enable\l_if\< fl::is_integral\< T\l \>::value &&!fl::is_same\l\< T, bool \>::value \>::type\l \>::convert",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d6d/structfl_1_1detail_1_1_json_to_type_3_01_t_00_01typename_01fl_1_1enable__if_3_01fl_1_1is__integrb61ac40ff3cd50738ee6844952e661f6_a246a38b2ffe26d7b9e52dd371640453b.html#a246a38b2ffe26d7b9e52dd371640453b",tooltip=" "];
+  Node1 -> Node13 [id="edge16_Node000001_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::JsonArgConverter\l\< R()\>::convert",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d13/classfl_1_1_json_arg_converter_3_01_r_07_08_4_ade4b3d9799cb9c0035186106173d4323.html#ade4b3d9799cb9c0035186106173d4323",tooltip=" "];
+  Node1 -> Node14 [id="edge17_Node000001_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::ScopedTrace::dump",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/da7/classfl_1_1_scoped_trace_ac57c024467d07e0ad6b2f163cb0d0d87.html#ac57c024467d07e0ad6b2f163cb0d0d87",tooltip="Dump the current call stack to an inlined vector of TracePoints."];
+  Node1 -> Node15 [id="edge18_Node000001_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl::Rpc::handle",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dd1/classfl_1_1_rpc_a16bb9675b8d15f3713e49fbb5a8b05a3.html#a16bb9675b8d15f3713e49fbb5a8b05a3",tooltip="Process a JSON-RPC request."];
+  Node15 -> Node16 [id="edge19_Node000015_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::Rpc::handle_maybe",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dd1/classfl_1_1_rpc_acfc87927e9e6affe54e4f2861adac5fd.html#acfc87927e9e6affe54e4f2861adac5fd",tooltip="For notifications (no id), returns nullopt."];
+  Node1 -> Node17 [id="edge20_Node000001_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl::detail::ResponseAware\lInvoker\< void(Args...)\>\l::invoke",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d87/classfl_1_1detail_1_1_response_aware_invoker_3_01void_07_args_8_8_8_08_4_ad1c280c134f699e63cf20bea092fc3c7.html#ad1c280c134f699e63cf20bea092fc3c7",tooltip=" "];
+  Node1 -> Node18 [id="edge21_Node000001_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="fl::detail::TypedInvoker\l\< void(Args...)\>::invoke",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d77/classfl_1_1detail_1_1_typed_invoker_3_01void_07_args_8_8_8_08_4_a5aca776943245d3b9a52049fc4d70640.html#a5aca776943245d3b9a52049fc4d70640",tooltip=" "];
+  Node1 -> Node19 [id="edge22_Node000001_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl::TypedRpcBinding\l\< R(Args...)\>::invokeWithReturn",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d7c/classfl_1_1_typed_rpc_binding_3_01_r_07_args_8_8_8_08_4_a28e5b6b738196d019be330319d4ee92c.html#a28e5b6b738196d019be330319d4ee92c",tooltip=" "];
+}

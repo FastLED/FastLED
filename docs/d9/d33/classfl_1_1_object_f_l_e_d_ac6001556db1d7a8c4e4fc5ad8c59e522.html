@@ -105,9 +105,6 @@ $(function(){initNavTree('d9/d33/classfl_1_1_object_f_l_e_d_ac6001556db1d7a8c4e4
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">fl::ObjectFLED::~ObjectFLED </td>
@@ -116,26 +113,7 @@ $(function(){initNavTree('d9/d33/classfl_1_1_object_f_l_e_d_ac6001556db1d7a8c4e4
           <td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="../../de/d7a/_object_f_l_e_d_8h_source.html#l00113">113</a> of file <a class="el" href="../../de/d7a/_object_f_l_e_d_8h_source.html">ObjectFLED.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  113</span>                  { </div>
-<div class="line"><span class="lineno">  114</span>        <span class="comment">// Wait for prior xmission to end, don&#39;t need to wait for latch time before deleting buffer</span></div>
-<div class="line"><span class="lineno">  115</span>        <span class="keywordflow">while</span> (micros() - <a class="code hl_variable" href="../../d9/d33/classfl_1_1_object_f_l_e_d_a41b8b84a041027b4147f29057780be95.html#a41b8b84a041027b4147f29057780be95">update_begin_micros</a> &lt; <a class="code hl_variable" href="../../d9/d33/classfl_1_1_object_f_l_e_d_a14dd418554d8c095d34c9ed927f74815.html#a14dd418554d8c095d34c9ed927f74815">numbytes</a> * 8 * <a class="code hl_variable" href="../../d9/d33/classfl_1_1_object_f_l_e_d_aa13ba2fde287a9081f134312823034d9.html#aa13ba2fde287a9081f134312823034d9">TH_TL</a> / <a class="code hl_variable" href="../../d9/d33/classfl_1_1_object_f_l_e_d_a4547acd7ebfaa61f464b72af99ae2b8f.html#a4547acd7ebfaa61f464b72af99ae2b8f">OC_FACTOR</a> / 1000 + 5);</div>
-<div class="line"><span class="lineno">  116</span>        <span class="keyword">delete</span> <a class="code hl_variable" href="../../d9/d33/classfl_1_1_object_f_l_e_d_ae2263c2d1e824abe715154f197c4bc74.html#ae2263c2d1e824abe715154f197c4bc74">frameBuffer</a>; </div>
-<div class="line"><span class="lineno">  117</span>    }</div>
-<div class="ttc" id="aclassfl_1_1_object_f_l_e_d_a14dd418554d8c095d34c9ed927f74815_html_a14dd418554d8c095d34c9ed927f74815"><div class="ttname"><a href="../../d9/d33/classfl_1_1_object_f_l_e_d_a14dd418554d8c095d34c9ed927f74815.html#a14dd418554d8c095d34c9ed927f74815">fl::ObjectFLED::numbytes</a></div><div class="ttdeci">static uint32_t numbytes</div><div class="ttdef"><b>Definition</b> <a href="../../de/d7a/_object_f_l_e_d_8h_source.html#l00157">ObjectFLED.h:157</a></div></div>
-<div class="ttc" id="aclassfl_1_1_object_f_l_e_d_a41b8b84a041027b4147f29057780be95_html_a41b8b84a041027b4147f29057780be95"><div class="ttname"><a href="../../d9/d33/classfl_1_1_object_f_l_e_d_a41b8b84a041027b4147f29057780be95.html#a41b8b84a041027b4147f29057780be95">fl::ObjectFLED::update_begin_micros</a></div><div class="ttdeci">uint32_t update_begin_micros</div><div class="ttdef"><b>Definition</b> <a href="../../de/d7a/_object_f_l_e_d_8h_source.html#l00166">ObjectFLED.h:166</a></div></div>
-<div class="ttc" id="aclassfl_1_1_object_f_l_e_d_a4547acd7ebfaa61f464b72af99ae2b8f_html_a4547acd7ebfaa61f464b72af99ae2b8f"><div class="ttname"><a href="../../d9/d33/classfl_1_1_object_f_l_e_d_a4547acd7ebfaa61f464b72af99ae2b8f.html#a4547acd7ebfaa61f464b72af99ae2b8f">fl::ObjectFLED::OC_FACTOR</a></div><div class="ttdeci">float OC_FACTOR</div><div class="ttdef"><b>Definition</b> <a href="../../de/d7a/_object_f_l_e_d_8h_source.html#l00178">ObjectFLED.h:178</a></div></div>
-<div class="ttc" id="aclassfl_1_1_object_f_l_e_d_aa13ba2fde287a9081f134312823034d9_html_aa13ba2fde287a9081f134312823034d9"><div class="ttname"><a href="../../d9/d33/classfl_1_1_object_f_l_e_d_aa13ba2fde287a9081f134312823034d9.html#aa13ba2fde287a9081f134312823034d9">fl::ObjectFLED::TH_TL</a></div><div class="ttdeci">uint16_t TH_TL</div><div class="ttdef"><b>Definition</b> <a href="../../de/d7a/_object_f_l_e_d_8h_source.html#l00179">ObjectFLED.h:179</a></div></div>
-<div class="ttc" id="aclassfl_1_1_object_f_l_e_d_ae2263c2d1e824abe715154f197c4bc74_html_ae2263c2d1e824abe715154f197c4bc74"><div class="ttname"><a href="../../d9/d33/classfl_1_1_object_f_l_e_d_ae2263c2d1e824abe715154f197c4bc74.html#ae2263c2d1e824abe715154f197c4bc74">fl::ObjectFLED::frameBuffer</a></div><div class="ttdeci">static uint8_t * frameBuffer</div><div class="ttdef"><b>Definition</b> <a href="../../de/d7a/_object_f_l_e_d_8h_source.html#l00156">ObjectFLED.h:156</a></div></div>
-</div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../de/d7a/_object_f_l_e_d_8h_source.html#l00156">frameBuffer</a>, <a class="el" href="../../de/d7a/_object_f_l_e_d_8h_source.html#l00157">numbytes</a>, <a class="el" href="../../de/d7a/_object_f_l_e_d_8h_source.html#l00178">OC_FACTOR</a>, <a class="el" href="../../de/d7a/_object_f_l_e_d_8h_source.html#l00179">TH_TL</a>, and <a class="el" href="../../de/d7a/_object_f_l_e_d_8h_source.html#l00166">update_begin_micros</a>.</p>
 
 </div>
 </div>
@@ -146,7 +124,7 @@ $(function(){initNavTree('d9/d33/classfl_1_1_object_f_l_e_d_ac6001556db1d7a8c4e4
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d9/d33/classfl_1_1_object_f_l_e_d.html">ObjectFLED</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

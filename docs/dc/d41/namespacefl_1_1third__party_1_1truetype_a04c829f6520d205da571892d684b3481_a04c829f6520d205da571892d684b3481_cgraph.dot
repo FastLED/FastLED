@@ -1,0 +1,28 @@
+digraph "fl::third_party::truetype::stbtt_GetGlyphKernAdvance"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::third_party::truetype\l::stbtt_GetGlyphKernAdvance",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::third_party::truetype\l::stbtt__GetGlyphGPOSInfoAdvance",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d41/namespacefl_1_1third__party_1_1truetype_a517ef2bf8d762e8c01e9ea06508d1cdf.html#a517ef2bf8d762e8c01e9ea06508d1cdf",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::third_party::truetype\l::stbtt__GetCoverageIndex",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d41/namespacefl_1_1third__party_1_1truetype_aabf7967f4e7ae755b0a627827bac12d3.html#aabf7967f4e7ae755b0a627827bac12d3",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::third_party::truetype\l::ttUSHORT",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d41/namespacefl_1_1third__party_1_1truetype_ad7576e878b0aa73a43e55e221d8749f0.html#ad7576e878b0aa73a43e55e221d8749f0",tooltip=" "];
+  Node2 -> Node5 [id="edge4_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::third_party::truetype\l::stbtt__GetGlyphClass",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d41/namespacefl_1_1third__party_1_1truetype_a695cc6f5b53c97b67c10e64d17416fd8.html#a695cc6f5b53c97b67c10e64d17416fd8",tooltip=" "];
+  Node5 -> Node4 [id="edge5_Node000005_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node6 [id="edge6_Node000002_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::third_party::truetype\l::ttSHORT",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d41/namespacefl_1_1third__party_1_1truetype_a46a5ad8bdae0fd01591f8f006f733ddb.html#a46a5ad8bdae0fd01591f8f006f733ddb",tooltip=" "];
+  Node2 -> Node4 [id="edge7_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node7 [id="edge8_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::third_party::truetype\l::stbtt__GetGlyphKernInfoAdvance",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d41/namespacefl_1_1third__party_1_1truetype_a5fdd20df5658c85d7be2868f1c970b88.html#a5fdd20df5658c85d7be2868f1c970b88",tooltip=" "];
+  Node7 -> Node6 [id="edge9_Node000007_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node8 [id="edge10_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::third_party::truetype\l::ttULONG",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d41/namespacefl_1_1third__party_1_1truetype_acae857e9eb53423ecbf6b767172ea100.html#acae857e9eb53423ecbf6b767172ea100",tooltip=" "];
+  Node7 -> Node4 [id="edge11_Node000007_Node000004",color="steelblue1",style="solid",tooltip=" "];
+}

@@ -1,0 +1,24 @@
+<map id="hsv2rgb_rainbow" name="hsv2rgb_rainbow">
+<area shape="rect" id="Node000001" title=" " alt="" coords="229,228,363,253"/>
+<area shape="poly" id="edge4_Node000001_Node000001" title=" " alt="" coords="332,218,322,210,296,207,274,209,263,213,261,219,267,226,263,230,256,220,259,210,273,204,296,201,324,205,336,214"/>
+<area shape="rect" id="Node000002" href="$da/dd6/structfl_1_1_c_r_g_b_aaa6271412fed6f21b07db731731ffd34.html#aaa6271412fed6f21b07db731731ffd34" title="Allow construction from a hsv8 color." alt="" coords="33,5,153,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="284,215,270,177,248,131,218,84,180,44,152,30,155,25,183,40,223,80,253,128,275,175,289,214"/>
+<area shape="rect" id="Node000003" href="$db/dd1/crgb_8h_a157722b593d32c306e8bb4b95b4d135b.html#a157722b593d32c306e8bb4b95b4d135b" title=" " alt="" coords="25,55,161,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="280,217,241,154,213,121,180,94,158,82,160,78,183,89,216,118,245,151,284,214"/>
+<area shape="rect" id="Node000004" href="$db/dd1/crgb_8h_aeae1fad39513e4829746c9ba4b5c2fd7.html#aeae1fad39513e4829746c9ba4b5c2fd7" title="HSV conversion function selection based on compile&#45;time defines This allows users to configure which ..." alt="" coords="25,104,161,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="273,220,232,180,180,143,154,132,156,127,183,138,236,176,277,216"/>
+<area shape="rect" id="Node000005" href="$dd/dc7/group___h_s_v2_r_g_b_ga2022cd234bf9b915d45ac38b838b8960.html#ga2022cd234bf9b915d45ac38b838b8960" title=" " alt="" coords="27,153,160,179"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="255,224,180,193,145,181,146,176,182,187,257,219"/>
+<area shape="rect" id="Node000006" href="$de/dc1/_h_s_v_test_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="68,203,119,228"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="215,233,118,221,119,216,216,228"/>
+<area shape="rect" id="Node000007" href="$da/dd6/structfl_1_1_c_r_g_b_ae91ac505c58bc2bfe5f94cade1298db7.html#ae91ac505c58bc2bfe5f94cade1298db7" title="Allow assignment from HSV color." alt="" coords="19,252,168,277"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="216,253,169,258,168,253,215,247"/>
+<area shape="rect" id="Node000008" href="$db/d83/classfl_1_1_flow_field_float_a45f8c953d7f9e725f258d57189bd458f.html#a45f8c953d7f9e725f258d57189bd458f" title=" " alt="" coords="27,302,160,342"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="254,261,182,291,149,304,147,299,180,286,252,256"/>
+<area shape="rect" id="Node000009" href="$d2/d24/classfl_1_1_flow_field_f_p_a9134f9d9c4b85a75ceb7731000160cf0.html#a9134f9d9c4b85a75ceb7731000160cf0" title=" " alt="" coords="5,367,181,392"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="279,266,238,312,212,336,183,356,154,369,152,364,180,352,209,332,235,308,275,263"/>
+<area shape="rect" id="Node000010" href="$da/dd6/structfl_1_1_c_r_g_b_a97f18659cd0c1448b13587b42940aa8e.html#a97f18659cd0c1448b13587b42940aa8e" title="Allow assignment from hue, saturation, and value." alt="" coords="28,416,159,441"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="286,267,247,336,218,374,183,406,158,418,156,414,180,401,214,370,243,333,281,265"/>
+<area shape="rect" id="Node000011" href="$da/dd6/structfl_1_1_c_r_g_b_aeb9e7561468289b7f855e23ad1de0e27.html#aeb9e7561468289b7f855e23ad1de0e27" title="Allow assignment from just a hue." alt="" coords="29,465,158,491"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="290,267,277,309,255,359,224,410,205,434,183,455,160,468,157,464,180,451,201,430,220,407,250,357,272,307,285,266"/>
+</map>

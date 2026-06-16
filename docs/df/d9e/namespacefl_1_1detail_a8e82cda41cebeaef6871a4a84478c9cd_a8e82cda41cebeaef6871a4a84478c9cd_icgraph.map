@@ -1,0 +1,15 @@
+<map id="fl::detail::div_by_count" name="fl::detail::div_by_count">
+<area shape="rect" id="Node000001" title=" " alt="" coords="455,133,581,173"/>
+<area shape="rect" id="Node000002" href="$d7/d67/classfl_1_1detail_1_1_savitzky_golay_filter_impl_aedc311c14959812b1230641475884777.html#aedc311c14959812b1230641475884777" title=" " alt="" coords="230,37,406,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="472,128,406,92,378,80,380,75,408,87,475,123"/>
+<area shape="rect" id="Node000005" href="$db/d3f/classfl_1_1detail_1_1_alpha_trimmed_mean_impl_afb20813588a07d869bb22bd74112b233.html#afb20813588a07d869bb22bd74112b233" title=" " alt="" coords="229,101,407,141"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="440,144,407,138,407,133,441,138"/>
+<area shape="rect" id="Node000006" href="$db/d3f/classfl_1_1detail_1_1_alpha_trimmed_mean_impl_ab2afc0f134e47452ac903f06563e069c.html#ab2afc0f134e47452ac903f06563e069c" title=" " alt="" coords="229,165,407,205"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="441,168,407,174,407,168,440,163"/>
+<area shape="rect" id="Node000007" href="$d2/db8/classfl_1_1detail_1_1_hampel_filter_impl_aaee431fa9db086a42b158db3944c0eae.html#aaee431fa9db086a42b158db3944c0eae" title=" " alt="" coords="235,229,401,269"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="475,183,408,220,380,232,378,227,406,215,472,179"/>
+<area shape="rect" id="Node000003" href="$d7/d67/classfl_1_1detail_1_1_savitzky_golay_filter_impl_ac0a9dced7c605511906b47a1fcd433bb.html#ac0a9dced7c605511906b47a1fcd433bb" title=" " alt="" coords="5,5,181,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="216,45,181,40,182,35,216,40"/>
+<area shape="rect" id="Node000004" href="$d7/d67/classfl_1_1detail_1_1_savitzky_golay_filter_impl_a628eb1fb6c712cb157b9be5d422fccf6.html#a628eb1fb6c712cb157b9be5d422fccf6" title=" " alt="" coords="5,69,181,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="216,74,182,79,181,74,216,69"/>
+</map>

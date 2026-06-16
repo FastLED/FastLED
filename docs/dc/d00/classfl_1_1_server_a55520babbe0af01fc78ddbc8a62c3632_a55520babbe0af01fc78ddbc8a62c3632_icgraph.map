@@ -1,0 +1,19 @@
+<map id="fl::Server::setRequestHandler" name="fl::Server::setRequestHandler">
+<area shape="rect" id="Node000001" title="Set request handler." alt="" coords="419,155,631,180"/>
+<area shape="rect" id="Node000002" href="$dc/ddb/classfl_1_1_remote_afeaf2df646dee4d6ce7644062f9ed357.html#afeaf2df646dee4d6ce7644062f9ed357" title="Construct with I/O callbacks." alt="" coords="219,129,367,155"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="405,157,367,153,368,147,405,152"/>
+<area shape="rect" id="Node000009" href="$dc/d00/classfl_1_1_server_a100615100d89f2a4e725a2525405ddfe.html#a100615100d89f2a4e725a2525405ddfe" title=" " alt="" coords="216,179,371,204"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="405,182,371,186,371,181,405,177"/>
+<area shape="rect" id="Node000003" href="$dc/ddb/classfl_1_1_remote_a8da8a6befa5ac8817895bcf5e6549ac9.html#a8da8a6befa5ac8817895bcf5e6549ac9" title=" " alt="" coords="13,5,161,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="268,122,223,82,167,44,140,33,142,28,169,40,227,78,272,118"/>
+<area shape="rect" id="Node000004" href="$dc/ddb/classfl_1_1_remote_a6bf53db28ee124cb5de2e4235aca44c7.html#a6bf53db28ee124cb5de2e4235aca44c7" title=" " alt="" coords="13,55,161,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="250,126,167,94,132,83,134,77,169,89,252,121"/>
+<area shape="rect" id="Node000005" href="$d2/d9f/classfl_1_1_w_l_e_d_aac647eb33edf4763608c393c494ba749.html#aac647eb33edf4763608c393c494ba749" title="Construct WLED with default stub I/O callbacks." alt="" coords="25,104,148,129"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="205,134,148,127,149,122,206,129"/>
+<area shape="rect" id="Node000006" href="$d2/d9f/classfl_1_1_w_l_e_d_a7a58faceb49c4058e4c968eb2ddb118d.html#a7a58faceb49c4058e4c968eb2ddb118d" title="Construct WLED with custom I/O callbacks." alt="" coords="25,153,148,179"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="206,155,149,162,148,156,205,150"/>
+<area shape="rect" id="Node000007" href="$dc/ddb/classfl_1_1_remote_a39f4e10f6904e6e66a64c222cf5f2a7c.html#a39f4e10f6904e6e66a64c222cf5f2a7c" title=" " alt="" coords="5,203,168,228"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="236,162,217,168,169,192,133,205,132,200,167,188,215,164,234,157"/>
+<area shape="rect" id="Node000008" href="$dc/ddb/classfl_1_1_remote_adcc334643d8aaedd1c0e37386380eba7.html#adcc334643d8aaedd1c0e37386380eba7" title=" " alt="" coords="5,252,168,277"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="225,163,218,168,202,185,194,204,186,223,170,241,146,254,144,250,166,237,182,220,190,202,198,183,214,164,222,159"/>
+</map>

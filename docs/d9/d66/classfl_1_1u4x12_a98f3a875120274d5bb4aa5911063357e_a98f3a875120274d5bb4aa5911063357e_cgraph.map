@@ -1,0 +1,10 @@
+<map id="fl::u4x12::floor" name="fl::u4x12::floor">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,120,55"/>
+<area shape="rect" id="Node000002" href="$d9/d66/classfl_1_1u4x12_aa037038df3bc4cac24f4baf35373d51d.html#aa037038df3bc4cac24f4baf35373d51d" title=" " alt="" coords="364,5,491,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="120,36,350,20,350,26,120,41"/>
+<area shape="rect" id="Node000003" href="$d9/d66/classfl_1_1u4x12_a8b32cb7169783d4aae4fee024fcd8872.html#a8b32cb7169783d4aae4fee024fcd8872" title=" " alt="" coords="168,55,316,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="121,47,154,52,154,58,120,53"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="290,52,365,32,366,37,291,57"/>
+<area shape="rect" id="Node000004" href="$d9/d66/classfl_1_1u4x12_a73460421098ce5ed8a565bcf895215dd.html#a73460421098ce5ed8a565bcf895215dd" title=" " alt="" coords="372,55,483,80"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="316,65,358,65,358,70,316,70"/>
+</map>

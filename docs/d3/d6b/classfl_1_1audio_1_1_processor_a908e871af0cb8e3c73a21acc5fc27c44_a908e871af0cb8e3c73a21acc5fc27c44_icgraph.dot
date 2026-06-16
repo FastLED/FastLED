@@ -1,0 +1,35 @@
+digraph "fl::audio::Processor::getTempoAnalyzer"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::audio::Processor\l::getTempoAnalyzer",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node1 [id="edge1_Node000001_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node2 [id="edge2_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::audio::Processor\l::getTempoBPM",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d6b/classfl_1_1audio_1_1_processor_ab7c5207b37b92f1fee14e3514d846411.html#ab7c5207b37b92f1fee14e3514d846411",tooltip=" "];
+  Node2 -> Node2 [id="edge3_Node000002_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node3 [id="edge4_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::audio::Reactive\l::getTempoBPM",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dea/classfl_1_1audio_1_1_reactive_a4220bda16cc4ed64dcd5cbfee0e8d94a.html#a4220bda16cc4ed64dcd5cbfee0e8d94a",tooltip=" "];
+  Node2 -> Node4 [id="edge5_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::audio::Processor\l::onDropImpact",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d6b/classfl_1_1audio_1_1_processor_a44c9bf7e90fafc4f6bc668d7796ef27c.html#a44c9bf7e90fafc4f6bc668d7796ef27c",tooltip=" "];
+  Node4 -> Node4 [id="edge6_Node000004_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node5 [id="edge7_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::audio::Processor\l::getTempoConfidence",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d6b/classfl_1_1audio_1_1_processor_aa7b7d568bc201312e29f45c95f584206.html#aa7b7d568bc201312e29f45c95f584206",tooltip=" "];
+  Node5 -> Node5 [id="edge8_Node000005_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node6 [id="edge9_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::audio::Reactive\l::getTempoConfidence",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dea/classfl_1_1audio_1_1_reactive_a56cdf2839bd5e16a0aeaa58f75a2f39a.html#a56cdf2839bd5e16a0aeaa58f75a2f39a",tooltip=" "];
+  Node5 -> Node4 [id="edge10_Node000005_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node7 [id="edge11_Node000001_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::audio::Processor\l::onTempoStable",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d6b/classfl_1_1audio_1_1_processor_a7000fcfc6e42c4572538e330400df124.html#a7000fcfc6e42c4572538e330400df124",tooltip=" "];
+  Node7 -> Node7 [id="edge12_Node000007_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node8 [id="edge13_Node000007_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::audio::Processor\l::onTempoWithConfidence",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d6b/classfl_1_1audio_1_1_processor_a4b669aaaac2d1b02b2aa3fc61e70e17b.html#a4b669aaaac2d1b02b2aa3fc61e70e17b",tooltip=" "];
+  Node8 -> Node8 [id="edge14_Node000008_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node9 [id="edge15_Node000001_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::audio::Processor\l::onTempoUnstable",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d6b/classfl_1_1audio_1_1_processor_a038a4fefc21ebde68fdbe5d495472bfb.html#a038a4fefc21ebde68fdbe5d495472bfb",tooltip=" "];
+  Node9 -> Node9 [id="edge16_Node000009_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 -> Node8 [id="edge17_Node000009_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

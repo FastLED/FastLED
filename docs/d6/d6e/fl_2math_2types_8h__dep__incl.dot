@@ -1,0 +1,42 @@
+digraph "fl/math/types.h"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl/math/types.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Defines fractional types used for lib8tion functions."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl/math/lib8tion/types.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/dac/fl_2math_2lib8tion_2types_8h.html",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="lib8tion/types.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/ddf/lib8tion_2types_8h.html",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="lib8tion.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/da5/lib8tion_8h.html",tooltip="Fast, efficient 8-bit math functions specifically designed for high-performance LED programming."];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="/home/runner/work/FastLED\l/FastLED/examples/Apa102\l/Apa102.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d0f/_apa102_8ino.html",tooltip=" "];
+  Node4 -> Node6 [id="edge5_Node000004_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="/home/runner/work/FastLED\l/FastLED/examples/Apa102HD\l/Apa102HD.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d75/_apa102_h_d_8ino.html",tooltip="Example showing how to use the APA102HD gamma correction."];
+  Node4 -> Node7 [id="edge6_Node000004_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="/home/runner/work/FastLED\l/FastLED/examples/HD107\l/HD107.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/db4/_h_d107_8ino.html",tooltip="Example showing how to use the HD107 and HD which has built in gamma correction."];
+  Node4 -> Node8 [id="edge7_Node000004_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="FastLED.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d97/_fast_l_e_d_8h.html",tooltip="central include file for FastLED, defines the CFastLED class/object"];
+  Node8 -> Node9 [id="edge8_Node000008_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="FastLED.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/de5/_fast_l_e_d_8cpp_8hpp.html",tooltip=" "];
+  Node4 -> Node12 [id="edge9_Node000004_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="crgb.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d4b/crgb_8hpp.html",tooltip="Defines utility functions for the red, green, and blue (RGB) pixel struct."];
+  Node12 -> Node13 [id="edge10_Node000012_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="pixeltypes.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d2/dba/pixeltypes_8h.html",tooltip="Includes defintions for RGB and HSV pixels."];
+  Node13 -> Node8 [id="edge11_Node000013_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 -> Node20 [id="edge12_Node000013_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="fl/system/fastled.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d7/dc2/fl_2system_2_fast_l_e_d_8h.html",tooltip="Internal FastLED header for implementation files."];
+  Node20 -> Node8 [id="edge13_Node000020_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 -> Node17 [id="edge14_Node000020_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fastspi.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/ddc/fastspi_8h.html",tooltip="Serial peripheral interface (SPI) definitions per platform."];
+  Node17 -> Node8 [id="edge15_Node000017_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 -> Node52 [id="edge16_Node000020_Node000052",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node52 [id="Node000052",label="fl/math/ease.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/d60/ease_8cpp_8hpp.html",tooltip=" "];
+  Node4 -> Node17 [id="edge17_Node000004_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 -> Node52 [id="edge18_Node000004_Node000052",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 -> Node20 [id="edge19_Node000004_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 -> Node13 [id="edge20_Node000004_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

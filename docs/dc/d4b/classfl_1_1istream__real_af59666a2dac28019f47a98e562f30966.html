@@ -115,32 +115,32 @@ $(function(){initNavTree('dc/d4b/classfl_1_1istream__real_af59666a2dac28019f47a9
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d7/d52/istream_8cpp_source.html#l00261">261</a> of file <a class="el" href="../../d7/d52/istream_8cpp_source.html">istream.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d4/d99/istream_8cpp_8hpp_source.html#l00261">261</a> of file <a class="el" href="../../d4/d99/istream_8cpp_8hpp_source.html">istream.cpp.hpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">  261</span>                                               {</div>
 <div class="line"><span class="lineno">  262</span>    <span class="keywordtype">string</span> token;</div>
 <div class="line"><span class="lineno">  263</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="../../dc/d4b/classfl_1_1istream__real_adf98bd57fc49ef2c902259cdbca94771.html#adf98bd57fc49ef2c902259cdbca94771">readToken</a>(token)) {</div>
 <div class="line"><span class="lineno">  264</span>        fl::i32 temp;</div>
-<div class="line"><span class="lineno">  265</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d5/d2d/namespacefl_1_1anonymous__namespace_02istream_8cpp_03_abd00564260facd1566a2bb061190fefc.html#abd00564260facd1566a2bb061190fefc">parse_i32</a>(token.c_str(), temp) &amp;&amp; temp &gt;= -32768 &amp;&amp; temp &lt;= 32767) {</div>
+<div class="line"><span class="lineno">  265</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d8/d33/namespacefl_1_1anonymous__namespace_02istream_8cpp_8hpp_03_a6f35388ea6a364e77235c18e9aa4bc35.html#a6f35388ea6a364e77235c18e9aa4bc35">parse_i32</a>(token.c_str(), temp) &amp;&amp; temp &gt;= -32768 &amp;&amp; temp &lt;= 32767) {</div>
 <div class="line"><span class="lineno">  266</span>            n = <span class="keyword">static_cast&lt;</span>fl::i16<span class="keyword">&gt;</span>(temp);</div>
 <div class="line"><span class="lineno">  267</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  268</span>            <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a31543d313e7422f87f0fcf7509f5f366.html#a31543d313e7422f87f0fcf7509f5f366">failed_</a> = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  268</span>            <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a565deced1139c7619db1d61fa032abe9.html#a565deced1139c7619db1d61fa032abe9">mFailed</a> = <span class="keyword">true</span>;</div>
 <div class="line"><span class="lineno">  269</span>        }</div>
 <div class="line"><span class="lineno">  270</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  271</span>        <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a31543d313e7422f87f0fcf7509f5f366.html#a31543d313e7422f87f0fcf7509f5f366">failed_</a> = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  271</span>        <a class="code hl_variable" href="../../dc/d4b/classfl_1_1istream__real_a565deced1139c7619db1d61fa032abe9.html#a565deced1139c7619db1d61fa032abe9">mFailed</a> = <span class="keyword">true</span>;</div>
 <div class="line"><span class="lineno">  272</span>    }</div>
 <div class="line"><span class="lineno">  273</span>    <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
 <div class="line"><span class="lineno">  274</span>}</div>
-<div class="ttc" id="aclassfl_1_1istream__real_a31543d313e7422f87f0fcf7509f5f366_html_a31543d313e7422f87f0fcf7509f5f366"><div class="ttname"><a href="../../dc/d4b/classfl_1_1istream__real_a31543d313e7422f87f0fcf7509f5f366.html#a31543d313e7422f87f0fcf7509f5f366">fl::istream_real::failed_</a></div><div class="ttdeci">bool failed_</div><div class="ttdef"><b>Definition</b> <a href="../../db/dc9/istream_8h_source.html#l00033">istream.h:33</a></div></div>
-<div class="ttc" id="aclassfl_1_1istream__real_adf98bd57fc49ef2c902259cdbca94771_html_adf98bd57fc49ef2c902259cdbca94771"><div class="ttname"><a href="../../dc/d4b/classfl_1_1istream__real_adf98bd57fc49ef2c902259cdbca94771.html#adf98bd57fc49ef2c902259cdbca94771">fl::istream_real::readToken</a></div><div class="ttdeci">bool readToken(string &amp;token)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d52/istream_8cpp_source.html#l00173">istream.cpp:173</a></div></div>
-<div class="ttc" id="anamespacefl_1_1anonymous__namespace_02istream_8cpp_03_abd00564260facd1566a2bb061190fefc_html_abd00564260facd1566a2bb061190fefc"><div class="ttname"><a href="../../d5/d2d/namespacefl_1_1anonymous__namespace_02istream_8cpp_03_abd00564260facd1566a2bb061190fefc.html#abd00564260facd1566a2bb061190fefc">fl::anonymous_namespace{istream.cpp}::parse_i32</a></div><div class="ttdeci">bool parse_i32(const char *str, fl::i32 &amp;result)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d52/istream_8cpp_source.html#l00024">istream.cpp:24</a></div></div>
+<div class="ttc" id="aclassfl_1_1istream__real_a565deced1139c7619db1d61fa032abe9_html_a565deced1139c7619db1d61fa032abe9"><div class="ttname"><a href="../../dc/d4b/classfl_1_1istream__real_a565deced1139c7619db1d61fa032abe9.html#a565deced1139c7619db1d61fa032abe9">fl::istream_real::mFailed</a></div><div class="ttdeci">bool mFailed</div><div class="ttdef"><b>Definition</b> <a href="../../db/dc9/istream_8h_source.html#l00028">istream.h:28</a></div></div>
+<div class="ttc" id="aclassfl_1_1istream__real_adf98bd57fc49ef2c902259cdbca94771_html_adf98bd57fc49ef2c902259cdbca94771"><div class="ttname"><a href="../../dc/d4b/classfl_1_1istream__real_adf98bd57fc49ef2c902259cdbca94771.html#adf98bd57fc49ef2c902259cdbca94771">fl::istream_real::readToken</a></div><div class="ttdeci">bool readToken(string &amp;token)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d99/istream_8cpp_8hpp_source.html#l00173">istream.cpp.hpp:173</a></div></div>
+<div class="ttc" id="anamespacefl_1_1anonymous__namespace_02istream_8cpp_8hpp_03_a6f35388ea6a364e77235c18e9aa4bc35_html_a6f35388ea6a364e77235c18e9aa4bc35"><div class="ttname"><a href="../../d8/d33/namespacefl_1_1anonymous__namespace_02istream_8cpp_8hpp_03_a6f35388ea6a364e77235c18e9aa4bc35.html#a6f35388ea6a364e77235c18e9aa4bc35">fl::anonymous_namespace{istream.cpp.hpp}::parse_i32</a></div><div class="ttdeci">bool parse_i32(const char *str, fl::i32 &amp;result)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d99/istream_8cpp_8hpp_source.html#l00024">istream.cpp.hpp:24</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../dc/d4b/classfl_1_1istream__real_ab593846ff4a004fbc44ab28ac7a80e5f.html#ab593846ff4a004fbc44ab28ac7a80e5f">istream_real()</a>, <a class="el" href="../../d1/d93/str_8h_source.html#l00326">fl::StrN&lt; SIZE &gt;::c_str()</a>, <a class="el" href="../../db/dc9/istream_8h_source.html#l00033">failed_</a>, and <a class="el" href="../../d7/d52/istream_8cpp_source.html#l00173">readToken()</a>.</p>
+<p class="reference">References <a class="el" href="../../dc/d4b/classfl_1_1istream__real_a5fbce5bd8ad11d97946caad0564943b0.html#a5fbce5bd8ad11d97946caad0564943b0">istream_real()</a>, <a class="el" href="../../d1/d86/basic__string_8cpp_8hpp_source.html#l00032">fl::basic_string::c_str()</a>, <a class="el" href="../../db/dc9/istream_8h_source.html#l00028">mFailed</a>, and <a class="el" href="../../d4/d99/istream_8cpp_8hpp_source.html#l00173">readToken()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dc/d4b/classfl_1_1istream__real_af59666a2dac28019f47a98e562f30966_af59666a2dac28019f47a98e562f30966_cgraph.svg" width="100%" height="522"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dc/d4b/classfl_1_1istream__real_af59666a2dac28019f47a98e562f30966_af59666a2dac28019f47a98e562f30966_cgraph.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -152,7 +152,7 @@ $(function(){initNavTree('dc/d4b/classfl_1_1istream__real_af59666a2dac28019f47a9
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../dc/d4b/classfl_1_1istream__real.html">istream_real</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

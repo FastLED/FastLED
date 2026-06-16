@@ -115,63 +115,69 @@ $(function(){initNavTree('d0/dc3/_blink_8ino_a4fc01d736fe50cf5b977f755b675f11d.h
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/dc3/_blink_8ino_source.html#l00021">21</a> of file <a class="el" href="../../d0/dc3/_blink_8ino_source.html">Blink.ino</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   21</span>             { </div>
-<div class="line"><span class="lineno">   22</span>    <span class="comment">//Serial.begin(9600);</span></div>
-<div class="line"><span class="lineno">   23</span>    <span class="comment">//Serial.println(&quot;BLINK setup starting&quot;);</span></div>
-<div class="line"><span class="lineno">   24</span>    </div>
-<div class="line"><span class="lineno">   25</span>    <span class="comment">// Uncomment/edit one of the following lines for your leds arrangement.</span></div>
-<div class="line"><span class="lineno">   26</span>    <span class="comment">// ## Clockless types ##</span></div>
-<div class="line"><span class="lineno">   27</span>    <a class="code hl_variable" href="../../d6/dda/_fast_l_e_d_8cpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.addLeds&lt;<a class="code hl_class" href="../../d5/d5c/class_n_e_o_p_i_x_e_l.html">NEOPIXEL</a>, <a class="code hl_define" href="../../d8/d21/_adafruit_bridge_8ino_adad67fe595ea440c8f8247ec2cddf070.html#adad67fe595ea440c8f8247ec2cddf070">DATA_PIN</a>&gt;(<a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>, <a class="code hl_define" href="../../d8/d21/_adafruit_bridge_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>);  <span class="comment">// GRB ordering is assumed</span></div>
-<div class="line"><span class="lineno">   28</span>    </div>
-<div class="line"><span class="lineno">   29</span>    <span class="comment">//Serial.println(&quot;BLINK setup complete&quot;);</span></div>
-<div class="line"><span class="lineno">   30</span>    <span class="comment">// FastLED.addLeds&lt;SM16824E, DATA_PIN, RGB&gt;(leds, NUM_LEDS);  // RGB ordering (uses SM16824EController)</span></div>
-<div class="line"><span class="lineno">   31</span>    <span class="comment">// FastLED.addLeds&lt;SM16703, DATA_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   32</span>    <span class="comment">// FastLED.addLeds&lt;TM1829, DATA_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   33</span>    <span class="comment">// FastLED.addLeds&lt;TM1812, DATA_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   34</span>    <span class="comment">// FastLED.addLeds&lt;TM1809, DATA_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   35</span>    <span class="comment">// FastLED.addLeds&lt;TM1804, DATA_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   36</span>    <span class="comment">// FastLED.addLeds&lt;TM1803, DATA_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   37</span>    <span class="comment">// FastLED.addLeds&lt;UCS1903, DATA_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   38</span>    <span class="comment">// FastLED.addLeds&lt;UCS1903B, DATA_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   39</span>    <span class="comment">// FastLED.addLeds&lt;UCS1904, DATA_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   40</span>    <span class="comment">// FastLED.addLeds&lt;UCS2903, DATA_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   41</span>    <span class="comment">// FastLED.addLeds&lt;WS2812, DATA_PIN, RGB&gt;(leds, NUM_LEDS);  // GRB ordering is typical</span></div>
-<div class="line"><span class="lineno">   42</span>    <span class="comment">// FastLED.addLeds&lt;WS2852, DATA_PIN, RGB&gt;(leds, NUM_LEDS);  // GRB ordering is typical</span></div>
-<div class="line"><span class="lineno">   43</span>    <span class="comment">// FastLED.addLeds&lt;WS2812B, DATA_PIN, RGB&gt;(leds, NUM_LEDS);  // GRB ordering is typical</span></div>
-<div class="line"><span class="lineno">   44</span>    <span class="comment">// FastLED.addLeds&lt;GS1903, DATA_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   45</span>    <span class="comment">// FastLED.addLeds&lt;SK6812, DATA_PIN, RGB&gt;(leds, NUM_LEDS);  // GRB ordering is typical</span></div>
-<div class="line"><span class="lineno">   46</span>    <span class="comment">// FastLED.addLeds&lt;SK6822, DATA_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   47</span>    <span class="comment">// FastLED.addLeds&lt;APA106, DATA_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   48</span>    <span class="comment">// FastLED.addLeds&lt;PL9823, DATA_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   49</span>    <span class="comment">// FastLED.addLeds&lt;SK6822, DATA_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   50</span>    <span class="comment">// FastLED.addLeds&lt;WS2811, DATA_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   51</span>    <span class="comment">// FastLED.addLeds&lt;WS2813, DATA_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   52</span>    <span class="comment">// FastLED.addLeds&lt;APA104, DATA_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   53</span>    <span class="comment">// FastLED.addLeds&lt;WS2811_400, DATA_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   54</span>    <span class="comment">// FastLED.addLeds&lt;GE8822, DATA_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   55</span>    <span class="comment">// FastLED.addLeds&lt;GW6205, DATA_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   56</span>    <span class="comment">// FastLED.addLeds&lt;GW6205_400, DATA_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   57</span>    <span class="comment">// FastLED.addLeds&lt;LPD1886, DATA_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   58</span>    <span class="comment">// FastLED.addLeds&lt;LPD1886_8BIT, DATA_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   59</span>    <span class="comment">// ## Clocked (SPI) types ##</span></div>
-<div class="line"><span class="lineno">   60</span>    <span class="comment">// FastLED.addLeds&lt;LPD6803, DATA_PIN, CLOCK_PIN, RGB&gt;(leds, NUM_LEDS);  // GRB ordering is typical</span></div>
-<div class="line"><span class="lineno">   61</span>    <span class="comment">// FastLED.addLeds&lt;LPD8806, DATA_PIN, CLOCK_PIN, RGB&gt;(leds, NUM_LEDS);  // GRB ordering is typical</span></div>
-<div class="line"><span class="lineno">   62</span>    <span class="comment">// FastLED.addLeds&lt;WS2801, DATA_PIN, CLOCK_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   63</span>    <span class="comment">// FastLED.addLeds&lt;WS2803, DATA_PIN, CLOCK_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   64</span>    <span class="comment">// FastLED.addLeds&lt;SM16716, DATA_PIN, CLOCK_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
-<div class="line"><span class="lineno">   65</span>    <span class="comment">// FastLED.addLeds&lt;P9813, DATA_PIN, CLOCK_PIN, RGB&gt;(leds, NUM_LEDS);  // BGR ordering is typical</span></div>
-<div class="line"><span class="lineno">   66</span>    <span class="comment">// FastLED.addLeds&lt;DOTSTAR, DATA_PIN, CLOCK_PIN, RGB&gt;(leds, NUM_LEDS);  // BGR ordering is typical</span></div>
-<div class="line"><span class="lineno">   67</span>    <span class="comment">// FastLED.addLeds&lt;APA102, DATA_PIN, CLOCK_PIN, RGB&gt;(leds, NUM_LEDS);  // BGR ordering is typical</span></div>
-<div class="line"><span class="lineno">   68</span>    <span class="comment">// FastLED.addLeds&lt;SK9822, DATA_PIN, CLOCK_PIN, RGB&gt;(leds, NUM_LEDS);  // BGR ordering is typical</span></div>
-<div class="line"><span class="lineno">   69</span>}</div>
-<div class="ttc" id="a_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d_html_a1b4f26a01e11d7eb2848bc41b0f6dd9d"><div class="ttname"><a href="../../d8/d21/_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a></div><div class="ttdeci">CRGB leds[NUM_LEDS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d21/_adafruit_bridge_8ino_source.html#l00013">AdafruitBridge.ino:13</a></div></div>
-<div class="ttc" id="a_adafruit_bridge_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd_html_a4c4ae9a4146ce8d6a5debc90300d9abd"><div class="ttname"><a href="../../d8/d21/_adafruit_bridge_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a></div><div class="ttdeci">#define NUM_LEDS</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d21/_adafruit_bridge_8ino_source.html#l00011">AdafruitBridge.ino:11</a></div></div>
-<div class="ttc" id="a_adafruit_bridge_8ino_adad67fe595ea440c8f8247ec2cddf070_html_adad67fe595ea440c8f8247ec2cddf070"><div class="ttname"><a href="../../d8/d21/_adafruit_bridge_8ino_adad67fe595ea440c8f8247ec2cddf070.html#adad67fe595ea440c8f8247ec2cddf070">DATA_PIN</a></div><div class="ttdeci">#define DATA_PIN</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d21/_adafruit_bridge_8ino_source.html#l00010">AdafruitBridge.ino:10</a></div></div>
-<div class="ttc" id="a_fast_l_e_d_8cpp_a8e94985674086ea368e1d51cbc0f82a9_html_a8e94985674086ea368e1d51cbc0f82a9"><div class="ttname"><a href="../../d6/dda/_fast_l_e_d_8cpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00074">FastLED.cpp:74</a></div></div>
-<div class="ttc" id="aclass_n_e_o_p_i_x_e_l_html"><div class="ttname"><a href="../../d5/d5c/class_n_e_o_p_i_x_e_l.html">NEOPIXEL</a></div><div class="ttdoc">LED controller for WS2812 LEDs with GRB color order.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d97/_fast_l_e_d_8h_source.html#l00158">FastLED.h:158</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d0/dc3/_blink_8ino_source.html#l00024">24</a> of file <a class="el" href="../../d0/dc3/_blink_8ino_source.html">Blink.ino</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   24</span>             {</div>
+<div class="line"><span class="lineno">   25</span>    <a class="code hl_define" href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a>.begin(115200);</div>
+<div class="line"><span class="lineno">   26</span>    <a class="code hl_define" href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a>.println(<span class="stringliteral">&quot;\n==============================================&quot;</span>);</div>
+<div class="line"><span class="lineno">   27</span>    <a class="code hl_define" href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a>.println(<span class="stringliteral">&quot;   BLINK.INO - Simple LED Blink Example&quot;</span>);</div>
+<div class="line"><span class="lineno">   28</span>    <a class="code hl_define" href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a>.println(<span class="stringliteral">&quot;==============================================\n&quot;</span>);</div>
+<div class="line"><span class="lineno">   29</span> </div>
+<div class="line"><span class="lineno">   30</span>    <span class="comment">// Uncomment/edit one of the following lines for your leds arrangement.</span></div>
+<div class="line"><span class="lineno">   31</span>    <span class="comment">// ## Clockless types ##</span></div>
+<div class="line"><span class="lineno">   32</span>    <a class="code hl_variable" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.addLeds&lt;NEOPIXEL, <a class="code hl_define" href="../../d6/d05/_animartrix_8ino_a573681f817f1ec4eca69d66cd687236d.html#a573681f817f1ec4eca69d66cd687236d">PIN_DATA</a>&gt;(<a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a>, <a class="code hl_define" href="../../d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>);  <span class="comment">// GRB ordering is assumed</span></div>
+<div class="line"><span class="lineno">   33</span> </div>
+<div class="line"><span class="lineno">   34</span>    <a class="code hl_define" href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a>.println(<span class="stringliteral">&quot;✓ Blink setup complete - starting blink loop\n&quot;</span>);</div>
+<div class="line"><span class="lineno">   35</span>    <span class="comment">// FastLED.addLeds&lt;SM16824E, PIN_DATA, RGB&gt;(leds, NUM_LEDS);  // RGB ordering (uses SM16824EController)</span></div>
+<div class="line"><span class="lineno">   36</span>    <span class="comment">// FastLED.addLeds&lt;SM16703, PIN_DATA, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   37</span>    <span class="comment">// FastLED.addLeds&lt;TM1829, PIN_DATA, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   38</span>    <span class="comment">// FastLED.addLeds&lt;TM1812, PIN_DATA, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   39</span>    <span class="comment">// FastLED.addLeds&lt;TM1809, PIN_DATA, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   40</span>    <span class="comment">// FastLED.addLeds&lt;TM1804, PIN_DATA, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   41</span>    <span class="comment">// FastLED.addLeds&lt;TM1803, PIN_DATA, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   42</span>    <span class="comment">// FastLED.addLeds&lt;UCS1903, PIN_DATA, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   43</span>    <span class="comment">// FastLED.addLeds&lt;UCS1903B, PIN_DATA, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   44</span>    <span class="comment">// FastLED.addLeds&lt;UCS1904, PIN_DATA, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   45</span>    <span class="comment">// FastLED.addLeds&lt;UCS2903, PIN_DATA, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   46</span>    <span class="comment">// FastLED.addLeds&lt;UCS7604, PIN_DATA, GRB&gt;(leds, NUM_LEDS);  // 8-bit RGBW chipset (all platforms)</span></div>
+<div class="line"><span class="lineno">   47</span>    <span class="comment">// FastLED.addLeds&lt;UCS7604HD, PIN_DATA, GRB&gt;(leds, NUM_LEDS);  // 16-bit RGBW chipset (all platforms)</span></div>
+<div class="line"><span class="lineno">   48</span>    <span class="comment">// FastLED.addLeds&lt;WS2812, PIN_DATA, RGB&gt;(leds, NUM_LEDS);  // GRB ordering is typical</span></div>
+<div class="line"><span class="lineno">   49</span>    <span class="comment">// FastLED.addLeds&lt;WS2852, PIN_DATA, RGB&gt;(leds, NUM_LEDS);  // GRB ordering is typical</span></div>
+<div class="line"><span class="lineno">   50</span>    <span class="comment">// FastLED.addLeds&lt;WS2812B, PIN_DATA, RGB&gt;(leds, NUM_LEDS);  // GRB ordering is typical</span></div>
+<div class="line"><span class="lineno">   51</span>    <span class="comment">// FastLED.addLeds&lt;WS2812BV5, PIN_DATA, RGB&gt;(leds, NUM_LEDS);  // GRB ordering is typical (newer V5 variant with tighter timing)</span></div>
+<div class="line"><span class="lineno">   52</span>    <span class="comment">// FastLED.addLeds&lt;WS2812BMiniV3, PIN_DATA, RGB&gt;(leds, NUM_LEDS);  // GRB ordering is typical (same timing as V5)</span></div>
+<div class="line"><span class="lineno">   53</span>    <span class="comment">// FastLED.addLeds&lt;GS1903, PIN_DATA, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   54</span>    <span class="comment">// FastLED.addLeds&lt;SK6812, PIN_DATA, RGB&gt;(leds, NUM_LEDS);  // GRB ordering is typical</span></div>
+<div class="line"><span class="lineno">   55</span>    <span class="comment">// FastLED.addLeds&lt;SK6822, PIN_DATA, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   56</span>    <span class="comment">// FastLED.addLeds&lt;APA106, PIN_DATA, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   57</span>    <span class="comment">// FastLED.addLeds&lt;PL9823, PIN_DATA, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   58</span>    <span class="comment">// FastLED.addLeds&lt;SK6822, PIN_DATA, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   59</span>    <span class="comment">// FastLED.addLeds&lt;WS2811, PIN_DATA, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   60</span>    <span class="comment">// FastLED.addLeds&lt;WS2813, PIN_DATA, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   61</span>    <span class="comment">// FastLED.addLeds&lt;APA104, PIN_DATA, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   62</span>    <span class="comment">// FastLED.addLeds&lt;WS2811_400, PIN_DATA, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   63</span>    <span class="comment">// FastLED.addLeds&lt;GE8822, PIN_DATA, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   64</span>    <span class="comment">// FastLED.addLeds&lt;GW6205, PIN_DATA, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   65</span>    <span class="comment">// FastLED.addLeds&lt;GW6205_400, PIN_DATA, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   66</span>    <span class="comment">// FastLED.addLeds&lt;LPD1886, PIN_DATA, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   67</span>    <span class="comment">// FastLED.addLeds&lt;LPD1886_8BIT, PIN_DATA, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   68</span>    <span class="comment">// ## Clocked (SPI) types ##</span></div>
+<div class="line"><span class="lineno">   69</span>    <span class="comment">// FastLED.addLeds&lt;LPD6803, PIN_DATA, CLOCK_PIN, RGB&gt;(leds, NUM_LEDS);  // GRB ordering is typical</span></div>
+<div class="line"><span class="lineno">   70</span>    <span class="comment">// FastLED.addLeds&lt;LPD8806, PIN_DATA, CLOCK_PIN, RGB&gt;(leds, NUM_LEDS);  // GRB ordering is typical</span></div>
+<div class="line"><span class="lineno">   71</span>    <span class="comment">// FastLED.addLeds&lt;WS2801, PIN_DATA, CLOCK_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   72</span>    <span class="comment">// FastLED.addLeds&lt;WS2803, PIN_DATA, CLOCK_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   73</span>    <span class="comment">// FastLED.addLeds&lt;SM16716, PIN_DATA, CLOCK_PIN, RGB&gt;(leds, NUM_LEDS);</span></div>
+<div class="line"><span class="lineno">   74</span>    <span class="comment">// FastLED.addLeds&lt;P9813, PIN_DATA, CLOCK_PIN, RGB&gt;(leds, NUM_LEDS);  // BGR ordering is typical</span></div>
+<div class="line"><span class="lineno">   75</span>    <span class="comment">// FastLED.addLeds&lt;DOTSTAR, PIN_DATA, CLOCK_PIN, RGB&gt;(leds, NUM_LEDS);  // BGR ordering is typical</span></div>
+<div class="line"><span class="lineno">   76</span>    <span class="comment">// FastLED.addLeds&lt;APA102, PIN_DATA, CLOCK_PIN, RGB&gt;(leds, NUM_LEDS);  // BGR ordering is typical</span></div>
+<div class="line"><span class="lineno">   77</span>    <span class="comment">// FastLED.addLeds&lt;SK9822, PIN_DATA, CLOCK_PIN, RGB&gt;(leds, NUM_LEDS);  // BGR ordering is typical</span></div>
+<div class="line"><span class="lineno">   78</span>}</div>
+<div class="ttc" id="a_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd_html_a4c4ae9a4146ce8d6a5debc90300d9abd"><div class="ttname"><a href="../../d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a></div><div class="ttdeci">#define NUM_LEDS</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d05/_animartrix_8ino_source.html#l00079">Animartrix.ino:79</a></div></div>
+<div class="ttc" id="a_animartrix_8ino_a573681f817f1ec4eca69d66cd687236d_html_a573681f817f1ec4eca69d66cd687236d"><div class="ttname"><a href="../../d6/d05/_animartrix_8ino_a573681f817f1ec4eca69d66cd687236d.html#a573681f817f1ec4eca69d66cd687236d">PIN_DATA</a></div><div class="ttdeci">#define PIN_DATA</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d05/_animartrix_8ino_source.html#l00066">Animartrix.ino:66</a></div></div>
+<div class="ttc" id="a_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad_html_a83a59cb1680f896fa1c411261436d4ad"><div class="ttname"><a href="../../d6/d05/_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a></div><div class="ttdeci">fl::CRGB leds[NUM_LEDS]</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d05/_animartrix_8ino_source.html#l00093">Animartrix.ino:93</a></div></div>
+<div class="ttc" id="a_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9_html_a8e94985674086ea368e1d51cbc0f82a9"><div class="ttname"><a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00075">FastLED.cpp.hpp:75</a></div></div>
+<div class="ttc" id="asystem_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3_html_ab1a8531ded8c3d5bee8e36aebec7a8f3"><div class="ttname"><a href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a></div><div class="ttdeci">#define Serial</div><div class="ttdef"><b>Definition</b> <a href="../../de/d8b/system_2serial_8h_source.html#l00304">serial.h:304</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d8/d21/_adafruit_bridge_8ino_source.html#l00010">DATA_PIN</a>, <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00074">FastLED</a>, <a class="el" href="../../d8/d21/_adafruit_bridge_8ino_source.html#l00013">leds</a>, and <a class="el" href="../../d8/d21/_adafruit_bridge_8ino_source.html#l00011">NUM_LEDS</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00075">FastLED</a>, <a class="el" href="../../d6/d05/_animartrix_8ino_source.html#l00093">leds</a>, <a class="el" href="../../d6/d05/_animartrix_8ino_source.html#l00079">NUM_LEDS</a>, <a class="el" href="../../d6/d05/_animartrix_8ino_source.html#l00066">PIN_DATA</a>, and <a class="el" href="../../de/d8b/system_2serial_8h_source.html#l00304">Serial</a>.</p>
 
 </div>
 </div>
@@ -182,7 +188,7 @@ $(function(){initNavTree('d0/dc3/_blink_8ino_a4fc01d736fe50cf5b977f755b675f11d.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_05dd8b05715c4ed4a1c3d13c1176049b.html">Blink</a></li><li class="navelem"><a class="el" href="../../d0/dc3/_blink_8ino.html">Blink.ino</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

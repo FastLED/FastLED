@@ -1,16 +1,78 @@
-<map id="fl/mutex.h" name="fl/mutex.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="135,5,223,31"/>
-<area shape="rect" id="Node000002" href="$d1/ddc/audio_8cpp.html" title=" " alt="" coords="5,79,103,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="149,40,76,81,73,76,146,35"/>
-<area shape="rect" id="Node000003" href="$d9/ddd/fetch_8cpp.html" title=" " alt="" coords="45,167,140,192"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="169,44,101,168,97,165,164,42"/>
-<area shape="rect" id="Node000004" href="$d6/d6a/fetch_8h.html" title="Unified HTTP fetch API for FastLED (cross&#45;platform)" alt="" coords="179,79,257,104"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="195,42,214,77,209,80,190,44"/>
-<area shape="rect" id="Node000006" href="$df/d0a/id__tracker_8h.html" title=" " alt="" coords="362,79,471,104"/>
-<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="231,32,379,76,377,81,230,37"/>
-<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="191,114,111,169,108,164,188,110"/>
-<area shape="rect" id="Node000005" href="$d5/dec/_net_test_real_8h.html" title=" " alt="" coords="165,152,365,207"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="233,115,253,151,248,153,228,117"/>
-<area shape="rect" id="Node000007" href="$df/de6/id__tracker_8cpp.html" title=" " alt="" coords="388,167,512,192"/>
-<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="429,116,448,165,443,167,424,118"/>
+<map id="fl/stl/mutex.h" name="fl/stl/mutex.h">
+<area shape="rect" id="Node000001" title="Platform&#45;independent mutex interface." alt="" coords="701,5,809,31"/>
+<area shape="rect" id="Node000002" href="$d9/dd5/audio_2audio_8cpp_8hpp.html" title=" " alt="" coords="5,79,171,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="687,29,183,81,171,83,171,77,182,76,687,23"/>
+<area shape="rect" id="Node000006" href="$d1/d48/audio__batch_8h.html" title=" " alt="" coords="381,79,547,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="695,37,512,81,510,76,694,31"/>
+<area shape="rect" id="Node000011" href="$d1/dcf/fft_8cpp_8hpp.html" title=" " alt="" coords="195,79,357,104"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="687,32,353,81,352,76,686,27"/>
+<area shape="rect" id="Node000013" href="$df/d0a/id__tracker_8h.html" title=" " alt="" coords="1177,79,1348,104"/>
+<area shape="poly" id="edge14_Node000001_Node000013" title=" " alt="" coords="823,26,1182,76,1181,81,822,31"/>
+<area shape="rect" id="Node000017" href="$dc/db1/random_8cpp_8hpp.html" title=" " alt="" coords="571,79,749,104"/>
+<area shape="poly" id="edge18_Node000001_Node000017" title=" " alt="" coords="730,41,677,81,674,76,727,37"/>
+<area shape="rect" id="Node000020" href="$d6/d6a/fetch_8h.html" title="Unified HTTP fetch API for FastLED (cross&#45;platform)" alt="" coords="1893,79,2027,104"/>
+<area shape="poly" id="edge22_Node000001_Node000020" title=" " alt="" coords="823,21,1893,83,1893,89,823,26"/>
+<area shape="rect" id="Node000035" href="$db/d18/chrono_8cpp_8hpp.html" title=" " alt="" coords="773,79,926,104"/>
+<area shape="poly" id="edge37_Node000001_Node000035" title=" " alt="" coords="782,37,835,76,832,81,779,41"/>
+<area shape="rect" id="Node000038" href="$d8/d04/string__interner_8cpp_8hpp.html" title=" " alt="" coords="951,79,1153,104"/>
+<area shape="poly" id="edge41_Node000001_Node000038" title=" " alt="" coords="816,31,1004,76,1003,81,815,36"/>
+<area shape="rect" id="Node000003" href="$d1/d21/fl_2audio_2__build_8cpp_8hpp.html" title="Unity build header for fl/audio/ directory." alt="" coords="245,284,413,309"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="89,117,93,169,101,196,115,220,143,244,176,262,211,276,246,284,245,289,209,281,174,267,140,248,111,223,96,198,87,170,83,118"/>
+<area shape="rect" id="Node000004" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="672,372,800,397"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="398,310,682,369,681,375,397,315"/>
+<area shape="rect" id="Node000005" href="$db/d23/fl_8audio_09_8cpp.html" title="Unity build: recursive includes from src/fl/audio/." alt="" coords="251,372,407,397"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="332,323,332,371,327,371,327,323"/>
+<area shape="rect" id="Node000007" href="$d6/d08/audio__batch_8cpp_8hpp.html" title=" " alt="" coords="336,174,544,199"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="460,118,446,175,440,173,455,117"/>
+<area shape="rect" id="Node000008" href="$d1/dd7/fx__engine_8cpp_8hpp.html" title=" " alt="" coords="568,174,739,199"/>
+<area shape="poly" id="edge8_Node000006_Node000008" title=" " alt="" coords="500,108,631,171,629,176,498,112"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="420,211,343,286,339,282,417,207"/>
+<area shape="rect" id="Node000009" href="$df/d9c/fl_2fx_2__build_8cpp_8hpp.html" title="Unity build header for fl/fx/ directory." alt="" coords="553,284,698,309"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="650,213,631,284,626,283,644,212"/>
+<area shape="poly" id="edge10_Node000009_Node000004" title=" " alt="" coords="653,316,723,370,719,374,650,320"/>
+<area shape="rect" id="Node000012" href="$d4/d06/fl_2audio_2fft_2__build_8cpp_8hpp.html" title=" " alt="" coords="125,174,312,199"/>
+<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="264,117,228,175,223,172,260,114"/>
+<area shape="poly" id="edge13_Node000012_Node000003" title=" " alt="" coords="242,207,319,282,316,286,238,211"/>
+<area shape="rect" id="Node000014" href="$d4/d08/id__tracker_8cpp_8hpp.html" title=" " alt="" coords="1151,174,1366,199"/>
+<area shape="poly" id="edge15_Node000013_Node000014" title=" " alt="" coords="1264,118,1262,174,1256,174,1259,118"/>
+<area shape="rect" id="Node000015" href="$d1/d97/fl_2channels_2__build_8cpp_8hpp.html" title=" " alt="" coords="1163,284,1354,309"/>
+<area shape="poly" id="edge16_Node000014_Node000015" title=" " alt="" coords="1261,213,1261,284,1256,284,1256,213"/>
+<area shape="poly" id="edge17_Node000015_Node000004" title=" " alt="" coords="1202,315,1151,327,960,358,801,379,800,373,960,353,1150,321,1201,310"/>
+<area shape="rect" id="Node000018" href="$dc/d5b/fl_2math_2__build_8cpp_8hpp.html" title="Unity build header for fl/math/ directory." alt="" coords="763,174,930,199"/>
+<area shape="poly" id="edge19_Node000017_Node000018" title=" " alt="" coords="696,108,825,171,822,176,694,113"/>
+<area shape="poly" id="edge20_Node000018_Node000004" title=" " alt="" coords="820,210,790,236,764,271,752,298,745,326,739,372,734,372,739,325,747,296,759,268,786,233,817,206"/>
+<area shape="rect" id="Node000019" href="$d4/dc0/fl_8math_09_8cpp.html" title="Unity build: recursive includes from src/fl/math/." alt="" coords="773,284,928,309"/>
+<area shape="poly" id="edge21_Node000018_Node000019" title=" " alt="" coords="850,213,853,284,848,284,845,213"/>
+<area shape="rect" id="Node000021" href="$df/d01/_client_real_8h.html" title=" " alt="" coords="2033,159,2233,214"/>
+<area shape="poly" id="edge23_Node000020_Node000021" title=" " alt="" coords="1994,108,2086,157,2083,162,1992,113"/>
+<area shape="rect" id="Node000023" href="$d9/dce/_client_validation_real_8h.html" title=" " alt="" coords="1390,152,1626,221"/>
+<area shape="poly" id="edge25_Node000020_Node000023" title=" " alt="" coords="1879,109,1638,155,1627,157,1626,152,1637,149,1878,103"/>
+<area shape="rect" id="Node000025" href="$d3/d25/_loopback_test_runner_8h.html" title="Non&#45;blocking HTTP test runner for FastLED loopback testing." alt="" coords="1649,159,1887,214"/>
+<area shape="poly" id="edge27_Node000020_Node000025" title=" " alt="" coords="1925,112,1823,162,1821,157,1923,108"/>
+<area shape="rect" id="Node000027" href="$dd/d56/http_8h.html" title="fl::net::http — High&#45;level HTTP client and server facade" alt="" coords="1911,174,2009,199"/>
+<area shape="poly" id="edge29_Node000020_Node000027" title=" " alt="" coords="1963,118,1963,174,1957,174,1957,118"/>
+<area shape="rect" id="Node000029" href="$de/daa/fetch_8cpp_8hpp.html" title=" " alt="" coords="2502,284,2679,309"/>
+<area shape="poly" id="edge31_Node000020_Node000029" title=" " alt="" coords="2041,92,2150,98,2274,108,2389,125,2435,136,2469,150,2511,180,2545,218,2571,254,2587,283,2583,285,2566,257,2541,221,2507,184,2467,154,2433,141,2388,130,2274,114,2150,103,2041,98"/>
+<area shape="rect" id="Node000033" href="$d2/d83/fetch__request_8h.html" title=" " alt="" coords="2266,174,2457,199"/>
+<area shape="poly" id="edge33_Node000020_Node000033" title=" " alt="" coords="2035,104,2246,149,2325,171,2324,177,2245,155,2034,109"/>
+<area shape="rect" id="Node000022" href="$d8/d11/_client_8ino.html" title="Educational tutorial for FastLED HTTP fetch API with explicit types." alt="" coords="2020,269,2220,324"/>
+<area shape="poly" id="edge24_Node000021_Node000022" title=" " alt="" coords="2131,229,2126,269,2121,269,2126,228"/>
+<area shape="rect" id="Node000024" href="$d8/d5b/_client_validation_8ino.html" title="HTTP Client Validation Suite for FastLED fetch API." alt="" coords="1378,269,1638,324"/>
+<area shape="poly" id="edge26_Node000023_Node000024" title=" " alt="" coords="1511,235,1511,269,1505,269,1505,235"/>
+<area shape="rect" id="Node000026" href="$dc/dba/_loopback_8ino.html" title="HTTP Server Loopback Test for FastLED @filter: (platform is native)" alt="" coords="1668,269,1868,324"/>
+<area shape="poly" id="edge28_Node000025_Node000026" title=" " alt="" coords="1771,228,1771,269,1765,269,1765,228"/>
+<area shape="rect" id="Node000028" href="$d7/d97/net_8h.html" title="Umbrella header for fl::net — high&#45;level networking facade." alt="" coords="1905,284,1997,309"/>
+<area shape="poly" id="edge30_Node000027_Node000028" title=" " alt="" coords="1960,213,1954,284,1949,283,1955,213"/>
+<area shape="rect" id="Node000030" href="$db/d91/fl_2net_2http_2__build_8cpp_8hpp.html" title="Unity build header for fl/net/http/ directory." alt="" coords="2385,372,2567,397"/>
+<area shape="poly" id="edge32_Node000029_Node000030" title=" " alt="" coords="2566,320,2493,374,2490,370,2563,315"/>
+<area shape="poly" id="edge34_Node000033_Node000029" title=" " alt="" coords="2399,203,2567,282,2565,286,2397,208"/>
+<area shape="rect" id="Node000034" href="$d8/d7a/fetch__request_8cpp_8hpp.html" title=" " alt="" coords="2245,284,2478,309"/>
+<area shape="poly" id="edge35_Node000033_Node000034" title=" " alt="" coords="2364,213,2364,284,2359,284,2359,213"/>
+<area shape="poly" id="edge36_Node000034_Node000030" title=" " alt="" coords="2389,315,2462,370,2459,374,2386,320"/>
+<area shape="rect" id="Node000036" href="$dc/d07/fl_2stl_2__build_8cpp_8hpp.html" title=" " alt="" coords="969,174,1117,199"/>
+<area shape="poly" id="edge38_Node000035_Node000036" title=" " alt="" coords="886,108,1020,171,1018,176,884,112"/>
+<area shape="poly" id="edge39_Node000036_Node000004" title=" " alt="" coords="1030,212,986,276,962,306,942,326,908,345,871,360,801,378,800,373,870,355,905,341,938,322,958,303,982,273,1026,209"/>
+<area shape="rect" id="Node000037" href="$de/df0/fl_8stl_09_8cpp.html" title="Unity build: recursive includes from src/fl/stl/." alt="" coords="1003,284,1139,309"/>
+<area shape="poly" id="edge40_Node000036_Node000037" title=" " alt="" coords="1052,212,1070,283,1065,284,1046,213"/>
+<area shape="poly" id="edge42_Node000038_Node000036" title=" " alt="" coords="1052,118,1046,174,1041,174,1047,117"/>
 </map>

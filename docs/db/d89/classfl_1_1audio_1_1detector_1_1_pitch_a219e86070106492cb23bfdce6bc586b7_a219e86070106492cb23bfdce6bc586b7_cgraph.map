@@ -1,0 +1,11 @@
+<map id="fl::audio::detector::Pitch::calculateConfidence" name="fl::audio::detector::Pitch::calculateConfidence">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,73,207,113"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="299,5,365,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,70,254,39,285,30,286,35,256,45,165,75"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="301,55,363,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="207,79,287,70,287,75,208,84"/>
+<area shape="rect" id="Node000004" href="$d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d" title=" " alt="" coords="303,104,361,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="208,101,289,110,289,115,207,106"/>
+<area shape="rect" id="Node000005" href="$d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c" title=" " alt="" coords="255,153,409,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="169,110,279,146,278,151,168,115"/>
+</map>

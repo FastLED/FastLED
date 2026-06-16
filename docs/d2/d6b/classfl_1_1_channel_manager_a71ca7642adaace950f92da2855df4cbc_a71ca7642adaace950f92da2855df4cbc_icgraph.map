@@ -1,0 +1,8 @@
+<map id="fl::ChannelManager::setExclusiveDriver" name="fl::ChannelManager::setExclusiveDriver">
+<area shape="rect" id="Node000001" title="Register a single driver at a priority above the platform default and disable all others (compile&#45;tim..." alt="" coords="265,29,417,69"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="380,18,367,11,341,8,319,10,306,15,301,21,304,28,298,30,296,20,303,10,318,5,341,3,368,6,383,13"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_a6d5e5bb1d08be99fb86a044a74bdf578.html#a6d5e5bb1d08be99fb86a044a74bdf578" title="Register a single driver at a priority above the platform default (compile&#45;time TU&#45;linking variant)." alt="" coords="5,11,217,37"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="251,42,217,38,218,33,252,37"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_acf1fbe61fec65ce648a6d0eabd9c85bd.html#acf1fbe61fec65ce648a6d0eabd9c85bd" title="Enable only one driver exclusively, runtime form (disables all others)" alt="" coords="5,61,217,86"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="252,61,218,65,217,60,251,56"/>
+</map>

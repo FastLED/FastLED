@@ -1,0 +1,19 @@
+<map id="fl::json::is_string" name="fl::json::is_string">
+<area shape="rect" id="Node000001" title=" " alt="" coords="629,135,757,160"/>
+<area shape="rect" id="Node000002" href="$d8/d90/structfl_1_1detail_1_1_json_to_type_3_01fl_1_1vector_3_01fl_1_1u8_01_4_00_01void_01_4_a190122f0d31e82490b868e78571d0012.html#a190122f0d31e82490b868e78571d0012" title=" " alt="" coords="398,5,554,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="663,128,625,101,580,74,553,61,555,56,583,69,628,96,667,124"/>
+<area shape="rect" id="Node000003" href="$dc/d75/namespacefl_1_1wled_a0e1b21aa8cf41f28a4973d7444282fce.html#a0e1b21aa8cf41f28a4973d7444282fce" title="Parse all fields from a segment JSON object into a WLEDSegment." alt="" coords="371,84,581,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="624,134,531,112,532,107,625,129"/>
+<area shape="rect" id="Node000005" href="$db/d63/class_auto_research_remote_control_abb6600e8a1e8c4ef46ba29e7bd3b78b4.html#abb6600e8a1e8c4ef46ba29e7bd3b78b4" title="Register all RPC functions with shared autoresearch state." alt="" coords="112,185,323,225"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="616,153,500,161,371,175,305,187,304,182,370,170,500,156,615,148"/>
+<area shape="rect" id="Node000007" href="$db/d63/class_auto_research_remote_control_a2e12a8f854f2f66312793a4405f4fddb.html#a2e12a8f854f2f66312793a4405f4fddb" title=" " alt="" coords="371,185,581,225"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="632,166,553,187,552,182,630,161"/>
+<area shape="rect" id="Node000008" href="$db/d63/class_auto_research_remote_control_a7992b62fd1f26fe1898d2ea8a78b370a.html#a7992b62fd1f26fe1898d2ea8a78b370a" title=" " alt="" coords="371,249,581,289"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="671,172,632,206,583,239,556,251,554,246,580,234,629,202,668,168"/>
+<area shape="rect" id="Node000004" href="$d2/d9f/classfl_1_1_w_l_e_d_a073f5478071f0b32ea9ac80cf3fd236c.html#a073f5478071f0b32ea9ac80cf3fd236c" title="Set WLED state from JSON object." alt="" coords="148,84,287,109"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="358,99,287,99,287,94,358,94"/>
+<area shape="rect" id="Node000006" href="$dd/dc8/_auto_research_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,192,64,217"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="98,207,64,207,64,202,98,202"/>
+<area shape="poly" id="edge7_Node000007_Node000005" title=" " alt="" coords="357,207,323,207,323,202,357,202"/>
+<area shape="poly" id="edge9_Node000008_Node000005" title=" " alt="" coords="381,248,298,227,299,222,382,243"/>
+</map>

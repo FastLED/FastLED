@@ -1,0 +1,31 @@
+<map id="setup" name="setup">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,205,64,230"/>
+<area shape="rect" id="Node000002" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_ab07b6f9e44bc8aba1f780b0230f5be21.html#ab07b6f9e44bc8aba1f780b0230f5be21" title="Factory method for 200 OK response." alt="" coords="112,205,307,230"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="64,215,99,215,99,220,64,220"/>
+<area shape="rect" id="Node000003" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_a1a8b4038fa86119ce80f6b9857c7eee3.html#a1a8b4038fa86119ce80f6b9857c7eee3" title=" " alt="" coords="355,197,525,237"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="307,224,341,224,341,229,307,229"/>
+<area shape="poly" id="edge17_Node000003_Node000002" title=" " alt="" coords="354,211,320,211,320,206,354,206"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="399,198,397,188,403,178,418,173,440,171,466,174,480,181,477,186,464,179,440,176,419,178,406,183,402,189,404,196"/>
+<area shape="rect" id="Node000004" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_aea2ac581ef439e865a98eae4778c7416.html#aea2ac581ef439e865a98eae4778c7416" title="Factory method for 400 Bad Request response." alt="" coords="573,5,744,45"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="456,195,503,133,535,98,572,67,608,48,610,53,575,72,539,102,507,137,461,199"/>
+<area shape="rect" id="Node000005" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_a8688692b19d75358b846a85f6c367b5c.html#a8688692b19d75358b846a85f6c367b5c" title="Set response body." alt="" coords="573,69,744,109"/>
+<area shape="poly" id="edge6_Node000003_Node000005" title=" " alt="" coords="476,195,521,163,572,131,613,112,616,117,575,136,524,167,479,199"/>
+<area shape="rect" id="Node000006" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_abd12ccbafacd9b44270123f766d91dc9.html#abd12ccbafacd9b44270123f766d91dc9" title="Add HTTP header." alt="" coords="573,133,744,173"/>
+<area shape="poly" id="edge8_Node000003_Node000006" title=" " alt="" coords="525,199,600,175,602,181,526,204"/>
+<area shape="rect" id="Node000007" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_a6844fcc0edb41a50dad5d21ee745ad1a.html#a6844fcc0edb41a50dad5d21ee745ad1a" title="Factory method for 500 Internal Server Error response." alt="" coords="573,197,744,237"/>
+<area shape="poly" id="edge10_Node000003_Node000007" title=" " alt="" coords="525,223,559,224,559,229,525,229"/>
+<area shape="rect" id="Node000008" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_a5750f33732ba08a389f9f6ce4a387338.html#a5750f33732ba08a389f9f6ce4a387338" title="Set JSON response body with automatic Content&#45;Type header." alt="" coords="573,285,744,325"/>
+<area shape="poly" id="edge12_Node000003_Node000008" title=" " alt="" coords="475,235,575,278,573,283,473,240"/>
+<area shape="rect" id="Node000009" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_a571a6ad842ad6f23649072749926227e.html#a571a6ad842ad6f23649072749926227e" title="Factory method for 404 Not Found response." alt="" coords="573,349,744,389"/>
+<area shape="poly" id="edge15_Node000003_Node000009" title=" " alt="" coords="455,236,500,286,530,314,564,340,561,344,527,319,496,290,451,239"/>
+<area shape="rect" id="Node000010" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_a7c2f923cab94b0b52945ce0bcfd12e90.html#a7c2f923cab94b0b52945ce0bcfd12e90" title="Set HTTP status code." alt="" coords="573,413,744,453"/>
+<area shape="poly" id="edge18_Node000003_Node000010" title=" " alt="" coords="450,236,467,271,492,315,525,361,565,403,561,407,521,365,487,318,462,274,445,239"/>
+<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="575,47,575,47,538,79,505,116,458,186,454,183,501,113,534,76,572,43,572,43"/>
+<area shape="poly" id="edge7_Node000005_Node000003" title=" " alt="" coords="575,111,575,112,515,150,467,190,464,186,512,146,572,107,572,107"/>
+<area shape="poly" id="edge9_Node000006_Node000003" title=" " alt="" coords="574,172,498,195,497,190,572,167"/>
+<area shape="poly" id="edge11_Node000007_Node000003" title=" " alt="" coords="573,211,539,211,539,206,573,206"/>
+<area shape="poly" id="edge13_Node000008_Node000003" title=" " alt="" coords="623,288,523,245,525,240,625,283"/>
+<area shape="poly" id="edge14_Node000008_Node000008" title=" " alt="" coords="618,286,615,276,622,266,636,261,659,259,684,262,698,269,696,274,683,267,659,264,638,266,625,271,620,277,623,284"/>
+<area shape="poly" id="edge16_Node000009_Node000003" title=" " alt="" coords="623,352,572,328,520,289,476,249,479,245,523,285,575,323,626,347"/>
+<area shape="poly" id="edge19_Node000010_Node000003" title=" " alt="" coords="619,416,595,405,572,391,536,358,505,321,459,251,464,248,509,318,540,355,575,387,597,401,621,411"/>
+</map>

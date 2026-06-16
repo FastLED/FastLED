@@ -1,0 +1,39 @@
+<map id="fl::audio::detector::MultiBandBeat::~MultiBandBeat" name="fl::audio::detector::MultiBandBeat::~MultiBandBeat">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,368,247,408"/>
+<area shape="rect" id="Node000002" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a5e3bab39bf17461edc0caaf9d372f9f7.html#a5e3bab39bf17461edc0caaf9d372f9f7" title=" " alt="" coords="588,29,819,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="129,367,144,307,174,225,196,182,223,140,255,103,293,72,327,54,363,40,438,25,514,21,584,25,583,30,514,26,439,30,364,45,329,59,296,77,259,107,227,143,201,184,179,227,149,308,134,368"/>
+<area shape="rect" id="Node000003" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_ad4f93538e5951c5784ade165964dd446.html#ad4f93538e5951c5784ade165964dd446" title="Configure the multi&#45;band beat detector." alt="" coords="318,111,513,151"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="136,366,160,327,196,277,241,224,293,177,332,154,335,159,296,181,245,227,200,280,165,330,141,369"/>
+<area shape="rect" id="Node000004" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a31a8032e89c171eefef6c456bb331fdd.html#a31a8032e89c171eefef6c456bb331fdd" title="Reset internal state (clear history, reset cooldowns)" alt="" coords="620,93,787,133"/>
+<area shape="poly" id="edge20_Node000001_Node000004" title=" " alt="" coords="141,366,202,297,245,259,293,226,357,197,411,185,467,177,535,160,583,143,610,135,612,140,585,148,537,165,468,182,412,190,359,202,296,230,249,263,206,301,145,370"/>
+<area shape="rect" id="Node000005" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_af83f9f7c2b2695b8a912a98ff6b8bde7.html#af83f9f7c2b2695b8a912a98ff6b8bde7" title="Detect beats in all frequency bands." alt="" coords="309,240,521,280"/>
+<area shape="poly" id="edge7_Node000001_Node000005" title=" " alt="" coords="156,366,218,327,294,290,315,282,316,287,296,294,220,332,158,370"/>
+<area shape="rect" id="Node000011" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a7c111f69d90c4b6964aa2b3d796cb59f.html#a7c111f69d90c4b6964aa2b3d796cb59f" title="Get current bass energy (0.0&#45;1.0)" alt="" coords="300,304,531,344"/>
+<area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="217,365,310,344,312,350,218,371"/>
+<area shape="rect" id="Node000012" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a32b6986470f16899797e6f7335e4f1be.html#a32b6986470f16899797e6f7335e4f1be" title="Get current mid energy (0.0&#45;1.0)" alt="" coords="303,368,527,408"/>
+<area shape="poly" id="edge14_Node000001_Node000012" title=" " alt="" coords="247,385,289,385,289,391,247,391"/>
+<area shape="rect" id="Node000013" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a41551144e734e2b41740ed429ec8a02b.html#a41551144e734e2b41740ed429ec8a02b" title="Get current treble energy (0.0&#45;1.0)" alt="" coords="318,433,513,487"/>
+<area shape="poly" id="edge15_Node000001_Node000013" title=" " alt="" coords="208,405,305,430,304,435,207,411"/>
+<area shape="rect" id="Node000014" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a38440a4a405e71b1911d65c13f75b8dc.html#a38440a4a405e71b1911d65c13f75b8dc" title="Check if a bass beat was detected in the last frame." alt="" coords="312,512,519,552"/>
+<area shape="poly" id="edge16_Node000001_Node000014" title=" " alt="" coords="153,406,216,452,255,476,296,498,314,505,312,510,294,502,252,481,213,456,150,410"/>
+<area shape="rect" id="Node000015" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a6e5cfd0d09c10b5430a7f4a843231d05.html#a6e5cfd0d09c10b5430a7f4a843231d05" title="Check if a mid beat was detected in the last frame." alt="" coords="316,576,515,616"/>
+<area shape="poly" id="edge17_Node000001_Node000015" title=" " alt="" coords="143,407,168,441,203,483,247,525,296,562,308,568,306,573,293,566,243,530,199,486,164,444,139,410"/>
+<area shape="rect" id="Node000016" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a59e623e65c364afaee2c7e80adfd46e6.html#a59e623e65c364afaee2c7e80adfd46e6" title="Check if multiple bands triggered simultaneously (strong beat)" alt="" coords="295,640,536,680"/>
+<area shape="poly" id="edge18_Node000001_Node000016" title=" " alt="" coords="138,407,159,452,193,512,239,574,266,602,296,626,305,631,302,636,293,630,263,606,235,577,189,515,155,455,133,409"/>
+<area shape="rect" id="Node000017" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_aba53cebfabd63b18d5464ee8d3e3b3d3.html#aba53cebfabd63b18d5464ee8d3e3b3d3" title="Check if a treble beat was detected in the last frame." alt="" coords="308,704,523,744"/>
+<area shape="poly" id="edge19_Node000001_Node000017" title=" " alt="" coords="135,407,153,464,185,541,206,581,232,621,262,658,296,690,304,695,301,699,293,694,258,662,228,624,202,584,180,543,148,466,130,409"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="650,30,647,20,656,10,674,5,703,3,737,5,755,13,753,18,735,11,703,8,675,10,658,15,652,21,655,28"/>
+<area shape="poly" id="edge4_Node000003_Node000002" title=" " alt="" coords="483,108,583,79,613,70,615,76,585,84,484,113"/>
+<area shape="poly" id="edge5_Node000003_Node000003" title=" " alt="" coords="362,111,359,101,368,92,386,86,415,84,449,87,467,94,465,99,447,92,415,89,387,91,370,96,364,102,367,109"/>
+<area shape="poly" id="edge6_Node000003_Node000004" title=" " alt="" coords="513,122,606,117,606,122,513,127"/>
+<area shape="rect" id="Node000006" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a87124ad16e03c77d722f7ec4b702338d.html#a87124ad16e03c77d722f7ec4b702338d" title="Calculate energy for bass band (bins 0&#45;1)" alt="" coords="607,158,800,213"/>
+<area shape="poly" id="edge8_Node000005_Node000006" title=" " alt="" coords="492,237,593,211,594,216,494,243"/>
+<area shape="rect" id="Node000007" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a3a4b66b06bbccc2f2a48baa589759056.html#a3a4b66b06bbccc2f2a48baa589759056" title="Calculate energy for mid band (bins 6&#45;7)" alt="" coords="607,237,800,291"/>
+<area shape="poly" id="edge9_Node000005_Node000007" title=" " alt="" coords="522,259,593,260,593,265,522,264"/>
+<area shape="rect" id="Node000008" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_af1dac745ebe25331e624d24be3262e4d.html#af1dac745ebe25331e624d24be3262e4d" title="Calculate energy for treble band (bins 14&#45;15)" alt="" coords="607,315,800,370"/>
+<area shape="poly" id="edge10_Node000005_Node000008" title=" " alt="" coords="494,278,537,289,602,309,600,314,535,295,492,283"/>
+<area shape="rect" id="Node000009" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a1bc8b4ad09883caaf0bface7b6e2d0cc.html#a1bc8b4ad09883caaf0bface7b6e2d0cc" title="Detect beat in a specific frequency band." alt="" coords="584,395,823,435"/>
+<area shape="poly" id="edge11_Node000005_Node000009" title=" " alt="" coords="519,278,538,290,556,313,563,336,569,358,586,379,595,386,592,390,582,383,564,361,558,337,551,315,534,294,516,282"/>
+<area shape="rect" id="Node000010" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="652,459,755,485"/>
+<area shape="poly" id="edge12_Node000005_Node000010" title=" " alt="" coords="522,278,538,290,553,310,561,330,562,370,564,408,571,427,586,445,610,460,639,468,637,473,608,465,582,449,567,429,559,410,557,370,555,331,548,312,534,294,518,282"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="fl::audio::Processor::onDrop" name="fl::audio::Processor::onDrop">
+<area shape="rect" id="Node000001" title=" " alt="" coords="204,29,349,69"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="309,17,298,11,277,8,258,10,247,15,243,21,245,28,240,30,238,20,244,11,257,5,277,3,300,6,312,13"/>
+<area shape="rect" id="Node000002" href="$d3/d6b/classfl_1_1audio_1_1_processor_a01e2e863a4e1b0838105285416e80703.html#a01e2e863a4e1b0838105285416e80703" title=" " alt="" coords="5,29,156,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="190,52,156,52,156,47,190,47"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="113,17,102,11,81,8,62,10,51,15,47,21,49,28,44,30,42,20,48,11,61,5,81,3,104,6,116,13"/>
+</map>

@@ -117,27 +117,28 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_ac4f613f1b3e618528dca3189df8
 
 <p>Clear out the local data array. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00259">259</a> of file <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html">FastLED.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  259</span>                         {</div>
-<div class="line"><span class="lineno">  260</span>    CLEDController *pCur = <a class="code hl_function" href="../../d6/d2c/class_c_l_e_d_controller_a8b412ff1fd4833d0db63a175d40a2ee0.html#a8b412ff1fd4833d0db63a175d40a2ee0">CLEDController::head</a>();</div>
-<div class="line"><span class="lineno">  261</span>    <span class="keywordflow">while</span>(pCur) {</div>
-<div class="line"><span class="lineno">  262</span>        pCur-&gt;<a class="code hl_function" href="../../d6/d2c/class_c_l_e_d_controller_aca9f099645c6976b1a52ba13ab455352.html#aca9f099645c6976b1a52ba13ab455352">clearLedDataInternal</a>();</div>
-<div class="line"><span class="lineno">  263</span>        pCur = pCur-&gt;<a class="code hl_function" href="../../d6/d2c/class_c_l_e_d_controller_a21a4d2b3415dd7b24175ebdb51c9ced0.html#a21a4d2b3415dd7b24175ebdb51c9ced0">next</a>();</div>
-<div class="line"><span class="lineno">  264</span>    }</div>
-<div class="line"><span class="lineno">  265</span>}</div>
-<div class="ttc" id="aclass_c_l_e_d_controller_a21a4d2b3415dd7b24175ebdb51c9ced0_html_a21a4d2b3415dd7b24175ebdb51c9ced0"><div class="ttname"><a href="../../d6/d2c/class_c_l_e_d_controller_a21a4d2b3415dd7b24175ebdb51c9ced0.html#a21a4d2b3415dd7b24175ebdb51c9ced0">CLEDController::next</a></div><div class="ttdeci">CLEDController * next()</div><div class="ttdoc">Get the next controller in the linked list after this one.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d6d/cled__controller_8h_source.html#l00159">cled_controller.h:159</a></div></div>
-<div class="ttc" id="aclass_c_l_e_d_controller_a8b412ff1fd4833d0db63a175d40a2ee0_html_a8b412ff1fd4833d0db63a175d40a2ee0"><div class="ttname"><a href="../../d6/d2c/class_c_l_e_d_controller_a8b412ff1fd4833d0db63a175d40a2ee0.html#a8b412ff1fd4833d0db63a175d40a2ee0">CLEDController::head</a></div><div class="ttdeci">static CLEDController * head()</div><div class="ttdoc">Get the first LED controller in the linked list of controllers.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d6d/cled__controller_8h_source.html#l00155">cled_controller.h:155</a></div></div>
-<div class="ttc" id="aclass_c_l_e_d_controller_aca9f099645c6976b1a52ba13ab455352_html_aca9f099645c6976b1a52ba13ab455352"><div class="ttname"><a href="../../d6/d2c/class_c_l_e_d_controller_aca9f099645c6976b1a52ba13ab455352.html#aca9f099645c6976b1a52ba13ab455352">CLEDController::clearLedDataInternal</a></div><div class="ttdeci">void clearLedDataInternal(int nLeds=-1)</div><div class="ttdoc">Zero out the LED data managed by this controller.</div><div class="ttdef"><b>Definition</b> <a href="../../dd/dd8/cled__controller_8cpp_source.html#l00024">cled_controller.cpp:24</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00369">369</a> of file <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html">FastLED.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  369</span>                         {</div>
+<div class="line"><span class="lineno">  370</span>    <a class="code hl_typedef" href="../../db/d6d/cled__controller_8h_a5c4c69e67efd8ee1b27833dfef522d6f.html#a5c4c69e67efd8ee1b27833dfef522d6f">CLEDController</a> *pCur = <a class="code hl_function" href="../../d8/da0/classfl_1_1_c_l_e_d_controller_ad9e0dfb8b8b333d9e48c7695b202710c.html#ad9e0dfb8b8b333d9e48c7695b202710c">CLEDController::head</a>();</div>
+<div class="line"><span class="lineno">  371</span>    <span class="keywordflow">while</span>(pCur) {</div>
+<div class="line"><span class="lineno">  372</span>        pCur-&gt;<a class="code hl_function" href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a1a558e8688b557feecf36c91ac48f574.html#a1a558e8688b557feecf36c91ac48f574">clearLedDataInternal</a>();</div>
+<div class="line"><span class="lineno">  373</span>        pCur = pCur-&gt;<a class="code hl_function" href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a87abe437742b3f2b06943fafd4404aef.html#a87abe437742b3f2b06943fafd4404aef">next</a>();</div>
+<div class="line"><span class="lineno">  374</span>    }</div>
+<div class="line"><span class="lineno">  375</span>}</div>
+<div class="ttc" id="aclassfl_1_1_c_l_e_d_controller_a1a558e8688b557feecf36c91ac48f574_html_a1a558e8688b557feecf36c91ac48f574"><div class="ttname"><a href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a1a558e8688b557feecf36c91ac48f574.html#a1a558e8688b557feecf36c91ac48f574">fl::CLEDController::clearLedDataInternal</a></div><div class="ttdeci">void clearLedDataInternal(int nLeds=-1) FL_NOEXCEPT</div><div class="ttdoc">Zero out the LED data managed by this controller.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dcc/cled__controller_8cpp_8hpp_source.html#l00059">cled_controller.cpp.hpp:59</a></div></div>
+<div class="ttc" id="aclassfl_1_1_c_l_e_d_controller_a87abe437742b3f2b06943fafd4404aef_html_a87abe437742b3f2b06943fafd4404aef"><div class="ttname"><a href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a87abe437742b3f2b06943fafd4404aef.html#a87abe437742b3f2b06943fafd4404aef">fl::CLEDController::next</a></div><div class="ttdeci">CLEDController * next() FL_NOEXCEPT</div><div class="ttdoc">Get the next controller in the linked list after this one.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d9d/fl_2channels_2cled__controller_8h_source.html#l00213">cled_controller.h:213</a></div></div>
+<div class="ttc" id="aclassfl_1_1_c_l_e_d_controller_ad9e0dfb8b8b333d9e48c7695b202710c_html_ad9e0dfb8b8b333d9e48c7695b202710c"><div class="ttname"><a href="../../d8/da0/classfl_1_1_c_l_e_d_controller_ad9e0dfb8b8b333d9e48c7695b202710c.html#ad9e0dfb8b8b333d9e48c7695b202710c">fl::CLEDController::head</a></div><div class="ttdeci">static CLEDController * head() FL_NOEXCEPT</div><div class="ttdoc">Get the first LED controller in the linked list of controllers.</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d9d/fl_2channels_2cled__controller_8h_source.html#l00209">cled_controller.h:209</a></div></div>
+<div class="ttc" id="acled__controller_8h_a5c4c69e67efd8ee1b27833dfef522d6f_html_a5c4c69e67efd8ee1b27833dfef522d6f"><div class="ttname"><a href="../../db/d6d/cled__controller_8h_a5c4c69e67efd8ee1b27833dfef522d6f.html#a5c4c69e67efd8ee1b27833dfef522d6f">CLEDController</a></div><div class="ttdeci">fl::CLEDController CLEDController</div><div class="ttdef"><b>Definition</b> <a href="../../db/d6d/cled__controller_8h_source.html#l00010">cled_controller.h:10</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../dd/dd8/cled__controller_8cpp_source.html#l00024">CLEDController::clearLedDataInternal()</a>, <a class="el" href="../../db/d6d/cled__controller_8h_source.html#l00155">CLEDController::head()</a>, and <a class="el" href="../../db/d6d/cled__controller_8h_source.html#l00159">CLEDController::next()</a>.</p>
+<p class="reference">References <a class="el" href="../../df/dcc/cled__controller_8cpp_8hpp_source.html#l00059">fl::CLEDController::clearLedDataInternal()</a>, <a class="el" href="../../d6/d9d/fl_2channels_2cled__controller_8h_source.html#l00209">fl::CLEDController::head()</a>, and <a class="el" href="../../d6/d9d/fl_2channels_2cled__controller_8h_source.html#l00213">fl::CLEDController::next()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00252">clear()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00362">clear()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dd/dbb/class_c_fast_l_e_d_ac4f613f1b3e618528dca3189df88ce80_ac4f613f1b3e618528dca3189df88ce80_cgraph.svg" width="100%" height="413"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dd/dbb/class_c_fast_l_e_d_ac4f613f1b3e618528dca3189df88ce80_ac4f613f1b3e618528dca3189df88ce80_cgraph.svg" width="100%" height="434"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
@@ -156,7 +157,7 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_ac4f613f1b3e618528dca3189df8
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dd/dbb/class_c_fast_l_e_d.html">CFastLED</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,0 +1,24 @@
+digraph "fl::BiquadFilter::notch"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::BiquadFilter::notch",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::BiquadFilter::Biquad\lFilter",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d3a/classfl_1_1_biquad_filter_a2d59fddf6f958ef54b2f9c1adda8c60b.html#a2d59fddf6f958ef54b2f9c1adda8c60b",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::detail::BiquadFilter\lImpl::notch",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/df8/classfl_1_1detail_1_1_biquad_filter_impl_a87ef930beb2a9a390e975050f01209ed.html#a87ef930beb2a9a390e975050f01209ed",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::detail::BiquadFilter\lImpl::BiquadFilterImpl",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/df8/classfl_1_1detail_1_1_biquad_filter_impl_a87dbbe4aa01749ecb1ae579844fc9a92.html#a87dbbe4aa01749ecb1ae579844fc9a92",tooltip=" "];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::cosf",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_ad87db990a26723fa560bc364734ea6cc.html#ad87db990a26723fa560bc364734ea6cc",tooltip=" "];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::cos_impl_float",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_a82dc97b9808ee5c39eb57f649d20a2fd.html#a82dc97b9808ee5c39eb57f649d20a2fd",tooltip=" "];
+  Node3 -> Node10 [id="edge6_Node000003_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::sinf",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a4ba2744fe96375793e6f7a98b188d343.html#a4ba2744fe96375793e6f7a98b188d343",tooltip=" "];
+  Node10 -> Node11 [id="edge7_Node000010_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::sin_impl_float",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_abb4917bf7e0fc28049964497cb88305f.html#abb4917bf7e0fc28049964497cb88305f",tooltip=" "];
+}

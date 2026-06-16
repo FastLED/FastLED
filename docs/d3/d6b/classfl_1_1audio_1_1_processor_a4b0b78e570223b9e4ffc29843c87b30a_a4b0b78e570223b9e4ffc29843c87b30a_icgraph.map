@@ -1,0 +1,7 @@
+<map id="fl::audio::Processor::onEqualizer" name="fl::audio::Processor::onEqualizer">
+<area shape="rect" id="Node000001" title=" " alt="" coords="207,29,352,69"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="313,18,301,11,279,8,260,10,249,15,245,21,247,28,242,30,240,20,246,11,259,5,279,3,303,6,315,13"/>
+<area shape="rect" id="Node000002" href="$d3/d6b/classfl_1_1audio_1_1_processor_a70e6073637661a471baf2e6b9d9ed568.html#a70e6073637661a471baf2e6b9d9ed568" title=" " alt="" coords="5,29,159,69"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="193,52,159,52,159,47,193,47"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="115,18,104,11,82,8,63,10,52,15,48,21,50,28,45,30,43,20,48,11,62,5,82,3,105,6,118,13"/>
+</map>

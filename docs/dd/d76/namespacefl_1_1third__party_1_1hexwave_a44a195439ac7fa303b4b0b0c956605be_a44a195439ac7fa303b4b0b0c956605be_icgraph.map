@@ -1,0 +1,9 @@
+<map id="fl::third_party::hexwave::memset" name="fl::third_party::hexwave::memset">
+<area shape="rect" id="Node000001" title=" " alt="" coords="504,37,679,77"/>
+<area shape="rect" id="Node000002" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_a706734748c19f4ac353569d7aa7c5b0e.html#a706734748c19f4ac353569d7aa7c5b0e" title="Create a new oscillator with the given waveform parameters." alt="" coords="261,5,435,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="490,47,435,39,436,34,490,41"/>
+<area shape="rect" id="Node000004" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_af3f50c133d31699878600252717015f7.html#af3f50c133d31699878600252717015f7" title="Generate audio samples." alt="" coords="240,69,456,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="491,73,457,78,456,72,490,68"/>
+<area shape="rect" id="Node000003" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_a98002b5c669050aa19b7cdfd46ee8f9e.html#a98002b5c669050aa19b7cdfd46ee8f9e" title="Create oscillator using global engine (DEPRECATED)" alt="" coords="5,5,192,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="247,28,192,28,192,23,247,23"/>
+</map>

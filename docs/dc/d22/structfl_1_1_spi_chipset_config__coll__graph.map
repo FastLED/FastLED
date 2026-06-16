@@ -1,0 +1,5 @@
+<map id="fl::SpiChipsetConfig" name="fl::SpiChipsetConfig">
+<area shape="rect" id="Node000001" title="SPI chipset configuration (data + clock pins)" alt="" coords="5,93,153,119"/>
+<area shape="rect" id="Node000002" href="$d0/d69/structfl_1_1_spi_encoder.html" title="SPI encoder configuration for LED protocols." alt="" coords="24,5,135,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="82,45,82,93,77,93,77,45"/>
+</map>

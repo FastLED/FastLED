@@ -117,34 +117,26 @@ $(function(){initNavTree('dc/d25/_pacifica_8ino_a4c00a661fc55f1df61fc874119c746d
 <dl class="section examples"><dt>Examples</dt><dd><a class="el" href="../../d6/d86/_pacifica_8ino-example.html#a3">Pacifica.ino</a>.</dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dc/d25/_pacifica_8ino_source.html#l00159">159</a> of file <a class="el" href="../../dc/d25/_pacifica_8ino_source.html">Pacifica.ino</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  160</span>{</div>
-<div class="line"><span class="lineno">  161</span>  <span class="keywordflow">for</span>( uint16_t i = 0; i &lt; <a class="code hl_define" href="../../d8/d21/_adafruit_bridge_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>; i++) {</div>
-<div class="line"><span class="lineno">  162</span>    <a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>[i].blue = <a class="code hl_function" href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a>( <a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>[i].blue,  145); </div>
-<div class="line"><span class="lineno">  163</span>    <a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>[i].green= <a class="code hl_function" href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a>( <a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>[i].green, 200); </div>
-<div class="line"><span class="lineno">  164</span>    <a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>[i] |= <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a>( 2, 5, 7);</div>
-<div class="line"><span class="lineno">  165</span>  }</div>
-<div class="line"><span class="lineno">  166</span>}</div>
-<div class="ttc" id="a_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d_html_a1b4f26a01e11d7eb2848bc41b0f6dd9d"><div class="ttname"><a href="../../d8/d21/_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a></div><div class="ttdeci">CRGB leds[NUM_LEDS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d21/_adafruit_bridge_8ino_source.html#l00013">AdafruitBridge.ino:13</a></div></div>
-<div class="ttc" id="a_adafruit_bridge_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd_html_a4c4ae9a4146ce8d6a5debc90300d9abd"><div class="ttname"><a href="../../d8/d21/_adafruit_bridge_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a></div><div class="ttdeci">#define NUM_LEDS</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d21/_adafruit_bridge_8ino_source.html#l00011">AdafruitBridge.ino:11</a></div></div>
-<div class="ttc" id="agroup___scaling_gad7535ccda9c92470c4e6ee0265585555_html_gad7535ccda9c92470c4e6ee0265585555"><div class="ttname"><a href="../../d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE uint8_t scale8(uint8_t i, fract8 scale)</div><div class="ttdoc">Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ...</div><div class="ttdef"><b>Definition</b> <a href="../../db/d91/scale8_8h_source.html#l00044">scale8.h:44</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00086">crgb.h:86</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../dc/d25/_pacifica_8ino_source.html#l00162">162</a> of file <a class="el" href="../../dc/d25/_pacifica_8ino_source.html">Pacifica.ino</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  163</span>{</div>
+<div class="line"><span class="lineno">  164</span>  <span class="keywordflow">for</span>( uint16_t i = 0; i &lt; <a class="code hl_define" href="../../d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>; i++) {</div>
+<div class="line"><span class="lineno">  165</span>    <a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a>[i].blue = scale8( <a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a>[i].blue,  145); </div>
+<div class="line"><span class="lineno">  166</span>    <a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a>[i].green= scale8( <a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a>[i].green, 200); </div>
+<div class="line"><span class="lineno">  167</span>    <a class="code hl_variable" href="../../d6/d05/_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a>[i] |= <a class="code hl_typedef" href="../../d4/d36/namespacefl_a0d074c08905bad763e238b16d85e20e7.html#a0d074c08905bad763e238b16d85e20e7">fl::CRGB</a>( 2, 5, 7);</div>
+<div class="line"><span class="lineno">  168</span>  }</div>
+<div class="line"><span class="lineno">  169</span>}</div>
+<div class="ttc" id="a_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd_html_a4c4ae9a4146ce8d6a5debc90300d9abd"><div class="ttname"><a href="../../d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a></div><div class="ttdeci">#define NUM_LEDS</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d05/_animartrix_8ino_source.html#l00079">Animartrix.ino:79</a></div></div>
+<div class="ttc" id="a_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad_html_a83a59cb1680f896fa1c411261436d4ad"><div class="ttname"><a href="../../d6/d05/_animartrix_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a></div><div class="ttdeci">fl::CRGB leds[NUM_LEDS]</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d05/_animartrix_8ino_source.html#l00093">Animartrix.ino:93</a></div></div>
+<div class="ttc" id="anamespacefl_a0d074c08905bad763e238b16d85e20e7_html_a0d074c08905bad763e238b16d85e20e7"><div class="ttname"><a href="../../d4/d36/namespacefl_a0d074c08905bad763e238b16d85e20e7.html#a0d074c08905bad763e238b16d85e20e7">fl::CRGB</a></div><div class="ttdeci">fl::CRGB CRGB</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d78/video_8h_source.html#l00015">video.h:15</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d8/d21/_adafruit_bridge_8ino_source.html#l00013">leds</a>, <a class="el" href="../../d8/d21/_adafruit_bridge_8ino_source.html#l00011">NUM_LEDS</a>, and <a class="el" href="../../db/d91/scale8_8h_source.html#l00044">scale8()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d05/_animartrix_8ino_source.html#l00093">leds</a>, and <a class="el" href="../../d6/d05/_animartrix_8ino_source.html#l00079">NUM_LEDS</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dc/d70/pacifica_8h_source.html#l00045">fl::Pacifica::draw()</a>, and <a class="el" href="../../dc/d25/_pacifica_8ino_source.html#l00087">pacifica_loop()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dc/d70/pacifica_8h_source.html#l00043">fl::Pacifica::draw()</a>, and <a class="el" href="../../dc/d25/_pacifica_8ino_source.html#l00090">pacifica_loop()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/d25/_pacifica_8ino_a4c00a661fc55f1df61fc874119c746df_a4c00a661fc55f1df61fc874119c746df_cgraph.svg" width="296" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
-</div>
-<div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
-<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
-</div>
-<div id="dynsection-1-content" class="dyncontent" style="display:none;">
 <div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/d25/_pacifica_8ino_a4c00a661fc55f1df61fc874119c746df_a4c00a661fc55f1df61fc874119c746df_icgraph.svg" width="458" height="86"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
@@ -157,7 +149,7 @@ $(function(){initNavTree('dc/d25/_pacifica_8ino_a4c00a661fc55f1df61fc874119c746d
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_6c462138272298d2e4097d58743c07ce.html">Pacifica</a></li><li class="navelem"><a class="el" href="../../dc/d25/_pacifica_8ino.html">Pacifica.ino</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

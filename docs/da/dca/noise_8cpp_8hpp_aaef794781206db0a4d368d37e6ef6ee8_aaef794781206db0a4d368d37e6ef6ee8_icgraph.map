@@ -1,0 +1,36 @@
+<map id="grad8" name="grad8">
+<area shape="rect" id="Node000001" title=" " alt="" coords="700,124,759,150"/>
+<area shape="rect" id="Node000002" href="$d8/d5c/group___noise_ga54cef7bd75a211d3fc84fa853bb869fb.html#ga54cef7bd75a211d3fc84fa853bb869fb" title="8&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="552,75,652,100"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="686,123,634,103,636,98,688,118"/>
+<area shape="rect" id="Node000003" href="$d8/d5c/group___noise_ga5128d0f0c0c77b7514de5c5c26448300.html#ga5128d0f0c0c77b7514de5c5c26448300" title=" " alt="" coords="552,124,652,150"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="686,140,652,140,652,134,686,134"/>
+<area shape="rect" id="Node000004" href="$d8/d5c/group___noise_gaa3db0f2f3777cf5bb7a4dd1359dba4fe.html#gaa3db0f2f3777cf5bb7a4dd1359dba4fe" title=" " alt="" coords="552,174,652,199"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="688,156,636,176,634,171,686,151"/>
+<area shape="rect" id="Node000005" href="$d8/df9/group___noise_generation_ga149ba5b04496ee4b4f33a77fe4934b4b.html#ga149ba5b04496ee4b4f33a77fe4934b4b" title="8&#45;Bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="435,124,504,150"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="553,171,503,152,505,147,555,166"/>
+<area shape="rect" id="Node000006" href="$d8/df9/group___noise_generation_ga241eb59109b1d0a39daca3466d216721.html#ga241eb59109b1d0a39daca3466d216721" title=" " alt="" coords="435,174,504,199"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="538,189,504,189,504,184,538,184"/>
+<area shape="rect" id="Node000007" href="$d8/df9/group___noise_generation_gaeb72246ebd597b60a7e575173accf2fd.html#gaeb72246ebd597b60a7e575173accf2fd" title=" " alt="" coords="435,223,504,248"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="555,206,505,225,503,220,553,201"/>
+<area shape="rect" id="Node000008" href="$d4/df2/classfl_1_1_luminova_aa775ddcb74da9d8ae057ac8e4c3c50cc.html#aa775ddcb74da9d8ae057ac8e4c3c50cc" title=" " alt="" coords="5,162,148,187"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="435,215,432,212,420,187,415,163,415,118,415,97,412,77,403,58,385,40,361,24,338,14,317,9,295,8,250,19,197,41,158,66,126,100,102,135,87,163,82,160,98,132,122,97,155,62,195,36,248,14,295,3,317,4,340,9,364,20,388,36,407,55,417,75,421,96,420,118,420,162,425,185,437,209,439,212"/>
+<area shape="rect" id="Node000009" href="$de/da4/group___noise_fill_gac5e4db886061d72b10ca82cf52aa4d7c.html#gac5e4db886061d72b10ca82cf52aa4d7c" title="Fill a 2D 8&#45;bit buffer with noise, using inoise8()" alt="" coords="224,75,359,100"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="436,215,432,212,417,184,411,159,403,136,385,114,358,99,360,94,388,110,408,133,416,158,422,182,437,209,440,212"/>
+<area shape="rect" id="Node000014" href="$de/da4/group___noise_fill_ga912553a59d75e9e03b631a1f65022e95.html#ga912553a59d75e9e03b631a1f65022e95" title="Fill a 1D 8&#45;bit buffer with noise, using inoise8()" alt="" coords="232,124,351,150"/>
+<area shape="poly" id="edge10_Node000007_Node000014" title=" " alt="" coords="438,216,433,212,410,185,400,174,385,163,350,149,352,144,388,159,404,170,414,182,437,208,441,212"/>
+<area shape="rect" id="Node000017" href="$d4/d06/curr_8h_a27ef46fa8abd1dedd29a3904d81622d2.html#a27ef46fa8abd1dedd29a3904d81622d2" title=" " alt="" coords="214,174,369,199"/>
+<area shape="poly" id="edge11_Node000007_Node000017" title=" " alt="" coords="421,223,386,213,344,202,345,196,387,208,422,218"/>
+<area shape="rect" id="Node000020" href="$d6/d9d/_noise_8ino_a695b396822bbfb2d9b29c121cf13e8f3.html#a695b396822bbfb2d9b29c121cf13e8f3" title=" " alt="" coords="251,223,332,248"/>
+<area shape="poly" id="edge12_Node000007_Node000020" title=" " alt="" coords="421,238,332,238,332,233,421,233"/>
+<area shape="rect" id="Node000022" href="$d9/d41/classfl_1_1_noise_palette_a22d1820b5a78e9ccfb4123ef9161f738.html#a22d1820b5a78e9ccfb4123ef9161f738" title=" " alt="" coords="198,272,385,298"/>
+<area shape="poly" id="edge13_Node000007_Node000022" title=" " alt="" coords="422,252,387,262,341,275,340,270,386,257,421,247"/>
+<area shape="rect" id="Node000024" href="$dc/db7/examples_2_luminova_2luminova_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="51,398,102,423"/>
+<area shape="poly" id="edge14_Node000007_Node000024" title=" " alt="" coords="461,262,434,313,413,339,388,360,364,372,332,381,251,396,103,411,102,406,251,391,331,376,363,367,385,356,409,335,429,310,456,260"/>
+<area shape="rect" id="Node000025" href="$d4/df2/classfl_1_1_luminova_a003620fe7206a4d4c4b23ef2ea4d4d46.html#a003620fe7206a4d4c4b23ef2ea4d4d46" title=" " alt="" coords="196,322,387,347"/>
+<area shape="poly" id="edge15_Node000007_Node000025" title=" " alt="" coords="450,261,422,287,388,311,357,324,355,319,385,307,419,283,446,257"/>
+<area shape="rect" id="Node000026" href="$dc/db7/examples_2_luminova_2luminova_8h_a86824ded4d9f0ee6bad1cf3856cb4d31.html#a86824ded4d9f0ee6bad1cf3856cb4d31" title=" " alt="" coords="240,423,343,448"/>
+<area shape="poly" id="edge17_Node000007_Node000026" title=" " alt="" coords="465,263,455,295,439,333,418,372,388,406,367,420,344,429,342,424,365,415,385,402,413,369,435,331,450,293,459,261"/>
+<area shape="poly" id="edge9_Node000009_Node000009" title=" " alt="" coords="322,65,313,57,291,54,273,56,263,60,261,66,266,73,262,76,256,67,259,57,271,50,291,48,316,52,326,61"/>
+<area shape="poly" id="edge16_Node000025_Node000008" title=" " alt="" coords="209,319,195,311,157,282,125,248,83,189,88,186,130,244,161,278,197,307,212,314"/>
+<area shape="poly" id="edge18_Node000026_Node000024" title=" " alt="" coords="226,431,102,416,103,410,226,425"/>
+</map>

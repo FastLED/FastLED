@@ -1,0 +1,49 @@
+digraph "gPowerModel"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="gPowerModel",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)"];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="calculate_unscaled\l_power_mW",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d1d/group___power_gafdf503b02fd644c3398d34f27c3d363d.html#gafdf503b02fd644c3398d34f27c3d363d",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="calculate_max_brightness\l_for_power_mW",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d1d/group___power_gab540bd9608e32378f1fb29bd9226c970.html#gab540bd9608e32378f1fb29bd9226c970",tooltip="Determines the highest brightness level you can use and still stay under the specified power budget f..."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="calculate_max_brightness\l_for_power_vmA",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d1d/group___power_gaf1109b6fa8f504362807f39bc4126306.html#gaf1109b6fa8f504362807f39bc4126306",tooltip="Determines the highest brightness level you can use and still stay under the specified power budget f..."];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="CFastLED::setMaxPowerInMilli\lWatts",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a660c4ce3348e4463932f350be99215bf.html#a660c4ce3348e4463932f350be99215bf",tooltip="Set the maximum power to be used, given in milliwatts."];
+  Node2 -> Node7 [id="edge5_Node000002_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="calculate_max_brightness\l_for_power_mW",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d1d/group___power_gab33dbfb39f4368fffdc17807883c787e.html#gab33dbfb39f4368fffdc17807883c787e",tooltip="Determines the highest brightness level you can use and still stay under the specified power budget f..."];
+  Node2 -> Node8 [id="edge6_Node000002_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="calculate_unscaled\l_power_mW",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d1d/group___power_ga46fe8354310cd1888743e400b70175cd.html#ga46fe8354310cd1888743e400b70175cd",tooltip="Determines how many milliwatts the current LED data would draw at max brightness (255)"];
+  Node2 -> Node9 [id="edge7_Node000002_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="CFastLED::getEstimatedPower\lInMilliWatts",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a06a8bc368f2ef5816015b75ad54d1e6b.html#a06a8bc368f2ef5816015b75ad54d1e6b",tooltip="Get estimated power consumption in milliwatts."];
+  Node1 -> Node10 [id="edge8_Node000001_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="get_power_model",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d5f/group___power_model_gaec3b3e44c2f5e7f70127ad76f480ccd0.html#gaec3b3e44c2f5e7f70127ad76f480ccd0",tooltip="Get current RGB power model."];
+  Node10 -> Node11 [id="edge9_Node000010_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="CFastLED::getPowerModel",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_add8d88cb11f7e09c627de99ba78e69d3.html#add8d88cb11f7e09c627de99ba78e69d3",tooltip="Get current RGB power model."];
+  Node1 -> Node12 [id="edge10_Node000001_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="get_power_scaling_exponent",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d5f/group___power_model_ga8aa9fd0df8e3e989b4907e9f703343b2.html#ga8aa9fd0df8e3e989b4907e9f703343b2",tooltip="Get the current brightness-to-power response exponent."];
+  Node12 -> Node13 [id="edge11_Node000012_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="CFastLED::getPowerScaling\lExponent",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a60ff859b0d54bfa42a669b9fdec5ab34.html#a60ff859b0d54bfa42a669b9fdec5ab34",tooltip="Get the configured brightness-to-power response exponent."];
+  Node1 -> Node14 [id="edge12_Node000001_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="set_power_model",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d5f/group___power_model_ga83d1cb7bfce9bd338765968bb40d54e5.html#ga83d1cb7bfce9bd338765968bb40d54e5",tooltip="Set custom RGB LED power consumption model."];
+  Node14 -> Node15 [id="edge13_Node000014_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="set_power_model",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d5f/group___power_model_ga759a23d8dec6a2de0d5b89095014d4e6.html#ga759a23d8dec6a2de0d5b89095014d4e6",tooltip="Set custom RGBW LED power consumption model."];
+  Node14 -> Node16 [id="edge14_Node000014_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="set_power_model",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d5f/group___power_model_gad42f079a40ba5d5a0db04e14b645e49e.html#gad42f079a40ba5d5a0db04e14b645e49e",tooltip="Set custom RGBWW LED power consumption model."];
+  Node14 -> Node17 [id="edge15_Node000014_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="set_power_scaling_exponent",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d5f/group___power_model_gad213f217079d1c8e2453b74bd3aec6de.html#gad213f217079d1c8e2453b74bd3aec6de",tooltip="Set a non-linear brightness-to-power response exponent."];
+  Node17 -> Node18 [id="edge16_Node000017_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="CFastLED::setPowerScaling\lExponent",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a7b1664e5e57fd2e2141ef00cc28a1a1f.html#a7b1664e5e57fd2e2141ef00cc28a1a1f",tooltip="Set a non-linear brightness-to-power response exponent."];
+  Node14 -> Node19 [id="edge17_Node000014_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="CFastLED::setPowerModel",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a5d64d016a6852b44aa79e158545a40aa.html#a5d64d016a6852b44aa79e158545a40aa",tooltip=" "];
+  Node14 -> Node20 [id="edge18_Node000014_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="CFastLED::setPowerModel",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_aea009a14e51158999765c111c514fa8c.html#aea009a14e51158999765c111c514fa8c",tooltip=" "];
+  Node14 -> Node21 [id="edge19_Node000014_Node000021",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node21 [id="Node000021",label="CFastLED::setPowerModel",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a261a8d22d7221b379723a83f4c343f92.html#a261a8d22d7221b379723a83f4c343f92",tooltip=" "];
+  Node1 -> Node17 [id="edge20_Node000001_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

@@ -1,0 +1,11 @@
+<map id="fl::audio::detector::MusicalBeat::MusicalBeat" name="fl::audio::detector::MusicalBeat::MusicalBeat">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,61,204,101"/>
+<area shape="rect" id="Node000002" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_aa3fe998bea55ed148d76230699db4b43.html#aa3fe998bea55ed148d76230699db4b43" title="Configure the beat detector." alt="" coords="252,61,431,101"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,79,238,79,238,84,204,84"/>
+<area shape="poly" id="edge4_Node000002_Node000002" title=" " alt="" coords="298,62,295,52,302,42,318,37,341,35,369,38,384,45,381,50,367,43,341,40,319,42,305,47,300,53,303,60"/>
+<area shape="rect" id="Node000003" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a13472c5b2c18bcd9cc92903b52b18faa.html#a13472c5b2c18bcd9cc92903b52b18faa" title=" " alt="" coords="479,29,677,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="431,67,465,62,465,67,431,72"/>
+<area shape="rect" id="Node000004" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a79e3a2459c58dda6768e059545035644.html#a79e3a2459c58dda6768e059545035644" title="Reset internal state (clear history, reset BPM)" alt="" coords="503,93,653,133"/>
+<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="431,91,489,99,489,104,431,96"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="534,30,532,20,539,10,554,5,578,3,605,6,620,13,618,18,604,11,578,8,555,10,542,15,537,21,539,28"/>
+</map>

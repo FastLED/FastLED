@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['✅_20examples_20of_20justified_20creations_3a_0',['✅ EXAMPLES OF JUSTIFIED CREATIONS:',['../df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md118',1,'']]],
-  ['✅_20when_20to_20create_20ino_20files_3a_1',['✅ WHEN TO CREATE .INO FILES:',['../df/dbc/md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2examples_2_a_g_e_n_t_s.html#autotoc_md112',1,'']]]
+  ['→_20client_0',['→ Client',['../d0/de6/md_fl_2stl_2asio_2http_2_p_r_o_t_o_c_o_l.html#autotoc_md454',1,'HTTP Response Format (Server → Client)'],['..//home/runner/work/FastLED/FastLED/src/fl/stl/asio/http/README.md#autotoc_md402',1,'Response Formats (Server → Client)']]],
+  ['→_20larger_20automatic_1',['→ Larger Automatic',['..//home/runner/work/FastLED/FastLED/src/fl/math/fixed_point/README.md#autotoc_md230',1,'Auto-Promotion (Smaller → Larger, Automatic)'],['..//home/runner/work/FastLED/FastLED/src/fl/stl/fixed_point/README.md#autotoc_md529',1,'Auto-Promotion (Smaller → Larger, Automatic)']]],
+  ['→_20server_2',['→ Server',['../d0/de6/md_fl_2stl_2asio_2http_2_p_r_o_t_o_c_o_l.html#autotoc_md450',1,'HTTP Request Format (Client → Server)'],['..//home/runner/work/FastLED/FastLED/src/fl/stl/asio/http/README.md#autotoc_md401',1,'Request Format (Client → Server)']]]
 ];

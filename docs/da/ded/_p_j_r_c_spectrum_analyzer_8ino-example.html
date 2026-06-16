@@ -103,14 +103,18 @@ $(function(){initNavTree('da/ded/_p_j_r_c_spectrum_analyzer_8ino-example.html','
   <div class="headertitle"><div class="title">PJRCSpectrumAnalyzer.ino</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"></div>
+<div class="fragment"><div class="line"><span class="comment">// @filter: (platform is teensy) and (memory is large)</span></div>
+<div class="line"></div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Platform detection logic</span></div>
-<div class="line"><span class="preprocessor">#if defined(__arm__) &amp;&amp; defined(TEENSYDUINO)</span></div>
+<div class="line"><span class="comment">// Requires lots of memory for 60x32 LED matrix + Audio library + FFT</span></div>
+<div class="line"><span class="comment">// Only supported on Teensy models with OctoWS2811 and sufficient RAM:</span></div>
+<div class="line"><span class="comment">//   - Teensy 3.5 (__MK64FX512__)</span></div>
+<div class="line"><span class="comment">//   - Teensy 3.6 (__MK66FX1M0__)</span></div>
+<div class="line"><span class="comment">//   - Teensy 4.0/4.1 (__IMXRT1062__)</span></div>
+<div class="line"><span class="comment">// NOT supported on: Teensy 3.0/3.1/3.2 (insufficient RAM), Teensy LC (no OctoWS2811)</span></div>
+<div class="line"> </div>
 <div class="line"><span class="preprocessor">#include &quot;<a class="code" href="../../de/d2f/_p_j_r_c_spectrum_analyzer_8h.html">PJRCSpectrumAnalyzer.h</a>&quot;</span></div>
-<div class="line"><span class="preprocessor">#else</span></div>
-<div class="line"><span class="preprocessor">#include &quot;platforms/sketch_fake.hpp&quot;</span></div>
-<div class="line"><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="a_p_j_r_c_spectrum_analyzer_8h_html"><div class="ttname"><a href="../../de/d2f/_p_j_r_c_spectrum_analyzer_8h.html">PJRCSpectrumAnalyzer.h</a></div></div>
 </div><!-- fragment --> </div><!-- contents -->
 </div><!-- doc-content -->
@@ -118,7 +122,7 @@ $(function(){initNavTree('da/ded/_p_j_r_c_spectrum_analyzer_8ino-example.html','
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:19 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:06:58 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

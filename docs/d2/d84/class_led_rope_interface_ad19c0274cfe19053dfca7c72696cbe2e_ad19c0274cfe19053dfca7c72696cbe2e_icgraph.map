@@ -1,5 +1,7 @@
 <map id="LedRopeInterface::DrawSequentialRepeat" name="LedRopeInterface::DrawSequentialRepeat">
-<area shape="rect" id="Node000001" title=" " alt="" coords="160,5,407,45"/>
-<area shape="rect" id="Node000002" href="$dd/d45/struct_painter_a99ab92bb8d2baae96c7b4b4aacda4de3.html#a99ab92bb8d2baae96c7b4b4aacda4de3" title=" " alt="" coords="5,13,112,38"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="146,28,112,28,112,23,146,23"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="259,5,505,45"/>
+<area shape="rect" id="Node000002" href="$dd/d45/struct_painter_a99ab92bb8d2baae96c7b4b4aacda4de3.html#a99ab92bb8d2baae96c7b4b4aacda4de3" title=" " alt="" coords="104,13,211,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="245,28,211,28,211,23,245,23"/>
+<area shape="rect" id="Node000003" href="$d8/de5/_luminescent_grand_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,13,56,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="90,28,56,28,56,23,90,23"/>
 </map>

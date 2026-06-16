@@ -1,0 +1,6 @@
+<map id="CMinWait::wait" name="CMinWait::wait">
+<area shape="rect" id="Node000001" title="Blocking delay until WAIT time since mark() has passed." alt="" coords="5,29,125,55"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a95a89c7ba649b9bd2c9136c0f517d82f.html#a95a89c7ba649b9bd2c9136c0f517d82f" title="Universal microsecond timer &#45; returns microseconds since system startup." alt="" coords="173,29,256,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="125,39,159,39,159,45,125,45"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="189,31,184,21,187,11,197,5,215,3,235,6,244,15,240,19,233,11,215,8,199,10,191,15,189,20,194,28"/>
+</map>

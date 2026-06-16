@@ -1,0 +1,7 @@
+<map id="updateLEDs" name="updateLEDs">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,104,56"/>
+<area shape="rect" id="Node000002" href="$df/da5/lib8tion_8h_a696b9421eca961df0a68c7c6c3e983ab.html#a696b9421eca961df0a68c7c6c3e983ab" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="152,5,231,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="104,32,138,25,139,30,105,37"/>
+<area shape="rect" id="Node000003" href="$d1/dfb/colorutils_8h_afba4db18577c19e39c54f1c5793741b7.html#afba4db18577c19e39c54f1c5793741b7" title="Fill a range of LEDs with a solid color." alt="" coords="153,55,229,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="105,49,140,56,139,61,104,55"/>
+</map>

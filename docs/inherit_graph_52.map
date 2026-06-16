@@ -1,3 +1,9 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$d8/dcd/classfl_1_1allocator.html" title=" " alt="" coords="5,5,139,31"/>
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,77,172,102"/>
+<area shape="rect" id="Node000001" href="$da/da0/classfl_1_1fixed__point.html" title=" " alt="" coords="230,5,417,45"/>
+<area shape="poly" id="edge6_Node000000_Node000001" title=" " alt="" coords="149,70,248,43,250,48,150,76"/>
+<area shape="rect" id="Node000002" href="$da/da0/classfl_1_1fixed__point.html" title=" " alt="" coords="220,69,427,109"/>
+<area shape="poly" id="edge7_Node000000_Node000002" title=" " alt="" coords="186,87,220,87,220,92,186,92"/>
+<area shape="rect" id="Node000003" href="$da/da0/classfl_1_1fixed__point.html" title=" " alt="" coords="238,133,409,173"/>
+<area shape="poly" id="edge8_Node000000_Node000003" title=" " alt="" coords="150,103,250,131,248,136,149,108"/>
 </map>

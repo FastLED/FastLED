@@ -1,0 +1,19 @@
+<map id="fl::map_range_clamped" name="fl::map_range_clamped">
+<area shape="rect" id="Node000001" title=" " alt="" coords="657,105,832,131"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a16b959c0a6717214a91e88287d5aab08.html#a16b959c0a6717214a91e88287d5aab08" title="Rescale raw inoise16() output to full 16&#45;bit range [0, 65535] Curries in the global NOISE16_EXTENT_MI..." alt="" coords="435,80,609,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="643,109,609,105,610,100,644,104"/>
+<area shape="rect" id="Node000011" href="$d7/d8f/_el_panel_reactive_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="493,129,551,155"/>
+<area shape="poly" id="edge8_Node000001_Node000011" title=" " alt="" coords="644,132,552,142,551,136,643,126"/>
+<area shape="rect" id="Node000003" href="$d7/d91/group___cylinder_noise_ga2bdee5e155aa2ab13ece081198d7b990.html#ga2bdee5e155aa2ab13ece081198d7b990" title="Generate CRGB noise for a cylinder pattern." alt="" coords="219,5,383,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="476,77,386,45,349,33,351,28,388,39,477,72"/>
+<area shape="rect" id="Node000004" href="$d7/d91/group___cylinder_noise_ga73362dfc92c8e1badb3b3491852639a9.html#ga73362dfc92c8e1badb3b3491852639a9" title="Cylinder noise functions &#45; sample three z&#45;slices for independent component evolution." alt="" coords="216,55,387,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="421,84,386,80,387,74,421,78"/>
+<area shape="rect" id="Node000006" href="$d6/d5f/group___ring_noise_gaf4d521145a9a922c3469227ce7df4003.html#gaf4d521145a9a922c3469227ce7df4003" title="Generate CRGB noise for a ring pattern." alt="" coords="232,104,371,129"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="421,106,371,112,370,107,421,101"/>
+<area shape="rect" id="Node000007" href="$d6/d5f/group___ring_noise_ga424c29c488273a2f0efb1bb80bb0911a.html#ga424c29c488273a2f0efb1bb80bb0911a" title="Ring noise functions &#45; sample three z&#45;slices for independent component evolution." alt="" coords="229,153,374,179"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="457,112,436,119,388,143,351,156,349,151,386,138,434,114,455,107"/>
+<area shape="rect" id="Node000005" href="$d7/d91/group___cylinder_noise_ga63aad65ffc506c9ebb2beeceb56a89a8.html#ga63aad65ffc506c9ebb2beeceb56a89a8" title="Generate HSV8 (8&#45;bit) noise for a cylinder pattern." alt="" coords="5,55,168,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="202,70,168,70,168,65,202,65"/>
+<area shape="rect" id="Node000008" href="$d6/d5f/group___ring_noise_ga3b0969c97de0d33d2054483d6695c727.html#ga3b0969c97de0d33d2054483d6695c727" title="Generate HSV8 (8&#45;bit) noise for a ring pattern." alt="" coords="18,153,155,179"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="215,169,155,169,155,163,215,163"/>
+</map>

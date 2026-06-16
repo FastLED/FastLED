@@ -1,0 +1,6 @@
+<map id="fl::beat88" name="fl::beat88">
+<area shape="rect" id="Node000001" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM, with BPM specified in Q8.8 fixed&#45;point format." alt="" coords="5,29,88,55"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="136,29,211,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,39,122,39,122,45,88,45"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="152,30,147,21,150,11,159,5,173,3,191,6,198,14,194,18,188,11,173,8,161,10,154,14,153,20,156,28"/>
+</map>

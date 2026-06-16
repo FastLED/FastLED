@@ -1,0 +1,73 @@
+<map id="fl::Fx::Fx" name="fl::Fx::Fx">
+<area shape="rect" id="Node000001" title=" " alt="" coords="891,569,969,595"/>
+<area shape="rect" id="Node000002" href="$d4/d1c/classfl_1_1_fx1d_ab7fbbc350f5c43865846e2338b502c41.html#ab7fbbc350f5c43865846e2338b502c41" title=" " alt="" coords="732,301,843,327"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="913,558,793,328,798,326,918,556"/>
+<area shape="rect" id="Node000023" href="$d7/d3e/classfl_1_1_fx2d_a98879bee7a7a97ceb2cc34ea2eefc7fe.html#a98879bee7a7a97ceb2cc34ea2eefc7fe" title=" " alt="" coords="732,824,843,849"/>
+<area shape="poly" id="edge24_Node000001_Node000023" title=" " alt="" coords="917,608,798,825,794,822,913,606"/>
+<area shape="rect" id="Node000003" href="$dc/dd6/classfl_1_1_cylon_a3620734318dd50830de92c6308bb2253.html#a3620734318dd50830de92c6308bb2253" title=" " alt="" coords="509,5,629,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="782,288,774,235,758,169,745,135,728,101,708,71,682,44,657,29,628,22,630,17,659,24,686,40,712,67,733,98,750,132,763,167,780,234,787,287"/>
+<area shape="rect" id="Node000004" href="$d1/d60/classfl_1_1_demo_reel100_a6559135991bbbe3cc1ddf59a2caebf8c.html#a6559135991bbbe3cc1ddf59a2caebf8c" title=" " alt="" coords="453,55,684,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="779,288,769,245,751,192,722,138,704,114,682,93,664,83,667,78,686,89,708,111,727,135,756,190,774,243,784,287"/>
+<area shape="rect" id="Node000005" href="$d5/d9b/classfl_1_1_fire2012_a0dd970c99039b1a5b4f55f138edc1c58.html#a0dd970c99039b1a5b4f55f138edc1c58" title=" " alt="" coords="489,104,648,129"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="776,289,763,255,743,215,717,176,682,143,647,127,650,122,686,138,721,172,748,212,768,253,781,287"/>
+<area shape="rect" id="Node000006" href="$d5/da0/classfl_1_1_fx2d_to1d_a8541e270fae162cac4686f1ab553411d.html#a8541e270fae162cac4686f1ab553411d" title="Construct a 2D&#45;to&#45;1D sampling effect." alt="" coords="483,153,654,179"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="770,291,735,240,711,214,683,192,653,179,655,174,685,188,714,210,739,236,775,288"/>
+<area shape="rect" id="Node000007" href="$d5/d3c/classfl_1_1_noise_wave_a105523c91fa5674aaca5a53d5d06454b.html#a105523c91fa5674aaca5a53d5d06454b" title=" " alt="" coords="473,203,665,228"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="761,294,725,267,683,242,651,231,653,226,685,237,728,262,764,290"/>
+<area shape="rect" id="Node000008" href="$d2/db2/classfl_1_1_pacifica_a7b370deecffc6719cade35d4ee9617f3.html#a7b370deecffc6719cade35d4ee9617f3" title=" " alt="" coords="497,252,641,277"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="722,301,683,291,632,280,633,275,685,286,724,295"/>
+<area shape="rect" id="Node000009" href="$d5/d56/classfl_1_1_particles1d_a4778f1bb869d213d5d5389d8d8563a64.html#a4778f1bb869d213d5d5389d8d8563a64" title=" " alt="" coords="475,301,663,327"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="718,317,663,317,663,311,718,311"/>
+<area shape="rect" id="Node000012" href="$db/d58/classfl_1_1_perlin_particle_punch_a8d086b76d3eb54ff8978028b90eda27b.html#a8d086b76d3eb54ff8978028b90eda27b" title=" " alt="" coords="487,351,650,391"/>
+<area shape="poly" id="edge11_Node000002_Node000012" title=" " alt="" coords="726,333,646,354,645,349,724,328"/>
+<area shape="rect" id="Node000015" href="$df/d11/classfl_1_1_pride2015_a774c173d32e2db00e3247668d3d3d6cb.html#a774c173d32e2db00e3247668d3d3d6cb" title=" " alt="" coords="481,416,657,441"/>
+<area shape="poly" id="edge14_Node000002_Node000015" title=" " alt="" coords="767,340,731,374,685,406,652,418,651,413,683,401,728,370,764,336"/>
+<area shape="rect" id="Node000016" href="$de/db5/classfl_1_1_twinkle_fox_a01d356a6cad76b553ffba1e370f9c246.html#a01d356a6cad76b553ffba1e370f9c246" title=" " alt="" coords="473,465,664,491"/>
+<area shape="poly" id="edge15_Node000002_Node000016" title=" " alt="" coords="777,341,742,399,716,429,685,455,659,468,657,463,683,450,712,426,737,396,772,338"/>
+<area shape="rect" id="Node000017" href="$d0/d4b/classfl_1_1_video_a2ae5bcff1d1b730462582bc42f2cffee.html#a2ae5bcff1d1b730462582bc42f2cffee" title=" " alt="" coords="509,515,629,540"/>
+<area shape="poly" id="edge16_Node000002_Node000017" title=" " alt="" coords="782,341,770,378,750,422,722,467,686,504,659,519,630,526,628,521,657,514,682,500,718,463,745,420,765,376,777,339"/>
+<area shape="rect" id="Node000022" href="$d0/d4b/classfl_1_1_video_adc8d138c469b77124a2a23e49f15567c.html#adc8d138c469b77124a2a23e49f15567c" title=" " alt="" coords="509,564,629,589"/>
+<area shape="poly" id="edge23_Node000002_Node000022" title=" " alt="" coords="785,341,776,387,758,444,729,503,709,530,686,553,659,569,630,577,628,572,657,564,682,549,705,527,724,501,753,442,771,385,780,339"/>
+<area shape="rect" id="Node000010" href="$d5/d56/classfl_1_1_particles1d_ae4b5b0ed1b20858b9163be36f36688df.html#ae4b5b0ed1b20858b9163be36f36688df" title="Update and render all particles with overdraw technique." alt="" coords="229,277,379,303"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="461,307,379,299,379,294,461,302"/>
+<area shape="poly" id="edge10_Node000010_Node000010" title=" " alt="" coords="344,268,334,259,304,256,280,258,267,263,265,268,272,275,267,279,260,269,264,259,279,253,304,251,336,255,348,264"/>
+<area shape="rect" id="Node000013" href="$db/d58/classfl_1_1_perlin_particle_punch_adca28244ab30f0ca0aca88d1a2658968.html#adca28244ab30f0ca0aca88d1a2658968" title=" " alt="" coords="223,351,385,391"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="474,374,386,374,386,369,474,369"/>
+<area shape="poly" id="edge13_Node000013_Node000013" title=" " alt="" coords="342,340,329,333,304,330,282,332,270,337,265,343,267,350,262,352,260,342,266,332,281,327,304,325,330,328,344,335"/>
+<area shape="rect" id="Node000018" href="$d0/d4b/classfl_1_1_video_a96da02c71cd2776cb8bd2717c6cc245a.html#a96da02c71cd2776cb8bd2717c6cc245a" title=" " alt="" coords="244,416,364,441"/>
+<area shape="poly" id="edge17_Node000017_Node000018" title=" " alt="" coords="494,520,452,504,436,492,427,479,418,466,404,455,363,439,365,434,407,450,422,463,431,476,440,488,455,500,496,515"/>
+<area shape="rect" id="Node000019" href="$d0/d4b/classfl_1_1_video_a781fae029cc62c7fd7aa644dfb0ec3be.html#a781fae029cc62c7fd7aa644dfb0ec3be" title=" " alt="" coords="239,465,369,491"/>
+<area shape="poly" id="edge18_Node000017_Node000019" title=" " alt="" coords="495,516,369,493,370,487,496,511"/>
+<area shape="rect" id="Node000020" href="$d0/d4b/classfl_1_1_video_a2a116cafd5588cce6f34c68c59d186f7.html#a2a116cafd5588cce6f34c68c59d186f7" title=" " alt="" coords="245,539,363,564"/>
+<area shape="poly" id="edge19_Node000017_Node000020" title=" " alt="" coords="495,537,364,549,363,543,495,531"/>
+<area shape="rect" id="Node000021" href="$d0/d4b/classfl_1_1_video_a958384d2d775d417cec22426ff39e14f.html#a958384d2d775d417cec22426ff39e14f" title=" " alt="" coords="5,564,155,589"/>
+<area shape="poly" id="edge22_Node000017_Node000021" title=" " alt="" coords="496,542,454,554,431,567,406,578,340,589,274,593,155,588,155,583,274,588,340,584,405,573,428,562,452,549,495,537"/>
+<area shape="poly" id="edge20_Node000020_Node000020" title=" " alt="" coords="344,529,334,521,304,517,280,519,267,524,265,530,272,537,267,540,260,530,264,520,279,514,304,512,336,516,348,525"/>
+<area shape="poly" id="edge21_Node000020_Node000021" title=" " alt="" coords="231,562,155,571,155,566,231,557"/>
+<area shape="rect" id="Node000024" href="$d8/df5/classfl_1_1_animartrix_a8ba7b7c451c37ad1ae58a135b2486657.html#a8ba7b7c451c37ad1ae58a135b2486657" title=" " alt="" coords="477,627,661,652"/>
+<area shape="poly" id="edge25_Node000023_Node000024" title=" " alt="" coords="776,812,763,778,743,739,716,700,682,667,660,654,662,650,686,663,720,696,748,736,768,776,781,810"/>
+<area shape="rect" id="Node000026" href="$dc/d2b/classfl_1_1_blend2d_a46d2a049e57d4d91790eb93371972702.html#a46d2a049e57d4d91790eb93371972702" title=" " alt="" coords="493,676,645,701"/>
+<area shape="poly" id="edge27_Node000023_Node000026" title=" " alt="" coords="770,814,735,763,711,738,683,716,644,700,646,696,685,712,714,734,739,760,775,811"/>
+<area shape="rect" id="Node000027" href="$d4/d1c/classfl_1_1_flow_field_ab50347b9ad7d7ff636212b025b2262d6.html#ab50347b9ad7d7ff636212b025b2262d6" title=" " alt="" coords="483,725,654,751"/>
+<area shape="poly" id="edge28_Node000023_Node000027" title=" " alt="" coords="760,817,725,790,683,766,647,753,648,748,685,761,728,785,763,813"/>
+<area shape="rect" id="Node000030" href="$d4/df2/classfl_1_1_luminova_a5dcd3944fec8382bae2f41921495f6ca.html#a5dcd3944fec8382bae2f41921495f6ca" title=" " alt="" coords="481,775,656,800"/>
+<area shape="poly" id="edge31_Node000023_Node000030" title=" " alt="" coords="719,823,683,815,627,803,629,797,685,810,720,818"/>
+<area shape="rect" id="Node000031" href="$d9/d41/classfl_1_1_noise_palette_ace0d9f2e7767ae3fb89dc47434024244.html#ace0d9f2e7767ae3fb89dc47434024244" title=" " alt="" coords="463,824,674,849"/>
+<area shape="poly" id="edge32_Node000023_Node000031" title=" " alt="" coords="718,839,674,839,674,834,718,834"/>
+<area shape="rect" id="Node000032" href="$d0/d3e/classfl_1_1_red_square_a28c5b0aa9c2bba25daf125e7ba3322b3.html#a28c5b0aa9c2bba25daf125e7ba3322b3" title=" " alt="" coords="475,873,662,899"/>
+<area shape="poly" id="edge33_Node000023_Node000032" title=" " alt="" coords="724,855,685,865,633,876,632,871,683,859,722,850"/>
+<area shape="rect" id="Node000033" href="$d5/d79/classfl_1_1_scale_up_a480a45f04c956116dad175f978daebc5.html#a480a45f04c956116dad175f978daebc5" title="Construct a ScaleUp effect wrapper." alt="" coords="493,923,645,948"/>
+<area shape="poly" id="edge34_Node000023_Node000033" title=" " alt="" coords="764,861,728,889,685,914,646,927,644,922,683,909,725,884,761,856"/>
+<area shape="rect" id="Node000034" href="$d6/d5f/classfl_1_1_wave_fx_a6cee8ec0838deb4d3842f47e672b9395.html#a6cee8ec0838deb4d3842f47e672b9395" title="Construct wave effect with given coordinate mapping and parameters." alt="" coords="493,972,644,997"/>
+<area shape="poly" id="edge35_Node000023_Node000034" title=" " alt="" coords="775,863,739,914,714,941,685,963,646,979,644,974,683,958,711,937,735,911,770,860"/>
+<area shape="rect" id="Node000035" href="$dc/d2b/classfl_1_1_blend2d_aa6b753d9f7a72e49bb11b0e25a6a2948.html#aa6b753d9f7a72e49bb11b0e25a6a2948" title=" " alt="" coords="507,1021,630,1047"/>
+<area shape="poly" id="edge36_Node000023_Node000035" title=" " alt="" coords="781,864,768,898,748,938,721,978,686,1012,659,1026,631,1033,629,1028,657,1021,682,1008,717,975,743,936,763,896,776,862"/>
+<area shape="rect" id="Node000036" href="$dc/d2b/classfl_1_1_blend2d_aad17ffdf04279a43a6f3825c910ccb13.html#aad17ffdf04279a43a6f3825c910ccb13" title=" " alt="" coords="485,1071,652,1096"/>
+<area shape="poly" id="edge37_Node000023_Node000036" title=" " alt="" coords="784,864,774,907,756,961,727,1015,708,1040,686,1062,653,1078,651,1073,682,1057,704,1037,722,1013,751,959,769,906,779,862"/>
+<area shape="rect" id="Node000025" href="$d8/df5/classfl_1_1_animartrix_a36ad8dc1940ab67e11e662da749d7276.html#a36ad8dc1940ab67e11e662da749d7276" title=" " alt="" coords="212,640,396,665"/>
+<area shape="poly" id="edge26_Node000024_Node000025" title=" " alt="" coords="463,647,396,651,396,645,463,642"/>
+<area shape="rect" id="Node000028" href="$db/d83/classfl_1_1_flow_field_float_a7ff46ea82551d3bd37863ae41a428686.html#a7ff46ea82551d3bd37863ae41a428686" title=" " alt="" coords="237,705,371,745"/>
+<area shape="poly" id="edge29_Node000027_Node000028" title=" " alt="" coords="469,736,371,731,371,725,470,730"/>
+<area shape="rect" id="Node000029" href="$d2/d24/classfl_1_1_flow_field_f_p_a3ff76d9359ca463b7970dec38874c534.html#a3ff76d9359ca463b7970dec38874c534" title=" " alt="" coords="203,769,405,795"/>
+<area shape="poly" id="edge30_Node000027_Node000029" title=" " alt="" coords="479,756,382,772,381,767,478,750"/>
+</map>

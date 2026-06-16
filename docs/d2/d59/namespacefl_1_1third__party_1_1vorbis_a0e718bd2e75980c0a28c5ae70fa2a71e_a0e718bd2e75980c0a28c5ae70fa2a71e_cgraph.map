@@ -1,0 +1,35 @@
+<map id="fl::third_party::vorbis::stb_vorbis_stream_length_in_seconds" name="fl::third_party::vorbis::stb_vorbis_stream_length_in_seconds">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,169,204,224"/>
+<area shape="rect" id="Node000002" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a651ecb450861148a1c7f342414fc71a1.html#a651ecb450861148a1c7f342414fc71a1" title=" " alt="" coords="252,169,451,224"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,194,238,194,238,199,204,199"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a3cdd970ae1ac06323addaec93ae7d4b9.html#a3cdd970ae1ac06323addaec93ae7d4b9" title=" " alt="" coords="749,5,812,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="368,167,390,136,420,101,456,68,498,41,559,20,624,10,685,8,736,10,736,15,685,13,625,15,561,25,500,46,459,72,423,105,394,140,372,170"/>
+<area shape="rect" id="Node000004" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a1683913568d2d627f6044d09ac1e724e.html#a1683913568d2d627f6044d09ac1e724e" title=" " alt="" coords="499,285,655,325"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="411,222,523,276,521,281,408,227"/>
+<area shape="rect" id="Node000005" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_ad498d4311e89b862ef54bdfdf360d4b1.html#ad498d4311e89b862ef54bdfdf360d4b1" title=" " alt="" coords="499,55,655,95"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="392,167,497,105,510,99,513,103,500,110,395,171"/>
+<area shape="rect" id="Node000007" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a845383ec7ad68fd476faee7f790f96f3.html#a845383ec7ad68fd476faee7f790f96f3" title=" " alt="" coords="499,349,655,389"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="377,222,431,278,464,308,500,334,509,340,507,345,497,339,461,312,427,282,374,226"/>
+<area shape="rect" id="Node000010" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a9b05d96fa9cb97cc6c41c4086028c22f.html#a9b05d96fa9cb97cc6c41c4086028c22f" title=" " alt="" coords="703,183,859,223"/>
+<area shape="poly" id="edge9_Node000002_Node000010" title=" " alt="" coords="451,196,689,199,689,205,451,201"/>
+<area shape="rect" id="Node000012" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a89ec0330080e8070876c894bf5e7fd56.html#a89ec0330080e8070876c894bf5e7fd56" title=" " alt="" coords="703,248,859,303"/>
+<area shape="poly" id="edge11_Node000002_Node000012" title=" " alt="" coords="452,212,690,256,689,261,451,217"/>
+<area shape="rect" id="Node000014" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a3949dc078eb1405eea56f9d9b30b207f.html#a3949dc078eb1405eea56f9d9b30b207f" title=" " alt="" coords="499,119,655,159"/>
+<area shape="poly" id="edge13_Node000002_Node000014" title=" " alt="" coords="450,169,485,160,486,165,452,174"/>
+<area shape="rect" id="Node000006" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a85a16124231fdd97ad0d62275f49f529.html#a85a16124231fdd97ad0d62275f49f529" title=" " alt="" coords="703,55,859,95"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="655,73,689,73,689,78,655,78"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a8959608cf4da341ccc51adc96b7cedec.html#a8959608cf4da341ccc51adc96b7cedec" title="Read from file." alt="" coords="745,403,817,428"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="655,384,731,402,730,407,654,389"/>
+<area shape="rect" id="Node000009" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d" title=" " alt="" coords="703,338,859,378"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="655,362,689,360,689,365,655,367"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a07cb8122a735dede4fda2e93053cc435.html#a07cb8122a735dede4fda2e93053cc435" title="Set file position." alt="" coords="907,191,981,216"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="859,201,893,201,893,206,859,206"/>
+<area shape="rect" id="Node000013" href="$d4/d36/namespacefl_abdcc1d7d8e00727d7495db6d6116cf7d.html#abdcc1d7d8e00727d7495db6d6116cf7d" title="Get current file position." alt="" coords="913,263,975,288"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="859,273,899,273,899,278,859,278"/>
+<area shape="poly" id="edge15_Node000014_Node000003" title=" " alt="" coords="634,117,653,105,668,89,676,74,685,57,701,41,735,25,737,30,704,46,689,61,681,76,672,93,656,109,637,122"/>
+<area shape="poly" id="edge16_Node000014_Node000006" title=" " alt="" coords="640,117,702,97,704,102,642,122"/>
+<area shape="poly" id="edge17_Node000014_Node000010" title=" " alt="" coords="642,157,704,177,702,182,640,162"/>
+<area shape="poly" id="edge18_Node000014_Node000012" title=" " alt="" coords="603,157,649,194,704,233,713,239,710,243,701,238,646,198,600,161"/>
+<area shape="rect" id="Node000015" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a7949606fdf877db337c4676c7a9cdc46.html#a7949606fdf877db337c4676c7a9cdc46" title=" " alt="" coords="703,119,859,159"/>
+<area shape="poly" id="edge14_Node000014_Node000015" title=" " alt="" coords="655,137,689,137,689,142,655,142"/>
+</map>

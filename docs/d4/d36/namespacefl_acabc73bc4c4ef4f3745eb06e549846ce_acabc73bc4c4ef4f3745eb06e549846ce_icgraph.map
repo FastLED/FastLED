@@ -1,0 +1,5 @@
+<map id="fl::packWS2816Pixel" name="fl::packWS2816Pixel">
+<area shape="rect" id="Node000001" title="Pack a single 16&#45;bit RGB pixel into two 8&#45;bit CRGB pixels for WS2816." alt="" coords="192,5,345,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a13921ab63664ac04043398f986046c46.html#a13921ab63664ac04043398f986046c46" title="Encode 16&#45;bit RGB pixel data into dual 8&#45;bit RGB format for WS2816." alt="" coords="5,5,144,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="178,21,144,21,144,15,178,15"/>
+</map>

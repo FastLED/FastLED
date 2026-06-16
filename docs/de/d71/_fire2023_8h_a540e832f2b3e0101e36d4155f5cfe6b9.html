@@ -118,58 +118,66 @@ $(function(){initNavTree('de/d71/_fire2023_8h_a540e832f2b3e0101e36d4155f5cfe6b9.
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="section examples"><dt>Examples</dt><dd><a class="el" href="../../dd/d0e/_noise_8ino-example.html#a0">Noise.ino</a>, and <a class="el" href="../../da/d42/_x_y_matrix_8ino-example.html#a0">XYMatrix.ino</a>.</dd>
-</dl>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d71/_fire2023_8h_source.html#l00220">220</a> of file <a class="el" href="../../de/d71/_fire2023_8h_source.html">Fire2023.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  220</span>                                  {</div>
-<div class="line"><span class="lineno">  221</span>  <span class="comment">// any out of bounds address maps to the first hidden pixel</span></div>
-<div class="line"><span class="lineno">  222</span>  <span class="comment">// https://macetech.github.io/FastLED-XY-Map-Generator/</span></div>
-<div class="line"><span class="lineno">  223</span>  <span class="keywordflow">if</span> ( (<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> &gt;= <a class="code hl_define" href="../../da/dc7/advanced_8h_a241aeeb764887ae5e3de58b98f04b16d.html#a241aeeb764887ae5e3de58b98f04b16d">WIDTH</a>) || (<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> &gt;= <a class="code hl_define" href="../../da/dc7/advanced_8h_aed89bd71aee8be823e8a20ec4e093c1e.html#aed89bd71aee8be823e8a20ec4e093c1e">HEIGHT</a>) ) {</div>
-<div class="line"><span class="lineno">  224</span>    <span class="keywordflow">return</span> (<a class="code hl_define" href="../../de/d71/_fire2023_8h_a90bf33f39cf37a2e4fddc0fdbd84ba81.html#a90bf33f39cf37a2e4fddc0fdbd84ba81">LAST_VISIBLE_LED</a> + 1);</div>
-<div class="line"><span class="lineno">  225</span>  }</div>
-<div class="line"><span class="lineno">  226</span>  <span class="keyword">const</span> uint8_t XYTable[] = {</div>
-<div class="line"><span class="lineno">  227</span>    25,  26,  81,  82,</div>
-<div class="line"><span class="lineno">  228</span>    25,  27,  81,  83,  </div>
-<div class="line"><span class="lineno">  229</span>    25,  28,  80,  84,  </div>
-<div class="line"><span class="lineno">  230</span>    24,  29,  79,  85,  </div>
-<div class="line"><span class="lineno">  231</span>    23,  30,  78,  86,  </div>
-<div class="line"><span class="lineno">  232</span>    22,  31,  77,  87,  </div>
-<div class="line"><span class="lineno">  233</span>    21,  32,  76,  88,  </div>
-<div class="line"><span class="lineno">  234</span>    20,  33,  75,  89,  </div>
-<div class="line"><span class="lineno">  235</span>    19,  34,  74,  90,  </div>
-<div class="line"><span class="lineno">  236</span>    18,  35,  73,  91,  </div>
-<div class="line"><span class="lineno">  237</span>    17,  36,  72,  92,  </div>
-<div class="line"><span class="lineno">  238</span>    16,  37,  71,  93,</div>
-<div class="line"><span class="lineno">  239</span>    15,  38,  70,  94,</div>
-<div class="line"><span class="lineno">  240</span>    14,  39,  69,  95,</div>
-<div class="line"><span class="lineno">  241</span>    13,  40,  68,  96,</div>
-<div class="line"><span class="lineno">  242</span>    12,  41,  67,  97,</div>
-<div class="line"><span class="lineno">  243</span>    11,  42,  66,  98,</div>
-<div class="line"><span class="lineno">  244</span>    10,  43,  65,  99,</div>
-<div class="line"><span class="lineno">  245</span>     9,  44,  64, 100,  </div>
-<div class="line"><span class="lineno">  246</span>     8,  45,  63, 101,  </div>
-<div class="line"><span class="lineno">  247</span>     7,  46,  62, 102,  </div>
-<div class="line"><span class="lineno">  248</span>     6,  47,  61, 103,  </div>
-<div class="line"><span class="lineno">  249</span>     5,  48,  60, 104,  </div>
-<div class="line"><span class="lineno">  250</span>     4,  49,  59, 105,  </div>
-<div class="line"><span class="lineno">  251</span>     3,  50,  58, 106,</div>
-<div class="line"><span class="lineno">  252</span>     2,  51,  57, 107,   </div>
-<div class="line"><span class="lineno">  253</span>     1,  52,  56, 108,</div>
-<div class="line"><span class="lineno">  254</span>     0,  53,  55, 109</div>
-<div class="line"><span class="lineno">  255</span>  };  </div>
-<div class="line"><span class="lineno">  256</span> </div>
-<div class="line"><span class="lineno">  257</span>  uint8_t i = (<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> * <a class="code hl_define" href="../../da/dc7/advanced_8h_a241aeeb764887ae5e3de58b98f04b16d.html#a241aeeb764887ae5e3de58b98f04b16d">WIDTH</a>) + <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>;</div>
-<div class="line"><span class="lineno">  258</span>  uint8_t j = XYTable[i];</div>
-<div class="line"><span class="lineno">  259</span>  <span class="keywordflow">return</span> j;</div>
-<div class="line"><span class="lineno">  260</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../de/d71/_fire2023_8h_source.html#l00219">219</a> of file <a class="el" href="../../de/d71/_fire2023_8h_source.html">Fire2023.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  219</span>                                  {</div>
+<div class="line"><span class="lineno">  220</span>  <span class="comment">// any out of bounds address maps to the first hidden pixel</span></div>
+<div class="line"><span class="lineno">  221</span>  <span class="comment">// https://macetech.github.io/FastLED-XY-Map-Generator/</span></div>
+<div class="line"><span class="lineno">  222</span>  <span class="keywordflow">if</span> ( (<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> &gt;= <a class="code hl_define" href="../../da/dc7/advanced_8h_a241aeeb764887ae5e3de58b98f04b16d.html#a241aeeb764887ae5e3de58b98f04b16d">WIDTH</a>) || (<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> &gt;= <a class="code hl_define" href="../../da/dc7/advanced_8h_aed89bd71aee8be823e8a20ec4e093c1e.html#aed89bd71aee8be823e8a20ec4e093c1e">HEIGHT</a>) ) {</div>
+<div class="line"><span class="lineno">  223</span>    <span class="keywordflow">return</span> (<a class="code hl_define" href="../../de/d71/_fire2023_8h_a90bf33f39cf37a2e4fddc0fdbd84ba81.html#a90bf33f39cf37a2e4fddc0fdbd84ba81">LAST_VISIBLE_LED</a> + 1);</div>
+<div class="line"><span class="lineno">  224</span>  }</div>
+<div class="line"><span class="lineno">  225</span>  <span class="keyword">const</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_afd9f334550c5839ec8307748aba15027.html#afd9f334550c5839ec8307748aba15027">uint8_t</a> XYTable[] = {</div>
+<div class="line"><span class="lineno">  226</span>    25,  26,  81,  82,</div>
+<div class="line"><span class="lineno">  227</span>    25,  27,  81,  83,  </div>
+<div class="line"><span class="lineno">  228</span>    25,  28,  80,  84,  </div>
+<div class="line"><span class="lineno">  229</span>    24,  29,  79,  85,  </div>
+<div class="line"><span class="lineno">  230</span>    23,  30,  78,  86,  </div>
+<div class="line"><span class="lineno">  231</span>    22,  31,  77,  87,  </div>
+<div class="line"><span class="lineno">  232</span>    21,  32,  76,  88,  </div>
+<div class="line"><span class="lineno">  233</span>    20,  33,  75,  89,  </div>
+<div class="line"><span class="lineno">  234</span>    19,  34,  74,  90,  </div>
+<div class="line"><span class="lineno">  235</span>    18,  35,  73,  91,  </div>
+<div class="line"><span class="lineno">  236</span>    17,  36,  72,  92,  </div>
+<div class="line"><span class="lineno">  237</span>    16,  37,  71,  93,</div>
+<div class="line"><span class="lineno">  238</span>    15,  38,  70,  94,</div>
+<div class="line"><span class="lineno">  239</span>    14,  39,  69,  95,</div>
+<div class="line"><span class="lineno">  240</span>    13,  40,  68,  96,</div>
+<div class="line"><span class="lineno">  241</span>    12,  41,  67,  97,</div>
+<div class="line"><span class="lineno">  242</span>    11,  42,  66,  98,</div>
+<div class="line"><span class="lineno">  243</span>    10,  43,  65,  99,</div>
+<div class="line"><span class="lineno">  244</span>     9,  44,  64, 100,  </div>
+<div class="line"><span class="lineno">  245</span>     8,  45,  63, 101,  </div>
+<div class="line"><span class="lineno">  246</span>     7,  46,  62, 102,  </div>
+<div class="line"><span class="lineno">  247</span>     6,  47,  61, 103,  </div>
+<div class="line"><span class="lineno">  248</span>     5,  48,  60, 104,  </div>
+<div class="line"><span class="lineno">  249</span>     4,  49,  59, 105,  </div>
+<div class="line"><span class="lineno">  250</span>     3,  50,  58, 106,</div>
+<div class="line"><span class="lineno">  251</span>     2,  51,  57, 107,   </div>
+<div class="line"><span class="lineno">  252</span>     1,  52,  56, 108,</div>
+<div class="line"><span class="lineno">  253</span>     0,  53,  55, 109</div>
+<div class="line"><span class="lineno">  254</span>  };  </div>
+<div class="line"><span class="lineno">  255</span> </div>
+<div class="line"><span class="lineno">  256</span>  <a class="code hl_typedef" href="../../d4/d36/namespacefl_afd9f334550c5839ec8307748aba15027.html#afd9f334550c5839ec8307748aba15027">uint8_t</a> i = (<a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> * <a class="code hl_define" href="../../da/dc7/advanced_8h_a241aeeb764887ae5e3de58b98f04b16d.html#a241aeeb764887ae5e3de58b98f04b16d">WIDTH</a>) + <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a>;</div>
+<div class="line"><span class="lineno">  257</span>  <a class="code hl_typedef" href="../../d4/d36/namespacefl_afd9f334550c5839ec8307748aba15027.html#afd9f334550c5839ec8307748aba15027">uint8_t</a> j = XYTable[i];</div>
+<div class="line"><span class="lineno">  258</span>  <span class="keywordflow">return</span> j;</div>
+<div class="line"><span class="lineno">  259</span>}</div>
 <div class="ttc" id="a_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33_html_a0a2f84ed7838f07779ae24c5a9086d33"><div class="ttname"><a href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a></div><div class="ttdeci">int y</div><div class="ttdef"><b>Definition</b> <a href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00093">simple.h:93</a></div></div>
 <div class="ttc" id="a_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc_html_a6150e0515f7202e2fb518f7206ed97dc"><div class="ttname"><a href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a></div><div class="ttdeci">int x</div><div class="ttdef"><b>Definition</b> <a href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">simple.h:92</a></div></div>
-<div class="ttc" id="a_fire2023_8h_a90bf33f39cf37a2e4fddc0fdbd84ba81_html_a90bf33f39cf37a2e4fddc0fdbd84ba81"><div class="ttname"><a href="../../de/d71/_fire2023_8h_a90bf33f39cf37a2e4fddc0fdbd84ba81.html#a90bf33f39cf37a2e4fddc0fdbd84ba81">LAST_VISIBLE_LED</a></div><div class="ttdeci">#define LAST_VISIBLE_LED</div><div class="ttdef"><b>Definition</b> <a href="../../de/d71/_fire2023_8h_source.html#l00048">Fire2023.h:48</a></div></div>
-<div class="ttc" id="aadvanced_8h_a241aeeb764887ae5e3de58b98f04b16d_html_a241aeeb764887ae5e3de58b98f04b16d"><div class="ttname"><a href="../../da/dc7/advanced_8h_a241aeeb764887ae5e3de58b98f04b16d.html#a241aeeb764887ae5e3de58b98f04b16d">WIDTH</a></div><div class="ttdeci">#define WIDTH</div><div class="ttdef"><b>Definition</b> <a href="../../da/dc7/advanced_8h_source.html#l00034">advanced.h:34</a></div></div>
-<div class="ttc" id="aadvanced_8h_aed89bd71aee8be823e8a20ec4e093c1e_html_aed89bd71aee8be823e8a20ec4e093c1e"><div class="ttname"><a href="../../da/dc7/advanced_8h_aed89bd71aee8be823e8a20ec4e093c1e.html#aed89bd71aee8be823e8a20ec4e093c1e">HEIGHT</a></div><div class="ttdeci">#define HEIGHT</div><div class="ttdef"><b>Definition</b> <a href="../../da/dc7/advanced_8h_source.html#l00035">advanced.h:35</a></div></div>
+<div class="ttc" id="a_fire2023_8h_a90bf33f39cf37a2e4fddc0fdbd84ba81_html_a90bf33f39cf37a2e4fddc0fdbd84ba81"><div class="ttname"><a href="../../de/d71/_fire2023_8h_a90bf33f39cf37a2e4fddc0fdbd84ba81.html#a90bf33f39cf37a2e4fddc0fdbd84ba81">LAST_VISIBLE_LED</a></div><div class="ttdeci">#define LAST_VISIBLE_LED</div><div class="ttdef"><b>Definition</b> <a href="../../de/d71/_fire2023_8h_source.html#l00047">Fire2023.h:47</a></div></div>
+<div class="ttc" id="aadvanced_8h_a241aeeb764887ae5e3de58b98f04b16d_html_a241aeeb764887ae5e3de58b98f04b16d"><div class="ttname"><a href="../../da/dc7/advanced_8h_a241aeeb764887ae5e3de58b98f04b16d.html#a241aeeb764887ae5e3de58b98f04b16d">WIDTH</a></div><div class="ttdeci">#define WIDTH</div></div>
+<div class="ttc" id="aadvanced_8h_aed89bd71aee8be823e8a20ec4e093c1e_html_aed89bd71aee8be823e8a20ec4e093c1e"><div class="ttname"><a href="../../da/dc7/advanced_8h_aed89bd71aee8be823e8a20ec4e093c1e.html#aed89bd71aee8be823e8a20ec4e093c1e">HEIGHT</a></div><div class="ttdeci">#define HEIGHT</div></div>
+<div class="ttc" id="anamespacefl_afd9f334550c5839ec8307748aba15027_html_afd9f334550c5839ec8307748aba15027"><div class="ttname"><a href="../../d4/d36/namespacefl_afd9f334550c5839ec8307748aba15027.html#afd9f334550c5839ec8307748aba15027">fl::uint8_t</a></div><div class="ttdeci">unsigned char uint8_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00209">s16x16x4.h:209</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../da/dc7/advanced_8h_source.html#l00035">HEIGHT</a>, <a class="el" href="../../de/d71/_fire2023_8h_source.html#l00048">LAST_VISIBLE_LED</a>, <a class="el" href="../../da/dc7/advanced_8h_source.html#l00034">WIDTH</a>, <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">x</a>, and <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00093">y</a>.</p>
+<p class="reference">References <a class="el" href="../../da/dc7/advanced_8h_aed89bd71aee8be823e8a20ec4e093c1e.html#aed89bd71aee8be823e8a20ec4e093c1e">HEIGHT</a>, <a class="el" href="../../de/d71/_fire2023_8h_source.html#l00047">LAST_VISIBLE_LED</a>, <a class="el" href="../../da/dc7/advanced_8h_a241aeeb764887ae5e3de58b98f04b16d.html#a241aeeb764887ae5e3de58b98f04b16d">WIDTH</a>, <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">x</a>, and <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00093">y</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../de/d71/_fire2023_8h_source.html#l00138">Fire2023()</a>.</p>
+<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../de/d71/_fire2023_8h_a540e832f2b3e0101e36d4155f5cfe6b9_a540e832f2b3e0101e36d4155f5cfe6b9_icgraph.svg" width="275" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
 
 </div>
 </div>
@@ -180,7 +188,7 @@ $(function(){initNavTree('de/d71/_fire2023_8h_a540e832f2b3e0101e36d4155f5cfe6b9.
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_a7814f5eb642f8fc842d435ed906d060.html">Fire2023</a></li><li class="navelem"><a class="el" href="../../de/d71/_fire2023_8h.html">Fire2023.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

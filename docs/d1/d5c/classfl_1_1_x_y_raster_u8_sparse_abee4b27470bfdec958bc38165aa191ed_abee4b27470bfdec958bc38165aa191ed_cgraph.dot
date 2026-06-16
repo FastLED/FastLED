@@ -14,7 +14,7 @@ digraph "fl::XYRasterU8Sparse::setSize"
   Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="fl::XYRasterU8Sparse\l::bounds_pixels",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d5c/classfl_1_1_x_y_raster_u8_sparse_aa3f84c529a8ccf4058ac3ba15205bc30.html#aa3f84c529a8ccf4058ac3ba15205bc30",tooltip=" "];
   Node2 -> Node5 [id="edge4_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fl::rect::height",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d48/structfl_1_1rect_a10a26664913a5c0d2c1bc90324eec211.html#a10a26664913a5c0d2c1bc90324eec211",tooltip=" "];
+  Node5 [id="Node000005",label="fl::rect::height",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d48/structfl_1_1rect_aecf504a5e48968c2f8d2c58f7c14f32e.html#aecf504a5e48968c2f8d2c58f7c14f32e",tooltip=" "];
   Node1 -> Node6 [id="edge5_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
   Node6 [id="Node000006",label="fl::XYRasterU8Sparse\l::setBounds",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d5c/classfl_1_1_x_y_raster_u8_sparse_a2458d708cb29196a10cd906106574afd.html#a2458d708cb29196a10cd906106574afd",tooltip=" "];
   Node6 -> Node3 [id="edge6_Node000006_Node000003",color="steelblue1",style="solid",tooltip=" "];
@@ -22,5 +22,5 @@ digraph "fl::XYRasterU8Sparse::setSize"
   Node7 [id="Node000007",label="fl::XYRasterU8Sparse\l::width",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d5c/classfl_1_1_x_y_raster_u8_sparse_a3bef75737cc85bbf9c81bea07692a2af.html#a3bef75737cc85bbf9c81bea07692a2af",tooltip=" "];
   Node7 -> Node3 [id="edge8_Node000007_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node7 -> Node8 [id="edge9_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];
-  Node8 [id="Node000008",label="fl::rect::width",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d48/structfl_1_1rect_a53a34c983506bad429941593f00d022d.html#a53a34c983506bad429941593f00d022d",tooltip=" "];
+  Node8 [id="Node000008",label="fl::rect::width",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d48/structfl_1_1rect_aa7bc19df8ded3d56173324ff96f4abfa.html#aa7bc19df8ded3d56173324ff96f4abfa",tooltip=" "];
 }

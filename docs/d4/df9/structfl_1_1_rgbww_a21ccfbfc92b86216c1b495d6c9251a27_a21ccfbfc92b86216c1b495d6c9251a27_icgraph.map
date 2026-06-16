@@ -1,0 +1,8 @@
+<map id="fl::Rgbww::active" name="fl::Rgbww::active">
+<area shape="rect" id="Node000001" title=" " alt="" coords="305,57,437,82"/>
+<area shape="rect" id="Node000002" href="$d5/d87/structfl_1_1_channel_options_ae83de4a87357c01ed28a5ba00ad25f78.html#ae83de4a87357c01ed28a5ba00ad25f78" title="True if this channel emits 5&#45;channel RGBWW." alt="" coords="61,5,202,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="291,57,202,41,202,36,292,52"/>
+<area shape="rect" id="Node000003" href="$dc/d8d/namespacefl_1_1anonymous__namespace_02channel_8cpp_8hpp_03_ad61b123c8a67b000fe20a82438d06343.html#ad61b123c8a67b000fe20a82438d06343" title="Encode UCS7604 pixel data into the channel data buffer." alt="" coords="5,93,257,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="292,86,241,96,240,91,291,81"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="172,82,158,75,131,72,108,74,94,79,89,85,92,92,87,94,84,84,91,74,107,69,131,67,159,70,174,77"/>
+</map>

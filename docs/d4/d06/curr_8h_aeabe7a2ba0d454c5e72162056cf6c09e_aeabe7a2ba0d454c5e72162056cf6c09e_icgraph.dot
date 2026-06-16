@@ -8,9 +8,9 @@ digraph "firePalette"
   rankdir="RL";
   Node1 [id="Node000001",label="firePalette",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fireGroup",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d06/curr_8h_a577b85d2595519588a4f0da4a3e258c2.html#a577b85d2595519588a4f0da4a3e258c2",tooltip=" "];
+  Node2 [id="Node000002",label="fireGroup",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d06/curr_8h_abf2ed93366f94237b599c2a90ef3a46e.html#abf2ed93366f94237b599c2a90ef3a46e",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="getFirePalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d06/curr_8h_a7c7364130874ee24d835a600b36dda98.html#a7c7364130874ee24d835a600b36dda98",tooltip=" "];
+  Node3 [id="Node000003",label="getFirePalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d06/curr_8h_a6953e48d81c304e67bbfa622f4b02526.html#a6953e48d81c304e67bbfa622f4b02526",tooltip=" "];
   Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node4 [id="Node000004",label="fillFrameBufferFire",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d06/curr_8h_af9691ba6aeb226dd50626f04206c6e28.html#af9691ba6aeb226dd50626f04206c6e28",tooltip=" "];
   Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];

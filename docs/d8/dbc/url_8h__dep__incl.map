@@ -1,0 +1,34 @@
+<map id="fl/stl/url.h" name="fl/stl/url.h">
+<area shape="rect" id="Node000001" title="Lightweight URL parser for embedded environments." alt="" coords="307,5,389,31"/>
+<area shape="rect" id="Node000002" href="$d8/d50/_audio_url_8ino.html" title=" " alt="" coords="5,299,211,353"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="304,38,244,65,176,105,142,130,111,159,83,191,61,226,57,244,61,263,70,281,83,297,79,300,66,284,56,265,52,244,56,224,79,188,107,155,138,126,173,101,242,60,301,33"/>
+<area shape="rect" id="Node000003" href="$d5/daf/asset_8cpp_8hpp.html" title="Runtime implementation of fl::resolve_asset." alt="" coords="385,152,548,177"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="379,37,422,77,448,116,464,150,459,153,443,119,418,80,375,41"/>
+<area shape="rect" id="Node000007" href="$d3/d3e/asset_8h.html" title="First&#45;class asset handles for sketches that live under &lt;sketch&gt;/data/." alt="" coords="288,79,408,104"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="351,44,351,79,345,79,345,44"/>
+<area shape="rect" id="Node000008" href="$d0/d90/ui_2audio_8h.html" title=" " alt="" coords="193,152,292,177"/>
+<area shape="poly" id="edge18_Node000001_Node000008" title=" " alt="" coords="320,41,298,59,278,80,258,118,248,152,243,151,254,116,274,77,294,55,316,37"/>
+<area shape="rect" id="Node000068" href="$d2/d83/fetch__request_8h.html" title=" " alt="" coords="566,79,757,104"/>
+<area shape="poly" id="edge13_Node000001_Node000068" title=" " alt="" coords="403,29,611,76,610,81,402,34"/>
+<area shape="rect" id="Node000004" href="$d1/d2c/fl_2asset_2__build_8cpp_8hpp.html" title="Unity build header for fl/asset/ directory." alt="" coords="386,225,553,251"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="470,191,472,225,466,225,465,191"/>
+<area shape="rect" id="Node000005" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="492,313,620,339"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="492,258,546,311,542,315,489,262"/>
+<area shape="rect" id="Node000006" href="$d8/dc8/fl_8asset_09_8cpp.html" title="Unity build: recursive includes from src/fl/asset/." alt="" coords="313,313,468,339"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="452,263,404,315,400,311,448,259"/>
+<area shape="poly" id="edge7_Node000007_Node000002" title=" " alt="" coords="354,118,355,148,353,183,343,220,325,252,301,275,273,292,243,305,212,315,210,310,241,300,270,288,298,271,321,249,338,218,347,183,350,148,349,118"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="380,109,449,149,446,154,378,113"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="321,114,261,154,258,150,318,110"/>
+<area shape="rect" id="Node000009" href="$d4/d86/ui_2audio_8cpp_8hpp.html" title=" " alt="" coords="169,225,311,251"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="244,191,243,225,238,225,239,191"/>
+<area shape="rect" id="Node000012" href="$d9/d3b/ui_8h.html" title="Aggregator header for the fl/ui/ family of per&#45;element UI types." alt="" coords="71,225,145,251"/>
+<area shape="poly" id="edge11_Node000008_Node000012" title=" " alt="" coords="210,186,131,227,129,223,208,181"/>
+<area shape="poly" id="edge12_Node000012_Node000002" title=" " alt="" coords="111,264,111,299,105,299,105,264"/>
+<area shape="rect" id="Node000069" href="$de/daa/fetch_8cpp_8hpp.html" title=" " alt="" coords="573,152,750,177"/>
+<area shape="poly" id="edge14_Node000068_Node000069" title=" " alt="" coords="664,118,664,152,659,152,659,118"/>
+<area shape="rect" id="Node000073" href="$d8/d7a/fetch__request_8cpp_8hpp.html" title=" " alt="" coords="774,152,1007,177"/>
+<area shape="poly" id="edge16_Node000068_Node000073" title=" " alt="" coords="712,106,854,149,853,154,711,111"/>
+<area shape="rect" id="Node000070" href="$db/d91/fl_2net_2http_2__build_8cpp_8hpp.html" title="Unity build header for fl/net/http/ directory." alt="" coords="687,225,870,251"/>
+<area shape="poly" id="edge15_Node000069_Node000070" title=" " alt="" coords="693,182,761,223,758,227,691,187"/>
+<area shape="poly" id="edge17_Node000073_Node000070" title=" " alt="" coords="862,187,798,227,796,223,859,183"/>
+</map>

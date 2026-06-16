@@ -1,0 +1,6 @@
+<map id="fl::detail::checkLoggerEnabled" name="fl::detail::checkLoggerEnabled">
+<area shape="rect" id="Node000001" title="Check if logger is enabled and print error once if not." alt="" coords="5,29,223,55"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="71,31,62,21,67,11,85,5,114,3,152,7,162,12,166,18,161,20,159,16,150,12,114,8,86,10,70,15,67,20,75,27"/>
+<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail_ae18de49f03a7a361a888c1e75d5e2f86.html#ae18de49f03a7a361a888c1e75d5e2f86" title="Print error message for disabled logger (non&#45;template helper) Called from checkLoggerEnabled template..." alt="" coords="271,22,485,62"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="223,39,257,39,257,45,223,45"/>
+</map>

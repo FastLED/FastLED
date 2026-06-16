@@ -1,0 +1,12 @@
+<map id="fl::detail::TypeTag::id" name="fl::detail::TypeTag::id">
+<area shape="rect" id="Node000001" title=" " alt="" coords="516,31,671,56"/>
+<area shape="rect" id="Node000002" href="$d7/dd1/classfl_1_1_rpc_abc0e75803d499c764cbf25b8affa0828.html#abc0e75803d499c764cbf25b8affa0828" title="Get a registered method by name." alt="" coords="338,5,429,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="502,35,428,26,429,21,503,30"/>
+<area shape="rect" id="Node000003" href="$d7/dd1/classfl_1_1_rpc_a4178792373064445ef93bf68a2769ac3.html#a4178792373064445ef93bf68a2769ac3" title=" " alt="" coords="299,55,468,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="503,56,468,60,468,55,502,51"/>
+<area shape="rect" id="Node000004" href="$d7/dd1/classfl_1_1_rpc_abcb5805b43e29dccaa852c4c27765a66.html#abcb5805b43e29dccaa852c4c27765a66" title="Bind a method with configuration (name, function, optional metadata)." alt="" coords="152,55,251,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="285,70,251,70,251,65,285,65"/>
+<area shape="poly" id="edge5_Node000004_Node000004" title=" " alt="" coords="227,44,219,36,201,33,186,35,178,40,177,46,181,53,176,56,171,46,174,37,184,30,201,28,222,32,230,40"/>
+<area shape="rect" id="Node000005" href="$d7/dd1/classfl_1_1_rpc_a7848eb3c0697893c79d23518707a0231.html#a7848eb3c0697893c79d23518707a0231" title="Convenience overload: bind method by name, function, and optional mode." alt="" coords="5,55,104,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="138,70,104,70,104,65,138,65"/>
+</map>

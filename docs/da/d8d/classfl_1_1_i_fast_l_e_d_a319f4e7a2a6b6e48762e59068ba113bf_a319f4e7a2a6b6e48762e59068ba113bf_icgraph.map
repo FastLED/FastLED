@@ -1,0 +1,4 @@
+<map id="fl::IFastLED::getNumLEDs" name="fl::IFastLED::getNumLEDs">
+<area shape="rect" id="Node000001" title="Get the number of LEDs." alt="" coords="5,29,191,55"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="131,19,121,11,98,8,79,10,68,15,66,20,72,28,67,31,61,21,64,11,77,5,98,3,123,6,134,15"/>
+</map>

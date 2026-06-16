@@ -1,0 +1,7 @@
+<map id="fl::task::Scheduler::instance" name="fl::task::Scheduler::instance">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,144,75"/>
+<area shape="rect" id="Node000002" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a56ea341e8b9965989c7634c973ef8027.html#a56ea341e8b9965989c7634c973ef8027" title=" " alt="" coords="204,5,343,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="144,42,190,35,191,40,144,47"/>
+<area shape="rect" id="Node000003" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="192,70,355,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="144,62,179,67,178,72,144,67"/>
+</map>

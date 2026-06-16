@@ -1,0 +1,7 @@
+<map id="fill_raw_noise8" name="fill_raw_noise8">
+<area shape="rect" id="Node000001" title="Fill a 1D 8&#45;bit buffer with noise, using inoise8()" alt="" coords="149,31,268,56"/>
+<area shape="rect" id="Node000002" href="$de/da4/group___noise_fill_gaa22275f31917a40dc58abe41236fc57e.html#gaa22275f31917a40dc58abe41236fc57e" title="Fill an LED array with random colors, using 16&#45;bit noise." alt="" coords="5,5,101,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="135,34,101,28,102,23,136,29"/>
+<area shape="rect" id="Node000003" href="$de/da4/group___noise_fill_ga592eaa48e75633215d447c131e23590b.html#ga592eaa48e75633215d447c131e23590b" title="Fill an LED array with random colors, using 8&#45;bit noise." alt="" coords="9,55,97,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="136,57,98,63,97,58,135,52"/>
+</map>

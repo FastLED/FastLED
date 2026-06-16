@@ -21,7 +21,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d0/dc9/class_c_pixel_l_e_d_controller_af68ac3dc99e466b6f1b71dc1f5f1bd06.html#af68ac3dc99e466b6f1b71dc1f5f1bd06" target="_top" xlink:title="Write the passed in RGB data out to the LEDs managed by this controller.">
+<g id="a_Node000002"><a xlink:href="../../d0/dc9/class_c_pixel_l_e_d_controller_a8af733ab9cdbbc87742932cf18e22346.html#a8af733ab9cdbbc87742932cf18e22346" target="_top" xlink:title="Write the passed in RGB data out to the LEDs managed by this controller.">
 <polygon fill="white" stroke="#666666" points="113,-78 0,-78 0,-48 113,-48 113,-78"/>
 <text text-anchor="start" x="8" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">CPixelLEDController</text>
 <text text-anchor="middle" x="56.5" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">::show</text>

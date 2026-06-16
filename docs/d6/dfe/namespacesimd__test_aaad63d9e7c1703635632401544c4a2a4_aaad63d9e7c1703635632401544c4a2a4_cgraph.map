@@ -1,0 +1,5 @@
+<map id="simd_test::test_xor_u8_16" name="simd_test::test_xor_u8_16">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,152,45"/>
+<area shape="rect" id="Node000002" href="$d6/dfe/namespacesimd__test_aa9ae75f15db528b84ebd87cb1baae7e1.html#aa9ae75f15db528b84ebd87cb1baae7e1" title="Compare two uint8_t arrays element&#45;wise." alt="" coords="200,5,351,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="152,23,186,23,186,28,152,28"/>
+</map>

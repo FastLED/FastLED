@@ -1,0 +1,25 @@
+<map id="fl/math/simd.h" name="fl/math/simd.h">
+<area shape="rect" id="Node000001" title="Umbrella header for SIMD subsystem." alt="" coords="414,5,530,31"/>
+<area shape="rect" id="Node000002" href="$d0/d7e/fl_2math_2simd_2types_8h.html" title="SIMD register type aliases." alt="" coords="394,152,550,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="414,25,179,45,70,61,33,70,14,81,9,89,10,97,16,105,28,112,68,126,122,136,253,151,380,158,380,163,253,156,121,142,67,131,26,117,13,109,5,99,3,88,10,77,31,66,69,56,178,40,413,20"/>
+<area shape="rect" id="Node000004" href="$d0/d1e/u8x16_8h.html" title="SIMD operations on 16&#45;element uint8_t vectors." alt="" coords="24,79,184,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="414,33,177,79,176,73,413,28"/>
+<area shape="rect" id="Node000005" href="$d7/d94/u8x32_8h.html" title="SIMD operations on 32&#45;element uint8_t vectors (256&#45;bit)" alt="" coords="208,79,368,104"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="443,33,332,76,330,71,441,28"/>
+<area shape="rect" id="Node000006" href="$d3/d0c/u16x8_8h.html" title="SIMD operations on 8&#45;element uint16_t vectors." alt="" coords="392,79,552,104"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="475,31,475,65,469,65,469,31"/>
+<area shape="rect" id="Node000007" href="$d5/d91/simd_2u16x16_8h.html" title="SIMD operations on 16&#45;element uint16_t vectors (256&#45;bit)" alt="" coords="576,79,744,104"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="503,28,617,71,615,76,501,33"/>
+<area shape="rect" id="Node000008" href="$dc/d0c/u32x4_8h.html" title="SIMD operations on 4&#45;element uint32_t/int32_t vectors." alt="" coords="768,79,928,104"/>
+<area shape="poly" id="edge11_Node000001_Node000008" title=" " alt="" coords="531,28,775,74,774,79,530,33"/>
+<area shape="rect" id="Node000009" href="$d2/df4/f32x4_8h.html" title="SIMD operations on 4&#45;element float32 vectors." alt="" coords="952,79,1109,104"/>
+<area shape="poly" id="edge13_Node000001_Node000009" title=" " alt="" coords="530,24,938,76,938,81,530,29"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="405,225,539,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="475,178,475,212,469,212,469,178"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="163,101,399,147,398,152,162,107"/>
+<area shape="poly" id="edge6_Node000005_Node000002" title=" " alt="" coords="318,102,430,144,428,149,316,107"/>
+<area shape="poly" id="edge8_Node000006_Node000002" title=" " alt="" coords="475,104,475,138,469,138,469,104"/>
+<area shape="poly" id="edge10_Node000007_Node000002" title=" " alt="" coords="631,107,516,149,514,144,629,102"/>
+<area shape="poly" id="edge12_Node000008_Node000002" title=" " alt="" coords="788,107,546,152,545,147,787,101"/>
+<area shape="poly" id="edge14_Node000009_Node000002" title=" " alt="" coords="952,105,564,154,563,149,951,100"/>
+</map>

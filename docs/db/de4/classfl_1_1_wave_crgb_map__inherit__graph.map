@@ -1,7 +1,7 @@
 <map id="fl::WaveCrgbMap" name="fl::WaveCrgbMap">
-<area shape="rect" id="Node000001" title=" " alt="" coords="137,5,269,31"/>
-<area shape="rect" id="Node000002" href="$d0/da7/classfl_1_1_wave_crgb_gradient_map.html" title=" " alt="" coords="5,79,193,104"/>
+<area shape="rect" id="Node000001" title="Abstract base class for mapping wave simulation values to LED colors." alt="" coords="137,5,269,31"/>
+<area shape="rect" id="Node000002" href="$d0/da7/classfl_1_1_wave_crgb_gradient_map.html" title="Wave&#45;to&#45;color mapper using gradient/palette coloring." alt="" coords="5,79,193,104"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="177,41,118,81,115,76,174,36"/>
-<area shape="rect" id="Node000003" href="$de/d99/classfl_1_1_wave_crgb_map_default.html" title=" " alt="" coords="217,79,397,104"/>
+<area shape="rect" id="Node000003" href="$de/d99/classfl_1_1_wave_crgb_map_default.html" title="Default wave&#45;to&#45;color mapper producing grayscale output." alt="" coords="217,79,397,104"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="233,36,292,76,289,81,230,41"/>
 </map>

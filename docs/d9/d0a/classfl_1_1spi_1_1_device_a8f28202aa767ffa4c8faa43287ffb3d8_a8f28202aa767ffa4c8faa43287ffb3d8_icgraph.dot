@@ -1,0 +1,14 @@
+digraph "fl::spi::Device::Device"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::spi::Device::Device",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Construct SPI device with configuration."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::spi::Device::Device",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d0a/classfl_1_1spi_1_1_device_a164c4a5d432910862a3a908727a11138.html#a164c4a5d432910862a3a908727a11138",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::spi::Device::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d0a/classfl_1_1spi_1_1_device_a0d4f32bfdbe507e52ff28f4d11c601a8.html#a0d4f32bfdbe507e52ff28f4d11c601a8",tooltip=" "];
+}

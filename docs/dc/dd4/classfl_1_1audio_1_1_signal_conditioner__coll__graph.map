@@ -1,0 +1,22 @@
+<map id="fl::audio::SignalConditioner" name="fl::audio::SignalConditioner">
+<area shape="rect" id="Node000001" title="SignalConditioner performs low&#45;level audio preprocessing to clean raw PCM samples before FFT analysis..." alt="" coords="1045,99,1243,125"/>
+<area shape="rect" id="Node000002" href="$db/dbf/namespacefl_1_1audio.html#d6/dfa/structfl_1_1audio_1_1_signal_conditioner_config" title="Configuration for signal conditioning pipeline." alt="" coords="699,5,896,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="899,46,1022,76,1099,97,1097,102,1021,81,898,51"/>
+<area shape="rect" id="Node000003" href="$da/dde/classfl_1_1audio_1_1_signal_conditioner.html#da/de8/structfl_1_1audio_1_1_signal_conditioner_1_1_stats" title="Get current statistics (for debugging/monitoring)" alt="" coords="699,69,896,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="910,94,1045,103,1045,108,910,99"/>
+<area shape="rect" id="Node000004" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="729,134,866,159"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="880,136,1045,119,1046,124,880,141"/>
+<area shape="rect" id="Node000005" href="$d4/dad/classfl_1_1vector__basic.html" title="Type&#45;erased vector base class." alt="" coords="301,163,421,189"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="422,158,470,148,572,137,675,137,729,140,729,145,675,143,572,142,471,153,423,163"/>
+<area shape="rect" id="Node000008" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="471,163,588,189"/>
+<area shape="poly" id="edge8_Node000008_Node000005" title=" " alt="" coords="435,173,471,173,471,179,435,179"/>
+<area shape="rect" id="Node000009" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="733,183,862,209"/>
+<area shape="poly" id="edge10_Node000009_Node000005" title=" " alt="" coords="420,189,471,199,541,204,611,205,732,199,732,205,611,210,540,209,470,204,419,195"/>
+<area shape="rect" id="Node000006" href="$db/d13/classfl_1_1memory__resource.html" title="Polymorphic memory resource base class (PMR&#45;style)." alt="" coords="13,138,169,163"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="183,157,301,168,301,173,182,162"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl.html#d8/d72/structfl_1_1vector__element__ops" title="Function pointer table for type&#45;specific element operations." alt="" coords="5,187,176,213"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="190,198,277,192,310,186,311,191,278,197,190,203"/>
+<area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="601,165,728,152,729,157,602,171"/>
+<area shape="poly" id="edge11_Node000009_Node000008" title=" " alt="" coords="602,188,612,189,733,195,732,200,612,195,601,193"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="876,190,947,182,1021,167,1075,146,1120,122,1122,127,1077,151,1022,172,948,188,876,196"/>
+</map>

@@ -1,43 +1,46 @@
 <map id="fl::DemoReel100::draw" name="fl::DemoReel100::draw">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,204,176,229"/>
-<area shape="rect" id="Node000002" href="$d1/d60/classfl_1_1_demo_reel100_a464aaf09e28b992fc28ec7db4d427607.html#a464aaf09e28b992fc28ec7db4d427607" title=" " alt="" coords="224,179,437,204"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,205,210,201,211,207,176,210"/>
-<area shape="rect" id="Node000003" href="$d1/d60/classfl_1_1_demo_reel100_aad4b41d93c1a9f7acecea8b49cda7078.html#aad4b41d93c1a9f7acecea8b49cda7078" title=" " alt="" coords="228,228,433,253"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="176,223,215,226,214,232,176,228"/>
-<area shape="rect" id="Node000004" href="$d5/d25/_demo_reel100_8ino_a4875f6d9a2b0f08d3cf221974234121b.html#a4875f6d9a2b0f08d3cf221974234121b" title=" " alt="" coords="533,104,583,129"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="412,225,436,213,452,196,459,178,467,158,484,139,518,122,521,126,487,143,472,161,464,180,456,199,439,217,415,230"/>
-<area shape="rect" id="Node000012" href="$d5/d25/_demo_reel100_8ino_ae67cd131fd8d3a78a25cb7f40998f292.html#ae67cd131fd8d3a78a25cb7f40998f292" title=" " alt="" coords="522,253,594,279"/>
-<area shape="poly" id="edge7_Node000003_Node000012" title=" " alt="" coords="434,249,509,258,508,263,434,255"/>
-<area shape="rect" id="Node000016" href="$d5/d25/_demo_reel100_8ino_a4cf4b428065fac16dc28a16e2f9004e1.html#a4cf4b428065fac16dc28a16e2f9004e1" title=" " alt="" coords="527,153,589,179"/>
-<area shape="poly" id="edge11_Node000003_Node000016" title=" " alt="" coords="395,225,436,213,460,201,484,188,512,177,514,182,486,192,463,205,438,218,397,230"/>
-<area shape="rect" id="Node000019" href="$d5/d25/_demo_reel100_8ino_a6784b2bb794bd47a615b7a9be2ebf7db.html#a6784b2bb794bd47a615b7a9be2ebf7db" title=" " alt="" coords="709,404,783,429"/>
-<area shape="poly" id="edge14_Node000003_Node000019" title=" " alt="" coords="343,252,364,282,397,320,438,359,486,389,540,407,595,417,649,420,695,419,695,424,649,425,595,422,538,412,484,394,435,363,393,324,360,285,338,255"/>
-<area shape="rect" id="Node000021" href="$d5/d25/_demo_reel100_8ino_a1cecfe941bd75c57cea1a4f26c8ccb24.html#a1cecfe941bd75c57cea1a4f26c8ccb24" title=" " alt="" coords="485,353,631,379"/>
-<area shape="poly" id="edge16_Node000003_Node000021" title=" " alt="" coords="356,251,523,344,520,349,353,256"/>
-<area shape="rect" id="Node000023" href="$d5/d25/_demo_reel100_8ino_ae67f05643df1798b39ca5b88496dcebf.html#ae67f05643df1798b39ca5b88496dcebf" title=" " alt="" coords="523,203,593,228"/>
-<area shape="poly" id="edge21_Node000003_Node000023" title=" " alt="" coords="434,227,509,218,509,223,434,232"/>
-<area shape="rect" id="Node000005" href="$d6/d6c/group___beat_generators_gaecd7cbfc2640407cabf75afcc7d9ddf4.html#gaecd7cbfc2640407cabf75afcc7d9ddf4" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="707,5,785,31"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="576,102,621,72,677,40,693,33,695,38,680,44,624,76,579,106"/>
-<area shape="rect" id="Node000010" href="$d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="679,55,813,80"/>
-<area shape="poly" id="edge5_Node000004_Node000010" title=" " alt="" coords="583,108,683,81,684,86,584,113"/>
-<area shape="rect" id="Node000011" href="$d8/dd0/_fire_cylinder_8h_a470cec2dcb21e474c257065bb93bfcd1.html#a470cec2dcb21e474c257065bb93bfcd1" title=" " alt="" coords="712,104,780,129"/>
-<area shape="poly" id="edge6_Node000004_Node000011" title=" " alt="" coords="584,114,698,114,698,119,584,119"/>
-<area shape="rect" id="Node000013" href="$d1/dfb/colorutils_8h_a399e4e094995b8e97420b89a2dd6548b.html#a399e4e094995b8e97420b89a2dd6548b" title=" " alt="" coords="687,203,805,228"/>
-<area shape="poly" id="edge8_Node000012_Node000013" title=" " alt="" coords="593,254,684,229,686,234,595,259"/>
-<area shape="rect" id="Node000014" href="$d2/d0d/group___random_ga17034d936ef716efe820e11c1df043b0.html#ga17034d936ef716efe820e11c1df043b0" title="Generate a 16&#45;bit random number." alt="" coords="866,329,954,355"/>
-<area shape="poly" id="edge9_Node000012_Node000014" title=" " alt="" coords="595,271,853,327,852,332,594,276"/>
-<area shape="rect" id="Node000015" href="$d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe" title="Generate an 8&#45;bit random number." alt="" coords="870,267,950,292"/>
-<area shape="poly" id="edge10_Node000012_Node000015" title=" " alt="" coords="594,265,856,275,856,280,594,270"/>
-<area shape="poly" id="edge13_Node000016_Node000013" title=" " alt="" coords="590,171,684,197,683,202,589,177"/>
-<area shape="rect" id="Node000017" href="$d6/d6c/group___beat_generators_gaa46e5de1c4c27833359e7a97a18c839b.html#gaa46e5de1c4c27833359e7a97a18c839b" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="703,153,789,179"/>
-<area shape="poly" id="edge12_Node000016_Node000017" title=" " alt="" coords="590,163,689,163,689,169,590,169"/>
-<area shape="rect" id="Node000020" href="$d1/dfb/colorutils_8h_a8cfac7f712d38ac9aa9bcd172283b453.html#a8cfac7f712d38ac9aa9bcd172283b453" title="Fill a range of LEDs with a rainbow of colors." alt="" coords="861,404,959,429"/>
-<area shape="poly" id="edge15_Node000019_Node000020" title=" " alt="" coords="784,414,847,414,847,419,784,419"/>
-<area shape="poly" id="edge20_Node000021_Node000019" title=" " alt="" coords="607,376,696,401,695,406,605,381"/>
-<area shape="rect" id="Node000022" href="$d5/d25/_demo_reel100_8ino_ab00a79f2963c57048ec1d9271fbfb2dd.html#ab00a79f2963c57048ec1d9271fbfb2dd" title=" " alt="" coords="703,355,789,380"/>
-<area shape="poly" id="edge17_Node000021_Node000022" title=" " alt="" coords="631,364,689,364,689,370,631,369"/>
-<area shape="poly" id="edge18_Node000022_Node000014" title=" " alt="" coords="789,358,851,348,852,354,790,363"/>
-<area shape="poly" id="edge19_Node000022_Node000015" title=" " alt="" coords="770,352,872,296,874,301,772,357"/>
-<area shape="poly" id="edge23_Node000023_Node000013" title=" " alt="" coords="593,213,673,213,673,218,593,218"/>
-<area shape="poly" id="edge22_Node000023_Node000017" title=" " alt="" coords="592,204,689,178,690,183,594,209"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,179,176,204"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="293,129,368,155"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,176,279,150,280,155,154,181"/>
+<area shape="rect" id="Node000003" href="$d1/d60/classfl_1_1_demo_reel100_a464aaf09e28b992fc28ec7db4d427607.html#a464aaf09e28b992fc28ec7db4d427607" title=" " alt="" coords="224,179,437,204"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="176,189,210,189,210,194,176,194"/>
+<area shape="rect" id="Node000004" href="$d1/d60/classfl_1_1_demo_reel100_a340f4ba1c2a0e90c8b2925a77004c981.html#a340f4ba1c2a0e90c8b2925a77004c981" title=" " alt="" coords="228,228,433,253"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="154,201,255,223,254,228,153,207"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="294,131,286,121,290,111,305,105,331,103,363,107,375,116,371,120,361,111,331,108,306,110,294,115,291,120,298,127"/>
+<area shape="rect" id="Node000005" href="$d5/d25/_demo_reel100_8ino_a4875f6d9a2b0f08d3cf221974234121b.html#a4875f6d9a2b0f08d3cf221974234121b" title=" " alt="" coords="533,104,583,129"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="412,225,436,213,452,196,459,178,467,158,484,139,518,122,521,126,487,143,472,161,464,180,456,199,439,217,415,230"/>
+<area shape="rect" id="Node000009" href="$d5/d25/_demo_reel100_8ino_ae67cd131fd8d3a78a25cb7f40998f292.html#ae67cd131fd8d3a78a25cb7f40998f292" title=" " alt="" coords="522,253,594,279"/>
+<area shape="poly" id="edge9_Node000004_Node000009" title=" " alt="" coords="434,249,509,258,508,263,434,255"/>
+<area shape="rect" id="Node000013" href="$d5/d25/_demo_reel100_8ino_a4cf4b428065fac16dc28a16e2f9004e1.html#a4cf4b428065fac16dc28a16e2f9004e1" title=" " alt="" coords="527,153,589,179"/>
+<area shape="poly" id="edge13_Node000004_Node000013" title=" " alt="" coords="395,225,436,213,460,201,484,188,512,177,514,182,486,192,463,205,438,218,397,230"/>
+<area shape="rect" id="Node000015" href="$d5/d25/_demo_reel100_8ino_a6784b2bb794bd47a615b7a9be2ebf7db.html#a6784b2bb794bd47a615b7a9be2ebf7db" title=" " alt="" coords="709,404,783,429"/>
+<area shape="poly" id="edge16_Node000004_Node000015" title=" " alt="" coords="343,252,364,282,397,320,438,359,486,389,540,407,595,417,649,420,695,419,695,424,649,425,595,422,538,412,484,394,435,363,393,324,360,285,338,255"/>
+<area shape="rect" id="Node000017" href="$d5/d25/_demo_reel100_8ino_a1cecfe941bd75c57cea1a4f26c8ccb24.html#a1cecfe941bd75c57cea1a4f26c8ccb24" title=" " alt="" coords="485,353,631,379"/>
+<area shape="poly" id="edge18_Node000004_Node000017" title=" " alt="" coords="356,251,523,344,520,349,353,256"/>
+<area shape="rect" id="Node000019" href="$d5/d25/_demo_reel100_8ino_ae67f05643df1798b39ca5b88496dcebf.html#ae67f05643df1798b39ca5b88496dcebf" title=" " alt="" coords="523,203,593,228"/>
+<area shape="poly" id="edge23_Node000004_Node000019" title=" " alt="" coords="434,227,509,218,509,223,434,232"/>
+<area shape="rect" id="Node000006" href="$df/da5/lib8tion_8h_a696b9421eca961df0a68c7c6c3e983ab.html#a696b9421eca961df0a68c7c6c3e983ab" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="707,5,785,31"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="576,102,621,72,677,40,693,33,695,38,680,44,624,76,579,106"/>
+<area shape="rect" id="Node000007" href="$d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="679,55,813,80"/>
+<area shape="poly" id="edge7_Node000005_Node000007" title=" " alt="" coords="583,108,683,81,684,86,584,113"/>
+<area shape="rect" id="Node000008" href="$d8/dd0/_fire_cylinder_8h_a470cec2dcb21e474c257065bb93bfcd1.html#a470cec2dcb21e474c257065bb93bfcd1" title=" " alt="" coords="712,104,780,129"/>
+<area shape="poly" id="edge8_Node000005_Node000008" title=" " alt="" coords="584,114,698,114,698,119,584,119"/>
+<area shape="rect" id="Node000010" href="$d1/dfb/colorutils_8h_a399e4e094995b8e97420b89a2dd6548b.html#a399e4e094995b8e97420b89a2dd6548b" title=" " alt="" coords="687,203,805,228"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="593,254,684,229,686,234,595,259"/>
+<area shape="rect" id="Node000011" href="$d2/d0d/group___random_gaaaff3e84c6ab2cf5f71400a4b6958beb.html#gaaaff3e84c6ab2cf5f71400a4b6958beb" title="Generate a 16&#45;bit random number." alt="" coords="866,329,954,355"/>
+<area shape="poly" id="edge11_Node000009_Node000011" title=" " alt="" coords="595,271,853,327,852,332,594,276"/>
+<area shape="rect" id="Node000012" href="$d2/d0d/group___random_gadb05544426b14ef8d85fb2eb73cb8a0a.html#gadb05544426b14ef8d85fb2eb73cb8a0a" title="Generate an 8&#45;bit random number." alt="" coords="870,267,950,292"/>
+<area shape="poly" id="edge12_Node000009_Node000012" title=" " alt="" coords="594,265,856,275,856,280,594,270"/>
+<area shape="poly" id="edge15_Node000013_Node000010" title=" " alt="" coords="590,171,684,197,683,202,589,177"/>
+<area shape="rect" id="Node000014" href="$df/da5/lib8tion_8h_adf8e83564c52b94d0ff5594aede0be28.html#adf8e83564c52b94d0ff5594aede0be28" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="703,153,789,179"/>
+<area shape="poly" id="edge14_Node000013_Node000014" title=" " alt="" coords="590,163,689,163,689,169,590,169"/>
+<area shape="rect" id="Node000016" href="$d1/dfb/colorutils_8h_a5e33a6635101019cce6b0936c9415a6f.html#a5e33a6635101019cce6b0936c9415a6f" title="Fill a range of LEDs with a rainbow of colors." alt="" coords="861,404,959,429"/>
+<area shape="poly" id="edge17_Node000015_Node000016" title=" " alt="" coords="784,414,847,414,847,419,784,419"/>
+<area shape="poly" id="edge22_Node000017_Node000015" title=" " alt="" coords="607,376,696,401,695,406,605,381"/>
+<area shape="rect" id="Node000018" href="$d5/d25/_demo_reel100_8ino_ab00a79f2963c57048ec1d9271fbfb2dd.html#ab00a79f2963c57048ec1d9271fbfb2dd" title=" " alt="" coords="703,355,789,380"/>
+<area shape="poly" id="edge19_Node000017_Node000018" title=" " alt="" coords="631,364,689,364,689,370,631,369"/>
+<area shape="poly" id="edge20_Node000018_Node000011" title=" " alt="" coords="789,358,851,348,852,354,790,363"/>
+<area shape="poly" id="edge21_Node000018_Node000012" title=" " alt="" coords="770,352,872,296,874,301,772,357"/>
+<area shape="poly" id="edge25_Node000019_Node000010" title=" " alt="" coords="593,213,673,213,673,218,593,218"/>
+<area shape="poly" id="edge24_Node000019_Node000014" title=" " alt="" coords="592,204,689,178,690,183,594,209"/>
 </map>

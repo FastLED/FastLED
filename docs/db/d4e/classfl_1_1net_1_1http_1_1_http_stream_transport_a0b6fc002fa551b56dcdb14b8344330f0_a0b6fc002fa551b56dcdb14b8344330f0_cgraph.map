@@ -1,0 +1,18 @@
+<map id="fl::net::http::HttpStreamTransport::resolveRpc" name="fl::net::http::HttpStreamTransport::resolveRpc">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,120,181,160"/>
+<area shape="rect" id="Node000002" href="$d0/d34/classfl_1_1task_1_1_promise_aa56d4b0b92b73976e77a01888ea8f7de.html#aa56d4b0b92b73976e77a01888ea8f7de" title="Complete the Promise with an error (used by networking library)" alt="" coords="232,56,388,96"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="161,117,228,97,230,102,163,122"/>
+<area shape="rect" id="Node000005" href="$d0/d34/classfl_1_1task_1_1_promise_a626af66c4aaa780a2b0a0ee396f9a9db.html#a626af66c4aaa780a2b0a0ee396f9a9db" title="Complete the Promise with a result (used by networking library)" alt="" coords="229,120,391,160"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="182,137,216,137,216,143,182,143"/>
+<area shape="rect" id="Node000007" href="$de/d40/classfl_1_1json_ac94ae67fc50a75046692cd52b2dfb3e6.html#ac94ae67fc50a75046692cd52b2dfb3e6" title=" " alt="" coords="246,185,374,210"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="170,157,249,178,247,184,169,163"/>
+<area shape="rect" id="Node000003" href="$d0/d34/classfl_1_1task_1_1_promise_a51a1be9fd686089d804cec834abd6ccc.html#a51a1be9fd686089d804cec834abd6ccc" title="Get the error (only valid if is_rejected() returns true)" alt="" coords="439,5,573,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="387,53,424,44,426,49,388,59"/>
+<area shape="rect" id="Node000004" href="$d0/d34/classfl_1_1task_1_1_promise_aa4a0fc861a1271cbb04a46aa7628c611.html#aa4a0fc861a1271cbb04a46aa7628c611" title="Check if Promise is valid." alt="" coords="621,88,756,128"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="389,80,608,99,608,104,388,85"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="552,43,632,80,630,85,550,48"/>
+<area shape="poly" id="edge6_Node000005_Node000004" title=" " alt="" coords="391,131,607,112,608,117,391,136"/>
+<area shape="rect" id="Node000006" href="$d0/d34/classfl_1_1task_1_1_promise_a2eccb92f3cd894efe9a728eea2db7c45.html#a2eccb92f3cd894efe9a728eea2db7c45" title="Get the result value (only valid if is_resolved() returns true)" alt="" coords="439,171,573,211"/>
+<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="388,157,426,167,424,172,387,163"/>
+<area shape="poly" id="edge8_Node000006_Node000004" title=" " alt="" coords="550,168,630,131,632,136,552,173"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="fl::asset_detail::registry" name="fl::asset_detail::registry">
+<area shape="rect" id="Node000001" title=" " alt="" coords="593,42,768,67"/>
+<area shape="rect" id="Node000002" href="$de/dde/namespacefl_1_1asset__detail_a38e7d1ca3a3f86b6d275e3489e9dd008.html#a38e7d1ca3a3f86b6d275e3489e9dd008" title="Look up an asset path in the registry. Returns invalid url() on miss." alt="" coords="377,5,545,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="579,44,545,39,546,34,580,39"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_afd8b21d9436eca955d033abc6ba74ea6.html#afd8b21d9436eca955d033abc6ba74ea6" title="Public helper: plug an asset mapping at runtime." alt="" coords="396,70,527,95"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="580,70,528,77,527,72,579,65"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a0a4f1a4cca802944a086c97fe689f2a6.html#a0a4f1a4cca802944a086c97fe689f2a6" title="Resolve an asset handle to a URL (or local file path) at runtime." alt="" coords="201,13,329,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="364,28,330,28,330,23,364,23"/>
+<area shape="rect" id="Node000004" href="$d2/d4d/classfl_1_1_u_i_audio_ab43d38f3467f2315c042021c07fabd00.html#ab43d38f3467f2315c042021c07fabd00" title="Asset&#45;handle overload (issue #2284)." alt="" coords="5,13,153,38"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="188,28,154,28,154,23,188,23"/>
+</map>

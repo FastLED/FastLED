@@ -1,9 +1,17 @@
 <map id="plotSoftDot" name="plotSoftDot">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,100,56"/>
-<area shape="rect" id="Node000002" href="$dc/db7/examples_2_luminova_2luminova_8h_a51ece01deb8ffb2d71d6487c4171e369.html#a51ece01deb8ffb2d71d6487c4171e369" title=" " alt="" coords="148,31,219,56"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="100,41,134,41,134,46,100,46"/>
-<area shape="rect" id="Node000003" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="267,5,331,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="218,33,253,25,254,31,220,38"/>
-<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aad41032db4d607eb9981dd356975ed71.html#aad41032db4d607eb9981dd356975ed71" title=" " alt="" coords="271,55,326,80"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="220,48,258,56,257,62,219,53"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,100,80"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a680a4050712ddcb48b6107ce5294a82f.html#a680a4050712ddcb48b6107ce5294a82f" title=" " alt="" coords="155,5,221,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="87,52,141,32,143,37,89,57"/>
+<area shape="rect" id="Node000004" href="$dc/db7/examples_2_luminova_2luminova_8h_a51ece01deb8ffb2d71d6487c4171e369.html#a51ece01deb8ffb2d71d6487c4171e369" title=" " alt="" coords="153,55,223,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="100,65,139,65,139,70,100,70"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a2027cd83a5ffcdf8fefb4aeefa139246.html#a2027cd83a5ffcdf8fefb4aeefa139246" title=" " alt="" coords="148,104,228,129"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="89,78,141,97,139,102,87,83"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a382370a0b4fd2e828c944855fb904166.html#a382370a0b4fd2e828c944855fb904166" title=" " alt="" coords="283,5,416,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="221,15,269,15,269,21,221,21"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a8346d03be07d25e0a78bc006d13505f4.html#a8346d03be07d25e0a78bc006d13505f4" title=" " alt="" coords="322,55,377,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="223,65,308,65,308,70,223,70"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a7dfae6bfef2fcb693ecbec4e12b3fb0b.html#a7dfae6bfef2fcb693ecbec4e12b3fb0b" title=" " alt="" coords="276,104,423,129"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="228,114,262,114,262,119,228,119"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a9843bb18fb38342c45b6202d4a439322.html#a9843bb18fb38342c45b6202d4a439322" title=" " alt="" coords="471,104,621,129"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="423,114,457,114,457,119,423,119"/>
 </map>

@@ -1,0 +1,10 @@
+<map id="fl::gfx::detail::renderRingRow" name="fl::gfx::detail::renderRingRow">
+<area shape="rect" id="Node000001" title="Render one scanline of a ring using incremental d² with phase&#45;based scanning." alt="" coords="664,29,875,55"/>
+<area shape="poly" id="edge4_Node000001_Node000001" title=" " alt="" coords="815,20,812,15,804,12,769,8,742,10,728,15,725,20,732,27,728,31,719,21,724,11,741,5,769,3,805,7,815,11,819,17"/>
+<area shape="rect" id="Node000002" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_ac1063e6536a3ebf22978c3a5fe41310b.html#ac1063e6536a3ebf22978c3a5fe41310b" title=" " alt="" coords="413,29,616,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="650,45,616,45,616,39,650,39"/>
+<area shape="rect" id="Node000003" href="$d0/d8b/namespacefl_1_1gfx_ab43aaa534398d0c1572e2ecbbffcd631.html#ab43aaa534398d0c1572e2ecbbffcd631" title=" " alt="" coords="237,29,365,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="399,45,366,45,366,39,399,39"/>
+<area shape="rect" id="Node000004" href="$de/d5c/structfl_1_1gfx_1_1_canvas_a4592348ee30cf7896ccbed4e9c2c5b95.html#a4592348ee30cf7896ccbed4e9c2c5b95" title=" " alt="" coords="5,29,189,55"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="223,45,190,45,190,39,223,39"/>
+</map>

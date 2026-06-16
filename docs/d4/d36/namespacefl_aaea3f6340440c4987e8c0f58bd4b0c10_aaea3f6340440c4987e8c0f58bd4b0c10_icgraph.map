@@ -1,0 +1,9 @@
+<map id="fl::resetCauseName" name="fl::resetCauseName">
+<area shape="rect" id="Node000001" title="Return a static&#45;lifetime name for c — zero&#45;cost, no allocation." alt="" coords="716,13,867,38"/>
+<area shape="rect" id="Node000002" href="$df/dbf/structfl_1_1_reset_info_a20ca4fcd4004173351cf745b2e485086.html#a20ca4fcd4004173351cf745b2e485086" title="Cause name (zero&#45;cost, static string_view)." alt="" coords="483,13,668,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="702,28,668,28,668,23,702,23"/>
+<area shape="rect" id="Node000003" href="$df/dbf/structfl_1_1_reset_info_a6fa0c255743108e94b0473528ad94500.html#a6fa0c255743108e94b0473528ad94500" title="Write a single&#45;line human&#45;readable description into the caller&#39;s buffer." alt="" coords="272,13,435,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="469,28,435,28,435,23,469,23"/>
+<area shape="rect" id="Node000004" href="$df/d52/namespacefl_1_1platforms_a3333f9482b0798c0daebdc07be2cdd5c.html#a3333f9482b0798c0daebdc07be2cdd5c" title=" " alt="" coords="5,5,224,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="258,28,224,28,224,23,258,23"/>
+</map>

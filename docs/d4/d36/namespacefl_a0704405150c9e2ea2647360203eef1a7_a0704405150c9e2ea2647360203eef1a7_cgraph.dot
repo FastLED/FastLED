@@ -8,7 +8,7 @@ digraph "fl::HSV16toRGB"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::HSV16toRGB",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="map16_to_8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d12/group__intmap_ga43a52eb77959095c09b86f6d514eee5e.html#ga43a52eb77959095c09b86f6d514eee5e",tooltip=" "];
+  Node2 [id="Node000002",label="fl::map16_to_8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d12/group__intmap_gaa22e4ff6f570b2e2662c77854c5c6148.html#gaa22e4ff6f570b2e2662c77854c5c6148",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="map32_to_16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d12/group__intmap_ga941524c476a65f30ca1a31d5629f5de5.html#ga941524c476a65f30ca1a31d5629f5de5",tooltip=" "];
+  Node3 [id="Node000003",label="fl::map32_to_16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d12/group__intmap_ga8e50a18fc577d3c0aafcdc300de507ef.html#ga8e50a18fc577d3c0aafcdc300de507ef",tooltip=" "];
 }

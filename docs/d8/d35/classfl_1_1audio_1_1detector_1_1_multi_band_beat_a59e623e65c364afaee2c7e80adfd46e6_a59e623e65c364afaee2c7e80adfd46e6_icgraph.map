@@ -1,0 +1,5 @@
+<map id="fl::audio::detector::MultiBandBeat::isMultiBandBeat" name="fl::audio::detector::MultiBandBeat::isMultiBandBeat">
+<area shape="rect" id="Node000001" title="Check if multiple bands triggered simultaneously (strong beat)" alt="" coords="295,5,536,45"/>
+<area shape="rect" id="Node000002" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_ad89f61c68cafd22344ecbfb03e0cd899.html#ad89f61c68cafd22344ecbfb03e0cd899" title=" " alt="" coords="5,5,247,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="281,28,247,28,247,23,281,23"/>
+</map>

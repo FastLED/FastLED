@@ -1,0 +1,13 @@
+<map id="fl::wave3Transpose_16" name="fl::wave3Transpose_16">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,42,175,67"/>
+<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail_afa4a607fdb31c744529cfe7156160684.html#afa4a607fdb31c744529cfe7156160684" title="Helper: Convert byte to Wave3Byte using nibble LUT (internal use only)" alt="" coords="241,5,424,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="175,42,227,35,228,41,175,47"/>
+<area shape="rect" id="Node000003" href="$df/d9e/namespacefl_1_1detail_af8a68cecaea535bce87ed6b98d58b149.html#af8a68cecaea535bce87ed6b98d58b149" title="Transpose 16 lanes of Wave3Byte data into interleaved format." alt="" coords="223,70,443,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="175,62,209,66,209,71,175,67"/>
+<area shape="rect" id="Node000004" href="$df/d9e/namespacefl_1_1detail_a3f580da2244b0dfd2cfffed1e7874706.html#a3f580da2244b0dfd2cfffed1e7874706" title="Transpose one symbol of 16 lanes (16 input bytes) into 16 output bytes: 8 pulses × 2 bytes,..." alt="" coords="491,63,655,103"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="443,80,477,80,477,85,443,85"/>
+<area shape="rect" id="Node000005" href="$df/d9e/namespacefl_1_1detail_a85251852414197ed32d0dc54ab229984.html#a85251852414197ed32d0dc54ab229984" title="Pulses 7,6,5,4 of v (byte j = bit (7&#45;j)). Depends only on the high nibble." alt="" coords="703,45,839,70"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="655,69,689,65,689,70,655,75"/>
+<area shape="rect" id="Node000006" href="$df/d9e/namespacefl_1_1detail_ada26c9ef5cbebfb232811412781ecec9.html#ada26c9ef5cbebfb232811412781ecec9" title="Pulses 3,2,1,0 of v (byte j = bit (3&#45;j)). Depends only on the low nibble." alt="" coords="703,94,839,119"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="655,90,689,94,689,99,655,95"/>
+</map>

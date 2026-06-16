@@ -1,0 +1,12 @@
+<map id="fl::audio::detector::Percussion::Percussion" name="fl::audio::detector::Percussion::Percussion">
+<area shape="rect" id="Node000001" title=" " alt="" coords="480,49,659,89"/>
+<area shape="rect" id="Node000002" href="$d7/d21/classfl_1_1audio_1_1detector_1_1_percussion_a0bd6b7b63294ae1789db0eee84da6dab.html#a0bd6b7b63294ae1789db0eee84da6dab" title=" " alt="" coords="243,5,432,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="466,53,432,46,433,41,467,47"/>
+<area shape="rect" id="Node000003" href="$d7/d21/classfl_1_1audio_1_1detector_1_1_percussion_add9d8945f137df79c1ffb62f57589722.html#add9d8945f137df79c1ffb62f57589722" title=" " alt="" coords="261,93,414,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="467,91,415,101,414,96,466,86"/>
+<area shape="poly" id="edge5_Node000003_Node000003" title=" " alt="" coords="377,82,363,75,337,72,315,74,302,79,297,85,299,92,294,94,291,84,298,74,314,69,337,67,364,70,379,77"/>
+<area shape="rect" id="Node000004" href="$d7/d21/classfl_1_1audio_1_1detector_1_1_percussion_ad8d078eee7a2ba456483e35ef51ed4be.html#ad8d078eee7a2ba456483e35ef51ed4be" title=" " alt="" coords="5,61,195,101"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="247,104,194,97,195,91,247,99"/>
+<area shape="rect" id="Node000005" href="$d7/d21/classfl_1_1audio_1_1detector_1_1_percussion_a41d7c3afb8c847a7355f09b6cf376b19.html#a41d7c3afb8c847a7355f09b6cf376b19" title=" " alt="" coords="23,125,177,165"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="247,128,177,138,176,132,247,123"/>
+</map>

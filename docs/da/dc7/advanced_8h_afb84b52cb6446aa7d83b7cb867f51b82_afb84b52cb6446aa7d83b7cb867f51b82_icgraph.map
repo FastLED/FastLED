@@ -1,0 +1,12 @@
+<map id="beatSensitivity" name="beatSensitivity">
+<area shape="rect" id="Node000001" title=" " alt="" coords="515,47,635,72"/>
+<area shape="rect" id="Node000002" href="$da/dc7/advanced_8h_a15110eff35f1483bd9926d89e8956c7c.html#a15110eff35f1483bd9926d89e8956c7c" title=" " alt="" coords="373,47,467,72"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="501,62,467,62,467,57,501,57"/>
+<area shape="rect" id="Node000003" href="$da/dc7/advanced_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="232,5,283,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="359,47,282,27,284,22,361,42"/>
+<area shape="rect" id="Node000004" href="$da/d5e/classfl_1_1audio_1_1detector_1_1_beat_a943a7abeb7b46afb2465277b63ec3dca.html#a943a7abeb7b46afb2465277b63ec3dca" title=" " alt="" coords="189,79,325,119"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="361,77,326,85,325,80,359,71"/>
+<area shape="poly" id="edge5_Node000004_Node000004" title=" " alt="" coords="284,67,275,61,257,58,242,60,233,64,230,71,231,78,226,79,224,70,229,61,240,55,257,53,277,56,287,63"/>
+<area shape="rect" id="Node000005" href="$da/d5e/classfl_1_1audio_1_1detector_1_1_beat_a8015bb04d312d1e0b4efba50c7810400.html#a8015bb04d312d1e0b4efba50c7810400" title=" " alt="" coords="5,79,141,119"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="175,102,141,102,141,97,175,97"/>
+</map>

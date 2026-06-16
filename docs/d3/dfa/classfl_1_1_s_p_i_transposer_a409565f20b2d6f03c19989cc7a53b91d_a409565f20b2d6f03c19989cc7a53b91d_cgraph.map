@@ -1,0 +1,20 @@
+<map id="fl::SPITransposer::transpose4" name="fl::SPITransposer::transpose4">
+<area shape="rect" id="Node000001" title="Transpose 4 lanes of data into interleaved quad&#45;SPI format." alt="" coords="5,129,141,169"/>
+<area shape="rect" id="Node000002" href="$d2/d24/classfl_1_1vector_a14c21203a1f583636c5ef6fdb9a58d4b.html#a14c21203a1f583636c5ef6fdb9a58d4b" title=" " alt="" coords="215,5,331,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,127,134,87,188,48,217,33,220,38,191,52,137,92,96,131"/>
+<area shape="rect" id="Node000003" href="$dd/dd8/classfl_1_1_optional_a1c6d194efbcfda4ab12e09305999b667.html#a1c6d194efbcfda4ab12e09305999b667" title=" " alt="" coords="404,81,547,107"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="106,126,144,107,189,91,240,83,293,79,390,82,390,87,293,85,241,88,190,97,146,111,108,131"/>
+<area shape="rect" id="Node000004" href="$d3/dfa/classfl_1_1_s_p_i_transposer_ab6ee4d2f7057e6599a6bc4dd730d834a.html#ab6ee4d2f7057e6599a6bc4dd730d834a" title="Get byte from lane at given index, handling padding automatically." alt="" coords="205,157,341,197"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="142,156,191,163,191,168,141,161"/>
+<area shape="rect" id="Node000007" href="$dd/dd8/classfl_1_1_optional_ad5f53bf55f59f43884a71b107dee14c7.html#ad5f53bf55f59f43884a71b107dee14c7" title=" " alt="" coords="189,107,356,132"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="141,136,175,131,176,136,142,141"/>
+<area shape="rect" id="Node000008" href="$d2/d24/classfl_1_1vector_af937c1c325072247a23862ef0adbc51b.html#af937c1c325072247a23862ef0adbc51b" title=" " alt="" coords="209,221,336,247"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="110,166,190,206,213,215,211,220,188,211,108,171"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_ae7e92d1208a1d82fe582f97af296cbc8.html#ae7e92d1208a1d82fe582f97af296cbc8" title="Low&#45;level bit&#45;interleaving primitive for 4 lanes (ISR&#45;safe)" alt="" coords="200,271,345,311"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="93,167,135,212,191,257,201,263,198,268,188,262,131,216,89,171"/>
+<area shape="rect" id="Node000005" href="$d0/d08/classfl_1_1span_a1e467b483bfd364c93ae966e5bd4e427.html#a1e467b483bfd364c93ae966e5bd4e427" title=" " alt="" coords="416,160,535,185"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="341,173,402,171,402,177,341,178"/>
+<area shape="rect" id="Node000006" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="424,209,527,235"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="342,189,411,205,410,210,341,194"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="356,106,390,102,391,107,357,112"/>
+</map>

@@ -8,9 +8,17 @@ digraph "plotSoftDot"
   rankdir="LR";
   Node1 [id="Node000001",label="plotSoftDot",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="plotDot",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/db7/examples_2_luminova_2luminova_8h_a51ece01deb8ffb2d71d6487c4171e369.html#a51ece01deb8ffb2d71d6487c4171e369",tooltip=" "];
+  Node2 [id="Node000002",label="fl::ceilf",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a680a4050712ddcb48b6107ce5294a82f.html#a680a4050712ddcb48b6107ce5294a82f",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="scale8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555",tooltip="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..."];
-  Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::XY",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aad41032db4d607eb9981dd356975ed71.html#aad41032db4d607eb9981dd356975ed71",tooltip=" "];
+  Node3 [id="Node000003",label="fl::ceil_impl_float",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a382370a0b4fd2e828c944855fb904166.html#a382370a0b4fd2e828c944855fb904166",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="plotDot",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/db7/examples_2_luminova_2luminova_8h_a51ece01deb8ffb2d71d6487c4171e369.html#a51ece01deb8ffb2d71d6487c4171e369",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::XY",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a8346d03be07d25e0a78bc006d13505f4.html#a8346d03be07d25e0a78bc006d13505f4",tooltip=" "];
+  Node1 -> Node6 [id="edge5_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::roundf",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a2027cd83a5ffcdf8fefb4aeefa139246.html#a2027cd83a5ffcdf8fefb4aeefa139246",tooltip=" "];
+  Node6 -> Node7 [id="edge6_Node000006_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::round_impl_float",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a7dfae6bfef2fcb693ecbec4e12b3fb0b.html#a7dfae6bfef2fcb693ecbec4e12b3fb0b",tooltip=" "];
+  Node7 -> Node8 [id="edge7_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::lround_impl_float",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a9843bb18fb38342c45b6202d4a439322.html#a9843bb18fb38342c45b6202d4a439322",tooltip=" "];
 }

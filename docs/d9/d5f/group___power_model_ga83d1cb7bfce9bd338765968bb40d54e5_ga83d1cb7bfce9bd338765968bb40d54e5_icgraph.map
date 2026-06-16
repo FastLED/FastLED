@@ -1,0 +1,17 @@
+<map id="set_power_model" name="set_power_model">
+<area shape="rect" id="Node000001" title="Set custom RGB LED power consumption model." alt="" coords="509,129,647,155"/>
+<area shape="rect" id="Node000002" href="$d9/d5f/group___power_model_ga759a23d8dec6a2de0d5b89095014d4e6.html#ga759a23d8dec6a2de0d5b89095014d4e6" title="Set custom RGBW LED power consumption model." alt="" coords="287,5,425,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="555,121,513,81,488,61,460,44,424,31,426,26,462,40,491,57,517,77,558,117"/>
+<area shape="rect" id="Node000003" href="$d9/d5f/group___power_model_gad42f079a40ba5d5a0db04e14b645e49e.html#gad42f079a40ba5d5a0db04e14b645e49e" title="Set custom RGBWW LED power consumption model." alt="" coords="287,55,425,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="538,126,460,94,420,83,422,77,462,89,540,121"/>
+<area shape="rect" id="Node000004" href="$d9/d5f/group___power_model_gad213f217079d1c8e2453b74bd3aec6de.html#gad213f217079d1c8e2453b74bd3aec6de" title="Set a non&#45;linear brightness&#45;to&#45;power response exponent." alt="" coords="251,104,461,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="495,135,461,131,462,126,496,130"/>
+<area shape="rect" id="Node000006" href="$dd/dbb/class_c_fast_l_e_d_a5d64d016a6852b44aa79e158545a40aa.html#a5d64d016a6852b44aa79e158545a40aa" title=" " alt="" coords="261,153,451,179"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="496,154,452,158,451,153,495,148"/>
+<area shape="rect" id="Node000007" href="$dd/dbb/class_c_fast_l_e_d_aea009a14e51158999765c111c514fa8c.html#aea009a14e51158999765c111c514fa8c" title=" " alt="" coords="261,203,451,228"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="538,163,462,193,417,205,416,200,460,187,536,158"/>
+<area shape="rect" id="Node000008" href="$dd/dbb/class_c_fast_l_e_d_a261a8d22d7221b379723a83f4c343f92.html#a261a8d22d7221b379723a83f4c343f92" title=" " alt="" coords="261,252,451,277"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="558,167,516,205,463,242,430,254,428,249,460,237,513,201,554,163"/>
+<area shape="rect" id="Node000005" href="$dd/dbb/class_c_fast_l_e_d_a7b1664e5e57fd2e2141ef00cc28a1a1f.html#a7b1664e5e57fd2e2141ef00cc28a1a1f" title="Set a non&#45;linear brightness&#45;to&#45;power response exponent." alt="" coords="5,97,203,137"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="237,119,203,119,203,114,237,114"/>
+</map>

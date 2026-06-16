@@ -1,0 +1,5 @@
+<map id="CFastLED::onEndShowLeds" name="CFastLED::onEndShowLeds">
+<area shape="rect" id="Node000001" title="Manually trigger the end show LEDs event." alt="" coords="177,5,372,31"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_a93471b4babe96100496e8e25062cba3f.html#a93471b4babe96100496e8e25062cba3f" title="Update all our controllers with the current led colors, using the passed in brightness." alt="" coords="5,5,129,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="163,21,129,21,129,15,163,15"/>
+</map>

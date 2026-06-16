@@ -1,0 +1,23 @@
+<map id="fl/gfx/downscale.h" name="fl/gfx/downscale.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="363,5,503,31"/>
+<area shape="rect" id="Node000002" href="$db/d49/_audio_2simple_2simple_8h.html" title=" " alt="" coords="5,79,205,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="377,37,206,81,205,76,375,32"/>
+<area shape="rect" id="Node000003" href="$d6/d1a/examples_2_downscale_2downscale_8h.html" title=" " alt="" coords="230,79,450,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="412,42,370,81,367,77,409,38"/>
+<area shape="rect" id="Node000005" href="$d3/dd8/crgb_8cpp_8hpp.html" title=" " alt="" coords="474,93,579,119"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="458,38,515,91,512,95,454,42"/>
+<area shape="rect" id="Node000008" href="$dd/d9e/downscale_8cpp_8hpp.html" title=" " alt="" coords="669,93,851,119"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="491,32,717,91,716,96,490,37"/>
+<area shape="rect" id="Node000004" href="$dc/dfb/_downscale_8ino.html" title=" " alt="" coords="191,181,411,236"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="327,147,314,182,309,180,322,145"/>
+<area shape="rect" id="Node000006" href="$d7/dd5/__build_8cpp_8hpp.html" title=" " alt="" coords="435,196,551,221"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="521,133,500,197,495,195,516,131"/>
+<area shape="rect" id="Node000007" href="$dd/de2/src_8cpp.html" title="Unity build: flat includes from src/ root directory." alt="" coords="575,196,691,221"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="551,126,623,194,619,198,547,130"/>
+<area shape="rect" id="Node000009" href="$d5/d88/fl_2gfx_2__build_8cpp_8hpp.html" title="Unity build for fl/gfx/ — graphics types, primitives, and simulators." alt="" coords="715,196,869,221"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="770,131,791,195,786,197,765,133"/>
+<area shape="rect" id="Node000010" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="648,284,776,309"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="774,233,725,285,721,282,770,230"/>
+<area shape="rect" id="Node000011" href="$db/d06/fl_8gfx_09_8cpp.html" title="Unity build: recursive includes from src/fl/gfx/." alt="" coords="800,284,941,309"/>
+<area shape="poly" id="edge10_Node000009_Node000011" title=" " alt="" coords="814,230,862,282,858,285,810,233"/>
+</map>

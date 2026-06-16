@@ -8,5 +8,5 @@ digraph "fl::UIDropdownImpl::UIDropdownImpl"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::UIDropdownImpl\l::UIDropdownImpl",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::HeapVector::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector_a9fb49716a8ac1d675acaf8405905d4b4.html#a9fb49716a8ac1d675acaf8405905d4b4",tooltip=" "];
+  Node2 [id="Node000002",label="fl::vector_basic::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c",tooltip=" "];
 }

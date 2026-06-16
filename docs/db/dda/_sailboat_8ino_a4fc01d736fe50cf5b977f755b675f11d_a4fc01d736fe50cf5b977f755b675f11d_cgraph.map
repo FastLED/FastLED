@@ -1,0 +1,10 @@
+<map id="setup" name="setup">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,64,80"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350" title=" " alt="" coords="153,5,231,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="63,55,111,39,139,31,140,36,113,45,65,60"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a6a0e89a1b4749cf4fbffeae60a312496.html#a6a0e89a1b4749cf4fbffeae60a312496" title="Convert compile&#45;time CHIPSET type to runtime timing config." alt="" coords="112,55,272,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="64,65,98,65,98,70,64,70"/>
+<area shape="rect" id="Node000004" href="$df/df5/structfl_1_1_channel_config_a7c2bac8681489e939059e9d59bbc6ece.html#a7c2bac8681489e939059e9d59bbc6ece" title="Set screen map for JS canvas visualization." alt="" coords="122,129,262,169"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="61,78,142,120,139,125,59,82"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="162,129,160,119,165,110,176,104,192,102,211,105,221,112,217,117,208,110,192,107,178,109,169,114,166,120,167,128"/>
+</map>

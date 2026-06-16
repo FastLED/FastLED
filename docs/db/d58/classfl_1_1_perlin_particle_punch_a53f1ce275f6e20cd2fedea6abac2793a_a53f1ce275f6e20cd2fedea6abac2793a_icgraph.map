@@ -1,0 +1,7 @@
+<map id="fl::PerlinParticlePunch::tryAllocateMeteor" name="fl::PerlinParticlePunch::tryAllocateMeteor">
+<area shape="rect" id="Node000001" title=" " alt="" coords="429,5,592,45"/>
+<area shape="rect" id="Node000002" href="$db/d58/classfl_1_1_perlin_particle_punch_a11b45f2bbe670ac10c7dd31204eb600d.html#a11b45f2bbe670ac10c7dd31204eb600d" title="Spawn a BEAT meteor at position 0, traveling toward end of strip." alt="" coords="219,5,381,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="415,28,382,28,382,23,415,23"/>
+<area shape="rect" id="Node000003" href="$db/d58/classfl_1_1_perlin_particle_punch_aae158d36e0b12c32e8a9dacfb065aaaa.html#aae158d36e0b12c32e8a9dacfb065aaaa" title=" " alt="" coords="5,5,171,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="205,28,171,28,171,23,205,23"/>
+</map>

@@ -1,0 +1,43 @@
+<map id="fl::audio::Detector" name="fl::audio::Detector">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,621,144,646"/>
+<area shape="rect" id="Node000002" href="$d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat.html" title="Detects backbeats (beats 2 and 4 in 4/4 time) in music." alt="" coords="200,5,336,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="75,607,87,491,109,327,125,242,143,165,165,101,190,56,203,43,207,47,194,59,170,103,148,166,130,243,114,327,92,491,81,607"/>
+<area shape="rect" id="Node000003" href="$da/d5e/classfl_1_1audio_1_1detector_1_1_beat.html" title=" " alt="" coords="200,69,336,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="76,607,89,502,113,357,128,283,146,215,167,159,190,120,204,107,207,111,194,123,172,161,152,217,134,284,118,358,95,503,81,607"/>
+<area shape="rect" id="Node000004" href="$db/d5d/classfl_1_1audio_1_1detector_1_1_buildup_detector.html" title=" " alt="" coords="200,133,336,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="73,607,75,527,90,415,104,354,125,294,153,236,190,184,204,171,208,175,194,187,158,238,130,296,109,356,95,416,80,528,78,607"/>
+<area shape="rect" id="Node000005" href="$d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector.html" title=" " alt="" coords="200,197,336,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="74,607,80,537,97,442,112,391,132,340,158,291,190,248,204,235,208,240,194,251,162,294,137,342,117,392,102,443,85,538,79,607"/>
+<area shape="rect" id="Node000006" href="$df/d03/classfl_1_1audio_1_1detector_1_1_downbeat.html" title="Detects downbeats (first beat of each measure) in music." alt="" coords="200,261,336,301"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="76,607,85,547,105,469,120,427,139,386,162,347,190,311,205,299,208,304,194,315,166,350,143,388,125,429,110,471,90,548,81,607"/>
+<area shape="rect" id="Node000007" href="$d9/d17/classfl_1_1audio_1_1detector_1_1_drop_detector.html" title=" " alt="" coords="200,325,336,365"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="79,606,91,558,113,497,145,433,166,402,190,375,206,363,209,368,194,379,170,406,150,435,118,499,96,560,84,608"/>
+<area shape="rect" id="Node000008" href="$d1/d44/classfl_1_1audio_1_1detector_1_1_dynamics_analyzer.html" title=" " alt="" coords="192,389,344,429"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="83,607,99,570,122,526,153,480,190,439,208,427,211,432,194,443,157,483,127,528,104,572,88,609"/>
+<area shape="rect" id="Node000009" href="$d2/db4/classfl_1_1audio_1_1detector_1_1_energy_analyzer.html" title=" " alt="" coords="200,453,336,493"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="91,608,133,556,160,528,190,503,211,491,214,496,194,508,164,532,137,560,95,611"/>
+<area shape="rect" id="Node000010" href="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector.html" title="WLED&#45;style equalizer detector that provides a 16&#45;bin frequency spectrum normalized to 0...." alt="" coords="195,517,341,557"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="108,611,191,567,217,555,219,560,193,572,111,616"/>
+<area shape="rect" id="Node000011" href="$d4/d0a/classfl_1_1audio_1_1detector_1_1_frequency_bands.html" title=" " alt="" coords="199,581,337,621"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="157,617,198,610,199,615,158,622"/>
+<area shape="rect" id="Node000012" href="$d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector.html" title=" " alt="" coords="200,645,336,685"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="158,644,200,651,199,657,157,650"/>
+<area shape="rect" id="Node000013" href="$df/df1/classfl_1_1audio_1_1detector_1_1_mood_analyzer.html" title=" " alt="" coords="200,709,336,749"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="111,650,193,695,219,707,217,712,191,700,108,655"/>
+<area shape="rect" id="Node000014" href="$d9/d77/classfl_1_1audio_1_1detector_1_1_note.html" title="Note &#45; Musical note detection with MIDI output." alt="" coords="200,773,336,813"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="95,656,137,707,164,735,194,759,214,771,211,776,190,764,160,739,133,711,91,659"/>
+<area shape="rect" id="Node000015" href="$d7/d21/classfl_1_1audio_1_1detector_1_1_percussion.html" title=" " alt="" coords="200,837,336,877"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="88,658,104,694,127,738,157,784,194,823,211,835,208,839,190,827,153,787,122,741,99,697,83,660"/>
+<area shape="rect" id="Node000016" href="$db/d89/classfl_1_1audio_1_1detector_1_1_pitch.html" title="Pitch &#45; Continuous pitch tracking using autocorrelation." alt="" coords="200,901,336,941"/>
+<area shape="poly" id="edge15_Node000001_Node000016" title=" " alt="" coords="84,659,96,707,118,768,150,831,170,861,194,887,209,899,206,903,190,891,166,864,145,834,113,770,91,708,79,660"/>
+<area shape="rect" id="Node000017" href="$d2/d67/classfl_1_1audio_1_1detector_1_1_silence.html" title=" " alt="" coords="200,965,336,1005"/>
+<area shape="poly" id="edge16_Node000001_Node000017" title=" " alt="" coords="81,659,90,718,110,796,125,837,143,878,166,917,194,951,208,963,205,967,190,955,162,920,139,881,120,839,105,797,85,719,76,660"/>
+<area shape="rect" id="Node000018" href="$d6/df8/classfl_1_1audio_1_1detector_1_1_tempo_analyzer.html" title=" " alt="" coords="200,1029,336,1069"/>
+<area shape="poly" id="edge17_Node000001_Node000018" title=" " alt="" coords="79,660,85,729,102,823,117,874,137,925,162,973,194,1016,208,1027,204,1031,190,1019,158,976,132,927,112,876,97,825,80,730,74,660"/>
+<area shape="rect" id="Node000019" href="$d3/da6/classfl_1_1audio_1_1detector_1_1_transient.html" title="Transient &#45; Detects sharp attack transients in audio." alt="" coords="200,1093,336,1133"/>
+<area shape="poly" id="edge18_Node000001_Node000019" title=" " alt="" coords="78,660,80,739,95,850,109,911,130,971,158,1028,194,1080,208,1091,204,1095,190,1083,153,1031,125,973,104,912,90,851,75,739,73,660"/>
+<area shape="rect" id="Node000020" href="$df/d1a/classfl_1_1audio_1_1detector_1_1_vibe.html" title=" " alt="" coords="200,1157,336,1197"/>
+<area shape="poly" id="edge19_Node000001_Node000020" title=" " alt="" coords="81,659,95,764,118,909,134,982,152,1050,172,1105,194,1144,207,1155,204,1159,190,1147,167,1108,146,1051,128,983,113,909,89,765,76,660"/>
+<area shape="rect" id="Node000021" href="$d6/d31/classfl_1_1audio_1_1detector_1_1_vocal.html" title=" " alt="" coords="200,1221,336,1261"/>
+<area shape="poly" id="edge20_Node000001_Node000021" title=" " alt="" coords="81,659,92,775,114,939,130,1023,148,1100,170,1164,194,1208,207,1219,203,1223,190,1211,165,1166,143,1102,125,1024,109,940,87,776,75,660"/>
+</map>

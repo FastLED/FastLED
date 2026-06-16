@@ -1,0 +1,11 @@
+<map id="fl::audio::detector::KeyDetector::KeyDetector" name="fl::audio::detector::KeyDetector::KeyDetector">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,37,204,77"/>
+<area shape="rect" id="Node000002" href="$d9/dfb/classfl_1_1audio_1_1detector_1_1_key_detector_ae9f7651d384d4060c12a6a9086e93524.html#ae9f7651d384d4060c12a6a9086e93524" title=" " alt="" coords="252,29,467,84"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,63,238,63,238,68,204,68"/>
+<area shape="poly" id="edge2_Node000002_Node000001" title=" " alt="" coords="252,50,218,50,218,45,252,45"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="322,29,322,19,329,10,341,5,359,3,381,6,393,14,390,18,379,11,359,8,343,10,332,15,327,21,327,29"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a0b5da884257d0f4003ead08f27915a2b.html#a0b5da884257d0f4003ead08f27915a2b" title=" " alt="" coords="515,44,583,69"/>
+<area shape="poly" id="edge4_Node000002_Node000003" title=" " alt="" coords="467,54,501,54,501,59,467,59"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aaa77b1626998d6dc47d0e3245b1a3e4a.html#aaa77b1626998d6dc47d0e3245b1a3e4a" title=" " alt="" coords="631,44,765,69"/>
+<area shape="poly" id="edge5_Node000003_Node000004" title=" " alt="" coords="583,54,617,54,617,59,583,59"/>
+</map>

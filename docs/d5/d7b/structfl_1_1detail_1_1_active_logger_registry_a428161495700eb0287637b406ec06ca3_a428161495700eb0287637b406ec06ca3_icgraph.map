@@ -1,0 +1,16 @@
+<map id="fl::detail::ActiveLoggerRegistry::forEach" name="fl::detail::ActiveLoggerRegistry::forEach">
+<area shape="rect" id="Node000001" title=" " alt="" coords="845,79,1013,119"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_abe5657de2c328256b3c15a1388b793aa.html#abe5657de2c328256b3c15a1388b793aa" title=" " alt="" coords="611,57,769,82"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="831,89,769,82,769,76,832,84"/>
+<area shape="rect" id="Node000003" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_ab5cd1a92bcf542222607179a5363c2e0.html#ab5cd1a92bcf542222607179a5363c2e0" title="Service all registered loggers (called by task)" alt="" coords="583,107,797,147"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="832,113,798,117,797,111,831,107"/>
+<area shape="rect" id="Node000004" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a3bff7aaa6e1158fbbee95055b3458285.html#a3bff7aaa6e1158fbbee95055b3458285" title=" " alt="" coords="316,73,535,113"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="569,114,534,110,535,104,569,109"/>
+<area shape="rect" id="Node000006" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a90e57dbaf9bc274b5302c859efd53af3.html#a90e57dbaf9bc274b5302c859efd53af3" title=" " alt="" coords="5,134,268,189"/>
+<area shape="poly" id="edge7_Node000003_Node000006" title=" " alt="" coords="569,137,268,156,268,150,569,132"/>
+<area shape="rect" id="Node000005" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_ae03d5fbeb6d8557bd7c4c5fabfe77b06.html#ae03d5fbeb6d8557bd7c4c5fabfe77b06" title=" " alt="" coords="21,5,252,45"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="326,73,222,48,223,43,327,68"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="327,119,254,136,253,131,326,114"/>
+<area shape="rect" id="Node000007" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_acc200cb8837f82379821217fb4a6bc29.html#acc200cb8837f82379821217fb4a6bc29" title=" " alt="" coords="29,69,244,109"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="302,94,244,93,244,88,302,89"/>
+</map>

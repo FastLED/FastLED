@@ -1,0 +1,12 @@
+<map id="fl/audio/frequency_bin_mapper.h" name="fl/audio/frequency_bin_mapper.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="155,5,294,45"/>
+<area shape="rect" id="Node000002" href="$dc/da8/src_2fl_2audio_2audio__reactive_8h.html" title=" " alt="" coords="69,93,252,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="203,58,172,95,168,91,199,54"/>
+<area shape="rect" id="Node000007" href="$df/d6c/frequency__bin__mapper_8cpp_8hpp.html" title="Implementation of FrequencyBinMapper for fft::FFT bin to frequency channel mapping." alt="" coords="254,167,414,207"/>
+<area shape="poly" id="edge4_Node000001_Node000007" title=" " alt="" coords="247,55,323,165,319,168,243,58"/>
+<area shape="rect" id="Node000003" href="$d5/dc5/audio__reactive_8cpp_8hpp.html" title=" " alt="" coords="5,174,231,199"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="150,132,127,175,122,172,146,129"/>
+<area shape="rect" id="Node000004" href="$d1/d21/fl_2audio_2__build_8cpp_8hpp.html" title="Unity build header for fl/audio/ directory." alt="" coords="142,255,310,280"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="147,205,212,252,208,257,143,210"/>
+<area shape="poly" id="edge5_Node000007_Node000004" title=" " alt="" coords="298,217,244,256,241,252,295,213"/>
+</map>

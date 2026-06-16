@@ -1,0 +1,9 @@
+<map id="fl::gfx::blur1d" name="fl::gfx::blur1d">
+<area shape="rect" id="Node000001" title="Legacy raw&#45;pointer version of blur1d." alt="" coords="5,5,113,31"/>
+<area shape="rect" id="Node000002" href="$d5/d3d/group___color_blurs_ga49f52d9c240dbe519dcdeb778269b8d7.html#ga49f52d9c240dbe519dcdeb778269b8d7" title="One&#45;dimensional blur filter (span version)." alt="" coords="161,5,269,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,15,147,15,147,21,113,21"/>
+<area shape="rect" id="Node000003" href="$da/dd6/structfl_1_1_c_r_g_b_aa272170bea8120f101f27ebd2c323b55.html#aa272170bea8120f101f27ebd2c323b55" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="317,5,451,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="270,15,303,15,303,21,270,21"/>
+<area shape="rect" id="Node000004" href="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" title="Default constructor." alt="" coords="499,5,619,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="451,15,485,15,485,21,451,21"/>
+</map>

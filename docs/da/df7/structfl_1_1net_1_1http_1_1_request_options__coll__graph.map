@@ -1,0 +1,18 @@
+<map id="fl::net::http::RequestOptions" name="fl::net::http::RequestOptions">
+<area shape="rect" id="Node000001" title="Request options (matches JavaScript fetch RequestInit)" alt="" coords="1256,71,1460,96"/>
+<area shape="rect" id="Node000002" href="$d2/db2/classfl_1_1string.html" title=" " alt="" coords="1015,35,1090,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1105,51,1256,69,1255,74,1104,56"/>
+<area shape="rect" id="Node000003" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="577,26,743,66"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="757,44,1015,45,1015,50,757,49"/>
+<area shape="rect" id="Node000004" href="$de/d66/classfl_1_1basic__string.html" title="Concrete type&#45;erased string class." alt="" coords="5,10,121,35"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="135,13,318,3,429,4,539,13,593,24,592,29,538,18,429,10,318,9,135,18"/>
+<area shape="rect" id="Node000005" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="193,35,324,60"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="135,29,194,37,193,42,135,34"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="337,45,577,44,577,49,337,50"/>
+<area shape="rect" id="Node000006" href="$de/dd4/classfl_1_1_map_red_black_tree.html" title=" " alt="" coords="955,85,1151,154"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="1164,104,1255,93,1256,98,1165,109"/>
+<area shape="rect" id="Node000007" href="$de/dd4/classfl_1_1_map_red_black_tree.html" title=" " alt="" coords="563,92,757,147"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="771,117,954,117,954,122,771,122"/>
+<area shape="rect" id="Node000008" href="$de/dd4/classfl_1_1_map_red_black_tree.html" title=" " alt="" coords="171,94,347,148"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="360,118,562,117,562,123,360,123"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="fl::audio::detector::MultiBandBeat::configure" name="fl::audio::detector::MultiBandBeat::configure">
+<area shape="rect" id="Node000001" title="Configure the multi&#45;band beat detector." alt="" coords="5,61,200,101"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="55,62,52,52,60,42,77,37,103,35,133,38,149,45,147,50,131,43,103,40,78,42,62,47,57,53,60,60"/>
+<area shape="rect" id="Node000002" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a5e3bab39bf17461edc0caaf9d372f9f7.html#a5e3bab39bf17461edc0caaf9d372f9f7" title=" " alt="" coords="248,29,479,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,67,234,63,235,68,200,72"/>
+<area shape="rect" id="Node000003" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a31a8032e89c171eefef6c456bb331fdd.html#a31a8032e89c171eefef6c456bb331fdd" title="Reset internal state (clear history, reset cooldowns)" alt="" coords="280,93,447,133"/>
+<area shape="poly" id="edge4_Node000001_Node000003" title=" " alt="" coords="200,91,267,99,266,104,200,96"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="315,30,312,20,320,10,337,5,363,3,393,6,410,13,408,18,392,11,363,8,338,10,323,15,318,21,320,28"/>
+</map>

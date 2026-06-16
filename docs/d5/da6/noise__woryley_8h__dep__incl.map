@@ -1,5 +1,11 @@
-<map id="fl/noise_woryley.h" name="fl/noise_woryley.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="13,5,151,31"/>
-<area shape="rect" id="Node000002" href="$da/d13/noise__woryley_8cpp.html" title=" " alt="" coords="5,79,159,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="85,44,85,79,79,79,79,44"/>
+<map id="fl/math/noise/noise_woryley.h" name="fl/math/noise/noise_woryley.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="70,5,217,45"/>
+<area shape="rect" id="Node000002" href="$d7/dd9/fl_2math_2noise_8h.html" title="Umbrella header for pure&#45;numeric noise subsystem." alt="" coords="5,101,124,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,57,77,102,74,98,115,54"/>
+<area shape="rect" id="Node000003" href="$db/dac/noise__woryley_8cpp_8hpp.html" title=" " alt="" coords="149,93,295,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="172,54,207,91,203,95,168,57"/>
+<area shape="rect" id="Node000004" href="$de/d77/fl_2math_2noise_2__build_8cpp_8hpp.html" title="Unity build header for fl/math/noise/ directory." alt="" coords="119,181,325,207"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="225,147,225,181,219,181,219,147"/>
+<area shape="rect" id="Node000005" href="$dc/d5b/fl_2math_2__build_8cpp_8hpp.html" title="Unity build header for fl/math/ directory." alt="" coords="139,255,305,280"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="225,220,225,255,219,255,219,220"/>
 </map>

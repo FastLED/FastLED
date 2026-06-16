@@ -1,0 +1,7 @@
+<map id="fl::asset_detail::lookup_registry" name="fl::asset_detail::lookup_registry">
+<area shape="rect" id="Node000001" title="Look up an asset path in the registry. Returns invalid url() on miss." alt="" coords="377,5,545,45"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a0a4f1a4cca802944a086c97fe689f2a6.html#a0a4f1a4cca802944a086c97fe689f2a6" title="Resolve an asset handle to a URL (or local file path) at runtime." alt="" coords="201,13,329,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="364,28,330,28,330,23,364,23"/>
+<area shape="rect" id="Node000003" href="$d2/d4d/classfl_1_1_u_i_audio_ab43d38f3467f2315c042021c07fabd00.html#ab43d38f3467f2315c042021c07fabd00" title="Asset&#45;handle overload (issue #2284)." alt="" coords="5,13,153,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="188,28,154,28,154,23,188,23"/>
+</map>

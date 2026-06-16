@@ -1,0 +1,19 @@
+<map id="fl::wave8Transpose_8" name="fl::wave8Transpose_8">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,84,167,109"/>
+<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail_a66fa111cf8d1f98b7ecda4f2d97b8d75.html#a66fa111cf8d1f98b7ecda4f2d97b8d75" title="Byte&#45;indexed expansion (#2526): one indexed 8&#45;byte copy." alt="" coords="215,55,432,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="166,84,207,79,207,84,167,89"/>
+<area shape="rect" id="Node000007" href="$df/d9e/namespacefl_1_1detail_a28048c15bb5d847dd9c0e186ac8acfa6.html#a28048c15bb5d847dd9c0e186ac8acfa6" title="Transpose 8 lanes of Wave8Byte data into interleaved format." alt="" coords="217,108,429,133"/>
+<area shape="poly" id="edge5_Node000001_Node000007" title=" " alt="" coords="167,102,204,106,203,111,167,107"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ad2b40cc7124494efca5c352857dabc75.html#ad2b40cc7124494efca5c352857dabc75" title=" " alt="" coords="501,5,615,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="384,52,487,30,488,35,385,57"/>
+<area shape="rect" id="Node000006" href="$d6/d93/namespacefl_1_1isr_ac523cbf336c4932a0edbd894800e1d26.html#ac523cbf336c4932a0edbd894800e1d26" title="ISR&#45;optimized 32&#45;bit block copy for 4&#45;byte aligned memory." alt="" coords="487,55,629,80"/>
+<area shape="poly" id="edge4_Node000002_Node000006" title=" " alt="" coords="432,65,473,65,473,70,432,70"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_ad200a6a214a70194b7c33fd67af6cea4.html#ad200a6a214a70194b7c33fd67af6cea4" title=" " alt="" coords="707,5,797,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="616,15,693,15,693,21,616,21"/>
+<area shape="rect" id="Node000008" href="$df/d9e/namespacefl_1_1detail_a954bb6152db952896e31a856475eed32.html#a954bb6152db952896e31a856475eed32" title="Transpose one symbol of 8 lanes (8 input bytes) into 8 output bytes: 8 pulses × 1 byte (bit L = lane ..." alt="" coords="480,105,636,145"/>
+<area shape="poly" id="edge6_Node000007_Node000008" title=" " alt="" coords="430,120,466,120,466,126,429,125"/>
+<area shape="rect" id="Node000009" href="$df/d9e/namespacefl_1_1detail_a85251852414197ed32d0dc54ab229984.html#a85251852414197ed32d0dc54ab229984" title="Pulses 7,6,5,4 of v (byte j = bit (7&#45;j)). Depends only on the high nibble." alt="" coords="684,87,820,112"/>
+<area shape="poly" id="edge7_Node000008_Node000009" title=" " alt="" coords="636,112,670,107,671,113,636,117"/>
+<area shape="rect" id="Node000010" href="$df/d9e/namespacefl_1_1detail_ada26c9ef5cbebfb232811412781ecec9.html#ada26c9ef5cbebfb232811412781ecec9" title="Pulses 3,2,1,0 of v (byte j = bit (3&#45;j)). Depends only on the low nibble." alt="" coords="684,136,820,161"/>
+<area shape="poly" id="edge8_Node000008_Node000010" title=" " alt="" coords="636,132,671,136,670,141,636,137"/>
+</map>

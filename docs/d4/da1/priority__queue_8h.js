@@ -1,5 +1,7 @@
 var priority__queue_8h =
 [
+    [ "fl::priority_queue_stable< T, Compare >", "d2/dfa/classfl_1_1priority__queue__stable.html", "d2/dfa/classfl_1_1priority__queue__stable" ],
+    [ "fl::priority_queue_stable< T, Compare >::StableElement", "da/dc6/structfl_1_1priority__queue__stable_1_1_stable_element.html", "da/dc6/structfl_1_1priority__queue__stable_1_1_stable_element" ],
     [ "fl::PriorityQueue< T, Compare, VectorT >", "df/d91/classfl_1_1_priority_queue.html", "df/d91/classfl_1_1_priority_queue" ],
     [ "fl::pop_heap", "d4/d36/namespacefl_ab36d8513734d787c843c689b0d383503.html#ab36d8513734d787c843c689b0d383503", null ],
     [ "fl::pop_heap", "d4/d36/namespacefl_ac5b2224bf2c369fde850b50537baa50e.html#ac5b2224bf2c369fde850b50537baa50e", null ],

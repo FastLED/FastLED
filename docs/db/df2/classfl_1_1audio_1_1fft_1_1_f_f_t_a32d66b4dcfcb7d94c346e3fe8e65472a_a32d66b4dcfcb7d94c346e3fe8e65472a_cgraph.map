@@ -1,0 +1,9 @@
+<map id="fl::audio::fft::FFT::size" name="fl::audio::fft::FFT::size">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,37,132,77"/>
+<area shape="rect" id="Node000002" href="$db/df2/classfl_1_1audio_1_1fft_1_1_f_f_t_a989918144d742422cc05fd3dde5f553e.html#a989918144d742422cc05fd3dde5f553e" title=" " alt="" coords="183,5,310,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="132,43,169,36,170,42,133,49"/>
+<area shape="rect" id="Node000004" href="$d2/d98/structfl_1_1audio_1_1fft_1_1_f_f_t_1_1_impl_cache_a6aaa22314e84ddebfb016fa03bb60859.html#a6aaa22314e84ddebfb016fa03bb60859" title=" " alt="" coords="180,69,313,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="133,66,167,72,166,78,132,71"/>
+<area shape="rect" id="Node000003" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="361,13,524,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="310,23,348,23,348,28,310,28"/>
+</map>

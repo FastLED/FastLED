@@ -1,9 +1,13 @@
 var class_a_p_a102_controller =
 [
-    [ "SPI", "d4/d96/class_a_p_a102_controller_a2b4570a245ceb3f22a2b7f5cf0890ca9.html#a2b4570a245ceb3f22a2b7f5cf0890ca9", null ],
-    [ "APA102Controller", "d4/d96/class_a_p_a102_controller_a55ba4d3d380e6ceff155c35facebe94c.html#a55ba4d3d380e6ceff155c35facebe94c", null ],
+    [ "SPI", "d4/d96/class_a_p_a102_controller_a7a60bf2a0734f287bccaa6b5d707f32e.html#a7a60bf2a0734f287bccaa6b5d707f32e", null ],
+    [ "APA102Controller", "d4/d96/class_a_p_a102_controller_a94af805b038caa9fa2cabc6b0910e350.html#a94af805b038caa9fa2cabc6b0910e350", null ],
+    [ "calculateBytes", "d4/d96/class_a_p_a102_controller_a288832d0fa4f35b5054ee2a986cf5d19.html#a288832d0fa4f35b5054ee2a986cf5d19", null ],
     [ "endBoundary", "d4/d96/class_a_p_a102_controller_ac9676b78658ebcab74033429c5c046f8.html#ac9676b78658ebcab74033429c5c046f8", null ],
     [ "getGlobalBrightnessAndScalingFactors", "d4/d96/class_a_p_a102_controller_a7a97b41a9641119f70eaf13369875ab2.html#a7a97b41a9641119f70eaf13369875ab2", null ],
+    [ "getPaddingByte", "d4/d96/class_a_p_a102_controller_ad0d10ba604ea2585c97c4d440ff0e488.html#ad0d10ba604ea2585c97c4d440ff0e488", null ],
+    [ "getPaddingLEDFrame", "d4/d96/class_a_p_a102_controller_a54f134a078076e638a84a3b116a218c8.html#a54f134a078076e638a84a3b116a218c8", null ],
+    [ "getPaddingLEDFrameSize", "d4/d96/class_a_p_a102_controller_a2967c920aa44583da792a6bf3277dd85.html#a2967c920aa44583da792a6bf3277dd85", null ],
     [ "init", "d4/d96/class_a_p_a102_controller_a1e05116946e011a1e8a54de6c9e085e3.html#a1e05116946e011a1e8a54de6c9e085e3", null ],
     [ "showPixels", "d4/d96/class_a_p_a102_controller_a523f76b88c07e29cba6c40bd0cefe4b3.html#a523f76b88c07e29cba6c40bd0cefe4b3", null ],
     [ "showPixelsDefault", "d4/d96/class_a_p_a102_controller_a632117bec47c6b4ba7e3ed1703478a42.html#a632117bec47c6b4ba7e3ed1703478a42", null ],

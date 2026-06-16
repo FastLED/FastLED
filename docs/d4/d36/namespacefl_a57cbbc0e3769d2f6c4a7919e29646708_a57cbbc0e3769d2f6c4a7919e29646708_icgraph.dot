@@ -1,0 +1,67 @@
+digraph "fl::snprintf"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::snprintf",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Snprintf-like formatting function that writes to a buffer."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::net::http::ChunkedWriter\l::chunkOverhead",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d60/classfl_1_1net_1_1http_1_1_chunked_writer_a6cc4b9a8a90698f7d822d2116a24c566.html#a6cc4b9a8a90698f7d822d2116a24c566",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::net::http::HttpStream\lTransport::writeResponse",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a07968575a3145c9accb1a6386674af9b.html#a07968575a3145c9accb1a6386674af9b",tooltip="Write JSON-RPC response to stream."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::net::http::HttpStream\lTransport::isConnected",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8237da9613a0a0c2bffbd8bfddd1f50e.html#a8237da9613a0a0c2bffbd8bfddd1f50e",tooltip="Check if connected."];
+  Node4 -> Node4 [id="edge4_Node000004_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 -> Node8 [id="edge5_Node000004_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::net::http::HttpStream\lTransport::readRequest",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_aab4451d64b6a491f073f941fd22258c0.html#aab4451d64b6a491f073f941fd22258c0",tooltip="Read next JSON-RPC request from stream Non-blocking, returns nullopt if no complete request available..."];
+  Node8 -> Node4 [id="edge6_Node000008_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 -> Node9 [id="edge7_Node000004_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::net::http::HttpStream\lTransport::rpc",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a5268be2c592ea322ab9e4b7612bda7f7.html#a5268be2c592ea322ab9e4b7612bda7f7",tooltip="Send a pre-built JSON-RPC request."];
+  Node4 -> Node10 [id="edge8_Node000004_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::net::http::HttpStream\lTransport::rpcStream",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a31df9c89b9d57c3e277973d4021f8adc.html#a31df9c89b9d57c3e277973d4021f8adc",tooltip="Send a streaming pre-built JSON-RPC request."];
+  Node4 -> Node11 [id="edge9_Node000004_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::net::http::HttpStream\lTransport::sendHeartbeat",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_af403cc0fa1c835f0354267646a1692a4.html#af403cc0fa1c835f0354267646a1692a4",tooltip=" "];
+  Node11 -> Node6 [id="edge10_Node000011_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::net::http::HttpStream\lTransport::update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a57c01766a42aa6cbab3d0c6b7617a5ff.html#a57c01766a42aa6cbab3d0c6b7617a5ff",tooltip="Update connection state (handles reconnection, heartbeat) Call this in main loop."];
+  Node6 -> Node4 [id="edge11_Node000006_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 -> Node6 [id="edge12_Node000004_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 -> Node3 [id="edge13_Node000004_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node9 [id="edge14_Node000003_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node10 [id="edge15_Node000003_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node11 [id="edge16_Node000003_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node12 [id="edge17_Node000001_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::audio::detector\l::Key::getKeyName",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d07/structfl_1_1audio_1_1detector_1_1_key_ae91bea60fcd651a8d82470730bbcf40e.html#ae91bea60fcd651a8d82470730bbcf40e",tooltip=" "];
+  Node1 -> Node13 [id="edge18_Node000001_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="getPort",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/da2/_pintest_8h_a93bbe376a29543413d0db81f2b454521.html#a93bbe376a29543413d0db81f2b454521",tooltip=" "];
+  Node13 -> Node14 [id="edge19_Node000013_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="CheckPin",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/da2/_pintest_8h_af43508c2adeefdc4dfdbffc37e4a1f96.html#af43508c2adeefdc4dfdbffc37e4a1f96",tooltip=" "];
+  Node14 -> Node14 [id="edge20_Node000014_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 -> Node15 [id="edge21_Node000014_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/da2/_pintest_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node1 -> Node16 [id="edge22_Node000001_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::net::http::HttpStream\lTransport::idToString",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_ad2a3e0e5769b4cb21848994dc6006558.html#ad2a3e0e5769b4cb21848994dc6006558",tooltip=" "];
+  Node16 -> Node17 [id="edge23_Node000016_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl::net::http::HttpStream\lTransport::parseChunkedMessages",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_abcd0cfab5c8828fed71b4eb662761dc4.html#abcd0cfab5c8828fed71b4eb662761dc4",tooltip=" "];
+  Node17 -> Node8 [id="edge24_Node000017_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 -> Node6 [id="edge25_Node000017_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 -> Node9 [id="edge26_Node000016_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 -> Node10 [id="edge27_Node000016_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node18 [id="edge28_Node000001_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="fl::third_party::TJpgInstance\lDecoder::initializeDecoder",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dc7/classfl_1_1third__party_1_1_t_jpg_instance_decoder_af06614f62add10d44962535184030739.html#af06614f62add10d44962535184030739",tooltip=" "];
+  Node18 -> Node19 [id="edge29_Node000018_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl::third_party::TJpgInstance\lDecoder::beginDecodingStream",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dc7/classfl_1_1third__party_1_1_t_jpg_instance_decoder_a09b13a08024f1b53a4dabdaf316b3f7a.html#a09b13a08024f1b53a4dabdaf316b3f7a",tooltip=" "];
+  Node1 -> Node20 [id="edge30_Node000001_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="fl::SerialPort::printf",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d67/classfl_1_1_serial_port_a99291ac3b9fb6def2d792313ec597f17.html#a99291ac3b9fb6def2d792313ec597f17",tooltip="Print formatted string to serial output (printf-style)"];
+  Node1 -> Node21 [id="edge31_Node000001_Node000021",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node21 [id="Node000021",label="fl::third_party::TJpgInstance\lDecoder::processChunk",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dc7/classfl_1_1third__party_1_1_t_jpg_instance_decoder_a568ee1d86087e0e735bbb87ec1d39a37.html#a568ee1d86087e0e735bbb87ec1d39a37",tooltip=" "];
+  Node1 -> Node22 [id="edge32_Node000001_Node000022",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node22 [id="Node000022",label="fl::sprintf",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a6de1c828242d21937b5bd24cf3e81cba.html#a6de1c828242d21937b5bd24cf3e81cba",tooltip="Sprintf-like formatting function that writes to a buffer."];
+  Node22 -> Node23 [id="edge33_Node000022_Node000023",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node23 [id="Node000023",label="fl::ScopedTrace::dump",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/da7/classfl_1_1_scoped_trace_ae917094c7db1a836213a05bdbe7df4dc.html#ae917094c7db1a836213a05bdbe7df4dc",tooltip="Dump the current call stack to a string."];
+  Node23 -> Node24 [id="edge34_Node000023_Node000024",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node24 [id="Node000024",label="fl::ScopedTrace::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/da7/classfl_1_1_scoped_trace_a5a704d58dfe6ca123bc931e804e1e29b.html#a5a704d58dfe6ca123bc931e804e1e29b",tooltip=" "];
+  Node1 -> Node25 [id="edge35_Node000001_Node000025",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node25 [id="Node000025",label="fl::net::http::ChunkedWriter\l::writeChunk",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d60/classfl_1_1net_1_1http_1_1_chunked_writer_a11ab01ca9ae9c9d86e532c0084fe57fe.html#a11ab01ca9ae9c9d86e532c0084fe57fe",tooltip=" "];
+}

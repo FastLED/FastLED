@@ -1,8 +1,6 @@
 var pixel__controller_8h =
 [
-    [ "ColorAdjustment", "d5/d4d/pixel__controller_8h.html#d4/d7d/struct_color_adjustment", [
-      [ "premixed", "d5/d4d/pixel__controller_8h.html#a15aa34a8f35d6175f738f2f9a8047727", null ]
-    ] ],
+    [ "ColorAdjustment", "d4/d7d/struct_color_adjustment.html", "d4/d7d/struct_color_adjustment" ],
     [ "PixelController< RGB_ORDER, LANES, MASK >", "d0/dee/struct_pixel_controller.html", "d0/dee/struct_pixel_controller" ],
     [ "MAX_LIKELY_UPDATE_RATE_HZ", "d5/d4d/pixel__controller_8h_a6b62d843cb5aa0c21dceafe56901fd17.html#a6b62d843cb5aa0c21dceafe56901fd17", null ],
     [ "MIN_ACCEPTABLE_DITHER_RATE_HZ", "d5/d4d/pixel__controller_8h_a4e5988c0a9a14761da407256de025abf.html#a4e5988c0a9a14761da407256de025abf", null ],

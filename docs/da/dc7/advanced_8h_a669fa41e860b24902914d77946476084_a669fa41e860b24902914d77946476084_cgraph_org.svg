@@ -20,7 +20,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../da/dc7/advanced_8h_aed2bfc0e3ae7cebbe26e38bda776ed34.html#aed2bfc0e3ae7cebbe26e38bda776ed34" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../da/dc7/advanced_8h_ab0153bf4f3b268c9656bd574579691f7.html#ab0153bf4f3b268c9656bd574579691f7" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="192,-56 131,-56 131,-37 192,-37 192,-56"/>
 <text text-anchor="middle" x="161.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">autoGain</text>
 </a>
@@ -38,7 +38,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_a6072e119545650c71b6544cc0ce9e355.html#a6072e119545650c71b6544cc0ce9e355" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="191,-19 132,-19 132,0 191,0 191,-19"/>
 <text text-anchor="middle" x="161.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::clamp</text>
 </a>

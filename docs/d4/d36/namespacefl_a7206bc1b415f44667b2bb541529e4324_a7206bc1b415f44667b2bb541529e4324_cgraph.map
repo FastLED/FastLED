@@ -1,5 +1,10 @@
 <map id="fl::traverseGridSegment16" name="fl::traverseGridSegment16">
-<area shape="rect" id="Node000001" title="Traverse a grid segment using fixed&#45;point 8.8 arithmetic." alt="" coords="5,5,199,31"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a56e7d4811c99d9aa696932bcb89a50b1.html#a56e7d4811c99d9aa696932bcb89a50b1" title=" " alt="" coords="247,5,309,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="199,15,233,15,233,21,199,21"/>
+<area shape="rect" id="Node000001" title="Traverse a grid segment using fixed&#45;point 8.8 arithmetic." alt="" coords="5,55,199,80"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84" title=" " alt="" coords="302,5,363,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="161,52,288,25,289,30,163,57"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a3cdd970ae1ac06323addaec93ae7d4b9.html#a3cdd970ae1ac06323addaec93ae7d4b9" title=" " alt="" coords="301,55,364,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="199,65,288,65,288,70,199,70"/>
+<area shape="rect" id="Node000004" href="$d6/d7c/structfl_1_1numeric__limits_a31c1687ca77003f233081c372a5c9922.html#a31c1687ca77003f233081c372a5c9922" title=" " alt="" coords="247,128,419,153"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="144,78,280,121,278,126,142,83"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="295,130,287,120,291,110,307,104,333,101,365,105,377,115,374,119,363,110,333,107,308,109,295,114,292,119,299,126"/>
 </map>

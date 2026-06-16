@@ -1,0 +1,39 @@
+<map id="fl::noiseRingCRGB" name="fl::noiseRingCRGB">
+<area shape="rect" id="Node000001" title="Generate CRGB noise for a ring pattern." alt="" coords="5,151,144,176"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ad87db990a26723fa560bc364734ea6cc.html#ad87db990a26723fa560bc364734ea6cc" title=" " alt="" coords="247,33,312,59"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,149,132,113,191,74,233,57,235,61,193,79,135,117,92,153"/>
+<area shape="rect" id="Node000007" href="$d8/df9/group___noise_generation_gaa452e57f154ab8d6d692375dba1ef5cb.html#gaa452e57f154ab8d6d692375dba1ef5cb" title=" " alt="" coords="241,89,318,115"/>
+<area shape="poly" id="edge5_Node000001_Node000007" title=" " alt="" coords="117,148,227,115,228,120,119,153"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_a16b959c0a6717214a91e88287d5aab08.html#a16b959c0a6717214a91e88287d5aab08" title="Rescale raw inoise16() output to full 16&#45;bit range [0, 65535] Curries in the global NOISE16_EXTENT_MI..." alt="" coords="192,151,367,176"/>
+<area shape="poly" id="edge8_Node000001_Node000010" title=" " alt="" coords="144,161,178,161,178,166,144,166"/>
+<area shape="rect" id="Node000014" href="$d4/d36/namespacefl_a4ba2744fe96375793e6f7a98b188d343.html#a4ba2744fe96375793e6f7a98b188d343" title=" " alt="" coords="248,200,311,225"/>
+<area shape="poly" id="edge12_Node000001_Node000014" title=" " alt="" coords="129,173,235,199,234,205,127,179"/>
+<area shape="rect" id="Node000016" href="$d4/d36/namespacefl_a2bccb5decc8613e4b6e232e0a881578f.html#a2bccb5decc8613e4b6e232e0a881578f" title="Alias for millis64() &#45; returns 64&#45;bit millisecond time." alt="" coords="245,273,313,299"/>
+<area shape="poly" id="edge15_Node000001_Node000016" title=" " alt="" coords="96,174,193,236,244,264,241,269,191,240,94,178"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a82dc97b9808ee5c39eb57f649d20a2fd.html#a82dc97b9808ee5c39eb57f649d20a2fd" title=" " alt="" coords="436,9,568,35"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="312,40,422,28,422,33,312,45"/>
+<area shape="rect" id="Node000004" href="$df/d9e/namespacefl_1_1detail_ab42e702a90f152dbad7d35ea9eab976a.html#ab42e702a90f152dbad7d35ea9eab976a" title=" " alt="" coords="637,5,800,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="568,18,624,17,624,22,568,23"/>
+<area shape="rect" id="Node000005" href="$df/d9e/namespacefl_1_1detail_a525aa6aacdb5d3d48ebe21adb14da430.html#a525aa6aacdb5d3d48ebe21adb14da430" title=" " alt="" coords="848,105,1008,131"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="770,28,801,40,854,67,899,95,896,100,851,72,799,44,768,33"/>
+<area shape="rect" id="Node000008" href="$d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59" title=" " alt="" coords="448,73,556,99"/>
+<area shape="poly" id="edge6_Node000007_Node000008" title=" " alt="" coords="318,97,434,88,434,93,319,102"/>
+<area shape="rect" id="Node000009" href="$da/dca/noise_8cpp_8hpp_aa1191276c67b1c0264857c9d802c665b.html#aa1191276c67b1c0264857c9d802c665b" title=" " alt="" coords="685,55,752,80"/>
+<area shape="poly" id="edge7_Node000008_Node000009" title=" " alt="" coords="556,79,671,69,672,74,556,84"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_ab29e8b6f887f0b299a405c90c001bca6.html#ab29e8b6f887f0b299a405c90c001bca6" title=" " alt="" coords="415,151,589,176"/>
+<area shape="poly" id="edge9_Node000010_Node000011" title=" " alt="" coords="367,161,401,161,401,166,367,166"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350" title=" " alt="" coords="679,104,758,129"/>
+<area shape="poly" id="edge10_Node000011_Node000012" title=" " alt="" coords="561,148,665,125,666,130,562,153"/>
+<area shape="rect" id="Node000013" href="$d4/d36/namespacefl_a33fb57d527658d545f129f9fd7cf5860.html#a33fb57d527658d545f129f9fd7cf5860" title=" " alt="" coords="663,153,774,179"/>
+<area shape="poly" id="edge11_Node000011_Node000013" title=" " alt="" coords="590,162,650,162,650,168,590,167"/>
+<area shape="rect" id="Node000015" href="$d4/d36/namespacefl_abb4917bf7e0fc28049964497cb88305f.html#abb4917bf7e0fc28049964497cb88305f" title=" " alt="" coords="437,200,567,225"/>
+<area shape="poly" id="edge13_Node000014_Node000015" title=" " alt="" coords="311,210,424,210,424,215,311,215"/>
+<area shape="poly" id="edge14_Node000015_Node000005" title=" " alt="" coords="567,214,677,211,739,203,799,189,853,165,898,137,901,141,856,170,801,194,740,208,677,216,567,219"/>
+<area shape="poly" id="edge20_Node000016_Node000016" title=" " alt="" coords="246,275,239,265,243,255,256,249,279,247,308,250,319,260,315,264,305,255,279,252,258,254,246,259,244,264,250,272"/>
+<area shape="rect" id="Node000017" href="$d4/d36/namespacefl_ac8ee0e5ecac16a6ee42def0436a43663.html#ac8ee0e5ecac16a6ee42def0436a43663" title="64&#45;bit millisecond timer &#45; returns milliseconds since system startup without wraparound" alt="" coords="457,275,547,300"/>
+<area shape="poly" id="edge16_Node000016_Node000017" title=" " alt="" coords="314,284,443,284,443,290,314,289"/>
+<area shape="poly" id="edge19_Node000017_Node000017" title=" " alt="" coords="467,276,459,266,463,256,478,250,502,248,532,252,544,261,541,265,530,257,502,253,479,255,467,260,464,266,471,273"/>
+<area shape="rect" id="Node000018" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="681,279,756,304"/>
+<area shape="poly" id="edge17_Node000017_Node000018" title=" " alt="" coords="548,285,668,288,667,293,548,291"/>
+<area shape="poly" id="edge18_Node000018_Node000018" title=" " alt="" coords="685,280,677,270,681,260,695,254,719,252,748,256,759,265,756,269,746,261,719,257,697,259,685,264,682,270,689,277"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="PixelController::loadAndScale1" name="PixelController::loadAndScale1">
+<area shape="rect" id="Node000001" title="non&#45;template alias of loadAndScale&lt;1&gt;()" alt="" coords="260,133,439,173"/>
+<area shape="rect" id="Node000002" href="$d9/d0f/class_d_m_x_serial_controller_a861d9beed51cce6441b50398f1eabebf.html#a861d9beed51cce6441b50398f1eabebf" title="Send the LED data to the strip." alt="" coords="31,5,186,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="312,127,265,92,211,60,182,48,185,43,213,55,268,88,315,123"/>
+<area shape="rect" id="Node000003" href="$d0/da7/class_d_m_x_simple_controller_a6744d598f10ba5d97a57df08c46bafab.html#a6744d598f10ba5d97a57df08c46bafab" title="Send the LED data to the strip." alt="" coords="27,69,190,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="259,132,184,112,185,107,261,127"/>
+<area shape="rect" id="Node000004" href="$d0/d40/class_l_p_d6803_controller_a35f42384ada050146e6813f0fc766356.html#a35f42384ada050146e6813f0fc766356" title="Send the LED data to the strip." alt="" coords="33,133,184,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="246,156,184,156,184,151,246,151"/>
+<area shape="rect" id="Node000005" href="$d2/dd6/class_p9813_controller_ab7381f0a1850d006f3449d27838b19c5.html#ab7381f0a1850d006f3449d27838b19c5" title="Send the LED data to the strip." alt="" coords="5,198,212,223"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="252,179,163,201,162,195,251,174"/>
+<area shape="rect" id="Node000006" href="$d6/dd4/class_r_e_f_hardware_s_p_i_output_abf49fb3515cd8dc27edddd7ea26ad644.html#abf49fb3515cd8dc27edddd7ea26ad644" title="write a block of uint8_ts out in groups of three." alt="" coords="21,248,196,288"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="309,183,264,211,213,237,180,250,178,245,211,232,261,206,306,179"/>
+</map>

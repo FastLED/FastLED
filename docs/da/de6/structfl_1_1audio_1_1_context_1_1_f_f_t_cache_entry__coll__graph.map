@@ -1,0 +1,18 @@
+<map id="fl::audio::Context::FFTCacheEntry" name="fl::audio::Context::FFTCacheEntry">
+<area shape="rect" id="Node000001" title=" " alt="" coords="45,460,179,500"/>
+<area shape="rect" id="Node000002" href="$d9/d76/structfl_1_1audio_1_1fft_1_1_args.html" title=" " alt="" coords="13,365,147,390"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="90,402,109,459,103,461,85,404"/>
+<area shape="rect" id="Node000003" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="171,357,309,397"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="207,408,138,462,134,458,203,404"/>
+<area shape="rect" id="Node000004" href="$d6/d86/classfl_1_1audio_1_1fft_1_1_bins.html" title=" " alt="" coords="34,269,166,295"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="130,300,213,355,210,359,127,305"/>
+<area shape="rect" id="Node000005" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="5,123,144,148"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="74,162,72,202,79,244,92,268,87,270,73,246,67,202,68,162"/>
+<area shape="rect" id="Node000010" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="177,123,375,148"/>
+<area shape="poly" id="edge5_Node000003_Node000010" title=" " alt="" coords="274,162,256,270,245,357,239,357,251,269,269,161"/>
+<area shape="rect" id="Node000013" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="366,269,511,295"/>
+<area shape="poly" id="edge8_Node000013_Node000010" title=" " alt="" coords="301,155,427,267,424,271,298,159"/>
+<area shape="rect" id="Node000011" href="$da/d98/classfl_1_1_atomic_fake.html" title=" " alt="" coords="208,5,344,45"/>
+<area shape="poly" id="edge6_Node000010_Node000011" title=" " alt="" coords="279,59,279,122,273,122,273,59"/>
+<area shape="poly" id="edge7_Node000003_Node000013" title=" " alt="" coords="403,303,281,360,279,355,401,298"/>
+</map>

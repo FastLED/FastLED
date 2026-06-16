@@ -1,0 +1,26 @@
+<map id="AutoResearchRemoteControl::startBleRemote" name="AutoResearchRemoteControl::startBleRemote">
+<area shape="rect" id="Node000001" title="Start BLE remote (creates BLE GATT server + second Remote instance)" alt="" coords="5,134,216,174"/>
+<area shape="rect" id="Node000002" href="$db/d24/namespacefl_1_1net_1_1ble_a127a2a08c56f488eb6b54384831dd7ea.html#a127a2a08c56f488eb6b54384831dd7ea" title="Create BLE GATT server, heap&#45;allocate transport state." alt="" coords="271,5,467,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="132,132,188,85,224,61,263,40,281,32,283,37,265,44,227,65,191,89,135,136"/>
+<area shape="rect" id="Node000003" href="$da/d79/_auto_research_ble_8cpp_a148423e1a23c3528f5499ffd84bbd65a.html#a148423e1a23c3528f5499ffd84bbd65a" title="Get current BLE autoresearch state." alt="" coords="320,55,419,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="156,131,263,90,306,78,307,83,265,95,158,136"/>
+<area shape="rect" id="Node000004" href="$db/d24/namespacefl_1_1net_1_1ble_ae7970789e29ca77e2ecdf2950590e4f1.html#ae7970789e29ca77e2ecdf2950590e4f1" title="Get RequestSource and ResponseSink lambdas for fl::Remote." alt="" coords="281,105,457,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="216,139,267,134,268,139,216,145"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a3fd92c727664a77396403265415789d3.html#a3fd92c727664a77396403265415789d3" title=" " alt="" coords="307,169,432,195"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="216,163,293,171,293,176,216,168"/>
+<area shape="rect" id="Node000007" href="$de/d40/classfl_1_1json_af8bc0968107152344bfa8468bba76f54.html#af8bc0968107152344bfa8468bba76f54" title=" " alt="" coords="523,224,636,249"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="162,172,211,189,265,203,394,223,509,232,509,237,393,229,263,209,210,194,160,177"/>
+<area shape="rect" id="Node000008" href="$db/d63/class_auto_research_remote_control_aea46aca58a3e61bbea8f46a1917c35fb.html#aea46aca58a3e61bbea8f46a1917c35fb" title="Register all RPC methods on a given Remote instance." alt="" coords="264,270,475,310"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="141,172,197,210,265,249,296,262,293,267,263,254,194,214,138,176"/>
+<area shape="rect" id="Node000006" href="$da/d3c/namespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259.html#a0bddf371925d8c4e94b88e9d7b35d259" title=" " alt="" coords="527,169,631,195"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="432,179,514,179,514,185,432,185"/>
+<area shape="poly" id="edge8_Node000008_Node000007" title=" " alt="" coords="448,267,515,250,516,255,449,273"/>
+<area shape="rect" id="Node000009" href="$de/d40/classfl_1_1json_af272c33451fcfba68454595a4f6d8444.html#af272c33451fcfba68454595a4f6d8444" title=" " alt="" coords="533,277,626,303"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="475,287,519,287,519,293,475,293"/>
+<area shape="rect" id="Node000010" href="$de/d40/classfl_1_1json_a08247deaa089c843eae1e64655e2d761.html#a08247deaa089c843eae1e64655e2d761" title=" " alt="" coords="697,228,797,253"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="622,275,689,255,690,260,624,280"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="684,277,809,303"/>
+<area shape="poly" id="edge11_Node000009_Node000011" title=" " alt="" coords="626,287,670,287,670,293,626,293"/>
+<area shape="rect" id="Node000012" href="$de/d40/classfl_1_1json_ad617704f72b6ca9c33c996466fde27b5.html#ad617704f72b6ca9c33c996466fde27b5" title=" " alt="" coords="692,327,801,352"/>
+<area shape="poly" id="edge12_Node000009_Node000012" title=" " alt="" coords="624,300,690,320,689,325,622,305"/>
+</map>

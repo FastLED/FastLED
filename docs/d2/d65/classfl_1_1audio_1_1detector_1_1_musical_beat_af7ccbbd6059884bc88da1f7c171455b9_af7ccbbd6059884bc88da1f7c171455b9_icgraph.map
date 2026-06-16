@@ -1,0 +1,9 @@
+<map id="fl::audio::detector::MusicalBeat::calculateIBIStdDev" name="fl::audio::detector::MusicalBeat::calculateIBIStdDev">
+<area shape="rect" id="Node000001" title="Calculate standard deviation of IBI history." alt="" coords="783,13,1024,53"/>
+<area shape="rect" id="Node000002" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a25756788660507be8a6660dc23f82624.html#a25756788660507be8a6660dc23f82624" title="Calculate beat confidence based on rhythmic consistency." alt="" coords="528,5,735,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="769,35,735,35,735,30,769,30"/>
+<area shape="rect" id="Node000003" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a14368f704c7c67d888b81f70c7004dcb.html#a14368f704c7c67d888b81f70c7004dcb" title="Process one audio frame." alt="" coords="263,13,480,53"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="515,35,480,35,480,30,515,30"/>
+<area shape="rect" id="Node000004" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a8ead4e67bdff0c0600d13fc942313879.html#a8ead4e67bdff0c0600d13fc942313879" title=" " alt="" coords="5,13,215,53"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="249,35,215,35,215,30,249,30"/>
+</map>

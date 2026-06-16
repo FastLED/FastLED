@@ -1,0 +1,5 @@
+<map id="fl::TimeRamp::getCurrentPhase" name="fl::TimeRamp::getCurrentPhase">
+<area shape="rect" id="Node000001" title="Get the current phase of the ramp." alt="" coords="213,5,400,45"/>
+<area shape="rect" id="Node000002" href="$d0/d9d/classfl_1_1_time_ramp_af2ed0a7927456db7d0be670f5692a28a.html#af2ed0a7927456db7d0be670f5692a28a" title="Call this when you want to (re)start the ramp cycle." alt="" coords="5,13,165,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,28,166,28,166,23,200,23"/>
+</map>

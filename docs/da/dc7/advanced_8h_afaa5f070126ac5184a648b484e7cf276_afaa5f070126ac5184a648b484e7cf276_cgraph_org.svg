@@ -20,7 +20,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../da/dc7/advanced_8h_a40fb0ce80fe239814f5a2d21922802b3.html#a40fb0ce80fe239814f5a2d21922802b3" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../da/dc7/advanced_8h_a54f99bb25114b6ba3dfdb9c39d18ac7c.html#a54f99bb25114b6ba3dfdb9c39d18ac7c" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="191.5,-93 123.5,-93 123.5,-74 191.5,-74 191.5,-93"/>
 <text text-anchor="middle" x="157.5" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">fadeSpeed</text>
 </a>
@@ -56,7 +56,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d1/dfb/colorutils_8h_afcada3a28df2b4491cbee30297e39ea7.html#afcada3a28df2b4491cbee30297e39ea7" target="_top" xlink:title="Fill a range of LEDs with a solid color.">
+<g id="a_Node000004"><a xlink:href="../../d1/dfb/colorutils_8h_afba4db18577c19e39c54f1c5793741b7.html#afba4db18577c19e39c54f1c5793741b7" target="_top" xlink:title="Fill a range of LEDs with a solid color.">
 <polygon fill="white" stroke="#666666" points="186,-19 129,-19 129,0 186,0 186,-19"/>
 <text text-anchor="middle" x="157.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fill_solid</text>
 </a>

@@ -1,5 +1,7 @@
 <map id="fl::istream::good" name="fl::istream::good">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,133,31"/>
-<area shape="rect" id="Node000002" href="$dc/d4b/classfl_1_1istream__real_a235c67cedaad6a2e7745ed8bc04c35be.html#a235c67cedaad6a2e7745ed8bc04c35be" title=" " alt="" coords="181,5,341,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="134,15,168,15,168,21,134,21"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,133,55"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="38,31,31,21,34,11,48,5,69,3,96,6,107,15,103,19,94,11,69,8,49,10,38,15,36,20,42,28"/>
+<area shape="rect" id="Node000002" href="$dc/d4b/classfl_1_1istream__real_a235c67cedaad6a2e7745ed8bc04c35be.html#a235c67cedaad6a2e7745ed8bc04c35be" title=" " alt="" coords="181,29,341,55"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="134,39,168,39,168,45,134,45"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="230,31,223,21,226,11,240,5,261,3,288,6,299,15,295,19,286,11,261,8,241,10,230,15,228,20,234,28"/>
 </map>

@@ -113,8 +113,12 @@ $(function(){initNavTree('df/dab/fastled__progmem_8h_af4d0ad0021dafa1c293cb3363a
 </div><div class="memdoc">
 
 <p>PROGMEM keyword for storage. </p>
+<p>Teensy 4.x (<code>__IMXRT1062__</code>) workaround: Teensy core defines <code>PROGMEM</code> as <code>__attribute__((section(".progmem")))</code>, which causes GCC to emit "section
+type conflict" errors when a single translation unit contains FL_PROGMEM variables of different types (e.g. <code><a class="el" href="../../dd/dc7/group___h_s_v2_r_g_b_ga65c1895006b38f8c5114118b6a170327.html#ga65c1895006b38f8c5114118b6a170327">CRGB</a></code>, <code>float</code>, <code>i32</code>) — see the fl.fx+ unity build that aggregates <code><a class="el" href="../../dc/dcc/colorpalettes_8h.html" title="Declarations for the predefined color palettes supplied by FastLED.">colorpalettes.h</a></code>, <code><a class="el" href="../../d3/d84/sin32_8h.html">sin32.h</a></code>, and <code><a class="el" href="../../d6/d8b/mic__response__data_8h.html" title="High-resolution microphone frequency response data and utilities.">mic_response_data.h</a></code>. Teensy 4 has a unified linear address space and places <code>const</code> data in <code>.rodata</code> (flash) automatically via the linker script, so the section attribute is unnecessary on this platform. Emitting empty <code>FL_PROGMEM</code> keeps user code that uses Arduino's <code>PROGMEM</code> directly unaffected. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../df/dab/fastled__progmem_8h_source.html#l00053">53</a> of file <a class="el" href="../../df/dab/fastled__progmem_8h_source.html">fastled_progmem.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/dab/fastled__progmem_8h_source.html#l00071">71</a> of file <a class="el" href="../../df/dab/fastled__progmem_8h_source.html">fastled_progmem.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d60/ease_8cpp_8hpp_source.html#l00142">fl::easeInSine8()</a>, <a class="el" href="../../d0/dbd/namespacefl_1_1anonymous__namespace_02five__bit__hd__gamma_8cpp_8hpp_03_1_1five__bit__impl_aad6b88a6ba8d1512794cac052b87ae51.html#aad6b88a6ba8d1512794cac052b87ae51">fl::anonymous_namespace{five_bit_hd_gamma.cpp.hpp}::five_bit_impl::FL_ALIGN_PROGMEM()</a>, <a class="el" href="../../d4/d36/namespacefl_a3a039b01687bb3a787b7cc81568d2c7e.html#a3a039b01687bb3a787b7cc81568d2c7e">fl::FL_ALIGN_PROGMEM()</a>, and <a class="el" href="../../d6/d9a/namespacefl_1_1gfx_1_1detail_ad187ca92026259abfd6091d009745aae.html#ad187ca92026259abfd6091d009745aae">fl::gfx::detail::FL_ALIGN_PROGMEM()</a>.</p>
 
 </div>
 </div>
@@ -125,7 +129,7 @@ $(function(){initNavTree('df/dab/fastled__progmem_8h_af4d0ad0021dafa1c293cb3363a
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../df/dab/fastled__progmem_8h.html">fastled_progmem.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

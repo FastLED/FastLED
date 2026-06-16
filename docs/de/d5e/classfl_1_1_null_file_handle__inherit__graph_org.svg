@@ -20,9 +20,9 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d5/d86/classfl_1_1_file_handle.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="90,-74 10,-74 10,-55 90,-55 90,-74"/>
-<text text-anchor="middle" x="50" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">fl::FileHandle</text>
+<g id="a_Node000002"><a xlink:href="../../d0/d5d/classfl_1_1filebuf.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="79.5,-74 20.5,-74 20.5,-55 79.5,-55 79.5,-74"/>
+<text text-anchor="middle" x="50" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">fl::filebuf</text>
 </a>
 </g>
 </g>

@@ -1,0 +1,28 @@
+<map id="fl::IChannelDriver::canHandle" name="fl::IChannelDriver::canHandle">
+<area shape="rect" id="Node000001" title="Check if this driver can handle the given channel data." alt="" coords="5,81,140,121"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="34,81,31,71,37,62,51,56,73,54,97,57,110,64,108,69,95,62,73,59,53,61,41,66,36,72,39,80"/>
+<area shape="rect" id="Node000002" href="$d3/da0/classfl_1_1_i_channel_driver_a9e956fbce56cb0e64f49d4657d17d44e.html#a9e956fbce56cb0e64f49d4657d17d44e" title="Wait for driver to become READY." alt="" coords="215,49,350,89"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="140,88,201,78,202,84,141,93"/>
+<area shape="rect" id="Node000031" href="$d3/da0/classfl_1_1_i_channel_driver_a282787aa70184218c84f3af77e9591d9.html#a282787aa70184218c84f3af77e9591d9" title=" " alt="" coords="188,113,377,153"/>
+<area shape="poly" id="edge14_Node000001_Node000031" title=" " alt="" coords="141,108,175,114,174,119,140,114"/>
+<area shape="rect" id="Node000003" href="$d3/da0/classfl_1_1_i_channel_driver_af9855443f84a0598989425bdcad83721.html#af9855443f84a0598989425bdcad83721" title="Query driver state and perform maintenance." alt="" coords="428,49,563,89"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="350,66,414,66,414,71,350,71"/>
+<area shape="rect" id="Node000004" href="$d3/da0/classfl_1_1_i_channel_driver_a9b3137f96a8915d980f7e33ba1e3b3d9.html#a9b3137f96a8915d980f7e33ba1e3b3d9" title=" " alt="" coords="425,113,565,153"/>
+<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="351,86,416,106,414,111,349,91"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="456,49,453,39,460,30,474,24,495,22,520,25,533,32,531,37,518,30,495,27,475,29,463,34,459,40,461,48"/>
+<area shape="rect" id="Node000005" href="$df/d9e/namespacefl_1_1detail_a3363a63882437dcb732ef0d0714ae000.html#a3363a63882437dcb732ef0d0714ae000" title="Get the current tiered&#45;wait spin budget (microseconds)." alt="" coords="613,5,837,31"/>
+<area shape="poly" id="edge6_Node000004_Node000005" title=" " alt="" coords="545,110,564,99,578,84,586,70,596,55,612,41,627,33,629,38,615,46,600,59,591,72,582,87,567,103,548,115"/>
+<area shape="rect" id="Node000006" href="$da/d46/classfl_1_1net_1_1_network_detector_af9ba6574c6b2c48dafc9b4a9b4e3c39d.html#af9ba6574c6b2c48dafc9b4a9b4e3c39d" title=" " alt="" coords="636,55,815,95"/>
+<area shape="poly" id="edge7_Node000004_Node000006" title=" " alt="" coords="565,113,630,96,632,101,566,118"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a95a89c7ba649b9bd2c9136c0f517d82f.html#a95a89c7ba649b9bd2c9136c0f517d82f" title="Universal microsecond timer &#45; returns microseconds since system startup." alt="" coords="885,145,968,171"/>
+<area shape="poly" id="edge8_Node000004_Node000007" title=" " alt="" coords="566,147,614,154,753,161,872,158,872,164,753,166,613,159,565,152"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="688,245,763,271"/>
+<area shape="poly" id="edge10_Node000004_Node000008" title=" " alt="" coords="530,150,615,200,686,237,684,241,612,204,528,155"/>
+<area shape="rect" id="Node000009" href="$db/d5c/namespacefl_1_1task_a2d40b476742263a3fa212e24b722e3ef.html#a2d40b476742263a3fa212e24b722e3ef" title="Run selected task subsystems." alt="" coords="678,120,773,145"/>
+<area shape="poly" id="edge12_Node000004_Node000009" title=" " alt="" coords="565,130,664,130,664,135,565,135"/>
+<area shape="poly" id="edge9_Node000007_Node000007" title=" " alt="" coords="894,147,887,137,890,127,904,121,927,119,955,122,966,132,962,136,952,127,927,124,905,126,894,131,892,136,898,144"/>
+<area shape="poly" id="edge11_Node000008_Node000008" title=" " alt="" coords="692,247,685,237,689,227,703,221,725,219,753,222,764,232,761,236,751,227,725,224,704,226,693,231,691,236,697,244"/>
+<area shape="poly" id="edge13_Node000009_Node000007" title=" " alt="" coords="773,136,872,148,871,154,772,141"/>
+<area shape="poly" id="edge15_Node000031_Node000003" title=" " alt="" coords="349,110,414,90,416,95,351,115"/>
+<area shape="poly" id="edge16_Node000031_Node000004" title=" " alt="" coords="378,130,412,130,412,135,378,135"/>
+</map>

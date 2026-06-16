@@ -1,0 +1,14 @@
+<map id="fl/sensors/button.h" name="fl/sensors/button.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="124,5,267,31"/>
+<area shape="rect" id="Node000002" href="$d2/dfd/sensors_2button_8cpp_8hpp.html" title=" " alt="" coords="5,86,191,111"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="172,41,114,88,111,84,169,37"/>
+<area shape="rect" id="Node000006" href="$d5/dc3/ui__button__integration_8cpp_8hpp.html" title="UIButton/UIDropdown &lt;&#45;&gt; Button integration via IButtonInput interface." alt="" coords="215,79,370,119"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="222,37,271,76,268,81,219,41"/>
+<area shape="rect" id="Node000003" href="$d0/dfc/fl_2sensors_2__build_8cpp_8hpp.html" title=" " alt="" coords="104,167,287,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="125,118,183,164,179,169,121,122"/>
+<area shape="rect" id="Node000004" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="45,240,173,265"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="173,203,125,242,121,238,169,198"/>
+<area shape="rect" id="Node000005" href="$d4/d87/fl_8sensors_09_8cpp.html" title="Unity build: recursive includes from src/fl/sensors/." alt="" coords="197,240,367,265"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="221,198,270,238,266,242,218,203"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="260,129,212,168,208,164,257,125"/>
+</map>

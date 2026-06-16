@@ -120,7 +120,7 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_a2e356f0e8fcacdd6e2270c993a2
 </div><div class="memdoc">
 
 <p>Set the maximum refresh rate. </p>
-<p>This is global for all leds. Attempts to call <a class="el" href="../../dd/dbb/class_c_fast_l_e_d_a3adb23ec5f919524928d576002cb45de.html#a3adb23ec5f919524928d576002cb45de" title="Update all our controllers with the current led colors.">show()</a> faster than this rate will simply wait. </p><dl class="section note"><dt>Note</dt><dd>The refresh rate defaults to the slowest refresh rate of all the leds added through <a class="el" href="../../dd/dbb/class_c_fast_l_e_d_afd7928d822589740af6e23b2d510cf3f.html#afd7928d822589740af6e23b2d510cf3f" title="Add a CLEDController instance to the world.">addLeds()</a>. If you wish to set/override this rate, be sure to call <a class="el" href="#a2e356f0e8fcacdd6e2270c993a2f966e" title="Set the maximum refresh rate.">setMaxRefreshRate()</a> <em>after</em> adding all of your leds. </dd></dl>
+<p>This is global for all leds. Attempts to call <a class="el" href="../../dd/dbb/class_c_fast_l_e_d_a3adb23ec5f919524928d576002cb45de.html#a3adb23ec5f919524928d576002cb45de" title="Update all our controllers with the current led colors.">show()</a> faster than this rate will simply wait. </p><dl class="section note"><dt>Note</dt><dd>The refresh rate defaults to the slowest refresh rate of all the leds added through <a class="el" href="../../dd/dbb/class_c_fast_l_e_d_af05a7eb54282b7c43293e2905b7405bb.html#af05a7eb54282b7c43293e2905b7405bb" title="Add a CLEDController instance to the world.">addLeds()</a>. If you wish to set/override this rate, be sure to call <a class="el" href="#a2e356f0e8fcacdd6e2270c993a2f966e" title="Set the maximum refresh rate.">setMaxRefreshRate()</a> <em>after</em> adding all of your leds. </dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">refresh</td><td>maximum refresh rate in hz </td></tr>
@@ -129,23 +129,23 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_a2e356f0e8fcacdd6e2270c993a2
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html#l00372">372</a> of file <a class="el" href="../../d6/dda/_fast_l_e_d_8cpp_source.html">FastLED.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  372</span>                                                              {</div>
-<div class="line"><span class="lineno">  373</span>    <span class="keywordflow">if</span>(constrain) {</div>
-<div class="line"><span class="lineno">  374</span>        <span class="comment">// if we&#39;re constraining, the new value of m_nMinMicros _must_ be higher than previously (because we&#39;re only</span></div>
-<div class="line"><span class="lineno">  375</span>        <span class="comment">// allowed to slow things down if constraining)</span></div>
-<div class="line"><span class="lineno">  376</span>        <span class="keywordflow">if</span>(refresh &gt; 0) {</div>
-<div class="line"><span class="lineno">  377</span>            <a class="code hl_variable" href="../../dd/dbb/class_c_fast_l_e_d_a8a2bd20ae33e3037fe2a3c6ca4aac62f.html#a8a2bd20ae33e3037fe2a3c6ca4aac62f">m_nMinMicros</a> = ((1000000 / refresh) &gt; <a class="code hl_variable" href="../../dd/dbb/class_c_fast_l_e_d_a8a2bd20ae33e3037fe2a3c6ca4aac62f.html#a8a2bd20ae33e3037fe2a3c6ca4aac62f">m_nMinMicros</a>) ? (1000000 / refresh) : <a class="code hl_variable" href="../../dd/dbb/class_c_fast_l_e_d_a8a2bd20ae33e3037fe2a3c6ca4aac62f.html#a8a2bd20ae33e3037fe2a3c6ca4aac62f">m_nMinMicros</a>;</div>
-<div class="line"><span class="lineno">  378</span>        }</div>
-<div class="line"><span class="lineno">  379</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span>(refresh &gt; 0) {</div>
-<div class="line"><span class="lineno">  380</span>        <a class="code hl_variable" href="../../dd/dbb/class_c_fast_l_e_d_a8a2bd20ae33e3037fe2a3c6ca4aac62f.html#a8a2bd20ae33e3037fe2a3c6ca4aac62f">m_nMinMicros</a> = 1000000 / refresh;</div>
-<div class="line"><span class="lineno">  381</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  382</span>        <a class="code hl_variable" href="../../dd/dbb/class_c_fast_l_e_d_a8a2bd20ae33e3037fe2a3c6ca4aac62f.html#a8a2bd20ae33e3037fe2a3c6ca4aac62f">m_nMinMicros</a> = 0;</div>
-<div class="line"><span class="lineno">  383</span>    }</div>
-<div class="line"><span class="lineno">  384</span>}</div>
-<div class="ttc" id="aclass_c_fast_l_e_d_a8a2bd20ae33e3037fe2a3c6ca4aac62f_html_a8a2bd20ae33e3037fe2a3c6ca4aac62f"><div class="ttname"><a href="../../dd/dbb/class_c_fast_l_e_d_a8a2bd20ae33e3037fe2a3c6ca4aac62f.html#a8a2bd20ae33e3037fe2a3c6ca4aac62f">CFastLED::m_nMinMicros</a></div><div class="ttdeci">fl::u32 m_nMinMicros</div><div class="ttdoc">minimum µs between frames, used for capping frame rates</div><div class="ttdef"><b>Definition</b> <a href="../../db/d97/_fast_l_e_d_8h_source.html#l00382">FastLED.h:382</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00506">506</a> of file <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html">FastLED.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  506</span>                                                              {</div>
+<div class="line"><span class="lineno">  507</span>    <span class="keywordflow">if</span>(constrain) {</div>
+<div class="line"><span class="lineno">  508</span>        <span class="comment">// if we&#39;re constraining, the new value of mNMinMicros _must_ be higher than previously (because we&#39;re only</span></div>
+<div class="line"><span class="lineno">  509</span>        <span class="comment">// allowed to slow things down if constraining)</span></div>
+<div class="line"><span class="lineno">  510</span>        <span class="keywordflow">if</span>(refresh &gt; 0) {</div>
+<div class="line"><span class="lineno">  511</span>            <a class="code hl_variable" href="../../dd/dbb/class_c_fast_l_e_d_ac0eea1a96d5b038ab6c311c66547abf5.html#ac0eea1a96d5b038ab6c311c66547abf5">mNMinMicros</a> = ((1000000 / refresh) &gt; <a class="code hl_variable" href="../../dd/dbb/class_c_fast_l_e_d_ac0eea1a96d5b038ab6c311c66547abf5.html#ac0eea1a96d5b038ab6c311c66547abf5">mNMinMicros</a>) ? (1000000 / refresh) : <a class="code hl_variable" href="../../dd/dbb/class_c_fast_l_e_d_ac0eea1a96d5b038ab6c311c66547abf5.html#ac0eea1a96d5b038ab6c311c66547abf5">mNMinMicros</a>;</div>
+<div class="line"><span class="lineno">  512</span>        }</div>
+<div class="line"><span class="lineno">  513</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span>(refresh &gt; 0) {</div>
+<div class="line"><span class="lineno">  514</span>        <a class="code hl_variable" href="../../dd/dbb/class_c_fast_l_e_d_ac0eea1a96d5b038ab6c311c66547abf5.html#ac0eea1a96d5b038ab6c311c66547abf5">mNMinMicros</a> = 1000000 / refresh;</div>
+<div class="line"><span class="lineno">  515</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  516</span>        <a class="code hl_variable" href="../../dd/dbb/class_c_fast_l_e_d_ac0eea1a96d5b038ab6c311c66547abf5.html#ac0eea1a96d5b038ab6c311c66547abf5">mNMinMicros</a> = 0;</div>
+<div class="line"><span class="lineno">  517</span>    }</div>
+<div class="line"><span class="lineno">  518</span>}</div>
+<div class="ttc" id="aclass_c_fast_l_e_d_ac0eea1a96d5b038ab6c311c66547abf5_html_ac0eea1a96d5b038ab6c311c66547abf5"><div class="ttname"><a href="../../dd/dbb/class_c_fast_l_e_d_ac0eea1a96d5b038ab6c311c66547abf5.html#ac0eea1a96d5b038ab6c311c66547abf5">CFastLED::mNMinMicros</a></div><div class="ttdeci">fl::u32 mNMinMicros</div><div class="ttdoc">minimum µs between frames, used for capping frame rates</div><div class="ttdef"><b>Definition</b> <a href="../../db/d97/_fast_l_e_d_8h_source.html#l00614">FastLED.h:614</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html#l00382">m_nMinMicros</a>.</p>
+<p class="reference">References <a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html#l00614">mNMinMicros</a>.</p>
 
 </div>
 </div>
@@ -156,7 +156,7 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_a2e356f0e8fcacdd6e2270c993a2
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dd/dbb/class_c_fast_l_e_d.html">CFastLED</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

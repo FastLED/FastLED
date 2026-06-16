@@ -1,0 +1,8 @@
+<map id="fl::gfx::detail::toFixed8&lt; fl::s16x16 &gt;" name="fl::gfx::detail::toFixed8&lt; fl::s16x16 &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,172,75"/>
+<area shape="rect" id="Node000002" href="$d9/d9f/classfl_1_1s16x16_aa048b427f50f28993a67941e0f303a65.html#aa048b427f50f28993a67941e0f303a65" title=" " alt="" coords="245,5,362,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="172,38,230,28,231,33,173,43"/>
+<area shape="rect" id="Node000003" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_ab04a22e2927673d2692b4f3e354af564.html#ab04a22e2927673d2692b4f3e354af564" title="Convert any Coord type to 8.8 fixed&#45;point (fl::i32)." alt="" coords="220,79,387,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="173,67,214,74,213,79,172,72"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="268,80,261,70,265,60,279,54,303,52,333,56,345,65,342,69,331,61,303,57,281,59,269,64,266,70,273,77"/>
+</map>

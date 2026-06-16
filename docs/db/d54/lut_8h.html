@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fl/lut.h File Reference</title>
+<title>FastLED: fl/math/lut.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -108,13 +108,12 @@ $(function(){initNavTree('db/d54/lut_8h.html','../../'); initResizable(true); })
   <div class="headertitle"><div class="title">lut.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="../../da/da9/allocator_8h_source.html">fl/allocator.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d4/d64/force__inline_8h_source.html">fl/force_inline.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../dc/d18/memory_8h_source.html">fl/memory.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../df/dd8/stdint_8h_source.html">fl/stdint.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/int.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d4/d67/geometry_8h_source.html">fl/geometry.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../df/d2a/namespace_8h_source.html">fl/namespace.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../da/da9/allocator_8h_source.html">fl/stl/allocator.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d6a/shared__ptr_8h_source.html">fl/stl/shared_ptr.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../da/d4b/unique__ptr_8h_source.html">fl/stl/unique_ptr.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/stl/int.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d67/geometry_8h_source.html">fl/math/geometry.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for lut.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -140,7 +139,7 @@ Classes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
@@ -149,21 +148,21 @@ Typedefs</h2></td></tr>
 <tr class="separator:a6cefa45dd8b6cc84c04f7ad2417589de"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a09469f802cd6a2e3a92672d2b83a9d7f" id="r_a09469f802cd6a2e3a92672d2b83a9d7f"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="../../d6/d18/classfl_1_1_l_u_t.html">LUT</a>&lt; <a class="el" href="../../d5/d5d/structfl_1_1vec2.html">vec2</a>&lt; u16 &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a09469f802cd6a2e3a92672d2b83a9d7f.html#a09469f802cd6a2e3a92672d2b83a9d7f">fl::LUTXY16</a></td></tr>
 <tr class="separator:a09469f802cd6a2e3a92672d2b83a9d7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5d307bcfa41ff5241ade9d4fccfc1b65" id="r_a5d307bcfa41ff5241ade9d4fccfc1b65"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="../../d6/d18/classfl_1_1_l_u_t.html">LUT</a>&lt; <a class="el" href="../../d4/d36/namespacefl_a853ddd0222a0547e63df2afdd422e11a.html#a853ddd0222a0547e63df2afdd422e11a">vec2f</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a5d307bcfa41ff5241ade9d4fccfc1b65.html#a5d307bcfa41ff5241ade9d4fccfc1b65">fl::LUTXYFLOAT</a></td></tr>
-<tr class="separator:a5d307bcfa41ff5241ade9d4fccfc1b65"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f5cdd2c25ccb79d0a913fe73fe26475" id="r_a9f5cdd2c25ccb79d0a913fe73fe26475"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a9f5cdd2c25ccb79d0a913fe73fe26475.html#a9f5cdd2c25ccb79d0a913fe73fe26475">fl::LUTXYFLOAT</a> = <a class="el" href="../../d6/d18/classfl_1_1_l_u_t.html">LUT</a>&lt;<a class="el" href="../../d4/d36/namespacefl_a48a8de5776a08438981ff547032a8401.html#a48a8de5776a08438981ff547032a8401">vec2f</a>&gt;</td></tr>
+<tr class="separator:a9f5cdd2c25ccb79d0a913fe73fe26475"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a246bd80f6be0e16b3c76e96c3b6281ed" id="r_a246bd80f6be0e16b3c76e96c3b6281ed"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="../../d6/d18/classfl_1_1_l_u_t.html">LUT</a>&lt; <a class="el" href="../../d4/d36/namespacefl_a61f967bb4963ce21a9ef09d513f9ea66.html#a61f967bb4963ce21a9ef09d513f9ea66">vec3f</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a246bd80f6be0e16b3c76e96c3b6281ed.html#a246bd80f6be0e16b3c76e96c3b6281ed">fl::LUTXYZFLOAT</a></td></tr>
 <tr class="separator:a246bd80f6be0e16b3c76e96c3b6281ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a234c2f2e01ee4096118541ef93de3fcd" id="r_a234c2f2e01ee4096118541ef93de3fcd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a234c2f2e01ee4096118541ef93de3fcd.html#a234c2f2e01ee4096118541ef93de3fcd">fl::FASTLED_SMART_PTR_NO_FWD</a> (<a class="el" href="../../d4/d36/namespacefl_a6cefa45dd8b6cc84c04f7ad2417589de.html#a6cefa45dd8b6cc84c04f7ad2417589de">LUT16</a>)</td></tr>
-<tr class="separator:a234c2f2e01ee4096118541ef93de3fcd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae9116742f0d6281cf045ccf4b2a2791a" id="r_ae9116742f0d6281cf045ccf4b2a2791a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ae9116742f0d6281cf045ccf4b2a2791a.html#ae9116742f0d6281cf045ccf4b2a2791a">fl::FASTLED_SMART_PTR_NO_FWD</a> (<a class="el" href="../../d4/d36/namespacefl_a09469f802cd6a2e3a92672d2b83a9d7f.html#a09469f802cd6a2e3a92672d2b83a9d7f">LUTXY16</a>)</td></tr>
-<tr class="separator:ae9116742f0d6281cf045ccf4b2a2791a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a62986fa3751de77035b7a343907ef650" id="r_a62986fa3751de77035b7a343907ef650"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a62986fa3751de77035b7a343907ef650.html#a62986fa3751de77035b7a343907ef650">fl::FASTLED_SMART_PTR_NO_FWD</a> (<a class="el" href="../../d4/d36/namespacefl_a5d307bcfa41ff5241ade9d4fccfc1b65.html#a5d307bcfa41ff5241ade9d4fccfc1b65">LUTXYFLOAT</a>)</td></tr>
-<tr class="separator:a62986fa3751de77035b7a343907ef650"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aff7a931f178b895489dc62a3b3ae70b3" id="r_aff7a931f178b895489dc62a3b3ae70b3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aff7a931f178b895489dc62a3b3ae70b3.html#aff7a931f178b895489dc62a3b3ae70b3">fl::FASTLED_SMART_PTR_NO_FWD</a> (<a class="el" href="../../d4/d36/namespacefl_a246bd80f6be0e16b3c76e96c3b6281ed.html#a246bd80f6be0e16b3c76e96c3b6281ed">LUTXYZFLOAT</a>)</td></tr>
-<tr class="separator:aff7a931f178b895489dc62a3b3ae70b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a177ee851eb108e11012c8e5fba6c0606" id="r_a177ee851eb108e11012c8e5fba6c0606"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a177ee851eb108e11012c8e5fba6c0606.html#a177ee851eb108e11012c8e5fba6c0606">fl::FASTLED_SHARED_PTR_NO_FWD</a> (<a class="el" href="../../d4/d36/namespacefl_a6cefa45dd8b6cc84c04f7ad2417589de.html#a6cefa45dd8b6cc84c04f7ad2417589de">LUT16</a>)</td></tr>
+<tr class="separator:a177ee851eb108e11012c8e5fba6c0606"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a491f26c54cd7c32f9a6e90f6b410506d" id="r_a491f26c54cd7c32f9a6e90f6b410506d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a491f26c54cd7c32f9a6e90f6b410506d.html#a491f26c54cd7c32f9a6e90f6b410506d">fl::FASTLED_SHARED_PTR_NO_FWD</a> (<a class="el" href="../../d4/d36/namespacefl_a09469f802cd6a2e3a92672d2b83a9d7f.html#a09469f802cd6a2e3a92672d2b83a9d7f">LUTXY16</a>)</td></tr>
+<tr class="separator:a491f26c54cd7c32f9a6e90f6b410506d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a418cfb602922f5ea39602a9e0855bfc4" id="r_a418cfb602922f5ea39602a9e0855bfc4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a418cfb602922f5ea39602a9e0855bfc4.html#a418cfb602922f5ea39602a9e0855bfc4">fl::FASTLED_SHARED_PTR_NO_FWD</a> (<a class="el" href="../../d4/d36/namespacefl_a9f5cdd2c25ccb79d0a913fe73fe26475.html#a9f5cdd2c25ccb79d0a913fe73fe26475">LUTXYFLOAT</a>)</td></tr>
+<tr class="separator:a418cfb602922f5ea39602a9e0855bfc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae2d81546b4f127b3ddef90ebca138ed3" id="r_ae2d81546b4f127b3ddef90ebca138ed3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ae2d81546b4f127b3ddef90ebca138ed3.html#ae2d81546b4f127b3ddef90ebca138ed3">fl::FASTLED_SHARED_PTR_NO_FWD</a> (<a class="el" href="../../d4/d36/namespacefl_a246bd80f6be0e16b3c76e96c3b6281ed.html#a246bd80f6be0e16b3c76e96c3b6281ed">LUTXYZFLOAT</a>)</td></tr>
+<tr class="separator:ae2d81546b4f127b3ddef90ebca138ed3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -171,8 +170,8 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../db/d54/lut_8h.html">lut.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_94896ea2d28e1d34f24a1dbbb9436aa8.html">math</a></li><li class="navelem"><a class="el" href="../../db/d54/lut_8h.html">lut.h</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

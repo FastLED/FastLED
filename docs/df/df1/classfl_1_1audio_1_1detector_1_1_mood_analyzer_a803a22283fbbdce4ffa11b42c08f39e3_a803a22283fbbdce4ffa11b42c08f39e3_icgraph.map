@@ -1,0 +1,8 @@
+<map id="fl::audio::detector::MoodAnalyzer::shouldChangeMood" name="fl::audio::detector::MoodAnalyzer::shouldChangeMood">
+<area shape="rect" id="Node000001" title=" " alt="" coords="512,29,771,69"/>
+<area shape="rect" id="Node000002" href="$df/df1/classfl_1_1audio_1_1detector_1_1_mood_analyzer_a4e2695cd16583146b92ffdb4298eba1e.html#a4e2695cd16583146b92ffdb4298eba1e" title=" " alt="" coords="288,29,464,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="498,52,464,52,464,47,498,47"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="419,18,404,11,376,8,351,10,337,15,331,21,334,28,329,30,326,20,334,10,350,5,376,3,405,6,421,13"/>
+<area shape="rect" id="Node000003" href="$df/df1/classfl_1_1audio_1_1detector_1_1_mood_analyzer_acedf3a8670d47015ad245098ef2f004d.html#acedf3a8670d47015ad245098ef2f004d" title=" " alt="" coords="5,29,240,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="274,52,240,52,240,47,274,47"/>
+</map>

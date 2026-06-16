@@ -1,0 +1,17 @@
+<map id="fl::VorbisDecoderImpl::begin" name="fl::VorbisDecoderImpl::begin">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,107,167,147"/>
+<area shape="rect" id="Node000002" href="$d0/d5d/classfl_1_1filebuf_a793372790686e92ff08b00c8ef8d7f14.html#a793372790686e92ff08b00c8ef8d7f14" title=" " alt="" coords="238,65,385,91"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="167,107,239,91,240,96,168,112"/>
+<area shape="rect" id="Node000005" href="$d5/d60/classfl_1_1_vorbis_decoder_impl_a776149891b89686b05ffb093117116e4.html#a776149891b89686b05ffb093117116e4" title=" " alt="" coords="215,115,408,140"/>
+<area shape="poly" id="edge7_Node000001_Node000005" title=" " alt="" coords="167,125,201,125,201,130,167,130"/>
+<area shape="rect" id="Node000006" href="$d0/d5d/classfl_1_1filebuf_aee75ab4545523b63bfc8e174a7233c3c.html#aee75ab4545523b63bfc8e174a7233c3c" title=" " alt="" coords="254,188,369,213"/>
+<area shape="poly" id="edge8_Node000001_Node000006" title=" " alt="" coords="149,145,259,181,257,186,147,150"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="277,67,269,57,273,47,288,41,311,39,341,42,352,51,349,56,339,47,311,44,289,46,277,51,275,56,281,64"/>
+<area shape="rect" id="Node000003" href="$d0/d5d/classfl_1_1filebuf_a3ca0eba35a06cb3f609c2681a0ec97ff.html#a3ca0eba35a06cb3f609c2681a0ec97ff" title=" " alt="" coords="461,29,587,55"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="384,63,447,52,448,57,385,68"/>
+<area shape="rect" id="Node000004" href="$d0/d5d/classfl_1_1filebuf_a41242131df15400fdc65c0bba4e7bae9.html#a41242131df15400fdc65c0bba4e7bae9" title=" " alt="" coords="456,103,592,128"/>
+<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="385,88,443,98,442,104,384,93"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="489,31,482,21,486,11,500,5,524,3,553,6,565,15,562,20,551,11,524,8,502,10,490,15,487,20,494,28"/>
+<area shape="poly" id="edge6_Node000004_Node000004" title=" " alt="" coords="489,104,482,94,486,84,500,78,524,76,553,80,565,89,562,93,551,85,524,81,502,83,490,88,487,94,494,101"/>
+<area shape="poly" id="edge9_Node000006_Node000006" title=" " alt="" coords="277,190,269,180,273,170,288,164,311,161,341,165,352,174,349,178,339,170,311,167,289,169,277,173,275,179,281,186"/>
+</map>

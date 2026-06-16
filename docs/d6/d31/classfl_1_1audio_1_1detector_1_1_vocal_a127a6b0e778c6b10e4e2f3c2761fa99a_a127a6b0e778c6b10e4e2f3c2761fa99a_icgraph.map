@@ -1,0 +1,10 @@
+<map id="fl::audio::detector::Vocal::calculateVocalPresenceRatio" name="fl::audio::detector::Vocal::calculateVocalPresenceRatio">
+<area shape="rect" id="Node000001" title=" " alt="" coords="373,30,600,85"/>
+<area shape="rect" id="Node000002" href="$d6/d31/classfl_1_1audio_1_1detector_1_1_vocal_ad68376503d426bb4aabe66ae0a07336e.html#ad68376503d426bb4aabe66ae0a07336e" title=" " alt="" coords="189,37,325,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="360,60,326,60,326,55,360,55"/>
+<area shape="poly" id="edge4_Node000002_Node000002" title=" " alt="" coords="288,25,277,19,257,16,240,18,229,23,226,29,228,36,222,38,220,28,226,19,238,13,257,11,279,14,291,21"/>
+<area shape="rect" id="Node000003" href="$d6/d31/classfl_1_1audio_1_1detector_1_1_vocal_aff949e7724354f44375b801cf3419646.html#aff949e7724354f44375b801cf3419646" title=" " alt="" coords="5,5,141,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="175,46,141,40,142,34,176,41"/>
+<area shape="rect" id="Node000004" href="$d6/d31/classfl_1_1audio_1_1detector_1_1_vocal_ab67d8180c9b984896107a14007a8deb7.html#ab67d8180c9b984896107a14007a8deb7" title=" " alt="" coords="5,69,141,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="176,74,142,80,141,75,175,69"/>
+</map>

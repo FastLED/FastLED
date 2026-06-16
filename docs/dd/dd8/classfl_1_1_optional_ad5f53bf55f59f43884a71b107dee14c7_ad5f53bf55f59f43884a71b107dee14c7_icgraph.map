@@ -1,0 +1,73 @@
+<map id="fl::Optional::has_value" name="fl::Optional::has_value">
+<area shape="rect" id="Node000001" title=" " alt="" coords="951,608,1117,633"/>
+<area shape="rect" id="Node000002" href="$d5/d8b/classfl_1_1_channel_a27ac9770da107f25ff6b2e3cbabd4f2a.html#a27ac9770da107f25ff6b2e3cbabd4f2a" title=" " alt="" coords="728,276,903,301"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1018,597,970,504,900,392,862,342,827,304,831,300,866,339,905,388,974,502,1023,594"/>
+<area shape="rect" id="Node000016" href="$d4/d36/namespacefl_a186b596ee2d8dbd5386a081c95401c8b.html#a186b596ee2d8dbd5386a081c95401c8b" title=" " alt="" coords="729,403,902,428"/>
+<area shape="poly" id="edge18_Node000001_Node000016" title=" " alt="" coords="1019,597,1001,562,975,520,941,477,901,442,880,430,883,426,904,437,945,474,979,517,1006,559,1024,594"/>
+<area shape="rect" id="Node000018" href="$d4/d36/namespacefl_ab9a569f3493b0267ba32021be174dd94.html#ab9a569f3493b0267ba32021be174dd94" title=" " alt="" coords="747,452,883,477"/>
+<area shape="poly" id="edge20_Node000001_Node000018" title=" " alt="" coords="1014,599,967,544,936,515,901,491,876,480,879,475,904,486,939,511,971,540,1018,595"/>
+<area shape="rect" id="Node000024" href="$df/d01/_client_real_8h_a75e6549812ad7bff897e0c92a225878a.html#a75e6549812ad7bff897e0c92a225878a" title=" " alt="" coords="737,501,894,527"/>
+<area shape="poly" id="edge24_Node000001_Node000024" title=" " alt="" coords="1003,602,957,570,902,540,871,529,873,524,904,536,960,566,1006,597"/>
+<area shape="rect" id="Node000026" href="$df/d01/_client_real_8h_a63e6ab1f58438832fe951d98467c6db1.html#a63e6ab1f58438832fe951d98467c6db1" title=" " alt="" coords="728,551,903,576"/>
+<area shape="poly" id="edge26_Node000001_Node000026" title=" " alt="" coords="971,607,864,579,865,573,972,602"/>
+<area shape="rect" id="Node000027" href="$d3/dfa/classfl_1_1_s_p_i_transposer_a8182f9233ebc9f7e54a3eff0b9866f8f.html#a8182f9233ebc9f7e54a3eff0b9866f8f" title="Transpose 16 lanes of data into interleaved hex&#45;SPI format." alt="" coords="747,601,883,641"/>
+<area shape="poly" id="edge28_Node000001_Node000027" title=" " alt="" coords="937,623,884,623,884,618,937,618"/>
+<area shape="rect" id="Node000028" href="$d3/dfa/classfl_1_1_s_p_i_transposer_ab685cdd1edcc4b507a91d7dbfd5ba41b.html#ab685cdd1edcc4b507a91d7dbfd5ba41b" title="Transpose 2 lanes of data into interleaved dual&#45;SPI format." alt="" coords="747,665,883,705"/>
+<area shape="poly" id="edge29_Node000001_Node000028" title=" " alt="" coords="977,640,884,667,883,662,976,635"/>
+<area shape="rect" id="Node000033" href="$d3/dfa/classfl_1_1_s_p_i_transposer_a409565f20b2d6f03c19989cc7a53b91d.html#a409565f20b2d6f03c19989cc7a53b91d" title="Transpose 4 lanes of data into interleaved quad&#45;SPI format." alt="" coords="747,729,883,769"/>
+<area shape="poly" id="edge33_Node000001_Node000033" title=" " alt="" coords="1010,644,962,682,904,719,878,731,876,726,901,714,959,677,1006,640"/>
+<area shape="rect" id="Node000034" href="$d3/dfa/classfl_1_1_s_p_i_transposer_a33641c518e945549b98264fed476ff12.html#a33641c518e945549b98264fed476ff12" title="Transpose 8 lanes of data into interleaved octal&#45;SPI format." alt="" coords="747,793,883,833"/>
+<area shape="poly" id="edge35_Node000001_Node000034" title=" " alt="" coords="1021,647,974,714,942,751,904,783,883,795,881,790,901,778,938,747,970,710,1016,644"/>
+<area shape="rect" id="Node000035" href="$dd/dd8/classfl_1_1_optional_ab862f5c1eb3485ee1bebec48c3c839fa.html#ab862f5c1eb3485ee1bebec48c3c839fa" title=" " alt="" coords="737,857,894,883"/>
+<area shape="poly" id="edge37_Node000001_Node000035" title=" " alt="" coords="1027,648,1011,691,985,745,950,800,929,825,904,847,882,860,879,855,901,843,925,821,946,796,981,742,1006,689,1022,646"/>
+<area shape="rect" id="Node000036" href="$dd/dd8/classfl_1_1_optional_a74308e13b2c6e1131834888ba1a7c6dd.html#a74308e13b2c6e1131834888ba1a7c6dd" title=" " alt="" coords="737,907,894,932"/>
+<area shape="poly" id="edge38_Node000001_Node000036" title=" " alt="" coords="1030,648,1017,700,993,768,956,837,932,869,904,897,886,909,883,904,901,893,928,866,952,835,988,766,1012,699,1025,646"/>
+<area shape="rect" id="Node000003" href="$d5/d8b/classfl_1_1_channel_aba6af4be09d5ab9bd2bed306e4238925.html#aba6af4be09d5ab9bd2bed306e4238925" title="Protected constructor for template subclasses (e.g., ClocklessIdf5)" alt="" coords="517,203,669,228"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="768,274,679,242,642,231,643,226,681,237,770,269"/>
+<area shape="rect" id="Node000006" href="$d5/d8b/classfl_1_1_channel_abfdb59164f69ea16a5290ccc6c9c7367.html#abfdb59164f69ea16a5290ccc6c9c7367" title=" " alt="" coords="268,5,433,31"/>
+<area shape="poly" id="edge17_Node000002_Node000006" title=" " alt="" coords="788,268,732,221,653,160,558,97,508,69,456,44,423,33,425,28,458,40,510,64,561,93,656,156,735,217,791,264"/>
+<area shape="rect" id="Node000013" href="$d5/d8b/classfl_1_1_channel_a73b662986c55cfb31ff1e72065df03dd.html#a73b662986c55cfb31ff1e72065df03dd" title="Private constructor (use create() factory method)" alt="" coords="517,252,669,277"/>
+<area shape="poly" id="edge14_Node000002_Node000013" title=" " alt="" coords="714,280,669,276,669,270,715,275"/>
+<area shape="rect" id="Node000014" href="$d5/d8b/classfl_1_1_channel_a547ccb4c09f235fdad54564198d19028.html#a547ccb4c09f235fdad54564198d19028" title="Backwards&#45;compatible constructor (deprecated)" alt="" coords="517,301,669,327"/>
+<area shape="poly" id="edge15_Node000002_Node000014" title=" " alt="" coords="715,303,669,308,669,303,714,297"/>
+<area shape="rect" id="Node000015" href="$d5/d8b/classfl_1_1_channel_acb0aa97ad60c6c8a739a60610b2bc1f9.html#acb0aa97ad60c6c8a739a60610b2bc1f9" title="Create a new channel with optional mBus driver pinning." alt="" coords="523,351,663,376"/>
+<area shape="poly" id="edge16_Node000002_Node000015" title=" " alt="" coords="769,309,681,341,640,353,638,348,679,335,767,304"/>
+<area shape="rect" id="Node000004" href="$d5/d8b/classfl_1_1_channel_ac688f91aefbe88369c7c7a120a0d7772.html#ac688f91aefbe88369c7c7a120a0d7772" title=" " alt="" coords="275,55,427,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="571,194,522,142,491,116,456,94,426,82,428,77,459,89,494,112,526,139,575,190"/>
+<area shape="rect" id="Node000005" href="$d5/d8b/classfl_1_1_channel_a1024ab39998e20eaad3dc0f7ed0f60ca.html#a1024ab39998e20eaad3dc0f7ed0f60ca" title=" " alt="" coords="275,104,427,129"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="560,198,512,169,456,143,420,132,422,127,458,138,515,165,563,193"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="570,194,503,111,482,74,473,59,456,44,432,32,435,28,459,40,477,55,487,71,508,109,574,190"/>
+<area shape="rect" id="Node000007" href="$d5/d8b/classfl_1_1_channel_a5047a061dfeb02365ea94e5a850b1ccc.html#a5047a061dfeb02365ea94e5a850b1ccc" title=" " alt="" coords="268,153,433,179"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="516,202,413,181,414,176,517,197"/>
+<area shape="rect" id="Node000008" href="$d5/d8b/classfl_1_1_channel_adb053871cd9d4b44b0e57837387e5599.html#adb053871cd9d4b44b0e57837387e5599" title="Set gamma correction value." alt="" coords="265,203,436,228"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="502,218,436,218,436,213,502,213"/>
+<area shape="rect" id="Node000009" href="$d5/d8b/classfl_1_1_channel_a0dccce627f46ca1d42624d0f82889385.html#a0dccce627f46ca1d42624d0f82889385" title="Set screen map for JS canvas visualization." alt="" coords="255,252,446,277"/>
+<area shape="poly" id="edge8_Node000003_Node000009" title=" " alt="" coords="517,233,414,255,413,249,516,228"/>
+<area shape="rect" id="Node000010" href="$d5/d8b/classfl_1_1_channel_acfb78f07c618a1248db6c4fbbed5e408.html#acfb78f07c618a1248db6c4fbbed5e408" title="Set screen map for 1D strip remapping from XMap." alt="" coords="5,329,196,355"/>
+<area shape="poly" id="edge9_Node000003_Node000010" title=" " alt="" coords="519,236,507,242,493,253,484,266,475,279,459,291,411,307,344,320,196,337,196,332,343,315,410,302,456,286,471,275,479,263,489,250,504,237,516,231"/>
+<area shape="rect" id="Node000011" href="$d5/d8b/classfl_1_1_channel_ac3c700e8433fc9775f3f8a716161e3b1.html#ac3c700e8433fc9775f3f8a716161e3b1" title="Set screen map for JS canvas visualization from XYMap." alt="" coords="255,353,446,379"/>
+<area shape="poly" id="edge10_Node000003_Node000011" title=" " alt="" coords="513,237,507,241,496,252,490,263,484,287,477,312,459,336,424,356,421,351,456,332,473,309,479,286,485,261,492,249,504,237,510,232"/>
+<area shape="rect" id="Node000012" href="$d5/d8b/classfl_1_1_channel_a6a2bf9a4ab0f0ee7df060a3d0cba96b3.html#a6a2bf9a4ab0f0ee7df060a3d0cba96b3" title="Set screen map for JS canvas visualization from dimensions." alt="" coords="5,379,196,404"/>
+<area shape="poly" id="edge13_Node000003_Node000012" title=" " alt="" coords="512,237,507,241,493,259,487,278,486,317,484,356,476,375,459,392,420,414,378,427,333,434,288,434,204,423,138,407,140,402,205,418,289,429,333,428,376,422,418,409,456,388,471,372,479,355,481,317,482,277,489,257,503,238,508,233"/>
+<area shape="poly" id="edge11_Node000011_Node000010" title=" " alt="" coords="241,358,196,354,197,349,242,353"/>
+<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="242,380,197,384,196,379,241,374"/>
+<area shape="rect" id="Node000017" href="$d4/d36/namespacefl_a54c09f7965e851d33159fefd483004eb.html#a54c09f7965e851d33159fefd483004eb" title="Read a line from a serial&#45;like input source (blocking with optional timeout)" alt="" coords="527,403,658,428"/>
+<area shape="poly" id="edge19_Node000016_Node000017" title=" " alt="" coords="715,418,658,418,658,413,715,413"/>
+<area shape="rect" id="Node000019" href="$d4/d36/namespacefl_af62a6a137d58541697cc30d451c9d751.html#af62a6a137d58541697cc30d451c9d751" title=" " alt="" coords="545,455,640,480"/>
+<area shape="poly" id="edge21_Node000018_Node000019" title=" " alt="" coords="733,468,640,469,640,464,733,463"/>
+<area shape="rect" id="Node000020" href="$d4/d36/namespacefl_a6913bcc5545eb4b029ec170d48a14766.html#a6913bcc5545eb4b029ec170d48a14766" title="Create a JSON&#45;RPC RequestSource that reads from fl:: serial input." alt="" coords="244,455,457,480"/>
+<area shape="poly" id="edge22_Node000019_Node000020" title=" " alt="" coords="532,470,457,470,457,465,532,465"/>
+<area shape="rect" id="Node000023" href="$d4/d36/namespacefl_abf67c32c8c00be8e7bf8dc0e0c36ca1c.html#abf67c32c8c00be8e7bf8dc0e0c36ca1c" title="Optimized readSerialLine for fl:: serial input." alt="" coords="285,504,416,529"/>
+<area shape="poly" id="edge23_Node000019_Node000023" title=" " alt="" coords="532,482,414,507,413,501,531,477"/>
+<area shape="rect" id="Node000025" href="$df/d01/_client_real_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="567,528,618,553"/>
+<area shape="poly" id="edge25_Node000024_Node000025" title=" " alt="" coords="723,528,619,540,618,535,723,522"/>
+<area shape="poly" id="edge27_Node000026_Node000025" title=" " alt="" coords="714,556,618,546,618,540,714,550"/>
+<area shape="rect" id="Node000029" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a97018959f2c77546fa12f2a0adb2f540.html#a97018959f2c77546fa12f2a0adb2f540" title="Flush all lanes (transpose and transmit)" alt="" coords="505,729,680,769"/>
+<area shape="poly" id="edge30_Node000028_Node000029" title=" " alt="" coords="734,711,664,731,662,726,733,706"/>
+<area shape="rect" id="Node000030" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a512a780a7050fa0e91e83c5dba1e17bc.html#a512a780a7050fa0e91e83c5dba1e17bc" title=" " alt="" coords="263,697,438,737"/>
+<area shape="poly" id="edge31_Node000029_Node000030" title=" " alt="" coords="491,738,438,731,438,726,492,733"/>
+<area shape="rect" id="Node000031" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a547b2f30f70e16dbb22762f3f2370254.html#a547b2f30f70e16dbb22762f3f2370254" title="Internal implementation &#45; write all lanes atomically." alt="" coords="263,761,438,801"/>
+<area shape="poly" id="edge32_Node000029_Node000031" title=" " alt="" coords="492,765,438,772,438,767,491,759"/>
+<area shape="poly" id="edge34_Node000033_Node000029" title=" " alt="" coords="733,751,680,751,680,746,733,746"/>
+<area shape="poly" id="edge36_Node000034_Node000029" title=" " alt="" coords="733,792,662,771,664,766,734,787"/>
+</map>

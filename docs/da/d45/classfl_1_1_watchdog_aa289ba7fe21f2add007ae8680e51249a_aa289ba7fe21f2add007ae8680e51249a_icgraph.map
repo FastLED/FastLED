@@ -1,0 +1,25 @@
+<map id="fl::Watchdog::Watchdog" name="fl::Watchdog::Watchdog">
+<area shape="rect" id="Node000001" title=" " alt="" coords="712,115,887,140"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="840,106,829,97,799,94,775,96,762,101,760,106,766,113,762,117,754,107,759,97,774,91,799,88,831,92,843,102"/>
+<area shape="rect" id="Node000002" href="$da/d45/classfl_1_1_watchdog_a779d7ee7f6325df2bed85eadf80e288b.html#a779d7ee7f6325df2bed85eadf80e288b" title=" " alt="" coords="484,40,659,66"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="754,112,663,80,624,68,626,63,665,74,755,107"/>
+<area shape="rect" id="Node000003" href="$da/d45/classfl_1_1_watchdog_ac17a6f3165a3df128a543aca6dc81d9b.html#ac17a6f3165a3df128a543aca6dc81d9b" title=" " alt="" coords="479,90,664,115"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="698,119,664,115,664,110,698,114"/>
+<area shape="rect" id="Node000004" href="$da/d45/classfl_1_1_watchdog_a09a903bdc23fddbb6caac87080a2a567.html#a09a903bdc23fddbb6caac87080a2a567" title=" " alt="" coords="489,139,654,164"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="698,141,654,146,654,140,698,136"/>
+<area shape="rect" id="Node000011" href="$da/d45/classfl_1_1_watchdog_a6342f5724bfa02d5361deb958d1fd2d6.html#a6342f5724bfa02d5361deb958d1fd2d6" title=" " alt="" coords="483,188,659,214"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="753,148,665,178,622,191,620,186,663,173,751,143"/>
+<area shape="rect" id="Node000005" href="$d7/d76/classfl_1_1_scoped_watchdog_a196822062d7ab5c2b32c34a6d1efddd0.html#a196822062d7ab5c2b32c34a6d1efddd0" title="Construct with an explicit timeout." alt="" coords="5,102,155,142"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="487,135,477,128,466,117,459,105,453,80,447,58,440,48,429,39,399,23,371,13,346,9,321,9,267,19,204,39,174,52,147,69,103,104,100,100,144,64,172,47,202,34,266,14,320,3,346,3,373,8,401,18,432,35,444,45,452,56,459,79,464,103,470,114,480,124,490,131"/>
+<area shape="rect" id="Node000006" href="$d7/d76/classfl_1_1_scoped_watchdog_ae049c448ae90dc80c758ef5e6787db9e.html#ae049c448ae90dc80c758ef5e6787db9e" title="Feed the watchdog at end&#45;of&#45;scope so the next loop() iteration has a clean deadline window." alt="" coords="241,49,393,89"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="503,138,478,129,430,103,392,90,394,85,432,99,480,124,504,133"/>
+<area shape="rect" id="Node000007" href="$d1/df2/_auto_research_low_memory_8h_a313a652d1531f7d82fb04a3f6499ddff.html#a313a652d1531f7d82fb04a3f6499ddff" title=" " alt="" coords="205,114,428,139"/>
+<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="475,145,428,140,428,135,475,139"/>
+<area shape="rect" id="Node000008" href="$d1/df2/_auto_research_low_memory_8h_ae3f918f9121ab392058ef53302b021cf.html#ae3f918f9121ab392058ef53302b021cf" title=" " alt="" coords="203,163,431,188"/>
+<area shape="poly" id="edge8_Node000004_Node000008" title=" " alt="" coords="475,163,431,168,431,162,475,158"/>
+<area shape="rect" id="Node000009" href="$df/d52/namespacefl_1_1platforms_a3333f9482b0798c0daebdc07be2cdd5c.html#a3333f9482b0798c0daebdc07be2cdd5c" title=" " alt="" coords="207,213,426,253"/>
+<area shape="poly" id="edge9_Node000004_Node000009" title=" " alt="" coords="501,171,480,178,432,202,393,215,392,210,430,197,478,173,500,166"/>
+<area shape="rect" id="Node000010" href="$dd/dbb/class_c_fast_l_e_d_aa9adb7a4dd598dbdfaeb49e2d12e3fcb.html#aa9adb7a4dd598dbdfaeb49e2d12e3fcb" title="Access the unified cross&#45;platform watchdog timer." alt="" coords="240,278,393,303"/>
+<area shape="poly" id="edge11_Node000004_Node000010" title=" " alt="" coords="488,173,480,178,464,199,457,221,451,245,432,267,414,278,394,285,393,280,412,273,429,263,446,242,452,220,459,196,477,174,485,168"/>
+<area shape="poly" id="edge10_Node000009_Node000005" title=" " alt="" coords="223,211,202,202,150,174,107,145,110,140,153,169,204,197,225,206"/>
+</map>

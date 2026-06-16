@@ -1,0 +1,8 @@
+<map id="fl::CRGB::setHSV" name="fl::CRGB::setHSV">
+<area shape="rect" id="Node000001" title="Allow assignment from hue, saturation, and value." alt="" coords="5,43,136,68"/>
+<area shape="rect" id="Node000002" href="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" title="Default constructor." alt="" coords="191,5,311,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="132,40,176,31,177,36,133,45"/>
+<area shape="rect" id="Node000003" href="$dd/dc7/group___h_s_v2_r_g_b_gab6a6fedf5fcb4f47b95eed3aee43c613.html#gab6a6fedf5fcb4f47b95eed3aee43c613" title=" " alt="" coords="184,79,317,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="135,65,174,73,173,79,134,71"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="221,80,215,70,218,61,230,54,251,52,275,56,286,64,282,68,273,60,251,57,232,59,222,64,220,70,225,77"/>
+</map>

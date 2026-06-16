@@ -1,0 +1,6 @@
+<map id="fl::ChannelManager::pollNeededWaitSliceMs" name="fl::ChannelManager::pollNeededWaitSliceMs">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,22,188,62"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="236,29,311,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="188,39,222,39,222,45,188,45"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="244,31,238,21,241,11,253,5,273,3,298,6,308,15,304,19,295,11,273,8,255,10,245,15,243,20,248,28"/>
+</map>

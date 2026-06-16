@@ -119,21 +119,21 @@ $(function(){initNavTree('db/d37/class_keyboard_state_a1c6f100c4a96b02d671b0bafe
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00167">167</a> of file <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html">Keyboard.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  167</span>                                                              {</div>
-<div class="line"><span class="lineno">  168</span>  <span class="comment">// Note that d1 and d2 just mean &quot;data-1&quot; and &quot;data-2&quot;.</span></div>
-<div class="line"><span class="lineno">  169</span>  <span class="comment">// TODO: Find out what d1 and d2 should be called.</span></div>
-<div class="line"><span class="lineno">  170</span>  <span class="keyword">const</span> <span class="keywordtype">bool</span> foot_pedal = (d1 == <a class="code hl_enumvalue" href="../../de/d60/settings_8h_a22176b8d4a09265837a22b79c1679b4f.html#a22176b8d4a09265837a22b79c1679b4fa9d49e74cb014fea8b431a4edb8f4d508">kMidiFootPedal</a>);</div>
-<div class="line"><span class="lineno">  171</span>  </div>
-<div class="line"><span class="lineno">  172</span>  <span class="keywordflow">if</span> (foot_pedal) {</div>
-<div class="line"><span class="lineno">  173</span>    <span class="comment">// Spec says that if that values 0-63 are OFF, otherwise ON.</span></div>
-<div class="line"><span class="lineno">  174</span>    <a class="code hl_variable" href="../../db/d37/class_keyboard_state_a9d646ca8c490219be924db314c6e3e1c.html#a9d646ca8c490219be924db314c6e3e1c">sustain_pedal_</a> = (d2 &gt;= 64);</div>
-<div class="line"><span class="lineno">  175</span>  }</div>
-<div class="line"><span class="lineno">  176</span>}</div>
-<div class="ttc" id="aclass_keyboard_state_a9d646ca8c490219be924db314c6e3e1c_html_a9d646ca8c490219be924db314c6e3e1c"><div class="ttname"><a href="../../db/d37/class_keyboard_state_a9d646ca8c490219be924db314c6e3e1c.html#a9d646ca8c490219be924db314c6e3e1c">KeyboardState::sustain_pedal_</a></div><div class="ttdeci">bool sustain_pedal_</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00102">Keyboard.h:102</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html#l00168">168</a> of file <a class="el" href="../../d9/d5c/_keyboard_8cpp_source.html">Keyboard.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  168</span>                                                              {</div>
+<div class="line"><span class="lineno">  169</span>  <span class="comment">// Note that d1 and d2 just mean &quot;data-1&quot; and &quot;data-2&quot;.</span></div>
+<div class="line"><span class="lineno">  170</span>  <span class="comment">// TODO: Find out what d1 and d2 should be called.</span></div>
+<div class="line"><span class="lineno">  171</span>  <span class="keyword">const</span> <span class="keywordtype">bool</span> foot_pedal = (d1 == <a class="code hl_enumvalue" href="../../de/d60/settings_8h_a22176b8d4a09265837a22b79c1679b4f.html#a22176b8d4a09265837a22b79c1679b4fa9d49e74cb014fea8b431a4edb8f4d508">kMidiFootPedal</a>);</div>
+<div class="line"><span class="lineno">  172</span> </div>
+<div class="line"><span class="lineno">  173</span>  <span class="keywordflow">if</span> (foot_pedal) {</div>
+<div class="line"><span class="lineno">  174</span>    <span class="comment">// Spec says that if that values 0-63 are OFF, otherwise ON.</span></div>
+<div class="line"><span class="lineno">  175</span>    <a class="code hl_variable" href="../../db/d37/class_keyboard_state_ae3d2cb9b4628b2bf8af737813f07bb7a.html#ae3d2cb9b4628b2bf8af737813f07bb7a">mSustainPedal</a> = (d2 &gt;= 64);</div>
+<div class="line"><span class="lineno">  176</span>  }</div>
+<div class="line"><span class="lineno">  177</span>}</div>
+<div class="ttc" id="aclass_keyboard_state_ae3d2cb9b4628b2bf8af737813f07bb7a_html_ae3d2cb9b4628b2bf8af737813f07bb7a"><div class="ttname"><a href="../../db/d37/class_keyboard_state_ae3d2cb9b4628b2bf8af737813f07bb7a.html#ae3d2cb9b4628b2bf8af737813f07bb7a">KeyboardState::mSustainPedal</a></div><div class="ttdeci">bool mSustainPedal</div><div class="ttdef"><b>Definition</b> <a href="../../df/d85/_keyboard_8h_source.html#l00102">Keyboard.h:102</a></div></div>
 <div class="ttc" id="asettings_8h_a22176b8d4a09265837a22b79c1679b4f_html_a22176b8d4a09265837a22b79c1679b4fa9d49e74cb014fea8b431a4edb8f4d508"><div class="ttname"><a href="../../de/d60/settings_8h_a22176b8d4a09265837a22b79c1679b4f.html#a22176b8d4a09265837a22b79c1679b4fa9d49e74cb014fea8b431a4edb8f4d508">kMidiFootPedal</a></div><div class="ttdeci">@ kMidiFootPedal</div><div class="ttdef"><b>Definition</b> <a href="../../de/d60/settings_8h_source.html#l00022">settings.h:22</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../de/d60/settings_8h_source.html#l00022">kMidiFootPedal</a>, and <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00102">sustain_pedal_</a>.</p>
+<p class="reference">References <a class="el" href="../../de/d60/settings_8h_source.html#l00022">kMidiFootPedal</a>, and <a class="el" href="../../df/d85/_keyboard_8h_source.html#l00102">mSustainPedal</a>.</p>
 
 </div>
 </div>
@@ -144,7 +144,7 @@ $(function(){initNavTree('db/d37/class_keyboard_state_a1c6f100c4a96b02d671b0bafe
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../db/d37/class_keyboard_state.html">KeyboardState</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

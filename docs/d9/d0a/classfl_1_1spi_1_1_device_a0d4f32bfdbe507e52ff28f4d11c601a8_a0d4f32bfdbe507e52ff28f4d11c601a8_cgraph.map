@@ -1,0 +1,11 @@
+<map id="fl::spi::Device::operator=" name="fl::spi::Device::operator=">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,189,56"/>
+<area shape="rect" id="Node000002" href="$d9/d0a/classfl_1_1spi_1_1_device_a8f28202aa767ffa4c8faa43287ffb3d8.html#a8f28202aa767ffa4c8faa43287ffb3d8" title="Construct SPI device with configuration." alt="" coords="237,31,400,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="190,41,224,41,224,46,190,46"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a3fd92c727664a77396403265415789d3.html#a3fd92c727664a77396403265415789d3" title=" " alt="" coords="463,5,588,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="400,31,448,25,449,30,400,36"/>
+<area shape="rect" id="Node000005" href="$d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c" title=" " alt="" coords="448,55,603,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="400,50,435,54,434,59,400,55"/>
+<area shape="rect" id="Node000004" href="$da/d3c/namespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259.html#a0bddf371925d8c4e94b88e9d7b35d259" title=" " alt="" coords="651,5,755,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="588,15,637,15,637,21,588,21"/>
+</map>

@@ -1,0 +1,37 @@
+digraph "fl::gfx::blurGaussian"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::gfx::blurGaussian",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="XYMap-backed Gaussian blur (non-optimized, per-pixel path)."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::gfx::blurGaussianMappedImpl",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d8b/namespacefl_1_1gfx_afc0e7645d38e1c662353ef960797499e.html#afc0e7645d38e1c662353ef960797499e",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::gfx::blur_detail\l::alpha_identity",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d8f/namespacefl_1_1gfx_1_1blur__detail_a34d2ba76aa6e39b90d485af17c835732.html#a34d2ba76aa6e39b90d485af17c835732",tooltip=" "];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::gfx::CanvasMapped::at",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/de3/structfl_1_1gfx_1_1_canvas_mapped_acc768e7e69f8bde8615341bc08ecf690.html#acc768e7e69f8bde8615341bc08ecf690",tooltip=" "];
+  Node2 -> Node5 [id="edge4_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::gfx::blurGaussianImpl",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d8b/namespacefl_1_1gfx_a9c2302b4a1a567e89ab63f5ddc3b7532.html#a9c2302b4a1a567e89ab63f5ddc3b7532",tooltip=" "];
+  Node5 -> Node3 [id="edge5_Node000005_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node6 [id="edge6_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::gfx::blur_detail\l::compute_pad_size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d8f/namespacefl_1_1gfx_1_1blur__detail_a944ff6b562051adb55615b615614fa1b.html#a944ff6b562051adb55615b615614fa1b",tooltip=" "];
+  Node5 -> Node7 [id="edge7_Node000005_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::span::data",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d08/classfl_1_1span_a326aa9f29859fe8a92833fd5db12c3bb.html#a326aa9f29859fe8a92833fd5db12c3bb",tooltip=" "];
+  Node5 -> Node8 [id="edge8_Node000005_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::gfx::blur_detail\l::get_padbuf",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/d8f/namespacefl_1_1gfx_1_1blur__detail_a7c0d48099e6d1b373d8cab2c1b397ac7.html#a7c0d48099e6d1b373d8cab2c1b397ac7",tooltip=" "];
+  Node5 -> Node11 [id="edge9_Node000005_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::gfx::blur_detail\l::hpass_row",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/d8f/namespacefl_1_1gfx_1_1blur__detail_a5403b58dc02b2aae64fa2e979e928bbb.html#a5403b58dc02b2aae64fa2e979e928bbb",tooltip=" "];
+  Node5 -> Node13 [id="edge10_Node000005_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::P",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a715b655d8ee6017d3c827c5de110d59e.html#a715b655d8ee6017d3c827c5de110d59e",tooltip=" "];
+  Node5 -> Node15 [id="edge11_Node000005_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl::gfx::blur_detail\l::vpass_full",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/d8f/namespacefl_1_1gfx_1_1blur__detail_a0cafaa9c040e0e3be2dfea193bf08710.html#a0cafaa9c040e0e3be2dfea193bf08710",tooltip=" "];
+  Node2 -> Node6 [id="edge12_Node000002_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node7 [id="edge13_Node000002_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node8 [id="edge14_Node000002_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node17 [id="edge15_Node000002_Node000017",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl::XYMap::isRectangularGrid",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dce/classfl_1_1_x_y_map_a92c41ff890d9dc9cdbac08a9523e7a9f.html#a92c41ff890d9dc9cdbac08a9523e7a9f",tooltip=" "];
+  Node2 -> Node13 [id="edge16_Node000002_Node000013",color="steelblue1",style="solid",tooltip=" "];
+}

@@ -1,0 +1,20 @@
+<map id="fl::s12x4::sincos" name="fl::s12x4::sincos">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,107,132,132"/>
+<area shape="rect" id="Node000002" href="$da/d43/classfl_1_1s12x4_ad95562b9dda482d099422cd456051fd8.html#ad95562b9dda482d099422cd456051fd8" title=" " alt="" coords="400,56,524,81"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="118,104,180,91,287,78,386,70,386,75,288,83,180,97,120,109"/>
+<area shape="rect" id="Node000003" href="$da/d43/classfl_1_1s12x4_a990f427046d7cd3f09e54ea0497c5a2a.html#a990f427046d7cd3f09e54ea0497c5a2a" title=" " alt="" coords="180,5,352,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="86,104,128,77,179,48,212,33,214,38,181,52,130,81,89,109"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a289ad302494249edde0b6b9e28c831f1.html#a289ad302494249edde0b6b9e28c831f1" title=" " alt="" coords="228,208,304,233"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="89,130,130,157,181,186,216,201,214,206,179,191,128,162,86,134"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a37a484f9e39484372eee81c7a66fad7d.html#a37a484f9e39484372eee81c7a66fad7d" title=" " alt="" coords="425,183,499,208"/>
+<area shape="poly" id="edge10_Node000001_Node000005" title=" " alt="" coords="127,129,181,141,412,184,411,189,179,146,126,135"/>
+<area shape="rect" id="Node000009" href="$da/d43/classfl_1_1s12x4_afe8ced3b2b52154711ad780f7dd170c4.html#afe8ced3b2b52154711ad780f7dd170c4" title=" " alt="" coords="193,107,339,132"/>
+<area shape="poly" id="edge7_Node000001_Node000009" title=" " alt="" coords="132,117,179,117,179,122,132,122"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="317,28,400,50,398,55,315,33"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="304,213,411,199,412,204,304,218"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a530ae797477506b0949a2cae39010c6a.html#a530ae797477506b0949a2cae39010c6a" title=" " alt="" coords="572,183,691,208"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="499,193,558,193,558,198,499,198"/>
+<area shape="poly" id="edge8_Node000009_Node000002" title=" " alt="" coords="315,104,398,82,400,87,317,109"/>
+<area shape="rect" id="Node000010" href="$da/d43/classfl_1_1s12x4_a0f51528407321365c4336fc482e79336.html#a0f51528407321365c4336fc482e79336" title=" " alt="" coords="407,107,517,132"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="340,117,394,117,394,122,340,122"/>
+</map>

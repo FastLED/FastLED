@@ -1,10 +1,12 @@
 <map id="CFastLED::operator[]" name="CFastLED::operator[]">
-<area shape="rect" id="Node000001" title="Get a reference to a registered controller." alt="" coords="5,31,160,56"/>
-<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller_a8b412ff1fd4833d0db63a175d40a2ee0.html#a8b412ff1fd4833d0db63a175d40a2ee0" title="Get the first LED controller in the linked list of controllers." alt="" coords="208,5,368,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="160,31,194,27,195,32,160,36"/>
-<area shape="rect" id="Node000004" href="$d6/d2c/class_c_l_e_d_controller_a21a4d2b3415dd7b24175ebdb51c9ced0.html#a21a4d2b3415dd7b24175ebdb51c9ced0" title="Get the next controller in the linked list after this one." alt="" coords="209,55,367,80"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="160,50,196,54,195,59,160,55"/>
-<area shape="rect" id="Node000003" href="$d6/d2c/class_c_l_e_d_controller_a8c560c6d171f117dfd19c0f2ec780a32.html#a8c560c6d171f117dfd19c0f2ec780a32" title="Create an led controller object, add it to the chain of controllers." alt="" coords="416,31,643,56"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="368,24,402,27,402,33,368,29"/>
-<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="367,57,402,53,402,59,367,62"/>
+<area shape="rect" id="Node000001" title="Get a reference to a registered controller." alt="" coords="5,45,160,70"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ad9e0dfb8b8b333d9e48c7695b202710c.html#ad9e0dfb8b8b333d9e48c7695b202710c" title="Get the first LED controller in the linked list of controllers." alt="" coords="208,5,344,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="159,42,194,36,195,41,160,47"/>
+<area shape="rect" id="Node000006" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a87abe437742b3f2b06943fafd4404aef.html#a87abe437742b3f2b06943fafd4404aef" title="Get the next controller in the linked list after this one." alt="" coords="208,69,344,109"/>
+<area shape="poly" id="edge4_Node000001_Node000006" title=" " alt="" coords="160,67,195,73,194,78,159,73"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a7e91fc8f83d62c9da5e5c3d6d1bc10ce.html#a7e91fc8f83d62c9da5e5c3d6d1bc10ce" title="Protected constructor with registration mode." alt="" coords="392,37,528,77"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="345,35,379,41,378,46,344,40"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a9e51518d1427463dffd596c69c6f3e46.html#a9e51518d1427463dffd596c69c6f3e46" title="Add this controller to the linked list." alt="" coords="576,37,712,77"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="528,55,562,55,562,60,528,60"/>
+<area shape="poly" id="edge5_Node000006_Node000003" title=" " alt="" coords="344,75,378,69,379,74,345,80"/>
 </map>

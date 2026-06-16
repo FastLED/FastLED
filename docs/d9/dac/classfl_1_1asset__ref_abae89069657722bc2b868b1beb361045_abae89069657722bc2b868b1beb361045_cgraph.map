@@ -1,0 +1,7 @@
+<map id="fl::asset_ref::asset_ref" name="fl::asset_ref::asset_ref">
+<area shape="rect" id="Node000001" title="Construct from a pointer to a null&#45;terminated string with known length." alt="" coords="5,31,171,56"/>
+<area shape="rect" id="Node000002" href="$d6/daf/direct_8h_a1ddd0aa76a31f81b55f0ffccc1f3d4de.html#a1ddd0aa76a31f81b55f0ffccc1f3d4de" title=" " alt="" coords="255,5,317,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="171,30,241,21,241,26,171,35"/>
+<area shape="rect" id="Node000003" href="$d9/dac/classfl_1_1asset__ref_a3eb90fc9da8f94b558663ffd6ea38caa.html#a3eb90fc9da8f94b558663ffd6ea38caa" title="The relative asset path as a string view (e.g. &quot;data/track.mp3&quot;)." alt="" coords="219,55,353,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="171,51,205,55,204,60,171,56"/>
+</map>

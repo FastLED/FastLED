@@ -1,0 +1,19 @@
+<map id="fl::net::http::FetchOptions" name="fl::net::http::FetchOptions">
+<area shape="rect" id="Node000001" title="Fetch options builder (fluent interface)" alt="" coords="1531,110,1717,135"/>
+<area shape="rect" id="Node000002" href="$d2/db2/classfl_1_1string.html" title=" " alt="" coords="970,115,1045,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1058,126,1211,128,1415,128,1530,124,1531,130,1415,133,1211,133,1058,132"/>
+<area shape="rect" id="Node000006" href="$d7/d70/structfl_1_1net_1_1http_1_1_request_options.html" title="Request options (matches JavaScript fetch RequestInit)" alt="" coords="1211,79,1415,105"/>
+<area shape="poly" id="edge7_Node000006_Node000002" title=" " alt="" coords="1059,119,1210,101,1211,107,1059,125"/>
+<area shape="rect" id="Node000003" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="532,108,697,148"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="711,125,970,125,970,131,711,131"/>
+<area shape="rect" id="Node000004" href="$de/d66/classfl_1_1basic__string.html" title="Concrete type&#45;erased string class." alt="" coords="5,115,121,141"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="135,119,145,119,319,115,493,119,531,120,531,126,493,124,319,120,145,124,135,125"/>
+<area shape="rect" id="Node000005" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="171,141,301,166"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="136,136,171,141,170,146,135,141"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="316,153,401,153,493,148,531,143,532,148,494,153,401,159,316,159"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="1429,101,1531,111,1530,116,1428,106"/>
+<area shape="rect" id="Node000007" href="$de/dd4/classfl_1_1_map_red_black_tree.html" title=" " alt="" coords="909,5,1105,75"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="1119,56,1238,77,1237,82,1118,62"/>
+<area shape="rect" id="Node000008" href="$de/dd4/classfl_1_1_map_red_black_tree.html" title=" " alt="" coords="517,13,712,67"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="726,37,909,37,909,43,726,43"/>
+</map>

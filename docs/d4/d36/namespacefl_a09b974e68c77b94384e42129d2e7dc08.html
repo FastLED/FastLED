@@ -119,47 +119,55 @@ $(function(){initNavTree('d4/d36/namespacefl_a09b974e68c77b94384e42129d2e7dc08.h
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../da/d13/noise__woryley_8cpp_source.html#l00033">33</a> of file <a class="el" href="../../da/d13/noise__woryley_8cpp_source.html">noise_woryley.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   33</span>                                      {</div>
-<div class="line"><span class="lineno">   34</span>    i32 cell_x = <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> &gt;&gt; 15;</div>
-<div class="line"><span class="lineno">   35</span>    i32 cell_y = <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> &gt;&gt; 15;</div>
-<div class="line"><span class="lineno">   36</span> </div>
-<div class="line"><span class="lineno">   37</span>    i32 min_dist = <a class="code hl_define" href="../../da/d7a/pixel__stream_8cpp_a181807730d4a375f848ba139813ce04f.html#a181807730d4a375f848ba139813ce04f">INT32_MAX</a>;</div>
-<div class="line"><span class="lineno">   38</span> </div>
-<div class="line"><span class="lineno">   39</span>    <span class="comment">// Check surrounding 9 cells</span></div>
-<div class="line"><span class="lineno">   40</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> dy = -1; dy &lt;= 1; ++dy) {</div>
-<div class="line"><span class="lineno">   41</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> dx = -1; dx &lt;= 1; ++dx) {</div>
-<div class="line"><span class="lineno">   42</span>            i32 gx = cell_x + dx;</div>
-<div class="line"><span class="lineno">   43</span>            i32 gy = cell_y + dy;</div>
-<div class="line"><span class="lineno">   44</span> </div>
-<div class="line"><span class="lineno">   45</span>            i32 fx, fy;</div>
-<div class="line"><span class="lineno">   46</span>            feature_point(gx, gy, fx, fy);</div>
-<div class="line"><span class="lineno">   47</span> </div>
-<div class="line"><span class="lineno">   48</span>            i32 feature_x = (gx &lt;&lt; 15) + fx;</div>
-<div class="line"><span class="lineno">   49</span>            i32 feature_y = (gy &lt;&lt; 15) + fy;</div>
-<div class="line"><span class="lineno">   50</span> </div>
-<div class="line"><span class="lineno">   51</span>            i32 dx_q15 = <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a> - feature_x;</div>
-<div class="line"><span class="lineno">   52</span>            i32 dy_q15 = <a class="code hl_variable" href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a> - feature_y;</div>
-<div class="line"><span class="lineno">   53</span> </div>
-<div class="line"><span class="lineno">   54</span>            <span class="comment">// Approximate distance using Manhattan (faster) or Euclidean</span></div>
-<div class="line"><span class="lineno">   55</span>            <span class="comment">// (costlier)</span></div>
-<div class="line"><span class="lineno">   56</span>            i32 dist =</div>
-<div class="line"><span class="lineno">   57</span>                q15_abs(dx_q15) + q15_abs(dy_q15); <span class="comment">// Manhattan distance</span></div>
-<div class="line"><span class="lineno">   58</span> </div>
-<div class="line"><span class="lineno">   59</span>            <span class="keywordflow">if</span> (dist &lt; min_dist)</div>
-<div class="line"><span class="lineno">   60</span>                min_dist = dist;</div>
-<div class="line"><span class="lineno">   61</span>        }</div>
-<div class="line"><span class="lineno">   62</span>    }</div>
-<div class="line"><span class="lineno">   63</span> </div>
-<div class="line"><span class="lineno">   64</span>    <span class="comment">// Normalize: maximum possible distance is roughly 2*Q15_ONE</span></div>
-<div class="line"><span class="lineno">   65</span>    <span class="keywordflow">return</span> (min_dist &lt;&lt; 15) / (2 * <a class="code hl_variable" href="../../d5/d4a/namespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_03_a65bc463e344a56191bdd308883a06d0e.html#a65bc463e344a56191bdd308883a06d0e">Q15_ONE</a>);</div>
-<div class="line"><span class="lineno">   66</span>}</div>
-<div class="ttc" id="a_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33_html_a0a2f84ed7838f07779ae24c5a9086d33"><div class="ttname"><a href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a></div><div class="ttdeci">int y</div><div class="ttdef"><b>Definition</b> <a href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00093">simple.h:93</a></div></div>
-<div class="ttc" id="a_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc_html_a6150e0515f7202e2fb518f7206ed97dc"><div class="ttname"><a href="../../db/d49/_audio_2simple_2simple_8h_a6150e0515f7202e2fb518f7206ed97dc.html#a6150e0515f7202e2fb518f7206ed97dc">x</a></div><div class="ttdeci">int x</div><div class="ttdef"><b>Definition</b> <a href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">simple.h:92</a></div></div>
-<div class="ttc" id="anamespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_03_a65bc463e344a56191bdd308883a06d0e_html_a65bc463e344a56191bdd308883a06d0e"><div class="ttname"><a href="../../d5/d4a/namespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_03_a65bc463e344a56191bdd308883a06d0e.html#a65bc463e344a56191bdd308883a06d0e">fl::anonymous_namespace{noise_woryley.cpp}::Q15_ONE</a></div><div class="ttdeci">constexpr i32 Q15_ONE</div><div class="ttdef"><b>Definition</b> <a href="../../da/d13/noise__woryley_8cpp_source.html#l00006">noise_woryley.cpp:6</a></div></div>
-<div class="ttc" id="apixel__stream_8cpp_a181807730d4a375f848ba139813ce04f_html_a181807730d4a375f848ba139813ce04f"><div class="ttname"><a href="../../da/d7a/pixel__stream_8cpp_a181807730d4a375f848ba139813ce04f.html#a181807730d4a375f848ba139813ce04f">INT32_MAX</a></div><div class="ttdeci">#define INT32_MAX</div><div class="ttdef"><b>Definition</b> <a href="../../da/d7a/pixel__stream_8cpp_source.html#l00007">pixel_stream.cpp:7</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../db/dac/noise__woryley_8cpp_8hpp_source.html#l00034">34</a> of file <a class="el" href="../../db/dac/noise__woryley_8cpp_8hpp_source.html">noise_woryley.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   34</span>                                      {</div>
+<div class="line"><span class="lineno">   35</span>    i32 cell_x = <a class="code hl_variable" href="../../d4/d36/namespacefl_a01deac84db27d10f737f8a92973bea86.html#a01deac84db27d10f737f8a92973bea86">x</a> &gt;&gt; 15;</div>
+<div class="line"><span class="lineno">   36</span>    i32 cell_y = <a class="code hl_variable" href="../../d4/d36/namespacefl_a19c81898aec29a20ef9d7e3be29eedfb.html#a19c81898aec29a20ef9d7e3be29eedfb">y</a> &gt;&gt; 15;</div>
+<div class="line"><span class="lineno">   37</span> </div>
+<div class="line"><span class="lineno">   38</span>    <span class="comment">// Use (max)() to prevent macro expansion by Arduino.h&#39;s max macro</span></div>
+<div class="line"><span class="lineno">   39</span>    i32 min_dist = (<a class="code hl_function" href="../../d6/d7c/structfl_1_1numeric__limits_a31c1687ca77003f233081c372a5c9922.html#a31c1687ca77003f233081c372a5c9922">fl::numeric_limits&lt;i32&gt;::max</a>)();</div>
+<div class="line"><span class="lineno">   40</span> </div>
+<div class="line"><span class="lineno">   41</span>    <span class="comment">// Check surrounding 9 cells</span></div>
+<div class="line"><span class="lineno">   42</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> dy = -1; dy &lt;= 1; ++dy) {</div>
+<div class="line"><span class="lineno">   43</span>        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> dx = -1; dx &lt;= 1; ++dx) {</div>
+<div class="line"><span class="lineno">   44</span>            i32 gx = cell_x + dx;</div>
+<div class="line"><span class="lineno">   45</span>            i32 gy = cell_y + dy;</div>
+<div class="line"><span class="lineno">   46</span> </div>
+<div class="line"><span class="lineno">   47</span>            i32 fx, fy;</div>
+<div class="line"><span class="lineno">   48</span>            feature_point(gx, gy, fx, fy);</div>
+<div class="line"><span class="lineno">   49</span> </div>
+<div class="line"><span class="lineno">   50</span>            i32 feature_x = (gx &lt;&lt; 15) + fx;</div>
+<div class="line"><span class="lineno">   51</span>            i32 feature_y = (gy &lt;&lt; 15) + fy;</div>
+<div class="line"><span class="lineno">   52</span> </div>
+<div class="line"><span class="lineno">   53</span>            i32 dx_q15 = <a class="code hl_variable" href="../../d4/d36/namespacefl_a01deac84db27d10f737f8a92973bea86.html#a01deac84db27d10f737f8a92973bea86">x</a> - feature_x;</div>
+<div class="line"><span class="lineno">   54</span>            i32 dy_q15 = <a class="code hl_variable" href="../../d4/d36/namespacefl_a19c81898aec29a20ef9d7e3be29eedfb.html#a19c81898aec29a20ef9d7e3be29eedfb">y</a> - feature_y;</div>
+<div class="line"><span class="lineno">   55</span> </div>
+<div class="line"><span class="lineno">   56</span>            <span class="comment">// Approximate distance using Manhattan (faster) or Euclidean</span></div>
+<div class="line"><span class="lineno">   57</span>            <span class="comment">// (costlier)</span></div>
+<div class="line"><span class="lineno">   58</span>            i32 dist =</div>
+<div class="line"><span class="lineno">   59</span>                q15_abs(dx_q15) + q15_abs(dy_q15); <span class="comment">// Manhattan distance</span></div>
+<div class="line"><span class="lineno">   60</span> </div>
+<div class="line"><span class="lineno">   61</span>            <span class="keywordflow">if</span> (dist &lt; min_dist)</div>
+<div class="line"><span class="lineno">   62</span>                min_dist = dist;</div>
+<div class="line"><span class="lineno">   63</span>        }</div>
+<div class="line"><span class="lineno">   64</span>    }</div>
+<div class="line"><span class="lineno">   65</span> </div>
+<div class="line"><span class="lineno">   66</span>    <span class="comment">// Normalize: maximum possible distance is roughly 2*Q15_ONE</span></div>
+<div class="line"><span class="lineno">   67</span>    <span class="keywordflow">return</span> (min_dist &lt;&lt; 15) / (2 * <a class="code hl_variable" href="../../d3/d7d/namespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_8hpp_03_aee6add7140bf97c50cedf73f60d7b0d9.html#aee6add7140bf97c50cedf73f60d7b0d9">Q15_ONE</a>);</div>
+<div class="line"><span class="lineno">   68</span>}</div>
+<div class="ttc" id="anamespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_8hpp_03_aee6add7140bf97c50cedf73f60d7b0d9_html_aee6add7140bf97c50cedf73f60d7b0d9"><div class="ttname"><a href="../../d3/d7d/namespacefl_1_1anonymous__namespace_02noise__woryley_8cpp_8hpp_03_aee6add7140bf97c50cedf73f60d7b0d9.html#aee6add7140bf97c50cedf73f60d7b0d9">fl::anonymous_namespace{noise_woryley.cpp.hpp}::Q15_ONE</a></div><div class="ttdeci">constexpr i32 Q15_ONE</div><div class="ttdef"><b>Definition</b> <a href="../../db/dac/noise__woryley_8cpp_8hpp_source.html#l00007">noise_woryley.cpp.hpp:7</a></div></div>
+<div class="ttc" id="anamespacefl_a01deac84db27d10f737f8a92973bea86_html_a01deac84db27d10f737f8a92973bea86"><div class="ttname"><a href="../../d4/d36/namespacefl_a01deac84db27d10f737f8a92973bea86.html#a01deac84db27d10f737f8a92973bea86">fl::x</a></div><div class="ttdeci">x</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00024">transposition.cpp.hpp:24</a></div></div>
+<div class="ttc" id="anamespacefl_a19c81898aec29a20ef9d7e3be29eedfb_html_a19c81898aec29a20ef9d7e3be29eedfb"><div class="ttname"><a href="../../d4/d36/namespacefl_a19c81898aec29a20ef9d7e3be29eedfb.html#a19c81898aec29a20ef9d7e3be29eedfb">fl::y</a></div><div class="ttdeci">y</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00023">transposition.cpp.hpp:23</a></div></div>
+<div class="ttc" id="astructfl_1_1numeric__limits_a31c1687ca77003f233081c372a5c9922_html_a31c1687ca77003f233081c372a5c9922"><div class="ttname"><a href="../../d6/d7c/structfl_1_1numeric__limits_a31c1687ca77003f233081c372a5c9922.html#a31c1687ca77003f233081c372a5c9922">fl::numeric_limits::max</a></div><div class="ttdeci">static constexpr T max() FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d86/limits_8h_source.html#l00108">limits.h:108</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../da/d7a/pixel__stream_8cpp_source.html#l00007">INT32_MAX</a>, <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">x</a>, and <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00093">y</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/d86/limits_8h_source.html#l00108">fl::numeric_limits&lt; T &gt;::max()</a>, <a class="el" href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00024">x</a>, and <a class="el" href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00023">y</a>.</p>
+<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_a09b974e68c77b94384e42129d2e7dc08_a09b974e68c77b94384e42129d2e7dc08_cgraph.svg" width="410" height="60"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
 
 </div>
 </div>
@@ -170,7 +178,7 @@ $(function(){initNavTree('d4/d36/namespacefl_a09b974e68c77b94384e42129d2e7dc08.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:22 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

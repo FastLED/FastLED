@@ -121,15 +121,15 @@ template&lt;typename T, typename A, typename... Args&gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../df/d6a/shared__ptr_8h_source.html#l00386">386</a> of file <a class="el" href="../../df/d6a/shared__ptr_8h_source.html">shared_ptr.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  386</span>                                                          {</div>
-<div class="line"><span class="lineno">  387</span>    <span class="comment">// For now, just delegate to make_shared</span></div>
-<div class="line"><span class="lineno">  388</span>    <span class="comment">// Full allocator support would require more complex control block management</span></div>
-<div class="line"><span class="lineno">  389</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">make_shared&lt;T&gt;</a>(<a class="code hl_function" href="../../d4/d36/namespacefl_aed7245c077ae6f226d13c9ea795694a8.html#aed7245c077ae6f226d13c9ea795694a8">fl::forward&lt;Args&gt;</a>(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>)...);</div>
-<div class="line"><span class="lineno">  390</span>}</div>
-<div class="ttc" id="anamespacefl_a87ae8a24cc8b709a64f39370e71846af_html_a87ae8a24cc8b709a64f39370e71846af"><div class="ttname"><a href="../../d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared</a></div><div class="ttdeci">shared_ptr&lt; T &gt; make_shared(Args &amp;&amp;... args)</div><div class="ttdef"><b>Definition</b> <a href="../../df/d6a/shared__ptr_8h_source.html#l00348">shared_ptr.h:348</a></div></div>
-<div class="ttc" id="anamespacefl_aed7245c077ae6f226d13c9ea795694a8_html_aed7245c077ae6f226d13c9ea795694a8"><div class="ttname"><a href="../../d4/d36/namespacefl_aed7245c077ae6f226d13c9ea795694a8.html#aed7245c077ae6f226d13c9ea795694a8">fl::forward</a></div><div class="ttdeci">constexpr T &amp;&amp; forward(typename remove_reference&lt; T &gt;::type &amp;t) noexcept</div><div class="ttdef"><b>Definition</b> <a href="../../df/d63/type__traits_8h_source.html#l00213">type_traits.h:213</a></div></div>
-<div class="ttc" id="aold_8h_a690f84001beb455ff2f2bbd5fdcc79d5_html_a690f84001beb455ff2f2bbd5fdcc79d5"><div class="ttname"><a href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a></div><div class="ttdeci">corkscrew_args args</div><div class="ttdef"><b>Definition</b> <a href="../../d7/da1/old_8h_source.html#l00150">old.h:150</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../df/d6a/shared__ptr_8h_source.html#l00449">449</a> of file <a class="el" href="../../df/d6a/shared__ptr_8h_source.html">shared_ptr.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  449</span>                                                                      {</div>
+<div class="line"><span class="lineno">  450</span>    <span class="comment">// For now, just delegate to make_shared</span></div>
+<div class="line"><span class="lineno">  451</span>    <span class="comment">// Full allocator support would require more complex control block management</span></div>
+<div class="line"><span class="lineno">  452</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">make_shared&lt;T&gt;</a>(<a class="code hl_function" href="../../da/d3c/namespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259.html#a0bddf371925d8c4e94b88e9d7b35d259">fl::forward&lt;Args&gt;</a>(<a class="code hl_variable" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>)...);</div>
+<div class="line"><span class="lineno">  453</span>}</div>
+<div class="ttc" id="anamespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259_html_a0bddf371925d8c4e94b88e9d7b35d259"><div class="ttname"><a href="../../da/d3c/namespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259.html#a0bddf371925d8c4e94b88e9d7b35d259">fl::fl::forward</a></div><div class="ttdeci">constexpr T &amp;&amp; forward(typename remove_reference&lt; T &gt;::type &amp;t) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00234">s16x16x4.h:234</a></div></div>
+<div class="ttc" id="anamespacefl_a87ae8a24cc8b709a64f39370e71846af_html_a87ae8a24cc8b709a64f39370e71846af"><div class="ttname"><a href="../../d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af">fl::make_shared</a></div><div class="ttdeci">shared_ptr&lt; T &gt; make_shared(Args &amp;&amp;... args) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/d6a/shared__ptr_8h_source.html#l00414">shared_ptr.h:414</a></div></div>
+<div class="ttc" id="aold_8h_a690f84001beb455ff2f2bbd5fdcc79d5_html_a690f84001beb455ff2f2bbd5fdcc79d5"><div class="ttname"><a href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a></div><div class="ttdeci">corkscrew_args args</div><div class="ttdef"><b>Definition</b> <a href="../../d7/da1/old_8h_source.html#l00149">old.h:149</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -140,7 +140,7 @@ template&lt;typename T, typename A, typename... Args&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:22 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

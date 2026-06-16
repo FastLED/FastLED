@@ -1,0 +1,5 @@
+<map id="fl::SpiChannelEngineAdapter" name="fl::SpiChannelEngineAdapter">
+<area shape="rect" id="Node000001" title="Adapter that wraps HW SPI controllers for ChannelManager." alt="" coords="5,79,212,104"/>
+<area shape="rect" id="Node000002" href="$d3/da0/classfl_1_1_i_channel_driver.html" title="Minimal interface for LED channel transmission drivers." alt="" coords="41,5,176,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="111,44,111,79,106,79,106,44"/>
+</map>

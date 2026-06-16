@@ -1,9 +1,0 @@
-<map id="fl::UICheckbox::Listener::Listener" name="fl::UICheckbox::Listener::Listener">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,23,181,63"/>
-<area shape="rect" id="Node000002" href="$d7/dfe/classfl_1_1_u_i_checkbox_af76f946adbb7b46a4f8636cef8933271.html#af76f946adbb7b46a4f8636cef8933271" title=" " alt="" coords="233,5,436,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="181,31,220,27,220,33,182,37"/>
-<area shape="rect" id="Node000004" href="$de/dca/classfl_1_1_engine_events_a0ec4bb952e2d965c309f69af153ce8d3.html#a0ec4bb952e2d965c309f69af153ce8d3" title=" " alt="" coords="229,55,440,80"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="182,49,216,53,215,58,181,55"/>
-<area shape="rect" id="Node000003" href="$d7/dfe/classfl_1_1_u_i_checkbox_a999a2bc4a7105a7b8975aee0a48302c3.html#a999a2bc4a7105a7b8975aee0a48302c3" title=" " alt="" coords="488,5,648,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="436,15,474,15,474,21,436,21"/>
-</map>

@@ -4,11 +4,13 @@ var unique__ptr_8h =
     [ "fl::default_delete< T[]>", "da/ddc/structfl_1_1default__delete_3_01_t_0f_0e_4.html", "da/ddc/structfl_1_1default__delete_3_01_t_0f_0e_4" ],
     [ "fl::unique_ptr< T, Deleter >", "d6/d2e/classfl_1_1unique__ptr.html", "d6/d2e/classfl_1_1unique__ptr" ],
     [ "fl::unique_ptr< T[], Deleter >", "df/dcd/classfl_1_1unique__ptr_3_01_t_0f_0e_00_01_deleter_01_4.html", "df/dcd/classfl_1_1unique__ptr_3_01_t_0f_0e_00_01_deleter_01_4" ],
-    [ "fl::operator!=", "d4/d36/namespacefl_aec9a9a355019f5512f3fb1909cb7e72c.html#aec9a9a355019f5512f3fb1909cb7e72c", null ],
-    [ "fl::operator!=", "d4/d36/namespacefl_a02238ecc5a115f6561c81c3ae36ec530.html#a02238ecc5a115f6561c81c3ae36ec530", null ],
-    [ "fl::operator!=", "d4/d36/namespacefl_a1f3d48944944248a8fc4a5b5fa3a0137.html#a1f3d48944944248a8fc4a5b5fa3a0137", null ],
-    [ "fl::operator==", "d4/d36/namespacefl_ac417ff638df00ffb6a86c3a7a7467d2d.html#ac417ff638df00ffb6a86c3a7a7467d2d", null ],
-    [ "fl::operator==", "d4/d36/namespacefl_a9870630270dede272ffac7b4f542d686.html#a9870630270dede272ffac7b4f542d686", null ],
-    [ "fl::operator==", "d4/d36/namespacefl_a477f60e82086b400c091a776db6a1d88.html#a477f60e82086b400c091a776db6a1d88", null ],
-    [ "fl::swap", "d4/d36/namespacefl_abb1987db9fe9faa89c21acc8099f19ac.html#abb1987db9fe9faa89c21acc8099f19ac", null ]
+    [ "fl::make_unique", "d4/d36/namespacefl_a3fd92c727664a77396403265415789d3.html#a3fd92c727664a77396403265415789d3", null ],
+    [ "fl::make_unique", "d4/d36/namespacefl_adc8fa6dff5ecdfbe0116a67349b983d9.html#adc8fa6dff5ecdfbe0116a67349b983d9", null ],
+    [ "fl::operator!=", "d4/d36/namespacefl_aa98818f283b71e4942cce816e1d4d338.html#aa98818f283b71e4942cce816e1d4d338", null ],
+    [ "fl::operator!=", "d4/d36/namespacefl_a8774ac5d0d7699c727cb553cd5e31e9c.html#a8774ac5d0d7699c727cb553cd5e31e9c", null ],
+    [ "fl::operator!=", "d4/d36/namespacefl_a3e6b6a1dda6506610ff5644c3ad57700.html#a3e6b6a1dda6506610ff5644c3ad57700", null ],
+    [ "fl::operator==", "d4/d36/namespacefl_ac111668f474eebee4d47f87b168d4e38.html#ac111668f474eebee4d47f87b168d4e38", null ],
+    [ "fl::operator==", "d4/d36/namespacefl_a8817130fe59a06af0d0df4ed9f88737c.html#a8817130fe59a06af0d0df4ed9f88737c", null ],
+    [ "fl::operator==", "d4/d36/namespacefl_a3fa9caa53b2b025d40f33e783b6c5263.html#a3fa9caa53b2b025d40f33e783b6c5263", null ],
+    [ "fl::swap", "d4/d36/namespacefl_adb79484b6a41df38c281fc58dc88514f.html#adb79484b6a41df38c281fc58dc88514f", null ]
 ];

@@ -1,0 +1,67 @@
+<map id="fl/math/fixed_point/u8x24.h" name="fl/math/fixed_point/u8x24.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1155,5,1297,45"/>
+<area shape="rect" id="Node000002" href="$d5/d00/gamma__lut_8h.html" title=" " alt="" coords="995,93,1140,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1177,54,1092,96,1090,91,1175,49"/>
+<area shape="rect" id="Node000094" href="$de/d62/fixed__point_8h.html" title=" " alt="" coords="1290,93,1445,119"/>
+<area shape="poly" id="edge11_Node000001_Node000094" title=" " alt="" coords="1273,50,1348,91,1345,95,1270,54"/>
+<area shape="rect" id="Node000003" href="$d5/d4f/encoder__utils_8h.html" title="Shared utilities for SPI chipset encoders." alt="" coords="529,167,680,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="987,124,681,175,680,170,986,118"/>
+<area shape="rect" id="Node000093" href="$dd/d85/gamma__lut_8cpp_8hpp.html" title="Explicit instantiation of gamma LUT templates." alt="" coords="955,372,1143,397"/>
+<area shape="poly" id="edge9_Node000002_Node000093" title=" " alt="" coords="1068,133,1052,372,1047,372,1063,132"/>
+<area shape="rect" id="Node000004" href="$db/d13/encoders_2apa102_8h.html" title="APA102/DOTSTAR SPI chipset encoder." alt="" coords="355,262,505,302"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="559,215,467,264,464,260,556,211"/>
+<area shape="rect" id="Node000088" href="$d7/dd3/encoders_2hd108_8h.html" title="HD108 SPI chipset encoder." alt="" coords="529,262,680,302"/>
+<area shape="poly" id="edge4_Node000003_Node000088" title=" " alt="" coords="607,220,607,262,602,262,602,220"/>
+<area shape="rect" id="Node000089" href="$de/db9/lpd6803_8h.html" title="LPD6803 SPI chipset encoder." alt="" coords="704,262,855,302"/>
+<area shape="poly" id="edge5_Node000003_Node000089" title=" " alt="" coords="653,211,745,260,743,264,651,215"/>
+<area shape="rect" id="Node000090" href="$d7/deb/lpd8806_8h.html" title="LPD8806 SPI chipset encoder." alt="" coords="879,262,1029,302"/>
+<area shape="poly" id="edge6_Node000003_Node000090" title=" " alt="" coords="694,207,867,252,892,259,891,264,865,257,693,212"/>
+<area shape="rect" id="Node000091" href="$dd/d37/encoders_2p9813_8h.html" title="P9813 SPI chipset encoder." alt="" coords="5,262,156,302"/>
+<area shape="poly" id="edge7_Node000003_Node000091" title=" " alt="" coords="516,200,353,223,168,257,140,265,138,259,167,252,353,218,515,195"/>
+<area shape="rect" id="Node000092" href="$d5/df5/sk9822_8h.html" title="SK9822 SPI chipset encoder." alt="" coords="180,262,331,302"/>
+<area shape="poly" id="edge8_Node000003_Node000092" title=" " alt="" coords="516,212,343,257,318,264,316,259,341,252,515,207"/>
+<area shape="rect" id="Node000050" href="$d5/d88/fl_2gfx_2__build_8cpp_8hpp.html" title="Unity build for fl/gfx/ — graphics types, primitives, and simulators." alt="" coords="1161,460,1315,485"/>
+<area shape="poly" id="edge10_Node000093_Node000050" title=" " alt="" coords="1088,401,1213,457,1211,462,1085,406"/>
+<area shape="rect" id="Node000037" href="$d5/df1/fft__impl_8cpp_8hpp.html" title=" " alt="" coords="1405,174,1602,199"/>
+<area shape="poly" id="edge12_Node000094_Node000037" title=" " alt="" coords="1401,123,1485,171,1482,176,1398,128"/>
+<area shape="rect" id="Node000052" href="$db/d4e/colorutils_8cpp_8hpp.html" title=" " alt="" coords="1124,174,1299,199"/>
+<area shape="poly" id="edge13_Node000094_Node000052" title=" " alt="" coords="1334,127,1235,176,1233,172,1331,122"/>
+<area shape="rect" id="Node000058" href="$df/d60/ease_8cpp_8hpp.html" title=" " alt="" coords="1499,372,1657,397"/>
+<area shape="poly" id="edge15_Node000094_Node000058" title=" " alt="" coords="1373,132,1380,170,1394,217,1415,265,1445,308,1469,328,1495,345,1546,369,1544,374,1492,350,1465,332,1441,311,1410,268,1389,218,1375,171,1368,133"/>
+<area shape="rect" id="Node000095" href="$db/d19/ease_8h.html" title=" " alt="" coords="1765,174,1879,199"/>
+<area shape="poly" id="edge16_Node000094_Node000095" title=" " alt="" coords="1447,118,1765,173,1764,178,1447,124"/>
+<area shape="poly" id="edge14_Node000052_Node000050" title=" " alt="" coords="1209,213,1200,302,1200,357,1209,411,1219,437,1232,458,1227,461,1214,440,1203,413,1195,357,1194,301,1204,212"/>
+<area shape="poly" id="edge35_Node000095_Node000058" title=" " alt="" coords="1799,210,1674,311,1594,374,1591,370,1671,307,1796,206"/>
+<area shape="rect" id="Node000006" href="$d4/df9/_auto_research_test_8cpp.html" title=" " alt="" coords="2321,357,2560,412"/>
+<area shape="poly" id="edge17_Node000095_Node000006" title=" " alt="" coords="1893,190,2115,211,2225,229,2270,240,2303,252,2323,264,2336,277,2363,307,2414,355,2411,359,2359,311,2332,280,2319,268,2301,257,2268,245,2224,235,2114,217,1893,195"/>
+<area shape="rect" id="Node000096" href="$db/df4/_color_boost_8h.html" title="Demo of CRGB::colorBoost() for video display on WS2812 LEDs using animated rainbow effect (based on P..." alt="" coords="1787,255,2007,309"/>
+<area shape="poly" id="edge18_Node000095_Node000096" title=" " alt="" coords="1842,208,1878,253,1873,256,1838,212"/>
+<area shape="rect" id="Node000098" href="$dd/d55/_ease_in_out_8h.html" title=" " alt="" coords="2031,255,2245,309"/>
+<area shape="poly" id="edge19_Node000095_Node000098" title=" " alt="" coords="1875,201,2050,252,2048,257,1873,206"/>
+<area shape="rect" id="Node000013" href="$d3/de6/channel_8cpp_8hpp.html" title=" " alt="" coords="2497,460,2699,485"/>
+<area shape="poly" id="edge20_Node000095_Node000013" title=" " alt="" coords="1893,187,1989,193,2097,204,2194,223,2232,237,2260,253,2276,272,2285,292,2287,333,2289,373,2297,392,2312,410,2342,426,2387,440,2497,459,2496,464,2386,445,2340,431,2308,414,2292,394,2284,374,2282,333,2280,293,2272,274,2256,257,2230,241,2193,229,2096,210,1988,198,1893,193"/>
+<area shape="rect" id="Node000100" href="$d4/db7/encoders_2ucs7604_8h.html" title="UCS7604 LED chipset encoder implementation." alt="" coords="2372,262,2523,302"/>
+<area shape="poly" id="edge21_Node000095_Node000100" title=" " alt="" coords="1893,191,2101,213,2227,230,2353,252,2385,259,2383,265,2352,257,2226,235,2100,218,1893,196"/>
+<area shape="rect" id="Node000007" href="$d0/d00/ucs7604_8h.html" title="UCS7604 LED chipset controller implementation for FastLED." alt="" coords="2636,372,2795,397"/>
+<area shape="poly" id="edge27_Node000095_Node000007" title=" " alt="" coords="1893,186,2096,189,2352,198,2475,207,2581,218,2661,233,2688,242,2705,253,2716,266,2723,282,2728,315,2726,347,2721,372,2716,371,2721,347,2723,316,2717,283,2711,269,2702,257,2686,247,2660,238,2580,223,2474,212,2351,203,2096,194,1893,191"/>
+<area shape="rect" id="Node000028" href="$d8/d61/hd108_8h.html" title=" " alt="" coords="2547,269,2691,295"/>
+<area shape="poly" id="edge26_Node000095_Node000028" title=" " alt="" coords="1893,187,2015,193,2176,204,2356,223,2536,252,2589,267,2587,272,2535,257,2355,228,2175,209,2015,198,1893,192"/>
+<area shape="rect" id="Node000101" href="$df/dcc/fl_2gfx_2crgb_8h.html" title="Defines the 8&#45;bit red, green, and blue (RGB) pixel type in the fl namespace." alt="" coords="1455,269,1554,295"/>
+<area shape="poly" id="edge28_Node000095_Node000101" title=" " alt="" coords="1756,205,1666,228,1567,257,1530,272,1528,267,1565,252,1664,222,1755,200"/>
+<area shape="rect" id="Node000053" href="$d8/d89/five__bit__hd__gamma_8cpp_8hpp.html" title=" " alt="" coords="1681,365,1816,405"/>
+<area shape="poly" id="edge29_Node000095_Node000053" title=" " alt="" coords="1805,211,1778,256,1760,314,1753,365,1748,364,1755,313,1773,254,1801,209"/>
+<area shape="rect" id="Node000207" href="$d8/d2f/hsv16_8cpp_8hpp.html" title=" " alt="" coords="1219,372,1372,397"/>
+<area shape="poly" id="edge31_Node000095_Node000207" title=" " alt="" coords="1751,199,1582,223,1501,239,1444,257,1400,284,1361,317,1307,374,1303,370,1357,313,1397,280,1442,252,1500,234,1581,217,1751,193"/>
+<area shape="rect" id="Node000208" href="$d0/d1a/hsv16_8h.html" title=" " alt="" coords="1219,269,1329,295"/>
+<area shape="poly" id="edge33_Node000095_Node000208" title=" " alt="" coords="1751,201,1400,257,1327,272,1326,267,1399,252,1751,196"/>
+<area shape="rect" id="Node000190" href="$df/da5/lib8tion_8h.html" title="Fast, efficient 8&#45;bit math functions specifically designed for high&#45;performance LED programming." alt="" coords="1578,269,1661,295"/>
+<area shape="poly" id="edge36_Node000095_Node000190" title=" " alt="" coords="1786,207,1645,272,1643,267,1784,203"/>
+<area shape="poly" id="edge22_Node000100_Node000006" title=" " alt="" coords="2448,316,2445,357,2440,357,2443,316"/>
+<area shape="poly" id="edge23_Node000100_Node000013" title=" " alt="" coords="2513,306,2546,327,2575,356,2589,383,2597,412,2601,460,2596,460,2592,413,2584,385,2571,359,2543,331,2510,310"/>
+<area shape="poly" id="edge24_Node000100_Node000007" title=" " alt="" coords="2511,304,2686,369,2684,374,2510,309"/>
+<area shape="poly" id="edge25_Node000007_Node000013" title=" " alt="" coords="2690,408,2616,462,2612,458,2687,403"/>
+<area shape="poly" id="edge30_Node000053_Node000050" title=" " alt="" coords="1684,411,1671,415,1575,434,1479,449,1315,468,1315,462,1479,444,1575,429,1669,409,1683,406"/>
+<area shape="poly" id="edge32_Node000207_Node000050" title=" " alt="" coords="1282,410,1248,461,1244,458,1278,407"/>
+<area shape="poly" id="edge34_Node000208_Node000207" title=" " alt="" coords="1282,307,1296,371,1290,373,1277,309"/>
+<area shape="poly" id="edge37_Node000190_Node000058" title=" " alt="" coords="1612,308,1585,373,1580,371,1607,306"/>
+</map>

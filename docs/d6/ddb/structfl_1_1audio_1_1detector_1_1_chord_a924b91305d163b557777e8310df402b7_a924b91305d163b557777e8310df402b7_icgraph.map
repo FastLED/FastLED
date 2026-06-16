@@ -1,0 +1,10 @@
+<map id="fl::audio::detector::Chord::isValid" name="fl::audio::detector::Chord::isValid">
+<area shape="rect" id="Node000001" title=" " alt="" coords="753,46,889,86"/>
+<area shape="rect" id="Node000002" href="$d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_a0c9a3bf528200760a8b9656be4a3fbb0.html#a0c9a3bf528200760a8b9656be4a3fbb0" title=" " alt="" coords="516,5,705,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="739,56,705,50,706,45,740,50"/>
+<area shape="rect" id="Node000003" href="$d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_a8d60404c1eba1a4424b6495478011ddb.html#a8d60404c1eba1a4424b6495478011ddb" title=" " alt="" coords="291,46,468,86"/>
+<area shape="poly" id="edge4_Node000001_Node000003" title=" " alt="" coords="740,73,705,74,516,74,468,73,468,67,516,69,705,69,740,68"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="503,51,469,56,468,51,502,46"/>
+<area shape="rect" id="Node000004" href="$d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_acbc732d69cf26e673a19723d5f042c10.html#acbc732d69cf26e673a19723d5f042c10" title=" " alt="" coords="5,46,243,86"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="277,69,243,69,243,63,277,63"/>
+</map>

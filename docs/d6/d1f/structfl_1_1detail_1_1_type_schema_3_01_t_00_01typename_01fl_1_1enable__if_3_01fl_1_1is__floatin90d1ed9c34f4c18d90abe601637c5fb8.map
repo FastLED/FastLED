@@ -1,0 +1,5 @@
+<map id="fl::detail::TypeSchema&lt; T, typename fl::enable_if&lt; fl::is_floating_point&lt; T &gt;::value &gt;::type &gt;" name="fl::detail::TypeSchema&lt; T, typename fl::enable_if&lt; fl::is_floating_point&lt; T &gt;::value &gt;::type &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,137,188,207"/>
+<area shape="rect" id="Node000002" href="$d8/d47/structfl_1_1detail_1_1_type_schema.html" title=" " alt="" coords="14,5,179,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="99,59,99,137,94,137,94,59"/>
+</map>

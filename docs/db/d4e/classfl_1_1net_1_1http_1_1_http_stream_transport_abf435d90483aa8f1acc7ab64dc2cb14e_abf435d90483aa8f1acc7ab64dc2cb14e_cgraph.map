@@ -1,0 +1,8 @@
+<map id="fl::net::http::HttpStreamTransport::checkHeartbeatTimeout" name="fl::net::http::HttpStreamTransport::checkHeartbeatTimeout">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,61,252,101"/>
+<area shape="rect" id="Node000002" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_ac903b0c43a022a373bda24dac11bed24.html#ac903b0c43a022a373bda24dac11bed24" title="Disconnect from server." alt="" coords="300,29,476,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="252,63,286,59,287,64,253,69"/>
+<area shape="rect" id="Node000003" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_ae58eaad94febed1e9fa000c58ed5107b.html#ae58eaad94febed1e9fa000c58ed5107b" title="Get connection timeout." alt="" coords="300,93,476,133"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="253,94,287,98,286,103,252,99"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="340,30,337,20,345,10,362,5,388,3,418,6,434,13,432,18,417,11,388,8,363,10,348,15,342,21,345,28"/>
+</map>

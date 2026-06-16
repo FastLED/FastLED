@@ -1,0 +1,14 @@
+<map id="fl::SerialPort::readString" name="fl::SerialPort::readString">
+<area shape="rect" id="Node000001" title="Read all available bytes into a string." alt="" coords="5,79,181,104"/>
+<area shape="rect" id="Node000002" href="$de/d67/classfl_1_1_serial_port_ab121e35dbb39bd8a3ff0b9cc9af8e96a.html#ab121e35dbb39bd8a3ff0b9cc9af8e96a" title="Check how many bytes are available to read." alt="" coords="229,5,399,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="127,76,228,39,252,32,254,37,230,45,129,81"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="277,79,351,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="181,89,263,89,263,94,181,94"/>
+<area shape="rect" id="Node000005" href="$de/d67/classfl_1_1_serial_port_aed1374fc28e70820bc39430f7a16940e.html#aed1374fc28e70820bc39430f7a16940e" title="Read next byte from serial input." alt="" coords="245,128,383,153"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="151,101,244,122,242,128,150,107"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a01186a22a1055c583d5408c116c84ffa.html#a01186a22a1055c583d5408c116c84ffa" title=" " alt="" coords="447,5,545,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="399,15,433,15,433,21,399,21"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="284,80,278,70,281,61,293,54,314,52,339,56,349,64,346,68,337,60,314,57,295,59,285,64,283,70,288,77"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a18e7608a302c3628c24710b27480641b.html#a18e7608a302c3628c24710b27480641b" title=" " alt="" coords="463,128,529,153"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="384,138,449,138,449,143,384,143"/>
+</map>

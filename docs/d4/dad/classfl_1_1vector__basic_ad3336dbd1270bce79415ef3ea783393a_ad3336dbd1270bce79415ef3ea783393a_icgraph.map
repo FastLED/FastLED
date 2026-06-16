@@ -1,0 +1,30 @@
+<map id="fl::vector_basic::inlineBufferPtr" name="fl::vector_basic::inlineBufferPtr">
+<area shape="rect" id="Node000001" title="Compute inline buffer pointer from offset." alt="" coords="736,156,900,196"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="855,144,842,137,818,135,797,137,785,141,780,147,783,155,777,156,775,146,782,137,796,131,818,129,843,132,857,140"/>
+<area shape="rect" id="Node000002" href="$d4/dad/classfl_1_1vector__basic_a4a79234edce9c9748432aba0f499b001.html#a4a79234edce9c9748432aba0f499b001" title="Is data currently in the inline buffer?" alt="" coords="513,131,688,157"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="722,165,687,159,688,154,722,159"/>
+<area shape="rect" id="Node000047" href="$d4/dad/classfl_1_1vector__basic_aa709d10073cb8bdbb18bf4ca4f8561e6.html#aa709d10073cb8bdbb18bf4ca4f8561e6" title="Move&#45;assign from another vector_basic (clears this first)." alt="" coords="283,5,449,45"/>
+<area shape="poly" id="edge14_Node000001_Node000047" title=" " alt="" coords="762,153,687,121,561,80,447,48,448,43,563,75,689,116,764,148"/>
+<area shape="rect" id="Node000052" href="$d4/dad/classfl_1_1vector__basic_a48223a8162cf9d3b9c3e31962cf3184e.html#a48223a8162cf9d3b9c3e31962cf3184e" title=" " alt="" coords="282,184,450,224"/>
+<area shape="poly" id="edge15_Node000001_Node000052" title=" " alt="" coords="722,185,450,201,450,196,722,179"/>
+<area shape="rect" id="Node000054" href="$d4/dad/classfl_1_1vector__basic_af883d2217b11ac6ea91134588f181acf.html#af883d2217b11ac6ea91134588f181acf" title="Swap contents with another vector_basic." alt="" coords="267,273,465,298"/>
+<area shape="poly" id="edge16_Node000001_Node000054" title=" " alt="" coords="723,201,420,275,419,270,722,196"/>
+<area shape="rect" id="Node000003" href="$d4/dad/classfl_1_1vector__basic_af6e858579254c11d1f0622a3584ea6b4.html#af6e858579254c11d1f0622a3584ea6b4" title=" " alt="" coords="302,120,430,160"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="499,145,430,144,430,138,499,140"/>
+<area shape="rect" id="Node000004" href="$d4/dad/classfl_1_1vector__basic_a17f684eb95a4b6b0511454f7f80f87d1.html#a17f684eb95a4b6b0511454f7f80f87d1" title="Grow to new_capacity. Moves existing elements." alt="" coords="276,70,456,95"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="538,130,465,111,417,98,418,93,466,105,540,125"/>
+<area shape="poly" id="edge7_Node000002_Node000047" title=" " alt="" coords="570,125,522,92,464,60,436,48,438,43,466,55,525,88,573,121"/>
+<area shape="poly" id="edge8_Node000002_Node000052" title=" " alt="" coords="538,163,445,187,444,181,536,158"/>
+<area shape="poly" id="edge10_Node000002_Node000054" title=" " alt="" coords="573,167,467,238,397,275,394,270,464,234,570,162"/>
+<area shape="rect" id="Node000005" href="$d4/dad/classfl_1_1vector__basic_a9a315ee221dc1563fecb0c0f84c73438.html#a9a315ee221dc1563fecb0c0f84c73438" title="Ensure capacity for at least n elements. Grows if needed." alt="" coords="26,92,198,132"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="262,97,199,105,198,99,262,92"/>
+<area shape="rect" id="Node000029" href="$d4/dad/classfl_1_1vector__basic_a307989a09148dc75fc5fbb2111cfef6f.html#a307989a09148dc75fc5fbb2111cfef6f" title=" " alt="" coords="5,42,219,67"/>
+<area shape="poly" id="edge6_Node000004_Node000029" title=" " alt="" coords="262,74,219,69,219,64,262,69"/>
+<area shape="rect" id="Node000053" href="$d2/d24/classfl_1_1vector_a9fc7d614a5f15d6e28461feeacc53468.html#a9fc7d614a5f15d6e28461feeacc53468" title=" " alt="" coords="47,184,177,224"/>
+<area shape="poly" id="edge9_Node000052_Node000053" title=" " alt="" coords="268,207,178,207,178,201,268,201"/>
+<area shape="poly" id="edge13_Node000054_Node000054" title=" " alt="" coords="408,264,397,255,366,251,341,253,327,258,325,264,332,271,328,274,320,264,324,254,340,248,366,246,399,250,412,259"/>
+<area shape="rect" id="Node000055" href="$d2/d24/classfl_1_1vector_aa3ae32a9c2f09eab87fcff68a8ea78e2.html#aa3ae32a9c2f09eab87fcff68a8ea78e2" title=" " alt="" coords="47,320,177,360"/>
+<area shape="poly" id="edge11_Node000054_Node000055" title=" " alt="" coords="294,303,178,329,177,323,293,298"/>
+<area shape="rect" id="Node000056" href="$d2/d24/classfl_1_1vector_a7dd86cddda96caea12150c0f0cb87618.html#a7dd86cddda96caea12150c0f0cb87618" title=" " alt="" coords="47,256,177,296"/>
+<area shape="poly" id="edge12_Node000054_Node000056" title=" " alt="" coords="253,284,177,281,178,276,253,279"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="hsv2rgb_raw" name="hsv2rgb_raw">
+<area shape="rect" id="Node000001" title="Convert an HSV value to RGB using a mathematically straight spectrum." alt="" coords="196,31,301,56"/>
+<area shape="rect" id="Node000002" href="$dd/dc7/group___h_s_v2_r_g_b_ga67db85b3beb8d49cb29c9889ea3f6ee4.html#ga67db85b3beb8d49cb29c9889ea3f6ee4" title="Convert an HSV value to RGB using a mathematically straight spectrum." alt="" coords="24,5,129,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="182,36,129,28,130,23,182,31"/>
+<area shape="rect" id="Node000003" href="$dd/dc7/group___h_s_v2_r_g_b_ga39c0b7ab88f42a627ed0ed5e310b256d.html#ga39c0b7ab88f42a627ed0ed5e310b256d" title="Convert an HSV value to RGB using a mathematically straight spectrum." alt="" coords="5,55,148,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="183,55,148,60,148,55,182,50"/>
+</map>

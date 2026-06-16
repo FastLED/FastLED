@@ -1,0 +1,8 @@
+<map id="fl::list&lt; T &gt;" name="fl::list&lt; T &gt;">
+<area shape="rect" id="Node000001" title="A doubly&#45;linked list container." alt="" coords="141,97,237,123"/>
+<area shape="rect" id="Node000002" href="$d4/d18/structfl_1_1list_1_1_node.html" title=" " alt="" coords="5,7,144,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="102,39,176,95,173,99,99,43"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="159,11,171,20,162,28,145,31,144,26,160,23,165,20,156,16"/>
+<area shape="rect" id="Node000003" href="$db/d13/classfl_1_1memory__resource.html" title="Polymorphic memory resource base class (PMR&#45;style)." alt="" coords="226,7,382,33"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="280,43,206,99,203,95,276,39"/>
+</map>

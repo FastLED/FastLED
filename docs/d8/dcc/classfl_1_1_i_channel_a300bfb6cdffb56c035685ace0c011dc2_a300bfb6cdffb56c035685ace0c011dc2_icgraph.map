@@ -1,0 +1,12 @@
+<map id="fl::IChannel::IChannel" name="fl::IChannel::IChannel">
+<area shape="rect" id="Node000001" title=" " alt="" coords="223,80,383,105"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="340,70,330,62,303,59,280,61,268,65,266,71,272,78,268,82,261,72,265,62,279,56,303,53,332,57,344,66"/>
+<area shape="rect" id="Node000002" href="$d8/dcc/classfl_1_1_i_channel_aa2d5114b3dc1903ed48b5ea6bbcb71d4.html#aa2d5114b3dc1903ed48b5ea6bbcb71d4" title=" " alt="" coords="10,5,170,31"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="259,77,174,45,138,33,140,28,176,39,260,72"/>
+<area shape="rect" id="Node000003" href="$d8/dcc/classfl_1_1_i_channel_a06dbf2e01a9d0038362c83ad98af8db6.html#a06dbf2e01a9d0038362c83ad98af8db6" title=" " alt="" coords="10,55,170,80"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="209,84,170,79,171,74,209,79"/>
+<area shape="rect" id="Node000004" href="$d8/dcc/classfl_1_1_i_channel_aad9a60e4323a3be3e66438da233cef59.html#aad9a60e4323a3be3e66438da233cef59" title=" " alt="" coords="5,104,175,129"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="210,106,175,110,174,104,209,101"/>
+<area shape="rect" id="Node000005" href="$d8/dcc/classfl_1_1_i_channel_ad1bb0f101bb25e49db0ee83540a5f809.html#ad1bb0f101bb25e49db0ee83540a5f809" title=" " alt="" coords="5,153,175,179"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="257,113,176,143,136,156,134,151,174,138,256,108"/>
+</map>

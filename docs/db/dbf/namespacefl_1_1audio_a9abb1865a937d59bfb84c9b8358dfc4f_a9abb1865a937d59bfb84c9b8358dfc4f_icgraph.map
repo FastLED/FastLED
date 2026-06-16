@@ -1,0 +1,10 @@
+<map id="fl::audio::interpolateMicResponse" name="fl::audio::interpolateMicResponse">
+<area shape="rect" id="Node000001" title="Interpolate mic response at an arbitrary frequency (Hz)." alt="" coords="631,37,807,77"/>
+<area shape="rect" id="Node000002" href="$db/dbf/namespacefl_1_1audio_a51b42dfdb22be4944a9a6d62c87a376c.html#a51b42dfdb22be4944a9a6d62c87a376c" title="Downsample a high&#45;resolution mic response curve to N output bins." alt="" coords="395,37,583,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="616,59,583,59,583,54,616,54"/>
+<area shape="rect" id="Node000003" href="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_a3a263b257d55afc4ace05d432939e792.html#a3a263b257d55afc4ace05d432939e792" title="Set microphone correction profile (propagated from Processor)." alt="" coords="200,29,347,84"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="381,59,347,59,347,54,381,54"/>
+<area shape="rect" id="Node000004" href="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_a88188f71bc78dc8603f86597cec368a2.html#a88188f71bc78dc8603f86597cec368a2" title="Reconfigure equalizer tuning parameters at runtime." alt="" coords="5,29,152,84"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="186,59,152,59,152,54,186,54"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="111,18,99,11,79,8,62,10,51,15,45,21,46,29,40,29,40,19,47,10,60,5,79,3,101,6,114,14"/>
+</map>

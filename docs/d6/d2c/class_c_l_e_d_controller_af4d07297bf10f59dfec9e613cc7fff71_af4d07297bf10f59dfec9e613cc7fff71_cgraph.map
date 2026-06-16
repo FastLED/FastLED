@@ -1,7 +1,0 @@
-<map id="CLEDController::setScreenMap" name="CLEDController::setScreenMap">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,225,60"/>
-<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller_a8c560c6d171f117dfd19c0f2ec780a32.html#a8c560c6d171f117dfd19c0f2ec780a32" title="Create an led controller object, add it to the chain of controllers." alt="" coords="273,5,500,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="225,33,260,29,260,34,226,38"/>
-<area shape="rect" id="Node000003" href="$de/dca/classfl_1_1_engine_events_aeb85848268614982b022006bd41a2726.html#aeb85848268614982b022006bd41a2726" title=" " alt="" coords="287,55,486,95"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="226,56,274,61,274,66,225,61"/>
-</map>

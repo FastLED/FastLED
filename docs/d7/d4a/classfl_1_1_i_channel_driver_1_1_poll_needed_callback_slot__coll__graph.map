@@ -1,0 +1,13 @@
+<map id="fl::IChannelDriver::PollNeededCallbackSlot" name="fl::IChannelDriver::PollNeededCallbackSlot">
+<area shape="rect" id="Node000001" title="ISR&#45;safe storage for a poll&#45;needed callback handle." alt="" coords="1004,71,1189,111"/>
+<area shape="rect" id="Node000002" href="$da/d98/classfl_1_1_atomic_fake.html" title=" " alt="" coords="669,103,879,157"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="892,113,1003,100,1004,105,892,119"/>
+<area shape="rect" id="Node000003" href="$d3/d13/structfl_1_1_i_channel_driver_1_1_poll_needed_callback_slot_1_1_snapshot.html" title=" " alt="" coords="272,44,457,99"/>
+<area shape="poly" id="edge6_Node000001_Node000003" title=" " alt="" coords="471,68,645,70,980,83,1004,84,1003,90,980,89,645,75,471,74"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="472,84,669,112,669,118,471,89"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="338,28,348,20,365,17,379,19,389,25,394,34,394,44,388,44,389,35,385,29,377,24,365,23,350,25,342,32"/>
+<area shape="rect" id="Node000004" href="$d3/d8f/structfl_1_1_i_channel_driver_1_1_poll_needed_callback.html" title="ISR&#45;safe callback handle invoked when the manager should poll again." alt="" coords="5,51,165,91"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="179,69,272,69,272,74,179,74"/>
+<area shape="rect" id="Node000005" href="$da/d98/classfl_1_1_atomic_fake.html" title=" " alt="" coords="289,151,440,176"/>
+<area shape="poly" id="edge5_Node000002_Node000005" title=" " alt="" coords="454,166,546,166,645,159,673,155,674,160,646,165,547,172,454,171"/>
+</map>

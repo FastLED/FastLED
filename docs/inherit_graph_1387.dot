@@ -1,0 +1,10 @@
+digraph "Graphical Class Hierarchy"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node0 [id="Node000000",label="fl::TIMING_WS2812B\l_MINI_V3",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d3d/structfl_1_1_t_i_m_i_n_g___w_s2812_b___m_i_n_i___v3.html",tooltip="WS2812B-Mini-V3 / WS2812B-V5 RGB controller @ 800 kHz Four-phase: TH0=225ns, TH1=580ns,..."];
+}

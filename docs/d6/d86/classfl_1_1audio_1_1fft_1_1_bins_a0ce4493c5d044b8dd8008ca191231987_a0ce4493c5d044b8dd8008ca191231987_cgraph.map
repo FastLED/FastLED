@@ -1,0 +1,15 @@
+<map id="fl::audio::fft::Bins::linear_mut" name="fl::audio::fft::Bins::linear_mut">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,97,137,137"/>
+<area shape="rect" id="Node000002" href="$da/d27/classfl_1_1audio_1_1fft_1_1_float_vector_pool_ae9e0a949ca5ed56a4f007e4cb0b06a57.html#ae9e0a949ca5ed56a4f007e4cb0b06a57" title=" " alt="" coords="185,57,364,97"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="137,101,172,94,173,99,138,106"/>
+<area shape="rect" id="Node000006" href="$d6/d86/classfl_1_1audio_1_1fft_1_1_bins_a164813bb2bd2b0ed13e5e992915c617f.html#a164813bb2bd2b0ed13e5e992915c617f" title=" " alt="" coords="209,129,341,169"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="138,124,195,134,195,139,137,130"/>
+<area shape="rect" id="Node000003" href="$d2/d24/classfl_1_1vector_a51b9ac42dba7a7b4bd5a08a276634cef.html#a51b9ac42dba7a7b4bd5a08a276634cef" title=" " alt="" coords="434,5,553,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="349,54,431,32,433,37,350,59"/>
+<area shape="rect" id="Node000004" href="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a" title=" " alt="" coords="448,55,539,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="364,70,434,67,434,72,365,76"/>
+<area shape="rect" id="Node000005" href="$d2/d24/classfl_1_1vector_a305fb6473faab9c2798479c057a58d50.html#a305fb6473faab9c2798479c057a58d50" title=" " alt="" coords="425,104,561,129"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="365,90,412,99,411,104,364,96"/>
+<area shape="rect" id="Node000007" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="412,153,575,179"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="341,151,399,156,398,161,341,157"/>
+</map>

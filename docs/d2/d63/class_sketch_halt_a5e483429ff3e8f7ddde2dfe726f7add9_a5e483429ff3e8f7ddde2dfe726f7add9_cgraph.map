@@ -1,0 +1,12 @@
+<map id="SketchHalt::check" name="SketchHalt::check">
+<area shape="rect" id="Node000001" title="Check if sketch is halted and handle periodic message printing." alt="" coords="5,43,144,68"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a82d61c027070cb53f84ede1132299204.html#a82d61c027070cb53f84ede1132299204" title="Delay for a given number of milliseconds (legacy &#45; no async pumping)" alt="" coords="192,5,301,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="133,40,178,30,179,35,134,45"/>
+<area shape="rect" id="Node000022" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="209,79,284,104"/>
+<area shape="poly" id="edge4_Node000001_Node000022" title=" " alt="" coords="136,65,197,78,196,83,135,71"/>
+<area shape="rect" id="Node000003" href="$df/d9e/namespacefl_1_1detail_abd6e1e8189dbbbf28d720923205bd0dd.html#abd6e1e8189dbbbf28d720923205bd0dd" title="Internal delay implementation used by the public fl::delay wrapper." alt="" coords="349,5,504,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="302,15,335,15,335,21,302,21"/>
+<area shape="rect" id="Node000004" href="$db/d5c/namespacefl_1_1task_a2d40b476742263a3fa212e24b722e3ef.html#a2d40b476742263a3fa212e24b722e3ef" title="Run selected task subsystems." alt="" coords="552,5,647,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="504,15,538,15,538,21,504,21"/>
+<area shape="poly" id="edge5_Node000022_Node000022" title=" " alt="" coords="218,80,212,70,215,61,227,54,247,52,270,55,280,64,277,68,268,60,247,57,229,59,219,64,217,70,223,77"/>
+</map>

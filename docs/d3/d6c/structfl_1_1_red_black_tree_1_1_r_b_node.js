@@ -1,6 +1,6 @@
 var structfl_1_1_red_black_tree_1_1_r_b_node =
 [
-    [ "RBNode", "d3/d6c/structfl_1_1_red_black_tree_1_1_r_b_node_a20f35852f4079735bf0a5651b64780bc.html#a20f35852f4079735bf0a5651b64780bc", null ],
+    [ "RBNode", "d3/d6c/structfl_1_1_red_black_tree_1_1_r_b_node_a1752dcf6a3b2b9786228d5855ef25175.html#a1752dcf6a3b2b9786228d5855ef25175", null ],
     [ "RBNode", "d3/d6c/structfl_1_1_red_black_tree_1_1_r_b_node_a3e384efab185b7ef94b8183ec830ed1e.html#a3e384efab185b7ef94b8183ec830ed1e", null ],
     [ "color", "d3/d6c/structfl_1_1_red_black_tree_1_1_r_b_node_a0b58ffab1759dc3843d174855deb75a4.html#a0b58ffab1759dc3843d174855deb75a4", null ],
     [ "data", "d3/d6c/structfl_1_1_red_black_tree_1_1_r_b_node_a1bb492e55cdb195d417539c9bf5b209b.html#a1bb492e55cdb195d417539c9bf5b209b", null ],

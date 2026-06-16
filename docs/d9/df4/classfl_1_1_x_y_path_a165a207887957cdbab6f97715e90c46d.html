@@ -127,24 +127,24 @@ $(function(){initNavTree('d9/df4/classfl_1_1_x_y_path_a165a207887957cdbab6f97715
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d78/xypath_8cpp_source.html#l00290">290</a> of file <a class="el" href="../../d4/d78/xypath_8cpp_source.html">xypath.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  290</span>                                               {</div>
-<div class="line"><span class="lineno">  291</span>    <span class="keywordtype">float</span> diff = <a class="code hl_function" href="../../d4/d36/namespacefl_a6072e119545650c71b6544cc0ce9e355.html#a6072e119545650c71b6544cc0ce9e355">fl::clamp</a>(<a class="code hl_define" href="../../d8/db8/math__macros_8h_a996f7be338ccb40d1a2a5abc1ad61759.html#a996f7be338ccb40d1a2a5abc1ad61759">ABS</a>(to - from), 0.0f, 1.0f);</div>
-<div class="line"><span class="lineno">  292</span>    <span class="keywordflow">return</span> <a class="code hl_define" href="../../d8/db8/math__macros_8h_afa99ec4acc4ecb2dc3c2d05da15d0e3f.html#afa99ec4acc4ecb2dc3c2d05da15d0e3f">MAX</a>(1, 200 * diff);</div>
-<div class="line"><span class="lineno">  293</span>}</div>
-<div class="ttc" id="amath__macros_8h_a996f7be338ccb40d1a2a5abc1ad61759_html_a996f7be338ccb40d1a2a5abc1ad61759"><div class="ttname"><a href="../../d8/db8/math__macros_8h_a996f7be338ccb40d1a2a5abc1ad61759.html#a996f7be338ccb40d1a2a5abc1ad61759">ABS</a></div><div class="ttdeci">#define ABS(x)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/db8/math__macros_8h_source.html#l00053">math_macros.h:53</a></div></div>
-<div class="ttc" id="amath__macros_8h_afa99ec4acc4ecb2dc3c2d05da15d0e3f_html_afa99ec4acc4ecb2dc3c2d05da15d0e3f"><div class="ttname"><a href="../../d8/db8/math__macros_8h_afa99ec4acc4ecb2dc3c2d05da15d0e3f.html#afa99ec4acc4ecb2dc3c2d05da15d0e3f">MAX</a></div><div class="ttdeci">#define MAX(a, b)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/db8/math__macros_8h_source.html#l00045">math_macros.h:45</a></div></div>
-<div class="ttc" id="anamespacefl_a6072e119545650c71b6544cc0ce9e355_html_a6072e119545650c71b6544cc0ce9e355"><div class="ttname"><a href="../../d4/d36/namespacefl_a6072e119545650c71b6544cc0ce9e355.html#a6072e119545650c71b6544cc0ce9e355">fl::clamp</a></div><div class="ttdeci">FASTLED_FORCE_INLINE T clamp(T value, T min, T max)</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dd3/clamp_8h_source.html#l00010">clamp.h:10</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d0/dd8/xypath_8cpp_8hpp_source.html#l00291">291</a> of file <a class="el" href="../../d0/dd8/xypath_8cpp_8hpp_source.html">xypath.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  291</span>                                               {</div>
+<div class="line"><span class="lineno">  292</span>    <span class="keywordtype">float</span> diff = <a class="code hl_function" href="../../d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350">fl::clamp</a>(<a class="code hl_function" href="../../d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84">fl::abs</a>(to - from), 0.0f, 1.0f);</div>
+<div class="line"><span class="lineno">  293</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">fl::max</a>(1, 200 * diff);</div>
+<div class="line"><span class="lineno">  294</span>}</div>
+<div class="ttc" id="anamespacefl_a19ba0dae8249e0cf164136846f85e909_html_a19ba0dae8249e0cf164136846f85e909"><div class="ttname"><a href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">fl::max</a></div><div class="ttdeci">constexpr common_type_t&lt; T, U &gt; max(T a, U b) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00075">math.h:75</a></div></div>
+<div class="ttc" id="anamespacefl_aefed87cfefc8330419d3393867945e84_html_aefed87cfefc8330419d3393867945e84"><div class="ttname"><a href="../../d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84">fl::abs</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type abs(T x) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d62/fixed__point_8h_source.html#l00525">fixed_point.h:525</a></div></div>
+<div class="ttc" id="anamespacefl_afb42d6eb6443afc7223ce9b1a812f350_html_afb42d6eb6443afc7223ce9b1a812f350"><div class="ttname"><a href="../../d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350">fl::clamp</a></div><div class="ttdeci">constexpr enable_if&lt; is_fixed_point&lt; T &gt;::value, T &gt;::type clamp(T x, T lo, T hi) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../de/d62/fixed__point_8h_source.html#l00542">fixed_point.h:542</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d8/db8/math__macros_8h_source.html#l00053">ABS</a>, <a class="el" href="../../d6/dd3/clamp_8h_source.html#l00010">fl::clamp()</a>, and <a class="el" href="../../d8/db8/math__macros_8h_source.html#l00045">MAX</a>.</p>
+<p class="reference">References <a class="el" href="../../de/d62/fixed__point_8h_source.html#l00525">fl::abs()</a>, <a class="el" href="../../de/d62/fixed__point_8h_source.html#l00542">fl::clamp()</a>, and <a class="el" href="../../df/db1/math_8h_source.html#l00075">fl::max()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d4/d78/xypath_8cpp_source.html#l00272">drawColor()</a>, and <a class="el" href="../../d4/d78/xypath_8cpp_source.html#l00281">drawGradient()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/dd8/xypath_8cpp_8hpp_source.html#l00273">drawColor()</a>, and <a class="el" href="../../d0/dd8/xypath_8cpp_8hpp_source.html#l00282">drawGradient()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d9/df4/classfl_1_1_x_y_path_a165a207887957cdbab6f97715e90c46d_a165a207887957cdbab6f97715e90c46d_cgraph.svg" width="324" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d9/df4/classfl_1_1_x_y_path_a165a207887957cdbab6f97715e90c46d_a165a207887957cdbab6f97715e90c46d_cgraph.svg" width="324" height="135"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
@@ -163,7 +163,7 @@ $(function(){initNavTree('d9/df4/classfl_1_1_x_y_path_a165a207887957cdbab6f97715
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d9/df4/classfl_1_1_x_y_path.html">XYPath</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

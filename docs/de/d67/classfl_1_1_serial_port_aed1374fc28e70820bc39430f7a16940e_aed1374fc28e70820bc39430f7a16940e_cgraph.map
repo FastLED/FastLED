@@ -1,0 +1,5 @@
+<map id="fl::SerialPort::read" name="fl::SerialPort::read">
+<area shape="rect" id="Node000001" title="Read next byte from serial input." alt="" coords="5,5,144,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a18e7608a302c3628c24710b27480641b.html#a18e7608a302c3628c24710b27480641b" title=" " alt="" coords="192,5,259,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="144,15,178,15,178,21,144,21"/>
+</map>

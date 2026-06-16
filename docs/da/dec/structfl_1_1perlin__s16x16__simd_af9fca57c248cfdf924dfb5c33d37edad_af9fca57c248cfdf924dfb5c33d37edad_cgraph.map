@@ -1,0 +1,9 @@
+<map id="fl::perlin_s16x16_simd::pnoise2d_raw_simd4_vec" name="fl::perlin_s16x16_simd::pnoise2d_raw_simd4_vec">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,47,203,87"/>
+<area shape="rect" id="Node000002" href="$d3/d7d/structfl_1_1perlin__s16x16_a1a05f472ef13e32ff6b280da22010afe.html#a1a05f472ef13e32ff6b280da22010afe" title=" " alt="" coords="251,5,417,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="197,45,260,31,261,36,198,50"/>
+<area shape="rect" id="Node000003" href="$d3/d7d/structfl_1_1perlin__s16x16_af819b0a7f3019ab1f0a0b454a28c3588.html#af819b0a7f3019ab1f0a0b454a28c3588" title=" " alt="" coords="251,55,417,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="203,65,237,65,237,70,203,70"/>
+<area shape="rect" id="Node000004" href="$d3/d7d/structfl_1_1perlin__s16x16_a6a83fdcdabd10f11cc1d0be7b31114fc.html#a6a83fdcdabd10f11cc1d0be7b31114fc" title=" " alt="" coords="253,104,415,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="198,85,261,98,260,104,197,90"/>
+</map>

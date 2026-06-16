@@ -1,0 +1,12 @@
+digraph "fl::task::Executor::unregister_runner"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::task::Executor\l::unregister_runner",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Unregister a runner."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::net::http::FetchManager\l::update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d80/classfl_1_1net_1_1http_1_1_fetch_manager_af67c6313b910fd1cd4973d3a111ce30b.html#af67c6313b910fd1cd4973d3a111ce30b",tooltip="Update this runner (called during task pumping)"];
+}

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fx/frame.h File Reference</title>
+<title>FastLED: fl/fx/frame.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -107,14 +107,17 @@ $(function(){initNavTree('df/d7d/frame_8h.html','../../'); initResizable(true); 
   <div class="headertitle"><div class="title">frame.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;<a class="el" href="../../da/d66/string_8h_source.html">string.h</a>&gt;</code><br />
-<code>#include &quot;<a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../df/d2a/namespace_8h_source.html">fl/namespace.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../dc/d18/memory_8h_source.html">fl/memory.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../da/d61/xymap_8h_source.html">fl/xymap.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d6/d68/vector_8h_source.html">fl/vector.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../da/da9/allocator_8h_source.html">fl/allocator.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d9/d35/draw__mode_8h_source.html">fl/draw_mode.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../dd/d8d/cstring_8h_source.html">fl/stl/cstring.h</a>&quot;</code><br />
+<code>#include &quot;crgb.h&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d6a/shared__ptr_8h_source.html">fl/stl/shared_ptr.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d7a/span_8h_source.html">fl/stl/span.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../da/d61/xymap_8h_source.html">fl/math/xymap.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/d68/vector_8h_source.html">fl/stl/vector.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/dd8/stdint_8h_source.html">fl/stl/stdint.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../da/da9/allocator_8h_source.html">fl/stl/allocator.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d9/d35/draw__mode_8h_source.html">fl/gfx/draw_mode.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dd/dcd/pixel_8h_source.html">fl/codec/pixel.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for frame.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -140,13 +143,13 @@ Classes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a28cce58bbbfa08810f356af3954ee9f8" id="r_a28cce58bbbfa08810f356af3954ee9f8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a28cce58bbbfa08810f356af3954ee9f8.html#a28cce58bbbfa08810f356af3954ee9f8">fl::FASTLED_SMART_PTR</a> (<a class="el" href="../../d1/de0/classfl_1_1_frame.html">Frame</a>)</td></tr>
-<tr class="separator:a28cce58bbbfa08810f356af3954ee9f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae0b5d008cebc720578446f0084bcf596" id="r_ae0b5d008cebc720578446f0084bcf596"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ae0b5d008cebc720578446f0084bcf596.html#ae0b5d008cebc720578446f0084bcf596">fl::FASTLED_SHARED_PTR</a> (<a class="el" href="../../d1/de0/classfl_1_1_frame.html">Frame</a>)</td></tr>
+<tr class="separator:ae0b5d008cebc720578446f0084bcf596"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -154,8 +157,8 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_acbb946b833f21b16ec30aa21c4c3a72.html">fx</a></li><li class="navelem"><a class="el" href="../../df/d7d/frame_8h.html">frame.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_d90d106199f3fa0759eaa8cec7e30de8.html">fx</a></li><li class="navelem"><a class="el" href="../../df/d7d/frame_8h.html">frame.h</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

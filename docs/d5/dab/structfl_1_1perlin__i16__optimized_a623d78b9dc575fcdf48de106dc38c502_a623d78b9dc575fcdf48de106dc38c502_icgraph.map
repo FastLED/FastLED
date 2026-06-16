@@ -1,0 +1,11 @@
+<map id="fl::perlin_i16_optimized::pnoise2d_raw" name="fl::perlin_i16_optimized::pnoise2d_raw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="625,37,800,77"/>
+<area shape="rect" id="Node000002" href="$d5/dab/structfl_1_1perlin__i16__optimized_a98ddf9fec9562191ab76de13a6dc7b28.html#a98ddf9fec9562191ab76de13a6dc7b28" title=" " alt="" coords="387,5,561,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="612,46,561,40,562,34,612,41"/>
+<area shape="rect" id="Node000003" href="$d2/d1b/namespaceautoresearch_1_1animartrix__check_a167b24bef09d074d48b1e29727fd61e3.html#a167b24bef09d074d48b1e29727fd61e3" title=" " alt="" coords="371,69,577,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="612,73,578,78,577,73,611,68"/>
+<area shape="rect" id="Node000004" href="$db/d63/class_auto_research_remote_control_abb6600e8a1e8c4ef46ba29e7bd3b78b4.html#abb6600e8a1e8c4ef46ba29e7bd3b78b4" title="Register all RPC functions with shared autoresearch state." alt="" coords="112,69,323,109"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="357,92,323,92,323,87,357,87"/>
+<area shape="rect" id="Node000005" href="$dd/dc8/_auto_research_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,77,64,102"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="98,92,64,92,64,87,98,87"/>
+</map>

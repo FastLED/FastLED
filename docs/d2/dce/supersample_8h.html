@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fl/supersample.h File Reference</title>
+<title>FastLED: fl/math/supersample.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -111,7 +111,7 @@ $(function(){initNavTree('d2/dce/supersample_8h.html','../../'); initResizable(t
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d0/da6/supersample_8h__dep__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d0/da6/supersample_8h__dep__incl.svg" width="100%" height="525"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../d2/dce/supersample_8h_source.html">Go to the source code of this file.</a></p>
@@ -119,15 +119,15 @@ $(function(){initNavTree('d2/dce/supersample_8h.html','../../'); initResizable(t
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:ad37afc941d920308dd71960e4613cdf6" id="r_ad37afc941d920308dd71960e4613cdf6"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ad37afc941d920308dd71960e4613cdf6.html#ad37afc941d920308dd71960e4613cdf6">fl::SuperSample</a> { <a class="el" href="../../d4/d36/namespacefl_ad37afc941d920308dd71960e4613cdf6.html#ad37afc941d920308dd71960e4613cdf6af213904fd17b4c9630581686d2e4ca89">fl::SUPER_SAMPLE_NONE</a> = 1
-, <a class="el" href="../../d4/d36/namespacefl_ad37afc941d920308dd71960e4613cdf6.html#ad37afc941d920308dd71960e4613cdf6a1e910f180f77f3704a8066db79cd6111">fl::SUPER_SAMPLE_2X</a> = 2
-, <a class="el" href="../../d4/d36/namespacefl_ad37afc941d920308dd71960e4613cdf6.html#ad37afc941d920308dd71960e4613cdf6a24072aca92c61bd88948f7118d96c21b">fl::SUPER_SAMPLE_4X</a> = 4
-, <a class="el" href="../../d4/d36/namespacefl_ad37afc941d920308dd71960e4613cdf6.html#ad37afc941d920308dd71960e4613cdf6a086e36ad906a8ab6071172529675ff3e">fl::SUPER_SAMPLE_8X</a> = 8
+<tr class="memitem:ad37afc941d920308dd71960e4613cdf6" id="r_ad37afc941d920308dd71960e4613cdf6"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ad37afc941d920308dd71960e4613cdf6.html#ad37afc941d920308dd71960e4613cdf6">fl::SuperSample</a> { <a class="el" href="../../d4/d36/namespacefl_ad37afc941d920308dd71960e4613cdf6.html#ad37afc941d920308dd71960e4613cdf6ab5c9465f87c0fe16ebac2e7a7701fa62">fl::SUPER_SAMPLE_NONE</a> = 1
+, <a class="el" href="../../d4/d36/namespacefl_ad37afc941d920308dd71960e4613cdf6.html#ad37afc941d920308dd71960e4613cdf6a917906fd8fbe4fdbc3794c32bdde9044">fl::SUPER_SAMPLE_2X</a> = 2
+, <a class="el" href="../../d4/d36/namespacefl_ad37afc941d920308dd71960e4613cdf6.html#ad37afc941d920308dd71960e4613cdf6afed74010f7f47764cb655748502e2ba6">fl::SUPER_SAMPLE_4X</a> = 4
+, <a class="el" href="../../d4/d36/namespacefl_ad37afc941d920308dd71960e4613cdf6.html#ad37afc941d920308dd71960e4613cdf6add76c7db767ff1662441af7c3e24da33">fl::SUPER_SAMPLE_8X</a> = 8
  }</td></tr>
 <tr class="separator:ad37afc941d920308dd71960e4613cdf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -137,8 +137,8 @@ Enumerations</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d2/dce/supersample_8h.html">supersample.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_94896ea2d28e1d34f24a1dbbb9436aa8.html">math</a></li><li class="navelem"><a class="el" href="../../d2/dce/supersample_8h.html">supersample.h</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

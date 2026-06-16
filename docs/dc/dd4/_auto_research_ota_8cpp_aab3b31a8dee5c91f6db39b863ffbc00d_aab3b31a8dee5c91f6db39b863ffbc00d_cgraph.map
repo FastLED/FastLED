@@ -1,0 +1,5 @@
+<map id="startOta" name="startOta">
+<area shape="rect" id="Node000001" title="Start WiFi Soft AP and OTA HTTP server." alt="" coords="5,5,80,31"/>
+<area shape="rect" id="Node000002" href="$de/d40/classfl_1_1json_af8bc0968107152344bfa8468bba76f54.html#af8bc0968107152344bfa8468bba76f54" title=" " alt="" coords="128,5,241,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="80,15,114,15,114,21,80,21"/>
+</map>

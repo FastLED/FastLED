@@ -1,0 +1,5 @@
+<map id="fl::test::SerialReporter" name="fl::test::SerialReporter">
+<area shape="rect" id="Node000001" title="Serial reporter for embedded devices Usage: SerialReporter reporter(mySerialPrint); fl::test::TestCon..." alt="" coords="5,79,169,104"/>
+<area shape="rect" id="Node000002" href="$da/d63/classfl_1_1test_1_1_i_reporter.html" title=" " alt="" coords="22,5,153,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="90,44,90,79,85,79,85,44"/>
+</map>

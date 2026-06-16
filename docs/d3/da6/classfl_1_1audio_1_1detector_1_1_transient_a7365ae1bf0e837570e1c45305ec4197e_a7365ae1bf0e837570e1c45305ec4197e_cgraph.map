@@ -1,0 +1,19 @@
+<map id="fl::audio::detector::Transient::update" name="fl::audio::detector::Transient::update">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,141,148,181"/>
+<area shape="poly" id="edge7_Node000001_Node000001" title=" " alt="" coords="33,142,31,132,38,122,53,117,77,115,104,118,118,125,116,130,102,123,77,120,54,122,41,127,36,133,38,140"/>
+<area shape="rect" id="Node000002" href="$d3/da6/classfl_1_1audio_1_1detector_1_1_transient_ac484ad1d903a32bde41a310beaf65ebf.html#ac484ad1d903a32bde41a310beaf65ebf" title=" " alt="" coords="233,5,389,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="94,139,137,97,165,74,195,55,218,44,221,49,197,60,168,79,140,101,97,143"/>
+<area shape="rect" id="Node000003" href="$d3/da6/classfl_1_1audio_1_1detector_1_1_transient_a1a2920c0a33fed12547e659196d06b0a.html#a1a2920c0a33fed12547e659196d06b0a" title=" " alt="" coords="196,69,425,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="135,139,195,119,222,111,224,116,197,124,136,144"/>
+<area shape="rect" id="Node000005" href="$d3/da6/classfl_1_1audio_1_1detector_1_1_transient_a5a8088e28859990e2f67d761f93b7427.html#a5a8088e28859990e2f67d761f93b7427" title=" " alt="" coords="217,134,404,189"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="148,159,204,159,204,164,148,164"/>
+<area shape="rect" id="Node000006" href="$d3/da6/classfl_1_1audio_1_1detector_1_1_transient_a4a51c9867b483fb4bed0fb988cc524cc.html#a4a51c9867b483fb4bed0fb988cc524cc" title=" " alt="" coords="212,213,409,253"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="139,179,197,197,227,207,226,212,195,203,137,184"/>
+<area shape="rect" id="Node000008" href="$d3/da6/classfl_1_1audio_1_1detector_1_1_transient_a8e303bdcaa89e034c7a8aaa83897509d.html#a8e303bdcaa89e034c7a8aaa83897509d" title=" " alt="" coords="202,277,419,317"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="97,180,140,222,168,244,197,263,211,270,208,274,195,268,165,248,137,226,94,183"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="473,77,540,102"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="426,87,460,87,460,92,426,92"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="475,253,538,278"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="410,247,462,255,461,261,409,252"/>
+<area shape="poly" id="edge9_Node000008_Node000007" title=" " alt="" coords="419,277,462,270,462,275,420,282"/>
+</map>

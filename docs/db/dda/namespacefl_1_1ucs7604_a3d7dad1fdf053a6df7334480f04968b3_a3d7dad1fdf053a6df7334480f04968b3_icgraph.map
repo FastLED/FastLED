@@ -1,0 +1,8 @@
+<map id="fl::ucs7604::brightness" name="fl::ucs7604::brightness">
+<area shape="rect" id="Node000001" title="Get current global UCS7604 brightness value." alt="" coords="377,101,545,126"/>
+<area shape="rect" id="Node000002" href="$dd/d78/classfl_1_1_u_c_s7604_controller_t_a0b8dc7f2f0f2e0a2ed3461aa905080ea.html#a0b8dc7f2f0f2e0a2ed3461aa905080ea" title=" " alt="" coords="5,5,329,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="383,101,329,90,330,84,384,95"/>
+<area shape="rect" id="Node000003" href="$dc/d8d/namespacefl_1_1anonymous__namespace_02channel_8cpp_8hpp_03_ad61b123c8a67b000fe20a82438d06343.html#ad61b123c8a67b000fe20a82438d06343" title="Encode UCS7604 pixel data into the channel data buffer." alt="" coords="41,152,293,192"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="384,131,269,155,268,149,383,126"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="218,140,200,133,167,131,139,133,121,138,115,143,118,151,113,153,110,142,119,133,138,127,167,125,201,128,220,135"/>
+</map>

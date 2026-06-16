@@ -112,20 +112,21 @@ $(function(){initNavTree('df/dab/fastled__progmem_8h.html','../../'); initResiza
 <p>Whether or not pgmspace.h is #included is separately controllable by FASTLED_INCLUDE_PGMSPACE, if needed. </p>
 
 <p class="definition">Definition in file <a class="el" href="../../df/dab/fastled__progmem_8h_source.html">fastled_progmem.h</a>.</p>
-</div><div class="textblock"><code>#include &quot;<a class="el" href="../../df/d2a/namespace_8h_source.html">fl/namespace.h</a>&quot;</code><br />
+</div><div class="textblock"><code>#include &quot;platforms/is_platform.h&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/stl/int.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for fastled_progmem.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d1/d70/fastled__progmem_8h__incl.svg" width="160" height="110"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d1/d70/fastled__progmem_8h__incl.svg" width="311" height="256"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 </div><div class="textblock"><div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> This graph shows which files directly or indirectly include this file:</div>
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d6/d3c/fastled__progmem_8h__dep__incl.svg" width="100%" height="525"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d6/d3c/fastled__progmem_8h__dep__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../df/dab/fastled__progmem_8h_source.html">Go to the source code of this file.</a></p>
@@ -137,9 +138,13 @@ Macros</h2></td></tr>
 <tr class="memitem:a04d274f8324a77bf90e1374fedb63eac" id="r_a04d274f8324a77bf90e1374fedb63eac"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/dab/fastled__progmem_8h_a04d274f8324a77bf90e1374fedb63eac.html#a04d274f8324a77bf90e1374fedb63eac">FASTLED_USE_PROGMEM</a>&#160;&#160;&#160;1</td></tr>
 <tr class="memdesc:a04d274f8324a77bf90e1374fedb63eac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determine whether the current platform supports PROGMEM.  <br /></td></tr>
 <tr class="separator:a04d274f8324a77bf90e1374fedb63eac"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a30d32309ee815a4857c30666fafeed6b" id="r_a30d32309ee815a4857c30666fafeed6b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/dab/fastled__progmem_8h_a30d32309ee815a4857c30666fafeed6b.html#a30d32309ee815a4857c30666fafeed6b">FL_ALIGN_PROGMEM</a>&#160;&#160;&#160;__attribute__ ((aligned (4)))</td></tr>
-<tr class="memdesc:a30d32309ee815a4857c30666fafeed6b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helps to force 4-byte alignment for platforms with unaligned access.  <br /></td></tr>
-<tr class="separator:a30d32309ee815a4857c30666fafeed6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a00d3546942ec16b2168d5d1f6f5cc55d" id="r_a00d3546942ec16b2168d5d1f6f5cc55d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/dab/fastled__progmem_8h_a00d3546942ec16b2168d5d1f6f5cc55d.html#a00d3546942ec16b2168d5d1f6f5cc55d">FL_ALIGN_PROGMEM</a>(N)</td></tr>
+<tr class="memdesc:a00d3546942ec16b2168d5d1f6f5cc55d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Force N-byte alignment for platforms with unaligned access or cache-line optimization.  <br /></td></tr>
+<tr class="separator:a00d3546942ec16b2168d5d1f6f5cc55d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1dec494d1cfc16e7c6de2d18eef532aa" id="r_a1dec494d1cfc16e7c6de2d18eef532aa"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/dab/fastled__progmem_8h_a1dec494d1cfc16e7c6de2d18eef532aa.html#a1dec494d1cfc16e7c6de2d18eef532aa">FL_PGM_READ_DWORD_ALIGNED</a>(addr)</td></tr>
+<tr class="separator:a1dec494d1cfc16e7c6de2d18eef532aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6e83b33d3e000a7965f9379b4dd111f" id="r_aa6e83b33d3e000a7965f9379b4dd111f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/dab/fastled__progmem_8h_aa6e83b33d3e000a7965f9379b4dd111f.html#aa6e83b33d3e000a7965f9379b4dd111f">FL_PGM_READ_WORD_ALIGNED</a>(addr)</td></tr>
+<tr class="separator:aa6e83b33d3e000a7965f9379b4dd111f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af4d0ad0021dafa1c293cb3363a82ee8f" id="r_af4d0ad0021dafa1c293cb3363a82ee8f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/dab/fastled__progmem_8h_af4d0ad0021dafa1c293cb3363a82ee8f.html#af4d0ad0021dafa1c293cb3363a82ee8f">FL_PROGMEM</a>&#160;&#160;&#160;PROGMEM</td></tr>
 <tr class="memdesc:af4d0ad0021dafa1c293cb3363a82ee8f"><td class="mdescLeft">&#160;</td><td class="mdescRight">PROGMEM keyword for storage.  <br /></td></tr>
 <tr class="separator:af4d0ad0021dafa1c293cb3363a82ee8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -164,7 +169,7 @@ Macros</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../df/dab/fastled__progmem_8h.html">fastled_progmem.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

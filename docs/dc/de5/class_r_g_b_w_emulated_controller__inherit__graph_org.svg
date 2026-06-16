@@ -11,7 +11,7 @@
 <!-- Node1 -->
 <g id="Node000001" class="node">
 <title>Node1</title>
-<g id="a_Node000001"><a xlink:title=" ">
+<g id="a_Node000001"><a xlink:title="Emulation layer to support RGBW LEDs on RGB controllers.">
 <polygon fill="#999999" stroke="#666666" points="171,-30 0,-30 0,0 171,0 171,-30"/>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">RGBWEmulatedController</text>
 <text text-anchor="middle" x="85.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; CONTROLLER, RGB_ORDER &gt;</text>
@@ -42,7 +42,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d6/d2c/class_c_l_e_d_controller.html" target="_top" xlink:title="Base definition for an LED controller.">
+<g id="a_Node000003"><a xlink:href="../../d8/da0/classfl_1_1_c_l_e_d_controller.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="126.5,-285 36.5,-285 36.5,-266 126.5,-266 126.5,-285"/>
 <text text-anchor="middle" x="81.5" y="-273" font-family="Helvetica,sans-Serif" font-size="10.00">CLEDController</text>
 </a>

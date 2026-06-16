@@ -1,0 +1,22 @@
+<map id="fl::ChannelManager::notifyPollNeeded" name="fl::ChannelManager::notifyPollNeeded">
+<area shape="rect" id="Node000001" title=" " alt="" coords="631,165,779,205"/>
+<area shape="rect" id="Node000002" href="$d2/d6b/classfl_1_1_channel_manager_a7bffd7927e98f20d7449fa20f9fa5924.html#a7bffd7927e98f20d7449fa20f9fa5924" title=" " alt="" coords="401,165,583,205"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="617,188,583,188,583,183,617,183"/>
+<area shape="rect" id="Node000003" href="$d2/d6b/classfl_1_1_channel_manager_addc4b631522a2d44151c6b7c23a26ca1.html#addc4b631522a2d44151c6b7c23a26ca1" title="Constructor." alt="" coords="205,165,353,205"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="388,197,354,197,354,191,388,192"/>
+<area shape="poly" id="edge7_Node000003_Node000002" title=" " alt="" coords="367,174,401,174,401,179,367,179"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="313,154,301,147,279,144,260,146,249,151,245,157,247,164,242,166,240,156,246,147,259,141,279,139,303,142,315,149"/>
+<area shape="rect" id="Node000004" href="$d2/d6b/classfl_1_1_channel_manager_aa438729715ab72be4a644a74f592ed02.html#aa438729715ab72be4a644a74f592ed02" title=" " alt="" coords="7,5,155,45"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="253,156,210,107,156,59,136,48,138,43,159,55,214,104,257,153"/>
+<area shape="rect" id="Node000005" href="$d2/d6b/classfl_1_1_channel_manager_ab82d583e3cfc6cc4d4ba29bea6c231e1.html#ab82d583e3cfc6cc4d4ba29bea6c231e1" title=" " alt="" coords="7,69,155,109"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="228,161,156,124,130,112,132,107,158,119,231,156"/>
+<area shape="rect" id="Node000006" href="$d2/d6b/classfl_1_1_channel_manager_aed1be386f6b38cabd478d1d9c11c240c.html#aed1be386f6b38cabd478d1d9c11c240c" title="Get the global singleton instance." alt="" coords="7,133,155,173"/>
+<area shape="poly" id="edge6_Node000003_Node000006" title=" " alt="" coords="191,174,155,168,156,163,192,169"/>
+<area shape="rect" id="Node000019" href="$d2/d6b/classfl_1_1_channel_manager_a82a98383df4ab7ca54db2d17e9848604.html#a82a98383df4ab7ca54db2d17e9848604" title=" " alt="" coords="7,197,155,237"/>
+<area shape="poly" id="edge8_Node000003_Node000019" title=" " alt="" coords="192,202,156,208,155,203,191,197"/>
+<area shape="rect" id="Node000033" href="$d2/d6b/classfl_1_1_channel_manager_a83de55d30b154933d7efde6821269045.html#a83de55d30b154933d7efde6821269045" title=" " alt="" coords="7,261,155,301"/>
+<area shape="poly" id="edge9_Node000003_Node000033" title=" " alt="" coords="231,215,158,252,132,264,130,259,156,247,228,210"/>
+<area shape="rect" id="Node000034" href="$d2/d6b/classfl_1_1_channel_manager_a71ca7642adaace950f92da2855df4cbc.html#a71ca7642adaace950f92da2855df4cbc" title="Register a single driver at a priority above the platform default and disable all others (compile&#45;tim..." alt="" coords="5,349,157,389"/>
+<area shape="poly" id="edge10_Node000003_Node000034" title=" " alt="" coords="254,218,211,265,159,315,114,351,110,347,156,311,207,261,250,214"/>
+<area shape="poly" id="edge11_Node000034_Node000034" title=" " alt="" coords="115,338,103,331,81,328,62,330,51,335,47,341,49,348,44,350,42,340,48,331,61,325,81,323,105,326,117,333"/>
+</map>

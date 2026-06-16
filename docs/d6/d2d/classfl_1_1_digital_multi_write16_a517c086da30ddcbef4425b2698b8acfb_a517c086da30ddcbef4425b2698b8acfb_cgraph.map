@@ -1,0 +1,11 @@
+<map id="fl::DigitalMultiWrite16::write" name="fl::DigitalMultiWrite16::write">
+<area shape="rect" id="Node000001" title="Write pre&#45;transposed 16&#45;bit data to the 16 pins." alt="" coords="5,51,171,91"/>
+<area shape="rect" id="Node000002" href="$d6/d2d/classfl_1_1_digital_multi_write16_ab2fbb0f68e3c32263d9bbaf0cc7b0ec8.html#ab2fbb0f68e3c32263d9bbaf0cc7b0ec8" title=" " alt="" coords="219,22,384,62"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="170,57,205,53,205,58,171,63"/>
+<area shape="rect" id="Node000005" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="250,87,353,112"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="171,80,236,88,236,93,170,85"/>
+<area shape="rect" id="Node000003" href="$d9/df3/classfl_1_1set_a8d2f661a320b4e6ad287c6f0f54e2f1d.html#a8d2f661a320b4e6ad287c6f0f54e2f1d" title=" " alt="" coords="438,5,541,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="384,29,424,24,424,29,385,34"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_ab91b418b90c32e475842ad7ce3785afb.html#ab91b418b90c32e475842ad7ce3785afb" title="Write digital value to pin." alt="" coords="432,55,547,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="385,51,418,55,418,60,384,56"/>
+</map>

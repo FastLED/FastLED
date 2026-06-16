@@ -1,0 +1,14 @@
+<map id="fl::validation::validateExpectedEngines" name="fl::validation::validateExpectedEngines">
+<area shape="rect" id="Node000001" title="Validate that at least one driver is registered with ChannelManager." alt="" coords="5,88,169,128"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a8aafd1d8ccf1aab536564352dd23d204.html#a8aafd1d8ccf1aab536564352dd23d204" title="Get the global ChannelManager singleton instance." alt="" coords="218,66,365,91"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="169,94,204,89,205,94,170,99"/>
+<area shape="rect" id="Node000009" href="$d2/d6b/classfl_1_1_channel_manager_a96f21ad5ff259842566e73eb07f14549.html#a96f21ad5ff259842566e73eb07f14549" title="Get full state of all registered drivers." alt="" coords="217,116,365,156"/>
+<area shape="poly" id="edge6_Node000001_Node000009" title=" " alt="" coords="170,117,204,121,203,127,169,122"/>
+<area shape="rect" id="Node000003" href="$d2/d6b/classfl_1_1_channel_manager_aed1be386f6b38cabd478d1d9c11c240c.html#aed1be386f6b38cabd478d1d9c11c240c" title="Get the global singleton instance." alt="" coords="413,59,561,99"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="365,76,400,76,400,81,365,81"/>
+<area shape="rect" id="Node000004" href="$d2/d6b/classfl_1_1_channel_manager_addc4b631522a2d44151c6b7c23a26ca1.html#addc4b631522a2d44151c6b7c23a26ca1" title="Constructor." alt="" coords="617,29,765,69"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="561,65,602,59,603,65,562,71"/>
+<area shape="rect" id="Node000008" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="609,94,772,119"/>
+<area shape="poly" id="edge5_Node000003_Node000008" title=" " alt="" coords="562,86,596,91,596,96,561,91"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="652,30,650,20,656,11,670,5,691,3,714,6,727,13,725,18,713,11,691,8,671,10,660,15,655,21,658,28"/>
+</map>

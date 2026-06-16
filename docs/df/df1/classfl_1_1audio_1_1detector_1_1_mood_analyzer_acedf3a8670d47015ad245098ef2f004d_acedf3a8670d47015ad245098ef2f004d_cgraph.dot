@@ -1,0 +1,50 @@
+digraph "fl::audio::detector::MoodAnalyzer::~MoodAnalyzer"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::audio::detector\l::MoodAnalyzer::~MoodAnalyzer",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::audio::detector\l::MoodAnalyzer::fireCallbacks",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/df1/classfl_1_1audio_1_1detector_1_1_mood_analyzer_a7e940455cd1983f1b3cb0774cda6e340.html#a7e940455cd1983f1b3cb0774cda6e340",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::audio::detector\l::MoodAnalyzer::update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/df1/classfl_1_1audio_1_1detector_1_1_mood_analyzer_a4e2695cd16583146b92ffdb4298eba1e.html#a4e2695cd16583146b92ffdb4298eba1e",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::audio::detector\l::MoodAnalyzer::MoodAnalyzer",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/df1/classfl_1_1audio_1_1detector_1_1_mood_analyzer_af19d768df1da0a5dd8f19611b119d55f.html#af19d768df1da0a5dd8f19611b119d55f",tooltip=" "];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::audio::detector\l::MoodAnalyzer::calculateArousal",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/df1/classfl_1_1audio_1_1detector_1_1_mood_analyzer_aa5f7a77ae26dfe9df6dd6b8cce4cf502.html#aa5f7a77ae26dfe9df6dd6b8cce4cf502",tooltip=" "];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::max",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909",tooltip=" "];
+  Node5 -> Node7 [id="edge6_Node000005_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::min",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb",tooltip=" "];
+  Node5 -> Node8 [id="edge7_Node000005_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="rms",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d49/_audio_2simple_2simple_8h_a588b0ed03ff3e39281e2bc8b149dbdbd.html#a588b0ed03ff3e39281e2bc8b149dbdbd",tooltip=" "];
+  Node8 -> Node8 [id="edge8_Node000008_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 -> Node10 [id="edge9_Node000008_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::sqrt",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1",tooltip=" "];
+  Node3 -> Node11 [id="edge10_Node000003_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::audio::detector\l::MoodAnalyzer::calculateConfidence",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/df1/classfl_1_1audio_1_1detector_1_1_mood_analyzer_aecf0b3f9bfed9af32498e8132fb91e4f.html#aecf0b3f9bfed9af32498e8132fb91e4f",tooltip=" "];
+  Node11 -> Node6 [id="edge11_Node000011_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node11 -> Node7 [id="edge12_Node000011_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node11 -> Node10 [id="edge13_Node000011_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node12 [id="edge14_Node000003_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::audio::detector\l::MoodAnalyzer::calculateSpectral\lCentroid",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/df1/classfl_1_1audio_1_1detector_1_1_mood_analyzer_a0cc921df17aaec25d42d45deebbff5f2.html#a0cc921df17aaec25d42d45deebbff5f2",tooltip=" "];
+  Node3 -> Node13 [id="edge15_Node000003_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::audio::detector\l::MoodAnalyzer::calculateSpectralFlux",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/df1/classfl_1_1audio_1_1detector_1_1_mood_analyzer_a9c1dca4459f017c135f8d33ade5d0e06.html#a9c1dca4459f017c135f8d33ade5d0e06",tooltip=" "];
+  Node13 -> Node14 [id="edge16_Node000013_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::audio::fft::Bins::raw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d86/classfl_1_1audio_1_1fft_1_1_bins_a6ffb71ea065157cab03d64006e779d0d.html#a6ffb71ea065157cab03d64006e779d0d",tooltip=" "];
+  Node13 -> Node10 [id="edge17_Node000013_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node15 [id="edge18_Node000003_Node000015",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl::audio::detector\l::MoodAnalyzer::calculateSpectral\lRolloff",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/df1/classfl_1_1audio_1_1detector_1_1_mood_analyzer_a9eeb77b61570f5549911c4f29986f6b3.html#a9eeb77b61570f5549911c4f29986f6b3",tooltip=" "];
+  Node3 -> Node16 [id="edge19_Node000003_Node000016",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::audio::detector\l::MoodAnalyzer::calculateValence",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/df1/classfl_1_1audio_1_1detector_1_1_mood_analyzer_ab3edc67a499db27f43a5007b461a7082.html#ab3edc67a499db27f43a5007b461a7082",tooltip=" "];
+  Node16 -> Node6 [id="edge20_Node000016_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node16 -> Node7 [id="edge21_Node000016_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node17 [id="edge22_Node000003_Node000017",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl::audio::detector\l::MoodAnalyzer::shouldChangeMood",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/df1/classfl_1_1audio_1_1detector_1_1_mood_analyzer_a803a22283fbbdce4ffa11b42c08f39e3.html#a803a22283fbbdce4ffa11b42c08f39e3",tooltip=" "];
+  Node17 -> Node18 [id="edge23_Node000017_Node000018",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="fl::audio::detector\l::Mood::getCategory",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/dc1/structfl_1_1audio_1_1detector_1_1_mood_a4941c3dd2ea49a8f541a719370cb53bf.html#a4941c3dd2ea49a8f541a719370cb53bf",tooltip=" "];
+  Node3 -> Node3 [id="edge24_Node000003_Node000003",color="steelblue1",style="solid",tooltip=" "];
+}

@@ -1,0 +1,18 @@
+<map id="fl::encodeUCS7604" name="fl::encodeUCS7604">
+<area shape="rect" id="Node000001" title="Encode complete UCS7604 frame (preamble + padding + pixel data)" alt="" coords="781,147,925,172"/>
+<area shape="rect" id="Node000002" href="$d4/df9/_auto_research_test_8cpp_adaf2e23d83d4eb143bb3728848a40c30.html#adaf2e23d83d4eb143bb3728848a40c30" title="Build expected UCS7604 encoded bytes from LED data." alt="" coords="485,60,658,85"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="819,142,779,120,733,101,658,84,659,78,734,95,781,115,822,137"/>
+<area shape="rect" id="Node000013" href="$dd/d78/classfl_1_1_u_c_s7604_controller_t_a0b8dc7f2f0f2e0a2ed3461aa905080ea.html#a0b8dc7f2f0f2e0a2ed3461aa905080ea" title=" " alt="" coords="409,110,733,209"/>
+<area shape="poly" id="edge6_Node000001_Node000013" title=" " alt="" coords="768,162,733,162,733,157,768,157"/>
+<area shape="rect" id="Node000014" href="$dc/d8d/namespacefl_1_1anonymous__namespace_02channel_8cpp_8hpp_03_ad61b123c8a67b000fe20a82438d06343.html#ad61b123c8a67b000fe20a82438d06343" title="Encode UCS7604 pixel data into the channel data buffer." alt="" coords="445,257,697,297"/>
+<area shape="poly" id="edge7_Node000001_Node000014" title=" " alt="" coords="819,181,734,223,638,259,636,254,732,218,816,176"/>
+<area shape="rect" id="Node000003" href="$d4/df9/_auto_research_test_8cpp_aac567188ee44c45d15b20231ecff68c9.html#aac567188ee44c45d15b20231ecff68c9" title=" " alt="" coords="259,35,361,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="471,66,361,55,362,50,471,60"/>
+<area shape="rect" id="Node000012" href="$d4/df9/_auto_research_test_8cpp_ab5d3883aa989a0c1298af1a8a0d2851a.html#ab5d3883aa989a0c1298af1a8a0d2851a" title=" " alt="" coords="275,84,345,109"/>
+<area shape="poly" id="edge5_Node000002_Node000012" title=" " alt="" coords="471,85,345,96,345,91,471,79"/>
+<area shape="rect" id="Node000004" href="$d4/df9/_auto_research_test_8cpp_a4c76939743f62fdeea55c4ec8a3e2a31.html#a4c76939743f62fdeea55c4ec8a3e2a31" title=" " alt="" coords="5,5,211,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="245,41,195,33,196,28,245,35"/>
+<area shape="rect" id="Node000011" href="$d4/df9/_auto_research_test_8cpp_a5acfa3d36f5c1ff77be18eecaedf19b3.html#a5acfa3d36f5c1ff77be18eecaedf19b3" title=" " alt="" coords="5,55,211,95"/>
+<area shape="poly" id="edge4_Node000003_Node000011" title=" " alt="" coords="245,59,211,64,211,58,245,54"/>
+<area shape="poly" id="edge8_Node000014_Node000014" title=" " alt="" coords="616,245,600,238,571,235,546,237,531,242,525,248,528,255,523,257,520,247,528,238,545,232,571,230,602,233,618,240"/>
+</map>

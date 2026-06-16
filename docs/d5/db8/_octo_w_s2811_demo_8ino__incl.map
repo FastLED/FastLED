@@ -1,5 +1,9 @@
-<map id="/home/runner/work/FastLED/FastLED/examples/Multiple/OctoWS2811Demo/OctoWS2811Demo.ino" name="/home/runner/work/FastLED/FastLED/examples/Multiple/OctoWS2811Demo/OctoWS2811Demo.ino">
-<area shape="rect" id="Node000001" title="Demonstrates how to use OctoWS2811 output." alt="" coords="5,5,304,60"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="57,108,252,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="157,60,157,94,152,94,152,60"/>
+<map id="/home/runner/work/FastLED/FastLED/examples/SpecialDrivers/Teensy/OctoWS2811/OctoWS2811Demo/OctoWS2811Demo.ino" name="/home/runner/work/FastLED/FastLED/examples/SpecialDrivers/Teensy/OctoWS2811/OctoWS2811Demo/OctoWS2811Demo.ino">
+<area shape="rect" id="Node000001" title="Demonstrates how to use OctoWS2811 output." alt="" coords="5,5,289,75"/>
+<area shape="rect" id="Node000002" href="$d8/dab/_octo_w_s2811_demo_8h.html" title=" " alt="" coords="69,123,225,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="150,75,150,109,145,109,145,75"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="26,196,143,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="139,150,106,187,102,184,135,147"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="167,196,253,221"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="160,147,193,184,189,187,156,150"/>
 </map>

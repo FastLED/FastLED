@@ -1,0 +1,15 @@
+<map id="fl::Channel::addToDrawList" name="fl::Channel::addToDrawList">
+<area shape="rect" id="Node000001" title="Add this channel to the global controller draw list." alt="" coords="5,70,200,95"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a9e51518d1427463dffd596c69c6f3e46.html#a9e51518d1427463dffd596c69c6f3e46" title="Add this controller to the linked list." alt="" coords="251,63,387,103"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,80,237,80,237,85,200,85"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a5e115bf146729c8868c918538feb06df.html#a5e115bf146729c8868c918538feb06df" title="Check if this controller is in the linked list." alt="" coords="452,5,588,45"/>
+<area shape="poly" id="edge7_Node000001_Node000003" title=" " alt="" coords="154,67,248,48,346,36,438,28,439,33,347,41,248,53,155,72"/>
+<area shape="rect" id="Node000005" href="$da/db7/structfl_1_1_channel_events_aa02eba6c71d0300625657d33cefceab9.html#aa02eba6c71d0300625657d33cefceab9" title=" " alt="" coords="248,127,391,167"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="148,93,239,120,237,125,146,98"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="387,61,438,46,439,51,388,66"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a7e91fc8f83d62c9da5e5c3d6d1bc10ce.html#a7e91fc8f83d62c9da5e5c3d6d1bc10ce" title="Protected constructor with registration mode." alt="" coords="649,35,785,75"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="589,33,636,40,635,45,588,38"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="649,62,402,80,401,74,649,57"/>
+<area shape="rect" id="Node000006" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="439,134,601,159"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="391,144,425,144,425,149,391,149"/>
+</map>

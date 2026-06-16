@@ -1,0 +1,9 @@
+<map id="loop" name="loop">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,56,80"/>
+<area shape="rect" id="Node000002" href="$d1/dfb/colorutils_8h_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="114,5,173,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="55,54,100,34,103,39,58,59"/>
+<area shape="rect" id="Node000003" href="$d1/dfb/colorutils_8h_afba4db18577c19e39c54f1c5793741b7.html#afba4db18577c19e39c54f1c5793741b7" title="Fill a range of LEDs with a solid color." alt="" coords="105,55,181,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="56,65,92,65,92,70,56,70"/>
+<area shape="rect" id="Node000004" href="$d6/d19/group___linear_interpolation_ga37e6bcc81239a0e7094492041eb6713c.html#ga37e6bcc81239a0e7094492041eb6713c" title="Linear interpolation between two unsigned 8&#45;bit values, with 8&#45;bit fraction." alt="" coords="104,104,183,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="58,76,102,96,100,101,55,81"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="fl::makeClockless" name="fl::makeClockless">
+<area shape="rect" id="Node000001" title="Build a ClocklessChipset from a compile&#45;time TIMING trait." alt="" coords="193,13,329,38"/>
+<area shape="rect" id="Node000002" href="$df/df5/structfl_1_1_channel_config_aaa382ee7bfe572aa96a4b55ad78f6d7c.html#aaa382ee7bfe572aa96a4b55ad78f6d7c" title="Template constructor with TIMING type (backwards compatibility)" alt="" coords="5,5,145,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,28,145,28,145,23,180,23"/>
+</map>

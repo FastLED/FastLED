@@ -12,5 +12,5 @@ digraph "fl::NoisePalette::SetupRandomPalette"
   Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fl::NoisePalette::NoisePalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d41/classfl_1_1_noise_palette_ace0d9f2e7767ae3fb89dc47434024244.html#ace0d9f2e7767ae3fb89dc47434024244",tooltip=" "];
   Node2 -> Node4 [id="edge3_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::NoisePalette::change\lToRandomPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d41/classfl_1_1_noise_palette_a42d01b57f572eeb194742aef96d9c755.html#a42d01b57f572eeb194742aef96d9c755",tooltip=" "];
+  Node4 [id="Node000004",label="fl::NoisePalette::change\lToRandomPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d41/classfl_1_1_noise_palette_a6c4fe851c4bb523a19f0a06a8e4484b6.html#a6c4fe851c4bb523a19f0a06a8e4484b6",tooltip=" "];
 }

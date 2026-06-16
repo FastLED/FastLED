@@ -1,0 +1,18 @@
+<map id="fl::audio::detector::Pitch::calculateAutocorrelation" name="fl::audio::detector::Pitch::calculateAutocorrelation">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,146,235,186"/>
+<area shape="rect" id="Node000002" href="$db/d89/classfl_1_1audio_1_1detector_1_1_pitch_a219e86070106492cb23bfdce6bc586b7.html#a219e86070106492cb23bfdce6bc586b7" title=" " alt="" coords="283,82,484,122"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="202,143,287,123,288,128,204,149"/>
+<area shape="rect" id="Node000007" href="$db/d89/classfl_1_1audio_1_1detector_1_1_pitch_a975791e09660fed8768c301dd4cb7435.html#a975791e09660fed8768c301dd4cb7435" title=" " alt="" coords="294,146,473,186"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="235,163,280,163,280,169,235,169"/>
+<area shape="rect" id="Node000008" href="$db/d89/classfl_1_1audio_1_1detector_1_1_pitch_a26f72181086c88b0b679780d09edc3cf.html#a26f72181086c88b0b679780d09edc3cf" title=" " alt="" coords="287,210,479,250"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="204,183,288,204,287,209,202,189"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="576,5,643,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="430,79,531,39,562,29,564,34,533,45,432,84"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="578,55,641,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="484,84,564,72,565,77,485,89"/>
+<area shape="rect" id="Node000005" href="$d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d" title=" " alt="" coords="580,104,639,129"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="485,106,567,111,566,117,484,111"/>
+<area shape="rect" id="Node000006" href="$d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c" title=" " alt="" coords="532,153,687,179"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="455,120,551,147,550,152,454,125"/>
+<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="473,163,518,163,518,169,473,169"/>
+</map>

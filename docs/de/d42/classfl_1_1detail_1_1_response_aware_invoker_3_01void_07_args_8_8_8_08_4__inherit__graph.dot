@@ -1,0 +1,13 @@
+digraph "fl::detail::ResponseAwareInvoker&lt; void(Args...)&gt;"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl::detail::ResponseAware\lInvoker\< void(Args...)\>",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::detail::ErasedInvoker",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dc/d61/classfl_1_1detail_1_1_erased_invoker.html",tooltip=" "];
+  Node3 -> Node1 [id="edge2_Node000001_Node000003",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< void(Args...)\>",fontcolor="grey" ];
+  Node3 [id="Node000003",label="fl::detail::ResponseAware\lInvoker\< Sig \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$df/d9e/namespacefl_1_1detail.html#d6/dfa/classfl_1_1detail_1_1_response_aware_invoker",tooltip="Invoker for response-aware RPC methods."];
+}

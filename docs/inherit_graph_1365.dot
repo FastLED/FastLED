@@ -1,0 +1,10 @@
+digraph "Graphical Class Hierarchy"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node0 [id="Node000000",label="fl::TIMING_PL9823",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/db6/structfl_1_1_t_i_m_i_n_g___p_l9823.html",tooltip="PL9823 RGB controller @ 800 kHz Four-phase: TH0=350ns, TH1=1360ns, TL0=1360ns, TL1=350ns."];
+}

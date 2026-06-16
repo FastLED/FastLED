@@ -6,5 +6,7 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::add_pointer\< T \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl.html#da/d17/structfl_1_1add__pointer",tooltip=" "];
+  Node0 [id="Node000000",label="DelegateControllerBase",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node0 -> Node1 [id="edge4_Node000000_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 [id="Node000001",label="fl::UCS7604ControllerT\l\< DATA_PIN, RGB_ORDER,\l MODE, CHIPSET_TIMING,\l CLOCKLESS_CONTROLLER \>\l::DelegateController",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/da3/classfl_1_1_u_c_s7604_controller_t_1_1_delegate_controller.html",tooltip=" "];
 }

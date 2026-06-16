@@ -1,5 +1,43 @@
 <map id="fl::Malloc" name="fl::Malloc">
-<area shape="rect" id="Node000001" title=" " alt="" coords="188,13,269,38"/>
-<area shape="rect" id="Node000002" href="$d8/dcd/classfl_1_1allocator_aa9d9c16a474070fb656f274e015f90ec.html#aa9d9c16a474070fb656f274e015f90ec" title=" " alt="" coords="5,5,140,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,28,140,28,140,23,174,23"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="1560,270,1641,295"/>
+<area shape="rect" id="Node000002" href="$d8/dcd/classfl_1_1allocator_a3e83ded135ddb591aacb9b67dddd13d0.html#a3e83ded135ddb591aacb9b67dddd13d0" title=" " alt="" coords="1329,5,1463,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1594,257,1587,214,1572,160,1547,106,1530,81,1510,59,1488,45,1463,35,1465,30,1491,40,1514,55,1534,78,1552,103,1577,158,1592,212,1599,256"/>
+<area shape="rect" id="Node000003" href="$de/d22/classfl_1_1allocator__realloc_abb68fb7f6d9ff7fe366b12483b962d2f.html#abb68fb7f6d9ff7fe366b12483b962d2f" title=" " alt="" coords="1323,69,1469,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1589,258,1561,194,1538,160,1510,130,1491,117,1468,107,1471,102,1493,112,1514,126,1542,156,1565,191,1594,256"/>
+<area shape="rect" id="Node000004" href="$d5/db8/classfl_1_1_slab_allocator_a4ea971b85e269de431ab656d195ab077.html#a4ea971b85e269de431ab656d195ab077" title=" " alt="" coords="892,156,1024,196"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="1586,259,1557,213,1536,191,1511,174,1449,150,1383,136,1315,129,1248,129,1184,133,1124,141,1025,161,1024,155,1123,135,1183,128,1248,123,1316,124,1383,131,1450,145,1513,170,1539,187,1561,210,1590,256"/>
+<area shape="rect" id="Node000005" href="$d5/db8/classfl_1_1_slab_allocator_a0ff0f30e7a88389125a024d5624400aa.html#a0ff0f30e7a88389125a024d5624400aa" title=" " alt="" coords="1330,184,1462,224"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="1565,265,1511,238,1462,222,1463,217,1513,234,1568,261"/>
+<area shape="rect" id="Node000007" href="$d0/d61/classfl_1_1anonymous__namespace_02memory__resource_8cpp_8hpp_03_1_1_default_memory_resource_aad6f880b7d25f1f65be8f75eeb04b126.html#aad6f880b7d25f1f65be8f75eeb04b126" title=" " alt="" coords="1280,248,1512,317"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="1546,285,1512,285,1512,280,1546,280"/>
+<area shape="rect" id="Node000008" href="$d1/d86/namespacefl_1_1third__party_a083ba28beb07e5df5325ec1f6664c3c3.html#a083ba28beb07e5df5325ec1f6664c3c3" title="Create an LZW decompression context." alt="" coords="689,343,827,383"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="1571,305,1543,320,1513,332,1418,353,1321,368,1224,377,1129,382,957,380,828,372,828,367,957,375,1129,376,1223,372,1321,363,1417,348,1511,327,1541,315,1568,301"/>
+<area shape="rect" id="Node000013" href="$d1/d86/namespacefl_1_1third__party_abd0590cc8ea888da867f0b97e06e7c1c.html#abd0590cc8ea888da867f0b97e06e7c1c" title=" " alt="" coords="884,392,1032,432"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="1586,309,1556,345,1536,362,1513,376,1451,400,1386,417,1320,428,1254,433,1131,434,1032,426,1033,420,1131,428,1254,428,1319,422,1385,411,1450,395,1511,371,1532,358,1552,341,1582,305"/>
+<area shape="rect" id="Node000016" href="$d1/d86/namespacefl_1_1third__party_a17e7cbf4c06570cddcfcb56e99bd626a.html#a17e7cbf4c06570cddcfcb56e99bd626a" title=" " alt="" coords="1322,447,1470,487"/>
+<area shape="poly" id="edge16_Node000001_Node000016" title=" " alt="" coords="1593,309,1563,369,1541,401,1514,429,1493,442,1472,452,1469,447,1491,437,1510,425,1537,397,1559,366,1588,307"/>
+<area shape="rect" id="Node000019" href="$d1/d86/namespacefl_1_1third__party_a4ea5ec46df94a0b7dba8f7dbccf92965.html#a4ea5ec46df94a0b7dba8f7dbccf92965" title="Create the NSGIF object." alt="" coords="1322,512,1470,552"/>
+<area shape="poly" id="edge20_Node000001_Node000019" title=" " alt="" coords="1599,310,1591,351,1575,403,1550,455,1534,479,1514,501,1494,514,1471,524,1469,519,1491,510,1510,497,1530,476,1546,453,1570,401,1585,350,1594,309"/>
+<area shape="rect" id="Node000006" href="$d5/db8/classfl_1_1_slab_allocator_a2bded56f4c8e3c76c386c2387df716db.html#a2bded56f4c8e3c76c386c2387df716db" title=" " alt="" coords="1091,184,1225,224"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="1316,207,1226,207,1226,201,1316,201"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="1077,195,1024,188,1024,183,1078,190"/>
+<area shape="rect" id="Node000009" href="$d1/d86/namespacefl_1_1third__party_a34aa4d967d8ddaeefa12954d47fe7863.html#a34aa4d967d8ddaeefa12954d47fe7863" title="Scan the source image data." alt="" coords="488,364,636,404"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="675,374,636,379,636,373,675,369"/>
+<area shape="rect" id="Node000010" href="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_a477899043772e64106571d7233be2793.html#a477899043772e64106571d7233be2793" title=" " alt="" coords="236,407,431,447"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="475,403,431,411,430,406,474,398"/>
+<area shape="rect" id="Node000011" href="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_ae83f856122e8a7954a96bf51d6ca96a1.html#ae83f856122e8a7954a96bf51d6ca96a1" title=" " alt="" coords="5,453,179,493"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="223,451,179,459,178,454,222,445"/>
+<area shape="rect" id="Node000014" href="$d1/d86/namespacefl_1_1third__party_aa00bee5c0f7b53c8e9441d62f98c61b2.html#aa00bee5c0f7b53c8e9441d62f98c61b2" title="Attempts to initialise the next frame." alt="" coords="684,413,832,453"/>
+<area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="871,424,833,428,832,423,870,419"/>
+<area shape="poly" id="edge14_Node000014_Node000009" title=" " alt="" coords="670,414,636,405,637,400,671,409"/>
+<area shape="rect" id="Node000015" href="$d1/d86/namespacefl_1_1third__party_a3f914f8fd903813b728ce719ad8b59c7.html#a3f914f8fd903813b728ce719ad8b59c7" title="Decodes a GIF frame." alt="" coords="488,428,636,468"/>
+<area shape="poly" id="edge15_Node000014_Node000015" title=" " alt="" coords="670,443,637,445,636,440,670,437"/>
+<area shape="rect" id="Node000017" href="$d1/d86/namespacefl_1_1third__party_aa9b6d03b719534d98113784d4ad52b3f.html#aa9b6d03b719534d98113784d4ad52b3f" title=" " alt="" coords="1084,451,1232,491"/>
+<area shape="poly" id="edge17_Node000016_Node000017" title=" " alt="" coords="1308,471,1232,472,1232,467,1308,465"/>
+<area shape="rect" id="Node000018" href="$d1/d86/namespacefl_1_1third__party_a69436b97b760adfd50dcf61530d5fa9f.html#a69436b97b760adfd50dcf61530d5fa9f" title="Parse the image data for a gif frame." alt="" coords="880,456,1036,496"/>
+<area shape="poly" id="edge18_Node000017_Node000018" title=" " alt="" coords="1070,476,1037,477,1037,471,1070,470"/>
+<area shape="poly" id="edge19_Node000018_Node000014" title=" " alt="" coords="866,459,832,452,833,447,867,454"/>
+<area shape="rect" id="Node000020" href="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_a5b722503ed333d59593dfaf7eddafbdb.html#a5b722503ed333d59593dfaf7eddafbdb" title=" " alt="" coords="227,485,440,525"/>
+<area shape="poly" id="edge21_Node000019_Node000020" title=" " alt="" coords="1308,535,959,536,757,536,590,530,440,519,441,514,590,525,757,531,959,531,1308,530"/>
+<area shape="poly" id="edge22_Node000020_Node000011" title=" " alt="" coords="213,492,178,487,179,482,213,487"/>
 </map>

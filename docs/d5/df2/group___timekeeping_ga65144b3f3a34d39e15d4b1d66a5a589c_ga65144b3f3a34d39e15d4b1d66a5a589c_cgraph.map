@@ -1,0 +1,6 @@
+<map id="fl::minutes16" name="fl::minutes16">
+<area shape="rect" id="Node000001" title="Return the current minutes since boot in a 16&#45;bit value." alt="" coords="5,29,112,55"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="160,29,235,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="112,39,146,39,146,45,112,45"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="174,30,169,21,171,11,181,5,197,3,217,6,225,15,221,18,214,11,197,8,183,10,176,15,174,20,178,28"/>
+</map>

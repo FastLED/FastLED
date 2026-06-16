@@ -1,0 +1,48 @@
+<map id="fl::makeScaledPixelRangeRGB" name="fl::makeScaledPixelRangeRGB">
+<area shape="rect" id="Node000001" title="Create RGB input iterator range from PixelIterator." alt="" coords="720,429,937,455"/>
+<area shape="poly" id="edge8_Node000001_Node000001" title=" " alt="" coords="869,420,859,411,829,408,804,410,792,415,789,420,796,427,792,431,784,421,788,411,803,405,829,403,861,407,873,416"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_af8493332ea99e488481aa9268d28af96.html#af8493332ea99e488481aa9268d28af96" title="Encode complete UCS7604 frame (preamble + padding + pixel data)" alt="" coords="528,116,672,141"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="818,417,800,363,770,293,727,220,700,186,670,156,650,144,653,139,674,152,704,182,731,217,774,290,805,361,823,415"/>
+<area shape="rect" id="Node000016" href="$d0/d09/classfl_1_1_pixel_iterator_a2c08448cbefb8e28d4945b15bbc7f38d.html#a2c08448cbefb8e28d4945b15bbc7f38d" title="Encode pixels in APA102/DOTSTAR format (zero allocation)" alt="" coords="537,166,663,206"/>
+<area shape="poly" id="edge9_Node000001_Node000016" title=" " alt="" coords="813,418,791,376,759,323,718,269,670,220,653,208,656,204,674,216,723,265,764,320,796,373,818,415"/>
+<area shape="rect" id="Node000018" href="$d0/d09/classfl_1_1_pixel_iterator_a2058de4fa68026d3bc5104ed55d91fdf.html#a2058de4fa68026d3bc5104ed55d91fdf" title="Encode pixels in HD108 format (zero allocation)" alt="" coords="537,230,663,270"/>
+<area shape="poly" id="edge11_Node000001_Node000018" title=" " alt="" coords="807,420,750,354,712,317,670,284,651,272,653,268,674,280,715,313,754,351,811,417"/>
+<area shape="rect" id="Node000019" href="$d0/d09/classfl_1_1_pixel_iterator_aaa9c4346ec8256b21ba2159de02ba357.html#aaa9c4346ec8256b21ba2159de02ba357" title="Encode pixels in LPD6803 format (zero allocation)" alt="" coords="537,294,663,334"/>
+<area shape="poly" id="edge13_Node000001_Node000019" title=" " alt="" coords="796,424,738,387,671,348,647,337,649,332,673,344,741,383,798,419"/>
+<area shape="rect" id="Node000020" href="$d0/d09/classfl_1_1_pixel_iterator_af454bc4016b5c2eb647034b14180545a.html#af454bc4016b5c2eb647034b14180545a" title="Encode pixels in LPD8806 format (zero allocation)" alt="" coords="537,358,663,398"/>
+<area shape="poly" id="edge15_Node000001_Node000020" title=" " alt="" coords="768,428,662,398,663,393,770,423"/>
+<area shape="rect" id="Node000021" href="$d0/d09/classfl_1_1_pixel_iterator_a42ecea6b4931e6b36b7f2b51036e12f0.html#a42ecea6b4931e6b36b7f2b51036e12f0" title="Encode pixels in P9813 format (zero allocation)" alt="" coords="537,422,663,462"/>
+<area shape="poly" id="edge17_Node000001_Node000021" title=" " alt="" coords="706,445,663,445,663,439,706,439"/>
+<area shape="rect" id="Node000022" href="$d0/d09/classfl_1_1_pixel_iterator_abbe36e88cafa622bb58093609a8467e7.html#abbe36e88cafa622bb58093609a8467e7" title="Encode pixels in SK9822 format (zero allocation)" alt="" coords="537,486,663,526"/>
+<area shape="poly" id="edge19_Node000001_Node000022" title=" " alt="" coords="770,461,663,491,662,486,768,456"/>
+<area shape="rect" id="Node000023" href="$d0/d09/classfl_1_1_pixel_iterator_a8ba886c28628e371d378a79aba930dba.html#a8ba886c28628e371d378a79aba930dba" title="Encode pixels in SM16716 format (zero allocation)" alt="" coords="537,550,663,590"/>
+<area shape="poly" id="edge21_Node000001_Node000023" title=" " alt="" coords="798,465,741,501,673,540,649,552,647,547,671,536,738,497,796,460"/>
+<area shape="rect" id="Node000024" href="$d0/d09/classfl_1_1_pixel_iterator_a45cad1df9ef8083aeda9bac2efc7399d.html#a45cad1df9ef8083aeda9bac2efc7399d" title="Encode pixels in WS2801 format (zero allocation)" alt="" coords="537,614,663,654"/>
+<area shape="poly" id="edge23_Node000001_Node000024" title=" " alt="" coords="811,467,754,533,715,571,674,604,653,616,651,612,670,600,712,567,750,530,807,464"/>
+<area shape="rect" id="Node000025" href="$d0/d09/classfl_1_1_pixel_iterator_ad83cd6e943fb6ebe849791557e29c007.html#ad83cd6e943fb6ebe849791557e29c007" title="Encode pixels in WS2803 format (zero allocation)" alt="" coords="537,678,663,718"/>
+<area shape="poly" id="edge25_Node000001_Node000025" title=" " alt="" coords="818,469,796,511,764,564,723,619,674,668,656,680,653,676,670,664,718,615,759,561,791,508,813,466"/>
+<area shape="rect" id="Node000026" href="$d0/d09/classfl_1_1_pixel_iterator_ab82e131fa7af425e2205e2df4c12c333.html#ab82e131fa7af425e2205e2df4c12c333" title=" " alt="" coords="537,742,663,782"/>
+<area shape="poly" id="edge27_Node000001_Node000026" title=" " alt="" coords="822,468,803,522,773,592,730,666,703,701,674,732,657,744,654,740,670,728,699,697,725,663,768,589,798,520,817,467"/>
+<area shape="rect" id="Node000003" href="$d4/df9/_auto_research_test_8cpp_adaf2e23d83d4eb143bb3728848a40c30.html#adaf2e23d83d4eb143bb3728848a40c30" title="Build expected UCS7604 encoded bytes from LED data." alt="" coords="231,29,405,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="566,111,525,89,479,70,404,53,405,48,481,65,528,84,568,106"/>
+<area shape="rect" id="Node000014" href="$dd/d78/classfl_1_1_u_c_s7604_controller_t_a0b8dc7f2f0f2e0a2ed3461aa905080ea.html#a0b8dc7f2f0f2e0a2ed3461aa905080ea" title=" " alt="" coords="156,79,480,178"/>
+<area shape="poly" id="edge5_Node000002_Node000014" title=" " alt="" coords="514,131,480,131,480,126,514,126"/>
+<area shape="rect" id="Node000015" href="$dc/d8d/namespacefl_1_1anonymous__namespace_02channel_8cpp_8hpp_03_ad61b123c8a67b000fe20a82438d06343.html#ad61b123c8a67b000fe20a82438d06343" title="Encode UCS7604 pixel data into the channel data buffer." alt="" coords="192,226,444,266"/>
+<area shape="poly" id="edge6_Node000002_Node000015" title=" " alt="" coords="545,149,529,156,506,174,481,192,437,212,393,228,391,223,435,208,479,188,502,170,527,152,543,144"/>
+<area shape="rect" id="Node000004" href="$d4/df9/_auto_research_test_8cpp_aac567188ee44c45d15b20231ecff68c9.html#aac567188ee44c45d15b20231ecff68c9" title=" " alt="" coords="5,5,108,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="217,35,108,25,108,20,218,30"/>
+<area shape="rect" id="Node000013" href="$d4/df9/_auto_research_test_8cpp_ab5d3883aa989a0c1298af1a8a0d2851a.html#ab5d3883aa989a0c1298af1a8a0d2851a" title=" " alt="" coords="22,55,91,80"/>
+<area shape="poly" id="edge4_Node000003_Node000013" title=" " alt="" coords="218,54,92,67,91,61,217,49"/>
+<area shape="poly" id="edge7_Node000015_Node000015" title=" " alt="" coords="363,214,347,207,318,205,293,207,277,211,272,217,275,225,270,226,267,216,274,207,292,201,318,199,348,202,365,209"/>
+<area shape="rect" id="Node000017" href="$d5/d8b/classfl_1_1_channel_a44414e176c7d2ef65fcdd390f6852322.html#a44414e176c7d2ef65fcdd390f6852322" title=" " alt="" coords="233,461,403,487"/>
+<area shape="poly" id="edge10_Node000016_Node000017" title=" " alt="" coords="536,215,530,220,514,234,504,247,482,280,332,463,328,460,478,276,500,244,510,231,526,216,533,211"/>
+<area shape="poly" id="edge12_Node000018_Node000017" title=" " alt="" coords="538,279,530,284,467,331,410,382,332,463,329,459,407,378,464,327,526,280,535,274"/>
+<area shape="poly" id="edge14_Node000019_Node000017" title=" " alt="" coords="541,342,529,348,421,411,340,463,337,459,418,407,527,344,539,338"/>
+<area shape="poly" id="edge16_Node000020_Node000017" title=" " alt="" coords="529,405,357,464,356,459,527,400"/>
+<area shape="poly" id="edge18_Node000021_Node000017" title=" " alt="" coords="524,453,404,467,403,462,523,448"/>
+<area shape="poly" id="edge20_Node000022_Node000017" title=" " alt="" coords="523,500,403,486,404,481,524,495"/>
+<area shape="poly" id="edge22_Node000023_Node000017" title=" " alt="" coords="527,548,356,489,357,484,529,543"/>
+<area shape="poly" id="edge24_Node000024_Node000017" title=" " alt="" coords="539,610,527,604,418,541,337,489,340,485,421,537,529,600,541,606"/>
+<area shape="poly" id="edge26_Node000025_Node000017" title=" " alt="" coords="535,674,526,668,464,621,407,570,329,489,332,485,410,566,467,617,530,664,538,669"/>
+<area shape="poly" id="edge28_Node000026_Node000017" title=" " alt="" coords="534,737,526,732,491,702,457,668,398,597,353,533,325,488,329,486,357,530,402,594,461,665,494,698,530,728,537,733"/>
+</map>

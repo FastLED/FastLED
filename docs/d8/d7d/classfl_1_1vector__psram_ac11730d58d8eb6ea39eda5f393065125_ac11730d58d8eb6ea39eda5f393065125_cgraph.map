@@ -1,0 +1,7 @@
+<map id="fl::vector_psram::vector_psram" name="fl::vector_psram::vector_psram">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,23,181,63"/>
+<area shape="rect" id="Node000002" href="$d2/d24/classfl_1_1vector_ac9d959e1d6e7a43a30b5d1c709e4050a.html#ac9d959e1d6e7a43a30b5d1c709e4050a" title=" " alt="" coords="267,5,395,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="181,31,254,24,254,29,182,37"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_abe0f645352cc535c08d01a446b1078bc.html#abe0f645352cc535c08d01a446b1078bc" title="Get the PSRAM memory resource (wraps PSRamAllocate / PSRamDeallocate)." alt="" coords="229,55,433,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="182,50,216,53,215,58,181,55"/>
+</map>

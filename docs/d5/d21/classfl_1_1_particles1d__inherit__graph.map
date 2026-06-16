@@ -1,0 +1,7 @@
+<map id="fl::Particles1d" name="fl::Particles1d">
+<area shape="rect" id="Node000001" title="Power&#45;based particle system for 1D LED strips creating organic light effects." alt="" coords="5,152,115,177"/>
+<area shape="rect" id="Node000002" href="$d4/d1c/classfl_1_1_fx1d.html" title=" " alt="" coords="25,79,95,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="63,118,63,152,57,152,57,118"/>
+<area shape="rect" id="Node000003" href="$da/d5d/classfl_1_1_fx.html" title=" " alt="" coords="33,5,87,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="63,44,63,79,57,79,57,44"/>
+</map>

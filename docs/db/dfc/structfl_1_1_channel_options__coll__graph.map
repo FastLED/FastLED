@@ -1,0 +1,9 @@
+<map id="fl::ChannelOptions" name="fl::ChannelOptions">
+<area shape="rect" id="Node000001" title="Optional channel configuration parameters All fields have sensible defaults and can be overridden as ..." alt="" coords="37,196,179,221"/>
+<area shape="rect" id="Node000002" href="$da/dd6/structfl_1_1_c_r_g_b.html" title="Representation of an 8&#45;bit RGB pixel (Red, Green, Blue)" alt="" coords="5,93,80,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="43,132,45,152,52,171,64,184,79,194,76,198,60,188,47,173,39,153,38,133"/>
+<area shape="rect" id="Node000003" href="$dd/dd8/classfl_1_1_optional.html" title=" " alt="" coords="104,93,256,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="172,133,147,174,124,198,120,194,143,170,167,130"/>
+<area shape="rect" id="Node000004" href="$dd/dd8/classfl_1_1_optional.html" title=" " alt="" coords="115,5,245,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="183,45,183,93,177,93,177,45"/>
+</map>

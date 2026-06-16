@@ -1,0 +1,7 @@
+<map id="fl::encodeWS2803" name="fl::encodeWS2803">
+<area shape="rect" id="Node000001" title="Encode pixel data in WS2803 format (alias for WS2801)" alt="" coords="397,13,536,38"/>
+<area shape="rect" id="Node000002" href="$d0/d09/classfl_1_1_pixel_iterator_ad83cd6e943fb6ebe849791557e29c007.html#ad83cd6e943fb6ebe849791557e29c007" title="Encode pixels in WS2803 format (zero allocation)" alt="" coords="224,5,349,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="384,28,350,28,350,23,384,23"/>
+<area shape="rect" id="Node000003" href="$d5/d8b/classfl_1_1_channel_a44414e176c7d2ef65fcdd390f6852322.html#a44414e176c7d2ef65fcdd390f6852322" title=" " alt="" coords="5,13,176,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="210,28,176,28,176,23,210,23"/>
+</map>

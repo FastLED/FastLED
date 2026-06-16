@@ -1,0 +1,7 @@
+<map id="fl::memory_resource" name="fl::memory_resource">
+<area shape="rect" id="Node000001" title="Polymorphic memory resource base class (PMR&#45;style)." alt="" coords="5,60,161,85"/>
+<area shape="rect" id="Node000002" href="$d0/d61/classfl_1_1anonymous__namespace_02memory__resource_8cpp_8hpp_03_1_1_default_memory_resource.html" title=" " alt="" coords="209,5,420,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="170,55,208,48,209,54,171,60"/>
+<area shape="rect" id="Node000003" href="$da/d68/classfl_1_1anonymous__namespace_02memory__resource_8cpp_8hpp_03_1_1_p_s_ram_memory_resource.html" title=" " alt="" coords="209,84,420,139"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="174,85,210,91,209,96,173,90"/>
+</map>

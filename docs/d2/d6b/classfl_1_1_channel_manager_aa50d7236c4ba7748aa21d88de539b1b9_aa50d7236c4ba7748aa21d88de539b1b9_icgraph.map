@@ -1,0 +1,25 @@
+<map id="fl::ChannelManager::waitForReady" name="fl::ChannelManager::waitForReady">
+<area shape="rect" id="Node000001" title="Wait for all drivers to become READY." alt="" coords="661,189,809,229"/>
+<area shape="rect" id="Node000002" href="$d2/d6b/classfl_1_1_channel_manager_a98f45051a8d8277e9ecbae8b5db58f2b.html#a98f45051a8d8277e9ecbae8b5db58f2b" title="Add a driver with priority (higher priority = preferred)" alt="" coords="465,29,613,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="709,180,666,131,612,83,592,72,595,67,615,79,670,128,713,177"/>
+<area shape="rect" id="Node000006" href="$d2/d6b/classfl_1_1_channel_manager_aa953ad4a44bfc74a4673954f5923aa80.html#aa953ad4a44bfc74a4673954f5923aa80" title="Remove all drivers from the manager." alt="" coords="465,93,613,133"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="684,185,612,148,587,136,589,131,615,143,687,180"/>
+<area shape="rect" id="Node000008" href="$d2/d6b/classfl_1_1_channel_manager_add1a721d7508ff52a0dce3f8c30735b5.html#add1a721d7508ff52a0dce3f8c30735b5" title="Poll drivers before frame starts to clear previous frame state." alt="" coords="465,157,613,197"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="647,198,613,192,614,187,648,192"/>
+<area shape="rect" id="Node000009" href="$d2/d6b/classfl_1_1_channel_manager_a77d76b8525c19a43c545d9ca590bab32.html#a77d76b8525c19a43c545d9ca590bab32" title="Reset bus manager state, clearing all enqueued and transmitting channels." alt="" coords="465,221,613,261"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="648,226,614,232,613,227,647,221"/>
+<area shape="rect" id="Node000010" href="$dd/dbb/class_c_fast_l_e_d_aeb27e6f97287c4add5056c7218a78c82.html#aeb27e6f97287c4add5056c7218a78c82" title="Wait for all channel bus transmissions to complete." alt="" coords="480,286,599,311"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="689,238,614,276,582,288,580,283,612,271,686,234"/>
+<area shape="rect" id="Node000011" href="$dd/dbb/class_c_fast_l_e_d_a234cfd99ebdb37ecd4aedf51484d74e2.html#a234cfd99ebdb37ecd4aedf51484d74e2" title="Wait for all channel bus transmissions to complete with timeout." alt="" coords="480,335,599,361"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="711,242,668,285,615,326,590,338,588,333,612,322,665,281,707,238"/>
+<area shape="rect" id="Node000003" href="$d2/d6b/classfl_1_1_channel_manager_a71ca7642adaace950f92da2855df4cbc.html#a71ca7642adaace950f92da2855df4cbc" title="Register a single driver at a priority above the platform default and disable all others (compile&#45;tim..." alt="" coords="265,29,417,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="452,52,417,52,417,47,452,47"/>
+<area shape="poly" id="edge5_Node000003_Node000003" title=" " alt="" coords="375,18,363,11,341,8,322,10,311,15,307,21,309,28,304,30,302,20,308,11,321,5,341,3,365,6,377,13"/>
+<area shape="rect" id="Node000004" href="$dd/dbb/class_c_fast_l_e_d_a6d5e5bb1d08be99fb86a044a74bdf578.html#a6d5e5bb1d08be99fb86a044a74bdf578" title="Register a single driver at a priority above the platform default (compile&#45;time TU&#45;linking variant)." alt="" coords="5,13,217,38"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="251,43,217,39,218,34,252,37"/>
+<area shape="rect" id="Node000005" href="$dd/dbb/class_c_fast_l_e_d_acf1fbe61fec65ce648a6d0eabd9c85bd.html#acf1fbe61fec65ce648a6d0eabd9c85bd" title="Enable only one driver exclusively, runtime form (disables all others)" alt="" coords="5,62,217,87"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="252,62,218,66,217,60,251,57"/>
+<area shape="rect" id="Node000007" href="$dd/dbb/class_c_fast_l_e_d_aa98f1c4caa3fbef233d34ee757d29994.html#aa98f1c4caa3fbef233d34ee757d29994" title="Clear/reset FastLED state based on the provided flags." alt="" coords="280,165,403,190"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="465,140,382,167,381,162,463,135"/>
+<area shape="poly" id="edge10_Node000009_Node000007" title=" " alt="" coords="463,220,381,193,382,188,465,214"/>
+</map>

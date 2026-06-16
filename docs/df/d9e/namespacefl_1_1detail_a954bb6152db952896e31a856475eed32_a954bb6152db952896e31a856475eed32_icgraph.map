@@ -1,0 +1,17 @@
+<map id="fl::detail::spread_transpose8_symbol" name="fl::detail::spread_transpose8_symbol">
+<area shape="rect" id="Node000001" title="Transpose one symbol of 8 lanes (8 input bytes) into 8 output bytes: 8 pulses × 1 byte (bit L = lane ..." alt="" coords="475,61,631,101"/>
+<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail_a6407553e7cf821f4f7727bd01b890b6c.html#a6407553e7cf821f4f7727bd01b890b6c" title="Transpose 8 lanes of Wave3Byte data into interleaved format." alt="" coords="215,12,427,37"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="461,61,373,40,375,35,462,56"/>
+<area shape="rect" id="Node000004" href="$df/d9e/namespacefl_1_1detail_a28048c15bb5d847dd9c0e186ac8acfa6.html#a28048c15bb5d847dd9c0e186ac8acfa6" title="Transpose 8 lanes of Wave8Byte data into interleaved format." alt="" coords="215,68,427,93"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="461,83,427,83,427,78,461,78"/>
+<area shape="rect" id="Node000007" href="$df/d9e/namespacefl_1_1detail_a231be5f311080ab2a8fe4414ee17dcfd.html#a231be5f311080ab2a8fe4414ee17dcfd" title="BF1 for 8&#45;lane Wave8 — same algebraic identity as 16&#45;lane BF1." alt="" coords="222,130,419,170"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="473,107,389,133,387,127,471,102"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ac4d4def367c8e9efc65e0b5995e7041f.html#ac4d4def367c8e9efc65e0b5995e7041f" title=" " alt="" coords="5,5,167,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="201,24,167,23,167,18,201,19"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_ad0e6c4abefa2d795fcdba18f0d5c1573.html#ad0e6c4abefa2d795fcdba18f0d5c1573" title=" " alt="" coords="5,55,167,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="201,77,167,75,167,69,201,71"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_ae2acb08c338d6c448ad65af439834073.html#ae2acb08c338d6c448ad65af439834073" title=" " alt="" coords="5,104,167,129"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="224,98,167,107,166,102,223,93"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a733fdaab9a4ad6bebab70adeaa206340.html#a733fdaab9a4ad6bebab70adeaa206340" title="BF1 for 8&#45;lane Wave8 (#2548 deep&#45;dive followup)." alt="" coords="13,154,159,194"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="209,164,160,169,159,164,208,159"/>
+</map>

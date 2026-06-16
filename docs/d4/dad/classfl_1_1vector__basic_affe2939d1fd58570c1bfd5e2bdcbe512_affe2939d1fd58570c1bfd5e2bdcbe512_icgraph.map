@@ -1,0 +1,13 @@
+<map id="fl::vector_basic::erase_range_impl" name="fl::vector_basic::erase_range_impl">
+<area shape="rect" id="Node000001" title="Erase range [first_index, first_index + count)." alt="" coords="611,67,775,107"/>
+<area shape="rect" id="Node000002" href="$d4/dad/classfl_1_1vector__basic_a257cbe696d6c890610eacb7e7db59bb9.html#a257cbe696d6c890610eacb7e7db59bb9" title="Erase element at index. Shifts subsequent elements left." alt="" coords="363,45,563,70"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="597,77,562,73,563,67,598,72"/>
+<area shape="rect" id="Node000006" href="$d2/d24/classfl_1_1vector_aca6008b72f14268cb39971cc13c0f256.html#aca6008b72f14268cb39971cc13c0f256" title=" " alt="" coords="397,95,528,135"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="597,101,528,109,528,104,597,96"/>
+<area shape="rect" id="Node000003" href="$d2/d24/classfl_1_1vector_a088de19a9239cba6afb216b33637e70d.html#a088de19a9239cba6afb216b33637e70d" title=" " alt="" coords="184,37,315,77"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="349,60,315,60,315,55,349,55"/>
+<area shape="rect" id="Node000004" href="$d2/d24/classfl_1_1vector_a6e213d5198a213f6fbf733a9f6f0cbe6.html#a6e213d5198a213f6fbf733a9f6f0cbe6" title=" " alt="" coords="5,5,136,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="170,46,136,40,137,34,171,41"/>
+<area shape="rect" id="Node000005" href="$d2/d24/classfl_1_1vector_afa54ea6bc02c2d490c6e39666345a941.html#afa54ea6bc02c2d490c6e39666345a941" title=" " alt="" coords="5,69,136,109"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="171,74,137,80,136,75,170,69"/>
+</map>

@@ -1,0 +1,14 @@
+<map id="fl::audio::Processor::getDropImpact" name="fl::audio::Processor::getDropImpact">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,63,151,103"/>
+<area shape="poly" id="edge7_Node000001_Node000001" title=" " alt="" coords="42,64,40,54,45,45,58,39,78,37,101,40,113,47,110,51,99,45,78,42,60,44,49,49,45,55,47,62"/>
+<area shape="rect" id="Node000002" href="$db/dbf/namespacefl_1_1audio_a1cbdb2338ec760ba92ce43fece0713d2.html#a1cbdb2338ec760ba92ce43fece0713d2" title=" " alt="" coords="202,29,341,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="150,65,197,55,198,60,151,70"/>
+<area shape="rect" id="Node000003" href="$d3/d6b/classfl_1_1audio_1_1_processor_a10468705a0084ec505cd37b23eab90c1.html#a10468705a0084ec505cd37b23eab90c1" title=" " alt="" coords="199,103,344,143"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="151,96,185,103,184,108,150,101"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="240,31,233,21,236,11,250,5,271,3,298,6,309,15,305,19,296,11,271,8,251,10,240,15,238,20,244,28"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="235,104,233,94,239,85,252,79,271,77,294,80,306,87,304,91,292,85,271,82,253,84,242,89,238,95,240,102"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="402,81,527,107"/>
+<area shape="poly" id="edge5_Node000003_Node000004" title=" " alt="" coords="344,110,387,103,388,108,345,115"/>
+<area shape="rect" id="Node000005" href="$d3/d6b/classfl_1_1audio_1_1_processor_ade806d07af52e3d281939cebce7643d5.html#ade806d07af52e3d281939cebce7643d5" title=" " alt="" coords="392,131,537,171"/>
+<area shape="poly" id="edge6_Node000003_Node000005" title=" " alt="" coords="345,131,379,136,378,141,344,136"/>
+</map>

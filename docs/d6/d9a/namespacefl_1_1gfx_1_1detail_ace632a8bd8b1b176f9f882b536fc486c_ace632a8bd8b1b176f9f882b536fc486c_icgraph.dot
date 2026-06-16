@@ -1,0 +1,29 @@
+digraph "fl::gfx::detail::computeBandShift"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::gfx::detail::compute\lBandShift",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Precompute right-shift and reciprocal multiplier for AA division."];
+  Node1 -> Node1 [id="edge1_Node000001_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node2 [id="edge2_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::gfx::detail::drawDiscCore",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d9a/namespacefl_1_1gfx_1_1detail_a76279d4830b289ed940eb35d755156f9.html#a76279d4830b289ed940eb35d755156f9",tooltip=" "];
+  Node2 -> Node3 [id="edge3_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::gfx::drawDisc",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d8b/namespacefl_1_1gfx_a99e28c17bab90d96ecd6a950357fde83.html#a99e28c17bab90d96ecd6a950357fde83",tooltip=" "];
+  Node3 -> Node4 [id="edge4_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::gfx::Canvas::drawDisc",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d5c/structfl_1_1gfx_1_1_canvas_aba6d3279b2186afd2564efe7f71e9d8f.html#aba6d3279b2186afd2564efe7f71e9d8f",tooltip=" "];
+  Node1 -> Node5 [id="edge5_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::gfx::detail::drawRingCore",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d9a/namespacefl_1_1gfx_1_1detail_ac1063e6536a3ebf22978c3a5fe41310b.html#ac1063e6536a3ebf22978c3a5fe41310b",tooltip=" "];
+  Node5 -> Node6 [id="edge6_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::gfx::drawRing",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d8b/namespacefl_1_1gfx_ab43aaa534398d0c1572e2ecbbffcd631.html#ab43aaa534398d0c1572e2ecbbffcd631",tooltip=" "];
+  Node6 -> Node7 [id="edge7_Node000006_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::gfx::Canvas::drawRing",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d5c/structfl_1_1gfx_1_1_canvas_a4592348ee30cf7896ccbed4e9c2c5b95.html#a4592348ee30cf7896ccbed4e9c2c5b95",tooltip=" "];
+  Node1 -> Node8 [id="edge8_Node000001_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::gfx::detail::drawStroke\lLineCore",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d9a/namespacefl_1_1gfx_1_1detail_a0ed31accfda46ef3ddc9a0eb3ad5ef04.html#a0ed31accfda46ef3ddc9a0eb3ad5ef04",tooltip=" "];
+  Node8 -> Node9 [id="edge9_Node000008_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::gfx::drawStrokeLine",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d8b/namespacefl_1_1gfx_abe30294359092a06f52b99a369bca3ec.html#abe30294359092a06f52b99a369bca3ec",tooltip=" "];
+  Node9 -> Node10 [id="edge10_Node000009_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::gfx::Canvas::drawStrokeLine",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d5c/structfl_1_1gfx_1_1_canvas_ab3d4aedbb1e4bd95e5ef3f3c7b341e09.html#ab3d4aedbb1e4bd95e5ef3f3c7b341e09",tooltip=" "];
+}

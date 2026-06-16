@@ -1,0 +1,6 @@
+<map id="fl::WaveCrgbMap::mapWaveToLEDs" name="fl::WaveCrgbMap::mapWaveToLEDs">
+<area shape="rect" id="Node000001" title="Convert wave simulation values to LED colors." alt="" coords="5,29,211,69"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="72,30,70,20,75,11,88,5,108,3,131,6,143,13,140,17,129,11,108,8,90,10,79,15,75,21,77,28"/>
+<area shape="rect" id="Node000002" href="$d8/d78/examples_2_wave_2wave_8h_a2f7384c6694b02c64c672b7bfe08e968.html#a2f7384c6694b02c64c672b7bfe08e968" title=" " alt="" coords="259,37,341,62"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="211,47,245,47,245,52,211,52"/>
+</map>

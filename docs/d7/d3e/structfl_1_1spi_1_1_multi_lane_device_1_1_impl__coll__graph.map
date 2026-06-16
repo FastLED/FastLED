@@ -1,0 +1,25 @@
+<map id="fl::spi::MultiLaneDevice::Impl" name="fl::spi::MultiLaneDevice::Impl">
+<area shape="rect" id="Node000001" title=" " alt="" coords="300,372,475,412"/>
+<area shape="rect" id="Node000002" href="$d3/df8/structfl_1_1spi_1_1_device_impl_base.html" title="Common functionality for device implementation (pImpl pattern)" alt="" coords="135,284,306,309"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="254,314,355,369,352,374,252,318"/>
+<area shape="rect" id="Node000003" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="89,189,299,214"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="204,226,220,283,215,285,198,228"/>
+<area shape="rect" id="Node000004" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="5,5,204,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="86,42,73,59,63,79,58,98,63,118,82,141,106,161,158,186,155,191,103,165,78,145,58,120,53,99,58,77,68,57,81,39"/>
+<area shape="rect" id="Node000007" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="175,93,320,119"/>
+<area shape="poly" id="edge5_Node000007_Node000004" title=" " alt="" coords="137,35,229,91,227,95,134,40"/>
+<area shape="poly" id="edge4_Node000003_Node000007" title=" " alt="" coords="236,132,203,190,198,187,232,129"/>
+<area shape="rect" id="Node000008" href="$d3/dca/structfl_1_1_spi_config.html" title="Configuration for SPI device (supports 1&#45;8 lanes)" alt="" coords="338,284,437,309"/>
+<area shape="poly" id="edge6_Node000001_Node000008" title=" " alt="" coords="390,323,390,372,385,372,385,323"/>
+<area shape="rect" id="Node000009" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="324,189,451,214"/>
+<area shape="poly" id="edge7_Node000008_Node000009" title=" " alt="" coords="390,228,390,284,385,284,385,228"/>
+<area shape="rect" id="Node000010" href="$d4/dad/classfl_1_1vector__basic.html" title="Type&#45;erased vector base class." alt="" coords="417,5,537,31"/>
+<area shape="poly" id="edge8_Node000009_Node000010" title=" " alt="" coords="452,42,428,66,408,95,399,119,393,145,390,188,385,188,388,144,394,118,404,92,424,62,449,38"/>
+<area shape="rect" id="Node000013" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="418,93,535,119"/>
+<area shape="poly" id="edge10_Node000013_Node000010" title=" " alt="" coords="479,45,479,93,474,93,474,45"/>
+<area shape="rect" id="Node000014" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="475,181,604,221"/>
+<area shape="poly" id="edge12_Node000014_Node000010" title=" " alt="" coords="509,36,561,79,587,108,606,142,608,154,603,166,584,183,581,179,599,163,602,154,601,144,582,111,558,83,506,40"/>
+<area shape="poly" id="edge9_Node000009_Node000013" title=" " alt="" coords="450,129,432,144,397,190,393,187,428,141,447,125"/>
+<area shape="poly" id="edge13_Node000014_Node000013" title=" " alt="" coords="485,131,496,156,517,179,513,183,492,159,480,133"/>
+<area shape="poly" id="edge11_Node000001_Node000014" title=" " alt="" coords="523,235,486,290,439,350,413,374,410,370,435,346,482,287,519,232"/>
+</map>

@@ -1,20 +1,29 @@
 <map id="third_party/cq_kernel/kiss_fft.h" name="third_party/cq_kernel/kiss_fft.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="189,5,348,45"/>
-<area shape="rect" id="Node000002" href="$d3/d74/__kiss__fft__guts_8h.html" title=" " alt="" coords="281,93,440,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="301,53,342,91,338,95,297,57"/>
-<area shape="rect" id="Node000008" href="$dc/da7/kiss__fftr_8h.html" title=" " alt="" coords="99,93,257,133"/>
-<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="241,57,200,95,196,91,237,53"/>
-<area shape="rect" id="Node000003" href="$d1/dda/cq__kernel_8h.html" title=" " alt="" coords="99,181,257,221"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="309,142,219,184,217,179,307,137"/>
-<area shape="rect" id="Node000006" href="$d7/dc2/kiss__fft_8cpp.html" title=" " alt="" coords="464,181,623,221"/>
-<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="414,137,504,179,502,184,412,142"/>
-<area shape="rect" id="Node000007" href="$d2/da1/kiss__fftr_8cpp.html" title=" " alt="" coords="281,181,440,221"/>
-<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="363,147,363,181,358,181,358,147"/>
-<area shape="rect" id="Node000004" href="$d1/dff/fft__impl_8cpp.html" title=" " alt="" coords="5,277,116,302"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="143,232,78,279,75,274,140,227"/>
-<area shape="rect" id="Node000005" href="$d2/d90/cq__kernel_8cpp.html" title=" " alt="" coords="140,269,299,309"/>
-<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="195,233,213,268,208,270,191,235"/>
-<area shape="poly" id="edge9_Node000008_Node000003" title=" " alt="" coords="181,147,181,181,175,181,175,147"/>
-<area shape="poly" id="edge8_Node000008_Node000004" title=" " alt="" coords="131,143,108,161,88,183,76,207,69,233,63,277,58,276,64,232,71,205,84,180,104,157,128,138"/>
-<area shape="poly" id="edge10_Node000008_Node000007" title=" " alt="" coords="232,137,322,179,320,184,229,142"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="517,5,675,45"/>
+<area shape="rect" id="Node000002" href="$d3/d74/__kiss__fft__guts_8h.html" title=" " alt="" coords="609,93,767,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="628,53,669,91,666,95,624,57"/>
+<area shape="rect" id="Node000015" href="$dc/da7/kiss__fftr_8h.html" title=" " alt="" coords="426,93,585,133"/>
+<area shape="poly" id="edge10_Node000001_Node000015" title=" " alt="" coords="568,57,527,95,524,91,564,53"/>
+<area shape="rect" id="Node000003" href="$d1/dda/cq__kernel_8h.html" title=" " alt="" coords="426,181,585,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="637,142,546,184,544,179,634,137"/>
+<area shape="rect" id="Node000013" href="$d0/d8f/kiss__fft_8cpp_8hpp.html" title=" " alt="" coords="726,277,885,317"/>
+<area shape="poly" id="edge6_Node000002_Node000013" title=" " alt="" coords="739,139,762,157,782,180,794,204,802,230,808,276,802,277,797,231,789,206,778,183,759,161,736,143"/>
+<area shape="rect" id="Node000014" href="$da/dad/kiss__fftr_8cpp_8hpp.html" title=" " alt="" coords="609,181,767,221"/>
+<area shape="poly" id="edge8_Node000002_Node000014" title=" " alt="" coords="691,147,691,181,685,181,685,147"/>
+<area shape="rect" id="Node000004" href="$d5/df1/fft__impl_8cpp_8hpp.html" title=" " alt="" coords="269,284,467,309"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="468,231,386,286,383,282,465,227"/>
+<area shape="rect" id="Node000009" href="$dc/dbc/cq__kernel_8cpp_8hpp.html" title=" " alt="" coords="491,277,650,317"/>
+<area shape="poly" id="edge4_Node000003_Node000009" title=" " alt="" coords="528,231,560,275,555,278,524,234"/>
+<area shape="rect" id="Node000010" href="$df/d37/third__party_2cq__kernel_2__build_8cpp_8hpp.html" title=" " alt="" coords="609,372,767,412"/>
+<area shape="poly" id="edge5_Node000009_Node000010" title=" " alt="" coords="607,323,666,370,663,374,603,327"/>
+<area shape="poly" id="edge7_Node000013_Node000010" title=" " alt="" coords="773,327,713,374,710,370,769,323"/>
+<area shape="poly" id="edge9_Node000014_Node000010" title=" " alt="" coords="691,235,691,371,685,371,685,235"/>
+<area shape="poly" id="edge15_Node000015_Node000003" title=" " alt="" coords="508,147,508,181,503,181,503,147"/>
+<area shape="poly" id="edge14_Node000015_Node000004" title=" " alt="" coords="460,143,436,161,415,183,399,209,387,237,373,284,368,283,382,235,394,207,411,180,433,157,457,139"/>
+<area shape="poly" id="edge16_Node000015_Node000014" title=" " alt="" coords="559,137,649,179,647,184,557,142"/>
+<area shape="rect" id="Node000016" href="$de/db2/fft__backend_8h.html" title=" " alt="" coords="172,189,351,214"/>
+<area shape="poly" id="edge11_Node000015_Node000016" title=" " alt="" coords="440,140,295,191,293,186,438,135"/>
+<area shape="poly" id="edge13_Node000016_Node000004" title=" " alt="" coords="286,221,357,282,353,286,283,225"/>
+<area shape="rect" id="Node000017" href="$d3/df2/_audio_fft_parity_8ino.html" title="Sanity test for the ESP&#45;DSP real&#45;FFT backend in fl::audio::fft." alt="" coords="5,269,245,324"/>
+<area shape="poly" id="edge12_Node000016_Node000017" title=" " alt="" coords="235,224,165,271,162,267,232,220"/>
 </map>

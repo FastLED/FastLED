@@ -1,0 +1,41 @@
+<map id="fl::AutoResearchConfig" name="fl::AutoResearchConfig">
+<area shape="rect" id="Node000001" title="Configuration for driver&#45;agnostic autoresearch testing Contains all input parameters needed for autor..." alt="" coords="1617,230,1787,255"/>
+<area shape="rect" id="Node000002" href="$d5/de9/structfl_1_1_chipset_timing_config.html" title="Runtime bit&#45;period timing for a clockless chipset." alt="" coords="1302,143,1475,169"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1473,169,1594,199,1672,227,1670,232,1593,204,1472,174"/>
+<area shape="rect" id="Node000003" href="$d0/d08/classfl_1_1span.html" title=" " alt="" coords="1284,193,1493,218"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1507,217,1618,230,1617,235,1507,222"/>
+<area shape="rect" id="Node000004" href="$df/df5/structfl_1_1_channel_config.html" title="Configuration for a single LED channel." alt="" coords="1041,163,1173,189"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1187,182,1284,192,1283,197,1187,187"/>
+<area shape="rect" id="Node000005" href="$d0/d08/classfl_1_1span.html" title=" " alt="" coords="684,213,836,238"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="849,215,1017,193,1054,186,1055,191,1018,199,850,220"/>
+<area shape="rect" id="Node000007" href="$d0/d08/classfl_1_1span.html" title=" " alt="" coords="353,213,511,238"/>
+<area shape="poly" id="edge9_Node000003_Node000007" title=" " alt="" coords="453,200,490,164,542,121,603,80,637,63,671,49,760,26,837,16,906,19,972,33,1036,55,1104,86,1261,164,1285,178,1324,190,1323,195,1283,182,1259,169,1101,91,1034,60,970,38,906,24,837,22,761,31,673,55,639,68,606,85,545,126,494,168,457,204"/>
+<area shape="poly" id="edge5_Node000005_Node000007" title=" " alt="" coords="525,223,684,223,684,228,525,228"/>
+<area shape="rect" id="Node000029" href="$d0/d08/classfl_1_1span.html" title=" " alt="" coords="873,259,1017,285"/>
+<area shape="poly" id="edge22_Node000029_Node000007" title=" " alt="" coords="505,238,535,243,717,260,873,268,872,273,717,265,534,248,504,243"/>
+<area shape="rect" id="Node000008" href="$d5/d87/structfl_1_1_channel_options.html" title="Optional channel configuration parameters All fields have sensible defaults and can be overridden as ..." alt="" coords="689,65,831,90"/>
+<area shape="poly" id="edge6_Node000004_Node000008" title=" " alt="" coords="844,79,930,92,975,102,1018,116,1060,138,1092,161,1089,165,1057,142,1016,121,973,107,929,97,844,85"/>
+<area shape="rect" id="Node000011" href="$d2/d78/classfl_1_1_screen_map.html" title=" " alt="" coords="705,114,815,139"/>
+<area shape="poly" id="edge7_Node000004_Node000011" title=" " alt="" coords="829,130,919,139,1018,153,1055,161,1054,166,1017,159,918,145,829,135"/>
+<area shape="rect" id="Node000018" href="$dd/dd8/classfl_1_1_optional.html" title=" " alt="" coords="672,163,848,189"/>
+<area shape="poly" id="edge8_Node000004_Node000018" title=" " alt="" coords="862,173,1041,173,1041,179,862,179"/>
+<area shape="rect" id="Node000019" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="1323,427,1454,467"/>
+<area shape="poly" id="edge10_Node000001_Node000019" title=" " alt="" coords="1431,417,1680,253,1683,258,1434,421"/>
+<area shape="rect" id="Node000020" href="$d3/d2b/classfl_1_1_rx_channel.html" title=" " alt="" coords="1053,405,1161,430"/>
+<area shape="poly" id="edge11_Node000019_Node000020" title=" " alt="" coords="1175,422,1323,437,1323,443,1175,427"/>
+<area shape="rect" id="Node000021" href="$d2/db2/classfl_1_1string.html" title=" " alt="" coords="395,338,469,363"/>
+<area shape="poly" id="edge12_Node000020_Node000021" title=" " alt="" coords="483,344,582,339,716,339,867,349,944,360,1018,376,1053,388,1084,402,1082,407,1051,393,1017,381,943,366,867,355,716,344,583,344,483,349"/>
+<area shape="rect" id="Node000025" href="$d0/ddd/structfl_1_1_rx_channel_config.html" title=" " alt="" coords="685,377,835,402"/>
+<area shape="poly" id="edge14_Node000025_Node000021" title=" " alt="" coords="483,362,535,373,612,382,685,386,685,391,612,387,534,379,482,368"/>
+<area shape="poly" id="edge13_Node000020_Node000025" title=" " alt="" coords="848,394,1053,410,1053,416,848,399"/>
+<area shape="rect" id="Node000027" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="695,427,825,467"/>
+<area shape="poly" id="edge15_Node000020_Node000027" title=" " alt="" coords="839,441,1017,428,1053,423,1053,429,1018,433,840,446"/>
+<area shape="rect" id="Node000014" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="5,483,204,509"/>
+<area shape="poly" id="edge19_Node000019_Node000014" title=" " alt="" coords="161,510,284,538,357,549,431,553,1109,553,1145,551,1181,544,1250,521,1311,492,1357,464,1359,469,1313,496,1252,526,1182,549,1145,556,1109,559,431,559,357,554,283,543,160,515"/>
+<area shape="poly" id="edge16_Node000027_Node000014" title=" " alt="" coords="192,479,228,473,381,454,535,443,648,443,694,443,694,448,648,448,535,448,381,459,228,479,193,484"/>
+<area shape="rect" id="Node000013" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="359,483,505,509"/>
+<area shape="poly" id="edge18_Node000013_Node000014" title=" " alt="" coords="218,493,359,493,359,499,218,499"/>
+<area shape="poly" id="edge20_Node000019_Node000013" title=" " alt="" coords="518,490,848,476,1323,448,1323,454,848,481,519,496"/>
+<area shape="poly" id="edge17_Node000027_Node000013" title=" " alt="" coords="518,481,694,454,695,459,518,486"/>
+<area shape="poly" id="edge21_Node000001_Node000029" title=" " alt="" coords="1030,266,1617,243,1617,249,1031,271"/>
+</map>

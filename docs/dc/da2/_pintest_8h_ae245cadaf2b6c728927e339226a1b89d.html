@@ -119,24 +119,15 @@ template&lt;&gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="../../dc/da2/_pintest_8h_source.html#l00135">135</a> of file <a class="el" href="../../dc/da2/_pintest_8h_source.html">Pintest.h</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">  135</span>                                                 {</div>
-<div class="line"><span class="lineno">  136</span>    <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d4/de9/struct_____f_l___p_o_r_t___i_n_f_o_a407030c6570cb7463ac9a76355abae35.html#a407030c6570cb7463ac9a76355abae35">__FL_PORT_INFO&lt;0&gt;::hasPort</a>() &amp;&amp; (ptr == (<span class="keywordtype">void</span>*)<a class="code hl_function" href="../../d4/de9/struct_____f_l___p_o_r_t___i_n_f_o_a3bab01aa4faddd77dcd6a567bcf50043.html#a3bab01aa4faddd77dcd6a567bcf50043">__FL_PORT_INFO&lt;0&gt;::portAddr</a>())) {</div>
-<div class="line"><span class="lineno">  137</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/de9/struct_____f_l___p_o_r_t___i_n_f_o_ad7cedd4bff6b75c60ddf249dade8dd1c.html#ad7cedd4bff6b75c60ddf249dade8dd1c">__FL_PORT_INFO&lt;0&gt;::portName</a>();</div>
+<div class="line"><span class="lineno">  136</span>    <span class="keywordflow">if</span> (__FL_PORT_INFO&lt;0&gt;::hasPort() &amp;&amp; (ptr == (<span class="keywordtype">void</span>*)__FL_PORT_INFO&lt;0&gt;::portAddr())) {</div>
+<div class="line"><span class="lineno">  137</span>        <span class="keywordflow">return</span> __FL_PORT_INFO&lt;0&gt;::portName();</div>
 <div class="line"><span class="lineno">  138</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  139</span>        <span class="keywordflow">return</span> NULL;  <span class="comment">// Base case - no more ports to check</span></div>
+<div class="line"><span class="lineno">  139</span>        <span class="keywordflow">return</span> <a class="code hl_define" href="../../d0/d8f/kiss__fft_8cpp_8hpp_a070d2ce7b6bb7e5c05602aa8c308d0c4.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a>;  <span class="comment">// Base case - no more ports to check</span></div>
 <div class="line"><span class="lineno">  140</span>    }</div>
 <div class="line"><span class="lineno">  141</span>}</div>
-<div class="ttc" id="astruct_____f_l___p_o_r_t___i_n_f_o_a3bab01aa4faddd77dcd6a567bcf50043_html_a3bab01aa4faddd77dcd6a567bcf50043"><div class="ttname"><a href="../../d4/de9/struct_____f_l___p_o_r_t___i_n_f_o_a3bab01aa4faddd77dcd6a567bcf50043.html#a3bab01aa4faddd77dcd6a567bcf50043">__FL_PORT_INFO::portAddr</a></div><div class="ttdeci">static const void * portAddr()</div><div class="ttdoc">Gets the raw address of the port.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d65/fastpin_8h_source.html#l00439">fastpin.h:439</a></div></div>
-<div class="ttc" id="astruct_____f_l___p_o_r_t___i_n_f_o_a407030c6570cb7463ac9a76355abae35_html_a407030c6570cb7463ac9a76355abae35"><div class="ttname"><a href="../../d4/de9/struct_____f_l___p_o_r_t___i_n_f_o_a407030c6570cb7463ac9a76355abae35.html#a407030c6570cb7463ac9a76355abae35">__FL_PORT_INFO::hasPort</a></div><div class="ttdeci">static bool hasPort()</div><div class="ttdoc">Checks whether a port exists.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d65/fastpin_8h_source.html#l00435">fastpin.h:435</a></div></div>
-<div class="ttc" id="astruct_____f_l___p_o_r_t___i_n_f_o_ad7cedd4bff6b75c60ddf249dade8dd1c_html_ad7cedd4bff6b75c60ddf249dade8dd1c"><div class="ttname"><a href="../../d4/de9/struct_____f_l___p_o_r_t___i_n_f_o_ad7cedd4bff6b75c60ddf249dade8dd1c.html#ad7cedd4bff6b75c60ddf249dade8dd1c">__FL_PORT_INFO::portName</a></div><div class="ttdeci">static const char * portName()</div><div class="ttdoc">Gets the name of the port, as a C-string.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d65/fastpin_8h_source.html#l00437">fastpin.h:437</a></div></div>
+<div class="ttc" id="akiss__fft_8cpp_8hpp_a070d2ce7b6bb7e5c05602aa8c308d0c4_html_a070d2ce7b6bb7e5c05602aa8c308d0c4"><div class="ttname"><a href="../../d0/d8f/kiss__fft_8cpp_8hpp_a070d2ce7b6bb7e5c05602aa8c308d0c4.html#a070d2ce7b6bb7e5c05602aa8c308d0c4">NULL</a></div><div class="ttdeci">#define NULL</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d8f/kiss__fft_8cpp_8hpp_source.html#l00017">kiss_fft.cpp.hpp:17</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../db/d65/fastpin_8h_source.html#l00435">__FL_PORT_INFO&lt; port &gt;::hasPort()</a>, <a class="el" href="../../db/d65/fastpin_8h_source.html#l00439">__FL_PORT_INFO&lt; port &gt;::portAddr()</a>, and <a class="el" href="../../db/d65/fastpin_8h_source.html#l00437">__FL_PORT_INFO&lt; port &gt;::portName()</a>.</p>
-<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
-<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
-</div>
-<div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/da2/_pintest_8h_ae245cadaf2b6c728927e339226a1b89d_ae245cadaf2b6c728927e339226a1b89d_cgraph.svg" width="399" height="135"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
-</div>
+<p class="reference">References <a class="el" href="../../d0/d8f/kiss__fft_8cpp_8hpp_source.html#l00017">NULL</a>.</p>
 
 </div>
 </div>
@@ -147,7 +138,7 @@ template&lt;&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_26c6288c6e5cb98dccb832f1aa4eaa4f.html">Pintest</a></li><li class="navelem"><a class="el" href="../../dc/da2/_pintest_8h.html">Pintest.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

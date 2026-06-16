@@ -1,0 +1,28 @@
+<map id="autoresearch::setupRpcAsyncTask" name="autoresearch::setupRpcAsyncTask">
+<area shape="rect" id="Node000001" title="Setup async task for JSON&#45;RPC processing." alt="" coords="5,141,248,167"/>
+<area shape="rect" id="Node000002" href="$db/d5c/namespacefl_1_1task_a0f002cad452f6b7f8dff6ba2b8f0f8b8.html#a0f002cad452f6b7f8dff6ba2b8f0f8b8" title=" " alt="" coords="332,35,471,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="160,139,354,63,356,68,162,144"/>
+<area shape="rect" id="Node000004" href="$de/daf/classfl_1_1task_1_1_handle_a01b05372acab06bd2197d033aafe8cb9.html#a01b05372acab06bd2197d033aafe8cb9" title=" " alt="" coords="323,141,480,167"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="248,151,309,151,309,157,248,157"/>
+<area shape="rect" id="Node000011" href="$db/d63/class_auto_research_remote_control_a5dc876faece5043348a46a5836c335c6.html#a5dc876faece5043348a46a5836c335c6" title="Process RPC system (pull + tick + push)" alt="" coords="296,277,507,317"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="154,165,351,268,348,273,151,169"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="594,5,719,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="471,37,580,24,581,29,471,42"/>
+<area shape="rect" id="Node000005" href="$de/daf/classfl_1_1task_1_1_handle_a16eea6cd4df5ebb0c3cbb297b10c1707.html#a16eea6cd4df5ebb0c3cbb297b10c1707" title=" " alt="" coords="569,55,744,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="430,139,487,115,554,90,585,81,587,86,556,95,489,120,432,144"/>
+<area shape="rect" id="Node000006" href="$d2/d2b/classfl_1_1task_1_1_scheduler_ad1f60f825514d99a9ee0d06f564be1a7.html#ad1f60f825514d99a9ee0d06f564be1a7" title=" " alt="" coords="587,105,726,145"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="480,142,573,132,574,137,480,148"/>
+<area shape="rect" id="Node000007" href="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a" title=" " alt="" coords="843,127,933,152"/>
+<area shape="poly" id="edge10_Node000004_Node000007" title=" " alt="" coords="480,155,611,158,758,154,829,146,829,151,759,159,611,163,480,161"/>
+<area shape="rect" id="Node000008" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a266030d285c7f6ae31eb3c619cee8693.html#a266030d285c7f6ae31eb3c619cee8693" title=" " alt="" coords="587,219,726,259"/>
+<area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="441,164,584,212,582,218,440,169"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="727,126,829,133,829,138,726,132"/>
+<area shape="rect" id="Node000009" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a56ea341e8b9965989c7634c973ef8027.html#a56ea341e8b9965989c7634c973ef8027" title=" " alt="" coords="819,205,957,245"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="726,232,805,227,805,233,727,238"/>
+<area shape="rect" id="Node000010" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="807,269,969,295"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="727,250,806,264,805,269,726,255"/>
+<area shape="rect" id="Node000012" href="$db/d24/namespacefl_1_1net_1_1ble_adf5498b241de23436558069ebfddb000.html#adf5498b241de23436558069ebfddb000" title="Deinitialize BLE stack and free heap state." alt="" coords="555,284,759,309"/>
+<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="507,294,541,294,541,299,507,299"/>
+<area shape="rect" id="Node000013" href="$da/d79/_auto_research_ble_8cpp_a148423e1a23c3528f5499ffd84bbd65a.html#a148423e1a23c3528f5499ffd84bbd65a" title="Get current BLE autoresearch state." alt="" coords="607,333,706,359"/>
+<area shape="poly" id="edge13_Node000011_Node000013" title=" " alt="" coords="506,314,594,331,593,337,505,319"/>
+</map>

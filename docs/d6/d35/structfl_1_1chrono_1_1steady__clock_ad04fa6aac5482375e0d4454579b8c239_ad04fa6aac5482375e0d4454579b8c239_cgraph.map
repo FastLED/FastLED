@@ -1,0 +1,7 @@
+<map id="fl::chrono::steady_clock::now" name="fl::chrono::steady_clock::now">
+<area shape="rect" id="Node000001" title="Returns the current time point (implemented after fl::micros() declaration)" alt="" coords="5,29,140,69"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="43,29,41,20,46,11,57,5,73,3,91,6,101,13,98,17,89,11,73,8,58,10,50,14,46,21,48,28"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a95a89c7ba649b9bd2c9136c0f517d82f.html#a95a89c7ba649b9bd2c9136c0f517d82f" title="Universal microsecond timer &#45; returns microseconds since system startup." alt="" coords="188,37,271,62"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="140,47,174,47,174,52,140,52"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="203,38,198,28,201,19,212,12,229,10,251,13,260,22,256,26,248,18,229,15,213,17,205,22,203,28,208,35"/>
+</map>

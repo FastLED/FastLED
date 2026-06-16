@@ -1,0 +1,10 @@
+<map id="fl::CLEDController::removeFromList" name="fl::CLEDController::removeFromList">
+<area shape="rect" id="Node000001" title="Remove a controller from the linked list." alt="" coords="511,35,647,75"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a2929056de1378423feb303e26f015c1c.html#a2929056de1378423feb303e26f015c1c" title="Remove this controller from the draw list." alt="" coords="292,35,463,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="497,57,463,57,463,52,497,52"/>
+<area shape="poly" id="edge4_Node000002_Node000002" title=" " alt="" coords="411,23,399,16,377,13,358,15,347,20,343,26,345,34,340,35,337,25,343,16,357,10,377,8,401,11,414,18"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a53048e807ed46862ebc5ef910126145e.html#a53048e807ed46862ebc5ef910126145e" title=" " alt="" coords="55,5,194,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="278,46,194,36,194,31,278,41"/>
+<area shape="rect" id="Node000004" href="$d5/d8b/classfl_1_1_channel_a0ba6c6bbdbae21db23f1310b9af6def9.html#a0ba6c6bbdbae21db23f1310b9af6def9" title="Remove this channel from the global controller draw list." alt="" coords="5,70,244,95"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="278,68,239,73,239,67,278,63"/>
+</map>

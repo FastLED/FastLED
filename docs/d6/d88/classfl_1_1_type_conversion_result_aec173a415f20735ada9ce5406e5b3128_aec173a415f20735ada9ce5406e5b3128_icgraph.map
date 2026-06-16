@@ -1,0 +1,9 @@
+<map id="fl::TypeConversionResult::success" name="fl::TypeConversionResult::success">
+<area shape="rect" id="Node000001" title=" " alt="" coords="405,23,588,63"/>
+<area shape="rect" id="Node000002" href="$d7/dd1/classfl_1_1_rpc_af0c0d7b6410f120603f256edfd27649a.html#af0c0d7b6410f120603f256edfd27649a" title="Bind async method with ResponseSend&amp; parameter (for ASYNC/ASYNC_STREAM modes) Signature: void(Respons..." alt="" coords="220,5,357,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="391,33,357,29,358,24,392,28"/>
+<area shape="rect" id="Node000003" href="$d7/dd1/classfl_1_1_rpc_a16bb9675b8d15f3713e49fbb5a8b05a3.html#a16bb9675b8d15f3713e49fbb5a8b05a3" title="Process a JSON&#45;RPC request." alt="" coords="231,55,346,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="392,58,347,63,346,58,391,53"/>
+<area shape="rect" id="Node000004" href="$d7/dd1/classfl_1_1_rpc_acfc87927e9e6affe54e4f2861adac5fd.html#acfc87927e9e6affe54e4f2861adac5fd" title="For notifications (no id), returns nullopt." alt="" coords="5,55,172,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="218,70,172,70,172,65,218,65"/>
+</map>

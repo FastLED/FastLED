@@ -115,14 +115,43 @@ $(function(){initNavTree('d8/de5/_luminescent_grand_8ino_a4fc01d736fe50cf5b977f7
       </table>
 </div><div class="memdoc">
 
-<p>This is a work in progress showcasing a complex MIDI keyboard visualizer. </p>
-<p>To run this compiler use </p><blockquote class="doxtable">
-<p>pip install fastled Then go to your sketch directory and run fastled </p>
-</blockquote>
-
-<p class="definition">Definition at line <a class="el" href="../../d8/de5/_luminescent_grand_8ino_source.html#l00012">12</a> of file <a class="el" href="../../d8/de5/_luminescent_grand_8ino_source.html">LuminescentGrand.ino</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   12</span>{}</div>
+<p class="definition">Definition at line <a class="el" href="../../d8/de5/_luminescent_grand_8ino_source.html#l00121">121</a> of file <a class="el" href="../../d8/de5/_luminescent_grand_8ino_source.html">LuminescentGrand.ino</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  121</span>             {</div>
+<div class="line"><span class="lineno">  122</span>  <a class="code hl_define" href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a>(<span class="stringliteral">&quot;setup&quot;</span>);</div>
+<div class="line"><span class="lineno">  123</span>  <span class="comment">// Serial port for logging.</span></div>
+<div class="line"><span class="lineno">  124</span>  <a class="code hl_define" href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a>.begin(57600);</div>
+<div class="line"><span class="lineno">  125</span>  <span class="comment">//start serial with midi baudrate 31250</span></div>
+<div class="line"><span class="lineno">  126</span>  <span class="comment">// Initiate MIDI communications, listen to all channels</span></div>
+<div class="line"><span class="lineno">  127</span>  MY_MIDI.begin(<a class="code hl_define" href="../../d8/dd0/midi___defs_8h_ac60eaa68c9d91e29fca58a6128c3d1cf.html#ac60eaa68c9d91e29fca58a6128c3d1cf">MIDI_CHANNEL_OMNI</a>);</div>
+<div class="line"><span class="lineno">  128</span> </div>
+<div class="line"><span class="lineno">  129</span>  <span class="comment">// Connect the HandleNoteOn function to the library, so it is called upon reception of a NoteOn.</span></div>
+<div class="line"><span class="lineno">  130</span>  MY_MIDI.setHandleNoteOn(<a class="code hl_function" href="../../d8/de5/_luminescent_grand_8ino_ab0bc55c4addfc1a3e21270de2e7f5c3b.html#ab0bc55c4addfc1a3e21270de2e7f5c3b">HandleNoteOn</a>);</div>
+<div class="line"><span class="lineno">  131</span>  MY_MIDI.setHandleNoteOff(<a class="code hl_function" href="../../d8/de5/_luminescent_grand_8ino_a98a0bed97c6da33828fae06e39e62b3b.html#a98a0bed97c6da33828fae06e39e62b3b">HandleNoteOff</a>);</div>
+<div class="line"><span class="lineno">  132</span>  MY_MIDI.setHandleAfterTouchPoly(<a class="code hl_function" href="../../d8/de5/_luminescent_grand_8ino_a447971793925792bdddf63367ea70a4c.html#a447971793925792bdddf63367ea70a4c">HandleAfterTouchPoly</a>);</div>
+<div class="line"><span class="lineno">  133</span>  MY_MIDI.setHandleAfterTouchChannel(<a class="code hl_function" href="../../d8/de5/_luminescent_grand_8ino_a89d368b1771ecdeb3e47fa15090fb938.html#a89d368b1771ecdeb3e47fa15090fb938">HandleAfterTouchChannel</a>);</div>
+<div class="line"><span class="lineno">  134</span>  MY_MIDI.setHandleControlChange(<a class="code hl_function" href="../../d8/de5/_luminescent_grand_8ino_adf4c0204923f99d676ed4f9040a047cd.html#adf4c0204923f99d676ed4f9040a047cd">HandleControlChange</a>);</div>
+<div class="line"><span class="lineno">  135</span> </div>
+<div class="line"><span class="lineno">  136</span>  <a class="code hl_function" href="../../dc/d4e/ui__state_8cpp_aa6f50ea564e0ba7375ce590a5196f12f.html#aa6f50ea564e0ba7375ce590a5196f12f">ui_init</a>();</div>
+<div class="line"><span class="lineno">  137</span>}</div>
+<div class="ttc" id="a_luminescent_grand_8ino_a447971793925792bdddf63367ea70a4c_html_a447971793925792bdddf63367ea70a4c"><div class="ttname"><a href="../../d8/de5/_luminescent_grand_8ino_a447971793925792bdddf63367ea70a4c.html#a447971793925792bdddf63367ea70a4c">HandleAfterTouchPoly</a></div><div class="ttdeci">void HandleAfterTouchPoly(byte channel, byte note, byte pressure)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/de5/_luminescent_grand_8ino_source.html#l00091">LuminescentGrand.ino:91</a></div></div>
+<div class="ttc" id="a_luminescent_grand_8ino_a89d368b1771ecdeb3e47fa15090fb938_html_a89d368b1771ecdeb3e47fa15090fb938"><div class="ttname"><a href="../../d8/de5/_luminescent_grand_8ino_a89d368b1771ecdeb3e47fa15090fb938.html#a89d368b1771ecdeb3e47fa15090fb938">HandleAfterTouchChannel</a></div><div class="ttdeci">void HandleAfterTouchChannel(byte channel, byte pressure)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/de5/_luminescent_grand_8ino_source.html#l00104">LuminescentGrand.ino:104</a></div></div>
+<div class="ttc" id="a_luminescent_grand_8ino_a98a0bed97c6da33828fae06e39e62b3b_html_a98a0bed97c6da33828fae06e39e62b3b"><div class="ttname"><a href="../../d8/de5/_luminescent_grand_8ino_a98a0bed97c6da33828fae06e39e62b3b.html#a98a0bed97c6da33828fae06e39e62b3b">HandleNoteOff</a></div><div class="ttdeci">void HandleNoteOff(byte channel, byte midi_note, byte velocity)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/de5/_luminescent_grand_8ino_source.html#l00081">LuminescentGrand.ino:81</a></div></div>
+<div class="ttc" id="a_luminescent_grand_8ino_ab0bc55c4addfc1a3e21270de2e7f5c3b_html_ab0bc55c4addfc1a3e21270de2e7f5c3b"><div class="ttname"><a href="../../d8/de5/_luminescent_grand_8ino_ab0bc55c4addfc1a3e21270de2e7f5c3b.html#ab0bc55c4addfc1a3e21270de2e7f5c3b">HandleNoteOn</a></div><div class="ttdeci">void HandleNoteOn(byte channel, byte midi_note, byte velocity)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/de5/_luminescent_grand_8ino_source.html#l00069">LuminescentGrand.ino:69</a></div></div>
+<div class="ttc" id="a_luminescent_grand_8ino_adf4c0204923f99d676ed4f9040a047cd_html_adf4c0204923f99d676ed4f9040a047cd"><div class="ttname"><a href="../../d8/de5/_luminescent_grand_8ino_adf4c0204923f99d676ed4f9040a047cd.html#adf4c0204923f99d676ed4f9040a047cd">HandleControlChange</a></div><div class="ttdeci">void HandleControlChange(byte channel, byte d1, byte d2)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/de5/_luminescent_grand_8ino_source.html#l00099">LuminescentGrand.ino:99</a></div></div>
+<div class="ttc" id="alog_8h_a8ccae77aa5fe30a41f19d233cb0de2c1_html_a8ccae77aa5fe30a41f19d233cb0de2c1"><div class="ttname"><a href="../../d7/d7f/log_8h_a8ccae77aa5fe30a41f19d233cb0de2c1.html#a8ccae77aa5fe30a41f19d233cb0de2c1">FL_DBG</a></div><div class="ttdeci">#define FL_DBG</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00388">log.h:388</a></div></div>
+<div class="ttc" id="amidi___defs_8h_ac60eaa68c9d91e29fca58a6128c3d1cf_html_ac60eaa68c9d91e29fca58a6128c3d1cf"><div class="ttname"><a href="../../d8/dd0/midi___defs_8h_ac60eaa68c9d91e29fca58a6128c3d1cf.html#ac60eaa68c9d91e29fca58a6128c3d1cf">MIDI_CHANNEL_OMNI</a></div><div class="ttdeci">#define MIDI_CHANNEL_OMNI</div><div class="ttdef"><b>Definition</b> <a href="../../d8/dd0/midi___defs_8h_source.html#l00043">midi_Defs.h:43</a></div></div>
+<div class="ttc" id="asystem_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3_html_ab1a8531ded8c3d5bee8e36aebec7a8f3"><div class="ttname"><a href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a></div><div class="ttdeci">#define Serial</div><div class="ttdef"><b>Definition</b> <a href="../../de/d8b/system_2serial_8h_source.html#l00304">serial.h:304</a></div></div>
+<div class="ttc" id="aui__state_8cpp_aa6f50ea564e0ba7375ce590a5196f12f_html_aa6f50ea564e0ba7375ce590a5196f12f"><div class="ttname"><a href="../../dc/d4e/ui__state_8cpp_aa6f50ea564e0ba7375ce590a5196f12f.html#aa6f50ea564e0ba7375ce590a5196f12f">ui_init</a></div><div class="ttdeci">void ui_init()</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d4e/ui__state_8cpp_source.html#l00054">ui_state.cpp:54</a></div></div>
 </div><!-- fragment -->
+<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00388">FL_DBG</a>, <a class="el" href="../../d8/de5/_luminescent_grand_8ino_source.html#l00104">HandleAfterTouchChannel()</a>, <a class="el" href="../../d8/de5/_luminescent_grand_8ino_source.html#l00091">HandleAfterTouchPoly()</a>, <a class="el" href="../../d8/de5/_luminescent_grand_8ino_source.html#l00099">HandleControlChange()</a>, <a class="el" href="../../d8/de5/_luminescent_grand_8ino_source.html#l00081">HandleNoteOff()</a>, <a class="el" href="../../d8/de5/_luminescent_grand_8ino_source.html#l00069">HandleNoteOn()</a>, <a class="el" href="../../d8/dd0/midi___defs_8h_source.html#l00043">MIDI_CHANNEL_OMNI</a>, <a class="el" href="../../de/d8b/system_2serial_8h_source.html#l00304">Serial</a>, and <a class="el" href="../../dc/d4e/ui__state_8cpp_source.html#l00054">ui_init()</a>.</p>
+<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d8/de5/_luminescent_grand_8ino_a4fc01d736fe50cf5b977f755b675f11d_a4fc01d736fe50cf5b977f755b675f11d_cgraph.svg" width="448" height="283"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+
 </div>
 </div>
 </div><!-- contents -->
@@ -132,7 +161,7 @@ $(function(){initNavTree('d8/de5/_luminescent_grand_8ino_a4fc01d736fe50cf5b977f7
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_786f9dc3989cf40b3de9df2d18ba04d7.html">LuminescentGrand</a></li><li class="navelem"><a class="el" href="../../d8/de5/_luminescent_grand_8ino.html">LuminescentGrand.ino</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

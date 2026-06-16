@@ -1,0 +1,7 @@
+<map id="fl::priority_queue_stable::clear" name="fl::priority_queue_stable::clear">
+<area shape="rect" id="Node000001" title="Clear all elements from the queue." alt="" coords="5,37,137,77"/>
+<area shape="rect" id="Node000002" href="$d2/dfa/classfl_1_1priority__queue__stable_a2253dcafef4265dc559a41938f87f714.html#a2253dcafef4265dc559a41938f87f714" title="Check if the queue is empty." alt="" coords="185,5,317,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="137,43,171,37,172,42,138,48"/>
+<area shape="rect" id="Node000003" href="$d2/dfa/classfl_1_1priority__queue__stable_a224c069aabd19a2d51f0312c54d675eb.html#a224c069aabd19a2d51f0312c54d675eb" title="Remove the top element from the queue." alt="" coords="185,69,317,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="138,66,172,73,171,78,137,72"/>
+</map>

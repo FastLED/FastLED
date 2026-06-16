@@ -1,0 +1,5 @@
+<map id="fl::FastLEDAdapter" name="fl::FastLEDAdapter">
+<area shape="rect" id="Node000001" title="Real FastLED implementation adapter." alt="" coords="5,79,145,104"/>
+<area shape="rect" id="Node000002" href="$da/d8d/classfl_1_1_i_fast_l_e_d.html" title="Pure virtual interface for FastLED operations." alt="" coords="29,5,122,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="78,44,78,79,73,79,73,44"/>
+</map>

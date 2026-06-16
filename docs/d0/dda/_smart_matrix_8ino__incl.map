@@ -1,5 +1,7 @@
 <map id="/home/runner/work/FastLED/FastLED/examples/SmartMatrix/SmartMatrix.ino" name="/home/runner/work/FastLED/FastLED/examples/SmartMatrix/SmartMatrix.ino">
 <area shape="rect" id="Node000001" title="SmartMatrix example with platform detection." alt="" coords="5,5,236,60"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="23,108,218,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="123,60,123,94,118,94,118,60"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="9,108,94,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="102,62,72,99,67,95,97,58"/>
+<area shape="rect" id="Node000003" href="$da/d99/has__include_8h.html" title=" " alt="" coords="119,108,261,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="144,58,174,95,170,99,140,62"/>
 </map>

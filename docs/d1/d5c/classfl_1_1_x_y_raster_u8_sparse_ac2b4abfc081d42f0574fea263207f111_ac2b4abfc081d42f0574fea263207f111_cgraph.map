@@ -1,5 +1,6 @@
 <map id="fl::XYRasterU8Sparse::reset" name="fl::XYRasterU8Sparse::reset">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,164,45"/>
-<area shape="rect" id="Node000002" href="$d1/d5c/classfl_1_1_x_y_raster_u8_sparse_a3ee8202267d0e671012c270eae2f8b8e.html#a3ee8202267d0e671012c270eae2f8b8e" title=" " alt="" coords="212,5,371,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,23,198,23,198,28,164,28"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,164,69"/>
+<area shape="poly" id="edge2_Node000001_Node000001" title=" " alt="" coords="46,30,44,20,50,11,64,5,85,3,109,6,122,13,119,18,107,11,85,8,65,10,53,15,49,21,51,28"/>
+<area shape="rect" id="Node000002" href="$d1/d5c/classfl_1_1_x_y_raster_u8_sparse_a1c673793a21c24ab7bb260e20c5accb6.html#a1c673793a21c24ab7bb260e20c5accb6" title=" " alt="" coords="212,29,371,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,47,198,47,198,52,164,52"/>
 </map>

@@ -1,0 +1,11 @@
+<map id="fl::CRGB16::nscale8" name="fl::CRGB16::nscale8">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,155,56"/>
+<area shape="rect" id="Node000002" href="$dd/df5/structfl_1_1_c_r_g_b16_a86482cfd8f2385a291b9eb81fbf577d0.html#a86482cfd8f2385a291b9eb81fbf577d0" title=" " alt="" coords="203,5,355,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="155,31,188,27,189,32,155,36"/>
+<area shape="rect" id="Node000003" href="$d5/dec/classfl_1_1u8x8_a7e4afb60be35fded1580db7b9f469280.html#a7e4afb60be35fded1580db7b9f469280" title=" " alt="" coords="209,55,349,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="155,50,196,55,195,60,155,55"/>
+<area shape="rect" id="Node000004" href="$d5/dec/classfl_1_1u8x8_af0bfb544ff5558dc2bcb3986ddbfa1b8.html#af0bfb544ff5558dc2bcb3986ddbfa1b8" title=" " alt="" coords="403,29,513,55"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="348,55,389,49,389,54,349,60"/>
+<area shape="rect" id="Node000005" href="$d5/dec/classfl_1_1u8x8_a6f24da2ef3b9c2ec020e488f86d26631.html#a6f24da2ef3b9c2ec020e488f86d26631" title=" " alt="" coords="407,79,509,104"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="349,74,393,80,393,85,348,79"/>
+</map>

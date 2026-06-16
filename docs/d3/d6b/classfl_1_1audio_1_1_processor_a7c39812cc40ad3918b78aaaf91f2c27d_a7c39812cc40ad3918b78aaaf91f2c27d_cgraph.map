@@ -1,0 +1,11 @@
+<map id="fl::audio::Processor::onEnergy" name="fl::audio::Processor::onEnergy">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,151,69"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="50,29,48,20,53,11,63,5,78,3,95,6,105,13,102,17,93,11,78,8,65,10,57,14,54,21,55,28"/>
+<area shape="rect" id="Node000002" href="$db/d49/_audio_2simple_2simple_8h_a588b0ed03ff3e39281e2bc8b149dbdbd.html#a588b0ed03ff3e39281e2bc8b149dbdbd" title=" " alt="" coords="199,37,245,62"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="151,47,185,47,185,52,151,52"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="201,38,196,28,199,19,208,12,222,10,239,13,247,22,243,25,236,18,222,15,210,17,203,22,202,28,206,35"/>
+<area shape="rect" id="Node000003" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="293,11,396,37"/>
+<area shape="poly" id="edge4_Node000002_Node000003" title=" " alt="" coords="245,42,279,35,280,40,246,47"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1" title=" " alt="" coords="313,61,376,86"/>
+<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="246,51,300,62,299,67,245,56"/>
+</map>

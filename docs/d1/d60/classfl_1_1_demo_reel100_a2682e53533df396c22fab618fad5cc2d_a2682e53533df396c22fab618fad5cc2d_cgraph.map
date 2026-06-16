@@ -1,0 +1,13 @@
+<map id="fl::DemoReel100::juggle" name="fl::DemoReel100::juggle">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,184,56"/>
+<area shape="rect" id="Node000002" href="$d6/d6c/group___beat_generators_gadf8e83564c52b94d0ff5594aede0be28.html#gadf8e83564c52b94d0ff5594aede0be28" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="248,5,351,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,30,234,23,235,29,184,35"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a399e4e094995b8e97420b89a2dd6548b.html#a399e4e094995b8e97420b89a2dd6548b" title=" " alt="" coords="232,55,367,80"/>
+<area shape="poly" id="edge4_Node000001_Node000006" title=" " alt="" coords="184,51,218,55,218,60,184,56"/>
+<area shape="rect" id="Node000003" href="$d6/d6c/group___beat_generators_ga120dfa6dac7fa3d3958ae1e30b64e1d7.html#ga120dfa6dac7fa3d3958ae1e30b64e1d7" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="417,5,500,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="351,15,404,15,404,21,351,21"/>
+<area shape="rect" id="Node000004" href="$d6/d6c/group___beat_generators_gac4b5cef78b913f63a26012d69ca37889.html#gac4b5cef78b913f63a26012d69ca37889" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM, with BPM specified in Q8.8 fixed&#45;point format." alt="" coords="551,5,633,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="500,15,537,15,537,21,500,21"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a5a8a33cdb0434211edc66189968155ea.html#a5a8a33cdb0434211edc66189968155ea" title=" " alt="" coords="415,55,503,80"/>
+<area shape="poly" id="edge5_Node000006_Node000007" title=" " alt="" coords="367,65,401,65,401,70,367,70"/>
+</map>

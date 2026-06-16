@@ -1,5 +1,8 @@
 <map id="CountingButton::CountingButton" name="CountingButton::CountingButton">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,195,45"/>
-<area shape="rect" id="Node000002" href="$d6/d58/class_counting_button_a22f6cee1dc58bf651da93fd5ee66f7a0.html#a22f6cee1dc58bf651da93fd5ee66f7a0" title=" " alt="" coords="243,13,407,38"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="195,23,229,23,229,28,195,28"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,47,195,87"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="287,29,362,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="195,54,273,45,273,50,195,59"/>
+<area shape="rect" id="Node000003" href="$d6/d58/class_counting_button_a22f6cee1dc58bf651da93fd5ee66f7a0.html#a22f6cee1dc58bf651da93fd5ee66f7a0" title=" " alt="" coords="243,79,407,104"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="195,75,230,79,229,84,195,80"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="288,31,280,21,284,11,300,5,325,3,356,7,368,16,365,20,354,11,325,8,301,10,288,15,285,20,292,27"/>
 </map>

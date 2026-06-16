@@ -5,9 +5,9 @@ var kiss__fft_8h =
       [ "r", "d0/dc9/kiss__fft_8h.html#a686b6187e3e885de316908319c71ea8f", null ]
     ] ],
     [ "FIXED_POINT", "d0/dc9/kiss__fft_8h_a26db2f437905e35d7c8305cfd9842307.html#a26db2f437905e35d7c8305cfd9842307", null ],
-    [ "KISS_FFT_FREE", "d0/dc9/kiss__fft_8h_a167bff53d1f15bc13289353390b7faae.html#a167bff53d1f15bc13289353390b7faae", null ],
+    [ "KISS_FFT_FREE", "d0/dc9/kiss__fft_8h_ad058ff438cbada5529d97fe33c23170c.html#ad058ff438cbada5529d97fe33c23170c", null ],
     [ "kiss_fft_free", "d0/dc9/kiss__fft_8h_a62e86236e852945b8e120d0228377d71.html#a62e86236e852945b8e120d0228377d71", null ],
-    [ "KISS_FFT_MALLOC", "d0/dc9/kiss__fft_8h_aa6e24524bfa0247ac606c950e43a9a4d.html#aa6e24524bfa0247ac606c950e43a9a4d", null ],
+    [ "KISS_FFT_MALLOC", "d0/dc9/kiss__fft_8h_afa6ff82ec4dd7d6fc9d38937c856f270.html#afa6ff82ec4dd7d6fc9d38937c856f270", null ],
     [ "kiss_fft_scalar", "d0/dc9/kiss__fft_8h_a4d9bf2d6a2ce1b061545a16faf77d337.html#a4d9bf2d6a2ce1b061545a16faf77d337", null ],
     [ "kiss_fftr_next_fast_size_real", "d0/dc9/kiss__fft_8h_ad5d759d8e80434375e61c6a7de9aee79.html#ad5d759d8e80434375e61c6a7de9aee79", null ],
     [ "kiss_fft_cfg", "d0/dc9/kiss__fft_8h_ab8c364e12d4cbde47dca54eb4bc3ce79.html#ab8c364e12d4cbde47dca54eb4bc3ce79", null ],

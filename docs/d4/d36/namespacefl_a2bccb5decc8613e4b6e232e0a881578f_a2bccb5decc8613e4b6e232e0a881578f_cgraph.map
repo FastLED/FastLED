@@ -1,0 +1,10 @@
+<map id="fl::time" name="fl::time">
+<area shape="rect" id="Node000001" title="Alias for millis64() &#45; returns 64&#45;bit millisecond time." alt="" coords="5,29,73,55"/>
+<area shape="poly" id="edge5_Node000001_Node000001" title=" " alt="" coords="18,30,13,21,16,11,25,5,39,3,57,6,64,14,60,18,54,11,39,8,27,10,20,14,19,20,22,28"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ac8ee0e5ecac16a6ee42def0436a43663.html#ac8ee0e5ecac16a6ee42def0436a43663" title="64&#45;bit millisecond timer &#45; returns milliseconds since system startup without wraparound" alt="" coords="121,29,212,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="73,39,108,39,108,45,73,45"/>
+<area shape="poly" id="edge4_Node000002_Node000002" title=" " alt="" coords="145,30,141,21,143,11,152,5,167,3,184,6,192,14,188,18,181,11,167,8,154,10,147,14,146,20,150,28"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="260,29,335,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="212,39,247,39,247,45,212,45"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="275,30,270,21,273,11,282,5,297,3,315,6,323,14,319,18,313,11,297,8,284,10,277,14,276,20,280,28"/>
+</map>

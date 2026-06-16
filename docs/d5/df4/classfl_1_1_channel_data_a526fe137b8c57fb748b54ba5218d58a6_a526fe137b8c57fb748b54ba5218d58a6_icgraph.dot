@@ -1,0 +1,14 @@
+digraph "fl::ChannelData::ChannelData"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::ChannelData::ChannelData",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Private constructor - variant-based (modern API)"];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::ChannelData::ChannelData",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/df4/classfl_1_1_channel_data_a951c025272c30d25cc23f43cc75591d5.html#a951c025272c30d25cc23f43cc75591d5",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::ChannelData::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/df4/classfl_1_1_channel_data_a26066f68505faf2d46ddd0175824b6e7.html#a26066f68505faf2d46ddd0175824b6e7",tooltip=" "];
+}

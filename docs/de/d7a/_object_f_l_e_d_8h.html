@@ -108,14 +108,17 @@ $(function(){initNavTree('de/d7a/_object_f_l_e_d_8h.html','../../'); initResizab
   <div class="headertitle"><div class="title">ObjectFLED.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;WProgram.h&gt;</code><br />
+<div class="textblock"><code>#include &quot;platforms/arm/teensy/is_teensy.h&quot;</code><br />
+<code>#include &lt;WProgram.h&gt;</code><br />
 <code>#include &quot;DMAChannel.h&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../da/d07/_object_f_l_e_d_dma_manager_8h_source.html">ObjectFLEDDmaManager.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/dd8/stdint_8h_source.html">fl/stl/stdint.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for ObjectFLED.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d3/d61/_object_f_l_e_d_8h__incl.svg" width="256" height="124"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d3/d61/_object_f_l_e_d_8h__incl.svg" width="631" height="212"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 </div>
 <p><a href="../../de/d7a/_object_f_l_e_d_8h_source.html">Go to the source code of this file.</a></p>
@@ -128,7 +131,7 @@ Classes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
@@ -202,9 +205,9 @@ Macros</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a6a3feb94c38b5b5e9a3991a20bd84d4e" id="r_a6a3feb94c38b5b5e9a3991a20bd84d4e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a6a3feb94c38b5b5e9a3991a20bd84d4e.html#a6a3feb94c38b5b5e9a3991a20bd84d4e">fl::drawSquare</a> (void *, uint16_t, uint16_t, int, int, uint32_t, uint32_t)</td></tr>
+<tr class="memitem:a6a3feb94c38b5b5e9a3991a20bd84d4e" id="r_a6a3feb94c38b5b5e9a3991a20bd84d4e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a6a3feb94c38b5b5e9a3991a20bd84d4e.html#a6a3feb94c38b5b5e9a3991a20bd84d4e">fl::drawSquare</a> (void *, <a class="el" href="../../d4/d36/namespacefl_a2a7ff6d5cd82db7da838399136039759.html#a2a7ff6d5cd82db7da838399136039759">uint16_t</a>, <a class="el" href="../../d4/d36/namespacefl_a2a7ff6d5cd82db7da838399136039759.html#a2a7ff6d5cd82db7da838399136039759">uint16_t</a>, int, int, <a class="el" href="../../d4/d36/namespacefl_a2384f46fb563f37f7ed4a2173d93e9e9.html#a2384f46fb563f37f7ed4a2173d93e9e9">uint32_t</a>, <a class="el" href="../../d4/d36/namespacefl_a2384f46fb563f37f7ed4a2173d93e9e9.html#a2384f46fb563f37f7ed4a2173d93e9e9">uint32_t</a>)</td></tr>
 <tr class="separator:a6a3feb94c38b5b5e9a3991a20bd84d4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac50649d797d5b67ccd6d6c70a0ee5ab6" id="r_ac50649d797d5b67ccd6d6c70a0ee5ab6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ac50649d797d5b67ccd6d6c70a0ee5ab6.html#ac50649d797d5b67ccd6d6c70a0ee5ab6">fl::fadeToColorBy</a> (void *, uint16_t, uint32_t, uint8_t)</td></tr>
+<tr class="memitem:ac50649d797d5b67ccd6d6c70a0ee5ab6" id="r_ac50649d797d5b67ccd6d6c70a0ee5ab6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ac50649d797d5b67ccd6d6c70a0ee5ab6.html#ac50649d797d5b67ccd6d6c70a0ee5ab6">fl::fadeToColorBy</a> (void *, <a class="el" href="../../d4/d36/namespacefl_a2a7ff6d5cd82db7da838399136039759.html#a2a7ff6d5cd82db7da838399136039759">uint16_t</a>, <a class="el" href="../../d4/d36/namespacefl_a2384f46fb563f37f7ed4a2173d93e9e9.html#a2384f46fb563f37f7ed4a2173d93e9e9">uint32_t</a>, <a class="el" href="../../d4/d36/namespacefl_afd9f334550c5839ec8307748aba15027.html#afd9f334550c5839ec8307748aba15027">uint8_t</a>)</td></tr>
 <tr class="separator:ac50649d797d5b67ccd6d6c70a0ee5ab6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
@@ -214,7 +217,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_c30bdf76ce759a4eae8387be42921388.html">third_party</a></li><li class="navelem"><a class="el" href="../../dir_c31c3e3593f8f0c28b47badf4d12d70e.html">object_fled</a></li><li class="navelem"><a class="el" href="../../dir_3fb338c90e52612a3293a7dbe09f30ff.html">src</a></li><li class="navelem"><a class="el" href="../../de/d7a/_object_f_l_e_d_8h.html">ObjectFLED.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

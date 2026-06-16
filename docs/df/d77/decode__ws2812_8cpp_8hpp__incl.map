@@ -1,0 +1,29 @@
+<map id="fl/channels/rx/decode_ws2812.cpp.hpp" name="fl/channels/rx/decode_ws2812.cpp.hpp">
+<area shape="rect" id="Node000001" title="Shared 4&#45;phase WS2812 edge&#45;pair &#45;&gt; byte decoder (definition)." alt="" coords="509,5,669,45"/>
+<area shape="rect" id="Node000002" href="$dd/d09/decode__ws2812_8h.html" title="Shared 4&#45;phase WS2812 edge&#45;pair &#45;&gt; byte decoder (declaration)." alt="" coords="509,93,669,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="591,46,591,79,586,79,586,46"/>
+<area shape="rect" id="Node000003" href="$d6/d73/rx_8h.html" title="Common RX interfaces and shared types." alt="" coords="385,181,507,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="556,136,480,177,478,172,553,131"/>
+<area shape="rect" id="Node000004" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="5,255,108,280"/>
+<area shape="poly" id="edge17_Node000002_Node000004" title=" " alt="" coords="524,136,111,253,109,248,522,131"/>
+<area shape="rect" id="Node000012" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="436,328,563,353"/>
+<area shape="poly" id="edge14_Node000002_Node000012" title=" " alt="" coords="641,131,699,158,754,193,774,213,786,235,788,258,776,282,763,293,744,303,694,318,635,329,577,336,576,331,634,323,692,313,742,298,760,288,772,278,783,257,781,236,770,216,750,197,696,162,639,136"/>
+<area shape="rect" id="Node000021" href="$de/d93/result_8h.html" title="result&lt;T, E&gt; type alias for fl::expected (Rust&#45;style naming)" alt="" coords="537,255,640,280"/>
+<area shape="poly" id="edge15_Node000002_Node000021" title=" " alt="" coords="591,134,591,241,586,241,586,134"/>
+<area shape="rect" id="Node000037" href="$d4/d7a/span_8h.html" title=" " alt="" coords="664,255,761,280"/>
+<area shape="poly" id="edge16_Node000002_Node000037" title=" " alt="" coords="606,132,697,242,692,246,602,136"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="386,209,122,257,121,252,385,204"/>
+<area shape="rect" id="Node000006" href="$dc/d62/optional_8h.html" title=" " alt="" coords="343,255,461,280"/>
+<area shape="poly" id="edge4_Node000003_Node000006" title=" " alt="" coords="441,208,419,244,414,242,436,206"/>
+<area shape="poly" id="edge8_Node000003_Node000012" title=" " alt="" coords="454,206,475,254,495,314,490,315,470,256,449,208"/>
+<area shape="poly" id="edge6_Node000003_Node000021" title=" " alt="" coords="470,204,554,246,552,251,468,209"/>
+<area shape="rect" id="Node000008" href="$d7/d84/cstddef_8h.html" title=" " alt="" coords="143,328,256,353"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="385,202,325,209,262,220,207,236,187,245,173,256,168,270,169,285,184,316,179,318,164,286,162,269,169,253,184,241,205,231,260,215,324,204,385,197"/>
+<area shape="rect" id="Node000029" href="$df/d6a/shared__ptr_8h.html" title=" " alt="" coords="184,255,319,280"/>
+<area shape="poly" id="edge9_Node000003_Node000029" title=" " alt="" coords="416,209,297,252,295,247,414,204"/>
+<area shape="poly" id="edge12_Node000003_Node000037" title=" " alt="" coords="490,204,657,248,655,254,488,209"/>
+<area shape="poly" id="edge5_Node000006_Node000012" title=" " alt="" coords="419,278,474,317,471,322,416,282"/>
+<area shape="poly" id="edge11_Node000029_Node000012" title=" " alt="" coords="292,277,447,322,445,327,290,283"/>
+<area shape="poly" id="edge10_Node000029_Node000008" title=" " alt="" coords="245,282,218,318,214,315,241,279"/>
+<area shape="poly" id="edge13_Node000037_Node000012" title=" " alt="" coords="679,283,548,326,546,321,678,277"/>
+</map>

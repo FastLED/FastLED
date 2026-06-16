@@ -1,0 +1,28 @@
+<map id="fl::noiseRingHSV8" name="fl::noiseRingHSV8">
+<area shape="rect" id="Node000001" title="Generate HSV8 (8&#45;bit) noise for a ring pattern." alt="" coords="5,165,143,191"/>
+<area shape="rect" id="Node000002" href="$d6/d5f/group___ring_noise_ga424c29c488273a2f0efb1bb80bb0911a.html#ga424c29c488273a2f0efb1bb80bb0911a" title="Ring noise functions &#45; sample three z&#45;slices for independent component evolution." alt="" coords="191,129,336,155"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="141,163,182,155,183,160,142,168"/>
+<area shape="rect" id="Node000017" href="$d4/d36/namespacefl_a2bccb5decc8613e4b6e232e0a881578f.html#a2bccb5decc8613e4b6e232e0a881578f" title="Alias for millis64() &#45; returns 64&#45;bit millisecond time." alt="" coords="437,227,505,252"/>
+<area shape="poly" id="edge14_Node000001_Node000017" title=" " alt="" coords="143,186,424,230,423,235,142,191"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ad87db990a26723fa560bc364734ea6cc.html#ad87db990a26723fa560bc364734ea6cc" title=" " alt="" coords="439,5,504,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="274,127,319,85,350,60,383,40,424,24,426,29,385,44,353,65,323,89,278,131"/>
+<area shape="rect" id="Node000008" href="$d8/df9/group___noise_generation_gaa452e57f154ab8d6d692375dba1ef5cb.html#gaa452e57f154ab8d6d692375dba1ef5cb" title=" " alt="" coords="433,55,510,80"/>
+<area shape="poly" id="edge4_Node000002_Node000008" title=" " alt="" coords="291,127,383,89,419,78,420,83,385,94,293,132"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a16b959c0a6717214a91e88287d5aab08.html#a16b959c0a6717214a91e88287d5aab08" title="Rescale raw inoise16() output to full 16&#45;bit range [0, 65535] Curries in the global NOISE16_EXTENT_MI..." alt="" coords="384,104,559,129"/>
+<area shape="poly" id="edge6_Node000002_Node000011" title=" " alt="" coords="336,130,370,126,371,132,337,136"/>
+<area shape="rect" id="Node000015" href="$d4/d36/namespacefl_a4ba2744fe96375793e6f7a98b188d343.html#a4ba2744fe96375793e6f7a98b188d343" title=" " alt="" coords="440,153,503,179"/>
+<area shape="poly" id="edge8_Node000002_Node000015" title=" " alt="" coords="337,148,427,158,426,164,336,153"/>
+<area shape="poly" id="edge10_Node000002_Node000017" title=" " alt="" coords="293,152,432,218,430,223,290,157"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a82dc97b9808ee5c39eb57f649d20a2fd.html#a82dc97b9808ee5c39eb57f649d20a2fd" title=" " alt="" coords="628,5,760,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="504,15,614,15,614,21,504,21"/>
+<area shape="rect" id="Node000009" href="$d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59" title=" " alt="" coords="640,55,748,80"/>
+<area shape="poly" id="edge5_Node000008_Node000009" title=" " alt="" coords="510,65,626,65,626,70,510,70"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_ab29e8b6f887f0b299a405c90c001bca6.html#ab29e8b6f887f0b299a405c90c001bca6" title=" " alt="" coords="607,104,781,129"/>
+<area shape="poly" id="edge7_Node000011_Node000012" title=" " alt="" coords="559,114,593,114,593,119,559,119"/>
+<area shape="rect" id="Node000016" href="$d4/d36/namespacefl_abb4917bf7e0fc28049964497cb88305f.html#abb4917bf7e0fc28049964497cb88305f" title=" " alt="" coords="629,153,759,179"/>
+<area shape="poly" id="edge9_Node000015_Node000016" title=" " alt="" coords="503,163,616,163,616,169,503,169"/>
+<area shape="poly" id="edge13_Node000017_Node000017" title=" " alt="" coords="437,228,430,218,434,208,448,202,471,200,500,204,512,213,508,217,498,209,471,205,449,207,437,212,435,218,441,225"/>
+<area shape="rect" id="Node000018" href="$d4/d36/namespacefl_ac8ee0e5ecac16a6ee42def0436a43663.html#ac8ee0e5ecac16a6ee42def0436a43663" title="64&#45;bit millisecond timer &#45; returns milliseconds since system startup without wraparound" alt="" coords="649,227,739,252"/>
+<area shape="poly" id="edge11_Node000017_Node000018" title=" " alt="" coords="506,237,635,237,635,242,506,242"/>
+<area shape="poly" id="edge12_Node000018_Node000018" title=" " alt="" coords="658,228,650,218,654,208,669,202,694,200,725,204,737,213,734,217,723,209,694,205,670,207,658,212,655,218,662,225"/>
+</map>

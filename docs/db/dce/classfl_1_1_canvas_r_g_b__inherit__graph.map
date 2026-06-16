@@ -1,0 +1,7 @@
+<map id="fl::CanvasRGB" name="fl::CanvasRGB">
+<area shape="rect" id="Node000001" title="Convenience alias for CRGB canvas — use fl::CanvasRGB for no&#45;template syntax." alt="" coords="27,168,142,193"/>
+<area shape="rect" id="Node000002" href="$d1/d0e/classfl_1_1_canvas.html" title=" " alt="" coords="8,93,161,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="87,133,87,168,82,168,82,133"/>
+<area shape="rect" id="Node000003" href="$d1/d0e/classfl_1_1_canvas.html" title="Generic canvas for any pixel type (e.g." alt="" coords="5,5,164,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="87,45,87,93,82,93,82,45"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="fl::expected::success" name="fl::expected::success">
+<area shape="rect" id="Node000001" title="Create successful result." alt="" coords="5,55,163,80"/>
+<area shape="rect" id="Node000002" href="$d7/d93/classfl_1_1expected_a519c280d81d3683cfbfb758ed0198277.html#a519c280d81d3683cfbfb758ed0198277" title="Default constructor (creates error state)" alt="" coords="211,5,377,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="138,52,225,31,227,36,139,57"/>
+<area shape="rect" id="Node000003" href="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a" title=" " alt="" coords="249,55,339,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="163,65,234,65,234,70,163,70"/>
+<area shape="rect" id="Node000004" href="$d7/d93/classfl_1_1expected_a85abd0dcb2c53b60f4ecb00c7cc31c6e.html#a85abd0dcb2c53b60f4ecb00c7cc31c6e" title="Get value (only valid if ok() == true)" alt="" coords="223,104,365,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="139,77,227,98,225,103,138,83"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_ad2bd3fbfa62b8cb135f8c67ce6bfeefe.html#ad2bd3fbfa62b8cb135f8c67ce6bfeefe" title=" " alt="" coords="425,104,484,129"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="366,114,412,114,412,119,366,119"/>
+</map>

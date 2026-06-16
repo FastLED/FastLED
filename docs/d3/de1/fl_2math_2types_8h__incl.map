@@ -1,0 +1,10 @@
+<map id="fl/math/types.h" name="fl/math/types.h">
+<area shape="rect" id="Node000001" title="Defines fractional types used for lib8tion functions." alt="" coords="5,5,125,31"/>
+<area shape="rect" id="Node000002" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="14,152,117,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="64,31,56,64,55,104,61,138,56,139,49,104,51,63,59,30"/>
+<area shape="rect" id="Node000004" href="$d3/d7e/int_8h.html" title=" " alt="" coords="64,79,147,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="74,30,94,65,90,68,70,32"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="6,225,125,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="68,178,68,212,63,212,63,178"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="101,106,81,141,76,139,96,103"/>
+</map>

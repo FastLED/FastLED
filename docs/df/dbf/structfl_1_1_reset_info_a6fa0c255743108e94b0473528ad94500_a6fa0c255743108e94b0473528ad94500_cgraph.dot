@@ -1,0 +1,26 @@
+digraph "fl::ResetInfo::describe"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::ResetInfo::describe",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Write a single-line human-readable description into the caller's buffer."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::ResetInfo::causeName",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/dbf/structfl_1_1_reset_info_a20ca4fcd4004173351cf745b2e485086.html#a20ca4fcd4004173351cf745b2e485086",tooltip="Cause name (zero-cost, static string_view)."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::resetCauseName",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aaea3f6340440c4987e8c0f58bd4b0c10.html#aaea3f6340440c4987e8c0f58bd4b0c10",tooltip="Return a static-lifetime name for c — zero-cost, no allocation."];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::string_view::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/ddb/classfl_1_1string__view_a62053f60d43376477b7857084f50b3c3.html#a62053f60d43376477b7857084f50b3c3",tooltip=" "];
+  Node1 -> Node5 [id="edge4_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::ResetInfo::subcauseName",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/dbf/structfl_1_1_reset_info_a3e1d509f5f76c503d7c66f18a1e9f85b.html#a3e1d509f5f76c503d7c66f18a1e9f85b",tooltip="Platform-specific subcause name (zero-cost, static string_view)."];
+  Node1 -> Node6 [id="edge5_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::platforms::writeChar",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d52/namespacefl_1_1platforms_ad20e296d63b1caeff2411184fac4a386.html#ad20e296d63b1caeff2411184fac4a386",tooltip=" "];
+  Node1 -> Node7 [id="edge6_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::platforms::writeHex",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d52/namespacefl_1_1platforms_aa5d078387c6a4b12de6855b88efa546d.html#aa5d078387c6a4b12de6855b88efa546d",tooltip=" "];
+  Node1 -> Node8 [id="edge7_Node000001_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::platforms::writeNulIfRoom",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d52/namespacefl_1_1platforms_a36d9f55e28dc0a959619cf2e13f1ae71.html#a36d9f55e28dc0a959619cf2e13f1ae71",tooltip=" "];
+  Node1 -> Node9 [id="edge8_Node000001_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::platforms::writeView",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d52/namespacefl_1_1platforms_a9e23b7af1062b830c72c14c56841a88f.html#a9e23b7af1062b830c72c14c56841a88f",tooltip=" "];
+}

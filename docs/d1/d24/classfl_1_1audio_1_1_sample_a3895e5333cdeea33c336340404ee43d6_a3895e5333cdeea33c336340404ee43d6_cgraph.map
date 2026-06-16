@@ -1,0 +1,6 @@
+<map id="fl::audio::Sample::applyGain" name="fl::audio::Sample::applyGain">
+<area shape="rect" id="Node000001" title="Apply a digital gain multiplier to all PCM samples in&#45;place." alt="" coords="5,29,144,69"/>
+<area shape="rect" id="Node000002" href="$d1/d24/classfl_1_1audio_1_1_sample_a2c4f85477b6762bbc06c23ffea8a6a6f.html#a2c4f85477b6762bbc06c23ffea8a6a6f" title=" " alt="" coords="192,29,331,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="145,47,178,47,178,52,145,52"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="226,30,224,20,230,11,242,5,261,3,283,6,295,13,293,17,282,11,261,8,244,10,233,15,229,21,231,28"/>
+</map>

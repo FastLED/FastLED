@@ -1,0 +1,10 @@
+<map id="fl::SerializerVisitor" name="fl::SerializerVisitor">
+<area shape="rect" id="Node000001" title=" " alt="" coords="13,269,154,295"/>
+<area shape="rect" id="Node000002" href="$dc/dfe/classfl_1_1deque.html" title=" " alt="" coords="15,181,151,207"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="86,221,86,269,81,269,81,221"/>
+<area shape="rect" id="Node000003" href="$db/d13/classfl_1_1memory__resource.html" title="Polymorphic memory resource base class (PMR&#45;style)." alt="" coords="5,5,161,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="82,45,79,80,78,119,84,181,79,181,73,119,73,79,77,44"/>
+<area shape="rect" id="Node000004" href="$dc/dfe/classfl_1_1deque.html" title=" " alt="" coords="164,93,280,119"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="115,36,205,91,202,95,112,40"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="193,128,104,183,101,179,190,124"/>
+</map>

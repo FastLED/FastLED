@@ -1,0 +1,8 @@
+<map id="fl::audio::BeatDetectors::BeatDetectors" name="fl::audio::BeatDetectors::BeatDetectors">
+<area shape="rect" id="Node000001" title=" " alt="" coords="451,29,625,69"/>
+<area shape="rect" id="Node000002" href="$d7/dae/structfl_1_1audio_1_1_beat_detectors_abe42107745e95aa186819ad310d10b56.html#abe42107745e95aa186819ad310d10b56" title=" " alt="" coords="228,29,403,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="437,52,403,52,403,47,437,47"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="353,18,340,11,315,8,294,10,281,15,277,21,279,28,274,30,271,20,278,10,293,5,315,3,341,6,355,13"/>
+<area shape="rect" id="Node000003" href="$d7/dae/structfl_1_1audio_1_1_beat_detectors_a17e54dddaaa0d658a3d9a92166cbef96.html#a17e54dddaaa0d658a3d9a92166cbef96" title=" " alt="" coords="5,29,180,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="214,52,180,52,180,47,214,47"/>
+</map>

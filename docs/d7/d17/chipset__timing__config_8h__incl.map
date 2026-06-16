@@ -1,0 +1,18 @@
+<map id="fl/chipsets/chipset_timing_config.h" name="fl/chipsets/chipset_timing_config.h">
+<area shape="rect" id="Node000001" title="Runtime chipset timing configuration for clockless LED drivers." alt="" coords="68,5,207,45"/>
+<area shape="rect" id="Node000002" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="48,255,150,280"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="114,47,59,97,33,130,14,168,8,187,13,205,33,229,58,246,55,250,29,233,9,208,3,187,9,166,29,128,56,94,110,43"/>
+<area shape="rect" id="Node000004" href="$d0/d3f/led__timing_8h.html" title="Centralized LED chipset timing definitions with nanosecond precision." alt="" coords="114,93,287,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="155,44,185,81,180,84,151,47"/>
+<area shape="rect" id="Node000005" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="200,255,326,280"/>
+<area shape="poly" id="edge10_Node000001_Node000005" title=" " alt="" coords="208,35,259,55,283,71,301,92,310,111,314,131,311,173,297,212,280,244,276,242,292,210,305,172,309,132,305,113,297,95,279,75,257,59,206,40"/>
+<area shape="rect" id="Node000006" href="$d5/d9f/clockless__encoder_8h.html" title="Encoding pipeline selector for clockless LED chipsets." alt="" coords="23,167,175,207"/>
+<area shape="poly" id="edge9_Node000001_Node000006" title=" " alt="" coords="127,47,114,69,104,94,100,124,99,153,94,153,94,123,99,93,109,67,122,44"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="40,328,158,353"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="102,280,102,314,96,314,96,280"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="204,119,204,160,199,185,189,208,167,233,141,250,138,246,164,229,185,205,194,183,199,159,199,119"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="210,118,234,166,259,240,254,242,229,168,205,120"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="187,121,136,160,133,156,184,117"/>
+<area shape="poly" id="edge7_Node000006_Node000002" title=" " alt="" coords="102,207,102,241,96,241,96,207"/>
+<area shape="poly" id="edge8_Node000006_Node000005" title=" " alt="" coords="140,204,228,246,226,251,137,209"/>
+</map>

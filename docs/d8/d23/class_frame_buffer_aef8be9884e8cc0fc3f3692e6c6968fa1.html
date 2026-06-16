@@ -123,16 +123,24 @@ $(function(){initNavTree('d8/d23/class_frame_buffer_aef8be9884e8cc0fc3f3692e6c69
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d3/dd6/framebuffer_8cpp_source.html#l00054">54</a> of file <a class="el" href="../../d3/dd6/framebuffer_8cpp_source.html">framebuffer.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   54</span>                          {</div>
-<div class="line"><span class="lineno">   55</span>  free(<a class="code hl_variable" href="../../dd/dc5/class_frame_buffer_base_ae13ec40235584afb9738506fa5fb89a4.html#ae13ec40235584afb9738506fa5fb89a4">color_array_</a>);</div>
-<div class="line"><span class="lineno">   56</span>  <a class="code hl_variable" href="../../dd/dc5/class_frame_buffer_base_ae13ec40235584afb9738506fa5fb89a4.html#ae13ec40235584afb9738506fa5fb89a4">color_array_</a> = NULL;</div>
-<div class="line"><span class="lineno">   57</span>  <a class="code hl_variable" href="../../dd/dc5/class_frame_buffer_base_ae5b3fc4ab184c595721cf6e488f4f417.html#ae5b3fc4ab184c595721cf6e488f4f417">n_color_array_</a> = 0;</div>
-<div class="line"><span class="lineno">   58</span>}</div>
-<div class="ttc" id="aclass_frame_buffer_base_ae13ec40235584afb9738506fa5fb89a4_html_ae13ec40235584afb9738506fa5fb89a4"><div class="ttname"><a href="../../dd/dc5/class_frame_buffer_base_ae13ec40235584afb9738506fa5fb89a4.html#ae13ec40235584afb9738506fa5fb89a4">FrameBufferBase::color_array_</a></div><div class="ttdeci">Color3i * color_array_</div><div class="ttdef"><b>Definition</b> <a href="../../d4/dd2/framebuffer_8h_source.html#l00025">framebuffer.h:25</a></div></div>
-<div class="ttc" id="aclass_frame_buffer_base_ae5b3fc4ab184c595721cf6e488f4f417_html_ae5b3fc4ab184c595721cf6e488f4f417"><div class="ttname"><a href="../../dd/dc5/class_frame_buffer_base_ae5b3fc4ab184c595721cf6e488f4f417.html#ae5b3fc4ab184c595721cf6e488f4f417">FrameBufferBase::n_color_array_</a></div><div class="ttdeci">int n_color_array_</div><div class="ttdef"><b>Definition</b> <a href="../../d4/dd2/framebuffer_8h_source.html#l00026">framebuffer.h:26</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d3/dd6/framebuffer_8cpp_source.html#l00055">55</a> of file <a class="el" href="../../d3/dd6/framebuffer_8cpp_source.html">framebuffer.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   55</span>                          {</div>
+<div class="line"><span class="lineno">   56</span>  <a class="code hl_function" href="../../d4/d36/namespacefl_a8d74e9eb1fcd03c2d38cf1c23fb33b82.html#a8d74e9eb1fcd03c2d38cf1c23fb33b82">fl::free</a>(<a class="code hl_variable" href="../../dd/dc5/class_frame_buffer_base_a254a1d7a059f4ac9a103fafa8e235ed4.html#a254a1d7a059f4ac9a103fafa8e235ed4">mColorArray</a>);</div>
+<div class="line"><span class="lineno">   57</span>  <a class="code hl_variable" href="../../dd/dc5/class_frame_buffer_base_a254a1d7a059f4ac9a103fafa8e235ed4.html#a254a1d7a059f4ac9a103fafa8e235ed4">mColorArray</a> = <span class="keyword">nullptr</span>;</div>
+<div class="line"><span class="lineno">   58</span>  <a class="code hl_variable" href="../../dd/dc5/class_frame_buffer_base_ae270f2f5e3fb7f2e0bf7b4221cdfeb74.html#ae270f2f5e3fb7f2e0bf7b4221cdfeb74">mNColorArray</a> = 0;</div>
+<div class="line"><span class="lineno">   59</span>}</div>
+<div class="ttc" id="aclass_frame_buffer_base_a254a1d7a059f4ac9a103fafa8e235ed4_html_a254a1d7a059f4ac9a103fafa8e235ed4"><div class="ttname"><a href="../../dd/dc5/class_frame_buffer_base_a254a1d7a059f4ac9a103fafa8e235ed4.html#a254a1d7a059f4ac9a103fafa8e235ed4">FrameBufferBase::mColorArray</a></div><div class="ttdeci">Color3i * mColorArray</div><div class="ttdef"><b>Definition</b> <a href="../../d4/dd2/framebuffer_8h_source.html#l00025">framebuffer.h:25</a></div></div>
+<div class="ttc" id="aclass_frame_buffer_base_ae270f2f5e3fb7f2e0bf7b4221cdfeb74_html_ae270f2f5e3fb7f2e0bf7b4221cdfeb74"><div class="ttname"><a href="../../dd/dc5/class_frame_buffer_base_ae270f2f5e3fb7f2e0bf7b4221cdfeb74.html#ae270f2f5e3fb7f2e0bf7b4221cdfeb74">FrameBufferBase::mNColorArray</a></div><div class="ttdeci">int mNColorArray</div><div class="ttdef"><b>Definition</b> <a href="../../d4/dd2/framebuffer_8h_source.html#l00026">framebuffer.h:26</a></div></div>
+<div class="ttc" id="anamespacefl_a8d74e9eb1fcd03c2d38cf1c23fb33b82_html_a8d74e9eb1fcd03c2d38cf1c23fb33b82"><div class="ttname"><a href="../../d4/d36/namespacefl_a8d74e9eb1fcd03c2d38cf1c23fb33b82.html#a8d74e9eb1fcd03c2d38cf1c23fb33b82">fl::free</a></div><div class="ttdeci">void free(void *ptr)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d1c/malloc_8cpp_8hpp_source.html#l00013">malloc.cpp.hpp:13</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/dd2/framebuffer_8h_source.html#l00025">FrameBufferBase::color_array_</a>, and <a class="el" href="../../d4/dd2/framebuffer_8h_source.html#l00026">FrameBufferBase::n_color_array_</a>.</p>
+<p class="reference">References <a class="el" href="../../d5/d1c/malloc_8cpp_8hpp_source.html#l00013">fl::free()</a>, <a class="el" href="../../d4/dd2/framebuffer_8h_source.html#l00025">FrameBufferBase::mColorArray</a>, and <a class="el" href="../../d4/dd2/framebuffer_8h_source.html#l00026">FrameBufferBase::mNColorArray</a>.</p>
+<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d8/d23/class_frame_buffer_aef8be9884e8cc0fc3f3692e6c6968fa1_aef8be9884e8cc0fc3f3692e6c6968fa1_cgraph.svg" width="326" height="60"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
 
 </div>
 </div>
@@ -143,7 +151,7 @@ $(function(){initNavTree('d8/d23/class_frame_buffer_aef8be9884e8cc0fc3f3692e6c69
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d8/d23/class_frame_buffer.html">FrameBuffer</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

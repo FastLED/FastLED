@@ -1,0 +1,8 @@
+<map id="PixelController::dither" name="PixelController::dither">
+<area shape="rect" id="Node000001" title="Add dither offset to pixel value (BEFORE scaling)." alt="" coords="5,29,168,55"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_ae44229e20fb4ba4473b057dcda87122e.html#ae44229e20fb4ba4473b057dcda87122e" title="Copy constructor." alt="" coords="216,29,436,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,39,202,39,202,45,168,45"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="288,31,280,21,284,11,300,5,326,3,359,7,372,16,368,20,357,11,326,8,301,10,287,15,285,20,292,27"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_af3310e3a869dfeafae981291b76b572d.html#af3310e3a869dfeafae981291b76b572d" title=" " alt="" coords="484,29,640,55"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="436,39,470,39,470,45,436,45"/>
+</map>

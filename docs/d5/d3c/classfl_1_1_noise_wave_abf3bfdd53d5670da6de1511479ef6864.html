@@ -112,7 +112,7 @@ $(function(){initNavTree('d5/d3c/classfl_1_1_noise_wave_abf3bfdd53d5670da6de1511
         <tr>
           <td class="memname">void fl::NoiseWave::draw </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="../../da/d5d/classfl_1_1_fx_a932d6e78e1afa4bb40cacefe1f01c97a.html#a932d6e78e1afa4bb40cacefe1f01c97a">DrawContext</a></td>          <td class="paramname"><span class="paramname"><em>context</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="../../df/dc7/structfl_1_1_draw_context.html">DrawContext</a></td>          <td class="paramname"><span class="paramname"><em>context</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -124,37 +124,46 @@ $(function(){initNavTree('d5/d3c/classfl_1_1_noise_wave_abf3bfdd53d5670da6de1511
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">now</td><td>The current time in milliseconds. <a class="el" href="../../da/d5d/classfl_1_1_fx.html">Fx</a> writers are encouraged to use this instead of millis() directly as this will more deterministic behavior. </td></tr>
+    <tr><td class="paramname">now</td><td>The current time in milliseconds. <a class="el" href="../../da/d5d/classfl_1_1_fx.html">Fx</a> writers are encouraged to use this instead of <a class="el" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer - returns milliseconds since system startup.">millis()</a> directly as this will more deterministic behavior. </td></tr>
   </table>
   </dd>
 </dl>
 
 <p>Implements <a class="el" href="../../da/d5d/classfl_1_1_fx_acd7594f99b0d75c1a14fce90f0219fd7.html#acd7594f99b0d75c1a14fce90f0219fd7">fl::Fx</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d2c/noisewave_8h_source.html#l00018">18</a> of file <a class="el" href="../../d9/d2c/noisewave_8h_source.html">noisewave.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   18</span>                                            {</div>
-<div class="line"><span class="lineno">   19</span>        <span class="keywordflow">if</span> (context.leds == <span class="keyword">nullptr</span> || <a class="code hl_variable" href="../../da/d5d/classfl_1_1_fx_a1535a3408666a39305db6532e4a57252.html#a1535a3408666a39305db6532e4a57252">mNumLeds</a> == 0) {</div>
-<div class="line"><span class="lineno">   20</span>            <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">   21</span>        }</div>
-<div class="line"><span class="lineno">   22</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d5/d3c/classfl_1_1_noise_wave_a033ed6bec961c2131b2b83fc2a20e771.html#a033ed6bec961c2131b2b83fc2a20e771">start_time</a> == 0) {</div>
-<div class="line"><span class="lineno">   23</span>            <a class="code hl_variable" href="../../d5/d3c/classfl_1_1_noise_wave_a033ed6bec961c2131b2b83fc2a20e771.html#a033ed6bec961c2131b2b83fc2a20e771">start_time</a> = context.now;</div>
-<div class="line"><span class="lineno">   24</span>        }</div>
+<p class="definition">Definition at line <a class="el" href="../../d9/d2c/noisewave_8h_source.html#l00016">16</a> of file <a class="el" href="../../d9/d2c/noisewave_8h_source.html">noisewave.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   16</span>                                            {</div>
+<div class="line"><span class="lineno">   17</span>        <span class="keywordflow">if</span> (context.leds.empty() || <a class="code hl_variable" href="../../da/d5d/classfl_1_1_fx_a6835ef50b9ce8c56d889a56210a89749.html#a6835ef50b9ce8c56d889a56210a89749">mNumLeds</a> == 0) {</div>
+<div class="line"><span class="lineno">   18</span>            <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">   19</span>        }</div>
+<div class="line"><span class="lineno">   20</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d5/d3c/classfl_1_1_noise_wave_a033ed6bec961c2131b2b83fc2a20e771.html#a033ed6bec961c2131b2b83fc2a20e771">start_time</a> == 0) {</div>
+<div class="line"><span class="lineno">   21</span>            <a class="code hl_variable" href="../../d5/d3c/classfl_1_1_noise_wave_a033ed6bec961c2131b2b83fc2a20e771.html#a033ed6bec961c2131b2b83fc2a20e771">start_time</a> = context.now;</div>
+<div class="line"><span class="lineno">   22</span>        }</div>
+<div class="line"><span class="lineno">   23</span> </div>
+<div class="line"><span class="lineno">   24</span>        <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> time_now = <a class="code hl_function" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a>() - <a class="code hl_variable" href="../../d5/d3c/classfl_1_1_noise_wave_a033ed6bec961c2131b2b83fc2a20e771.html#a033ed6bec961c2131b2b83fc2a20e771">start_time</a>;</div>
 <div class="line"><span class="lineno">   25</span> </div>
-<div class="line"><span class="lineno">   26</span>        <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> time_now = millis() - <a class="code hl_variable" href="../../d5/d3c/classfl_1_1_noise_wave_a033ed6bec961c2131b2b83fc2a20e771.html#a033ed6bec961c2131b2b83fc2a20e771">start_time</a>;</div>
-<div class="line"><span class="lineno">   27</span> </div>
-<div class="line"><span class="lineno">   28</span>        <span class="keywordflow">for</span> (int32_t i = 0; i &lt; <a class="code hl_variable" href="../../da/d5d/classfl_1_1_fx_a1535a3408666a39305db6532e4a57252.html#a1535a3408666a39305db6532e4a57252">mNumLeds</a>; ++i) {</div>
-<div class="line"><span class="lineno">   29</span>            <span class="keywordtype">int</span> r = <a class="code hl_variable" href="../../d5/d3c/classfl_1_1_noise_wave_aa939e8325eb34db0c809399f8c9c9670.html#aa939e8325eb34db0c809399f8c9c9670">noiseGeneratorRed</a>.LedValue(i, time_now);</div>
-<div class="line"><span class="lineno">   30</span>            <span class="keywordtype">int</span> b = <a class="code hl_variable" href="../../d5/d3c/classfl_1_1_noise_wave_a50e38dcae0bd7e39ae3709641a8ab0c7.html#a50e38dcae0bd7e39ae3709641a8ab0c7">noiseGeneratorBlue</a>.LedValue(i, time_now + 100000) &gt;&gt; 1;</div>
-<div class="line"><span class="lineno">   31</span>            <span class="keywordtype">int</span> g = 0;</div>
-<div class="line"><span class="lineno">   32</span>            context.leds[i] = CRGB(r, g, b);</div>
-<div class="line"><span class="lineno">   33</span>        }</div>
-<div class="line"><span class="lineno">   34</span>    }</div>
-<div class="ttc" id="aclassfl_1_1_fx_a1535a3408666a39305db6532e4a57252_html_a1535a3408666a39305db6532e4a57252"><div class="ttname"><a href="../../da/d5d/classfl_1_1_fx_a1535a3408666a39305db6532e4a57252.html#a1535a3408666a39305db6532e4a57252">fl::Fx::mNumLeds</a></div><div class="ttdeci">uint16_t mNumLeds</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d0c/fx_8h_source.html#l00053">fx.h:53</a></div></div>
-<div class="ttc" id="aclassfl_1_1_noise_wave_a033ed6bec961c2131b2b83fc2a20e771_html_a033ed6bec961c2131b2b83fc2a20e771"><div class="ttname"><a href="../../d5/d3c/classfl_1_1_noise_wave_a033ed6bec961c2131b2b83fc2a20e771.html#a033ed6bec961c2131b2b83fc2a20e771">fl::NoiseWave::start_time</a></div><div class="ttdeci">fl::u32 start_time</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d2c/noisewave_8h_source.html#l00041">noisewave.h:41</a></div></div>
-<div class="ttc" id="aclassfl_1_1_noise_wave_a50e38dcae0bd7e39ae3709641a8ab0c7_html_a50e38dcae0bd7e39ae3709641a8ab0c7"><div class="ttname"><a href="../../d5/d3c/classfl_1_1_noise_wave_a50e38dcae0bd7e39ae3709641a8ab0c7.html#a50e38dcae0bd7e39ae3709641a8ab0c7">fl::NoiseWave::noiseGeneratorBlue</a></div><div class="ttdeci">NoiseGenerator noiseGeneratorBlue</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d2c/noisewave_8h_source.html#l00040">noisewave.h:40</a></div></div>
-<div class="ttc" id="aclassfl_1_1_noise_wave_aa939e8325eb34db0c809399f8c9c9670_html_aa939e8325eb34db0c809399f8c9c9670"><div class="ttname"><a href="../../d5/d3c/classfl_1_1_noise_wave_aa939e8325eb34db0c809399f8c9c9670.html#aa939e8325eb34db0c809399f8c9c9670">fl::NoiseWave::noiseGeneratorRed</a></div><div class="ttdeci">NoiseGenerator noiseGeneratorRed</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d2c/noisewave_8h_source.html#l00039">noisewave.h:39</a></div></div>
+<div class="line"><span class="lineno">   26</span>        <span class="keywordflow">for</span> (i32 i = 0; i &lt; <a class="code hl_variable" href="../../da/d5d/classfl_1_1_fx_a6835ef50b9ce8c56d889a56210a89749.html#a6835ef50b9ce8c56d889a56210a89749">mNumLeds</a>; ++i) {</div>
+<div class="line"><span class="lineno">   27</span>            <span class="keywordtype">int</span> r = <a class="code hl_variable" href="../../d5/d3c/classfl_1_1_noise_wave_aa939e8325eb34db0c809399f8c9c9670.html#aa939e8325eb34db0c809399f8c9c9670">noiseGeneratorRed</a>.LedValue(i, time_now);</div>
+<div class="line"><span class="lineno">   28</span>            <span class="keywordtype">int</span> b = <a class="code hl_variable" href="../../d5/d3c/classfl_1_1_noise_wave_a50e38dcae0bd7e39ae3709641a8ab0c7.html#a50e38dcae0bd7e39ae3709641a8ab0c7">noiseGeneratorBlue</a>.LedValue(i, time_now + 100000) &gt;&gt; 1;</div>
+<div class="line"><span class="lineno">   29</span>            <span class="keywordtype">int</span> g = 0;</div>
+<div class="line"><span class="lineno">   30</span>            context.leds[i] = <a class="code hl_typedef" href="../../d4/d36/namespacefl_a0d074c08905bad763e238b16d85e20e7.html#a0d074c08905bad763e238b16d85e20e7">CRGB</a>(r, g, b);</div>
+<div class="line"><span class="lineno">   31</span>        }</div>
+<div class="line"><span class="lineno">   32</span>    }</div>
+<div class="ttc" id="aclassfl_1_1_fx_a6835ef50b9ce8c56d889a56210a89749_html_a6835ef50b9ce8c56d889a56210a89749"><div class="ttname"><a href="../../da/d5d/classfl_1_1_fx_a6835ef50b9ce8c56d889a56210a89749.html#a6835ef50b9ce8c56d889a56210a89749">fl::Fx::mNumLeds</a></div><div class="ttdeci">u16 mNumLeds</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d0c/fx_8h_source.html#l00053">fx.h:53</a></div></div>
+<div class="ttc" id="aclassfl_1_1_noise_wave_a033ed6bec961c2131b2b83fc2a20e771_html_a033ed6bec961c2131b2b83fc2a20e771"><div class="ttname"><a href="../../d5/d3c/classfl_1_1_noise_wave_a033ed6bec961c2131b2b83fc2a20e771.html#a033ed6bec961c2131b2b83fc2a20e771">fl::NoiseWave::start_time</a></div><div class="ttdeci">fl::u32 start_time</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d2c/noisewave_8h_source.html#l00039">noisewave.h:39</a></div></div>
+<div class="ttc" id="aclassfl_1_1_noise_wave_a50e38dcae0bd7e39ae3709641a8ab0c7_html_a50e38dcae0bd7e39ae3709641a8ab0c7"><div class="ttname"><a href="../../d5/d3c/classfl_1_1_noise_wave_a50e38dcae0bd7e39ae3709641a8ab0c7.html#a50e38dcae0bd7e39ae3709641a8ab0c7">fl::NoiseWave::noiseGeneratorBlue</a></div><div class="ttdeci">NoiseGenerator noiseGeneratorBlue</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d2c/noisewave_8h_source.html#l00038">noisewave.h:38</a></div></div>
+<div class="ttc" id="aclassfl_1_1_noise_wave_aa939e8325eb34db0c809399f8c9c9670_html_aa939e8325eb34db0c809399f8c9c9670"><div class="ttname"><a href="../../d5/d3c/classfl_1_1_noise_wave_aa939e8325eb34db0c809399f8c9c9670.html#aa939e8325eb34db0c809399f8c9c9670">fl::NoiseWave::noiseGeneratorRed</a></div><div class="ttdeci">NoiseGenerator noiseGeneratorRed</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d2c/noisewave_8h_source.html#l00037">noisewave.h:37</a></div></div>
+<div class="ttc" id="anamespacefl_a0d074c08905bad763e238b16d85e20e7_html_a0d074c08905bad763e238b16d85e20e7"><div class="ttname"><a href="../../d4/d36/namespacefl_a0d074c08905bad763e238b16d85e20e7.html#a0d074c08905bad763e238b16d85e20e7">fl::CRGB</a></div><div class="ttdeci">fl::CRGB CRGB</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d78/video_8h_source.html#l00015">video.h:15</a></div></div>
+<div class="ttc" id="anamespacefl_a335fa6e4af7f0a011997ea0137d49b5a_html_a335fa6e4af7f0a011997ea0137d49b5a"><div class="ttname"><a href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a">fl::millis</a></div><div class="ttdeci">fl::u32 millis()</div><div class="ttdoc">Universal millisecond timer - returns milliseconds since system startup.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d18/chrono_8cpp_8hpp_source.html#l00064">chrono.cpp.hpp:64</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../db/ded/draw__context_8h_source.html#l00013">fl::_DrawContext::leds</a>, <a class="el" href="../../d2/d0c/fx_8h_source.html#l00053">fl::Fx::mNumLeds</a>, <a class="el" href="../../d9/d2c/noisewave_8h_source.html#l00040">noiseGeneratorBlue</a>, <a class="el" href="../../d9/d2c/noisewave_8h_source.html#l00039">noiseGeneratorRed</a>, <a class="el" href="../../db/ded/draw__context_8h_source.html#l00012">fl::_DrawContext::now</a>, and <a class="el" href="../../d9/d2c/noisewave_8h_source.html#l00041">start_time</a>.</p>
+<p class="reference">References <a class="el" href="../../db/ded/draw__context_8h_source.html#l00012">fl::DrawContext::leds</a>, <a class="el" href="../../db/d18/chrono_8cpp_8hpp_source.html#l00064">fl::millis()</a>, <a class="el" href="../../d2/d0c/fx_8h_source.html#l00053">fl::Fx::mNumLeds</a>, <a class="el" href="../../d9/d2c/noisewave_8h_source.html#l00038">noiseGeneratorBlue</a>, <a class="el" href="../../d9/d2c/noisewave_8h_source.html#l00037">noiseGeneratorRed</a>, <a class="el" href="../../db/ded/draw__context_8h_source.html#l00011">fl::DrawContext::now</a>, and <a class="el" href="../../d9/d2c/noisewave_8h_source.html#l00039">start_time</a>.</p>
+<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d5/d3c/classfl_1_1_noise_wave_abf3bfdd53d5670da6de1511479ef6864_abf3bfdd53d5670da6de1511479ef6864_cgraph.svg" width="284" height="60"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
 
 </div>
 </div>
@@ -165,7 +174,7 @@ $(function(){initNavTree('d5/d3c/classfl_1_1_noise_wave_abf3bfdd53d5670da6de1511
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d5/d3c/classfl_1_1_noise_wave.html">NoiseWave</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

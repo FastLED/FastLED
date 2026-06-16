@@ -1,0 +1,14 @@
+<map id="fl/net/http/stream_client.h" name="fl/net/http/stream_client.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="415,5,550,45"/>
+<area shape="rect" id="Node000002" href="$d7/d08/_rpc_bidirectional_8ino.html" title="Example demonstrating bidirectional HTTP streaming RPC (server + client in same process)" alt="" coords="5,93,272,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="403,51,236,96,235,91,401,46"/>
+<area shape="rect" id="Node000003" href="$d8/db9/_rpc_client_8ino.html" title="Example demonstrating HTTP streaming RPC client." alt="" coords="296,93,496,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="458,57,422,95,418,91,454,54"/>
+<area shape="rect" id="Node000004" href="$dd/d56/http_8h.html" title="fl::net::http — High&#45;level HTTP client and server facade" alt="" coords="521,108,618,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="511,53,560,106,556,109,507,57"/>
+<area shape="rect" id="Node000006" href="$d7/dd2/net_2rpc_8h.html" title="fl::net::rpc — RPC transport type aliases" alt="" coords="643,108,733,133"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="538,49,632,91,664,106,662,110,630,96,536,54"/>
+<area shape="rect" id="Node000005" href="$d7/d97/net_8h.html" title="Umbrella header for fl::net — high&#45;level networking facade." alt="" coords="582,196,674,221"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="587,143,622,194,618,197,583,146"/>
+<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="674,146,639,197,634,194,670,143"/>
+</map>

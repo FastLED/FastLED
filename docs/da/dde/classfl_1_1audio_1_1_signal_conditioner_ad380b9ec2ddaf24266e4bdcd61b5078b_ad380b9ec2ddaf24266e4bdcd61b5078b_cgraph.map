@@ -1,0 +1,7 @@
+<map id="fl::audio::SignalConditioner::configure" name="fl::audio::SignalConditioner::configure">
+<area shape="rect" id="Node000001" title="Configure the signal conditioner." alt="" coords="5,29,203,69"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="58,30,56,20,63,10,79,5,104,3,133,6,148,13,146,18,131,11,104,8,80,10,66,15,61,21,63,28"/>
+<area shape="rect" id="Node000002" href="$da/dde/classfl_1_1audio_1_1_signal_conditioner_ad722da4953e88a99dfe7ffa4a760e135.html#ad722da4953e88a99dfe7ffa4a760e135" title=" " alt="" coords="251,29,448,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="203,56,237,56,237,61,203,61"/>
+<area shape="poly" id="edge2_Node000002_Node000001" title=" " alt="" coords="251,43,217,43,217,38,251,38"/>
+</map>

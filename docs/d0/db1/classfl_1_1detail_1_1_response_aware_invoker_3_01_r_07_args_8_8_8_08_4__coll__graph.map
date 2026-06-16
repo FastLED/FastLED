@@ -1,0 +1,25 @@
+<map id="fl::detail::ResponseAwareInvoker&lt; R(Args...)&gt;" name="fl::detail::ResponseAwareInvoker&lt; R(Args...)&gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1373,119,1560,159"/>
+<area shape="rect" id="Node000002" href="$dc/d61/classfl_1_1detail_1_1_erased_invoker.html" title=" " alt="" coords="1027,5,1201,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1181,32,1217,41,1284,57,1350,78,1431,117,1429,122,1348,83,1283,62,1215,46,1180,37"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="1012,55,1216,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1230,94,1374,120,1373,125,1229,99"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl.html#d0/ddd/classfl_1_1function" title=" " alt="" coords="669,100,798,125"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="812,102,1011,83,1012,88,812,108"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="1045,119,1183,159"/>
+<area shape="poly" id="edge11_Node000012_Node000004" title=" " alt="" coords="812,121,823,122,940,130,1045,135,1044,140,940,136,822,127,811,126"/>
+<area shape="rect" id="Node000005" href="$de/d40/classfl_1_1json.html" title=" " alt="" coords="1081,184,1147,209"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="1160,187,1349,157,1372,153,1373,158,1350,162,1161,192"/>
+<area shape="rect" id="Node000006" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="668,177,799,217"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="812,194,1081,194,1081,199,812,199"/>
+<area shape="rect" id="Node000007" href="$dc/dec/structfl_1_1json__value.html" title=" " alt="" coords="372,132,480,157"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="494,151,644,175,668,180,667,185,644,181,493,156"/>
+<area shape="rect" id="Node000008" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="5,215,204,240"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="218,217,228,217,668,196,668,202,228,222,218,223"/>
+<area shape="rect" id="Node000011" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="353,245,499,271"/>
+<area shape="poly" id="edge9_Node000011_Node000008" title=" " alt="" coords="218,235,353,248,353,254,218,241"/>
+<area shape="poly" id="edge8_Node000006_Node000011" title=" " alt="" coords="512,249,577,241,643,227,684,214,686,219,645,233,578,246,513,254"/>
+<area shape="poly" id="edge10_Node000001_Node000012" title=" " alt="" coords="1197,137,1373,137,1373,142,1197,142"/>
+<area shape="rect" id="Node000013" href="$df/d9e/namespacefl_1_1detail.html#d6/dfa/classfl_1_1detail_1_1_response_aware_invoker" title="Invoker for response&#45;aware RPC methods." alt="" coords="1021,234,1207,274"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="1220,232,1284,216,1348,196,1391,177,1430,157,1432,162,1393,182,1350,200,1285,221,1221,237"/>
+</map>

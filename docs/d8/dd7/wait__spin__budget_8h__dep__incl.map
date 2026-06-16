@@ -1,0 +1,21 @@
+<map id="fl/channels/detail/wait_spin_budget.h" name="fl/channels/detail/wait_spin_budget.h">
+<area shape="rect" id="Node000001" title="Runtime&#45;tunable microsecond spin budget for the channel&#45;manager and driver wait loops (Phase 1 of #28..." alt="" coords="382,5,534,45"/>
+<area shape="rect" id="Node000002" href="$d7/de5/_fast_l_e_d_8cpp_8hpp.html" title=" " alt="" coords="139,101,267,126"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="390,52,238,103,236,98,388,47"/>
+<area shape="rect" id="Node000005" href="$d9/dd1/wait__spin__budget_8cpp_8hpp.html" title="Storage and accessors for the tiered&#45;wait spin budget (#2818)." alt="" coords="294,93,489,133"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="437,58,408,95,404,91,433,55"/>
+<area shape="rect" id="Node000010" href="$df/dc5/fl_2channels_2driver_8cpp_8hpp.html" title=" " alt="" coords="444,189,632,214"/>
+<area shape="poly" id="edge7_Node000001_Node000010" title=" " alt="" coords="482,56,503,92,524,145,537,188,532,189,519,147,498,95,477,58"/>
+<area shape="rect" id="Node000011" href="$d2/dd3/manager_8cpp_8hpp.html" title=" " alt="" coords="565,101,773,126"/>
+<area shape="poly" id="edge9_Node000001_Node000011" title=" " alt="" coords="518,48,642,98,640,103,516,53"/>
+<area shape="rect" id="Node000003" href="$d7/dd5/__build_8cpp_8hpp.html" title=" " alt="" coords="5,189,121,214"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="174,136,84,191,81,186,171,131"/>
+<area shape="rect" id="Node000004" href="$dd/de2/src_8cpp.html" title="Unity build: flat includes from src/ root directory." alt="" coords="145,189,261,214"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="206,140,206,188,201,188,201,140"/>
+<area shape="rect" id="Node000006" href="$dc/df7/fl_2channels_2detail_2__build_8cpp_8hpp.html" title="Unity build header for fl/channels/detail/ directory." alt="" coords="286,181,419,221"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="380,147,364,182,359,180,375,145"/>
+<area shape="rect" id="Node000007" href="$d1/d97/fl_2channels_2__build_8cpp_8hpp.html" title=" " alt="" coords="443,269,633,295"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="411,224,512,267,510,272,408,229"/>
+<area shape="poly" id="edge8_Node000010_Node000007" title=" " alt="" coords="541,228,541,269,535,269,535,228"/>
+<area shape="poly" id="edge10_Node000011_Node000007" title=" " alt="" coords="671,140,665,181,658,203,647,223,631,239,613,253,576,272,573,267,610,248,628,235,643,220,653,201,660,180,666,139"/>
+</map>

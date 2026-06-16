@@ -1,0 +1,7 @@
+<map id="fl::audio::detector::MoodAnalyzer::calculateSpectralFlux" name="fl::audio::detector::MoodAnalyzer::calculateSpectralFlux">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,23,276,63"/>
+<area shape="rect" id="Node000002" href="$d6/d86/classfl_1_1audio_1_1fft_1_1_bins_a6ffb71ea065157cab03d64006e779d0d.html#a6ffb71ea065157cab03d64006e779d0d" title=" " alt="" coords="324,5,488,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="276,28,310,24,311,30,276,33"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1" title=" " alt="" coords="375,55,437,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="276,53,361,61,360,66,276,58"/>
+</map>

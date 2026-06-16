@@ -1,0 +1,40 @@
+<map id="fl::CLEDController::size" name="fl::CLEDController::size">
+<area shape="rect" id="Node000001" title="How many LEDs does this controller manage?" alt="" coords="764,290,900,330"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a0d03ac7c49f291499fe04f582a516bee.html#a0d03ac7c49f291499fe04f582a516bee" title=" " alt="" coords="531,79,667,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="815,279,776,209,748,172,714,140,691,126,666,116,668,111,694,121,718,136,752,168,780,206,819,276"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_a93471b4babe96100496e8e25062cba3f.html#a93471b4babe96100496e8e25062cba3f" title="Update all our controllers with the current led colors, using the passed in brightness." alt="" coords="263,29,387,55"/>
+<area shape="poly" id="edge16_Node000001_Node000003" title=" " alt="" coords="823,277,812,229,792,171,760,115,739,90,714,70,675,48,632,33,587,24,541,19,454,22,382,32,381,27,454,16,541,14,588,18,633,28,677,43,718,65,743,86,764,111,797,169,817,227,828,276"/>
+<area shape="rect" id="Node000004" href="$dd/dbb/class_c_fast_l_e_d_a50e30222e81562a7ef334dbe4fdfa856.html#a50e30222e81562a7ef334dbe4fdfa856" title="Set all leds on all controllers to the given color/scale." alt="" coords="245,144,404,169"/>
+<area shape="poly" id="edge17_Node000001_Node000004" title=" " alt="" coords="810,280,771,228,745,204,715,184,677,169,636,157,553,145,473,143,404,148,404,142,473,138,554,140,637,152,678,164,717,180,748,199,775,225,815,277"/>
+<area shape="rect" id="Node000009" href="$d4/d28/group___chipsets_ga460b948159965c26b3d6eabb58311c36.html#ga460b948159965c26b3d6eabb58311c36" title=" " alt="" coords="504,194,693,234"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="787,285,715,248,682,237,683,232,717,244,789,280"/>
+<area shape="rect" id="Node000010" href="$d3/d1d/group___power_gab33dbfb39f4368fffdc17807883c787e.html#gab33dbfb39f4368fffdc17807883c787e" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="503,258,695,298"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="750,302,695,294,695,289,751,296"/>
+<area shape="rect" id="Node000011" href="$d4/d28/group___chipsets_gadcbb639de93a59ffc51498fdb163f9a8.html#gadcbb639de93a59ffc51498fdb163f9a8" title=" " alt="" coords="481,322,716,362"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="751,324,716,329,716,323,750,318"/>
+<area shape="rect" id="Node000012" href="$d5/d8b/classfl_1_1_channel_a30725e1f629f565e70af978735637638.html#a30725e1f629f565e70af978735637638" title="Get the LED array as a span (non&#45;const)" alt="" coords="535,387,662,412"/>
+<area shape="poly" id="edge12_Node000001_Node000012" title=" " alt="" coords="790,340,755,359,717,377,663,392,662,387,715,371,753,355,787,335"/>
+<area shape="rect" id="Node000015" href="$d5/d8b/classfl_1_1_channel_a5a1e4519fa133655de697dc934757345.html#a5a1e4519fa133655de697dc934757345" title="Get the LED array as a span (const)" alt="" coords="535,436,662,461"/>
+<area shape="poly" id="edge15_Node000001_Node000015" title=" " alt="" coords="810,343,770,386,745,408,717,426,691,437,663,444,662,439,689,432,715,421,741,403,766,382,806,339"/>
+<area shape="rect" id="Node000016" href="$d5/d8b/classfl_1_1_channel_a3136c2f6ec1be19e6cf4851484caea27.html#a3136c2f6ec1be19e6cf4851484caea27" title="Get the number of LEDs in this channel." alt="" coords="536,485,661,511"/>
+<area shape="poly" id="edge18_Node000001_Node000016" title=" " alt="" coords="819,344,803,375,780,411,752,446,717,475,691,488,662,496,661,491,689,483,715,470,748,442,776,408,798,373,814,341"/>
+<area shape="rect" id="Node000017" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a9fa4f7919cbab3fa89deb770bbf64f81.html#a9fa4f7919cbab3fa89deb770bbf64f81" title="Visit all controllers in the linked list with a visitor The visitor must be a callable that accepts (..." alt="" coords="531,535,667,575"/>
+<area shape="poly" id="edge19_Node000001_Node000017" title=" " alt="" coords="824,345,810,386,788,435,757,484,718,525,694,540,668,549,666,544,692,535,714,521,753,481,783,433,805,384,819,343"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="517,85,385,57,387,52,518,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="518,119,387,147,385,141,517,114"/>
+<area shape="rect" id="Node000006" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a0fc5830eb1815a9268986bb46cb95972.html#a0fc5830eb1815a9268986bb46cb95972" title=" " alt="" coords="257,79,393,119"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="517,102,393,102,393,97,517,97"/>
+<area shape="rect" id="Node000005" href="$dd/dbb/class_c_fast_l_e_d_aeb7bd3e8f2dbced6284a2182191d5fcb.html#aeb7bd3e8f2dbced6284a2182191d5fcb" title="Clear the leds, wiping the local array of data." alt="" coords="25,144,148,169"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="231,159,148,159,148,154,231,154"/>
+<area shape="rect" id="Node000007" href="$d8/da0/classfl_1_1_c_l_e_d_controller_aefe2d04448733f36909d1dab7c5cb3e3.html#aefe2d04448733f36909d1dab7c5cb3e3" title="Clear out/zero out the given number of LEDs." alt="" coords="19,79,155,119"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="243,102,155,102,155,97,243,97"/>
+<area shape="rect" id="Node000008" href="$d5/d8b/classfl_1_1_channel_a56c6fceae41ac78584e120f7e01f7aff.html#a56c6fceae41ac78584e120f7e01f7aff" title="Show the LEDs with optional brightness scaling." alt="" coords="5,5,168,31"/>
+<area shape="poly" id="edge8_Node000006_Node000008" title=" " alt="" coords="243,78,215,68,167,46,131,33,133,28,169,41,217,64,245,73"/>
+<area shape="poly" id="edge7_Node000007_Node000007" title=" " alt="" coords="127,68,113,61,87,58,64,60,50,65,45,71,48,78,42,80,40,70,47,60,63,55,87,53,114,56,129,63"/>
+<area shape="rect" id="Node000013" href="$d5/d8b/classfl_1_1_channel_a73b662986c55cfb31ff1e72065df03dd.html#a73b662986c55cfb31ff1e72065df03dd" title="Private constructor (use create() factory method)" alt="" coords="249,363,401,388"/>
+<area shape="poly" id="edge13_Node000012_Node000013" title=" " alt="" coords="521,395,401,385,401,379,522,390"/>
+<area shape="rect" id="Node000014" href="$d5/d8b/classfl_1_1_channel_a547ccb4c09f235fdad54564198d19028.html#a547ccb4c09f235fdad54564198d19028" title="Backwards&#45;compatible constructor (deprecated)" alt="" coords="249,412,401,437"/>
+<area shape="poly" id="edge14_Node000012_Node000014" title=" " alt="" coords="522,409,401,420,401,415,521,404"/>
+<area shape="rect" id="Node000018" href="$dd/dbb/class_c_fast_l_e_d_a06a8bc368f2ef5816015b75ad54d1e6b.html#a06a8bc368f2ef5816015b75ad54d1e6b" title="Get estimated power consumption in milliwatts." alt="" coords="216,535,433,575"/>
+<area shape="poly" id="edge20_Node000017_Node000018" title=" " alt="" coords="517,558,434,558,434,553,517,553"/>
+</map>

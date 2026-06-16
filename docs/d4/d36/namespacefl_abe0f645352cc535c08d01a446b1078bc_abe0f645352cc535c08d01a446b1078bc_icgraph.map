@@ -1,0 +1,15 @@
+<map id="fl::psram_memory_resource" name="fl::psram_memory_resource">
+<area shape="rect" id="Node000001" title="Get the PSRAM memory resource (wraps PSRamAllocate / PSRamDeallocate)." alt="" coords="479,138,683,163"/>
+<area shape="rect" id="Node000002" href="$d8/d7d/classfl_1_1vector__psram_ac11730d58d8eb6ea39eda5f393065125.html#ac11730d58d8eb6ea39eda5f393065125" title=" " alt="" coords="255,99,431,139"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="472,139,430,133,431,128,473,134"/>
+<area shape="rect" id="Node000007" href="$d8/d7d/classfl_1_1vector__psram_a30b7b3bf7bae71502d636709911a98d8.html#a30b7b3bf7bae71502d636709911a98d8" title=" " alt="" coords="255,163,431,203"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="473,168,431,174,430,168,472,163"/>
+<area shape="rect" id="Node000003" href="$d8/d7d/classfl_1_1vector__psram_ac2ff5b3f9e04eac127da2222011d766a.html#ac2ff5b3f9e04eac127da2222011d766a" title=" " alt="" coords="18,5,194,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="287,95,206,60,173,48,174,43,208,55,289,90"/>
+<area shape="rect" id="Node000004" href="$d8/d7d/classfl_1_1vector__psram_a602ace79e8d18111a74d1e33e67463aa.html#a602ace79e8d18111a74d1e33e67463aa" title=" " alt="" coords="18,69,194,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="240,109,194,103,194,98,241,103"/>
+<area shape="rect" id="Node000005" href="$d8/d7d/classfl_1_1vector__psram_a5d12f6a0b34c688a1e854f35e6365492.html#a5d12f6a0b34c688a1e854f35e6365492" title=" " alt="" coords="5,134,207,159"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="241,133,207,137,206,132,240,128"/>
+<area shape="rect" id="Node000006" href="$d8/d7d/classfl_1_1vector__psram_a40f89c941efbf6eeffa91edcae55034b.html#a40f89c941efbf6eeffa91edcae55034b" title=" " alt="" coords="5,183,207,209"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="274,146,256,153,208,175,168,186,167,181,206,169,254,148,272,141"/>
+</map>

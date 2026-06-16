@@ -1,0 +1,5 @@
+<map id="fl::task::Runner" name="fl::task::Runner">
+<area shape="rect" id="Node000001" title="Generic task runner interface." alt="" coords="42,5,162,31"/>
+<area shape="rect" id="Node000002" href="$d2/d80/classfl_1_1net_1_1http_1_1_fetch_manager.html" title="Internal fetch manager for promise tracking." alt="" coords="5,79,199,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,44,105,79,99,79,99,44"/>
+</map>

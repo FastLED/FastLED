@@ -6,5 +6,7 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::FrameInterpolator\l::Less",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d7f/structfl_1_1_frame_interpolator_1_1_less.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::audio::ISynthEngine",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d47/classfl_1_1audio_1_1_i_synth_engine.html",tooltip="Interface for synth engine that holds BLEP/BLAMP tables."];
+  Node0 -> Node1 [id="edge31_Node000000_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 [id="Node000001",label="fl::audio::SynthEngineImpl",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d50/classfl_1_1audio_1_1_synth_engine_impl.html",tooltip=" "];
 }

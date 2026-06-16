@@ -9,5 +9,9 @@ digraph "fl::FxEngine::addFx"
   Node1 [id="Node000001",label="fl::FxEngine::addFx",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Adds a new effect to the engine."];
   Node1 -> Node1 [id="edge1_Node000001_Node000001",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node2 [id="edge2_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::make_shared_no\l_tracking",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a24e2fed3f1ee8978d3ebbca27a550f29.html#a24e2fed3f1ee8978d3ebbca27a550f29",tooltip=" "];
+  Node2 [id="Node000002",label="fl::FxEngine::addFx",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d60/classfl_1_1_fx_engine_a1e840a27e09686190e44844b3f062642.html#a1e840a27e09686190e44844b3f062642",tooltip="Adds a new effect to the engine."];
+  Node2 -> Node3 [id="edge3_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::make_shared",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af",tooltip=" "];
+  Node1 -> Node4 [id="edge4_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::make_shared_no\l_tracking",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a55d1da0273f76b8ebef5a9b8d93dfaa3.html#a55d1da0273f76b8ebef5a9b8d93dfaa3",tooltip=" "];
 }

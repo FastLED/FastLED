@@ -1,0 +1,18 @@
+<map id="fl::NoiseBias1D" name="fl::NoiseBias1D">
+<area shape="rect" id="Node000001" title="Per&#45;position attack/decay bias for one axis." alt="" coords="136,373,257,399"/>
+<area shape="rect" id="Node000002" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="5,271,199,311"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="133,318,187,371,183,375,129,322"/>
+<area shape="rect" id="Node000003" href="$d4/dad/classfl_1_1vector__basic.html" title="Type&#45;erased vector base class." alt="" coords="157,93,277,119"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="184,128,133,165,109,190,91,218,88,231,88,244,95,270,90,271,83,245,82,230,86,216,105,186,129,161,181,123"/>
+<area shape="rect" id="Node000006" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="158,168,275,193"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="219,133,219,168,214,168,214,133"/>
+<area shape="rect" id="Node000007" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="223,278,362,303"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="253,123,304,161,328,186,347,216,351,232,347,248,333,266,316,280,313,276,329,263,342,245,346,232,342,218,324,190,301,165,250,128"/>
+<area shape="rect" id="Node000004" href="$db/d13/classfl_1_1memory__resource.html" title="Polymorphic memory resource base class (PMR&#45;style)." alt="" coords="45,5,201,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="148,38,205,91,202,95,144,42"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl.html#d8/d72/structfl_1_1vector__element__ops" title="Function pointer table for type&#45;specific element operations." alt="" coords="226,5,397,31"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="292,42,261,71,233,95,229,91,258,67,288,39"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="145,192,122,202,104,219,98,231,96,244,99,270,94,271,91,243,93,229,100,216,119,198,143,187"/>
+<area shape="poly" id="edge9_Node000007_Node000006" title=" " alt="" coords="247,200,261,216,280,248,292,277,287,279,275,250,257,219,243,204"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="273,315,210,375,207,371,269,311"/>
+</map>

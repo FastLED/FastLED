@@ -1,0 +1,47 @@
+<map id="grad16" name="grad16">
+<area shape="rect" id="Node000001" title=" " alt="" coords="505,245,572,270"/>
+<area shape="rect" id="Node000002" href="$d8/df9/group___noise_generation_ga1e47a4e7acdbc675b4ecd0a021869a6f.html#ga1e47a4e7acdbc675b4ecd0a021869a6f" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise without scaling." alt="" coords="349,170,457,195"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="506,239,456,209,433,198,436,193,459,204,509,235"/>
+<area shape="rect" id="Node000003" href="$d8/df9/group___noise_generation_gaadae53dd47894ba16f988d2afb3a4aa9.html#gaadae53dd47894ba16f988d2afb3a4aa9" title=" " alt="" coords="349,219,457,245"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="491,251,457,245,458,240,492,246"/>
+<area shape="rect" id="Node000004" href="$d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59" title=" " alt="" coords="349,269,457,294"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="492,268,458,274,457,269,491,263"/>
+<area shape="rect" id="Node000039" href="$d8/df9/group___noise_generation_ga38be7f206bbebd296013703af95fed94.html#ga38be7f206bbebd296013703af95fed94" title=" " alt="" coords="349,318,457,343"/>
+<area shape="poly" id="edge22_Node000001_Node000039" title=" " alt="" coords="507,279,459,308,433,320,431,316,456,303,504,275"/>
+<area shape="rect" id="Node000005" href="$d8/df9/group___noise_generation_ga84f51afa244b0b4eb39bada95a33acb8.html#ga84f51afa244b0b4eb39bada95a33acb8" title="16&#45;bit, fixed point implementation of Perlin&#39;s noise." alt="" coords="224,194,301,219"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="361,265,348,258,284,222,286,217,351,254,363,260"/>
+<area shape="rect" id="Node000006" href="$d8/df9/group___noise_generation_gad2c041d7b65808890265ed62a75555bb.html#gad2c041d7b65808890265ed62a75555bb" title=" " alt="" coords="224,243,301,269"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="335,272,301,266,302,260,336,267"/>
+<area shape="rect" id="Node000007" href="$d8/df9/group___noise_generation_ga6ae857dd0735e2ea05347ae11b587f9e.html#ga6ae857dd0735e2ea05347ae11b587f9e" title=" " alt="" coords="224,293,301,318"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="336,295,302,301,301,296,335,290"/>
+<area shape="rect" id="Node000008" href="$d8/df9/group___noise_generation_gaa452e57f154ab8d6d692375dba1ef5cb.html#gaa452e57f154ab8d6d692375dba1ef5cb" title=" " alt="" coords="224,342,301,367"/>
+<area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="362,302,351,308,286,344,283,340,348,303,359,297"/>
+<area shape="rect" id="Node000009" href="$db/d58/classfl_1_1_perlin_particle_punch_a84ecb8c54101723ac162fa497a166a38.html#a84ecb8c54101723ac162fa497a166a38" title=" " alt="" coords="9,5,172,45"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="224,334,222,331,203,293,197,257,197,223,202,190,205,158,204,126,195,93,174,59,161,47,165,43,178,56,200,91,210,125,211,158,207,190,203,223,202,256,209,291,226,328,228,331"/>
+<area shape="rect" id="Node000013" href="$de/d71/_fire2023_8h_abe327b12b434120ecf20ae3f46800983.html#abe327b12b434120ecf20ae3f46800983" title=" " alt="" coords="51,70,130,95"/>
+<area shape="poly" id="edge9_Node000008_Node000013" title=" " alt="" coords="224,334,222,331,206,300,200,270,202,214,204,187,202,161,193,135,174,109,154,95,130,88,131,82,156,90,178,105,198,133,207,160,209,187,207,214,205,269,211,298,226,328,228,331"/>
+<area shape="rect" id="Node000015" href="$d4/d06/curr_8h_aad1b235b62f5ad63a1ce16192b809770.html#aad1b235b62f5ad63a1ce16192b809770" title=" " alt="" coords="17,119,165,145"/>
+<area shape="poly" id="edge10_Node000008_Node000015" title=" " alt="" coords="225,335,222,331,208,307,202,283,201,240,198,198,190,178,174,158,159,147,162,143,178,154,195,176,203,197,206,239,207,282,213,305,226,328,229,331"/>
+<area shape="rect" id="Node000019" href="$d5/d88/_fire_matrix_8h_a593fb12ac1f018e17ad0f8ee5eeaa6ba.html#a593fb12ac1f018e17ad0f8ee5eeaa6ba" title=" " alt="" coords="29,169,153,194"/>
+<area shape="poly" id="edge11_Node000008_Node000019" title=" " alt="" coords="225,335,222,331,211,314,205,297,200,265,194,236,187,222,174,207,152,194,154,189,178,203,191,219,199,234,205,264,210,295,216,311,226,328,229,331"/>
+<area shape="rect" id="Node000021" href="$d8/dd0/_fire_cylinder_8h_a617c5a2afa470899e1f864d74ff6506d.html#a617c5a2afa470899e1f864d74ff6506d" title=" " alt="" coords="29,218,153,243"/>
+<area shape="poly" id="edge12_Node000008_Node000021" title=" " alt="" coords="227,335,222,331,207,310,199,291,191,274,174,257,152,245,154,240,178,253,195,271,204,289,212,308,226,328,230,332"/>
+<area shape="rect" id="Node000023" href="$db/d0d/_r_g_b_w_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="65,267,116,293"/>
+<area shape="poly" id="edge13_Node000008_Node000023" title=" " alt="" coords="231,337,175,306,115,288,117,283,177,302,233,332"/>
+<area shape="rect" id="Node000024" href="$d7/d91/group___cylinder_noise_ga2bdee5e155aa2ab13ece081198d7b990.html#ga2bdee5e155aa2ab13ece081198d7b990" title="Generate CRGB noise for a cylinder pattern." alt="" coords="9,317,173,342"/>
+<area shape="poly" id="edge14_Node000008_Node000024" title=" " alt="" coords="210,350,172,344,173,339,211,344"/>
+<area shape="rect" id="Node000025" href="$d7/d91/group___cylinder_noise_ga73362dfc92c8e1badb3b3491852639a9.html#ga73362dfc92c8e1badb3b3491852639a9" title="Cylinder noise functions &#45; sample three z&#45;slices for independent component evolution." alt="" coords="5,366,176,391"/>
+<area shape="poly" id="edge15_Node000008_Node000025" title=" " alt="" coords="211,365,177,369,176,364,210,359"/>
+<area shape="rect" id="Node000027" href="$d6/d5f/group___ring_noise_gaf4d521145a9a922c3469227ce7df4003.html#gaf4d521145a9a922c3469227ce7df4003" title="Generate CRGB noise for a ring pattern." alt="" coords="21,415,160,441"/>
+<area shape="poly" id="edge16_Node000008_Node000027" title=" " alt="" coords="231,377,177,405,142,418,140,413,175,400,229,372"/>
+<area shape="rect" id="Node000028" href="$d6/d5f/group___ring_noise_ga424c29c488273a2f0efb1bb80bb0911a.html#ga424c29c488273a2f0efb1bb80bb0911a" title="Ring noise functions &#45; sample three z&#45;slices for independent component evolution." alt="" coords="18,465,163,490"/>
+<area shape="poly" id="edge17_Node000008_Node000028" title=" " alt="" coords="248,381,218,419,177,454,151,467,149,462,175,450,214,415,244,378"/>
+<area shape="rect" id="Node000032" href="$df/dd3/group___sphere_noise_gafd111e502417a887a610fe278551d6a9.html#gafd111e502417a887a610fe278551d6a9" title="Generate CRGB noise for a sphere pattern." alt="" coords="13,514,168,539"/>
+<area shape="poly" id="edge18_Node000008_Node000032" title=" " alt="" coords="256,381,228,442,205,475,178,503,155,516,153,512,174,499,201,472,223,440,251,379"/>
+<area shape="rect" id="Node000033" href="$df/dd3/group___sphere_noise_ga92b519f783d1e25c8f7f64cca68c541e.html#ga92b519f783d1e25c8f7f64cca68c541e" title="Sphere noise functions &#45; sample three z&#45;slices for independent component evolution." alt="" coords="10,563,171,589"/>
+<area shape="poly" id="edge19_Node000008_Node000033" title=" " alt="" coords="260,381,251,419,235,465,211,512,178,553,158,565,155,561,174,549,207,509,230,463,246,418,255,380"/>
+<area shape="rect" id="Node000035" href="$d7/da1/old_8h_a594263e8f2bd59f5de78b81eedf64471.html#a594263e8f2bd59f5de78b81eedf64471" title=" " alt="" coords="27,613,155,638"/>
+<area shape="poly" id="edge20_Node000008_Node000035" title=" " alt="" coords="262,381,256,428,242,487,217,549,200,577,178,602,156,616,153,611,174,598,195,574,213,546,237,486,251,427,257,381"/>
+<area shape="rect" id="Node000037" href="$da/d7a/struct_noise_generator_a52de12fb347f8a47986c8c979caa9126.html#a52de12fb347f8a47986c8c979caa9126" title=" " alt="" coords="7,662,175,687"/>
+<area shape="poly" id="edge21_Node000008_Node000037" title=" " alt="" coords="264,381,261,437,249,510,239,548,223,586,203,621,178,653,162,664,159,660,174,649,199,618,219,584,234,547,244,509,256,437,259,381"/>
+</map>

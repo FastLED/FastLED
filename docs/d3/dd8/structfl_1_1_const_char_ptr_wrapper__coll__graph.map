@@ -1,0 +1,12 @@
+<map id="fl::ConstCharPtrWrapper" name="fl::ConstCharPtrWrapper">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,360,184,385"/>
+<area shape="rect" id="Node000002" href="$d2/db2/classfl_1_1string.html" title=" " alt="" coords="57,272,132,297"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,311,97,359,92,359,92,311"/>
+<area shape="rect" id="Node000003" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="12,183,177,223"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="97,236,97,272,92,272,92,236"/>
+<area shape="rect" id="Node000004" href="$de/d66/classfl_1_1basic__string.html" title="Concrete type&#45;erased string class." alt="" coords="31,5,147,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="93,44,97,183,91,183,87,45"/>
+<area shape="rect" id="Node000005" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="111,80,241,105"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="115,38,164,78,160,82,112,42"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="161,118,111,184,107,181,157,115"/>
+</map>

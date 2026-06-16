@@ -1,0 +1,9 @@
+<map id="fl/wdt/watchdog.cpp.hpp" name="fl/wdt/watchdog.cpp.hpp">
+<area shape="rect" id="Node000001" title="Platform&#45;agnostic implementations for the unified watchdog API:" alt="" coords="59,5,239,31"/>
+<area shape="rect" id="Node000002" href="$df/ddb/fl_2wdt_2__build_8cpp_8hpp.html" title="Unity build header for fl/wdt/ directory." alt="" coords="71,79,227,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="152,44,152,79,147,79,147,44"/>
+<area shape="rect" id="Node000003" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="5,152,133,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="128,115,84,154,81,150,125,111"/>
+<area shape="rect" id="Node000004" href="$d1/d12/fl_8wdt_09_8cpp.html" title="Unity build: recursive includes from src/fl/wdt/." alt="" coords="157,152,301,177"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="174,111,218,150,214,154,170,115"/>
+</map>

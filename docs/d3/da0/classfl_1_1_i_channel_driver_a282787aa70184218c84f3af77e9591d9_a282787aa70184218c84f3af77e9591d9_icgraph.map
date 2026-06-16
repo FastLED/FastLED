@@ -1,0 +1,6 @@
+<map id="fl::IChannelDriver::waitForReadyOrDraining" name="fl::IChannelDriver::waitForReadyOrDraining">
+<area shape="rect" id="Node000001" title=" " alt="" coords="188,29,377,69"/>
+<area shape="rect" id="Node000002" href="$d3/da0/classfl_1_1_i_channel_driver_ab462336dccdfebe96350807253f1a509.html#ab462336dccdfebe96350807253f1a509" title="Check if this driver can handle the given channel data." alt="" coords="5,29,140,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,52,140,52,140,47,174,47"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="108,18,95,11,73,8,53,10,41,15,36,21,39,28,34,30,31,20,37,10,51,5,73,3,97,6,110,13"/>
+</map>

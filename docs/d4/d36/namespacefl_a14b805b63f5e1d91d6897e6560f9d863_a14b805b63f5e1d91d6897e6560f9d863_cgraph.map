@@ -1,0 +1,26 @@
+<map id="fl::delayMs" name="fl::delayMs">
+<area shape="rect" id="Node000001" title="Shorter alias for delay with optional async task pumping." alt="" coords="5,271,99,297"/>
+<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail_abd6e1e8189dbbbf28d720923205bd0dd.html#abd6e1e8189dbbbf28d720923205bd0dd" title="Internal delay implementation used by the public fl::delay wrapper." alt="" coords="147,271,301,297"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="99,281,133,281,133,287,99,287"/>
+<area shape="rect" id="Node000003" href="$db/d5c/namespacefl_1_1task_a2d40b476742263a3fa212e24b722e3ef.html#a2d40b476742263a3fa212e24b722e3ef" title="Run selected task subsystems." alt="" coords="349,271,444,297"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="301,281,336,281,336,287,301,287"/>
+<area shape="rect" id="Node000004" href="$dc/dad/classfl_1_1_singleton_thread_local_a00591689c0e4cc5d96b511b3277f7682.html#a00591689c0e4cc5d96b511b3277f7682" title=" " alt="" coords="492,5,671,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="397,271,405,230,421,172,449,110,467,81,490,55,495,51,498,55,494,59,472,84,453,113,426,174,410,231,402,272"/>
+<area shape="rect" id="Node000013" href="$d0/dd2/classfl_1_1task_1_1_executor_ac534e963910c0f0acf445c8c61aee216.html#ac534e963910c0f0acf445c8c61aee216" title=" " alt="" coords="516,69,647,109"/>
+<area shape="poly" id="edge4_Node000003_Node000013" title=" " alt="" coords="400,270,411,240,430,199,456,157,490,119,502,111,505,115,494,123,460,160,434,202,416,242,405,272"/>
+<area shape="rect" id="Node000015" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a266030d285c7f6ae31eb3c619cee8693.html#a266030d285c7f6ae31eb3c619cee8693" title=" " alt="" coords="512,133,651,173"/>
+<area shape="poly" id="edge5_Node000003_Node000015" title=" " alt="" coords="405,270,439,228,464,204,490,183,501,177,503,182,494,188,467,208,443,231,409,273"/>
+<area shape="rect" id="Node000017" href="$d4/d36/namespacefl_a88411fb4cdce0874360d326ef1a2578f.html#a88411fb4cdce0874360d326ef1a2578f" title="Factory for C++11/14 (no CTAD)." alt="" coords="506,198,657,223"/>
+<area shape="poly" id="edge6_Node000003_Node000017" title=" " alt="" coords="418,269,491,232,512,225,514,230,493,237,420,274"/>
+<area shape="rect" id="Node000018" href="$d4/d36/namespacefl_a95a89c7ba649b9bd2c9136c0f517d82f.html#a95a89c7ba649b9bd2c9136c0f517d82f" title="Universal microsecond timer &#45; returns microseconds since system startup." alt="" coords="540,271,623,297"/>
+<area shape="poly" id="edge7_Node000003_Node000018" title=" " alt="" coords="444,281,526,281,526,287,444,287"/>
+<area shape="rect" id="Node000019" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="550,321,613,346"/>
+<area shape="poly" id="edge9_Node000003_Node000019" title=" " alt="" coords="445,294,537,319,536,324,444,299"/>
+<area shape="rect" id="Node000020" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a894dae01c9c6738eeae091f8fddeefb3.html#a894dae01c9c6738eeae091f8fddeefb3" title=" " alt="" coords="512,371,651,411"/>
+<area shape="poly" id="edge10_Node000003_Node000020" title=" " alt="" coords="413,295,448,324,493,355,509,363,506,368,491,360,445,329,410,299"/>
+<area shape="rect" id="Node000024" href="$d0/dd2/classfl_1_1task_1_1_executor_a8f94605a8078df47675753e193d1e969.html#a8f94605a8078df47675753e193d1e969" title="Update all registered runners." alt="" coords="516,435,647,475"/>
+<area shape="poly" id="edge11_Node000003_Node000024" title=" " alt="" coords="406,295,437,355,463,390,494,421,505,428,502,433,490,425,459,394,433,358,401,298"/>
+<area shape="rect" id="Node000025" href="$d4/d36/namespacefl_ac8bfd7357d354c16311ece7e62e08901.html#ac8bfd7357d354c16311ece7e62e08901" title="Yield to the platform scheduler." alt="" coords="546,499,617,525"/>
+<area shape="poly" id="edge12_Node000003_Node000025" title=" " alt="" coords="403,297,411,334,428,385,455,439,473,463,494,485,512,496,533,504,532,509,510,501,490,489,469,467,450,441,423,387,406,335,398,298"/>
+<area shape="poly" id="edge8_Node000018_Node000018" title=" " alt="" coords="551,273,544,263,548,253,560,247,581,245,607,248,617,257,614,261,605,253,581,250,562,252,552,257,550,262,555,270"/>
+</map>

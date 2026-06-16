@@ -1,8 +1,9 @@
 <map id="fl::XYRasterU8Sparse::clear" name="fl::XYRasterU8Sparse::clear">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,5,164,45"/>
-<area shape="rect" id="Node000002" href="$d1/d5c/classfl_1_1_x_y_raster_u8_sparse_a3ee8202267d0e671012c270eae2f8b8e.html#a3ee8202267d0e671012c270eae2f8b8e" title=" " alt="" coords="419,5,577,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,20,212,19,371,19,405,19,405,25,371,24,212,24,164,25"/>
-<area shape="rect" id="Node000003" href="$d1/d5c/classfl_1_1_x_y_raster_u8_sparse_ac2b4abfc081d42f0574fea263207f111.html#ac2b4abfc081d42f0574fea263207f111" title=" " alt="" coords="212,33,371,73"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="165,33,199,38,198,43,164,39"/>
-<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="371,40,405,35,406,41,371,45"/>
+<area shape="rect" id="Node000002" href="$d1/d5c/classfl_1_1_x_y_raster_u8_sparse_a1c673793a21c24ab7bb260e20c5accb6.html#a1c673793a21c24ab7bb260e20c5accb6" title=" " alt="" coords="419,5,577,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,11,212,7,291,3,371,7,405,10,405,15,370,12,291,9,212,12,164,17"/>
+<area shape="rect" id="Node000003" href="$d1/d5c/classfl_1_1_x_y_raster_u8_sparse_ac2b4abfc081d42f0574fea263207f111.html#ac2b4abfc081d42f0574fea263207f111" title=" " alt="" coords="212,45,371,85"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="165,38,199,45,198,50,164,43"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="370,47,405,41,406,46,371,53"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="253,46,250,36,257,27,270,21,291,19,315,22,329,29,326,34,314,27,291,24,272,26,260,31,256,37,258,44"/>
 </map>

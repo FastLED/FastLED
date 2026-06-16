@@ -1,0 +1,5 @@
+<map id="fl::spi::MultiLaneDevice::Impl" name="fl::spi::MultiLaneDevice::Impl">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,79,180,119"/>
+<area shape="rect" id="Node000002" href="$d3/df8/structfl_1_1spi_1_1_device_impl_base.html" title="Common functionality for device implementation (pImpl pattern)" alt="" coords="7,5,178,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="95,44,95,79,90,79,90,44"/>
+</map>

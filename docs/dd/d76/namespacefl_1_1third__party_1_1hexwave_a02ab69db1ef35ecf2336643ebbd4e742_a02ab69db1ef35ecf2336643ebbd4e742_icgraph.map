@@ -1,0 +1,7 @@
+<map id="fl::third_party::hexwave::hexwave_engine_destroy" name="fl::third_party::hexwave::hexwave_engine_destroy">
+<area shape="rect" id="Node000001" title="Destroy a HexWaveEngine and free its resources." alt="" coords="228,37,424,77"/>
+<area shape="rect" id="Node000002" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_aa3919fa11833cf2e47534f6941a764b1.html#aa3919fa11833cf2e47534f6941a764b1" title="Initialize the hexwave library (DEPRECATED &#45; use hexwave_engine_create)" alt="" coords="5,5,180,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="214,45,180,40,181,35,215,39"/>
+<area shape="rect" id="Node000003" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_ad85887b0f8a194b325e94dce4942c60e.html#ad85887b0f8a194b325e94dce4942c60e" title="Shutdown the hexwave library (DEPRECATED &#45; use hexwave_engine_destroy)" alt="" coords="5,69,180,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="215,75,181,80,180,75,214,70"/>
+</map>

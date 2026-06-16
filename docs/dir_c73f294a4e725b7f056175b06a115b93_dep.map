@@ -1,0 +1,17 @@
+<map id="fl/fx/2d/animartrix_detail" name="fl/fx/2d/animartrix_detail">
+<area shape="rect" id="node2" href="dir_3fd14babb80fd437f8313247e9a3f8f4.html" title="viz" alt="" coords="85,136,126,161"/>
+<area shape="poly" id="edge2" href="dir_000008_000196.html" alt="" coords="108,88,108,122,103,122,103,88"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000008_000196.html" title="1" alt="" coords="109,110,118,125"/>
+<area shape="rect" id="node3" href="dir_0dd6897a8ae40540acd9d694849e950e.html" title="stl" alt="" coords="50,209,89,235"/>
+<area shape="poly" id="edge1" href="dir_000008_000179.html" alt="" coords="99,90,87,111,76,137,71,167,70,195,65,195,66,166,71,135,82,109,95,87"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000008_000179.html" title="83" alt="" coords="67,183,85,198"/>
+<area shape="rect" id="node4" href="dir_94896ea2d28e1d34f24a1dbbb9436aa8.html" title="math" alt="" coords="124,209,180,235"/>
+<area shape="poly" id="edge3" href="dir_000008_000112.html" alt="" coords="116,87,129,109,141,135,149,166,153,195,148,196,144,167,136,137,124,111,111,90"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000008_000112.html" title="14" alt="" coords="150,183,167,197"/>
+<area shape="poly" id="edge4" href="dir_000196_000179.html" alt="" coords="102,163,84,198,79,196,97,160"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000196_000179.html" title="55" alt="" coords="82,190,100,204"/>
+<area shape="poly" id="edge5" href="dir_000196_000112.html" alt="" coords="115,160,139,196,135,199,111,163"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000196_000112.html" title="3" alt="" coords="137,182,146,197"/>
+<area shape="rect" id="clust2" href="dir_c73f294a4e725b7f056175b06a115b93.html" alt="" coords="27,52,184,172"/>
+<area shape="rect" id="clust1" href="dir_ef4cc1a41c4d257473780bb85842dcc6.html" title="2d" alt="" coords="16,16,195,183"/>
+</map>

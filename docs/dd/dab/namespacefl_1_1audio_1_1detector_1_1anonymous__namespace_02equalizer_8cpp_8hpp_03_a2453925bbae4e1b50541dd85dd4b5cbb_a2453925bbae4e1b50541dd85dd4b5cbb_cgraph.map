@@ -1,0 +1,16 @@
+<map id="fl::audio::detector::anonymous_namespace{equalizer::cpp::hpp}::applyScaling" name="fl::audio::detector::anonymous_namespace{equalizer::cpp::hpp}::applyScaling">
+<area shape="rect" id="Node000001" title="Apply fft::FFT scaling mode to a single bin value." alt="" coords="5,29,193,99"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="64,29,65,19,72,10,84,5,99,3,118,6,130,14,127,18,116,11,99,8,85,10,75,14,70,21,69,29"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_af3a8e787bc8bcd73dcddb8b47a826554.html#af3a8e787bc8bcd73dcddb8b47a826554" title=" " alt="" coords="244,26,307,51"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="193,48,230,42,231,48,194,53"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a0b5da884257d0f4003ead08f27915a2b.html#a0b5da884257d0f4003ead08f27915a2b" title=" " alt="" coords="241,75,309,101"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="194,74,228,79,227,84,193,79"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a083789a22e6f21134e65d0d0ed247858.html#a083789a22e6f21134e65d0d0ed247858" title=" " alt="" coords="359,26,490,51"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="307,36,345,36,345,41,307,41"/>
+<area shape="rect" id="Node000004" href="$df/d9e/namespacefl_1_1detail_aefd5cee30614d18a52adbf22fc83f4a8.html#aefd5cee30614d18a52adbf22fc83f4a8" title=" " alt="" coords="544,26,707,51"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="490,36,530,36,530,41,490,41"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_aaa77b1626998d6dc47d0e3245b1a3e4a.html#aaa77b1626998d6dc47d0e3245b1a3e4a" title=" " alt="" coords="357,75,492,101"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="310,85,343,85,343,91,310,91"/>
+<area shape="rect" id="Node000007" href="$df/d9e/namespacefl_1_1detail_af564e0d482e4925c603cb299c623c312.html#af564e0d482e4925c603cb299c623c312" title=" " alt="" coords="540,75,711,101"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="492,85,526,85,526,91,492,91"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="fl::CRGB::blendAlphaMaxChannel" name="fl::CRGB::blendAlphaMaxChannel">
+<area shape="rect" id="Node000001" title=" " alt="" coords="467,70,704,95"/>
+<area shape="rect" id="Node000002" href="$d1/de0/classfl_1_1_frame_a9b46af8f9f48f2e538d2c18ef82b0c6b.html#a9b46af8f9f48f2e538d2c18ef82b0c6b" title=" " alt="" coords="276,13,395,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="515,69,391,41,392,35,516,64"/>
+<area shape="rect" id="Node000004" href="$d2/dba/structfl_1_1_x_y_draw_composited_ac05016f683e2bca8612a6991bb8bbb30.html#ac05016f683e2bca8612a6991bb8bbb30" title=" " alt="" coords="252,63,419,103"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="453,85,419,85,419,80,453,80"/>
+<area shape="rect" id="Node000005" href="$d1/de0/classfl_1_1_frame_a81f6818a57d19c73fddc25bfb4ff98e3.html#a81f6818a57d19c73fddc25bfb4ff98e3" title=" " alt="" coords="267,127,403,153"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="516,101,392,130,391,125,515,96"/>
+<area shape="rect" id="Node000003" href="$d4/d2b/classfl_1_1video_1_1_frame_interpolator_a4c607b044a29b0bc1929e71ca69d30bc.html#a4c607b044a29b0bc1929e71ca69d30bc" title=" " alt="" coords="5,5,204,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="262,28,204,28,204,23,262,23"/>
+</map>

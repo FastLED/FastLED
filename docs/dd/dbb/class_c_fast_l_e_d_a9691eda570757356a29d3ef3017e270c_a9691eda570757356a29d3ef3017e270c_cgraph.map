@@ -1,0 +1,7 @@
+<map id="CFastLED::getWaitSpinBudgetUs" name="CFastLED::getWaitSpinBudgetUs">
+<area shape="rect" id="Node000001" title="Get the current tiered&#45;wait spin budget (microseconds)." alt="" coords="5,5,236,31"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_ab18a384b277ccbbc35aea29d7fa24455.html#ab18a384b277ccbbc35aea29d7fa24455" title=" " alt="" coords="284,5,523,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="236,15,271,15,271,21,236,21"/>
+<area shape="rect" id="Node000003" href="$df/d9e/namespacefl_1_1detail_a3363a63882437dcb732ef0d0714ae000.html#a3363a63882437dcb732ef0d0714ae000" title="Get the current tiered&#45;wait spin budget (microseconds)." alt="" coords="571,5,795,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="523,15,557,15,557,21,523,21"/>
+</map>

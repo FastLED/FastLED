@@ -31,7 +31,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../df/d40/examples_2_corkscrew_2corkscrew_8h_a3ce1eed35210653027031143f1cc1ef4.html#a3ce1eed35210653027031143f1cc1ef4" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../df/d40/examples_2_corkscrew_2corkscrew_8h_a51f14a1e7c3bfcb462552862987a4a24.html#a51f14a1e7c3bfcb462552862987a4a24" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="209,-56 143,-56 143,-37 209,-37 209,-56"/>
 <text text-anchor="middle" x="176" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">corkscrew</text>
 </a>
@@ -49,7 +49,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe" target="_top" xlink:title="Generate an 8&#45;bit random number.">
+<g id="a_Node000003"><a xlink:href="../../d2/d0d/group___random_gadb05544426b14ef8d85fb2eb73cb8a0a.html#gadb05544426b14ef8d85fb2eb73cb8a0a" target="_top" xlink:title="Generate an 8&#45;bit random number.">
 <polygon fill="white" stroke="#666666" points="206,-19 146,-19 146,0 206,0 206,-19"/>
 <text text-anchor="middle" x="176" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">random8</text>
 </a>

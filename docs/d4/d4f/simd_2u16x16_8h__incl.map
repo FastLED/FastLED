@@ -1,0 +1,7 @@
+<map id="fl/math/simd/u16x16.h" name="fl/math/simd/u16x16.h">
+<area shape="rect" id="Node000001" title="SIMD operations on 16&#45;element uint16_t vectors (256&#45;bit)" alt="" coords="5,5,173,31"/>
+<area shape="rect" id="Node000002" href="$d0/d7e/fl_2math_2simd_2types_8h.html" title="SIMD register type aliases." alt="" coords="11,79,167,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,31,92,65,87,65,87,31"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="23,152,156,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="92,104,92,138,87,138,87,104"/>
+</map>

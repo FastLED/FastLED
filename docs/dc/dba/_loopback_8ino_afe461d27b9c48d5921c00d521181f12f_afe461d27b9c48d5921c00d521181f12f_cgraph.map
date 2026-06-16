@@ -1,0 +1,51 @@
+<map id="loop" name="loop">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,329,56,355"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="521,29,596,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="35,328,61,277,106,203,135,164,169,126,207,92,249,65,282,51,316,40,386,29,452,28,508,32,507,37,452,33,386,35,317,45,283,56,252,70,210,97,173,130,139,167,110,206,65,279,40,330"/>
+<area shape="rect" id="Node000003" href="$db/d5c/namespacefl_1_1task_a2d40b476742263a3fa212e24b722e3ef.html#a2d40b476742263a3fa212e24b722e3ef" title="Run selected task subsystems." alt="" coords="106,329,201,355"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="56,339,92,339,92,345,56,345"/>
+<area shape="rect" id="Node000026" href="$dc/dba/_loopback_8ino_a3c7b93186aa45d9ff5d239f0d88f6008.html#a3c7b93186aa45d9ff5d239f0d88f6008" title=" " alt="" coords="104,624,203,649"/>
+<area shape="poly" id="edge25_Node000001_Node000026" title=" " alt="" coords="40,354,144,610,139,612,35,356"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="529,31,522,21,526,11,538,5,559,3,584,6,594,15,591,19,581,11,559,8,540,10,530,15,527,20,533,28"/>
+<area shape="rect" id="Node000004" href="$dc/dad/classfl_1_1_singleton_thread_local_a00591689c0e4cc5d96b511b3277f7682.html#a00591689c0e4cc5d96b511b3277f7682" title=" " alt="" coords="251,258,429,298"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="191,327,267,300,269,305,192,332"/>
+<area shape="rect" id="Node000013" href="$d0/dd2/classfl_1_1task_1_1_executor_ac534e963910c0f0acf445c8c61aee216.html#ac534e963910c0f0acf445c8c61aee216" title=" " alt="" coords="275,322,405,362"/>
+<area shape="poly" id="edge9_Node000003_Node000013" title=" " alt="" coords="201,339,261,339,261,345,201,345"/>
+<area shape="rect" id="Node000015" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a266030d285c7f6ae31eb3c619cee8693.html#a266030d285c7f6ae31eb3c619cee8693" title=" " alt="" coords="271,386,409,426"/>
+<area shape="poly" id="edge11_Node000003_Node000015" title=" " alt="" coords="192,352,269,379,267,384,191,357"/>
+<area shape="rect" id="Node000017" href="$d4/d36/namespacefl_a88411fb4cdce0874360d326ef1a2578f.html#a88411fb4cdce0874360d326ef1a2578f" title="Factory for C++11/14 (no CTAD)." alt="" coords="483,451,634,476"/>
+<area shape="poly" id="edge14_Node000003_Node000017" title=" " alt="" coords="165,353,199,396,224,418,252,436,306,454,362,465,418,469,469,469,469,474,418,475,362,470,304,460,250,440,220,422,195,399,161,356"/>
+<area shape="rect" id="Node000018" href="$d4/d36/namespacefl_a95a89c7ba649b9bd2c9136c0f517d82f.html#a95a89c7ba649b9bd2c9136c0f517d82f" title="Universal microsecond timer &#45; returns microseconds since system startup." alt="" coords="299,525,381,551"/>
+<area shape="poly" id="edge16_Node000003_Node000018" title=" " alt="" coords="163,354,198,412,223,447,253,480,277,500,302,516,299,521,274,504,249,484,219,451,193,415,159,356"/>
+<area shape="rect" id="Node000019" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="309,575,371,600"/>
+<area shape="poly" id="edge18_Node000003_Node000019" title=" " alt="" coords="159,354,167,395,183,451,211,510,230,538,252,561,273,574,296,581,294,586,271,578,249,565,226,541,206,513,178,452,161,396,154,355"/>
+<area shape="rect" id="Node000020" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a894dae01c9c6738eeae091f8fddeefb3.html#a894dae01c9c6738eeae091f8fddeefb3" title=" " alt="" coords="271,79,409,119"/>
+<area shape="poly" id="edge19_Node000003_Node000020" title=" " alt="" coords="154,328,163,290,181,237,209,180,227,153,249,129,257,123,261,127,252,133,231,156,213,183,186,239,168,292,160,330"/>
+<area shape="rect" id="Node000023" href="$d0/dd2/classfl_1_1task_1_1_executor_a8f94605a8078df47675753e193d1e969.html#a8f94605a8078df47675753e193d1e969" title="Update all registered runners." alt="" coords="275,143,405,183"/>
+<area shape="poly" id="edge22_Node000003_Node000023" title=" " alt="" coords="157,328,190,264,216,226,249,193,261,185,264,190,252,197,220,230,194,267,162,330"/>
+<area shape="rect" id="Node000024" href="$d4/d36/namespacefl_ac8bfd7357d354c16311ece7e62e08901.html#ac8bfd7357d354c16311ece7e62e08901" title="Yield to the platform scheduler." alt="" coords="305,208,375,233"/>
+<area shape="poly" id="edge23_Node000003_Node000024" title=" " alt="" coords="162,327,197,286,222,263,249,244,290,227,292,232,252,248,225,267,201,290,166,330"/>
+<area shape="rect" id="Node000005" href="$dd/dfc/classfl_1_1_thread_local_fake_acf6d3e1d23583fb93008b3ca5c3799e5.html#acf6d3e1d23583fb93008b3ca5c3799e5" title=" " alt="" coords="485,198,632,238"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="413,255,471,239,473,244,415,260"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a1e67c0c24ebcd98fcf8554753d1639a6.html#a1e67c0c24ebcd98fcf8554753d1639a6" title=" " alt="" coords="489,287,628,312"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="430,284,476,289,475,294,430,289"/>
+<area shape="poly" id="edge7_Node000006_Node000006" title=" " alt="" coords="529,288,522,278,526,269,538,262,559,260,584,264,594,272,591,276,581,268,559,265,540,267,530,272,527,278,533,285"/>
+<area shape="rect" id="Node000010" href="$da/d3c/namespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259.html#a0bddf371925d8c4e94b88e9d7b35d259" title=" " alt="" coords="688,369,792,395"/>
+<area shape="poly" id="edge8_Node000006_Node000010" title=" " alt="" coords="607,310,641,322,709,360,707,364,639,327,605,315"/>
+<area shape="rect" id="Node000014" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="477,336,640,361"/>
+<area shape="poly" id="edge10_Node000013_Node000014" title=" " alt="" coords="406,341,464,343,464,348,405,347"/>
+<area shape="poly" id="edge13_Node000015_Node000014" title=" " alt="" coords="409,385,496,362,497,367,410,390"/>
+<area shape="rect" id="Node000016" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a56ea341e8b9965989c7634c973ef8027.html#a56ea341e8b9965989c7634c973ef8027" title=" " alt="" coords="489,386,628,426"/>
+<area shape="poly" id="edge12_Node000015_Node000016" title=" " alt="" coords="410,403,475,403,475,409,410,409"/>
+<area shape="poly" id="edge15_Node000017_Node000010" title=" " alt="" coords="605,448,639,436,706,400,709,404,641,440,607,453"/>
+<area shape="poly" id="edge17_Node000018_Node000018" title=" " alt="" coords="309,527,303,517,306,507,319,501,340,499,366,502,376,511,373,515,364,507,340,504,320,506,310,511,308,516,313,524"/>
+<area shape="poly" id="edge20_Node000020_Node000002" title=" " alt="" coords="409,79,507,53,508,58,410,84"/>
+<area shape="rect" id="Node000021" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a030936767149b44cd3be5b5eccceae86.html#a030936767149b44cd3be5b5eccceae86" title=" " alt="" coords="489,79,628,119"/>
+<area shape="poly" id="edge21_Node000020_Node000021" title=" " alt="" coords="410,97,475,97,475,102,410,102"/>
+<area shape="rect" id="Node000025" href="$d4/d36/namespacefl_acb143a6439297e59bd3a0f45f3f09d66.html#acb143a6439297e59bd3a0f45f3f09d66" title=" " alt="" coords="509,148,608,173"/>
+<area shape="poly" id="edge24_Node000024_Node000025" title=" " alt="" coords="375,209,498,174,499,180,376,214"/>
+<area shape="rect" id="Node000027" href="$df/da5/lib8tion_8h_a696b9421eca961df0a68c7c6c3e983ab.html#a696b9421eca961df0a68c7c6c3e983ab" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="301,624,379,649"/>
+<area shape="poly" id="edge26_Node000026_Node000027" title=" " alt="" coords="203,634,287,634,287,639,203,639"/>
+<area shape="rect" id="Node000028" href="$d1/dfb/colorutils_8h_afba4db18577c19e39c54f1c5793741b7.html#afba4db18577c19e39c54f1c5793741b7" title="Fill a range of LEDs with a solid color." alt="" coords="302,673,378,699"/>
+<area shape="poly" id="edge27_Node000026_Node000028" title=" " alt="" coords="203,647,289,670,288,675,201,652"/>
+</map>

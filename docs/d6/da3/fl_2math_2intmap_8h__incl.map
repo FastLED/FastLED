@@ -1,0 +1,35 @@
+<map id="fl/math/intmap.h" name="fl/math/intmap.h">
+<area shape="rect" id="Node000001" title="Integer mapping functions between different integer sizes." alt="" coords="443,5,574,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="278,79,425,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="484,33,390,75,388,71,482,28"/>
+<area shape="rect" id="Node000003" href="$df/db1/math_8h.html" title=" " alt="" coords="449,79,568,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="511,31,511,65,506,65,506,31"/>
+<area shape="rect" id="Node000008" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="581,299,708,324"/>
+<area shape="poly" id="edge19_Node000001_Node000008" title=" " alt="" coords="529,29,556,49,583,77,608,114,624,146,645,225,649,256,649,285,644,285,643,256,639,226,619,148,604,117,579,80,553,53,526,33"/>
+<area shape="rect" id="Node000004" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="733,152,908,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="559,101,758,146,756,152,558,107"/>
+<area shape="poly" id="edge18_Node000003_Node000008" title=" " alt="" coords="523,102,571,152,598,187,622,224,634,255,643,284,637,286,629,257,617,227,594,190,567,156,519,106"/>
+<area shape="rect" id="Node000009" href="$d3/d7e/int_8h.html" title=" " alt="" coords="173,225,255,251"/>
+<area shape="poly" id="edge8_Node000003_Node000009" title=" " alt="" coords="468,107,408,127,342,154,287,187,241,219,238,215,284,182,339,150,406,122,467,102"/>
+<area shape="rect" id="Node000012" href="$df/d63/type__traits_8h.html" title=" " alt="" coords="353,152,489,177"/>
+<area shape="poly" id="edge10_Node000003_Node000012" title=" " alt="" coords="496,106,447,145,444,141,493,102"/>
+<area shape="rect" id="Node000015" href="$da/ded/undef_8h.html" title=" " alt="" coords="63,152,165,177"/>
+<area shape="poly" id="edge16_Node000003_Node000015" title=" " alt="" coords="450,106,180,154,179,149,449,101"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="756,299,931,324"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="829,176,838,198,846,225,849,256,848,285,843,285,844,256,841,226,833,200,824,179"/>
+<area shape="rect" id="Node000006" href="$d1/ddf/align_8h.html" title="Alignment macros and utilities for FastLED." alt="" coords="733,225,831,251"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="817,179,797,215,792,212,812,176"/>
+<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="794,249,826,286,822,290,790,253"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="761,253,680,295,678,290,759,248"/>
+<area shape="rect" id="Node000010" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="163,299,265,324"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="217,251,217,285,211,285,211,251"/>
+<area shape="poly" id="edge14_Node000012_Node000008" title=" " alt="" coords="423,177,429,213,436,232,448,249,474,269,504,285,536,295,568,302,567,307,535,300,502,289,471,274,444,253,431,235,424,214,418,178"/>
+<area shape="poly" id="edge13_Node000012_Node000009" title=" " alt="" coords="388,180,261,223,260,218,387,175"/>
+<area shape="rect" id="Node000013" href="$d9/d83/move_8h.html" title=" " alt="" coords="280,225,383,251"/>
+<area shape="poly" id="edge11_Node000012_Node000013" title=" " alt="" coords="408,179,358,219,355,214,405,175"/>
+<area shape="rect" id="Node000014" href="$d0/d1b/static__assert_8h.html" title="Portable compile&#45;time assertion wrapper." alt="" coords="458,225,607,251"/>
+<area shape="poly" id="edge15_Node000012_Node000014" title=" " alt="" coords="440,175,504,215,501,220,437,180"/>
+<area shape="poly" id="edge12_Node000013_Node000008" title=" " alt="" coords="382,248,581,293,580,298,381,253"/>
+<area shape="rect" id="Node000016" href="$da/d99/has__include_8h.html" title=" " alt="" coords="5,225,148,251"/>
+<area shape="poly" id="edge17_Node000015_Node000016" title=" " alt="" coords="110,179,91,215,87,212,105,176"/>
+</map>

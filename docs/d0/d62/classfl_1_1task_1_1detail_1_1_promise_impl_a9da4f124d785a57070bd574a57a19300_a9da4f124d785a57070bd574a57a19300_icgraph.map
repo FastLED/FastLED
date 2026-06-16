@@ -1,0 +1,5 @@
+<map id="fl::task::detail::PromiseImpl::is_completed" name="fl::task::detail::PromiseImpl::is_completed">
+<area shape="rect" id="Node000001" title="Check if Promise is completed." alt="" coords="225,5,397,45"/>
+<area shape="rect" id="Node000002" href="$d0/d62/classfl_1_1task_1_1detail_1_1_promise_impl_a69c67c779bae72b4c0b420dc7d5b654c.html#a69c67c779bae72b4c0b420dc7d5b654c" title="Update Promise state &#45; processes callbacks if needed." alt="" coords="5,5,177,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="211,28,177,28,177,23,211,23"/>
+</map>

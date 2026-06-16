@@ -107,7 +107,7 @@ $(function(){initNavTree('d1/d69/bitset_8h_a96e310c8c75d2db2110158610604b4bc.htm
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../d4/d54/compiler__control_8h_a373eeaf762a6a66a0a6984bd204a72dd.html#a373eeaf762a6a66a0a6984bd204a72dd">FL_DISABLE_WARNING_PUSH</a> FL_DISABLE_WARNING </td>
+          <td class="memname"><a class="el" href="../../df/d96/s16x16x4_8h_a373eeaf762a6a66a0a6984bd204a72dd.html#a373eeaf762a6a66a0a6984bd204a72dd">FL_DISABLE_WARNING_PUSH</a> FL_DISABLE_WARNING </td>
           <td>(</td>
           <td class="paramtype">double-</td>          <td class="paramname"><span class="paramname"><em>promotion</em></span></td><td>)</td>
           <td></td>
@@ -115,7 +115,7 @@ $(function(){initNavTree('d1/d69/bitset_8h_a96e310c8c75d2db2110158610604b4bc.htm
       </table>
 </div><div class="memdoc">
 <p>A simple fixed-size Bitset implementation similar to std::Bitset.</p>
-<p>Constructs a BitsetFixed with all bits reset.</p>
+<p>Constructs a bitset_fixed with all bits reset.</p>
 <p>Resets all bits to zero.</p>
 <p>Sets or clears the bit at position pos.</p>
 <p>Clears the bit at position pos.</p>
@@ -128,7 +128,7 @@ $(function(){initNavTree('d1/d69/bitset_8h_a96e310c8c75d2db2110158610604b4bc.htm
 <p>Bitwise AND</p>
 <p>Bitwise OR</p>
 <p>Bitwise XOR</p>
-<p>Size of the BitsetFixed (number of bits).</p>
+<p>Size of the bitset_fixed (number of bits).</p>
 <p>Finds the first bit that matches the test value. Returns the index of the first matching bit, or -1 if none found. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">test_value</td><td>The value to search for (true or false) </td></tr>
@@ -144,8 +144,10 @@ $(function(){initNavTree('d1/d69/bitset_8h_a96e310c8c75d2db2110158610604b4bc.htm
   </table>
   </dd>
 </dl>
+<p>Equality comparison</p>
+<p>Lexicographic comparison</p>
 <p>Friend operators for convenience.</p>
-<p>A Bitset implementation with inline storage that can grow if needed. T is the storage type (u8, u16, u32, uint64_t) N is the initial number of bits to store inline</p>
+<p>A Bitset implementation with inline storage that can grow if needed. T is the storage type (<a class="el" href="../../df/da5/lib8tion_8h_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a>, u16, u32, <a class="el" href="../../df/da5/lib8tion_8h_add3f775ccb36323b444c97c36b6bb694.html#add3f775ccb36323b444c97c36b6bb694">u64</a>) N is the initial number of bits to store inline</p>
 <p>Constructs a Bitset with all bits reset.</p>
 <p>Resets all bits to zero.</p>
 <p>Resizes the Bitset if needed</p>
@@ -153,6 +155,9 @@ $(function(){initNavTree('d1/d69/bitset_8h_a96e310c8c75d2db2110158610604b4bc.htm
 <p>Clears the bit at position pos.</p>
 <p>Flips (toggles) the bit at position pos.</p>
 <p>Flips all bits.</p>
+<p>Add a bit to the end (initialized to 0)</p>
+<p>Emplace back - for consistency with other containers</p>
+<p>Remove the last bit</p>
 <p>Tests whether the bit at position pos is set.</p>
 <p>Returns the value of the bit at position pos.</p>
 <p>Returns the number of set bits.</p>
@@ -167,620 +172,723 @@ $(function(){initNavTree('d1/d69/bitset_8h_a96e310c8c75d2db2110158610604b4bc.htm
   </dd>
 </dl>
 <p>Bitwise operators</p>
+<p>Equality comparison</p>
+<p>Lexicographic comparison</p>
 
-<p class="definition">Definition at line <a class="el" href="../../d1/d69/bitset_8h_source.html#l00012">12</a> of file <a class="el" href="../../d1/d69/bitset_8h_source.html">bitset.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   19</span>             {</div>
-<div class="line"><span class="lineno">   20</span> </div>
-<div class="line"><span class="lineno">   21</span><span class="keyword">template</span> &lt;fl::u32 N&gt; <span class="keyword">class </span>BitsetInlined;</div>
-<div class="line"><span class="lineno">   22</span> </div>
-<div class="line"><span class="lineno">   23</span><span class="keyword">template</span> &lt;fl::u32 N&gt; <span class="keyword">class </span>BitsetFixed;</div>
-<div class="line"><span class="lineno">   24</span> </div>
-<div class="line"><span class="lineno">   25</span><span class="keyword">class </span>string;</div>
-<div class="line"><span class="lineno">   26</span><span class="keyword">template</span> &lt;fl::u32 N = 16&gt;</div>
-<div class="line"><span class="lineno">   27</span><span class="keyword">using </span>bitset = BitsetInlined&lt;N&gt;; <span class="comment">// inlined but can go bigger.</span></div>
-<div class="line"><span class="lineno">   28</span> </div>
-<div class="line"><span class="lineno">   29</span><span class="keyword">template</span> &lt;fl::u32 N&gt;</div>
-<div class="line"><span class="lineno">   30</span><span class="keyword">using </span>bitset_fixed = BitsetFixed&lt;N&gt;; <span class="comment">// fixed size, no dynamic allocation.</span></div>
-<div class="line"><span class="lineno">   31</span> </div>
-<div class="line"><span class="lineno">   32</span> </div>
-<div class="line"><span class="lineno">   33</span><span class="comment">// TODO: move this to fl/math.h</span></div>
-<div class="line"><span class="lineno">   34</span><span class="keyword">template</span>&lt;<span class="keyword">typename</span> IntType&gt;</div>
-<div class="line"><span class="lineno">   35</span><span class="keyword">inline</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> popcount(IntType value) {</div>
-<div class="line"><span class="lineno">   36</span>    <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a><span class="keyword">&gt;</span>(__builtin_popcount(value));</div>
-<div class="line"><span class="lineno">   37</span>}</div>
-<div class="line"><span class="lineno">   38</span> </div>
-<div class="line"><span class="lineno">   39</span><span class="keyword">template</span>&lt;<span class="keyword">typename</span> IntType&gt;</div>
-<div class="line"><span class="lineno">   40</span><span class="keyword">inline</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> countr_zero(IntType value) {</div>
-<div class="line"><span class="lineno">   41</span>    <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a><span class="keyword">&gt;</span>(__builtin_ctz(value));</div>
-<div class="line"><span class="lineno">   42</span>}</div>
-<div class="line"><span class="lineno">   43</span></div>
-<div class="line"><span class="lineno">   45</span><span class="keyword">template</span> &lt;fl::u32 N&gt; <span class="keyword">class </span>BitsetFixed {</div>
-<div class="line"><span class="lineno">   46</span>  <span class="keyword">private</span>:</div>
-<div class="line"><span class="lineno">   47</span>    <span class="keyword">static_assert</span>(<span class="keyword">sizeof</span>(fl::u16) == 2, <span class="stringliteral">&quot;u16 should be 2 bytes&quot;</span>);</div>
-<div class="line"><span class="lineno">   48</span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> fl::u32 bits_per_block = 8 * <span class="keyword">sizeof</span>(fl::u16);</div>
-<div class="line"><span class="lineno">   49</span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> fl::u32 block_count =</div>
-<div class="line"><span class="lineno">   50</span>        (N + bits_per_block - 1) / bits_per_block;</div>
-<div class="line"><span class="lineno">   51</span>    <span class="keyword">using </span>block_type = fl::u16;</div>
-<div class="line"><span class="lineno">   52</span> </div>
-<div class="line"><span class="lineno">   53</span>    <span class="comment">// Underlying blocks storing bits</span></div>
-<div class="line"><span class="lineno">   54</span>    block_type _blocks[block_count];</div>
-<div class="line"><span class="lineno">   55</span> </div>
-<div class="line"><span class="lineno">   56</span>  <span class="keyword">public</span>:</div>
-<div class="line"><span class="lineno">   57</span>    <span class="keyword">struct </span>Proxy {</div>
-<div class="line"><span class="lineno">   58</span>        BitsetFixed &amp;_bitset;</div>
-<div class="line"><span class="lineno">   59</span>        fl::u32 _pos;</div>
+<p class="definition">Definition at line <a class="el" href="../../d1/d69/bitset_8h_source.html#l00013">13</a> of file <a class="el" href="../../d1/d69/bitset_8h_source.html">bitset.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   20</span>             {</div>
+<div class="line"><span class="lineno">   21</span> </div>
+<div class="line"><span class="lineno">   22</span><span class="keyword">template</span> &lt;fl::u32 N&gt; <span class="keyword">class </span>bitset_inlined;</div>
+<div class="line"><span class="lineno">   23</span> </div>
+<div class="line"><span class="lineno">   24</span><span class="keyword">template</span> &lt;fl::u32 N&gt; <span class="keyword">class </span>bitset_fixed;</div>
+<div class="line"><span class="lineno">   25</span> </div>
+<div class="line"><span class="lineno">   26</span><span class="keyword">class </span>string;</div>
+<div class="line"><span class="lineno">   27</span><span class="keyword">template</span> &lt;fl::u32 N = 16&gt;</div>
+<div class="line"><span class="lineno">   28</span><span class="keyword">using </span>bitset = bitset_inlined&lt;N&gt;; <span class="comment">// inlined but can go bigger.</span></div>
+<div class="line"><span class="lineno">   29</span> </div>
+<div class="line"><span class="lineno">   30</span> </div>
+<div class="line"><span class="lineno">   31</span><span class="comment">// TODO: move this to fl/math.h</span></div>
+<div class="line"><span class="lineno">   32</span><span class="keyword">template</span>&lt;<span class="keyword">typename</span> IntType&gt;</div>
+<div class="line"><span class="lineno">   33</span><span class="keyword">inline</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> popcount(IntType value) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">   34</span>    <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a><span class="keyword">&gt;</span>(__builtin_popcount(value));</div>
+<div class="line"><span class="lineno">   35</span>}</div>
+<div class="line"><span class="lineno">   36</span> </div>
+<div class="line"><span class="lineno">   37</span><span class="keyword">template</span>&lt;<span class="keyword">typename</span> IntType&gt;</div>
+<div class="line"><span class="lineno">   38</span><span class="keyword">inline</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> countr_zero(IntType value) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">   39</span>    <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a><span class="keyword">&gt;</span>(__builtin_ctz(value));</div>
+<div class="line"><span class="lineno">   40</span>}</div>
+<div class="line"><span class="lineno">   41</span></div>
+<div class="line"><span class="lineno">   43</span><span class="keyword">template</span> &lt;fl::u32 N&gt; <span class="keyword">class </span>bitset_fixed {</div>
+<div class="line"><span class="lineno">   44</span>  <span class="keyword">private</span>:</div>
+<div class="line"><span class="lineno">   45</span>    <a class="code hl_define" href="../../df/d96/s16x16x4_8h_a1e4d1792cf482d5f64f27714ea210d47.html#a1e4d1792cf482d5f64f27714ea210d47">FL_STATIC_ASSERT</a>(<span class="keyword">sizeof</span>(fl::u16) == 2, <span class="stringliteral">&quot;u16 should be 2 bytes&quot;</span>);</div>
+<div class="line"><span class="lineno">   46</span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> fl::u32 bits_per_block = 8 * <span class="keyword">sizeof</span>(fl::u16);</div>
+<div class="line"><span class="lineno">   47</span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> fl::u32 block_count =</div>
+<div class="line"><span class="lineno">   48</span>        (N + bits_per_block - 1) / bits_per_block;</div>
+<div class="line"><span class="lineno">   49</span>    <span class="keyword">using </span>block_type = fl::u16;</div>
+<div class="line"><span class="lineno">   50</span> </div>
+<div class="line"><span class="lineno">   51</span>    <span class="comment">// Underlying blocks storing bits</span></div>
+<div class="line"><span class="lineno">   52</span>    block_type _blocks[block_count];</div>
+<div class="line"><span class="lineno">   53</span> </div>
+<div class="line"><span class="lineno">   54</span>  <span class="keyword">public</span>:</div>
+<div class="line"><span class="lineno">   55</span>    <span class="keyword">struct </span>Proxy {</div>
+<div class="line"><span class="lineno">   56</span>        bitset_fixed &amp;_bitset;</div>
+<div class="line"><span class="lineno">   57</span>        fl::u32 _pos;</div>
+<div class="line"><span class="lineno">   58</span> </div>
+<div class="line"><span class="lineno">   59</span>        Proxy(bitset_fixed &amp;bitset, fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> : _bitset(bitset), _pos(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) {}</div>
 <div class="line"><span class="lineno">   60</span> </div>
-<div class="line"><span class="lineno">   61</span>        Proxy(BitsetFixed &amp;bitset, fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) : _bitset(bitset), _pos(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) {}</div>
-<div class="line"><span class="lineno">   62</span> </div>
-<div class="line"><span class="lineno">   63</span>        Proxy &amp;operator=(<span class="keywordtype">bool</span> value) {</div>
-<div class="line"><span class="lineno">   64</span>            _bitset.set(_pos, value);</div>
-<div class="line"><span class="lineno">   65</span>            <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><span class="lineno">   66</span>        }</div>
-<div class="line"><span class="lineno">   67</span> </div>
-<div class="line"><span class="lineno">   68</span>        <span class="keyword">operator</span> bool()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> _bitset.test(_pos); }</div>
-<div class="line"><span class="lineno">   69</span>    };</div>
-<div class="line"><span class="lineno">   70</span> </div>
-<div class="line"><span class="lineno">   71</span>    Proxy operator[](fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) { <span class="keywordflow">return</span> Proxy(*<span class="keyword">this</span>, <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>); }</div>
-<div class="line"><span class="lineno">   72</span></div>
-<div class="line"><span class="lineno">   74</span>    <span class="keyword">constexpr</span> BitsetFixed() noexcept : _blocks{} {}</div>
-<div class="line"><span class="lineno">   75</span> </div>
-<div class="line"><span class="lineno">   76</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_aa878a2c7d8c38f99002cb94c3d6d3465.html#aa878a2c7d8c38f99002cb94c3d6d3465">to_string</a>(<span class="keywordtype">string</span>* dst)<span class="keyword"> const </span>{</div>
-<div class="line"><span class="lineno">   77</span>        detail::to_string(_blocks, N, dst);</div>
-<div class="line"><span class="lineno">   78</span>    }</div>
-<div class="line"><span class="lineno">   79</span></div>
-<div class="line"><span class="lineno">   81</span>    <span class="keywordtype">void</span> reset() noexcept {</div>
-<div class="line"><span class="lineno">   82</span>        <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; block_count; ++i) {</div>
-<div class="line"><span class="lineno">   83</span>            _blocks[i] = 0;</div>
-<div class="line"><span class="lineno">   84</span>        }</div>
-<div class="line"><span class="lineno">   85</span>    }</div>
-<div class="line"><span class="lineno">   86</span></div>
-<div class="line"><span class="lineno">   88</span>    BitsetFixed &amp;set(fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>, <span class="keywordtype">bool</span> value = <span class="keyword">true</span>) {</div>
-<div class="line"><span class="lineno">   89</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &lt; N) {</div>
-<div class="line"><span class="lineno">   90</span>            <span class="keyword">const</span> fl::u32 idx = <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> / bits_per_block;</div>
-<div class="line"><span class="lineno">   91</span>            <span class="keyword">const</span> fl::u32 off = <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> % bits_per_block;</div>
-<div class="line"><span class="lineno">   92</span>            <span class="keywordflow">if</span> (value) {</div>
-<div class="line"><span class="lineno">   93</span>                _blocks[idx] |= (block_type(1) &lt;&lt; off);</div>
-<div class="line"><span class="lineno">   94</span>            } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">   95</span>                _blocks[idx] &amp;= ~(block_type(1) &lt;&lt; off);</div>
-<div class="line"><span class="lineno">   96</span>            }</div>
-<div class="line"><span class="lineno">   97</span>        }</div>
-<div class="line"><span class="lineno">   98</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><span class="lineno">   99</span>    }</div>
-<div class="line"><span class="lineno">  100</span> </div>
-<div class="line"><span class="lineno">  101</span>    <span class="keywordtype">void</span> assign(fl::size n, <span class="keywordtype">bool</span> value) {</div>
-<div class="line"><span class="lineno">  102</span>        <span class="keywordflow">if</span> (n &gt; N) {</div>
-<div class="line"><span class="lineno">  103</span>            n = N;</div>
-<div class="line"><span class="lineno">  104</span>        }</div>
-<div class="line"><span class="lineno">  105</span>        <span class="keywordflow">for</span> (fl::size i = 0; i &lt; n; ++i) {</div>
-<div class="line"><span class="lineno">  106</span>            set(i, value);</div>
-<div class="line"><span class="lineno">  107</span>        }</div>
-<div class="line"><span class="lineno">  108</span>    }</div>
-<div class="line"><span class="lineno">  109</span></div>
-<div class="line"><span class="lineno">  111</span>    BitsetFixed &amp;reset(fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) { <span class="keywordflow">return</span> set(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>, <span class="keyword">false</span>); }</div>
-<div class="line"><span class="lineno">  112</span></div>
-<div class="line"><span class="lineno">  114</span>    BitsetFixed &amp;flip(fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) {</div>
-<div class="line"><span class="lineno">  115</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &lt; N) {</div>
-<div class="line"><span class="lineno">  116</span>            <span class="keyword">const</span> fl::u32 idx = <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> / bits_per_block;</div>
-<div class="line"><span class="lineno">  117</span>            <span class="keyword">const</span> fl::u32 off = <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> % bits_per_block;</div>
-<div class="line"><span class="lineno">  118</span>            _blocks[idx] ^= (block_type(1) &lt;&lt; off);</div>
-<div class="line"><span class="lineno">  119</span>        }</div>
-<div class="line"><span class="lineno">  120</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><span class="lineno">  121</span>    }</div>
-<div class="line"><span class="lineno">  122</span></div>
-<div class="line"><span class="lineno">  124</span>    BitsetFixed &amp;flip() noexcept {</div>
-<div class="line"><span class="lineno">  125</span>        <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; block_count; ++i) {</div>
-<div class="line"><span class="lineno">  126</span>            _blocks[i] = ~_blocks[i];</div>
-<div class="line"><span class="lineno">  127</span>        }</div>
-<div class="line"><span class="lineno">  128</span>        <span class="comment">// Mask out unused high bits in the last block</span></div>
-<div class="line"><span class="lineno">  129</span>        <span class="keywordflow">if</span> (N % bits_per_block != 0) {</div>
-<div class="line"><span class="lineno">  130</span>            <span class="keyword">const</span> fl::u32 extra = bits_per_block - (N % bits_per_block);</div>
-<div class="line"><span class="lineno">  131</span>            _blocks[block_count - 1] &amp;= (~block_type(0) &gt;&gt; extra);</div>
-<div class="line"><span class="lineno">  132</span>        }</div>
-<div class="line"><span class="lineno">  133</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><span class="lineno">  134</span>    }</div>
-<div class="line"><span class="lineno">  135</span></div>
-<div class="line"><span class="lineno">  137</span>    <span class="keywordtype">bool</span> test(fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) <span class="keyword">const</span> <span class="keyword">noexcept</span> {</div>
-<div class="line"><span class="lineno">  138</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &lt; N) {</div>
-<div class="line"><span class="lineno">  139</span>            <span class="keyword">const</span> fl::u32 idx = <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> / bits_per_block;</div>
-<div class="line"><span class="lineno">  140</span>            <span class="keyword">const</span> fl::u32 off = <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> % bits_per_block;</div>
-<div class="line"><span class="lineno">  141</span>            <span class="keywordflow">return</span> (_blocks[idx] &gt;&gt; off) &amp; 1;</div>
-<div class="line"><span class="lineno">  142</span>        }</div>
-<div class="line"><span class="lineno">  143</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  144</span>    }</div>
-<div class="line"><span class="lineno">  145</span></div>
-<div class="line"><span class="lineno">  147</span>    <span class="keywordtype">bool</span> operator[](fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) <span class="keyword">const</span> <span class="keyword">noexcept</span> { <span class="keywordflow">return</span> test(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>); }</div>
-<div class="line"><span class="lineno">  148</span></div>
-<div class="line"><span class="lineno">  150</span>    fl::u32 count() const noexcept {</div>
-<div class="line"><span class="lineno">  151</span>        fl::u32 cnt = 0;</div>
-<div class="line"><span class="lineno">  152</span>        <span class="comment">// Count bits in all complete blocks</span></div>
-<div class="line"><span class="lineno">  153</span>        <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; block_count - 1; ++i) {</div>
-<div class="line"><span class="lineno">  154</span>            cnt += fl::popcount(_blocks[i]);</div>
-<div class="line"><span class="lineno">  155</span>        }</div>
-<div class="line"><span class="lineno">  156</span> </div>
-<div class="line"><span class="lineno">  157</span>        <span class="comment">// For the last block, we need to be careful about counting only valid</span></div>
-<div class="line"><span class="lineno">  158</span>        <span class="comment">// bits</span></div>
-<div class="line"><span class="lineno">  159</span>        <span class="keywordflow">if</span> (block_count &gt; 0) {</div>
-<div class="line"><span class="lineno">  160</span>            block_type last_block = _blocks[block_count - 1];</div>
-<div class="line"><span class="lineno">  161</span>            <span class="comment">// If N is not a multiple of bits_per_block, mask out the unused</span></div>
-<div class="line"><span class="lineno">  162</span>            <span class="comment">// bits</span></div>
-<div class="line"><span class="lineno">  163</span>            <span class="keywordflow">if</span> (N % bits_per_block != 0) {</div>
-<div class="line"><span class="lineno">  164</span>                <span class="keyword">const</span> fl::u32 valid_bits = N % bits_per_block;</div>
-<div class="line"><span class="lineno">  165</span>                <span class="comment">// Create a mask with only the valid bits set to 1</span></div>
-<div class="line"><span class="lineno">  166</span>                block_type mask = (valid_bits == bits_per_block)</div>
-<div class="line"><span class="lineno">  167</span>                                      ? <span class="keyword">static_cast&lt;</span>block_type<span class="keyword">&gt;</span>(~block_type(0))</div>
-<div class="line"><span class="lineno">  168</span>                                      : ((block_type(1) &lt;&lt; valid_bits) - 1);</div>
-<div class="line"><span class="lineno">  169</span>                last_block &amp;= mask;</div>
-<div class="line"><span class="lineno">  170</span>            }</div>
-<div class="line"><span class="lineno">  171</span>            cnt += fl::popcount(last_block);</div>
-<div class="line"><span class="lineno">  172</span>        }</div>
-<div class="line"><span class="lineno">  173</span> </div>
-<div class="line"><span class="lineno">  174</span>        <span class="keywordflow">return</span> cnt;</div>
-<div class="line"><span class="lineno">  175</span>    }</div>
-<div class="line"><span class="lineno">  176</span></div>
-<div class="line"><span class="lineno">  178</span>    <span class="keywordtype">bool</span> any() const noexcept { <span class="keywordflow">return</span> count() &gt; 0; }</div>
-<div class="line"><span class="lineno">  179</span>    <span class="keywordtype">bool</span> none() const noexcept { <span class="keywordflow">return</span> count() == 0; }</div>
-<div class="line"><span class="lineno">  180</span>    <span class="keywordtype">bool</span> all() const noexcept {</div>
-<div class="line"><span class="lineno">  181</span>        <span class="keywordflow">if</span> (N == 0)</div>
-<div class="line"><span class="lineno">  182</span>            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  183</span> </div>
-<div class="line"><span class="lineno">  184</span>        <span class="comment">// Check all complete blocks</span></div>
-<div class="line"><span class="lineno">  185</span>        <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; block_count - 1; ++i) {</div>
-<div class="line"><span class="lineno">  186</span>            <span class="keywordflow">if</span> (_blocks[i] != ~block_type(0)) {</div>
-<div class="line"><span class="lineno">  187</span>                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  188</span>            }</div>
-<div class="line"><span class="lineno">  189</span>        }</div>
-<div class="line"><span class="lineno">  190</span> </div>
-<div class="line"><span class="lineno">  191</span>        <span class="comment">// Check the last block</span></div>
-<div class="line"><span class="lineno">  192</span>        <span class="keywordflow">if</span> (block_count &gt; 0) {</div>
-<div class="line"><span class="lineno">  193</span>            block_type mask;</div>
-<div class="line"><span class="lineno">  194</span>            <span class="keywordflow">if</span> (N % bits_per_block != 0) {</div>
-<div class="line"><span class="lineno">  195</span>                <span class="comment">// Create a mask for the valid bits in the last block</span></div>
-<div class="line"><span class="lineno">  196</span>                mask = (block_type(1) &lt;&lt; (N % bits_per_block)) - 1;</div>
-<div class="line"><span class="lineno">  197</span>            } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  198</span>                mask = <span class="keyword">static_cast&lt;</span>block_type<span class="keyword">&gt;</span>(~block_type(0));</div>
-<div class="line"><span class="lineno">  199</span>            }</div>
-<div class="line"><span class="lineno">  200</span> </div>
-<div class="line"><span class="lineno">  201</span>            <span class="keywordflow">if</span> ((_blocks[block_count - 1] &amp; mask) != mask) {</div>
-<div class="line"><span class="lineno">  202</span>                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  203</span>            }</div>
-<div class="line"><span class="lineno">  204</span>        }</div>
-<div class="line"><span class="lineno">  205</span> </div>
-<div class="line"><span class="lineno">  206</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  207</span>    }</div>
-<div class="line"><span class="lineno">  208</span></div>
-<div class="line"><span class="lineno">  210</span>    BitsetFixed &amp;operator&amp;=(<span class="keyword">const</span> BitsetFixed &amp;other) <span class="keyword">noexcept</span> {</div>
-<div class="line"><span class="lineno">  211</span>        <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; block_count; ++i) {</div>
-<div class="line"><span class="lineno">  212</span>            _blocks[i] &amp;= other._blocks[i];</div>
-<div class="line"><span class="lineno">  213</span>        }</div>
-<div class="line"><span class="lineno">  214</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><span class="lineno">  215</span>    }</div>
-<div class="line"><span class="lineno">  217</span>    BitsetFixed &amp;operator|=(<span class="keyword">const</span> BitsetFixed &amp;other) <span class="keyword">noexcept</span> {</div>
-<div class="line"><span class="lineno">  218</span>        <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; block_count; ++i) {</div>
-<div class="line"><span class="lineno">  219</span>            _blocks[i] |= other._blocks[i];</div>
-<div class="line"><span class="lineno">  220</span>        }</div>
-<div class="line"><span class="lineno">  221</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><span class="lineno">  222</span>    }</div>
-<div class="line"><span class="lineno">  224</span>    BitsetFixed &amp;operator^=(<span class="keyword">const</span> BitsetFixed &amp;other) <span class="keyword">noexcept</span> {</div>
-<div class="line"><span class="lineno">  225</span>        <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; block_count; ++i) {</div>
-<div class="line"><span class="lineno">  226</span>            _blocks[i] ^= other._blocks[i];</div>
-<div class="line"><span class="lineno">  227</span>        }</div>
-<div class="line"><span class="lineno">  228</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><span class="lineno">  229</span>    }</div>
-<div class="line"><span class="lineno">  230</span></div>
-<div class="line"><span class="lineno">  232</span>    <span class="keyword">constexpr</span> fl::u32 size() const noexcept { <span class="keywordflow">return</span> N; }</div>
-<div class="line"><span class="lineno">  233</span></div>
-<div class="line"><span class="lineno">  238</span>    fl::i32 find_first(<span class="keywordtype">bool</span> test_value, fl::u32 <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a> = 0) const noexcept {</div>
-<div class="line"><span class="lineno">  239</span>        <span class="comment">// If offset is beyond our size, no match possible</span></div>
-<div class="line"><span class="lineno">  240</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a> &gt;= N) {</div>
-<div class="line"><span class="lineno">  241</span>            <span class="keywordflow">return</span> -1;</div>
-<div class="line"><span class="lineno">  242</span>        }</div>
-<div class="line"><span class="lineno">  243</span> </div>
-<div class="line"><span class="lineno">  244</span>        <span class="comment">// Calculate which block to start from</span></div>
-<div class="line"><span class="lineno">  245</span>        fl::u32 start_block = <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a> / bits_per_block;</div>
-<div class="line"><span class="lineno">  246</span>        fl::u32 start_bit = <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a> % bits_per_block;</div>
-<div class="line"><span class="lineno">  247</span>        </div>
-<div class="line"><span class="lineno">  248</span>        <span class="keywordflow">for</span> (fl::u32 block_idx = start_block; block_idx &lt; block_count; ++block_idx) {</div>
-<div class="line"><span class="lineno">  249</span>            block_type current_block = _blocks[block_idx];</div>
-<div class="line"><span class="lineno">  250</span>            </div>
-<div class="line"><span class="lineno">  251</span>            <span class="comment">// For the last block, we need to mask out unused bits</span></div>
-<div class="line"><span class="lineno">  252</span>            <span class="keywordflow">if</span> (block_idx == block_count - 1 &amp;&amp; N % bits_per_block != 0) {</div>
-<div class="line"><span class="lineno">  253</span>                <span class="keyword">const</span> fl::u32 valid_bits = N % bits_per_block;</div>
-<div class="line"><span class="lineno">  254</span>                block_type mask = (valid_bits == bits_per_block) </div>
-<div class="line"><span class="lineno">  255</span>                    ? <span class="keyword">static_cast&lt;</span>block_type<span class="keyword">&gt;</span>(~block_type(0)) </div>
-<div class="line"><span class="lineno">  256</span>                    : ((block_type(1) &lt;&lt; valid_bits) - 1);</div>
-<div class="line"><span class="lineno">  257</span>                current_block &amp;= mask;</div>
-<div class="line"><span class="lineno">  258</span>            }</div>
-<div class="line"><span class="lineno">  259</span>            </div>
-<div class="line"><span class="lineno">  260</span>            <span class="comment">// If looking for false bits, invert the block</span></div>
-<div class="line"><span class="lineno">  261</span>            <span class="keywordflow">if</span> (!test_value) {</div>
-<div class="line"><span class="lineno">  262</span>                current_block = ~current_block;</div>
-<div class="line"><span class="lineno">  263</span>            }</div>
-<div class="line"><span class="lineno">  264</span>            </div>
-<div class="line"><span class="lineno">  265</span>            <span class="comment">// For the first block, mask out bits before the offset</span></div>
-<div class="line"><span class="lineno">  266</span>            <span class="keywordflow">if</span> (block_idx == start_block &amp;&amp; start_bit &gt; 0) {</div>
-<div class="line"><span class="lineno">  267</span>                current_block &amp;= ~((block_type(1) &lt;&lt; start_bit) - 1);</div>
-<div class="line"><span class="lineno">  268</span>            }</div>
-<div class="line"><span class="lineno">  269</span>            </div>
-<div class="line"><span class="lineno">  270</span>            <span class="comment">// If there are any matching bits in this block</span></div>
-<div class="line"><span class="lineno">  271</span>            <span class="keywordflow">if</span> (current_block != 0) {</div>
-<div class="line"><span class="lineno">  272</span>                <span class="comment">// Find the first set bit</span></div>
-<div class="line"><span class="lineno">  273</span>                fl::u32 bit_pos = fl::countr_zero(current_block);</div>
-<div class="line"><span class="lineno">  274</span>                fl::u32 absolute_pos = block_idx * bits_per_block + bit_pos;</div>
-<div class="line"><span class="lineno">  275</span>                </div>
-<div class="line"><span class="lineno">  276</span>                <span class="comment">// Make sure we haven&#39;t gone past the end of the bitset</span></div>
-<div class="line"><span class="lineno">  277</span>                <span class="keywordflow">if</span> (absolute_pos &lt; N) {</div>
-<div class="line"><span class="lineno">  278</span>                    <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>fl::i32<span class="keyword">&gt;</span>(absolute_pos);</div>
-<div class="line"><span class="lineno">  279</span>                }</div>
-<div class="line"><span class="lineno">  280</span>            }</div>
-<div class="line"><span class="lineno">  281</span>        }</div>
-<div class="line"><span class="lineno">  282</span>        </div>
-<div class="line"><span class="lineno">  283</span>        <span class="keywordflow">return</span> -1;  <span class="comment">// No matching bit found</span></div>
-<div class="line"><span class="lineno">  284</span>    }</div>
-<div class="line"><span class="lineno">  285</span></div>
-<div class="line"><span class="lineno">  291</span>    fl::i32 find_run(<span class="keywordtype">bool</span> test_value, fl::u32 min_length, fl::u32 <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a> = 0) const noexcept {</div>
-<div class="line"><span class="lineno">  292</span>        fl::u32 run_start = <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a>;</div>
-<div class="line"><span class="lineno">  293</span>        fl::u32 run_length = 0;</div>
-<div class="line"><span class="lineno">  294</span>        </div>
-<div class="line"><span class="lineno">  295</span>        <span class="keywordflow">for</span> (fl::u32 i = <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a>; i &lt; N &amp;&amp; run_length &lt; min_length; ++i) {</div>
-<div class="line"><span class="lineno">  296</span>            <span class="keywordtype">bool</span> current_bit = test(i);</div>
-<div class="line"><span class="lineno">  297</span>            <span class="keywordflow">if</span> (current_bit != test_value) {</div>
-<div class="line"><span class="lineno">  298</span>                run_length = 0;</div>
-<div class="line"><span class="lineno">  299</span>                <span class="keywordflow">if</span> (i + 1 &lt; N) {</div>
-<div class="line"><span class="lineno">  300</span>                    run_start = i + 1;</div>
-<div class="line"><span class="lineno">  301</span>                }</div>
-<div class="line"><span class="lineno">  302</span>            } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  303</span>                ++run_length;</div>
-<div class="line"><span class="lineno">  304</span>            }</div>
-<div class="line"><span class="lineno">  305</span>        }</div>
-<div class="line"><span class="lineno">  306</span> </div>
-<div class="line"><span class="lineno">  307</span>        <span class="keywordflow">if</span> (run_length &gt;= min_length) {</div>
-<div class="line"><span class="lineno">  308</span>            <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>fl::i32<span class="keyword">&gt;</span>(run_start);</div>
-<div class="line"><span class="lineno">  309</span>        }</div>
-<div class="line"><span class="lineno">  310</span>        </div>
-<div class="line"><span class="lineno">  311</span>        <span class="keywordflow">return</span> -1; <span class="comment">// No run found</span></div>
-<div class="line"><span class="lineno">  312</span>    }</div>
-<div class="line"><span class="lineno">  313</span></div>
-<div class="line"><span class="lineno">  315</span>    <span class="keyword">friend</span> BitsetFixed <a class="code hl_function" href="../../db/dd1/crgb_8h_a8a80cf207f08b95b7e6d5775ec02ac4b.html#a8a80cf207f08b95b7e6d5775ec02ac4b">operator&amp;</a>(BitsetFixed lhs,</div>
-<div class="line"><span class="lineno">  316</span>                                 <span class="keyword">const</span> BitsetFixed &amp;rhs) <span class="keyword">noexcept</span> {</div>
-<div class="line"><span class="lineno">  317</span>        <span class="keywordflow">return</span> lhs &amp;= rhs;</div>
-<div class="line"><span class="lineno">  318</span>    }</div>
-<div class="line"><span class="lineno">  319</span>    <span class="keyword">friend</span> BitsetFixed <a class="code hl_function" href="../../db/dd1/crgb_8h_a8a5083bb351fad245f328ae8066134ae.html#a8a5083bb351fad245f328ae8066134ae">operator|</a>(BitsetFixed lhs,</div>
-<div class="line"><span class="lineno">  320</span>                                 <span class="keyword">const</span> BitsetFixed &amp;rhs) <span class="keyword">noexcept</span> {</div>
-<div class="line"><span class="lineno">  321</span>        <span class="keywordflow">return</span> lhs |= rhs;</div>
-<div class="line"><span class="lineno">  322</span>    }</div>
-<div class="line"><span class="lineno">  323</span>    <span class="keyword">friend</span> BitsetFixed operator^(BitsetFixed lhs,</div>
-<div class="line"><span class="lineno">  324</span>                                 <span class="keyword">const</span> BitsetFixed &amp;rhs) <span class="keyword">noexcept</span> {</div>
-<div class="line"><span class="lineno">  325</span>        <span class="keywordflow">return</span> lhs ^= rhs;</div>
-<div class="line"><span class="lineno">  326</span>    }</div>
-<div class="line"><span class="lineno">  327</span>    <span class="keyword">friend</span> BitsetFixed operator~(BitsetFixed bs) <span class="keyword">noexcept</span> { <span class="keywordflow">return</span> bs.flip(); }</div>
-<div class="line"><span class="lineno">  328</span>};</div>
-<div class="line"><span class="lineno">  329</span></div>
-<div class="line"><span class="lineno">  333</span><span class="keyword">template</span> &lt;fl::u32 N = 16&gt; <span class="comment">// Default size is 16 bits, or 2 bytes</span></div>
-<div class="line"><span class="lineno">  334</span><span class="keyword">class </span>BitsetInlined {</div>
-<div class="line"><span class="lineno">  335</span>  <span class="keyword">private</span>:</div>
-<div class="line"><span class="lineno">  336</span>    <span class="comment">// Either store a fixed Bitset&lt;N&gt; or a dynamic Bitset</span></div>
-<div class="line"><span class="lineno">  337</span>    <span class="keyword">using </span>fixed_bitset = BitsetFixed&lt;N&gt;;</div>
-<div class="line"><span class="lineno">  338</span>    Variant&lt;fixed_bitset, bitset_dynamic&gt; _storage;</div>
-<div class="line"><span class="lineno">  339</span> </div>
-<div class="line"><span class="lineno">  340</span>  <span class="keyword">public</span>:</div>
-<div class="line"><span class="lineno">  341</span>    <span class="keyword">struct </span>Proxy {</div>
-<div class="line"><span class="lineno">  342</span>        BitsetInlined &amp;_bitset;</div>
-<div class="line"><span class="lineno">  343</span>        fl::u32 _pos;</div>
-<div class="line"><span class="lineno">  344</span> </div>
-<div class="line"><span class="lineno">  345</span>        Proxy(BitsetInlined &amp;bitset, fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>)</div>
-<div class="line"><span class="lineno">  346</span>            : _bitset(bitset), _pos(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) {}</div>
-<div class="line"><span class="lineno">  347</span> </div>
-<div class="line"><span class="lineno">  348</span>        Proxy &amp;operator=(<span class="keywordtype">bool</span> value) {</div>
-<div class="line"><span class="lineno">  349</span>            _bitset.set(_pos, value);</div>
-<div class="line"><span class="lineno">  350</span>            <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><span class="lineno">  351</span>        }</div>
-<div class="line"><span class="lineno">  352</span> </div>
-<div class="line"><span class="lineno">  353</span>        <span class="keyword">operator</span> bool()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> _bitset.test(_pos); }</div>
-<div class="line"><span class="lineno">  354</span>    };</div>
-<div class="line"><span class="lineno">  355</span> </div>
-<div class="line"><span class="lineno">  356</span>    Proxy operator[](fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) { <span class="keywordflow">return</span> Proxy(*<span class="keyword">this</span>, <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>); }</div>
-<div class="line"><span class="lineno">  357</span></div>
-<div class="line"><span class="lineno">  359</span>    BitsetInlined() : _storage(fixed_bitset()) {}</div>
-<div class="line"><span class="lineno">  360</span>    BitsetInlined(fl::size size) : _storage(fixed_bitset()) {</div>
-<div class="line"><span class="lineno">  361</span>        <span class="keywordflow">if</span> (size &gt; N) {</div>
-<div class="line"><span class="lineno">  362</span>            _storage = bitset_dynamic(size);</div>
-<div class="line"><span class="lineno">  363</span>        }</div>
-<div class="line"><span class="lineno">  364</span>    }</div>
-<div class="line"><span class="lineno">  365</span>    BitsetInlined(<span class="keyword">const</span> BitsetInlined &amp;other) : _storage(other._storage) {}</div>
-<div class="line"><span class="lineno">  366</span>    BitsetInlined(BitsetInlined &amp;&amp;other) noexcept</div>
-<div class="line"><span class="lineno">  367</span>        : _storage(<a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">fl::move</a>(other._storage)) {}</div>
-<div class="line"><span class="lineno">  368</span>    BitsetInlined &amp;operator=(<span class="keyword">const</span> BitsetInlined &amp;other) {</div>
-<div class="line"><span class="lineno">  369</span>        <span class="keywordflow">if</span> (<span class="keyword">this</span> != &amp;other) {</div>
-<div class="line"><span class="lineno">  370</span>            _storage = other._storage;</div>
-<div class="line"><span class="lineno">  371</span>        }</div>
-<div class="line"><span class="lineno">  372</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><span class="lineno">  373</span>    }</div>
-<div class="line"><span class="lineno">  374</span>    BitsetInlined &amp;operator=(BitsetInlined &amp;&amp;other) <span class="keyword">noexcept</span> {</div>
-<div class="line"><span class="lineno">  375</span>        <span class="keywordflow">if</span> (<span class="keyword">this</span> != &amp;other) {</div>
-<div class="line"><span class="lineno">  376</span>            _storage = <a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">fl::move</a>(other._storage);</div>
-<div class="line"><span class="lineno">  377</span>        }</div>
-<div class="line"><span class="lineno">  378</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><span class="lineno">  379</span>    }</div>
-<div class="line"><span class="lineno">  380</span></div>
-<div class="line"><span class="lineno">  382</span>    <span class="keywordtype">void</span> reset() noexcept {</div>
-<div class="line"><span class="lineno">  383</span>        <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
-<div class="line"><span class="lineno">  384</span>            _storage.template ptr&lt;fixed_bitset&gt;()-&gt;reset();</div>
-<div class="line"><span class="lineno">  385</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  386</span>            _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;reset();</div>
-<div class="line"><span class="lineno">  387</span>        }</div>
-<div class="line"><span class="lineno">  388</span>    }</div>
+<div class="line"><span class="lineno">   61</span>        Proxy &amp;operator=(<span class="keywordtype">bool</span> value) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">   62</span>            _bitset.set(_pos, value);</div>
+<div class="line"><span class="lineno">   63</span>            <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">   64</span>        }</div>
+<div class="line"><span class="lineno">   65</span> </div>
+<div class="line"><span class="lineno">   66</span>        <span class="keyword">operator</span> bool() const <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> { <span class="keywordflow">return</span> _bitset.test(_pos); }</div>
+<div class="line"><span class="lineno">   67</span>    };</div>
+<div class="line"><span class="lineno">   68</span> </div>
+<div class="line"><span class="lineno">   69</span>    Proxy operator[](fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> { <span class="keywordflow">return</span> Proxy(*<span class="keyword">this</span>, <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>); }</div>
+<div class="line"><span class="lineno">   70</span></div>
+<div class="line"><span class="lineno">   72</span>    <span class="keyword">constexpr</span> bitset_fixed() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> : _blocks{} {}</div>
+<div class="line"><span class="lineno">   73</span> </div>
+<div class="line"><span class="lineno">   74</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_aa878a2c7d8c38f99002cb94c3d6d3465.html#aa878a2c7d8c38f99002cb94c3d6d3465">to_string</a>(<span class="keywordtype">string</span>* dst) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">   75</span>        detail::to_string(_blocks, N, dst);</div>
+<div class="line"><span class="lineno">   76</span>    }</div>
+<div class="line"><span class="lineno">   77</span></div>
+<div class="line"><span class="lineno">   79</span>    <span class="keywordtype">void</span> reset() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">   80</span>        <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; block_count; ++i) {</div>
+<div class="line"><span class="lineno">   81</span>            _blocks[i] = 0;</div>
+<div class="line"><span class="lineno">   82</span>        }</div>
+<div class="line"><span class="lineno">   83</span>    }</div>
+<div class="line"><span class="lineno">   84</span></div>
+<div class="line"><span class="lineno">   86</span>    bitset_fixed &amp;set(fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>, <span class="keywordtype">bool</span> value = <span class="keyword">true</span>) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">   87</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &lt; N) {</div>
+<div class="line"><span class="lineno">   88</span>            <span class="keyword">const</span> fl::u32 idx = <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> / bits_per_block;</div>
+<div class="line"><span class="lineno">   89</span>            <span class="keyword">const</span> fl::u32 off = <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> % bits_per_block;</div>
+<div class="line"><span class="lineno">   90</span>            <span class="keywordflow">if</span> (value) {</div>
+<div class="line"><span class="lineno">   91</span>                _blocks[idx] |= (block_type(1) &lt;&lt; off);</div>
+<div class="line"><span class="lineno">   92</span>            } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">   93</span>                _blocks[idx] &amp;= ~(block_type(1) &lt;&lt; off);</div>
+<div class="line"><span class="lineno">   94</span>            }</div>
+<div class="line"><span class="lineno">   95</span>        }</div>
+<div class="line"><span class="lineno">   96</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">   97</span>    }</div>
+<div class="line"><span class="lineno">   98</span> </div>
+<div class="line"><span class="lineno">   99</span>    <span class="keywordtype">void</span> assign(fl::size n, <span class="keywordtype">bool</span> value) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  100</span>        <span class="keywordflow">if</span> (n &gt; N) {</div>
+<div class="line"><span class="lineno">  101</span>            n = N;</div>
+<div class="line"><span class="lineno">  102</span>        }</div>
+<div class="line"><span class="lineno">  103</span>        <span class="keywordflow">for</span> (fl::size i = 0; i &lt; n; ++i) {</div>
+<div class="line"><span class="lineno">  104</span>            set(i, value);</div>
+<div class="line"><span class="lineno">  105</span>        }</div>
+<div class="line"><span class="lineno">  106</span>    }</div>
+<div class="line"><span class="lineno">  107</span></div>
+<div class="line"><span class="lineno">  109</span>    bitset_fixed &amp;reset(fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> { <span class="keywordflow">return</span> set(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>, <span class="keyword">false</span>); }</div>
+<div class="line"><span class="lineno">  110</span></div>
+<div class="line"><span class="lineno">  112</span>    bitset_fixed &amp;flip(fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  113</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &lt; N) {</div>
+<div class="line"><span class="lineno">  114</span>            <span class="keyword">const</span> fl::u32 idx = <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> / bits_per_block;</div>
+<div class="line"><span class="lineno">  115</span>            <span class="keyword">const</span> fl::u32 off = <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> % bits_per_block;</div>
+<div class="line"><span class="lineno">  116</span>            _blocks[idx] ^= (block_type(1) &lt;&lt; off);</div>
+<div class="line"><span class="lineno">  117</span>        }</div>
+<div class="line"><span class="lineno">  118</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">  119</span>    }</div>
+<div class="line"><span class="lineno">  120</span></div>
+<div class="line"><span class="lineno">  122</span>    bitset_fixed &amp;flip() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  123</span>        <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; block_count; ++i) {</div>
+<div class="line"><span class="lineno">  124</span>            _blocks[i] = ~_blocks[i];</div>
+<div class="line"><span class="lineno">  125</span>        }</div>
+<div class="line"><span class="lineno">  126</span>        <span class="comment">// Mask out unused high bits in the last block</span></div>
+<div class="line"><span class="lineno">  127</span>        <span class="keywordflow">if</span> (N % bits_per_block != 0) {</div>
+<div class="line"><span class="lineno">  128</span>            <span class="keyword">const</span> fl::u32 extra = bits_per_block - (N % bits_per_block);</div>
+<div class="line"><span class="lineno">  129</span>            _blocks[block_count - 1] &amp;= (~block_type(0) &gt;&gt; extra);</div>
+<div class="line"><span class="lineno">  130</span>        }</div>
+<div class="line"><span class="lineno">  131</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">  132</span>    }</div>
+<div class="line"><span class="lineno">  133</span></div>
+<div class="line"><span class="lineno">  135</span>    <span class="keywordtype">bool</span> test(fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  136</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &lt; N) {</div>
+<div class="line"><span class="lineno">  137</span>            <span class="keyword">const</span> fl::u32 idx = <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> / bits_per_block;</div>
+<div class="line"><span class="lineno">  138</span>            <span class="keyword">const</span> fl::u32 off = <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> % bits_per_block;</div>
+<div class="line"><span class="lineno">  139</span>            <span class="keywordflow">return</span> (_blocks[idx] &gt;&gt; off) &amp; 1;</div>
+<div class="line"><span class="lineno">  140</span>        }</div>
+<div class="line"><span class="lineno">  141</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  142</span>    }</div>
+<div class="line"><span class="lineno">  143</span></div>
+<div class="line"><span class="lineno">  145</span>    <span class="keywordtype">bool</span> operator[](fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> { <span class="keywordflow">return</span> test(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>); }</div>
+<div class="line"><span class="lineno">  146</span></div>
+<div class="line"><span class="lineno">  148</span>    fl::u32 count() const <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  149</span>        fl::u32 cnt = 0;</div>
+<div class="line"><span class="lineno">  150</span>        <span class="comment">// Count bits in all complete blocks</span></div>
+<div class="line"><span class="lineno">  151</span>        <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; block_count - 1; ++i) {</div>
+<div class="line"><span class="lineno">  152</span>            cnt += fl::popcount(_blocks[i]);</div>
+<div class="line"><span class="lineno">  153</span>        }</div>
+<div class="line"><span class="lineno">  154</span> </div>
+<div class="line"><span class="lineno">  155</span>        <span class="comment">// For the last block, we need to be careful about counting only valid</span></div>
+<div class="line"><span class="lineno">  156</span>        <span class="comment">// bits</span></div>
+<div class="line"><span class="lineno">  157</span>        <span class="keywordflow">if</span> (block_count &gt; 0) {</div>
+<div class="line"><span class="lineno">  158</span>            block_type last_block = _blocks[block_count - 1];</div>
+<div class="line"><span class="lineno">  159</span>            <span class="comment">// If N is not a multiple of bits_per_block, mask out the unused</span></div>
+<div class="line"><span class="lineno">  160</span>            <span class="comment">// bits</span></div>
+<div class="line"><span class="lineno">  161</span>            <span class="keywordflow">if</span> (N % bits_per_block != 0) {</div>
+<div class="line"><span class="lineno">  162</span>                <span class="keyword">const</span> fl::u32 valid_bits = N % bits_per_block;</div>
+<div class="line"><span class="lineno">  163</span>                <span class="comment">// Create a mask with only the valid bits set to 1</span></div>
+<div class="line"><span class="lineno">  164</span>                block_type mask = (valid_bits == bits_per_block)</div>
+<div class="line"><span class="lineno">  165</span>                                      ? <span class="keyword">static_cast&lt;</span>block_type<span class="keyword">&gt;</span>(~block_type(0))</div>
+<div class="line"><span class="lineno">  166</span>                                      : ((block_type(1) &lt;&lt; valid_bits) - 1);</div>
+<div class="line"><span class="lineno">  167</span>                last_block &amp;= mask;</div>
+<div class="line"><span class="lineno">  168</span>            }</div>
+<div class="line"><span class="lineno">  169</span>            cnt += fl::popcount(last_block);</div>
+<div class="line"><span class="lineno">  170</span>        }</div>
+<div class="line"><span class="lineno">  171</span> </div>
+<div class="line"><span class="lineno">  172</span>        <span class="keywordflow">return</span> cnt;</div>
+<div class="line"><span class="lineno">  173</span>    }</div>
+<div class="line"><span class="lineno">  174</span></div>
+<div class="line"><span class="lineno">  176</span>    <span class="keywordtype">bool</span> any() const <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> { <span class="keywordflow">return</span> count() &gt; 0; }</div>
+<div class="line"><span class="lineno">  177</span>    <span class="keywordtype">bool</span> none() const <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> { <span class="keywordflow">return</span> count() == 0; }</div>
+<div class="line"><span class="lineno">  178</span>    <span class="keywordtype">bool</span> all() const <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  179</span>        <span class="keywordflow">if</span> (N == 0)</div>
+<div class="line"><span class="lineno">  180</span>            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  181</span> </div>
+<div class="line"><span class="lineno">  182</span>        <span class="comment">// Check all complete blocks</span></div>
+<div class="line"><span class="lineno">  183</span>        <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; block_count - 1; ++i) {</div>
+<div class="line"><span class="lineno">  184</span>            <span class="keywordflow">if</span> (_blocks[i] != ~block_type(0)) {</div>
+<div class="line"><span class="lineno">  185</span>                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  186</span>            }</div>
+<div class="line"><span class="lineno">  187</span>        }</div>
+<div class="line"><span class="lineno">  188</span> </div>
+<div class="line"><span class="lineno">  189</span>        <span class="comment">// Check the last block</span></div>
+<div class="line"><span class="lineno">  190</span>        <span class="keywordflow">if</span> (block_count &gt; 0) {</div>
+<div class="line"><span class="lineno">  191</span>            block_type mask;</div>
+<div class="line"><span class="lineno">  192</span>            <span class="keywordflow">if</span> (N % bits_per_block != 0) {</div>
+<div class="line"><span class="lineno">  193</span>                <span class="comment">// Create a mask for the valid bits in the last block</span></div>
+<div class="line"><span class="lineno">  194</span>                mask = (block_type(1) &lt;&lt; (N % bits_per_block)) - 1;</div>
+<div class="line"><span class="lineno">  195</span>            } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  196</span>                mask = <span class="keyword">static_cast&lt;</span>block_type<span class="keyword">&gt;</span>(~block_type(0));</div>
+<div class="line"><span class="lineno">  197</span>            }</div>
+<div class="line"><span class="lineno">  198</span> </div>
+<div class="line"><span class="lineno">  199</span>            <span class="keywordflow">if</span> ((_blocks[block_count - 1] &amp; mask) != mask) {</div>
+<div class="line"><span class="lineno">  200</span>                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  201</span>            }</div>
+<div class="line"><span class="lineno">  202</span>        }</div>
+<div class="line"><span class="lineno">  203</span> </div>
+<div class="line"><span class="lineno">  204</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  205</span>    }</div>
+<div class="line"><span class="lineno">  206</span></div>
+<div class="line"><span class="lineno">  208</span>    bitset_fixed &amp;operator&amp;=(<span class="keyword">const</span> bitset_fixed &amp;other) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  209</span>        <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; block_count; ++i) {</div>
+<div class="line"><span class="lineno">  210</span>            _blocks[i] &amp;= other._blocks[i];</div>
+<div class="line"><span class="lineno">  211</span>        }</div>
+<div class="line"><span class="lineno">  212</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">  213</span>    }</div>
+<div class="line"><span class="lineno">  215</span>    bitset_fixed &amp;<a class="code hl_function" href="../../db/d97/_fast_l_e_d_8h_a1663fce3f269dfd635af10335edf8b87.html#a1663fce3f269dfd635af10335edf8b87">operator|=</a>(<span class="keyword">const</span> bitset_fixed &amp;other) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  216</span>        <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; block_count; ++i) {</div>
+<div class="line"><span class="lineno">  217</span>            _blocks[i] |= other._blocks[i];</div>
+<div class="line"><span class="lineno">  218</span>        }</div>
+<div class="line"><span class="lineno">  219</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">  220</span>    }</div>
+<div class="line"><span class="lineno">  222</span>    bitset_fixed &amp;operator^=(<span class="keyword">const</span> bitset_fixed &amp;other) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  223</span>        <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; block_count; ++i) {</div>
+<div class="line"><span class="lineno">  224</span>            _blocks[i] ^= other._blocks[i];</div>
+<div class="line"><span class="lineno">  225</span>        }</div>
+<div class="line"><span class="lineno">  226</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">  227</span>    }</div>
+<div class="line"><span class="lineno">  228</span></div>
+<div class="line"><span class="lineno">  230</span>    <span class="keyword">constexpr</span> fl::u32 size() const <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> { <span class="keywordflow">return</span> N; }</div>
+<div class="line"><span class="lineno">  231</span></div>
+<div class="line"><span class="lineno">  236</span>    fl::i32 find_first(<span class="keywordtype">bool</span> test_value, fl::u32 <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a> = 0) const <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  237</span>        <span class="comment">// If offset is beyond our size, no match possible</span></div>
+<div class="line"><span class="lineno">  238</span>        <span class="keywordflow">if</span> (<a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a> &gt;= N) {</div>
+<div class="line"><span class="lineno">  239</span>            <span class="keywordflow">return</span> -1;</div>
+<div class="line"><span class="lineno">  240</span>        }</div>
+<div class="line"><span class="lineno">  241</span> </div>
+<div class="line"><span class="lineno">  242</span>        <span class="comment">// Calculate which block to start from</span></div>
+<div class="line"><span class="lineno">  243</span>        fl::u32 start_block = <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a> / bits_per_block;</div>
+<div class="line"><span class="lineno">  244</span>        fl::u32 start_bit = <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a> % bits_per_block;</div>
+<div class="line"><span class="lineno">  245</span>        </div>
+<div class="line"><span class="lineno">  246</span>        <span class="keywordflow">for</span> (fl::u32 block_idx = start_block; block_idx &lt; block_count; ++block_idx) {</div>
+<div class="line"><span class="lineno">  247</span>            block_type current_block = _blocks[block_idx];</div>
+<div class="line"><span class="lineno">  248</span>            </div>
+<div class="line"><span class="lineno">  249</span>            <span class="comment">// For the last block, we need to mask out unused bits</span></div>
+<div class="line"><span class="lineno">  250</span>            <span class="keywordflow">if</span> (block_idx == block_count - 1 &amp;&amp; N % bits_per_block != 0) {</div>
+<div class="line"><span class="lineno">  251</span>                <span class="keyword">const</span> fl::u32 valid_bits = N % bits_per_block;</div>
+<div class="line"><span class="lineno">  252</span>                block_type mask = (valid_bits == bits_per_block) </div>
+<div class="line"><span class="lineno">  253</span>                    ? <span class="keyword">static_cast&lt;</span>block_type<span class="keyword">&gt;</span>(~block_type(0)) </div>
+<div class="line"><span class="lineno">  254</span>                    : ((block_type(1) &lt;&lt; valid_bits) - 1);</div>
+<div class="line"><span class="lineno">  255</span>                current_block &amp;= mask;</div>
+<div class="line"><span class="lineno">  256</span>            }</div>
+<div class="line"><span class="lineno">  257</span>            </div>
+<div class="line"><span class="lineno">  258</span>            <span class="comment">// If looking for false bits, invert the block</span></div>
+<div class="line"><span class="lineno">  259</span>            <span class="keywordflow">if</span> (!test_value) {</div>
+<div class="line"><span class="lineno">  260</span>                current_block = ~current_block;</div>
+<div class="line"><span class="lineno">  261</span>            }</div>
+<div class="line"><span class="lineno">  262</span>            </div>
+<div class="line"><span class="lineno">  263</span>            <span class="comment">// For the first block, mask out bits before the offset</span></div>
+<div class="line"><span class="lineno">  264</span>            <span class="keywordflow">if</span> (block_idx == start_block &amp;&amp; start_bit &gt; 0) {</div>
+<div class="line"><span class="lineno">  265</span>                current_block &amp;= ~((block_type(1) &lt;&lt; start_bit) - 1);</div>
+<div class="line"><span class="lineno">  266</span>            }</div>
+<div class="line"><span class="lineno">  267</span>            </div>
+<div class="line"><span class="lineno">  268</span>            <span class="comment">// If there are any matching bits in this block</span></div>
+<div class="line"><span class="lineno">  269</span>            <span class="keywordflow">if</span> (current_block != 0) {</div>
+<div class="line"><span class="lineno">  270</span>                <span class="comment">// Find the first set bit</span></div>
+<div class="line"><span class="lineno">  271</span>                fl::u32 bit_pos = fl::countr_zero(current_block);</div>
+<div class="line"><span class="lineno">  272</span>                fl::u32 absolute_pos = block_idx * bits_per_block + bit_pos;</div>
+<div class="line"><span class="lineno">  273</span>                </div>
+<div class="line"><span class="lineno">  274</span>                <span class="comment">// Make sure we haven&#39;t gone past the end of the bitset</span></div>
+<div class="line"><span class="lineno">  275</span>                <span class="keywordflow">if</span> (absolute_pos &lt; N) {</div>
+<div class="line"><span class="lineno">  276</span>                    <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>fl::i32<span class="keyword">&gt;</span>(absolute_pos);</div>
+<div class="line"><span class="lineno">  277</span>                }</div>
+<div class="line"><span class="lineno">  278</span>            }</div>
+<div class="line"><span class="lineno">  279</span>        }</div>
+<div class="line"><span class="lineno">  280</span>        </div>
+<div class="line"><span class="lineno">  281</span>        <span class="keywordflow">return</span> -1;  <span class="comment">// No matching bit found</span></div>
+<div class="line"><span class="lineno">  282</span>    }</div>
+<div class="line"><span class="lineno">  283</span></div>
+<div class="line"><span class="lineno">  289</span>    fl::i32 find_run(<span class="keywordtype">bool</span> test_value, fl::u32 min_length, fl::u32 <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a> = 0) const <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  290</span>        fl::u32 run_start = <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a>;</div>
+<div class="line"><span class="lineno">  291</span>        fl::u32 run_length = 0;</div>
+<div class="line"><span class="lineno">  292</span>        </div>
+<div class="line"><span class="lineno">  293</span>        <span class="keywordflow">for</span> (fl::u32 i = <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a>; i &lt; N &amp;&amp; run_length &lt; min_length; ++i) {</div>
+<div class="line"><span class="lineno">  294</span>            <span class="keywordtype">bool</span> current_bit = test(i);</div>
+<div class="line"><span class="lineno">  295</span>            <span class="keywordflow">if</span> (current_bit != test_value) {</div>
+<div class="line"><span class="lineno">  296</span>                run_length = 0;</div>
+<div class="line"><span class="lineno">  297</span>                <span class="keywordflow">if</span> (i + 1 &lt; N) {</div>
+<div class="line"><span class="lineno">  298</span>                    run_start = i + 1;</div>
+<div class="line"><span class="lineno">  299</span>                }</div>
+<div class="line"><span class="lineno">  300</span>            } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  301</span>                ++run_length;</div>
+<div class="line"><span class="lineno">  302</span>            }</div>
+<div class="line"><span class="lineno">  303</span>        }</div>
+<div class="line"><span class="lineno">  304</span> </div>
+<div class="line"><span class="lineno">  305</span>        <span class="keywordflow">if</span> (run_length &gt;= min_length) {</div>
+<div class="line"><span class="lineno">  306</span>            <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>fl::i32<span class="keyword">&gt;</span>(run_start);</div>
+<div class="line"><span class="lineno">  307</span>        }</div>
+<div class="line"><span class="lineno">  308</span>        </div>
+<div class="line"><span class="lineno">  309</span>        <span class="keywordflow">return</span> -1; <span class="comment">// No run found</span></div>
+<div class="line"><span class="lineno">  310</span>    }</div>
+<div class="line"><span class="lineno">  311</span></div>
+<div class="line"><span class="lineno">  313</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a85ba05df525add48070aed53f3088b8c.html#a85ba05df525add48070aed53f3088b8c">operator==</a>(<span class="keyword">const</span> bitset_fixed &amp;other) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  314</span>        <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; block_count; ++i) {</div>
+<div class="line"><span class="lineno">  315</span>            <span class="keywordflow">if</span> (_blocks[i] != other._blocks[i]) {</div>
+<div class="line"><span class="lineno">  316</span>                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  317</span>            }</div>
+<div class="line"><span class="lineno">  318</span>        }</div>
+<div class="line"><span class="lineno">  319</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  320</span>    }</div>
+<div class="line"><span class="lineno">  321</span> </div>
+<div class="line"><span class="lineno">  322</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a5c282abe564ddeed95d0ae0752190551.html#a5c282abe564ddeed95d0ae0752190551">operator!=</a>(<span class="keyword">const</span> bitset_fixed &amp;other) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  323</span>        <span class="keywordflow">return</span> !(*<span class="keyword">this</span> == other);</div>
+<div class="line"><span class="lineno">  324</span>    }</div>
+<div class="line"><span class="lineno">  325</span></div>
+<div class="line"><span class="lineno">  327</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a82f362b1edd7f52608e3fd0f4fa71229.html#a82f362b1edd7f52608e3fd0f4fa71229">operator&lt;</a>(<span class="keyword">const</span> bitset_fixed &amp;other) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  328</span>        <span class="keywordflow">for</span> (fl::i32 i = <span class="keyword">static_cast&lt;</span>fl::i32<span class="keyword">&gt;</span>(block_count) - 1; i &gt;= 0; --i) {</div>
+<div class="line"><span class="lineno">  329</span>            <span class="keywordflow">if</span> (_blocks[i] &lt; other._blocks[i]) {</div>
+<div class="line"><span class="lineno">  330</span>                <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  331</span>            }</div>
+<div class="line"><span class="lineno">  332</span>            <span class="keywordflow">if</span> (_blocks[i] &gt; other._blocks[i]) {</div>
+<div class="line"><span class="lineno">  333</span>                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  334</span>            }</div>
+<div class="line"><span class="lineno">  335</span>        }</div>
+<div class="line"><span class="lineno">  336</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  337</span>    }</div>
+<div class="line"><span class="lineno">  338</span> </div>
+<div class="line"><span class="lineno">  339</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a95efad47ded60bcb457ef02c0513ae1f.html#a95efad47ded60bcb457ef02c0513ae1f">operator&lt;=</a>(<span class="keyword">const</span> bitset_fixed &amp;other) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  340</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span> &lt; other || *<span class="keyword">this</span> == other;</div>
+<div class="line"><span class="lineno">  341</span>    }</div>
+<div class="line"><span class="lineno">  342</span> </div>
+<div class="line"><span class="lineno">  343</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a8b86dd00fcaf272ee03e349e5ec7b5ad.html#a8b86dd00fcaf272ee03e349e5ec7b5ad">operator&gt;</a>(<span class="keyword">const</span> bitset_fixed &amp;other) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  344</span>        <span class="keywordflow">return</span> other &lt; *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">  345</span>    }</div>
+<div class="line"><span class="lineno">  346</span> </div>
+<div class="line"><span class="lineno">  347</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d4/d36/namespacefl_afde5412306138de832ebd4e826940ba3.html#afde5412306138de832ebd4e826940ba3">operator&gt;=</a>(<span class="keyword">const</span> bitset_fixed &amp;other) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  348</span>        <span class="keywordflow">return</span> other &lt;= *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">  349</span>    }</div>
+<div class="line"><span class="lineno">  350</span></div>
+<div class="line"><span class="lineno">  352</span>    <span class="keyword">friend</span> bitset_fixed <a class="code hl_function" href="../../db/d97/_fast_l_e_d_8h_ab4e8215eff6e86440de26fec4d259480.html#ab4e8215eff6e86440de26fec4d259480">operator&amp;</a>(bitset_fixed lhs,</div>
+<div class="line"><span class="lineno">  353</span>                                 <span class="keyword">const</span> bitset_fixed &amp;rhs) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  354</span>        <span class="keywordflow">return</span> lhs &amp;= rhs;</div>
+<div class="line"><span class="lineno">  355</span>    }</div>
+<div class="line"><span class="lineno">  356</span>    <span class="keyword">friend</span> bitset_fixed <a class="code hl_function" href="../../db/d97/_fast_l_e_d_8h_a664d59edf00ef403547a6da19ba0cb01.html#a664d59edf00ef403547a6da19ba0cb01">operator|</a>(bitset_fixed lhs,</div>
+<div class="line"><span class="lineno">  357</span>                                 <span class="keyword">const</span> bitset_fixed &amp;rhs) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  358</span>        <span class="keywordflow">return</span> lhs |= rhs;</div>
+<div class="line"><span class="lineno">  359</span>    }</div>
+<div class="line"><span class="lineno">  360</span>    <span class="keyword">friend</span> bitset_fixed operator^(bitset_fixed lhs,</div>
+<div class="line"><span class="lineno">  361</span>                                 <span class="keyword">const</span> bitset_fixed &amp;rhs) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  362</span>        <span class="keywordflow">return</span> lhs ^= rhs;</div>
+<div class="line"><span class="lineno">  363</span>    }</div>
+<div class="line"><span class="lineno">  364</span>    <span class="keyword">friend</span> bitset_fixed operator~(bitset_fixed bs) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> { <span class="keywordflow">return</span> bs.flip(); }</div>
+<div class="line"><span class="lineno">  365</span>};</div>
+<div class="line"><span class="lineno">  366</span></div>
+<div class="line"><span class="lineno">  370</span><span class="keyword">template</span> &lt;fl::u32 N = 16&gt; <span class="comment">// Default size is 16 bits, or 2 bytes</span></div>
+<div class="line"><span class="lineno">  371</span><span class="keyword">class </span>bitset_inlined {</div>
+<div class="line"><span class="lineno">  372</span>  <span class="keyword">private</span>:</div>
+<div class="line"><span class="lineno">  373</span>    <span class="comment">// Either store a fixed Bitset&lt;N&gt; or a dynamic Bitset</span></div>
+<div class="line"><span class="lineno">  374</span>    <span class="keyword">using </span>fixed_bitset = bitset_fixed&lt;N&gt;;</div>
+<div class="line"><span class="lineno">  375</span>    variant&lt;fixed_bitset, bitset_dynamic&gt; _storage;</div>
+<div class="line"><span class="lineno">  376</span> </div>
+<div class="line"><span class="lineno">  377</span>  <span class="keyword">public</span>:</div>
+<div class="line"><span class="lineno">  378</span>    <span class="keyword">struct </span>Proxy {</div>
+<div class="line"><span class="lineno">  379</span>        bitset_inlined &amp;_bitset;</div>
+<div class="line"><span class="lineno">  380</span>        fl::u32 _pos;</div>
+<div class="line"><span class="lineno">  381</span> </div>
+<div class="line"><span class="lineno">  382</span>        Proxy(bitset_inlined &amp;bitset, fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></div>
+<div class="line"><span class="lineno">  383</span>            : _bitset(bitset), _pos(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) {}</div>
+<div class="line"><span class="lineno">  384</span> </div>
+<div class="line"><span class="lineno">  385</span>        Proxy &amp;operator=(<span class="keywordtype">bool</span> value) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  386</span>            _bitset.set(_pos, value);</div>
+<div class="line"><span class="lineno">  387</span>            <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">  388</span>        }</div>
 <div class="line"><span class="lineno">  389</span> </div>
-<div class="line"><span class="lineno">  390</span>    <span class="keywordtype">void</span> assign(fl::size n, <span class="keywordtype">bool</span> value) {</div>
-<div class="line"><span class="lineno">  391</span>        resize(n);</div>
-<div class="line"><span class="lineno">  392</span>        <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
-<div class="line"><span class="lineno">  393</span>            _storage.template ptr&lt;fixed_bitset&gt;()-&gt;assign(n, value);</div>
-<div class="line"><span class="lineno">  394</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  395</span>            _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;assign(n, value);</div>
-<div class="line"><span class="lineno">  396</span>        }</div>
-<div class="line"><span class="lineno">  397</span>    }</div>
-<div class="line"><span class="lineno">  398</span> </div>
-<div class="line"><span class="lineno">  399</span> </div>
-<div class="line"><span class="lineno">  400</span></div>
-<div class="line"><span class="lineno">  402</span>    <span class="keywordtype">void</span> resize(fl::u32 new_size) {</div>
-<div class="line"><span class="lineno">  403</span>        <span class="keywordflow">if</span> (new_size &lt;= N) {</div>
-<div class="line"><span class="lineno">  404</span>            <span class="comment">// If we&#39;re already using the fixed Bitset, nothing to do</span></div>
-<div class="line"><span class="lineno">  405</span>            <span class="keywordflow">if</span> (_storage.template is&lt;bitset_dynamic&gt;()) {</div>
-<div class="line"><span class="lineno">  406</span>                <span class="comment">// Convert back to fixed Bitset</span></div>
-<div class="line"><span class="lineno">  407</span>                fixed_bitset fixed;</div>
-<div class="line"><span class="lineno">  408</span>                bitset_dynamic *dynamic =</div>
-<div class="line"><span class="lineno">  409</span>                    _storage.template ptr&lt;bitset_dynamic&gt;();</div>
-<div class="line"><span class="lineno">  410</span> </div>
-<div class="line"><span class="lineno">  411</span>                <span class="comment">// Copy bits from dynamic to fixed</span></div>
-<div class="line"><span class="lineno">  412</span>                <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; N &amp;&amp; i &lt; dynamic-&gt;size(); ++i) {</div>
-<div class="line"><span class="lineno">  413</span>                    <span class="keywordflow">if</span> (dynamic-&gt;test(i)) {</div>
-<div class="line"><span class="lineno">  414</span>                        fixed.set(i);</div>
-<div class="line"><span class="lineno">  415</span>                    }</div>
-<div class="line"><span class="lineno">  416</span>                }</div>
-<div class="line"><span class="lineno">  417</span> </div>
-<div class="line"><span class="lineno">  418</span>                _storage = fixed;</div>
-<div class="line"><span class="lineno">  419</span>            }</div>
-<div class="line"><span class="lineno">  420</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  421</span>            <span class="comment">// Need to use dynamic Bitset</span></div>
-<div class="line"><span class="lineno">  422</span>            <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
-<div class="line"><span class="lineno">  423</span>                <span class="comment">// Convert from fixed to dynamic</span></div>
-<div class="line"><span class="lineno">  424</span>                bitset_dynamic dynamic(new_size);</div>
-<div class="line"><span class="lineno">  425</span>                fixed_bitset *fixed = _storage.template ptr&lt;fixed_bitset&gt;();</div>
+<div class="line"><span class="lineno">  390</span>        <span class="keyword">operator</span> bool() const <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> { <span class="keywordflow">return</span> _bitset.test(_pos); }</div>
+<div class="line"><span class="lineno">  391</span>    };</div>
+<div class="line"><span class="lineno">  392</span> </div>
+<div class="line"><span class="lineno">  393</span>    Proxy operator[](fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> { <span class="keywordflow">return</span> Proxy(*<span class="keyword">this</span>, <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>); }</div>
+<div class="line"><span class="lineno">  394</span></div>
+<div class="line"><span class="lineno">  396</span>    bitset_inlined() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> : _storage(fixed_bitset()) {}</div>
+<div class="line"><span class="lineno">  397</span>    bitset_inlined(fl::size size) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> : _storage(fixed_bitset()) {</div>
+<div class="line"><span class="lineno">  398</span>        <span class="keywordflow">if</span> (size &gt; N) {</div>
+<div class="line"><span class="lineno">  399</span>            _storage = bitset_dynamic(size);</div>
+<div class="line"><span class="lineno">  400</span>        }</div>
+<div class="line"><span class="lineno">  401</span>    }</div>
+<div class="line"><span class="lineno">  402</span>    bitset_inlined(<span class="keyword">const</span> bitset_inlined &amp;other) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> : _storage(other._storage) {}</div>
+<div class="line"><span class="lineno">  403</span>    bitset_inlined(bitset_inlined &amp;&amp;other) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></div>
+<div class="line"><span class="lineno">  404</span>        : _storage(<a class="code hl_function" href="../../d4/d36/namespacefl_a03eeb690d9582a74cb2e4a1f5a806e80.html#a03eeb690d9582a74cb2e4a1f5a806e80">fl::move</a>(other._storage)) {}</div>
+<div class="line"><span class="lineno">  405</span>    bitset_inlined &amp;operator=(<span class="keyword">const</span> bitset_inlined &amp;other) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  406</span>        <span class="keywordflow">if</span> (<span class="keyword">this</span> != &amp;other) {</div>
+<div class="line"><span class="lineno">  407</span>            _storage = other._storage;</div>
+<div class="line"><span class="lineno">  408</span>        }</div>
+<div class="line"><span class="lineno">  409</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">  410</span>    }</div>
+<div class="line"><span class="lineno">  411</span>    bitset_inlined &amp;operator=(bitset_inlined &amp;&amp;other) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  412</span>        <span class="keywordflow">if</span> (<span class="keyword">this</span> != &amp;other) {</div>
+<div class="line"><span class="lineno">  413</span>            _storage = <a class="code hl_function" href="../../d4/d36/namespacefl_a03eeb690d9582a74cb2e4a1f5a806e80.html#a03eeb690d9582a74cb2e4a1f5a806e80">fl::move</a>(other._storage);</div>
+<div class="line"><span class="lineno">  414</span>        }</div>
+<div class="line"><span class="lineno">  415</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">  416</span>    }</div>
+<div class="line"><span class="lineno">  417</span></div>
+<div class="line"><span class="lineno">  419</span>    <span class="keywordtype">void</span> reset() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  420</span>        <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
+<div class="line"><span class="lineno">  421</span>            _storage.template ptr&lt;fixed_bitset&gt;()-&gt;reset();</div>
+<div class="line"><span class="lineno">  422</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  423</span>            _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;reset();</div>
+<div class="line"><span class="lineno">  424</span>        }</div>
+<div class="line"><span class="lineno">  425</span>    }</div>
 <div class="line"><span class="lineno">  426</span> </div>
-<div class="line"><span class="lineno">  427</span>                <span class="comment">// Copy bits from fixed to dynamic</span></div>
-<div class="line"><span class="lineno">  428</span>                <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; N; ++i) {</div>
-<div class="line"><span class="lineno">  429</span>                    <span class="keywordflow">if</span> (fixed-&gt;test(i)) {</div>
-<div class="line"><span class="lineno">  430</span>                        dynamic.set(i);</div>
-<div class="line"><span class="lineno">  431</span>                    }</div>
-<div class="line"><span class="lineno">  432</span>                }</div>
-<div class="line"><span class="lineno">  433</span> </div>
-<div class="line"><span class="lineno">  434</span>                _storage = dynamic;</div>
-<div class="line"><span class="lineno">  435</span>            } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  436</span>                <span class="comment">// Already using dynamic, just resize</span></div>
-<div class="line"><span class="lineno">  437</span>                _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;resize(new_size);</div>
-<div class="line"><span class="lineno">  438</span>            }</div>
-<div class="line"><span class="lineno">  439</span>        }</div>
-<div class="line"><span class="lineno">  440</span>    }</div>
-<div class="line"><span class="lineno">  441</span></div>
-<div class="line"><span class="lineno">  443</span>    BitsetInlined &amp;set(fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>, <span class="keywordtype">bool</span> value = <span class="keyword">true</span>) {</div>
-<div class="line"><span class="lineno">  444</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &gt;= N &amp;&amp; _storage.template is&lt;fixed_bitset&gt;()) {</div>
-<div class="line"><span class="lineno">  445</span>            resize(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> + 1);</div>
-<div class="line"><span class="lineno">  446</span>        }</div>
+<div class="line"><span class="lineno">  427</span>    <span class="keywordtype">void</span> assign(fl::size n, <span class="keywordtype">bool</span> value) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  428</span>        resize(n);</div>
+<div class="line"><span class="lineno">  429</span>        <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
+<div class="line"><span class="lineno">  430</span>            _storage.template ptr&lt;fixed_bitset&gt;()-&gt;assign(n, value);</div>
+<div class="line"><span class="lineno">  431</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  432</span>            _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;assign(n, value);</div>
+<div class="line"><span class="lineno">  433</span>        }</div>
+<div class="line"><span class="lineno">  434</span>    }</div>
+<div class="line"><span class="lineno">  435</span> </div>
+<div class="line"><span class="lineno">  436</span> </div>
+<div class="line"><span class="lineno">  437</span></div>
+<div class="line"><span class="lineno">  439</span>    <span class="keywordtype">void</span> resize(fl::u32 new_size) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  440</span>        <span class="keywordflow">if</span> (new_size &lt;= N) {</div>
+<div class="line"><span class="lineno">  441</span>            <span class="comment">// If we&#39;re already using the fixed Bitset, nothing to do</span></div>
+<div class="line"><span class="lineno">  442</span>            <span class="keywordflow">if</span> (_storage.template is&lt;bitset_dynamic&gt;()) {</div>
+<div class="line"><span class="lineno">  443</span>                <span class="comment">// Convert back to fixed Bitset</span></div>
+<div class="line"><span class="lineno">  444</span>                fixed_bitset fixed;</div>
+<div class="line"><span class="lineno">  445</span>                bitset_dynamic *dynamic =</div>
+<div class="line"><span class="lineno">  446</span>                    _storage.template ptr&lt;bitset_dynamic&gt;();</div>
 <div class="line"><span class="lineno">  447</span> </div>
-<div class="line"><span class="lineno">  448</span>        <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
-<div class="line"><span class="lineno">  449</span>            <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &lt; N) {</div>
-<div class="line"><span class="lineno">  450</span>                _storage.template ptr&lt;fixed_bitset&gt;()-&gt;set(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>, value);</div>
-<div class="line"><span class="lineno">  451</span>            }</div>
-<div class="line"><span class="lineno">  452</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  453</span>            <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &gt;= _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;size()) {</div>
-<div class="line"><span class="lineno">  454</span>                _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;resize(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> + 1);</div>
-<div class="line"><span class="lineno">  455</span>            }</div>
-<div class="line"><span class="lineno">  456</span>            _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;set(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>, value);</div>
-<div class="line"><span class="lineno">  457</span>        }</div>
-<div class="line"><span class="lineno">  458</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><span class="lineno">  459</span>    }</div>
-<div class="line"><span class="lineno">  460</span></div>
-<div class="line"><span class="lineno">  462</span>    BitsetInlined &amp;reset(fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) { <span class="keywordflow">return</span> set(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>, <span class="keyword">false</span>); }</div>
-<div class="line"><span class="lineno">  463</span></div>
-<div class="line"><span class="lineno">  465</span>    BitsetInlined &amp;flip(fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) {</div>
-<div class="line"><span class="lineno">  466</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &gt;= N &amp;&amp; _storage.template is&lt;fixed_bitset&gt;()) {</div>
-<div class="line"><span class="lineno">  467</span>            resize(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> + 1);</div>
-<div class="line"><span class="lineno">  468</span>        }</div>
-<div class="line"><span class="lineno">  469</span> </div>
-<div class="line"><span class="lineno">  470</span>        <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
-<div class="line"><span class="lineno">  471</span>            <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &lt; N) {</div>
-<div class="line"><span class="lineno">  472</span>                _storage.template ptr&lt;fixed_bitset&gt;()-&gt;flip(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>);</div>
-<div class="line"><span class="lineno">  473</span>            }</div>
-<div class="line"><span class="lineno">  474</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  475</span>            <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &gt;= _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;size()) {</div>
-<div class="line"><span class="lineno">  476</span>                _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;resize(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> + 1);</div>
-<div class="line"><span class="lineno">  477</span>            }</div>
-<div class="line"><span class="lineno">  478</span>            _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;flip(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>);</div>
-<div class="line"><span class="lineno">  479</span>        }</div>
-<div class="line"><span class="lineno">  480</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><span class="lineno">  481</span>    }</div>
-<div class="line"><span class="lineno">  482</span></div>
-<div class="line"><span class="lineno">  484</span>    BitsetInlined &amp;flip() noexcept {</div>
+<div class="line"><span class="lineno">  448</span>                <span class="comment">// Copy bits from dynamic to fixed</span></div>
+<div class="line"><span class="lineno">  449</span>                <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; N &amp;&amp; i &lt; dynamic-&gt;size(); ++i) {</div>
+<div class="line"><span class="lineno">  450</span>                    <span class="keywordflow">if</span> (dynamic-&gt;test(i)) {</div>
+<div class="line"><span class="lineno">  451</span>                        fixed.set(i);</div>
+<div class="line"><span class="lineno">  452</span>                    }</div>
+<div class="line"><span class="lineno">  453</span>                }</div>
+<div class="line"><span class="lineno">  454</span> </div>
+<div class="line"><span class="lineno">  455</span>                _storage = fixed;</div>
+<div class="line"><span class="lineno">  456</span>            }</div>
+<div class="line"><span class="lineno">  457</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  458</span>            <span class="comment">// Need to use dynamic Bitset</span></div>
+<div class="line"><span class="lineno">  459</span>            <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
+<div class="line"><span class="lineno">  460</span>                <span class="comment">// Convert from fixed to dynamic</span></div>
+<div class="line"><span class="lineno">  461</span>                bitset_dynamic dynamic(new_size);</div>
+<div class="line"><span class="lineno">  462</span>                fixed_bitset *fixed = _storage.template ptr&lt;fixed_bitset&gt;();</div>
+<div class="line"><span class="lineno">  463</span> </div>
+<div class="line"><span class="lineno">  464</span>                <span class="comment">// Copy bits from fixed to dynamic</span></div>
+<div class="line"><span class="lineno">  465</span>                <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; N; ++i) {</div>
+<div class="line"><span class="lineno">  466</span>                    <span class="keywordflow">if</span> (fixed-&gt;test(i)) {</div>
+<div class="line"><span class="lineno">  467</span>                        dynamic.set(i);</div>
+<div class="line"><span class="lineno">  468</span>                    }</div>
+<div class="line"><span class="lineno">  469</span>                }</div>
+<div class="line"><span class="lineno">  470</span> </div>
+<div class="line"><span class="lineno">  471</span>                _storage = dynamic;</div>
+<div class="line"><span class="lineno">  472</span>            } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  473</span>                <span class="comment">// Already using dynamic, just resize</span></div>
+<div class="line"><span class="lineno">  474</span>                _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;resize(new_size);</div>
+<div class="line"><span class="lineno">  475</span>            }</div>
+<div class="line"><span class="lineno">  476</span>        }</div>
+<div class="line"><span class="lineno">  477</span>    }</div>
+<div class="line"><span class="lineno">  478</span></div>
+<div class="line"><span class="lineno">  480</span>    bitset_inlined &amp;set(fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>, <span class="keywordtype">bool</span> value = <span class="keyword">true</span>) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  481</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &gt;= N &amp;&amp; _storage.template is&lt;fixed_bitset&gt;()) {</div>
+<div class="line"><span class="lineno">  482</span>            resize(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> + 1);</div>
+<div class="line"><span class="lineno">  483</span>        }</div>
+<div class="line"><span class="lineno">  484</span> </div>
 <div class="line"><span class="lineno">  485</span>        <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
-<div class="line"><span class="lineno">  486</span>            _storage.template ptr&lt;fixed_bitset&gt;()-&gt;flip();</div>
-<div class="line"><span class="lineno">  487</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  488</span>            _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;flip();</div>
-<div class="line"><span class="lineno">  489</span>        }</div>
-<div class="line"><span class="lineno">  490</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><span class="lineno">  491</span>    }</div>
-<div class="line"><span class="lineno">  492</span></div>
-<div class="line"><span class="lineno">  494</span>    <span class="keywordtype">bool</span> test(fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) <span class="keyword">const</span> <span class="keyword">noexcept</span> {</div>
-<div class="line"><span class="lineno">  495</span>        <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
-<div class="line"><span class="lineno">  496</span>            <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &lt; N ? _storage.template ptr&lt;fixed_bitset&gt;()-&gt;test(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>)</div>
-<div class="line"><span class="lineno">  497</span>                           : <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  498</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  499</span>            <span class="keywordflow">return</span> _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;test(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>);</div>
-<div class="line"><span class="lineno">  500</span>        }</div>
-<div class="line"><span class="lineno">  501</span>    }</div>
-<div class="line"><span class="lineno">  502</span></div>
-<div class="line"><span class="lineno">  504</span>    <span class="keywordtype">bool</span> operator[](fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) <span class="keyword">const</span> <span class="keyword">noexcept</span> { <span class="keywordflow">return</span> test(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>); }</div>
-<div class="line"><span class="lineno">  505</span></div>
-<div class="line"><span class="lineno">  507</span>    fl::u32 count() const noexcept {</div>
-<div class="line"><span class="lineno">  508</span>        <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
-<div class="line"><span class="lineno">  509</span>            <span class="keywordflow">return</span> _storage.template ptr&lt;fixed_bitset&gt;()-&gt;count();</div>
-<div class="line"><span class="lineno">  510</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  511</span>            <span class="keywordflow">return</span> _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;count();</div>
-<div class="line"><span class="lineno">  512</span>        }</div>
-<div class="line"><span class="lineno">  513</span>    }</div>
-<div class="line"><span class="lineno">  514</span></div>
-<div class="line"><span class="lineno">  516</span>    <span class="keywordtype">bool</span> any() const noexcept {</div>
-<div class="line"><span class="lineno">  517</span>        <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
-<div class="line"><span class="lineno">  518</span>            <span class="keywordflow">return</span> _storage.template ptr&lt;fixed_bitset&gt;()-&gt;any();</div>
-<div class="line"><span class="lineno">  519</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  520</span>            <span class="keywordflow">return</span> _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;any();</div>
-<div class="line"><span class="lineno">  521</span>        }</div>
-<div class="line"><span class="lineno">  522</span>    }</div>
-<div class="line"><span class="lineno">  523</span> </div>
-<div class="line"><span class="lineno">  524</span>    <span class="keywordtype">bool</span> none() const noexcept {</div>
-<div class="line"><span class="lineno">  525</span>        <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
-<div class="line"><span class="lineno">  526</span>            <span class="keywordflow">return</span> _storage.template ptr&lt;fixed_bitset&gt;()-&gt;none();</div>
-<div class="line"><span class="lineno">  527</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  528</span>            <span class="keywordflow">return</span> _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;none();</div>
-<div class="line"><span class="lineno">  529</span>        }</div>
-<div class="line"><span class="lineno">  530</span>    }</div>
-<div class="line"><span class="lineno">  531</span> </div>
-<div class="line"><span class="lineno">  532</span>    <span class="keywordtype">bool</span> all() const noexcept {</div>
-<div class="line"><span class="lineno">  533</span>        <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
-<div class="line"><span class="lineno">  534</span>            <span class="keywordflow">return</span> _storage.template ptr&lt;fixed_bitset&gt;()-&gt;all();</div>
-<div class="line"><span class="lineno">  535</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  536</span>            <span class="keywordflow">return</span> _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;all();</div>
-<div class="line"><span class="lineno">  537</span>        }</div>
-<div class="line"><span class="lineno">  538</span>    }</div>
-<div class="line"><span class="lineno">  539</span></div>
-<div class="line"><span class="lineno">  541</span>    fl::u32 size() const noexcept {</div>
-<div class="line"><span class="lineno">  542</span>        <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
-<div class="line"><span class="lineno">  543</span>            <span class="keywordflow">return</span> N;</div>
-<div class="line"><span class="lineno">  544</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  545</span>            <span class="keywordflow">return</span> _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;size();</div>
+<div class="line"><span class="lineno">  486</span>            <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &lt; N) {</div>
+<div class="line"><span class="lineno">  487</span>                _storage.template ptr&lt;fixed_bitset&gt;()-&gt;set(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>, value);</div>
+<div class="line"><span class="lineno">  488</span>            }</div>
+<div class="line"><span class="lineno">  489</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  490</span>            <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &gt;= _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;size()) {</div>
+<div class="line"><span class="lineno">  491</span>                _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;resize(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> + 1);</div>
+<div class="line"><span class="lineno">  492</span>            }</div>
+<div class="line"><span class="lineno">  493</span>            _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;set(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>, value);</div>
+<div class="line"><span class="lineno">  494</span>        }</div>
+<div class="line"><span class="lineno">  495</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">  496</span>    }</div>
+<div class="line"><span class="lineno">  497</span></div>
+<div class="line"><span class="lineno">  499</span>    bitset_inlined &amp;reset(fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> { <span class="keywordflow">return</span> set(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>, <span class="keyword">false</span>); }</div>
+<div class="line"><span class="lineno">  500</span></div>
+<div class="line"><span class="lineno">  502</span>    bitset_inlined &amp;flip(fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  503</span>        <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &gt;= N &amp;&amp; _storage.template is&lt;fixed_bitset&gt;()) {</div>
+<div class="line"><span class="lineno">  504</span>            resize(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> + 1);</div>
+<div class="line"><span class="lineno">  505</span>        }</div>
+<div class="line"><span class="lineno">  506</span> </div>
+<div class="line"><span class="lineno">  507</span>        <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
+<div class="line"><span class="lineno">  508</span>            <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &lt; N) {</div>
+<div class="line"><span class="lineno">  509</span>                _storage.template ptr&lt;fixed_bitset&gt;()-&gt;flip(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>);</div>
+<div class="line"><span class="lineno">  510</span>            }</div>
+<div class="line"><span class="lineno">  511</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  512</span>            <span class="keywordflow">if</span> (<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &gt;= _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;size()) {</div>
+<div class="line"><span class="lineno">  513</span>                _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;resize(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> + 1);</div>
+<div class="line"><span class="lineno">  514</span>            }</div>
+<div class="line"><span class="lineno">  515</span>            _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;flip(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>);</div>
+<div class="line"><span class="lineno">  516</span>        }</div>
+<div class="line"><span class="lineno">  517</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">  518</span>    }</div>
+<div class="line"><span class="lineno">  519</span></div>
+<div class="line"><span class="lineno">  521</span>    bitset_inlined &amp;flip() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  522</span>        <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
+<div class="line"><span class="lineno">  523</span>            _storage.template ptr&lt;fixed_bitset&gt;()-&gt;flip();</div>
+<div class="line"><span class="lineno">  524</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  525</span>            _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;flip();</div>
+<div class="line"><span class="lineno">  526</span>        }</div>
+<div class="line"><span class="lineno">  527</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">  528</span>    }</div>
+<div class="line"><span class="lineno">  529</span></div>
+<div class="line"><span class="lineno">  531</span>    <span class="keywordtype">void</span> push_back() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  532</span>        fl::u32 new_size = size() + 1;</div>
+<div class="line"><span class="lineno">  533</span>        resize(new_size);</div>
+<div class="line"><span class="lineno">  534</span>    }</div>
+<div class="line"><span class="lineno">  535</span></div>
+<div class="line"><span class="lineno">  537</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span>... Args&gt;</div>
+<div class="line"><span class="lineno">  538</span>    <span class="keywordtype">void</span> emplace_back(Args&amp;&amp;...) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  539</span>        push_back();  <span class="comment">// bitset bits are bool, just expand</span></div>
+<div class="line"><span class="lineno">  540</span>    }</div>
+<div class="line"><span class="lineno">  541</span></div>
+<div class="line"><span class="lineno">  543</span>    <span class="keywordtype">void</span> pop_back() <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  544</span>        <span class="keywordflow">if</span> (size() &gt; 0) {</div>
+<div class="line"><span class="lineno">  545</span>            resize(size() - 1);</div>
 <div class="line"><span class="lineno">  546</span>        }</div>
 <div class="line"><span class="lineno">  547</span>    }</div>
 <div class="line"><span class="lineno">  548</span></div>
-<div class="line"><span class="lineno">  550</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_aa878a2c7d8c38f99002cb94c3d6d3465.html#aa878a2c7d8c38f99002cb94c3d6d3465">to_string</a>(<span class="keywordtype">string</span>* dst)<span class="keyword"> const </span>{</div>
+<div class="line"><span class="lineno">  550</span>    <span class="keywordtype">bool</span> test(fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
 <div class="line"><span class="lineno">  551</span>        <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
-<div class="line"><span class="lineno">  552</span>            _storage.template ptr&lt;fixed_bitset&gt;()-&gt;to_string(dst);</div>
-<div class="line"><span class="lineno">  553</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  554</span>            _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;to_string(dst);</div>
-<div class="line"><span class="lineno">  555</span>        }</div>
-<div class="line"><span class="lineno">  556</span>    }</div>
-<div class="line"><span class="lineno">  557</span></div>
-<div class="line"><span class="lineno">  562</span>    fl::i32 find_first(<span class="keywordtype">bool</span> test_value, fl::u32 <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a> = 0) const noexcept {</div>
-<div class="line"><span class="lineno">  563</span>        <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
-<div class="line"><span class="lineno">  564</span>            <span class="keywordflow">return</span> _storage.template ptr&lt;fixed_bitset&gt;()-&gt;find_first(test_value, <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a>);</div>
-<div class="line"><span class="lineno">  565</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  566</span>            <span class="keywordflow">return</span> _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;find_first(test_value, <a class="code hl_function" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a>);</div>
-<div class="line"><span class="lineno">  567</span>        }</div>
-<div class="line"><span class="lineno">  568</span>    }</div>
-<div class="line"><span class="lineno">  569</span></div>
-<div class="line"><span class="lineno">  571</span>    <span class="keyword">friend</span> BitsetInlined operator~(<span class="keyword">const</span> BitsetInlined &amp;bs) <span class="keyword">noexcept</span> {</div>
-<div class="line"><span class="lineno">  572</span>        BitsetInlined result = bs;</div>
-<div class="line"><span class="lineno">  573</span>        result.flip();</div>
-<div class="line"><span class="lineno">  574</span>        <span class="keywordflow">return</span> result;</div>
-<div class="line"><span class="lineno">  575</span>    }</div>
-<div class="line"><span class="lineno">  576</span> </div>
-<div class="line"><span class="lineno">  577</span>    <span class="keyword">friend</span> BitsetInlined <a class="code hl_function" href="../../db/dd1/crgb_8h_a8a80cf207f08b95b7e6d5775ec02ac4b.html#a8a80cf207f08b95b7e6d5775ec02ac4b">operator&amp;</a>(<span class="keyword">const</span> BitsetInlined &amp;lhs,</div>
-<div class="line"><span class="lineno">  578</span>                                   <span class="keyword">const</span> BitsetInlined &amp;rhs) <span class="keyword">noexcept</span> {</div>
-<div class="line"><span class="lineno">  579</span>        BitsetInlined result = lhs;</div>
-<div class="line"><span class="lineno">  580</span> </div>
-<div class="line"><span class="lineno">  581</span>        <span class="keywordflow">if</span> (result._storage.template is&lt;fixed_bitset&gt;() &amp;&amp;</div>
-<div class="line"><span class="lineno">  582</span>            rhs._storage.template is&lt;fixed_bitset&gt;()) {</div>
-<div class="line"><span class="lineno">  583</span>            <span class="comment">// Both are fixed, use the fixed implementation</span></div>
-<div class="line"><span class="lineno">  584</span>            *result._storage.template ptr&lt;fixed_bitset&gt;() &amp;=</div>
-<div class="line"><span class="lineno">  585</span>                *rhs._storage.template ptr&lt;fixed_bitset&gt;();</div>
-<div class="line"><span class="lineno">  586</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  587</span>            <span class="comment">// At least one is dynamic, handle bit by bit</span></div>
-<div class="line"><span class="lineno">  588</span>            fl::u32 min_size =</div>
-<div class="line"><span class="lineno">  589</span>                result.size() &lt; rhs.size() ? result.size() : rhs.size();</div>
-<div class="line"><span class="lineno">  590</span>            <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; min_size; ++i) {</div>
-<div class="line"><span class="lineno">  591</span>                result.set(i, result.test(i) &amp;&amp; rhs.test(i));</div>
-<div class="line"><span class="lineno">  592</span>            }</div>
-<div class="line"><span class="lineno">  593</span>            <span class="comment">// Clear any bits beyond the size of rhs</span></div>
-<div class="line"><span class="lineno">  594</span>            <span class="keywordflow">for</span> (fl::u32 i = min_size; i &lt; result.size(); ++i) {</div>
-<div class="line"><span class="lineno">  595</span>                result.reset(i);</div>
-<div class="line"><span class="lineno">  596</span>            }</div>
-<div class="line"><span class="lineno">  597</span>        }</div>
-<div class="line"><span class="lineno">  598</span> </div>
-<div class="line"><span class="lineno">  599</span>        <span class="keywordflow">return</span> result;</div>
-<div class="line"><span class="lineno">  600</span>    }</div>
-<div class="line"><span class="lineno">  601</span> </div>
-<div class="line"><span class="lineno">  602</span>    <span class="keyword">friend</span> BitsetInlined <a class="code hl_function" href="../../db/dd1/crgb_8h_a8a5083bb351fad245f328ae8066134ae.html#a8a5083bb351fad245f328ae8066134ae">operator|</a>(<span class="keyword">const</span> BitsetInlined &amp;lhs,</div>
-<div class="line"><span class="lineno">  603</span>                                   <span class="keyword">const</span> BitsetInlined &amp;rhs) <span class="keyword">noexcept</span> {</div>
-<div class="line"><span class="lineno">  604</span>        BitsetInlined result = lhs;</div>
-<div class="line"><span class="lineno">  605</span> </div>
-<div class="line"><span class="lineno">  606</span>        <span class="keywordflow">if</span> (result._storage.template is&lt;fixed_bitset&gt;() &amp;&amp;</div>
-<div class="line"><span class="lineno">  607</span>            rhs._storage.template is&lt;fixed_bitset&gt;()) {</div>
-<div class="line"><span class="lineno">  608</span>            <span class="comment">// Both are fixed, use the fixed implementation</span></div>
-<div class="line"><span class="lineno">  609</span>            *result._storage.template ptr&lt;fixed_bitset&gt;() |=</div>
-<div class="line"><span class="lineno">  610</span>                *rhs._storage.template ptr&lt;fixed_bitset&gt;();</div>
-<div class="line"><span class="lineno">  611</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  612</span>            <span class="comment">// At least one is dynamic, handle bit by bit</span></div>
-<div class="line"><span class="lineno">  613</span>            fl::u32 max_size =</div>
-<div class="line"><span class="lineno">  614</span>                result.size() &gt; rhs.size() ? result.size() : rhs.size();</div>
-<div class="line"><span class="lineno">  615</span> </div>
-<div class="line"><span class="lineno">  616</span>            <span class="comment">// Resize if needed</span></div>
-<div class="line"><span class="lineno">  617</span>            <span class="keywordflow">if</span> (result.size() &lt; max_size) {</div>
-<div class="line"><span class="lineno">  618</span>                result.resize(max_size);</div>
-<div class="line"><span class="lineno">  619</span>            }</div>
-<div class="line"><span class="lineno">  620</span> </div>
-<div class="line"><span class="lineno">  621</span>            <span class="comment">// Set bits from rhs</span></div>
-<div class="line"><span class="lineno">  622</span>            <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; rhs.size(); ++i) {</div>
-<div class="line"><span class="lineno">  623</span>                <span class="keywordflow">if</span> (rhs.test(i)) {</div>
-<div class="line"><span class="lineno">  624</span>                    result.set(i);</div>
-<div class="line"><span class="lineno">  625</span>                }</div>
-<div class="line"><span class="lineno">  626</span>            }</div>
-<div class="line"><span class="lineno">  627</span>        }</div>
-<div class="line"><span class="lineno">  628</span> </div>
-<div class="line"><span class="lineno">  629</span>        <span class="keywordflow">return</span> result;</div>
-<div class="line"><span class="lineno">  630</span>    }</div>
-<div class="line"><span class="lineno">  631</span> </div>
-<div class="line"><span class="lineno">  632</span>    <span class="keyword">friend</span> BitsetInlined operator^(<span class="keyword">const</span> BitsetInlined &amp;lhs,</div>
-<div class="line"><span class="lineno">  633</span>                                   <span class="keyword">const</span> BitsetInlined &amp;rhs) <span class="keyword">noexcept</span> {</div>
-<div class="line"><span class="lineno">  634</span>        BitsetInlined result = lhs;</div>
-<div class="line"><span class="lineno">  635</span> </div>
-<div class="line"><span class="lineno">  636</span>        <span class="keywordflow">if</span> (result._storage.template is&lt;fixed_bitset&gt;() &amp;&amp;</div>
-<div class="line"><span class="lineno">  637</span>            rhs._storage.template is&lt;fixed_bitset&gt;()) {</div>
-<div class="line"><span class="lineno">  638</span>            <span class="comment">// Both are fixed, use the fixed implementation</span></div>
-<div class="line"><span class="lineno">  639</span>            *result._storage.template ptr&lt;fixed_bitset&gt;() ^=</div>
-<div class="line"><span class="lineno">  640</span>                *rhs._storage.template ptr&lt;fixed_bitset&gt;();</div>
-<div class="line"><span class="lineno">  641</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  642</span>            <span class="comment">// At least one is dynamic, handle bit by bit</span></div>
-<div class="line"><span class="lineno">  643</span>            fl::u32 max_size =</div>
-<div class="line"><span class="lineno">  644</span>                result.size() &gt; rhs.size() ? result.size() : rhs.size();</div>
-<div class="line"><span class="lineno">  645</span> </div>
-<div class="line"><span class="lineno">  646</span>            <span class="comment">// Resize if needed</span></div>
-<div class="line"><span class="lineno">  647</span>            <span class="keywordflow">if</span> (result.size() &lt; max_size) {</div>
-<div class="line"><span class="lineno">  648</span>                result.resize(max_size);</div>
-<div class="line"><span class="lineno">  649</span>            }</div>
-<div class="line"><span class="lineno">  650</span> </div>
-<div class="line"><span class="lineno">  651</span>            <span class="comment">// XOR bits from rhs</span></div>
-<div class="line"><span class="lineno">  652</span>            <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; rhs.size(); ++i) {</div>
-<div class="line"><span class="lineno">  653</span>                result.set(i, result.test(i) != rhs.test(i));</div>
-<div class="line"><span class="lineno">  654</span>            }</div>
-<div class="line"><span class="lineno">  655</span>        }</div>
-<div class="line"><span class="lineno">  656</span> </div>
-<div class="line"><span class="lineno">  657</span>        <span class="keywordflow">return</span> result;</div>
-<div class="line"><span class="lineno">  658</span>    }</div>
-<div class="line"><span class="lineno">  659</span>};</div>
-<div class="line"><span class="lineno">  660</span> </div>
-<div class="line"><span class="lineno">  661</span>} <span class="comment">// namespace fl</span></div>
+<div class="line"><span class="lineno">  552</span>            <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a> &lt; N ? _storage.template ptr&lt;fixed_bitset&gt;()-&gt;test(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>)</div>
+<div class="line"><span class="lineno">  553</span>                           : <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  554</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  555</span>            <span class="keywordflow">return</span> _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;test(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>);</div>
+<div class="line"><span class="lineno">  556</span>        }</div>
+<div class="line"><span class="lineno">  557</span>    }</div>
+<div class="line"><span class="lineno">  558</span></div>
+<div class="line"><span class="lineno">  560</span>    <span class="keywordtype">bool</span> operator[](fl::u32 <a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> { <span class="keywordflow">return</span> test(<a class="code hl_variable" href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a>); }</div>
+<div class="line"><span class="lineno">  561</span></div>
+<div class="line"><span class="lineno">  563</span>    fl::u32 count() const <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  564</span>        <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
+<div class="line"><span class="lineno">  565</span>            <span class="keywordflow">return</span> _storage.template ptr&lt;fixed_bitset&gt;()-&gt;count();</div>
+<div class="line"><span class="lineno">  566</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  567</span>            <span class="keywordflow">return</span> _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;count();</div>
+<div class="line"><span class="lineno">  568</span>        }</div>
+<div class="line"><span class="lineno">  569</span>    }</div>
+<div class="line"><span class="lineno">  570</span></div>
+<div class="line"><span class="lineno">  572</span>    <span class="keywordtype">bool</span> any() const <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  573</span>        <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
+<div class="line"><span class="lineno">  574</span>            <span class="keywordflow">return</span> _storage.template ptr&lt;fixed_bitset&gt;()-&gt;any();</div>
+<div class="line"><span class="lineno">  575</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  576</span>            <span class="keywordflow">return</span> _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;any();</div>
+<div class="line"><span class="lineno">  577</span>        }</div>
+<div class="line"><span class="lineno">  578</span>    }</div>
+<div class="line"><span class="lineno">  579</span> </div>
+<div class="line"><span class="lineno">  580</span>    <span class="keywordtype">bool</span> none() const <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  581</span>        <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
+<div class="line"><span class="lineno">  582</span>            <span class="keywordflow">return</span> _storage.template ptr&lt;fixed_bitset&gt;()-&gt;none();</div>
+<div class="line"><span class="lineno">  583</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  584</span>            <span class="keywordflow">return</span> _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;none();</div>
+<div class="line"><span class="lineno">  585</span>        }</div>
+<div class="line"><span class="lineno">  586</span>    }</div>
+<div class="line"><span class="lineno">  587</span> </div>
+<div class="line"><span class="lineno">  588</span>    <span class="keywordtype">bool</span> all() const <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  589</span>        <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
+<div class="line"><span class="lineno">  590</span>            <span class="keywordflow">return</span> _storage.template ptr&lt;fixed_bitset&gt;()-&gt;all();</div>
+<div class="line"><span class="lineno">  591</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  592</span>            <span class="keywordflow">return</span> _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;all();</div>
+<div class="line"><span class="lineno">  593</span>        }</div>
+<div class="line"><span class="lineno">  594</span>    }</div>
+<div class="line"><span class="lineno">  595</span></div>
+<div class="line"><span class="lineno">  597</span>    fl::u32 size() const <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  598</span>        <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
+<div class="line"><span class="lineno">  599</span>            <span class="keywordflow">return</span> N;</div>
+<div class="line"><span class="lineno">  600</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  601</span>            <span class="keywordflow">return</span> _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;size();</div>
+<div class="line"><span class="lineno">  602</span>        }</div>
+<div class="line"><span class="lineno">  603</span>    }</div>
+<div class="line"><span class="lineno">  604</span></div>
+<div class="line"><span class="lineno">  606</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../df/d9e/namespacefl_1_1detail_aa878a2c7d8c38f99002cb94c3d6d3465.html#aa878a2c7d8c38f99002cb94c3d6d3465">to_string</a>(<span class="keywordtype">string</span>* dst) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  607</span>        <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
+<div class="line"><span class="lineno">  608</span>            _storage.template ptr&lt;fixed_bitset&gt;()-&gt;to_string(dst);</div>
+<div class="line"><span class="lineno">  609</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  610</span>            _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;to_string(dst);</div>
+<div class="line"><span class="lineno">  611</span>        }</div>
+<div class="line"><span class="lineno">  612</span>    }</div>
+<div class="line"><span class="lineno">  613</span></div>
+<div class="line"><span class="lineno">  618</span>    fl::i32 find_first(<span class="keywordtype">bool</span> test_value, fl::u32 <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a> = 0) const <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  619</span>        <span class="keywordflow">if</span> (_storage.template is&lt;fixed_bitset&gt;()) {</div>
+<div class="line"><span class="lineno">  620</span>            <span class="keywordflow">return</span> _storage.template ptr&lt;fixed_bitset&gt;()-&gt;find_first(test_value, <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a>);</div>
+<div class="line"><span class="lineno">  621</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  622</span>            <span class="keywordflow">return</span> _storage.template ptr&lt;bitset_dynamic&gt;()-&gt;find_first(test_value, <a class="code hl_function" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a>);</div>
+<div class="line"><span class="lineno">  623</span>        }</div>
+<div class="line"><span class="lineno">  624</span>    }</div>
+<div class="line"><span class="lineno">  625</span></div>
+<div class="line"><span class="lineno">  627</span>    <span class="keyword">friend</span> bitset_inlined operator~(<span class="keyword">const</span> bitset_inlined &amp;bs) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  628</span>        bitset_inlined <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> = bs;</div>
+<div class="line"><span class="lineno">  629</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.flip();</div>
+<div class="line"><span class="lineno">  630</span>        <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>;</div>
+<div class="line"><span class="lineno">  631</span>    }</div>
+<div class="line"><span class="lineno">  632</span> </div>
+<div class="line"><span class="lineno">  633</span>    <span class="keyword">friend</span> bitset_inlined <a class="code hl_function" href="../../db/d97/_fast_l_e_d_8h_ab4e8215eff6e86440de26fec4d259480.html#ab4e8215eff6e86440de26fec4d259480">operator&amp;</a>(<span class="keyword">const</span> bitset_inlined &amp;lhs,</div>
+<div class="line"><span class="lineno">  634</span>                                   <span class="keyword">const</span> bitset_inlined &amp;rhs) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  635</span>        bitset_inlined <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> = lhs;</div>
+<div class="line"><span class="lineno">  636</span> </div>
+<div class="line"><span class="lineno">  637</span>        <span class="keywordflow">if</span> (<a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>._storage.template is&lt;fixed_bitset&gt;() &amp;&amp;</div>
+<div class="line"><span class="lineno">  638</span>            rhs._storage.template is&lt;fixed_bitset&gt;()) {</div>
+<div class="line"><span class="lineno">  639</span>            <span class="comment">// Both are fixed, use the fixed implementation</span></div>
+<div class="line"><span class="lineno">  640</span>            *<a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>._storage.template ptr&lt;fixed_bitset&gt;() &amp;=</div>
+<div class="line"><span class="lineno">  641</span>                *rhs._storage.template ptr&lt;fixed_bitset&gt;();</div>
+<div class="line"><span class="lineno">  642</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  643</span>            <span class="comment">// At least one is dynamic, handle bit by bit</span></div>
+<div class="line"><span class="lineno">  644</span>            fl::u32 min_size =</div>
+<div class="line"><span class="lineno">  645</span>                <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.size() &lt; rhs.size() ? <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.size() : rhs.size();</div>
+<div class="line"><span class="lineno">  646</span>            <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; min_size; ++i) {</div>
+<div class="line"><span class="lineno">  647</span>                <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.set(i, <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.test(i) &amp;&amp; rhs.test(i));</div>
+<div class="line"><span class="lineno">  648</span>            }</div>
+<div class="line"><span class="lineno">  649</span>            <span class="comment">// Clear any bits beyond the size of rhs</span></div>
+<div class="line"><span class="lineno">  650</span>            <span class="keywordflow">for</span> (fl::u32 i = min_size; i &lt; <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.size(); ++i) {</div>
+<div class="line"><span class="lineno">  651</span>                <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.reset(i);</div>
+<div class="line"><span class="lineno">  652</span>            }</div>
+<div class="line"><span class="lineno">  653</span>        }</div>
+<div class="line"><span class="lineno">  654</span> </div>
+<div class="line"><span class="lineno">  655</span>        <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>;</div>
+<div class="line"><span class="lineno">  656</span>    }</div>
+<div class="line"><span class="lineno">  657</span> </div>
+<div class="line"><span class="lineno">  658</span>    <span class="keyword">friend</span> bitset_inlined <a class="code hl_function" href="../../db/d97/_fast_l_e_d_8h_a664d59edf00ef403547a6da19ba0cb01.html#a664d59edf00ef403547a6da19ba0cb01">operator|</a>(<span class="keyword">const</span> bitset_inlined &amp;lhs,</div>
+<div class="line"><span class="lineno">  659</span>                                   <span class="keyword">const</span> bitset_inlined &amp;rhs) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  660</span>        bitset_inlined <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> = lhs;</div>
+<div class="line"><span class="lineno">  661</span> </div>
+<div class="line"><span class="lineno">  662</span>        <span class="keywordflow">if</span> (<a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>._storage.template is&lt;fixed_bitset&gt;() &amp;&amp;</div>
+<div class="line"><span class="lineno">  663</span>            rhs._storage.template is&lt;fixed_bitset&gt;()) {</div>
+<div class="line"><span class="lineno">  664</span>            <span class="comment">// Both are fixed, use the fixed implementation</span></div>
+<div class="line"><span class="lineno">  665</span>            *<a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>._storage.template ptr&lt;fixed_bitset&gt;() |=</div>
+<div class="line"><span class="lineno">  666</span>                *rhs._storage.template ptr&lt;fixed_bitset&gt;();</div>
+<div class="line"><span class="lineno">  667</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  668</span>            <span class="comment">// At least one is dynamic, handle bit by bit</span></div>
+<div class="line"><span class="lineno">  669</span>            fl::u32 max_size =</div>
+<div class="line"><span class="lineno">  670</span>                <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.size() &gt; rhs.size() ? <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.size() : rhs.size();</div>
+<div class="line"><span class="lineno">  671</span> </div>
+<div class="line"><span class="lineno">  672</span>            <span class="comment">// Resize if needed</span></div>
+<div class="line"><span class="lineno">  673</span>            <span class="keywordflow">if</span> (<a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.size() &lt; max_size) {</div>
+<div class="line"><span class="lineno">  674</span>                <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.resize(max_size);</div>
+<div class="line"><span class="lineno">  675</span>            }</div>
+<div class="line"><span class="lineno">  676</span> </div>
+<div class="line"><span class="lineno">  677</span>            <span class="comment">// Set bits from rhs</span></div>
+<div class="line"><span class="lineno">  678</span>            <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; rhs.size(); ++i) {</div>
+<div class="line"><span class="lineno">  679</span>                <span class="keywordflow">if</span> (rhs.test(i)) {</div>
+<div class="line"><span class="lineno">  680</span>                    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.set(i);</div>
+<div class="line"><span class="lineno">  681</span>                }</div>
+<div class="line"><span class="lineno">  682</span>            }</div>
+<div class="line"><span class="lineno">  683</span>        }</div>
+<div class="line"><span class="lineno">  684</span> </div>
+<div class="line"><span class="lineno">  685</span>        <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>;</div>
+<div class="line"><span class="lineno">  686</span>    }</div>
+<div class="line"><span class="lineno">  687</span> </div>
+<div class="line"><span class="lineno">  688</span>    <span class="keyword">friend</span> bitset_inlined operator^(<span class="keyword">const</span> bitset_inlined &amp;lhs,</div>
+<div class="line"><span class="lineno">  689</span>                                   <span class="keyword">const</span> bitset_inlined &amp;rhs) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  690</span>        bitset_inlined <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a> = lhs;</div>
+<div class="line"><span class="lineno">  691</span> </div>
+<div class="line"><span class="lineno">  692</span>        <span class="keywordflow">if</span> (<a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>._storage.template is&lt;fixed_bitset&gt;() &amp;&amp;</div>
+<div class="line"><span class="lineno">  693</span>            rhs._storage.template is&lt;fixed_bitset&gt;()) {</div>
+<div class="line"><span class="lineno">  694</span>            <span class="comment">// Both are fixed, use the fixed implementation</span></div>
+<div class="line"><span class="lineno">  695</span>            *<a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>._storage.template ptr&lt;fixed_bitset&gt;() ^=</div>
+<div class="line"><span class="lineno">  696</span>                *rhs._storage.template ptr&lt;fixed_bitset&gt;();</div>
+<div class="line"><span class="lineno">  697</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  698</span>            <span class="comment">// At least one is dynamic, handle bit by bit</span></div>
+<div class="line"><span class="lineno">  699</span>            fl::u32 max_size =</div>
+<div class="line"><span class="lineno">  700</span>                <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.size() &gt; rhs.size() ? <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.size() : rhs.size();</div>
+<div class="line"><span class="lineno">  701</span> </div>
+<div class="line"><span class="lineno">  702</span>            <span class="comment">// Resize if needed</span></div>
+<div class="line"><span class="lineno">  703</span>            <span class="keywordflow">if</span> (<a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.size() &lt; max_size) {</div>
+<div class="line"><span class="lineno">  704</span>                <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.resize(max_size);</div>
+<div class="line"><span class="lineno">  705</span>            }</div>
+<div class="line"><span class="lineno">  706</span> </div>
+<div class="line"><span class="lineno">  707</span>            <span class="comment">// XOR bits from rhs</span></div>
+<div class="line"><span class="lineno">  708</span>            <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; rhs.size(); ++i) {</div>
+<div class="line"><span class="lineno">  709</span>                <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.set(i, <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>.test(i) != rhs.test(i));</div>
+<div class="line"><span class="lineno">  710</span>            }</div>
+<div class="line"><span class="lineno">  711</span>        }</div>
+<div class="line"><span class="lineno">  712</span> </div>
+<div class="line"><span class="lineno">  713</span>        <span class="keywordflow">return</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">result</a>;</div>
+<div class="line"><span class="lineno">  714</span>    }</div>
+<div class="line"><span class="lineno">  715</span></div>
+<div class="line"><span class="lineno">  717</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a85ba05df525add48070aed53f3088b8c.html#a85ba05df525add48070aed53f3088b8c">operator==</a>(<span class="keyword">const</span> bitset_inlined &amp;other) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  718</span>        <span class="keywordflow">if</span> (size() != other.size()) {</div>
+<div class="line"><span class="lineno">  719</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  720</span>        }</div>
+<div class="line"><span class="lineno">  721</span>        <span class="keywordflow">for</span> (fl::u32 i = 0; i &lt; size(); ++i) {</div>
+<div class="line"><span class="lineno">  722</span>            <span class="keywordflow">if</span> (test(i) != other.test(i)) {</div>
+<div class="line"><span class="lineno">  723</span>                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  724</span>            }</div>
+<div class="line"><span class="lineno">  725</span>        }</div>
+<div class="line"><span class="lineno">  726</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  727</span>    }</div>
+<div class="line"><span class="lineno">  728</span> </div>
+<div class="line"><span class="lineno">  729</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a5c282abe564ddeed95d0ae0752190551.html#a5c282abe564ddeed95d0ae0752190551">operator!=</a>(<span class="keyword">const</span> bitset_inlined &amp;other) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  730</span>        <span class="keywordflow">return</span> !(*<span class="keyword">this</span> == other);</div>
+<div class="line"><span class="lineno">  731</span>    }</div>
+<div class="line"><span class="lineno">  732</span></div>
+<div class="line"><span class="lineno">  734</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a82f362b1edd7f52608e3fd0f4fa71229.html#a82f362b1edd7f52608e3fd0f4fa71229">operator&lt;</a>(<span class="keyword">const</span> bitset_inlined &amp;other) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  735</span>        fl::u32 min_size = size() &lt; other.size() ? size() : other.size();</div>
+<div class="line"><span class="lineno">  736</span>        <span class="keywordflow">for</span> (fl::u32 i = min_size; i &gt; 0; --i) {</div>
+<div class="line"><span class="lineno">  737</span>            <span class="keywordtype">bool</span> this_bit = test(i - 1);</div>
+<div class="line"><span class="lineno">  738</span>            <span class="keywordtype">bool</span> other_bit = other.test(i - 1);</div>
+<div class="line"><span class="lineno">  739</span>            <span class="keywordflow">if</span> (this_bit != other_bit) {</div>
+<div class="line"><span class="lineno">  740</span>                <span class="keywordflow">return</span> !this_bit;  <span class="comment">// false &lt; true</span></div>
+<div class="line"><span class="lineno">  741</span>            }</div>
+<div class="line"><span class="lineno">  742</span>        }</div>
+<div class="line"><span class="lineno">  743</span>        <span class="comment">// All common bits are equal, shorter is less</span></div>
+<div class="line"><span class="lineno">  744</span>        <span class="keywordflow">return</span> size() &lt; other.size();</div>
+<div class="line"><span class="lineno">  745</span>    }</div>
+<div class="line"><span class="lineno">  746</span> </div>
+<div class="line"><span class="lineno">  747</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a95efad47ded60bcb457ef02c0513ae1f.html#a95efad47ded60bcb457ef02c0513ae1f">operator&lt;=</a>(<span class="keyword">const</span> bitset_inlined &amp;other) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  748</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span> &lt; other || *<span class="keyword">this</span> == other;</div>
+<div class="line"><span class="lineno">  749</span>    }</div>
+<div class="line"><span class="lineno">  750</span> </div>
+<div class="line"><span class="lineno">  751</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d4/d36/namespacefl_a8b86dd00fcaf272ee03e349e5ec7b5ad.html#a8b86dd00fcaf272ee03e349e5ec7b5ad">operator&gt;</a>(<span class="keyword">const</span> bitset_inlined &amp;other) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  752</span>        <span class="keywordflow">return</span> other &lt; *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">  753</span>    }</div>
+<div class="line"><span class="lineno">  754</span> </div>
+<div class="line"><span class="lineno">  755</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d4/d36/namespacefl_afde5412306138de832ebd4e826940ba3.html#afde5412306138de832ebd4e826940ba3">operator&gt;=</a>(<span class="keyword">const</span> bitset_inlined &amp;other) <span class="keyword">const</span> <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><span class="lineno">  756</span>        <span class="keywordflow">return</span> other &lt;= *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">  757</span>    }</div>
+<div class="line"><span class="lineno">  758</span>};</div>
+<div class="line"><span class="lineno">  759</span> </div>
+<div class="line"><span class="lineno">  760</span>} <span class="comment">// namespace fl</span></div>
 <div class="ttc" id="a_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae_html_a29716abd4f651ba9d6f1476ea79fa7ae"><div class="ttname"><a href="../../d4/d0c/_blur_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae">pos</a></div><div class="ttdeci">uint8_t pos</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d0c/_blur_8ino_source.html#l00011">Blur.ino:11</a></div></div>
-<div class="ttc" id="acrgb_8h_a8a5083bb351fad245f328ae8066134ae_html_a8a5083bb351fad245f328ae8066134ae"><div class="ttname"><a href="../../db/dd1/crgb_8h_a8a5083bb351fad245f328ae8066134ae.html#a8a5083bb351fad245f328ae8066134ae">operator|</a></div><div class="ttdeci">FASTLED_FORCE_INLINE CRGB operator|(const CRGB &amp;p1, const CRGB &amp;p2)</div><div class="ttdoc">Combine two CRGB objects, taking the largest value of each channel.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00868">crgb.h:868</a></div></div>
-<div class="ttc" id="acrgb_8h_a8a80cf207f08b95b7e6d5775ec02ac4b_html_a8a80cf207f08b95b7e6d5775ec02ac4b"><div class="ttname"><a href="../../db/dd1/crgb_8h_a8a80cf207f08b95b7e6d5775ec02ac4b.html#a8a80cf207f08b95b7e6d5775ec02ac4b">operator&amp;</a></div><div class="ttdeci">FASTLED_FORCE_INLINE CRGB operator&amp;(const CRGB &amp;p1, const CRGB &amp;p2)</div><div class="ttdoc">Combine two CRGB objects, taking the smallest value of each channel.</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00860">crgb.h:860</a></div></div>
-<div class="ttc" id="adirect_8h_a0b3fd115c40d6ac683a810a572fc6104_html_a0b3fd115c40d6ac683a810a572fc6104"><div class="ttname"><a href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset</a></div><div class="ttdeci">UISlider offset(&quot;Offset&quot;, 0.0f, 0.0f, 1.0f, 0.01f)</div></div>
-<div class="ttc" id="anamespacefl_1_1detail_aa878a2c7d8c38f99002cb94c3d6d3465_html_aa878a2c7d8c38f99002cb94c3d6d3465"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_aa878a2c7d8c38f99002cb94c3d6d3465.html#aa878a2c7d8c38f99002cb94c3d6d3465">fl::detail::to_string</a></div><div class="ttdeci">void to_string(const fl::u16 *bit_data, fl::u32 bit_count, string *dst)</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d7b/bitset_8cpp_source.html#l00008">bitset.cpp:8</a></div></div>
-<div class="ttc" id="anamespacefl_a0445ddcae69ac4e524ec18098eb84dbf_html_a0445ddcae69ac4e524ec18098eb84dbf"><div class="ttname"><a href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">fl::move</a></div><div class="ttdeci">constexpr remove_reference&lt; T &gt;::type &amp;&amp; move(T &amp;&amp;t) noexcept</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d83/move_8h_source.html#l00027">move.h:27</a></div></div>
-<div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d7e/int_8h_source.html#l00017">int.h:17</a></div></div>
+<div class="ttc" id="a_fast_l_e_d_8h_a1663fce3f269dfd635af10335edf8b87_html_a1663fce3f269dfd635af10335edf8b87"><div class="ttname"><a href="../../db/d97/_fast_l_e_d_8h_a1663fce3f269dfd635af10335edf8b87.html#a1663fce3f269dfd635af10335edf8b87">operator|=</a></div><div class="ttdeci">ClearFlags &amp; operator|=(ClearFlags &amp;a, ClearFlags b)</div><div class="ttdoc">Enable bitwise OR assignment for ClearFlags.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d97/_fast_l_e_d_8h_source.html#l00599">FastLED.h:599</a></div></div>
+<div class="ttc" id="a_fast_l_e_d_8h_a664d59edf00ef403547a6da19ba0cb01_html_a664d59edf00ef403547a6da19ba0cb01"><div class="ttname"><a href="../../db/d97/_fast_l_e_d_8h_a664d59edf00ef403547a6da19ba0cb01.html#a664d59edf00ef403547a6da19ba0cb01">operator|</a></div><div class="ttdeci">ClearFlags operator|(ClearFlags a, ClearFlags b)</div><div class="ttdoc">Enable bitwise OR for ClearFlags.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d97/_fast_l_e_d_8h_source.html#l00589">FastLED.h:589</a></div></div>
+<div class="ttc" id="a_fast_l_e_d_8h_ab4e8215eff6e86440de26fec4d259480_html_ab4e8215eff6e86440de26fec4d259480"><div class="ttname"><a href="../../db/d97/_fast_l_e_d_8h_ab4e8215eff6e86440de26fec4d259480.html#ab4e8215eff6e86440de26fec4d259480">operator&amp;</a></div><div class="ttdeci">ClearFlags operator&amp;(ClearFlags a, ClearFlags b)</div><div class="ttdoc">Enable bitwise AND for ClearFlags.</div><div class="ttdef"><b>Definition</b> <a href="../../db/d97/_fast_l_e_d_8h_source.html#l00594">FastLED.h:594</a></div></div>
+<div class="ttc" id="adirect_8h_ae2738c620ee3ab857c9656b3bf86a24d_html_ae2738c620ee3ab857c9656b3bf86a24d"><div class="ttname"><a href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a></div><div class="ttdeci">fl::UISlider offset(&quot;Offset&quot;, 0.0f, 0.0f, 1.0f, 0.01f)</div></div>
+<div class="ttc" id="anamespacefl_1_1detail_aa878a2c7d8c38f99002cb94c3d6d3465_html_aa878a2c7d8c38f99002cb94c3d6d3465"><div class="ttname"><a href="../../df/d9e/namespacefl_1_1detail_aa878a2c7d8c38f99002cb94c3d6d3465.html#aa878a2c7d8c38f99002cb94c3d6d3465">fl::detail::to_string</a></div><div class="ttdeci">void to_string(const fl::u16 *bit_data, fl::u32 bit_count, string *dst)</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d91/bitset_8cpp_8hpp_source.html#l00009">bitset.cpp.hpp:9</a></div></div>
+<div class="ttc" id="anamespacefl_a03eeb690d9582a74cb2e4a1f5a806e80_html_a03eeb690d9582a74cb2e4a1f5a806e80"><div class="ttname"><a href="../../d4/d36/namespacefl_a03eeb690d9582a74cb2e4a1f5a806e80.html#a03eeb690d9582a74cb2e4a1f5a806e80">fl::move</a></div><div class="ttdeci">constexpr remove_reference&lt; T &gt;::type &amp;&amp; move(T &amp;&amp;t) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d83/move_8h_source.html#l00028">move.h:28</a></div></div>
+<div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../df/dd8/stdint_8h_source.html#l00131">stdint.h:131</a></div></div>
+<div class="ttc" id="anamespacefl_a5c282abe564ddeed95d0ae0752190551_html_a5c282abe564ddeed95d0ae0752190551"><div class="ttname"><a href="../../d4/d36/namespacefl_a5c282abe564ddeed95d0ae0752190551.html#a5c282abe564ddeed95d0ae0752190551">fl::operator!=</a></div><div class="ttdeci">FASTLED_FORCE_INLINE bool operator!=(const CRGB &amp;lhs, const CRGB &amp;rhs) FL_NOEXCEPT</div><div class="ttdoc">Check if two CRGB objects do not have the same color data.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00739">crgb.h:739</a></div></div>
+<div class="ttc" id="anamespacefl_a82f362b1edd7f52608e3fd0f4fa71229_html_a82f362b1edd7f52608e3fd0f4fa71229"><div class="ttname"><a href="../../d4/d36/namespacefl_a82f362b1edd7f52608e3fd0f4fa71229.html#a82f362b1edd7f52608e3fd0f4fa71229">fl::operator&lt;</a></div><div class="ttdeci">FASTLED_FORCE_INLINE bool operator&lt;(const CRGB &amp;lhs, const CRGB &amp;rhs) FL_NOEXCEPT</div><div class="ttdoc">Check if the sum of the color channels in one CRGB object is less than another.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00745">crgb.h:745</a></div></div>
+<div class="ttc" id="anamespacefl_a85ba05df525add48070aed53f3088b8c_html_a85ba05df525add48070aed53f3088b8c"><div class="ttname"><a href="../../d4/d36/namespacefl_a85ba05df525add48070aed53f3088b8c.html#a85ba05df525add48070aed53f3088b8c">fl::operator==</a></div><div class="ttdeci">FASTLED_FORCE_INLINE bool operator==(const CRGB &amp;lhs, const CRGB &amp;rhs) FL_NOEXCEPT</div><div class="ttdoc">Check if two CRGB objects have the same color data.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00733">crgb.h:733</a></div></div>
+<div class="ttc" id="anamespacefl_a8b86dd00fcaf272ee03e349e5ec7b5ad_html_a8b86dd00fcaf272ee03e349e5ec7b5ad"><div class="ttname"><a href="../../d4/d36/namespacefl_a8b86dd00fcaf272ee03e349e5ec7b5ad.html#a8b86dd00fcaf272ee03e349e5ec7b5ad">fl::operator&gt;</a></div><div class="ttdeci">FASTLED_FORCE_INLINE bool operator&gt;(const CRGB &amp;lhs, const CRGB &amp;rhs) FL_NOEXCEPT</div><div class="ttdoc">Check if the sum of the color channels in one CRGB object is greater than another.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00754">crgb.h:754</a></div></div>
+<div class="ttc" id="anamespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99_html_a8fa65f6529fc3eb6a174cb304a4bfc99"><div class="ttname"><a href="../../d4/d36/namespacefl_a8fa65f6529fc3eb6a174cb304a4bfc99.html#a8fa65f6529fc3eb6a174cb304a4bfc99">fl::result</a></div><div class="ttdeci">expected&lt; T, E &gt; result</div><div class="ttdoc">Alias for expected (Rust-style naming)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d93/result_8h_source.html#l00031">result.h:31</a></div></div>
+<div class="ttc" id="anamespacefl_a95efad47ded60bcb457ef02c0513ae1f_html_a95efad47ded60bcb457ef02c0513ae1f"><div class="ttname"><a href="../../d4/d36/namespacefl_a95efad47ded60bcb457ef02c0513ae1f.html#a95efad47ded60bcb457ef02c0513ae1f">fl::operator&lt;=</a></div><div class="ttdeci">FASTLED_FORCE_INLINE bool operator&lt;=(const CRGB &amp;lhs, const CRGB &amp;rhs) FL_NOEXCEPT</div><div class="ttdoc">Check if the sum of the color channels in one CRGB object is less than or equal to another.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00772">crgb.h:772</a></div></div>
+<div class="ttc" id="anamespacefl_afde5412306138de832ebd4e826940ba3_html_afde5412306138de832ebd4e826940ba3"><div class="ttname"><a href="../../d4/d36/namespacefl_afde5412306138de832ebd4e826940ba3.html#afde5412306138de832ebd4e826940ba3">fl::operator&gt;=</a></div><div class="ttdeci">FASTLED_FORCE_INLINE bool operator&gt;=(const CRGB &amp;lhs, const CRGB &amp;rhs) FL_NOEXCEPT</div><div class="ttdoc">Check if the sum of the color channels in one CRGB object is greater than or equal to another.</div><div class="ttdef"><b>Definition</b> <a href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00763">crgb.h:763</a></div></div>
+<div class="ttc" id="as16x16x4_8h_a1e4d1792cf482d5f64f27714ea210d47_html_a1e4d1792cf482d5f64f27714ea210d47"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_a1e4d1792cf482d5f64f27714ea210d47.html#a1e4d1792cf482d5f64f27714ea210d47">FL_STATIC_ASSERT</a></div><div class="ttdeci">#define FL_STATIC_ASSERT(...)</div></div>
+<div class="ttc" id="as16x16x4_8h_af54aac016b86a178940aca20946a8002_html_af54aac016b86a178940aca20946a8002"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></div><div class="ttdeci">#define FL_NOEXCEPT</div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d4/d54/compiler__control_8h_source.html#l00076">FL_DISABLE_WARNING_FLOAT_CONVERSION</a>, <a class="el" href="../../d4/d54/compiler__control_8h_source.html#l00075">FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION</a>, <a class="el" href="../../d9/d83/move_8h_source.html#l00027">fl::move()</a>, <a class="el" href="../../d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104">offset()</a>, <a class="el" href="../../db/dd1/crgb_8h_source.html#l00860">operator&amp;()</a>, <a class="el" href="../../db/dd1/crgb_8h_source.html#l00868">operator|()</a>, <a class="el" href="../../d4/d0c/_blur_8ino_source.html#l00011">pos</a>, <a class="el" href="../../dc/d7b/bitset_8cpp_source.html#l00008">fl::detail::to_string()</a>, and <a class="el" href="../../d1/d93/str_8h_source.html#l00957">fl::to_string()</a>.</p>
+<p class="reference">References <a class="el" href="../../df/d96/s16x16x4_8h_ad597a7b4a72f03310c0a569635c38e51.html#ad597a7b4a72f03310c0a569635c38e51">FL_DISABLE_WARNING_FLOAT_CONVERSION</a>, <a class="el" href="../../df/d96/s16x16x4_8h_a1898098c6485e6e2787500c9c895a025.html#a1898098c6485e6e2787500c9c895a025">FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION</a>, <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a>, <a class="el" href="../../df/d96/s16x16x4_8h_a1e4d1792cf482d5f64f27714ea210d47.html#a1e4d1792cf482d5f64f27714ea210d47">FL_STATIC_ASSERT</a>, <a class="el" href="../../df/d96/s16x16x4_8h_source.html#l00028">fl::fl::move()</a>, <a class="el" href="../../d9/d83/move_8h_source.html#l00028">fl::move()</a>, <a class="el" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset()</a>, <a class="el" href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00739">fl::operator!=()</a>, <a class="el" href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00787">fl::operator&amp;()</a>, <a class="el" href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00745">fl::operator&lt;()</a>, <a class="el" href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00772">fl::operator&lt;=()</a>, <a class="el" href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00733">fl::operator==()</a>, <a class="el" href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00754">fl::operator&gt;()</a>, <a class="el" href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00763">fl::operator&gt;=()</a>, <a class="el" href="../../df/dcc/fl_2gfx_2crgb_8h_source.html#l00795">fl::operator|()</a>, <a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html#l00599">operator|=()</a>, <a class="el" href="../../d4/d0c/_blur_8ino_source.html#l00011">pos</a>, <a class="el" href="../../d9/d91/bitset_8cpp_8hpp_source.html#l00009">fl::detail::to_string()</a>, <a class="el" href="../../da/d66/string_8h_source.html#l00450">fl::to_string()</a>, and <a class="el" href="../../dd/d37/static__constexpr__defs_8cpp_8hpp_source.html#l00082">fl::type_rank&lt; T &gt;::value</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d1/d69/bitset_8h_a96e310c8c75d2db2110158610604b4bc_a96e310c8c75d2db2110158610604b4bc_cgraph.svg" width="370" height="283"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d1/d69/bitset_8h_a96e310c8c75d2db2110158610604b4bc_a96e310c8c75d2db2110158610604b4bc_cgraph.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -791,8 +899,8 @@ $(function(){initNavTree('d1/d69/bitset_8h_a96e310c8c75d2db2110158610604b4bc.htm
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d1/d69/bitset_8h.html">bitset.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_0dd6897a8ae40540acd9d694849e950e.html">stl</a></li><li class="navelem"><a class="el" href="../../d1/d69/bitset_8h.html">bitset.h</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

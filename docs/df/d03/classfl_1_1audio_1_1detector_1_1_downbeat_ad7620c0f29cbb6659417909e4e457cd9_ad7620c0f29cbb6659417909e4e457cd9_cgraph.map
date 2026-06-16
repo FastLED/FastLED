@@ -1,0 +1,28 @@
+<map id="fl::audio::detector::Downbeat::update" name="fl::audio::detector::Downbeat::update">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,166,155,206"/>
+<area shape="poly" id="edge11_Node000001_Node000001" title=" " alt="" coords="35,166,32,156,39,147,55,141,80,139,108,142,124,149,121,154,107,147,80,145,57,147,42,151,37,157,40,165"/>
+<area shape="rect" id="Node000002" href="$df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_a8c6a9cca34b69d15d987bbefc0c21dc1.html#a8c6a9cca34b69d15d987bbefc0c21dc1" title="Construct with shared Beat (recommended)" alt="" coords="239,6,410,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,164,137,110,167,81,201,56,225,44,227,49,204,60,170,85,141,114,97,167"/>
+<area shape="rect" id="Node000003" href="$df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_a2d602a6a7fbb478afdb956660d2860fc.html#a2d602a6a7fbb478afdb956660d2860fc" title=" " alt="" coords="206,70,443,110"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="113,164,155,141,202,120,224,112,226,117,204,124,157,146,116,168"/>
+<area shape="rect" id="Node000004" href="$df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_afb91a3e8747ec76cc9a05db789e70945.html#afb91a3e8747ec76cc9a05db789e70945" title=" " alt="" coords="219,134,430,174"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="155,174,205,167,206,172,156,179"/>
+<area shape="rect" id="Node000009" href="$df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_ab74f5fcc689eefc96d9b8e035c7382e3.html#ab74f5fcc689eefc96d9b8e035c7382e3" title=" " alt="" coords="233,198,416,238"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="156,193,220,202,219,207,155,198"/>
+<area shape="rect" id="Node000012" href="$df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_adbb0ccb3f934e2305f5ca5eb4fcc49ba.html#adbb0ccb3f934e2305f5ca5eb4fcc49ba" title=" " alt="" coords="207,262,442,302"/>
+<area shape="poly" id="edge12_Node000001_Node000012" title=" " alt="" coords="116,204,157,226,204,248,226,255,224,260,202,252,155,231,113,208"/>
+<area shape="rect" id="Node000013" href="$df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_ad76840d4464537e9289bb78e4b849a31.html#ad76840d4464537e9289bb78e4b849a31" title=" " alt="" coords="203,326,447,366"/>
+<area shape="poly" id="edge13_Node000001_Node000013" title=" " alt="" coords="97,205,141,258,170,287,204,312,216,318,213,323,201,316,167,291,137,262,93,208"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84" title=" " alt="" coords="573,5,635,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="426,132,445,120,461,101,468,81,475,60,493,40,525,24,559,17,560,22,527,29,496,44,480,63,473,83,466,104,448,124,428,136"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350" title=" " alt="" coords="565,55,643,80"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="413,131,446,120,469,105,494,90,550,73,552,79,496,95,472,109,448,124,415,136"/>
+<area shape="rect" id="Node000007" href="$df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_a382377178909b27271cc90f8d32e54ff.html#a382377178909b27271cc90f8d32e54ff" title="Returns true if downbeat was detected this frame." alt="" coords="513,105,695,145"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="430,140,499,133,499,138,430,146"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="571,169,637,195"/>
+<area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="430,162,557,175,556,180,430,167"/>
+<area shape="rect" id="Node000010" href="$df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_ab2361a41ac373bd0e3b1732b7b0a6ee7.html#ab2361a41ac373bd0e3b1732b7b0a6ee7" title=" " alt="" coords="495,219,713,273"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="416,224,481,231,481,236,416,230"/>
+<area shape="rect" id="Node000011" href="$d4/dca/classfl_1_1array_ad9b2176ba32cd08ef9c7624d425869d4.html#ad9b2176ba32cd08ef9c7624d425869d4" title=" " alt="" coords="551,297,657,323"/>
+<area shape="poly" id="edge10_Node000009_Node000011" title=" " alt="" coords="417,235,448,248,472,266,482,275,496,284,539,298,537,303,494,288,479,279,469,270,445,252,415,240"/>
+</map>

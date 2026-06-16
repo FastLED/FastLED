@@ -1,0 +1,8 @@
+<map id="fl::UIGroup::UIGroup" name="fl::UIGroup::UIGroup">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,157,55"/>
+<area shape="rect" id="Node000002" href="$d4/d3a/classfl_1_1_u_i_group_a11f715b8a38e6badbd388019bba57c45.html#a11f715b8a38e6badbd388019bba57c45" title=" " alt="" coords="205,29,328,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="157,39,191,39,191,45,157,45"/>
+<area shape="rect" id="Node000003" href="$d4/d3a/classfl_1_1_u_i_group_a5e6b7544f1209becf6234308527f3370.html#a5e6b7544f1209becf6234308527f3370" title=" " alt="" coords="376,29,512,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="328,39,362,39,362,45,328,45"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="415,31,409,21,412,11,424,5,444,3,468,6,478,15,475,19,466,11,444,8,425,10,416,15,414,20,419,28"/>
+</map>

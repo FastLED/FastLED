@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fl/five_bit_hd_gamma.h File Reference</title>
+<title>FastLED: fl/gfx/five_bit_hd_gamma.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -101,6 +101,7 @@ $(function(){initNavTree('dc/d44/five__bit__hd__gamma_8h.html','../../'); initRe
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#namespaces">Namespaces</a> &#124;
 <a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a>  </div>
@@ -111,11 +112,9 @@ $(function(){initNavTree('dc/d44/five__bit__hd__gamma_8h.html','../../'); initRe
 <div class="textblock"><p>Declares functions for five-bit gamma correction. </p>
 
 <p class="definition">Definition in file <a class="el" href="../../dc/d44/five__bit__hd__gamma_8h_source.html">five_bit_hd_gamma.h</a>.</p>
-</div><div class="textblock"><code>#include &quot;<a class="el" href="../../da/d41/gamma_8h_source.html">fl/gamma.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/int.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../df/db1/math_8h_source.html">fl/math.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../db/d91/scale8_8h_source.html">lib8tion/scale8.h</a>&quot;</code><br />
+</div><div class="textblock"><code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/stl/int.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d7a/span_8h_source.html">fl/stl/span.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for five_bit_hd_gamma.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -133,40 +132,76 @@ $(function(){initNavTree('dc/d44/five__bit__hd__gamma_8h.html','../../'); initRe
 </div>
 <p><a href="../../dc/d44/five__bit__hd__gamma_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:df/d45/structfl_1_1_c_r_g_b_a5" id="r_df/d45/structfl_1_1_c_r_g_b_a5"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html#df/d45/structfl_1_1_c_r_g_b_a5">fl::CRGBA5</a></td></tr>
+<tr class="separator:df/d45/structfl_1_1_c_r_g_b_a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:a0b4d5ae1c89a46822e8c170e38f43466" id="r_a0b4d5ae1c89a46822e8c170e38f43466"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a0b4d5ae1c89a46822e8c170e38f43466.html#a0b4d5ae1c89a46822e8c170e38f43466">fl::FiveBitGammaCorrectionMode</a> { <a class="el" href="../../d4/d36/namespacefl_a0b4d5ae1c89a46822e8c170e38f43466.html#a0b4d5ae1c89a46822e8c170e38f43466aa821d28841c088d4127c12ec664daf89">fl::kFiveBitGammaCorrectionMode_Null</a> = 0
-, <a class="el" href="../../d4/d36/namespacefl_a0b4d5ae1c89a46822e8c170e38f43466.html#a0b4d5ae1c89a46822e8c170e38f43466afd1ee17be036ab937ccff8900d00c08c">fl::kFiveBitGammaCorrectionMode_BitShift</a> = 1
+<tr class="memitem:a0b4d5ae1c89a46822e8c170e38f43466" id="r_a0b4d5ae1c89a46822e8c170e38f43466"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a0b4d5ae1c89a46822e8c170e38f43466.html#a0b4d5ae1c89a46822e8c170e38f43466">fl::FiveBitGammaCorrectionMode</a> { <a class="el" href="../../d4/d36/namespacefl_a0b4d5ae1c89a46822e8c170e38f43466.html#a0b4d5ae1c89a46822e8c170e38f43466a5e0239937175b40aa971557da26d9d5e">fl::kFiveBitGammaCorrectionMode_Null</a> = 0
+, <a class="el" href="../../d4/d36/namespacefl_a0b4d5ae1c89a46822e8c170e38f43466.html#a0b4d5ae1c89a46822e8c170e38f43466ada5fd9daaf0096d009c8ca25318e83ec">fl::kFiveBitGammaCorrectionMode_BitShift</a> = 1
  }</td></tr>
 <tr class="separator:a0b4d5ae1c89a46822e8c170e38f43466"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ac5196e7510e1eaba77d095ff709c8e6d" id="r_ac5196e7510e1eaba77d095ff709c8e6d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ac5196e7510e1eaba77d095ff709c8e6d.html#ac5196e7510e1eaba77d095ff709c8e6d">fl::five_bit_bitshift</a> (u16 r16, u16 g16, u16 b16, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> <a class="el" href="../../da/dc7/advanced_8h_a96d9503945476f13a97c8f406269fcef.html#a96d9503945476f13a97c8f406269fcef">brightness</a>, <a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> *out, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> *out_power_5bit)</td></tr>
-<tr class="separator:ac5196e7510e1eaba77d095ff709c8e6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0a5b2e8db7ffb2a55b95f1eee503e9fb" id="r_a0a5b2e8db7ffb2a55b95f1eee503e9fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a0a5b2e8db7ffb2a55b95f1eee503e9fb.html#a0a5b2e8db7ffb2a55b95f1eee503e9fb">fl::five_bit_bitshift</a> (uint16_t r16, uint16_t g16, uint16_t b16, uint8_t <a class="el" href="../../da/dc7/advanced_8h_a96d9503945476f13a97c8f406269fcef.html#a96d9503945476f13a97c8f406269fcef">brightness</a>, <a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> *out, uint8_t *out_power_5bit)</td></tr>
-<tr class="separator:a0a5b2e8db7ffb2a55b95f1eee503e9fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a079a3cfc47fd1c0c9096da728e812bec" id="r_a079a3cfc47fd1c0c9096da728e812bec"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a079a3cfc47fd1c0c9096da728e812bec.html#a079a3cfc47fd1c0c9096da728e812bec">fl::five_bit_hd_gamma_bitshift</a> (<a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> colors, <a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> colors_scale, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> global_brightness, <a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> *out_colors, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> *out_power_5bit)</td></tr>
-<tr class="separator:a079a3cfc47fd1c0c9096da728e812bec"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a867c25ef6a64b8bbb31fb4162e75e46e" id="r_a867c25ef6a64b8bbb31fb4162e75e46e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a867c25ef6a64b8bbb31fb4162e75e46e.html#a867c25ef6a64b8bbb31fb4162e75e46e">fl::five_bit_hd_gamma_function</a> (<a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> color, u16 *r16, u16 *g16, u16 *b16)</td></tr>
-<tr class="separator:a867c25ef6a64b8bbb31fb4162e75e46e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad2fb43a2a5fd42f78b0ed9e97e30b020" id="r_ad2fb43a2a5fd42f78b0ed9e97e30b020"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ad2fb43a2a5fd42f78b0ed9e97e30b020.html#ad2fb43a2a5fd42f78b0ed9e97e30b020">fl::internal_builtin_five_bit_hd_gamma_bitshift</a> (<a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> colors, <a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> colors_scale, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> global_brightness, <a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> *out_colors, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> *out_power_5bit)</td></tr>
-<tr class="separator:ad2fb43a2a5fd42f78b0ed9e97e30b020"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf2dff238e5ce8ba6f45a22474060aa2" id="r_adf2dff238e5ce8ba6f45a22474060aa2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../df/d96/s16x16x4_8h_ad12102840a95770657e94a62c99a82ec.html#ad12102840a95770657e94a62c99a82ec">FL_OPTIMIZE_FUNCTION</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_adf2dff238e5ce8ba6f45a22474060aa2.html#adf2dff238e5ce8ba6f45a22474060aa2">fl::five_bit_hd_gamma_bitshift</a> (<a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span</a>&lt; const <a class="el" href="../../da/dd6/structfl_1_1_c_r_g_b.html">CRGB</a> &gt; colors, <a class="el" href="../../da/dd6/structfl_1_1_c_r_g_b.html">CRGB</a> colors_scale, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> global_brightness, <a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span</a>&lt; <a class="el" href="../../da/dd6/structfl_1_1_c_r_g_b.html">CRGB</a> &gt; out_colors, <a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span</a>&lt; <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> &gt; out_power_5bit)</td></tr>
+<tr class="separator:adf2dff238e5ce8ba6f45a22474060aa2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8156afc2871c59e9a570bb4da577f8d9" id="r_a8156afc2871c59e9a570bb4da577f8d9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../df/d96/s16x16x4_8h_ad12102840a95770657e94a62c99a82ec.html#ad12102840a95770657e94a62c99a82ec">FL_OPTIMIZE_FUNCTION</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a8156afc2871c59e9a570bb4da577f8d9.html#a8156afc2871c59e9a570bb4da577f8d9">fl::five_bit_hd_gamma_bitshift</a> (<a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span</a>&lt; const <a class="el" href="../../da/dd6/structfl_1_1_c_r_g_b.html">CRGB</a> &gt; colors, <a class="el" href="../../da/dd6/structfl_1_1_c_r_g_b.html">CRGB</a> colors_scale, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> global_brightness, <a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span</a>&lt; <a class="el" href="../../d4/d36/namespacefl.html#df/d45/structfl_1_1_c_r_g_b_a5">CRGBA5</a> &gt; out)</td></tr>
+<tr class="separator:a8156afc2871c59e9a570bb4da577f8d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<hr/><h2 class="groupheader">Class Documentation</h2>
+<a name="df/d45/structfl_1_1_c_r_g_b_a5" id="df/d45/structfl_1_1_c_r_g_b_a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#df/d45/structfl_1_1_c_r_g_b_a5">&#9670;&#160;</a></span>fl::CRGBA5</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct fl::CRGBA5</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<div id="dynsection-2" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-2-trigger" src="../../closed.png" alt="+"/> Collaboration diagram for fl::CRGBA5:</div>
+<div id="dynsection-2-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-2-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d0/d56/structfl_1_1_c_r_g_b_a5__coll__graph.svg" width="103" height="124"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="../../graph_legend.html">legend</a>]</span></center></div>
+<table class="fieldtable">
+<tr><th colspan="3">Class Members</th></tr>
+<tr><td class="fieldtype">
+<a id="a78d3d39d7f8ba5dc33afc9bb8bc09840" name="a78d3d39d7f8ba5dc33afc9bb8bc09840"></a><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a></td>
+<td class="fieldname">
+brightness_5bit</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="a323251a80d1f4e6491f15cf496771c7b" name="a323251a80d1f4e6491f15cf496771c7b"></a><a class="el" href="../../da/dd6/structfl_1_1_c_r_g_b.html">CRGB</a></td>
+<td class="fieldname">
+color</td>
+<td class="fielddoc">
+</td></tr>
+</table>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dc/d44/five__bit__hd__gamma_8h.html">five_bit_hd_gamma.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_c9349635bab014644c82face402cd66f.html">gfx</a></li><li class="navelem"><a class="el" href="../../dc/d44/five__bit__hd__gamma_8h.html">five_bit_hd_gamma.h</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

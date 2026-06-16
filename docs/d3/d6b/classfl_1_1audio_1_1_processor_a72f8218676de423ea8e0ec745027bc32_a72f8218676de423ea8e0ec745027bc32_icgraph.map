@@ -1,0 +1,9 @@
+<map id="fl::audio::Processor::getDropImpact" name="fl::audio::Processor::getDropImpact">
+<area shape="rect" id="Node000001" title=" " alt="" coords="199,49,344,89"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="304,37,292,31,271,28,253,30,242,35,238,41,240,48,235,50,233,40,239,31,252,25,271,23,294,26,306,33"/>
+<area shape="rect" id="Node000002" href="$d8/dea/classfl_1_1audio_1_1_reactive_a3f34e1fd25198d4f6375bbcbb69ff05e.html#a3f34e1fd25198d4f6375bbcbb69ff05e" title=" " alt="" coords="9,5,147,45"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="185,52,147,44,148,38,186,47"/>
+<area shape="rect" id="Node000003" href="$d3/d6b/classfl_1_1audio_1_1_processor_a44c9bf7e90fafc4f6bc668d7796ef27c.html#a44c9bf7e90fafc4f6bc668d7796ef27c" title=" " alt="" coords="5,93,151,133"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="186,91,152,99,151,94,185,86"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="110,81,99,75,78,72,60,74,49,79,45,85,47,92,42,94,40,84,45,75,58,69,78,67,101,70,113,77"/>
+</map>

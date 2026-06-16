@@ -1,0 +1,39 @@
+<map id="fl::ceilf" name="fl::ceilf">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1019,225,1085,251"/>
+<area shape="rect" id="Node000002" href="$dc/d82/classfl_1_1_corkscrew_a17fb6139424f13bebfa1177619f62baf.html#a17fb6139424f13bebfa1177619f62baf" title=" " alt="" coords="779,58,944,98"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1032,216,1004,180,969,144,936,120,902,100,905,96,939,116,972,140,1008,176,1036,212"/>
+<area shape="rect" id="Node000009" href="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a457278fcf5b0d96f9d8af8df6446e70f.html#a457278fcf5b0d96f9d8af8df6446e70f" title="Calculate FFT bin to frequency bin mappings Pre&#45;calculates which FFT bins contribute to each frequenc..." alt="" coords="752,154,971,194"/>
+<area shape="poly" id="edge6_Node000001_Node000009" title=" " alt="" coords="1007,223,970,209,933,197,935,192,972,203,1009,218"/>
+<area shape="rect" id="Node000015" href="$db/d83/classfl_1_1_flow_field_float_a3bcc83eebe29f13ce04a740082f954ca.html#a3bcc83eebe29f13ce04a740082f954ca" title=" " alt="" coords="795,218,928,258"/>
+<area shape="poly" id="edge13_Node000001_Node000015" title=" " alt="" coords="1005,241,928,241,928,235,1005,235"/>
+<area shape="rect" id="Node000019" href="$dc/db7/examples_2_luminova_2luminova_8h_a40f3cc59a4c51aba63f21eff4110f624.html#a40f3cc59a4c51aba63f21eff4110f624" title=" " alt="" coords="814,283,909,308"/>
+<area shape="poly" id="edge18_Node000001_Node000019" title=" " alt="" coords="1010,259,971,273,909,289,908,284,970,267,1008,253"/>
+<area shape="rect" id="Node000021" href="$db/dd7/classfl_1_1_noise_bias1_d_a0069f377570d18bafbd101055259f19b.html#a0069f377570d18bafbd101055259f19b" title="Inject a shaped bump. Multiple triggers per frame accumulate additively." alt="" coords="775,332,947,357"/>
+<area shape="poly" id="edge20_Node000001_Node000021" title=" " alt="" coords="1035,264,1008,294,972,322,942,334,940,329,969,317,1004,290,1031,261"/>
+<area shape="rect" id="Node000003" href="$dc/d82/classfl_1_1_corkscrew_a19e8c25e03e4efe26891f9e2ec166d5c.html#a19e8c25e03e4efe26891f9e2ec166d5c" title=" " alt="" coords="509,26,681,66"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="765,69,680,59,681,54,766,64"/>
+<area shape="rect" id="Node000004" href="$dc/d82/classfl_1_1_corkscrew_ac2d7b05f94370ed3f83dcb3673589fad.html#ac2d7b05f94370ed3f83dcb3673589fad" title=" " alt="" coords="5,5,171,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="497,26,437,17,376,12,328,12,219,17,171,18,171,12,219,11,328,7,376,7,438,11,498,21"/>
+<area shape="rect" id="Node000008" href="$dc/d82/classfl_1_1_corkscrew_ab6ad3e3bc89051fb0d64526a97b3ae20.html#ab6ad3e3bc89051fb0d64526a97b3ae20" title=" " alt="" coords="243,26,413,66"/>
+<area shape="poly" id="edge4_Node000003_Node000008" title=" " alt="" coords="495,49,413,49,413,43,495,43"/>
+<area shape="poly" id="edge5_Node000008_Node000004" title=" " alt="" coords="230,37,171,30,171,25,230,32"/>
+<area shape="rect" id="Node000010" href="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_ae604f983be2f383b2b0196f83396b8ab.html#ae604f983be2f383b2b0196f83396b8ab" title="Configure the frequency bin mapper This calculates bin boundaries and FFT&#45;to&#45;frequency bin mappings." alt="" coords="485,154,704,194"/>
+<area shape="poly" id="edge7_Node000009_Node000010" title=" " alt="" coords="738,177,704,177,704,171,738,171"/>
+<area shape="poly" id="edge12_Node000010_Node000010" title=" " alt="" coords="640,142,624,135,595,133,569,135,553,139,547,145,550,153,545,154,542,144,550,135,568,129,595,127,626,130,642,137"/>
+<area shape="rect" id="Node000011" href="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_aff7a703833f164394d054f0f48c2ef9a.html#aff7a703833f164394d054f0f48c2ef9a" title=" " alt="" coords="219,90,437,130"/>
+<area shape="poly" id="edge8_Node000010_Node000011" title=" " alt="" coords="471,156,381,133,382,127,473,151"/>
+<area shape="rect" id="Node000014" href="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a0d39c0b36cc9acb67ac5b8ae04a36ac6.html#a0d39c0b36cc9acb67ac5b8ae04a36ac6" title=" " alt="" coords="219,154,437,194"/>
+<area shape="poly" id="edge10_Node000010_Node000014" title=" " alt="" coords="472,177,438,177,438,171,472,171"/>
+<area shape="rect" id="Node000013" href="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a87d17b79660b18efcade392935222299.html#a87d17b79660b18efcade392935222299" title=" " alt="" coords="219,218,437,258"/>
+<area shape="poly" id="edge11_Node000010_Node000013" title=" " alt="" coords="498,200,412,221,411,215,497,195"/>
+<area shape="poly" id="edge9_Node000011_Node000010" title=" " alt="" coords="451,128,541,151,540,156,450,133"/>
+<area shape="rect" id="Node000016" href="$db/d83/classfl_1_1_flow_field_float_ac4cf938910a705ee3e3baeb116fd52f9.html#ac4cf938910a705ee3e3baeb116fd52f9" title=" " alt="" coords="521,218,668,258"/>
+<area shape="poly" id="edge14_Node000015_Node000016" title=" " alt="" coords="781,241,668,241,668,235,781,235"/>
+<area shape="rect" id="Node000018" href="$db/d83/classfl_1_1_flow_field_float_abcb79cb983e9315c36b092599ac6f358.html#abcb79cb983e9315c36b092599ac6f358" title=" " alt="" coords="527,282,662,322"/>
+<area shape="poly" id="edge16_Node000015_Node000018" title=" " alt="" coords="782,260,663,289,662,283,781,254"/>
+<area shape="rect" id="Node000017" href="$db/d83/classfl_1_1_flow_field_float_a9df20bacd881d806a6a7cf346a5b0823.html#a9df20bacd881d806a6a7cf346a5b0823" title="Subclasses implement rendering given the time delta and total time." alt="" coords="261,282,395,322"/>
+<area shape="poly" id="edge15_Node000016_Node000017" title=" " alt="" coords="509,261,396,289,394,283,507,256"/>
+<area shape="poly" id="edge17_Node000018_Node000017" title=" " alt="" coords="513,305,395,305,395,299,513,299"/>
+<area shape="rect" id="Node000020" href="$dc/db7/examples_2_luminova_2luminova_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="569,347,620,372"/>
+<area shape="poly" id="edge19_Node000019_Node000020" title=" " alt="" coords="801,310,753,322,705,337,621,357,620,352,703,331,751,317,799,305"/>
+</map>

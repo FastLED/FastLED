@@ -1,7 +1,7 @@
 <map id="noisegen.h" name="noisegen.h">
-<area shape="rect" id="Node000001" title="Noise generation classes." alt="" coords="179,5,273,31"/>
-<area shape="rect" id="Node000002" href="$d5/d77/_fx_noise_ring_8h.html" title=" " alt="" coords="5,79,236,133"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="203,42,154,81,151,77,199,37"/>
-<area shape="rect" id="Node000003" href="$d9/d2c/noisewave_8h.html" title=" " alt="" coords="261,93,402,119"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="252,37,319,91,315,95,249,41"/>
+<area shape="rect" id="Node000001" title="Noise generation classes." alt="" coords="197,5,291,31"/>
+<area shape="rect" id="Node000002" href="$d3/dac/_fx_noise_ring_8ino.html" title="Noise effect on circular ring with ScreenMap." alt="" coords="5,79,256,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="219,41,167,81,164,77,216,37"/>
+<area shape="rect" id="Node000003" href="$d9/d2c/noisewave_8h.html" title=" " alt="" coords="281,93,434,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="272,37,344,91,340,95,268,41"/>
 </map>

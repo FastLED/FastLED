@@ -1,0 +1,14 @@
+<map id="fl::AsyncLogger::enableBackgroundFlush" name="fl::AsyncLogger::enableBackgroundFlush">
+<area shape="rect" id="Node000001" title="Enable background timer&#45;based flushing (opt&#45;in)" alt="" coords="5,101,256,141"/>
+<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail_a2e82003c43743a6a665e4d58c7f932ce.html#a2e82003c43743a6a665e4d58c7f932ce" title=" " alt="" coords="318,5,466,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="185,99,303,55,323,48,324,53,305,60,187,104"/>
+<area shape="rect" id="Node000003" href="$d6/d93/namespacefl_1_1isr_a5d882da3a1d346e782048222b578ab49.html#a5d882da3a1d346e782048222b578ab49" title="Attach a timer&#45;based ISR handler." alt="" coords="319,69,465,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="256,103,305,97,306,103,256,109"/>
+<area shape="rect" id="Node000004" href="$d6/d35/classfl_1_1_async_logger_ad95625ceb246ef889558a7f72d86b4fb.html#ad95625ceb246ef889558a7f72d86b4fb" title="Disable background flushing." alt="" coords="304,133,480,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="256,134,291,138,290,144,256,139"/>
+<area shape="rect" id="Node000006" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="528,194,691,219"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="176,139,236,163,305,183,413,199,515,204,514,210,412,204,303,188,235,168,175,144"/>
+<area shape="rect" id="Node000005" href="$d6/d93/namespacefl_1_1isr_a29c0b8a68aa4b89155f40b914eaaa4fb.html#a29c0b8a68aa4b89155f40b914eaaa4fb" title="Detach an ISR handler." alt="" coords="528,141,691,166"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="480,151,515,151,515,156,480,156"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="475,171,544,188,543,193,473,176"/>
+</map>

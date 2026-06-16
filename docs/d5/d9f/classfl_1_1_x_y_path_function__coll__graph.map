@@ -1,23 +1,26 @@
 <map id="fl::XYPathFunction" name="fl::XYPathFunction">
-<area shape="rect" id="Node000001" title=" " alt="" coords="991,89,1129,115"/>
-<area shape="rect" id="Node000002" href="$d9/d43/classfl_1_1_x_y_path_generator.html" title=" " alt="" coords="692,5,840,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="844,31,967,63,1030,87,1028,92,966,69,843,36"/>
-<area shape="rect" id="Node000003" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="689,55,843,95"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="857,81,991,93,990,98,856,86"/>
-<area shape="rect" id="Node000004" href="$d4/d36/namespacefl.html#d0/ddd/classfl_1_1function" title=" " alt="" coords="367,63,496,88"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="510,73,689,73,689,78,510,78"/>
-<area shape="rect" id="Node000005" href="$d2/db2/classfl_1_1string.html" title=" " alt="" coords="729,120,803,145"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="817,126,966,111,990,109,991,114,967,117,817,131"/>
-<area shape="rect" id="Node000006" href="$dc/d96/classfl_1_1_str_n.html" title=" " alt="" coords="347,113,516,153"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="530,130,729,130,729,135,530,135"/>
-<area shape="rect" id="Node000007" href="$dc/d96/classfl_1_1_str_n.html" title=" " alt="" coords="5,120,131,145"/>
-<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="145,130,346,130,346,135,145,135"/>
-<area shape="rect" id="Node000008" href="$d2/d48/structfl_1_1rect.html" title=" " alt="" coords="709,177,823,203"/>
-<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="835,175,899,161,966,142,1034,112,1036,117,968,147,901,167,837,181"/>
-<area shape="rect" id="Node000009" href="$d5/d5d/structfl_1_1vec2.html" title=" " alt="" coords="372,177,491,203"/>
-<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="504,187,709,187,709,193,504,193"/>
-<area shape="rect" id="Node000010" href="$d5/d5d/structfl_1_1vec2.html" title=" " alt="" coords="15,177,121,203"/>
-<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="135,187,372,187,372,193,135,193"/>
-<area shape="rect" id="Node000011" href="$d2/d48/structfl_1_1rect.html" title=" " alt="" coords="381,227,482,252"/>
-<area shape="poly" id="edge10_Node000008_Node000011" title=" " alt="" coords="495,230,665,207,709,199,710,205,666,213,496,235"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="1157,89,1296,115"/>
+<area shape="rect" id="Node000002" href="$d9/d43/classfl_1_1_x_y_path_generator.html" title=" " alt="" coords="859,5,1007,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1011,31,1134,63,1197,87,1195,92,1133,69,1009,36"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="856,55,1009,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1023,81,1157,93,1157,98,1023,86"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl.html#d0/ddd/classfl_1_1function" title=" " alt="" coords="535,63,665,88"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="678,73,856,73,856,78,678,78"/>
+<area shape="rect" id="Node000005" href="$d2/db2/classfl_1_1string.html" title=" " alt="" coords="895,120,970,145"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="983,126,1133,111,1157,109,1157,114,1134,117,984,131"/>
+<area shape="rect" id="Node000006" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="517,113,683,153"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="696,130,895,130,895,135,696,135"/>
+<area shape="rect" id="Node000007" href="$de/d66/classfl_1_1basic__string.html" title="Concrete type&#45;erased string class." alt="" coords="5,99,121,124"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="135,101,299,93,397,94,494,102,535,110,534,115,493,107,396,99,299,98,135,107"/>
+<area shape="rect" id="Node000008" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="171,124,301,149"/>
+<area shape="poly" id="edge8_Node000008_Node000007" title=" " alt="" coords="136,119,171,124,170,130,135,124"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="315,133,493,131,517,131,517,136,493,137,315,139"/>
+<area shape="rect" id="Node000009" href="$d2/d48/structfl_1_1rect.html" title=" " alt="" coords="876,177,989,203"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="1002,175,1066,161,1132,142,1200,112,1202,117,1134,147,1067,167,1003,181"/>
+<area shape="rect" id="Node000010" href="$d5/d5d/structfl_1_1vec2.html" title=" " alt="" coords="541,177,659,203"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="673,187,876,187,876,193,673,193"/>
+<area shape="rect" id="Node000011" href="$d5/d5d/structfl_1_1vec2.html" title=" " alt="" coords="183,177,289,203"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="303,187,541,187,541,193,303,193"/>
+<area shape="rect" id="Node000012" href="$d2/d48/structfl_1_1rect.html" title=" " alt="" coords="549,227,651,252"/>
+<area shape="poly" id="edge12_Node000009_Node000012" title=" " alt="" coords="664,230,832,207,875,199,876,205,832,213,665,235"/>
 </map>

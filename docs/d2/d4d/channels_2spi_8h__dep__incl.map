@@ -1,0 +1,12 @@
+<map id="fl/channels/spi.h" name="fl/channels/spi.h">
+<area shape="rect" id="Node000001" title="Multi&#45;lane SPI interface for LED output Hardware (SPI_HW): 1&#45;8 parallel data lanes Software (SPI_BITB..." alt="" coords="165,5,292,31"/>
+<area shape="rect" id="Node000002" href="$d0/daf/device_8cpp_8hpp.html" title=" " alt="" coords="5,79,223,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,40,134,81,131,76,197,35"/>
+<area shape="rect" id="Node000007" href="$d9/de8/spi_8cpp_8hpp.html" title=" " alt="" coords="247,79,440,104"/>
+<area shape="poly" id="edge4_Node000001_Node000007" title=" " alt="" coords="260,35,326,76,323,81,257,40"/>
+<area shape="rect" id="Node000003" href="$da/d51/fl_2channels_2spi_2__build_8cpp_8hpp.html" title=" " alt="" coords="122,152,335,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="145,109,211,150,209,154,142,113"/>
+<area shape="rect" id="Node000004" href="$d1/d97/fl_2channels_2__build_8cpp_8hpp.html" title=" " alt="" coords="133,225,324,251"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="231,191,231,225,226,225,226,191"/>
+<area shape="poly" id="edge5_Node000007_Node000003" title=" " alt="" coords="315,113,249,154,246,150,312,109"/>
+</map>

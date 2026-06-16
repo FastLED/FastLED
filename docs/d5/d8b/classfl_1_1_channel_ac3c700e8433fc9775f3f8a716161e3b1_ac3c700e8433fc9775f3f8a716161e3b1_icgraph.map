@@ -1,0 +1,7 @@
+<map id="fl::Channel::setScreenMap" name="fl::Channel::setScreenMap">
+<area shape="rect" id="Node000001" title="Set screen map for JS canvas visualization from XYMap." alt="" coords="244,31,435,56"/>
+<area shape="rect" id="Node000002" href="$d5/d8b/classfl_1_1_channel_acfb78f07c618a1248db6c4fbbed5e408.html#acfb78f07c618a1248db6c4fbbed5e408" title="Set screen map for 1D strip remapping from XMap." alt="" coords="5,5,196,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="230,34,196,31,196,25,231,29"/>
+<area shape="rect" id="Node000003" href="$d5/d8b/classfl_1_1_channel_a6a2bf9a4ab0f0ee7df060a3d0cba96b3.html#a6a2bf9a4ab0f0ee7df060a3d0cba96b3" title="Set screen map for JS canvas visualization from dimensions." alt="" coords="5,55,196,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="231,57,196,60,196,55,230,52"/>
+</map>

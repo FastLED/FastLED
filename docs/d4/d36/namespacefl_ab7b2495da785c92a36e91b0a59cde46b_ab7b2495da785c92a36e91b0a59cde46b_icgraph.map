@@ -1,0 +1,14 @@
+<map id="fl::analogWrite" name="fl::analogWrite">
+<area shape="rect" id="Node000001" title="Write analog value to pin (PWM)" alt="" coords="267,55,384,80"/>
+<area shape="rect" id="Node000002" href="$d9/d1f/el__panel_8cpp_a3d505a2f5ac043b8dc404b92ebb049ef.html#a3d505a2f5ac043b8dc404b92ebb049ef" title=" " alt="" coords="123,5,208,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="270,53,207,33,208,28,271,48"/>
+<area shape="rect" id="Node000004" href="$d9/d1f/el__panel_8cpp_a212827690ec1d11dc4c38a5cc6b541d5.html#a212827690ec1d11dc4c38a5cc6b541d5" title=" " alt="" coords="112,55,219,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="253,70,219,70,219,65,253,65"/>
+<area shape="rect" id="Node000006" href="$d9/d1f/el__panel_8cpp_ad3b5b489324dd03fc27ad993bae9f2ff.html#ad3b5b489324dd03fc27ad993bae9f2ff" title=" " alt="" coords="114,104,217,129"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="271,87,208,106,207,101,270,82"/>
+<area shape="rect" id="Node000003" href="$d7/d8f/_el_panel_reactive_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,5,64,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="109,21,64,21,64,15,109,15"/>
+<area shape="rect" id="Node000005" href="$d7/d8f/_el_panel_reactive_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="9,79,60,104"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="99,82,60,89,60,84,98,77"/>
+<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="100,107,60,99,61,93,101,102"/>
+</map>

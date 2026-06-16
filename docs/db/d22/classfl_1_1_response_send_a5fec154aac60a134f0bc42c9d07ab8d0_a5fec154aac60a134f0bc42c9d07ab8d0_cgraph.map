@@ -1,0 +1,9 @@
+<map id="fl::ResponseSend::ResponseSend" name="fl::ResponseSend::ResponseSend">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,241,56"/>
+<area shape="rect" id="Node000002" href="$db/d22/classfl_1_1_response_send_a46ef658c0a705dbdd35c4de556d3a531.html#a46ef658c0a705dbdd35c4de556d3a531" title="Construct ResponseSend with request ID and response sink." alt="" coords="289,31,525,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="242,41,275,41,275,46,242,46"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a03eeb690d9582a74cb2e4a1f5a806e80.html#a03eeb690d9582a74cb2e4a1f5a806e80" title=" " alt="" coords="637,5,712,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="525,29,624,20,624,25,526,35"/>
+<area shape="rect" id="Node000004" href="$db/d22/classfl_1_1_response_send_a8ad32cc63d189f9e7caeb022b34be35b.html#a8ad32cc63d189f9e7caeb022b34be35b" title="Get the request ID." alt="" coords="573,55,776,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="526,51,560,54,560,60,525,57"/>
+</map>

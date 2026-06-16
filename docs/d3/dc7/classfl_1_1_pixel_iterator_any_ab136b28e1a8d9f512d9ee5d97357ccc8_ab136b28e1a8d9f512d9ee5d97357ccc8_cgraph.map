@@ -1,0 +1,18 @@
+<map id="fl::PixelIteratorAny::PixelIteratorAny" name="fl::PixelIteratorAny::PixelIteratorAny">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,51,148,91"/>
+<area shape="rect" id="Node000002" href="$d3/dc7/classfl_1_1_pixel_iterator_any_aea17d97c9899a905de7199dbb846567d.html#aea17d97c9899a905de7199dbb846567d" title="Initialize the adapter with color order conversion." alt="" coords="211,22,354,62"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,59,197,51,198,57,149,64"/>
+<area shape="rect" id="Node000007" href="$d3/d33/structfl_1_1_rgbww_invalid_aa1bef9258439f652fc5ea1b85139c1d3.html#aa1bef9258439f652fc5ea1b85139c1d3" title=" " alt="" coords="196,87,369,112"/>
+<area shape="poly" id="edge5_Node000001_Node000007" title=" " alt="" coords="149,78,183,83,182,88,148,84"/>
+<area shape="rect" id="Node000003" href="$dd/dd8/classfl_1_1_optional_a3afb0aa53508efa140f1e461796428a9.html#a3afb0aa53508efa140f1e461796428a9" title="Emplace with rvalue reference." alt="" coords="453,29,610,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="354,39,439,39,439,45,354,45"/>
+<area shape="rect" id="Node000004" href="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a" title=" " alt="" coords="717,5,808,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="610,31,703,21,704,27,610,37"/>
+<area shape="rect" id="Node000005" href="$dd/dd8/classfl_1_1_optional_a1a7216013ea48bf987511dae97d2915f.html#a1a7216013ea48bf987511dae97d2915f" title=" " alt="" coords="694,55,831,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="610,48,680,56,680,61,610,53"/>
+<area shape="rect" id="Node000008" href="$d4/df9/structfl_1_1_rgbww_a45ad99083ef8d9a1f7d8a02f660365aa.html#a45ad99083ef8d9a1f7d8a02f660365aa" title=" " alt="" coords="693,107,832,132"/>
+<area shape="poly" id="edge6_Node000007_Node000008" title=" " alt="" coords="369,100,680,113,680,119,369,106"/>
+<area shape="rect" id="Node000009" href="$d3/d33/structfl_1_1_rgbww_invalid_a5f8a68d07d6c9ed440f02787789d3577.html#a5f8a68d07d6c9ed440f02787789d3577" title=" " alt="" coords="417,133,645,159"/>
+<area shape="poly" id="edge7_Node000007_Node000009" title=" " alt="" coords="352,109,450,128,449,133,351,115"/>
+<area shape="poly" id="edge8_Node000009_Node000008" title=" " alt="" coords="641,131,679,126,679,132,642,136"/>
+</map>

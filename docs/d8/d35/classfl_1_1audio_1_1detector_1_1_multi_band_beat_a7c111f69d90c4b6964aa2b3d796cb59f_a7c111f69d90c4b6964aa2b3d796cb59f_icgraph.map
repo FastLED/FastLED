@@ -1,0 +1,5 @@
+<map id="fl::audio::detector::MultiBandBeat::getBassEnergy" name="fl::audio::detector::MultiBandBeat::getBassEnergy">
+<area shape="rect" id="Node000001" title="Get current bass energy (0.0&#45;1.0)" alt="" coords="295,5,525,45"/>
+<area shape="rect" id="Node000002" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_ad89f61c68cafd22344ecbfb03e0cd899.html#ad89f61c68cafd22344ecbfb03e0cd899" title=" " alt="" coords="5,5,247,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="281,28,247,28,247,23,281,23"/>
+</map>

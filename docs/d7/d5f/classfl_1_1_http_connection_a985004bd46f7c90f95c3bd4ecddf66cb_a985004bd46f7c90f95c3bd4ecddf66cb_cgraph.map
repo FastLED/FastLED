@@ -1,0 +1,23 @@
+<map id="fl::HttpConnection::onEvent" name="fl::HttpConnection::onEvent">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,74,144,114"/>
+<area shape="rect" id="Node000002" href="$de/d33/structfl_1_1asio_1_1error__code_aa69757cace373f0830531c3e0ad303c4.html#aa69757cace373f0830531c3e0ad303c4" title="Convenience: true if no error." alt="" coords="192,5,359,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="128,71,227,33,229,38,129,76"/>
+<area shape="rect" id="Node000003" href="$d7/d5f/classfl_1_1_http_connection_aaba22bc2bc03acc4eb3f666c4de837d2.html#aaba22bc2bc03acc4eb3f666c4de837d2" title=" " alt="" coords="407,49,545,89"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="144,87,393,71,393,77,144,92"/>
+<area shape="rect" id="Node000034" href="$d7/d5f/classfl_1_1_http_connection_a2cc7c7f25e39d7282a114019671c74f7.html#a2cc7c7f25e39d7282a114019671c74f7" title=" " alt="" coords="407,113,545,153"/>
+<area shape="poly" id="edge9_Node000001_Node000034" title=" " alt="" coords="144,98,393,122,393,127,144,103"/>
+<area shape="rect" id="Node000035" href="$d7/d5f/classfl_1_1_http_connection_a11271f645780988c74b3b3a9173a5595.html#a11271f645780988c74b3b3a9173a5595" title=" " alt="" coords="206,157,345,197"/>
+<area shape="poly" id="edge11_Node000001_Node000035" title=" " alt="" coords="125,112,214,149,212,154,123,116"/>
+<area shape="rect" id="Node000004" href="$d7/d5f/classfl_1_1_http_connection_a9f989774f6254b213699ab4cd688d858.html#a9f989774f6254b213699ab4cd688d858" title=" " alt="" coords="780,54,971,94"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="546,67,766,70,766,75,545,72"/>
+<area shape="rect" id="Node000005" href="$d7/d5f/classfl_1_1_http_connection_afec0714bfaf76f6dd676f76f5faa8c43.html#afec0714bfaf76f6dd676f76f5faa8c43" title=" " alt="" coords="1019,26,1184,66"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="546,55,593,49,699,40,782,37,971,39,1005,40,1005,45,971,45,782,42,699,45,594,54,546,60"/>
+<area shape="rect" id="Node000006" href="$d7/d5f/classfl_1_1_http_connection_ad9f710e04bb0829d726f68b851f29f21.html#ad9f710e04bb0829d726f68b851f29f21" title=" " alt="" coords="593,110,732,150"/>
+<area shape="poly" id="edge6_Node000003_Node000006" title=" " alt="" coords="538,86,589,103,587,108,537,91"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="970,60,1005,55,1006,61,971,65"/>
+<area shape="poly" id="edge8_Node000006_Node000004" title=" " alt="" coords="731,109,785,95,787,100,733,114"/>
+<area shape="rect" id="Node000007" href="$d7/d5f/classfl_1_1_http_connection_a5771485770bb65873ba278d1806af6e3.html#a5771485770bb65873ba278d1806af6e3" title=" " alt="" coords="788,118,963,158"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="732,130,774,132,774,137,732,135"/>
+<area shape="poly" id="edge10_Node000034_Node000006" title=" " alt="" coords="546,129,579,129,579,134,546,134"/>
+<area shape="poly" id="edge12_Node000035_Node000034" title=" " alt="" coords="344,159,393,148,394,153,345,164"/>
+</map>

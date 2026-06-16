@@ -10,13 +10,13 @@ var struct_key =
     [ "Update", "db/d42/struct_key_ac841a3966fde8cd5df0eafa0bdcf0cca.html#ac841a3966fde8cd5df0eafa0bdcf0cca", null ],
     [ "UpdateIntensity", "db/d42/struct_key_af13ad91740bfcfc76380b4684a2668c1.html#af13ad91740bfcfc76380b4684a2668c1", null ],
     [ "VelocityFactor", "db/d42/struct_key_ad1ebc123a10761ef1d1273e4afa30f61.html#ad1ebc123a10761ef1d1273e4afa30f61", null ],
-    [ "curr_color_", "db/d42/struct_key_a9f67c53a51f8b33667c327f79c6782dc.html#a9f67c53a51f8b33667c327f79c6782dc", null ],
-    [ "event_time_", "db/d42/struct_key_aacec21e44be625a3163a6d01b761175d.html#aacec21e44be625a3163a6d01b761175d", null ],
-    [ "idx_", "db/d42/struct_key_a775f5aeefca73a245048896f6b3ecc90.html#a775f5aeefca73a245048896f6b3ecc90", null ],
-    [ "intensity_", "db/d42/struct_key_ad4eeb30a93ca6b8eb43b6a7c098f4b46.html#ad4eeb30a93ca6b8eb43b6a7c098f4b46", null ],
-    [ "on_", "db/d42/struct_key_ab2bfd7c1e68242f10dc13a84a52e7b67.html#ab2bfd7c1e68242f10dc13a84a52e7b67", null ],
-    [ "orig_color_", "db/d42/struct_key_a4283fe28c2271ceb8a45fbab91b3ed84.html#a4283fe28c2271ceb8a45fbab91b3ed84", null ],
-    [ "sustain_pedal_on_", "db/d42/struct_key_ab8a9dbfa64a039f7f0da53a840ac5ee1.html#ab8a9dbfa64a039f7f0da53a840ac5ee1", null ],
-    [ "sustained_", "db/d42/struct_key_a9cacf11333d4f58f51c9b1ca0306cc26.html#a9cacf11333d4f58f51c9b1ca0306cc26", null ],
-    [ "velocity_", "db/d42/struct_key_acebf868d829229a66a801c707f2ea6f4.html#acebf868d829229a66a801c707f2ea6f4", null ]
+    [ "mCurrColor", "db/d42/struct_key_af029b59eff6813504425c91428fe162d.html#af029b59eff6813504425c91428fe162d", null ],
+    [ "mEventTime", "db/d42/struct_key_a85083f533a8eecfcc322cc85e1272d1a.html#a85083f533a8eecfcc322cc85e1272d1a", null ],
+    [ "mIdx", "db/d42/struct_key_aa0acc62214dc1f9f885fc64aa87d1768.html#aa0acc62214dc1f9f885fc64aa87d1768", null ],
+    [ "mIntensity", "db/d42/struct_key_a91a4b80f859e628d648e98359cddead4.html#a91a4b80f859e628d648e98359cddead4", null ],
+    [ "mOn", "db/d42/struct_key_a1e4c3ec15241f33f84f74377d742f0e7.html#a1e4c3ec15241f33f84f74377d742f0e7", null ],
+    [ "mOrigColor", "db/d42/struct_key_a62b57bd9017e2d8702d031dc16a760ec.html#a62b57bd9017e2d8702d031dc16a760ec", null ],
+    [ "mSustained", "db/d42/struct_key_a64f8f0472468ea9bb5f2566295b178cf.html#a64f8f0472468ea9bb5f2566295b178cf", null ],
+    [ "mSustainPedalOn", "db/d42/struct_key_a57679eb658ef5cba594757b96eea613a.html#a57679eb658ef5cba594757b96eea613a", null ],
+    [ "mVelocity", "db/d42/struct_key_a105176c96a024854a405dcd7c5fddc82.html#a105176c96a024854a405dcd7c5fddc82", null ]
 ];

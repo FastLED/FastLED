@@ -1,7 +1,9 @@
 <map id="LedLayoutArray" name="LedLayoutArray">
-<area shape="rect" id="Node000001" title=" " alt="" coords="233,52,357,77"/>
-<area shape="rect" id="Node000002" href="$d3/d78/namespaceanonymous__namespace_02_led_rope_t_c_l_8cpp_03_a47e8fc2af72127dbc485073a2248dfd2.html#a47e8fc2af72127dbc485073a2248dfd2" title=" " alt="" coords="5,5,185,60"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="219,55,185,50,186,44,220,50"/>
-<area shape="rect" id="Node000003" href="$dd/d45/struct_painter_a99ab92bb8d2baae96c7b4b4aacda4de3.html#a99ab92bb8d2baae96c7b4b4aacda4de3" title=" " alt="" coords="42,84,149,109"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="220,79,149,91,149,86,219,74"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="332,52,456,77"/>
+<area shape="rect" id="Node000002" href="$d3/d78/namespaceanonymous__namespace_02_led_rope_t_c_l_8cpp_03_a7b016ca2c4fdac4d82598319aa426999.html#a7b016ca2c4fdac4d82598319aa426999" title=" " alt="" coords="104,5,284,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="318,55,284,50,285,44,319,50"/>
+<area shape="rect" id="Node000003" href="$dd/d45/struct_painter_a99ab92bb8d2baae96c7b4b4aacda4de3.html#a99ab92bb8d2baae96c7b4b4aacda4de3" title=" " alt="" coords="141,84,247,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="319,79,248,91,247,86,318,74"/>
+<area shape="rect" id="Node000004" href="$d8/de5/_luminescent_grand_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,84,56,109"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="127,99,56,99,56,94,127,94"/>
 </map>

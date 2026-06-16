@@ -1,0 +1,5 @@
+var structfl_1_1is__fp__promotable_3_01fixed__point_3_01_from_int_00_01_from_frac_00_01_from_sign_017f0dfba5719713031fc4fdbdd6658500 =
+[
+    [ "value", "d1/d2c/structfl_1_1is__fp__promotable_a25bc8bfe7947564b8fde86271f8ac771.html#a25bc8bfe7947564b8fde86271f8ac771", null ],
+    [ "value", "dc/dfc/structfl_1_1is__fp__promotable_3_01fixed__point_3_01_from_int_00_01_from_frac_00_01_from_sign_017f0dfba5719713031fc4fdbdd6658500_ad95f0f83586a2bf980cd2a80a126e29e.html#ad95f0f83586a2bf980cd2a80a126e29e", null ]
+];

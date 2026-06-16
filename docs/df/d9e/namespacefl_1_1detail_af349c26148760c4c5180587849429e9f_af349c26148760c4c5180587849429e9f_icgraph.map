@@ -1,0 +1,8 @@
+<map id="fl::detail::setWaitSpinBudgetUs" name="fl::detail::setWaitSpinBudgetUs">
+<area shape="rect" id="Node000001" title="Set the tiered&#45;wait spin budget (microseconds)." alt="" coords="569,29,792,55"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_a8534128798e2125291c4133831c962ef.html#a8534128798e2125291c4133831c962ef" title=" " alt="" coords="284,29,521,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="556,45,522,45,522,39,556,39"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_a4c25dcd58b7323c6f31c6eebef165a0f.html#a4c25dcd58b7323c6f31c6eebef165a0f" title="Override the channel&#45;manager tiered&#45;wait spin budget (microseconds)." alt="" coords="5,29,236,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="270,45,236,45,236,39,270,39"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="171,21,168,16,160,12,121,8,90,10,74,15,71,20,79,27,76,31,66,21,71,11,89,5,121,3,161,7,172,12,176,18"/>
+</map>

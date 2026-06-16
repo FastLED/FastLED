@@ -1,0 +1,5 @@
+<map id="fl::SpiChannelEngineAdapter::transmitBatch" name="fl::SpiChannelEngineAdapter::transmitBatch">
+<area shape="rect" id="Node000001" title="Transmit a batch of channels (all same clock pin)" alt="" coords="260,5,467,45"/>
+<area shape="rect" id="Node000002" href="$d3/daf/classfl_1_1_spi_channel_engine_adapter_a7d10891b9d71344c305a92e5be625b28.html#a7d10891b9d71344c305a92e5be625b28" title="Trigger transmission of enqueued data." alt="" coords="5,5,212,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="247,28,212,28,212,23,247,23"/>
+</map>

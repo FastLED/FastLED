@@ -1,0 +1,10 @@
+<map id="fl::AsyncLogger" name="fl::AsyncLogger">
+<area shape="rect" id="Node000001" title="ISR&#45;safe async logger wrapper (zero heap allocation) Uses embedded AsyncLogQueue instead of heap&#45;allo..." alt="" coords="976,14,1097,39"/>
+<area shape="rect" id="Node000002" href="$db/d11/classfl_1_1_async_log_queue.html" title=" " alt="" coords="715,7,868,47"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="882,24,976,24,976,29,882,29"/>
+<area shape="rect" id="Node000003" href="$d0/d37/structfl_1_1_async_log_queue_1_1_descriptor.html" title="Descriptor for one log message." alt="" coords="5,7,209,62"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="223,26,233,25,462,17,691,19,715,20,715,25,691,24,462,23,233,31,223,31"/>
+<area shape="rect" id="Node000004" href="$db/d11/classfl_1_1_async_log_queue.html" title="High&#45;performance SPSC async log queue." alt="" coords="349,49,568,89"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="223,43,349,56,349,61,223,49"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="581,51,714,34,715,39,582,56"/>
+</map>

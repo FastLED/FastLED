@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="PlasmaWaveGenerator",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/df6/class_plasma_wave_generator.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::fl::is_floating\l_point\< long double \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/de2/structfl_1_1fl_1_1is__floating__point_3_01long_01double_01_4.html",tooltip=" "];
 }

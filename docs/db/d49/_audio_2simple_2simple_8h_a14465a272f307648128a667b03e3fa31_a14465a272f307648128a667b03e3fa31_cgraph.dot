@@ -8,9 +8,13 @@ digraph "shiftUp"
   rankdir="LR";
   Node1 [id="Node000001",label="shiftUp",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fadeToBlack",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d49/_audio_2simple_2simple_8h_a54d81654e60c45e0c9383c772410c2d1.html#a54d81654e60c45e0c9383c772410c2d1",tooltip=" "];
+  Node2 [id="Node000002",label="fadeToBlack",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d49/_audio_2simple_2simple_8h_a8ac55c034ee374a5414558a5795cf95d.html#a8ac55c034ee374a5414558a5795cf95d",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="frameBufferXY",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d49/_audio_2simple_2simple_8h_aff7c782e0ef19a49fa5caef05b54ad41.html#aff7c782e0ef19a49fa5caef05b54ad41",tooltip=" "];
+  Node3 [id="Node000003",label="frameBufferXY",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d49/_audio_2simple_2simple_8h_aa0f88d9c0dc219d517516f937395c214.html#aa0f88d9c0dc219d517516f937395c214",tooltip=" "];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::memfill",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a4b8a9d50bb843c25b6392094c34e7fb1.html#a4b8a9d50bb843c25b6392094c34e7fb1",tooltip=" "];
+  Node4 [id="Node000004",label="fl::memcopy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a434a098968c53d3fd0e901c030ed1e05.html#a434a098968c53d3fd0e901c030ed1e05",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::memcpy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d",tooltip=" "];
+  Node1 -> Node6 [id="edge5_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::memset",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a44a195439ac7fa303b4b0b0c956605be.html#a44a195439ac7fa303b4b0b0c956605be",tooltip=" "];
 }

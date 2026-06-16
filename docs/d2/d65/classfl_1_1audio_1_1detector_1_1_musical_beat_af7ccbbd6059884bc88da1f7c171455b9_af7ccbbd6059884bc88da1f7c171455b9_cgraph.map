@@ -1,0 +1,5 @@
+<map id="fl::audio::detector::MusicalBeat::calculateIBIStdDev" name="fl::audio::detector::MusicalBeat::calculateIBIStdDev">
+<area shape="rect" id="Node000001" title="Calculate standard deviation of IBI history." alt="" coords="5,5,247,45"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1" title=" " alt="" coords="295,13,357,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="247,23,281,23,281,28,247,28"/>
+</map>

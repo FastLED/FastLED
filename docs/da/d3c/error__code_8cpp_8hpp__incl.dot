@@ -1,0 +1,37 @@
+digraph "fl/stl/asio/error_code.cpp.hpp"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl/stl/asio/error_code.cpp.hpp",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl/stl/asio/error_code.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/daa/error__code_8h.html",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl/task/promise.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d17/promise_8h.html",tooltip="Promise-based fluent API for FastLED - standalone async primitives."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl/stl/function.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dd/d67/function_8h.html",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl/stl/shared_ptr.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/d6a/shared__ptr_8h.html",tooltip=" "];
+  Node5 -> Node16 [id="edge5_Node000005_Node000016",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl/stl/atomic.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dd/d02/atomic_8h.html",tooltip=" "];
+  Node5 -> Node8 [id="edge6_Node000005_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl/stl/noexcept.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d01/noexcept_8h.html",tooltip=" "];
+  Node4 -> Node8 [id="edge7_Node000004_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node47 [id="edge8_Node000003_Node000047",color="steelblue1",style="solid",tooltip=" "];
+  Node47 [id="Node000047",label="fl/stl/string.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/d66/string_8h.html",tooltip=" "];
+  Node47 -> Node5 [id="edge9_Node000047_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node47 -> Node7 [id="edge10_Node000047_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl/stl/move.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d83/move_8h.html",tooltip=" "];
+  Node7 -> Node8 [id="edge11_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node47 -> Node8 [id="edge12_Node000047_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node5 [id="edge13_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node7 [id="edge14_Node000003_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node16 [id="edge15_Node000003_Node000016",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node8 [id="edge16_Node000003_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node10 [id="edge17_Node000002_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl/stl/stdint.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/dd8/stdint_8h.html",tooltip=" "];
+  Node2 -> Node47 [id="edge18_Node000002_Node000047",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node8 [id="edge19_Node000002_Node000008",color="steelblue1",style="solid",tooltip=" "];
+}

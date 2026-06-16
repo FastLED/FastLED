@@ -1,0 +1,5 @@
+<map id="fl::delayMillis" name="fl::delayMillis">
+<area shape="rect" id="Node000001" title="Delay for a given number of milliseconds (legacy &#45; no async pumping)" alt="" coords="192,5,301,31"/>
+<area shape="rect" id="Node000002" href="$d2/d63/class_sketch_halt_a5e483429ff3e8f7ddde2dfe726f7add9.html#a5e483429ff3e8f7ddde2dfe726f7add9" title="Check if sketch is halted and handle periodic message printing." alt="" coords="5,5,144,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="178,21,144,21,144,15,178,15"/>
+</map>

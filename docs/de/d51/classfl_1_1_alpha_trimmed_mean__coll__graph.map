@@ -1,0 +1,19 @@
+<map id="fl::AlphaTrimmedMean&lt; T, N &gt;" name="fl::AlphaTrimmedMean&lt; T, N &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1077,89,1245,129"/>
+<area shape="rect" id="Node000002" href="$db/d3f/classfl_1_1detail_1_1_alpha_trimmed_mean_impl.html" title=" " alt="" coords="805,89,983,129"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="996,107,1077,107,1077,112,996,112"/>
+<area shape="rect" id="Node000003" href="$d9/d12/classfl_1_1circular__buffer.html" title=" " alt="" coords="265,111,396,151"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="410,125,677,116,805,111,805,116,677,121,410,131"/>
+<area shape="rect" id="Node000004" href="$d0/deb/namespace_3global_scope_4.html#d0/ddf/class_n" title=" " alt="" coords="51,18,90,43"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="104,31,170,42,207,52,243,67,256,77,267,87,298,108,295,113,264,91,252,81,240,72,205,57,168,47,103,36"/>
+<area shape="rect" id="Node000009" href="$d9/d12/classfl_1_1circular__buffer.html" title=" " alt="" coords="265,37,396,77"/>
+<area shape="poly" id="edge8_Node000009_Node000004" title=" " alt="" coords="103,23,168,17,205,17,242,21,287,35,285,40,241,27,205,23,168,22,104,28"/>
+<area shape="rect" id="Node000005" href="$d4/d64/classfl_1_1circular__buffer__core.html" title=" " alt="" coords="5,156,136,196"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="149,167,241,153,265,148,266,153,242,159,150,172"/>
+<area shape="rect" id="Node000007" href="$d9/d12/classfl_1_1circular__buffer.html" title=" " alt="" coords="5,75,136,115"/>
+<area shape="poly" id="edge5_Node000003_Node000007" title=" " alt="" coords="127,117,161,127,214,133,265,133,265,138,213,138,159,132,126,122"/>
+<area shape="poly" id="edge9_Node000009_Node000007" title=" " alt="" coords="149,91,241,81,269,75,270,80,242,87,150,96"/>
+<area shape="rect" id="Node000008" href="$db/d3f/classfl_1_1detail_1_1_alpha_trimmed_mean_impl.html" title=" " alt="" coords="500,37,677,77"/>
+<area shape="poly" id="edge6_Node000002_Node000008" title=" " alt="" coords="691,72,806,92,805,97,691,77"/>
+<area shape="poly" id="edge7_Node000008_Node000009" title=" " alt="" coords="410,55,500,55,500,60,410,60"/>
+</map>

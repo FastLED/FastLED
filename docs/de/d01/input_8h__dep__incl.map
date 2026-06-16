@@ -1,0 +1,40 @@
+<map id="fl/audio/input.h" name="fl/audio/input.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="727,5,846,31"/>
+<area shape="rect" id="Node000002" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="484,357,569,383"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="713,23,544,31,442,39,336,51,234,68,144,91,71,119,44,135,25,154,15,168,10,181,11,208,25,232,46,255,97,290,130,307,159,318,199,327,297,344,484,363,483,368,296,349,198,333,158,323,128,312,94,294,42,259,20,235,6,209,5,181,10,165,20,150,41,131,69,114,142,85,233,63,335,46,441,34,544,26,713,18"/>
+<area shape="rect" id="Node000006" href="$da/d69/audio__input_8h.html" title=" " alt="" coords="452,79,615,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="733,37,575,81,573,76,732,32"/>
+<area shape="rect" id="Node000056" href="$dd/da6/audio__manager_8cpp_8hpp.html" title=" " alt="" coords="804,357,1033,383"/>
+<area shape="poly" id="edge16_Node000001_Node000056" title=" " alt="" coords="811,38,855,87,877,118,894,151,912,210,920,270,922,357,917,357,915,270,907,211,889,153,872,120,851,90,807,42"/>
+<area shape="rect" id="Node000068" href="$da/d68/audio__manager_8h.html" title=" " alt="" coords="693,167,880,192"/>
+<area shape="poly" id="edge17_Node000001_Node000068" title=" " alt="" coords="789,44,789,166,784,166,784,44"/>
+<area shape="rect" id="Node000069" href="$db/d4b/audio__processor_8cpp_8hpp.html" title=" " alt="" coords="955,79,1189,104"/>
+<area shape="poly" id="edge21_Node000001_Node000069" title=" " alt="" coords="846,31,1026,76,1025,81,845,37"/>
+<area shape="rect" id="Node000003" href="$d7/de5/_fast_l_e_d_8cpp_8hpp.html" title=" " alt="" coords="637,431,765,456"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="568,385,674,428,672,433,566,390"/>
+<area shape="rect" id="Node000004" href="$d7/dd5/__build_8cpp_8hpp.html" title=" " alt="" coords="574,504,690,529"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="682,468,645,506,641,502,678,464"/>
+<area shape="rect" id="Node000005" href="$dd/de2/src_8cpp.html" title="Unity build: flat includes from src/ root directory." alt="" coords="714,504,830,529"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="724,464,762,502,759,506,721,468"/>
+<area shape="rect" id="Node000007" href="$da/d85/_audio_input_8ino.html" title=" " alt="" coords="141,255,360,309"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="537,118,532,163,524,187,510,208,478,235,440,255,400,268,361,277,360,272,399,263,438,250,475,231,506,205,519,185,527,162,532,117"/>
+<area shape="rect" id="Node000008" href="$d2/d22/_e_s_p32_audio_input_8h.html" title=" " alt="" coords="35,152,253,207"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="469,110,254,157,253,151,467,104"/>
+<area shape="rect" id="Node000009" href="$d9/d05/_teensy_audio_input_8h.html" title=" " alt="" coords="277,152,496,207"/>
+<area shape="poly" id="edge9_Node000006_Node000009" title=" " alt="" coords="503,113,433,154,430,150,500,109"/>
+<area shape="rect" id="Node000010" href="$d0/d90/ui_2audio_8h.html" title=" " alt="" coords="571,167,669,192"/>
+<area shape="poly" id="edge10_Node000006_Node000010" title=" " alt="" coords="556,112,610,164,606,168,553,115"/>
+<area shape="poly" id="edge8_Node000008_Node000007" title=" " alt="" coords="184,214,224,253,221,257,180,218"/>
+<area shape="rect" id="Node000011" href="$d4/d86/ui_2audio_8cpp_8hpp.html" title=" " alt="" coords="588,269,729,295"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="632,204,657,268,652,270,627,206"/>
+<area shape="rect" id="Node000015" href="$d9/d3b/ui_8h.html" title="Aggregator header for the fl/ui/ family of per&#45;element UI types." alt="" coords="489,269,564,295"/>
+<area shape="poly" id="edge12_Node000010_Node000015" title=" " alt="" coords="601,204,539,271,535,268,598,201"/>
+<area shape="poly" id="edge13_Node000015_Node000002" title=" " alt="" coords="529,309,529,357,524,357,524,309"/>
+<area shape="poly" id="edge14_Node000015_Node000056" title=" " alt="" coords="558,299,577,307,634,324,693,337,804,355,803,361,692,342,632,329,575,312,556,304"/>
+<area shape="rect" id="Node000057" href="$d1/d21/fl_2audio_2__build_8cpp_8hpp.html" title="Unity build header for fl/audio/ directory." alt="" coords="899,431,1067,456"/>
+<area shape="poly" id="edge15_Node000056_Node000057" title=" " alt="" coords="940,391,974,429,970,432,936,395"/>
+<area shape="poly" id="edge18_Node000068_Node000003" title=" " alt="" coords="781,206,707,431,702,430,776,204"/>
+<area shape="poly" id="edge20_Node000068_Node000011" title=" " alt="" coords="763,203,675,271,671,267,760,198"/>
+<area shape="poly" id="edge19_Node000068_Node000056" title=" " alt="" coords="805,202,912,355,908,358,800,205"/>
+<area shape="poly" id="edge22_Node000069_Node000057" title=" " alt="" coords="1078,118,1082,169,1081,237,1072,311,1062,349,1048,384,1027,412,1003,432,999,428,1023,408,1043,381,1057,347,1066,310,1076,236,1076,169,1073,118"/>
+</map>

@@ -1,0 +1,42 @@
+<map id="fl/channels/rx.h" name="fl/channels/rx.h">
+<area shape="rect" id="Node000001" title="Common RX interfaces and shared types." alt="" coords="737,5,859,31"/>
+<area shape="rect" id="Node000002" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="263,174,349,199"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="746,37,603,81,337,176,335,171,601,76,744,32"/>
+<area shape="rect" id="Node000006" href="$de/d4c/rx_8cpp_8hpp.html" title="Implementation of RxDevice factory." alt="" coords="1135,86,1299,111"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="873,31,1156,83,1155,89,872,36"/>
+<area shape="rect" id="Node000010" href="$da/d7b/rx_2channel_8h.html" title=" " alt="" coords="614,86,790,111"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="775,41,718,88,715,84,772,37"/>
+<area shape="rect" id="Node000019" href="$dd/d09/decode__ws2812_8h.html" title="Shared 4&#45;phase WS2812 edge&#45;pair &#45;&gt; byte decoder (declaration)." alt="" coords="905,79,1065,119"/>
+<area shape="poly" id="edge19_Node000001_Node000019" title=" " alt="" coords="839,33,941,76,939,81,837,38"/>
+<area shape="rect" id="Node000003" href="$d7/de5/_fast_l_e_d_8cpp_8hpp.html" title=" " alt="" coords="69,262,197,287"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="272,208,157,264,155,259,269,203"/>
+<area shape="rect" id="Node000004" href="$d7/dd5/__build_8cpp_8hpp.html" title=" " alt="" coords="5,343,121,368"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="115,299,76,344,72,341,111,296"/>
+<area shape="rect" id="Node000005" href="$dd/de2/src_8cpp.html" title="Unity build: flat includes from src/ root directory." alt="" coords="145,343,261,368"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="154,296,195,341,191,344,150,299"/>
+<area shape="rect" id="Node000007" href="$d1/d97/fl_2channels_2__build_8cpp_8hpp.html" title=" " alt="" coords="1097,343,1288,368"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="1229,123,1241,166,1244,233,1239,295,1224,323,1207,344,1203,341,1220,320,1234,294,1238,233,1235,167,1224,125"/>
+<area shape="rect" id="Node000008" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="1041,416,1169,441"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="1170,379,1121,418,1117,414,1166,374"/>
+<area shape="rect" id="Node000009" href="$d7/d44/fl_8channels_09_8cpp.html" title="Unity build: recursive includes from src/fl/channels/." alt="" coords="1193,416,1371,441"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="1219,374,1269,414,1266,418,1216,379"/>
+<area shape="poly" id="edge13_Node000010_Node000002" title=" " alt="" coords="616,116,495,139,361,169,338,176,336,171,360,164,493,133,615,111"/>
+<area shape="rect" id="Node000011" href="$d2/ddc/test_8h.html" title=" " alt="" coords="373,167,581,207"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="660,119,527,169,525,164,658,114"/>
+<area shape="rect" id="Node000014" href="$d7/d1f/rx__test_8cpp_8hpp.html" title=" " alt="" coords="605,167,799,207"/>
+<area shape="poly" id="edge14_Node000010_Node000014" title=" " alt="" coords="705,125,705,166,699,166,699,125"/>
+<area shape="rect" id="Node000017" href="$d4/df5/rx_2channel_8cpp_8hpp.html" title=" " alt="" coords="823,174,1042,199"/>
+<area shape="poly" id="edge16_Node000010_Node000017" title=" " alt="" coords="747,114,903,171,901,176,745,119"/>
+<area shape="rect" id="Node000012" href="$df/d05/_r_x_8ino.html" title="RX channel test for ESP32." alt="" coords="469,255,682,295"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="510,214,555,252,552,256,507,218"/>
+<area shape="rect" id="Node000013" href="$df/dac/test_8cpp.html" title=" " alt="" coords="221,255,444,295"/>
+<area shape="poly" id="edge12_Node000011_Node000013" title=" " alt="" coords="435,216,366,257,363,252,432,211"/>
+<area shape="rect" id="Node000015" href="$d8/d94/fl_2channels_2detail_2validation_2__build_8cpp_8hpp.html" title=" " alt="" coords="706,255,895,295"/>
+<area shape="poly" id="edge15_Node000014_Node000015" title=" " alt="" coords="736,214,781,252,777,256,732,218"/>
+<area shape="rect" id="Node000018" href="$d2/d8f/fl_2channels_2rx_2__build_8cpp_8hpp.html" title=" " alt="" coords="1019,262,1225,287"/>
+<area shape="poly" id="edge17_Node000017_Node000018" title=" " alt="" coords="972,203,1097,259,1095,264,969,208"/>
+<area shape="poly" id="edge18_Node000018_Node000007" title=" " alt="" coords="1144,296,1184,341,1180,344,1140,299"/>
+<area shape="rect" id="Node000020" href="$d9/db5/decode__ws2812_8cpp_8hpp.html" title="Shared 4&#45;phase WS2812 edge&#45;pair &#45;&gt; byte decoder (definition)." alt="" coords="1066,167,1226,207"/>
+<area shape="poly" id="edge20_Node000019_Node000020" title=" " alt="" coords="1033,123,1112,164,1109,169,1031,127"/>
+<area shape="poly" id="edge21_Node000020_Node000018" title=" " alt="" coords="1140,221,1128,262,1123,261,1134,219"/>
+</map>

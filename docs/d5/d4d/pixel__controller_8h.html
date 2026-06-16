@@ -110,18 +110,21 @@ $(function(){initNavTree('d5/d4d/pixel__controller_8h.html','../../'); initResiz
 <div class="textblock"><p>Low level pixel data writing class. </p>
 
 <p class="definition">Definition in file <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html">pixel_controller.h</a>.</p>
-</div><div class="textblock"><code>#include &quot;<a class="el" href="../../d8/d54/intmap_8h_source.html">lib8tion/intmap.h</a>&quot;</code><br />
+</div><div class="textblock"><code>#include &quot;<a class="el" href="../../db/d72/fl_2math_2intmap_8h_source.html">fl/math/intmap.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../da/d60/fl_2math_2math8_8h_source.html">fl/math/math8.h</a>&quot;</code><br />
+<code>#include &quot;platforms/is_platform.h&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d7/dbb/rgbw_8h_source.html">rgbw.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../dc/d44/five__bit__hd__gamma_8h_source.html">fl/five_bit_hd_gamma.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d4/d64/force__inline_8h_source.html">fl/force_inline.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../db/d91/scale8_8h_source.html">lib8tion/scale8.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../df/d2a/namespace_8h_source.html">fl/namespace.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d98/rgbww_8h_source.html">fl/gfx/rgbww.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dc/d44/five__bit__hd__gamma_8h_source.html">fl/gfx/five_bit_hd_gamma.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d7/d7f/log_8h_source.html">fl/log/log.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d54/compiler__control_8h_source.html">fl/stl/compiler_control.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d0/d1b/static__assert_8h_source.html">fl/stl/static_assert.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/de8/fl_2math_2scale8_8h_source.html">fl/math/scale8.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/d07/eorder_8h_source.html">eorder.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d8/d90/dither__mode_8h_source.html">dither_mode.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d8/d6c/pixel__iterator_8h_source.html">pixel_iterator.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d4/d54/compiler__control_8h_source.html">fl/compiler_control.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html">FastLED.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/d10/variant_8h_source.html">fl/stl/variant.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for pixel_controller.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -134,15 +137,16 @@ $(function(){initNavTree('d5/d4d/pixel__controller_8h.html','../../'); initResiz
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../db/d21/pixel__controller_8h__dep__incl.svg" width="100%" height="514"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../db/d21/pixel__controller_8h__dep__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../d5/d4d/pixel__controller_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:d4/d7d/struct_color_adjustment" id="r_d4/d7d/struct_color_adjustment"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#d4/d7d/struct_color_adjustment">ColorAdjustment</a></td></tr>
-<tr class="separator:d4/d7d/struct_color_adjustment"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d7d/struct_color_adjustment.html">ColorAdjustment</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Color adjustment structure for pixel output.  <a href="../../d4/d7d/struct_color_adjustment.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/dee/struct_pixel_controller.html">PixelController&lt; RGB_ORDER, LANES, MASK &gt;</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pixel controller class.  <a href="../../d0/dee/struct_pixel_controller.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -180,37 +184,6 @@ Macros</h2></td></tr>
 <tr class="memdesc:a25177681f9e6192fe226707691a24dcb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alias for RECOMMENDED_VIRTUAL_BITS.  <br /></td></tr>
 <tr class="separator:a25177681f9e6192fe226707691a24dcb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<hr/><h2 class="groupheader">Class Documentation</h2>
-<a name="d4/d7d/struct_color_adjustment" id="d4/d7d/struct_color_adjustment"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#d4/d7d/struct_color_adjustment">&#9670;&#160;</a></span>ColorAdjustment</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">struct ColorAdjustment</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<div id="dynsection-2" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-2-trigger" src="../../closed.png" alt="+"/> Collaboration diagram for ColorAdjustment:</div>
-<div id="dynsection-2-summary" class="dynsummary" style="display:block;">
-</div>
-<div id="dynsection-2-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../da/d4d/struct_color_adjustment__coll__graph.svg" width="142" height="124"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
-<center><span class="legend">[<a target="top" href="../../graph_legend.html">legend</a>]</span></center></div>
-<table class="fieldtable">
-<tr><th colspan="3">Class Members</th></tr>
-<tr><td class="fieldtype">
-<a id="a15aa34a8f35d6175f738f2f9a8047727" name="a15aa34a8f35d6175f738f2f9a8047727"></a><a class="el" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a></td>
-<td class="fieldname">
-premixed</td>
-<td class="fielddoc">
-</td></tr>
-</table>
-
-</div>
-</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -218,7 +191,7 @@ premixed</td>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d5/d4d/pixel__controller_8h.html">pixel_controller.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:02 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,0 +1,8 @@
+<map id="fl::audio::Processor::getPercussionDetector" name="fl::audio::Processor::getPercussionDetector">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,183,69"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="55,30,53,20,59,10,73,5,94,3,118,6,132,13,129,18,117,11,94,8,74,10,62,15,58,21,60,28"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="241,7,366,33"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="183,34,227,28,227,33,183,40"/>
+<area shape="rect" id="Node000003" href="$d3/d6b/classfl_1_1audio_1_1_processor_ade806d07af52e3d281939cebce7643d5.html#ade806d07af52e3d281939cebce7643d5" title=" " alt="" coords="231,57,376,97"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="183,59,217,63,217,68,183,64"/>
+</map>

@@ -1,0 +1,16 @@
+<map id="fl::PixelIterator::writeP9813" name="fl::PixelIterator::writeP9813">
+<area shape="rect" id="Node000001" title="Encode pixels in P9813 format (zero allocation)" alt="" coords="5,47,131,87"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a403bd8d96e6625e5daef764daf780f26.html#a403bd8d96e6625e5daef764daf780f26" title="Helper function to create a back_insert_iterator." alt="" coords="224,5,351,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="131,50,178,39,215,31,216,36,179,45,132,56"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aef406227ddbce2fa87c85d82c6f5a0ea.html#aef406227ddbce2fa87c85d82c6f5a0ea" title="Encode pixel data in P9813 format." alt="" coords="225,55,350,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="131,65,211,65,211,70,131,70"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a0245017ca5e8aeaf10ccae7aee944f08.html#a0245017ca5e8aeaf10ccae7aee944f08" title="Create RGB input iterator range from PixelIterator." alt="" coords="179,128,396,153"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="129,85,236,121,234,126,128,90"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_ae023c80fd2ff1cc36fda200e72ab52f5.html#ae023c80fd2ff1cc36fda200e72ab52f5" title="Generate P9813 flag byte from RGB components." alt="" coords="444,55,580,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="351,65,430,65,430,70,351,70"/>
+<area shape="poly" id="edge7_Node000005_Node000005" title=" " alt="" coords="252,130,244,120,248,110,263,104,287,101,318,105,330,114,327,118,316,110,287,107,264,109,252,114,249,119,256,126"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a9f32cf31427769f3900630cb3506f2c6.html#a9f32cf31427769f3900630cb3506f2c6" title=" " alt="" coords="459,128,565,153"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="396,138,445,138,445,143,396,143"/>
+<area shape="rect" id="Node000007" href="$da/d3c/namespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259.html#a0bddf371925d8c4e94b88e9d7b35d259" title=" " alt="" coords="628,128,732,153"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="566,138,614,138,614,143,566,143"/>
+</map>

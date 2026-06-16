@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: /home/runner/work/FastLED/FastLED/examples/FxSdCard/FxSdCard.ino File Reference</title>
+<title>FastLED: /home/runner/work/FastLED/FastLED/examples/Fx/FxSdCard/FxSdCard.ino File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -101,11 +101,35 @@ $(function(){initNavTree('d7/d35/_fx_sd_card_8ino.html','../../'); initResizable
 
 <div class="header">
   <div class="summary">
-<a href="#func-members">Functions</a>  </div>
+<a href="#define-members">Macros</a> &#124;
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle"><div class="title">FxSdCard.ino File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html">FastLED.h</a>&quot;</code><br />
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Play a mapped video off an SD card. </p>
+<dl class="section author"><dt>Author</dt><dd>Zach Vorhies</dd></dl>
+<p>This sketch supports two on-disk formats:</p>
+<ol type="1">
+<li><b>FLED v1 container</b> (<code>*.fled</code>) — preferred. A single self- describing file that carries both the raw RGB frames and the ScreenMap that maps them onto the physical LED layout. No sidecar <code>.json</code> needed; the mapping travels in the file's 12-byte header. Spec: <a href="https://github.com/zackees/ledmapper/blob/main/docs/fled-format.md">https://github.com/zackees/ledmapper/blob/main/docs/fled-format.md</a></li>
+<li><b>Legacy headerless <code>.rgb</code></b> + sidecar <code>screenmap.json</code> — kept working for backward compatibility. If no <code>.fled</code> file is on the SD card, the sketch falls back to the old pairing.</li>
+</ol>
+<p>Compatible with the FastLED web compiler:</p><ol type="1">
+<li><code>pip install fastled</code></li>
+<li><code>cd</code> into this example dir</li>
+<li><code>fastled</code> at the repo root opens a browser-based runner. </li>
+</ol>
+
+<p class="definition">Definition in file <a class="el" href="../../d7/d35/_fx_sd_card_8ino_source.html">FxSdCard.ino</a>.</p>
+</div><div class="textblock"><code>#include &quot;FastLED.h&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d2/de0/arduino_8h_source.html">Arduino.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/dc7/noisepalette_8h_source.html">fl/fx/2d/noisepalette.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d9/d3c/fx__engine_8h_source.html">fl/fx/fx_engine.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dd/d78/video_8h_source.html">fl/fx/video.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/d8d/file__system_8h_source.html">fl/system/file_system.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d9/d3b/ui_8h_source.html">fl/ui/ui.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d7/d97/screenmap_8h_source.html">fl/math/screenmap.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for FxSdCard.ino:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -116,12 +140,62 @@ $(function(){initNavTree('d7/d35/_fx_sd_card_8ino.html','../../'); initResizable
 </div>
 <p><a href="../../d7/d35/_fx_sd_card_8ino_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:abdf9543b76f1ba5db0b3a5176612a767" id="r_abdf9543b76f1ba5db0b3a5176612a767"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d35/_fx_sd_card_8ino_abdf9543b76f1ba5db0b3a5176612a767.html#abdf9543b76f1ba5db0b3a5176612a767">CHIP_SELECT_PIN</a>&#160;&#160;&#160;5</td></tr>
+<tr class="separator:abdf9543b76f1ba5db0b3a5176612a767"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a00c9e5e8fdc981fc21a1e82e722980b2" id="r_a00c9e5e8fdc981fc21a1e82e722980b2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d35/_fx_sd_card_8ino_a00c9e5e8fdc981fc21a1e82e722980b2.html#a00c9e5e8fdc981fc21a1e82e722980b2">COLOR_ORDER</a>&#160;&#160;&#160;<a class="el" href="../../db/d07/eorder_8h_a61ef4a09022f540ce448c547ad15ee6a.html#a61ef4a09022f540ce448c547ad15ee6a">GRB</a></td></tr>
+<tr class="separator:a00c9e5e8fdc981fc21a1e82e722980b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac92ca5ab87034a348decad7ee8d4bd1b" id="r_ac92ca5ab87034a348decad7ee8d4bd1b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d35/_fx_sd_card_8ino_ac92ca5ab87034a348decad7ee8d4bd1b.html#ac92ca5ab87034a348decad7ee8d4bd1b">FPS</a>&#160;&#160;&#160;60</td></tr>
+<tr class="separator:ac92ca5ab87034a348decad7ee8d4bd1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaef57fab56b804d85580f89cc5309d4d" id="r_aaef57fab56b804d85580f89cc5309d4d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d35/_fx_sd_card_8ino_aaef57fab56b804d85580f89cc5309d4d.html#aaef57fab56b804d85580f89cc5309d4d">IS_SERPINTINE</a>&#160;&#160;&#160;true</td></tr>
+<tr class="separator:aaef57fab56b804d85580f89cc5309d4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab4553be4db9860d940f81d7447173b2f" id="r_ab4553be4db9860d940f81d7447173b2f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d35/_fx_sd_card_8ino_ab4553be4db9860d940f81d7447173b2f.html#ab4553be4db9860d940f81d7447173b2f">LED_PIN</a>&#160;&#160;&#160;2</td></tr>
+<tr class="separator:ab4553be4db9860d940f81d7447173b2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a364dc046543d8ab7d4214120afc9c814" id="r_a364dc046543d8ab7d4214120afc9c814"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d35/_fx_sd_card_8ino_a364dc046543d8ab7d4214120afc9c814.html#a364dc046543d8ab7d4214120afc9c814">LED_TYPE</a>&#160;&#160;&#160;WS2811</td></tr>
+<tr class="separator:a364dc046543d8ab7d4214120afc9c814"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a144c7d32cf5ab713b7507dfd2a600cae" id="r_a144c7d32cf5ab713b7507dfd2a600cae"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d35/_fx_sd_card_8ino_a144c7d32cf5ab713b7507dfd2a600cae.html#a144c7d32cf5ab713b7507dfd2a600cae">MATRIX_HEIGHT</a>&#160;&#160;&#160;32</td></tr>
+<tr class="separator:a144c7d32cf5ab713b7507dfd2a600cae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af04e6ec3c92f294d177b2ffd4885ee71" id="r_af04e6ec3c92f294d177b2ffd4885ee71"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d35/_fx_sd_card_8ino_af04e6ec3c92f294d177b2ffd4885ee71.html#af04e6ec3c92f294d177b2ffd4885ee71">MATRIX_WIDTH</a>&#160;&#160;&#160;32</td></tr>
+<tr class="separator:af04e6ec3c92f294d177b2ffd4885ee71"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c4ae9a4146ce8d6a5debc90300d9abd" id="r_a4c4ae9a4146ce8d6a5debc90300d9abd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d35/_fx_sd_card_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>&#160;&#160;&#160;(<a class="el" href="../../d6/d05/_animartrix_8ino_af04e6ec3c92f294d177b2ffd4885ee71.html#af04e6ec3c92f294d177b2ffd4885ee71">MATRIX_WIDTH</a> * <a class="el" href="../../d6/d05/_animartrix_8ino_a144c7d32cf5ab713b7507dfd2a600cae.html#a144c7d32cf5ab713b7507dfd2a600cae">MATRIX_HEIGHT</a>)</td></tr>
+<tr class="separator:a4c4ae9a4146ce8d6a5debc90300d9abd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6891ad3a4e84a4482b1e3ab22762b945" id="r_a6891ad3a4e84a4482b1e3ab22762b945"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d35/_fx_sd_card_8ino_a6891ad3a4e84a4482b1e3ab22762b945.html#a6891ad3a4e84a4482b1e3ab22762b945">NUM_VIDEO_FRAMES</a>&#160;&#160;&#160;2</td></tr>
+<tr class="separator:a6891ad3a4e84a4482b1e3ab22762b945"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:afe461d27b9c48d5921c00d521181f12f" id="r_afe461d27b9c48d5921c00d521181f12f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d35/_fx_sd_card_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop</a> ()</td></tr>
 <tr class="separator:afe461d27b9c48d5921c00d521181f12f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a31b8310bfbbef87ba721eb0104ea6119" id="r_a31b8310bfbbef87ba721eb0104ea6119"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d0/d4b/classfl_1_1_video.html">fl::Video</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d35/_fx_sd_card_8ino_a31b8310bfbbef87ba721eb0104ea6119.html#a31b8310bfbbef87ba721eb0104ea6119">openVideoEitherFormat</a> (const char *fledPath, const char *rgbPath, const char *sidecarScreenmapPath, <a class="el" href="../../d2/d78/classfl_1_1_screen_map.html">fl::ScreenMap</a> *outScreenMap)</td></tr>
+<tr class="separator:a31b8310bfbbef87ba721eb0104ea6119"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4fc01d736fe50cf5b977f755b675f11d" id="r_a4fc01d736fe50cf5b977f755b675f11d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d35/_fx_sd_card_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a> ()</td></tr>
 <tr class="separator:a4fc01d736fe50cf5b977f755b675f11d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac2dec8493c1618d241f28dec7447d81" id="r_aac2dec8493c1618d241f28dec7447d81"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d35/_fx_sd_card_8ino_aac2dec8493c1618d241f28dec7447d81.html#aac2dec8493c1618d241f28dec7447d81">validateScreenMapSize</a> (const <a class="el" href="../../d2/d78/classfl_1_1_screen_map.html">fl::ScreenMap</a> &amp;m, const char *source)</td></tr>
+<tr class="separator:aac2dec8493c1618d241f28dec7447d81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add3ff24d5357dbeb92d3b450fd751a40" id="r_add3ff24d5357dbeb92d3b450fd751a40"><td class="memItemLeft" align="right" valign="top">UINumberField&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d35/_fx_sd_card_8ino_add3ff24d5357dbeb92d3b450fd751a40.html#add3ff24d5357dbeb92d3b450fd751a40">whichVideo</a> (&quot;Which fl::Video&quot;, 0, 0, 1)</td></tr>
+<tr class="separator:add3ff24d5357dbeb92d3b450fd751a40"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:abb85c4a8fb39954e9a9b920895d2691c" id="r_abb85c4a8fb39954e9a9b920895d2691c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../de/d86/classfl_1_1_u_i_description.html">fl::UIDescription</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d35/_fx_sd_card_8ino_abb85c4a8fb39954e9a9b920895d2691c.html#abb85c4a8fb39954e9a9b920895d2691c">description</a> (&quot;fl::Video data is streamed off of a SD card and displayed on a LED strip. The <a class="el" href="../../dc/ded/_fx_gfx2_video_8ino_a755864d6b0081cc96f6412f1c6f2be97.html#a755864d6b0081cc96f6412f1c6f2be97">video</a> data is mapped to the LED strip using a <a class="el" href="../../d2/d78/classfl_1_1_screen_map.html">fl::ScreenMap</a> embedded in the FLED file (with a sidecar screenmap.json fallback for legacy .rgb files).&quot;)</td></tr>
+<tr class="separator:abb85c4a8fb39954e9a9b920895d2691c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a596ed0ccdf138a1e53bd3b5329ed605e" id="r_a596ed0ccdf138a1e53bd3b5329ed605e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../df/d37/classfl_1_1_file_system.html">fl::FileSystem</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d35/_fx_sd_card_8ino_a596ed0ccdf138a1e53bd3b5329ed605e.html#a596ed0ccdf138a1e53bd3b5329ed605e">filesystem</a></td></tr>
+<tr class="separator:a596ed0ccdf138a1e53bd3b5329ed605e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9bb8de58107fc20b1e49669b6298eb28" id="r_a9bb8de58107fc20b1e49669b6298eb28"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d35/_fx_sd_card_8ino_a9bb8de58107fc20b1e49669b6298eb28.html#a9bb8de58107fc20b1e49669b6298eb28">gError</a> = false</td></tr>
+<tr class="separator:a9bb8de58107fc20b1e49669b6298eb28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83a59cb1680f896fa1c411261436d4ad" id="r_a83a59cb1680f896fa1c411261436d4ad"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../da/dd6/structfl_1_1_c_r_g_b.html">fl::CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d35/_fx_sd_card_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad">leds</a> [<a class="el" href="../../d6/d05/_animartrix_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>]</td></tr>
+<tr class="separator:a83a59cb1680f896fa1c411261436d4ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f6106e4be0f5498d5b5b38c7fe51cc7" id="r_a0f6106e4be0f5498d5b5b38c7fe51cc7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d2/d78/classfl_1_1_screen_map.html">fl::ScreenMap</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d35/_fx_sd_card_8ino_a0f6106e4be0f5498d5b5b38c7fe51cc7.html#a0f6106e4be0f5498d5b5b38c7fe51cc7">screenMap</a></td></tr>
+<tr class="separator:a0f6106e4be0f5498d5b5b38c7fe51cc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98def8d1377dab40aab9364bf6741955" id="r_a98def8d1377dab40aab9364bf6741955"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d9/d82/classfl_1_1_u_i_title.html">fl::UITitle</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d35/_fx_sd_card_8ino_a98def8d1377dab40aab9364bf6741955.html#a98def8d1377dab40aab9364bf6741955">title</a> (&quot;SDCard Demo - Mapped fl::Video&quot;)</td></tr>
+<tr class="separator:a98def8d1377dab40aab9364bf6741955"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8667d527e3acf17e1c5de7ba92730d89" id="r_a8667d527e3acf17e1c5de7ba92730d89"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d0/d4b/classfl_1_1_video.html">fl::Video</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d35/_fx_sd_card_8ino_a8667d527e3acf17e1c5de7ba92730d89.html#a8667d527e3acf17e1c5de7ba92730d89">video</a></td></tr>
+<tr class="separator:a8667d527e3acf17e1c5de7ba92730d89"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aecb6e9283cc6d4f459aedaa3fdfd5569" id="r_aecb6e9283cc6d4f459aedaa3fdfd5569"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d0/d4b/classfl_1_1_video.html">fl::Video</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d35/_fx_sd_card_8ino_aecb6e9283cc6d4f459aedaa3fdfd5569.html#aecb6e9283cc6d4f459aedaa3fdfd5569">video2</a></td></tr>
+<tr class="separator:aecb6e9283cc6d4f459aedaa3fdfd5569"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f987514568eeb313e565a64adda931d" id="r_a9f987514568eeb313e565a64adda931d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dd/d47/classfl_1_1_u_i_slider.html">fl::UISlider</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d35/_fx_sd_card_8ino_a9f987514568eeb313e565a64adda931d.html#a9f987514568eeb313e565a64adda931d">videoSpeed</a> (&quot;fl::Video Speed&quot;, 1.0f, -1, 2.0f, 0.01f)</td></tr>
+<tr class="separator:a9f987514568eeb313e565a64adda931d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -129,8 +203,8 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_c35e3ac77356cdc3fc8e34259008fe74.html">FxSdCard</a></li><li class="navelem"><a class="el" href="../../d7/d35/_fx_sd_card_8ino.html">FxSdCard.ino</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_e6c43ff3b6655e541cf2b1319207663d.html">Fx</a></li><li class="navelem"><a class="el" href="../../dir_8f7ac0ef3548c242b81a9c5e74f64d53.html">FxSdCard</a></li><li class="navelem"><a class="el" href="../../d7/d35/_fx_sd_card_8ino.html">FxSdCard.ino</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

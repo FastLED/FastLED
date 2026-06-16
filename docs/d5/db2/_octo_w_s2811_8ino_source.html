@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: /home/runner/work/FastLED/FastLED/examples/OctoWS2811/OctoWS2811.ino Source File</title>
+<title>FastLED: /home/runner/work/FastLED/FastLED/examples/SpecialDrivers/Teensy/OctoWS2811/OctoWS2811/OctoWS2811.ino Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -105,12 +105,9 @@ $(function(){initNavTree('d5/db2/_octo_w_s2811_8ino_source.html','../../'); init
 <div class="contents">
 <a href="../../d5/db2/_octo_w_s2811_8ino.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">// Platform detection logic</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#if defined(__arm__) &amp;&amp; defined(TEENSYDUINO) &amp;&amp; !defined(__MKL26Z64__)  </span><span class="comment">// Teensy LC</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">// @filter: (platform is teensy) and not (board is teensylc)</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &quot;<a class="code" href="../../d8/d53/_octo_w_s2811__impl_8h.html">OctoWS2811_impl.h</a>&quot;</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;platforms/sketch_fake.hpp&quot;</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="a_octo_w_s2811__impl_8h_html"><div class="ttname"><a href="../../d8/d53/_octo_w_s2811__impl_8h.html">OctoWS2811_impl.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -118,8 +115,8 @@ $(function(){initNavTree('d5/db2/_octo_w_s2811_8ino_source.html','../../'); init
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_ace4e50fcc955ba7d1af81fff465c2e8.html">OctoWS2811</a></li><li class="navelem"><a class="el" href="../../d5/db2/_octo_w_s2811_8ino.html">OctoWS2811.ino</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:19 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_45d8fcb39455346615c49383ff8b6a4c.html">SpecialDrivers</a></li><li class="navelem"><a class="el" href="../../dir_a740218ace553a9d1f83e9052516a9cf.html">Teensy</a></li><li class="navelem"><a class="el" href="../../dir_0158ba18d277bf8b9e402f3cae91727e.html">OctoWS2811</a></li><li class="navelem"><a class="el" href="../../dir_704669fb0ce845bca5671c3046a521d6.html">OctoWS2811</a></li><li class="navelem"><a class="el" href="../../d5/db2/_octo_w_s2811_8ino.html">OctoWS2811.ino</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:06:58 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,5 +1,5 @@
 <map id="fl::WaveFx" name="fl::WaveFx">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,152,96,177"/>
+<area shape="rect" id="Node000001" title="2D wave simulation effect with supersampling and gradient coloring" alt="" coords="5,152,96,177"/>
 <area shape="rect" id="Node000002" href="$d7/d3e/classfl_1_1_fx2d.html" title=" " alt="" coords="15,79,86,104"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="53,118,53,152,48,152,48,118"/>
 <area shape="rect" id="Node000003" href="$da/d5d/classfl_1_1_fx.html" title=" " alt="" coords="23,5,78,31"/>

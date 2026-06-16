@@ -1,0 +1,40 @@
+<map id="fl::pwm_state::findByPin" name="fl::pwm_state::findByPin">
+<area shape="rect" id="Node000001" title=" " alt="" coords="744,219,923,244"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ab7b2495da785c92a36e91b0a59cde46b.html#ab7b2495da785c92a36e91b0a59cde46b" title="Write analog value to pin (PWM)" alt="" coords="558,80,675,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="805,212,755,173,695,132,647,108,649,103,697,128,758,169,808,208"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a277fd63efca228ed3df7bb778b7ab842.html#a277fd63efca228ed3df7bb778b7ab842" title="Query the configured PWM frequency for a pin." alt="" coords="537,143,696,168"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="783,217,653,171,655,166,784,212"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_aa7a47cf722a2586453e75f6e70284dad.html#aa7a47cf722a2586453e75f6e70284dad" title="Set pin mode (input, output, pull&#45;up, pull&#45;down)" alt="" coords="569,244,664,269"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="731,246,665,254,664,249,730,241"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_a77306b4a5327eb19e8d003b550b1a0a5.html#a77306b4a5327eb19e8d003b550b1a0a5" title="Set PWM frequency for a pin." alt="" coords="305,156,462,181"/>
+<area shape="poly" id="edge21_Node000001_Node000012" title=" " alt="" coords="730,220,462,182,462,177,731,214"/>
+<area shape="rect" id="Node000016" href="$d4/d36/namespacefl_a799e0254efc7ac0e21305c2c38685f0b.html#a799e0254efc7ac0e21305c2c38685f0b" title="Release PWM channel and stop output on a pin." alt="" coords="569,293,664,319"/>
+<area shape="poly" id="edge18_Node000001_Node000016" title=" " alt="" coords="787,252,697,285,662,296,660,291,695,279,786,247"/>
+<area shape="rect" id="Node000017" href="$d4/d36/namespacefl_a4576b062b8c708eaee16aace718f85f6.html#a4576b062b8c708eaee16aace718f85f6" title="Set PWM duty cycle with 16&#45;bit resolution." alt="" coords="563,395,670,420"/>
+<area shape="poly" id="edge19_Node000001_Node000017" title=" " alt="" coords="808,255,635,396,632,392,804,251"/>
+<area shape="rect" id="Node000003" href="$d9/d1f/el__panel_8cpp_a3d505a2f5ac043b8dc404b92ebb049ef.html#a3d505a2f5ac043b8dc404b92ebb049ef" title=" " alt="" coords="128,156,213,181"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="544,104,420,122,278,146,214,160,213,155,277,141,419,116,544,99"/>
+<area shape="rect" id="Node000005" href="$d9/d1f/el__panel_8cpp_a212827690ec1d11dc4c38a5cc6b541d5.html#a212827690ec1d11dc4c38a5cc6b541d5" title=" " alt="" coords="330,55,437,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="544,88,437,76,437,70,545,82"/>
+<area shape="rect" id="Node000007" href="$d9/d1f/el__panel_8cpp_ad3b5b489324dd03fc27ad993bae9f2ff.html#ad3b5b489324dd03fc27ad993bae9f2ff" title=" " alt="" coords="332,5,435,31"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="574,77,489,45,434,30,436,25,490,39,576,72"/>
+<area shape="rect" id="Node000004" href="$d7/d8f/_el_panel_reactive_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,156,64,181"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="114,171,64,171,64,166,114,166"/>
+<area shape="rect" id="Node000006" href="$d7/d8f/_el_panel_reactive_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="145,31,196,56"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="316,62,196,49,196,43,316,57"/>
+<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="319,28,197,43,196,38,318,23"/>
+<area shape="poly" id="edge11_Node000009_Node000003" title=" " alt="" coords="555,249,277,197,213,182,214,177,278,191,556,244"/>
+<area shape="rect" id="Node000010" href="$d0/da2/classfl_1_1third__party_1_1ez_w_s2812gpio_abad8db01ff1ef8c38c5f8fee610254da.html#abad8db01ff1ef8c38c5f8fee610254da" title="Initialize GPIO pin." alt="" coords="277,307,489,347"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="561,276,490,298,451,310,450,305,489,293,560,271"/>
+<area shape="rect" id="Node000011" href="$d3/d25/classfl_1_1_digital_pin_impl_a52b7c62cb136adbb22283fc1345d6918.html#a52b7c62cb136adbb22283fc1345d6918" title=" " alt="" coords="318,395,449,435"/>
+<area shape="poly" id="edge12_Node000009_Node000011" title=" " alt="" coords="558,273,539,284,523,302,515,321,507,340,491,361,464,382,436,398,433,393,462,377,487,357,502,338,510,319,518,299,536,280,555,268"/>
+<area shape="poly" id="edge14_Node000009_Node000012" title=" " alt="" coords="569,241,536,227,488,203,431,184,433,179,490,198,538,222,572,236"/>
+<area shape="rect" id="Node000013" href="$d8/d07/namespacefl_1_1validation_a46b68a701e41e321618f87bdb6d80cc2.html#a46b68a701e41e321618f87bdb6d80cc2" title="Test RX channel with manual GPIO toggle pattern." alt="" coords="280,257,487,283"/>
+<area shape="poly" id="edge16_Node000009_Node000013" title=" " alt="" coords="556,263,487,267,487,261,556,257"/>
+<area shape="poly" id="edge13_Node000011_Node000011" title=" " alt="" coords="419,384,406,377,383,374,363,376,351,381,347,387,349,394,344,396,341,386,348,376,362,371,383,369,408,372,421,379"/>
+<area shape="poly" id="edge15_Node000012_Node000003" title=" " alt="" coords="291,171,213,171,213,166,291,166"/>
+<area shape="rect" id="Node000014" href="$d7/d5f/_auto_research_helpers_8cpp_aec5c2c23f8a1e895555f21f61b66b74e.html#aec5c2c23f8a1e895555f21f61b66b74e" title="Test RX channel with manual GPIO toggle." alt="" coords="112,257,229,283"/>
+<area shape="poly" id="edge17_Node000013_Node000014" title=" " alt="" coords="266,273,230,273,230,267,266,267"/>
+<area shape="rect" id="Node000018" href="$d4/d36/namespacefl_abccc821ac69303bc62b15cc61a5e4217.html#abccc821ac69303bc62b15cc61a5e4217" title="Alias for setPwm16 &#45; Set PWM duty cycle with 16&#45;bit resolution." alt="" coords="317,460,450,485"/>
+<area shape="poly" id="edge20_Node000017_Node000018" title=" " alt="" coords="565,427,490,450,441,463,440,457,489,445,564,422"/>
+</map>

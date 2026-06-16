@@ -1,0 +1,23 @@
+<map id="fl/channels/rx/config.h" name="fl/channels/rx/config.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="555,5,719,31"/>
+<area shape="rect" id="Node000002" href="$da/d7b/rx_2channel_8h.html" title=" " alt="" coords="549,79,725,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="640,44,640,79,635,79,635,44"/>
+<area shape="rect" id="Node000003" href="$d2/ddc/test_8h.html" title=" " alt="" coords="251,152,459,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="584,110,423,154,422,149,583,105"/>
+<area shape="rect" id="Node000006" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="513,159,599,185"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="618,115,570,161,566,157,614,112"/>
+<area shape="rect" id="Node000010" href="$d7/d1f/rx__test_8cpp_8hpp.html" title=" " alt="" coords="628,152,823,192"/>
+<area shape="poly" id="edge7_Node000002_Node000010" title=" " alt="" coords="662,111,706,150,702,154,659,115"/>
+<area shape="rect" id="Node000016" href="$d4/df5/rx_2channel_8cpp_8hpp.html" title=" " alt="" coords="849,159,1068,185"/>
+<area shape="poly" id="edge9_Node000002_Node000016" title=" " alt="" coords="698,105,913,157,911,162,697,110"/>
+<area shape="rect" id="Node000004" href="$df/d05/_r_x_8ino.html" title="RX channel test for ESP32." alt="" coords="5,240,219,280"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="290,199,166,242,164,237,288,194"/>
+<area shape="rect" id="Node000005" href="$df/dac/test_8cpp.html" title=" " alt="" coords="243,240,466,280"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="357,206,357,240,352,240,352,206"/>
+<area shape="rect" id="Node000007" href="$d7/de5/_fast_l_e_d_8cpp_8hpp.html" title=" " alt="" coords="491,247,619,273"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="558,199,558,247,552,247,553,199"/>
+<area shape="rect" id="Node000011" href="$d8/d94/fl_2channels_2detail_2validation_2__build_8cpp_8hpp.html" title=" " alt="" coords="643,240,832,280"/>
+<area shape="poly" id="edge8_Node000010_Node000011" title=" " alt="" coords="733,205,737,239,732,240,727,206"/>
+<area shape="rect" id="Node000017" href="$d2/d8f/fl_2channels_2rx_2__build_8cpp_8hpp.html" title=" " alt="" coords="857,247,1063,273"/>
+<area shape="poly" id="edge10_Node000016_Node000017" title=" " alt="" coords="962,199,962,247,957,247,956,199"/>
+</map>

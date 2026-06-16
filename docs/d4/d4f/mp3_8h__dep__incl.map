@@ -1,0 +1,14 @@
+<map id="fl/codec/mp3.h" name="fl/codec/mp3.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="111,5,229,31"/>
+<area shape="rect" id="Node000002" href="$de/d4b/file__system__codecs_8cpp_8hpp.html" title="FileSystem codec methods — compiled in fl.codec+ module." alt="" coords="5,79,156,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,42,104,81,100,77,145,38"/>
+<area shape="rect" id="Node000006" href="$d3/df6/mp3_8cpp_8hpp.html" title=" " alt="" coords="181,86,341,111"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="195,38,249,84,245,88,192,42"/>
+<area shape="rect" id="Node000003" href="$d7/df8/fl_2codec_2__build_8cpp_8hpp.html" title=" " alt="" coords="85,167,255,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="114,126,158,164,155,168,111,130"/>
+<area shape="rect" id="Node000004" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="22,240,150,265"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="148,203,101,242,98,238,144,199"/>
+<area shape="rect" id="Node000005" href="$dd/dad/fl_8codec_09_8cpp.html" title="Unity build: recursive includes from src/fl/codec/." alt="" coords="175,240,333,265"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="196,199,242,238,239,242,192,203"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="239,122,185,168,182,164,235,118"/>
+</map>

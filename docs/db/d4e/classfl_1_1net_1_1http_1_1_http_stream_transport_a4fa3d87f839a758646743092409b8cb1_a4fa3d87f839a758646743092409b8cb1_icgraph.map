@@ -1,0 +1,17 @@
+<map id="fl::net::http::HttpStreamTransport::recvData" name="fl::net::http::HttpStreamTransport::recvData">
+<area shape="rect" id="Node000001" title="Receive raw data from connection." alt="" coords="956,63,1132,103"/>
+<area shape="poly" id="edge10_Node000001_Node000001" title=" " alt="" coords="1087,51,1072,44,1044,41,1020,43,1005,48,1000,54,1002,62,997,63,995,53,1002,44,1019,38,1044,36,1073,39,1089,46"/>
+<area shape="rect" id="Node000002" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a36aa20b252cc505454144d47d39dabd1.html#a36aa20b252cc505454144d47d39dabd1" title=" " alt="" coords="677,63,908,103"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="942,85,908,85,908,80,942,80"/>
+<area shape="rect" id="Node000003" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_aab4451d64b6a491f073f941fd22258c0.html#aab4451d64b6a491f073f941fd22258c0" title="Read next JSON&#45;RPC request from stream Non&#45;blocking, returns nullopt if no complete request available..." alt="" coords="453,5,629,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="691,62,629,48,630,43,692,57"/>
+<area shape="rect" id="Node000006" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a57c01766a42aa6cbab3d0c6b7617a5ff.html#a57c01766a42aa6cbab3d0c6b7617a5ff" title="Update connection state (handles reconnection, heartbeat) Call this in main loop." alt="" coords="5,31,181,71"/>
+<area shape="poly" id="edge9_Node000002_Node000006" title=" " alt="" coords="664,94,459,98,344,95,229,85,165,73,166,68,230,80,344,89,459,93,664,88"/>
+<area shape="rect" id="Node000004" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a8237da9613a0a0c2bffbd8bfddd1f50e.html#a8237da9613a0a0c2bffbd8bfddd1f50e" title="Check if connected." alt="" coords="229,31,405,71"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="440,48,406,52,405,47,440,43"/>
+<area shape="poly" id="edge5_Node000004_Node000002" title=" " alt="" coords="419,55,677,72,677,78,419,60"/>
+<area shape="poly" id="edge6_Node000004_Node000003" title=" " alt="" coords="419,28,453,24,453,29,419,33"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="355,19,342,12,317,9,296,11,283,16,278,22,281,30,275,31,273,21,280,12,295,6,317,4,343,7,358,14"/>
+<area shape="poly" id="edge7_Node000004_Node000006" title=" " alt="" coords="215,62,182,62,182,57,215,57"/>
+<area shape="poly" id="edge8_Node000006_Node000004" title=" " alt="" coords="195,39,229,39,229,45,195,44"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="fl/stl/asio/http/native_server.cpp.hpp" name="fl/stl/asio/http/native_server.cpp.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="318,5,474,45"/>
+<area shape="rect" id="Node000002" href="$d7/d08/_rpc_bidirectional_8ino.html" title="Example demonstrating bidirectional HTTP streaming RPC (server + client in same process)" alt="" coords="5,93,272,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="332,53,212,96,210,91,330,48"/>
+<area shape="rect" id="Node000003" href="$d2/df2/_rpc_server_8ino.html" title="Example demonstrating fl::Remote with HTTP streaming transport (server side)" alt="" coords="296,93,496,148"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="399,59,399,93,393,93,393,59"/>
+<area shape="rect" id="Node000004" href="$d3/ded/fl_2stl_2asio_2http_2__build_8cpp_8hpp.html" title=" " alt="" coords="521,108,730,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="456,48,598,105,596,110,454,53"/>
+<area shape="rect" id="Node000005" href="$db/d67/fl_2stl_2asio_2__build_8cpp_8hpp.html" title=" " alt="" coords="536,196,715,221"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="628,147,628,195,623,195,623,147"/>
+<area shape="rect" id="Node000006" href="$dc/d07/fl_2stl_2__build_8cpp_8hpp.html" title=" " alt="" coords="551,269,699,295"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="628,235,628,269,623,269,623,235"/>
+</map>

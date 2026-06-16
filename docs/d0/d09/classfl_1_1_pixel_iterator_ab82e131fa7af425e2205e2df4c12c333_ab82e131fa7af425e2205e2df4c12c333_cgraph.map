@@ -1,0 +1,24 @@
+<map id="fl::PixelIterator::writeWS2812" name="fl::PixelIterator::writeWS2812">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,146,131,186"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a403bd8d96e6625e5daef764daf780f26.html#a403bd8d96e6625e5daef764daf780f26" title="Helper function to create a back_insert_iterator." alt="" coords="231,5,357,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="79,144,118,91,146,63,177,40,216,24,218,29,180,44,149,67,122,95,83,147"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a6d12fad5aa2031e1abb41765650ce6a8.html#a6d12fad5aa2031e1abb41765650ce6a8" title="Encode 3&#45;byte pixel data in WS2812 format." alt="" coords="207,55,381,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="91,144,130,115,178,89,198,81,200,86,180,94,133,120,94,148"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a9cbf1f2a5558ce8f1ba9c1b1eb411db7.html#a9cbf1f2a5558ce8f1ba9c1b1eb411db7" title="Encode 4&#45;byte pixel data in WS2812 format." alt="" coords="201,104,387,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="131,149,178,138,217,130,218,135,179,143,132,154"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a1515ea7d89a548f38c4231f5c28205c5.html#a1515ea7d89a548f38c4231f5c28205c5" title="Encode 5&#45;byte pixel data in WS2812 format (issue #2558, RGBWW)." alt="" coords="195,153,393,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="131,163,181,163,181,169,131,169"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a0245017ca5e8aeaf10ccae7aee944f08.html#a0245017ca5e8aeaf10ccae7aee944f08" title="Create RGB input iterator range from PixelIterator." alt="" coords="185,227,403,252"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="131,184,241,220,240,225,130,189"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a897e8186b6287f0bccef2ec8f12f4b99.html#a897e8186b6287f0bccef2ec8f12f4b99" title="Create RGBW input iterator range from PixelIterator." alt="" coords="179,276,409,301"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="88,184,127,224,153,244,180,261,199,269,197,274,177,266,150,248,124,228,84,188"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_a23e23f9821fec52f5b46dcdebb49db7b.html#a23e23f9821fec52f5b46dcdebb49db7b" title="Create RGBWW input iterator range from PixelIterator (issue #2558)" alt="" coords="199,326,389,366"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="81,185,119,247,147,281,180,311,192,318,189,322,177,315,143,285,115,250,77,188"/>
+<area shape="poly" id="edge8_Node000006_Node000006" title=" " alt="" coords="259,228,251,218,255,208,270,202,294,200,324,204,336,213,333,217,322,209,294,205,271,207,259,212,256,218,263,225"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a9f32cf31427769f3900630cb3506f2c6.html#a9f32cf31427769f3900630cb3506f2c6" title=" " alt="" coords="457,276,564,301"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="359,249,410,261,448,270,447,275,409,266,358,255"/>
+<area shape="rect" id="Node000008" href="$da/d3c/namespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259.html#a0bddf371925d8c4e94b88e9d7b35d259" title=" " alt="" coords="612,276,716,301"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="564,286,598,286,598,291,564,291"/>
+<area shape="poly" id="edge10_Node000009_Node000007" title=" " alt="" coords="410,286,443,286,443,291,410,291"/>
+<area shape="poly" id="edge12_Node000010_Node000007" title=" " alt="" coords="369,323,448,302,449,308,371,329"/>
+</map>

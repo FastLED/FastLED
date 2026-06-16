@@ -1,0 +1,8 @@
+<map id="fl::AsyncLogger::disableBackgroundFlush" name="fl::AsyncLogger::disableBackgroundFlush">
+<area shape="rect" id="Node000001" title="Disable background flushing." alt="" coords="575,5,751,45"/>
+<area shape="rect" id="Node000002" href="$d6/d35/classfl_1_1_async_logger_a55785739910a193b5b6dffeb455bd150.html#a55785739910a193b5b6dffeb455bd150" title=" " alt="" coords="5,13,228,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="561,25,527,24,276,24,228,25,228,20,276,19,527,19,561,19"/>
+<area shape="rect" id="Node000003" href="$d6/d35/classfl_1_1_async_logger_a9d75c7b5ffac34f42439fa954696064e.html#a9d75c7b5ffac34f42439fa954696064e" title="Enable background timer&#45;based flushing (opt&#45;in)" alt="" coords="276,33,527,73"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="561,39,527,43,527,37,561,34"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="262,42,228,39,229,34,263,37"/>
+</map>

@@ -1,5 +1,6 @@
 <map id="LedRopeTCL::RawDrawPixel" name="LedRopeTCL::RawDrawPixel">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,208,31"/>
-<area shape="rect" id="Node000002" href="$d3/d1d/classfl_1_1_u_i_button_a840152841a9986ba7ca08da3df06353f.html#a840152841a9986ba7ca08da3df06353f" title=" " alt="" coords="256,5,421,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="208,15,242,15,242,21,208,21"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,208,55"/>
+<area shape="rect" id="Node000002" href="$d3/d1d/classfl_1_1_u_i_button_a3e9ed797554830831335b5fcdd6eb26b.html#a3e9ed797554830831335b5fcdd6eb26b" title=" " alt="" coords="256,29,421,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="208,39,242,39,242,45,208,45"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="301,31,293,21,297,11,313,5,339,3,371,7,384,16,380,20,369,11,339,8,314,10,301,15,298,20,305,27"/>
 </map>

@@ -1,0 +1,5 @@
+<map id="fl::SpiChannelEngineAdapter::enqueue" name="fl::SpiChannelEngineAdapter::enqueue">
+<area shape="rect" id="Node000001" title="Enqueue channel data for transmission." alt="" coords="5,5,212,45"/>
+<area shape="rect" id="Node000002" href="$d3/daf/classfl_1_1_spi_channel_engine_adapter_afdc02f9ab5ab3e449c9033ad74a8cd4b.html#afdc02f9ab5ab3e449c9033ad74a8cd4b" title="Check if adapter can handle channel data." alt="" coords="260,5,467,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="212,23,246,23,246,28,212,28"/>
+</map>

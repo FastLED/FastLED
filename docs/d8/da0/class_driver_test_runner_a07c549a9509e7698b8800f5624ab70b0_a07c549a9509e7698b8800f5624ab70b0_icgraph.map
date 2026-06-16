@@ -1,0 +1,12 @@
+<map id="DriverTestRunner::recordResult" name="DriverTestRunner::recordResult">
+<area shape="rect" id="Node000001" title="Record a test result." alt="" coords="731,39,913,79"/>
+<area shape="rect" id="Node000002" href="$d8/da0/class_driver_test_runner_aa77889694f06958a884c104d33914044.html#aa77889694f06958a884c104d33914044" title="Test a single driver with LED patterns." alt="" coords="476,8,683,48"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="717,48,683,44,683,38,718,43"/>
+<area shape="rect" id="Node000006" href="$d8/da0/class_driver_test_runner_aecda4c92e3d610584564ddf0d2f81e8e.html#aecda4c92e3d610584564ddf0d2f81e8e" title="Validate that all expected drivers are present." alt="" coords="233,69,428,109"/>
+<area shape="poly" id="edge4_Node000001_Node000006" title=" " alt="" coords="717,68,429,86,428,81,717,63"/>
+<area shape="rect" id="Node000003" href="$d8/da0/class_driver_test_runner_a635659d481050af473f4b5896a8d4f99.html#a635659d481050af473f4b5896a8d4f99" title="Test all available drivers." alt="" coords="239,5,423,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="462,29,423,29,423,24,462,24"/>
+<area shape="rect" id="Node000004" href="$d8/da0/class_driver_test_runner_aaab05c61d961d92ff48a5746076f8de6.html#aaab05c61d961d92ff48a5746076f8de6" title="Run all tests: validation + driver tests." alt="" coords="5,37,185,77"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="225,42,186,48,185,42,224,37"/>
+<area shape="poly" id="edge5_Node000006_Node000004" title=" " alt="" coords="219,77,185,72,186,67,220,72"/>
+</map>

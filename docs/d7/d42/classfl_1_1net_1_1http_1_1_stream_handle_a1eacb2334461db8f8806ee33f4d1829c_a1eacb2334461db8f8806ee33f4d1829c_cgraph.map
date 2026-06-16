@@ -1,0 +1,21 @@
+<map id="fl::net::http::StreamHandle::StreamHandle" name="fl::net::http::StreamHandle::StreamHandle">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,101,200,141"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="57,102,55,92,62,82,78,77,103,75,131,78,146,85,144,90,129,83,103,80,79,82,65,87,60,93,63,100"/>
+<area shape="rect" id="Node000002" href="$d7/d42/classfl_1_1net_1_1http_1_1_stream_handle_a54e58b3be2d0cfc2b1c31230c5cf4515.html#a54e58b3be2d0cfc2b1c31230c5cf4515" title="Register callback for errors." alt="" coords="248,5,443,45"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="170,99,247,67,299,48,301,53,249,72,172,104"/>
+<area shape="rect" id="Node000004" href="$d7/d42/classfl_1_1net_1_1http_1_1_stream_handle_a2225a42bfd532c1a56baffc97c571059.html#a2225a42bfd532c1a56baffc97c571059" title="Register callback for intermediate stream data." alt="" coords="248,69,443,109"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="200,115,245,109,245,114,201,120"/>
+<area shape="rect" id="Node000005" href="$d7/d42/classfl_1_1net_1_1http_1_1_stream_handle_a12c426bc87e00bb489f05ecca934ed87.html#a12c426bc87e00bb489f05ecca934ed87" title="Access the underlying promise." alt="" coords="248,133,443,173"/>
+<area shape="poly" id="edge8_Node000001_Node000005" title=" " alt="" coords="201,132,235,136,234,141,200,137"/>
+<area shape="rect" id="Node000006" href="$d7/d42/classfl_1_1net_1_1http_1_1_stream_handle_aa4f3908d2e72ca70e505fdd4fce84856.html#aa4f3908d2e72ca70e505fdd4fce84856" title="Register callback for final result." alt="" coords="248,197,443,237"/>
+<area shape="poly" id="edge9_Node000001_Node000006" title=" " alt="" coords="129,139,178,164,237,190,235,195,175,169,127,144"/>
+<area shape="rect" id="Node000007" href="$d7/d42/classfl_1_1net_1_1http_1_1_stream_handle_ae0dd7bc9011af6c98b3f9939af7e7fbc.html#ae0dd7bc9011af6c98b3f9939af7e7fbc" title="Check if handle is valid." alt="" coords="248,261,443,301"/>
+<area shape="poly" id="edge12_Node000001_Node000007" title=" " alt="" coords="123,140,177,193,212,222,249,247,262,253,259,258,247,252,208,226,173,197,120,143"/>
+<area shape="poly" id="edge3_Node000002_Node000001" title=" " alt="" coords="249,48,249,48,141,97,139,92,247,43,248,43"/>
+<area shape="rect" id="Node000003" href="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a" title=" " alt="" coords="491,77,581,102"/>
+<area shape="poly" id="edge4_Node000002_Node000003" title=" " alt="" coords="408,43,444,55,486,70,485,75,442,60,406,48"/>
+<area shape="poly" id="edge6_Node000004_Node000001" title=" " alt="" coords="248,96,203,102,202,97,248,91"/>
+<area shape="poly" id="edge7_Node000004_Node000003" title=" " alt="" coords="443,87,477,87,477,92,443,92"/>
+<area shape="poly" id="edge10_Node000006_Node000001" title=" " alt="" coords="312,200,247,176,183,149,185,144,249,171,314,195"/>
+<area shape="poly" id="edge11_Node000006_Node000003" title=" " alt="" coords="418,195,441,183,483,148,515,112,519,115,487,152,444,188,421,200"/>
+</map>

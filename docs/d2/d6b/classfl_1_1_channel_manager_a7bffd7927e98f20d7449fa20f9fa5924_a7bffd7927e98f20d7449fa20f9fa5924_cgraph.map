@@ -1,0 +1,11 @@
+<map id="fl::ChannelManager::notifyPollNeededThunk" name="fl::ChannelManager::notifyPollNeededThunk">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,187,69"/>
+<area shape="rect" id="Node000002" href="$d2/d6b/classfl_1_1_channel_manager_addc4b631522a2d44151c6b7c23a26ca1.html#addc4b631522a2d44151c6b7c23a26ca1" title="Constructor." alt="" coords="235,29,383,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="187,56,221,56,221,61,187,61"/>
+<area shape="rect" id="Node000004" href="$d2/d6b/classfl_1_1_channel_manager_aec84f1f8e6fc734720ebea52fcfe4a62.html#aec84f1f8e6fc734720ebea52fcfe4a62" title=" " alt="" coords="235,93,383,133"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="164,67,229,87,228,92,162,72"/>
+<area shape="poly" id="edge4_Node000002_Node000001" title=" " alt="" coords="234,43,200,43,200,38,234,38"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="269,30,267,20,273,10,287,5,309,3,333,6,347,13,344,18,332,11,309,8,288,10,276,15,272,21,274,28"/>
+<area shape="rect" id="Node000003" href="$de/dca/classfl_1_1_engine_events_a82722c0166c257ae8bc81b08e8d00ffb.html#a82722c0166c257ae8bc81b08e8d00ffb" title=" " alt="" coords="431,37,641,62"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="383,47,417,47,417,52,383,52"/>
+</map>

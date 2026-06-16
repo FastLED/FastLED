@@ -1,0 +1,16 @@
+<map id="fl::Potentiometer::getAdcMaxValue" name="fl::Potentiometer::getAdcMaxValue">
+<area shape="rect" id="Node000001" title=" " alt="" coords="625,97,764,137"/>
+<area shape="rect" id="Node000002" href="$d9/d2a/classfl_1_1_potentiometer_a0e73e67bf70be8f9a0033b34b8129770.html#a0e73e67bf70be8f9a0033b34b8129770" title=" " alt="" coords="192,37,331,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="654,92,617,71,577,56,513,45,447,41,385,44,331,49,331,44,385,38,447,36,513,39,578,51,620,67,656,87"/>
+<area shape="rect" id="Node000005" href="$d9/d2a/classfl_1_1_potentiometer_a20438851fa1e09b1fd81f7c5460f6e75.html#a20438851fa1e09b1fd81f7c5460f6e75" title=" " alt="" coords="379,65,577,105"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="611,108,577,103,578,97,612,102"/>
+<area shape="rect" id="Node000006" href="$d9/d2a/classfl_1_1_potentiometer_a62ca17083a23b36a35f9e9a8da50bcf7.html#a62ca17083a23b36a35f9e9a8da50bcf7" title=" " alt="" coords="409,129,547,169"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="612,132,548,142,547,137,611,127"/>
+<area shape="rect" id="Node000007" href="$d9/d2a/classfl_1_1_potentiometer_a223e512eb526c020b802d4d54107959e.html#a223e512eb526c020b802d4d54107959e" title=" " alt="" coords="398,193,558,233"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="650,147,578,184,547,196,545,191,576,179,648,142"/>
+<area shape="rect" id="Node000003" href="$de/d29/structfl_1_1_potentiometer_1_1_listener_a7f63847b22122d1983d3fe730e2349e2.html#a7f63847b22122d1983d3fe730e2349e2" title=" " alt="" coords="5,5,144,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="178,46,144,40,145,35,178,40"/>
+<area shape="rect" id="Node000004" href="$d9/d2a/classfl_1_1_potentiometer_a7205b0db178d7e92c89c46f10ef0f0e2.html#a7205b0db178d7e92c89c46f10ef0f0e2" title=" " alt="" coords="5,69,144,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="178,74,145,80,144,75,178,69"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="365,73,331,69,331,64,365,68"/>
+</map>

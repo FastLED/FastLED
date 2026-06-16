@@ -1,0 +1,22 @@
+digraph "fl::third_party::nsgif__parse_colour_table"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::third_party::nsgif\l__parse_colour_table",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Get a frame's colour table."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::third_party::nsgif\l__process_frame",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d86/namespacefl_1_1third__party_aa00bee5c0f7b53c8e9441d62f98c61b2.html#aa00bee5c0f7b53c8e9441d62f98c61b2",tooltip="Attempts to initialise the next frame."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::third_party::nsgif\l_data_scan",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d86/namespacefl_1_1third__party_a34aa4d967d8ddaeefa12954d47fe7863.html#a34aa4d967d8ddaeefa12954d47fe7863",tooltip="Scan the source image data."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::third_party::Software\lGifDecoder::loadMoreData",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_a477899043772e64106571d7233be2793.html#a477899043772e64106571d7233be2793",tooltip=" "];
+  Node4 -> Node6 [id="edge4_Node000004_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::third_party::Software\lGifDecoder::decode",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_a31562819b41f08828f326096d848ec5b.html#a31562819b41f08828f326096d848ec5b",tooltip=" "];
+  Node6 -> Node6 [id="edge5_Node000006_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node7 [id="edge6_Node000002_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::third_party::nsgif\l_frame_decode",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d86/namespacefl_1_1third__party_a3f914f8fd903813b728ce719ad8b59c7.html#a3f914f8fd903813b728ce719ad8b59c7",tooltip="Decodes a GIF frame."];
+  Node7 -> Node6 [id="edge7_Node000007_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

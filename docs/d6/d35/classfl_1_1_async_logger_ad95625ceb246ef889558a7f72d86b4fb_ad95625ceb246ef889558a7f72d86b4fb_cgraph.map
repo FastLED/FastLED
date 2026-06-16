@@ -1,0 +1,7 @@
+<map id="fl::AsyncLogger::disableBackgroundFlush" name="fl::AsyncLogger::disableBackgroundFlush">
+<area shape="rect" id="Node000001" title="Disable background flushing." alt="" coords="5,23,181,63"/>
+<area shape="rect" id="Node000002" href="$d6/d93/namespacefl_1_1isr_a29c0b8a68aa4b89155f40b914eaaa4fb.html#a29c0b8a68aa4b89155f40b914eaaa4fb" title="Detach an ISR handler." alt="" coords="229,5,392,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="181,30,216,26,216,32,182,36"/>
+<area shape="rect" id="Node000003" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="229,55,392,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="182,50,216,54,216,60,181,56"/>
+</map>

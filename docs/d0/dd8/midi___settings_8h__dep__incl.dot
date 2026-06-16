@@ -9,5 +9,7 @@ digraph "/home/runner/work/FastLED/FastLED/examples/LuminescentGrand/arduino/mid
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="/home/runner/work/FastLED\l/FastLED/examples/LuminescentGrand\l/arduino/MIDI.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d27/_m_i_d_i_8h.html",tooltip="MIDI Library for the Arduino."];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="/home/runner/work/FastLED\l/FastLED/examples/LuminescentGrand\l/arduino/MIDI.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d60/_m_i_d_i_8cpp.html",tooltip="MIDI Library for the Arduino."];
+  Node3 [id="Node000003",label="/home/runner/work/FastLED\l/FastLED/examples/LuminescentGrand\l/LuminescentGrand.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/de5/_luminescent_grand_8ino.html",tooltip=" "];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="/home/runner/work/FastLED\l/FastLED/examples/LuminescentGrand\l/arduino/MIDI.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d60/_m_i_d_i_8cpp.html",tooltip="MIDI Library for the Arduino."];
 }

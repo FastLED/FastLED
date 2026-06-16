@@ -1,0 +1,9 @@
+<map id="fl::spi::MultiLaneDevice::flush" name="fl::spi::MultiLaneDevice::flush">
+<area shape="rect" id="Node000001" title="Flush all lanes (transpose and transmit)" alt="" coords="451,37,625,77"/>
+<area shape="rect" id="Node000002" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a512a780a7050fa0e91e83c5dba1e17bc.html#a512a780a7050fa0e91e83c5dba1e17bc" title=" " alt="" coords="228,5,403,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="437,45,402,40,403,35,437,40"/>
+<area shape="rect" id="Node000003" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a547b2f30f70e16dbb22762f3f2370254.html#a547b2f30f70e16dbb22762f3f2370254" title="Internal implementation &#45; write all lanes atomically." alt="" coords="228,69,403,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="437,74,403,79,402,74,437,69"/>
+<area shape="rect" id="Node000004" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_ac20394c24a6406ccdd49a33d7e4f85ff.html#ac20394c24a6406ccdd49a33d7e4f85ff" title="Convenience method &#45; write multiple lanes in parallel (variadic template)" alt="" coords="5,69,180,109"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="214,92,180,92,180,87,214,87"/>
+</map>

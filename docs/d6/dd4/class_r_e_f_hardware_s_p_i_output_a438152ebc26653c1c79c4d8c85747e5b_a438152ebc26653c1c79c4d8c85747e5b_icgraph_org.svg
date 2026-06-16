@@ -59,7 +59,7 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d6/dd4/class_r_e_f_hardware_s_p_i_output_a17c12dc926c86fc42b2f857149c699a1.html#a17c12dc926c86fc42b2f857149c699a1" target="_top" xlink:title="write a block of uint8_ts out in groups of three.">
+<g id="a_Node000006"><a xlink:href="../../d6/dd4/class_r_e_f_hardware_s_p_i_output_abf49fb3515cd8dc27edddd7ea26ad644.html#abf49fb3515cd8dc27edddd7ea26ad644" target="_top" xlink:title="write a block of uint8_ts out in groups of three.">
 <polygon fill="white" stroke="#666666" points="298,-30 167,-30 167,0 298,0 298,-30"/>
 <text text-anchor="start" x="175" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">REFHardwareSPIOutput</text>
 <text text-anchor="middle" x="232.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::writePixels</text>

@@ -107,14 +107,14 @@ $(function(){initNavTree('d0/da8/fastled__delay_8h_af4eefef410bd123f2a8b201a28c2
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define F_CPU_MHZ&#160;&#160;&#160;(F_CPU / 1000000L)</td>
+          <td class="memname">#define F_CPU_MHZ&#160;&#160;&#160;(GET_CPU_FREQUENCY() / 1000000L)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>CPU speed, in megahertz (MHz) </p>
+<p>CPU speed, in megahertz (MHz) - compile-time constant Uses GET_CPU_FREQUENCY() from platforms/cpu_frequency.h which provides a compile-time constant value, avoiding issues with platforms like STM32duino where F_CPU may be defined as a runtime variable (SystemCoreClock) </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/da8/fastled__delay_8h_source.html#l00205">205</a> of file <a class="el" href="../../d0/da8/fastled__delay_8h_source.html">fastled_delay.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/da8/fastled__delay_8h_source.html#l00090">90</a> of file <a class="el" href="../../d0/da8/fastled__delay_8h_source.html">fastled_delay.h</a>.</p>
 
 </div>
 </div>
@@ -125,7 +125,7 @@ $(function(){initNavTree('d0/da8/fastled__delay_8h_af4eefef410bd123f2a8b201a28c2
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d0/da8/fastled__delay_8h.html">fastled_delay.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

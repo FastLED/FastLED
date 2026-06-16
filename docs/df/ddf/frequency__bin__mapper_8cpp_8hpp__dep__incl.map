@@ -1,0 +1,9 @@
+<map id="fl/audio/frequency_bin_mapper.cpp.hpp" name="fl/audio/frequency_bin_mapper.cpp.hpp">
+<area shape="rect" id="Node000001" title="Implementation of FrequencyBinMapper for fft::FFT bin to frequency channel mapping." alt="" coords="72,5,232,45"/>
+<area shape="rect" id="Node000002" href="$d1/d21/fl_2audio_2__build_8cpp_8hpp.html" title="Unity build header for fl/audio/ directory." alt="" coords="68,93,236,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="155,59,155,93,149,93,149,59"/>
+<area shape="rect" id="Node000003" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="5,167,133,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="130,130,85,168,81,164,127,126"/>
+<area shape="rect" id="Node000004" href="$db/d23/fl_8audio_09_8cpp.html" title="Unity build: recursive includes from src/fl/audio/." alt="" coords="158,167,314,192"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="178,126,224,164,221,168,174,130"/>
+</map>

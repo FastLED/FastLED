@@ -1,0 +1,16 @@
+<map id="fl::detail::posix_filebuf" name="fl::detail::posix_filebuf">
+<area shape="rect" id="Node000001" title=" " alt="" coords="76,360,243,385"/>
+<area shape="rect" id="Node000002" href="$d0/d5d/classfl_1_1filebuf.html" title=" " alt="" coords="5,272,84,297"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="73,303,145,358,142,362,69,308"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl.html#d4/dc0/structfl_1_1_f_i_l_e__impl" title=" " alt="" coords="109,272,210,297"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="162,311,162,359,157,359,157,311"/>
+<area shape="rect" id="Node000004" href="$d2/db2/classfl_1_1string.html" title=" " alt="" coords="234,272,309,297"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="247,308,208,338,176,362,173,358,204,334,244,304"/>
+<area shape="rect" id="Node000005" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="189,183,354,223"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="274,236,274,272,269,272,269,236"/>
+<area shape="rect" id="Node000006" href="$de/d66/classfl_1_1basic__string.html" title="Concrete type&#45;erased string class." alt="" coords="208,5,324,31"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="269,44,273,183,268,183,264,45"/>
+<area shape="rect" id="Node000007" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="287,80,418,105"/>
+<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="292,38,340,78,337,82,289,42"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="338,118,288,184,284,181,334,115"/>
+</map>

@@ -1,5 +1,7 @@
 <map id="fl::TransformFloatImpl::set_scale" name="fl::TransformFloatImpl::set_scale">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,171,45"/>
-<area shape="rect" id="Node000002" href="$d5/db7/classfl_1_1_transform_float_impl_a8145cba30adc6670f3e9201562d1a44e.html#a8145cba30adc6670f3e9201562d1a44e" title=" " alt="" coords="219,5,384,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="171,23,205,23,205,28,171,28"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,171,69"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="48,30,46,20,52,10,66,5,88,3,113,6,127,13,124,18,111,11,88,8,68,10,55,15,51,21,53,28"/>
+<area shape="rect" id="Node000002" href="$d5/db7/classfl_1_1_transform_float_impl_a8145cba30adc6670f3e9201562d1a44e.html#a8145cba30adc6670f3e9201562d1a44e" title=" " alt="" coords="219,29,384,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="171,47,205,47,205,52,171,52"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="261,30,259,20,265,10,280,5,301,3,326,6,340,13,337,18,325,11,301,8,281,10,269,15,264,21,266,28"/>
 </map>

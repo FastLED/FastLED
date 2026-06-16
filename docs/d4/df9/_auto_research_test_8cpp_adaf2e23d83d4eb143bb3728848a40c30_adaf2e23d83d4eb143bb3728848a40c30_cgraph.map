@@ -1,0 +1,42 @@
+<map id="buildExpectedUCS7604" name="buildExpectedUCS7604">
+<area shape="rect" id="Node000001" title="Build expected UCS7604 encoded bytes from LED data." alt="" coords="5,255,179,280"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_ad692558fd1412eb6bfeeb59a782fee47.html#ad692558fd1412eb6bfeeb59a782fee47" title=" " alt="" coords="272,141,412,181"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="112,252,163,222,226,192,258,180,260,185,228,196,165,227,115,257"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a403bd8d96e6625e5daef764daf780f26.html#a403bd8d96e6625e5daef764daf780f26" title="Helper function to create a back_insert_iterator." alt="" coords="279,205,405,231"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="157,252,265,230,266,236,158,257"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_af8493332ea99e488481aa9268d28af96.html#af8493332ea99e488481aa9268d28af96" title="Encode complete UCS7604 frame (preamble + padding + pixel data)" alt="" coords="270,255,414,280"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="179,265,256,265,256,270,179,270"/>
+<area shape="rect" id="Node000011" href="$dc/da5/classfl_1_1_gamma8_a0570eaa0a174959bf99ee8b7dd8cca77.html#a0570eaa0a174959bf99ee8b7dd8cca77" title=" " alt="" coords="529,451,714,476"/>
+<area shape="poly" id="edge22_Node000001_Node000011" title=" " alt="" coords="160,277,342,314,459,342,476,360,485,378,492,396,507,413,533,430,561,443,559,448,530,435,504,417,488,399,480,380,472,363,456,347,341,319,159,283"/>
+<area shape="rect" id="Node000021" href="$d4/d7d/struct_color_adjustment_ab03d1bf53686d5f037f70de5a7e61aab.html#ab03d1bf53686d5f037f70de5a7e61aab" title="the per&#45;channel scale values premixed with brightness." alt="" coords="227,356,457,381"/>
+<area shape="poly" id="edge23_Node000001_Node000021" title=" " alt="" coords="116,278,166,306,228,334,275,350,273,355,226,339,164,310,113,282"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a6b8c1c3d9c1f0133d76297c9325c3ccc.html#a6b8c1c3d9c1f0133d76297c9325c3ccc" title="Build UCS7604 preamble (15 bytes)" alt="" coords="526,79,717,104"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="413,261,436,254,456,241,468,227,475,212,479,179,482,146,490,129,504,113,512,107,515,111,507,117,494,132,487,147,484,180,480,213,473,230,459,245,438,258,415,266"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_ad84dda9e2bac4b689240405fac541479.html#ad84dda9e2bac4b689240405fac541479" title="Encode RGB pixels in UCS7604 16&#45;bit format with gamma correction." alt="" coords="512,377,731,403"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="415,277,438,285,459,297,475,314,483,332,491,349,507,364,517,370,514,374,504,368,487,352,479,334,471,317,456,301,435,290,413,282"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_ab48f77d450cf05f81e3cb66a588e5ae5.html#ab48f77d450cf05f81e3cb66a588e5ae5" title=" " alt="" coords="808,303,896,328"/>
+<area shape="poly" id="edge11_Node000004_Node000007" title=" " alt="" coords="413,253,456,241,480,227,504,215,570,200,623,193,675,197,738,216,767,230,794,249,834,290,830,294,790,253,765,235,736,220,674,202,623,198,571,205,506,221,482,232,458,246,415,258"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a8499aed78d9a0774922c53162368360c.html#a8499aed78d9a0774922c53162368360c" title="Encode RGBW pixels in UCS7604 16&#45;bit format with gamma correction." alt="" coords="505,229,737,255"/>
+<area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="414,258,492,251,492,256,414,263"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a77da6b88e5c2a0f6e0f241ea0ebfbf13.html#a77da6b88e5c2a0f6e0f241ea0ebfbf13" title="Encode RGB pixels in UCS7604 8&#45;bit format." alt="" coords="516,279,727,304"/>
+<area shape="poly" id="edge9_Node000004_Node000009" title=" " alt="" coords="414,271,502,278,502,284,414,276"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_ac40685c0458c3102212f344c4e2ae154.html#ac40685c0458c3102212f344c4e2ae154" title="Encode RGBW pixels in UCS7604 8&#45;bit format." alt="" coords="509,328,733,353"/>
+<area shape="poly" id="edge10_Node000004_Node000010" title=" " alt="" coords="393,278,458,297,506,314,538,322,537,328,505,319,457,302,391,283"/>
+<area shape="poly" id="edge12_Node000004_Node000011" title=" " alt="" coords="415,274,438,283,459,297,472,312,479,327,485,356,490,385,496,399,507,413,529,431,555,443,553,448,527,435,503,417,491,402,485,387,480,357,474,328,468,315,456,301,436,288,413,279"/>
+<area shape="rect" id="Node000017" href="$d4/d36/namespacefl_a0245017ca5e8aeaf10ccae7aee944f08.html#a0245017ca5e8aeaf10ccae7aee944f08" title="Create RGB input iterator range from PixelIterator." alt="" coords="513,29,730,55"/>
+<area shape="poly" id="edge17_Node000004_Node000017" title=" " alt="" coords="413,262,436,254,456,241,472,221,479,199,480,177,479,155,477,132,479,109,486,86,503,64,508,60,512,64,507,68,491,89,484,110,482,132,484,154,486,177,484,200,476,223,459,245,438,259,415,267"/>
+<area shape="rect" id="Node000020" href="$d4/d36/namespacefl_a897e8186b6287f0bccef2ec8f12f4b99.html#a897e8186b6287f0bccef2ec8f12f4b99" title="Create RGBW input iterator range from PixelIterator." alt="" coords="506,128,737,153"/>
+<area shape="poly" id="edge20_Node000004_Node000020" title=" " alt="" coords="413,259,436,252,456,241,472,225,479,207,487,189,504,171,531,156,533,161,507,175,492,192,484,209,476,228,459,245,438,257,415,264"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="695,375,736,363,813,332,815,337,738,369,696,380"/>
+<area shape="poly" id="edge8_Node000008_Node000007" title=" " alt="" coords="691,252,738,265,813,294,811,299,736,270,689,257"/>
+<area shape="poly" id="edge13_Node000011_Node000007" title=" " alt="" coords="661,448,698,433,736,413,787,375,827,336,831,340,790,379,739,418,700,438,663,453"/>
+<area shape="poly" id="edge14_Node000011_Node000011" title=" " alt="" coords="584,452,576,442,580,432,596,426,621,424,654,428,666,437,663,442,652,433,621,429,597,431,584,436,581,442,588,449"/>
+<area shape="rect" id="Node000012" href="$d1/dd6/classfl_1_1weak__ptr_a6e44d8f31e04b94c9f1895ca315627c3.html#a6e44d8f31e04b94c9f1895ca315627c3" title=" " alt="" coords="785,475,919,500"/>
+<area shape="poly" id="edge15_Node000011_Node000012" title=" " alt="" coords="714,470,772,476,772,482,714,476"/>
+<area shape="rect" id="Node000016" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="789,425,915,451"/>
+<area shape="poly" id="edge16_Node000011_Node000016" title=" " alt="" coords="714,451,776,444,776,449,714,456"/>
+<area shape="poly" id="edge19_Node000017_Node000017" title=" " alt="" coords="584,31,576,21,580,11,596,5,621,3,654,7,666,16,663,20,652,11,621,8,597,10,584,15,581,20,588,27"/>
+<area shape="rect" id="Node000018" href="$d4/d36/namespacefl_a9f32cf31427769f3900630cb3506f2c6.html#a9f32cf31427769f3900630cb3506f2c6" title=" " alt="" coords="799,79,905,104"/>
+<area shape="poly" id="edge18_Node000017_Node000018" title=" " alt="" coords="685,52,738,63,785,74,784,79,737,69,683,57"/>
+<area shape="poly" id="edge21_Node000020_Node000018" title=" " alt="" coords="681,125,785,103,786,108,682,131"/>
+</map>

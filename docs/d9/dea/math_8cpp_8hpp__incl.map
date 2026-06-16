@@ -1,0 +1,35 @@
+<map id="fl/math/math.cpp.hpp" name="fl/math/math.cpp.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="476,5,637,31"/>
+<area shape="rect" id="Node000002" href="$df/db1/math_8h.html" title=" " alt="" coords="407,79,525,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="544,33,493,72,490,68,540,29"/>
+<area shape="rect" id="Node000016" href="$d1/dbc/sketch__macros_8h.html" title=" " alt="" coords="638,79,833,104"/>
+<area shape="poly" id="edge18_Node000001_Node000016" title=" " alt="" coords="586,28,695,71,693,76,584,33"/>
+<area shape="rect" id="Node000003" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="441,152,616,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="478,103,511,140,507,143,474,106"/>
+<area shape="rect" id="Node000007" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="5,299,132,324"/>
+<area shape="poly" id="edge17_Node000002_Node000007" title=" " alt="" coords="407,104,309,122,196,149,143,165,97,184,61,205,39,227,34,241,36,256,52,286,47,289,31,258,29,241,34,224,58,200,95,179,141,160,195,143,308,117,406,99"/>
+<area shape="rect" id="Node000008" href="$d3/d7e/int_8h.html" title=" " alt="" coords="362,225,445,251"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="460,105,432,153,412,212,407,211,428,151,456,103"/>
+<area shape="rect" id="Node000011" href="$df/d63/type__traits_8h.html" title=" " alt="" coords="195,152,331,177"/>
+<area shape="poly" id="edge9_Node000002_Node000011" title=" " alt="" coords="434,107,310,150,308,145,433,102"/>
+<area shape="rect" id="Node000014" href="$da/ded/undef_8h.html" title=" " alt="" coords="652,152,755,177"/>
+<area shape="poly" id="edge15_Node000002_Node000014" title=" " alt="" coords="505,101,653,145,651,151,503,107"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="517,299,692,324"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="543,176,563,197,582,224,595,255,603,284,597,286,590,256,577,227,559,200,539,179"/>
+<area shape="rect" id="Node000005" href="$d1/ddf/align_8h.html" title="Alignment macros and utilities for FastLED." alt="" coords="469,225,567,251"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="530,178,524,212,519,211,524,177"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="534,249,582,288,578,292,530,253"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="469,251,457,253,146,302,145,296,456,248,468,246"/>
+<area shape="rect" id="Node000009" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="352,299,455,324"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="406,251,406,285,401,285,401,251"/>
+<area shape="poly" id="edge13_Node000011_Node000007" title=" " alt="" coords="196,178,108,198,72,211,51,227,45,240,45,255,56,286,51,287,40,256,40,239,47,224,70,207,107,193,195,173"/>
+<area shape="poly" id="edge12_Node000011_Node000008" title=" " alt="" coords="287,175,370,217,367,221,285,180"/>
+<area shape="rect" id="Node000012" href="$d9/d83/move_8h.html" title=" " alt="" coords="61,225,164,251"/>
+<area shape="poly" id="edge10_Node000011_Node000012" title=" " alt="" coords="240,180,151,222,149,217,238,175"/>
+<area shape="rect" id="Node000013" href="$d0/d1b/static__assert_8h.html" title="Portable compile&#45;time assertion wrapper." alt="" coords="189,225,338,251"/>
+<area shape="poly" id="edge14_Node000011_Node000013" title=" " alt="" coords="266,178,266,212,261,212,261,178"/>
+<area shape="poly" id="edge11_Node000012_Node000007" title=" " alt="" coords="108,252,85,288,81,286,103,250"/>
+<area shape="rect" id="Node000015" href="$da/d99/has__include_8h.html" title=" " alt="" coords="643,225,785,251"/>
+<area shape="poly" id="edge16_Node000014_Node000015" title=" " alt="" coords="708,177,713,211,708,212,702,178"/>
+<area shape="poly" id="edge19_Node000016_Node000004" title=" " alt="" coords="749,103,774,131,798,169,807,190,811,211,810,232,800,252,781,272,758,287,706,306,705,301,756,283,778,268,796,249,805,231,806,212,802,191,794,171,769,134,745,106"/>
+</map>

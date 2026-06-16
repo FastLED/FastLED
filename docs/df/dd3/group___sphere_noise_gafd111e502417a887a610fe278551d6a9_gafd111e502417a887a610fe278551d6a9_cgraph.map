@@ -1,0 +1,31 @@
+<map id="fl::noiseSphereCRGB" name="fl::noiseSphereCRGB">
+<area shape="rect" id="Node000001" title="Generate CRGB noise for a sphere pattern." alt="" coords="5,81,160,107"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ad87db990a26723fa560bc364734ea6cc.html#ad87db990a26723fa560bc364734ea6cc" title=" " alt="" coords="214,7,279,32"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="111,79,205,35,207,40,113,84"/>
+<area shape="rect" id="Node000007" href="$d8/df9/group___noise_generation_gaa452e57f154ab8d6d692375dba1ef5cb.html#gaa452e57f154ab8d6d692375dba1ef5cb" title=" " alt="" coords="208,56,285,81"/>
+<area shape="poly" id="edge5_Node000001_Node000007" title=" " alt="" coords="160,79,194,74,195,79,161,85"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_a4ba2744fe96375793e6f7a98b188d343.html#a4ba2744fe96375793e6f7a98b188d343" title=" " alt="" coords="215,105,278,131"/>
+<area shape="poly" id="edge8_Node000001_Node000010" title=" " alt="" coords="161,103,202,109,201,114,160,108"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl_a2bccb5decc8613e4b6e232e0a881578f.html#a2bccb5decc8613e4b6e232e0a881578f" title="Alias for millis64() &#45; returns 64&#45;bit millisecond time." alt="" coords="213,179,281,204"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="106,104,214,169,211,174,104,109"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a82dc97b9808ee5c39eb57f649d20a2fd.html#a82dc97b9808ee5c39eb57f649d20a2fd" title=" " alt="" coords="333,5,465,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="279,16,320,16,320,21,279,22"/>
+<area shape="rect" id="Node000004" href="$df/d9e/namespacefl_1_1detail_ab42e702a90f152dbad7d35ea9eab976a.html#ab42e702a90f152dbad7d35ea9eab976a" title=" " alt="" coords="513,5,676,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="465,15,500,15,500,21,465,21"/>
+<area shape="rect" id="Node000005" href="$df/d9e/namespacefl_1_1detail_a525aa6aacdb5d3d48ebe21adb14da430.html#a525aa6aacdb5d3d48ebe21adb14da430" title=" " alt="" coords="724,56,884,81"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="649,28,738,50,737,55,648,33"/>
+<area shape="rect" id="Node000008" href="$d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59" title=" " alt="" coords="345,55,453,80"/>
+<area shape="poly" id="edge6_Node000007_Node000008" title=" " alt="" coords="285,66,331,65,332,71,285,71"/>
+<area shape="rect" id="Node000009" href="$da/dca/noise_8cpp_8hpp_aa1191276c67b1c0264857c9d802c665b.html#aa1191276c67b1c0264857c9d802c665b" title=" " alt="" coords="561,55,628,80"/>
+<area shape="poly" id="edge7_Node000008_Node000009" title=" " alt="" coords="454,65,547,65,547,70,454,70"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_abb4917bf7e0fc28049964497cb88305f.html#abb4917bf7e0fc28049964497cb88305f" title=" " alt="" coords="530,105,659,131"/>
+<area shape="poly" id="edge9_Node000010_Node000011" title=" " alt="" coords="278,115,516,115,516,121,278,121"/>
+<area shape="poly" id="edge10_Node000011_Node000005" title=" " alt="" coords="649,103,736,82,737,87,650,108"/>
+<area shape="poly" id="edge16_Node000012_Node000012" title=" " alt="" coords="221,180,216,170,218,161,229,154,247,152,268,155,277,164,273,168,265,160,247,157,231,159,223,164,221,170,226,177"/>
+<area shape="rect" id="Node000013" href="$d4/d36/namespacefl_ac8ee0e5ecac16a6ee42def0436a43663.html#ac8ee0e5ecac16a6ee42def0436a43663" title="64&#45;bit millisecond timer &#45; returns milliseconds since system startup without wraparound" alt="" coords="354,180,445,205"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="281,189,340,189,340,195,281,194"/>
+<area shape="poly" id="edge15_Node000013_Node000013" title=" " alt="" coords="374,181,368,172,371,162,382,156,399,153,420,157,429,165,426,169,418,162,399,159,384,161,375,165,374,171,378,179"/>
+<area shape="rect" id="Node000014" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="557,180,632,205"/>
+<area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="445,190,544,190,544,195,445,195"/>
+<area shape="poly" id="edge14_Node000014_Node000014" title=" " alt="" coords="563,181,556,172,559,162,573,156,595,153,621,157,633,166,629,170,619,162,595,159,574,161,563,165,561,171,567,178"/>
+</map>

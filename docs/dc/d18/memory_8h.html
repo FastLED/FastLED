@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fl/memory.h File Reference</title>
+<title>FastLED: fl/stl/memory.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -102,16 +102,12 @@ $(function(){initNavTree('dc/d18/memory_8h.html','../../'); initResizable(true);
 <div class="header">
   <div class="summary">
 <a href="#namespaces">Namespaces</a> &#124;
-<a href="#typedef-members">Typedefs</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">memory.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="../../dd/d98/ptr_8h_source.html">fl/ptr.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../df/d6a/shared__ptr_8h_source.html">fl/shared_ptr.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../dc/db4/weak__ptr_8h_source.html">fl/weak_ptr.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../da/d4b/unique__ptr_8h_source.html">fl/unique_ptr.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../df/d63/type__traits_8h_source.html">fl/type_traits.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../df/d6a/shared__ptr_8h_source.html">fl/stl/shared_ptr.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for memory.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -132,29 +128,14 @@ $(function(){initNavTree('dc/d18/memory_8h.html','../../'); initResizable(true);
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
-Typedefs</h2></td></tr>
-<tr class="memitem:ac5ff85a77b80a1b2667c4501dd94a53a" id="r_ac5ff85a77b80a1b2667c4501dd94a53a"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
-<tr class="memitem:ac5ff85a77b80a1b2667c4501dd94a53a"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ac5ff85a77b80a1b2667c4501dd94a53a.html#ac5ff85a77b80a1b2667c4501dd94a53a">fl::intrusive_ptr</a> = <a class="el" href="../../d1/d56/classfl_1_1_ptr.html">fl::Ptr</a>&lt;T&gt;</td></tr>
-<tr class="separator:ac5ff85a77b80a1b2667c4501dd94a53a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:acb05d7c9394179cc8f1516a6bc883da9" id="r_acb05d7c9394179cc8f1516a6bc883da9"><td class="memTemplParams" colspan="2">template&lt;typename T, typename... Args&gt; </td></tr>
-<tr class="memitem:acb05d7c9394179cc8f1516a6bc883da9"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d4/d36/namespacefl_ac5ff85a77b80a1b2667c4501dd94a53a.html#ac5ff85a77b80a1b2667c4501dd94a53a">intrusive_ptr</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_acb05d7c9394179cc8f1516a6bc883da9.html#acb05d7c9394179cc8f1516a6bc883da9">fl::make_intrusive</a> (Args &amp;&amp;... <a class="el" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>)</td></tr>
-<tr class="separator:acb05d7c9394179cc8f1516a6bc883da9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:add10843b9459da37211a593912819db0" id="r_add10843b9459da37211a593912819db0"><td class="memTemplParams" colspan="2">template&lt;typename T, typename... Args&gt; </td></tr>
-<tr class="memitem:add10843b9459da37211a593912819db0"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d1/d74/classfl_1_1shared__ptr.html">fl::shared_ptr</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_add10843b9459da37211a593912819db0.html#add10843b9459da37211a593912819db0">fl::make_shared_ptr</a> (Args &amp;&amp;... <a class="el" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>)</td></tr>
-<tr class="separator:add10843b9459da37211a593912819db0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2db2912842971bc75bc5528219bedc95" id="r_a2db2912842971bc75bc5528219bedc95"><td class="memTemplParams" colspan="2">template&lt;typename T, typename... Args&gt; </td></tr>
-<tr class="memitem:a2db2912842971bc75bc5528219bedc95"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d4/d36/namespacefl.html#d5/d67/structfl_1_1enable__if">fl::enable_if</a>&lt;!<a class="el" href="../../dc/d25/structfl_1_1is__array.html">fl::is_array</a>&lt; T &gt;::value, <a class="el" href="../../d6/d2e/classfl_1_1unique__ptr.html">unique_ptr</a>&lt; T &gt; &gt;::type&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a2db2912842971bc75bc5528219bedc95.html#a2db2912842971bc75bc5528219bedc95">fl::make_unique</a> (Args &amp;&amp;... <a class="el" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>)</td></tr>
-<tr class="separator:a2db2912842971bc75bc5528219bedc95"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afbfcfab9367e5510b69e465a56b511e8" id="r_afbfcfab9367e5510b69e465a56b511e8"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
-<tr class="memitem:afbfcfab9367e5510b69e465a56b511e8"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d4/d36/namespacefl.html#d5/d67/structfl_1_1enable__if">fl::enable_if</a>&lt; <a class="el" href="../../dc/d25/structfl_1_1is__array.html">fl::is_array</a>&lt; T &gt;::value, <a class="el" href="../../d6/d2e/classfl_1_1unique__ptr.html">unique_ptr</a>&lt; T &gt; &gt;::type&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_afbfcfab9367e5510b69e465a56b511e8.html#afbfcfab9367e5510b69e465a56b511e8">fl::make_unique</a> (<a class="el" href="../../d4/d36/namespacefl_a8a657d5e3d1c15816e367eada17134c9.html#a8a657d5e3d1c15816e367eada17134c9">fl::size_t</a> size)</td></tr>
-<tr class="separator:afbfcfab9367e5510b69e465a56b511e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af87b9d78a6a121bd7dea99887ebfcbba" id="r_af87b9d78a6a121bd7dea99887ebfcbba"><td class="memTemplParams" colspan="2">template&lt;typename T, typename... Args&gt; </td></tr>
+<tr class="memitem:af87b9d78a6a121bd7dea99887ebfcbba"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d1/d74/classfl_1_1shared__ptr.html">fl::shared_ptr</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_af87b9d78a6a121bd7dea99887ebfcbba.html#af87b9d78a6a121bd7dea99887ebfcbba">fl::make_shared_ptr</a> (Args &amp;&amp;... <a class="el" href="../../d7/da1/old_8h_a690f84001beb455ff2f2bbd5fdcc79d5.html#a690f84001beb455ff2f2bbd5fdcc79d5">args</a>) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
+<tr class="separator:af87b9d78a6a121bd7dea99887ebfcbba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -162,8 +143,8 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dc/d18/memory_8h.html">memory.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_0dd6897a8ae40540acd9d694849e950e.html">stl</a></li><li class="navelem"><a class="el" href="../../dc/d18/memory_8h.html">memory.h</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

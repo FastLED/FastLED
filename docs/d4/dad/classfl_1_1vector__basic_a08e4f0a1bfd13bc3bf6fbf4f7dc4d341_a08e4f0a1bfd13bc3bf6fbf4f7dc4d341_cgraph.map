@@ -1,0 +1,16 @@
+<map id="fl::vector_basic::resize_value_impl" name="fl::vector_basic::resize_value_impl">
+<area shape="rect" id="Node000001" title="Resize to n elements. New elements are copy&#45;constructed from value." alt="" coords="5,55,172,95"/>
+<area shape="rect" id="Node000002" href="$d4/dad/classfl_1_1vector__basic_ab007e98763f01e1326ef5ddb39ddf006.html#ab007e98763f01e1326ef5ddb39ddf006" title="Pointer to element at index (byte arithmetic)." alt="" coords="220,5,427,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="171,53,257,31,258,37,172,58"/>
+<area shape="rect" id="Node000003" href="$d4/dad/classfl_1_1vector__basic_a9a315ee221dc1563fecb0c0f84c73438.html#a9a315ee221dc1563fecb0c0f84c73438" title="Ensure capacity for at least n elements. Grows if needed." alt="" coords="237,55,409,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="172,73,224,73,224,78,172,78"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d" title=" " alt="" coords="955,95,1049,120"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="159,93,220,105,322,115,427,120,631,123,810,117,941,110,941,115,810,123,631,128,427,126,322,120,220,110,158,98"/>
+<area shape="rect" id="Node000004" href="$d4/dad/classfl_1_1vector__basic_a17f684eb95a4b6b0511454f7f80f87d1.html#a17f684eb95a4b6b0511454f7f80f87d1" title="Grow to new_capacity. Moves existing elements." alt="" coords="475,63,655,88"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="409,73,461,73,461,78,409,78"/>
+<area shape="rect" id="Node000005" href="$d4/dad/classfl_1_1vector__basic_a4a79234edce9c9748432aba0f499b001.html#a4a79234edce9c9748432aba0f499b001" title="Is data currently in the inline buffer?" alt="" coords="717,20,892,45"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="636,60,719,45,720,50,637,65"/>
+<area shape="rect" id="Node000007" href="$d4/dad/classfl_1_1vector__basic_a81fe1c9feb8228d4269494b7984c6270.html#a81fe1c9feb8228d4269494b7984c6270" title=" " alt="" coords="703,69,907,95"/>
+<area shape="poly" id="edge5_Node000004_Node000007" title=" " alt="" coords="655,75,689,76,689,81,655,80"/>
+<area shape="poly" id="edge6_Node000007_Node000008" title=" " alt="" coords="904,92,941,97,941,102,904,97"/>
+</map>

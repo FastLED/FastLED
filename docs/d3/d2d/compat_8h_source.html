@@ -106,9 +106,9 @@ $(function(){initNavTree('d3/d2d/compat_8h_source.html','../../'); initResizable
 <a href="../../d3/d2d/compat_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#ifdef ARDUINO_ESP32_DEV</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &quot;<a class="code" href="../../d4/d54/compiler__control_8h.html">fl/compiler_control.h</a>&quot;</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &quot;<a class="code" href="../../d4/d54/compiler__control_8h.html">fl/stl/compiler_control.h</a>&quot;</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &quot;platforms/esp/esp_version.h&quot;</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &quot;platforms/esp/esp_version.h&quot;</span>  <span class="comment">// ok platform headers</span></div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &quot;driver/ledc.h&quot;</span></div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;esp32-hal-ledc.h&quot;</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
@@ -116,19 +116,19 @@ $(function(){initNavTree('d3/d2d/compat_8h_source.html','../../'); initResizable
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">// IDF 4.4 and 5.0+ both have analogWrite() available, so this polyfill is only needed</span></div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// for very old IDF versions. We use a weak symbol so it auto-disables on newer platforms.</span></div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#if !ESP_IDF_VERSION_4_OR_HIGHER</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><a class="code hl_define" href="../../d4/d54/compiler__control_8h_afde174fbd5fd09901dcac3f36aed38d8.html#afde174fbd5fd09901dcac3f36aed38d8">FL_LINK_WEAK</a> <span class="keywordtype">void</span> analogWrite(uint8_t pin, <span class="keywordtype">int</span> value) {</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><a class="code hl_define" href="../../df/d96/s16x16x4_8h_afde174fbd5fd09901dcac3f36aed38d8.html#afde174fbd5fd09901dcac3f36aed38d8">FL_LINK_WEAK</a> <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d36/namespacefl_ab7b2495da785c92a36e91b0a59cde46b.html#ab7b2495da785c92a36e91b0a59cde46b">analogWrite</a>(uint8_t pin, <span class="keywordtype">int</span> value) {</div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>  <span class="comment">// Setup PWM channel for the pin if not already done</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>  <span class="keyword">static</span> <span class="keywordtype">bool</span> channels_setup[16] = {<span class="keyword">false</span>}; <span class="comment">// ESP32 has 16 PWM channels</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>  <span class="keyword">static</span> uint8_t channel_counter = 0;</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>  <span class="keyword">static</span> <span class="keywordtype">bool</span> channels_setup[16] = {<span class="keyword">false</span>}; <span class="comment">// ESP32 has 16 PWM channels // okay static in header</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>  <span class="keyword">static</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_afd9f334550c5839ec8307748aba15027.html#afd9f334550c5839ec8307748aba15027">uint8_t</a> channel_counter = 0; <span class="comment">// okay static in header</span></div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>  </div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>  <span class="comment">// Find or assign channel for this pin</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>  <span class="keyword">static</span> uint8_t pin_to_channel[40] = {255}; <span class="comment">// ESP32 has up to 40 GPIO pins, 255 = unassigned</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>  <span class="keyword">static</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl_afd9f334550c5839ec8307748aba15027.html#afd9f334550c5839ec8307748aba15027">uint8_t</a> pin_to_channel[40] = {255}; <span class="comment">// ESP32 has up to 40 GPIO pins, 255 = unassigned</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>  <span class="keywordflow">if</span> (pin_to_channel[pin] == 255) {</div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    pin_to_channel[pin] = channel_counter++;</div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    <span class="keywordflow">if</span> (channel_counter &gt; 15) channel_counter = 0; <span class="comment">// Wrap around</span></div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>  }</div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>  </div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>  uint8_t channel = pin_to_channel[pin];</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>  <a class="code hl_typedef" href="../../d4/d36/namespacefl_afd9f334550c5839ec8307748aba15027.html#afd9f334550c5839ec8307748aba15027">uint8_t</a> channel = pin_to_channel[pin];</div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>  </div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>  <span class="comment">// Setup channel if not already done</span></div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>  <span class="keywordflow">if</span> (!channels_setup[channel]) {</div>
@@ -145,8 +145,10 @@ $(function(){initNavTree('d3/d2d/compat_8h_source.html','../../'); initResizable
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#endif  </span><span class="comment">// ESP32</span></div>
-<div class="ttc" id="acompiler__control_8h_afde174fbd5fd09901dcac3f36aed38d8_html_afde174fbd5fd09901dcac3f36aed38d8"><div class="ttname"><a href="../../d4/d54/compiler__control_8h_afde174fbd5fd09901dcac3f36aed38d8.html#afde174fbd5fd09901dcac3f36aed38d8">FL_LINK_WEAK</a></div><div class="ttdeci">#define FL_LINK_WEAK</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d54/compiler__control_8h_source.html#l00145">compiler_control.h:145</a></div></div>
 <div class="ttc" id="acompiler__control_8h_html"><div class="ttname"><a href="../../d4/d54/compiler__control_8h.html">compiler_control.h</a></div></div>
+<div class="ttc" id="anamespacefl_ab7b2495da785c92a36e91b0a59cde46b_html_ab7b2495da785c92a36e91b0a59cde46b"><div class="ttname"><a href="../../d4/d36/namespacefl_ab7b2495da785c92a36e91b0a59cde46b.html#ab7b2495da785c92a36e91b0a59cde46b">fl::analogWrite</a></div><div class="ttdeci">void analogWrite(int pin, u16 val)</div><div class="ttdoc">Write analog value to pin (PWM)</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d48/pin_8cpp_8hpp_source.html#l00227">pin.cpp.hpp:227</a></div></div>
+<div class="ttc" id="anamespacefl_afd9f334550c5839ec8307748aba15027_html_afd9f334550c5839ec8307748aba15027"><div class="ttname"><a href="../../d4/d36/namespacefl_afd9f334550c5839ec8307748aba15027.html#afd9f334550c5839ec8307748aba15027">fl::uint8_t</a></div><div class="ttdeci">unsigned char uint8_t</div><div class="ttdef"><b>Definition</b> <a href="../../df/d96/s16x16x4_8h_source.html#l00209">s16x16x4.h:209</a></div></div>
+<div class="ttc" id="as16x16x4_8h_afde174fbd5fd09901dcac3f36aed38d8_html_afde174fbd5fd09901dcac3f36aed38d8"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_afde174fbd5fd09901dcac3f36aed38d8.html#afde174fbd5fd09901dcac3f36aed38d8">FL_LINK_WEAK</a></div><div class="ttdeci">#define FL_LINK_WEAK</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -154,7 +156,7 @@ $(function(){initNavTree('d3/d2d/compat_8h_source.html','../../'); initResizable
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_8bb4b718726ef6bb146f349e752b8dbd.html">AnalogOutput</a></li><li class="navelem"><a class="el" href="../../d3/d2d/compat_8h.html">compat.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:19 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:06:58 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

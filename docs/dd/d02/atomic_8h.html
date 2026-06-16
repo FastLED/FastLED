@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fl/atomic.h File Reference</title>
+<title>FastLED: fl/stl/atomic.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -103,19 +103,20 @@ $(function(){initNavTree('dd/d02/atomic_8h.html','../../'); initResizable(true);
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#namespaces">Namespaces</a> &#124;
-<a href="#typedef-members">Typedefs</a>  </div>
+<a href="#define-members">Macros</a> &#124;
+<a href="#typedef-members">Typedefs</a> &#124;
+<a href="#enum-members">Enumerations</a>  </div>
   <div class="headertitle"><div class="title">atomic.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="../../db/dd5/thread_8h_source.html">fl/thread.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/int.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d1/ddf/align_8h_source.html">fl/align.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d5/d5e/thread__config_8h_source.html">fl/stl/thread_config.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/stl/int.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for atomic.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d3/d32/atomic_8h__incl.svg" width="408" height="256"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d3/d32/atomic_8h__incl.svg" width="294" height="256"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 </div><div class="textblock"><div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> This graph shows which files directly or indirectly include this file:</div>
@@ -135,8 +136,13 @@ Classes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+Macros</h2></td></tr>
+<tr class="memitem:aef30aee3b7bfba2fba74e63cfa92e4c0" id="r_aef30aee3b7bfba2fba74e63cfa92e4c0"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d02/atomic_8h_aef30aee3b7bfba2fba74e63cfa92e4c0.html#aef30aee3b7bfba2fba74e63cfa92e4c0">FASTLED_USE_REAL_ATOMICS</a>&#160;&#160;&#160;0</td></tr>
+<tr class="separator:aef30aee3b7bfba2fba74e63cfa92e4c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
@@ -153,6 +159,19 @@ Typedefs</h2></td></tr>
 <tr class="separator:a6b7d87fb2430d36a0261da015550e30a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a83e953d02c1a01b116165fc0f2072685" id="r_a83e953d02c1a01b116165fc0f2072685"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a83e953d02c1a01b116165fc0f2072685.html#a83e953d02c1a01b116165fc0f2072685">fl::atomic_uint</a> = <a class="el" href="../../d4/d36/namespacefl_a25eb2c2a88cb36bda59cd09d7b4a0ef9.html#a25eb2c2a88cb36bda59cd09d7b4a0ef9">atomic</a>&lt;unsigned int&gt;</td></tr>
 <tr class="separator:a83e953d02c1a01b116165fc0f2072685"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:a267004a7ccc7983ba23af5b6da02ccf5" id="r_a267004a7ccc7983ba23af5b6da02ccf5"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a267004a7ccc7983ba23af5b6da02ccf5.html#a267004a7ccc7983ba23af5b6da02ccf5">fl::memory_order</a> { <br />
+&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a267004a7ccc7983ba23af5b6da02ccf5.html#a267004a7ccc7983ba23af5b6da02ccf5a20605726c3d7d05c08736f1b3c006598">fl::memory_order_relaxed</a>
+, <a class="el" href="../../d4/d36/namespacefl_a267004a7ccc7983ba23af5b6da02ccf5.html#a267004a7ccc7983ba23af5b6da02ccf5a3bd980fe54d787d29a44396a32942a12">fl::memory_order_acquire</a>
+, <a class="el" href="../../d4/d36/namespacefl_a267004a7ccc7983ba23af5b6da02ccf5.html#a267004a7ccc7983ba23af5b6da02ccf5ab1193318649268f9316805858e863995">fl::memory_order_release</a>
+, <a class="el" href="../../d4/d36/namespacefl_a267004a7ccc7983ba23af5b6da02ccf5.html#a267004a7ccc7983ba23af5b6da02ccf5aca9298cb68815a63defb2c5ff79f4a98">fl::memory_order_acq_rel</a>
+, <br />
+&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a267004a7ccc7983ba23af5b6da02ccf5.html#a267004a7ccc7983ba23af5b6da02ccf5a9f5272eea0f5ac38b4e2d79c5e0aca3d">fl::memory_order_seq_cst</a>
+<br />
+ }</td></tr>
+<tr class="separator:a267004a7ccc7983ba23af5b6da02ccf5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -160,8 +179,8 @@ Typedefs</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dd/d02/atomic_8h.html">atomic.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_0dd6897a8ae40540acd9d694849e950e.html">stl</a></li><li class="navelem"><a class="el" href="../../dd/d02/atomic_8h.html">atomic.h</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

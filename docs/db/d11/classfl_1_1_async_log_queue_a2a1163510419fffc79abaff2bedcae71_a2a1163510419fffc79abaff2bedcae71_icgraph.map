@@ -1,0 +1,10 @@
+<map id="fl::AsyncLogQueue::loadHead" name="fl::AsyncLogQueue::loadHead">
+<area shape="rect" id="Node000001" title=" " alt="" coords="428,35,579,75"/>
+<area shape="rect" id="Node000002" href="$db/d11/classfl_1_1_async_log_queue_a9cc4bdd1be7e5f95ee7f10f6c6b3458f.html#a9cc4bdd1be7e5f95ee7f10f6c6b3458f" title="Check if queue is empty." alt="" coords="217,5,367,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="414,45,367,38,368,33,415,40"/>
+<area shape="rect" id="Node000003" href="$db/d11/classfl_1_1_async_log_queue_a9fb4a7f57a926aff9c5a4bd2c2eafd82.html#a9fb4a7f57a926aff9c5a4bd2c2eafd82" title="Get current number of messages in queue." alt="" coords="204,70,380,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="415,69,380,74,380,68,414,64"/>
+<area shape="rect" id="Node000004" href="$db/d11/classfl_1_1_async_log_queue_adc26dbca03cbe7ce109b011a8fc14fa1.html#adc26dbca03cbe7ce109b011a8fc14fa1" title="Get maximum descriptor capacity." alt="" coords="5,63,156,103"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="190,85,156,85,156,80,190,80"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="116,51,104,44,81,41,60,43,48,48,44,54,46,62,41,63,39,53,45,44,59,38,81,36,105,39,119,46"/>
+</map>

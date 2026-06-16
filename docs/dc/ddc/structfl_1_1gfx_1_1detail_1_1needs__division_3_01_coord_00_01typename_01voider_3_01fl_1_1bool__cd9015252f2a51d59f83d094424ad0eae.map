@@ -1,0 +1,12 @@
+<map id="fl::gfx::detail::needs_division&lt; Coord, typename voider&lt; fl::bool_constant&lt;(Coord::FRAC_BITS&lt; 16)&gt; &gt;::type &gt;" name="fl::gfx::detail::needs_division&lt; Coord, typename voider&lt; fl::bool_constant&lt;(Coord::FRAC_BITS&lt; 16)&gt; &gt;::type &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="943,29,1212,98"/>
+<area shape="rect" id="Node000002" href="$dd/dca/structfl_1_1fl_1_1integral__constant.html" title=" " alt="" coords="323,16,429,42"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="443,18,537,10,656,4,787,4,919,16,971,26,970,32,918,21,787,10,656,9,537,15,444,24"/>
+<area shape="rect" id="Node000005" href="$d6/df4/structfl_1_1gfx_1_1detail_1_1needs__division.html" title=" " alt="" coords="479,37,701,77"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="443,35,479,40,478,45,443,40"/>
+<area shape="rect" id="Node000003" href="$dd/dca/structfl_1_1fl_1_1integral__constant.html" title=" " alt="" coords="5,9,172,49"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="186,26,323,26,323,32,186,32"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="495,101,685,141"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="699,106,942,77,943,82,699,111"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="715,59,725,60,942,62,942,67,725,65,715,65"/>
+</map>

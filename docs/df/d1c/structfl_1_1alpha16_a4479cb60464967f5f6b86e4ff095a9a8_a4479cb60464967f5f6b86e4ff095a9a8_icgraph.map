@@ -1,0 +1,12 @@
+<map id="fl::alpha16::scale_signed" name="fl::alpha16::scale_signed">
+<area shape="rect" id="Node000001" title="Scale a signed integer by this alpha (UNORM16 semantics)." alt="" coords="643,37,775,77"/>
+<area shape="rect" id="Node000002" href="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a1f39ef1ff22ecf5406281e75646c277d.html#a1f39ef1ff22ecf5406281e75646c277d" title=" " alt="" coords="440,37,595,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="629,60,595,60,595,55,629,55"/>
+<area shape="rect" id="Node000003" href="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a4c842a6f5023ef1144f1d0c63f850b3a.html#a4c842a6f5023ef1144f1d0c63f850b3a" title=" " alt="" coords="237,5,392,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="426,46,392,40,393,35,427,40"/>
+<area shape="rect" id="Node000005" href="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a4cd66183d61e2210388cdd23cc47aa5f.html#a4cd66183d61e2210388cdd23cc47aa5f" title=" " alt="" coords="237,69,392,109"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="427,74,393,80,392,74,426,69"/>
+<area shape="rect" id="Node000004" href="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_af90c3b64c4b213516e4904846f6b96e6.html#af90c3b64c4b213516e4904846f6b96e6" title=" " alt="" coords="5,45,189,70"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="224,41,184,47,183,42,223,36"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="223,79,183,73,184,67,224,73"/>
+</map>

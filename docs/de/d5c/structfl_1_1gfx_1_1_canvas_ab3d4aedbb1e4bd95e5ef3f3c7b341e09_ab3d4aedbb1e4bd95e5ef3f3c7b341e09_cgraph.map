@@ -1,0 +1,18 @@
+<map id="fl::gfx::Canvas::drawStrokeLine" name="fl::gfx::Canvas::drawStrokeLine">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,131,228,157"/>
+<area shape="rect" id="Node000002" href="$d0/d8b/namespacefl_1_1gfx_abe30294359092a06f52b99a369bca3ec.html#abe30294359092a06f52b99a369bca3ec" title=" " alt="" coords="276,131,443,157"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="228,141,262,141,262,147,228,147"/>
+<area shape="rect" id="Node000003" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_a0ed31accfda46ef3ddc9a0eb3ad5ef04.html#a0ed31accfda46ef3ddc9a0eb3ad5ef04" title=" " alt="" coords="491,124,676,164"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="443,141,477,141,477,147,443,147"/>
+<area shape="rect" id="Node000004" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_ace632a8bd8b1b176f9f882b536fc486c.html#ace632a8bd8b1b176f9f882b536fc486c" title="Precompute right&#45;shift and reciprocal multiplier for AA division." alt="" coords="751,29,920,69"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="624,121,723,79,746,71,747,76,725,84,627,126"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_aef88a9667b8b893abab1e0e41a3e81d3.html#aef88a9667b8b893abab1e0e41a3e81d3" title=" " alt="" coords="794,94,877,119"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="676,128,780,112,780,117,676,133"/>
+<area shape="rect" id="Node000008" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_a57e26c64aa843c6d1d1080fa16f4306a.html#a57e26c64aa843c6d1d1080fa16f4306a" title="Render one scanline of a stroke line using phase&#45;based scanning." alt="" coords="724,167,947,193"/>
+<area shape="poly" id="edge6_Node000003_Node000008" title=" " alt="" coords="676,155,733,163,732,168,676,160"/>
+<area shape="rect" id="Node000009" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_ab04a22e2927673d2692b4f3e354af564.html#ab04a22e2927673d2692b4f3e354af564" title="Convert any Coord type to 8.8 fixed&#45;point (fl::i32)." alt="" coords="752,241,919,266"/>
+<area shape="poly" id="edge8_Node000003_Node000009" title=" " alt="" coords="631,162,794,233,791,238,629,166"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="789,30,786,20,793,10,810,5,835,3,864,6,880,13,878,18,863,11,835,8,811,10,796,15,791,21,794,28"/>
+<area shape="poly" id="edge7_Node000008_Node000008" title=" " alt="" coords="795,169,786,159,790,149,807,143,835,141,871,145,881,149,885,155,880,158,877,153,869,150,835,146,808,148,794,153,791,158,799,165"/>
+<area shape="poly" id="edge9_Node000009_Node000009" title=" " alt="" coords="795,242,786,232,790,222,807,216,835,214,871,218,881,223,885,228,880,231,877,227,869,223,835,219,808,221,794,226,791,232,799,239"/>
+</map>

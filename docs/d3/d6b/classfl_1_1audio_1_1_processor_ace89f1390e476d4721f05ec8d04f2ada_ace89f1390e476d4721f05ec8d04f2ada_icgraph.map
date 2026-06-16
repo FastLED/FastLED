@@ -1,0 +1,7 @@
+<map id="fl::audio::Processor::getEqDominantMagnitude" name="fl::audio::Processor::getEqDominantMagnitude">
+<area shape="rect" id="Node000001" title="Magnitude of strongest bin (0.0&#45;1.0)" alt="" coords="199,29,399,69"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="336,18,323,11,299,8,278,10,265,15,260,21,263,28,258,30,255,20,262,10,276,5,299,3,324,6,338,13"/>
+<area shape="rect" id="Node000002" href="$d3/d6b/classfl_1_1audio_1_1_processor_a44c9bf7e90fafc4f6bc668d7796ef27c.html#a44c9bf7e90fafc4f6bc668d7796ef27c" title=" " alt="" coords="5,29,151,69"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="185,52,151,52,151,47,185,47"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="115,18,102,11,78,8,57,10,44,15,40,21,42,28,37,30,35,20,41,10,56,5,78,3,104,6,118,13"/>
+</map>

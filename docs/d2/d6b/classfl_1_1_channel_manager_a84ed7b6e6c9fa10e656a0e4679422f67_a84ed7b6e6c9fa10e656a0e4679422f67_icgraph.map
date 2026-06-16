@@ -1,0 +1,12 @@
+<map id="fl::ChannelManager::findDriverByName" name="fl::ChannelManager::findDriverByName">
+<area shape="rect" id="Node000001" title="Silent counterpart to getDriverByName()." alt="" coords="708,63,859,103"/>
+<area shape="rect" id="Node000002" href="$d2/d6b/classfl_1_1_channel_manager_a77e631a1c98b48f71f8cf103366f484e.html#a77e631a1c98b48f71f8cf103366f484e" title="Get driver by name for affinity binding." alt="" coords="495,5,643,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="694,62,642,48,643,42,695,57"/>
+<area shape="rect" id="Node000003" href="$d5/d8b/classfl_1_1_channel_a1ac53e5596ff3b71fd028a159eb542fb.html#a1ac53e5596ff3b71fd028a159eb542fb" title="Cold slow&#45;path helper for showPixels() when the driver was NOT pre&#45;bound via setDriver()." alt="" coords="224,92,429,132"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="694,91,430,108,429,103,694,86"/>
+<area shape="rect" id="Node000005" href="$d2/d6b/classfl_1_1_channel_manager_a33cd4c2dccbbbd5a0fc243bad8f33b2b.html#a33cd4c2dccbbbd5a0fc243bad8f33b2b" title="Select best driver for channel data (used by Channel::showPixels)" alt="" coords="477,120,660,160"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="695,109,645,123,643,117,694,104"/>
+<area shape="rect" id="Node000004" href="$d5/d8b/classfl_1_1_channel_a44414e176c7d2ef65fcdd390f6852322.html#a44414e176c7d2ef65fcdd390f6852322" title=" " alt="" coords="5,99,176,125"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="210,115,176,115,176,109,210,109"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="463,131,429,127,430,121,464,125"/>
+</map>

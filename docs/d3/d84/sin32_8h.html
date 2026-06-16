@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fl/sin32.h File Reference</title>
+<title>FastLED: fl/math/sin32.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -101,57 +101,113 @@ $(function(){initNavTree('d3/d84/sin32_8h.html','../../'); initResizable(true); 
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#namespaces">Namespaces</a> &#124;
-<a href="#func-members">Functions</a>  </div>
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle"><div class="title">sin32.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="../../df/dd8/stdint_8h_source.html">fl/stdint.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/int.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d4/d64/force__inline_8h_source.html">force_inline.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../df/d2a/namespace_8h_source.html">namespace.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/stl/int.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d54/compiler__control_8h_source.html">fl/stl/compiler_control.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/dab/fastled__progmem_8h_source.html">fastled_progmem.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d8/de1/simd_8h_source.html">fl/math/simd.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d1/ddf/align_8h_source.html">fl/stl/align.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for sin32.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/d0e/sin32_8h__incl.svg" width="422" height="256"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dc/d0e/sin32_8h__incl.svg" width="100%" height="547"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div><div class="textblock"><div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> This graph shows which files directly or indirectly include this file:</div>
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../da/d57/sin32_8h__dep__incl.svg" width="103" height="110"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../da/d57/sin32_8h__dep__incl.svg" width="100%" height="547"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../d3/d84/sin32_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:d8/d61/structfl_1_1_sin_cos32" id="r_d8/d61/structfl_1_1_sin_cos32"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html#d8/d61/structfl_1_1_sin_cos32">fl::SinCos32</a></td></tr>
+<tr class="separator:d8/d61/structfl_1_1_sin_cos32"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:aaed23ae1fbcd970cfd15d914931d5894" id="r_aaed23ae1fbcd970cfd15d914931d5894"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> i16&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aaed23ae1fbcd970cfd15d914931d5894.html#aaed23ae1fbcd970cfd15d914931d5894">fl::cos16lut</a> (u16 angle)</td></tr>
-<tr class="separator:aaed23ae1fbcd970cfd15d914931d5894"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4f802b320dde9907457c9754e50d2edc" id="r_a4f802b320dde9907457c9754e50d2edc"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> i32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a4f802b320dde9907457c9754e50d2edc.html#a4f802b320dde9907457c9754e50d2edc">fl::cos32</a> (u32 angle)</td></tr>
-<tr class="separator:a4f802b320dde9907457c9754e50d2edc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abc22a42e148462bd17031b7c6624dc36" id="r_abc22a42e148462bd17031b7c6624dc36"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> i16&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_abc22a42e148462bd17031b7c6624dc36.html#abc22a42e148462bd17031b7c6624dc36">fl::sin16lut</a> (u16 angle)</td></tr>
-<tr class="separator:abc22a42e148462bd17031b7c6624dc36"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6e2e35d8f9639dce7a224474c95a34b1" id="r_a6e2e35d8f9639dce7a224474c95a34b1"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> i32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a6e2e35d8f9639dce7a224474c95a34b1.html#a6e2e35d8f9639dce7a224474c95a34b1">fl::sin32</a> (u32 angle)</td></tr>
-<tr class="separator:a6e2e35d8f9639dce7a224474c95a34b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aadaa1395273440ebb2bea4bdff050483" id="r_aadaa1395273440ebb2bea4bdff050483"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> i16&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aadaa1395273440ebb2bea4bdff050483.html#aadaa1395273440ebb2bea4bdff050483">fl::cos16lut</a> (u16 angle) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
+<tr class="separator:aadaa1395273440ebb2bea4bdff050483"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a289ad302494249edde0b6b9e28c831f1" id="r_a289ad302494249edde0b6b9e28c831f1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> i32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a289ad302494249edde0b6b9e28c831f1.html#a289ad302494249edde0b6b9e28c831f1">fl::cos32</a> (u32 angle) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
+<tr class="separator:a289ad302494249edde0b6b9e28c831f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a232c51cb1bacdbb2241d6cf3d3e33456" id="r_a232c51cb1bacdbb2241d6cf3d3e33456"><td class="memItemLeft" align="right" valign="top">struct&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a232c51cb1bacdbb2241d6cf3d3e33456.html#a232c51cb1bacdbb2241d6cf3d3e33456">fl::FL_ALIGNAS</a> (16) SinCos32_simd</td></tr>
+<tr class="memdesc:a232c51cb1bacdbb2241d6cf3d3e33456"><td class="mdescLeft">&#160;</td><td class="mdescRight">Combined sin+cos result for 4 angles (raw SIMD primitives)  <br /></td></tr>
+<tr class="separator:a232c51cb1bacdbb2241d6cf3d3e33456"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35f35403e888950d6c84697f2063c984" id="r_a35f35403e888950d6c84697f2063c984"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> i32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a35f35403e888950d6c84697f2063c984.html#a35f35403e888950d6c84697f2063c984">fl::read_sin32_lut</a> (const i32 *addr) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
+<tr class="separator:a35f35403e888950d6c84697f2063c984"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d00632e7615d8d318c4c8178f0e0f46" id="r_a5d00632e7615d8d318c4c8178f0e0f46"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> i16&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a5d00632e7615d8d318c4c8178f0e0f46.html#a5d00632e7615d8d318c4c8178f0e0f46">fl::sin16lut</a> (u16 angle) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
+<tr class="separator:a5d00632e7615d8d318c4c8178f0e0f46"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a37a484f9e39484372eee81c7a66fad7d" id="r_a37a484f9e39484372eee81c7a66fad7d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> i32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a37a484f9e39484372eee81c7a66fad7d.html#a37a484f9e39484372eee81c7a66fad7d">fl::sin32</a> (u32 angle) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
+<tr class="separator:a37a484f9e39484372eee81c7a66fad7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a530ae797477506b0949a2cae39010c6a" id="r_a530ae797477506b0949a2cae39010c6a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> i32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a530ae797477506b0949a2cae39010c6a.html#a530ae797477506b0949a2cae39010c6a">fl::sin32_interp</a> (<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> qi, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> qi_next, i32 dmask, u32 <a class="el" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> <a class="el" href="../../d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d">offset</a>=0) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
+<tr class="separator:a530ae797477506b0949a2cae39010c6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab168280957e4bfee3a3976381bd9e663" id="r_ab168280957e4bfee3a3976381bd9e663"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> <a class="el" href="../../d4/d36/namespacefl.html#d8/d61/structfl_1_1_sin_cos32">SinCos32</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ab168280957e4bfee3a3976381bd9e663.html#ab168280957e4bfee3a3976381bd9e663">fl::sincos32</a> (u32 angle) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
+<tr class="separator:ab168280957e4bfee3a3976381bd9e663"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3a23a29b7fae800b629360cd32fec586" id="r_a3a23a29b7fae800b629360cd32fec586"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> SinCos32_simd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a3a23a29b7fae800b629360cd32fec586.html#a3a23a29b7fae800b629360cd32fec586">fl::sincos32_simd</a> (<a class="el" href="../../df/d4b/namespacefl_1_1simd_a2dab23d7235c94b216475848d3d5434a.html#a2dab23d7235c94b216475848d3d5434a">simd::simd_u32x4</a> angles) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
+<tr class="memdesc:a3a23a29b7fae800b629360cd32fec586"><td class="mdescLeft">&#160;</td><td class="mdescRight">Process 4 angles simultaneously, returning vectorized sin/cos values SIMD-optimized: vectorized angle decomposition, vector <a class="el" href="../../d6/d18/classfl_1_1_l_u_t.html">LUT</a> loads with 4x4 transpose (AoS→SoA), and vectorized quadratic interpolation.  <br /></td></tr>
+<tr class="separator:a3a23a29b7fae800b629360cd32fec586"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a40f22a093a10fca710d7ab583cf2ee03" id="r_a40f22a093a10fca710d7ab583cf2ee03"><td class="memItemLeft" align="right" valign="top">const i32&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a40f22a093a10fca710d7ab583cf2ee03.html#a40f22a093a10fca710d7ab583cf2ee03">fl::sinCosPairedLut</a> []</td></tr>
+<tr class="separator:a40f22a093a10fca710d7ab583cf2ee03"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<hr/><h2 class="groupheader">Class Documentation</h2>
+<a name="d8/d61/structfl_1_1_sin_cos32" id="d8/d61/structfl_1_1_sin_cos32"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#d8/d61/structfl_1_1_sin_cos32">&#9670;&#160;</a></span>fl::SinCos32</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct fl::SinCos32</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="3">Class Members</th></tr>
+<tr><td class="fieldtype">
+<a id="acd8d5d356dea76aab01cfa0c25c7ea67" name="acd8d5d356dea76aab01cfa0c25c7ea67"></a>i32</td>
+<td class="fieldname">
+cos_val</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="a7eebf8dba4a9b41ff50b964c7edf80ef" name="a7eebf8dba4a9b41ff50b964c7edf80ef"></a>i32</td>
+<td class="fieldname">
+sin_val</td>
+<td class="fielddoc">
+</td></tr>
+</table>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d3/d84/sin32_8h.html">sin32.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_94896ea2d28e1d34f24a1dbbb9436aa8.html">math</a></li><li class="navelem"><a class="el" href="../../d3/d84/sin32_8h.html">sin32.h</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

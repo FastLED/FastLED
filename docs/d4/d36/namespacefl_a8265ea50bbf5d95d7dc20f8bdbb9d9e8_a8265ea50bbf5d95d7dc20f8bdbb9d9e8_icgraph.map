@@ -1,0 +1,11 @@
+<map id="fl::fopen" name="fl::fopen">
+<area shape="rect" id="Node000001" title="Open a file." alt="" coords="516,77,591,102"/>
+<area shape="rect" id="Node000002" href="$dd/d65/classfl_1_1detail_1_1posix__filebuf_a0916e09c07ed50dfbb3cfed465f99d35.html#a0916e09c07ed50dfbb3cfed465f99d35" title=" " alt="" coords="285,5,451,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="506,74,467,60,432,48,434,43,469,55,508,69"/>
+<area shape="rect" id="Node000003" href="$d1/d86/namespacefl_1_1third__party_a8d123505c9fb30050c3076e02a35962b.html#a8d123505c9fb30050c3076e02a35962b" title=" " alt="" coords="285,69,451,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="502,92,451,92,451,87,502,87"/>
+<area shape="rect" id="Node000004" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a2e0056c543517307cf14ec74a14a0f8f.html#a2e0056c543517307cf14ec74a14a0f8f" title=" " alt="" coords="268,133,468,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="508,109,469,124,434,136,432,131,467,119,506,104"/>
+<area shape="rect" id="Node000005" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a8b3f9859a51ffdd92598d45797fdbdc8.html#a8b3f9859a51ffdd92598d45797fdbdc8" title=" " alt="" coords="5,133,220,173"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="254,156,220,156,220,151,254,151"/>
+</map>

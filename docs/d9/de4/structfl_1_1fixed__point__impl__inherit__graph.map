@@ -1,0 +1,31 @@
+<map id="fl::fixed_point_impl&lt; IntBits, FracBits, S &gt;" name="fl::fixed_point_impl&lt; IntBits, FracBits, S &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,436,176,476"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl.html#d8/dd2/structfl_1_1fixed__point__impl_3_010_00_0132_00_01_sign_1_1_s_i_g_n_e_d_01_4" title=" " alt="" coords="427,20,606,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="94,422,107,337,130,230,160,131,178,93,198,67,223,50,251,37,311,21,371,17,427,21,427,26,371,23,311,27,253,42,226,54,202,71,183,96,165,133,135,232,113,338,99,423"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl.html#de/da7/structfl_1_1fixed__point__impl_3_010_00_0132_00_01_sign_1_1_u_n_s_i_g_n_e_d_01_4" title=" " alt="" coords="417,84,616,124"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="90,422,95,360,112,282,125,241,144,202,168,167,198,137,223,120,249,107,305,91,363,86,417,87,417,92,363,91,306,97,251,112,225,125,202,141,172,170,149,205,130,243,117,283,101,361,95,423"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl.html#d9/d62/structfl_1_1fixed__point__impl_3_0112_00_014_00_01_sign_1_1_s_i_g_n_e_d_01_4" title=" " alt="" coords="427,148,606,188"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="94,422,104,373,123,315,154,258,174,232,198,210,224,193,252,180,312,163,372,156,427,156,427,161,372,162,313,169,254,185,227,198,202,214,178,236,158,261,128,317,109,375,99,423"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl.html#dc/d09/structfl_1_1fixed__point__impl_3_0112_00_014_00_01_sign_1_1_u_n_s_i_g_n_e_d_01_4" title=" " alt="" coords="417,212,616,252"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="101,422,116,389,137,351,164,315,198,284,251,258,307,240,364,230,417,226,417,232,365,236,308,245,253,263,202,289,168,318,141,354,120,391,106,424"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl.html#dd/d3c/structfl_1_1fixed__point__impl_3_0116_00_0116_00_01_sign_1_1_s_i_g_n_e_d_01_4" title=" " alt="" coords="423,276,610,316"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="115,424,152,387,199,355,254,332,313,316,370,305,423,298,423,303,371,310,314,321,256,337,201,360,155,391,119,427"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl.html#d3/d32/structfl_1_1fixed__point__impl_3_0116_00_0116_00_01_sign_1_1_u_n_s_i_g_n_e_d_01_4" title=" " alt="" coords="413,340,620,380"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="151,428,199,412,309,387,413,370,413,375,310,392,201,417,152,433"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl.html#d9/d7d/structfl_1_1fixed__point__impl_3_0124_00_018_00_01_sign_1_1_s_i_g_n_e_d_01_4" title=" " alt="" coords="427,404,606,444"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="189,446,427,428,427,433,190,451"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl.html#da/dd9/structfl_1_1fixed__point__impl_3_0124_00_018_00_01_sign_1_1_u_n_s_i_g_n_e_d_01_4" title=" " alt="" coords="417,468,616,508"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="190,464,200,465,417,480,417,486,200,471,189,470"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl.html#d0/dbb/structfl_1_1fixed__point__impl_3_014_00_0112_00_01_sign_1_1_s_i_g_n_e_d_01_4" title=" " alt="" coords="427,532,606,572"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="147,479,201,499,318,525,427,541,427,546,317,530,199,504,145,484"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl.html#d0/d0b/structfl_1_1fixed__point__impl_3_014_00_0112_00_01_sign_1_1_u_n_s_i_g_n_e_d_01_4" title=" " alt="" coords="417,596,616,636"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="118,485,155,523,177,541,201,556,254,578,310,594,366,604,418,610,417,615,365,609,309,599,252,583,199,561,174,546,151,527,114,489"/>
+<area shape="rect" id="Node000012" href="$d4/d36/namespacefl.html#d7/d7d/structfl_1_1fixed__point__impl_3_018_00_0124_00_01_sign_1_1_s_i_g_n_e_d_01_4" title=" " alt="" coords="427,660,606,700"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="105,488,120,522,140,560,168,597,201,627,255,654,314,671,373,679,427,682,427,687,372,685,313,676,253,659,199,632,164,601,136,563,115,524,100,490"/>
+<area shape="rect" id="Node000013" href="$d4/d36/namespacefl.html#d1/dd0/structfl_1_1fixed__point__impl_3_018_00_0124_00_01_sign_1_1_u_n_s_i_g_n_e_d_01_4" title=" " alt="" coords="417,724,616,764"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="99,489,109,538,127,596,158,655,178,680,202,702,251,729,307,745,364,752,417,753,417,758,363,758,306,751,249,734,198,706,174,684,153,657,123,599,104,539,93,490"/>
+<area shape="rect" id="Node000014" href="$d4/d36/namespacefl.html#df/d0b/structfl_1_1fixed__point__impl_3_018_00_018_00_01_sign_1_1_s_i_g_n_e_d_01_4" title=" " alt="" coords="431,788,602,828"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="95,490,100,552,116,631,130,671,148,709,172,744,202,774,227,791,254,803,314,819,375,823,431,820,431,825,375,828,313,824,253,808,224,795,198,778,168,748,144,712,125,673,111,632,95,553,90,490"/>
+<area shape="rect" id="Node000015" href="$d4/d36/namespacefl.html#d6/d51/structfl_1_1fixed__point__impl_3_018_00_018_00_01_sign_1_1_u_n_s_i_g_n_e_d_01_4" title=" " alt="" coords="421,852,612,892"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="99,489,112,575,134,682,164,783,182,820,202,845,225,861,251,873,308,888,366,892,421,888,421,893,366,897,307,893,250,878,223,866,198,849,178,823,159,784,129,684,107,576,94,490"/>
+</map>

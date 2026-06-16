@@ -1,0 +1,18 @@
+<map id="fl::audio::Processor::onVocal" name="fl::audio::Processor::onVocal">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,73,151,113"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="42,74,40,64,45,55,58,49,78,47,101,50,113,57,110,61,99,55,78,52,60,54,49,59,45,65,47,72"/>
+<area shape="rect" id="Node000002" href="$d3/d6b/classfl_1_1audio_1_1_processor_a14349d7f7a502d8196bf25f9a8f6825e.html#a14349d7f7a502d8196bf25f9a8f6825e" title=" " alt="" coords="199,29,344,69"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="150,74,184,66,185,72,151,79"/>
+<area shape="rect" id="Node000006" href="$d3/d6b/classfl_1_1audio_1_1_processor_ab153bfe7c69779fd58f645bdd335802d.html#ab153bfe7c69779fd58f645bdd335802d" title=" " alt="" coords="199,117,344,157"/>
+<area shape="poly" id="edge8_Node000001_Node000006" title=" " alt="" coords="151,107,185,115,184,120,150,112"/>
+<area shape="poly" id="edge7_Node000002_Node000002" title=" " alt="" coords="235,30,233,20,239,11,252,5,271,3,294,6,306,13,304,17,292,11,271,8,253,10,242,15,238,21,240,28"/>
+<area shape="rect" id="Node000003" href="$d3/d6b/classfl_1_1audio_1_1_processor_ad51350a4ee9759eaa3043b29588d46b0.html#ad51350a4ee9759eaa3043b29588d46b0" title=" " alt="" coords="392,73,537,113"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="345,63,379,71,378,76,344,68"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="428,74,426,64,432,55,445,49,465,47,487,50,500,57,497,61,486,55,465,52,446,54,435,59,431,65,434,72"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="595,51,721,77"/>
+<area shape="poly" id="edge5_Node000003_Node000004" title=" " alt="" coords="537,80,581,73,582,78,538,85"/>
+<area shape="rect" id="Node000005" href="$d3/d6b/classfl_1_1audio_1_1_processor_ade806d07af52e3d281939cebce7643d5.html#ade806d07af52e3d281939cebce7643d5" title=" " alt="" coords="585,101,731,141"/>
+<area shape="poly" id="edge6_Node000003_Node000005" title=" " alt="" coords="538,101,572,106,571,111,537,106"/>
+<area shape="poly" id="edge9_Node000006_Node000003" title=" " alt="" coords="344,118,378,110,379,116,345,123"/>
+<area shape="poly" id="edge10_Node000006_Node000006" title=" " alt="" coords="235,118,233,108,239,99,252,93,271,91,294,94,306,101,304,105,292,99,271,96,253,98,242,103,238,109,240,116"/>
+</map>

@@ -15,10 +15,10 @@ var class_led_rope_t_c_l =
     [ "RawDrawPixels", "d4/df6/class_led_rope_t_c_l_a534132624a69f291af7103e6cad1c587.html#a534132624a69f291af7103e6cad1c587", null ],
     [ "Set", "d4/df6/class_led_rope_t_c_l_aaf2f05574d1070e735f2469bb2a51979.html#aaf2f05574d1070e735f2469bb2a51979", null ],
     [ "set_draw_offset", "d4/df6/class_led_rope_t_c_l_a4585594975001ee622ef20f07117050f.html#a4585594975001ee622ef20f07117050f", null ],
-    [ "controller_added_", "d4/df6/class_led_rope_t_c_l_a8baacd3bd67ff58c0f559fa51dfa7f96.html#a8baacd3bd67ff58c0f559fa51dfa7f96", null ],
-    [ "draw_offset_", "d4/df6/class_led_rope_t_c_l_aa8e5d82e6414004d1103aebf8cfbeca4.html#aa8e5d82e6414004d1103aebf8cfbeca4", null ],
-    [ "frame_buffer_", "d4/df6/class_led_rope_t_c_l_a634686a768a519015c35d326df73954b.html#a634686a768a519015c35d326df73954b", null ],
-    [ "lazy_initialized_", "d4/df6/class_led_rope_t_c_l_a31a4a447244687b2a5736d2fa6615013.html#a31a4a447244687b2a5736d2fa6615013", null ],
-    [ "led_buffer_", "d4/df6/class_led_rope_t_c_l_a2179761b83d1a84aa9f6bdc0317fe2dd.html#a2179761b83d1a84aa9f6bdc0317fe2dd", null ],
+    [ "mControllerAdded", "d4/df6/class_led_rope_t_c_l_ab43f744cd99ca7d4ba00db6e2155b2c5.html#ab43f744cd99ca7d4ba00db6e2155b2c5", null ],
+    [ "mDrawOffset", "d4/df6/class_led_rope_t_c_l_a6e31812c070e077a47b6e6382d06c1d6.html#a6e31812c070e077a47b6e6382d06c1d6", null ],
+    [ "mFrameBuffer", "d4/df6/class_led_rope_t_c_l_a1f9d671a8094137e124e16a47a7647f4.html#a1f9d671a8094137e124e16a47a7647f4", null ],
+    [ "mLazyInitialized", "d4/df6/class_led_rope_t_c_l_a32b3fa5259e985b2aed7434863fbc761.html#a32b3fa5259e985b2aed7434863fbc761", null ],
+    [ "mLedBuffer", "d4/df6/class_led_rope_t_c_l_a6e64790229e7f73e4a3e9021704cbbf8.html#a6e64790229e7f73e4a3e9021704cbbf8", null ],
     [ "mScreenMap", "d4/df6/class_led_rope_t_c_l_a106ba8537c5926fd975defbb013fb0e5.html#a106ba8537c5926fd975defbb013fb0e5", null ]
 ];

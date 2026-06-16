@@ -1,0 +1,17 @@
+<map id="fl::ChannelEvents::instance" name="fl::ChannelEvents::instance">
+<area shape="rect" id="Node000001" title=" " alt="" coords="292,146,435,186"/>
+<area shape="rect" id="Node000002" href="$d5/d8b/classfl_1_1_channel_aca6fc2d13573eb25aa436459fb7309e2.html#aca6fc2d13573eb25aa436459fb7309e2" title="Destructor." alt="" coords="43,5,206,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="339,136,298,88,272,64,243,44,205,30,207,25,245,40,275,60,302,84,343,133"/>
+<area shape="rect" id="Node000003" href="$d5/d8b/classfl_1_1_channel_a4ca6754b8f1a333ec18be19e505e56bc.html#a4ca6754b8f1a333ec18be19e505e56bc" title="Add this channel to the global controller draw list." alt="" coords="27,55,222,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="324,140,286,115,243,94,208,83,209,78,245,89,289,111,327,136"/>
+<area shape="rect" id="Node000004" href="$d5/d8b/classfl_1_1_channel_a4fd9736141ec00c1a8f5db47a0af1882.html#a4fd9736141ec00c1a8f5db47a0af1882" title="Apply reconfigurable settings from a ChannelConfig." alt="" coords="37,104,213,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="278,150,243,143,189,132,190,127,245,138,279,145"/>
+<area shape="rect" id="Node000005" href="$dd/dbb/class_c_fast_l_e_d_afdf3c3fcd91dcafbca741ae395570737.html#afdf3c3fcd91dcafbca741ae395570737" title="Access the channel event system." alt="" coords="32,153,217,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="278,169,217,169,217,163,278,163"/>
+<area shape="rect" id="Node000006" href="$d5/d8b/classfl_1_1_channel_acb0aa97ad60c6c8a739a60610b2bc1f9.html#acb0aa97ad60c6c8a739a60610b2bc1f9" title="Create a new channel with optional mBus driver pinning." alt="" coords="55,203,195,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="279,186,187,205,186,200,278,181"/>
+<area shape="rect" id="Node000007" href="$d5/d8b/classfl_1_1_channel_a0ba6c6bbdbae21db23f1310b9af6def9.html#a0ba6c6bbdbae21db23f1310b9af6def9" title="Remove this channel from the global controller draw list." alt="" coords="5,252,244,277"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="326,196,288,220,245,242,205,254,203,249,243,237,285,216,323,192"/>
+<area shape="rect" id="Node000008" href="$d5/d8b/classfl_1_1_channel_a44414e176c7d2ef65fcdd390f6852322.html#a44414e176c7d2ef65fcdd390f6852322" title=" " alt="" coords="39,301,210,327"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="343,199,301,247,275,271,245,291,211,305,209,300,243,286,272,267,298,243,339,195"/>
+</map>

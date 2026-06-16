@@ -8,9 +8,14 @@ digraph "fl::RectangularDrawBuffer::getMaxBytesInStrip"
   rankdir="RL";
   Node1 [id="Node000001",label="fl::RectangularDrawBuffer\l::getMaxBytesInStrip",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::RectangularDrawBuffer\l::getBlockInfo",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d10/classfl_1_1_rectangular_draw_buffer_ab09c66bb8f558c3e5b728730e60ea753.html#ab09c66bb8f558c3e5b728730e60ea753",tooltip=" "];
-  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::RectangularDrawBuffer\l::onQueuingDone",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d10/classfl_1_1_rectangular_draw_buffer_a793464dde6e4e1a324ab46973615345c.html#a793464dde6e4e1a324ab46973615345c",tooltip=" "];
-  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::RectangularDrawBuffer\l::getTotalBytes",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d10/classfl_1_1_rectangular_draw_buffer_af45fc32a106ba76e39af4e9b699c372e.html#af45fc32a106ba76e39af4e9b699c372e",tooltip=" "];
+  Node2 [id="Node000002",label="fl::RectangularDrawBuffer\l::~RectangularDrawBuffer",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d10/classfl_1_1_rectangular_draw_buffer_ada51b33f27f50070f13473dd195d1f04.html#ada51b33f27f50070f13473dd195d1f04",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::RectangularDrawBuffer\l::getBlockInfo",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d10/classfl_1_1_rectangular_draw_buffer_ab09c66bb8f558c3e5b728730e60ea753.html#ab09c66bb8f558c3e5b728730e60ea753",tooltip=" "];
+  Node3 -> Node2 [id="edge3_Node000003_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node4 [id="edge4_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::RectangularDrawBuffer\l::onQueuingDone",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d10/classfl_1_1_rectangular_draw_buffer_a793464dde6e4e1a324ab46973615345c.html#a793464dde6e4e1a324ab46973615345c",tooltip=" "];
+  Node4 -> Node2 [id="edge5_Node000004_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node5 [id="edge6_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::RectangularDrawBuffer\l::getTotalBytes",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d10/classfl_1_1_rectangular_draw_buffer_af45fc32a106ba76e39af4e9b699c372e.html#af45fc32a106ba76e39af4e9b699c372e",tooltip=" "];
+  Node5 -> Node2 [id="edge7_Node000005_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
 }

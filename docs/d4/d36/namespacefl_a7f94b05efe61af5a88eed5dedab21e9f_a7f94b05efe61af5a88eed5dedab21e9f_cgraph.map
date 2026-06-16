@@ -1,0 +1,5 @@
+<map id="fl::encodeLPD6803" name="fl::encodeLPD6803">
+<area shape="rect" id="Node000001" title="Encode pixel data in LPD6803 format." alt="" coords="5,5,148,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a19bab8334f56dc92ffcd8277422519a4.html#a19bab8334f56dc92ffcd8277422519a4" title="Convert RGB to LPD6803 16&#45;bit format (1bbbbbgggggrrrrr)" alt="" coords="196,5,361,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,15,182,15,182,21,148,21"/>
+</map>

@@ -1,12 +1,13 @@
 var five__bit__hd__gamma_8h =
 [
-    [ "fl::FiveBitGammaCorrectionMode", "d4/d36/namespacefl_a0b4d5ae1c89a46822e8c170e38f43466.html#a0b4d5ae1c89a46822e8c170e38f43466", [
-      [ "fl::kFiveBitGammaCorrectionMode_Null", "d4/d36/namespacefl_a0b4d5ae1c89a46822e8c170e38f43466.html#a0b4d5ae1c89a46822e8c170e38f43466aa821d28841c088d4127c12ec664daf89", null ],
-      [ "fl::kFiveBitGammaCorrectionMode_BitShift", "d4/d36/namespacefl_a0b4d5ae1c89a46822e8c170e38f43466.html#a0b4d5ae1c89a46822e8c170e38f43466afd1ee17be036ab937ccff8900d00c08c", null ]
+    [ "fl::CRGBA5", "d4/d36/namespacefl.html#df/d45/structfl_1_1_c_r_g_b_a5", [
+      [ "brightness_5bit", "d4/d36/namespacefl.html#a78d3d39d7f8ba5dc33afc9bb8bc09840", null ],
+      [ "color", "d4/d36/namespacefl.html#a323251a80d1f4e6491f15cf496771c7b", null ]
     ] ],
-    [ "fl::five_bit_bitshift", "d4/d36/namespacefl_ac5196e7510e1eaba77d095ff709c8e6d.html#ac5196e7510e1eaba77d095ff709c8e6d", null ],
-    [ "fl::five_bit_bitshift", "d4/d36/namespacefl_a0a5b2e8db7ffb2a55b95f1eee503e9fb.html#a0a5b2e8db7ffb2a55b95f1eee503e9fb", null ],
-    [ "fl::five_bit_hd_gamma_bitshift", "d4/d36/namespacefl_a079a3cfc47fd1c0c9096da728e812bec.html#a079a3cfc47fd1c0c9096da728e812bec", null ],
-    [ "fl::five_bit_hd_gamma_function", "d4/d36/namespacefl_a867c25ef6a64b8bbb31fb4162e75e46e.html#a867c25ef6a64b8bbb31fb4162e75e46e", null ],
-    [ "fl::internal_builtin_five_bit_hd_gamma_bitshift", "d4/d36/namespacefl_ad2fb43a2a5fd42f78b0ed9e97e30b020.html#ad2fb43a2a5fd42f78b0ed9e97e30b020", null ]
+    [ "fl::FiveBitGammaCorrectionMode", "d4/d36/namespacefl_a0b4d5ae1c89a46822e8c170e38f43466.html#a0b4d5ae1c89a46822e8c170e38f43466", [
+      [ "fl::FiveBitGammaCorrectionMode::kFiveBitGammaCorrectionMode_Null", "d4/d36/namespacefl_a0b4d5ae1c89a46822e8c170e38f43466.html#a0b4d5ae1c89a46822e8c170e38f43466a5e0239937175b40aa971557da26d9d5e", null ],
+      [ "fl::FiveBitGammaCorrectionMode::kFiveBitGammaCorrectionMode_BitShift", "d4/d36/namespacefl_a0b4d5ae1c89a46822e8c170e38f43466.html#a0b4d5ae1c89a46822e8c170e38f43466ada5fd9daaf0096d009c8ca25318e83ec", null ]
+    ] ],
+    [ "fl::five_bit_hd_gamma_bitshift", "d4/d36/namespacefl_adf2dff238e5ce8ba6f45a22474060aa2.html#adf2dff238e5ce8ba6f45a22474060aa2", null ],
+    [ "fl::five_bit_hd_gamma_bitshift", "d4/d36/namespacefl_a8156afc2871c59e9a570bb4da577f8d9.html#a8156afc2871c59e9a570bb4da577f8d9", null ]
 ];

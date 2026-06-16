@@ -1,0 +1,37 @@
+<map id="autoresearch::simd_check::as_u32" name="autoresearch::simd_check::as_u32">
+<area shape="rect" id="Node000001" title=" " alt="" coords="785,261,932,301"/>
+<area shape="rect" id="Node000002" href="$d9/d1a/namespaceautoresearch_1_1simd__check_a31fa178fd9b80e3836f4a68e5f433705.html#a31fa178fd9b80e3836f4a68e5f433705" title=" " alt="" coords="559,5,713,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="846,249,831,206,808,155,776,103,736,59,712,45,715,41,739,55,781,100,813,152,836,204,851,247"/>
+<area shape="rect" id="Node000006" href="$d9/d1a/namespaceautoresearch_1_1simd__check_a1c5c38278a177910236f6f277a6a8554.html#a1c5c38278a177910236f6f277a6a8554" title=" " alt="" coords="549,69,723,109"/>
+<area shape="poly" id="edge4_Node000001_Node000006" title=" " alt="" coords="839,251,797,186,769,152,736,124,715,112,718,107,739,119,773,149,802,183,843,248"/>
+<area shape="rect" id="Node000009" href="$d9/d1a/namespaceautoresearch_1_1simd__check_addf63d575e71fe84554a45dda3f07bdd.html#addf63d575e71fe84554a45dda3f07bdd" title=" " alt="" coords="547,133,725,173"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="825,254,785,220,736,188,710,176,712,171,739,183,788,215,829,250"/>
+<area shape="rect" id="Node000010" href="$d9/d1a/namespaceautoresearch_1_1simd__check_a1d5e4a2de730a62ce109f60f1a21dd38.html#a1d5e4a2de730a62ce109f60f1a21dd38" title=" " alt="" coords="549,197,723,237"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="774,260,705,240,707,235,776,255"/>
+<area shape="rect" id="Node000011" href="$d9/d1a/namespaceautoresearch_1_1simd__check_a04826b9dfa70336e3fa7a2ef7b317a51.html#a04826b9dfa70336e3fa7a2ef7b317a51" title=" " alt="" coords="535,261,737,301"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="772,284,737,284,737,279,772,279"/>
+<area shape="rect" id="Node000012" href="$d9/d1a/namespaceautoresearch_1_1simd__check_a815bb6e379c00496cf61d3c76c2b736a.html#a815bb6e379c00496cf61d3c76c2b736a" title=" " alt="" coords="543,325,729,365"/>
+<area shape="poly" id="edge14_Node000001_Node000012" title=" " alt="" coords="776,308,707,328,705,323,774,303"/>
+<area shape="rect" id="Node000013" href="$d9/d1a/namespaceautoresearch_1_1simd__check_abd61096df64573ad1b3ce19fa5fd25eb.html#abd61096df64573ad1b3ce19fa5fd25eb" title=" " alt="" coords="537,389,735,429"/>
+<area shape="poly" id="edge16_Node000001_Node000013" title=" " alt="" coords="829,313,788,347,739,380,712,392,710,387,736,375,785,343,825,309"/>
+<area shape="rect" id="Node000014" href="$d9/d1a/namespaceautoresearch_1_1simd__check_a7c5fb2be3d2ec70baaeca6a8dbad93ac.html#a7c5fb2be3d2ec70baaeca6a8dbad93ac" title=" " alt="" coords="551,453,721,493"/>
+<area shape="poly" id="edge18_Node000001_Node000014" title=" " alt="" coords="843,315,802,380,773,414,739,444,718,455,715,451,736,439,769,410,797,377,839,312"/>
+<area shape="rect" id="Node000015" href="$d9/d1a/namespaceautoresearch_1_1simd__check_a4814316c45f342f95161b5d26d47baf1.html#a4814316c45f342f95161b5d26d47baf1" title=" " alt="" coords="550,517,722,557"/>
+<area shape="poly" id="edge20_Node000001_Node000015" title=" " alt="" coords="851,315,836,359,813,410,781,462,739,507,721,519,718,515,736,503,776,459,808,408,831,357,846,314"/>
+<area shape="rect" id="Node000003" href="$d9/d1a/namespaceautoresearch_1_1simd__check_acd8ffc3b65508dec50abd9f9ed7a6f20.html#acd8ffc3b65508dec50abd9f9ed7a6f20" title=" " alt="" coords="264,53,487,93"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="546,45,485,56,484,51,545,39"/>
+<area shape="rect" id="Node000004" href="$db/d63/class_auto_research_remote_control_abb6600e8a1e8c4ef46ba29e7bd3b78b4.html#abb6600e8a1e8c4ef46ba29e7bd3b78b4" title="Register all RPC functions with shared autoresearch state." alt="" coords="5,101,216,141"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="252,98,217,105,216,100,251,93"/>
+<area shape="rect" id="Node000007" href="$d9/d1a/namespaceautoresearch_1_1simd__check_a81f34bf71b7b00b59cedf9fb126a6050.html#a81f34bf71b7b00b59cedf9fb126a6050" title="Get the static test table. Used by both runSimdTests() and the RPC handler." alt="" coords="302,261,449,301"/>
+<area shape="poly" id="edge5_Node000006_Node000007" title=" " alt="" coords="547,118,536,124,491,157,451,195,393,263,389,259,447,191,488,152,533,119,544,113"/>
+<area shape="poly" id="edge6_Node000007_Node000004" title=" " alt="" coords="328,256,144,144,146,139,330,252"/>
+<area shape="rect" id="Node000008" href="$d9/d1a/namespaceautoresearch_1_1simd__check_a4bd7c9fa82e77bb9c28efbf177f99216.html#a4bd7c9fa82e77bb9c28efbf177f99216" title="Run the full SIMD test suite. Returns the number of failures." alt="" coords="29,261,192,301"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="288,284,192,284,192,279,288,279"/>
+<area shape="poly" id="edge9_Node000009_Node000007" title=" " alt="" coords="553,181,536,188,465,226,407,263,404,259,462,221,534,183,551,176"/>
+<area shape="poly" id="edge11_Node000010_Node000007" title=" " alt="" coords="541,243,450,266,448,261,540,238"/>
+<area shape="poly" id="edge13_Node000011_Node000007" title=" " alt="" coords="521,284,449,284,449,279,521,279"/>
+<area shape="poly" id="edge15_Node000012_Node000007" title=" " alt="" coords="540,325,448,302,450,297,541,319"/>
+<area shape="poly" id="edge17_Node000013_Node000007" title=" " alt="" coords="551,387,534,380,462,342,404,304,407,299,465,337,536,375,553,382"/>
+<area shape="poly" id="edge19_Node000014_Node000007" title=" " alt="" coords="544,450,533,444,488,410,447,372,389,303,393,300,451,368,491,406,536,439,547,445"/>
+<area shape="poly" id="edge21_Node000015_Node000007" title=" " alt="" coords="541,513,533,507,505,484,480,458,437,400,404,345,383,303,388,300,409,343,441,397,484,454,509,480,536,503,544,508"/>
+</map>

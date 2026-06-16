@@ -1,0 +1,7 @@
+<map id="fl::spi::Device::end" name="fl::spi::Device::end">
+<area shape="rect" id="Node000001" title="Shutdown the SPI hardware and release resources." alt="" coords="5,5,148,31"/>
+<area shape="rect" id="Node000002" href="$d9/d0a/classfl_1_1spi_1_1_device_a851fa0298ee8a47bd677be39404e8c15.html#a851fa0298ee8a47bd677be39404e8c15" title="Wait for pending async operation to complete." alt="" coords="196,5,405,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,15,182,15,182,21,148,21"/>
+<area shape="rect" id="Node000003" href="$d9/d0a/classfl_1_1spi_1_1_device_a1186e792511c298ed4bbd1c12a180c8c.html#a1186e792511c298ed4bbd1c12a180c8c" title="Check if device is initialized and ready for use." alt="" coords="453,5,624,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="406,15,440,15,440,21,406,21"/>
+</map>

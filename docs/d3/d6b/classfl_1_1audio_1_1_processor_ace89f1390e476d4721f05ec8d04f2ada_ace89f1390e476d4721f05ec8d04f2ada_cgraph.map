@@ -1,0 +1,14 @@
+<map id="fl::audio::Processor::getEqDominantMagnitude" name="fl::audio::Processor::getEqDominantMagnitude">
+<area shape="rect" id="Node000001" title="Magnitude of strongest bin (0.0&#45;1.0)" alt="" coords="5,63,205,103"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="62,64,60,54,67,44,82,39,105,37,132,40,147,47,144,52,131,45,105,42,83,44,70,49,65,55,68,62"/>
+<area shape="rect" id="Node000002" href="$db/dbf/namespacefl_1_1audio_a1cbdb2338ec760ba92ce43fece0713d2.html#a1cbdb2338ec760ba92ce43fece0713d2" title=" " alt="" coords="267,29,406,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="205,63,253,54,254,59,206,68"/>
+<area shape="rect" id="Node000003" href="$d3/d6b/classfl_1_1audio_1_1_processor_a3ea6090ef70536d974a52c655f335783.html#a3ea6090ef70536d974a52c655f335783" title=" " alt="" coords="253,103,420,143"/>
+<area shape="poly" id="edge4_Node000001_Node000003" title=" " alt="" coords="206,98,240,104,239,109,205,103"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="303,31,296,21,300,11,314,5,337,3,365,6,376,16,373,20,363,11,337,8,315,10,304,15,301,20,308,28"/>
+<area shape="poly" id="edge5_Node000003_Node000003" title=" " alt="" coords="298,104,296,94,302,85,316,79,337,77,360,80,373,87,371,92,359,85,337,82,317,84,306,89,301,95,304,102"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="478,81,603,107"/>
+<area shape="poly" id="edge6_Node000003_Node000004" title=" " alt="" coords="420,109,464,102,465,108,421,114"/>
+<area shape="rect" id="Node000005" href="$d3/d6b/classfl_1_1audio_1_1_processor_ade806d07af52e3d281939cebce7643d5.html#ade806d07af52e3d281939cebce7643d5" title=" " alt="" coords="468,131,613,171"/>
+<area shape="poly" id="edge7_Node000003_Node000005" title=" " alt="" coords="421,132,455,137,454,142,420,137"/>
+</map>

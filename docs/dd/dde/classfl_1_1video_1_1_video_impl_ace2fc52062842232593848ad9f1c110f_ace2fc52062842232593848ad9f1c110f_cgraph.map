@@ -1,0 +1,33 @@
+<map id="fl::video::VideoImpl::draw" name="fl::video::VideoImpl::draw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,122,153,162"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="715,5,841,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="112,119,153,97,200,76,266,52,318,37,440,18,509,12,578,9,701,11,701,16,579,15,509,17,440,23,319,42,267,57,202,80,156,101,115,124"/>
+<area shape="rect" id="Node000003" href="$d6/dcf/classfl_1_1video_1_1_frame_tracker_a6c6f5f5628f090ae3e0ea599e6f256c0.html#a6c6f5f5628f090ae3e0ea599e6f256c0" title=" " alt="" coords="205,154,388,194"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="154,150,192,156,191,161,153,155"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a2bccb5decc8613e4b6e232e0a881578f.html#a2bccb5decc8613e4b6e232e0a881578f" title="Alias for millis64() &#45; returns 64&#45;bit millisecond time." alt="" coords="263,243,331,268"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="120,160,203,204,260,234,258,239,200,208,117,165"/>
+<area shape="rect" id="Node000007" href="$dd/dde/classfl_1_1video_1_1_video_impl_aee23fa041b0640d1f600ba5df8aad151.html#aee23fa041b0640d1f600ba5df8aad151" title=" " alt="" coords="201,90,392,130"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="153,129,187,123,188,129,154,134"/>
+<area shape="poly" id="edge8_Node000004_Node000004" title=" " alt="" coords="261,244,254,234,258,224,272,218,297,216,327,220,339,229,335,233,325,225,297,221,274,223,261,228,259,234,265,241"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_ac8ee0e5ecac16a6ee42def0436a43663.html#ac8ee0e5ecac16a6ee42def0436a43663" title="64&#45;bit millisecond timer &#45; returns milliseconds since system startup without wraparound" alt="" coords="492,243,583,268"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="331,253,478,253,478,258,331,258"/>
+<area shape="poly" id="edge7_Node000005_Node000005" title=" " alt="" coords="498,244,490,234,494,224,510,218,537,216,571,220,584,229,581,234,569,225,537,221,512,223,498,228,495,234,502,241"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="741,243,815,268"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="583,253,727,253,727,258,583,258"/>
+<area shape="poly" id="edge6_Node000006_Node000006" title=" " alt="" coords="739,244,731,234,735,224,751,218,778,216,812,220,825,229,821,234,810,225,778,221,752,223,739,228,736,234,743,241"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_add9e137f59b736bd3f5b4b9ff21a59d5.html#add9e137f59b736bd3f5b4b9ff21a59d5" title=" " alt="" coords="734,157,822,183"/>
+<area shape="poly" id="edge10_Node000007_Node000008" title=" " alt="" coords="361,127,440,146,516,156,592,162,720,167,720,173,591,168,515,161,440,151,360,133"/>
+<area shape="rect" id="Node000009" href="$dd/dde/classfl_1_1video_1_1_video_impl_a8274092b28300627291a6d5562d4043d.html#a8274092b28300627291a6d5562d4043d" title=" " alt="" coords="452,97,623,137"/>
+<area shape="poly" id="edge11_Node000007_Node000009" title=" " alt="" coords="392,110,439,111,438,117,392,115"/>
+<area shape="rect" id="Node000012" href="$dd/dde/classfl_1_1video_1_1_video_impl_a0df776f1efbf24ab86caa13c96825292.html#a0df776f1efbf24ab86caa13c96825292" title=" " alt="" coords="440,33,635,73"/>
+<area shape="poly" id="edge16_Node000007_Node000012" title=" " alt="" coords="381,87,439,73,440,78,382,93"/>
+<area shape="poly" id="edge13_Node000009_Node000002" title=" " alt="" coords="609,94,633,82,647,72,656,61,666,50,681,40,701,31,703,36,684,44,670,54,660,65,651,76,636,87,611,99"/>
+<area shape="poly" id="edge12_Node000009_Node000008" title=" " alt="" coords="623,133,721,155,720,160,622,138"/>
+<area shape="rect" id="Node000010" href="$d3/d73/classfl_1_1_fixed_vector_a80bca5389482eea467efb7d9cb96a332.html#a80bca5389482eea467efb7d9cb96a332" title=" " alt="" coords="683,55,873,80"/>
+<area shape="poly" id="edge14_Node000009_Node000010" title=" " alt="" coords="622,97,702,80,703,85,623,102"/>
+<area shape="rect" id="Node000011" href="$d3/d73/classfl_1_1_fixed_vector_af6b024b342305e2348f8fc0f31a50ab4.html#af6b024b342305e2348f8fc0f31a50ab4" title=" " alt="" coords="705,104,851,129"/>
+<area shape="poly" id="edge15_Node000009_Node000011" title=" " alt="" coords="623,114,691,114,691,119,623,119"/>
+<area shape="poly" id="edge17_Node000012_Node000002" title=" " alt="" coords="634,36,701,26,702,32,635,41"/>
+<area shape="poly" id="edge18_Node000012_Node000010" title=" " alt="" coords="635,56,669,58,669,63,635,61"/>
+<area shape="poly" id="edge19_Node000012_Node000011" title=" " alt="" coords="614,70,717,98,716,103,613,75"/>
+</map>

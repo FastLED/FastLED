@@ -1,0 +1,16 @@
+<map id="fl::CRGB::colorBoost" name="fl::CRGB::colorBoost">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,157,55"/>
+<area shape="rect" id="Node000002" href="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" title="Default constructor." alt="" coords="425,5,545,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="157,35,411,20,411,25,158,40"/>
+<area shape="rect" id="Node000003" href="$da/dd6/structfl_1_1_c_r_g_b_a2792268a864ed3d46b191c20fd56ff87.html#a2792268a864ed3d46b191c20fd56ff87" title=" " alt="" coords="205,55,357,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="158,49,192,53,191,59,157,54"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="334,52,418,31,419,37,335,57"/>
+<area shape="rect" id="Node000004" href="$d4/d5d/structfl_1_1_h_s_v16_a76546a195f4bb8cce8ac071d4d7786d4.html#a76546a195f4bb8cce8ac071d4d7786d4" title=" " alt="" coords="405,55,564,80"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="357,65,392,65,392,70,357,70"/>
+<area shape="rect" id="Node000005" href="$d4/d5d/structfl_1_1_h_s_v16_afb1735cc73fa0e364b7a24893e2f6f8b.html#afb1735cc73fa0e364b7a24893e2f6f8b" title=" " alt="" coords="612,5,744,31"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="534,52,613,32,615,37,536,57"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_adbc9938a37fd2f52f4c865a78914f420.html#adbc9938a37fd2f52f4c865a78914f420" title=" " alt="" coords="635,55,721,80"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="564,65,621,65,621,70,564,70"/>
+<area shape="rect" id="Node000021" href="$d4/d5d/structfl_1_1_h_s_v16_a66d9cc0fccee4175baaef83f1a2d7d7d.html#a66d9cc0fccee4175baaef83f1a2d7d7d" title=" " alt="" coords="613,104,743,129"/>
+<area shape="poly" id="edge7_Node000004_Node000021" title=" " alt="" coords="536,77,615,98,613,103,534,83"/>
+</map>

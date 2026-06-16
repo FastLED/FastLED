@@ -1,0 +1,12 @@
+<map id="fl::s4x12::atan2" name="fl::s4x12::atan2">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,52,128,78"/>
+<area shape="rect" id="Node000002" href="$d5/d65/classfl_1_1s4x12_a0ed77ac90b18522deab6c126c63e319d.html#a0ed77ac90b18522deab6c126c63e319d" title=" " alt="" coords="371,52,495,78"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,50,127,30,175,13,216,5,249,3,282,5,323,13,364,26,399,43,397,48,362,31,322,18,281,11,249,8,217,11,177,18,129,34,90,55"/>
+<area shape="rect" id="Node000003" href="$d5/d65/classfl_1_1s4x12_a92571efbfeeddcc3efeb9bd45123a945.html#a92571efbfeeddcc3efeb9bd45123a945" title=" " alt="" coords="195,52,303,78"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="128,62,182,62,182,68,128,68"/>
+<area shape="rect" id="Node000004" href="$d5/d65/classfl_1_1s4x12_a0383d2dc84ed8f064a8d319cd7418883.html#a0383d2dc84ed8f064a8d319cd7418883" title=" " alt="" coords="176,102,323,127"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="115,75,189,95,187,101,114,80"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="303,62,357,62,357,68,303,68"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="219,54,213,44,216,34,229,28,249,26,274,29,285,38,281,42,272,34,249,31,230,33,220,38,218,43,224,51"/>
+<area shape="poly" id="edge6_Node000004_Node000002" title=" " alt="" coords="296,99,371,79,372,84,298,104"/>
+</map>

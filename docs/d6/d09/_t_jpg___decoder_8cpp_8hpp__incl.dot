@@ -1,0 +1,41 @@
+digraph "third_party/TJpg_Decoder/src/TJpg_Decoder.cpp.hpp"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="third_party/TJpg_Decoder\l/src/TJpg_Decoder.cpp.hpp",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="TJpg_Decoder.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d4f/_t_jpg___decoder_8h.html",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="User_Config.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d85/_user___config_8h.html",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="platforms/esp/is_esp.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="platforms/arm/rp/is\l_rp2040.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node2 -> Node6 [id="edge5_Node000002_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="tjpgd.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dd0/tjpgd_8h.html",tooltip=" "];
+  Node6 -> Node7 [id="edge6_Node000006_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl/stl/string.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/d66/string_8h.html",tooltip=" "];
+  Node7 -> Node12 [id="edge7_Node000007_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl/stl/cstring.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d8d/cstring_8h.html",tooltip=" "];
+  Node12 -> Node10 [id="edge8_Node000012_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl/stl/stdint.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/dd8/stdint_8h.html",tooltip=" "];
+  Node12 -> Node13 [id="edge9_Node000012_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl/stl/noexcept.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d01/noexcept_8h.html",tooltip=" "];
+  Node7 -> Node22 [id="edge10_Node000007_Node000022",color="steelblue1",style="solid",tooltip=" "];
+  Node22 [id="Node000022",label="fl/stl/compiler_control.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d54/compiler__control_8h.html",tooltip=" "];
+  Node7 -> Node13 [id="edge11_Node000007_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node6 -> Node10 [id="edge12_Node000006_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node6 -> Node13 [id="edge13_Node000006_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node6 -> Node54 [id="edge14_Node000006_Node000054",color="steelblue1",style="solid",tooltip=" "];
+  Node54 [id="Node000054",label="tjpgdcnf.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d41/tjpgdcnf_8h.html",tooltip=" "];
+  Node2 -> Node10 [id="edge15_Node000002_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node7 [id="edge16_Node000002_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node13 [id="edge17_Node000002_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node22 [id="edge18_Node000001_Node000022",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node7 [id="edge19_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node12 [id="edge20_Node000001_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node13 [id="edge21_Node000001_Node000013",color="steelblue1",style="solid",tooltip=" "];
+}

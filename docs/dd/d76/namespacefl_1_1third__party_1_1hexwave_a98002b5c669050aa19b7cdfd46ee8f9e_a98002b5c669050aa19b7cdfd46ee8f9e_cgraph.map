@@ -1,0 +1,9 @@
+<map id="fl::third_party::hexwave::hexwave_create_legacy" name="fl::third_party::hexwave::hexwave_create_legacy">
+<area shape="rect" id="Node000001" title="Create oscillator using global engine (DEPRECATED)" alt="" coords="5,37,192,77"/>
+<area shape="rect" id="Node000002" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_a706734748c19f4ac353569d7aa7c5b0e.html#a706734748c19f4ac353569d7aa7c5b0e" title="Create a new oscillator with the given waveform parameters." alt="" coords="240,37,415,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="193,55,226,55,226,60,193,60"/>
+<area shape="rect" id="Node000003" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_a73df37e7c28a4aa231f4573592e48f82.html#a73df37e7c28a4aa231f4573592e48f82" title="Change oscillator waveform parameters (takes effect at next cycle boundary)" alt="" coords="463,5,637,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="415,42,449,37,450,42,415,47"/>
+<area shape="rect" id="Node000004" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_a44a195439ac7fa303b4b0b0c956605be.html#a44a195439ac7fa303b4b0b0c956605be" title=" " alt="" coords="463,69,637,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="415,67,450,72,449,78,415,73"/>
+</map>

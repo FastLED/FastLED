@@ -1,0 +1,31 @@
+<map id="fl::ChannelManager" name="fl::ChannelManager">
+<area shape="rect" id="Node000001" title="Unified channel manager with priority&#45;based driver selection." alt="" coords="1423,120,1571,145"/>
+<area shape="rect" id="Node000002" href="$db/da2/classfl_1_1_engine_events_1_1_listener.html" title=" " alt="" coords="1023,5,1210,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1224,27,1311,43,1400,70,1445,93,1480,118,1477,122,1442,98,1398,75,1310,48,1223,32"/>
+<area shape="rect" id="Node000003" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="1007,55,1227,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1241,87,1399,110,1438,117,1437,123,1398,115,1240,92"/>
+<area shape="rect" id="Node000004" href="$d4/dad/classfl_1_1vector__basic.html" title="Type&#45;erased vector base class." alt="" coords="307,97,427,123"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="436,92,456,89,603,65,718,50,834,44,983,51,1007,54,1006,59,982,57,834,50,719,55,604,70,456,94,437,97"/>
+<area shape="rect" id="Node000007" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="672,97,789,123"/>
+<area shape="poly" id="edge7_Node000007_Node000004" title=" " alt="" coords="440,107,672,107,672,113,440,113"/>
+<area shape="rect" id="Node000008" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="1021,120,1212,145"/>
+<area shape="poly" id="edge9_Node000008_Node000004" title=" " alt="" coords="441,115,648,131,815,134,983,131,1021,131,1021,136,983,137,815,139,648,137,440,121"/>
+<area shape="rect" id="Node000005" href="$db/d13/classfl_1_1memory__resource.html" title="Polymorphic memory resource base class (PMR&#45;style)." alt="" coords="13,92,169,117"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="182,104,306,106,306,112,182,109"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl.html#d8/d72/structfl_1_1vector__element__ops" title="Function pointer table for type&#45;specific element operations." alt="" coords="5,141,176,167"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="189,139,277,126,308,120,309,125,278,131,190,145"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="803,101,1006,83,1007,88,803,106"/>
+<area shape="poly" id="edge10_Node000008_Node000007" title=" " alt="" coords="803,114,838,117,1021,126,1021,132,837,122,803,119"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="1226,130,1422,130,1422,135,1226,135"/>
+<area shape="rect" id="Node000009" href="$d2/db2/classfl_1_1string.html" title=" " alt="" coords="1079,169,1154,195"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="1167,176,1274,166,1398,150,1438,143,1439,148,1399,155,1274,171,1168,181"/>
+<area shape="rect" id="Node000010" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="648,202,813,242"/>
+<area shape="poly" id="edge12_Node000009_Node000010" title=" " alt="" coords="827,209,1079,183,1079,188,827,215"/>
+<area shape="rect" id="Node000011" href="$de/d66/classfl_1_1basic__string.html" title="Concrete type&#45;erased string class." alt="" coords="33,204,149,229"/>
+<area shape="poly" id="edge13_Node000010_Node000011" title=" " alt="" coords="163,215,648,219,648,224,163,220"/>
+<area shape="rect" id="Node000012" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="301,245,432,271"/>
+<area shape="poly" id="edge15_Node000012_Node000011" title=" " alt="" coords="163,225,301,246,301,251,162,230"/>
+<area shape="poly" id="edge14_Node000010_Node000012" title=" " alt="" coords="446,260,532,261,624,253,676,239,677,245,624,258,532,266,446,266"/>
+<area shape="rect" id="Node000013" href="$d3/d8f/structfl_1_1_i_channel_driver_1_1_poll_needed_callback.html" title="ISR&#45;safe callback handle invoked when the manager should poll again." alt="" coords="1037,219,1197,259"/>
+<area shape="poly" id="edge16_Node000001_Node000013" title=" " alt="" coords="1210,230,1302,215,1351,204,1398,189,1442,167,1477,143,1480,148,1445,171,1400,194,1352,209,1303,221,1211,235"/>
+</map>

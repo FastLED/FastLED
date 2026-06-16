@@ -1,0 +1,26 @@
+<map id="PixelController::stepAdvanceAndLoadAndScale0" name="PixelController::stepAdvanceAndLoadAndScale0">
+<area shape="rect" id="Node000001" title="stepDithering() and advanceAndLoadAndScale0()" alt="" coords="5,151,215,191"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_a954f847c97057d3b5bc3135a225623b2.html#a954f847c97057d3b5bc3135a225623b2" title="A version of loadAndScale() that advances the output data pointer." alt="" coords="279,57,459,97"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="165,149,300,99,302,104,167,154"/>
+<area shape="rect" id="Node000009" href="$d0/dee/struct_pixel_controller_a56e7ebce42fbb5808bed5d5f4fb3218b.html#a56e7ebce42fbb5808bed5d5f4fb3218b" title="Scale a value using the per&#45;channel scale data." alt="" coords="550,167,709,192"/>
+<area shape="poly" id="edge12_Node000001_Node000009" title=" " alt="" coords="215,170,536,175,536,180,215,175"/>
+<area shape="rect" id="Node000010" href="$d0/dee/struct_pixel_controller_ac7cb7840989882cce60218ac43dbe8ef.html#ac7cb7840989882cce60218ac43dbe8ef" title="Step the dithering forward &#45; creates triangular wave that toggles between pixels." alt="" coords="263,209,476,235"/>
+<area shape="poly" id="edge14_Node000001_Node000010" title=" " alt="" coords="213,189,291,204,290,209,212,194"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_ae44229e20fb4ba4473b057dcda87122e.html#ae44229e20fb4ba4473b057dcda87122e" title="Copy constructor." alt="" coords="1013,85,1233,111"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="414,54,465,34,524,19,647,4,698,3,745,6,843,22,966,49,1073,78,1071,83,965,54,842,27,745,11,698,8,648,9,524,24,467,39,415,59"/>
+<area shape="rect" id="Node000005" href="$d0/dee/struct_pixel_controller_ab44f62f166d162bd1e3b095b368feef2.html#ab44f62f166d162bd1e3b095b368feef2" title="Advance the data pointer forward, adjust position counter." alt="" coords="524,35,735,60"/>
+<area shape="poly" id="edge5_Node000002_Node000005" title=" " alt="" coords="459,64,510,58,510,63,460,69"/>
+<area shape="rect" id="Node000006" href="$d0/dee/struct_pixel_controller_adad75cb77a4eab720f2ee1023b643a59.html#adad75cb77a4eab720f2ee1023b643a59" title="Complete pipeline: load → dither → scale (THE MAGIC HAPPENS HERE!) Order is critical: pixel + dither ..." alt="" coords="540,85,719,125"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="460,84,527,91,526,96,459,89"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="1085,87,1077,77,1081,67,1097,61,1123,59,1156,62,1169,72,1166,76,1154,67,1123,64,1098,66,1085,71,1082,76,1089,83"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_af3310e3a869dfeafae981291b76b572d.html#af3310e3a869dfeafae981291b76b572d" title=" " alt="" coords="1281,85,1437,111"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="1233,95,1268,95,1268,101,1233,101"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="710,82,782,70,874,64,966,70,1045,80,1045,86,965,75,874,70,783,75,711,87"/>
+<area shape="rect" id="Node000007" href="$d0/dee/struct_pixel_controller_af1d6dbfe39be747916896dc44c730a29.html#af1d6dbfe39be747916896dc44c730a29" title="Add dither offset to pixel value (BEFORE scaling)." alt="" coords="793,85,955,111"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="719,99,779,98,779,103,719,105"/>
+<area shape="rect" id="Node000008" href="$d0/dee/struct_pixel_controller_a2268d03939af0ad8fcb478ad6c9f33c7.html#a2268d03939af0ad8fcb478ad6c9f33c7" title="Read a byte of LED data." alt="" coords="783,135,965,160"/>
+<area shape="poly" id="edge10_Node000006_Node000008" title=" " alt="" coords="719,117,787,129,787,135,718,123"/>
+<area shape="poly" id="edge9_Node000007_Node000003" title=" " alt="" coords="955,95,999,95,999,101,955,101"/>
+<area shape="poly" id="edge11_Node000008_Node000003" title=" " alt="" coords="938,132,1044,111,1046,116,939,137"/>
+<area shape="poly" id="edge13_Node000009_Node000003" title=" " alt="" coords="709,184,831,186,898,181,965,170,999,159,1033,145,1089,115,1092,120,1035,150,1001,164,966,175,899,187,831,192,709,190"/>
+</map>

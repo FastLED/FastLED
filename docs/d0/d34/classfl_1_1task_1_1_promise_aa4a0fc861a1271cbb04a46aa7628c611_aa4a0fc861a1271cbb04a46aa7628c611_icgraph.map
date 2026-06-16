@@ -1,0 +1,81 @@
+<map id="fl::task::Promise::valid" name="fl::task::Promise::valid">
+<area shape="rect" id="Node000001" title="Check if Promise is valid." alt="" coords="979,495,1113,535"/>
+<area shape="rect" id="Node000002" href="$db/d5c/namespacefl_1_1task_ab96dc4828a01d1cff109d355d8ffc23d.html#ab96dc4828a01d1cff109d355d8ffc23d" title="Synchronously wait for a promise to complete (ONLY safe in top&#45;level contexts)" alt="" coords="569,195,707,235"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1024,485,985,430,959,402,929,378,907,365,887,357,850,350,811,345,765,327,733,306,703,282,656,237,660,234,706,278,736,302,768,322,812,340,850,345,888,352,909,360,932,373,962,398,989,426,1029,482"/>
+<area shape="rect" id="Node000010" href="$d0/d34/classfl_1_1task_1_1_promise_a4cdb7be9121f0850c0714e09a594675c.html#a4cdb7be9121f0850c0714e09a594675c" title="Register error callback &#45; returns reference for chaining." alt="" coords="781,667,916,707"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="1026,549,985,600,932,651,901,670,899,665,929,647,981,596,1021,545"/>
+<area shape="rect" id="Node000011" href="$d0/d34/classfl_1_1task_1_1_promise_aa56d4b0b92b73976e77a01888ea8f7de.html#aa56d4b0b92b73976e77a01888ea8f7de" title="Complete the Promise with an error (used by networking library)" alt="" coords="560,445,716,485"/>
+<area shape="poly" id="edge13_Node000001_Node000011" title=" " alt="" coords="965,508,716,477,716,472,965,503"/>
+<area shape="rect" id="Node000024" href="$d0/d34/classfl_1_1task_1_1_promise_ac8b33675a4359d2cd195c7371ef4d0a6.html#ac8b33675a4359d2cd195c7371ef4d0a6" title=" " alt="" coords="771,731,927,771"/>
+<area shape="poly" id="edge19_Node000001_Node000024" title=" " alt="" coords="1037,549,1021,588,999,634,969,681,932,721,915,733,912,729,929,717,965,677,994,632,1016,586,1032,547"/>
+<area shape="rect" id="Node000025" href="$d0/d34/classfl_1_1task_1_1_promise_a626af66c4aaa780a2b0a0ee396f9a9db.html#a626af66c4aaa780a2b0a0ee396f9a9db" title="Complete the Promise with a result (used by networking library)" alt="" coords="557,509,719,549"/>
+<area shape="poly" id="edge20_Node000001_Node000025" title=" " alt="" coords="965,521,719,529,719,523,965,515"/>
+<area shape="rect" id="Node000026" href="$d0/d34/classfl_1_1task_1_1_promise_af40b98437ff46b01fc8786b6c127751d.html#af40b98437ff46b01fc8786b6c127751d" title=" " alt="" coords="557,701,719,741"/>
+<area shape="poly" id="edge23_Node000001_Node000026" title=" " alt="" coords="1016,546,977,578,932,607,887,625,850,633,812,641,768,658,744,674,720,691,695,703,693,698,717,686,741,669,765,653,811,636,848,628,885,620,929,602,974,574,1012,542"/>
+<area shape="rect" id="Node000027" href="$d0/d34/classfl_1_1task_1_1_promise_a51a1be9fd686089d804cec834abd6ccc.html#a51a1be9fd686089d804cec834abd6ccc" title="Get the error (only valid if is_rejected() returns true)" alt="" coords="781,387,916,427"/>
+<area shape="poly" id="edge24_Node000001_Node000027" title=" " alt="" coords="1000,490,929,448,893,430,895,425,932,444,1003,485"/>
+<area shape="rect" id="Node000032" href="$d0/d34/classfl_1_1task_1_1_promise_a2cf5debc89941141eb35912bcd7f0a6c.html#a2cf5debc89941141eb35912bcd7f0a6c" title="Check if Promise is completed (resolved or rejected)" alt="" coords="781,145,916,185"/>
+<area shape="poly" id="edge31_Node000001_Node000032" title=" " alt="" coords="1039,482,1030,422,1010,347,996,307,978,268,956,231,929,199,914,187,917,183,933,195,960,228,983,265,1001,305,1015,345,1035,421,1044,481"/>
+<area shape="rect" id="Node000033" href="$d0/d34/classfl_1_1task_1_1_promise_a5cf466a3714b398db20ed51c66141852.html#a5cf466a3714b398db20ed51c66141852" title="Check if Promise is rejected (completed with error)" alt="" coords="781,795,916,835"/>
+<area shape="poly" id="edge33_Node000001_Node000033" title=" " alt="" coords="1042,549,1030,600,1009,663,977,728,956,758,932,785,917,797,913,793,929,781,952,755,972,725,1004,661,1024,599,1036,548"/>
+<area shape="rect" id="Node000034" href="$d0/d34/classfl_1_1task_1_1_promise_adaacc91f53140dd25a25549e0fd76e84.html#adaacc91f53140dd25a25549e0fd76e84" title="Check if Promise is resolved (completed successfully)" alt="" coords="781,209,916,249"/>
+<area shape="poly" id="edge34_Node000001_Node000034" title=" " alt="" coords="1036,483,1023,434,1002,376,971,315,951,287,929,263,913,251,916,247,932,259,956,284,975,313,1007,374,1028,433,1041,481"/>
+<area shape="rect" id="Node000035" href="$d0/d34/classfl_1_1task_1_1_promise_a6bf5459206f37ac5027db4f9a27a1b24.html#a6bf5459206f37ac5027db4f9a27a1b24" title="Register success callback &#45; returns reference for chaining." alt="" coords="767,860,931,885"/>
+<area shape="poly" id="edge36_Node000001_Node000035" title=" " alt="" coords="1045,549,1038,613,1019,693,1005,735,986,776,962,815,932,849,914,862,911,858,929,845,958,812,981,774,1000,733,1014,691,1032,612,1040,549"/>
+<area shape="rect" id="Node000036" href="$d0/d34/classfl_1_1task_1_1_promise_aa9653e7805b9f5fe093fef2faa31960b.html#aa9653e7805b9f5fe093fef2faa31960b" title="Update Promise state in main loop &#45; should be called periodically This processes pending callbacks wh..." alt="" coords="781,273,916,313"/>
+<area shape="poly" id="edge37_Node000001_Node000036" title=" " alt="" coords="1029,484,990,409,962,369,929,333,902,315,905,311,932,329,966,366,995,407,1034,481"/>
+<area shape="rect" id="Node000037" href="$d0/d34/classfl_1_1task_1_1_promise_a2eccb92f3cd894efe9a728eea2db7c45.html#a2eccb92f3cd894efe9a728eea2db7c45" title="Get the result value (only valid if is_resolved() returns true)" alt="" coords="781,553,916,593"/>
+<area shape="poly" id="edge39_Node000001_Node000037" title=" " alt="" coords="966,541,917,556,915,551,965,536"/>
+<area shape="rect" id="Node000003" href="$df/d01/_client_real_8h_a75e6549812ad7bff897e0c92a225878a.html#a75e6549812ad7bff897e0c92a225878a" title=" " alt="" coords="326,203,483,228"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="555,218,484,218,484,213,555,213"/>
+<area shape="rect" id="Node000005" href="$d9/dce/_client_validation_real_8h_a48d1b41170d4da38b2d99148b76a9a22.html#a48d1b41170d4da38b2d99148b76a9a22" title=" " alt="" coords="335,55,474,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="611,186,567,138,539,114,508,94,473,80,475,75,511,89,542,110,570,134,615,183"/>
+<area shape="rect" id="Node000007" href="$df/d01/_client_real_8h_a648cd3d90f8e240cbbfe5cb934057124.html#a648cd3d90f8e240cbbfe5cb934057124" title="APPROACH 4: JSON Response with await pattern &#160;&#160;Same JSON handling but using await_top_level for synch..." alt="" coords="343,153,467,179"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="554,200,465,181,466,176,555,195"/>
+<area shape="rect" id="Node000008" href="$d9/dce/_client_validation_real_8h_ad90185b2a71aa34da786634a378ac25b.html#ad90185b2a71aa34da786634a378ac25b" title=" " alt="" coords="332,104,477,129"/>
+<area shape="poly" id="edge8_Node000002_Node000008" title=" " alt="" coords="595,190,554,165,508,143,473,132,475,127,510,138,557,161,598,185"/>
+<area shape="rect" id="Node000009" href="$d9/dce/_client_validation_real_8h_a4a6f06023a5a6afd3efafcb856740c10.html#a4a6f06023a5a6afd3efafcb856740c10" title=" " alt="" coords="331,5,478,31"/>
+<area shape="poly" id="edge10_Node000002_Node000009" title=" " alt="" coords="619,184,601,150,576,112,545,75,508,44,477,30,479,25,511,40,549,71,580,109,606,148,624,181"/>
+<area shape="rect" id="Node000004" href="$df/d01/_client_real_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="103,179,154,204"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="312,210,154,196,155,191,312,205"/>
+<area shape="rect" id="Node000006" href="$d9/dce/_client_validation_real_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="103,55,154,80"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="322,70,154,70,154,65,322,65"/>
+<area shape="poly" id="edge7_Node000007_Node000004" title=" " alt="" coords="329,176,155,192,154,186,328,170"/>
+<area shape="poly" id="edge9_Node000008_Node000006" title=" " alt="" coords="319,104,154,74,154,69,320,99"/>
+<area shape="poly" id="edge11_Node000009_Node000006" title=" " alt="" coords="320,36,154,66,154,60,319,31"/>
+<area shape="rect" id="Node000012" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a0b6fc002fa551b56dcdb14b8344330f0.html#a0b6fc002fa551b56dcdb14b8344330f0" title=" " alt="" coords="317,573,493,613"/>
+<area shape="poly" id="edge14_Node000011_Node000012" title=" " alt="" coords="566,494,559,499,544,514,536,530,527,547,511,563,490,575,487,570,508,559,523,543,531,528,540,511,556,495,563,489"/>
+<area shape="rect" id="Node000023" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_af659ab8459593a819d70716506e76e19.html#af659ab8459593a819d70716506e76e19" title=" " alt="" coords="300,509,509,549"/>
+<area shape="poly" id="edge16_Node000011_Node000023" title=" " alt="" coords="552,491,479,511,477,506,550,486"/>
+<area shape="rect" id="Node000019" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a5268be2c592ea322ab9e4b7612bda7f7.html#a5268be2c592ea322ab9e4b7612bda7f7" title="Send a pre&#45;built JSON&#45;RPC request." alt="" coords="317,445,493,485"/>
+<area shape="poly" id="edge18_Node000011_Node000019" title=" " alt="" coords="546,467,493,467,493,462,546,462"/>
+<area shape="rect" id="Node000013" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_abcd0cfab5c8828fed71b4eb662761dc4.html#abcd0cfab5c8828fed71b4eb662761dc4" title=" " alt="" coords="5,541,252,581"/>
+<area shape="poly" id="edge15_Node000012_Node000013" title=" " alt="" coords="302,584,252,578,252,572,303,578"/>
+<area shape="poly" id="edge17_Node000023_Node000013" title=" " alt="" coords="287,545,253,549,252,544,286,540"/>
+<area shape="poly" id="edge21_Node000025_Node000012" title=" " alt="" coords="552,555,479,575,477,570,550,550"/>
+<area shape="poly" id="edge22_Node000025_Node000023" title=" " alt="" coords="544,531,510,531,510,526,544,526"/>
+<area shape="poly" id="edge25_Node000027_Node000002" title=" " alt="" coords="783,383,765,371,729,338,696,301,650,237,654,234,700,298,732,334,768,367,786,378"/>
+<area shape="poly" id="edge26_Node000027_Node000011" title=" " alt="" coords="769,432,713,447,711,442,767,427"/>
+<area shape="rect" id="Node000028" href="$d0/d34/classfl_1_1task_1_1_promise_a9af1464fc77b450d7f501f9a9caddf8a.html#a9af1464fc77b450d7f501f9a9caddf8a" title="Create a rejected Promise with error." alt="" coords="571,349,705,389"/>
+<area shape="poly" id="edge27_Node000027_Node000028" title=" " alt="" coords="767,395,705,384,706,378,768,390"/>
+<area shape="rect" id="Node000029" href="$db/d5c/namespacefl_1_1task_a0b58138871d6ab845d072723971b393d.html#a0b58138871d6ab845d072723971b393d" title="Convenience function to create a rejected Promise (const char* overload)" alt="" coords="319,253,490,293"/>
+<area shape="poly" id="edge28_Node000028_Node000029" title=" " alt="" coords="587,344,508,307,476,295,477,290,510,302,589,340"/>
+<area shape="rect" id="Node000030" href="$db/d5c/namespacefl_1_1task_af9b00b94fecdde360533514286ee0238.html#af9b00b94fecdde360533514286ee0238" title="Convenience function to create a rejected Promise." alt="" coords="319,317,490,357"/>
+<area shape="poly" id="edge29_Node000028_Node000030" title=" " alt="" coords="557,360,490,351,491,346,558,355"/>
+<area shape="rect" id="Node000031" href="$d0/d34/classfl_1_1task_1_1_promise_a1d7beb14a83c6bb2df0ef3775147318d.html#a1d7beb14a83c6bb2df0ef3775147318d" title="Create a rejected Promise with error message." alt="" coords="337,381,472,421"/>
+<area shape="poly" id="edge30_Node000028_Node000031" title=" " alt="" coords="558,382,472,394,472,389,557,377"/>
+<area shape="poly" id="edge32_Node000032_Node000002" title=" " alt="" coords="768,187,708,201,707,196,767,182"/>
+<area shape="poly" id="edge35_Node000034_Node000002" title=" " alt="" coords="767,226,707,222,708,217,768,221"/>
+<area shape="poly" id="edge38_Node000036_Node000002" title=" " alt="" coords="780,270,692,238,694,233,782,265"/>
+<area shape="poly" id="edge40_Node000037_Node000002" title=" " alt="" coords="825,542,764,441,741,389,716,338,651,237,656,234,721,335,745,387,769,438,829,540"/>
+<area shape="poly" id="edge41_Node000037_Node000025" title=" " alt="" coords="767,558,718,548,719,543,768,553"/>
+<area shape="poly" id="edge42_Node000037_Node000026" title=" " alt="" coords="784,602,769,613,753,633,745,651,737,671,720,691,702,703,699,698,717,687,733,668,741,649,749,630,765,609,781,597"/>
+<area shape="rect" id="Node000038" href="$d0/d34/classfl_1_1task_1_1_promise_a70811e463c0161394aae6e29b442b266.html#a70811e463c0161394aae6e29b442b266" title="Create a resolved Promise with value." alt="" coords="571,573,705,613"/>
+<area shape="poly" id="edge43_Node000037_Node000038" title=" " alt="" coords="768,583,706,589,705,584,767,578"/>
+<area shape="rect" id="Node000053" href="$d0/d34/classfl_1_1task_1_1_promise_a71f127c9ade421a1dd5203fc4f2cd113.html#a71f127c9ade421a1dd5203fc4f2cd113" title="Create a resolved Promise with value (move version)" alt="" coords="571,637,705,677"/>
+<area shape="poly" id="edge46_Node000037_Node000053" title=" " alt="" coords="786,600,720,627,690,639,688,634,718,622,784,595"/>
+<area shape="rect" id="Node000039" href="$d1/d13/namespacefl_1_1net_1_1http_a957091a69596c0de70d12e178c8bd57d.html#a957091a69596c0de70d12e178c8bd57d" title="Internal helper to execute a fetch request and return a promise." alt="" coords="329,637,481,677"/>
+<area shape="poly" id="edge44_Node000038_Node000039" title=" " alt="" coords="558,617,479,639,477,634,557,612"/>
+<area shape="rect" id="Node000052" href="$db/d5c/namespacefl_1_1task_aa3f17a59245199bde2c625c766db40f4.html#aa3f17a59245199bde2c625c766db40f4" title="Convenience function to create a resolved Promise." alt="" coords="318,701,491,741"/>
+<area shape="poly" id="edge45_Node000038_Node000052" title=" " alt="" coords="566,622,559,627,544,642,536,658,527,675,511,691,490,703,487,698,508,687,523,671,531,656,540,639,556,623,563,617"/>
+</map>

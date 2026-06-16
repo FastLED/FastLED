@@ -1,5 +1,17 @@
 <map id="/home/runner/work/FastLED/FastLED/examples/Ports/PJRCSpectrumAnalyzer/PJRCSpectrumAnalyzer.ino" name="/home/runner/work/FastLED/FastLED/examples/Ports/PJRCSpectrumAnalyzer/PJRCSpectrumAnalyzer.ino">
-<area shape="rect" id="Node000001" title="Creates an impressive LED light show to music input on the Teensy." alt="" coords="5,5,276,75"/>
-<area shape="rect" id="Node000002" title=" " alt="" coords="43,123,238,148"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="143,75,143,109,138,109,138,75"/>
+<area shape="rect" id="Node000001" title="Creates an impressive LED light show to music input on the Teensy." alt="" coords="202,5,473,75"/>
+<area shape="rect" id="Node000002" href="$de/d2f/_p_j_r_c_spectrum_analyzer_8h.html" title=" " alt="" coords="246,123,429,148"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="340,75,340,109,335,109,335,75"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,196,123,221"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="294,151,122,195,121,190,293,145"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="147,196,232,221"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="315,150,227,192,225,188,312,146"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="257,196,327,221"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="332,150,309,186,304,183,328,147"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="352,196,416,221"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="347,147,371,183,367,186,343,150"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="441,196,493,221"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="359,146,434,187,432,191,357,150"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="517,196,571,221"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="371,145,504,191,502,196,370,151"/>
 </map>

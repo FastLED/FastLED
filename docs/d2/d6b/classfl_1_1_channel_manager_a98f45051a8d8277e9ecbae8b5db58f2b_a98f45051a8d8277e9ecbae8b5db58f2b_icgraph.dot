@@ -1,0 +1,17 @@
+digraph "fl::ChannelManager::addDriver"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::ChannelManager\l::addDriver",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Add a driver with priority (higher priority = preferred)"];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::ChannelManager\l::setExclusiveDriver",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d6b/classfl_1_1_channel_manager_a71ca7642adaace950f92da2855df4cbc.html#a71ca7642adaace950f92da2855df4cbc",tooltip="Register a single driver at a priority above the platform default and disable all others (compile-tim..."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="CFastLED::setExclusiveDriver",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_a6d5e5bb1d08be99fb86a044a74bdf578.html#a6d5e5bb1d08be99fb86a044a74bdf578",tooltip="Register a single driver at a priority above the platform default (compile-time TU-linking variant)."];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="CFastLED::setExclusiveDriver",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dbb/class_c_fast_l_e_d_acf1fbe61fec65ce648a6d0eabd9c85bd.html#acf1fbe61fec65ce648a6d0eabd9c85bd",tooltip="Enable only one driver exclusively, runtime form (disables all others)"];
+  Node2 -> Node2 [id="edge4_Node000002_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fl/function.h File Reference</title>
+<title>FastLED: fl/stl/function.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -106,27 +106,25 @@ $(function(){initNavTree('dd/d67/function_8h.html','../../'); initResizable(true
   <div class="headertitle"><div class="title">function.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="../../dc/d18/memory_8h_source.html">fl/memory.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../df/d63/type__traits_8h_source.html">fl/type_traits.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d4/d54/compiler__control_8h_source.html">fl/compiler_control.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d6/d10/variant_8h_source.html">fl/variant.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d0/dda/memfill_8h_source.html">fl/memfill.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../db/d36/inplacenew_8h_source.html">fl/inplacenew.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../df/d72/bit__cast_8h_source.html">fl/bit_cast.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d1/ddf/align_8h_source.html">fl/align.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../df/d6a/shared__ptr_8h_source.html">fl/stl/shared_ptr.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d63/type__traits_8h_source.html">fl/stl/type_traits.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d54/compiler__control_8h_source.html">fl/stl/compiler_control.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/d10/variant_8h_source.html">fl/stl/variant.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dd/d8d/cstring_8h_source.html">fl/stl/cstring.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d7/d58/new_8h_source.html">fl/stl/new.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d1/ddf/align_8h_source.html">fl/stl/align.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d41/pair_8h_source.html">fl/stl/pair.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/d68/vector_8h_source.html">fl/stl/vector.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/dd9/algorithm_8h_source.html">fl/stl/algorithm.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d0/d1b/static__assert_8h_source.html">fl/stl/static_assert.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d1/dbc/sketch__macros_8h_source.html">fl/system/sketch_macros.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for function.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
 <div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d4/ded/function_8h__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
-</div>
-</div><div class="textblock"><div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> This graph shows which files directly or indirectly include this file:</div>
-<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
-</div>
-<div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d2/d88/function_8h__dep__incl.svg" width="100%" height="536"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../dd/d67/function_8h_source.html">Go to the source code of this file.</a></p>
@@ -135,10 +133,12 @@ $(function(){initNavTree('dd/d67/function_8h.html','../../'); initResizable(true
 Macros</h2></td></tr>
 <tr class="memitem:a255e85529978bb20dbf35a725491f8cf" id="r_a255e85529978bb20dbf35a725491f8cf"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d67/function_8h_a255e85529978bb20dbf35a725491f8cf.html#a255e85529978bb20dbf35a725491f8cf">FASTLED_INLINE_LAMBDA_SIZE</a>&#160;&#160;&#160;64</td></tr>
 <tr class="separator:a255e85529978bb20dbf35a725491f8cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab6f9e21899d42c4657e38fd5be9727ef" id="r_ab6f9e21899d42c4657e38fd5be9727ef"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d67/function_8h_ab6f9e21899d42c4657e38fd5be9727ef.html#ab6f9e21899d42c4657e38fd5be9727ef">FL_FUNCTION_FULL_VARIANT</a>&#160;&#160;&#160;0</td></tr>
+<tr class="separator:ab6f9e21899d42c4657e38fd5be9727ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ade8043ede62066d1f4666a7eece358d1" id="r_ade8043ede62066d1f4666a7eece358d1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d54/compiler__control_8h_a373eeaf762a6a66a0a6984bd204a72dd.html#a373eeaf762a6a66a0a6984bd204a72dd">FL_DISABLE_WARNING_PUSH</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d67/function_8h_ade8043ede62066d1f4666a7eece358d1.html#ade8043ede62066d1f4666a7eece358d1">FL_DISABLE_WARNING</a> (float-equal) namespace fl</td></tr>
+<tr class="memitem:ade8043ede62066d1f4666a7eece358d1" id="r_ade8043ede62066d1f4666a7eece358d1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../df/d96/s16x16x4_8h_a373eeaf762a6a66a0a6984bd204a72dd.html#a373eeaf762a6a66a0a6984bd204a72dd">FL_DISABLE_WARNING_PUSH</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d67/function_8h_ade8043ede62066d1f4666a7eece358d1.html#ade8043ede62066d1f4666a7eece358d1">FL_DISABLE_WARNING</a> (float-equal) namespace fl</td></tr>
 <tr class="separator:ade8043ede62066d1f4666a7eece358d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
@@ -147,8 +147,8 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dd/d67/function_8h.html">function.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_0dd6897a8ae40540acd9d694849e950e.html">stl</a></li><li class="navelem"><a class="el" href="../../dd/d67/function_8h.html">function.h</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

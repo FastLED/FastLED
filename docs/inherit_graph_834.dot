@@ -1,0 +1,10 @@
+digraph "Graphical Class Hierarchy"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node0 [id="Node000000",label="fl::is_fp_promotable\l\< fixed_point\< FromInt,\l FromFrac, FromSign \>,\l fixed_point\< ToInt, ToFrac,\l ToSign \> \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/dfc/structfl_1_1is__fp__promotable_3_01fixed__point_3_01_from_int_00_01_from_frac_00_01_from_sign_017f0dfba5719713031fc4fdbdd6658500.html",tooltip=" "];
+}

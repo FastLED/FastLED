@@ -1,0 +1,5 @@
+<map id="fl::spi::Lane::data" name="fl::spi::Lane::data">
+<area shape="rect" id="Node000001" title="Get const access to buffer data." alt="" coords="191,5,324,31"/>
+<area shape="rect" id="Node000002" href="$d3/d3e/classfl_1_1spi_1_1_lane_ac852fb2936ca20728c33c63976d979a9.html#ac852fb2936ca20728c33c63976d979a9" title="Write data to this lane&#39;s buffer." alt="" coords="5,5,143,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="177,21,143,21,143,15,177,15"/>
+</map>

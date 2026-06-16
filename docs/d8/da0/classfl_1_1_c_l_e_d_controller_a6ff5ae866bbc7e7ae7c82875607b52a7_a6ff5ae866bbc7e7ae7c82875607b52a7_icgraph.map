@@ -1,0 +1,9 @@
+<map id="fl::CLEDController::setLeds" name="fl::CLEDController::setLeds">
+<area shape="rect" id="Node000001" title="Set the default array of LEDs to be used by this controller." alt="" coords="229,47,365,87"/>
+<area shape="rect" id="Node000002" href="$d5/d8b/classfl_1_1_channel_a73b662986c55cfb31ff1e72065df03dd.html#a73b662986c55cfb31ff1e72065df03dd" title="Private constructor (use create() factory method)" alt="" coords="17,5,169,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="215,50,146,33,147,28,216,45"/>
+<area shape="rect" id="Node000003" href="$d5/d8b/classfl_1_1_channel_a547ccb4c09f235fdad54564198d19028.html#a547ccb4c09f235fdad54564198d19028" title="Backwards&#45;compatible constructor (deprecated)" alt="" coords="17,55,169,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="215,70,169,70,169,65,215,65"/>
+<area shape="rect" id="Node000004" href="$d5/d8b/classfl_1_1_channel_a4fd9736141ec00c1a8f5db47a0af1882.html#a4fd9736141ec00c1a8f5db47a0af1882" title="Apply reconfigurable settings from a ChannelConfig." alt="" coords="5,104,181,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="216,90,147,106,146,101,215,84"/>
+</map>

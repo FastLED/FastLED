@@ -1,0 +1,17 @@
+<map id="fl::audio::detector::EqualizerDetector::computeBinCenters" name="fl::audio::detector::EqualizerDetector::computeBinCenters">
+<area shape="rect" id="Node000001" title=" " alt="" coords="851,104,1009,159"/>
+<area shape="rect" id="Node000002" href="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_aa776078eebff89abfe3d074504fe7e94.html#aa776078eebff89abfe3d074504fe7e94" title=" " alt="" coords="600,71,803,125"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="836,120,802,115,803,110,837,115"/>
+<area shape="rect" id="Node000006" href="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_a3a263b257d55afc4ace05d432939e792.html#a3a263b257d55afc4ace05d432939e792" title="Set microphone correction profile (propagated from Processor)." alt="" coords="405,136,552,191"/>
+<area shape="poly" id="edge8_Node000001_Node000006" title=" " alt="" coords="837,141,552,161,552,156,837,135"/>
+<area shape="rect" id="Node000003" href="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_a3f8cf150db9a60e9bad0ce8147c3586c.html#a3f8cf150db9a60e9bad0ce8147c3586c" title=" " alt="" coords="405,5,552,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="594,69,551,57,553,52,595,64"/>
+<area shape="rect" id="Node000005" href="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_a88188f71bc78dc8603f86597cec368a2.html#a88188f71bc78dc8603f86597cec368a2" title="Reconfigure equalizer tuning parameters at runtime." alt="" coords="211,83,357,137"/>
+<area shape="poly" id="edge7_Node000002_Node000005" title=" " alt="" coords="586,104,358,111,357,105,586,99"/>
+<area shape="rect" id="Node000004" href="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_a54bcd91a63476c263a89b1193d771535.html#a54bcd91a63476c263a89b1193d771535" title=" " alt="" coords="5,39,163,93"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="392,37,211,49,163,55,162,50,210,43,391,32"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="398,68,354,85,352,80,396,63"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="197,94,162,86,164,81,198,88"/>
+<area shape="poly" id="edge6_Node000005_Node000005" title=" " alt="" coords="316,72,304,64,284,61,267,63,256,68,251,74,251,83,246,83,246,73,253,64,265,58,284,56,306,59,319,67"/>
+<area shape="poly" id="edge9_Node000006_Node000005" title=" " alt="" coords="392,142,357,133,358,128,393,137"/>
+</map>

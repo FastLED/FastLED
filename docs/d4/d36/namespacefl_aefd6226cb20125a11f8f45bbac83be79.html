@@ -109,30 +109,25 @@ $(function(){initNavTree('d4/d36/namespacefl_aefd6226cb20125a11f8f45bbac83be79.h
         <tr>
           <td class="memname">void fl::set_rgb_2_rgbw_function </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="../../d4/d36/namespacefl_a1f4422720269b68ccca40ddd7c756468.html#a1f4422720269b68ccca40ddd7c756468">rgb_2_rgbw_function</a></td>          <td class="paramname"><span class="paramname"><em>func</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="../../d4/d36/namespacefl_a8c314e86da46874360e5f1559895c4b8.html#a8c314e86da46874360e5f1559895c4b8">rgb_2_rgbw_function</a></td>          <td class="paramname"><span class="paramname"><em>func</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d1/d8d/rgbw_8cpp_source.html#l00118">118</a> of file <a class="el" href="../../d1/d8d/rgbw_8cpp_source.html">rgbw.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  118</span>                                                       {</div>
-<div class="line"><span class="lineno">  119</span>    <span class="keywordflow">if</span> (func == <span class="keyword">nullptr</span>) {</div>
-<div class="line"><span class="lineno">  120</span>        <a class="code hl_variable" href="../../d4/d36/namespacefl_a0299c39f1f1d292af88b88942a62e96e.html#a0299c39f1f1d292af88b88942a62e96e">g_user_function</a> = <a class="code hl_function" href="../../d4/d36/namespacefl_a35c82b15730d0dfc7cff6d8c01195efa.html#a35c82b15730d0dfc7cff6d8c01195efa">rgb_2_rgbw_exact</a>;</div>
-<div class="line"><span class="lineno">  121</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  122</span>    }</div>
-<div class="line"><span class="lineno">  123</span>    <a class="code hl_variable" href="../../d4/d36/namespacefl_a0299c39f1f1d292af88b88942a62e96e.html#a0299c39f1f1d292af88b88942a62e96e">g_user_function</a> = func;</div>
-<div class="line"><span class="lineno">  124</span>}</div>
-<div class="ttc" id="anamespacefl_a0299c39f1f1d292af88b88942a62e96e_html_a0299c39f1f1d292af88b88942a62e96e"><div class="ttname"><a href="../../d4/d36/namespacefl_a0299c39f1f1d292af88b88942a62e96e.html#a0299c39f1f1d292af88b88942a62e96e">fl::g_user_function</a></div><div class="ttdeci">rgb_2_rgbw_function g_user_function</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d8d/rgbw_8cpp_source.html#l00116">rgbw.cpp:116</a></div></div>
-<div class="ttc" id="anamespacefl_a35c82b15730d0dfc7cff6d8c01195efa_html_a35c82b15730d0dfc7cff6d8c01195efa"><div class="ttname"><a href="../../d4/d36/namespacefl_a35c82b15730d0dfc7cff6d8c01195efa.html#a35c82b15730d0dfc7cff6d8c01195efa">fl::rgb_2_rgbw_exact</a></div><div class="ttdeci">void rgb_2_rgbw_exact(uint16_t w_color_temperature, uint8_t r, uint8_t g, uint8_t b, uint8_t r_scale, uint8_t g_scale, uint8_t b_scale, uint8_t *out_r, uint8_t *out_g, uint8_t *out_b, uint8_t *out_w)</div><div class="ttdoc">Converts RGB to RGBW using a color transfer method from saturated color channels to white.</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d8d/rgbw_8cpp_source.html#l00041">rgbw.cpp:41</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../df/d5d/rgbw_8cpp_8hpp_source.html#l00173">173</a> of file <a class="el" href="../../df/d5d/rgbw_8cpp_8hpp_source.html">rgbw.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  173</span>                                                       {</div>
+<div class="line"><span class="lineno">  174</span>    <a class="code hl_function" href="../../d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01">fl::Singleton&lt;Rgb2RgbwUserState&gt;::instance</a>().fn = func;</div>
+<div class="line"><span class="lineno">  175</span>}</div>
+<div class="ttc" id="aclassfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01_html_a47fdc044003ec27f9e9833f7f5418e01"><div class="ttname"><a href="../../d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01">fl::Singleton::instance</a></div><div class="ttdeci">static T &amp; instance() FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d0b/singleton_8h_source.html#l00041">singleton.h:41</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d1/d8d/rgbw_8cpp_source.html#l00116">g_user_function</a>, and <a class="el" href="../../d1/d8d/rgbw_8cpp_source.html#l00041">rgb_2_rgbw_exact()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d0b/singleton_8h_source.html#l00041">fl::Singleton&lt; T, N &gt;::instance()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_aefd6226cb20125a11f8f45bbac83be79_aefd6226cb20125a11f8f45bbac83be79_cgraph.svg" width="467" height="51"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d4/d36/namespacefl_aefd6226cb20125a11f8f45bbac83be79_aefd6226cb20125a11f8f45bbac83be79_cgraph.svg" width="362" height="51"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -144,7 +139,7 @@ $(function(){initNavTree('d4/d36/namespacefl_aefd6226cb20125a11f8f45bbac83be79.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:22 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:04 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

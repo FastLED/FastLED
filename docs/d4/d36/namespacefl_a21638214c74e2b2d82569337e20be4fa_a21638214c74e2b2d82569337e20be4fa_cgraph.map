@@ -1,0 +1,13 @@
+<map id="fl::wave8Transpose_4" name="fl::wave8Transpose_4">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,167,80"/>
+<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail_a66fa111cf8d1f98b7ecda4f2d97b8d75.html#a66fa111cf8d1f98b7ecda4f2d97b8d75" title="Byte&#45;indexed expansion (#2526): one indexed 8&#45;byte copy." alt="" coords="215,29,432,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="166,56,201,52,201,58,167,61"/>
+<area shape="rect" id="Node000007" href="$df/d9e/namespacefl_1_1detail_ae1d58a1cf30e78fd6c61de082f55e870.html#ae1d58a1cf30e78fd6c61de082f55e870" title="Transpose 4 lanes of Wave8Byte data into interleaved format." alt="" coords="217,79,429,104"/>
+<area shape="poly" id="edge5_Node000001_Node000007" title=" " alt="" coords="167,73,204,77,203,82,167,78"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ad2b40cc7124494efca5c352857dabc75.html#ad2b40cc7124494efca5c352857dabc75" title=" " alt="" coords="494,5,609,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="432,28,480,23,480,28,432,33"/>
+<area shape="rect" id="Node000006" href="$d6/d93/namespacefl_1_1isr_ac523cbf336c4932a0edbd894800e1d26.html#ac523cbf336c4932a0edbd894800e1d26" title="ISR&#45;optimized 32&#45;bit block copy for 4&#45;byte aligned memory." alt="" coords="480,55,623,80"/>
+<area shape="poly" id="edge4_Node000002_Node000006" title=" " alt="" coords="432,51,466,55,466,61,432,57"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_ad200a6a214a70194b7c33fd67af6cea4.html#ad200a6a214a70194b7c33fd67af6cea4" title=" " alt="" coords="671,5,760,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="609,15,657,15,657,21,609,21"/>
+</map>

@@ -1,20 +1,26 @@
 var topics =
 [
+    [ "Async Logging (ISR-Safe)", "d5/d54/group__log__async.html", "d5/d54/group__log__async" ],
     [ "Color Blurring Functions", "d5/d3d/group___color_blurs.html", "d5/d3d/group___color_blurs" ],
     [ "Color Correction/Temperature", "d0/d89/group___color_enums.html", "d0/d89/group___color_enums" ],
+    [ "Color Fade Functions", "d3/d1c/group___color_fades.html", "d3/d1c/group___color_fades" ],
+    [ "Color Palettes", "d4/d98/group___color_palettes.html", "d4/d98/group___color_palettes" ],
     [ "Color Utility Functions", "d9/da8/group___color_utils.html", "d9/da8/group___color_utils" ],
-    [ "ColorPalettes", "d4/d98/group___color_palettes.html", "d4/d98/group___color_palettes" ],
     [ "Fast Math Functions", "df/da2/group__lib8tion.html", "df/da2/group__lib8tion" ],
     [ "Fast Memory Functions for AVR", "d6/de6/group___fast_memory.html", "d6/de6/group___fast_memory" ],
     [ "HSV to RGB Conversion Functions", "dd/dc7/group___h_s_v2_r_g_b.html", "dd/dc7/group___h_s_v2_r_g_b" ],
+    [ "Hardware Interface Logging", "d8/d1c/group__log__hw__interfaces.html", "d8/d1c/group__log__hw__interfaces" ],
     [ "Input", "dc/df1/group__input.html", "dc/df1/group__input" ],
     [ "LED Chipset Controllers", "d4/d28/group___chipsets.html", "d4/d28/group___chipsets" ],
     [ "Noise Fill Functions", "de/da4/group___noise_fill.html", "de/da4/group___noise_fill" ],
     [ "Noise Functions", "d8/d5c/group___noise.html", "d8/d5c/group___noise" ],
     [ "Output", "d7/db2/group__output.html", "d7/db2/group__output" ],
+    [ "Palette Classes", "d6/d39/group___palette_classes.html", "d6/d39/group___palette_classes" ],
     [ "Pixel Data Sets", "de/d64/group___pixel_set.html", "de/d64/group___pixel_set" ],
     [ "Pixel Data Types (CRGB/CHSV)", "db/d87/group___pixel_types.html", "db/d87/group___pixel_types" ],
     [ "Power Management Functions", "d3/d1d/group___power.html", "d3/d1d/group___power" ],
+    [ "Shape Noise Functions", "d7/dc3/group___shape_noise.html", "d7/dc3/group___shape_noise" ],
     [ "Thru", "df/d55/group__thru.html", "df/d55/group__thru" ],
-    [ "Timekeeping Functions", "d5/df2/group___timekeeping.html", "d5/df2/group___timekeeping" ]
+    [ "Timekeeping Functions", "d5/df2/group___timekeeping.html", "d5/df2/group___timekeeping" ],
+    [ "Waveform Beat Generators", "d6/d6c/group___beat_generators.html", "d6/d6c/group___beat_generators" ]
 ];

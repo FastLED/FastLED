@@ -106,13 +106,13 @@ $(function(){initNavTree('d0/d40/class_l_p_d6803_controller_a90d8b0c2141ed53c25a
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> DATA_PIN, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> CLOCK_PIN, <a class="el" href="../../d4/d36/namespacefl_ab289ace8bd149d39b87ebd778e9abe23.html#ab289ace8bd149d39b87ebd778e9abe23">EOrder</a> RGB_ORDER = RGB, uint32_t SPI_SPEED = DATA_RATE_MHZ(12)&gt; </div>
+template&lt;int DATA_PIN, <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> CLOCK_PIN, <a class="el" href="../../d4/d36/namespacefl_ab289ace8bd149d39b87ebd778e9abe23.html#ab289ace8bd149d39b87ebd778e9abe23">EOrder</a> RGB_ORDER = RGB, fl::u32 SPI_SPEED = DATA_RATE_MHZ(12)&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void <a class="el" href="../../d0/d40/class_l_p_d6803_controller.html">LPD6803Controller</a>&lt; <a class="el" href="../../d8/d21/_adafruit_bridge_8ino_adad67fe595ea440c8f8247ec2cddf070.html#adad67fe595ea440c8f8247ec2cddf070">DATA_PIN</a>, <a class="el" href="../../d0/dc3/_blink_8ino_a23b348310475af5d6544794f1a167ee8.html#a23b348310475af5d6544794f1a167ee8">CLOCK_PIN</a>, RGB_ORDER, SPI_SPEED &gt;::init </td>
+          <td class="memname">virtual void <a class="el" href="../../d0/d40/class_l_p_d6803_controller.html">LPD6803Controller</a>&lt; <a class="el" href="../../df/d01/_client_real_8h_adad67fe595ea440c8f8247ec2cddf070.html#adad67fe595ea440c8f8247ec2cddf070">DATA_PIN</a>, <a class="el" href="../../d0/dc3/_blink_8ino_a23b348310475af5d6544794f1a167ee8.html#a23b348310475af5d6544794f1a167ee8">CLOCK_PIN</a>, <a class="el" href="../../d3/d8b/_parallel___i_o_8ino_a87eecf85eebf5be8fb74183807e8e2f0.html#a87eecf85eebf5be8fb74183807e8e2f0">RGB_ORDER</a>, SPI_SPEED &gt;::init </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -127,15 +127,15 @@ template&lt;<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2b
 
 <p>Initialize the LED controller. </p>
 
-<p>Implements <a class="el" href="../../d6/d2c/class_c_l_e_d_controller_af877a15a5ec452780fbd1d359b8a9913.html#af877a15a5ec452780fbd1d359b8a9913">CLEDController</a>.</p>
+<p>Implements <a class="el" href="../../d8/da0/classfl_1_1_c_l_e_d_controller_a88f575d8cc3b1aadba8f88d97a0119d6.html#a88f575d8cc3b1aadba8f88d97a0119d6">fl::CLEDController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/d66/chipsets_8h_source.html#l00346">346</a> of file <a class="el" href="../../db/d66/chipsets_8h_source.html">chipsets.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  346</span>                        {</div>
-<div class="line"><span class="lineno">  347</span>        <a class="code hl_variable" href="../../d0/d40/class_l_p_d6803_controller_ab3b2929f97813d80e93e464270fce843.html#ab3b2929f97813d80e93e464270fce843">mSPI</a>.init();</div>
-<div class="line"><span class="lineno">  348</span>    }</div>
-<div class="ttc" id="aclass_l_p_d6803_controller_ab3b2929f97813d80e93e464270fce843_html_ab3b2929f97813d80e93e464270fce843"><div class="ttname"><a href="../../d0/d40/class_l_p_d6803_controller_ab3b2929f97813d80e93e464270fce843.html#ab3b2929f97813d80e93e464270fce843">LPD6803Controller::mSPI</a></div><div class="ttdeci">SPI mSPI</div><div class="ttdef"><b>Definition</b> <a href="../../db/d66/chipsets_8h_source.html#l00338">chipsets.h:338</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../dd/d1b/lpd880x_8h_source.html#l00113">113</a> of file <a class="el" href="../../dd/d1b/lpd880x_8h_source.html">lpd880x.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  113</span>                        {</div>
+<div class="line"><span class="lineno">  114</span>        <a class="code hl_variable" href="../../d0/d40/class_l_p_d6803_controller_ab3b2929f97813d80e93e464270fce843.html#ab3b2929f97813d80e93e464270fce843">mSPI</a>.init();</div>
+<div class="line"><span class="lineno">  115</span>    }</div>
+<div class="ttc" id="aclass_l_p_d6803_controller_ab3b2929f97813d80e93e464270fce843_html_ab3b2929f97813d80e93e464270fce843"><div class="ttname"><a href="../../d0/d40/class_l_p_d6803_controller_ab3b2929f97813d80e93e464270fce843.html#ab3b2929f97813d80e93e464270fce843">LPD6803Controller::mSPI</a></div><div class="ttdeci">SPI mSPI</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d1b/lpd880x_8h_source.html#l00105">lpd880x.h:105</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../db/d66/chipsets_8h_source.html#l00338">mSPI</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d1b/lpd880x_8h_source.html#l00105">mSPI</a>.</p>
 
 </div>
 </div>
@@ -146,7 +146,7 @@ template&lt;<a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2b
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d0/d40/class_l_p_d6803_controller.html">LPD6803Controller</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

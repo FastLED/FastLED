@@ -1,0 +1,6 @@
+<map id="test_stress.stress_test_rapid" name="test_stress.stress_test_rapid">
+<area shape="rect" id="Node000001" title=" " alt="" coords="184,22,320,62"/>
+<area shape="rect" id="Node000002" href="$d5/d22/namespacetest__stress_a573611374b6e37c513fa105c70539c3c.html#a573611374b6e37c513fa105c70539c3c" title=" " alt="" coords="5,29,136,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="170,45,136,45,136,39,170,39"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="103,19,93,11,71,8,52,10,42,15,39,20,45,28,41,31,34,21,38,11,50,5,71,3,96,6,106,15"/>
+</map>

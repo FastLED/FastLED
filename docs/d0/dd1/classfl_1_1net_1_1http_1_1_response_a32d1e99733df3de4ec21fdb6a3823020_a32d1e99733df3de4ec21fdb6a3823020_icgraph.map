@@ -1,0 +1,15 @@
+<map id="fl::net::http::Response::get_header" name="fl::net::http::Response::get_header">
+<area shape="rect" id="Node000001" title="Get header value (like JavaScript response.headers.get())" alt="" coords="835,25,999,65"/>
+<area shape="rect" id="Node000002" href="$d0/dd1/classfl_1_1net_1_1http_1_1_response_a8e0b95a5583b711afd86ac267ca2c203.html#a8e0b95a5583b711afd86ac267ca2c203" title="Get content type convenience method." alt="" coords="623,25,787,65"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="821,47,787,47,787,42,821,42"/>
+<area shape="rect" id="Node000003" href="$d0/dd1/classfl_1_1net_1_1http_1_1_response_a51705ec3125666014aafa0b6b23131b2.html#a51705ec3125666014aafa0b6b23131b2" title="Check if response appears to contain JSON content." alt="" coords="411,25,575,65"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="609,47,575,47,575,42,609,42"/>
+<area shape="rect" id="Node000004" href="$d0/dd1/classfl_1_1net_1_1http_1_1_response_ab146220738b78d1340286c6e914ed666.html#ab146220738b78d1340286c6e914ed666" title="Response body parsed as JSON (JavaScript&#45;like API)" alt="" coords="199,25,363,65"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="397,47,363,47,363,42,397,42"/>
+<area shape="rect" id="Node000005" href="$d9/dce/_client_validation_real_8h_a48d1b41170d4da38b2d99148b76a9a22.html#a48d1b41170d4da38b2d99148b76a9a22" title=" " alt="" coords="9,5,147,31"/>
+<area shape="poly" id="edge6_Node000003_Node000005" title=" " alt="" coords="410,24,362,15,249,10,148,14,148,9,249,4,363,10,411,19"/>
+<area shape="rect" id="Node000007" href="$d9/dce/_client_validation_real_8h_ad90185b2a71aa34da786634a378ac25b.html#ad90185b2a71aa34da786634a378ac25b" title=" " alt="" coords="5,59,151,84"/>
+<area shape="poly" id="edge7_Node000003_Node000007" title=" " alt="" coords="411,71,363,79,252,85,151,81,151,76,252,80,362,74,410,65"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="185,35,147,30,148,24,185,29"/>
+<area shape="poly" id="edge5_Node000004_Node000007" title=" " alt="" coords="185,60,151,64,150,59,185,55"/>
+</map>

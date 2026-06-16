@@ -115,26 +115,33 @@ $(function(){initNavTree('de/d10/classfl_1_1_rectangular_draw_buffer_a1b9f52c3cc
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d3/d8d/rectangular__draw__buffer_8cpp_source.html#l00079">79</a> of file <a class="el" href="../../d3/d8d/rectangular__draw__buffer_8cpp_source.html">rectangular_draw_buffer.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   79</span>                                                    {</div>
-<div class="line"><span class="lineno">   80</span>    u32 max_bytes = 0;</div>
-<div class="line"><span class="lineno">   81</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> it = <a class="code hl_variable" href="../../de/d10/classfl_1_1_rectangular_draw_buffer_a68960104c3757c1330973e2912b97045.html#a68960104c3757c1330973e2912b97045">mDrawList</a>.begin(); it != <a class="code hl_variable" href="../../de/d10/classfl_1_1_rectangular_draw_buffer_a68960104c3757c1330973e2912b97045.html#a68960104c3757c1330973e2912b97045">mDrawList</a>.end(); ++it) {</div>
-<div class="line"><span class="lineno">   82</span>        max_bytes = <a class="code hl_define" href="../../d8/db8/math__macros_8h_afa99ec4acc4ecb2dc3c2d05da15d0e3f.html#afa99ec4acc4ecb2dc3c2d05da15d0e3f">MAX</a>(max_bytes, it-&gt;mNumBytes);</div>
-<div class="line"><span class="lineno">   83</span>    }</div>
-<div class="line"><span class="lineno">   84</span>    <span class="keywordflow">return</span> max_bytes;</div>
-<div class="line"><span class="lineno">   85</span>}</div>
-<div class="ttc" id="aclassfl_1_1_rectangular_draw_buffer_a68960104c3757c1330973e2912b97045_html_a68960104c3757c1330973e2912b97045"><div class="ttname"><a href="../../de/d10/classfl_1_1_rectangular_draw_buffer_a68960104c3757c1330973e2912b97045.html#a68960104c3757c1330973e2912b97045">fl::RectangularDrawBuffer::mDrawList</a></div><div class="ttdeci">DrawList mDrawList</div><div class="ttdef"><b>Definition</b> <a href="../../d9/df3/rectangular__draw__buffer_8h_source.html#l00082">rectangular_draw_buffer.h:82</a></div></div>
-<div class="ttc" id="amath__macros_8h_afa99ec4acc4ecb2dc3c2d05da15d0e3f_html_afa99ec4acc4ecb2dc3c2d05da15d0e3f"><div class="ttname"><a href="../../d8/db8/math__macros_8h_afa99ec4acc4ecb2dc3c2d05da15d0e3f.html#afa99ec4acc4ecb2dc3c2d05da15d0e3f">MAX</a></div><div class="ttdeci">#define MAX(a, b)</div><div class="ttdef"><b>Definition</b> <a href="../../d8/db8/math__macros_8h_source.html#l00045">math_macros.h:45</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d0/d38/rectangular__draw__buffer_8cpp_8hpp_source.html#l00080">80</a> of file <a class="el" href="../../d0/d38/rectangular__draw__buffer_8cpp_8hpp_source.html">rectangular_draw_buffer.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   80</span>                                                    {</div>
+<div class="line"><span class="lineno">   81</span>    u32 max_bytes = 0;</div>
+<div class="line"><span class="lineno">   82</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> it = <a class="code hl_variable" href="../../de/d10/classfl_1_1_rectangular_draw_buffer_a68960104c3757c1330973e2912b97045.html#a68960104c3757c1330973e2912b97045">mDrawList</a>.begin(); it != <a class="code hl_variable" href="../../de/d10/classfl_1_1_rectangular_draw_buffer_a68960104c3757c1330973e2912b97045.html#a68960104c3757c1330973e2912b97045">mDrawList</a>.end(); ++it) {</div>
+<div class="line"><span class="lineno">   83</span>        max_bytes = <a class="code hl_function" href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">fl::max</a>(max_bytes, it-&gt;mNumBytes);</div>
+<div class="line"><span class="lineno">   84</span>    }</div>
+<div class="line"><span class="lineno">   85</span>    <span class="keywordflow">return</span> max_bytes;</div>
+<div class="line"><span class="lineno">   86</span>}</div>
+<div class="ttc" id="aclassfl_1_1_rectangular_draw_buffer_a68960104c3757c1330973e2912b97045_html_a68960104c3757c1330973e2912b97045"><div class="ttname"><a href="../../de/d10/classfl_1_1_rectangular_draw_buffer_a68960104c3757c1330973e2912b97045.html#a68960104c3757c1330973e2912b97045">fl::RectangularDrawBuffer::mDrawList</a></div><div class="ttdeci">DrawList mDrawList</div><div class="ttdef"><b>Definition</b> <a href="../../d9/df3/rectangular__draw__buffer_8h_source.html#l00086">rectangular_draw_buffer.h:86</a></div></div>
+<div class="ttc" id="anamespacefl_a19ba0dae8249e0cf164136846f85e909_html_a19ba0dae8249e0cf164136846f85e909"><div class="ttname"><a href="../../d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909">fl::max</a></div><div class="ttdeci">constexpr common_type_t&lt; T, U &gt; max(T a, U b) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../df/db1/math_8h_source.html#l00075">math.h:75</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d8/db8/math__macros_8h_source.html#l00045">MAX</a>, and <a class="el" href="../../d9/df3/rectangular__draw__buffer_8h_source.html#l00082">mDrawList</a>.</p>
+<p class="reference">References <a class="el" href="../../df/db1/math_8h_source.html#l00075">fl::max()</a>, and <a class="el" href="../../d9/df3/rectangular__draw__buffer_8h_source.html#l00086">mDrawList</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d3/d8d/rectangular__draw__buffer_8cpp_source.html#l00093">getBlockInfo()</a>, and <a class="el" href="../../d3/d8d/rectangular__draw__buffer_8cpp_source.html#l00087">getTotalBytes()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../de/d10/classfl_1_1_rectangular_draw_buffer_ada51b33f27f50070f13473dd195d1f04.html#ada51b33f27f50070f13473dd195d1f04">~RectangularDrawBuffer()</a>, <a class="el" href="../../d0/d38/rectangular__draw__buffer_8cpp_8hpp_source.html#l00094">getBlockInfo()</a>, and <a class="el" href="../../d0/d38/rectangular__draw__buffer_8cpp_8hpp_source.html#l00088">getTotalBytes()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../de/d10/classfl_1_1_rectangular_draw_buffer_a1b9f52c3ccf598b0cb78a01d0b71196d_a1b9f52c3ccf598b0cb78a01d0b71196d_icgraph.svg" width="100%" height="386"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../de/d10/classfl_1_1_rectangular_draw_buffer_a1b9f52c3ccf598b0cb78a01d0b71196d_a1b9f52c3ccf598b0cb78a01d0b71196d_cgraph.svg" width="315" height="51"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+<div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
+<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-1-content" class="dyncontent" style="display:none;">
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../de/d10/classfl_1_1_rectangular_draw_buffer_a1b9f52c3ccf598b0cb78a01d0b71196d_a1b9f52c3ccf598b0cb78a01d0b71196d_icgraph.svg" width="100%" height="427"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 
 </div>
@@ -146,7 +153,7 @@ $(function(){initNavTree('de/d10/classfl_1_1_rectangular_draw_buffer_a1b9f52c3cc
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../de/d10/classfl_1_1_rectangular_draw_buffer.html">RectangularDrawBuffer</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:06 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

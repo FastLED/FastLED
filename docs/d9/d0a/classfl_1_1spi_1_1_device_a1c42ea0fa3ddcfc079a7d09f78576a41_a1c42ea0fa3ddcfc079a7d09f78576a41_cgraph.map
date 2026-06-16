@@ -1,0 +1,5 @@
+<map id="fl::spi::Device::begin" name="fl::spi::Device::begin">
+<area shape="rect" id="Node000001" title="Initialize the SPI hardware." alt="" coords="5,5,160,31"/>
+<area shape="rect" id="Node000002" href="$d4/dad/classfl_1_1vector__basic_af188bd6e2b911e1127f3ef37b4b90143.html#af188bd6e2b911e1127f3ef37b4b90143" title=" " alt="" coords="208,5,379,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="160,15,194,15,194,21,160,21"/>
+</map>

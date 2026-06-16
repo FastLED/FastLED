@@ -1,0 +1,9 @@
+<map id="fl::asset_ref::asset_ref" name="fl::asset_ref::asset_ref">
+<area shape="rect" id="Node000001" title="Copy/move: trivial — pointer + length." alt="" coords="5,31,171,56"/>
+<area shape="rect" id="Node000002" href="$d9/dac/classfl_1_1asset__ref_abae89069657722bc2b868b1beb361045.html#abae89069657722bc2b868b1beb361045" title="Construct from a pointer to a null&#45;terminated string with known length." alt="" coords="219,31,384,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="171,41,205,41,205,46,171,46"/>
+<area shape="rect" id="Node000003" href="$d6/daf/direct_8h_a1ddd0aa76a31f81b55f0ffccc1f3d4de.html#a1ddd0aa76a31f81b55f0ffccc1f3d4de" title=" " alt="" coords="468,5,531,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="384,30,454,21,455,26,385,35"/>
+<area shape="rect" id="Node000004" href="$d9/dac/classfl_1_1asset__ref_a3eb90fc9da8f94b558663ffd6ea38caa.html#a3eb90fc9da8f94b558663ffd6ea38caa" title="The relative asset path as a string view (e.g. &quot;data/track.mp3&quot;)." alt="" coords="432,55,567,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="385,51,418,55,418,60,384,56"/>
+</map>

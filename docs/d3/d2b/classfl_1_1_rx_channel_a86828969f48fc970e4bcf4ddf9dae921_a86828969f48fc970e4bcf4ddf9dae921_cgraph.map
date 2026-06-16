@@ -1,0 +1,20 @@
+<map id="fl::RxChannel::getPin" name="fl::RxChannel::getPin">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,104,163,129"/>
+<area shape="poly" id="edge10_Node000001_Node000001" title=" " alt="" coords="48,106,41,96,45,86,59,80,84,77,114,81,126,90,123,94,112,86,84,83,61,85,48,90,46,95,52,102"/>
+<area shape="rect" id="Node000002" href="$d3/d2b/classfl_1_1_rx_channel_aefea876735fd558d40b63698222aa634.html#aefea876735fd558d40b63698222aa634" title=" " alt="" coords="211,104,397,129"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="163,114,197,114,197,119,163,119"/>
+<area shape="rect" id="Node000003" href="$d3/d2b/classfl_1_1_rx_channel_abc90bc5973308d672d3577eba69013f1.html#abc90bc5973308d672d3577eba69013f1" title=" " alt="" coords="463,29,618,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="337,101,445,63,472,56,473,61,446,69,339,106"/>
+<area shape="rect" id="Node000004" href="$d3/d2b/classfl_1_1_rx_channel_a76e4a6ee54cd7d0e180d42f556cdc67f.html#a76e4a6ee54cd7d0e180d42f556cdc67f" title=" " alt="" coords="445,79,636,104"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="397,104,431,100,432,106,398,109"/>
+<area shape="rect" id="Node000006" href="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a" title=" " alt="" coords="495,128,586,153"/>
+<area shape="poly" id="edge7_Node000002_Node000006" title=" " alt="" coords="398,123,482,132,481,137,397,129"/>
+<area shape="rect" id="Node000007" href="$d3/d2b/classfl_1_1_rx_channel_a65cefe3f7a857a7b67903d2f4ef22a77.html#a65cefe3f7a857a7b67903d2f4ef22a77" title=" " alt="" coords="462,177,619,203"/>
+<area shape="poly" id="edge8_Node000002_Node000007" title=" " alt="" coords="341,127,446,162,477,171,476,176,445,167,339,132"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="503,31,494,21,499,11,514,5,541,3,574,7,586,16,583,20,572,11,541,8,516,10,502,15,499,20,506,27"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a00be5c89d851d3cf8f72d28097905f42.html#a00be5c89d851d3cf8f72d28097905f42" title=" " alt="" coords="729,79,824,104"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="636,89,715,89,715,94,636,94"/>
+<area shape="poly" id="edge6_Node000005_Node000005" title=" " alt="" coords="739,80,730,70,735,60,750,54,777,52,810,56,822,65,819,70,808,61,777,57,752,59,738,64,735,70,742,77"/>
+<area shape="rect" id="Node000008" href="$da/d98/classfl_1_1_atomic_fake_ae7cc69cf515cdd4f11f4ed9b44b0ef83.html#ae7cc69cf515cdd4f11f4ed9b44b0ef83" title=" " alt="" coords="684,177,869,203"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="620,187,670,187,670,193,620,193"/>
+</map>

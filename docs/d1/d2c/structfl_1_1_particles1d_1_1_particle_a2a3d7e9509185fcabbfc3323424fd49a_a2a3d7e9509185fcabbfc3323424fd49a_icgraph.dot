@@ -1,0 +1,14 @@
+digraph "fl::Particles1d::Particle::getPower"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::Particles1d::Particle\l::getPower",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::Particles1d::Particle\l::draw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d2c/structfl_1_1_particles1d_1_1_particle_a00274cfabaae10ea0ebdb0666627977b.html#a00274cfabaae10ea0ebdb0666627977b",tooltip="Render particle with sub-pixel accuracy and power-modulated color."];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::Particles1d::Particle\l::update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d2c/structfl_1_1_particles1d_1_1_particle_a233775effd323d6ed8a8f0a11f6513b5.html#a233775effd323d6ed8a8f0a11f6513b5",tooltip="Update position based on velocity × power."];
+}

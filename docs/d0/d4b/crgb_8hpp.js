@@ -1,8 +1,8 @@
 var crgb_8hpp =
 [
     [ "FUNCTION_SCALE8", "d0/d4b/crgb_8hpp_aa2324c5b390fb0d4ff09c5a531afb624.html#aa2324c5b390fb0d4ff09c5a531afb624", null ],
-    [ "operator%", "d0/d4b/crgb_8hpp_a3dab64b7dfff8c31e3ec8c3c20eec465.html#a3dab64b7dfff8c31e3ec8c3c20eec465", null ],
-    [ "operator*", "d0/d4b/crgb_8hpp_aeda6b694068cd82be2563b7c748d26e9.html#aeda6b694068cd82be2563b7c748d26e9", null ],
-    [ "operator+", "d0/d4b/crgb_8hpp_af5b229fba59cb1f39f861960bf8f09ee.html#af5b229fba59cb1f39f861960bf8f09ee", null ],
-    [ "operator-", "d0/d4b/crgb_8hpp_a6f22a2e8f0c09c840e3c0d649dcd74c8.html#a6f22a2e8f0c09c840e3c0d649dcd74c8", null ]
+    [ "fl::operator%", "d4/d36/namespacefl_a62be6e9ead7828a7e77701f350c0bf98.html#a62be6e9ead7828a7e77701f350c0bf98", null ],
+    [ "fl::operator*", "d4/d36/namespacefl_a4917373c924f558956838ff263988df1.html#a4917373c924f558956838ff263988df1", null ],
+    [ "fl::operator+", "d4/d36/namespacefl_a5377b318cc7ffbd2f67b0b6659e17b06.html#a5377b318cc7ffbd2f67b0b6659e17b06", null ],
+    [ "fl::operator-", "d4/d36/namespacefl_a55a3bd9a62a87342ecdfb3b8da78c590.html#a55a3bd9a62a87342ecdfb3b8da78c590", null ]
 ];

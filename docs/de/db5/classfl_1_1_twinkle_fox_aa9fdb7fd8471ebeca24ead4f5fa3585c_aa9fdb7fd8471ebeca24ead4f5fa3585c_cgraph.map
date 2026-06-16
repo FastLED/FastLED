@@ -1,0 +1,29 @@
+<map id="fl::TwinkleFox::drawTwinkleFox" name="fl::TwinkleFox::drawTwinkleFox">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,131,228,156"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="773,5,848,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="134,128,194,89,234,68,275,51,341,34,410,21,545,8,667,6,760,11,759,16,667,12,546,13,410,26,342,39,277,57,236,73,197,94,137,133"/>
+<area shape="rect" id="Node000004" href="$de/db5/classfl_1_1_twinkle_fox_ac0c48830370a7302cebe6100b8bd6226.html#ac0c48830370a7302cebe6100b8bd6226" title=" " alt="" coords="276,66,477,106"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="175,128,272,106,273,112,176,133"/>
+<area shape="rect" id="Node000010" href="$da/dd6/structfl_1_1_c_r_g_b_a8931f3bad3b656409122dc815850a000.html#a8931f3bad3b656409122dc815850a000" title="Get the average of the R, G, and B values." alt="" coords="282,131,471,156"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="228,141,268,141,268,146,228,146"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="339,204,414,229"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="164,154,327,200,325,205,162,159"/>
+<area shape="rect" id="Node000012" href="$da/dd6/structfl_1_1_c_r_g_b_ae30b045e289d2de1bfb985bf048a130a.html#ae30b045e289d2de1bfb985bf048a130a" title="Scale down a RGB to N/256ths of it&#39;s current brightness using &quot;video&quot; dimming rules." alt="" coords="289,253,465,279"/>
+<area shape="poly" id="edge13_Node000001_Node000012" title=" " alt="" coords="136,154,196,196,236,219,277,240,298,247,296,252,275,244,233,224,193,200,133,158"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6" title=" " alt="" coords="896,5,979,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="849,15,882,15,882,21,849,21"/>
+<area shape="rect" id="Node000005" href="$de/db5/classfl_1_1_twinkle_fox_a43f099310635fac392d702664c97c3a5.html#a43f099310635fac392d702664c97c3a5" title=" " alt="" coords="525,38,725,78"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="477,72,511,68,512,73,478,77"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="550,103,701,128"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="478,95,536,102,536,107,477,100"/>
+<area shape="rect" id="Node000009" href="$de/db5/classfl_1_1_twinkle_fox_a5c68d964361dfa1535a5d5ae100f95b2.html#a5c68d964361dfa1535a5d5ae100f95b2" title=" " alt="" coords="540,153,711,193"/>
+<area shape="poly" id="edge9_Node000004_Node000009" title=" " alt="" coords="444,104,478,116,526,137,549,145,548,150,524,142,476,120,443,109"/>
+<area shape="poly" id="edge6_Node000006_Node000002" title=" " alt="" coords="693,100,724,88,759,64,787,38,791,42,762,69,727,92,694,105"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_ab169b38b75fd1ab29b3dc61a32497ff1.html#ab169b38b75fd1ab29b3dc61a32497ff1" title="Helper function to divide a number by 16, aka four logical shift right (LSR)&#39;s." alt="" coords="775,87,846,112"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="701,106,761,101,762,106,701,111"/>
+<area shape="rect" id="Node000008" href="$d6/d19/group___linear_interpolation_gaeb360269bf892a49b96b9ea8248ea8a7.html#gaeb360269bf892a49b96b9ea8248ea8a7" title="Map from one full&#45;range 8&#45;bit value into a narrower range of 8&#45;bit values, possibly a range of hues." alt="" coords="781,136,840,161"/>
+<area shape="poly" id="edge8_Node000006_Node000008" title=" " alt="" coords="697,125,768,138,767,144,696,131"/>
+<area shape="poly" id="edge12_Node000011_Node000011" title=" " alt="" coords="337,206,328,196,332,186,349,180,377,177,413,182,422,187,426,193,421,195,419,190,411,187,377,183,350,185,336,190,333,195,341,202"/>
+<area shape="rect" id="Node000013" href="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" title="Default constructor." alt="" coords="565,253,685,279"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="465,263,552,263,552,269,465,269"/>
+</map>

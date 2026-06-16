@@ -1,0 +1,10 @@
+<map id="fl::audio::detector::Percussion::applyCrossBandRejection" name="fl::audio::detector::Percussion::applyCrossBandRejection">
+<area shape="rect" id="Node000001" title=" " alt="" coords="444,30,657,85"/>
+<area shape="rect" id="Node000002" href="$d7/d21/classfl_1_1audio_1_1detector_1_1_percussion_add9d8945f137df79c1ffb62f57589722.html#add9d8945f137df79c1ffb62f57589722" title=" " alt="" coords="243,37,396,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="430,60,397,60,397,55,430,55"/>
+<area shape="poly" id="edge4_Node000002_Node000002" title=" " alt="" coords="356,26,343,19,319,16,298,18,286,23,281,29,283,36,278,38,276,28,282,18,297,13,319,11,345,14,359,21"/>
+<area shape="rect" id="Node000003" href="$d7/d21/classfl_1_1audio_1_1detector_1_1_percussion_ad8d078eee7a2ba456483e35ef51ed4be.html#ad8d078eee7a2ba456483e35ef51ed4be" title=" " alt="" coords="5,5,195,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="228,47,195,42,195,37,229,42"/>
+<area shape="rect" id="Node000004" href="$d7/d21/classfl_1_1audio_1_1detector_1_1_percussion_a41d7c3afb8c847a7355f09b6cf376b19.html#a41d7c3afb8c847a7355f09b6cf376b19" title=" " alt="" coords="23,69,177,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="229,73,177,81,176,76,228,68"/>
+</map>

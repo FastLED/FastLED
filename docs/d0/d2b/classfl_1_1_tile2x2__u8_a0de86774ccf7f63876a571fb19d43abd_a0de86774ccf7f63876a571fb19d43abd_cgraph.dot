@@ -8,7 +8,9 @@ digraph "fl::Tile2x2_u8::MaxTile"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::Tile2x2_u8::MaxTile",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::Tile2x2_u8::Tile2x2_u8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d2b/classfl_1_1_tile2x2__u8_afb1909069b64b353746728e101881cfc.html#afb1909069b64b353746728e101881cfc",tooltip=" "];
+  Node2 [id="Node000002",label="fl::Tile2x2_u8::Tile2x2_u8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d2b/classfl_1_1_tile2x2__u8_ae5fc47e841995003a71436cec5ebfb33.html#ae5fc47e841995003a71436cec5ebfb33",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fl::Tile2x2_u8::at",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d2b/classfl_1_1_tile2x2__u8_a53d97221d08a4fc65b1a9bc28a908efd.html#a53d97221d08a4fc65b1a9bc28a908efd",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::max",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909",tooltip=" "];
 }

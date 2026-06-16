@@ -1,0 +1,20 @@
+digraph "fl::IChannelDriver::PollNeededCallbackSlot"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::IChannelDriver\l::PollNeededCallbackSlot",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="ISR-safe storage for a poll-needed callback handle."];
+  Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mSnapshot",fontcolor="grey" ];
+  Node2 [id="Node000002",label="fl::AtomicFake\< fl\l::IChannelDriver::PollNeeded\lCallbackSlot::Snapshot * \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$da/d98/classfl_1_1_atomic_fake.html",tooltip=" "];
+  Node3 -> Node2 [id="edge2_Node000002_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mValue",fontcolor="grey" ];
+  Node3 [id="Node000003",label="fl::IChannelDriver\l::PollNeededCallbackSlot\l::Snapshot",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d3/d13/structfl_1_1_i_channel_driver_1_1_poll_needed_callback_slot_1_1_snapshot.html",tooltip=" "];
+  Node4 -> Node3 [id="edge3_Node000003_Node000004",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" callback",fontcolor="grey" ];
+  Node4 [id="Node000004",label="fl::IChannelDriver\l::PollNeededCallback",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d3/d8f/structfl_1_1_i_channel_driver_1_1_poll_needed_callback.html",tooltip="ISR-safe callback handle invoked when the manager should poll again."];
+  Node3 -> Node3 [id="edge4_Node000003_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" next",fontcolor="grey" ];
+  Node5 -> Node2 [id="edge5_Node000002_Node000005",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::IChannelDriver\l::PollNeededCallbackSlot\l::Snapshot * \>",fontcolor="grey" ];
+  Node5 [id="Node000005",label="fl::AtomicFake\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$da/d98/classfl_1_1_atomic_fake.html",tooltip=" "];
+  Node3 -> Node1 [id="edge6_Node000001_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mRetired",fontcolor="grey" ];
+}

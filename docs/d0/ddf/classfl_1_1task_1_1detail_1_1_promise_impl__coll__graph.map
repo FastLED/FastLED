@@ -1,0 +1,20 @@
+<map id="fl::task::detail::PromiseImpl&lt; T &gt;" name="fl::task::detail::PromiseImpl&lt; T &gt;">
+<area shape="rect" id="Node000001" title="Implementation class for Promise &#45; holds the actual state and logic." alt="" coords="892,79,1064,119"/>
+<area shape="rect" id="Node000002" href="$da/d98/classfl_1_1_atomic_fake.html" title=" " alt="" coords="564,7,724,33"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="738,30,869,57,927,76,925,81,867,63,737,36"/>
+<area shape="rect" id="Node000003" href="$da/d98/classfl_1_1_atomic_fake.html" title=" " alt="" coords="220,7,371,33"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="385,17,564,17,564,23,385,23"/>
+<area shape="rect" id="Node000004" href="$d4/dda/structfl_1_1task_1_1_error.html" title="Error type for promises." alt="" coords="591,57,697,82"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="710,72,892,88,891,94,710,78"/>
+<area shape="rect" id="Node000005" href="$d2/db2/classfl_1_1string.html" title=" " alt="" coords="258,57,333,82"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="347,67,591,67,591,72,347,72"/>
+<area shape="rect" id="Node000006" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="5,49,171,89"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="184,67,258,67,258,72,184,72"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="577,107,711,147"/>
+<area shape="poly" id="edge6_Node000001_Node000009" title=" " alt="" coords="725,123,868,115,892,112,892,117,868,120,725,128"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl.html#d0/ddd/classfl_1_1function" title=" " alt="" coords="231,146,360,171"/>
+<area shape="poly" id="edge7_Node000009_Node000010" title=" " alt="" coords="373,149,576,130,577,135,374,154"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="555,171,733,211"/>
+<area shape="poly" id="edge9_Node000011_Node000010" title=" " alt="" coords="354,172,395,180,477,187,555,190,554,195,476,193,394,185,353,177"/>
+<area shape="poly" id="edge8_Node000001_Node000011" title=" " alt="" coords="746,171,867,141,933,116,934,121,869,147,748,176"/>
+</map>

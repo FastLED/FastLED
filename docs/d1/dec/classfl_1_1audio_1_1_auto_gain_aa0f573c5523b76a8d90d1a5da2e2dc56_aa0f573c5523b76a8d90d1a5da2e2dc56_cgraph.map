@@ -1,0 +1,9 @@
+<map id="fl::audio::AutoGain::configure" name="fl::audio::AutoGain::configure">
+<area shape="rect" id="Node000001" title="Configure the auto gain controller." alt="" coords="5,29,148,69"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="41,30,39,20,44,11,57,5,77,3,99,6,111,13,108,17,97,11,77,8,59,10,48,15,44,21,46,28"/>
+<area shape="rect" id="Node000002" href="$d1/dec/classfl_1_1audio_1_1_auto_gain_a1e8a853f5997a19afdfc8b1586c979e7.html#a1e8a853f5997a19afdfc8b1586c979e7" title=" " alt="" coords="196,29,339,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,55,183,56,183,61,148,61"/>
+<area shape="rect" id="Node000003" href="$d1/dec/classfl_1_1audio_1_1_auto_gain_af04483d2824d8a90ba7705897ec02b90.html#af04483d2824d8a90ba7705897ec02b90" title="Resolve preset enum into concrete PI tuning parameters." alt="" coords="196,93,339,133"/>
+<area shape="poly" id="edge4_Node000001_Node000003" title=" " alt="" coords="138,67,195,86,194,91,136,72"/>
+<area shape="poly" id="edge2_Node000002_Node000001" title=" " alt="" coords="196,43,161,43,161,38,196,38"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="fl::audio::detector::ChordDetector::initializeTemplateMap" name="fl::audio::detector::ChordDetector::initializeTemplateMap">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,193,84"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="50,29,50,19,59,10,76,5,99,3,128,6,144,14,142,18,126,11,99,8,77,10,62,15,55,21,55,29"/>
+<area shape="rect" id="Node000002" href="$d4/dfe/classfl_1_1audio_1_1detector_1_1_chord_detector_a82c05c59355b6d7b071fafd2da47ecfc.html#a82c05c59355b6d7b071fafd2da47ecfc" title=" " alt="" coords="241,37,468,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="194,63,228,63,228,68,194,68"/>
+<area shape="poly" id="edge2_Node000002_Node000001" title=" " alt="" coords="241,50,207,50,207,45,241,45"/>
+</map>

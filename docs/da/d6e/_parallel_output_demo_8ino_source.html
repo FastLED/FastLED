@@ -103,14 +103,13 @@ $(function(){initNavTree('da/d6e/_parallel_output_demo_8ino_source.html','../../
   <div class="headertitle"><div class="title">ParallelOutputDemo.ino</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="../../da/d6e/_parallel_output_demo_8ino.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">// Platform detection logic</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#if defined(CORE_TEENSY) &amp;&amp; defined(TEENSYDUINO) &amp;&amp; defined(HAS_PORTDC)</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &quot;<a class="code" href="../../d2/d03/_parallel_output_demo_8h.html">ParallelOutputDemo.h</a>&quot;</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;platforms/sketch_fake.hpp&quot;</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#endif</span></div>
+<a href="../../da/d6e/_parallel_output_demo_8ino.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">// @filter: (platform is teensy) and (memory is large)</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">// FastLED.h must be included first to trigger precompiled headers for FastLED&#39;s build system</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;FastLED.h&quot;</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;<a class="code" href="../../d2/d03/_parallel_output_demo_8h.html">ParallelOutputDemo.h</a>&quot;</span></div>
 <div class="ttc" id="a_parallel_output_demo_8h_html"><div class="ttname"><a href="../../d2/d03/_parallel_output_demo_8h.html">ParallelOutputDemo.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -119,7 +118,7 @@ $(function(){initNavTree('da/d6e/_parallel_output_demo_8ino_source.html','../../
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_b0ccd010afae1b6736eeed36b0121387.html">Multiple</a></li><li class="navelem"><a class="el" href="../../dir_e2bb19e0d903e444cf02a1eb11fa8f0b.html">ParallelOutputDemo</a></li><li class="navelem"><a class="el" href="../../da/d6e/_parallel_output_demo_8ino.html">ParallelOutputDemo.ino</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:19 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:06:58 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

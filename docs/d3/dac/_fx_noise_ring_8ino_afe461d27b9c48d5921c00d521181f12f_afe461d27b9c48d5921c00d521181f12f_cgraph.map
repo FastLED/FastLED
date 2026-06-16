@@ -1,0 +1,18 @@
+<map id="loop" name="loop">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,67,56,92"/>
+<area shape="rect" id="Node000002" href="$d3/dac/_fx_noise_ring_8ino_a7a1cdb28d8d83f314435a3a1dc13f17f.html#a7a1cdb28d8d83f314435a3a1dc13f17f" title=" " alt="" coords="114,29,169,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="56,68,100,53,102,58,57,73"/>
+<area shape="rect" id="Node000022" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="104,103,179,128"/>
+<area shape="poly" id="edge8_Node000001_Node000022" title=" " alt="" coords="57,85,92,96,90,102,56,90"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="262,5,329,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="168,35,248,23,248,28,169,41"/>
+<area shape="rect" id="Node000004" href="$d6/d5f/group___ring_noise_ga3b0969c97de0d33d2054483d6695c727.html#ga3b0969c97de0d33d2054483d6695c727" title="Generate HSV8 (8&#45;bit) noise for a ring pattern." alt="" coords="227,55,364,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="169,44,213,51,212,56,168,49"/>
+<area shape="rect" id="Node000005" href="$d6/d5f/group___ring_noise_ga424c29c488273a2f0efb1bb80bb0911a.html#ga424c29c488273a2f0efb1bb80bb0911a" title="Ring noise functions &#45; sample three z&#45;slices for independent component evolution." alt="" coords="412,29,557,55"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="364,56,398,51,399,56,364,61"/>
+<area shape="rect" id="Node000020" href="$d4/d36/namespacefl_a2bccb5decc8613e4b6e232e0a881578f.html#a2bccb5decc8613e4b6e232e0a881578f" title="Alias for millis64() &#45; returns 64&#45;bit millisecond time." alt="" coords="605,55,673,80"/>
+<area shape="poly" id="edge7_Node000004_Node000020" title=" " alt="" coords="364,65,592,65,592,70,364,70"/>
+<area shape="poly" id="edge5_Node000005_Node000020" title=" " alt="" coords="558,51,592,57,592,62,557,57"/>
+<area shape="poly" id="edge6_Node000020_Node000020" title=" " alt="" coords="613,56,608,46,611,37,622,30,639,28,661,31,670,40,666,44,658,36,639,33,623,35,615,40,613,46,618,53"/>
+<area shape="poly" id="edge9_Node000022_Node000022" title=" " alt="" coords="122,104,118,94,120,85,128,78,141,76,157,79,164,88,159,91,154,84,141,81,130,83,125,88,124,94,127,102"/>
+</map>

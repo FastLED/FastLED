@@ -1,0 +1,8 @@
+<map id="fl::CRGB::operator&#45;&#45;" name="fl::CRGB::operator&#45;&#45;">
+<area shape="rect" id="Node000001" title="Subtract a constant of &#39;1&#39; from each channel, saturating at 0x00." alt="" coords="5,5,153,31"/>
+<area shape="rect" id="Node000002" href="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" title="Default constructor." alt="" coords="447,5,567,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="154,15,433,15,433,21,154,21"/>
+<area shape="rect" id="Node000003" href="$da/dd6/structfl_1_1_c_r_g_b_af05b3d907cb443a1c12f1a9e265d7ef5.html#af05b3d907cb443a1c12f1a9e265d7ef5" title="Subtract a constant from each channel, saturating at 0x00." alt="" coords="201,31,399,56"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="154,24,188,28,187,33,154,29"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="399,29,433,24,433,30,399,34"/>
+</map>

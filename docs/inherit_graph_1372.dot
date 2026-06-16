@@ -1,0 +1,10 @@
+digraph "Graphical Class Hierarchy"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node0 [id="Node000000",label="fl::TIMING_TM1814",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/dc8/structfl_1_1_t_i_m_i_n_g___t_m1814.html",tooltip="TM1814 RGBW controller @ 800 kHz Four-phase: TH0=360ns, TH1=960ns, TL0=940ns, TL1=340ns."];
+}

@@ -1,0 +1,10 @@
+<map id="fl::spi::ParallelDevice::waitComplete" name="fl::spi::ParallelDevice::waitComplete">
+<area shape="rect" id="Node000001" title="Wait for pending transmission to complete." alt="" coords="451,44,609,84"/>
+<area shape="rect" id="Node000002" href="$d7/de0/classfl_1_1spi_1_1_parallel_device_aa434f17460d7b1b7895203ae4bbfbdd6.html#aa434f17460d7b1b7895203ae4bbfbdd6" title="Shutdown hardware and release resources." alt="" coords="212,26,403,51"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="437,56,402,52,403,47,437,51"/>
+<area shape="rect" id="Node000004" href="$d7/de0/classfl_1_1spi_1_1_parallel_device_a7401728911c15f96eedba08dcf5544d6.html#a7401728911c15f96eedba08dcf5544d6" title=" " alt="" coords="5,69,164,109"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="437,72,164,88,164,82,437,67"/>
+<area shape="rect" id="Node000003" href="$d7/de0/classfl_1_1spi_1_1_parallel_device_a10aadeda61420eb31eb23685b9b3f0ed.html#a10aadeda61420eb31eb23685b9b3f0ed" title="Destructor &#45; releases hardware resources." alt="" coords="5,5,164,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="198,35,164,33,164,27,198,29"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="238,57,165,74,164,69,237,52"/>
+</map>

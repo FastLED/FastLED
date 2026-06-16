@@ -1,0 +1,10 @@
+<map id="fl::third_party::hexwave::hex_add_oversampled_bleplike" name="fl::third_party::hexwave::hex_add_oversampled_bleplike">
+<area shape="rect" id="Node000001" title=" " alt="" coords="492,37,727,77"/>
+<area shape="rect" id="Node000002" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_afe1589840cddbec96237a5ed7865bee1.html#afe1589840cddbec96237a5ed7865bee1" title=" " alt="" coords="269,5,444,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="478,43,444,39,444,34,479,38"/>
+<area shape="rect" id="Node000004" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_a42fbc5dd00dc2697f85e6530ecf2ceac.html#a42fbc5dd00dc2697f85e6530ecf2ceac" title=" " alt="" coords="269,69,444,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="479,77,444,81,444,76,478,71"/>
+<area shape="rect" id="Node000003" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_af3f50c133d31699878600252717015f7.html#af3f50c133d31699878600252717015f7" title="Generate audio samples." alt="" coords="5,37,221,77"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="256,41,222,46,221,40,255,36"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="255,79,221,74,222,69,256,73"/>
+</map>

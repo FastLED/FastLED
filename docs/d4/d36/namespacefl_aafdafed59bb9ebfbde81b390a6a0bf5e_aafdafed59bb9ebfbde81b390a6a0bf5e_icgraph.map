@@ -1,0 +1,7 @@
+<map id="fl::serial_ready" name="fl::serial_ready">
+<area shape="rect" id="Node000001" title=" " alt="" coords="249,31,368,56"/>
+<area shape="rect" id="Node000002" href="$de/d67/classfl_1_1_serial_port_a366c439b1b56f77b30016987b7abf8cd.html#a366c439b1b56f77b30016987b7abf8cd" title="Check if serial port is ready for I/O." alt="" coords="5,5,201,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="236,37,201,33,202,27,236,32"/>
+<area shape="rect" id="Node000003" href="$dd/dc8/_auto_research_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="74,55,133,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="236,54,133,67,133,61,236,49"/>
+</map>

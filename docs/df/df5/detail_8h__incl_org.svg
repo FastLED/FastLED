@@ -23,8 +23,8 @@
 <g id="Node000002" class="node">
 <title>Node2</title>
 <g id="a_Node000002"><a xlink:href="../../df/dd8/stdint_8h.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="116.5,-74 54.5,-74 54.5,-55 116.5,-55 116.5,-74"/>
-<text text-anchor="middle" x="85.5" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">fl/stdint.h</text>
+<polygon fill="white" stroke="#666666" points="124,-74 47,-74 47,-55 124,-55 124,-74"/>
+<text text-anchor="middle" x="85.5" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">fl/stl/stdint.h</text>
 </a>
 </g>
 </g>
@@ -37,21 +37,12 @@
 </a>
 </g>
 </g>
-<!-- Node2&#45;&gt;Node2 -->
-<g id="edge3_Node000002_Node000002" class="edge">
-<title>Node2&#45;&gt;Node2</title>
-<g id="a_edge3_Node000002_Node000002"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M108.44,-74.03C121.9,-76.06 134.5,-72.88 134.5,-64.5 134.5,-58.28 127.56,-54.92 118.48,-54.44"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="118.24,-50.94 108.44,-54.97 118.61,-57.93 118.24,-50.94"/>
-</a>
-</g>
-</g>
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
 <g id="a_Node000003"><a xlink:title=" ">
-<polygon fill="#e0e0e0" stroke="#999999" points="113.5,-19 57.5,-19 57.5,0 113.5,0 113.5,-19"/>
-<text text-anchor="middle" x="85.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">stddef.h</text>
+<polygon fill="#e0e0e0" stroke="#999999" points="130,-19 41,-19 41,0 130,0 130,-19"/>
+<text text-anchor="middle" x="85.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">platforms/int.h</text>
 </a>
 </g>
 </g>

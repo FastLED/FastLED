@@ -1,0 +1,15 @@
+<map id="autoResearchSetExclusiveDriverByName" name="autoResearchSetExclusiveDriverByName">
+<area shape="rect" id="Node000001" title="AutoResearch&#45;style helper: set an exclusive driver by name." alt="" coords="633,85,828,125"/>
+<area shape="rect" id="Node000002" href="$d1/dc9/namespaceautoresearch_a1868ca9225c807cbaf571228e6629e34.html#a1868ca9225c807cbaf571228e6629e34" title="On FL_IS_STUB: register a one&#45;shot async task that drives autoresearch." alt="" coords="112,5,327,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="619,87,585,81,327,42,327,37,586,76,620,82"/>
+<area shape="rect" id="Node000004" href="$db/d63/class_auto_research_remote_control_abb6600e8a1e8c4ef46ba29e7bd3b78b4.html#abb6600e8a1e8c4ef46ba29e7bd3b78b4" title="Register all RPC functions with shared autoresearch state." alt="" coords="114,69,325,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="619,105,325,95,325,90,619,99"/>
+<area shape="rect" id="Node000005" href="$db/d63/class_auto_research_remote_control_a7992b62fd1f26fe1898d2ea8a78b370a.html#a7992b62fd1f26fe1898d2ea8a78b370a" title=" " alt="" coords="375,113,585,153"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="620,120,586,124,585,119,619,115"/>
+<area shape="rect" id="Node000006" href="$d7/d5f/_auto_research_helpers_8cpp_a27ef6a5586c56c0790bbb0a4c5b68466.html#a27ef6a5586c56c0790bbb0a4c5b68466" title="Test a specific driver with given timing configuration." alt="" coords="437,178,523,203"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="674,133,586,168,524,184,523,179,585,163,672,129"/>
+<area shape="rect" id="Node000003" href="$dd/dc8/_auto_research_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,45,64,70"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="99,49,65,55,64,50,98,44"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="100,71,64,65,65,60,101,66"/>
+<area shape="poly" id="edge6_Node000005_Node000004" title=" " alt="" coords="360,116,324,110,325,104,361,111"/>
+</map>

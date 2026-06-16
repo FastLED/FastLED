@@ -1,0 +1,5 @@
+<map id="fl::asset_detail::lookup_registry" name="fl::asset_detail::lookup_registry">
+<area shape="rect" id="Node000001" title="Look up an asset path in the registry. Returns invalid url() on miss." alt="" coords="5,5,173,45"/>
+<area shape="rect" id="Node000002" href="$de/dde/namespacefl_1_1asset__detail_ab3fb9f509aa0f90e62ae74553d95cbcd.html#ab3fb9f509aa0f90e62ae74553d95cbcd" title=" " alt="" coords="221,13,396,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,23,208,23,208,28,174,28"/>
+</map>

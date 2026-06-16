@@ -1,0 +1,12 @@
+<map id="fl::RxDevice::~RxDevice" name="fl::RxDevice::~RxDevice">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,79,187,104"/>
+<area shape="rect" id="Node000002" href="$d2/df6/classfl_1_1_rx_device_af708a71085308a1fd0c244dfbced71be.html#af708a71085308a1fd0c244dfbced71be" title=" " alt="" coords="250,29,421,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="158,76,259,55,260,60,159,81"/>
+<area shape="rect" id="Node000003" href="$d2/df6/classfl_1_1_rx_device_a8a20a374878e2789303c92b732f4150f.html#a8a20a374878e2789303c92b732f4150f" title="Template factory method to create RX device by type." alt="" coords="261,79,410,104"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="187,89,247,89,247,94,187,94"/>
+<area shape="rect" id="Node000004" href="$d2/df6/classfl_1_1_rx_device_a7a0f52289e1b21a8b51a70a14bf751d2.html#a7a0f52289e1b21a8b51a70a14bf751d2" title="Create dummy RxDevice instance (default fallback)" alt="" coords="235,128,436,153"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="159,101,260,123,259,128,158,107"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="301,31,293,21,297,11,312,5,335,3,365,6,376,15,373,20,363,11,335,8,313,10,301,15,299,20,305,28"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="484,128,609,153"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="436,138,470,138,470,143,436,143"/>
+</map>

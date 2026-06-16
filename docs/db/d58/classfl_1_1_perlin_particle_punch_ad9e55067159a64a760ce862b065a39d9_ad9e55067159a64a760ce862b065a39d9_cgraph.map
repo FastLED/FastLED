@@ -1,0 +1,21 @@
+<map id="fl::PerlinParticlePunch::renderAmbient" name="fl::PerlinParticlePunch::renderAmbient">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,147,168,187"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="222,80,373,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="137,145,215,115,240,107,242,112,217,121,139,150"/>
+<area shape="rect" id="Node000007" href="$da/dd6/structfl_1_1_c_r_g_b_aa272170bea8120f101f27ebd2c323b55.html#aa272170bea8120f101f27ebd2c323b55" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="231,129,364,155"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="168,155,217,149,217,154,169,160"/>
+<area shape="rect" id="Node000009" href="$d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d" title=" " alt="" coords="268,179,327,204"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="169,174,254,184,254,189,168,179"/>
+<area shape="rect" id="Node000010" href="$db/d58/classfl_1_1_perlin_particle_punch_a940ba15318dbcce3ab89d3ad590ba310.html#a940ba15318dbcce3ab89d3ad590ba310" title=" " alt="" coords="216,229,379,269"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="140,185,233,221,231,226,138,190"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="449,5,524,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="330,77,440,33,442,38,332,82"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_ab169b38b75fd1ab29b3dc61a32497ff1.html#ab169b38b75fd1ab29b3dc61a32497ff1" title="Helper function to divide a number by 16, aka four logical shift right (LSR)&#39;s." alt="" coords="451,55,522,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="373,80,437,71,438,76,373,85"/>
+<area shape="rect" id="Node000006" href="$d6/d19/group___linear_interpolation_gaeb360269bf892a49b96b9ea8248ea8a7.html#gaeb360269bf892a49b96b9ea8248ea8a7" title="Map from one full&#45;range 8&#45;bit value into a narrower range of 8&#45;bit values, possibly a range of hues." alt="" coords="457,104,516,129"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="373,100,444,109,443,114,373,105"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aa1e0cd66825220bead12cfc1ab7f33c6.html#aa1e0cd66825220bead12cfc1ab7f33c6" title=" " alt="" coords="595,5,677,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="524,15,580,15,580,21,524,21"/>
+<area shape="rect" id="Node000008" href="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" title="Default constructor." alt="" coords="427,153,547,179"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="365,148,413,154,412,159,364,153"/>
+</map>

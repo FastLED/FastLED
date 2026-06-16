@@ -1,32 +1,33 @@
-digraph "fl/supersample.h"
+digraph "fl/math/supersample.h"
 {
  // INTERACTIVE_SVG=YES
  // LATEX_PDF_SIZE
   bgcolor="transparent";
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
-  Node1 [id="Node000001",label="fl/supersample.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 [id="Node000001",label="fl/math/supersample.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl/wave_simulation.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d36/wave__simulation_8h.html",tooltip=" "];
+  Node2 [id="Node000002",label="fl/math/wave/wave_simulation.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d36/wave__simulation_8h.html",tooltip=" "];
   Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="/home/runner/work/FastLED\l/FastLED/examples/Wave/Wave.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/d78/examples_2_wave_2wave_8h.html",tooltip=" "];
-  Node2 -> Node4 [id="edge3_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl/wave_simulation.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d8c/wave__simulation_8cpp.html",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="/home/runner/work/FastLED\l/FastLED/examples/Wave\l/Wave.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d16/_wave_8ino.html",tooltip=" "];
   Node2 -> Node5 [id="edge4_Node000002_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="fx/2d/wave.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/de9/src_2fx_22d_2wave_8h.html",tooltip=" "];
+  Node5 [id="Node000005",label="fl/fx/2d/wave.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d50/src_2fl_2fx_22d_2wave_8h.html",tooltip="2D wave simulation effect for LED matrices"];
   Node5 -> Node6 [id="edge5_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node6 [id="Node000006",label="/home/runner/work/FastLED\l/FastLED/examples/Downscale\l/src/wave.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$de/d79/examples_2_downscale_2src_2wave_8h.html",tooltip=" "];
-  Node5 -> Node9 [id="edge6_Node000005_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node9 [id="Node000009",label="/home/runner/work/FastLED\l/FastLED/examples/FestivalStick/curr.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d06/curr_8h.html",tooltip=" "];
-  Node5 -> Node10 [id="edge7_Node000005_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node10 [id="Node000010",label="/home/runner/work/FastLED\l/FastLED/examples/Wave2d\l/Wave2d.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d94/_wave2d_8h.html",tooltip=" "];
-  Node5 -> Node11 [id="edge8_Node000005_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node11 [id="Node000011",label="/home/runner/work/FastLED\l/FastLED/examples/XYPath\l/src/wave.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/dd3/examples_2_x_y_path_2src_2wave_8h.html",tooltip=" "];
-  Node5 -> Node16 [id="edge9_Node000005_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node16 [id="Node000016",label="fx/2d/wave.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d7c/src_2fx_22d_2wave_8cpp.html",tooltip=" "];
-  Node1 -> Node17 [id="edge10_Node000001_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node17 [id="Node000017",label="fl/wave_simulation\l_real.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d8e/wave__simulation__real_8h.html",tooltip=" "];
-  Node17 -> Node2 [id="edge11_Node000017_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node17 -> Node18 [id="edge12_Node000017_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node18 [id="Node000018",label="fl/wave_simulation\l_real.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/da2/wave__simulation__real_8cpp.html",tooltip=" "];
+  Node5 -> Node10 [id="edge6_Node000005_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="/home/runner/work/FastLED\l/FastLED/examples/FestivalStick/curr.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d06/curr_8h.html",tooltip=" "];
+  Node5 -> Node12 [id="edge7_Node000005_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="/home/runner/work/FastLED\l/FastLED/examples/Wave2d\l/Wave2d.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/d94/_wave2d_8h.html",tooltip=" "];
+  Node5 -> Node14 [id="edge8_Node000005_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="/home/runner/work/FastLED\l/FastLED/examples/XYPath\l/src/wave.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/dd3/examples_2_x_y_path_2src_2wave_8h.html",tooltip=" "];
+  Node5 -> Node20 [id="edge9_Node000005_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="fl/fx/2d/wave.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dd/d65/wave_8cpp_8hpp.html",tooltip=" "];
+  Node2 -> Node25 [id="edge10_Node000002_Node000025",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node25 [id="Node000025",label="fl/math/wave.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d3e/src_2fl_2math_2wave_8h.html",tooltip="Umbrella header for wave simulation subsystem."];
+  Node2 -> Node26 [id="edge11_Node000002_Node000026",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node26 [id="Node000026",label="fl/math/wave/wave_simulation.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d24/wave__simulation_8cpp_8hpp.html",tooltip=" "];
+  Node26 -> Node27 [id="edge12_Node000026_Node000027",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node27 [id="Node000027",label="fl/math/wave/_build.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/d36/fl_2math_2wave_2__build_8cpp_8hpp.html",tooltip="Unity build header for fl/math/wave/ directory."];
 }

@@ -1,0 +1,5 @@
+<map id="fl::task::PromiseResult::operator bool" name="fl::task::PromiseResult::operator bool">
+<area shape="rect" id="Node000001" title="Boolean conversion operator (same as ok())" alt="" coords="5,5,173,45"/>
+<area shape="rect" id="Node000002" href="$d1/d3c/classfl_1_1task_1_1_promise_result_a47bdae0780409cda6b8e25bb47cc0ec6.html#a47bdae0780409cda6b8e25bb47cc0ec6" title="Check if the result is successful." alt="" coords="221,13,413,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,23,208,23,208,28,174,28"/>
+</map>

@@ -1,5 +1,6 @@
 var class_r_e_f_hardware_s_p_i_output =
 [
+    [ "endTransaction", "d6/dd4/class_r_e_f_hardware_s_p_i_output_aa31d484d62ff4a70c0a9e78440adfe39.html#aa31d484d62ff4a70c0a9e78440adfe39", null ],
     [ "init", "d6/dd4/class_r_e_f_hardware_s_p_i_output_aaf52398e54f9e5908f3956ce8ef923a5.html#aaf52398e54f9e5908f3956ce8ef923a5", null ],
     [ "release", "d6/dd4/class_r_e_f_hardware_s_p_i_output_a7c39a37f4a8d759bfb59623fa95b09ce.html#a7c39a37f4a8d759bfb59623fa95b09ce", null ],
     [ "SAMHArdwareSPIOutput", "d6/dd4/class_r_e_f_hardware_s_p_i_output_a4c446c64a3b9fd1989d5f89cf5fe048b.html#a4c446c64a3b9fd1989d5f89cf5fe048b", null ],
@@ -13,7 +14,7 @@ var class_r_e_f_hardware_s_p_i_output =
     [ "writeBytes", "d6/dd4/class_r_e_f_hardware_s_p_i_output_a006f0c4c224b739dea4caa19def41bc0.html#a006f0c4c224b739dea4caa19def41bc0", null ],
     [ "writeBytesValue", "d6/dd4/class_r_e_f_hardware_s_p_i_output_ae46b2c93ab765399fb1eb58bdd4ec56c.html#ae46b2c93ab765399fb1eb58bdd4ec56c", null ],
     [ "writeBytesValueRaw", "d6/dd4/class_r_e_f_hardware_s_p_i_output_aaab6ac04ce04d07dc127c755573bb411.html#aaab6ac04ce04d07dc127c755573bb411", null ],
-    [ "writePixels", "d6/dd4/class_r_e_f_hardware_s_p_i_output_a17c12dc926c86fc42b2f857149c699a1.html#a17c12dc926c86fc42b2f857149c699a1", null ],
-    [ "writeWord", "d6/dd4/class_r_e_f_hardware_s_p_i_output_ac016d569bfd0e907249a5243d64a2bfe.html#ac016d569bfd0e907249a5243d64a2bfe", null ],
-    [ "m_pSelect", "d6/dd4/class_r_e_f_hardware_s_p_i_output_a3ba0ef0eb9bff69af12b4b277c682a3e.html#a3ba0ef0eb9bff69af12b4b277c682a3e", null ]
+    [ "writePixels", "d6/dd4/class_r_e_f_hardware_s_p_i_output_abf49fb3515cd8dc27edddd7ea26ad644.html#abf49fb3515cd8dc27edddd7ea26ad644", null ],
+    [ "writeWord", "d6/dd4/class_r_e_f_hardware_s_p_i_output_a6db93689117927eaff6ed51291ee2597.html#a6db93689117927eaff6ed51291ee2597", null ],
+    [ "mPSelect", "d6/dd4/class_r_e_f_hardware_s_p_i_output_afacc0bf03603e9c0e17d36b9fd4cc86d.html#afacc0bf03603e9c0e17d36b9fd4cc86d", null ]
 ];

@@ -1,0 +1,11 @@
+<map id="fl::audio::AudioManager::remove" name="fl::audio::AudioManager::remove">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,181,75"/>
+<area shape="rect" id="Node000002" href="$d4/d9d/classfl_1_1audio_1_1_audio_manager_a94906d166e679f0aee102b7200fb2e53.html#a94906d166e679f0aee102b7200fb2e53" title=" " alt="" coords="229,35,405,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="182,52,215,52,215,57,182,57"/>
+<area shape="rect" id="Node000003" href="$d4/d9d/classfl_1_1audio_1_1_audio_manager_a5bfbd81ceda3da10014947211340be86.html#a5bfbd81ceda3da10014947211340be86" title=" " alt="" coords="453,35,629,75"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="406,52,439,52,439,57,406,57"/>
+<area shape="rect" id="Node000004" href="$d4/d9d/classfl_1_1audio_1_1_audio_manager_a9aae1d4f301e6ce6bdcf33044f5b581f.html#a9aae1d4f301e6ce6bdcf33044f5b581f" title=" " alt="" coords="677,5,853,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="629,41,663,36,664,41,630,46"/>
+<area shape="rect" id="Node000005" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="684,70,847,95"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="630,63,671,68,670,73,629,68"/>
+</map>

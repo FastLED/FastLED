@@ -6,5 +6,5 @@ var scale__up_8h =
     [ "FASTLED_SCALE_UP_DECIDE_AT_RUNTIME", "d2/d74/scale__up_8h_a934f77b87c1c075c0cb1a79757046359.html#a934f77b87c1c075c0cb1a79757046359", null ],
     [ "FASTLED_SCALE_UP_FORCE_FLOATING_POINT", "d2/d74/scale__up_8h_ad1fdff146ab302df7699bd2cf51fb2cc.html#ad1fdff146ab302df7699bd2cf51fb2cc", null ],
     [ "FASTLED_SCALE_UP_HIGH_PRECISION", "d2/d74/scale__up_8h_a648bcecb94473066930deb7abdbbfe48.html#a648bcecb94473066930deb7abdbbfe48", null ],
-    [ "fl::FASTLED_SMART_PTR", "d4/d36/namespacefl_a9c8c9a8ba6129ccc145d9e1411462b4d.html#a9c8c9a8ba6129ccc145d9e1411462b4d", null ]
+    [ "fl::FASTLED_SHARED_PTR", "d4/d36/namespacefl_acf40027bc8a5de89415773c10afacc8c.html#acf40027bc8a5de89415773c10afacc8c", null ]
 ];

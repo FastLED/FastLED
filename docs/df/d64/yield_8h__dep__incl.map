@@ -1,0 +1,24 @@
+<map id="fl/system/yield.h" name="fl/system/yield.h">
+<area shape="rect" id="Node000001" title="Platform&#45;aware cooperative yield for FastLED." alt="" coords="311,5,442,31"/>
+<area shape="rect" id="Node000002" href="$d7/de5/_fast_l_e_d_8cpp_8hpp.html" title=" " alt="" coords="138,79,266,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="337,38,232,81,230,76,335,33"/>
+<area shape="rect" id="Node000005" href="$dd/d5d/yield_8cpp_8hpp.html" title=" " alt="" coords="290,79,463,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="379,44,379,79,374,79,374,44"/>
+<area shape="rect" id="Node000009" href="$dc/de9/executor_8cpp_8hpp.html" title=" " alt="" coords="487,79,663,104"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="422,33,544,76,542,81,421,38"/>
+<area shape="rect" id="Node000003" href="$d7/dd5/__build_8cpp_8hpp.html" title=" " alt="" coords="5,152,121,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="169,113,87,154,85,149,166,108"/>
+<area shape="rect" id="Node000004" href="$dd/de2/src_8cpp.html" title="Unity build: flat includes from src/ root directory." alt="" coords="145,152,261,177"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="205,118,206,152,200,152,200,118"/>
+<area shape="rect" id="Node000006" href="$d7/d7b/fl_2system_2__build_8cpp_8hpp.html" title="Unity build header for fl/system/ directory." alt="" coords="287,152,467,177"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="379,118,379,152,374,152,374,118"/>
+<area shape="rect" id="Node000007" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="417,225,545,251"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="406,183,465,223,462,227,403,187"/>
+<area shape="rect" id="Node000008" href="$de/da6/fl_8system_09_8cpp.html" title="Unity build: recursive includes from src/fl/system/." alt="" coords="225,225,393,251"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="358,189,322,227,318,223,354,185"/>
+<area shape="rect" id="Node000010" href="$dc/d15/fl_2task_2__build_8cpp_8hpp.html" title="Unity build header for fl/task/ directory." alt="" coords="495,152,655,177"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="578,118,578,152,573,152,573,118"/>
+<area shape="poly" id="edge10_Node000010_Node000007" title=" " alt="" coords="551,188,498,227,495,223,548,183"/>
+<area shape="rect" id="Node000011" href="$d2/dfe/fl_8task_09_8cpp.html" title="Unity build: recursive includes from src/fl/task/." alt="" coords="569,225,717,251"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="598,185,634,223,630,227,594,189"/>
+</map>

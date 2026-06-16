@@ -1,0 +1,15 @@
+<map id="fl::audio::Config::getMicProfile" name="fl::audio::Config::getMicProfile">
+<area shape="rect" id="Node000001" title=" " alt="" coords="517,97,648,137"/>
+<area shape="rect" id="Node000002" href="$d4/d9d/classfl_1_1audio_1_1_audio_manager_a19815b509ca8b88682cb93c9faba4360.html#a19815b509ca8b88682cb93c9faba4360" title=" " alt="" coords="261,104,469,129"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="503,119,470,119,470,114,503,114"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_aa6902ef0c06d6419b56e76662db6c5b9.html#aa6902ef0c06d6419b56e76662db6c5b9" title="Add an audio input and return an auto&#45;pumped Processor." alt="" coords="52,5,167,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="329,100,275,71,212,45,166,31,167,26,214,39,277,67,332,95"/>
+<area shape="rect" id="Node000004" href="$dd/dbb/class_c_fast_l_e_d_a4c80cc41fe64d47acf02e810c57768d4.html#a4c80cc41fe64d47acf02e810c57768d4" title="Add a pre&#45;created audio input and return an auto&#45;pumped Processor." alt="" coords="52,55,167,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="285,104,167,81,168,76,286,99"/>
+<area shape="rect" id="Node000005" href="$dd/dbb/class_c_fast_l_e_d_aa25cbb36c9196a7c2da75e86e6209792.html#aa25cbb36c9196a7c2da75e86e6209792" title="Add a UIAudio element and return an auto&#45;pumped Processor." alt="" coords="52,104,167,129"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="248,119,167,119,167,114,248,114"/>
+<area shape="rect" id="Node000006" href="$d4/d9d/classfl_1_1audio_1_1_audio_manager_a97cc4cd17a7f475823fbb7f32e2847cf.html#a97cc4cd17a7f475823fbb7f32e2847cf" title=" " alt="" coords="5,153,213,179"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="286,135,177,156,176,151,285,129"/>
+<area shape="rect" id="Node000007" href="$d2/d4d/classfl_1_1_u_i_audio_a0ea0030d28045b495e3b179a622995e5.html#a0ea0030d28045b495e3b179a622995e5" title=" " alt="" coords="29,203,189,228"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="331,138,277,166,214,193,172,205,171,200,212,187,275,161,329,134"/>
+</map>

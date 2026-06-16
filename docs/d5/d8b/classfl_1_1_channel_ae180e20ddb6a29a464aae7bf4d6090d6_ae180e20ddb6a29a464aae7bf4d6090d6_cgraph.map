@@ -1,0 +1,5 @@
+<map id="fl::Channel::getDither" name="fl::Channel::getDither">
+<area shape="rect" id="Node000001" title="Get the dither mode." alt="" coords="5,13,165,38"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a280f23ed10b10068f0a7460f8977cb33.html#a280f23ed10b10068f0a7460f8977cb33" title="Get the dithering option currently set for this controller." alt="" coords="213,5,349,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="166,23,200,23,200,28,166,28"/>
+</map>

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fl::deque&lt; T, Allocator &gt;::iterator Class Reference</title>
+<title>FastLED: fl::deque&lt; T &gt;::iterator Class Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -101,56 +101,96 @@ $(function(){initNavTree('dd/db8/classfl_1_1deque_1_1iterator.html','../../'); i
 
 <div class="header">
   <div class="summary">
+<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="#friends">Friends</a> &#124;
 <a href="../../d4/d26/classfl_1_1deque_1_1iterator-members.html">List of all members</a>  </div>
-  <div class="headertitle"><div class="title">fl::deque&lt; T, Allocator &gt;::iterator Class Reference</div></div>
+  <div class="headertitle"><div class="title">fl::deque&lt; T &gt;::iterator Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><div class="compoundTemplParams">template&lt;typename T, typename Allocator = fl::allocator&lt;T&gt;&gt;<br />
-class fl::deque&lt; T, Allocator &gt;::iterator</div>
-<p class="definition">Definition at line <a class="el" href="../../dc/d44/deque_8h_source.html#l00064">64</a> of file <a class="el" href="../../dc/d44/deque_8h_source.html">deque.h</a>.</p>
+<div class="textblock"><div class="compoundTemplParams">template&lt;typename T&gt;<br />
+class fl::deque&lt; T &gt;::iterator</div>
+<p class="definition">Definition at line <a class="el" href="../../dc/d44/deque_8h_source.html#l00061">61</a> of file <a class="el" href="../../dc/d44/deque_8h_source.html">deque.h</a>.</p>
 </div>
 <p><code>#include &lt;<a class="el" href="../../dc/d44/deque_8h_source.html">deque.h</a>&gt;</code></p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Collaboration diagram for fl::deque&lt; T, Allocator &gt;::iterator:</div>
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Collaboration diagram for fl::deque&lt; T &gt;::iterator:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../da/d0c/classfl_1_1deque_1_1iterator__coll__graph.svg" width="194" height="139"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../da/d0c/classfl_1_1deque_1_1iterator__coll__graph.svg" width="183" height="212"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 <center><span class="legend">[<a target="top" href="../../graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr class="memitem:a9ae16759360a045c20ea75563a729650" id="r_a9ae16759360a045c20ea75563a729650"><td class="memItemLeft" align="right" valign="top">typedef fl::size&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a9ae16759360a045c20ea75563a729650.html#a9ae16759360a045c20ea75563a729650">difference_type</a></td></tr>
+<tr class="separator:a9ae16759360a045c20ea75563a729650"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a37aea38a07977f6d7c08f04186eb8875" id="r_a37aea38a07977f6d7c08f04186eb8875"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="../../db/d7f/structfl_1_1random__access__iterator__tag.html">fl::random_access_iterator_tag</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a37aea38a07977f6d7c08f04186eb8875.html#a37aea38a07977f6d7c08f04186eb8875">iterator_category</a></td></tr>
+<tr class="separator:a37aea38a07977f6d7c08f04186eb8875"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af621192655ac96fcf2311afb1362d36b" id="r_af621192655ac96fcf2311afb1362d36b"><td class="memItemLeft" align="right" valign="top">typedef T *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_af621192655ac96fcf2311afb1362d36b.html#af621192655ac96fcf2311afb1362d36b">pointer</a></td></tr>
+<tr class="separator:af621192655ac96fcf2311afb1362d36b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0db515f13024134b4c9222e43ba433ef" id="r_a0db515f13024134b4c9222e43ba433ef"><td class="memItemLeft" align="right" valign="top">typedef T &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a0db515f13024134b4c9222e43ba433ef.html#a0db515f13024134b4c9222e43ba433ef">reference</a></td></tr>
+<tr class="separator:a0db515f13024134b4c9222e43ba433ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61c94c9aa236489a57c80d0c6790bb30" id="r_a61c94c9aa236489a57c80d0c6790bb30"><td class="memItemLeft" align="right" valign="top">typedef T&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a61c94c9aa236489a57c80d0c6790bb30.html#a61c94c9aa236489a57c80d0c6790bb30">value_type</a></td></tr>
+<tr class="separator:a61c94c9aa236489a57c80d0c6790bb30"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a7151bd8b2f081ff9a13146d136f96072" id="r_a7151bd8b2f081ff9a13146d136f96072"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a7151bd8b2f081ff9a13146d136f96072.html#a7151bd8b2f081ff9a13146d136f96072">iterator</a> (<a class="el" href="../../dc/dfe/classfl_1_1deque.html">deque</a> *dq, fl::size index)</td></tr>
-<tr class="separator:a7151bd8b2f081ff9a13146d136f96072"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a83afdbac7eab0dcc00fcffbb109853ad" id="r_a83afdbac7eab0dcc00fcffbb109853ad"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a83afdbac7eab0dcc00fcffbb109853ad.html#a83afdbac7eab0dcc00fcffbb109853ad">operator!=</a> (const <a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator.html">iterator</a> &amp;other) const</td></tr>
-<tr class="separator:a83afdbac7eab0dcc00fcffbb109853ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a76beccd61e8e89d34cf0123c5aa1e470" id="r_a76beccd61e8e89d34cf0123c5aa1e470"><td class="memItemLeft" align="right" valign="top">T &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a76beccd61e8e89d34cf0123c5aa1e470.html#a76beccd61e8e89d34cf0123c5aa1e470">operator*</a> () const</td></tr>
-<tr class="separator:a76beccd61e8e89d34cf0123c5aa1e470"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aecd3cbdce8b043b46892df2f9704ac10" id="r_aecd3cbdce8b043b46892df2f9704ac10"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator.html">iterator</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_aecd3cbdce8b043b46892df2f9704ac10.html#aecd3cbdce8b043b46892df2f9704ac10">operator++</a> ()</td></tr>
-<tr class="separator:aecd3cbdce8b043b46892df2f9704ac10"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a60d45d923f3e2c1e7655386f4b63b051" id="r_a60d45d923f3e2c1e7655386f4b63b051"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator.html">iterator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a60d45d923f3e2c1e7655386f4b63b051.html#a60d45d923f3e2c1e7655386f4b63b051">operator++</a> (int)</td></tr>
-<tr class="separator:a60d45d923f3e2c1e7655386f4b63b051"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a670a594c18db87316959e83167e7b9c8" id="r_a670a594c18db87316959e83167e7b9c8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator.html">iterator</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a670a594c18db87316959e83167e7b9c8.html#a670a594c18db87316959e83167e7b9c8">operator--</a> ()</td></tr>
-<tr class="separator:a670a594c18db87316959e83167e7b9c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad894ba9839690dd2ff5dc90bcbb9e732" id="r_ad894ba9839690dd2ff5dc90bcbb9e732"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator.html">iterator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_ad894ba9839690dd2ff5dc90bcbb9e732.html#ad894ba9839690dd2ff5dc90bcbb9e732">operator--</a> (int)</td></tr>
-<tr class="separator:ad894ba9839690dd2ff5dc90bcbb9e732"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6856d48b0853a8cd3b751f8ae790d347" id="r_a6856d48b0853a8cd3b751f8ae790d347"><td class="memItemLeft" align="right" valign="top">T *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a6856d48b0853a8cd3b751f8ae790d347.html#a6856d48b0853a8cd3b751f8ae790d347">operator-&gt;</a> () const</td></tr>
-<tr class="separator:a6856d48b0853a8cd3b751f8ae790d347"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a83763948cdf9b879f7509b0608ace5e3" id="r_a83763948cdf9b879f7509b0608ace5e3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a83763948cdf9b879f7509b0608ace5e3.html#a83763948cdf9b879f7509b0608ace5e3">operator==</a> (const <a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator.html">iterator</a> &amp;other) const</td></tr>
-<tr class="separator:a83763948cdf9b879f7509b0608ace5e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a07c18d9fcd6e3d3533ff9cd85b4c2869" id="r_a07c18d9fcd6e3d3533ff9cd85b4c2869"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a07c18d9fcd6e3d3533ff9cd85b4c2869.html#a07c18d9fcd6e3d3533ff9cd85b4c2869">iterator</a> (<a class="el" href="../../dc/dfe/classfl_1_1deque.html">deque</a> *dq, fl::size index)</td></tr>
+<tr class="separator:a07c18d9fcd6e3d3533ff9cd85b4c2869"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1fb1bf9d841b2d878ce4e68e53b3f07a" id="r_a1fb1bf9d841b2d878ce4e68e53b3f07a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a1fb1bf9d841b2d878ce4e68e53b3f07a.html#a1fb1bf9d841b2d878ce4e68e53b3f07a">operator!=</a> (const <a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator.html">iterator</a> &amp;other) const</td></tr>
+<tr class="separator:a1fb1bf9d841b2d878ce4e68e53b3f07a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a81dbde376196c2bdf97b5e0168d37db8" id="r_a81dbde376196c2bdf97b5e0168d37db8"><td class="memItemLeft" align="right" valign="top">T &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a81dbde376196c2bdf97b5e0168d37db8.html#a81dbde376196c2bdf97b5e0168d37db8">operator*</a> () const</td></tr>
+<tr class="separator:a81dbde376196c2bdf97b5e0168d37db8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9e9a80128248fd778ab80638feb16c1" id="r_ae9e9a80128248fd778ab80638feb16c1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator.html">iterator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_ae9e9a80128248fd778ab80638feb16c1.html#ae9e9a80128248fd778ab80638feb16c1">operator+</a> (fl::size n) const</td></tr>
+<tr class="separator:ae9e9a80128248fd778ab80638feb16c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48d130ec06bfcf87d69f667a9c28902d" id="r_a48d130ec06bfcf87d69f667a9c28902d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator.html">iterator</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a48d130ec06bfcf87d69f667a9c28902d.html#a48d130ec06bfcf87d69f667a9c28902d">operator++</a> ()</td></tr>
+<tr class="separator:a48d130ec06bfcf87d69f667a9c28902d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae28327fadf4a13834e1eb4716202ce29" id="r_ae28327fadf4a13834e1eb4716202ce29"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator.html">iterator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_ae28327fadf4a13834e1eb4716202ce29.html#ae28327fadf4a13834e1eb4716202ce29">operator++</a> (int)</td></tr>
+<tr class="separator:ae28327fadf4a13834e1eb4716202ce29"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89dada64e5f71117b622a63bf505d325" id="r_a89dada64e5f71117b622a63bf505d325"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator.html">iterator</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a89dada64e5f71117b622a63bf505d325.html#a89dada64e5f71117b622a63bf505d325">operator+=</a> (fl::size n)</td></tr>
+<tr class="separator:a89dada64e5f71117b622a63bf505d325"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a979e65e30a5e762462a7912331775142" id="r_a979e65e30a5e762462a7912331775142"><td class="memItemLeft" align="right" valign="top">fl::size&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a979e65e30a5e762462a7912331775142.html#a979e65e30a5e762462a7912331775142">operator-</a> (const <a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator.html">iterator</a> &amp;other) const</td></tr>
+<tr class="separator:a979e65e30a5e762462a7912331775142"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac48864d93478826247715a3f0d55a92b" id="r_ac48864d93478826247715a3f0d55a92b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator.html">iterator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_ac48864d93478826247715a3f0d55a92b.html#ac48864d93478826247715a3f0d55a92b">operator-</a> (fl::size n) const</td></tr>
+<tr class="separator:ac48864d93478826247715a3f0d55a92b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e4bf3afc860d8d70e2177b793f0e89a" id="r_a8e4bf3afc860d8d70e2177b793f0e89a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator.html">iterator</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a8e4bf3afc860d8d70e2177b793f0e89a.html#a8e4bf3afc860d8d70e2177b793f0e89a">operator--</a> ()</td></tr>
+<tr class="separator:a8e4bf3afc860d8d70e2177b793f0e89a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a67b177218bcb367d02094137e8ec1818" id="r_a67b177218bcb367d02094137e8ec1818"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator.html">iterator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a67b177218bcb367d02094137e8ec1818.html#a67b177218bcb367d02094137e8ec1818">operator--</a> (int)</td></tr>
+<tr class="separator:a67b177218bcb367d02094137e8ec1818"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a293e2f929648ae21ae07501263368ece" id="r_a293e2f929648ae21ae07501263368ece"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator.html">iterator</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a293e2f929648ae21ae07501263368ece.html#a293e2f929648ae21ae07501263368ece">operator-=</a> (fl::size n)</td></tr>
+<tr class="separator:a293e2f929648ae21ae07501263368ece"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3995d7c30933b730f8abfbf7b0e33096" id="r_a3995d7c30933b730f8abfbf7b0e33096"><td class="memItemLeft" align="right" valign="top">T *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a3995d7c30933b730f8abfbf7b0e33096.html#a3995d7c30933b730f8abfbf7b0e33096">operator-&gt;</a> () const</td></tr>
+<tr class="separator:a3995d7c30933b730f8abfbf7b0e33096"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ff22690f0efacc9109241806046e6ba" id="r_a3ff22690f0efacc9109241806046e6ba"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a3ff22690f0efacc9109241806046e6ba.html#a3ff22690f0efacc9109241806046e6ba">operator&lt;</a> (const <a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator.html">iterator</a> &amp;other) const</td></tr>
+<tr class="separator:a3ff22690f0efacc9109241806046e6ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff53c82af33aacb024586d128b494343" id="r_aff53c82af33aacb024586d128b494343"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_aff53c82af33aacb024586d128b494343.html#aff53c82af33aacb024586d128b494343">operator&lt;=</a> (const <a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator.html">iterator</a> &amp;other) const</td></tr>
+<tr class="separator:aff53c82af33aacb024586d128b494343"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44e5ddee4af28bcc7ae5205bc8850304" id="r_a44e5ddee4af28bcc7ae5205bc8850304"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a44e5ddee4af28bcc7ae5205bc8850304.html#a44e5ddee4af28bcc7ae5205bc8850304">operator==</a> (const <a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator.html">iterator</a> &amp;other) const</td></tr>
+<tr class="separator:a44e5ddee4af28bcc7ae5205bc8850304"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45e001d4ed12b1df6f87fdfb1b7493f5" id="r_a45e001d4ed12b1df6f87fdfb1b7493f5"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a45e001d4ed12b1df6f87fdfb1b7493f5.html#a45e001d4ed12b1df6f87fdfb1b7493f5">operator&gt;</a> (const <a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator.html">iterator</a> &amp;other) const</td></tr>
+<tr class="separator:a45e001d4ed12b1df6f87fdfb1b7493f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1260bbc786e2bee0a231731081b80de3" id="r_a1260bbc786e2bee0a231731081b80de3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a1260bbc786e2bee0a231731081b80de3.html#a1260bbc786e2bee0a231731081b80de3">operator&gt;=</a> (const <a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator.html">iterator</a> &amp;other) const</td></tr>
+<tr class="separator:a1260bbc786e2bee0a231731081b80de3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b9b26483306a0ced431a8d26d0877d6" id="r_a2b9b26483306a0ced431a8d26d0877d6"><td class="memItemLeft" align="right" valign="top">T &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a2b9b26483306a0ced431a8d26d0877d6.html#a2b9b26483306a0ced431a8d26d0877d6">operator[]</a> (fl::size n) const</td></tr>
+<tr class="separator:a2b9b26483306a0ced431a8d26d0877d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr class="memitem:aa562141970783790ebb57d438679a17a" id="r_aa562141970783790ebb57d438679a17a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dc/dfe/classfl_1_1deque.html">deque</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_aa562141970783790ebb57d438679a17a.html#aa562141970783790ebb57d438679a17a">mDeque</a></td></tr>
-<tr class="separator:aa562141970783790ebb57d438679a17a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a245037d77d3d13d36fd1331cb9faff60" id="r_a245037d77d3d13d36fd1331cb9faff60"><td class="memItemLeft" align="right" valign="top">fl::size&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a245037d77d3d13d36fd1331cb9faff60.html#a245037d77d3d13d36fd1331cb9faff60">mIndex</a></td></tr>
-<tr class="separator:a245037d77d3d13d36fd1331cb9faff60"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a03b7b1ab51b62de818bbcb17cb34463c" id="r_a03b7b1ab51b62de818bbcb17cb34463c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../dc/dfe/classfl_1_1deque.html">deque</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a03b7b1ab51b62de818bbcb17cb34463c.html#a03b7b1ab51b62de818bbcb17cb34463c">mDeque</a></td></tr>
+<tr class="separator:a03b7b1ab51b62de818bbcb17cb34463c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a18935874f13617f70fa150dc1e461abf" id="r_a18935874f13617f70fa150dc1e461abf"><td class="memItemLeft" align="right" valign="top">fl::size&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_a18935874f13617f70fa150dc1e461abf.html#a18935874f13617f70fa150dc1e461abf">mIndex</a></td></tr>
+<tr class="separator:a18935874f13617f70fa150dc1e461abf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
+Friends</h2></td></tr>
+<tr class="memitem:ab4b7a21d84953f72c35b951d13ac3ee6" id="r_ab4b7a21d84953f72c35b951d13ac3ee6"><td class="memItemLeft" align="right" valign="top">class&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator_ab4b7a21d84953f72c35b951d13ac3ee6.html#ab4b7a21d84953f72c35b951d13ac3ee6">deque</a></td></tr>
+<tr class="separator:ab4b7a21d84953f72c35b951d13ac3ee6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>fl/<a class="el" href="../../dc/d44/deque_8h_source.html">deque.h</a></li>
+<li>fl/stl/<a class="el" href="../../dc/d44/deque_8h_source.html">deque.h</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -159,7 +199,7 @@ Private Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../dc/dfe/classfl_1_1deque.html">deque</a></li><li class="navelem"><a class="el" href="../../dd/db8/classfl_1_1deque_1_1iterator.html">iterator</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:22 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,0 +1,9 @@
+<map id="fl::Watchdog::lastResetWasWatchdog" name="fl::Watchdog::lastResetWasWatchdog">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,204,69"/>
+<area shape="poly" id="edge4_Node000001_Node000001" title=" " alt="" coords="59,30,56,20,64,10,80,5,105,3,133,6,149,13,146,18,132,11,105,8,81,10,67,15,61,21,64,28"/>
+<area shape="rect" id="Node000002" href="$da/d45/classfl_1_1_watchdog_ad817823bd41330b6f0d6afdfbcefa7ed.html#ad817823bd41330b6f0d6afdfbcefa7ed" title="Detailed reset information including platform raw register + subcause id." alt="" coords="252,37,448,62"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,47,238,47,238,52,204,52"/>
+<area shape="rect" id="Node000003" href="$da/d45/classfl_1_1_watchdog_a5c1ddec6fa8ad283f62bf06d9ae0cbc9.html#a5c1ddec6fa8ad283f62bf06d9ae0cbc9" title=" " alt="" coords="496,37,707,62"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="448,47,482,47,482,52,448,52"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="561,38,552,28,556,18,573,12,601,10,637,14,647,19,651,24,646,27,643,23,635,19,601,15,574,17,560,22,557,28,565,35"/>
+</map>

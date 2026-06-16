@@ -1,0 +1,14 @@
+<map id="fl/math/distance_lut.h" name="fl/math/distance_lut.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,168,31"/>
+<area shape="rect" id="Node000002" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="111,225,214,251"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="81,32,64,60,49,97,42,138,44,158,52,176,75,201,105,218,103,222,72,205,47,179,39,159,36,138,43,95,60,57,76,30"/>
+<area shape="rect" id="Node000004" href="$df/dab/fastled__progmem_8h.html" title="Wrapper definitions to allow seamless use of PROGMEM in environments that have it." alt="" coords="75,79,224,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="99,29,132,66,128,70,95,33"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="103,299,222,324"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="165,251,165,285,160,285,160,251"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="62,152,237,177"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="152,104,152,138,147,138,147,104"/>
+<area shape="rect" id="Node000006" href="$d3/d7e/int_8h.html" title=" " alt="" coords="261,152,344,177"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="175,102,266,144,264,149,173,106"/>
+<area shape="poly" id="edge6_Node000006_Node000002" title=" " alt="" coords="281,180,199,221,196,217,279,175"/>
+</map>

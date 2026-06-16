@@ -1,0 +1,8 @@
+<map id="fl::Remote::bind" name="fl::Remote::bind">
+<area shape="rect" id="Node000001" title="Register method by name, function, and optional mode (default SYNC)" alt="" coords="5,55,131,80"/>
+<area shape="rect" id="Node000002" href="$dc/ddb/classfl_1_1_remote_a22ec543edde8a685570e3c6d1a3b0c02.html#a22ec543edde8a685570e3c6d1a3b0c02" title="Register method with config (name, function, optional metadata)" alt="" coords="179,29,304,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="131,56,165,50,166,56,131,61"/>
+<area shape="rect" id="Node000003" href="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a" title=" " alt="" coords="196,79,287,104"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="131,73,183,81,182,86,131,79"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="212,31,206,21,210,11,222,5,241,3,265,6,275,15,272,19,263,11,241,8,223,10,214,15,212,20,217,28"/>
+</map>

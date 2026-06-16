@@ -1,0 +1,18 @@
+<map id="fl::FixedVector::resize" name="fl::FixedVector::resize">
+<area shape="rect" id="Node000001" title=" " alt="" coords="576,80,736,105"/>
+<area shape="rect" id="Node000002" href="$d4/df9/_auto_research_test_8cpp_ac7607ef5b12973ed8cd8353da071aef8.html#ac7607ef5b12973ed8cd8353da071aef8" title="Dump raw edge timing data to console for debugging." alt="" coords="343,55,507,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="562,85,506,79,507,74,563,80"/>
+<area shape="rect" id="Node000014" href="$d8/d07/namespacefl_1_1validation_a46b68a701e41e321618f87bdb6d80cc2.html#a46b68a701e41e321618f87bdb6d80cc2" title="Test RX channel with manual GPIO toggle pattern." alt="" coords="321,104,528,129"/>
+<area shape="poly" id="edge6_Node000001_Node000014" title=" " alt="" coords="563,105,529,109,528,103,562,100"/>
+<area shape="rect" id="Node000003" href="$d4/df9/_auto_research_test_8cpp_ade4309c9f4171360f59ed787c7041584.html#ade4309c9f4171360f59ed787c7041584" title=" " alt="" coords="179,55,250,80"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="329,70,250,70,250,65,329,65"/>
+<area shape="rect" id="Node000004" href="$d4/df9/_auto_research_test_8cpp_aac567188ee44c45d15b20231ecff68c9.html#aac567188ee44c45d15b20231ecff68c9" title=" " alt="" coords="5,5,108,31"/>
+<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="334,55,273,46,108,26,108,21,274,41,335,50"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="165,55,97,33,99,28,167,50"/>
+<area shape="rect" id="Node000013" href="$d4/df9/_auto_research_test_8cpp_ab5d3883aa989a0c1298af1a8a0d2851a.html#ab5d3883aa989a0c1298af1a8a0d2851a" title=" " alt="" coords="22,55,91,80"/>
+<area shape="poly" id="edge4_Node000003_Node000013" title=" " alt="" coords="166,70,91,70,91,65,166,65"/>
+<area shape="rect" id="Node000015" href="$d7/d5f/_auto_research_helpers_8cpp_aec5c2c23f8a1e895555f21f61b66b74e.html#aec5c2c23f8a1e895555f21f61b66b74e" title="Test RX channel with manual GPIO toggle." alt="" coords="156,104,273,129"/>
+<area shape="poly" id="edge7_Node000014_Node000015" title=" " alt="" coords="308,119,273,119,273,114,308,114"/>
+<area shape="rect" id="Node000016" href="$dd/dc8/_auto_research_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="31,104,82,129"/>
+<area shape="poly" id="edge8_Node000015_Node000016" title=" " alt="" coords="142,119,82,119,82,114,142,114"/>
+</map>

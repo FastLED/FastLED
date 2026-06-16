@@ -1,0 +1,5 @@
+<map id="fl::wave3" name="fl::wave3">
+<area shape="rect" id="Node000001" title="Convert byte to 3 wave3 bytes using nibble LUT." alt="" coords="5,13,87,38"/>
+<area shape="rect" id="Node000002" href="$df/d9e/namespacefl_1_1detail_afa4a607fdb31c744529cfe7156160684.html#afa4a607fdb31c744529cfe7156160684" title="Helper: Convert byte to Wave3Byte using nibble LUT (internal use only)" alt="" coords="135,5,317,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="87,23,121,23,121,28,87,28"/>
+</map>

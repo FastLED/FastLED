@@ -1,0 +1,17 @@
+<map id="fl::audio::SpectralFluxDetector::~SpectralFluxDetector" name="fl::audio::SpectralFluxDetector::~SpectralFluxDetector">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,101,224,141"/>
+<area shape="rect" id="Node000002" href="$df/d68/classfl_1_1audio_1_1_spectral_flux_detector_aafd53f207e19737176de810add35c468.html#aafd53f207e19737176de810add35c468" title=" " alt="" coords="539,9,757,49"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="138,98,196,57,232,37,271,22,335,9,401,3,465,4,525,8,525,13,465,9,401,9,336,14,273,27,235,42,198,62,141,103"/>
+<area shape="rect" id="Node000003" href="$df/d68/classfl_1_1audio_1_1_spectral_flux_detector_ad9150f6d8238fa0d3899214f94281ec0.html#ad9150f6d8238fa0d3899214f94281ec0" title=" " alt="" coords="272,37,491,77"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="198,98,284,77,285,83,199,103"/>
+<area shape="rect" id="Node000004" href="$df/d68/classfl_1_1audio_1_1_spectral_flux_detector_adf6cdc7292f80a62d8a625b70a13be12.html#adf6cdc7292f80a62d8a625b70a13be12" title=" " alt="" coords="272,101,491,141"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="224,118,258,118,258,123,224,123"/>
+<area shape="rect" id="Node000005" href="$df/d68/classfl_1_1audio_1_1_spectral_flux_detector_a8dc8f048f2663bbd10dfd258bfdf1a90.html#a8dc8f048f2663bbd10dfd258bfdf1a90" title=" " alt="" coords="272,189,491,229"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="177,138,308,182,306,187,176,143"/>
+<area shape="rect" id="Node000007" href="$df/d68/classfl_1_1audio_1_1_spectral_flux_detector_a525434baf3a7d0b7e4ad2ea484aecd04.html#a525434baf3a7d0b7e4ad2ea484aecd04" title=" " alt="" coords="272,253,491,293"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="139,139,197,189,234,215,273,238,288,245,286,250,271,243,231,220,194,193,135,143"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="491,43,525,39,525,44,491,48"/>
+<area shape="poly" id="edge7_Node000005_Node000005" title=" " alt="" coords="332,189,329,179,337,170,354,164,381,162,412,165,429,172,427,177,411,170,381,167,355,169,340,174,334,180,337,188"/>
+<area shape="rect" id="Node000006" href="$df/d68/classfl_1_1audio_1_1_spectral_flux_detector_a21809fa7dd37f4250be8d30a461417cf.html#a21809fa7dd37f4250be8d30a461417cf" title=" " alt="" coords="539,189,757,229"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="491,206,525,206,525,211,491,211"/>
+</map>

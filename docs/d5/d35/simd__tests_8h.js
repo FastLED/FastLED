@@ -1,0 +1,27 @@
+var simd__tests_8h =
+[
+    [ "simd_test::test_add_f32_4", "d6/dfe/namespacesimd__test_a93c7eaed04361d0a90b42704caf7c3bd.html#a93c7eaed04361d0a90b42704caf7c3bd", null ],
+    [ "simd_test::test_add_sat_u8_16", "d6/dfe/namespacesimd__test_a47aa118c3b50358daea2c9caedeb820b.html#a47aa118c3b50358daea2c9caedeb820b", null ],
+    [ "simd_test::test_and_u8_16", "d6/dfe/namespacesimd__test_a5cd89f9d0778c8a897c0f04ee13e779d.html#a5cd89f9d0778c8a897c0f04ee13e779d", null ],
+    [ "simd_test::test_andnot_u8_16", "d6/dfe/namespacesimd__test_adc1c012120145506f6bee7585117d23b.html#adc1c012120145506f6bee7585117d23b", null ],
+    [ "simd_test::test_avg_round_u8_16", "d6/dfe/namespacesimd__test_ac69773595c6c709d608c96e52310ead8.html#ac69773595c6c709d608c96e52310ead8", null ],
+    [ "simd_test::test_avg_u8_16", "d6/dfe/namespacesimd__test_a4b9a10b1f8b996156df3b36b93eb6822.html#a4b9a10b1f8b996156df3b36b93eb6822", null ],
+    [ "simd_test::test_blend_u8_16", "d6/dfe/namespacesimd__test_ad358a83689de210a4bc275d47031e499.html#ad358a83689de210a4bc275d47031e499", null ],
+    [ "simd_test::test_div_f32_4", "d6/dfe/namespacesimd__test_aa8339426ff79e65cd6a5cd503e0eda68.html#aa8339426ff79e65cd6a5cd503e0eda68", null ],
+    [ "simd_test::test_load_store_f32_4", "d6/dfe/namespacesimd__test_a05175661de30421a06884bc13a30f1ac.html#a05175661de30421a06884bc13a30f1ac", null ],
+    [ "simd_test::test_load_store_u32_4", "d6/dfe/namespacesimd__test_a4bc55001c4c96a1e3c97bdbcf6b5bf06.html#a4bc55001c4c96a1e3c97bdbcf6b5bf06", null ],
+    [ "simd_test::test_load_store_u8_16", "d6/dfe/namespacesimd__test_a11b9bd52acf45410eb3d637969ebad8a.html#a11b9bd52acf45410eb3d637969ebad8a", null ],
+    [ "simd_test::test_max_f32_4", "d6/dfe/namespacesimd__test_a656f5b47c12eb43591d5576802deab42.html#a656f5b47c12eb43591d5576802deab42", null ],
+    [ "simd_test::test_max_u8_16", "d6/dfe/namespacesimd__test_abf7c3097f2806a474ce1cc6b978f8f08.html#abf7c3097f2806a474ce1cc6b978f8f08", null ],
+    [ "simd_test::test_min_f32_4", "d6/dfe/namespacesimd__test_a598f7bffcc7eec0fc0f1ebcce42561cf.html#a598f7bffcc7eec0fc0f1ebcce42561cf", null ],
+    [ "simd_test::test_min_u8_16", "d6/dfe/namespacesimd__test_a6fef99868ee4ec98093e1ccbe0557836.html#a6fef99868ee4ec98093e1ccbe0557836", null ],
+    [ "simd_test::test_mul_f32_4", "d6/dfe/namespacesimd__test_a801e1e712f380435f2f51258b68f3f32.html#a801e1e712f380435f2f51258b68f3f32", null ],
+    [ "simd_test::test_or_u8_16", "d6/dfe/namespacesimd__test_a15b9ef324d31ec58cd515ab764430acf.html#a15b9ef324d31ec58cd515ab764430acf", null ],
+    [ "simd_test::test_scale_u8_16", "d6/dfe/namespacesimd__test_abea4bc101ffe860ed64ffefdecfe4eed.html#abea4bc101ffe860ed64ffefdecfe4eed", null ],
+    [ "simd_test::test_set1_f32_4", "d6/dfe/namespacesimd__test_a6d5d8bac6c59b99f9dccc64d6f3e15dd.html#a6d5d8bac6c59b99f9dccc64d6f3e15dd", null ],
+    [ "simd_test::test_set1_u32_4", "d6/dfe/namespacesimd__test_a38667bd4b948f6e7db24816cdc11bb26.html#a38667bd4b948f6e7db24816cdc11bb26", null ],
+    [ "simd_test::test_sqrt_f32_4", "d6/dfe/namespacesimd__test_ae1521c573268e16c492a17ddcc6442df.html#ae1521c573268e16c492a17ddcc6442df", null ],
+    [ "simd_test::test_sub_f32_4", "d6/dfe/namespacesimd__test_aba82af6f4068b592a7120c3b873758d3.html#aba82af6f4068b592a7120c3b873758d3", null ],
+    [ "simd_test::test_sub_sat_u8_16", "d6/dfe/namespacesimd__test_a91645c9f8dc86fbf72308dcb1f0e58dd.html#a91645c9f8dc86fbf72308dcb1f0e58dd", null ],
+    [ "simd_test::test_xor_u8_16", "d6/dfe/namespacesimd__test_aaad63d9e7c1703635632401544c4a2a4.html#aaad63d9e7c1703635632401544c4a2a4", null ]
+];

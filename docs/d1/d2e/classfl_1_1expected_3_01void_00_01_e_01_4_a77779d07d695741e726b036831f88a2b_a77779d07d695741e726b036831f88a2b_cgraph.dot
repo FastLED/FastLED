@@ -1,0 +1,12 @@
+digraph "fl::expected&lt; void, E &gt;::failure"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::expected\< void,\l E \>::failure",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::expected\< void,\l E \>::expected",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d2e/classfl_1_1expected_3_01void_00_01_e_01_4_adafd4813eb4c8dd0c59ad6ca3955b6ab.html#adafd4813eb4c8dd0c59ad6ca3955b6ab",tooltip="Default constructor (creates error state)"];
+}

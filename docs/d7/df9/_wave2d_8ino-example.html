@@ -110,25 +110,20 @@ $(function(){initNavTree('d7/df9/_wave2d_8ino-example.html','../../'); initResiz
 <li>Run the FastLED web compiler at root: <code>fastled</code></li>
 <li>When the compiler is done a web page will open.</li>
 </ol>
-<div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="../../d1/dbc/sketch__macros_8h.html">fl/sketch_macros.h</a>&quot;</span></div>
+<div class="fragment"><div class="line"><span class="comment">// @filter: (memory is large)</span></div>
 <div class="line"> </div>
-<div class="line"><span class="preprocessor">#if SKETCH_HAS_LOTS_OF_MEMORY</span></div>
+<div class="line"><span class="comment">// FastLED.h must be included first to trigger precompiled headers for FastLED&#39;s build system</span></div>
+<div class="line"><span class="preprocessor">#include &quot;FastLED.h&quot;</span></div>
 <div class="line"> </div>
 <div class="line"><span class="preprocessor">#include &quot;<a class="code" href="../../d5/d94/_wave2d_8h.html">Wave2d.h</a>&quot;</span></div>
-<div class="line"> </div>
-<div class="line"><span class="preprocessor">#else</span></div>
-<div class="line"><span class="preprocessor">#include &quot;platforms/sketch_fake.hpp&quot;</span></div>
-<div class="line"> </div>
-<div class="line"><span class="preprocessor">#endif  </span><span class="comment">// SKETCH_HAS_LOTS_OF_MEMORY</span></div>
 <div class="ttc" id="a_wave2d_8h_html"><div class="ttname"><a href="../../d5/d94/_wave2d_8h.html">Wave2d.h</a></div></div>
-<div class="ttc" id="asketch__macros_8h_html"><div class="ttname"><a href="../../d1/dbc/sketch__macros_8h.html">sketch_macros.h</a></div></div>
 </div><!-- fragment --> </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:19 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:06:58 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,0 +1,10 @@
+digraph "Graphical Class Hierarchy"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node0 [id="Node000000",label="fl::s16x16x4",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d7f/structfl_1_1s16x16x4.html",tooltip="4-wide s16x16 vector (general fixed-point) Backed by 128-bit SIMD register (4× i32 in Q16 format)"];
+}

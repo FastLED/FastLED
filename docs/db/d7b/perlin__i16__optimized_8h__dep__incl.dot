@@ -1,0 +1,36 @@
+digraph "fl/fx/2d/animartrix_detail/perlin_i16_optimized.h"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl/fx/2d/animartrix\l_detail/perlin_i16_optimized.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="/home/runner/work/FastLED\l/FastLED/examples/AutoResearch\l/AutoResearchAnimartrixBench.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d0a/_auto_research_animartrix_bench_8h.html",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="/home/runner/work/FastLED\l/FastLED/examples/AutoResearch\l/AutoResearchRemote.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/dfb/_auto_research_remote_8cpp.html",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl/fx/2d/animartrix\l_detail.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d5d/animartrix__detail_8h.html",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl/fx/2d/animartrix.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/dc3/animartrix_8hpp.html",tooltip=" "];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="/home/runner/work/FastLED\l/FastLED/examples/Animartrix\l/Animartrix.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d05/_animartrix_8ino.html",tooltip="Demo of the Animatrix effects."];
+  Node5 -> Node7 [id="edge6_Node000005_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="/home/runner/work/FastLED\l/FastLED/examples/AnimartrixRing\l/AnimartrixRing.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/dba/_animartrix_ring_8ino.html",tooltip=" "];
+  Node5 -> Node8 [id="edge7_Node000005_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="/home/runner/work/FastLED\l/FastLED/examples/AnimartrixRing\l/sound_orchestrator.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d67/sound__orchestrator_8h.html",tooltip=" "];
+  Node8 -> Node7 [id="edge8_Node000008_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node10 [id="edge9_Node000005_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="/home/runner/work/FastLED\l/FastLED/examples/FestivalStick/curr.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d06/curr_8h.html",tooltip=" "];
+  Node5 -> Node12 [id="edge10_Node000005_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="/home/runner/work/FastLED\l/FastLED/examples/Fx/FxEngine\l/FxEngine.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d35/_fx_engine_8ino.html",tooltip="Demonstrates FxEngine for switching between effects."];
+  Node5 -> Node13 [id="edge11_Node000005_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="/home/runner/work/FastLED\l/FastLED/examples/wasm\l/wasm_impl.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/d40/wasm__impl_8h.html",tooltip=" "];
+  Node1 -> Node15 [id="edge12_Node000001_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="fl/fx/2d/animartrix\l_detail/perlin_i16_optimized.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d51/perlin__i16__optimized_8cpp_8hpp.html",tooltip=" "];
+  Node15 -> Node16 [id="edge13_Node000015_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl/fx/2d/animartrix\l_detail/_build.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d40/fl_2fx_22d_2animartrix__detail_2__build_8cpp_8hpp.html",tooltip=" "];
+  Node16 -> Node17 [id="edge14_Node000016_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl/fx/2d/_build.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/d41/fl_2fx_22d_2__build_8cpp_8hpp.html",tooltip="Unity build header for fl/fx/2d/ directory."];
+}

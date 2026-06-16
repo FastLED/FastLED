@@ -1,0 +1,7 @@
+<map id="fl::Rgbww" name="fl::Rgbww">
+<area shape="rect" id="Node000001" title="Per&#45;strip RGBWW configuration." alt="" coords="107,5,192,31"/>
+<area shape="rect" id="Node000002" href="$d6/dd0/structfl_1_1_rgbww_default.html" title="Default RGBWW configuration: colorimetric mode at warm=2700K / cool=6500K, default profile,..." alt="" coords="5,79,139,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="129,42,86,80,83,76,125,38"/>
+<area shape="rect" id="Node000003" href="$d3/d33/structfl_1_1_rgbww_invalid.html" title="Sentinel: disables RGBWW (variant should hold fl::Empty instead, but this is kept for symmetry with R..." alt="" coords="163,79,293,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="174,38,217,76,213,80,170,42"/>
+</map>

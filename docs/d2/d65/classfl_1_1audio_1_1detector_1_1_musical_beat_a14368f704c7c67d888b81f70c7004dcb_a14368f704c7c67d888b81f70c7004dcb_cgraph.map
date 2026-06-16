@@ -1,0 +1,35 @@
+<map id="fl::audio::detector::MusicalBeat::processSample" name="fl::audio::detector::MusicalBeat::processSample">
+<area shape="rect" id="Node000001" title="Process one audio frame." alt="" coords="5,219,223,259"/>
+<area shape="rect" id="Node000002" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a25756788660507be8a6660dc23f82624.html#a25756788660507be8a6660dc23f82624" title="Calculate beat confidence based on rhythmic consistency." alt="" coords="293,83,499,137"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="144,217,201,182,270,148,289,140,291,145,272,152,204,187,147,221"/>
+<area shape="rect" id="Node000006" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_aa892bcc192e2ecd6b2031c290f4b7725.html#aa892bcc192e2ecd6b2031c290f4b7725" title="Get inter&#45;beat interval (IBI) statistics." alt="" coords="585,219,795,259"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="223,237,572,237,572,242,223,242"/>
+<area shape="rect" id="Node000008" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a23c3f97cc42b2f345503145ce16499c8.html#a23c3f97cc42b2f345503145ce16499c8" title="Check if IBI is within valid BPM range." alt="" coords="601,309,779,349"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="142,257,199,295,234,313,271,326,353,341,436,347,516,346,587,340,587,346,516,351,436,352,352,347,270,331,232,318,196,300,139,262"/>
+<area shape="rect" id="Node000013" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_ae8c4e7e2d6ed27b8d955a9e2e1cd3db2.html#ae8c4e7e2d6ed27b8d955a9e2e1cd3db2" title="Update BPM estimate from inter&#45;beat intervals." alt="" coords="271,162,521,202"/>
+<area shape="poly" id="edge13_Node000001_Node000013" title=" " alt="" coords="212,217,283,202,284,207,214,222"/>
+<area shape="rect" id="Node000015" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_abef5ac55aa91cb94f03cda4f2c34d229.html#abef5ac55aa91cb94f03cda4f2c34d229" title="Validate if an onset is a true musical beat." alt="" coords="295,277,497,317"/>
+<area shape="poly" id="edge17_Node000001_Node000015" title=" " alt="" coords="214,257,284,271,283,276,212,262"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84" title=" " alt="" coords="659,5,721,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="460,80,569,41,645,23,646,28,570,46,462,85"/>
+<area shape="rect" id="Node000004" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_af7ccbbd6059884bc88da1f7c171455b9.html#af7ccbbd6059884bc88da1f7c171455b9" title="Calculate standard deviation of IBI history." alt="" coords="569,55,811,95"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="499,95,555,89,556,94,500,100"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="500,135,523,148,539,162,547,177,556,191,571,204,585,212,582,216,568,208,552,194,543,180,534,166,520,152,498,140"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="657,120,723,145"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="500,115,643,126,643,132,499,121"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1" title=" " alt="" coords="859,63,921,88"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="811,73,845,73,845,78,811,78"/>
+<area shape="rect" id="Node000009" href="$d5/d25/_demo_reel100_8ino_a4875f6d9a2b0f08d3cf221974234121b.html#a4875f6d9a2b0f08d3cf221974234121b" title=" " alt="" coords="865,316,915,341"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="780,326,851,326,851,331,780,331"/>
+<area shape="rect" id="Node000010" href="$df/da5/lib8tion_8h_a696b9421eca961df0a68c7c6c3e983ab.html#a696b9421eca961df0a68c7c6c3e983ab" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="997,267,1076,292"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="915,318,985,294,987,299,917,323"/>
+<area shape="rect" id="Node000011" href="$d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="969,316,1104,341"/>
+<area shape="poly" id="edge11_Node000009_Node000011" title=" " alt="" coords="916,326,956,326,956,331,916,331"/>
+<area shape="rect" id="Node000012" href="$d8/dd0/_fire_cylinder_8h_a470cec2dcb21e474c257065bb93bfcd1.html#a470cec2dcb21e474c257065bb93bfcd1" title=" " alt="" coords="1003,365,1071,391"/>
+<area shape="poly" id="edge12_Node000009_Node000012" title=" " alt="" coords="917,335,991,360,989,365,915,340"/>
+<area shape="poly" id="edge14_Node000013_Node000006" title=" " alt="" coords="500,199,574,214,573,219,499,205"/>
+<area shape="poly" id="edge15_Node000013_Node000007" title=" " alt="" coords="515,159,643,138,644,143,516,165"/>
+<area shape="rect" id="Node000014" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="659,169,721,195"/>
+<area shape="poly" id="edge16_Node000013_Node000014" title=" " alt="" coords="522,179,645,179,645,185,522,185"/>
+<area shape="poly" id="edge18_Node000015_Node000008" title=" " alt="" coords="497,305,587,315,586,320,496,310"/>
+</map>

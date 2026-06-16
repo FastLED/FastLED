@@ -1,0 +1,27 @@
+<map id="fl::PixelIterator::writeHD108" name="fl::PixelIterator::writeHD108">
+<area shape="rect" id="Node000001" title="Encode pixels in HD108 format (zero allocation)" alt="" coords="5,97,131,137"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a403bd8d96e6625e5daef764daf780f26.html#a403bd8d96e6625e5daef764daf780f26" title="Helper function to create a back_insert_iterator." alt="" coords="224,5,351,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,94,130,66,178,40,210,28,212,33,180,44,133,70,95,99"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aef09f777bf4696c87f6e823baad93fa8.html#aef09f777bf4696c87f6e823baad93fa8" title="Encode pixel data in HD108 format with global brightness." alt="" coords="223,104,352,129"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="131,114,209,114,209,119,131,119"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_ac142c352ad477c7fef29ee3bb0eb28b2.html#ac142c352ad477c7fef29ee3bb0eb28b2" title="Encode pixel data in HD108 format with per&#45;LED brightness." alt="" coords="209,55,365,80"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="131,100,178,89,215,80,216,86,179,94,132,105"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a838e3eb7aadd2717af8899fbf69cdff4.html#a838e3eb7aadd2717af8899fbf69cdff4" title="Create brightness input iterator range from PixelIterator." alt="" coords="194,227,381,267"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="89,135,128,175,180,213,193,219,190,224,177,218,125,179,85,139"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_a0245017ca5e8aeaf10ccae7aee944f08.html#a0245017ca5e8aeaf10ccae7aee944f08" title="Create RGB input iterator range from PixelIterator." alt="" coords="179,177,396,203"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="129,134,236,170,234,175,128,139"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a34ee7e984978ce7e86c74bb6ad80bdd3.html#a34ee7e984978ce7e86c74bb6ad80bdd3" title="Generate HD108 per&#45;channel gain header bytes." alt="" coords="444,104,639,129"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="352,114,430,114,430,119,352,119"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a524cd243df726c3d5869faafcf480ac4.html#a524cd243df726c3d5869faafcf480ac4" title="Convert 8&#45;bit color to HD108 16&#45;bit gamma&#45;corrected value (gamma 2.8)" alt="" coords="453,55,630,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="352,102,462,80,463,85,353,107"/>
+<area shape="rect" id="Node000006" href="$d3/d1a/structfl_1_1_progmem_l_u_t16_a7aef23d2239be4d68b4ffff4cb51629f.html#a7aef23d2239be4d68b4ffff4cb51629f" title=" " alt="" coords="687,40,940,95"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="630,65,673,65,673,70,630,70"/>
+<area shape="poly" id="edge7_Node000007_Node000004" title=" " alt="" coords="354,77,462,99,461,104,353,83"/>
+<area shape="poly" id="edge8_Node000007_Node000005" title=" " alt="" coords="365,65,439,65,439,70,365,70"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a9f32cf31427769f3900630cb3506f2c6.html#a9f32cf31427769f3900630cb3506f2c6" title=" " alt="" coords="488,205,595,231"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="381,234,474,223,474,228,381,239"/>
+<area shape="rect" id="Node000010" href="$da/d3c/namespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259.html#a0bddf371925d8c4e94b88e9d7b35d259" title=" " alt="" coords="761,205,865,231"/>
+<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="595,215,747,215,747,221,595,221"/>
+<area shape="poly" id="edge13_Node000011_Node000009" title=" " alt="" coords="397,199,475,208,474,213,396,205"/>
+<area shape="poly" id="edge14_Node000011_Node000011" title=" " alt="" coords="252,179,244,169,248,159,263,153,287,151,318,154,330,163,327,168,316,159,287,156,264,158,252,163,249,168,256,176"/>
+</map>

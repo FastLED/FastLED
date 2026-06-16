@@ -1,0 +1,17 @@
+<map id="fl::vector_basic::resize_impl" name="fl::vector_basic::resize_impl">
+<area shape="rect" id="Node000001" title="Resize to n elements. New elements are default&#45;constructed (zeroed for trivial)." alt="" coords="5,63,208,88"/>
+<area shape="rect" id="Node000002" href="$d4/dad/classfl_1_1vector__basic_ab007e98763f01e1326ef5ddb39ddf006.html#ab007e98763f01e1326ef5ddb39ddf006" title="Pointer to element at index (byte arithmetic)." alt="" coords="256,5,463,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="163,60,289,31,290,36,164,65"/>
+<area shape="rect" id="Node000003" href="$d4/dad/classfl_1_1vector__basic_a9a315ee221dc1563fecb0c0f84c73438.html#a9a315ee221dc1563fecb0c0f84c73438" title="Ensure capacity for at least n elements. Grows if needed." alt="" coords="273,55,445,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="208,73,260,73,260,78,208,78"/>
+<area shape="rect" id="Node000009" href="$d4/dad/classfl_1_1vector__basic_a38767d94f84edfe73244b02d49921944.html#a38767d94f84edfe73244b02d49921944" title=" " alt="" coords="276,119,443,159"/>
+<area shape="poly" id="edge6_Node000001_Node000009" title=" " alt="" coords="159,86,267,113,266,118,157,91"/>
+<area shape="rect" id="Node000004" href="$d4/dad/classfl_1_1vector__basic_a17f684eb95a4b6b0511454f7f80f87d1.html#a17f684eb95a4b6b0511454f7f80f87d1" title="Grow to new_capacity. Moves existing elements." alt="" coords="511,63,691,88"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="445,73,497,73,497,78,445,78"/>
+<area shape="rect" id="Node000005" href="$d4/dad/classfl_1_1vector__basic_a4a79234edce9c9748432aba0f499b001.html#a4a79234edce9c9748432aba0f499b001" title="Is data currently in the inline buffer?" alt="" coords="753,39,928,64"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="690,64,739,59,740,64,691,69"/>
+<area shape="rect" id="Node000007" href="$d4/dad/classfl_1_1vector__basic_a81fe1c9feb8228d4269494b7984c6270.html#a81fe1c9feb8228d4269494b7984c6270" title=" " alt="" coords="739,88,943,113"/>
+<area shape="poly" id="edge5_Node000004_Node000007" title=" " alt="" coords="691,82,725,86,725,91,690,87"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_a44a195439ac7fa303b4b0b0c956605be.html#a44a195439ac7fa303b4b0b0c956605be" title=" " alt="" coords="555,127,647,152"/>
+<area shape="poly" id="edge7_Node000009_Node000010" title=" " alt="" coords="443,137,541,137,541,142,443,142"/>
+</map>

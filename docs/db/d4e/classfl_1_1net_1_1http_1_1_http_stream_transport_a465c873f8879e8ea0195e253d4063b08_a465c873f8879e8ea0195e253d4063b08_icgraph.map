@@ -1,0 +1,13 @@
+<map id="fl::net::http::HttpStreamTransport::triggerReconnect" name="fl::net::http::HttpStreamTransport::triggerReconnect">
+<area shape="rect" id="Node000001" title="Trigger reconnection (for subclasses to override)" alt="" coords="732,59,933,99"/>
+<area shape="rect" id="Node000002" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a4fa3d87f839a758646743092409b8cb1.html#a4fa3d87f839a758646743092409b8cb1" title="Receive raw data from connection." alt="" coords="508,29,684,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="718,67,684,63,685,58,719,62"/>
+<area shape="rect" id="Node000007" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a57c01766a42aa6cbab3d0c6b7617a5ff.html#a57c01766a42aa6cbab3d0c6b7617a5ff" title="Update connection state (handles reconnection, heartbeat) Call this in main loop." alt="" coords="5,87,181,127"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="719,86,182,106,181,101,718,80"/>
+<area shape="poly" id="edge5_Node000002_Node000002" title=" " alt="" coords="636,18,622,11,596,8,573,10,560,15,555,21,557,28,552,30,550,20,557,10,572,5,596,3,623,6,638,13"/>
+<area shape="rect" id="Node000003" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_a36aa20b252cc505454144d47d39dabd1.html#a36aa20b252cc505454144d47d39dabd1" title=" " alt="" coords="229,29,460,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="494,52,460,52,460,47,494,47"/>
+<area shape="rect" id="Node000004" href="$db/d4e/classfl_1_1net_1_1http_1_1_http_stream_transport_aab4451d64b6a491f073f941fd22258c0.html#aab4451d64b6a491f073f941fd22258c0" title="Read next JSON&#45;RPC request from stream Non&#45;blocking, returns nullopt if no complete request available..." alt="" coords="5,23,181,63"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="216,49,182,48,182,42,216,43"/>
+<area shape="poly" id="edge4_Node000003_Node000007" title=" " alt="" coords="244,75,182,89,181,84,243,70"/>
+</map>

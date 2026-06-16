@@ -1,0 +1,15 @@
+<map id="fl::Rgbw::Rgbw" name="fl::Rgbw::Rgbw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="636,223,753,248"/>
+<area shape="rect" id="Node000002" href="$dc/da6/structfl_1_1_rgbw_default_aa1f05c6121ba6c38a371d7c8ba80043d.html#aa1f05c6121ba6c38a371d7c8ba80043d" title=" " alt="" coords="421,151,588,176"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="647,220,538,179,540,174,649,215"/>
+<area shape="rect" id="Node000005" href="$d2/d73/structfl_1_1_rgbw_invalid_ab541971c49f630b5d3746d39b8823632.html#ab541971c49f630b5d3746d39b8823632" title=" " alt="" coords="423,223,586,248"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="622,238,586,238,586,233,622,233"/>
+<area shape="rect" id="Node000007" href="$d6/da6/structfl_1_1_rgbw_white_is_off_ad0ce0eb4f38b39c9679c565b66e10451.html#ad0ce0eb4f38b39c9679c565b66e10451" title=" " alt="" coords="433,273,576,313"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="639,255,572,275,571,270,638,250"/>
+<area shape="rect" id="Node000003" href="$dd/d78/classfl_1_1_u_c_s7604_controller_t_a5b824ab62c030a131878f46d505dfbc6.html#a5b824ab62c030a131878f46d505dfbc6" title=" " alt="" coords="5,5,373,89"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="466,147,372,104,337,92,339,87,374,100,468,142"/>
+<area shape="rect" id="Node000004" href="$dd/d78/classfl_1_1_u_c_s7604_controller_t_a0b8dc7f2f0f2e0a2ed3461aa905080ea.html#a0b8dc7f2f0f2e0a2ed3461aa905080ea" title=" " alt="" coords="27,114,351,213"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="408,166,352,166,352,161,408,161"/>
+<area shape="rect" id="Node000006" href="$d5/d87/structfl_1_1_channel_options_adea73d377fcc90dd7e59d43b8d850316.html#adea73d377fcc90dd7e59d43b8d850316" title=" " alt="" coords="119,237,260,277"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="410,244,261,255,260,249,409,239"/>
+</map>

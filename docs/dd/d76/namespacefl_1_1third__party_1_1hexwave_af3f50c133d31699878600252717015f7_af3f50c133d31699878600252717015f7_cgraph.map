@@ -1,0 +1,18 @@
+<map id="fl::third_party::hexwave::hexwave_generate_samples" name="fl::third_party::hexwave::hexwave_generate_samples">
+<area shape="rect" id="Node000001" title="Generate audio samples." alt="" coords="5,165,221,205"/>
+<area shape="rect" id="Node000002" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_a11518c3c3c229b6f1e95dac2bef295ef.html#a11518c3c3c229b6f1e95dac2bef295ef" title=" " alt="" coords="289,5,464,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="132,163,190,110,227,80,268,55,282,48,284,53,271,60,230,85,193,114,136,167"/>
+<area shape="rect" id="Node000003" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_afe1589840cddbec96237a5ed7865bee1.html#afe1589840cddbec96237a5ed7865bee1" title=" " alt="" coords="289,69,464,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="159,163,268,119,291,111,293,116,270,124,161,168"/>
+<area shape="rect" id="Node000005" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_a42fbc5dd00dc2697f85e6530ecf2ceac.html#a42fbc5dd00dc2697f85e6530ecf2ceac" title=" " alt="" coords="289,133,464,173"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="221,170,275,163,276,168,222,175"/>
+<area shape="rect" id="Node000006" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_af0ccd25a652543f8069bb4548fb3708a.html#af0ccd25a652543f8069bb4548fb3708a" title=" " alt="" coords="269,197,484,237"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="222,196,256,200,255,205,221,201"/>
+<area shape="rect" id="Node000007" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d" title=" " alt="" coords="289,261,464,301"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="161,203,270,247,293,255,291,260,268,252,159,208"/>
+<area shape="rect" id="Node000008" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_a44a195439ac7fa303b4b0b0c956605be.html#a44a195439ac7fa303b4b0b0c956605be" title=" " alt="" coords="289,325,464,365"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="136,204,193,257,230,286,271,311,284,318,282,322,268,316,227,290,190,261,132,208"/>
+<area shape="rect" id="Node000004" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave_a57ebf6743bad5f49be97774c0e5907c6.html#a57ebf6743bad5f49be97774c0e5907c6" title=" " alt="" coords="532,101,767,141"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="464,97,519,103,518,109,464,102"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="464,140,518,134,519,139,464,146"/>
+</map>

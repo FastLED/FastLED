@@ -1,0 +1,5 @@
+<map id="fl::audio::SpectralEqualizer::setCustomGains" name="fl::audio::SpectralEqualizer::setCustomGains">
+<area shape="rect" id="Node000001" title="Set custom per&#45;band gains (switches to Custom curve)" alt="" coords="5,5,200,45"/>
+<area shape="rect" id="Node000002" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="248,13,351,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,23,234,23,234,28,200,28"/>
+</map>

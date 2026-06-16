@@ -1,0 +1,12 @@
+<map id="fl/channels/wave3.h" name="fl/channels/wave3.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="260,5,411,31"/>
+<area shape="rect" id="Node000002" href="$d4/df9/_auto_research_test_8cpp.html" title=" " alt="" coords="5,79,244,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="295,38,190,81,188,76,293,33"/>
+<area shape="rect" id="Node000003" href="$d9/d66/wave3_8hpp.html" title="Inline implementation details for wave3 transposition." alt="" coords="269,86,402,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="338,44,338,86,333,86,333,44"/>
+<area shape="rect" id="Node000004" href="$db/d7a/wave3_8cpp_8hpp.html" title="Wave3 waveform generation and transposition implementation." alt="" coords="290,181,485,207"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="374,35,398,53,416,78,423,106,418,136,408,162,397,182,393,180,403,160,413,134,417,106,412,80,394,57,371,40"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="356,137,382,179,378,182,352,139"/>
+<area shape="rect" id="Node000005" href="$d1/d97/fl_2channels_2__build_8cpp_8hpp.html" title=" " alt="" coords="292,255,483,280"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="390,220,390,255,385,255,385,220"/>
+</map>

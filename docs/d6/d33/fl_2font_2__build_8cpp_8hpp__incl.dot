@@ -1,0 +1,43 @@
+digraph "fl/font/_build.cpp.hpp"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl/font/_build.cpp.hpp",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl/font/truetype.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dc4/truetype_8cpp_8hpp.html",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl/font/truetype.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dee/truetype_8h.html",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl/stl/vector.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/d68/vector_8h.html",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl/stl/stdint.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/dd8/stdint_8h.html",tooltip=" "];
+  Node4 -> Node20 [id="edge5_Node000004_Node000020",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="fl/stl/align.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/ddf/align_8h.html",tooltip="Alignment macros and utilities for FastLED."];
+  Node20 -> Node11 [id="edge6_Node000020_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl/stl/noexcept.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d01/noexcept_8h.html",tooltip=" "];
+  Node4 -> Node11 [id="edge7_Node000004_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node36 [id="edge8_Node000003_Node000036",color="steelblue1",style="solid",tooltip=" "];
+  Node36 [id="Node000036",label="fl/stl/shared_ptr.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/d6a/shared__ptr_8h.html",tooltip=" "];
+  Node36 -> Node20 [id="edge9_Node000036_Node000020",color="steelblue1",style="solid",tooltip=" "];
+  Node36 -> Node11 [id="edge10_Node000036_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node40 [id="edge11_Node000003_Node000040",color="steelblue1",style="solid",tooltip=" "];
+  Node40 [id="Node000040",label="fl/stl/span.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d7a/span_8h.html",tooltip=" "];
+  Node40 -> Node11 [id="edge12_Node000040_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node5 [id="edge13_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node11 [id="edge14_Node000003_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node42 [id="edge15_Node000002_Node000042",color="steelblue1",style="solid",tooltip=" "];
+  Node42 [id="Node000042",label="fl/font/ttf_covenant5x5.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dad/ttf__covenant5x5_8h.html",tooltip=" "];
+  Node42 -> Node40 [id="edge16_Node000042_Node000040",color="steelblue1",style="solid",tooltip=" "];
+  Node42 -> Node5 [id="edge17_Node000042_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node43 [id="edge18_Node000002_Node000043",color="steelblue1",style="solid",tooltip=" "];
+  Node43 [id="Node000043",label="third_party/stb/truetype\l/stb_truetype.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d6f/stb__truetype_8h.html",tooltip=" "];
+  Node43 -> Node5 [id="edge19_Node000043_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node11 [id="edge20_Node000002_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node44 [id="edge21_Node000001_Node000044",color="steelblue1",style="solid",tooltip=" "];
+  Node44 [id="Node000044",label="fl/font/ttf_covenant5x5.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/dfe/ttf__covenant5x5_8cpp_8hpp.html",tooltip=" "];
+  Node44 -> Node42 [id="edge22_Node000044_Node000042",color="steelblue1",style="solid",tooltip=" "];
+  Node44 -> Node20 [id="edge23_Node000044_Node000020",color="steelblue1",style="solid",tooltip=" "];
+}

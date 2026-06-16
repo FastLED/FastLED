@@ -1,0 +1,10 @@
+<map id="fl::audio::detector::DynamicsAnalyzer::updatePeak" name="fl::audio::detector::DynamicsAnalyzer::updatePeak">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,16,165,71"/>
+<area shape="rect" id="Node000002" href="$db/d49/_audio_2simple_2simple_8h_a588b0ed03ff3e39281e2bc8b149dbdbd.html#a588b0ed03ff3e39281e2bc8b149dbdbd" title=" " alt="" coords="213,31,260,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="165,41,199,41,199,46,165,46"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="215,32,211,22,213,13,222,6,237,4,254,7,261,16,257,19,251,12,237,9,224,11,218,16,216,22,220,29"/>
+<area shape="rect" id="Node000003" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="308,5,411,31"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="259,36,294,29,295,34,261,41"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1" title=" " alt="" coords="328,55,391,80"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="261,45,315,56,314,61,259,50"/>
+</map>

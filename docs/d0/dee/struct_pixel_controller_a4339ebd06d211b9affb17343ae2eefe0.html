@@ -106,13 +106,13 @@ $(function(){initNavTree('d0/dee/struct_pixel_controller_a4339ebd06d211b9affb173
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="../../d4/d36/namespacefl_ab289ace8bd149d39b87ebd778e9abe23.html#ab289ace8bd149d39b87ebd778e9abe23">EOrder</a> RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </div>
+template&lt;<a class="el" href="../../d4/d36/namespacefl_ab289ace8bd149d39b87ebd778e9abe23.html#ab289ace8bd149d39b87ebd778e9abe23">EOrder</a> RGB_ORDER, int LANES = 1, fl::u32 MASK = 0xFFFFFFFF&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> void <a class="el" href="../../d0/dee/struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::preStepFirstByteDithering </td>
+          <td class="memname"><a class="el" href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> void <a class="el" href="../../d0/dee/struct_pixel_controller.html">PixelController</a>&lt; <a class="el" href="../../d3/d8b/_parallel___i_o_8ino_a87eecf85eebf5be8fb74183807e8e2f0.html#a87eecf85eebf5be8fb74183807e8e2f0">RGB_ORDER</a>, LANES, MASK &gt;::preStepFirstByteDithering </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -127,15 +127,15 @@ template&lt;<a class="el" href="../../d4/d36/namespacefl_ab289ace8bd149d39b87ebd
 
 <p>Some chipsets pre-cycle the first byte, which means we want to cycle byte 0's dithering separately. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00336">336</a> of file <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html">pixel_controller.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  336</span>                                                          {</div>
-<div class="line"><span class="lineno">  337</span>        <a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a576c3a3eac363fb83e475e142bbe586d.html#a576c3a3eac363fb83e475e142bbe586d">d</a>[<a class="code hl_define" href="../../d5/d4d/pixel__controller_8h_afef3a6dc05d96466ceb8bd8a89d7b6bd.html#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a>(0)] = <a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a9ba367b1689ad3fc6c1cac3174faf341.html#a9ba367b1689ad3fc6c1cac3174faf341">e</a>[<a class="code hl_define" href="../../d5/d4d/pixel__controller_8h_afef3a6dc05d96466ceb8bd8a89d7b6bd.html#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a>(0)] - <a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a576c3a3eac363fb83e475e142bbe586d.html#a576c3a3eac363fb83e475e142bbe586d">d</a>[<a class="code hl_define" href="../../d5/d4d/pixel__controller_8h_afef3a6dc05d96466ceb8bd8a89d7b6bd.html#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a>(0)];</div>
-<div class="line"><span class="lineno">  338</span>    }</div>
-<div class="ttc" id="apixel__controller_8h_afef3a6dc05d96466ceb8bd8a89d7b6bd_html_afef3a6dc05d96466ceb8bd8a89d7b6bd"><div class="ttname"><a href="../../d5/d4d/pixel__controller_8h_afef3a6dc05d96466ceb8bd8a89d7b6bd.html#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a></div><div class="ttdeci">#define RO(X)</div><div class="ttdoc">Gets the assigned color channel for a byte&#39;s position in the output, using the color order (EOrder) t...</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00045">pixel_controller.h:45</a></div></div>
-<div class="ttc" id="astruct_pixel_controller_a576c3a3eac363fb83e475e142bbe586d_html_a576c3a3eac363fb83e475e142bbe586d"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller_a576c3a3eac363fb83e475e142bbe586d.html#a576c3a3eac363fb83e475e142bbe586d">PixelController::d</a></div><div class="ttdeci">uint8_t d[3]</div><div class="ttdoc">values for the scaled dither signal</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00087">pixel_controller.h:87</a></div></div>
-<div class="ttc" id="astruct_pixel_controller_a9ba367b1689ad3fc6c1cac3174faf341_html_a9ba367b1689ad3fc6c1cac3174faf341"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller_a9ba367b1689ad3fc6c1cac3174faf341.html#a9ba367b1689ad3fc6c1cac3174faf341">PixelController::e</a></div><div class="ttdeci">uint8_t e[3]</div><div class="ttdoc">values for the unscaled dither signal</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00088">pixel_controller.h:88</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00407">407</a> of file <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html">pixel_controller.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  407</span>                                                          {</div>
+<div class="line"><span class="lineno">  408</span>        <a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a5ad48a201e6f48a4ff1fa9936e590324.html#a5ad48a201e6f48a4ff1fa9936e590324">d</a>[<a class="code hl_define" href="../../d5/d4d/pixel__controller_8h_afef3a6dc05d96466ceb8bd8a89d7b6bd.html#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a>(0)] = <a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a48370046539a9b7107bd0c5ee21c9f44.html#a48370046539a9b7107bd0c5ee21c9f44">e</a>[<a class="code hl_define" href="../../d5/d4d/pixel__controller_8h_afef3a6dc05d96466ceb8bd8a89d7b6bd.html#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a>(0)] - <a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a5ad48a201e6f48a4ff1fa9936e590324.html#a5ad48a201e6f48a4ff1fa9936e590324">d</a>[<a class="code hl_define" href="../../d5/d4d/pixel__controller_8h_afef3a6dc05d96466ceb8bd8a89d7b6bd.html#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a>(0)];</div>
+<div class="line"><span class="lineno">  409</span>    }</div>
+<div class="ttc" id="apixel__controller_8h_afef3a6dc05d96466ceb8bd8a89d7b6bd_html_afef3a6dc05d96466ceb8bd8a89d7b6bd"><div class="ttname"><a href="../../d5/d4d/pixel__controller_8h_afef3a6dc05d96466ceb8bd8a89d7b6bd.html#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a></div><div class="ttdeci">#define RO(X)</div><div class="ttdoc">Gets the assigned color channel for a byte&#39;s position in the output, using the color order (EOrder) t...</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00046">pixel_controller.h:46</a></div></div>
+<div class="ttc" id="astruct_pixel_controller_a48370046539a9b7107bd0c5ee21c9f44_html_a48370046539a9b7107bd0c5ee21c9f44"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller_a48370046539a9b7107bd0c5ee21c9f44.html#a48370046539a9b7107bd0c5ee21c9f44">PixelController::e</a></div><div class="ttdeci">fl::u8 e[3]</div><div class="ttdoc">[DITHER] Max dither range per R,G,B channel (inversely proportional to brightness)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00107">pixel_controller.h:107</a></div></div>
+<div class="ttc" id="astruct_pixel_controller_a5ad48a201e6f48a4ff1fa9936e590324_html_a5ad48a201e6f48a4ff1fa9936e590324"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller_a5ad48a201e6f48a4ff1fa9936e590324.html#a5ad48a201e6f48a4ff1fa9936e590324">PixelController::d</a></div><div class="ttdeci">fl::u8 d[3]</div><div class="ttdoc">[DITHER] Current dither offset per R,G,B channel (toggles via stepDithering)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00106">pixel_controller.h:106</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00087">d</a>, <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00088">e</a>, <a class="el" href="../../d4/d64/force__inline_8h_source.html#l00006">FASTLED_FORCE_INLINE</a>, and <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00045">RO</a>.</p>
+<p class="reference">References <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00106">d</a>, <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00107">e</a>, <a class="el" href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a>, and <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00046">RO</a>.</p>
 
 </div>
 </div>
@@ -146,7 +146,7 @@ template&lt;<a class="el" href="../../d4/d36/namespacefl_ab289ace8bd149d39b87ebd
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d0/dee/struct_pixel_controller.html">PixelController</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:22 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

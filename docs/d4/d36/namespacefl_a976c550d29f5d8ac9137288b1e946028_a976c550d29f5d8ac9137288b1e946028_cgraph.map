@@ -1,11 +1,21 @@
 <map id="fl::traverseGridSegment" name="fl::traverseGridSegment">
-<area shape="rect" id="Node000001" title="Traverse a grid segment by selecting the cells that are crossed." alt="" coords="5,26,183,52"/>
-<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a56e7d4811c99d9aa696932bcb89a50b1.html#a56e7d4811c99d9aa696932bcb89a50b1" title=" " alt="" coords="472,26,535,52"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="150,24,230,11,328,3,370,4,424,11,460,20,458,25,424,16,370,10,328,8,231,16,151,29"/>
-<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a7206bc1b415f44667b2bb541529e4324.html#a7206bc1b415f44667b2bb541529e4324" title="Traverse a grid segment using fixed&#45;point 8.8 arithmetic." alt="" coords="231,26,424,52"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="183,36,217,36,217,42,183,42"/>
-<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_aa28553af69ffe6e3a60cde7f9fc02b4d.html#aa28553af69ffe6e3a60cde7f9fc02b4d" title=" " alt="" coords="231,76,424,101"/>
-<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="155,49,254,70,253,75,154,54"/>
-<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="424,36,458,36,458,42,424,42"/>
-<area shape="poly" id="edge5_Node000004_Node000002" title=" " alt="" coords="378,73,423,60,458,50,460,55,425,66,379,78"/>
+<area shape="rect" id="Node000001" title="Traverse a grid segment by selecting the cells that are crossed." alt="" coords="5,92,183,117"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84" title=" " alt="" coords="527,5,589,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="111,90,162,57,195,40,230,27,307,12,385,7,457,7,514,11,514,16,457,12,386,12,308,18,231,33,197,45,165,61,114,94"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a3cdd970ae1ac06323addaec93ae7d4b9.html#a3cdd970ae1ac06323addaec93ae7d4b9" title=" " alt="" coords="527,128,589,153"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="157,115,231,126,386,136,513,138,513,144,386,142,230,131,156,120"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="294,193,361,219"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="119,115,170,142,232,172,282,190,280,195,230,176,168,147,117,120"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a7206bc1b415f44667b2bb541529e4324.html#a7206bc1b415f44667b2bb541529e4324" title="Traverse a grid segment using fixed&#45;point 8.8 arithmetic." alt="" coords="231,92,424,117"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="183,102,217,102,217,107,183,107"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_aa28553af69ffe6e3a60cde7f9fc02b4d.html#aa28553af69ffe6e3a60cde7f9fc02b4d" title=" " alt="" coords="231,43,424,68"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="154,89,253,68,254,74,155,95"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="390,89,423,77,446,59,471,40,513,24,515,29,473,44,450,63,425,82,392,94"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="409,115,513,131,512,136,409,120"/>
+<area shape="rect" id="Node000006" href="$d6/d7c/structfl_1_1numeric__limits_a31c1687ca77003f233081c372a5c9922.html#a31c1687ca77003f233081c372a5c9922" title=" " alt="" coords="472,79,644,104"/>
+<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="424,96,458,94,458,100,424,102"/>
+<area shape="poly" id="edge8_Node000006_Node000006" title=" " alt="" coords="521,80,513,70,517,60,532,54,558,52,590,56,603,65,599,70,588,61,558,57,533,59,520,64,518,70,525,77"/>
+<area shape="poly" id="edge10_Node000007_Node000002" title=" " alt="" coords="406,40,513,22,514,28,407,45"/>
+<area shape="poly" id="edge11_Node000007_Node000003" title=" " alt="" coords="395,66,425,77,450,95,473,113,514,128,512,133,471,118,446,99,423,82,393,71"/>
+<area shape="poly" id="edge12_Node000007_Node000006" title=" " alt="" coords="409,65,463,74,462,79,409,71"/>
 </map>

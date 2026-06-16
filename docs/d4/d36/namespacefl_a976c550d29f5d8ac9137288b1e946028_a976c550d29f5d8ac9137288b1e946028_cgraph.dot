@@ -8,11 +8,21 @@ digraph "fl::traverseGridSegment"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::traverseGridSegment",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Traverse a grid segment by selecting the cells that are crossed."];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::end",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a56e7d4811c99d9aa696932bcb89a50b1.html#a56e7d4811c99d9aa696932bcb89a50b1",tooltip=" "];
+  Node2 [id="Node000002",label="fl::abs",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::traverseGridSegment16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a7206bc1b415f44667b2bb541529e4324.html#a7206bc1b415f44667b2bb541529e4324",tooltip="Traverse a grid segment using fixed-point 8.8 arithmetic."];
-  Node3 -> Node2 [id="edge3_Node000003_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node4 [id="edge4_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::traverseGridSegment32",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aa28553af69ffe6e3a60cde7f9fc02b4d.html#aa28553af69ffe6e3a60cde7f9fc02b4d",tooltip=" "];
-  Node4 -> Node2 [id="edge5_Node000004_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::end",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a3cdd970ae1ac06323addaec93ae7d4b9.html#a3cdd970ae1ac06323addaec93ae7d4b9",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::max",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909",tooltip=" "];
+  Node1 -> Node5 [id="edge4_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::traverseGridSegment16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a7206bc1b415f44667b2bb541529e4324.html#a7206bc1b415f44667b2bb541529e4324",tooltip="Traverse a grid segment using fixed-point 8.8 arithmetic."];
+  Node5 -> Node2 [id="edge5_Node000005_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node3 [id="edge6_Node000005_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node5 -> Node6 [id="edge7_Node000005_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::numeric_limits::max",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d7c/structfl_1_1numeric__limits_a31c1687ca77003f233081c372a5c9922.html#a31c1687ca77003f233081c372a5c9922",tooltip=" "];
+  Node6 -> Node6 [id="edge8_Node000006_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node7 [id="edge9_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::traverseGridSegment32",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aa28553af69ffe6e3a60cde7f9fc02b4d.html#aa28553af69ffe6e3a60cde7f9fc02b4d",tooltip=" "];
+  Node7 -> Node2 [id="edge10_Node000007_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node3 [id="edge11_Node000007_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node7 -> Node6 [id="edge12_Node000007_Node000006",color="steelblue1",style="solid",tooltip=" "];
 }

@@ -8,6 +8,6 @@ digraph "fl::XYRasterU8Sparse::draw"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::XYRasterU8Sparse\l::draw",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::XYRasterU8Sparse\l::draw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d5c/classfl_1_1_x_y_raster_u8_sparse_ac3abed7a705055d47560f1d42561129e.html#ac3abed7a705055d47560f1d42561129e",tooltip=" "];
+  Node2 [id="Node000002",label="fl::XYRasterU8Sparse\l::draw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d5c/classfl_1_1_x_y_raster_u8_sparse_a30e4f44b89d809f328fa88f9b7fbebb2.html#a30e4f44b89d809f328fa88f9b7fbebb2",tooltip=" "];
   Node2 -> Node2 [id="edge2_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
 }

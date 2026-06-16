@@ -1,0 +1,9 @@
+<map id="fl::third_party::nsgif__app_ext_is_loop_count" name="fl::third_party::nsgif__app_ext_is_loop_count">
+<area shape="rect" id="Node000001" title="Check an app ext identifier and authentication code for loop count extension." alt="" coords="716,5,900,45"/>
+<area shape="rect" id="Node000002" href="$d1/d86/namespacefl_1_1third__party_ae24b0fa9c5b2e70510700c8f33f567ee.html#ae24b0fa9c5b2e70510700c8f33f567ee" title="Parse the application extension." alt="" coords="445,5,668,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="702,28,668,28,668,23,702,23"/>
+<area shape="rect" id="Node000003" href="$d1/d86/namespacefl_1_1third__party_a2dde749546d6b40a40f9d1b6f2311c2f.html#a2dde749546d6b40a40f9d1b6f2311c2f" title="Parse the frame&#39;s extensions." alt="" coords="201,5,397,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="432,28,397,28,397,23,432,23"/>
+<area shape="rect" id="Node000004" href="$d1/d86/namespacefl_1_1third__party_aa00bee5c0f7b53c8e9441d62f98c61b2.html#aa00bee5c0f7b53c8e9441d62f98c61b2" title="Attempts to initialise the next frame." alt="" coords="5,5,153,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="187,28,154,28,154,23,187,23"/>
+</map>

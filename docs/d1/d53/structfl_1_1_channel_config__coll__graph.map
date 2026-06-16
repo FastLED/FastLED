@@ -1,0 +1,28 @@
+<map id="fl::ChannelConfig" name="fl::ChannelConfig">
+<area shape="rect" id="Node000001" title="Configuration for a single LED channel." alt="" coords="1049,163,1181,189"/>
+<area shape="rect" id="Node000002" href="$d0/d08/classfl_1_1span.html" title=" " alt="" coords="760,133,912,158"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="926,152,1049,166,1049,171,925,158"/>
+<area shape="rect" id="Node000003" href="$da/dd6/structfl_1_1_c_r_g_b.html" title="Representation of an 8&#45;bit RGB pixel (Red, Green, Blue)" alt="" coords="389,70,463,95"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="477,88,760,131,760,136,476,93"/>
+<area shape="rect" id="Node000005" href="$d5/d87/structfl_1_1_channel_options.html" title="Optional channel configuration parameters All fields have sensible defaults and can be overridden as ..." alt="" coords="765,49,907,74"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="477,77,765,62,765,68,477,83"/>
+<area shape="rect" id="Node000004" href="$d0/d08/classfl_1_1span.html" title=" " alt="" coords="347,137,505,162"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="518,149,736,148,760,147,760,152,736,153,518,154"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="883,77,1026,135,1086,161,1084,166,1024,140,881,82"/>
+<area shape="rect" id="Node000006" href="$dd/dd8/classfl_1_1_optional.html" title=" " alt="" coords="350,7,502,33"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="516,16,622,19,736,31,798,46,797,51,736,36,621,24,516,21"/>
+<area shape="rect" id="Node000007" href="$dd/dd8/classfl_1_1_optional.html" title=" " alt="" coords="13,139,143,165"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="121,132,315,55,385,30,387,35,317,60,123,137"/>
+<area shape="rect" id="Node000015" href="$dd/dd8/classfl_1_1_optional.html" title=" " alt="" coords="560,186,736,211"/>
+<area shape="poly" id="edge14_Node000015_Node000007" title=" " alt="" coords="158,157,316,171,560,190,560,195,316,176,157,162"/>
+<area shape="rect" id="Node000008" href="$d2/d78/classfl_1_1_screen_map.html" title=" " alt="" coords="781,246,891,271"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="905,253,964,244,1024,228,1064,209,1096,187,1099,191,1067,213,1026,233,965,250,905,258"/>
+<area shape="rect" id="Node000009" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="316,291,536,317"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="549,294,736,275,780,267,781,273,736,280,550,299"/>
+<area shape="rect" id="Node000010" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="5,266,151,291"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="165,287,175,288,316,297,315,303,174,293,164,292"/>
+<area shape="rect" id="Node000014" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="335,242,517,267"/>
+<area shape="poly" id="edge12_Node000014_Node000010" title=" " alt="" coords="164,270,334,258,334,264,165,275"/>
+<area shape="poly" id="edge11_Node000008_Node000014" title=" " alt="" coords="531,253,780,255,780,261,531,258"/>
+<area shape="poly" id="edge13_Node000001_Node000015" title=" " alt="" coords="750,191,1049,176,1049,182,750,196"/>
+</map>

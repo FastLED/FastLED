@@ -1,0 +1,14 @@
+<map id="fl::audio::detector::MoodAnalyzer::calculateArousal" name="fl::audio::detector::MoodAnalyzer::calculateArousal">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,47,244,87"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="292,5,359,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="206,45,278,27,279,32,207,50"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="294,55,357,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="244,65,280,65,280,70,244,70"/>
+<area shape="rect" id="Node000004" href="$db/d49/_audio_2simple_2simple_8h_a588b0ed03ff3e39281e2bc8b149dbdbd.html#a588b0ed03ff3e39281e2bc8b149dbdbd" title=" " alt="" coords="302,128,349,153"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="181,85,290,125,288,130,179,90"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="303,129,298,120,301,110,310,104,325,101,343,105,351,113,347,117,341,109,325,107,312,109,305,113,304,119,308,127"/>
+<area shape="rect" id="Node000005" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="407,103,509,128"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="348,134,393,125,394,130,349,139"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1" title=" " alt="" coords="427,152,489,177"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="349,142,413,154,412,159,348,147"/>
+</map>

@@ -1,0 +1,21 @@
+<map id="fl::charToDigit" name="fl::charToDigit">
+<area shape="rect" id="Node000001" title=" " alt="" coords="641,169,752,195"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_af0cf9a03d28b70d9ab7b5586984a423f.html#af0cf9a03d28b70d9ab7b5586984a423f" title=" " alt="" coords="517,112,589,137"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="650,167,585,140,587,135,652,162"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_adc2740ea40d7bd7ec8f2d1539cbcfb5f.html#adc2740ea40d7bd7ec8f2d1539cbcfb5f" title=" " alt="" coords="513,193,593,219"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="628,196,594,202,593,197,627,191"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ab145aa2b7fac3bc6edbd7aa6e7b05a68.html#ab145aa2b7fac3bc6edbd7aa6e7b05a68" title=" " alt="" coords="329,5,392,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="532,103,502,72,464,44,428,30,392,23,393,18,429,25,467,40,505,68,535,99"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a2ec86559f1ac629789e3423692954be4.html#a2ec86559f1ac629789e3423692954be4" title=" " alt="" coords="329,55,392,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="506,110,465,95,391,76,393,71,466,90,508,105"/>
+<area shape="rect" id="Node000005" href="$df/d26/structfl_1_1detail_1_1_json_to_integer_visitor_af6b7c80f7dc3f5161f65b46cf9f1e29e.html#af6b7c80f7dc3f5161f65b46cf9f1e29e" title=" " alt="" coords="275,105,446,145"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="504,127,446,127,446,122,504,122"/>
+<area shape="rect" id="Node000006" href="$dc/d75/namespacefl_1_1wled_a0e1b21aa8cf41f28a4973d7444282fce.html#a0e1b21aa8cf41f28a4973d7444282fce" title="Parse all fields from a segment JSON object into a WLEDSegment." alt="" coords="256,169,465,195"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="508,145,466,159,420,172,418,167,465,154,506,140"/>
+<area shape="rect" id="Node000007" href="$d2/d9f/classfl_1_1_w_l_e_d_a073f5478071f0b32ea9ac80cf3fd236c.html#a073f5478071f0b32ea9ac80cf3fd236c" title="Set WLED state from JSON object." alt="" coords="37,169,176,195"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="242,185,176,185,176,179,242,179"/>
+<area shape="rect" id="Node000009" href="$d1/d7d/classfl_1_1net_1_1http_1_1_chunked_reader_a18905da777bbff809d0dd61115fe1559.html#a18905da777bbff809d0dd61115fe1559" title=" " alt="" coords="259,219,462,259"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="500,218,463,224,462,219,499,213"/>
+<area shape="rect" id="Node000010" href="$d1/d7d/classfl_1_1net_1_1http_1_1_chunked_reader_a6844d30c9da5e403aa2f6dd06f30c85d.html#a6844d30c9da5e403aa2f6dd06f30c85d" title=" " alt="" coords="5,219,208,259"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="246,242,208,242,208,237,246,237"/>
+</map>

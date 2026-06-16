@@ -1,0 +1,16 @@
+<map id="fl::gfx::Canvas::drawDisc" name="fl::gfx::Canvas::drawDisc">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,118,188,143"/>
+<area shape="rect" id="Node000002" href="$d0/d8b/namespacefl_1_1gfx_a99e28c17bab90d96ecd6a950357fde83.html#a99e28c17bab90d96ecd6a950357fde83" title=" " alt="" coords="236,118,363,143"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="188,128,222,128,222,133,188,133"/>
+<area shape="rect" id="Node000003" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_a76279d4830b289ed940eb35d755156f9.html#a76279d4830b289ed940eb35d755156f9" title=" " alt="" coords="411,118,613,143"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="363,128,397,128,397,133,363,133"/>
+<area shape="rect" id="Node000004" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_ace632a8bd8b1b176f9f882b536fc486c.html#ace632a8bd8b1b176f9f882b536fc486c" title="Precompute right&#45;shift and reciprocal multiplier for AA division." alt="" coords="682,29,851,69"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="550,115,661,79,685,71,687,76,662,84,552,120"/>
+<area shape="rect" id="Node000005" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_a6dfa4961e3abbbfbeeea1abe7d8d5259.html#a6dfa4961e3abbbfbeeea1abe7d8d5259" title="Render one scanline of a disc using incremental d²." alt="" coords="661,118,872,143"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="614,128,648,128,648,133,614,133"/>
+<area shape="rect" id="Node000006" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_ab04a22e2927673d2692b4f3e354af564.html#ab04a22e2927673d2692b4f3e354af564" title="Convert any Coord type to 8.8 fixed&#45;point (fl::i32)." alt="" coords="683,191,850,217"/>
+<area shape="poly" id="edge7_Node000003_Node000006" title=" " alt="" coords="558,141,709,185,708,190,556,146"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="720,30,717,20,724,10,741,5,767,3,796,6,812,13,810,18,795,11,767,8,742,10,727,15,722,21,725,28"/>
+<area shape="poly" id="edge6_Node000005_Node000005" title=" " alt="" coords="726,120,717,110,721,100,738,94,767,91,802,95,813,100,816,106,812,109,809,104,801,100,767,97,739,99,725,104,722,109,730,116"/>
+<area shape="poly" id="edge8_Node000006_Node000006" title=" " alt="" coords="726,193,717,183,721,173,738,167,767,165,802,169,813,173,816,179,812,182,809,177,801,174,767,170,739,172,725,177,722,182,730,189"/>
+</map>

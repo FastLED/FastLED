@@ -1,0 +1,12 @@
+<map id="fl::third_party::nsgif__parse_logical_screen_descriptor" name="fl::third_party::nsgif__parse_logical_screen_descriptor">
+<area shape="rect" id="Node000001" title="Read Logical Screen Descriptor." alt="" coords="665,42,837,97"/>
+<area shape="rect" id="Node000002" href="$d1/d86/namespacefl_1_1third__party_a34aa4d967d8ddaeefa12954d47fe7863.html#a34aa4d967d8ddaeefa12954d47fe7863" title="Scan the source image data." alt="" coords="469,49,617,89"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="652,72,617,72,617,67,652,67"/>
+<area shape="rect" id="Node000003" href="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_a477899043772e64106571d7233be2793.html#a477899043772e64106571d7233be2793" title=" " alt="" coords="227,49,421,89"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="456,72,421,72,421,67,456,67"/>
+<area shape="rect" id="Node000004" href="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_ae83f856122e8a7954a96bf51d6ca96a1.html#ae83f856122e8a7954a96bf51d6ca96a1" title=" " alt="" coords="5,5,179,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="212,51,178,44,179,39,213,46"/>
+<area shape="rect" id="Node000005" href="$d3/d7a/classfl_1_1third__party_1_1_software_gif_decoder_a31562819b41f08828f326096d848ec5b.html#a31562819b41f08828f326096d848ec5b" title=" " alt="" coords="5,93,179,133"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="213,93,179,100,178,94,212,88"/>
+<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="131,82,118,75,92,72,70,74,56,79,51,85,54,92,49,94,46,84,53,74,68,69,92,67,119,70,134,77"/>
+</map>

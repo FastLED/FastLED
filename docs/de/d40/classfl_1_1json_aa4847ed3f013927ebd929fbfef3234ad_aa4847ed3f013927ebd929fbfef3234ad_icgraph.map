@@ -1,0 +1,17 @@
+<map id="fl::json::is_bool" name="fl::json::is_bool">
+<area shape="rect" id="Node000001" title=" " alt="" coords="629,106,748,131"/>
+<area shape="rect" id="Node000002" href="$db/d63/class_auto_research_remote_control_a9a819dc75227620145214052d8c25f48.html#a9a819dc75227620145214052d8c25f48" title=" " alt="" coords="371,5,581,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="655,101,580,60,549,48,551,43,582,55,658,96"/>
+<area shape="rect" id="Node000005" href="$dc/d75/namespacefl_1_1wled_a0e1b21aa8cf41f28a4973d7444282fce.html#a0e1b21aa8cf41f28a4973d7444282fce" title="Parse all fields from a segment JSON object into a WLEDSegment." alt="" coords="371,134,581,159"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="616,131,573,137,572,131,615,126"/>
+<area shape="rect" id="Node000006" href="$d2/d9f/classfl_1_1_w_l_e_d_a073f5478071f0b32ea9ac80cf3fd236c.html#a073f5478071f0b32ea9ac80cf3fd236c" title="Set WLED state from JSON object." alt="" coords="148,147,287,173"/>
+<area shape="poly" id="edge8_Node000001_Node000006" title=" " alt="" coords="658,141,623,160,582,175,503,186,423,188,349,183,286,175,286,170,349,178,423,183,503,181,581,169,621,155,656,136"/>
+<area shape="rect" id="Node000007" href="$db/d63/class_auto_research_remote_control_a7992b62fd1f26fe1898d2ea8a78b370a.html#a7992b62fd1f26fe1898d2ea8a78b370a" title=" " alt="" coords="371,69,581,109"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="615,111,581,107,582,101,616,106"/>
+<area shape="rect" id="Node000003" href="$db/d63/class_auto_research_remote_control_abb6600e8a1e8c4ef46ba29e7bd3b78b4.html#abb6600e8a1e8c4ef46ba29e7bd3b78b4" title="Register all RPC functions with shared autoresearch state." alt="" coords="112,57,323,97"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="363,51,318,60,317,55,362,45"/>
+<area shape="rect" id="Node000004" href="$dd/dc8/_auto_research_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,65,64,90"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="98,80,64,80,64,75,98,75"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="358,155,287,159,287,154,358,150"/>
+<area shape="poly" id="edge7_Node000007_Node000003" title=" " alt="" coords="357,86,323,85,323,80,357,81"/>
+</map>

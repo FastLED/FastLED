@@ -1,0 +1,16 @@
+<map id="PixelController::loadAndScale0" name="PixelController::loadAndScale0">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,22,184,62"/>
+<area shape="rect" id="Node000002" href="$d0/dee/struct_pixel_controller_adad75cb77a4eab720f2ee1023b643a59.html#adad75cb77a4eab720f2ee1023b643a59" title="Complete pipeline: load → dither → scale (THE MAGIC HAPPENS HERE!) Order is critical: pixel + dither ..." alt="" coords="232,22,411,62"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="185,39,218,39,218,45,185,45"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_ae44229e20fb4ba4473b057dcda87122e.html#ae44229e20fb4ba4473b057dcda87122e" title="Copy constructor." alt="" coords="689,29,909,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="410,20,458,14,550,9,642,14,721,24,721,30,641,19,550,14,459,19,411,26"/>
+<area shape="rect" id="Node000005" href="$d0/dee/struct_pixel_controller_af1d6dbfe39be747916896dc44c730a29.html#af1d6dbfe39be747916896dc44c730a29" title="Add dither offset to pixel value (BEFORE scaling)." alt="" coords="469,29,631,55"/>
+<area shape="poly" id="edge5_Node000002_Node000005" title=" " alt="" coords="411,39,455,39,455,45,411,45"/>
+<area shape="rect" id="Node000006" href="$d0/dee/struct_pixel_controller_a2268d03939af0ad8fcb478ad6c9f33c7.html#a2268d03939af0ad8fcb478ad6c9f33c7" title="Read a byte of LED data." alt="" coords="459,79,641,104"/>
+<area shape="poly" id="edge7_Node000002_Node000006" title=" " alt="" coords="411,59,478,73,476,78,410,64"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="761,31,753,21,757,11,773,5,799,3,832,7,845,16,842,20,830,11,799,8,774,10,761,15,758,20,765,27"/>
+<area shape="rect" id="Node000004" href="$d0/dee/struct_pixel_controller_af3310e3a869dfeafae981291b76b572d.html#af3310e3a869dfeafae981291b76b572d" title=" " alt="" coords="957,29,1113,55"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="909,39,944,39,944,45,909,45"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="631,39,675,39,675,45,631,45"/>
+<area shape="poly" id="edge8_Node000006_Node000003" title=" " alt="" coords="614,76,720,55,722,60,615,81"/>
+</map>

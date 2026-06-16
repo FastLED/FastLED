@@ -1,0 +1,32 @@
+<map id="fl::audio::detector::Downbeat::~Downbeat" name="fl::audio::detector::Downbeat::~Downbeat">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,122,187,162"/>
+<area shape="rect" id="Node000002" href="$df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_ab39e6c781ea2d22502223b76f0e10dd3.html#ab39e6c781ea2d22502223b76f0e10dd3" title=" " alt="" coords="235,78,423,118"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="186,122,221,116,222,121,187,127"/>
+<area shape="rect" id="Node000003" href="$df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_ad7620c0f29cbb6659417909e4e457cd9.html#ad7620c0f29cbb6659417909e4e457cd9" title=" " alt="" coords="254,166,403,206"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="187,157,241,167,240,172,186,162"/>
+<area shape="poly" id="edge13_Node000003_Node000003" title=" " alt="" coords="285,166,283,156,290,147,305,141,329,139,356,142,370,149,368,154,354,147,329,145,306,147,293,151,288,157,290,165"/>
+<area shape="rect" id="Node000004" href="$df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_a8c6a9cca34b69d15d987bbefc0c21dc1.html#a8c6a9cca34b69d15d987bbefc0c21dc1" title="Construct with shared Beat (recommended)" alt="" coords="507,6,678,46"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="371,164,397,148,421,128,435,109,443,91,452,73,469,56,493,42,496,47,472,60,456,76,448,94,440,112,425,132,400,152,373,168"/>
+<area shape="rect" id="Node000005" href="$df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_a2d602a6a7fbb478afdb956660d2860fc.html#a2d602a6a7fbb478afdb956660d2860fc" title=" " alt="" coords="474,70,711,110"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="368,164,470,120,494,111,496,116,472,124,370,168"/>
+<area shape="rect" id="Node000006" href="$df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_afb91a3e8747ec76cc9a05db789e70945.html#afb91a3e8747ec76cc9a05db789e70945" title=" " alt="" coords="487,134,698,174"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="403,174,474,166,474,171,404,180"/>
+<area shape="rect" id="Node000011" href="$df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_ab74f5fcc689eefc96d9b8e035c7382e3.html#ab74f5fcc689eefc96d9b8e035c7382e3" title=" " alt="" coords="501,198,684,238"/>
+<area shape="poly" id="edge10_Node000003_Node000011" title=" " alt="" coords="404,192,488,203,488,208,403,198"/>
+<area shape="rect" id="Node000014" href="$df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_adbb0ccb3f934e2305f5ca5eb4fcc49ba.html#adbb0ccb3f934e2305f5ca5eb4fcc49ba" title=" " alt="" coords="475,262,710,302"/>
+<area shape="poly" id="edge14_Node000003_Node000014" title=" " alt="" coords="370,204,472,248,496,256,494,261,470,252,368,208"/>
+<area shape="rect" id="Node000015" href="$df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_ad76840d4464537e9289bb78e4b849a31.html#ad76840d4464537e9289bb78e4b849a31" title=" " alt="" coords="471,326,715,366"/>
+<area shape="poly" id="edge15_Node000003_Node000015" title=" " alt="" coords="348,204,400,258,434,287,472,312,486,319,484,323,469,316,431,291,396,262,345,208"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84" title=" " alt="" coords="841,5,903,31"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="694,132,713,120,729,101,736,81,743,60,761,40,793,24,827,17,828,22,795,29,764,44,748,63,741,83,734,104,716,124,696,136"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350" title=" " alt="" coords="833,55,911,80"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="681,131,714,120,737,105,762,90,818,73,820,79,764,95,740,109,716,124,683,136"/>
+<area shape="rect" id="Node000009" href="$df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_a382377178909b27271cc90f8d32e54ff.html#a382377178909b27271cc90f8d32e54ff" title="Returns true if downbeat was detected this frame." alt="" coords="781,105,963,145"/>
+<area shape="poly" id="edge8_Node000006_Node000009" title=" " alt="" coords="698,140,767,133,767,138,698,146"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="839,169,905,195"/>
+<area shape="poly" id="edge9_Node000006_Node000010" title=" " alt="" coords="698,162,825,175,824,180,698,167"/>
+<area shape="rect" id="Node000012" href="$df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_ab2361a41ac373bd0e3b1732b7b0a6ee7.html#ab2361a41ac373bd0e3b1732b7b0a6ee7" title=" " alt="" coords="763,219,981,273"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="684,224,749,231,749,236,684,230"/>
+<area shape="rect" id="Node000013" href="$d4/dca/classfl_1_1array_ad9b2176ba32cd08ef9c7624d425869d4.html#ad9b2176ba32cd08ef9c7624d425869d4" title=" " alt="" coords="819,297,925,323"/>
+<area shape="poly" id="edge12_Node000011_Node000013" title=" " alt="" coords="685,235,716,248,740,266,750,275,764,284,807,298,805,303,762,288,747,279,737,270,713,252,683,240"/>
+</map>

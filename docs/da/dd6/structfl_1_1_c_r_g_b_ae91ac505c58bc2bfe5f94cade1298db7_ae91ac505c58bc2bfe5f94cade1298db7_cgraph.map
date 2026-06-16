@@ -1,0 +1,8 @@
+<map id="fl::CRGB::operator=" name="fl::CRGB::operator=">
+<area shape="rect" id="Node000001" title="Allow assignment from HSV color." alt="" coords="5,43,155,68"/>
+<area shape="rect" id="Node000002" href="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" title="Default constructor." alt="" coords="209,5,329,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="145,40,195,30,196,35,146,45"/>
+<area shape="rect" id="Node000003" href="$dd/dc7/group___h_s_v2_r_g_b_gab6a6fedf5fcb4f47b95eed3aee43c613.html#gab6a6fedf5fcb4f47b95eed3aee43c613" title=" " alt="" coords="203,79,336,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="148,65,189,73,188,79,147,71"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="238,80,231,70,235,60,248,54,269,52,295,56,306,64,303,68,293,60,269,57,249,59,239,64,237,70,242,77"/>
+</map>

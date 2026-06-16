@@ -1,0 +1,20 @@
+<map id="lib8tion/math8.h" name="lib8tion/math8.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="194,5,323,31"/>
+<area shape="rect" id="Node000002" href="$db/db8/fl_2math_2lib8tion_2math8_8h.html" title=" " alt="" coords="169,79,348,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="261,31,261,65,256,65,256,31"/>
+<area shape="rect" id="Node000003" href="$da/d60/fl_2math_2math8_8h.html" title="Legacy compatibility header for 8&#45;bit math functions." alt="" coords="195,152,322,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="261,104,261,138,256,138,256,104"/>
+<area shape="rect" id="Node000004" href="$d4/de8/fl_2math_2scale8_8h.html" title="Legacy compatibility header for 8&#45;bit scaling functions." alt="" coords="94,225,221,251"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="244,180,187,219,184,215,241,175"/>
+<area shape="rect" id="Node000061" href="$d2/d0f/fl_2math_2lib8static_8h.html" title="Defines static inlining macros for lib8tion functions." alt="" coords="5,299,149,324"/>
+<area shape="poly" id="edge7_Node000003_Node000061" title=" " alt="" coords="196,172,165,179,134,189,106,205,83,227,77,240,73,255,74,285,69,285,68,254,72,238,79,224,103,201,132,184,164,174,194,167"/>
+<area shape="rect" id="Node000009" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="99,372,274,397"/>
+<area shape="poly" id="edge9_Node000003_Node000009" title=" " alt="" coords="258,178,236,251,198,360,193,358,231,250,253,177"/>
+<area shape="rect" id="Node000063" href="$db/d72/fl_2math_2intmap_8h.html" title="Integer mapping functions between different integer sizes." alt="" coords="296,225,427,251"/>
+<area shape="poly" id="edge8_Node000003_Node000063" title=" " alt="" coords="277,175,335,215,332,219,274,180"/>
+<area shape="rect" id="Node000065" title=" " alt="" coords="451,225,594,251"/>
+<area shape="poly" id="edge10_Node000003_Node000065" title=" " alt="" coords="302,175,467,219,466,224,300,180"/>
+<area shape="poly" id="edge4_Node000004_Node000061" title=" " alt="" coords="146,253,102,292,99,288,143,249"/>
+<area shape="poly" id="edge6_Node000004_Node000009" title=" " alt="" coords="162,251,184,358,179,359,157,252"/>
+<area shape="poly" id="edge5_Node000061_Node000009" title=" " alt="" coords="96,322,159,362,156,367,93,326"/>
+</map>

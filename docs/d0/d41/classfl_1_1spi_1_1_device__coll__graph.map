@@ -1,0 +1,19 @@
+<map id="fl::spi::Device" name="fl::spi::Device">
+<area shape="rect" id="Node000001" title="Single&#45;channel SPI device interface (TX&#45;only, transaction&#45;based, optimized for FastLED)" alt="" coords="965,159,1076,184"/>
+<area shape="rect" id="Node000002" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="721,151,876,191"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="890,169,965,169,965,174,890,174"/>
+<area shape="rect" id="Node000003" href="$d1/d42/structfl_1_1spi_1_1_device_1_1_impl.html" title="Private implementation data for Device class." alt="" coords="395,77,542,103"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="535,103,722,150,720,155,534,109"/>
+<area shape="rect" id="Node000004" href="$d3/dca/structfl_1_1_spi_config.html" title="Configuration for SPI device (supports 1&#45;8 lanes)" alt="" coords="61,5,160,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="174,25,357,59,420,75,419,80,355,65,173,31"/>
+<area shape="rect" id="Node000010" href="$d1/d42/structfl_1_1spi_1_1_device_1_1_impl.html#d2/da9/structfl_1_1spi_1_1_device_1_1_impl_1_1_async_state" title="State for async operations." alt="" coords="37,55,184,95"/>
+<area shape="poly" id="edge4_Node000003_Node000010" title=" " alt="" coords="198,76,395,84,395,90,198,82"/>
+<area shape="rect" id="Node000011" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="5,120,216,145"/>
+<area shape="poly" id="edge5_Node000003_Node000011" title=" " alt="" coords="230,118,356,103,395,98,395,103,356,109,230,123"/>
+<area shape="rect" id="Node000016" href="$d5/d2b/structfl_1_1default__delete.html" title=" " alt="" coords="380,151,557,191"/>
+<area shape="poly" id="edge6_Node000002_Node000016" title=" " alt="" coords="571,169,721,169,721,174,571,174"/>
+<area shape="rect" id="Node000017" href="$d5/d2b/structfl_1_1default__delete.html" title=" " alt="" coords="25,175,196,200"/>
+<area shape="poly" id="edge7_Node000016_Node000017" title=" " alt="" coords="210,187,356,183,380,181,380,187,356,189,210,192"/>
+<area shape="rect" id="Node000018" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="401,215,536,255"/>
+<area shape="poly" id="edge8_Node000002_Node000018" title=" " alt="" coords="550,226,622,217,697,203,745,189,747,194,698,209,623,223,550,232"/>
+</map>

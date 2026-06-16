@@ -1,0 +1,21 @@
+<map id="fl::get_spi_async_logger_isr" name="fl::get_spi_async_logger_isr">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,116,207,141"/>
+<area shape="poly" id="edge11_Node000001_Node000001" title=" " alt="" coords="69,118,62,108,66,98,81,92,106,89,138,93,150,103,146,107,136,98,106,95,82,97,69,102,67,107,74,114"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a78c09365a5278caa64b43fe7ff242146.html#a78c09365a5278caa64b43fe7ff242146" title="Template&#45;based logger accessor with auto&#45;registration and enablement check." alt="" coords="255,109,407,149"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="207,126,241,126,241,131,207,131"/>
+<area shape="poly" id="edge5_Node000002_Node000002" title=" " alt="" coords="289,109,286,99,293,90,308,84,331,82,357,85,371,92,369,97,355,90,331,87,309,89,296,94,291,100,294,108"/>
+<area shape="rect" id="Node000003" href="$df/d9e/namespacefl_1_1detail_aa9f76c83c862a97dce4b86c77be98046.html#aa9f76c83c862a97dce4b86c77be98046" title="Check if logger is enabled and print error once if not." alt="" coords="455,29,672,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="366,106,407,85,454,65,483,56,485,61,456,70,409,90,368,111"/>
+<area shape="rect" id="Node000005" href="$d5/d7b/structfl_1_1detail_1_1_active_logger_registry_a0ba7ba9bde21bfc28ef06006930c34f1.html#a0ba7ba9bde21bfc28ef06006930c34f1" title=" " alt="" coords="479,79,647,119"/>
+<area shape="poly" id="edge6_Node000002_Node000005" title=" " alt="" coords="406,116,465,109,466,114,407,122"/>
+<area shape="rect" id="Node000006" href="$db/d4a/classfl_1_1_singleton_shared_a138a66e14b03a073e9a15565e823b203.html#a138a66e14b03a073e9a15565e823b203" title=" " alt="" coords="757,107,901,147"/>
+<area shape="poly" id="edge10_Node000002_Node000006" title=" " alt="" coords="407,128,455,129,672,129,743,127,744,133,672,134,455,134,407,133"/>
+<area shape="rect" id="Node000018" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_acc200cb8837f82379821217fb4a6bc29.html#acc200cb8837f82379821217fb4a6bc29" title=" " alt="" coords="456,194,671,234"/>
+<area shape="poly" id="edge8_Node000002_Node000018" title=" " alt="" coords="385,146,456,173,494,187,492,192,454,178,384,151"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="526,31,517,21,522,11,537,5,563,3,596,7,608,16,605,20,594,11,563,8,538,10,525,15,523,20,530,27"/>
+<area shape="rect" id="Node000004" href="$df/d9e/namespacefl_1_1detail_ae18de49f03a7a361a888c1e75d5e2f86.html#ae18de49f03a7a361a888c1e75d5e2f86" title="Print error message for disabled logger (non&#45;template helper) Called from checkLoggerEnabled template..." alt="" coords="722,22,937,62"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="672,39,708,39,708,45,672,45"/>
+<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="648,106,744,116,743,121,647,111"/>
+<area shape="rect" id="Node000019" href="$d5/d06/classfl_1_1detail_1_1_async_logger_service_task_a3bff7aaa6e1158fbbee95055b3458285.html#a3bff7aaa6e1158fbbee95055b3458285" title=" " alt="" coords="720,194,939,234"/>
+<area shape="poly" id="edge9_Node000018_Node000019" title=" " alt="" coords="671,211,707,211,707,217,671,217"/>
+</map>

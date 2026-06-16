@@ -1,0 +1,39 @@
+digraph "fl::getTraceStorage"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::getTraceStorage",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::ScopedTrace::clear",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/da7/classfl_1_1_scoped_trace_a5b83424985517ed4873c7cf9b0632a52.html#a5b83424985517ed4873c7cf9b0632a52",tooltip="Clear the entire call stack (primarily for testing)"];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::ScopedTrace::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/da7/classfl_1_1_scoped_trace_a5a704d58dfe6ca123bc931e804e1e29b.html#a5a704d58dfe6ca123bc931e804e1e29b",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::ScopedTrace::depth",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/da7/classfl_1_1_scoped_trace_a705eb6b77df587c23a8a34df54178531.html#a705eb6b77df587c23a8a34df54178531",tooltip="Get the current stack depth."];
+  Node4 -> Node3 [id="edge4_Node000004_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node5 [id="edge5_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::ScopedTrace::dump",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/da7/classfl_1_1_scoped_trace_ae917094c7db1a836213a05bdbe7df4dc.html#ae917094c7db1a836213a05bdbe7df4dc",tooltip="Dump the current call stack to a string."];
+  Node5 -> Node3 [id="edge6_Node000005_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node6 [id="edge7_Node000001_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::ScopedTrace::dump",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/da7/classfl_1_1_scoped_trace_ac57c024467d07e0ad6b2f163cb0d0d87.html#ac57c024467d07e0ad6b2f163cb0d0d87",tooltip="Dump the current call stack to an inlined vector of TracePoints."];
+  Node1 -> Node7 [id="edge8_Node000001_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::ScopedTrace::pop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/da7/classfl_1_1_scoped_trace_a16442bae6b75d0d1ecd68519e795bf6f.html#a16442bae6b75d0d1ecd68519e795bf6f",tooltip="Pop the most recent function from the call stack."];
+  Node7 -> Node8 [id="edge9_Node000007_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::ScopedTrace::~Scoped\lTrace",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/da7/classfl_1_1_scoped_trace_a7398df68f878868608cb89abed8c1cb8.html#a7398df68f878868608cb89abed8c1cb8",tooltip="Destructor - automatically pops from stack."];
+  Node7 -> Node3 [id="edge10_Node000007_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node9 [id="edge11_Node000001_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="fl::ScopedTrace::push",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/da7/classfl_1_1_scoped_trace_a15a731fc730bafb3789128ba90d33b9c.html#a15a731fc730bafb3789128ba90d33b9c",tooltip="Push a function name onto the call stack."];
+  Node9 -> Node10 [id="edge12_Node000009_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::ScopedTrace::ScopedTrace",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/da7/classfl_1_1_scoped_trace_a4dcbf88189bcce7b53c8ac0b0599cede.html#a4dcbf88189bcce7b53c8ac0b0599cede",tooltip="Construct and push function name onto stack."];
+  Node10 -> Node11 [id="edge13_Node000010_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="fl::ScopedTrace::ScopedTrace",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/da7/classfl_1_1_scoped_trace_aedd8875137f1ec4e3ecc62de6bfdd6b4.html#aedd8875137f1ec4e3ecc62de6bfdd6b4",tooltip=" "];
+  Node10 -> Node12 [id="edge14_Node000010_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::ScopedTrace::ScopedTrace",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/da7/classfl_1_1_scoped_trace_a3f95eb154853f7f6173903ceb38fde0f.html#a3f95eb154853f7f6173903ceb38fde0f",tooltip=" "];
+  Node10 -> Node13 [id="edge15_Node000010_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::ScopedTrace::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/da7/classfl_1_1_scoped_trace_a601c60e85d06fbeda247871c62106aab.html#a601c60e85d06fbeda247871c62106aab",tooltip=" "];
+  Node10 -> Node3 [id="edge16_Node000010_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 -> Node3 [id="edge17_Node000009_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

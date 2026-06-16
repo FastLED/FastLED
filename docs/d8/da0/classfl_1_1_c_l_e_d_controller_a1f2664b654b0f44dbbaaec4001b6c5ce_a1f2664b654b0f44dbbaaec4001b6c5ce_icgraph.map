@@ -1,0 +1,8 @@
+<map id="fl::CLEDController::setRgbw" name="fl::CLEDController::setRgbw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="421,49,557,89"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="541,38,523,31,489,28,460,30,443,35,436,41,439,48,434,50,431,40,440,30,459,25,489,23,524,25,543,33"/>
+<area shape="rect" id="Node000002" href="$d4/d28/group___chipsets_gad119f2555688176da39dc9f8e18479c0.html#gad119f2555688176da39dc9f8e18479c0" title="Constructor with optional RGBW configuration." alt="" coords="91,5,288,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="408,60,288,42,289,37,408,55"/>
+<area shape="rect" id="Node000003" href="$dd/d78/classfl_1_1_u_c_s7604_controller_t_a5b824ab62c030a131878f46d505dfbc6.html#a5b824ab62c030a131878f46d505dfbc6" title=" " alt="" coords="5,70,373,154"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="408,83,374,88,373,83,407,78"/>
+</map>

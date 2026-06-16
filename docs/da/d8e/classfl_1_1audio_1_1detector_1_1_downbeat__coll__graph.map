@@ -1,0 +1,34 @@
+<map id="fl::audio::detector::Downbeat" name="fl::audio::detector::Downbeat">
+<area shape="rect" id="Node000001" title="Detects downbeats (first beat of each measure) in music." alt="" coords="1661,253,1797,293"/>
+<area shape="rect" id="Node000002" href="$df/d9b/classfl_1_1audio_1_1_detector.html" title=" " alt="" coords="675,5,813,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="827,15,909,19,996,30,1182,68,1323,108,1462,159,1638,228,1689,250,1687,255,1636,232,1460,164,1322,113,1180,73,996,35,909,25,827,21"/>
+<area shape="rect" id="Node000004" href="$da/d5e/classfl_1_1audio_1_1detector_1_1_beat.html" title=" " alt="" coords="1020,106,1156,146"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="828,25,911,41,997,68,1031,85,1061,104,1058,108,1029,89,995,72,909,46,827,30"/>
+<area shape="rect" id="Node000003" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="1303,253,1484,293"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1498,270,1661,270,1661,275,1498,275"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1170,148,1225,168,1280,193,1328,222,1368,250,1365,255,1325,226,1277,198,1223,173,1168,153"/>
+<area shape="rect" id="Node000005" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="675,64,813,89"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="827,84,996,107,1020,111,1019,117,996,113,827,89"/>
+<area shape="rect" id="Node000010" href="$d9/db0/classfl_1_1_moving_average.html" title=" " alt="" coords="669,114,819,154"/>
+<area shape="poly" id="edge6_Node000004_Node000010" title=" " alt="" coords="833,129,1020,125,1020,130,833,135"/>
+<area shape="rect" id="Node000021" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="665,181,823,221"/>
+<area shape="poly" id="edge19_Node000001_Node000021" title=" " alt="" coords="837,202,1484,238,1561,242,1638,250,1661,254,1660,259,1637,255,1561,247,1484,243,836,208"/>
+<area shape="poly" id="edge7_Node000004_Node000021" title=" " alt="" coords="836,183,995,150,1020,144,1022,149,997,155,837,188"/>
+<area shape="rect" id="Node000023" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="5,237,204,263"/>
+<area shape="poly" id="edge11_Node000003_Node000023" title=" " alt="" coords="155,264,277,297,350,310,425,315,1089,315,1202,307,1305,290,1306,295,1202,313,1089,321,425,321,350,316,276,303,154,270"/>
+<area shape="poly" id="edge8_Node000021_Node000023" title=" " alt="" coords="195,232,228,227,434,195,525,187,641,189,665,190,665,195,641,194,525,193,434,200,228,233,195,238"/>
+<area shape="rect" id="Node000026" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="353,237,499,263"/>
+<area shape="poly" id="edge10_Node000026_Node000023" title=" " alt="" coords="218,247,353,247,353,253,218,253"/>
+<area shape="poly" id="edge12_Node000003_Node000026" title=" " alt="" coords="513,250,847,261,1302,269,1302,274,847,266,513,256"/>
+<area shape="poly" id="edge9_Node000021_Node000026" title=" " alt="" coords="512,237,641,218,665,214,666,219,642,223,513,242"/>
+<area shape="rect" id="Node000027" href="$dc/dfe/classfl_1_1deque.html" title=" " alt="" coords="1325,327,1462,352"/>
+<area shape="poly" id="edge13_Node000001_Node000027" title=" " alt="" coords="1475,322,1637,290,1661,285,1662,290,1638,295,1476,327"/>
+<area shape="rect" id="Node000028" href="$dc/dfe/classfl_1_1deque.html" title=" " alt="" coords="1030,377,1146,403"/>
+<area shape="poly" id="edge14_Node000027_Node000028" title=" " alt="" coords="1159,376,1324,348,1325,353,1160,381"/>
+<area shape="rect" id="Node000029" href="$dc/dfe/classfl_1_1deque.html" title=" " alt="" coords="1331,385,1455,411"/>
+<area shape="poly" id="edge18_Node000029_Node000028" title=" " alt="" coords="1160,393,1180,394,1331,396,1331,401,1180,399,1160,398"/>
+<area shape="rect" id="Node000007" href="$db/d13/classfl_1_1memory__resource.html" title="Polymorphic memory resource base class (PMR&#45;style)." alt="" coords="666,407,822,432"/>
+<area shape="poly" id="edge15_Node000028_Node000007" title=" " alt="" coords="836,409,1029,392,1030,398,836,414"/>
+<area shape="poly" id="edge17_Node000029_Node000007" title=" " alt="" coords="836,423,986,429,1156,426,1248,417,1331,405,1331,411,1248,422,1156,431,986,434,836,429"/>
+<area shape="poly" id="edge16_Node000001_Node000029" title=" " alt="" coords="1469,385,1551,366,1594,352,1636,336,1673,314,1704,291,1707,295,1676,319,1639,340,1596,357,1552,371,1470,390"/>
+</map>

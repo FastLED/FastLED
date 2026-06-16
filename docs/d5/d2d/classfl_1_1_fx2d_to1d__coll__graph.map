@@ -1,0 +1,28 @@
+<map id="fl::Fx2dTo1d" name="fl::Fx2dTo1d">
+<area shape="rect" id="Node000001" title="Fx2dTo1d samples a 2D effect into a 1D LED strip using a ScreenMap." alt="" coords="984,139,1084,164"/>
+<area shape="rect" id="Node000002" href="$d4/d1c/classfl_1_1_fx1d.html" title=" " alt="" coords="746,55,817,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="831,81,996,136,994,141,829,86"/>
+<area shape="rect" id="Node000003" href="$da/d5d/classfl_1_1_fx.html" title=" " alt="" coords="424,5,479,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="493,19,584,29,692,45,746,56,745,61,692,50,584,34,492,24"/>
+<area shape="rect" id="Node000004" href="$d7/d6c/classfl_1_1_x_map.html" title=" " alt="" coords="414,55,489,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="502,65,746,65,746,70,502,70"/>
+<area shape="rect" id="Node000005" href="$d2/d78/classfl_1_1_screen_map.html" title=" " alt="" coords="726,139,837,164"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="851,149,984,149,984,154,851,154"/>
+<area shape="rect" id="Node000006" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="341,104,561,129"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="576,127,726,143,725,148,575,132"/>
+<area shape="rect" id="Node000007" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="18,129,163,155"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="177,133,341,122,341,127,177,139"/>
+<area shape="rect" id="Node000011" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="360,153,543,179"/>
+<area shape="poly" id="edge8_Node000011_Node000007" title=" " alt="" coords="164,154,200,159,282,164,360,166,359,171,282,170,200,165,164,160"/>
+<area shape="poly" id="edge7_Node000005_Node000011" title=" " alt="" coords="556,164,692,159,725,156,726,161,692,165,557,169"/>
+<area shape="rect" id="Node000012" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="716,209,847,249"/>
+<area shape="poly" id="edge9_Node000001_Node000012" title=" " alt="" coords="859,202,991,161,992,167,861,207"/>
+<area shape="rect" id="Node000013" href="$da/dd6/structfl_1_1_c_r_g_b.html" title="Representation of an 8&#45;bit RGB pixel (Red, Green, Blue)" alt="" coords="414,203,489,228"/>
+<area shape="poly" id="edge10_Node000012_Node000013" title=" " alt="" coords="503,215,716,223,715,229,503,220"/>
+<area shape="rect" id="Node000014" href="$d5/d2b/structfl_1_1default__delete.html" title=" " alt="" coords="385,253,517,293"/>
+<area shape="poly" id="edge11_Node000012_Node000014" title=" " alt="" coords="530,263,692,243,715,239,716,245,692,249,531,268"/>
+<area shape="rect" id="Node000015" href="$d5/d2b/structfl_1_1default__delete.html" title=" " alt="" coords="5,260,176,285"/>
+<area shape="poly" id="edge12_Node000014_Node000015" title=" " alt="" coords="190,270,385,270,385,275,190,275"/>
+<area shape="rect" id="Node000016" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="384,317,519,357"/>
+<area shape="poly" id="edge13_Node000012_Node000016" title=" " alt="" coords="532,322,610,304,691,278,750,246,752,251,693,283,611,309,533,327"/>
+</map>

@@ -1,0 +1,33 @@
+digraph "loop"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="loop",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::millis",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a",tooltip="Universal millisecond timer - returns milliseconds since system startup."];
+  Node2 -> Node2 [id="edge2_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node3 [id="edge3_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="particles",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d4e/_particles1d_8h_a3b09fd7d739d2e44f5cf41c159ef6989.html#a3b09fd7d739d2e44f5cf41c159ef6989",tooltip=" "];
+  Node1 -> Node4 [id="edge4_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="uiAutoSpawn",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d4e/_particles1d_8h_a495f8b97c342cb0e9f62506d791022f6.html#a495f8b97c342cb0e9f62506d791022f6",tooltip=" "];
+  Node1 -> Node5 [id="edge5_Node000001_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="uiBrightness",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d4e/_particles1d_8h_a1e2c4b1d9158151a78243e7a95c8b68a.html#a1e2c4b1d9158151a78243e7a95c8b68a",tooltip=" "];
+  Node1 -> Node6 [id="edge6_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="uiCyclical",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d4e/_particles1d_8h_afa43d596d57e743ac7f87005e2840665.html#afa43d596d57e743ac7f87005e2840665",tooltip=" "];
+  Node1 -> Node7 [id="edge7_Node000001_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="uiFadeAmount",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d4e/_particles1d_8h_a54c96924f516196a1c59395568ef9538.html#a54c96924f516196a1c59395568ef9538",tooltip=" "];
+  Node1 -> Node8 [id="edge8_Node000001_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="uiLifetime",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d4e/_particles1d_8h_a7237ccbdde2d8488a4e7331c87a3ea18.html#a7237ccbdde2d8488a4e7331c87a3ea18",tooltip=" "];
+  Node1 -> Node9 [id="edge9_Node000001_Node000009",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="uiOverdrawCount",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d4e/_particles1d_8h_a57fd69ec39cdb5dda32285d7e2b97c64.html#a57fd69ec39cdb5dda32285d7e2b97c64",tooltip=" "];
+  Node1 -> Node10 [id="edge10_Node000001_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="uiSpawnButton",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d4e/_particles1d_8h_a3324ecb33c91c166ab71dd0da3673c2f.html#a3324ecb33c91c166ab71dd0da3673c2f",tooltip=" "];
+  Node1 -> Node11 [id="edge11_Node000001_Node000011",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="uiSpawnInterval",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d4e/_particles1d_8h_aa13e2615c7e026bf7e04a07b5eaf8f2a.html#aa13e2615c7e026bf7e04a07b5eaf8f2a",tooltip=" "];
+  Node1 -> Node12 [id="edge12_Node000001_Node000012",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="uiSpeed",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d4e/_particles1d_8h_a8a19706a72d765aa8f88a20752202354.html#a8a19706a72d765aa8f88a20752202354",tooltip=" "];
+}

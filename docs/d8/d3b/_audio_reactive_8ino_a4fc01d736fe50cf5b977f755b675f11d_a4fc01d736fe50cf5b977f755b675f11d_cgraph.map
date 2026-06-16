@@ -1,0 +1,11 @@
+<map id="setup" name="setup">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,74,64,99"/>
+<area shape="rect" id="Node000002" href="$dc/d52/classfl_1_1audio_1_1_config_aaace506af66baf0ff0f5704695b9513b.html#aaace506af66baf0ff0f5704695b9513b" title=" " alt="" coords="112,37,243,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="64,78,98,71,99,76,65,83"/>
+<area shape="rect" id="Node000005" href="$d1/dfb/colorutils_8h_afba4db18577c19e39c54f1c5793741b7.html#afba4db18577c19e39c54f1c5793741b7" title="Fill a range of LEDs with a solid color." alt="" coords="139,102,215,127"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="65,90,127,102,126,107,64,95"/>
+<area shape="rect" id="Node000003" href="$dc/d52/classfl_1_1audio_1_1_config_aea6ac29e0ebdee4aadc8e38d9cb3a71f.html#aea6ac29e0ebdee4aadc8e38d9cb3a71f" title=" " alt="" coords="291,5,421,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="242,43,277,37,278,42,243,48"/>
+<area shape="rect" id="Node000004" href="$dc/d52/classfl_1_1audio_1_1_config_a80ce537820ee6d81e2ec9fc24aef7a87.html#a80ce537820ee6d81e2ec9fc24aef7a87" title="Microphone pink noise correction profile." alt="" coords="291,69,421,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="243,66,278,73,277,78,242,72"/>
+</map>

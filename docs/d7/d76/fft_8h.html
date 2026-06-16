@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fl/fft.h File Reference</title>
+<title>FastLED: fl/audio/fft/fft.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -102,15 +102,15 @@ $(function(){initNavTree('d7/d76/fft_8h.html','../../'); initResizable(true); })
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
-<a href="#namespaces">Namespaces</a>  </div>
+<a href="#namespaces">Namespaces</a> &#124;
+<a href="#enum-members">Enumerations</a>  </div>
   <div class="headertitle"><div class="title">fft.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="../../da/d4b/unique__ptr_8h_source.html">fl/unique_ptr.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d4/d7a/span_8h_source.html">fl/span.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d6/d68/vector_8h_source.html">fl/vector.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d9/d83/move_8h_source.html">fl/move.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d0/dda/memfill_8h_source.html">fl/memfill.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d4/d7a/span_8h_source.html">fl/stl/span.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/d68/vector_8h_source.html">fl/stl/vector.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/db1/math_8h_source.html">fl/math/math.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for fft.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -130,18 +130,41 @@ $(function(){initNavTree('d7/d76/fft_8h.html','../../'); initResizable(true); })
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d47/classfl_1_1_f_f_t.html">fl::FFT</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d76/structfl_1_1audio_1_1fft_1_1_args.html">fl::audio::fft::Args</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d63/structfl_1_1_f_f_t___args.html">fl::FFT_Args</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d86/classfl_1_1audio_1_1fft_1_1_bins.html">fl::audio::fft::Bins</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dd3/structfl_1_1_f_f_t_bins.html">fl::FFTBins</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/df2/classfl_1_1audio_1_1fft_1_1_f_f_t.html">fl::audio::fft::FFT</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dbf/namespacefl_1_1audio.html">fl::audio</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dee/namespacefl_1_1audio_1_1fft.html">fl::audio::fft</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:a6daa8d51b19c113e5318d12785c0f571" id="r_a6daa8d51b19c113e5318d12785c0f571"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dee/namespacefl_1_1audio_1_1fft_a6daa8d51b19c113e5318d12785c0f571.html#a6daa8d51b19c113e5318d12785c0f571">fl::audio::fft::Mode</a> { <br />
+&#160;&#160;<a class="el" href="../../de/dee/namespacefl_1_1audio_1_1fft_a6daa8d51b19c113e5318d12785c0f571.html#a6daa8d51b19c113e5318d12785c0f571ae1f2d5134ed2543d38a0de9751cf75d9">fl::audio::fft::AUTO</a>
+, <a class="el" href="../../de/dee/namespacefl_1_1audio_1_1fft_a6daa8d51b19c113e5318d12785c0f571.html#a6daa8d51b19c113e5318d12785c0f571a74e1a95a9ed363677fb3691ed0a5506d">fl::audio::fft::LOG_REBIN</a>
+, <a class="el" href="../../de/dee/namespacefl_1_1audio_1_1fft_a6daa8d51b19c113e5318d12785c0f571.html#a6daa8d51b19c113e5318d12785c0f571a273283e789df4285798abcd51e2b23c5">fl::audio::fft::CQ_NAIVE</a>
+, <a class="el" href="../../de/dee/namespacefl_1_1audio_1_1fft_a6daa8d51b19c113e5318d12785c0f571.html#a6daa8d51b19c113e5318d12785c0f571a804cd6438854945084edfaa38154ff85">fl::audio::fft::CQ_OCTAVE</a>
+, <br />
+&#160;&#160;<a class="el" href="../../de/dee/namespacefl_1_1audio_1_1fft_a6daa8d51b19c113e5318d12785c0f571.html#a6daa8d51b19c113e5318d12785c0f571a73e82bba75a81379b62c94b7f2087763">fl::audio::fft::CQ_HYBRID</a>
+<br />
+ }</td></tr>
+<tr class="separator:a6daa8d51b19c113e5318d12785c0f571"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa036454af7be032ea4c5436153862487" id="r_aa036454af7be032ea4c5436153862487"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dee/namespacefl_1_1audio_1_1fft_aa036454af7be032ea4c5436153862487.html#aa036454af7be032ea4c5436153862487">fl::audio::fft::Window</a> { <a class="el" href="../../de/dee/namespacefl_1_1audio_1_1fft_aa036454af7be032ea4c5436153862487.html#aa036454af7be032ea4c5436153862487ae1f2d5134ed2543d38a0de9751cf75d9">fl::audio::fft::AUTO</a>
+, <a class="el" href="../../de/dee/namespacefl_1_1audio_1_1fft_aa036454af7be032ea4c5436153862487.html#aa036454af7be032ea4c5436153862487ab50339a10e1de285ac99d4c3990b8693">fl::audio::fft::NONE</a>
+, <a class="el" href="../../de/dee/namespacefl_1_1audio_1_1fft_aa036454af7be032ea4c5436153862487.html#aa036454af7be032ea4c5436153862487a0cc67b768345986318df7c23b7ec8c8e">fl::audio::fft::HANNING</a>
+, <a class="el" href="../../de/dee/namespacefl_1_1audio_1_1fft_aa036454af7be032ea4c5436153862487.html#aa036454af7be032ea4c5436153862487a571575ff930fc746f331e0f84155fac0">fl::audio::fft::BLACKMAN_HARRIS</a>
+ }</td></tr>
+<tr class="separator:aa036454af7be032ea4c5436153862487"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -149,8 +172,8 @@ Namespaces</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d7/d76/fft_8h.html">fft.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_80b55e5ea7143e3a561e896c6c19b58f.html">audio</a></li><li class="navelem"><a class="el" href="../../dir_945806df7450bb6349c55f94e1489bef.html">fft</a></li><li class="navelem"><a class="el" href="../../d7/d76/fft_8h.html">fft.h</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

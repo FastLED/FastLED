@@ -108,13 +108,29 @@ $(function(){initNavTree('d6/ddc/fastspi_8h.html','../../'); initResizable(true)
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Serial peripheral interface (SPI) definitions per platform. </p>
+<p>ARCHITECTURE: This file provides:</p><ol type="1">
+<li>Common SPI macros and utilities (DATA_RATE_MHZ, DATA_RATE_KHZ)</li>
+<li><a class="el" href="../../d9/d35/class_software_s_p_i_output.html" title="Software SPI output (generic cross-platform bit-banging) NOTE: This is NOT in the fl namespace per fa...">SoftwareSPIOutput</a> template (generic bit-banging SPI)</li>
+<li>Includes all platform-specific implementations via dispatch headers</li>
+</ol>
+<p>IMPORTANT: The SPIOutput template is NOT defined in this file. Instead, it is defined by platform-specific spi_output_template.h files:</p><ul>
+<li>Each platform (esp32, teensy, nrf52, etc.) has its own platform directory</li>
+<li>Each platform directory contains spi_output_template.h</li>
+<li>The dispatch header (platforms/spi_output_template.h) selects the right one</li>
+<li>This approach centralizes platform logic in platform-specific directories</li>
+</ul>
+<p>The include pattern is: #include "fastspi.h" // Includes this file // At this point, <a class="el" href="../../d9/d35/class_software_s_p_i_output.html" title="Software SPI output (generic cross-platform bit-banging) NOTE: This is NOT in the fl namespace per fa...">SoftwareSPIOutput</a> is available // SPIOutput is defined (by whichever platform-specific template was included) </p>
 
 <p class="definition">Definition in file <a class="el" href="../../d6/ddc/fastspi_8h_source.html">fastspi.h</a>.</p>
-</div><div class="textblock"><code>#include &quot;<a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html">FastLED.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d2/dd9/controller_8h_source.html">controller.h</a>&quot;</code><br />
+</div><div class="textblock"><code>#include &quot;<a class="el" href="../../d2/dd9/controller_8h_source.html">controller.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../df/da5/lib8tion_8h_source.html">lib8tion.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d9/d8d/fastspi__bitbang_8h_source.html">fastspi_bitbang.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/int.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d2/ddb/fastspi__types_8h_source.html">fastspi_types.h</a>&quot;</code><br />
+<code>#include &quot;platforms/shared/spi_bitbang/generic_software_spi.h&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/stl/int.h</a>&quot;</code><br />
+<code>#include &quot;platforms/cpu_frequency.h&quot;</code><br />
+<code>#include &quot;platforms/spi_device_proxy.h&quot;</code><br />
+<code>#include &quot;platforms/spi_output_template.h&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d7/dc2/fl_2system_2_fast_l_e_d_8h_source.html">fl/system/fastled.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for fastspi.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -127,7 +143,7 @@ $(function(){initNavTree('d6/ddc/fastspi_8h.html','../../'); initResizable(true)
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../de/d78/fastspi_8h__dep__incl.svg" width="100%" height="459"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../de/d78/fastspi_8h__dep__incl.svg" width="440" height="403"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 </div>
 <p><a href="../../d6/ddc/fastspi_8h_source.html">Go to the source code of this file.</a></p>
@@ -135,22 +151,23 @@ $(function(){initNavTree('d6/ddc/fastspi_8h.html','../../'); initResizable(true)
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d35/class_software_s_p_i_output.html">SoftwareSPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Software SPI output.  <a href="../../d9/d35/class_software_s_p_i_output.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d97/class_s_p_i_output.html">SPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hardware SPI output.  <a href="../../d3/d97/class_s_p_i_output.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Software SPI output (generic cross-platform bit-banging) NOTE: This is NOT in the fl namespace per <a class="el" href="../../d6/ddc/fastspi_8h.html" title="Serial peripheral interface (SPI) definitions per platform.">fastspi.h</a> design requirements.  <a href="../../d9/d35/class_software_s_p_i_output.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
 <tr class="memitem:a609bfadebfd20cb383627fe84b4f8abe" id="r_a609bfadebfd20cb383627fe84b4f8abe"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/ddc/fastspi_8h_a609bfadebfd20cb383627fe84b4f8abe.html#a609bfadebfd20cb383627fe84b4f8abe">__INC_FASTSPI_H</a></td></tr>
 <tr class="separator:a609bfadebfd20cb383627fe84b4f8abe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa8d916cc870eee608d52f3576b5338a7" id="r_aa8d916cc870eee608d52f3576b5338a7"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/ddc/fastspi_8h_aa8d916cc870eee608d52f3576b5338a7.html#aa8d916cc870eee608d52f3576b5338a7">DATA_RATE_KHZ</a>(X)</td></tr>
-<tr class="memdesc:aa8d916cc870eee608d52f3576b5338a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert data rate from kilohertz (KHz) to clock cycles per bit.  <br /></td></tr>
-<tr class="separator:aa8d916cc870eee608d52f3576b5338a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4bcb592d94b1f9d3a99afec742513efc" id="r_a4bcb592d94b1f9d3a99afec742513efc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/ddc/fastspi_8h_a4bcb592d94b1f9d3a99afec742513efc.html#a4bcb592d94b1f9d3a99afec742513efc">DATA_RATE_MHZ</a>(X)</td></tr>
-<tr class="memdesc:a4bcb592d94b1f9d3a99afec742513efc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert data rate from megahertz (MHz) to clock cycles per bit.  <br /></td></tr>
-<tr class="separator:a4bcb592d94b1f9d3a99afec742513efc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5eebd97b9a3c258441b55796dbbe3da3" id="r_a5eebd97b9a3c258441b55796dbbe3da3"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/ddc/fastspi_8h_a5eebd97b9a3c258441b55796dbbe3da3.html#a5eebd97b9a3c258441b55796dbbe3da3">DATA_RATE_KHZ</a>&#160;&#160;&#160;<a class="el" href="../../d6/ddc/fastspi_8h_abe2379c74ae4ea158b1450ceaec44c6e.html#abe2379c74ae4ea158b1450ceaec44c6e">FL_DATA_RATE_KHZ</a></td></tr>
+<tr class="separator:a5eebd97b9a3c258441b55796dbbe3da3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd8df6bada2ce822d4704a66f8950726" id="r_abd8df6bada2ce822d4704a66f8950726"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/ddc/fastspi_8h_abd8df6bada2ce822d4704a66f8950726.html#abd8df6bada2ce822d4704a66f8950726">DATA_RATE_MHZ</a>&#160;&#160;&#160;<a class="el" href="../../d6/ddc/fastspi_8h_ae006b05879c0649a21526c9cfb62e2eb.html#ae006b05879c0649a21526c9cfb62e2eb">FL_DATA_RATE_MHZ</a></td></tr>
+<tr class="separator:abd8df6bada2ce822d4704a66f8950726"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe2379c74ae4ea158b1450ceaec44c6e" id="r_abe2379c74ae4ea158b1450ceaec44c6e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/ddc/fastspi_8h_abe2379c74ae4ea158b1450ceaec44c6e.html#abe2379c74ae4ea158b1450ceaec44c6e">FL_DATA_RATE_KHZ</a>(X)</td></tr>
+<tr class="separator:abe2379c74ae4ea158b1450ceaec44c6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae006b05879c0649a21526c9cfb62e2eb" id="r_ae006b05879c0649a21526c9cfb62e2eb"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/ddc/fastspi_8h_ae006b05879c0649a21526c9cfb62e2eb.html#ae006b05879c0649a21526c9cfb62e2eb">FL_DATA_RATE_MHZ</a>(X)</td></tr>
+<tr class="separator:ae006b05879c0649a21526c9cfb62e2eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3d7ec61952f1aba83d8083e9f6ebe768" id="r_a3d7ec61952f1aba83d8083e9f6ebe768"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/ddc/fastspi_8h_a3d7ec61952f1aba83d8083e9f6ebe768.html#a3d7ec61952f1aba83d8083e9f6ebe768">FL_TO_CLOCK_DIVIDER</a>(FREQ_MHZ,  CPU_FREQ_MHZ)</td></tr>
+<tr class="separator:a3d7ec61952f1aba83d8083e9f6ebe768"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -159,7 +176,7 @@ Macros</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d6/ddc/fastspi_8h.html">fastspi.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,0 +1,5 @@
+<map id="fl::noiseSphereHSV16" name="fl::noiseSphereHSV16">
+<area shape="rect" id="Node000001" title="Sphere noise functions &#45; sample three z&#45;slices for independent component evolution." alt="" coords="207,5,368,31"/>
+<area shape="rect" id="Node000002" href="$df/dd3/group___sphere_noise_gaa4b051aa869617244405f816184296c0.html#gaa4b051aa869617244405f816184296c0" title="Generate HSV8 (8&#45;bit) noise for a sphere pattern." alt="" coords="5,5,159,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="193,21,159,21,159,15,193,15"/>
+</map>

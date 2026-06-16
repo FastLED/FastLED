@@ -1,9 +1,14 @@
 <map id="fl::RectangularDrawBuffer::getMaxBytesInStrip" name="fl::RectangularDrawBuffer::getMaxBytesInStrip">
-<area shape="rect" id="Node000001" title=" " alt="" coords="480,37,669,77"/>
-<area shape="rect" id="Node000002" href="$de/d10/classfl_1_1_rectangular_draw_buffer_ab09c66bb8f558c3e5b728730e60ea753.html#ab09c66bb8f558c3e5b728730e60ea753" title=" " alt="" coords="243,5,432,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="466,45,432,41,433,35,467,40"/>
-<area shape="rect" id="Node000004" href="$de/d10/classfl_1_1_rectangular_draw_buffer_af45fc32a106ba76e39af4e9b699c372e.html#af45fc32a106ba76e39af4e9b699c372e" title=" " alt="" coords="243,69,432,109"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="467,75,433,79,432,74,466,69"/>
-<area shape="rect" id="Node000003" href="$de/d10/classfl_1_1_rectangular_draw_buffer_a793464dde6e4e1a324ab46973615345c.html#a793464dde6e4e1a324ab46973615345c" title=" " alt="" coords="5,5,195,45"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="229,28,195,28,195,23,229,23"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="720,24,909,64"/>
+<area shape="rect" id="Node000002" href="$de/d10/classfl_1_1_rectangular_draw_buffer_ada51b33f27f50070f13473dd195d1f04.html#ada51b33f27f50070f13473dd195d1f04" title=" " alt="" coords="5,32,197,72"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="725,24,672,15,544,8,415,13,296,24,198,38,197,32,296,19,415,7,544,3,672,10,726,19"/>
+<area shape="rect" id="Node000003" href="$de/d10/classfl_1_1_rectangular_draw_buffer_ab09c66bb8f558c3e5b728730e60ea753.html#ab09c66bb8f558c3e5b728730e60ea753" title=" " alt="" coords="483,24,672,64"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="707,47,672,47,672,42,707,42"/>
+<area shape="rect" id="Node000005" href="$de/d10/classfl_1_1_rectangular_draw_buffer_af45fc32a106ba76e39af4e9b699c372e.html#af45fc32a106ba76e39af4e9b699c372e" title=" " alt="" coords="245,124,435,164"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="713,70,673,79,435,128,434,123,671,74,712,65"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="469,48,245,51,197,52,197,47,245,46,469,42"/>
+<area shape="rect" id="Node000004" href="$de/d10/classfl_1_1_rectangular_draw_buffer_a793464dde6e4e1a324ab46973615345c.html#a793464dde6e4e1a324ab46973615345c" title=" " alt="" coords="245,60,435,100"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="470,63,435,69,434,63,469,58"/>
+<area shape="poly" id="edge5_Node000004_Node000002" title=" " alt="" coords="231,70,197,66,198,61,232,65"/>
+<area shape="poly" id="edge7_Node000005_Node000002" title=" " alt="" coords="264,122,244,115,148,75,150,70,246,110,266,117"/>
 </map>

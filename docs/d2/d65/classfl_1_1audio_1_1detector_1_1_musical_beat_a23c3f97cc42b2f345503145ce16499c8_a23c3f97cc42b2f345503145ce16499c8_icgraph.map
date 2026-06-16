@@ -1,0 +1,10 @@
+<map id="fl::audio::detector::MusicalBeat::isValidIBI" name="fl::audio::detector::MusicalBeat::isValidIBI">
+<area shape="rect" id="Node000001" title="Check if IBI is within valid BPM range." alt="" coords="777,5,956,45"/>
+<area shape="rect" id="Node000002" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a14368f704c7c67d888b81f70c7004dcb.html#a14368f704c7c67d888b81f70c7004dcb" title="Process one audio frame." alt="" coords="263,5,480,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="764,25,729,24,528,24,480,25,480,20,528,19,729,19,764,19"/>
+<area shape="rect" id="Node000004" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_abef5ac55aa91cb94f03cda4f2c34d229.html#abef5ac55aa91cb94f03cda4f2c34d229" title="Validate if an onset is a true musical beat." alt="" coords="528,33,729,73"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="764,40,730,44,729,39,763,35"/>
+<area shape="rect" id="Node000003" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a8ead4e67bdff0c0600d13fc942313879.html#a8ead4e67bdff0c0600d13fc942313879" title=" " alt="" coords="5,5,215,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="249,28,215,28,215,23,249,23"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="514,44,480,40,480,35,515,38"/>
+</map>

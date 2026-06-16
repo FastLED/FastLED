@@ -1,0 +1,22 @@
+<map id="fl::task::PromiseResult::ok" name="fl::task::PromiseResult::ok">
+<area shape="rect" id="Node000001" title="Check if the result is successful." alt="" coords="437,195,629,221"/>
+<area shape="rect" id="Node000002" href="$d1/d3c/classfl_1_1task_1_1_promise_result_ad8e3cb24341101305cf81dae6469488a.html#ad8e3cb24341101305cf81dae6469488a" title="Get the error value." alt="" coords="221,71,389,111"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="495,191,388,134,346,113,349,108,391,130,498,186"/>
+<area shape="rect" id="Node000005" href="$d1/d3c/classfl_1_1task_1_1_promise_result_af4d0a47cc2fbca58208c9a893242d697.html#af4d0a47cc2fbca58208c9a893242d697" title="Get the error message as a convenience." alt="" coords="5,133,173,173"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="470,195,389,179,277,166,173,159,174,154,277,161,390,173,471,190"/>
+<area shape="rect" id="Node000006" href="$d1/d3c/classfl_1_1task_1_1_promise_result_a9f2cecc20490ad58e19c2f15f8f054fc.html#a9f2cecc20490ad58e19c2f15f8f054fc" title="Boolean conversion operator (same as ok())" alt="" coords="221,188,389,228"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="424,211,390,211,390,205,424,205"/>
+<area shape="rect" id="Node000007" href="$d1/d3c/classfl_1_1task_1_1_promise_result_a916f487a4454d0f966e2e59613eb5757.html#a916f487a4454d0f966e2e59613eb5757" title="Get the success value (mutable)" alt="" coords="221,252,389,292"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="475,227,378,254,377,249,473,222"/>
+<area shape="rect" id="Node000008" href="$d1/d3c/classfl_1_1task_1_1_promise_result_a23c55a6aa4d01f959bf88586a740ced3.html#a23c55a6aa4d01f959bf88586a740ced3" title="Get the success value (const)" alt="" coords="221,316,389,356"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="506,231,454,268,391,306,365,318,362,314,388,302,451,264,503,227"/>
+<area shape="rect" id="Node000003" href="$d1/d3c/classfl_1_1task_1_1_promise_result_ab2bb0f40032ae21a2d29ce282fb8050c.html#ab2bb0f40032ae21a2d29ce282fb8050c" title="Construct an error PromiseResult." alt="" coords="5,5,173,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="224,69,155,48,157,43,226,64"/>
+<area shape="rect" id="Node000004" href="$d1/d3c/classfl_1_1task_1_1_promise_result_a378d4460ee63c4be61e90a48ae70ce6e.html#a378d4460ee63c4be61e90a48ae70ce6e" title="Construct an error PromiseResult (move)" alt="" coords="5,69,173,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="207,93,174,93,174,87,207,87"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="224,117,160,136,158,131,222,112"/>
+<area shape="rect" id="Node000009" href="$d1/d3c/classfl_1_1task_1_1_promise_result_a520aca177f322579964e09b1a636ec98.html#a520aca177f322579964e09b1a636ec98" title="Construct a successful PromiseResult." alt="" coords="5,284,173,324"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="207,324,173,319,174,314,208,319"/>
+<area shape="rect" id="Node000010" href="$d1/d3c/classfl_1_1task_1_1_promise_result_a56831f276f5391d96f5e69a796f452e9.html#a56831f276f5391d96f5e69a796f452e9" title="Construct a successful PromiseResult (move)" alt="" coords="5,348,173,388"/>
+<area shape="poly" id="edge10_Node000008_Node000010" title=" " alt="" coords="208,353,174,358,173,353,207,348"/>
+</map>

@@ -1,0 +1,27 @@
+<map id="fl/build/fl.control+.cpp" name="fl/build/fl.control+.cpp">
+<area shape="rect" id="Node000001" title="Unity build: recursive includes from src/fl/control/." alt="" coords="147,5,313,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,132,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="205,33,109,75,106,71,203,28"/>
+<area shape="rect" id="Node000003" href="$d2/de0/arduino_8h.html" title=" " alt="" coords="157,79,303,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="233,31,233,65,227,65,227,31"/>
+<area shape="rect" id="Node000005" href="$d4/d50/fl_2control_2__build_8cpp_8hpp.html" title=" " alt="" coords="328,79,505,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="261,28,374,71,373,76,259,33"/>
+<area shape="rect" id="Node000004" href="$da/d99/has__include_8h.html" title=" " alt="" coords="159,152,301,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="233,104,233,138,227,138,227,104"/>
+<area shape="rect" id="Node000006" href="$d3/da5/wled_8cpp_8hpp.html" title=" " alt="" coords="328,152,497,177"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="419,104,417,139,411,138,413,104"/>
+<area shape="rect" id="Node000103" href="$da/d2a/fl_2control_2wled_2__build_8cpp_8hpp.html" title=" " alt="" coords="608,152,820,177"/>
+<area shape="poly" id="edge8_Node000005_Node000103" title=" " alt="" coords="465,101,653,146,652,151,464,107"/>
+<area shape="rect" id="Node000007" href="$dd/df9/wled_8h.html" title=" " alt="" coords="280,233,375,258"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="402,179,352,225,348,221,398,176"/>
+<area shape="rect" id="Node000069" href="$d7/d7f/log_8h.html" title="Centralized logging categories for FastLED hardware interfaces and subsystems." alt="" coords="755,313,846,339"/>
+<area shape="poly" id="edge7_Node000006_Node000069" title=" " alt="" coords="414,177,417,220,425,244,439,263,460,277,491,288,572,305,662,315,742,320,742,325,661,320,571,310,489,293,457,282,435,267,420,246,412,221,409,178"/>
+<area shape="rect" id="Node000104" href="$de/dbb/adapter_8cpp_8hpp.html" title=" " alt="" coords="449,233,672,258"/>
+<area shape="poly" id="edge9_Node000103_Node000104" title=" " alt="" coords="693,180,597,229,594,224,690,175"/>
+<area shape="rect" id="Node000106" href="$d9/d3b/client_8cpp_8hpp.html" title=" " alt="" coords="696,233,905,258"/>
+<area shape="poly" id="edge10_Node000103_Node000106" title=" " alt="" coords="729,176,779,221,776,225,725,179"/>
+<area shape="rect" id="Node000107" href="$de/d2c/json__helpers_8cpp_8hpp.html" title=" " alt="" coords="929,225,1075,265"/>
+<area shape="poly" id="edge12_Node000103_Node000107" title=" " alt="" coords="757,175,921,219,919,224,755,180"/>
+<area shape="poly" id="edge11_Node000106_Node000069" title=" " alt="" coords="803,258,803,299,798,299,798,258"/>
+<area shape="poly" id="edge13_Node000107_Node000069" title=" " alt="" coords="955,268,844,311,842,306,953,263"/>
+</map>

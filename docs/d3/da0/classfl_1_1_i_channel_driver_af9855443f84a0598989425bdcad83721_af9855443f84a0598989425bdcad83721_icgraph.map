@@ -1,0 +1,14 @@
+<map id="fl::IChannelDriver::poll" name="fl::IChannelDriver::poll">
+<area shape="rect" id="Node000001" title="Query driver state and perform maintenance." alt="" coords="425,61,560,101"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="528,50,515,43,493,40,473,42,461,47,456,53,459,60,454,62,451,52,457,42,471,37,493,35,517,38,530,45"/>
+<area shape="rect" id="Node000002" href="$d3/da0/classfl_1_1_i_channel_driver_a9e956fbce56cb0e64f49d4657d17d44e.html#a9e956fbce56cb0e64f49d4657d17d44e" title="Wait for driver to become READY." alt="" coords="215,93,350,133"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="412,96,351,106,350,100,411,91"/>
+<area shape="rect" id="Node000005" href="$d3/da0/classfl_1_1_i_channel_driver_a282787aa70184218c84f3af77e9591d9.html#a282787aa70184218c84f3af77e9591d9" title=" " alt="" coords="188,29,377,69"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="411,72,377,66,378,61,412,66"/>
+<area shape="rect" id="Node000003" href="$d3/da0/classfl_1_1_i_channel_driver_ab462336dccdfebe96350807253f1a509.html#ab462336dccdfebe96350807253f1a509" title="Check if this driver can handle the given channel data." alt="" coords="5,29,140,69"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="203,92,138,72,140,67,204,87"/>
+<area shape="rect" id="Node000004" href="$d3/da0/classfl_1_1_i_channel_driver_a77efb070f7ead86b033df3267bfa8d88.html#a77efb070f7ead86b033df3267bfa8d88" title="Block until this driver finishes any in&#45;flight transmit." alt="" coords="5,93,140,133"/>
+<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="201,116,140,116,140,111,201,111"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="108,18,95,11,73,8,53,10,41,15,36,21,39,28,34,30,31,20,37,10,51,5,73,3,97,6,110,13"/>
+<area shape="poly" id="edge7_Node000005_Node000003" title=" " alt="" coords="174,52,140,52,140,47,174,47"/>
+</map>

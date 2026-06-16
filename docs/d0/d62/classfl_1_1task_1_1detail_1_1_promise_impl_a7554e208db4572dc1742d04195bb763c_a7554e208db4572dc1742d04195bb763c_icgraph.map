@@ -1,0 +1,9 @@
+<map id="fl::task::detail::PromiseImpl::set_state" name="fl::task::detail::PromiseImpl::set_state">
+<area shape="rect" id="Node000001" title="Write the state atomically." alt="" coords="225,69,397,109"/>
+<area shape="rect" id="Node000002" href="$d0/d62/classfl_1_1task_1_1detail_1_1_promise_impl_a310e9b10d4598567379963a9da17d745.html#a310e9b10d4598567379963a9da17d745" title="Reject Promise with error." alt="" coords="5,5,177,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="228,68,160,48,161,43,230,63"/>
+<area shape="rect" id="Node000003" href="$d0/d62/classfl_1_1task_1_1detail_1_1_promise_impl_a91ca3e7d8c9f59a6f93358b0ee3a53db.html#a91ca3e7d8c9f59a6f93358b0ee3a53db" title="Resolve Promise with value." alt="" coords="5,69,177,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="211,92,177,92,177,87,211,87"/>
+<area shape="rect" id="Node000004" href="$d0/d62/classfl_1_1task_1_1detail_1_1_promise_impl_a85857e1ee953eab2db00f1b84112ab39.html#a85857e1ee953eab2db00f1b84112ab39" title=" " alt="" coords="5,133,177,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="230,116,161,136,160,131,228,111"/>
+</map>

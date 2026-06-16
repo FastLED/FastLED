@@ -1,12 +1,13 @@
 var classfl_1_1_engine_events_1_1_listener =
 [
-    [ "Listener", "db/da2/classfl_1_1_engine_events_1_1_listener_a8518e167a8642439e62b1d1a6f92486a.html#a8518e167a8642439e62b1d1a6f92486a", null ],
-    [ "~Listener", "db/da2/classfl_1_1_engine_events_1_1_listener_aee5ac8d524a5d928b04ad5ddd0435a50.html#aee5ac8d524a5d928b04ad5ddd0435a50", null ],
-    [ "onBeginFrame", "db/da2/classfl_1_1_engine_events_1_1_listener_afe6e04c6ee929d06cf01704eec9304a1.html#afe6e04c6ee929d06cf01704eec9304a1", null ],
-    [ "onCanvasUiSet", "db/da2/classfl_1_1_engine_events_1_1_listener_a08dcb3a6dbd52cc1161f1c58227b9f7e.html#a08dcb3a6dbd52cc1161f1c58227b9f7e", null ],
-    [ "onEndFrame", "db/da2/classfl_1_1_engine_events_1_1_listener_a4ec95c54fb99b96ca3117358acfad812.html#a4ec95c54fb99b96ca3117358acfad812", null ],
-    [ "onEndShowLeds", "db/da2/classfl_1_1_engine_events_1_1_listener_a2e6a1d5c8c6eb7a452c07ef5731d2fef.html#a2e6a1d5c8c6eb7a452c07ef5731d2fef", null ],
-    [ "onPlatformPreLoop", "db/da2/classfl_1_1_engine_events_1_1_listener_a09e40a92095fe6e748ce5c0c2ee0e790.html#a09e40a92095fe6e748ce5c0c2ee0e790", null ],
-    [ "onPlatformPreLoop2", "db/da2/classfl_1_1_engine_events_1_1_listener_a9871b914ab96ba6b76d3769725ae5221.html#a9871b914ab96ba6b76d3769725ae5221", null ],
-    [ "onStripAdded", "db/da2/classfl_1_1_engine_events_1_1_listener_afc0c5ac6f9b5fc407f19a66f88daca11.html#afc0c5ac6f9b5fc407f19a66f88daca11", null ]
+    [ "Listener", "db/da2/classfl_1_1_engine_events_1_1_listener_a790a1b0679dc932b312ee945ecf0cc46.html#a790a1b0679dc932b312ee945ecf0cc46", null ],
+    [ "~Listener", "db/da2/classfl_1_1_engine_events_1_1_listener_ac785ff88f46f3a7fae72f7d32400a33c.html#ac785ff88f46f3a7fae72f7d32400a33c", null ],
+    [ "onBeginFrame", "db/da2/classfl_1_1_engine_events_1_1_listener_a54246d75a4cc7ca52c9b877fea058ae0.html#a54246d75a4cc7ca52c9b877fea058ae0", null ],
+    [ "onCanvasUiSet", "db/da2/classfl_1_1_engine_events_1_1_listener_a5929b5879fa21bcae52a8375291f9d35.html#a5929b5879fa21bcae52a8375291f9d35", null ],
+    [ "onEndFrame", "db/da2/classfl_1_1_engine_events_1_1_listener_ac304b1387024144966b25bad6a288a69.html#ac304b1387024144966b25bad6a288a69", null ],
+    [ "onEndShowLeds", "db/da2/classfl_1_1_engine_events_1_1_listener_ab2ad114569435c777e3d26ffc4f8e97c.html#ab2ad114569435c777e3d26ffc4f8e97c", null ],
+    [ "onExit", "db/da2/classfl_1_1_engine_events_1_1_listener_a5720c710bba3bdffb1f34d0312abd866.html#a5720c710bba3bdffb1f34d0312abd866", null ],
+    [ "onPlatformPreLoop", "db/da2/classfl_1_1_engine_events_1_1_listener_af59ab84f662d1ab3ee0b85caeba6a60a.html#af59ab84f662d1ab3ee0b85caeba6a60a", null ],
+    [ "onPlatformPreLoop2", "db/da2/classfl_1_1_engine_events_1_1_listener_a855334db5a4016c0f18c61212269e7f2.html#a855334db5a4016c0f18c61212269e7f2", null ],
+    [ "onStripAdded", "db/da2/classfl_1_1_engine_events_1_1_listener_a64308736ff301b6d10fc8fb96388318e.html#a64308736ff301b6d10fc8fb96388318e", null ]
 ];

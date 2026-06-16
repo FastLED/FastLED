@@ -1,0 +1,9 @@
+<map id="fl/system/heap.h" name="fl/system/heap.h">
+<area shape="rect" id="Node000001" title="Platform&#45;abstracted heap memory query functions." alt="" coords="5,5,136,31"/>
+<area shape="rect" id="Node000002" href="$d3/d7e/int_8h.html" title=" " alt="" coords="29,79,112,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="73,31,73,65,68,65,68,31"/>
+<area shape="rect" id="Node000003" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="19,152,122,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="73,104,73,138,68,138,68,104"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="11,225,130,251"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="73,178,73,212,68,212,68,178"/>
+</map>

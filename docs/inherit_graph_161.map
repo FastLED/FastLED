@@ -1,3 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$de/d7f/structfl_1_1_frame_interpolator_1_1_less.html" title=" " alt="" coords="5,5,160,45"/>
+<area shape="rect" id="Node000000" href="$d8/d47/classfl_1_1audio_1_1_i_synth_engine.html" title="Interface for synth engine that holds BLEP/BLAMP tables." alt="" coords="5,5,172,31"/>
+<area shape="rect" id="Node000001" href="$da/d50/classfl_1_1audio_1_1_synth_engine_impl.html" title=" " alt="" coords="220,5,412,31"/>
+<area shape="poly" id="edge31_Node000000_Node000001" title=" " alt="" coords="186,15,220,15,220,21,186,21"/>
 </map>

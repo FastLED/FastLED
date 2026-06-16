@@ -1,9 +1,17 @@
-<map id="fl/splat.h" name="fl/splat.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="164,5,243,31"/>
-<area shape="rect" id="Node000002" href="$d3/d9b/corkscrew_8cpp.html" title=" " alt="" coords="5,79,132,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="171,39,92,81,89,76,168,35"/>
-<area shape="rect" id="Node000003" href="$da/dbe/splat_8cpp.html" title=" " alt="" coords="157,79,250,104"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="206,44,206,79,201,79,201,44"/>
-<area shape="rect" id="Node000004" href="$d2/d31/xypath__renderer_8cpp.html" title=" " alt="" coords="275,79,441,104"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="242,34,334,76,332,81,239,39"/>
+<map id="fl/gfx/splat.h" name="fl/gfx/splat.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="230,5,333,31"/>
+<area shape="rect" id="Node000002" href="$d0/da5/corkscrew_8cpp_8hpp.html" title=" " alt="" coords="5,79,184,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="240,38,126,81,124,76,238,33"/>
+<area shape="rect" id="Node000006" href="$d6/df1/splat_8cpp_8hpp.html" title=" " alt="" coords="208,79,355,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="284,44,284,79,279,79,279,44"/>
+<area shape="rect" id="Node000007" href="$df/dfa/xypath__renderer_8cpp_8hpp.html" title=" " alt="" coords="379,79,599,104"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="329,33,457,76,455,81,327,38"/>
+<area shape="rect" id="Node000003" href="$d5/d88/fl_2gfx_2__build_8cpp_8hpp.html" title="Unity build for fl/gfx/ — graphics types, primitives, and simulators." alt="" coords="205,152,358,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="138,106,252,149,250,154,136,111"/>
+<area shape="rect" id="Node000004" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="139,225,267,251"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="260,189,217,227,214,223,257,185"/>
+<area shape="rect" id="Node000005" href="$db/d06/fl_8gfx_09_8cpp.html" title="Unity build: recursive includes from src/fl/gfx/." alt="" coords="291,225,432,251"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="306,184,350,223,346,227,302,188"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="284,118,284,152,279,152,279,118"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="444,111,316,154,314,149,442,106"/>
 </map>

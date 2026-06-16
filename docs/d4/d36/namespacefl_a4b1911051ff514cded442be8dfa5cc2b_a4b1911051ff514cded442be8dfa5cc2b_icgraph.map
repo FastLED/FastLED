@@ -1,0 +1,25 @@
+<map id="fl::floor" name="fl::floor">
+<area shape="rect" id="Node000001" title=" " alt="" coords="579,191,645,217"/>
+<area shape="rect" id="Node000002" href="$db/d9a/classfl_1_1_spectral_variance_aab4b30b2be5581bc53207470bd7712e1.html#aab4b30b2be5581bc53207470bd7712e1" title=" " alt="" coords="352,5,499,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="601,179,575,119,555,87,529,59,498,42,500,37,532,55,559,83,580,116,606,177"/>
+<area shape="rect" id="Node000003" href="$d3/d7e/classfl_1_1detail_1_1_spectral_variance_impl_ad9a56a290f3a6565057bab6af1a62a65.html#ad9a56a290f3a6565057bab6af1a62a65" title=" " alt="" coords="327,69,524,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="591,182,564,151,529,124,506,112,508,107,532,119,567,147,595,178"/>
+<area shape="rect" id="Node000004" href="$d0/d8f/kiss__fft_8cpp_8hpp_acc60de358f03c4acbef269dced5872a0.html#acc60de358f03c4acbef269dced5872a0" title=" " alt="" coords="385,134,465,159"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="568,189,530,175,465,157,466,152,531,169,570,184"/>
+<area shape="rect" id="Node000012" href="$d3/d7e/classfl_1_1detail_1_1_spectral_variance_impl_aeb524fd8c28444fd66714a90e69f6b0e.html#aeb524fd8c28444fd66714a90e69f6b0e" title="Change the floor threshold for active channel detection." alt="" coords="329,184,521,224"/>
+<area shape="poly" id="edge6_Node000001_Node000012" title=" " alt="" coords="565,207,522,207,522,201,565,201"/>
+<area shape="rect" id="Node000013" href="$db/d9a/classfl_1_1_spectral_variance_a72e39dacdd5be0bf531b7204a8254523.html#a72e39dacdd5be0bf531b7204a8254523" title=" " alt="" coords="352,248,499,288"/>
+<area shape="poly" id="edge7_Node000001_Node000013" title=" " alt="" coords="569,224,532,239,495,251,494,245,530,233,567,219"/>
+<area shape="rect" id="Node000014" href="$d4/d36/namespacefl_a0585edea80d3b23fb7fcd54b95a09bbc.html#a0585edea80d3b23fb7fcd54b95a09bbc" title="Traverse a grid segment using floating point arithmetic." alt="" coords="320,313,531,338"/>
+<area shape="poly" id="edge8_Node000001_Node000014" title=" " alt="" coords="599,230,571,268,553,286,532,302,504,315,502,310,529,298,549,282,567,264,594,227"/>
+<area shape="rect" id="Node000015" href="$dd/d45/struct_painter_ab6318a63a778550cd78f3eae183cb8dc.html#ab6318a63a778550cd78f3eae183cb8dc" title=" " alt="" coords="336,362,515,387"/>
+<area shape="poly" id="edge9_Node000001_Node000015" title=" " alt="" coords="606,231,581,293,560,325,532,353,513,364,510,359,529,349,556,322,576,290,601,229"/>
+<area shape="rect" id="Node000005" href="$d0/d8f/kiss__fft_8cpp_8hpp_aa3a3753f06cf36fa0e2c28751799ce55.html#aa3a3753f06cf36fa0e2c28751799ce55" title=" " alt="" coords="165,134,272,159"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="372,149,272,149,272,144,372,144"/>
+<area shape="rect" id="Node000006" href="$da/dad/kiss__fftr_8cpp_8hpp_a7762a2bef4c3ff3b94cc7f5229a076fc.html#a7762a2bef4c3ff3b94cc7f5229a076fc" title=" " alt="" coords="5,134,117,159"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="151,149,118,149,118,144,151,144"/>
+<area shape="rect" id="Node000016" href="$dd/d45/struct_painter_a99ab92bb8d2baae96c7b4b4aacda4de3.html#a99ab92bb8d2baae96c7b4b4aacda4de3" title=" " alt="" coords="165,362,272,387"/>
+<area shape="poly" id="edge10_Node000015_Node000016" title=" " alt="" coords="322,377,273,377,273,372,322,372"/>
+<area shape="rect" id="Node000017" href="$d8/de5/_luminescent_grand_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="36,362,87,387"/>
+<area shape="poly" id="edge11_Node000016_Node000017" title=" " alt="" coords="151,377,87,377,87,372,151,372"/>
+</map>

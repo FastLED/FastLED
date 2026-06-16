@@ -1,0 +1,25 @@
+<map id="fl::audio::detector::Pitch" name="fl::audio::detector::Pitch">
+<area shape="rect" id="Node000001" title="Pitch &#45; Continuous pitch tracking using autocorrelation." alt="" coords="1147,55,1283,95"/>
+<area shape="rect" id="Node000002" href="$df/d9b/classfl_1_1audio_1_1_detector.html" title=" " alt="" coords="843,5,981,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="995,29,1123,53,1147,58,1146,63,1122,58,994,34"/>
+<area shape="rect" id="Node000003" href="$d6/db5/classfl_1_1_one_euro_filter.html" title=" " alt="" coords="843,55,981,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="995,73,1146,73,1146,78,995,78"/>
+<area shape="rect" id="Node000004" href="$dd/d07/classfl_1_1detail_1_1_one_euro_filter_impl.html" title=" " alt="" coords="301,34,472,74"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="486,43,496,42,658,39,819,54,843,58,843,63,818,59,658,44,496,47,486,48"/>
+<area shape="rect" id="Node000006" href="$d6/db5/classfl_1_1_one_euro_filter.html" title=" " alt="" coords="567,65,731,91"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="486,60,567,68,566,73,485,66"/>
+<area shape="rect" id="Node000005" href="$dd/d07/classfl_1_1detail_1_1_one_euro_filter_impl.html" title=" " alt="" coords="5,34,176,74"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="190,51,301,51,301,57,190,57"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="744,74,843,73,843,79,744,80"/>
+<area shape="rect" id="Node000007" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="843,120,981,145"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="994,116,1122,93,1146,88,1147,93,1123,98,995,122"/>
+<area shape="rect" id="Node000008" href="$d4/dad/classfl_1_1vector__basic.html" title="Type&#45;erased vector base class." alt="" coords="327,153,447,179"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="460,156,496,153,842,133,843,138,496,158,460,161"/>
+<area shape="rect" id="Node000011" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="590,169,707,195"/>
+<area shape="poly" id="edge12_Node000011_Node000008" title=" " alt="" coords="460,168,590,176,589,181,460,173"/>
+<area shape="rect" id="Node000009" href="$db/d13/classfl_1_1memory__resource.html" title="Polymorphic memory resource base class (PMR&#45;style)." alt="" coords="13,112,169,137"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="183,135,327,155,326,160,182,140"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl.html#d8/d72/structfl_1_1vector__element__ops" title="Function pointer table for type&#45;specific element operations." alt="" coords="5,161,176,187"/>
+<area shape="poly" id="edge10_Node000008_Node000010" title=" " alt="" coords="190,169,326,165,326,170,190,174"/>
+<area shape="poly" id="edge11_Node000007_Node000011" title=" " alt="" coords="721,176,818,162,879,143,880,148,819,167,721,181"/>
+</map>

@@ -1,0 +1,22 @@
+<map id="fl::audio::detector::EqualizerDetector::configure" name="fl::audio::detector::EqualizerDetector::configure">
+<area shape="rect" id="Node000001" title="Reconfigure equalizer tuning parameters at runtime." alt="" coords="5,71,152,125"/>
+<area shape="poly" id="edge5_Node000001_Node000001" title=" " alt="" coords="40,71,40,61,47,52,60,46,79,44,101,47,114,55,111,60,99,52,79,49,62,51,51,56,45,62,46,71"/>
+<area shape="rect" id="Node000002" href="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_a3f8cf150db9a60e9bad0ce8147c3586c.html#a3f8cf150db9a60e9bad0ce8147c3586c" title=" " alt="" coords="200,5,347,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="151,71,186,59,187,64,153,76"/>
+<area shape="rect" id="Node000003" href="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_aa776078eebff89abfe3d074504fe7e94.html#aa776078eebff89abfe3d074504fe7e94" title=" " alt="" coords="395,5,597,60"/>
+<area shape="poly" id="edge6_Node000001_Node000003" title=" " alt="" coords="152,91,245,83,346,69,385,61,386,66,347,74,246,88,153,96"/>
+<area shape="rect" id="Node000015" href="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_a3a263b257d55afc4ace05d432939e792.html#a3a263b257d55afc4ace05d432939e792" title="Set microphone correction profile (propagated from Processor)." alt="" coords="200,136,347,191"/>
+<area shape="poly" id="edge7_Node000001_Node000015" title=" " alt="" coords="153,120,187,132,186,137,151,125"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="347,30,381,30,381,35,347,35"/>
+<area shape="rect" id="Node000004" href="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_aada0630bff50683427a6e81d0d647685.html#aada0630bff50683427a6e81d0d647685" title=" " alt="" coords="668,75,827,129"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="596,58,656,74,654,79,595,63"/>
+<area shape="rect" id="Node000010" href="$db/dbf/namespacefl_1_1audio_abb758259be0e1ff6bf938c9eae4b6118.html#abb758259be0e1ff6bf938c9eae4b6118" title="Compute pink noise compensation gains for all bins." alt="" coords="645,10,849,50"/>
+<area shape="poly" id="edge4_Node000003_Node000010" title=" " alt="" coords="597,29,632,29,632,34,597,34"/>
+<area shape="poly" id="edge8_Node000015_Node000004" title=" " alt="" coords="347,139,394,129,530,111,654,103,654,108,531,117,395,134,348,144"/>
+<area shape="rect" id="Node000016" href="$db/dbf/namespacefl_1_1audio_a51b42dfdb22be4944a9a6d62c87a376c.html#a51b42dfdb22be4944a9a6d62c87a376c" title="Downsample a high&#45;resolution mic response curve to N output bins." alt="" coords="402,143,590,183"/>
+<area shape="poly" id="edge9_Node000015_Node000016" title=" " alt="" coords="347,161,388,161,388,166,347,166"/>
+<area shape="rect" id="Node000019" href="$db/dbf/namespacefl_1_1audio_a12d3939a6e866914ca5473e1710ae635.html#a12d3939a6e866914ca5473e1710ae635" title="Get the high&#45;resolution response curve for a given mic profile." alt="" coords="401,207,591,247"/>
+<area shape="poly" id="edge11_Node000015_Node000019" title=" " alt="" coords="347,182,413,201,412,206,346,187"/>
+<area shape="rect" id="Node000017" href="$db/dbf/namespacefl_1_1audio_a9abb1865a937d59bfb84c9b8358dfc4f.html#a9abb1865a937d59bfb84c9b8358dfc4f" title="Interpolate mic response at an arbitrary frequency (Hz)." alt="" coords="659,154,835,194"/>
+<area shape="poly" id="edge10_Node000016_Node000017" title=" " alt="" coords="590,165,646,167,645,172,590,170"/>
+</map>

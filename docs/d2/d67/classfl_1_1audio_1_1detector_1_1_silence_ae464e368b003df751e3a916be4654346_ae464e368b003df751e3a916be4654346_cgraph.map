@@ -1,0 +1,14 @@
+<map id="fl::audio::detector::Silence::~Silence" name="fl::audio::detector::Silence::~Silence">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,49,148,89"/>
+<area shape="rect" id="Node000002" href="$d2/d67/classfl_1_1audio_1_1detector_1_1_silence_aebf2b37620c77ea9d9729fdfe6da11d4.html#aebf2b37620c77ea9d9729fdfe6da11d4" title=" " alt="" coords="196,5,365,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,51,182,44,183,49,149,57"/>
+<area shape="rect" id="Node000003" href="$d2/d67/classfl_1_1audio_1_1detector_1_1_silence_ab70cbfa94fb4ad6d8e9553185963a7ca.html#ab70cbfa94fb4ad6d8e9553185963a7ca" title=" " alt="" coords="213,93,349,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="149,82,200,93,199,98,148,87"/>
+<area shape="poly" id="edge6_Node000003_Node000003" title=" " alt="" coords="242,94,240,84,246,75,260,69,281,67,304,70,317,77,315,82,303,75,281,72,261,74,250,79,245,85,248,92"/>
+<area shape="rect" id="Node000004" href="$d2/d67/classfl_1_1audio_1_1detector_1_1_silence_a03107fa4d456df1138c0fa65fd917678.html#a03107fa4d456df1138c0fa65fd917678" title=" " alt="" coords="461,29,597,69"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="349,93,448,67,449,73,350,98"/>
+<area shape="rect" id="Node000005" href="$d2/d67/classfl_1_1audio_1_1detector_1_1_silence_a0b804da76b305090bd16bda7fd358865.html#a0b804da76b305090bd16bda7fd358865" title=" " alt="" coords="413,93,645,133"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="349,111,400,111,400,116,349,116"/>
+<area shape="rect" id="Node000006" href="$d2/d67/classfl_1_1audio_1_1detector_1_1_silence_a09757c15a22c9c4fc845f9ebc70d837e.html#a09757c15a22c9c4fc845f9ebc70d837e" title=" " alt="" coords="429,157,630,197"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="350,128,438,151,437,156,349,133"/>
+</map>

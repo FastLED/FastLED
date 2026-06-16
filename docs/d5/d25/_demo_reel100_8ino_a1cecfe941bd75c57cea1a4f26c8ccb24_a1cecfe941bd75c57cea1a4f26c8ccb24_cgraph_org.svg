@@ -56,7 +56,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d2/d0d/group___random_ga17034d936ef716efe820e11c1df043b0.html#ga17034d936ef716efe820e11c1df043b0" target="_top" xlink:title="Generate a 16&#45;bit random number.">
+<g id="a_Node000003"><a xlink:href="../../d2/d0d/group___random_gaaaff3e84c6ab2cf5f71400a4b6958beb.html#gaaaff3e84c6ab2cf5f71400a4b6958beb" target="_top" xlink:title="Generate a 16&#45;bit random number.">
 <polygon fill="white" stroke="#666666" points="315.5,-93 249.5,-93 249.5,-74 315.5,-74 315.5,-93"/>
 <text text-anchor="middle" x="282.5" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">random16</text>
 </a>
@@ -74,7 +74,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d2/d0d/group___random_ga4e63c74426f6516f28470dc1b814aefe.html#ga4e63c74426f6516f28470dc1b814aefe" target="_top" xlink:title="Generate an 8&#45;bit random number.">
+<g id="a_Node000004"><a xlink:href="../../d2/d0d/group___random_gadb05544426b14ef8d85fb2eb73cb8a0a.html#gadb05544426b14ef8d85fb2eb73cb8a0a" target="_top" xlink:title="Generate an 8&#45;bit random number.">
 <polygon fill="white" stroke="#666666" points="312.5,-56 252.5,-56 252.5,-37 312.5,-37 312.5,-56"/>
 <text text-anchor="middle" x="282.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">random8</text>
 </a>
@@ -92,7 +92,7 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d1/dfb/colorutils_8h_a8cfac7f712d38ac9aa9bcd172283b453.html#a8cfac7f712d38ac9aa9bcd172283b453" target="_top" xlink:title="Fill a range of LEDs with a rainbow of colors.">
+<g id="a_Node000006"><a xlink:href="../../d1/dfb/colorutils_8h_a5e33a6635101019cce6b0936c9415a6f.html#a5e33a6635101019cce6b0936c9415a6f" target="_top" xlink:title="Fill a range of LEDs with a rainbow of colors.">
 <polygon fill="white" stroke="#666666" points="319,-19 246,-19 246,0 319,0 319,-19"/>
 <text text-anchor="middle" x="282.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fill_rainbow</text>
 </a>

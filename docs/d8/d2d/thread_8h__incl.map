@@ -1,5 +1,9 @@
-<map id="fl/thread.h" name="fl/thread.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="23,5,111,31"/>
-<area shape="rect" id="Node000002" href="$da/d99/has__include_8h.html" title=" " alt="" coords="5,79,128,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="69,31,69,65,64,65,64,31"/>
+<map id="fl/stl/thread.h" name="fl/stl/thread.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="115,5,223,31"/>
+<area shape="rect" id="Node000002" href="$d5/d5e/thread__config_8h.html" title="Platform detection for FASTLED_MULTITHREADED macro." alt="" coords="5,79,160,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="157,33,109,72,106,68,154,29"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="185,79,327,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="185,29,233,68,230,72,182,33"/>
+<area shape="rect" id="Node000003" href="$da/d99/has__include_8h.html" title=" " alt="" coords="11,152,154,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="85,104,85,138,80,138,80,104"/>
 </map>

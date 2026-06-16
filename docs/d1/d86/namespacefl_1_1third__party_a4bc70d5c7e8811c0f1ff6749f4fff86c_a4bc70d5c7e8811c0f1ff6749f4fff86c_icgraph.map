@@ -1,0 +1,12 @@
+<map id="fl::third_party::nsgif__colour_table_extract" name="fl::third_party::nsgif__colour_table_extract">
+<area shape="rect" id="Node000001" title="Extract a GIF colour table into a LibNSGIF colour table buffer." alt="" coords="604,41,773,81"/>
+<area shape="rect" id="Node000002" href="$d1/d86/namespacefl_1_1third__party_af750d842663ad165389fd35017401aea.html#af750d842663ad165389fd35017401aea" title="Get a frame&#39;s colour table." alt="" coords="397,12,556,52"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="590,50,556,46,557,40,591,45"/>
+<area shape="rect" id="Node000004" href="$d1/d86/namespacefl_1_1third__party_a34aa4d967d8ddaeefa12954d47fe7863.html#a34aa4d967d8ddaeefa12954d47fe7863" title="Scan the source image data." alt="" coords="5,69,153,109"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="590,68,154,89,153,83,590,63"/>
+<area shape="rect" id="Node000003" href="$d1/d86/namespacefl_1_1third__party_aa00bee5c0f7b53c8e9441d62f98c61b2.html#aa00bee5c0f7b53c8e9441d62f98c61b2" title="Attempts to initialise the next frame." alt="" coords="201,12,349,52"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="383,35,349,35,349,29,383,29"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="194,58,149,72,148,67,193,53"/>
+<area shape="rect" id="Node000008" href="$d1/d86/namespacefl_1_1third__party_a3f914f8fd903813b728ce719ad8b59c7.html#a3f914f8fd903813b728ce719ad8b59c7" title="Decodes a GIF frame." alt="" coords="5,5,153,45"/>
+<area shape="poly" id="edge4_Node000003_Node000008" title=" " alt="" coords="187,32,154,31,154,25,187,26"/>
+</map>

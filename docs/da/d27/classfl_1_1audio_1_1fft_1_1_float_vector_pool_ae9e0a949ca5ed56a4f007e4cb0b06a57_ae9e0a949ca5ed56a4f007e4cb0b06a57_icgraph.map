@@ -1,0 +1,41 @@
+<map id="fl::audio::fft::FloatVectorPool::acquire" name="fl::audio::fft::FloatVectorPool::acquire">
+<area shape="rect" id="Node000001" title=" " alt="" coords="613,147,792,187"/>
+<area shape="rect" id="Node000002" href="$d6/d86/classfl_1_1audio_1_1fft_1_1_bins_a4df193ccc4b6e7e3453cbe3aca83b5c9.html#a4df193ccc4b6e7e3453cbe3aca83b5c9" title=" " alt="" coords="229,35,385,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="668,140,621,104,594,87,564,74,520,61,473,53,385,47,386,42,474,47,521,56,566,69,596,82,624,100,672,136"/>
+<area shape="rect" id="Node000006" href="$d6/d86/classfl_1_1audio_1_1fft_1_1_bins_a0ce4493c5d044b8dd8008ca191231987.html#a0ce4493c5d044b8dd8008ca191231987" title=" " alt="" coords="433,147,565,187"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="600,170,566,170,566,165,600,165"/>
+<area shape="rect" id="Node000013" href="$d6/d86/classfl_1_1audio_1_1fft_1_1_bins_a0883a4a35f125d65b2af711da435fe91.html#a0883a4a35f125d65b2af711da435fe91" title=" " alt="" coords="241,317,373,357"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="644,195,386,307,358,319,356,314,384,302,642,191"/>
+<area shape="rect" id="Node000015" href="$d6/d86/classfl_1_1audio_1_1fft_1_1_bins_add384b18f6c287ff97d0243ca10fc755.html#add384b18f6c287ff97d0243ca10fc755" title=" " alt="" coords="433,83,565,123"/>
+<area shape="poly" id="edge19_Node000001_Node000015" title=" " alt="" coords="624,146,563,126,564,121,626,141"/>
+<area shape="rect" id="Node000016" href="$d6/d86/classfl_1_1audio_1_1fft_1_1_bins_a3d2853c4e3a9ee192b3a24f2a8791057.html#a3d2853c4e3a9ee192b3a24f2a8791057" title=" " alt="" coords="241,189,373,229"/>
+<area shape="poly" id="edge21_Node000001_Node000016" title=" " alt="" coords="615,193,566,202,465,211,374,212,374,207,465,205,565,197,614,188"/>
+<area shape="rect" id="Node000003" href="$d2/db2/classfl_1_1string_a0978ca02550f22bdf5207a4cb50ed30a.html#a0978ca02550f22bdf5207a4cb50ed30a" title=" " alt="" coords="28,5,159,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="215,37,159,30,159,24,216,32"/>
+<area shape="rect" id="Node000004" href="$d1/d27/classfl_1_1sstream_a51db47086b79a135addd76d7093c0291.html#a51db47086b79a135addd76d7093c0291" title=" " alt="" coords="5,55,181,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="216,59,182,62,181,56,215,53"/>
+<area shape="rect" id="Node000005" href="$d6/d86/classfl_1_1audio_1_1fft_1_1_bins_af5d45fe81553a1723d85435d6765a91a.html#af5d45fe81553a1723d85435d6765a91a" title=" " alt="" coords="27,125,159,165"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="266,68,230,84,139,127,137,122,228,80,264,63"/>
+<area shape="poly" id="edge11_Node000006_Node000005" title=" " alt="" coords="419,166,159,151,160,146,420,160"/>
+<area shape="rect" id="Node000007" href="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_aee1450b068aabe6bb50b1935361e1c2e.html#aee1450b068aabe6bb50b1935361e1c2e" title=" " alt="" coords="230,253,385,293"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="460,197,387,243,362,255,359,250,384,238,458,193"/>
+<area shape="rect" id="Node000008" href="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a4c842a6f5023ef1144f1d0c63f850b3a.html#a4c842a6f5023ef1144f1d0c63f850b3a" title=" " alt="" coords="16,253,171,293"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="216,275,171,275,171,270,216,270"/>
+<area shape="rect" id="Node000010" href="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a4cd66183d61e2210388cdd23cc47aa5f.html#a4cd66183d61e2210388cdd23cc47aa5f" title=" " alt="" coords="16,189,171,229"/>
+<area shape="poly" id="edge8_Node000007_Node000010" title=" " alt="" coords="226,251,160,231,161,226,227,246"/>
+<area shape="rect" id="Node000011" href="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_af55f1a9f44852cee054233b1bfc5ea23.html#af55f1a9f44852cee054233b1bfc5ea23" title=" " alt="" coords="16,381,171,421"/>
+<area shape="poly" id="edge9_Node000007_Node000011" title=" " alt="" coords="238,302,231,307,216,322,208,338,199,354,183,371,163,383,160,378,180,367,195,351,203,336,212,319,228,303,235,297"/>
+<area shape="rect" id="Node000012" href="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_afe9dcd43e0591f626db7127bbc638f73.html#afe9dcd43e0591f626db7127bbc638f73" title=" " alt="" coords="16,317,171,357"/>
+<area shape="poly" id="edge10_Node000007_Node000012" title=" " alt="" coords="227,299,161,319,160,314,226,294"/>
+<area shape="poly" id="edge14_Node000013_Node000005" title=" " alt="" coords="231,310,227,306,215,290,208,273,203,241,199,209,192,194,180,179,158,164,161,159,183,175,196,191,204,208,208,240,213,272,219,287,231,303,235,306"/>
+<area shape="poly" id="edge15_Node000013_Node000008" title=" " alt="" coords="227,315,160,295,162,290,228,310"/>
+<area shape="poly" id="edge16_Node000013_Node000010" title=" " alt="" coords="235,312,228,307,212,290,203,274,195,258,180,243,160,231,163,227,183,239,199,255,208,271,216,287,231,303,238,308"/>
+<area shape="poly" id="edge17_Node000013_Node000011" title=" " alt="" coords="228,363,162,383,160,378,227,358"/>
+<area shape="poly" id="edge18_Node000013_Node000012" title=" " alt="" coords="227,339,171,339,171,334,227,334"/>
+<area shape="rect" id="Node000014" href="$d6/dd2/classfl_1_1audio_1_1fft_1_1_context_a33224453d292843513dfa8faf4685245.html#a33224453d292843513dfa8faf4685245" title=" " alt="" coords="16,445,171,485"/>
+<area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="275,368,233,402,183,435,157,447,155,442,180,430,230,398,272,364"/>
+<area shape="poly" id="edge20_Node000015_Node000005" title=" " alt="" coords="420,114,160,141,159,135,419,109"/>
+<area shape="poly" id="edge22_Node000016_Node000005" title=" " alt="" coords="227,188,159,167,160,162,229,182"/>
+<area shape="poly" id="edge23_Node000016_Node000008" title=" " alt="" coords="228,235,162,255,160,250,227,230"/>
+<area shape="poly" id="edge24_Node000016_Node000010" title=" " alt="" coords="227,211,171,211,171,206,227,206"/>
+</map>

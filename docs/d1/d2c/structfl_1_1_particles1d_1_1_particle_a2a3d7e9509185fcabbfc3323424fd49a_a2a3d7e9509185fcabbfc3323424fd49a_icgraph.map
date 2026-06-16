@@ -1,0 +1,7 @@
+<map id="fl::Particles1d::Particle::getPower" name="fl::Particles1d::Particle::getPower">
+<area shape="rect" id="Node000001" title=" " alt="" coords="219,37,384,77"/>
+<area shape="rect" id="Node000002" href="$d1/d2c/structfl_1_1_particles1d_1_1_particle_a00274cfabaae10ea0ebdb0666627977b.html#a00274cfabaae10ea0ebdb0666627977b" title="Render particle with sub&#45;pixel accuracy and power&#45;modulated color." alt="" coords="5,5,171,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="205,46,171,40,171,35,206,40"/>
+<area shape="rect" id="Node000003" href="$d1/d2c/structfl_1_1_particles1d_1_1_particle_a233775effd323d6ed8a8f0a11f6513b5.html#a233775effd323d6ed8a8f0a11f6513b5" title="Update position based on velocity × power." alt="" coords="5,69,171,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="206,74,171,80,171,74,205,69"/>
+</map>

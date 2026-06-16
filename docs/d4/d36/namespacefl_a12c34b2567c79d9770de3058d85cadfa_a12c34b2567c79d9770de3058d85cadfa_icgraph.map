@@ -1,0 +1,9 @@
+<map id="fl::interrupt_disable" name="fl::interrupt_disable">
+<area shape="rect" id="Node000001" title="Disable global interrupts (platform&#45;specific)." alt="" coords="421,45,569,70"/>
+<area shape="rect" id="Node000002" href="$df/dc3/classfl_1_1isr_1_1critical__section_a48782a5c1d5358669f941fb5f7036456.html#a48782a5c1d5358669f941fb5f7036456" title=" " alt="" coords="213,37,373,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="407,60,373,60,373,55,407,55"/>
+<area shape="rect" id="Node000003" href="$df/dc3/classfl_1_1isr_1_1critical__section_a0a128a627ff9c77657a3a0dc300331e9.html#a0a128a627ff9c77657a3a0dc300331e9" title=" " alt="" coords="5,5,165,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="199,46,165,40,166,35,200,40"/>
+<area shape="rect" id="Node000004" href="$df/dc3/classfl_1_1isr_1_1critical__section_ad35cf9b1f9d01e0715cd80156800d223.html#ad35cf9b1f9d01e0715cd80156800d223" title=" " alt="" coords="5,69,165,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="200,74,166,80,165,74,199,69"/>
+</map>

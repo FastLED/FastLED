@@ -1,0 +1,19 @@
+<map id="fl::ResetInfo::describe" name="fl::ResetInfo::describe">
+<area shape="rect" id="Node000001" title="Write a single&#45;line human&#45;readable description into the caller&#39;s buffer." alt="" coords="5,153,168,179"/>
+<area shape="rect" id="Node000002" href="$df/dbf/structfl_1_1_reset_info_a20ca4fcd4004173351cf745b2e485086.html#a20ca4fcd4004173351cf745b2e485086" title="Cause name (zero&#45;cost, static string_view)." alt="" coords="229,5,414,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="95,151,142,97,176,66,215,40,229,33,231,38,217,44,179,70,146,101,99,155"/>
+<area shape="rect" id="Node000004" href="$d0/ddb/classfl_1_1string__view_a62053f60d43376477b7857084f50b3c3.html#a62053f60d43376477b7857084f50b3c3" title=" " alt="" coords="248,55,395,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="104,151,153,120,215,89,238,81,239,86,217,94,155,125,107,156"/>
+<area shape="rect" id="Node000005" href="$df/dbf/structfl_1_1_reset_info_a3e1d509f5f76c503d7c66f18a1e9f85b.html#a3e1d509f5f76c503d7c66f18a1e9f85b" title="Platform&#45;specific subcause name (zero&#45;cost, static string_view)." alt="" coords="217,104,425,129"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="147,151,246,130,247,135,148,156"/>
+<area shape="rect" id="Node000006" href="$df/d52/namespacefl_1_1platforms_ad20e296d63b1caeff2411184fac4a386.html#ad20e296d63b1caeff2411184fac4a386" title=" " alt="" coords="235,153,407,179"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="168,163,222,163,222,169,168,169"/>
+<area shape="rect" id="Node000007" href="$df/d52/namespacefl_1_1platforms_aa5d078387c6a4b12de6855b88efa546d.html#aa5d078387c6a4b12de6855b88efa546d" title=" " alt="" coords="237,203,405,228"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="148,176,247,197,246,202,147,181"/>
+<area shape="rect" id="Node000008" href="$df/d52/namespacefl_1_1platforms_a36d9f55e28dc0a959619cf2e13f1ae71.html#a36d9f55e28dc0a959619cf2e13f1ae71" title=" " alt="" coords="216,252,427,277"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="108,176,156,207,217,237,243,246,241,251,215,242,153,211,105,181"/>
+<area shape="rect" id="Node000009" href="$df/d52/namespacefl_1_1platforms_a9e23b7af1062b830c72c14c56841a88f.html#a9e23b7af1062b830c72c14c56841a88f" title=" " alt="" coords="234,301,409,327"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="100,177,146,231,180,261,217,286,235,294,233,299,215,291,177,265,143,234,96,181"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aaea3f6340440c4987e8c0f58bd4b0c10.html#aaea3f6340440c4987e8c0f58bd4b0c10" title="Return a static&#45;lifetime name for c — zero&#45;cost, no allocation." alt="" coords="475,5,625,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="415,15,461,15,461,21,415,21"/>
+</map>

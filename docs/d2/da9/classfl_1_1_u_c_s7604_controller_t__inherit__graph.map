@@ -1,0 +1,13 @@
+<map id="fl::UCS7604ControllerT&lt; DATA_PIN, RGB_ORDER, MODE, CHIPSET_TIMING, CLOCKLESS_CONTROLLER &gt;" name="fl::UCS7604ControllerT&lt; DATA_PIN, RGB_ORDER, MODE, CHIPSET_TIMING, CLOCKLESS_CONTROLLER &gt;">
+<area shape="rect" id="Node000001" title="UCS7604 controller extending CPixelLEDController." alt="" coords="397,148,608,217"/>
+<area shape="rect" id="Node000004" href="$dd/d78/classfl_1_1_u_c_s7604_controller_t.html" title=" " alt="" coords="973,33,1312,117"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="558,138,593,117,631,101,717,80,806,68,893,62,973,61,973,67,893,67,806,73,718,86,633,107,596,122,561,143"/>
+<area shape="rect" id="Node000005" href="$dd/d78/classfl_1_1_u_c_s7604_controller_t.html" title=" " alt="" coords="973,141,1312,225"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="622,180,973,180,973,185,622,185"/>
+<area shape="rect" id="Node000006" href="$dd/d78/classfl_1_1_u_c_s7604_controller_t.html" title=" " alt="" coords="999,249,1286,348"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="562,223,596,243,633,259,726,282,822,296,915,302,999,303,999,309,914,308,821,301,725,287,631,264,594,248,559,228"/>
+<area shape="rect" id="Node000002" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title="Template extension of the CLEDController class." alt="" coords="175,155,348,210"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="362,180,397,180,397,185,362,185"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller.html" title=" " alt="" coords="5,170,125,195"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="139,180,175,180,175,185,139,185"/>
+</map>

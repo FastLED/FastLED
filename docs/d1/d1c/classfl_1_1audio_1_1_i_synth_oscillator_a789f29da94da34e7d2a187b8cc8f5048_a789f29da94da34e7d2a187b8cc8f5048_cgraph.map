@@ -1,0 +1,7 @@
+<map id="fl::audio::ISynthOscillator::create" name="fl::audio::ISynthOscillator::create">
+<area shape="rect" id="Node000001" title="Factory function to create an oscillator with specified engine and parameters." alt="" coords="5,23,191,63"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="257,5,382,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="190,30,242,24,243,29,191,35"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aa21717c25b2ce7eedea93b5d87880564.html#aa21717c25b2ce7eedea93b5d87880564" title=" " alt="" coords="239,55,400,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="191,51,225,54,224,60,191,56"/>
+</map>

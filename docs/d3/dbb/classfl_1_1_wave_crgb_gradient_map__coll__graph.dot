@@ -5,13 +5,9 @@ digraph "fl::WaveCrgbGradientMap"
   bgcolor="transparent";
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
-  Node1 [id="Node000001",label="fl::WaveCrgbGradientMap",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 [id="Node000001",label="fl::WaveCrgbGradientMap",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Wave-to-color mapper using gradient/palette coloring."];
   Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::WaveCrgbMap",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dc/dce/classfl_1_1_wave_crgb_map.html",tooltip=" "];
+  Node2 [id="Node000002",label="fl::WaveCrgbMap",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dc/dce/classfl_1_1_wave_crgb_map.html",tooltip="Abstract base class for mapping wave simulation values to LED colors."];
   Node3 -> Node1 [id="edge2_Node000001_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mGradient",fontcolor="grey" ];
   Node3 [id="Node000003",label="fl::GradientInlined",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d0/db5/classfl_1_1_gradient_inlined.html",tooltip=" "];
-  Node4 -> Node3 [id="edge3_Node000003_Node000004",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mVariant",fontcolor="grey" ];
-  Node4 [id="Node000004",label="fl::Variant\< CRGBPalette16,\l CRGBPalette32, CRGBPalette256,\l GradientFunction \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$de/d60/classfl_1_1_variant.html",tooltip=" "];
-  Node5 -> Node4 [id="edge4_Node000004_Node000005",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< CRGBPalette16, CRGBPalette32,\l CRGBPalette256, GradientFunction \>",fontcolor="grey" ];
-  Node5 [id="Node000005",label="fl::Variant\< Types \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$de/d60/classfl_1_1_variant.html",tooltip=" "];
 }

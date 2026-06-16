@@ -1,0 +1,9 @@
+<map id="fl::audio::detector::Vibe" name="fl::audio::detector::Vibe">
+<area shape="rect" id="Node000001" title=" " alt="" coords="64,211,200,251"/>
+<area shape="rect" id="Node000002" href="$df/d9b/classfl_1_1audio_1_1_detector.html" title=" " alt="" coords="5,108,144,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="90,144,124,209,120,212,85,147"/>
+<area shape="rect" id="Node000003" href="$dd/d7a/classfl_1_1audio_1_1_silence_envelope.html" title=" " alt="" coords="168,108,357,133"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="240,144,157,212,153,208,236,140"/>
+<area shape="rect" id="Node000004" href="$dd/d7a/classfl_1_1audio_1_1_silence_envelope.html#da/da9/structfl_1_1audio_1_1_silence_envelope_1_1_config" title=" " alt="" coords="168,5,357,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="265,59,265,108,260,108,260,59"/>
+</map>

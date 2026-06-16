@@ -1,0 +1,16 @@
+digraph "LegacyClocklessProxy::create"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="LegacyClocklessProxy\l::create",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="LegacyClocklessProxy\l::LegacyClocklessProxy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/da1/class_legacy_clockless_proxy_ad123585137cd4458f5b1d0e0d38c8f69.html#ad123585137cd4458f5b1d0e0d38c8f69",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="LegacyClocklessProxy\l::LegacyClocklessProxy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/da1/class_legacy_clockless_proxy_ae51763d08ff9828674e0bc097a3cfe70.html#ae51763d08ff9828674e0bc097a3cfe70",tooltip=" "];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="LegacyClocklessProxy\l::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/da1/class_legacy_clockless_proxy_aedfb0ffd5918b50679e77d56b64ff140.html#aedfb0ffd5918b50679e77d56b64ff140",tooltip=" "];
+}

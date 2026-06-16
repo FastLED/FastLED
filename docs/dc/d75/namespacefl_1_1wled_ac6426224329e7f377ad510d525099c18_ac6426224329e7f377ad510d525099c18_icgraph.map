@@ -1,0 +1,5 @@
+<map id="fl::wled::rgbToHex" name="fl::wled::rgbToHex">
+<area shape="rect" id="Node000001" title="Convert RGB components to hex string." alt="" coords="192,5,331,31"/>
+<area shape="rect" id="Node000002" href="$d2/d9f/classfl_1_1_w_l_e_d_ac8c92c79b2fcb96c31fc00e19204ca7c.html#ac8c92c79b2fcb96c31fc00e19204ca7c" title="Get current WLED state as JSON object." alt="" coords="5,5,144,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="178,21,145,21,145,15,178,15"/>
+</map>

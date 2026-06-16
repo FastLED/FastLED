@@ -1,10 +1,10 @@
 var classfl_1_1_time_ramp =
 [
-    [ "TimeRamp", "d0/d9d/classfl_1_1_time_ramp_a9d03e14d54355d9c9d49051b77718a01.html#a9d03e14d54355d9c9d49051b77718a01", null ],
-    [ "isActive", "d0/d9d/classfl_1_1_time_ramp_aa86982c4d0ae7393bd86c0b5959c5b10.html#aa86982c4d0ae7393bd86c0b5959c5b10", null ],
-    [ "trigger", "d0/d9d/classfl_1_1_time_ramp_a9f0b72e7ed74128fee2becc745d2ab72.html#a9f0b72e7ed74128fee2becc745d2ab72", null ],
-    [ "trigger", "d0/d9d/classfl_1_1_time_ramp_a3d2aa3e73437acdf7be896888ef57867.html#a3d2aa3e73437acdf7be896888ef57867", null ],
-    [ "update8", "d0/d9d/classfl_1_1_time_ramp_aa060cb7edcafe345e03bfac190e98fe4.html#aa060cb7edcafe345e03bfac190e98fe4", null ],
+    [ "TimeRamp", "d0/d9d/classfl_1_1_time_ramp_a8d5e72873afb81e1d8b6136635ac05da.html#a8d5e72873afb81e1d8b6136635ac05da", null ],
+    [ "getCurrentPhase", "d0/d9d/classfl_1_1_time_ramp_a42a35ea50f2e5f6d92c82d32554afc53.html#a42a35ea50f2e5f6d92c82d32554afc53", null ],
+    [ "isActive", "d0/d9d/classfl_1_1_time_ramp_acb104aadbb7e7819eaf47c2f1b18ef01.html#acb104aadbb7e7819eaf47c2f1b18ef01", null ],
+    [ "trigger", "d0/d9d/classfl_1_1_time_ramp_af2ed0a7927456db7d0be670f5692a28a.html#af2ed0a7927456db7d0be670f5692a28a", null ],
+    [ "update8", "d0/d9d/classfl_1_1_time_ramp_abe4ca1e555925d0a3e8bea56cc92e29a.html#abe4ca1e555925d0a3e8bea56cc92e29a", null ],
     [ "mFallingTime", "d0/d9d/classfl_1_1_time_ramp_a5de86b47d8fbdd2ed56f8e9d95da1138.html#a5de86b47d8fbdd2ed56f8e9d95da1138", null ],
     [ "mFinishedFallingTime", "d0/d9d/classfl_1_1_time_ramp_afd4547839437123c3daf3b186ed9235a.html#afd4547839437123c3daf3b186ed9235a", null ],
     [ "mFinishedPlateauTime", "d0/d9d/classfl_1_1_time_ramp_a3c6eed65c2ee35b347498c517bfdf6ce.html#a3c6eed65c2ee35b347498c517bfdf6ce", null ],

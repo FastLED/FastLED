@@ -1,0 +1,7 @@
+<map id="fl::third_party::ezWS2812gpio::set_pixel" name="fl::third_party::ezWS2812gpio::set_pixel">
+<area shape="rect" id="Node000001" title="Set color for specific number of LEDs." alt="" coords="5,5,217,45"/>
+<area shape="rect" id="Node000002" href="$d0/da2/classfl_1_1third__party_1_1ez_w_s2812gpio_af70d139cd5e8cd618b563289129308d9.html#af70d139cd5e8cd618b563289129308d9" title="Send a byte (8 bits) with MSB first." alt="" coords="265,5,477,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="217,23,252,23,252,28,217,28"/>
+<area shape="rect" id="Node000003" href="$d0/da2/classfl_1_1third__party_1_1ez_w_s2812gpio_a6b2345d18ce077ac29460db86abc8ae5.html#a6b2345d18ce077ac29460db86abc8ae5" title="Send a single bit using precise timing." alt="" coords="525,5,737,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="477,23,512,23,512,28,477,28"/>
+</map>

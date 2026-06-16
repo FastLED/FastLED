@@ -1,0 +1,15 @@
+<map id="fl::wave3Untranspose_4" name="fl::wave3Untranspose_4">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,80,184,105"/>
+<area shape="rect" id="Node000002" href="$d6/d93/namespacefl_1_1isr_a87ccebcc8a496958569065ad778ac76d.html#a87ccebcc8a496958569065ad778ac76d" title="ISR&#45;optimized memcpy with alignment detection and switch dispatch." alt="" coords="232,80,351,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,90,218,90,218,95,184,95"/>
+<area shape="rect" id="Node000003" href="$d6/d93/namespacefl_1_1isr_a13c110beae3baf09f54f056345fe11e6.html#a13c110beae3baf09f54f056345fe11e6" title="ISR&#45;optimized 16&#45;bit block copy for 2&#45;byte aligned memory." alt="" coords="405,5,547,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="316,77,398,40,417,32,419,37,400,44,318,82"/>
+<area shape="rect" id="Node000004" href="$d6/d93/namespacefl_1_1isr_ac523cbf336c4932a0edbd894800e1d26.html#ac523cbf336c4932a0edbd894800e1d26" title="ISR&#45;optimized 32&#45;bit block copy for 4&#45;byte aligned memory." alt="" coords="405,55,547,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="350,82,391,76,391,82,351,87"/>
+<area shape="rect" id="Node000005" href="$d6/d93/namespacefl_1_1isr_a3dd21e230a7b65ce14dfab31b467f635.html#a3dd21e230a7b65ce14dfab31b467f635" title="ISR&#45;optimized byte copy." alt="" coords="399,104,553,129"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="351,98,385,102,385,107,350,103"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a2815270748b8084061e7103ee57960da.html#a2815270748b8084061e7103ee57960da" title=" " alt="" coords="426,153,526,179"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="320,103,400,138,422,146,420,151,398,143,318,108"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_ad200a6a214a70194b7c33fd67af6cea4.html#ad200a6a214a70194b7c33fd67af6cea4" title=" " alt="" coords="601,153,691,179"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="526,163,588,163,588,169,526,169"/>
+</map>

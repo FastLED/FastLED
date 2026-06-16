@@ -1,0 +1,100 @@
+<map id="test_json_await" name="test_json_await">
+<area shape="rect" id="Node000001" title="APPROACH 4: JSON Response with await pattern &#160;&#160;Same JSON handling but using await_top_level for synch..." alt="" coords="5,879,129,905"/>
+<area shape="rect" id="Node000002" href="$db/d5c/namespacefl_1_1task_ab96dc4828a01d1cff109d355d8ffc23d.html#ab96dc4828a01d1cff109d355d8ffc23d" title="Synchronously wait for a promise to complete (ONLY safe in top&#45;level contexts)" alt="" coords="659,591,797,631"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="79,877,120,836,176,790,233,750,280,721,330,697,395,672,459,652,525,637,645,617,645,622,526,642,461,658,397,677,332,702,283,726,236,754,179,794,123,840,82,881"/>
+<area shape="rect" id="Node000034" href="$de/d40/classfl_1_1json_ac94ae67fc50a75046692cd52b2dfb3e6.html#ac94ae67fc50a75046692cd52b2dfb3e6" title=" " alt="" coords="199,805,327,830"/>
+<area shape="poly" id="edge26_Node000001_Node000034" title=" " alt="" coords="92,877,176,839,198,831,200,836,178,844,94,882"/>
+<area shape="rect" id="Node000035" href="$d1/d13/namespacefl_1_1net_1_1http_aa69a7e5a3706b6fb7c8627f19c7b10d2.html#aa69a7e5a3706b6fb7c8627f19c7b10d2" title="HTTP GET request." alt="" coords="181,854,344,879"/>
+<area shape="poly" id="edge27_Node000001_Node000035" title=" " alt="" coords="129,881,167,876,168,882,130,887"/>
+<area shape="rect" id="Node000048" href="$d1/dfb/colorutils_8h_afba4db18577c19e39c54f1c5793741b7.html#afba4db18577c19e39c54f1c5793741b7" title="Fill a range of LEDs with a solid color." alt="" coords="225,903,301,929"/>
+<area shape="poly" id="edge39_Node000001_Node000048" title=" " alt="" coords="130,897,211,907,210,912,129,902"/>
+<area shape="rect" id="Node000049" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_a5750f33732ba08a389f9f6ce4a387338.html#a5750f33732ba08a389f9f6ce4a387338" title="Set JSON response body with automatic Content&#45;Type header." alt="" coords="177,1071,348,1111"/>
+<area shape="poly" id="edge40_Node000001_Node000049" title=" " alt="" coords="83,903,234,1059,230,1062,79,907"/>
+<area shape="rect" id="Node000057" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_a7c2f923cab94b0b52945ce0bcfd12e90.html#a7c2f923cab94b0b52945ce0bcfd12e90" title="Set HTTP status code." alt="" coords="643,1249,813,1289"/>
+<area shape="poly" id="edge59_Node000001_Node000057" title=" " alt="" coords="73,904,83,946,102,1005,134,1067,154,1096,179,1121,231,1157,287,1188,347,1212,408,1230,527,1254,629,1265,629,1270,526,1260,406,1236,345,1217,285,1192,228,1162,176,1125,150,1099,129,1070,97,1007,78,948,68,905"/>
+<area shape="rect" id="Node000003" href="$de/d4f/namespacefl_1_1task_1_1detail_a47ceeb6aa357d65f1b7f1db3e9c2e476.html#a47ceeb6aa357d65f1b7f1db3e9c2e476" title="Get reference to thread&#45;local await recursion depth." alt="" coords="873,412,1028,452"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="743,589,796,528,832,493,872,462,881,456,884,461,875,466,836,497,800,531,747,592"/>
+<area shape="rect" id="Node000013" href="$d0/d34/classfl_1_1task_1_1_promise_a51a1be9fd686089d804cec834abd6ccc.html#a51a1be9fd686089d804cec834abd6ccc" title="Get the error (only valid if is_rejected() returns true)" alt="" coords="883,476,1018,516"/>
+<area shape="poly" id="edge4_Node000002_Node000013" title=" " alt="" coords="766,588,872,532,896,520,898,525,875,537,768,593"/>
+<area shape="rect" id="Node000014" href="$d0/d34/classfl_1_1task_1_1_promise_aa4a0fc861a1271cbb04a46aa7628c611.html#aa4a0fc861a1271cbb04a46aa7628c611" title="Check if Promise is valid." alt="" coords="1098,623,1233,663"/>
+<area shape="poly" id="edge23_Node000002_Node000014" title=" " alt="" coords="797,588,848,578,906,570,968,568,1029,576,1078,592,1121,614,1119,618,1076,597,1027,581,968,574,907,575,849,583,798,593"/>
+<area shape="rect" id="Node000015" href="$d0/d34/classfl_1_1task_1_1_promise_a2cf5debc89941141eb35912bcd7f0a6c.html#a2cf5debc89941141eb35912bcd7f0a6c" title="Check if Promise is completed (resolved or rejected)" alt="" coords="883,591,1018,631"/>
+<area shape="poly" id="edge6_Node000002_Node000015" title=" " alt="" coords="798,608,870,608,870,613,798,613"/>
+<area shape="rect" id="Node000016" href="$d0/d34/classfl_1_1task_1_1_promise_adaacc91f53140dd25a25549e0fd76e84.html#adaacc91f53140dd25a25549e0fd76e84" title="Check if Promise is resolved (completed successfully)" alt="" coords="883,655,1018,695"/>
+<area shape="poly" id="edge8_Node000002_Node000016" title=" " alt="" coords="798,628,871,649,870,654,797,633"/>
+<area shape="rect" id="Node000017" href="$db/d5c/namespacefl_1_1task_a2d40b476742263a3fa212e24b722e3ef.html#a2d40b476742263a3fa212e24b722e3ef" title="Run selected task subsystems." alt="" coords="903,285,998,310"/>
+<area shape="poly" id="edge10_Node000002_Node000017" title=" " alt="" coords="741,589,871,398,929,320,933,323,876,402,745,592"/>
+<area shape="rect" id="Node000032" href="$d0/d34/classfl_1_1task_1_1_promise_aa9653e7805b9f5fe093fef2faa31960b.html#aa9653e7805b9f5fe093fef2faa31960b" title="Update Promise state in main loop &#45; should be called periodically This processes pending callbacks wh..." alt="" coords="883,719,1018,759"/>
+<area shape="poly" id="edge21_Node000002_Node000032" title=" " alt="" coords="761,629,875,704,887,711,885,715,872,709,758,633"/>
+<area shape="rect" id="Node000033" href="$d0/d34/classfl_1_1task_1_1_promise_a2eccb92f3cd894efe9a728eea2db7c45.html#a2eccb92f3cd894efe9a728eea2db7c45" title="Get the result value (only valid if is_resolved() returns true)" alt="" coords="883,783,1018,823"/>
+<area shape="poly" id="edge24_Node000002_Node000033" title=" " alt="" coords="770,628,800,648,827,673,844,699,851,723,858,746,875,769,880,773,876,777,871,772,853,748,846,725,839,701,823,676,797,652,767,633"/>
+<area shape="rect" id="Node000004" href="$dc/dad/classfl_1_1_singleton_thread_local_a00591689c0e4cc5d96b511b3277f7682.html#a00591689c0e4cc5d96b511b3277f7682" title=" " alt="" coords="1076,485,1255,525"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1011,450,1094,478,1092,483,1009,455"/>
+<area shape="poly" id="edge5_Node000013_Node000014" title=" " alt="" coords="996,514,1029,532,1085,572,1133,611,1129,616,1082,577,1027,537,994,518"/>
+<area shape="poly" id="edge7_Node000015_Node000014" title=" " alt="" coords="1019,618,1085,628,1084,633,1018,623"/>
+<area shape="poly" id="edge9_Node000016_Node000014" title=" " alt="" coords="1018,662,1084,652,1085,657,1019,667"/>
+<area shape="poly" id="edge11_Node000017_Node000004" title=" " alt="" coords="964,309,1030,399,1051,438,1061,455,1078,471,1085,476,1082,481,1074,475,1057,458,1047,441,1026,401,960,312"/>
+<area shape="rect" id="Node000018" href="$d0/dd2/classfl_1_1task_1_1_executor_ac534e963910c0f0acf445c8c61aee216.html#ac534e963910c0f0acf445c8c61aee216" title=" " alt="" coords="1100,120,1231,160"/>
+<area shape="poly" id="edge12_Node000017_Node000018" title=" " alt="" coords="959,283,1005,229,1038,198,1075,170,1086,163,1089,168,1077,174,1041,202,1009,233,964,286"/>
+<area shape="rect" id="Node000020" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a266030d285c7f6ae31eb3c619cee8693.html#a266030d285c7f6ae31eb3c619cee8693" title=" " alt="" coords="1096,184,1235,224"/>
+<area shape="poly" id="edge13_Node000017_Node000020" title=" " alt="" coords="975,282,1075,234,1092,227,1094,231,1077,238,977,287"/>
+<area shape="rect" id="Node000022" href="$d4/d36/namespacefl_a88411fb4cdce0874360d326ef1a2578f.html#a88411fb4cdce0874360d326ef1a2578f" title="Factory for C++11/14 (no CTAD)." alt="" coords="1090,249,1241,274"/>
+<area shape="poly" id="edge14_Node000017_Node000022" title=" " alt="" coords="998,287,1076,274,1077,279,998,292"/>
+<area shape="rect" id="Node000023" href="$d4/d36/namespacefl_a95a89c7ba649b9bd2c9136c0f517d82f.html#a95a89c7ba649b9bd2c9136c0f517d82f" title="Universal microsecond timer &#45; returns microseconds since system startup." alt="" coords="1124,322,1207,347"/>
+<area shape="poly" id="edge15_Node000017_Node000023" title=" " alt="" coords="998,303,1111,323,1110,328,998,308"/>
+<area shape="rect" id="Node000024" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="1134,371,1197,397"/>
+<area shape="poly" id="edge17_Node000017_Node000024" title=" " alt="" coords="976,308,1022,332,1077,356,1121,371,1120,376,1075,361,1020,337,974,312"/>
+<area shape="rect" id="Node000025" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a894dae01c9c6738eeae091f8fddeefb3.html#a894dae01c9c6738eeae091f8fddeefb3" title=" " alt="" coords="1096,421,1235,461"/>
+<area shape="poly" id="edge18_Node000017_Node000025" title=" " alt="" coords="965,308,1012,355,1043,382,1077,406,1091,413,1089,418,1075,410,1040,386,1008,359,962,312"/>
+<area shape="rect" id="Node000029" href="$d0/dd2/classfl_1_1task_1_1_executor_a8f94605a8078df47675753e193d1e969.html#a8f94605a8078df47675753e193d1e969" title="Update all registered runners." alt="" coords="1100,5,1231,45"/>
+<area shape="poly" id="edge19_Node000017_Node000029" title=" " alt="" coords="953,284,965,240,989,179,1025,113,1048,83,1074,55,1086,47,1089,51,1078,59,1052,86,1029,116,994,182,970,242,958,285"/>
+<area shape="rect" id="Node000030" href="$d4/d36/namespacefl_ac8bfd7357d354c16311ece7e62e08901.html#ac8bfd7357d354c16311ece7e62e08901" title="Yield to the platform scheduler." alt="" coords="1130,70,1201,95"/>
+<area shape="poly" id="edge20_Node000017_Node000030" title=" " alt="" coords="954,283,969,248,994,200,1030,149,1051,126,1074,106,1094,95,1116,87,1117,92,1097,99,1078,110,1054,130,1034,153,999,203,974,250,959,286"/>
+<area shape="poly" id="edge16_Node000023_Node000023" title=" " alt="" coords="1130,324,1123,314,1127,304,1141,298,1165,295,1195,299,1207,308,1204,312,1193,304,1165,301,1143,303,1131,308,1128,313,1135,320"/>
+<area shape="poly" id="edge22_Node000032_Node000014" title=" " alt="" coords="999,716,1027,704,1109,666,1112,671,1029,709,1001,721"/>
+<area shape="poly" id="edge25_Node000033_Node000014" title=" " alt="" coords="1005,780,1027,768,1087,720,1136,671,1140,675,1091,724,1029,773,1008,785"/>
+<area shape="rect" id="Node000036" href="$dd/d03/classfl_1_1net_1_1http_1_1_fetch_options_a921e92a7b887e568cef838ffe44cfe2c.html#a921e92a7b887e568cef838ffe44cfe2c" title="Set request body." alt="" coords="396,879,583,919"/>
+<area shape="poly" id="edge28_Node000035_Node000036" title=" " alt="" coords="345,875,383,881,382,886,344,881"/>
+<area shape="rect" id="Node000039" href="$d1/d13/namespacefl_1_1net_1_1http_a957091a69596c0de70d12e178c8bd57d.html#a957091a69596c0de70d12e178c8bd57d" title="Internal helper to execute a fetch request and return a promise." alt="" coords="413,687,565,727"/>
+<area shape="poly" id="edge30_Node000035_Node000039" title=" " alt="" coords="326,852,346,839,357,827,364,815,370,790,376,763,383,750,394,737,400,732,403,736,398,741,387,753,381,765,375,791,369,817,362,830,350,843,329,856"/>
+<area shape="rect" id="Node000045" href="$dd/d03/classfl_1_1net_1_1http_1_1_fetch_options_a4456fb4f6ddd306b5f519993080c9889.html#a4456fb4f6ddd306b5f519993080c9889" title="Add header." alt="" coords="396,943,583,983"/>
+<area shape="poly" id="edge34_Node000035_Node000045" title=" " alt="" coords="322,877,349,888,364,898,374,908,397,928,410,935,407,939,395,933,370,912,361,903,347,893,320,882"/>
+<area shape="rect" id="Node000046" href="$dd/d03/classfl_1_1net_1_1http_1_1_fetch_options_af9afaa003f14f83e2f5df6d031a3bf2e.html#af9afaa003f14f83e2f5df6d031a3bf2e" title="Get the options for this request." alt="" coords="396,751,583,791"/>
+<area shape="poly" id="edge36_Node000035_Node000046" title=" " alt="" coords="317,851,347,839,370,820,395,800,408,794,410,799,397,805,374,824,349,844,319,856"/>
+<area shape="rect" id="Node000047" href="$dd/d03/classfl_1_1net_1_1http_1_1_fetch_options_aaabc1d09931c784c5db43adff3355db1.html#aaabc1d09931c784c5db43adff3355db1" title="Set timeout in milliseconds." alt="" coords="396,815,583,855"/>
+<area shape="poly" id="edge37_Node000035_Node000047" title=" " alt="" coords="344,853,382,847,383,852,345,858"/>
+<area shape="rect" id="Node000037" href="$dd/d03/classfl_1_1net_1_1http_1_1_fetch_options_a2886f08f0354d8631626717882dd9611.html#a2886f08f0354d8631626717882dd9611" title=" " alt="" coords="635,815,821,855"/>
+<area shape="poly" id="edge29_Node000036_Node000037" title=" " alt="" coords="564,876,639,856,641,861,565,881"/>
+<area shape="rect" id="Node000040" href="$d0/d34/classfl_1_1task_1_1_promise_a70811e463c0161394aae6e29b442b266.html#a70811e463c0161394aae6e29b442b266" title="Create a resolved Promise with value." alt="" coords="661,751,795,791"/>
+<area shape="poly" id="edge31_Node000039_Node000040" title=" " alt="" coords="565,724,648,747,647,752,564,729"/>
+<area shape="rect" id="Node000044" href="$d0/dd1/classfl_1_1net_1_1http_1_1_response_af9dec231f54603a4e87ea1c8dc9499d8.html#af9dec231f54603a4e87ea1c8dc9499d8" title=" " alt="" coords="646,687,810,727"/>
+<area shape="poly" id="edge33_Node000039_Node000044" title=" " alt="" coords="565,704,632,704,632,709,565,709"/>
+<area shape="poly" id="edge32_Node000040_Node000033" title=" " alt="" coords="796,778,870,788,869,794,795,783"/>
+<area shape="poly" id="edge35_Node000045_Node000037" title=" " alt="" coords="561,940,581,929,596,913,604,897,613,881,629,865,638,859,641,863,632,869,617,884,609,900,600,916,584,933,563,945"/>
+<area shape="poly" id="edge38_Node000047_Node000037" title=" " alt="" coords="583,832,621,832,621,837,583,837"/>
+<area shape="poly" id="edge58_Node000049_Node000049" title=" " alt="" coords="226,1071,224,1061,230,1052,243,1046,263,1044,286,1047,298,1054,295,1059,284,1052,263,1049,244,1051,233,1056,229,1062,231,1070"/>
+<area shape="rect" id="Node000050" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_a1a8b4038fa86119ce80f6b9857c7eee3.html#a1a8b4038fa86119ce80f6b9857c7eee3" title=" " alt="" coords="404,1071,575,1111"/>
+<area shape="poly" id="edge41_Node000049_Node000050" title=" " alt="" coords="348,1097,390,1097,390,1102,348,1102"/>
+<area shape="poly" id="edge51_Node000050_Node000049" title=" " alt="" coords="404,1085,361,1084,361,1079,404,1079"/>
+<area shape="poly" id="edge42_Node000050_Node000050" title=" " alt="" coords="447,1071,444,1061,451,1052,466,1046,489,1044,516,1047,530,1054,528,1059,514,1052,489,1049,468,1051,454,1056,450,1062,452,1070"/>
+<area shape="rect" id="Node000051" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_aea2ac581ef439e865a98eae4778c7416.html#aea2ac581ef439e865a98eae4778c7416" title="Factory method for 400 Bad Request response." alt="" coords="643,1185,813,1225"/>
+<area shape="poly" id="edge43_Node000050_Node000051" title=" " alt="" coords="510,1109,560,1144,631,1182,628,1187,557,1148,507,1113"/>
+<area shape="rect" id="Node000052" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_a8688692b19d75358b846a85f6c367b5c.html#a8688692b19d75358b846a85f6c367b5c" title="Set response body." alt="" coords="643,879,813,919"/>
+<area shape="poly" id="edge45_Node000050_Node000052" title=" " alt="" coords="520,1069,581,1005,602,971,612,956,629,940,668,921,670,926,632,945,616,959,607,974,585,1008,524,1072"/>
+<area shape="rect" id="Node000053" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_abd12ccbafacd9b44270123f766d91dc9.html#abd12ccbafacd9b44270123f766d91dc9" title="Add HTTP header." alt="" coords="643,943,813,983"/>
+<area shape="poly" id="edge47_Node000050_Node000053" title=" " alt="" coords="527,1068,575,1036,629,1004,677,985,679,990,632,1009,578,1041,530,1073"/>
+<area shape="rect" id="Node000054" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_a6844fcc0edb41a50dad5d21ee745ad1a.html#a6844fcc0edb41a50dad5d21ee745ad1a" title="Factory method for 500 Internal Server Error response." alt="" coords="643,1007,813,1047"/>
+<area shape="poly" id="edge49_Node000050_Node000054" title=" " alt="" coords="574,1074,666,1048,668,1053,576,1079"/>
+<area shape="rect" id="Node000055" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_a571a6ad842ad6f23649072749926227e.html#a571a6ad842ad6f23649072749926227e" title="Factory method for 404 Not Found response." alt="" coords="643,1071,813,1111"/>
+<area shape="poly" id="edge52_Node000050_Node000055" title=" " alt="" coords="575,1097,629,1097,629,1102,575,1102"/>
+<area shape="rect" id="Node000056" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_ab07b6f9e44bc8aba1f780b0230f5be21.html#ab07b6f9e44bc8aba1f780b0230f5be21" title="Factory method for 200 OK response." alt="" coords="631,1135,825,1161"/>
+<area shape="poly" id="edge54_Node000050_Node000056" title=" " alt="" coords="543,1108,626,1130,625,1135,541,1113"/>
+<area shape="poly" id="edge56_Node000050_Node000057" title=" " alt="" coords="506,1109,579,1192,632,1247,632,1247,630,1252,629,1251,575,1196,502,1113"/>
+<area shape="poly" id="edge44_Node000051_Node000050" title=" " alt="" coords="692,1188,630,1164,548,1120,550,1115,632,1159,694,1183"/>
+<area shape="poly" id="edge46_Node000052_Node000050" title=" " alt="" coords="644,914,632,921,616,935,607,950,585,984,514,1062,511,1058,581,981,602,947,612,932,629,917,641,909"/>
+<area shape="poly" id="edge48_Node000053_Node000050" title=" " alt="" coords="643,980,632,985,569,1023,518,1063,514,1059,566,1019,629,980,641,975"/>
+<area shape="poly" id="edge50_Node000054_Node000050" title=" " alt="" coords="643,1043,551,1069,550,1064,642,1038"/>
+<area shape="poly" id="edge53_Node000055_Node000050" title=" " alt="" coords="642,1085,589,1084,589,1079,642,1079"/>
+<area shape="poly" id="edge55_Node000056_Node000050" title=" " alt="" coords="698,1138,588,1108,589,1103,700,1133"/>
+<area shape="poly" id="edge57_Node000057_Node000050" title=" " alt="" coords="684,1252,656,1241,629,1227,525,1123,529,1119,632,1223,658,1236,686,1247"/>
+</map>

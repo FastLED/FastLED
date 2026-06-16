@@ -1,0 +1,36 @@
+<map id="fl/chipsets/encoders/ws2801_encoder_impl.h" name="fl/chipsets/encoders/ws2801_encoder_impl.h">
+<area shape="rect" id="Node000001" title="WS2801/WS2803 SPI chipset encoder (pixel iterator adapter)" alt="" coords="653,5,836,45"/>
+<area shape="rect" id="Node000002" href="$dc/de2/ws2801_8h.html" title=" " alt="" coords="426,93,581,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="688,48,553,92,551,86,686,43"/>
+<area shape="rect" id="Node000004" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="936,401,1039,427"/>
+<area shape="poly" id="edge19_Node000001_Node000004" title=" " alt="" coords="837,29,916,43,957,54,995,70,1029,90,1056,116,1074,147,1081,185,1081,269,1074,306,1057,341,1035,371,1013,394,1009,390,1031,367,1052,338,1069,305,1075,268,1075,186,1069,149,1052,119,1026,95,993,75,955,60,915,48,836,35"/>
+<area shape="rect" id="Node000003" href="$d2/dba/pixeltypes_8h.html" title="Includes defintions for RGB and HSV pixels." alt="" coords="849,174,950,199"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="581,116,702,136,837,164,851,168,850,173,836,169,701,141,581,121"/>
+<area shape="rect" id="Node000090" title=" " alt="" coords="5,174,124,199"/>
+<area shape="poly" id="edge13_Node000002_Node000090" title=" " alt="" coords="426,120,290,141,136,169,119,173,118,168,135,164,289,135,425,115"/>
+<area shape="rect" id="Node000091" title=" " alt="" coords="148,174,211,199"/>
+<area shape="poly" id="edge14_Node000002_Node000091" title=" " alt="" coords="432,121,332,141,224,169,218,171,216,166,223,164,331,136,430,116"/>
+<area shape="rect" id="Node000092" title=" " alt="" coords="235,174,310,199"/>
+<area shape="poly" id="edge15_Node000002_Node000092" title=" " alt="" coords="468,121,323,169,316,172,314,167,321,164,466,116"/>
+<area shape="rect" id="Node000093" title=" " alt="" coords="335,167,491,207"/>
+<area shape="poly" id="edge16_Node000002_Node000093" title=" " alt="" coords="492,121,447,160,443,156,488,117"/>
+<area shape="rect" id="Node000094" title=" " alt="" coords="515,167,673,207"/>
+<area shape="poly" id="edge17_Node000002_Node000094" title=" " alt="" coords="518,117,564,156,560,160,515,121"/>
+<area shape="rect" id="Node000013" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="697,174,824,199"/>
+<area shape="poly" id="edge18_Node000002_Node000013" title=" " alt="" coords="542,116,711,167,709,172,540,121"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="917,198,945,221,973,253,994,288,1005,328,1005,359,999,389,994,387,1000,359,999,328,989,290,969,256,942,225,914,202"/>
+<area shape="rect" id="Node000006" href="$df/da5/lib8tion_8h.html" title="Fast, efficient 8&#45;bit math functions specifically designed for high&#45;performance LED programming." alt="" coords="907,328,990,353"/>
+<area shape="poly" id="edge4_Node000003_Node000006" title=" " alt="" coords="915,198,936,222,954,254,959,285,957,315,951,314,953,286,949,256,932,225,911,202"/>
+<area shape="rect" id="Node000082" href="$d2/d6b/src_2color_8h.html" title="Contains definitions for color correction and temperature." alt="" coords="671,255,736,280"/>
+<area shape="poly" id="edge6_Node000003_Node000082" title=" " alt="" coords="872,202,745,252,743,247,870,197"/>
+<area shape="rect" id="Node000083" href="$db/d07/eorder_8h.html" title="Defines color channel ordering enumerations." alt="" coords="761,255,835,280"/>
+<area shape="poly" id="edge7_Node000003_Node000083" title=" " alt="" coords="886,202,826,248,822,244,883,197"/>
+<area shape="rect" id="Node000085" href="$d8/dd0/chsv_8h.html" title="Defines the hue, saturation, and value (HSV) pixel struct." alt="" coords="685,328,748,353"/>
+<area shape="poly" id="edge8_Node000003_Node000085" title=" " alt="" coords="862,202,837,209,809,215,783,217,737,217,717,219,698,225,680,237,662,256,656,271,662,287,674,303,690,318,686,321,670,307,657,290,651,271,657,253,676,233,696,221,716,214,737,212,783,212,808,210,836,204,861,197"/>
+<area shape="rect" id="Node000087" href="$d0/d4b/crgb_8hpp.html" title="Defines utility functions for the red, green, and blue (RGB) pixel struct." alt="" coords="860,255,939,280"/>
+<area shape="poly" id="edge9_Node000003_Node000087" title=" " alt="" coords="902,200,902,241,897,241,897,200"/>
+<area shape="poly" id="edge5_Node000006_Node000004" title=" " alt="" coords="957,352,977,388,972,391,953,355"/>
+<area shape="poly" id="edge10_Node000087_Node000004" title=" " alt="" coords="898,281,891,315,892,334,898,352,918,376,944,393,941,397,914,380,893,355,887,335,886,314,893,280"/>
+<area shape="poly" id="edge12_Node000087_Node000006" title=" " alt="" coords="910,279,935,315,931,318,905,282"/>
+<area shape="poly" id="edge11_Node000087_Node000085" title=" " alt="" coords="871,283,760,325,758,320,869,278"/>
+</map>

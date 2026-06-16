@@ -1,0 +1,14 @@
+<map id="fl::gfx::drawDisc" name="fl::gfx::drawDisc">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,118,132,143"/>
+<area shape="rect" id="Node000002" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_a76279d4830b289ed940eb35d755156f9.html#a76279d4830b289ed940eb35d755156f9" title=" " alt="" coords="180,118,383,143"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="132,128,166,128,166,133,132,133"/>
+<area shape="rect" id="Node000003" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_ace632a8bd8b1b176f9f882b536fc486c.html#ace632a8bd8b1b176f9f882b536fc486c" title="Precompute right&#45;shift and reciprocal multiplier for AA division." alt="" coords="451,29,621,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="319,115,430,79,455,71,456,76,431,84,321,120"/>
+<area shape="rect" id="Node000004" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_a6dfa4961e3abbbfbeeea1abe7d8d5259.html#a6dfa4961e3abbbfbeeea1abe7d8d5259" title="Render one scanline of a disc using incremental d²." alt="" coords="431,118,641,143"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="383,128,417,128,417,133,383,133"/>
+<area shape="rect" id="Node000005" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_ab04a22e2927673d2692b4f3e354af564.html#ab04a22e2927673d2692b4f3e354af564" title="Convert any Coord type to 8.8 fixed&#45;point (fl::i32)." alt="" coords="453,191,619,217"/>
+<area shape="poly" id="edge6_Node000002_Node000005" title=" " alt="" coords="327,141,479,185,477,190,326,146"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="489,30,486,20,494,10,510,5,536,3,565,6,581,13,579,18,564,11,536,8,511,10,497,15,491,21,494,28"/>
+<area shape="poly" id="edge5_Node000004_Node000004" title=" " alt="" coords="495,120,486,110,491,100,508,94,536,91,572,95,582,100,586,106,581,109,578,104,570,100,536,97,509,99,494,104,491,109,499,116"/>
+<area shape="poly" id="edge7_Node000005_Node000005" title=" " alt="" coords="495,193,486,183,491,173,508,167,536,165,572,169,582,173,586,179,581,182,578,177,570,174,536,170,509,172,494,177,491,182,499,189"/>
+</map>

@@ -1,0 +1,17 @@
+<map id="fl::third_party::ezWS2812gpio::begin" name="fl::third_party::ezWS2812gpio::begin">
+<area shape="rect" id="Node000001" title="Initialize GPIO pin." alt="" coords="5,23,217,63"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ab91b418b90c32e475842ad7ce3785afb.html#ab91b418b90c32e475842ad7ce3785afb" title="Write digital value to pin." alt="" coords="739,5,853,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="217,37,725,18,725,23,217,42"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aa7a47cf722a2586453e75f6e70284dad.html#aa7a47cf722a2586453e75f6e70284dad" title="Set pin mode (input, output, pull&#45;up, pull&#45;down)" alt="" coords="265,56,360,81"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="218,54,252,58,251,64,217,59"/>
+<area shape="rect" id="Node000004" href="$d9/d33/namespacefl_1_1pwm__state_aee72e1cd03d83550f0f59cd5a4356e07.html#aee72e1cd03d83550f0f59cd5a4356e07" title=" " alt="" coords="428,105,607,131"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="360,79,409,91,444,100,443,105,407,97,359,84"/>
+<area shape="rect" id="Node000007" href="$d9/d33/namespacefl_1_1pwm__state_a567fc66f5ca74ddc7b7253ab96d5fe04.html#a567fc66f5ca74ddc7b7253ab96d5fe04" title=" " alt="" coords="408,56,627,81"/>
+<area shape="poly" id="edge5_Node000003_Node000007" title=" " alt="" coords="360,66,394,66,394,71,360,71"/>
+<area shape="rect" id="Node000005" href="$d9/d33/namespacefl_1_1pwm__state_a6df56c095fbd351947b973e0e1d5289a.html#a6df56c095fbd351947b973e0e1d5289a" title=" " alt="" coords="965,80,1116,105"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="607,111,951,94,951,100,607,116"/>
+<area shape="poly" id="edge6_Node000007_Node000002" title=" " alt="" coords="587,53,725,28,726,33,588,59"/>
+<area shape="rect" id="Node000008" href="$d9/d33/namespacefl_1_1pwm__state_a1e6e308bd81ec9ab9f1bd0f62bbba1b2.html#a1e6e308bd81ec9ab9f1bd0f62bbba1b2" title=" " alt="" coords="675,55,917,80"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="627,65,661,65,661,71,627,71"/>
+<area shape="poly" id="edge8_Node000008_Node000005" title=" " alt="" coords="918,77,952,81,951,86,917,83"/>
+</map>

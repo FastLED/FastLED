@@ -1,0 +1,80 @@
+<map id="runTest" name="runTest">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,429,75,455"/>
+<area shape="rect" id="Node000002" href="$d4/df9/_auto_research_test_8cpp_adaf2e23d83d4eb143bb3728848a40c30.html#adaf2e23d83d4eb143bb3728848a40c30" title="Build expected UCS7604 encoded bytes from LED data." alt="" coords="123,175,296,200"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="45,428,76,370,120,295,186,209,190,213,125,298,81,372,50,430"/>
+<area shape="rect" id="Node000023" href="$d4/df9/_auto_research_test_8cpp_ade4309c9f4171360f59ed787c7041584.html#ade4309c9f4171360f59ed787c7041584" title=" " alt="" coords="174,528,245,553"/>
+<area shape="poly" id="edge21_Node000001_Node000023" title=" " alt="" coords="64,452,176,518,173,523,61,457"/>
+<area shape="rect" id="Node000031" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="687,503,790,528"/>
+<area shape="poly" id="edge42_Node000001_Node000031" title=" " alt="" coords="45,428,73,385,95,362,121,345,164,330,220,319,284,311,352,307,420,308,483,314,536,326,576,345,592,361,600,378,603,415,605,452,611,469,624,485,648,500,675,509,673,514,646,505,621,489,607,471,600,453,598,415,595,380,588,364,573,350,535,331,482,319,420,313,352,312,284,316,221,324,166,335,124,350,99,366,78,388,50,431"/>
+<area shape="rect" id="Node000032" href="$d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c" title=" " alt="" coords="661,552,816,577"/>
+<area shape="poly" id="edge43_Node000001_Node000032" title=" " alt="" coords="74,431,185,405,334,378,409,369,478,367,535,373,558,379,576,389,593,406,601,424,603,463,604,502,611,520,624,537,649,553,647,557,621,541,606,523,599,503,598,463,596,426,588,409,573,393,556,384,534,378,477,372,409,375,334,383,186,410,76,436"/>
+<area shape="rect" id="Node000040" href="$d4/df9/_auto_research_test_8cpp_aab4e2f01a664c2f47e0313fa1728f367.html#aab4e2f01a664c2f47e0313fa1728f367" title="Check if an encoder selector identifies a UCS7604 variant." alt="" coords="163,577,255,603"/>
+<area shape="poly" id="edge41_Node000001_Node000040" title=" " alt="" coords="49,454,76,507,97,537,124,562,151,576,149,581,121,567,93,540,71,510,44,456"/>
+<area shape="rect" id="Node000041" href="$d4/d36/namespacefl_af5bbd781bdb3eed52770e81d8c1dff48.html#af5bbd781bdb3eed52770e81d8c1dff48" title="Convert RxDeviceType to human&#45;readable string." alt="" coords="165,627,254,652"/>
+<area shape="poly" id="edge44_Node000001_Node000041" title=" " alt="" coords="46,454,54,486,69,529,92,574,124,612,153,628,151,632,121,616,87,577,64,531,49,488,41,456"/>
+<area shape="rect" id="Node000003" href="$d0/dee/struct_pixel_controller_ad692558fd1412eb6bfeeb59a782fee47.html#ad692558fd1412eb6bfeeb59a782fee47" title=" " alt="" coords="389,138,529,178"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="296,175,375,165,376,170,296,180"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a403bd8d96e6625e5daef764daf780f26.html#a403bd8d96e6625e5daef764daf780f26" title="Helper function to create a back_insert_iterator." alt="" coords="396,203,523,228"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="296,194,383,204,382,209,296,200"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_af8493332ea99e488481aa9268d28af96.html#af8493332ea99e488481aa9268d28af96" title="Encode complete UCS7604 frame (preamble + padding + pixel data)" alt="" coords="387,252,531,277"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="241,198,345,237,380,246,378,251,343,242,239,203"/>
+<area shape="rect" id="Node000012" href="$dc/da5/classfl_1_1_gamma8_a0570eaa0a174959bf99ee8b7dd8cca77.html#a0570eaa0a174959bf99ee8b7dd8cca77" title=" " alt="" coords="646,29,831,55"/>
+<area shape="poly" id="edge19_Node000002_Node000012" title=" " alt="" coords="219,173,268,122,303,95,343,73,416,50,492,37,565,31,632,31,632,37,566,37,492,42,417,55,345,78,306,99,272,126,223,176"/>
+<area shape="rect" id="Node000022" href="$d4/d7d/struct_color_adjustment_ab03d1bf53686d5f037f70de5a7e61aab.html#ab03d1bf53686d5f037f70de5a7e61aab" title="the per&#45;channel scale values premixed with brightness." alt="" coords="344,88,575,113"/>
+<area shape="poly" id="edge20_Node000002_Node000022" title=" " alt="" coords="233,172,283,148,343,123,375,114,377,119,345,129,285,153,236,177"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a6b8c1c3d9c1f0133d76297c9325c3ccc.html#a6b8c1c3d9c1f0133d76297c9325c3ccc" title="Build UCS7604 preamble (15 bytes)" alt="" coords="643,253,834,279"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="532,262,630,263,630,268,532,268"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_ad84dda9e2bac4b689240405fac541479.html#ad84dda9e2bac4b689240405fac541479" title="Encode RGB pixels in UCS7604 16&#45;bit format with gamma correction." alt="" coords="629,352,848,377"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="526,275,576,294,591,305,601,317,610,327,624,337,643,345,641,350,621,342,606,331,597,320,587,309,573,299,524,280"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_ab48f77d450cf05f81e3cb66a588e5ae5.html#ab48f77d450cf05f81e3cb66a588e5ae5" title=" " alt="" coords="903,192,991,217"/>
+<area shape="poly" id="edge12_Node000005_Node000008" title=" " alt="" coords="531,257,553,250,573,237,585,223,591,208,595,176,599,145,607,129,621,116,652,97,681,86,708,80,735,79,791,91,856,116,878,128,899,144,930,178,926,182,895,148,876,132,854,120,789,96,735,85,709,85,682,91,654,102,624,120,611,133,604,146,600,177,597,210,590,226,576,241,556,254,533,262"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a8499aed78d9a0774922c53162368360c.html#a8499aed78d9a0774922c53162368360c" title="Encode RGBW pixels in UCS7604 16&#45;bit format with gamma correction." alt="" coords="623,303,855,328"/>
+<area shape="poly" id="edge8_Node000005_Node000009" title=" " alt="" coords="531,275,655,298,654,303,530,280"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_a77da6b88e5c2a0f6e0f241ea0ebfbf13.html#a77da6b88e5c2a0f6e0f241ea0ebfbf13" title="Encode RGB pixels in UCS7604 8&#45;bit format." alt="" coords="633,401,844,427"/>
+<area shape="poly" id="edge10_Node000005_Node000010" title=" " alt="" coords="533,273,556,282,576,295,595,318,601,342,607,365,614,376,624,387,634,393,631,397,621,391,609,380,602,368,596,344,590,321,573,299,553,286,531,278"/>
+<area shape="rect" id="Node000011" href="$d4/d36/namespacefl_ac40685c0458c3102212f344c4e2ae154.html#ac40685c0458c3102212f344c4e2ae154" title="Encode RGBW pixels in UCS7604 8&#45;bit format." alt="" coords="627,451,851,476"/>
+<area shape="poly" id="edge11_Node000005_Node000011" title=" " alt="" coords="533,271,556,280,576,295,591,313,598,331,601,368,604,403,611,420,625,436,632,442,628,446,621,440,606,422,598,404,596,368,593,332,586,315,573,299,553,285,531,276"/>
+<area shape="poly" id="edge13_Node000005_Node000012" title=" " alt="" coords="531,258,553,250,573,237,588,218,595,198,597,157,597,115,605,93,621,72,639,58,642,63,625,76,610,96,603,116,602,157,601,199,593,221,576,241,556,255,532,263"/>
+<area shape="rect" id="Node000018" href="$d4/d36/namespacefl_a0245017ca5e8aeaf10ccae7aee944f08.html#a0245017ca5e8aeaf10ccae7aee944f08" title="Create RGB input iterator range from PixelIterator." alt="" coords="630,155,847,180"/>
+<area shape="poly" id="edge16_Node000005_Node000018" title=" " alt="" coords="531,253,573,237,588,226,596,214,606,201,621,189,636,182,638,187,624,194,610,205,601,217,592,230,576,242,533,258"/>
+<area shape="rect" id="Node000021" href="$d4/d36/namespacefl_a897e8186b6287f0bccef2ec8f12f4b99.html#a897e8186b6287f0bccef2ec8f12f4b99" title="Create RGBW input iterator range from PixelIterator." alt="" coords="623,204,854,229"/>
+<area shape="poly" id="edge18_Node000005_Node000021" title=" " alt="" coords="531,250,650,229,651,234,532,255"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="829,350,853,337,880,313,903,285,933,229,938,231,907,287,884,317,856,342,831,354"/>
+<area shape="poly" id="edge9_Node000009_Node000008" title=" " alt="" coords="822,300,853,288,893,259,925,227,928,230,897,263,856,292,824,305"/>
+<area shape="poly" id="edge14_Node000012_Node000008" title=" " alt="" coords="816,52,856,72,883,96,906,124,937,178,932,181,901,127,879,100,853,76,814,57"/>
+<area shape="poly" id="edge15_Node000012_Node000012" title=" " alt="" coords="705,31,697,21,701,11,715,5,739,3,768,6,779,15,776,20,766,11,739,8,717,10,705,15,702,20,709,28"/>
+<area shape="poly" id="edge17_Node000018_Node000018" title=" " alt="" coords="705,156,697,146,701,136,715,130,739,128,768,132,779,141,776,145,766,137,739,133,717,135,705,140,702,146,709,153"/>
+<area shape="rect" id="Node000024" href="$d4/d36/namespacefl_ae9393b9b146723d5edf654f73b4ca439.html#ae9393b9b146723d5edf654f73b4ca439" title="Check if a chipset timing is eligible for wave3 encoding." alt="" coords="394,552,525,577"/>
+<area shape="poly" id="edge22_Node000023_Node000024" title=" " alt="" coords="245,541,380,554,380,560,245,547"/>
+<area shape="rect" id="Node000025" href="$d0/d08/classfl_1_1span_a326aa9f29859fe8a92833fd5db12c3bb.html#a326aa9f29859fe8a92833fd5db12c3bb" title=" " alt="" coords="406,601,513,627"/>
+<area shape="poly" id="edge23_Node000023_Node000025" title=" " alt="" coords="246,546,297,562,321,575,345,586,393,600,392,605,343,591,319,579,295,567,244,551"/>
+<area shape="rect" id="Node000026" href="$d4/df9/_auto_research_test_8cpp_afaa70e9f2bc81a9ee2bb02e9237ff4d9.html#afaa70e9f2bc81a9ee2bb02e9237ff4d9" title=" " alt="" coords="395,703,523,728"/>
+<area shape="poly" id="edge24_Node000023_Node000026" title=" " alt="" coords="246,541,273,548,298,563,311,578,318,593,323,624,327,653,334,667,346,681,363,693,383,702,381,707,361,698,342,685,329,670,322,655,317,624,313,595,306,581,294,567,271,553,244,546"/>
+<area shape="poly" id="edge38_Node000023_Node000031" title=" " alt="" coords="245,542,272,549,298,563,314,582,321,602,329,620,345,636,407,664,434,671,461,674,487,672,514,665,573,636,585,626,592,615,597,590,602,563,609,550,621,537,646,523,673,516,674,521,648,528,624,541,613,553,607,565,602,591,597,617,589,629,576,640,516,670,488,677,461,679,433,676,405,669,343,640,324,623,316,604,310,585,294,567,270,554,244,547"/>
+<area shape="rect" id="Node000033" href="$d1/d27/classfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e.html#a08170cac6eba7241f099ae16730f6f8e" title=" " alt="" coords="681,799,797,824"/>
+<area shape="poly" id="edge39_Node000023_Node000033" title=" " alt="" coords="246,540,273,547,298,563,314,585,322,608,322,653,320,675,322,697,330,717,346,737,381,764,420,784,463,799,506,809,592,818,667,817,667,822,592,823,505,814,461,804,418,789,378,768,342,741,325,720,317,698,315,675,316,653,316,609,310,588,294,567,271,552,244,545"/>
+<area shape="rect" id="Node000034" href="$d4/df9/_auto_research_test_8cpp_ac7607ef5b12973ed8cd8353da071aef8.html#ac7607ef5b12973ed8cd8353da071aef8" title="Dump raw edge timing data to console for debugging." alt="" coords="377,833,541,859"/>
+<area shape="poly" id="edge32_Node000023_Node000034" title=" " alt="" coords="246,540,273,547,298,563,318,592,327,621,328,649,325,678,322,706,322,734,329,763,346,792,368,812,394,826,391,831,365,816,342,796,324,765,316,735,316,706,320,677,323,649,322,622,313,594,294,567,271,552,244,545"/>
+<area shape="rect" id="Node000037" href="$d4/d36/namespacefl_a91e1324b8f8b552ee88b79ba67181369.html#a91e1324b8f8b552ee88b79ba67181369" title="Create 4&#45;phase RX timing from 3&#45;phase chipset timing with tolerance." alt="" coords="376,404,543,429"/>
+<area shape="poly" id="edge36_Node000023_Node000037" title=" " alt="" coords="222,526,272,482,306,458,343,438,362,431,363,436,345,443,309,463,275,487,226,530"/>
+<area shape="rect" id="Node000038" href="$d4/d36/namespacefl_a44a195439ac7fa303b4b0b0c956605be.html#a44a195439ac7fa303b4b0b0c956605be" title=" " alt="" coords="413,453,505,479"/>
+<area shape="poly" id="edge37_Node000023_Node000038" title=" " alt="" coords="239,525,343,487,399,474,400,479,345,493,241,530"/>
+<area shape="rect" id="Node000039" href="$d4/d36/namespacefl_ae2e1ae9fd84b84af8b23721d551b9609.html#ae2e1ae9fd84b84af8b23721d551b9609" title=" " alt="" coords="418,503,501,528"/>
+<area shape="poly" id="edge40_Node000023_Node000039" title=" " alt="" coords="245,534,404,518,404,524,245,540"/>
+<area shape="rect" id="Node000027" href="$d2/d24/classfl_1_1vector_a14c21203a1f583636c5ef6fdb9a58d4b.html#a14c21203a1f583636c5ef6fdb9a58d4b" title=" " alt="" coords="681,749,797,775"/>
+<area shape="poly" id="edge25_Node000026_Node000027" title=" " alt="" coords="524,723,668,748,667,753,523,729"/>
+<area shape="rect" id="Node000028" href="$d2/d24/classfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980.html#ae9a8cea8d4b81d8f2f10a2b007ac2980" title=" " alt="" coords="661,601,817,627"/>
+<area shape="poly" id="edge26_Node000026_Node000028" title=" " alt="" coords="523,701,573,681,587,670,596,659,606,647,621,636,647,625,649,630,624,640,610,651,601,662,591,674,576,686,525,706"/>
+<area shape="rect" id="Node000029" href="$d2/d24/classfl_1_1vector_a305fb6473faab9c2798479c057a58d50.html#a305fb6473faab9c2798479c057a58d50" title=" " alt="" coords="671,651,807,676"/>
+<area shape="poly" id="edge27_Node000026_Node000029" title=" " alt="" coords="523,701,656,676,657,681,524,706"/>
+<area shape="rect" id="Node000030" href="$d9/dce/_client_validation_real_8h_a02882a6e53c2b3b63eba56831f88f604.html#a02882a6e53c2b3b63eba56831f88f604" title=" " alt="" coords="711,700,767,725"/>
+<area shape="poly" id="edge28_Node000026_Node000030" title=" " alt="" coords="523,712,697,710,697,716,523,717"/>
+<area shape="poly" id="edge29_Node000026_Node000031" title=" " alt="" coords="523,706,550,697,573,681,586,664,593,647,595,611,598,574,606,555,621,537,646,522,673,514,675,519,648,527,624,541,610,558,603,575,601,611,598,648,591,667,576,685,552,702,525,711"/>
+<area shape="poly" id="edge30_Node000026_Node000032" title=" " alt="" coords="523,705,549,696,573,681,584,670,590,659,596,635,602,610,609,598,621,587,647,572,650,577,624,591,613,601,607,612,601,636,595,661,588,673,576,685,552,700,525,710"/>
+<area shape="poly" id="edge31_Node000026_Node000033" title=" " alt="" coords="503,726,576,754,600,770,624,784,668,797,666,802,622,788,597,774,573,759,501,731"/>
+<area shape="poly" id="edge35_Node000034_Node000033" title=" " alt="" coords="541,833,667,818,667,823,542,839"/>
+<area shape="rect" id="Node000035" href="$d1/d27/classfl_1_1sstream_a2020a3513ae92ed435685030c3127194.html#a2020a3513ae92ed435685030c3127194" title=" " alt="" coords="673,848,804,873"/>
+<area shape="poly" id="edge33_Node000034_Node000035" title=" " alt="" coords="542,848,660,854,659,859,541,853"/>
+<area shape="rect" id="Node000036" href="$d3/d73/classfl_1_1_fixed_vector_af86cd6955983355051129798610c8def.html#af86cd6955983355051129798610c8def" title=" " alt="" coords="659,897,819,923"/>
+<area shape="poly" id="edge34_Node000034_Node000036" title=" " alt="" coords="511,856,623,883,662,892,661,897,622,889,510,861"/>
+</map>

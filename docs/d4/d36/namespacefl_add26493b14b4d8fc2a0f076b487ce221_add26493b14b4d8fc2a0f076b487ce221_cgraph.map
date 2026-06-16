@@ -1,0 +1,5 @@
+<map id="fl::encodeAPA102_HD" name="fl::encodeAPA102_HD">
+<area shape="rect" id="Node000001" title="Encode pixel data in APA102 format with per&#45;LED brightness." alt="" coords="5,5,167,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ac2cf8663a108788e320558648cc42a7d.html#ac2cf8663a108788e320558648cc42a7d" title="Map 8&#45;bit brightness to 5&#45;bit (0&#45;31)" alt="" coords="215,5,380,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="167,15,201,15,201,21,167,21"/>
+</map>

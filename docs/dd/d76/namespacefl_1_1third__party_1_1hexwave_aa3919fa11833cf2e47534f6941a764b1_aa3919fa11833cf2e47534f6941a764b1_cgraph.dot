@@ -1,0 +1,25 @@
+digraph "fl::third_party::hexwave::hexwave_init"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::third_party::hexwave\l::hexwave_init",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Initialize the hexwave library (DEPRECATED - use hexwave_engine_create)"];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::third_party::hexwave\l::hexwave_engine_create",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d76/namespacefl_1_1third__party_1_1hexwave_ae1d7f1bfbf1e38371ddb8430a353d7bf.html#ae1d7f1bfbf1e38371ddb8430a353d7bf",tooltip="Create and initialize a new HexWaveEngine."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::third_party::hexwave::cos",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d76/namespacefl_1_1third__party_1_1hexwave_a9cda2472ab9bd68df745496533aa76e7.html#a9cda2472ab9bd68df745496533aa76e7",tooltip=" "];
+  Node2 -> Node4 [id="edge3_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::third_party::hexwave\l::free",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d76/namespacefl_1_1third__party_1_1hexwave_a8d74e9eb1fcd03c2d38cf1c23fb33b82.html#a8d74e9eb1fcd03c2d38cf1c23fb33b82",tooltip=" "];
+  Node2 -> Node5 [id="edge4_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::third_party::hexwave\l::malloc",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d76/namespacefl_1_1third__party_1_1hexwave_a800f05fe5ce25fa8f4c2b55c45ba300f.html#a800f05fe5ce25fa8f4c2b55c45ba300f",tooltip=" "];
+  Node2 -> Node6 [id="edge5_Node000002_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::third_party::hexwave::sin",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d76/namespacefl_1_1third__party_1_1hexwave_abc07da8d8983da7016b55f7626e9c060.html#abc07da8d8983da7016b55f7626e9c060",tooltip=" "];
+  Node2 -> Node7 [id="edge6_Node000002_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::step",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aa6f747fb354cae784bdd4c656cbdd9fb.html#aa6f747fb354cae784bdd4c656cbdd9fb",tooltip=" "];
+  Node1 -> Node8 [id="edge7_Node000001_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl::third_party::hexwave\l::hexwave_engine_destroy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d76/namespacefl_1_1third__party_1_1hexwave_a02ab69db1ef35ecf2336643ebbd4e742.html#a02ab69db1ef35ecf2336643ebbd4e742",tooltip="Destroy a HexWaveEngine and free its resources."];
+  Node8 -> Node4 [id="edge8_Node000008_Node000004",color="steelblue1",style="solid",tooltip=" "];
+}

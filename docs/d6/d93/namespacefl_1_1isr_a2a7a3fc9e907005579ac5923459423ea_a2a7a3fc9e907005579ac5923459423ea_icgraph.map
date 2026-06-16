@@ -1,0 +1,5 @@
+<map id="fl::isr::memset_zero_word" name="fl::isr::memset_zero_word">
+<area shape="rect" id="Node000001" title="ISR&#45;safe word&#45;aligned memset (4&#45;byte writes)" alt="" coords="204,5,395,31"/>
+<area shape="rect" id="Node000002" href="$d6/d93/namespacefl_1_1isr_ae7336865f05d03188eb93400b3c152b7.html#ae7336865f05d03188eb93400b3c152b7" title="ISR&#45;safe memset with alignment optimization." alt="" coords="5,5,156,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="190,21,156,21,156,15,190,15"/>
+</map>

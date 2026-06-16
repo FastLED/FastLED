@@ -1,0 +1,19 @@
+<map id="fl::s16x16::cos" name="fl::s16x16::cos">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,53,120,78"/>
+<area shape="rect" id="Node000002" href="$d9/d9f/classfl_1_1s16x16_a5e82494e286448e4cad2de1b302b9168.html#a5e82494e286448e4cad2de1b302b9168" title=" " alt="" coords="396,27,536,53"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="82,50,120,29,167,12,230,4,294,5,354,12,406,22,405,27,354,17,294,10,231,9,169,17,123,34,85,55"/>
+<area shape="rect" id="Node000003" href="$d9/d9f/classfl_1_1s16x16_abb43dd69e7dfbbb23acfdb79835c987a.html#abb43dd69e7dfbbb23acfdb79835c987a" title=" " alt="" coords="168,27,348,53"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="120,55,154,51,155,56,121,61"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a289ad302494249edde0b6b9e28c831f1.html#a289ad302494249edde0b6b9e28c831f1" title=" " alt="" coords="220,126,296,151"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="89,76,169,112,208,124,206,129,167,117,87,81"/>
+<area shape="rect" id="Node000009" href="$d9/d9f/classfl_1_1s16x16_a9c7a5411b60510e5a513c5d1e305720d.html#a9c7a5411b60510e5a513c5d1e305720d" title=" " alt="" coords="181,77,335,102"/>
+<area shape="poly" id="edge7_Node000001_Node000009" title=" " alt="" coords="121,70,168,76,167,81,120,75"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="348,37,382,37,382,43,348,43"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a37a484f9e39484372eee81c7a66fad7d.html#a37a484f9e39484372eee81c7a66fad7d" title=" " alt="" coords="429,126,503,151"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="296,136,416,136,416,141,296,141"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a530ae797477506b0949a2cae39010c6a.html#a530ae797477506b0949a2cae39010c6a" title=" " alt="" coords="584,126,703,151"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="503,136,570,136,570,141,503,141"/>
+<area shape="poly" id="edge8_Node000009_Node000002" title=" " alt="" coords="312,74,398,53,399,59,313,79"/>
+<area shape="rect" id="Node000010" href="$d9/d9f/classfl_1_1s16x16_aa048b427f50f28993a67941e0f303a65.html#aa048b427f50f28993a67941e0f303a65" title=" " alt="" coords="407,77,525,102"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="336,87,393,87,393,92,336,92"/>
+</map>

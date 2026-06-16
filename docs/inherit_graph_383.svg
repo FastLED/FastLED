@@ -11,10 +11,10 @@
 <!-- Node0 -->
 <g id="Node000000" class="node">
 <title>Node0</title>
-<g id="a_Node000000"><a xlink:href="d0/d5c/classfl_1_1_sorted_heap_vector.html" target="_top" xlink:title=" ">
+<g id="a_Node000000"><a xlink:href="db/dac/structfl_1_1detail_1_1_type_to_json_3_01fl_1_1json_01_4.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="116,-30 0,-30 0,0 116,0 116,-30"/>
-<text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::SortedHeapVector</text>
-<text text-anchor="middle" x="58" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; T, LessThan &gt;</text>
+<text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::detail::TypeToJson</text>
+<text text-anchor="middle" x="58" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; fl::json &gt;</text>
 </a>
 </g>
 </g>

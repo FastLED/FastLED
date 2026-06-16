@@ -1,0 +1,15 @@
+<map id="fl::isr::memset_zero" name="fl::isr::memset_zero">
+<area shape="rect" id="Node000001" title="ISR&#45;safe memset with alignment optimization." alt="" coords="5,43,156,68"/>
+<area shape="rect" id="Node000002" href="$d6/d93/namespacefl_1_1isr_a51ec8e6b0dbf1f6f1c4a1fd77702f9a9.html#a51ec8e6b0dbf1f6f1c4a1fd77702f9a9" title="ISR&#45;safe memset replacement (byte&#45;by&#45;byte zero)" alt="" coords="443,5,629,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="133,40,204,27,320,18,429,15,429,20,320,23,204,33,134,45"/>
+<area shape="rect" id="Node000003" href="$d6/d93/namespacefl_1_1isr_a2a7a3fc9e907005579ac5923459423ea.html#a2a7a3fc9e907005579ac5923459423ea" title="ISR&#45;safe word&#45;aligned memset (4&#45;byte writes)" alt="" coords="204,43,395,68"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="156,53,190,53,190,58,156,58"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a2815270748b8084061e7103ee57960da.html#a2815270748b8084061e7103ee57960da" title=" " alt="" coords="249,92,349,117"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="138,65,236,88,235,93,137,71"/>
+<area shape="poly" id="edge5_Node000003_Node000002" title=" " alt="" coords="380,40,442,30,442,35,381,45"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_ad200a6a214a70194b7c33fd67af6cea4.html#ad200a6a214a70194b7c33fd67af6cea4" title=" " alt="" coords="491,68,581,93"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="395,63,478,72,477,77,395,68"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d" title=" " alt="" coords="677,68,772,93"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="581,78,663,78,663,83,581,83"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="349,97,478,84,478,89,350,102"/>
+</map>

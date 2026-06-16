@@ -1,0 +1,5 @@
+<map id="fl::spi::MultiLaneDevice::waitComplete" name="fl::spi::MultiLaneDevice::waitComplete">
+<area shape="rect" id="Node000001" title="Wait for pending transmission to complete." alt="" coords="5,5,180,45"/>
+<area shape="rect" id="Node000002" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a522448a9b9b59c86768f41c9498dbe5a.html#a522448a9b9b59c86768f41c9498dbe5a" title="Check if device is initialized." alt="" coords="228,5,403,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,23,214,23,214,28,180,28"/>
+</map>

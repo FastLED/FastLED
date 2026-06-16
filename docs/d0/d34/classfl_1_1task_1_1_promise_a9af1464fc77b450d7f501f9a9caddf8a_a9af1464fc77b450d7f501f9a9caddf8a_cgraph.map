@@ -1,0 +1,14 @@
+<map id="fl::task::Promise::reject" name="fl::task::Promise::reject">
+<area shape="rect" id="Node000001" title="Create a rejected Promise with error." alt="" coords="5,63,140,103"/>
+<area shape="rect" id="Node000002" href="$d0/d34/classfl_1_1task_1_1_promise_a4ae6da8172cc69a1dbbc7a01bc86f959.html#a4ae6da8172cc69a1dbbc7a01bc86f959" title="Default constructor &#45; creates invalid Promise." alt="" coords="371,5,505,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="137,60,187,48,275,35,357,27,357,33,275,40,189,53,139,65"/>
+<area shape="rect" id="Node000003" href="$d0/d34/classfl_1_1task_1_1_promise_a9fd2b38e45453a1061acc972d64a2bed.html#a9fd2b38e45453a1061acc972d64a2bed" title="Create a pending Promise." alt="" coords="188,63,323,103"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="140,80,174,80,174,85,140,85"/>
+<area shape="rect" id="Node000005" href="$d0/d34/classfl_1_1task_1_1_promise_a51a1be9fd686089d804cec834abd6ccc.html#a51a1be9fd686089d804cec834abd6ccc" title="Get the error (only valid if is_rejected() returns true)" alt="" coords="188,127,323,167"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="131,100,186,120,184,125,130,105"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="319,60,360,47,361,52,320,65"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="375,70,501,95"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="323,80,361,80,361,85,323,85"/>
+<area shape="rect" id="Node000006" href="$d0/d34/classfl_1_1task_1_1_promise_aa4a0fc861a1271cbb04a46aa7628c611.html#aa4a0fc861a1271cbb04a46aa7628c611" title="Check if Promise is valid." alt="" coords="371,127,505,167"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="323,144,356,144,356,149,323,149"/>
+</map>

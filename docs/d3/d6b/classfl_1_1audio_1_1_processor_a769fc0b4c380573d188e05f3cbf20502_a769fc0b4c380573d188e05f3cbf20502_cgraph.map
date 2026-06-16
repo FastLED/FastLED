@@ -1,0 +1,14 @@
+<map id="fl::audio::Processor::getTrebleLevel" name="fl::audio::Processor::getTrebleLevel">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,63,151,103"/>
+<area shape="poly" id="edge7_Node000001_Node000001" title=" " alt="" coords="40,64,38,54,44,45,58,39,78,37,102,40,114,47,112,52,100,45,78,42,59,44,47,49,43,55,45,62"/>
+<area shape="rect" id="Node000002" href="$db/dbf/namespacefl_1_1audio_a1cbdb2338ec760ba92ce43fece0713d2.html#a1cbdb2338ec760ba92ce43fece0713d2" title=" " alt="" coords="209,29,347,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="151,66,202,55,203,60,152,71"/>
+<area shape="rect" id="Node000003" href="$d3/d6b/classfl_1_1audio_1_1_processor_a14290b2912c64567baedbe513ab27347.html#a14290b2912c64567baedbe513ab27347" title=" " alt="" coords="199,103,357,143"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="152,95,186,102,185,107,151,101"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="245,31,238,21,242,11,255,5,278,3,306,6,317,16,314,20,304,11,278,8,257,10,246,15,243,20,249,28"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="240,104,238,94,244,85,258,79,278,77,302,80,314,87,312,92,300,85,278,82,259,84,247,89,243,95,245,102"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="415,81,541,107"/>
+<area shape="poly" id="edge5_Node000003_Node000004" title=" " alt="" coords="357,109,401,103,402,108,358,114"/>
+<area shape="rect" id="Node000005" href="$d3/d6b/classfl_1_1audio_1_1_processor_ade806d07af52e3d281939cebce7643d5.html#ade806d07af52e3d281939cebce7643d5" title=" " alt="" coords="405,131,551,171"/>
+<area shape="poly" id="edge6_Node000003_Node000005" title=" " alt="" coords="358,132,392,137,391,142,358,137"/>
+</map>

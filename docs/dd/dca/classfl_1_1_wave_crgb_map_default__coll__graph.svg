@@ -22,7 +22,7 @@
 <!-- Node1 -->
 <g id="Node000001" class="node">
 <title>Node1</title>
-<g id="a_Node000001"><a xlink:title=" ">
+<g id="a_Node000001"><a xlink:title="Default wave&#45;to&#45;color mapper producing grayscale output.">
 <polygon fill="#999999" stroke="#666666" points="135,-19 0,-19 0,0 135,0 135,-19"/>
 <text text-anchor="middle" x="67.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::WaveCrgbMapDefault</text>
 </a>
@@ -31,7 +31,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../dc/dce/classfl_1_1_wave_crgb_map.html" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../dc/dce/classfl_1_1_wave_crgb_map.html" target="_top" xlink:title="Abstract base class for mapping wave simulation values to LED colors.">
 <polygon fill="white" stroke="#666666" points="117,-74 18,-74 18,-55 117,-55 117,-74"/>
 <text text-anchor="middle" x="67.5" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">fl::WaveCrgbMap</text>
 </a>

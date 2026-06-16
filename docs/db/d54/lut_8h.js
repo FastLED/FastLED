@@ -3,10 +3,10 @@ var lut_8h =
     [ "fl::LUT< T >", "d6/d18/classfl_1_1_l_u_t.html", "d6/d18/classfl_1_1_l_u_t" ],
     [ "fl::LUT16", "d4/d36/namespacefl_a6cefa45dd8b6cc84c04f7ad2417589de.html#a6cefa45dd8b6cc84c04f7ad2417589de", null ],
     [ "fl::LUTXY16", "d4/d36/namespacefl_a09469f802cd6a2e3a92672d2b83a9d7f.html#a09469f802cd6a2e3a92672d2b83a9d7f", null ],
-    [ "fl::LUTXYFLOAT", "d4/d36/namespacefl_a5d307bcfa41ff5241ade9d4fccfc1b65.html#a5d307bcfa41ff5241ade9d4fccfc1b65", null ],
+    [ "fl::LUTXYFLOAT", "d4/d36/namespacefl_a9f5cdd2c25ccb79d0a913fe73fe26475.html#a9f5cdd2c25ccb79d0a913fe73fe26475", null ],
     [ "fl::LUTXYZFLOAT", "d4/d36/namespacefl_a246bd80f6be0e16b3c76e96c3b6281ed.html#a246bd80f6be0e16b3c76e96c3b6281ed", null ],
-    [ "fl::FASTLED_SMART_PTR_NO_FWD", "d4/d36/namespacefl_a234c2f2e01ee4096118541ef93de3fcd.html#a234c2f2e01ee4096118541ef93de3fcd", null ],
-    [ "fl::FASTLED_SMART_PTR_NO_FWD", "d4/d36/namespacefl_ae9116742f0d6281cf045ccf4b2a2791a.html#ae9116742f0d6281cf045ccf4b2a2791a", null ],
-    [ "fl::FASTLED_SMART_PTR_NO_FWD", "d4/d36/namespacefl_a62986fa3751de77035b7a343907ef650.html#a62986fa3751de77035b7a343907ef650", null ],
-    [ "fl::FASTLED_SMART_PTR_NO_FWD", "d4/d36/namespacefl_aff7a931f178b895489dc62a3b3ae70b3.html#aff7a931f178b895489dc62a3b3ae70b3", null ]
+    [ "fl::FASTLED_SHARED_PTR_NO_FWD", "d4/d36/namespacefl_a177ee851eb108e11012c8e5fba6c0606.html#a177ee851eb108e11012c8e5fba6c0606", null ],
+    [ "fl::FASTLED_SHARED_PTR_NO_FWD", "d4/d36/namespacefl_a491f26c54cd7c32f9a6e90f6b410506d.html#a491f26c54cd7c32f9a6e90f6b410506d", null ],
+    [ "fl::FASTLED_SHARED_PTR_NO_FWD", "d4/d36/namespacefl_a418cfb602922f5ea39602a9e0855bfc4.html#a418cfb602922f5ea39602a9e0855bfc4", null ],
+    [ "fl::FASTLED_SHARED_PTR_NO_FWD", "d4/d36/namespacefl_ae2d81546b4f127b3ddef90ebca138ed3.html#ae2d81546b4f127b3ddef90ebca138ed3", null ]
 ];

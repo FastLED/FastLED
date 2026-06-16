@@ -1,0 +1,15 @@
+<map id="fl::CRGB::nscale8_video" name="fl::CRGB::nscale8_video">
+<area shape="rect" id="Node000001" title="Scale down a RGB to N/256ths of it&#39;s current brightness using &quot;video&quot; dimming rules." alt="" coords="475,80,651,105"/>
+<area shape="rect" id="Node000002" href="$de/db5/classfl_1_1_twinkle_fox_aa9fdb7fd8471ebeca24ead4f5fa3585c.html#aa9fdb7fd8471ebeca24ead4f5fa3585c" title=" " alt="" coords="204,5,427,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="518,77,426,45,382,33,383,28,427,39,520,72"/>
+<area shape="rect" id="Node000004" href="$d4/dd0/_twinkle_fox_8ino_a6d0a3407d4b43c23c7bdd4aac9fc76fd.html#a6d0a3407d4b43c23c7bdd4aac9fc76fd" title=" " alt="" coords="260,55,371,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="461,85,371,76,371,70,461,80"/>
+<area shape="rect" id="Node000006" href="$d4/d1c/fl_2gfx_2colorutils_8h_a4ab605f27e67edf3cf9bd320c55042de.html#a4ab605f27e67edf3cf9bd320c55042de" title=" " alt="" coords="230,104,401,129"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="461,105,401,111,401,106,460,100"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a62be6e9ead7828a7e77701f350c0bf98.html#a62be6e9ead7828a7e77701f350c0bf98" title="Scale using CRGB::nscale8_video()" alt="" coords="262,153,369,179"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="517,113,427,143,370,158,368,153,426,138,516,108"/>
+<area shape="rect" id="Node000003" href="$de/db5/classfl_1_1_twinkle_fox_ab5d3d43b11bed65afbd407071ee85eb8.html#ab5d3d43b11bed65afbd407071ee85eb8" title=" " alt="" coords="5,5,156,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="190,21,156,21,156,15,190,15"/>
+<area shape="rect" id="Node000005" href="$d4/dd0/_twinkle_fox_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="55,55,106,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="246,70,106,70,106,65,246,65"/>
+</map>

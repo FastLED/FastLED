@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fl/xypath_impls.h File Reference</title>
+<title>FastLED: fl/gfx/xypath_impls.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -107,14 +107,15 @@ $(function(){initNavTree('d8/d5f/xypath__impls_8h.html','../../'); initResizable
   <div class="headertitle"><div class="title">xypath_impls.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="../../db/d54/lut_8h_source.html">fl/lut.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d8/db8/math__macros_8h_source.html">fl/math_macros.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../dc/d18/memory_8h_source.html">fl/memory.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d2/db4/tile2x2_8h_source.html">fl/tile2x2.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d2/d80/transform_8h_source.html">fl/transform.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d8/d4b/unused_8h_source.html">fl/unused.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d6/d68/vector_8h_source.html">fl/vector.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../de/d77/warn_8h_source.html">fl/warn.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../db/d54/lut_8h_source.html">fl/math/lut.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/db1/math_8h_source.html">fl/math/math.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d6a/shared__ptr_8h_source.html">fl/stl/shared_ptr.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d2/db4/tile2x2_8h_source.html">fl/gfx/tile2x2.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d2/d80/transform_8h_source.html">fl/math/transform.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d54/compiler__control_8h_source.html">fl/stl/compiler_control.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/d68/vector_8h_source.html">fl/stl/vector.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d7/d7f/log_8h_source.html">fl/log/log.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for xypath_impls.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -127,7 +128,7 @@ $(function(){initNavTree('d8/d5f/xypath__impls_8h.html','../../'); initResizable
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d4/db0/xypath__impls_8h__dep__incl.svg" width="100%" height="536"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d4/db0/xypath__impls_8h__dep__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../d8/d5f/xypath__impls_8h_source.html">Go to the source code of this file.</a></p>
@@ -171,37 +172,37 @@ Classes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a5583ccb1f9f25a8070bce073af84f393" id="r_a5583ccb1f9f25a8070bce073af84f393"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a5583ccb1f9f25a8070bce073af84f393.html#a5583ccb1f9f25a8070bce073af84f393">fl::FASTLED_SMART_PTR</a> (<a class="el" href="../../dd/dab/classfl_1_1_archimedean_spiral_path.html">ArchimedeanSpiralPath</a>)</td></tr>
-<tr class="separator:a5583ccb1f9f25a8070bce073af84f393"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aabffa8e8e6d3e6fa51113f888f1723a4" id="r_aabffa8e8e6d3e6fa51113f888f1723a4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aabffa8e8e6d3e6fa51113f888f1723a4.html#aabffa8e8e6d3e6fa51113f888f1723a4">fl::FASTLED_SMART_PTR</a> (<a class="el" href="../../d8/d11/classfl_1_1_catmull_rom_params.html">CatmullRomParams</a>)</td></tr>
-<tr class="separator:aabffa8e8e6d3e6fa51113f888f1723a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adc016cb7094d05e6b0e5bbc2be6244b5" id="r_adc016cb7094d05e6b0e5bbc2be6244b5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_adc016cb7094d05e6b0e5bbc2be6244b5.html#adc016cb7094d05e6b0e5bbc2be6244b5">fl::FASTLED_SMART_PTR</a> (<a class="el" href="../../d2/d1f/classfl_1_1_catmull_rom_path.html">CatmullRomPath</a>)</td></tr>
-<tr class="separator:adc016cb7094d05e6b0e5bbc2be6244b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6055ff11fbd2ff96e1efc16631408ed5" id="r_a6055ff11fbd2ff96e1efc16631408ed5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a6055ff11fbd2ff96e1efc16631408ed5.html#a6055ff11fbd2ff96e1efc16631408ed5">fl::FASTLED_SMART_PTR</a> (<a class="el" href="../../da/d3f/classfl_1_1_circle_path.html">CirclePath</a>)</td></tr>
-<tr class="separator:a6055ff11fbd2ff96e1efc16631408ed5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac7ea61d5f1017ef7081a403f0b971fc6" id="r_ac7ea61d5f1017ef7081a403f0b971fc6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ac7ea61d5f1017ef7081a403f0b971fc6.html#ac7ea61d5f1017ef7081a403f0b971fc6">fl::FASTLED_SMART_PTR</a> (<a class="el" href="../../d1/d9f/classfl_1_1_gielis_curve_path.html">GielisCurvePath</a>)</td></tr>
-<tr class="separator:ac7ea61d5f1017ef7081a403f0b971fc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3ac92ff54c9f17d161f9ecfcbca61d81" id="r_a3ac92ff54c9f17d161f9ecfcbca61d81"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a3ac92ff54c9f17d161f9ecfcbca61d81.html#a3ac92ff54c9f17d161f9ecfcbca61d81">fl::FASTLED_SMART_PTR</a> (<a class="el" href="../../df/dc4/classfl_1_1_heart_path.html">HeartPath</a>)</td></tr>
-<tr class="separator:a3ac92ff54c9f17d161f9ecfcbca61d81"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a14f292346277f1e10330ce94e31eb5ad" id="r_a14f292346277f1e10330ce94e31eb5ad"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a14f292346277f1e10330ce94e31eb5ad.html#a14f292346277f1e10330ce94e31eb5ad">fl::FASTLED_SMART_PTR</a> (<a class="el" href="../../d3/da9/classfl_1_1_line_path.html">LinePath</a>)</td></tr>
-<tr class="separator:a14f292346277f1e10330ce94e31eb5ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7aeabb9ebd1d48b688ce5ac95971551a" id="r_a7aeabb9ebd1d48b688ce5ac95971551a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a7aeabb9ebd1d48b688ce5ac95971551a.html#a7aeabb9ebd1d48b688ce5ac95971551a">fl::FASTLED_SMART_PTR</a> (<a class="el" href="../../dc/dc8/classfl_1_1_line_path_params.html">LinePathParams</a>)</td></tr>
-<tr class="separator:a7aeabb9ebd1d48b688ce5ac95971551a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9008b468dd22a07d770a759b872f3cba" id="r_a9008b468dd22a07d770a759b872f3cba"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a9008b468dd22a07d770a759b872f3cba.html#a9008b468dd22a07d770a759b872f3cba">fl::FASTLED_SMART_PTR</a> (<a class="el" href="../../df/d1d/classfl_1_1_phyllotaxis_path.html">PhyllotaxisPath</a>)</td></tr>
-<tr class="separator:a9008b468dd22a07d770a759b872f3cba"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a20a5277b4e2b7cc6f72d2866c485d88b" id="r_a20a5277b4e2b7cc6f72d2866c485d88b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a20a5277b4e2b7cc6f72d2866c485d88b.html#a20a5277b4e2b7cc6f72d2866c485d88b">fl::FASTLED_SMART_PTR</a> (<a class="el" href="../../dd/d29/classfl_1_1_point_path.html">PointPath</a>)</td></tr>
-<tr class="separator:a20a5277b4e2b7cc6f72d2866c485d88b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4902a73edfbb4c2ba766fe0178e58c38" id="r_a4902a73edfbb4c2ba766fe0178e58c38"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a4902a73edfbb4c2ba766fe0178e58c38.html#a4902a73edfbb4c2ba766fe0178e58c38">fl::FASTLED_SMART_PTR</a> (<a class="el" href="../../d3/dc1/classfl_1_1_rose_path.html">RosePath</a>)</td></tr>
-<tr class="separator:a4902a73edfbb4c2ba766fe0178e58c38"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a99bcc92c5b23a250af3e30386fe02c7c" id="r_a99bcc92c5b23a250af3e30386fe02c7c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a99bcc92c5b23a250af3e30386fe02c7c.html#a99bcc92c5b23a250af3e30386fe02c7c">fl::FASTLED_SMART_PTR</a> (<a class="el" href="../../dc/dc2/classfl_1_1_rose_path_params.html">RosePathParams</a>)</td></tr>
-<tr class="separator:a99bcc92c5b23a250af3e30386fe02c7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa5fd67edc6fc65d9ff61ca8592df3d0e" id="r_aa5fd67edc6fc65d9ff61ca8592df3d0e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aa5fd67edc6fc65d9ff61ca8592df3d0e.html#aa5fd67edc6fc65d9ff61ca8592df3d0e">fl::FASTLED_SMART_PTR</a> (<a class="el" href="../../d9/df4/classfl_1_1_x_y_path.html">XYPath</a>)</td></tr>
-<tr class="separator:aa5fd67edc6fc65d9ff61ca8592df3d0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abf06fea1159b307aa9cc746fa9f0f58b" id="r_abf06fea1159b307aa9cc746fa9f0f58b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_abf06fea1159b307aa9cc746fa9f0f58b.html#abf06fea1159b307aa9cc746fa9f0f58b">fl::FASTLED_SHARED_PTR</a> (<a class="el" href="../../dd/dab/classfl_1_1_archimedean_spiral_path.html">ArchimedeanSpiralPath</a>)</td></tr>
+<tr class="separator:abf06fea1159b307aa9cc746fa9f0f58b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a753a8002d1be36ad16f16ac86cf6243a" id="r_a753a8002d1be36ad16f16ac86cf6243a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a753a8002d1be36ad16f16ac86cf6243a.html#a753a8002d1be36ad16f16ac86cf6243a">fl::FASTLED_SHARED_PTR</a> (<a class="el" href="../../d8/d11/classfl_1_1_catmull_rom_params.html">CatmullRomParams</a>)</td></tr>
+<tr class="separator:a753a8002d1be36ad16f16ac86cf6243a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aecd3b6d003d6b3b2fc5da84f1ccbfa07" id="r_aecd3b6d003d6b3b2fc5da84f1ccbfa07"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aecd3b6d003d6b3b2fc5da84f1ccbfa07.html#aecd3b6d003d6b3b2fc5da84f1ccbfa07">fl::FASTLED_SHARED_PTR</a> (<a class="el" href="../../d2/d1f/classfl_1_1_catmull_rom_path.html">CatmullRomPath</a>)</td></tr>
+<tr class="separator:aecd3b6d003d6b3b2fc5da84f1ccbfa07"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2229f761ee373a48204709082b79a539" id="r_a2229f761ee373a48204709082b79a539"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a2229f761ee373a48204709082b79a539.html#a2229f761ee373a48204709082b79a539">fl::FASTLED_SHARED_PTR</a> (<a class="el" href="../../da/d3f/classfl_1_1_circle_path.html">CirclePath</a>)</td></tr>
+<tr class="separator:a2229f761ee373a48204709082b79a539"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca88105411a32772942abb4d1d47e04f" id="r_aca88105411a32772942abb4d1d47e04f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aca88105411a32772942abb4d1d47e04f.html#aca88105411a32772942abb4d1d47e04f">fl::FASTLED_SHARED_PTR</a> (<a class="el" href="../../d1/d9f/classfl_1_1_gielis_curve_path.html">GielisCurvePath</a>)</td></tr>
+<tr class="separator:aca88105411a32772942abb4d1d47e04f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab7bf90b8e220368262942df76017a5d3" id="r_ab7bf90b8e220368262942df76017a5d3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ab7bf90b8e220368262942df76017a5d3.html#ab7bf90b8e220368262942df76017a5d3">fl::FASTLED_SHARED_PTR</a> (<a class="el" href="../../df/dc4/classfl_1_1_heart_path.html">HeartPath</a>)</td></tr>
+<tr class="separator:ab7bf90b8e220368262942df76017a5d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae4dfbaf2cd51db7d05c950835a421937" id="r_ae4dfbaf2cd51db7d05c950835a421937"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ae4dfbaf2cd51db7d05c950835a421937.html#ae4dfbaf2cd51db7d05c950835a421937">fl::FASTLED_SHARED_PTR</a> (<a class="el" href="../../d3/da9/classfl_1_1_line_path.html">LinePath</a>)</td></tr>
+<tr class="separator:ae4dfbaf2cd51db7d05c950835a421937"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a000a388a2475f0870cd6aadca81b11e3" id="r_a000a388a2475f0870cd6aadca81b11e3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a000a388a2475f0870cd6aadca81b11e3.html#a000a388a2475f0870cd6aadca81b11e3">fl::FASTLED_SHARED_PTR</a> (<a class="el" href="../../dc/dc8/classfl_1_1_line_path_params.html">LinePathParams</a>)</td></tr>
+<tr class="separator:a000a388a2475f0870cd6aadca81b11e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad9ed1b1805fce8c282afbb28cf75bc74" id="r_ad9ed1b1805fce8c282afbb28cf75bc74"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ad9ed1b1805fce8c282afbb28cf75bc74.html#ad9ed1b1805fce8c282afbb28cf75bc74">fl::FASTLED_SHARED_PTR</a> (<a class="el" href="../../df/d1d/classfl_1_1_phyllotaxis_path.html">PhyllotaxisPath</a>)</td></tr>
+<tr class="separator:ad9ed1b1805fce8c282afbb28cf75bc74"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a206ffb983264de133a681fdd0b709a55" id="r_a206ffb983264de133a681fdd0b709a55"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a206ffb983264de133a681fdd0b709a55.html#a206ffb983264de133a681fdd0b709a55">fl::FASTLED_SHARED_PTR</a> (<a class="el" href="../../dd/d29/classfl_1_1_point_path.html">PointPath</a>)</td></tr>
+<tr class="separator:a206ffb983264de133a681fdd0b709a55"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba2440c5b30718bb4451e86a158c9ab2" id="r_aba2440c5b30718bb4451e86a158c9ab2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aba2440c5b30718bb4451e86a158c9ab2.html#aba2440c5b30718bb4451e86a158c9ab2">fl::FASTLED_SHARED_PTR</a> (<a class="el" href="../../d3/dc1/classfl_1_1_rose_path.html">RosePath</a>)</td></tr>
+<tr class="separator:aba2440c5b30718bb4451e86a158c9ab2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abfe6455ec1f76661603df6ef46ef4826" id="r_abfe6455ec1f76661603df6ef46ef4826"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_abfe6455ec1f76661603df6ef46ef4826.html#abfe6455ec1f76661603df6ef46ef4826">fl::FASTLED_SHARED_PTR</a> (<a class="el" href="../../dc/dc2/classfl_1_1_rose_path_params.html">RosePathParams</a>)</td></tr>
+<tr class="separator:abfe6455ec1f76661603df6ef46ef4826"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a25022ab6286c2b0de071c0d27bde28" id="r_a6a25022ab6286c2b0de071c0d27bde28"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a6a25022ab6286c2b0de071c0d27bde28.html#a6a25022ab6286c2b0de071c0d27bde28">fl::FASTLED_SHARED_PTR</a> (<a class="el" href="../../d9/df4/classfl_1_1_x_y_path.html">XYPath</a>)</td></tr>
+<tr class="separator:a6a25022ab6286c2b0de071c0d27bde28"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -209,8 +210,8 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d8/d5f/xypath__impls_8h.html">xypath_impls.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_c9349635bab014644c82face402cd66f.html">gfx</a></li><li class="navelem"><a class="el" href="../../d8/d5f/xypath__impls_8h.html">xypath_impls.h</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

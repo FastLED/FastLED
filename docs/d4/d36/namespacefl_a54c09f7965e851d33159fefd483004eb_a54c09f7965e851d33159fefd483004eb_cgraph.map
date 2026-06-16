@@ -1,0 +1,21 @@
+<map id="fl::readSerialLine" name="fl::readSerialLine">
+<area shape="rect" id="Node000001" title="Read a line from a serial&#45;like input source (blocking with optional timeout)" alt="" coords="5,128,136,153"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a186b596ee2d8dbd5386a081c95401c8b.html#a186b596ee2d8dbd5386a081c95401c8b" title=" " alt="" coords="184,128,357,153"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="136,138,170,138,170,143,136,143"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_aea219cb806e210fa698fe53624fbc7ac.html#aea219cb806e210fa698fe53624fbc7ac" title="Delay for a given number of microseconds." alt="" coords="407,5,570,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="284,126,335,84,368,60,404,40,420,33,422,38,407,44,371,65,338,88,287,130"/>
+<area shape="rect" id="Node000004" href="$dd/dd8/classfl_1_1_optional_ad5f53bf55f59f43884a71b107dee14c7.html#ad5f53bf55f59f43884a71b107dee14c7" title=" " alt="" coords="405,55,572,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="304,125,404,89,428,81,429,87,406,94,306,130"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="451,128,526,153"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="358,138,438,138,438,143,358,143"/>
+<area shape="rect" id="Node000007" href="$d1/d27/classfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e.html#a08170cac6eba7241f099ae16730f6f8e" title=" " alt="" coords="431,177,547,203"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="328,151,419,172,418,177,327,156"/>
+<area shape="rect" id="Node000008" href="$dd/dd8/classfl_1_1_optional_a1a7216013ea48bf987511dae97d2915f.html#a1a7216013ea48bf987511dae97d2915f" title=" " alt="" coords="420,227,557,252"/>
+<area shape="poly" id="edge8_Node000002_Node000008" title=" " alt="" coords="293,151,344,181,406,212,429,220,427,225,404,216,341,185,291,156"/>
+<area shape="rect" id="Node000005" href="$dd/dd8/classfl_1_1_optional_a1c6d194efbcfda4ab12e09305999b667.html#a1c6d194efbcfda4ab12e09305999b667" title=" " alt="" coords="620,55,763,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="573,65,606,65,606,70,573,70"/>
+<area shape="poly" id="edge6_Node000006_Node000006" title=" " alt="" coords="455,130,448,120,452,110,466,104,489,101,517,105,528,114,525,118,515,110,489,107,467,109,456,113,453,119,460,126"/>
+<area shape="rect" id="Node000009" href="$dd/dd8/classfl_1_1_optional_a0c3fe141556cad218a68e49c72ac139a.html#a0c3fe141556cad218a68e49c72ac139a" title=" " alt="" coords="632,227,751,252"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="558,237,618,237,618,242,558,242"/>
+<area shape="poly" id="edge10_Node000009_Node000009" title=" " alt="" coords="658,228,651,218,655,208,668,202,691,200,720,204,731,213,727,217,717,209,691,205,670,207,658,212,656,218,662,225"/>
+</map>

@@ -1,0 +1,15 @@
+<map id="fl::spi::ParallelDevice" name="fl::spi::ParallelDevice">
+<area shape="rect" id="Node000001" title="Parallel GPIO SPI device (1&#45;32 pins driven from single data stream)" alt="" coords="997,85,1156,110"/>
+<area shape="rect" id="Node000002" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="757,70,908,125"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="922,95,997,95,997,100,922,100"/>
+<area shape="rect" id="Node000003" href="$d1/d11/structfl_1_1spi_1_1_parallel_device_1_1_impl.html" title=" " alt="" coords="387,5,546,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="560,41,734,75,757,79,756,85,733,80,559,46"/>
+<area shape="rect" id="Node000004" href="$d3/dca/structfl_1_1_spi_config.html" title="Configuration for SPI device (supports 1&#45;8 lanes)" alt="" coords="41,13,140,38"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="154,23,387,23,387,28,154,28"/>
+<area shape="rect" id="Node000010" href="$d5/d2b/structfl_1_1default__delete.html" title=" " alt="" coords="380,70,553,125"/>
+<area shape="poly" id="edge4_Node000002_Node000010" title=" " alt="" coords="567,95,757,95,757,100,567,100"/>
+<area shape="rect" id="Node000011" href="$d5/d2b/structfl_1_1default__delete.html" title=" " alt="" coords="5,85,176,110"/>
+<area shape="poly" id="edge5_Node000010_Node000011" title=" " alt="" coords="190,95,379,95,379,100,190,100"/>
+<area shape="rect" id="Node000012" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="399,149,534,189"/>
+<area shape="poly" id="edge6_Node000002_Node000012" title=" " alt="" coords="547,160,637,148,733,129,758,122,760,127,734,135,638,153,548,165"/>
+</map>

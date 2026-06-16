@@ -1,0 +1,21 @@
+<map id="fl::UIAudio::UIAudio" name="fl::UIAudio::UIAudio">
+<area shape="rect" id="Node000001" title="Asset&#45;handle overload (issue #2284)." alt="" coords="5,116,153,141"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a336a1bcec17356e1141f42f35ee02bb9.html#a336a1bcec17356e1141f42f35ee02bb9" title="Construct an asset handle from a relative sketch path at runtime." alt="" coords="229,87,302,112"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,114,214,105,215,110,154,120"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a0a4f1a4cca802944a086c97fe689f2a6.html#a0a4f1a4cca802944a086c97fe689f2a6" title="Resolve an asset handle to a URL (or local file path) at runtime." alt="" coords="201,144,329,169"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="154,137,189,142,188,148,153,142"/>
+<area shape="rect" id="Node000003" href="$de/dde/namespacefl_1_1asset__detail_a96ede9fc23fb9bf6983aada6a1c93e34.html#a96ede9fc23fb9bf6983aada6a1c93e34" title="Compile&#45;time length of a null&#45;terminated C string." alt="" coords="385,29,537,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="301,86,403,56,405,61,303,91"/>
+<area shape="rect" id="Node000004" href="$de/dde/namespacefl_1_1asset__detail_af361660dbfe3bbe551cd700ec8b371e9.html#af361660dbfe3bbe551cd700ec8b371e9" title="Compile&#45;time check: returns true if the string contains a &quot;..&quot; segment." alt="" coords="379,79,544,119"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="302,97,365,97,365,102,302,102"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="429,31,422,21,426,11,439,5,461,3,488,6,499,15,496,19,486,11,461,8,441,10,430,15,428,20,433,28"/>
+<area shape="rect" id="Node000005" href="$de/dde/namespacefl_1_1asset__detail_a6a167501a51d683604efe86303115145.html#a6a167501a51d683604efe86303115145" title="Recursive constexpr walk looking for any &quot;..&quot; segment." alt="" coords="593,79,779,119"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="544,97,580,97,580,102,544,102"/>
+<area shape="poly" id="edge6_Node000005_Node000005" title=" " alt="" coords="644,80,642,70,648,60,663,55,686,53,712,56,726,63,724,68,711,61,686,58,664,60,652,65,647,71,649,78"/>
+<area shape="rect" id="Node000008" href="$d2/db7/classfl_1_1url_a43ad5bb11bc9cd93dfd88ff161be7fa5.html#a43ad5bb11bc9cd93dfd88ff161be7fa5" title=" " alt="" coords="408,144,515,169"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="329,154,394,154,394,159,329,159"/>
+<area shape="rect" id="Node000009" href="$de/dde/namespacefl_1_1asset__detail_a38e7d1ca3a3f86b6d275e3489e9dd008.html#a38e7d1ca3a3f86b6d275e3489e9dd008" title="Look up an asset path in the registry. Returns invalid url() on miss." alt="" coords="377,194,545,234"/>
+<area shape="poly" id="edge9_Node000007_Node000009" title=" " alt="" coords="310,167,380,188,379,193,309,172"/>
+<area shape="rect" id="Node000010" href="$de/dde/namespacefl_1_1asset__detail_ab3fb9f509aa0f90e62ae74553d95cbcd.html#ab3fb9f509aa0f90e62ae74553d95cbcd" title=" " alt="" coords="599,201,773,227"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="546,211,585,211,585,217,546,217"/>
+</map>

@@ -1,3 +1,11 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$d6/d18/classfl_1_1_l_u_t.html" title=" " alt="" coords="5,5,107,31"/>
+<area shape="rect" id="Node000000" href="$dc/d61/classfl_1_1detail_1_1_erased_invoker.html" title=" " alt="" coords="5,109,180,134"/>
+<area shape="rect" id="Node000001" href="$d3/d5e/classfl_1_1detail_1_1_response_aware_invoker_3_01_r_07_args_8_8_8_08_4.html" title=" " alt="" coords="228,5,415,45"/>
+<area shape="poly" id="edge141_Node000000_Node000001" title=" " alt="" coords="130,100,227,55,258,43,260,48,229,60,132,105"/>
+<area shape="rect" id="Node000002" href="$db/d87/classfl_1_1detail_1_1_response_aware_invoker_3_01void_07_args_8_8_8_08_4.html" title=" " alt="" coords="228,69,415,109"/>
+<area shape="poly" id="edge142_Node000000_Node000002" title=" " alt="" coords="193,105,227,100,228,105,194,110"/>
+<area shape="rect" id="Node000003" href="$dd/de4/classfl_1_1detail_1_1_typed_invoker_3_01_r_07_args_8_8_8_08_4.html" title=" " alt="" coords="237,133,406,173"/>
+<area shape="poly" id="edge143_Node000000_Node000003" title=" " alt="" coords="194,133,237,139,236,144,193,138"/>
+<area shape="rect" id="Node000004" href="$d8/d77/classfl_1_1detail_1_1_typed_invoker_3_01void_07_args_8_8_8_08_4.html" title=" " alt="" coords="237,197,406,237"/>
+<area shape="poly" id="edge144_Node000000_Node000004" title=" " alt="" coords="132,138,229,183,260,195,258,200,227,188,130,143"/>
 </map>

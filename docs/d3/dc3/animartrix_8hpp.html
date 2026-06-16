@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fx/2d/animartrix.hpp File Reference</title>
+<title>FastLED: fl/fx/2d/animartrix.hpp File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -104,22 +104,26 @@ $(function(){initNavTree('d3/dc3/animartrix_8hpp.html','../../'); initResizable(
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#namespaces">Namespaces</a> &#124;
 <a href="#define-members">Macros</a> &#124;
+<a href="#typedef-members">Typedefs</a> &#124;
 <a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a> &#124;
 <a href="#var-members">Variables</a>  </div>
   <div class="headertitle"><div class="title">animartrix.hpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d6/d01/dbg_8h_source.html">fl/dbg.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../df/d2a/namespace_8h_source.html">fl/namespace.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../dc/d18/memory_8h_source.html">fl/memory.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../da/d4b/unique__ptr_8h_source.html">fl/unique_ptr.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../da/d61/xymap_8h_source.html">fl/xymap.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d9/d43/fx2d_8h_source.html">fx/fx2d.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;crgb.h&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d7/d7f/log_8h_source.html">fl/log/log.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dc/d18/memory_8h_source.html">fl/stl/memory.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../da/d4b/unique__ptr_8h_source.html">fl/stl/unique_ptr.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../da/d61/xymap_8h_source.html">fl/math/xymap.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/d68/vector_8h_source.html">fl/stl/vector.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d41/pair_8h_source.html">fl/stl/pair.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../da/d66/string_8h_source.html">fl/stl/string.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d9/d43/fx2d_8h_source.html">fl/fx/fx2d.h</a>&quot;</code><br />
 <code>#include &quot;eorder.h&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d5/d4d/pixel__controller_8h_source.html">pixel_controller.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d3/d3b/animartrix__detail_8hpp_source.html">animartrix_detail.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d5d/animartrix__detail_8h_source.html">fl/fx/2d/animartrix_detail.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for animartrix.hpp:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -132,7 +136,7 @@ $(function(){initNavTree('d3/dc3/animartrix_8hpp.html','../../'); initResizable(
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d2/db8/animartrix_8hpp__dep__incl.svg" width="100%" height="404"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d2/db8/animartrix_8hpp__dep__incl.svg" width="100%" height="481"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../d3/dc3/animartrix_8hpp_source.html">Go to the source code of this file.</a></p>
@@ -141,102 +145,117 @@ $(function(){initNavTree('d3/dc3/animartrix_8hpp.html','../../'); initResizable(
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/df5/classfl_1_1_animartrix.html">fl::Animartrix</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:d1/dbd/structfl_1_1_animartrix_anim_info" id="r_d1/dbd/structfl_1_1_animartrix_anim_info"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html#d1/dbd/structfl_1_1_animartrix_anim_info">fl::AnimartrixAnimInfo</a></td></tr>
+<tr class="separator:d1/dbd/structfl_1_1_animartrix_anim_info"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:d3/d78/structfl_1_1_animartrix_entry" id="r_d3/d78/structfl_1_1_animartrix_entry"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html#d3/d78/structfl_1_1_animartrix_entry">fl::AnimartrixEntry</a></td></tr>
-<tr class="memdesc:d3/d78/structfl_1_1_animartrix_entry"><td class="mdescLeft">&#160;</td><td class="mdescRight">################################################## Details with the implementation of <a class="el" href="../../d8/df5/classfl_1_1_animartrix.html">Animartrix</a>  <a href="../../d4/d36/namespacefl.html#d3/d78/structfl_1_1_animartrix_entry">More...</a><br /></td></tr>
 <tr class="separator:d3/d78/structfl_1_1_animartrix_entry"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/dda/classfl_1_1_fast_l_e_d_a_n_i_mart_r_i_x.html">fl::FastLEDANIMartRIX</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a8be91ce5d854856b03d69f2b653ee9b9" id="r_a8be91ce5d854856b03d69f2b653ee9b9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/dc3/animartrix_8hpp_a8be91ce5d854856b03d69f2b653ee9b9.html#a8be91ce5d854856b03d69f2b653ee9b9">ANIMARTRIX_INTERNAL</a></td></tr>
-<tr class="separator:a8be91ce5d854856b03d69f2b653ee9b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad354dedf810b90d3aedfc422b707dba4" id="r_ad354dedf810b90d3aedfc422b707dba4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/dc3/animartrix_8hpp_ad354dedf810b90d3aedfc422b707dba4.html#ad354dedf810b90d3aedfc422b707dba4">ANIMARTRIX_VIZ</a>(FloatClass,  FPClass)</td></tr>
+<tr class="separator:ad354dedf810b90d3aedfc422b707dba4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86d42416700c4d3510d200e72aaa60b9" id="r_a86d42416700c4d3510d200e72aaa60b9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/dc3/animartrix_8hpp_a86d42416700c4d3510d200e72aaa60b9.html#a86d42416700c4d3510d200e72aaa60b9">FL_ANIMARTRIX_USE_FIXED_POINT</a>&#160;&#160;&#160;1</td></tr>
+<tr class="separator:a86d42416700c4d3510d200e72aaa60b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+Typedefs</h2></td></tr>
+<tr class="memitem:a1ae11330ef45742d5bef1d055662a1b2" id="r_a1ae11330ef45742d5bef1d055662a1b2"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a1ae11330ef45742d5bef1d055662a1b2.html#a1ae11330ef45742d5bef1d055662a1b2">fl::AnimartrixVizFactory</a> = <a class="el" href="../../d1/d69/classfl_1_1_i_animartrix2_viz.html">IAnimartrix2Viz</a>* (*)()</td></tr>
+<tr class="separator:a1ae11330ef45742d5bef1d055662a1b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:a4717e431b6c23ec1a1afb5161dc1aa69" id="r_a4717e431b6c23ec1a1afb5161dc1aa69"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69">fl::AnimartrixAnim</a> { <br />
-&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69acde97309b0196141809564ffeb097bbe">fl::RGB_BLOBS5</a> = 0
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a4dc891b308ac9b65e2c4b200d429a0ed">fl::RGB_BLOBS4</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69aecfb84709b4a69017a16c4a7edb3e08b">fl::RGB_BLOBS3</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69ab63a39cf4ab72366e72709c0abb5d2e4">fl::RGB_BLOBS2</a>
+<tr class="memitem:a4717e431b6c23ec1a1afb5161dc1aa69" id="r_a4717e431b6c23ec1a1afb5161dc1aa69"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69">fl::AnimartrixAnim</a> { <br />
+&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a14b0c49ec418043ab28c8ef22cf0cc8b">fl::RGB_BLOBS5</a> = 0
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69ab2a9a4a7c0bf2a8cbd700db49b0f67a0">fl::RGB_BLOBS4</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69aa634cfb3b57bb3ce5506a0a234f0a005">fl::RGB_BLOBS3</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a07a3ee61ff88e1c84b1c3aed1f4bc43e">fl::RGB_BLOBS2</a>
 , <br />
-&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a930df185b5e6e06e24b62d16612be9e0">fl::RGB_BLOBS</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a51518a02a49c2f8ca7149cd732245be3">fl::POLAR_WAVES</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a91ff3d89fa0c616b54bca6211e686166">fl::SLOW_FADE</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a173fbce1bfb0c7a59da90284fde65634">fl::ZOOM2</a>
+&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a2b091220c183750e27af446688ac19ee">fl::RGB_BLOBS</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a7213600d1c95602abb645f083262bb57">fl::POLAR_WAVES</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69aad4bac7269f2bb39fac020129d20247b">fl::SLOW_FADE</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a2eccfd3ce7fe3eebb682c4b819604605">fl::ZOOM2</a>
 , <br />
-&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a28e7c7e0ef18d42d4f97e9db55ead5c9">fl::ZOOM</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69ac177616d2b80b20d8a8386f4c7ba1ec5">fl::HOT_BLOB</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69affbcc786a881dc5b81bde0bfcf36425b">fl::SPIRALUS2</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a5df43efd6173b144819d2fca57b7576c">fl::SPIRALUS</a>
+&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a66f276916d5a97cbb3b0008213bda1c3">fl::ZOOM</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69aa67510e421d29319569dcab964707fd5">fl::HOT_BLOB</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a0c3dcbe96bd4eff836fc042f886cf50b">fl::SPIRALUS2</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a1e47339b17f6d67e7e9378ba51999791">fl::SPIRALUS</a>
 , <br />
-&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69ab34aec3026234fb3163c29ce04f239fe">fl::YVES</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69ab45ddba542b22e5bb18f332e16348843">fl::SCALEDEMO1</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a9dc5c8a99dc4139bf49b2b2b4761c134">fl::LAVA1</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69adf8603d94d06980f10894d6327df64da">fl::CALEIDO3</a>
+&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a90be582c6c3b281e9c6622642b684be4">fl::YVES</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a351e277446ff69cd7e8cd2e3f88a3614">fl::SCALEDEMO1</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69ad7d0d0a2975d797f7368d8f379c89333">fl::LAVA1</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a189592f5ba07a984c228dc426ac4d555">fl::CALEIDO3</a>
 , <br />
-&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a21d034ce3805b0e9358e0e88310ca09e">fl::CALEIDO2</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69ae2455dc62ac91e63084be37a56d462cd">fl::CALEIDO1</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a4ec7fc6dca73582bc2eb4460a71f06a3">fl::DISTANCE_EXPERIMENT</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a49f98d2f38a32aaf83922f98653611c8">fl::CENTER_FIELD</a>
+&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a1c7c155ab3f54237b1ee5ec59845d7ad">fl::CALEIDO2</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69afb88d307d51fd745470a2fc2da25e26a">fl::CALEIDO1</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a95ec2241e79479734a9767957a7af44f">fl::DISTANCE_EXPERIMENT</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a7f7a8e4fed8c95be4834cde1774cdf50">fl::CENTER_FIELD</a>
 , <br />
-&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a66cad69a9a9e9e2cc68509ca7c048ea2">fl::WAVES</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a2cf34fb9b74e4d3cc845383ac2690416">fl::CHASING_SPIRALS</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a8ad021e507bd2d347e3fa60fda39caa7">fl::ROTATING_BLOB</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69acd0854bd65648e191ed2ff89e6453e19">fl::RINGS</a>
+&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a3a53940499e32acadaf621956623f24f">fl::WAVES</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69ada5336879340e10052dc497f23e62c1b">fl::CHASING_SPIRALS</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a03d3e1a1af2d6c88abb892f95d934bc1">fl::ROTATING_BLOB</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69af73c72aec9cbf0bdceec0f7182828542">fl::RINGS</a>
 , <br />
-&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a0bf1303141bf117e66f3c818051c188c">fl::COMPLEX_KALEIDO</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a774ad0fc52a9f75979043a6bce1d4b07">fl::COMPLEX_KALEIDO_2</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69adf1a1c84bf573d435f8075cbc6dee5eb">fl::COMPLEX_KALEIDO_3</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a590b583372c5c7cd116ecd75da38c06e">fl::COMPLEX_KALEIDO_4</a>
+&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69aaefdc9e27c2f3269ffb417aaf62eccba">fl::COMPLEX_KALEIDO</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69acf35973065e5d4f1b12bdee0f19752cb">fl::COMPLEX_KALEIDO_2</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a6725b48f52e87b2baa60d6ac9445a3fc">fl::COMPLEX_KALEIDO_3</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a3a6e705ed520dc6a6f462dbe33e35143">fl::COMPLEX_KALEIDO_4</a>
 , <br />
-&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a6a2393e5e76525a4826bded11c835ef9">fl::COMPLEX_KALEIDO_5</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69aab7f14b28037d335ebdb2d61b9c31841">fl::COMPLEX_KALEIDO_6</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a3c58dfe39609097fadd8aeeb8fd14945">fl::WATER</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a557e1467e6c4b502a0c4bc29359f9d1e">fl::PARAMETRIC_WATER</a>
+&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a5698c02367b96209fb8dac7325207370">fl::COMPLEX_KALEIDO_5</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69ae21bfec97048a4912985b8578c6bb37f">fl::COMPLEX_KALEIDO_6</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a2add2964642f39099cb51edf4a4f5a70">fl::WATER</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69ac60548ed2502c67b2e97ea3d26a46e58">fl::PARAMETRIC_WATER</a>
 , <br />
-&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69ab3401867300d267ac525170543ba0ac2">fl::MODULE_EXPERIMENT1</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69ac532f5ee4477ac46dfcfbf2b41ef5771">fl::MODULE_EXPERIMENT2</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a439bf0bde15e42ec2fdd693606e204db">fl::MODULE_EXPERIMENT3</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69abf2c204f91be4ab2bc4d35d6794445ab">fl::MODULE_EXPERIMENT4</a>
+&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a3602a6a520d95897f6be48dca5ad97ac">fl::MODULE_EXPERIMENT1</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69afe84feab3d320f185c1d0a4335dee917">fl::MODULE_EXPERIMENT2</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69af66a1d44ae5d73bdd8b336e90128284f">fl::MODULE_EXPERIMENT3</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a8734f320c7f2e65ac3f833c29f2c2440">fl::MODULE_EXPERIMENT4</a>
 , <br />
-&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69ac02b7d89336f620cbce5fea97cb50265">fl::MODULE_EXPERIMENT5</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a406f2c8ca31b62751c18ccb30f35d920">fl::MODULE_EXPERIMENT6</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a5cebb9104a7a0561e962748b787fbdc1">fl::MODULE_EXPERIMENT7</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a789f94adfaacf1a2eb586930fb51c582">fl::MODULE_EXPERIMENT8</a>
+&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69ab63d3db983b77cf0464ca490a5007edc">fl::MODULE_EXPERIMENT5</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69ad244ebcea2df17ddfaf84eb211757b76">fl::MODULE_EXPERIMENT6</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a824a89642f72faeb166821765e096d12">fl::MODULE_EXPERIMENT7</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69afaf4df2b28270e3e802203adda1a3048">fl::MODULE_EXPERIMENT8</a>
 , <br />
-&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69aa5294123948b63a187301e11048bc865">fl::MODULE_EXPERIMENT9</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a30d99ef2091ff8fc819970884810810c">fl::MODULE_EXPERIMENT10</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a9106f068591195b289625f49678eb5fa">fl::MODULE_EXPERIMENT_SM1</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69af8d4bc28a24397fbb04be4cecf9886b2">fl::MODULE_EXPERIMENT_SM2</a>
+&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69ae3e216244c2d39128ef51b2c097c3125">fl::MODULE_EXPERIMENT9</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a7743d8cde0069e8988c2224fd982ff1b">fl::MODULE_EXPERIMENT10</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69adb7175161840a58ea53d8a40372c5c9b">fl::MODULE_EXPERIMENT_SM1</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a0f37c71a6134fddf7e0399b065346d14">fl::MODULE_EXPERIMENT_SM2</a>
 , <br />
-&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a3f9e46cb4aeff0ca6650ef228b449190">fl::MODULE_EXPERIMENT_SM3</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a91884d7f3e67b15eb23ffea9ca2b98da">fl::MODULE_EXPERIMENT_SM4</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a98df5a30129733b552bbf034824b7b04">fl::MODULE_EXPERIMENT_SM5</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a16ae9172341fe22402d18b962c87ff19">fl::MODULE_EXPERIMENT_SM6</a>
+&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a59454fba886cf5bbaf5e14259cd4869f">fl::MODULE_EXPERIMENT_SM3</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a8855e6a65330e89a8c524f75f6d215f3">fl::MODULE_EXPERIMENT_SM4</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a078e2ecf1f32d15598518fc9a2977bf4">fl::MODULE_EXPERIMENT_SM5</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a6f9851f34d457c593a9ee8ebc6d0a76f">fl::MODULE_EXPERIMENT_SM6</a>
 , <br />
-&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a57bfee6c0422b45a86e446e0579ba948">fl::MODULE_EXPERIMENT_SM8</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a6329275f436fdbb0933310dd454f48e2">fl::MODULE_EXPERIMENT_SM9</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69ab8b4fd90aefa539249bf9f624f85c867">fl::MODULE_EXPERIMENT_SM10</a>
-, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a8a9d8df5da35f677fdccd1c606edaf6e">fl::NUM_ANIMATIONS</a>
+&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69ad4192f8a948afcb3a09d1d6c93ef400f">fl::MODULE_EXPERIMENT_SM8</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69ab296e16dbda4d2a16028925d16f0c39e">fl::MODULE_EXPERIMENT_SM9</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a4f107f482bf9b30a2df33d11c9588d10">fl::MODULE_EXPERIMENT_SM10</a>
+, <a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a03ef792731fc299656b6a8bc6ac60918">fl::FLUFFY_BLOBS</a>
+, <br />
+&#160;&#160;<a class="el" href="../../d4/d36/namespacefl_a4717e431b6c23ec1a1afb5161dc1aa69.html#a4717e431b6c23ec1a1afb5161dc1aa69a7f6bda7fc2e7bb47999cf29dcd28221d">fl::NUM_ANIMATIONS</a>
 <br />
  }</td></tr>
 <tr class="separator:a4717e431b6c23ec1a1afb5161dc1aa69"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:aa7c87150d16920a62a427c5ed62107f3" id="r_aa7c87150d16920a62a427c5ed62107f3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aa7c87150d16920a62a427c5ed62107f3.html#aa7c87150d16920a62a427c5ed62107f3">fl::AnimartrixLoop</a> (<a class="el" href="../../d8/df5/classfl_1_1_animartrix.html">Animartrix</a> &amp;self, fl::u32 now)</td></tr>
-<tr class="separator:aa7c87150d16920a62a427c5ed62107f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1883555a2dad204b9d5ec5e330e3d001" id="r_a1883555a2dad204b9d5ec5e330e3d001"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a1883555a2dad204b9d5ec5e330e3d001.html#a1883555a2dad204b9d5ec5e330e3d001">fl::FASTLED_SMART_PTR</a> (<a class="el" href="../../d8/df5/classfl_1_1_animartrix.html">Animartrix</a>)</td></tr>
-<tr class="separator:a1883555a2dad204b9d5ec5e330e3d001"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a752a24ca4c4ba594951812166bfac654" id="r_a752a24ca4c4ba594951812166bfac654"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a752a24ca4c4ba594951812166bfac654.html#a752a24ca4c4ba594951812166bfac654">fl::FASTLED_SHARED_PTR</a> (<a class="el" href="../../d8/df5/classfl_1_1_animartrix.html">Animartrix</a>)</td></tr>
+<tr class="separator:a752a24ca4c4ba594951812166bfac654"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d68e658207028f00d4d0a9ec040bf8c" id="r_a7d68e658207028f00d4d0a9ec040bf8c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a7d68e658207028f00d4d0a9ec040bf8c.html#a7d68e658207028f00d4d0a9ec040bf8c">fl::getAnimartrixCount</a> ()</td></tr>
+<tr class="separator:a7d68e658207028f00d4d0a9ec040bf8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a237b7dc0213d359c7b1f08294bda0326" id="r_a237b7dc0213d359c7b1f08294bda0326"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/d36/namespacefl.html#d1/dbd/structfl_1_1_animartrix_anim_info">AnimartrixAnimInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a237b7dc0213d359c7b1f08294bda0326.html#a237b7dc0213d359c7b1f08294bda0326">fl::getAnimartrixInfo</a> (int index)</td></tr>
+<tr class="separator:a237b7dc0213d359c7b1f08294bda0326"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a00ade097fdc81c8144ac4478410aa5dd" id="r_a00ade097fdc81c8144ac4478410aa5dd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d2/db2/classfl_1_1string.html">fl::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a00ade097fdc81c8144ac4478410aa5dd.html#a00ade097fdc81c8144ac4478410aa5dd">fl::getAnimartrixName</a> (int animation)</td></tr>
 <tr class="separator:a00ade097fdc81c8144ac4478410aa5dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8852925ab707f6b2ace947ae31c75780" id="r_a8852925ab707f6b2ace947ae31c75780"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
+<tr class="memitem:a8852925ab707f6b2ace947ae31c75780"><td class="memTemplItemLeft" align="right" valign="top">static <a class="el" href="../../d1/d69/classfl_1_1_i_animartrix2_viz.html">IAnimartrix2Viz</a> *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a8852925ab707f6b2ace947ae31c75780.html#a8852925ab707f6b2ace947ae31c75780">fl::makeViz</a> ()</td></tr>
+<tr class="separator:a8852925ab707f6b2ace947ae31c75780"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b8034ee109c995ec1bd23b08ab7da79" id="r_a3b8034ee109c995ec1bd23b08ab7da79"><td class="memItemLeft" align="right" valign="top">u16&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a3b8034ee109c995ec1bd23b08ab7da79.html#a3b8034ee109c995ec1bd23b08ab7da79">fl::xyMapCallbackAdapter</a> (u16 <a class="el" href="../../d4/d36/namespacefl_a01deac84db27d10f737f8a92973bea86.html#a01deac84db27d10f737f8a92973bea86">x</a>, u16 <a class="el" href="../../d4/d36/namespacefl_a19c81898aec29a20ef9d7e3be29eedfb.html#a19c81898aec29a20ef9d7e3be29eedfb">y</a>, void *userData)</td></tr>
+<tr class="separator:a3b8034ee109c995ec1bd23b08ab7da79"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
@@ -244,6 +263,35 @@ Variables</h2></td></tr>
 <tr class="separator:a0eac59d90e652e950c086b8173a902d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/><h2 class="groupheader">Class Documentation</h2>
+<a name="d1/dbd/structfl_1_1_animartrix_anim_info" id="d1/dbd/structfl_1_1_animartrix_anim_info"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#d1/dbd/structfl_1_1_animartrix_anim_info">&#9670;&#160;</a></span>fl::AnimartrixAnimInfo</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct fl::AnimartrixAnimInfo</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="3">Class Members</th></tr>
+<tr><td class="fieldtype">
+<a id="a7980ccf6651685e2116e0f7cc4394d71" name="a7980ccf6651685e2116e0f7cc4394d71"></a>int</td>
+<td class="fieldname">
+id</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="a1fcbfd1b7ae61230a86791b82f08b781" name="a1fcbfd1b7ae61230a86791b82f08b781"></a>const char *</td>
+<td class="fieldname">
+name</td>
+<td class="fielddoc">
+</td></tr>
+</table>
+
+</div>
+</div>
 <a name="d3/d78/structfl_1_1_animartrix_entry" id="d3/d78/structfl_1_1_animartrix_entry"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#d3/d78/structfl_1_1_animartrix_entry">&#9670;&#160;</a></span>fl::AnimartrixEntry</h2>
 
@@ -255,6 +303,13 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+<div id="dynsection-2" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-2-trigger" src="../../closed.png" alt="+"/> Collaboration diagram for fl::AnimartrixEntry:</div>
+<div id="dynsection-2-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-2-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../da/d8d/structfl_1_1_animartrix_entry__coll__graph.svg" width="152" height="124"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="../../graph_legend.html">legend</a>]</span></center></div>
 <table class="fieldtable">
 <tr><th colspan="3">Class Members</th></tr>
 <tr><td class="fieldtype">
@@ -264,9 +319,9 @@ anim</td>
 <td class="fielddoc">
 </td></tr>
 <tr><td class="fieldtype">
-<a id="af87c161925f97976cf00873bd4a9e893" name="af87c161925f97976cf00873bd4a9e893"></a>void(FastLEDANIMartRIX::*)()</td>
+<a id="a4b502176d096fc1d214f25045f80cfbf" name="a4b502176d096fc1d214f25045f80cfbf"></a><a class="el" href="../../d4/d36/namespacefl_a1ae11330ef45742d5bef1d055662a1b2.html#a1ae11330ef45742d5bef1d055662a1b2">AnimartrixVizFactory</a></td>
 <td class="fieldname">
-func</td>
+factory</td>
 <td class="fielddoc">
 </td></tr>
 <tr><td class="fieldtype">
@@ -285,8 +340,8 @@ name</td>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_acbb946b833f21b16ec30aa21c4c3a72.html">fx</a></li><li class="navelem"><a class="el" href="../../dir_da6de6ffed4dc8eba2e7529df043e06f.html">2d</a></li><li class="navelem"><a class="el" href="../../d3/dc3/animartrix_8hpp.html">animartrix.hpp</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_d90d106199f3fa0759eaa8cec7e30de8.html">fx</a></li><li class="navelem"><a class="el" href="../../dir_ef4cc1a41c4d257473780bb85842dcc6.html">2d</a></li><li class="navelem"><a class="el" href="../../d3/dc3/animartrix_8hpp.html">animartrix.hpp</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

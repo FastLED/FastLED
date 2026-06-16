@@ -1,0 +1,25 @@
+<map id="animartrix_ring::SoundOrchestrator::tick" name="animartrix_ring::SoundOrchestrator::tick">
+<area shape="rect" id="Node000001" title="Per&#45;frame tick." alt="" coords="5,135,256,175"/>
+<area shape="rect" id="Node000002" href="$d4/dc8/classanimartrix__ring_1_1_sound_orchestrator_a046b952e6e46e0c7f6a45866c5555877.html#a046b952e6e46e0c7f6a45866c5555877" title=" " alt="" coords="304,7,555,47"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="161,133,225,95,303,57,324,49,326,54,305,62,228,99,164,137"/>
+<area shape="rect" id="Node000003" href="$d4/dc8/classanimartrix__ring_1_1_sound_orchestrator_a0e328c23a90020e2489a2512e593f651.html#a0e328c23a90020e2489a2512e593f651" title=" " alt="" coords="304,71,555,111"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="224,133,321,112,323,117,225,138"/>
+<area shape="rect" id="Node000009" href="$d4/dc8/classanimartrix__ring_1_1_sound_orchestrator_ab5c7d71f88d780b4bef512823b5b45a2.html#ab5c7d71f88d780b4bef512823b5b45a2" title=" " alt="" coords="304,135,555,175"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="256,153,290,153,290,158,256,158"/>
+<area shape="rect" id="Node000010" href="$d4/dc8/classanimartrix__ring_1_1_sound_orchestrator_ab506ac5a1c086ffe60fb3f1fc011e8df.html#ab506ac5a1c086ffe60fb3f1fc011e8df" title=" " alt="" coords="304,199,555,239"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="225,173,323,194,321,199,224,178"/>
+<area shape="rect" id="Node000011" href="$d4/dc8/classanimartrix__ring_1_1_sound_orchestrator_a3fcf16f273e088d29927605e4625d512.html#a3fcf16f273e088d29927605e4625d512" title=" " alt="" coords="304,263,555,303"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="164,173,228,211,305,249,326,257,324,262,303,254,225,216,161,178"/>
+<area shape="rect" id="Node000004" href="$d5/d25/_demo_reel100_8ino_a4875f6d9a2b0f08d3cf221974234121b.html#a4875f6d9a2b0f08d3cf221974234121b" title=" " alt="" coords="703,55,753,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="555,79,689,68,689,73,555,84"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_abc07da8d8983da7016b55f7626e9c060.html#abc07da8d8983da7016b55f7626e9c060" title=" " alt="" coords="699,104,757,129"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="555,99,686,111,685,116,555,105"/>
+<area shape="rect" id="Node000005" href="$df/da5/lib8tion_8h_a696b9421eca961df0a68c7c6c3e983ab.html#a696b9421eca961df0a68c7c6c3e983ab" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="929,5,1008,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="753,60,915,26,916,31,754,65"/>
+<area shape="rect" id="Node000006" href="$d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="901,55,1036,80"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="753,65,887,65,887,70,753,70"/>
+<area shape="rect" id="Node000007" href="$d8/dd0/_fire_cylinder_8h_a470cec2dcb21e474c257065bb93bfcd1.html#a470cec2dcb21e474c257065bb93bfcd1" title=" " alt="" coords="935,104,1003,129"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="754,69,854,89,921,103,920,109,853,94,753,74"/>
+<area shape="rect" id="Node000012" href="$d4/dc8/classanimartrix__ring_1_1_sound_orchestrator_a29181769941b66337af5f4a0382bdc02.html#a29181769941b66337af5f4a0382bdc02" title=" " alt="" coords="603,263,853,303"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="555,281,589,281,589,286,555,286"/>
+</map>

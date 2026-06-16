@@ -1,6 +1,6 @@
 var classfl_1_1istream__real =
 [
-    [ "istream_real", "dc/d4b/classfl_1_1istream__real_ab593846ff4a004fbc44ab28ac7a80e5f.html#ab593846ff4a004fbc44ab28ac7a80e5f", null ],
+    [ "istream_real", "dc/d4b/classfl_1_1istream__real_a5fbce5bd8ad11d97946caad0564943b0.html#a5fbce5bd8ad11d97946caad0564943b0", null ],
     [ "clear", "dc/d4b/classfl_1_1istream__real_a0e18168fb83e465ac6b3bc051c69cbda.html#a0e18168fb83e465ac6b3bc051c69cbda", null ],
     [ "eof", "dc/d4b/classfl_1_1istream__real_acdd05561c7e7fdaf39a88657fd29d32e.html#acdd05561c7e7fdaf39a88657fd29d32e", null ],
     [ "fail", "dc/d4b/classfl_1_1istream__real_a00a9b8fae8c55e3171db7cc374a65703.html#a00a9b8fae8c55e3171db7cc374a65703", null ],
@@ -22,9 +22,9 @@ var classfl_1_1istream__real =
     [ "readLine", "dc/d4b/classfl_1_1istream__real_ab70ff31d4c958447b46066a17a55d047.html#ab70ff31d4c958447b46066a17a55d047", null ],
     [ "readToken", "dc/d4b/classfl_1_1istream__real_adf98bd57fc49ef2c902259cdbca94771.html#adf98bd57fc49ef2c902259cdbca94771", null ],
     [ "skipWhitespace", "dc/d4b/classfl_1_1istream__real_a1896b88f9d1cb20dd178716dc97c60c7.html#a1896b88f9d1cb20dd178716dc97c60c7", null ],
-    [ "buffer_", "dc/d4b/classfl_1_1istream__real_a58cdc60b8b6a41a06a92f33031d3fcb1.html#a58cdc60b8b6a41a06a92f33031d3fcb1", null ],
-    [ "buffer_len_", "dc/d4b/classfl_1_1istream__real_a30dd6eb0f4f8bb2456fced57527f3557.html#a30dd6eb0f4f8bb2456fced57527f3557", null ],
     [ "BUFFER_SIZE", "dc/d4b/classfl_1_1istream__real_a9dca9b9e297824879c2f3696bc4f00c7.html#a9dca9b9e297824879c2f3696bc4f00c7", null ],
-    [ "failed_", "dc/d4b/classfl_1_1istream__real_a31543d313e7422f87f0fcf7509f5f366.html#a31543d313e7422f87f0fcf7509f5f366", null ],
-    [ "pos_", "dc/d4b/classfl_1_1istream__real_a7cfd85fb6fbb6c22f49f15ef5d712a7c.html#a7cfd85fb6fbb6c22f49f15ef5d712a7c", null ]
+    [ "mBuffer", "dc/d4b/classfl_1_1istream__real_a394682cc4c8762dfee64c2ff456c62c3.html#a394682cc4c8762dfee64c2ff456c62c3", null ],
+    [ "mBufferLen", "dc/d4b/classfl_1_1istream__real_a2af0bf93c37f54366f4b7abc33520632.html#a2af0bf93c37f54366f4b7abc33520632", null ],
+    [ "mFailed", "dc/d4b/classfl_1_1istream__real_a565deced1139c7619db1d61fa032abe9.html#a565deced1139c7619db1d61fa032abe9", null ],
+    [ "mPos", "dc/d4b/classfl_1_1istream__real_a312c8696be016d5571314a1cbf63b9c7.html#a312c8696be016d5571314a1cbf63b9c7", null ]
 ];

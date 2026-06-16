@@ -1,0 +1,6 @@
+<map id="test_stress.start_server" name="test_stress.start_server">
+<area shape="rect" id="Node000001" title=" " alt="" coords="184,29,359,55"/>
+<area shape="rect" id="Node000002" href="$d5/d22/namespacetest__stress_a573611374b6e37c513fa105c70539c3c.html#a573611374b6e37c513fa105c70539c3c" title=" " alt="" coords="5,29,136,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="170,45,137,45,137,39,170,39"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="106,20,96,11,71,8,49,10,38,15,36,20,42,28,38,31,31,21,34,11,48,5,71,3,99,6,110,16"/>
+</map>

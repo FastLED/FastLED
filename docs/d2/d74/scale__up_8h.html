@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fx/2d/scale_up.h File Reference</title>
+<title>FastLED: fl/fx/2d/scale_up.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -109,18 +109,18 @@ $(function(){initNavTree('d2/d74/scale__up_8h.html','../../'); initResizable(tru
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Expands a grid using bilinear interpolation and scaling up. </p>
-<p>This is useful for under powered devices that can't handle the full resolution of the grid, or if you suddenly need to increase the size of the grid and don't want to re-create new assets at the new resolution. </p>
+<div class="textblock"><p>Expands a grid using bilinear interpolation for upscaling effects. </p>
+<p>This effect wrapper allows rendering at a lower resolution and then scaling up to the display resolution using bilinear interpolation. This is useful for:</p><ul>
+<li>Underpowered devices that can't handle full resolution rendering</li>
+<li>Dynamic resolution scaling when grid size changes</li>
+<li>Optimizing performance by rendering complex effects at lower resolution </li>
+</ul>
 
 <p class="definition">Definition in file <a class="el" href="../../d2/d74/scale__up_8h_source.html">scale_up.h</a>.</p>
-</div><div class="textblock"><code>#include &quot;<a class="el" href="../../df/dd8/stdint_8h_source.html">fl/stdint.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d6/d0c/upscale_8h_source.html">fl/upscale.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../dc/d18/memory_8h_source.html">fl/memory.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d6/d68/vector_8h_source.html">fl/vector.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../da/d61/xymap_8h_source.html">fl/xymap.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d9/d43/fx2d_8h_source.html">fx/fx2d.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d9/dfa/random8_8h_source.html">lib8tion/random8.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d1/d31/noise_8h_source.html">noise.h</a>&quot;</code><br />
+</div><div class="textblock"><code>#include &quot;<a class="el" href="../../df/dd8/stdint_8h_source.html">fl/stl/stdint.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d7a/span_8h_source.html">fl/stl/span.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../da/d61/xymap_8h_source.html">fl/math/xymap.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d9/d43/fx2d_8h_source.html">fl/fx/fx2d.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for scale_up.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -133,7 +133,7 @@ $(function(){initNavTree('d2/d74/scale__up_8h.html','../../'); initResizable(tru
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../de/d38/scale__up_8h__dep__incl.svg" width="154" height="110"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../de/d38/scale__up_8h__dep__incl.svg" width="194" height="256"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 </div>
 <p><a href="../../d2/d74/scale__up_8h_source.html">Go to the source code of this file.</a></p>
@@ -141,31 +141,41 @@ $(function(){initNavTree('d2/d74/scale__up_8h.html','../../'); initResizable(tru
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d79/classfl_1_1_scale_up.html">fl::ScaleUp</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Effect wrapper that upscales delegate effects using bilinear interpolation.  <a href="../../d5/d79/classfl_1_1_scale_up.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a3c2eb1a26f8499eec9a3ea365223e17e" id="r_a3c2eb1a26f8499eec9a3ea365223e17e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d74/scale__up_8h_a3c2eb1a26f8499eec9a3ea365223e17e.html#a3c2eb1a26f8499eec9a3ea365223e17e">FASTLED_SCALE_UP</a>&#160;&#160;&#160;<a class="el" href="../../dc/d8c/scale__up_8cpp_a934f77b87c1c075c0cb1a79757046359.html#a934f77b87c1c075c0cb1a79757046359">FASTLED_SCALE_UP_DECIDE_AT_RUNTIME</a></td></tr>
+<tr class="memitem:a3c2eb1a26f8499eec9a3ea365223e17e" id="r_a3c2eb1a26f8499eec9a3ea365223e17e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d74/scale__up_8h_a3c2eb1a26f8499eec9a3ea365223e17e.html#a3c2eb1a26f8499eec9a3ea365223e17e">FASTLED_SCALE_UP</a>&#160;&#160;&#160;<a class="el" href="../../d4/dd1/scale__up_8cpp_8hpp_a934f77b87c1c075c0cb1a79757046359.html#a934f77b87c1c075c0cb1a79757046359">FASTLED_SCALE_UP_DECIDE_AT_RUNTIME</a></td></tr>
 <tr class="separator:a3c2eb1a26f8499eec9a3ea365223e17e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">ScaleUp Precision Modes</div></td></tr>
+<tr><td colspan="2"><div class="groupText"><p>These constants configure the scaling algorithm's precision and performance tradeoffs.</p>
+<p>Set FASTLED_SCALE_UP to one of these values to control behavior.</p>
+<dl class="section note"><dt>Note</dt><dd>To override FASTLED_SCALE_UP, it must be defined via build system flags (e.g., platformio.ini with <code>build_flags = -DFASTLED_SCALE_UP=0</code>). Including it in source files will not work as this header will already be included. This optimization is only necessary for sketches at maximum memory capacity; normal usage does not require overriding the default DECIDE_AT_RUNTIME mode. </dd></dl>
+</div></td></tr>
 <tr class="memitem:a7a22d9cde4fcadf30f65f1810436f179" id="r_a7a22d9cde4fcadf30f65f1810436f179"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d74/scale__up_8h_a7a22d9cde4fcadf30f65f1810436f179.html#a7a22d9cde4fcadf30f65f1810436f179">FASTLED_SCALE_UP_ALWAYS_POWER_OF_2</a>&#160;&#160;&#160;0</td></tr>
+<tr class="memdesc:a7a22d9cde4fcadf30f65f1810436f179"><td class="mdescLeft">&#160;</td><td class="mdescRight">Optimized for power-of-2 grid sizes (fastest, lowest memory) Uses bit-shifting operations for division.  <br /></td></tr>
 <tr class="separator:a7a22d9cde4fcadf30f65f1810436f179"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a934f77b87c1c075c0cb1a79757046359" id="r_a934f77b87c1c075c0cb1a79757046359"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d74/scale__up_8h_a934f77b87c1c075c0cb1a79757046359.html#a934f77b87c1c075c0cb1a79757046359">FASTLED_SCALE_UP_DECIDE_AT_RUNTIME</a>&#160;&#160;&#160;2</td></tr>
+<tr class="memdesc:a934f77b87c1c075c0cb1a79757046359"><td class="mdescLeft">&#160;</td><td class="mdescRight">Runtime selection based on grid size (adaptive) Uses more executable memory as both POWER_OF_2 and HIGH_PRECISION implementations are compiled in.  <br /></td></tr>
 <tr class="separator:a934f77b87c1c075c0cb1a79757046359"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad1fdff146ab302df7699bd2cf51fb2cc" id="r_ad1fdff146ab302df7699bd2cf51fb2cc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d74/scale__up_8h_ad1fdff146ab302df7699bd2cf51fb2cc.html#ad1fdff146ab302df7699bd2cf51fb2cc">FASTLED_SCALE_UP_FORCE_FLOATING_POINT</a>&#160;&#160;&#160;3</td></tr>
+<tr class="memdesc:ad1fdff146ab302df7699bd2cf51fb2cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Floating-point implementation (slowest, not recommended) Provided for completeness but offers no performance benefits over integer versions.  <br /></td></tr>
 <tr class="separator:ad1fdff146ab302df7699bd2cf51fb2cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a648bcecb94473066930deb7abdbbfe48" id="r_a648bcecb94473066930deb7abdbbfe48"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d74/scale__up_8h_a648bcecb94473066930deb7abdbbfe48.html#a648bcecb94473066930deb7abdbbfe48">FASTLED_SCALE_UP_HIGH_PRECISION</a>&#160;&#160;&#160;1</td></tr>
+<tr class="memdesc:a648bcecb94473066930deb7abdbbfe48"><td class="mdescLeft">&#160;</td><td class="mdescRight">High-precision mode for arbitrary grid sizes Uses more memory than POWER_OF_2 mode but handles any grid dimensions correctly.  <br /></td></tr>
 <tr class="separator:a648bcecb94473066930deb7abdbbfe48"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a9c8c9a8ba6129ccc145d9e1411462b4d" id="r_a9c8c9a8ba6129ccc145d9e1411462b4d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a9c8c9a8ba6129ccc145d9e1411462b4d.html#a9c8c9a8ba6129ccc145d9e1411462b4d">fl::FASTLED_SMART_PTR</a> (<a class="el" href="../../d5/d79/classfl_1_1_scale_up.html">ScaleUp</a>)</td></tr>
-<tr class="separator:a9c8c9a8ba6129ccc145d9e1411462b4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acf40027bc8a5de89415773c10afacc8c" id="r_acf40027bc8a5de89415773c10afacc8c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_acf40027bc8a5de89415773c10afacc8c.html#acf40027bc8a5de89415773c10afacc8c">fl::FASTLED_SHARED_PTR</a> (<a class="el" href="../../d5/d79/classfl_1_1_scale_up.html">ScaleUp</a>)</td></tr>
+<tr class="separator:acf40027bc8a5de89415773c10afacc8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -173,8 +183,8 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_acbb946b833f21b16ec30aa21c4c3a72.html">fx</a></li><li class="navelem"><a class="el" href="../../dir_da6de6ffed4dc8eba2e7529df043e06f.html">2d</a></li><li class="navelem"><a class="el" href="../../d2/d74/scale__up_8h.html">scale_up.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_d90d106199f3fa0759eaa8cec7e30de8.html">fx</a></li><li class="navelem"><a class="el" href="../../dir_ef4cc1a41c4d257473780bb85842dcc6.html">2d</a></li><li class="navelem"><a class="el" href="../../d2/d74/scale__up_8h.html">scale_up.h</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

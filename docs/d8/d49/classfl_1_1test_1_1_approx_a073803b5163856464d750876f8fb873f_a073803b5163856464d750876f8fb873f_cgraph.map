@@ -1,0 +1,7 @@
+<map id="fl::test::Approx::margin" name="fl::test::Approx::margin">
+<area shape="rect" id="Node000001" title="Set absolute margin for comparison When margin &gt; 0, passes if |a &#45; b| &lt;= margin." alt="" coords="5,5,176,31"/>
+<area shape="rect" id="Node000002" href="$d8/d49/classfl_1_1test_1_1_approx_ac5d5912fd9f8809ccea95d0914f97259.html#ac5d5912fd9f8809ccea95d0914f97259" title=" " alt="" coords="224,5,395,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,15,210,15,210,21,176,21"/>
+<area shape="rect" id="Node000003" href="$d8/d49/classfl_1_1test_1_1_approx_afefec7915c18cbea5c93645ea3ae73d0.html#afefec7915c18cbea5c93645ea3ae73d0" title=" " alt="" coords="443,5,604,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="395,15,429,15,429,21,395,21"/>
+</map>

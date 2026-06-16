@@ -1,0 +1,11 @@
+<map id="fl::q16::Chasing_Spirals_Q16_Batch4_ColorGrouped" name="fl::q16::Chasing_Spirals_Q16_Batch4_ColorGrouped">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,23,208,63"/>
+<area shape="rect" id="Node000002" href="$db/dc5/classfl_1_1_chasing___spirals___q31_a164cdd86f3571242a01a72cedcfb3175.html#a164cdd86f3571242a01a72cedcfb3175" title=" " alt="" coords="256,23,397,63"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="208,41,242,41,242,46,208,46"/>
+<area shape="rect" id="Node000003" href="$d5/d17/_analog_output_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="483,5,542,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="397,31,469,21,470,26,398,36"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a3a23a29b7fae800b629360cd32fec586.html#a3a23a29b7fae800b629360cd32fec586" title="Process 4 angles simultaneously, returning vectorized sin/cos values SIMD&#45;optimized: vectorized angle..." alt="" coords="445,55,580,80"/>
+<area shape="poly" id="edge4_Node000002_Node000006" title=" " alt="" coords="398,50,432,54,431,60,397,55"/>
+<area shape="rect" id="Node000004" href="$d5/d17/_analog_output_8ino_a41443fd94d659dbb2ce2e63bbcca8a41.html#a41443fd94d659dbb2ce2e63bbcca8a41" title=" " alt="" coords="628,5,711,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="542,15,614,15,614,21,542,21"/>
+</map>

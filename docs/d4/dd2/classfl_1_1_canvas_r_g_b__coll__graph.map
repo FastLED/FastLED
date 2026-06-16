@@ -1,0 +1,13 @@
+<map id="fl::CanvasRGB" name="fl::CanvasRGB">
+<area shape="rect" id="Node000001" title="Convenience alias for CRGB canvas — use fl::CanvasRGB for no&#45;template syntax." alt="" coords="160,256,275,281"/>
+<area shape="rect" id="Node000002" href="$d1/d0e/classfl_1_1_canvas.html" title=" " alt="" coords="141,181,294,207"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="220,221,220,256,215,256,215,221"/>
+<area shape="rect" id="Node000003" href="$de/d5c/structfl_1_1gfx_1_1_canvas.html" title=" " alt="" coords="29,93,211,119"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="145,126,206,179,202,183,142,130"/>
+<area shape="rect" id="Node000004" href="$da/dd6/structfl_1_1_c_r_g_b.html" title="Representation of an 8&#45;bit RGB pixel (Red, Green, Blue)" alt="" coords="5,5,80,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="64,39,111,91,107,95,60,43"/>
+<area shape="rect" id="Node000005" href="$de/d5c/structfl_1_1gfx_1_1_canvas.html" title="Simple rectangular canvas for graphics operations Combines a pixel buffer with dimensions for cache&#45;o..." alt="" coords="105,5,293,31"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="181,43,133,95,129,91,177,39"/>
+<area shape="rect" id="Node000006" href="$d1/d0e/classfl_1_1_canvas.html" title="Generic canvas for any pixel type (e.g." alt="" coords="235,93,394,119"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="293,130,233,183,229,179,290,126"/>
+</map>

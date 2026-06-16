@@ -1,0 +1,8 @@
+<map id="fl::audio::detector::FrequencyBands::calculateBandEnergy" name="fl::audio::detector::FrequencyBands::calculateBandEnergy">
+<area shape="rect" id="Node000001" title=" " alt="" coords="515,22,719,77"/>
+<area shape="rect" id="Node000002" href="$d4/d0a/classfl_1_1audio_1_1detector_1_1_frequency_bands_aa4ec48388da847d2852cf28ac516c108.html#aa4ec48388da847d2852cf28ac516c108" title=" " alt="" coords="276,29,467,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="501,52,467,52,467,47,501,47"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="413,18,398,11,371,8,348,10,333,15,328,21,331,28,326,30,323,20,330,10,347,5,371,3,400,6,415,13"/>
+<area shape="rect" id="Node000003" href="$d4/d0a/classfl_1_1audio_1_1detector_1_1_frequency_bands_a1658e5ac4d9ad508b8c6ce603f6bf22e.html#a1658e5ac4d9ad508b8c6ce603f6bf22e" title=" " alt="" coords="5,22,228,77"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="262,52,228,52,228,47,262,47"/>
+</map>

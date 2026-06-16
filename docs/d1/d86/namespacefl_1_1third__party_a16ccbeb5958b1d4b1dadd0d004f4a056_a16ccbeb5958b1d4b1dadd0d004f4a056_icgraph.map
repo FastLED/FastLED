@@ -1,0 +1,10 @@
+<map id="fl::third_party::nsgif__bitmap_get" name="fl::third_party::nsgif__bitmap_get">
+<area shape="rect" id="Node000001" title="Helper to get the rendering bitmap for a gif." alt="" coords="601,35,749,75"/>
+<area shape="rect" id="Node000002" href="$d1/d86/namespacefl_1_1third__party_a17e7cbf4c06570cddcfcb56e99bd626a.html#a17e7cbf4c06570cddcfcb56e99bd626a" title=" " alt="" coords="405,5,553,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="587,44,553,39,554,34,588,39"/>
+<area shape="rect" id="Node000003" href="$d1/d86/namespacefl_1_1third__party_aa9b6d03b719534d98113784d4ad52b3f.html#aa9b6d03b719534d98113784d4ad52b3f" title=" " alt="" coords="209,35,357,75"/>
+<area shape="poly" id="edge4_Node000001_Node000003" title=" " alt="" coords="588,59,553,60,405,60,357,59,357,54,405,55,553,55,588,54"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="392,41,358,46,357,41,391,36"/>
+<area shape="rect" id="Node000004" href="$d1/d86/namespacefl_1_1third__party_a69436b97b760adfd50dcf61530d5fa9f.html#a69436b97b760adfd50dcf61530d5fa9f" title="Parse the image data for a gif frame." alt="" coords="5,35,161,75"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="196,57,162,57,162,52,196,52"/>
+</map>

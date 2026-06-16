@@ -1,0 +1,45 @@
+<map id="fl/audio/audio_frame.h" name="fl/audio/audio_frame.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="769,5,937,31"/>
+<area shape="rect" id="Node000002" href="$d1/d48/audio__batch_8h.html" title=" " alt="" coords="240,79,405,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="756,35,406,82,405,76,755,30"/>
+<area shape="rect" id="Node000010" href="$d9/d3c/fx__engine_8h.html" title=" " alt="" coords="1453,79,1579,104"/>
+<area shape="poly" id="edge6_Node000001_Node000010" title=" " alt="" coords="951,27,1453,81,1452,86,951,32"/>
+<area shape="rect" id="Node000003" href="$d6/d08/audio__batch_8cpp_8hpp.html" title=" " alt="" coords="5,167,213,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="282,112,139,169,137,164,280,107"/>
+<area shape="rect" id="Node000007" href="$d1/dd7/fx__engine_8cpp_8hpp.html" title=" " alt="" coords="237,167,408,192"/>
+<area shape="poly" id="edge4_Node000002_Node000007" title=" " alt="" coords="325,118,325,166,320,166,320,118"/>
+<area shape="rect" id="Node000004" href="$d1/d21/fl_2audio_2__build_8cpp_8hpp.html" title="Unity build header for fl/audio/ directory." alt="" coords="25,269,193,295"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="112,206,112,269,107,269,107,206"/>
+<area shape="rect" id="Node000008" href="$df/d9c/fl_2fx_2__build_8cpp_8hpp.html" title="Unity build header for fl/fx/ directory." alt="" coords="250,269,395,295"/>
+<area shape="poly" id="edge5_Node000007_Node000008" title=" " alt="" coords="325,206,325,269,320,269,320,206"/>
+<area shape="poly" id="edge22_Node000010_Node000007" title=" " alt="" coords="1439,97,922,117,632,133,512,143,420,155,359,169,358,164,420,149,511,138,632,128,922,111,1439,92"/>
+<area shape="rect" id="Node000011" href="$d6/d05/_animartrix_8ino.html" title="Demo of the Animatrix effects." alt="" coords="2333,152,2552,207"/>
+<area shape="poly" id="edge7_Node000010_Node000011" title=" " alt="" coords="1593,92,1909,109,2111,126,2315,149,2334,152,2333,157,2314,155,2111,131,1909,115,1593,98"/>
+<area shape="rect" id="Node000012" href="$df/dba/_animartrix_ring_8ino.html" title=" " alt="" coords="1721,255,1967,309"/>
+<area shape="poly" id="edge8_Node000010_Node000012" title=" " alt="" coords="1593,90,1770,93,1984,102,2085,109,2172,120,2237,133,2259,141,2272,150,2287,169,2293,186,2293,201,2287,215,2275,227,2258,238,2213,255,2157,267,2094,275,1968,283,1967,278,2094,270,2156,261,2212,250,2256,233,2271,223,2282,212,2288,200,2288,187,2282,171,2269,154,2256,146,2235,138,2171,125,2084,115,1984,107,1770,99,1593,96"/>
+<area shape="rect" id="Node000013" href="$db/d4d/examples_2_animartrix_ring_2audio__reactive_8h.html" title=" " alt="" coords="433,152,679,207"/>
+<area shape="poly" id="edge9_Node000010_Node000013" title=" " alt="" coords="1439,98,1113,115,903,131,691,155,680,156,679,151,690,149,902,126,1112,109,1439,92"/>
+<area shape="rect" id="Node000015" href="$d4/d67/sound__orchestrator_8h.html" title=" " alt="" coords="998,152,1245,207"/>
+<area shape="poly" id="edge11_Node000010_Node000015" title=" " alt="" coords="1451,110,1242,155,1241,149,1450,104"/>
+<area shape="rect" id="Node000017" href="$d4/d06/curr_8h.html" title=" " alt="" coords="703,159,975,199"/>
+<area shape="poly" id="edge14_Node000010_Node000017" title=" " alt="" coords="1439,102,1234,123,986,155,940,162,939,157,985,149,1233,118,1439,97"/>
+<area shape="rect" id="Node000019" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates FxEngine for switching between effects." alt="" coords="1269,152,1499,207"/>
+<area shape="poly" id="edge16_Node000010_Node000019" title=" " alt="" coords="1488,114,1426,154,1423,150,1485,110"/>
+<area shape="rect" id="Node000020" href="$dc/ded/_fx_gfx2_video_8ino.html" title="Demonstrates graphics to video conversion." alt="" coords="1523,152,1776,207"/>
+<area shape="poly" id="edge17_Node000010_Node000020" title=" " alt="" coords="1547,109,1610,150,1607,154,1544,114"/>
+<area shape="rect" id="Node000021" href="$d7/d35/_fx_sd_card_8ino.html" title="Play a mapped video off an SD card." alt="" coords="1801,152,2031,207"/>
+<area shape="poly" id="edge18_Node000010_Node000021" title=" " alt="" coords="1583,104,1801,151,1800,156,1582,110"/>
+<area shape="rect" id="Node000022" href="$db/dda/_sailboat_8ino.html" title="Audio&#45;reactive sailboat lighting with perlin noise, ambient particles, and beat meteors for EDM music..." alt="" coords="2056,152,2259,207"/>
+<area shape="poly" id="edge19_Node000010_Node000022" title=" " alt="" coords="1593,96,1798,116,2044,149,2056,151,2055,157,2044,155,1797,121,1593,101"/>
+<area shape="rect" id="Node000023" href="$da/d40/wasm__impl_8h.html" title=" " alt="" coords="2576,152,2776,207"/>
+<area shape="poly" id="edge20_Node000010_Node000023" title=" " alt="" coords="1593,90,1768,92,2009,100,2285,118,2426,132,2564,149,2576,151,2575,156,2564,155,2426,137,2284,124,2009,106,1768,97,1593,95"/>
+<area shape="rect" id="Node000014" href="$d4/d14/audio__reactive_8cpp.html" title=" " alt="" coords="433,255,679,309"/>
+<area shape="poly" id="edge10_Node000013_Node000014" title=" " alt="" coords="559,220,559,255,553,255,553,220"/>
+<area shape="poly" id="edge12_Node000015_Node000012" title=" " alt="" coords="1259,204,1509,239,1721,265,1720,270,1509,245,1258,209"/>
+<area shape="rect" id="Node000016" href="$d8/d52/sound__orchestrator_8cpp.html" title=" " alt="" coords="998,255,1245,309"/>
+<area shape="poly" id="edge13_Node000015_Node000016" title=" " alt="" coords="1124,220,1124,255,1119,255,1119,220"/>
+<area shape="rect" id="Node000018" href="$dd/d43/_festival_stick_8ino.html" title=" " alt="" coords="723,255,955,309"/>
+<area shape="poly" id="edge15_Node000017_Node000018" title=" " alt="" coords="841,213,841,254,836,254,836,213"/>
+<area shape="rect" id="Node000024" href="$d7/dd3/wasm_8ino.html" title="Demonstrates an advanced ino file with multiple effects and UI elements." alt="" coords="2576,255,2776,309"/>
+<area shape="poly" id="edge21_Node000023_Node000024" title=" " alt="" coords="2679,220,2679,255,2673,255,2673,220"/>
+</map>

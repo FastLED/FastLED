@@ -1,0 +1,27 @@
+<map id="fl::Server::Server" name="fl::Server::Server">
+<area shape="rect" id="Node000001" title="Default constructor." alt="" coords="419,252,549,277"/>
+<area shape="rect" id="Node000002" href="$dc/ddb/classfl_1_1_remote_afeaf2df646dee4d6ce7644062f9ed357.html#afeaf2df646dee4d6ce7644062f9ed357" title="Construct with I/O callbacks." alt="" coords="219,128,367,153"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="461,244,421,204,369,167,344,156,346,151,372,162,424,200,464,240"/>
+<area shape="rect" id="Node000009" href="$dc/d00/classfl_1_1_server_af5c7124342f5a4639717a1c5ef64914d.html#af5c7124342f5a4639717a1c5ef64914d" title=" " alt="" coords="228,177,359,203"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="443,248,370,216,337,205,339,200,372,212,445,243"/>
+<area shape="rect" id="Node000010" href="$dc/d00/classfl_1_1_server_a58a6b441fc14b8e1a17805d7664cae5c.html#a58a6b441fc14b8e1a17805d7664cae5c" title=" " alt="" coords="228,227,359,252"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="405,257,359,251,360,245,406,252"/>
+<area shape="rect" id="Node000011" href="$dc/d00/classfl_1_1_server_ab40c6c331766464ad01bcd2d51a5417c.html#ab40c6c331766464ad01bcd2d51a5417c" title=" " alt="" coords="223,276,364,301"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="406,277,365,282,364,277,405,272"/>
+<area shape="rect" id="Node000012" href="$dc/d00/classfl_1_1_server_ac36adb4d5b9a5679889709afaaeab276.html#ac36adb4d5b9a5679889709afaaeab276" title=" " alt="" coords="216,325,371,351"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="444,286,372,316,339,328,337,323,370,312,442,281"/>
+<area shape="rect" id="Node000013" href="$dc/d00/classfl_1_1_server_a100615100d89f2a4e725a2525405ddfe.html#a100615100d89f2a4e725a2525405ddfe" title=" " alt="" coords="216,375,371,400"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="464,289,424,328,372,366,346,377,344,372,369,361,420,324,461,285"/>
+<area shape="rect" id="Node000003" href="$dc/ddb/classfl_1_1_remote_a8da8a6befa5ac8817895bcf5e6549ac9.html#a8da8a6befa5ac8817895bcf5e6549ac9" title=" " alt="" coords="13,5,161,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="268,121,223,82,167,44,140,33,142,28,169,40,226,78,272,117"/>
+<area shape="rect" id="Node000004" href="$dc/ddb/classfl_1_1_remote_a6bf53db28ee124cb5de2e4235aca44c7.html#a6bf53db28ee124cb5de2e4235aca44c7" title=" " alt="" coords="13,55,161,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="249,125,167,94,132,83,134,78,169,89,251,120"/>
+<area shape="rect" id="Node000005" href="$d2/d9f/classfl_1_1_w_l_e_d_aac647eb33edf4763608c393c494ba749.html#aac647eb33edf4763608c393c494ba749" title="Construct WLED with default stub I/O callbacks." alt="" coords="25,104,148,129"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="205,133,148,126,149,121,206,128"/>
+<area shape="rect" id="Node000006" href="$d2/d9f/classfl_1_1_w_l_e_d_a7a58faceb49c4058e4c968eb2ddb118d.html#a7a58faceb49c4058e4c968eb2ddb118d" title="Construct WLED with custom I/O callbacks." alt="" coords="25,153,148,179"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="206,154,149,161,148,156,205,149"/>
+<area shape="rect" id="Node000007" href="$dc/ddb/classfl_1_1_remote_a39f4e10f6904e6e66a64c222cf5f2a7c.html#a39f4e10f6904e6e66a64c222cf5f2a7c" title=" " alt="" coords="5,203,168,228"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="235,160,217,167,169,192,134,205,132,200,167,188,215,162,233,155"/>
+<area shape="rect" id="Node000008" href="$dc/ddb/classfl_1_1_remote_adcc334643d8aaedd1c0e37386380eba7.html#adcc334643d8aaedd1c0e37386380eba7" title=" " alt="" coords="5,252,168,277"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="225,162,218,167,202,184,194,203,187,222,170,241,147,254,144,250,166,237,182,220,190,201,197,182,214,163,222,157"/>
+</map>

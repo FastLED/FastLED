@@ -112,7 +112,7 @@ $(function(){initNavTree('d0/d4b/classfl_1_1_video_a1782335a1d72248addea492fa965
         <tr>
           <td class="memname">void fl::Video::draw </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="../../da/d5d/classfl_1_1_fx_a932d6e78e1afa4bb40cacefe1f01c97a.html#a932d6e78e1afa4bb40cacefe1f01c97a">DrawContext</a></td>          <td class="paramname"><span class="paramname"><em>context</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="../../df/dc7/structfl_1_1_draw_context.html">DrawContext</a></td>          <td class="paramname"><span class="paramname"><em>context</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -124,26 +124,35 @@ $(function(){initNavTree('d0/d4b/classfl_1_1_video_a1782335a1d72248addea492fa965
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">now</td><td>The current time in milliseconds. <a class="el" href="../../da/d5d/classfl_1_1_fx.html">Fx</a> writers are encouraged to use this instead of millis() directly as this will more deterministic behavior. </td></tr>
+    <tr><td class="paramname">now</td><td>The current time in milliseconds. <a class="el" href="../../da/d5d/classfl_1_1_fx.html">Fx</a> writers are encouraged to use this instead of <a class="el" href="../../d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer - returns milliseconds since system startup.">millis()</a> directly as this will more deterministic behavior. </td></tr>
   </table>
   </dd>
 </dl>
 
 <p>Implements <a class="el" href="../../da/d5d/classfl_1_1_fx_acd7594f99b0d75c1a14fce90f0219fd7.html#acd7594f99b0d75c1a14fce90f0219fd7">fl::Fx</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d05/video_8cpp_source.html#l00094">94</a> of file <a class="el" href="../../d0/d05/video_8cpp_source.html">video.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   94</span>                                    {</div>
-<div class="line"><span class="lineno">   95</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_abe11ebd3329d6d9ce07b8683fd4c845d.html#abe11ebd3329d6d9ce07b8683fd4c845d">mImpl</a>) {</div>
-<div class="line"><span class="lineno">   96</span>        <a class="code hl_define" href="../../de/d77/warn_8h_a62d512e6c3e6c7342ac28ffbcb8ad765.html#a62d512e6c3e6c7342ac28ffbcb8ad765">FASTLED_WARN_IF</a>(!<a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_a7b5a521ac418c057e246458bf764da7f.html#a7b5a521ac418c057e246458bf764da7f">mError</a>.empty(), <a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_a7b5a521ac418c057e246458bf764da7f.html#a7b5a521ac418c057e246458bf764da7f">mError</a>.c_str());</div>
-<div class="line"><span class="lineno">   97</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">   98</span>    }</div>
-<div class="line"><span class="lineno">   99</span>    <a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_abe11ebd3329d6d9ce07b8683fd4c845d.html#abe11ebd3329d6d9ce07b8683fd4c845d">mImpl</a>-&gt;draw(context.now, context.leds);</div>
-<div class="line"><span class="lineno">  100</span>}</div>
-<div class="ttc" id="aclassfl_1_1_video_a7b5a521ac418c057e246458bf764da7f_html_a7b5a521ac418c057e246458bf764da7f"><div class="ttname"><a href="../../d0/d4b/classfl_1_1_video_a7b5a521ac418c057e246458bf764da7f.html#a7b5a521ac418c057e246458bf764da7f">fl::Video::mError</a></div><div class="ttdeci">Str mError</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d78/video_8h_source.html#l00080">video.h:80</a></div></div>
-<div class="ttc" id="aclassfl_1_1_video_abe11ebd3329d6d9ce07b8683fd4c845d_html_abe11ebd3329d6d9ce07b8683fd4c845d"><div class="ttname"><a href="../../d0/d4b/classfl_1_1_video_abe11ebd3329d6d9ce07b8683fd4c845d.html#abe11ebd3329d6d9ce07b8683fd4c845d">fl::Video::mImpl</a></div><div class="ttdeci">VideoImplPtr mImpl</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d78/video_8h_source.html#l00079">video.h:79</a></div></div>
-<div class="ttc" id="awarn_8h_a62d512e6c3e6c7342ac28ffbcb8ad765_html_a62d512e6c3e6c7342ac28ffbcb8ad765"><div class="ttname"><a href="../../de/d77/warn_8h_a62d512e6c3e6c7342ac28ffbcb8ad765.html#a62d512e6c3e6c7342ac28ffbcb8ad765">FASTLED_WARN_IF</a></div><div class="ttdeci">#define FASTLED_WARN_IF</div><div class="ttdef"><b>Definition</b> <a href="../../de/d77/warn_8h_source.html#l00009">warn.h:9</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d6/d37/video_8cpp_8hpp_source.html#l00071">71</a> of file <a class="el" href="../../d6/d37/video_8cpp_8hpp_source.html">video.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   71</span>                                    {</div>
+<div class="line"><span class="lineno">   72</span>    <span class="keywordflow">if</span> (!<a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_abe11ebd3329d6d9ce07b8683fd4c845d.html#abe11ebd3329d6d9ce07b8683fd4c845d">mImpl</a>) {</div>
+<div class="line"><span class="lineno">   73</span>        <a class="code hl_define" href="../../d7/d7f/log_8h_a8a834b8e008e536fe6c38e90ec61669e.html#a8a834b8e008e536fe6c38e90ec61669e">FL_WARN_IF</a>(!<a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_a49fb403eb2ca0919cd5532b49225e623.html#a49fb403eb2ca0919cd5532b49225e623">mError</a>.empty(), <a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_a49fb403eb2ca0919cd5532b49225e623.html#a49fb403eb2ca0919cd5532b49225e623">mError</a>.c_str());</div>
+<div class="line"><span class="lineno">   74</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">   75</span>    }</div>
+<div class="line"><span class="lineno">   76</span>    <a class="code hl_variable" href="../../d0/d4b/classfl_1_1_video_abe11ebd3329d6d9ce07b8683fd4c845d.html#abe11ebd3329d6d9ce07b8683fd4c845d">mImpl</a>-&gt;draw(context.now, context.leds);</div>
+<div class="line"><span class="lineno">   77</span>}</div>
+<div class="ttc" id="aclassfl_1_1_video_a49fb403eb2ca0919cd5532b49225e623_html_a49fb403eb2ca0919cd5532b49225e623"><div class="ttname"><a href="../../d0/d4b/classfl_1_1_video_a49fb403eb2ca0919cd5532b49225e623.html#a49fb403eb2ca0919cd5532b49225e623">fl::Video::mError</a></div><div class="ttdeci">string mError</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d78/video_8h_source.html#l00091">video.h:91</a></div></div>
+<div class="ttc" id="aclassfl_1_1_video_abe11ebd3329d6d9ce07b8683fd4c845d_html_abe11ebd3329d6d9ce07b8683fd4c845d"><div class="ttname"><a href="../../d0/d4b/classfl_1_1_video_abe11ebd3329d6d9ce07b8683fd4c845d.html#abe11ebd3329d6d9ce07b8683fd4c845d">fl::Video::mImpl</a></div><div class="ttdeci">VideoImplPtr mImpl</div><div class="ttdef"><b>Definition</b> <a href="../../dd/d78/video_8h_source.html#l00090">video.h:90</a></div></div>
+<div class="ttc" id="alog_8h_a8a834b8e008e536fe6c38e90ec61669e_html_a8a834b8e008e536fe6c38e90ec61669e"><div class="ttname"><a href="../../d7/d7f/log_8h_a8a834b8e008e536fe6c38e90ec61669e.html#a8a834b8e008e536fe6c38e90ec61669e">FL_WARN_IF</a></div><div class="ttdeci">#define FL_WARN_IF(COND, MSG)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d7f/log_8h_source.html#l00277">log.h:277</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../de/d77/warn_8h_source.html#l00009">FASTLED_WARN_IF</a>, <a class="el" href="../../db/ded/draw__context_8h_source.html#l00013">fl::_DrawContext::leds</a>, <a class="el" href="../../dd/d78/video_8h_source.html#l00080">mError</a>, <a class="el" href="../../dd/d78/video_8h_source.html#l00079">mImpl</a>, and <a class="el" href="../../db/ded/draw__context_8h_source.html#l00012">fl::_DrawContext::now</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d7f/log_8h_source.html#l00277">FL_WARN_IF</a>, <a class="el" href="../../db/ded/draw__context_8h_source.html#l00012">fl::DrawContext::leds</a>, <a class="el" href="../../dd/d78/video_8h_source.html#l00091">mError</a>, <a class="el" href="../../dd/d78/video_8h_source.html#l00090">mImpl</a>, and <a class="el" href="../../db/ded/draw__context_8h_source.html#l00011">fl::DrawContext::now</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d7/d35/_fx_sd_card_8ino_source.html#l00157">loop()</a>, and <a class="el" href="../../d0/d4b/classfl_1_1_video_a958384d2d775d417cec22426ff39e14f.html#a958384d2d775d417cec22426ff39e14f">operator=()</a>.</p>
+<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d0/d4b/classfl_1_1_video_a1782335a1d72248addea492fa965ab8b_a1782335a1d72248addea492fa965ab8b_icgraph.svg" width="323" height="86"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
 
 </div>
 </div>
@@ -154,7 +163,7 @@ $(function(){initNavTree('d0/d4b/classfl_1_1_video_a1782335a1d72248addea492fa965
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d0/d4b/classfl_1_1_video.html">Video</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

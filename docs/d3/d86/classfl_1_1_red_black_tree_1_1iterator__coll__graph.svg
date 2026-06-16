@@ -47,7 +47,7 @@
   </g>
 </defs>
 <script type="application/ecmascript">
-var viewWidth = 692;
+var viewWidth = 698;
 var viewHeight = 190;
 var sectionId = 'dynsection-0';
 </script>
@@ -59,10 +59,10 @@ var sectionId = 'dynsection-0';
 <g id="Node000001" class="node">
 <title>Node1</title>
 <g id="a_Node000001"><a xlink:title=" ">
-<polygon fill="#999999" stroke="#666666" points="684,-110.5 569,-110.5 569,-69.5 684,-69.5 684,-110.5"/>
-<text text-anchor="start" x="577" y="-98.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::RedBlackTree&lt; T,</text>
-<text text-anchor="start" x="577" y="-87.5" font-family="Helvetica,sans-Serif" font-size="10.00"> Compare, Allocator</text>
-<text text-anchor="middle" x="626.5" y="-76.5" font-family="Helvetica,sans-Serif" font-size="10.00"> &gt;::iterator</text>
+<polygon fill="#999999" stroke="#666666" points="690,-110.5 575,-110.5 575,-69.5 690,-69.5 690,-110.5"/>
+<text text-anchor="start" x="583" y="-98.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::RedBlackTree&lt; T,</text>
+<text text-anchor="start" x="583" y="-87.5" font-family="Helvetica,sans-Serif" font-size="10.00"> Compare, Allocator</text>
+<text text-anchor="middle" x="632.5" y="-76.5" font-family="Helvetica,sans-Serif" font-size="10.00"> &gt;::iterator</text>
 </a>
 </g>
 </g>
@@ -81,18 +81,18 @@ var sectionId = 'dynsection-0';
 <g id="edge1_Node000001_Node000002" class="edge">
 <title>Node2&#45;&gt;Node1</title>
 <g id="a_edge1_Node000001_Node000002"><a xlink:title=" ">
-<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M312.82,-106.46C385.64,-102.62 500.47,-96.58 568.84,-92.98"/>
-<polygon fill="#9a32cd" stroke="#9a32cd" points="312.19,-102.98 302.39,-107.01 312.56,-109.98 312.19,-102.98"/>
+<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M312.2,-106.54C386.38,-102.7 504.94,-96.56 574.81,-92.94"/>
+<polygon fill="#9a32cd" stroke="#9a32cd" points="311.85,-103.06 302.04,-107.07 312.21,-110.05 311.85,-103.06"/>
 </a>
 </g>
-<text text-anchor="middle" x="436.5" y="-105" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> node_</text>
+<text text-anchor="middle" x="442.5" y="-105" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> mNode</text>
 </g>
 <!-- Node2&#45;&gt;Node2 -->
 <g id="edge2_Node000002_Node000002" class="edge">
 <title>Node2&#45;&gt;Node2</title>
 <g id="a_edge2_Node000002_Node000002"><a xlink:title=" ">
-<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M228.85,-140.82C231.29,-145.4 236.51,-148.5 244.5,-148.5 257.62,-148.5 263.25,-140.15 261.41,-130.6"/>
-<polygon fill="#9a32cd" stroke="#9a32cd" points="232.29,-140.09 227.59,-130.6 225.34,-140.95 232.29,-140.09"/>
+<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M228.17,-140.82C230.72,-145.4 236.16,-148.5 244.5,-148.5 258.19,-148.5 264.07,-140.15 262.14,-130.6"/>
+<polygon fill="#9a32cd" stroke="#9a32cd" points="231.61,-140.07 226.86,-130.6 224.66,-140.96 231.61,-140.07"/>
 </a>
 </g>
 <text text-anchor="middle" x="244.5" y="-173.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> left</text>
@@ -103,9 +103,9 @@ var sectionId = 'dynsection-0';
 <g id="Node000003" class="node">
 <title>Node3</title>
 <g id="a_Node000003"><a xlink:href="../../dd/d28/classfl_1_1_red_black_tree.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="499,-75 374,-75 374,-45 499,-45 499,-75"/>
-<text text-anchor="start" x="382" y="-63" font-family="Helvetica,sans-Serif" font-size="10.00">fl::RedBlackTree&lt; T,</text>
-<text text-anchor="middle" x="436.5" y="-52" font-family="Helvetica,sans-Serif" font-size="10.00"> Compare, Allocator &gt;</text>
+<polygon fill="white" stroke="#666666" points="505,-75 380,-75 380,-45 505,-45 505,-75"/>
+<text text-anchor="start" x="388" y="-63" font-family="Helvetica,sans-Serif" font-size="10.00">fl::RedBlackTree&lt; T,</text>
+<text text-anchor="middle" x="442.5" y="-52" font-family="Helvetica,sans-Serif" font-size="10.00"> Compare, Allocator &gt;</text>
 </a>
 </g>
 </g>
@@ -113,21 +113,21 @@ var sectionId = 'dynsection-0';
 <g id="edge4_Node000003_Node000002" class="edge">
 <title>Node2&#45;&gt;Node3</title>
 <g id="a_edge4_Node000003_Node000002"><a xlink:title=" ">
-<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M311.95,-92.13C314.67,-91.41 317.36,-90.7 320,-90 338.63,-85.08 358.97,-79.78 377.31,-75.02"/>
-<polygon fill="#9a32cd" stroke="#9a32cd" points="310.79,-88.82 302.03,-94.77 312.59,-95.58 310.79,-88.82"/>
+<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M311.94,-92.09C314.66,-91.38 317.36,-90.68 320,-90 339.46,-84.99 360.72,-79.68 379.94,-74.94"/>
+<polygon fill="#9a32cd" stroke="#9a32cd" points="310.79,-88.77 302.01,-94.7 312.57,-95.54 310.79,-88.77"/>
 </a>
 </g>
-<text text-anchor="middle" x="338" y="-93" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> root_</text>
+<text text-anchor="middle" x="341" y="-93" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> mRoot</text>
 </g>
 <!-- Node3&#45;&gt;Node1 -->
 <g id="edge3_Node000001_Node000003" class="edge">
 <title>Node3&#45;&gt;Node1</title>
 <g id="a_edge3_Node000001_Node000003"><a xlink:title=" ">
-<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M508.97,-71.4C528.79,-74.57 550.04,-77.96 568.89,-80.97"/>
-<polygon fill="#9a32cd" stroke="#9a32cd" points="509.48,-67.94 499.06,-69.82 508.38,-74.86 509.48,-67.94"/>
+<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M514.97,-71.4C534.79,-74.57 556.04,-77.96 574.89,-80.97"/>
+<polygon fill="#9a32cd" stroke="#9a32cd" points="515.48,-67.94 505.06,-69.82 514.38,-74.86 515.48,-67.94"/>
 </a>
 </g>
-<text text-anchor="middle" x="534" y="-80" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> mTree</text>
+<text text-anchor="middle" x="540" y="-80" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> mTree</text>
 </g>
 <!-- Node4 -->
 <g id="Node000004" class="node">
@@ -142,11 +142,11 @@ var sectionId = 'dynsection-0';
 <g id="edge5_Node000003_Node000004" class="edge">
 <title>Node4&#45;&gt;Node3</title>
 <g id="a_edge5_Node000003_Node000004"><a xlink:title=" ">
-<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M293.25,-56.53C302.14,-56.31 311.35,-56.12 320,-56 336,-55.79 340.01,-55.6 356,-56 361.8,-56.15 367.84,-56.35 373.88,-56.59"/>
+<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M293.25,-56.53C302.14,-56.31 311.35,-56.12 320,-56 338.66,-55.75 343.34,-55.53 362,-56 367.8,-56.15 373.84,-56.35 379.88,-56.59"/>
 <polygon fill="#9a32cd" stroke="#9a32cd" points="292.92,-53.04 283.01,-56.8 293.1,-60.03 292.92,-53.04"/>
 </a>
 </g>
-<text text-anchor="middle" x="338" y="-59" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> comp_</text>
+<text text-anchor="middle" x="341" y="-59" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> mComp</text>
 </g>
 <!-- Node5 -->
 <g id="Node000005" class="node">
@@ -181,11 +181,11 @@ var sectionId = 'dynsection-0';
 <g id="edge7_Node000003_Node000006" class="edge">
 <title>Node6&#45;&gt;Node3</title>
 <g id="a_edge7_Node000003_Node000006"><a xlink:title=" ">
-<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M302.99,-27.73C320.07,-31.59 338.81,-35.89 356,-40 362.64,-41.59 369.59,-43.28 376.5,-44.99"/>
-<polygon fill="#9a32cd" stroke="#9a32cd" points="303.67,-24.3 293.15,-25.52 302.14,-31.13 303.67,-24.3"/>
+<path fill="none" stroke="#9a32cd" stroke-dasharray="5,2" d="M303.1,-26.94C321.91,-30.95 342.87,-35.54 362,-40 368.65,-41.55 375.61,-43.22 382.51,-44.92"/>
+<polygon fill="#9a32cd" stroke="#9a32cd" points="303.71,-23.49 293.2,-24.84 302.25,-30.34 303.71,-23.49"/>
 </a>
 </g>
-<text text-anchor="middle" x="338" y="-43" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> alloc_</text>
+<text text-anchor="middle" x="341" y="-43" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> mAlloc</text>
 </g>
 <!-- Node7 -->
 <g id="Node000007" class="node">

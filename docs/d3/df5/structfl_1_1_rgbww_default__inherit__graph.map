@@ -1,0 +1,5 @@
+<map id="fl::RgbwwDefault" name="fl::RgbwwDefault">
+<area shape="rect" id="Node000001" title="Default RGBWW configuration: colorimetric mode at warm=2700K / cool=6500K, default profile,..." alt="" coords="5,79,139,104"/>
+<area shape="rect" id="Node000002" href="$d4/df9/structfl_1_1_rgbww.html" title="Per&#45;strip RGBWW configuration." alt="" coords="29,5,115,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="75,44,75,79,69,79,69,44"/>
+</map>

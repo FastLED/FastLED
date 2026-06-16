@@ -1,0 +1,11 @@
+<map id="fl::spi::ParallelDevice::ParallelDevice" name="fl::spi::ParallelDevice::ParallelDevice">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,23,164,63"/>
+<area shape="rect" id="Node000002" href="$d7/de0/classfl_1_1spi_1_1_parallel_device_a98f45a4e7d85b985afa8d41577df29c9.html#a98f45a4e7d85b985afa8d41577df29c9" title="Construct parallel device." alt="" coords="212,23,371,63"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,41,198,41,198,46,164,46"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a3fd92c727664a77396403265415789d3.html#a3fd92c727664a77396403265415789d3" title=" " alt="" coords="433,5,559,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="370,31,419,25,420,30,371,36"/>
+<area shape="rect" id="Node000005" href="$d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c" title=" " alt="" coords="419,55,573,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="371,50,405,54,404,59,370,55"/>
+<area shape="rect" id="Node000004" href="$da/d3c/namespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259.html#a0bddf371925d8c4e94b88e9d7b35d259" title=" " alt="" coords="621,5,725,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="559,15,607,15,607,21,559,21"/>
+</map>

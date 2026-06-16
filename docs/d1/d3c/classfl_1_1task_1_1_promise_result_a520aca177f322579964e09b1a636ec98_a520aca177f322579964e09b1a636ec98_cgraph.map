@@ -1,0 +1,9 @@
+<map id="fl::task::PromiseResult::PromiseResult" name="fl::task::PromiseResult::PromiseResult">
+<area shape="rect" id="Node000001" title="Construct a successful PromiseResult." alt="" coords="5,23,173,63"/>
+<area shape="rect" id="Node000002" href="$d1/d3c/classfl_1_1task_1_1_promise_result_a23c55a6aa4d01f959bf88586a740ced3.html#a23c55a6aa4d01f959bf88586a740ced3" title="Get the success value (const)" alt="" coords="221,23,389,63"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,41,208,41,208,46,174,46"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ad2bd3fbfa62b8cb135f8c67ce6bfeefe.html#ad2bd3fbfa62b8cb135f8c67ce6bfeefe" title=" " alt="" coords="504,5,563,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="390,31,490,20,491,25,390,37"/>
+<area shape="rect" id="Node000004" href="$d1/d3c/classfl_1_1task_1_1_promise_result_a47bdae0780409cda6b8e25bb47cc0ec6.html#a47bdae0780409cda6b8e25bb47cc0ec6" title="Check if the result is successful." alt="" coords="437,55,629,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="390,50,424,53,424,58,390,55"/>
+</map>

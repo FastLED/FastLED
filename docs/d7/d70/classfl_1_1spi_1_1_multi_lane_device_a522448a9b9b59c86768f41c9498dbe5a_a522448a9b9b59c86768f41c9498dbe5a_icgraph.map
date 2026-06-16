@@ -1,0 +1,27 @@
+<map id="fl::spi::MultiLaneDevice::isReady" name="fl::spi::MultiLaneDevice::isReady">
+<area shape="rect" id="Node000001" title="Check if device is initialized." alt="" coords="705,161,880,201"/>
+<area shape="rect" id="Node000002" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a97018959f2c77546fa12f2a0adb2f540.html#a97018959f2c77546fa12f2a0adb2f540" title="Flush all lanes (transpose and transmit)" alt="" coords="483,63,657,103"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="733,158,615,105,617,100,735,153"/>
+<area shape="rect" id="Node000003" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a512a780a7050fa0e91e83c5dba1e17bc.html#a512a780a7050fa0e91e83c5dba1e17bc" title=" " alt="" coords="5,151,180,191"/>
+<area shape="poly" id="edge6_Node000001_Node000003" title=" " alt="" coords="748,211,651,260,588,286,519,308,446,324,371,329,297,323,262,313,227,300,209,288,199,274,191,258,178,242,120,193,124,189,182,238,195,255,204,271,213,284,229,295,263,308,298,317,371,324,445,318,517,303,586,281,648,255,746,206"/>
+<area shape="rect" id="Node000004" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a547b2f30f70e16dbb22762f3f2370254.html#a547b2f30f70e16dbb22762f3f2370254" title="Internal implementation &#45; write all lanes atomically." alt="" coords="244,5,419,45"/>
+<area shape="poly" id="edge15_Node000001_Node000004" title=" " alt="" coords="768,152,721,99,690,73,656,53,597,33,535,22,474,18,419,19,419,14,474,13,536,17,599,28,658,48,693,69,724,95,772,148"/>
+<area shape="rect" id="Node000006" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_ace536cf9464924b8fba04e8f1bc083aa.html#ace536cf9464924b8fba04e8f1bc083aa" title="Check if transmission is in progress." alt="" coords="483,360,657,400"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="773,215,725,278,694,313,659,343,628,362,625,358,656,339,690,309,721,275,769,211"/>
+<area shape="rect" id="Node000007" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a44c55402b14a1d2962aaea6d0574b46a.html#a44c55402b14a1d2962aaea6d0574b46a" title="Wait for pending transmission to complete." alt="" coords="483,161,657,201"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="692,184,657,184,657,179,692,179"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="470,100,229,141,174,153,173,148,227,136,469,94"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="472,62,415,48,416,43,474,57"/>
+<area shape="rect" id="Node000005" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_ac20394c24a6406ccdd49a33d7e4f85ff.html#ac20394c24a6406ccdd49a33d7e4f85ff" title="Convenience method &#45; write multiple lanes in parallel (variadic template)" alt="" coords="5,5,180,45"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="230,28,180,28,180,23,230,23"/>
+<area shape="poly" id="edge11_Node000007_Node000003" title=" " alt="" coords="469,165,434,161,301,158,180,165,180,159,301,153,435,156,469,160"/>
+<area shape="poly" id="edge14_Node000007_Node000004" title=" " alt="" coords="526,156,362,48,365,43,528,152"/>
+<area shape="rect" id="Node000008" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a68cfb14b18d62e7ccce04976e2fae78f.html#a68cfb14b18d62e7ccce04976e2fae78f" title="Shutdown hardware and release resources." alt="" coords="228,259,435,285"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="522,210,436,249,394,262,392,257,434,244,519,205"/>
+<area shape="rect" id="Node000010" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_ad887a0e5eac7523dee2f0279eb91f449.html#ad887a0e5eac7523dee2f0279eb91f449" title="Convenience method &#45; wait for transmission to complete." alt="" coords="244,195,419,235"/>
+<area shape="poly" id="edge12_Node000007_Node000010" title=" " alt="" coords="470,198,419,205,419,200,469,193"/>
+<area shape="poly" id="edge10_Node000008_Node000003" title=" " alt="" coords="253,258,227,249,171,222,123,193,126,189,173,217,229,244,255,253"/>
+<area shape="rect" id="Node000009" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a2bc918c56583453aec7f6c3e8af8d7e7.html#a2bc918c56583453aec7f6c3e8af8d7e7" title="Destructor &#45; releases hardware resources." alt="" coords="5,252,180,292"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="214,275,180,275,180,269,214,269"/>
+<area shape="poly" id="edge13_Node000010_Node000010" title=" " alt="" coords="372,183,358,176,331,173,308,175,295,180,290,186,292,194,287,195,284,185,292,176,307,170,331,168,359,171,374,178"/>
+</map>

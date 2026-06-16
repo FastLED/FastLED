@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="bitswap_type",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/ded/bitswap_8h.html#d6/d93/unionbitswap__type",tooltip="Union containing a full 8 bytes to swap the bit orientation on."];
+  Node0 [id="Node000000",label="autoresearch::parlio\l_stream::ValidateResult",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d84/namespaceautoresearch_1_1parlio__stream.html#d9/dc3/structautoresearch_1_1parlio__stream_1_1_validate_result",tooltip=" "];
 }

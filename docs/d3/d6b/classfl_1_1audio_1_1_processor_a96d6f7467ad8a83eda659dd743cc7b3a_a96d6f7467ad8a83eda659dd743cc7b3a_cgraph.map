@@ -1,0 +1,13 @@
+<map id="fl::audio::Processor::getDownbeatDetector" name="fl::audio::Processor::getDownbeatDetector">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,53,179,93"/>
+<area shape="poly" id="edge5_Node000001_Node000001" title=" " alt="" coords="53,53,51,43,57,34,71,28,92,26,116,29,129,36,127,41,114,34,92,31,72,33,61,38,56,44,58,52"/>
+<area shape="rect" id="Node000002" href="$d3/d6b/classfl_1_1audio_1_1_processor_ac09406be98e613b4f9c26a87538198e2.html#ac09406be98e613b4f9c26a87538198e2" title=" " alt="" coords="227,53,372,93"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,70,213,70,213,75,179,75"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="430,5,555,31"/>
+<area shape="poly" id="edge6_Node000001_Node000003" title=" " alt="" coords="129,50,174,30,226,14,275,7,325,4,416,7,416,12,325,10,276,12,227,19,176,35,131,55"/>
+<area shape="rect" id="Node000004" href="$d3/d6b/classfl_1_1audio_1_1_processor_ade806d07af52e3d281939cebce7643d5.html#ade806d07af52e3d281939cebce7643d5" title=" " alt="" coords="420,82,565,122"/>
+<area shape="poly" id="edge7_Node000001_Node000004" title=" " alt="" coords="164,90,227,102,299,105,372,102,406,101,406,107,372,107,299,110,226,107,163,95"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="263,53,261,43,267,34,280,28,299,26,322,29,334,36,332,41,320,34,299,31,281,33,270,38,266,44,268,52"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="370,50,433,32,434,37,371,55"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="373,81,407,86,406,92,372,86"/>
+</map>

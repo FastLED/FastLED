@@ -1,0 +1,13 @@
+<map id="fl::AudioBatch::ensurePeaks" name="fl::AudioBatch::ensurePeaks">
+<area shape="rect" id="Node000001" title=" " alt="" coords="223,104,425,129"/>
+<area shape="rect" id="Node000002" href="$d6/d9d/classfl_1_1_audio_batch_a8448582ad86aebe19e63a1b2a6dde154.html#a8448582ad86aebe19e63a1b2a6dde154" title=" " alt="" coords="15,5,165,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="288,100,235,72,174,44,140,33,142,28,176,40,237,67,290,95"/>
+<area shape="rect" id="Node000003" href="$d6/d9d/classfl_1_1_audio_batch_ab90f2695f7e1d4e9d04b540c475cde6b.html#ab90f2695f7e1d4e9d04b540c475cde6b" title=" " alt="" coords="15,55,165,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="249,104,151,83,152,77,250,99"/>
+<area shape="rect" id="Node000004" href="$d6/d9d/classfl_1_1_audio_batch_a485e6c67bdef32bd52a3fdfeb3facd22.html#a485e6c67bdef32bd52a3fdfeb3facd22" title=" " alt="" coords="17,104,163,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="209,119,163,119,163,114,209,114"/>
+<area shape="rect" id="Node000005" href="$d6/d9d/classfl_1_1_audio_batch_a21d9fe882dae81549f7f764015ca3bff.html#a21d9fe882dae81549f7f764015ca3bff" title=" " alt="" coords="11,153,169,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="250,135,152,156,151,151,249,130"/>
+<area shape="rect" id="Node000006" href="$d6/d9d/classfl_1_1_audio_batch_a75cdbb4424299ad8d2b3e437a5202cfa.html#a75cdbb4424299ad8d2b3e437a5202cfa" title=" " alt="" coords="5,203,175,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="289,138,236,165,176,192,139,205,137,200,174,188,234,161,287,134"/>
+</map>

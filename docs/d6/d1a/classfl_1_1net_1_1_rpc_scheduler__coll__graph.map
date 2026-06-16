@@ -1,0 +1,16 @@
+<map id="fl::net::RpcScheduler&lt; Task &gt;" name="fl::net::RpcScheduler&lt; Task &gt;">
+<area shape="rect" id="Node000001" title="Generic time&#45;based task scheduler." alt="" coords="1449,71,1604,111"/>
+<area shape="rect" id="Node000002" href="$d2/dfa/classfl_1_1priority__queue__stable.html" title=" " alt="" coords="1124,63,1341,118"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1355,88,1449,88,1449,93,1355,93"/>
+<area shape="rect" id="Node000003" href="$df/d91/classfl_1_1_priority_queue.html" title=" " alt="" coords="453,62,640,117"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="654,78,860,69,981,68,1100,72,1124,74,1124,79,1100,77,981,73,861,74,654,84"/>
+<area shape="rect" id="Node000013" href="$d2/dfa/classfl_1_1priority__queue__stable.html" title="Stable priority queue that maintains FIFO ordering for equal&#45;priority elements." alt="" coords="748,104,923,144"/>
+<area shape="poly" id="edge7_Node000013_Node000003" title=" " alt="" coords="654,99,748,111,748,116,653,105"/>
+<area shape="rect" id="Node000004" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="5,5,240,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="254,41,430,67,453,71,453,76,429,72,253,46"/>
+<area shape="rect" id="Node000009" href="$d6/d07/structfl_1_1less.html" title=" " alt="" coords="5,69,240,109"/>
+<area shape="poly" id="edge4_Node000003_Node000009" title=" " alt="" coords="254,87,453,87,453,92,254,92"/>
+<area shape="rect" id="Node000011" href="$df/d91/classfl_1_1_priority_queue.html" title=" " alt="" coords="36,133,209,173"/>
+<area shape="poly" id="edge5_Node000003_Node000011" title=" " alt="" coords="223,146,323,137,429,121,460,114,461,119,430,127,323,143,223,151"/>
+<area shape="poly" id="edge6_Node000002_Node000013" title=" " alt="" coords="936,114,1100,101,1124,99,1124,104,1100,107,936,120"/>
+</map>

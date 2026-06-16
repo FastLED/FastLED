@@ -1,0 +1,11 @@
+<map id="fl::audio::Processor::getEqDominantFreqHz" name="fl::audio::Processor::getEqDominantFreqHz">
+<area shape="rect" id="Node000001" title="Frequency of strongest bin (Hz)" alt="" coords="5,29,181,69"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="52,30,50,20,56,10,71,5,93,3,119,6,133,13,130,18,117,11,93,8,72,10,60,15,55,21,57,28"/>
+<area shape="rect" id="Node000002" href="$d3/d6b/classfl_1_1audio_1_1_processor_a3ea6090ef70536d974a52c655f335783.html#a3ea6090ef70536d974a52c655f335783" title=" " alt="" coords="229,29,396,69"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="182,47,215,47,215,52,182,52"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="274,30,272,20,278,11,292,5,313,3,336,6,349,13,347,18,335,11,313,8,293,10,282,15,277,21,280,28"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="454,7,579,33"/>
+<area shape="poly" id="edge4_Node000002_Node000003" title=" " alt="" coords="396,35,440,28,441,34,397,40"/>
+<area shape="rect" id="Node000004" href="$d3/d6b/classfl_1_1audio_1_1_processor_ade806d07af52e3d281939cebce7643d5.html#ade806d07af52e3d281939cebce7643d5" title=" " alt="" coords="444,57,589,97"/>
+<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="397,58,431,63,430,68,396,63"/>
+</map>

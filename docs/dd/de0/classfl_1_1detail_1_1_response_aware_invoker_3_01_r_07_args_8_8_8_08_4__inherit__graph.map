@@ -1,0 +1,7 @@
+<map id="fl::detail::ResponseAwareInvoker&lt; R(Args...)&gt;" name="fl::detail::ResponseAwareInvoker&lt; R(Args...)&gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="102,108,289,148"/>
+<area shape="rect" id="Node000002" href="$dc/d61/classfl_1_1detail_1_1_erased_invoker.html" title=" " alt="" coords="5,13,180,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="116,46,178,106,174,110,112,50"/>
+<area shape="rect" id="Node000003" href="$df/d9e/namespacefl_1_1detail.html#d6/dfa/classfl_1_1detail_1_1_response_aware_invoker" title="Invoker for response&#45;aware RPC methods." alt="" coords="205,5,391,45"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="271,57,216,110,213,106,267,53"/>
+</map>

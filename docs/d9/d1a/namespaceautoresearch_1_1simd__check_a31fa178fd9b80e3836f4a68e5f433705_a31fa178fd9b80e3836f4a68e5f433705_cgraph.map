@@ -1,0 +1,18 @@
+<map id="autoresearch::simd_check::benchSimd4" name="autoresearch::simd_check::benchSimd4">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,112,160,152"/>
+<area shape="rect" id="Node000002" href="$d9/d1a/namespaceautoresearch_1_1simd__check_a0130a9f090980e720fff0c3d8115562f.html#a0130a9f090980e720fff0c3d8115562f" title=" " alt="" coords="220,5,367,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,109,157,82,207,55,221,48,224,53,209,60,159,87,116,114"/>
+<area shape="rect" id="Node000003" href="$d9/d9f/classfl_1_1s16x16_a9c7a5411b60510e5a513c5d1e305720d.html#a9c7a5411b60510e5a513c5d1e305720d" title=" " alt="" coords="216,70,371,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="160,111,225,96,226,101,161,117"/>
+<area shape="rect" id="Node000006" href="$d1/d7f/structfl_1_1s16x16x4_a9779c1f01acf93469171a665b5ae329c.html#a9779c1f01acf93469171a665b5ae329c" title=" " alt="" coords="208,119,379,145"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="160,129,194,129,194,135,160,135"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a95a89c7ba649b9bd2c9136c0f517d82f.html#a95a89c7ba649b9bd2c9136c0f517d82f" title="Universal microsecond timer &#45; returns microseconds since system startup." alt="" coords="252,193,335,218"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="142,150,243,185,242,190,140,155"/>
+<area shape="rect" id="Node000008" href="$d1/d7f/structfl_1_1s16x16x4_ad759beffb69df92a0f986fa2c56d3527.html#ad759beffb69df92a0f986fa2c56d3527" title=" " alt="" coords="225,242,362,267"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="106,150,151,190,209,228,224,235,222,240,207,233,148,194,102,154"/>
+<area shape="rect" id="Node000004" href="$d9/d9f/classfl_1_1s16x16_a5e82494e286448e4cad2de1b302b9168.html#a5e82494e286448e4cad2de1b302b9168" title=" " alt="" coords="427,46,567,71"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="371,71,412,66,413,71,371,76"/>
+<area shape="rect" id="Node000005" href="$d9/d9f/classfl_1_1s16x16_aa048b427f50f28993a67941e0f303a65.html#aa048b427f50f28993a67941e0f303a65" title=" " alt="" coords="438,95,555,121"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="371,90,425,96,424,102,371,95"/>
+<area shape="poly" id="edge7_Node000007_Node000007" title=" " alt="" coords="260,194,253,184,257,174,270,168,293,166,322,170,333,179,329,183,319,175,293,171,272,173,260,178,258,184,264,191"/>
+</map>

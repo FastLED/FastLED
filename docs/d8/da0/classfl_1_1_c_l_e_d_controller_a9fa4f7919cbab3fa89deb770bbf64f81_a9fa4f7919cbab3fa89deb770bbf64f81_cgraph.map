@@ -1,0 +1,20 @@
+<map id="fl::CLEDController::visitControllers" name="fl::CLEDController::visitControllers">
+<area shape="rect" id="Node000001" title="Visit all controllers in the linked list with a visitor The visitor must be a callable that accepts (..." alt="" coords="5,99,141,139"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a7e91fc8f83d62c9da5e5c3d6d1bc10ce.html#a7e91fc8f83d62c9da5e5c3d6d1bc10ce" title="Protected constructor with registration mode." alt="" coords="373,35,509,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="89,97,130,55,158,35,188,20,237,10,286,10,334,17,376,28,375,33,333,22,286,15,237,15,190,25,161,40,134,60,93,100"/>
+<area shape="rect" id="Node000005" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ad9e0dfb8b8b333d9e48c7695b202710c.html#ad9e0dfb8b8b333d9e48c7695b202710c" title="Get the first LED controller in the linked list of controllers." alt="" coords="189,35,325,75"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="131,96,185,77,187,82,132,101"/>
+<area shape="rect" id="Node000006" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a961d046a5488ecee3adf0b17a02328d5.html#a961d046a5488ecee3adf0b17a02328d5" title="Pointer to the CRGB array for this controller." alt="" coords="189,99,325,139"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="142,116,176,116,176,121,142,121"/>
+<area shape="rect" id="Node000007" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a87abe437742b3f2b06943fafd4404aef.html#a87abe437742b3f2b06943fafd4404aef" title="Get the next controller in the linked list after this one." alt="" coords="189,163,325,203"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="132,136,187,156,185,161,131,141"/>
+<area shape="rect" id="Node000008" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ab8e1ee460f25af890c1d40479e4c5b09.html#ab8e1ee460f25af890c1d40479e4c5b09" title="How many LEDs does this controller manage?" alt="" coords="189,227,325,267"/>
+<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="97,137,139,174,191,212,200,218,197,222,188,217,136,178,94,141"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a9e51518d1427463dffd596c69c6f3e46.html#a9e51518d1427463dffd596c69c6f3e46" title="Add this controller to the linked list." alt="" coords="557,5,693,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="509,41,544,36,544,41,510,46"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a5e115bf146729c8868c918538feb06df.html#a5e115bf146729c8868c918538feb06df" title="Check if this controller is in the linked list." alt="" coords="741,35,877,75"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="694,34,728,39,728,44,693,39"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="741,59,693,60,557,60,523,59,523,54,557,55,693,55,741,54"/>
+<area shape="poly" id="edge6_Node000005_Node000002" title=" " alt="" coords="326,52,360,52,360,57,326,57"/>
+<area shape="poly" id="edge9_Node000007_Node000002" title=" " alt="" coords="303,160,324,148,369,116,407,82,411,86,372,120,327,153,306,165"/>
+</map>

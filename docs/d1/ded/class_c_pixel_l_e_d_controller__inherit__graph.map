@@ -1,79 +1,75 @@
 <map id="CPixelLEDController&lt; RGB_ORDER, LANES, MASK &gt;" name="CPixelLEDController&lt; RGB_ORDER, LANES, MASK &gt;">
-<area shape="rect" id="Node000001" title="Template extension of the CLEDController class." alt="" coords="175,670,348,725"/>
-<area shape="rect" id="Node000003" href="$d4/d96/class_a_p_a102_controller.html" title=" " alt="" coords="1819,6,2050,104"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="268,656,281,607,302,549,331,489,370,435,403,400,434,374,464,355,494,339,644,282,882,181,980,143,1071,111,1164,83,1266,59,1382,36,1520,14,1588,5,1643,3,1766,14,1820,22,1819,28,1765,19,1642,8,1589,10,1520,19,1383,41,1267,64,1166,88,1073,116,981,148,884,186,646,287,497,344,467,359,437,379,407,404,374,438,336,492,307,551,287,609,273,658"/>
-<area shape="rect" id="Node000007" href="$d4/d96/class_a_p_a102_controller.html" title=" " alt="" coords="1811,282,2058,366"/>
-<area shape="poly" id="edge5_Node000001_Node000007" title=" " alt="" coords="289,658,325,619,371,585,443,551,503,537,566,530,645,518,890,471,1081,440,1520,378,1811,337,1812,343,1520,383,1082,445,891,476,646,523,567,535,504,542,444,556,373,589,329,623,293,661"/>
-<area shape="rect" id="Node000009" href="$d4/d96/class_a_p_a102_controller.html" title=" " alt="" coords="1789,129,2080,213"/>
-<area shape="poly" id="edge7_Node000001_Node000009" title=" " alt="" coords="278,656,315,595,341,563,370,536,521,428,656,348,782,291,906,250,1035,221,1176,198,1520,151,1588,144,1658,142,1789,149,1789,154,1658,148,1588,149,1520,156,1177,203,1036,226,907,255,784,296,658,353,524,433,374,540,345,567,320,598,283,659"/>
-<area shape="rect" id="Node000010" href="$d4/d96/class_a_p_a102_controller.html" title=" " alt="" coords="1811,405,2058,489"/>
-<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="315,661,371,635,570,579,777,535,983,502,1184,478,1374,461,1546,451,1811,444,1811,449,1546,456,1374,466,1185,483,984,507,777,540,572,584,373,640,317,666"/>
-<area shape="rect" id="Node000012" href="$d4/d96/class_a_p_a102_controller.html" title=" " alt="" coords="1801,534,2068,618"/>
-<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="361,668,372,666,498,650,665,635,1067,609,1479,590,1801,578,1801,583,1480,595,1068,615,665,640,499,655,372,671,362,673"/>
-<area shape="rect" id="Node000014" href="$d9/d0f/class_d_m_x_serial_controller.html" title=" " alt="" coords="1857,663,2012,703"/>
-<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="362,690,739,676,1221,663,1496,663,1631,661,1765,664,1857,672,1857,677,1765,670,1631,667,1496,668,1221,668,740,681,362,696"/>
-<area shape="rect" id="Node000016" href="$d0/da7/class_d_m_x_simple_controller.html" title=" " alt="" coords="1833,763,2037,803"/>
-<area shape="poly" id="edge15_Node000001_Node000016" title=" " alt="" coords="362,700,1765,771,1833,775,1832,780,1765,776,362,705"/>
-<area shape="rect" id="Node000018" href="$d9/d95/class_w_s2801_controller.html" title=" " alt="" coords="1841,1190,2029,1245"/>
-<area shape="poly" id="edge17_Node000001_Node000018" title=" " alt="" coords="282,736,319,802,344,836,374,866,446,923,511,964,573,995,633,1018,765,1054,931,1099,1012,1122,1075,1136,1222,1158,1841,1208,1840,1213,1221,1163,1074,1141,1010,1127,930,1104,763,1059,631,1023,570,1000,509,969,443,927,370,870,340,840,314,805,277,739"/>
-<area shape="rect" id="Node000020" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title=" " alt="" coords="701,864,851,904"/>
-<area shape="poly" id="edge19_Node000001_Node000020" title=" " alt="" coords="300,732,334,761,373,786,458,821,546,846,629,863,701,874,700,879,628,869,544,851,456,826,371,791,331,765,297,736"/>
-<area shape="rect" id="Node000029" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title=" " alt="" coords="670,1227,882,1296"/>
-<area shape="poly" id="edge36_Node000001_Node000029" title=" " alt="" coords="267,738,275,858,294,1012,308,1088,326,1156,348,1211,360,1231,374,1246,394,1258,423,1266,498,1274,585,1274,669,1270,670,1275,585,1280,498,1280,422,1271,392,1263,370,1250,356,1234,343,1213,321,1158,303,1089,289,1013,270,858,262,739"/>
-<area shape="rect" id="Node000031" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title=" " alt="" coords="931,1333,1197,1417"/>
-<area shape="poly" id="edge38_Node000001_Node000031" title=" " alt="" coords="266,739,271,876,287,1058,301,1149,320,1231,344,1297,358,1321,373,1339,394,1345,441,1351,586,1360,931,1370,930,1375,586,1365,440,1356,393,1351,371,1344,354,1325,339,1299,315,1232,296,1150,282,1059,266,876,261,739"/>
-<area shape="rect" id="Node000034" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title=" " alt="" coords="645,1392,907,1476"/>
-<area shape="poly" id="edge41_Node000001_Node000034" title=" " alt="" coords="265,739,267,893,272,994,280,1102,294,1207,313,1301,340,1377,356,1405,374,1426,403,1447,434,1462,468,1472,503,1477,576,1478,645,1469,645,1474,576,1483,503,1483,467,1477,432,1467,400,1451,370,1430,351,1409,335,1379,308,1303,289,1207,275,1102,266,995,262,893,260,739"/>
-<area shape="rect" id="Node000002" href="$d6/d2c/class_c_l_e_d_controller.html" title="Base definition for an LED controller." alt="" coords="5,685,125,710"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="139,695,175,695,175,700,139,700"/>
-<area shape="rect" id="Node000004" href="$d6/dc7/class_a_p_a102_controller_h_d.html" title="APA102 high definition controller class." alt="" coords="2143,46,2341,101"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="2064,60,2142,65,2142,70,2064,65"/>
-<area shape="rect" id="Node000005" href="$d6/dc7/class_a_p_a102_controller_h_d.html" title=" " alt="" coords="2596,116,2811,170"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="2356,88,2596,124,2595,129,2355,93"/>
-<area shape="rect" id="Node000008" href="$d9/d06/class_h_d107_controller.html" title="HD107 is just the APA102 with a default 40Mhz clock rate." alt="" coords="2153,297,2331,352"/>
-<area shape="poly" id="edge6_Node000007_Node000008" title=" " alt="" coords="2072,322,2152,322,2152,327,2072,327"/>
-<area shape="poly" id="edge8_Node000009_Node000005" title=" " alt="" coords="2093,162,2595,144,2596,149,2094,168"/>
-<area shape="rect" id="Node000011" href="$d3/de0/class_s_k9822_controller.html" title="SK9822 controller class." alt="" coords="2129,420,2355,474"/>
-<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="2072,444,2129,444,2129,450,2072,450"/>
-<area shape="rect" id="Node000013" href="$da/d45/class_s_k9822_controller_h_d.html" title="SK9822 controller class." alt="" coords="2143,549,2341,604"/>
-<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="2082,574,2142,574,2142,579,2082,579"/>
-<area shape="rect" id="Node000015" href="$df/d73/class_d_m_x_s_e_r_i_a_l.html" title="DMX512 based LED controller class, using the DMXSerial library." alt="" coords="2137,670,2347,696"/>
-<area shape="poly" id="edge14_Node000014_Node000015" title=" " alt="" coords="2026,680,2137,680,2137,686,2026,686"/>
-<area shape="rect" id="Node000017" href="$da/d31/class_d_m_x_s_i_m_p_l_e.html" title="DMX512 based LED controller class, using the DmxSimple library." alt="" coords="2151,763,2333,803"/>
-<area shape="poly" id="edge16_Node000016_Node000017" title=" " alt="" coords="2050,780,2150,780,2150,786,2050,786"/>
-<area shape="rect" id="Node000019" href="$dc/d28/class_w_s2803_controller.html" title="WS2803 controller class." alt="" coords="2129,1190,2355,1245"/>
-<area shape="poly" id="edge18_Node000018_Node000019" title=" " alt="" coords="2043,1215,2129,1215,2129,1220,2043,1220"/>
-<area shape="rect" id="Node000021" href="$d4/d96/class_a_p_a102_controller.html" title="APA102 controller class." alt="" coords="1221,255,1496,324"/>
-<area shape="poly" id="edge20_Node000020_Node000021" title=" " alt="" coords="805,852,1322,322,1325,326,809,856"/>
-<area shape="rect" id="Node000022" href="$d9/d0f/class_d_m_x_serial_controller.html" title="DMX512 based LED controller class, using the DMXSerial library." alt="" coords="1281,678,1436,718"/>
-<area shape="poly" id="edge26_Node000020_Node000022" title=" " alt="" coords="844,857,930,827,1289,715,1290,720,932,832,845,862"/>
-<area shape="rect" id="Node000023" href="$d0/da7/class_d_m_x_simple_controller.html" title="DMX512 based LED controller class, using the DmxSimple library." alt="" coords="1257,792,1461,832"/>
-<area shape="poly" id="edge28_Node000020_Node000023" title=" " alt="" coords="865,871,1256,822,1257,827,865,876"/>
-<area shape="rect" id="Node000024" href="$d0/d40/class_l_p_d6803_controller.html" title="LPD6803 controller class (LPD1101)." alt="" coords="1259,857,1458,912"/>
-<area shape="poly" id="edge30_Node000020_Node000024" title=" " alt="" coords="865,882,1259,882,1259,887,865,887"/>
-<area shape="rect" id="Node000025" href="$dc/d33/class_l_p_d8806_controller.html" title="LPD8806 controller class." alt="" coords="1259,936,1458,990"/>
-<area shape="poly" id="edge31_Node000020_Node000025" title=" " alt="" coords="866,894,1259,947,1259,952,865,899"/>
-<area shape="rect" id="Node000026" href="$d2/dd6/class_p9813_controller.html" title="P9813 controller class." alt="" coords="1271,1014,1446,1069"/>
-<area shape="poly" id="edge32_Node000020_Node000026" title=" " alt="" coords="837,907,931,942,1112,990,1271,1023,1270,1028,1111,995,930,947,835,912"/>
-<area shape="rect" id="Node000027" href="$d8/df9/class_s_m16716_controller.html" title="SM16716 controller class." alt="" coords="1259,1093,1458,1148"/>
-<area shape="poly" id="edge33_Node000020_Node000027" title=" " alt="" coords="806,912,861,964,895,990,932,1013,1015,1048,1101,1075,1185,1094,1260,1107,1259,1112,1184,1099,1100,1080,1013,1053,929,1017,892,995,858,968,802,916"/>
-<area shape="rect" id="Node000028" href="$d9/d95/class_w_s2801_controller.html" title="WS2801 controller class." alt="" coords="1246,1224,1471,1278"/>
-<area shape="poly" id="edge34_Node000020_Node000028" title=" " alt="" coords="795,916,817,957,847,1007,886,1056,932,1099,1008,1147,1090,1183,1172,1210,1247,1229,1245,1234,1170,1215,1088,1188,1005,1151,929,1104,882,1060,843,1010,812,960,790,918"/>
-<area shape="poly" id="edge21_Node000021_Node000003" title=" " alt="" coords="1397,243,1452,191,1484,167,1519,146,1630,118,1818,77,1819,82,1631,123,1521,151,1487,171,1455,196,1401,246"/>
-<area shape="poly" id="edge22_Node000021_Node000007" title=" " alt="" coords="1510,313,1520,314,1671,322,1811,324,1811,329,1671,328,1520,319,1510,318"/>
-<area shape="poly" id="edge23_Node000021_Node000009" title=" " alt="" coords="1509,257,1520,255,1589,246,1643,242,1697,237,1765,224,1816,210,1818,216,1766,230,1697,242,1643,247,1589,251,1520,260,1510,262"/>
-<area shape="poly" id="edge24_Node000021_Node000010" title=" " alt="" coords="1416,330,1465,362,1521,388,1594,410,1670,426,1744,436,1811,441,1811,447,1743,441,1669,431,1593,416,1519,393,1463,367,1413,335"/>
-<area shape="poly" id="edge25_Node000021_Node000012" title=" " alt="" coords="1384,335,1407,377,1438,422,1476,466,1521,502,1588,534,1661,556,1733,569,1801,575,1801,580,1733,574,1659,561,1586,539,1519,507,1473,470,1434,426,1402,380,1379,338"/>
-<area shape="poly" id="edge27_Node000022_Node000014" title=" " alt="" coords="1450,693,1857,682,1857,688,1450,698"/>
-<area shape="poly" id="edge29_Node000023_Node000016" title=" " alt="" coords="1475,804,1832,785,1832,791,1475,809"/>
-<area shape="poly" id="edge35_Node000028_Node000018" title=" " alt="" coords="1485,1245,1765,1231,1840,1225,1841,1230,1766,1236,1485,1250"/>
-<area shape="rect" id="Node000030" href="$d5/d83/class_r_g_b_w_emulated_controller.html" title=" " alt="" coords="1245,1303,1473,1343"/>
-<area shape="poly" id="edge37_Node000029_Node000030" title=" " alt="" coords="896,1271,1245,1308,1244,1314,895,1277"/>
-<area shape="rect" id="Node000032" href="$dd/dbc/class_w_s2816_controller.html" title=" " alt="" coords="1841,1383,2029,1423"/>
-<area shape="poly" id="edge39_Node000031_Node000032" title=" " alt="" coords="1211,1377,1841,1397,1840,1403,1211,1382"/>
-<area shape="rect" id="Node000033" href="$dc/d9f/class_w_s2816.html" title="WS2816 controller class." alt="" coords="2147,1383,2337,1423"/>
-<area shape="poly" id="edge40_Node000032_Node000033" title=" " alt="" coords="2042,1400,2147,1400,2147,1406,2042,1406"/>
-<area shape="rect" id="Node000035" href="$dd/dbc/class_w_s2816_controller.html" title=" " alt="" coords="1265,1418,1453,1458"/>
-<area shape="poly" id="edge42_Node000034_Node000035" title=" " alt="" coords="920,1432,1264,1434,1264,1440,920,1437"/>
-<area shape="poly" id="edge43_Node000035_Node000032" title=" " alt="" coords="1466,1429,1765,1411,1840,1406,1841,1412,1765,1416,1466,1434"/>
+<area shape="rect" id="Node000001" title="Template extension of the CLEDController class." alt="" coords="175,1068,348,1123"/>
+<area shape="rect" id="Node000003" href="$d4/d96/class_a_p_a102_controller.html" title=" " alt="" coords="1823,434,2062,547"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="271,1054,308,954,336,897,370,843,474,714,520,666,568,624,618,586,675,549,819,465,916,415,1001,381,1080,359,1156,347,1235,342,1319,342,1524,344,1563,341,1598,334,1658,318,1687,314,1716,315,1746,325,1779,344,1792,362,1794,381,1795,400,1803,419,1825,439,1821,443,1799,422,1789,402,1789,382,1787,364,1776,348,1744,330,1715,321,1687,319,1659,324,1599,339,1564,346,1524,349,1319,347,1235,348,1157,352,1081,364,1003,386,918,420,821,470,678,553,621,590,571,628,524,669,478,718,374,846,340,900,313,956,276,1056"/>
+<area shape="rect" id="Node000007" href="$d4/d96/class_a_p_a102_controller.html" title=" " alt="" coords="1819,310,2066,409"/>
+<area shape="poly" id="edge5_Node000001_Node000007" title=" " alt="" coords="265,1054,275,987,295,901,326,809,346,763,370,721,417,650,463,594,509,548,558,512,611,480,671,451,819,389,1010,314,1163,267,1320,235,1524,206,1598,191,1659,175,1687,172,1716,175,1747,186,1779,207,1789,217,1794,228,1794,251,1794,274,1796,285,1803,297,1821,313,1817,317,1799,300,1791,288,1788,275,1789,251,1788,230,1784,220,1776,211,1744,191,1715,181,1687,178,1660,180,1599,196,1524,212,1321,240,1164,272,1012,319,821,394,673,456,614,485,561,516,513,552,467,597,422,653,374,724,351,766,331,811,300,903,281,988,270,1055"/>
+<area shape="rect" id="Node000009" href="$d4/d96/class_a_p_a102_controller.html" title=" " alt="" coords="1801,65,2084,164"/>
+<area shape="poly" id="edge7_Node000001_Node000009" title=" " alt="" coords="264,1054,277,932,299,770,330,613,349,549,370,504,417,436,464,383,511,343,561,311,615,284,675,258,819,194,919,148,1006,112,1085,84,1160,64,1236,49,1319,37,1524,18,1652,4,1708,5,1778,18,1828,37,1874,62,1872,67,1826,42,1777,23,1707,10,1652,9,1524,24,1320,43,1237,54,1161,69,1086,89,1008,116,922,153,821,199,677,263,618,289,564,316,515,347,468,387,421,439,374,506,354,551,335,614,304,771,282,932,269,1055"/>
+<area shape="rect" id="Node000010" href="$d4/d96/class_a_p_a102_controller.html" title=" " alt="" coords="1819,689,2066,788"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="362,1077,372,1076,615,1070,1079,1062,1540,1048,1701,1037,1751,1031,1776,1024,1801,993,1838,930,1914,787,1919,789,1843,933,1805,996,1779,1028,1752,1036,1701,1042,1541,1053,1079,1067,615,1075,372,1081,362,1082"/>
+<area shape="rect" id="Node000012" href="$d4/d96/class_a_p_a102_controller.html" title=" " alt="" coords="1809,188,2076,286"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="260,1054,265,966,281,848,295,784,314,720,338,657,370,598,393,564,416,537,462,499,583,429,828,280,931,226,1030,181,1131,144,1243,112,1372,83,1523,54,1597,36,1659,20,1688,18,1717,21,1747,33,1779,55,1791,69,1797,84,1795,114,1792,144,1795,159,1803,174,1814,185,1810,189,1799,177,1790,161,1787,144,1790,113,1791,84,1787,71,1776,59,1745,38,1716,27,1688,23,1660,25,1599,41,1525,60,1373,88,1244,117,1133,149,1032,186,933,231,830,285,585,434,465,504,420,541,397,567,374,601,343,659,319,721,300,786,286,849,270,966,265,1054"/>
+<area shape="rect" id="Node000014" href="$d9/d95/class_w_s2801_controller.html" title=" " alt="" coords="1849,1015,2037,1070"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="362,1095,610,1096,961,1094,1365,1084,1573,1074,1777,1061,1848,1053,1849,1059,1778,1066,1574,1079,1366,1089,961,1099,610,1102,362,1100"/>
+<area shape="rect" id="Node000016" href="$dd/d78/classfl_1_1_u_c_s7604_controller_t.html" title=" " alt="" coords="1161,1150,1500,1234"/>
+<area shape="poly" id="edge15_Node000001_Node000016" title=" " alt="" coords="362,1110,372,1112,587,1131,755,1139,922,1145,1138,1162,1161,1165,1161,1170,1137,1168,922,1151,754,1144,587,1137,372,1117,361,1116"/>
+<area shape="rect" id="Node000017" href="$dd/d78/classfl_1_1_u_c_s7604_controller_t.html" title=" " alt="" coords="1161,1291,1500,1375"/>
+<area shape="poly" id="edge16_Node000001_Node000017" title=" " alt="" coords="339,1125,372,1134,504,1144,757,1159,1009,1177,1096,1186,1139,1196,1149,1208,1153,1220,1156,1232,1163,1244,1192,1268,1224,1288,1221,1293,1189,1273,1159,1248,1151,1234,1148,1222,1145,1210,1136,1201,1096,1192,1008,1183,757,1165,504,1150,372,1140,338,1130"/>
+<area shape="rect" id="Node000018" href="$dd/d78/classfl_1_1_u_c_s7604_controller_t.html" title=" " alt="" coords="1187,1417,1474,1516"/>
+<area shape="poly" id="edge17_Node000001_Node000018" title=" " alt="" coords="278,1135,293,1172,314,1214,341,1256,374,1292,430,1340,481,1376,530,1403,578,1423,628,1439,684,1452,820,1478,915,1491,1011,1495,1103,1492,1187,1485,1187,1490,1103,1497,1011,1500,914,1496,820,1484,683,1457,627,1444,576,1428,527,1408,479,1380,427,1344,370,1296,337,1259,309,1217,288,1174,273,1137"/>
+<area shape="rect" id="Node000019" href="$dd/d78/classfl_1_1_u_c_s7604_controller_t.html" title="UCS7604 controller extending CPixelLEDController." alt="" coords="585,1281,795,1350"/>
+<area shape="poly" id="edge18_Node000001_Node000019" title=" " alt="" coords="291,1132,328,1175,374,1213,424,1241,479,1264,585,1295,584,1300,477,1269,422,1246,370,1218,324,1179,287,1136"/>
+<area shape="rect" id="Node000020" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title=" " alt="" coords="615,734,765,774"/>
+<area shape="poly" id="edge22_Node000001_Node000020" title=" " alt="" coords="306,1057,662,772,665,777,309,1062"/>
+<area shape="rect" id="Node000030" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title=" " alt="" coords="615,1548,765,1588"/>
+<area shape="poly" id="edge38_Node000001_Node000030" title=" " alt="" coords="269,1137,281,1235,303,1358,317,1418,333,1471,352,1514,374,1542,390,1551,414,1558,476,1567,547,1570,615,1569,615,1574,547,1575,476,1573,413,1564,388,1556,370,1546,348,1516,328,1473,312,1419,297,1359,276,1236,264,1137"/>
+<area shape="rect" id="Node000032" href="$d0/dc9/class_c_pixel_l_e_d_controller.html" title=" " alt="" coords="584,1612,796,1681"/>
+<area shape="poly" id="edge40_Node000001_Node000032" title=" " alt="" coords="268,1136,277,1250,297,1396,311,1468,328,1533,349,1585,374,1619,396,1635,420,1648,474,1663,530,1667,584,1665,584,1670,530,1673,473,1668,418,1653,393,1640,370,1623,344,1588,323,1535,306,1470,291,1397,272,1251,262,1137"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller.html" title=" " alt="" coords="5,1083,125,1108"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="139,1093,175,1093,175,1098,139,1098"/>
+<area shape="rect" id="Node000004" href="$d6/dc7/class_a_p_a102_controller_h_d.html" title="APA102 high definition controller class." alt="" coords="2147,424,2345,479"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="2076,471,2146,462,2147,467,2077,476"/>
+<area shape="rect" id="Node000005" href="$d6/dc7/class_a_p_a102_controller_h_d.html" title=" " alt="" coords="2600,278,2815,332"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="2345,418,2619,330,2621,335,2347,423"/>
+<area shape="rect" id="Node000008" href="$d9/d06/class_h_d107_controller.html" title="HD107 is just the APA102 with a default 40Mhz clock rate." alt="" coords="2157,332,2335,387"/>
+<area shape="poly" id="edge6_Node000007_Node000008" title=" " alt="" coords="2080,357,2157,357,2157,362,2080,362"/>
+<area shape="poly" id="edge8_Node000009_Node000005" title=" " alt="" coords="2098,138,2226,164,2359,194,2502,235,2627,275,2626,280,2500,240,2358,199,2225,169,2097,144"/>
+<area shape="rect" id="Node000011" href="$d3/de0/class_s_k9822_controller.html" title="SK9822 controller class." alt="" coords="2133,711,2359,766"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="2080,736,2133,736,2133,741,2080,741"/>
+<area shape="rect" id="Node000013" href="$da/d45/class_s_k9822_controller_h_d.html" title="SK9822 controller class." alt="" coords="2147,210,2345,264"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="2090,234,2147,234,2147,240,2090,240"/>
+<area shape="rect" id="Node000015" href="$dc/d28/class_w_s2803_controller.html" title="WS2803 controller class." alt="" coords="2133,1015,2359,1070"/>
+<area shape="poly" id="edge14_Node000014_Node000015" title=" " alt="" coords="2050,1040,2133,1040,2133,1045,2050,1045"/>
+<area shape="poly" id="edge19_Node000019_Node000016" title=" " alt="" coords="808,1287,819,1285,1161,1219,1162,1225,821,1290,809,1292"/>
+<area shape="poly" id="edge20_Node000019_Node000017" title=" " alt="" coords="791,1352,820,1358,907,1368,995,1370,1081,1366,1161,1358,1161,1364,1081,1371,995,1375,907,1373,820,1364,790,1357"/>
+<area shape="poly" id="edge21_Node000019_Node000018" title=" " alt="" coords="723,1360,765,1409,792,1431,821,1448,849,1457,886,1464,980,1472,1085,1473,1187,1471,1187,1476,1085,1479,979,1477,886,1469,848,1462,819,1453,789,1435,762,1413,719,1363"/>
+<area shape="rect" id="Node000021" href="$d4/d96/class_a_p_a102_controller.html" title="APA102 controller class." alt="" coords="1193,365,1468,434"/>
+<area shape="poly" id="edge23_Node000020_Node000021" title=" " alt="" coords="701,720,718,680,744,633,777,586,818,545,861,516,908,491,1005,452,1103,426,1192,409,1193,415,1104,431,1007,457,910,496,864,521,822,550,781,589,748,635,723,682,706,722"/>
+<area shape="rect" id="Node000022" href="$d9/d0f/class_d_m_x_serial_controller.html" title="DMX512 based LED controller class, using the DMXSerial library." alt="" coords="1253,824,1408,864"/>
+<area shape="poly" id="edge29_Node000020_Node000022" title=" " alt="" coords="779,772,820,780,1057,813,1253,834,1253,839,1056,818,820,785,778,777"/>
+<area shape="rect" id="Node000023" href="$d0/da7/class_d_m_x_simple_controller.html" title="DMX512 based LED controller class, using the DmxSimple library." alt="" coords="1229,888,1433,928"/>
+<area shape="poly" id="edge30_Node000020_Node000023" title=" " alt="" coords="731,780,773,806,821,828,927,859,1036,880,1140,893,1229,901,1228,906,1139,899,1036,885,926,864,819,833,771,810,728,784"/>
+<area shape="rect" id="Node000024" href="$d0/d40/class_l_p_d6803_controller.html" title="LPD6803 controller class (LPD1101)." alt="" coords="1231,459,1430,514"/>
+<area shape="poly" id="edge31_Node000020_Node000024" title=" " alt="" coords="711,721,756,667,786,639,819,616,869,589,923,566,1033,530,1139,506,1231,492,1231,498,1140,512,1034,535,925,571,872,594,821,620,789,644,760,671,715,724"/>
+<area shape="rect" id="Node000025" href="$dc/d33/class_l_p_d8806_controller.html" title="LPD8806 controller class." alt="" coords="1231,538,1430,592"/>
+<area shape="poly" id="edge32_Node000020_Node000025" title=" " alt="" coords="730,724,772,699,819,676,927,639,1037,611,1141,589,1230,575,1231,580,1142,595,1038,616,928,644,821,681,774,703,732,729"/>
+<area shape="rect" id="Node000026" href="$d2/dd6/class_p9813_controller.html" title="P9813 controller class." alt="" coords="1243,616,1418,671"/>
+<area shape="poly" id="edge33_Node000020_Node000026" title=" " alt="" coords="778,729,819,720,1049,680,1243,652,1244,657,1049,685,821,725,779,734"/>
+<area shape="rect" id="Node000027" href="$d8/df9/class_s_m16716_controller.html" title="SM16716 controller class." alt="" coords="1231,695,1430,750"/>
+<area shape="poly" id="edge34_Node000020_Node000027" title=" " alt="" coords="779,747,1231,725,1231,730,780,752"/>
+<area shape="rect" id="Node000028" href="$d9/d95/class_w_s2801_controller.html" title="WS2801 controller class." alt="" coords="1218,952,1443,1007"/>
+<area shape="poly" id="edge35_Node000020_Node000028" title=" " alt="" coords="712,784,757,844,787,874,821,899,869,922,920,940,1025,965,1127,977,1218,981,1217,986,1127,983,1024,970,919,945,867,926,819,903,783,878,753,848,708,788"/>
+<area shape="rect" id="Node000029" href="$d5/d8b/classfl_1_1_channel.html" title="LED channel for parallel output, pretty much a CPixelLEDController but with timing and pin informatio..." alt="" coords="1285,774,1376,799"/>
+<area shape="poly" id="edge37_Node000020_Node000029" title=" " alt="" coords="779,756,1285,781,1285,787,779,761"/>
+<area shape="poly" id="edge24_Node000021_Node000003" title=" " alt="" coords="1482,431,1502,444,1511,457,1514,470,1517,481,1526,491,1560,508,1597,520,1635,528,1674,532,1751,530,1823,520,1824,525,1752,535,1674,537,1634,533,1595,525,1558,513,1522,495,1512,484,1509,471,1506,459,1498,448,1479,435"/>
+<area shape="poly" id="edge25_Node000021_Node000007" title=" " alt="" coords="1482,397,1625,394,1777,384,1819,379,1820,384,1778,389,1625,399,1482,403"/>
+<area shape="poly" id="edge26_Node000021_Node000009" title=" " alt="" coords="1357,352,1386,309,1424,261,1470,216,1523,179,1590,149,1662,129,1734,117,1801,110,1801,116,1734,122,1663,134,1592,154,1525,183,1473,220,1428,265,1390,312,1361,355"/>
+<area shape="poly" id="edge27_Node000021_Node000010" title=" " alt="" coords="1482,427,1502,444,1516,466,1520,488,1515,530,1509,572,1513,592,1526,613,1555,641,1589,665,1626,685,1664,701,1744,722,1820,733,1819,738,1743,728,1662,706,1623,690,1586,670,1552,645,1522,616,1508,594,1504,572,1510,530,1515,488,1511,468,1498,448,1478,431"/>
+<area shape="poly" id="edge28_Node000021_Node000012" title=" " alt="" coords="1410,356,1465,332,1523,310,1596,290,1670,274,1809,250,1810,255,1671,279,1597,295,1525,315,1467,337,1412,361"/>
+<area shape="poly" id="edge36_Node000028_Node000014" title=" " alt="" coords="1457,990,1849,1030,1848,1035,1457,995"/>
+<area shape="rect" id="Node000031" href="$d7/d62/class_h_d108_controller.html" title=" " alt="" coords="1241,1540,1420,1595"/>
+<area shape="poly" id="edge39_Node000030_Node000031" title=" " alt="" coords="779,1565,1241,1565,1241,1570,779,1570"/>
+<area shape="rect" id="Node000033" href="$d5/d83/class_r_g_b_w_emulated_controller.html" title="Emulation layer to support RGBW LEDs on RGB controllers." alt="" coords="1217,1626,1445,1666"/>
+<area shape="poly" id="edge41_Node000032_Node000033" title=" " alt="" coords="810,1644,1216,1644,1216,1649,810,1649"/>
 </map>

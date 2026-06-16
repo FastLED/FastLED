@@ -16,5 +16,8 @@ digraph "fl::Tile2x2_u8::lower_left"
   Node2 -> Node10 [id="edge4_Node000002_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node10 [id="Node000010",label="fl::XYPathRenderer\l::at_subpixel",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dbc/classfl_1_1_x_y_path_renderer_a11dad2232449f8e9e8f089387a45a357.html#a11dad2232449f8e9e8f089387a45a357",tooltip=" "];
   Node10 -> Node11 [id="edge5_Node000010_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node11 [id="Node000011",label="fl::XYPathRenderer\l::rasterize",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dbc/classfl_1_1_x_y_path_renderer_a7c03ca116bbfb4f317474d05ea868c6b.html#a7c03ca116bbfb4f317474d05ea868c6b",tooltip=" "];
+  Node11 [id="Node000011",label="fl::XYPathRenderer\l::~XYPathRenderer",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dbc/classfl_1_1_x_y_path_renderer_abc12e093de808791fdea9c85d264bee6.html#abc12e093de808791fdea9c85d264bee6",tooltip=" "];
+  Node10 -> Node12 [id="edge6_Node000010_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::XYPathRenderer\l::rasterize",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/dbc/classfl_1_1_x_y_path_renderer_a7c03ca116bbfb4f317474d05ea868c6b.html#a7c03ca116bbfb4f317474d05ea868c6b",tooltip=" "];
+  Node12 -> Node11 [id="edge7_Node000012_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
 }

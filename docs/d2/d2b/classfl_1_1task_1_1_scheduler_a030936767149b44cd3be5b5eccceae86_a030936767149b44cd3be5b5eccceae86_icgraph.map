@@ -1,0 +1,33 @@
+<map id="fl::task::Scheduler::warn_no_then" name="fl::task::Scheduler::warn_no_then">
+<area shape="rect" id="Node000001" title=" " alt="" coords="715,265,853,305"/>
+<area shape="rect" id="Node000002" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a894dae01c9c6738eeae091f8fddeefb3.html#a894dae01c9c6738eeae091f8fddeefb3" title=" " alt="" coords="511,233,649,273"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="701,275,649,267,650,262,701,270"/>
+<area shape="rect" id="Node000062" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a523f729f91cfca13038bd39ca4838397.html#a523f729f91cfca13038bd39ca4838397" title=" " alt="" coords="493,297,667,337"/>
+<area shape="poly" id="edge13_Node000001_Node000062" title=" " alt="" coords="701,301,667,306,666,301,701,296"/>
+<area shape="rect" id="Node000003" href="$d4/d60/classfl_1_1_fx_engine_ab4bd2776efb0a1fa06ccae2ea8a16c8b.html#ab4bd2776efb0a1fa06ccae2ea8a16c8b" title="Renders the current effect or transition to the output buffer." alt="" coords="270,193,409,218"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="497,240,403,221,404,215,498,234"/>
+<area shape="rect" id="Node000004" href="$db/d5c/namespacefl_1_1task_a2d40b476742263a3fa212e24b722e3ef.html#a2d40b476742263a3fa212e24b722e3ef" title="Run selected task subsystems." alt="" coords="292,242,387,267"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="497,256,387,257,387,252,497,251"/>
+<area shape="rect" id="Node000005" href="$db/d5c/namespacefl_1_1task_ab96dc4828a01d1cff109d355d8ffc23d.html#ab96dc4828a01d1cff109d355d8ffc23d" title="Synchronously wait for a promise to complete (ONLY safe in top&#45;level contexts)" alt="" coords="26,5,165,45"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="277,254,253,246,232,231,215,210,207,188,206,145,205,101,198,80,183,59,163,44,166,40,187,55,203,78,210,101,211,144,212,187,219,207,235,227,255,241,279,249"/>
+<area shape="rect" id="Node000013" href="$df/d9e/namespacefl_1_1detail_abd6e1e8189dbbbf28d720923205bd0dd.html#abd6e1e8189dbbbf28d720923205bd0dd" title="Internal delay implementation used by the public fl::delay wrapper." alt="" coords="18,70,173,95"/>
+<area shape="poly" id="edge5_Node000004_Node000013" title=" " alt="" coords="278,253,253,245,232,231,218,216,211,201,206,169,202,139,196,124,184,110,164,98,167,93,187,106,200,121,207,137,212,169,216,199,223,213,235,227,256,240,279,248"/>
+<area shape="rect" id="Node000036" href="$d1/d13/namespacefl_1_1net_1_1http_a25ef84b119ebfab47c0ecec96a224181.html#a25ef84b119ebfab47c0ecec96a224181" title="Legacy manual update for fetch promises (use fl::task::run() for new code)" alt="" coords="28,120,163,160"/>
+<area shape="poly" id="edge6_Node000004_Node000036" title=" " alt="" coords="278,250,254,242,232,232,216,217,207,203,198,188,184,174,162,162,164,157,187,170,202,185,211,200,220,214,235,227,256,237,279,245"/>
+<area shape="rect" id="Node000037" href="$dc/dba/_loopback_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="70,185,121,210"/>
+<area shape="poly" id="edge7_Node000004_Node000037" title=" " alt="" coords="278,243,120,206,122,201,279,238"/>
+<area shape="rect" id="Node000038" href="$d7/d37/classfl_1_1net_1_1http_1_1_fetch_engine_listener_a5c4b1669a29e122fd11f9b2f48641e1f.html#a5c4b1669a29e122fd11f9b2f48641e1f" title=" " alt="" coords="5,235,185,275"/>
+<area shape="poly" id="edge8_Node000004_Node000038" title=" " alt="" coords="278,257,186,257,186,252,278,252"/>
+<area shape="rect" id="Node000039" href="$dd/dbb/class_c_fast_l_e_d_a93471b4babe96100496e8e25062cba3f.html#a93471b4babe96100496e8e25062cba3f" title="Update all our controllers with the current led colors, using the passed in brightness." alt="" coords="33,299,157,325"/>
+<area shape="poly" id="edge9_Node000004_Node000039" title=" " alt="" coords="279,271,151,302,150,297,278,266"/>
+<area shape="rect" id="Node000040" href="$dd/dbb/class_c_fast_l_e_d_a50e30222e81562a7ef334dbe4fdfa856.html#a50e30222e81562a7ef334dbe4fdfa856" title="Set all leds on all controllers to the given color/scale." alt="" coords="16,349,175,374"/>
+<area shape="poly" id="edge10_Node000004_Node000040" title=" " alt="" coords="280,267,235,285,220,297,212,311,202,325,187,338,159,351,157,346,184,334,198,321,207,308,216,294,232,280,278,262"/>
+<area shape="rect" id="Node000042" href="$d2/d6b/classfl_1_1_channel_manager_adc62325e449dbe69df3b351071f50821.html#adc62325e449dbe69df3b351071f50821" title="Wait until a condition is met, with check&#45;pump&#45;delay logic." alt="" coords="21,399,169,439"/>
+<area shape="poly" id="edge11_Node000004_Node000042" title=" " alt="" coords="279,264,256,272,235,285,224,297,217,309,211,335,206,361,199,375,187,389,170,401,167,396,184,385,194,372,201,360,206,333,212,307,219,294,232,281,253,267,278,259"/>
+<area shape="rect" id="Node000056" href="$d3/da0/classfl_1_1_i_channel_driver_a9b3137f96a8915d980f7e33ba1e3b3d9.html#a9b3137f96a8915d980f7e33ba1e3b3d9" title=" " alt="" coords="25,463,165,503"/>
+<area shape="poly" id="edge12_Node000004_Node000056" title=" " alt="" coords="280,262,256,271,235,285,220,304,213,324,211,366,210,409,203,431,187,453,167,468,164,463,183,449,198,428,205,408,206,366,207,323,215,302,231,281,253,266,278,257"/>
+<area shape="rect" id="Node000063" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a55942f7d4bf9dc02cf0c4b871b207722.html#a55942f7d4bf9dc02cf0c4b871b207722" title=" " alt="" coords="239,295,439,335"/>
+<area shape="poly" id="edge14_Node000062_Node000063" title=" " alt="" coords="479,319,440,318,440,313,480,314"/>
+<area shape="rect" id="Node000064" href="$d2/d2b/classfl_1_1task_1_1_scheduler_a855c5a328c90cebcc0b5877612b6005b.html#a855c5a328c90cebcc0b5877612b6005b" title=" " alt="" coords="233,359,445,399"/>
+<area shape="poly" id="edge15_Node000062_Node000064" title=" " alt="" coords="488,343,419,361,418,356,487,338"/>
+</map>

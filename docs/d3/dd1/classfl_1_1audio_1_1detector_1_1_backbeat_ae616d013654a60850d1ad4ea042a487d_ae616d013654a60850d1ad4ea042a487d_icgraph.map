@@ -1,0 +1,12 @@
+<map id="fl::audio::detector::Backbeat::Backbeat" name="fl::audio::detector::Backbeat::Backbeat">
+<area shape="rect" id="Node000001" title="Construct with shared Beat." alt="" coords="432,69,592,109"/>
+<area shape="rect" id="Node000002" href="$d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_ada220e44f462603e8fdebb9da0ee36e6.html#ada220e44f462603e8fdebb9da0ee36e6" title="Construct with standalone Beat." alt="" coords="224,5,384,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="433,68,369,48,370,43,434,63"/>
+<area shape="rect" id="Node000003" href="$d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_a1a173feac8b883c25926f2e305e850d2.html#a1a173feac8b883c25926f2e305e850d2" title="Construct with shared Beat and Downbeat." alt="" coords="224,69,384,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="418,92,384,92,384,87,418,87"/>
+<area shape="rect" id="Node000004" href="$d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_a128515a9b1b491a4a3801ce743719b0c.html#a128515a9b1b491a4a3801ce743719b0c" title=" " alt="" coords="232,157,376,197"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="452,117,353,160,351,155,450,112"/>
+<area shape="poly" id="edge5_Node000004_Node000004" title=" " alt="" coords="339,146,327,139,304,136,284,138,272,143,268,149,270,156,265,158,263,148,269,138,283,133,304,131,328,134,342,141"/>
+<area shape="rect" id="Node000005" href="$d3/dd1/classfl_1_1audio_1_1detector_1_1_backbeat_ab80abe1a4f92cbd9fc5ee8a20244536a.html#ab80abe1a4f92cbd9fc5ee8a20244536a" title=" " alt="" coords="5,157,176,197"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="218,180,176,180,176,175,218,175"/>
+</map>

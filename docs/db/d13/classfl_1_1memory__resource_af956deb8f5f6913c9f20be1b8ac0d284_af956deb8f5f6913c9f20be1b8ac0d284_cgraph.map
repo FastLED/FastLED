@@ -1,0 +1,14 @@
+<map id="fl::memory_resource::reallocate" name="fl::memory_resource::reallocate">
+<area shape="rect" id="Node000001" title="Try to resize in&#45;place." alt="" coords="5,93,161,133"/>
+<area shape="rect" id="Node000002" href="$db/d13/classfl_1_1memory__resource_a751094b91ee25add8cba2ce055124234.html#a751094b91ee25add8cba2ce055124234" title=" " alt="" coords="209,29,365,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="147,91,209,71,211,76,149,96"/>
+<area shape="rect" id="Node000004" href="$db/d13/classfl_1_1memory__resource_a2110839b38b49e63d42287c9eddc82f0.html#a2110839b38b49e63d42287c9eddc82f0" title=" " alt="" coords="209,93,365,133"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="161,111,196,111,196,116,161,116"/>
+<area shape="rect" id="Node000006" href="$db/d13/classfl_1_1memory__resource_a6898c8e228e6caa93d1c79292692ca0d.html#a6898c8e228e6caa93d1c79292692ca0d" title="Default: returns nullptr (not supported). Override for realloc&#45;capable resources." alt="" coords="209,157,365,197"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="149,131,211,151,209,156,147,136"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="249,30,247,20,253,11,267,5,287,3,311,6,324,13,321,18,309,11,287,8,268,10,256,15,252,21,254,28"/>
+<area shape="rect" id="Node000003" href="$db/d13/classfl_1_1memory__resource_ab582069827c02cc55e41275945aca485.html#ab582069827c02cc55e41275945aca485" title=" " alt="" coords="413,29,569,69"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="365,47,400,47,400,52,365,52"/>
+<area shape="rect" id="Node000005" href="$db/d13/classfl_1_1memory__resource_a8dc12fa5e3ea6500c587d6a188f26a0f.html#a8dc12fa5e3ea6500c587d6a188f26a0f" title=" " alt="" coords="413,93,569,133"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="365,111,400,111,400,116,365,116"/>
+</map>

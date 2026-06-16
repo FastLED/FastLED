@@ -1,0 +1,29 @@
+<map id="fl::audio::detector::Percussion" name="fl::audio::detector::Percussion">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1409,78,1545,118"/>
+<area shape="rect" id="Node000002" href="$df/d9b/classfl_1_1audio_1_1_detector.html" title=" " alt="" coords="1104,5,1243,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1257,30,1386,61,1428,75,1427,80,1385,66,1256,35"/>
+<area shape="rect" id="Node000003" href="$dd/ded/namespacefl_1_1fl_1_1detail.html#d6/d06/unionfl_1_1fl_1_1detail_1_1max__align__with__ld" title=" " alt="" coords="1109,55,1237,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1251,78,1409,90,1409,96,1251,84"/>
+<area shape="rect" id="Node000004" href="$d1/d2a/classfl_1_1_attack_decay_filter.html" title=" " alt="" coords="1096,119,1251,159"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="1264,125,1385,109,1409,105,1410,111,1386,114,1265,130"/>
+<area shape="rect" id="Node000005" href="$d8/dc2/classfl_1_1detail_1_1_attack_decay_filter_impl.html" title=" " alt="" coords="344,75,543,115"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="556,91,793,95,933,103,1071,117,1096,121,1095,126,1070,122,932,108,793,100,556,96"/>
+<area shape="rect" id="Node000007" href="$d1/d2a/classfl_1_1_attack_decay_filter.html" title=" " alt="" coords="736,127,928,152"/>
+<area shape="poly" id="edge7_Node000007_Node000005" title=" " alt="" coords="557,107,567,109,736,127,736,133,566,114,556,113"/>
+<area shape="rect" id="Node000006" href="$d8/dc2/classfl_1_1detail_1_1_attack_decay_filter_impl.html" title=" " alt="" coords="5,75,204,115"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="218,93,344,93,344,98,218,98"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="942,137,1095,137,1095,142,942,142"/>
+<area shape="rect" id="Node000008" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="1095,221,1252,261"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="1234,213,1384,145,1439,116,1442,120,1387,150,1237,218"/>
+<area shape="rect" id="Node000009" href="$d6/d86/classfl_1_1audio_1_1fft_1_1_bins.html" title=" " alt="" coords="766,199,898,224"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="912,215,1094,231,1094,237,912,221"/>
+<area shape="rect" id="Node000010" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="374,204,513,229"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="526,214,712,213,765,211,765,217,712,218,526,220"/>
+<area shape="rect" id="Node000015" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="344,276,543,301"/>
+<area shape="poly" id="edge11_Node000008_Node000015" title=" " alt="" coords="556,279,1094,243,1094,248,557,284"/>
+<area shape="rect" id="Node000018" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="759,312,905,337"/>
+<area shape="poly" id="edge14_Node000018_Node000015" title=" " alt="" coords="557,296,760,315,759,321,556,302"/>
+<area shape="rect" id="Node000016" href="$da/d98/classfl_1_1_atomic_fake.html" title=" " alt="" coords="37,269,173,309"/>
+<area shape="poly" id="edge12_Node000015_Node000016" title=" " alt="" coords="186,286,343,286,343,291,186,291"/>
+<area shape="poly" id="edge13_Node000008_Node000018" title=" " alt="" coords="918,328,993,325,1032,319,1070,309,1114,286,1149,259,1152,263,1116,291,1072,314,1033,324,994,330,918,334"/>
+</map>

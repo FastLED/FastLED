@@ -1,0 +1,7 @@
+<map id="random16" name="random16">
+<area shape="rect" id="Node000001" title="Generate an 16&#45;bit random number in the given range." alt="" coords="5,31,93,56"/>
+<area shape="rect" id="Node000002" href="$db/d97/_fast_l_e_d_8h_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title="Memory functions are available in fl:: namespace via fl/stl/cstring.h Using declarations cannot work ..." alt="" coords="162,5,209,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,33,148,22,149,27,94,38"/>
+<area shape="rect" id="Node000003" href="$d2/d0d/group___random_gaaaff3e84c6ab2cf5f71400a4b6958beb.html#gaaaff3e84c6ab2cf5f71400a4b6958beb" title="Generate a 16&#45;bit random number." alt="" coords="141,55,229,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="94,48,128,55,127,60,93,54"/>
+</map>

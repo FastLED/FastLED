@@ -1,0 +1,12 @@
+digraph "fl::packWS2816Pixel"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::packWS2816Pixel",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Pack a single 16-bit RGB pixel into two 8-bit CRGB pixels for WS2816."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::encodeWS2816",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a13921ab63664ac04043398f986046c46.html#a13921ab63664ac04043398f986046c46",tooltip="Encode 16-bit RGB pixel data into dual 8-bit RGB format for WS2816."];
+}

@@ -1,0 +1,19 @@
+<map id="fl/gfx/corkscrew.h" name="fl/gfx/corkscrew.h">
+<area shape="rect" id="Node000001" title="Corkscrew LED strip projection and rendering." alt="" coords="315,5,451,31"/>
+<area shape="rect" id="Node000002" href="$df/d40/examples_2_corkscrew_2corkscrew_8h.html" title=" " alt="" coords="5,79,223,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="335,37,197,81,195,76,333,32"/>
+<area shape="rect" id="Node000004" href="$d4/d06/curr_8h.html" title=" " alt="" coords="247,86,519,126"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="386,44,386,86,381,86,381,44"/>
+<area shape="rect" id="Node000006" href="$d0/da5/corkscrew_8cpp_8hpp.html" title=" " alt="" coords="543,93,722,119"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="431,33,600,91,598,96,429,38"/>
+<area shape="rect" id="Node000003" href="$d7/de3/_corkscrew_8ino.html" title=" " alt="" coords="5,181,223,236"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="117,147,117,181,111,181,111,147"/>
+<area shape="rect" id="Node000005" href="$dd/d43/_festival_stick_8ino.html" title=" " alt="" coords="267,181,499,236"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="386,140,386,181,381,181,381,140"/>
+<area shape="rect" id="Node000007" href="$d5/d88/fl_2gfx_2__build_8cpp_8hpp.html" title="Unity build for fl/gfx/ — graphics types, primitives, and simulators." alt="" coords="556,196,709,221"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="635,133,635,196,630,196,630,133"/>
+<area shape="rect" id="Node000008" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="489,284,617,309"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="615,233,566,285,562,282,611,230"/>
+<area shape="rect" id="Node000009" href="$db/d06/fl_8gfx_09_8cpp.html" title="Unity build: recursive includes from src/fl/gfx/." alt="" coords="641,284,782,309"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="654,230,702,282,698,285,650,233"/>
+</map>

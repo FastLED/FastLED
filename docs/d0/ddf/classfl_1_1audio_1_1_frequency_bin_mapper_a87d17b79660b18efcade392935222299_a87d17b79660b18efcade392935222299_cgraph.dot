@@ -1,0 +1,42 @@
+digraph "fl::audio::FrequencyBinMapper::~FrequencyBinMapper"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::audio::FrequencyBinMapper\l::~FrequencyBinMapper",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::audio::FrequencyBinMapper\l::configure",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_ae604f983be2f383b2b0196f83396b8ab.html#ae604f983be2f383b2b0196f83396b8ab",tooltip="Configure the frequency bin mapper This calculates bin boundaries and FFT-to-frequency bin mappings."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::audio::FrequencyBinMapper\l::FrequencyBinMapper",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_aff7a703833f164394d054f0f48c2ef9a.html#aff7a703833f164394d054f0f48c2ef9a",tooltip=" "];
+  Node3 -> Node2 [id="edge3_Node000003_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node4 [id="edge4_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::audio::FrequencyBinMapper\l::calculateBinBoundaries",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_aca828d77220fdaf9492335d21480cb2a.html#aca828d77220fdaf9492335d21480cb2a",tooltip="Calculate frequency bin boundaries (linear or logarithmic spacing)"];
+  Node4 -> Node5 [id="edge5_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::audio::FrequencyBinMapper\l::calculateLinearFrequencies",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_ac00a1cd7e5df9094c6248051584e5329.html#ac00a1cd7e5df9094c6248051584e5329",tooltip="Calculate linearly-spaced frequency boundaries."];
+  Node4 -> Node7 [id="edge6_Node000004_Node000007",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl::audio::FrequencyBinMapper\l::calculateLogFrequencies",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_ac3108303376ac5f6f48c3c1e2da001d4.html#ac3108303376ac5f6f48c3c1e2da001d4",tooltip="Calculate logarithmically-spaced frequency boundaries."];
+  Node2 -> Node13 [id="edge7_Node000002_Node000013",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::audio::FrequencyBinMapper\l::calculateBinMappings",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a457278fcf5b0d96f9d8af8df6446e70f.html#a457278fcf5b0d96f9d8af8df6446e70f",tooltip="Calculate FFT bin to frequency bin mappings Pre-calculates which FFT bins contribute to each frequenc..."];
+  Node13 -> Node14 [id="edge8_Node000013_Node000014",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::ceilf",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d36/namespacefl_a680a4050712ddcb48b6107ce5294a82f.html#a680a4050712ddcb48b6107ce5294a82f",tooltip=" "];
+  Node13 -> Node16 [id="edge9_Node000013_Node000016",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl::audio::FrequencyBinMapper\l::frequencyToFFTBin",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a602e993725b485f2648906f8658f4f36.html#a602e993725b485f2648906f8658f4f36",tooltip="Convert frequency (Hz) to FFT bin index."];
+  Node2 -> Node2 [id="edge10_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node17 [id="edge11_Node000001_Node000017",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl::audio::FrequencyBinMapper\l::getBassEnergy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a850a902c60d976eca8eaf255e8c0482c.html#a850a902c60d976eca8eaf255e8c0482c",tooltip="Get bass energy (average of bins 0-1 in 16-bin mode)"];
+  Node17 -> Node18 [id="edge12_Node000017_Node000018",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="fl::span::size",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac",tooltip=" "];
+  Node1 -> Node19 [id="edge13_Node000001_Node000019",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl::audio::FrequencyBinMapper\l::getMidEnergy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a98cbe96a5bfeb5f8b2a54f4754c9d962.html#a98cbe96a5bfeb5f8b2a54f4754c9d962",tooltip="Get mid energy (average of bins 6-7 in 16-bin mode)"];
+  Node19 -> Node18 [id="edge14_Node000019_Node000018",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node20 [id="edge15_Node000001_Node000020",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="fl::audio::FrequencyBinMapper\l::getTrebleEnergy",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_ac4578937ce025a3c491864fd539be2b3.html#ac4578937ce025a3c491864fd539be2b3",tooltip="Get treble energy (average of bins 14-15 in 16-bin mode)"];
+  Node20 -> Node18 [id="edge16_Node000020_Node000018",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node21 [id="edge17_Node000001_Node000021",color="steelblue1",style="solid",tooltip=" "];
+  Node21 [id="Node000021",label="fl::audio::FrequencyBinMapper\l::mapBins",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a9a095e84f5f12904f0ab85217e474976.html#a9a095e84f5f12904f0ab85217e474976",tooltip="Map FFT bins to frequency channels."];
+  Node21 -> Node3 [id="edge18_Node000021_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node21 -> Node18 [id="edge19_Node000021_Node000018",color="steelblue1",style="solid",tooltip=" "];
+}

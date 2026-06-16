@@ -1,0 +1,28 @@
+<map id="fl::SerialPort::printf" name="fl::SerialPort::printf">
+<area shape="rect" id="Node000001" title="Print formatted string to serial output (printf&#45;style)" alt="" coords="5,56,149,81"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aee6f6a125b8389786800233a69115983.html#aee6f6a125b8389786800233a69115983" title="Format with no arguments." alt="" coords="752,156,835,181"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="114,53,187,32,286,12,341,5,398,3,455,6,510,15,586,42,658,77,720,114,766,146,763,150,717,119,655,82,584,47,509,21,454,11,398,8,341,10,286,17,188,37,115,59"/>
+<area shape="rect" id="Node000007" href="$de/d67/classfl_1_1_serial_port_a3339b490d16bccad572b1ce0989abcb4.html#a3339b490d16bccad572b1ce0989abcb4" title="Print string to serial output." alt="" coords="197,56,336,81"/>
+<area shape="poly" id="edge5_Node000001_Node000007" title=" " alt="" coords="150,66,183,66,183,71,150,71"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl_a57cbbc0e3769d2f6c4a7919e29646708.html#a57cbbc0e3769d2f6c4a7919e29646708" title="Snprintf&#45;like formatting function that writes to a buffer." alt="" coords="223,159,311,184"/>
+<area shape="poly" id="edge8_Node000001_Node000010" title=" " alt="" coords="103,79,231,150,229,154,101,84"/>
+<area shape="rect" id="Node000003" href="$da/d2a/namespacefl_1_1format__detail_a892df3c6e93f2a0ce7cfe9b1ea83b035.html#a892df3c6e93f2a0ce7cfe9b1ea83b035" title=" " alt="" coords="883,149,1017,189"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="835,166,869,166,869,171,835,171"/>
+<area shape="rect" id="Node000004" href="$da/d2a/namespacefl_1_1format__detail_a55e63a30ab96d32cfb6a9520c4f24355.html#a55e63a30ab96d32cfb6a9520c4f24355" title=" " alt="" coords="1069,117,1209,157"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1017,155,1054,148,1055,154,1018,160"/>
+<area shape="rect" id="Node000006" href="$da/d2a/namespacefl_1_1format__detail_ae201c82be70c2c0296369f2cb56315f4.html#ae201c82be70c2c0296369f2cb56315f4" title=" " alt="" coords="1065,181,1212,221"/>
+<area shape="poly" id="edge4_Node000003_Node000006" title=" " alt="" coords="1018,177,1052,183,1051,189,1017,183"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a23e9f3b5be31d78996d08b3c811ec5d1.html#a23e9f3b5be31d78996d08b3c811ec5d1" title=" " alt="" coords="413,31,481,56"/>
+<area shape="poly" id="edge6_Node000007_Node000008" title=" " alt="" coords="336,56,399,47,399,53,336,62"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a2b133338a142a6ec52750f65eb3a33e5.html#a2b133338a142a6ec52750f65eb3a33e5" title=" " alt="" coords="409,80,484,105"/>
+<area shape="poly" id="edge7_Node000007_Node000009" title=" " alt="" coords="336,75,396,83,395,89,336,81"/>
+<area shape="poly" id="edge9_Node000010_Node000002" title=" " alt="" coords="311,167,483,162,704,162,738,163,738,169,704,167,483,168,311,172"/>
+<area shape="rect" id="Node000011" href="$d2/de0/namespacefl_1_1printf__detail_af624455a71e2438c1653c74d94d37a13.html#af624455a71e2438c1653c74d94d37a13" title=" " alt="" coords="384,181,509,221"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="311,176,371,186,370,191,310,181"/>
+<area shape="rect" id="Node000013" href="$d1/d27/classfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e.html#a08170cac6eba7241f099ae16730f6f8e" title=" " alt="" coords="389,245,505,271"/>
+<area shape="poly" id="edge14_Node000010_Node000013" title=" " alt="" coords="292,182,385,230,401,237,399,242,383,235,290,187"/>
+<area shape="poly" id="edge11_Node000011_Node000002" title=" " alt="" coords="509,192,738,171,739,176,510,198"/>
+<area shape="rect" id="Node000012" href="$d2/de0/namespacefl_1_1printf__detail_a85f00d6ee02a148fcde282c4e164d4ec.html#a85f00d6ee02a148fcde282c4e164d4ec" title=" " alt="" coords="557,231,704,271"/>
+<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="510,215,545,225,543,230,509,220"/>
+<area shape="poly" id="edge13_Node000012_Node000002" title=" " alt="" coords="670,229,754,185,756,190,672,234"/>
+</map>

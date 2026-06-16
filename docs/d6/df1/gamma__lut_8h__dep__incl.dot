@@ -1,0 +1,34 @@
+digraph "fl/gfx/gamma_lut.h"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl/gfx/gamma_lut.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl/chipsets/encoders\l/encoder_utils.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d4f/encoder__utils_8h.html",tooltip="Shared utilities for SPI chipset encoders."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl/chipsets/encoders\l/apa102.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d13/encoders_2apa102_8h.html",tooltip="APA102/DOTSTAR SPI chipset encoder."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl/chipsets/encoders\l/pixel_iterator.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d65/fl_2chipsets_2encoders_2pixel__iterator_8h.html",tooltip="Non-templated low level pixel data writing class."];
+  Node2 -> Node87 [id="edge4_Node000002_Node000087",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node87 [id="Node000087",label="fl/chipsets/encoders\l/hd108.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/dd3/encoders_2hd108_8h.html",tooltip="HD108 SPI chipset encoder."];
+  Node87 -> Node4 [id="edge5_Node000087_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node88 [id="edge6_Node000002_Node000088",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node88 [id="Node000088",label="fl/chipsets/encoders\l/lpd6803.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/db9/lpd6803_8h.html",tooltip="LPD6803 SPI chipset encoder."];
+  Node88 -> Node4 [id="edge7_Node000088_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node89 [id="edge8_Node000002_Node000089",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node89 [id="Node000089",label="fl/chipsets/encoders\l/lpd8806.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/deb/lpd8806_8h.html",tooltip="LPD8806 SPI chipset encoder."];
+  Node89 -> Node4 [id="edge9_Node000089_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node90 [id="edge10_Node000002_Node000090",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node90 [id="Node000090",label="fl/chipsets/encoders\l/p9813.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d37/encoders_2p9813_8h.html",tooltip="P9813 SPI chipset encoder."];
+  Node90 -> Node4 [id="edge11_Node000090_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node91 [id="edge12_Node000002_Node000091",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node91 [id="Node000091",label="fl/chipsets/encoders\l/sk9822.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/df5/sk9822_8h.html",tooltip="SK9822 SPI chipset encoder."];
+  Node91 -> Node4 [id="edge13_Node000091_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node92 [id="edge14_Node000001_Node000092",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node92 [id="Node000092",label="fl/gfx/gamma_lut.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d85/gamma__lut_8cpp_8hpp.html",tooltip="Explicit instantiation of gamma LUT templates."];
+  Node92 -> Node49 [id="edge15_Node000092_Node000049",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node49 [id="Node000049",label="fl/gfx/_build.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d5/d88/fl_2gfx_2__build_8cpp_8hpp.html",tooltip="Unity build for fl/gfx/ — graphics types, primitives, and simulators."];
+}

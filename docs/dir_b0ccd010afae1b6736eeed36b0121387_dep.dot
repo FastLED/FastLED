@@ -15,7 +15,6 @@ digraph "/home/runner/work/FastLED/FastLED/examples/Multiple"
   dir_8e64be4dbaf038a5f091fdc7f11f12e5 [label="MirroringSample", fillcolor="#d5ddec", color="grey25", style="filled", URL="dir_8e64be4dbaf038a5f091fdc7f11f12e5.html",tooltip=""];
   dir_c27facde8729514210a53d1caf182995 [label="MultiArrays", fillcolor="#d5ddec", color="grey25", style="filled", URL="dir_c27facde8729514210a53d1caf182995.html",tooltip=""];
   dir_a8e8e2f7421b50568d47b7b0b614c5c6 [label="MultipleStripsInOneArray", fillcolor="#d5ddec", color="grey25", style="filled", URL="dir_a8e8e2f7421b50568d47b7b0b614c5c6.html",tooltip=""];
-  dir_b73035d7e3b81d3cb5e9c65f87e5e2ff [label="OctoWS2811Demo", fillcolor="#d5ddec", color="grey25", style="filled", URL="dir_b73035d7e3b81d3cb5e9c65f87e5e2ff.html",tooltip=""];
   dir_e2bb19e0d903e444cf02a1eb11fa8f0b [label="ParallelOutputDemo", fillcolor="#d5ddec", color="grey25", style="filled", URL="dir_e2bb19e0d903e444cf02a1eb11fa8f0b.html",tooltip=""];
   }
   }

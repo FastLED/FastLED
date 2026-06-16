@@ -1,0 +1,13 @@
+<map id="fl::AsyncLogger::flushN" name="fl::AsyncLogger::flushN">
+<area shape="rect" id="Node000001" title="Flush up to N messages from queue (bounded flush)" alt="" coords="5,104,176,129"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d" title=" " alt="" coords="224,5,319,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,101,223,40,232,35,234,39,225,44,116,106"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="240,55,303,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="137,101,226,77,228,82,139,107"/>
+<area shape="rect" id="Node000004" href="$d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d" title=" " alt="" coords="242,104,301,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="176,114,228,114,228,119,176,119"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a23e9f3b5be31d78996d08b3c811ec5d1.html#a23e9f3b5be31d78996d08b3c811ec5d1" title=" " alt="" coords="237,153,305,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="139,127,225,151,223,156,137,132"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_adfaedbd8e1ada269a7733e58ff142aea.html#adfaedbd8e1ada269a7733e58ff142aea" title=" " alt="" coords="231,203,311,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="116,127,225,188,236,194,233,198,223,192,114,132"/>
+</map>

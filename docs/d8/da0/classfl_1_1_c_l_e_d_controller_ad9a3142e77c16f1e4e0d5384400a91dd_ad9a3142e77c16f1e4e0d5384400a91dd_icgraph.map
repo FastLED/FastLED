@@ -1,0 +1,7 @@
+<map id="fl::CLEDController::getAdjustmentData" name="fl::CLEDController::getAdjustmentData">
+<area shape="rect" id="Node000001" title=" " alt="" coords="204,37,361,77"/>
+<area shape="rect" id="Node000002" href="$d0/dc9/class_c_pixel_l_e_d_controller_a8af733ab9cdbbc87742932cf18e22346.html#a8af733ab9cdbbc87742932cf18e22346" title="Write the passed in RGB data out to the LEDs managed by this controller." alt="" coords="5,5,156,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="190,45,156,40,157,35,191,40"/>
+<area shape="rect" id="Node000003" href="$d0/dc9/class_c_pixel_l_e_d_controller_aab8df51126298945b1c08385b7b4cac1.html#aab8df51126298945b1c08385b7b4cac1" title="Set all the LEDs on the controller to a given color." alt="" coords="5,69,156,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="191,75,157,80,156,75,190,69"/>
+</map>

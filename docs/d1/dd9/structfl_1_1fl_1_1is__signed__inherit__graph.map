@@ -1,0 +1,27 @@
+<map id="fl::fl::is_signed&lt; T &gt;" name="fl::fl::is_signed&lt; T &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,365,159,390"/>
+<area shape="rect" id="Node000002" href="$dd/d6f/structfl_1_1fl_1_1is__signed_3_01char_01_4.html" title=" " alt="" coords="349,5,475,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="81,351,86,293,100,217,113,177,130,139,153,103,181,71,219,46,263,31,307,22,348,20,349,25,308,28,264,36,222,51,184,75,157,106,135,141,118,179,105,219,91,294,86,351"/>
+<area shape="rect" id="Node000003" href="$d3/dd9/structfl_1_1fl_1_1is__signed_3_01const_01_t_01_4.html" title=" " alt="" coords="349,69,475,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="84,351,93,305,111,248,139,190,158,164,181,141,220,116,263,100,307,91,348,86,349,92,308,96,265,105,222,121,184,145,162,167,144,193,116,250,98,306,89,352"/>
+<area shape="rect" id="Node000004" href="$d9/d35/structfl_1_1fl_1_1is__signed_3_01const_01volatile_01_t_01_4.html" title=" " alt="" coords="341,133,483,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="90,351,103,319,122,282,148,244,181,213,219,190,260,174,302,163,340,156,341,161,303,168,262,179,221,195,184,217,152,248,127,284,108,321,94,353"/>
+<area shape="rect" id="Node000005" href="$dd/d27/structfl_1_1fl_1_1is__signed_3_01double_01_4.html" title=" " alt="" coords="349,197,475,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="100,352,135,314,181,279,223,259,266,243,348,224,349,229,268,249,225,264,184,284,139,318,104,355"/>
+<area shape="rect" id="Node000006" href="$d3/da7/structfl_1_1fl_1_1is__signed_3_01float_01_4.html" title=" " alt="" coords="349,261,475,301"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="122,357,182,333,268,309,348,291,349,296,270,314,184,339,124,362"/>
+<area shape="rect" id="Node000007" href="$d9/d8b/structfl_1_1fl_1_1is__signed_3_01int_01_4.html" title=" " alt="" coords="349,325,475,365"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="172,366,348,349,348,354,173,371"/>
+<area shape="rect" id="Node000008" href="$db/dbf/structfl_1_1fl_1_1is__signed_3_01long_01_4.html" title=" " alt="" coords="349,389,475,429"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="173,384,183,385,348,401,348,406,182,391,172,390"/>
+<area shape="rect" id="Node000009" href="$d6/dec/structfl_1_1fl_1_1is__signed_3_01long_01double_01_4.html" title=" " alt="" coords="349,453,475,493"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="122,394,184,419,269,443,349,460,348,465,268,448,182,424,120,399"/>
+<area shape="rect" id="Node000010" href="$d5/d94/structfl_1_1fl_1_1is__signed_3_01long_01long_01_4.html" title=" " alt="" coords="349,517,475,557"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="103,399,138,439,160,458,184,475,225,495,268,509,349,527,348,533,266,514,222,499,181,480,157,463,134,442,99,403"/>
+<area shape="rect" id="Node000011" href="$d6/d18/structfl_1_1fl_1_1is__signed_3_01short_01_4.html" title=" " alt="" coords="349,581,475,621"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="94,402,107,434,126,472,152,510,184,542,223,565,266,580,309,590,349,596,348,601,308,596,264,585,221,569,181,546,148,514,121,475,102,437,89,404"/>
+<area shape="rect" id="Node000012" href="$d5/dc2/structfl_1_1fl_1_1is__signed_3_01signed_01char_01_4.html" title=" " alt="" coords="349,645,475,685"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="89,403,98,449,115,506,143,564,162,590,184,613,222,636,265,652,308,660,348,664,348,669,307,665,263,657,220,641,181,617,158,593,138,567,110,508,93,450,84,404"/>
+<area shape="rect" id="Node000013" href="$df/d55/structfl_1_1fl_1_1is__signed_3_01volatile_01_t_01_4.html" title=" " alt="" coords="349,709,475,749"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="86,404,91,462,105,538,117,577,134,616,157,651,184,682,222,706,264,721,308,728,349,730,348,736,307,734,263,726,219,711,181,686,152,655,130,618,112,579,100,539,85,463,81,404"/>
+</map>

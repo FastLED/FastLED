@@ -1,0 +1,27 @@
+<map id="fl::net::http::StreamHandle" name="fl::net::http::StreamHandle">
+<area shape="rect" id="Node000001" title="Handle for ASYNC_STREAM calls Provides onData() for intermediate updates, plus then()/catch_() for fi..." alt="" coords="1636,211,1831,237"/>
+<area shape="rect" id="Node000002" href="$d0/d34/classfl_1_1task_1_1_promise.html" title=" " alt="" coords="1379,244,1517,284"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1531,250,1642,234,1642,239,1531,255"/>
+<area shape="rect" id="Node000003" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="756,237,949,291"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="963,261,1379,261,1379,267,963,267"/>
+<area shape="rect" id="Node000004" href="$d0/d62/classfl_1_1task_1_1detail_1_1_promise_impl.html" title=" " alt="" coords="357,47,529,87"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="512,89,617,132,733,187,812,234,809,239,731,192,615,137,510,94"/>
+<area shape="rect" id="Node000018" href="$d4/d36/namespacefl.html#d4/d36/namespacefl" title=" " alt="" coords="35,5,174,45"/>
+<area shape="poly" id="edge4_Node000004_Node000018" title=" " alt="" coords="188,33,357,54,357,59,187,38"/>
+<area shape="rect" id="Node000025" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="769,129,936,183"/>
+<area shape="poly" id="edge13_Node000025_Node000018" title=" " alt="" coords="188,19,333,19,432,20,475,23,530,32,589,47,633,63,733,104,788,126,786,131,731,109,631,68,587,52,529,37,475,28,432,25,333,24,188,25"/>
+<area shape="rect" id="Node000010" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="5,282,204,307"/>
+<area shape="poly" id="edge5_Node000003_Node000010" title=" " alt="" coords="218,285,228,284,756,264,756,269,228,289,218,290"/>
+<area shape="rect" id="Node000012" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="371,313,516,338"/>
+<area shape="poly" id="edge7_Node000012_Node000010" title=" " alt="" coords="218,302,371,316,370,321,217,307"/>
+<area shape="rect" id="Node000024" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="756,346,949,401"/>
+<area shape="poly" id="edge10_Node000024_Node000010" title=" " alt="" coords="159,309,251,336,358,361,462,381,544,391,626,392,732,387,755,385,756,390,732,392,626,397,543,396,461,386,357,367,250,341,158,314"/>
+<area shape="poly" id="edge14_Node000025_Node000010" title=" " alt="" coords="145,274,219,242,319,204,434,168,553,141,609,135,666,134,769,141,769,146,666,140,609,141,554,147,435,173,321,209,221,247,147,279"/>
+<area shape="poly" id="edge6_Node000003_Node000012" title=" " alt="" coords="530,326,627,323,680,318,731,309,793,289,795,294,733,315,681,323,628,329,530,331"/>
+<area shape="poly" id="edge11_Node000024_Node000012" title=" " alt="" coords="480,342,515,358,554,369,605,377,657,381,756,380,756,385,657,386,604,383,553,375,513,363,478,347"/>
+<area shape="poly" id="edge15_Node000025_Node000012" title=" " alt="" coords="495,305,528,291,552,275,601,255,641,244,681,234,731,216,802,181,805,186,733,221,683,239,643,249,603,260,555,280,531,296,498,310"/>
+<area shape="rect" id="Node000023" href="$d0/d34/classfl_1_1task_1_1_promise.html" title="Promise class that provides fluent .then() and .catch_() semantics This is a lightweight wrapper arou..." alt="" coords="1044,325,1209,350"/>
+<area shape="poly" id="edge8_Node000002_Node000023" title=" " alt="" coords="1223,322,1354,295,1395,282,1397,287,1355,300,1224,327"/>
+<area shape="poly" id="edge9_Node000023_Node000024" title=" " alt="" coords="963,356,1043,346,1044,351,963,361"/>
+<area shape="poly" id="edge12_Node000001_Node000025" title=" " alt="" coords="950,161,1636,214,1636,219,949,166"/>
+</map>

@@ -1,0 +1,8 @@
+<map id="fl::delaycycles_min1" name="fl::delaycycles_min1">
+<area shape="rect" id="Node000001" title="A variant of delaycycles that will always delay at least one cycle." alt="" coords="5,31,160,56"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="50,32,43,22,46,12,60,6,83,4,111,8,122,17,118,21,108,13,83,9,61,11,50,16,48,22,54,29"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ad9504849eab5b0a3468cb0d11aab07af.html#ad9504849eab5b0a3468cb0d11aab07af" title="Forward declaration of delaycycles template." alt="" coords="227,5,342,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="160,31,213,24,214,29,161,36"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a6524fe75c96142a93da1ffc0c2cd469c.html#a6524fe75c96142a93da1ffc0c2cd469c" title=" " alt="" coords="208,55,361,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="161,50,194,54,194,59,160,55"/>
+</map>

@@ -1,0 +1,10 @@
+<map id="fl::third_party::plm_audio_t" name="fl::third_party::plm_audio_t">
+<area shape="rect" id="Node000001" title=" " alt="" coords="264,137,405,177"/>
+<area shape="rect" id="Node000002" href="$d1/d86/namespacefl_1_1third__party.html#d3/da0/structfl_1_1third__party_1_1plm__buffer__t" title=" " alt="" coords="5,73,147,113"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="161,111,264,137,263,143,159,117"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="52,57,60,50,76,47,90,49,99,55,103,64,101,73,96,73,97,64,95,58,88,54,76,52,63,54,55,61"/>
+<area shape="rect" id="Node000003" href="$d1/d86/namespacefl_1_1third__party.html#d2/da7/structfl_1_1third__party_1_1plm__quantizer__spec__t" title=" " alt="" coords="5,137,147,177"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="160,155,264,155,264,160,160,160"/>
+<area shape="rect" id="Node000004" href="$d1/d86/namespacefl_1_1third__party.html#da/d8c/structfl_1_1third__party_1_1plm__samples__t" title=" " alt="" coords="5,201,147,241"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="159,198,263,172,264,177,161,203"/>
+</map>

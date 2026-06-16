@@ -1,0 +1,9 @@
+<map id="fl::FlowFieldFloat" name="fl::FlowFieldFloat">
+<area shape="rect" id="Node000001" title="Float&#45;precision flow field implementation." alt="" coords="5,225,139,251"/>
+<area shape="rect" id="Node000002" href="$d4/d1c/classfl_1_1_flow_field.html" title="Abstract base class for 2D flow field effects." alt="" coords="22,152,122,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="75,191,75,225,69,225,69,191"/>
+<area shape="rect" id="Node000003" href="$d7/d3e/classfl_1_1_fx2d.html" title=" " alt="" coords="37,79,107,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="75,118,75,152,69,152,69,118"/>
+<area shape="rect" id="Node000004" href="$da/d5d/classfl_1_1_fx.html" title=" " alt="" coords="45,5,99,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="75,44,75,79,69,79,69,44"/>
+</map>

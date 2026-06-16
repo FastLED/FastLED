@@ -1,0 +1,12 @@
+<map id="fl::audio::detector::MultiBandBeat::MultiBandBeat" name="fl::audio::detector::MultiBandBeat::MultiBandBeat">
+<area shape="rect" id="Node000001" title=" " alt="" coords="537,37,768,77"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="697,26,681,19,653,16,628,18,612,23,607,29,610,36,605,38,602,28,610,18,627,13,653,11,683,14,699,21"/>
+<area shape="rect" id="Node000002" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_ad89f61c68cafd22344ecbfb03e0cd899.html#ad89f61c68cafd22344ecbfb03e0cd899" title=" " alt="" coords="5,5,247,45"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="523,47,489,44,247,32,247,26,490,39,524,41"/>
+<area shape="rect" id="Node000003" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_ad4f93538e5951c5784ade165964dd446.html#ad4f93538e5951c5784ade165964dd446" title="Configure the multi&#45;band beat detector." alt="" coords="295,77,489,117"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="524,80,490,85,489,80,523,75"/>
+<area shape="poly" id="edge5_Node000003_Node000002" title=" " alt="" coords="304,76,200,48,201,43,305,71"/>
+<area shape="poly" id="edge6_Node000003_Node000003" title=" " alt="" coords="436,66,421,59,392,56,367,58,352,63,346,69,349,76,344,78,341,68,349,58,366,53,392,51,422,54,438,61"/>
+<area shape="rect" id="Node000004" href="$d8/d35/classfl_1_1audio_1_1detector_1_1_multi_band_beat_a781a269b8875a67640df514bb50bbff0.html#a781a269b8875a67640df514bb50bbff0" title=" " alt="" coords="11,77,241,117"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="281,100,242,100,242,95,281,95"/>
+</map>

@@ -1,0 +1,15 @@
+<map id="fl/net/ble.h" name="fl/net/ble.h">
+<area shape="rect" id="Node000001" title="fl::net::ble — BLE GATT transport layer for JSON&#45;RPC" alt="" coords="290,5,381,31"/>
+<area shape="rect" id="Node000002" href="$db/dfb/_auto_research_remote_8cpp.html" title=" " alt="" coords="5,79,244,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="295,38,190,81,188,76,293,33"/>
+<area shape="rect" id="Node000003" href="$d4/d43/ble_8cpp_8hpp.html" title=" " alt="" coords="268,93,403,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="338,45,338,93,333,93,333,45"/>
+<area shape="rect" id="Node000007" href="$d7/d97/net_8h.html" title="Umbrella header for fl::net — high&#45;level networking facade." alt="" coords="427,93,519,119"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="367,36,455,91,453,95,364,40"/>
+<area shape="rect" id="Node000004" href="$df/ddb/fl_2net_2__build_8cpp_8hpp.html" title="Unity build header for fl/net/ directory." alt="" coords="259,181,412,207"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="338,133,338,181,333,181,333,133"/>
+<area shape="rect" id="Node000005" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="193,255,321,280"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="314,218,271,256,268,252,311,214"/>
+<area shape="rect" id="Node000006" href="$d4/d79/fl_8net_09_8cpp.html" title="Unity build: recursive includes from src/fl/net/." alt="" coords="345,255,486,280"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="360,214,404,252,400,256,356,218"/>
+</map>

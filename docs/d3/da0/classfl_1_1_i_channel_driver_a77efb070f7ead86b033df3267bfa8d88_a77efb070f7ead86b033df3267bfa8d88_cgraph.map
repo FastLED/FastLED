@@ -1,0 +1,23 @@
+<map id="fl::IChannelDriver::waitDone" name="fl::IChannelDriver::waitDone">
+<area shape="rect" id="Node000001" title="Block until this driver finishes any in&#45;flight transmit." alt="" coords="5,81,140,121"/>
+<area shape="rect" id="Node000002" href="$d3/da0/classfl_1_1_i_channel_driver_a9e956fbce56cb0e64f49d4657d17d44e.html#a9e956fbce56cb0e64f49d4657d17d44e" title="Wait for driver to become READY." alt="" coords="188,81,323,121"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="140,98,174,98,174,103,140,103"/>
+<area shape="rect" id="Node000003" href="$d3/da0/classfl_1_1_i_channel_driver_af9855443f84a0598989425bdcad83721.html#af9855443f84a0598989425bdcad83721" title="Query driver state and perform maintenance." alt="" coords="373,49,508,89"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="323,86,360,80,360,85,324,92"/>
+<area shape="rect" id="Node000004" href="$d3/da0/classfl_1_1_i_channel_driver_a9b3137f96a8915d980f7e33ba1e3b3d9.html#a9b3137f96a8915d980f7e33ba1e3b3d9" title=" " alt="" coords="371,113,511,153"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="324,110,357,116,357,121,323,115"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="406,49,404,39,409,30,422,24,441,22,462,25,474,32,471,37,461,30,441,27,423,29,413,34,409,40,411,48"/>
+<area shape="rect" id="Node000005" href="$df/d9e/namespacefl_1_1detail_a3363a63882437dcb732ef0d0714ae000.html#a3363a63882437dcb732ef0d0714ae000" title="Get the current tiered&#45;wait spin budget (microseconds)." alt="" coords="559,5,783,31"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="490,110,509,99,523,84,532,70,541,55,557,41,572,33,574,38,560,46,545,59,536,72,527,87,512,103,493,115"/>
+<area shape="rect" id="Node000006" href="$da/d46/classfl_1_1net_1_1_network_detector_af9ba6574c6b2c48dafc9b4a9b4e3c39d.html#af9ba6574c6b2c48dafc9b4a9b4e3c39d" title=" " alt="" coords="581,55,760,95"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="510,113,576,96,577,101,511,118"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a95a89c7ba649b9bd2c9136c0f517d82f.html#a95a89c7ba649b9bd2c9136c0f517d82f" title="Universal microsecond timer &#45; returns microseconds since system startup." alt="" coords="831,183,913,208"/>
+<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="511,129,638,134,711,142,783,155,835,174,834,179,782,161,711,147,638,139,511,134"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="633,195,708,220"/>
+<area shape="poly" id="edge9_Node000004_Node000008" title=" " alt="" coords="504,150,621,189,619,194,502,155"/>
+<area shape="rect" id="Node000009" href="$db/d5c/namespacefl_1_1task_a2d40b476742263a3fa212e24b722e3ef.html#a2d40b476742263a3fa212e24b722e3ef" title="Run selected task subsystems." alt="" coords="623,244,718,269"/>
+<area shape="poly" id="edge11_Node000004_Node000009" title=" " alt="" coords="462,151,504,191,531,212,560,229,610,246,609,251,558,234,528,216,501,195,458,155"/>
+<area shape="poly" id="edge8_Node000007_Node000007" title=" " alt="" coords="839,184,832,174,836,164,849,158,872,156,900,160,911,169,908,173,898,165,872,161,851,163,840,168,837,174,843,181"/>
+<area shape="poly" id="edge10_Node000008_Node000008" title=" " alt="" coords="638,196,631,186,634,176,648,170,671,168,699,172,710,181,706,185,696,177,671,173,649,175,638,180,636,186,642,193"/>
+<area shape="poly" id="edge12_Node000009_Node000007" title=" " alt="" coords="718,245,782,229,830,211,832,216,783,234,719,250"/>
+</map>

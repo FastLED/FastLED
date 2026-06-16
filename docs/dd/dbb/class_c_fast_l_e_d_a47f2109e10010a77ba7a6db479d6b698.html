@@ -105,9 +105,6 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_a47f2109e10010a77ba7a6db479d
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void CFastLED::onBeginFrame </td>
@@ -116,27 +113,35 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_a47f2109e10010a77ba7a6db479d
           <td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 <p>Manually trigger the begin frame event. </p>
 <dl class="section note"><dt>Note</dt><dd>This is called automatically by <a class="el" href="../../dd/dbb/class_c_fast_l_e_d_a3adb23ec5f919524928d576002cb45de.html#a3adb23ec5f919524928d576002cb45de" title="Update all our controllers with the current led colors.">show()</a> unless FASTLED_MANUAL_ENGINE_EVENTS is defined </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html#l00401">401</a> of file <a class="el" href="../../db/d97/_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  401</span>{ <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_a7147debfba714b8ab0925af1a7c935c0.html#a7147debfba714b8ab0925af1a7c935c0">fl::EngineEvents::onBeginFrame</a>(); }</div>
-<div class="ttc" id="aclassfl_1_1_engine_events_a7147debfba714b8ab0925af1a7c935c0_html_a7147debfba714b8ab0925af1a7c935c0"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_a7147debfba714b8ab0925af1a7c935c0.html#a7147debfba714b8ab0925af1a7c935c0">fl::EngineEvents::onBeginFrame</a></div><div class="ttdeci">static void onBeginFrame()</div><div class="ttdef"><b>Definition</b> <a href="../../db/dc0/engine__events_8h_source.html#l00074">engine_events.h:74</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00723">723</a> of file <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html">FastLED.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  723</span>                            {</div>
+<div class="line"><span class="lineno">  724</span><span class="preprocessor">    #if FASTLED_HAS_ENGINE_EVENTS</span></div>
+<div class="line"><span class="lineno">  725</span>    <a class="code hl_function" href="../../de/dca/classfl_1_1_engine_events_ab4d061cd06863ef497abefa72cf7226f.html#ab4d061cd06863ef497abefa72cf7226f">fl::EngineEvents::onBeginFrame</a>();</div>
+<div class="line"><span class="lineno">  726</span><span class="preprocessor">    #endif</span></div>
+<div class="line"><span class="lineno">  727</span>}</div>
+<div class="ttc" id="aclassfl_1_1_engine_events_ab4d061cd06863ef497abefa72cf7226f_html_ab4d061cd06863ef497abefa72cf7226f"><div class="ttname"><a href="../../de/dca/classfl_1_1_engine_events_ab4d061cd06863ef497abefa72cf7226f.html#ab4d061cd06863ef497abefa72cf7226f">fl::EngineEvents::onBeginFrame</a></div><div class="ttdeci">static void onBeginFrame() FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="../../db/dc0/engine__events_8h_source.html#l00074">engine_events.h:74</a></div></div>
 </div><!-- fragment -->
 <p class="reference">References <a class="el" href="../../db/dc0/engine__events_8h_source.html#l00074">fl::EngineEvents::onBeginFrame()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d7/de5/_fast_l_e_d_8cpp_8hpp_source.html#l00234">show()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
 <div class="center"><iframe scrolling="no" frameborder="0" src="../../dd/dbb/class_c_fast_l_e_d_a47f2109e10010a77ba7a6db479d6b698_a47f2109e10010a77ba7a6db479d6b698_cgraph.svg" width="430" height="51"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+<div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
+<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-1-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../dd/dbb/class_c_fast_l_e_d_a47f2109e10010a77ba7a6db479d6b698_a47f2109e10010a77ba7a6db479d6b698_icgraph.svg" width="367" height="36"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -148,7 +153,7 @@ $(function(){initNavTree('dd/dbb/class_c_fast_l_e_d_a47f2109e10010a77ba7a6db479d
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dd/dbb/class_c_fast_l_e_d.html">CFastLED</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

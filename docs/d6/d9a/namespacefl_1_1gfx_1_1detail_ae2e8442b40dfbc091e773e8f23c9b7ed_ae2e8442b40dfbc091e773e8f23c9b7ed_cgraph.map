@@ -1,0 +1,8 @@
+<map id="fl::gfx::detail::toQ16&lt; fl::s16x16 &gt;" name="fl::gfx::detail::toQ16&lt; fl::s16x16 &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,156,75"/>
+<area shape="rect" id="Node000002" href="$d9/d9f/classfl_1_1s16x16_aa048b427f50f28993a67941e0f303a65.html#aa048b427f50f28993a67941e0f303a65" title=" " alt="" coords="221,5,338,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="156,39,206,29,207,34,157,44"/>
+<area shape="rect" id="Node000003" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_ae82324867b78347258369b9d070df0df.html#ae82324867b78347258369b9d070df0df" title="Convert any Coord type to Q16.16 raw i32 for integer inner loops." alt="" coords="204,79,355,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="157,66,196,74,195,79,156,72"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="247,80,240,70,243,60,257,54,279,52,306,56,318,64,314,69,304,60,279,57,258,59,247,64,245,70,251,77"/>
+</map>

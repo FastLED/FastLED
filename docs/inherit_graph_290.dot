@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::Json",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d13/classfl_1_1_json.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::detail::anonymous\l_namespace\{allocator.cpp.hpp\}\l::SlabRegistryEntry",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d64/namespacefl_1_1detail_1_1anonymous__namespace_02allocator_8cpp_8hpp_03.html#d1/dcd/structfl_1_1detail_1_1anonymous__namespace_02allocator_8cpp_8hpp_03_1_1_slab_registry_entry",tooltip=" "];
 }

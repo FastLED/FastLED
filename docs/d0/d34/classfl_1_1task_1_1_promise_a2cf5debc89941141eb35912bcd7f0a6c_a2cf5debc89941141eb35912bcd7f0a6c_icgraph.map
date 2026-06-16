@@ -1,0 +1,22 @@
+<map id="fl::task::Promise::is_completed" name="fl::task::Promise::is_completed">
+<area shape="rect" id="Node000001" title="Check if Promise is completed (resolved or rejected)" alt="" coords="496,97,631,137"/>
+<area shape="rect" id="Node000002" href="$db/d5c/namespacefl_1_1task_ab96dc4828a01d1cff109d355d8ffc23d.html#ab96dc4828a01d1cff109d355d8ffc23d" title="Synchronously wait for a promise to complete (ONLY safe in top&#45;level contexts)" alt="" coords="309,97,448,137"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="482,119,448,119,448,114,482,114"/>
+<area shape="rect" id="Node000003" href="$df/d01/_client_real_8h_a75e6549812ad7bff897e0c92a225878a.html#a75e6549812ad7bff897e0c92a225878a" title=" " alt="" coords="104,5,261,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="338,90,301,66,260,44,231,33,233,28,262,40,304,62,340,86"/>
+<area shape="rect" id="Node000005" href="$d9/dce/_client_validation_real_8h_a48d1b41170d4da38b2d99148b76a9a22.html#a48d1b41170d4da38b2d99148b76a9a22" title=" " alt="" coords="113,104,252,129"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="296,119,252,119,252,114,296,114"/>
+<area shape="rect" id="Node000007" href="$df/d01/_client_real_8h_a648cd3d90f8e240cbbfe5cb934057124.html#a648cd3d90f8e240cbbfe5cb934057124" title="APPROACH 4: JSON Response with await pattern &#160;&#160;Same JSON handling but using await_top_level for synch..." alt="" coords="121,55,245,80"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="296,99,233,83,235,77,297,93"/>
+<area shape="rect" id="Node000008" href="$d9/dce/_client_validation_real_8h_ad90185b2a71aa34da786634a378ac25b.html#ad90185b2a71aa34da786634a378ac25b" title=" " alt="" coords="110,153,255,179"/>
+<area shape="poly" id="edge8_Node000002_Node000008" title=" " alt="" coords="297,140,235,156,233,151,296,135"/>
+<area shape="rect" id="Node000009" href="$d9/dce/_client_validation_real_8h_a4a6f06023a5a6afd3efafcb856740c10.html#a4a6f06023a5a6afd3efafcb856740c10" title=" " alt="" coords="109,203,256,228"/>
+<area shape="poly" id="edge10_Node000002_Node000009" title=" " alt="" coords="340,147,303,170,262,192,230,205,228,200,260,188,300,166,337,142"/>
+<area shape="rect" id="Node000004" href="$df/d01/_client_real_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,31,56,56"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="93,36,57,42,56,37,92,30"/>
+<area shape="rect" id="Node000006" href="$d9/dce/_client_validation_real_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,153,56,179"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="127,136,105,143,57,160,56,155,103,138,125,131"/>
+<area shape="poly" id="edge7_Node000007_Node000004" title=" " alt="" coords="107,58,56,50,57,45,108,53"/>
+<area shape="poly" id="edge9_Node000008_Node000006" title=" " alt="" coords="96,169,56,169,56,163,96,163"/>
+<area shape="poly" id="edge11_Node000009_Node000006" title=" " alt="" coords="129,201,103,193,56,177,57,172,105,187,130,196"/>
+</map>

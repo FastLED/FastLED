@@ -1,0 +1,29 @@
+<map id="fl/chipsets/encoders/ws2812.h" name="fl/chipsets/encoders/ws2812.h">
+<area shape="rect" id="Node000001" title="WS2812/WS2812B/WS2813/NeoPixel encoder." alt="" coords="389,5,539,45"/>
+<area shape="rect" id="Node000002" href="$db/d65/fl_2chipsets_2encoders_2pixel__iterator_8h.html" title="Non&#45;templated low level pixel data writing class." alt="" coords="389,93,539,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="467,59,467,93,461,93,461,59"/>
+<area shape="rect" id="Node000003" href="$d4/df9/_auto_research_test_8cpp.html" title=" " alt="" coords="361,328,599,383"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="518,139,540,157,557,180,564,200,565,221,554,262,532,299,508,329,504,326,528,296,549,260,560,221,559,201,552,183,536,161,515,143"/>
+<area shape="rect" id="Node000004" href="$d0/d00/ucs7604_8h.html" title="UCS7604 LED chipset controller implementation for FastLED." alt="" coords="126,343,285,368"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="375,120,337,127,299,139,264,158,234,183,221,202,212,223,203,269,203,311,206,342,201,343,197,311,198,268,207,221,216,199,230,180,261,153,297,134,336,122,374,115"/>
+<area shape="rect" id="Node000017" href="$d2/d82/fl_2gfx_2pixel__iterator_8h.html" title=" " alt="" coords="386,181,542,207"/>
+<area shape="poly" id="edge7_Node000002_Node000017" title=" " alt="" coords="467,147,467,181,461,181,461,147"/>
+<area shape="rect" id="Node000018" href="$d2/d1e/pixel__iterator__any_8h.html" title=" " alt="" coords="623,335,769,375"/>
+<area shape="poly" id="edge8_Node000002_Node000018" title=" " alt="" coords="518,138,549,156,578,179,614,219,646,262,689,334,684,336,641,265,610,222,574,183,546,161,515,142"/>
+<area shape="rect" id="Node000019" href="$d8/d6c/pixel__iterator_8h.html" title="Legacy header." alt="" coords="243,181,362,207"/>
+<area shape="poly" id="edge10_Node000002_Node000019" title=" " alt="" coords="415,142,328,184,325,179,412,137"/>
+<area shape="rect" id="Node000005" href="$db/d66/chipsets_8h.html" title="Contains the bulk of the definitions for the various LED chipsets supported." alt="" coords="5,431,93,456"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="174,377,72,433,69,428,171,372"/>
+<area shape="rect" id="Node000010" href="$d3/de6/channel_8cpp_8hpp.html" title=" " alt="" coords="344,431,547,456"/>
+<area shape="poly" id="edge5_Node000004_Node000010" title=" " alt="" coords="251,370,414,428,412,433,249,375"/>
+<area shape="rect" id="Node000014" href="$db/d67/ucs7604_8cpp_8hpp.html" title=" " alt="" coords="118,431,319,456"/>
+<area shape="poly" id="edge6_Node000004_Node000014" title=" " alt="" coords="212,381,219,430,214,431,207,382"/>
+<area shape="poly" id="edge9_Node000018_Node000010" title=" " alt="" coords="629,382,480,433,478,428,627,377"/>
+<area shape="poly" id="edge11_Node000019_Node000005" title=" " alt="" coords="269,216,194,262,153,294,115,330,95,356,78,384,56,431,51,429,74,382,91,353,111,326,149,290,191,258,267,211"/>
+<area shape="rect" id="Node000020" href="$d5/d4d/pixel__controller_8h.html" title="Low level pixel data writing class." alt="" coords="256,255,389,280"/>
+<area shape="poly" id="edge12_Node000019_Node000020" title=" " alt="" coords="312,219,322,254,317,255,307,221"/>
+<area shape="poly" id="edge13_Node000020_Node000003" title=" " alt="" coords="357,284,433,326,431,330,355,289"/>
+<area shape="poly" id="edge15_Node000020_Node000004" title=" " alt="" coords="297,290,223,345,220,340,294,286"/>
+<area shape="poly" id="edge14_Node000020_Node000010" title=" " alt="" coords="326,293,332,337,340,360,352,381,365,396,382,409,416,428,414,433,379,414,362,400,347,384,335,362,327,338,320,294"/>
+<area shape="poly" id="edge16_Node000020_Node000018" title=" " alt="" coords="401,280,502,300,613,325,639,333,637,338,611,331,501,305,400,285"/>
+</map>

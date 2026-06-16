@@ -8,5 +8,9 @@ digraph "fl::UINumberFieldImpl::UINumberFieldImpl"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::UINumberFieldImpl\l::UINumberFieldImpl",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::UINumberFieldImpl\l::value",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d62/classfl_1_1_u_i_number_field_impl_abe730a5b06b86d01675192998117d56f.html#abe730a5b06b86d01675192998117d56f",tooltip=" "];
+  Node2 [id="Node000002",label="fl::max",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::min",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::UINumberFieldImpl\l::value",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d62/classfl_1_1_u_i_number_field_impl_abe730a5b06b86d01675192998117d56f.html#abe730a5b06b86d01675192998117d56f",tooltip=" "];
 }

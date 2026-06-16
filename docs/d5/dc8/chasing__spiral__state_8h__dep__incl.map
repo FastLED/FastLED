@@ -1,0 +1,16 @@
+<map id="fl/fx/2d/animartrix_detail/chasing_spiral_state.h" name="fl/fx/2d/animartrix_detail/chasing_spiral_state.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="89,5,252,60"/>
+<area shape="rect" id="Node000002" href="$d9/dc3/chasing__spirals_8cpp_8hpp.html" title=" " alt="" coords="45,211,187,265"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="156,74,144,109,131,163,122,211,117,210,126,162,139,107,151,72"/>
+<area shape="rect" id="Node000009" href="$d8/de1/chasing__spirals_8h.html" title=" " alt="" coords="154,108,297,163"/>
+<area shape="poly" id="edge4_Node000001_Node000009" title=" " alt="" coords="194,71,213,107,209,109,189,74"/>
+<area shape="rect" id="Node000003" href="$d1/d36/fl_2fx_22d_2animartrix__detail_2viz_2__build_8cpp_8hpp.html" title="Unity build for animartrix_detail/viz/ directory Includes all visualizer implementations in alphabeti..." alt="" coords="5,313,192,353"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="111,280,105,314,100,313,106,279"/>
+<area shape="rect" id="Node000004" href="$d2/d40/fl_2fx_22d_2animartrix__detail_2__build_8cpp_8hpp.html" title=" " alt="" coords="17,401,181,441"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="101,367,101,401,96,401,96,367"/>
+<area shape="poly" id="edge7_Node000009_Node000002" title=" " alt="" coords="188,174,146,213,143,209,185,170"/>
+<area shape="rect" id="Node000010" href="$d3/d5d/animartrix__detail_8h.html" title=" " alt="" coords="221,218,360,258"/>
+<area shape="poly" id="edge5_Node000009_Node000010" title=" " alt="" coords="252,173,280,216,276,219,248,176"/>
+<area shape="rect" id="Node000011" href="$d3/dc3/animartrix_8hpp.html" title=" " alt="" coords="217,321,383,346"/>
+<area shape="poly" id="edge6_Node000010_Node000011" title=" " alt="" coords="297,271,301,320,296,321,291,272"/>
+</map>

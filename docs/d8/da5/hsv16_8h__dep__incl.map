@@ -1,7 +1,32 @@
-<map id="fl/hsv16.h" name="fl/hsv16.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="101,5,186,31"/>
-<area shape="rect" id="Node000002" href="$da/d89/crgb__hsv16_8cpp.html" title="HSV16&#45;dependent methods for CRGB &#45; only linked when HSV16 functionality is used." alt="" coords="5,79,140,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="124,43,86,80,82,77,120,39"/>
-<area shape="rect" id="Node000003" href="$da/d5e/hsv16_8cpp.html" title=" " alt="" coords="164,79,264,104"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="167,39,204,77,201,80,163,43"/>
+<map id="fl/gfx/hsv16.h" name="fl/gfx/hsv16.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="296,5,407,31"/>
+<area shape="rect" id="Node000002" href="$d2/d25/crgb__extra_8cpp_8hpp.html" title=" " alt="" coords="5,152,188,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="283,28,211,45,176,60,144,81,128,97,116,117,102,153,97,151,112,114,124,94,140,77,173,55,210,40,282,22"/>
+<area shape="rect" id="Node000006" href="$d8/d2f/hsv16_8cpp_8hpp.html" title=" " alt="" coords="155,79,308,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="321,40,252,81,250,76,319,35"/>
+<area shape="rect" id="Node000007" href="$d4/d61/fl_2gfx_2noise_2noise_8cpp_8hpp.html" title=" " alt="" coords="265,152,453,177"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="355,45,361,152,356,152,350,45"/>
+<area shape="rect" id="Node000009" href="$de/d0b/fl_2gfx_2noise_2noise_8h.html" title="Functions to generate noise patterns on rings and spheres." alt="" coords="389,79,535,104"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="382,36,445,76,442,81,379,40"/>
+<area shape="rect" id="Node000011" href="$d1/d31/noise_8h.html" title="Functions to generate and fill arrays with noise." alt="" coords="538,152,607,177"/>
+<area shape="poly" id="edge17_Node000001_Node000011" title=" " alt="" coords="421,22,454,29,487,39,520,55,548,77,561,95,569,115,575,151,570,152,564,117,556,97,544,81,517,60,485,44,452,34,420,27"/>
+<area shape="rect" id="Node000003" href="$d5/d88/fl_2gfx_2__build_8cpp_8hpp.html" title="Unity build for fl/gfx/ — graphics types, primitives, and simulators." alt="" coords="149,313,303,339"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="117,186,219,311,214,315,113,190"/>
+<area shape="rect" id="Node000004" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="83,401,211,427"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="208,351,160,403,156,399,204,347"/>
+<area shape="rect" id="Node000005" href="$db/d06/fl_8gfx_09_8cpp.html" title="Unity build: recursive includes from src/fl/gfx/." alt="" coords="235,401,377,427"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="248,347,297,399,293,403,244,351"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="233,118,229,313,224,313,228,118"/>
+<area shape="rect" id="Node000008" href="$d6/d17/fl_2gfx_2noise_2__build_8cpp_8hpp.html" title="Unity build header for fl/gfx/noise/ directory." alt="" coords="263,225,455,251"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="362,191,362,225,357,225,357,191"/>
+<area shape="poly" id="edge9_Node000008_Node000003" title=" " alt="" coords="331,260,246,315,243,311,328,256"/>
+<area shape="poly" id="edge12_Node000009_Node000007" title=" " alt="" coords="436,114,378,154,375,150,433,110"/>
+<area shape="rect" id="Node000010" href="$d3/dac/_fx_noise_ring_8ino.html" title="Noise effect on circular ring with ScreenMap." alt="" coords="463,299,714,353"/>
+<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="470,117,488,179,502,215,520,249,539,275,560,297,556,300,535,278,516,252,498,217,483,181,465,118"/>
+<area shape="poly" id="edge13_Node000009_Node000011" title=" " alt="" coords="493,109,556,150,553,154,490,114"/>
+<area shape="rect" id="Node000012" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="530,225,615,251"/>
+<area shape="poly" id="edge14_Node000011_Node000012" title=" " alt="" coords="575,191,575,225,570,225,570,191"/>
+<area shape="rect" id="Node000016" href="$d8/d10/noisegen_8h.html" title="Noise generation classes." alt="" coords="639,225,733,251"/>
+<area shape="poly" id="edge15_Node000011_Node000016" title=" " alt="" coords="604,183,669,223,666,227,601,187"/>
+<area shape="poly" id="edge16_Node000016_Node000010" title=" " alt="" coords="664,262,620,301,617,297,661,258"/>
 </map>

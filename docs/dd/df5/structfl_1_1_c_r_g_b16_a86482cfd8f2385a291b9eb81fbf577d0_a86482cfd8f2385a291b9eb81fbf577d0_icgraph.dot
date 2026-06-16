@@ -1,0 +1,18 @@
+digraph "fl::CRGB16::CRGB16"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::CRGB16::CRGB16",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::CRGB16::CRGB16",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/df5/structfl_1_1_c_r_g_b16_a017ae442c472e18ee8df18cfdccbab96.html#a017ae442c472e18ee8df18cfdccbab96",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::CRGB16::nscale",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/df5/structfl_1_1_c_r_g_b16_a4afe596348603a57612fa364d2bf0ba8.html#a4afe596348603a57612fa364d2bf0ba8",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::CRGB16::nscale8",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/df5/structfl_1_1_c_r_g_b16_a7c18ef20922b8d2035e1d27ee2ca303d.html#a7c18ef20922b8d2035e1d27ee2ca303d",tooltip=" "];
+  Node1 -> Node5 [id="edge4_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::CRGB16::operator+=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/df5/structfl_1_1_c_r_g_b16_a920237fb8ed23da3184ab99a1f20383f.html#a920237fb8ed23da3184ab99a1f20383f",tooltip=" "];
+}

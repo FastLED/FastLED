@@ -1,0 +1,12 @@
+<map id="fl::spi::ParallelDevice::Impl" name="fl::spi::ParallelDevice::Impl">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,344,164,384"/>
+<area shape="rect" id="Node000002" href="$d3/dca/structfl_1_1_spi_config.html" title="Configuration for SPI device (supports 1&#45;8 lanes)" alt="" coords="35,256,134,281"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="87,295,87,344,82,344,82,295"/>
+<area shape="rect" id="Node000003" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="21,168,148,193"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="87,207,87,255,82,255,82,207"/>
+<area shape="rect" id="Node000004" href="$d4/dad/classfl_1_1vector__basic.html" title="Type&#45;erased vector base class." alt="" coords="19,5,139,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="83,44,87,168,82,168,78,45"/>
+<area shape="rect" id="Node000007" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="101,80,218,105"/>
+<area shape="poly" id="edge5_Node000007_Node000004" title=" " alt="" coords="104,38,148,78,144,82,100,42"/>
+<area shape="poly" id="edge4_Node000003_Node000007" title=" " alt="" coords="142,118,97,169,93,166,138,114"/>
+</map>

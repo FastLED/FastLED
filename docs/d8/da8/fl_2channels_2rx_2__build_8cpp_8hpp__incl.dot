@@ -1,0 +1,67 @@
+digraph "fl/channels/rx/_build.cpp.hpp"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl/channels/rx/_build.cpp.hpp",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl/channels/rx/channel.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/df5/rx_2channel_8cpp_8hpp.html",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl/channels/rx/channel.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/d7b/rx_2channel_8h.html",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl/channels/rx/config.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dd/d5c/fl_2channels_2rx_2config_8h.html",tooltip=" "];
+  Node4 -> Node8 [id="edge4_Node000004_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="fl/stl/noexcept.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d01/noexcept_8h.html",tooltip=" "];
+  Node4 -> Node23 [id="edge5_Node000004_Node000023",color="steelblue1",style="solid",tooltip=" "];
+  Node23 [id="Node000023",label="fl/stl/string.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/d66/string_8h.html",tooltip=" "];
+  Node23 -> Node22 [id="edge6_Node000023_Node000022",color="steelblue1",style="solid",tooltip=" "];
+  Node22 [id="Node000022",label="fl/stl/compiler_control.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d54/compiler__control_8h.html",tooltip=" "];
+  Node23 -> Node29 [id="edge7_Node000023_Node000029",color="steelblue1",style="solid",tooltip=" "];
+  Node29 [id="Node000029",label="fl/stl/shared_ptr.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/d6a/shared__ptr_8h.html",tooltip=" "];
+  Node29 -> Node30 [id="edge8_Node000029_Node000030",color="steelblue1",style="solid",tooltip=" "];
+  Node30 [id="Node000030",label="fl/stl/atomic.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dd/d02/atomic_8h.html",tooltip=" "];
+  Node29 -> Node8 [id="edge9_Node000029_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node23 -> Node37 [id="edge10_Node000023_Node000037",color="steelblue1",style="solid",tooltip=" "];
+  Node37 [id="Node000037",label="fl/stl/span.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d4/d7a/span_8h.html",tooltip=" "];
+  Node37 -> Node8 [id="edge11_Node000037_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node23 -> Node8 [id="edge12_Node000023_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node53 [id="edge13_Node000003_Node000053",color="steelblue1",style="solid",tooltip=" "];
+  Node53 [id="Node000053",label="fl/channels/rx.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d6/d73/rx_8h.html",tooltip="Common RX interfaces and shared types."];
+  Node53 -> Node6 [id="edge14_Node000053_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl/stl/stdint.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/dd8/stdint_8h.html",tooltip=" "];
+  Node53 -> Node54 [id="edge15_Node000053_Node000054",color="steelblue1",style="solid",tooltip=" "];
+  Node54 [id="Node000054",label="fl/stl/result.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$de/d93/result_8h.html",tooltip="result<T, E> type alias for fl::expected (Rust-style naming)"];
+  Node53 -> Node8 [id="edge16_Node000053_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node53 -> Node29 [id="edge17_Node000053_Node000029",color="steelblue1",style="solid",tooltip=" "];
+  Node53 -> Node37 [id="edge18_Node000053_Node000037",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node22 [id="edge19_Node000003_Node000022",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node8 [id="edge20_Node000003_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node29 [id="edge21_Node000003_Node000029",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node6 [id="edge22_Node000003_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node23 [id="edge23_Node000003_Node000023",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node56 [id="edge24_Node000002_Node000056",color="steelblue1",style="solid",tooltip=" "];
+  Node56 [id="Node000056",label="fl/log/log.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d7f/log_8h.html",tooltip="Centralized logging categories for FastLED hardware interfaces and subsystems."];
+  Node56 -> Node57 [id="edge25_Node000056_Node000057",color="steelblue1",style="solid",tooltip=" "];
+  Node57 [id="Node000057",label="fl/system/sketch_macros.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/dbc/sketch__macros_8h.html",tooltip=" "];
+  Node56 -> Node58 [id="edge26_Node000056_Node000058",color="steelblue1",style="solid",tooltip=" "];
+  Node58 [id="Node000058",label="fl/stl/strstream.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d8/d00/strstream_8h.html",tooltip=" "];
+  Node58 -> Node6 [id="edge27_Node000058_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node58 -> Node23 [id="edge28_Node000058_Node000023",color="steelblue1",style="solid",tooltip=" "];
+  Node58 -> Node8 [id="edge29_Node000058_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node56 -> Node61 [id="edge30_Node000056_Node000061",color="steelblue1",style="solid",tooltip=" "];
+  Node61 [id="Node000061",label="fl/stl/chrono.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dd/d90/chrono_8h.html",tooltip="FastLED chrono implementation - duration types for time measurements."];
+  Node56 -> Node22 [id="edge31_Node000056_Node000022",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node30 [id="edge32_Node000002_Node000030",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node23 [id="edge33_Node000002_Node000023",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node63 [id="edge34_Node000001_Node000063",color="steelblue1",style="solid",tooltip=" "];
+  Node63 [id="Node000063",label="fl/channels/rx/decode\l_ws2812.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/db5/decode__ws2812_8cpp_8hpp.html",tooltip="Shared 4-phase WS2812 edge-pair -> byte decoder (definition)."];
+  Node63 -> Node64 [id="edge35_Node000063_Node000064",color="steelblue1",style="solid",tooltip=" "];
+  Node64 [id="Node000064",label="fl/channels/rx/decode\l_ws2812.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d09/decode__ws2812_8h.html",tooltip="Shared 4-phase WS2812 edge-pair -> byte decoder (declaration)."];
+  Node64 -> Node53 [id="edge36_Node000064_Node000053",color="steelblue1",style="solid",tooltip=" "];
+  Node64 -> Node8 [id="edge37_Node000064_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node64 -> Node54 [id="edge38_Node000064_Node000054",color="steelblue1",style="solid",tooltip=" "];
+  Node64 -> Node37 [id="edge39_Node000064_Node000037",color="steelblue1",style="solid",tooltip=" "];
+  Node64 -> Node6 [id="edge40_Node000064_Node000006",color="steelblue1",style="solid",tooltip=" "];
+}

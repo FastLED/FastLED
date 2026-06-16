@@ -1,0 +1,8 @@
+<map id="fl::audio::fft::FloatVectorPool::releaseIfNotEmpty" name="fl::audio::fft::FloatVectorPool::releaseIfNotEmpty">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,185,45"/>
+<area shape="rect" id="Node000002" href="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a" title=" " alt="" coords="460,13,551,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="186,20,233,19,412,19,446,20,446,25,412,24,233,24,186,25"/>
+<area shape="rect" id="Node000003" href="$da/d27/classfl_1_1audio_1_1fft_1_1_float_vector_pool_a725de4e6b7df4d94079263cf8e67eed2.html#a725de4e6b7df4d94079263cf8e67eed2" title=" " alt="" coords="233,33,412,73"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="186,34,220,38,219,43,185,39"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="412,37,446,32,447,37,413,42"/>
+</map>

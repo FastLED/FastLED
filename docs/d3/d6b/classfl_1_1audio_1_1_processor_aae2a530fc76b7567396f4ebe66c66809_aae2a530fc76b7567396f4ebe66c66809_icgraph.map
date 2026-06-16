@@ -1,0 +1,7 @@
+<map id="fl::audio::Processor::getMidRaw" name="fl::audio::Processor::getMidRaw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="199,29,344,69"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="304,17,292,11,271,8,253,10,242,15,238,21,240,28,235,30,233,20,239,11,252,5,271,3,294,6,306,13"/>
+<area shape="rect" id="Node000002" href="$d3/d6b/classfl_1_1audio_1_1_processor_a44c9bf7e90fafc4f6bc668d7796ef27c.html#a44c9bf7e90fafc4f6bc668d7796ef27c" title=" " alt="" coords="5,29,151,69"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="185,52,151,52,151,47,185,47"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="110,17,99,11,78,8,60,10,49,15,45,21,47,28,42,30,40,20,45,11,58,5,78,3,101,6,113,13"/>
+</map>

@@ -1,0 +1,59 @@
+digraph "fl/stl/expected.h"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl/stl/expected.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Generic expected<T, E> type for error handling without exceptions."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl/remote/rpc/rpc.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d16/remote_2rpc_2rpc_8h.html",tooltip=" "];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl/remote/remote.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d04/remote_8cpp_8hpp.html",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl/remote/_build.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d3/db1/fl_2remote_2__build_8cpp_8hpp.html",tooltip=" "];
+  Node2 -> Node7 [id="edge4_Node000002_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node7 [id="Node000007",label="fl/remote/remote.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d06/remote_8h.html",tooltip=" "];
+  Node7 -> Node8 [id="edge5_Node000007_Node000008",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node8 [id="Node000008",label="/home/runner/work/FastLED\l/FastLED/examples/Asio\l/RpcBidirectional/RpcBidirectional.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d08/_rpc_bidirectional_8ino.html",tooltip="Example demonstrating bidirectional HTTP streaming RPC (server + client in same process)"];
+  Node7 -> Node9 [id="edge6_Node000007_Node000009",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node9 [id="Node000009",label="/home/runner/work/FastLED\l/FastLED/examples/Asio\l/RpcClient/RpcClient.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/db9/_rpc_client_8ino.html",tooltip="Example demonstrating HTTP streaming RPC client."];
+  Node7 -> Node10 [id="edge7_Node000007_Node000010",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="/home/runner/work/FastLED\l/FastLED/examples/Asio\l/RpcServer/RpcServer.ino",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/df2/_rpc_server_8ino.html",tooltip="Example demonstrating fl::Remote with HTTP streaming transport (server side)"];
+  Node7 -> Node11 [id="edge8_Node000007_Node000011",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node11 [id="Node000011",label="/home/runner/work/FastLED\l/FastLED/examples/AutoResearch\l/AutoResearchLowMemory.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/df2/_auto_research_low_memory_8h.html",tooltip=" "];
+  Node7 -> Node12 [id="edge9_Node000007_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl/fx/wled.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dd/df9/wled_8h.html",tooltip=" "];
+  Node7 -> Node3 [id="edge10_Node000007_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node16 [id="edge11_Node000002_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="fl/remote/rpc/rpc.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d8f/rpc_8cpp_8hpp.html",tooltip=" "];
+  Node16 -> Node17 [id="edge12_Node000016_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="fl/remote/rpc/_build.cpp.hpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d1e/fl_2remote_2rpc_2__build_8cpp_8hpp.html",tooltip=" "];
+  Node17 -> Node4 [id="edge13_Node000017_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node18 [id="edge14_Node000001_Node000018",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="fl/stl/result.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d93/result_8h.html",tooltip="result<T, E> type alias for fl::expected (Rust-style naming)"];
+  Node18 -> Node19 [id="edge15_Node000018_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl/channels/rx.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d73/rx_8h.html",tooltip="Common RX interfaces and shared types."];
+  Node19 -> Node20 [id="edge16_Node000019_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="FastLED.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d97/_fast_l_e_d_8h.html",tooltip="central include file for FastLED, defines the CFastLED class/object"];
+  Node19 -> Node24 [id="edge17_Node000019_Node000024",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node24 [id="Node000024",label="fl/channels/rx.cpp.hpp",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$de/d4c/rx_8cpp_8hpp.html",tooltip="Implementation of RxDevice factory."];
+  Node19 -> Node27 [id="edge18_Node000019_Node000027",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node27 [id="Node000027",label="fl/channels/rx/channel.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/d7b/rx_2channel_8h.html",tooltip=" "];
+  Node27 -> Node20 [id="edge19_Node000027_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node19 -> Node36 [id="edge20_Node000019_Node000036",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node36 [id="Node000036",label="fl/channels/rx/decode\l_ws2812.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$dd/d09/decode__ws2812_8h.html",tooltip="Shared 4-phase WS2812 edge-pair -> byte decoder (declaration)."];
+  Node18 -> Node36 [id="edge21_Node000018_Node000036",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node18 -> Node38 [id="edge22_Node000018_Node000038",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node38 [id="Node000038",label="fl/channels/spi/transaction.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/db6/transaction_8h.html",tooltip="Transaction class for asynchronous SPI operations."];
+  Node38 -> Node39 [id="edge23_Node000038_Node000039",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node39 [id="Node000039",label="fl/channels/spi.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d9/df0/channels_2spi_8h.html",tooltip="Multi-lane SPI interface for LED output Hardware (SPI_HW): 1-8 parallel data lanes Software (SPI_BITB..."];
+  Node38 -> Node43 [id="edge24_Node000038_Node000043",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node43 [id="Node000043",label="fl/channels/spi/device.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/de9/device_8h.html",tooltip="SPI Device class for single-channel communication."];
+  Node43 -> Node39 [id="edge25_Node000043_Node000039",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node38 -> Node44 [id="edge26_Node000038_Node000044",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node44 [id="Node000044",label="fl/channels/spi/multi\l_lane_device.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/dc3/multi__lane__device_8h.html",tooltip="Multi-lane SPI device for 2-8 independent LED strips."];
+  Node44 -> Node39 [id="edge27_Node000044_Node000039",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node38 -> Node46 [id="edge28_Node000038_Node000046",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node46 [id="Node000046",label="fl/channels/spi/parallel\l_device.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d3/d08/parallel__device_8h.html",tooltip="Parallel GPIO SPI device for 1-32 outputs driven from single data stream."];
+}

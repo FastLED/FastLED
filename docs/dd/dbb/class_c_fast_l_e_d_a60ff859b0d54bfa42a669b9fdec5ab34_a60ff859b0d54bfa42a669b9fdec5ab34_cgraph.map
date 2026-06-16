@@ -1,0 +1,9 @@
+<map id="CFastLED::getPowerScalingExponent" name="CFastLED::getPowerScalingExponent">
+<area shape="rect" id="Node000001" title="Get the configured brightness&#45;to&#45;power response exponent." alt="" coords="5,5,204,45"/>
+<area shape="rect" id="Node000002" href="$d9/d5f/group___power_model_ga8aa9fd0df8e3e989b4907e9f703343b2.html#ga8aa9fd0df8e3e989b4907e9f703343b2" title="Get the current brightness&#45;to&#45;power response exponent." alt="" coords="252,13,463,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,23,238,23,238,28,204,28"/>
+<area shape="rect" id="Node000003" href="$d1/d2a/power__mgt_8cpp_8hpp_afe71d257dc9aca526178a992761bb812.html#afe71d257dc9aca526178a992761bb812" title="Global RGB power model (initialized to WS2812 @ 5V defaults, linear response)" alt="" coords="511,13,621,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="463,23,497,23,497,28,463,28"/>
+<area shape="rect" id="Node000004" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="669,13,832,38"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="621,23,655,23,655,28,621,28"/>
+</map>

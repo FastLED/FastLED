@@ -1,0 +1,15 @@
+<map id="fl::audio::SpectralEqualizer" name="fl::audio::SpectralEqualizer">
+<area shape="rect" id="Node000001" title="SpectralEqualizer applies frequency&#45;dependent gain correction to address mid&#45;frequency dominance and ..." alt="" coords="981,53,1176,78"/>
+<area shape="rect" id="Node000002" href="$db/dbf/namespacefl_1_1audio.html#dc/d09/structfl_1_1audio_1_1_spectral_equalizer_config" title="Configuration for spectral equalizer." alt="" coords="680,45,875,85"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="889,63,981,63,981,68,889,68"/>
+<area shape="rect" id="Node000003" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="404,18,543,43"/>
+<area shape="poly" id="edge7_Node000001_Node000003" title=" " alt="" coords="556,21,567,20,677,17,763,18,849,27,958,43,1003,50,1002,55,957,48,848,32,763,24,677,22,567,25,557,26"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="557,37,680,52,679,57,556,43"/>
+<area shape="rect" id="Node000004" href="$d4/dad/classfl_1_1vector__basic.html" title="Type&#45;erased vector base class." alt="" coords="5,22,125,47"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="139,27,149,27,265,24,380,25,404,26,404,31,380,31,265,29,149,32,139,32"/>
+<area shape="rect" id="Node000007" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="175,47,292,73"/>
+<area shape="poly" id="edge5_Node000007_Node000004" title=" " alt="" coords="139,43,175,49,174,54,138,48"/>
+<area shape="poly" id="edge4_Node000003_Node000007" title=" " alt="" coords="306,49,380,40,403,37,404,42,380,45,306,54"/>
+<area shape="rect" id="Node000008" href="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer.html#dd/d40/structfl_1_1audio_1_1_spectral_equalizer_1_1_stats" title="Get statistics (for debugging/monitoring)" alt="" coords="680,109,875,149"/>
+<area shape="poly" id="edge6_Node000001_Node000008" title=" " alt="" coords="885,104,1017,75,1018,81,886,109"/>
+</map>

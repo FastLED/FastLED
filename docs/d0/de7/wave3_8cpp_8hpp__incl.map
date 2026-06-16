@@ -1,0 +1,49 @@
+<map id="fl/channels/wave3.cpp.hpp" name="fl/channels/wave3.cpp.hpp">
+<area shape="rect" id="Node000001" title="Wave3 waveform generation and transposition implementation." alt="" coords="329,5,523,31"/>
+<area shape="rect" id="Node000002" href="$da/db7/wave3_8h.html" title=" " alt="" coords="43,174,193,199"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="386,33,327,53,265,81,197,125,143,167,139,163,193,120,262,76,325,48,384,28"/>
+<area shape="rect" id="Node000010" href="$d9/d66/wave3_8hpp.html" title="Inline implementation details for wave3 transposition." alt="" coords="275,79,409,119"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="415,33,374,71,370,67,412,29"/>
+<area shape="rect" id="Node000013" href="$dd/d48/memcpy_8h.html" title="ISR&#45;safe memory operations (inline, header&#45;only)" alt="" coords="439,174,581,199"/>
+<area shape="poly" id="edge31_Node000001_Node000013" title=" " alt="" coords="434,30,500,160,496,163,429,32"/>
+<area shape="rect" id="Node000019" href="$d0/d3f/led__timing_8h.html" title="Centralized LED chipset timing definitions with nanosecond precision." alt="" coords="649,255,822,280"/>
+<area shape="poly" id="edge25_Node000001_Node000019" title=" " alt="" coords="442,29,712,244,708,248,439,33"/>
+<area shape="rect" id="Node000003" href="$d1/ddf/align_8h.html" title="Alignment macros and utilities for FastLED." alt="" coords="111,335,210,361"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="114,201,101,237,98,258,102,279,117,304,136,324,132,328,112,307,97,281,93,258,95,236,109,199"/>
+<area shape="rect" id="Node000007" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="156,255,331,280"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="138,197,215,245,212,249,135,202"/>
+<area shape="rect" id="Node000008" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="419,416,521,441"/>
+<area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="121,199,126,238,133,259,145,278,186,303,263,339,429,408,427,413,261,344,183,308,141,282,129,261,121,239,116,200"/>
+<area shape="rect" id="Node000004" href="$d7/d84/cstddef_8h.html" title=" " alt="" coords="239,416,352,441"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="182,359,265,407,262,411,179,363"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="5,416,180,441"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="153,363,114,407,110,404,149,359"/>
+<area shape="rect" id="Node000006" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="583,416,709,441"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="211,355,569,412,568,418,210,360"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="233,282,185,328,181,324,229,278"/>
+<area shape="poly" id="edge7_Node000007_Node000005" title=" " alt="" coords="177,283,135,300,117,313,102,330,93,346,89,365,90,402,85,402,84,365,88,345,97,326,113,309,133,295,175,278"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="411,489,529,515"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="473,442,473,476,467,476,467,442"/>
+<area shape="poly" id="edge12_Node000010_Node000002" title=" " alt="" coords="294,121,161,172,159,167,292,116"/>
+<area shape="poly" id="edge17_Node000010_Node000007" title=" " alt="" coords="308,121,281,141,259,168,247,205,244,241,239,240,242,204,254,165,277,137,305,117"/>
+<area shape="rect" id="Node000011" href="$db/d89/bit__spread__lut_8hpp.html" title="Shared u32 &quot;spread LUT&quot; bit&#45;matrix transpose primitive (no SIMD, no u64)." alt="" coords="269,167,415,207"/>
+<area shape="poly" id="edge13_Node000010_Node000011" title=" " alt="" coords="345,119,345,153,339,153,339,119"/>
+<area shape="poly" id="edge18_Node000010_Node000013" title=" " alt="" coords="380,116,477,165,474,170,378,121"/>
+<area shape="poly" id="edge14_Node000011_Node000007" title=" " alt="" coords="320,209,270,248,267,244,316,205"/>
+<area shape="rect" id="Node000012" href="$d3/d7e/int_8h.html" title=" " alt="" coords="350,335,433,361"/>
+<area shape="poly" id="edge15_Node000011_Node000012" title=" " alt="" coords="350,206,386,321,381,323,345,208"/>
+<area shape="poly" id="edge16_Node000012_Node000008" title=" " alt="" coords="405,359,450,404,447,408,401,363"/>
+<area shape="poly" id="edge24_Node000013_Node000004" title=" " alt="" coords="492,202,419,252,377,288,340,330,319,367,305,404,300,402,314,365,336,326,374,284,416,248,489,197"/>
+<area shape="poly" id="edge19_Node000013_Node000007" title=" " alt="" coords="472,202,296,253,295,248,470,197"/>
+<area shape="poly" id="edge23_Node000013_Node000008" title=" " alt="" coords="510,200,498,255,476,403,470,402,493,254,505,199"/>
+<area shape="rect" id="Node000014" href="$df/d72/bit__cast_8h.html" title=" " alt="" coords="507,255,625,280"/>
+<area shape="poly" id="edge20_Node000013_Node000014" title=" " alt="" coords="520,198,552,242,548,245,516,201"/>
+<area shape="poly" id="edge22_Node000014_Node000006" title=" " alt="" coords="571,280,580,319,599,367,627,404,622,407,594,369,575,321,565,281"/>
+<area shape="poly" id="edge21_Node000014_Node000012" title=" " alt="" coords="542,282,430,332,428,327,540,278"/>
+<area shape="poly" id="edge27_Node000019_Node000006" title=" " alt="" coords="748,279,762,297,775,320,781,345,775,369,749,396,716,414,713,409,745,392,770,367,776,345,770,322,758,300,744,282"/>
+<area shape="poly" id="edge26_Node000019_Node000008" title=" " alt="" coords="703,283,653,303,598,330,541,370,494,409,491,405,537,366,595,326,650,298,701,278"/>
+<area shape="rect" id="Node000020" href="$d5/d9f/clockless__encoder_8h.html" title="Encoding pipeline selector for clockless LED chipsets." alt="" coords="609,328,761,368"/>
+<area shape="poly" id="edge28_Node000019_Node000020" title=" " alt="" coords="730,282,707,318,702,315,726,279"/>
+<area shape="poly" id="edge30_Node000020_Node000006" title=" " alt="" coords="678,369,660,405,655,402,673,367"/>
+<area shape="poly" id="edge29_Node000020_Node000008" title=" " alt="" coords="634,371,515,414,513,409,632,366"/>
+</map>

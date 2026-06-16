@@ -10,6 +10,6 @@ digraph "/home/runner/work/FastLED/FastLED/examples/Async"
     graph [ bgcolor="#edf0f7", pencolor="grey25", label="examples", fontname=Helvetica,fontsize=10 style="filled,dashed", URL="dir_d28a4824dc47e487b107a5db32ef43c4.html",tooltip=""]
   dir_7bef1c3e461c30f149d9c635b845d67c [label="Async", fillcolor="#edf0f7", color="grey25", style="filled,bold", URL="dir_7bef1c3e461c30f149d9c635b845d67c.html",tooltip=""];
   }
-  dir_4d1829fa9bd13d7db71e765b2707b248 [label="fl", fillcolor="#edf0f7", color="grey25", style="filled", URL="dir_4d1829fa9bd13d7db71e765b2707b248.html",tooltip=""];
-  dir_7bef1c3e461c30f149d9c635b845d67c->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="3", labeldistance=1.5 headhref="dir_000012_000042.html" href="dir_000012_000042.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_4d1829fa9bd13d7db71e765b2707b248 [label="fl", fillcolor="#edf0f7", color="red", style="filled", URL="dir_4d1829fa9bd13d7db71e765b2707b248.html",tooltip=""];
+  dir_7bef1c3e461c30f149d9c635b845d67c->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="3", labeldistance=1.5 headhref="dir_000017_000074.html" href="dir_000017_000074.html" color="steelblue1" fontcolor="steelblue1"];
 }

@@ -1,0 +1,25 @@
+<map id="fl::test::XMLReporter" name="fl::test::XMLReporter">
+<area shape="rect" id="Node000001" title="XML reporter that outputs JUnit&#45;compatible XML format The output is accumulated in a string buffer pr..." alt="" coords="120,416,275,441"/>
+<area shape="rect" id="Node000002" href="$da/d63/classfl_1_1test_1_1_i_reporter.html" title=" " alt="" coords="5,299,136,324"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="95,331,187,414,183,418,91,335"/>
+<area shape="rect" id="Node000003" href="$d2/db2/classfl_1_1string.html" title=" " alt="" coords="160,299,235,324"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="200,337,200,416,195,416,195,337"/>
+<area shape="rect" id="Node000004" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="109,196,275,236"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="197,249,199,298,194,298,191,250"/>
+<area shape="rect" id="Node000005" href="$de/d66/classfl_1_1basic__string.html" title="Concrete type&#45;erased string class." alt="" coords="81,5,197,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="140,45,142,80,148,118,164,160,182,194,178,197,159,162,143,119,136,80,135,45"/>
+<area shape="rect" id="Node000006" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="157,93,288,119"/>
+<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="162,39,213,91,209,95,158,43"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="203,131,196,144,191,170,192,196,186,196,186,170,191,142,198,128"/>
+<area shape="rect" id="Node000007" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="299,299,461,324"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="377,339,366,368,346,394,312,414,276,425,274,419,310,409,342,390,361,365,372,337"/>
+<area shape="rect" id="Node000008" href="$d4/dad/classfl_1_1vector__basic.html" title="Type&#45;erased vector base class." alt="" coords="408,93,528,119"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="451,131,428,161,408,197,391,253,384,299,378,298,386,252,403,195,424,158,446,128"/>
+<area shape="rect" id="Node000011" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="417,203,535,229"/>
+<area shape="poly" id="edge12_Node000011_Node000008" title=" " alt="" coords="473,132,478,203,472,203,467,133"/>
+<area shape="rect" id="Node000009" href="$db/d13/classfl_1_1memory__resource.html" title="Polymorphic memory resource base class (PMR&#45;style)." alt="" coords="230,5,386,31"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="341,35,400,67,446,91,444,95,397,72,339,40"/>
+<area shape="rect" id="Node000010" href="$d4/d36/namespacefl.html#d8/d72/structfl_1_1vector__element__ops" title="Function pointer table for type&#45;specific element operations." alt="" coords="411,5,581,31"/>
+<area shape="poly" id="edge10_Node000008_Node000010" title=" " alt="" coords="491,44,474,94,469,92,486,43"/>
+<area shape="poly" id="edge11_Node000007_Node000011" title=" " alt="" coords="456,240,394,300,390,297,453,236"/>
+</map>

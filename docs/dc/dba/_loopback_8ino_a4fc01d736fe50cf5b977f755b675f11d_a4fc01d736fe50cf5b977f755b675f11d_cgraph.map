@@ -1,0 +1,40 @@
+<map id="setup" name="setup">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,205,64,230"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="172,155,247,181"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="64,205,111,189,158,177,159,182,113,195,65,210"/>
+<area shape="rect" id="Node000003" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_ab07b6f9e44bc8aba1f780b0230f5be21.html#ab07b6f9e44bc8aba1f780b0230f5be21" title="Factory method for 200 OK response." alt="" coords="112,205,307,230"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="64,215,99,215,99,220,64,220"/>
+<area shape="rect" id="Node000012" href="$dc/dba/_loopback_8ino_a3c7b93186aa45d9ff5d239f0d88f6008.html#a3c7b93186aa45d9ff5d239f0d88f6008" title=" " alt="" coords="160,262,259,287"/>
+<area shape="poly" id="edge22_Node000001_Node000012" title=" " alt="" coords="65,224,158,255,156,260,63,229"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="180,157,174,147,178,137,190,131,209,129,233,132,243,141,240,145,231,137,209,134,191,136,182,141,180,146,185,154"/>
+<area shape="rect" id="Node000004" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_a1a8b4038fa86119ce80f6b9857c7eee3.html#a1a8b4038fa86119ce80f6b9857c7eee3" title=" " alt="" coords="355,197,525,237"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="307,224,341,224,341,229,307,229"/>
+<area shape="poly" id="edge19_Node000004_Node000003" title=" " alt="" coords="354,211,320,211,320,206,354,206"/>
+<area shape="poly" id="edge5_Node000004_Node000004" title=" " alt="" coords="399,198,397,188,403,178,418,173,440,171,466,174,480,181,477,186,464,179,440,176,419,178,406,183,402,189,404,196"/>
+<area shape="rect" id="Node000005" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_aea2ac581ef439e865a98eae4778c7416.html#aea2ac581ef439e865a98eae4778c7416" title="Factory method for 400 Bad Request response." alt="" coords="573,5,744,45"/>
+<area shape="poly" id="edge6_Node000004_Node000005" title=" " alt="" coords="456,195,503,133,535,98,572,67,608,48,610,53,575,72,539,102,507,137,461,199"/>
+<area shape="rect" id="Node000006" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_a8688692b19d75358b846a85f6c367b5c.html#a8688692b19d75358b846a85f6c367b5c" title="Set response body." alt="" coords="573,69,744,109"/>
+<area shape="poly" id="edge8_Node000004_Node000006" title=" " alt="" coords="476,195,521,163,572,131,613,112,616,117,575,136,524,167,479,199"/>
+<area shape="rect" id="Node000007" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_abd12ccbafacd9b44270123f766d91dc9.html#abd12ccbafacd9b44270123f766d91dc9" title="Add HTTP header." alt="" coords="573,133,744,173"/>
+<area shape="poly" id="edge10_Node000004_Node000007" title=" " alt="" coords="525,199,600,175,602,181,526,204"/>
+<area shape="rect" id="Node000008" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_a6844fcc0edb41a50dad5d21ee745ad1a.html#a6844fcc0edb41a50dad5d21ee745ad1a" title="Factory method for 500 Internal Server Error response." alt="" coords="573,197,744,237"/>
+<area shape="poly" id="edge12_Node000004_Node000008" title=" " alt="" coords="525,223,559,224,559,229,525,229"/>
+<area shape="rect" id="Node000009" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_a5750f33732ba08a389f9f6ce4a387338.html#a5750f33732ba08a389f9f6ce4a387338" title="Set JSON response body with automatic Content&#45;Type header." alt="" coords="573,285,744,325"/>
+<area shape="poly" id="edge14_Node000004_Node000009" title=" " alt="" coords="469,235,526,259,572,278,570,283,524,264,467,240"/>
+<area shape="rect" id="Node000010" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_a571a6ad842ad6f23649072749926227e.html#a571a6ad842ad6f23649072749926227e" title="Factory method for 404 Not Found response." alt="" coords="573,349,744,389"/>
+<area shape="poly" id="edge17_Node000004_Node000010" title=" " alt="" coords="482,235,506,245,527,259,543,280,551,300,556,319,567,339,562,341,551,321,546,301,539,282,524,263,503,250,480,240"/>
+<area shape="rect" id="Node000011" href="$da/d78/classfl_1_1asio_1_1http_1_1_response_a7c2f923cab94b0b52945ce0bcfd12e90.html#a7c2f923cab94b0b52945ce0bcfd12e90" title="Set HTTP status code." alt="" coords="573,413,744,453"/>
+<area shape="poly" id="edge20_Node000004_Node000011" title=" " alt="" coords="487,235,508,245,527,259,541,278,548,296,552,332,553,367,558,384,567,402,563,405,553,386,548,368,547,333,543,298,536,281,523,263,506,250,485,240"/>
+<area shape="poly" id="edge7_Node000005_Node000004" title=" " alt="" coords="575,47,575,47,538,79,505,116,458,186,454,183,501,113,534,76,572,43,572,43"/>
+<area shape="poly" id="edge9_Node000006_Node000004" title=" " alt="" coords="575,111,575,112,515,150,467,190,464,186,512,146,572,107,572,107"/>
+<area shape="poly" id="edge11_Node000007_Node000004" title=" " alt="" coords="574,172,498,195,497,190,572,167"/>
+<area shape="poly" id="edge13_Node000008_Node000004" title=" " alt="" coords="573,211,539,211,539,206,573,206"/>
+<area shape="poly" id="edge15_Node000009_Node000004" title=" " alt="" coords="631,288,536,245,538,240,633,283"/>
+<area shape="poly" id="edge16_Node000009_Node000009" title=" " alt="" coords="618,286,615,276,622,266,636,261,659,259,684,262,698,269,696,274,683,267,659,264,638,266,625,271,620,277,623,284"/>
+<area shape="poly" id="edge18_Node000010_Node000004" title=" " alt="" coords="616,352,593,342,572,327,555,307,548,287,543,267,532,248,537,245,548,265,553,285,560,304,575,323,596,337,619,347"/>
+<area shape="poly" id="edge21_Node000011_Node000004" title=" " alt="" coords="612,416,590,406,571,391,558,373,550,354,547,318,545,283,541,266,531,249,536,246,546,264,550,283,552,318,555,353,562,370,575,387,593,401,614,411"/>
+<area shape="rect" id="Node000013" href="$df/da5/lib8tion_8h_a696b9421eca961df0a68c7c6c3e983ab.html#a696b9421eca961df0a68c7c6c3e983ab" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="401,262,479,287"/>
+<area shape="poly" id="edge23_Node000012_Node000013" title=" " alt="" coords="259,272,387,272,387,277,259,277"/>
+<area shape="rect" id="Node000014" href="$d1/dfb/colorutils_8h_afba4db18577c19e39c54f1c5793741b7.html#afba4db18577c19e39c54f1c5793741b7" title="Fill a range of LEDs with a solid color." alt="" coords="402,311,478,337"/>
+<area shape="poly" id="edge24_Node000012_Node000014" title=" " alt="" coords="260,283,389,311,388,316,258,288"/>
+</map>

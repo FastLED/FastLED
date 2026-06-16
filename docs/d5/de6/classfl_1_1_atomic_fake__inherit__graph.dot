@@ -17,4 +17,6 @@ digraph "fl::AtomicFake&lt; T &gt;"
   Node5 [id="Node000005",label="fl::AtomicFake\< fl\l::u32 \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$da/d98/classfl_1_1_atomic_fake.html",tooltip=" "];
   Node1 -> Node6 [id="edge5_Node000001_Node000006",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::i32 \>",fontcolor="grey" ];
   Node6 [id="Node000006",label="fl::AtomicFake\< fl\l::i32 \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$da/d98/classfl_1_1_atomic_fake.html",tooltip=" "];
+  Node1 -> Node7 [id="edge6_Node000001_Node000007",dir="back",color="orange",style="dashed",tooltip=" ",label=" \< fl::IChannelDriver\l::PollNeededCallbackSlot\l::Snapshot * \>",fontcolor="grey" ];
+  Node7 [id="Node000007",label="fl::AtomicFake\< fl\l::IChannelDriver::PollNeeded\lCallbackSlot::Snapshot * \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$da/d98/classfl_1_1_atomic_fake.html",tooltip=" "];
 }

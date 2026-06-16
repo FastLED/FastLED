@@ -1,0 +1,6 @@
+<map id="fl::RxDevice::getRawEdgeTimes" name="fl::RxDevice::getRawEdgeTimes">
+<area shape="rect" id="Node000001" title="Get raw edge timings in universal format (for debugging)" alt="" coords="5,29,195,69"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="67,30,65,20,71,11,82,5,100,3,120,6,131,13,128,17,118,11,100,8,84,10,74,15,71,21,73,28"/>
+<area shape="rect" id="Node000002" href="$d6/daf/direct_8h_ae2738c620ee3ab857c9656b3bf86a24d.html#ae2738c620ee3ab857c9656b3bf86a24d" title=" " alt="" coords="243,37,301,62"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="195,47,229,47,229,52,195,52"/>
+</map>

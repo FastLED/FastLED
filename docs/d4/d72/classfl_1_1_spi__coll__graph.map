@@ -1,0 +1,16 @@
+<map id="fl::Spi" name="fl::Spi">
+<area shape="rect" id="Node000001" title="SPI Device &#45; RAII wrapper for multi&#45;lane SPI." alt="" coords="1360,49,1419,74"/>
+<area shape="rect" id="Node000002" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="1083,41,1264,81"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1278,59,1360,59,1360,64,1278,64"/>
+<area shape="rect" id="Node000003" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device.html" title="Multi&#45;lane SPI device (1&#45;8 independent LED strips)" alt="" coords="780,49,955,74"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="968,59,1083,59,1083,64,968,64"/>
+<area shape="rect" id="Node000004" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="362,34,529,89"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="543,59,780,59,780,64,543,64"/>
+<area shape="rect" id="Node000021" href="$d6/d2e/classfl_1_1unique__ptr.html" title=" " alt="" coords="5,9,140,49"/>
+<area shape="poly" id="edge7_Node000002_Node000021" title=" " alt="" coords="153,13,164,12,250,9,336,12,653,20,969,33,1059,39,1083,42,1082,47,1058,44,969,39,653,25,336,17,250,15,164,17,154,18"/>
+<area shape="poly" id="edge4_Node000004_Node000021" title=" " alt="" coords="154,40,164,41,362,56,362,61,164,47,153,45"/>
+<area shape="rect" id="Node000022" href="$d5/d2b/structfl_1_1default__delete.html" title=" " alt="" coords="765,101,969,141"/>
+<area shape="poly" id="edge5_Node000002_Node000022" title=" " alt="" coords="983,96,1082,76,1083,82,984,101"/>
+<area shape="rect" id="Node000020" href="$d5/d2b/structfl_1_1default__delete.html" title=" " alt="" coords="360,113,531,138"/>
+<area shape="poly" id="edge6_Node000022_Node000020" title=" " alt="" coords="544,122,765,120,765,125,544,127"/>
+</map>

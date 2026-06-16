@@ -1,0 +1,36 @@
+<map id="fl::third_party::nsgif__decode_complex" name="fl::third_party::nsgif__decode_complex">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,199,153,239"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a01186a22a1055c583d5408c116c84ffa.html#a01186a22a1055c583d5408c116c84ffa" title=" " alt="" coords="422,23,521,49"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="84,198,98,159,121,111,155,64,176,44,200,27,227,15,255,8,313,3,369,8,418,17,417,23,368,13,313,8,256,13,228,20,203,32,179,48,159,67,126,114,103,161,89,199"/>
+<area shape="rect" id="Node000003" href="$d1/d86/namespacefl_1_1third__party_a3d5b039401750156ae4b525a465c6129.html#a3d5b039401750156ae4b525a465c6129" title="Get any frame clip adjustment for the image extent." alt="" coords="209,41,342,81"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="94,197,138,146,168,117,200,91,208,86,211,91,203,96,171,121,142,149,98,200"/>
+<area shape="rect" id="Node000004" href="$d1/d86/namespacefl_1_1third__party_ad09af82192fdc3036345af592e93ac12.html#ad09af82192fdc3036345af592e93ac12" title="Perform any jump over decoded data, to accommodate clipped portion of frame." alt="" coords="209,105,342,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="118,196,200,155,214,149,216,154,202,160,120,201"/>
+<area shape="rect" id="Node000005" href="$d1/d86/namespacefl_1_1third__party_acb9e16033130408f9aa7f604f700e6d6.html#acb9e16033130408f9aa7f604f700e6d6" title="Read input codes until end of LZW context owned output buffer." alt="" coords="206,169,345,209"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="153,205,192,199,193,204,154,210"/>
+<area shape="rect" id="Node000012" href="$d1/d86/namespacefl_1_1third__party_a049f11895554e2c4b022cf0a10f2fef1.html#a049f11895554e2c4b022cf0a10f2fef1" title="Initialise an LZW decompression context for decoding." alt="" coords="402,233,541,273"/>
+<area shape="poly" id="edge12_Node000001_Node000012" title=" " alt="" coords="154,223,388,243,388,249,153,228"/>
+<area shape="rect" id="Node000013" href="$d1/d86/namespacefl_1_1third__party_a86a3a8ce601875d7945a9366d954423e.html#a86a3a8ce601875d7945a9366d954423e" title="Convert an LZW result code to equivalent GIF result code." alt="" coords="201,284,349,324"/>
+<area shape="poly" id="edge14_Node000001_Node000013" title=" " alt="" coords="127,236,217,276,215,281,125,241"/>
+<area shape="rect" id="Node000014" href="$d1/d86/namespacefl_1_1third__party_aba694817aad5c1ef70abb3fd77173a05.html#aba694817aad5c1ef70abb3fd77173a05" title="Get the next line for GIF decode." alt="" coords="201,348,349,388"/>
+<area shape="poly" id="edge15_Node000001_Node000014" title=" " alt="" coords="99,237,144,284,203,334,211,339,209,344,200,338,140,288,95,241"/>
+<area shape="rect" id="Node000016" href="$d4/d36/namespacefl_aa6f747fb354cae784bdd4c656cbdd9fb.html#aa6f747fb354cae784bdd4c656cbdd9fb" title=" " alt="" coords="631,362,697,387"/>
+<area shape="poly" id="edge19_Node000001_Node000016" title=" " alt="" coords="89,238,104,275,127,320,160,364,180,383,203,398,256,419,312,431,370,435,428,432,483,424,535,413,617,389,618,394,536,419,484,429,428,437,370,440,311,437,254,425,200,402,177,387,156,368,123,323,99,277,84,240"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="322,103,348,91,430,52,433,57,350,96,324,108"/>
+<area shape="rect" id="Node000006" href="$d1/d86/namespacefl_1_1third__party_a1652aecb5a36f531062b45a7491ef9a6.html#a1652aecb5a36f531062b45a7491ef9a6" title="Get the next LZW code and write its value(s) to output buffer." alt="" coords="402,105,541,145"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="336,167,396,147,398,152,338,172"/>
+<area shape="rect" id="Node000011" href="$d1/d86/namespacefl_1_1third__party_a604c640cdffe4f96c1eadbdde0be5ad0.html#a604c640cdffe4f96c1eadbdde0be5ad0" title="Write values for this code to the output stack." alt="" coords="402,169,541,209"/>
+<area shape="poly" id="edge11_Node000005_Node000011" title=" " alt="" coords="345,187,388,187,388,192,345,192"/>
+<area shape="rect" id="Node000007" href="$d1/d86/namespacefl_1_1third__party_ad441e092ef34f474cbcb95ac4382c7ce.html#ad441e092ef34f474cbcb95ac4382c7ce" title="Handle clear code." alt="" coords="595,199,733,239"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="522,143,547,155,595,184,606,190,604,195,592,189,544,160,520,148"/>
+<area shape="rect" id="Node000008" href="$d1/d86/namespacefl_1_1third__party_a1e33977161df12579a850d54ef065783.html#a1e33977161df12579a850d54ef065783" title="Get the next LZW code of given size from the raw input data." alt="" coords="783,139,921,179"/>
+<area shape="poly" id="edge9_Node000006_Node000008" title=" " alt="" coords="541,116,633,113,735,120,785,132,784,137,734,125,633,118,541,121"/>
+<area shape="rect" id="Node000010" href="$d1/d86/namespacefl_1_1third__party_ac22256614e544d5cbae5e9dedc4fd1fc.html#ac22256614e544d5cbae5e9dedc4fd1fc" title="Create new table entry." alt="" coords="593,135,735,175"/>
+<area shape="poly" id="edge10_Node000006_Node000010" title=" " alt="" coords="541,133,580,139,579,145,540,139"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="727,196,774,181,776,186,728,201"/>
+<area shape="poly" id="edge13_Node000012_Node000007" title=" " alt="" coords="540,238,581,231,582,236,541,244"/>
+<area shape="rect" id="Node000015" href="$d1/d86/namespacefl_1_1third__party_af64228b94a1ed58f27733c4029eb1e67.html#af64228b94a1ed58f27733c4029eb1e67" title="Get the next line for GIF decode." alt="" coords="397,297,545,337"/>
+<area shape="poly" id="edge16_Node000014_Node000015" title=" " alt="" coords="349,346,383,338,384,343,350,352"/>
+<area shape="poly" id="edge18_Node000014_Node000016" title=" " alt="" coords="350,367,617,371,617,377,350,372"/>
+<area shape="poly" id="edge17_Node000015_Node000016" title=" " alt="" coords="540,335,618,359,617,364,538,340"/>
+</map>

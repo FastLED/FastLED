@@ -1,15 +1,23 @@
 <map id="fl::ScaleUp" name="fl::ScaleUp">
-<area shape="rect" id="Node000001" title=" " alt="" coords="147,357,238,383"/>
-<area shape="rect" id="Node000002" href="$d7/d3e/classfl_1_1_fx2d.html" title=" " alt="" coords="89,247,160,273"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="142,283,187,356,183,358,137,286"/>
-<area shape="rect" id="Node000003" href="$da/d5d/classfl_1_1_fx.html" title=" " alt="" coords="5,115,60,141"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="51,150,119,245,114,249,46,153"/>
-<area shape="rect" id="Node000004" href="$d0/dce/classfl_1_1_x_y_map.html" title=" " alt="" coords="85,115,167,141"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="128,154,127,247,122,247,123,154"/>
-<area shape="rect" id="Node000005" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="185,225,339,295"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="235,307,203,358,198,355,231,305"/>
-<area shape="rect" id="Node000006" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="192,108,332,148"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="265,162,265,225,259,225,259,162"/>
-<area shape="rect" id="Node000007" href="$db/ddd/classfl_1_1_heap_vector.html" title=" " alt="" coords="192,5,332,45"/>
-<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="265,59,265,108,259,108,259,59"/>
+<area shape="rect" id="Node000001" title="Effect wrapper that upscales delegate effects using bilinear interpolation." alt="" coords="153,359,243,384"/>
+<area shape="rect" id="Node000002" href="$d7/d3e/classfl_1_1_fx2d.html" title=" " alt="" coords="91,263,161,289"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="145,298,191,357,187,360,141,301"/>
+<area shape="rect" id="Node000003" href="$da/d5d/classfl_1_1_fx.html" title=" " alt="" coords="5,168,60,193"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="55,201,116,261,113,265,52,205"/>
+<area shape="rect" id="Node000004" href="$d0/dce/classfl_1_1_x_y_map.html" title=" " alt="" coords="85,168,167,193"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="129,207,129,263,123,263,123,207"/>
+<area shape="rect" id="Node000005" href="$d8/d7d/classfl_1_1vector__psram.html" title=" " alt="" coords="197,256,348,296"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="251,309,209,360,205,357,247,305"/>
+<area shape="rect" id="Node000006" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="191,168,354,193"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="275,207,275,256,270,256,270,207"/>
+<area shape="rect" id="Node000007" href="$d4/dad/classfl_1_1vector__basic.html" title="Type&#45;erased vector base class." alt="" coords="259,5,379,31"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="288,40,267,58,251,81,247,104,250,127,268,167,263,169,245,129,241,104,246,79,263,55,285,36"/>
+<area shape="rect" id="Node000010" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="261,80,378,105"/>
+<area shape="poly" id="edge8_Node000010_Node000007" title=" " alt="" coords="322,45,322,80,317,80,317,45"/>
+<area shape="rect" id="Node000012" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="402,80,519,105"/>
+<area shape="poly" id="edge11_Node000012_Node000007" title=" " alt="" coords="355,35,439,77,437,82,353,39"/>
+<area shape="poly" id="edge7_Node000006_Node000010" title=" " alt="" coords="309,119,281,169,277,166,304,116"/>
+<area shape="rect" id="Node000011" href="$d8/d7d/classfl_1_1vector__psram.html" title=" " alt="" coords="378,168,543,193"/>
+<area shape="poly" id="edge9_Node000005_Node000011" title=" " alt="" coords="427,202,312,258,309,254,424,197"/>
+<area shape="poly" id="edge10_Node000011_Node000012" title=" " alt="" coords="463,119,463,167,458,167,458,119"/>
 </map>

@@ -1,0 +1,4 @@
+<map id="fl::IFastLED::setMaxRefreshRate" name="fl::IFastLED::setMaxRefreshRate">
+<area shape="rect" id="Node000001" title="Set the maximum refresh rate." alt="" coords="5,29,235,55"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="161,20,150,11,120,8,95,10,82,15,80,20,87,27,83,31,75,21,79,11,94,5,120,3,152,7,165,16"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="fl::audio::detector::Note::midiNoteToFrequency" name="fl::audio::detector::Note::midiNoteToFrequency">
+<area shape="rect" id="Node000001" title=" " alt="" coords="615,37,825,77"/>
+<area shape="poly" id="edge6_Node000001_Node000001" title=" " alt="" coords="762,26,747,19,720,16,696,18,682,23,676,29,679,36,674,38,671,28,679,18,695,13,720,11,749,14,765,21"/>
+<area shape="rect" id="Node000002" href="$d9/d77/classfl_1_1audio_1_1detector_1_1_note_a2482d62d81f30bdf48c6f4d96b20be6b.html#a2482d62d81f30bdf48c6f4d96b20be6b" title=" " alt="" coords="373,37,567,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="601,60,567,60,567,55,601,55"/>
+<area shape="rect" id="Node000003" href="$d9/d77/classfl_1_1audio_1_1detector_1_1_note_ab77adfa4f5543e6ad35ecee8b8450b5c.html#ab77adfa4f5543e6ad35ecee8b8450b5c" title=" " alt="" coords="189,37,325,77"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="359,60,325,60,325,55,359,55"/>
+<area shape="poly" id="edge5_Node000003_Node000003" title=" " alt="" coords="288,25,277,19,257,16,240,18,229,23,226,29,228,36,222,38,220,28,226,19,238,13,257,11,279,14,291,21"/>
+<area shape="rect" id="Node000004" href="$d9/d77/classfl_1_1audio_1_1detector_1_1_note_a482dba6bfe0ac67e49a7390dfe8339e6.html#a482dba6bfe0ac67e49a7390dfe8339e6" title=" " alt="" coords="5,5,141,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="175,46,141,40,142,34,176,41"/>
+<area shape="rect" id="Node000005" href="$d9/d77/classfl_1_1audio_1_1detector_1_1_note_a1dc0b1ea7bc91d08607bc9bea547da15.html#a1dc0b1ea7bc91d08607bc9bea547da15" title=" " alt="" coords="5,69,141,109"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="176,74,142,80,141,75,175,69"/>
+</map>

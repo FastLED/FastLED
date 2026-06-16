@@ -1,0 +1,10 @@
+<map id="fl::HttpConnection::calculateBackoffDelay" name="fl::HttpConnection::calculateBackoffDelay">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,22,180,62"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27" title="Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all..." alt="" coords="228,29,303,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,39,214,39,214,45,180,45"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="238,31,232,21,235,11,247,5,265,3,288,6,297,15,294,19,285,11,265,8,248,10,239,15,238,20,243,28"/>
+<area shape="rect" id="Node000003" href="$df/d9e/namespacefl_1_1detail_abd6e1e8189dbbbf28d720923205bd0dd.html#abd6e1e8189dbbbf28d720923205bd0dd" title="Internal delay implementation used by the public fl::delay wrapper." alt="" coords="351,29,505,55"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="303,39,337,39,337,45,303,45"/>
+<area shape="rect" id="Node000004" href="$db/d5c/namespacefl_1_1task_a2d40b476742263a3fa212e24b722e3ef.html#a2d40b476742263a3fa212e24b722e3ef" title="Run selected task subsystems." alt="" coords="553,29,648,55"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="505,39,540,39,540,45,505,45"/>
+</map>

@@ -31,7 +31,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d5/d79/classfl_1_1_scale_up_ad42d61a31fe592ec619931db5f687df5.html#ad42d61a31fe592ec619931db5f687df5" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d5/d79/classfl_1_1_scale_up_a916580a4a28a717473deb3ace916ec77.html#a916580a4a28a717473deb3ace916ec77" target="_top" xlink:title="Expand a low&#45;resolution buffer to high&#45;resolution using bilinear interpolation.">
 <polygon fill="white" stroke="#666666" points="256,-93 146,-93 146,-74 256,-74 256,-93"/>
 <text text-anchor="middle" x="201" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">fl::ScaleUp::expand</text>
 </a>
@@ -85,7 +85,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d5/d79/classfl_1_1_scale_up_a4a667682b8d113e18d4c9c95bda93262.html#a4a667682b8d113e18d4c9c95bda93262" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d5/d79/classfl_1_1_scale_up_a4a667682b8d113e18d4c9c95bda93262.html#a4a667682b8d113e18d4c9c95bda93262" target="_top" xlink:title="Render the effect by drawing delegate at low&#45;res and scaling up.">
 <polygon fill="white" stroke="#666666" points="98,-93 0,-93 0,-74 98,-74 98,-93"/>
 <text text-anchor="middle" x="49" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">fl::ScaleUp::draw</text>
 </a>

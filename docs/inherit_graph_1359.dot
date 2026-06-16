@@ -1,0 +1,10 @@
+digraph "Graphical Class Hierarchy"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node0 [id="Node000000",label="fl::TIMING_DP1903_400KHZ",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d7a/structfl_1_1_t_i_m_i_n_g___d_p1903__400_k_h_z.html",tooltip="DP1903 controller @ 400 kHz Four-phase: TH0=800ns, TH1=2400ns, TL0=2400ns, TL1=800ns."];
+}

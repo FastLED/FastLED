@@ -1,0 +1,25 @@
+<map id="fl/channels/channel.h" name="fl/channels/channel.h">
+<area shape="rect" id="Node000001" title="ESP32&#45;P4 Parallel IO (PARLIO) LED channel." alt="" coords="217,5,375,31"/>
+<area shape="rect" id="Node000002" href="$db/dad/_r_g_b_w_w_8ino.html" title=" " alt="" coords="5,79,208,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="259,39,165,81,163,76,257,34"/>
+<area shape="rect" id="Node000003" href="$d7/de5/_fast_l_e_d_8cpp_8hpp.html" title=" " alt="" coords="209,255,337,280"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="293,45,282,107,273,181,273,207,275,255,270,255,268,207,268,181,277,106,288,44"/>
+<area shape="rect" id="Node000006" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="283,181,368,207"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="303,44,326,181,321,181,298,45"/>
+<area shape="rect" id="Node000007" href="$d3/de6/channel_8cpp_8hpp.html" title=" " alt="" coords="504,93,707,119"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="352,32,564,91,563,96,350,37"/>
+<area shape="rect" id="Node000011" href="$d4/de5/channel__typed_8h.html" title="Phase 3b templated channel facade – Channel&lt;Bus, Chipset&gt; with compile&#45;time bus/chipset enforcement." alt="" coords="333,86,480,126"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="324,37,384,84,381,88,320,41"/>
+<area shape="rect" id="Node000004" href="$d7/dd5/__build_8cpp_8hpp.html" title=" " alt="" coords="146,328,262,353"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="254,292,217,330,213,326,251,288"/>
+<area shape="rect" id="Node000005" href="$dd/de2/src_8cpp.html" title="Unity build: flat includes from src/ root directory." alt="" coords="286,328,402,353"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="297,288,334,326,331,330,293,292"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="311,219,284,256,280,253,307,216"/>
+<area shape="rect" id="Node000008" href="$d1/d97/fl_2channels_2__build_8cpp_8hpp.html" title=" " alt="" coords="510,181,701,207"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="608,133,608,181,603,181,603,133"/>
+<area shape="rect" id="Node000009" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="388,255,516,280"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="570,215,478,257,476,252,567,210"/>
+<area shape="rect" id="Node000010" href="$d7/d44/fl_8channels_09_8cpp.html" title="Unity build: recursive includes from src/fl/channels/." alt="" coords="540,255,719,280"/>
+<area shape="poly" id="edge10_Node000008_Node000010" title=" " alt="" coords="616,219,628,254,623,255,611,221"/>
+<area shape="poly" id="edge12_Node000011_Node000006" title=" " alt="" coords="381,138,339,183,335,179,377,134"/>
+</map>

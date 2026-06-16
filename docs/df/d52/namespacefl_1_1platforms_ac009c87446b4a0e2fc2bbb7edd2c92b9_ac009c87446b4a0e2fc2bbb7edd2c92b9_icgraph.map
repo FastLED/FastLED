@@ -1,0 +1,7 @@
+<map id="fl::platforms::scopedWatchdogPause3s" name="fl::platforms::scopedWatchdogPause3s">
+<area shape="rect" id="Node000001" title=" " alt="" coords="469,5,688,45"/>
+<area shape="rect" id="Node000002" href="$df/d52/namespacefl_1_1platforms_a3333f9482b0798c0daebdc07be2cdd5c.html#a3333f9482b0798c0daebdc07be2cdd5c" title=" " alt="" coords="203,5,421,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="456,28,422,28,422,23,456,23"/>
+<area shape="rect" id="Node000003" href="$d7/d76/classfl_1_1_scoped_watchdog_a196822062d7ab5c2b32c34a6d1efddd0.html#a196822062d7ab5c2b32c34a6d1efddd0" title="Construct with an explicit timeout." alt="" coords="5,5,155,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="189,28,155,28,155,23,189,23"/>
+</map>

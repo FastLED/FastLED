@@ -12,5 +12,5 @@ digraph "fl::XYRasterU8Sparse::height"
   Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fl::XYRasterU8Sparse\l::bounds_pixels",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/d5c/classfl_1_1_x_y_raster_u8_sparse_aa3f84c529a8ccf4058ac3ba15205bc30.html#aa3f84c529a8ccf4058ac3ba15205bc30",tooltip=" "];
   Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::rect::height",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d48/structfl_1_1rect_a10a26664913a5c0d2c1bc90324eec211.html#a10a26664913a5c0d2c1bc90324eec211",tooltip=" "];
+  Node4 [id="Node000004",label="fl::rect::height",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d48/structfl_1_1rect_aecf504a5e48968c2f8d2c58f7c14f32e.html#aecf504a5e48968c2f8d2c58f7c14f32e",tooltip=" "];
 }

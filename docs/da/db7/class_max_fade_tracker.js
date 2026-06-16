@@ -5,10 +5,10 @@ var class_max_fade_tracker =
     [ "setAttackTime", "da/db7/class_max_fade_tracker_ac2d801a1b88b5ca3e7d53f82b69c3fd8.html#ac2d801a1b88b5ca3e7d53f82b69c3fd8", null ],
     [ "setDecayTime", "da/db7/class_max_fade_tracker_ad37c737e74095ec8ae799d258d325e2f.html#ad37c737e74095ec8ae799d258d325e2f", null ],
     [ "setOutputTime", "da/db7/class_max_fade_tracker_ac5f67bacbfb2a1baf0df4a1565619ce5.html#ac5f67bacbfb2a1baf0df4a1565619ce5", null ],
-    [ "attackRate_", "da/db7/class_max_fade_tracker_adc46b6406132299a0acc7bbc50399d46.html#adc46b6406132299a0acc7bbc50399d46", null ],
-    [ "currentLevel_", "da/db7/class_max_fade_tracker_a3267614b0634fb01f86317d2b085e73c.html#a3267614b0634fb01f86317d2b085e73c", null ],
-    [ "decayRate_", "da/db7/class_max_fade_tracker_a3d05f65ae68a310f1665636e6fcd31ba.html#a3d05f65ae68a310f1665636e6fcd31ba", null ],
-    [ "outputRate_", "da/db7/class_max_fade_tracker_a2174e94f695802943c87b4e6585ac4c8.html#a2174e94f695802943c87b4e6585ac4c8", null ],
-    [ "sampleRate_", "da/db7/class_max_fade_tracker_a20c2efc32eb46c1d0bd216eeaa33ddc1.html#a20c2efc32eb46c1d0bd216eeaa33ddc1", null ],
-    [ "smoothedOutput_", "da/db7/class_max_fade_tracker_a827132a07a91f6ffefcd908f6ba8e1b8.html#a827132a07a91f6ffefcd908f6ba8e1b8", null ]
+    [ "mAttackRate", "da/db7/class_max_fade_tracker_a2e48a0a3dfa3591ab1ec420c36c5e049.html#a2e48a0a3dfa3591ab1ec420c36c5e049", null ],
+    [ "mCurrentLevel", "da/db7/class_max_fade_tracker_aac6ff77599d7885d083bf6cf247a36bd.html#aac6ff77599d7885d083bf6cf247a36bd", null ],
+    [ "mDecayRate", "da/db7/class_max_fade_tracker_a7e71e4c43e4b534002569975878e758b.html#a7e71e4c43e4b534002569975878e758b", null ],
+    [ "mOutputRate", "da/db7/class_max_fade_tracker_a15d22f7196685cecb532e3f448d8aacf.html#a15d22f7196685cecb532e3f448d8aacf", null ],
+    [ "mSampleRate", "da/db7/class_max_fade_tracker_ac6ead0b839f19b62b84b7bef30b81a64.html#ac6ead0b839f19b62b84b7bef30b81a64", null ],
+    [ "mSmoothedOutput", "da/db7/class_max_fade_tracker_a03482dce0dce75bd66a6df8b1761b14b.html#a03482dce0dce75bd66a6df8b1761b14b", null ]
 ];

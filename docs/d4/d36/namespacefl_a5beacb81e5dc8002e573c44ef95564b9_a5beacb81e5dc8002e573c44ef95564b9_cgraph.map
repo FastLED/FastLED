@@ -1,0 +1,7 @@
+<map id="fl::encodeWS2812" name="fl::encodeWS2812">
+<area shape="rect" id="Node000001" title="Encode pixel data in WS2812 format (automatic RGB/RGBW selection)" alt="" coords="5,31,144,56"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a6d12fad5aa2031e1abb41765650ce6a8.html#a6d12fad5aa2031e1abb41765650ce6a8" title="Encode 3&#45;byte pixel data in WS2812 format." alt="" coords="199,5,372,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="144,32,185,27,186,33,144,38"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a9cbf1f2a5558ce8f1ba9c1b1eb411db7.html#a9cbf1f2a5558ce8f1ba9c1b1eb411db7" title="Encode 4&#45;byte pixel data in WS2812 format." alt="" coords="192,55,379,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="144,49,179,52,178,58,144,54"/>
+</map>

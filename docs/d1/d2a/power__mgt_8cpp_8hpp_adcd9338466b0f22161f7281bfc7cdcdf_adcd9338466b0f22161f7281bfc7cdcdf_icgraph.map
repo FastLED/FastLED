@@ -1,0 +1,26 @@
+<map id="map_power_value" name="map_power_value">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1059,125,1200,150"/>
+<area shape="rect" id="Node000002" href="$d3/d1d/group___power_gab540bd9608e32378f1fb29bd9226c970.html#gab540bd9608e32378f1fb29bd9226c970" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="555,37,747,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1094,120,1054,101,1010,85,943,71,874,63,748,57,748,52,874,58,943,66,1011,80,1057,96,1096,116"/>
+<area shape="rect" id="Node000006" href="$d3/d1d/group___power_gab33dbfb39f4368fffdc17807883c787e.html#gab33dbfb39f4368fffdc17807883c787e" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="555,165,747,205"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="1100,160,1059,182,1011,200,943,211,874,214,807,211,747,205,748,200,807,206,874,209,943,206,1010,195,1057,177,1097,155"/>
+<area shape="rect" id="Node000007" href="$d3/d1d/group___power_gafdf503b02fd644c3398d34f27c3d363d.html#gafdf503b02fd644c3398d34f27c3d363d" title=" " alt="" coords="836,145,983,185"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="1046,151,983,159,982,153,1045,145"/>
+<area shape="rect" id="Node000010" href="$d3/d1d/group___power_ga681489b02b2825095fd40db45906bf26.html#ga681489b02b2825095fd40db45906bf26" title="Applies the configured power&#45;scaling response to a total power value." alt="" coords="808,95,1011,121"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="1045,129,1004,123,1005,118,1045,124"/>
+<area shape="rect" id="Node000003" href="$d3/d1d/group___power_gaf1109b6fa8f504362807f39bc4126306.html#gaf1109b6fa8f504362807f39bc4126306" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="289,5,481,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="541,47,481,39,482,34,542,42"/>
+<area shape="rect" id="Node000004" href="$dd/dbb/class_c_fast_l_e_d_a660c4ce3348e4463932f350be99215bf.html#a660c4ce3348e4463932f350be99215bf" title="Set the maximum power to be used, given in milliwatts." alt="" coords="276,69,495,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="542,73,495,79,495,74,541,68"/>
+<area shape="rect" id="Node000005" href="$dd/dbb/class_c_fast_l_e_d_a1f82b444605e69e415de4bef8775bd37.html#a1f82b444605e69e415de4bef8775bd37" title="Set the maximum power to be used, given in volts and milliamps." alt="" coords="5,69,228,109"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="262,92,228,92,228,87,262,87"/>
+<area shape="poly" id="edge7_Node000007_Node000002" title=" " alt="" coords="822,142,807,134,792,123,782,112,773,102,759,92,733,80,735,75,761,87,776,98,786,109,795,119,809,130,825,138"/>
+<area shape="poly" id="edge8_Node000007_Node000006" title=" " alt="" coords="823,175,748,181,747,175,822,169"/>
+<area shape="rect" id="Node000008" href="$d3/d1d/group___power_ga46fe8354310cd1888743e400b70175cd.html#ga46fe8354310cd1888743e400b70175cd" title="Determines how many milliwatts the current LED data would draw at max brightness (255)" alt="" coords="578,229,725,269"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="841,192,761,220,723,232,721,227,759,215,839,187"/>
+<area shape="rect" id="Node000009" href="$dd/dbb/class_c_fast_l_e_d_a06a8bc368f2ef5816015b75ad54d1e6b.html#a06a8bc368f2ef5816015b75ad54d1e6b" title="Get estimated power consumption in milliwatts." alt="" coords="543,101,760,141"/>
+<area shape="poly" id="edge10_Node000007_Node000009" title=" " alt="" coords="822,153,760,143,761,137,823,148"/>
+<area shape="poly" id="edge12_Node000010_Node000002" title=" " alt="" coords="830,95,747,79,748,74,831,90"/>
+<area shape="poly" id="edge13_Node000010_Node000006" title=" " alt="" coords="839,127,809,136,761,156,725,168,723,163,759,151,807,131,838,122"/>
+<area shape="poly" id="edge14_Node000010_Node000009" title=" " alt="" coords="795,117,760,118,760,113,794,111"/>
+</map>

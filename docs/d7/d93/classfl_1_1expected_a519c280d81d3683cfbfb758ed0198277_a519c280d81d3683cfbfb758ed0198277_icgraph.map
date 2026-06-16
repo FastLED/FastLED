@@ -1,0 +1,34 @@
+<map id="fl::expected::expected" name="fl::expected::expected">
+<area shape="rect" id="Node000001" title="Default constructor (creates error state)" alt="" coords="687,157,853,182"/>
+<area shape="rect" id="Node000002" href="$d7/d93/classfl_1_1expected_a8cc89ce5ff1f7e0edf22552f8bf1a5d9.html#a8cc89ce5ff1f7e0edf22552f8bf1a5d9" title=" " alt="" coords="469,33,636,58"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="744,149,697,110,637,72,609,61,611,56,640,67,700,105,747,145"/>
+<area shape="rect" id="Node000003" href="$d7/d93/classfl_1_1expected_a3541c5b09901c2ad9078a0f462d214db.html#a3541c5b09901c2ad9078a0f462d214db" title="Move constructor (defaulted &#45; variant handles it)" alt="" coords="469,82,636,107"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="725,154,638,121,601,110,603,105,640,116,727,149"/>
+<area shape="rect" id="Node000004" href="$d7/d93/classfl_1_1expected_abbee0bb98c9bf0a1391cb3e810ea4fd5.html#abbee0bb98c9bf0a1391cb3e810ea4fd5" title="Create error result." alt="" coords="479,131,627,157"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="672,161,626,155,627,150,673,155"/>
+<area shape="rect" id="Node000014" href="$d7/d93/classfl_1_1expected_a43962c78b223e9bf7f78b6d5fe2be30f.html#a43962c78b223e9bf7f78b6d5fe2be30f" title=" " alt="" coords="467,230,639,255"/>
+<area shape="poly" id="edge12_Node000001_Node000014" title=" " alt="" coords="726,189,640,221,602,232,601,227,638,216,724,184"/>
+<area shape="rect" id="Node000015" href="$d7/d93/classfl_1_1expected_aa11f7b7ffd93fd0d4b4c2a61a7863c5d.html#aa11f7b7ffd93fd0d4b4c2a61a7863c5d" title="Move assignment (defaulted &#45; variant handles it)" alt="" coords="467,279,639,305"/>
+<area shape="poly" id="edge13_Node000001_Node000015" title=" " alt="" coords="747,193,700,232,640,270,611,282,609,277,637,266,697,228,744,189"/>
+<area shape="rect" id="Node000016" href="$d7/d93/classfl_1_1expected_ae712d6f5942009caa637e9181d47d40b.html#ae712d6f5942009caa637e9181d47d40b" title="Create successful result." alt="" coords="474,181,631,206"/>
+<area shape="poly" id="edge14_Node000001_Node000016" title=" " alt="" coords="673,183,632,187,631,182,672,177"/>
+<area shape="rect" id="Node000005" href="$d3/d2b/classfl_1_1_rx_channel_a14a948e851faeb318738072647ac2b44.html#a14a948e851faeb318738072647ac2b44" title=" " alt="" coords="242,70,405,95"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="491,130,418,111,371,98,373,93,419,105,492,125"/>
+<area shape="rect" id="Node000006" href="$dc/d85/namespacefl_1_1channels_1_1rx_adf091740491eb262a159f09c092a157d.html#adf091740491eb262a159f09c092a157d" title="Decode a WS2812 edge&#45;pair stream into bytes." alt="" coords="237,235,409,275"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="482,164,468,172,454,184,445,197,436,211,420,225,398,237,395,232,417,220,432,208,440,194,450,181,465,167,480,159"/>
+<area shape="rect" id="Node000007" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a97018959f2c77546fa12f2a0adb2f540.html#a97018959f2c77546fa12f2a0adb2f540" title="Flush all lanes (transpose and transmit)" alt="" coords="236,120,411,160"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="465,145,411,144,411,139,465,140"/>
+<area shape="rect" id="Node000011" href="$d7/de0/classfl_1_1spi_1_1_parallel_device_a46d4c7d7aebd2478ad2d56532051ef75.html#a46d4c7d7aebd2478ad2d56532051ef75" title="Write data (single stream drives all pins via LUT)" alt="" coords="244,5,403,45"/>
+<area shape="poly" id="edge9_Node000004_Node000011" title=" " alt="" coords="478,128,465,121,449,105,440,89,432,74,417,59,396,48,399,43,420,55,436,71,445,87,453,102,468,117,481,124"/>
+<area shape="rect" id="Node000013" href="$d9/d0a/classfl_1_1spi_1_1_device_a2242937ce5772a2fe9ba38632c000cc0.html#a2242937ce5772a2fe9ba38632c000cc0" title="Begin asynchronous write operation (returns immediately)" alt="" coords="228,185,419,210"/>
+<area shape="poly" id="edge11_Node000004_Node000013" title=" " alt="" coords="485,162,379,187,378,182,483,157"/>
+<area shape="rect" id="Node000008" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a512a780a7050fa0e91e83c5dba1e17bc.html#a512a780a7050fa0e91e83c5dba1e17bc" title=" " alt="" coords="5,95,180,135"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="222,132,180,127,181,122,223,126"/>
+<area shape="rect" id="Node000009" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a547b2f30f70e16dbb22762f3f2370254.html#a547b2f30f70e16dbb22762f3f2370254" title="Internal implementation &#45; write all lanes atomically." alt="" coords="5,159,180,199"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="223,160,181,167,180,161,222,154"/>
+<area shape="rect" id="Node000012" href="$d7/de0/classfl_1_1spi_1_1_parallel_device_a7401728911c15f96eedba08dcf5544d6.html#a7401728911c15f96eedba08dcf5544d6" title=" " alt="" coords="13,5,172,45"/>
+<area shape="poly" id="edge10_Node000011_Node000012" title=" " alt="" coords="230,28,172,28,172,23,230,23"/>
+<area shape="poly" id="edge15_Node000016_Node000006" title=" " alt="" coords="492,212,399,237,398,232,491,207"/>
+<area shape="poly" id="edge16_Node000016_Node000007" title=" " alt="" coords="483,180,409,163,411,157,484,175"/>
+<area shape="poly" id="edge17_Node000016_Node000013" title=" " alt="" coords="461,198,419,198,419,193,460,192"/>
+</map>

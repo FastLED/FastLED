@@ -1,0 +1,10 @@
+<map id="fl::Particles1d::Particle::spawn" name="fl::Particles1d::Particle::spawn">
+<area shape="rect" id="Node000001" title="Spawn with random position, velocity, color, and lifetime." alt="" coords="5,71,171,111"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="225,29,300,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="159,69,211,54,212,59,160,74"/>
+<area shape="rect" id="Node000003" href="$d2/d0d/group___random_gaaaff3e84c6ab2cf5f71400a4b6958beb.html#gaaaff3e84c6ab2cf5f71400a4b6958beb" title="Generate a 16&#45;bit random number." alt="" coords="219,79,307,104"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="171,89,205,89,205,94,171,94"/>
+<area shape="rect" id="Node000004" href="$d2/d0d/group___random_gadb05544426b14ef8d85fb2eb73cb8a0a.html#gadb05544426b14ef8d85fb2eb73cb8a0a" title="Generate an 8&#45;bit random number." alt="" coords="223,128,303,153"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="160,109,210,123,208,128,159,114"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="234,31,228,21,231,11,243,5,263,3,287,6,297,15,293,19,284,11,263,8,244,10,235,15,233,20,238,28"/>
+</map>

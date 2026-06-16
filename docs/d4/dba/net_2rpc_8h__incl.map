@@ -1,0 +1,7 @@
+<map id="fl/net/rpc.h" name="fl/net/rpc.h">
+<area shape="rect" id="Node000001" title="fl::net::rpc — RPC transport type aliases" alt="" coords="106,5,197,31"/>
+<area shape="rect" id="Node000002" href="$d3/d5b/stream__client_8h.html" title=" " alt="" coords="5,79,140,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="142,33,103,71,99,67,138,29"/>
+<area shape="rect" id="Node000003" href="$d6/db6/stream__server_8h.html" title=" " alt="" coords="164,79,299,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="165,29,204,67,200,71,161,33"/>
+</map>

@@ -1,0 +1,17 @@
+<map id="calculate_unscaled_power_mW" name="calculate_unscaled_power_mW">
+<area shape="rect" id="Node000001" title=" " alt="" coords="808,133,955,173"/>
+<area shape="rect" id="Node000002" href="$d3/d1d/group___power_gab540bd9608e32378f1fb29bd9226c970.html#gab540bd9608e32378f1fb29bd9226c970" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="555,37,747,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="834,129,759,92,726,80,728,75,761,87,836,124"/>
+<area shape="rect" id="Node000006" href="$d3/d1d/group___power_gab33dbfb39f4368fffdc17807883c787e.html#gab33dbfb39f4368fffdc17807883c787e" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="555,101,747,141"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="794,144,747,137,748,132,795,139"/>
+<area shape="rect" id="Node000007" href="$d3/d1d/group___power_ga46fe8354310cd1888743e400b70175cd.html#ga46fe8354310cd1888743e400b70175cd" title="Determines how many milliwatts the current LED data would draw at max brightness (255)" alt="" coords="578,165,725,205"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="795,168,725,178,725,173,794,163"/>
+<area shape="rect" id="Node000008" href="$dd/dbb/class_c_fast_l_e_d_a06a8bc368f2ef5816015b75ad54d1e6b.html#a06a8bc368f2ef5816015b75ad54d1e6b" title="Get estimated power consumption in milliwatts." alt="" coords="543,229,760,269"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="836,182,761,220,728,232,726,227,759,215,834,178"/>
+<area shape="rect" id="Node000003" href="$d3/d1d/group___power_gaf1109b6fa8f504362807f39bc4126306.html#gaf1109b6fa8f504362807f39bc4126306" title="Determines the highest brightness level you can use and still stay under the specified power budget f..." alt="" coords="289,5,481,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="541,47,481,39,482,34,542,42"/>
+<area shape="rect" id="Node000004" href="$dd/dbb/class_c_fast_l_e_d_a660c4ce3348e4463932f350be99215bf.html#a660c4ce3348e4463932f350be99215bf" title="Set the maximum power to be used, given in milliwatts." alt="" coords="276,69,495,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="542,73,495,79,495,74,541,68"/>
+<area shape="rect" id="Node000005" href="$dd/dbb/class_c_fast_l_e_d_a1f82b444605e69e415de4bef8775bd37.html#a1f82b444605e69e415de4bef8775bd37" title="Set the maximum power to be used, given in volts and milliamps." alt="" coords="5,69,228,109"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="262,92,228,92,228,87,262,87"/>
+</map>

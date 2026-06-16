@@ -127,24 +127,25 @@ template&lt;&gt; </div>
 <div class="line"><span class="lineno">  178</span> </div>
 <div class="line"><span class="lineno">  179</span>    <span class="keyword">const</span> <span class="keywordtype">char</span> *pinport = <a class="code hl_function" href="../../dc/da2/_pintest_8h_a7089184423e1bbf435e40abb052bbf46.html#a7089184423e1bbf435e40abb052bbf46">GetPinPort</a>((<span class="keywordtype">void</span>*)systemThinksPortIs);</div>
 <div class="line"><span class="lineno">  180</span>    <span class="keywordflow">if</span> (pinport) {</div>
-<div class="line"><span class="lineno">  181</span>        Serial.print(<span class="stringliteral">&quot;__FL_DEFPIN(&quot;</span>); Serial.print(0);</div>
-<div class="line"><span class="lineno">  182</span>        Serial.print(<span class="stringliteral">&quot;,&quot;</span>); Serial.print(maskBit);</div>
-<div class="line"><span class="lineno">  183</span>        Serial.print(<span class="stringliteral">&quot;,&quot;</span>); Serial.print(pinport);</div>
-<div class="line"><span class="lineno">  184</span>        Serial.print(<span class="stringliteral">&quot;); &quot;</span>);</div>
+<div class="line"><span class="lineno">  181</span>        <a class="code hl_define" href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a>.print(<span class="stringliteral">&quot;__FL_DEFPIN(&quot;</span>); <a class="code hl_define" href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a>.print(0);</div>
+<div class="line"><span class="lineno">  182</span>        <a class="code hl_define" href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a>.print(<span class="stringliteral">&quot;,&quot;</span>); <a class="code hl_define" href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a>.print(maskBit);</div>
+<div class="line"><span class="lineno">  183</span>        <a class="code hl_define" href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a>.print(<span class="stringliteral">&quot;,&quot;</span>); <a class="code hl_define" href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a>.print(pinport);</div>
+<div class="line"><span class="lineno">  184</span>        <a class="code hl_define" href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a>.print(<span class="stringliteral">&quot;); &quot;</span>);</div>
 <div class="line"><span class="lineno">  185</span>        <a class="code hl_variable" href="../../dc/da2/_pintest_8h_ad0c8d436d25f550045e34ad1aef258e1.html#ad0c8d436d25f550045e34ad1aef258e1">pcount</a>++;</div>
-<div class="line"><span class="lineno">  186</span>        <span class="keywordflow">if</span>(<a class="code hl_variable" href="../../dc/da2/_pintest_8h_ad0c8d436d25f550045e34ad1aef258e1.html#ad0c8d436d25f550045e34ad1aef258e1">pcount</a> == 4) { <a class="code hl_variable" href="../../dc/da2/_pintest_8h_ad0c8d436d25f550045e34ad1aef258e1.html#ad0c8d436d25f550045e34ad1aef258e1">pcount</a> = 0; Serial.println(<span class="stringliteral">&quot;&quot;</span>); }</div>
+<div class="line"><span class="lineno">  186</span>        <span class="keywordflow">if</span>(<a class="code hl_variable" href="../../dc/da2/_pintest_8h_ad0c8d436d25f550045e34ad1aef258e1.html#ad0c8d436d25f550045e34ad1aef258e1">pcount</a> == 4) { <a class="code hl_variable" href="../../dc/da2/_pintest_8h_ad0c8d436d25f550045e34ad1aef258e1.html#ad0c8d436d25f550045e34ad1aef258e1">pcount</a> = 0; <a class="code hl_define" href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a>.println(<span class="stringliteral">&quot;&quot;</span>); }</div>
 <div class="line"><span class="lineno">  187</span>    }</div>
 <div class="line"><span class="lineno">  188</span>}</div>
 <div class="ttc" id="a_pintest_8h_a7089184423e1bbf435e40abb052bbf46_html_a7089184423e1bbf435e40abb052bbf46"><div class="ttname"><a href="../../dc/da2/_pintest_8h_a7089184423e1bbf435e40abb052bbf46.html#a7089184423e1bbf435e40abb052bbf46">GetPinPort</a></div><div class="ttdeci">const char * GetPinPort(void *ptr)</div><div class="ttdef"><b>Definition</b> <a href="../../dc/da2/_pintest_8h_source.html#l00143">Pintest.h:143</a></div></div>
 <div class="ttc" id="a_pintest_8h_ad0c8d436d25f550045e34ad1aef258e1_html_ad0c8d436d25f550045e34ad1aef258e1"><div class="ttname"><a href="../../dc/da2/_pintest_8h_ad0c8d436d25f550045e34ad1aef258e1.html#ad0c8d436d25f550045e34ad1aef258e1">pcount</a></div><div class="ttdeci">static uint8_t pcount</div><div class="ttdef"><b>Definition</b> <a href="../../dc/da2/_pintest_8h_source.html#l00147">Pintest.h:147</a></div></div>
+<div class="ttc" id="asystem_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3_html_ab1a8531ded8c3d5bee8e36aebec7a8f3"><div class="ttname"><a href="../../de/d8b/system_2serial_8h_ab1a8531ded8c3d5bee8e36aebec7a8f3.html#ab1a8531ded8c3d5bee8e36aebec7a8f3">Serial</a></div><div class="ttdeci">#define Serial</div><div class="ttdef"><b>Definition</b> <a href="../../de/d8b/system_2serial_8h_source.html#l00304">serial.h:304</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../dc/da2/_pintest_8h_source.html#l00143">GetPinPort()</a>, and <a class="el" href="../../dc/da2/_pintest_8h_source.html#l00147">pcount</a>.</p>
+<p class="reference">References <a class="el" href="../../dc/da2/_pintest_8h_source.html#l00143">GetPinPort()</a>, <a class="el" href="../../dc/da2/_pintest_8h_source.html#l00147">pcount</a>, and <a class="el" href="../../de/d8b/system_2serial_8h_source.html#l00304">Serial</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/da2/_pintest_8h_a095bc1ede86fdccb63d047743f7b8780_a095bc1ede86fdccb63d047743f7b8780_cgraph.svg" width="666" height="135"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/da2/_pintest_8h_a095bc1ede86fdccb63d047743f7b8780_a095bc1ede86fdccb63d047743f7b8780_cgraph.svg" width="414" height="60"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 
 </div>
@@ -156,7 +157,7 @@ template&lt;&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_26c6288c6e5cb98dccb832f1aa4eaa4f.html">Pintest</a></li><li class="navelem"><a class="el" href="../../dc/da2/_pintest_8h.html">Pintest.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

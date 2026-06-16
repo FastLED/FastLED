@@ -1,0 +1,11 @@
+<map id="fl::spi::MultiLaneDevice::~MultiLaneDevice" name="fl::spi::MultiLaneDevice::~MultiLaneDevice">
+<area shape="rect" id="Node000001" title="Destructor &#45; releases hardware resources." alt="" coords="5,37,180,77"/>
+<area shape="rect" id="Node000002" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a68cfb14b18d62e7ccce04976e2fae78f.html#a68cfb14b18d62e7ccce04976e2fae78f" title="Shutdown hardware and release resources." alt="" coords="228,45,435,70"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="180,55,214,55,214,60,180,60"/>
+<area shape="rect" id="Node000003" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a66a4df428de2fc83a006ad0544e56b1b.html#a66a4df428de2fc83a006ad0544e56b1b" title="Get access to a specific lane." alt="" coords="483,5,657,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="426,42,469,36,469,41,427,47"/>
+<area shape="rect" id="Node000004" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a44c55402b14a1d2962aaea6d0574b46a.html#a44c55402b14a1d2962aaea6d0574b46a" title="Wait for pending transmission to complete." alt="" coords="483,69,657,109"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="427,67,469,73,469,78,426,73"/>
+<area shape="rect" id="Node000005" href="$d7/d70/classfl_1_1spi_1_1_multi_lane_device_a522448a9b9b59c86768f41c9498dbe5a.html#a522448a9b9b59c86768f41c9498dbe5a" title="Check if device is initialized." alt="" coords="705,69,880,109"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="658,87,692,87,692,92,658,92"/>
+</map>

@@ -1,5 +1,9 @@
 <map id="fl::UINumberFieldImpl::UINumberFieldImpl" name="fl::UINumberFieldImpl::UINumberFieldImpl">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,169,45"/>
-<area shape="rect" id="Node000002" href="$dd/d62/classfl_1_1_u_i_number_field_impl_abe730a5b06b86d01675192998117d56f.html#abe730a5b06b86d01675192998117d56f" title=" " alt="" coords="217,5,381,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="170,23,204,23,204,28,170,28"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,47,169,87"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="266,5,333,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="169,46,252,26,253,31,170,51"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="268,55,331,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="170,65,254,65,254,70,170,70"/>
+<area shape="rect" id="Node000004" href="$dd/d62/classfl_1_1_u_i_number_field_impl_abe730a5b06b86d01675192998117d56f.html#abe730a5b06b86d01675192998117d56f" title=" " alt="" coords="217,105,381,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="163,85,212,98,211,104,161,90"/>
 </map>

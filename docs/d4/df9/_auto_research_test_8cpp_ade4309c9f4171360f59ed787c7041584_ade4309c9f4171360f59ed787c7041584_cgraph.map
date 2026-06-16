@@ -1,0 +1,38 @@
+<map id="capture" name="capture">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,300,76,325"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ae9393b9b146723d5edf654f73b4ca439.html#ae9393b9b146723d5edf654f73b4ca439" title="Check if a chipset timing is eligible for wave3 encoding." alt="" coords="142,100,273,125"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="42,299,49,266,64,222,88,175,104,154,122,135,128,130,131,134,126,139,108,157,93,178,69,224,55,268,47,300"/>
+<area shape="rect" id="Node000003" href="$d0/d08/classfl_1_1span_a326aa9f29859fe8a92833fd5db12c3bb.html#a326aa9f29859fe8a92833fd5db12c3bb" title=" " alt="" coords="154,149,261,175"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="44,299,72,243,94,211,122,184,140,174,143,178,126,188,98,215,76,246,49,301"/>
+<area shape="rect" id="Node000004" href="$d4/df9/_auto_research_test_8cpp_afaa70e9f2bc81a9ee2bb02e9237ff4d9.html#afaa70e9f2bc81a9ee2bb02e9237ff4d9" title=" " alt="" coords="143,199,271,224"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="53,298,83,270,123,241,152,227,154,231,125,246,86,274,56,302"/>
+<area shape="rect" id="Node000009" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="367,252,470,277"/>
+<area shape="poly" id="edge17_Node000001_Node000009" title=" " alt="" coords="76,302,124,293,246,277,354,267,354,272,247,282,124,298,77,307"/>
+<area shape="rect" id="Node000011" href="$d1/d27/classfl_1_1sstream_a08170cac6eba7241f099ae16730f6f8e.html#a08170cac6eba7241f099ae16730f6f8e" title=" " alt="" coords="361,301,477,327"/>
+<area shape="poly" id="edge18_Node000001_Node000011" title=" " alt="" coords="77,310,347,311,347,316,77,315"/>
+<area shape="rect" id="Node000012" href="$d4/df9/_auto_research_test_8cpp_ac7607ef5b12973ed8cd8353da071aef8.html#ac7607ef5b12973ed8cd8353da071aef8" title="Dump raw edge timing data to console for debugging." alt="" coords="125,351,289,376"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="77,321,153,344,151,349,76,326"/>
+<area shape="rect" id="Node000015" href="$d4/d36/namespacefl_a91e1324b8f8b552ee88b79ba67181369.html#a91e1324b8f8b552ee88b79ba67181369" title="Create 4&#45;phase RX timing from 3&#45;phase chipset timing with tolerance." alt="" coords="124,400,291,425"/>
+<area shape="poly" id="edge15_Node000001_Node000015" title=" " alt="" coords="55,324,85,354,125,385,141,393,139,397,123,390,81,358,51,327"/>
+<area shape="rect" id="Node000016" href="$d4/d36/namespacefl_a44a195439ac7fa303b4b0b0c956605be.html#a44a195439ac7fa303b4b0b0c956605be" title=" " alt="" coords="161,449,253,475"/>
+<area shape="poly" id="edge16_Node000001_Node000016" title=" " alt="" coords="49,324,76,379,98,410,126,436,150,448,147,453,122,440,94,413,72,381,44,327"/>
+<area shape="rect" id="Node000017" href="$d4/d36/namespacefl_ae2e1ae9fd84b84af8b23721d551b9609.html#ae2e1ae9fd84b84af8b23721d551b9609" title=" " alt="" coords="166,499,249,524"/>
+<area shape="poly" id="edge19_Node000001_Node000017" title=" " alt="" coords="47,325,55,357,69,401,93,446,108,467,126,485,154,501,152,505,122,489,104,471,88,449,65,403,50,359,42,326"/>
+<area shape="rect" id="Node000005" href="$d2/d24/classfl_1_1vector_a14c21203a1f583636c5ef6fdb9a58d4b.html#a14c21203a1f583636c5ef6fdb9a58d4b" title=" " alt="" coords="361,104,477,129"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="262,196,289,184,303,173,313,162,322,150,337,138,350,132,352,137,340,143,326,154,317,165,307,177,292,188,264,201"/>
+<area shape="rect" id="Node000006" href="$d2/d24/classfl_1_1vector_ae9a8cea8d4b81d8f2f10a2b007ac2980.html#ae9a8cea8d4b81d8f2f10a2b007ac2980" title=" " alt="" coords="341,153,497,179"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="267,196,345,179,346,184,268,201"/>
+<area shape="rect" id="Node000007" href="$d2/d24/classfl_1_1vector_a305fb6473faab9c2798479c057a58d50.html#a305fb6473faab9c2798479c057a58d50" title=" " alt="" coords="351,203,487,228"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="272,210,337,211,336,216,272,215"/>
+<area shape="rect" id="Node000008" href="$d9/dce/_client_validation_real_8h_a02882a6e53c2b3b63eba56831f88f604.html#a02882a6e53c2b3b63eba56831f88f604" title=" " alt="" coords="391,5,447,31"/>
+<area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="270,197,289,184,302,167,309,150,312,114,315,77,322,58,337,40,355,27,376,20,378,25,358,32,340,44,327,61,320,78,317,114,314,151,307,170,292,188,273,201"/>
+<area shape="poly" id="edge8_Node000004_Node000009" title=" " alt="" coords="259,222,355,246,354,251,258,227"/>
+<area shape="rect" id="Node000010" href="$d4/dad/classfl_1_1vector__basic_a9a248c6b3d33d24ef21e4275c4fbae8c.html#a9a248c6b3d33d24ef21e4275c4fbae8c" title=" " alt="" coords="341,55,496,80"/>
+<area shape="poly" id="edge9_Node000004_Node000010" title=" " alt="" coords="268,196,289,184,306,161,312,138,319,113,337,89,344,84,347,89,341,93,323,116,317,139,311,164,292,188,271,201"/>
+<area shape="poly" id="edge10_Node000004_Node000011" title=" " alt="" coords="229,222,278,253,340,286,360,294,358,299,338,291,275,258,226,227"/>
+<area shape="poly" id="edge14_Node000012_Node000011" title=" " alt="" coords="262,348,350,327,351,332,263,353"/>
+<area shape="rect" id="Node000013" href="$d1/d27/classfl_1_1sstream_a2020a3513ae92ed435685030c3127194.html#a2020a3513ae92ed435685030c3127194" title=" " alt="" coords="353,400,484,425"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="263,373,351,394,350,399,262,379"/>
+<area shape="rect" id="Node000014" href="$d3/d73/classfl_1_1_fixed_vector_af86cd6955983355051129798610c8def.html#af86cd6955983355051129798610c8def" title=" " alt="" coords="339,351,499,376"/>
+<area shape="poly" id="edge13_Node000012_Node000014" title=" " alt="" coords="289,361,325,361,325,366,289,366"/>
+</map>

@@ -123,11 +123,22 @@ $(function(){initNavTree('d3/d25/classfl_1_1_digital_pin_impl_a77fc8365e288283da
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../de/d2b/digital__pin_8cpp_source.html#l00078">78</a> of file <a class="el" href="../../de/d2b/digital__pin_8cpp_source.html">digital_pin.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   78</span>{ <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d3/d25/classfl_1_1_digital_pin_impl_a1f1371fe5c44d88810e4f0aa8d004ab1.html#a1f1371fe5c44d88810e4f0aa8d004ab1">mPin</a>.hival(); }</div>
-<div class="ttc" id="aclassfl_1_1_digital_pin_impl_a1f1371fe5c44d88810e4f0aa8d004ab1_html_a1f1371fe5c44d88810e4f0aa8d004ab1"><div class="ttname"><a href="../../d3/d25/classfl_1_1_digital_pin_impl_a1f1371fe5c44d88810e4f0aa8d004ab1.html#a1f1371fe5c44d88810e4f0aa8d004ab1">fl::DigitalPinImpl::mPin</a></div><div class="ttdeci">Pin mPin</div><div class="ttdef"><b>Definition</b> <a href="../../de/d2b/digital__pin_8cpp_source.html#l00081">digital_pin.cpp:81</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../de/d9c/digital__pin_8cpp_8hpp_source.html#l00041">41</a> of file <a class="el" href="../../de/d9c/digital__pin_8cpp_8hpp_source.html">digital_pin.cpp.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   41</span>                {</div>
+<div class="line"><span class="lineno">   42</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="../../d4/d36/namespacefl_aa8c98e0a4c897eb7f4ce639498a78c5a.html#aa8c98e0a4c897eb7f4ce639498a78c5a">fl::digitalRead</a>(<a class="code hl_variable" href="../../d3/d25/classfl_1_1_digital_pin_impl_adb4c7713a48c04f89e1417b78a93e763.html#adb4c7713a48c04f89e1417b78a93e763">mPin</a>) == <a class="code hl_enumvalue" href="../../d4/d36/namespacefl_a4dc4d2d43415a9cb99c9b30b9f8a07d7.html#a4dc4d2d43415a9cb99c9b30b9f8a07d7a655d20c1ca69519ca647684edbb2db35">fl::PinValue::High</a>;</div>
+<div class="line"><span class="lineno">   43</span>    }</div>
+<div class="ttc" id="aclassfl_1_1_digital_pin_impl_adb4c7713a48c04f89e1417b78a93e763_html_adb4c7713a48c04f89e1417b78a93e763"><div class="ttname"><a href="../../d3/d25/classfl_1_1_digital_pin_impl_adb4c7713a48c04f89e1417b78a93e763.html#adb4c7713a48c04f89e1417b78a93e763">fl::DigitalPinImpl::mPin</a></div><div class="ttdeci">int mPin</div><div class="ttdef"><b>Definition</b> <a href="../../de/d9c/digital__pin_8cpp_8hpp_source.html#l00050">digital_pin.cpp.hpp:50</a></div></div>
+<div class="ttc" id="anamespacefl_a4dc4d2d43415a9cb99c9b30b9f8a07d7_html_a4dc4d2d43415a9cb99c9b30b9f8a07d7a655d20c1ca69519ca647684edbb2db35"><div class="ttname"><a href="../../d4/d36/namespacefl_a4dc4d2d43415a9cb99c9b30b9f8a07d7.html#a4dc4d2d43415a9cb99c9b30b9f8a07d7a655d20c1ca69519ca647684edbb2db35">fl::PinValue::High</a></div><div class="ttdeci">@ High</div><div class="ttdoc">Logic high (3.3V / 5V, platform-dependent)</div><div class="ttdef"><b>Definition</b> <a href="../../db/d4e/pin_8h_source.html#l00051">pin.h:51</a></div></div>
+<div class="ttc" id="anamespacefl_aa8c98e0a4c897eb7f4ce639498a78c5a_html_aa8c98e0a4c897eb7f4ce639498a78c5a"><div class="ttname"><a href="../../d4/d36/namespacefl_aa8c98e0a4c897eb7f4ce639498a78c5a.html#aa8c98e0a4c897eb7f4ce639498a78c5a">fl::digitalRead</a></div><div class="ttdeci">PinValue digitalRead(int pin)</div><div class="ttdoc">Read digital value from pin.</div><div class="ttdef"><b>Definition</b> <a href="../../d2/d48/pin_8cpp_8hpp_source.html#l00055">pin.cpp.hpp:55</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../de/d2b/digital__pin_8cpp_source.html#l00081">mPin</a>.</p>
+<p class="reference">References <a class="el" href="../../d2/d48/pin_8cpp_8hpp_source.html#l00055">fl::digitalRead()</a>, <a class="el" href="../../db/d4e/pin_8h_source.html#l00051">fl::High</a>, and <a class="el" href="../../de/d9c/digital__pin_8cpp_8hpp_source.html#l00050">mPin</a>.</p>
+<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d3/d25/classfl_1_1_digital_pin_impl_a77fc8365e288283da7b6ce4b31a89627_a77fc8365e288283da7b6ce4b31a89627_cgraph.svg" width="302" height="51"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
 
 </div>
 </div>
@@ -138,7 +149,7 @@ $(function(){initNavTree('d3/d25/classfl_1_1_digital_pin_impl_a77fc8365e288283da
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d3/d25/classfl_1_1_digital_pin_impl.html">DigitalPinImpl</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:22 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:05 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

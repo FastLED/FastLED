@@ -1,0 +1,39 @@
+<map id="fl::spi::Device::writeAsync" name="fl::spi::Device::writeAsync">
+<area shape="rect" id="Node000001" title="Begin asynchronous write operation (returns immediately)" alt="" coords="5,255,196,281"/>
+<area shape="rect" id="Node000002" href="$d9/d0a/classfl_1_1spi_1_1_device_ac5161d40cbb5453133fc88b9b9935f5a.html#ac5161d40cbb5453133fc88b9b9935f5a" title="Acquire DMA&#45;capable buffer for zero&#45;copy transmission." alt="" coords="257,43,423,83"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,254,157,178,196,132,242,93,252,87,254,91,246,97,200,136,161,181,111,257"/>
+<area shape="rect" id="Node000003" href="$d9/d0a/classfl_1_1spi_1_1_device_a1186e792511c298ed4bbd1c12a180c8c.html#a1186e792511c298ed4bbd1c12a180c8c" title="Check if device is initialized and ready for use." alt="" coords="484,50,655,75"/>
+<area shape="poly" id="edge6_Node000001_Node000003" title=" " alt="" coords="102,254,116,209,142,145,161,111,184,80,211,51,243,28,279,13,317,5,357,3,397,6,470,22,529,42,527,47,469,27,396,11,357,8,318,10,281,18,245,33,215,55,188,83,166,114,147,147,121,210,108,256"/>
+<area shape="rect" id="Node000004" href="$d0/d08/classfl_1_1span_a326aa9f29859fe8a92833fd5db12c3bb.html#a326aa9f29859fe8a92833fd5db12c3bb" title=" " alt="" coords="287,157,393,182"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="121,253,175,222,243,191,273,181,274,186,245,196,178,227,124,258"/>
+<area shape="rect" id="Node000005" href="$d7/d93/classfl_1_1expected_abbee0bb98c9bf0a1391cb3e810ea4fd5.html#abbee0bb98c9bf0a1391cb3e810ea4fd5" title="Create error result." alt="" coords="266,206,414,231"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="162,253,264,232,265,237,163,258"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a3fd92c727664a77396403265415789d3.html#a3fd92c727664a77396403265415789d3" title=" " alt="" coords="277,357,403,382"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="127,278,245,335,285,350,283,355,243,340,125,283"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="303,430,377,455"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="116,279,170,331,245,392,298,422,295,426,243,397,166,335,112,283"/>
+<area shape="rect" id="Node000010" href="$da/d3c/namespacefl_1_1fl_a14315b21314f12a4c40dde841fcc4c8a.html#a14315b21314f12a4c40dde841fcc4c8a" title=" " alt="" coords="524,306,615,331"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="166,278,244,291,388,305,510,313,510,319,387,310,244,296,165,283"/>
+<area shape="rect" id="Node000011" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="289,479,391,505"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="110,280,127,317,156,368,196,421,220,445,245,466,276,480,274,485,243,470,216,449,192,424,152,371,123,320,105,282"/>
+<area shape="rect" id="Node000012" href="$d7/d93/classfl_1_1expected_ae712d6f5942009caa637e9181d47d40b.html#ae712d6f5942009caa637e9181d47d40b" title="Create successful result." alt="" coords="261,255,419,281"/>
+<area shape="poly" id="edge13_Node000001_Node000012" title=" " alt="" coords="196,265,248,265,248,271,196,271"/>
+<area shape="rect" id="Node000015" href="$d9/d0a/classfl_1_1spi_1_1_device_a49982aa325e19f0956d42fde9132caa2.html#a49982aa325e19f0956d42fde9132caa2" title=" " alt="" coords="244,553,436,578"/>
+<area shape="poly" id="edge18_Node000001_Node000015" title=" " alt="" coords="109,280,125,324,154,386,194,454,219,486,246,515,267,532,291,545,288,549,264,536,242,519,215,490,190,457,149,388,121,326,104,282"/>
+<area shape="rect" id="Node000016" href="$d9/d0a/classfl_1_1spi_1_1_device_a4b4903b281bf5fdb3ddb6ec923b53d71.html#a4b4903b281bf5fdb3ddb6ec923b53d71" title="Transmit from previously acquired DMA buffer." alt="" coords="253,107,427,133"/>
+<area shape="poly" id="edge20_Node000001_Node000016" title=" " alt="" coords="111,253,164,199,201,168,243,142,258,135,260,140,245,146,204,172,167,203,115,257"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="424,60,470,60,470,65,424,65"/>
+<area shape="rect" id="Node000006" href="$d7/d93/classfl_1_1expected_a519c280d81d3683cfbfb758ed0198277.html#a519c280d81d3683cfbfb758ed0198277" title="Default constructor (creates error state)" alt="" coords="486,206,653,231"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="414,216,472,216,472,221,414,221"/>
+<area shape="rect" id="Node000008" href="$da/d3c/namespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259.html#a0bddf371925d8c4e94b88e9d7b35d259" title=" " alt="" coords="517,357,621,382"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="403,367,504,367,504,372,403,372"/>
+<area shape="poly" id="edge10_Node000009_Node000009" title=" " alt="" coords="303,432,295,422,299,412,314,406,340,403,372,407,385,417,381,421,370,412,340,409,315,411,302,416,300,421,307,428"/>
+<area shape="poly" id="edge14_Node000012_Node000006" title=" " alt="" coords="399,253,495,232,497,237,400,258"/>
+<area shape="poly" id="edge15_Node000012_Node000010" title=" " alt="" coords="399,278,511,303,510,308,398,283"/>
+<area shape="rect" id="Node000013" href="$d7/d93/classfl_1_1expected_a85abd0dcb2c53b60f4ecb00c7cc31c6e.html#a85abd0dcb2c53b60f4ecb00c7cc31c6e" title="Get value (only valid if ok() == true)" alt="" coords="498,255,641,281"/>
+<area shape="poly" id="edge16_Node000012_Node000013" title=" " alt="" coords="419,265,484,265,484,271,419,271"/>
+<area shape="rect" id="Node000014" href="$d4/d36/namespacefl_ad2bd3fbfa62b8cb135f8c67ce6bfeefe.html#ad2bd3fbfa62b8cb135f8c67ce6bfeefe" title=" " alt="" coords="703,255,761,281"/>
+<area shape="poly" id="edge17_Node000013_Node000014" title=" " alt="" coords="641,265,688,265,688,271,641,271"/>
+<area shape="poly" id="edge19_Node000015_Node000015" title=" " alt="" coords="303,554,295,544,299,534,314,528,340,526,372,530,385,539,381,544,370,535,340,531,315,533,302,538,300,544,307,551"/>
+<area shape="poly" id="edge21_Node000016_Node000003" title=" " alt="" coords="391,105,504,76,505,81,392,110"/>
+</map>

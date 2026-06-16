@@ -1,0 +1,7 @@
+<map id="RGBWEmulatedController::beginShowLeds" name="RGBWEmulatedController::beginShowLeds">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,195,75"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_ab8e1ee460f25af890c1d40479e4c5b09.html#ab8e1ee460f25af890c1d40479e4c5b09" title="How many LEDs does this controller manage?" alt="" coords="245,5,381,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="195,39,231,34,232,39,195,44"/>
+<area shape="rect" id="Node000003" href="$db/d74/struct_rgbw_a10319a45c0582fd4ea504324e3fcf2fe.html#a10319a45c0582fd4ea504324e3fcf2fe" title=" " alt="" coords="243,70,384,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="195,64,229,69,228,74,195,70"/>
+</map>

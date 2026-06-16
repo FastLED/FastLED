@@ -1,0 +1,13 @@
+<map id="fl::canUseWave3" name="fl::canUseWave3">
+<area shape="rect" id="Node000001" title="Check if a chipset timing is eligible for wave3 encoding." alt="" coords="528,60,659,85"/>
+<area shape="rect" id="Node000002" href="$d4/df9/_auto_research_test_8cpp_ade4309c9f4171360f59ed787c7041584.html#ade4309c9f4171360f59ed787c7041584" title=" " alt="" coords="409,60,480,85"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="514,75,480,75,480,70,514,70"/>
+<area shape="rect" id="Node000003" href="$d4/df9/_auto_research_test_8cpp_aac567188ee44c45d15b20231ecff68c9.html#aac567188ee44c45d15b20231ecff68c9" title=" " alt="" coords="259,35,361,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="395,66,361,60,362,54,396,61"/>
+<area shape="rect" id="Node000012" href="$d4/df9/_auto_research_test_8cpp_ab5d3883aa989a0c1298af1a8a0d2851a.html#ab5d3883aa989a0c1298af1a8a0d2851a" title=" " alt="" coords="275,84,345,109"/>
+<area shape="poly" id="edge5_Node000002_Node000012" title=" " alt="" coords="396,84,346,93,345,88,395,79"/>
+<area shape="rect" id="Node000004" href="$d4/df9/_auto_research_test_8cpp_a4c76939743f62fdeea55c4ec8a3e2a31.html#a4c76939743f62fdeea55c4ec8a3e2a31" title=" " alt="" coords="5,5,211,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="245,41,195,33,196,28,245,35"/>
+<area shape="rect" id="Node000011" href="$d4/df9/_auto_research_test_8cpp_a5acfa3d36f5c1ff77be18eecaedf19b3.html#a5acfa3d36f5c1ff77be18eecaedf19b3" title=" " alt="" coords="5,55,211,95"/>
+<area shape="poly" id="edge4_Node000003_Node000011" title=" " alt="" coords="245,59,211,64,211,58,245,54"/>
+</map>

@@ -20,7 +20,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d6/d1a/examples_2_downscale_2downscale_8h_a7c16ec41fbd080f3cff7bb7e0219e3f3.html#a7c16ec41fbd080f3cff7bb7e0219e3f3" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d6/d1a/examples_2_downscale_2downscale_8h_aa531fd05d582e6b76fd6d0c1f25281f3.html#aa531fd05d582e6b76fd6d0c1f25281f3" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="241.5,-204 152.5,-204 152.5,-185 241.5,-185 241.5,-204"/>
 <text text-anchor="middle" x="197" y="-192" font-family="Helvetica,sans-Serif" font-size="10.00">maxAnimation</text>
 </a>
@@ -38,7 +38,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d6/d1a/examples_2_downscale_2downscale_8h_ad64ba1c6fc79ef2dee26cd34dc88359f.html#ad64ba1c6fc79ef2dee26cd34dc88359f" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d6/d1a/examples_2_downscale_2downscale_8h_a8b3694c2bb403850550e64898599c971.html#a8b3694c2bb403850550e64898599c971" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="241,-167 153,-167 153,-148 241,-148 241,-167"/>
 <text text-anchor="middle" x="197" y="-155" font-family="Helvetica,sans-Serif" font-size="10.00">shapeProgress</text>
 </a>
@@ -56,7 +56,7 @@
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../d8/d78/examples_2_wave_2wave_8h_a158d39a9e3154e76a27c891bfc9ecd29.html#a158d39a9e3154e76a27c891bfc9ecd29" target="_top" xlink:title=" ">
+<g id="a_Node000004"><a xlink:href="../../d8/d78/examples_2_wave_2wave_8h_a39b55aa940034f3984cb60571091f474.html#a39b55aa940034f3984cb60571091f474" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="219,-130 175,-130 175,-111 219,-111 219,-130"/>
 <text text-anchor="middle" x="197" y="-118" font-family="Helvetica,sans-Serif" font-size="10.00">slider</text>
 </a>
@@ -74,7 +74,7 @@
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d6/d1a/examples_2_downscale_2downscale_8h_a2c9aba64a2fdccfb6cd433b2480a0bd7.html#a2c9aba64a2fdccfb6cd433b2480a0bd7" target="_top" xlink:title=" ">
+<g id="a_Node000005"><a xlink:href="../../d6/d1a/examples_2_downscale_2downscale_8h_a8175971bc2a8d12a2964972a533063e5.html#a8175971bc2a8d12a2964972a533063e5" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="221.5,-93 172.5,-93 172.5,-74 221.5,-74 221.5,-93"/>
 <text text-anchor="middle" x="197" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">trigger</text>
 </a>
@@ -92,7 +92,7 @@
 <!-- Node6 -->
 <g id="Node000006" class="node">
 <title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d6/d1a/examples_2_downscale_2downscale_8h_ae6b1e320a8edd01c20e07d51b586724a.html#ae6b1e320a8edd01c20e07d51b586724a" target="_top" xlink:title=" ">
+<g id="a_Node000006"><a xlink:href="../../d6/d1a/examples_2_downscale_2downscale_8h_a2cf473872385cda065e57eb8a52af4ba.html#a2cf473872385cda065e57eb8a52af4ba" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="233.5,-56 160.5,-56 160.5,-37 233.5,-37 233.5,-56"/>
 <text text-anchor="middle" x="197" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">useWaveFx</text>
 </a>
@@ -110,7 +110,7 @@
 <!-- Node7 -->
 <g id="Node000007" class="node">
 <title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../d7/dfe/classfl_1_1_u_i_checkbox_a999a2bc4a7105a7b8975aee0a48302c3.html#a999a2bc4a7105a7b8975aee0a48302c3" target="_top" xlink:title=" ">
+<g id="a_Node000007"><a xlink:href="../../d7/dfe/classfl_1_1_u_i_checkbox_abcb7568e4461b38f7dcebd49840cfe75.html#abcb7568e4461b38f7dcebd49840cfe75" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="257,-19 137,-19 137,0 257,0 257,-19"/>
 <text text-anchor="middle" x="197" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::UICheckbox::value</text>
 </a>

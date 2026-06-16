@@ -1,0 +1,9 @@
+<map id="fl::blur1d" name="fl::blur1d">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,84,31"/>
+<area shape="rect" id="Node000002" href="$d5/d3d/group___color_blurs_ga49f52d9c240dbe519dcdeb778269b8d7.html#ga49f52d9c240dbe519dcdeb778269b8d7" title="One&#45;dimensional blur filter (span version)." alt="" coords="132,5,240,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="84,15,118,15,118,21,84,21"/>
+<area shape="rect" id="Node000003" href="$da/dd6/structfl_1_1_c_r_g_b_aa272170bea8120f101f27ebd2c323b55.html#aa272170bea8120f101f27ebd2c323b55" title="Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules." alt="" coords="288,5,421,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="240,15,274,15,274,21,240,21"/>
+<area shape="rect" id="Node000004" href="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" title="Default constructor." alt="" coords="469,5,589,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="422,15,455,15,455,21,422,21"/>
+</map>

@@ -1,0 +1,16 @@
+<map id="fl::audio::detector::EnergyAnalyzer::update" name="fl::audio::detector::EnergyAnalyzer::update">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,137,191,177"/>
+<area shape="poly" id="edge5_Node000001_Node000001" title=" " alt="" coords="50,138,47,128,54,118,72,113,98,111,128,114,145,121,143,126,127,119,98,116,73,118,57,123,52,129,55,136"/>
+<area shape="rect" id="Node000002" href="$d2/db4/classfl_1_1audio_1_1detector_1_1_energy_analyzer_a71cb5a732054c78dab4c675385d1d4b3.html#a71cb5a732054c78dab4c675385d1d4b3" title=" " alt="" coords="239,5,481,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="120,135,172,95,237,55,255,47,257,52,240,60,175,99,123,139"/>
+<area shape="rect" id="Node000003" href="$db/dbf/namespacefl_1_1audio_a7189558c538537464f1d31c91596631d.html#a7189558c538537464f1d31c91596631d" title="Compute the time delta (in seconds) for an audio buffer." alt="" coords="265,70,455,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="148,135,238,104,272,96,273,101,239,109,150,140"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="327,119,393,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="191,146,313,134,313,139,191,151"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="329,169,391,194"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="191,163,315,175,315,180,191,168"/>
+<area shape="rect" id="Node000006" href="$d2/db4/classfl_1_1audio_1_1detector_1_1_energy_analyzer_a8829ccaa206f48846e1bf20c92d3f499.html#a8829ccaa206f48846e1bf20c92d3f499" title=" " alt="" coords="241,219,479,259"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="156,175,239,203,271,212,270,217,238,208,154,180"/>
+<area shape="rect" id="Node000007" href="$d2/db4/classfl_1_1audio_1_1detector_1_1_energy_analyzer_ab57af951e33b948ccf54bcc98d2f2a57.html#ab57af951e33b948ccf54bcc98d2f2a57" title=" " alt="" coords="251,283,469,323"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="120,176,172,222,205,247,240,268,255,275,253,280,237,273,202,252,168,227,117,180"/>
+</map>

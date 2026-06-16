@@ -1,0 +1,26 @@
+<map id="fl::FlowFieldFloat" name="fl::FlowFieldFloat">
+<area shape="rect" id="Node000001" title="Float&#45;precision flow field implementation." alt="" coords="293,493,427,519"/>
+<area shape="rect" id="Node000002" href="$d4/d1c/classfl_1_1_flow_field.html" title="Abstract base class for 2D flow field effects." alt="" coords="310,383,410,409"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="363,422,363,493,357,493,357,422"/>
+<area shape="rect" id="Node000003" href="$d7/d3e/classfl_1_1_fx2d.html" title=" " alt="" coords="582,242,653,267"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="609,281,585,319,569,338,549,354,517,369,488,373,459,374,423,379,397,386,396,381,422,373,459,368,488,368,515,364,547,350,565,335,581,316,604,279"/>
+<area shape="rect" id="Node000004" href="$da/d5d/classfl_1_1_fx.html" title=" " alt="" coords="683,93,738,119"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="706,133,688,173,659,213,631,243,627,240,655,210,683,171,701,130"/>
+<area shape="rect" id="Node000005" href="$d0/dce/classfl_1_1_x_y_map.html" title=" " alt="" coords="576,93,659,119"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="620,133,620,242,615,242,615,133"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl.html#df/dac/structfl_1_1_flow_field_params" title="Configuration parameters for FlowField." alt="" coords="127,242,275,267"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="221,277,252,313,291,350,339,381,336,385,288,354,248,316,217,280"/>
+<area shape="rect" id="Node000007" href="$d3/ddd/classfl_1_1_noise_bias2_d.html" title="Two&#45;axis attack/decay bias for 2D effects (per&#45;column X + per&#45;row Y)." alt="" coords="299,242,421,267"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="363,281,363,383,357,383,357,281"/>
+<area shape="rect" id="Node000008" href="$db/dd7/classfl_1_1_noise_bias1_d.html" title="Per&#45;position attack/decay bias for one axis." alt="" coords="221,93,342,119"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="296,130,356,241,352,243,292,132"/>
+<area shape="rect" id="Node000014" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="5,5,144,31"/>
+<area shape="poly" id="edge11_Node000001_Node000014" title=" " alt="" coords="68,44,60,73,56,105,56,397,62,414,80,430,107,444,140,457,218,478,294,492,293,498,217,483,139,462,104,449,77,434,58,417,51,398,51,105,55,72,63,43"/>
+<area shape="poly" id="edge8_Node000008_Node000014" title=" " alt="" coords="116,34,254,91,252,96,114,38"/>
+<area shape="rect" id="Node000015" href="$d4/d3d/classfl_1_1_time_warp.html" title=" " alt="" coords="445,242,549,267"/>
+<area shape="poly" id="edge9_Node000002_Node000015" title=" " alt="" coords="492,282,476,318,450,354,425,373,397,386,395,381,422,368,446,350,471,315,487,279"/>
+<area shape="rect" id="Node000016" href="$d8/db5/classfl_1_1_time_function.html" title=" " alt="" coords="425,93,551,119"/>
+<area shape="poly" id="edge10_Node000015_Node000016" title=" " alt="" coords="492,132,499,242,494,242,487,133"/>
+<area shape="rect" id="Node000017" href="$d3/d6b/classfl_1_1_flow_field_float_1_1_perlin2_d.html" title=" " alt="" coords="435,376,568,416"/>
+<area shape="poly" id="edge12_Node000001_Node000017" title=" " alt="" coords="467,426,377,495,374,491,464,422"/>
+</map>

@@ -1,0 +1,32 @@
+digraph "fl::floor"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::floor",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::SpectralVariance\l::SpectralVariance",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d9a/classfl_1_1_spectral_variance_aab4b30b2be5581bc53207470bd7712e1.html#aab4b30b2be5581bc53207470bd7712e1",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::detail::SpectralVariance\lImpl::SpectralVarianceImpl",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d7e/classfl_1_1detail_1_1_spectral_variance_impl_ad9a56a290f3a6565057bab6af1a62a65.html#ad9a56a290f3a6565057bab6af1a62a65",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="kf_factor",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d8f/kiss__fft_8cpp_8hpp_acc60de358f03c4acbef269dced5872a0.html#acc60de358f03c4acbef269dced5872a0",tooltip=" "];
+  Node4 -> Node5 [id="edge4_Node000004_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="kiss_fft_alloc",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d8f/kiss__fft_8cpp_8hpp_aa3a3753f06cf36fa0e2c28751799ce55.html#aa3a3753f06cf36fa0e2c28751799ce55",tooltip=" "];
+  Node5 -> Node6 [id="edge5_Node000005_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="kiss_fftr_alloc",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$da/dad/kiss__fftr_8cpp_8hpp_a7762a2bef4c3ff3b94cc7f5229a076fc.html#a7762a2bef4c3ff3b94cc7f5229a076fc",tooltip=" "];
+  Node1 -> Node12 [id="edge6_Node000001_Node000012",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node12 [id="Node000012",label="fl::detail::SpectralVariance\lImpl::setFloor",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d7e/classfl_1_1detail_1_1_spectral_variance_impl_aeb524fd8c28444fd66714a90e69f6b0e.html#aeb524fd8c28444fd66714a90e69f6b0e",tooltip="Change the floor threshold for active channel detection."];
+  Node1 -> Node13 [id="edge7_Node000001_Node000013",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node13 [id="Node000013",label="fl::SpectralVariance\l::setFloor",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d9a/classfl_1_1_spectral_variance_a72e39dacdd5be0bf531b7204a8254523.html#a72e39dacdd5be0bf531b7204a8254523",tooltip=" "];
+  Node1 -> Node14 [id="edge8_Node000001_Node000014",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node14 [id="Node000014",label="fl::traverseGridSegmentFloat",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a0585edea80d3b23fb7fcd54b95a09bbc.html#a0585edea80d3b23fb7fcd54b95a09bbc",tooltip="Traverse a grid segment using floating point arithmetic."];
+  Node1 -> Node15 [id="edge9_Node000001_Node000015",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node15 [id="Node000015",label="Painter::VegasVisualizer",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d45/struct_painter_ab6318a63a778550cd78f3eae183cb8dc.html#ab6318a63a778550cd78f3eae183cb8dc",tooltip=" "];
+  Node15 -> Node16 [id="edge10_Node000015_Node000016",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node16 [id="Node000016",label="Painter::Paint",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/d45/struct_painter_a99ab92bb8d2baae96c7b4b4aacda4de3.html#a99ab92bb8d2baae96c7b4b4aacda4de3",tooltip=" "];
+  Node16 -> Node17 [id="edge11_Node000016_Node000017",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node17 [id="Node000017",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/de5/_luminescent_grand_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+}

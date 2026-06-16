@@ -1,0 +1,12 @@
+<map id="fl::spi::DeviceImplBase" name="fl::spi::DeviceImplBase">
+<area shape="rect" id="Node000001" title="Common functionality for device implementation (pImpl pattern)" alt="" coords="25,387,196,412"/>
+<area shape="rect" id="Node000002" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="5,299,216,324"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,338,113,386,108,386,108,338"/>
+<area shape="rect" id="Node000003" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="11,123,210,148"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="109,162,106,197,105,236,112,298,106,299,100,236,101,197,104,161"/>
+<area shape="rect" id="Node000006" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="215,211,361,236"/>
+<area shape="poly" id="edge5_Node000006_Node000003" title=" " alt="" coords="148,152,265,208,263,213,145,156"/>
+<area shape="rect" id="Node000004" href="$da/d98/classfl_1_1_atomic_fake.html" title=" " alt="" coords="43,5,179,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="113,59,113,122,108,122,108,59"/>
+<area shape="poly" id="edge4_Node000002_Node000006" title=" " alt="" coords="253,244,136,301,134,296,251,240"/>
+</map>

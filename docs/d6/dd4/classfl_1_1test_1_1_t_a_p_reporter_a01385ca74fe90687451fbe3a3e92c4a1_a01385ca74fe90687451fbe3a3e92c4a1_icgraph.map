@@ -1,0 +1,9 @@
+<map id="fl::test::TAPReporter::output" name="fl::test::TAPReporter::output">
+<area shape="rect" id="Node000001" title=" " alt="" coords="204,69,355,109"/>
+<area shape="rect" id="Node000002" href="$d6/dd4/classfl_1_1test_1_1_t_a_p_reporter_a79254a9df776394356c6c61d5d6d3bc9.html#a79254a9df776394356c6c61d5d6d3bc9" title="Called when a test case ends." alt="" coords="5,5,156,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="203,68,142,48,144,43,204,63"/>
+<area shape="rect" id="Node000003" href="$d6/dd4/classfl_1_1test_1_1_t_a_p_reporter_a3b7a31b92c612401dd52524b405e7322.html#a3b7a31b92c612401dd52524b405e7322" title=" " alt="" coords="5,69,156,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="191,92,156,92,156,87,191,87"/>
+<area shape="rect" id="Node000004" href="$d6/dd4/classfl_1_1test_1_1_t_a_p_reporter_ad918e7b72326f9a7dbcb5e0c7ab8d1ee.html#ad918e7b72326f9a7dbcb5e0c7ab8d1ee" title=" " alt="" coords="5,133,156,173"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="204,116,144,136,142,131,203,111"/>
+</map>

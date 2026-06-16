@@ -1,0 +1,13 @@
+<map id="fl::detail::wave3_convert_byte_to_wave3byte" name="fl::detail::wave3_convert_byte_to_wave3byte">
+<area shape="rect" id="Node000001" title="Helper: Convert byte to Wave3Byte using nibble LUT (internal use only)" alt="" coords="223,97,405,137"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_ab4a17f9331a91796b5d8645f9e5983ae.html#ab4a17f9331a91796b5d8645f9e5983ae" title="Convert byte to 3 wave3 bytes using nibble LUT." alt="" coords="49,5,131,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="267,92,223,67,174,44,130,30,132,25,176,40,225,63,270,87"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_afce0e81eba51e7f8494c32187ff61b07.html#afce0e81eba51e7f8494c32187ff61b07" title=" " alt="" coords="5,55,175,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="209,96,148,83,149,77,210,91"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_ac165e2a9f302cbcd514a023af593466e.html#ac165e2a9f302cbcd514a023af593466e" title=" " alt="" coords="9,104,171,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="209,119,171,119,171,114,209,114"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a544b74f36e1ed292d610cb88faf2cc64.html#a544b74f36e1ed292d610cb88faf2cc64" title=" " alt="" coords="9,153,171,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="210,142,149,156,148,151,209,137"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_ac4d4def367c8e9efc65e0b5995e7041f.html#ac4d4def367c8e9efc65e0b5995e7041f" title=" " alt="" coords="9,203,171,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="268,146,176,192,140,205,138,200,174,188,266,141"/>
+</map>

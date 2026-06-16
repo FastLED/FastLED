@@ -86,10 +86,10 @@ var sectionId = 'dynsection-0';
 </a>
 </g>
 </g>
-<!-- Node5 -->
-<g id="Node000005" class="node">
-<title>Node5</title>
-<g id="a_Node000005"><a xlink:href="../../d0/d7c/midi___message_8h.html" target="_top" xlink:title="MIDI Library for the Arduino &#45; Message struct definition.">
+<!-- Node6 -->
+<g id="Node000006" class="node">
+<title>Node6</title>
+<g id="a_Node000006"><a xlink:href="../../d0/d7c/midi___message_8h.html" target="_top" xlink:title="MIDI Library for the Arduino &#45; Message struct definition.">
 <polygon fill="white" stroke="#666666" points="203,-195 0,-195 0,-154 203,-154 203,-195"/>
 <text text-anchor="start" x="8" y="-183" font-family="Helvetica,sans-Serif" font-size="10.00">/home/runner/work/FastLED</text>
 <text text-anchor="start" x="8" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">/FastLED/examples/LuminescentGrand</text>
@@ -97,19 +97,19 @@ var sectionId = 'dynsection-0';
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node5 -->
-<g id="edge10_Node000001_Node000005" class="edge">
-<title>Node1&#45;&gt;Node5</title>
-<g id="a_edge10_Node000001_Node000005"><a xlink:title=" ">
+<!-- Node1&#45;&gt;Node6 -->
+<g id="edge11_Node000001_Node000006" class="edge">
+<title>Node1&#45;&gt;Node6</title>
+<g id="a_edge11_Node000001_Node000006"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M239.03,-303.63C221.33,-294.97 202.35,-284.25 186.5,-272 157.53,-249.61 130.79,-216.3 115.32,-195.26"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="237.61,-306.83 248.14,-307.97 240.62,-300.51 237.61,-306.83"/>
 </a>
 </g>
 </g>
-<!-- Node8 -->
-<g id="Node000008" class="node">
-<title>Node8</title>
-<g id="a_Node000008"><a xlink:href="../../db/dff/serial_m_i_d_i_8h.html" target="_top" xlink:title="MIDI Library for the Arduino &#45; Platform @license MIT &#45; Copyright (c) 2015 Francois Best.">
+<!-- Node9 -->
+<g id="Node000009" class="node">
+<title>Node9</title>
+<g id="a_Node000009"><a xlink:href="../../db/dff/serial_m_i_d_i_8h.html" target="_top" xlink:title="MIDI Library for the Arduino &#45; Platform @license MIT &#45; Copyright (c) 2015 Francois Best.">
 <polygon fill="white" stroke="#666666" points="749,-272 546,-272 546,-231 749,-231 749,-272"/>
 <text text-anchor="start" x="554" y="-260" font-family="Helvetica,sans-Serif" font-size="10.00">/home/runner/work/FastLED</text>
 <text text-anchor="start" x="554" y="-249" font-family="Helvetica,sans-Serif" font-size="10.00">/FastLED/examples/LuminescentGrand</text>
@@ -117,10 +117,10 @@ var sectionId = 'dynsection-0';
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node8 -->
-<g id="edge11_Node000001_Node000008" class="edge">
-<title>Node1&#45;&gt;Node8</title>
-<g id="a_edge11_Node000001_Node000008"><a xlink:title=" ">
+<!-- Node1&#45;&gt;Node9 -->
+<g id="edge12_Node000001_Node000009" class="edge">
+<title>Node1&#45;&gt;Node9</title>
+<g id="a_edge12_Node000001_Node000009"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M397.66,-305.88C447.63,-295.21 507.46,-282.42 556.04,-272.04"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="396.85,-302.48 387.8,-307.99 398.32,-309.32 396.85,-302.48"/>
 </a>
@@ -146,19 +146,19 @@ var sectionId = 'dynsection-0';
 </a>
 </g>
 </g>
-<!-- Node2&#45;&gt;Node5 -->
-<g id="edge4_Node000002_Node000005" class="edge">
-<title>Node2&#45;&gt;Node5</title>
-<g id="a_edge4_Node000002_Node000005"><a xlink:title=" ">
+<!-- Node2&#45;&gt;Node6 -->
+<g id="edge5_Node000002_Node000006" class="edge">
+<title>Node2&#45;&gt;Node6</title>
+<g id="a_edge5_Node000002_Node000006"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M236.1,-227.27C209.23,-216.94 177.95,-204.9 152.31,-195.04"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="235.19,-230.67 245.78,-230.99 237.7,-224.13 235.19,-230.67"/>
 </a>
 </g>
 </g>
-<!-- Node6 -->
-<g id="Node000006" class="node">
-<title>Node6</title>
-<g id="a_Node000006"><a xlink:href="../../d0/dc7/midi___platform_8h.html" target="_top" xlink:title="MIDI Library for the Arduino &#45; Platform @license MIT &#45; Copyright (c) 2015 Francois Best.">
+<!-- Node7 -->
+<g id="Node000007" class="node">
+<title>Node7</title>
+<g id="a_Node000007"><a xlink:href="../../d0/dc7/midi___platform_8h.html" target="_top" xlink:title="MIDI Library for the Arduino &#45; Platform @license MIT &#45; Copyright (c) 2015 Francois Best.">
 <polygon fill="white" stroke="#666666" points="463,-195 260,-195 260,-154 463,-154 463,-195"/>
 <text text-anchor="start" x="268" y="-183" font-family="Helvetica,sans-Serif" font-size="10.00">/home/runner/work/FastLED</text>
 <text text-anchor="start" x="268" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">/FastLED/examples/LuminescentGrand</text>
@@ -166,19 +166,19 @@ var sectionId = 'dynsection-0';
 </a>
 </g>
 </g>
-<!-- Node2&#45;&gt;Node6 -->
-<g id="edge6_Node000002_Node000006" class="edge">
-<title>Node2&#45;&gt;Node6</title>
-<g id="a_edge6_Node000002_Node000006"><a xlink:title=" ">
+<!-- Node2&#45;&gt;Node7 -->
+<g id="edge7_Node000002_Node000007" class="edge">
+<title>Node2&#45;&gt;Node7</title>
+<g id="a_edge7_Node000002_Node000007"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M320.13,-223.23C328.21,-213.91 337.09,-203.67 344.54,-195.07"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="317.48,-220.95 313.58,-230.79 322.77,-225.53 317.48,-220.95"/>
 </a>
 </g>
 </g>
-<!-- Node7 -->
-<g id="Node000007" class="node">
-<title>Node7</title>
-<g id="a_Node000007"><a xlink:href="../../df/d80/midi___settings_8h.html" target="_top" xlink:title="MIDI Library for the Arduino &#45; Settings.">
+<!-- Node8 -->
+<g id="Node000008" class="node">
+<title>Node8</title>
+<g id="a_Node000008"><a xlink:href="../../df/d80/midi___settings_8h.html" target="_top" xlink:title="MIDI Library for the Arduino &#45; Settings.">
 <polygon fill="white" stroke="#666666" points="684,-195 481,-195 481,-154 684,-154 684,-195"/>
 <text text-anchor="start" x="489" y="-183" font-family="Helvetica,sans-Serif" font-size="10.00">/home/runner/work/FastLED</text>
 <text text-anchor="start" x="489" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">/FastLED/examples/LuminescentGrand</text>
@@ -186,10 +186,10 @@ var sectionId = 'dynsection-0';
 </a>
 </g>
 </g>
-<!-- Node2&#45;&gt;Node7 -->
-<g id="edge8_Node000002_Node000007" class="edge">
-<title>Node2&#45;&gt;Node7</title>
-<g id="a_edge8_Node000002_Node000007"><a xlink:title=" ">
+<!-- Node2&#45;&gt;Node8 -->
+<g id="edge9_Node000002_Node000008" class="edge">
+<title>Node2&#45;&gt;Node8</title>
+<g id="a_edge9_Node000002_Node000008"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M380.71,-228.42C421.06,-217.84 468.97,-205.27 507.98,-195.04"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="379.68,-225.07 370.9,-230.99 381.46,-231.84 379.68,-225.07"/>
 </a>
@@ -198,11 +198,11 @@ var sectionId = 'dynsection-0';
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="../../dc/d60/_m_i_d_i_8cpp.html" target="_top" xlink:title="MIDI Library for the Arduino.">
-<polygon fill="white" stroke="#666666" points="463,-41 260,-41 260,0 463,0 463,-41"/>
-<text text-anchor="start" x="268" y="-29" font-family="Helvetica,sans-Serif" font-size="10.00">/home/runner/work/FastLED</text>
-<text text-anchor="start" x="268" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">/FastLED/examples/LuminescentGrand</text>
-<text text-anchor="middle" x="361.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">/arduino/MIDI.cpp</text>
+<g id="a_Node000004"><a xlink:href="../../d8/de5/_luminescent_grand_8ino.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="353,-41 150,-41 150,0 353,0 353,-41"/>
+<text text-anchor="start" x="158" y="-29" font-family="Helvetica,sans-Serif" font-size="10.00">/home/runner/work/FastLED</text>
+<text text-anchor="start" x="158" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">/FastLED/examples/LuminescentGrand</text>
+<text text-anchor="middle" x="251.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">/LuminescentGrand.ino</text>
 </a>
 </g>
 </g>
@@ -210,42 +210,62 @@ var sectionId = 'dynsection-0';
 <g id="edge3_Node000003_Node000004" class="edge">
 <title>Node3&#45;&gt;Node4</title>
 <g id="a_edge3_Node000003_Node000004"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M361.5,-66.69C361.5,-58.08 361.5,-48.9 361.5,-41.07"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="358,-66.79 361.5,-76.79 365,-66.79 358,-66.79"/>
+<path fill="none" stroke="#63b8ff" d="M324.24,-71.09C309.9,-61.32 293.78,-50.32 280.35,-41.17"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="322.65,-74.25 332.89,-76.99 326.6,-68.47 322.65,-74.25"/>
 </a>
 </g>
 </g>
-<!-- Node5&#45;&gt;Node3 -->
-<g id="edge5_Node000005_Node000003" class="edge">
-<title>Node5&#45;&gt;Node3</title>
-<g id="a_edge5_Node000005_Node000003"><a xlink:title=" ">
+<!-- Node5 -->
+<g id="Node000005" class="node">
+<title>Node5</title>
+<g id="a_Node000005"><a xlink:href="../../dc/d60/_m_i_d_i_8cpp.html" target="_top" xlink:title="MIDI Library for the Arduino.">
+<polygon fill="white" stroke="#666666" points="574,-41 371,-41 371,0 574,0 574,-41"/>
+<text text-anchor="start" x="379" y="-29" font-family="Helvetica,sans-Serif" font-size="10.00">/home/runner/work/FastLED</text>
+<text text-anchor="start" x="379" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">/FastLED/examples/LuminescentGrand</text>
+<text text-anchor="middle" x="472.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">/arduino/MIDI.cpp</text>
+</a>
+</g>
+</g>
+<!-- Node3&#45;&gt;Node5 -->
+<g id="edge4_Node000003_Node000005" class="edge">
+<title>Node3&#45;&gt;Node5</title>
+<g id="a_edge4_Node000003_Node000005"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M398.69,-71.37C413.26,-61.53 429.71,-50.41 443.38,-41.17"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="396.7,-68.49 390.37,-76.99 400.62,-74.29 396.7,-68.49"/>
+</a>
+</g>
+</g>
+<!-- Node6&#45;&gt;Node3 -->
+<g id="edge6_Node000006_Node000003" class="edge">
+<title>Node6&#45;&gt;Node3</title>
+<g id="a_edge6_Node000006_Node000003"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M178.76,-151.21C215.29,-140.68 258.52,-128.21 293.75,-118.04"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="177.77,-147.86 169.13,-153.99 179.71,-154.58 177.77,-147.86"/>
 </a>
 </g>
 </g>
-<!-- Node6&#45;&gt;Node3 -->
-<g id="edge7_Node000006_Node000003" class="edge">
-<title>Node6&#45;&gt;Node3</title>
-<g id="a_edge7_Node000006_Node000003"><a xlink:title=" ">
+<!-- Node7&#45;&gt;Node3 -->
+<g id="edge8_Node000007_Node000003" class="edge">
+<title>Node7&#45;&gt;Node3</title>
+<g id="a_edge8_Node000007_Node000003"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M361.5,-143.69C361.5,-135.08 361.5,-125.9 361.5,-118.07"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="358,-143.79 361.5,-153.79 365,-143.79 358,-143.79"/>
 </a>
 </g>
 </g>
-<!-- Node7&#45;&gt;Node3 -->
-<g id="edge9_Node000007_Node000003" class="edge">
-<title>Node7&#45;&gt;Node3</title>
-<g id="a_edge9_Node000007_Node000003"><a xlink:title=" ">
+<!-- Node8&#45;&gt;Node3 -->
+<g id="edge10_Node000008_Node000003" class="edge">
+<title>Node8&#45;&gt;Node3</title>
+<g id="a_edge10_Node000008_Node000003"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M515.24,-150.67C484.53,-140.25 448.53,-128.03 419.08,-118.04"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="514.42,-154.09 525.01,-153.99 516.67,-147.46 514.42,-154.09"/>
 </a>
 </g>
 </g>
-<!-- Node8&#45;&gt;Node3 -->
-<g id="edge12_Node000008_Node000003" class="edge">
-<title>Node8&#45;&gt;Node3</title>
-<g id="a_edge12_Node000008_Node000003"><a xlink:title=" ">
+<!-- Node9&#45;&gt;Node3 -->
+<g id="edge13_Node000009_Node000003" class="edge">
+<title>Node9&#45;&gt;Node3</title>
+<g id="a_edge13_Node000009_Node000003"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M675.93,-223.19C693.93,-202.59 710.83,-174.47 693.5,-154 664.38,-119.6 549.81,-106.51 463.35,-101.53"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="673.23,-220.96 669.04,-230.69 678.38,-225.69 673.23,-220.96"/>
 </a>

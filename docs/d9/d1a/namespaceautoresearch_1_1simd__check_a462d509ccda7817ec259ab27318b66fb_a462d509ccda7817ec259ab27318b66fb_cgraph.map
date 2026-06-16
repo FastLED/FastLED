@@ -1,0 +1,8 @@
+<map id="autoresearch::simd_check::benchFloat4" name="autoresearch::simd_check::benchFloat4">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,160,75"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d" title=" " alt="" coords="208,5,303,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="159,36,194,28,195,34,161,41"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a95a89c7ba649b9bd2c9136c0f517d82f.html#a95a89c7ba649b9bd2c9136c0f517d82f" title="Universal microsecond timer &#45; returns microseconds since system startup." alt="" coords="214,79,297,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="161,69,201,77,200,83,159,74"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="227,80,221,70,224,61,236,54,255,52,279,55,289,64,285,68,276,60,255,57,237,59,228,64,226,70,231,77"/>
+</map>

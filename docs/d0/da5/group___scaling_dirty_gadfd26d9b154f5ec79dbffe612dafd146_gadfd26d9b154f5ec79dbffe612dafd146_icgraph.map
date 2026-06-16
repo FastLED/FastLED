@@ -1,9 +1,0 @@
-<map id="nscale8_video_LEAVING_R1_DIRTY" name="nscale8_video_LEAVING_R1_DIRTY">
-<area shape="rect" id="Node000001" title="In place modifying version of scale8_video() that does not clean up the R1 register on AVR." alt="" coords="443,23,621,63"/>
-<area shape="rect" id="Node000002" href="$d0/da8/group___scaling_ga4204edd4a3f8aac7124a10f1f5cfccfe.html#ga4204edd4a3f8aac7124a10f1f5cfccfe" title="Scale two one&#45;byte values by a third one, which is treated as the numerator of a fraction whose demom..." alt="" coords="264,5,395,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="429,33,395,29,395,24,429,28"/>
-<area shape="rect" id="Node000003" href="$d0/da8/group___scaling_ga700b7f510f32e8c91385093c436c27d9.html#ga700b7f510f32e8c91385093c436c27d9" title="Scale three one&#45;byte values by a fourth one, which is treated as the numerator of a fraction whose de..." alt="" coords="264,55,395,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="429,58,395,62,395,57,429,53"/>
-<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a6a2c1ac508cdebdb083137793e219560.html#a6a2c1ac508cdebdb083137793e219560" title=" " alt="" coords="5,55,216,80"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="250,70,216,70,216,65,250,65"/>
-</map>

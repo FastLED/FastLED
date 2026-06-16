@@ -1,0 +1,21 @@
+<map id="fl::audio::AudioManager::processor" name="fl::audio::AudioManager::processor">
+<area shape="rect" id="Node000001" title=" " alt="" coords="517,157,693,197"/>
+<area shape="rect" id="Node000002" href="$d4/d9d/classfl_1_1audio_1_1_audio_manager_a19815b509ca8b88682cb93c9faba4360.html#a19815b509ca8b88682cb93c9faba4360" title=" " alt="" coords="261,109,469,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="503,156,421,137,422,132,505,151"/>
+<area shape="rect" id="Node000008" href="$d4/d9d/classfl_1_1audio_1_1_audio_manager_ab4ec0824d17d0fa4968e21e287f44476.html#ab4ec0824d17d0fa4968e21e287f44476" title=" " alt="" coords="261,164,469,189"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="504,179,470,179,470,174,504,174"/>
+<area shape="rect" id="Node000009" href="$d4/d9d/classfl_1_1audio_1_1_audio_manager_a711d8bd2228f5994d1de70a03e7f3568.html#a711d8bd2228f5994d1de70a03e7f3568" title=" " alt="" coords="277,225,453,265"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="522,203,437,227,436,222,520,198"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_aa6902ef0c06d6419b56e76662db6c5b9.html#aa6902ef0c06d6419b56e76662db6c5b9" title="Add an audio input and return an auto&#45;pumped Processor." alt="" coords="52,5,167,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="331,104,276,74,212,44,166,31,168,26,214,40,279,69,333,100"/>
+<area shape="rect" id="Node000004" href="$dd/dbb/class_c_fast_l_e_d_a4c80cc41fe64d47acf02e810c57768d4.html#a4c80cc41fe64d47acf02e810c57768d4" title="Add a pre&#45;created audio input and return an auto&#45;pumped Processor." alt="" coords="52,55,167,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="292,109,166,82,167,77,293,104"/>
+<area shape="rect" id="Node000005" href="$dd/dbb/class_c_fast_l_e_d_aa25cbb36c9196a7c2da75e86e6209792.html#aa25cbb36c9196a7c2da75e86e6209792" title="Add a UIAudio element and return an auto&#45;pumped Processor." alt="" coords="52,104,167,129"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="248,122,167,121,167,115,248,117"/>
+<area shape="rect" id="Node000006" href="$d4/d9d/classfl_1_1audio_1_1_audio_manager_a97cc4cd17a7f475823fbb7f32e2847cf.html#a97cc4cd17a7f475823fbb7f32e2847cf" title=" " alt="" coords="5,153,213,179"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="278,140,184,156,184,151,277,134"/>
+<area shape="rect" id="Node000007" href="$d2/d4d/classfl_1_1_u_i_audio_a0ea0030d28045b495e3b179a622995e5.html#a0ea0030d28045b495e3b179a622995e5" title=" " alt="" coords="29,203,189,228"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="292,141,263,154,249,163,239,173,229,183,215,192,181,205,179,200,212,188,226,179,236,169,245,159,260,149,290,136"/>
+<area shape="rect" id="Node000010" href="$dd/dbb/class_c_fast_l_e_d_af866eeaa43ffb46a87e4bd439027d2cc.html#af866eeaa43ffb46a87e4bd439027d2cc" title="Remove the audio processor." alt="" coords="39,252,179,277"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="264,255,180,262,179,257,263,250"/>
+</map>

@@ -1,18 +1,37 @@
-<map id="fx/detail/fx_layer.h" name="fx/detail/fx_layer.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="515,5,659,31"/>
-<area shape="rect" id="Node000002" href="$d5/d6b/fx__compositor_8h.html" title=" " alt="" coords="365,79,549,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="555,40,480,81,477,76,552,35"/>
-<area shape="rect" id="Node000003" href="$d9/d3c/fx__engine_8h.html" title=" " alt="" coords="464,152,579,177"/>
-<area shape="poly" id="edge8_Node000001_Node000003" title=" " alt="" coords="584,45,564,105,533,153,528,150,559,103,579,43"/>
-<area shape="rect" id="Node000008" href="$dc/dcf/fx__layer_8cpp.html" title=" " alt="" coords="625,79,783,104"/>
-<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="619,35,686,76,683,81,616,40"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="479,113,513,150,509,154,475,116"/>
-<area shape="rect" id="Node000004" href="$d4/d06/curr_8h.html" title=" " alt="" coords="5,233,277,273"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="458,183,225,235,224,230,457,178"/>
-<area shape="rect" id="Node000005" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates FxEngine for switching between effects." alt="" coords="302,225,511,280"/>
-<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="496,188,443,227,440,223,493,184"/>
-<area shape="rect" id="Node000006" href="$da/d40/wasm__impl_8h.html" title=" " alt="" coords="536,225,736,280"/>
-<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="549,184,603,223,599,227,546,188"/>
-<area shape="rect" id="Node000007" href="$df/d8e/fx__engine_8cpp.html" title=" " alt="" coords="760,240,891,265"/>
-<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="582,178,749,223,794,237,792,242,747,228,581,183"/>
+<map id="fl/fx/detail/fx_layer.h" name="fl/fx/detail/fx_layer.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1969,5,2125,31"/>
+<area shape="rect" id="Node000002" href="$d5/d6b/fx__compositor_8h.html" title=" " alt="" coords="1838,79,2034,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="2019,40,1956,81,1953,76,2016,36"/>
+<area shape="rect" id="Node000022" href="$d4/d2d/fx__layer_8cpp_8hpp.html" title=" " alt="" coords="2335,79,2534,104"/>
+<area shape="poly" id="edge16_Node000001_Node000022" title=" " alt="" coords="2123,30,2372,76,2371,81,2122,36"/>
+<area shape="rect" id="Node000003" href="$d9/d3c/fx__engine_8h.html" title=" " alt="" coords="1318,152,1445,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1834,108,1445,158,1444,153,1833,103"/>
+<area shape="rect" id="Node000004" href="$d6/d05/_animartrix_8ino.html" title="Demo of the Animatrix effects." alt="" coords="5,225,224,280"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1304,169,1116,171,853,180,550,198,395,211,243,228,224,231,224,225,242,223,394,206,550,192,853,175,1116,166,1304,163"/>
+<area shape="rect" id="Node000005" href="$df/dba/_animartrix_ring_8ino.html" title=" " alt="" coords="354,328,601,383"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="1304,170,1047,176,716,187,425,204,330,215,301,221,287,227,279,240,277,252,280,265,287,278,317,308,355,329,353,333,314,312,283,282,275,266,271,252,274,237,284,223,299,216,329,210,425,199,716,181,1047,170,1304,165"/>
+<area shape="rect" id="Node000006" href="$db/d4d/examples_2_animartrix_ring_2audio__reactive_8h.html" title=" " alt="" coords="298,225,545,280"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="1304,171,978,188,768,205,556,228,545,230,545,224,556,223,768,199,978,183,1304,166"/>
+<area shape="rect" id="Node000008" href="$d4/d67/sound__orchestrator_8h.html" title=" " alt="" coords="569,225,815,280"/>
+<area shape="poly" id="edge6_Node000003_Node000008" title=" " alt="" coords="1304,175,1089,195,827,228,816,230,815,224,826,223,1088,190,1304,170"/>
+<area shape="rect" id="Node000010" href="$d4/d06/curr_8h.html" title=" " alt="" coords="839,233,1111,273"/>
+<area shape="poly" id="edge8_Node000003_Node000010" title=" " alt="" coords="1314,183,1064,235,1063,230,1313,178"/>
+<area shape="rect" id="Node000012" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates FxEngine for switching between effects." alt="" coords="1135,225,1364,280"/>
+<area shape="poly" id="edge9_Node000003_Node000012" title=" " alt="" coords="1353,187,1291,228,1288,223,1350,183"/>
+<area shape="rect" id="Node000013" href="$dc/ded/_fx_gfx2_video_8ino.html" title="Demonstrates graphics to video conversion." alt="" coords="1388,225,1641,280"/>
+<area shape="poly" id="edge10_Node000003_Node000013" title=" " alt="" coords="1412,182,1475,223,1473,228,1409,187"/>
+<area shape="rect" id="Node000014" href="$d7/d35/_fx_sd_card_8ino.html" title="Play a mapped video off an SD card." alt="" coords="1666,225,1897,280"/>
+<area shape="poly" id="edge11_Node000003_Node000014" title=" " alt="" coords="1449,178,1666,224,1665,229,1448,183"/>
+<area shape="rect" id="Node000015" href="$db/dda/_sailboat_8ino.html" title="Audio&#45;reactive sailboat lighting with perlin noise, ambient particles, and beat meteors for EDM music..." alt="" coords="1921,225,2124,280"/>
+<area shape="poly" id="edge12_Node000003_Node000015" title=" " alt="" coords="1458,169,1662,189,1908,223,1921,225,1920,230,1908,228,1662,194,1458,175"/>
+<area shape="rect" id="Node000016" href="$da/d40/wasm__impl_8h.html" title=" " alt="" coords="2148,225,2348,280"/>
+<area shape="poly" id="edge13_Node000003_Node000016" title=" " alt="" coords="1459,166,1757,182,1946,198,2136,223,2148,225,2147,230,2136,228,1945,204,1756,187,1458,171"/>
+<area shape="rect" id="Node000018" href="$d1/dd7/fx__engine_8cpp_8hpp.html" title=" " alt="" coords="2372,240,2543,265"/>
+<area shape="poly" id="edge14_Node000003_Node000018" title=" " alt="" coords="1458,163,1622,165,1847,172,2102,191,2233,205,2360,223,2422,237,2421,243,2360,228,2232,210,2102,196,1846,178,1622,170,1458,168"/>
+<area shape="poly" id="edge7_Node000008_Node000005" title=" " alt="" coords="625,288,534,330,532,326,623,283"/>
+<area shape="rect" id="Node000019" href="$df/d9c/fl_2fx_2__build_8cpp_8hpp.html" title="Unity build header for fl/fx/ directory." alt="" coords="2446,343,2591,368"/>
+<area shape="poly" id="edge15_Node000018_Node000019" title=" " alt="" coords="2474,276,2514,341,2509,344,2469,278"/>
+<area shape="rect" id="Node000023" href="$d0/d93/fl_2fx_2detail_2__build_8cpp_8hpp.html" title=" " alt="" coords="2413,152,2600,177"/>
+<area shape="poly" id="edge17_Node000022_Node000023" title=" " alt="" coords="2458,112,2497,150,2493,154,2455,116"/>
+<area shape="poly" id="edge18_Node000023_Node000019" title=" " alt="" coords="2532,186,2546,204,2557,225,2561,258,2554,292,2542,322,2529,344,2524,341,2537,319,2549,290,2556,258,2552,226,2542,207,2528,189"/>
 </map>

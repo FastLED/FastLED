@@ -109,23 +109,20 @@ $(function(){initNavTree('d8/d0d/class_d_a_t_a___n_o_p.html','../../'); initResi
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Dummy class for output controllers that need no data transformations. </p>
 <p>Some of the SPI controllers will need to perform a transform on each byte before doing anything with it. Creating a class of this form and passing it in as a template parameter to writeBytes()/writeBytes3() will ensure that the body of this method will get called on every byte worked on. </p><dl class="section note"><dt>Note</dt><dd>Recommendation: make the adjust method aggressively inlined. </dd></dl>
-<dl class="todo"><dt><b><a class="el" href="../../dd/da0/todo.html#_todo000011">Todo</a></b></dt><dd>Convinience macro for building these </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="../../dd/da0/todo.html#_todo000002">Todo</a></b></dt><dd>Convinience macro for building these </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d2/ddb/fastspi__types_8h_source.html#l00038">38</a> of file <a class="el" href="../../d2/ddb/fastspi__types_8h_source.html">fastspi_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d2/ddb/fastspi__types_8h_source.html#l00044">44</a> of file <a class="el" href="../../d2/ddb/fastspi__types_8h_source.html">fastspi_types.h</a>.</p>
 </div>
 <p><code>#include &lt;<a class="el" href="../../d2/ddb/fastspi__types_8h_source.html">fastspi_types.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a04e08608f39f20dad29685dbf85b7790" id="r_a04e08608f39f20dad29685dbf85b7790"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d0d/class_d_a_t_a___n_o_p_a04e08608f39f20dad29685dbf85b7790.html#a04e08608f39f20dad29685dbf85b7790">adjust</a> (<a class="el" href="../../df/d80/register_8h_a1daa598467bdfaa27c878f3782885c2e.html#a1daa598467bdfaa27c878f3782885c2e">FASTLED_REGISTER</a> uint8_t data)</td></tr>
-<tr class="memdesc:a04e08608f39f20dad29685dbf85b7790"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hook called to adjust a byte of data before writing it to the output.  <br /></td></tr>
-<tr class="separator:a04e08608f39f20dad29685dbf85b7790"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1b1d7c26545a8da0cad78828709d96e3" id="r_a1b1d7c26545a8da0cad78828709d96e3"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d0d/class_d_a_t_a___n_o_p_a1b1d7c26545a8da0cad78828709d96e3.html#a1b1d7c26545a8da0cad78828709d96e3">adjust</a> (<a class="el" href="../../df/d80/register_8h_a1daa598467bdfaa27c878f3782885c2e.html#a1daa598467bdfaa27c878f3782885c2e">FASTLED_REGISTER</a> uint8_t data, <a class="el" href="../../df/d80/register_8h_a1daa598467bdfaa27c878f3782885c2e.html#a1daa598467bdfaa27c878f3782885c2e">FASTLED_REGISTER</a> uint8_t <a class="el" href="../../d6/d9d/_noise_8ino_ab7346c8b67db0b99afe3fe1eff3b5b38.html#ab7346c8b67db0b99afe3fe1eff3b5b38">scale</a>)</td></tr>
-<tr class="memdesc:a1b1d7c26545a8da0cad78828709d96e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hook called to adjust a byte of data before writing it to the output.     <br /></td></tr>
-<tr class="separator:a1b1d7c26545a8da0cad78828709d96e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5a05965df99e92867f7fe7491bb934b6" id="r_a5a05965df99e92867f7fe7491bb934b6"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="../../d4/d64/force__inline_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d0d/class_d_a_t_a___n_o_p_a5a05965df99e92867f7fe7491bb934b6.html#a5a05965df99e92867f7fe7491bb934b6">postBlock</a> (int, void *context=NULL)</td></tr>
-<tr class="memdesc:a5a05965df99e92867f7fe7491bb934b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hook called after a block of data is written to the output.  <br /></td></tr>
-<tr class="separator:a5a05965df99e92867f7fe7491bb934b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1e71770f0042f0361cc4feebf71cda8" id="r_ac1e71770f0042f0361cc4feebf71cda8"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d0d/class_d_a_t_a___n_o_p_ac1e71770f0042f0361cc4feebf71cda8.html#ac1e71770f0042f0361cc4feebf71cda8">adjust</a> (<a class="el" href="../../df/d96/s16x16x4_8h_a1daa598467bdfaa27c878f3782885c2e.html#a1daa598467bdfaa27c878f3782885c2e">FASTLED_REGISTER</a> <a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> data)</td></tr>
+<tr class="memdesc:ac1e71770f0042f0361cc4feebf71cda8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hook called to adjust a byte of data before writing it to the output.  <br /></td></tr>
+<tr class="separator:ac1e71770f0042f0361cc4feebf71cda8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed5b3f40826b540128f9b6f928a3eda8" id="r_aed5b3f40826b540128f9b6f928a3eda8"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="../../df/d96/s16x16x4_8h_a2f767b53d92c9d761d9f8d28a35d80c7.html#a2f767b53d92c9d761d9f8d28a35d80c7">FASTLED_FORCE_INLINE</a> void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d0d/class_d_a_t_a___n_o_p_aed5b3f40826b540128f9b6f928a3eda8.html#aed5b3f40826b540128f9b6f928a3eda8">postBlock</a> (int, void *context=nullptr)</td></tr>
+<tr class="memdesc:aed5b3f40826b540128f9b6f928a3eda8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hook called after a block of data is written to the output.  <br /></td></tr>
+<tr class="separator:aed5b3f40826b540128f9b6f928a3eda8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li><a class="el" href="../../d2/ddb/fastspi__types_8h_source.html">fastspi_types.h</a></li>
@@ -137,7 +134,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d8/d0d/class_d_a_t_a___n_o_p.html">DATA_NOP</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

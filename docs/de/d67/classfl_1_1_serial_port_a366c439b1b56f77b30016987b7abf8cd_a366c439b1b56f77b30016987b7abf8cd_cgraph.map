@@ -1,0 +1,5 @@
+<map id="fl::SerialPort::operator bool" name="fl::SerialPort::operator bool">
+<area shape="rect" id="Node000001" title="Check if serial port is ready for I/O." alt="" coords="5,5,201,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aafdafed59bb9ebfbde81b390a6a0bf5e.html#aafdafed59bb9ebfbde81b390a6a0bf5e" title=" " alt="" coords="249,5,368,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="202,15,235,15,235,21,202,21"/>
+</map>

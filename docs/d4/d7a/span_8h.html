@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fl/span.h File Reference</title>
+<title>FastLED: fl/stl/span.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -101,40 +101,71 @@ $(function(){initNavTree('d4/d7a/span_8h.html','../../'); initResizable(true); }
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#namespaces">Namespaces</a> &#124;
-<a href="#typedef-members">Typedefs</a>  </div>
+<a href="#typedef-members">Typedefs</a> &#124;
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle"><div class="title">span.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="../../d0/d48/slice_8h_source.html">fl/slice.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../df/db1/math_8h_source.html">fl/math/math.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d67/geometry_8h_source.html">fl/math/geometry.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d72/bit__cast_8h_source.html">fl/stl/bit_cast.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d6/d23/initializer__list_8h_source.html">fl/stl/initializer_list.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d63/type__traits_8h_source.html">fl/stl/type_traits.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/stl/int.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for span.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d0/d41/span_8h__incl.svg" width="488" height="476"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
-</div>
-</div><div class="textblock"><div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> This graph shows which files directly or indirectly include this file:</div>
-<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
-</div>
-<div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d3/d82/span_8h__dep__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d0/d41/span_8h__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../d4/d7a/span_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/ddc/structfl_1_1has__data__and__size.html">fl::has_data_and_size&lt; T &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d07/classfl_1_1has__data__method.html">fl::has_data_method&lt; T &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d10/classfl_1_1has__size__method.html">fl::has_size_method&lt; T &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/da3/classfl_1_1_matrix_slice.html">fl::MatrixSlice&lt; T &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/d08/classfl_1_1span.html">fl::span&lt; T, Extent &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d6b/classfl_1_1span_3_01_t_00_01dynamic__extent_01_4.html">fl::span&lt; T, dynamic_extent &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:a41efc6482adf6ba3487dee62b02c7f13" id="r_a41efc6482adf6ba3487dee62b02c7f13"><td class="memTemplParams" colspan="2">template&lt;typename T&gt; </td></tr>
-<tr class="memitem:a41efc6482adf6ba3487dee62b02c7f13"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a41efc6482adf6ba3487dee62b02c7f13.html#a41efc6482adf6ba3487dee62b02c7f13">fl::span</a> = <a class="el" href="../../d8/de4/classfl_1_1_slice.html">Slice</a>&lt;T&gt;</td></tr>
-<tr class="separator:a41efc6482adf6ba3487dee62b02c7f13"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1825130953ff99ced39c9c0b3895c012" id="r_a1825130953ff99ced39c9c0b3895c012"><td class="memTemplParams" colspan="2">template&lt;typename T, fl::size INLINED_SIZE&gt; </td></tr>
+<tr class="memitem:a1825130953ff99ced39c9c0b3895c012"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a1825130953ff99ced39c9c0b3895c012.html#a1825130953ff99ced39c9c0b3895c012">fl::InlinedVector</a> = <a class="el" href="../../dc/d05/classfl_1_1_vector_n.html">VectorN</a>&lt;T, INLINED_SIZE&gt;</td></tr>
+<tr class="separator:a1825130953ff99ced39c9c0b3895c012"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a06f1d89e192d0c0640564e9e629ac8f8" id="r_a06f1d89e192d0c0640564e9e629ac8f8"><td class="memTemplParams" colspan="2">template&lt;typename T, fl::size Extent&gt; </td></tr>
+<tr class="memitem:a06f1d89e192d0c0640564e9e629ac8f8"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d0/d08/classfl_1_1span.html">span</a>&lt; const <a class="el" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a>,(Extent==<a class="el" href="../../d4/d36/namespacefl_aa41f50073e469f1d05f6585641059bcc.html#aa41f50073e469f1d05f6585641059bcc">dynamic_extent</a>) ? <a class="el" href="../../d4/d36/namespacefl_aa41f50073e469f1d05f6585641059bcc.html#aa41f50073e469f1d05f6585641059bcc">dynamic_extent</a> :(Extent *sizeof(T))&gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a06f1d89e192d0c0640564e9e629ac8f8.html#a06f1d89e192d0c0640564e9e629ac8f8">fl::as_bytes</a> (const <a class="el" href="../../d0/d08/classfl_1_1span.html">span</a>&lt; T, Extent &gt; &amp;s) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
+<tr class="separator:a06f1d89e192d0c0640564e9e629ac8f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae504ba30a8da304bd0bbc5025f10c372" id="r_ae504ba30a8da304bd0bbc5025f10c372"><td class="memTemplParams" colspan="2">template&lt;typename T, fl::size Extent&gt; </td></tr>
+<tr class="memitem:ae504ba30a8da304bd0bbc5025f10c372"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d0/d08/classfl_1_1span.html">span</a>&lt; <a class="el" href="../../da/d3c/namespacefl_1_1fl_a7573a66f01c09f14a1ff0411f8e1153c.html#a7573a66f01c09f14a1ff0411f8e1153c">fl::u8</a>,(Extent==<a class="el" href="../../d4/d36/namespacefl_aa41f50073e469f1d05f6585641059bcc.html#aa41f50073e469f1d05f6585641059bcc">dynamic_extent</a>) ? <a class="el" href="../../d4/d36/namespacefl_aa41f50073e469f1d05f6585641059bcc.html#aa41f50073e469f1d05f6585641059bcc">dynamic_extent</a> :(Extent *sizeof(T))&gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ae504ba30a8da304bd0bbc5025f10c372.html#ae504ba30a8da304bd0bbc5025f10c372">fl::as_writable_bytes</a> (<a class="el" href="../../d0/d08/classfl_1_1span.html">span</a>&lt; T, Extent &gt; &amp;s) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
+<tr class="separator:ae504ba30a8da304bd0bbc5025f10c372"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:aa41f50073e469f1d05f6585641059bcc" id="r_aa41f50073e469f1d05f6585641059bcc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d9/d13/cpp__compat_8h_a72f0657181cca64b44eb186b707eb380.html#a72f0657181cca64b44eb186b707eb380">constexpr</a> fl::size&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aa41f50073e469f1d05f6585641059bcc.html#aa41f50073e469f1d05f6585641059bcc">fl::dynamic_extent</a> = fl::size(-1)</td></tr>
+<tr class="separator:aa41f50073e469f1d05f6585641059bcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -142,8 +173,8 @@ Typedefs</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d4/d7a/span_8h.html">span.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_0dd6897a8ae40540acd9d694849e950e.html">stl</a></li><li class="navelem"><a class="el" href="../../d4/d7a/span_8h.html">span.h</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

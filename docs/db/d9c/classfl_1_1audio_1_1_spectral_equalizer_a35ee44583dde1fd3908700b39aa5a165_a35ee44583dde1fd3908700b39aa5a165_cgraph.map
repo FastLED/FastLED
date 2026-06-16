@@ -1,0 +1,14 @@
+<map id="fl::audio::SpectralEqualizer::SpectralEqualizer" name="fl::audio::SpectralEqualizer::SpectralEqualizer">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,200,75"/>
+<area shape="rect" id="Node000002" href="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a63bd5a8fe3f4719ee4648c824d263c64.html#a63bd5a8fe3f4719ee4648c824d263c64" title="Configure the spectral equalizer This calculates per&#45;band gain multipliers based on the selected curv..." alt="" coords="248,35,443,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="200,61,234,61,234,66,200,66"/>
+<area shape="poly" id="edge2_Node000002_Node000001" title=" " alt="" coords="248,48,214,48,214,43,248,43"/>
+<area shape="poly" id="edge7_Node000002_Node000002" title=" " alt="" coords="300,35,297,25,305,16,321,10,345,8,374,11,389,18,387,23,372,16,345,13,322,15,308,20,303,26,305,34"/>
+<area shape="rect" id="Node000003" href="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a52e8f221c9fe9cba4ac96f387cc1f726.html#a52e8f221c9fe9cba4ac96f387cc1f726" title="Calculate gains based on current curve." alt="" coords="491,35,685,75"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="443,52,477,52,477,57,443,57"/>
+<area shape="rect" id="Node000004" href="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_aa6f94ad4e418f660b71ac6e99fc0ba14.html#aa6f94ad4e418f660b71ac6e99fc0ba14" title="Calculate A&#45;weighting gains." alt="" coords="733,5,932,45"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="685,40,719,36,720,42,686,46"/>
+<area shape="rect" id="Node000005" href="$db/d9c/classfl_1_1audio_1_1_spectral_equalizer_a98b8eafa2abe451f740b05be2260bdbb.html#a98b8eafa2abe451f740b05be2260bdbb" title="Calculate flat gains (all 1.0)" alt="" coords="980,35,1175,75"/>
+<area shape="poly" id="edge6_Node000003_Node000005" title=" " alt="" coords="685,54,733,55,932,55,966,54,966,60,932,60,733,60,685,59"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="932,35,967,39,966,44,932,40"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="fl::audio::detector::Downbeat::Downbeat" name="fl::audio::detector::Downbeat::Downbeat">
+<area shape="rect" id="Node000001" title="Construct with standalone Beat." alt="" coords="5,35,176,75"/>
+<area shape="rect" id="Node000002" href="$df/d03/classfl_1_1audio_1_1detector_1_1_downbeat_a8c6a9cca34b69d15d987bbefc0c21dc1.html#a8c6a9cca34b69d15d987bbefc0c21dc1" title="Construct with shared Beat (recommended)" alt="" coords="224,5,395,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,41,210,36,211,41,176,46"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="247,70,372,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="176,63,233,70,232,76,176,68"/>
+</map>

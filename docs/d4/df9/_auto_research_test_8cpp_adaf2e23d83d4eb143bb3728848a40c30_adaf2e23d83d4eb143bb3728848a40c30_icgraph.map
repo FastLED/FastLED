@@ -1,0 +1,20 @@
+<map id="buildExpectedUCS7604" name="buildExpectedUCS7604">
+<area shape="rect" id="Node000001" title="Build expected UCS7604 encoded bytes from LED data." alt="" coords="672,189,845,214"/>
+<area shape="rect" id="Node000002" href="$d4/df9/_auto_research_test_8cpp_aac567188ee44c45d15b20231ecff68c9.html#aac567188ee44c45d15b20231ecff68c9" title=" " alt="" coords="521,163,624,189"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="658,190,624,186,625,180,659,185"/>
+<area shape="rect" id="Node000011" href="$d4/df9/_auto_research_test_8cpp_ab5d3883aa989a0c1298af1a8a0d2851a.html#ab5d3883aa989a0c1298af1a8a0d2851a" title=" " alt="" coords="538,213,607,238"/>
+<area shape="poly" id="edge9_Node000001_Node000011" title=" " alt="" coords="659,217,608,224,607,218,658,212"/>
+<area shape="rect" id="Node000003" href="$d4/df9/_auto_research_test_8cpp_a4c76939743f62fdeea55c4ec8a3e2a31.html#a4c76939743f62fdeea55c4ec8a3e2a31" title=" " alt="" coords="268,134,473,159"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="507,169,458,162,459,157,508,164"/>
+<area shape="rect" id="Node000010" href="$d4/df9/_auto_research_test_8cpp_a5acfa3d36f5c1ff77be18eecaedf19b3.html#a5acfa3d36f5c1ff77be18eecaedf19b3" title=" " alt="" coords="268,184,473,224"/>
+<area shape="poly" id="edge7_Node000002_Node000010" title=" " alt="" coords="508,188,474,192,473,187,507,182"/>
+<area shape="rect" id="Node000004" href="$d1/dc9/namespaceautoresearch_a1868ca9225c807cbaf571228e6629e34.html#a1868ca9225c807cbaf571228e6629e34" title="On FL_IS_STUB: register a one&#45;shot async task that drives autoresearch." alt="" coords="5,5,220,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="339,129,284,94,219,60,188,48,190,43,221,55,287,89,342,124"/>
+<area shape="rect" id="Node000006" href="$db/d63/class_auto_research_remote_control_a2e12a8f854f2f66312793a4405f4fddb.html#a2e12a8f854f2f66312793a4405f4fddb" title=" " alt="" coords="7,69,218,109"/>
+<area shape="poly" id="edge4_Node000003_Node000006" title=" " alt="" coords="299,134,203,112,204,107,300,128"/>
+<area shape="rect" id="Node000008" href="$db/d63/class_auto_research_remote_control_a7992b62fd1f26fe1898d2ea8a78b370a.html#a7992b62fd1f26fe1898d2ea8a78b370a" title=" " alt="" coords="7,184,218,224"/>
+<area shape="poly" id="edge5_Node000003_Node000008" title=" " alt="" coords="300,165,204,187,203,181,299,160"/>
+<area shape="rect" id="Node000009" href="$d7/d5f/_auto_research_helpers_8cpp_a27ef6a5586c56c0790bbb0a4c5b68466.html#a27ef6a5586c56c0790bbb0a4c5b68466" title="Test a specific driver with given timing configuration." alt="" coords="69,134,156,159"/>
+<area shape="poly" id="edge6_Node000003_Node000009" title=" " alt="" coords="254,149,156,149,156,144,254,144"/>
+<area shape="poly" id="edge8_Node000010_Node000008" title=" " alt="" coords="254,207,218,207,218,201,254,201"/>
+</map>

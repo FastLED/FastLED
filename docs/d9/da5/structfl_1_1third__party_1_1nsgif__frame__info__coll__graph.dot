@@ -1,0 +1,11 @@
+digraph "fl::third_party::nsgif_frame_info"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  Node1 [id="Node000001",label="fl::third_party::nsgif\l_frame_info",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Information about a GIF frame."];
+  Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" rect",fontcolor="grey" ];
+  Node2 [id="Node000002",label="fl::third_party::nsgif_rect",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d1/d86/namespacefl_1_1third__party.html#d5/d9b/structfl_1_1third__party_1_1nsgif__rect",tooltip="LibNSGIF rectangle structure."];
+}

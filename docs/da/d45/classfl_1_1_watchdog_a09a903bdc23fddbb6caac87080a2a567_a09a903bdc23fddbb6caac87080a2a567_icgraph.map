@@ -1,0 +1,16 @@
+<map id="fl::Watchdog::instance" name="fl::Watchdog::instance">
+<area shape="rect" id="Node000001" title=" " alt="" coords="479,133,644,158"/>
+<area shape="rect" id="Node000002" href="$d7/d76/classfl_1_1_scoped_watchdog_a196822062d7ab5c2b32c34a6d1efddd0.html#a196822062d7ab5c2b32c34a6d1efddd0" title="Construct with an explicit timeout." alt="" coords="5,96,155,136"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="540,123,494,74,464,51,430,33,368,14,317,8,266,15,204,33,174,46,147,62,103,98,100,94,144,58,172,41,202,28,265,10,317,3,369,9,432,28,467,46,498,70,544,120"/>
+<area shape="rect" id="Node000003" href="$d7/d76/classfl_1_1_scoped_watchdog_ae049c448ae90dc80c758ef5e6787db9e.html#ae049c448ae90dc80c758ef5e6787db9e" title="Feed the watchdog at end&#45;of&#45;scope so the next loop() iteration has a clean deadline window." alt="" coords="241,43,393,83"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="517,130,430,97,392,85,394,80,432,92,519,125"/>
+<area shape="rect" id="Node000004" href="$d1/df2/_auto_research_low_memory_8h_a313a652d1531f7d82fb04a3f6499ddff.html#a313a652d1531f7d82fb04a3f6499ddff" title=" " alt="" coords="205,107,428,133"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="465,138,428,134,428,129,465,133"/>
+<area shape="rect" id="Node000005" href="$d1/df2/_auto_research_low_memory_8h_ae3f918f9121ab392058ef53302b021cf.html#ae3f918f9121ab392058ef53302b021cf" title=" " alt="" coords="203,157,431,182"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="465,157,431,161,431,155,465,152"/>
+<area shape="rect" id="Node000006" href="$df/d52/namespacefl_1_1platforms_a3333f9482b0798c0daebdc07be2cdd5c.html#a3333f9482b0798c0daebdc07be2cdd5c" title=" " alt="" coords="207,207,426,247"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="516,165,432,196,389,209,388,204,430,191,514,160"/>
+<area shape="rect" id="Node000007" href="$dd/dbb/class_c_fast_l_e_d_aa9adb7a4dd598dbdfaeb49e2d12e3fcb.html#aa9adb7a4dd598dbdfaeb49e2d12e3fcb" title="Access the unified cross&#45;platform watchdog timer." alt="" coords="240,271,393,297"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="542,170,495,217,465,241,432,261,395,275,393,270,429,256,462,236,492,213,539,166"/>
+<area shape="poly" id="edge6_Node000006_Node000002" title=" " alt="" coords="223,204,202,196,150,167,107,138,110,134,153,163,204,191,225,199"/>
+</map>

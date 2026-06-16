@@ -1,0 +1,10 @@
+<map id="fl::CLEDController::clearWhiteChannel" name="fl::CLEDController::clearWhiteChannel">
+<area shape="rect" id="Node000001" title="Reset this channel to plain 3&#45;channel RGB (clears any RGBW/RGBWW configuration)." alt="" coords="5,35,159,75"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a7e91fc8f83d62c9da5e5c3d6d1bc10ce.html#a7e91fc8f83d62c9da5e5c3d6d1bc10ce" title="Protected constructor with registration mode." alt="" coords="207,35,343,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="159,52,193,52,193,57,159,57"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a9e51518d1427463dffd596c69c6f3e46.html#a9e51518d1427463dffd596c69c6f3e46" title="Add this controller to the linked list." alt="" coords="391,5,527,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="343,41,377,36,378,41,343,46"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a5e115bf146729c8868c918538feb06df.html#a5e115bf146729c8868c918538feb06df" title="Check if this controller is in the linked list." alt="" coords="575,35,711,75"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="527,34,562,39,561,44,527,39"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="575,59,527,60,391,60,356,59,356,54,391,55,527,55,575,54"/>
+</map>

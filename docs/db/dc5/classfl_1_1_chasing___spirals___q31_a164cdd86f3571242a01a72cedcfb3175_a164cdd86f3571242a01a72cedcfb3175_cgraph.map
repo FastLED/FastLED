@@ -1,0 +1,11 @@
+<map id="fl::Chasing_Spirals_Q31::draw" name="fl::Chasing_Spirals_Q31::draw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,23,147,63"/>
+<area shape="rect" id="Node000002" href="$d5/d17/_analog_output_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="233,5,291,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="147,31,219,21,219,26,148,36"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a3a23a29b7fae800b629360cd32fec586.html#a3a23a29b7fae800b629360cd32fec586" title="Process 4 angles simultaneously, returning vectorized sin/cos values SIMD&#45;optimized: vectorized angle..." alt="" coords="195,55,329,80"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="148,50,181,54,181,60,147,55"/>
+<area shape="rect" id="Node000003" href="$d5/d17/_analog_output_8ino_a41443fd94d659dbb2ce2e63bbcca8a41.html#a41443fd94d659dbb2ce2e63bbcca8a41" title=" " alt="" coords="377,5,460,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="292,15,364,15,364,21,292,21"/>
+<area shape="rect" id="Node000004" href="$d5/d17/_analog_output_8ino_a493f802fe26dce77f378873f891158f8.html#a493f802fe26dce77f378873f891158f8" title=" " alt="" coords="508,5,637,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="460,15,494,15,494,21,460,21"/>
+</map>

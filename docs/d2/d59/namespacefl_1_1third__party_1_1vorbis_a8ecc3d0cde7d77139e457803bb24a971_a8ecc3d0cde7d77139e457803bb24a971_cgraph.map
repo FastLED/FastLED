@@ -1,0 +1,18 @@
+<map id="fl::third_party::vorbis::compute_sorted_huffman" name="fl::third_party::vorbis::compute_sorted_huffman">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,99,201,139"/>
+<area shape="rect" id="Node000002" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a9e8145eaad2ce44204c290ad153812ed.html#a9e8145eaad2ce44204c290ad153812ed" title=" " alt="" coords="249,5,405,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="151,96,248,55,264,48,266,53,250,60,153,101"/>
+<area shape="rect" id="Node000003" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_acfcfb27fa3824f51bb0be343badc4d54.html#acfcfb27fa3824f51bb0be343badc4d54" title=" " alt="" coords="249,69,405,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="201,103,235,99,236,104,202,108"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a5b7d5f63fa0ba708e7ca8554bb1c4720.html#a5b7d5f63fa0ba708e7ca8554bb1c4720" title=" " alt="" coords="292,134,363,159"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="202,128,279,138,278,143,201,134"/>
+<area shape="rect" id="Node000010" href="$d2/d59/namespacefl_1_1third__party_1_1vorbis_a12f71d6795aeb85984dce55cc529c653.html#a12f71d6795aeb85984dce55cc529c653" title=" " alt="" coords="249,184,405,224"/>
+<area shape="poly" id="edge8_Node000001_Node000010" title=" " alt="" coords="158,136,262,177,260,181,156,141"/>
+<area shape="rect" id="Node000005" href="$df/d9e/namespacefl_1_1detail_a6ceafefa035ed7743e9c1098a208e649.html#a6ceafefa035ed7743e9c1098a208e649" title=" " alt="" coords="453,134,605,159"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="363,144,440,144,440,149,363,149"/>
+<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="496,135,489,126,493,116,507,110,529,107,557,111,568,120,565,124,555,116,529,113,508,115,497,119,495,125,501,132"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a80e54bbf6547a2844ff3a2215f0e6823.html#a80e54bbf6547a2844ff3a2215f0e6823" title=" " alt="" coords="653,109,820,134"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="605,135,639,131,640,136,606,140"/>
+<area shape="rect" id="Node000009" href="$d4/d36/namespacefl_a18e193998f38762ec52b7c1963474af8.html#a18e193998f38762ec52b7c1963474af8" title=" " alt="" coords="670,158,803,183"/>
+<area shape="poly" id="edge7_Node000005_Node000009" title=" " alt="" coords="606,153,656,159,656,164,605,158"/>
+</map>

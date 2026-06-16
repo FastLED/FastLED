@@ -9,5 +9,5 @@ var _fx_twinkle_fox_8ino =
     [ "loop", "dd/d4d/_fx_twinkle_fox_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f", null ],
     [ "setup", "dd/d4d/_fx_twinkle_fox_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d", null ],
     [ "leds", "dd/d4d/_fx_twinkle_fox_8ino_ac8baf9db612cb3c24e79851cfec4cdc4.html#ac8baf9db612cb3c24e79851cfec4cdc4", null ],
-    [ "twinkleFox", "dd/d4d/_fx_twinkle_fox_8ino_ac51c3d66bc68b8f29422de595e44d34c.html#ac51c3d66bc68b8f29422de595e44d34c", null ]
+    [ "twinkleFox", "dd/d4d/_fx_twinkle_fox_8ino_a1fed6f7046ec050bb53c267e82618c36.html#a1fed6f7046ec050bb53c267e82618c36", null ]
 ];

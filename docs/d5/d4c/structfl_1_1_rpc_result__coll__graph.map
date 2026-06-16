@@ -1,0 +1,23 @@
+<map id="fl::RpcResult" name="fl::RpcResult">
+<area shape="rect" id="Node000001" title="Result metadata for executed RPC calls." alt="" coords="1201,90,1304,116"/>
+<area shape="rect" id="Node000002" href="$d2/db2/classfl_1_1string.html" title=" " alt="" coords="981,64,1056,89"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1070,79,1202,95,1201,100,1069,85"/>
+<area shape="rect" id="Node000003" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="715,35,880,75"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="894,62,981,70,981,75,893,67"/>
+<area shape="rect" id="Node000004" href="$de/d66/classfl_1_1basic__string.html" title="Concrete type&#45;erased string class." alt="" coords="47,9,163,34"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="176,13,277,6,406,3,548,6,691,20,742,32,740,38,690,26,548,12,406,8,278,12,177,18"/>
+<area shape="rect" id="Node000005" href="$d6/d2d/classfl_1_1string__n.html" title=" " alt="" coords="361,42,491,68"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="177,26,361,46,360,51,176,32"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="505,52,714,52,714,58,505,58"/>
+<area shape="rect" id="Node000006" href="$de/d40/classfl_1_1json.html" title=" " alt="" coords="986,114,1051,140"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="1065,126,1119,125,1177,120,1210,113,1212,118,1178,126,1119,131,1065,131"/>
+<area shape="rect" id="Node000007" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="732,118,863,158"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="877,131,985,126,986,131,877,136"/>
+<area shape="rect" id="Node000008" href="$dc/dec/structfl_1_1json__value.html" title=" " alt="" coords="372,92,480,117"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="494,108,732,129,731,134,493,113"/>
+<area shape="rect" id="Node000009" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="5,161,204,186"/>
+<area shape="poly" id="edge9_Node000007_Node000009" title=" " alt="" coords="217,165,732,138,732,144,218,170"/>
+<area shape="rect" id="Node000012" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="353,205,499,230"/>
+<area shape="poly" id="edge11_Node000012_Node000009" title=" " alt="" coords="212,186,354,205,353,210,211,191"/>
+<area shape="poly" id="edge10_Node000007_Node000012" title=" " alt="" coords="512,213,599,206,690,187,728,173,762,155,764,160,730,178,691,192,600,211,513,219"/>
+</map>

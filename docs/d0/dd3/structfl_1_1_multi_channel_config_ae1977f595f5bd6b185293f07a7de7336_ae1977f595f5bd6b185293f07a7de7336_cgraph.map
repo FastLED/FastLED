@@ -1,0 +1,8 @@
+<map id="fl::MultiChannelConfig::~MultiChannelConfig" name="fl::MultiChannelConfig::~MultiChannelConfig">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,173,45"/>
+<area shape="rect" id="Node000002" href="$d0/dd3/structfl_1_1_multi_channel_config_a6044572e5beefea68e2fb0cbdd0901eb.html#a6044572e5beefea68e2fb0cbdd0901eb" title=" " alt="" coords="467,5,632,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="173,23,453,23,453,28,173,28"/>
+<area shape="rect" id="Node000003" href="$d0/dd3/structfl_1_1_multi_channel_config_aea115e53df2070b3096af89ac31c7d19.html#aea115e53df2070b3096af89ac31c7d19" title="Add a channel configuration to the multi&#45;channel config." alt="" coords="221,38,419,63"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="174,32,208,36,207,41,173,37"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="418,37,453,33,454,39,419,42"/>
+</map>

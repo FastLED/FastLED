@@ -1,0 +1,16 @@
+digraph "fl::third_party::ezWS2812::zero"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::third_party::ezWS2812\l::zero",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Convert color bit to SPI signal for '0' bit."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::third_party::ezWS2812\l::color_to_spi",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/db5/classfl_1_1third__party_1_1ez_w_s2812_ab6215f378a11466b2bc909ad3f408e4c.html#ab6215f378a11466b2bc909ad3f408e4c",tooltip="Convert color byte to SPI bit pattern."];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::third_party::ezWS2812\l::set_pixel",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/db5/classfl_1_1third__party_1_1ez_w_s2812_ac685a46980ddb72910e7924076831238.html#ac685a46980ddb72910e7924076831238",tooltip="Set color for specific number of LEDs."];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::third_party::ezWS2812\l::set_all",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/db5/classfl_1_1third__party_1_1ez_w_s2812_ab50502eecb84e1c0a23ac5c35a29b80e.html#ab50502eecb84e1c0a23ac5c35a29b80e",tooltip="Set all LEDs to the same color."];
+}

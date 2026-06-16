@@ -1,0 +1,19 @@
+<map id="fl::audio::FrequencyBinMapper::FrequencyBinMapper" name="fl::audio::FrequencyBinMapper::FrequencyBinMapper">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,100,224,140"/>
+<area shape="rect" id="Node000002" href="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_ae604f983be2f383b2b0196f83396b8ab.html#ae604f983be2f383b2b0196f83396b8ab" title="Configure the frequency bin mapper This calculates bin boundaries and FFT&#45;to&#45;frequency bin mappings." alt="" coords="272,100,491,140"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="224,126,258,126,258,132,224,132"/>
+<area shape="poly" id="edge2_Node000002_Node000001" title=" " alt="" coords="272,114,238,114,238,108,272,108"/>
+<area shape="poly" id="edge9_Node000002_Node000002" title=" " alt="" coords="332,100,329,90,337,81,354,75,381,73,412,76,429,83,427,88,411,81,381,79,355,81,340,85,334,91,337,99"/>
+<area shape="rect" id="Node000003" href="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_aca828d77220fdaf9492335d21480cb2a.html#aca828d77220fdaf9492335d21480cb2a" title="Calculate frequency bin boundaries (linear or logarithmic spacing)" alt="" coords="539,68,757,108"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="490,104,525,100,525,105,491,110"/>
+<area shape="rect" id="Node000012" href="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a457278fcf5b0d96f9d8af8df6446e70f.html#a457278fcf5b0d96f9d8af8df6446e70f" title="Calculate FFT bin to frequency bin mappings Pre&#45;calculates which FFT bins contribute to each frequenc..." alt="" coords="539,132,757,172"/>
+<area shape="poly" id="edge6_Node000002_Node000012" title=" " alt="" coords="491,130,525,135,525,140,490,136"/>
+<area shape="rect" id="Node000004" href="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_ac00a1cd7e5df9094c6248051584e5329.html#ac00a1cd7e5df9094c6248051584e5329" title="Calculate linearly&#45;spaced frequency boundaries." alt="" coords="805,5,1024,45"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="733,65,815,46,817,51,734,71"/>
+<area shape="rect" id="Node000006" href="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_ac3108303376ac5f6f48c3c1e2da001d4.html#ac3108303376ac5f6f48c3c1e2da001d4" title="Calculate logarithmically&#45;spaced frequency boundaries." alt="" coords="805,69,1024,109"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="757,86,791,86,791,91,757,91"/>
+<area shape="rect" id="Node000013" href="$d4/d36/namespacefl_a680a4050712ddcb48b6107ce5294a82f.html#a680a4050712ddcb48b6107ce5294a82f" title=" " alt="" coords="881,137,948,162"/>
+<area shape="poly" id="edge7_Node000012_Node000013" title=" " alt="" coords="757,148,867,147,867,152,758,154"/>
+<area shape="rect" id="Node000015" href="$d0/ddf/classfl_1_1audio_1_1_frequency_bin_mapper_a602e993725b485f2648906f8658f4f36.html#a602e993725b485f2648906f8658f4f36" title="Convert frequency (Hz) to FFT bin index." alt="" coords="805,187,1024,227"/>
+<area shape="poly" id="edge8_Node000012_Node000015" title=" " alt="" coords="747,169,803,181,802,186,746,175"/>
+</map>

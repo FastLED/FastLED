@@ -1,0 +1,8 @@
+<map id="fl::audio::Processor::getDynamicsAnalyzer" name="fl::audio::Processor::getDynamicsAnalyzer">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,179,69"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="53,30,51,20,57,11,71,5,92,3,116,6,129,13,127,18,114,11,92,8,72,10,61,15,56,21,58,28"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a87ae8a24cc8b709a64f39370e71846af.html#a87ae8a24cc8b709a64f39370e71846af" title=" " alt="" coords="237,7,362,33"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="179,34,223,28,223,33,179,40"/>
+<area shape="rect" id="Node000003" href="$d3/d6b/classfl_1_1audio_1_1_processor_ade806d07af52e3d281939cebce7643d5.html#ade806d07af52e3d281939cebce7643d5" title=" " alt="" coords="227,57,372,97"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="179,58,213,63,212,68,179,64"/>
+</map>

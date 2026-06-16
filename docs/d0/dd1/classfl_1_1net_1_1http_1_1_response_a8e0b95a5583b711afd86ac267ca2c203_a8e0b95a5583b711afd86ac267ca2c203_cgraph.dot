@@ -1,0 +1,14 @@
+digraph "fl::net::http::Response::get_content_type"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::net::http::Response\l::get_content_type",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Get content type convenience method."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::net::http::Response\l::get_header",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dd1/classfl_1_1net_1_1http_1_1_response_a32d1e99733df3de4ec21fdb6a3823020.html#a32d1e99733df3de4ec21fdb6a3823020",tooltip="Get header value (like JavaScript response.headers.get())"];
+  Node2 -> Node3 [id="edge2_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::make_optional",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_a521850c6281549f94bcea643cc9af9ac.html#a521850c6281549f94bcea643cc9af9ac",tooltip=" "];
+}

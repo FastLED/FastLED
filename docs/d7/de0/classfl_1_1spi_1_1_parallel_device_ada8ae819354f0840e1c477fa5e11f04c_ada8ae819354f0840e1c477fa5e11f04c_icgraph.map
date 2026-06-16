@@ -1,0 +1,5 @@
+<map id="fl::spi::ParallelDevice::begin" name="fl::spi::ParallelDevice::begin">
+<area shape="rect" id="Node000001" title="Initialize hardware and setup LUT." alt="" coords="212,5,371,45"/>
+<area shape="rect" id="Node000002" href="$d7/de0/classfl_1_1spi_1_1_parallel_device_a7401728911c15f96eedba08dcf5544d6.html#a7401728911c15f96eedba08dcf5544d6" title=" " alt="" coords="5,5,164,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="198,28,164,28,164,23,198,23"/>
+</map>

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fl::unordered_set&lt; Key &gt;::const_iterator Class Reference</title>
+<title>FastLED: fl::unordered_set&lt; Key, Hash, KeyEqual &gt;::const_iterator Class Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -106,65 +106,67 @@ $(function(){initNavTree('d5/d56/classfl_1_1unordered__set_1_1const__iterator.ht
 <a href="#pri-types">Private Types</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="../../da/d78/classfl_1_1unordered__set_1_1const__iterator-members.html">List of all members</a>  </div>
-  <div class="headertitle"><div class="title">fl::unordered_set&lt; Key &gt;::const_iterator Class Reference</div></div>
+  <div class="headertitle"><div class="title">fl::unordered_set&lt; Key, Hash, KeyEqual &gt;::const_iterator Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><div class="compoundTemplParams">template&lt;typename <a class="el" href="../../db/d42/struct_key.html">Key</a>&gt;<br />
-class fl::unordered_set&lt; Key &gt;::const_iterator</div>
-<p class="definition">Definition at line <a class="el" href="../../df/d26/unordered__set_8h_source.html#l00043">43</a> of file <a class="el" href="../../df/d26/unordered__set_8h_source.html">unordered_set.h</a>.</p>
+<div class="textblock"><div class="compoundTemplParams">template&lt;typename <a class="el" href="../../db/d42/struct_key.html">Key</a>, typename <a class="el" href="../../d6/dfd/structfl_1_1_hash.html">Hash</a> = Hash&lt;Key&gt;, typename KeyEqual = EqualTo&lt;Key&gt;&gt;<br />
+class fl::unordered_set&lt; Key, Hash, KeyEqual &gt;::const_iterator</div>
+<p class="definition">Definition at line <a class="el" href="../../df/d26/unordered__set_8h_source.html#l00046">46</a> of file <a class="el" href="../../df/d26/unordered__set_8h_source.html">unordered_set.h</a>.</p>
 </div>
 <p><code>#include &lt;<a class="el" href="../../df/d26/unordered__set_8h_source.html">unordered_set.h</a>&gt;</code></p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Collaboration diagram for fl::unordered_set&lt; Key &gt;::const_iterator:</div>
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Collaboration diagram for fl::unordered_set&lt; Key, Hash, KeyEqual &gt;::const_iterator:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../dc/dd0/classfl_1_1unordered__set_1_1const__iterator__coll__graph.svg" width="290" height="388"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dc/dd0/classfl_1_1unordered__set_1_1const__iterator__coll__graph.svg" width="100%" height="472"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 <center><span class="legend">[<a target="top" href="../../graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:a18a5875dd6f68bdee4f34315df7a03ac" id="r_a18a5875dd6f68bdee4f34315df7a03ac"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_a18a5875dd6f68bdee4f34315df7a03ac.html#a18a5875dd6f68bdee4f34315df7a03ac">pointer</a> = const <a class="el" href="../../db/d42/struct_key.html">Key</a>*</td></tr>
-<tr class="separator:a18a5875dd6f68bdee4f34315df7a03ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abfa5df459b3f4670e6eaf18e26685d86" id="r_abfa5df459b3f4670e6eaf18e26685d86"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_abfa5df459b3f4670e6eaf18e26685d86.html#abfa5df459b3f4670e6eaf18e26685d86">reference</a> = const <a class="el" href="../../db/d42/struct_key.html">Key</a>&amp;</td></tr>
-<tr class="separator:abfa5df459b3f4670e6eaf18e26685d86"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a41e35e167ba26277dd48e3c32235889b" id="r_a41e35e167ba26277dd48e3c32235889b"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_a41e35e167ba26277dd48e3c32235889b.html#a41e35e167ba26277dd48e3c32235889b">value_type</a> = <a class="el" href="../../db/d42/struct_key.html">Key</a></td></tr>
-<tr class="separator:a41e35e167ba26277dd48e3c32235889b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a646204d87ddede8bf79c786d0b67ed55" id="r_a646204d87ddede8bf79c786d0b67ed55"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_a646204d87ddede8bf79c786d0b67ed55.html#a646204d87ddede8bf79c786d0b67ed55">iterator_category</a> = <a class="el" href="../../db/d39/structfl_1_1forward__iterator__tag.html">fl::forward_iterator_tag</a></td></tr>
+<tr class="separator:a646204d87ddede8bf79c786d0b67ed55"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9dbf8517dced70ac607775ced1a8b126" id="r_a9dbf8517dced70ac607775ced1a8b126"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_a9dbf8517dced70ac607775ced1a8b126.html#a9dbf8517dced70ac607775ced1a8b126">pointer</a> = const <a class="el" href="../../db/d42/struct_key.html">Key</a>*</td></tr>
+<tr class="separator:a9dbf8517dced70ac607775ced1a8b126"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adada628d72bd231bb5e3213e82e03e0b" id="r_adada628d72bd231bb5e3213e82e03e0b"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_adada628d72bd231bb5e3213e82e03e0b.html#adada628d72bd231bb5e3213e82e03e0b">reference</a> = const <a class="el" href="../../db/d42/struct_key.html">Key</a>&amp;</td></tr>
+<tr class="separator:adada628d72bd231bb5e3213e82e03e0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa93c2a9aa7f0fda0c2c5c264e211e560" id="r_aa93c2a9aa7f0fda0c2c5c264e211e560"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_aa93c2a9aa7f0fda0c2c5c264e211e560.html#aa93c2a9aa7f0fda0c2c5c264e211e560">value_type</a> = <a class="el" href="../../db/d42/struct_key.html">Key</a></td></tr>
+<tr class="separator:aa93c2a9aa7f0fda0c2c5c264e211e560"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a0d0fe606fe6e339e3926f2d44498dfb3" id="r_a0d0fe606fe6e339e3926f2d44498dfb3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_a0d0fe606fe6e339e3926f2d44498dfb3.html#a0d0fe606fe6e339e3926f2d44498dfb3">const_iterator</a> ()=default</td></tr>
-<tr class="separator:a0d0fe606fe6e339e3926f2d44498dfb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adb3230e84790ae41812f45f950680664" id="r_adb3230e84790ae41812f45f950680664"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_adb3230e84790ae41812f45f950680664.html#adb3230e84790ae41812f45f950680664">const_iterator</a> (const <a class="el" href="../../df/dc1/classfl_1_1unordered__set_1_1iterator.html">iterator</a> &amp;other)</td></tr>
-<tr class="separator:adb3230e84790ae41812f45f950680664"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a95ef778b2aa4cd94d7758f22ac3fe286" id="r_a95ef778b2aa4cd94d7758f22ac3fe286"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_a95ef778b2aa4cd94d7758f22ac3fe286.html#a95ef778b2aa4cd94d7758f22ac3fe286">const_iterator</a> (<a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_aad0776f15a178874407abb700fa99e1e.html#aad0776f15a178874407abb700fa99e1e">map_const_iterator</a> it)</td></tr>
-<tr class="separator:a95ef778b2aa4cd94d7758f22ac3fe286"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a983c93f079d70cf863fbe09ab2486669" id="r_a983c93f079d70cf863fbe09ab2486669"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_a983c93f079d70cf863fbe09ab2486669.html#a983c93f079d70cf863fbe09ab2486669">operator!=</a> (const <a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator.html">const_iterator</a> &amp;other) const</td></tr>
-<tr class="separator:a983c93f079d70cf863fbe09ab2486669"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a29e4d9485ff5956b0771ae5adceeabf6" id="r_a29e4d9485ff5956b0771ae5adceeabf6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_abfa5df459b3f4670e6eaf18e26685d86.html#abfa5df459b3f4670e6eaf18e26685d86">reference</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_a29e4d9485ff5956b0771ae5adceeabf6.html#a29e4d9485ff5956b0771ae5adceeabf6">operator*</a> () const</td></tr>
-<tr class="separator:a29e4d9485ff5956b0771ae5adceeabf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0d2f61f53530436d23c8bf0bc613656f" id="r_a0d2f61f53530436d23c8bf0bc613656f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator.html">const_iterator</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_a0d2f61f53530436d23c8bf0bc613656f.html#a0d2f61f53530436d23c8bf0bc613656f">operator++</a> ()</td></tr>
-<tr class="separator:a0d2f61f53530436d23c8bf0bc613656f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abbe0ce3e324081fa9b89da35d41aa75c" id="r_abbe0ce3e324081fa9b89da35d41aa75c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator.html">const_iterator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_abbe0ce3e324081fa9b89da35d41aa75c.html#abbe0ce3e324081fa9b89da35d41aa75c">operator++</a> (int)</td></tr>
-<tr class="separator:abbe0ce3e324081fa9b89da35d41aa75c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9323487b19b4a6949cb935180ba31b00" id="r_a9323487b19b4a6949cb935180ba31b00"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_a18a5875dd6f68bdee4f34315df7a03ac.html#a18a5875dd6f68bdee4f34315df7a03ac">pointer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_a9323487b19b4a6949cb935180ba31b00.html#a9323487b19b4a6949cb935180ba31b00">operator-&gt;</a> () const</td></tr>
-<tr class="separator:a9323487b19b4a6949cb935180ba31b00"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa213e5ee62feab3fc43774dd8ac3d22e" id="r_aa213e5ee62feab3fc43774dd8ac3d22e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_aa213e5ee62feab3fc43774dd8ac3d22e.html#aa213e5ee62feab3fc43774dd8ac3d22e">operator==</a> (const <a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator.html">const_iterator</a> &amp;other) const</td></tr>
-<tr class="separator:aa213e5ee62feab3fc43774dd8ac3d22e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb403e660d47436c888f8977c4949973" id="r_aeb403e660d47436c888f8977c4949973"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_aeb403e660d47436c888f8977c4949973.html#aeb403e660d47436c888f8977c4949973">const_iterator</a> () <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a>=default</td></tr>
+<tr class="separator:aeb403e660d47436c888f8977c4949973"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac594d5977db5a5603ff70c2da8688683" id="r_ac594d5977db5a5603ff70c2da8688683"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_ac594d5977db5a5603ff70c2da8688683.html#ac594d5977db5a5603ff70c2da8688683">const_iterator</a> (const <a class="el" href="../../df/dc1/classfl_1_1unordered__set_1_1iterator.html">iterator</a> &amp;other)</td></tr>
+<tr class="separator:ac594d5977db5a5603ff70c2da8688683"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ed8b7814b2cbe77a7594a9c44853a9f" id="r_a5ed8b7814b2cbe77a7594a9c44853a9f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_a5ed8b7814b2cbe77a7594a9c44853a9f.html#a5ed8b7814b2cbe77a7594a9c44853a9f">const_iterator</a> (<a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_a0e575e41e197e7169fb302b67615f9a8.html#a0e575e41e197e7169fb302b67615f9a8">map_const_iterator</a> it)</td></tr>
+<tr class="separator:a5ed8b7814b2cbe77a7594a9c44853a9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a063e3bad77a4e31cc5357bf04f294913" id="r_a063e3bad77a4e31cc5357bf04f294913"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_a063e3bad77a4e31cc5357bf04f294913.html#a063e3bad77a4e31cc5357bf04f294913">operator!=</a> (const <a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator.html">const_iterator</a> &amp;other) const</td></tr>
+<tr class="separator:a063e3bad77a4e31cc5357bf04f294913"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5bf0f2c1f8094de85c6364940bafabc9" id="r_a5bf0f2c1f8094de85c6364940bafabc9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_adada628d72bd231bb5e3213e82e03e0b.html#adada628d72bd231bb5e3213e82e03e0b">reference</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_a5bf0f2c1f8094de85c6364940bafabc9.html#a5bf0f2c1f8094de85c6364940bafabc9">operator*</a> () const</td></tr>
+<tr class="separator:a5bf0f2c1f8094de85c6364940bafabc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b1dec202ab1487003bf78d9ea470625" id="r_a7b1dec202ab1487003bf78d9ea470625"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator.html">const_iterator</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_a7b1dec202ab1487003bf78d9ea470625.html#a7b1dec202ab1487003bf78d9ea470625">operator++</a> ()</td></tr>
+<tr class="separator:a7b1dec202ab1487003bf78d9ea470625"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b3cd3eed5886b9c0e7fd1c8cf329028" id="r_a0b3cd3eed5886b9c0e7fd1c8cf329028"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator.html">const_iterator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_a0b3cd3eed5886b9c0e7fd1c8cf329028.html#a0b3cd3eed5886b9c0e7fd1c8cf329028">operator++</a> (int)</td></tr>
+<tr class="separator:a0b3cd3eed5886b9c0e7fd1c8cf329028"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f351cca04f1324e78fb38e5f21915b3" id="r_a9f351cca04f1324e78fb38e5f21915b3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_a9dbf8517dced70ac607775ced1a8b126.html#a9dbf8517dced70ac607775ced1a8b126">pointer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_a9f351cca04f1324e78fb38e5f21915b3.html#a9f351cca04f1324e78fb38e5f21915b3">operator-&gt;</a> () const</td></tr>
+<tr class="separator:a9f351cca04f1324e78fb38e5f21915b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad42d1668622ca0cea7535e26150beb2a" id="r_ad42d1668622ca0cea7535e26150beb2a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_ad42d1668622ca0cea7535e26150beb2a.html#ad42d1668622ca0cea7535e26150beb2a">operator==</a> (const <a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator.html">const_iterator</a> &amp;other) const</td></tr>
+<tr class="separator:ad42d1668622ca0cea7535e26150beb2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-types" name="pri-types"></a>
 Private Types</h2></td></tr>
-<tr class="memitem:aad0776f15a178874407abb700fa99e1e" id="r_aad0776f15a178874407abb700fa99e1e"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_aad0776f15a178874407abb700fa99e1e.html#aad0776f15a178874407abb700fa99e1e">map_const_iterator</a> = typename <a class="el" href="../../d4/d36/namespacefl_abaae7f90b18904efb34f766576b6b6fa.html#abaae7f90b18904efb34f766576b6b6fa">fl::unordered_map</a>&lt;<a class="el" href="../../db/d42/struct_key.html">Key</a>, bool&gt;<a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_a0d0fe606fe6e339e3926f2d44498dfb3.html#a0d0fe606fe6e339e3926f2d44498dfb3">::const_iterator</a></td></tr>
-<tr class="separator:aad0776f15a178874407abb700fa99e1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e575e41e197e7169fb302b67615f9a8" id="r_a0e575e41e197e7169fb302b67615f9a8"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_a0e575e41e197e7169fb302b67615f9a8.html#a0e575e41e197e7169fb302b67615f9a8">map_const_iterator</a> = typename <a class="el" href="../../dc/d56/classfl_1_1unordered__map.html">fl::unordered_map</a>&lt;<a class="el" href="../../db/d42/struct_key.html">Key</a>, bool, <a class="el" href="../../d6/dfd/structfl_1_1_hash.html">Hash</a>, KeyEqual&gt;<a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_aeb403e660d47436c888f8977c4949973.html#aeb403e660d47436c888f8977c4949973">::const_iterator</a></td></tr>
+<tr class="separator:a0e575e41e197e7169fb302b67615f9a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr class="memitem:aba155d2663a2454173b8e6fc77eb8f55" id="r_aba155d2663a2454173b8e6fc77eb8f55"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_aad0776f15a178874407abb700fa99e1e.html#aad0776f15a178874407abb700fa99e1e">map_const_iterator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_aba155d2663a2454173b8e6fc77eb8f55.html#aba155d2663a2454173b8e6fc77eb8f55">it_</a></td></tr>
-<tr class="separator:aba155d2663a2454173b8e6fc77eb8f55"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a952c0f9332163276afbc88a1731007" id="r_a8a952c0f9332163276afbc88a1731007"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_a0e575e41e197e7169fb302b67615f9a8.html#a0e575e41e197e7169fb302b67615f9a8">map_const_iterator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator_a8a952c0f9332163276afbc88a1731007.html#a8a952c0f9332163276afbc88a1731007">mIt</a></td></tr>
+<tr class="separator:a8a952c0f9332163276afbc88a1731007"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>fl/<a class="el" href="../../df/d26/unordered__set_8h_source.html">unordered_set.h</a></li>
+<li>fl/stl/<a class="el" href="../../df/d26/unordered__set_8h_source.html">unordered_set.h</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -173,7 +175,7 @@ Private Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../dd/d07/classfl_1_1unordered__set.html">unordered_set</a></li><li class="navelem"><a class="el" href="../../d5/d56/classfl_1_1unordered__set_1_1const__iterator.html">const_iterator</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:07 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,0 +1,21 @@
+digraph "fl::Server::pull"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="RL";
+  Node1 [id="Node000001",label="fl::Server::pull",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip="Pull requests from source, process, queue responses."];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::Server::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d00/classfl_1_1_server_a100615100d89f2a4e725a2525405ddfe.html#a100615100d89f2a4e725a2525405ddfe",tooltip=" "];
+  Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::Remote::update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/ddb/classfl_1_1_remote_a4579a9af2b68eb330345740407ef37fd.html#a4579a9af2b68eb330345740407ef37fd",tooltip="Main update: pull + tick + push (overrides Server::update)"];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="autoResearchLowMemoryLoop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/df2/_auto_research_low_memory_8h_a313a652d1531f7d82fb04a3f6499ddff.html#a313a652d1531f7d82fb04a3f6499ddff",tooltip=" "];
+  Node3 -> Node5 [id="edge4_Node000003_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::Remote::sendStreamUpdate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/ddb/classfl_1_1_remote_ac3d43fbc53d5dba8766a2a83834e2a06.html#ac3d43fbc53d5dba8766a2a83834e2a06",tooltip="Send stream update for a streaming async method (ASYNC_STREAM mode) The request ID is automatically r..."];
+  Node1 -> Node6 [id="edge5_Node000001_Node000006",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::Server::update",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/d00/classfl_1_1_server_a29083a0d8c0d26ca3c6c4ab341a1b0cb.html#a29083a0d8c0d26ca3c6c4ab341a1b0cb",tooltip="Main update: pull + push."];
+  Node6 -> Node2 [id="edge6_Node000006_Node000002",dir="back",color="steelblue1",style="solid",tooltip=" "];
+}

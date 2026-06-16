@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fl/align.h File Reference</title>
+<title>FastLED: fl/stl/align.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -101,28 +101,72 @@ $(function(){initNavTree('d1/ddf/align_8h.html','../../'); initResizable(true); 
 
 <div class="header">
   <div class="summary">
-<a href="#define-members">Macros</a>  </div>
+<a href="#nested-classes">Classes</a> &#124;
+<a href="#namespaces">Namespaces</a> &#124;
+<a href="#define-members">Macros</a> &#124;
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">align.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> This graph shows which files directly or indirectly include this file:</div>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Alignment macros and utilities for FastLED. </p>
+<p>Provides platform-independent alignment control with special handling for GCC 4.8.3 (Roger Clark STM32 core) and 8-bit AVR platforms. Also provides assume_aligned&lt;N&gt;(ptr) optimizer hint. </p>
+
+<p class="definition">Definition in file <a class="el" href="../../d1/ddf/align_8h_source.html">align.h</a>.</p>
+</div><div class="textblock"><code>#include &quot;<a class="el" href="../../d7/d84/cstddef_8h_source.html">fl/stl/cstddef.h</a>&quot;</code><br />
+<code>#include &quot;platforms/is_platform.h&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
+</div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for align.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../df/d0c/align_8h__incl.svg" width="474" height="110"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
+</div><div class="textblock"><div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> This graph shows which files directly or indirectly include this file:</div>
+<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-1-content" class="dyncontent" style="display:none;">
 <div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../dd/dcf/align_8h__dep__incl.svg" width="100%" height="600"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../d1/ddf/align_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d3b/classfl_1_1aligned__ptr.html">fl::aligned_ptr&lt; T, N &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
 <tr class="memitem:af8ff064181a2295b94633541ca2e5930" id="r_af8ff064181a2295b94633541ca2e5930"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/ddf/align_8h_af8ff064181a2295b94633541ca2e5930.html#af8ff064181a2295b94633541ca2e5930">FL_ALIGN</a></td></tr>
 <tr class="separator:af8ff064181a2295b94633541ca2e5930"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a29dcb94b335f8a78c78a00e2fc6541dd" id="r_a29dcb94b335f8a78c78a00e2fc6541dd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/ddf/align_8h_a29dcb94b335f8a78c78a00e2fc6541dd.html#a29dcb94b335f8a78c78a00e2fc6541dd">FL_ALIGN_AS</a>(T)</td></tr>
 <tr class="separator:a29dcb94b335f8a78c78a00e2fc6541dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0148b5276fc8a2c019dd20e4b4105ff4" id="r_a0148b5276fc8a2c019dd20e4b4105ff4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/ddf/align_8h_a0148b5276fc8a2c019dd20e4b4105ff4.html#a0148b5276fc8a2c019dd20e4b4105ff4">FL_ALIGN_AS_T</a>(expr)</td></tr>
+<tr class="separator:a0148b5276fc8a2c019dd20e4b4105ff4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa370858e259cc6b3837eb99921bec432" id="r_aa370858e259cc6b3837eb99921bec432"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/ddf/align_8h_aa370858e259cc6b3837eb99921bec432.html#aa370858e259cc6b3837eb99921bec432">FL_ALIGN_BYTES</a>&#160;&#160;&#160;1</td></tr>
 <tr class="separator:aa370858e259cc6b3837eb99921bec432"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a31f878ac21758b6e670cd8575335cdf9" id="r_a31f878ac21758b6e670cd8575335cdf9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/ddf/align_8h_a31f878ac21758b6e670cd8575335cdf9.html#a31f878ac21758b6e670cd8575335cdf9">FL_ALIGN_MAX</a>&#160;&#160;&#160;alignas(max_align_t)</td></tr>
+<tr class="separator:a31f878ac21758b6e670cd8575335cdf9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea56bd2a3313a0cf0eb877a46ca42086" id="r_aea56bd2a3313a0cf0eb877a46ca42086"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/ddf/align_8h_aea56bd2a3313a0cf0eb877a46ca42086.html#aea56bd2a3313a0cf0eb877a46ca42086">FL_ALIGNAS</a>(N)</td></tr>
+<tr class="separator:aea56bd2a3313a0cf0eb877a46ca42086"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a7b01a5ac18798d10b1b11d1f853ec8c6" id="r_a7b01a5ac18798d10b1b11d1f853ec8c6"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="../../da/d3c/namespacefl_1_1fl_ad95910fa68ff00bf006f4992b1b89256.html#ad95910fa68ff00bf006f4992b1b89256">fl::size_t</a> N, typename T&gt; </td></tr>
+<tr class="memitem:a7b01a5ac18798d10b1b11d1f853ec8c6"><td class="memTemplItemLeft" align="right" valign="top">const T *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a7b01a5ac18798d10b1b11d1f853ec8c6.html#a7b01a5ac18798d10b1b11d1f853ec8c6">fl::assume_aligned</a> (const T *ptr) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
+<tr class="separator:a7b01a5ac18798d10b1b11d1f853ec8c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79ac109b4ed308c1363d4c70089c9e69" id="r_a79ac109b4ed308c1363d4c70089c9e69"><td class="memTemplParams" colspan="2">template&lt;<a class="el" href="../../da/d3c/namespacefl_1_1fl_ad95910fa68ff00bf006f4992b1b89256.html#ad95910fa68ff00bf006f4992b1b89256">fl::size_t</a> N, typename T&gt; </td></tr>
+<tr class="memitem:a79ac109b4ed308c1363d4c70089c9e69"><td class="memTemplItemLeft" align="right" valign="top">T *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a79ac109b4ed308c1363d4c70089c9e69.html#a79ac109b4ed308c1363d4c70089c9e69">fl::assume_aligned</a> (T *ptr) <a class="el" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></td></tr>
+<tr class="separator:a79ac109b4ed308c1363d4c70089c9e69"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -130,8 +174,8 @@ Macros</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d1/ddf/align_8h.html">align.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_0dd6897a8ae40540acd9d694849e950e.html">stl</a></li><li class="navelem"><a class="el" href="../../d1/ddf/align_8h.html">align.h</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

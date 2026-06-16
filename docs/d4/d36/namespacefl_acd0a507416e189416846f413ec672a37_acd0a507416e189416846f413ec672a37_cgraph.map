@@ -1,0 +1,5 @@
+<map id="fl::pinMap" name="fl::pinMap">
+<area shape="rect" id="Node000001" title="Resolve port IDs for an array of PinInfo in&#45;place." alt="" coords="5,5,92,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a323f088e163b9ada03436721370e853f.html#a323f088e163b9ada03436721370e853f" title="Map a runtime pin number to an integer port ID using FastPin&lt;N&gt;::port()." alt="" coords="140,5,239,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,15,126,15,126,21,92,21"/>
+</map>

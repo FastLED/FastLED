@@ -1,0 +1,6 @@
+<map id="fl::IFastLED::setSegment" name="fl::IFastLED::setSegment">
+<area shape="rect" id="Node000001" title="Set a segment range for subsequent operations." alt="" coords="5,29,184,55"/>
+<area shape="poly" id="edge2_Node000001_Node000001" title=" " alt="" coords="67,31,61,21,64,11,75,5,95,3,118,6,128,15,124,19,115,11,95,8,77,10,68,15,66,20,71,28"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a3cdd970ae1ac06323addaec93ae7d4b9.html#a3cdd970ae1ac06323addaec93ae7d4b9" title=" " alt="" coords="232,29,295,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,39,218,39,218,45,184,45"/>
+</map>

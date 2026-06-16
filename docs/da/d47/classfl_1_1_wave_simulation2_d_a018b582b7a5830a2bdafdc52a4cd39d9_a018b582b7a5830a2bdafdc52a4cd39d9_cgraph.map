@@ -1,7 +1,11 @@
 <map id="fl::WaveSimulation2D::setSuperSample" name="fl::WaveSimulation2D::setSuperSample">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,168,45"/>
-<area shape="rect" id="Node000002" href="$da/d47/classfl_1_1_wave_simulation2_d_ae729085b341ecdaef1ea2c4fa18bac40.html#ae729085b341ecdaef1ea2c4fa18bac40" title=" " alt="" coords="216,5,379,45"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,23,202,23,202,28,168,28"/>
-<area shape="rect" id="Node000003" href="$d8/d78/examples_2_wave_2wave_8h_aa7d6eb4e4f91328bcee5e19a6a76ee4e.html#aa7d6eb4e4f91328bcee5e19a6a76ee4e" title=" " alt="" coords="427,13,521,38"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="379,23,413,23,413,28,379,28"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,23,168,63"/>
+<area shape="rect" id="Node000002" href="$da/d47/classfl_1_1_wave_simulation2_d_ae729085b341ecdaef1ea2c4fa18bac40.html#ae729085b341ecdaef1ea2c4fa18bac40" title=" " alt="" coords="216,23,379,63"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,41,202,41,202,46,168,46"/>
+<area shape="rect" id="Node000003" href="$d8/d78/examples_2_wave_2wave_8h_ad4492f55d142b7728a4221681c440b30.html#ad4492f55d142b7728a4221681c440b30" title=" " alt="" coords="442,5,537,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="379,30,428,23,429,29,379,35"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a3fd92c727664a77396403265415789d3.html#a3fd92c727664a77396403265415789d3" title=" " alt="" coords="427,55,552,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="379,51,413,55,413,60,379,56"/>
+<area shape="rect" id="Node000005" href="$da/d3c/namespacefl_1_1fl_a0bddf371925d8c4e94b88e9d7b35d259.html#a0bddf371925d8c4e94b88e9d7b35d259" title=" " alt="" coords="600,55,704,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="552,65,586,65,586,70,552,70"/>
 </map>

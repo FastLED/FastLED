@@ -1,0 +1,7 @@
+<map id="fl::third_party::hexwave::HexWave" name="fl::third_party::hexwave::HexWave">
+<area shape="rect" id="Node000001" title=" " alt="" coords="281,37,456,77"/>
+<area shape="rect" id="Node000002" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave.html#d7/d15/structfl_1_1third__party_1_1hexwave_1_1_hex_wave_parameters" title=" " alt="" coords="5,5,180,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="194,34,281,45,281,50,193,40"/>
+<area shape="rect" id="Node000003" href="$dd/d76/namespacefl_1_1third__party_1_1hexwave.html#db/d49/structfl_1_1third__party_1_1hexwave_1_1_hex_wave_engine" title="Engine state holding BLEP/BLAMP tables." alt="" coords="5,69,180,109"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="193,75,281,65,281,70,194,80"/>
+</map>

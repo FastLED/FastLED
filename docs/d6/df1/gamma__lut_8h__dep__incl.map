@@ -1,0 +1,28 @@
+<map id="fl/gfx/gamma_lut.h" name="fl/gfx/gamma_lut.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="711,5,856,31"/>
+<area shape="rect" id="Node000002" href="$d5/d4f/encoder__utils_8h.html" title="Shared utilities for SPI chipset encoders." alt="" coords="529,79,680,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="746,39,649,81,647,76,744,34"/>
+<area shape="rect" id="Node000092" href="$dd/d85/gamma__lut_8cpp_8hpp.html" title="Explicit instantiation of gamma LUT templates." alt="" coords="869,86,1057,111"/>
+<area shape="poly" id="edge14_Node000001_Node000092" title=" " alt="" coords="823,34,938,84,936,88,821,39"/>
+<area shape="rect" id="Node000003" href="$db/d13/encoders_2apa102_8h.html" title="APA102/DOTSTAR SPI chipset encoder." alt="" coords="5,167,156,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="516,115,354,138,168,169,157,171,156,166,167,164,353,133,515,109"/>
+<area shape="rect" id="Node000087" href="$d7/dd3/encoders_2hd108_8h.html" title="HD108 SPI chipset encoder." alt="" coords="180,167,331,207"/>
+<area shape="poly" id="edge4_Node000002_Node000087" title=" " alt="" coords="517,124,332,169,331,164,516,119"/>
+<area shape="rect" id="Node000088" href="$de/db9/lpd6803_8h.html" title="LPD6803 SPI chipset encoder." alt="" coords="355,167,505,207"/>
+<area shape="poly" id="edge6_Node000002_Node000088" title=" " alt="" coords="555,127,469,169,467,164,553,122"/>
+<area shape="rect" id="Node000089" href="$d7/deb/lpd8806_8h.html" title="LPD8806 SPI chipset encoder." alt="" coords="529,167,680,207"/>
+<area shape="poly" id="edge8_Node000002_Node000089" title=" " alt="" coords="607,133,607,166,602,166,602,133"/>
+<area shape="rect" id="Node000090" href="$dd/d37/encoders_2p9813_8h.html" title="P9813 SPI chipset encoder." alt="" coords="704,167,855,207"/>
+<area shape="poly" id="edge10_Node000002_Node000090" title=" " alt="" coords="656,122,742,164,740,169,654,127"/>
+<area shape="rect" id="Node000091" href="$d5/df5/sk9822_8h.html" title="SK9822 SPI chipset encoder." alt="" coords="879,167,1029,207"/>
+<area shape="poly" id="edge12_Node000002_Node000091" title=" " alt="" coords="694,119,879,164,878,169,692,124"/>
+<area shape="rect" id="Node000004" href="$db/d65/fl_2chipsets_2encoders_2pixel__iterator_8h.html" title="Non&#45;templated low level pixel data writing class." alt="" coords="441,255,592,295"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="170,205,442,257,441,262,169,210"/>
+<area shape="poly" id="edge5_Node000087_Node000004" title=" " alt="" coords="327,209,460,252,459,257,325,214"/>
+<area shape="poly" id="edge7_Node000088_Node000004" title=" " alt="" coords="461,215,499,253,496,256,457,218"/>
+<area shape="poly" id="edge9_Node000089_Node000004" title=" " alt="" coords="577,218,538,256,534,253,573,215"/>
+<area shape="poly" id="edge11_Node000090_Node000004" title=" " alt="" coords="710,213,575,257,573,252,708,208"/>
+<area shape="poly" id="edge13_Node000091_Node000004" title=" " alt="" coords="865,210,593,262,592,257,864,205"/>
+<area shape="rect" id="Node000049" href="$d5/d88/fl_2gfx_2__build_8cpp_8hpp.html" title="Unity build for fl/gfx/ — graphics types, primitives, and simulators." alt="" coords="1053,174,1207,199"/>
+<area shape="poly" id="edge15_Node000092_Node000049" title=" " alt="" coords="999,115,1109,171,1106,176,997,120"/>
+</map>

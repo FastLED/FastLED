@@ -1,0 +1,7 @@
+<map id="fl::ChannelManager::getDriverCount" name="fl::ChannelManager::getDriverCount">
+<area shape="rect" id="Node000001" title="Get count of registered drivers (including unnamed ones)" alt="" coords="243,23,391,63"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_a391a5eaa2e94590e1bc2adf1ac0f9456.html#a391a5eaa2e94590e1bc2adf1ac0f9456" title="Add LED channel with runtime configuration (from ChannelConfig)" alt="" coords="43,5,157,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="228,36,157,27,158,22,229,30"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_aa790ed751ca9d0af237a41c2fdccf52b.html#aa790ed751ca9d0af237a41c2fdccf52b" title="Get count of registered channel drivers." alt="" coords="5,55,195,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="229,56,195,59,195,54,229,50"/>
+</map>

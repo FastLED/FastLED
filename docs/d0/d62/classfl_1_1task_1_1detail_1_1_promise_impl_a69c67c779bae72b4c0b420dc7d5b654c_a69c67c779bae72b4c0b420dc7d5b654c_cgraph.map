@@ -1,0 +1,10 @@
+<map id="fl::task::detail::PromiseImpl::update" name="fl::task::detail::PromiseImpl::update">
+<area shape="rect" id="Node000001" title="Update Promise state &#45; processes callbacks if needed." alt="" coords="5,37,177,77"/>
+<area shape="rect" id="Node000002" href="$d0/d62/classfl_1_1task_1_1detail_1_1_promise_impl_a9da4f124d785a57070bd574a57a19300.html#a9da4f124d785a57070bd574a57a19300" title="Check if Promise is completed." alt="" coords="228,5,400,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="177,42,214,37,215,42,178,48"/>
+<area shape="rect" id="Node000004" href="$d0/d62/classfl_1_1task_1_1detail_1_1_promise_impl_a7406882f82063d080ef43de728acaed9.html#a7406882f82063d080ef43de728acaed9" title="Process pending callbacks." alt="" coords="225,69,403,109"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="178,67,212,72,212,77,177,72"/>
+<area shape="rect" id="Node000003" href="$d0/d62/classfl_1_1task_1_1detail_1_1_promise_impl_a9d3b1a7fbfd024a9c42345ba3eab7348.html#a9d3b1a7fbfd024a9c42345ba3eab7348" title="Read the state atomically." alt="" coords="451,37,623,77"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="401,35,438,40,437,46,400,40"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="403,74,437,69,438,74,403,79"/>
+</map>

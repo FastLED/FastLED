@@ -1,0 +1,10 @@
+<map id="ToggleButton::ToggleButton" name="ToggleButton::ToggleButton">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,29,205,55"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a50131c41da2f619067d98360de35fa27.html#a50131c41da2f619067d98360de35fa27" title="Public delay wrapper that keeps bare Arduino delay() preferred after using fl::delay; while still all..." alt="" coords="253,29,328,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="205,39,240,39,240,45,205,45"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="263,31,258,21,261,11,272,5,291,3,313,6,323,15,319,19,311,11,291,8,274,10,265,15,263,20,268,28"/>
+<area shape="rect" id="Node000003" href="$df/d9e/namespacefl_1_1detail_abd6e1e8189dbbbf28d720923205bd0dd.html#abd6e1e8189dbbbf28d720923205bd0dd" title="Internal delay implementation used by the public fl::delay wrapper." alt="" coords="376,29,531,55"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="328,39,362,39,362,45,328,45"/>
+<area shape="rect" id="Node000004" href="$db/d5c/namespacefl_1_1task_a2d40b476742263a3fa212e24b722e3ef.html#a2d40b476742263a3fa212e24b722e3ef" title="Run selected task subsystems." alt="" coords="579,29,673,55"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="531,39,565,39,565,45,531,45"/>
+</map>

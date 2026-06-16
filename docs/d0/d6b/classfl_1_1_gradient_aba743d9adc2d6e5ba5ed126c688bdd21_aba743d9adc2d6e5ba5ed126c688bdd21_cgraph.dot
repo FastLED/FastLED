@@ -8,8 +8,15 @@ digraph "fl::Gradient::operator="
   rankdir="LR";
   Node1 [id="Node000001",label="fl::Gradient::operator=",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node2 [id="Node000002",label="fl::Gradient::Gradient",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d6b/classfl_1_1_gradient_a7d0bbc988a07b1a9171b59d987dbec51.html#a7d0bbc988a07b1a9171b59d987dbec51",tooltip=" "];
+  Node2 [id="Node000002",label="fl::Gradient::Gradient",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d6b/classfl_1_1_gradient_ad0583faaaf846f10fff1aacd79b45443.html#ad0583faaaf846f10fff1aacd79b45443",tooltip=" "];
   Node2 -> Node2 [id="edge2_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 -> Node3 [id="edge3_Node000002_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="palette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dd0/_fire_cylinder_8h_a470cec2dcb21e474c257065bb93bfcd1.html#a470cec2dcb21e474c257065bb93bfcd1",tooltip=" "];
+  Node3 [id="Node000003",label="fl::Gradient::colorAt",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d6b/classfl_1_1_gradient_a71fd47e1f0fbfcf43487b2b6139dd70c.html#a71fd47e1f0fbfcf43487b2b6139dd70c",tooltip=" "];
+  Node2 -> Node4 [id="edge4_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::Gradient::fill",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d6b/classfl_1_1_gradient_a43d1e927a805589b2457ac0d1f218411.html#a43d1e927a805589b2457ac0d1f218411",tooltip=" "];
+  Node2 -> Node5 [id="edge5_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="palette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dd0/_fire_cylinder_8h_a470cec2dcb21e474c257065bb93bfcd1.html#a470cec2dcb21e474c257065bb93bfcd1",tooltip=" "];
+  Node2 -> Node6 [id="edge6_Node000002_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node6 [id="Node000006",label="fl::Gradient::set",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d6b/classfl_1_1_gradient_a07780f0f173e9c35e0e71b00617a1c8a.html#a07780f0f173e9c35e0e71b00617a1c8a",tooltip=" "];
+  Node6 -> Node5 [id="edge7_Node000006_Node000005",color="steelblue1",style="solid",tooltip=" "];
 }

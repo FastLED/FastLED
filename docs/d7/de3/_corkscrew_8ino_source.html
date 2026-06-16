@@ -103,20 +103,11 @@ $(function(){initNavTree('d7/de3/_corkscrew_8ino_source.html','../../'); initRes
   <div class="headertitle"><div class="title">Corkscrew.ino</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="../../d7/de3/_corkscrew_8ino.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#include &lt;<a class="code" href="../../db/d97/_fast_l_e_d_8h.html">FastLED.h</a>&gt;</span>  <span class="comment">// Main FastLED library for controlling LEDs</span></div>
+<a href="../../d7/de3/_corkscrew_8ino.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">// @filter: (memory is large)</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#if !SKETCH_HAS_LOTS_OF_MEMORY</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment">// Don&#39;t compile this for AVR microcontrollers (like Arduino Uno) because they typically </span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">// don&#39;t have enough memory to handle this complex animation.</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">// Instead, we provide empty setup/loop functions so the sketch will compile but do nothing.</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno"><a class="line" href="../../d7/de3/_corkscrew_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">    7</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="../../d7/de3/_corkscrew_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a>() {}</div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno"><a class="line" href="../../d7/de3/_corkscrew_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">    8</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="../../d7/de3/_corkscrew_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop</a>() {}</div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#else  </span><span class="comment">// For all other platforms with more memory (ESP32, Teensy, etc.)</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/d40/examples_2_corkscrew_2corkscrew_8h.html">Corkscrew.h</a>&quot;</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#endif  </span><span class="comment">// End of the non-AVR code section</span></div>
-<div class="ttc" id="a_corkscrew_8ino_a4fc01d736fe50cf5b977f755b675f11d_html_a4fc01d736fe50cf5b977f755b675f11d"><div class="ttname"><a href="../../d7/de3/_corkscrew_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d">setup</a></div><div class="ttdeci">void setup()</div><div class="ttdef"><b>Definition</b> <a href="#l00007">Corkscrew.ino:7</a></div></div>
-<div class="ttc" id="a_corkscrew_8ino_afe461d27b9c48d5921c00d521181f12f_html_afe461d27b9c48d5921c00d521181f12f"><div class="ttname"><a href="../../d7/de3/_corkscrew_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f">loop</a></div><div class="ttdeci">void loop()</div><div class="ttdef"><b>Definition</b> <a href="#l00008">Corkscrew.ino:8</a></div></div>
-<div class="ttc" id="a_fast_l_e_d_8h_html"><div class="ttname"><a href="../../db/d97/_fast_l_e_d_8h.html">FastLED.h</a></div><div class="ttdoc">central include file for FastLED, defines the CFastLED class/object</div></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &lt;FastLED.h&gt;</span>  <span class="comment">// Main FastLED library for controlling LEDs</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &quot;<a class="code" href="../../df/d40/examples_2_corkscrew_2corkscrew_8h.html">Corkscrew.h</a>&quot;</span></div>
 <div class="ttc" id="aexamples_2_corkscrew_2corkscrew_8h_html"><div class="ttname"><a href="../../df/d40/examples_2_corkscrew_2corkscrew_8h.html">Corkscrew.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -125,7 +116,7 @@ $(function(){initNavTree('d7/de3/_corkscrew_8ino_source.html','../../'); initRes
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_dada05b0a611f48c92eb4fcdbe293ddb.html">Corkscrew</a></li><li class="navelem"><a class="el" href="../../d7/de3/_corkscrew_8ino.html">Corkscrew.ino</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:19 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:06:58 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

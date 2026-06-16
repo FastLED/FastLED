@@ -1,0 +1,7 @@
+<map id="fl::enableAllDrivers" name="fl::enableAllDrivers">
+<area shape="rect" id="Node000001" title="Register every channel driver available on this platform with ChannelManager, restoring 3...." alt="" coords="252,31,399,56"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_a391a5eaa2e94590e1bc2adf1ac0f9456.html#a391a5eaa2e94590e1bc2adf1ac0f9456" title="Add LED channel with runtime configuration (from ChannelConfig)" alt="" coords="47,5,162,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="238,36,162,27,162,22,238,31"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_a03f0559bdcb421d199f6eb8faa0002f9.html#a03f0559bdcb421d199f6eb8faa0002f9" title="Enroll every channel driver available on this platform with ChannelManager." alt="" coords="5,55,204,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="238,55,205,59,204,54,238,50"/>
+</map>

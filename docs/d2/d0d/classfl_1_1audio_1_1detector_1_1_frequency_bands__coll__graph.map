@@ -1,0 +1,36 @@
+<map id="fl::audio::detector::FrequencyBands" name="fl::audio::detector::FrequencyBands">
+<area shape="rect" id="Node000001" title=" " alt="" coords="1509,99,1647,139"/>
+<area shape="rect" id="Node000002" href="$df/d9b/classfl_1_1audio_1_1_detector.html" title=" " alt="" coords="1187,5,1325,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1340,13,1412,20,1450,28,1486,41,1528,67,1561,97,1557,101,1525,71,1484,46,1449,34,1411,25,1339,18"/>
+<area shape="rect" id="Node000003" href="$d5/d1c/classfl_1_1_exponential_smoother.html" title=" " alt="" coords="1167,58,1345,98"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1359,89,1509,108,1509,113,1359,94"/>
+<area shape="rect" id="Node000004" href="$d7/da1/classfl_1_1detail_1_1_exponential_smoother_impl.html" title=" " alt="" coords="368,14,591,54"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="605,30,854,34,999,42,1143,55,1167,59,1166,64,1142,61,998,47,854,40,605,35"/>
+<area shape="rect" id="Node000006" href="$d5/d1c/classfl_1_1_exponential_smoother.html" title=" " alt="" coords="784,65,1000,91"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="605,46,615,47,784,65,784,70,614,53,604,51"/>
+<area shape="rect" id="Node000005" href="$d7/da1/classfl_1_1detail_1_1_exponential_smoother_impl.html" title=" " alt="" coords="5,14,228,54"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="242,31,368,31,368,37,242,37"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="1014,75,1166,75,1166,81,1014,81"/>
+<area shape="rect" id="Node000007" href="$d1/d2a/classfl_1_1_attack_decay_filter.html" title=" " alt="" coords="1179,137,1333,177"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="1347,161,1415,161,1485,153,1535,137,1536,142,1486,158,1415,166,1347,166"/>
+<area shape="rect" id="Node000008" href="$d8/dc2/classfl_1_1detail_1_1_attack_decay_filter_impl.html" title=" " alt="" coords="380,127,579,167"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="592,143,844,141,1143,146,1178,148,1178,153,1143,151,844,146,592,148"/>
+<area shape="rect" id="Node000010" href="$d1/d2a/classfl_1_1_attack_decay_filter.html" title=" " alt="" coords="796,179,988,204"/>
+<area shape="poly" id="edge11_Node000010_Node000008" title=" " alt="" coords="593,158,615,161,796,179,795,185,614,166,592,163"/>
+<area shape="rect" id="Node000009" href="$d8/dc2/classfl_1_1detail_1_1_attack_decay_filter_impl.html" title=" " alt="" coords="17,127,216,167"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="230,145,380,145,380,150,230,150"/>
+<area shape="poly" id="edge10_Node000007_Node000010" title=" " alt="" coords="1001,178,1178,161,1179,167,1002,184"/>
+<area shape="rect" id="Node000011" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="1177,271,1335,311"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="1319,263,1399,227,1484,182,1550,137,1553,142,1487,187,1401,232,1321,268"/>
+<area shape="rect" id="Node000012" href="$d6/d86/classfl_1_1audio_1_1fft_1_1_bins.html" title=" " alt="" coords="826,251,958,276"/>
+<area shape="poly" id="edge13_Node000011_Node000012" title=" " alt="" coords="972,267,1177,283,1177,288,972,272"/>
+<area shape="rect" id="Node000013" href="$d2/d24/classfl_1_1vector.html" title=" " alt="" coords="410,256,549,281"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="562,266,760,265,826,263,826,268,760,270,562,271"/>
+<area shape="rect" id="Node000018" href="$d4/dc0/structfl_1_1detail_1_1_control_block_base.html" title=" " alt="" coords="380,328,579,353"/>
+<area shape="poly" id="edge15_Node000011_Node000018" title=" " alt="" coords="592,331,1177,294,1177,299,592,336"/>
+<area shape="rect" id="Node000021" href="$d1/d74/classfl_1_1shared__ptr.html" title=" " alt="" coords="819,364,965,389"/>
+<area shape="poly" id="edge18_Node000021_Node000018" title=" " alt="" coords="593,348,819,368,819,373,592,353"/>
+<area shape="rect" id="Node000019" href="$da/d98/classfl_1_1_atomic_fake.html" title=" " alt="" coords="49,321,185,361"/>
+<area shape="poly" id="edge16_Node000018_Node000019" title=" " alt="" coords="198,338,380,338,380,343,198,343"/>
+<area shape="poly" id="edge17_Node000011_Node000021" title=" " alt="" coords="978,380,1059,377,1101,371,1142,361,1190,338,1230,309,1233,314,1193,342,1144,366,1102,376,1059,382,979,385"/>
+</map>

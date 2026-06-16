@@ -1,4 +1,19 @@
 var searchData=
 [
-  ['u8easingfunction_0',['U8EasingFunction',['../d4/d36/namespacefl_a351456da7166b4fdf8e1ea8c9c333517.html#a351456da7166b4fdf8e1ea8c9c333517',1,'fl']]]
+  ['rampphase_0',['RampPhase',['../d4/d36/namespacefl_a2877a4f580878567e34215a59c4e15f9.html#a2877a4f580878567e34215a59c4e15f9',1,'fl']]],
+  ['registeredparameternumbers_1',['RegisteredParameterNumbers',['../dc/d44/struct_r_p_n_a8204295a9a411a3b0687f9301cd9f292.html#a8204295a9a411a3b0687f9301cd9f292',1,'RPN']]],
+  ['registrationmode_2',['RegistrationMode',['../d8/da0/classfl_1_1_c_l_e_d_controller_a3dbf8e3de1a4b5b7df1d31e2f7ec1fd1.html#a3dbf8e3de1a4b5b7df1d31e2f7ec1fd1',1,'fl::CLEDController']]],
+  ['remoteclearflags_3',['RemoteClearFlags',['../d4/d36/namespacefl_aaf0f4e8df0adcad8b8eac53d599898aa.html#aaf0f4e8df0adcad8b8eac53d599898aa',1,'fl']]],
+  ['resetcause_4',['ResetCause',['../d4/d36/namespacefl_a5096449b4a994331b3746d029e8c3187.html#a5096449b4a994331b3746d029e8c3187',1,'fl']]],
+  ['resulterror_5',['ResultError',['../d4/d36/namespacefl_a8b1ee295f40939df39d8df9a1960bbec.html#a8b1ee295f40939df39d8df9a1960bbec',1,'fl']]],
+  ['returncode_6',['ReturnCode',['../db/dfb/_auto_research_remote_8cpp_a576a148b16490804141abadc485e2f0f.html#a576a148b16490804141abadc485e2f0f',1,'AutoResearchRemote.cpp']]],
+  ['rgbw_5fmode_7',['RGBW_MODE',['../d4/d36/namespacefl_a4d0b913888f510f2bc0ac2093750e963.html#a4d0b913888f510f2bc0ac2093750e963',1,'fl::RGBW_MODE'],['../d7/dbb/rgbw_8h_a4d0b913888f510f2bc0ac2093750e963.html#a4d0b913888f510f2bc0ac2093750e963',1,'RGBW_MODE:&#160;rgbw.h']]],
+  ['rgbwlutinterp_8',['RgbwLutInterp',['../d4/d36/namespacefl_a72d3610391944a758ec8bc47b227b6a9.html#a72d3610391944a758ec8bc47b227b6a9',1,'fl']]],
+  ['rgbww_5fmode_9',['RGBWW_MODE',['../d4/d36/namespacefl_ad5c5b1ec01cb08e389332d8af2f3a8c5.html#ad5c5b1ec01cb08e389332d8af2f3a8c5',1,'fl']]],
+  ['ripplebehavior_10',['rippleBehavior',['../de/de3/ripple_8h_a634431dc85c7ae6b9a0cf08d1f7e416c.html#a634431dc85c7ae6b9a0cf08d1f7e416c',1,'ripple.h']]],
+  ['ripplestate_11',['rippleState',['../de/de3/ripple_8h_a1f2f44ff7f5e1cfc83b354cfdfa2bcdb.html#a1f2f44ff7f5e1cfc83b354cfdfa2bcdb',1,'ripple.h']]],
+  ['rpcmode_12',['RpcMode',['../d4/d36/namespacefl_af8cfb58be08f8a4032d5a293fe8ad792.html#af8cfb58be08f8a4032d5a293fe8ad792',1,'fl']]],
+  ['rxbackend_13',['RxBackend',['../d4/d36/namespacefl_a6f679a987369746122401c946b3a1d8b.html#a6f679a987369746122401c946b3a1d8b',1,'fl']]],
+  ['rxdevicetype_14',['RxDeviceType',['../d4/d36/namespacefl_acf4be728c6cec387b6601072b61872fb.html#acf4be728c6cec387b6601072b61872fb',1,'fl']]],
+  ['rxwaitresult_15',['RxWaitResult',['../d4/d36/namespacefl_abbddfa9e0f349eb2c0b3195913b67bc5.html#abbddfa9e0f349eb2c0b3195913b67bc5',1,'fl']]]
 ];

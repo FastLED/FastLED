@@ -1,0 +1,9 @@
+<map id="fl::getPwmFrequency" name="fl::getPwmFrequency">
+<area shape="rect" id="Node000001" title="Query the configured PWM frequency for a pin." alt="" coords="5,5,164,31"/>
+<area shape="rect" id="Node000002" href="$d9/d33/namespacefl_1_1pwm__state_aee72e1cd03d83550f0f59cd5a4356e07.html#aee72e1cd03d83550f0f59cd5a4356e07" title=" " alt="" coords="212,5,391,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,15,198,15,198,21,164,21"/>
+<area shape="rect" id="Node000003" href="$d9/d33/namespacefl_1_1pwm__state_a6df56c095fbd351947b973e0e1d5289a.html#a6df56c095fbd351947b973e0e1d5289a" title=" " alt="" coords="439,5,589,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="391,15,425,15,425,21,391,21"/>
+<area shape="rect" id="Node000004" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="637,5,800,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="589,15,624,15,624,21,589,21"/>
+</map>

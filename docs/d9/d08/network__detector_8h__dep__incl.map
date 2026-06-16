@@ -1,0 +1,14 @@
+<map id="fl/net/network_detector.h" name="fl/net/network_detector.h">
+<area shape="rect" id="Node000001" title="Cross&#45;platform facade for runtime network activity detection." alt="" coords="118,5,302,31"/>
+<area shape="rect" id="Node000002" href="$df/dc5/fl_2channels_2driver_8cpp_8hpp.html" title=" " alt="" coords="5,79,193,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="182,40,119,81,116,76,179,36"/>
+<area shape="rect" id="Node000006" href="$d2/dd3/manager_8cpp_8hpp.html" title=" " alt="" coords="218,79,426,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="241,36,305,76,302,81,238,40"/>
+<area shape="rect" id="Node000003" href="$d1/d97/fl_2channels_2__build_8cpp_8hpp.html" title=" " alt="" coords="115,152,305,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="130,109,193,150,190,154,127,114"/>
+<area shape="rect" id="Node000004" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="58,225,186,251"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="187,188,138,227,135,223,184,184"/>
+<area shape="rect" id="Node000005" href="$d7/d44/fl_8channels_09_8cpp.html" title="Unity build: recursive includes from src/fl/channels/." alt="" coords="210,225,389,251"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="237,184,286,223,283,227,233,188"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="294,114,230,154,227,150,291,109"/>
+</map>

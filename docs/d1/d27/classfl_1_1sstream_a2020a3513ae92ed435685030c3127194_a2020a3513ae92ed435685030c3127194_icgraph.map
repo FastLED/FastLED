@@ -1,0 +1,27 @@
+<map id="fl::sstream::clear" name="fl::sstream::clear">
+<area shape="rect" id="Node000001" title=" " alt="" coords="627,187,757,212"/>
+<area shape="rect" id="Node000002" href="$d4/df9/_auto_research_test_8cpp_ac7607ef5b12973ed8cd8353da071aef8.html#ac7607ef5b12973ed8cd8353da071aef8" title="Dump raw edge timing data to console for debugging." alt="" coords="399,56,563,81"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="668,179,628,140,577,103,533,84,535,79,580,98,632,136,672,175"/>
+<area shape="rect" id="Node000004" href="$d4/df9/_auto_research_test_8cpp_aac567188ee44c45d15b20231ecff68c9.html#aac567188ee44c45d15b20231ecff68c9" title=" " alt="" coords="5,56,108,81"/>
+<area shape="poly" id="edge8_Node000001_Node000004" title=" " alt="" coords="657,182,619,163,578,147,484,127,352,106,108,77,108,71,353,101,484,121,579,142,622,159,659,178"/>
+<area shape="rect" id="Node000014" href="$d6/dfe/namespacesimd__test_ada70deca98a60672910d9e941b2c6244.html#ada70deca98a60672910d9e941b2c6244" title="Print summary table of all test results." alt="" coords="385,157,578,183"/>
+<area shape="poly" id="edge6_Node000001_Node000014" title=" " alt="" coords="613,191,572,185,573,180,613,186"/>
+<area shape="rect" id="Node000016" href="$d9/d1a/namespaceautoresearch_1_1simd__check_a4bd7c9fa82e77bb9c28efbf177f99216.html#a4bd7c9fa82e77bb9c28efbf177f99216" title="Run the full SIMD test suite. Returns the number of failures." alt="" coords="400,207,563,247"/>
+<area shape="poly" id="edge9_Node000001_Node000016" title=" " alt="" coords="613,212,563,219,562,214,613,207"/>
+<area shape="rect" id="Node000007" href="$dd/dc8/_auto_research_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="452,272,511,297"/>
+<area shape="poly" id="edge10_Node000001_Node000007" title=" " alt="" coords="660,222,622,242,580,262,512,282,510,276,578,257,620,238,657,217"/>
+<area shape="rect" id="Node000017" href="$d8/da0/class_driver_test_runner_aecda4c92e3d610584564ddf0d2f81e8e.html#aecda4c92e3d610584564ddf0d2f81e8e" title="Validate that all expected drivers are present." alt="" coords="384,322,579,362"/>
+<area shape="poly" id="edge11_Node000001_Node000017" title=" " alt="" coords="674,225,634,269,608,292,580,312,556,324,554,320,577,308,605,288,630,265,671,221"/>
+<area shape="rect" id="Node000003" href="$d4/df9/_auto_research_test_8cpp_ade4309c9f4171360f59ed787c7041584.html#ade4309c9f4171360f59ed787c7041584" title=" " alt="" coords="211,5,281,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="407,56,281,28,282,23,409,50"/>
+<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="386,71,108,71,108,66,386,66"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="198,33,105,59,104,53,197,28"/>
+<area shape="rect" id="Node000013" href="$d4/df9/_auto_research_test_8cpp_ab5d3883aa989a0c1298af1a8a0d2851a.html#ab5d3883aa989a0c1298af1a8a0d2851a" title=" " alt="" coords="22,5,91,31"/>
+<area shape="poly" id="edge4_Node000003_Node000013" title=" " alt="" coords="197,21,91,21,91,15,197,15"/>
+<area shape="rect" id="Node000015" href="$d6/df8/_s_i_m_d_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="217,157,275,183"/>
+<area shape="poly" id="edge7_Node000014_Node000015" title=" " alt="" coords="371,173,276,173,276,167,371,167"/>
+<area shape="rect" id="Node000018" href="$d8/da0/class_driver_test_runner_aaab05c61d961d92ff48a5746076f8de6.html#aaab05c61d961d92ff48a5746076f8de6" title="Run all tests: validation + driver tests." alt="" coords="156,322,336,362"/>
+<area shape="poly" id="edge12_Node000017_Node000018" title=" " alt="" coords="370,345,336,345,336,339,370,339"/>
+<area shape="rect" id="Node000019" href="$d8/de2/_driver_test_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="27,329,86,355"/>
+<area shape="poly" id="edge13_Node000018_Node000019" title=" " alt="" coords="142,345,86,345,86,339,142,339"/>
+</map>

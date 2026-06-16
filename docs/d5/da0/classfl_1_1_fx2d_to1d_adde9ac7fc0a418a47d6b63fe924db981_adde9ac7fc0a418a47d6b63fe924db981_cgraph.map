@@ -1,0 +1,19 @@
+<map id="fl::Fx2dTo1d::draw" name="fl::Fx2dTo1d::draw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,104,145,129"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a7028271728479d2b9330f545c776ca5b.html#a7028271728479d2b9330f545c776ca5b" title="Sample a pixel from a 2D CRGB grid at floating&#45;point coordinates." alt="" coords="211,79,298,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="145,104,197,97,198,102,146,109"/>
+<area shape="rect" id="Node000009" href="$d4/d1c/classfl_1_1_fx1d_a28ea920e4b7234489d906d528639084b.html#a28ea920e4b7234489d906d528639084b" title=" " alt="" coords="193,128,316,153"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="146,123,180,128,179,133,145,129"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_ae42bfeb5fc989a01c398b85f4e3accca.html#ae42bfeb5fc989a01c398b85f4e3accca" title="Bilinear interpolation sample from a 2D CRGB grid." alt="" coords="365,55,501,80"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="298,83,351,76,351,81,299,88"/>
+<area shape="rect" id="Node000008" href="$d4/d36/namespacefl_a119e769098c559cc0883bed762678d55.html#a119e769098c559cc0883bed762678d55" title="Nearest&#45;neighbor sample from a 2D CRGB grid." alt="" coords="364,104,501,129"/>
+<area shape="poly" id="edge6_Node000002_Node000008" title=" " alt="" coords="299,95,351,102,350,108,298,100"/>
+<area shape="rect" id="Node000004" href="$da/dd6/structfl_1_1_c_r_g_b_a7e34886ec51c1aff8262123de5152437.html#a7e34886ec51c1aff8262123de5152437" title=" " alt="" coords="549,5,668,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="478,52,548,32,550,37,479,57"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="575,104,642,129"/>
+<area shape="poly" id="edge4_Node000003_Node000006" title=" " alt="" coords="479,77,562,101,561,106,478,83"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="577,55,640,80"/>
+<area shape="poly" id="edge5_Node000003_Node000007" title=" " alt="" coords="501,65,563,65,563,70,501,70"/>
+<area shape="poly" id="edge7_Node000008_Node000006" title=" " alt="" coords="502,114,562,114,562,119,502,119"/>
+<area shape="poly" id="edge8_Node000008_Node000007" title=" " alt="" coords="478,101,563,77,565,82,479,107"/>
+</map>

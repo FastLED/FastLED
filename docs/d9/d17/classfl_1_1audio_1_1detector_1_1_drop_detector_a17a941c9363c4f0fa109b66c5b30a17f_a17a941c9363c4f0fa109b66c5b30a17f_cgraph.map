@@ -1,0 +1,7 @@
+<map id="fl::audio::detector::DropDetector::calculateEnergyFlux" name="fl::audio::detector::DropDetector::calculateEnergyFlux">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,23,263,63"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="311,5,377,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="263,25,297,21,297,26,263,30"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="313,55,375,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="263,55,299,60,299,65,263,61"/>
+</map>

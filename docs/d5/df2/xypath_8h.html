@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fl/xypath.h File Reference</title>
+<title>FastLED: fl/gfx/xypath.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -107,13 +107,14 @@ $(function(){initNavTree('d5/df2/xypath_8h.html','../../'); initResizable(true);
   <div class="headertitle"><div class="title">xypath.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="../../dd/d67/function_8h_source.html">fl/function.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../da/d78/leds_8h_source.html">fl/leds.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d3/d41/pair_8h_source.html">fl/pair.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../dc/d18/memory_8h_source.html">fl/memory.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d2/db4/tile2x2_8h_source.html">fl/tile2x2.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d2/d80/transform_8h_source.html">fl/transform.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d8/d5f/xypath__impls_8h_source.html">fl/xypath_impls.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../dd/d67/function_8h_source.html">fl/stl/function.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../da/d78/leds_8h_source.html">fl/gfx/leds.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d41/pair_8h_source.html">fl/stl/pair.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../df/d6a/shared__ptr_8h_source.html">fl/stl/shared_ptr.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d2/db4/tile2x2_8h_source.html">fl/gfx/tile2x2.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d2/d80/transform_8h_source.html">fl/math/transform.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d8/d5f/xypath__impls_8h_source.html">fl/gfx/xypath_impls.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for xypath.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -126,7 +127,7 @@ $(function(){initNavTree('d5/df2/xypath_8h.html','../../'); initResizable(true);
 <div id="dynsection-1-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-1-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d1/d04/xypath_8h__dep__incl.svg" width="100%" height="481"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d1/d04/xypath_8h__dep__incl.svg" width="100%" height="558"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 </div>
 <p><a href="../../d5/df2/xypath_8h_source.html">Go to the source code of this file.</a></p>
@@ -141,21 +142,21 @@ Classes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/de2/namespacefl_1_1xypath__detail.html">fl::xypath_detail</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:aa5fd67edc6fc65d9ff61ca8592df3d0e" id="r_aa5fd67edc6fc65d9ff61ca8592df3d0e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_aa5fd67edc6fc65d9ff61ca8592df3d0e.html#aa5fd67edc6fc65d9ff61ca8592df3d0e">fl::FASTLED_SMART_PTR</a> (<a class="el" href="../../d9/df4/classfl_1_1_x_y_path.html">XYPath</a>)</td></tr>
-<tr class="separator:aa5fd67edc6fc65d9ff61ca8592df3d0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a214a64a2de3625b72ecb3fa44c000964" id="r_a214a64a2de3625b72ecb3fa44c000964"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a214a64a2de3625b72ecb3fa44c000964.html#a214a64a2de3625b72ecb3fa44c000964">fl::FASTLED_SMART_PTR</a> (<a class="el" href="../../d0/d99/classfl_1_1_x_y_path_function.html">XYPathFunction</a>)</td></tr>
-<tr class="separator:a214a64a2de3625b72ecb3fa44c000964"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae10998838dace20495bc3a1ff3a09e2d" id="r_ae10998838dace20495bc3a1ff3a09e2d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_ae10998838dace20495bc3a1ff3a09e2d.html#ae10998838dace20495bc3a1ff3a09e2d">fl::FASTLED_SMART_PTR</a> (<a class="el" href="../../d9/d43/classfl_1_1_x_y_path_generator.html">XYPathGenerator</a>)</td></tr>
-<tr class="separator:ae10998838dace20495bc3a1ff3a09e2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a97febd688e24b70eec20c466a3c0ab39" id="r_a97febd688e24b70eec20c466a3c0ab39"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a97febd688e24b70eec20c466a3c0ab39.html#a97febd688e24b70eec20c466a3c0ab39">fl::FASTLED_SMART_PTR</a> (<a class="el" href="../../d2/dbc/classfl_1_1_x_y_path_renderer.html">XYPathRenderer</a>)</td></tr>
-<tr class="separator:a97febd688e24b70eec20c466a3c0ab39"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a25022ab6286c2b0de071c0d27bde28" id="r_a6a25022ab6286c2b0de071c0d27bde28"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a6a25022ab6286c2b0de071c0d27bde28.html#a6a25022ab6286c2b0de071c0d27bde28">fl::FASTLED_SHARED_PTR</a> (<a class="el" href="../../d9/df4/classfl_1_1_x_y_path.html">XYPath</a>)</td></tr>
+<tr class="separator:a6a25022ab6286c2b0de071c0d27bde28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a842176f576ecf742ef54f0e98c5922e8" id="r_a842176f576ecf742ef54f0e98c5922e8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a842176f576ecf742ef54f0e98c5922e8.html#a842176f576ecf742ef54f0e98c5922e8">fl::FASTLED_SHARED_PTR</a> (<a class="el" href="../../d0/d99/classfl_1_1_x_y_path_function.html">XYPathFunction</a>)</td></tr>
+<tr class="separator:a842176f576ecf742ef54f0e98c5922e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2751a47dc1e470465a786d12a57a4aee" id="r_a2751a47dc1e470465a786d12a57a4aee"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a2751a47dc1e470465a786d12a57a4aee.html#a2751a47dc1e470465a786d12a57a4aee">fl::FASTLED_SHARED_PTR</a> (<a class="el" href="../../d9/d43/classfl_1_1_x_y_path_generator.html">XYPathGenerator</a>)</td></tr>
+<tr class="separator:a2751a47dc1e470465a786d12a57a4aee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3feec03d2787d26d345bc05428aab073" id="r_a3feec03d2787d26d345bc05428aab073"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a3feec03d2787d26d345bc05428aab073.html#a3feec03d2787d26d345bc05428aab073">fl::FASTLED_SHARED_PTR</a> (<a class="el" href="../../d2/dbc/classfl_1_1_x_y_path_renderer.html">XYPathRenderer</a>)</td></tr>
+<tr class="separator:a3feec03d2787d26d345bc05428aab073"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a31c7645d951955d935ca9ec8346b2298" id="r_a31c7645d951955d935ca9ec8346b2298"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d2/db2/classfl_1_1string.html">fl::string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/de2/namespacefl_1_1xypath__detail_a31c7645d951955d935ca9ec8346b2298.html#a31c7645d951955d935ca9ec8346b2298">fl::xypath_detail::unique_missing_name</a> (const char *prefix)</td></tr>
 <tr class="separator:a31c7645d951955d935ca9ec8346b2298"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -165,8 +166,8 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d5/df2/xypath_8h.html">xypath.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_c9349635bab014644c82face402cd66f.html">gfx</a></li><li class="navelem"><a class="el" href="../../d5/df2/xypath_8h.html">xypath.h</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

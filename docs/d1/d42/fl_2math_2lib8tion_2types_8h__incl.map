@@ -1,0 +1,12 @@
+<map id="fl/math/lib8tion/types.h" name="fl/math/lib8tion/types.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,179,31"/>
+<area shape="rect" id="Node000002" href="$dc/d11/fl_2math_2types_8h.html" title="Defines fractional types used for lib8tion functions." alt="" coords="32,79,152,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="95,31,95,65,89,65,89,31"/>
+<area shape="rect" id="Node000003" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="41,225,143,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="91,105,83,137,81,177,88,212,83,213,76,178,78,137,86,104"/>
+<area shape="rect" id="Node000005" href="$d3/d7e/int_8h.html" title=" " alt="" coords="91,152,173,177"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="101,103,121,139,116,141,96,106"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="33,299,151,324"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="95,251,95,285,89,285,89,251"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="128,179,108,215,103,212,123,176"/>
+</map>

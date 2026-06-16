@@ -1,0 +1,17 @@
+<map id="fl::encoder_for" name="fl::encoder_for">
+<area shape="rect" id="Node000001" title="Extract the encoder selector from a compile&#45;time TIMING type." alt="" coords="629,93,744,118"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a336a0d84589b1ad8d94fd4a267b68504.html#a336a0d84589b1ad8d94fd4a267b68504" title="Build a ClocklessChipset from a compile&#45;time TIMING trait." alt="" coords="408,13,544,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="647,89,580,60,523,41,524,36,582,55,649,84"/>
+<area shape="rect" id="Node000004" href="$db/d63/class_auto_research_remote_control_abb6600e8a1e8c4ef46ba29e7bd3b78b4.html#abb6600e8a1e8c4ef46ba29e7bd3b78b4" title="Register all RPC functions with shared autoresearch state." alt="" coords="112,113,323,153"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="616,105,581,104,476,100,430,100,371,104,299,116,298,111,370,99,430,94,476,94,581,99,616,100"/>
+<area shape="rect" id="Node000006" href="$db/d63/class_auto_research_remote_control_a2e12a8f854f2f66312793a4405f4fddb.html#a2e12a8f854f2f66312793a4405f4fddb" title=" " alt="" coords="371,113,581,153"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="616,117,582,122,581,117,615,112"/>
+<area shape="rect" id="Node000007" href="$db/d63/class_auto_research_remote_control_a7992b62fd1f26fe1898d2ea8a78b370a.html#a7992b62fd1f26fe1898d2ea8a78b370a" title=" " alt="" coords="371,177,581,217"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="656,128,582,168,551,180,549,175,580,163,653,123"/>
+<area shape="rect" id="Node000003" href="$df/df5/structfl_1_1_channel_config_aaa382ee7bfe572aa96a4b55ad78f6d7c.html#aaa382ee7bfe572aa96a4b55ad78f6d7c" title="Template constructor with TIMING type (backwards compatibility)" alt="" coords="147,5,287,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="394,28,288,28,288,23,394,23"/>
+<area shape="rect" id="Node000005" href="$dd/dc8/_auto_research_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,121,64,146"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="98,136,64,136,64,131,98,131"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="357,136,323,136,323,131,357,131"/>
+<area shape="poly" id="edge8_Node000007_Node000004" title=" " alt="" coords="381,177,298,156,299,151,382,171"/>
+</map>

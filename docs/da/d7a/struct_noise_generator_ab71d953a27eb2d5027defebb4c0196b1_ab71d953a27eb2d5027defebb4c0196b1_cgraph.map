@@ -1,0 +1,11 @@
+<map id="NoiseGenerator::LedValue" name="NoiseGenerator::LedValue">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,196,56"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="295,5,361,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,30,280,21,281,26,197,35"/>
+<area shape="rect" id="Node000003" href="$da/d7a/struct_noise_generator_a52de12fb347f8a47986c8c979caa9126.html#a52de12fb347f8a47986c8c979caa9126" title=" " alt="" coords="244,55,412,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="197,51,231,54,230,60,196,56"/>
+<area shape="rect" id="Node000004" href="$d8/df9/group___noise_generation_gaa452e57f154ab8d6d692375dba1ef5cb.html#gaa452e57f154ab8d6d692375dba1ef5cb" title=" " alt="" coords="460,55,537,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="412,65,446,65,446,70,412,70"/>
+<area shape="rect" id="Node000005" href="$d8/df9/group___noise_generation_gae021f30d62fea75ea1397e1a81b28a59.html#gae021f30d62fea75ea1397e1a81b28a59" title=" " alt="" coords="585,55,693,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="537,65,571,65,571,70,537,70"/>
+</map>

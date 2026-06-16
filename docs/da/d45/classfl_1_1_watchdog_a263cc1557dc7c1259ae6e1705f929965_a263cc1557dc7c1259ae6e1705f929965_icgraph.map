@@ -1,0 +1,10 @@
+<map id="fl::Watchdog::begin" name="fl::Watchdog::begin">
+<area shape="rect" id="Node000001" title=" " alt="" coords="479,35,625,60"/>
+<area shape="poly" id="edge2_Node000001_Node000001" title=" " alt="" coords="594,26,583,17,552,13,527,15,513,20,511,26,518,33,514,36,506,26,510,16,526,10,552,8,585,12,598,21"/>
+<area shape="rect" id="Node000002" href="$d1/df2/_auto_research_low_memory_8h_ae3f918f9121ab392058ef53302b021cf.html#ae3f918f9121ab392058ef53302b021cf" title=" " alt="" coords="203,5,431,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="464,39,418,33,419,28,465,34"/>
+<area shape="rect" id="Node000003" href="$df/d52/namespacefl_1_1platforms_a3333f9482b0798c0daebdc07be2cdd5c.html#a3333f9482b0798c0daebdc07be2cdd5c" title=" " alt="" coords="207,55,426,95"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="465,60,426,65,426,60,465,55"/>
+<area shape="rect" id="Node000004" href="$d7/d76/classfl_1_1_scoped_watchdog_a196822062d7ab5c2b32c34a6d1efddd0.html#a196822062d7ab5c2b32c34a6d1efddd0" title="Construct with an explicit timeout." alt="" coords="5,55,155,95"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="194,78,155,78,155,73,194,73"/>
+</map>

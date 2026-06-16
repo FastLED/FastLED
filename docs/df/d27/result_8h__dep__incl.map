@@ -1,0 +1,48 @@
+<map id="fl/stl/result.h" name="fl/stl/result.h">
+<area shape="rect" id="Node000001" title="result&lt;T, E&gt; type alias for fl::expected (Rust&#45;style naming)" alt="" coords="1029,5,1131,31"/>
+<area shape="rect" id="Node000002" href="$d6/d73/rx_8h.html" title="Common RX interfaces and shared types." alt="" coords="833,79,954,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1038,38,925,81,923,76,1037,33"/>
+<area shape="rect" id="Node000020" href="$dd/d09/decode__ws2812_8h.html" title="Shared 4&#45;phase WS2812 edge&#45;pair &#45;&gt; byte decoder (declaration)." alt="" coords="1000,152,1160,192"/>
+<area shape="poly" id="edge13_Node000001_Node000020" title=" " alt="" coords="1083,44,1083,152,1077,152,1077,44"/>
+<area shape="rect" id="Node000022" href="$d0/db6/transaction_8h.html" title="Transaction class for asynchronous SPI operations." alt="" coords="1221,79,1425,104"/>
+<area shape="poly" id="edge14_Node000001_Node000022" title=" " alt="" coords="1133,32,1284,76,1283,81,1131,37"/>
+<area shape="rect" id="Node000003" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="699,247,784,273"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="857,113,828,131,801,154,782,178,767,204,748,248,743,246,762,202,778,175,797,150,825,126,854,108"/>
+<area shape="rect" id="Node000007" href="$de/d4c/rx_8cpp_8hpp.html" title="Implementation of RxDevice factory." alt="" coords="811,159,975,185"/>
+<area shape="poly" id="edge4_Node000002_Node000007" title=" " alt="" coords="896,118,896,159,891,159,891,118"/>
+<area shape="rect" id="Node000011" href="$da/d7b/rx_2channel_8h.html" title=" " alt="" coords="489,159,665,185"/>
+<area shape="poly" id="edge6_Node000002_Node000011" title=" " alt="" coords="835,110,624,162,623,157,833,105"/>
+<area shape="poly" id="edge11_Node000002_Node000020" title=" " alt="" coords="934,107,1036,149,1034,154,932,112"/>
+<area shape="rect" id="Node000004" href="$d7/de5/_fast_l_e_d_8cpp_8hpp.html" title=" " alt="" coords="677,328,805,353"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="744,286,744,328,739,328,739,286"/>
+<area shape="rect" id="Node000008" href="$d1/d97/fl_2channels_2__build_8cpp_8hpp.html" title=" " alt="" coords="809,247,999,273"/>
+<area shape="poly" id="edge5_Node000007_Node000008" title=" " alt="" coords="899,198,905,246,900,247,894,199"/>
+<area shape="poly" id="edge8_Node000011_Node000003" title=" " alt="" coords="613,189,720,245,718,249,610,193"/>
+<area shape="rect" id="Node000012" href="$d2/ddc/test_8h.html" title=" " alt="" coords="248,240,456,280"/>
+<area shape="poly" id="edge7_Node000011_Node000012" title=" " alt="" coords="535,192,403,242,401,237,533,187"/>
+<area shape="rect" id="Node000015" href="$d7/d1f/rx__test_8cpp_8hpp.html" title=" " alt="" coords="480,240,675,280"/>
+<area shape="poly" id="edge9_Node000011_Node000015" title=" " alt="" coords="580,198,580,240,575,240,575,198"/>
+<area shape="rect" id="Node000018" href="$d4/df5/rx_2channel_8cpp_8hpp.html" title=" " alt="" coords="5,247,224,273"/>
+<area shape="poly" id="edge10_Node000011_Node000018" title=" " alt="" coords="502,190,177,250,176,245,501,185"/>
+<area shape="rect" id="Node000021" href="$d9/db5/decode__ws2812_8cpp_8hpp.html" title="Shared 4&#45;phase WS2812 edge&#45;pair &#45;&gt; byte decoder (definition)." alt="" coords="1024,240,1184,280"/>
+<area shape="poly" id="edge12_Node000020_Node000021" title=" " alt="" coords="1092,204,1101,239,1096,241,1086,206"/>
+<area shape="rect" id="Node000023" href="$d9/df0/channels_2spi_8h.html" title="Multi&#45;lane SPI interface for LED output Hardware (SPI_HW): 1&#45;8 parallel data lanes Software (SPI_BITB..." alt="" coords="1250,247,1377,273"/>
+<area shape="poly" id="edge15_Node000022_Node000023" title=" " alt="" coords="1275,112,1247,129,1225,153,1219,172,1225,191,1237,208,1253,223,1288,245,1285,250,1250,228,1233,212,1220,193,1214,172,1220,151,1243,125,1272,107"/>
+<area shape="rect" id="Node000027" href="$db/de9/device_8h.html" title="SPI Device class for single&#45;channel communication." alt="" coords="1235,159,1410,185"/>
+<area shape="poly" id="edge18_Node000022_Node000027" title=" " alt="" coords="1325,118,1325,159,1320,159,1320,118"/>
+<area shape="rect" id="Node000028" href="$da/dc3/multi__lane__device_8h.html" title="Multi&#45;lane SPI device for 2&#45;8 independent LED strips." alt="" coords="1434,152,1587,192"/>
+<area shape="poly" id="edge20_Node000022_Node000028" title=" " alt="" coords="1364,107,1466,149,1464,154,1362,112"/>
+<area shape="rect" id="Node000030" href="$d3/d08/parallel__device_8h.html" title="Parallel GPIO SPI device for 1&#45;32 outputs driven from single data stream." alt="" coords="1629,152,1797,192"/>
+<area shape="poly" id="edge24_Node000022_Node000030" title=" " alt="" coords="1393,104,1630,151,1629,156,1392,109"/>
+<area shape="rect" id="Node000024" href="$d0/daf/device_8cpp_8hpp.html" title=" " alt="" coords="1077,328,1294,353"/>
+<area shape="poly" id="edge16_Node000023_Node000024" title=" " alt="" coords="1284,282,1206,330,1203,325,1282,278"/>
+<area shape="rect" id="Node000026" href="$d9/de8/spi_8cpp_8hpp.html" title=" " alt="" coords="1318,328,1511,353"/>
+<area shape="poly" id="edge17_Node000023_Node000026" title=" " alt="" coords="1341,279,1401,326,1398,330,1338,283"/>
+<area shape="poly" id="edge19_Node000027_Node000023" title=" " alt="" coords="1323,199,1317,247,1312,247,1317,198"/>
+<area shape="poly" id="edge21_Node000028_Node000023" title=" " alt="" coords="1456,200,1341,250,1339,245,1454,195"/>
+<area shape="poly" id="edge23_Node000028_Node000026" title=" " alt="" coords="1476,203,1458,221,1442,241,1432,264,1425,288,1418,328,1413,327,1420,287,1427,262,1438,239,1454,217,1472,199"/>
+<area shape="rect" id="Node000029" href="$dc/d95/multi__lane__device_8cpp_8hpp.html" title=" " alt="" coords="1452,240,1615,280"/>
+<area shape="poly" id="edge22_Node000028_Node000029" title=" " alt="" coords="1522,205,1531,239,1526,240,1517,206"/>
+<area shape="rect" id="Node000031" href="$d7/d37/parallel__device_8cpp_8hpp.html" title=" " alt="" coords="1639,240,1807,280"/>
+<area shape="poly" id="edge25_Node000030_Node000031" title=" " alt="" coords="1720,205,1723,239,1718,240,1714,206"/>
+</map>

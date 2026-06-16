@@ -1,5 +1,11 @@
-<map id="fl/line_simplification.h" name="fl/line_simplification.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="13,5,178,31"/>
-<area shape="rect" id="Node000002" href="$de/ddb/line__simplification_8cpp.html" title=" " alt="" coords="5,79,185,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="98,44,98,79,93,79,93,44"/>
+<map id="fl/math/line_simplification.h" name="fl/math/line_simplification.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="51,5,253,31"/>
+<area shape="rect" id="Node000002" href="$de/dd4/line__simplification_8cpp_8hpp.html" title=" " alt="" coords="29,79,275,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="155,44,155,79,149,79,149,44"/>
+<area shape="rect" id="Node000003" href="$dc/d5b/fl_2math_2__build_8cpp_8hpp.html" title="Unity build header for fl/math/ directory." alt="" coords="69,152,235,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="155,118,155,152,149,152,149,118"/>
+<area shape="rect" id="Node000004" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="5,225,133,251"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="130,188,85,227,81,223,127,184"/>
+<area shape="rect" id="Node000005" href="$d4/dc0/fl_8math_09_8cpp.html" title="Unity build: recursive includes from src/fl/math/." alt="" coords="157,225,312,251"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="177,184,223,223,219,227,174,188"/>
 </map>

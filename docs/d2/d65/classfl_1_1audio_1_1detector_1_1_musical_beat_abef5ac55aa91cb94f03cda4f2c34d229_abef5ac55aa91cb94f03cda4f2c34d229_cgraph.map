@@ -1,0 +1,13 @@
+<map id="fl::audio::detector::MusicalBeat::validateBeat" name="fl::audio::detector::MusicalBeat::validateBeat">
+<area shape="rect" id="Node000001" title="Validate if an onset is a true musical beat." alt="" coords="5,47,207,87"/>
+<area shape="rect" id="Node000002" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a23c3f97cc42b2f345503145ce16499c8.html#a23c3f97cc42b2f345503145ce16499c8" title="Check if IBI is within valid BPM range." alt="" coords="255,47,433,87"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="207,65,241,65,241,70,207,70"/>
+<area shape="rect" id="Node000003" href="$d5/d25/_demo_reel100_8ino_a4875f6d9a2b0f08d3cf221974234121b.html#a4875f6d9a2b0f08d3cf221974234121b" title=" " alt="" coords="481,55,532,80"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="434,65,467,65,467,70,434,70"/>
+<area shape="rect" id="Node000004" href="$df/da5/lib8tion_8h_a696b9421eca961df0a68c7c6c3e983ab.html#a696b9421eca961df0a68c7c6c3e983ab" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="608,5,687,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="531,56,597,33,599,38,533,61"/>
+<area shape="rect" id="Node000005" href="$d1/dfb/colorutils_8h_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="580,55,715,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="532,65,566,65,566,70,532,70"/>
+<area shape="rect" id="Node000006" href="$d8/dd0/_fire_cylinder_8h_a470cec2dcb21e474c257065bb93bfcd1.html#a470cec2dcb21e474c257065bb93bfcd1" title=" " alt="" coords="613,104,681,129"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="533,73,601,98,599,103,531,78"/>
+</map>

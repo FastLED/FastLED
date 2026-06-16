@@ -1,53 +1,41 @@
 <map id="fl::Pacifica::draw" name="fl::Pacifica::draw">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,251,132,276"/>
-<area shape="rect" id="Node000002" href="$d6/d6c/group___beat_generators_gade6acbf6fd3c9d346148bccfcafb2fe2.html#gade6acbf6fd3c9d346148bccfcafb2fe2" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="869,31,936,56"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="73,249,87,220,110,182,140,144,178,112,222,88,267,68,361,39,459,21,556,13,647,13,731,17,856,32,855,38,730,23,647,18,556,19,460,27,363,44,269,73,224,93,182,116,144,147,114,185,92,223,78,251"/>
-<area shape="rect" id="Node000004" href="$d6/d6c/group___beat_generators_gaa46e5de1c4c27833359e7a97a18c839b.html#gaa46e5de1c4c27833359e7a97a18c839b" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="225,176,311,201"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="95,248,179,212,211,201,212,206,181,216,97,253"/>
-<area shape="rect" id="Node000006" href="$d6/d6c/group___beat_generators_gaecd7cbfc2640407cabf75afcc7d9ddf4.html#gaecd7cbfc2640407cabf75afcc7d9ddf4" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="451,377,530,403"/>
-<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="113,274,438,372,437,377,111,279"/>
-<area shape="rect" id="Node000009" href="$d6/d6c/group___beat_generators_gaf917825ff26c8e1174c5b674a2f3c631.html#gaf917825ff26c8e1174c5b674a2f3c631" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="225,127,311,152"/>
-<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="79,249,119,206,148,182,179,161,211,148,213,153,181,166,151,186,123,210,82,252"/>
-<area shape="rect" id="Node000010" href="$da/de3/group___color_fills_gafcada3a28df2b4491cbee30297e39ea7.html#gafcada3a28df2b4491cbee30297e39ea7" title="Fill a range of LEDs with a solid color." alt="" coords="222,471,314,496"/>
-<area shape="poly" id="edge13_Node000001_Node000010" title=" " alt="" coords="77,275,90,310,111,356,142,406,182,449,210,466,208,471,178,453,138,409,107,359,85,312,72,277"/>
-<area shape="rect" id="Node000011" href="$dc/d25/_pacifica_8ino_a638fb6ae6610fed66077161e7e044f26.html#a638fb6ae6610fed66077161e7e044f26" title=" " alt="" coords="180,369,356,395"/>
-<area shape="poly" id="edge14_Node000001_Node000011" title=" " alt="" coords="92,274,181,328,235,360,232,365,179,332,90,278"/>
-<area shape="rect" id="Node000013" href="$dc/d25/_pacifica_8ino_a4c00a661fc55f1df61fc874119c746df.html#a4c00a661fc55f1df61fc874119c746df" title=" " alt="" coords="404,529,577,555"/>
-<area shape="poly" id="edge19_Node000001_Node000013" title=" " alt="" coords="79,275,117,337,146,373,182,404,205,417,227,425,268,431,309,437,332,444,357,457,373,470,382,483,391,495,406,508,432,522,430,527,402,512,387,499,378,486,369,474,355,462,330,449,308,442,267,437,225,430,203,422,178,408,142,377,112,340,74,278"/>
-<area shape="rect" id="Node000014" href="$d2/db2/classfl_1_1_pacifica_ac949d5e9a88b724a060954658b892ebc.html#ac949d5e9a88b724a060954658b892ebc" title=" " alt="" coords="195,226,341,266"/>
-<area shape="poly" id="edge21_Node000001_Node000014" title=" " alt="" coords="132,255,181,251,182,256,132,261"/>
-<area shape="rect" id="Node000003" href="$d6/d6c/group___beat_generators_ga1b48fc520db5f40910caf79974992395.html#ga1b48fc520db5f40910caf79974992395" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM, with BPM specified in Q8.8 fixed&#45;point format." alt="" coords="984,5,1051,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="936,33,970,26,971,31,937,39"/>
-<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="311,174,355,161,431,133,488,109,547,87,625,66,687,55,749,48,855,41,856,47,750,53,688,60,626,71,549,92,490,114,433,138,357,166,312,179"/>
-<area shape="rect" id="Node000005" href="$d0/da8/group___scaling_ga1ff8ac00ad78e22acc7bb7445bfdb145.html#ga1ff8ac00ad78e22acc7bb7445bfdb145" title="Scale a 16&#45;bit unsigned value by an 16&#45;bit value, which is treated as the numerator of a fraction who..." alt="" coords="455,176,527,201"/>
-<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="312,186,441,186,441,191,312,191"/>
-<area shape="rect" id="Node000007" href="$d6/d6c/group___beat_generators_ga12014943214a72eec31433d9682d4ebe.html#ga12014943214a72eec31433d9682d4ebe" title="Generates an 8&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="694,377,753,403"/>
-<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="530,387,680,387,680,393,530,393"/>
-<area shape="rect" id="Node000008" href="$d0/da8/group___scaling_gad7535ccda9c92470c4e6ee0265585555.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ..." alt="" coords="871,453,935,479"/>
-<area shape="poly" id="edge9_Node000006_Node000008" title=" " alt="" coords="531,394,857,455,857,460,530,400"/>
-<area shape="poly" id="edge8_Node000007_Node000002" title=" " alt="" coords="753,387,788,381,805,374,819,363,834,341,847,310,870,227,886,138,896,69,901,70,891,139,875,228,852,311,839,344,823,367,808,378,789,386,753,393"/>
-<area shape="poly" id="edge11_Node000009_Node000003" title=" " alt="" coords="305,124,403,93,513,61,625,37,747,21,869,15,970,14,971,20,869,21,747,26,626,42,514,66,405,98,307,129"/>
-<area shape="poly" id="edge12_Node000009_Node000005" title=" " alt="" coords="312,146,442,175,441,180,311,151"/>
-<area shape="poly" id="edge16_Node000011_Node000006" title=" " alt="" coords="356,382,438,385,437,391,356,388"/>
-<area shape="poly" id="edge15_Node000011_Node000007" title=" " alt="" coords="355,367,404,362,491,358,578,362,681,378,680,383,577,367,491,363,404,367,355,372"/>
-<area shape="poly" id="edge18_Node000011_Node000008" title=" " alt="" coords="317,392,358,412,372,426,381,440,390,452,405,462,465,483,528,495,592,501,655,501,770,490,857,474,858,480,771,496,655,506,592,506,527,500,464,488,403,467,386,456,377,443,368,429,354,416,315,397"/>
-<area shape="rect" id="Node000012" href="$d5/d98/group___math_ga07133b3085824d0fcd4f5086d286c4b5.html#ga07133b3085824d0fcd4f5086d286c4b5" title="Add one byte to another, saturating at 0xFF." alt="" coords="459,427,522,452"/>
-<area shape="poly" id="edge17_Node000011_Node000012" title=" " alt="" coords="319,392,446,425,445,431,317,397"/>
-<area shape="poly" id="edge20_Node000013_Node000008" title=" " alt="" coords="577,540,694,533,758,523,820,507,871,484,873,488,822,513,759,528,695,538,578,546"/>
-<area shape="poly" id="edge30_Node000014_Node000005" title=" " alt="" coords="340,225,441,199,442,204,341,230"/>
-<area shape="rect" id="Node000015" href="$d4/d36/namespacefl_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="415,229,566,255"/>
-<area shape="poly" id="edge22_Node000014_Node000015" title=" " alt="" coords="341,242,401,241,402,246,341,247"/>
-<area shape="rect" id="Node000016" href="$d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="686,131,761,156"/>
-<area shape="poly" id="edge23_Node000015_Node000016" title=" " alt="" coords="539,227,576,210,590,199,599,188,609,176,624,165,672,148,673,153,627,170,612,180,603,191,594,203,579,215,542,232"/>
-<area shape="rect" id="Node000021" href="$da/dc7/advanced_8h_a96d9503945476f13a97c8f406269fcef.html#a96d9503945476f13a97c8f406269fcef" title=" " alt="" coords="678,180,769,205"/>
-<area shape="poly" id="edge24_Node000015_Node000021" title=" " alt="" coords="551,227,664,202,665,208,552,232"/>
-<area shape="rect" id="Node000019" href="$d0/da5/group___scaling_dirty_ga3fade00fb4cf5b937b973128198a7a79.html#ga3fade00fb4cf5b937b973128198a7a79" title="Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls." alt="" coords="675,229,772,255"/>
-<area shape="poly" id="edge25_Node000015_Node000019" title=" " alt="" coords="566,239,661,239,661,245,566,245"/>
-<area shape="rect" id="Node000022" href="$d4/d36/namespacefl_ab169b38b75fd1ab29b3dc61a32497ff1.html#ab169b38b75fd1ab29b3dc61a32497ff1" title="Helper function to divide a number by 16, aka four logical shift right (LSR)&#39;s." alt="" coords="688,279,759,304"/>
-<area shape="poly" id="edge26_Node000015_Node000022" title=" " alt="" coords="552,252,675,279,674,284,551,257"/>
-<area shape="rect" id="Node000023" href="$d6/d19/group___linear_interpolation_gaf65357c7aeca9778e5a2f80a6bac2b5d.html#gaf65357c7aeca9778e5a2f80a6bac2b5d" title="Map from one full&#45;range 8&#45;bit value into a narrower range of 8&#45;bit values, possibly a range of hues." alt="" coords="694,328,753,353"/>
-<area shape="poly" id="edge27_Node000015_Node000023" title=" " alt="" coords="513,252,563,282,626,313,681,330,680,335,624,318,561,287,510,257"/>
-<area shape="rect" id="Node000020" href="$d0/da5/group___scaling_dirty_ga7386235cada3aca429b189681d2ec56d.html#ga7386235cada3aca429b189681d2ec56d" title="This version of scale8() does not clean up the R1 register on AVR." alt="" coords="625,81,821,107"/>
-<area shape="poly" id="edge29_Node000015_Node000020" title=" " alt="" coords="548,227,576,211,592,188,598,164,605,140,612,128,624,116,630,111,634,115,627,120,616,131,610,142,603,165,597,190,579,215,550,232"/>
-<area shape="poly" id="edge28_Node000023_Node000008" title=" " alt="" coords="753,340,788,347,823,362,844,380,863,400,891,440,886,443,859,403,841,383,820,367,786,352,752,345"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,182,132,207"/>
+<area shape="rect" id="Node000002" href="$d6/d6c/group___beat_generators_ga120dfa6dac7fa3d3958ae1e30b64e1d7.html#ga120dfa6dac7fa3d3958ae1e30b64e1d7" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="603,80,685,106"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="74,180,88,153,111,118,141,84,179,56,231,31,278,15,321,6,362,3,405,6,450,13,555,40,588,53,617,70,614,75,586,58,554,45,448,19,404,11,362,8,321,11,279,20,233,36,181,61,145,87,115,121,93,156,78,183"/>
+<area shape="rect" id="Node000005" href="$d6/d6c/group___beat_generators_gadf8e83564c52b94d0ff5594aede0be28.html#gadf8e83564c52b94d0ff5594aede0be28" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="428,55,531,80"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="77,180,117,135,146,110,179,91,239,71,302,61,362,58,414,59,414,64,362,63,302,66,240,76,181,96,149,114,121,138,81,183"/>
+<area shape="rect" id="Node000006" href="$d6/d6c/group___beat_generators_ga696b9421eca961df0a68c7c6c3e983ab.html#ga696b9421eca961df0a68c7c6c3e983ab" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="221,106,315,131"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="100,179,179,148,218,133,220,138,181,153,102,184"/>
+<area shape="rect" id="Node000008" href="$d6/d6c/group___beat_generators_ga4c4a1bcd3ca4f16cf04f1344afd601cc.html#ga4c4a1bcd3ca4f16cf04f1344afd601cc" title="Generates a 16&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="428,156,531,182"/>
+<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="132,188,414,170,414,176,133,193"/>
+<area shape="rect" id="Node000009" href="$da/de3/group___color_fills_gafba4db18577c19e39c54f1c5793741b7.html#gafba4db18577c19e39c54f1c5793741b7" title="Fill a range of LEDs with a solid color." alt="" coords="222,207,314,232"/>
+<area shape="poly" id="edge12_Node000001_Node000009" title=" " alt="" coords="133,200,209,210,208,215,132,205"/>
+<area shape="rect" id="Node000010" href="$dc/d25/_pacifica_8ino_a638fb6ae6610fed66077161e7e044f26.html#a638fb6ae6610fed66077161e7e044f26" title=" " alt="" coords="180,256,356,282"/>
+<area shape="poly" id="edge13_Node000001_Node000010" title=" " alt="" coords="97,205,181,241,206,250,204,255,179,246,95,210"/>
+<area shape="rect" id="Node000013" href="$dc/d25/_pacifica_8ino_a4c00a661fc55f1df61fc874119c746df.html#a4c00a661fc55f1df61fc874119c746df" title=" " alt="" coords="181,306,355,331"/>
+<area shape="poly" id="edge16_Node000001_Node000013" title=" " alt="" coords="83,205,123,247,151,271,181,291,198,299,196,303,179,295,148,275,120,251,79,209"/>
+<area shape="rect" id="Node000014" href="$d2/db2/classfl_1_1_pacifica_abacdfced6a88f08263b5b3b646c87db9.html#abacdfced6a88f08263b5b3b646c87db9" title=" " alt="" coords="195,356,341,396"/>
+<area shape="poly" id="edge17_Node000001_Node000014" title=" " alt="" coords="79,206,117,270,146,307,182,340,192,347,189,352,178,345,142,311,112,273,74,209"/>
+<area shape="rect" id="Node000003" href="$d6/d6c/group___beat_generators_gac4b5cef78b913f63a26012d69ca37889.html#gac4b5cef78b913f63a26012d69ca37889" title="Generates a 16&#45;bit &quot;sawtooth&quot; wave at a given BPM, with BPM specified in Q8.8 fixed&#45;point format." alt="" coords="733,112,816,138"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="686,101,721,109,719,114,685,106"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a335fa6e4af7f0a011997ea0137d49b5a.html#a335fa6e4af7f0a011997ea0137d49b5a" title="Universal millisecond timer &#45; returns milliseconds since system startup." alt="" coords="864,112,939,138"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="816,122,850,122,850,128,816,128"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="880,113,875,104,878,95,887,88,901,86,919,89,926,97,922,101,916,94,901,91,889,93,882,98,881,103,884,111"/>
+<area shape="poly" id="edge6_Node000005_Node000002" title=" " alt="" coords="531,73,590,82,589,87,531,78"/>
+<area shape="rect" id="Node000007" href="$d6/d6c/group___beat_generators_ga7195cd79b30358b151154623586631aa.html#ga7195cd79b30358b151154623586631aa" title="Generates an 8&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="442,106,517,131"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="316,116,428,116,428,121,316,121"/>
+<area shape="poly" id="edge9_Node000007_Node000002" title=" " alt="" coords="517,110,589,99,589,104,517,115"/>
+<area shape="poly" id="edge11_Node000008_Node000003" title=" " alt="" coords="531,159,719,131,720,136,531,164"/>
+<area shape="rect" id="Node000011" href="$df/da5/lib8tion_8h_a7195cd79b30358b151154623586631aa.html#a7195cd79b30358b151154623586631aa" title="Generates an 8&#45;bit &quot;sawtooth&quot; wave at a given BPM." alt="" coords="450,232,509,258"/>
+<area shape="poly" id="edge14_Node000010_Node000011" title=" " alt="" coords="356,257,436,247,437,253,356,262"/>
+<area shape="rect" id="Node000012" href="$df/da5/lib8tion_8h_a696b9421eca961df0a68c7c6c3e983ab.html#a696b9421eca961df0a68c7c6c3e983ab" title="Generates an 8&#45;bit sine wave at a given BPM that oscillates within a given range." alt="" coords="440,282,519,307"/>
+<area shape="poly" id="edge15_Node000010_Node000012" title=" " alt="" coords="356,277,427,286,426,291,356,282"/>
+<area shape="rect" id="Node000015" href="$d4/d36/namespacefl_a3d488dd1e2d27e99307310527e51cad3.html#a3d488dd1e2d27e99307310527e51cad3" title=" " alt="" coords="404,363,555,388"/>
+<area shape="poly" id="edge18_Node000014_Node000015" title=" " alt="" coords="341,373,390,373,390,378,341,378"/>
+<area shape="rect" id="Node000016" href="$d4/d36/namespacefl_a924fc8748f53389e55fdc63bfc14b805.html#a924fc8748f53389e55fdc63bfc14b805" title=" " alt="" coords="607,314,681,339"/>
+<area shape="poly" id="edge19_Node000015_Node000016" title=" " alt="" coords="522,361,593,339,594,344,523,366"/>
+<area shape="rect" id="Node000018" href="$d4/d36/namespacefl_ab169b38b75fd1ab29b3dc61a32497ff1.html#ab169b38b75fd1ab29b3dc61a32497ff1" title="Helper function to divide a number by 16, aka four logical shift right (LSR)&#39;s." alt="" coords="609,363,679,388"/>
+<area shape="poly" id="edge20_Node000015_Node000018" title=" " alt="" coords="555,373,595,373,595,378,555,378"/>
+<area shape="rect" id="Node000019" href="$d6/d19/group___linear_interpolation_gaeb360269bf892a49b96b9ea8248ea8a7.html#gaeb360269bf892a49b96b9ea8248ea8a7" title="Map from one full&#45;range 8&#45;bit value into a narrower range of 8&#45;bit values, possibly a range of hues." alt="" coords="615,412,673,438"/>
+<area shape="poly" id="edge21_Node000015_Node000019" title=" " alt="" coords="523,386,602,410,601,415,522,391"/>
 </map>

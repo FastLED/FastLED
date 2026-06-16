@@ -1,0 +1,7 @@
+<map id="fl::DigitalMultiWrite8::init" name="fl::DigitalMultiWrite8::init">
+<area shape="rect" id="Node000001" title="Initialize from 8 pin numbers. &#45;1 means &quot;skip this bit position&quot;." alt="" coords="5,35,163,75"/>
+<area shape="rect" id="Node000002" href="$d9/d21/classfl_1_1_digital_multi_write8_a7fbae234ef762aa44e2d880ff3f83011.html#a7fbae234ef762aa44e2d880ff3f83011" title=" " alt="" coords="211,5,368,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="163,41,197,36,198,41,163,46"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a323f088e163b9ada03436721370e853f.html#a323f088e163b9ada03436721370e853f" title="Map a runtime pin number to an integer port ID using FastPin&lt;N&gt;::port()." alt="" coords="240,70,339,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="163,63,226,71,226,77,163,68"/>
+</map>

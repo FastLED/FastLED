@@ -1,0 +1,14 @@
+<map id="fl/log/async_logger.h" name="fl/log/async_logger.h">
+<area shape="rect" id="Node000001" title="ISR&#45;safe async logger using SPSC queue backend (zero heap allocation)" alt="" coords="122,5,277,31"/>
+<area shape="rect" id="Node000002" href="$d2/de0/async__logger_8cpp_8hpp.html" title=" " alt="" coords="5,79,204,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="175,41,122,81,119,76,172,37"/>
+<area shape="rect" id="Node000006" href="$d8/dab/log_8cpp_8hpp.html" title=" " alt="" coords="229,79,362,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="227,37,281,76,278,81,224,41"/>
+<area shape="rect" id="Node000003" href="$d4/d6c/fl_2log_2__build_8cpp_8hpp.html" title="Unity build header for fl/log/ directory." alt="" coords="123,152,275,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="132,110,185,150,182,154,129,114"/>
+<area shape="rect" id="Node000004" href="$d1/deb/fl_2__build_8cpp_8hpp.html" title=" " alt="" coords="57,225,185,251"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="178,189,135,227,132,223,175,185"/>
+<area shape="rect" id="Node000005" href="$de/ddd/fl_8log_09_8cpp.html" title="Unity build: recursive includes from src/fl/log/." alt="" coords="209,225,349,251"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="224,184,268,223,264,227,220,188"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="270,114,217,154,213,150,267,110"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="fl::ResponseSend::ResponseSend" name="fl::ResponseSend::ResponseSend">
+<area shape="rect" id="Node000001" title="Construct ResponseSend with request ID and response sink." alt="" coords="5,31,241,56"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a03eeb690d9582a74cb2e4a1f5a806e80.html#a03eeb690d9582a74cb2e4a1f5a806e80" title=" " alt="" coords="353,5,428,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="241,29,340,20,340,25,242,35"/>
+<area shape="rect" id="Node000003" href="$db/d22/classfl_1_1_response_send_a8ad32cc63d189f9e7caeb022b34be35b.html#a8ad32cc63d189f9e7caeb022b34be35b" title="Get the request ID." alt="" coords="289,55,492,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="242,51,276,54,276,60,241,57"/>
+</map>

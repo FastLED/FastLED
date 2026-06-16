@@ -1,0 +1,5 @@
+<map id="fl::third_party::ezWS2812::end_transfer" name="fl::third_party::ezWS2812::end_transfer">
+<area shape="rect" id="Node000001" title="Complete LED data transfer Sends reset signal to latch data into LEDs." alt="" coords="5,5,189,45"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aea219cb806e210fa698fe53624fbc7ac.html#aea219cb806e210fa698fe53624fbc7ac" title="Delay for a given number of microseconds." alt="" coords="237,13,400,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="190,23,224,23,224,28,190,28"/>
+</map>

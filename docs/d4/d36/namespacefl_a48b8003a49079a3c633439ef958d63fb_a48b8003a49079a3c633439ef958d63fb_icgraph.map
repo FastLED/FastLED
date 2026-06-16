@@ -1,0 +1,32 @@
+<map id="fl::getTraceStorage" name="fl::getTraceStorage">
+<area shape="rect" id="Node000001" title=" " alt="" coords="729,132,872,157"/>
+<area shape="rect" id="Node000002" href="$d2/da7/classfl_1_1_scoped_trace_a5b83424985517ed4873c7cf9b0632a52.html#a5b83424985517ed4873c7cf9b0632a52" title="Clear the entire call stack (primarily for testing)" alt="" coords="286,5,445,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="773,125,731,94,680,67,620,48,558,35,444,23,445,17,559,30,622,43,682,62,734,90,776,121"/>
+<area shape="rect" id="Node000004" href="$d2/da7/classfl_1_1_scoped_trace_a705eb6b77df587c23a8a34df54178531.html#a705eb6b77df587c23a8a34df54178531" title="Get the current stack depth." alt="" coords="283,55,447,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="762,128,723,111,681,97,621,84,559,76,447,70,448,64,559,71,621,79,682,91,725,106,764,123"/>
+<area shape="rect" id="Node000005" href="$d2/da7/classfl_1_1_scoped_trace_ae917094c7db1a836213a05bdbe7df4dc.html#ae917094c7db1a836213a05bdbe7df4dc" title="Dump the current call stack to a string." alt="" coords="517,107,681,132"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="715,137,681,132,682,127,716,131"/>
+<area shape="rect" id="Node000006" href="$d2/da7/classfl_1_1_scoped_trace_ac57c024467d07e0ad6b2f163cb0d0d87.html#ac57c024467d07e0ad6b2f163cb0d0d87" title="Dump the current call stack to an inlined vector of TracePoints." alt="" coords="517,156,681,181"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="716,157,682,162,681,156,715,152"/>
+<area shape="rect" id="Node000007" href="$d2/da7/classfl_1_1_scoped_trace_a16442bae6b75d0d1ecd68519e795bf6f.html#a16442bae6b75d0d1ecd68519e795bf6f" title="Pop the most recent function from the call stack." alt="" coords="524,205,675,231"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="759,165,682,195,644,208,643,203,680,190,757,160"/>
+<area shape="rect" id="Node000009" href="$d2/da7/classfl_1_1_scoped_trace_a15a731fc730bafb3789128ba90d33b9c.html#a15a731fc730bafb3789128ba90d33b9c" title="Push a function name onto the call stack." alt="" coords="520,271,679,296"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="778,169,735,206,683,244,630,273,628,268,680,240,731,201,774,165"/>
+<area shape="rect" id="Node000003" href="$d2/da7/classfl_1_1_scoped_trace_a5a704d58dfe6ca123bc931e804e1e29b.html#a5a704d58dfe6ca123bc931e804e1e29b" title=" " alt="" coords="13,131,206,156"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="282,37,262,44,222,65,185,89,127,132,124,128,182,85,220,60,260,40,280,32"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="309,87,154,133,152,128,308,81"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="504,127,206,141,206,136,503,121"/>
+<area shape="poly" id="edge10_Node000007_Node000003" title=" " alt="" coords="519,205,469,197,206,158,207,153,470,191,520,200"/>
+<area shape="rect" id="Node000008" href="$d2/da7/classfl_1_1_scoped_trace_a7398df68f878868608cb89abed8c1cb8.html#a7398df68f878868608cb89abed8c1cb8" title="Destructor &#45; automatically pops from stack." alt="" coords="273,206,458,246"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="510,224,458,226,458,220,510,218"/>
+<area shape="poly" id="edge17_Node000009_Node000003" title=" " alt="" coords="506,293,450,293,387,289,323,279,260,260,216,238,177,210,121,158,124,154,180,206,219,234,262,256,324,273,388,283,450,288,506,288"/>
+<area shape="rect" id="Node000010" href="$d2/da7/classfl_1_1_scoped_trace_a4dcbf88189bcce7b53c8ac0b0599cede.html#a4dcbf88189bcce7b53c8ac0b0599cede" title="Construct and push function name onto stack." alt="" coords="261,321,469,347"/>
+<area shape="poly" id="edge12_Node000009_Node000010" title=" " alt="" coords="527,302,425,324,424,319,526,296"/>
+<area shape="poly" id="edge16_Node000010_Node000003" title=" " alt="" coords="291,319,260,304,228,277,188,236,119,158,123,155,192,232,231,273,263,300,294,315"/>
+<area shape="rect" id="Node000011" href="$d2/da7/classfl_1_1_scoped_trace_aedd8875137f1ec4e3ecc62de6bfdd6b4.html#aedd8875137f1ec4e3ecc62de6bfdd6b4" title=" " alt="" coords="5,272,213,297"/>
+<area shape="poly" id="edge13_Node000010_Node000011" title=" " alt="" coords="285,321,176,300,177,295,286,316"/>
+<area shape="rect" id="Node000012" href="$d2/da7/classfl_1_1_scoped_trace_a3f95eb154853f7f6173903ceb38fde0f.html#a3f95eb154853f7f6173903ceb38fde0f" title=" " alt="" coords="5,321,213,347"/>
+<area shape="poly" id="edge14_Node000010_Node000012" title=" " alt="" coords="248,337,213,337,213,331,248,331"/>
+<area shape="rect" id="Node000013" href="$d2/da7/classfl_1_1_scoped_trace_a601c60e85d06fbeda247871c62106aab.html#a601c60e85d06fbeda247871c62106aab" title=" " alt="" coords="13,371,206,396"/>
+<area shape="poly" id="edge15_Node000010_Node000013" title=" " alt="" coords="286,352,177,373,176,368,285,347"/>
+</map>

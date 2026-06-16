@@ -10,6 +10,6 @@ var class_frame_buffer_base =
     [ "length", "dd/dc5/class_frame_buffer_base_ab81620ae9322b4161ffb5647f4866e62.html#ab81620ae9322b4161ffb5647f4866e62", null ],
     [ "Set", "dd/dc5/class_frame_buffer_base_a769adf60e8f0341e8ca84de7839dc0f5.html#a769adf60e8f0341e8ca84de7839dc0f5", null ],
     [ "Set", "dd/dc5/class_frame_buffer_base_ac1d0fe8a030ee6dd0ebd60fd46849f1a.html#ac1d0fe8a030ee6dd0ebd60fd46849f1a", null ],
-    [ "color_array_", "dd/dc5/class_frame_buffer_base_ae13ec40235584afb9738506fa5fb89a4.html#ae13ec40235584afb9738506fa5fb89a4", null ],
-    [ "n_color_array_", "dd/dc5/class_frame_buffer_base_ae5b3fc4ab184c595721cf6e488f4f417.html#ae5b3fc4ab184c595721cf6e488f4f417", null ]
+    [ "mColorArray", "dd/dc5/class_frame_buffer_base_a254a1d7a059f4ac9a103fafa8e235ed4.html#a254a1d7a059f4ac9a103fafa8e235ed4", null ],
+    [ "mNColorArray", "dd/dc5/class_frame_buffer_base_ae270f2f5e3fb7f2e0bf7b4221cdfeb74.html#ae270f2f5e3fb7f2e0bf7b4221cdfeb74", null ]
 ];

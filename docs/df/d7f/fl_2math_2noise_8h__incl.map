@@ -1,0 +1,18 @@
+<map id="fl/math/noise.h" name="fl/math/noise.h">
+<area shape="rect" id="Node000001" title="Umbrella header for pure&#45;numeric noise subsystem." alt="" coords="105,5,223,31"/>
+<area shape="rect" id="Node000002" href="$d4/d3f/noise__woryley_8h.html" title=" " alt="" coords="5,79,152,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,33,111,71,108,67,150,29"/>
+<area shape="rect" id="Node000006" href="$d7/db2/perlin__s16x16__simd_8h.html" title=" " alt="" coords="177,79,325,119"/>
+<area shape="poly" id="edge4_Node000001_Node000006" title=" " alt="" coords="179,29,221,67,218,71,175,33"/>
+<area shape="rect" id="Node000003" href="$d3/d7e/int_8h.html" title=" " alt="" coords="37,262,120,287"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="81,119,81,248,76,248,76,119"/>
+<area shape="rect" id="Node000004" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="95,343,198,368"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="91,286,130,331,126,334,87,289"/>
+<area shape="rect" id="Node000007" href="$db/d65/math_2noise_2perlin__s16x16_8h.html" title=" " alt="" coords="142,167,290,207"/>
+<area shape="poly" id="edge5_Node000006_Node000007" title=" " alt="" coords="245,120,231,155,226,153,241,118"/>
+<area shape="rect" id="Node000016" href="$d8/de1/simd_8h.html" title="Umbrella header for SIMD subsystem." alt="" coords="314,174,430,199"/>
+<area shape="poly" id="edge8_Node000006_Node000016" title=" " alt="" coords="279,117,346,164,343,168,276,121"/>
+<area shape="rect" id="Node000008" href="$d7/d64/s16x16_8h.html" title=" " alt="" coords="145,255,287,295"/>
+<area shape="poly" id="edge6_Node000007_Node000008" title=" " alt="" coords="219,207,219,241,213,241,213,207"/>
+<area shape="poly" id="edge7_Node000008_Node000004" title=" " alt="" coords="201,297,168,334,164,330,197,293"/>
+</map>

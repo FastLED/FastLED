@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fl/move.h Source File</title>
+<title>FastLED: fl/stl/move.h Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -104,60 +104,63 @@ $(function(){initNavTree('d9/d83/move_8h_source.html','../../'); initResizable(t
 </div><!--header-->
 <div class="contents">
 <a href="../../d9/d83/move_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d4/d36/namespacefl.html">fl</a> {</div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#include &quot;<a class="code" href="../../db/d01/noexcept_8h.html">fl/stl/noexcept.h</a>&quot;</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d4/d36/namespacefl.html">fl</a> {</div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">// Define remove_reference trait</span></div>
-<div class="foldopen" id="foldopen00007" data-start="{" data-end="};">
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl.html">    7</a></span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt; <span class="keyword">struct </span><a class="code hl_struct" href="../../d4/d36/namespacefl.html#dd/d2f/structfl_1_1remove__reference">remove_reference</a> {</div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl.html#a8c9726028539929188bef8fdc0540c82">    8</a></span>    <span class="keyword">using </span><a class="code hl_typedef" href="../../d4/d36/namespacefl.html#a8c9726028539929188bef8fdc0540c82">type</a> = T;</div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>};</div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">// Define remove_reference trait</span></div>
+<div class="foldopen" id="foldopen00008" data-start="{" data-end="};">
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl.html">    8</a></span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt; <span class="keyword">struct </span><a class="code hl_struct" href="../../d4/d36/namespacefl.html#dd/d2f/structfl_1_1remove__reference">remove_reference</a> {</div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl.html#a8c9726028539929188bef8fdc0540c82">    9</a></span>    <span class="keyword">using </span><a class="code hl_typedef" href="../../d4/d36/namespacefl.html#a8c9726028539929188bef8fdc0540c82">type</a> = T;</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>};</div>
 </div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">// Specialization for lvalue reference</span></div>
-<div class="foldopen" id="foldopen00012" data-start="{" data-end="};">
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl.html">   12</a></span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt; <span class="keyword">struct </span><a class="code hl_struct" href="../../d4/d36/namespacefl.html#dd/d2f/structfl_1_1remove__reference">remove_reference</a>&lt;T &amp;&gt; {</div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl.html#a7bf918d5bf853bfb1fd5aee8c72ff295">   13</a></span>    <span class="keyword">using </span><a class="code hl_typedef" href="../../d4/d36/namespacefl.html#a7bf918d5bf853bfb1fd5aee8c72ff295">type</a> = T;</div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>};</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// Specialization for lvalue reference</span></div>
+<div class="foldopen" id="foldopen00013" data-start="{" data-end="};">
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl.html">   13</a></span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt; <span class="keyword">struct </span><a class="code hl_struct" href="../../d4/d36/namespacefl.html#dd/d2f/structfl_1_1remove__reference">remove_reference</a>&lt;T &amp;&gt; {</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl.html#a7bf918d5bf853bfb1fd5aee8c72ff295">   14</a></span>    <span class="keyword">using </span><a class="code hl_typedef" href="../../d4/d36/namespacefl.html#a7bf918d5bf853bfb1fd5aee8c72ff295">type</a> = T;</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>};</div>
 </div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment">// Specialization for rvalue reference</span></div>
-<div class="foldopen" id="foldopen00017" data-start="{" data-end="};">
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl.html">   17</a></span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt; <span class="keyword">struct </span><a class="code hl_struct" href="../../d4/d36/namespacefl.html#dd/d2f/structfl_1_1remove__reference">remove_reference</a>&lt;T &amp;&amp;&gt; {</div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl.html#a0b3700a66ed4e012d9e4fee72cd5535b">   18</a></span>    <span class="keyword">using </span><a class="code hl_typedef" href="../../d4/d36/namespacefl.html#a0b3700a66ed4e012d9e4fee72cd5535b">type</a> = T;</div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>};</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">// Specialization for rvalue reference</span></div>
+<div class="foldopen" id="foldopen00018" data-start="{" data-end="};">
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl.html">   18</a></span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt; <span class="keyword">struct </span><a class="code hl_struct" href="../../d4/d36/namespacefl.html#dd/d2f/structfl_1_1remove__reference">remove_reference</a>&lt;T &amp;&amp;&gt; {</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl.html#a0b3700a66ed4e012d9e4fee72cd5535b">   19</a></span>    <span class="keyword">using </span><a class="code hl_typedef" href="../../d4/d36/namespacefl.html#a0b3700a66ed4e012d9e4fee72cd5535b">type</a> = T;</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>};</div>
 </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="comment">// Helper alias template for remove_reference</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_af8200623e7db9cc2e7ea600693a0bfa5.html#af8200623e7db9cc2e7ea600693a0bfa5">   23</a></span><span class="keyword">using </span><a class="code hl_typedef" href="../../d4/d36/namespacefl_af8200623e7db9cc2e7ea600693a0bfa5.html#af8200623e7db9cc2e7ea600693a0bfa5">remove_reference_t</a> = <span class="keyword">typename</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl.html#a8c9726028539929188bef8fdc0540c82">remove_reference&lt;T&gt;::type</a>;</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="comment">// Implementation of move</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="foldopen" id="foldopen00027" data-start="{" data-end="}">
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">   27</a></span><span class="keyword">constexpr</span> <span class="keyword">typename</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl.html#a8c9726028539929188bef8fdc0540c82">remove_reference&lt;T&gt;::type</a> &amp;&amp;<a class="code hl_function" href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">move</a>(T &amp;&amp;<a class="code hl_variable" href="../../dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a>) <span class="keyword">noexcept</span> {</div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>typename <a class="code hl_typedef" href="../../d4/d36/namespacefl.html#a8c9726028539929188bef8fdc0540c82">remove_reference&lt;T&gt;::type</a> &amp;&amp;<span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a>);</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>}</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="comment">// Helper alias template for remove_reference</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_af8200623e7db9cc2e7ea600693a0bfa5.html#af8200623e7db9cc2e7ea600693a0bfa5">   24</a></span><span class="keyword">using </span><a class="code hl_typedef" href="../../d4/d36/namespacefl_af8200623e7db9cc2e7ea600693a0bfa5.html#af8200623e7db9cc2e7ea600693a0bfa5">remove_reference_t</a> = <span class="keyword">typename</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl.html#a8c9726028539929188bef8fdc0540c82">remove_reference&lt;T&gt;::type</a>;</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="comment">// Implementation of move</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="foldopen" id="foldopen00028" data-start="{" data-end="}">
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="../../d4/d36/namespacefl_a03eeb690d9582a74cb2e4a1f5a806e80.html#a03eeb690d9582a74cb2e4a1f5a806e80">   28</a></span><span class="keyword">constexpr</span> <span class="keyword">typename</span> <a class="code hl_typedef" href="../../d4/d36/namespacefl.html#a8c9726028539929188bef8fdc0540c82">remove_reference&lt;T&gt;::type</a> &amp;&amp;<a class="code hl_function" href="../../d4/d36/namespacefl_a03eeb690d9582a74cb2e4a1f5a806e80.html#a03eeb690d9582a74cb2e4a1f5a806e80">move</a>(T &amp;&amp;<a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>) <a class="code hl_define" href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a> {</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>typename <a class="code hl_typedef" href="../../d4/d36/namespacefl.html#a8c9726028539929188bef8fdc0540c82">remove_reference&lt;T&gt;::type</a> &amp;&amp;<span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">t</a>);</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>}</div>
 </div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>} <span class="comment">// namespace fl</span></div>
-<div class="ttc" id="aexamples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe_html_ae96c939a2a46590dc79c7d9ca8331dfe"><div class="ttname"><a href="../../dc/db7/examples_2_luminova_2luminova_8h_ae96c939a2a46590dc79c7d9ca8331dfe.html#ae96c939a2a46590dc79c7d9ca8331dfe">t</a></div><div class="ttdeci">static uint32_t t</div><div class="ttdef"><b>Definition</b> <a href="../../dc/db7/examples_2_luminova_2luminova_8h_source.html#l00054">Luminova.h:54</a></div></div>
-<div class="ttc" id="anamespacefl_a0445ddcae69ac4e524ec18098eb84dbf_html_a0445ddcae69ac4e524ec18098eb84dbf"><div class="ttname"><a href="../../d4/d36/namespacefl_a0445ddcae69ac4e524ec18098eb84dbf.html#a0445ddcae69ac4e524ec18098eb84dbf">fl::move</a></div><div class="ttdeci">constexpr remove_reference&lt; T &gt;::type &amp;&amp; move(T &amp;&amp;t) noexcept</div><div class="ttdef"><b>Definition</b> <a href="#l00027">move.h:27</a></div></div>
-<div class="ttc" id="anamespacefl_af8200623e7db9cc2e7ea600693a0bfa5_html_af8200623e7db9cc2e7ea600693a0bfa5"><div class="ttname"><a href="../../d4/d36/namespacefl_af8200623e7db9cc2e7ea600693a0bfa5.html#af8200623e7db9cc2e7ea600693a0bfa5">fl::remove_reference_t</a></div><div class="ttdeci">typename remove_reference&lt; T &gt;::type remove_reference_t</div><div class="ttdef"><b>Definition</b> <a href="#l00023">move.h:23</a></div></div>
-<div class="ttc" id="anamespacefl_html"><div class="ttname"><a href="../../d4/d36/namespacefl.html">fl</a></div><div class="ttdoc">IMPORTANT!</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00020">crgb.h:20</a></div></div>
-<div class="ttc" id="anamespacefl_html_a0b3700a66ed4e012d9e4fee72cd5535b"><div class="ttname"><a href="../../d4/d36/namespacefl.html#a0b3700a66ed4e012d9e4fee72cd5535b">fl::remove_reference&lt; T &amp;&amp; &gt;::type</a></div><div class="ttdeci">T type</div><div class="ttdef"><b>Definition</b> <a href="#l00018">move.h:18</a></div></div>
-<div class="ttc" id="anamespacefl_html_a7bf918d5bf853bfb1fd5aee8c72ff295"><div class="ttname"><a href="../../d4/d36/namespacefl.html#a7bf918d5bf853bfb1fd5aee8c72ff295">fl::remove_reference&lt; T &amp; &gt;::type</a></div><div class="ttdeci">T type</div><div class="ttdef"><b>Definition</b> <a href="#l00013">move.h:13</a></div></div>
-<div class="ttc" id="anamespacefl_html_a8c9726028539929188bef8fdc0540c82"><div class="ttname"><a href="../../d4/d36/namespacefl.html#a8c9726028539929188bef8fdc0540c82">fl::remove_reference::type</a></div><div class="ttdeci">T type</div><div class="ttdef"><b>Definition</b> <a href="#l00008">move.h:8</a></div></div>
-<div class="ttc" id="anamespacefl_html_dd/d2f/structfl_1_1remove__reference"><div class="ttname"><a href="../../d4/d36/namespacefl.html#dd/d2f/structfl_1_1remove__reference">fl::remove_reference</a></div><div class="ttdef"><b>Definition</b> <a href="#l00007">move.h:7</a></div></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>} <span class="comment">// namespace fl</span></div>
+<div class="ttc" id="anamespacefl_a03eeb690d9582a74cb2e4a1f5a806e80_html_a03eeb690d9582a74cb2e4a1f5a806e80"><div class="ttname"><a href="../../d4/d36/namespacefl_a03eeb690d9582a74cb2e4a1f5a806e80.html#a03eeb690d9582a74cb2e4a1f5a806e80">fl::move</a></div><div class="ttdeci">constexpr remove_reference&lt; T &gt;::type &amp;&amp; move(T &amp;&amp;t) FL_NOEXCEPT</div><div class="ttdef"><b>Definition</b> <a href="#l00028">move.h:28</a></div></div>
+<div class="ttc" id="anamespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140_html_abbddb15aa2e7c8eb469d1dd56d6d2140"><div class="ttname"><a href="../../d4/d36/namespacefl_abbddb15aa2e7c8eb469d1dd56d6d2140.html#abbddb15aa2e7c8eb469d1dd56d6d2140">fl::t</a></div><div class="ttdeci">t</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/transposition_8cpp_8hpp_source.html#l00027">transposition.cpp.hpp:27</a></div></div>
+<div class="ttc" id="anamespacefl_af8200623e7db9cc2e7ea600693a0bfa5_html_af8200623e7db9cc2e7ea600693a0bfa5"><div class="ttname"><a href="../../d4/d36/namespacefl_af8200623e7db9cc2e7ea600693a0bfa5.html#af8200623e7db9cc2e7ea600693a0bfa5">fl::remove_reference_t</a></div><div class="ttdeci">typename remove_reference&lt; T &gt;::type remove_reference_t</div><div class="ttdef"><b>Definition</b> <a href="#l00024">move.h:24</a></div></div>
+<div class="ttc" id="anamespacefl_html"><div class="ttname"><a href="../../d4/d36/namespacefl.html">fl</a></div><div class="ttdoc">Base definition for an LED controller.</div><div class="ttdef"><b>Definition</b> <a href="../../d0/d4b/crgb_8hpp_source.html#l00179">crgb.hpp:179</a></div></div>
+<div class="ttc" id="anamespacefl_html_a0b3700a66ed4e012d9e4fee72cd5535b"><div class="ttname"><a href="../../d4/d36/namespacefl.html#a0b3700a66ed4e012d9e4fee72cd5535b">fl::remove_reference&lt; T &amp;&amp; &gt;::type</a></div><div class="ttdeci">T type</div><div class="ttdef"><b>Definition</b> <a href="#l00019">move.h:19</a></div></div>
+<div class="ttc" id="anamespacefl_html_a7bf918d5bf853bfb1fd5aee8c72ff295"><div class="ttname"><a href="../../d4/d36/namespacefl.html#a7bf918d5bf853bfb1fd5aee8c72ff295">fl::remove_reference&lt; T &amp; &gt;::type</a></div><div class="ttdeci">T type</div><div class="ttdef"><b>Definition</b> <a href="#l00014">move.h:14</a></div></div>
+<div class="ttc" id="anamespacefl_html_a8c9726028539929188bef8fdc0540c82"><div class="ttname"><a href="../../d4/d36/namespacefl.html#a8c9726028539929188bef8fdc0540c82">fl::remove_reference::type</a></div><div class="ttdeci">T type</div><div class="ttdef"><b>Definition</b> <a href="#l00009">move.h:9</a></div></div>
+<div class="ttc" id="anamespacefl_html_dd/d2f/structfl_1_1remove__reference"><div class="ttname"><a href="../../d4/d36/namespacefl.html#dd/d2f/structfl_1_1remove__reference">fl::remove_reference</a></div><div class="ttdef"><b>Definition</b> <a href="#l00008">move.h:8</a></div></div>
+<div class="ttc" id="anoexcept_8h_html"><div class="ttname"><a href="../../db/d01/noexcept_8h.html">noexcept.h</a></div></div>
+<div class="ttc" id="as16x16x4_8h_af54aac016b86a178940aca20946a8002_html_af54aac016b86a178940aca20946a8002"><div class="ttname"><a href="../../df/d96/s16x16x4_8h_af54aac016b86a178940aca20946a8002.html#af54aac016b86a178940aca20946a8002">FL_NOEXCEPT</a></div><div class="ttdeci">#define FL_NOEXCEPT</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d9/d83/move_8h.html">move.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_0dd6897a8ae40540acd9d694849e950e.html">stl</a></li><li class="navelem"><a class="el" href="../../d9/d83/move_8h.html">move.h</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:00 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

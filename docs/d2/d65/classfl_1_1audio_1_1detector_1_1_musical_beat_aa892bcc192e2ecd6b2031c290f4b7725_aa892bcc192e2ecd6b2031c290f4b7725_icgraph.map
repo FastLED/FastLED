@@ -1,0 +1,14 @@
+<map id="fl::audio::detector::MusicalBeat::getAverageIBI" name="fl::audio::detector::MusicalBeat::getAverageIBI">
+<area shape="rect" id="Node000001" title="Get inter&#45;beat interval (IBI) statistics." alt="" coords="827,81,1036,121"/>
+<area shape="rect" id="Node000002" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a8ead4e67bdff0c0600d13fc942313879.html#a8ead4e67bdff0c0600d13fc942313879" title=" " alt="" coords="5,47,215,87"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="886,76,835,50,778,30,699,16,619,9,537,9,458,12,312,29,196,50,195,45,311,24,458,7,537,3,619,4,700,11,779,25,838,45,888,71"/>
+<area shape="rect" id="Node000003" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a25756788660507be8a6660dc23f82624.html#a25756788660507be8a6660dc23f82624" title="Calculate beat confidence based on rhythmic consistency." alt="" coords="550,40,757,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="813,89,757,82,757,77,813,84"/>
+<area shape="rect" id="Node000004" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_a14368f704c7c67d888b81f70c7004dcb.html#a14368f704c7c67d888b81f70c7004dcb" title="Process one audio frame." alt="" coords="263,79,480,119"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="813,108,779,109,528,109,480,107,480,102,528,103,779,103,813,103"/>
+<area shape="rect" id="Node000005" href="$d2/d65/classfl_1_1audio_1_1detector_1_1_musical_beat_ae8c4e7e2d6ed27b8d955a9e2e1cd3db2.html#ae8c4e7e2d6ed27b8d955a9e2e1cd3db2" title="Update BPM estimate from inter&#45;beat intervals." alt="" coords="528,170,779,210"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="859,128,779,154,721,173,719,168,778,149,858,123"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="537,83,480,90,480,84,536,78"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="249,87,214,83,215,78,249,82"/>
+<area shape="poly" id="edge7_Node000005_Node000004" title=" " alt="" coords="573,169,527,154,431,122,432,117,529,149,575,163"/>
+</map>

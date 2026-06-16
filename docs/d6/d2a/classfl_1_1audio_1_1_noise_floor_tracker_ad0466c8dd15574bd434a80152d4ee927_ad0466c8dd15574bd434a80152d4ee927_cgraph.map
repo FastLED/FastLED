@@ -1,0 +1,21 @@
+<map id="fl::audio::NoiseFloorTracker::~NoiseFloorTracker" name="fl::audio::NoiseFloorTracker::~NoiseFloorTracker">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,91,204,131"/>
+<area shape="rect" id="Node000002" href="$d6/d2a/classfl_1_1audio_1_1_noise_floor_tracker_a68074ca315df951eb50164a8ccb180a4.html#a68074ca315df951eb50164a8ccb180a4" title="Configure the noise floor tracker." alt="" coords="252,29,451,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="185,88,256,70,257,75,187,93"/>
+<area shape="rect" id="Node000004" href="$d6/d2a/classfl_1_1audio_1_1_noise_floor_tracker_a48fd7632dc1c0574cb1f938c577cc615.html#a48fd7632dc1c0574cb1f938c577cc615" title="Update noise floor estimate with new observation." alt="" coords="252,151,451,191"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="188,128,256,145,255,150,187,133"/>
+<area shape="poly" id="edge4_Node000002_Node000002" title=" " alt="" coords="306,30,303,20,310,10,327,5,351,3,380,6,395,13,393,18,378,11,351,8,328,10,313,15,308,21,311,28"/>
+<area shape="rect" id="Node000003" href="$d6/d2a/classfl_1_1audio_1_1_noise_floor_tracker_af00fa4c8bb3e60a46665b2b65f4dfc4e.html#af00fa4c8bb3e60a46665b2b65f4dfc4e" title=" " alt="" coords="499,29,697,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="451,56,485,56,485,61,451,61"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="498,43,465,43,465,38,498,38"/>
+<area shape="rect" id="Node000005" href="$d6/d2a/classfl_1_1audio_1_1_noise_floor_tracker_ac5e58ec9ffe53ff0222f3de8ae16ff27.html#ac5e58ec9ffe53ff0222f3de8ae16ff27" title="Calculate combined metric from time and frequency domains." alt="" coords="499,93,697,133"/>
+<area shape="poly" id="edge6_Node000004_Node000005" title=" " alt="" coords="437,148,498,134,499,139,439,153"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="745,189,812,214"/>
+<area shape="poly" id="edge7_Node000004_Node000006" title=" " alt="" coords="451,175,731,195,731,201,451,180"/>
+<area shape="rect" id="Node000007" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="747,242,810,267"/>
+<area shape="poly" id="edge8_Node000004_Node000007" title=" " alt="" coords="378,188,431,226,464,244,499,257,562,269,626,271,685,267,734,260,735,266,686,272,626,276,561,274,498,263,462,249,428,231,374,193"/>
+<area shape="rect" id="Node000008" href="$d6/d2a/classfl_1_1audio_1_1_noise_floor_tracker_a55c738c54d05563c739826bf37912db5.html#a55c738c54d05563c739826bf37912db5" title="Update floor estimate based on current observation." alt="" coords="499,208,697,248"/>
+<area shape="poly" id="edge9_Node000004_Node000008" title=" " alt="" coords="439,188,499,202,498,208,437,193"/>
+<area shape="poly" id="edge10_Node000008_Node000006" title=" " alt="" coords="697,211,732,205,732,211,698,216"/>
+<area shape="poly" id="edge11_Node000008_Node000007" title=" " alt="" coords="698,240,734,246,733,251,697,245"/>
+</map>

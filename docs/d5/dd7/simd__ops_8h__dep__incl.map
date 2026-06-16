@@ -1,0 +1,12 @@
+<map id="fl/math/fixed_point/simd_ops.h" name="fl/math/fixed_point/simd_ops.h">
+<area shape="rect" id="Node000001" title="Cross&#45;type SIMD fixed&#45;point operations (implemented after all types are defined)" alt="" coords="184,5,327,45"/>
+<area shape="rect" id="Node000002" href="$df/d96/s16x16x4_8h.html" title="SIMD 4&#45;wide s16x16 fixed&#45;point vector type." alt="" coords="184,93,327,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="249,59,250,93,245,93,244,59"/>
+<area shape="poly" id="edge5_Node000002_Node000001" title=" " alt="" coords="261,80,260,46,266,46,267,80"/>
+<area shape="rect" id="Node000003" href="$d7/dd1/_auto_research_simd_8h.html" title=" " alt="" coords="136,181,375,236"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="258,147,258,181,253,181,253,147"/>
+<area shape="rect" id="Node000004" href="$dd/dc8/_auto_research_8ino.html" title=" " alt="" coords="5,284,244,339"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="212,246,161,286,157,282,209,242"/>
+<area shape="rect" id="Node000005" href="$db/dfb/_auto_research_remote_8cpp.html" title=" " alt="" coords="268,284,507,339"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="302,242,354,282,351,286,299,246"/>
+</map>

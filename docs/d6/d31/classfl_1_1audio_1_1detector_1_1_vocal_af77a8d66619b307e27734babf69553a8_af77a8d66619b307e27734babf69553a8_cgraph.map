@@ -1,0 +1,11 @@
+<map id="fl::audio::detector::Vocal::calculateRawConfidence" name="fl::audio::detector::Vocal::calculateRawConfidence">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,73,237,113"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84" title=" " alt="" coords="294,5,355,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,70,280,31,282,36,177,75"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_afb42d6eb6443afc7223ce9b1a812f350.html#afb42d6eb6443afc7223ce9b1a812f350" title=" " alt="" coords="285,55,364,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="237,76,272,71,272,76,238,81"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="291,104,358,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="238,104,278,109,277,114,237,109"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="293,153,356,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="178,110,281,148,279,153,177,115"/>
+</map>

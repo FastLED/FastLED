@@ -1,0 +1,16 @@
+<map id="CFastLED::remove" name="CFastLED::remove">
+<area shape="rect" id="Node000001" title="Remove the audio processor." alt="" coords="5,38,145,63"/>
+<area shape="rect" id="Node000002" href="$d4/d9d/classfl_1_1audio_1_1_audio_manager_a5bfbd81ceda3da10014947211340be86.html#a5bfbd81ceda3da10014947211340be86" title=" " alt="" coords="641,35,817,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="123,35,193,23,310,16,427,18,536,26,628,37,627,42,535,32,427,24,310,21,194,28,124,41"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a03eeb690d9582a74cb2e4a1f5a806e80.html#a03eeb690d9582a74cb2e4a1f5a806e80" title=" " alt="" coords="244,38,319,63"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="146,48,230,48,230,53,146,53"/>
+<area shape="rect" id="Node000006" href="$d4/d9d/classfl_1_1audio_1_1_audio_manager_a711d8bd2228f5994d1de70a03e7f3568.html#a711d8bd2228f5994d1de70a03e7f3568" title=" " alt="" coords="193,88,369,128"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="123,61,197,82,195,87,121,66"/>
+<area shape="rect" id="Node000003" href="$d4/d9d/classfl_1_1audio_1_1_audio_manager_a9aae1d4f301e6ce6bdcf33044f5b581f.html#a9aae1d4f301e6ce6bdcf33044f5b581f" title=" " alt="" coords="865,5,1041,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="817,41,851,36,852,41,818,46"/>
+<area shape="rect" id="Node000004" href="$d9/d5b/classfl_1_1_singleton_a47fdc044003ec27f9e9833f7f5418e01.html#a47fdc044003ec27f9e9833f7f5418e01" title=" " alt="" coords="872,70,1035,95"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="818,63,859,68,858,73,817,68"/>
+<area shape="rect" id="Node000007" href="$d4/d9d/classfl_1_1audio_1_1_audio_manager_a94906d166e679f0aee102b7200fb2e53.html#a94906d166e679f0aee102b7200fb2e53" title=" " alt="" coords="417,63,593,103"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="369,95,403,91,404,97,370,101"/>
+<area shape="poly" id="edge7_Node000007_Node000002" title=" " alt="" coords="593,69,627,65,628,70,594,74"/>
+</map>

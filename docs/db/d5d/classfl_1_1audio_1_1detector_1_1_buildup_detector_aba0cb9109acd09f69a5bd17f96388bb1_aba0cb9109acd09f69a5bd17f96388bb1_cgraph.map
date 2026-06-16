@@ -1,0 +1,14 @@
+<map id="fl::audio::detector::BuildupDetector::calculateBuildupIntensity" name="fl::audio::detector::BuildupDetector::calculateBuildupIntensity">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,40,208,95"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a19ba0dae8249e0cf164136846f85e909.html#a19ba0dae8249e0cf164136846f85e909" title=" " alt="" coords="256,5,323,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="207,37,242,28,244,33,209,42"/>
+<area shape="rect" id="Node000003" href="$d4/d36/namespacefl_a0356f07fb7a8f25752385fd8208b47fb.html#a0356f07fb7a8f25752385fd8208b47fb" title=" " alt="" coords="258,55,321,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="208,65,244,65,244,70,208,70"/>
+<area shape="rect" id="Node000004" href="$db/d49/_audio_2simple_2simple_8h_a588b0ed03ff3e39281e2bc8b149dbdbd.html#a588b0ed03ff3e39281e2bc8b149dbdbd" title=" " alt="" coords="266,128,313,153"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="177,92,254,124,252,129,175,97"/>
+<area shape="poly" id="edge4_Node000004_Node000004" title=" " alt="" coords="267,129,262,120,265,110,274,104,289,101,307,105,315,113,311,117,305,109,289,107,276,109,269,113,268,119,272,127"/>
+<area shape="rect" id="Node000005" href="$d0/d08/classfl_1_1span_aef7ee7eb5254da1ba1eb4f3e0173d0ac.html#aef7ee7eb5254da1ba1eb4f3e0173d0ac" title=" " alt="" coords="371,103,473,128"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="312,134,357,125,358,130,313,139"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a40c15aab45d44b7ca11f148cc2e997c1.html#a40c15aab45d44b7ca11f148cc2e997c1" title=" " alt="" coords="391,152,453,177"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="313,142,377,154,376,159,312,147"/>
+</map>

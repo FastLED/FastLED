@@ -1,7 +1,9 @@
-<map id="fl/initializer_list.h" name="fl/initializer_list.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="68,5,203,31"/>
-<area shape="rect" id="Node000002" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="5,79,127,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="126,33,89,71,85,67,122,29"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="151,79,261,104"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="149,29,187,67,183,71,145,33"/>
+<map id="fl/stl/initializer_list.h" name="fl/stl/initializer_list.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="202,5,317,45"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,93,180,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="221,48,131,90,128,85,218,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="204,93,315,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="262,46,262,79,257,79,257,46"/>
+<area shape="rect" id="Node000004" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="339,93,465,119"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="295,43,370,84,368,89,292,48"/>
 </map>

@@ -1,0 +1,5 @@
+<map id="fl::ChannelOptions::isRgbw" name="fl::ChannelOptions::isRgbw">
+<area shape="rect" id="Node000001" title="True if this channel emits 4&#45;channel RGBW." alt="" coords="5,5,147,45"/>
+<area shape="rect" id="Node000002" href="$d7/d27/structfl_1_1_rgbw_a6eb207420561b0ae3d3907354871253b.html#a6eb207420561b0ae3d3907354871253b" title=" " alt="" coords="195,13,316,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="147,23,181,23,181,28,147,28"/>
+</map>

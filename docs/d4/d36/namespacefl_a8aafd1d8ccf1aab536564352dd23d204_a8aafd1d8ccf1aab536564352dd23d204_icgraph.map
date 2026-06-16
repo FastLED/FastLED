@@ -1,0 +1,31 @@
+<map id="fl::channelManager" name="fl::channelManager">
+<area shape="rect" id="Node000001" title="Get the global ChannelManager singleton instance." alt="" coords="643,292,789,317"/>
+<area shape="rect" id="Node000002" href="$dd/dbb/class_c_fast_l_e_d_a391a5eaa2e94590e1bc2adf1ac0f9456.html#a391a5eaa2e94590e1bc2adf1ac0f9456" title="Add LED channel with runtime configuration (from ChannelConfig)" alt="" coords="431,5,546,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="708,279,696,228,675,165,641,99,619,70,593,44,571,31,546,24,547,19,573,26,596,40,623,66,646,96,680,163,702,227,713,278"/>
+<area shape="rect" id="Node000003" href="$dd/dbb/class_c_fast_l_e_d_aa98f1c4caa3fbef233d34ee757d29994.html#aa98f1c4caa3fbef233d34ee757d29994" title="Clear/reset FastLED state based on the provided flags." alt="" coords="427,55,550,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="705,280,691,238,668,187,635,136,616,113,593,94,572,82,549,75,551,70,575,77,596,89,619,109,640,133,673,185,696,236,710,278"/>
+<area shape="rect" id="Node000004" href="$dd/dbb/class_c_fast_l_e_d_aa790ed751ca9d0af237a41c2fdccf52b.html#aa790ed751ca9d0af237a41c2fdccf52b" title="Get count of registered channel drivers." alt="" coords="394,104,583,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="701,280,684,248,660,211,630,174,593,143,571,132,574,127,596,138,633,170,664,208,689,246,706,278"/>
+<area shape="rect" id="Node000005" href="$dd/dbb/class_c_fast_l_e_d_af7b5072fd166010e669f75ea21c58c72.html#af7b5072fd166010e669f75ea21c58c72" title="Get full state of all registered channel drivers." alt="" coords="397,153,580,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="695,283,652,236,624,212,593,192,566,181,568,176,596,188,627,208,655,232,699,279"/>
+<area shape="rect" id="Node000006" href="$dd/dbb/class_c_fast_l_e_d_a237827730dbf5eef5d2b036e8e796489.html#a237827730dbf5eef5d2b036e8e796489" title="Check if a driver is enabled by name." alt="" coords="392,203,585,228"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="681,287,640,264,594,243,553,231,555,226,596,238,643,259,684,282"/>
+<area shape="rect" id="Node000007" href="$d2/d6b/classfl_1_1_channel_manager_a82a98383df4ab7ca54db2d17e9848604.html#a82a98383df4ab7ca54db2d17e9848604" title=" " alt="" coords="415,253,563,293"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="629,295,563,286,563,280,629,290"/>
+<area shape="rect" id="Node000008" href="$d8/d07/namespacefl_1_1validation_ac8e7ec799362b88cf653dc48935b458c.html#ac8e7ec799362b88cf653dc48935b458c" title="Print validation results (logs registered drivers and status)" alt="" coords="396,317,581,357"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="629,320,582,326,581,321,629,314"/>
+<area shape="rect" id="Node000011" href="$dd/dbb/class_c_fast_l_e_d_a6d5e5bb1d08be99fb86a044a74bdf578.html#a6d5e5bb1d08be99fb86a044a74bdf578" title="Register a single driver at a priority above the platform default (compile&#45;time TU&#45;linking variant)." alt="" coords="383,381,595,407"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="684,327,643,350,596,371,555,384,553,379,594,366,640,345,681,322"/>
+<area shape="rect" id="Node000012" href="$dd/dbb/class_c_fast_l_e_d_acf1fbe61fec65ce648a6d0eabd9c85bd.html#acf1fbe61fec65ce648a6d0eabd9c85bd" title="Enable only one driver exclusively, runtime form (disables all others)" alt="" coords="383,431,595,456"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="699,330,655,376,627,400,596,420,565,433,563,428,593,416,624,396,652,372,695,326"/>
+<area shape="rect" id="Node000013" href="$d8/d07/namespacefl_1_1validation_a99438082b6a6eb992c70949978692719.html#a99438082b6a6eb992c70949978692719" title="Validate that at least one driver is registered with ChannelManager." alt="" coords="407,481,571,521"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="705,331,663,399,633,437,596,470,572,483,570,478,593,465,629,433,659,396,701,328"/>
+<area shape="rect" id="Node000014" href="$dd/dbb/class_c_fast_l_e_d_aeb27e6f97287c4add5056c7218a78c82.html#aeb27e6f97287c4add5056c7218a78c82" title="Wait for all channel bus transmissions to complete." alt="" coords="429,545,548,571"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="711,332,697,376,675,431,641,487,620,513,596,535,574,548,549,555,547,550,572,543,593,531,616,509,637,484,670,429,692,374,706,330"/>
+<area shape="rect" id="Node000015" href="$dd/dbb/class_c_fast_l_e_d_a234cfd99ebdb37ecd4aedf51484d74e2.html#a234cfd99ebdb37ecd4aedf51484d74e2" title="Wait for all channel bus transmissions to complete with timeout." alt="" coords="429,595,548,620"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="714,331,703,385,682,453,667,489,647,524,624,556,596,584,574,598,549,606,547,600,572,593,593,580,620,553,643,521,662,487,677,451,698,383,709,330"/>
+<area shape="rect" id="Node000009" href="$d7/d5f/_auto_research_helpers_8cpp_afa9923b289ffeed47a01b72c911c1110.html#afa9923b289ffeed47a01b72c911c1110" title="AutoResearch that expected engines are available for this platform Prints ERROR if any expected engin..." alt="" coords="112,324,335,349"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="382,339,335,339,335,334,382,334"/>
+<area shape="rect" id="Node000010" href="$dd/dc8/_auto_research_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,324,64,349"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="98,339,64,339,64,334,98,334"/>
+</map>

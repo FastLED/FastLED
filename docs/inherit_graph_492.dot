@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="KeyboardState",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d37/class_keyboard_state.html",tooltip=" "];
+  Node0 [id="Node000000",label="fl::fl::int_cast_detail\l::cast_target\< T, 2, true \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d32/namespacefl_1_1fl_1_1int__cast__detail.html#dd/d97/structfl_1_1fl_1_1int__cast__detail_1_1cast__target_3_01_t_00_012_00_01true_01_4",tooltip=" "];
 }

@@ -1,0 +1,5 @@
+<map id="fl::fill_rainbow_circular" name="fl::fill_rainbow_circular">
+<area shape="rect" id="Node000001" title="Fill a range of LEDs with a rainbow of colors, so that the hues are continuous between the end of the..." alt="" coords="5,5,173,31"/>
+<area shape="rect" id="Node000002" href="$da/de3/group___color_fills_ga425a682204231fa804027c39ffc3030e.html#ga425a682204231fa804027c39ffc3030e" title="Fill a range of LEDs with a rainbow of colors, so that the hues are continuous between the end of the..." alt="" coords="221,5,389,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="174,15,208,15,208,21,174,21"/>
+</map>

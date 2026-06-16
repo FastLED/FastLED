@@ -1,0 +1,7 @@
+<map id="fl::FlowField::noisePunch" name="fl::FlowField::noisePunch">
+<area shape="rect" id="Node000001" title="Trigger a noise punch on both axes at center with proportional width." alt="" coords="5,31,188,56"/>
+<area shape="rect" id="Node000002" href="$d7/d3e/classfl_1_1_fx2d_ad6b933327525e3183bebc5c4670c335c.html#ad6b933327525e3183bebc5c4670c335c" title=" " alt="" coords="236,5,379,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="188,30,222,26,223,31,188,35"/>
+<area shape="rect" id="Node000003" href="$d7/d3e/classfl_1_1_fx2d_ac8815af5daab1c78876ecded7373a2f8.html#ac8815af5daab1c78876ecded7373a2f8" title=" " alt="" coords="239,55,376,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="188,51,225,55,225,61,188,56"/>
+</map>

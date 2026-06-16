@@ -106,15 +106,15 @@ $(function(){initNavTree('d0/dee/struct_pixel_controller_aa86847022436988b28343a
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;<a class="el" href="../../d4/d36/namespacefl_ab289ace8bd149d39b87ebd778e9abe23.html#ab289ace8bd149d39b87ebd778e9abe23">EOrder</a> RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </div>
+template&lt;<a class="el" href="../../d4/d36/namespacefl_ab289ace8bd149d39b87ebd778e9abe23.html#ab289ace8bd149d39b87ebd778e9abe23">EOrder</a> RGB_ORDER, int LANES = 1, fl::u32 MASK = 0xFFFFFFFF&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="../../d0/dee/struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::enable_dithering </td>
+          <td class="memname">void <a class="el" href="../../d0/dee/struct_pixel_controller.html">PixelController</a>&lt; <a class="el" href="../../d3/d8b/_parallel___i_o_8ino_a87eecf85eebf5be8fb74183807e8e2f0.html#a87eecf85eebf5be8fb74183807e8e2f0">RGB_ORDER</a>, LANES, MASK &gt;::enable_dithering </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="../../d8/d90/dither__mode_8h_a00be0a29fd8991e0189667f559bdef3b.html#a00be0a29fd8991e0189667f559bdef3b">EDitherMode</a></td>          <td class="paramname"><span class="paramname"><em>dither</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="../../d8/d90/dither__mode_8h_ac8fcb04ce6b123eca150707a493adef4.html#ac8fcb04ce6b123eca150707a493adef4">EDitherMode</a></td>          <td class="paramname"><span class="paramname"><em>dither</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -125,36 +125,36 @@ template&lt;<a class="el" href="../../d4/d36/namespacefl_ab289ace8bd149d39b87ebd
 </table>
 </div><div class="memdoc">
 
-<p>Toggle dithering enable If dithering is set to enabled, this will re-init the dithering values (<a class="el" href="../../d0/dee/struct_pixel_controller_a2a8441da873d3a094c15c337b34d3e43.html#a2a8441da873d3a094c15c337b34d3e43" title="Set up the values for binary dithering.">init_binary_dithering()</a>). </p>
-<p>Otherwise it will clear the stored dithering data. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Toggle dithering enable/disable. </p>
+<dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">dither</td><td>the dither setting </td></tr>
+    <tr><td class="paramname">dither</td><td>BINARY_DITHER (on) or DISABLE_DITHER (off) </td></tr>
   </table>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00303">303</a> of file <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html">pixel_controller.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  303</span>                                              {</div>
-<div class="line"><span class="lineno">  304</span>        <span class="keywordflow">switch</span>(<a class="code hl_function" href="../../d0/dee/struct_pixel_controller_aa2a1b38058a62a4337605425e482202f.html#aa2a1b38058a62a4337605425e482202f">dither</a>) {</div>
-<div class="line"><span class="lineno">  305</span>            <span class="keywordflow">case</span> <a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">BINARY_DITHER</a>: <a class="code hl_function" href="../../d0/dee/struct_pixel_controller_a2a8441da873d3a094c15c337b34d3e43.html#a2a8441da873d3a094c15c337b34d3e43">init_binary_dithering</a>(); <span class="keywordflow">break</span>;</div>
-<div class="line"><span class="lineno">  306</span>            <span class="keywordflow">default</span>: <a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a576c3a3eac363fb83e475e142bbe586d.html#a576c3a3eac363fb83e475e142bbe586d">d</a>[0]=<a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a576c3a3eac363fb83e475e142bbe586d.html#a576c3a3eac363fb83e475e142bbe586d">d</a>[1]=<a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a576c3a3eac363fb83e475e142bbe586d.html#a576c3a3eac363fb83e475e142bbe586d">d</a>[2]=<a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a9ba367b1689ad3fc6c1cac3174faf341.html#a9ba367b1689ad3fc6c1cac3174faf341">e</a>[0]=<a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a9ba367b1689ad3fc6c1cac3174faf341.html#a9ba367b1689ad3fc6c1cac3174faf341">e</a>[1]=<a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a9ba367b1689ad3fc6c1cac3174faf341.html#a9ba367b1689ad3fc6c1cac3174faf341">e</a>[2]=0; <span class="keywordflow">break</span>;</div>
-<div class="line"><span class="lineno">  307</span>        }</div>
-<div class="line"><span class="lineno">  308</span>    }</div>
-<div class="ttc" id="astruct_pixel_controller_a2a8441da873d3a094c15c337b34d3e43_html_a2a8441da873d3a094c15c337b34d3e43"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller_a2a8441da873d3a094c15c337b34d3e43.html#a2a8441da873d3a094c15c337b34d3e43">PixelController::init_binary_dithering</a></div><div class="ttdeci">void init_binary_dithering()</div><div class="ttdoc">Set up the values for binary dithering.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00238">pixel_controller.h:238</a></div></div>
-<div class="ttc" id="astruct_pixel_controller_a576c3a3eac363fb83e475e142bbe586d_html_a576c3a3eac363fb83e475e142bbe586d"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller_a576c3a3eac363fb83e475e142bbe586d.html#a576c3a3eac363fb83e475e142bbe586d">PixelController::d</a></div><div class="ttdeci">uint8_t d[3]</div><div class="ttdoc">values for the scaled dither signal</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00087">pixel_controller.h:87</a></div></div>
-<div class="ttc" id="astruct_pixel_controller_a9ba367b1689ad3fc6c1cac3174faf341_html_a9ba367b1689ad3fc6c1cac3174faf341"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller_a9ba367b1689ad3fc6c1cac3174faf341.html#a9ba367b1689ad3fc6c1cac3174faf341">PixelController::e</a></div><div class="ttdeci">uint8_t e[3]</div><div class="ttdoc">values for the unscaled dither signal</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00088">pixel_controller.h:88</a></div></div>
-<div class="ttc" id="astruct_pixel_controller_aa2a1b38058a62a4337605425e482202f_html_aa2a1b38058a62a4337605425e482202f"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller_aa2a1b38058a62a4337605425e482202f.html#aa2a1b38058a62a4337605425e482202f">PixelController::dither</a></div><div class="ttdeci">static FASTLED_FORCE_INLINE uint8_t dither(PixelController &amp;pc, uint8_t b)</div><div class="ttdoc">Calculate a dither value using the per-channel dither data.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00360">pixel_controller.h:360</a></div></div>
-<div class="ttc" id="astruct_pixel_controller_html"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller.html">PixelController</a></div><div class="ttdoc">Pixel controller class.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00083">pixel_controller.h:83</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00374">374</a> of file <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html">pixel_controller.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  374</span>                                              {</div>
+<div class="line"><span class="lineno">  375</span>        <span class="keywordflow">switch</span>(<a class="code hl_function" href="../../d0/dee/struct_pixel_controller_af1d6dbfe39be747916896dc44c730a29.html#af1d6dbfe39be747916896dc44c730a29">dither</a>) {</div>
+<div class="line"><span class="lineno">  376</span>            <span class="keywordflow">case</span> <a class="code hl_struct" href="../../d0/dee/struct_pixel_controller.html">BINARY_DITHER</a>: <a class="code hl_function" href="../../d0/dee/struct_pixel_controller_a2a8441da873d3a094c15c337b34d3e43.html#a2a8441da873d3a094c15c337b34d3e43">init_binary_dithering</a>(); <span class="keywordflow">break</span>;  <span class="comment">// Initialize dithering algorithm</span></div>
+<div class="line"><span class="lineno">  377</span>            <span class="keywordflow">default</span>: <a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a5ad48a201e6f48a4ff1fa9936e590324.html#a5ad48a201e6f48a4ff1fa9936e590324">d</a>[0]=<a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a5ad48a201e6f48a4ff1fa9936e590324.html#a5ad48a201e6f48a4ff1fa9936e590324">d</a>[1]=<a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a5ad48a201e6f48a4ff1fa9936e590324.html#a5ad48a201e6f48a4ff1fa9936e590324">d</a>[2]=<a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a48370046539a9b7107bd0c5ee21c9f44.html#a48370046539a9b7107bd0c5ee21c9f44">e</a>[0]=<a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a48370046539a9b7107bd0c5ee21c9f44.html#a48370046539a9b7107bd0c5ee21c9f44">e</a>[1]=<a class="code hl_variable" href="../../d0/dee/struct_pixel_controller_a48370046539a9b7107bd0c5ee21c9f44.html#a48370046539a9b7107bd0c5ee21c9f44">e</a>[2]=0; <span class="keywordflow">break</span>;     <span class="comment">// Clear dither values (disabled)</span></div>
+<div class="line"><span class="lineno">  378</span>        }</div>
+<div class="line"><span class="lineno">  379</span>    }</div>
+<div class="ttc" id="astruct_pixel_controller_a2a8441da873d3a094c15c337b34d3e43_html_a2a8441da873d3a094c15c337b34d3e43"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller_a2a8441da873d3a094c15c337b34d3e43.html#a2a8441da873d3a094c15c337b34d3e43">PixelController::init_binary_dithering</a></div><div class="ttdeci">void init_binary_dithering()</div><div class="ttdoc">Set up the values for binary dithering.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00309">pixel_controller.h:309</a></div></div>
+<div class="ttc" id="astruct_pixel_controller_a48370046539a9b7107bd0c5ee21c9f44_html_a48370046539a9b7107bd0c5ee21c9f44"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller_a48370046539a9b7107bd0c5ee21c9f44.html#a48370046539a9b7107bd0c5ee21c9f44">PixelController::e</a></div><div class="ttdeci">fl::u8 e[3]</div><div class="ttdoc">[DITHER] Max dither range per R,G,B channel (inversely proportional to brightness)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00107">pixel_controller.h:107</a></div></div>
+<div class="ttc" id="astruct_pixel_controller_a5ad48a201e6f48a4ff1fa9936e590324_html_a5ad48a201e6f48a4ff1fa9936e590324"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller_a5ad48a201e6f48a4ff1fa9936e590324.html#a5ad48a201e6f48a4ff1fa9936e590324">PixelController::d</a></div><div class="ttdeci">fl::u8 d[3]</div><div class="ttdoc">[DITHER] Current dither offset per R,G,B channel (toggles via stepDithering)</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00106">pixel_controller.h:106</a></div></div>
+<div class="ttc" id="astruct_pixel_controller_af1d6dbfe39be747916896dc44c730a29_html_af1d6dbfe39be747916896dc44c730a29"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller_af1d6dbfe39be747916896dc44c730a29.html#af1d6dbfe39be747916896dc44c730a29">PixelController::dither</a></div><div class="ttdeci">static FASTLED_FORCE_INLINE fl::u8 dither(PixelController &amp;pc, fl::u8 b)</div><div class="ttdoc">Add dither offset to pixel value (BEFORE scaling).</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00431">pixel_controller.h:431</a></div></div>
+<div class="ttc" id="astruct_pixel_controller_html"><div class="ttname"><a href="../../d0/dee/struct_pixel_controller.html">PixelController</a></div><div class="ttdoc">Pixel controller class.</div><div class="ttdef"><b>Definition</b> <a href="../../d5/d4d/pixel__controller_8h_source.html#l00102">pixel_controller.h:102</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d8/d90/dither__mode_8h_source.html#l00014">BINARY_DITHER</a>, <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00087">d</a>, <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00360">dither()</a>, <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00088">e</a>, <a class="el" href="../../d8/d90/dither__mode_8h_source.html#l00017">EDitherMode</a>, and <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00238">init_binary_dithering()</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/d90/dither__mode_8h_source.html#l00012">BINARY_DITHER</a>, <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00106">d</a>, <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00431">dither()</a>, <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00107">e</a>, and <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00309">init_binary_dithering()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00183">PixelController()</a>, <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00169">PixelController()</a>, and <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00154">PixelController()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00202">PixelController()</a>, <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00188">PixelController()</a>, and <a class="el" href="../../d5/d4d/pixel__controller_8h_source.html#l00173">PixelController()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d0/dee/struct_pixel_controller_aa86847022436988b28343a76bab0db4c_aa86847022436988b28343a76bab0db4c_cgraph.svg" width="100%" height="428"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../d0/dee/struct_pixel_controller_aa86847022436988b28343a76bab0db4c_aa86847022436988b28343a76bab0db4c_cgraph.svg" width="100%" height="394"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div></div>
 </div>
 <div id="dynsection-1" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-1-trigger" src="../../closed.png" alt="+"/> Here is the caller graph for this function:</div>
@@ -173,7 +173,7 @@ template&lt;<a class="el" href="../../d4/d36/namespacefl_ab289ace8bd149d39b87ebd
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d0/dee/struct_pixel_controller.html">PixelController</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:03 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

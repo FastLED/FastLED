@@ -1,7 +1,11 @@
 <map id="fl::Leds" name="fl::Leds">
-<area shape="rect" id="Node000001" title=" " alt="" coords="59,93,127,119"/>
-<area shape="rect" id="Node000002" href="$d0/dce/classfl_1_1_x_y_map.html" title=" " alt="" coords="5,5,88,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="47,44,52,68,61,81,74,91,71,95,58,85,47,70,41,45"/>
-<area shape="rect" id="Node000003" href="$d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)" alt="" coords="112,5,171,31"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="131,44,102,94,98,91,126,41"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="71,181,139,207"/>
+<area shape="rect" id="Node000002" href="$d0/dce/classfl_1_1_x_y_map.html" title=" " alt="" coords="5,93,88,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="59,130,74,156,95,179,91,183,70,159,55,133"/>
+<area shape="rect" id="Node000003" href="$d0/d08/classfl_1_1span.html" title=" " alt="" coords="112,93,264,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="169,131,119,183,115,179,165,127"/>
+<area shape="rect" id="Node000004" href="$da/dd6/structfl_1_1_c_r_g_b.html" title="Representation of an 8&#45;bit RGB pixel (Red, Green, Blue)" alt="" coords="80,5,155,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="137,39,180,91,176,94,133,43"/>
+<area shape="rect" id="Node000005" href="$d0/d08/classfl_1_1span.html" title=" " alt="" coords="179,5,336,31"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="241,43,200,94,196,91,237,40"/>
 </map>

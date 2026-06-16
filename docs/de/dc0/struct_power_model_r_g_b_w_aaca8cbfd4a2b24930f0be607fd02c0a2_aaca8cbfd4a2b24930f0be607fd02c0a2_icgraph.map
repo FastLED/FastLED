@@ -1,0 +1,5 @@
+<map id="PowerModelRGBW::toRGB" name="PowerModelRGBW::toRGB">
+<area shape="rect" id="Node000001" title="Convert to RGB model (extracts RGB components, preserves exponent)" alt="" coords="191,5,381,31"/>
+<area shape="rect" id="Node000002" href="$d9/d5f/group___power_model_ga759a23d8dec6a2de0d5b89095014d4e6.html#ga759a23d8dec6a2de0d5b89095014d4e6" title="Set custom RGBW LED power consumption model." alt="" coords="5,5,143,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="177,21,143,21,143,15,177,15"/>
+</map>

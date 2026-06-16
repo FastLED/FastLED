@@ -11,7 +11,7 @@
 <!-- Node1 -->
 <g id="Node000001" class="node">
 <title>Node1</title>
-<g id="a_Node000001"><a xlink:title=" ">
+<g id="a_Node000001"><a xlink:title="Abstract base class for mapping wave simulation values to LED colors.">
 <polygon fill="#999999" stroke="#666666" points="198,-74 99,-74 99,-55 198,-55 198,-74"/>
 <text text-anchor="middle" x="148.5" y="-62" font-family="Helvetica,sans-Serif" font-size="10.00">fl::WaveCrgbMap</text>
 </a>
@@ -20,7 +20,7 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d0/da7/classfl_1_1_wave_crgb_gradient_map.html" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d0/da7/classfl_1_1_wave_crgb_gradient_map.html" target="_top" xlink:title="Wave&#45;to&#45;color mapper using gradient/palette coloring.">
 <polygon fill="white" stroke="#666666" points="141,-19 0,-19 0,0 141,0 141,-19"/>
 <text text-anchor="middle" x="70.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::WaveCrgbGradientMap</text>
 </a>
@@ -38,7 +38,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../de/d99/classfl_1_1_wave_crgb_map_default.html" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../de/d99/classfl_1_1_wave_crgb_map_default.html" target="_top" xlink:title="Default wave&#45;to&#45;color mapper producing grayscale output.">
 <polygon fill="white" stroke="#666666" points="294,-19 159,-19 159,0 294,0 294,-19"/>
 <text text-anchor="middle" x="226.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::WaveCrgbMapDefault</text>
 </a>

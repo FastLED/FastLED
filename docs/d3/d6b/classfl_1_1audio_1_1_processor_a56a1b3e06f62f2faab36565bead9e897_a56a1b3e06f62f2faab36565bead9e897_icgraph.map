@@ -1,0 +1,7 @@
+<map id="fl::audio::Processor::setNoiseFloorTrackingEnabled" name="fl::audio::Processor::setNoiseFloorTrackingEnabled">
+<area shape="rect" id="Node000001" title="Enable/disable noise floor tracking." alt="" coords="199,29,425,69"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="351,18,338,11,312,8,290,10,276,15,271,21,274,28,269,30,266,20,273,10,288,5,312,3,339,6,354,13"/>
+<area shape="rect" id="Node000002" href="$d3/d6b/classfl_1_1audio_1_1_processor_a44c9bf7e90fafc4f6bc668d7796ef27c.html#a44c9bf7e90fafc4f6bc668d7796ef27c" title=" " alt="" coords="5,29,151,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="185,52,151,52,151,47,185,47"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="117,18,104,11,78,8,56,10,42,15,37,21,40,28,35,30,32,20,39,10,54,5,78,3,105,6,120,13"/>
+</map>

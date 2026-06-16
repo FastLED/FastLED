@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>FastLED: fl/wave_simulation.h File Reference</title>
+<title>FastLED: fl/math/wave/wave_simulation.h File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -107,19 +107,13 @@ $(function(){initNavTree('dc/d36/wave__simulation_8h.html','../../'); initResiza
   <div class="headertitle"><div class="title">wave_simulation.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="../../df/dd8/stdint_8h_source.html">fl/stdint.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d8/db8/math__macros_8h_source.html">fl/math_macros.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../df/d2a/namespace_8h_source.html">fl/namespace.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../da/d4b/unique__ptr_8h_source.html">fl/unique_ptr.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../de/d77/warn_8h_source.html">fl/warn.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../dd/d8e/wave__simulation__real_8h_source.html">fl/wave_simulation_real.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../da/d15/grid_8h_source.html">fl/grid.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../dc/d18/memory_8h_source.html">fl/memory.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d2/dce/supersample_8h_source.html">fl/supersample.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../da/d61/xymap_8h_source.html">fl/xymap.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d2/d0c/fx_8h_source.html">fx/fx.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d9/d43/fx2d_8h_source.html">fx/fx2d.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/int.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="../../df/db1/math_8h_source.html">fl/math/math.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dd/d8e/wave__simulation__real_8h_source.html">fl/math/wave/wave_simulation_real.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../da/d15/grid_8h_source.html">fl/math/grid.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../da/d4b/unique__ptr_8h_source.html">fl/stl/unique_ptr.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d2/dce/supersample_8h_source.html">fl/math/supersample.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/stl/int.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../db/d01/noexcept_8h_source.html">fl/stl/noexcept.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Include dependency graph for wave_simulation.h:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -147,13 +141,13 @@ Classes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></td></tr>
-<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">IMPORTANT! <br /></td></tr>
+<tr class="memdesc:d4/d36/namespacefl"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:a351456da7166b4fdf8e1ea8c9c333517" id="r_a351456da7166b4fdf8e1ea8c9c333517"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a351456da7166b4fdf8e1ea8c9c333517.html#a351456da7166b4fdf8e1ea8c9c333517">fl::U8EasingFunction</a> { <a class="el" href="../../d4/d36/namespacefl_a351456da7166b4fdf8e1ea8c9c333517.html#a351456da7166b4fdf8e1ea8c9c333517a0cf5c24d21781176aa004b1c99a2bd83">fl::WAVE_U8_MODE_LINEAR</a>
-, <a class="el" href="../../d4/d36/namespacefl_a351456da7166b4fdf8e1ea8c9c333517.html#a351456da7166b4fdf8e1ea8c9c333517aebe90d9386335a6f83dd651108cc83c7">fl::WAVE_U8_MODE_SQRT</a>
+<tr class="memitem:a351456da7166b4fdf8e1ea8c9c333517" id="r_a351456da7166b4fdf8e1ea8c9c333517"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl_a351456da7166b4fdf8e1ea8c9c333517.html#a351456da7166b4fdf8e1ea8c9c333517">fl::U8EasingFunction</a> { <a class="el" href="../../d4/d36/namespacefl_a351456da7166b4fdf8e1ea8c9c333517.html#a351456da7166b4fdf8e1ea8c9c333517a1a7222f78e57ab4ff33edd0a64fa8664">fl::WAVE_U8_MODE_LINEAR</a>
+, <a class="el" href="../../d4/d36/namespacefl_a351456da7166b4fdf8e1ea8c9c333517.html#a351456da7166b4fdf8e1ea8c9c333517a36b23e1cede2e6954763188795b676b1">fl::WAVE_U8_MODE_SQRT</a>
  }</td></tr>
 <tr class="separator:a351456da7166b4fdf8e1ea8c9c333517"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -163,8 +157,8 @@ Enumerations</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dc/d36/wave__simulation_8h.html">wave_simulation.h</a></li>
-    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../dir_94896ea2d28e1d34f24a1dbbb9436aa8.html">math</a></li><li class="navelem"><a class="el" href="../../dir_2e0de1e3a6041cb8a186d5794a24e14b.html">wave</a></li><li class="navelem"><a class="el" href="../../dc/d36/wave__simulation_8h.html">wave_simulation.h</a></li>
+    <li class="footer">Generated on Tue Jun 16 2026 00:07:01 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

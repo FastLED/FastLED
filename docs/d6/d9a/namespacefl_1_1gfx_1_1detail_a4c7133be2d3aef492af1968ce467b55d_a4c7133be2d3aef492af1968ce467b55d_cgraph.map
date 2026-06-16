@@ -1,0 +1,12 @@
+<map id="fl::gfx::detail::drawLineCore" name="fl::gfx::detail::drawLineCore">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,80,207,105"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_aefed87cfefc8330419d3393867945e84.html#aefed87cfefc8330419d3393867945e84" title=" " alt="" coords="311,5,373,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="142,77,254,39,297,27,299,32,255,45,144,82"/>
+<area shape="rect" id="Node000003" href="$d0/d8b/namespacefl_1_1gfx_a82edaad44f942771f5f99fe52a30daa0.html#a82edaad44f942771f5f99fe52a30daa0" title="Internal helper: add or set pixel to rectangular buffer with bounds checking Direct row&#45;major indexin..." alt="" coords="255,55,429,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="207,79,241,76,241,81,207,85"/>
+<area shape="rect" id="Node000004" href="$da/d3c/namespacefl_1_1fl_a5d5f266e22b532883d3bcc5159a7f1b8.html#a5d5f266e22b532883d3bcc5159a7f1b8" title=" " alt="" coords="298,104,386,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="207,100,284,108,284,113,207,106"/>
+<area shape="rect" id="Node000005" href="$d6/d9a/namespacefl_1_1gfx_1_1detail_ab04a22e2927673d2692b4f3e354af564.html#ab04a22e2927673d2692b4f3e354af564" title="Convert any Coord type to 8.8 fixed&#45;point (fl::i32)." alt="" coords="259,177,425,203"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="139,103,299,170,297,175,137,108"/>
+<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="304,179,296,169,300,159,316,153,342,151,375,155,388,164,384,168,373,159,342,156,317,158,303,163,301,168,308,175"/>
+</map>

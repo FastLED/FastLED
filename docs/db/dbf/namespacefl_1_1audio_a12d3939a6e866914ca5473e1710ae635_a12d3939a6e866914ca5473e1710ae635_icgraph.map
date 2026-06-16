@@ -1,0 +1,10 @@
+<map id="fl::audio::getMicResponseCurve" name="fl::audio::getMicResponseCurve">
+<area shape="rect" id="Node000001" title="Get the high&#45;resolution response curve for a given mic profile." alt="" coords="600,37,789,77"/>
+<area shape="rect" id="Node000002" href="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_a3a263b257d55afc4ace05d432939e792.html#a3a263b257d55afc4ace05d432939e792" title="Set microphone correction profile (propagated from Processor)." alt="" coords="405,29,552,84"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="586,59,552,59,552,54,586,54"/>
+<area shape="rect" id="Node000003" href="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_a88188f71bc78dc8603f86597cec368a2.html#a88188f71bc78dc8603f86597cec368a2" title="Reconfigure equalizer tuning parameters at runtime." alt="" coords="211,29,357,84"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="392,59,358,59,358,54,392,54"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="316,18,304,11,284,8,267,10,256,15,251,21,251,29,246,29,246,19,253,10,265,5,284,3,306,6,319,14"/>
+<area shape="rect" id="Node000004" href="$d6/ddf/classfl_1_1audio_1_1detector_1_1_equalizer_detector_a54bcd91a63476c263a89b1193d771535.html#a54bcd91a63476c263a89b1193d771535" title=" " alt="" coords="5,29,163,84"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="197,59,163,59,163,54,197,54"/>
+</map>

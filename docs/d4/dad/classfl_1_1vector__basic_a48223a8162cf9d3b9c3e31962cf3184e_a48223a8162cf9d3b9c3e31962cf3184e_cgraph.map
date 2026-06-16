@@ -1,0 +1,15 @@
+<map id="fl::vector_basic::shrink_to_fit_impl" name="fl::vector_basic::shrink_to_fit_impl">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,88,173,128"/>
+<area shape="rect" id="Node000002" href="$d4/dad/classfl_1_1vector__basic_a30b933d0f031b7bf574c24590f23159b.html#a30b933d0f031b7bf574c24590f23159b" title="Does this vector have an inline buffer at all?" alt="" coords="230,5,417,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="146,85,252,47,254,52,148,90"/>
+<area shape="rect" id="Node000003" href="$d4/dad/classfl_1_1vector__basic_ad3336dbd1270bce79415ef3ea783393a.html#ad3336dbd1270bce79415ef3ea783393a" title="Compute inline buffer pointer from offset." alt="" coords="473,84,637,124"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="173,105,459,102,459,107,174,110"/>
+<area shape="rect" id="Node000004" href="$d4/dad/classfl_1_1vector__basic_a4a79234edce9c9748432aba0f499b001.html#a4a79234edce9c9748432aba0f499b001" title="Is data currently in the inline buffer?" alt="" coords="236,121,411,146"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="174,114,223,120,222,125,173,120"/>
+<area shape="rect" id="Node000005" href="$d4/dad/classfl_1_1vector__basic_a81fe1c9feb8228d4269494b7984c6270.html#a81fe1c9feb8228d4269494b7984c6270" title=" " alt="" coords="221,170,425,195"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="139,126,222,156,250,164,249,169,221,161,137,131"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="512,84,509,74,516,65,532,59,555,57,582,60,597,67,595,72,581,65,555,63,533,65,520,69,515,75,517,83"/>
+<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="410,120,459,113,460,119,411,125"/>
+<area shape="rect" id="Node000006" href="$d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d" title=" " alt="" coords="508,170,603,195"/>
+<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="426,180,494,180,494,185,426,185"/>
+</map>

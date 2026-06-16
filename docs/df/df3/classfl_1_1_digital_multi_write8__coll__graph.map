@@ -1,0 +1,5 @@
+<map id="fl::DigitalMultiWrite8" name="fl::DigitalMultiWrite8">
+<area shape="rect" id="Node000001" title="Pre&#45;computed nibble LUT for fast 8&#45;pin digital writes." alt="" coords="5,152,163,177"/>
+<area shape="rect" id="Node000002" href="$d9/d21/classfl_1_1_digital_multi_write8.html#de/d89/structfl_1_1_digital_multi_write8_1_1_pin_list" title=" " alt="" coords="5,5,163,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="87,59,87,152,81,152,81,59"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="setup" name="setup">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,55,64,80"/>
+<area shape="rect" id="Node000002" href="$df/d05/_r_x_8ino_a3c4e68a74a6a118bb84027384953d8b8.html#a3c4e68a74a6a118bb84027384953d8b8" title=" " alt="" coords="117,5,266,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="63,55,111,39,134,32,136,37,113,45,65,60"/>
+<area shape="rect" id="Node000003" href="$df/dac/test_8cpp_a2e8aa956c129f79502ef2a6ad020ba4c.html#a2e8aa956c129f79502ef2a6ad020ba4c" title="Test RX channel functionality with low&#45;frequency pattern." alt="" coords="112,55,271,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="64,65,98,65,98,70,64,70"/>
+<area shape="rect" id="Node000004" href="$df/dac/test_8cpp_afd70796be955f5bfe3fd751c455922f2.html#afd70796be955f5bfe3fd751c455922f2" title="Verify jumper wire connection between TX and RX pins." alt="" coords="124,104,259,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="65,74,138,97,137,102,63,79"/>
+</map>

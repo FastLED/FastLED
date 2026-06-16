@@ -1,0 +1,10 @@
+<map id="RGBWEmulatedController::RGBWEmulatedController" name="RGBWEmulatedController::RGBWEmulatedController">
+<area shape="rect" id="Node000001" title="Constructor with optional RGBW configuration." alt="" coords="5,29,203,69"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a1f2664b654b0f44dbbaaec4001b6c5ce.html#a1f2664b654b0f44dbbaaec4001b6c5ce" title=" " alt="" coords="251,29,387,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="203,47,237,47,237,52,203,52"/>
+<area shape="poly" id="edge4_Node000002_Node000002" title=" " alt="" coords="284,30,282,20,287,11,300,5,319,3,340,6,352,13,349,17,339,11,319,8,301,10,291,15,287,21,289,28"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a7e91fc8f83d62c9da5e5c3d6d1bc10ce.html#a7e91fc8f83d62c9da5e5c3d6d1bc10ce" title="Protected constructor with registration mode." alt="" coords="435,29,571,69"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="387,47,421,47,421,52,387,52"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a9e51518d1427463dffd596c69c6f3e46.html#a9e51518d1427463dffd596c69c6f3e46" title="Add this controller to the linked list." alt="" coords="619,29,755,69"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="571,47,605,47,605,52,571,52"/>
+</map>

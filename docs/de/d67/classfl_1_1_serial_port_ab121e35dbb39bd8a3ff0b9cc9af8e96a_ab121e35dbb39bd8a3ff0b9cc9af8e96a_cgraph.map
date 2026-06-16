@@ -1,0 +1,5 @@
+<map id="fl::SerialPort::available" name="fl::SerialPort::available">
+<area shape="rect" id="Node000001" title="Check how many bytes are available to read." alt="" coords="5,5,175,31"/>
+<area shape="rect" id="Node000002" href="$d4/d36/namespacefl_a01186a22a1055c583d5408c116c84ffa.html#a01186a22a1055c583d5408c116c84ffa" title=" " alt="" coords="223,5,321,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="175,15,209,15,209,21,175,21"/>
+</map>

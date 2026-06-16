@@ -1,5 +1,7 @@
-<map id="fl::deque&lt; T, Allocator &gt;::iterator" name="fl::deque&lt; T, Allocator &gt;::iterator">
-<area shape="rect" id="Node000001" title=" " alt="" coords="13,93,180,133"/>
-<area shape="rect" id="Node000002" href="$dc/dfe/classfl_1_1deque.html" title=" " alt="" coords="5,5,188,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="99,44,99,93,94,93,94,44"/>
+<map id="fl::deque&lt; T &gt;::iterator" name="fl::deque&lt; T &gt;::iterator">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,181,177,207"/>
+<area shape="rect" id="Node000002" href="$dc/dfe/classfl_1_1deque.html" title=" " alt="" coords="33,93,149,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="94,133,94,181,89,181,89,133"/>
+<area shape="rect" id="Node000003" href="$db/d13/classfl_1_1memory__resource.html" title="Polymorphic memory resource base class (PMR&#45;style)." alt="" coords="13,5,169,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="94,45,94,93,89,93,89,45"/>
 </map>

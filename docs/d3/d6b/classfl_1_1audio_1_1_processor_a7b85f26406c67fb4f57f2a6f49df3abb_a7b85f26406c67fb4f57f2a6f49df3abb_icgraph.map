@@ -1,0 +1,9 @@
+<map id="fl::audio::Processor::setGain" name="fl::audio::Processor::setGain">
+<area shape="rect" id="Node000001" title="Set a simple digital gain multiplier applied to each sample before detector." alt="" coords="199,61,344,101"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="304,49,292,43,271,40,253,42,242,47,238,53,240,60,235,62,233,52,239,43,252,37,271,35,294,38,306,45"/>
+<area shape="rect" id="Node000002" href="$d3/d6b/classfl_1_1audio_1_1_processor_a44c9bf7e90fafc4f6bc668d7796ef27c.html#a44c9bf7e90fafc4f6bc668d7796ef27c" title=" " alt="" coords="5,29,151,69"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="185,70,151,64,152,59,186,64"/>
+<area shape="rect" id="Node000003" href="$d8/dea/classfl_1_1audio_1_1_reactive_aaa3ca5d10aa5b336390aa8bcd67a634a.html#aaa3ca5d10aa5b336390aa8bcd67a634a" title=" " alt="" coords="9,93,147,133"/>
+<area shape="poly" id="edge4_Node000001_Node000003" title=" " alt="" coords="185,98,148,105,147,99,185,93"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="110,17,99,11,78,8,60,10,49,15,45,21,47,28,42,30,40,20,45,11,58,5,78,3,101,6,113,13"/>
+</map>

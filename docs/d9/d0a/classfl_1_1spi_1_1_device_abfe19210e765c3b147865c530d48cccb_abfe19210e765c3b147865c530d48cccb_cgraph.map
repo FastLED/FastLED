@@ -1,0 +1,9 @@
+<map id="fl::spi::Device::~Device" name="fl::spi::Device::~Device">
+<area shape="rect" id="Node000001" title="Destructor &#45; releases hardware resources." alt="" coords="5,5,180,31"/>
+<area shape="rect" id="Node000002" href="$d9/d0a/classfl_1_1spi_1_1_device_a1efb1bb9dd5c9626afaa071b58ec1972.html#a1efb1bb9dd5c9626afaa071b58ec1972" title="Shutdown the SPI hardware and release resources." alt="" coords="228,5,371,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="181,15,214,15,214,21,181,21"/>
+<area shape="rect" id="Node000003" href="$d9/d0a/classfl_1_1spi_1_1_device_a851fa0298ee8a47bd677be39404e8c15.html#a851fa0298ee8a47bd677be39404e8c15" title="Wait for pending async operation to complete." alt="" coords="419,5,628,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="371,15,405,15,405,21,371,21"/>
+<area shape="rect" id="Node000004" href="$d9/d0a/classfl_1_1spi_1_1_device_a1186e792511c298ed4bbd1c12a180c8c.html#a1186e792511c298ed4bbd1c12a180c8c" title="Check if device is initialized and ready for use." alt="" coords="676,5,847,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="628,15,662,15,662,21,628,21"/>
+</map>

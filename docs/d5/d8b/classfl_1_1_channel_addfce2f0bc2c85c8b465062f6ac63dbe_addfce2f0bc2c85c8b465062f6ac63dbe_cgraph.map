@@ -1,0 +1,10 @@
+<map id="fl::Channel::isInDrawList" name="fl::Channel::isInDrawList">
+<area shape="rect" id="Node000001" title="Check if this channel is in the controller draw list." alt="" coords="5,42,184,67"/>
+<area shape="rect" id="Node000002" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a5e115bf146729c8868c918538feb06df.html#a5e115bf146729c8868c918538feb06df" title="Check if this controller is in the linked list." alt="" coords="232,35,368,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,52,219,52,219,57,184,57"/>
+<area shape="rect" id="Node000003" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a7e91fc8f83d62c9da5e5c3d6d1bc10ce.html#a7e91fc8f83d62c9da5e5c3d6d1bc10ce" title="Protected constructor with registration mode." alt="" coords="416,5,552,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="368,41,402,36,403,41,369,46"/>
+<area shape="rect" id="Node000004" href="$d8/da0/classfl_1_1_c_l_e_d_controller_a9e51518d1427463dffd596c69c6f3e46.html#a9e51518d1427463dffd596c69c6f3e46" title="Add this controller to the linked list." alt="" coords="600,35,736,75"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="553,34,587,39,586,44,552,39"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="600,59,552,60,416,60,381,59,382,54,416,55,552,55,600,54"/>
+</map>

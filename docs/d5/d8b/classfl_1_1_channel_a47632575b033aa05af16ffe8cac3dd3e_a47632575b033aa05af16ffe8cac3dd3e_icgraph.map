@@ -1,0 +1,12 @@
+<map id="fl::Channel::asController" name="fl::Channel::asController">
+<area shape="rect" id="Node000001" title="Get pointer to base CLEDController for linked list traversal." alt="" coords="483,31,661,56"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="614,22,603,13,572,9,547,11,534,16,531,22,538,29,534,32,526,22,530,12,546,6,572,4,605,8,617,17"/>
+<area shape="rect" id="Node000002" href="$d5/d8b/classfl_1_1_channel_a0dccce627f46ca1d42624d0f82889385.html#a0dccce627f46ca1d42624d0f82889385" title="Set screen map for JS canvas visualization." alt="" coords="244,5,435,31"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="469,35,435,31,435,26,469,29"/>
+<area shape="rect" id="Node000003" href="$d5/d8b/classfl_1_1_channel_ac3c700e8433fc9775f3f8a716161e3b1.html#ac3c700e8433fc9775f3f8a716161e3b1" title="Set screen map for JS canvas visualization from XYMap." alt="" coords="244,55,435,80"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="469,57,435,60,435,55,469,51"/>
+<area shape="rect" id="Node000004" href="$d5/d8b/classfl_1_1_channel_acfb78f07c618a1248db6c4fbbed5e408.html#acfb78f07c618a1248db6c4fbbed5e408" title="Set screen map for 1D strip remapping from XMap." alt="" coords="5,29,196,55"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="230,58,196,55,196,49,231,53"/>
+<area shape="rect" id="Node000005" href="$d5/d8b/classfl_1_1_channel_a6a2bf9a4ab0f0ee7df060a3d0cba96b3.html#a6a2bf9a4ab0f0ee7df060a3d0cba96b3" title="Set screen map for JS canvas visualization from dimensions." alt="" coords="5,79,196,104"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="231,81,196,84,196,79,230,76"/>
+</map>

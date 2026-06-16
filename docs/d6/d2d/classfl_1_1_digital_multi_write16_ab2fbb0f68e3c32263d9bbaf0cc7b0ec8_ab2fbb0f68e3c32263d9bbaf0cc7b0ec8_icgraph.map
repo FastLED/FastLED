@@ -1,0 +1,9 @@
+<map id="fl::DigitalMultiWrite16::applyNibble" name="fl::DigitalMultiWrite16::applyNibble">
+<area shape="rect" id="Node000001" title=" " alt="" coords="432,35,597,75"/>
+<area shape="rect" id="Node000002" href="$d6/d2d/classfl_1_1_digital_multi_write16_a517c086da30ddcbef4425b2698b8acfb.html#a517c086da30ddcbef4425b2698b8acfb" title="Write pre&#45;transposed 16&#45;bit data to the 16 pins." alt="" coords="219,35,384,75"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="418,57,384,57,384,52,418,52"/>
+<area shape="rect" id="Node000003" href="$d6/d2d/classfl_1_1_digital_multi_write16_acddfa0f31daba041d8076772c5bdb8ee.html#acddfa0f31daba041d8076772c5bdb8ee" title=" " alt="" coords="5,5,171,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="205,44,171,39,171,34,206,39"/>
+<area shape="rect" id="Node000004" href="$d4/d36/namespacefl_ab5bc76750f7a0b948186397c6581fbf3.html#ab5bc76750f7a0b948186397c6581fbf3" title="Convenience free function — creates a temporary DigitalMultiWrite16, initializes it,..." alt="" coords="7,70,169,95"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="206,70,170,75,169,69,205,65"/>
+</map>

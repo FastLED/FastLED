@@ -1,0 +1,12 @@
+<map id="fl::Frame::draw" name="fl::Frame::draw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,124,56"/>
+<area shape="rect" id="Node000002" href="$da/dd6/structfl_1_1_c_r_g_b_a819280601bde62a67c39be0fff7f34af.html#a819280601bde62a67c39be0fff7f34af" title=" " alt="" coords="172,5,409,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="124,34,164,30,164,35,124,39"/>
+<area shape="rect" id="Node000005" href="$d4/d36/namespacefl_a0393d1d09fff5bccc427802cc22e756d.html#a0393d1d09fff5bccc427802cc22e756d" title=" " alt="" coords="243,55,338,80"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="124,47,230,58,229,64,124,52"/>
+<area shape="rect" id="Node000003" href="$da/dd6/structfl_1_1_c_r_g_b_adb891cc4fe8f5ac2188d72c13c0256fd.html#adb891cc4fe8f5ac2188d72c13c0256fd" title="Default constructor." alt="" coords="624,5,744,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="410,15,611,15,611,21,410,21"/>
+<area shape="rect" id="Node000004" href="$da/dd6/structfl_1_1_c_r_g_b_a7e34886ec51c1aff8262123de5152437.html#a7e34886ec51c1aff8262123de5152437" title=" " alt="" coords="457,31,576,56"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="405,28,444,33,443,38,404,33"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="576,32,610,27,611,32,576,37"/>
+</map>

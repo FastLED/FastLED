@@ -9,8 +9,8 @@ var _blur2d_8ino =
     [ "WIDTH", "df/d42/_blur2d_8ino_a241aeeb764887ae5e3de58b98f04b16d.html#a241aeeb764887ae5e3de58b98f04b16d", null ],
     [ "loop", "df/d42/_blur2d_8ino_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f", null ],
     [ "setup", "df/d42/_blur2d_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d", null ],
-    [ "leds", "df/d42/_blur2d_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d", null ],
+    [ "leds", "df/d42/_blur2d_8ino_a83a59cb1680f896fa1c411261436d4ad.html#a83a59cb1680f896fa1c411261436d4ad", null ],
     [ "pos", "df/d42/_blur2d_8ino_a29716abd4f651ba9d6f1476ea79fa7ae.html#a29716abd4f651ba9d6f1476ea79fa7ae", null ],
     [ "toggle", "df/d42/_blur2d_8ino_aac80e317e5bde15da9ff90feeccbc5ef.html#aac80e317e5bde15da9ff90feeccbc5ef", null ],
-    [ "xymap", "df/d42/_blur2d_8ino_aec006558d688505c331eb481e3df4319.html#aec006558d688505c331eb481e3df4319", null ]
+    [ "xymap", "df/d42/_blur2d_8ino_a632a33a79303a0031c36976309bd7148.html#a632a33a79303a0031c36976309bd7148", null ]
 ];

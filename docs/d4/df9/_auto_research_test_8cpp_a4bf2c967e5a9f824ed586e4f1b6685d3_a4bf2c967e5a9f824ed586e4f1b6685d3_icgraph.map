@@ -1,0 +1,22 @@
+<map id="getBitPatternName" name="getBitPatternName">
+<area shape="rect" id="Node000001" title=" " alt="" coords="887,157,1033,182"/>
+<area shape="rect" id="Node000002" href="$d4/df9/_auto_research_test_8cpp_a4c76939743f62fdeea55c4ec8a3e2a31.html#a4c76939743f62fdeea55c4ec8a3e2a31" title=" " alt="" coords="633,127,839,153"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="872,161,833,155,833,150,873,155"/>
+<area shape="rect" id="Node000009" href="$d4/df9/_auto_research_test_8cpp_a5acfa3d36f5c1ff77be18eecaedf19b3.html#a5acfa3d36f5c1ff77be18eecaedf19b3" title=" " alt="" coords="633,177,839,217"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="873,183,839,187,839,182,872,178"/>
+<area shape="rect" id="Node000003" href="$d1/dc9/namespaceautoresearch_a1868ca9225c807cbaf571228e6629e34.html#a1868ca9225c807cbaf571228e6629e34" title="On FL_IS_STUB: register a one&#45;shot async task that drives autoresearch." alt="" coords="112,5,327,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="707,121,652,85,619,67,585,53,519,37,452,28,327,22,327,17,453,22,520,32,586,48,621,62,655,80,710,117"/>
+<area shape="rect" id="Node000005" href="$db/d63/class_auto_research_remote_control_a2e12a8f854f2f66312793a4405f4fddb.html#a2e12a8f854f2f66312793a4405f4fddb" title=" " alt="" coords="375,63,585,103"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="665,127,569,105,570,100,666,122"/>
+<area shape="rect" id="Node000007" href="$db/d63/class_auto_research_remote_control_a7992b62fd1f26fe1898d2ea8a78b370a.html#a7992b62fd1f26fe1898d2ea8a78b370a" title=" " alt="" coords="375,177,585,217"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="666,158,570,180,569,175,665,153"/>
+<area shape="rect" id="Node000008" href="$d7/d5f/_auto_research_helpers_8cpp_a27ef6a5586c56c0790bbb0a4c5b68466.html#a27ef6a5586c56c0790bbb0a4c5b68466" title="Test a specific driver with given timing configuration." alt="" coords="437,127,523,153"/>
+<area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="620,143,523,143,523,137,620,137"/>
+<area shape="rect" id="Node000004" href="$dd/dc8/_auto_research_8ino_a4fc01d736fe50cf5b977f755b675f11d.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,45,64,70"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="99,49,65,55,64,50,98,44"/>
+<area shape="rect" id="Node000006" href="$db/d63/class_auto_research_remote_control_abb6600e8a1e8c4ef46ba29e7bd3b78b4.html#abb6600e8a1e8c4ef46ba29e7bd3b78b4" title="Register all RPC functions with shared autoresearch state." alt="" coords="114,69,325,109"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="361,88,325,89,325,84,361,83"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="100,71,64,65,65,60,101,66"/>
+<area shape="poly" id="edge8_Node000007_Node000006" title=" " alt="" coords="395,176,374,168,311,140,256,112,258,107,313,135,376,163,396,171"/>
+<area shape="poly" id="edge11_Node000009_Node000007" title=" " alt="" coords="620,200,585,200,585,195,620,195"/>
+</map>

@@ -1,0 +1,8 @@
+<map id="CFastLED::watchdog" name="CFastLED::watchdog">
+<area shape="rect" id="Node000001" title="Access the unified cross&#45;platform watchdog timer." alt="" coords="5,29,159,55"/>
+<area shape="rect" id="Node000002" href="$da/d45/classfl_1_1_watchdog_a09a903bdc23fddbb6caac87080a2a567.html#a09a903bdc23fddbb6caac87080a2a567" title=" " alt="" coords="207,29,372,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="159,39,193,39,193,45,159,45"/>
+<area shape="rect" id="Node000003" href="$da/d45/classfl_1_1_watchdog_aa289ba7fe21f2add007ae8680e51249a.html#aa289ba7fe21f2add007ae8680e51249a" title=" " alt="" coords="420,29,595,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="372,39,406,39,406,45,372,45"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="472,31,464,21,468,11,483,5,507,3,537,6,549,15,546,20,535,11,507,8,484,10,472,15,470,20,476,28"/>
+</map>

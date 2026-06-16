@@ -1,0 +1,35 @@
+<map id="fl/audio/silence_envelope.cpp.hpp" name="fl/audio/silence_envelope.cpp.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="124,5,367,31"/>
+<area shape="rect" id="Node000002" href="$d2/d8d/silence__envelope_8h.html" title=" " alt="" coords="56,79,254,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="233,33,182,72,179,68,229,29"/>
+<area shape="rect" id="Node000004" href="$df/db1/math_8h.html" title=" " alt="" coords="372,79,490,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="276,28,389,71,387,76,275,33"/>
+<area shape="rect" id="Node000003" href="$db/d01/noexcept_8h.html" title=" " alt="" coords="388,299,514,324"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="133,106,87,133,39,169,21,189,11,209,9,229,20,249,43,266,78,279,121,290,171,298,278,306,374,308,374,314,277,311,171,303,120,295,76,285,40,271,16,252,4,230,6,208,17,186,36,165,84,128,130,102"/>
+<area shape="poly" id="edge19_Node000004_Node000003" title=" " alt="" coords="436,104,444,152,452,225,454,285,449,285,447,226,439,152,431,104"/>
+<area shape="rect" id="Node000005" href="$d4/d54/compiler__control_8h.html" title=" " alt="" coords="669,152,844,177"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="484,101,691,146,690,152,483,107"/>
+<area shape="rect" id="Node000009" href="$d3/d7e/int_8h.html" title=" " alt="" coords="30,225,112,251"/>
+<area shape="poly" id="edge9_Node000004_Node000009" title=" " alt="" coords="403,106,283,154,113,223,111,218,281,150,401,102"/>
+<area shape="rect" id="Node000012" href="$df/d63/type__traits_8h.html" title=" " alt="" coords="294,152,430,177"/>
+<area shape="poly" id="edge11_Node000004_Node000012" title=" " alt="" coords="421,106,384,144,380,140,418,102"/>
+<area shape="rect" id="Node000015" href="$da/ded/undef_8h.html" title=" " alt="" coords="541,152,644,177"/>
+<area shape="poly" id="edge17_Node000004_Node000015" title=" " alt="" coords="458,102,555,144,552,149,456,106"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="712,299,886,324"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="776,176,800,196,820,224,824,240,823,257,814,287,809,286,818,256,819,241,815,226,797,199,773,180"/>
+<area shape="rect" id="Node000007" href="$d1/ddf/align_8h.html" title="Alignment macros and utilities for FastLED." alt="" coords="707,225,806,251"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="759,178,759,212,754,212,754,178"/>
+<area shape="poly" id="edge8_Node000007_Node000003" title=" " alt="" coords="708,253,514,298,513,293,707,248"/>
+<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="766,250,787,286,783,288,761,252"/>
+<area shape="rect" id="Node000010" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="20,299,122,324"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="74,251,74,285,68,285,68,251"/>
+<area shape="poly" id="edge15_Node000012_Node000003" title=" " alt="" coords="380,175,404,196,427,224,441,255,449,284,444,286,436,256,422,227,400,200,376,179"/>
+<area shape="poly" id="edge14_Node000012_Node000009" title=" " alt="" coords="316,180,126,226,125,221,314,175"/>
+<area shape="rect" id="Node000013" href="$d9/d83/move_8h.html" title=" " alt="" coords="310,225,413,251"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="364,178,364,212,359,212,359,178"/>
+<area shape="rect" id="Node000014" href="$d0/d1b/static__assert_8h.html" title="Portable compile&#45;time assertion wrapper." alt="" coords="136,225,286,251"/>
+<area shape="poly" id="edge16_Node000012_Node000014" title=" " alt="" coords="339,180,249,222,247,217,336,175"/>
+<area shape="poly" id="edge13_Node000013_Node000003" title=" " alt="" coords="378,249,427,288,424,292,374,253"/>
+<area shape="rect" id="Node000016" href="$da/d99/has__include_8h.html" title=" " alt="" coords="540,225,682,251"/>
+<area shape="poly" id="edge18_Node000015_Node000016" title=" " alt="" coords="598,177,607,212,602,213,593,178"/>
+</map>
