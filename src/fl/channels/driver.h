@@ -18,10 +18,13 @@
 
 #pragma once
 
-#include "fl/stl/shared_ptr.h"
-#include "fl/stl/string.h"  // IWYU pragma: keep
-#include "fl/stl/noexcept.h"
+#include "fl/channels/can_match.h"      // free fl::canMatch / canMatchBulk
+#include "fl/channels/capabilities.h"   // DriverCapabilities, PinGroup, ChannelRequest, HandleResult
 #include "fl/stl/atomic.h"
+#include "fl/stl/noexcept.h"
+#include "fl/stl/shared_ptr.h"
+#include "fl/stl/span.h"
+#include "fl/stl/string.h"  // IWYU pragma: keep
 
 namespace fl {
 
@@ -224,6 +227,48 @@ public:
     /// @note Drivers must implement this to filter by chipset type (e.g., SPI-only, clockless-only)
     /// @note Used by ChannelManager to route channels to compatible drivers
     virtual bool canHandle(const ChannelDataPtr& data) const FL_NOEXCEPT = 0;
+
+    // ================================================================
+    // #3186 declarative-capabilities surface — drivers publish data;
+    // the base class implements the matching virtuals by delegating to
+    // free fl::canMatch / fl::canMatchBulk against the published data.
+    // ================================================================
+
+    /// @brief Driver-wide capability descriptor (declarative form).
+    /// @return Small constant-header descriptor; safe to return by value.
+    /// @note Drivers SHOULD override to publish real protocol gates,
+    ///       frequency ranges, clock-tree model, and flags. The default
+    ///       synthesizes a minimal descriptor from getCapabilities() so
+    ///       unmigrated drivers stay queryable but may match poorly.
+    virtual DriverCapabilities getDriverCapabilities() const FL_NOEXCEPT {
+        Capabilities legacy = getCapabilities();
+        DriverCapabilities caps;
+        caps.supports_clockless = legacy.supportsClockless;
+        caps.supports_spi       = legacy.supportsSpi;
+        return caps;
+    }
+
+    /// @brief Per-resource group enumeration.
+    /// @return Non-owning span into driver-owned storage.
+    /// @note Drivers SHOULD override and return a span over a
+    ///       `static constexpr PinGroup kGroups[N]` (or a member-owned
+    ///       table built at construction). The default returns an empty
+    ///       span — manager code falls back to legacy canHandle() for
+    ///       unmigrated drivers.
+    virtual fl::span<const PinGroup> getPinGroups() const FL_NOEXCEPT {
+        return fl::span<const PinGroup>();
+    }
+
+    /// @brief Predicate: can this driver match a (single- or multi-pin) request?
+    /// @note Base default delegates to free fl::canMatch on the
+    ///       published capability data. Drivers should NOT override
+    ///       unless they have dynamic constraints unrepresentable in
+    ///       static data.
+    /// @note A single-pin request has exactly one bit set in
+    ///       request.data_pins (use ChannelRequest::singlePin() factory).
+    virtual HandleResult canMatch(const ChannelRequest& request) const FL_NOEXCEPT {
+        return fl::canMatch(getDriverCapabilities(), getPinGroups(), request);
+    }
 
     /// @brief Wait for driver to become READY
     /// @param timeoutMs Optional timeout in milliseconds (0 = no timeout)
