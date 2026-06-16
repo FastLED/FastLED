@@ -10,6 +10,7 @@ import asyncio
 import json
 import os
 import subprocess
+import sys
 import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -198,6 +199,28 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
     drivers: list[str] = []
     simd_test_mode = args.simd
     coroutine_test_mode = args.coroutine
+
+    # Parse --wave2d-perf "<W>x<H>" — None disables the mode.
+    # Cf. #3124 for the planned --perf-XX convention rename.
+    wave2d_perf_grid: tuple[int, int] | None = None
+    if args.wave2d_perf is not None:
+        spec = str(args.wave2d_perf).lower().strip()
+        try:
+            if "x" not in spec:
+                raise ValueError("expected 'WxH' form")
+            w_str, h_str = spec.split("x", 1)
+            w_val = int(w_str)
+            h_val = int(h_str)
+            if not (4 <= w_val <= 1024 and 4 <= h_val <= 1024):
+                raise ValueError("W and H must be in [4, 1024]")
+            wave2d_perf_grid = (w_val, h_val)
+        except ValueError as exc:
+            print(
+                f"{Fore.RED}❌ --wave2d-perf: invalid grid spec "
+                f"{args.wave2d_perf!r}: {exc}{Style.RESET_ALL}",
+                file=sys.stderr,
+            )
+            sys.exit(2)
 
     if args.all:
         drivers = [
@@ -703,6 +726,7 @@ def _parse_args_and_build_commands(args: Args) -> RunContext | int:
         build_dir=build_dir,
         simd_test_mode=simd_test_mode,
         coroutine_test_mode=coroutine_test_mode,
+        wave2d_perf_grid=wave2d_perf_grid,
         net_server_mode=net_server_mode,
         net_client_mode=net_client_mode,
         net_loopback_mode=net_loopback_mode,
@@ -1335,11 +1359,183 @@ async def _run_tests_or_special_mode(ctx: RunContext, qctx: QuietContext) -> int
     if ctx.coroutine_test_mode:
         return await _run_coroutine_tests(ctx)
 
+    # Wave2D perf benchmark mode (#3113 Task 1 / #3122 A1)
+    if ctx.wave2d_perf_grid is not None:
+        return await _run_wave2d_perf_tests(ctx)
+
     # (LPC bring-up mode short-circuits earlier — see the gpio_only_mode
     # block above; reached only by ESP32/Teensy-class targets.)
 
     # Main RPC test execution
     return await _run_rpc_tests(ctx, qctx)
+
+
+async def _run_wave2d_perf_tests(ctx: RunContext) -> int:
+    """Run the Wave2D perf benchmark via RPC chain.
+
+    Implements meta #3113 Task 1 host side. Wires the device-side
+    wave2dPerf + perfProbe* RPCs (#3116, #3118, refactored to live
+    behind fl::wave_perf::* in #3120) into a single host-driven
+    measurement pass.
+
+    Sequence per platform:
+      1. perfProbeMemcpy — verify SRAM throughput vs vendor floor.
+      2. perfProbeNop    — verify cycle-time consistency.
+      3. perfProbeRepeat — verify wave2dPerf is reproducible
+                           (std_dev_pct < 5%).
+      4. wave2dPerf x 4  — { FivePoint, NinePointIsotropic } x
+                           { compute, loads_only }.
+         The loads_only/compute gap separates memory from compute cost.
+
+    If any probe in 1-3 fails, results are stamped UNTRUSTED in the
+    output. (Cf. issue #3124 for the planned --perf-XX flag-rename.)
+    """
+    assert ctx.wave2d_perf_grid is not None
+    upload_port = ctx.upload_port
+    assert upload_port is not None
+    serial_iface = ctx.serial_iface
+    grid_w, grid_h = ctx.wave2d_perf_grid
+
+    print()
+    print("=" * 60)
+    print(f"WAVE2D PERF — {grid_w}x{grid_h}")
+    print("=" * 60)
+    print()
+
+    client: RpcClient | None = None
+    untrusted_reasons: list[str] = []
+    results: dict[str, Any] = {
+        "grid": [grid_w, grid_h],
+        "probes": {},
+        "bench": {},
+        "untrusted": False,
+        "untrusted_reasons": untrusted_reasons,
+    }
+    try:
+        print("   Connecting to device...", end="", flush=True)
+        client = RpcClient(upload_port, timeout=30.0, serial_interface=serial_iface)
+        await client.connect(boot_wait=1.0)
+        print(f" {Fore.GREEN}ok{Style.RESET_ALL}")
+
+        # --- Probe 1: memcpy throughput ----------------------------------
+        print("   perfProbeMemcpy (4096 bytes x 1000 iters)...", end="", flush=True)
+        memcpy_resp = await client.send_and_match(
+            "perfProbeMemcpy",
+            args=[{"bytes": 4096, "iterations": 1000}],
+            match_key="success",
+            retries=2,
+        )
+        memcpy_data = memcpy_resp.data
+        memcpy_mb_per_s = float(memcpy_data.get("mb_per_s", 0.0))
+        results["probes"]["memcpy"] = memcpy_data
+        print(f" {Fore.GREEN}{memcpy_mb_per_s:.1f} MB/s{Style.RESET_ALL}")
+
+        # --- Probe 2: nop cycle calibration ------------------------------
+        print("   perfProbeNop (100k iters)...", end="", flush=True)
+        nop_resp = await client.send_and_match(
+            "perfProbeNop",
+            args=[{"iterations": 100000}],
+            match_key="success",
+            retries=2,
+        )
+        nop_data = nop_resp.data
+        us_per_iter = float(nop_data.get("us_per_iter", 0.0))
+        results["probes"]["nop"] = nop_data
+        print(f" {Fore.GREEN}{us_per_iter:.4f} us/iter{Style.RESET_ALL}")
+
+        # --- Probe 3: wave2dPerf repeat-stability ------------------------
+        print(
+            f"   perfProbeRepeat ({grid_w}x{grid_h}, 50 iters x 8 repeats)...",
+            end="",
+            flush=True,
+        )
+        repeat_resp = await client.send_and_match(
+            "perfProbeRepeat",
+            args=[
+                {
+                    "W": grid_w,
+                    "H": grid_h,
+                    "iterations": 50,
+                    "repeats": 8,
+                    "stencil": "FivePoint",
+                }
+            ],
+            match_key="success",
+            retries=2,
+        )
+        repeat_data = repeat_resp.data
+        std_dev_pct = float(repeat_data.get("std_dev_pct", 100.0))
+        results["probes"]["repeat"] = repeat_data
+        if std_dev_pct >= 5.0:
+            untrusted_reasons.append(
+                f"perfProbeRepeat std_dev_pct={std_dev_pct:.2f} >= 5.0"
+            )
+            print(
+                f" {Fore.YELLOW}{std_dev_pct:.2f}% (UNTRUSTED >= 5%){Style.RESET_ALL}"
+            )
+        else:
+            print(f" {Fore.GREEN}{std_dev_pct:.2f}% (stable){Style.RESET_ALL}")
+
+        # --- Main benchmark: wave2dPerf across 2 stencils x 2 modes ------
+        print()
+        print("   wave2dPerf:")
+        for stencil in ("FivePoint", "NinePointIsotropic"):
+            for loads_only in (False, True):
+                label = (
+                    f"     {stencil} {'(loads_only)' if loads_only else '(compute)'}"
+                )
+                print(f"{label} ...", end="", flush=True)
+                bench_resp = await client.send_and_match(
+                    "wave2dPerf",
+                    args=[
+                        {
+                            "W": grid_w,
+                            "H": grid_h,
+                            "iterations": 100,
+                            "stencil": stencil,
+                            "loads_only": loads_only,
+                        }
+                    ],
+                    match_key="success",
+                    retries=2,
+                )
+                bench_data = bench_resp.data
+                us_per_cell = float(bench_data.get("us_per_cell_per_update", 0.0))
+                fps = float(bench_data.get("fps_at_one_update_per_frame", 0.0))
+                key = f"{stencil.lower()}_{'loads_only' if loads_only else 'compute'}"
+                results["bench"][key] = bench_data
+                print(
+                    f" {Fore.GREEN}{us_per_cell:.4f} us/cell, "
+                    f"{fps:.0f} fps{Style.RESET_ALL}"
+                )
+
+        if untrusted_reasons:
+            results["untrusted"] = True
+            print()
+            print(f"{Fore.YELLOW}*** RESULTS STAMPED UNTRUSTED ***{Style.RESET_ALL}")
+            for reason in untrusted_reasons:
+                print(f"   - {reason}")
+
+        print()
+        print("--- JSON ---")
+        print(json.dumps(results, indent=2))
+        print()
+        return 0
+
+    except RpcTimeoutError:
+        print()
+        print(f"{Fore.RED}WAVE2D PERF TIMEOUT{Style.RESET_ALL}")
+        return 1
+    except KeyboardInterrupt as ki:
+        handle_keyboard_interrupt(ki)
+        raise
+    except Exception as e:
+        print()
+        print(f"{Fore.RED}WAVE2D PERF ERROR: {e}{Style.RESET_ALL}")
+        return 1
+    finally:
+        if client is not None:
+            await client.close()
 
 
 async def _run_simd_tests(ctx: RunContext) -> int:
