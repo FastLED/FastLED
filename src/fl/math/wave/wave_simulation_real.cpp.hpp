@@ -193,6 +193,24 @@ WaveSimulation2D_Real::WaveSimulation2D_Real(u32 W, u32 H,
       mDampening(static_cast<int>(dampening)),
       mDampDecayQ15(wave_detail::compute_damp_decay_q15(static_cast<int>(dampening))) {}
 
+// PSRAM-backed overload. Identical to the SRAM constructor above but
+// constructs grid1 / grid2 with the PSRAM memory resource so the
+// (potentially large) cell buffers don't compete with SRAM. The grids
+// then `resize()` to the requested cell count from PSRAM.
+WaveSimulation2D_Real::WaveSimulation2D_Real(PsramStorage,
+                                             u32 W, u32 H,
+                                             float speed,
+                                             float dampening) FL_NOEXCEPT
+    : width(W), height(H), stride(W + 2),
+      grid1(psram_memory_resource()),
+      grid2(psram_memory_resource()), whichGrid(0),
+      mCourantSq(wave_detail::float_to_fixed(fl::clamp(speed, 0.0f, 0.5f))),
+      mDampening(static_cast<int>(dampening)),
+      mDampDecayQ15(wave_detail::compute_damp_decay_q15(static_cast<int>(dampening))) {
+    grid1.resize((W + 2) * (H + 2));
+    grid2.resize((W + 2) * (H + 2));
+}
+
 void WaveSimulation2D_Real::setSpeed(float something) {
     // See constructor for clamp rationale.
     mCourantSq = wave_detail::float_to_fixed(fl::clamp(something, 0.0f, 0.5f));
