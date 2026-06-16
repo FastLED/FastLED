@@ -47,9 +47,9 @@
 #include "fl/fx/frame.h"
 
 
-void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote* remote) {
+void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
     // Register "testSimd" function - run comprehensive SIMD test suite
-    remote->bind("testSimd", [](const fl::json& args) -> fl::json {
+    remote.bind("testSimd", [](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
 
         // Run the full test suite and collect per-test results
@@ -84,7 +84,7 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote* remote) {
     });
 
     // Register "testSimdBenchmark" - multiply speed benchmark
-    remote->bind("testSimdBenchmark", [](const fl::json& args) -> fl::json {
+    remote.bind("testSimdBenchmark", [](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
 
         int iters = 10000;
@@ -144,7 +144,7 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote* remote) {
     // (fl::perlin_i16_optimized::pnoise2d). Same workload that drives every
     // Animartrix frame — one Perlin lookup per output pixel, 16x16 grid
     // per iteration. Args: {iterations} (optional, default 100).
-    remote->bind("animartrixPerlinBench", [](const fl::json& args) -> fl::json {
+    remote.bind("animartrixPerlinBench", [](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
 
         int iters = 100;
@@ -184,7 +184,7 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote* remote) {
     // Compares nibble-LUT vs byte-LUT vs batched byte-LUT, and times the full
     // per-byte-position cost (expansion + 16-lane transpose) for both LUTs.
     // Args: {iterations} (optional, default 30000, max 200000)
-    remote->bind("wave8ExpandBenchmark", [](const fl::json& args) -> fl::json {
+    remote.bind("wave8ExpandBenchmark", [](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
 
         int iters = 30000;
@@ -216,7 +216,7 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote* remote) {
     // path which dispatches to wave8Transpose_16x4_bf1_pipe4 (BF1, #2559).
     // Drives N back-to-back FastLED.show() cycles and verifies each completes
     // within timeout. Returns per-iter timing so the host can diagnose stalls.
-    remote->bind("parlioStreamValidate", [this](const fl::json& args) -> fl::json {
+    remote.bind("parlioStreamValidate", [this](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
         auto invalidArgs = [](const char* message) -> fl::json {
             fl::json error = fl::json::object();
@@ -364,7 +364,7 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote* remote) {
     // {scratch, output} in SRAM/PSRAM (4 combinations). Answers the PSRAM
     // hypothesis + ISR-streaming feasibility on the byte-LUT path (#2526
     // follow-up).
-    remote->bind("parlioEncodeBenchmark", [](const fl::json& args) -> fl::json {
+    remote.bind("parlioEncodeBenchmark", [](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
 
         int iters = 12000;

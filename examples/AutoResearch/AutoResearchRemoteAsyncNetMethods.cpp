@@ -47,10 +47,10 @@
 #include "fl/fx/frame.h"
 
 
-void AutoResearchRemoteControl::bindAsyncNetMethods(fl::Remote* remote) {
+void AutoResearchRemoteControl::bindAsyncNetMethods(fl::Remote& remote) {
     // Register "testAsync" function - verify that show() returns before TX completes (async DMA)
     // This proves the SPI driver releases back to the main thread while draining.
-    remote->bind("testAsync", [this](const fl::json& args) -> fl::json {
+    remote.bind("testAsync", [this](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
 
         // Parse optional parameters from args object
@@ -186,20 +186,20 @@ void AutoResearchRemoteControl::bindAsyncNetMethods(fl::Remote* remote) {
     // ========================================================================
 
     // Register "startNetServer" - Start WiFi AP + HTTP server for net-server validation
-    remote->bind("startNetServer", [this](const fl::json& args) -> fl::json {
+    remote.bind("startNetServer", [this](const fl::json& args) -> fl::json {
         mState->net_server_active = true;
         return startNetServer();
     });
 
     // Register "startNetClient" - Start WiFi AP only for net-client validation
-    remote->bind("startNetClient", [this](const fl::json& args) -> fl::json {
+    remote.bind("startNetClient", [this](const fl::json& args) -> fl::json {
         mState->net_client_active = true;
         return startNetClient();
     });
 
     // Register "runNetClientTest" - ESP32 fetches from host HTTP server
     // Args: {host_ip: string, port: int}
-    remote->bind("runNetClientTest", [](const fl::json& args) -> fl::json {
+    remote.bind("runNetClientTest", [](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
 
         // Parse arguments - args is the config object
@@ -226,12 +226,12 @@ void AutoResearchRemoteControl::bindAsyncNetMethods(fl::Remote* remote) {
 
     // Register "runNetLoopback" - Self-contained loopback test (no WiFi needed)
     // Starts HTTP server on localhost, client GETs 127.0.0.1 endpoints
-    remote->bind("runNetLoopback", [](const fl::json& args) -> fl::json {
+    remote.bind("runNetLoopback", [](const fl::json& args) -> fl::json {
         return runNetLoopback();
     });
 
     // Register "stopNet" - Stop WiFi AP and HTTP server/client
-    remote->bind("stopNet", [this](const fl::json& args) -> fl::json {
+    remote.bind("stopNet", [this](const fl::json& args) -> fl::json {
         mState->net_server_active = false;
         mState->net_client_active = false;
         return stopNet();
@@ -242,12 +242,12 @@ void AutoResearchRemoteControl::bindAsyncNetMethods(fl::Remote* remote) {
     // ========================================================================
 
     // Register "startOta" - Start WiFi AP + OTA HTTP server for OTA validation
-    remote->bind("startOta", [](const fl::json& args) -> fl::json {
+    remote.bind("startOta", [](const fl::json& args) -> fl::json {
         return startOta();
     });
 
     // Register "stopOta" - Stop OTA server and WiFi AP
-    remote->bind("stopOta", [](const fl::json& args) -> fl::json {
+    remote.bind("stopOta", [](const fl::json& args) -> fl::json {
         return stopOta();
     });
 
@@ -256,18 +256,18 @@ void AutoResearchRemoteControl::bindAsyncNetMethods(fl::Remote* remote) {
     // ========================================================================
 
     // Register "startBle" - Start BLE GATT server + create BLE Remote
-    remote->bind("startBle", [this](const fl::json& args) -> fl::json {
+    remote.bind("startBle", [this](const fl::json& args) -> fl::json {
         return this->startBleRemote();
     });
 
     // Register "stopBle" - Stop BLE GATT server + destroy BLE Remote
-    remote->bind("stopBle", [this](const fl::json& args) -> fl::json {
+    remote.bind("stopBle", [this](const fl::json& args) -> fl::json {
         return this->stopBleRemote();
     });
 
     // Register "decodeFile" - Decode a media file and return first 16 pixels
     // Args: [base64_data_string, extension_string]  (base64 auto-decoded to fl::vector<fl::u8>)
-    remote->bind("decodeFile", [](fl::vector<fl::u8> data, fl::string ext) -> fl::json {
+    remote.bind("decodeFile", [](fl::vector<fl::u8> data, fl::string ext) -> fl::json {
         fl::json response = fl::json::object();
 
         if (ext != ".mp4") {
@@ -352,7 +352,7 @@ void AutoResearchRemoteControl::bindAsyncNetMethods(fl::Remote* remote) {
     });
 
     // Register "bleStatus" - Query BLE connection/subscription state
-    remote->bind("bleStatus", [this](const fl::json& args) -> fl::json {
+    remote.bind("bleStatus", [this](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
         response.set("ble_active", mState->ble_server_active);
         fl::net::ble::StatusInfo info = fl::net::ble::queryStatus(mBleState);

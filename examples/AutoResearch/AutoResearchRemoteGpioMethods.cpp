@@ -47,9 +47,9 @@
 #include "fl/fx/frame.h"
 
 
-void AutoResearchRemoteControl::bindGpioMethods(fl::Remote* remote) {
+void AutoResearchRemoteControl::bindGpioMethods(fl::Remote& remote) {
     // Register "setDebug" function - enable/disable runtime debug logging
-    remote->bind("setDebug", [this](const fl::json& args) -> fl::json {
+    remote.bind("setDebug", [this](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
 
         // Validate args: expects [enabled: bool]
@@ -79,7 +79,7 @@ void AutoResearchRemoteControl::bindGpioMethods(fl::Remote* remote) {
 
     // Register "testGpioConnection" function - test if TX and RX pins are electrically connected
     // This is a pre-test to diagnose hardware connection issues before running validation
-    remote->bind("testGpioConnection", [](const fl::json& args) -> fl::json {
+    remote.bind("testGpioConnection", [](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
 
         // Validate args: expects [txPin, rxPin]
@@ -145,7 +145,7 @@ void AutoResearchRemoteControl::bindGpioMethods(fl::Remote* remote) {
     // ========================================================================
 
     // Register "getPins" function - query current and default pin configuration
-    remote->bind("getPins", [this](const fl::json& args) -> fl::json {
+    remote.bind("getPins", [this](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
         response.set("success", true);
         response.set("txPin", static_cast<int64_t>(mState->pin_tx));
@@ -172,7 +172,7 @@ void AutoResearchRemoteControl::bindGpioMethods(fl::Remote* remote) {
     });
 
     // Register "setTxPin" function - set TX pin (regenerates test cases)
-    remote->bind("setTxPin", [this](const fl::json& args) -> fl::json {
+    remote.bind("setTxPin", [this](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
 
         if (!args.is_array() || args.size() != 1 || !args[0].is_int()) {
@@ -202,7 +202,7 @@ void AutoResearchRemoteControl::bindGpioMethods(fl::Remote* remote) {
     });
 
     // Register "setRxPin" function - set RX pin (recreates RX channel)
-    remote->bind("setRxPin", [this](const fl::json& args) -> fl::json {
+    remote.bind("setRxPin", [this](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
 
         if (!args.is_array() || args.size() != 1 || !args[0].is_int()) {
@@ -257,7 +257,7 @@ void AutoResearchRemoteControl::bindGpioMethods(fl::Remote* remote) {
     });
 
     // Register "setPins" function - set both TX and RX pins atomically
-    remote->bind("setPins", [this](const fl::json& args) -> fl::json {
+    remote.bind("setPins", [this](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
 
         // Accept either {txPin, rxPin} object or [txPin, rxPin] array
@@ -349,12 +349,12 @@ void AutoResearchRemoteControl::bindGpioMethods(fl::Remote* remote) {
 
     // Register "findConnectedPins" function - probe adjacent pin pairs to find a jumper wire connection
     // This allows automatic discovery of TX/RX pin pair without requiring user to specify them
-    remote->bind("findConnectedPins", [this](const fl::json& args) -> fl::json {
+    remote.bind("findConnectedPins", [this](const fl::json& args) -> fl::json {
         return findConnectedPinsImpl(args);
     });
 
     // Register "help" function - list all RPC functions with descriptions
-    remote->bind("help", [this](const fl::json& args) -> fl::json {
+    remote.bind("help", [this](const fl::json& args) -> fl::json {
         fl::json functions = fl::json::array();
 
         // Phase 1: Basic Control
