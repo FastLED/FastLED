@@ -210,16 +210,19 @@ const NotNullStringHolderPtr& basic_string::heapData() const {
 
 // ======= WRITE =======
 
+// Trivial delegates to the workhorse write(const char*, fl::size) below.
+// Folding away the address-of-byte indirection that write(u8) previously
+// did, and dropping the verbose static_cast<void*> intermediate from
+// write(u8*) — shrinks each call site by a few bytes (#3122 B5 /
+// #2886 Stage 5).
 fl::size basic_string::write(const fl::u8* data, fl::size n) {
-    const char* str = fl::bit_cast_ptr<const char>(static_cast<const void*>(data));
-    return write(str, n);
+    return write(fl::bit_cast_ptr<const char>(data), n);
 }
 
 fl::size basic_string::write(char c) { return write(&c, 1); }
 
 fl::size basic_string::write(fl::u8 c) {
-    const char* str = fl::bit_cast_ptr<const char>(static_cast<const void*>(&c));
-    return write(str, 1);
+    return write(static_cast<char>(c));
 }
 
 fl::size basic_string::write(const char* str, fl::size n) {
