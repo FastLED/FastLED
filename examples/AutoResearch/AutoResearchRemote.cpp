@@ -26,6 +26,7 @@
 #include "fl/stl/json.h"
 #include "fl/task/task.h"
 #include "fl/task/executor.h"
+#include "fl/math/wave/wave_simulation_real.h"
 #include "fl/stl/atomic.h"
 #include "fl/task/promise.h"
 #include "fl/math/simd.h"
@@ -3608,6 +3609,130 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
         r.set("total", static_cast<int64_t>(num_tests));
         r.set("results", results);
         return r;
+    });
+
+    // Wave2D perf benchmark — first task from meta #3113.
+    //
+    // Args: { W, H, iterations, stencil ("FivePoint" | "NinePointIsotropic"),
+    //         loads_only (bool, optional) }
+    //
+    // Builds a WaveSimulation2D_Real, seeds it with a deterministic
+    // checkerboard, optionally warms up, then times `iterations` calls to
+    // update() using fl::micros(). Returns timing dict including us/update
+    // and us/cell/update so we can compare scaling across platforms.
+    //
+    // `loads_only=true` swaps update() for a memory-bound baseline (just
+    // sum every cell into a sink) so the gap between the two reveals
+    // compute vs memory cost — critical for the ESP32-S3 PSRAM-vs-SRAM
+    // analysis in sibling issue #3114.
+    mRemote->bind("wave2dPerf", [](const fl::json& args) -> fl::json {
+        // Defaults sized so the test runs in a sensible budget on small
+        // platforms (32x32 / 100 iters ~= 100-500 ms on M4-class).
+        int W = 32;
+        int H = 32;
+        int iterations = 100;
+        fl::string stencil_name = "NinePointIsotropic";
+        bool loads_only = false;
+        if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
+            const fl::json &cfg = args[0];
+            if (cfg.contains("W") && cfg["W"].is_int()) {
+                W = static_cast<int>(cfg["W"].as_int().value());
+            }
+            if (cfg.contains("H") && cfg["H"].is_int()) {
+                H = static_cast<int>(cfg["H"].as_int().value());
+            }
+            if (cfg.contains("iterations") && cfg["iterations"].is_int()) {
+                iterations = static_cast<int>(cfg["iterations"].as_int().value());
+            }
+            if (cfg.contains("stencil") && cfg["stencil"].is_string()) {
+                stencil_name = cfg["stencil"].as_string().value();
+            }
+            if (cfg.contains("loads_only") && cfg["loads_only"].is_bool()) {
+                loads_only = cfg["loads_only"].as_bool().value();
+            }
+        }
+
+        fl::json response = fl::json::object();
+        response.set("W", static_cast<int64_t>(W));
+        response.set("H", static_cast<int64_t>(H));
+        response.set("iterations", static_cast<int64_t>(iterations));
+        response.set("stencil", stencil_name.c_str());
+        response.set("loads_only", loads_only);
+
+        // Refuse silly inputs. 1024 cap protects us from accidentally
+        // requesting a multi-MB grid via a bad RPC payload.
+        if (W < 4 || H < 4 || W > 1024 || H > 1024 || iterations < 1 || iterations > 100000) {
+            response.set("success", false);
+            response.set("error", "out_of_range");
+            return response;
+        }
+
+        fl::LaplacianStencil stencil = fl::LaplacianStencil::NinePointIsotropic;
+        if (stencil_name == "FivePoint") {
+            stencil = fl::LaplacianStencil::FivePoint;
+        }
+
+        auto sim = fl::make_unique<fl::WaveSimulation2D_Real>(
+            static_cast<fl::u32>(W), static_cast<fl::u32>(H), 0.16f, 6.0f);
+        sim->setHalfDuplex(false);
+        sim->setStencil(stencil);
+
+        // Deterministic checkerboard seed at +/-0.5 (avoids the +/-1.0
+        // float_to_fixed asymmetry issue noted in #3083's audit).
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                sim->setf(static_cast<fl::size>(x),
+                          static_cast<fl::size>(y),
+                          ((x + y) & 1) ? -0.5f : 0.5f);
+            }
+        }
+
+        // Warm-up step — gets past any first-call init quirks and primes
+        // caches before the measurement window.
+        sim->update();
+
+        const fl::u32 t0 = fl::micros();
+        if (loads_only) {
+            // Memory-bound baseline: read every inner cell `iterations`
+            // times, sum into a volatile sink so the compiler can't
+            // hoist or elide the loop. Touches the same memory pattern
+            // as update() without any of the kernel arithmetic.
+            volatile fl::i32 sink = 0;
+            for (int i = 0; i < iterations; ++i) {
+                fl::i32 acc = 0;
+                for (int y = 0; y < H; ++y) {
+                    for (int x = 0; x < W; ++x) {
+                        acc += sim->geti16(
+                            static_cast<fl::size>(x),
+                            static_cast<fl::size>(y));
+                    }
+                }
+                sink += acc;
+            }
+            (void)sink;
+        } else {
+            for (int i = 0; i < iterations; ++i) {
+                sim->update();
+            }
+        }
+        const fl::u32 t1 = fl::micros();
+        const fl::u32 total_us = t1 - t0;
+
+        const double cells_per_update = static_cast<double>(W) * H;
+        const double us_per_update =
+            static_cast<double>(total_us) / static_cast<double>(iterations);
+        const double us_per_cell_per_update =
+            us_per_update / cells_per_update;
+        const double fps_at_one_update_per_frame =
+            us_per_update > 0.0 ? (1.0e6 / us_per_update) : 0.0;
+
+        response.set("success", true);
+        response.set("total_us", static_cast<int64_t>(total_us));
+        response.set("us_per_update", us_per_update);
+        response.set("us_per_cell_per_update", us_per_cell_per_update);
+        response.set("fps_at_one_update_per_frame",
+                     fps_at_one_update_per_frame);
+        return response;
     });
 }
 
