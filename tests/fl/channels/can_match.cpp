@@ -334,6 +334,43 @@ FL_TEST_CASE("canMatch: 9-pin bulk on capacity=8 group yields NoCapacity") {
     FL_REQUIRE(fl::canMatch(caps, groups, req) == HandleResult::NoCapacity);
 }
 
+FL_TEST_CASE("canMatch: driver-wide max_total_channels is enforced before group walk") {
+    // Driver publishes max_total_channels=4 but a group with capacity 16.
+    // A 5-pin bulk request is rejected at the driver-aggregate gate,
+    // not silently accepted by the over-generous group.
+    auto caps = makeRmtCaps();
+    caps.max_total_channels = 4;
+    PinGroup groups[] = { makeRmtClocklessGroup(0, 16) };
+    auto req = makeBulkClocklessRequest(2, 5);
+    FL_REQUIRE(fl::canMatch(caps, groups, req) == HandleResult::NoCapacity);
+}
+
+FL_TEST_CASE("canMatch: precise tick math (u64 ratio) — exactly at upper bound passes") {
+    // 80 MHz APB / divider 8 = 10 MHz effective clock.
+    // Window {1, 100} for T0H: with u64 ratio math, n_lo = ceil(1*1e7/1e9)
+    // = 1, n_hi = floor(100*1e7/1e9) = 1. So N=1 is valid (phase =
+    // 1/1e7 sec = 100 ns, inside {1, 100}). Confirms the boundary-precise
+    // u64 numerator matches expected behavior.
+    DriverCapabilities caps;
+    caps.name = fl::string_view("Tight");
+    caps.priority = 1;
+    caps.supports_clockless = true;
+    caps.clockless_frequency = FreqRange::any();
+    caps.clockless_timing = ClocklessTimingCapability{
+        80000000u, 8u, 8u, 32767u
+    };
+    PinGroup groups[] = { makeRmtClocklessGroup() };
+
+    auto req = ChannelRequest::singlePin(Protocol::Clockless, 4, -1,
+        ChipsetClocklessTiming{
+            NanosRange{1u, 100u},
+            NanosRange{200u, 800u},
+            NanosRange{200u, 800u},
+            NanosRange{1u, 100u},
+        });
+    FL_REQUIRE(fl::canMatch(caps, groups, req) == HandleResult::Yes);
+}
+
 FL_TEST_CASE("canMatch: bulk with off-allowlist pin yields NoPin") {
     auto caps = makeSpiCaps();
     PinGroup groups[] = { makeSharedClockSpiGroup() };

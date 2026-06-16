@@ -42,30 +42,40 @@ inline FreqRange effectiveFrequencyRange(
         : caps.spi_frequency;
 }
 
-// "Can this driver hit a phase of integer N ticks where N*tick_ns is
-// inside `window`?" — n_lo = ceil(min_ns / tick_ns), n_hi =
-// floor(max_ns / tick_ns). Match iff there's at least one integer in
-// [n_lo, n_hi] AND n_lo <= max_ticks.
+// "Can this driver hit a phase of integer N ticks where the phase
+// duration N / effective_clock_hz (seconds) is inside `window`
+// (nanoseconds)?" Equivalently: is there an integer N >= 1 such that
+//   window.min_ns <= N * 1e9 / effective_clock_hz <= window.max_ns
+// Solving for N integer-safely (no truncated tick_ns intermediate):
+//   n_lo = ceil(window.min_ns * effective_clock_hz / 1e9)
+//   n_hi = floor(window.max_ns * effective_clock_hz / 1e9)
+// Match iff n_lo <= n_hi AND n_lo <= max_ticks (when max_ticks != 0).
+//
+// The u64 numerator avoids the tick_ns truncation that previously
+// mis-ranked tight windows near boundaries (CodeRabbit #3197).
 inline bool canHitPhase(
-        fl::u32 tick_ns, fl::u16 max_ticks,
+        fl::u32 effective_clock_hz, fl::u16 max_ticks,
         const NanosRange& window) FL_NOEXCEPT {
     if (window.isUnspecified()) {
         // No chipset constraint on this phase.
         return true;
     }
-    if (tick_ns == 0u) {
+    if (effective_clock_hz == 0u) {
         return false;
     }
-    // ceil(min_ns / tick_ns) without overflowing.
-    fl::u32 n_lo = (window.min_ns / tick_ns) + ((window.min_ns % tick_ns) ? 1u : 0u);
-    fl::u32 n_hi = window.max_ns / tick_ns;
-    if (n_lo < 1u) {
-        n_lo = 1u;
+    const fl::u64 kBillion = 1000000000ULL;
+    const fl::u64 lo_num = static_cast<fl::u64>(window.min_ns) * effective_clock_hz;
+    const fl::u64 hi_num = static_cast<fl::u64>(window.max_ns) * effective_clock_hz;
+    // ceil(lo_num / kBillion) — divide-and-round-up without overflow.
+    fl::u64 n_lo_64 = (lo_num + kBillion - 1ULL) / kBillion;
+    fl::u64 n_hi_64 = hi_num / kBillion;
+    if (n_lo_64 < 1ULL) {
+        n_lo_64 = 1ULL;
     }
-    if (n_lo > n_hi) {
+    if (n_lo_64 > n_hi_64) {
         return false;
     }
-    if (max_ticks != 0u && n_lo > static_cast<fl::u32>(max_ticks)) {
+    if (max_ticks != 0u && n_lo_64 > static_cast<fl::u64>(max_ticks)) {
         return false;
     }
     return true;
@@ -98,14 +108,10 @@ inline bool isClocklessTimingCompatible(
         if (effective_clock == 0u) {
             continue;
         }
-        fl::u32 tick_ns = 1000000000u / effective_clock;
-        if (tick_ns == 0u) {
-            continue;
-        }
-        if (canHitPhase(tick_ns, cap.max_phase_ticks, chip.t0h_window) &&
-            canHitPhase(tick_ns, cap.max_phase_ticks, chip.t0l_window) &&
-            canHitPhase(tick_ns, cap.max_phase_ticks, chip.t1h_window) &&
-            canHitPhase(tick_ns, cap.max_phase_ticks, chip.t1l_window)) {
+        if (canHitPhase(effective_clock, cap.max_phase_ticks, chip.t0h_window) &&
+            canHitPhase(effective_clock, cap.max_phase_ticks, chip.t0l_window) &&
+            canHitPhase(effective_clock, cap.max_phase_ticks, chip.t1h_window) &&
+            canHitPhase(effective_clock, cap.max_phase_ticks, chip.t1l_window)) {
             return true;
         }
     }
@@ -201,6 +207,15 @@ HandleResult canMatch(
     if (request.data_pins.none()) {
         // No pins requested — nothing to match against.
         return HandleResult::NoPin;
+    }
+    // Driver-wide aggregate cap: a bulk request with N pins can't be
+    // served by a driver that publishes max_total_channels < N, even if
+    // an individual group's max_concurrent would otherwise fit it
+    // (CodeRabbit #3197).
+    const fl::u32 requested_count = request.data_pins.count();
+    if (caps.max_total_channels != 0u &&
+        requested_count > static_cast<fl::u32>(caps.max_total_channels)) {
+        return HandleResult::NoCapacity;
     }
 
     HandleResult best = HandleResult::NoProtocol;
