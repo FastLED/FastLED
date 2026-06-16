@@ -152,9 +152,18 @@ inline void autoResearchLowMemorySetup() {
             const fl::u32 expected_edges =
                 2u * static_cast<fl::u32>(freq_hz) *
                      static_cast<fl::u32>(duration_ms) / 1000u;
+            // Cap the captured edge count at kLowMemEdgeBufSize so the
+            // static buffer below stays small enough to fit alongside .bss
+            // on a 16 KB SRAM part. See FastLED #3125 -- the previous
+            // 2048-entry buffer was 8 KB stack on top of an already-8.5 KB
+            // .bss, which overflowed SRAM the moment this handler ran.
+            // 512 entries = 256 period pairs is plenty for the bench's
+            // 1 / 10 / 100 kHz sigma measurement (sample count converges
+            // well before 256 pairs at any of those rates).
+            constexpr fl::u32 kLowMemEdgeBufSize = 512u;
             fl::u32 cap = expected_edges + (expected_edges / 2u);
             if (cap < 256u)  cap = 256u;
-            if (cap > 2048u) cap = 2048u;
+            if (cap > kLowMemEdgeBufSize) cap = kLowMemEdgeBufSize;
 
             auto rx = fl::LpcSctRxChannel::create(rx_pin);
             if (!rx) return fl::string("0,0,0,0,0,0,0");
@@ -184,7 +193,11 @@ inline void autoResearchLowMemorySetup() {
             }
             rx->wait(1);
 
-            fl::EdgeTime edges_buf[2048];
+            // Static storage so the 2 KB buffer (512 * 4 B) lives in .bss
+            // instead of bloating the lambda's stack frame on a 16 KB
+            // SRAM part. The handler is invoked serially over JSON-RPC,
+            // so sharing across calls is safe. See FastLED #3125.
+            static fl::EdgeTime edges_buf[kLowMemEdgeBufSize];
             const fl::size n_read = rx->getRawEdgeTimes(
                 fl::span<fl::EdgeTime>(edges_buf, sizeof(edges_buf) / sizeof(edges_buf[0])));
 
@@ -283,9 +296,16 @@ inline void autoResearchLowMemorySetup() {
             const fl::u32 missing = (fl::u32)expected_bytes - decoded_bytes;
             mismatched += missing;
 
-            fl::EdgeTime probe[1024];
+            // Static storage so the diagnostic probe (4 KB at 1024 entries,
+            // now 2 KB at 512) lives in .bss rather than the lambda's
+            // stack frame. See FastLED #3125 -- same pattern as the
+            // pinToggleRx handler above. Diagnostic-only; truncating at
+            // 512 doesn't affect decode correctness (the decoder uses
+            // its own count via cfg.buffer_size).
+            constexpr fl::size kLowMemWs2812ProbeSize = 512u;
+            static fl::EdgeTime probe[kLowMemWs2812ProbeSize];
             const fl::size edges_captured = rx->getRawEdgeTimes(
-                fl::span<fl::EdgeTime>(probe, 1024));
+                fl::span<fl::EdgeTime>(probe, kLowMemWs2812ProbeSize));
 
             const bool success = (mismatched == 0 && decoded_bytes == (fl::u32)expected_bytes);
 
