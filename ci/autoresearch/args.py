@@ -27,6 +27,9 @@ class Args:
     all: bool
     simd: bool
     coroutine: bool
+    # Wave2D perf benchmark — accepts "<W>x<H>" (e.g. "32x32") or None.
+    # Cf. issue #3124 for the future --perf-XX / --test-XX convention.
+    wave2d_perf: str | None
 
     # Standard options
     environment: str | None
@@ -264,6 +267,18 @@ See Also:
             "--coroutine",
             action="store_true",
             help="Test coroutine/task creation, stop, and await (no LED drivers needed)",
+        )
+        driver_group.add_argument(
+            "--wave2d-perf",
+            type=str,
+            default=None,
+            metavar="WxH",
+            help=(
+                "Run the Wave2D perf benchmark (meta #3113 Task 1). "
+                "Argument is grid size 'WxH', e.g. '32x32' or '64x64'. "
+                "Chains perfProbe* sanity probes before wave2dPerf; "
+                "marks results UNTRUSTED if probes fail."
+            ),
         )
         driver_group.add_argument(
             "--parallel",
@@ -593,6 +608,7 @@ See Also:
             all=parsed.all,
             simd=parsed.simd,
             coroutine=parsed.coroutine,
+            wave2d_perf=parsed.wave2d_perf,
             environment=parsed.environment,
             verbose=parsed.verbose,
             skip_lint=parsed.skip_lint,
