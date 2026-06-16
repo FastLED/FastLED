@@ -1,4 +1,7 @@
-// Status, debugTest, deliberateHang, drivers, runSingleTest, runParallelTest, ping, testNoSerial RPC bindings.
+// System control RPC bindings: device status, debug toggles, driver
+// inventory, RPC ack/health (ping, testNoSerial), and the user-facing
+// runSingleTest/runParallelTest dispatchers. "System" = device control,
+// not feature exercise (those live in the math/network/async/driver bins).
 // Extracted from AutoResearchRemote.cpp as part of #3132 / meta #3127.
 
 #include "fl/system/sketch_macros.h"
@@ -47,7 +50,7 @@
 #include "fl/fx/frame.h"
 
 
-void AutoResearchRemoteControl::bindBasicMethods(fl::Remote& remote) {
+void AutoResearchRemoteControl::bindSystemMethods(fl::Remote& remote) {
 
     // Register "status" function - device readiness check
     remote.bind("status", [this](const fl::json& args) -> fl::json {

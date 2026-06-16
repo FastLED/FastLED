@@ -1,4 +1,6 @@
-// GPIO + pin-management RPC bindings: setDebug, testGpioConnection, getPins, setTxPin, setRxPin, setPins, findConnectedPins, help.
+// Pin configuration RPC bindings: get/set TX/RX/pair, GPIO connectivity
+// probe, jumper-finder, debug-log toggle, help. GPIO is the implementation;
+// the RPC API is "pins" (the user-facing concept).
 // Extracted from AutoResearchRemote.cpp as part of #3132 / meta #3127.
 
 #include "fl/system/sketch_macros.h"
@@ -47,7 +49,7 @@
 #include "fl/fx/frame.h"
 
 
-void AutoResearchRemoteControl::bindGpioMethods(fl::Remote& remote) {
+void AutoResearchRemoteControl::bindPinMethods(fl::Remote& remote) {
     // Register "setDebug" function - enable/disable runtime debug logging
     remote.bind("setDebug", [this](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();

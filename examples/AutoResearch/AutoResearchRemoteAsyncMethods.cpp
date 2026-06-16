@@ -1,4 +1,7 @@
-// Coroutine RPC bindings: testCoroutineBasic/Stop/Concurrent/Await/AwaitError/PromiseCallbacks/PromiseCatchCallback/ChainedAwait/All.
+// Async primitive RPC bindings — exercise fl::task::coroutine() / await()
+// and fl::Promise semantics: basic create/complete, stop, concurrent,
+// await, await-error, promise callbacks, promise-catch callbacks, chained
+// await, and an "all" aggregator.
 // Extracted from AutoResearchRemote.cpp as part of #3132 / meta #3127.
 
 #include "fl/system/sketch_macros.h"
@@ -47,7 +50,7 @@
 #include "fl/fx/frame.h"
 
 
-void AutoResearchRemoteControl::bindCoroutineMethods(fl::Remote& remote) {
+void AutoResearchRemoteControl::bindAsyncMethods(fl::Remote& remote) {
     // ========================================================================
     // Coroutine Tests - fl::task::coroutine() and fl::task::await()
     // ========================================================================

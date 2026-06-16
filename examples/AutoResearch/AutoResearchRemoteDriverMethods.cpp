@@ -1,4 +1,8 @@
-// FlexIO RX RPC bindings: flexioRxBenchmark, flexioObjectFledTest, flexioRxLoopbackPing.
+// LED driver test/benchmark RPC bindings. Today: Teensy 4.x FlexIO RX
+// validation (flexioRxBenchmark, flexioObjectFledTest, flexioRxLoopbackPing).
+// Platform-specific driver tests for other MCUs land here in the future —
+// the RPC layer is platform-agnostic; #if guards inside each binding gate
+// the platform-specific bodies.
 // Extracted from AutoResearchRemote.cpp as part of #3132 / meta #3127.
 
 #include "fl/system/sketch_macros.h"
@@ -47,7 +51,7 @@
 #include "fl/fx/frame.h"
 
 
-void AutoResearchRemoteControl::bindFlexioMethods(fl::Remote& remote) {
+void AutoResearchRemoteControl::bindDriverMethods(fl::Remote& remote) {
     // Register "flexioRxBenchmark" — square-wave validation for the new
     // FlexIO RX backend (Phase 2 of FastLED#2764).
     //
