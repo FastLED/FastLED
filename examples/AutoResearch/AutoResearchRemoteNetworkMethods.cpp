@@ -1,4 +1,8 @@
-// Async, net, OTA, BLE RPC bindings: testAsync, startNetServer, startNetClient, runNetClientTest, runNetLoopback, stopNet, startOta, stopOta, startBle, stopBle, decodeFile, bleStatus.
+// Network / wireless RPC bindings: WiFi AP + HTTP (startNetServer,
+// startNetClient, runNetClientTest, runNetLoopback, stopNet), OTA HTTP
+// (startOta, stopOta), BLE GATT (startBle, stopBle, bleStatus), media
+// codec (decodeFile), and the async-DMA show() validator (testAsync —
+// here because it lives in the same I/O / driver-async family).
 // Extracted from AutoResearchRemote.cpp as part of #3132 / meta #3127.
 
 #include "fl/system/sketch_macros.h"
@@ -47,7 +51,7 @@
 #include "fl/fx/frame.h"
 
 
-void AutoResearchRemoteControl::bindAsyncNetMethods(fl::Remote& remote) {
+void AutoResearchRemoteControl::bindNetworkMethods(fl::Remote& remote) {
     // Register "testAsync" function - verify that show() returns before TX completes (async DMA)
     // This proves the SPI driver releases back to the main thread while draining.
     remote.bind("testAsync", [this](const fl::json& args) -> fl::json {
