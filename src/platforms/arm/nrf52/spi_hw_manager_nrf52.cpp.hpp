@@ -37,7 +37,7 @@ constexpr int PRIORITY_SPI_HW_2 = 6;   // Lower (2-lane dual-SPI)
 
 /// @brief Register nRF52 SpiHw2 instances
 static void addSpiHw2IfPossible() {
-    FL_DBG("nRF52: Registering SpiHw2 instances");
+    FL_DBG_F("nRF52: Registering SpiHw2 instances");
 
     // nRF52 has multiple Timer/PPI combinations available
     static auto controller0 = fl::make_shared<SPIDualNRF52>(0, "SPI0");
@@ -46,13 +46,13 @@ static void addSpiHw2IfPossible() {
     SpiHw2::registerInstance(controller0);
     SpiHw2::registerInstance(controller1);
 
-    FL_DBG("nRF52: SpiHw2 instances registered");
+    FL_DBG_F("nRF52: SpiHw2 instances registered");
 }
 
 #if defined(FL_IS_NRF52840) || defined(FL_IS_NRF52833)
 /// @brief Register nRF52 SpiHw4 instances (NRF52840/52833 only)
 static void addSpiHw4IfPossible() {
-    FL_DBG("nRF52: Registering SpiHw4 instances");
+    FL_DBG_F("nRF52: Registering SpiHw4 instances");
 
     // nRF52 has multiple Timer/PPI combinations available
     static auto controller0 = fl::make_shared<SPIQuadNRF52>(0, "SPI0");
@@ -61,7 +61,7 @@ static void addSpiHw4IfPossible() {
     SpiHw4::registerInstance(controller0);
     SpiHw4::registerInstance(controller1);
 
-    FL_DBG("nRF52: SpiHw4 instances registered");
+    FL_DBG_F("nRF52: SpiHw4 instances registered");
 }
 #endif
 
@@ -82,7 +82,7 @@ namespace platforms {
 /// - nRF52832: SpiHw2 only (via Timer/PPI peripherals)
 /// - nRF52840/52833: Both SpiHw2 and SpiHw4 (via Timer/PPI peripherals)
 void initSpiHardware() {
-    FL_DBG("nRF52: Initializing SPI hardware");
+    FL_DBG_F("nRF52: Initializing SPI hardware");
 
     // Register in priority order (highest to lowest)
 #if defined(FL_IS_NRF52840) || defined(FL_IS_NRF52833)
@@ -90,7 +90,7 @@ void initSpiHardware() {
 #endif
     detail::addSpiHw2IfPossible();  // Priority 6 (all variants)
 
-    FL_DBG("nRF52: SPI hardware initialized");
+    FL_DBG_F("nRF52: SPI hardware initialized");
 }
 
 }  // namespace platforms

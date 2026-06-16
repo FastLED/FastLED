@@ -159,18 +159,18 @@ ISR(TIMER1_COMPA_vect) {
 
 int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) FL_NOEXCEPT {
     if (!config.handler) {
-        FL_WARN("AVR ISR: handler is null");
+        FL_WARN_F("AVR ISR: handler is null");
         return -1;  // Invalid parameter
     }
 
     if (config.frequency_hz == 0) {
-        FL_WARN("AVR ISR: frequency_hz is 0");
+        FL_WARN_F("AVR ISR: frequency_hz is 0");
         return -2;  // Invalid frequency
     }
 
     // Check if timer is already in use
     if (g_avr_timer_data != nullptr) {
-        FL_WARN("AVR ISR: Timer1 already in use (only one timer supported)");
+        FL_WARN_F("AVR ISR: Timer1 already in use (only one timer supported)");
         return -16;  // Timer already in use
     }
 
@@ -178,7 +178,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
     auto handle_owner = fl::make_unique<avr_isr_handle_data>();
     auto* handle_data = handle_owner.get();
     if (!handle_data) {
-        FL_WARN("AVR ISR: failed to allocate handle data");
+        FL_WARN_F("AVR ISR: failed to allocate handle data");
         return -3;  // Out of memory
     }
 
@@ -186,7 +186,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
     u8 prescaler_idx;
     u16 ocr_value;
     if (!calculate_timer_config(config.frequency_hz, prescaler_idx, ocr_value)) {
-        FL_WARN("AVR ISR: frequency " << config.frequency_hz << " Hz out of range");
+        FL_WARN_F("AVR ISR: frequency %s Hz out of range", config.frequency_hz);
         return -2;  // Invalid frequency (out of range)
     }
 
@@ -197,12 +197,10 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
     i32 freq_error = static_cast<i32>(actual_freq) - static_cast<i32>(config.frequency_hz);
     i32 error_pct = (freq_error * 100) / static_cast<i32>(config.frequency_hz);
     if (error_pct > 5 || error_pct < -5) {
-        FL_WARN("AVR ISR: frequency error " << error_pct << "% (requested "
-                << config.frequency_hz << " Hz, actual " << actual_freq << " Hz)");
+        FL_WARN_F("AVR ISR: frequency error %s% (requested %s Hz, actual %s Hz)", error_pct, config.frequency_hz, actual_freq);
     }
 
-    FL_DBG("AVR ISR: Timer1 config: prescaler=" << PRESCALERS[prescaler_idx].value
-           << ", OCR1A=" << ocr_value << ", actual_freq=" << actual_freq << " Hz");
+    FL_DBG_F("AVR ISR: Timer1 config: prescaler=%s, OCR1A=%s, actual_freq=%s Hz", PRESCALERS[prescaler_idx].value, ocr_value, actual_freq);
 
     // Store configuration
     handle_data->mIsTimer = true;
@@ -239,7 +237,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
 
     handle_data->mIsEnabled = true;
 
-    FL_DBG("AVR ISR: Timer1 started at " << actual_freq << " Hz");
+    FL_DBG_F("AVR ISR: Timer1 started at %s Hz", actual_freq);
 
     // Populate output handle
     if (out_handle) {
@@ -259,19 +257,19 @@ int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* ou
     (void)pin;
     (void)config;
     (void)out_handle;
-    FL_WARN("AVR ISR: external interrupts not yet implemented");
+    FL_WARN_F("AVR ISR: external interrupts not yet implemented");
     return -100;  // Not implemented
 }
 
 int detach_handler(isr_handle_t& handle) FL_NOEXCEPT {
     if (!handle.is_valid() || handle.platform_id != AVR_PLATFORM_ID) {
-        FL_WARN("AVR ISR: invalid handle");
+        FL_WARN_F("AVR ISR: invalid handle");
         return -1;  // Invalid handle
     }
 
     avr_isr_handle_data* handle_data = static_cast<avr_isr_handle_data*>(handle.platform_handle);
     if (!handle_data) {
-        FL_WARN("AVR ISR: null handle data");
+        FL_WARN_F("AVR ISR: null handle data");
         return -1;  // Invalid handle
     }
 
@@ -296,19 +294,19 @@ int detach_handler(isr_handle_t& handle) FL_NOEXCEPT {
     handle.platform_handle = nullptr;
     handle.platform_id = 0;
 
-    FL_DBG("AVR ISR: handler detached");
+    FL_DBG_F("AVR ISR: handler detached");
     return 0;  // Success
 }
 
 int enable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
     if (!handle.is_valid() || handle.platform_id != AVR_PLATFORM_ID) {
-        FL_WARN("AVR ISR: invalid handle");
+        FL_WARN_F("AVR ISR: invalid handle");
         return -1;  // Invalid handle
     }
 
     avr_isr_handle_data* handle_data = static_cast<avr_isr_handle_data*>(handle.platform_handle);
     if (!handle_data) {
-        FL_WARN("AVR ISR: null handle data");
+        FL_WARN_F("AVR ISR: null handle data");
         return -1;  // Invalid handle
     }
 
@@ -337,13 +335,13 @@ int enable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
 
 int disable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
     if (!handle.is_valid() || handle.platform_id != AVR_PLATFORM_ID) {
-        FL_WARN("AVR ISR: invalid handle");
+        FL_WARN_F("AVR ISR: invalid handle");
         return -1;  // Invalid handle
     }
 
     avr_isr_handle_data* handle_data = static_cast<avr_isr_handle_data*>(handle.platform_handle);
     if (!handle_data) {
-        FL_WARN("AVR ISR: null handle data");
+        FL_WARN_F("AVR ISR: null handle data");
         return -1;  // Invalid handle
     }
 

@@ -23,6 +23,7 @@
 #include "Common.h"
 #include "AutoResearchTest.h"
 #include "AutoResearchHelpers.h"
+#include "fl/stl/compiler_control.h"
 #include "fl/stl/sstream.h"
 #include "fl/stl/unique_ptr.h"
 #include "fl/stl/optional.h"
@@ -87,7 +88,7 @@ void AutoResearchRemoteControl::bindBenchmarkMethods(fl::Remote& remote) {
         }
         const fl::u32 t0 = fl::micros();
         for (int i = 0; i < iterations; ++i) {
-            memcpy(dst_buf, src_buf, bytes);
+            FL_BUILTIN_MEMCPY(dst_buf, src_buf, bytes);
         }
         const fl::u32 t1 = fl::micros();
         const fl::u32 total_us = t1 - t0;

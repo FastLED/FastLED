@@ -522,7 +522,7 @@ public:
 
         // Recursion depth check
         if (mDepth > MAX_JSON_DEPTH) {
-            FL_ERROR("JSON parser: FATAL - recursion depth exceeded " << MAX_JSON_DEPTH);
+            FL_ERROR_F("JSON parser: FATAL - recursion depth exceeded %s", MAX_JSON_DEPTH);
             return ParseState::ERROR;
         }
 
@@ -919,7 +919,7 @@ public:
     ParseState on_token(JsonToken token, const fl::span<const char>& value) override {
         // Recursion depth check
         if (mDepth > MAX_JSON_DEPTH) {
-            FL_ERROR("JSON parser: FATAL - recursion depth exceeded " << MAX_JSON_DEPTH);
+            FL_ERROR_F("JSON parser: FATAL - recursion depth exceeded %s", MAX_JSON_DEPTH);
             return ParseState::ERROR;
         }
 

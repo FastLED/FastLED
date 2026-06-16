@@ -109,7 +109,7 @@ public:
         // Initialize bus with auto DMA
         esp_err_t ret = spi_bus_initialize(mHost, &bus_config, SPI_DMA_CH_AUTO);
         if (ret != ESP_OK) {
-            FL_WARN("SPI bus init failed: " << ret);
+            FL_WARN_F("SPI bus init failed: %s", ret);
             return;
         }
 
@@ -124,7 +124,7 @@ public:
         // Add device to bus
         ret = spi_bus_add_device(mHost, &dev_config, &mSPIHandle);
         if (ret != ESP_OK) {
-            FL_WARN("SPI add device failed: " << ret);
+            FL_WARN_F("SPI add device failed: %s", ret);
             spi_bus_free(mHost);
             return;
         }

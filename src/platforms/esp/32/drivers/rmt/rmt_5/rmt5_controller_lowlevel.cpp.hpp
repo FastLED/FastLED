@@ -65,7 +65,7 @@ RmtController5LowLevel::~RmtController5LowLevel() {
 void RmtController5LowLevel::loadPixelData(PixelIterator& pixels) FL_NOEXCEPT {
     // Safety check: don't modify buffer if driver is transmitting it
     if (mChannelData->isInUse()) {
-        FL_WARN("RMT5 Controller: Skipping update - buffer in use by driver");
+        FL_WARN_F("RMT5 Controller: Skipping update - buffer in use by driver");
         return;
     }
 
@@ -88,7 +88,7 @@ void RmtController5LowLevel::showPixels() FL_NOEXCEPT {
     if (mDriver) {
         mDriver->enqueue(mChannelData);
     } else {
-        FL_WARN("RMT5 Controller: RMT driver not available for showPixels()");
+        FL_WARN_F("RMT5 Controller: RMT driver not available for showPixels()");
     }
 }
 

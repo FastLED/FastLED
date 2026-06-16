@@ -96,14 +96,14 @@ void invoke_user_callback() FL_NOEXCEPT {
 void handle_system_reset(const char* handler_name) FL_NOEXCEPT {
     invoke_user_callback();
 
-    FL_DBG("\n[" << handler_name << "] System reset detected - performing safe USB disconnect");
+    FL_DBG_F("\n[%s] System reset detected - performing safe USB disconnect", handler_name);
 
     disconnect_usb_hardware();
 
 #if HAS_USB_SERIAL_JTAG
-    FL_DBG("[" << handler_name << "] ✓ USB disconnected - proceeding with reset");
+    FL_DBG_F("[%s] ✓ USB disconnected - proceeding with reset", handler_name);
 #else
-    FL_DBG("[" << handler_name << "] No USB Serial JTAG hardware - using default reset behavior");
+    FL_DBG_F("[%s] No USB Serial JTAG hardware - using default reset behavior", handler_name);
 #endif
 }
 
@@ -138,7 +138,7 @@ bool init_task_watchdog(u32 timeout_ms) FL_NOEXCEPT {
         err = ESP_OK;  // Already armed; keep the existing IDF4 timeout.
     }
     if (err != ESP_OK) {
-        FL_DBG("[WATCHDOG] Failed to initialize (error: " << err << ")");
+        FL_DBG_F("[WATCHDOG] Failed to initialize (error: %s)", err);
         return false;
     }
 
@@ -147,11 +147,11 @@ bool init_task_watchdog(u32 timeout_ms) FL_NOEXCEPT {
 
 // Logs watchdog configuration status
 void log_watchdog_status(u32 timeout_ms, watchdog_callback_t callback) FL_NOEXCEPT {
-    FL_DBG("[WATCHDOG] ✓ " << timeout_ms << "ms watchdog active with reset on timeout");
+    FL_DBG_F("[WATCHDOG] ✓ %sms watchdog active with reset on timeout", timeout_ms);
     if (callback != nullptr) {
-        FL_DBG("[WATCHDOG] ℹ️  User callback registered");
+        FL_DBG_F("[WATCHDOG] ℹ️  User callback registered");
     }
-    FL_DBG("[WATCHDOG] Monitors the loop task plus idle-task CPU starvation");
+    FL_DBG_F("[WATCHDOG] Monitors the loop task plus idle-task CPU starvation");
 }
 
 } // anonymous namespace
@@ -159,7 +159,7 @@ void log_watchdog_status(u32 timeout_ms, watchdog_callback_t callback) FL_NOEXCE
 void watchdog_setup(u32 timeout_ms,
                     watchdog_callback_t callback,
                     void* user_data) FL_NOEXCEPT {
-    FL_DBG("\n[WATCHDOG] Configuring ESP32 custom " << timeout_ms << "ms watchdog (IDF v4.x)");
+    FL_DBG_F("\n[WATCHDOG] Configuring ESP32 custom %sms watchdog (IDF v4.x)", timeout_ms);
 
     // Store callback for reset handlers
     detail::s_user_callback = callback;

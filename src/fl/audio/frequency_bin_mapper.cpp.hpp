@@ -123,8 +123,7 @@ void FrequencyBinMapper::mapBins(span<const float> fftBins, span<float> outputBi
 
     // Validate output buffer size
     if (outputBins.size() < numBins) {
-        FL_WARN("FrequencyBinMapper: output buffer too small (" << outputBins.size()
-                << " < " << numBins << ")");
+        FL_WARN_F("FrequencyBinMapper: output buffer too small (%s < %s)", outputBins.size(), numBins);
         return;
     }
 

@@ -248,7 +248,7 @@ bool ChannelEngineLcdRgb::beginTransmission(fl::span<const ChannelDataPtr> chann
         }
 
         if (!mPeripheral->initialize(pconfig)) {
-            FL_WARN("ChannelEngineLcdRgb: Failed to initialize peripheral");
+            FL_WARN_F("ChannelEngineLcdRgb: Failed to initialize peripheral");
             return false;
         }
 
@@ -267,7 +267,7 @@ bool ChannelEngineLcdRgb::beginTransmission(fl::span<const ChannelDataPtr> chann
         for (int i = 0; i < 2; i++) {
             mBuffers[i] = mPeripheral->allocateFrameBuffer(mBufferSize);
             if (mBuffers[i] == nullptr) {
-                FL_WARN("ChannelEngineLcdRgb: Failed to allocate buffer");
+                FL_WARN_F("ChannelEngineLcdRgb: Failed to allocate buffer");
                 return false;
             }
             // Initialize with zeros
@@ -299,7 +299,7 @@ bool ChannelEngineLcdRgb::beginTransmission(fl::span<const ChannelDataPtr> chann
         for (const auto& channel : channelData) {
             channel->setInUse(false);
         }
-        FL_WARN("ChannelEngineLcdRgb: Failed to start transmission");
+        FL_WARN_F("ChannelEngineLcdRgb: Failed to start transmission");
         return false;
     }
 

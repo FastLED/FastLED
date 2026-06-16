@@ -48,7 +48,7 @@ bool CLED::begin(const CLEDConfig& config) FL_NOEXCEPT {
     // Validate parameters
     if (config.resolution_bits > 20) {
         // ESP32 LEDC maximum is 20 bits
-        FL_WARN("CLED: resolution_bits > 20 not supported (requested: " << config.resolution_bits << ")");
+        FL_WARN_F("CLED: resolution_bits > 20 not supported (requested: %s)", config.resolution_bits);
         return false;
     }
 
@@ -61,28 +61,25 @@ bool CLED::begin(const CLEDConfig& config) FL_NOEXCEPT {
     // New API (Arduino Core 3.x): ledcAttach auto-assigns channel
     u8 assigned_channel = ledcAttach(config.pin, config.frequency, config.resolution_bits);
     if (assigned_channel == 0) {
-        FL_WARN("CLED: LEDC attach failed for pin " << config.pin);
+        FL_WARN_F("CLED: LEDC attach failed for pin %s", config.pin);
         return false;
     }
 
     // Update internal state with auto-assigned channel
     mConfig.channel = assigned_channel;
 
-    FL_DBG("CLED: Initialized pin " << config.pin << " with auto-assigned channel "
-           << static_cast<int>(assigned_channel) << " at " << config.frequency
-           << " Hz, " << config.resolution_bits << " bits");
+    FL_DBG_F("CLED: Initialized pin %s with auto-assigned channel %s at %s Hz, %s bits", config.pin, static_cast<int>(assigned_channel), config.frequency, config.resolution_bits);
 #else
     // Old API (Arduino Core 2.x): ledcSetup + ledcAttachPin with explicit channel
     ledcAttachPin(config.pin, config.channel);
     u32 freq = ledcSetup(config.channel, config.frequency, config.resolution_bits);
 
     if (freq == 0) {
-        FL_WARN("CLED: LEDC setup failed for channel " << config.channel);
+        FL_WARN_F("CLED: LEDC setup failed for channel %s", config.channel);
         return false;
     }
 
-    FL_DBG("CLED: Initialized channel " << config.channel << " at " << freq
-           << " Hz, " << config.resolution_bits << " bits");
+    FL_DBG_F("CLED: Initialized channel %s at %s Hz, %s bits", config.channel, freq, config.resolution_bits);
 #endif
 
     mInitialized = true;

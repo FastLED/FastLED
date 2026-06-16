@@ -98,8 +98,7 @@ public:
         mHandle = mBusManager->registerDevice(CLOCK_PIN, DATA_PIN, SPI_CLOCK_RATE, this);
 
         if (!mHandle.is_valid) {
-            FL_LOG_SPI("SPIDeviceProxy: Failed to register with bus manager (pin "
-                    << static_cast<int>(CLOCK_PIN) << ":" << static_cast<int>(DATA_PIN) << ")");
+            FL_LOG_SPI_F("SPIDeviceProxy: Failed to register with bus manager (pin %s:%s)", static_cast<int>(CLOCK_PIN), static_cast<int>(DATA_PIN));
             return;
         }
 

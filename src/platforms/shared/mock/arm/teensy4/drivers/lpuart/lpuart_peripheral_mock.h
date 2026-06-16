@@ -84,7 +84,7 @@ public:
         u32 reset_us;
     };
 
-    LPUARTPeripheralMock() FL_NOEXCEPT : mForceCreateFailure(false), mLastInstance(nullptr) {}
+    LPUARTPeripheralMock() FL_NOEXCEPT : mLastInstance(nullptr), mForceCreateFailure(false) {}
     ~LPUARTPeripheralMock() override = default;
 
     // ------------------------------------------------------------------

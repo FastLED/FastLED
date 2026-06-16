@@ -105,12 +105,12 @@ bool I2sLcdCamPeripheralEsp::initialize(const I2sLcdCamConfig& config) FL_NOEXCE
             mConfig.use_psram == config.use_psram) {
             // GPIOs might differ for different channels, but peripheral can be shared
             // as long as all GPIOs are configured in the bus
-            FL_WARN_ONCE("I2sLcdCamPeripheralEsp: Already initialized, reusing peripheral");
+            FL_WARN_F_ONCE("I2sLcdCamPeripheralEsp: Already initialized, reusing peripheral");
             return true;
         }
 
         // Config doesn't match - need to reinitialize
-        FL_WARN_ONCE("I2sLcdCamPeripheralEsp: Config changed, reinitializing peripheral");
+        FL_WARN_F_ONCE("I2sLcdCamPeripheralEsp: Config changed, reinitializing peripheral");
         deinitialize();
     }
 
@@ -118,12 +118,12 @@ bool I2sLcdCamPeripheralEsp::initialize(const I2sLcdCamConfig& config) FL_NOEXCE
 
     // Validate configuration
     if (config.num_lanes < 1 || config.num_lanes > 16) {
-        FL_WARN("I2sLcdCamPeripheralEsp: Invalid num_lanes: " << config.num_lanes);
+        FL_WARN_F("I2sLcdCamPeripheralEsp: Invalid num_lanes: %s", config.num_lanes);
         return false;
     }
 
     if (config.pclk_hz == 0) {
-        FL_WARN("I2sLcdCamPeripheralEsp: Invalid pclk_hz: 0");
+        FL_WARN_F("I2sLcdCamPeripheralEsp: Invalid pclk_hz: 0");
         return false;
     }
 
@@ -158,7 +158,7 @@ bool I2sLcdCamPeripheralEsp::initialize(const I2sLcdCamConfig& config) FL_NOEXCE
     // Create I80 bus
     esp_err_t err = esp_lcd_new_i80_bus(&bus_config, &mI80Bus);
     if (err != ESP_OK) {
-        FL_WARN("I2sLcdCamPeripheralEsp: Failed to create I80 bus: " << err);
+        FL_WARN_F("I2sLcdCamPeripheralEsp: Failed to create I80 bus: %s", err);
         return false;
     }
 
@@ -181,7 +181,7 @@ bool I2sLcdCamPeripheralEsp::initialize(const I2sLcdCamConfig& config) FL_NOEXCE
     // Create panel IO
     err = esp_lcd_new_panel_io_i80(mI80Bus, &io_config, &mPanelIo);
     if (err != ESP_OK) {
-        FL_WARN("I2sLcdCamPeripheralEsp: Failed to create panel IO: " << err);
+        FL_WARN_F("I2sLcdCamPeripheralEsp: Failed to create panel IO: %s", err);
         esp_lcd_del_i80_bus(mI80Bus);
         mI80Bus = nullptr;
         return false;

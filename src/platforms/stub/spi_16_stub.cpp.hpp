@@ -225,10 +225,10 @@ namespace platforms {
 /// Called lazily on first access to SpiHw16::getAll().
 /// Registers mock SpiHw16 controller instances for testing.
 void initSpiHw16Instances() FL_NOEXCEPT {
-    FL_WARN("Registering SpiHw16 stub instances...");
+    FL_WARN_F("Registering SpiHw16 stub instances...");
     SpiHw16::registerInstance(getController2_Spi16());
     SpiHw16::registerInstance(getController3_Spi16());
-    FL_WARN("SpiHw16 stub instances registered!");
+    FL_WARN_F("SpiHw16 stub instances registered!");
 }
 
 }  // namespace platforms

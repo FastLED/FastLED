@@ -20,7 +20,7 @@ class MedianFilterImpl {
         : mRing(capacity), mSorted(capacity),
           mSortedCount(0), mLastMedian(T(0)) {
         if (capacity % 2 == 0) {
-            FL_ERROR("MedianFilter: capacity should be odd, adding 1");
+            FL_ERROR_F("MedianFilter: capacity should be odd, adding 1");
             mRing = circular_buffer<T, N>(capacity + 1);
             mSorted = circular_buffer<T, N>(capacity + 1);
         }
@@ -86,7 +86,7 @@ class MedianFilterImpl {
 
     void resize(fl::size new_capacity) {
         if (new_capacity % 2 == 0) {
-            FL_ERROR("MedianFilter: capacity should be odd, adding 1");
+            FL_ERROR_F("MedianFilter: capacity should be odd, adding 1");
             new_capacity += 1;
         }
         mRing = circular_buffer<T, N>(new_capacity);

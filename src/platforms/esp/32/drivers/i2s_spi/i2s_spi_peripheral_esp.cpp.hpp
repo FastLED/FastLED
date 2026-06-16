@@ -162,13 +162,12 @@ bool I2sSpiPeripheralEsp::initialize(const I2sSpiConfig &config) FL_NOEXCEPT {
     }
 
     if (config.num_lanes < 1 || config.num_lanes > 16) {
-        FL_WARN("I2sSpiPeripheralEsp: Invalid num_lanes: "
-                << config.num_lanes);
+        FL_WARN_F("I2sSpiPeripheralEsp: Invalid num_lanes: %s", config.num_lanes);
         return false;
     }
 
     if (config.clock_gpio < 0) {
-        FL_WARN("I2sSpiPeripheralEsp: Invalid clock_gpio");
+        FL_WARN_F("I2sSpiPeripheralEsp: Invalid clock_gpio");
         return false;
     }
 
@@ -282,7 +281,7 @@ bool I2sSpiPeripheralEsp::initialize(const I2sSpiConfig &config) FL_NOEXCEPT {
     mDmaBuffer = static_cast<u16 *>(
         heap_caps_malloc(dmaBytes, MALLOC_CAP_DMA | MALLOC_CAP_8BIT));
     if (mDmaBuffer == nullptr) {
-        FL_WARN("I2sSpiPeripheralEsp: Failed to allocate DMA buffer");
+        FL_WARN_F("I2sSpiPeripheralEsp: Failed to allocate DMA buffer");
         return false;
     }
     fl::memset(mDmaBuffer, 0, dmaBytes);
@@ -298,7 +297,7 @@ bool I2sSpiPeripheralEsp::initialize(const I2sSpiConfig &config) FL_NOEXCEPT {
     mDmaDescs = static_cast<lldesc_t *>(heap_caps_malloc(
         mDmaDescCount * sizeof(lldesc_t), MALLOC_CAP_DMA));
     if (mDmaDescs == nullptr) {
-        FL_WARN("I2sSpiPeripheralEsp: Failed to allocate DMA descriptors");
+        FL_WARN_F("I2sSpiPeripheralEsp: Failed to allocate DMA descriptors");
         heap_caps_free(mDmaBuffer);
         mDmaBuffer = nullptr;
         mDmaBufferWords = 0;
@@ -335,8 +334,7 @@ bool I2sSpiPeripheralEsp::initialize(const I2sSpiConfig &config) FL_NOEXCEPT {
         ETS_I2S0_INTR_SOURCE, ESP_INTR_FLAG_IRAM, &isrHandler, this,
         &mIntrHandle);
     if (intr_err != ESP_OK) {
-        FL_WARN("I2sSpiPeripheralEsp: Failed to allocate interrupt: "
-                << intr_err);
+        FL_WARN_F("I2sSpiPeripheralEsp: Failed to allocate interrupt: %s", intr_err);
         heap_caps_free(mDmaDescs);
         mDmaDescs = nullptr;
         mDmaDescCount = 0;
@@ -352,8 +350,7 @@ bool I2sSpiPeripheralEsp::initialize(const I2sSpiConfig &config) FL_NOEXCEPT {
     }
 
     mInitialized = true;
-    FL_DBG("I2sSpiPeripheralEsp: Native I2S init with "
-           << config.num_lanes << " lanes, " << clockMHz << " MHz clock");
+    FL_DBG_F("I2sSpiPeripheralEsp: Native I2S init with %s lanes, %s MHz clock", config.num_lanes, clockMHz);
     return true;
 }
 

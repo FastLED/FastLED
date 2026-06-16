@@ -88,8 +88,7 @@ public:
         mHandle = mBusManager->registerDevice(CLOCK_PIN, DATA_PIN, SPI_SPEED, this);
 
         if (!mHandle.is_valid) {
-            FL_LOG_SPI("Failed to register with bus manager (pin "
-                    << CLOCK_PIN << ":" << DATA_PIN << ")");
+            FL_LOG_SPI_F("Failed to register with bus manager (pin %s:%s)", CLOCK_PIN, DATA_PIN);
             return;
         }
 

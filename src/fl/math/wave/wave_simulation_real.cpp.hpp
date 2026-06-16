@@ -87,7 +87,7 @@ float WaveSimulation1D_Real::getSpeed() const {
 
 i16 WaveSimulation1D_Real::geti16(fl::size x) const {
     if (x >= length) {
-        FL_WARN("Out of range.");
+        FL_WARN_F("Out of range.");
         return 0;
     }
     const i16 *curr = (whichGrid == 0) ? grid1.data() : grid2.data();
@@ -96,7 +96,7 @@ i16 WaveSimulation1D_Real::geti16(fl::size x) const {
 
 i16 WaveSimulation1D_Real::geti16Previous(fl::size x) const {
     if (x >= length) {
-        FL_WARN("Out of range.");
+        FL_WARN_F("Out of range.");
         return 0;
     }
     const i16 *prev = (whichGrid == 0) ? grid2.data() : grid1.data();
@@ -105,7 +105,7 @@ i16 WaveSimulation1D_Real::geti16Previous(fl::size x) const {
 
 float WaveSimulation1D_Real::getf(fl::size x) const {
     if (x >= length) {
-        FL_WARN("Out of range.");
+        FL_WARN_F("Out of range.");
         return 0.0f;
     }
     // Retrieve value from the active grid (offset by 1 for boundary).
@@ -117,7 +117,7 @@ bool WaveSimulation1D_Real::has(fl::size x) const { return (x < length); }
 
 void WaveSimulation1D_Real::set(fl::size x, float value) {
     if (x >= length) {
-        FL_WARN("warning X value too high");
+        FL_WARN_F("warning X value too high");
         return;
     }
     i16 *curr = (whichGrid == 0) ? grid1.data() : grid2.data();
@@ -229,7 +229,7 @@ float WaveSimulation2D_Real::getSpeed() const {
 
 float WaveSimulation2D_Real::getf(fl::size x, fl::size y) const {
     if (x >= width || y >= height) {
-        FL_WARN("Out of range: " << x << ", " << y);
+        FL_WARN_F("Out of range: %s, %s", x, y);
         return 0.0f;
     }
     const i16 *curr = (whichGrid == 0 ? grid1.data() : grid2.data());
@@ -238,7 +238,7 @@ float WaveSimulation2D_Real::getf(fl::size x, fl::size y) const {
 
 i16 WaveSimulation2D_Real::geti16(fl::size x, fl::size y) const {
     if (x >= width || y >= height) {
-        FL_WARN("Out of range: " << x << ", " << y);
+        FL_WARN_F("Out of range: %s, %s", x, y);
         return 0;
     }
     const i16 *curr = (whichGrid == 0 ? grid1.data() : grid2.data());
@@ -247,7 +247,7 @@ i16 WaveSimulation2D_Real::geti16(fl::size x, fl::size y) const {
 
 i16 WaveSimulation2D_Real::geti16Previous(fl::size x, fl::size y) const {
     if (x >= width || y >= height) {
-        FL_WARN("Out of range: " << x << ", " << y);
+        FL_WARN_F("Out of range: %s, %s", x, y);
         return 0;
     }
     const i16 *prev = (whichGrid == 0 ? grid2.data() : grid1.data());
@@ -265,7 +265,7 @@ void WaveSimulation2D_Real::setf(fl::size x, fl::size y, float value) {
 
 void WaveSimulation2D_Real::seti16(fl::size x, fl::size y, i16 value) {
     if (x >= width || y >= height) {
-        FL_WARN("Out of range: " << x << ", " << y);
+        FL_WARN_F("Out of range: %s, %s", x, y);
         return;
     }
     i16 *curr = (whichGrid == 0 ? grid1.data() : grid2.data());

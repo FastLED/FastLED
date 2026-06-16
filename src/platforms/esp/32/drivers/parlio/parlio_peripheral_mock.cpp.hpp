@@ -199,7 +199,7 @@ ParlioPeripheralMockImpl::~ParlioPeripheralMockImpl() {
 
 bool ParlioPeripheralMockImpl::initialize(const ParlioPeripheralConfig& config) FL_NOEXCEPT {
     if (config.data_width == 0 || config.data_width > 16) {
-        FL_WARN("ParlioPeripheralMock: Invalid data width: " << config.data_width);
+        FL_WARN_F("ParlioPeripheralMock: Invalid data width: %s", config.data_width);
         return false;
     }
     mConfig = config;
@@ -221,7 +221,7 @@ bool ParlioPeripheralMockImpl::deinitialize() FL_NOEXCEPT {
 
 bool ParlioPeripheralMockImpl::enable() FL_NOEXCEPT {
     if (!mInitialized) {
-        FL_WARN("ParlioPeripheralMock: Cannot enable - not initialized");
+        FL_WARN_F("ParlioPeripheralMock: Cannot enable - not initialized");
         return false;
     }
     mEnabled = true;
@@ -230,7 +230,7 @@ bool ParlioPeripheralMockImpl::enable() FL_NOEXCEPT {
 
 bool ParlioPeripheralMockImpl::disable() FL_NOEXCEPT {
     if (!mInitialized) {
-        FL_WARN("ParlioPeripheralMock: Cannot disable - not initialized");
+        FL_WARN_F("ParlioPeripheralMock: Cannot disable - not initialized");
         return false;
     }
     mEnabled = false;
@@ -243,12 +243,12 @@ bool ParlioPeripheralMockImpl::disable() FL_NOEXCEPT {
 
 bool ParlioPeripheralMockImpl::transmit(const u8* buffer, size_t bit_count, u16 idle_value) FL_NOEXCEPT {
     if (!mInitialized) {
-        FL_WARN("ParlioPeripheralMock: Cannot transmit - not initialized");
+        FL_WARN_F("ParlioPeripheralMock: Cannot transmit - not initialized");
         return false;
     }
 
     if (!mEnabled) {
-        FL_WARN("ParlioPeripheralMock: Cannot transmit - not enabled");
+        FL_WARN_F("ParlioPeripheralMock: Cannot transmit - not enabled");
         return false;
     }
 
@@ -293,7 +293,7 @@ bool ParlioPeripheralMockImpl::transmit(const u8* buffer, size_t bit_count, u16 
 bool ParlioPeripheralMockImpl::waitAllDone(u32 timeout_ms) FL_NOEXCEPT {
     (void)timeout_ms;
     if (!mInitialized) {
-        FL_WARN("ParlioPeripheralMock: Cannot wait - not initialized");
+        FL_WARN_F("ParlioPeripheralMock: Cannot wait - not initialized");
         return false;
     }
     // GAP CLOSURE (#2992 follow-up):
@@ -333,7 +333,7 @@ void ParlioPeripheralMockImpl::settleEngineState() FL_NOEXCEPT {
 
 bool ParlioPeripheralMockImpl::registerTxDoneCallback(void* callback, void* user_ctx) FL_NOEXCEPT {
     if (!mInitialized) {
-        FL_WARN("ParlioPeripheralMock: Cannot register callback - not initialized");
+        FL_WARN_F("ParlioPeripheralMock: Cannot register callback - not initialized");
         return false;
     }
     mCallback = callback;
@@ -389,7 +389,7 @@ u8* ParlioPeripheralMockImpl::allocateDmaBuffer(size_t size) FL_NOEXCEPT {
 #endif
 
     if (buffer == nullptr) {
-        FL_WARN("ParlioPeripheralMock: Failed to allocate buffer (" << aligned_size << " bytes)");
+        FL_WARN_F("ParlioPeripheralMock: Failed to allocate buffer (%s bytes)", aligned_size);
     }
     return static_cast<u8*>(buffer);
 }
@@ -484,7 +484,7 @@ fl::span<const u8> ParlioPeripheralMockImpl::getTransmissionDataForPin(int gpio_
     }
     auto it = mPerPinData.find(gpio_pin);
     if (it == mPerPinData.end()) {
-        FL_WARN("ParlioPeripheralMock: GPIO pin " << gpio_pin << " not found in transmission data");
+        FL_WARN_F("ParlioPeripheralMock: GPIO pin %s not found in transmission data", gpio_pin);
         return fl::span<const u8>();
     }
     return fl::span<const u8>(it->second);

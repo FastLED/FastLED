@@ -850,7 +850,7 @@ bool Server::start(int port) {
     esp_err_t err = httpd_start(&s_esp_httpd, &config);
     if (err != ESP_OK) {
         mLastError = "httpd_start failed";
-        FL_WARN("[HTTP] httpd_start failed: " << esp_err_to_name(err));
+        FL_WARN_F("[HTTP] httpd_start failed: %s", esp_err_to_name(err));
         return false;
     }
 
@@ -866,7 +866,7 @@ bool Server::start(int port) {
 
         esp_err_t reg_err = httpd_register_uri_handler(s_esp_httpd, &uri_handler);
         if (reg_err != ESP_OK) {
-            FL_WARN("[HTTP] Failed to register route " << mRoutes[i].path.c_str());
+            FL_WARN_F("[HTTP] Failed to register route %s", mRoutes[i].path.c_str());
         }
         s_esp_route_contexts.push_back(fl::move(ctx));
     }
@@ -875,7 +875,7 @@ bool Server::start(int port) {
     mRunning = true;
     mLastError.clear();
 
-    FL_WARN("[HTTP] Server started on port " << port);
+    FL_WARN_F("[HTTP] Server started on port %s", port);
     return true;
 }
 
@@ -894,7 +894,7 @@ void Server::stop() {
     mRoutes.clear();
 
     mRunning = false;
-    FL_WARN("[HTTP] Server stopped");
+    FL_WARN_F("[HTTP] Server stopped");
 }
 
 void Server::route(const string& method, const string& path, RouteHandler handler) {

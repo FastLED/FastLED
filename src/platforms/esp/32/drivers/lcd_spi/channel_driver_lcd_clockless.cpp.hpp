@@ -1,4 +1,4 @@
-// IWYU pragma: private
+﻿// IWYU pragma: private
 
 /// @file channel_driver_lcd_clockless.cpp.hpp
 /// @brief LCD_CAM I80 clockless channel driver implementation
@@ -80,7 +80,7 @@ ChannelDriverLcdClockless::~ChannelDriverLcdClockless() {
         bool done = mPeripheral->waitTransmitDone(2000);
         mBusy = false;
         if (!done) {
-            FL_WARN("ChannelDriverLcdClockless: DMA wait timed out — "
+            FL_WARN_F("ChannelDriverLcdClockless: DMA wait timed out â€” "
                     "freeing ring buffers anyway");
         }
     }
@@ -113,7 +113,7 @@ bool ChannelDriverLcdClockless::allocateRingBuffers(
     for (size_t i = 0; i < kRingBufferCount; i++) {
         mRingBuffers[i] = mPeripheral->allocateBuffer(slotCapacityBytes);
         if (mRingBuffers[i] == nullptr) {
-            FL_WARN("ChannelDriverLcdClockless: ring buffer alloc failed");
+            FL_WARN_F("ChannelDriverLcdClockless: ring buffer alloc failed");
             freeRingBuffers();
             return false;
         }
@@ -308,7 +308,7 @@ void ChannelDriverLcdClockless::show() FL_NOEXCEPT {
 
     (void)waitForReady(2000);
     if (mBusy) {
-        FL_WARN("ChannelDriverLcdClockless: DMA hung — forcing release");
+        FL_WARN_F("ChannelDriverLcdClockless: DMA hung â€” forcing release");
         mBusy = false;
         for (auto &channel : mTransmittingChannels) {
             channel->setInUse(false);
@@ -363,7 +363,7 @@ IChannelDriver::DriverState ChannelDriverLcdClockless::poll() FL_NOEXCEPT {
 }
 
 //=============================================================================
-// Encoding — wave3 or wave8 transpose into u16 DMA words
+// Encoding â€” wave3 or wave8 transpose into u16 DMA words
 //=============================================================================
 
 void ChannelDriverLcdClockless::setPollNeededCallback(PollNeededCallback callback) FL_NOEXCEPT {
@@ -420,7 +420,7 @@ size_t FL_IRAM ChannelDriverLcdClockless::encodeChunk(
 // ISR Callback
 //=============================================================================
 
-// FL_IRAM matches the declaration in channel_driver_lcd_clockless.h — this
+// FL_IRAM matches the declaration in channel_driver_lcd_clockless.h â€” this
 // callback runs in ISR context and MUST live in IRAM so it can execute while
 // flash cache is suspended. Without it, a concurrent flash operation (NVS
 // commit, esp_flash_erase_region, etc.) keeps the ISR stalled past the 300 ms
@@ -462,13 +462,12 @@ bool ChannelDriverLcdClockless::beginTransmission(
     }
 
     if (channels.size() > 16) {
-        FL_WARN("ChannelDriverLcdClockless: too many channels ("
-                << channels.size() << "), max 16 supported");
+        FL_WARN_F("ChannelDriverLcdClockless: too many channels (%s), max 16 supported", channels.size());
         return false;
     }
 
     if (!ensureWorkerTask()) {
-        FL_WARN("ChannelDriverLcdClockless: worker task creation failed");
+        FL_WARN_F("ChannelDriverLcdClockless: worker task creation failed");
         return false;
     }
 
@@ -576,7 +575,7 @@ bool ChannelDriverLcdClockless::beginTransmission(
         // PCLK and DC pins are required by the LCD I80 bus API but the
         // signals are not connected to LEDs for clockless output (data
         // streams out on data_gpios). Use GPIO 0 for both (same convention
-        // as the legacy I2S LCD_CAM driver this replaces — proven safe on
+        // as the legacy I2S LCD_CAM driver this replaces â€” proven safe on
         // ESP32-S3 because the strapping pin tolerates being multiplexed
         // to unused peripheral functions).
         if (config.clock_gpio < 0) {
@@ -587,7 +586,7 @@ bool ChannelDriverLcdClockless::beginTransmission(
         }
 
         if (!mPeripheral->initialize(config)) {
-            FL_WARN("ChannelDriverLcdClockless: Failed to init peripheral");
+            FL_WARN_F("ChannelDriverLcdClockless: Failed to init peripheral");
             return false;
         }
 
@@ -602,7 +601,7 @@ bool ChannelDriverLcdClockless::beginTransmission(
     // Register ISR callback
     if (!mPeripheral->registerTransmitCallback(
             reinterpret_cast<void *>(&isrChunkDone), this)) { // ok reinterpret cast
-        FL_WARN("ChannelDriverLcdClockless: registerTransmitCallback failed");
+        FL_WARN_F("ChannelDriverLcdClockless: registerTransmitCallback failed");
         return false;
     }
 
@@ -623,7 +622,7 @@ bool ChannelDriverLcdClockless::beginTransmission(
         for (const auto &channel : channels) {
             channel->setInUse(false);
         }
-        FL_WARN("ChannelDriverLcdClockless: Initial transmit failed");
+        FL_WARN_F("ChannelDriverLcdClockless: Initial transmit failed");
         return false;
     }
     mIsrCtx.mSubmittedChunks = 1;

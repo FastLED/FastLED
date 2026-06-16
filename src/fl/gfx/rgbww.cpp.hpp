@@ -1,10 +1,10 @@
-/// @file rgbww.cpp.hpp
+﻿/// @file rgbww.cpp.hpp
 /// Dispatch + implementations for the 5-channel RGB->RGBWW path
 /// (issue #2558, Phase 3 of #2545).
 ///
 /// The colorimetric modes call `solve_rgbcct()` from
 /// fl/gfx/rgbw_colorimetric.h whenever FASTLED_RGBW_COLORIMETRIC is defined
-/// (that's the one flag that gates the underlying color math library — see
+/// (that's the one flag that gates the underlying color math library â€” see
 /// PR #2552). Without it, the dispatch emits FL_WARN_ONCE and outputs five
 /// zero bytes. Suppress the warn-once with
 /// `-DFASTLED_SUPPRESS_RGBWW_FALLBACK_WARNING=1`.
@@ -23,7 +23,7 @@
 // rgbw_colorimetric.h carries the RgbcctProfile type definition that
 // kRgbwwDefaultProfile needs, plus the inline math primitives Phase D uses.
 // The non-inline solve_rgbcct symbol itself only exists when
-// FASTLED_RGBW_COLORIMETRIC is defined at library build time — see the gated
+// FASTLED_RGBW_COLORIMETRIC is defined at library build time â€” see the gated
 // dispatch bodies further down.
 #include "fl/gfx/rgbw_colorimetric.h"
 #include "fl/log/log.h"
@@ -45,8 +45,8 @@ inline void zero_out(u8 *r, u8 *g, u8 *b, u8 *ww, u8 *wc) FL_NOEXCEPT {
 // kRgbwDefaultProfile (the colorimetric 4-channel default); W vertex is
 // hardcoded to the Planckian xy at 2700K (warm) and 6500K (cool) so static
 // initialization stays trivial (no CCT conversion at init time).
-//   2700K Planckian xy ≈ (0.4600, 0.4107)  (matches cct_to_xy(2700) ± 0.002)
-//   6500K Planckian xy ≈ (0.3135, 0.3237)  (matches cct_to_xy(6500) ± 0.002)
+//   2700K Planckian xy â‰ˆ (0.4600, 0.4107)  (matches cct_to_xy(2700) Â± 0.002)
+//   6500K Planckian xy â‰ˆ (0.3135, 0.3237)  (matches cct_to_xy(6500) Â± 0.002)
 // Default profile: native LED gamut + D65 source white on both warm and cool
 // paths (#2710). Users wanting Rec709 / Rec2020 / DCI-P3 input semantics
 // should call `fl::set_input_gamut()` on their per-strip profile copy.
@@ -111,7 +111,7 @@ const colorimetric_detail::RgbcctProfile* get_rgbww_colorimetric_profile() FL_NO
 }
 
 // User-installable RGB->RGBWW function pointer, held behind a lazy
-// Singleton<T> (same pattern as the rgb_2_rgbw user function — see #2424 for
+// Singleton<T> (same pattern as the rgb_2_rgbw user function â€” see #2424 for
 // the binary-bloat rationale). Default is nullptr; the user function path
 // emits zero output when nothing is installed.
 namespace {
@@ -158,7 +158,7 @@ void rgb_2_rgbww_user_function(const Rgbww& cfg,
                                u8 *out_ww, u8 *out_wc) FL_NOEXCEPT {
     rgb_2_rgbww_function fn = fl::Singleton<Rgb2RgbwwUserState>::instance().fn;
     if (fn == nullptr) {
-        // No user function installed — produce safe zero output.
+        // No user function installed â€” produce safe zero output.
         zero_out(out_r, out_g, out_b, out_ww, out_wc);
         return;
     }
@@ -171,15 +171,15 @@ void rgb_2_rgbww_user_function(const Rgbww& cfg,
 
 namespace {
 // Compute the warm/cool blend factor from the input chromaticity. Simple
-// x-based heuristic: warmer inputs (higher x, closer to warm white) → lower
-// eta (more warm-W); cooler inputs → higher eta. Mathematically not optimal
-// — a chromaticity-aware solver could place eta to minimize dE — but cheap,
+// x-based heuristic: warmer inputs (higher x, closer to warm white) â†’ lower
+// eta (more warm-W); cooler inputs â†’ higher eta. Mathematically not optimal
+// â€” a chromaticity-aware solver could place eta to minimize dE â€” but cheap,
 // monotonic, and good enough for the common ambilight / neutral-pastel case.
 // Per-process cache for the input chromaticity matrix used by
 // compute_eta_from_input. `build_source_matrix` runs a 3x3 invert, which is
 // far too expensive to repeat per pixel (CodeRabbit #2707). The keyed input
-// fields are profile-level data — the matrix is invariant until the active
-// profile's input_xy_* changes — so we cache it and invalidate only when one
+// fields are profile-level data â€” the matrix is invariant until the active
+// profile's input_xy_* changes â€” so we cache it and invalidate only when one
 // of those eight floats differs from the cached snapshot.
 struct EtaSourceMatrixCache {
     float xy_r[2] = {0.0f, 0.0f};
@@ -202,7 +202,7 @@ inline float compute_eta_from_input(const colorimetric_detail::RgbcctProfile& pr
     // emitter-space projection used previously would bias eta toward the LED
     // gamut, so a neutral source white wouldn't blend symmetrically across
     // warm/cool when the source primaries (e.g. sRGB) differ from the LED
-    // primaries — exactly the regression flagged on this PR.
+    // primaries â€” exactly the regression flagged on this PR.
     EtaSourceMatrixCache& cache =
         fl::Singleton<EtaSourceMatrixCache>::instance();
     const fl::DiodeProfile& wp = profile.warm_path;
@@ -232,7 +232,7 @@ inline float compute_eta_from_input(const colorimetric_detail::RgbcctProfile& pr
         X = xyz[0]; Y = xyz[1]; Z = xyz[2];
     } else {
         // Legacy emitter-space fallback for profiles without populated source.
-        // Three xyY_to_XYZ calls per pixel — degraded but still cheap, and
+        // Three xyY_to_XYZ calls per pixel â€” degraded but still cheap, and
         // only reached when the user explicitly opts out of source space.
         float P_R[3], P_G[3], P_B[3];
         colorimetric_detail::xyY_to_XYZ(wp.xy_r[0], wp.xy_r[1], wp.lum_r, P_R);
@@ -256,7 +256,7 @@ inline float compute_eta_from_input(const colorimetric_detail::RgbcctProfile& pr
 // Resolve the per-call RgbcctProfile, honoring cfg.warm_cct / cool_cct.
 //
 // (#2558) CodeRabbit caught that the previous implementation ignored the
-// per-strip CCT fields whenever cfg.profile == nullptr — every Rgbww config
+// per-strip CCT fields whenever cfg.profile == nullptr â€” every Rgbww config
 // produced the same warm=2700/cool=6500 default. Now we shift the W vertex
 // of a per-call profile to whatever CCTs the user requested. When the
 // requested CCTs match the default profile's nominal_cct values exactly, we
@@ -361,7 +361,7 @@ void rgb_2_rgbww_colorimetric_boosted(const Rgbww& cfg,
 
 // Stub path when the colorimetric math library is not compiled in. Emits
 // FL_WARN_ONCE (suppressible) and five zero bytes. Does not pull in the
-// solver, profile cache, or float math machinery — same gc-section behavior
+// solver, profile cache, or float math machinery â€” same gc-section behavior
 // as the rest of the colorimetric Phase 1 dispatch in PR #2552.
 void rgb_2_rgbww_colorimetric(const Rgbww& cfg,
                               u8 r, u8 g, u8 b,
@@ -371,7 +371,7 @@ void rgb_2_rgbww_colorimetric(const Rgbww& cfg,
     (void)cfg; (void)r; (void)g; (void)b;
     (void)r_scale; (void)g_scale; (void)b_scale;
 #ifndef FASTLED_SUPPRESS_RGBWW_FALLBACK_WARNING
-    FL_WARN_ONCE("RGBWW: kRGBWWColorimetric requires FASTLED_RGBW_COLORIMETRIC=1 "
+    FL_WARN_F_ONCE("RGBWW: kRGBWWColorimetric requires FASTLED_RGBW_COLORIMETRIC=1 "
                  "(the math library that provides solve_rgbcct). Outputting zeros.");
 #endif
     zero_out(out_r, out_g, out_b, out_ww, out_wc);
@@ -385,7 +385,7 @@ void rgb_2_rgbww_colorimetric_boosted(const Rgbww& cfg,
     (void)cfg; (void)r; (void)g; (void)b;
     (void)r_scale; (void)g_scale; (void)b_scale;
 #ifndef FASTLED_SUPPRESS_RGBWW_FALLBACK_WARNING
-    FL_WARN_ONCE("RGBWW: kRGBWWColorimetricBoosted requires FASTLED_RGBW_COLORIMETRIC=1. "
+    FL_WARN_F_ONCE("RGBWW: kRGBWWColorimetricBoosted requires FASTLED_RGBW_COLORIMETRIC=1. "
                  "Outputting zeros.");
 #endif
     zero_out(out_r, out_g, out_b, out_ww, out_wc);

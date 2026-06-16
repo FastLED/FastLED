@@ -71,7 +71,7 @@ JsonUiUpdateInput setJsonUiHandlers(const JsonUiUpdateOutput& updateJsHandler) F
                 manager->updateUiComponents(jsonStr);
                 // FL_WARN("*** updateEngineState lambda: updateUiComponents completed");
             } else {
-                FL_WARN("*** updateEngineState lambda: NO MANAGER EXISTS!");
+                FL_WARN_F("*** updateEngineState lambda: NO MANAGER EXISTS!");
             }
         });
         // FL_WARN("setJsonUiHandlers: updateEngineState lambda created, returning it (is " << (result ? "VALID" : "nullptr") << ")");

@@ -157,13 +157,13 @@ SpiPeripheralMockImpl::SpiPeripheralMockImpl()
 
 bool SpiPeripheralMockImpl::initializeBus(const SpiBusConfig& config) FL_NOEXCEPT {
     if (mInitialized) {
-        FL_WARN("SpiPeripheralMock: Already initialized");
+        FL_WARN_F("SpiPeripheralMock: Already initialized");
         return false;
     }
 
     // Validate config
     if (config.sclk_pin < 0) {
-        FL_WARN("SpiPeripheralMock: Invalid SCLK pin: " << config.sclk_pin);
+        FL_WARN_F("SpiPeripheralMock: Invalid SCLK pin: %s", config.sclk_pin);
         return false;
     }
 
@@ -176,23 +176,23 @@ bool SpiPeripheralMockImpl::initializeBus(const SpiBusConfig& config) FL_NOEXCEP
 
 bool SpiPeripheralMockImpl::addDevice(const SpiDeviceConfig& config) FL_NOEXCEPT {
     if (!mInitialized) {
-        FL_WARN("SpiPeripheralMock: Cannot add device - bus not initialized");
+        FL_WARN_F("SpiPeripheralMock: Cannot add device - bus not initialized");
         return false;
     }
 
     if (mDeviceAdded) {
-        FL_WARN("SpiPeripheralMock: Device already added");
+        FL_WARN_F("SpiPeripheralMock: Device already added");
         return false;
     }
 
     // Validate config
     if (config.clock_speed_hz <= 0) {
-        FL_WARN("SpiPeripheralMock: Invalid clock speed: " << config.clock_speed_hz);
+        FL_WARN_F("SpiPeripheralMock: Invalid clock speed: %s", config.clock_speed_hz);
         return false;
     }
 
     if (config.queue_size <= 0) {
-        FL_WARN("SpiPeripheralMock: Invalid queue size: " << config.queue_size);
+        FL_WARN_F("SpiPeripheralMock: Invalid queue size: %s", config.queue_size);
         return false;
     }
 
@@ -206,7 +206,7 @@ bool SpiPeripheralMockImpl::addDevice(const SpiDeviceConfig& config) FL_NOEXCEPT
 
 bool SpiPeripheralMockImpl::removeDevice() FL_NOEXCEPT {
     if (!mDeviceAdded) {
-        FL_WARN("SpiPeripheralMock: No device to remove");
+        FL_WARN_F("SpiPeripheralMock: No device to remove");
         return false;
     }
 
@@ -217,12 +217,12 @@ bool SpiPeripheralMockImpl::removeDevice() FL_NOEXCEPT {
 
 bool SpiPeripheralMockImpl::freeBus() FL_NOEXCEPT {
     if (!mInitialized) {
-        FL_WARN("SpiPeripheralMock: Bus not initialized");
+        FL_WARN_F("SpiPeripheralMock: Bus not initialized");
         return false;
     }
 
     if (mDeviceAdded) {
-        FL_WARN("SpiPeripheralMock: Must remove device before freeing bus");
+        FL_WARN_F("SpiPeripheralMock: Must remove device before freeing bus");
         return false;
     }
 
@@ -240,12 +240,12 @@ bool SpiPeripheralMockImpl::isInitialized() const FL_NOEXCEPT {
 
 bool SpiPeripheralMockImpl::queueTransaction(const SpiTransaction& trans) FL_NOEXCEPT {
     if (!mInitialized) {
-        FL_WARN("SpiPeripheralMock: Cannot queue transaction - not initialized");
+        FL_WARN_F("SpiPeripheralMock: Cannot queue transaction - not initialized");
         return false;
     }
 
     if (!mDeviceAdded) {
-        FL_WARN("SpiPeripheralMock: Cannot queue transaction - no device added");
+        FL_WARN_F("SpiPeripheralMock: Cannot queue transaction - no device added");
         return false;
     }
 
@@ -256,7 +256,7 @@ bool SpiPeripheralMockImpl::queueTransaction(const SpiTransaction& trans) FL_NOE
 
     // Check queue capacity
     if (mQueuedTransactions.size() >= mMaxQueueSize) {
-        FL_WARN("SpiPeripheralMock: Transaction queue full (" << mMaxQueueSize << ")");
+        FL_WARN_F("SpiPeripheralMock: Transaction queue full (%s)", mMaxQueueSize);
         return false;
     }
 
@@ -293,12 +293,12 @@ bool SpiPeripheralMockImpl::pollTransaction(u32 timeout_ms) FL_NOEXCEPT {
     (void)timeout_ms;  // Unused in synchronous mock
 
     if (!mInitialized) {
-        FL_WARN("SpiPeripheralMock: Cannot poll - not initialized");
+        FL_WARN_F("SpiPeripheralMock: Cannot poll - not initialized");
         return false;
     }
 
     if (!mDeviceAdded) {
-        FL_WARN("SpiPeripheralMock: Cannot poll - no device added");
+        FL_WARN_F("SpiPeripheralMock: Cannot poll - no device added");
         return false;
     }
 
@@ -323,7 +323,7 @@ bool SpiPeripheralMockImpl::pollTransaction(u32 timeout_ms) FL_NOEXCEPT {
 
 bool SpiPeripheralMockImpl::registerCallback(void* callback, void* user_ctx) FL_NOEXCEPT {
     if (!mInitialized) {
-        FL_WARN("SpiPeripheralMock: Cannot register callback - not initialized");
+        FL_WARN_F("SpiPeripheralMock: Cannot register callback - not initialized");
         return false;
     }
 
@@ -360,7 +360,7 @@ u8* SpiPeripheralMockImpl::allocateDma(size_t size) FL_NOEXCEPT {
 #endif
 
     if (buffer == nullptr) {
-        FL_WARN("SpiPeripheralMock: Failed to allocate buffer (" << aligned_size << " bytes)");
+        FL_WARN_F("SpiPeripheralMock: Failed to allocate buffer (%s bytes)", aligned_size);
     }
 
     return static_cast<u8*>(buffer);

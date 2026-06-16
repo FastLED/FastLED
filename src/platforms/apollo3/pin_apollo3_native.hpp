@@ -71,7 +71,7 @@ static PWMState g_pwm_state[AM_HAL_GPIO_MAX_PADS] = {};
 
 inline void pinMode(int pin, PinMode mode) FL_NOEXCEPT {
     if (pin < 0 || pin >= AM_HAL_GPIO_MAX_PADS) {
-        FL_WARN("Apollo3: Invalid pin " << pin);
+        FL_WARN_F("Apollo3: Invalid pin %s", pin);
         return;
     }
 
@@ -105,13 +105,13 @@ inline void pinMode(int pin, PinMode mode) FL_NOEXCEPT {
             pin_config.eGPInput = AM_HAL_GPIO_PIN_INPUT_ENABLE;
             pin_config.eGPOutcfg = AM_HAL_GPIO_PIN_OUTCFG_DISABLE;
             pin_config.ePullup = AM_HAL_GPIO_PIN_PULLUP_NONE;  // Apollo3 doesn't have internal pulldown
-            FL_WARN("Apollo3: InputPulldown mode not supported (no internal pulldown), using Input mode");
+            FL_WARN_F("Apollo3: InputPulldown mode not supported (no internal pulldown), using Input mode");
             break;
     }
 
     u32 result = am_hal_gpio_pinconfig(pin, pin_config);
     if (result != AM_HAL_STATUS_SUCCESS) {
-        FL_WARN("Apollo3: Failed to configure pin " << pin);
+        FL_WARN_F("Apollo3: Failed to configure pin %s", pin);
     }
 }
 
@@ -168,7 +168,7 @@ inline u16 analogRead(int pin) FL_NOEXCEPT {
         case 34: adc_channel = AM_HAL_ADC_SLOT_CHSEL_SE7; break;
         case 35: adc_channel = AM_HAL_ADC_SLOT_CHSEL_SE8; break;
         default:
-            FL_WARN("Apollo3: Pin " << pin << " does not support ADC");
+            FL_WARN_F("Apollo3: Pin %s does not support ADC", pin);
             return 0;
     }
 
@@ -176,14 +176,14 @@ inline u16 analogRead(int pin) FL_NOEXCEPT {
     if (!g_adc_state.initialized) {
         u32 status = am_hal_adc_initialize(0, &g_adc_state.handle);
         if (status != AM_HAL_STATUS_SUCCESS) {
-            FL_WARN("Apollo3: ADC initialization failed");
+            FL_WARN_F("Apollo3: ADC initialization failed");
             return 0;
         }
 
         // Power on ADC
         status = am_hal_adc_power_control(g_adc_state.handle, AM_HAL_SYSCTRL_WAKE, false);
         if (status != AM_HAL_STATUS_SUCCESS) {
-            FL_WARN("Apollo3: ADC power control failed");
+            FL_WARN_F("Apollo3: ADC power control failed");
             am_hal_adc_deinitialize(g_adc_state.handle);
             g_adc_state.handle = nullptr;
             return 0;
@@ -201,7 +201,7 @@ inline u16 analogRead(int pin) FL_NOEXCEPT {
 
         status = am_hal_adc_configure(g_adc_state.handle, &adc_config);
         if (status != AM_HAL_STATUS_SUCCESS) {
-            FL_WARN("Apollo3: ADC configuration failed");
+            FL_WARN_F("Apollo3: ADC configuration failed");
             am_hal_adc_power_control(g_adc_state.handle, AM_HAL_SYSCTRL_DEEPSLEEP, false);
             am_hal_adc_deinitialize(g_adc_state.handle);
             g_adc_state.handle = nullptr;
@@ -211,7 +211,7 @@ inline u16 analogRead(int pin) FL_NOEXCEPT {
         // Enable ADC
         status = am_hal_adc_enable(g_adc_state.handle);
         if (status != AM_HAL_STATUS_SUCCESS) {
-            FL_WARN("Apollo3: ADC enable failed");
+            FL_WARN_F("Apollo3: ADC enable failed");
             am_hal_adc_power_control(g_adc_state.handle, AM_HAL_SYSCTRL_DEEPSLEEP, false);
             am_hal_adc_deinitialize(g_adc_state.handle);
             g_adc_state.handle = nullptr;
@@ -231,14 +231,14 @@ inline u16 analogRead(int pin) FL_NOEXCEPT {
 
     u32 status = am_hal_adc_configure_slot(g_adc_state.handle, 0, &slot_config);
     if (status != AM_HAL_STATUS_SUCCESS) {
-        FL_WARN("Apollo3: ADC slot configuration failed");
+        FL_WARN_F("Apollo3: ADC slot configuration failed");
         return 0;
     }
 
     // Trigger ADC conversion
     status = am_hal_adc_sw_trigger(g_adc_state.handle);
     if (status != AM_HAL_STATUS_SUCCESS) {
-        FL_WARN("Apollo3: ADC trigger failed");
+        FL_WARN_F("Apollo3: ADC trigger failed");
         return 0;
     }
 
@@ -264,7 +264,7 @@ inline u16 analogRead(int pin) FL_NOEXCEPT {
         for (volatile int i = 0; i < 10; i++);
     }
 
-    FL_WARN("Apollo3: ADC conversion timeout");
+    FL_WARN_F("Apollo3: ADC conversion timeout");
     return 0;
 }
 
@@ -276,7 +276,7 @@ inline void analogWrite(int pin, u16 val) FL_NOEXCEPT {
 
     // Validate pin range
     if (pin < 0 || pin >= AM_HAL_GPIO_MAX_PADS) {
-        FL_WARN("Apollo3: Invalid pin " << pin);
+        FL_WARN_F("Apollo3: Invalid pin %s", pin);
         return;
     }
 
@@ -327,7 +327,7 @@ inline void analogWrite(int pin, u16 val) FL_NOEXCEPT {
 
         u32 status = am_hal_gpio_pinconfig(pin, pin_config);
         if (status != AM_HAL_STATUS_SUCCESS) {
-            FL_WARN("Apollo3: Failed to configure pin " << pin << " for PWM");
+            FL_WARN_F("Apollo3: Failed to configure pin %s for PWM", pin);
             return;
         }
 
@@ -417,18 +417,18 @@ inline void setAdcRange(AdcRange range) FL_NOEXCEPT {
 
         u32 status = am_hal_adc_configure(g_adc_state.handle, &adc_config);
         if (status != AM_HAL_STATUS_SUCCESS) {
-            FL_WARN("Apollo3: ADC reconfiguration failed");
+            FL_WARN_F("Apollo3: ADC reconfiguration failed");
             return;
         }
 
         // Re-enable ADC
         status = am_hal_adc_enable(g_adc_state.handle);
         if (status != AM_HAL_STATUS_SUCCESS) {
-            FL_WARN("Apollo3: ADC re-enable failed");
+            FL_WARN_F("Apollo3: ADC re-enable failed");
             return;
         }
 
-        FL_DBG("Apollo3: ADC reference changed");
+        FL_DBG_F("Apollo3: ADC reference changed");
     }
 
     // Store reference for future use (will be applied on next ADC init if not yet initialized)

@@ -1,4 +1,4 @@
-/// @file rgbw_colorimetric.cpp.hpp
+﻿/// @file rgbw_colorimetric.cpp.hpp
 /// Heavy implementations for the colorimetric RGBW solvers (issue #2545).
 /// Gated by FASTLED_RGBW_COLORIMETRIC so the float math + simplex solver
 /// + LUT machinery only land in the binary when the user opts in.
@@ -86,7 +86,7 @@ void build_profile_cache(const DiodeProfile* p, int cct_override,
     pack(cache->P_B, cache->P_G, cache->P_W, P_BGW);
 
     // Inverting a singular matrix leaves the destination with whatever
-    // invert3x3 wrote — solvers reading it would silently produce garbage.
+    // invert3x3 wrote â€” solvers reading it would silently produce garbage.
     // Warn once if any inversion fails so the user knows their profile has
     // degenerate primaries (colinear chromaticities, near-zero luminance, etc).
     const bool ok_rgb = invert3x3(P_RGB, cache->P_RGB_inv);
@@ -94,7 +94,7 @@ void build_profile_cache(const DiodeProfile* p, int cct_override,
     const bool ok_rbw = invert3x3(P_RBW, cache->P_RBW_inv);
     const bool ok_bgw = invert3x3(P_BGW, cache->P_BGW_inv);
     if (!(ok_rgb && ok_rgw && ok_rbw && ok_bgw)) {
-        FL_WARN_ONCE("RGBW colorimetric: profile has degenerate primaries — "
+        FL_WARN_F_ONCE("RGBW colorimetric: profile has degenerate primaries â€” "
                      "one or more sub-gamut matrix inversions failed. Output "
                      "colors will be incorrect. Check DiodeProfile xy/lum values.");
         // Zero-init any failed inverse so downstream matvec3() output is
@@ -124,7 +124,7 @@ void build_profile_cache(const DiodeProfile* p, int cct_override,
         // measured-device absolute XYZ units, so scale M_src by the same
         // white-fit factor used by the reference math model:
         //   K = 1 / max(solve_subgamut(source_white_Y1))
-        // This makes M_src·[1,1,1] land at the brightest achievable device
+        // This makes M_srcÂ·[1,1,1] land at the brightest achievable device
         // white instead of an underpowered Y=1 target. Without this scale,
         // native/D65 dual-edge and LP solves cannot match the Python model.
         float X_w[3];
@@ -171,7 +171,7 @@ void build_profile_cache(const DiodeProfile* p, int cct_override,
 }
 
 // Project an out-of-hull target XYZ onto the achievable LED gamut (#2708,
-// math-model gist §3). Returns true if a projection was applied, in which
+// math-model gist Â§3). Returns true if a projection was applied, in which
 // case `X_t` and `xy_t` are updated to the projected point at unit Y. When
 // the target is already inside the full RGB triangle, returns false and
 // leaves `X_t` / `xy_t` untouched.
@@ -189,7 +189,7 @@ static bool project_to_hull(const ProfileCache& cache,
 
     const DiodeProfile& p = *cache.profile;
     float bary[3];
-    // Test the full RGB triangle (not the sub-gamut triangles) — a target
+    // Test the full RGB triangle (not the sub-gamut triangles) â€” a target
     // can be outside a single sub-gamut yet still inside the full hull.
     if (barycentric_xy(xy_t, p.xy_r, p.xy_g, p.xy_b, bary)
         && bary[0] >= -1e-9f && bary[1] >= -1e-9f && bary[2] >= -1e-9f) {
@@ -229,7 +229,7 @@ static bool project_to_hull(const ProfileCache& cache,
         }
     }
     if (best_xyz[1] <= 1e-12f) {
-        // All sub-gamut projections collapsed to zero — pathological
+        // All sub-gamut projections collapsed to zero â€” pathological
         // profile or extreme target. Leave the original X_t alone; the
         // strict solver will return false and the dispatch falls back.
         return false;
@@ -947,7 +947,7 @@ LutTable build_lut(const ProfileCache& cache, int grid_n,
 void lookup_lut(const LutTable& lut, const float xy_t[2], float Y_t,
                 float out_rgbw[4]) FL_NOEXCEPT {
     // Defend against degenerate LUTs (empty table, unbuilt cells, zero span).
-    // build_lut() returns an empty LutTable on bad input — without these
+    // build_lut() returns an empty LutTable on bad input â€” without these
     // guards the divide-by-zero and OOB reads would corrupt random memory.
     out_rgbw[0] = out_rgbw[1] = out_rgbw[2] = out_rgbw[3] = 0.0f;
     if (lut.N < 2 || lut.cells.get() == nullptr) {

@@ -343,8 +343,7 @@ class FL_ALIGN unordered_map {
             mark_occupied(idx);
             ++_size;
         } else {
-            FASTLED_ASSERT(idx != npos(), "unordered_map::insert: invalid index at "
-                                            << idx << " which is " << npos());
+            FASTLED_ASSERT(idx != npos(), "unordered_map::insert: invalid index");
             _buckets[idx].value = value;
         }
         return {iterator(this, idx), is_new};
@@ -374,8 +373,7 @@ class FL_ALIGN unordered_map {
             mark_occupied(idx);
             ++_size;
         } else {
-            FASTLED_ASSERT(idx != npos(), "unordered_map::insert: invalid index at "
-                                            << idx << " which is " << npos());
+            FASTLED_ASSERT(idx != npos(), "unordered_map::insert: invalid index");
             _buckets[idx].value = fl::move(value);
         }
         return {iterator(this, idx), is_new};
@@ -1043,8 +1041,7 @@ class FL_ALIGN unordered_map {
             if (idx == npos()) {
                 // no more space
                 FASTLED_ASSERT(
-                    false, "unordered_map::rehash_inline_no_resize: invalid index at "
-                               << idx << " which is " << npos());
+                    false, "unordered_map::rehash_inline_no_resize: invalid index");
                 return;
             }
             // if idx < pos then we are moving the entry to a new location
@@ -1068,8 +1065,7 @@ class FL_ALIGN unordered_map {
                     // no more space
                     FASTLED_ASSERT(
                         false,
-                        "unordered_map::rehash_inline_no_resize: invalid index at "
-                            << new_idx << " which is " << npos());
+                        "unordered_map::rehash_inline_no_resize: invalid index");
                     return;
                 }
                 occupied.set(new_idx);
@@ -1086,9 +1082,9 @@ class FL_ALIGN unordered_map {
             }
             FASTLED_ASSERT(
                 occupied.test(i),
-                "unordered_map::rehash_inline_no_resize: invalid occupied at " << i);
+                "unordered_map::rehash_inline_no_resize: invalid occupied");
             FASTLED_ASSERT(
-                tmp.empty(), "unordered_map::rehash_inline_no_resize: invalid tmp at " << i);
+                tmp.empty(), "unordered_map::rehash_inline_no_resize: invalid tmp");
         }
         // Reset tombstones count since we've cleared all deleted entries
         _tombstones = 0;

@@ -1,4 +1,4 @@
-// IWYU pragma: private
+﻿// IWYU pragma: private
 
 /// @file bitbang_channel_driver.cpp.hpp
 /// @brief Implementation of BitBangChannelDriver
@@ -67,7 +67,7 @@ void BitBangChannelDriver::rebuildPinConfig(
 
         int pin = ch->getPin();
         if (pin < 0 || pin > 255) {
-            FL_WARN("BitBangChannelDriver: pin " << pin << " out of range, skipping");
+            FL_WARN_F("BitBangChannelDriver: pin %s out of range, skipping", pin);
             continue;
         }
 
@@ -76,8 +76,8 @@ void BitBangChannelDriver::rebuildPinConfig(
         }
 
         if (mNumActiveSlots >= 8) {
-            FL_WARN("BitBangChannelDriver: more than 8 unique data pins, "
-                     "pin " << pin << " will be skipped");
+            FL_WARN_F("BitBangChannelDriver: more than 8 unique data pins, "
+                     "pin %s will be skipped", pin);
             continue;
         }
 
@@ -333,7 +333,7 @@ void BitBangChannelDriver::show() FL_NOEXCEPT {
         transmitSpi(spi);
     }
 
-    // Done — clear in-use flags
+    // Done â€” clear in-use flags
     for (fl::size i = 0; i < mTransmittingChannels.size(); ++i) {
         if (mTransmittingChannels[i]) {
             mTransmittingChannels[i]->setInUse(false);

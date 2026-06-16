@@ -102,8 +102,7 @@ public:
         mHandle = mBusManager->registerDevice(CLOCK_PIN, DATA_PIN, SPI_CLOCK_DIVIDER, this);
 
         if (!mHandle.is_valid) {
-            FL_WARN("SPIDeviceProxy: Failed to register with bus manager (pin "
-                    << static_cast<int>(CLOCK_PIN) << ":" << static_cast<int>(DATA_PIN) << ")");
+            FL_WARN_F("SPIDeviceProxy: Failed to register with bus manager (pin %s:%s)", static_cast<int>(CLOCK_PIN), static_cast<int>(DATA_PIN));
             return;
         }
 
@@ -313,7 +312,7 @@ public:
         } else {
             // Multi-lane SPI doesn't support bit-level operations
             // This is typically only used for specific LED protocols
-            FL_WARN("SPIDeviceProxy: writeBit() not supported for multi-lane SPI");
+            FL_WARN_F("SPIDeviceProxy: writeBit() not supported for multi-lane SPI");
         }
     }
 
@@ -335,7 +334,7 @@ public:
         // For the proxy, we can't easily support this in multi-lane mode
         // since we need the instance's buffer
         // This should only be called from within writeBytes<D>() which handles buffering
-        FL_WARN("SPIDeviceProxy: writeBytesValueRaw() should not be called directly");
+        FL_WARN_F("SPIDeviceProxy: writeBytesValueRaw() should not be called directly");
     }
 
     /// Finalize transmission - flush buffered multi-lane SPI writes

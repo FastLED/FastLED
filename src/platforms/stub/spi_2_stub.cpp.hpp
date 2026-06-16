@@ -232,10 +232,10 @@ namespace platforms {
 /// Called lazily on first access to SpiHw2::getAll().
 /// Registers mock SpiHw2 controller instances for testing.
 void initSpiHw2Instances() FL_NOEXCEPT {
-    FL_WARN("Registering SpiHw2 stub instances...");
+    FL_WARN_F("Registering SpiHw2 stub instances...");
     SpiHw2::registerInstance(getController0_Spi2());
     SpiHw2::registerInstance(getController1_Spi2());
-    FL_WARN("SpiHw2 stub instances registered!");
+    FL_WARN_F("SpiHw2 stub instances registered!");
 }
 
 }  // namespace platforms

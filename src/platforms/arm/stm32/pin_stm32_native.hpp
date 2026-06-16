@@ -61,7 +61,7 @@ inline void pinMode(int pin, PinMode mode) FL_NOEXCEPT {
     u32 pin_mask = fl::stm32::getGPIOPin(pin);
 
     if (port == nullptr || pin_mask == 0) {
-        FL_WARN("STM32: Invalid pin " << pin);
+        FL_WARN_F("STM32: Invalid pin %s", pin);
         return;
     }
 
@@ -125,7 +125,7 @@ inline void pinMode(int pin, PinMode mode) FL_NOEXCEPT {
             GPIO_InitStruct.Pull = GPIO_PULLDOWN;
             break;
         default:
-            FL_WARN("STM32: Unknown pin mode " << static_cast<int>(mode) << " for pin " << pin);
+            FL_WARN_F("STM32: Unknown pin mode %s for pin %s", static_cast<int>(mode), pin);
             return;
     }
 
@@ -133,7 +133,7 @@ inline void pinMode(int pin, PinMode mode) FL_NOEXCEPT {
 #else
     (void)pin;
     (void)mode;
-    FL_WARN("STM32: HAL_GPIO_MODULE not enabled");
+    FL_WARN_F("STM32: HAL_GPIO_MODULE not enabled");
 #endif
 }
 
@@ -188,7 +188,7 @@ inline u16 analogRead(int pin) FL_NOEXCEPT {
     // without the pinmap tables provided by STM32duino core.
     // For non-Arduino STM32 builds, ADC must be configured manually using HAL APIs.
     (void)pin;
-    FL_WARN("STM32: analogRead not available without STM32duino core");
+    FL_WARN_F("STM32: analogRead not available without STM32duino core");
     return 0;
 #if 0  // Disabled: requires STM32duino pinmap functions
 #if defined(HAL_ADC_MODULE_ENABLED) && defined(FL_STM32_HAS_PINMAP)
@@ -199,14 +199,14 @@ inline u16 analogRead(int pin) FL_NOEXCEPT {
     // These are only available when STM32duino core is present
     PinName pin_name = digitalPinToPinName(pin);
     if (pin_name == NC) {
-        FL_WARN("STM32: Invalid pin " << pin);
+        FL_WARN_F("STM32: Invalid pin %s", pin);
         return 0;
     }
 
     // Find ADC instance and channel for this pin using STM32duino pinmap
     u32 function = pinmap_find_function(pin_name, PinMap_ADC);
     if (function == (u32)NC) {
-        FL_WARN("STM32: Pin " << pin << " does not support ADC");
+        FL_WARN_F("STM32: Pin %s does not support ADC", pin);
         return 0;
     }
 
@@ -215,7 +215,7 @@ inline u16 analogRead(int pin) FL_NOEXCEPT {
     u32 adc_channel = STM_PIN_CHANNEL(function);
 
     if (adc_instance == nullptr) {
-        FL_WARN("STM32: Failed to get ADC instance for pin " << pin);
+        FL_WARN_F("STM32: Failed to get ADC instance for pin %s", pin);
         return 0;
     }
 
@@ -253,7 +253,7 @@ inline u16 analogRead(int pin) FL_NOEXCEPT {
 
     // Initialize ADC peripheral
     if (HAL_ADC_Init(&AdcHandle) != HAL_OK) {
-        FL_WARN("STM32: ADC initialization failed");
+        FL_WARN_F("STM32: ADC initialization failed");
         return 0;
     }
 
@@ -274,21 +274,21 @@ inline u16 analogRead(int pin) FL_NOEXCEPT {
 #endif
 
     if (HAL_ADC_ConfigChannel(&AdcHandle, &AdcChannelConf) != HAL_OK) {
-        FL_WARN("STM32: ADC channel configuration failed");
+        FL_WARN_F("STM32: ADC channel configuration failed");
         HAL_ADC_DeInit(&AdcHandle) FL_NOEXCEPT;
         return 0;
     }
 
     // Start ADC conversion
     if (HAL_ADC_Start(&AdcHandle) != HAL_OK) {
-        FL_WARN("STM32: ADC start failed");
+        FL_WARN_F("STM32: ADC start failed");
         HAL_ADC_DeInit(&AdcHandle) FL_NOEXCEPT;
         return 0;
     }
 
     // Poll for conversion complete (10ms timeout)
     if (HAL_ADC_PollForConversion(&AdcHandle, 10) != HAL_OK) {
-        FL_WARN("STM32: ADC conversion timeout");
+        FL_WARN_F("STM32: ADC conversion timeout");
         HAL_ADC_Stop(&AdcHandle) FL_NOEXCEPT;
         HAL_ADC_DeInit(&AdcHandle) FL_NOEXCEPT;
         return 0;
@@ -321,7 +321,7 @@ inline void analogWrite(int pin, u16 val) FL_NOEXCEPT {
     // For non-Arduino STM32 builds, PWM must be configured manually using HAL TIM APIs.
     (void)pin;
     (void)val;
-    FL_WARN("STM32: analogWrite not available without STM32duino core");
+    FL_WARN_F("STM32: analogWrite not available without STM32duino core");
 #if 0  // Disabled: requires STM32duino pinmap functions
 #if defined(HAL_TIM_MODULE_ENABLED) && defined(FL_STM32_HAS_PINMAP)
     // Implementation based on STM32duino analog.cpp pwm_start()
@@ -331,7 +331,7 @@ inline void analogWrite(int pin, u16 val) FL_NOEXCEPT {
     // These are only available when STM32duino core is present
     PinName pin_name = digitalPinToPinName(pin);
     if (pin_name == NC) {
-        FL_WARN("STM32: Invalid pin " << pin);
+        FL_WARN_F("STM32: Invalid pin %s", pin);
         return;
     }
 
@@ -352,7 +352,7 @@ inline void analogWrite(int pin, u16 val) FL_NOEXCEPT {
     u32 timer_channel = STM_PIN_CHANNEL(function);
 
     if (timer_instance == nullptr) {
-        FL_WARN("STM32: Failed to get Timer instance for pin " << pin);
+        FL_WARN_F("STM32: Failed to get Timer instance for pin %s", pin);
         return;
     }
 
@@ -364,7 +364,7 @@ inline void analogWrite(int pin, u16 val) FL_NOEXCEPT {
         case 3: hal_channel = TIM_CHANNEL_3; break;
         case 4: hal_channel = TIM_CHANNEL_4; break;
         default:
-            FL_WARN("STM32: Invalid timer channel " << timer_channel);
+            FL_WARN_F("STM32: Invalid timer channel %s", timer_channel);
             return;
     }
 
@@ -374,7 +374,7 @@ inline void analogWrite(int pin, u16 val) FL_NOEXCEPT {
     u32 pin_mask = STM_GPIO_PIN(pin_name);
 
     if (port == nullptr) {
-        FL_WARN("STM32: Failed to get GPIO port for pin " << pin);
+        FL_WARN_F("STM32: Failed to get GPIO port for pin %s", pin);
         return;
     }
 
@@ -401,7 +401,7 @@ inline void analogWrite(int pin, u16 val) FL_NOEXCEPT {
     // Get timer clock frequency for PWM calculation
     u32 timer_clock = fl::stm32::getTimerClockFreq(timer_instance);
     if (timer_clock == 0) {
-        FL_WARN("STM32: Failed to get timer clock frequency");
+        FL_WARN_F("STM32: Failed to get timer clock frequency");
         return;
     }
 
@@ -443,7 +443,7 @@ inline void analogWrite(int pin, u16 val) FL_NOEXCEPT {
 #endif
 
     if (timer_idx < 0) {
-        FL_WARN("STM32: Unsupported timer instance for PWM");
+        FL_WARN_F("STM32: Unsupported timer instance for PWM");
         return;
     }
 
@@ -457,7 +457,7 @@ inline void analogWrite(int pin, u16 val) FL_NOEXCEPT {
 
     // Initialize timer base
     if (HAL_TIM_Base_Init(htim) != HAL_OK) {
-        FL_WARN("STM32: Timer base initialization failed");
+        FL_WARN_F("STM32: Timer base initialization failed");
         return;
     }
 
@@ -472,13 +472,13 @@ inline void analogWrite(int pin, u16 val) FL_NOEXCEPT {
     sConfigOC.Pulse = (static_cast<u32>(val) * period) / 255;
 
     if (HAL_TIM_PWM_ConfigChannel(htim, &sConfigOC, hal_channel) != HAL_OK) {
-        FL_WARN("STM32: Timer PWM configuration failed");
+        FL_WARN_F("STM32: Timer PWM configuration failed");
         return;
     }
 
     // Start PWM output
     if (HAL_TIM_PWM_Start(htim, hal_channel) != HAL_OK) {
-        FL_WARN("STM32: Timer PWM start failed");
+        FL_WARN_F("STM32: Timer PWM start failed");
         return;
     }
 
@@ -518,7 +518,7 @@ inline void setAdcRange(AdcRange range) FL_NOEXCEPT {
     // dynamic switching. Users should configure VREF hardware appropriately.
 
     (void)range;
-    FL_DBG("STM32: setAdcRange not dynamically configurable - using hardware VREF");
+    FL_DBG_F("STM32: setAdcRange not dynamically configurable - using hardware VREF");
 }
 
 // ============================================================================

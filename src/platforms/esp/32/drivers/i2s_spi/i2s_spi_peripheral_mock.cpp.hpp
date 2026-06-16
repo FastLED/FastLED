@@ -115,7 +115,7 @@ I2sSpiPeripheralMockImpl::~I2sSpiPeripheralMockImpl() {}
 bool I2sSpiPeripheralMockImpl::initialize(
     const I2sSpiConfig &config) FL_NOEXCEPT {
     if (config.num_lanes == 0 || config.num_lanes > 16) {
-        FL_WARN("I2sSpiPeripheralMock: Invalid num_lanes: " << config.num_lanes);
+        FL_WARN_F("I2sSpiPeripheralMock: Invalid num_lanes: %s", config.num_lanes);
         return false;
     }
     mConfig = config;
@@ -148,8 +148,7 @@ u8 *I2sSpiPeripheralMockImpl::allocateBuffer(size_t size_bytes) FL_NOEXCEPT {
     buffer = aligned_alloc(64, aligned_size);
 #endif
     if (buffer == nullptr) {
-        FL_WARN("I2sSpiPeripheralMock: Failed to allocate buffer ("
-                << aligned_size << " bytes)");
+        FL_WARN_F("I2sSpiPeripheralMock: Failed to allocate buffer (%s bytes)", aligned_size);
     }
     return static_cast<u8 *>(buffer);
 }
@@ -171,7 +170,7 @@ void I2sSpiPeripheralMockImpl::freeBuffer(u8 *buffer) FL_NOEXCEPT {
 bool I2sSpiPeripheralMockImpl::transmit(const u8 *buffer,
                                         size_t size_bytes) FL_NOEXCEPT {
     if (!mInitialized) {
-        FL_WARN("I2sSpiPeripheralMock: Cannot transmit - not initialized");
+        FL_WARN_F("I2sSpiPeripheralMock: Cannot transmit - not initialized");
         return false;
     }
     if (mShouldFailTransmit) {

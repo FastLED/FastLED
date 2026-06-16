@@ -31,14 +31,14 @@ void init() {
         return;  // Already initialized
     }
 
-    FL_DBG("SAMD51: Platform initialization starting");
+    FL_DBG_F("SAMD51: Platform initialization starting");
 
     // Trigger weak linkage initialization for dual-lane and quad-lane SPI controllers
     (void)fl::SpiHw2::getAll();
     (void)fl::SpiHw4::getAll();
 
     initialized = true;
-    FL_DBG("SAMD51: Platform initialization complete");
+    FL_DBG_F("SAMD51: Platform initialization complete");
 }
 
 } // namespace platforms

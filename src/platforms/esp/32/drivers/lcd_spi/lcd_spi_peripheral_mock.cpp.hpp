@@ -96,8 +96,7 @@ LcdSpiPeripheralMockImpl::~LcdSpiPeripheralMockImpl() {}
 bool LcdSpiPeripheralMockImpl::initialize(
     const LcdSpiConfig &config) FL_NOEXCEPT {
     if (config.num_lanes == 0 || config.num_lanes > 16) {
-        FL_WARN("LcdSpiPeripheralMock: Invalid num_lanes: "
-                << config.num_lanes);
+        FL_WARN_F("LcdSpiPeripheralMock: Invalid num_lanes: %s", config.num_lanes);
         return false;
     }
     // Issue #2270: mirror the real peripheral's owner-aware teardown so
@@ -135,8 +134,7 @@ u16 *LcdSpiPeripheralMockImpl::allocateBuffer(size_t size_bytes) FL_NOEXCEPT {
     buffer = aligned_alloc(64, aligned_size);
 #endif
     if (buffer == nullptr) {
-        FL_WARN("LcdSpiPeripheralMock: Failed to allocate buffer ("
-                << aligned_size << " bytes)");
+        FL_WARN_F("LcdSpiPeripheralMock: Failed to allocate buffer (%s bytes)", aligned_size);
     }
     return static_cast<u16 *>(buffer);
 }
@@ -154,7 +152,7 @@ void LcdSpiPeripheralMockImpl::freeBuffer(u16 *buffer) FL_NOEXCEPT {
 bool LcdSpiPeripheralMockImpl::transmit(const u16 *buffer,
                                         size_t size_bytes) FL_NOEXCEPT {
     if (!mInitialized) {
-        FL_WARN("LcdSpiPeripheralMock: Cannot transmit - not initialized");
+        FL_WARN_F("LcdSpiPeripheralMock: Cannot transmit - not initialized");
         return false;
     }
     if (mShouldFailTransmit) {

@@ -31,48 +31,48 @@ public:
     ~NullOTA() override = default;
 
     bool beginWiFi(const char*, const char*, const char*, const char*) FL_NOEXCEPT override {
-        FL_WARN("OTA not supported on this platform");
+        FL_WARN_F("OTA not supported on this platform");
         return false;  // Not supported
     }
 
     bool begin(const char*, const char*) FL_NOEXCEPT override {
-        FL_WARN("OTA not supported on this platform");
+        FL_WARN_F("OTA not supported on this platform");
         return false;  // Not supported
     }
 
     bool enableApFallback(const char*, const char*) FL_NOEXCEPT override {
-        FL_WARN("OTA not supported on this platform");
+        FL_WARN_F("OTA not supported on this platform");
         return false;  // Not supported
     }
 
     void onProgress(fl::function<void(size_t, size_t)>) FL_NOEXCEPT override {
-        FL_WARN("OTA not supported on this platform");
+        FL_WARN_F("OTA not supported on this platform");
         // No-op
     }
 
     void onError(fl::function<void(const char*)>) FL_NOEXCEPT override {
-        FL_WARN("OTA not supported on this platform");
+        FL_WARN_F("OTA not supported on this platform");
         // No-op
     }
 
     void onState(fl::function<void(u8)>) FL_NOEXCEPT override {
-        FL_WARN("OTA not supported on this platform");
+        FL_WARN_F("OTA not supported on this platform");
         // No-op
     }
 
     void onBeforeReboot(void (*callback)()) FL_NOEXCEPT override {
-        FL_WARN("OTA not supported on this platform");
+        FL_WARN_F("OTA not supported on this platform");
         // No-op
         (void)callback;  // Suppress unused parameter warning
     }
 
     void poll() FL_NOEXCEPT override {
-        FL_WARN("OTA not supported on this platform");
+        FL_WARN_F("OTA not supported on this platform");
         // No-op
     }
 
     bool isConnected() const FL_NOEXCEPT override {
-        FL_WARN("OTA not supported on this platform");
+        FL_WARN_F("OTA not supported on this platform");
         return false;  // Not supported
     }
 

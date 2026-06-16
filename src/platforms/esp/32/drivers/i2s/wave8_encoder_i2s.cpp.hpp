@@ -21,8 +21,7 @@ size_t wave8EncodeI2sSingleLane(
     // Calculate required output size
     const size_t required_words = wave8CalculateI2sOutputSize(input.size());
     if (output.size() < required_words) {
-        FL_WARN("wave8EncodeI2sSingleLane: Output buffer too small (need "
-                << required_words << " words, have " << output.size() << ")");
+        FL_WARN_F("wave8EncodeI2sSingleLane: Output buffer too small (need %s words, have %s)", required_words, output.size());
         return 0;
     }
 
@@ -72,7 +71,7 @@ size_t wave8EncodeI2sMultiLane(
     const size_t lane_size = lanes[0].size();
     for (int i = 1; i < num_lanes; i++) {
         if (lanes[i].size() != lane_size) {
-            FL_WARN("wave8EncodeI2sMultiLane: Lane size mismatch");
+            FL_WARN_F("wave8EncodeI2sMultiLane: Lane size mismatch");
             return 0;
         }
     }
@@ -80,7 +79,7 @@ size_t wave8EncodeI2sMultiLane(
     // Calculate required output size
     const size_t required_words = wave8CalculateI2sOutputSize(lane_size);
     if (output.size() < required_words) {
-        FL_WARN("wave8EncodeI2sMultiLane: Output buffer too small");
+        FL_WARN_F("wave8EncodeI2sMultiLane: Output buffer too small");
         return 0;
     }
 

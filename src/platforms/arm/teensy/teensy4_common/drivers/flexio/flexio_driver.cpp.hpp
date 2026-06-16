@@ -248,7 +248,7 @@ static bool flexio_dma_init() {
     }
     sDmaChannel = new DMAChannel();  // ok bare allocation
     if (!sDmaChannel) {
-        FL_LOG_FLEXIO("FlexIO: Failed to allocate DMA channel");
+        FL_LOG_FLEXIO_F("FlexIO: Failed to allocate DMA channel");
         return false;
     }
     sDmaChannel->triggerAtHardwareEvent(DMAMUX_SOURCE_FLEXIO2_REQUEST0);
@@ -266,8 +266,7 @@ bool flexio_init(const FlexIOPinInfo& pin_info, u32 t0h_ns, u32 t1h_ns,
         flexio_deinit();
     }
 
-    FL_LOG_FLEXIO("FlexIO: init pin " << (int)pin_info.teensy_pin
-           << " (FlexIO2:" << (int)pin_info.flexio_pin << ")");
+    FL_LOG_FLEXIO_F("FlexIO: init pin %s (FlexIO2:%s)", (int)pin_info.teensy_pin, (int)pin_info.flexio_pin);
 
     flexio_clock_init();
     flexio_pin_init(pin_info);

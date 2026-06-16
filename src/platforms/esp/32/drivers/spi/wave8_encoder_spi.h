@@ -53,8 +53,7 @@ inline size_t wave8EncodeSingleLane(
 
     const size_t required_size = input.size() * 8;
     if (output.size() < required_size) {
-        FL_WARN("wave8EncodeSingleLane: Output buffer too small (need "
-                << required_size << " bytes, have " << output.size() << " bytes)");
+        FL_WARN_F("wave8EncodeSingleLane: Output buffer too small (need %s bytes, have %s bytes)", required_size, output.size());
         return 0;
     }
 
@@ -86,15 +85,13 @@ inline size_t wave8EncodeDualLane(
     const Wave8BitExpansionLut& lut) FL_NOEXCEPT {
 
     if (lane0.size() != lane1.size()) {
-        FL_WARN("wave8EncodeDualLane: Lane sizes mismatch (lane0="
-                << lane0.size() << " bytes, lane1=" << lane1.size() << " bytes)");
+        FL_WARN_F("wave8EncodeDualLane: Lane sizes mismatch (lane0=%s bytes, lane1=%s bytes)", lane0.size(), lane1.size());
         return 0;
     }
 
     const size_t required_size = lane0.size() * 16;
     if (output.size() < required_size) {
-        FL_WARN("wave8EncodeDualLane: Output buffer too small (need "
-                << required_size << " bytes, have " << output.size() << " bytes)");
+        FL_WARN_F("wave8EncodeDualLane: Output buffer too small (need %s bytes, have %s bytes)", required_size, output.size());
         return 0;
     }
 
@@ -132,16 +129,14 @@ inline size_t wave8EncodeQuadLane(
     const size_t lane_size = lanes[0].size();
     for (int i = 1; i < 4; i++) {
         if (lanes[i].size() != lane_size) {
-            FL_WARN("wave8EncodeQuadLane: Lane size mismatch (lane0="
-                    << lane_size << " bytes, lane" << i << "=" << lanes[i].size() << " bytes)");
+            FL_WARN_F("wave8EncodeQuadLane: Lane size mismatch (lane0=%s bytes, lane%s=%s bytes)", lane_size, i, lanes[i].size());
             return 0;
         }
     }
 
     const size_t required_size = lane_size * 32;
     if (output.size() < required_size) {
-        FL_WARN("wave8EncodeQuadLane: Output buffer too small (need "
-                << required_size << " bytes, have " << output.size() << " bytes)");
+        FL_WARN_F("wave8EncodeQuadLane: Output buffer too small (need %s bytes, have %s bytes)", required_size, output.size());
         return 0;
     }
 

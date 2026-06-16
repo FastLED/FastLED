@@ -19,22 +19,22 @@ namespace net {
 namespace ble {
 
 TransportState* createTransport(const char*) FL_NOEXCEPT {
-    FL_ERROR("BLE not implemented on this platform");
+    FL_ERROR_F("BLE not implemented on this platform");
     return nullptr;
 }
 
 void destroyTransport(TransportState*) FL_NOEXCEPT {
-    FL_ERROR("BLE not implemented on this platform");
+    FL_ERROR_F("BLE not implemented on this platform");
 }
 
 StatusInfo queryStatus(const TransportState*) FL_NOEXCEPT {
-    FL_ERROR("BLE not implemented on this platform");
+    FL_ERROR_F("BLE not implemented on this platform");
     return StatusInfo{};
 }
 
 fl::pair<fl::function<fl::optional<fl::json>()>, fl::function<void(const fl::json&)>>
 getTransportCallbacks(TransportState*) FL_NOEXCEPT {
-    FL_ERROR("BLE not implemented on this platform");
+    FL_ERROR_F("BLE not implemented on this platform");
     return {
         fl::function<fl::optional<fl::json>()>([]() -> fl::optional<fl::json> { return fl::optional<fl::json>(); }),
         fl::function<void(const fl::json&)>([](const fl::json&) {})

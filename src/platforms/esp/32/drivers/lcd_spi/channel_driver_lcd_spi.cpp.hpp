@@ -1,4 +1,4 @@
-// IWYU pragma: private
+﻿// IWYU pragma: private
 
 /// @file channel_driver_lcd_spi.cpp
 /// @brief LCD_CAM SPI channel driver implementation
@@ -59,7 +59,7 @@ ChannelDriverLcdSpi::ChannelDriverLcdSpi(
 }
 
 ChannelDriverLcdSpi::~ChannelDriverLcdSpi() {
-    // Block until DMA completes — ring buffers are DMA sources,
+    // Block until DMA completes â€” ring buffers are DMA sources,
     // so freeing them while DMA is active would be a use-after-free.
     if (mBusy && mPeripheral) {
         bool done = mPeripheral->waitTransmitDone(2000);
@@ -69,7 +69,7 @@ ChannelDriverLcdSpi::~ChannelDriverLcdSpi() {
             // hardware or a mock with no auto-completion. Free anyway:
             // LeakSanitizer flags the alternative, and a 2 s stall already
             // indicates the DMA is lost.
-            FL_WARN("ChannelDriverLcdSpi: DMA wait timed out — "
+            FL_WARN_F("ChannelDriverLcdSpi: DMA wait timed out â€” "
                     "freeing ring buffers anyway");
         }
     }
@@ -101,8 +101,7 @@ bool ChannelDriverLcdSpi::allocateRingBuffers(
     for (size_t i = 0; i < kRingBufferCount; i++) {
         mRingBuffers[i] = mPeripheral->allocateBuffer(slotCapacityBytes);
         if (mRingBuffers[i] == nullptr) {
-            FL_WARN("ChannelDriverLcdSpi: ring buffer alloc failed slot "
-                    << i);
+            FL_WARN_F("ChannelDriverLcdSpi: ring buffer alloc failed slot %s", i);
             freeRingBuffers();
             return false;
         }
@@ -143,7 +142,7 @@ void ChannelDriverLcdSpi::show() FL_NOEXCEPT {
         fl::task::run(250, fl::task::ExecFlags::SYSTEM);
     }
     if (mBusy) {
-        FL_WARN("ChannelDriverLcdSpi: DMA hung — forcing release");
+        FL_WARN_F("ChannelDriverLcdSpi: DMA hung â€” forcing release");
         mBusy = false;
         for (auto &channel : mTransmittingChannels) {
             channel->setInUse(false);
@@ -184,7 +183,7 @@ IChannelDriver::DriverState ChannelDriverLcdSpi::poll() FL_NOEXCEPT {
 }
 
 //=============================================================================
-// Transposition (byte → 16-bit word, per-chunk)
+// Transposition (byte â†’ 16-bit word, per-chunk)
 //=============================================================================
 
 void ChannelDriverLcdSpi::transposeToWords(
@@ -219,7 +218,7 @@ void ChannelDriverLcdSpi::transposeToWords(
 }
 
 //=============================================================================
-// ISR Callback — processes chunk completion
+// ISR Callback â€” processes chunk completion
 //=============================================================================
 
 bool ChannelDriverLcdSpi::isrChunkDone(void *panel_io, const void *edata,
@@ -241,7 +240,7 @@ bool ChannelDriverLcdSpi::isrChunkDone(void *panel_io, const void *edata,
     size_t writeIdx = ctx.mRingWriteIdx;
     u16 *buf = self->mRingBuffers[writeIdx];
 
-    // Calculate bytes for this chunk (may pad beyond source data — that's OK,
+    // Calculate bytes for this chunk (may pad beyond source data â€” that's OK,
     // transposeToWords outputs zeros for out-of-range bytes)
     size_t bytesRemaining = ctx.mTotalBytes - ctx.mNextByteOffset;
     size_t chunkBytes = ctx.mChunkInputBytes;
@@ -253,7 +252,7 @@ bool ChannelDriverLcdSpi::isrChunkDone(void *panel_io, const void *edata,
     self->transposeToWords(self->mTransmittingChannels, buf,
                            ctx.mNextByteOffset, chunkBytes);
 
-    // Explicit read-modify-write — `mNextByteOffset` is volatile (ISR/main
+    // Explicit read-modify-write â€” `mNextByteOffset` is volatile (ISR/main
     // memory model, see channel_driver_lcd_spi.h:117-130). C++20 deprecates
     // compound assignment on volatile (-Wvolatile); C++23 makes it a hard
     // error. #2723
@@ -263,17 +262,17 @@ bool ChannelDriverLcdSpi::isrChunkDone(void *panel_io, const void *edata,
     // Submit this chunk for DMA
     size_t dmaBytes = chunkBytes * 8 * sizeof(u16);
     if (!self->mPeripheral->transmit(buf, dmaBytes)) {
-        // Transmit failed — abort stream
+        // Transmit failed â€” abort stream
         ctx.mStreamComplete = true;
         self->mBusy = false;
-        FL_WARN("ChannelDriverLcdSpi: ISR transmit failed");
+        FL_WARN_F("ChannelDriverLcdSpi: ISR transmit failed");
     }
 
     return false;
 }
 
 //=============================================================================
-// Begin Transmission — sets up chunked streaming
+// Begin Transmission â€” sets up chunked streaming
 //=============================================================================
 
 bool ChannelDriverLcdSpi::beginTransmission(
@@ -305,7 +304,7 @@ bool ChannelDriverLcdSpi::beginTransmission(
         chunkInputBytes = maxSize;
     }
 
-    // Each source byte → 8 u16 words → 16 DMA bytes
+    // Each source byte â†’ 8 u16 words â†’ 16 DMA bytes
     size_t slotCapacityBytes = chunkInputBytes * 8 * sizeof(u16);
 
     // Only reinitialize the peripheral when hardware config changes
@@ -346,7 +345,7 @@ bool ChannelDriverLcdSpi::beginTransmission(
         }
 
         if (!mPeripheral->initialize(config)) {
-            FL_WARN("ChannelDriverLcdSpi: Failed to initialize peripheral");
+            FL_WARN_F("ChannelDriverLcdSpi: Failed to initialize peripheral");
             return false;
         }
 
@@ -362,7 +361,7 @@ bool ChannelDriverLcdSpi::beginTransmission(
     // Register the ISR callback for chunked streaming
     if (!mPeripheral->registerTransmitCallback(
             reinterpret_cast<void *>(&isrChunkDone), this)) { // ok reinterpret cast
-        FL_WARN("ChannelDriverLcdSpi: registerTransmitCallback failed");
+        FL_WARN_F("ChannelDriverLcdSpi: registerTransmitCallback failed");
         return false;
     }
 
@@ -388,7 +387,7 @@ bool ChannelDriverLcdSpi::beginTransmission(
     mIsrCtx.mNextByteOffset = firstChunkBytes;
     mIsrCtx.mRingWriteIdx = 1; // next write goes to slot 1
 
-    // Submit first chunk — ISR callback handles the rest
+    // Submit first chunk â€” ISR callback handles the rest
     mBusy = true;
     size_t firstDmaBytes = firstChunkBytes * 8 * sizeof(u16);
     if (!mPeripheral->transmit(mRingBuffers[0], firstDmaBytes)) {
@@ -396,7 +395,7 @@ bool ChannelDriverLcdSpi::beginTransmission(
         for (const auto &channel : channels) {
             channel->setInUse(false);
         }
-        FL_WARN("ChannelDriverLcdSpi: Initial transmit failed");
+        FL_WARN_F("ChannelDriverLcdSpi: Initial transmit failed");
         return false;
     }
 

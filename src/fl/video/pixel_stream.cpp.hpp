@@ -143,7 +143,7 @@ bool PixelStream::hasFrame(fl::u32 frameNumber) {
 bool PixelStream::readFrameAt(fl::u32 frameNumber, Frame *frame) {
     if (mType == kStreaming) {
         // Streaming handle doesn't support seeking
-        FL_DBG("Streaming handle doesn't support seeking");
+        FL_DBG_F("Streaming handle doesn't support seeking");
         return false;
     }
     fl::size_t frameBytes = static_cast<fl::size_t>(frameNumber)

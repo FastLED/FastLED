@@ -784,7 +784,7 @@ class CRGBPalette16 : public detail::TCRGBPalette<16> {
                 break;
             }
             if (count >= FASTLED_MAX_GRADIENT_PALETTE_ENTRIES) {
-                FL_WARN("DEFINE_GRADIENT_PALETTE missing index=255 terminator! "
+                FL_WARN_F("DEFINE_GRADIENT_PALETTE missing index=255 terminator! "
                         "This will cause buffer overruns and crashes. "
                         "Auto-correcting but please fix your gradient definition.");
                 break;
@@ -862,7 +862,7 @@ class CRGBPalette16 : public detail::TCRGBPalette<16> {
                 break;
             }
             if (count >= FASTLED_MAX_GRADIENT_PALETTE_ENTRIES) {
-                FL_WARN("Dynamic gradient palette missing index=255 terminator! "
+                FL_WARN_F("Dynamic gradient palette missing index=255 terminator! "
                         "This will cause buffer overruns and crashes. "
                         "Auto-correcting but please fix your gradient definition.");
                 break;
@@ -1062,7 +1062,7 @@ class CRGBPalette32 : public detail::TCRGBPalette<32> {
                 break;
             }
             if (count >= FASTLED_MAX_GRADIENT_PALETTE_ENTRIES) {
-                FL_WARN("DEFINE_GRADIENT_PALETTE missing index=255 terminator! "
+                FL_WARN_F("DEFINE_GRADIENT_PALETTE missing index=255 terminator! "
                         "This will cause buffer overruns and crashes. "
                         "Auto-correcting but please fix your gradient definition.");
                 break;
@@ -1140,7 +1140,7 @@ class CRGBPalette32 : public detail::TCRGBPalette<32> {
                 break;
             }
             if (count >= FASTLED_MAX_GRADIENT_PALETTE_ENTRIES) {
-                FL_WARN("Dynamic gradient palette missing index=255 terminator! "
+                FL_WARN_F("Dynamic gradient palette missing index=255 terminator! "
                         "This will cause buffer overruns and crashes. "
                         "Auto-correcting but please fix your gradient definition.");
                 break;
@@ -1280,7 +1280,7 @@ class CRGBPalette256 : public detail::TCRGBPalette<256> {
         while (indexstart < 255) {
             // Safety: check BEFORE reading to prevent buffer overrun
             if (entries_processed >= FASTLED_MAX_GRADIENT_PALETTE_ENTRIES) {
-                FL_WARN("DEFINE_GRADIENT_PALETTE missing index=255 terminator! "
+                FL_WARN_F("DEFINE_GRADIENT_PALETTE missing index=255 terminator! "
                         "This will cause buffer overruns and crashes. "
                         "Auto-correcting but please fix your gradient definition.");
                 // Extend current color to 255
@@ -1317,7 +1317,7 @@ class CRGBPalette256 : public detail::TCRGBPalette<256> {
         while (indexstart < 255) {
             // Safety: check BEFORE reading to prevent buffer overrun
             if (entries_processed >= FASTLED_MAX_GRADIENT_PALETTE_ENTRIES) {
-                FL_WARN("Dynamic gradient palette missing index=255 terminator! "
+                FL_WARN_F("Dynamic gradient palette missing index=255 terminator! "
                         "This will cause buffer overruns and crashes. "
                         "Auto-correcting but please fix your gradient definition.");
                 // Extend current color to 255

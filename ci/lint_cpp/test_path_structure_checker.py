@@ -86,6 +86,30 @@ EXCLUDED_TEST_FILES = {
 }
 
 
+def _matching_source_exists(test_name_no_ext: Path) -> bool:
+    """Return True when a test stem maps to an existing source artifact."""
+    return (
+        (SRC_ROOT / test_name_no_ext.with_suffix(".h")).exists()
+        or (SRC_ROOT / test_name_no_ext.with_suffix(".hpp")).exists()
+        or (SRC_ROOT / (str(test_name_no_ext) + ".cpp.hpp")).exists()
+    )
+
+
+def _split_test_source_exists(test_name_no_ext: Path) -> bool:
+    """Allow shard-style tests whose suffix maps back to an umbrella header.
+
+    Tests such as tests/fl/stl/string_append_concat.cpp still test
+    src/fl/stl/string.h.  Walk trailing underscore suffixes until either an
+    existing source file is found or no suffix remains.
+    """
+    candidate = test_name_no_ext
+    while "_" in candidate.name:
+        candidate = candidate.with_name(candidate.name.rsplit("_", 1)[0])
+        if _matching_source_exists(candidate):
+            return True
+    return False
+
+
 class TestPathStructureChecker(FileContentChecker):
     """Checker class for test file path structure validation."""
 
@@ -152,11 +176,12 @@ class TestPathStructureChecker(FileContentChecker):
         expected_source_cpp_hpp = SRC_ROOT / (str(test_name_no_ext) + ".cpp.hpp")
 
         # If matching source file exists at the expected location, no issue
-        if (
-            expected_source_h.exists()
-            or expected_source_hpp.exists()
-            or expected_source_cpp_hpp.exists()
-        ):
+        if _matching_source_exists(test_name_no_ext):
+            return []
+
+        # Split/sharded tests may add descriptive suffixes to a real umbrella
+        # source name, e.g. string_append_concat.cpp -> string.h.
+        if _split_test_source_exists(test_name_no_ext):
             return []
 
         # Check if file has "// ok standalone" comment in first few lines

@@ -1,4 +1,4 @@
-// IWYU pragma: private
+﻿// IWYU pragma: private
 
 
 
@@ -581,7 +581,7 @@ void i2s_transpose_and_encode(int channel, u32 has_data_mask,
 namespace fl {
 bool i2s_is_initialized() FL_NOEXCEPT { return false; }
 void i2s_init(int) FL_NOEXCEPT {
-    FL_WARN_ONCE("I2S parallel driver is disabled. "
+    FL_WARN_F_ONCE("I2S parallel driver is disabled. "
                  "Falling back to RMT/SPI driver.");
 }
 }  // namespace fl

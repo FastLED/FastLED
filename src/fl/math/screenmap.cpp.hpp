@@ -53,7 +53,7 @@ fl::vector<float> jsonArrayToFloatVector(const fl::json& jsonArray) {
         if (!parseResult.has_error()) {
             result.push_back(parseResult.get_value());
         } else {
-            FL_WARN("jsonArrayToFloatVector: parse_result<float> has error: " << parseResult.get_error().message);
+            FL_WARN_F("jsonArrayToFloatVector: parse_result<float> has error: %s", parseResult.get_error().message);
         }
     }
     
@@ -190,7 +190,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
     FL_UNUSED(jsonStrScreenMap);
     FL_UNUSED(segmentMaps);
     FL_UNUSED(err);
-    FL_WARN("ScreenMap::ParseJson called with FASTLED_NO_JSON");
+    FL_WARN_F("ScreenMap::ParseJson called with FASTLED_NO_JSON");
     if (err) {
         *err = "JSON is not supported in this build";
     }
@@ -206,13 +206,13 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
     auto jsonDoc = fl::json::parse(jsonStrScreenMap);
     if (!jsonDoc.has_value()) {
         *err = "Failed to parse JSON";
-        FL_WARN("Failed to parse JSON");
+        FL_WARN_F("Failed to parse JSON");
         return false;
     }
 
     if (!jsonDoc.is_object()) {
         *err = "JSON root is not an object";
-        FL_WARN("JSON root is not an object");
+        FL_WARN_F("JSON root is not an object");
         return false;
     }
 
@@ -242,7 +242,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
     // Check if "map" key exists and is an object
     if (!jsonDoc.contains("map")) {
         *err = "Missing 'map' key in JSON";
-        FL_WARN("Missing 'map' key in JSON");
+        FL_WARN_F("Missing 'map' key in JSON");
         return false;
     }
     
@@ -250,14 +250,14 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
     auto mapObj = jsonDoc["map"];
     if (!mapObj.has_value() || !mapObj.is_object()) {
         *err = "Invalid 'map' object in JSON";
-        FL_WARN("Invalid 'map' object in JSON");
+        FL_WARN_F("Invalid 'map' object in JSON");
         return false;
     }
     
     auto jsonMapPtr = mapObj.as_object();
     if (!jsonMapPtr || jsonMapPtr->empty()) {
         *err = "Failed to parse map from JSON or map is empty";
-        FL_WARN("Failed to parse map from JSON or map is empty");
+        FL_WARN_F("Failed to parse map from JSON or map is empty");
         return false;
     }
 
@@ -370,11 +370,11 @@ void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps,
                        fl::json *doc) {
 
 #if FASTLED_NO_JSON
-    FL_WARN("ScreenMap::toJson called with FASTLED_NO_JSON");
+    FL_WARN_F("ScreenMap::toJson called with FASTLED_NO_JSON");
     return;
 #else
     if (!doc) {
-        FL_WARN("ScreenMap::toJson called with nullptr doc");
+        FL_WARN_F("ScreenMap::toJson called with nullptr doc");
         return;
     }
 
@@ -402,7 +402,7 @@ void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps,
     size_t idx = 0;
     for (const auto& kv : segmentMaps) {
         if (kv.second.getLength() == 0) {
-            FL_WARN("ScreenMap::toJson called with empty segment: " << fl::string(kv.first));
+            FL_WARN_F("ScreenMap::toJson called with empty segment: %s", fl::string(kv.first));
             continue;
         }
 
@@ -440,7 +440,7 @@ void ScreenMap::toJson(const fl::flat_map<string, ScreenMap> &segmentMaps,
     doc->set("segments", segmentsArr);
 
     fl::string debugStr = doc->to_string();
-    FL_WARN("ScreenMap::toJson generated JSON: " << debugStr);
+    FL_WARN_F("ScreenMap::toJson generated JSON: %s", debugStr);
 #endif
 }
 

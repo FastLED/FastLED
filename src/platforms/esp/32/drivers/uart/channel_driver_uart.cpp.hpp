@@ -31,7 +31,7 @@ ChannelEngineUART::ChannelEngineUART(fl::shared_ptr<IUartPeripheral> peripheral)
       mCurrentBaudRate(0),
       mCurrentGroupIndex(0) {
     if (!mPeripheral) {
-        FL_WARN("UART: Null peripheral pointer in constructor");
+        FL_WARN_F("UART: Null peripheral pointer in constructor");
     }
 }
 
@@ -232,16 +232,16 @@ const Wave10Lut& ChannelEngineUART::getOrBuildLut(const ChipsetTimingConfig& tim
 void ChannelEngineUART::beginTransmission(
     fl::span<const ChannelDataPtr> channelData) FL_NOEXCEPT {
 
-    FL_DBG("UART: beginTransmission() called with " << channelData.size() << " channel(s)");
+    FL_DBG_F("UART: beginTransmission() called with %s channel(s)", channelData.size());
 
     if (channelData.size() == 0) {
-        FL_DBG("UART: No channels to transmit (size==0)");
+        FL_DBG_F("UART: No channels to transmit (size==0)");
         return;
     }
 
     // UART is single-lane only - show() guarantees single channel per transmission
     if (channelData.size() != 1) {
-        FL_WARN("UART: Expected exactly 1 channel, got " << channelData.size() << " (internal error)");
+        FL_WARN_F("UART: Expected exactly 1 channel, got %s (internal error)", channelData.size());
         return;
     }
 
@@ -250,7 +250,7 @@ void ChannelEngineUART::beginTransmission(
     const ChipsetTimingConfig& timing = channel->getTiming();
     size_t dataSize = channel->getSize();
 
-    FL_DBG("UART: Channel pin=" << pin << ", dataSize=" << dataSize);
+    FL_DBG_F("UART: Channel pin=%s, dataSize=%s", pin, dataSize);
 
     if (dataSize == 0) {
         return;
@@ -263,12 +263,12 @@ void ChannelEngineUART::beginTransmission(
     if (!mInitialized || mCurrentBaudRate != required_baud) {
         if (mInitialized) {
             // Reinitialize with new baud rate
-            FL_DBG("UART: Reinitializing peripheral (baud change: " << mCurrentBaudRate << " -> " << required_baud << ")");
+            FL_DBG_F("UART: Reinitializing peripheral (baud change: %s -> %s)", mCurrentBaudRate, required_baud);
             mPeripheral->deinitialize();
             mInitialized = false;
         }
 
-        FL_DBG("UART: Initializing peripheral with baud=" << required_baud << ", pin=" << pin);
+        FL_DBG_F("UART: Initializing peripheral with baud=%s, pin=%s", required_baud, pin);
 
         UartPeripheralConfig config(
             required_baud,     // mBaudRate (derived from timing)
@@ -281,11 +281,11 @@ void ChannelEngineUART::beginTransmission(
         );
 
         if (!mPeripheral->initialize(config)) {
-            FL_WARN("UART: Peripheral initialization failed");
+            FL_WARN_F("UART: Peripheral initialization failed");
             return;
         }
 
-        FL_DBG("UART: Peripheral initialized successfully");
+        FL_DBG_F("UART: Peripheral initialized successfully");
         mInitialized = true;
         mCurrentBaudRate = required_baud;
     }
@@ -307,22 +307,21 @@ void ChannelEngineUART::beginTransmission(
         mEncodedBuffer.size(),
         lut);
 
-    FL_DBG("UART: Encoded " << encoded_bytes << " bytes from " << dataSize << " LED bytes");
+    FL_DBG_F("UART: Encoded %s bytes from %s LED bytes", encoded_bytes, dataSize);
 
     if (encoded_bytes == 0) {
-        FL_WARN("UART: Encoding failed (required="
-                << required_encoded_size << " bytes)");
+        FL_WARN_F("UART: Encoding failed (required=%s bytes)", required_encoded_size);
         return;
     }
 
     // Submit encoded data to UART peripheral
-    FL_DBG("UART: Writing " << encoded_bytes << " bytes to peripheral");
+    FL_DBG_F("UART: Writing %s bytes to peripheral", encoded_bytes);
     if (!mPeripheral->writeBytes(mEncodedBuffer.data(), encoded_bytes)) {
-        FL_WARN("UART: Write failed (size=" << encoded_bytes << " bytes)");
+        FL_WARN_F("UART: Write failed (size=%s bytes)", encoded_bytes);
         return;
     }
 
-    FL_DBG("UART: Write successful, transmission started (non-blocking DMA)");
+    FL_DBG_F("UART: Write successful, transmission started (non-blocking DMA)");
 }
 
 void ChannelEngineUART::prepareScratchBuffer(

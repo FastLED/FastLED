@@ -219,8 +219,7 @@ TaskCoroutinePtr TaskCoroutineESP32::create(
         heap_caps_malloc(sizeof(StaticTask_t),
                          MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT)));
     if (!impl->mStackBuf || !impl->mTaskTcb) {
-        FL_WARN("TaskCoroutineESP32: Failed to allocate stack/TCB for '"
-                << impl->mName << "'");
+        FL_WARN_F("TaskCoroutineESP32: Failed to allocate stack/TCB for '%s'", impl->mName);
         task.reset();
         return nullptr;
     }
@@ -252,8 +251,7 @@ TaskCoroutinePtr TaskCoroutineESP32::create(
 #endif
 
     if (!impl->mTask) {
-        FL_WARN("TaskCoroutineESP32: Failed to create FreeRTOS task for '"
-                << impl->mName << "'");
+        FL_WARN_F("TaskCoroutineESP32: Failed to create FreeRTOS task for '%s'", impl->mName);
         task.reset();
         return nullptr;
     }

@@ -368,26 +368,26 @@ extern "C" {
 
 int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) FL_NOEXCEPT {
     if (!config.handler) {
-        FL_WARN("attachTimerHandler: handler is null");
+        FL_WARN_F("attachTimerHandler: handler is null");
         return -1;  // Invalid parameter
     }
 
     if (config.frequency_hz == 0) {
-        FL_WARN("attachTimerHandler: frequency_hz is 0");
+        FL_WARN_F("attachTimerHandler: frequency_hz is 0");
         return -2;  // Invalid frequency
     }
 
     // Allocate a free timer
     u8 timer_idx = 0;
     if (!allocate_timer(timer_idx)) {
-        FL_WARN("attachTimerHandler: no free timers");
+        FL_WARN_F("attachTimerHandler: no free timers");
         return -3;  // Out of resources
     }
 
     Tc* timer = get_timer_instance(timer_idx);
     if (!timer) {
         free_timer(timer_idx);
-        FL_WARN("attachTimerHandler: invalid timer instance");
+        FL_WARN_F("attachTimerHandler: invalid timer instance");
         return -4;  // Internal error
     }
 
@@ -396,7 +396,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
     auto* handle_data = handle_owner.get();
     if (!handle_data) {
         free_timer(timer_idx);
-        FL_WARN("attachTimerHandler: failed to allocate handle data");
+        FL_WARN_F("attachTimerHandler: failed to allocate handle data");
         return -5;  // Out of memory
     }
 
@@ -506,7 +506,7 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
     timer->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;
     tc_wait_sync(timer);
 
-    FL_DBG("Timer started at " << config.frequency_hz << " Hz on TC" << static_cast<int>(timer_idx));
+    FL_DBG_F("Timer started at %s Hz on TC%s", config.frequency_hz, static_cast<int>(timer_idx));
 
     // Release ownership - pointer is now managed by the C API (timer_handles + out_handle)
     handle_owner.release();
@@ -524,14 +524,14 @@ int attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) F
 
 int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* out_handle) FL_NOEXCEPT {
     if (!config.handler) {
-        FL_WARN("attachExternalHandler: handler is null");
+        FL_WARN_F("attachExternalHandler: handler is null");
         return -1;  // Invalid parameter
     }
 
     // Allocate an EIC channel
     u8 eic_ch = 0;
     if (!allocate_eic_channel(eic_ch)) {
-        FL_WARN("attachExternalHandler: no free EIC channels");
+        FL_WARN_F("attachExternalHandler: no free EIC channels");
         return -3;  // Out of resources
     }
 
@@ -540,7 +540,7 @@ int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* ou
     auto* handle_data = handle_owner.get();
     if (!handle_data) {
         free_eic_channel(eic_ch);
-        FL_WARN("attachExternalHandler: failed to allocate handle data");
+        FL_WARN_F("attachExternalHandler: failed to allocate handle data");
         return -5;  // Out of memory
     }
 
@@ -639,8 +639,7 @@ int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* ou
     NVIC_SetPriority(EIC_IRQn, nvic_priority) FL_NOEXCEPT;
     NVIC_EnableIRQ(EIC_IRQn) FL_NOEXCEPT;
 
-    FL_DBG("EIC interrupt attached on pin " << static_cast<int>(pin)
-           << " EIC channel " << static_cast<int>(eic_ch));
+    FL_DBG_F("EIC interrupt attached on pin %s EIC channel %s", static_cast<int>(pin), static_cast<int>(eic_ch));
 
     // Release ownership - pointer is now managed by the C API (eic_handles + out_handle)
     handle_owner.release();
@@ -658,13 +657,13 @@ int attach_external_handler(u8 pin, const isr_config_t& config, isr_handle_t* ou
 
 int detach_handler(isr_handle_t& handle) FL_NOEXCEPT {
     if (!handle.is_valid() || handle.platform_id != SAMD_PLATFORM_ID) {
-        FL_WARN("detachHandler: invalid handle");
+        FL_WARN_F("detachHandler: invalid handle");
         return -1;  // Invalid handle
     }
 
     samd_isr_handle_data* handle_data = static_cast<samd_isr_handle_data*>(handle.platform_handle);
     if (!handle_data) {
-        FL_WARN("detachHandler: null handle data");
+        FL_WARN_F("detachHandler: null handle data");
         return -1;  // Invalid handle
     }
 
@@ -691,19 +690,19 @@ int detach_handler(isr_handle_t& handle) FL_NOEXCEPT {
     handle.platform_handle = nullptr;
     handle.platform_id = 0;
 
-    FL_DBG("Handler detached");
+    FL_DBG_F("Handler detached");
     return 0;  // Success
 }
 
 int enable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
     if (!handle.is_valid() || handle.platform_id != SAMD_PLATFORM_ID) {
-        FL_WARN("enableHandler: invalid handle");
+        FL_WARN_F("enableHandler: invalid handle");
         return -1;  // Invalid handle
     }
 
     samd_isr_handle_data* handle_data = static_cast<samd_isr_handle_data*>(handle.platform_handle);
     if (!handle_data) {
-        FL_WARN("enableHandler: null handle data");
+        FL_WARN_F("enableHandler: null handle data");
         return -1;  // Invalid handle
     }
 
@@ -724,13 +723,13 @@ int enable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
 
 int disable_handler(const isr_handle_t& handle) FL_NOEXCEPT {
     if (!handle.is_valid() || handle.platform_id != SAMD_PLATFORM_ID) {
-        FL_WARN("disableHandler: invalid handle");
+        FL_WARN_F("disableHandler: invalid handle");
         return -1;  // Invalid handle
     }
 
     samd_isr_handle_data* handle_data = static_cast<samd_isr_handle_data*>(handle.platform_handle);
     if (!handle_data) {
-        FL_WARN("disableHandler: null handle data");
+        FL_WARN_F("disableHandler: null handle data");
         return -1;  // Invalid handle
     }
 

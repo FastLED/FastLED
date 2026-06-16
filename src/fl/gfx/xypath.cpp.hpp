@@ -256,8 +256,7 @@ XYPathPtr XYPath::NewCustomPath(const fl::function<vec2f(float)> &f,
     if (path->hasDrawBounds(&bounds)) {
         if (!bounds.mMin.is_zero()) {
             // Set the bounds to the path's bounds
-            FL_WARN(
-                "Bounds with an origin other than 0,0 is not supported yet");
+            FL_WARN_F("Bounds with an origin other than 0,0 is not supported yet");
         }
         auto w = bounds.width();
         auto h = bounds.height();
