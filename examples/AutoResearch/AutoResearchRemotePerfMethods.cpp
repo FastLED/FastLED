@@ -47,7 +47,7 @@
 #include "fl/fx/frame.h"
 
 
-void AutoResearchRemoteControl::bindPerfMethods(fl::Remote* remote) {
+void AutoResearchRemoteControl::bindPerfMethods(fl::Remote& remote) {
     // ====== AutoResearch perf-instrumentation sanity probes ======
     // Task 2 of meta #3113. Three probes verify autoresearch timing
     // produces trustworthy data BEFORE we use it to gate optimizations.
@@ -57,7 +57,7 @@ void AutoResearchRemoteControl::bindPerfMethods(fl::Remote* remote) {
     // Probe 2a: memcpy throughput. Caller invokes with { bytes,
     // iterations }; returns MB/s on SRAM. Host compares vs per-platform
     // vendor floor (e.g. ESP32-S3 ~175 MB/s) before trusting wave2dPerf.
-    remote->bind("perfProbeMemcpy", [](const fl::json& args) -> fl::json {
+    remote.bind("perfProbeMemcpy", [](const fl::json& args) -> fl::json {
         int bytes = 4096;
         int iterations = 1000;
         if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
@@ -102,7 +102,7 @@ void AutoResearchRemoteControl::bindPerfMethods(fl::Remote* remote) {
     // compiler optimizing the loop away. Host computes
     // (total_us * cpu_mhz / iterations) and checks [1.0, 2.5]
     // cycles-per-nop. Out-of-band → timer broken or IRQ jitter.
-    remote->bind("perfProbeNop", [](const fl::json& args) -> fl::json {
+    remote.bind("perfProbeNop", [](const fl::json& args) -> fl::json {
         int iterations = 100000;
         if (args.is_array() && args.size() >= 1 && args[0].is_object()) {
             const fl::json &cfg = args[0];
@@ -141,7 +141,7 @@ void AutoResearchRemoteControl::bindPerfMethods(fl::Remote* remote) {
     // N times at a fixed config, reports mean + std-dev. Host checks
     // std_dev/mean < 5%; higher → IRQ noise or RPC framing jitter is
     // contaminating wave2dPerf, mark UNTRUSTED.
-    remote->bind("perfProbeRepeat", [](const fl::json& args) -> fl::json {
+    remote.bind("perfProbeRepeat", [](const fl::json& args) -> fl::json {
         int W = 16;
         int H = 16;
         int iterations = 50;
@@ -214,7 +214,7 @@ void AutoResearchRemoteControl::bindPerfMethods(fl::Remote* remote) {
     // sum every cell into a sink) so the gap between the two reveals
     // compute vs memory cost — critical for the ESP32-S3 PSRAM-vs-SRAM
     // analysis in sibling issue #3114.
-    remote->bind("wave2dPerf", [](const fl::json& args) -> fl::json {
+    remote.bind("wave2dPerf", [](const fl::json& args) -> fl::json {
         // Defaults sized so the test runs in a sensible budget on small
         // platforms (32x32 / 100 iters ~= 100-500 ms on M4-class).
         int W = 32;

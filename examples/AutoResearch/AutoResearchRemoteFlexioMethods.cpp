@@ -47,7 +47,7 @@
 #include "fl/fx/frame.h"
 
 
-void AutoResearchRemoteControl::bindFlexioMethods(fl::Remote* remote) {
+void AutoResearchRemoteControl::bindFlexioMethods(fl::Remote& remote) {
     // Register "flexioRxBenchmark" — square-wave validation for the new
     // FlexIO RX backend (Phase 2 of FastLED#2764).
     //
@@ -67,7 +67,7 @@ void AutoResearchRemoteControl::bindFlexioMethods(fl::Remote* remote) {
     // Teensy-4-only because FLEXIO1 is iMXRT1062-specific. Other platforms
     // get a clean "not supported" response so the RPC harness can still
     // round-trip.
-    remote->bind("flexioRxBenchmark", [this](const fl::json& args) -> fl::json {
+    remote.bind("flexioRxBenchmark", [this](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
 #if !defined(FL_IS_TEENSY_4X)
         (void)args;
@@ -230,7 +230,7 @@ void AutoResearchRemoteControl::bindFlexioMethods(fl::Remote* remote) {
     //
     // Teensy-4-only — FLEXIO1 is iMXRT1062-specific. ObjectFLED also relies
     // on Teensy 4-core APIs, so non-Teensy builds return `PlatformNotSupported`.
-    remote->bind("flexioObjectFledTest", [this](const fl::json& args) -> fl::json {
+    remote.bind("flexioObjectFledTest", [this](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
 #if !defined(FL_IS_TEENSY_4X)
         (void)args;
@@ -446,7 +446,7 @@ void AutoResearchRemoteControl::bindFlexioMethods(fl::Remote* remote) {
     //     capture_buffer_first8_hex: [...], notes }
     //
     // Teensy-4-only.
-    remote->bind("flexioRxLoopbackPing", [this](const fl::json& args) -> fl::json {
+    remote.bind("flexioRxLoopbackPing", [this](const fl::json& args) -> fl::json {
         fl::json response = fl::json::object();
 #if !defined(FL_IS_TEENSY_4X)
         (void)args;

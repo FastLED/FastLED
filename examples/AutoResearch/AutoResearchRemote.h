@@ -109,11 +109,11 @@ private:
     // file sizes below 1 K LOC (#3132 / meta #3127). The Remote target is
     // passed explicitly so the same partitioning can be used for the BLE
     // Remote (mBleRemote) or any future transport.
-    void bindBasicMethods(fl::Remote* remote);
-    void bindFlexioMethods(fl::Remote* remote);
-    void bindGpioMethods(fl::Remote* remote);
-    void bindBenchmarkMethods(fl::Remote* remote);
-    void bindAsyncNetMethods(fl::Remote* remote);
-    void bindCoroutineMethods(fl::Remote* remote);
-    void bindPerfMethods(fl::Remote* remote);
+    void bindBasicMethods(fl::Remote& remote);
+    void bindFlexioMethods(fl::Remote& remote);
+    void bindGpioMethods(fl::Remote& remote);
+    void bindBenchmarkMethods(fl::Remote& remote);
+    void bindAsyncNetMethods(fl::Remote& remote);
+    void bindCoroutineMethods(fl::Remote& remote);
+    void bindPerfMethods(fl::Remote& remote);
 };

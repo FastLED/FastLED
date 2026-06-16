@@ -291,13 +291,13 @@ void AutoResearchRemoteControl::registerFunctions(fl::shared_ptr<AutoResearchSta
     //
     // Bindings are partitioned across sibling .cpp files (#3132 / meta #3127) so
     // each file stays under 1 K LOC.
-    bindBasicMethods(mRemote.get());
-    bindFlexioMethods(mRemote.get());
-    bindGpioMethods(mRemote.get());
-    bindBenchmarkMethods(mRemote.get());
-    bindAsyncNetMethods(mRemote.get());
-    bindCoroutineMethods(mRemote.get());
-    bindPerfMethods(mRemote.get());
+    bindBasicMethods(*mRemote);
+    bindFlexioMethods(*mRemote);
+    bindGpioMethods(*mRemote);
+    bindBenchmarkMethods(*mRemote);
+    bindAsyncNetMethods(*mRemote);
+    bindCoroutineMethods(*mRemote);
+    bindPerfMethods(*mRemote);
 }
 
 
