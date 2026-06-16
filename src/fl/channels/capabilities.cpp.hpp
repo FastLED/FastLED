@@ -7,8 +7,6 @@
 
 // IWYU pragma: private
 
-#pragma once
-
 #include "fl/channels/capabilities.h"
 
 namespace fl {

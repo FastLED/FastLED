@@ -3,8 +3,6 @@
 
 // IWYU pragma: private
 
-#pragma once
-
 #include "fl/channels/can_match.h"
 #include "fl/channels/capabilities.h"
 
