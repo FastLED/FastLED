@@ -4,6 +4,7 @@
 
 // begin current directory includes
 #include "fl/channels/can_match.cpp.hpp"
+#include "fl/channels/capabilities.cpp.hpp"
 #include "fl/channels/channel.cpp.hpp"
 #include "fl/channels/channel_events.cpp.hpp"
 #include "fl/channels/config.cpp.hpp"

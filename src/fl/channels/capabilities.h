@@ -146,49 +146,18 @@ struct PinSet {
     }
 
     /// Factory: allowlist with a single pin (the "fixed pin" idiom).
-    static PinSet fixed(fl::i16 pin) FL_NOEXCEPT {
-        PinSet ps(PinSetKind::Allowlist);
-        if (pin >= 0 && static_cast<fl::u32>(pin) < kPinSetCapacity) {
-            ps.pins.set(static_cast<fl::u32>(pin));
-        }
-        return ps;
-    }
+    /// Definition in capabilities.cpp.hpp.
+    static PinSet fixed(fl::i16 pin) FL_NOEXCEPT;
 
     /// True iff this set accepts the given single pin.
-    bool accepts(fl::i16 pin) const FL_NOEXCEPT {
-        if (kind == PinSetKind::None) {
-            return false;
-        }
-        if (pin < 0 || static_cast<fl::u32>(pin) >= kPinSetCapacity) {
-            return false;
-        }
-        if (kind == PinSetKind::AnyOutputPin) {
-            return true;
-        }
-        return pins.test(static_cast<fl::u32>(pin));
-    }
+    /// Definition in capabilities.cpp.hpp.
+    bool accepts(fl::i16 pin) const FL_NOEXCEPT;
 
     /// True iff every set bit in `request` is also accepted here.
     /// For AnyOutputPin: trivially true. For Allowlist: bitset
     /// inclusion check.
-    bool acceptsAll(const PinBitset& request) const FL_NOEXCEPT {
-        if (kind == PinSetKind::None) {
-            return request.none();
-        }
-        if (kind == PinSetKind::AnyOutputPin) {
-            return true;
-        }
-        // Allowlist: every requested bit must be in `pins`.
-        // i.e. request & ~pins must be empty. We implement that
-        // without operator overloads to stay portable across bitset
-        // impls: iterate via count() over the difference.
-        for (fl::u32 i = 0; i < kPinSetCapacity; ++i) {
-            if (request.test(i) && !pins.test(i)) {
-                return false;
-            }
-        }
-        return true;
-    }
+    /// Definition in capabilities.cpp.hpp.
+    bool acceptsAll(const PinBitset& request) const FL_NOEXCEPT;
 };
 
 
@@ -315,22 +284,8 @@ struct DriverCapabilities {
         fl::u8 reserved              : 4;
     } flags;
 
-    DriverCapabilities() FL_NOEXCEPT
-        : name()
-        , priority(0)
-        , supports_clockless(false)
-        , supports_spi(false)
-        , max_total_channels(0)
-        , clockless_frequency(FreqRange::any())
-        , spi_frequency(FreqRange::any())
-        , clockless_timing(ClocklessTimingCapability::unspecified())
-        , flags() {
-        flags.synchronized_start = 0;
-        flags.requires_dma_memory = 0;
-        flags.open_drain_capable = 0;
-        flags.mixed_protocols_ok = 0;
-        flags.reserved = 0;
-    }
+    /// Definition in capabilities.cpp.hpp.
+    DriverCapabilities() FL_NOEXCEPT;
 };
 
 
@@ -385,20 +340,11 @@ struct ChannelRequest {
         , frequency_hz() {}
 
     /// Convenience factory for the common single-pin case.
+    /// Definition in capabilities.cpp.hpp.
     static ChannelRequest singlePin(
             Protocol p, fl::i16 data, fl::i16 clock,
             const ChipsetClocklessTiming& t = ChipsetClocklessTiming::unspecified(),
-            fl::optional<fl::u32> freq = fl::optional<fl::u32>()) FL_NOEXCEPT {
-        ChannelRequest r;
-        r.protocol = p;
-        if (data >= 0 && static_cast<fl::u32>(data) < kPinSetCapacity) {
-            r.data_pins.set(static_cast<fl::u32>(data));
-        }
-        r.clock_pin = clock;
-        r.timing = t;
-        r.frequency_hz = freq;
-        return r;
-    }
+            fl::optional<fl::u32> freq = fl::optional<fl::u32>()) FL_NOEXCEPT;
 };
 
 
